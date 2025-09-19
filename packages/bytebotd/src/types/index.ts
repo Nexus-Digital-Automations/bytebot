@@ -659,7 +659,7 @@ export const TypeSafetyUtils = {
 // =============================================================================
 
 /**
- * Client information interface for security sessions
+ * Client information interface for enterprise security sessions
  */
 export interface ClientInfo {
   readonly userAgent?: string;
@@ -670,6 +670,19 @@ export interface ClientInfo {
   readonly deviceType?: 'desktop' | 'mobile' | 'tablet' | 'unknown';
   readonly screenResolution?: string;
   readonly timestamp: string;
+
+  // Enhanced security context for AIgent-Parlant bridge
+  readonly securityClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' | 'CLASSIFIED';
+  readonly organizationId?: string;
+  readonly departmentId?: string;
+  readonly complianceFrameworks?: string[];
+  readonly validationTimestamp?: string;
+  readonly operationId?: string;
+  readonly requestPath?: string;
+  readonly requestMethod?: string;
+  readonly sessionId?: string;
+  readonly parlantSessionId?: string;
+  readonly conversationId?: string;
 }
 
 /**

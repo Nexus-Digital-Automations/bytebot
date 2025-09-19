@@ -32,8 +32,33 @@ export {
   default as WebSocketUtils,
 } from './websocket-types';
 
-// Export WebSocket bridge service
+// Export WebSocket bridge services
 export { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
+export { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';
+export { ParlantWebSocketIntegrationService } from './parlant-websocket-integration.service';
+
+// Export conversational WebSocket types
+export {
+  ConversationalMessage,
+  ConversationalMessageType,
+  ValidationRequestMessage,
+  UserConfirmationMessage,
+  ProgressUpdateMessage,
+  ConversationalSession,
+  SessionStatus,
+  ValidationContext,
+  ValidationAction,
+  SecurityContext,
+  ActionImpact,
+} from './conversational-websocket-bridge.service';
+
+// Export integration types
+export {
+  ParlantValidationRequest,
+  ParlantValidationResult,
+  ValidationPriority,
+  ParlantStreamingOptions,
+} from './parlant-websocket-integration.service';
 
 /**
  * Re-export commonly used WebSocket types for convenience

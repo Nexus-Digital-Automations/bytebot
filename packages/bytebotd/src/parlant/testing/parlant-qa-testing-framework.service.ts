@@ -674,6 +674,8 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const testRequest: UltraOptimizedValidationRequest = {
       functionName: testCase.testData.functionName as string || 'integration_test',
       functionParams: testCase.testData.functionParams as Record<string, unknown> || {},
+      actionDescription: `Integration test for ${testCase.name}`,
+      operationId: `integration_test_${testCase.id}_${Date.now()}`,
       riskLevel: testCase.testData.riskLevel as RiskLevel || RiskLevel.MEDIUM,
       context: {
         userId: 'test-user',
@@ -750,6 +752,8 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const testRequest: UltraOptimizedValidationRequest = {
       functionName: 'compliance_test',
       functionParams: testCase.testData,
+      actionDescription: `Compliance test for ${testCase.name}`,
+      operationId: `compliance_test_${testCase.id}_${Date.now()}`,
       riskLevel: RiskLevel.HIGH,
       context: {
         userId: 'test-user',
@@ -870,6 +874,8 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const testRequest: UltraOptimizedValidationRequest = {
       functionName: testData.functionName as string || 'test_function',
       functionParams: testData.functionParams as Record<string, unknown> || {},
+      actionDescription: 'Response time measurement test',
+      operationId: `response_time_test_${Date.now()}`,
       riskLevel: RiskLevel.LOW,
       context: {
         userId: 'test-user',
@@ -894,6 +900,8 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
         const testRequest: UltraOptimizedValidationRequest = {
           functionName: `test_function_${i}`,
           functionParams: { attempt: i },
+          actionDescription: `Success rate test attempt ${i}`,
+          operationId: `success_rate_test_${i}_${Date.now()}`,
           riskLevel: RiskLevel.LOW,
           context: {
             userId: 'test-user',

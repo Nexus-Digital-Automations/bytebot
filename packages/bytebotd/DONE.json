@@ -4228,10 +4228,178 @@
       "updated_at": "2025-09-19T00:12:21.574Z",
       "archived_at": "2025-09-19T00:12:21.579Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:14:05.786Z",
+      "title": "Fix critical TypeScript undefined type and variable errors",
+      "description": "Eliminate remaining 246 TypeScript compilation errors by fixing undefined types (taskIdType, timeoutMsType, entryType, durationType, userIdType) and undefined variables (timeoutMs, entry, duration) in browser-use service files",
+      "category": "error",
+      "id": "error_1758240845785_b3hj344od5v",
+      "assigned_agent": "dev_session_1758240829716_1_general_f7cbcf78",
+      "started_at": "2025-09-19T00:14:25.320Z",
+      "claimed_by": "dev_session_1758240829716_1_general_f7cbcf78",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758240829716_1_general_f7cbcf78",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:14:25.320Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:17:01.647Z",
+      "updated_at": "2025-09-19T00:17:01.647Z",
+      "archived_at": "2025-09-19T00:17:01.651Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:14:05.090Z",
+      "title": "Fix ParlantConversationContext interface errors",
+      "description": "Fix all ParlantConversationContext interface errors in parlant-qa-testing-framework.service.ts - add required properties userId, agentRole, securityLevel, conversationHistory, metadata and move complianceTest to metadata",
+      "category": "error",
+      "id": "error_1758240845089_vutrdb3eu4e",
+      "assigned_agent": "dev_session_1758240829884_1_general_1df7549e",
+      "started_at": "2025-09-19T00:14:23.827Z",
+      "claimed_by": "dev_session_1758240829884_1_general_1df7549e",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758240829884_1_general_1df7549e",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:14:23.827Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:17:46.160Z",
+      "updated_at": "2025-09-19T00:17:46.160Z",
+      "archived_at": "2025-09-19T00:17:46.164Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T07:49:08.290Z",
+      "title": "Fix TypeScript unsafe violations in bytebot-ui ComputerToolContent components",
+      "description": "Resolve 40+ TypeScript unsafe assignment/member access/argument violations in AssistantMessage.tsx and ComputerToolContentNormal.tsx components. Fix type safety issues with error typed values and any[] returns.",
+      "category": "error",
+      "id": "error_1758181748289_9u0unpvdrgu",
+      "assigned_agent": "dev_session_1758241510227_1_general_c589f323",
+      "started_at": "2025-09-19T00:26:27.728Z",
+      "claimed_by": "dev_session_1758241510227_1_general_c589f323",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758241510227_1_general_c589f323",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:26:27.728Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:28:39.644Z",
+      "updated_at": "2025-09-19T00:28:39.644Z",
+      "archived_at": "2025-09-19T00:28:39.649Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T07:49:40.227Z",
+      "title": "Fix Python linting violations in orchestrator test_orchestration_comprehensive.py",
+      "description": "Remove 40+ trailing whitespace violations and fix module naming style violation in orchestrator package. Clean up test_orchestration_comprehensive.py formatting.",
+      "category": "error",
+      "id": "error_1758181780227_uakjevdx1io",
+      "assigned_agent": "dev_session_1758241510227_1_general_c589f323",
+      "started_at": "2025-09-19T00:29:08.734Z",
+      "claimed_by": "dev_session_1758241510227_1_general_c589f323",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758241510227_1_general_c589f323",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:29:08.734Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:29:53.976Z",
+      "updated_at": "2025-09-19T00:29:53.976Z",
+      "archived_at": "2025-09-19T00:29:53.982Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:25:23.815Z",
+      "title": "Wrap remaining security functions with multi-tier conversational validation",
+      "description": "Implement comprehensive security function wrapping with CRITICAL (dual approval), HIGH (single approval), MEDIUM (automatic), and LOW (optional) validation levels for approximately 30 remaining security functions in security-parlant-wrapped.utils.ts",
+      "category": "feature",
+      "id": "feature_1758241523815_wvfb7dmndd9",
+      "completed_at": "2025-09-19T00:30:19.433Z",
+      "updated_at": "2025-09-19T00:30:19.433Z",
+      "archived_at": "2025-09-19T00:30:19.438Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T07:50:06.178Z",
+      "title": "Fix missing dependency eslint-plugin-react-refresh in parlant chat API ESLint config",
+      "description": "Resolve module not found error for eslint-plugin-react-refresh in parlant/src/parlant/api/chat/eslint.config.js. Install missing dependency or remove unused import.",
+      "category": "error",
+      "id": "error_1758181806178_usbg1fxn6is",
+      "assigned_agent": "dev_session_1758241510227_1_general_c589f323",
+      "started_at": "2025-09-19T00:30:24.060Z",
+      "claimed_by": "dev_session_1758241510227_1_general_c589f323",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758241510227_1_general_c589f323",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:30:24.060Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:30:54.660Z",
+      "updated_at": "2025-09-19T00:30:54.660Z",
+      "archived_at": "2025-09-19T00:30:54.664Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:25:24.470Z",
+      "title": "Comprehensive Parlant Function Coverage Audit",
+      "description": "Conduct comprehensive audit of Parlant function coverage across Bytebot package to ensure 100% integration. Includes function discovery, coverage analysis, gap assessment, and integration validation.",
+      "category": "feature",
+      "id": "feature_1758241524469_qmvfo8z2roi",
+      "completed_at": "2025-09-19T00:31:21.925Z",
+      "updated_at": "2025-09-19T00:31:21.925Z",
+      "archived_at": "2025-09-19T00:31:21.929Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:25:21.822Z",
+      "title": "Optimize Bytebot Parlant Integration Performance",
+      "description": "Analyze and optimize existing Parlant code for sub-1000ms P95 response times. Implement 3-tier caching hierarchy (L1: memory <5ms, L2: Redis <15ms, L3: DB <50ms) and batch processing with dynamic sizing for 10-20x throughput improvement. Focus on bottleneck identification and optimization opportunities.",
+      "category": "feature",
+      "id": "feature_1758241521822_46b1iak3ew5",
+      "assigned_agent": "dev_session_1758241506451_1_general_9abd96f5",
+      "started_at": "2025-09-19T00:25:42.791Z",
+      "claimed_by": "dev_session_1758241506451_1_general_9abd96f5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758241506451_1_general_9abd96f5",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:25:42.791Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:32:54.701Z",
+      "updated_at": "2025-09-19T00:32:54.701Z",
+      "archived_at": "2025-09-19T00:32:54.706Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 109,
+  "total_completed": 117,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-19T00:12:21.579Z"
+  "last_archived": "2025-09-19T00:32:54.706Z"
 }

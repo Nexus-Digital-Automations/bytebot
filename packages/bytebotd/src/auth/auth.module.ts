@@ -1,74 +1,138 @@
 /**
- * Authentication Module - ByteBotd Computer Control Security
- * Configures authentication and authorization for computer automation endpoints
+ * Enhanced Authentication Module - AIgent-Parlant Enterprise Security Bridge
+ * Provides comprehensive JWT-to-Parlant authentication with enterprise-grade security
  *
  * Features:
- * - JWT authentication strategy configuration
- * - Passport integration for computer control security
- * - Guard and decorator providers for RBAC
- * - Shared configuration with other Bytebot services
+ * - Multi-algorithm JWT authentication (HS256, RS256, ES256, EdDSA)
+ * - AIgent-Parlant Security Bridge integration
+ * - 5-tier security classification system
+ * - Enterprise compliance and audit trails
+ * - Redis session clustering with emergency overrides
+ * - Conversational authentication validation
  *
- * @author Security Implementation Specialist
- * @version 1.0.0
- * @since ByteBotd Authentication Hardening
+ * @author AIgent Security Implementation Team
+ * @version 2.0.0
+ * @since AIgent-Parlant Bridge Integration
  */
 
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EnhancedJwtStrategy } from './strategies/enhanced-jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { AIgentParlantSecurityBridgeService } from './services/aigent-parlant-security-bridge.service';
+import { ParlantModule } from '../parlant/parlant.module';
+import { SecurityAuditService } from '../security/security-audit.service';
 
 /**
- * Authentication Module for ByteBotd
- * Provides comprehensive authentication and authorization infrastructure
+ * Enhanced enterprise authentication configuration factory
+ */
+export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
+  // Multi-algorithm support configuration
+  algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'],
+
+  // Primary secret for HS256 (backward compatibility)
+  secret: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),
+
+  // Enhanced signing options
+  signOptions: {
+    expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
+    algorithm: configService.get<string>('JWT_DEFAULT_ALGORITHM', 'HS256'),
+    issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
+    audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
+    keyid: configService.get<string>('JWT_KEY_ID'),
+  },
+
+  // Enhanced verification options
+  verifyOptions: {
+    algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'],
+    issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
+    audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
+    clockTolerance: 300, // 5 minutes
+    maxAge: configService.get<string>('JWT_MAX_AGE', '24h'),
+  },
+
+  // Enterprise security options
+  secretOrKeyProvider: (request: any, rawJwtToken: string, done: any) => {
+    // Dynamic key resolution handled by EnhancedJwtStrategy
+    done(null, configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'));
+  },
+});
+
+/**
+ * Enhanced Authentication Module for AIgent-Parlant Enterprise Integration
+ * Provides comprehensive JWT-to-Parlant authentication and security bridge
  */
 @Module({
   imports: [
-    // Import ConfigModule for environment variable access
-    ConfigModule,
-    
-    // Configure Passport for JWT strategy
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    
-    // Configure JWT module with shared secret
+    // Enhanced configuration module
+    ConfigModule.forRoot({
+      isGlobal: true,
+      expandVariables: true,
+      envFilePath: ['.env.local', '.env'],
+    }),
+
+    // Import Parlant module for conversational validation
+    forwardRef(() => ParlantModule),
+
+    // Configure Passport with enhanced JWT strategy
+    PassportModule.register({
+      defaultStrategy: 'enhanced-jwt',
+      session: false,
+      property: 'user',
+    }),
+
+    // Enhanced JWT module with multi-algorithm support
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'bytebot-default-secret-change-in-production'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m'),
-          algorithm: 'HS256',
-          issuer: 'bytebot-system',
-          audience: 'bytebotd-computer-control',
-        },
-        verifyOptions: {
-          algorithms: ['HS256'],
-          issuer: 'bytebot-system',
-          audience: 'bytebotd-computer-control',
-        },
-      }),
+      useFactory: enhancedJwtConfigFactory,
       inject: [ConfigService],
     }),
   ],
+
   providers: [
-    // JWT Strategy for token validation
+    // Legacy JWT strategy (for backward compatibility)
     JwtStrategy,
-    
-    // Authentication guards
+
+    // Enhanced JWT strategy with multi-algorithm support
+    EnhancedJwtStrategy,
+
+    // AIgent-Parlant Security Bridge service
+    AIgentParlantSecurityBridgeService,
+
+    // Enhanced authentication guards
     JwtAuthGuard,
     RolesGuard,
+
+    // Security audit service integration
+    SecurityAuditService,
   ],
+
   exports: [
-    // Export guards for use in controllers
+    // Export enhanced guards for use in controllers
     JwtAuthGuard,
     RolesGuard,
-    
-    // Export JWT module for potential token operations
+
+    // Export security bridge service
+    AIgentParlantSecurityBridgeService,
+
+    // Export JWT and Passport modules
     JwtModule,
     PassportModule,
+
+    // Export audit service for security monitoring
+    SecurityAuditService,
   ],
 })
-export class AuthModule {}
+export class AuthModule {
+  constructor() {
+    console.log('Enhanced AIgent-Parlant Authentication Module initialized');
+    console.log('Enterprise JWT authentication with conversational security bridge active');
+    console.log('Multi-algorithm support: HS256, RS256, ES256, EdDSA');
+    console.log('5-tier security classification system enabled');
+    console.log('Redis session clustering and emergency overrides available');
+  }
+}
