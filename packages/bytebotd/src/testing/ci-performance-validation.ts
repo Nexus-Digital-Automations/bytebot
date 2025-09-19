@@ -254,14 +254,18 @@ export class CIPerformanceValidator extends EventEmitter {
 
       // Create final validation result
       this.currentValidation = {
-        ...this.(currentValidation ?? "default"),
+        buildId: this.currentValidation?.buildId ?? context.buildId,
+        branch: this.currentValidation?.branch ?? context.branch,
+        commitHash: this.currentValidation?.commitHash ?? context.commitHash,
+        timestamp: this.currentValidation?.timestamp ?? Date.now(),
         testResults,
         loadTestResults: loadResults,
         optimizationResults,
         regressions,
         overallStatus,
         performanceGrade,
-        recommendations
+        recommendations,
+        artifacts: this.currentValidation?.artifacts ?? {}
       };
 
       // Generate and store artifacts
@@ -286,10 +290,35 @@ export class CIPerformanceValidator extends EventEmitter {
       
       // Create failed result
       const failedResult: CIPerformanceResult = {
-        ...this.(currentValidation ?? "default"),
+        buildId: this.currentValidation?.buildId ?? context.buildId,
+        branch: this.currentValidation?.branch ?? context.branch,
+        commitHash: this.currentValidation?.commitHash ?? context.commitHash,
+        timestamp: this.currentValidation?.timestamp ?? Date.now(),
         overallStatus: 'failed',
+        testResults: this.currentValidation?.testResults ?? {
+          totalTests: 0,
+          passedTests: 0,
+          failedTests: 0,
+          executionTime: 0,
+          memoryUsage: 0
+        },
+        loadTestResults: this.currentValidation?.loadTestResults ?? {
+          scenarios: 0,
+          passedScenarios: 0,
+          averageResponseTime: 0,
+          throughput: 0,
+          errorRate: 0
+        },
+        optimizationResults: this.currentValidation?.optimizationResults ?? {
+          timeSaved: 0,
+          cacheHitRate: 0,
+          parallelizationEfficiency: 0,
+          memoryOptimization: 0
+        },
+        regressions: this.currentValidation?.regressions ?? [],
         performanceGrade: 'F',
-        recommendations: ['Fix performance validation setup and retry']
+        recommendations: ['Fix performance validation setup and retry'],
+        artifacts: this.currentValidation?.artifacts ?? {}
       };
 
       this.emit('validationFailed', { error, context });
@@ -375,9 +404,9 @@ export class CIPerformanceValidator extends EventEmitter {
       const loadResults = {
         scenarios: allResults.length,
         passedScenarios: passedResults.length,
-        averageResponseTime: allResults.reduce((sum, r) => sum + r.averageResponseTime, 0) / allResults.length ?? 0,
-        throughput: allResults.reduce((sum, r) => sum + r.actualRps, 0) / allResults.length ?? 0,
-        errorRate: allResults.reduce((sum, r) => sum + r.errorRate, 0) / allResults.length ?? 0
+        averageResponseTime: allResults.length > 0 ? allResults.reduce((sum, r) => sum + r.averageResponseTime, 0) / allResults.length : 0,
+        throughput: allResults.length > 0 ? allResults.reduce((sum, r) => sum + r.actualRps, 0) / allResults.length : 0,
+        errorRate: allResults.length > 0 ? allResults.reduce((sum, r) => sum + r.errorRate, 0) / allResults.length : 0
       };
 
       // Check against thresholds
@@ -483,8 +512,12 @@ export class CIPerformanceValidator extends EventEmitter {
       console.log('⚠️ [CI-PERF] No baseline data available for regression analysis');
       return regressions;
     }
-    
-    const current = this.(currentValidation ?? "default");
+
+    const current = this.currentValidation;
+    if (!current) {
+      console.log('⚠️ [CI-PERF] No current validation data available for regression analysis');
+      return regressions;
+    }
 
     // Check for test execution time regression
     const testTimeChange = ((current.testResults.executionTime - latestBaseline.testResults.executionTime) / latestBaseline.testResults.executionTime) * 100;
@@ -560,7 +593,10 @@ export class CIPerformanceValidator extends EventEmitter {
    * Determine overall validation status
    */
   private determineOverallStatus(): 'passed' | 'failed' | 'warning' {
-    const current = this.(currentValidation ?? "default");
+    const current = this.currentValidation;
+    if (!current) {
+      return 'failed';
+    }
 
     // Check for critical failures
     const hasCriticalRegressions = current.regressions.some(r => r.severity === 'critical');
@@ -588,7 +624,10 @@ export class CIPerformanceValidator extends EventEmitter {
    * Calculate performance grade
    */
   private calculatePerformanceGrade(): 'A' | 'B' | 'C' | 'D' | 'F' {
-    const current = this.(currentValidation ?? "default");
+    const current = this.currentValidation;
+    if (!current) {
+      return 'F';
+    }
 
     // Calculate score based on multiple factors
     let score = 100;
@@ -618,7 +657,10 @@ export class CIPerformanceValidator extends EventEmitter {
    */
   private generateRecommendations(bottleneckAnalysis: any): string[] {
     const recommendations: string[] = [];
-    const current = this.(currentValidation ?? "default");
+    const current = this.currentValidation;
+    if (!current) {
+      return ['Complete performance validation setup before generating recommendations'];
+    }
 
     // Test execution recommendations
     if (current.testResults.executionTime > this.config.performanceThresholds.testExecutionTime.max) {
@@ -656,11 +698,15 @@ export class CIPerformanceValidator extends EventEmitter {
    * Generate validation artifacts
    */
   private async generateArtifacts(): Promise<void> {
-    const current = this.(currentValidation ?? "default");
+    const current = this.currentValidation;
+    if (!current) {
+      console.warn('⚠️ [CI-PERF] No validation data available for artifact generation');
+      return;
+    }
     const artifactsDir = `./artifacts/${current.buildId}`;
 
     try {
-      await fs.mkdir(_artifactsDir, { recursive: true });
+      await fs.mkdir(artifactsDir, { recursive: true });
 
       // Generate JSON report
       if (this.config.reporting.generateJsonReport) {
@@ -949,7 +995,7 @@ ${result.recommendations.map(rec => `- ${rec}`).join('\n')}
    */
   private getBaselineResults(branch: string): CIPerformanceResult[] | null {
     const baselineBranch = this.config.regressionDetection.baselineBranch;
-    return this.historicalResults.get(baselineBranch) || this.historicalResults.get(branch) ?? null;
+    return this.historicalResults.get(baselineBranch) || (this.historicalResults.get(branch) ?? null);
   }
 }
 

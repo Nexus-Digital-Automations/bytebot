@@ -688,7 +688,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         // const response = await fetch(`${endpoint}/health`);
         const responseTime = performance.now() - startTime;
         
-        this.endpointHealth.set(_endpoint, {
+        this.endpointHealth.set(endpoint, {
           url: endpoint,
           healthy: true,
           lastCheck: new Date(),
@@ -698,7 +698,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         
       } catch (error) {
         const currentHealth = this.endpointHealth.get(endpoint);
-        this.endpointHealth.set(_endpoint, {
+        this.endpointHealth.set(endpoint, {
           url: endpoint,
           healthy: false,
           lastCheck: new Date(),

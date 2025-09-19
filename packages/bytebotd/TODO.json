@@ -2414,6 +2414,48 @@
       ],
       "completed_at": "2025-09-18T16:48:05.180Z",
       "updated_at": "2025-09-18T16:48:05.180Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T23:30:58.027Z",
+      "title": "Fix ALL ESLint violations in CUA performance test",
+      "description": "ZERO TOLERANCE mission: Fix all ~23 ESLint violations in src/common/__tests__/cua-performance-scalability.spec.ts including duplicate imports, unused variables, any types, unsafe member access, and logical OR operators",
+      "category": "error",
+      "id": "error_1758238258026_3hpjejftig9",
+      "assigned_agent": "dev_session_1758238242817_1_general_2461aadf",
+      "started_at": "2025-09-18T23:31:15.834Z",
+      "claimed_by": "dev_session_1758238242817_1_general_2461aadf",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758238242817_1_general_2461aadf",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:31:15.834Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T23:34:46.444Z",
+      "updated_at": "2025-09-18T23:34:46.444Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T00:03:28.324Z",
+      "title": "Fix remaining TypeScript compilation errors",
+      "description": "Fix critical TypeScript errors: UserRole import, BrowserAction type mismatch, undefined riskFactors, function signature errors",
+      "category": "error",
+      "id": "error_1758240208324_emdbfnkgy9t",
+      "assigned_agent": "dev_session_1758240193444_1_general_88b75ad7",
+      "started_at": "2025-09-19T00:03:46.598Z",
+      "claimed_by": "dev_session_1758240193444_1_general_88b75ad7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758240193444_1_general_88b75ad7",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:03:46.598Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -6990,6 +7032,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-18T16:43:44.898Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758238242817_1_general_2461aadf": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T23:30:42.818Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T23:30:42.818Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758240193444_1_general_88b75ad7": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T00:03:13.445Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T00:03:13.445Z",
       "sessionId": null,
       "metadata": {}
     }

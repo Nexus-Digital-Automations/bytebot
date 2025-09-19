@@ -387,12 +387,12 @@ export class ComputerUseService {
           operationId,
           actionType: params.action,
           processingTimeMs: duration,
-          hasResult: !!_result,
-          resultType: _result ? typeof result : undefined,
+          hasResult: !!result,
+          resultType: result ? typeof result : undefined,
         },
       );
 
-      return _result;
+      return result;
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
@@ -1146,7 +1146,7 @@ export class ComputerUseService {
         base64Length: image.length,
       });
 
-      return _result;
+      return result;
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
@@ -1192,11 +1192,11 @@ export class ComputerUseService {
         `[${operationId}] Cursor position retrieved successfully`,
         {
           operationId,
-          position: { x: _result.x, y: _result.y },
+          position: { x: result.x, y: result.y },
         },
       );
 
-      return _result;
+      return result;
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
@@ -1287,7 +1287,7 @@ export class ComputerUseService {
 
         // Extract _error code safely
         const errorCode =
-          _error && typeof error === 'object' && 'code' in _error
+          _error && typeof _error === 'object' && 'code' in _error
             ? (_error as { code: unknown }).code
             : null;
 
@@ -1500,7 +1500,7 @@ export class ComputerUseService {
         },
       );
 
-      return _result;
+      return result;
     } catch (_error) {
       // Ensure temp file cleanup on _error
       if (tempFile) {
@@ -1533,7 +1533,7 @@ export class ComputerUseService {
         timestamp,
       };
 
-      return _result;
+      return result;
     }
   }
 
@@ -1692,7 +1692,7 @@ export class ComputerUseService {
           },
         );
 
-        return _result;
+        return result;
       } catch (fileError) {
         throw new Error(
           `Failed to read file: ${ErrorHandler.extractErrorMessage(fileError)}`,
@@ -1742,7 +1742,7 @@ export class ComputerUseService {
         timestamp,
       };
 
-      return _result;
+      return result;
     }
   }
 }

@@ -197,7 +197,7 @@ export class TestExecutionValidator extends EventEmitter {
       });
 
       let jestOutput = '';
-      const jestError = '';
+      let jestError = '';
 
       jestProcess.stdout?.on('data', (data: Buffer) => {
         jestOutput += data.toString();
@@ -210,7 +210,7 @@ export class TestExecutionValidator extends EventEmitter {
       });
 
       jestProcess.stderr?.on('data', (data: Buffer) => {
-        _jestError += data.toString();
+        jestError += data.toString();
       });
 
       const exitCode = await new Promise<number>((resolve) => {
@@ -717,7 +717,7 @@ export class TestExecutionValidator extends EventEmitter {
       ? allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) / allMetrics.length 
       : 100;
 
-    const recommendations = this.generateOptimizationOpportunities(_allMetrics, { parallelizationBenefit: 50 });
+    const recommendations = this.generateOptimizationOpportunities(allMetrics, { parallelizationBenefit: 50 });
 
     return {
       totalSuites,

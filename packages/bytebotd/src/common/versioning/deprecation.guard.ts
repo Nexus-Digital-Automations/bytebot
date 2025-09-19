@@ -399,7 +399,7 @@ export class DeprecationGuard implements CanActivate {
     const desktopClient = request.get('X-Desktop-Client') ?? 'unknown';
     const computerUseClient = request.get('X-Computer-Use-Client');
     const vncClient = request.get('X-VNC-Client') ?? 'unknown';
-    const userAgent = request.get('User-Agent') ?? 'unknown';
+    const _userAgent = request.get('User-Agent') ?? 'unknown';
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
     const versionMatch = desktopClient.match(/-([0-9]+\.[0-9]+\.[0-9]+)/);

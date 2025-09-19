@@ -240,7 +240,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     const performanceGrade = this.calculatePerformanceGrade(config, averageExecutionTime, averageMemoryUsage, memoryLeakDetected);
 
     // Generate recommendations
-    const recommendations = this.generateRecommendations(_config, {
+    const recommendations = this.generateRecommendations(config, {
       averageExecutionTime,
       averageMemoryUsage,
       memoryLeakDetected,
@@ -294,7 +294,7 @@ export class PerformanceTestingFramework extends EventEmitter {
       return suites;
     }, new Map<string, string[]>());
 
-    for (const [suiteName, testKeys] of testSuites) {
+    for (const [suiteName, testKeys] of Array.from(testSuites.entries())) {
       const suiteMetrics = testKeys.flatMap(key => this.metrics.get(key) ?? []);
       
       const totalTests = testKeys.length;

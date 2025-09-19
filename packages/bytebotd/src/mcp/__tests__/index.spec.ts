@@ -68,7 +68,7 @@ class IndexTestUtils {
    * Check if an object is a constructor function
    */
   static isConstructor(obj: unknown): boolean {
-    return (_typeof obj === 'function' &&
+    return (typeof obj === 'function' &&
       obj.prototype &&
       (obj as { prototype: { constructor: unknown } }).prototype.constructor === obj) as boolean;
   }

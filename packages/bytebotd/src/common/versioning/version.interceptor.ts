@@ -437,7 +437,7 @@ export class VersionInterceptor implements NestInterceptor {
   private checkDesktopCompatibility(
     desktopClientInfo: Record<string, unknown>,
     desktopCompatibility: DesktopCompatibility | null,
-    resolvedVersion: string,
+    _resolvedVersion: string,
   ): string[] {
     const issues: string[] = [];
 

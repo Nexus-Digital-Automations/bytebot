@@ -47,8 +47,8 @@ const REDIS_TEST_CONFIG = {
 describe('Cache Redis Integration Tests', () => {
   let module: TestingModule;
   let cacheService: CacheService;
-  let keyGenerator: CacheKeyGenerator;
-  let cacheManager: Cache;
+  let _keyGenerator: CacheKeyGenerator;
+  let _cacheManager: Cache;
   let redisClient: Redis;
   let isRedisAvailable = false;
 
@@ -60,7 +60,7 @@ describe('Cache Redis Integration Tests', () => {
       await redisClient.ping();
       isRedisAvailable = true;
       console.log('✅ Redis server detected - running integration tests');
-    } catch (error) {
+    } catch {
       console.warn('⚠️  Redis server not available - skipping integration tests');
       console.warn('To run Redis integration tests, start Redis server on localhost:6379');
       isRedisAvailable = false;
@@ -319,7 +319,9 @@ describe('Cache Redis Integration Tests', () => {
       it('should skip null values during cache warming', async () => {
         const keys = ['warm-valid', 'warm-null'];
         const dataProvider = jest.fn((key: string) => {
-          if (key === 'warm-null') return Promise.resolve(null);
+          if (key === 'warm-null') {
+            return Promise.resolve(null);
+          }
           return Promise.resolve(`data-for-${key}`);
         });
 
@@ -339,8 +341,8 @@ describe('Cache Redis Integration Tests', () => {
         const value1 = 'namespace 1 value';
         const value2 = 'namespace 2 value';
 
-        await cacheService.set(_key, value1, { namespace: 'ns1' });
-        await cacheService.set(_key, value2, { namespace: 'ns2' });
+        await cacheService.set(key, value1, { namespace: 'ns1' });
+        await cacheService.set(key, value2, { namespace: 'ns2' });
 
         const retrieved1 = await cacheService.get(key, { namespace: 'ns1' });
         const retrieved2 = await cacheService.get(key, { namespace: 'ns2' });
@@ -353,8 +355,8 @@ describe('Cache Redis Integration Tests', () => {
       it('should generate different Redis keys for different namespaces', async () => {
         const key = 'test-key';
         
-        await cacheService.set(_key, 'value1', { namespace: 'ns1' });
-        await cacheService.set(_key, 'value2', { namespace: 'ns2' });
+        await cacheService.set(key, 'value1', { namespace: 'ns1' });
+        await cacheService.set(key, 'value2', { namespace: 'ns2' });
 
         // Check Redis directly
         const redisKeys = await redisClient.keys('*');
@@ -520,10 +522,10 @@ describe('Cache Redis Integration Tests', () => {
 
     describe('Memory Usage and Cleanup', () => {
       it('should clean up expired keys automatically', async () => {
-        const key = 'cleanup-test';
+        const _key = 'cleanup-test';
         const value = 'will expire';
 
-        await cacheService.set(_key, value, { ttl: 1 });
+        await cacheService.set('cleanup-test', value, { ttl: 1 });
 
         // Verify key exists in Redis
         let exists = await redisClient.exists('bytebot:cleanup-test');
@@ -545,7 +547,7 @@ describe('Cache Redis Integration Tests', () => {
         for (let i = 0; i < keyCount; i++) {
           const key = `memory-test-${i}`;
           keys.push(key);
-          await cacheService.set(_key, `value-${i}`, { ttl: 60 });
+          await cacheService.set(key, `value-${i}`, { ttl: 60 });
         }
 
         // Verify they exist

@@ -67,7 +67,7 @@ describe('InputTrackingController', () => {
     isActive: true,
   };
 
-  const mockViewerUser: MockByteBotdUser = {
+  const _mockViewerUser: MockByteBotdUser = {
     id: 'viewer_user_1',
     sub: 'viewer_user_1',
     username: 'viewer',
@@ -221,14 +221,14 @@ describe('InputTrackingController', () => {
       let callCount = 0;
       Date.now = jest.fn(() => originalDateNow() + callCount++);
 
-      const result1 = controller.start(mockAdminUser);
-      const result2 = controller.start(mockOperatorUser);
+      const _result1 = controller.start(mockAdminUser);
+      const _result2 = controller.start(mockOperatorUser);
 
       expect(logger.log).toHaveBeenCalledTimes(2);
       const firstCallArgs = (logger.log as jest.Mock).mock
-        .calls[0] as unknown[];
+        .calls[0];
       const secondCallArgs = (logger.log as jest.Mock).mock
-        .calls[1] as unknown[];
+        .calls[1];
 
       // Verify different operation IDs were generated
       expect(
@@ -413,8 +413,8 @@ describe('InputTrackingController', () => {
       controller.start(mockOperatorUser);
       controller.stop(mockOperatorUser);
 
-      const startLogCall = (logger.log as jest.Mock).mock.calls[0] as unknown[];
-      const stopLogCall = (logger.log as jest.Mock).mock.calls[1] as unknown[];
+      const startLogCall = (logger.log as jest.Mock).mock.calls[0];
+      const stopLogCall = (logger.log as jest.Mock).mock.calls[1];
 
       expect((startLogCall[1] as Record<string, unknown>).operationId).toMatch(
         /^input-tracking-start-\d+$/,
@@ -564,7 +564,7 @@ describe('InputTrackingController', () => {
       controller.start(mockAdminUser);
       controller.stop(mockOperatorUser);
 
-      const logCalls = (logger.log as jest.Mock).mock.calls as unknown[][];
+      const logCalls = (logger.log as jest.Mock).mock.calls;
 
       expect((logCalls[0]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
         'input_tracking_started',

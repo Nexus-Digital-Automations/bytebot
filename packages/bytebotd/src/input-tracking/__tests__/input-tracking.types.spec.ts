@@ -91,7 +91,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with minimal required fields
         expect(
-          _isMouseEventData({
+          isMouseEventData({
             button: 0,
             x: 0,
             y: 0,
@@ -100,7 +100,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with negative coordinates
         expect(
-          _isMouseEventData({
+          isMouseEventData({
             button: 1,
             x: -100,
             y: -200,
@@ -109,7 +109,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with large coordinates
         expect(
-          _isMouseEventData({
+          isMouseEventData({
             button: 1,
             x: 99999,
             y: 99999,
@@ -240,7 +240,7 @@ describe('InputTrackingTypes', () => {
 
         // Minimal valid user
         expect(
-          _isMockByteBotdUser({
+          isMockByteBotdUser({
             id: 'test',
             username: 'test',
             role: 'viewer',
@@ -249,7 +249,7 @@ describe('InputTrackingTypes', () => {
 
         // Missing critical fields
         expect(
-          _isMockByteBotdUser({
+          isMockByteBotdUser({
             username: 'test',
             role: 'admin',
           }),
@@ -303,16 +303,16 @@ describe('InputTrackingTypes', () => {
         console.log(`[${testId}] Testing coordinates edge cases`);
 
         // Zero coordinates
-        expect(_isValidCoordinates({ x: 0, y: 0 })).toBe(true);
+        expect(isValidCoordinates({ x: 0, y: 0 })).toBe(true);
 
         // Negative coordinates
-        expect(_isValidCoordinates({ x: -100, y: -200 })).toBe(true);
+        expect(isValidCoordinates({ x: -100, y: -200 })).toBe(true);
 
         // Fractional coordinates
-        expect(_isValidCoordinates({ x: 100.5, y: 200.7 })).toBe(true);
+        expect(isValidCoordinates({ x: 100.5, y: 200.7 })).toBe(true);
 
         // Large coordinates
-        expect(_isValidCoordinates({ x: 999999, y: 999999 })).toBe(true);
+        expect(isValidCoordinates({ x: 999999, y: 999999 })).toBe(true);
 
         console.log(`[${testId}] Coordinates edge cases test completed`);
       });

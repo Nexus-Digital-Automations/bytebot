@@ -511,7 +511,7 @@ describe('MCP Error Handling and Recovery', () => {
       // Mock service to simulate timeout
       mockComputerUseService.screenshot.mockImplementation(() => 
         new Promise((_, reject) => 
-          setTimeout(() => reject(_new Error('ETIMEDOUT: Operation timed out')), 100)
+          setTimeout(() => reject(new Error('ETIMEDOUT: Operation timed out')), 100)
         )
       );
 

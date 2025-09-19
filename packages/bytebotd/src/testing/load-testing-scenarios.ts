@@ -569,7 +569,7 @@ export class ModuleLoadTestingOrchestrator {
 
       try {
         // Attempt to get the service/resource
-        const service = this.moduleRef.get(_resource, { strict: false });
+        const service = this.moduleRef.get(resource, { strict: false });
         if (!service) {
           throw new Error(`Required resource ${resource} not available`);
         }
@@ -588,7 +588,7 @@ export class ModuleLoadTestingOrchestrator {
       throw new Error('Application not initialized');
     }
 
-    if (_endpoint.startsWith('ws://')) {
+    if (endpoint.startsWith('ws://')) {
       // WebSocket endpoint - simulate connection
       return { status: 200 };
     }

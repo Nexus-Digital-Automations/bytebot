@@ -729,7 +729,7 @@ describe('RolesGuard', () => {
       const users = Array(20)
         .fill(null)
         .map((_, _i) =>
-          createMockUser(_UserRole._OPERATOR, [], {
+          createMockUser(UserRole._OPERATOR, [], {
             id: `concurrent_user${_i}`,
           }),
         );
@@ -966,7 +966,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_case_sensitivity`;
       console.log(`[${testId}] Testing role case sensitivity`);
 
-      const user = createMockUser(_UserRole._ADMIN, [], {
+      const user = createMockUser(UserRole._ADMIN, [], {
         role: 'ADMIN' as UserRole,
       });
       const context = createMockExecutionContext(user);

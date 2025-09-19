@@ -571,7 +571,7 @@ export class EnterpriseApiRateLimitService {
     if (!existing || now >= existing.resetTime) {
       // Create new tracking window
       const resetTime = new Date(now.getTime() + config.windowMs);
-      this.rateLimitTracking.set(_trackingKey, {
+      this.rateLimitTracking.set(trackingKey, {
         count: 0,
         resetTime,
         firstRequest: now,

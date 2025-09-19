@@ -266,7 +266,7 @@ describe('Base64ImageCompressor', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.base64).not.toMatch(_/^data:image\//);
+      expect(result.base64).not.toMatch(/^data:image\//);
     });
 
     /**
@@ -324,7 +324,7 @@ describe('Base64ImageCompressor', () => {
 
       // Testing with invalid format - intentionally using unsupported type
       await expect(
-        _Base64ImageCompressor.compressToSize(inputImage, {
+        Base64ImageCompressor.compressToSize(inputImage, {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
           format: 'gif' as unknown,
         }),
@@ -346,7 +346,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
       const result = await Base64ImageCompressor.compressWithResize(
-        _inputImage,
+        inputImage,
         {
           targetSizeKB: 1024,
           maxWidth: 1920,
@@ -364,7 +364,7 @@ describe('Base64ImageCompressor', () => {
     it('should apply progressive scaling when needed', async () => {
       let resizeCallCount = 0;
       mockSharpInstance.resize.mockImplementation((width, height, options) => {
-        _resizeCallCount++;
+        resizeCallCount++;
         expect(width).toBeGreaterThan(0);
         expect(height).toBeGreaterThan(0);
         expect((options as { fit: string }).fit).toBe('inside');
@@ -399,7 +399,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(5000);
 
       const result = await Base64ImageCompressor.compressWithResize(
-        _inputImage,
+        inputImage,
         {
           targetSizeKB: 500,
         },
@@ -491,7 +491,7 @@ describe('Base64ImageCompressor', () => {
       await compressPngBase64Under1MB(inputImage);
 
       expect(Base64ImageCompressor.compressToSize).toHaveBeenCalledWith(
-        _inputImage,
+        inputImage,
         {
           targetSizeKB: 1024,
           format: 'png',
@@ -532,7 +532,7 @@ describe('Base64ImageCompressor', () => {
         .fill(null)
         .map((_, i) => {
           const image = TestDataGenerator.generateBase64Image(1000 + i * 100);
-          return Base64ImageCompressor.compressToSize(_image, {
+          return Base64ImageCompressor.compressToSize(image, {
             targetSizeKB: 800,
           });
         });
@@ -553,7 +553,7 @@ describe('Base64ImageCompressor', () => {
       const largeImage = TestDataGenerator.generateBase64Image(10000); // 10MB
 
       const startTime = performance.now();
-      const result = await Base64ImageCompressor.compressToSize(_largeImage, {
+      const result = await Base64ImageCompressor.compressToSize(largeImage, {
         targetSizeKB: 1024,
         maxIterations: 5,
       });

@@ -70,7 +70,7 @@ import { ComputerAction } from '@bytebot/shared';
  */
 export class ParlantComputerActionDto {
   /** Base computer action type */
-  (action ?? "default"): string;
+  action: string;
   
   /** Action-specific properties - will vary based on action type */
   [key: string]: unknown;
@@ -104,19 +104,19 @@ export class ParlantComputerActionDto {
  */
 export class ParlantValidationResponseDto {
   /** Whether the action was approved */
-  (approved ?? "default"): boolean;
+  approved: boolean;
 
   /** Conversation ID for audit trail */
-  (conversationId ?? "default"): string;
+  conversationId: string;
 
   /** Validation timestamp */
-  (validationTimestamp ?? "default"): Date;
+  validationTimestamp: Date;
 
   /** Human-readable reasoning for the decision */
-  (reasoning ?? "default"): string;
+  reasoning: string;
 
   /** Confidence score for the validation */
-  (confidence ?? "default"): number;
+  confidence: number;
 
   /** Suggested alternatives if denied */
   suggestedAlternatives?: string[];
@@ -135,20 +135,20 @@ export class ParlantValidationResponseDto {
  */
 export class ParlantComputerActionResultDto {
   /** Action execution result */
-  (result ?? "default"): unknown;
+  result: unknown;
 
   /** Validation details */
-  (validation ?? "default"): ParlantValidationResponseDto;
+  validation: ParlantValidationResponseDto;
 
   /** Performance metrics */
-  (performance ?? "default"): {
+  performance: {
     validationTimeMs: number;
     executionTimeMs: number;
     totalTimeMs: number;
   };
 
   /** Audit information */
-  (audit ?? "default"): {
+  audit: {
     operationId: string;
     userId: string;
     timestamp: Date;
@@ -162,13 +162,13 @@ export class ParlantComputerActionResultDto {
  */
 export class ParlantSystemStatusDto {
   /** Whether Parlant validation is enabled */
-  (enabled ?? "default"): boolean;
+  enabled: boolean;
 
   /** Current system status */
-  (status ?? "default"): 'HEALTHY' | 'DEGRADED' | 'FAILED';
+  status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
 
   /** Performance metrics */
-  (metrics ?? "default"): {
+  metrics!: {
     totalOperations: number;
     approvedOperations: number;
     deniedOperations: number;
@@ -178,14 +178,14 @@ export class ParlantSystemStatusDto {
   };
 
   /** System health indicators */
-  (health ?? "default"): {
+  health: {
     validationService: 'healthy' | 'degraded' | 'failed';
     cacheService: 'healthy' | 'degraded' | 'failed';
     auditService: 'healthy' | 'degraded' | 'failed';
   };
 
   /** Last health check timestamp */
-  (lastHealthCheck ?? "default"): Date;
+  lastHealthCheck: Date;
 }
 
 // ===== PARLANT-ENHANCED CONTROLLER =====

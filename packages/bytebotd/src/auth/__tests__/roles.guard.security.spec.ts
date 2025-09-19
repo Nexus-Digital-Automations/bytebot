@@ -346,19 +346,19 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValue([UserRole._ADMIN]); // All require admin
 
       // Simulate concurrent requests where user role might be modified
-      const promises = contexts.map(async (context, _index) => {
+      const promises = contexts.map(async (context, index) => {
         // Simulate role modification during concurrent requests
         if (index === 5) {
           user.role = UserRole._ADMIN; // Simulate role escalation mid-flight
         }
 
         try {
-          const result = await guard.canActivate(context);
-          return { success: true, index: _index };
+          const _result = await guard.canActivate(context);
+          return { success: true, index: index };
         } catch (error) {
           return {
             success: false,
-            index: _index,
+            index: index,
             error: (error as Error).message,
           };
         }
@@ -400,7 +400,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       // Attempt to manipulate permissions during request
-      const originalPermissions = Object.values(Permission);
+      const _originalPermissions = Object.values(Permission);
       const maliciousRequest = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       // Try to inject permissions
@@ -675,7 +675,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
           return {
@@ -732,7 +732,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
       // Simulate race condition by modifying user role during concurrent checks
-      const promises = contexts.map(async (context, _index) => {
+      const promises = contexts.map(async (context, index) => {
         // Simulate role modification during concurrent access
         if (index === 10) {
           setTimeout(() => {
@@ -741,10 +741,10 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const result = await guard.canActivate(context);
-          return { success: true, index: _index };
+          const _result = await guard.canActivate(context);
+          return { success: true, index: index };
         } catch (_error) {
-          return { success: false, index: _index };
+          return { success: false, index: index };
         }
       });
 
@@ -871,7 +871,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
         try {
           return guard.canActivate(context);
-        } catch (error: unknown) {
+        } catch (_error: unknown) {
           return 'blocked';
         }
       });

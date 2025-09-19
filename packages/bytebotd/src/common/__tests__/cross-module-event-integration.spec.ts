@@ -26,7 +26,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Injectable } from '@nestjs/common';
 import { EventEmitter2, EventEmitterModule, OnEvent } from '@nestjs/event-emitter';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { ComputerUseModule } from '../../computer-use/computer-use.module';
@@ -40,15 +40,20 @@ import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module'
 import { MetricsService } from '../../metrics/metrics.service';
 import { CacheService } from '../../cache/cache.service';
 import { NutService } from '../../nut/nut.service';
-import { Injectable } from '@nestjs/common';
-import {
-  ComputerAction,
-  MoveMouseAction,
-  ClickMouseAction,
-  ScreenshotAction,
-} from '@bytebot/shared';
 
 // Event integration test interfaces
+interface EventPayload {
+  source?: string;
+  target?: string;
+  correlationId?: string;
+  sequenceNumber?: number;
+  retryCount?: number;
+  processingTime?: number;
+  originalCorrelationId?: string;
+  eventIndex?: number;
+  [key: string]: unknown;
+}
+
 interface CrossModuleEventContext {
   app: INestApplication;
   eventEmitter: EventEmitter2;
@@ -110,12 +115,12 @@ export class EventCollectorService {
   private eventMetrics: Map<string, number> = new Map();
 
   @OnEvent('**', { async: true })
-  async handleAllEvents(eventName: string, payload: any): Promise<void> {
+  async handleAllEvents(eventName: string, payload: EventPayload): Promise<void> {
     const event: EventRecord = {
       eventId: this.generateEventId(),
       eventName,
-      source: payload?.source || 'unknown',
-      target: payload?.target || 'all',
+      source: payload?.source ?? 'unknown',
+      target: payload?.target ?? 'all',
       timestamp: new Date(),
       payload: payload ?? {},
       correlationId: payload?.correlationId,
@@ -417,7 +422,7 @@ describe('Cross-Module Event Integration Tests', () => {
         e => e.eventName === 'computer-use.action.approved' && e.correlationId === correlationId
       );
       expect(approvalEvent).toBeDefined();
-      expect((approvalEvent ?? "default").payload.validationResult).toBe('approved');
+      expect(approvalEvent?.payload.validationResult).toBe('approved');
 
       recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);
     });
@@ -546,7 +551,7 @@ describe('Cross-Module Event Integration Tests', () => {
         e => e.eventName === 'enterprise-api.rate-limit.allowed' && e.correlationId === correlationId
       );
       expect(rateLimitEvent).toBeDefined();
-      expect((rateLimitEvent ?? "default").payload.remainingRequests).toBe(955);
+      expect(rateLimitEvent?.payload.remainingRequests).toBe(955);
 
       recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);
     });
@@ -563,7 +568,7 @@ describe('Cross-Module Event Integration Tests', () => {
 
       // Setup recovery event listener
       const recoveryEvents: EventRecord[] = [];
-      context.eventEmitter.on('test.recovery.event', (payload) => {
+      context.eventEmitter.on('test.recovery.event', (payload: EventPayload) => {
         recoveryEvents.push({
           eventId: 'recovery-test',
           eventName: 'test.recovery.event',
@@ -597,7 +602,7 @@ describe('Cross-Module Event Integration Tests', () => {
       const deadLetterEvents: EventRecord[] = [];
 
       // Setup dead letter queue listener
-      context.eventEmitter.on('dlq.event.failed', (payload) => {
+      context.eventEmitter.on('dlq.event.failed', (payload: EventPayload) => {
         deadLetterEvents.push({
           eventId: 'dlq-test',
           eventName: 'dlq.event.failed',
@@ -611,7 +616,7 @@ describe('Cross-Module Event Integration Tests', () => {
 
       // Setup failing processor that retries then sends to DLQ
       let failCount = 0;
-      context.eventEmitter.on('test.retryable.event', (payload) => {
+      context.eventEmitter.on('test.retryable.event', (payload: EventPayload) => {
         failCount++;
         if (failCount <= 3) {
           // Simulate retry
@@ -653,7 +658,7 @@ describe('Cross-Module Event Integration Tests', () => {
       const orderedEvents: EventRecord[] = [];
 
       // Setup ordered event collector
-      context.eventEmitter.on('test.ordered.event', (payload) => {
+      context.eventEmitter.on('test.ordered.event', (payload: EventPayload) => {
         orderedEvents.push({
           eventId: `ordered-${payload.sequenceNumber}`,
           eventName: 'test.ordered.event',
@@ -712,9 +717,9 @@ describe('Cross-Module Event Integration Tests', () => {
       const performanceEvents: Array<{ eventName: string; processingTime: number }> = [];
 
       // Setup performance monitoring
-      context.eventEmitter.on('performance.test.event', (payload) => {
+      context.eventEmitter.on('performance.test.event', (_payload: EventPayload) => {
         const startTime = Date.now();
-        
+
         // Simulate processing work
         const processingDelay = Math.random() * 50; // 0-50ms processing time
         setTimeout(() => {
@@ -723,7 +728,7 @@ describe('Cross-Module Event Integration Tests', () => {
             eventName: 'performance.test.event',
             processingTime,
           });
-          
+
           context.eventEmitter.emit('performance.test.completed', {
             correlationId,
             processingTime,
@@ -753,7 +758,7 @@ describe('Cross-Module Event Integration Tests', () => {
       
       const averageProcessingTime = performanceEvents.reduce((sum, e) => sum + e.processingTime, 0) / eventCount;
       const maxProcessingTime = Math.max(...performanceEvents.map(e => e.processingTime));
-      const minProcessingTime = Math.min(...performanceEvents.map(e => e.processingTime));
+      const _minProcessingTime = Math.min(...performanceEvents.map(e => e.processingTime));
 
       expect(averageProcessingTime).toBeLessThan(100); // Average under 100ms
       expect(maxProcessingTime).toBeLessThan(200); // Max under 200ms
@@ -784,7 +789,7 @@ describe('Cross-Module Event Integration Tests', () => {
       const processedEvents: EventRecord[] = [];
 
       // Setup high-throughput event processor
-      context.eventEmitter.on('throughput.test.event', (payload) => {
+      context.eventEmitter.on('throughput.test.event', (payload: EventPayload) => {
         processedEvents.push({
           eventId: `throughput-${payload.eventIndex}`,
           eventName: 'throughput.test.event',

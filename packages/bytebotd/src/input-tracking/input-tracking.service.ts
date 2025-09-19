@@ -121,7 +121,7 @@ export class InputTrackingService implements OnModuleDestroy {
                   image: string;
                 }>
               )();
-              this.screenshot = _result;
+              this.screenshot = result;
             } catch (_error) {
               const errorMessage =
                 _error instanceof Error ? _error.message : 'Unknown _error';

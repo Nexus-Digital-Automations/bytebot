@@ -1067,25 +1067,25 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Generate mitigation strategies based on risk factors
    */
-  private generateMitigationStrategies(_riskFactors: riskFactorsType): string[] {
+  private generateMitigationStrategies(riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.some(f => f.includes('memory'))) {
+    if (riskFactors.some((f: string) => f.includes('memory'))) {
       strategies.push('Monitor memory usage during execution');
     }
-    if (riskFactors.some(f => f.includes('CPU'))) {
+    if (riskFactors.some((f: string) => f.includes('CPU'))) {
       strategies.push('Implement CPU throttling if needed');
     }
-    if (riskFactors.some(f => f.includes('network'))) {
+    if (riskFactors.some((f: string) => f.includes('network'))) {
       strategies.push('Monitor network activity and implement rate limiting');
     }
-    if (riskFactors.some(f => f.includes('queue'))) {
+    if (riskFactors.some((f: string) => f.includes('queue'))) {
       strategies.push('Consider scheduling during off-peak hours');
     }
-    if (riskFactors.some(f => f.includes('data'))) {
+    if (riskFactors.some((f: string) => f.includes('data'))) {
       strategies.push('Ensure compliance with data retention policies');
     }
-    if (riskFactors.some(f => f.includes('deletion'))) {
+    if (riskFactors.some((f: string) => f.includes('deletion'))) {
       strategies.push('Create backup before deletion if required');
     }
 
@@ -1095,17 +1095,17 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Generate job creation description for validation
    */
-  private generateJobCreationDescription(_dto: dtoType): string {
-    const duration = dto.estimatedDurationMs ? 
+  private generateJobCreationDescription(dto: CreateAsyncJobDto): string {
+    const duration = dto.estimatedDurationMs ?
       `(estimated ${Math.round(dto.estimatedDurationMs / 60000)} minutes)` : '';
-    
-    return `Create ${dto.jobType.toLowerCase().replace('', ' ')} async job "${dto.name}" ${duration}`;
+
+    return `Create ${dto.jobType.toLowerCase().replace('_', ' ')} async job "${dto.name}" ${duration}`;
   }
 
   /**
    * Sanitize job DTO for validation (remove sensitive data)
    */
-  private sanitizeJobDtoForValidation(_dto: dtoType): Partial<CreateAsyncJobDto> {
+  private sanitizeJobDtoForValidation(dto: CreateAsyncJobDto): Partial<CreateAsyncJobDto> {
     return {
       name: dto.name,
       description: dto.description,
@@ -1121,9 +1121,9 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Create audit entry for async job operations
    */
-  private async createAsyncJobAuditEntry(_entry: entryType): Promise<void> {
+  private async createAsyncJobAuditEntry(entry: AsyncJobAuditEntry): Promise<void> {
     this.jobAuditHistory.push(entry);
-    
+
     // Keep audit history manageable (last 1000 entries)
     if (this.jobAuditHistory.length > 1000) {
       this.jobAuditHistory.splice(0, this.jobAuditHistory.length - 1000);
@@ -1140,7 +1140,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Create timeout promise for validation enforcement
    */
-  private createTimeoutPromise<T>(_timeoutMs: timeoutMsType): Promise<T> {
+  private createTimeoutPromise<T>(timeoutMs: number): Promise<T> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Operation timed out after ${timeoutMs}ms`));
@@ -1151,11 +1151,11 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(_operationTime: operationTimeType): void {
+  private updatePerformanceMetrics(operationTime: number): void {
     const alpha = 0.1; // Exponential moving average factor
-    this.averageValidationTime = 
-      this.averageValidationTime === 0 
-        ? operationTime 
+    this.averageValidationTime =
+      this.averageValidationTime === 0
+        ? operationTime
         : (1 - alpha) * this.averageValidationTime + alpha * operationTime;
   }
 

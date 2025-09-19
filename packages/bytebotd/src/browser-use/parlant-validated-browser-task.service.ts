@@ -919,7 +919,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Escalate risk level to next higher level
    */
-  private escalateRiskLevel(_currentLevel: currentLevelType): RiskLevel {
+  private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
       case RiskLevel.MINIMAL: return RiskLevel.LOW;
       case RiskLevel.LOW: return RiskLevel.MEDIUM;
@@ -933,7 +933,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate task-specific mitigation strategies
    */
-  private generateTaskMitigationStrategies(_riskLevel: riskLevelType): string[] {
+  private generateTaskMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.includes('high_action_count')) {
@@ -962,7 +962,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate resource limitations based on context
    */
-  private generateResourceLimitations(_context: contextType): string[] {
+  private generateResourceLimitations(context: BrowserTaskValidationContext): string[] {
     const limitations: string[] = [];
 
     if (context.browserEnvironment.resourceUsage.memoryMB > 500) {
@@ -983,7 +983,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate monitoring requirements based on risk level
    */
-  private generateMonitoringRequirements(_riskLevel: riskLevelType): string[] {
+  private generateMonitoringRequirements(riskLevel: RiskLevel): string[] {
     const requirements: string[] = [];
 
     switch (riskLevel) {
@@ -1015,7 +1015,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate task creation description
    */
-  private generateTaskCreationDescription(_taskData: taskDataType): string {
+  private generateTaskCreationDescription(taskData: TaskCreationData): string {
     const complexity = this.determineTaskComplexity(taskData.totalActions);
     return `Create browser task "${taskData.name}" with ${taskData.totalActions} actions (${complexity} complexity), priority: ${taskData.priority}`;
   }
@@ -1023,7 +1023,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Determine task complexity based on action count
    */
-  private determineTaskComplexity(_actionCount: actionCountType): string {
+  private determineTaskComplexity(actionCount: number): string {
     if (actionCount <= 5) return 'simple';
     if (actionCount <= 15) return 'moderate';
     if (actionCount <= 30) return 'complex';
@@ -1033,7 +1033,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Sanitize task data for validation
    */
-  private sanitizeTaskForValidation(_taskData: taskDataType): Record<string, unknown> {
+  private sanitizeTaskForValidation(taskData: TaskCreationData): Record<string, unknown> {
     return {
       name: taskData.name,
       taskId: taskData.taskId,
@@ -1049,7 +1049,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Sanitize update data for validation
    */
-  private sanitizeUpdateDataForValidation(_updateData: updateDataType): Record<string, unknown> {
+  private sanitizeUpdateDataForValidation(updateData: TaskUpdateData): Record<string, unknown> {
     return {
       status: updateData.status,
       hasExtractedData: !!updateData.extractedData,
@@ -1063,7 +1063,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Extract task metadata from task data
    */
-  private extractTaskMetadata(_taskData: taskDataType): TaskExecutionMetadata {
+  private extractTaskMetadata(taskData: TaskCreationData): TaskExecutionMetadata {
     return {
       priority: taskData.priority ?? BrowserTaskPriority.NORMAL,
       sessionConfig: taskData.sessionConfig,
@@ -1076,7 +1076,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Extract performance metrics from task result
    */
-  private extractPerformanceMetrics(_task: taskType): TaskPerformanceMetrics | undefined {
+  private extractPerformanceMetrics(task: BrowserTaskResultDto): TaskPerformanceMetrics | undefined {
     return {
       executionTime: task.executionTimeMs ?? 0,
       actionsExecuted: task.actionsCompleted,
@@ -1164,7 +1164,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(_riskLevel: riskLevelType): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
+  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
     switch (riskLevel) {
       case RiskLevel.MINIMAL:
       case RiskLevel.LOW: return 'BASIC';

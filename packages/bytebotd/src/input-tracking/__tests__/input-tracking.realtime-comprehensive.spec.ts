@@ -305,7 +305,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     for (let i = 0; i < eventCount; i++) {
       if (eventType === 'mouse') {
         events.push(
-          _createMouseEvent({
+          createMouseEvent({
             x: i % 1920,
             y: (i * 2) % 1080,
             time: Date.now() + i,
@@ -313,7 +313,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         );
       } else {
         events.push(
-          _createKeyboardEvent({
+          createKeyboardEvent({
             keycode: 65 + (i % 26),
             char: String.fromCharCode(97 + (i % 26)),
             time: Date.now() + i,
@@ -513,7 +513,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Verify movement events were processed
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           type: 'mouse_move',
           coordinates: expect.objectContaining({
             x: expect.any(Number) as unknown as number,
@@ -577,7 +577,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Verify drag action was created and broadcasted
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           action: 'drag_mouse',
           startCoordinates: { x: 100, y: 100 },
           endCoordinates: { x: 250, y: 250 },
@@ -624,7 +624,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Verify scroll actions were processed
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           action: 'scroll',
         }),
       );
@@ -757,7 +757,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Verify shortcuts were processed as press_keys actions
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           action: 'press_keys',
           keys: expect.any(Array) as unknown,
         }),
@@ -878,7 +878,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           new Promise((resolve) => {
             setTimeout(() => {
               if (keydownHandler) {
-                keydownHandler(_createKeyboardEvent({ keycode: 65 + (i % 26) }));
+                keydownHandler(createKeyboardEvent({ keycode: 65 + (i % 26) }));
               }
               resolve(undefined);
             }, i);
@@ -907,7 +907,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         for (const char of longText) {
           if (keydownHandler) {
             keydownHandler(
-              _createKeyboardEvent({
+              createKeyboardEvent({
                 keycode: char.charCodeAt(0),
                 char: char.toLowerCase(),
               }),
@@ -940,7 +940,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       while (Date.now() < endTime) {
         if (moveHandler) {
           moveHandler(
-            _createMouseEvent({
+            createMouseEvent({
               x: Math.random() * 1920,
               y: Math.random() * 1080,
             }),
@@ -974,7 +974,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           type: 'mouse_move',
           coordinates: { x: 300, y: 400 },
           timestamp: expect.any(Number) as number,
@@ -1001,7 +1001,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
-        _expect.objectContaining({
+        expect.objectContaining({
           action: 'click_mouse',
           coordinates: { x: 150, y: 250 },
           button: 'left',
@@ -1015,7 +1015,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Simulate high activity
       for (let i = 0; i < 50; i++) {
         if (moveHandler) {
-          moveHandler(_createMouseEvent({ x: i * 10, y: i * 5 }));
+          moveHandler(createMouseEvent({ x: i * 10, y: i * 5 }));
         }
       }
 
@@ -1050,7 +1050,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
     it('should handle Windows-specific input behaviors', () => {
       // Mock Windows platform
-      Object.defineProperty(_process, 'platform', {
+      Object.defineProperty(process, 'platform', {
         value: 'win32',
         configurable: true,
       });
@@ -1077,7 +1077,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
     it('should handle macOS-specific input behaviors', () => {
       // Mock macOS platform
-      Object.defineProperty(_process, 'platform', {
+      Object.defineProperty(process, 'platform', {
         value: 'darwin',
         configurable: true,
       });
@@ -1104,7 +1104,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
     it('should handle Linux-specific input behaviors', () => {
       // Mock Linux platform
-      Object.defineProperty(_process, 'platform', {
+      Object.defineProperty(process, 'platform', {
         value: 'linux',
         configurable: true,
       });
@@ -1156,7 +1156,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Should not crash on broadcast failure
       expect(() => {
-        moveHandler?.(_createMouseEvent({ x: 100, y: 100 }));
+        moveHandler?.(createMouseEvent({ x: 100, y: 100 }));
       }).not.toThrow();
     });
 
@@ -1172,7 +1172,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       for (let i = 0; i < 10000; i++) {
         if (keydownHandler) {
           keydownHandler(
-            _createKeyboardEvent({
+            createKeyboardEvent({
               keycode: 65 + (i % 26),
               char: String.fromCharCode(97 + (i % 26)),
             }),
@@ -1274,7 +1274,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Trigger mouse movement
-      moveHandler(_createMouseEvent({ x: 400, y: 300 }));
+      moveHandler(createMouseEvent({ x: 400, y: 300 }));
 
       // Should potentially trigger screenshot capture
       // (depending on implementation details)
@@ -1288,7 +1288,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Simulate a click that might trigger downstream actions
       clickHandler(
-        _createMouseEvent({
+        createMouseEvent({
           type: EventType.EVENT_MOUSE_CLICKED,
           x: 200,
           y: 300,

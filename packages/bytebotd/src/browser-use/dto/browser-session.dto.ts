@@ -32,27 +32,27 @@ export class BrowserTabInfoDto {
   @ApiProperty({
     description: 'Unique tab identifier',
   })
-  tabId: string;
+  tabId: string = '';
 
   @ApiProperty({
     description: 'Current tab URL',
   })
-  url: string;
+  url: string = '';
 
   @ApiProperty({
     description: 'Tab title',
   })
-  title: string;
+  title: string = '';
 
   @ApiProperty({
     description: 'Whether tab is currently active/focused',
   })
-  active: boolean;
+  active: boolean = false;
 
   @ApiProperty({
     description: 'Tab loading status',
   })
-  loading: boolean;
+  loading: boolean = false;
 
   @ApiPropertyOptional({
     description: 'Tab favicon URL',
@@ -62,12 +62,12 @@ export class BrowserTabInfoDto {
   @ApiProperty({
     description: 'Tab creation timestamp',
   })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @ApiProperty({
     description: 'Last activity timestamp',
   })
-  lastActivityAt: Date;
+  lastActivityAt: Date = new Date();
 }
 
 /**
@@ -216,33 +216,33 @@ export class BrowserSessionDto {
   @ApiProperty({
     description: 'Unique session identifier',
   })
-  sessionId: string;
+  sessionId: string = '';
 
   @ApiProperty({
     description: 'Session _name',
   })
-  name: string;
+  name: string = '';
 
   @ApiProperty({
     description: 'Current session status',
     enum: BrowserSessionStatus,
   })
-  status: BrowserSessionStatus;
+  status: BrowserSessionStatus = BrowserSessionStatus.CREATING;
 
   @ApiProperty({
     description: 'Browser process ID',
   })
-  browserPid: number;
+  browserPid: number = 0;
 
   @ApiProperty({
     description: 'Session creation timestamp',
   })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @ApiProperty({
     description: 'Last activity timestamp',
   })
-  lastActivityAt: Date;
+  lastActivityAt: Date = new Date();
 
   @ApiPropertyOptional({
     description: 'Session closure timestamp',
@@ -257,7 +257,7 @@ export class BrowserSessionDto {
   viewport: {
     width: number;
     height: number;
-  };
+  } = { width: 1920, height: 1080 };
 
   @ApiProperty({
     description: 'Browser configuration',
@@ -273,18 +273,18 @@ export class BrowserSessionDto {
       username?: string;
     };
     profilePath?: string;
-  };
+  } = { headless: true, devtools: false };
 
   @ApiProperty({
     description: 'Active browser tabs',
     type: [BrowserTabInfoDto],
   })
-  tabs: BrowserTabInfoDto[];
+  tabs: BrowserTabInfoDto[] = [];
 
   @ApiProperty({
     description: 'Current active tab ID',
   })
-  activeTabId: string;
+  activeTabId: string = '';
 
   @ApiProperty({
     description: 'Session statistics',
@@ -297,6 +297,12 @@ export class BrowserSessionDto {
     totalScreenshots: number;
     totalActions: number;
     upTimeMs: number;
+  } = {
+    totalTabs: 0,
+    totalPageLoads: 0,
+    totalScreenshots: 0,
+    totalActions: 0,
+    upTimeMs: 0
   };
 
   @ApiPropertyOptional({

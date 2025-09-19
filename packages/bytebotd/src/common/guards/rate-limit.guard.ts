@@ -195,7 +195,7 @@ export class EnterpriseRateLimitGuard
     } catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        (typeof error === 'object' &&
+        (typeof _error === 'object' &&
           _error !== null &&
           'status' in _error &&
           _error.status === HttpStatus.TOO_MANY_REQUESTS)
@@ -351,7 +351,7 @@ export class EnterpriseRateLimitGuard
         );
       }
     } else {
-      this.suspiciousActivityTracker.set(_clientIdentifier, {
+      this.suspiciousActivityTracker.set(clientIdentifier, {
         violations: 1,
         firstViolation: now,
         blocked: false,

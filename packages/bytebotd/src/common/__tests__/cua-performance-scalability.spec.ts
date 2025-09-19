@@ -26,7 +26,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Injectable } from '@nestjs/common';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { ComputerUseModule } from '../../computer-use/computer-use.module';
@@ -40,15 +40,24 @@ import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module'
 import { MetricsService } from '../../metrics/metrics.service';
 import { CacheService } from '../../cache/cache.service';
 import { NutService } from '../../nut/nut.service';
-import { Injectable } from '@nestjs/common';
-import {
-  ComputerAction,
-  MoveMouseAction,
-  ClickMouseAction,
-  ScreenshotAction,
-  WriteFileAction,
-} from '@bytebot/shared';
-import * as os from 'os';
+
+// TypeScript interfaces for performance testing
+interface LoadTestResult {
+  success: boolean;
+  responseTime: number;
+  error?: Error;
+}
+
+
+interface TestOperation {
+  (): Promise<unknown>;
+}
+
+interface ScalabilityConfig {
+  concurrentUsers: number;
+  operationsPerUser: number;
+  expectedThroughput: number;
+}
 
 // Performance test interfaces
 interface PerformanceContext {
@@ -195,9 +204,9 @@ export class PerformanceMonitorService {
         peak: Math.max(...this.metrics.cpuUsage),
       },
       memoryUsage: {
-        initial: this.metrics.memoryUsage[0] || process.memoryUsage(),
+        initial: this.metrics.memoryUsage[0] ?? process.memoryUsage(),
         peak: this.getPeakMemoryUsage(),
-        final: this.metrics.memoryUsage[this.metrics.memoryUsage.length - 1] || process.memoryUsage(),
+        final: this.metrics.memoryUsage[this.metrics.memoryUsage.length - 1] ?? process.memoryUsage(),
         growth: 0, // Will be calculated
       },
     };
@@ -224,9 +233,9 @@ export class PerformanceMonitorService {
   }
 
   private getPeakMemoryUsage(): NodeJS.MemoryUsage {
-    return this.metrics.memoryUsage.reduce((peak, current) => 
+    return this.metrics.memoryUsage.reduce((peak, current) =>
       current.heapUsed > peak.heapUsed ? current : peak
-    ) || process.memoryUsage();
+    ) ?? process.memoryUsage();
   }
 }
 
@@ -238,9 +247,9 @@ export class LoadGeneratorService {
   private activeLoadTests: Map<string, boolean> = new Map();
 
   async generateConcurrentLoad(
-    operations: Array<() => Promise<any>>,
+    operations: TestOperation[],
     configuration: LoadTestConfiguration
-  ): Promise<Array<{ success: boolean; responseTime: number; error?: Error }>> {
+  ): Promise<LoadTestResult[]> {
     const { concurrentUsers, operationsPerUser, rampUpTime, sustainedLoadTime } = configuration;
     const testId = `load${Date.now()}`;
     
@@ -248,7 +257,7 @@ export class LoadGeneratorService {
     
     try {
       // Ramp up phase
-      const userPromises: Promise<any>[] = [];
+      const userPromises: Promise<LoadTestResult[]>[] = [];
       const userStartDelay = rampUpTime / concurrentUsers;
       
       for (let userId = 0; userId < concurrentUsers; userId++) {
@@ -272,11 +281,11 @@ export class LoadGeneratorService {
   }
 
   async generateStressLoad(
-    operation: () => Promise<any>,
+    operation: () => Promise<unknown>,
     maxConcurrency: number,
     durationMs: number
-  ): Promise<Array<{ success: boolean; responseTime: number; error?: Error }>> {
-    const results: Array<{ success: boolean; responseTime: number; error?: Error }> = [];
+  ): Promise<LoadTestResult[]> {
+    const results: LoadTestResult[] = [];
     const startTime = Date.now();
     let activeOperations = 0;
     
@@ -325,15 +334,15 @@ export class LoadGeneratorService {
 
   private async simulateUser(
     userId: number,
-    operations: Array<() => Promise<any>>,
+    operations: TestOperation[],
     operationsPerUser: number,
     startDelay: number,
     sustainedLoadTime: number
-  ): Promise<Array<{ success: boolean; responseTime: number; error?: Error }>> {
+  ): Promise<LoadTestResult[]> {
     // Wait for ramp-up delay
     await new Promise(resolve => setTimeout(resolve, startDelay));
     
-    const userResults: Array<{ success: boolean; responseTime: number; error?: Error }> = [];
+    const userResults: LoadTestResult[] = [];
     const operationDelay = sustainedLoadTime / operationsPerUser;
     
     for (let opIndex = 0; opIndex < operationsPerUser; opIndex++) {
@@ -615,7 +624,10 @@ describe('CUA Performance and Scalability Tests', () => {
 
       // Analyze latency results
       for (const [operationName, latencies] of Object.entries(latencyResults)) {
-        const operation = criticalOperations.find(op => op.name === operationName)!;
+        const operation = criticalOperations.find(op => op.name === operationName);
+        if (!operation) {
+          throw new Error(`Operation ${operationName} not found in critical operations`);
+        }
         const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
         const p95Latency = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.95)];
         const p99Latency = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)];
@@ -668,18 +680,18 @@ describe('CUA Performance and Scalability Tests', () => {
         });
 
       // Execute operations that depend on caching
-      const operations = Array.from({ length: operationCount }, (_, i) => 
+      const operations = Array.from({ length: operationCount }, (_, _i) =>
         context.computerUseService.action({ action: 'cursor_position' })
       );
 
-      const results = await Promise.all(operations.map(async (op, index) => {
+      const results = await Promise.all(operations.map(async (op, _index) => {
         const opStartTime = Date.now();
         try {
           await op;
           const responseTime = Date.now() - opStartTime;
           context.performanceMonitor.recordOperation('cached_operation', responseTime, true);
           return { success: true, responseTime };
-        } catch (error) {
+        } catch (_error) {
           const responseTime = Date.now() - opStartTime;
           context.performanceMonitor.recordOperation('cached_operation', responseTime, false);
           return { success: false, responseTime };
@@ -838,7 +850,7 @@ describe('CUA Performance and Scalability Tests', () => {
         { concurrentUsers: 100, operationsPerUser: 10, expectedThroughput: 140 },
       ];
 
-      const scalabilityResults: Array<{ config: any; metrics: PerformanceMetrics }> = [];
+      const scalabilityResults: Array<{ config: ScalabilityConfig; metrics: PerformanceMetrics }> = [];
 
       for (const config of scalabilityConfigurations) {
         const testConfig: LoadTestConfiguration = {
@@ -1044,7 +1056,7 @@ describe('CUA Performance and Scalability Tests', () => {
    */
   function createMockNutService(): Partial<NutService> {
     return {
-      mouseMoveEvent: jest.fn().mockImplementation(async (x, y) => {
+      mouseMoveEvent: jest.fn().mockImplementation(async (_x, _y) => {
         // Simulate realistic processing time
         await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
         return { success: true };
@@ -1057,7 +1069,7 @@ describe('CUA Performance and Scalability Tests', () => {
       mouseWheelEvent: jest.fn().mockResolvedValue({ success: true }),
       holdKeys: jest.fn().mockResolvedValue({ success: true }),
       sendKeys: jest.fn().mockResolvedValue({ success: true }),
-      typeText: jest.fn().mockImplementation(async (text) => {
+      typeText: jest.fn().mockImplementation(async (text: string) => {
         // Simulate typing time based on text length
         await new Promise(resolve => setTimeout(resolve, text.length * 2));
         return { success: true };

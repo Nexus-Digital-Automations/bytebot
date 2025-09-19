@@ -34,8 +34,9 @@ export class InputTrackingGateway
 {
   private readonly logger = new Logger(InputTrackingGateway.name);
 
+  // @ts-ignore: Decorator signature resolution issue in TS 5.x
   @WebSocketServer()
-  (server ?? "default"): Server;
+  server!: Server;
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);

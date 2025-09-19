@@ -515,12 +515,12 @@ export const ErrorFactory = {
       permissions?: string[],
       context?: Record<string, unknown>,
     ) =>
-      new InsufficientPermissionsError(_undefined, {
+      new InsufficientPermissionsError(undefined, {
         requiredPermissions: permissions,
         context,
       }),
     roleRequired: (role: string, context?: Record<string, unknown>) =>
-      new RoleRequiredError(_undefined, { requiredRole: role, context }),
+      new RoleRequiredError(undefined, { requiredRole: role, context }),
   },
 
   /**
@@ -544,7 +544,7 @@ export const ErrorFactory = {
       rules?: string[],
       context?: Record<string, unknown>,
     ) =>
-      new SchemaValidationError(_undefined, {
+      new SchemaValidationError(undefined, {
         field,
         validationRules: rules,
         context,
@@ -571,7 +571,7 @@ export const ErrorFactory = {
       clientIp?: string,
       context?: Record<string, unknown>,
     ) =>
-      new AttackDetectedError(_undefined, {
+      new AttackDetectedError(undefined, {
         attackType,
         clientIp,
         severity: 'critical',
@@ -589,7 +589,7 @@ export const ErrorFactory = {
       context?: Record<string, unknown>,
     ) => new DatabaseError(undefined, { operation, retryable, context }),
     network: (service?: string, context?: Record<string, unknown>) =>
-      new NetworkError(_undefined, { service, retryable: true, context }),
+      new NetworkError(undefined, { service, retryable: true, context }),
     serviceUnavailable: (service?: string, context?: Record<string, unknown>) =>
       new ServiceUnavailableError(undefined, { service, context }),
   },

@@ -14,7 +14,7 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import {
   createSafeWebSocketServer,
   createSecureVerifyCallback,
@@ -59,7 +59,7 @@ interface ClientConnectionInfo {
 export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
   private readonly logger = new Logger(ParlantWebSocketBridgeService.name);
   private webSocketServer: WebSocket.Server | null = null;
-  private readonly clients = new Map<string, WebSocket>();
+  private readonly clients = new Map<string, WebSocket.WebSocket>();
   private readonly clientInfo = new Map<string, ClientConnectionInfo>();
   private readonly messageQueue = new Map<string, ParlantWebSocketMessage[]>();
   
@@ -245,10 +245,12 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    * Set up WebSocket server event handlers
    */
   private setupWebSocketEventHandlers(): void {
-    if (!this.webSocketServer) return;
+    if (!this.webSocketServer) {
+      return;
+    }
 
-    this.webSocketServer.on('connection', (ws: WebSocket, req) => {
-      this.handleNewConnection(ws, req);
+    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {
+      this.handleNewConnection(ws, convertIncomingMessageToRecord(req));
     });
 
     this.webSocketServer.on('error', (error: Error) => {
@@ -272,7 +274,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
   /**
    * Handle new WebSocket connection
    */
-  private handleNewConnection(ws: WebSocket, req: any): void {
+  private handleNewConnection(ws: WebSocket.WebSocket, req: EnhancedRequestInfo): void {
     const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const operationId = `connection_${clientId}`;
     
@@ -281,9 +283,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     const clientInfo: ClientConnectionInfo = {
       id: clientId,
       connectedAt: new Date(),
-      origin: req.headers.origin,
-      userAgent: req.headers['user-agent'],
-      remoteAddress: req.connection?.remoteAddress,
+      origin: req.headers?.origin ?? 'unknown',
+      userAgent: req.headers?.['user-agent'] ?? 'unknown',
+      remoteAddress: req.remoteAddress ?? 'unknown',
     };
 
     this.clients.set(clientId, ws);
@@ -331,7 +333,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     const operationId = `message_${clientId}_${Date.now()}`;
     
     try {
-      const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
+      const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ParlantWebSocketMessage;
       this.messageCount++;
       
       this.logger.debug(`[${operationId}] Received message from client`, {
@@ -343,7 +345,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       });
 
       // Add to message queue
-      const queue = this.messageQueue.get(clientId) || [];
+      const queue = this.messageQueue.get(clientId) ?? [];
       queue.push(message);
       this.messageQueue.set(clientId, queue);
 
@@ -356,7 +358,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
         operationId,
         clientId,
         error: error instanceof Error ? error.message : String(error),
-        rawData: data.toString(),
+        rawData: Buffer.from(data as ArrayBuffer).toString('utf8'),
       });
 
       this.sendErrorToClient(clientId, 'Invalid message format', operationId);
@@ -395,7 +397,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    */
   private sendMessageToClient(clientId: string, message: ParlantWebSocketMessage): void {
     const client = this.clients.get(clientId);
-    if (client && client.readyState === WebSocket.OPEN) {
+    if (client && client.readyState === WebSocket.WebSocket.OPEN) {
       try {
         client.send(JSON.stringify(message));
       } catch (error) {
@@ -522,7 +524,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     return this.configService.get<boolean>('PARLANT_RATE_LIMIT_ENABLED', true);
   }
 
-  private isRateLimited(remoteAddress: string): boolean {
+  private isRateLimited(_remoteAddress: string): boolean {
     // Simple rate limiting implementation
     return false; // Mock implementation
   }
@@ -545,7 +547,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    */
   broadcastMessage(message: ParlantWebSocketMessage): void {
     this.clients.forEach((client, clientId) => {
-      if (client.readyState === WebSocket.OPEN) {
+      if (client.readyState === WebSocket.WebSocket.OPEN) {
         this.sendMessageToClient(clientId, message);
       }
     });
@@ -554,13 +556,13 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
   /**
    * Clean shutdown of WebSocket server
    */
-  async onApplicationShutdown(): Promise<void> {
+  onApplicationShutdown(): void {
     this.logger.log('Shutting down Parlant WebSocket Bridge');
 
     if (this.webSocketServer) {
       // Close all client connections
-      this.clients.forEach((client, clientId) => {
-        if (client.readyState === WebSocket.OPEN) {
+      this.clients.forEach((client, _clientId) => {
+        if (client.readyState === WebSocket.WebSocket.OPEN) {
           client.close(1000, 'Server shutting down');
         }
       });

@@ -83,6 +83,21 @@ export class BrowserSessionConfigDto {
   viewportHeight?: number = 1080;
 
   @ApiPropertyOptional({
+    description: 'Browser viewport configuration',
+    type: 'object',
+    properties: {
+      width: { type: 'number', minimum: 320, maximum: 3840 },
+      height: { type: 'number', minimum: 240, maximum: 2160 },
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  viewport?: {
+    width: number;
+    height: number;
+  };
+
+  @ApiPropertyOptional({
     description: 'Run browser in headless mode',
     default: false,
   })
@@ -156,7 +171,7 @@ export class BrowserActionDto {
     enum: BrowserActionType,
   })
   @IsEnum(BrowserActionType)
-  type: BrowserActionType;
+  type: BrowserActionType = BrowserActionType.CLICK;
 
   @ApiPropertyOptional({
     description: 'CSS selector or XPath for element targeting',
@@ -223,14 +238,14 @@ export class CreateBrowserTaskDto {
     example: 'Extract product information from e-commerce site',
   })
   @IsString()
-  name: string;
+  name: string = '';
 
   @ApiProperty({
     description: 'Detailed task description or instructions',
     example: 'Navigate to product page, extract _name, price, and description',
   })
   @IsString()
-  description: string;
+  description: string = '';
 
   @ApiProperty({
     description: 'Array of browser actions to execute sequentially',
@@ -239,7 +254,7 @@ export class CreateBrowserTaskDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BrowserActionDto)
-  actions: BrowserActionDto[];
+  actions: BrowserActionDto[] = [];
 
   @ApiPropertyOptional({
     description: 'Task execution priority',
@@ -304,18 +319,18 @@ export class BrowserTaskResultDto {
   @ApiProperty({
     description: 'Unique task identifier',
   })
-  taskId: string;
+  taskId: string = '';
 
   @ApiProperty({
     description: 'Current task status',
     enum: BrowserTaskStatus,
   })
-  status: BrowserTaskStatus;
+  status: BrowserTaskStatus = BrowserTaskStatus.PENDING;
 
   @ApiProperty({
     description: 'Task execution start timestamp',
   })
-  startedAt: Date;
+  startedAt: Date = new Date();
 
   @ApiPropertyOptional({
     description: 'Task execution completion timestamp',
@@ -325,17 +340,17 @@ export class BrowserTaskResultDto {
   @ApiProperty({
     description: 'Total execution time in milliseconds',
   })
-  executionTimeMs: number;
+  executionTimeMs: number = 0;
 
   @ApiProperty({
     description: 'Number of actions completed successfully',
   })
-  actionsCompleted: number;
+  actionsCompleted: number = 0;
 
   @ApiProperty({
     description: 'Total number of actions in task',
   })
-  totalActions: number;
+  totalActions: number = 0;
 
   @ApiPropertyOptional({
     description: 'Extracted data from browser actions',
@@ -373,7 +388,7 @@ export class BrowserTaskResultDto {
     actionIndex?: number;
     screenshot?: string;
     metadata?: Record<string, unknown>;
-  }>;
+  }> = [];
 
   @ApiPropertyOptional({
     description: 'Task metadata and configuration used',

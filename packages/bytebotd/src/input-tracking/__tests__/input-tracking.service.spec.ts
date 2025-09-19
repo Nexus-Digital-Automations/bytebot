@@ -561,21 +561,21 @@ describe('InputTrackingService', () => {
 
       // Ctrl+C combination
       keydownHandler?.(
-        _createMockKeyboardEvent({
+        createMockKeyboardEvent({
           keycode: 17, // Ctrl
           ctrlKey: true,
         }),
       );
 
       keydownHandler?.(
-        _createMockKeyboardEvent({
+        createMockKeyboardEvent({
           keycode: 67, // C
           ctrlKey: true,
         }),
       );
 
       keyupHandler?.(
-        _createMockKeyboardEvent({
+        createMockKeyboardEvent({
           keycode: 67,
           ctrlKey: true,
         }),
@@ -806,8 +806,8 @@ describe('InputTrackingService', () => {
 
       // Rapid mouse movements
       mouseMoveHandler?.(createMockMouseEvent({ x: 100, y: 100 }));
-      mouseMoveHandler?.(_createMockMouseEvent({ x: 101, y: 101 }));
-      mouseMoveHandler?.(_createMockMouseEvent({ x: 102, y: 102 }));
+      mouseMoveHandler?.(createMockMouseEvent({ x: 101, y: 101 }));
+      mouseMoveHandler?.(createMockMouseEvent({ x: 102, y: 102 }));
 
       // Should not capture screenshot immediately
       expect(computerUseService.screenshot).not.toHaveBeenCalled();
@@ -839,7 +839,7 @@ describe('InputTrackingService', () => {
 
       // Simulate 1000 mouse move events
       for (let i = 0; i < 1000; i++) {
-        mouseMoveHandler?.(_createMockMouseEvent({ x: i, y: i }));
+        mouseMoveHandler?.(createMockMouseEvent({ x: i, y: i }));
       }
 
       const processingTime = Date.now() - startTime;
@@ -1155,7 +1155,7 @@ describe('InputTrackingService', () => {
       jest.runAllTimers();
 
       expect(logger.log).toHaveBeenCalledWith(
-        _expect.stringContaining('Detected action:'),
+        expect.stringContaining('Detected action:'),
         expect.any(String),
       );
 

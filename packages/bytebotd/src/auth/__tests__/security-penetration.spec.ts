@@ -84,7 +84,7 @@ describe('Security Penetration Testing Suite', () => {
   let jwtAuthGuard: JwtAuthGuard;
   let rolesGuard: RolesGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
   let reflector: Reflector;
   let module: TestingModule;
 
@@ -126,7 +126,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Algorithm confusion attack vectors
-    createAlgorithmConfusionTokens: (payload: SecurityTestPayload) => {
+    createAlgorithmConfusionTokens: (_payload: SecurityTestPayload) => {
       return {
         noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'none',
@@ -267,8 +267,8 @@ describe('Security Penetration Testing Suite', () => {
         } catch (error: unknown) {
           // Type guard for Error-like objects with message property
           const errorMessage =
-            _error && typeof error === 'object' && 'message' in _error
-              ? (_error as { message: string }).message
+            error && typeof error === 'object' && 'message' in error
+              ? (error as { message: string }).message
               : 'Unknown error occurred';
           results.push({ token, success: false, error: errorMessage });
         }
@@ -296,14 +296,14 @@ describe('Security Penetration Testing Suite', () => {
         .fill(null)
         .map(async (_, _index) => {
           // Simulate role modification during concurrent requests
-          if (index === 10) {
+          if (_index === 10) {
             setTimeout(() => {
               user.role = UserRole._ADMIN;
             }, 5);
           }
 
           try {
-            const result = await targetFunction(user);
+            const _result = await targetFunction(user);
             return { success: true, index: _index, userRole: user.role };
           } catch (_error) {
             return {
@@ -331,7 +331,7 @@ describe('Security Penetration Testing Suite', () => {
     metadata: PentestMetadata = {},
   ): ExecutionContext => {
     const mockRequest = {
-      user,
+      user: _user,
       headers: {
         'user-agent': 'PenetrationTestBot/1.0',
         'x-forwarded-for': metadata.ip ?? '10.0.0.100',
@@ -404,7 +404,7 @@ describe('Security Penetration Testing Suite', () => {
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
     pentestLogger.info(
@@ -493,7 +493,7 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         const context = createPentestExecutionContext(
-          _undefined,
+          undefined,
           { authorization: `Bearer ${maliciousToken}` },
           {
             attackVector: `header-injection-${Object.keys(headerInjection)[0]}`,
@@ -569,7 +569,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(maliciousPayload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest() as {
             user?: {
               role?: UserRole;
@@ -614,7 +614,7 @@ describe('Security Penetration Testing Suite', () => {
         `[${testId}] EXECUTING: Concurrent role escalation attack simulation`,
       );
 
-      const targetUser: ByteBotdUser = {
+      const _targetUser: ByteBotdUser = {
         sub: 'escalation-target',
         id: 'escalation-target',
         email: 'target@test.com',
@@ -630,7 +630,7 @@ describe('Security Penetration Testing Suite', () => {
       const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
           _targetUser,
-          async (user: ByteBotdUser) => {
+          async (_user: ByteBotdUser) => {
             const context = createPentestExecutionContext(
               _user,
               {},
@@ -706,7 +706,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const attackVector of attackVectors) {
         const context = createPentestExecutionContext(
-          _attackVector.user as ByteBotdUser,
+          attackVector.user as ByteBotdUser,
           {},
           { attackVector: attackVector.name },
         );
@@ -720,8 +720,8 @@ describe('Security Penetration Testing Suite', () => {
           const result = await rolesGuard.canActivate(context);
           escalationResults.push({
             attack: attackVector.name,
-            success: _result,
-            vulnerability: _result ? 'CRITICAL' : 'NONE',
+            success: result,
+            vulnerability: result ? 'CRITICAL' : 'NONE',
           });
         } catch (_error) {
           escalationResults.push({
@@ -776,7 +776,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const testCase of timingTestCases) {
         const context = createPentestExecutionContext(
-          _undefined,
+          undefined,
           {
             authorization: testCase.token
               ? `Bearer ${testCase.token}`
@@ -862,7 +862,7 @@ describe('Security Penetration Testing Suite', () => {
       const authzTimingResults = [];
 
       for (const testCase of roleTestCases) {
-        const user: ByteBotdUser = {
+        const _user: ByteBotdUser = {
           sub: `timing-user-${Date.now()}`,
           id: `timing-user-${Date.now()}`,
           email: 'timing@test.com',
@@ -974,7 +974,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const stuffingToken of credentialStuffingTokens) {
         const context = createPentestExecutionContext(
-          _undefined,
+          undefined,
           { authorization: `Bearer ${stuffingToken}` },
           { attackVector: 'credential-stuffing', ip: '10.0.0.200' },
         );
@@ -1025,10 +1025,10 @@ describe('Security Penetration Testing Suite', () => {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJ1c2VyQHRlc3QuY29tIiwicm9sZSI6InZpZXdlciIsImV4cCI6OTk5OTk5OTk5OX0.signature';
 
       const replayResults = await AttackSimulator.simulateSessionReplayAttack(
-        _legitimateToken,
+        legitimateToken,
         async (replayToken: string) => {
           const context = createPentestExecutionContext(
-            _undefined,
+            undefined,
             { authorization: `Bearer ${replayToken}` },
             { attackVector: 'session-replay', ip: '172.16.0.100' },
           );
@@ -1083,7 +1083,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const manipulatedToken of manipulationAttempts) {
         const context = createPentestExecutionContext(
-          _undefined,
+          undefined,
           { authorization: `Bearer ${manipulatedToken}` },
           { attackVector: 'token-manipulation', ip: '203.0.113.100' },
         );
@@ -1164,7 +1164,7 @@ describe('Security Penetration Testing Suite', () => {
           technique.payload,
         );
         const context = createPentestExecutionContext(
-          _undefined,
+          undefined,
           { authorization: `Bearer ${evasionToken}` },
           { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
         );
@@ -1175,7 +1175,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(technique.payload as object);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest() as {
             user?: {
               role?: UserRole;
@@ -1227,7 +1227,7 @@ describe('Security Penetration Testing Suite', () => {
           attemptCount++;
 
           const context = createPentestExecutionContext(
-            _undefined,
+            undefined,
             { authorization: `Bearer slow-attack-token-${attemptCount}` },
             {
               attackVector: 'low-and-slow',
@@ -1302,7 +1302,7 @@ describe('Security Penetration Testing Suite', () => {
               );
 
               const context = createPentestExecutionContext(
-                _undefined,
+                undefined,
                 { authorization: `Bearer ${maliciousToken}` },
                 { attackVector: `sustained-jwt-${round}-${i}` },
               );
@@ -1327,7 +1327,7 @@ describe('Security Penetration Testing Suite', () => {
           roundPromises.push(
             (async () => {
               // Intentional prototype pollution attack test - using type assertion for security testing
-              const maliciousUser: ByteBotdUser = {
+              const _maliciousUser: ByteBotdUser = {
                 id: `role-attacker-${round}-${i}`,
                 email: `attacker${round}${i}@malicious.com`,
                 username: `roleattacker${round}${i}`,
@@ -1445,7 +1445,7 @@ describe('Security Penetration Testing Suite', () => {
           case 'auth-failure': {
             {
               const authContext = createPentestExecutionContext(
-                _undefined,
+                undefined,
                 { authorization: `Bearer ${eventType.token}` },
                 { attackVector: eventType.type, ip: '192.168.100.100' },
               );
@@ -1466,7 +1466,7 @@ describe('Security Penetration Testing Suite', () => {
 
           case 'role-escalation': {
             {
-              const escalationUser: ByteBotdUser = {
+              const _escalationUser: ByteBotdUser = {
                 sub: 'audit-user',
                 id: 'audit-user',
                 email: 'audit@test.com',

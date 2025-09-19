@@ -26,14 +26,14 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Injectable } from '@nestjs/common';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { ComputerUseModule } from '../../computer-use/computer-use.module';
 import { ComputerUseTools } from '../../mcp/computer-use.tools';
 import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';
 import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';
-import { ParlantIntegrationService, ConversationalValidationError, RiskLevel } from '../../parlant/parlant-integration.service';
+import { ParlantIntegrationService, RiskLevel } from '../../parlant/parlant-integration.service';
 import { ParlantModule } from '../../parlant/parlant.module';
 import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';
 import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';
@@ -41,13 +41,9 @@ import { HealthService } from '../../health/health.service';
 import { MetricsService } from '../../metrics/metrics.service';
 import { CacheService } from '../../cache/cache.service';
 import { NutService } from '../../nut/nut.service';
-import { Injectable } from '@nestjs/common';
 import {
-  ComputerAction,
   MoveMouseAction,
-  ClickMouseAction,
   ScreenshotAction,
-  WriteFileAction,
 } from '@bytebot/shared';
 
 // Error recovery test interfaces
@@ -113,7 +109,7 @@ export class CircuitBreakerService {
 
   getCircuitBreakerState(serviceId: string): CircuitBreakerState {
     if (!this.circuitBreakers.has(serviceId)) {
-      this.circuitBreakers.set(_serviceId, {
+      this.circuitBreakers.set(serviceId, {
         serviceId,
         state: 'CLOSED',
         failureCount: 0,
@@ -123,7 +119,11 @@ export class CircuitBreakerService {
         timeout: this.defaultTimeout,
       });
     }
-    return this.circuitBreakers.get(serviceId)!;
+    const breaker = this.circuitBreakers.get(serviceId);
+    if (!breaker) {
+      throw new Error(`Circuit breaker not found for service: ${serviceId}`);
+    }
+    return breaker;
   }
 
   async executeWithCircuitBreaker<T>(
@@ -215,14 +215,18 @@ export class RetryManagerService {
       }
     }
     
-    throw (lastError ?? "default");
+    throw lastError ?? new Error('All retry attempts failed');
   }
 
   private isRetryableError(error: Error, retryableErrors: string[]): boolean {
     return retryableErrors.some(pattern => error.message.includes(pattern));
   }
 
-  private calculateDelay(attempt: number, options: any): number {
+  private calculateDelay(attempt: number, options: {
+    strategy: 'linear' | 'exponential' | 'fibonacci';
+    baseDelay: number;
+    maxDelay: number;
+  }): number {
     let delay: number;
     
     switch (options.strategy) {
@@ -384,7 +388,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const failurePromises = Array.from({ length: 6 }, () =>
         context.circuitBreakerService.executeWithCircuitBreaker('NutService', () =>
           context.computerUseService.action(action)
-        ).catch(error => error)
+        ).catch((_error: unknown) => _error as Error)
       );
 
       const results = await Promise.all(failurePromises);
@@ -399,7 +403,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const lastResult = results[results.length - 1] as Error;
       expect(lastResult.message).toContain('Circuit breaker OPEN');
 
-      recordRecoveryMetrics(_scenario, startTime, endTime, {
+      recordRecoveryMetrics(scenario, startTime, endTime, {
         totalFailures: 6,
         successfulRecoveries: 0,
         circuitBreakerTriggered: true,
@@ -427,7 +431,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const gracefulCursorPosition = async (): Promise<{ x: number; y: number }> => {
         try {
           return await context.nutService.getCursorPosition();
-        } catch (error) {
+        } catch (_error) {
           // Graceful degradation: return last known or default position
           return { x: 0, y: 0 }; // Default position
         }
@@ -508,7 +512,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
             ),
           ]);
           return true;
-        } catch (error) {
+        } catch (_error) {
           // Fallback: basic rule-based validation
           const isLowRisk = action.action === 'move_mouse' && 
             validationContext.securityLevel === 'HIGH';
@@ -656,13 +660,13 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const fallbackScreenshot = async () => {
         try {
           return await context.mcpTools.screenshot();
-        } catch (error) {
+        } catch (_error) {
           // Fallback to direct service call
           const result = await context.computerUseService.action({ action: 'screenshot' });
           return {
             content: [{
               type: 'image' as const,
-              data: (result as unknown).image,
+              data: (result as { image: string }).image,
               mimeType: 'image/png',
             }]
           };
@@ -709,9 +713,9 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const endTime = Date.now();
 
       expect(result).toBeDefined();
-      expect((result as unknown).image).toBeDefined();
+      expect((result as { image: string }).image).toBeDefined();
 
-      recordRecoveryMetrics(_scenario, startTime, endTime, {
+      recordRecoveryMetrics(scenario, startTime, endTime, {
         totalFailures: 0, // Cache failure shouldn't fail the operation
         successfulRecoveries: 1,
         gracefulDegradationActivated: true,
@@ -735,7 +739,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
 
       // Mock cache service recovery
       jest.spyOn(context.cacheService, 'set')
-        .mockImplementation(async (key, value, ttl) => {
+        .mockImplementation(async (_key, _value, _ttl) => {
           cacheAttempts++;
           if (cacheAttempts <= 2) {
             throw new Error('Cache service recovering');
@@ -763,7 +767,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
                 retryableErrors: ['recovering', 'unavailable'],
               }
             );
-          } catch (error) {
+          } catch (_error) {
             // Log but don't fail cache warming
             console.warn(`Failed to warm cache for key: ${operation.key}`);
           }
@@ -799,11 +803,11 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const recoveryEvents: string[] = [];
 
       // Setup event listeners for recovery coordination
-      context.eventEmitter.on('service.recovery.started', (payload) => {
+      context.eventEmitter.on('service.recovery.started', (payload: { serviceId: string }) => {
         recoveryEvents.push(`${payload.serviceId}:recovery-started`);
       });
 
-      context.eventEmitter.on('service.recovery.completed', (payload) => {
+      context.eventEmitter.on('service.recovery.completed', (payload: { serviceId: string }) => {
         recoveryEvents.push(`${payload.serviceId}:recovery-completed`);
       });
 
@@ -860,7 +864,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       expect(recoveryEvents.filter(e => e.includes('recovery-started'))).toHaveLength(3);
       expect(recoveryEvents.filter(e => e.includes('recovery-completed'))).toHaveLength(3);
 
-      recordRecoveryMetrics(_scenario, startTime, endTime, {
+      recordRecoveryMetrics(scenario, startTime, endTime, {
         totalFailures: 3,
         successfulRecoveries: 3,
         retryAttempts: 6,
@@ -883,8 +887,8 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       let healthCheckAttempts = 0;
 
       // Mock health check recovery process
-      jest.spyOn(context.healthService, 'checkHealth')
-        .mockImplementation(async () => {
+      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<() => Promise<{ status: string; details: Record<string, string> }>>;
+      checkHealthSpy.mockImplementation(async (): Promise<{ status: string; details: Record<string, string> }> => {
           healthCheckAttempts++;
           if (healthCheckAttempts <= 3) {
             return {
@@ -914,7 +918,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
 
         while (!isHealthy && attempts < maxAttempts) {
           attempts++;
-          const healthResult = await context.healthService.checkHealth();
+          const healthResult: { status: string; details: Record<string, string> } = await (context.healthService.checkHealth as () => Promise<{ status: string; details: Record<string, string> }>)();
           
           if (healthResult.status === 'healthy') {
             isHealthy = true;
@@ -948,13 +952,13 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
    */
   function createFailureScenario(params: Partial<FailureScenario>): FailureScenario {
     return {
-      scenarioId: params.scenarioId || generateScenarioId(),
-      description: params.description || 'Test failure scenario',
-      failureType: params.failureType || 'service-unavailable',
-      affectedServices: params.affectedServices || ['TestService'],
-      expectedRecoveryTime: params.expectedRecoveryTime || 5000,
-      maxRetryAttempts: params.maxRetryAttempts || 3,
-      recoveryStrategy: params.recoveryStrategy || 'exponential-backoff',
+      scenarioId: params.scenarioId ?? generateScenarioId(),
+      description: params.description ?? 'Test failure scenario',
+      failureType: params.failureType ?? 'service-unavailable',
+      affectedServices: params.affectedServices ?? ['TestService'],
+      expectedRecoveryTime: params.expectedRecoveryTime ?? 5000,
+      maxRetryAttempts: params.maxRetryAttempts ?? 3,
+      recoveryStrategy: params.recoveryStrategy ?? 'exponential-backoff',
     };
   }
 
@@ -977,9 +981,9 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       averageRecoveryTime: endTime - startTime,
       maxRecoveryTime: endTime - startTime,
       retryAttempts: results.retryAttempts ?? 0,
-      circuitBreakerTriggered: results.circuitBreakerTriggered || false,
-      gracefulDegradationActivated: results.gracefulDegradationActivated || false,
-      dataConsistencyMaintained: results.dataConsistencyMaintained || true,
+      circuitBreakerTriggered: results.circuitBreakerTriggered ?? false,
+      gracefulDegradationActivated: results.gracefulDegradationActivated ?? false,
+      dataConsistencyMaintained: results.dataConsistencyMaintained ?? true,
     };
 
     recoveryMetrics.push(metrics);

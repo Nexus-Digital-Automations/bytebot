@@ -122,7 +122,7 @@ describe('Parlant Performance Optimization Validation', () => {
       );
 
       expect(key1).toBe(key2);
-      expect(key1).toMatch(_/^testFunction:.+:.+$/);
+      expect(key1).toMatch(/^testFunction:.+:.+$/);
     });
 
     it('should cache and retrieve validation results', async () => {

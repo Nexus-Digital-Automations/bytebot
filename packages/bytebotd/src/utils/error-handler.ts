@@ -134,7 +134,7 @@ let globalErrorHandler: ErrorHandler;
  * Main error handler class
  */
 export class ErrorHandler {
-  constructor(_private config: ErrorHandlerConfig = defaultErrorHandlerConfig) {}
+  constructor(private config: ErrorHandlerConfig = defaultErrorHandlerConfig) {}
 
   /**
    * Safe execution wrapper that catches and transforms errors
@@ -284,7 +284,7 @@ export class ErrorHandler {
       errorName === 'ForbiddenException' ||
       errorMessage.includes('forbidden')
     ) {
-      return ErrorFactory.authorization.forbidden(_undefined, undefined, {
+      return ErrorFactory.authorization.forbidden(undefined, undefined, {
         originalError: error,
         stack: errorStack,
         context,
@@ -296,7 +296,7 @@ export class ErrorHandler {
       errorMessage.includes('validation')
     ) {
       return ErrorFactory.validation.invalidInput(
-        _undefined,
+        undefined,
         undefined,
         undefined,
         {
@@ -327,7 +327,7 @@ export class ErrorHandler {
       errorMessage.includes('rate limit') ||
       errorMessage.includes('too many requests')
     ) {
-      return ErrorFactory.security.rateLimitExceeded(_undefined, 'medium', {
+      return ErrorFactory.security.rateLimitExceeded(undefined, 'medium', {
         originalError: error,
         stack: errorStack,
         context,
@@ -338,7 +338,7 @@ export class ErrorHandler {
       errorMessage.includes('database') ||
       errorMessage.includes('connection')
     ) {
-      return ErrorFactory.system.database(_undefined, true, {
+      return ErrorFactory.system.database(undefined, true, {
         originalError: error,
         stack: errorStack,
         context,
@@ -354,7 +354,7 @@ export class ErrorHandler {
     }
 
     // Default to system error for unclassified errors
-    return ErrorFactory.system.serviceUnavailable(_undefined, {
+    return ErrorFactory.system.serviceUnavailable(undefined, {
       originalError: error,
       errorName,
       stack: errorStack,

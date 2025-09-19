@@ -10,17 +10,13 @@
  */
 
 import type { IncomingMessage } from 'http';
-import type WebSocket from 'ws';
+import * as WebSocket from 'ws';
 
 /**
  * WebSocket verification info structure that bridges IncomingMessage and Record types
  */
 export interface WebSocketVerificationInfo {
-  readonly req: IncomingMessage & {
-    headers: Record<string, string>;
-    url?: string;
-    method?: string;
-  };
+  readonly req: IncomingMessage;
   readonly origin?: string;
   readonly secure?: boolean;
   readonly extensions?: Record<string, unknown>;
@@ -64,8 +60,18 @@ export type SafeVerifyClientCallbackUnion =
 /**
  * WebSocket server options with enhanced type safety
  */
-export interface SafeWebSocketServerOptions extends WebSocket.ServerOptions {
+export interface SafeWebSocketServerOptions {
   verifyClient?: SafeVerifyClientCallbackUnion;
+  port?: number;
+  host?: string;
+  backlog?: number;
+  server?: import('http').Server | import('https').Server;
+  path?: string;
+  noServer?: boolean;
+  clientTracking?: boolean;
+  perMessageDeflate?: WebSocket.PerMessageDeflateOptions | false | true;
+  maxPayload?: number;
+  skipUTF8Validation?: boolean;
 }
 
 /**
@@ -101,12 +107,12 @@ export function convertIncomingMessageToRecord(
     url: req.url,
     method: req.method,
     origin: headers.origin,
-    secure: (req.connection as any)?.encrypted === true,
+    secure: (req.connection as { encrypted?: boolean })?.encrypted === true,
     remoteAddress: req.connection?.remoteAddress,
     userAgent: headers['user-agent'],
     // Add any additional properties from the request
     ...Object.getOwnPropertyNames(req).reduce((acc, key) => {
-      const value = (req as any)[key];
+      const value = (req as unknown as Record<string, unknown>)[key];
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         acc[key] = value;
       }
@@ -126,10 +132,7 @@ export function createVerificationInfo(
   }
 ): WebSocketVerificationInfo {
   return {
-    req: {
-      ...info.req,
-      headers: convertIncomingMessageToRecord(info.req).headers,
-    },
+    req: info.req,
     origin: info.origin,
     secure: info.secure,
   };
@@ -143,14 +146,22 @@ export function createWebSocketVerifyAdapter(
 ): WebSocket.VerifyClientCallbackSync | WebSocket.VerifyClientCallbackAsync {
   if (isAsyncVerifyCallback(callback)) {
     // Return async adapter
-    return async (info: Parameters<WebSocket.VerifyClientCallbackAsync>[0]) => {
-      const verificationInfo = createVerificationInfo(info);
+    return async (info: { origin: string; secure: boolean; req: IncomingMessage }) => {
+      const verificationInfo = createVerificationInfo({
+        origin: info.origin,
+        secure: info.secure,
+        req: info.req
+      });
       return await callback(verificationInfo);
     };
   } else {
     // Return sync adapter
-    return (info: Parameters<WebSocket.VerifyClientCallbackSync>[0]) => {
-      const verificationInfo = createVerificationInfo(info);
+    return (info: { origin: string; secure: boolean; req: IncomingMessage }) => {
+      const verificationInfo = createVerificationInfo({
+        origin: info.origin,
+        secure: info.secure,
+        req: info.req
+      });
       return callback(verificationInfo);
     };
   }
@@ -183,7 +194,7 @@ export function validateWebSocketHeaders(
     return { valid: false, reason: 'Missing or invalid Upgrade header' };
   }
   
-  if (!headers.connection || !headers.connection.toLowerCase().includes('upgrade')) {
+  if (!headers.connection?.toLowerCase().includes('upgrade')) {
     return { valid: false, reason: 'Missing or invalid Connection header' };
   }
   
@@ -245,7 +256,7 @@ export function createSecureVerifyCallback(
     
     // Connection count limiting
     if (options.maxConnections && remoteAddress) {
-      const currentCount = connectionCount.get(remoteAddress) || 0;
+      const currentCount = connectionCount.get(remoteAddress) ?? 0;
       if (currentCount >= options.maxConnections) {
         console.warn(`WebSocket connection rejected: Max connections exceeded for ${remoteAddress}`);
         return false;
@@ -253,7 +264,8 @@ export function createSecureVerifyCallback(
     }
     
     // Header validation
-    const headerValidation = validateWebSocketHeaders(req.headers);
+    const convertedReq = convertIncomingMessageToRecord(req);
+    const headerValidation = validateWebSocketHeaders(convertedReq.headers);
     if (!headerValidation.valid) {
       console.warn(`WebSocket connection rejected: ${headerValidation.reason}`);
       return false;

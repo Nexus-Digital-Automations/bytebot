@@ -5,20 +5,14 @@ import {
   BrowserTaskStatus,
   BrowserTaskPriority,
   CreateBrowserTaskDto,
+  BrowserActionType,
 } from './dto/browser-task.dto';
 
 /**
  * Browser automation action interface
  */
 export interface BrowserAction {
-  type:
-    | 'click'
-    | 'type'
-    | 'navigate'
-    | 'screenshot'
-    | 'wait'
-    | 'extract'
-    | 'scroll';
+  type: BrowserActionType;
   selector?: string;
   value?: string | number;
   timeout?: number;

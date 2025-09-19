@@ -238,7 +238,7 @@ describe('CacheKeyGenerator', () => {
 
     it('should allow disabling hash for long keys', () => {
       const longKey = 'a'.repeat(300);
-      const result = generator.generate(_longKey, undefined, { hashLongKeys: false });
+      const result = generator.generate(longKey, undefined, { hashLongKeys: false });
 
       expect(result).toBe(`bytebot:${'a'.repeat(300)}`);
       expect(result).not.toContain('hash_');
@@ -358,7 +358,7 @@ describe('CacheKeyGenerator', () => {
     it('should reject extremely long keys', () => {
       const extremelyLongKey = 'a'.repeat(1000);
       expect(() => {
-        generator.generate(_extremelyLongKey, undefined, { 
+        generator.generate(extremelyLongKey, undefined, { 
           hashLongKeys: false,
           maxLength: 999 
         });
@@ -370,7 +370,7 @@ describe('CacheKeyGenerator', () => {
       const keyWithTabs = 'key\tWith\nWhitespace';
       
       // Mock the sanitization to let whitespace through for testing
-      const originalGenerate = generator.generate;
+      const _originalGenerate = generator.generate;
       jest.spyOn(generator as unknown as { sanitizeKey: jest.Mock }, 'sanitizeKey').mockReturnValue(keyWithTabs);
       
       expect(() => {
@@ -478,7 +478,7 @@ describe('CacheKeyGenerator', () => {
 
     it('should use fallback key generation on errors', () => {
       // Mock the generate method to throw an error during processing
-      const originalNormalizeKey = (generator as unknown as { normalizeKey: jest.Mock }).normalizeKey;
+      const _originalNormalizeKey = (generator as unknown as { normalizeKey: jest.Mock }).normalizeKey;
       jest.spyOn(generator as unknown as { normalizeKey: jest.Mock }, 'normalizeKey').mockImplementation(() => {
         throw new Error('Normalization error');
       });

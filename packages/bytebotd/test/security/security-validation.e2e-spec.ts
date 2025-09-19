@@ -83,7 +83,7 @@ describe('Security Validation E2E Tests', () => {
     const xssPayloads = [
       '<script>alert("XSS")</script>',
       '<img src=x onerror=alert("XSS")>',
-      'javascript:alert("XSS")',
+      'javascript:alert("XSS")', // eslint-disable-line no-script-url
       '<svg onload=alert("XSS")>',
       '<iframe src="javascript:alert(\'XSS\')"></iframe>',
       '"><script>alert("XSS")</script>',
@@ -414,7 +414,7 @@ describe('Security Validation E2E Tests', () => {
     it('should complete requests within reasonable time', async () => {
       const startTime = Date.now();
 
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 

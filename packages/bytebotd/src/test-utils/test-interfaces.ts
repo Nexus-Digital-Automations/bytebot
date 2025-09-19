@@ -11,21 +11,13 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
+import { UserRole } from '@bytebot/shared';
 
 // =============================================================================
 // Core User and Authentication Types
 // =============================================================================
 
-/**
- * User roles enumeration for type-safe role management
- */
-export enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  VIEWER = 'viewer',
-  USER = 'user',
-  GUEST = 'guest',
-}
+// UserRole is imported from shared types to ensure consistency
 
 /**
  * JWT payload interface with complete user information

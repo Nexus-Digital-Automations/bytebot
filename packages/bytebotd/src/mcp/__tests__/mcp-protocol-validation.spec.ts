@@ -675,7 +675,7 @@ describe('MCP Protocol Validation', () => {
       expect(errorResponse.success).toBe(false);
       expect(errorResponse.error).toBeDefined();
 
-      const errorValid = ProtocolComplianceValidator.validateMcpError(errorResponse.(error ?? "default"));
+      const errorValid = ProtocolComplianceValidator.validateMcpError(errorResponse.error);
       expect(errorValid).toBe(true);
 
       console.log(`[${operationId}] MCP error response validation completed`);

@@ -477,7 +477,7 @@ describe('InputTrackingModule', () => {
 
       // Try creating module without required imports
       await expect(
-        _Test.createTestingModule({
+        Test.createTestingModule({
           // Missing ComputerUseModule import
           controllers: [InputTrackingController],
           providers: [InputTrackingService, InputTrackingGateway],
@@ -495,7 +495,7 @@ describe('InputTrackingModule', () => {
 
       // Test with incomplete provider configuration
       await expect(
-        _Test.createTestingModule({
+        Test.createTestingModule({
           imports: [InputTrackingModule],
           providers: [
             // Invalid provider configuration

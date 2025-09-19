@@ -186,7 +186,7 @@ describe('InputTrackingGateway', () => {
 
       gateway.handleConnection(mockClient as unknown as _Socket);
 
-      expect(logger.log).toHaveBeenCalledWith('Client connected: client_123');
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: client_123');
 
       console.log(`[${testId}] Client connection handling test completed`);
     });
@@ -199,7 +199,7 @@ describe('InputTrackingGateway', () => {
 
       gateway.handleDisconnect(mockClient as unknown as _Socket);
 
-      expect(logger.log).toHaveBeenCalledWith(
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith(
         'Client disconnected: client_456',
       );
 
@@ -218,9 +218,9 @@ describe('InputTrackingGateway', () => {
         gateway.handleConnection(client as unknown as _Socket);
       });
 
-      expect(logger.log).toHaveBeenCalledTimes(10);
+      expect(logger.log as jest.Mock).toHaveBeenCalledTimes(10);
       clients.forEach((client, i) => {
-        expect(logger.log).toHaveBeenCalledWith(
+        expect(logger.log as jest.Mock).toHaveBeenCalledWith(
           `Client connected: client${i}`,
         );
       });
@@ -243,7 +243,7 @@ describe('InputTrackingGateway', () => {
         gateway.handleDisconnect(mockClient as unknown as _Socket);
       }
 
-      expect(logger.log).toHaveBeenCalledTimes(10); // 5 connections + 5 disconnections
+      expect(logger.log as jest.Mock).toHaveBeenCalledTimes(10); // 5 connections + 5 disconnections
 
       console.log(
         `[${testId}] Rapid connection/disconnection cycles test completed`,
@@ -468,7 +468,7 @@ describe('InputTrackingGateway', () => {
       expect(mockServer.emit).toHaveBeenCalledTimes(3);
 
       const emitCalls = (mockServer.emit as jest.Mock).mock
-        .calls as unknown[][];
+        .calls;
       events.forEach((event, index) => {
         expect((emitCalls[index] as unknown[])[0]).toBe('action');
         expect((emitCalls[index] as unknown[])[1]).toEqual(event);
@@ -501,7 +501,7 @@ describe('InputTrackingGateway', () => {
 
       expect(() => {
         gateway.emitScreenshotAndAction(
-          _undefined as unknown as { image: string },
+          undefined as unknown as { image: string },
           mockClickAction,
         );
       }).not.toThrow();
@@ -559,7 +559,7 @@ describe('InputTrackingGateway', () => {
 
       gateway.handleConnection(invalidClient as unknown as _Socket);
 
-      expect(logger.log).toHaveBeenCalledWith('Client connected: ');
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: ');
 
       console.log(`[${testId}] Invalid client ID handling test completed`);
     });
@@ -576,8 +576,8 @@ describe('InputTrackingGateway', () => {
       gateway.handleDisconnect(client as unknown as _Socket);
 
       // Verify logging was called correctly
-      expect(logger.log).toHaveBeenCalledWith('Client connected: temp_client');
-      expect(logger.log).toHaveBeenCalledWith(
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: temp_client');
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith(
         'Client disconnected: temp_client',
       );
 
@@ -598,7 +598,7 @@ describe('InputTrackingGateway', () => {
         gateway.handleDisconnect(client as unknown as _Socket);
       }
 
-      expect(logger.log).toHaveBeenCalledTimes(connectionCount * 2);
+      expect(logger.log as jest.Mock).toHaveBeenCalledTimes(connectionCount * 2);
 
       console.log(`[${testId}] Memory leak prevention test completed`);
     });
@@ -792,7 +792,7 @@ describe('InputTrackingGateway', () => {
         () => {
           const totalTime = Date.now() - startTime;
 
-          expect(logger.log).toHaveBeenCalledTimes(10); // 10 connections
+          expect(logger.log as jest.Mock).toHaveBeenCalledTimes(10); // 10 connections
           expect(mockServer.emit).toHaveBeenCalledTimes(10); // 10 emissions
           expect(totalTime).toBeLessThan(1000); // Should complete quickly
 

@@ -32,7 +32,7 @@ export class JobSubmissionResponseDto {
   })
   @IsString()
   @IsUUID('4', { message: 'Job ID must be a valid UUID v4' })
-  jobId: string;
+  jobId: string = '';
 
   @ApiProperty({
     description: 'Current job status at submission time',
@@ -40,14 +40,14 @@ export class JobSubmissionResponseDto {
     example: JobStatus.PENDING,
   })
   @IsEnum(JobStatus)
-  status: JobStatus;
+  status: JobStatus = JobStatus.PENDING;
 
   @ApiProperty({
     description: 'Timestamp when job was submitted',
     example: '2023-12-19T10:30:45.789Z',
   })
   @IsString()
-  submittedAt: string;
+  submittedAt: string = '';
 
   @ApiPropertyOptional({
     description: 'Estimated completion time (optional)',
@@ -68,7 +68,7 @@ export class JobStatusResponseDto {
   })
   @IsString()
   @IsUUID('4')
-  jobId: string;
+  jobId: string = '';
 
   @ApiProperty({
     description: 'Current job status',
@@ -76,20 +76,20 @@ export class JobStatusResponseDto {
     example: JobStatus.IN_PROGRESS,
   })
   @IsEnum(JobStatus)
-  status: JobStatus;
+  status: JobStatus = JobStatus.PENDING;
 
   @ApiProperty({
     description: 'Job progress percentage (0-100)',
     example: 75,
   })
-  progress: number;
+  progress: number = 0;
 
   @ApiProperty({
     description: 'Timestamp when job was submitted',
     example: '2023-12-19T10:30:45.789Z',
   })
   @IsString()
-  submittedAt: string;
+  submittedAt: string = '';
 
   @ApiPropertyOptional({
     description: 'Timestamp when job started processing',
@@ -133,7 +133,7 @@ export class JobResultResponseDto {
   })
   @IsString()
   @IsUUID('4')
-  jobId: string;
+  jobId: string = '';
 
   @ApiProperty({
     description: 'Final job status',
@@ -141,7 +141,7 @@ export class JobResultResponseDto {
     example: JobStatus.COMPLETED,
   })
   @IsEnum(JobStatus)
-  status: JobStatus;
+  status: JobStatus = JobStatus.PENDING;
 
   @ApiPropertyOptional({
     description: 'Job execution result data (varies by action type)',
@@ -166,20 +166,20 @@ export class JobResultResponseDto {
     example: '2023-12-19T10:30:45.789Z',
   })
   @IsString()
-  submittedAt: string;
+  submittedAt: string = '';
 
   @ApiProperty({
     description: 'Timestamp when job completed',
     example: '2023-12-19T10:31:15.456Z',
   })
   @IsString()
-  completedAt: string;
+  completedAt: string = '';
 
   @ApiProperty({
     description: 'Total execution time in milliseconds',
     example: 30123,
   })
-  executionTimeMs: number;
+  executionTimeMs: number = 0;
 
   @ApiPropertyOptional({
     description: 'Additional result metadata',

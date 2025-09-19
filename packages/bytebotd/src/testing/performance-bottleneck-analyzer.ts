@@ -803,8 +803,8 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     memoryImpact: number;
     reliabilityImpact: number;
   } {
-    const executionTimeImpact = bottlenecks.reduce((sum, b) => sum + b.impact.performanceDegradation, 0) / bottlenecks.length ?? 0;
-    const memoryImpact = bottlenecks.reduce((sum, b) => sum + b.impact.resourceWaste, 0) / bottlenecks.length ?? 0;
+    const executionTimeImpact = bottlenecks.length > 0 ? bottlenecks.reduce((sum, b) => sum + b.impact.performanceDegradation, 0) / bottlenecks.length : 0;
+    const memoryImpact = bottlenecks.length > 0 ? bottlenecks.reduce((sum, b) => sum + b.impact.resourceWaste, 0) / bottlenecks.length : 0;
     const reliabilityImpact = bottlenecks.filter(b => b.severity === 'critical').length * 25;
 
     return {
@@ -857,7 +857,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     bottlenecks.forEach(bottleneck => {
       bottleneck.recommendations.forEach(rec => {
         if (!priorityGroups.has(rec.priority)) {
-          priorityGroups.set(_rec.priority, { impact: 0, recommendations: [] });
+          priorityGroups.set(rec.priority, { impact: 0, recommendations: [] });
         }
         
         const group = priorityGroups.get(rec.priority)!;

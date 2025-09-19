@@ -10,7 +10,7 @@ import {
   BrowserActionType,
   BrowserActionDto,
 } from './dto/browser-task.dto';
-import { AsyncJobResultDto } from './dto/async-job.dto';
+import { AsyncJobResultDto, CreateAsyncJobDto } from './dto/async-job.dto';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import { BrowserAsyncJobService } from './browser-async-job.service';
@@ -158,11 +158,10 @@ export class BrowserUseService {
     try {
       // Create task tracking
       const task = await this.taskService.createTask({
-        taskId,
         name: taskDto.name,
         description: taskDto.description,
         actions: taskDto.actions.map((action) => ({
-          type: this.convertActionType(action.type),
+          type: action.type,
           selector: action.selector,
           value: action.text ?? action.url,
           timeout: action.waitTimeoutMs,
@@ -178,20 +177,17 @@ export class BrowserUseService {
                 height: taskDto.sessionConfig.viewportHeight ?? 1080,
               },
               userAgent: taskDto.sessionConfig.userAgent,
-              defaultTimeout: taskDto.sessionConfig.timeoutMs,
+              timeoutMs: taskDto.sessionConfig.timeoutMs,
               devtools: taskDto.sessionConfig.devtools,
-              args: taskDto.sessionConfig.additionalArgs,
+              additionalArgs: taskDto.sessionConfig.additionalArgs,
             }
           : undefined,
         maxExecutionTimeMs: taskDto.maxExecutionTimeMs,
         metadata: taskDto.metadata,
         enableLogging: taskDto.enableLogging,
         continueOnError: taskDto.continueOnError,
-        status: BrowserTaskStatus.RUNNING,
-        startedAt: new Date(),
-        actionsCompleted: 0,
-        totalActions: taskDto.actions.length,
-        logs: [],
+        // Note: status, startedAt, actionsCompleted, totalActions, logs are set internally
+        // These are not part of CreateBrowserTaskDto interface
       });
 
       // Create or reuse browser session
@@ -224,12 +220,12 @@ export class BrowserUseService {
 
       this.logger.log(`Browser task completed: ${taskId}`, {
         taskId,
-        status: _result.status,
-        executionTimeMs: _result.executionTimeMs,
-        actionsCompleted: _result.actionsCompleted,
+        status: result.status,
+        executionTimeMs: result.executionTimeMs,
+        actionsCompleted: result.actionsCompleted,
       });
 
-      return _result;
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const executionTimeMs = Date.now() - startTime;
@@ -241,7 +237,7 @@ export class BrowserUseService {
       });
 
       // Update task with error status
-      await this.taskService.updateTaskStatus(_taskId, {
+      await this.taskService.updateTaskStatus(taskId, {
         status: BrowserTaskStatus.FAILED,
         completedAt: new Date(),
         executionTimeMs,
@@ -409,11 +405,11 @@ export class BrowserUseService {
   /**
    * Create async job for long-running browser automation tasks
    */
-  async createAsyncJob(_dto: dtoType): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating job: ${dto.name}`, {
-      jobName: dto.name,
-      jobType: dto.jobType,
-      priority: dto.priority,
+  async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
+    this.logger.log(`Creating job: ${_dto.name}`, {
+      jobName: _dto.name,
+      jobType: _dto.jobType,
+      priority: _dto.priority,
     });
 
     return await this.asyncJobService.createAsyncJob(_dto);
@@ -422,19 +418,19 @@ export class BrowserUseService {
   /**
    * Get async job status and results
    */
-  async getAsyncJob(_jobId: jobIdType): Promise<AsyncJobResultDto | null> {
-    this.logger.log(`Getting job: ${jobId}`);
+  async getAsyncJob(_jobId: string): Promise<AsyncJobResultDto | null> {
+    this.logger.log(`Getting job: ${_jobId}`);
 
-    return await this.asyncJobService.getAsyncJob(jobId);
+    return await this.asyncJobService.getAsyncJob(_jobId);
   }
 
   /**
    * Cancel async job
    */
-  async cancelAsyncJob(_jobId: jobIdType): Promise<void> {
-    this.logger.log(`Cancelling job: ${jobId}`);
+  async cancelAsyncJob(_jobId: string): Promise<void> {
+    this.logger.log(`Cancelling job: ${_jobId}`);
 
-    return await this.asyncJobService.cancelAsyncJob(jobId);
+    return await this.asyncJobService.cancelAsyncJob(_jobId);
   }
 
   /**
@@ -474,9 +470,9 @@ export class BrowserUseService {
       });
 
       return {
-        screenshot: _result.screenshot,
-        timestamp: _result.timestamp.toISOString(),
-        metadata: _result.metadata,
+        screenshot: result.screenshot,
+        timestamp: result.timestamp.toISOString(),
+        metadata: result.metadata,
       };
     } catch (error) {
       this.logger.error(`Screenshot failed for session: ${sessionId}`, error);
@@ -516,8 +512,8 @@ export class BrowserUseService {
 
           // Extract the first matching element or merge all data
           const selectorData =
-            Object.values(_result.data)[0] ??
-            (_result.data as unknown as BrowserElementData);
+            Object.values(result.data)[0] ??
+            (result.data as unknown as BrowserElementData);
           extractedData[key] = selectorData;
         } catch (error) {
           this.logger.warn(
@@ -642,7 +638,7 @@ export class BrowserUseService {
         }
 
         // Update task progress
-        await this.taskService.updateTaskProgress(_task.taskId, {
+        await this.taskService.updateTaskProgress(task.taskId, {
           actionsCompleted,
           currentStep: `Completed: ${action.type}`,
           progress: Math.round(
@@ -690,7 +686,7 @@ export class BrowserUseService {
   private async executeAction(
     sessionId: string,
     action: BrowserActionDto,
-    actionIndex: number,
+    _actionIndex: number,
   ): Promise<{
     success: boolean;
     executionTime: number;
@@ -799,8 +795,8 @@ export class BrowserUseService {
    */
   private async initializeWorkspace(): Promise<void> {
     try {
-      await fs.mkdir(_this.workingDirectory, { recursive: true });
-      await fs.mkdir(_this.tempDirectory, { recursive: true });
+      await fs.mkdir(this.workingDirectory, { recursive: true });
+      await fs.mkdir(this.tempDirectory, { recursive: true });
 
       this.logger.log('Browser-use workspace initialized', {
         workingDirectory: this.workingDirectory,
@@ -809,7 +805,7 @@ export class BrowserUseService {
       });
     } catch (error) {
       throw new Error(
-        `Failed to initialize workspace: ${err instanceof Error ? error.message : String(error)}`,
+        `Failed to initialize workspace: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -817,7 +813,7 @@ export class BrowserUseService {
   /**
    * Execute Python script with browser-use library
    */
-  private async executePythonScript(_script: scriptType): Promise<{
+  private async executePythonScript(_script: string): Promise<{
     success: boolean;
     output: string;
     error?: string;
@@ -829,7 +825,7 @@ export class BrowserUseService {
       );
 
       // Write script to temporary file
-      fs.writeFile(scriptFile, script)
+      fs.writeFile(scriptFile, _script)
         .then(() => {
           // Execute Python script
           const childProcess = spawn(this.pythonExecutable, [scriptFile], {
@@ -843,12 +839,12 @@ export class BrowserUseService {
           let stdout = '';
           let stderr = '';
 
-          childProcess.stdout.on('data', (_data: dataType) => {
-            stdout += data.toString();
+          childProcess.stdout.on('data', (_data: Buffer) => {
+            stdout += _data.toString();
           });
 
-          childProcess.stderr.on('data', (_data: dataType) => {
-            stderr += data.toString();
+          childProcess.stderr.on('data', (_data: Buffer) => {
+            stderr += _data.toString();
           });
 
           childProcess.on('close', async (code) => {
@@ -873,7 +869,7 @@ export class BrowserUseService {
             }
           });
 
-          childProcess.on('error', async (_err: errType) => {
+          childProcess.on('error', async (_err: Error) => {
             try {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {
@@ -883,15 +879,15 @@ export class BrowserUseService {
             resolve({
               success: false,
               output: '',
-              error: err.message,
+              error: _err.message,
             });
           });
         })
-        .catch((_writeErr: writeErrType) => {
+        .catch((_writeErr: Error) => {
           resolve({
             success: false,
             output: '',
-            error: `Failed to write script file: ${writeErr.message}`,
+            error: `Failed to write script file: ${_writeErr.message}`,
           });
         });
     });
@@ -900,7 +896,7 @@ export class BrowserUseService {
   /**
    * Generate Python scripts for different actions
    */
-  private generateNavigationScript(_sessionId: sessionIdType): string {
+  private generateNavigationScript(_sessionId: string, url: string): string {
     return `
 import asyncio
 from browser_use import Agent
@@ -927,7 +923,7 @@ if _name__ == "__main__":
 `;
   }
 
-  private generateClickScript(_sessionId: sessionIdType): string {
+  private generateClickScript(_sessionId: string, selector: string): string {
     return `
 import asyncio
 from browser_use import Agent
@@ -1103,7 +1099,10 @@ if _name__ == "__main__":
     | 'screenshot'
     | 'wait'
     | 'extract'
-    | 'scroll' {
+    | 'scroll'
+    | 'fill_form'
+    | 'submit_form'
+    | 'custom' {
     switch (actionType) {
       case BrowserActionType.CLICK:
         return 'click';
@@ -1121,6 +1120,12 @@ if _name__ == "__main__":
         return 'extract';
       case BrowserActionType.SCROLL:
         return 'scroll';
+      case BrowserActionType.FILL_FORM:
+        return 'fill_form';
+      case BrowserActionType.SUBMIT_FORM:
+        return 'submit_form';
+      case BrowserActionType.CUSTOM:
+        return 'custom';
       default:
         return 'click'; // fallback
     }
@@ -1129,8 +1134,8 @@ if _name__ == "__main__":
   /**
    * Convert log level string to TaskLogEntry level
    */
-  private convertLogLevel(_level: levelType): 'debug' | 'info' | 'warn' | 'error' {
-    switch (level.toLowerCase()) {
+  private convertLogLevel(_level: string): 'debug' | 'info' | 'warn' | 'error' {
+    switch (_level.toLowerCase()) {
       case 'debug':
         return 'debug';
       case 'info':

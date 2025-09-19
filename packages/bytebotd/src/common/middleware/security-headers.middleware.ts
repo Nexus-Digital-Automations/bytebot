@@ -505,7 +505,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       );
 
       this.logSecurityEvent(
-        _req,
+        req,
         'CORS_VIOLATION',
         `Unauthorized origin: ${origin}`,
         operationId,
@@ -534,7 +534,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
             return origin.endsWith(domain);
           }
           // Support localhost with any port
-          if (_allowed.includes('localhost:*')) {
+          if (allowed.includes('localhost:*')) {
             const baseOrigin = allowed.replace(':*', '');
             return origin.startsWith(baseOrigin);
           }
@@ -560,7 +560,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     }
 
     try {
-      const securityEventType = this.mapEventType(eventType);
+      const _securityEventType = this.mapEventType(eventType);
 
       const securityEvent = createSecurityEvent(
         _securityEventType,

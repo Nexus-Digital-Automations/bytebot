@@ -670,7 +670,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Generate mitigation strategies based on risk factors
    */
-  private generateMitigationStrategies(_riskLevel: riskLevelType): string[] {
+  private generateMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.includes('external_domain_access')) {
@@ -695,7 +695,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(_riskLevel: riskLevelType): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
+  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
     switch (riskLevel) {
       case RiskLevel.MINIMAL:
       case RiskLevel.LOW: return 'BASIC';

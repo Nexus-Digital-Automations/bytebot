@@ -372,10 +372,10 @@ export class TestExecutionOptimizer extends EventEmitter {
 
     // Analyze current performance and suggest improvements
     const avgTestTime = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.executionTime, 0) / this.testMetrics.size ?? 0;
+      .reduce((sum, m) => sum + m.executionTime, 0) / (this.testMetrics.size || 1);
 
     const avgMemoryUsage = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.memoryUsage, 0) / this.testMetrics.size ?? 0;
+      .reduce((sum, m) => sum + m.memoryUsage, 0) / (this.testMetrics.size || 1);
 
     // Caching recommendations
     if (!this.config.enableCaching) {
@@ -443,7 +443,7 @@ export class TestExecutionOptimizer extends EventEmitter {
 
     // Create cache directory if it doesn't exist
     try {
-      await fs.mkdir(_this.config.cacheDirectory, { recursive: true });
+      await fs.mkdir(this.config.cacheDirectory, { recursive: true });
     } catch (error) {
       console.warn(`⚠️ [OPTIMIZER] Failed to create cache directory: ${error}`);
     }
@@ -831,7 +831,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       const metrics = JSON.parse(metricsData);
       
       for (const [key, entry] of Object.entries(metrics)) {
-        this.testMetrics.set(key, entry as unknown);
+        this.testMetrics.set(key, entry as { executionTime: number; memoryUsage: number; stability: number });
       }
       
       console.log(`📊 [OPTIMIZER] Loaded ${this.testMetrics.size} test metrics`);
@@ -955,7 +955,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       existing.memoryUsage = existing.memoryUsage * (1 - alpha) + result.memoryUsage * alpha;
       existing.stability = existing.stability * 0.9 + (result.passed ? 1 : 0) * 0.1;
     } else {
-      this.testMetrics.set(_testFile, {
+      this.testMetrics.set(testFile, {
         executionTime: result.executionTime,
         memoryUsage: result.memoryUsage,
         stability: result.passed ? 1 : 0
@@ -1010,9 +1010,11 @@ export class TestExecutionOptimizer extends EventEmitter {
     console.log(`👥 [OPTIMIZER] Initializing worker pool with ${workerCount} workers...`);
     
     this.workerPool = Array(workerCount).fill(null).map((_, index) => ({
-      id: index,
+      id: index.toString(),
       busy: false,
-      currentTest: null
+      startTime: Date.now(),
+      memoryUsage: 0,
+      testsExecuted: 0
     }));
   }
 
@@ -1083,7 +1085,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
     const now = Date.now();
     
-    for (const [key, entry] of this.testCache.entries()) {
+    for (const [key, entry] of Array.from(this.testCache.entries())) {
       if (now - entry.timestamp > maxAge) {
         this.testCache.delete(key);
       }
@@ -1097,7 +1099,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     // Remove entries not referenced in recent metrics
     const recentTests = new Set(this.testMetrics.keys());
     
-    for (const testFile of this.dependencyGraph.keys()) {
+    for (const testFile of Array.from(this.dependencyGraph.keys())) {
       if (!recentTests.has(testFile)) {
         this.dependencyGraph.delete(testFile);
       }

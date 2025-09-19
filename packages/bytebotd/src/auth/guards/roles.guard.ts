@@ -52,6 +52,9 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission._USER_MANAGEMENT,
     Permission._METRICS_VIEW,
     Permission._LOGS_VIEW,
+    Permission._API_ADMIN,
+    Permission._SECURITY_MANAGEMENT,
+    Permission._SYSTEM_MANAGEMENT,
   ],
   [UserRole._OPERATOR]: [
     Permission._TASK_READ,
@@ -59,11 +62,14 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission._COMPUTER_CONTROL,
     Permission._COMPUTER_VIEW,
     Permission._METRICS_VIEW,
+    Permission._API_ACCESS,
+    Permission._EXECUTE,
   ],
   [UserRole._VIEWER]: [
     Permission._TASK_READ,
     Permission._COMPUTER_VIEW,
     Permission._METRICS_VIEW,
+    Permission._API_ACCESS,
   ],
   [UserRole._USER]: [Permission._TASK_READ, Permission._VIEW_OWN_PROFILE],
   [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
@@ -198,7 +204,7 @@ export class RolesGuard implements CanActivate {
       this.logger.error(`[${operationId}] RBAC authorization error`, {
         operationId,
         userId: user.id,
-        error: _errorMessage,
+        error: errorMessage,
         authTimeMs: authTime,
         securityEvent: 'rbac_authorization_error',
       });

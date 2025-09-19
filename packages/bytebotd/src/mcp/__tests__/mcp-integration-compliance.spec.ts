@@ -128,7 +128,7 @@ class MockMcpClient extends EventEmitter {
   private capabilities: any = {};
   private tools: any[] = [];
 
-  constructor(_private serverUrl: string) {
+  constructor(private serverUrl: string) {
     super();
   }
 

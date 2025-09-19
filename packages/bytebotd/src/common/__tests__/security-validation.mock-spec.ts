@@ -50,7 +50,7 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should allow safe text inputs', () => {
-      const safeInput = {
+      const _safeInput = {
         action: 'type_text',
         text: 'This is safe text input',
       };
@@ -147,7 +147,7 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should validate action types', () => {
-      const invalidAction = {
+      const _invalidAction = {
         action: 'malicious_action',
         data: 'test',
       };
@@ -162,7 +162,7 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should enforce maximum input length', () => {
-      const largeInput = {
+      const _largeInput = {
         action: 'type_text',
         text: 'A'.repeat(2000), // Exceeds 1000 character limit
       };
@@ -177,7 +177,7 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should allow valid input within limits', () => {
-      const validInput = {
+      const _validInput = {
         action: 'type_text',
         text: 'Valid text input',
       };
@@ -409,7 +409,7 @@ describe('Security Validation Mock Tests', () => {
 
       const startTime = Date.now();
 
-      const validInput = {
+      const _validInput = {
         action: 'type_text',
         text: 'Test input for performance validation',
       };

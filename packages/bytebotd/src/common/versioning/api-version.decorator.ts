@@ -242,7 +242,7 @@ export const MultiVersion = (versions: SupportedVersion[]) => {
  */
 export const ExperimentalApi = (version: SupportedVersion) => {
   return applyDecorators(
-    _ForVersion(version, {
+    ForVersion(version, {
       stability: 'experimental',
       desktopCompatibility: {
         minDesktopVersion: '1.0.0-beta',
@@ -280,7 +280,7 @@ export const ExperimentalApi = (version: SupportedVersion) => {
  */
 export const BetaApi = (version: SupportedVersion) => {
   return applyDecorators(
-    _ForVersion(version, {
+    ForVersion(version, {
       stability: 'beta',
       desktopCompatibility: {
         minDesktopVersion: '1.0.0-rc',
@@ -312,7 +312,7 @@ export const ComputerUseApi = (
   features?: string[],
 ) => {
   return applyDecorators(
-    _ForVersion(version, {
+    ForVersion(version, {
       desktopCompatibility: {
         minDesktopVersion: '1.0.0',
         vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],
