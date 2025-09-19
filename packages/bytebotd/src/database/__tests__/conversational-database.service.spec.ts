@@ -52,6 +52,21 @@ interface MockParlantValidationResponse extends ParlantValidationResponse {
   requiresManualApproval?: boolean;
 }
 
+const createMockValidationResponse = (
+  approved: boolean,
+  conversationId: string,
+  reason?: string,
+  options?: Partial<MockParlantValidationResponse>
+): MockParlantValidationResponse => ({
+  approved,
+  conversationId,
+  reason,
+  validationTimestamp: new Date(),
+  reasoning: reason || (approved ? 'Operation approved' : 'Operation denied'),
+  confidence: 0.95,
+  ...options,
+});
+
 const createMockParlantService = () => ({
   validateOperation: jest.fn<Promise<MockParlantValidationResponse>, [ParlantValidationRequest]>(),
   createConversation: jest.fn(),
@@ -154,11 +169,9 @@ describe('ConversationalDatabaseService', () => {
 
     it('should successfully find entity with approved validation', async () => {
       // Arrange
-      parlantService.validateOperation.mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-123',
-        reason: 'Low risk read operation approved',
-      });
+      parlantService.validateOperation.mockResolvedValue(
+        createMockValidationResponse(true, 'conv-123', 'Low risk read operation approved')
+      );
       mockRepository.findById.mockResolvedValue(testEntity);
 
       // Act
@@ -186,11 +199,9 @@ describe('ConversationalDatabaseService', () => {
 
     it('should reject operation when validation fails', async () => {
       // Arrange
-      parlantService.validateOperation.mockResolvedValue({
-        approved: false,
-        conversationId: 'conv-456',
-        reason: 'Access denied for this resource',
-      });
+      parlantService.validateOperation.mockResolvedValue(
+        createMockValidationResponse(false, 'conv-456', 'Access denied for this resource')
+      );
 
       // Act & Assert
       await expect(

@@ -51,6 +51,7 @@ import {
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
+  JobPriority,
 } from '../dto/async-job.dto';
 import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
 
@@ -146,6 +147,7 @@ describe('ComputerUseController', () => {
 
     const mockAsyncJobService = {
       submitAction: jest.fn(),
+      submitJob: jest.fn(),
       getJobStatus: jest.fn(),
       getJobResult: jest.fn(),
       cancelJob: jest.fn(),
@@ -358,16 +360,14 @@ describe('ComputerUseController', () => {
 
   describe('Asynchronous Job Management', () => {
     describe('POST /action/async', () => {
-      const mockAsyncSubmission: AsyncActionSubmissionDto = {
-        action: {
-          action: 'screenshot',
-        },
-        priority: 'normal',
+      const mockAsyncSubmission: ComputerActionDto & AsyncActionSubmissionDto = {
+        action: 'screenshot',
+        priority: JobPriority.NORMAL,
         timeout: 30000,
       };
 
       it('should submit async action successfully', async () => {
-        asyncJobService.submitAction.mockResolvedValue(mockJobSubmission);
+        (asyncJobService.submitJob as jest.MockedFunction<any>).mockResolvedValue(mockJobSubmission);
 
         const result = await controller.submitAsyncAction(mockAsyncSubmission, mockUser);
 
@@ -377,19 +377,24 @@ describe('ComputerUseController', () => {
           timestamp: expect.any(String),
           job: mockJobSubmission,
         });
-        expect(asyncJobService.submitAction).toHaveBeenCalledWith(
-          mockAsyncSubmission.action,
-          mockUser.id,
+        expect(asyncJobService.submitJob).toHaveBeenCalledWith(
+          { action: 'screenshot' },
           {
             priority: mockAsyncSubmission.priority,
             timeout: mockAsyncSubmission.timeout,
+            useCache: mockAsyncSubmission.useCache,
+            metadata: {
+              userId: mockUser.id,
+              username: mockUser.username,
+              operationId: expect.any(String),
+            },
           }
         );
       });
 
       it('should handle async submission errors', async () => {
         const submissionError = new Error('Job queue is full');
-        asyncJobService.submitAction.mockRejectedValue(submissionError);
+        (asyncJobService.submitJob as jest.MockedFunction<any>).mockRejectedValue(submissionError);
 
         await expect(
           controller.submitAsyncAction(mockAsyncSubmission, mockUser)
@@ -412,7 +417,7 @@ describe('ComputerUseController', () => {
       const jobId = 'job_123';
 
       it('should get job status successfully', async () => {
-        asyncJobService.getJobStatus.mockResolvedValue(mockJobStatus);
+        (asyncJobService.getJobStatus as jest.MockedFunction<any>).mockResolvedValue(mockJobStatus);
 
         const result = await controller.getJobStatus(jobId, mockUser);
 
@@ -422,12 +427,12 @@ describe('ComputerUseController', () => {
           timestamp: expect.any(String),
           status: mockJobStatus,
         });
-        expect(asyncJobService.getJobStatus).toHaveBeenCalledWith(jobId, mockUser.id);
+        expect(asyncJobService.getJobStatus).toHaveBeenCalledWith(jobId);
       });
 
       it('should handle job not found error', async () => {
         const notFoundError = new HttpException('Job not found', HttpStatus.NOT_FOUND);
-        asyncJobService.getJobStatus.mockRejectedValue(notFoundError);
+        (asyncJobService.getJobStatus as jest.MockedFunction<any>).mockRejectedValue(notFoundError);
 
         await expect(
           controller.getJobStatus(jobId, mockUser)
@@ -446,7 +451,7 @@ describe('ComputerUseController', () => {
       const jobId = 'job_123';
 
       it('should get job result successfully', async () => {
-        asyncJobService.getJobResult.mockResolvedValue(mockJobResult);
+        (asyncJobService.getJobResult as jest.MockedFunction<any>).mockResolvedValue(mockJobResult);
 
         const result = await controller.getJobResult(jobId, mockUser);
 
@@ -456,12 +461,12 @@ describe('ComputerUseController', () => {
           timestamp: expect.any(String),
           result: mockJobResult,
         });
-        expect(asyncJobService.getJobResult).toHaveBeenCalledWith(jobId, mockUser.id);
+        expect(asyncJobService.getJobResult).toHaveBeenCalledWith(jobId);
       });
 
       it('should handle job result retrieval errors', async () => {
         const resultError = new Error('Job result not available');
-        asyncJobService.getJobResult.mockRejectedValue(resultError);
+        (asyncJobService.getJobResult as jest.MockedFunction<any>).mockRejectedValue(resultError);
 
         await expect(
           controller.getJobResult(jobId, mockUser)
@@ -484,7 +489,7 @@ describe('ComputerUseController', () => {
       const jobId = 'job_123';
 
       it('should cancel job successfully', async () => {
-        asyncJobService.cancelJob.mockResolvedValue(true);
+        (asyncJobService.cancelJob as jest.MockedFunction<any>).mockResolvedValue(true);
 
         const result = await controller.cancelJob(jobId, mockUser);
 
@@ -495,11 +500,11 @@ describe('ComputerUseController', () => {
           jobId: jobId,
           cancelled: true,
         });
-        expect(asyncJobService.cancelJob).toHaveBeenCalledWith(jobId, mockUser.id);
+        expect(asyncJobService.cancelJob).toHaveBeenCalledWith(jobId);
       });
 
       it('should handle job cancellation failures', async () => {
-        asyncJobService.cancelJob.mockResolvedValue(false);
+        (asyncJobService.cancelJob as jest.MockedFunction<any>).mockResolvedValue(false);
 
         const result = await controller.cancelJob(jobId, mockUser);
 
@@ -514,7 +519,7 @@ describe('ComputerUseController', () => {
 
       it('should handle job cancellation errors', async () => {
         const cancellationError = new Error('Cannot cancel running job');
-        asyncJobService.cancelJob.mockRejectedValue(cancellationError);
+        (asyncJobService.cancelJob as jest.MockedFunction<any>).mockRejectedValue(cancellationError);
 
         await expect(
           controller.cancelJob(jobId, mockUser)

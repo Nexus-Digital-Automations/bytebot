@@ -118,14 +118,14 @@ describe('AsyncJobService', () => {
     };
 
     const mockMetricsService = {
-      recordJobSubmission: jest.fn(),
-      recordJobExecution: jest.fn(),
-      recordJobCompletion: jest.fn(),
-      recordJobCancellation: jest.fn(),
-      recordJobError: jest.fn(),
-      incrementCounter: jest.fn(),
-      recordDuration: jest.fn(),
-      setGauge: jest.fn(),
+      recordJobSubmission: jest.fn<void, [string, string]>(),
+      recordJobExecution: jest.fn<void, [string]>(),
+      recordJobCompletion: jest.fn<void, [string, number]>(),
+      recordJobCancellation: jest.fn<void, [string]>(),
+      recordJobError: jest.fn<void, [string, string]>(),
+      incrementCounter: jest.fn<void, [string, Record<string, string>?]>(),
+      recordDuration: jest.fn<void, [string, number, Record<string, string>?]>(),
+      setGauge: jest.fn<void, [string, number, Record<string, string>?]>(),
     };
 
     const mockLogger = {
@@ -245,7 +245,9 @@ describe('AsyncJobService', () => {
 
     it('should handle submission errors gracefully', async () => {
       // Mock an internal error during submission
-      metricsService.recordJobSubmission.mockRejectedValue(new Error('Metrics service unavailable'));
+      metricsService.recordJobSubmission.mockImplementation(() => {
+        throw new Error('Metrics service unavailable');
+      });
 
       // Should still succeed but handle the metrics error
       const result = await service.submitAction(mockComputerAction, userId);
@@ -601,7 +603,9 @@ describe('AsyncJobService', () => {
     });
 
     it('should handle metrics service failures', async () => {
-      metricsService.recordJobSubmission.mockRejectedValue(new Error('Metrics unavailable'));
+      metricsService.recordJobSubmission.mockImplementation(() => {
+        throw new Error('Metrics unavailable');
+      });
 
       const submission = await service.submitAction(mockComputerAction, userId);
 

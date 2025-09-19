@@ -154,7 +154,7 @@ describe('JobManagementService', () => {
     };
 
     // Mock Redis constructor
-    (Redis as jest.MockedClass<typeof Redis>).mockImplementation(() => mockRedisInstance as unknown);
+    (Redis as jest.MockedClass<typeof Redis>).mockImplementation(() => mockRedisInstance as Redis);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -177,7 +177,7 @@ describe('JobManagementService', () => {
     service = module.get<JobManagementService>(JobManagementService);
     computerUseService = module.get(ComputerUseService);
     configService = module.get(ConfigService);
-    redisClient = mockRedisInstance as unknown;
+    redisClient = mockRedisInstance as jest.Mocked<Redis>;
     logger = module.get(Logger);
 
     // Initialize the service

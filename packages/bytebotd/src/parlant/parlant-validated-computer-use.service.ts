@@ -528,7 +528,7 @@ export class ParlantValidatedComputerUseService {
       /secret/i,
       /token/i,
       /key/i,
-      /^[A-Za-z0-(9 ?? "default")@#$%^&*]{8,}$/, // Password-like pattern
+      /^[A-Za-z0-9@#$%^&*]{8,}$/, // Password-like pattern
     ];
 
     return passwordIndicators.some(pattern => pattern.test(text));

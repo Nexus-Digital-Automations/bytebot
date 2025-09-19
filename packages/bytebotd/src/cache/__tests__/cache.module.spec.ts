@@ -230,11 +230,7 @@ describe('CacheModule', () => {
     });
 
     it('should handle missing environment variables', async () => {
-      restoreEnv = mockEnvVars({
-        REDIS_HOST: undefined,
-        REDIS_PORT: undefined,
-        REDIS_PASSWORD: undefined,
-      } as unknown);
+      restoreEnv = mockEnvVars({});
 
       module = await Test.createTestingModule({
         imports: [CacheModule],

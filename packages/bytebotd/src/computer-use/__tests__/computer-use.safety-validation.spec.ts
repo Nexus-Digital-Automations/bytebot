@@ -508,7 +508,7 @@ describe('Computer Use Safety and Validation', () => {
       });
 
       try {
-        await service.action({ action: 'screenshot' } as unknown);
+        await service.action({ action: 'screenshot' } as ClickMouseAction);
       } catch (error) {
         expect(error.message).not.toContain('password');
         expect(error.message).not.toContain('mysql://');

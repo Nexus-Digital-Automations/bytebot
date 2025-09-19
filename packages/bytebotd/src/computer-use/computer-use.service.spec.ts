@@ -759,9 +759,9 @@ describe('ComputerUseService', () => {
       });
 
       it('should handle unsupported application', async () => {
-        const action = {
-          action: 'application' as const,
-          application: 'unsupported-app' as unknown,
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'unsupported-app',
         };
 
         await expect(service.action(action)).rejects.toThrow(
