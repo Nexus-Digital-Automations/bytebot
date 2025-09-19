@@ -974,17 +974,24 @@ export const useConversationContext = ({
     logDebug('Context changed', { contextId: context?.conversationId }, 'useConversationContext');
   }, [onContextChange]);
 
+  // Time conversion constants for duration calculations
+  const MILLISECONDS_PER_SECOND = 1000;
+  const SECONDS_PER_MINUTE = 60;
+  const MINUTES_PER_HOUR = 60;
+  const DECIMAL_PRECISION_MULTIPLIER = 10;
+  const DECIMAL_PRECISION_DIVISOR = 10;
+
   // Helper function declarations moved here to avoid hoisting issues
   const generateContextSummary = useCallback((
-    messages: ConversationMessage[],
+    messageList: ConversationMessage[],
     context: ParlantConversationContext | null
   ): string => {
     if (!context) {return '';}
 
-    const messageCount = messages.length;
+    const messageCount = messageList.length;
     const participantCount = participants.length;
     const duration = context.updatedAt.getTime() - context.createdAt.getTime();
-    const durationHours = Math.round(duration / (1000 * 60 * 60) * 10) / 10;
+    const durationHours = Math.round(duration / (MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR) * DECIMAL_PRECISION_MULTIPLIER) / DECIMAL_PRECISION_DIVISOR;
 
     return `${messageCount} messages from ${participantCount} participants over ${durationHours}h`;
   }, [participants]);
@@ -1246,7 +1253,7 @@ export const useConversationContext = ({
   // UTILITY FUNCTIONS
   // ===========================
   
-  const generateDetailedContextSummary = useCallback((
+  const _generateDetailedContextSummary = useCallback((
     hookMessages: ConversationMessage[],
     _context: ParlantConversationContext
   ): ContextSummary => {
