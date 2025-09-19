@@ -302,8 +302,8 @@ class IntegrationPerformanceMonitor {
   getThroughputStats() {
     if (this.throughputData.length < 2) return null;
 
-    const timeSpan = this.throughputData[this.throughputData.length - 1].timestamp - 
-                   this.throughputData[0].timestamp;
+    const timeSpan = (this.throughputData[this.throughputData.length - 1]?.timestamp ?? 0) -
+                   (this.throughputData[0]?.timestamp ?? 0);
     const totalOperations = this.throughputData.reduce((sum, data) => sum + data.operations, 0);
 
     return {

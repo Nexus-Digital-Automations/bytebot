@@ -491,7 +491,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
     const queueLength = this.microBatchQueue.length;
     const isHighPriority = request.ultraOptimizationHints?.priorityLevel === 'ULTRA';
     const queueAge = this.microBatchQueue.length > 0 ?
-      Date.now() - this.microBatchQueue[0].timestamp : 0;
+      Date.now() - (this.microBatchQueue[0]?.timestamp ?? Date.now()) : 0;
 
     return queueLength >= this.microBatchConfig.maxBatchSize ||
            queueAge >= this.microBatchConfig.maxWaitTimeMs ||
@@ -509,7 +509,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       const requests = batchItems.map(item => item.request);
       const responses = await this.performanceOrchestrator.validateBulkWithOptimization(
         requests,
-        batchItems[0].context
+        batchItems[0]?.context ?? {}
       );
 
       // Resolve all promises
@@ -734,8 +734,11 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
 
       const toRemove = this.l0Cache.size - this.l0CacheConfig.maxSize;
       for (let i = 0; i < toRemove; i++) {
-        this.l0Cache.delete(sortedEntries[i][0]);
-        removedCount++;
+        const entry = sortedEntries[i];
+        if (entry) {
+          this.l0Cache.delete(entry[0]);
+          removedCount++;
+        }
       }
     }
 

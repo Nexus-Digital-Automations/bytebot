@@ -442,8 +442,8 @@ describe('MCP WebSocket Integration', () => {
       expect(chunks).toHaveLength(testEvents.length);
 
       chunks.forEach((chunk, index) => {
-        expect(chunk.data).toBe(testEvents[index].data);
-        expect(chunk.event).toBe(testEvents[index].event);
+        expect(chunk.data).toBe(testEvents[index]?.data);
+        expect(chunk.event).toBe(testEvents[index]?.event);
       });
 
       console.log(`[${operationId}] SSE event streaming validated with ${chunks.length} events`);

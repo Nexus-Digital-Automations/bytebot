@@ -615,7 +615,7 @@ describe('CUA Performance and Scalability Tests', () => {
           await criticalOp.operation();
           const responseTime = Date.now() - startTime;
           
-          latencyResults[criticalOp.name].push(responseTime);
+          latencyResults[criticalOp.name]?.push(responseTime);
           context.performanceMonitor.recordOperation(criticalOp.name, responseTime, true);
         }
       }

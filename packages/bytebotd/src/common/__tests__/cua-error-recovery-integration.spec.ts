@@ -629,7 +629,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const endTime = Date.now();
 
       expect(result).toBeDefined();
-      expect(result.content[0].text).toBe('mouse moved');
+      expect(result.content[0]?.text).toBe('mouse moved');
       expect(connectionAttempts).toBe(4); // 3 failures + 1 success
 
       recordRecoveryMetrics(scenario, startTime, endTime, {
@@ -677,7 +677,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const endTime = Date.now();
 
       expect(result).toBeDefined();
-      expect(result.content[0].type).toBe('image');
+      expect(result.content[0]?.type).toBe('image');
 
       recordRecoveryMetrics(scenario, startTime, endTime, {
         totalFailures: 1,

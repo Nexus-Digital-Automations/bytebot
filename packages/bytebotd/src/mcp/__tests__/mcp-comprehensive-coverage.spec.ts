@@ -284,9 +284,9 @@ describe('MCP Comprehensive Coverage', () => {
       
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.content[0].type).toBe('text');
-      expect(result.content[0].text).toContain('150');
-      expect(result.content[0].text).toContain('250');
+      expect(result.content[0]?.type).toBe('text');
+      expect(result.content[0]?.text).toContain('150');
+      expect(result.content[0]?.text).toContain('250');
 
       console.log(`[${operationId}] Cursor position tracking tested`);
     });
@@ -755,7 +755,7 @@ describe('MCP Comprehensive Coverage', () => {
         if (!result.success) {
           expect(result.error.issues.length).toBeGreaterThan(0);
           
-          const errorPath = result.error.issues[0].path.join('.');
+          const errorPath = result.error.issues[0]?.path.join('.');
           expect(errorPath).toContain(testCase.expectedError);
           
           console.log(`[${operationId}] Invalid case ${index + 1}: ${testCase.expectedError} error correctly caught`);

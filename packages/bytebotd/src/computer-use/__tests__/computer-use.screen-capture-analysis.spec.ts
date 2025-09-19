@@ -205,7 +205,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           quality: 50,
-          fileSize: mockBasicScreenshotResult.metadata!.fileSize / 2,
+          fileSize: (mockBasicScreenshotResult.metadata?.fileSize ?? 1000) / 2,
         },
       };
 
@@ -259,7 +259,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       expect(result.metadata!.width).toBe(3840);
       expect(result.metadata!.displays).toHaveLength(2);
-      expect(result.metadata!.displays[0].primary).toBe(true);
+      expect(result.metadata!.displays[0]?.primary).toBe(true);
     });
 
     it('should capture screenshot from specific monitor', async () => {
@@ -400,7 +400,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           format: 'webp',
-          fileSize: mockBasicScreenshotResult.metadata!.fileSize * 0.6, // WebP is smaller
+          fileSize: (mockBasicScreenshotResult.metadata?.fileSize ?? 1000) * 0.6, // WebP is smaller
         },
       };
 

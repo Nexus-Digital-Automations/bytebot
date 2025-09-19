@@ -594,7 +594,7 @@ describe('Cross-Module Event Integration Tests', () => {
       await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(recoveryEvents).toHaveLength(1);
-      expect(recoveryEvents[0].payload.message).toBe('Recovery successful');
+      expect(recoveryEvents[0]?.payload.message).toBe('Recovery successful');
     });
 
     it('should implement dead letter queue for failed events', async () => {
@@ -648,8 +648,8 @@ describe('Cross-Module Event Integration Tests', () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       expect(deadLetterEvents).toHaveLength(1);
-      expect(deadLetterEvents[0].payload.originalCorrelationId).toBe(correlationId);
-      expect(deadLetterEvents[0].payload.failureReason).toBe('Max retries exceeded');
+      expect(deadLetterEvents[0]?.payload.originalCorrelationId).toBe(correlationId);
+      expect(deadLetterEvents[0]?.payload.failureReason).toBe('Max retries exceeded');
     });
 
     it('should maintain event ordering under high concurrency', async () => {
@@ -700,7 +700,9 @@ describe('Cross-Module Event Integration Tests', () => {
       // Calculate ordering violations (events processed out of sequence)
       let orderingViolations = 0;
       for (let i = 1; i < orderedEvents.length; i++) {
-        if (orderedEvents[i].sequenceNumber < orderedEvents[i-1].sequenceNumber) {
+        const currentSeq = orderedEvents[i]?.sequenceNumber ?? 0;
+        const prevSeq = orderedEvents[i-1]?.sequenceNumber ?? 0;
+        if (currentSeq < prevSeq) {
           orderingViolations++;
         }
       }

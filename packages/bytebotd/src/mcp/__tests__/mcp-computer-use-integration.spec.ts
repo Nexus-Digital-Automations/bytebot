@@ -204,7 +204,7 @@ describe('MCP Computer Use Integration Tests', () => {
         workflow.operations.push(cursorPosition);
         
         expect(cursorPosition.success).toBe(true);
-        const position = JSON.parse(cursorPosition.result.content[0].text);
+        const position = JSON.parse(cursorPosition.result.content[0]?.text);
         expect(position).toHaveProperty('x');
         expect(position).toHaveProperty('y');
         
@@ -217,7 +217,7 @@ describe('MCP Computer Use Integration Tests', () => {
         workflow.operations.push(mouseMove);
         
         expect(mouseMove.success).toBe(true);
-        expect(mouseMove.result.content[0].text).toBe('mouse moved');
+        expect(mouseMove.result.content[0]?.text).toBe('mouse moved');
         
         // Step 4: Perform click operation
         const mouseClick = await executeAndTrackMcpOperation(
@@ -232,7 +232,7 @@ describe('MCP Computer Use Integration Tests', () => {
         workflow.operations.push(mouseClick);
         
         expect(mouseClick.success).toBe(true);
-        expect(mouseClick.result.content[0].text).toBe('mouse clicked');
+        expect(mouseClick.result.content[0]?.text).toBe('mouse clicked');
         
         // Step 5: Type some text
         const typeText = await executeAndTrackMcpOperation(
@@ -243,7 +243,7 @@ describe('MCP Computer Use Integration Tests', () => {
         workflow.operations.push(typeText);
         
         expect(typeText.success).toBe(true);
-        expect(typeText.result.content[0].text).toBe('text typed');
+        expect(typeText.result.content[0]?.text).toBe('text typed');
         
         // Step 6: Take final screenshot to verify changes
         const finalScreenshot = await executeAndTrackMcpOperation(
@@ -305,7 +305,7 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(writeOperation.success).toBe(true);
-      expect(writeOperation.result.content[0].text).toContain('successfully');
+      expect(writeOperation.result.content[0]?.text).toContain('successfully');
       
       // Step 2: Read file back via MCP
       const readOperation = await executeAndTrackMcpOperation(
@@ -317,12 +317,12 @@ describe('MCP Computer Use Integration Tests', () => {
       expect(readOperation.success).toBe(true);
       expect(readOperation.result.content[0]).toHaveProperty('type', 'document');
       expect(readOperation.result.content[0]).toHaveProperty('source');
-      expect(readOperation.result.content[0].source).toHaveProperty('type', 'base64');
-      expect(readOperation.result.content[0].source).toHaveProperty('data');
+      expect(readOperation.result.content[0]?.source).toHaveProperty('type', 'base64');
+      expect(readOperation.result.content[0]?.source).toHaveProperty('data');
       
       // Step 3: Verify file content integrity
       const fileContent = JSON.parse(
-        Buffer.from(readOperation.result.content[0].source.data, 'base64').toString()
+        Buffer.from(readOperation.result.content[0]?.source.data, 'base64').toString()
       );
       
       expect(fileContent).toEqual(testData);
@@ -344,7 +344,7 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(selectAllOperation.success).toBe(true);
-      expect(selectAllOperation.result.content[0].text).toBe('keys typed');
+      expect(selectAllOperation.result.content[0]?.text).toBe('keys typed');
       expect(context.nutService.sendKeys).toHaveBeenCalledWith(['LeftControl', 'A']);
       
       // Step 2: Copy operation (Ctrl+C)
@@ -355,7 +355,7 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(copyOperation.success).toBe(true);
-      expect(copyOperation.result.content[0].text).toBe('keys typed');
+      expect(copyOperation.result.content[0]?.text).toBe('keys typed');
       
       // Step 3: Move cursor and paste (Ctrl+V)
       await executeAndTrackMcpOperation(
@@ -371,7 +371,7 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(pasteOperation.success).toBe(true);
-      expect(pasteOperation.result.content[0].text).toBe('text pasted');
+      expect(pasteOperation.result.content[0]?.text).toBe('text pasted');
       expect(context.nutService.pasteText).toHaveBeenCalledWith('Pasted via MCP integration');
     });
   });
@@ -408,7 +408,7 @@ describe('MCP Computer Use Integration Tests', () => {
       // Verify all operations completed successfully
       expect(results).toHaveLength(concurrentOperations);
       expect(results.every(result => result.success)).toBe(true);
-      expect(results.every(result => result.result.content[0].text === 'mouse moved')).toBe(true);
+      expect(results.every(result => result.result.content[0]?.text === 'mouse moved')).toBe(true);
       
       // Performance benchmarks
       expect(totalTime).toBeLessThan(5000); // Should complete within 5 seconds
@@ -485,8 +485,8 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(failedOperation.success).toBe(false);
-      expect(failedOperation.result.content[0].text).toContain('Error moving mouse');
-      expect(failedOperation.result.content[0].text).toContain('NUT service MCP test failure');
+      expect(failedOperation.result.content[0]?.text).toContain('Error moving mouse');
+      expect(failedOperation.result.content[0]?.text).toContain('NUT service MCP test failure');
     });
 
     it('should provide detailed error context for MCP tool failures', async () => {
@@ -504,8 +504,8 @@ describe('MCP Computer Use Integration Tests', () => {
       );
       
       expect(writeFailure.success).toBe(false);
-      expect(writeFailure.result.content[0].text).toContain('Error writing file');
-      expect(writeFailure.result.content[0].text).toContain('File write permission denied');
+      expect(writeFailure.result.content[0]?.text).toContain('Error writing file');
+      expect(writeFailure.result.content[0]?.text).toContain('File write permission denied');
     });
 
     it('should maintain MCP tool availability during partial service failures', async () => {
@@ -515,14 +515,14 @@ describe('MCP Computer Use Integration Tests', () => {
       
       // Screenshot should fail
       const screenshotResult = await context.mcpTools.screenshot();
-      expect(screenshotResult.content[0].text).toContain('Error taking screenshot');
+      expect(screenshotResult.content[0]?.text).toContain('Error taking screenshot');
       
       // But other operations should still work
       const mouseResult = await context.mcpTools.moveMouse({ coordinates: { x: 50, y: 50 } });
-      expect(mouseResult.content[0].text).toBe('mouse moved');
+      expect(mouseResult.content[0]?.text).toBe('mouse moved');
       
       const textResult = await context.mcpTools.typeText({ text: 'still working' });
-      expect(textResult.content[0].text).toBe('text typed');
+      expect(textResult.content[0]?.text).toBe('text typed');
     });
   });
 

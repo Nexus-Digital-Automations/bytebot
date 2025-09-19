@@ -402,7 +402,7 @@ class ResourceMonitor {
     }
 
     const recent = this.memorySnapshots.slice(-3);
-    const growth = recent[2].usage.heapUsed - recent[0].usage.heapUsed;
+    const growth = (recent[2]?.usage.heapUsed ?? 0) - (recent[0]?.usage.heapUsed ?? 0);
     const threshold = 10 * 1024 * 1024; // 10MB threshold
 
     return {
@@ -566,14 +566,14 @@ describe('MCP Error Handling and Recovery', () => {
 
       // Verify exponential backoff (100ms, 200ms delays between attempts)
       if (attemptTimes.length >= 3) {
-        const delay1 = attemptTimes[1] - attemptTimes[0];
-        const delay2 = attemptTimes[2] - attemptTimes[1];
+        const delay1 = (attemptTimes[1] ?? 0) - (attemptTimes[0] ?? 0);
+        const delay2 = (attemptTimes[2] ?? 0) - (attemptTimes[1] ?? 0);
         
         expect(delay1).toBeGreaterThan(80); // ~100ms +/- timing variance
         expect(delay2).toBeGreaterThan(180); // ~200ms +/- timing variance
       }
 
-      console.log(`[${operationId}] Exponential backoff verified with delays: ${attemptTimes.map((t, i) => i > 0 ? `${t - attemptTimes[i-1]}ms` : '0ms').join(', ')}`);
+      console.log(`[${operationId}] Exponential backoff verified with delays: ${attemptTimes.map((t, i) => i > 0 ? `${t - (attemptTimes[i-1] ?? 0)}ms` : '0ms').join(', ')}`);
     });
 
     it('should implement circuit breaker pattern for failing services', async () => {

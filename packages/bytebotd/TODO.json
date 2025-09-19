@@ -2896,7 +2896,7 @@
       "updated_at": "2025-09-19T06:22:13.542Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T06:23:33.140Z",
       "title": "Fix TypeScript TS18048 null safety violations",
       "description": "Systematically resolve \"possibly undefined\" errors by implementing optional chaining, nullish coalescing, type guards, and defensive programming patterns",
@@ -2910,6 +2910,28 @@
           "agentId": "dev_session_1758262998261_1_general_8906594e",
           "role": "primary",
           "assignedAt": "2025-09-19T06:23:51.059Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T06:40:08.407Z",
+      "updated_at": "2025-09-19T06:40:08.407Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T06:41:26.978Z",
+      "title": "Fix TS2532 Object Null Safety Errors in BytebotD",
+      "description": "Systematically resolve TypeScript TS2532 errors for possibly null/undefined objects using optional chaining, null guards, and defensive patterns",
+      "category": "error",
+      "id": "error_1758264086978_g6lpvj20hd9",
+      "assigned_agent": "dev_session_1758264071034_1_general_39cebf80",
+      "started_at": "2025-09-19T06:41:46.523Z",
+      "claimed_by": "dev_session_1758264071034_1_general_39cebf80",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758264071034_1_general_39cebf80",
+          "role": "primary",
+          "assignedAt": "2025-09-19T06:41:46.523Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -8015,6 +8037,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T06:23:18.262Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758264071034_1_general_39cebf80": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T06:41:11.035Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T06:41:11.035Z",
       "sessionId": null,
       "metadata": {}
     }

@@ -1360,17 +1360,17 @@ export class ParlantPerformanceValidatorService {
     // For now, simulate based on average latency
     const avgLatency = stats.averageLatency;
     if (avgLatency < 100) {
-      buckets[0].count = 80; buckets[0].percentage = 80;
-      buckets[1].count = 15; buckets[1].percentage = 15;
-      buckets[2].count = 5; buckets[2].percentage = 5;
+      if (buckets[0]) { buckets[0].count = 80; buckets[0].percentage = 80; }
+      if (buckets[1]) { buckets[1].count = 15; buckets[1].percentage = 15; }
+      if (buckets[2]) { buckets[2].count = 5; buckets[2].percentage = 5; }
     } else if (avgLatency < 500) {
-      buckets[1].count = 60; buckets[1].percentage = 60;
-      buckets[2].count = 30; buckets[2].percentage = 30;
-      buckets[3].count = 10; buckets[3].percentage = 10;
+      if (buckets[1]) { buckets[1].count = 60; buckets[1].percentage = 60; }
+      if (buckets[2]) { buckets[2].count = 30; buckets[2].percentage = 30; }
+      if (buckets[3]) { buckets[3].count = 10; buckets[3].percentage = 10; }
     } else {
-      buckets[2].count = 40; buckets[2].percentage = 40;
-      buckets[3].count = 40; buckets[3].percentage = 40;
-      buckets[4].count = 20; buckets[4].percentage = 20;
+      if (buckets[2]) { buckets[2].count = 40; buckets[2].percentage = 40; }
+      if (buckets[3]) { buckets[3].count = 40; buckets[3].percentage = 40; }
+      if (buckets[4]) { buckets[4].count = 20; buckets[4].percentage = 20; }
     }
 
     return {

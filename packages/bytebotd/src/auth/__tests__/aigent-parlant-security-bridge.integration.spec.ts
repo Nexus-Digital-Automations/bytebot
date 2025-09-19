@@ -343,7 +343,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       expect(testSession.userId).toBe('session-test-user');
       expect(testSession.state).toBe(SessionState.ACTIVE);
       expect(testSession.auditTrail).toHaveLength(1);
-      expect(testSession.auditTrail[0].action).toBe('CREATE');
+      expect(testSession.auditTrail[0]?.action).toBe('CREATE');
     });
 
     it('should validate existing sessions successfully', async () => {

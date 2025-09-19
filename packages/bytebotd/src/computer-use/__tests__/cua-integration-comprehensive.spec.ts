@@ -183,7 +183,7 @@ describe('CUA Integration Comprehensive Tests', () => {
       });
       
       expect(writeResult).toBeDefined();
-      expect(writeResult.content[0].text).toContain('successfully');
+      expect(writeResult.content[0]?.text).toContain('successfully');
       
       // Verify integration metrics
       updateIntegrationMetrics(operationId, true);
@@ -201,8 +201,8 @@ describe('CUA Integration Comprehensive Tests', () => {
         coordinates: { x: 100, y: 200 }
       });
       
-      expect(result.content[0].text).toContain('Error moving mouse');
-      expect(result.content[0].text).toContain('MCP integration test error');
+      expect(result.content[0]?.text).toContain('Error moving mouse');
+      expect(result.content[0]?.text).toContain('MCP integration test error');
       
       updateIntegrationMetrics(operationId, false);
       expect(integrationMetrics.failedIntegrationCalls).toBeGreaterThan(0);
@@ -232,10 +232,10 @@ describe('CUA Integration Comprehensive Tests', () => {
       expect(totalTime).toBeLessThan(5000); // 5 seconds for all operations
       
       // Verify each result has expected structure
-      expect(results[0].content[0].text).toBe('mouse moved');
-      expect(results[1].content[0].text).toBe('mouse clicked');
-      expect(results[2].content[0].text).toBe('text typed');
-      expect(results[3].content[0]).toHaveProperty('type', 'image');
+      expect(results[0]?.content[0]?.text).toBe('mouse moved');
+      expect(results[1]?.content[0]?.text).toBe('mouse clicked');
+      expect(results[2]?.content[0]?.text).toBe('text typed');
+      expect(results[3]?.content[0]).toHaveProperty('type', 'image');
     });
   });
 
@@ -440,8 +440,8 @@ describe('CUA Integration Comprehensive Tests', () => {
       
       // Verify event propagation
       expect(events).toHaveLength(2);
-      expect(events[0].eventName).toBe('computer-use.action.started');
-      expect(events[1].eventName).toBe('computer-use.action.completed');
+      expect(events[0]?.eventName).toBe('computer-use.action.started');
+      expect(events[1]?.eventName).toBe('computer-use.action.completed');
       expect(events.every(e => e.correlationId === operationId)).toBe(true);
       
       updateIntegrationMetrics(operationId, true);
@@ -477,7 +477,7 @@ describe('CUA Integration Comprehensive Tests', () => {
       context.eventEmitter.emit('test.successful.event', { operationId });
       
       expect(successfulEvents).toHaveLength(1);
-      expect(successfulEvents[0].correlationId).toBe(operationId);
+      expect(successfulEvents[0]?.correlationId).toBe(operationId);
       
       updateIntegrationMetrics(operationId, true);
     });
@@ -585,7 +585,7 @@ describe('CUA Integration Comprehensive Tests', () => {
       expect(directResults).toHaveLength(operationCount);
       
       mcpResults.forEach(result => {
-        expect(result.content[0].text).toBe('mouse moved');
+        expect(result.content[0]?.text).toBe('mouse moved');
       });
       
       // Performance benchmarks
