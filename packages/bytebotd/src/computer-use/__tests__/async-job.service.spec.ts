@@ -210,7 +210,7 @@ describe('AsyncJobService', () => {
     });
 
     it('should submit job with custom options', async () => {
-      const result = await service.submitAction(mockComputerAction, userId, mockOptions);
+      const result = await service.submitAction(mockComputerAction, mockOptions);
 
       expect(result).toMatchObject({
         jobId: 'mock-uuid-12345',
@@ -274,7 +274,7 @@ describe('AsyncJobService', () => {
       // Allow time for job processing
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       expect(status.status).toMatch(/queued|running|completed/);
       expect(status.progress).toBeGreaterThanOrEqual(0);
@@ -287,7 +287,7 @@ describe('AsyncJobService', () => {
       cacheService.set.mockResolvedValue(undefined);
 
       // Submit job with caching enabled
-      const submission = await service.submitAction(mockComputerAction, userId, {
+      const submission = await service.submitAction(mockComputerAction, {
         useCache: true,
       });
 
@@ -301,7 +301,7 @@ describe('AsyncJobService', () => {
       const cachedResult = { ...mockScreenshotResult, cached: true };
       cacheService.get.mockResolvedValue(cachedResult);
 
-      const submission = await service.submitAction(mockComputerAction, userId, {
+      const submission = await service.submitAction(mockComputerAction, {
         useCache: true,
       });
 
@@ -319,7 +319,7 @@ describe('AsyncJobService', () => {
       // Allow time for job processing
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       // Job should eventually be marked as failed
       expect(['queued', 'running', 'failed']).toContain(status.status);
@@ -333,14 +333,14 @@ describe('AsyncJobService', () => {
         () => new Promise(resolve => setTimeout(() => resolve(mockScreenshotResult), 50000))
       );
 
-      const submission = await service.submitAction(mockComputerAction, userId, {
+      const submission = await service.submitAction(mockComputerAction, {
         timeout: 100, // Very short timeout
       });
 
       // Allow time for timeout to occur
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const status = await service.getJobStatus(submission.jobId, userId);
+      const status = await service.getJobStatus(submission.jobId);
 
       // Job should be timed out or cancelled
       expect(['failed', 'cancelled', 'timeout']).toContain(status.status);
@@ -357,7 +357,7 @@ describe('AsyncJobService', () => {
     });
 
     it('should get job status successfully', async () => {
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       expect(status).toMatchObject({
         jobId: jobId,
@@ -376,7 +376,7 @@ describe('AsyncJobService', () => {
       const invalidJobId = 'non-existent-job';
 
       await expect(
-        service.getJobStatus(invalidJobId, userId)
+        service.getJobStatus(invalidJobId)
       ).rejects.toThrow('Job not found');
     });
 
@@ -384,7 +384,7 @@ describe('AsyncJobService', () => {
       const unauthorizedUserId = 'other-user-456';
 
       await expect(
-        service.getJobStatus(jobId, unauthorizedUserId)
+        service.getJobStatus(jobId)
       ).rejects.toThrow('Unauthorized');
     });
 
@@ -398,7 +398,7 @@ describe('AsyncJobService', () => {
       // Allow time for execution
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       expect(status.progress).toBeGreaterThanOrEqual(0);
       expect(status.progress).toBeLessThanOrEqual(100);
@@ -419,7 +419,7 @@ describe('AsyncJobService', () => {
       // Allow time for job completion
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const result = await service.getJobResult(jobId, userId);
+      const result = await service.getJobResult(jobId);
 
       expect(result).toMatchObject({
         jobId: jobId,
@@ -437,7 +437,7 @@ describe('AsyncJobService', () => {
     it('should handle result requests for pending jobs', async () => {
       // Immediately request result before completion
       await expect(
-        service.getJobResult(jobId, userId)
+        service.getJobResult(jobId)
       ).rejects.toThrow('Job not completed');
     });
 
@@ -448,7 +448,7 @@ describe('AsyncJobService', () => {
       // Allow time for job failure
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const result = await service.getJobResult(jobId, userId);
+      const result = await service.getJobResult(jobId);
 
       expect(result.status).toBe('failed');
       expect(result.result).toBeUndefined();
@@ -458,7 +458,7 @@ describe('AsyncJobService', () => {
       const unauthorizedUserId = 'other-user-456';
 
       await expect(
-        service.getJobResult(jobId, unauthorizedUserId)
+        service.getJobResult(jobId)
       ).rejects.toThrow('Unauthorized');
     });
 
@@ -466,7 +466,7 @@ describe('AsyncJobService', () => {
       const invalidJobId = 'non-existent-job';
 
       await expect(
-        service.getJobResult(invalidJobId, userId)
+        service.getJobResult(invalidJobId)
       ).rejects.toThrow('Job not found');
     });
   });
@@ -481,12 +481,12 @@ describe('AsyncJobService', () => {
     });
 
     it('should cancel queued job successfully', async () => {
-      const result = await service.cancelJob(jobId, userId);
+      const result = await service.cancelJob(jobId);
 
       expect(result).toBe(true);
       expect(metricsService.recordJobCancellation).toHaveBeenCalledWith(jobId);
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
       expect(status.status).toBe('cancelled');
     });
 
@@ -499,7 +499,7 @@ describe('AsyncJobService', () => {
       // Allow job to start
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      const result = await service.cancelJob(jobId, userId);
+      const result = await service.cancelJob(jobId);
 
       expect(result).toBe(true);
       expect(metricsService.recordJobCancellation).toHaveBeenCalledWith(jobId);
@@ -511,7 +511,7 @@ describe('AsyncJobService', () => {
       // Allow job to complete
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const result = await service.cancelJob(jobId, userId);
+      const result = await service.cancelJob(jobId);
 
       expect(result).toBe(false); // Cannot cancel completed jobs
     });
@@ -520,7 +520,7 @@ describe('AsyncJobService', () => {
       const unauthorizedUserId = 'other-user-456';
 
       await expect(
-        service.cancelJob(jobId, unauthorizedUserId)
+        service.cancelJob(jobId)
       ).rejects.toThrow('Unauthorized');
     });
 
@@ -528,7 +528,7 @@ describe('AsyncJobService', () => {
       const invalidJobId = 'non-existent-job';
 
       await expect(
-        service.cancelJob(invalidJobId, userId)
+        service.cancelJob(invalidJobId)
       ).rejects.toThrow('Job not found');
     });
   });
@@ -538,15 +538,15 @@ describe('AsyncJobService', () => {
 
     it('should handle priority-based job ordering', async () => {
       // Submit jobs with different priorities
-      const lowPriorityJob = await service.submitAction(mockComputerAction, userId, {
+      const lowPriorityJob = await service.submitAction(mockComputerAction, {
         priority: 'low',
       });
 
-      const highPriorityJob = await service.submitAction(mockMoveAction, userId, {
+      const highPriorityJob = await service.submitAction(mockMoveAction, {
         priority: 'high',
       });
 
-      const normalPriorityJob = await service.submitAction(mockClickAction, userId, {
+      const normalPriorityJob = await service.submitAction(mockClickAction, {
         priority: 'normal',
       });
 
@@ -565,9 +565,9 @@ describe('AsyncJobService', () => {
       });
 
       // Submit multiple jobs with different priorities
-      await service.submitAction(mockComputerAction, userId, { priority: 'low' });
-      await service.submitAction(mockMoveAction, userId, { priority: 'high' });
-      await service.submitAction(mockClickAction, userId, { priority: 'normal' });
+      await service.submitAction(mockComputerAction, { priority: 'low' });
+      await service.submitAction(mockMoveAction, { priority: 'high' });
+      await service.submitAction(mockClickAction, { priority: 'normal' });
 
       // Allow time for processing
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -594,7 +594,7 @@ describe('AsyncJobService', () => {
       cacheService.get.mockRejectedValue(new Error('Cache unavailable'));
       cacheService.set.mockRejectedValue(new Error('Cache unavailable'));
 
-      const submission = await service.submitAction(mockComputerAction, userId, {
+      const submission = await service.submitAction(mockComputerAction, {
         useCache: true,
       });
 
@@ -661,7 +661,7 @@ describe('AsyncJobService', () => {
       // Allow time for completion
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const result = await service.getJobResult(submission.jobId, userId);
+      const result = await service.getJobResult(submission.jobId);
 
       if (result.status === 'completed') {
         expect(result.duration).toBeGreaterThan(0);

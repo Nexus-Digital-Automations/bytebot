@@ -62,7 +62,7 @@ const createMockValidationResponse = (
   conversationId,
   reason,
   validationTimestamp: new Date(),
-  reasoning: reason || (approved ? 'Operation approved' : 'Operation denied'),
+  reasoning: reason ?? (approved ? 'Operation approved' : 'Operation denied'),
   confidence: 0.95,
   ...options,
 });

@@ -24,6 +24,7 @@ declare global {
     createTestBuffer: (content: string) => Buffer;
     createMockDate: (offset?: number) => Date;
     waitFor: (condition: () => boolean, timeout?: number) => Promise<void>;
+    generateTestId: (prefix: string) => string;
   };
 }
 
@@ -227,6 +228,13 @@ global.testUtils = {
     if (!condition()) {
       throw new Error(`Timeout waiting for condition after ${timeout}ms`);
     }
+  },
+
+  // Utility to generate unique test IDs
+  generateTestId: (prefix: string): string => {
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 9);
+    return `${prefix}_${timestamp}${randomSuffix}`;
   },
 };
 

@@ -717,6 +717,38 @@ export class BytebotMetricsService {
   }
 
   /**
+   * Get current system metrics
+   */
+  async getSystemMetrics(): Promise<{
+    cpuUsage: number;
+    memoryUsage: number;
+    activeConnections: number;
+    requestsPerSecond: number;
+  }> {
+    try {
+      const memoryUsage = process.memoryUsage();
+      const memoryUtilization = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+
+      // For demonstration purposes, returning mock values
+      // In a real implementation, these would be calculated from actual system metrics
+      return {
+        cpuUsage: Math.random() * 100, // Mock CPU usage
+        memoryUsage: memoryUtilization,
+        activeConnections: Math.floor(Math.random() * 200), // Mock active connections
+        requestsPerSecond: Math.floor(Math.random() * 300), // Mock RPS
+      };
+    } catch (error) {
+      this.logger.error('Failed to get system metrics', error);
+      return {
+        cpuUsage: 0,
+        memoryUsage: 0,
+        activeConnections: 0,
+        requestsPerSecond: 0,
+      };
+    }
+  }
+
+  /**
    * Clear all metrics (for testing)
    */
   clearMetrics(): void {

@@ -181,6 +181,12 @@ export class JobResultResponseDto {
   })
   executionTimeMs: number = 0;
 
+  @ApiProperty({
+    description: 'Job execution duration in milliseconds',
+    example: 1250,
+  })
+  duration: number = 0;
+
   @ApiPropertyOptional({
     description: 'Additional result metadata',
     example: { retryCount: 0, cacheHit: false },

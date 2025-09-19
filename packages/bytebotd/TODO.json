@@ -3045,6 +3045,34 @@
       ],
       "completed_at": "2025-09-19T07:19:03.575Z",
       "updated_at": "2025-09-19T07:19:03.575Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T07:21:39.012Z",
+      "title": "TS2339 Property Resolution - Phase 4B",
+      "description": "Systematic resolution of TS2339 property does not exist errors in BytebotD package. Focus on highest-frequency properties and core interfaces. Target: 30-50 error reduction from 163 remaining.",
+      "category": "error",
+      "id": "error_1758266499011_k83bb9wjs1"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T07:21:39.302Z",
+      "title": "Resolve TS2304 Variable Declaration Errors - Phase 4B",
+      "description": "Systematic resolution of TS2304 Cannot find name errors in BytebotD package. Target: reduce 135 errors by 25-40 through import resolution, variable naming fixes, scope corrections, and type declarations.",
+      "category": "error",
+      "id": "error_1758266499302_j26t1xj3qok",
+      "assigned_agent": "dev_session_1758266483888_1_general_66222fc1",
+      "started_at": "2025-09-19T07:21:57.539Z",
+      "claimed_by": "dev_session_1758266483888_1_general_66222fc1",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758266483888_1_general_66222fc1",
+          "role": "primary",
+          "assignedAt": "2025-09-19T07:21:57.539Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -8272,6 +8300,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T07:11:38.044Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758266483532_1_general_ba0cb22d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T07:21:23.533Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T07:21:23.533Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758266483888_1_general_66222fc1": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T07:21:23.889Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T07:21:23.889Z",
       "sessionId": null,
       "metadata": {}
     }

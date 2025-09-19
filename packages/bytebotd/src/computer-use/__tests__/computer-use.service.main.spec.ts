@@ -539,7 +539,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     });
 
     describe('Invalid Action Handling', () => {
-      it('should throw _error for unsupported action type', async () => {
+      it('should throw error for unsupported action type', async () => {
         // Arrange - Create invalid action by type assertion
         const invalidAction = {
           action: 'invalid_action',
@@ -710,7 +710,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     });
 
     describe('Cleanup and Resource Management', () => {
-      it('should release held keys on _error during trace_mouse', async () => {
+      it('should release held keys on error during trace_mouse', async () => {
         // Arrange
         const action = createTestAction<TraceMouseAction>({
           action: 'trace_mouse',
@@ -731,7 +731,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         );
       });
 
-      it('should release mouse button on _error during drag_mouse', async () => {
+      it('should release mouse button on error during drag_mouse', async () => {
         // Arrange
         const action = createTestAction<DragMouseAction>({
           action: 'drag_mouse',
@@ -803,7 +803,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       await delayPromise;
 
       // Assert
-      expect(_loggerWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay adjusted from 400000ms to 300000ms'),
       );
     });
@@ -824,7 +824,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       // Assert
       expect(result).toBeUndefined();
-      expect(_loggerWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay adjusted from -1000ms to 0ms'),
       );
     });
@@ -860,7 +860,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const error = new Error('Test error message');
 
         // Act
-        const result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
         expect(result).toBe('Test error message');
@@ -871,7 +871,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const error = 'String error message';
 
         // Act
-        const result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
         expect(result).toBe('String error message');
@@ -882,21 +882,21 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const error = { message: 'Object error message', code: 'ERR001' };
 
         // Act
-        const result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
         expect(result).toBe('Object error message');
       });
 
-      it('should handle non-_error objects', () => {
+      it('should handle non-error objects', () => {
         // Arrange
         const error = { status: 500, detail: 'Server error' };
 
         // Act
-        const result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
-        expect(result).toBe(JSON.stringify(_error));
+        expect(result).toBe(JSON.stringify(error));
       });
 
       it('should handle null and undefined', () => {
@@ -929,7 +929,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         };
 
         // Act
-        const result = ErrorHandler.extractErrorStack(_error);
+        const result = ErrorHandler.extractErrorStack(error);
 
         // Assert
         expect(result).toBe('Custom error\n    at custom.js:1:1');
@@ -977,7 +977,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         expect(result.stack).toEqual(expect.any(String));
       });
 
-      it('should handle missing original _error', () => {
+      it('should handle missing original error', () => {
         // Arrange
         const code = 'TEST_ERROR';
         const message = 'Test error message';

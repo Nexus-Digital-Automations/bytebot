@@ -263,7 +263,7 @@ describe('JobManagementService', () => {
         metadata: { source: 'test' },
       };
 
-      const jobId = await service.createJob(mockScreenshotAction, userId, options);
+      const jobId = await service.createJob(mockScreenshotAction, options);
 
       expect(jobId).toBe('mock-job-uuid-12345');
       expect(redisClient.hset).toHaveBeenCalledWith(
@@ -445,7 +445,7 @@ describe('JobManagementService', () => {
         completedAt: new Date().toISOString(),
       });
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       expect(status).toMatchObject({
         id: jobId,
@@ -467,7 +467,7 @@ describe('JobManagementService', () => {
       });
 
       await expect(
-        service.getJobStatus(jobId, userId)
+        service.getJobStatus(jobId)
       ).rejects.toThrow('Unauthorized access to job');
     });
 
@@ -483,7 +483,7 @@ describe('JobManagementService', () => {
       redisClient.hgetall.mockRejectedValue(new Error('Redis read failed'));
 
       await expect(
-        service.getJobStatus(jobId, userId)
+        service.getJobStatus(jobId)
       ).rejects.toThrow('Failed to retrieve job status');
     });
 
@@ -508,7 +508,7 @@ describe('JobManagementService', () => {
       };
       mockCrypto.createDecipher.mockReturnValue(mockDecipher);
 
-      const status = await service.getJobStatus(jobId, userId);
+      const status = await service.getJobStatus(jobId);
 
       expect(status).toBeDefined();
       // Verify decryption was attempted

@@ -128,7 +128,7 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should handle mouse movement _error', async () => {
+      it('should handle mouse movement error', async () => {
         const action: MoveMouseAction = {
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -199,7 +199,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should handle empty path _error', async () => {
+      it('should handle empty path error', async () => {
         const action: TraceMouseAction = {
           action: 'trace_mouse',
           path: [],
@@ -210,7 +210,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should release keys on _error', async () => {
+      it('should release keys on error', async () => {
         const action: TraceMouseAction = {
           action: 'trace_mouse',
           path: [{ x: 0, y: 0 }],
@@ -277,7 +277,7 @@ describe('ComputerUseService', () => {
         expect(mockNutService.mouseClickEvent).toHaveBeenCalledTimes(10);
       });
 
-      it('should handle click with hold keys and _error cleanup', async () => {
+      it('should handle click with hold keys and error cleanup', async () => {
         const action: ClickMouseAction = {
           action: 'click_mouse',
           button: 'left',
@@ -376,7 +376,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should cleanup on drag _error', async () => {
+      it('should cleanup on drag error', async () => {
         const action: DragMouseAction = {
           action: 'drag_mouse',
           path: [{ x: 0, y: 0 }],
@@ -648,7 +648,7 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should handle cursor position _error', async () => {
+      it('should handle cursor position error', async () => {
         const action: CursorPositionAction = {
           action: 'cursor_position',
         };
@@ -769,7 +769,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should handle wmctrl timeout _error gracefully', async () => {
+      it('should handle wmctrl timeout error gracefully', async () => {
         const action: ApplicationAction = {
           action: 'application',
           application: 'firefox',
@@ -869,7 +869,7 @@ describe('ComputerUseService', () => {
         expect(result.message).toContain('Invalid base64 data');
       });
 
-      it('should cleanup temporary file on _error', async () => {
+      it('should cleanup temporary file on error', async () => {
         const testData = Buffer.from('test').toString('base64');
         const action: WriteFileAction = {
           action: 'write_file',
@@ -981,7 +981,7 @@ describe('ComputerUseService', () => {
         expect(result.message).toContain('File read failed');
       });
 
-      it('should cleanup temporary file on _error', async () => {
+      it('should cleanup temporary file on error', async () => {
         const action: ReadFileAction = {
           action: 'read_file',
           path: '/home/user/test.txt',
@@ -1000,49 +1000,49 @@ describe('ComputerUseService', () => {
 
   describe('Error Handling', () => {
     describe('ErrorHandler utility', () => {
-      it('should extract _error messages from Error objects', () => {
+      it('should extract error messages from Error objects', () => {
         const error = new Error('Test error message');
-        const message = ErrorHandler.extractErrorMessage(_error);
+        const message = ErrorHandler.extractErrorMessage(error);
         expect(message).toBe('Test error message');
       });
 
-      it('should extract _error messages from string errors', () => {
+      it('should extract error messages from string errors', () => {
         const message = ErrorHandler.extractErrorMessage('String error');
         expect(message).toBe('String error');
       });
 
-      it('should extract _error messages from objects with message property', () => {
+      it('should extract error messages from objects with message property', () => {
         const error = { message: 'Object error message' };
-        const message = ErrorHandler.extractErrorMessage(_error);
+        const message = ErrorHandler.extractErrorMessage(error);
         expect(message).toBe('Object error message');
       });
 
-      it('should handle unknown _error types', () => {
+      it('should handle unknown error types', () => {
         const error = { unknownProperty: 'value' };
-        const message = ErrorHandler.extractErrorMessage(_error);
-        expect(message).toBe(JSON.stringify(_error));
+        const message = ErrorHandler.extractErrorMessage(error);
+        expect(message).toBe(JSON.stringify(error));
       });
 
       it('should extract stack traces from Error objects', () => {
         const error = new Error('Test error');
-        const stack = ErrorHandler.extractErrorStack(_error);
+        const stack = ErrorHandler.extractErrorStack(error);
         expect(stack).toBeDefined();
         expect(stack).toContain('Error: Test error');
       });
 
       it('should extract stack traces from objects with stack property', () => {
         const error = { stack: 'Custom stack trace' };
-        const stack = ErrorHandler.extractErrorStack(_error);
+        const stack = ErrorHandler.extractErrorStack(error);
         expect(stack).toBe('Custom stack trace');
       });
 
       it('should return undefined for objects without stack', () => {
         const error = { message: 'No stack' };
-        const stack = ErrorHandler.extractErrorStack(_error);
+        const stack = ErrorHandler.extractErrorStack(error);
         expect(stack).toBeUndefined();
       });
 
-      it('should create comprehensive _error objects', () => {
+      it('should create comprehensive error objects', () => {
         const originalError = new Error('Original error');
         const error = ErrorHandler.createError(
           'TEST_ERROR',
@@ -1052,7 +1052,7 @@ describe('ComputerUseService', () => {
           originalError,
         );
 
-        expect(_error).toMatchObject({
+        expect(error).toMatchObject({
           code: 'TEST_ERROR',
           message: 'Test message',
           operationId: 'operation_123',
@@ -1063,14 +1063,14 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should create _error objects without original error', () => {
+      it('should create error objects without original error', () => {
         const error = ErrorHandler.createError(
           'SIMPLE_ERROR',
           'Simple message',
           'operation_456',
         );
 
-        expect(_error).toMatchObject({
+        expect(error).toMatchObject({
           code: 'SIMPLE_ERROR',
           message: 'Simple message',
           operationId: 'operation_456',
@@ -1082,7 +1082,7 @@ describe('ComputerUseService', () => {
       });
     });
 
-    describe('Action _error handling', () => {
+    describe('Action error handling', () => {
       it('should handle unknown action types', async () => {
         const invalidAction = {
           action: 'invalid_action',
@@ -1093,7 +1093,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should provide structured _error information', async () => {
+      it('should provide structured error information', async () => {
         const action: MoveMouseAction = {
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -1152,7 +1152,7 @@ describe('ComputerUseService', () => {
       );
     });
 
-    it('should handle file operations with comprehensive _error scenarios', async () => {
+    it('should handle file operations with comprehensive error scenarios', async () => {
       const action: WriteFileAction = {
         action: 'write_file',
         path: '/home/user/test.txt',

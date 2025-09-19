@@ -217,8 +217,7 @@ interface NavigationAction {
   requiredParams?: string[];
   
   /** Action icon */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: any;
+  icon?: typeof Directions01Icon | null;
   
   /** Keyboard shortcut */
   shortcut?: string;
@@ -1297,7 +1296,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                 role="option"
                 aria-selected={selectedSuggestionIndex === index}
               >
-                {suggestion.action?.icon && (
+                {Boolean(suggestion.action?.icon) && suggestion.action?.icon && (
                   <HugeiconsIcon
                     icon={suggestion.action.icon}
                     className="w-4 h-4 text-gray-400 flex-shrink-0"

@@ -47,8 +47,9 @@ const mockAuditService = {
 } as jest.Mocked<Partial<SecurityAuditService>>;
 
 const mockConfigService = {
-  get: jest.fn(<T = any>(key: string, defaultValue?: T): T => {
-    const configs: Record<string, any> = {
+  get: jest.fn(<T>(key: string, defaultValue?: T): T => {
+    type ConfigValue = string | number | boolean;
+    const configs: Record<string, ConfigValue> = {
       'REDIS_URL': 'redis://localhost:6379',
       'BRIDGE_SESSION_TIMEOUT_MS': 3600000,
       'BRIDGE_MAX_CONCURRENT_SESSIONS': 10000,
@@ -61,10 +62,11 @@ const mockConfigService = {
       'JWT_ISSUER': 'aigent-bytebot-system',
       'JWT_AUDIENCE': 'bytebotd-enterprise-control',
     };
-    return configs[key] ?? defaultValue;
+    return (configs[key] ?? defaultValue) as T;
   }),
-  getOrThrow: jest.fn(<T = any>(key: string): T => {
-    const configs: Record<string, any> = {
+  getOrThrow: jest.fn(<T>(key: string): T => {
+    type ConfigValue = string | number | boolean;
+    const configs: Record<string, ConfigValue> = {
       'REDIS_URL': 'redis://localhost:6379',
       'BRIDGE_SESSION_TIMEOUT_MS': 3600000,
       'BRIDGE_MAX_CONCURRENT_SESSIONS': 10000,
@@ -80,7 +82,7 @@ const mockConfigService = {
     if (!(key in configs)) {
       throw new Error(`Configuration key "${key}" not found`);
     }
-    return configs[key];
+    return configs[key] as T;
   }),
   set: jest.fn(),
   setEnvFilePaths: jest.fn(),
@@ -486,7 +488,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
 
     it('should respect emergency override disabled configuration', async () => {
       // Mock disabled emergency overrides
-      mockConfigService.get.mockImplementation(<T = any>(key: string, defaultValue?: T): T => {
+      mockConfigService.get.mockImplementation(<T>(key: string, defaultValue?: T): T => {
         if (key === 'BRIDGE_EMERGENCY_OVERRIDE_ENABLED') return false as T;
         return defaultValue as T;
       });

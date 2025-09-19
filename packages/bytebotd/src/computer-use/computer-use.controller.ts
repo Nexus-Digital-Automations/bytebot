@@ -49,6 +49,7 @@ interface ErrorWithMessage {
   message: string;
 }
 
+
 /**
  * OCR result data interface
  */
@@ -324,16 +325,16 @@ export class ComputerUseController {
       return jobResponse;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(_error);
+      const errorMessage = getErrorMessage(error);
 
       this.logger.error(
         `[${operationId}] Error submitting computer action: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(_error),
+        getErrorStack(error),
         {
           operationId,
           action: params.action,
           processingTime,
-          errorType: _error?.constructor?.name ?? 'Unknown',
+          errorType: error?.constructor?.name ?? 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -433,16 +434,16 @@ export class ComputerUseController {
       return jobStatus;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(_error);
+      const errorMessage = getErrorMessage(error);
 
       this.logger.error(
         `[${operationId}] Error retrieving job status: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(_error),
+        getErrorStack(error),
         {
           operationId,
           jobId,
           processingTime,
-          errorType: _error?.constructor?.name ?? 'Unknown',
+          errorType: error?.constructor?.name ?? 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -532,18 +533,18 @@ export class ComputerUseController {
       if (resultCopy.result && typeof resultCopy.result === 'object') {
         const result = resultCopy.result as Record<string, unknown>;
         if (
-          _result.image &&
-          typeof _result.image === 'string' &&
-          _result.image.length > 100
+          result.image &&
+          typeof result.image === 'string' &&
+          result.image.length > 100
         ) {
-          _result.image = `[base64 image data - ${_result.image.length} chars]`;
+          result.image = `[base64 image data - ${result.image.length} chars]`;
         }
         if (
-          _result.data &&
-          typeof _result.data === 'string' &&
-          _result.data.length > 100
+          result.data &&
+          typeof result.data === 'string' &&
+          result.data.length > 100
         ) {
-          _result.data = `[base64 file data - ${_result.data.length} chars]`;
+          result.data = `[base64 file data - ${result.data.length} chars]`;
         }
       }
 
@@ -564,16 +565,16 @@ export class ComputerUseController {
       return jobResult;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(_error);
+      const errorMessage = getErrorMessage(error);
 
       this.logger.error(
         `[${operationId}] Error retrieving job result: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(_error),
+        getErrorStack(error),
         {
           operationId,
           jobId,
           processingTime,
-          errorType: _error?.constructor?.name ?? 'Unknown',
+          errorType: error?.constructor?.name ?? 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -692,16 +693,16 @@ export class ComputerUseController {
       };
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(_error);
+      const errorMessage = getErrorMessage(error);
 
       this.logger.error(
         `[${operationId}] Error cancelling job: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(_error),
+        getErrorStack(error),
         {
           operationId,
           jobId,
           processingTime,
-          errorType: _error?.constructor?.name ?? 'Unknown',
+          errorType: error?.constructor?.name ?? 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -812,11 +813,11 @@ export class ComputerUseController {
         },
       );
 
-      return _result;
+      return result;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(_error);
-      const errorStack = getErrorStack(_error);
+      const errorMessage = getErrorMessage(error);
+      const errorStack = getErrorStack(error);
 
       // Log the error with comprehensive context for debugging
       this.logger.error(
@@ -826,7 +827,7 @@ export class ComputerUseController {
           operationId,
           action: params.action,
           processingTime,
-          errorType: _error?.constructor?.name ?? 'Unknown',
+          errorType: error?.constructor?.name ?? 'Unknown',
         },
       );
 
@@ -836,5 +837,49 @@ export class ComputerUseController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * Execute computer action (legacy method for backward compatibility)
+   * @deprecated Use action() method instead
+   */
+  @Post('execute')
+  @ApiOperation({
+    summary: 'Execute computer action (legacy)',
+    description: 'Legacy endpoint for executing computer actions. Use /action instead.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @UsePipes(new ComputerActionValidationPipe(), SecuritySanitizationPipes)
+  @UseInterceptors(LoggingInterceptor)
+  @ForVersion(SUPPORTED_API_VERSIONS)
+  async executeAction(
+    @Body() params: ComputerActionDto,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<ComputerActionResponse> {
+    return this.action(params, user);
+  }
+
+  /**
+   * Capture screenshot (convenience method)
+   */
+  @Post('screenshot')
+  @ApiOperation({
+    summary: 'Capture screenshot',
+    description: 'Convenience endpoint for capturing screenshots',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @UseInterceptors(LoggingInterceptor)
+  @ForVersion(SUPPORTED_API_VERSIONS)
+  async captureScreenshot(
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<ComputerActionResponse> {
+    const screenshotAction: ComputerActionDto = {
+      action: 'screenshot',
+    };
+    return this.action(screenshotAction, user);
   }
 }

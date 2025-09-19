@@ -16,8 +16,7 @@ interface TaskItemProps {
 }
 
 interface StatusIconConfig {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: any;
+  icon?: typeof AlertCircleIcon | typeof CancelCircleIcon | typeof Tick02Icon;
   color?: string;
   useLoader?: boolean;
 }
@@ -84,9 +83,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
       );
     }
 
+    if (icon === undefined || icon === null) {
+      return null;
+    }
+
     return (
       <div className="flex items-center justify-center">
-        <HugeiconsIcon icon={icon} className={`h-5 w-5 ${color}`} />
+        <HugeiconsIcon icon={icon} className={`h-5 w-5 ${color ?? ''}`} />
       </div>
     );
   };
