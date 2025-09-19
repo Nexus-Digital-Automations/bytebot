@@ -485,7 +485,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
           userId: metadata.userId || "anonymous",
           roles: ["api_user"],
           sessionId:
-            ((req as unknown as { sessionID?: string }).sessionID) ||
+            (req as unknown as { sessionID?: string }).sessionID ||
             `universal_session_${Date.now()}`,
           ipAddress: metadata.ipAddress,
           metadata: {
@@ -637,7 +637,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
    */
   private sanitizeBody(body: unknown): unknown {
     if (!body) return undefined;
-    if (typeof body !== 'object' || Array.isArray(body)) return body;
+    if (typeof body !== "object" || Array.isArray(body)) return body;
 
     // Remove sensitive fields
     const sensitiveFields = [
