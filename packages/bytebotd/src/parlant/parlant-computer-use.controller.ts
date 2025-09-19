@@ -70,7 +70,7 @@ import { ComputerAction } from '@bytebot/shared';
  */
 export class ParlantComputerActionDto {
   /** Base computer action type */
-  action: string;
+  action!: string;
   
   /** Action-specific properties - will vary based on action type */
   [key: string]: unknown;
@@ -104,19 +104,19 @@ export class ParlantComputerActionDto {
  */
 export class ParlantValidationResponseDto {
   /** Whether the action was approved */
-  approved: boolean;
+  approved!: boolean;
 
   /** Conversation ID for audit trail */
-  conversationId: string;
+  conversationId!: string;
 
   /** Validation timestamp */
-  validationTimestamp: Date;
+  validationTimestamp!: Date;
 
   /** Human-readable reasoning for the decision */
-  reasoning: string;
+  reasoning!: string;
 
   /** Confidence score for the validation */
-  confidence: number;
+  confidence!: number;
 
   /** Suggested alternatives if denied */
   suggestedAlternatives?: string[];
@@ -135,20 +135,20 @@ export class ParlantValidationResponseDto {
  */
 export class ParlantComputerActionResultDto {
   /** Action execution result */
-  result: unknown;
+  result!: unknown;
 
   /** Validation details */
-  validation: ParlantValidationResponseDto;
+  validation!: ParlantValidationResponseDto;
 
   /** Performance metrics */
-  performance: {
+  performance!: {
     validationTimeMs: number;
     executionTimeMs: number;
     totalTimeMs: number;
   };
 
   /** Audit information */
-  audit: {
+  audit!: {
     operationId: string;
     userId: string;
     timestamp: Date;
@@ -162,10 +162,10 @@ export class ParlantComputerActionResultDto {
  */
 export class ParlantSystemStatusDto {
   /** Whether Parlant validation is enabled */
-  enabled: boolean;
+  enabled!: boolean;
 
   /** Current system status */
-  status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
+  status!: 'HEALTHY' | 'DEGRADED' | 'FAILED';
 
   /** Performance metrics */
   metrics!: {
@@ -178,14 +178,14 @@ export class ParlantSystemStatusDto {
   };
 
   /** System health indicators */
-  health: {
+  health!: {
     validationService: 'healthy' | 'degraded' | 'failed';
     cacheService: 'healthy' | 'degraded' | 'failed';
     auditService: 'healthy' | 'degraded' | 'failed';
   };
 
   /** Last health check timestamp */
-  lastHealthCheck: Date;
+  lastHealthCheck!: Date;
 }
 
 // ===== PARLANT-ENHANCED CONTROLLER =====

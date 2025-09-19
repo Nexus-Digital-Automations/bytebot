@@ -63,8 +63,8 @@ import { LoggingInterceptor } from '../../common/interceptors/logging.intercepto
  * Diagnostic request DTO
  */
 export class DiagnosticRequestDto {
-  diagnosticType: DiagnosticType;
-  scope: DiagnosticScope;
+  diagnosticType!: DiagnosticType;
+  scope!: DiagnosticScope;
   includePerformanceAnalysis?: boolean = true;
   includeResourceUsage?: boolean = true;
   includeNetworkDiagnostics?: boolean = false;
@@ -80,38 +80,38 @@ export class DiagnosticRequestDto {
  * Quick health check response DTO
  */
 export class QuickHealthResponseDto {
-  status: DiagnosticStatus;
-  healthScore: number;
-  timestamp: Date;
-  componentCount: number;
-  issuesFound: number;
-  criticalIssues: number;
-  uptime: number;
-  responseTime: number;
+  status!: DiagnosticStatus;
+  healthScore!: number;
+  timestamp!: Date;
+  componentCount!: number;
+  issuesFound!: number;
+  criticalIssues!: number;
+  uptime!: number;
+  responseTime!: number;
 }
 
 /**
  * Component health summary DTO
  */
 export class ComponentHealthSummaryDto {
-  componentName: string;
-  status: DiagnosticStatus;
-  healthScore: number;
-  responseTime: number;
-  uptime: number;
-  errorRate: number;
-  lastCheck: Date;
+  componentName!: string;
+  status!: DiagnosticStatus;
+  healthScore!: number;
+  responseTime!: number;
+  uptime!: number;
+  errorRate!: number;
+  lastCheck!: Date;
 }
 
 /**
  * System metrics overview DTO
  */
 export class SystemMetricsDto {
-  cpu: { usage: number; status: string };
-  memory: { usage: number; status: string };
-  disk: { usage: number; status: string };
-  network: { usage: number; status: string };
-  performance: {
+  cpu!: { usage: number; status: string };
+  memory!: { usage: number; status: string };
+  disk!: { usage: number; status: string };
+  network!: { usage: number; status: string };
+  performance!: {
     averageResponseTime: number;
     throughput: number;
     errorRate: number;
@@ -123,27 +123,27 @@ export class SystemMetricsDto {
  * Issue summary DTO
  */
 export class IssueSummaryDto {
-  id: string;
-  type: string;
-  severity: IssueSeverity;
-  title: string;
-  affectedComponents: string[];
-  businessImpact: string;
-  urgency: string;
-  estimatedResolution: Date;
+  id!: string;
+  type!: string;
+  severity!: IssueSeverity;
+  title!: string;
+  affectedComponents!: string[];
+  businessImpact!: string;
+  urgency!: string;
+  estimatedResolution!: Date;
 }
 
 /**
  * Recommendation summary DTO
  */
 export class RecommendationSummaryDto {
-  id: string;
-  type: RecommendationType;
-  title: string;
-  priority: string;
-  effort: string;
-  timeframe: string;
-  expectedBenefit: number;
+  id!: string;
+  type!: RecommendationType;
+  title!: string;
+  priority!: string;
+  effort!: string;
+  timeframe!: string;
+  expectedBenefit!: number;
 }
 
 // ===== MAIN CONTROLLER =====

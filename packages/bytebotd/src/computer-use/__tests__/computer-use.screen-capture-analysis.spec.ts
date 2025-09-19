@@ -168,7 +168,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
   describe('Basic Screenshot Capture', () => {
     it('should capture full screen screenshot successfully', async () => {
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -191,7 +191,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(jpegResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -209,7 +209,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(lowQualityResult);
+      nutService.screenshot.mockResolvedValue(mockSmallScreenshotData);
 
       const result = await service.screenshot();
 
@@ -253,7 +253,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       };
 
       nutService.getDisplayInfo.mockResolvedValue(multiMonitorResult.metadata.displays);
-      nutService.screenshot.mockResolvedValue(multiMonitorResult);
+      nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
       const result = await service.screenshot();
 
@@ -272,7 +272,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(singleMonitorResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -290,7 +290,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
           { id: 'display2', x: 1920, y: 0, width: 1920, height: 1080, primary: false },
         ]);
 
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result1 = await service.screenshot();
       const result2 = await service.screenshot();
@@ -312,7 +312,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(highDpiResult);
+      nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
       const result = await service.screenshot();
 
@@ -335,7 +335,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
     it('should extract metadata from screenshot images', async () => {
       mockSharpInstance.toBuffer.mockResolvedValue(mockScreenshotData);
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -361,7 +361,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       };
 
       mockSharpInstance.toBuffer.mockResolvedValue(mockSmallScreenshotData);
-      nutService.screenshot.mockResolvedValue(largeScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
       const result = await service.screenshot();
 
@@ -384,7 +384,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       mockSharpInstance.resize.mockReturnThis();
       mockSharpInstance.toBuffer.mockResolvedValue(mockSmallScreenshotData);
-      nutService.screenshot.mockResolvedValue(resizedResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -406,7 +406,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       mockSharpInstance.webp.mockReturnThis();
       mockSharpInstance.toBuffer.mockResolvedValue(mockSmallScreenshotData);
-      nutService.screenshot.mockResolvedValue(webpResult);
+      nutService.screenshot.mockResolvedValue(mockSmallScreenshotData);
 
       const result = await service.screenshot();
 
@@ -436,7 +436,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         space: 'srgb',
       });
 
-      nutService.screenshot.mockResolvedValue(colorAnalysisResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -457,7 +457,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(largeScreenshot);
+      nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
       const startTime = Date.now();
       const result = await service.screenshot();
@@ -469,7 +469,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
     });
 
     it('should implement memory management for multiple screenshots', async () => {
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       // Take multiple screenshots rapidly
       const screenshots = await Promise.all([
@@ -519,7 +519,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(optimizedResult);
+      nutService.screenshot.mockResolvedValue(mockSmallScreenshotData);
 
       const result = await service.screenshot();
 
@@ -547,7 +547,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
     it('should handle file system errors during save', async () => {
       (fs.writeFile as jest.Mock).mockRejectedValue(new Error('Disk full'));
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       // Should still return screenshot data even if file save fails
       const result = await service.screenshot();
@@ -575,7 +575,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         error: 'Corrupted screenshot data',
       };
 
-      nutService.screenshot.mockResolvedValue(corruptedResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -586,7 +586,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
   describe('Real-time Monitoring and Analysis', () => {
     it('should support continuous screenshot monitoring', async () => {
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const screenshots = [];
       for (let i = 0; i < 5; i++) {
@@ -641,7 +641,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(analysisResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -666,7 +666,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(performanceResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -679,7 +679,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
   describe('Storage and Cleanup', () => {
     it('should clean up temporary screenshot files', async () => {
       (fs.unlink as jest.Mock).mockResolvedValue(undefined);
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -699,7 +699,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         },
       };
 
-      nutService.screenshot.mockResolvedValue(oversizedResult);
+      nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
       const result = await service.screenshot();
 
@@ -709,7 +709,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
     it('should rotate old screenshot files', async () => {
       (fs.stat as jest.Mock).mockResolvedValue({ size: 1024 * 1024 });
-      nutService.screenshot.mockResolvedValue(mockBasicScreenshotResult);
+      nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 

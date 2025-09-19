@@ -251,9 +251,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.move.mockResolvedValue(undefined);
         nutService.moveMouse.mockResolvedValue(undefined);
 
-        await nutService.moveMouse(moveAction);
+        await nutService.moveMouse(moveAction.coordinates);
 
-        expect(nutService.moveMouse).toHaveBeenCalledWith(moveAction);
+        expect(nutService.moveMouse).toHaveBeenCalledWith(moveAction.coordinates);
         expect(nutService.moveMouse).toHaveBeenCalledTimes(1);
       });
 
@@ -269,9 +269,9 @@ describe('Computer Use NUT Integration', () => {
         (straightTo as jest.Mock).mockResolvedValue(undefined);
         nutService.moveMouse.mockResolvedValue(undefined);
 
-        await nutService.moveMouse(smoothMoveAction);
+        await nutService.moveMouse(smoothMoveAction.coordinates);
 
-        expect(nutService.moveMouse).toHaveBeenCalledWith(smoothMoveAction);
+        expect(nutService.moveMouse).toHaveBeenCalledWith(smoothMoveAction.coordinates);
       });
 
       it('should get current mouse position via NUT', async () => {
@@ -287,7 +287,7 @@ describe('Computer Use NUT Integration', () => {
         mouse.move.mockRejectedValue(new Error('Mouse movement failed'));
         nutService.moveMouse.mockRejectedValue(new Error('Mouse movement failed'));
 
-        await expect(nutService.moveMouse(moveAction)).rejects.toThrow('Mouse movement failed');
+        await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Mouse movement failed');
       });
     });
 
@@ -303,9 +303,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.leftClick.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
-        await nutService.clickMouse(clickAction);
+        await nutService.clickMouse(clickAction.button);
 
-        expect(nutService.clickMouse).toHaveBeenCalledWith(clickAction);
+        expect(nutService.clickMouse).toHaveBeenCalledWith(clickAction.button);
       });
 
       it('should handle right click operations', async () => {
@@ -317,9 +317,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.rightClick.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
-        await nutService.clickMouse(rightClickAction);
+        await nutService.clickMouse(rightClickAction.button);
 
-        expect(nutService.clickMouse).toHaveBeenCalledWith(rightClickAction);
+        expect(nutService.clickMouse).toHaveBeenCalledWith(rightClickAction.button);
       });
 
       it('should handle double click operations', async () => {
@@ -331,9 +331,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.doubleClick.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
-        await nutService.clickMouse(doubleClickAction);
+        await nutService.clickMouse(doubleClickAction.button);
 
-        expect(nutService.clickMouse).toHaveBeenCalledWith(doubleClickAction);
+        expect(nutService.clickMouse).toHaveBeenCalledWith(doubleClickAction.button);
       });
 
       it('should handle click with specific button types', async () => {
@@ -346,9 +346,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.releaseButton.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
-        await nutService.clickMouse(middleClickAction);
+        await nutService.clickMouse(middleClickAction.button);
 
-        expect(nutService.clickMouse).toHaveBeenCalledWith(middleClickAction);
+        expect(nutService.clickMouse).toHaveBeenCalledWith(middleClickAction.button);
       });
     });
 
@@ -411,9 +411,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.scrollDown.mockResolvedValue(undefined);
         nutService.scroll.mockResolvedValue(undefined);
 
-        await nutService.scroll(scrollAction);
+        await nutService.scroll(scrollAction.direction, scrollAction.amount);
 
-        expect(nutService.scroll).toHaveBeenCalledWith(scrollAction);
+        expect(nutService.scroll).toHaveBeenCalledWith(scrollAction.direction, scrollAction.amount);
       });
 
       it('should integrate with NUT scroll up', async () => {
@@ -425,9 +425,9 @@ describe('Computer Use NUT Integration', () => {
         mouse.scrollUp.mockResolvedValue(undefined);
         nutService.scroll.mockResolvedValue(undefined);
 
-        await nutService.scroll(scrollUpAction);
+        await nutService.scroll(scrollUpAction.direction, scrollUpAction.amount);
 
-        expect(nutService.scroll).toHaveBeenCalledWith(scrollUpAction);
+        expect(nutService.scroll).toHaveBeenCalledWith(scrollUpAction.direction, scrollUpAction.amount);
       });
 
       it('should handle horizontal scrolling', async () => {
@@ -438,9 +438,9 @@ describe('Computer Use NUT Integration', () => {
 
         nutService.scroll.mockResolvedValue(undefined);
 
-        await nutService.scroll(horizontalScrollAction);
+        await nutService.scroll(horizontalScrollAction.direction, horizontalScrollAction.amount);
 
-        expect(nutService.scroll).toHaveBeenCalledWith(horizontalScrollAction);
+        expect(nutService.scroll).toHaveBeenCalledWith(horizontalScrollAction.direction, horizontalScrollAction.amount);
       });
     });
   });
@@ -456,9 +456,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
-        await nutService.typeText(typeAction);
+        await nutService.typeText(typeAction.text);
 
-        expect(nutService.typeText).toHaveBeenCalledWith(typeAction);
+        expect(nutService.typeText).toHaveBeenCalledWith(typeAction.text);
       });
 
       it('should handle special characters in text', async () => {
@@ -470,9 +470,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
-        await nutService.typeText(specialTextAction);
+        await nutService.typeText(specialTextAction.text);
 
-        expect(nutService.typeText).toHaveBeenCalledWith(specialTextAction);
+        expect(nutService.typeText).toHaveBeenCalledWith(specialTextAction.text);
       });
 
       it('should handle Unicode text input', async () => {
@@ -484,9 +484,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
-        await nutService.typeText(unicodeTextAction);
+        await nutService.typeText(unicodeTextAction.text);
 
-        expect(nutService.typeText).toHaveBeenCalledWith(unicodeTextAction);
+        expect(nutService.typeText).toHaveBeenCalledWith(unicodeTextAction.text);
       });
 
       it('should handle typing with custom delay', async () => {
@@ -499,9 +499,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
-        await nutService.typeText(delayedTypeAction);
+        await nutService.typeText(delayedTypeAction.text, delayedTypeAction.delay);
 
-        expect(nutService.typeText).toHaveBeenCalledWith(delayedTypeAction);
+        expect(nutService.typeText).toHaveBeenCalledWith(delayedTypeAction.text, delayedTypeAction.delay);
       });
     });
 
@@ -516,9 +516,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
-        await nutService.pressKeys(keyAction);
+        await nutService.pressKeys(keyAction.keys);
 
-        expect(nutService.pressKeys).toHaveBeenCalledWith(keyAction);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(keyAction.keys);
       });
 
       it('should handle function keys', async () => {
@@ -531,9 +531,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
-        await nutService.pressKeys(functionKeyAction);
+        await nutService.pressKeys(functionKeyAction.keys);
 
-        expect(nutService.pressKeys).toHaveBeenCalledWith(functionKeyAction);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(functionKeyAction.keys);
       });
 
       it('should handle arrow keys', async () => {
@@ -546,9 +546,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
-        await nutService.pressKeys(arrowKeyAction);
+        await nutService.pressKeys(arrowKeyAction.keys);
 
-        expect(nutService.pressKeys).toHaveBeenCalledWith(arrowKeyAction);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(arrowKeyAction.keys);
       });
 
       it('should handle complex key combinations', async () => {
@@ -561,9 +561,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
-        await nutService.pressKeys(complexKeyAction);
+        await nutService.pressKeys(complexKeyAction.keys);
 
-        expect(nutService.pressKeys).toHaveBeenCalledWith(complexKeyAction);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(complexKeyAction.keys);
       });
 
       it('should handle key sequences with timing', async () => {
@@ -578,9 +578,9 @@ describe('Computer Use NUT Integration', () => {
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
-        await nutService.pressKeys(sequenceAction);
+        await nutService.pressKeys(sequenceAction.keys);
 
-        expect(nutService.pressKeys).toHaveBeenCalledWith(sequenceAction);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(sequenceAction.keys);
       });
     });
   });
@@ -738,7 +738,7 @@ describe('Computer Use NUT Integration', () => {
         coordinates: mockCoordinates,
       };
 
-      await expect(nutService.moveMouse(moveAction)).rejects.toThrow('Native automation failed');
+      await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Native automation failed');
     });
 
     it('should handle permissions errors', async () => {
@@ -796,8 +796,8 @@ describe('Computer Use NUT Integration', () => {
           platform: platform as unknown,
         };
 
-        await nutService.pressKeys(keyAction);
-        expect(nutService.pressKeys).toHaveBeenCalledWith(keyAction);
+        await nutService.pressKeys(keyAction.keys);
+        expect(nutService.pressKeys).toHaveBeenCalledWith(keyAction.keys);
       }
     });
   });

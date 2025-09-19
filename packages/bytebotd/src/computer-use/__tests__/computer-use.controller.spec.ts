@@ -31,7 +31,7 @@ jest.mock('../../common/guards/rate-limit.guard');
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ComputerUseController } from '../computer-use.controller';
-import { ComputerUseService } from '../computer-use.service';
+import { ComputerUseService, ScreenshotResult, FileWriteResult } from '../computer-use.service';
 import { AsyncJobService } from '../async-job.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -69,30 +69,32 @@ const mockUser: ByteBotdUser = {
 /**
  * Mock computer action results
  */
-const mockScreenshotResult = {
+const mockScreenshotResult: ScreenshotResult = {
   operationId: 'screenshot_123',
   success: true,
-  timestamp: new Date().toISOString(),
+  image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  screenshotData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
   screenshotPath: '/tmp/screenshot_123.png',
-  screenshotData: Buffer.from('fake-image-data'),
+  fileSize: 1024,
+  quality: 95,
   metadata: {
     width: 1920,
     height: 1080,
     format: 'png',
     fileSize: 1024,
+    quality: 95,
+    captureTime: new Date(),
+    operationId: 'screenshot_123',
   },
 };
 
-const mockFileWriteResult = {
+const mockFileWriteResult: FileWriteResult = {
   operationId: 'write_123',
   success: true,
-  timestamp: new Date().toISOString(),
-  filePath: '/tmp/test.txt',
-  bytesWritten: 100,
-  metadata: {
-    encoding: 'utf8',
-    permissions: '644',
-  },
+  timestamp: new Date(),
+  message: 'File written successfully',
+  path: '/tmp/test.txt',
+  size: 100,
 };
 
 /**
