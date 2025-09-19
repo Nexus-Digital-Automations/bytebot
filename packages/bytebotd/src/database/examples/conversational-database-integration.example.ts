@@ -859,10 +859,4 @@ export class ConversationalDatabaseUsageExamples {
 })
 export class ConversationalDatabaseExampleModule {}
 
-// ===== EXPORT FOR USAGE =====
-
-export {
-  ExampleUserManagementService,
-  ConversationalDatabaseUsageExamples,
-  ConversationalDatabaseExampleModule,
-};
+// Note: Classes already exported above with export keyword

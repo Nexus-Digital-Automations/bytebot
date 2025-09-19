@@ -4504,10 +4504,58 @@
       "updated_at": "2025-09-19T00:45:40.244Z",
       "archived_at": "2025-09-19T00:45:40.248Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:40:31.696Z",
+      "title": "Fix TypeScript compilation errors in Parlant monitoring services",
+      "description": "Continue resolving TypeScript compilation errors in parlant-performance-validator.service.ts and parlant-performance-alerting.service.ts, specifically readonly property assignment issues and decorator problems",
+      "category": "error",
+      "id": "error_1758242431696_zs4kft0ts7",
+      "assigned_agent": "dev_session_1758242415200_1_general_f4facded",
+      "started_at": "2025-09-19T00:40:51.344Z",
+      "claimed_by": "dev_session_1758242415200_1_general_f4facded",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758242415200_1_general_f4facded",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:40:51.344Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:47:30.517Z",
+      "updated_at": "2025-09-19T00:47:30.517Z",
+      "archived_at": "2025-09-19T00:47:30.521Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:49:47.782Z",
+      "title": "Fix TypeScript compilation errors in Parlant Phase 1 implementation",
+      "description": "Fix critical TypeScript errors to achieve passing build: readonly property errors, JWT module types, compliance framework mapping, interface definitions, Redis configuration. Target: reduce from 486 errors to under 50.",
+      "category": "error",
+      "id": "error_1758242987782_73tce0vj39i",
+      "assigned_agent": "dev_session_1758242972501_1_general_b3bccb45",
+      "started_at": "2025-09-19T00:50:05.881Z",
+      "claimed_by": "dev_session_1758242972501_1_general_b3bccb45",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758242972501_1_general_b3bccb45",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:50:05.881Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:59:14.075Z",
+      "updated_at": "2025-09-19T00:59:14.076Z",
+      "archived_at": "2025-09-19T00:59:14.082Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 122,
+  "total_completed": 124,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-19T00:45:40.248Z"
+  "last_archived": "2025-09-19T00:59:14.082Z"
 }
