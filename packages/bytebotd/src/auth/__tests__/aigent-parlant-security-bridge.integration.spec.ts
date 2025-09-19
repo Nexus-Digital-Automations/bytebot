@@ -47,8 +47,8 @@ const mockAuditService = {
 } as jest.Mocked<Partial<SecurityAuditService>>;
 
 const mockConfigService = {
-  get: jest.fn((key: string, defaultValue?: string | number | boolean) => {
-    const configs: Record<string, string | number | boolean> = {
+  get: jest.fn(<T = any>(key: string, defaultValue?: T): T => {
+    const configs: Record<string, any> = {
       'REDIS_URL': 'redis://localhost:6379',
       'BRIDGE_SESSION_TIMEOUT_MS': 3600000,
       'BRIDGE_MAX_CONCURRENT_SESSIONS': 10000,
@@ -63,7 +63,32 @@ const mockConfigService = {
     };
     return configs[key] ?? defaultValue;
   }),
-} as jest.Mocked<ConfigService>;
+  getOrThrow: jest.fn(<T = any>(key: string): T => {
+    const configs: Record<string, any> = {
+      'REDIS_URL': 'redis://localhost:6379',
+      'BRIDGE_SESSION_TIMEOUT_MS': 3600000,
+      'BRIDGE_MAX_CONCURRENT_SESSIONS': 10000,
+      'BRIDGE_EMERGENCY_OVERRIDE_ENABLED': true,
+      'BRIDGE_AUDIT_ALL_SESSIONS': true,
+      'BRIDGE_SESSION_CLUSTERING_ENABLED': true,
+      'JWT_SECRET_HS256': 'test-secret-hs256',
+      'JWT_PUBLIC_KEY_RS256': 'test-public-key-rs256',
+      'JWT_PRIVATE_KEY_RS256': 'test-private-key-rs256',
+      'JWT_ISSUER': 'aigent-bytebot-system',
+      'JWT_AUDIENCE': 'bytebotd-enterprise-control',
+    };
+    if (!(key in configs)) {
+      throw new Error(`Configuration key "${key}" not found`);
+    }
+    return configs[key];
+  }),
+  set: jest.fn(),
+  setEnvFilePaths: jest.fn(),
+  changes$: {
+    subscribe: jest.fn(),
+    pipe: jest.fn(),
+  },
+} as unknown as jest.Mocked<ConfigService>;
 
 describe('AIgent-Parlant Security Bridge Integration', () => {
   let securityBridge: AIgentParlantSecurityBridgeService;
@@ -461,9 +486,9 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
 
     it('should respect emergency override disabled configuration', async () => {
       // Mock disabled emergency overrides
-      mockConfigService.get.mockImplementation((key: string, defaultValue?: string | number | boolean) => {
-        if (key === 'BRIDGE_EMERGENCY_OVERRIDE_ENABLED') return false;
-        return defaultValue;
+      mockConfigService.get.mockImplementation(<T = any>(key: string, defaultValue?: T): T => {
+        if (key === 'BRIDGE_EMERGENCY_OVERRIDE_ENABLED') return false as T;
+        return defaultValue as T;
       });
 
       // Recreate service with disabled overrides
