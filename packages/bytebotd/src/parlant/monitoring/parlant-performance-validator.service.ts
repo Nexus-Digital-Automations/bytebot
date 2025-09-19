@@ -34,7 +34,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
+// Note: Using setInterval instead of Cron decorators for scheduling
 import { performance } from 'perf_hooks';
 import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';
 import { ParlantPerformanceBenchmarkService, BenchmarkResult } from '../testing/parlant-performance-benchmark.service';
@@ -122,7 +122,7 @@ export interface ActualMetrics {
     readonly current: number;
     readonly peak: number;
     readonly sustained: number;
-    readonly trend: 'INCREASING' | 'STABLE' | 'DECREASING';
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
   };
   readonly cacheHitRate: {
     readonly overall: number;
@@ -165,8 +165,8 @@ export interface LatencyDistribution {
 export interface LatencyBucket {
   readonly rangeStart: number; // ms
   readonly rangeEnd: number; // ms
-  readonly count: number;
-  readonly percentage: number;
+  count: number;
+  percentage: number;
 }
 
 /**
@@ -954,6 +954,40 @@ export class ParlantPerformanceValidatorService {
 
     // Perform initial validation
     this.performInitialValidation();
+    // Initialize scheduled validation tasks
+    this.initializeScheduledTasks();
+  }
+
+  /**
+   * Initialize scheduled validation tasks using setInterval
+   */
+  private initializeScheduledTasks(): void {
+    // Continuous validation every 5 minutes
+    setInterval(async () => {
+      try {
+        await this.performContinuousValidation();
+      } catch (error) {
+        this.logger.error('Continuous validation failed', error);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // Hourly validation
+    setInterval(async () => {
+      try {
+        await this.performHourlyValidation();
+      } catch (error) {
+        this.logger.error('Hourly validation failed', error);
+      }
+    }, 60 * 60 * 1000); // 1 hour
+
+    // Daily compliance check at midnight equivalent (every 24 hours)
+    setInterval(async () => {
+      try {
+        await this.performDailyCompliance();
+      } catch (error) {
+        this.logger.error('Daily compliance check failed', error);
+      }
+    }, 24 * 60 * 60 * 1000); // 24 hours
   }
 
   /**
@@ -1360,6 +1394,7 @@ export class ParlantPerformanceValidatorService {
     // TODO: Implement actual trend calculation based on historical data
     return 'STABLE';
   }
+
 
   private calculateCacheEfficiency(stats: ParlantPerformanceStats): number {
     // Simple efficiency calculation
@@ -2482,7 +2517,7 @@ export class ParlantPerformanceValidatorService {
 
   // ===== SCHEDULED TASKS =====
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performContinuousValidation(): Promise<void> {
     try {
       await this.performValidation({
@@ -2496,7 +2531,7 @@ export class ParlantPerformanceValidatorService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performHourlyValidation(): Promise<void> {
     try {
       await this.performValidation({
@@ -2510,7 +2545,7 @@ export class ParlantPerformanceValidatorService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performDailyCompliance(): Promise<void> {
     try {
       const result = await this.performValidation({

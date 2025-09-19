@@ -299,10 +299,10 @@ export interface NotificationEvent {
   readonly timestamp: Date;
   readonly channel: string;
   readonly target: string;
-  readonly status: 'SENT' | 'DELIVERED' | 'FAILED' | 'RATE_LIMITED';
-  readonly responseTime: number;
-  readonly errorMessage?: string;
-  readonly deliveryConfirmation?: Date;
+  status: 'SENT' | 'DELIVERED' | 'FAILED' | 'RATE_LIMITED';
+  responseTime: number;
+  errorMessage?: string;
+  deliveryConfirmation?: Date;
 }
 
 /**
@@ -408,6 +408,7 @@ export interface AlertImpactChain {
 export interface BusinessImpactAssessment {
   readonly overallImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly affectedUsers: number;
+  readonly affectedServices: string[];
   readonly affectedRevenue: number;
   readonly slaViolations: string[];
   readonly complianceRisks: string[];
@@ -1348,11 +1349,12 @@ export class ParlantPerformanceAlertingService {
   private getChannelTarget(channel: NotificationChannel): string {
     switch (channel.type) {
       case 'EMAIL':
-        return Array.isArray(channel.config.recipients)
-          ? channel.config.recipients[0]
+        const recipients = channel.config.recipients as string[] | undefined;
+        return Array.isArray(recipients)
+          ? recipients[0] || 'unknown@example.com'
           : 'unknown@example.com';
       case 'SLACK':
-        return channel.config.channel || '#alerts';
+        return (channel.config.channel as string) || '#alerts';
       default:
         return 'unknown';
     }

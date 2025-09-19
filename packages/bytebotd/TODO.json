@@ -2546,12 +2546,14 @@
       "updated_at": "2025-09-19T00:17:01.647Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-19T00:25:21.684Z",
       "title": "Implement WebSocket real-time streaming validation architecture for Parlant integration",
       "description": "Create ConversationalWebSocketBridge with session management, protocol handling, compression, heartbeat, and reconnection logic. Implement validation-request, user-confirmation, and progress-update protocols. Support 1000+ concurrent sessions with sub-50ms message delivery.",
       "category": "feature",
-      "id": "feature_1758241521684_wktfmzhwqlq"
+      "id": "feature_1758241521684_wktfmzhwqlq",
+      "completed_at": "2025-09-19T00:41:07.001Z",
+      "updated_at": "2025-09-19T00:41:07.001Z"
     },
     {
       "status": "completed",
@@ -2706,12 +2708,24 @@
       "id": "error_1758242085704_6syi233ool2"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-19T00:40:31.696Z",
       "title": "Fix TypeScript compilation errors in Parlant monitoring services",
       "description": "Continue resolving TypeScript compilation errors in parlant-performance-validator.service.ts and parlant-performance-alerting.service.ts, specifically readonly property assignment issues and decorator problems",
       "category": "error",
-      "id": "error_1758242431696_zs4kft0ts7"
+      "id": "error_1758242431696_zs4kft0ts7",
+      "assigned_agent": "dev_session_1758242415200_1_general_f4facded",
+      "started_at": "2025-09-19T00:40:51.344Z",
+      "claimed_by": "dev_session_1758242415200_1_general_f4facded",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758242415200_1_general_f4facded",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:40:51.344Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
