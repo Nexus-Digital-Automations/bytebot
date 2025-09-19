@@ -146,7 +146,12 @@ interface ComplianceValidation {
  * Test recommendations
  */
 interface TestRecommendation {
-  readonly category: 'PERFORMANCE' | 'SECURITY' | 'COMPLIANCE' | 'FUNCTIONALITY' | 'ARCHITECTURE';
+  readonly category:
+    | 'PERFORMANCE'
+    | 'SECURITY'
+    | 'COMPLIANCE'
+    | 'FUNCTIONALITY'
+    | 'ARCHITECTURE';
   readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly title: string;
   readonly description: string;
@@ -209,7 +214,8 @@ interface SuitePerformanceMetrics {
  */
 const phase1Requirements = {
   conversationalValidation: {
-    description: 'All database operations must be validated through conversational AI',
+    description:
+      'All database operations must be validated through conversational AI',
     testCriteria: [
       'CRUD operations validated',
       'Transaction operations validated',
@@ -223,7 +229,8 @@ const phase1Requirements = {
     },
   },
   securityClassification: {
-    description: 'Model-specific security classifications with appropriate validation levels',
+    description:
+      'Model-specific security classifications with appropriate validation levels',
     testCriteria: [
       'PUBLIC data minimal validation',
       'INTERNAL data standard validation',
@@ -262,7 +269,15 @@ const comprehensiveTestUserContexts: Record<string, ParlantUserContext> = {
   SYSTEM_ADMIN: {
     userId: 'system_admin_comprehensive',
     role: 'system_administrator',
-    permissions: ['read', 'write', 'delete', 'admin', 'migrate', 'backup', 'audit'],
+    permissions: [
+      'read',
+      'write',
+      'delete',
+      'admin',
+      'migrate',
+      'backup',
+      'audit',
+    ],
     sessionId: 'session_system_admin_comprehensive',
     timestamp: new Date(),
   },
@@ -308,9 +323,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
   // Comprehensive test results
   let comprehensiveTestSummary: ComprehensiveTestSummary;
-  let testSuiteResults: TestSuiteResult[] = [];
-  let performanceMetrics: any[] = [];
-  let auditTrailValidation: DatabaseParlantAuditEntry[] = [];
+  const testSuiteResults: TestSuiteResult[] = [];
+  const performanceMetrics: any[] = [];
+  const auditTrailValidation: DatabaseParlantAuditEntry[] = [];
 
   beforeAll(async () => {
     const testExecutionStartTime = Date.now();
@@ -367,7 +382,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
     console.log('🚀 PARLANT Phase 1 Comprehensive Database Testing Started');
     console.log(`📅 Execution Time: ${new Date().toISOString()}`);
-    console.log('🎯 Testing Targets: Sub-1000ms validation, 85%+ cache hit rate, enterprise compliance');
+    console.log(
+      '🎯 Testing Targets: Sub-1000ms validation, 85%+ cache hit rate, enterprise compliance',
+    );
   });
 
   afterAll(async () => {
@@ -415,7 +432,10 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             cacheStatus: Math.random() > 0.5 ? 'hit' : 'miss',
             source: 'parlant',
             riskAssessment: {
-              level: operation === 'DELETE' ? SecurityLevel._HIGH : SecurityLevel._MEDIUM,
+              level:
+                operation === 'DELETE'
+                  ? SecurityLevel._HIGH
+                  : SecurityLevel._MEDIUM,
               factors: [`${operation} operation`, 'Comprehensive testing'],
               score: operation === 'DELETE' ? 70 : 40,
               mitigations: ['Comprehensive monitoring', 'Full audit trail'],
@@ -427,7 +447,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
           .mockResolvedValueOnce(mockValidation);
 
-        jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValueOnce([{ result: 'success' }]);
+        jest
+          .spyOn(databaseService, 'executeRawQuery')
+          .mockResolvedValueOnce([{ result: 'success' }]);
 
         try {
           const result = await parlantDatabaseService.executeRawQuery(
@@ -458,14 +480,17 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       expect(validationResults.every((result) => result.success)).toBe(true);
 
       // Performance validation
-      const averageValidationTime = validationResults.reduce(
-        (sum, result) => sum + (result.validationTime || 0),
-        0,
-      ) / validationResults.length;
+      const averageValidationTime =
+        validationResults.reduce(
+          (sum, result) => sum + (result.validationTime || 0),
+          0,
+        ) / validationResults.length;
       expect(averageValidationTime).toBeLessThan(1000); // Sub-1000ms target
 
       // Cache efficiency validation
-      const cacheHitRate = validationResults.filter((result) => result.cacheStatus === 'hit').length / validationResults.length;
+      const cacheHitRate =
+        validationResults.filter((result) => result.cacheStatus === 'hit')
+          .length / validationResults.length;
 
       // Store test suite result
       testSuiteResults.push({
@@ -476,7 +501,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
         skippedTests: 0,
         executionTime: testExecutionTime,
         coveragePercentage: 100,
-        criticalIssues: validationResults.filter((r) => !r.success).map((r) => r.error || 'Unknown error'),
+        criticalIssues: validationResults
+          .filter((r) => !r.success)
+          .map((r) => r.error || 'Unknown error'),
         performanceMetrics: {
           averageTestTime: testExecutionTime / operations.length,
           memoryUsage: 128, // Mock value
@@ -488,7 +515,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
       console.log('✅ Conversational Validation Comprehensive Results:', {
         operationsTested: operations.length,
-        successRate: `${(validationResults.filter((r) => r.success).length / validationResults.length * 100).toFixed(2)}%`,
+        successRate: `${((validationResults.filter((r) => r.success).length / validationResults.length) * 100).toFixed(2)}%`,
         averageValidationTime: `${averageValidationTime.toFixed(2)}ms`,
         cacheHitRate: `${(cacheHitRate * 100).toFixed(2)}%`,
         testExecutionTime: `${testExecutionTime}ms`,
@@ -502,7 +529,8 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
       for (const securityLevel of securityLevels) {
         const userContext = comprehensiveTestUserContexts.SECURITY_ADMIN;
-        const expectedValidationTime = this.getExpectedValidationTimeForSecurity(securityLevel);
+        const expectedValidationTime =
+          this.getExpectedValidationTimeForSecurity(securityLevel);
 
         const mockValidation: ParlantValidationResponse = {
           approved: securityLevel !== PrismaModelSecurity.CLASSIFIED, // CLASSIFIED requires special approval
@@ -510,7 +538,10 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           reason: `Security validation for ${securityLevel} data access`,
           confidence: 0.92,
           executionContext: {
-            monitoringLevel: securityLevel === PrismaModelSecurity.CLASSIFIED ? 'COMPREHENSIVE' : 'STANDARD',
+            monitoringLevel:
+              securityLevel === PrismaModelSecurity.CLASSIFIED
+                ? 'COMPREHENSIVE'
+                : 'STANDARD',
             safeguards: this.getSecuritySafeguards(securityLevel),
             timeoutMs: 30000,
             retryAttempts: 1,
@@ -519,7 +550,8 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             startTime: new Date(),
             endTime: new Date(),
             processingTime: expectedValidationTime,
-            cacheStatus: securityLevel === PrismaModelSecurity.PUBLIC ? 'hit' : 'miss',
+            cacheStatus:
+              securityLevel === PrismaModelSecurity.PUBLIC ? 'hit' : 'miss',
             source: 'parlant',
             riskAssessment: {
               level: this.mapSecurityLevelToRisk(securityLevel),
@@ -559,23 +591,33 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       expect(securityValidationResults).toHaveLength(securityLevels.length);
 
       // Validate that higher security levels have longer validation times
-      const publicValidation = securityValidationResults.find((r) => r.securityLevel === PrismaModelSecurity.PUBLIC);
-      const classifiedValidation = securityValidationResults.find((r) => r.securityLevel === PrismaModelSecurity.CLASSIFIED);
+      const publicValidation = securityValidationResults.find(
+        (r) => r.securityLevel === PrismaModelSecurity.PUBLIC,
+      );
+      const classifiedValidation = securityValidationResults.find(
+        (r) => r.securityLevel === PrismaModelSecurity.CLASSIFIED,
+      );
 
       if (publicValidation && classifiedValidation) {
-        expect(classifiedValidation.validationTime).toBeGreaterThan(publicValidation.validationTime);
+        expect(classifiedValidation.validationTime).toBeGreaterThan(
+          publicValidation.validationTime,
+        );
       }
 
       // Store security validation test suite result
       testSuiteResults.push({
         suiteName: 'Security Classification Validation',
         testCount: securityLevels.length,
-        passedTests: securityValidationResults.filter((r) => r.approved !== undefined).length,
+        passedTests: securityValidationResults.filter(
+          (r) => r.approved !== undefined,
+        ).length,
         failedTests: securityValidationResults.filter((r) => r.error).length,
         skippedTests: 0,
         executionTime: testExecutionTime,
         coveragePercentage: 100,
-        criticalIssues: securityValidationResults.filter((r) => r.error).map((r) => r.error || 'Security validation error'),
+        criticalIssues: securityValidationResults
+          .filter((r) => r.error)
+          .map((r) => r.error || 'Security validation error'),
         performanceMetrics: {
           averageTestTime: testExecutionTime / securityLevels.length,
           memoryUsage: 256, // Mock value
@@ -640,7 +682,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
           .mockResolvedValueOnce(mockValidation);
 
-        jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValueOnce([{ benchmark: i }]);
+        jest
+          .spyOn(databaseService, 'executeRawQuery')
+          .mockResolvedValueOnce([{ benchmark: i }]);
 
         await parlantDatabaseService.executeRawQuery(
           'SELECT * FROM benchmark_test WHERE id = ?',
@@ -668,7 +712,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
       const p95ValidationTime = this.calculatePercentile(validationTimes, 0.95);
       const p99ValidationTime = this.calculatePercentile(validationTimes, 0.99);
-      const averageValidationTime = validationTimes.reduce((sum, time) => sum + time, 0) / validationTimes.length;
+      const averageValidationTime =
+        validationTimes.reduce((sum, time) => sum + time, 0) /
+        validationTimes.length;
       const cacheHitRate = cacheHits / performanceResults.length;
       const throughput = testIterations / (totalBenchmarkTime / 1000); // operations per second
 
@@ -725,7 +771,10 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       ];
 
       for (const operation of operations) {
-        const userContext = comprehensiveTestUserContexts[operation.user as keyof typeof comprehensiveTestUserContexts];
+        const userContext =
+          comprehensiveTestUserContexts[
+            operation.user as keyof typeof comprehensiveTestUserContexts
+          ];
         const metadata: DatabaseOperationMetadata = {
           operationType: operation.type as any,
           tableName: 'audit_test_table',
@@ -753,7 +802,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             cacheStatus: 'miss',
             source: 'parlant',
             riskAssessment: {
-              level: ['DELETE', 'MIGRATION'].includes(operation.type) ? SecurityLevel._HIGH : SecurityLevel._MEDIUM,
+              level: ['DELETE', 'MIGRATION'].includes(operation.type)
+                ? SecurityLevel._HIGH
+                : SecurityLevel._MEDIUM,
               factors: [`${operation.type} operation`, 'Audit trail testing'],
               score: ['DELETE', 'MIGRATION'].includes(operation.type) ? 70 : 40,
               mitigations: ['Comprehensive audit trail', 'Full monitoring'],
@@ -765,7 +816,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
           .mockResolvedValueOnce(mockValidation);
 
-        jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValueOnce([{ audit: 'success' }]);
+        jest
+          .spyOn(databaseService, 'executeRawQuery')
+          .mockResolvedValueOnce([{ audit: 'success' }]);
 
         await parlantDatabaseService.executeRawQuery(
           `SELECT 1 -- ${operation.type} audit test`,
@@ -781,7 +834,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       );
 
       // Audit trail validation
-      expect(recentAuditEntries.length).toBeGreaterThanOrEqual(operations.length);
+      expect(recentAuditEntries.length).toBeGreaterThanOrEqual(
+        operations.length,
+      );
 
       // Validate audit entry completeness
       recentAuditEntries.forEach((entry) => {
@@ -791,7 +846,9 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
         expect(entry.timestamp).toBeInstanceOf(Date);
         expect(entry.databaseOperation).toBeDefined();
         expect(entry.validationResult).toMatch(/^(APPROVED|DENIED)$/);
-        expect(entry.executionResult).toMatch(/^(SUCCESS|FAILURE|TIMEOUT|CANCELLED)$/);
+        expect(entry.executionResult).toMatch(
+          /^(SUCCESS|FAILURE|TIMEOUT|CANCELLED)$/,
+        );
       });
 
       // Store audit trail validation
@@ -821,21 +878,29 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
   /**
    * Get expected validation time for security level
    */
-  private getExpectedValidationTimeForSecurity(securityLevel: PrismaModelSecurity): number {
+  function getExpectedValidationTimeForSecurity(
+    securityLevel: PrismaModelSecurity,
+  ): number {
     switch (securityLevel) {
-      case PrismaModelSecurity.PUBLIC: return 100;
-      case PrismaModelSecurity.INTERNAL: return 200;
-      case PrismaModelSecurity.CONFIDENTIAL: return 400;
-      case PrismaModelSecurity.RESTRICTED: return 600;
-      case PrismaModelSecurity.CLASSIFIED: return 800;
-      default: return 300;
+      case PrismaModelSecurity.PUBLIC:
+        return 100;
+      case PrismaModelSecurity.INTERNAL:
+        return 200;
+      case PrismaModelSecurity.CONFIDENTIAL:
+        return 400;
+      case PrismaModelSecurity.RESTRICTED:
+        return 600;
+      case PrismaModelSecurity.CLASSIFIED:
+        return 800;
+      default:
+        return 300;
     }
   }
 
   /**
    * Get security safeguards for level
    */
-  private getSecuritySafeguards(securityLevel: PrismaModelSecurity): string[] {
+  function getSecuritySafeguards(securityLevel: PrismaModelSecurity): string[] {
     const baseSafeguards = ['query_logging', 'performance_monitoring'];
 
     switch (securityLevel) {
@@ -846,9 +911,20 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       case PrismaModelSecurity.CONFIDENTIAL:
         return [...baseSafeguards, 'access_logging', 'enhanced_monitoring'];
       case PrismaModelSecurity.RESTRICTED:
-        return [...baseSafeguards, 'access_logging', 'enhanced_monitoring', 'approval_required'];
+        return [
+          ...baseSafeguards,
+          'access_logging',
+          'enhanced_monitoring',
+          'approval_required',
+        ];
       case PrismaModelSecurity.CLASSIFIED:
-        return [...baseSafeguards, 'access_logging', 'enhanced_monitoring', 'approval_required', 'administrator_notification'];
+        return [
+          ...baseSafeguards,
+          'access_logging',
+          'enhanced_monitoring',
+          'approval_required',
+          'administrator_notification',
+        ];
       default:
         return baseSafeguards;
     }
@@ -857,35 +933,51 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
   /**
    * Map security level to risk level
    */
-  private mapSecurityLevelToRisk(securityLevel: PrismaModelSecurity): SecurityLevel {
+  function mapSecurityLevelToRisk(
+    securityLevel: PrismaModelSecurity,
+  ): SecurityLevel {
     switch (securityLevel) {
-      case PrismaModelSecurity.PUBLIC: return SecurityLevel._LOW;
-      case PrismaModelSecurity.INTERNAL: return SecurityLevel._LOW;
-      case PrismaModelSecurity.CONFIDENTIAL: return SecurityLevel._MEDIUM;
-      case PrismaModelSecurity.RESTRICTED: return SecurityLevel._HIGH;
-      case PrismaModelSecurity.CLASSIFIED: return SecurityLevel._CRITICAL;
-      default: return SecurityLevel._MEDIUM;
+      case PrismaModelSecurity.PUBLIC:
+        return SecurityLevel._LOW;
+      case PrismaModelSecurity.INTERNAL:
+        return SecurityLevel._LOW;
+      case PrismaModelSecurity.CONFIDENTIAL:
+        return SecurityLevel._MEDIUM;
+      case PrismaModelSecurity.RESTRICTED:
+        return SecurityLevel._HIGH;
+      case PrismaModelSecurity.CLASSIFIED:
+        return SecurityLevel._CRITICAL;
+      default:
+        return SecurityLevel._MEDIUM;
     }
   }
 
   /**
    * Get security score for level
    */
-  private getSecurityScore(securityLevel: PrismaModelSecurity): number {
+  function getSecurityScore(securityLevel: PrismaModelSecurity): number {
     switch (securityLevel) {
-      case PrismaModelSecurity.PUBLIC: return 10;
-      case PrismaModelSecurity.INTERNAL: return 25;
-      case PrismaModelSecurity.CONFIDENTIAL: return 50;
-      case PrismaModelSecurity.RESTRICTED: return 75;
-      case PrismaModelSecurity.CLASSIFIED: return 95;
-      default: return 40;
+      case PrismaModelSecurity.PUBLIC:
+        return 10;
+      case PrismaModelSecurity.INTERNAL:
+        return 25;
+      case PrismaModelSecurity.CONFIDENTIAL:
+        return 50;
+      case PrismaModelSecurity.RESTRICTED:
+        return 75;
+      case PrismaModelSecurity.CLASSIFIED:
+        return 95;
+      default:
+        return 40;
     }
   }
 
   /**
    * Get security mitigations for level
    */
-  private getSecurityMitigations(securityLevel: PrismaModelSecurity): string[] {
+  function getSecurityMitigations(
+    securityLevel: PrismaModelSecurity,
+  ): string[] {
     const baseMitigations = ['Standard access controls'];
 
     switch (securityLevel) {
@@ -894,11 +986,25 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
       case PrismaModelSecurity.INTERNAL:
         return [...baseMitigations, 'Internal access only'];
       case PrismaModelSecurity.CONFIDENTIAL:
-        return [...baseMitigations, 'Enhanced access controls', 'Audit logging'];
+        return [
+          ...baseMitigations,
+          'Enhanced access controls',
+          'Audit logging',
+        ];
       case PrismaModelSecurity.RESTRICTED:
-        return [...baseMitigations, 'Strict access controls', 'Comprehensive audit', 'Approval workflow'];
+        return [
+          ...baseMitigations,
+          'Strict access controls',
+          'Comprehensive audit',
+          'Approval workflow',
+        ];
       case PrismaModelSecurity.CLASSIFIED:
-        return [...baseMitigations, 'Maximum security controls', 'Administrator approval', 'Real-time monitoring'];
+        return [
+          ...baseMitigations,
+          'Maximum security controls',
+          'Administrator approval',
+          'Real-time monitoring',
+        ];
       default:
         return baseMitigations;
     }
@@ -907,35 +1013,65 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
   /**
    * Generate comprehensive test report
    */
-  private async generateComprehensiveTestReport(): Promise<void> {
+  async function generateComprehensiveTestReport(): Promise<void> {
     const executionEndTime = Date.now();
     const totalExecutionTime = executionEndTime - Date.now(); // This would be calculated from the actual start time
 
     // Calculate overall results
     const overallResults: OverallTestResults = {
-      totalTests: testSuiteResults.reduce((sum, suite) => sum + suite.testCount, 0),
-      totalPassed: testSuiteResults.reduce((sum, suite) => sum + suite.passedTests, 0),
-      totalFailed: testSuiteResults.reduce((sum, suite) => sum + suite.failedTests, 0),
-      totalSkipped: testSuiteResults.reduce((sum, suite) => sum + suite.skippedTests, 0),
+      totalTests: testSuiteResults.reduce(
+        (sum, suite) => sum + suite.testCount,
+        0,
+      ),
+      totalPassed: testSuiteResults.reduce(
+        (sum, suite) => sum + suite.passedTests,
+        0,
+      ),
+      totalFailed: testSuiteResults.reduce(
+        (sum, suite) => sum + suite.failedTests,
+        0,
+      ),
+      totalSkipped: testSuiteResults.reduce(
+        (sum, suite) => sum + suite.skippedTests,
+        0,
+      ),
       successRate: 0,
-      criticalFailures: testSuiteResults.reduce((sum, suite) => sum + suite.criticalIssues.length, 0),
+      criticalFailures: testSuiteResults.reduce(
+        (sum, suite) => sum + suite.criticalIssues.length,
+        0,
+      ),
       phase1ComplianceRate: 0,
       performanceTargetsMet: 0,
       securityValidationsPassed: 0,
     };
 
-    overallResults.successRate = overallResults.totalTests > 0
-      ? (overallResults.totalPassed / overallResults.totalTests) * 100
-      : 0;
+    overallResults.successRate =
+      overallResults.totalTests > 0
+        ? (overallResults.totalPassed / overallResults.totalTests) * 100
+        : 0;
 
     // Generate performance benchmarks summary
     const performanceBenchmarks: PerformanceBenchmarks = {
       validationPerformance: {
-        averageValidationTime: performanceMetrics.reduce((sum, metric) => sum + (metric.averageValidationTime || 0), 0) / Math.max(performanceMetrics.length, 1),
-        p95ValidationTime: Math.max(...performanceMetrics.map((metric) => metric.p95ValidationTime || 0)),
-        p99ValidationTime: Math.max(...performanceMetrics.map((metric) => metric.p99ValidationTime || 0)),
-        cacheHitRate: performanceMetrics.reduce((sum, metric) => sum + (metric.cacheHitRate || 0), 0) / Math.max(performanceMetrics.length, 1),
-        throughputOpsPerSecond: Math.max(...performanceMetrics.map((metric) => metric.throughput || 0)),
+        averageValidationTime:
+          performanceMetrics.reduce(
+            (sum, metric) => sum + (metric.averageValidationTime || 0),
+            0,
+          ) / Math.max(performanceMetrics.length, 1),
+        p95ValidationTime: Math.max(
+          ...performanceMetrics.map((metric) => metric.p95ValidationTime || 0),
+        ),
+        p99ValidationTime: Math.max(
+          ...performanceMetrics.map((metric) => metric.p99ValidationTime || 0),
+        ),
+        cacheHitRate:
+          performanceMetrics.reduce(
+            (sum, metric) => sum + (metric.cacheHitRate || 0),
+            0,
+          ) / Math.max(performanceMetrics.length, 1),
+        throughputOpsPerSecond: Math.max(
+          ...performanceMetrics.map((metric) => metric.throughput || 0),
+        ),
       },
       databasePerformance: {
         averageQueryTime: 50, // Mock value
@@ -949,16 +1085,22 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
         conversationCacheEfficiency: 0.85, // Mock value
       },
       targetValidation: {
-        sub1000msValidationAchieved: performanceMetrics.some((metric) => metric.sub1000msValidationAchieved),
-        cache85HitRateAchieved: performanceMetrics.some((metric) => metric.cache85HitRateAchieved),
-        throughput1000OpsAchieved: performanceMetrics.some((metric) => metric.throughput1000OpsAchieved),
+        sub1000msValidationAchieved: performanceMetrics.some(
+          (metric) => metric.sub1000msValidationAchieved,
+        ),
+        cache85HitRateAchieved: performanceMetrics.some(
+          (metric) => metric.cache85HitRateAchieved,
+        ),
+        throughput1000OpsAchieved: performanceMetrics.some(
+          (metric) => metric.throughput1000OpsAchieved,
+        ),
       },
     };
 
     // Generate final comprehensive report
     console.log('');
     console.log('🎉 PARLANT Phase 1 Database Testing - COMPREHENSIVE RESULTS');
-    console.log('=' .repeat(80));
+    console.log('='.repeat(80));
     console.log('');
     console.log('📊 OVERALL TEST RESULTS:');
     console.log(`   Total Tests: ${overallResults.totalTests}`);
@@ -968,24 +1110,42 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
     console.log(`   Critical Failures: ${overallResults.criticalFailures}`);
     console.log('');
     console.log('🚀 PERFORMANCE BENCHMARKS:');
-    console.log(`   Average Validation Time: ${performanceBenchmarks.validationPerformance.averageValidationTime.toFixed(2)}ms`);
-    console.log(`   P95 Validation Time: ${performanceBenchmarks.validationPerformance.p95ValidationTime.toFixed(2)}ms`);
-    console.log(`   Cache Hit Rate: ${(performanceBenchmarks.validationPerformance.cacheHitRate * 100).toFixed(2)}%`);
-    console.log(`   Throughput: ${performanceBenchmarks.validationPerformance.throughputOpsPerSecond.toFixed(2)} ops/sec`);
+    console.log(
+      `   Average Validation Time: ${performanceBenchmarks.validationPerformance.averageValidationTime.toFixed(2)}ms`,
+    );
+    console.log(
+      `   P95 Validation Time: ${performanceBenchmarks.validationPerformance.p95ValidationTime.toFixed(2)}ms`,
+    );
+    console.log(
+      `   Cache Hit Rate: ${(performanceBenchmarks.validationPerformance.cacheHitRate * 100).toFixed(2)}%`,
+    );
+    console.log(
+      `   Throughput: ${performanceBenchmarks.validationPerformance.throughputOpsPerSecond.toFixed(2)} ops/sec`,
+    );
     console.log('');
     console.log('🎯 PARLANT PHASE 1 TARGETS:');
-    console.log(`   Sub-1000ms Validation: ${performanceBenchmarks.targetValidation.sub1000msValidationAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`);
-    console.log(`   85%+ Cache Hit Rate: ${performanceBenchmarks.targetValidation.cache85HitRateAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`);
-    console.log(`   High Throughput: ${performanceBenchmarks.targetValidation.throughput1000OpsAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`);
+    console.log(
+      `   Sub-1000ms Validation: ${performanceBenchmarks.targetValidation.sub1000msValidationAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`,
+    );
+    console.log(
+      `   85%+ Cache Hit Rate: ${performanceBenchmarks.targetValidation.cache85HitRateAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`,
+    );
+    console.log(
+      `   High Throughput: ${performanceBenchmarks.targetValidation.throughput1000OpsAchieved ? '✅ ACHIEVED' : '❌ NOT MET'}`,
+    );
     console.log('');
     console.log('📋 AUDIT TRAIL VALIDATION:');
     console.log(`   Audit Entries Created: ${auditTrailValidation.length}`);
-    console.log(`   Audit Integrity: ${auditTrailValidation.length > 0 ? '✅ VERIFIED' : '❌ NO DATA'}`);
+    console.log(
+      `   Audit Integrity: ${auditTrailValidation.length > 0 ? '✅ VERIFIED' : '❌ NO DATA'}`,
+    );
     console.log(`   Compliance Readiness: ✅ ENTERPRISE READY`);
     console.log('');
     console.log('🎯 PHASE 1 IMPLEMENTATION STATUS: ✅ COMPLETE');
     console.log('');
-    console.log('🔥 PARLANT Database Testing Framework Successfully Implemented!');
+    console.log(
+      '🔥 PARLANT Database Testing Framework Successfully Implemented!',
+    );
     console.log('   - Conversational validation for all database operations');
     console.log('   - Enterprise-grade performance with sub-1000ms validation');
     console.log('   - Comprehensive audit trail for compliance');
@@ -997,6 +1157,6 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
     console.log('   - Backup and recovery scenario testing');
     console.log('   - Complete test coverage with performance benchmarking');
     console.log('');
-    console.log('=' .repeat(80));
+    console.log('='.repeat(80));
   }
 });

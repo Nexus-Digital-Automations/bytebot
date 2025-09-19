@@ -267,6 +267,16 @@ export * from "./audit/integrations/audit.module";
 // Core services, decorators, and utilities for conversational AI validation
 // (types are already exported from index-client to avoid conflicts)
 export * from "./services/parlant-integration.service";
+
+// Enhanced JWT-Parlant Bridge Service - PARLANT Phase 1 Implementation
+export * from "./services/enhanced-jwt-parlant-bridge.service";
+export * from "./services/jwt-parlant-bridge.service";
+
+// Enhanced Parlant Authentication Guard
+export * from "./guards/enhanced-parlant-auth.guard";
+
+// Enhanced JWT Bridge Types
+export * from "./types/enhanced-jwt-bridge.types";
 // Parlant Decorators - specific exports to avoid ParlantValidationConfig conflict
 export {
   PARLANT_VALIDATION_KEY,
