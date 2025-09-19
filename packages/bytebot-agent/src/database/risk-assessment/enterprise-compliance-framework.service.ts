@@ -74,17 +74,17 @@ export enum EURegion {
   EU = 'eu',
   UK = 'uk',
   EEA = 'eea',
-  SWITZERLAND = 'switzerland'
+  SWITZERLAND = 'switzerland',
 }
 
 export enum DataSubjectRight {
-  ACCESS = 'access',                    // Article 15
-  RECTIFICATION = 'rectification',      // Article 16
-  ERASURE = 'erasure',                  // Article 17
-  RESTRICTION = 'restriction',          // Article 18
-  PORTABILITY = 'portability',          // Article 20
-  OBJECTION = 'objection',              // Article 21
-  AUTOMATED_DECISION = 'automated_decision' // Article 22
+  ACCESS = 'access', // Article 15
+  RECTIFICATION = 'rectification', // Article 16
+  ERASURE = 'erasure', // Article 17
+  RESTRICTION = 'restriction', // Article 18
+  PORTABILITY = 'portability', // Article 20
+  OBJECTION = 'objection', // Article 21
+  AUTOMATED_DECISION = 'automated_decision', // Article 22
 }
 
 /**
@@ -173,7 +173,7 @@ export enum ComplianceStatus {
   NON_COMPLIANT = 'non_compliant',
   PARTIALLY_COMPLIANT = 'partially_compliant',
   UNDER_REVIEW = 'under_review',
-  EXCEPTION_GRANTED = 'exception_granted'
+  EXCEPTION_GRANTED = 'exception_granted',
 }
 
 export interface FrameworkComplianceResult {
@@ -211,7 +211,9 @@ export interface RealTimeComplianceMonitoring {
 
 @Injectable()
 export class EnterpriseComplianceFrameworkService {
-  private readonly logger = new Logger(EnterpriseComplianceFrameworkService.name);
+  private readonly logger = new Logger(
+    EnterpriseComplianceFrameworkService.name,
+  );
 
   // Compliance framework configuration
   private readonly complianceConfiguration: ComplianceFrameworkConfiguration;
@@ -220,17 +222,24 @@ export class EnterpriseComplianceFrameworkService {
   // Performance and caching
   private validationCount = 0;
   private averageValidationTime = 0;
-  private readonly complianceCache = new Map<string, ComplianceValidationResult>();
+  private readonly complianceCache = new Map<
+    string,
+    ComplianceValidationResult
+  >();
   private cacheHitRate = 0;
 
   // Compliance tracking and analytics
-  private readonly complianceMetrics = new Map<RegulatoryFramework, ComplianceMetric>();
-  private readonly violationHistory = new Map<string, ComplianceViolationRecord[]>();
+  private readonly complianceMetrics = new Map<
+    RegulatoryFramework,
+    ComplianceMetric
+  >();
+  private readonly violationHistory = new Map<
+    string,
+    ComplianceViolationRecord[]
+  >();
   private readonly auditTrail: ComplianceAuditEntry[] = [];
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.complianceConfiguration = this.loadComplianceConfiguration();
     this.monitoringSystem = this.initializeMonitoringSystem();
 
@@ -260,46 +269,70 @@ export class EnterpriseComplianceFrameworkService {
     const validationId = this.generateValidationId();
     const startTime = Date.now();
 
-    this.logger.debug(`[${validationId}] Starting comprehensive compliance validation`, {
-      operationType: context.operation.operationType,
-      dataClassification: context.dataClassification,
-      sensitiveDataTypes: context.sensitiveDataTypes.length,
-      frameworks: this.getEnabledFrameworks().length,
-      validationId,
-    });
+    this.logger.debug(
+      `[${validationId}] Starting comprehensive compliance validation`,
+      {
+        operationType: context.operation.operationType,
+        dataClassification: context.dataClassification,
+        sensitiveDataTypes: context.sensitiveDataTypes.length,
+        frameworks: this.getEnabledFrameworks().length,
+        validationId,
+      },
+    );
 
     try {
       // Check validation cache
       const cacheKey = this.generateComplianceCacheKey(context);
       if (this.complianceCache.has(cacheKey)) {
         this.cacheHitRate++;
-        this.logger.debug(`[${validationId}] Using cached compliance validation`);
+        this.logger.debug(
+          `[${validationId}] Using cached compliance validation`,
+        );
         return this.complianceCache.get(cacheKey)!;
       }
 
       // Validate against each enabled framework
-      const frameworkResults = await this.validateAgainstFrameworks(context, validationId);
+      const frameworkResults = await this.validateAgainstFrameworks(
+        context,
+        validationId,
+      );
 
       // Assess overall compliance status
-      const overallCompliance = this.assessOverallComplianceStatus(frameworkResults);
+      const overallCompliance =
+        this.assessOverallComplianceStatus(frameworkResults);
 
       // Identify violation risks
-      const violationRisks = await this.identifyViolationRisks(context, frameworkResults);
+      const violationRisks = await this.identifyViolationRisks(
+        context,
+        frameworkResults,
+      );
 
       // Generate required actions
-      const requiredActions = await this.generateRequiredActions(frameworkResults, violationRisks);
+      const requiredActions = await this.generateRequiredActions(
+        frameworkResults,
+        violationRisks,
+      );
 
       // Recommend compliance controls
-      const recommendedControls = await this.recommendComplianceControls(context, frameworkResults);
+      const recommendedControls = await this.recommendComplianceControls(
+        context,
+        frameworkResults,
+      );
 
       // Collect audit evidence
-      const auditEvidence = await this.collectAuditEvidence(context, frameworkResults);
+      const auditEvidence = await this.collectAuditEvidence(
+        context,
+        frameworkResults,
+      );
 
       // Calculate compliance score
       const complianceScore = this.calculateComplianceScore(frameworkResults);
 
       // Determine next review date
-      const nextReviewDate = this.calculateNextReviewDate(frameworkResults, violationRisks);
+      const nextReviewDate = this.calculateNextReviewDate(
+        frameworkResults,
+        violationRisks,
+      );
 
       const validationResult: ComplianceValidationResult = {
         validationId,
@@ -335,7 +368,6 @@ export class EnterpriseComplianceFrameworkService {
       });
 
       return validationResult;
-
     } catch (error) {
       this.logger.error(`[${validationId}] Compliance validation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -390,13 +422,19 @@ export class EnterpriseComplianceFrameworkService {
   ): Promise<ComplianceMonitoringResult> {
     const monitoringId = this.generateMonitoringId();
 
-    this.logger.debug(`[${monitoringId}] Starting real-time compliance monitoring`, {
-      operationId,
-      monitoringId,
-    });
+    this.logger.debug(
+      `[${monitoringId}] Starting real-time compliance monitoring`,
+      {
+        operationId,
+        monitoringId,
+      },
+    );
 
     // Initialize monitoring session
-    const monitoringSession = await this.initializeMonitoringSession(operationId, context);
+    const monitoringSession = await this.initializeMonitoringSession(
+      operationId,
+      context,
+    );
 
     // Start continuous monitoring
     const monitoringProcess = this.startContinuousMonitoring(monitoringSession);
@@ -425,10 +463,13 @@ export class EnterpriseComplianceFrameworkService {
     const gaps: ComplianceGap[] = [];
     const evidence: ComplianceEvidence[] = [];
 
-    this.logger.debug(`[${validationId}] Validating GDPR compliance requirements`);
+    this.logger.debug(
+      `[${validationId}] Validating GDPR compliance requirements`,
+    );
 
     // Article 6 - Lawfulness of processing
-    const lawfulnessResult = await this.validateGDPRLawfulnessOfProcessing(context);
+    const lawfulnessResult =
+      await this.validateGDPRLawfulnessOfProcessing(context);
     requirements.push(lawfulnessResult);
     if (!lawfulnessResult.compliant) {
       gaps.push({
@@ -466,7 +507,8 @@ export class EnterpriseComplianceFrameworkService {
     }
 
     // Article 25 - Data protection by design and by default
-    const privacyByDesignResult = await this.validateGDPRPrivacyByDesign(context);
+    const privacyByDesignResult =
+      await this.validateGDPRPrivacyByDesign(context);
     requirements.push(privacyByDesignResult);
 
     // Article 32 - Security of processing
@@ -475,12 +517,13 @@ export class EnterpriseComplianceFrameworkService {
 
     // Article 33/34 - Personal data breach notification
     if (this.isHighRiskOperation(context)) {
-      const breachNotificationResult = await this.validateGDPRBreachNotificationReadiness(context);
+      const breachNotificationResult =
+        await this.validateGDPRBreachNotificationReadiness(context);
       requirements.push(breachNotificationResult);
     }
 
     // Calculate overall GDPR compliance score
-    const compliantCount = requirements.filter(r => r.compliant).length;
+    const compliantCount = requirements.filter((r) => r.compliant).length;
     const score = Math.round((compliantCount / requirements.length) * 100);
     const status = this.determineComplianceStatus(score);
 
@@ -506,7 +549,9 @@ export class EnterpriseComplianceFrameworkService {
     const gaps: ComplianceGap[] = [];
     const evidence: ComplianceEvidence[] = [];
 
-    this.logger.debug(`[${validationId}] Validating SOX compliance requirements`);
+    this.logger.debug(
+      `[${validationId}] Validating SOX compliance requirements`,
+    );
 
     // Only validate SOX if dealing with financial data
     if (!this.isFinancialData(context)) {
@@ -550,10 +595,11 @@ export class EnterpriseComplianceFrameworkService {
     requirements.push(accessControlResult);
 
     // Change management
-    const changeManagementResult = await this.validateSOXChangeManagement(context);
+    const changeManagementResult =
+      await this.validateSOXChangeManagement(context);
     requirements.push(changeManagementResult);
 
-    const compliantCount = requirements.filter(r => r.compliant).length;
+    const compliantCount = requirements.filter((r) => r.compliant).length;
     const score = Math.round((compliantCount / requirements.length) * 100);
     const status = this.determineComplianceStatus(score);
 
@@ -579,7 +625,9 @@ export class EnterpriseComplianceFrameworkService {
     const gaps: ComplianceGap[] = [];
     const evidence: ComplianceEvidence[] = [];
 
-    this.logger.debug(`[${validationId}] Validating HIPAA compliance requirements`);
+    this.logger.debug(
+      `[${validationId}] Validating HIPAA compliance requirements`,
+    );
 
     // Only validate HIPAA if dealing with healthcare data
     if (!this.isHealthcareData(context)) {
@@ -595,15 +643,18 @@ export class EnterpriseComplianceFrameworkService {
     }
 
     // Administrative safeguards
-    const adminSafeguardResult = await this.validateHIPAAAdministrativeSafeguards(context);
+    const adminSafeguardResult =
+      await this.validateHIPAAAdministrativeSafeguards(context);
     requirements.push(adminSafeguardResult);
 
     // Physical safeguards
-    const physicalSafeguardResult = await this.validateHIPAAPhysicalSafeguards(context);
+    const physicalSafeguardResult =
+      await this.validateHIPAAPhysicalSafeguards(context);
     requirements.push(physicalSafeguardResult);
 
     // Technical safeguards
-    const technicalSafeguardResult = await this.validateHIPAATechnicalSafeguards(context);
+    const technicalSafeguardResult =
+      await this.validateHIPAATechnicalSafeguards(context);
     requirements.push(technicalSafeguardResult);
 
     // Access control
@@ -625,10 +676,11 @@ export class EnterpriseComplianceFrameworkService {
     requirements.push(integrityResult);
 
     // Transmission security
-    const transmissionSecurityResult = await this.validateHIPAATransmissionSecurity(context);
+    const transmissionSecurityResult =
+      await this.validateHIPAATransmissionSecurity(context);
     requirements.push(transmissionSecurityResult);
 
-    const compliantCount = requirements.filter(r => r.compliant).length;
+    const compliantCount = requirements.filter((r) => r.compliant).length;
     const score = Math.round((compliantCount / requirements.length) * 100);
     const status = this.determineComplianceStatus(score);
 
@@ -669,13 +721,19 @@ export class EnterpriseComplianceFrameworkService {
     }
 
     // Check for SOX violations
-    if (this.complianceConfiguration.soxCompliance.enabled && this.isFinancialData(context)) {
+    if (
+      this.complianceConfiguration.soxCompliance.enabled &&
+      this.isFinancialData(context)
+    ) {
       const soxViolations = await this.detectSOXViolations(context);
       violations.push(...soxViolations);
     }
 
     // Check for HIPAA violations
-    if (this.complianceConfiguration.hipaaCompliance.enabled && this.isHealthcareData(context)) {
+    if (
+      this.complianceConfiguration.hipaaCompliance.enabled &&
+      this.isHealthcareData(context)
+    ) {
       const hipaaViolations = await this.detectHIPAAViolations(context);
       violations.push(...hipaaViolations);
     }
@@ -684,7 +742,10 @@ export class EnterpriseComplianceFrameworkService {
     const riskAssessment = this.assessViolationRisk(violations, context);
 
     // Generate preventive actions
-    const preventiveActions = this.generatePreventiveActions(violations, riskAssessment);
+    const preventiveActions = this.generatePreventiveActions(
+      violations,
+      riskAssessment,
+    );
 
     return {
       detectionId,
@@ -693,7 +754,7 @@ export class EnterpriseComplianceFrameworkService {
       riskAssessment,
       preventiveActions,
       detectionTimestamp: new Date(),
-      requiresImmedateAction: violations.some(v => v.severity === 'critical'),
+      requiresImmedateAction: violations.some((v) => v.severity === 'critical'),
     };
   }
 
@@ -731,14 +792,18 @@ export class EnterpriseComplianceFrameworkService {
     }
 
     // Apply additional preventive controls
-    const additionalControls = await this.applyAdditionalPreventiveControls(context, violations);
+    const additionalControls = await this.applyAdditionalPreventiveControls(
+      context,
+      violations,
+    );
     enforcedControls.push(...additionalControls);
 
     return {
       enforcementId,
       enforcedControls,
       blockedOperations,
-      enforcementStatus: blockedOperations.length > 0 ? 'blocked' : 'controlled',
+      enforcementStatus:
+        blockedOperations.length > 0 ? 'blocked' : 'controlled',
       enforcementTimestamp: new Date(),
     };
   }
@@ -763,7 +828,10 @@ export class EnterpriseComplianceFrameworkService {
     });
 
     // Collect compliance data for timeframe
-    const complianceData = await this.collectComplianceData(timeframe, frameworks);
+    const complianceData = await this.collectComplianceData(
+      timeframe,
+      frameworks,
+    );
 
     // Analyze compliance trends
     const trendAnalysis = await this.analyzeComplianceTrends(complianceData);
@@ -772,16 +840,21 @@ export class EnterpriseComplianceFrameworkService {
     const gapAnalysis = await this.performGapAnalysis(complianceData);
 
     // Generate recommendations
-    const recommendations = await this.generateComplianceRecommendations(gapAnalysis);
+    const recommendations =
+      await this.generateComplianceRecommendations(gapAnalysis);
 
     // Create executive summary
-    const executiveSummary = this.createExecutiveSummary(complianceData, trendAnalysis);
+    const executiveSummary = this.createExecutiveSummary(
+      complianceData,
+      trendAnalysis,
+    );
 
     const report: ComplianceReport = {
       reportId,
       reportType,
       timeframe,
-      frameworks: frameworks.length > 0 ? frameworks : this.getEnabledFrameworks(),
+      frameworks:
+        frameworks.length > 0 ? frameworks : this.getEnabledFrameworks(),
       executiveSummary,
       complianceData,
       trendAnalysis,
@@ -813,16 +886,21 @@ export class EnterpriseComplianceFrameworkService {
     });
 
     // Collect audit evidence
-    const evidenceCollection = await this.collectAuditEvidence(auditScope, timeframe);
+    const evidenceCollection = await this.collectAuditEvidence(
+      auditScope,
+      timeframe,
+    );
 
     // Organize evidence by framework
-    const organizedEvidence = this.organizeEvidenceByFramework(evidenceCollection);
+    const organizedEvidence =
+      this.organizeEvidenceByFramework(evidenceCollection);
 
     // Generate evidence summary
     const evidenceSummary = this.generateEvidenceSummary(organizedEvidence);
 
     // Create evidence integrity verification
-    const integrityVerification = await this.createEvidenceIntegrityVerification(organizedEvidence);
+    const integrityVerification =
+      await this.createEvidenceIntegrityVerification(organizedEvidence);
 
     return {
       packageId,
@@ -844,7 +922,10 @@ export class EnterpriseComplianceFrameworkService {
   private loadComplianceConfiguration(): ComplianceFrameworkConfiguration {
     return {
       gdprCompliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_GDPR_ENABLED', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_GDPR_ENABLED',
+          true,
+        ),
         applicableRegions: [EURegion.EU, EURegion.UK],
         dataSubjectRights: Object.values(DataSubjectRight),
         consentManagement: this.loadGDPRConsentConfiguration(),
@@ -855,7 +936,10 @@ export class EnterpriseComplianceFrameworkService {
         dpoRequirements: this.loadGDPRDPOConfiguration(),
       },
       soxCompliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_SOX_ENABLED', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_SOX_ENABLED',
+          true,
+        ),
         section302: this.loadSOXSection302Configuration(),
         section404: this.loadSOXSection404Configuration(),
         section409: this.loadSOXSection409Configuration(),
@@ -865,7 +949,10 @@ export class EnterpriseComplianceFrameworkService {
         changeManagement: this.loadSOXChangeManagementConfiguration(),
       },
       hipaaCompliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_HIPAA_ENABLED', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_HIPAA_ENABLED',
+          true,
+        ),
         safeguards: this.loadHIPAASafeguardsConfiguration(),
         businessAssociate: this.loadHIPAABusinessAssociateConfiguration(),
         breachNotification: this.loadHIPAABreachNotificationConfiguration(),
@@ -874,34 +961,54 @@ export class EnterpriseComplianceFrameworkService {
         transmissionSecurity: this.loadHIPAATransmissionSecurityConfiguration(),
       },
       pciDssCompliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_PCI_DSS_ENABLED', false),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_PCI_DSS_ENABLED',
+          false,
+        ),
         requirements: this.loadPCIDSSRequirements(),
-        merchantLevel: this.configService.get<number>('PCI_DSS_MERCHANT_LEVEL', 4),
+        merchantLevel: this.configService.get<number>(
+          'PCI_DSS_MERCHANT_LEVEL',
+          4,
+        ),
         assessmentFrequency: 'annual',
         compensatingControls: [],
       },
       iso27001Compliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_ISO_27001_ENABLED', false),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_ISO_27001_ENABLED',
+          false,
+        ),
         controlObjectives: this.loadISO27001ControlObjectives(),
         riskAssessment: this.loadISO27001RiskAssessmentConfiguration(),
-        informationSecurity: this.loadISO27001InformationSecurityConfiguration(),
-        continuousImprovement: this.loadISO27001ContinuousImprovementConfiguration(),
+        informationSecurity:
+          this.loadISO27001InformationSecurityConfiguration(),
+        continuousImprovement:
+          this.loadISO27001ContinuousImprovementConfiguration(),
       },
       ccpaCompliance: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_CCPA_ENABLED', false),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_CCPA_ENABLED',
+          false,
+        ),
         consumerRights: this.loadCCPAConsumerRights(),
         businessThresholds: this.loadCCPABusinessThresholds(),
         privacyPolicy: this.loadCCPAPrivacyPolicyConfiguration(),
         dataMinimization: this.loadCCPADataMinimizationConfiguration(),
       },
       crossJurisdictional: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_CROSS_JURISDICTIONAL_ENABLED', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_CROSS_JURISDICTIONAL_ENABLED',
+          true,
+        ),
         conflictResolution: this.loadCrossJurisdictionalConflictResolution(),
         adequacyDecisions: this.loadAdequacyDecisions(),
         standardContractualClauses: this.loadStandardContractualClauses(),
       },
       enterpriseStandards: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_ENTERPRISE_STANDARDS_ENABLED', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_ENTERPRISE_STANDARDS_ENABLED',
+          true,
+        ),
         internalPolicies: this.loadInternalPolicies(),
         industryStandards: this.loadIndustryStandards(),
         customFrameworks: this.loadCustomFrameworks(),
@@ -915,18 +1022,36 @@ export class EnterpriseComplianceFrameworkService {
   private initializeMonitoringSystem(): ComplianceMonitoringSystem {
     return {
       realTimeMonitoring: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_REAL_TIME_MONITORING', true),
-        monitoringLevel: this.configService.get<ComplianceMonitoringLevel>('COMPLIANCE_MONITORING_LEVEL', 'comprehensive'),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_REAL_TIME_MONITORING',
+          true,
+        ),
+        monitoringLevel: this.configService.get<ComplianceMonitoringLevel>(
+          'COMPLIANCE_MONITORING_LEVEL',
+          'comprehensive',
+        ),
         monitoredOperations: this.loadMonitoredOperations(),
         alertThresholds: this.loadComplianceAlertThresholds(),
         escalationProcedures: this.loadComplianceEscalationProcedures(),
         continuousAssessment: this.loadContinuousComplianceAssessment(),
       },
       violationDetection: {
-        enabled: this.configService.get<boolean>('COMPLIANCE_VIOLATION_DETECTION', true),
-        detectionSensitivity: this.configService.get<string>('COMPLIANCE_DETECTION_SENSITIVITY', 'high'),
-        automatedResponse: this.configService.get<boolean>('COMPLIANCE_AUTOMATED_RESPONSE', true),
-        falsePositiveReduction: this.configService.get<boolean>('COMPLIANCE_FALSE_POSITIVE_REDUCTION', true),
+        enabled: this.configService.get<boolean>(
+          'COMPLIANCE_VIOLATION_DETECTION',
+          true,
+        ),
+        detectionSensitivity: this.configService.get<string>(
+          'COMPLIANCE_DETECTION_SENSITIVITY',
+          'high',
+        ),
+        automatedResponse: this.configService.get<boolean>(
+          'COMPLIANCE_AUTOMATED_RESPONSE',
+          true,
+        ),
+        falsePositiveReduction: this.configService.get<boolean>(
+          'COMPLIANCE_FALSE_POSITIVE_REDUCTION',
+          true,
+        ),
       },
       preventiveControls: this.loadPreventiveComplianceControls(),
       correctiveActions: this.loadCorrectiveComplianceActions(),
@@ -967,20 +1092,24 @@ export class EnterpriseComplianceFrameworkService {
    * Determine if operation involves financial data
    */
   private isFinancialData(context: ComplianceValidationContext): boolean {
-    return context.sensitiveDataTypes.includes(SensitiveDataType.FINANCIAL) ||
-           context.businessContext.industry === IndustryType.FINANCIAL_SERVICES ||
-           context.operation.tableName?.toLowerCase().includes('payment') ||
-           context.operation.tableName?.toLowerCase().includes('transaction');
+    return (
+      context.sensitiveDataTypes.includes(SensitiveDataType.FINANCIAL) ||
+      context.businessContext.industry === IndustryType.FINANCIAL_SERVICES ||
+      context.operation.tableName?.toLowerCase().includes('payment') ||
+      context.operation.tableName?.toLowerCase().includes('transaction')
+    );
   }
 
   /**
    * Determine if operation involves healthcare data
    */
   private isHealthcareData(context: ComplianceValidationContext): boolean {
-    return context.sensitiveDataTypes.includes(SensitiveDataType.HEALTH) ||
-           context.businessContext.industry === IndustryType.HEALTHCARE ||
-           context.operation.tableName?.toLowerCase().includes('patient') ||
-           context.operation.tableName?.toLowerCase().includes('medical');
+    return (
+      context.sensitiveDataTypes.includes(SensitiveDataType.HEALTH) ||
+      context.businessContext.industry === IndustryType.HEALTHCARE ||
+      context.operation.tableName?.toLowerCase().includes('patient') ||
+      context.operation.tableName?.toLowerCase().includes('medical')
+    );
   }
 
   /**
@@ -1003,7 +1132,9 @@ export class EnterpriseComplianceFrameworkService {
   /**
    * Generate cache key for compliance validation
    */
-  private generateComplianceCacheKey(context: ComplianceValidationContext): string {
+  private generateComplianceCacheKey(
+    context: ComplianceValidationContext,
+  ): string {
     const keyData = {
       operationType: context.operation.operationType,
       dataClassification: context.dataClassification,
@@ -1026,7 +1157,10 @@ export class EnterpriseComplianceFrameworkService {
    */
   private updateValidationMetrics(validationTime: number): void {
     this.validationCount++;
-    this.averageValidationTime = (this.averageValidationTime * (this.validationCount - 1) + validationTime) / this.validationCount;
+    this.averageValidationTime =
+      (this.averageValidationTime * (this.validationCount - 1) +
+        validationTime) /
+      this.validationCount;
   }
 
   /**
@@ -1061,11 +1195,14 @@ export class EnterpriseComplianceFrameworkService {
     return results;
   }
 
-  private assessOverallComplianceStatus(frameworkResults: FrameworkComplianceResult[]): ComplianceStatus {
+  private assessOverallComplianceStatus(
+    frameworkResults: FrameworkComplianceResult[],
+  ): ComplianceStatus {
     if (frameworkResults.length === 0) return ComplianceStatus.COMPLIANT;
 
-    const scores = frameworkResults.map(r => r.score);
-    const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    const scores = frameworkResults.map((r) => r.score);
+    const averageScore =
+      scores.reduce((sum, score) => sum + score, 0) / scores.length;
 
     return this.determineComplianceStatus(averageScore);
   }
@@ -1078,10 +1215,15 @@ export class EnterpriseComplianceFrameworkService {
     return [];
   }
 
-  private calculateComplianceScore(frameworkResults: FrameworkComplianceResult[]): number {
+  private calculateComplianceScore(
+    frameworkResults: FrameworkComplianceResult[],
+  ): number {
     if (frameworkResults.length === 0) return 100;
 
-    const totalScore = frameworkResults.reduce((sum, result) => sum + result.score, 0);
+    const totalScore = frameworkResults.reduce(
+      (sum, result) => sum + result.score,
+      0,
+    );
     return Math.round(totalScore / frameworkResults.length);
   }
 
@@ -1105,13 +1247,16 @@ export class EnterpriseComplianceFrameworkService {
       overallCompliance: ComplianceStatus.UNDER_REVIEW,
       frameworkResults: [],
       violationRisks: [],
-      requiredActions: [{
-        action: 'manual_compliance_review',
-        priority: 'high',
-        description: 'Manual compliance review required due to validation failure',
-        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        assignee: 'compliance_officer',
-      }],
+      requiredActions: [
+        {
+          action: 'manual_compliance_review',
+          priority: 'high',
+          description:
+            'Manual compliance review required due to validation failure',
+          deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+          assignee: 'compliance_officer',
+        },
+      ],
       recommendedControls: [],
       auditEvidence: [],
       complianceScore: 50, // Neutral score for unknown status
@@ -1121,40 +1266,90 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   // Additional stub implementations for comprehensive compliance framework
-  private async validateGDPRLawfulnessOfProcessing(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 6', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRLawfulnessOfProcessing(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 6',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
   private requiresConsent(context: ComplianceValidationContext): boolean {
-    return context.sensitiveDataTypes.includes(SensitiveDataType.PERSONAL_IDENTIFIABLE);
+    return context.sensitiveDataTypes.includes(
+      SensitiveDataType.PERSONAL_IDENTIFIABLE,
+    );
   }
 
-  private async validateGDPRConsent(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 7', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRConsent(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 7',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
-  private async validateGDPRRightToErasure(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 17', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRRightToErasure(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 17',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
-  private async validateGDPRPrivacyByDesign(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 25', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRPrivacyByDesign(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 25',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
-  private async validateGDPRSecurityOfProcessing(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 32', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRSecurityOfProcessing(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 32',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
   private isHighRiskOperation(context: ComplianceValidationContext): boolean {
-    return context.operation.isDestructive || context.operation.operationType === 'DELETE';
+    return (
+      context.operation.isDestructive ||
+      context.operation.operationType === 'DELETE'
+    );
   }
 
-  private async validateGDPRBreachNotificationReadiness(context: ComplianceValidationContext): Promise<RequirementComplianceResult> {
-    return { requirement: 'GDPR Article 33/34', compliant: true, evidence: [], lastChecked: new Date() };
+  private async validateGDPRBreachNotificationReadiness(
+    context: ComplianceValidationContext,
+  ): Promise<RequirementComplianceResult> {
+    return {
+      requirement: 'GDPR Article 33/34',
+      compliant: true,
+      evidence: [],
+      lastChecked: new Date(),
+    };
   }
 
-  private generateGDPRRecommendations(gaps: ComplianceGap[], context: ComplianceValidationContext): ComplianceRecommendation[] {
-    return gaps.map(gap => ({
+  private generateGDPRRecommendations(
+    gaps: ComplianceGap[],
+    context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
+    return gaps.map((gap) => ({
       recommendation: `Address ${gap.requirement}`,
       priority: gap.severity as any,
       implementation: gap.remediation,
@@ -1314,7 +1509,7 @@ export enum IndustryType {
   EDUCATION = 'education',
   RETAIL = 'retail',
   MANUFACTURING = 'manufacturing',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 export enum OrganizationType {
@@ -1322,7 +1517,7 @@ export enum OrganizationType {
   PRIVATE_COMPANY = 'private_company',
   NON_PROFIT = 'non_profit',
   GOVERNMENT_AGENCY = 'government_agency',
-  EDUCATIONAL_INSTITUTION = 'educational_institution'
+  EDUCATIONAL_INSTITUTION = 'educational_institution',
 }
 
 export interface RegulatoryScope {

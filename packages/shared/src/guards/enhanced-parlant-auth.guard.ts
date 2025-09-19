@@ -39,7 +39,11 @@ import {
   CrossPlatformUserContext,
   AlertSeverity,
 } from "../types/enhanced-jwt-bridge.types";
-import { UserContext, SecurityContext } from "../types/rbac.types";
+import {
+  UserContext,
+  SecurityContext,
+  ResourceType,
+} from "../types/rbac.types";
 
 /**
  * Enhanced authenticated request with PARLANT context
@@ -225,7 +229,7 @@ export class EnhancedParlantAuthGuard implements CanActivate {
             ? 80
             : 20,
         threatIndicators: [],
-        validationLevel: SecurityValidationLevel.STANDARD,
+        validationLevel: SecurityValidationLevel._STANDARD,
         tokenExchanged: true,
         parlantConversationId: validationResult.parlantContext?.conversationId,
         failoverUsed: false,
@@ -262,7 +266,7 @@ export class EnhancedParlantAuthGuard implements CanActivate {
       // Security alert for authentication failure
       await this.createSecurityAlert(
         "authentication_failure",
-        AlertSeverity.MEDIUM,
+        AlertSeverity._MEDIUM,
         request,
         operationId,
         error instanceof Error ? error.message : String(error),
@@ -321,7 +325,9 @@ export class EnhancedParlantAuthGuard implements CanActivate {
       // Determine token platform and create exchange request
       const tokenPlatform = this.detectTokenPlatform(token);
       const targetPlatform =
-        tokenPlatform === Platform.AIGENT ? Platform.PARLANT : Platform.AIGENT;
+        tokenPlatform === Platform._AIGENT
+          ? Platform._PARLANT
+          : Platform._AIGENT;
 
       const exchangeRequest: TokenExchangeRequest = {
         sourceToken: token,
@@ -331,7 +337,7 @@ export class EnhancedParlantAuthGuard implements CanActivate {
         metadata: {
           clientIp: this.getClientIp(request),
           userAgent: request.headers["user-agent"] || "unknown",
-          securityLevel: SecurityValidationLevel.STANDARD,
+          securityLevel: SecurityValidationLevel._STANDARD,
         },
       };
 
@@ -531,10 +537,10 @@ export class EnhancedParlantAuthGuard implements CanActivate {
     // Simple heuristic - in real implementation, decode and check issuer
     if (token.startsWith("eyJ")) {
       // JWT token - likely from AIgent
-      return Platform.AIGENT;
+      return Platform._AIGENT;
     }
     // Assume PARLANT format for other tokens
-    return Platform.PARLANT;
+    return Platform._PARLANT;
   }
 
   /**
@@ -586,7 +592,7 @@ export class EnhancedParlantAuthGuard implements CanActivate {
       },
       sessions: {
         active: true,
-        platforms: [Platform.AIGENT, Platform.PARLANT],
+        platforms: [Platform._AIGENT, Platform._PARLANT],
         startTime: new Date(),
         lastActivity: new Date(),
       },
@@ -606,13 +612,13 @@ export class EnhancedParlantAuthGuard implements CanActivate {
       username: userContext.identifiers.aigent.username,
       roles: [],
       permissions: userContext.permissions.aigent,
-      metadata: userContext.profile,
+      metadata: userContext.profile as Record<string, unknown>,
     };
 
     return {
       user: userContextObj,
       resource: {
-        type: "api_endpoint" as const,
+        type: ResourceType.API_ENDPOINT,
         metadata: {
           path: request.url,
           method: request.method,
@@ -621,14 +627,14 @@ export class EnhancedParlantAuthGuard implements CanActivate {
       action: {
         type: "access",
         metadata: {
-          operationId,
+          operationId: _operationId,
           timestamp: new Date(),
         },
       },
       environment: {
         currentTime: new Date(),
         clientIP: this.getClientIp(request),
-        headers: request.headers,
+        headers: request.headers as Record<string, string>,
         securityLevel: "medium",
       },
     };
@@ -645,12 +651,14 @@ export class EnhancedParlantAuthGuard implements CanActivate {
     conversationId: string;
     sessionId: string;
     capabilities: string[];
+    preferences: Record<string, unknown>;
   }> {
     return {
       agentId: `agent_${exchangeResponse.identityMapping.parlantUserId}`,
       conversationId: `conv_${Date.now()}`,
       sessionId: exchangeResponse.exchangeId,
       capabilities: ["chat", "analysis", "automation"],
+      preferences: {},
     };
   }
 

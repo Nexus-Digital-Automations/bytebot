@@ -33,7 +33,16 @@ export interface ApprovalRequest {
 }
 
 export interface DatabaseOperation {
-  readonly type: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE' | 'ALTER' | 'DROP' | 'BACKUP' | 'RESTORE';
+  readonly type:
+    | 'SELECT'
+    | 'INSERT'
+    | 'UPDATE'
+    | 'DELETE'
+    | 'CREATE'
+    | 'ALTER'
+    | 'DROP'
+    | 'BACKUP'
+    | 'RESTORE';
   readonly target: string;
   readonly schema?: string;
   readonly affectedRows?: number;
@@ -118,8 +127,20 @@ export interface ValidationResult {
   readonly recommendations: string[];
 }
 
-export type ApprovalPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' | 'EMERGENCY';
-export type ApprovalStatus = 'PENDING' | 'UNDER_REVIEW' | 'ESCALATED' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+export type ApprovalPriority =
+  | 'LOW'
+  | 'NORMAL'
+  | 'HIGH'
+  | 'URGENT'
+  | 'EMERGENCY';
+export type ApprovalStatus =
+  | 'PENDING'
+  | 'UNDER_REVIEW'
+  | 'ESCALATED'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'CANCELLED';
 
 export interface WorkflowConfiguration {
   readonly riskThresholds: RiskThresholds;
@@ -260,9 +281,9 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
           concurrentRequests: 0,
           queueDepth: 0,
           resourceUtilization: 0,
-          bottleneckAnalysis: []
-        }
-      }
+          bottleneckAnalysis: [],
+        },
+      },
     };
 
     this.initializeWorkflowEngine();
@@ -275,7 +296,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     this.logAuditEvent('WORKFLOW_ENGINE_INITIALIZED', {
       timestamp: new Date(),
       configuration: this.configuration,
-      systemState: 'OPERATIONAL'
+      systemState: 'OPERATIONAL',
     });
 
     // Start periodic cleanup and monitoring
@@ -291,7 +312,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     operation: DatabaseOperation,
     context: OperationContext,
     riskAssessment: RiskAssessmentResult,
-    metadata: Record<string, unknown> = {}
+    metadata: Record<string, unknown> = {},
   ): Promise<ApprovalRequest> {
     const startTime = Date.now();
 
@@ -314,11 +335,14 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
         priority,
         status: 'PENDING',
         approvers: [],
-        escalationLevel: 0
+        escalationLevel: 0,
       };
 
       // Set deadline based on risk level and priority
-      request.deadline = this.calculateDeadline(riskAssessment.riskLevel, priority);
+      request.deadline = this.calculateDeadline(
+        riskAssessment.riskLevel,
+        priority,
+      );
 
       // Route to appropriate approvers
       await this.routeToApprovers(request);
@@ -336,7 +360,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
         riskLevel: riskAssessment.riskLevel,
         priority,
         requester: context.userId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Update metrics
@@ -350,16 +374,17 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       this.logPerformanceMetric('submit_request', processingTime);
 
       return request;
-
     } catch (error) {
       this.logAuditEvent('APPROVAL_REQUEST_SUBMISSION_FAILED', {
         error: error instanceof Error ? error.message : 'Unknown error',
         operation: operation.type,
         requester: context.userId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      throw new Error(`Failed to submit approval request: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to submit approval request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -373,7 +398,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     reasoning: string,
     conditions: string[] = [],
     delegatedTo?: string,
-    validationResults: ValidationResult[] = []
+    validationResults: ValidationResult[] = [],
   ): Promise<boolean> {
     const startTime = Date.now();
 
@@ -385,7 +410,9 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
 
       // Validate approver authorization
       if (!this.isAuthorizedApprover(approverId, request)) {
-        throw new Error(`Approver ${approverId} not authorized for request ${requestId}`);
+        throw new Error(
+          `Approver ${approverId} not authorized for request ${requestId}`,
+        );
       }
 
       // Create approval record
@@ -397,7 +424,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
         reasoning,
         conditions,
         delegatedTo,
-        validationResults
+        validationResults,
       };
 
       // Add to request
@@ -431,9 +458,8 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
           finalDecision: request.status,
           totalApprovers: request.approvers.length,
           processingTime: Date.now() - request.timestamp.getTime(),
-          escalationLevel: request.escalationLevel
+          escalationLevel: request.escalationLevel,
         });
-
       } else if (decision === 'DELEGATED' && delegatedTo) {
         // Handle delegation
         await this.processDelegation(request, approverId, delegatedTo);
@@ -447,23 +473,24 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
         requestId,
         approverId,
         decision,
-        finalDecision: request.status
+        finalDecision: request.status,
       });
 
       const processingTime = Date.now() - startTime;
       this.logPerformanceMetric('process_decision', processingTime);
 
       return finalDecision;
-
     } catch (error) {
       this.logAuditEvent('APPROVAL_DECISION_PROCESSING_FAILED', {
         requestId,
         approverId,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      throw new Error(`Failed to process approval decision: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to process approval decision: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -486,14 +513,17 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       requestId: request.id,
       approvers: requiredApprovers,
       riskLevel,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   /**
    * Get required approvers based on risk level and rules
    */
-  private getRequiredApprovers(riskLevel: string, request: ApprovalRequest): string[] {
+  private getRequiredApprovers(
+    riskLevel: string,
+    request: ApprovalRequest,
+  ): string[] {
     const thresholds = this.configuration.riskThresholds;
     const approvers: string[] = [];
 
@@ -513,7 +543,10 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     }
 
     // Apply additional rules based on operation type
-    if (request.operation.type === 'DROP' || request.operation.type === 'ALTER') {
+    if (
+      request.operation.type === 'DROP' ||
+      request.operation.type === 'ALTER'
+    ) {
       approvers.push('senior-dba', 'data-architect');
     }
 
@@ -524,7 +557,10 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Calculate priority based on risk assessment and context
    */
-  private calculatePriority(riskAssessment: RiskAssessmentResult, context: OperationContext): ApprovalPriority {
+  private calculatePriority(
+    riskAssessment: RiskAssessmentResult,
+    context: OperationContext,
+  ): ApprovalPriority {
     const riskScore = riskAssessment.overallScore;
     const isEmergency = context.previousActions.includes('EMERGENCY_ACCESS');
     const isOutOfHours = !context.workingHours;
@@ -539,7 +575,10 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Calculate deadline based on risk level and priority
    */
-  private calculateDeadline(riskLevel: string, priority: ApprovalPriority): Date {
+  private calculateDeadline(
+    riskLevel: string,
+    priority: ApprovalPriority,
+  ): Date {
     const now = new Date();
     const timeouts = this.configuration.timeoutSettings;
 
@@ -598,8 +637,8 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     this.workflowMetrics.escalatedRequests++;
 
     // Find escalation policy
-    const policy = this.configuration.escalationPolicies.find(p =>
-      this.evaluateEscalationConditions(p.triggerConditions, request)
+    const policy = this.configuration.escalationPolicies.find((p) =>
+      this.evaluateEscalationConditions(p.triggerConditions, request),
     );
 
     if (policy) {
@@ -615,7 +654,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
           'SYSTEM_AUTO_APPROVAL',
           'APPROVED',
           `Automatic approval due to escalation level ${request.escalationLevel}`,
-          ['EMERGENCY_OVERRIDE']
+          ['EMERGENCY_OVERRIDE'],
         );
       }
     }
@@ -624,7 +663,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       requestId,
       escalationLevel: request.escalationLevel,
       policy: policy?.id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.emit('requestEscalated', request);
@@ -633,10 +672,16 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Evaluate whether approval request is complete
    */
-  private async evaluateApprovalDecision(request: ApprovalRequest): Promise<boolean> {
+  private async evaluateApprovalDecision(
+    request: ApprovalRequest,
+  ): Promise<boolean> {
     const requiredApprovals = this.getRequiredApprovals(request);
-    const receivedApprovals = request.approvers.filter(a => a.decision === 'APPROVED').length;
-    const receivedRejections = request.approvers.filter(a => a.decision === 'REJECTED').length;
+    const receivedApprovals = request.approvers.filter(
+      (a) => a.decision === 'APPROVED',
+    ).length;
+    const receivedRejections = request.approvers.filter(
+      (a) => a.decision === 'REJECTED',
+    ).length;
 
     // Check for rejections (any rejection fails the request)
     if (receivedRejections > 0) {
@@ -675,9 +720,18 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Check if user is authorized approver
    */
-  private isAuthorizedApprover(approverId: string, request: ApprovalRequest): boolean {
-    const requiredApprovers = this.getRequiredApprovers(request.riskAssessment.riskLevel, request);
-    return requiredApprovers.includes(approverId) || approverId === 'SYSTEM_AUTO_APPROVAL';
+  private isAuthorizedApprover(
+    approverId: string,
+    request: ApprovalRequest,
+  ): boolean {
+    const requiredApprovers = this.getRequiredApprovers(
+      request.riskAssessment.riskLevel,
+      request,
+    );
+    return (
+      requiredApprovers.includes(approverId) ||
+      approverId === 'SYSTEM_AUTO_APPROVAL'
+    );
   }
 
   /**
@@ -691,7 +745,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       'security-lead': 'Security Lead',
       'compliance-officer': 'Compliance Officer',
       'data-architect': 'Data Architect',
-      'SYSTEM_AUTO_APPROVAL': 'System Automatic Approval'
+      SYSTEM_AUTO_APPROVAL: 'System Automatic Approval',
     };
 
     return roleMap[approverId] || 'Unknown Role';
@@ -703,7 +757,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   private async processDelegation(
     request: ApprovalRequest,
     fromApproverId: string,
-    toApproverId: string
+    toApproverId: string,
   ): Promise<void> {
     // Send notification to delegated approver
     await this.sendApprovalNotification(toApproverId, request);
@@ -712,14 +766,17 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       requestId: request.id,
       fromApprover: fromApproverId,
       toApprover: toApproverId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   /**
    * Send approval notification
    */
-  private async sendApprovalNotification(approverId: string, request: ApprovalRequest): Promise<void> {
+  private async sendApprovalNotification(
+    approverId: string,
+    request: ApprovalRequest,
+  ): Promise<void> {
     const notification = {
       type: 'APPROVAL_REQUEST',
       approverId,
@@ -728,7 +785,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       deadline: request.deadline,
       summary: `${request.operation.type} operation requires approval`,
       details: request,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.notificationQueue.push(notification);
@@ -737,7 +794,10 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Send urgent notification for escalated requests
    */
-  private async sendUrgentNotification(approverId: string, request: ApprovalRequest): Promise<void> {
+  private async sendUrgentNotification(
+    approverId: string,
+    request: ApprovalRequest,
+  ): Promise<void> {
     const notification = {
       type: 'URGENT_APPROVAL_REQUEST',
       approverId,
@@ -747,7 +807,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       deadline: request.deadline,
       summary: `ESCALATED: ${request.operation.type} operation requires immediate approval`,
       details: request,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.notificationQueue.push(notification);
@@ -756,7 +816,10 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Evaluate escalation conditions
    */
-  private evaluateEscalationConditions(conditions: string[], request: ApprovalRequest): boolean {
+  private evaluateEscalationConditions(
+    conditions: string[],
+    request: ApprovalRequest,
+  ): boolean {
     // This would implement condition evaluation logic
     return conditions.length > 0; // Simplified implementation
   }
@@ -803,7 +866,8 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
 
     // Update average response time
     const totalOps = this.workflowMetrics.totalRequests;
-    metrics.avgResponseTime = ((metrics.avgResponseTime * (totalOps - 1)) + duration) / totalOps;
+    metrics.avgResponseTime =
+      (metrics.avgResponseTime * (totalOps - 1) + duration) / totalOps;
 
     // Calculate throughput (operations per second)
     metrics.throughput = totalOps / (Date.now() / 1000);
@@ -822,7 +886,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       eventType,
       details,
       service: 'RiskBasedApprovalWorkflowService',
-      severity: this.getEventSeverity(eventType)
+      severity: this.getEventSeverity(eventType),
     };
 
     this.auditTrail.push(auditEvent);
@@ -834,8 +898,13 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Get event severity for audit logging
    */
-  private getEventSeverity(eventType: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const criticalEvents = ['APPROVAL_REQUEST_SUBMISSION_FAILED', 'APPROVAL_DECISION_PROCESSING_FAILED'];
+  private getEventSeverity(
+    eventType: string,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    const criticalEvents = [
+      'APPROVAL_REQUEST_SUBMISSION_FAILED',
+      'APPROVAL_DECISION_PROCESSING_FAILED',
+    ];
     const highEvents = ['REQUEST_ESCALATED', 'EMERGENCY_APPROVAL'];
     const mediumEvents = ['APPROVAL_REQUEST_COMPLETED', 'APPROVAL_DELEGATED'];
 
@@ -860,14 +929,14 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
         this.logAuditEvent('REQUEST_EXPIRED', {
           requestId,
           expiredAt: new Date(),
-          escalationLevel: request.escalationLevel
+          escalationLevel: request.escalationLevel,
         });
       }
     }
 
     // Clean up old audit trail entries
     const retentionPeriod = this.configuration.auditSettings.retentionPeriod;
-    const cutoffTime = now - (retentionPeriod * 24 * 60 * 60 * 1000);
+    const cutoffTime = now - retentionPeriod * 24 * 60 * 60 * 1000;
 
     while (this.auditTrail.length > 0) {
       const oldestEvent = this.auditTrail[0] as { timestamp: Date };
@@ -909,7 +978,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     const escalationRate = escalatedRequests / totalRequests;
 
     // Score based on escalation rate (lower is better)
-    let score = 100 - (escalationRate * 50);
+    let score = 100 - escalationRate * 50;
 
     // Factor in approval time compliance
     const avgProcessingTime = this.workflowMetrics.averageProcessingTime;
@@ -985,7 +1054,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     this.logAuditEvent('WORKFLOW_ENGINE_SHUTDOWN', {
       timestamp: new Date(),
       pendingRequests: this.pendingRequests.size,
-      totalRequests: this.workflowMetrics.totalRequests
+      totalRequests: this.workflowMetrics.totalRequests,
     });
 
     this.emit('shutdown');
@@ -1000,7 +1069,7 @@ export const defaultWorkflowConfiguration: WorkflowConfiguration = {
     lowRisk: { max: 30, approvers: 1, timeLimit: 60 },
     mediumRisk: { max: 60, approvers: 1, timeLimit: 30 },
     highRisk: { max: 85, approvers: 2, timeLimit: 15 },
-    criticalRisk: { max: 100, approvers: 3, timeLimit: 5 }
+    criticalRisk: { max: 100, approvers: 3, timeLimit: 5 },
   },
   approvalRules: [
     {
@@ -1011,8 +1080,8 @@ export const defaultWorkflowConfiguration: WorkflowConfiguration = {
       maximumTime: 15,
       allowDelegation: true,
       requireConsensus: true,
-      skipOnLowRisk: false
-    }
+      skipOnLowRisk: false,
+    },
   ],
   escalationPolicies: [
     {
@@ -1022,8 +1091,8 @@ export const defaultWorkflowConfiguration: WorkflowConfiguration = {
       timeoutMinutes: 30,
       notificationChannels: ['email', 'sms'],
       automaticApproval: false,
-      emergencyBypass: true
-    }
+      emergencyBypass: true,
+    },
   ],
   timeoutSettings: {
     defaultTimeout: 30,
@@ -1032,35 +1101,35 @@ export const defaultWorkflowConfiguration: WorkflowConfiguration = {
     highRiskTimeout: 15,
     criticalRiskTimeout: 5,
     escalationInterval: 15,
-    emergencyBypassTimeout: 2
+    emergencyBypassTimeout: 2,
   },
   notificationSettings: {
     channels: ['email', 'sms', 'slack'],
     templates: {
       approval_request: 'Database operation requires your approval',
       urgent_request: 'URGENT: Database operation requires immediate approval',
-      escalation: 'Request escalated to your attention'
+      escalation: 'Request escalated to your attention',
     },
     urgencyLevels: {
       LOW: ['email'],
       NORMAL: ['email', 'slack'],
       HIGH: ['email', 'slack', 'sms'],
       URGENT: ['email', 'slack', 'sms'],
-      EMERGENCY: ['sms', 'phone']
+      EMERGENCY: ['sms', 'phone'],
     },
     deliveryMethods: ['push', 'email', 'sms'],
     retryPolicy: {
       maxRetries: 3,
       retryInterval: 5,
       backoffMultiplier: 2,
-      maxInterval: 30
-    }
+      maxInterval: 30,
+    },
   },
   auditSettings: {
     logLevel: 'COMPREHENSIVE',
     retentionPeriod: 90,
     encryptionRequired: true,
     complianceReporting: true,
-    realTimeMonitoring: true
-  }
+    realTimeMonitoring: true,
+  },
 };

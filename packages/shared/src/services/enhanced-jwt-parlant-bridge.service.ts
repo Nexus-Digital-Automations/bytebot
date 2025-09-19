@@ -30,20 +30,24 @@ import {
   ServiceUnavailableException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EventEmitter } from "events";
+import { EventEmitter as _EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
 import * as crypto from "crypto";
-import axios, { AxiosInstance } from "axios";
-import Redis from "ioredis";
+import _axios, { AxiosInstance as _AxiosInstance } from "axios";
+import _Redis from "ioredis";
 import {
-  UserContext,
-  SecurityContext,
-  AuthorizationResult,
-  Role,
-  Permission,
-  ResourceType,
+  UserContext as _UserContext,
+  SecurityContext as _SecurityContext,
+  AuthorizationResult as _AuthorizationResult,
+  Role as _Role,
+  Permission as _Permission,
+  ResourceType as _ResourceType,
 } from "../types/rbac.types";
-import { JwtParlantBridgeService, ParlantJwtPayload, ParlantValidationContext } from "./jwt-parlant-bridge.service";
+import {
+  JwtParlantBridgeService,
+  ParlantJwtPayload,
+  ParlantValidationContext as _ParlantValidationContext,
+} from "./jwt-parlant-bridge.service";
 
 /**
  * Enhanced JWT payload with PARLANT integration extensions
@@ -91,7 +95,11 @@ export interface TokenExchangeRequest {
   /** Target platform */
   targetPlatform: "aigent" | "parlant";
   /** Exchange reason */
-  exchangeReason: "authentication" | "session_sync" | "permission_escalation" | "failover";
+  exchangeReason:
+    | "authentication"
+    | "session_sync"
+    | "permission_escalation"
+    | "failover";
   /** Request metadata */
   metadata: {
     clientIp: string;
@@ -196,7 +204,11 @@ export interface SecurityMonitoringAlert {
   /** Alert ID */
   alertId: string;
   /** Alert type */
-  alertType: "authentication_failure" | "token_abuse" | "suspicious_activity" | "system_compromise";
+  alertType:
+    | "authentication_failure"
+    | "token_abuse"
+    | "suspicious_activity"
+    | "system_compromise";
   /** Severity level */
   severity: "low" | "medium" | "high" | "critical";
   /** Alert timestamp */
@@ -325,7 +337,9 @@ export class EnhancedJwtParlantBridgeService
    * Enhanced module initialization
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log("🔄 Starting Enhanced JWT-Parlant Bridge initialization...");
+    this.logger.log(
+      "🔄 Starting Enhanced JWT-Parlant Bridge initialization...",
+    );
 
     try {
       // Initialize base service
@@ -337,10 +351,15 @@ export class EnhancedJwtParlantBridgeService
       await this.initializeSecurityMonitoring();
       await this.startEnhancedPeriodicTasks();
 
-      this.logger.log("✅ Enhanced JWT-Parlant Bridge initialized successfully");
+      this.logger.log(
+        "✅ Enhanced JWT-Parlant Bridge initialized successfully",
+      );
       this.emit("enhanced_bridge:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Enhanced JWT-Parlant Bridge", error);
+      this.logger.error(
+        "❌ Failed to initialize Enhanced JWT-Parlant Bridge",
+        error,
+      );
       throw error;
     }
   }
@@ -363,7 +382,9 @@ export class EnhancedJwtParlantBridgeService
   /**
    * Bi-directional token exchange
    */
-  async exchangeToken(request: TokenExchangeRequest): Promise<TokenExchangeResponse> {
+  async exchangeToken(
+    request: TokenExchangeRequest,
+  ): Promise<TokenExchangeResponse> {
     const operationId = `token-exchange-${Date.now()}`;
     const startTime = Date.now();
 
@@ -377,19 +398,36 @@ export class EnhancedJwtParlantBridgeService
 
     try {
       // Security validation
-      const securityValidation = await this.validateTokenExchangeSecurity(request, operationId);
+      const securityValidation = await this.validateTokenExchangeSecurity(
+        request,
+        operationId,
+      );
       if (!securityValidation.passed) {
-        throw new ForbiddenException(`Token exchange security validation failed: ${securityValidation.reason}`);
+        throw new ForbiddenException(
+          `Token exchange security validation failed: ${securityValidation.reason}`,
+        );
       }
 
       // Parse source token
-      const sourcePayload = await this.parseSourceToken(request.sourceToken, request.sourcePlatform);
+      const sourcePayload = await this.parseSourceToken(
+        request.sourceToken,
+        request.sourcePlatform,
+      );
 
       // Identity mapping
-      const identityMapping = await this.performIdentityMapping(sourcePayload, request.targetPlatform, operationId);
+      const identityMapping = await this.performIdentityMapping(
+        sourcePayload,
+        request.targetPlatform,
+        operationId,
+      );
 
       // Token translation
-      const translatedToken = await this.translateToken(sourcePayload, request, identityMapping, operationId);
+      const translatedToken = await this.translateToken(
+        sourcePayload,
+        request,
+        identityMapping,
+        operationId,
+      );
 
       // Performance tracking
       const exchangeTime = Date.now() - startTime;
@@ -440,15 +478,22 @@ export class EnhancedJwtParlantBridgeService
           exchangeTime,
           identityMappingConfidence: identityMapping.confidence,
         },
-        complianceTags: ["TOKEN_EXCHANGE", "IDENTITY_MAPPING", "SECURITY_VALIDATION"],
+        complianceTags: [
+          "TOKEN_EXCHANGE",
+          "IDENTITY_MAPPING",
+          "SECURITY_VALIDATION",
+        ],
       });
 
-      this.logger.log(`[${operationId}] Token exchange completed successfully`, {
-        operationId,
-        exchangeTime,
-        identityMappingConfidence: identityMapping.confidence,
-        securityRiskScore: securityValidation.riskScore,
-      });
+      this.logger.log(
+        `[${operationId}] Token exchange completed successfully`,
+        {
+          operationId,
+          exchangeTime,
+          identityMappingConfidence: identityMapping.confidence,
+          securityRiskScore: securityValidation.riskScore,
+        },
+      );
 
       return response;
     } catch (error) {
@@ -472,7 +517,8 @@ export class EnhancedJwtParlantBridgeService
           validationTime: exchangeTime,
         },
         error: {
-          code: error instanceof Error ? error.constructor.name : "UnknownError",
+          code:
+            error instanceof Error ? error.constructor.name : "UnknownError",
           message: error instanceof Error ? error.message : String(error),
           retryable: !(error instanceof ForbiddenException),
           retryAfter: 60, // 1 minute
@@ -494,7 +540,10 @@ export class EnhancedJwtParlantBridgeService
           indicators: ["token_exchange_failure"],
           riskScore: 70,
           affectedSystems: [request.sourcePlatform, request.targetPlatform],
-          recommendedActions: ["investigate_token_source", "validate_user_identity"],
+          recommendedActions: [
+            "investigate_token_source",
+            "validate_user_identity",
+          ],
         },
       });
 
@@ -513,7 +562,7 @@ export class EnhancedJwtParlantBridgeService
    */
   async manageTokenLifecycle(
     tokenId: string,
-    operation: "refresh" | "revoke" | "extend" | "validate"
+    operation: "refresh" | "revoke" | "extend" | "validate",
   ): Promise<{
     success: boolean;
     newToken?: string;
@@ -560,7 +609,7 @@ export class EnhancedJwtParlantBridgeService
    */
   async performFailover(
     primarySystemId: string,
-    reason: "health_check_failed" | "timeout" | "manual_failover"
+    reason: "health_check_failed" | "timeout" | "manual_failover",
   ): Promise<{
     success: boolean;
     failoverSystemId?: string;
@@ -578,9 +627,12 @@ export class EnhancedJwtParlantBridgeService
 
     try {
       // Find best failover system
-      const failoverSystem = await this.selectBestFailoverSystem(primarySystemId);
+      const failoverSystem =
+        await this.selectBestFailoverSystem(primarySystemId);
       if (!failoverSystem) {
-        throw new ServiceUnavailableException("No healthy failover systems available");
+        throw new ServiceUnavailableException(
+          "No healthy failover systems available",
+        );
       }
 
       // Mark primary system as unavailable
@@ -595,7 +647,10 @@ export class EnhancedJwtParlantBridgeService
       failoverSystem.lastHealthCheck = new Date();
 
       // Migrate active sessions
-      const migratedSessions = await this.migrateActiveSessions(primarySystemId, failoverSystem.systemId);
+      const migratedSessions = await this.migrateActiveSessions(
+        primarySystemId,
+        failoverSystem.systemId,
+      );
 
       const failoverTime = Date.now() - startTime;
 
@@ -682,7 +737,8 @@ export class EnhancedJwtParlantBridgeService
       alerts.push(...systemAnomalyAlerts);
 
       // Update security metrics
-      this.performanceMetrics.securityMetrics.threatDetectionRate = alerts.length;
+      this.performanceMetrics.securityMetrics.threatDetectionRate =
+        alerts.length;
 
       // Store alerts
       this.securityAlerts.push(...alerts);
@@ -745,14 +801,17 @@ export class EnhancedJwtParlantBridgeService
       optimizations.push("load_balancing_optimized");
 
       const targetAchieved =
-        this.performanceMetrics.authenticationMetrics.p95ResponseTime < this.PERFORMANCE_TARGET_MS &&
-        this.performanceMetrics.exchangeMetrics.averageExchangeTime < this.PERFORMANCE_TARGET_MS;
+        this.performanceMetrics.authenticationMetrics.p95ResponseTime <
+          this.PERFORMANCE_TARGET_MS &&
+        this.performanceMetrics.exchangeMetrics.averageExchangeTime <
+          this.PERFORMANCE_TARGET_MS;
 
       this.logger.log(`[${operationId}] Performance optimization completed`, {
         operationId,
         optimizations,
         targetAchieved,
-        currentP95: this.performanceMetrics.authenticationMetrics.p95ResponseTime,
+        currentP95:
+          this.performanceMetrics.authenticationMetrics.p95ResponseTime,
         target: this.PERFORMANCE_TARGET_MS,
       });
 
@@ -781,7 +840,7 @@ export class EnhancedJwtParlantBridgeService
   async generateComplianceReport(
     startDate: Date,
     endDate: Date,
-    reportType: "soc2" | "gdpr" | "hipaa" | "pci_dss" | "comprehensive"
+    reportType: "soc2" | "gdpr" | "hipaa" | "pci_dss" | "comprehensive",
   ): Promise<{
     reportId: string;
     reportType: string;
@@ -818,10 +877,16 @@ export class EnhancedJwtParlantBridgeService
       const auditAnalysis = await this.analyzeAuditTrail(startDate, endDate);
 
       // Calculate compliance score
-      const complianceScore = await this.calculateComplianceScore(reportType, auditAnalysis);
+      const complianceScore = await this.calculateComplianceScore(
+        reportType,
+        auditAnalysis,
+      );
 
       // Generate findings
-      const findings = await this.generateComplianceFindings(reportType, auditAnalysis);
+      const findings = await this.generateComplianceFindings(
+        reportType,
+        auditAnalysis,
+      );
 
       const report = {
         reportId,
@@ -842,19 +907,25 @@ export class EnhancedJwtParlantBridgeService
       // Store report
       await this.storeComplianceReport(report);
 
-      this.logger.log(`[${operationId}] Compliance report generated successfully`, {
-        operationId,
-        reportId,
-        complianceScore,
-        findingsCount: findings.length,
-      });
+      this.logger.log(
+        `[${operationId}] Compliance report generated successfully`,
+        {
+          operationId,
+          reportId,
+          complianceScore,
+          findingsCount: findings.length,
+        },
+      );
 
       return report;
     } catch (error) {
-      this.logger.error(`[${operationId}] Compliance report generation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        `[${operationId}] Compliance report generation failed`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
 
       throw error;
     }
@@ -864,7 +935,9 @@ export class EnhancedJwtParlantBridgeService
 
   private async initializeFailoverSystems(): Promise<void> {
     // Initialize failover systems configuration
-    const parlantUrls = this.configService.get("parlant.failoverUrls", []).split(",");
+    const parlantUrls = this.configService
+      .get("parlant.failoverUrls", [])
+      .split(",");
 
     for (let i = 0; i < parlantUrls.length; i++) {
       const systemId = `parlant_system_${i}`;
@@ -883,7 +956,9 @@ export class EnhancedJwtParlantBridgeService
       this.parlantSystems.set(systemId, system);
     }
 
-    this.logger.log(`✅ Initialized ${this.parlantSystems.size} failover systems`);
+    this.logger.log(
+      `✅ Initialized ${this.parlantSystems.size} failover systems`,
+    );
   }
 
   private async initializeIdentityMappings(): Promise<void> {
@@ -899,12 +974,17 @@ export class EnhancedJwtParlantBridgeService
           mapping.lastSyncAt = new Date(mapping.lastSyncAt);
           this.identityMappings.set(mapping.mappingId, mapping);
         } catch (error) {
-          this.logger.warn(`Failed to parse identity mapping from Redis: ${key}`, error);
+          this.logger.warn(
+            `Failed to parse identity mapping from Redis: ${key}`,
+            error,
+          );
         }
       }
     }
 
-    this.logger.log(`✅ Loaded ${this.identityMappings.size} identity mappings`);
+    this.logger.log(
+      `✅ Loaded ${this.identityMappings.size} identity mappings`,
+    );
   }
 
   private async initializeSecurityMonitoring(): Promise<void> {
@@ -951,7 +1031,10 @@ export class EnhancedJwtParlantBridgeService
   }
 
   // Additional private methods for core functionality...
-  private async validateTokenExchangeSecurity(request: TokenExchangeRequest, operationId: string): Promise<{
+  private async validateTokenExchangeSecurity(
+    _request: TokenExchangeRequest,
+    _operationId: string,
+  ): Promise<{
     passed: boolean;
     reason?: string;
     riskScore: number;
@@ -960,7 +1043,7 @@ export class EnhancedJwtParlantBridgeService
   }> {
     const startTime = Date.now();
     const threatIndicators: string[] = [];
-    let riskScore = 0;
+    const riskScore = 0;
 
     // Basic validation placeholder
     const validationTime = Date.now() - startTime;
@@ -973,16 +1056,23 @@ export class EnhancedJwtParlantBridgeService
     };
   }
 
-  private async parseSourceToken(token: string, platform: "aigent" | "parlant"): Promise<any> {
+  private async parseSourceToken(
+    token: string,
+    _platform: "aigent" | "parlant",
+  ): Promise<Record<string, unknown>> {
     // Token parsing implementation
     try {
       return jwt.decode(token);
-    } catch (error) {
+    } catch (_error) {
       throw new UnauthorizedException("Invalid source token format");
     }
   }
 
-  private async performIdentityMapping(sourcePayload: any, targetPlatform: "aigent" | "parlant", operationId: string): Promise<{
+  private async performIdentityMapping(
+    _sourcePayload: Record<string, unknown>,
+    _targetPlatform: "aigent" | "parlant",
+    _operationId: string,
+  ): Promise<{
     success: boolean;
     confidence: number;
     aigentUserId: string;
@@ -997,7 +1087,12 @@ export class EnhancedJwtParlantBridgeService
     };
   }
 
-  private async translateToken(sourcePayload: any, request: TokenExchangeRequest, identityMapping: any, operationId: string): Promise<string> {
+  private async translateToken(
+    sourcePayload: Record<string, unknown>,
+    request: TokenExchangeRequest,
+    identityMapping: Record<string, unknown>,
+    _operationId: string,
+  ): Promise<string> {
     // Token translation implementation
     const targetPayload = {
       ...sourcePayload,
@@ -1006,23 +1101,39 @@ export class EnhancedJwtParlantBridgeService
       sub: identityMapping.aigentUserId,
     };
 
-    return jwt.sign(targetPayload, this.configService.get("JWT_SECRET", "default-secret"), {
-      expiresIn: "1h",
-    });
+    return jwt.sign(
+      targetPayload,
+      this.configService.get("JWT_SECRET", "default-secret"),
+      {
+        expiresIn: "1h",
+      },
+    );
   }
 
-  private async updatePerformanceMetrics(operation: "auth" | "exchange", time: number, success: boolean): Promise<void> {
+  private async updatePerformanceMetrics(
+    operation: "auth" | "exchange",
+    time: number,
+    _success: boolean,
+  ): Promise<void> {
     // Performance metrics update implementation
     if (operation === "auth") {
       this.performanceMetrics.authenticationMetrics.averageResponseTime =
-        (this.performanceMetrics.authenticationMetrics.averageResponseTime + time) / 2;
+        (this.performanceMetrics.authenticationMetrics.averageResponseTime +
+          time) /
+        2;
     } else if (operation === "exchange") {
       this.performanceMetrics.exchangeMetrics.averageExchangeTime =
-        (this.performanceMetrics.exchangeMetrics.averageExchangeTime + time) / 2;
+        (this.performanceMetrics.exchangeMetrics.averageExchangeTime + time) /
+        2;
     }
   }
 
-  private async createSecurityAlert(alertData: Omit<SecurityMonitoringAlert, "alertId" | "timestamp" | "responseStatus">): Promise<void> {
+  private async createSecurityAlert(
+    alertData: Omit<
+      SecurityMonitoringAlert,
+      "alertId" | "timestamp" | "responseStatus"
+    >,
+  ): Promise<void> {
     const alert: SecurityMonitoringAlert = {
       alertId: crypto.randomUUID(),
       timestamp: new Date(),
@@ -1035,27 +1146,41 @@ export class EnhancedJwtParlantBridgeService
   }
 
   // Additional implementation methods...
-  private async refreshToken(tokenId: string, operationId: string): Promise<any> {
+  private async refreshToken(
+    _tokenId: string,
+    _operationId: string,
+  ): Promise<Record<string, unknown>> {
     // Token refresh implementation
     return { success: true };
   }
 
-  private async revokeToken(tokenId: string, operationId: string): Promise<any> {
+  private async revokeToken(
+    _tokenId: string,
+    _operationId: string,
+  ): Promise<Record<string, unknown>> {
     // Token revocation implementation
     return { success: true };
   }
 
-  private async extendToken(tokenId: string, operationId: string): Promise<any> {
+  private async extendToken(
+    _tokenId: string,
+    _operationId: string,
+  ): Promise<Record<string, unknown>> {
     // Token extension implementation
     return { success: true };
   }
 
-  private async validateTokenLifecycle(tokenId: string, operationId: string): Promise<any> {
+  private async validateTokenLifecycle(
+    _tokenId: string,
+    _operationId: string,
+  ): Promise<Record<string, unknown>> {
     // Token validation implementation
     return { success: true };
   }
 
-  private async selectBestFailoverSystem(excludeSystemId: string): Promise<FailoverSystem | null> {
+  private async selectBestFailoverSystem(
+    excludeSystemId: string,
+  ): Promise<FailoverSystem | null> {
     // Failover system selection implementation
     for (const [systemId, system] of this.parlantSystems) {
       if (systemId !== excludeSystemId && system.healthStatus === "healthy") {
@@ -1065,12 +1190,17 @@ export class EnhancedJwtParlantBridgeService
     return null;
   }
 
-  private async migrateActiveSessions(fromSystemId: string, toSystemId: string): Promise<number> {
+  private async migrateActiveSessions(
+    _fromSystemId: string,
+    _toSystemId: string,
+  ): Promise<number> {
     // Session migration implementation
     return 0;
   }
 
-  private async detectSuspiciousAuthPatterns(): Promise<SecurityMonitoringAlert[]> {
+  private async detectSuspiciousAuthPatterns(): Promise<
+    SecurityMonitoringAlert[]
+  > {
     // Suspicious authentication pattern detection
     return [];
   }
@@ -1085,7 +1215,9 @@ export class EnhancedJwtParlantBridgeService
     return [];
   }
 
-  private getAlertSeverityDistribution(alerts: SecurityMonitoringAlert[]): Record<string, number> {
+  private getAlertSeverityDistribution(
+    _alerts: SecurityMonitoringAlert[],
+  ): Record<string, number> {
     // Alert severity distribution calculation
     return {};
   }
@@ -1118,7 +1250,10 @@ export class EnhancedJwtParlantBridgeService
     // Performance metrics save implementation
   }
 
-  private async analyzeAuditTrail(startDate: Date, endDate: Date): Promise<any> {
+  private async analyzeAuditTrail(
+    _startDate: Date,
+    _endDate: Date,
+  ): Promise<Record<string, unknown>> {
     // Audit trail analysis
     return {
       totalEvents: 0,
@@ -1128,17 +1263,25 @@ export class EnhancedJwtParlantBridgeService
     };
   }
 
-  private async calculateComplianceScore(reportType: string, auditAnalysis: any): Promise<number> {
+  private async calculateComplianceScore(
+    _reportType: string,
+    _auditAnalysis: Record<string, unknown>,
+  ): Promise<number> {
     // Compliance score calculation
     return 95;
   }
 
-  private async generateComplianceFindings(reportType: string, auditAnalysis: any): Promise<any[]> {
+  private async generateComplianceFindings(
+    _reportType: string,
+    _auditAnalysis: Record<string, unknown>,
+  ): Promise<unknown[]> {
     // Compliance findings generation
     return [];
   }
 
-  private async storeComplianceReport(report: any): Promise<void> {
+  private async storeComplianceReport(
+    _report: Record<string, unknown>,
+  ): Promise<void> {
     // Compliance report storage
   }
 }

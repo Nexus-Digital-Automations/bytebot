@@ -363,6 +363,11 @@ export {
 // Local Monitoring System - server-only (NestJS + Prometheus)
 export * from "./monitoring";
 
+// PARLANT Emergency Bypass System - Phase 1 Complete Implementation
+// Enterprise-grade emergency bypass with multi-tier authorization, time-limited tokens,
+// comprehensive audit trails, and intelligent failover mechanisms
+export * from "./parlant/bypass";
+
 // Note: Test utilities are available but not exported by default
 // to avoid jest dependencies in production builds.
 // Import them directly from specific paths when needed in tests:

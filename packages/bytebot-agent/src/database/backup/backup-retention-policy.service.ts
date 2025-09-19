@@ -28,7 +28,7 @@ export enum RetentionPolicyType {
   DIFFERENTIAL = 'DIFFERENTIAL',
   FULL_BACKUP = 'FULL_BACKUP',
   ARCHIVE = 'ARCHIVE',
-  COMPLIANCE = 'COMPLIANCE'
+  COMPLIANCE = 'COMPLIANCE',
 }
 
 export enum ComplianceFramework {
@@ -37,15 +37,15 @@ export enum ComplianceFramework {
   HIPAA = 'HIPAA',
   PCI_DSS = 'PCI_DSS',
   ISO_27001 = 'ISO_27001',
-  CUSTOM = 'CUSTOM'
+  CUSTOM = 'CUSTOM',
 }
 
 export enum StorageTier {
-  HOT = 'HOT',           // Immediate access, highest cost
-  WARM = 'WARM',         // Quick access, moderate cost
-  COLD = 'COLD',         // Slow access, low cost
-  GLACIER = 'GLACIER',   // Very slow access, lowest cost
-  ARCHIVE = 'ARCHIVE'    // Long-term storage, compliance focused
+  HOT = 'HOT', // Immediate access, highest cost
+  WARM = 'WARM', // Quick access, moderate cost
+  COLD = 'COLD', // Slow access, low cost
+  GLACIER = 'GLACIER', // Very slow access, lowest cost
+  ARCHIVE = 'ARCHIVE', // Long-term storage, compliance focused
 }
 
 export enum PolicyStatus {
@@ -54,7 +54,7 @@ export enum PolicyStatus {
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
   DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED'
+  ARCHIVED = 'ARCHIVED',
 }
 
 export enum GovernanceAction {
@@ -64,7 +64,7 @@ export enum GovernanceAction {
   SUSPEND = 'SUSPEND',
   ACTIVATE = 'ACTIVATE',
   DELETE = 'DELETE',
-  AUDIT = 'AUDIT'
+  AUDIT = 'AUDIT',
 }
 
 // ============================================================================
@@ -396,7 +396,9 @@ export class BackupRetentionPolicyService {
   private readonly logger = new Logger(BackupRetentionPolicyService.name);
 
   constructor() {
-    this.logger.log('🏗️ Initializing PARLANT Phase 1 Backup Retention Policy Service');
+    this.logger.log(
+      '🏗️ Initializing PARLANT Phase 1 Backup Retention Policy Service',
+    );
   }
 
   // ============================================================================
@@ -423,14 +425,19 @@ export class BackupRetentionPolicyService {
       // Perform initial validation
       const validationResult = await this.validatePolicyRequest(request);
       if (!validationResult.isValid) {
-        throw new Error(`Policy validation failed: ${validationResult.errors.join(', ')}`);
+        throw new Error(
+          `Policy validation failed: ${validationResult.errors.join(', ')}`,
+        );
       }
 
       // Create cost impact assessment
       const costAssessment = await this.calculateCostImpact(request.rules);
 
       // Create approval workflow based on policy complexity and cost
-      const approvalWorkflow = await this.createApprovalWorkflow(request, costAssessment);
+      const approvalWorkflow = await this.createApprovalWorkflow(
+        request,
+        costAssessment,
+      );
 
       // Create initial policy object
       const policy: RetentionPolicy = {
@@ -439,9 +446,9 @@ export class BackupRetentionPolicyService {
         description: request.description,
         version: '1.0.0',
         status: PolicyStatus.DRAFT,
-        rules: request.rules.map(rule => ({
+        rules: request.rules.map((rule) => ({
           ...rule,
-          id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         })),
         applicableEnvironments: request.applicableEnvironments,
         dataClassifications: request.dataClassifications,
@@ -454,38 +461,48 @@ export class BackupRetentionPolicyService {
         lastModified: new Date(),
         lastModifiedBy: 'system', // In real implementation, use authenticated user
         auditTrail: [],
-        parlantValidationHistory: []
+        parlantValidationHistory: [],
       };
 
       // PARLANT conversational validation if required
       let parlantSessionId: string | undefined;
       if (request.parlantValidationRequired) {
-        parlantSessionId = await this.submitPolicyForParlantValidation(policy, GovernanceAction.CREATE);
+        parlantSessionId = await this.submitPolicyForParlantValidation(
+          policy,
+          GovernanceAction.CREATE,
+        );
       }
 
       // Store policy (mock implementation)
       await this.storePolicyDraft(policy);
 
       // Create audit record
-      await this.createAuditRecord(policy, GovernanceAction.CREATE, 'Policy creation initiated');
+      await this.createAuditRecord(
+        policy,
+        GovernanceAction.CREATE,
+        'Policy creation initiated',
+      );
 
       // Submit to approval workflow
       const workflowId = await this.initiateApprovalWorkflow(policy);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Policy creation initiated in ${duration}ms - Policy ID: ${policyId}`);
+      this.logger.log(
+        `✅ Policy creation initiated in ${duration}ms - Policy ID: ${policyId}`,
+      );
 
       return {
         policyId,
         workflowId,
         status: PolicyStatus.PENDING_APPROVAL,
         estimatedApprovalTime: approvalWorkflow.timeoutHours,
-        parlantSessionId
+        parlantSessionId,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Policy creation failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Policy creation failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -511,12 +528,20 @@ export class BackupRetentionPolicyService {
       }
 
       // Analyze change impact
-      const changeImpact = await this.analyzeChangeImpact(existingPolicy, request.changes);
+      const changeImpact = await this.analyzeChangeImpact(
+        existingPolicy,
+        request.changes,
+      );
 
       // Validate modification request
-      const validationResult = await this.validatePolicyModification(existingPolicy, request);
+      const validationResult = await this.validatePolicyModification(
+        existingPolicy,
+        request,
+      );
       if (!validationResult.isValid) {
-        throw new Error(`Modification validation failed: ${validationResult.errors.join(', ')}`);
+        throw new Error(
+          `Modification validation failed: ${validationResult.errors.join(', ')}`,
+        );
       }
 
       // Create new version of policy
@@ -525,36 +550,47 @@ export class BackupRetentionPolicyService {
       // PARLANT conversational validation if required
       let parlantSessionId: string | undefined;
       if (request.parlantValidationRequired) {
-        parlantSessionId = await this.submitPolicyForParlantValidation(newPolicy, GovernanceAction.MODIFY);
+        parlantSessionId = await this.submitPolicyForParlantValidation(
+          newPolicy,
+          GovernanceAction.MODIFY,
+        );
       }
 
       // Create approval workflow for modification
-      const approvalWorkflow = await this.createModificationApprovalWorkflow(changeImpact);
+      const approvalWorkflow =
+        await this.createModificationApprovalWorkflow(changeImpact);
       newPolicy.approvalWorkflow = approvalWorkflow;
 
       // Store new version
       await this.storePolicyDraft(newPolicy);
 
       // Create audit record
-      await this.createAuditRecord(newPolicy, GovernanceAction.MODIFY, 'Policy modification initiated');
+      await this.createAuditRecord(
+        newPolicy,
+        GovernanceAction.MODIFY,
+        'Policy modification initiated',
+      );
 
       // Submit to approval workflow
       const workflowId = await this.initiateApprovalWorkflow(newPolicy);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Policy modification initiated in ${duration}ms - New version: ${newPolicy.version}`);
+      this.logger.log(
+        `✅ Policy modification initiated in ${duration}ms - New version: ${newPolicy.version}`,
+      );
 
       return {
         newVersion: newPolicy.version,
         workflowId,
         status: PolicyStatus.PENDING_APPROVAL,
         changeImpact: changeImpact.summary,
-        parlantSessionId
+        parlantSessionId,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Policy modification failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Policy modification failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -566,7 +602,9 @@ export class BackupRetentionPolicyService {
   /**
    * Schedules retention policy enforcement with governance controls
    */
-  async scheduleRetentionEnforcement(request: PolicyEnforcementScheduleRequest): Promise<{
+  async scheduleRetentionEnforcement(
+    request: PolicyEnforcementScheduleRequest,
+  ): Promise<{
     jobIds: string[];
     estimatedCostSavings: number;
     estimatedStorageFreed: number;
@@ -574,7 +612,9 @@ export class BackupRetentionPolicyService {
     parlantApprovals: Record<string, string>;
   }> {
     const startTime = Date.now();
-    this.logger.log(`⏰ Scheduling retention enforcement for ${request.policyIds.length} policies`);
+    this.logger.log(
+      `⏰ Scheduling retention enforcement for ${request.policyIds.length} policies`,
+    );
 
     try {
       const results: string[] = [];
@@ -596,7 +636,8 @@ export class BackupRetentionPolicyService {
 
         // PARLANT approval if required
         if (request.parlantApprovalRequired) {
-          const parlantSessionId = await this.submitEnforcementForParlantApproval(enforcementJob);
+          const parlantSessionId =
+            await this.submitEnforcementForParlantApproval(enforcementJob);
           parlantApprovals[policyId] = parlantSessionId;
         }
 
@@ -610,23 +651,30 @@ export class BackupRetentionPolicyService {
         enforcementTimeline[policyId] = enforcementJob.scheduledTime;
 
         // Create audit record
-        await this.createAuditRecord(policy, GovernanceAction.AUDIT, 'Enforcement scheduled');
+        await this.createAuditRecord(
+          policy,
+          GovernanceAction.AUDIT,
+          'Enforcement scheduled',
+        );
       }
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Enforcement scheduled for ${results.length} policies in ${duration}ms`);
+      this.logger.log(
+        `✅ Enforcement scheduled for ${results.length} policies in ${duration}ms`,
+      );
 
       return {
         jobIds: results,
         estimatedCostSavings: totalCostSavings,
         estimatedStorageFreed: totalStorageFreed,
         enforcementTimeline,
-        parlantApprovals
+        parlantApprovals,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Enforcement scheduling failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Enforcement scheduling failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -670,7 +718,10 @@ export class BackupRetentionPolicyService {
           const result = await this.executeEnforcementAction(action);
           job.executionResults.push(result);
 
-          if (result.status === 'SUCCESS' || result.status === 'PARTIAL_SUCCESS') {
+          if (
+            result.status === 'SUCCESS' ||
+            result.status === 'PARTIAL_SUCCESS'
+          ) {
             actionsCompleted++;
             actualCostSavings += result.actualCostImpact;
             actualStorageFreed += result.actualStorageImpact;
@@ -684,8 +735,10 @@ export class BackupRetentionPolicyService {
 
       // Validate compliance for each framework
       for (const validation of job.complianceValidations) {
-        const validationResult = await this.validateComplianceRequirement(validation);
-        complianceStatus[validation.framework] = validationResult.validationStatus;
+        const validationResult =
+          await this.validateComplianceRequirement(validation);
+        complianceStatus[validation.framework] =
+          validationResult.validationStatus;
       }
 
       // Update job completion
@@ -696,7 +749,9 @@ export class BackupRetentionPolicyService {
       await this.updateEnforcementJob(job);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Enforcement completed in ${duration}ms - Actions: ${actionsCompleted}/${job.actionsToPerform.length}`);
+      this.logger.log(
+        `✅ Enforcement completed in ${duration}ms - Actions: ${actionsCompleted}/${job.actionsToPerform.length}`,
+      );
 
       return {
         executionId: `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -705,12 +760,13 @@ export class BackupRetentionPolicyService {
         actualCostSavings,
         actualStorageFreed,
         complianceStatus,
-        issues
+        issues,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Enforcement execution failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Enforcement execution failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -722,7 +778,9 @@ export class BackupRetentionPolicyService {
   /**
    * Generates comprehensive compliance reports with audit trails
    */
-  async generateComplianceReport(request: PolicyComplianceReportRequest): Promise<{
+  async generateComplianceReport(
+    request: PolicyComplianceReportRequest,
+  ): Promise<{
     reportId: string;
     complianceStatus: Record<ComplianceFramework, string>;
     policyCompliance: Record<string, any>;
@@ -732,7 +790,9 @@ export class BackupRetentionPolicyService {
     reportData: any;
   }> {
     const startTime = Date.now();
-    this.logger.log(`📊 Generating compliance report for period: ${request.reportingPeriod.startDate} - ${request.reportingPeriod.endDate}`);
+    this.logger.log(
+      `📊 Generating compliance report for period: ${request.reportingPeriod.startDate} - ${request.reportingPeriod.endDate}`,
+    );
 
     try {
       const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -744,38 +804,59 @@ export class BackupRetentionPolicyService {
       const complianceStatus: Record<ComplianceFramework, string> = {};
       const policyCompliance: Record<string, any> = {};
 
-      for (const framework of request.complianceFrameworks || Object.values(ComplianceFramework)) {
-        const frameworkCompliance = await this.analyzeFrameworkCompliance(framework, policies, request.reportingPeriod);
+      for (const framework of request.complianceFrameworks ||
+        Object.values(ComplianceFramework)) {
+        const frameworkCompliance = await this.analyzeFrameworkCompliance(
+          framework,
+          policies,
+          request.reportingPeriod,
+        );
         complianceStatus[framework] = frameworkCompliance.overallStatus;
       }
 
       // Analyze policy-level compliance
       for (const policy of policies) {
-        const policyAnalysis = await this.analyzePolicyCompliance(policy, request.reportingPeriod);
+        const policyAnalysis = await this.analyzePolicyCompliance(
+          policy,
+          request.reportingPeriod,
+        );
         policyCompliance[policy.id] = policyAnalysis;
       }
 
       // Generate recommendations
-      const recommendations = await this.generateComplianceRecommendations(complianceStatus, policyCompliance);
-
-      // Collect audit trail
-      const auditTrail = await this.getAuditTrailForPeriod(request.reportingPeriod);
-
-      // Perform cost analysis
-      const costAnalysis = await this.performComplianceCostAnalysis(policies, request.reportingPeriod);
-
-      // Generate report data based on format
-      const reportData = await this.formatComplianceReport(request.outputFormat, {
-        reportId,
+      const recommendations = await this.generateComplianceRecommendations(
         complianceStatus,
         policyCompliance,
-        recommendations,
-        auditTrail: auditTrail.slice(0, 100), // Limit for response size
-        costAnalysis
-      });
+      );
+
+      // Collect audit trail
+      const auditTrail = await this.getAuditTrailForPeriod(
+        request.reportingPeriod,
+      );
+
+      // Perform cost analysis
+      const costAnalysis = await this.performComplianceCostAnalysis(
+        policies,
+        request.reportingPeriod,
+      );
+
+      // Generate report data based on format
+      const reportData = await this.formatComplianceReport(
+        request.outputFormat,
+        {
+          reportId,
+          complianceStatus,
+          policyCompliance,
+          recommendations,
+          auditTrail: auditTrail.slice(0, 100), // Limit for response size
+          costAnalysis,
+        },
+      );
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Compliance report generated in ${duration}ms - Report ID: ${reportId}`);
+      this.logger.log(
+        `✅ Compliance report generated in ${duration}ms - Report ID: ${reportId}`,
+      );
 
       return {
         reportId,
@@ -784,12 +865,13 @@ export class BackupRetentionPolicyService {
         recommendations,
         auditTrail: auditTrail.slice(0, 50), // Return limited audit trail
         costAnalysis,
-        reportData
+        reportData,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Compliance report generation failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Compliance report generation failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -803,9 +885,11 @@ export class BackupRetentionPolicyService {
    */
   private async submitPolicyForParlantValidation(
     policy: RetentionPolicy,
-    action: GovernanceAction
+    action: GovernanceAction,
   ): Promise<string> {
-    this.logger.log(`🤖 Submitting policy for PARLANT validation: ${policy.id}`);
+    this.logger.log(
+      `🤖 Submitting policy for PARLANT validation: ${policy.id}`,
+    );
 
     const sessionId = `parlant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -819,29 +903,33 @@ export class BackupRetentionPolicyService {
         dataClassification: policy.dataClassifications.join(', '),
         complianceRequirements: policy.complianceRequirements,
         budgetConstraints: policy.costImpactAssessment.estimatedMonthlyCostUSD,
-        performanceRequirements: 'Standard backup performance requirements'
+        performanceRequirements: 'Standard backup performance requirements',
       },
       riskContext: {
         currentRiskLevel: 'MEDIUM',
         acceptableRiskLevel: 'LOW',
         businessCriticalityLevel: 'HIGH',
         dataVolume: '> 1TB',
-        geographicScope: policy.applicableEnvironments
+        geographicScope: policy.applicableEnvironments,
       },
       validationCriteria: {
         requireCompliance: policy.complianceRequirements.length > 0,
-        requireCostApproval: policy.costImpactAssessment.estimatedMonthlyCostUSD > 1000,
+        requireCostApproval:
+          policy.costImpactAssessment.estimatedMonthlyCostUSD > 1000,
         requireSecurityReview: true,
         requirePerformanceValidation: true,
-        customValidationRules: []
-      }
+        customValidationRules: [],
+      },
     };
 
     // Generate PARLANT prompt
     const prompt = this.generateParlantValidationPrompt(validationRequest);
 
     // Mock PARLANT interaction (in real implementation, integrate with actual PARLANT service)
-    const parlantResponse = await this.mockParlantValidation(prompt, validationRequest);
+    const parlantResponse = await this.mockParlantValidation(
+      prompt,
+      validationRequest,
+    );
 
     // Store validation record
     const validationRecord: ParlantValidationRecord = {
@@ -856,19 +944,23 @@ export class BackupRetentionPolicyService {
       recommendedActions: parlantResponse.recommendedActions,
       riskFactors: parlantResponse.riskFactors,
       complianceConsiderations: parlantResponse.complianceConsiderations,
-      costImplications: parlantResponse.costImplications
+      costImplications: parlantResponse.costImplications,
     };
 
     policy.parlantValidationHistory.push(validationRecord);
 
-    this.logger.log(`✅ PARLANT validation completed: ${sessionId} - Outcome: ${parlantResponse.outcome}`);
+    this.logger.log(
+      `✅ PARLANT validation completed: ${sessionId} - Outcome: ${parlantResponse.outcome}`,
+    );
     return sessionId;
   }
 
   /**
    * Generates comprehensive PARLANT validation prompt
    */
-  private generateParlantValidationPrompt(request: ParlantPolicyValidationRequest): string {
+  private generateParlantValidationPrompt(
+    request: ParlantPolicyValidationRequest,
+  ): string {
     return `
 # Database Backup Retention Policy Validation Request
 
@@ -909,7 +1001,10 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
   /**
    * Mock PARLANT validation (replace with actual PARLANT integration)
    */
-  private async mockParlantValidation(prompt: string, request: ParlantPolicyValidationRequest): Promise<{
+  private async mockParlantValidation(
+    prompt: string,
+    request: ParlantPolicyValidationRequest,
+  ): Promise<{
     response: string;
     confidence: number;
     outcome: 'APPROVED' | 'REJECTED' | 'CONDITIONAL' | 'ESCALATED';
@@ -919,15 +1014,23 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
     costImplications: string[];
   }> {
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Mock intelligent analysis based on request
     const isHighCost = request.businessContext.budgetConstraints > 5000;
-    const isHighRisk = request.riskContext.currentRiskLevel === 'HIGH' || request.riskContext.currentRiskLevel === 'CRITICAL';
-    const hasStrictCompliance = request.businessContext.complianceRequirements.includes(ComplianceFramework.HIPAA) ||
-                               request.businessContext.complianceRequirements.includes(ComplianceFramework.PCI_DSS);
+    const isHighRisk =
+      request.riskContext.currentRiskLevel === 'HIGH' ||
+      request.riskContext.currentRiskLevel === 'CRITICAL';
+    const hasStrictCompliance =
+      request.businessContext.complianceRequirements.includes(
+        ComplianceFramework.HIPAA,
+      ) ||
+      request.businessContext.complianceRequirements.includes(
+        ComplianceFramework.PCI_DSS,
+      );
 
-    let outcome: 'APPROVED' | 'REJECTED' | 'CONDITIONAL' | 'ESCALATED' = 'APPROVED';
+    let outcome: 'APPROVED' | 'REJECTED' | 'CONDITIONAL' | 'ESCALATED' =
+      'APPROVED';
     let confidence = 0.85;
 
     if (isHighCost && isHighRisk) {
@@ -935,7 +1038,7 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
       confidence = 0.95;
     } else if (isHighCost || hasStrictCompliance) {
       outcome = 'CONDITIONAL';
-      confidence = 0.80;
+      confidence = 0.8;
     }
 
     const response = `
@@ -954,23 +1057,30 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
       confidence,
       outcome,
       recommendedActions: [
-        outcome === 'CONDITIONAL' ? 'Require additional financial approval for cost impact' : 'Proceed with standard approval workflow',
+        outcome === 'CONDITIONAL'
+          ? 'Require additional financial approval for cost impact'
+          : 'Proceed with standard approval workflow',
         'Document compliance validation results',
-        'Establish monitoring for policy effectiveness'
+        'Establish monitoring for policy effectiveness',
       ],
       riskFactors: [
-        isHighRisk ? 'High business criticality level' : 'Standard risk profile',
+        isHighRisk
+          ? 'High business criticality level'
+          : 'Standard risk profile',
         isHighCost ? 'Significant cost impact' : 'Moderate cost impact',
-        'Data volume considerations'
+        'Data volume considerations',
       ],
-      complianceConsiderations: request.businessContext.complianceRequirements.map(framework =>
-        `${framework} compliance requirements validated`
-      ),
+      complianceConsiderations:
+        request.businessContext.complianceRequirements.map(
+          (framework) => `${framework} compliance requirements validated`,
+        ),
       costImplications: [
         `Monthly operational cost: $${request.businessContext.budgetConstraints.toLocaleString()}`,
-        isHighCost ? 'Requires budget approval' : 'Within operational parameters',
-        'Long-term cost optimization opportunities identified'
-      ]
+        isHighCost
+          ? 'Requires budget approval'
+          : 'Within operational parameters',
+        'Long-term cost optimization opportunities identified',
+      ],
     };
   }
 
@@ -978,7 +1088,9 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   // Helper Methods (Mock Implementations)
   // ============================================================================
 
-  private async validatePolicyRequest(request: PolicyCreationRequest): Promise<{ isValid: boolean; errors: string[] }> {
+  private async validatePolicyRequest(
+    request: PolicyCreationRequest,
+  ): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
     if (!request.name || request.name.trim().length === 0) {
@@ -998,10 +1110,15 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
     return { isValid: errors.length === 0, errors };
   }
 
-  private async calculateCostImpact(rules: Omit<RetentionRule, 'id'>[]): Promise<CostImpactAssessment> {
+  private async calculateCostImpact(
+    rules: Omit<RetentionRule, 'id'>[],
+  ): Promise<CostImpactAssessment> {
     // Mock cost calculation
     const baseStorageCost = 0.023; // USD per GB per month
-    const totalStorageGB = rules.reduce((sum, rule) => sum + (rule.retentionPeriodDays * 100), 0); // Mock calculation
+    const totalStorageGB = rules.reduce(
+      (sum, rule) => sum + rule.retentionPeriodDays * 100,
+      0,
+    ); // Mock calculation
 
     return {
       estimatedMonthlyCostUSD: totalStorageGB * baseStorageCost,
@@ -1013,43 +1130,77 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
         [StorageTier.WARM]: totalStorageGB * 0.4 * baseStorageCost * 0.7,
         [StorageTier.COLD]: totalStorageGB * 0.2 * baseStorageCost * 0.4,
         [StorageTier.GLACIER]: totalStorageGB * 0.1 * baseStorageCost * 0.2,
-        [StorageTier.ARCHIVE]: 0
+        [StorageTier.ARCHIVE]: 0,
       },
       projectedCostGrowth: {
         sixMonths: totalStorageGB * baseStorageCost * 1.1,
         oneYear: totalStorageGB * baseStorageCost * 1.2,
-        twoYears: totalStorageGB * baseStorageCost * 1.5
-      }
+        twoYears: totalStorageGB * baseStorageCost * 1.5,
+      },
     };
   }
 
-  private async createApprovalWorkflow(request: PolicyCreationRequest, costAssessment: CostImpactAssessment): Promise<ApprovalWorkflow> {
+  private async createApprovalWorkflow(
+    request: PolicyCreationRequest,
+    costAssessment: CostImpactAssessment,
+  ): Promise<ApprovalWorkflow> {
     const isHighCost = costAssessment.estimatedMonthlyCostUSD > 1000;
-    const hasStrictCompliance = request.complianceRequirements.includes(ComplianceFramework.HIPAA);
+    const hasStrictCompliance = request.complianceRequirements.includes(
+      ComplianceFramework.HIPAA,
+    );
 
     return {
       id: `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       requiredApprovers: [
-        { role: 'Database Administrator', department: 'IT', minimumLevel: 'Senior', requiredCertifications: [], alternateApprovers: [] },
-        ...(isHighCost ? [{ role: 'Finance Manager', department: 'Finance', minimumLevel: 'Manager', requiredCertifications: [], alternateApprovers: [] }] : []),
-        ...(hasStrictCompliance ? [{ role: 'Compliance Officer', department: 'Legal', minimumLevel: 'Officer', requiredCertifications: [], alternateApprovers: [] }] : [])
+        {
+          role: 'Database Administrator',
+          department: 'IT',
+          minimumLevel: 'Senior',
+          requiredCertifications: [],
+          alternateApprovers: [],
+        },
+        ...(isHighCost
+          ? [
+              {
+                role: 'Finance Manager',
+                department: 'Finance',
+                minimumLevel: 'Manager',
+                requiredCertifications: [],
+                alternateApprovers: [],
+              },
+            ]
+          : []),
+        ...(hasStrictCompliance
+          ? [
+              {
+                role: 'Compliance Officer',
+                department: 'Legal',
+                minimumLevel: 'Officer',
+                requiredCertifications: [],
+                alternateApprovers: [],
+              },
+            ]
+          : []),
       ],
       approvalSteps: [
         {
           stepNumber: 1,
           approverRole: 'Database Administrator',
           description: 'Technical review of retention policy',
-          requiredDocuments: ['policy_specification', 'technical_impact_assessment'],
+          requiredDocuments: [
+            'policy_specification',
+            'technical_impact_assessment',
+          ],
           timeoutHours: 24,
           parlantPromptTemplate: 'Technical validation prompt',
-          automatedChecks: ['syntax_validation', 'performance_impact']
-        }
+          automatedChecks: ['syntax_validation', 'performance_impact'],
+        },
       ],
       escalationRules: [],
       timeoutHours: isHighCost || hasStrictCompliance ? 72 : 48,
       parliamentConsultationRequired: isHighCost && hasStrictCompliance,
       riskThreshold: isHighCost ? 'HIGH' : 'MEDIUM',
-      businessImpactAssessment: isHighCost
+      businessImpactAssessment: isHighCost,
     };
   }
 
@@ -1060,41 +1211,64 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
     this.logger.log(`💾 Storing policy draft: ${policy.id}`);
   }
 
-  private async createAuditRecord(policy: RetentionPolicy, action: GovernanceAction, description: string): Promise<void> {
-    this.logger.log(`📝 Creating audit record: ${action} for policy ${policy.id}`);
+  private async createAuditRecord(
+    policy: RetentionPolicy,
+    action: GovernanceAction,
+    description: string,
+  ): Promise<void> {
+    this.logger.log(
+      `📝 Creating audit record: ${action} for policy ${policy.id}`,
+    );
   }
 
-  private async initiateApprovalWorkflow(policy: RetentionPolicy): Promise<string> {
+  private async initiateApprovalWorkflow(
+    policy: RetentionPolicy,
+  ): Promise<string> {
     const workflowId = `wf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.logger.log(`🔄 Initiating approval workflow: ${workflowId} for policy ${policy.id}`);
+    this.logger.log(
+      `🔄 Initiating approval workflow: ${workflowId} for policy ${policy.id}`,
+    );
     return workflowId;
   }
 
-  private async getPolicyById(policyId: string): Promise<RetentionPolicy | null> {
+  private async getPolicyById(
+    policyId: string,
+  ): Promise<RetentionPolicy | null> {
     this.logger.log(`🔍 Retrieving policy: ${policyId}`);
     // Mock implementation - return null for now
     return null;
   }
 
-  private async analyzeChangeImpact(existingPolicy: RetentionPolicy, changes: PolicyChange[]): Promise<{ summary: string; riskLevel: string }> {
+  private async analyzeChangeImpact(
+    existingPolicy: RetentionPolicy,
+    changes: PolicyChange[],
+  ): Promise<{ summary: string; riskLevel: string }> {
     return {
       summary: `${changes.length} changes analyzed with moderate business impact`,
-      riskLevel: 'MEDIUM'
+      riskLevel: 'MEDIUM',
     };
   }
 
-  private async validatePolicyModification(policy: RetentionPolicy, request: PolicyModificationRequest): Promise<{ isValid: boolean; errors: string[] }> {
+  private async validatePolicyModification(
+    policy: RetentionPolicy,
+    request: PolicyModificationRequest,
+  ): Promise<{ isValid: boolean; errors: string[] }> {
     return { isValid: true, errors: [] };
   }
 
-  private async createPolicyVersion(existingPolicy: RetentionPolicy, request: PolicyModificationRequest): Promise<RetentionPolicy> {
+  private async createPolicyVersion(
+    existingPolicy: RetentionPolicy,
+    request: PolicyModificationRequest,
+  ): Promise<RetentionPolicy> {
     const newPolicy = { ...existingPolicy };
     newPolicy.version = request.newVersion;
     newPolicy.lastModified = new Date();
     return newPolicy;
   }
 
-  private async createModificationApprovalWorkflow(changeImpact: any): Promise<ApprovalWorkflow> {
+  private async createModificationApprovalWorkflow(
+    changeImpact: any,
+  ): Promise<ApprovalWorkflow> {
     return {
       id: `mod_wf_${Date.now()}`,
       requiredApprovers: [],
@@ -1103,11 +1277,14 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
       timeoutHours: 48,
       parliamentConsultationRequired: false,
       riskThreshold: changeImpact.riskLevel,
-      businessImpactAssessment: true
+      businessImpactAssessment: true,
     };
   }
 
-  private async createEnforcementJob(policy: RetentionPolicy, request: PolicyEnforcementScheduleRequest): Promise<RetentionEnforcementJob> {
+  private async createEnforcementJob(
+    policy: RetentionPolicy,
+    request: PolicyEnforcementScheduleRequest,
+  ): Promise<RetentionEnforcementJob> {
     return {
       id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       policyId: policy.id,
@@ -1120,31 +1297,43 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
       costSavingsUSD: 0,
       storageFreedTB: 0,
       complianceValidations: [],
-      parlantApprovalRequired: request.parlantApprovalRequired
+      parlantApprovalRequired: request.parlantApprovalRequired,
     };
   }
 
-  private async submitEnforcementForParlantApproval(job: RetentionEnforcementJob): Promise<string> {
+  private async submitEnforcementForParlantApproval(
+    job: RetentionEnforcementJob,
+  ): Promise<string> {
     const sessionId = `enf_parlant_${Date.now()}`;
-    this.logger.log(`🤖 Submitting enforcement for PARLANT approval: ${sessionId}`);
+    this.logger.log(
+      `🤖 Submitting enforcement for PARLANT approval: ${sessionId}`,
+    );
     return sessionId;
   }
 
-  private async scheduleEnforcementJob(job: RetentionEnforcementJob): Promise<string> {
+  private async scheduleEnforcementJob(
+    job: RetentionEnforcementJob,
+  ): Promise<string> {
     this.logger.log(`⏰ Scheduling enforcement job: ${job.id}`);
     return job.id;
   }
 
-  private async getEnforcementJob(jobId: string): Promise<RetentionEnforcementJob | null> {
+  private async getEnforcementJob(
+    jobId: string,
+  ): Promise<RetentionEnforcementJob | null> {
     this.logger.log(`🔍 Retrieving enforcement job: ${jobId}`);
     return null;
   }
 
-  private async updateEnforcementJob(job: RetentionEnforcementJob): Promise<void> {
+  private async updateEnforcementJob(
+    job: RetentionEnforcementJob,
+  ): Promise<void> {
     this.logger.log(`💾 Updating enforcement job: ${job.id}`);
   }
 
-  private async executeEnforcementAction(action: EnforcementAction): Promise<EnforcementResult> {
+  private async executeEnforcementAction(
+    action: EnforcementAction,
+  ): Promise<EnforcementResult> {
     return {
       actionId: `action_${Date.now()}`,
       status: 'SUCCESS',
@@ -1154,41 +1343,66 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
       actualStorageImpact: 0,
       complianceValidationResults: {},
       performanceMetrics: {},
-      rollbackRequired: false
+      rollbackRequired: false,
     };
   }
 
-  private async validateComplianceRequirement(validation: ComplianceValidation): Promise<ComplianceValidation> {
+  private async validateComplianceRequirement(
+    validation: ComplianceValidation,
+  ): Promise<ComplianceValidation> {
     validation.validationStatus = 'COMPLIANT';
     validation.validationTimestamp = new Date();
     return validation;
   }
 
-  private async getPoliciesForCompliance(request: PolicyComplianceReportRequest): Promise<RetentionPolicy[]> {
+  private async getPoliciesForCompliance(
+    request: PolicyComplianceReportRequest,
+  ): Promise<RetentionPolicy[]> {
     return [];
   }
 
-  private async analyzeFrameworkCompliance(framework: ComplianceFramework, policies: RetentionPolicy[], period: any): Promise<{ overallStatus: string }> {
+  private async analyzeFrameworkCompliance(
+    framework: ComplianceFramework,
+    policies: RetentionPolicy[],
+    period: any,
+  ): Promise<{ overallStatus: string }> {
     return { overallStatus: 'COMPLIANT' };
   }
 
-  private async analyzePolicyCompliance(policy: RetentionPolicy, period: any): Promise<any> {
+  private async analyzePolicyCompliance(
+    policy: RetentionPolicy,
+    period: any,
+  ): Promise<any> {
     return { status: 'COMPLIANT', details: 'Policy meets all requirements' };
   }
 
-  private async generateComplianceRecommendations(complianceStatus: any, policyCompliance: any): Promise<string[]> {
-    return ['Continue monitoring compliance status', 'Review policy effectiveness quarterly'];
+  private async generateComplianceRecommendations(
+    complianceStatus: any,
+    policyCompliance: any,
+  ): Promise<string[]> {
+    return [
+      'Continue monitoring compliance status',
+      'Review policy effectiveness quarterly',
+    ];
   }
 
-  private async getAuditTrailForPeriod(period: any): Promise<PolicyAuditRecord[]> {
+  private async getAuditTrailForPeriod(
+    period: any,
+  ): Promise<PolicyAuditRecord[]> {
     return [];
   }
 
-  private async performComplianceCostAnalysis(policies: RetentionPolicy[], period: any): Promise<any> {
+  private async performComplianceCostAnalysis(
+    policies: RetentionPolicy[],
+    period: any,
+  ): Promise<any> {
     return { totalCost: 0, recommendations: [] };
   }
 
-  private async formatComplianceReport(format: string, data: any): Promise<any> {
+  private async formatComplianceReport(
+    format: string,
+    data: any,
+  ): Promise<any> {
     return { format, data: 'Formatted report data' };
   }
 }

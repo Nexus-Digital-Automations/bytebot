@@ -78,9 +78,9 @@ export enum DisasterType {
  * Disaster severity levels
  */
 export enum DisasterSeverity {
-  LOW = 'LOW',           // Minor impact, normal procedures
-  MEDIUM = 'MEDIUM',     // Moderate impact, expedited recovery
-  HIGH = 'HIGH',         // Major impact, emergency procedures
+  LOW = 'LOW', // Minor impact, normal procedures
+  MEDIUM = 'MEDIUM', // Moderate impact, expedited recovery
+  HIGH = 'HIGH', // Major impact, emergency procedures
   CRITICAL = 'CRITICAL', // Severe impact, all-hands response
   CATASTROPHIC = 'CATASTROPHIC', // Complete failure, maximum response
 }
@@ -442,10 +442,10 @@ export interface RecoveryExecutionPlan {
  * Recovery strategy
  */
 export enum RecoveryStrategy {
-  FAILOVER = 'FAILOVER',           // Switch to backup systems
-  RESTORE = 'RESTORE',             // Restore from backup
-  REBUILD = 'REBUILD',             // Rebuild from scratch
-  HYBRID = 'HYBRID',               // Combination approach
+  FAILOVER = 'FAILOVER', // Switch to backup systems
+  RESTORE = 'RESTORE', // Restore from backup
+  REBUILD = 'REBUILD', // Rebuild from scratch
+  HYBRID = 'HYBRID', // Combination approach
   MANUAL_RECOVERY = 'MANUAL_RECOVERY', // Manual intervention required
 }
 
@@ -676,12 +676,12 @@ export interface DRTestExecution {
  * DR test type
  */
 export enum DRTestType {
-  TABLETOP = 'TABLETOP',           // Discussion-based test
-  WALKTHROUGH = 'WALKTHROUGH',     // Step-by-step procedure review
-  SIMULATION = 'SIMULATION',       // Simulated disaster scenario
-  PARALLEL = 'PARALLEL',           // Test systems running in parallel
-  CUTOVER = 'CUTOVER',             // Full cutover test
-  INTERRUPTED = 'INTERRUPTED',     // Planned interruption test
+  TABLETOP = 'TABLETOP', // Discussion-based test
+  WALKTHROUGH = 'WALKTHROUGH', // Step-by-step procedure review
+  SIMULATION = 'SIMULATION', // Simulated disaster scenario
+  PARALLEL = 'PARALLEL', // Test systems running in parallel
+  CUTOVER = 'CUTOVER', // Full cutover test
+  INTERRUPTED = 'INTERRUPTED', // Planned interruption test
 }
 
 /**
@@ -782,7 +782,11 @@ export interface ActionItem {
   assignedTo: string;
   dueDate: Date;
   status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-  category: 'PROCESS_IMPROVEMENT' | 'TRAINING' | 'TECHNICAL_FIX' | 'DOCUMENTATION';
+  category:
+    | 'PROCESS_IMPROVEMENT'
+    | 'TRAINING'
+    | 'TECHNICAL_FIX'
+    | 'DOCUMENTATION';
 }
 
 // ===== DISASTER RECOVERY AUTOMATION SERVICE =====
@@ -843,13 +847,16 @@ export class DisasterRecoveryAutomationService {
     const incidentId = this.generateIncidentId();
     const startTime = Date.now();
 
-    this.logger.log(`[${incidentId}] Disaster detected and response initiated`, {
-      disasterType,
-      severity,
-      affectedSystems: affectedSystems.length,
-      reportedBy,
-      incidentId,
-    });
+    this.logger.log(
+      `[${incidentId}] Disaster detected and response initiated`,
+      {
+        disasterType,
+        severity,
+        affectedSystems: affectedSystems.length,
+        reportedBy,
+        incidentId,
+      },
+    );
 
     try {
       // 1. Create disaster incident
@@ -875,7 +882,10 @@ export class DisasterRecoveryAutomationService {
       this.activeIncidents.set(incidentId, incident);
 
       // 6. Validate disaster response with PARLANT
-      const validationResponse = await this.validateDisasterResponse(incident, userContext);
+      const validationResponse = await this.validateDisasterResponse(
+        incident,
+        userContext,
+      );
 
       if (!validationResponse.approved) {
         this.logger.warn(`[${incidentId}] Disaster response not approved`, {
@@ -899,13 +909,16 @@ export class DisasterRecoveryAutomationService {
         await this.escalateIncident(incident);
       }
 
-      this.logger.log(`[${incidentId}] Disaster response initiated successfully`, {
-        severity,
-        autoRecoveryInitiated: this.shouldAutoInitiateRecovery(incident),
-        rto: incident.recoveryObjectives.rto,
-        rpo: incident.recoveryObjectives.rpo,
-        incidentId,
-      });
+      this.logger.log(
+        `[${incidentId}] Disaster response initiated successfully`,
+        {
+          severity,
+          autoRecoveryInitiated: this.shouldAutoInitiateRecovery(incident),
+          rto: incident.recoveryObjectives.rto,
+          rpo: incident.recoveryObjectives.rpo,
+          incidentId,
+        },
+      );
 
       return incident;
     } catch (error) {
@@ -943,13 +956,21 @@ export class DisasterRecoveryAutomationService {
 
     try {
       // 1. Create recovery execution plan
-      const executionPlan = await this.createRecoveryExecutionPlan(incident, planId);
+      const executionPlan = await this.createRecoveryExecutionPlan(
+        incident,
+        planId,
+      );
 
       // 2. Validate execution plan with PARLANT
-      const validationResponse = await this.validateRecoveryPlan(executionPlan, userContext);
+      const validationResponse = await this.validateRecoveryPlan(
+        executionPlan,
+        userContext,
+      );
 
       if (!validationResponse.approved) {
-        throw new Error(`Recovery plan validation failed: ${validationResponse.reason}`);
+        throw new Error(
+          `Recovery plan validation failed: ${validationResponse.reason}`,
+        );
       }
 
       // 3. Store execution plan
@@ -964,24 +985,32 @@ export class DisasterRecoveryAutomationService {
       const executionDuration = Date.now() - startTime;
       this.updateDRMetrics(incident, executionDuration, true);
 
-      this.logger.log(`[${incidentId}] Disaster recovery plan executed successfully`, {
-        planId,
-        executionDuration,
-        stepsCompleted: executionPlan.executionSteps.filter(s => s.status === StepStatus.COMPLETED).length,
-        totalSteps: executionPlan.executionSteps.length,
-        incidentId,
-      });
+      this.logger.log(
+        `[${incidentId}] Disaster recovery plan executed successfully`,
+        {
+          planId,
+          executionDuration,
+          stepsCompleted: executionPlan.executionSteps.filter(
+            (s) => s.status === StepStatus.COMPLETED,
+          ).length,
+          totalSteps: executionPlan.executionSteps.length,
+          incidentId,
+        },
+      );
 
       return executionPlan;
     } catch (error) {
       const executionDuration = Date.now() - startTime;
       this.updateDRMetrics(incident, executionDuration, false);
 
-      this.logger.error(`[${incidentId}] Disaster recovery plan execution failed`, {
-        error: error instanceof Error ? error.message : String(error),
-        executionDuration,
-        incidentId,
-      });
+      this.logger.error(
+        `[${incidentId}] Disaster recovery plan execution failed`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          executionDuration,
+          incidentId,
+        },
+      );
 
       throw error;
     }
@@ -1039,10 +1068,15 @@ export class DisasterRecoveryAutomationService {
       };
 
       // 2. Validate test execution with PARLANT
-      const validationResponse = await this.validateDRTest(testExecution, userContext);
+      const validationResponse = await this.validateDRTest(
+        testExecution,
+        userContext,
+      );
 
       if (!validationResponse.approved) {
-        throw new Error(`DR test validation failed: ${validationResponse.reason}`);
+        throw new Error(
+          `DR test validation failed: ${validationResponse.reason}`,
+        );
       }
 
       // 3. Execute test based on type
@@ -1052,7 +1086,8 @@ export class DisasterRecoveryAutomationService {
       this.testExecutions.set(testId, testExecution);
 
       testExecution.duration = Date.now() - startTime;
-      testExecution.testResults.performanceMetrics.totalTime = testExecution.duration;
+      testExecution.testResults.performanceMetrics.totalTime =
+        testExecution.duration;
 
       // 5. Generate test report
       await this.generateTestReport(testExecution);
@@ -1099,7 +1134,11 @@ export class DisasterRecoveryAutomationService {
         this.systemHealthCache.set(systemId, status as SystemStatus);
 
         // Detect status changes
-        if (previousStatus && previousStatus !== status && status === SystemStatus.FAILED) {
+        if (
+          previousStatus &&
+          previousStatus !== status &&
+          status === SystemStatus.FAILED
+        ) {
           await this.handleSystemFailure(systemId, status as SystemStatus);
         }
       }
@@ -1267,14 +1306,18 @@ export class DisasterRecoveryAutomationService {
   /**
    * Perform comprehensive impact assessment
    */
-  private async performImpactAssessment(incident: DisasterIncident): Promise<ImpactAssessment> {
-    this.logger.debug(`Performing impact assessment for incident ${incident.incidentId}`);
+  private async performImpactAssessment(
+    incident: DisasterIncident,
+  ): Promise<ImpactAssessment> {
+    this.logger.debug(
+      `Performing impact assessment for incident ${incident.incidentId}`,
+    );
 
     // Mock impact assessment - in production, this would analyze real system data
     const businessImpact: BusinessImpact = {
       affectedUsers: this.calculateAffectedUsers(incident.affectedSystems),
-      affectedServices: incident.affectedSystems.map(s => s.systemName),
-      serviceUnavailability: incident.affectedSystems.map(s => ({
+      affectedServices: incident.affectedSystems.map((s) => s.systemName),
+      serviceUnavailability: incident.affectedSystems.map((s) => ({
         serviceName: s.systemName,
         unavailableSince: incident.detectedAt,
         affectedFeatures: ['core functionality'],
@@ -1283,7 +1326,10 @@ export class DisasterRecoveryAutomationService {
       businessProcessImpact: [
         {
           processName: 'Data Processing',
-          impactLevel: incident.severity === DisasterSeverity.CRITICAL ? 'BLOCKED' : 'DEGRADED',
+          impactLevel:
+            incident.severity === DisasterSeverity.CRITICAL
+              ? 'BLOCKED'
+              : 'DEGRADED',
           description: 'Database operations affected',
           workaround: 'Use backup procedures where possible',
         },
@@ -1300,14 +1346,18 @@ export class DisasterRecoveryAutomationService {
     };
 
     const technicalImpact: TechnicalImpact = {
-      systemsDown: incident.affectedSystems.filter(s => s.currentStatus === SystemStatus.FAILED).length,
+      systemsDown: incident.affectedSystems.filter(
+        (s) => s.currentStatus === SystemStatus.FAILED,
+      ).length,
       dataLossRisk: this.assessDataLossRisk(incident),
       dataCorruptionRisk: this.assessDataCorruptionRisk(incident),
       recoverabilityAssessment: {
         recoverabilityScore: this.calculateRecoverabilityScore(incident),
         dataRecoveryComplexity: this.assessRecoveryComplexity(incident),
         estimatedRecoveryTime: this.estimateRecoveryTime(incident),
-        recoveryDependencies: incident.affectedSystems.flatMap(s => s.dependencies),
+        recoveryDependencies: incident.affectedSystems.flatMap(
+          (s) => s.dependencies,
+        ),
         riskFactors: this.identifyRiskFactors(incident),
       },
       cascadingFailureRisk: this.assessCascadingFailureRisk(incident),
@@ -1317,8 +1367,14 @@ export class DisasterRecoveryAutomationService {
       businessImpact,
       technicalImpact,
       complianceImpact: incident.impactAssessment.complianceImpact,
-      financialImpact: this.calculateFinancialImpact(businessImpact, technicalImpact),
-      reputationImpact: this.assessReputationImpact(incident.severity, businessImpact),
+      financialImpact: this.calculateFinancialImpact(
+        businessImpact,
+        technicalImpact,
+      ),
+      reputationImpact: this.assessReputationImpact(
+        incident.severity,
+        businessImpact,
+      ),
     };
   }
 
@@ -1332,15 +1388,24 @@ export class DisasterRecoveryAutomationService {
     planId: string,
   ): Promise<RecoveryExecutionPlan> {
     const recoveryStrategy = this.determineRecoveryStrategy(incident);
-    const executionSteps = await this.generateRecoverySteps(incident, recoveryStrategy);
+    const executionSteps = await this.generateRecoverySteps(
+      incident,
+      recoveryStrategy,
+    );
 
     const plan: RecoveryExecutionPlan = {
       planId,
       incidentId: incident.incidentId,
       recoveryStrategy,
       executionSteps,
-      resourceAllocation: await this.allocateResources(incident, executionSteps),
-      timeline: this.createRecoveryTimeline(executionSteps, incident.recoveryObjectives),
+      resourceAllocation: await this.allocateResources(
+        incident,
+        executionSteps,
+      ),
+      timeline: this.createRecoveryTimeline(
+        executionSteps,
+        incident.recoveryObjectives,
+      ),
       contingencies: await this.createContingencyPlans(incident),
       validationChecks: this.createValidationChecks(incident),
       rollbackPlan: await this.createRollbackPlan(incident),
@@ -1352,14 +1417,18 @@ export class DisasterRecoveryAutomationService {
   /**
    * Execute recovery steps
    */
-  private async executeRecoverySteps(plan: RecoveryExecutionPlan): Promise<void> {
+  private async executeRecoverySteps(
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     this.logger.debug(`Executing recovery steps for plan ${plan.planId}`, {
       stepCount: plan.executionSteps.length,
       strategy: plan.recoveryStrategy,
     });
 
     // Sort steps by execution order
-    const sortedSteps = plan.executionSteps.sort((a, b) => a.executionOrder - b.executionOrder);
+    const sortedSteps = plan.executionSteps.sort(
+      (a, b) => a.executionOrder - b.executionOrder,
+    );
 
     for (const step of sortedSteps) {
       try {
@@ -1392,7 +1461,11 @@ export class DisasterRecoveryAutomationService {
         });
 
         // Handle step failure
-        await this.handleStepFailure(step, plan, error instanceof Error ? error.message : String(error));
+        await this.handleStepFailure(
+          step,
+          plan,
+          error instanceof Error ? error.message : String(error),
+        );
         break;
       }
     }
@@ -1401,7 +1474,10 @@ export class DisasterRecoveryAutomationService {
   /**
    * Execute individual recovery step
    */
-  private async executeRecoveryStep(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan): Promise<void> {
+  private async executeRecoveryStep(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     switch (step.automationLevel) {
       case 'FULLY_AUTOMATED':
         await this.executeAutomatedStep(step, plan);
@@ -1492,7 +1568,9 @@ export class DisasterRecoveryAutomationService {
     }
 
     if (incident.severity === DisasterSeverity.CRITICAL) {
-      return incident.affectedSystems.some(s => s.criticality === RecoveryPriority.P0);
+      return incident.affectedSystems.some(
+        (s) => s.criticality === RecoveryPriority.P0,
+      );
     }
 
     if (incident.severity === DisasterSeverity.HIGH) {
@@ -1512,7 +1590,9 @@ export class DisasterRecoveryAutomationService {
 
     // Auto-initiate for critical systems with high severity
     if (incident.severity >= DisasterSeverity.HIGH) {
-      return incident.affectedSystems.some(s => s.criticality <= RecoveryPriority.P1);
+      return incident.affectedSystems.some(
+        (s) => s.criticality <= RecoveryPriority.P1,
+      );
     }
 
     return false;
@@ -1523,13 +1603,20 @@ export class DisasterRecoveryAutomationService {
    */
   private async checkSystemHealth(): Promise<Record<string, SystemStatus>> {
     // Mock system health check - in production, this would query real systems
-    const systems = ['database_primary', 'database_backup', 'application_server', 'web_server'];
+    const systems = [
+      'database_primary',
+      'database_backup',
+      'application_server',
+      'web_server',
+    ];
     const health: Record<string, SystemStatus> = {};
 
     for (const system of systems) {
       // Simulate occasional failures for testing
       const isHealthy = Math.random() > 0.02; // 2% failure rate
-      health[system] = isHealthy ? SystemStatus.OPERATIONAL : SystemStatus.FAILED;
+      health[system] = isHealthy
+        ? SystemStatus.OPERATIONAL
+        : SystemStatus.FAILED;
     }
 
     return health;
@@ -1538,7 +1625,10 @@ export class DisasterRecoveryAutomationService {
   /**
    * Handle system failure detection
    */
-  private async handleSystemFailure(systemId: string, status: SystemStatus): Promise<void> {
+  private async handleSystemFailure(
+    systemId: string,
+    status: SystemStatus,
+  ): Promise<void> {
     this.logger.warn(`System failure detected`, { systemId, status });
 
     // Auto-create incident for critical system failures
@@ -1621,14 +1711,23 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private determineRecoveryObjectives(incident: DisasterIncident): RecoveryObjectives {
+  private determineRecoveryObjectives(
+    incident: DisasterIncident,
+  ): RecoveryObjectives {
     // Set objectives based on severity and system criticality
-    const highestPriority = Math.min(...incident.affectedSystems.map(s =>
-      s.criticality === RecoveryPriority.P0 ? 0 :
-      s.criticality === RecoveryPriority.P1 ? 1 :
-      s.criticality === RecoveryPriority.P2 ? 2 :
-      s.criticality === RecoveryPriority.P3 ? 3 : 4
-    ));
+    const highestPriority = Math.min(
+      ...incident.affectedSystems.map((s) =>
+        s.criticality === RecoveryPriority.P0
+          ? 0
+          : s.criticality === RecoveryPriority.P1
+            ? 1
+            : s.criticality === RecoveryPriority.P2
+              ? 2
+              : s.criticality === RecoveryPriority.P3
+                ? 3
+                : 4,
+      ),
+    );
 
     const rtoMinutes = [5, 15, 60, 240, 1440][highestPriority] || 1440;
     const rpoMinutes = [1, 5, 15, 60, 240][highestPriority] || 240;
@@ -1642,7 +1741,9 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private async createCommunicationPlan(incident: DisasterIncident): Promise<CommunicationPlan> {
+  private async createCommunicationPlan(
+    incident: DisasterIncident,
+  ): Promise<CommunicationPlan> {
     return incident.communicationPlan; // Use default from incident creation
   }
 
@@ -1656,13 +1757,21 @@ export class DisasterRecoveryAutomationService {
     // In production, this would notify escalation contacts
   }
 
-  private async initiateAutomatedRecovery(incident: DisasterIncident, userContext: ParlantUserContext): Promise<void> {
-    this.logger.log(`Initiating automated recovery for incident ${incident.incidentId}`);
+  private async initiateAutomatedRecovery(
+    incident: DisasterIncident,
+    userContext: ParlantUserContext,
+  ): Promise<void> {
+    this.logger.log(
+      `Initiating automated recovery for incident ${incident.incidentId}`,
+    );
 
     incident.currentStatus = IncidentStatus.RESPONDING;
 
     // Create and execute recovery plan
-    const recoveryPlan = await this.executeDisasterRecoveryPlan(incident.incidentId, userContext);
+    const recoveryPlan = await this.executeDisasterRecoveryPlan(
+      incident.incidentId,
+      userContext,
+    );
 
     this.logger.log(`Automated recovery initiated`, {
       incidentId: incident.incidentId,
@@ -1676,11 +1785,17 @@ export class DisasterRecoveryAutomationService {
   }
 
   private isAutomatedResponseEnabled(): boolean {
-    return this.configService.get<boolean>('AUTOMATED_DR_RESPONSE_ENABLED', true);
+    return this.configService.get<boolean>(
+      'AUTOMATED_DR_RESPONSE_ENABLED',
+      true,
+    );
   }
 
   private isConversationalValidationEnabled(): boolean {
-    return this.configService.get<boolean>('DR_CONVERSATIONAL_VALIDATION_ENABLED', true);
+    return this.configService.get<boolean>(
+      'DR_CONVERSATIONAL_VALIDATION_ENABLED',
+      true,
+    );
   }
 
   private isDRTestingEnabled(): boolean {
@@ -1688,7 +1803,10 @@ export class DisasterRecoveryAutomationService {
   }
 
   private isCriticalSystem(systemId: string): boolean {
-    const criticalSystems = this.configService.get<string[]>('CRITICAL_SYSTEMS', ['database_primary']);
+    const criticalSystems = this.configService.get<string[]>(
+      'CRITICAL_SYSTEMS',
+      ['database_primary'],
+    );
     return criticalSystems.includes(systemId);
   }
 
@@ -1717,16 +1835,24 @@ export class DisasterRecoveryAutomationService {
     this.logger.debug('Loading disaster recovery plans');
   }
 
-  private updateDRMetrics(incident: DisasterIncident, duration: number, success: boolean): void {
+  private updateDRMetrics(
+    incident: DisasterIncident,
+    duration: number,
+    success: boolean,
+  ): void {
     this.incidentCount++;
-    this.averageRecoveryTime = (this.averageRecoveryTime * (this.incidentCount - 1) + duration) / this.incidentCount;
+    this.averageRecoveryTime =
+      (this.averageRecoveryTime * (this.incidentCount - 1) + duration) /
+      this.incidentCount;
 
     if (success) {
       this.successfulRecoveries++;
     }
   }
 
-  private generateDisasterResponseReasoning(incident: DisasterIncident): string {
+  private generateDisasterResponseReasoning(
+    incident: DisasterIncident,
+  ): string {
     if (incident.severity === DisasterSeverity.CATASTROPHIC) {
       return 'Catastrophic incident requires immediate automated response';
     } else if (incident.severity === DisasterSeverity.CRITICAL) {
@@ -1738,11 +1864,15 @@ export class DisasterRecoveryAutomationService {
 
   // Additional placeholder methods...
   private assessDataLossRisk(incident: DisasterIncident): RiskLevel {
-    return incident.severity >= DisasterSeverity.HIGH ? RiskLevel.HIGH : RiskLevel.MEDIUM;
+    return incident.severity >= DisasterSeverity.HIGH
+      ? RiskLevel.HIGH
+      : RiskLevel.MEDIUM;
   }
 
   private assessDataCorruptionRisk(incident: DisasterIncident): RiskLevel {
-    return incident.incidentType === DisasterType.SOFTWARE_CORRUPTION ? RiskLevel.HIGH : RiskLevel.LOW;
+    return incident.incidentType === DisasterType.SOFTWARE_CORRUPTION
+      ? RiskLevel.HIGH
+      : RiskLevel.LOW;
   }
 
   private calculateRecoverabilityScore(incident: DisasterIncident): number {
@@ -1758,7 +1888,9 @@ export class DisasterRecoveryAutomationService {
     return Math.max(0, baseScore - severityPenalty[incident.severity]);
   }
 
-  private assessRecoveryComplexity(incident: DisasterIncident): 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'VERY_COMPLEX' {
+  private assessRecoveryComplexity(
+    incident: DisasterIncident,
+  ): 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'VERY_COMPLEX' {
     if (incident.affectedSystems.length > 5) return 'VERY_COMPLEX';
     if (incident.severity >= DisasterSeverity.CRITICAL) return 'COMPLEX';
     if (incident.affectedSystems.length > 2) return 'MODERATE';
@@ -1773,7 +1905,9 @@ export class DisasterRecoveryAutomationService {
     const factors: string[] = [];
 
     if (incident.severity >= DisasterSeverity.HIGH) {
-      factors.push('High severity incident with potential for cascading failures');
+      factors.push(
+        'High severity incident with potential for cascading failures',
+      );
     }
 
     if (incident.affectedSystems.length > 3) {
@@ -1784,14 +1918,20 @@ export class DisasterRecoveryAutomationService {
   }
 
   private assessCascadingFailureRisk(incident: DisasterIncident): RiskLevel {
-    const dependentSystems = incident.affectedSystems.reduce((total, system) => total + system.dependencies.length, 0);
+    const dependentSystems = incident.affectedSystems.reduce(
+      (total, system) => total + system.dependencies.length,
+      0,
+    );
 
     if (dependentSystems > 10) return RiskLevel.HIGH;
     if (dependentSystems > 5) return RiskLevel.MEDIUM;
     return RiskLevel.LOW;
   }
 
-  private calculateFinancialImpact(businessImpact: BusinessImpact, technicalImpact: TechnicalImpact): FinancialImpact {
+  private calculateFinancialImpact(
+    businessImpact: BusinessImpact,
+    technicalImpact: TechnicalImpact,
+  ): FinancialImpact {
     const costPerUser = 10; // $10 per affected user per hour
     const costPerSystem = 1000; // $1000 per failed system per hour
 
@@ -1804,11 +1944,16 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private assessReputationImpact(severity: DisasterSeverity, businessImpact: BusinessImpact): ReputationImpact {
-    const baseRisk = severity >= DisasterSeverity.HIGH ? RiskLevel.MEDIUM : RiskLevel.LOW;
+  private assessReputationImpact(
+    severity: DisasterSeverity,
+    businessImpact: BusinessImpact,
+  ): ReputationImpact {
+    const baseRisk =
+      severity >= DisasterSeverity.HIGH ? RiskLevel.MEDIUM : RiskLevel.LOW;
 
     return {
-      mediaAttentionRisk: businessImpact.affectedUsers > 10000 ? RiskLevel.HIGH : baseRisk,
+      mediaAttentionRisk:
+        businessImpact.affectedUsers > 10000 ? RiskLevel.HIGH : baseRisk,
       customerTrustImpact: baseRisk,
       brandDamageRisk: baseRisk,
       competitorAdvantageRisk: baseRisk,
@@ -1816,7 +1961,9 @@ export class DisasterRecoveryAutomationService {
   }
 
   // Additional placeholder methods for plan execution
-  private determineRecoveryStrategy(incident: DisasterIncident): RecoveryStrategy {
+  private determineRecoveryStrategy(
+    incident: DisasterIncident,
+  ): RecoveryStrategy {
     if (incident.incidentType === DisasterType.HARDWARE_FAILURE) {
       return RecoveryStrategy.FAILOVER;
     } else if (incident.incidentType === DisasterType.SOFTWARE_CORRUPTION) {
@@ -1826,7 +1973,10 @@ export class DisasterRecoveryAutomationService {
     }
   }
 
-  private async generateRecoverySteps(incident: DisasterIncident, strategy: RecoveryStrategy): Promise<RecoveryExecutionStep[]> {
+  private async generateRecoverySteps(
+    incident: DisasterIncident,
+    strategy: RecoveryStrategy,
+  ): Promise<RecoveryExecutionStep[]> {
     const steps: RecoveryExecutionStep[] = [
       {
         stepId: 'assessment',
@@ -1838,7 +1988,10 @@ export class DisasterRecoveryAutomationService {
         automationLevel: 'FULLY_AUTOMATED',
         assignedTeam: 'incident_response',
         status: StepStatus.PENDING,
-        validationCriteria: ['system_status_confirmed', 'damage_extent_documented'],
+        validationCriteria: [
+          'system_status_confirmed',
+          'damage_extent_documented',
+        ],
       },
       {
         stepId: 'backup_verification',
@@ -1859,10 +2012,17 @@ export class DisasterRecoveryAutomationService {
         executionOrder: 3,
         estimatedDuration: 1800000, // 30 minutes
         dependencies: ['backup_verification'],
-        automationLevel: strategy === RecoveryStrategy.FAILOVER ? 'FULLY_AUTOMATED' : 'SEMI_AUTOMATED',
+        automationLevel:
+          strategy === RecoveryStrategy.FAILOVER
+            ? 'FULLY_AUTOMATED'
+            : 'SEMI_AUTOMATED',
         assignedTeam: 'recovery_team',
         status: StepStatus.PENDING,
-        validationCriteria: ['system_restored', 'data_validated', 'functionality_verified'],
+        validationCriteria: [
+          'system_restored',
+          'data_validated',
+          'functionality_verified',
+        ],
       },
     ];
 
@@ -1870,7 +2030,10 @@ export class DisasterRecoveryAutomationService {
   }
 
   // Additional placeholder methods continue...
-  private async allocateResources(incident: DisasterIncident, steps: RecoveryExecutionStep[]): Promise<ResourceAllocation> {
+  private async allocateResources(
+    incident: DisasterIncident,
+    steps: RecoveryExecutionStep[],
+  ): Promise<ResourceAllocation> {
     return {
       personnelAssignment: [],
       systemResources: [],
@@ -1884,23 +2047,33 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private createRecoveryTimeline(steps: RecoveryExecutionStep[], objectives: RecoveryObjectives): RecoveryTimeline {
+  private createRecoveryTimeline(
+    steps: RecoveryExecutionStep[],
+    objectives: RecoveryObjectives,
+  ): RecoveryTimeline {
     const now = new Date();
-    const totalDuration = steps.reduce((sum, step) => sum + step.estimatedDuration, 0);
+    const totalDuration = steps.reduce(
+      (sum, step) => sum + step.estimatedDuration,
+      0,
+    );
 
     return {
       plannedStart: now,
       plannedCompletion: new Date(now.getTime() + totalDuration),
       milestones: [],
-      criticalPath: steps.map(s => s.stepId),
+      criticalPath: steps.map((s) => s.stepId),
     };
   }
 
-  private async createContingencyPlans(incident: DisasterIncident): Promise<ContingencyPlan[]> {
+  private async createContingencyPlans(
+    incident: DisasterIncident,
+  ): Promise<ContingencyPlan[]> {
     return [];
   }
 
-  private createValidationChecks(incident: DisasterIncident): ValidationCheck[] {
+  private createValidationChecks(
+    incident: DisasterIncident,
+  ): ValidationCheck[] {
     return [
       {
         checkId: 'data_integrity',
@@ -1914,7 +2087,9 @@ export class DisasterRecoveryAutomationService {
     ];
   }
 
-  private async createRollbackPlan(incident: DisasterIncident): Promise<RollbackPlan> {
+  private async createRollbackPlan(
+    incident: DisasterIncident,
+  ): Promise<RollbackPlan> {
     return {
       planId: `rollback_${incident.incidentId}`,
       triggers: [],
@@ -1924,7 +2099,10 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private async validateRecoveryPlan(plan: RecoveryExecutionPlan, userContext: ParlantUserContext): Promise<ParlantValidationResponse> {
+  private async validateRecoveryPlan(
+    plan: RecoveryExecutionPlan,
+    userContext: ParlantUserContext,
+  ): Promise<ParlantValidationResponse> {
     // Mock validation
     return {
       approved: true,
@@ -1934,23 +2112,39 @@ export class DisasterRecoveryAutomationService {
     };
   }
 
-  private async executeAutomatedStep(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan): Promise<void> {
+  private async executeAutomatedStep(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     // Simulate automated step execution
-    await new Promise(resolve => setTimeout(resolve, Math.min(step.estimatedDuration, 5000)));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(step.estimatedDuration, 5000)),
+    );
   }
 
-  private async executeSemiAutomatedStep(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan): Promise<void> {
+  private async executeSemiAutomatedStep(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     // Simulate semi-automated step execution
-    await new Promise(resolve => setTimeout(resolve, Math.min(step.estimatedDuration, 10000)));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(step.estimatedDuration, 10000)),
+    );
   }
 
-  private async executeManualStep(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan): Promise<void> {
+  private async executeManualStep(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     // Simulate manual step execution (would require human intervention in production)
     this.logger.log(`Manual step requires intervention: ${step.stepName}`);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Quick simulation
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Quick simulation
   }
 
-  private async validateStepCompletion(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan): Promise<void> {
+  private async validateStepCompletion(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+  ): Promise<void> {
     // Validate step completion criteria
     for (const criteria of step.validationCriteria) {
       const isValid = await this.checkValidationCriteria(criteria);
@@ -1965,16 +2159,27 @@ export class DisasterRecoveryAutomationService {
     return Math.random() > 0.1; // 90% success rate
   }
 
-  private async handleStepFailure(step: RecoveryExecutionStep, plan: RecoveryExecutionPlan, errorMessage: string): Promise<void> {
-    this.logger.error(`Handling step failure for ${step.stepId}`, { errorMessage });
+  private async handleStepFailure(
+    step: RecoveryExecutionStep,
+    plan: RecoveryExecutionPlan,
+    errorMessage: string,
+  ): Promise<void> {
+    this.logger.error(`Handling step failure for ${step.stepId}`, {
+      errorMessage,
+    });
 
     // In production, this would trigger contingency plans or rollback procedures
     if (step.rollbackProcedure) {
-      this.logger.log(`Initiating rollback procedure: ${step.rollbackProcedure}`);
+      this.logger.log(
+        `Initiating rollback procedure: ${step.rollbackProcedure}`,
+      );
     }
   }
 
-  private async validateDRTest(test: DRTestExecution, userContext: ParlantUserContext): Promise<ParlantValidationResponse> {
+  private async validateDRTest(
+    test: DRTestExecution,
+    userContext: ParlantUserContext,
+  ): Promise<ParlantValidationResponse> {
     // Mock DR test validation
     return {
       approved: true,
@@ -1987,24 +2192,26 @@ export class DisasterRecoveryAutomationService {
   private async executeTestScenario(test: DRTestExecution): Promise<void> {
     // Simulate test execution based on test type
     const simulationTime = {
-      [DRTestType.TABLETOP]: 3600000,    // 1 hour
+      [DRTestType.TABLETOP]: 3600000, // 1 hour
       [DRTestType.WALKTHROUGH]: 7200000, // 2 hours
       [DRTestType.SIMULATION]: 14400000, // 4 hours
-      [DRTestType.PARALLEL]: 21600000,   // 6 hours
-      [DRTestType.CUTOVER]: 28800000,    // 8 hours
+      [DRTestType.PARALLEL]: 21600000, // 6 hours
+      [DRTestType.CUTOVER]: 28800000, // 8 hours
       [DRTestType.INTERRUPTED]: 18000000, // 5 hours
     };
 
     const testDuration = simulationTime[test.testType] || 3600000;
 
     // Simulate test execution
-    await new Promise(resolve => setTimeout(resolve, Math.min(testDuration / 1000, 5000))); // Max 5 seconds for demo
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(testDuration / 1000, 5000)),
+    ); // Max 5 seconds for demo
 
     // Mock test results
     test.testResults = {
       overallResult: Math.random() > 0.2 ? 'PASS' : 'FAIL', // 80% success rate
-      rtoAchieved: Math.floor(Math.random() * 1800) + 300,  // 5-35 minutes
-      rpoAchieved: Math.floor(Math.random() * 300) + 60,    // 1-6 minutes
+      rtoAchieved: Math.floor(Math.random() * 1800) + 300, // 5-35 minutes
+      rpoAchieved: Math.floor(Math.random() * 300) + 60, // 1-6 minutes
       objectivesMet: [
         {
           objective: 'RTO Target',
@@ -2099,7 +2306,10 @@ export class DisasterRecoveryAutomationService {
    * Get DR statistics
    */
   getDRStatistics() {
-    const successRate = this.incidentCount > 0 ? (this.successfulRecoveries / this.incidentCount) * 100 : 0;
+    const successRate =
+      this.incidentCount > 0
+        ? (this.successfulRecoveries / this.incidentCount) * 100
+        : 0;
 
     return {
       totalIncidents: this.incidentCount,
@@ -2117,7 +2327,11 @@ export class DisasterRecoveryAutomationService {
   /**
    * Force incident resolution
    */
-  async resolveIncident(incidentId: string, userId: string, resolution: string): Promise<boolean> {
+  async resolveIncident(
+    incidentId: string,
+    userId: string,
+    resolution: string,
+  ): Promise<boolean> {
     const incident = this.activeIncidents.get(incidentId);
     if (!incident) return false;
 

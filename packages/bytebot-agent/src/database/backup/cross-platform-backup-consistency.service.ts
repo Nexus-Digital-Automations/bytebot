@@ -32,7 +32,7 @@ export enum DatabasePlatform {
   SQLITE = 'SQLITE',
   REDIS = 'REDIS',
   CASSANDRA = 'CASSANDRA',
-  ELASTICSEARCH = 'ELASTICSEARCH'
+  ELASTICSEARCH = 'ELASTICSEARCH',
 }
 
 export enum Environment {
@@ -41,15 +41,15 @@ export enum Environment {
   STAGING = 'STAGING',
   PRODUCTION = 'PRODUCTION',
   DISASTER_RECOVERY = 'DISASTER_RECOVERY',
-  BACKUP_VALIDATION = 'BACKUP_VALIDATION'
+  BACKUP_VALIDATION = 'BACKUP_VALIDATION',
 }
 
 export enum ConsistencyLevel {
-  BINARY_IDENTICAL = 'BINARY_IDENTICAL',         // Exact bit-for-bit match
+  BINARY_IDENTICAL = 'BINARY_IDENTICAL', // Exact bit-for-bit match
   STRUCTURAL_EQUIVALENT = 'STRUCTURAL_EQUIVALENT', // Same schema, different data formats
-  LOGICAL_CONSISTENT = 'LOGICAL_CONSISTENT',      // Same logical data, different representations
-  SEMANTICALLY_VALID = 'SEMANTICALLY_VALID',      // Business logic consistency maintained
-  FUNCTIONALLY_EQUIVALENT = 'FUNCTIONALLY_EQUIVALENT' // Same query results, different storage
+  LOGICAL_CONSISTENT = 'LOGICAL_CONSISTENT', // Same logical data, different representations
+  SEMANTICALLY_VALID = 'SEMANTICALLY_VALID', // Business logic consistency maintained
+  FUNCTIONALLY_EQUIVALENT = 'FUNCTIONALLY_EQUIVALENT', // Same query results, different storage
 }
 
 export enum ValidationScope {
@@ -58,7 +58,7 @@ export enum ValidationScope {
   DATA_ONLY = 'DATA_ONLY',
   METADATA_ONLY = 'METADATA_ONLY',
   INCREMENTAL_CHANGES = 'INCREMENTAL_CHANGES',
-  CRITICAL_TABLES_ONLY = 'CRITICAL_TABLES_ONLY'
+  CRITICAL_TABLES_ONLY = 'CRITICAL_TABLES_ONLY',
 }
 
 // ============================================================================
@@ -228,7 +228,7 @@ export interface PerformanceConstraints {
 
 export interface TimeWindow {
   startTime: string; // HH:MM format
-  endTime: string;   // HH:MM format
+  endTime: string; // HH:MM format
   timezone: string;
   allowedDays: string[]; // ['MONDAY', 'TUESDAY', etc.]
 }
@@ -242,7 +242,11 @@ export interface ConsistencyValidationResult {
   requestId: string;
   startTime: Date;
   endTime: Date;
-  overallStatus: 'CONSISTENT' | 'INCONSISTENT' | 'PARTIAL_CONSISTENCY' | 'VALIDATION_FAILED';
+  overallStatus:
+    | 'CONSISTENT'
+    | 'INCONSISTENT'
+    | 'PARTIAL_CONSISTENCY'
+    | 'VALIDATION_FAILED';
   consistencyLevel: ConsistencyLevel;
   platformResults: PlatformValidationResult[];
   crossPlatformComparisons: CrossPlatformComparison[];
@@ -363,7 +367,14 @@ export interface PlatformDiscrepancy {
 }
 
 export interface SchemaDiscrepancy {
-  objectType: 'TABLE' | 'COLUMN' | 'INDEX' | 'CONSTRAINT' | 'PROCEDURE' | 'FUNCTION' | 'VIEW';
+  objectType:
+    | 'TABLE'
+    | 'COLUMN'
+    | 'INDEX'
+    | 'CONSTRAINT'
+    | 'PROCEDURE'
+    | 'FUNCTION'
+    | 'VIEW';
   objectName: string;
   discrepancyType: string;
   expectedDefinition: string;
@@ -376,7 +387,12 @@ export interface DataDiscrepancy {
   tableName: string;
   columnName?: string;
   rowIdentifier: string;
-  discrepancyType: 'MISSING_ROW' | 'EXTRA_ROW' | 'VALUE_MISMATCH' | 'TYPE_MISMATCH' | 'NULL_MISMATCH';
+  discrepancyType:
+    | 'MISSING_ROW'
+    | 'EXTRA_ROW'
+    | 'VALUE_MISMATCH'
+    | 'TYPE_MISMATCH'
+    | 'NULL_MISMATCH';
   expectedValue: any;
   actualValue: any;
   confidence: number;
@@ -399,7 +415,12 @@ export interface MetadataDiscrepancy {
 export interface RemediationSuggestion {
   id: string;
   priority: 'IMMEDIATE' | 'HIGH' | 'MEDIUM' | 'LOW';
-  category: 'SCHEMA_MIGRATION' | 'DATA_CORRECTION' | 'CONFIGURATION_CHANGE' | 'PLATFORM_UPGRADE' | 'MANUAL_INTERVENTION';
+  category:
+    | 'SCHEMA_MIGRATION'
+    | 'DATA_CORRECTION'
+    | 'CONFIGURATION_CHANGE'
+    | 'PLATFORM_UPGRADE'
+    | 'MANUAL_INTERVENTION';
   title: string;
   description: string;
   affectedDiscrepancies: string[];
@@ -461,7 +482,11 @@ export interface ParlantConsistencyAnalysis {
   riskAssessment: ParlantRiskAssessment;
   businessImpactAnalysis: ParlantBusinessImpactAnalysis;
   technicalRecommendations: ParlantTechnicalRecommendation[];
-  approvalRecommendation: 'APPROVE_REMEDIATION' | 'REQUEST_MANUAL_REVIEW' | 'ESCALATE_TO_EXPERT' | 'DEFER_ACTION';
+  approvalRecommendation:
+    | 'APPROVE_REMEDIATION'
+    | 'REQUEST_MANUAL_REVIEW'
+    | 'ESCALATE_TO_EXPERT'
+    | 'DEFER_ACTION';
   confidenceFactors: string[];
   uncertaintyAreas: string[];
 }
@@ -520,7 +545,11 @@ export interface ValidationPerformanceMetrics {
 }
 
 export interface ComplianceValidationStatus {
-  overallStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL_COMPLIANCE' | 'PENDING_REVIEW';
+  overallStatus:
+    | 'COMPLIANT'
+    | 'NON_COMPLIANT'
+    | 'PARTIAL_COMPLIANCE'
+    | 'PENDING_REVIEW';
   frameworkCompliance: Record<string, string>;
   requiredDocumentation: string[];
   auditTrailComplete: boolean;
@@ -640,10 +669,14 @@ export interface CompatibilityMatrix {
 
 @Injectable()
 export class CrossPlatformBackupConsistencyService {
-  private readonly logger = new Logger(CrossPlatformBackupConsistencyService.name);
+  private readonly logger = new Logger(
+    CrossPlatformBackupConsistencyService.name,
+  );
 
   constructor() {
-    this.logger.log('🌐 Initializing PARLANT Phase 1 Cross-Platform Backup Consistency Service');
+    this.logger.log(
+      '🌐 Initializing PARLANT Phase 1 Cross-Platform Backup Consistency Service',
+    );
   }
 
   // ============================================================================
@@ -653,9 +686,13 @@ export class CrossPlatformBackupConsistencyService {
   /**
    * Performs comprehensive cross-platform backup consistency validation
    */
-  async validateCrossPlatformConsistency(request: CrossPlatformConsistencyRequest): Promise<ConsistencyValidationResult> {
+  async validateCrossPlatformConsistency(
+    request: CrossPlatformConsistencyRequest,
+  ): Promise<ConsistencyValidationResult> {
     const startTime = Date.now();
-    this.logger.log(`🔍 Starting cross-platform consistency validation for ${request.sourceBackups.length} backups`);
+    this.logger.log(
+      `🔍 Starting cross-platform consistency validation for ${request.sourceBackups.length} backups`,
+    );
 
     try {
       const validationId = `cv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -682,7 +719,7 @@ export class CrossPlatformBackupConsistencyService {
           networkBandwidthMBps: 0,
           ioThroughputMBps: 0,
           cacheHitRatio: 0,
-          connectionPoolUtilization: 0
+          connectionPoolUtilization: 0,
         },
         discrepancies: [],
         remediationSuggestions: [],
@@ -694,7 +731,7 @@ export class CrossPlatformBackupConsistencyService {
           dataResidencyCompliant: false,
           encryptionStandardsMet: false,
           accessControlsValidated: false,
-          retentionPolicyCompliant: false
+          retentionPolicyCompliant: false,
         },
         executionSummary: {
           totalPlatformsValidated: 0,
@@ -708,75 +745,116 @@ export class CrossPlatformBackupConsistencyService {
           automatedRemediationsPossible: 0,
           manualInterventionsRequired: 0,
           overallConsistencyScore: 0,
-          recommendedNextSteps: []
-        }
+          recommendedNextSteps: [],
+        },
       };
 
       // Phase 1: Individual Platform Validation
-      this.logger.log(`📋 Phase 1: Individual platform validation for ${request.sourceBackups.length} backups`);
+      this.logger.log(
+        `📋 Phase 1: Individual platform validation for ${request.sourceBackups.length} backups`,
+      );
       const platformValidationStart = Date.now();
 
       for (const backup of request.sourceBackups) {
-        const platformResult = await this.validateIndividualPlatform(backup, request);
+        const platformResult = await this.validateIndividualPlatform(
+          backup,
+          request,
+        );
         result.platformResults.push(platformResult);
         result.executionSummary.totalPlatformsValidated++;
       }
 
-      result.performanceMetrics.schemaValidationTimeMs = Date.now() - platformValidationStart;
+      result.performanceMetrics.schemaValidationTimeMs =
+        Date.now() - platformValidationStart;
 
       // Phase 2: Cross-Platform Comparisons
       this.logger.log(`🔄 Phase 2: Cross-platform comparisons`);
       const comparisonStart = Date.now();
 
-      const comparisons = await this.performCrossPlatformComparisons(request.sourceBackups, request);
+      const comparisons = await this.performCrossPlatformComparisons(
+        request.sourceBackups,
+        request,
+      );
       result.crossPlatformComparisons = comparisons;
       result.executionSummary.totalComparisonsPerformed = comparisons.length;
 
-      result.performanceMetrics.dataValidationTimeMs = Date.now() - comparisonStart;
+      result.performanceMetrics.dataValidationTimeMs =
+        Date.now() - comparisonStart;
 
       // Phase 3: Discrepancy Analysis
       this.logger.log(`🔍 Phase 3: Discrepancy analysis and categorization`);
       const discrepancyStart = Date.now();
 
-      const discrepancies = await this.analyzeDiscrepancies(result.platformResults, result.crossPlatformComparisons);
+      const discrepancies = await this.analyzeDiscrepancies(
+        result.platformResults,
+        result.crossPlatformComparisons,
+      );
       result.discrepancies = discrepancies;
 
       // Update severity counts
-      result.executionSummary.criticalIssuesFound = discrepancies.filter(d => d.severity === 'CRITICAL').length;
-      result.executionSummary.highSeverityIssuesFound = discrepancies.filter(d => d.severity === 'HIGH').length;
-      result.executionSummary.mediumSeverityIssuesFound = discrepancies.filter(d => d.severity === 'MEDIUM').length;
-      result.executionSummary.lowSeverityIssuesFound = discrepancies.filter(d => d.severity === 'LOW').length;
+      result.executionSummary.criticalIssuesFound = discrepancies.filter(
+        (d) => d.severity === 'CRITICAL',
+      ).length;
+      result.executionSummary.highSeverityIssuesFound = discrepancies.filter(
+        (d) => d.severity === 'HIGH',
+      ).length;
+      result.executionSummary.mediumSeverityIssuesFound = discrepancies.filter(
+        (d) => d.severity === 'MEDIUM',
+      ).length;
+      result.executionSummary.lowSeverityIssuesFound = discrepancies.filter(
+        (d) => d.severity === 'LOW',
+      ).length;
 
-      result.performanceMetrics.metadataValidationTimeMs = Date.now() - discrepancyStart;
+      result.performanceMetrics.metadataValidationTimeMs =
+        Date.now() - discrepancyStart;
 
       // Phase 4: Remediation Suggestions
       this.logger.log(`💡 Phase 4: Generating remediation suggestions`);
       const remediationStart = Date.now();
 
-      const suggestions = await this.generateRemediationSuggestions(discrepancies, request);
+      const suggestions = await this.generateRemediationSuggestions(
+        discrepancies,
+        request,
+      );
       result.remediationSuggestions = suggestions;
       result.executionSummary.remediationActionsRequired = suggestions.length;
-      result.executionSummary.automatedRemediationsPossible = suggestions.filter(s => s.category !== 'MANUAL_INTERVENTION').length;
-      result.executionSummary.manualInterventionsRequired = suggestions.filter(s => s.category === 'MANUAL_INTERVENTION').length;
+      result.executionSummary.automatedRemediationsPossible =
+        suggestions.filter((s) => s.category !== 'MANUAL_INTERVENTION').length;
+      result.executionSummary.manualInterventionsRequired = suggestions.filter(
+        (s) => s.category === 'MANUAL_INTERVENTION',
+      ).length;
 
-      result.performanceMetrics.performanceValidationTimeMs = Date.now() - remediationStart;
+      result.performanceMetrics.performanceValidationTimeMs =
+        Date.now() - remediationStart;
 
       // Phase 5: PARLANT Analysis (if required)
-      if (request.parlantValidationRequired && (discrepancies.length > 0 || result.executionSummary.criticalIssuesFound > 0)) {
+      if (
+        request.parlantValidationRequired &&
+        (discrepancies.length > 0 ||
+          result.executionSummary.criticalIssuesFound > 0)
+      ) {
         this.logger.log(`🤖 Phase 5: PARLANT conversational analysis`);
-        const parlantAnalysis = await this.performParlantConsistencyAnalysis(result, request);
+        const parlantAnalysis = await this.performParlantConsistencyAnalysis(
+          result,
+          request,
+        );
         result.parlantAnalysis = parlantAnalysis;
       }
 
       // Phase 6: Compliance Validation
       this.logger.log(`✅ Phase 6: Compliance validation`);
-      const complianceStatus = await this.validateComplianceRequirements(result, request);
+      const complianceStatus = await this.validateComplianceRequirements(
+        result,
+        request,
+      );
       result.complianceStatus = complianceStatus;
 
       // Calculate overall status and consistency score
       result.overallStatus = this.determineOverallStatus(result);
-      result.executionSummary.overallConsistencyScore = this.calculateConsistencyScore(result);
-      result.executionSummary.recommendedNextSteps = this.generateNextSteps(result);
+      result.executionSummary.overallConsistencyScore =
+        this.calculateConsistencyScore(result);
+      result.executionSummary.recommendedNextSteps =
+        this.generateNextSteps(result);
 
       // Update final metrics
       const totalDuration = Date.now() - startTime;
@@ -784,17 +862,25 @@ export class CrossPlatformBackupConsistencyService {
       result.endTime = new Date();
 
       // Set environment count
-      const uniqueEnvironments = new Set(request.sourceBackups.map(b => b.environment));
-      result.executionSummary.totalEnvironmentsValidated = uniqueEnvironments.size;
+      const uniqueEnvironments = new Set(
+        request.sourceBackups.map((b) => b.environment),
+      );
+      result.executionSummary.totalEnvironmentsValidated =
+        uniqueEnvironments.size;
 
-      this.logger.log(`✅ Cross-platform consistency validation completed in ${totalDuration}ms`);
-      this.logger.log(`📊 Summary: ${result.overallStatus} - Score: ${result.executionSummary.overallConsistencyScore}/100`);
+      this.logger.log(
+        `✅ Cross-platform consistency validation completed in ${totalDuration}ms`,
+      );
+      this.logger.log(
+        `📊 Summary: ${result.overallStatus} - Score: ${result.executionSummary.overallConsistencyScore}/100`,
+      );
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Cross-platform consistency validation failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Cross-platform consistency validation failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -806,7 +892,7 @@ export class CrossPlatformBackupConsistencyService {
     sourcePlatform: DatabasePlatform,
     targetPlatform: DatabasePlatform,
     backupData: PlatformBackupInfo[],
-    migrationRules: CustomComparisonRule[]
+    migrationRules: CustomComparisonRule[],
   ): Promise<{
     migrationId: string;
     feasibilityScore: number;
@@ -817,29 +903,56 @@ export class CrossPlatformBackupConsistencyService {
     potentialDataLoss: string[];
   }> {
     const startTime = Date.now();
-    this.logger.log(`🔄 Validating platform migration: ${sourcePlatform} → ${targetPlatform}`);
+    this.logger.log(
+      `🔄 Validating platform migration: ${sourcePlatform} → ${targetPlatform}`,
+    );
 
     try {
       const migrationId = `migration_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Analyze platform compatibility
-      const compatibilityAssessment = await this.analyzePlatformCompatibility(sourcePlatform, targetPlatform, backupData);
+      const compatibilityAssessment = await this.analyzePlatformCompatibility(
+        sourcePlatform,
+        targetPlatform,
+        backupData,
+      );
 
       // Generate migration plan
-      const migrationPlan = await this.generateMigrationPlan(sourcePlatform, targetPlatform, backupData, migrationRules);
+      const migrationPlan = await this.generateMigrationPlan(
+        sourcePlatform,
+        targetPlatform,
+        backupData,
+        migrationRules,
+      );
 
       // Assess migration risks
-      const riskAssessment = await this.assessMigrationRisks(sourcePlatform, targetPlatform, compatibilityAssessment);
+      const riskAssessment = await this.assessMigrationRisks(
+        sourcePlatform,
+        targetPlatform,
+        compatibilityAssessment,
+      );
 
       // Calculate feasibility score and time estimate
-      const feasibilityScore = this.calculateMigrationFeasibility(compatibilityAssessment, migrationPlan);
-      const estimatedMigrationTime = this.estimateMigrationTime(migrationPlan, backupData);
+      const feasibilityScore = this.calculateMigrationFeasibility(
+        compatibilityAssessment,
+        migrationPlan,
+      );
+      const estimatedMigrationTime = this.estimateMigrationTime(
+        migrationPlan,
+        backupData,
+      );
 
       // Identify potential data loss scenarios
-      const potentialDataLoss = this.identifyDataLossScenarios(sourcePlatform, targetPlatform, backupData);
+      const potentialDataLoss = this.identifyDataLossScenarios(
+        sourcePlatform,
+        targetPlatform,
+        backupData,
+      );
 
       const duration = Date.now() - startTime;
-      this.logger.log(`✅ Platform migration validation completed in ${duration}ms - Feasibility: ${feasibilityScore}/100`);
+      this.logger.log(
+        `✅ Platform migration validation completed in ${duration}ms - Feasibility: ${feasibilityScore}/100`,
+      );
 
       return {
         migrationId,
@@ -848,12 +961,13 @@ export class CrossPlatformBackupConsistencyService {
         migrationPlan,
         riskAssessment,
         estimatedMigrationTime,
-        potentialDataLoss
+        potentialDataLoss,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`❌ Platform migration validation failed in ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `❌ Platform migration validation failed in ${duration}ms: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -867,9 +981,11 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validateIndividualPlatform(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<PlatformValidationResult> {
-    this.logger.log(`🔍 Validating individual platform: ${backup.platform} - ${backup.environment}`);
+    this.logger.log(
+      `🔍 Validating individual platform: ${backup.platform} - ${backup.environment}`,
+    );
 
     const result: PlatformValidationResult = {
       platform: backup.platform,
@@ -879,22 +995,25 @@ export class CrossPlatformBackupConsistencyService {
       schemaValidation: await this.validatePlatformSchema(backup, request),
       dataValidation: await this.validatePlatformData(backup, request),
       metadataValidation: await this.validatePlatformMetadata(backup, request),
-      performanceValidation: await this.validatePlatformPerformance(backup, request),
+      performanceValidation: await this.validatePlatformPerformance(
+        backup,
+        request,
+      ),
       errorDetails: [],
       warningDetails: [],
-      validationTimeMs: 0
+      validationTimeMs: 0,
     };
 
     // Aggregate validation status
     const validations = [
       result.schemaValidation.status,
       result.dataValidation.status,
-      result.metadataValidation.status
+      result.metadataValidation.status,
     ];
 
-    if (validations.some(status => status === 'INVALID')) {
+    if (validations.some((status) => status === 'INVALID')) {
       result.validationStatus = 'INVALID';
-    } else if (validations.some(status => status === 'WARNING')) {
+    } else if (validations.some((status) => status === 'WARNING')) {
       result.validationStatus = 'WARNING';
     }
 
@@ -906,7 +1025,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformSchema(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<SchemaValidationResult> {
     this.logger.log(`📋 Validating schema for ${backup.platform}`);
 
@@ -923,7 +1042,7 @@ export class CrossPlatformBackupConsistencyService {
       constraintsTotal: 0,
       schemaVersion: backup.metadata.schemaVersion,
       schemaDiscrepancies: [],
-      migrationRequirements: []
+      migrationRequirements: [],
     };
 
     // Platform-specific schema validation logic
@@ -960,10 +1079,11 @@ export class CrossPlatformBackupConsistencyService {
         objectType: 'TABLE',
         objectName: 'audit_log',
         discrepancyType: 'MISSING_TABLE',
-        expectedDefinition: 'TABLE audit_log (id INT, timestamp TIMESTAMP, action TEXT)',
+        expectedDefinition:
+          'TABLE audit_log (id INT, timestamp TIMESTAMP, action TEXT)',
         actualDefinition: 'NOT_FOUND',
         migrationRequired: true,
-        migrationComplexity: 'LOW'
+        migrationComplexity: 'LOW',
       });
     }
 
@@ -975,7 +1095,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformData(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<DataValidationResult> {
     this.logger.log(`📊 Validating data for ${backup.platform}`);
 
@@ -985,8 +1105,12 @@ export class CrossPlatformBackupConsistencyService {
       rowsTotal: 0,
       checksumMatch: true,
       dataIntegrityScore: 98.5,
-      samplingStrategy: request.validationScope === ValidationScope.FULL_DATABASE ? 'FULL_SCAN' : 'STATISTICAL_SAMPLING',
-      samplingCoverage: request.validationScope === ValidationScope.FULL_DATABASE ? 100 : 25,
+      samplingStrategy:
+        request.validationScope === ValidationScope.FULL_DATABASE
+          ? 'FULL_SCAN'
+          : 'STATISTICAL_SAMPLING',
+      samplingCoverage:
+        request.validationScope === ValidationScope.FULL_DATABASE ? 100 : 25,
       dataDiscrepancies: [],
       statisticalAnalysis: {
         rowCountDistribution: {},
@@ -995,23 +1119,29 @@ export class CrossPlatformBackupConsistencyService {
         uniqueValueAnalysis: {},
         dataQualityScore: 98.5,
         outlierDetection: [],
-        correlationAnalysis: {}
-      }
+        correlationAnalysis: {},
+      },
     };
 
     // Mock data validation based on platform
     switch (backup.platform) {
       case DatabasePlatform.POSTGRESQL:
         result.rowsTotal = 1000000;
-        result.rowsValidated = Math.floor(result.rowsTotal * (result.samplingCoverage / 100));
+        result.rowsValidated = Math.floor(
+          result.rowsTotal * (result.samplingCoverage / 100),
+        );
         break;
       case DatabasePlatform.MYSQL:
         result.rowsTotal = 850000;
-        result.rowsValidated = Math.floor(result.rowsTotal * (result.samplingCoverage / 100));
+        result.rowsValidated = Math.floor(
+          result.rowsTotal * (result.samplingCoverage / 100),
+        );
         break;
       default:
         result.rowsTotal = 750000;
-        result.rowsValidated = Math.floor(result.rowsTotal * (result.samplingCoverage / 100));
+        result.rowsValidated = Math.floor(
+          result.rowsTotal * (result.samplingCoverage / 100),
+        );
     }
 
     // Simulate checksum validation
@@ -1029,7 +1159,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformMetadata(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<MetadataValidationResult> {
     this.logger.log(`🔧 Validating metadata for ${backup.platform}`);
 
@@ -1045,15 +1175,23 @@ export class CrossPlatformBackupConsistencyService {
         versionCompatibility: {},
         featureCompatibility: {},
         configurationCompatibility: {},
-        extensionCompatibility: {}
-      }
+        extensionCompatibility: {},
+      },
     };
 
     // Platform-specific metadata validation
-    if (backup.platform === DatabasePlatform.POSTGRESQL && backup.metadata.postgresMetadata) {
+    if (
+      backup.platform === DatabasePlatform.POSTGRESQL &&
+      backup.metadata.postgresMetadata
+    ) {
       const pgMeta = backup.metadata.postgresMetadata;
-      result.versionCompatibility = this.isVersionCompatible(pgMeta.version, '12.0');
-      result.extensionCompatibility = this.areExtensionsCompatible(pgMeta.extensions);
+      result.versionCompatibility = this.isVersionCompatible(
+        pgMeta.version,
+        '12.0',
+      );
+      result.extensionCompatibility = this.areExtensionsCompatible(
+        pgMeta.extensions,
+      );
     }
 
     return result;
@@ -1064,7 +1202,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformPerformance(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<PerformanceValidationResult> {
     this.logger.log(`⚡ Validating performance for ${backup.platform}`);
 
@@ -1079,8 +1217,8 @@ export class CrossPlatformBackupConsistencyService {
         currentMetrics: {},
         performanceDelta: {},
         trendAnalysis: 'Stable performance within expected parameters',
-        projectedImpact: 'No significant impact expected'
-      }
+        projectedImpact: 'No significant impact expected',
+      },
     };
 
     // Generate mock benchmark results
@@ -1092,8 +1230,12 @@ export class CrossPlatformBackupConsistencyService {
         score: backup.performanceMetrics.creationTimeMs,
         unit: 'milliseconds',
         baseline: 300000, // 5 minutes baseline
-        percentageDifference: ((backup.performanceMetrics.creationTimeMs - 300000) / 300000) * 100,
-        status: backup.performanceMetrics.creationTimeMs <= 300000 ? 'BETTER' : 'WORSE'
+        percentageDifference:
+          ((backup.performanceMetrics.creationTimeMs - 300000) / 300000) * 100,
+        status:
+          backup.performanceMetrics.creationTimeMs <= 300000
+            ? 'BETTER'
+            : 'WORSE',
       },
       {
         benchmarkName: 'Compression Ratio',
@@ -1102,13 +1244,19 @@ export class CrossPlatformBackupConsistencyService {
         score: backup.performanceMetrics.compressionRatio,
         unit: 'ratio',
         baseline: 0.7,
-        percentageDifference: ((backup.performanceMetrics.compressionRatio - 0.7) / 0.7) * 100,
-        status: backup.performanceMetrics.compressionRatio >= 0.7 ? 'BETTER' : 'WORSE'
-      }
+        percentageDifference:
+          ((backup.performanceMetrics.compressionRatio - 0.7) / 0.7) * 100,
+        status:
+          backup.performanceMetrics.compressionRatio >= 0.7
+            ? 'BETTER'
+            : 'WORSE',
+      },
     ];
 
     // Determine overall performance status
-    const poorBenchmarks = result.benchmarkResults.filter(b => b.status === 'WORSE').length;
+    const poorBenchmarks = result.benchmarkResults.filter(
+      (b) => b.status === 'WORSE',
+    ).length;
     if (poorBenchmarks > result.benchmarkResults.length / 2) {
       result.status = 'POOR';
       result.performanceScore = 60;
@@ -1129,9 +1277,11 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async performCrossPlatformComparisons(
     backups: PlatformBackupInfo[],
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<CrossPlatformComparison[]> {
-    this.logger.log(`🔄 Performing cross-platform comparisons for ${backups.length} backups`);
+    this.logger.log(
+      `🔄 Performing cross-platform comparisons for ${backups.length} backups`,
+    );
 
     const comparisons: CrossPlatformComparison[] = [];
 
@@ -1142,17 +1292,25 @@ export class CrossPlatformBackupConsistencyService {
         const targetBackup = backups[j];
 
         // Skip if same platform and environment
-        if (sourceBackup.platform === targetBackup.platform &&
-            sourceBackup.environment === targetBackup.environment) {
+        if (
+          sourceBackup.platform === targetBackup.platform &&
+          sourceBackup.environment === targetBackup.environment
+        ) {
           continue;
         }
 
-        const comparison = await this.compareTwoBackups(sourceBackup, targetBackup, request);
+        const comparison = await this.compareTwoBackups(
+          sourceBackup,
+          targetBackup,
+          request,
+        );
         comparisons.push(comparison);
       }
     }
 
-    this.logger.log(`✅ Completed ${comparisons.length} cross-platform comparisons`);
+    this.logger.log(
+      `✅ Completed ${comparisons.length} cross-platform comparisons`,
+    );
     return comparisons;
   }
 
@@ -1162,11 +1320,13 @@ export class CrossPlatformBackupConsistencyService {
   private async compareTwoBackups(
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<CrossPlatformComparison> {
     const comparisonId = `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    this.logger.log(`🔍 Comparing ${source.platform}:${source.environment} ↔ ${target.platform}:${target.environment}`);
+    this.logger.log(
+      `🔍 Comparing ${source.platform}:${source.environment} ↔ ${target.platform}:${target.environment}`,
+    );
 
     const comparison: CrossPlatformComparison = {
       comparisonId,
@@ -1188,8 +1348,8 @@ export class CrossPlatformBackupConsistencyService {
         featureCompatibility: 0,
         migrationFeasibility: 'UNKNOWN',
         recommendedApproach: '',
-        alternativeOptions: []
-      }
+        alternativeOptions: [],
+      },
     };
 
     // Perform different types of comparisons based on validation scope
@@ -1220,41 +1380,61 @@ export class CrossPlatformBackupConsistencyService {
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
     comparison: CrossPlatformComparison,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<void> {
-    this.logger.log(`📊 Full database comparison: ${source.platform} ↔ ${target.platform}`);
+    this.logger.log(
+      `📊 Full database comparison: ${source.platform} ↔ ${target.platform}`,
+    );
 
     // Schema comparison
     const schemaScore = await this.compareSchemas(source, target, comparison);
 
     // Data comparison (if required consistency level allows)
-    const dataScore = await this.compareData(source, target, comparison, request.comparisonCriteria);
+    const dataScore = await this.compareData(
+      source,
+      target,
+      comparison,
+      request.comparisonCriteria,
+    );
 
     // Metadata comparison
-    const metadataScore = await this.compareMetadata(source, target, comparison);
+    const metadataScore = await this.compareMetadata(
+      source,
+      target,
+      comparison,
+    );
 
     // Performance comparison
-    const performanceScore = await this.comparePerformance(source, target, comparison);
+    const performanceScore = await this.comparePerformance(
+      source,
+      target,
+      comparison,
+    );
 
     // Calculate overall compatibility
     comparison.compatibilityAssessment.schemaCompatibility = schemaScore;
     comparison.compatibilityAssessment.dataCompatibility = dataScore;
-    comparison.compatibilityAssessment.performanceCompatibility = performanceScore;
+    comparison.compatibilityAssessment.performanceCompatibility =
+      performanceScore;
     comparison.compatibilityAssessment.overallCompatibility =
       (schemaScore + dataScore + performanceScore) / 3;
 
-    comparison.consistencyScore = comparison.compatibilityAssessment.overallCompatibility;
+    comparison.consistencyScore =
+      comparison.compatibilityAssessment.overallCompatibility;
 
     // Determine migration feasibility
     if (comparison.compatibilityAssessment.overallCompatibility >= 90) {
       comparison.compatibilityAssessment.migrationFeasibility = 'HIGH';
-      comparison.compatibilityAssessment.recommendedApproach = 'Direct migration with minimal changes';
+      comparison.compatibilityAssessment.recommendedApproach =
+        'Direct migration with minimal changes';
     } else if (comparison.compatibilityAssessment.overallCompatibility >= 70) {
       comparison.compatibilityAssessment.migrationFeasibility = 'MEDIUM';
-      comparison.compatibilityAssessment.recommendedApproach = 'Migration with moderate schema/data adjustments';
+      comparison.compatibilityAssessment.recommendedApproach =
+        'Migration with moderate schema/data adjustments';
     } else {
       comparison.compatibilityAssessment.migrationFeasibility = 'LOW';
-      comparison.compatibilityAssessment.recommendedApproach = 'Complex migration requiring significant changes';
+      comparison.compatibilityAssessment.recommendedApproach =
+        'Complex migration requiring significant changes';
     }
   }
 
@@ -1267,7 +1447,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async performParlantConsistencyAnalysis(
     result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<ParlantConsistencyAnalysis> {
     this.logger.log(`🤖 Performing PARLANT consistency analysis`);
 
@@ -1277,7 +1457,11 @@ export class CrossPlatformBackupConsistencyService {
     const prompt = this.generateConsistencyAnalysisPrompt(result, request);
 
     // Mock PARLANT response (in real implementation, integrate with actual PARLANT service)
-    const response = await this.mockParlantConsistencyResponse(prompt, result, request);
+    const response = await this.mockParlantConsistencyResponse(
+      prompt,
+      result,
+      request,
+    );
 
     const analysis: ParlantConsistencyAnalysis = {
       sessionId,
@@ -1290,10 +1474,12 @@ export class CrossPlatformBackupConsistencyService {
       technicalRecommendations: response.technicalRecommendations,
       approvalRecommendation: response.approvalRecommendation,
       confidenceFactors: response.confidenceFactors,
-      uncertaintyAreas: response.uncertaintyAreas
+      uncertaintyAreas: response.uncertaintyAreas,
     };
 
-    this.logger.log(`✅ PARLANT consistency analysis completed: ${sessionId} - Confidence: ${response.confidence}`);
+    this.logger.log(
+      `✅ PARLANT consistency analysis completed: ${sessionId} - Confidence: ${response.confidence}`,
+    );
     return analysis;
   }
 
@@ -1302,7 +1488,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private generateConsistencyAnalysisPrompt(
     result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): string {
     return `
 # Cross-Platform Database Backup Consistency Analysis Request
@@ -1322,9 +1508,12 @@ export class CrossPlatformBackupConsistencyService {
 - **Low Severity Issues**: ${result.executionSummary.lowSeverityIssuesFound}
 
 ## Platform Distribution
-${request.sourceBackups.map(backup =>
-  `- ${backup.platform} (${backup.environment}): ${backup.size / (1024 * 1024 * 1024)}GB`
-).join('\n')}
+${request.sourceBackups
+  .map(
+    (backup) =>
+      `- ${backup.platform} (${backup.environment}): ${backup.size / (1024 * 1024 * 1024)}GB`,
+  )
+  .join('\n')}
 
 ## Compliance and Business Context
 - **Business Criticality**: ${request.businessCriticality}
@@ -1355,25 +1544,35 @@ Please analyze this cross-platform backup consistency validation and provide:
   private async mockParlantConsistencyResponse(
     prompt: string,
     result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<{
     response: string;
     confidence: number;
     riskAssessment: ParlantRiskAssessment;
     businessImpactAnalysis: ParlantBusinessImpactAnalysis;
     technicalRecommendations: ParlantTechnicalRecommendation[];
-    approvalRecommendation: 'APPROVE_REMEDIATION' | 'REQUEST_MANUAL_REVIEW' | 'ESCALATE_TO_EXPERT' | 'DEFER_ACTION';
+    approvalRecommendation:
+      | 'APPROVE_REMEDIATION'
+      | 'REQUEST_MANUAL_REVIEW'
+      | 'ESCALATE_TO_EXPERT'
+      | 'DEFER_ACTION';
     confidenceFactors: string[];
     uncertaintyAreas: string[];
   }> {
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     const consistencyScore = result.executionSummary.overallConsistencyScore;
     const criticalIssues = result.executionSummary.criticalIssuesFound;
-    const isHighCriticality = request.businessCriticality === 'HIGH' || request.businessCriticality === 'CRITICAL';
+    const isHighCriticality =
+      request.businessCriticality === 'HIGH' ||
+      request.businessCriticality === 'CRITICAL';
 
-    let approvalRecommendation: 'APPROVE_REMEDIATION' | 'REQUEST_MANUAL_REVIEW' | 'ESCALATE_TO_EXPERT' | 'DEFER_ACTION';
+    let approvalRecommendation:
+      | 'APPROVE_REMEDIATION'
+      | 'REQUEST_MANUAL_REVIEW'
+      | 'ESCALATE_TO_EXPERT'
+      | 'DEFER_ACTION';
     let confidence = 0.85;
 
     if (criticalIssues > 0 && isHighCriticality) {
@@ -1381,16 +1580,17 @@ Please analyze this cross-platform backup consistency validation and provide:
       confidence = 0.95;
     } else if (criticalIssues > 0 || consistencyScore < 80) {
       approvalRecommendation = 'REQUEST_MANUAL_REVIEW';
-      confidence = 0.80;
+      confidence = 0.8;
     } else if (consistencyScore >= 90) {
       approvalRecommendation = 'APPROVE_REMEDIATION';
-      confidence = 0.90;
+      confidence = 0.9;
     } else {
       approvalRecommendation = 'REQUEST_MANUAL_REVIEW';
       confidence = 0.75;
     }
 
-    const riskLevel = criticalIssues > 0 ? 'HIGH' : consistencyScore < 80 ? 'MEDIUM' : 'LOW';
+    const riskLevel =
+      criticalIssues > 0 ? 'HIGH' : consistencyScore < 80 ? 'MEDIUM' : 'LOW';
 
     const response = `
 Based on comprehensive analysis of the cross-platform backup consistency validation:
@@ -1415,60 +1615,87 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
         businessContinuityRisk: isHighCriticality ? 'MEDIUM' : 'LOW',
         performanceRisk: 'LOW',
         securityRisk: 'LOW',
-        complianceRisk: request.complianceRequirements.length > 0 ? 'MEDIUM' : 'LOW',
+        complianceRisk:
+          request.complianceRequirements.length > 0 ? 'MEDIUM' : 'LOW',
         mitigationStrategies: [
           'Implement automated consistency monitoring',
           'Establish cross-platform validation schedules',
-          'Create remediation playbooks for common discrepancies'
+          'Create remediation playbooks for common discrepancies',
         ],
-        acceptableRiskThreshold: 'MEDIUM'
+        acceptableRiskThreshold: 'MEDIUM',
       },
       businessImpactAnalysis: {
         impactLevel: isHighCriticality ? 'HIGH' : 'MEDIUM',
-        affectedBusinessProcesses: ['Database backup and recovery', 'Cross-platform data migration', 'Disaster recovery procedures'],
-        downTimeEstimate: criticalIssues > 0 ? '2-4 hours for remediation' : '30 minutes for validation',
+        affectedBusinessProcesses: [
+          'Database backup and recovery',
+          'Cross-platform data migration',
+          'Disaster recovery procedures',
+        ],
+        downTimeEstimate:
+          criticalIssues > 0
+            ? '2-4 hours for remediation'
+            : '30 minutes for validation',
         costImplication: criticalIssues * 1000 + (100 - consistencyScore) * 100,
-        customerImpact: criticalIssues > 0 ? 'Potential impact on data availability' : 'No direct customer impact expected',
+        customerImpact:
+          criticalIssues > 0
+            ? 'Potential impact on data availability'
+            : 'No direct customer impact expected',
         revenueImpact: 'Minimal revenue impact with proper remediation',
-        regulatoryImpact: request.complianceRequirements.length > 0 ? 'Compliance validation required' : 'No regulatory impact',
-        stakeholderCommunicationPlan: 'Notify database administrators and affected application teams'
+        regulatoryImpact:
+          request.complianceRequirements.length > 0
+            ? 'Compliance validation required'
+            : 'No regulatory impact',
+        stakeholderCommunicationPlan:
+          'Notify database administrators and affected application teams',
       },
       technicalRecommendations: [
         {
           priority: criticalIssues > 0 ? 'IMMEDIATE' : 'HIGH',
           category: 'CONSISTENCY_REMEDIATION',
-          recommendation: 'Address critical consistency discrepancies through automated remediation where possible',
+          recommendation:
+            'Address critical consistency discrepancies through automated remediation where possible',
           justification: `${criticalIssues} critical issues require immediate attention to maintain data integrity`,
-          implementation: 'Execute approved remediation scripts and validate results',
-          verification: 'Re-run consistency validation to confirm remediation success',
+          implementation:
+            'Execute approved remediation scripts and validate results',
+          verification:
+            'Re-run consistency validation to confirm remediation success',
           rollback: 'Restore from verified backup if remediation fails',
-          dependencies: ['Database administrator approval', 'Change management approval'],
-          estimatedEffort: `${criticalIssues * 2 + Math.max(0, 90 - consistencyScore) / 10} hours`
+          dependencies: [
+            'Database administrator approval',
+            'Change management approval',
+          ],
+          estimatedEffort: `${criticalIssues * 2 + Math.max(0, 90 - consistencyScore) / 10} hours`,
         },
         {
           priority: 'MEDIUM',
           category: 'MONITORING_ENHANCEMENT',
-          recommendation: 'Implement continuous cross-platform consistency monitoring',
-          justification: 'Proactive monitoring will prevent future consistency issues',
-          implementation: 'Deploy automated consistency checks on backup creation',
-          verification: 'Validate monitoring alerts and reporting functionality',
+          recommendation:
+            'Implement continuous cross-platform consistency monitoring',
+          justification:
+            'Proactive monitoring will prevent future consistency issues',
+          implementation:
+            'Deploy automated consistency checks on backup creation',
+          verification:
+            'Validate monitoring alerts and reporting functionality',
           rollback: 'Disable monitoring if performance impact is excessive',
           dependencies: ['Monitoring infrastructure', 'Alert configuration'],
-          estimatedEffort: '4-8 hours'
-        }
+          estimatedEffort: '4-8 hours',
+        },
       ],
       approvalRecommendation,
       confidenceFactors: [
         `Consistency score of ${consistencyScore}/100 provides clear assessment baseline`,
         `${result.executionSummary.totalComparisonsPerformed} cross-platform comparisons completed`,
         'Comprehensive platform-specific validation performed',
-        'Business criticality and compliance requirements factored into analysis'
+        'Business criticality and compliance requirements factored into analysis',
       ],
       uncertaintyAreas: [
-        criticalIssues > 0 ? 'Root cause analysis for critical issues may reveal additional complexities' : 'Minor platform-specific edge cases may exist',
+        criticalIssues > 0
+          ? 'Root cause analysis for critical issues may reveal additional complexities'
+          : 'Minor platform-specific edge cases may exist',
         'Performance impact of remediation actions on production systems',
-        'Timing constraints for implementing recommendations'
-      ]
+        'Timing constraints for implementing recommendations',
+      ],
     };
   }
 
@@ -1478,13 +1705,16 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   private async analyzeDiscrepancies(
     platformResults: PlatformValidationResult[],
-    comparisons: CrossPlatformComparison[]
+    comparisons: CrossPlatformComparison[],
   ): Promise<ConsistencyDiscrepancy[]> {
     const discrepancies: ConsistencyDiscrepancy[] = [];
 
     // Analyze platform-specific issues
     for (const result of platformResults) {
-      if (result.validationStatus === 'INVALID' || result.schemaValidation.status === 'INVALID') {
+      if (
+        result.validationStatus === 'INVALID' ||
+        result.schemaValidation.status === 'INVALID'
+      ) {
         discrepancies.push({
           id: `disc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           type: 'SCHEMA',
@@ -1501,7 +1731,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
           intermittent: false,
           expectedBehavior: 'All schema objects should be present and valid',
           actualBehavior: 'Missing or invalid schema objects detected',
-          affectedComponents: ['Database schema', 'Table structures']
+          affectedComponents: ['Database schema', 'Table structures'],
         });
       }
     }
@@ -1513,8 +1743,14 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
           id: `disc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           type: 'DATA',
           severity: comparison.consistencyScore < 50 ? 'CRITICAL' : 'MEDIUM',
-          affectedPlatforms: [comparison.sourcePlatform, comparison.targetPlatform],
-          affectedEnvironments: [comparison.sourceEnvironment, comparison.targetEnvironment],
+          affectedPlatforms: [
+            comparison.sourcePlatform,
+            comparison.targetPlatform,
+          ],
+          affectedEnvironments: [
+            comparison.sourceEnvironment,
+            comparison.targetEnvironment,
+          ],
           description: `Low consistency score (${comparison.consistencyScore}/100) between platforms`,
           detailedAnalysis: 'Significant data or schema differences detected',
           businessImpact: 'Cross-platform operations may fail',
@@ -1525,7 +1761,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
           intermittent: false,
           expectedBehavior: 'High consistency across platforms',
           actualBehavior: `Consistency score of ${comparison.consistencyScore}/100`,
-          affectedComponents: ['Cross-platform data compatibility']
+          affectedComponents: ['Cross-platform data compatibility'],
         });
       }
     }
@@ -1535,20 +1771,28 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   private async generateRemediationSuggestions(
     discrepancies: ConsistencyDiscrepancy[],
-    request: CrossPlatformConsistencyRequest
+    request: CrossPlatformConsistencyRequest,
   ): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
     for (const discrepancy of discrepancies) {
       const suggestion: RemediationSuggestion = {
         id: `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        priority: discrepancy.severity === 'CRITICAL' ? 'IMMEDIATE' :
-                 discrepancy.severity === 'HIGH' ? 'HIGH' : 'MEDIUM',
-        category: discrepancy.type === 'SCHEMA' ? 'SCHEMA_MIGRATION' : 'DATA_CORRECTION',
+        priority:
+          discrepancy.severity === 'CRITICAL'
+            ? 'IMMEDIATE'
+            : discrepancy.severity === 'HIGH'
+              ? 'HIGH'
+              : 'MEDIUM',
+        category:
+          discrepancy.type === 'SCHEMA'
+            ? 'SCHEMA_MIGRATION'
+            : 'DATA_CORRECTION',
         title: `Resolve ${discrepancy.type.toLowerCase()} consistency issue`,
         description: `Address ${discrepancy.description}`,
         affectedDiscrepancies: [discrepancy.id],
-        estimatedEffort: discrepancy.severity === 'CRITICAL' ? '4-8 hours' : '2-4 hours',
+        estimatedEffort:
+          discrepancy.severity === 'CRITICAL' ? '4-8 hours' : '2-4 hours',
         estimatedCost: discrepancy.severity === 'CRITICAL' ? 2000 : 1000,
         riskAssessment: discrepancy.severity === 'CRITICAL' ? 'HIGH' : 'MEDIUM',
         implementationSteps: [
@@ -1557,19 +1801,23 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
             description: 'Analyze root cause of consistency issue',
             platform: discrepancy.affectedPlatforms[0],
             environment: discrepancy.affectedEnvironments[0],
-            scriptOrQuery: 'SELECT * FROM information_schema.tables WHERE table_name = ?',
+            scriptOrQuery:
+              'SELECT * FROM information_schema.tables WHERE table_name = ?',
             expectedOutcome: 'Identify missing or inconsistent schema objects',
             validationMethod: 'Compare schema definitions',
             rollbackScript: 'ROLLBACK TO SAVEPOINT pre_analysis',
             estimatedDurationMinutes: 30,
-            riskLevel: 'LOW'
-          }
+            riskLevel: 'LOW',
+          },
         ],
         rollbackPlan: 'Restore from verified backup snapshot',
-        validationCriteria: ['Consistency validation passes', 'No data loss detected'],
+        validationCriteria: [
+          'Consistency validation passes',
+          'No data loss detected',
+        ],
         businessApprovalRequired: discrepancy.severity === 'CRITICAL',
         technicalApprovalRequired: true,
-        parlantConsultationRecommended: discrepancy.severity === 'CRITICAL'
+        parlantConsultationRecommended: discrepancy.severity === 'CRITICAL',
       };
 
       suggestions.push(suggestion);
@@ -1580,7 +1828,13 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   // Additional helper methods would continue here with mock implementations...
 
-  private determineOverallStatus(result: ConsistencyValidationResult): 'CONSISTENT' | 'INCONSISTENT' | 'PARTIAL_CONSISTENCY' | 'VALIDATION_FAILED' {
+  private determineOverallStatus(
+    result: ConsistencyValidationResult,
+  ):
+    | 'CONSISTENT'
+    | 'INCONSISTENT'
+    | 'PARTIAL_CONSISTENCY'
+    | 'VALIDATION_FAILED' {
     if (result.executionSummary.criticalIssuesFound > 0) {
       return 'INCONSISTENT';
     } else if (result.executionSummary.overallConsistencyScore >= 90) {
@@ -1592,7 +1846,9 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     }
   }
 
-  private calculateConsistencyScore(result: ConsistencyValidationResult): number {
+  private calculateConsistencyScore(
+    result: ConsistencyValidationResult,
+  ): number {
     // Mock calculation based on various factors
     const baseScore = 100;
     let score = baseScore;
@@ -1630,7 +1886,10 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
   }
 
   // Mock helper methods for demonstration
-  private async validateComplianceRequirements(result: ConsistencyValidationResult, request: CrossPlatformConsistencyRequest): Promise<ComplianceValidationStatus> {
+  private async validateComplianceRequirements(
+    result: ConsistencyValidationResult,
+    request: CrossPlatformConsistencyRequest,
+  ): Promise<ComplianceValidationStatus> {
     return {
       overallStatus: 'COMPLIANT',
       frameworkCompliance: {},
@@ -1639,38 +1898,70 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
       dataResidencyCompliant: true,
       encryptionStandardsMet: true,
       accessControlsValidated: true,
-      retentionPolicyCompliant: true
+      retentionPolicyCompliant: true,
     };
   }
 
-  private async compareSchemaOnly(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison, request: CrossPlatformConsistencyRequest): Promise<void> {
+  private async compareSchemaOnly(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+    request: CrossPlatformConsistencyRequest,
+  ): Promise<void> {
     comparison.comparisonType = 'SCHEMA';
     comparison.consistencyScore = 95; // Mock
   }
 
-  private async compareDataOnly(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison, request: CrossPlatformConsistencyRequest): Promise<void> {
+  private async compareDataOnly(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+    request: CrossPlatformConsistencyRequest,
+  ): Promise<void> {
     comparison.comparisonType = 'DATA';
     comparison.consistencyScore = 90; // Mock
   }
 
-  private async compareMetadataOnly(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison, request: CrossPlatformConsistencyRequest): Promise<void> {
+  private async compareMetadataOnly(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+    request: CrossPlatformConsistencyRequest,
+  ): Promise<void> {
     comparison.comparisonType = 'METADATA';
     comparison.consistencyScore = 88; // Mock
   }
 
-  private async compareSchemas(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison): Promise<number> {
+  private async compareSchemas(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+  ): Promise<number> {
     return 95; // Mock score
   }
 
-  private async compareData(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison, criteria: ComparisonCriteria): Promise<number> {
+  private async compareData(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+    criteria: ComparisonCriteria,
+  ): Promise<number> {
     return 90; // Mock score
   }
 
-  private async compareMetadata(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison): Promise<number> {
+  private async compareMetadata(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+  ): Promise<number> {
     return 88; // Mock score
   }
 
-  private async comparePerformance(source: PlatformBackupInfo, target: PlatformBackupInfo, comparison: CrossPlatformComparison): Promise<number> {
+  private async comparePerformance(
+    source: PlatformBackupInfo,
+    target: PlatformBackupInfo,
+    comparison: CrossPlatformComparison,
+  ): Promise<number> {
     return 85; // Mock score
   }
 
@@ -1682,7 +1973,11 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     return true; // Mock implementation
   }
 
-  private async analyzePlatformCompatibility(source: DatabasePlatform, target: DatabasePlatform, backups: PlatformBackupInfo[]): Promise<CompatibilityAssessment> {
+  private async analyzePlatformCompatibility(
+    source: DatabasePlatform,
+    target: DatabasePlatform,
+    backups: PlatformBackupInfo[],
+  ): Promise<CompatibilityAssessment> {
     return {
       overallCompatibility: 85,
       schemaCompatibility: 90,
@@ -1691,15 +1986,24 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
       featureCompatibility: 85,
       migrationFeasibility: 'MEDIUM',
       recommendedApproach: 'Gradual migration with validation',
-      alternativeOptions: ['Direct migration', 'Phased migration']
+      alternativeOptions: ['Direct migration', 'Phased migration'],
     };
   }
 
-  private async generateMigrationPlan(source: DatabasePlatform, target: DatabasePlatform, backups: PlatformBackupInfo[], rules: CustomComparisonRule[]): Promise<RemediationSuggestion[]> {
+  private async generateMigrationPlan(
+    source: DatabasePlatform,
+    target: DatabasePlatform,
+    backups: PlatformBackupInfo[],
+    rules: CustomComparisonRule[],
+  ): Promise<RemediationSuggestion[]> {
     return []; // Mock implementation
   }
 
-  private async assessMigrationRisks(source: DatabasePlatform, target: DatabasePlatform, compatibility: CompatibilityAssessment): Promise<ParlantRiskAssessment> {
+  private async assessMigrationRisks(
+    source: DatabasePlatform,
+    target: DatabasePlatform,
+    compatibility: CompatibilityAssessment,
+  ): Promise<ParlantRiskAssessment> {
     return {
       overallRisk: 'MEDIUM',
       dataLossRisk: 'LOW',
@@ -1708,19 +2012,32 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
       securityRisk: 'LOW',
       complianceRisk: 'LOW',
       mitigationStrategies: [],
-      acceptableRiskThreshold: 'MEDIUM'
+      acceptableRiskThreshold: 'MEDIUM',
     };
   }
 
-  private calculateMigrationFeasibility(compatibility: CompatibilityAssessment, plan: RemediationSuggestion[]): number {
+  private calculateMigrationFeasibility(
+    compatibility: CompatibilityAssessment,
+    plan: RemediationSuggestion[],
+  ): number {
     return compatibility.overallCompatibility;
   }
 
-  private estimateMigrationTime(plan: RemediationSuggestion[], backups: PlatformBackupInfo[]): number {
+  private estimateMigrationTime(
+    plan: RemediationSuggestion[],
+    backups: PlatformBackupInfo[],
+  ): number {
     return 8; // 8 hours mock estimate
   }
 
-  private identifyDataLossScenarios(source: DatabasePlatform, target: DatabasePlatform, backups: PlatformBackupInfo[]): string[] {
-    return ['Potential precision loss in numeric data types', 'Date format compatibility issues'];
+  private identifyDataLossScenarios(
+    source: DatabasePlatform,
+    target: DatabasePlatform,
+    backups: PlatformBackupInfo[],
+  ): string[] {
+    return [
+      'Potential precision loss in numeric data types',
+      'Date format compatibility issues',
+    ];
   }
 }
