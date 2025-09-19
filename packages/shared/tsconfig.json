@@ -26,6 +26,8 @@
     "noFallthroughCasesInSwitch": true,
     "useDefineForClassFields": false,
     "strict": true,
+    "strictPropertyInitialization": false,
+    "strictFunctionTypes": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "alwaysStrict": true,

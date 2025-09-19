@@ -30,7 +30,7 @@ interface DynamicObject {
 interface ClassConstructor {
   prototype: Record<string, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  new (..._args: any[]): any;
+  new (...args: any[]): any;
 }
 import {
   ParlantValidationRequest,
@@ -74,8 +74,8 @@ import {
 /**
  * Wrapped function signature
  */
-export type WrappedFunction<T extends (..._args: unknown[]) => unknown> = (
-  ..._args: Parameters<T>
+export type WrappedFunction<T extends (...args: any[]) => any> = (
+  ...args: Parameters<T>
 ) => Promise<ReturnType<T>>;
 
 /**
@@ -203,7 +203,7 @@ export interface ParlantService {
  * ```
  */
 export function createParlantWrapper<
-  T extends (..._args: unknown[]) => unknown,
+  T extends (...args: any[]) => any,
 >(
   originalFunction: T,
   config: FunctionWrapperConfig,
@@ -316,7 +316,7 @@ export function createParlantWrapper<
  * @returns Wrapped function with decorator-based configuration
  */
 export function wrapFunctionWithMetadata<
-  T extends (..._args: unknown[]) => unknown,
+  T extends (...args: any[]) => any,
 >(
   originalFunction: T,
   target: unknown,
@@ -433,7 +433,7 @@ export function wrapClassMethods(
     }
 
     const wrappedMethod = wrapFunctionWithMetadata(
-      originalMethod as (..._args: unknown[]) => unknown,
+      originalMethod as (...args: any[]) => any,
       classTarget.prototype,
       methodName,
       parlantService,
@@ -453,7 +453,7 @@ export function wrapClassMethods(
  * Create wrapper context for function execution
  */
 function createWrapperContext(
-  originalFunction: (..._args: unknown[]) => unknown,
+  originalFunction: (...args: any[]) => any,
   config: FunctionWrapperConfig,
   logger: Logger,
 ): WrapperContext {
@@ -471,7 +471,7 @@ function createWrapperContext(
  * Extract source location from function
  */
 function extractSourceLocation(
-  _func: (..._args: unknown[]) => unknown,
+  _func: (...args: any[]) => any,
 ): SourceLocation {
   // In a real implementation, this would use stack traces or source maps
   return {
@@ -501,7 +501,7 @@ function createExecutionContext(): ExecutionContext {
 /**
  * Create validation request for function execution
  */
-function createValidationRequest<T extends (..._args: unknown[]) => unknown>(
+function createValidationRequest<T extends (...args: any[]) => any>(
   originalFunction: T,
   args: Parameters<T>,
   context: WrapperContext,
@@ -553,7 +553,7 @@ function createValidationRequest<T extends (..._args: unknown[]) => unknown>(
  * Execute function with monitoring and validation context
  */
 async function executeWithMonitoring<T>(
-  originalFunction: (..._args: unknown[]) => unknown,
+  originalFunction: (...args: any[]) => any,
   args: unknown[],
   context: WrapperContext,
   validationResponse: ParlantValidationResponse,
@@ -708,7 +708,7 @@ export class ParlantValidationRejection extends Error {
 /**
  * Function wrapper builder for fluent configuration
  */
-export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
+export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
   private config: Partial<FunctionWrapperConfig> = {};
 
   constructor(
@@ -842,7 +842,7 @@ export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
  *   .build();
  * ```
  */
-export function parlantWrapper<T extends (..._args: unknown[]) => unknown>(
+export function parlantWrapper<T extends (...args: any[]) => any>(
   originalFunction: T,
   parlantService: unknown,
 ): ParlantWrapperBuilder<T> {
@@ -863,7 +863,7 @@ export class ParlantWrapperRegistry {
   private static instance: ParlantWrapperRegistry;
   private wrappedFunctions = new Map<
     string,
-    WrappedFunction<(..._args: unknown[]) => unknown>
+    WrappedFunction<(...args: any[]) => any>
   >();
   private wrapperMetadata = new Map<string, FunctionWrapperConfig>();
   private logger = new Logger("ParlantWrapperRegistry");
@@ -878,7 +878,7 @@ export class ParlantWrapperRegistry {
   /**
    * Register a wrapped function
    */
-  register<T extends (..._args: unknown[]) => unknown>(
+  register<T extends (...args: any[]) => any>(
     functionId: string,
     wrappedFunction: WrappedFunction<T>,
     config: FunctionWrapperConfig,
@@ -896,7 +896,7 @@ export class ParlantWrapperRegistry {
   /**
    * Get a wrapped function
    */
-  get<T extends (..._args: unknown[]) => unknown>(
+  get<T extends (...args: any[]) => any>(
     functionId: string,
   ): WrappedFunction<T> | undefined {
     return this.wrappedFunctions.get(functionId);

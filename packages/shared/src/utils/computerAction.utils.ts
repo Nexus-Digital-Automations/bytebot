@@ -294,6 +294,24 @@ export function convertReadFileActionToToolUseBlock(
 }
 
 /**
+ * Type guard to check if object is a ComputerToolUseContentBlock
+ */
+export function isComputerToolUseContentBlock(
+  obj: unknown,
+): obj is ComputerToolUseContentBlock {
+  if (!obj || typeof obj !== "object") {
+    return false;
+  }
+  const block = obj as Record<string, unknown>;
+  return (
+    block.type === MessageContentType._ToolUse &&
+    typeof block.id === "string" &&
+    typeof block.name === "string" &&
+    typeof block.input === "object"
+  );
+}
+
+/**
  * Generic converter that handles all action types
  */
 export function convertComputerActionToToolUseBlock(

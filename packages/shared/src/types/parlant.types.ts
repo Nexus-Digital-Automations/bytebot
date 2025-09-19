@@ -403,6 +403,7 @@ export enum ValidationMode {
   _INTERACTIVE = "interactive",
   _BATCH = "batch",
   _STREAMING = "streaming",
+  _AUTOMATED = "automated",
 }
 
 /**

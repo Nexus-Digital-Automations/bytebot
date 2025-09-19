@@ -29,6 +29,36 @@ export enum AgentStatus {
 }
 
 /**
+ * Agent task interface compatible with Prisma Task model
+ */
+export interface AgentTask {
+  id: string;
+  description: string;
+  status:
+    | "PENDING"
+    | "RUNNING"
+    | "NEEDS_HELP"
+    | "NEEDS_REVIEW"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "FAILED";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  createdAt: Date;
+  updatedAt: Date;
+  // Optional fields from Prisma model
+  type?: "IMMEDIATE" | "SCHEDULED";
+  control?: "USER" | "ASSISTANT";
+  createdBy?: "USER" | "ASSISTANT";
+  scheduledFor?: Date | null;
+  executedAt?: Date | null;
+  completedAt?: Date | null;
+  queuedAt?: Date | null;
+  error?: string | null;
+  result?: unknown;
+  model?: unknown;
+}
+
+/**
  * Agent response interface
  */
 export interface AgentResponse {

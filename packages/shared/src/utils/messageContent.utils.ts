@@ -513,3 +513,77 @@ export function isReadFileToolUseBlock(
   const block = obj as Record<string, unknown>;
   return block.name === "computer_read_file";
 }
+
+/**
+ * Extract content blocks from message content
+ */
+export function extractContentBlocks(content: unknown): MessageContentBlock[] {
+  if (!content) {
+    return [];
+  }
+
+  if (Array.isArray(content)) {
+    return content.filter(isMessageContentBlock);
+  }
+
+  if (isMessageContentBlock(content)) {
+    return [content];
+  }
+
+  return [];
+}
+
+/**
+ * Validate a content block
+ */
+export function validateContentBlock(block: unknown): boolean {
+  return isMessageContentBlock(block);
+}
+
+/**
+ * Sanitize a content block (basic implementation)
+ */
+export function sanitizeContentBlock(block: MessageContentBlock): MessageContentBlock {
+  // Basic sanitization - can be extended based on requirements
+  return block;
+}
+
+/**
+ * Transform a content block (basic implementation)
+ */
+export function transformContentBlock(block: MessageContentBlock): MessageContentBlock {
+  // Basic transformation - can be extended based on requirements
+  return block;
+}
+
+/**
+ * Check if a block is a mouse action block
+ */
+export function isMouseActionBlock(obj: unknown): boolean {
+  return (
+    isMoveMouseToolUseBlock(obj) ||
+    isTraceMouseToolUseBlock(obj) ||
+    isClickMouseToolUseBlock(obj) ||
+    isPressMouseToolUseBlock(obj) ||
+    isDragMouseToolUseBlock(obj)
+  );
+}
+
+/**
+ * Check if a block is a keyboard action block
+ */
+export function isKeyboardActionBlock(obj: unknown): boolean {
+  return (
+    isTypeKeysToolUseBlock(obj) ||
+    isPressKeysToolUseBlock(obj) ||
+    isTypeTextToolUseBlock(obj) ||
+    isPasteTextToolUseBlock(obj)
+  );
+}
+
+/**
+ * Check if a block is a file operation block
+ */
+export function isFileOperationBlock(obj: unknown): boolean {
+  return isWriteFileToolUseBlock(obj) || isReadFileToolUseBlock(obj);
+}
