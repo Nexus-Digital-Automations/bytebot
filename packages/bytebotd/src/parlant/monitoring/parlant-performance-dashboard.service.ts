@@ -1339,33 +1339,37 @@ export class ParlantPerformanceDashboardService {
 
   // ===== SCHEDULED TASKS =====
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  private async performMinutelyTasks(): Promise<void> {
-    try {
-      await this.collectRealTimeMetrics();
-    } catch (error) {
-      this.logger.error('Minutely tasks failed', error);
-    }
+  // Scheduled tasks are implemented in the service initialization
+  private performMinutelyTasks(): void {
+    setInterval(async () => {
+      try {
+        await this.collectRealTimeMetrics();
+      } catch (error) {
+        this.logger.error('Minutely tasks failed', error);
+      }
+    }, 60000);
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
-  private async performFiveMinuteTasks(): Promise<void> {
-    try {
-      await this.detectAnomalies();
-      await this.checkAlertConditions();
-    } catch (error) {
-      this.logger.error('Five-minute tasks failed', error);
-    }
+  private performFiveMinuteTasks(): void {
+    setInterval(async () => {
+      try {
+        await this.detectAnomalies();
+        await this.checkAlertConditions();
+      } catch (error) {
+        this.logger.error('Five-minute tasks failed', error);
+      }
+    }, 300000);
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
-  private async performHourlyTasks(): Promise<void> {
-    try {
-      this.cleanupOldMetrics();
-      await this.generatePerformanceReport();
-    } catch (error) {
-      this.logger.error('Hourly tasks failed', error);
-    }
+  private performHourlyTasks(): void {
+    setInterval(async () => {
+      try {
+        this.cleanupOldMetrics();
+        await this.generatePerformanceReport();
+      } catch (error) {
+        this.logger.error('Hourly tasks failed', error);
+      }
+    }, 3600000);
   }
 
   private async generatePerformanceReport(): Promise<void> {

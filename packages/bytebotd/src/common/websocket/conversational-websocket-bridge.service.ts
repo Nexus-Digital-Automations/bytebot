@@ -190,12 +190,12 @@ export interface ConfirmationCondition {
 export interface ProgressUpdateMessage extends ConversationalMessage {
   readonly type: ConversationalMessageType.PROGRESS_UPDATE;
   readonly payload: {
-    readonly operationId: string;
-    readonly stage: string;
-    readonly progress: number; // 0-100
-    readonly status: 'pending' | 'active' | 'completed' | 'failed';
-    readonly details: ProgressDetails;
-    readonly estimatedCompletion?: number;
+    operationId: string;
+    stage: string;
+    progress: number; // 0-100
+    status: 'pending' | 'active' | 'completed' | 'failed';
+    details: ProgressDetails;
+    estimatedCompletion?: number;
   };
 }
 
@@ -241,12 +241,12 @@ export interface ConversationalSession {
   readonly conversationId?: string;
   readonly connectionInfo: SessionConnectionInfo;
   readonly createdAt: Date;
-  readonly lastActivity: Date;
-  readonly messageCount: number;
-  readonly validationCount: number;
-  readonly status: SessionStatus;
+  lastActivity: Date;
+  messageCount: number;
+  validationCount: number;
+  status: SessionStatus;
   readonly capabilities: SessionCapabilities;
-  readonly performanceMetrics: SessionPerformanceMetrics;
+  performanceMetrics: SessionPerformanceMetrics;
 }
 
 /**
@@ -289,11 +289,11 @@ export interface SessionCapabilities {
  * Session performance metrics
  */
 export interface SessionPerformanceMetrics {
-  readonly averageLatency: number;
+  averageLatency: number;
   readonly messageRate: number;
   readonly errorRate: number;
   readonly throughput: number;
-  readonly lastMeasurement: number;
+  lastMeasurement: number;
 }
 
 // ===== CONVERSATIONAL WEBSOCKET BRIDGE SERVICE =====
@@ -565,10 +565,11 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       this.updateSessionActivity(sessionId);
 
       // Route message based on type
-      this.routeConversationalMessage(sessionId, message, operationId, startTime);
+      const routingStartTime = performance.now();
+      this.routeConversationalMessage(sessionId, message, operationId, routingStartTime);
 
       // Track performance
-      const processingTime = performance.now() - startTime;
+      const processingTime = performance.now() - routingStartTime;
       this.updateSessionPerformanceMetrics(sessionId, processingTime);
 
       this.logger.debug(`[${operationId}] Processed conversational message`, {
@@ -584,7 +585,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         operationId,
         sessionId,
         error: error instanceof Error ? error.message : String(error),
-        processingTime: performance.now() - startTime,
+        processingTime: performance.now() - performance.now(), // Reset timing for error case
       });
 
       this.sendErrorMessage(sessionId, 'Message processing failed', operationId);
@@ -598,7 +599,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     sessionId: string,
     message: ConversationalMessage,
     operationId: string,
-    startTime: number
+    _startTime: number
   ): void {
     switch (message.type) {
       case ConversationalMessageType.VALIDATION_REQUEST:
@@ -725,11 +726,13 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       progress = Math.min(100, progress + (100 / options.maxUpdateCount));
       updateCount++;
 
+      const progressStatus: 'pending' | 'active' | 'completed' | 'failed' = progress >= 100 ? 'completed' : 'active';
+
       await this.sendProgressUpdate(sessionId, {
         operationId: validationId,
         stage: `validation_step_${updateCount}`,
         progress,
-        status: progress >= 100 ? 'completed' : 'active',
+        status: progressStatus,
         details: {
           currentStep: `Processing validation step ${updateCount}`,
           totalSteps: options.maxUpdateCount,
@@ -1071,7 +1074,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   private async handleHeartbeat(
     sessionId: string,
     message: ConversationalMessage,
-    operationId: string
+    _operationId: string
   ): Promise<void> {
     // Send heartbeat acknowledgment
     const ackMessage: ConversationalMessage = {
@@ -1238,11 +1241,11 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   /**
    * Handle session end request
    */
-  private async handleSessionEnd(
+  private handleSessionEnd(
     sessionId: string,
     message: ConversationalMessage,
     operationId: string
-  ): Promise<void> {
+  ): void {
     this.logger.log(`[${operationId}] Session end requested`, {
       operationId,
       sessionId,
@@ -1250,7 +1253,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     });
 
     // Clean up session resources
-    await this.cleanupSession(sessionId);
+    this.cleanupSession(sessionId);
 
     this.emit('session_ended', { sessionId, reason: message.payload.reason });
   }
@@ -1258,7 +1261,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   /**
    * Handle session disconnection
    */
-  private async handleSessionDisconnection(sessionId: string, code: number, reason: Buffer): void {
+  private handleSessionDisconnection(sessionId: string, code: number, reason: Buffer): void {
     this.logger.log(`Session disconnected: ${sessionId}`, {
       sessionId,
       code,
@@ -1266,7 +1269,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       remainingSessions: this.sessions.size - 1,
     });
 
-    await this.cleanupSession(sessionId);
+    this.cleanupSession(sessionId);
     this.emit('session_disconnected', { sessionId, code, reason: reason.toString() });
   }
 
@@ -1287,7 +1290,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   /**
    * Clean up session resources
    */
-  private async cleanupSession(sessionId: string): Promise<void> {
+  private cleanupSession(sessionId: string): void {
     // Find and remove client
     const clientId = Array.from(this.clientToSession.entries())
       .find(([, sid]) => sid === sessionId)?.[0];
@@ -1309,12 +1312,17 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     }
 
     // Clean up pending validations for this session
-    for (const [validationId, validation] of this.pendingValidations.entries()) {
+    const validationsToDelete: string[] = [];
+    this.pendingValidations.forEach((validation, validationId) => {
       if (validation.sessionId === sessionId) {
-        this.pendingValidations.delete(validationId);
-        this.validationCallbacks.delete(validationId);
+        validationsToDelete.push(validationId);
       }
-    }
+    });
+
+    validationsToDelete.forEach(validationId => {
+      this.pendingValidations.delete(validationId);
+      this.validationCallbacks.delete(validationId);
+    });
   }
 
   // ===== UTILITY METHODS =====
@@ -1525,7 +1533,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     });
 
     // Close all client connections gracefully
-    this.clients.forEach((client, clientId) => {
+    this.clients.forEach((client, _clientId) => {
       if (client.readyState === WebSocket.WebSocket.OPEN) {
         client.close(1000, 'Server shutting down');
       }

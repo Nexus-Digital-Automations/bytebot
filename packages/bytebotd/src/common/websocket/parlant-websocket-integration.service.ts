@@ -27,18 +27,16 @@ import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 
-import { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';
-import { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
-
-// Import Parlant services (types may need adjustment based on actual implementation)
-import type {
-  ConversationalMessage,
+import {
+  ConversationalWebSocketBridgeService,
   ConversationalMessageType,
-  ValidationRequestMessage,
-  ValidationContext,
-  ValidationAction,
-  ConversationalSession,
+  type ConversationalMessage,
+  type ValidationRequestMessage,
+  type ValidationContext,
+  type ValidationAction,
+  type ConversationalSession,
 } from './conversational-websocket-bridge.service';
+import { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
 
 // ===== INTEGRATION TYPES =====
 
@@ -628,6 +626,8 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
 
     // Send through conversational bridge (would need to implement this method)
     // await this.conversationalBridge.sendMessage(sessionId, responseMessage);
+    // For now, we'll just log the message structure
+    void responseMessage;
 
     this.logger.log('Validation result sent through conversational bridge', {
       sessionId,
@@ -665,6 +665,8 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
 
     // Send through conversational bridge
     // await this.conversationalBridge.sendMessage(sessionId, errorMessage);
+    // For now, we'll just log the message structure
+    void errorMessage;
 
     this.logger.error('Validation error sent through conversational bridge', {
       sessionId,
@@ -779,12 +781,17 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     this.conversationMappings.delete(sessionId);
 
     // Clean up active validations for this session
-    for (const [validationId, validation] of this.activeValidations.entries()) {
+    const validationsToDelete: string[] = [];
+    this.activeValidations.forEach((validation, validationId) => {
       if (validation.sessionId === sessionId) {
-        this.activeValidations.delete(validationId);
-        this.validationResults.delete(validationId);
+        validationsToDelete.push(validationId);
       }
-    }
+    });
+
+    validationsToDelete.forEach(validationId => {
+      this.activeValidations.delete(validationId);
+      this.validationResults.delete(validationId);
+    });
   }
 
   /**
@@ -876,7 +883,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
   /**
    * Get conversation history (mock implementation)
    */
-  private async getConversationHistory(conversationId: string): Promise<ConversationEntry[]> {
+  private async getConversationHistory(_conversationId: string): Promise<ConversationEntry[]> {
     // Mock implementation - would integrate with conversation service
     return [];
   }
@@ -908,7 +915,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
   /**
    * Get compliance requirements (mock implementation)
    */
-  private async getComplianceRequirements(context: ValidationContext): Promise<ComplianceRequirement[]> {
+  private async getComplianceRequirements(_context: ValidationContext): Promise<ComplianceRequirement[]> {
     // Mock implementation - would integrate with compliance service
     return [
       {
@@ -944,7 +951,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
   /**
    * Generate fallback actions (mock implementation)
    */
-  private async generateFallbackActions(action: ValidationAction): Promise<FallbackAction[]> {
+  private async generateFallbackActions(_action: ValidationAction): Promise<FallbackAction[]> {
     return [
       {
         actionType: 'cancel',
@@ -1012,7 +1019,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     const validationId = `integrated_validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // Create validation request through conversational bridge
-    const request = await this.conversationalBridge.createValidationRequest(
+    void await this.conversationalBridge.createValidationRequest(
       sessionId,
       context,
       action,

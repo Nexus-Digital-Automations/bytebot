@@ -21,6 +21,7 @@ import { ParlantIntegrationService } from './parlant-integration.service';
 import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
 import { ParlantHealthMetricsValidationService } from './services/parlant-health-metrics-validation.service';
 import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { ParlantMonitoringModule } from './monitoring/parlant-monitoring.module';
 
 /**
  * Parlant configuration factory for enterprise deployment
@@ -77,9 +78,12 @@ export const parlantConfigFactory = () => ({
       load: [parlantConfigFactory],
       isGlobal: false, // Scoped to Parlant module
     }),
-    
+
     // Import computer-use module for service dependency (using forwardRef to avoid circular dependency)
     forwardRef(() => ComputerUseModule),
+
+    // Import comprehensive monitoring module for enterprise performance monitoring
+    ParlantMonitoringModule,
   ],
   
   providers: [
@@ -119,8 +123,14 @@ export const parlantConfigFactory = () => ({
 export class ParlantModule {
   constructor() {
     // Log module initialization for monitoring
-    console.log('Parlant Module initialized - MAXIMUM IMPLEMENTATION active');
-    console.log('Function-level conversational validation enabled for all services');
+    console.log('🚀 Parlant Module initialized - MAXIMUM IMPLEMENTATION with ENTERPRISE MONITORING');
+    console.log('   ✅ Function-level conversational validation enabled for all services');
+    console.log('   ✅ Comprehensive performance monitoring and alerting');
+    console.log('   ✅ Real-time dashboard with enterprise metrics');
+    console.log('   ✅ Automated benchmark validation and regression detection');
+    console.log('   ✅ Business impact assessment and ROI analysis');
+    console.log('   ✅ Enterprise audit trail and compliance reporting');
+    console.log('   🎯 Performance Targets: <1000ms P95, >85% cache hit rate, >99.9% availability');
   }
 }
 
