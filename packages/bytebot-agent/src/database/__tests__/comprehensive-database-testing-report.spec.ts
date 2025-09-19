@@ -812,7 +812,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
   /**
    * Calculate percentile value
    */
-  private calculatePercentile(values: number[], percentile: number): number {
+  function calculatePercentile(values: number[], percentile: number): number {
     const sorted = values.sort((a, b) => a - b);
     const index = Math.floor(percentile * sorted.length);
     return sorted[index] || 0;

@@ -34,7 +34,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 import { performance } from 'perf_hooks';
-import * as pidusage from 'pidusage';
+// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring instead
 
 // ===== RESOURCE MONITORING TYPES =====
 
@@ -494,7 +494,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
     let totalUser = 0;
     let totalSystem = 0;
     let totalIdle = 0;
-    let totalIowait = 0;
+    const totalIowait = 0;
 
     const cores: CoreMetrics[] = cpus.map((cpu, index) => {
       const times = cpu.times;
@@ -597,10 +597,10 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
     const networkInterfaces = os.networkInterfaces();
     const interfaces: NetworkInterface[] = [];
 
-    let totalBytesReceived = 0;
-    let totalBytesSent = 0;
-    let totalPacketsReceived = 0;
-    let totalPacketsSent = 0;
+    const totalBytesReceived = 0;
+    const totalBytesSent = 0;
+    const totalPacketsReceived = 0;
+    const totalPacketsSent = 0;
 
     // Process each network interface
     Object.entries(networkInterfaces).forEach(([name, interfaceInfos]) => {

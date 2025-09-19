@@ -124,7 +124,10 @@ interface MigrationTestScenario {
 /**
  * Mock Parlant validation responses for testing
  */
-const mockParlantValidationResponses: Record<string, ParlantValidationResponse> = {
+const mockParlantValidationResponses: Record<
+  string,
+  ParlantValidationResponse
+> = {
   READ_APPROVED: {
     approved: true,
     conversationId: 'conv_read_test_001',
@@ -178,7 +181,8 @@ const mockParlantValidationResponses: Record<string, ParlantValidationResponse> 
   DELETE_DENIED: {
     approved: false,
     conversationId: 'conv_delete_test_001',
-    reason: 'Delete operation denied - insufficient authorization for destructive operation',
+    reason:
+      'Delete operation denied - insufficient authorization for destructive operation',
     confidence: 0.92,
     executionContext: {
       monitoringLevel: 'COMPREHENSIVE',
@@ -194,7 +198,11 @@ const mockParlantValidationResponses: Record<string, ParlantValidationResponse> 
       source: 'parlant',
       riskAssessment: {
         level: SecurityLevel._HIGH,
-        factors: ['Delete operation', 'Destructive operation', 'Data loss risk'],
+        factors: [
+          'Delete operation',
+          'Destructive operation',
+          'Data loss risk',
+        ],
         score: 75,
         mitigations: [
           'Create backup before proceeding',
@@ -315,8 +323,8 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
   };
 
   // Test data storage
-  let conversationHistoryTestData: ConversationHistoryTestData[] = [];
-  let performanceBenchmarks: PerformanceBenchmarkResults[] = [];
+  const conversationHistoryTestData: ConversationHistoryTestData[] = [];
+  const performanceBenchmarks: PerformanceBenchmarkResults[] = [];
   let migrationTestScenarios: MigrationTestScenario[] = [];
 
   beforeAll(async () => {
@@ -426,7 +434,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
 
       // Assert
       expect(result).toBeDefined();
-      expect(parlantDatabaseService as any).toHaveProperty('performParlantValidation');
+      expect(parlantDatabaseService as any).toHaveProperty(
+        'performParlantValidation',
+      );
 
       // Verify conversation history is recorded
       const auditTrail = parlantDatabaseService.getAuditTrail();
@@ -464,7 +474,10 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
       // Act
       const result = await parlantDatabaseService.executeRawQuery(
         'INSERT INTO browser_sessions (user_id, session_data) VALUES (?, ?)',
-        ['user_123', JSON.stringify({ browser: 'chrome', url: 'https://example.com' })],
+        [
+          'user_123',
+          JSON.stringify({ browser: 'chrome', url: 'https://example.com' }),
+        ],
         userContext,
       );
 
@@ -482,7 +495,8 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
       expect(writeOperation!.riskLevel).toBe(SecurityLevel._MEDIUM);
 
       // Verify safeguards are applied
-      const executionContext = mockParlantValidationResponses.WRITE_APPROVED.executionContext;
+      const executionContext =
+        mockParlantValidationResponses.WRITE_APPROVED.executionContext;
       expect(executionContext?.safeguards).toContain('query_logging');
       expect(executionContext?.safeguards).toContain('performance_monitoring');
     });
@@ -521,10 +535,16 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
     it('should validate Prisma ORM operations with model-specific security', async () => {
       // Arrange
       const userContext = testUserContexts.ADMIN_USER;
-      const mockUserData = { id: '1', email: 'test@example.com', role: 'admin' };
+      const mockUserData = {
+        id: '1',
+        email: 'test@example.com',
+        role: 'admin',
+      };
 
       // Mock Prisma operations
-      jest.spyOn(prismaClient.user, 'findUnique').mockResolvedValue(mockUserData);
+      jest
+        .spyOn(prismaClient.user, 'findUnique')
+        .mockResolvedValue(mockUserData);
 
       // Mock Parlant validation for Prisma operations
       jest
@@ -600,7 +620,11 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
           } else {
             // Should throw ConversationalValidationError
             await expect(
-              parlantDatabaseService.executeRawQuery('DELETE FROM test', [], userContext),
+              parlantDatabaseService.executeRawQuery(
+                'DELETE FROM test',
+                [],
+                userContext,
+              ),
             ).rejects.toThrow(ConversationalValidationError);
           }
         } catch (error) {
@@ -669,8 +693,12 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
         userConversations.forEach((conversation) => {
           expect(conversation.userId).toBe(userId);
           expect(conversation.timestamp).toBeInstanceOf(Date);
-          expect(conversation.timestamp.getTime()).toBeGreaterThanOrEqual(timeRange.start.getTime());
-          expect(conversation.timestamp.getTime()).toBeLessThanOrEqual(timeRange.end.getTime());
+          expect(conversation.timestamp.getTime()).toBeGreaterThanOrEqual(
+            timeRange.start.getTime(),
+          );
+          expect(conversation.timestamp.getTime()).toBeLessThanOrEqual(
+            timeRange.end.getTime(),
+          );
         });
       }
     });
@@ -696,7 +724,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
         expect(['APPROVED', 'DENIED']).toContain(entry.validationResult);
 
         // Execution result integrity
-        expect(['SUCCESS', 'FAILURE', 'TIMEOUT', 'CANCELLED']).toContain(entry.executionResult);
+        expect(['SUCCESS', 'FAILURE', 'TIMEOUT', 'CANCELLED']).toContain(
+          entry.executionResult,
+        );
 
         // Duration should be positive
         expect(entry.duration).toBeGreaterThanOrEqual(0);
@@ -733,7 +763,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
           .mockResolvedValue(mockParlantValidationResponses.READ_APPROVED);
 
-        jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValue([{ id: i }]);
+        jest
+          .spyOn(databaseService, 'executeRawQuery')
+          .mockResolvedValue([{ id: i }]);
 
         await parlantDatabaseService.executeRawQuery(
           'SELECT * FROM users WHERE id = ?',
@@ -751,11 +783,16 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
       const p95ValidationTime = validationTimes[p95Index];
 
       // Assert
-      expect(p95ValidationTime).toBeLessThan(testingConfig.performanceTesting.targetValidationTime);
+      expect(p95ValidationTime).toBeLessThan(
+        testingConfig.performanceTesting.targetValidationTime,
+      );
 
       // Calculate additional metrics
-      const averageTime = validationTimes.reduce((sum, time) => sum + time, 0) / validationTimes.length;
-      const throughput = iterations / (validationTimes[validationTimes.length - 1] / 1000);
+      const averageTime =
+        validationTimes.reduce((sum, time) => sum + time, 0) /
+        validationTimes.length;
+      const throughput =
+        iterations / (validationTimes[validationTimes.length - 1] / 1000);
 
       // Store benchmark results
       performanceBenchmarks.push({
@@ -793,7 +830,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
           .mockResolvedValue(mockParlantValidationResponses.READ_APPROVED);
 
-        jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValue([{ id: operationIndex }]);
+        jest
+          .spyOn(databaseService, 'executeRawQuery')
+          .mockResolvedValue([{ id: operationIndex }]);
 
         await parlantDatabaseService.executeRawQuery(
           'SELECT * FROM users WHERE id = ?',
@@ -804,9 +843,12 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
 
       // Assert
       const cacheStats = parlantDatabaseService.getCacheStatistics();
-      const cacheHitRate = parseFloat(cacheStats.cacheHitRate.replace('%', '')) / 100;
+      const cacheHitRate =
+        parseFloat(cacheStats.cacheHitRate.replace('%', '')) / 100;
 
-      expect(cacheHitRate).toBeGreaterThanOrEqual(testingConfig.performanceTesting.cacheHitRateTarget);
+      expect(cacheHitRate).toBeGreaterThanOrEqual(
+        testingConfig.performanceTesting.cacheHitRateTarget,
+      );
 
       console.log('Cache Performance Results:', {
         totalValidations: cacheStats.totalValidations,
@@ -826,7 +868,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
         .mockResolvedValue(mockParlantValidationResponses.READ_APPROVED);
 
-      jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValue([{ id: 1 }]);
+      jest
+        .spyOn(databaseService, 'executeRawQuery')
+        .mockResolvedValue([{ id: 1 }]);
 
       // Act - Execute concurrent operations
       const promises = Array.from({ length: concurrentOperations }, (_, i) =>
@@ -845,7 +889,9 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
       expect(results.every((result) => result !== null)).toBe(true);
 
       const throughput = concurrentOperations / (totalTime / 1000);
-      expect(throughput).toBeGreaterThan(testingConfig.performanceTesting.operationThroughputTarget / 10); // Adjusted for test environment
+      expect(throughput).toBeGreaterThan(
+        testingConfig.performanceTesting.operationThroughputTarget / 10,
+      ); // Adjusted for test environment
 
       console.log('Concurrent Operations Results:', {
         concurrentOperations,
@@ -882,7 +928,7 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
       {
         migrationName: 'add_audit_log_partitioning',
         migrationSteps: [
-          'CREATE TABLE audit_logs_2024 PARTITION OF audit_logs FOR VALUES FROM (\'2024-01-01\') TO (\'2025-01-01\')',
+          "CREATE TABLE audit_logs_2024 PARTITION OF audit_logs FOR VALUES FROM ('2024-01-01') TO ('2025-01-01')",
         ],
         riskLevel: RiskLevel.HIGH,
         backupRequired: true,
@@ -896,6 +942,8 @@ describe('PARLANT Database Testing Framework - Comprehensive Implementation', ()
     console.log(`- ${databaseOperationScenarios.length} operation scenarios`);
     console.log(`- ${Object.keys(testUserContexts).length} user contexts`);
     console.log(`- ${migrationTestScenarios.length} migration scenarios`);
-    console.log(`- Performance targets: ${testingConfig.performanceTesting.targetValidationTime}ms validation time`);
+    console.log(
+      `- Performance targets: ${testingConfig.performanceTesting.targetValidationTime}ms validation time`,
+    );
   }
 });

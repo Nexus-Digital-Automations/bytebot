@@ -32,7 +32,7 @@ import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { Worker, isMainThread, parentPort } from 'worker_threads';
 import * as os from 'os';
-import * as pidusage from 'pidusage';
+// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring instead
 import * as path from 'path';
 import { promisify } from 'util';
 
@@ -1158,6 +1158,11 @@ export class WebSocketPerformanceBenchmarkingService
       severity,
       affectedMetrics,
       recommendedActions: detected ? [
+        'Investigate recent code changes',
+        'Review resource allocation',
+        'Consider rollback if critical',
+      ] : [],
+      recommendations: detected ? [
         'Investigate recent code changes',
         'Review resource allocation',
         'Consider rollback if critical',

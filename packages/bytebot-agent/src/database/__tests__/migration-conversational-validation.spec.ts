@@ -58,7 +58,15 @@ interface MigrationTestScenario {
  */
 interface MigrationStep {
   readonly stepNumber: number;
-  readonly stepType: 'CREATE_TABLE' | 'ALTER_TABLE' | 'DROP_TABLE' | 'CREATE_INDEX' | 'DROP_INDEX' | 'INSERT_DATA' | 'UPDATE_DATA' | 'DELETE_DATA';
+  readonly stepType:
+    | 'CREATE_TABLE'
+    | 'ALTER_TABLE'
+    | 'DROP_TABLE'
+    | 'CREATE_INDEX'
+    | 'DROP_INDEX'
+    | 'INSERT_DATA'
+    | 'UPDATE_DATA'
+    | 'DELETE_DATA';
   readonly sql: string;
   readonly description: string;
   readonly canRollback: boolean;
@@ -110,7 +118,11 @@ interface MigrationPerformanceMetrics {
  */
 interface SchemaValidationResult {
   readonly tableName: string;
-  readonly validationType: 'STRUCTURE' | 'CONSTRAINTS' | 'INDEXES' | 'DATA_INTEGRITY';
+  readonly validationType:
+    | 'STRUCTURE'
+    | 'CONSTRAINTS'
+    | 'INDEXES'
+    | 'DATA_INTEGRITY';
   readonly isValid: boolean;
   readonly validationErrors: string[];
   readonly expectedSchema: any;
@@ -127,7 +139,8 @@ const migrationTestScenarios: MigrationTestScenario[] = [
   {
     migrationName: 'add_user_preferences_table',
     migrationVersion: '2024.09.001',
-    description: 'Add user preferences table with JSON storage for customizable user settings',
+    description:
+      'Add user preferences table with JSON storage for customizable user settings',
     migrationSteps: [
       {
         stepNumber: 1,
@@ -144,7 +157,8 @@ const migrationTestScenarios: MigrationTestScenario[] = [
         description: 'Create user_preferences table with JSON storage',
         canRollback: true,
         rollbackSql: 'DROP TABLE IF EXISTS user_preferences',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="table" AND name="user_preferences"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="table" AND name="user_preferences"',
         expectedResult: [{ name: 'user_preferences' }],
       },
       {
@@ -154,17 +168,20 @@ const migrationTestScenarios: MigrationTestScenario[] = [
         description: 'Create index on user_id for efficient lookups',
         canRollback: true,
         rollbackSql: 'DROP INDEX IF EXISTS idx_user_preferences_user_id',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_user_preferences_user_id"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_user_preferences_user_id"',
         expectedResult: [{ name: 'idx_user_preferences_user_id' }],
       },
       {
         stepNumber: 3,
         stepType: 'CREATE_INDEX',
         sql: 'CREATE INDEX idx_user_preferences_category ON user_preferences(preference_category)',
-        description: 'Create index on preference_category for category-based queries',
+        description:
+          'Create index on preference_category for category-based queries',
         canRollback: true,
         rollbackSql: 'DROP INDEX IF EXISTS idx_user_preferences_category',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_user_preferences_category"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_user_preferences_category"',
         expectedResult: [{ name: 'idx_user_preferences_category' }],
       },
     ],
@@ -201,7 +218,8 @@ const migrationTestScenarios: MigrationTestScenario[] = [
   {
     migrationName: 'audit_log_partitioning',
     migrationVersion: '2024.09.002',
-    description: 'Implement audit log table partitioning for improved performance and data management',
+    description:
+      'Implement audit log table partitioning for improved performance and data management',
     migrationSteps: [
       {
         stepNumber: 1,
@@ -217,7 +235,8 @@ const migrationTestScenarios: MigrationTestScenario[] = [
         description: 'Create partitioned audit logs table',
         canRollback: true,
         rollbackSql: 'DROP TABLE IF EXISTS audit_logs_partitioned',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="table" AND name="audit_logs_partitioned"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="table" AND name="audit_logs_partitioned"',
         expectedResult: [{ name: 'audit_logs_partitioned' }],
       },
       {
@@ -237,7 +256,8 @@ const migrationTestScenarios: MigrationTestScenario[] = [
         description: 'Create partition date index for efficient queries',
         canRollback: true,
         rollbackSql: 'DROP INDEX IF EXISTS idx_audit_logs_partitioned_date',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_audit_logs_partitioned_date"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_audit_logs_partitioned_date"',
         expectedResult: [{ name: 'idx_audit_logs_partitioned_date' }],
       },
     ],
@@ -267,15 +287,18 @@ const migrationTestScenarios: MigrationTestScenario[] = [
   {
     migrationName: 'browser_session_optimization',
     migrationVersion: '2024.09.003',
-    description: 'Optimize browser session table with better indexing and data compression',
+    description:
+      'Optimize browser session table with better indexing and data compression',
     migrationSteps: [
       {
         stepNumber: 1,
         stepType: 'ALTER_TABLE',
         sql: 'ALTER TABLE browser_sessions ADD COLUMN session_metadata JSON',
-        description: 'Add session metadata column for extended session information',
+        description:
+          'Add session metadata column for extended session information',
         canRollback: true,
-        rollbackSql: 'ALTER TABLE browser_sessions DROP COLUMN session_metadata',
+        rollbackSql:
+          'ALTER TABLE browser_sessions DROP COLUMN session_metadata',
         validationQuery: 'PRAGMA table_info(browser_sessions)',
         expectedResult: [], // Will validate column existence
       },
@@ -283,10 +306,12 @@ const migrationTestScenarios: MigrationTestScenario[] = [
         stepNumber: 2,
         stepType: 'CREATE_INDEX',
         sql: 'CREATE INDEX idx_browser_sessions_status_created ON browser_sessions(status, created_at)',
-        description: 'Create composite index for status and creation date queries',
+        description:
+          'Create composite index for status and creation date queries',
         canRollback: true,
         rollbackSql: 'DROP INDEX IF EXISTS idx_browser_sessions_status_created',
-        validationQuery: 'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_browser_sessions_status_created"',
+        validationQuery:
+          'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_browser_sessions_status_created"',
         expectedResult: [{ name: 'idx_browser_sessions_status_created' }],
       },
     ],
@@ -318,15 +343,24 @@ const migrationTestScenarios: MigrationTestScenario[] = [
 /**
  * Mock Parlant validation responses for migration scenarios
  */
-const mockMigrationValidationResponses: Record<string, ParlantValidationResponse> = {
+const mockMigrationValidationResponses: Record<
+  string,
+  ParlantValidationResponse
+> = {
   MIGRATION_APPROVED: {
     approved: true,
     conversationId: 'conv_migration_001',
-    reason: 'Database migration approved with comprehensive backup and rollback procedures',
-    confidence: 0.90,
+    reason:
+      'Database migration approved with comprehensive backup and rollback procedures',
+    confidence: 0.9,
     executionContext: {
       monitoringLevel: 'COMPREHENSIVE',
-      safeguards: ['backup_verification', 'rollback_plan', 'schema_validation', 'performance_monitoring'],
+      safeguards: [
+        'backup_verification',
+        'rollback_plan',
+        'schema_validation',
+        'performance_monitoring',
+      ],
       timeoutMs: 60000,
       retryAttempts: 0, // No retries for migrations
     },
@@ -338,7 +372,11 @@ const mockMigrationValidationResponses: Record<string, ParlantValidationResponse
       source: 'parlant',
       riskAssessment: {
         level: SecurityLevel._HIGH,
-        factors: ['Schema modification', 'Data transformation', 'Rollback complexity'],
+        factors: [
+          'Schema modification',
+          'Data transformation',
+          'Rollback complexity',
+        ],
         score: 65,
         mitigations: [
           'Pre-migration backup created',
@@ -352,7 +390,8 @@ const mockMigrationValidationResponses: Record<string, ParlantValidationResponse
   MIGRATION_DENIED: {
     approved: false,
     conversationId: 'conv_migration_denied_001',
-    reason: 'Migration denied - insufficient backup verification and high data loss risk',
+    reason:
+      'Migration denied - insufficient backup verification and high data loss risk',
     confidence: 0.95,
     executionContext: {
       monitoringLevel: 'COMPREHENSIVE',
@@ -424,8 +463,8 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
   let prismaClient: PrismaClient;
 
   // Test results storage
-  let migrationExecutionResults: MigrationExecutionResult[] = [];
-  let schemaValidationResults: SchemaValidationResult[] = [];
+  const migrationExecutionResults: MigrationExecutionResult[] = [];
+  const schemaValidationResults: SchemaValidationResult[] = [];
 
   beforeAll(async () => {
     // Setup testing module
@@ -505,9 +544,7 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       // Mock migration steps execution
       scenario.migrationSteps.forEach((step, index) => {
-        jest
-          .spyOn(prismaClient, '$executeRaw')
-          .mockResolvedValueOnce(1); // Simulate successful execution
+        jest.spyOn(prismaClient, '$executeRaw').mockResolvedValueOnce(1); // Simulate successful execution
         jest
           .spyOn(prismaClient, '$queryRaw')
           .mockResolvedValueOnce(step.expectedResult || []);
@@ -531,18 +568,21 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       };
 
       // Execute migration steps with validation
-      const migrationOperations = scenario.migrationSteps.map((step) => async () => {
-        // Execute the migration step
-        await prismaClient.$executeRaw`${step.sql}`;
+      const migrationOperations = scenario.migrationSteps.map(
+        (step) => async () => {
+          // Execute the migration step
+          await prismaClient.$executeRaw`${step.sql}`;
 
-        // Validate the step if validation query exists
-        if (step.validationQuery) {
-          const validationResult = await prismaClient.$queryRaw`${step.validationQuery}`;
-          return { step: step.stepNumber, result: validationResult };
-        }
+          // Validate the step if validation query exists
+          if (step.validationQuery) {
+            const validationResult =
+              await prismaClient.$queryRaw`${step.validationQuery}`;
+            return { step: step.stepNumber, result: validationResult };
+          }
 
-        return { step: step.stepNumber, result: 'completed' };
-      });
+          return { step: step.stepNumber, result: 'completed' };
+        },
+      );
 
       const result = await parlantDatabaseService.executeWithTransaction(
         scenario.migrationName,
@@ -563,7 +603,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       expect(backupService.createPreOperationBackup).toHaveBeenCalledTimes(1);
 
       // Verify migration steps were executed
-      expect(prismaClient.$executeRaw).toHaveBeenCalledTimes(scenario.migrationSteps.length);
+      expect(prismaClient.$executeRaw).toHaveBeenCalledTimes(
+        scenario.migrationSteps.length,
+      );
 
       // Verify audit trail
       const auditTrail = parlantDatabaseService.getAuditTrail();
@@ -637,7 +679,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       await expect(
         parlantDatabaseService.executeWithTransaction(
           scenario.migrationName,
-          scenario.migrationSteps.map((step) => () => prismaClient.$executeRaw`${step.sql}`),
+          scenario.migrationSteps.map(
+            (step) => () => prismaClient.$executeRaw`${step.sql}`,
+          ),
           migrationMetadata,
           userContext,
           { migrationVersion: scenario.migrationVersion },
@@ -660,7 +704,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       jest
         .spyOn(prismaClient, '$executeRaw')
         .mockResolvedValueOnce(1) // First step succeeds
-        .mockRejectedValueOnce(new Error('Index creation failed - insufficient disk space')); // Second step fails
+        .mockRejectedValueOnce(
+          new Error('Index creation failed - insufficient disk space'),
+        ); // Second step fails
 
       // Mock Parlant validation approval
       jest
@@ -680,7 +726,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       await expect(
         parlantDatabaseService.executeWithTransaction(
           `rollback_test_${scenario.migrationName}`,
-          scenario.migrationSteps.map((step) => () => prismaClient.$executeRaw`${step.sql}`),
+          scenario.migrationSteps.map(
+            (step) => () => prismaClient.$executeRaw`${step.sql}`,
+          ),
           migrationMetadata,
           userContext,
         ),
@@ -691,8 +739,8 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       // Verify rollback is recorded in audit trail
       const auditTrail = parlantDatabaseService.getAuditTrail();
-      const rollbackEntry = auditTrail.find(
-        (entry) => entry.functionName.includes('rollback_test'),
+      const rollbackEntry = auditTrail.find((entry) =>
+        entry.functionName.includes('rollback_test'),
       );
 
       expect(rollbackEntry).toBeDefined();
@@ -711,7 +759,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       scenario.migrationSteps.forEach((step) => {
         jest.spyOn(prismaClient, '$executeRaw').mockResolvedValueOnce(1);
-        jest.spyOn(prismaClient, '$queryRaw').mockResolvedValueOnce(step.expectedResult || []);
+        jest
+          .spyOn(prismaClient, '$queryRaw')
+          .mockResolvedValueOnce(step.expectedResult || []);
       });
 
       // Mock schema validation queries
@@ -733,7 +783,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       await parlantDatabaseService.executeWithTransaction(
         `schema_validation_${scenario.migrationName}`,
-        scenario.migrationSteps.map((step) => () => prismaClient.$executeRaw`${step.sql}`),
+        scenario.migrationSteps.map(
+          (step) => () => prismaClient.$executeRaw`${step.sql}`,
+        ),
         migrationMetadata,
         userContext,
       );
@@ -742,12 +794,17 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       const schemaValidationTasks = scenario.migrationSteps
         .filter((step) => step.validationQuery)
         .map(async (step) => {
-          const validationResult = await prismaClient.$queryRaw`${step.validationQuery}`;
+          const validationResult =
+            await prismaClient.$queryRaw`${step.validationQuery}`;
 
           return {
             tableName: 'user_preferences',
-            validationType: step.stepType.includes('TABLE') ? 'STRUCTURE' as const : 'INDEXES' as const,
-            isValid: JSON.stringify(validationResult) === JSON.stringify(step.expectedResult),
+            validationType: step.stepType.includes('TABLE')
+              ? ('STRUCTURE' as const)
+              : ('INDEXES' as const),
+            isValid:
+              JSON.stringify(validationResult) ===
+              JSON.stringify(step.expectedResult),
             validationErrors: [],
             expectedSchema: step.expectedResult,
             actualSchema: validationResult,
@@ -769,8 +826,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       console.log('Schema Validation Results:', {
         totalValidations: validationResults.length,
-        successfulValidations: validationResults.filter((r) => r.isValid).length,
-        complianceRate: `${(validationResults.filter((r) => r.isValid).length / validationResults.length * 100).toFixed(2)}%`,
+        successfulValidations: validationResults.filter((r) => r.isValid)
+          .length,
+        complianceRate: `${((validationResults.filter((r) => r.isValid).length / validationResults.length) * 100).toFixed(2)}%`,
       });
     });
   });
@@ -784,13 +842,21 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
       const userContext = migrationTestUserContexts.DATABASE_ADMIN;
 
       // Mock cross-database compatibility check
-      const sqliteToPostgreSQLTransformations = scenario.migrationSteps.map((step) => ({
-        ...step,
-        sql: step.sql
-          .replace(/TEXT PRIMARY KEY DEFAULT \(lower\(hex\(randomblob\(16\)\)\)\)/, 'UUID PRIMARY KEY DEFAULT gen_random_uuid()')
-          .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
-          .replace(/JSON/, 'JSONB'), // PostgreSQL optimization
-      }));
+      const sqliteToPostgreSQLTransformations = scenario.migrationSteps.map(
+        (step) => ({
+          ...step,
+          sql: step.sql
+            .replace(
+              /TEXT PRIMARY KEY DEFAULT \(lower\(hex\(randomblob\(16\)\)\)\)/,
+              'UUID PRIMARY KEY DEFAULT gen_random_uuid()',
+            )
+            .replace(
+              /DATETIME DEFAULT CURRENT_TIMESTAMP/,
+              'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            )
+            .replace(/JSON/, 'JSONB'), // PostgreSQL optimization
+        }),
+      );
 
       // Mock validation for both database types
       jest
@@ -811,7 +877,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       await parlantDatabaseService.executeWithTransaction(
         `sqlite_${scenario.migrationName}`,
-        scenario.migrationSteps.map((step) => () => prismaClient.$executeRaw`${step.sql}`),
+        scenario.migrationSteps.map(
+          (step) => () => prismaClient.$executeRaw`${step.sql}`,
+        ),
         sqliteMetadata,
         userContext,
       );
@@ -828,7 +896,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
 
       await parlantDatabaseService.executeWithTransaction(
         `postgresql_${scenario.migrationName}`,
-        sqliteToPostgreSQLTransformations.map((step) => () => prismaClient.$executeRaw`${step.sql}`),
+        sqliteToPostgreSQLTransformations.map(
+          (step) => () => prismaClient.$executeRaw`${step.sql}`,
+        ),
         postgresMetadata,
         userContext,
       );
@@ -876,7 +946,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
         // Mock successful execution
         jest
           .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-          .mockResolvedValue(mockMigrationValidationResponses.MIGRATION_APPROVED);
+          .mockResolvedValue(
+            mockMigrationValidationResponses.MIGRATION_APPROVED,
+          );
 
         scenario.migrationSteps.forEach(() => {
           jest.spyOn(prismaClient, '$executeRaw').mockResolvedValueOnce(1);
@@ -896,7 +968,9 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
           scenario.migrationSteps.map((step) => () => {
             // Simulate step execution time based on complexity
             const stepDelay = step.stepType.includes('DATA') ? 500 : 100;
-            return new Promise((resolve) => setTimeout(() => resolve(1), stepDelay));
+            return new Promise((resolve) =>
+              setTimeout(() => resolve(1), stepDelay),
+            );
           }),
           migrationMetadata,
           userContext,
@@ -926,32 +1000,53 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
         failedMigrations: migrationExecutionResults.filter(
           (result) => result.outcome === 'FAILURE',
         ).length,
-        averageExecutionTime: migrationExecutionResults.reduce(
-          (sum, result) => sum + result.totalDuration,
-          0,
-        ) / Math.max(migrationExecutionResults.length, 1),
-        averageValidationTime: migrationExecutionResults.reduce(
-          (sum, result) => sum + result.validationDuration,
-          0,
-        ) / Math.max(migrationExecutionResults.length, 1),
+        averageExecutionTime:
+          migrationExecutionResults.reduce(
+            (sum, result) => sum + result.totalDuration,
+            0,
+          ) / Math.max(migrationExecutionResults.length, 1),
+        averageValidationTime:
+          migrationExecutionResults.reduce(
+            (sum, result) => sum + result.validationDuration,
+            0,
+          ) / Math.max(migrationExecutionResults.length, 1),
         schemaValidationResults: {
           totalValidations: schemaValidationResults.length,
-          successfulValidations: schemaValidationResults.filter((result) => result.isValid).length,
-          complianceRate: schemaValidationResults.length > 0
-            ? (schemaValidationResults.filter((result) => result.isValid).length / schemaValidationResults.length * 100).toFixed(2) + '%'
-            : '0%',
+          successfulValidations: schemaValidationResults.filter(
+            (result) => result.isValid,
+          ).length,
+          complianceRate:
+            schemaValidationResults.length > 0
+              ? (
+                  (schemaValidationResults.filter((result) => result.isValid)
+                    .length /
+                    schemaValidationResults.length) *
+                  100
+                ).toFixed(2) + '%'
+              : '0%',
         },
         backupOperations: {
-          backupsCreated: migrationExecutionResults.filter((result) => result.backupCreated).length,
-          rollbacksAvailable: migrationExecutionResults.filter((result) => result.rollbackAvailable).length,
+          backupsCreated: migrationExecutionResults.filter(
+            (result) => result.backupCreated,
+          ).length,
+          rollbacksAvailable: migrationExecutionResults.filter(
+            (result) => result.rollbackAvailable,
+          ).length,
         },
       };
 
       // Assert
-      expect(performanceReport.totalMigrationsExecuted).toBeGreaterThanOrEqual(0);
-      expect(performanceReport.schemaValidationResults.totalValidations).toBeGreaterThanOrEqual(0);
+      expect(performanceReport.totalMigrationsExecuted).toBeGreaterThanOrEqual(
+        0,
+      );
+      expect(
+        performanceReport.schemaValidationResults.totalValidations,
+      ).toBeGreaterThanOrEqual(0);
 
-      console.log('Comprehensive Migration Performance Report:', performanceReport);
+      console.log(
+        'Comprehensive Migration Performance Report:',
+        performanceReport,
+      );
 
       // Verify performance targets if we have results
       if (migrationExecutionResults.length > 0) {

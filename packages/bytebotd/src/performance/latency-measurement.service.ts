@@ -31,7 +31,7 @@ import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
+import { Worker as _Worker, isMainThread as _isMainThread, parentPort as _parentPort, workerData as _workerData } from 'worker_threads';
 import * as crypto from 'crypto';
 
 // ===== LATENCY MEASUREMENT TYPES =====
@@ -1202,7 +1202,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     const lastMean = this.calculateMean(lastQuarter);
 
     const changeRate = ((lastMean - firstMean) / firstMean) * 100;
-    const trend = changeRate > 5 ? 'degrading' : changeRate < -5 ? 'improving' : 'stable';
+    const trend = changeRate > 5 ? 'degrading' as const : changeRate < -5 ? 'improving' as const : 'stable' as const;
 
     // Calculate volatility as coefficient of variation
     const mean = this.calculateMean(latencies);

@@ -664,7 +664,7 @@ export class ParlantValidationImpactAnalysisService
     this.logger.log('🚪 Analyzing bypass mechanism performance');
 
     // This would integrate with bypass mechanism data
-    const bypassMeasurements = this.getBypassed Measurements();
+    const bypassMeasurements = this.getBypassedMeasurements();
 
     const bypassRate = (bypassMeasurements.length / this.completedMeasurements.length) * 100;
 
@@ -1098,7 +1098,7 @@ export class ParlantValidationImpactAnalysisService
 
   // ===== PLACEHOLDER METHODS (to be implemented) =====
 
-  private getBypassed Measurements(): any[] { return []; }
+  private getBypassedMeasurements(): any[] { return []; }
   private calculateCacheMemoryEfficiency(): number { return 85; }
   private calculateCacheEvictionRate(): number { return 5; }
   private calculateCacheStalenessRate(): number { return 2; }

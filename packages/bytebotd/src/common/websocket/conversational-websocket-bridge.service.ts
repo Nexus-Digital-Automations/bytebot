@@ -910,7 +910,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       const serialized = JSON.stringify(message);
 
       // Apply compression if needed and enabled
-      const shouldCompress = message.metadata?.compression &&
+      const _shouldCompress = message.metadata?.compression &&
                            serialized.length > this.PERFORMANCE_TARGETS.MESSAGE_COMPRESSION_THRESHOLD;
 
       await promisify(client.send.bind(client))(serialized);
@@ -1134,7 +1134,20 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Collect and log performance metrics
    */
   private collectPerformanceMetrics(): void {
-    const metrics: any = {
+    interface CollectedMetrics {
+      activeSessions: number;
+      activeConnections: number;
+      pendingValidations: number;
+      totalMessages: number;
+      memoryUsage: NodeJS.MemoryUsage;
+      uptime: number;
+      timestamp: number;
+      averageLatency?: number;
+      averageMessageRate?: number;
+      averageErrorRate?: number;
+    }
+
+    const metrics: CollectedMetrics = {
       activeSessions: this.sessions.size,
       activeConnections: this.clients.size,
       pendingValidations: this.pendingValidations.size,
@@ -1145,7 +1158,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     };
 
     // Calculate average session performance
-    const sessionMetrics = Array.from(this.sessions.values())
+    const sessionMetrics: SessionPerformanceMetrics[] = Array.from(this.sessions.values())
       .map(s => s.performanceMetrics);
 
     if (sessionMetrics.length > 0) {

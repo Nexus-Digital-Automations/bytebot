@@ -130,8 +130,12 @@ const transactionTestScenarios: TransactionTestScenario[] = [
       {
         operationType: 'WRITE',
         tableName: 'user_preferences',
-        query: 'INSERT INTO user_preferences (user_id, preferences) VALUES (?, ?)',
-        parameters: ['test_user_001', JSON.stringify({ theme: 'dark', language: 'en' })],
+        query:
+          'INSERT INTO user_preferences (user_id, preferences) VALUES (?, ?)',
+        parameters: [
+          'test_user_001',
+          JSON.stringify({ theme: 'dark', language: 'en' }),
+        ],
         expectedAffectedRows: 1,
         canFail: false,
       },
@@ -156,15 +160,21 @@ const transactionTestScenarios: TransactionTestScenario[] = [
       {
         operationType: 'WRITE',
         tableName: 'audit_logs',
-        query: 'INSERT INTO audit_logs (event_type, user_id, details) VALUES (?, ?, ?)',
-        parameters: ['role_migration', 'system', 'Migrated 100 users to premium'],
+        query:
+          'INSERT INTO audit_logs (event_type, user_id, details) VALUES (?, ?, ?)',
+        parameters: [
+          'role_migration',
+          'system',
+          'Migrated 100 users to premium',
+        ],
         expectedAffectedRows: 1,
         canFail: false,
       },
       {
         operationType: 'DELETE',
         tableName: 'user_sessions',
-        query: 'DELETE FROM user_sessions WHERE user_id IN (SELECT id FROM users WHERE role = ?)',
+        query:
+          'DELETE FROM user_sessions WHERE user_id IN (SELECT id FROM users WHERE role = ?)',
         parameters: ['premium_user'],
         expectedAffectedRows: 50,
         canFail: true, // This operation can fail if no sessions exist
@@ -216,7 +226,8 @@ const transactionTestScenarios: TransactionTestScenario[] = [
       {
         operationType: 'WRITE',
         tableName: 'user_activities',
-        query: 'INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (?, ?, ?)',
+        query:
+          'INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (?, ?, ?)',
         parameters: ['test_user_001', 'session_update', new Date()],
         expectedAffectedRows: 1,
         canFail: false,
@@ -234,15 +245,23 @@ const transactionTestScenarios: TransactionTestScenario[] = [
 /**
  * Mock Parlant validation responses for transaction scenarios
  */
-const mockTransactionValidationResponses: Record<string, ParlantValidationResponse> = {
+const mockTransactionValidationResponses: Record<
+  string,
+  ParlantValidationResponse
+> = {
   TRANSACTION_APPROVED: {
     approved: true,
     conversationId: 'conv_transaction_001',
-    reason: 'Transaction approved with comprehensive monitoring and rollback capabilities',
+    reason:
+      'Transaction approved with comprehensive monitoring and rollback capabilities',
     confidence: 0.92,
     executionContext: {
       monitoringLevel: 'COMPREHENSIVE',
-      safeguards: ['transaction_wrapper', 'rollback_monitoring', 'performance_tracking'],
+      safeguards: [
+        'transaction_wrapper',
+        'rollback_monitoring',
+        'performance_tracking',
+      ],
       timeoutMs: 30000,
       retryAttempts: 1,
     },
@@ -254,7 +273,11 @@ const mockTransactionValidationResponses: Record<string, ParlantValidationRespon
       source: 'parlant',
       riskAssessment: {
         level: SecurityLevel._MEDIUM,
-        factors: ['Multi-operation transaction', 'Data modification', 'Rollback complexity'],
+        factors: [
+          'Multi-operation transaction',
+          'Data modification',
+          'Rollback complexity',
+        ],
         score: 45,
         mitigations: [
           'Automatic rollback on failure',
@@ -267,7 +290,8 @@ const mockTransactionValidationResponses: Record<string, ParlantValidationRespon
   TRANSACTION_DENIED: {
     approved: false,
     conversationId: 'conv_transaction_denied_001',
-    reason: 'Transaction denied - high risk destructive operations require additional approval',
+    reason:
+      'Transaction denied - high risk destructive operations require additional approval',
     confidence: 0.95,
     executionContext: {
       monitoringLevel: 'COMPREHENSIVE',
@@ -340,7 +364,7 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
   };
 
   // Test results storage
-  let transactionExecutionResults: TransactionExecutionResult[] = [];
+  const transactionExecutionResults: TransactionExecutionResult[] = [];
 
   beforeAll(async () => {
     // Setup testing module
@@ -407,12 +431,16 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
 
       // Mock successful transaction execution
       const mockTransactionResult = { users: 1, user_preferences: 1 };
-      jest.spyOn(prismaClient, '$transaction').mockResolvedValue(mockTransactionResult);
+      jest
+        .spyOn(prismaClient, '$transaction')
+        .mockResolvedValue(mockTransactionResult);
 
       // Mock Parlant validation approval
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act
       const startTime = Date.now();
@@ -423,12 +451,17 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
         queryDescription: `Transaction: ${scenario.scenarioName}`,
         isDestructive: false,
         requiresBackup: scenario.riskLevel === RiskLevel.HIGH,
-        affectedRows: scenario.operations.reduce((sum, op) => sum + op.expectedAffectedRows, 0),
+        affectedRows: scenario.operations.reduce(
+          (sum, op) => sum + op.expectedAffectedRows,
+          0,
+        ),
       };
 
       const result = await parlantDatabaseService.executeWithTransaction(
         scenario.scenarioName,
-        scenario.operations.map((op) => () => prismaClient.$executeRaw`${op.query}`),
+        scenario.operations.map(
+          (op) => () => prismaClient.$executeRaw`${op.query}`,
+        ),
         transactionMetadata,
         userContext,
         { transactionId, scenario: scenario.scenarioName },
@@ -490,7 +523,9 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       // Mock Parlant validation denial for high-risk operation
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_DENIED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_DENIED,
+        );
 
       // Act & Assert
       const transactionMetadata: DatabaseOperationMetadata = {
@@ -499,13 +534,18 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
         queryDescription: `Transaction: ${scenario.scenarioName}`,
         isDestructive: true,
         requiresBackup: true,
-        affectedRows: scenario.operations.reduce((sum, op) => sum + op.expectedAffectedRows, 0),
+        affectedRows: scenario.operations.reduce(
+          (sum, op) => sum + op.expectedAffectedRows,
+          0,
+        ),
       };
 
       await expect(
         parlantDatabaseService.executeWithTransaction(
           scenario.scenarioName,
-          scenario.operations.map((op) => () => prismaClient.$executeRaw`${op.query}`),
+          scenario.operations.map(
+            (op) => () => prismaClient.$executeRaw`${op.query}`,
+          ),
           transactionMetadata,
           userContext,
           { scenario: scenario.scenarioName },
@@ -517,7 +557,9 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
 
       // Verify denial is properly logged
       const auditTrail = parlantDatabaseService.getAuditTrail();
-      expect(auditTrail.some((entry) => entry.executionResult === 'FAILURE')).toBe(false);
+      expect(
+        auditTrail.some((entry) => entry.executionResult === 'FAILURE'),
+      ).toBe(false);
     });
 
     it('should validate ACID compliance during transaction execution', async () => {
@@ -532,20 +574,24 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
         { deletedSessions: 50 }, // Step 3: Delete sessions
       ];
 
-      jest.spyOn(prismaClient, '$transaction').mockImplementation(async (operations) => {
-        // Simulate ACID compliance testing
-        for (let i = 0; i < operations.length; i++) {
-          const result = await operations[i](prismaClient);
-          // Verify each step completes before proceeding
-          expect(result).toBeDefined();
-        }
-        return mockTransactionSteps;
-      });
+      jest
+        .spyOn(prismaClient, '$transaction')
+        .mockImplementation(async (operations) => {
+          // Simulate ACID compliance testing
+          for (let i = 0; i < operations.length; i++) {
+            const result = await operations[i](prismaClient);
+            // Verify each step completes before proceeding
+            expect(result).toBeDefined();
+          }
+          return mockTransactionSteps;
+        });
 
       // Mock Parlant validation approval
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act
       const transactionMetadata: DatabaseOperationMetadata = {
@@ -554,12 +600,17 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
         queryDescription: `ACID Transaction: ${scenario.scenarioName}`,
         isDestructive: true,
         requiresBackup: true,
-        affectedRows: scenario.operations.reduce((sum, op) => sum + op.expectedAffectedRows, 0),
+        affectedRows: scenario.operations.reduce(
+          (sum, op) => sum + op.expectedAffectedRows,
+          0,
+        ),
       };
 
       const result = await parlantDatabaseService.executeWithTransaction(
         scenario.scenarioName,
-        scenario.operations.map((op, index) => () => Promise.resolve(mockTransactionSteps[index])),
+        scenario.operations.map(
+          (op, index) => () => Promise.resolve(mockTransactionSteps[index]),
+        ),
         transactionMetadata,
         userContext,
         { acidCompliance: true },
@@ -601,28 +652,35 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       // Mock Parlant validation approval for concurrent operations
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act - Execute concurrent transactions
       const startTime = Date.now();
-      const concurrentPromises = Array.from({ length: concurrentCount }, (_, index) => {
-        const transactionMetadata: DatabaseOperationMetadata = {
-          operationType: 'WRITE',
-          tableName: 'user_sessions,user_activities',
-          queryDescription: `Concurrent transaction ${index + 1}: ${scenario.scenarioName}`,
-          isDestructive: false,
-          requiresBackup: false,
-          affectedRows: 2,
-        };
+      const concurrentPromises = Array.from(
+        { length: concurrentCount },
+        (_, index) => {
+          const transactionMetadata: DatabaseOperationMetadata = {
+            operationType: 'WRITE',
+            tableName: 'user_sessions,user_activities',
+            queryDescription: `Concurrent transaction ${index + 1}: ${scenario.scenarioName}`,
+            isDestructive: false,
+            requiresBackup: false,
+            affectedRows: 2,
+          };
 
-        return parlantDatabaseService.executeWithTransaction(
-          `${scenario.scenarioName}_${index}`,
-          scenario.operations.map(() => () => Promise.resolve({ success: true })),
-          transactionMetadata,
-          userContext,
-          { concurrentIndex: index },
-        );
-      });
+          return parlantDatabaseService.executeWithTransaction(
+            `${scenario.scenarioName}_${index}`,
+            scenario.operations.map(
+              () => () => Promise.resolve({ success: true }),
+            ),
+            transactionMetadata,
+            userContext,
+            { concurrentIndex: index },
+          );
+        },
+      );
 
       const results = await Promise.all(concurrentPromises);
       const totalTime = Date.now() - startTime;
@@ -656,18 +714,24 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       const userContext = transactionTestUserContexts.TRANSACTION_ADMIN;
 
       // Mock transaction failure at step 2 (should trigger rollback)
-      jest.spyOn(prismaClient, '$transaction').mockImplementation(async (operations) => {
-        // Execute first operation successfully
-        await operations[0](prismaClient);
+      jest
+        .spyOn(prismaClient, '$transaction')
+        .mockImplementation(async (operations) => {
+          // Execute first operation successfully
+          await operations[0](prismaClient);
 
-        // Fail at second operation
-        throw new Error('Audit log creation failed - insufficient storage space');
-      });
+          // Fail at second operation
+          throw new Error(
+            'Audit log creation failed - insufficient storage space',
+          );
+        });
 
       // Mock Parlant validation approval
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act & Assert
       const transactionMetadata: DatabaseOperationMetadata = {
@@ -682,7 +746,9 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       await expect(
         parlantDatabaseService.executeWithTransaction(
           scenario.scenarioName,
-          scenario.operations.map((op) => () => prismaClient.$executeRaw`${op.query}`),
+          scenario.operations.map(
+            (op) => () => prismaClient.$executeRaw`${op.query}`,
+          ),
           transactionMetadata,
           userContext,
         ),
@@ -717,7 +783,9 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       // Mock Parlant validation approval
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act
       const transactionMetadata: DatabaseOperationMetadata = {
@@ -761,29 +829,33 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       // Track operations for rollback validation
       const executedOperations: string[] = [];
 
-      jest.spyOn(prismaClient, '$transaction').mockImplementation(async (operations) => {
-        try {
-          for (let i = 0; i < operations.length; i++) {
-            executedOperations.push(`operation_${i}`);
+      jest
+        .spyOn(prismaClient, '$transaction')
+        .mockImplementation(async (operations) => {
+          try {
+            for (let i = 0; i < operations.length; i++) {
+              executedOperations.push(`operation_${i}`);
 
-            // Simulate failure at operation 2
-            if (i === 2) {
-              throw new Error('Intentional failure for rollback testing');
+              // Simulate failure at operation 2
+              if (i === 2) {
+                throw new Error('Intentional failure for rollback testing');
+              }
+
+              await operations[i](prismaClient);
             }
-
-            await operations[i](prismaClient);
+          } catch (error) {
+            // Prisma will automatically rollback all operations
+            executedOperations.length = 0; // Simulate rollback
+            throw error;
           }
-        } catch (error) {
-          // Prisma will automatically rollback all operations
-          executedOperations.length = 0; // Simulate rollback
-          throw error;
-        }
-      });
+        });
 
       // Mock Parlant validation approval
       jest
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
-        .mockResolvedValue(mockTransactionValidationResponses.TRANSACTION_APPROVED);
+        .mockResolvedValue(
+          mockTransactionValidationResponses.TRANSACTION_APPROVED,
+        );
 
       // Act
       const transactionMetadata: DatabaseOperationMetadata = {
@@ -813,8 +885,8 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
 
       // Verify audit trail reflects rollback
       const auditTrail = parlantDatabaseService.getAuditTrail();
-      const rollbackEntry = auditTrail.find(
-        (entry) => entry.functionName.includes('rollback_integrity'),
+      const rollbackEntry = auditTrail.find((entry) =>
+        entry.functionName.includes('rollback_integrity'),
       );
 
       expect(rollbackEntry).toBeDefined();
@@ -835,14 +907,16 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
         rolledBackTransactions: transactionExecutionResults.filter(
           (result) => result.outcome === 'ROLLBACK',
         ).length,
-        averageExecutionTime: transactionExecutionResults.reduce(
-          (sum, result) => sum + result.totalDuration,
-          0,
-        ) / Math.max(transactionExecutionResults.length, 1),
-        averageValidationTime: transactionExecutionResults.reduce(
-          (sum, result) => sum + result.validationDuration,
-          0,
-        ) / Math.max(transactionExecutionResults.length, 1),
+        averageExecutionTime:
+          transactionExecutionResults.reduce(
+            (sum, result) => sum + result.totalDuration,
+            0,
+          ) / Math.max(transactionExecutionResults.length, 1),
+        averageValidationTime:
+          transactionExecutionResults.reduce(
+            (sum, result) => sum + result.validationDuration,
+            0,
+          ) / Math.max(transactionExecutionResults.length, 1),
         performanceMetrics: {
           p95ExecutionTime: calculateP95(
             transactionExecutionResults.map((result) => result.totalDuration),
@@ -850,12 +924,16 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
           p99ExecutionTime: calculateP99(
             transactionExecutionResults.map((result) => result.totalDuration),
           ),
-          transactionThroughput: calculateThroughput(transactionExecutionResults),
+          transactionThroughput: calculateThroughput(
+            transactionExecutionResults,
+          ),
         },
       };
 
       // Assert
-      expect(performanceReport.totalTransactionsExecuted).toBeGreaterThanOrEqual(0);
+      expect(
+        performanceReport.totalTransactionsExecuted,
+      ).toBeGreaterThanOrEqual(0);
       expect(performanceReport.averageValidationTime).toBeLessThan(1000); // Sub-1000ms target
 
       console.log('Transaction Performance Report:', performanceReport);
@@ -863,7 +941,9 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
       // Performance targets validation
       if (performanceReport.totalTransactionsExecuted > 0) {
         expect(performanceReport.averageExecutionTime).toBeLessThan(5000); // 5 second average
-        expect(performanceReport.performanceMetrics.p95ExecutionTime).toBeLessThan(10000); // 10 second P95
+        expect(
+          performanceReport.performanceMetrics.p95ExecutionTime,
+        ).toBeLessThan(10000); // 10 second P95
       }
     });
   });
@@ -895,7 +975,10 @@ describe('Database Transaction Integrity and Rollback Testing', () => {
    */
   function calculateThroughput(results: TransactionExecutionResult[]): number {
     if (results.length === 0) return 0;
-    const totalTime = results.reduce((sum, result) => sum + result.totalDuration, 0);
+    const totalTime = results.reduce(
+      (sum, result) => sum + result.totalDuration,
+      0,
+    );
     return results.length / (totalTime / 1000); // transactions per second
   }
 });

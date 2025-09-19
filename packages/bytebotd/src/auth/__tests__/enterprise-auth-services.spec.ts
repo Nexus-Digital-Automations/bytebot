@@ -20,10 +20,8 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, UnauthorizedException, ForbiddenException, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
-import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { jest } from '@jest/globals';
 
@@ -31,21 +29,50 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 
+// Auth types
+interface User {
+  id: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
+}
+
+interface SecurityContext {
+  userId: string;
+  roles: string[];
+  permissions: string[];
+  sessionId: string;
+}
+
+interface TokenValidationResult {
+  valid: boolean;
+  userId: string;
+  roles: string[];
+  expiresAt: Date;
+}
+
+interface AuditDetails {
+  action: string;
+  resource?: string;
+  timestamp: Date;
+  metadata?: Record<string, unknown>;
+}
+
 // Mock Parlant Auth Bridge Service (to be implemented)
 interface ParlantAuthBridgeService {
   syncParlantSession(userId: string, jwtToken: string): Promise<{ sessionId: string }>;
   validateParlantPermissions(userId: string, resource: string, action: string): Promise<boolean>;
-  createParlantSecurityContext(user: any): Promise<any>;
-  auditAuthEvent(event: string, userId: string, details: any): Promise<void>;
+  createParlantSecurityContext(user: User): Promise<SecurityContext>;
+  auditAuthEvent(event: string, userId: string, details: AuditDetails): Promise<void>;
 }
 
 // Mock Enterprise Auth Service (to be implemented)
 interface EnterpriseAuthService {
-  validateJwtToken(token: string): Promise<any>;
+  validateJwtToken(token: string): Promise<TokenValidationResult>;
   refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
   revokeToken(token: string): Promise<void>;
   getUserPermissions(userId: string): Promise<string[]>;
-  validateSecurityPolicy(user: any, resource: string): Promise<boolean>;
+  validateSecurityPolicy(user: User, resource: string): Promise<boolean>;
 }
 
 // ===== MOCK IMPLEMENTATIONS =====
@@ -65,7 +92,7 @@ const createMockEnterpriseAuthService = (): jest.Mocked<EnterpriseAuthService> =
   validateSecurityPolicy: jest.fn(),
 });
 
-const createMockExecutionContext = (request: any = {}): ExecutionContext => ({
+const createMockExecutionContext = (request: Record<string, unknown> = {}): ExecutionContext => ({
   switchToHttp: () => ({
     getRequest: () => ({
       headers: { authorization: 'Bearer valid-jwt-token' },
@@ -80,7 +107,7 @@ const createMockExecutionContext = (request: any = {}): ExecutionContext => ({
   getArgByIndex: () => ({}),
   switchToRpc: () => ({}),
   switchToWs: () => ({}),
-  getType: () => 'http' as any,
+  getType: () => 'http' as const,
 });
 
 // ===== JWT AUTH GUARD TESTS =====
@@ -97,11 +124,11 @@ describe('JwtAuthGuard', () => {
       verify: jest.fn(),
       decode: jest.fn(),
       sign: jest.fn(),
-    } as any;
+    } as jest.Mocked<JwtService>;
 
     configService = {
       get: jest.fn((key: string) => {
-        const config: Record<string, any> = {
+        const config: Record<string, unknown> = {
           'jwt.secret': 'test-secret',
           'jwt.expiresIn': '1h',
           'parlant.enabled': true,
@@ -109,7 +136,7 @@ describe('JwtAuthGuard', () => {
         };
         return config[key];
       }),
-    } as any;
+    } as jest.Mocked<ConfigService>;
 
     mockLogger = {
       log: jest.fn(),
@@ -117,7 +144,7 @@ describe('JwtAuthGuard', () => {
       warn: jest.fn(),
       debug: jest.fn(),
       verbose: jest.fn(),
-    } as any;
+    } as jest.Mocked<Logger>;
 
     parlantAuthBridge = createMockParlantAuthBridge();
 
@@ -378,7 +405,7 @@ describe('RolesGuard', () => {
       getAll: jest.fn(),
       getAllAndMerge: jest.fn(),
       getAllAndOverride: jest.fn(),
-    } as any;
+    } as jest.Mocked<ConfigService>;
 
     mockLogger = {
       log: jest.fn(),
@@ -386,7 +413,7 @@ describe('RolesGuard', () => {
       warn: jest.fn(),
       debug: jest.fn(),
       verbose: jest.fn(),
-    } as any;
+    } as jest.Mocked<Logger>;
 
     parlantAuthBridge = createMockParlantAuthBridge();
 
@@ -582,8 +609,8 @@ describe('RolesGuard', () => {
       parlantAuthBridge.validateParlantPermissions.mockResolvedValue(true);
 
       const context = createMockExecutionContext({ user });
-      jest.spyOn(context, 'getClass').mockReturnValue(mockClass as any);
-      jest.spyOn(context, 'getHandler').mockReturnValue(mockHandler as any);
+      jest.spyOn(context, 'getClass').mockReturnValue(mockClass as unknown);
+      jest.spyOn(context, 'getHandler').mockReturnValue(mockHandler as unknown);
 
       // Act
       await guard.canActivate(context);
@@ -609,14 +636,14 @@ describe('JwtStrategy', () => {
   beforeEach(async () => {
     configService = {
       get: jest.fn((key: string) => {
-        const config: Record<string, any> = {
+        const config: Record<string, unknown> = {
           'jwt.secret': 'test-secret',
           'jwt.issuer': 'bytebot-ai',
           'jwt.audience': 'bytebot-users',
         };
         return config[key];
       }),
-    } as any;
+    } as jest.Mocked<ConfigService>;
 
     enterpriseAuthService = createMockEnterpriseAuthService();
     parlantAuthBridge = createMockParlantAuthBridge();
@@ -781,7 +808,7 @@ describe('Authentication Integration', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn().mockImplementation((key: string) => {
-              const config: Record<string, any> = {
+              const config: Record<string, unknown> = {
                 'jwt.secret': 'test-secret',
                 'parlant.enabled': true,
               };

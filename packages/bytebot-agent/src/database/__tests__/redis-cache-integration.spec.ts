@@ -114,7 +114,11 @@ interface CacheConsistencyResult {
  */
 class MockRedisClient {
   private data = new Map<string, { value: string; expiry?: number }>();
-  private operations: Array<{ operation: string; key: string; timestamp: number }> = [];
+  private operations: Array<{
+    operation: string;
+    key: string;
+    timestamp: number;
+  }> = [];
 
   async get(key: string): Promise<string | null> {
     this.operations.push({ operation: 'GET', key, timestamp: Date.now() });
@@ -151,19 +155,31 @@ class MockRedisClient {
   }
 
   async keys(pattern: string): Promise<string[]> {
-    this.operations.push({ operation: 'KEYS', key: pattern, timestamp: Date.now() });
+    this.operations.push({
+      operation: 'KEYS',
+      key: pattern,
+      timestamp: Date.now(),
+    });
     const regex = new RegExp(pattern.replace('*', '.*'));
     return Array.from(this.data.keys()).filter((key) => regex.test(key));
   }
 
   async flushall(): Promise<'OK'> {
-    this.operations.push({ operation: 'FLUSHALL', key: '*', timestamp: Date.now() });
+    this.operations.push({
+      operation: 'FLUSHALL',
+      key: '*',
+      timestamp: Date.now(),
+    });
     this.data.clear();
     return 'OK';
   }
 
   // Test utilities
-  getOperationHistory(): Array<{ operation: string; key: string; timestamp: number }> {
+  getOperationHistory(): Array<{
+    operation: string;
+    key: string;
+    timestamp: number;
+  }> {
     return [...this.operations];
   }
 
@@ -206,7 +222,10 @@ const cacheOperationScenarios: CacheOperationScenario[] = [
     scenarioName: 'invalidate_user_operations',
     operationType: 'INVALIDATE',
     cacheKey: 'validation:*:users:*',
-    invalidationPattern: ['validation:read:users:*', 'validation:write:users:*'],
+    invalidationPattern: [
+      'validation:read:users:*',
+      'validation:write:users:*',
+    ],
     expectedLatency: 100,
   },
   {
@@ -220,58 +239,59 @@ const cacheOperationScenarios: CacheOperationScenario[] = [
 /**
  * Mock validation responses for cache testing
  */
-const mockCachedValidationResponses: Record<string, ParlantValidationResponse> = {
-  CACHED_READ_RESPONSE: {
-    approved: true,
-    conversationId: 'conv_cached_read_001',
-    reason: 'Cached read operation approval - validated recently',
-    confidence: 0.95,
-    executionContext: {
-      monitoringLevel: 'BASIC',
-      safeguards: ['query_logging'],
-      timeoutMs: 10000,
-      retryAttempts: 3,
-    },
-    metadata: {
-      startTime: new Date(),
-      endTime: new Date(),
-      processingTime: 25, // Fast cached response
-      cacheStatus: 'hit',
-      source: 'redis_cache',
-      riskAssessment: {
-        level: SecurityLevel._LOW,
-        factors: ['Read operation', 'Previously validated'],
-        score: 10,
-        mitigations: [],
+const mockCachedValidationResponses: Record<string, ParlantValidationResponse> =
+  {
+    CACHED_READ_RESPONSE: {
+      approved: true,
+      conversationId: 'conv_cached_read_001',
+      reason: 'Cached read operation approval - validated recently',
+      confidence: 0.95,
+      executionContext: {
+        monitoringLevel: 'BASIC',
+        safeguards: ['query_logging'],
+        timeoutMs: 10000,
+        retryAttempts: 3,
+      },
+      metadata: {
+        startTime: new Date(),
+        endTime: new Date(),
+        processingTime: 25, // Fast cached response
+        cacheStatus: 'hit',
+        source: 'redis_cache',
+        riskAssessment: {
+          level: SecurityLevel._LOW,
+          factors: ['Read operation', 'Previously validated'],
+          score: 10,
+          mitigations: [],
+        },
       },
     },
-  },
-  CACHED_WRITE_RESPONSE: {
-    approved: true,
-    conversationId: 'conv_cached_write_001',
-    reason: 'Cached write operation approval with enhanced monitoring',
-    confidence: 0.88,
-    executionContext: {
-      monitoringLevel: 'STANDARD',
-      safeguards: ['query_logging', 'performance_monitoring'],
-      timeoutMs: 15000,
-      retryAttempts: 2,
-    },
-    metadata: {
-      startTime: new Date(),
-      endTime: new Date(),
-      processingTime: 45, // Cached response with additional checks
-      cacheStatus: 'hit',
-      source: 'redis_cache',
-      riskAssessment: {
-        level: SecurityLevel._MEDIUM,
-        factors: ['Write operation', 'Previously validated'],
-        score: 25,
-        mitigations: ['Cached approval with monitoring'],
+    CACHED_WRITE_RESPONSE: {
+      approved: true,
+      conversationId: 'conv_cached_write_001',
+      reason: 'Cached write operation approval with enhanced monitoring',
+      confidence: 0.88,
+      executionContext: {
+        monitoringLevel: 'STANDARD',
+        safeguards: ['query_logging', 'performance_monitoring'],
+        timeoutMs: 15000,
+        retryAttempts: 2,
+      },
+      metadata: {
+        startTime: new Date(),
+        endTime: new Date(),
+        processingTime: 45, // Cached response with additional checks
+        cacheStatus: 'hit',
+        source: 'redis_cache',
+        riskAssessment: {
+          level: SecurityLevel._MEDIUM,
+          factors: ['Write operation', 'Previously validated'],
+          score: 25,
+          mitigations: ['Cached approval with monitoring'],
+        },
       },
     },
-  },
-};
+  };
 
 /**
  * Test user contexts for cache testing
@@ -332,8 +352,8 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
   };
 
   // Test results storage
-  let cachePerformanceMetrics: CachePerformanceMetrics[] = [];
-  let cacheConsistencyResults: CacheConsistencyResult[] = [];
+  const cachePerformanceMetrics: CachePerformanceMetrics[] = [];
+  const cacheConsistencyResults: CacheConsistencyResult[] = [];
 
   beforeAll(async () => {
     // Initialize mock Redis client
@@ -403,7 +423,9 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       };
 
       // Mock database operation
-      jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValue([{ id: '1', name: 'Test User' }]);
+      jest
+        .spyOn(databaseService, 'executeRawQuery')
+        .mockResolvedValue([{ id: '1', name: 'Test User' }]);
 
       // Mock first validation (cache miss)
       jest
@@ -445,7 +467,9 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
 
       // Assert
       expect(secondOperationTime).toBeLessThan(firstOperationTime);
-      expect(secondOperationTime).toBeLessThan(cacheTestingConfig.performanceTesting.maxCacheLatency);
+      expect(secondOperationTime).toBeLessThan(
+        cacheTestingConfig.performanceTesting.maxCacheLatency,
+      );
 
       // Verify cache statistics
       const cacheStats = parlantDatabaseService.getCacheStatistics();
@@ -507,11 +531,17 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       const userContext = cacheTestUserContexts.CACHE_USER;
 
       // Mock Redis connection failure
-      jest.spyOn(mockRedisClient, 'get').mockRejectedValue(new Error('Redis connection failed'));
-      jest.spyOn(mockRedisClient, 'set').mockRejectedValue(new Error('Redis connection failed'));
+      jest
+        .spyOn(mockRedisClient, 'get')
+        .mockRejectedValue(new Error('Redis connection failed'));
+      jest
+        .spyOn(mockRedisClient, 'set')
+        .mockRejectedValue(new Error('Redis connection failed'));
 
       // Mock database operation
-      jest.spyOn(databaseService, 'executeRawQuery').mockResolvedValue([{ id: '1' }]);
+      jest
+        .spyOn(databaseService, 'executeRawQuery')
+        .mockResolvedValue([{ id: '1' }]);
 
       // Mock validation fallback (should work without cache)
       jest
@@ -529,7 +559,9 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       expect(result).toBeDefined();
       expect(result).toEqual([{ id: '1' }]);
 
-      console.log('Redis Failure Handling: Operation completed successfully without cache');
+      console.log(
+        'Redis Failure Handling: Operation completed successfully without cache',
+      );
     });
 
     it('should implement multi-level caching strategy', async () => {
@@ -565,13 +597,17 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       // Assert
       expect(cacheHitTimes[0]).toBeLessThan(cacheHitTimes[1]); // L1 < L2
       expect(cacheHitTimes[1]).toBeLessThan(cacheHitTimes[2]); // L2 < L3
-      expect(Math.max(...cacheHitTimes)).toBeLessThan(cacheTestingConfig.performanceTesting.maxCacheLatency);
+      expect(Math.max(...cacheHitTimes)).toBeLessThan(
+        cacheTestingConfig.performanceTesting.maxCacheLatency,
+      );
 
       console.log('Multi-Level Cache Performance:', {
         L1Time: `${cacheHitTimes[0]}ms`,
         L2Time: `${cacheHitTimes[1]}ms`,
         L3Time: `${cacheHitTimes[2]}ms`,
-        allUnderThreshold: Math.max(...cacheHitTimes) < cacheTestingConfig.performanceTesting.maxCacheLatency,
+        allUnderThreshold:
+          Math.max(...cacheHitTimes) <
+          cacheTestingConfig.performanceTesting.maxCacheLatency,
       });
     });
   });
@@ -600,7 +636,9 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       expect(await mockRedisClient.get(writeCacheKey)).not.toBeNull();
 
       // Act - Simulate data modification that should trigger cache invalidation
-      const keysToInvalidate = await mockRedisClient.keys('validation:*:users:*');
+      const keysToInvalidate = await mockRedisClient.keys(
+        'validation:*:users:*',
+      );
       for (const key of keysToInvalidate) {
         await mockRedisClient.del(key);
       }
@@ -627,7 +665,10 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
 
       // Populate related cache entries
       for (const key of relatedCacheKeys) {
-        await mockRedisClient.set(key, JSON.stringify({ cached: true, timestamp: Date.now() }));
+        await mockRedisClient.set(
+          key,
+          JSON.stringify({ cached: true, timestamp: Date.now() }),
+        );
       }
 
       // Verify all entries are cached
@@ -670,7 +711,11 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
 
       // Set cache entries with different TTLs
       for (const { key, ttl } of timeBasedKeys) {
-        await mockRedisClient.setex(key, ttl, JSON.stringify({ timestamp: Date.now() }));
+        await mockRedisClient.setex(
+          key,
+          ttl,
+          JSON.stringify({ timestamp: Date.now() }),
+        );
       }
 
       // Verify all entries are set
@@ -679,7 +724,11 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       }
 
       // Act - Wait for different TTL expirations
-      const invalidationResults: Array<{ key: string; expired: boolean; timeWaited: number }> = [];
+      const invalidationResults: Array<{
+        key: string;
+        expired: boolean;
+        timeWaited: number;
+      }> = [];
 
       for (let i = 0; i < timeBasedKeys.length; i++) {
         const waitTime = (timeBasedKeys[i].ttl + 0.5) * 1000; // Wait slightly longer than TTL
@@ -707,18 +756,28 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       const userContext = cacheTestUserContexts.CACHE_USER;
 
       // Act - Perform concurrent cache operations
-      const concurrentPromises = Array.from({ length: concurrentOperations }, async (_, index) => {
-        const operation = index % 3; // Rotate between SET, GET, DELETE
+      const concurrentPromises = Array.from(
+        { length: concurrentOperations },
+        async (_, index) => {
+          const operation = index % 3; // Rotate between SET, GET, DELETE
 
-        switch (operation) {
-          case 0: // SET
-            return mockRedisClient.set(`${cacheKey}:${index}`, JSON.stringify({ value: index }));
-          case 1: // GET
-            return mockRedisClient.get(`${cacheKey}:${Math.floor(index / 2)}`);
-          case 2: // DELETE
-            return mockRedisClient.del(`${cacheKey}:${Math.floor(index / 3)}`);
-        }
-      });
+          switch (operation) {
+            case 0: // SET
+              return mockRedisClient.set(
+                `${cacheKey}:${index}`,
+                JSON.stringify({ value: index }),
+              );
+            case 1: // GET
+              return mockRedisClient.get(
+                `${cacheKey}:${Math.floor(index / 2)}`,
+              );
+            case 2: // DELETE
+              return mockRedisClient.del(
+                `${cacheKey}:${Math.floor(index / 3)}`,
+              );
+          }
+        },
+      );
 
       const results = await Promise.all(concurrentPromises);
 
@@ -788,7 +847,9 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       const hitRate = cacheHits / totalOperations;
 
       // Assert
-      expect(hitRate).toBeGreaterThanOrEqual(cacheTestingConfig.performanceTesting.targetHitRate);
+      expect(hitRate).toBeGreaterThanOrEqual(
+        cacheTestingConfig.performanceTesting.targetHitRate,
+      );
 
       console.log('Cache Hit Rate Performance:', {
         totalOperations,
@@ -796,7 +857,8 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
         cacheMisses,
         hitRate: `${(hitRate * 100).toFixed(2)}%`,
         targetHitRate: `${(cacheTestingConfig.performanceTesting.targetHitRate * 100).toFixed(2)}%`,
-        targetMet: hitRate >= cacheTestingConfig.performanceTesting.targetHitRate,
+        targetMet:
+          hitRate >= cacheTestingConfig.performanceTesting.targetHitRate,
       });
 
       // Store performance metrics
@@ -814,7 +876,11 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       // Arrange
       const operations = [
         { type: 'GET', key: 'validation:latency:get:test' },
-        { type: 'SET', key: 'validation:latency:set:test', value: 'test_value' },
+        {
+          type: 'SET',
+          key: 'validation:latency:set:test',
+          value: 'test_value',
+        },
         { type: 'DEL', key: 'validation:latency:del:test' },
       ];
 
@@ -842,17 +908,23 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
 
       // Assert
       latencyResults.forEach((result) => {
-        expect(result.latency).toBeLessThan(cacheTestingConfig.performanceTesting.maxCacheLatency);
+        expect(result.latency).toBeLessThan(
+          cacheTestingConfig.performanceTesting.maxCacheLatency,
+        );
       });
 
-      const averageLatency = latencyResults.reduce((sum, result) => sum + result.latency, 0) / latencyResults.length;
+      const averageLatency =
+        latencyResults.reduce((sum, result) => sum + result.latency, 0) /
+        latencyResults.length;
 
       console.log('Cache Operation Latency:', {
         results: latencyResults,
         averageLatency: `${averageLatency.toFixed(2)}ms`,
         maxAllowedLatency: `${cacheTestingConfig.performanceTesting.maxCacheLatency}ms`,
         allOperationsUnderThreshold: latencyResults.every(
-          (result) => result.latency < cacheTestingConfig.performanceTesting.maxCacheLatency,
+          (result) =>
+            result.latency <
+            cacheTestingConfig.performanceTesting.maxCacheLatency,
         ),
       });
     });
@@ -861,11 +933,21 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
       // Act
       const performanceReport = {
         totalCacheOperations: cachePerformanceMetrics.length,
-        averageHitRate: cachePerformanceMetrics.reduce((sum, metric) => sum + metric.hitRate, 0) / Math.max(cachePerformanceMetrics.length, 1),
-        averageLatency: cachePerformanceMetrics.reduce((sum, metric) => sum + metric.latency, 0) / Math.max(cachePerformanceMetrics.length, 1),
+        averageHitRate:
+          cachePerformanceMetrics.reduce(
+            (sum, metric) => sum + metric.hitRate,
+            0,
+          ) / Math.max(cachePerformanceMetrics.length, 1),
+        averageLatency:
+          cachePerformanceMetrics.reduce(
+            (sum, metric) => sum + metric.latency,
+            0,
+          ) / Math.max(cachePerformanceMetrics.length, 1),
         consistencyTestResults: {
           totalConsistencyTests: cacheConsistencyResults.length,
-          consistentResults: cacheConsistencyResults.filter((result) => result.dataConsistent).length,
+          consistentResults: cacheConsistencyResults.filter(
+            (result) => result.dataConsistent,
+          ).length,
           inconsistenciesFound: cacheConsistencyResults.reduce(
             (sum, result) => sum + result.inconsistenciesFound.length,
             0,
@@ -875,17 +957,23 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
           hitRateTarget: `${(cacheTestingConfig.performanceTesting.targetHitRate * 100).toFixed(2)}%`,
           latencyTarget: `${cacheTestingConfig.performanceTesting.maxCacheLatency}ms`,
           hitRateAchieved: cachePerformanceMetrics.every(
-            (metric) => metric.hitRate >= cacheTestingConfig.performanceTesting.targetHitRate,
+            (metric) =>
+              metric.hitRate >=
+              cacheTestingConfig.performanceTesting.targetHitRate,
           ),
           latencyAchieved: cachePerformanceMetrics.every(
-            (metric) => metric.latency <= cacheTestingConfig.performanceTesting.maxCacheLatency,
+            (metric) =>
+              metric.latency <=
+              cacheTestingConfig.performanceTesting.maxCacheLatency,
           ),
         },
       };
 
       // Assert
       expect(performanceReport.totalCacheOperations).toBeGreaterThanOrEqual(0);
-      expect(performanceReport.consistencyTestResults.totalConsistencyTests).toBeGreaterThanOrEqual(0);
+      expect(
+        performanceReport.consistencyTestResults.totalConsistencyTests,
+      ).toBeGreaterThanOrEqual(0);
 
       console.log('Comprehensive Cache Performance Report:', performanceReport);
 
