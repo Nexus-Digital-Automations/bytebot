@@ -248,8 +248,8 @@ export class ThreatAnalyzer {
 
       // Log significant threats
       if (
-        riskLevel === ThreatSeverity.HIGH ||
-        riskLevel === ThreatSeverity.CRITICAL
+        riskLevel === ThreatSeverity._HIGH ||
+        riskLevel === ThreatSeverity._CRITICAL
       ) {
         this.logger.warn("High-risk threat detected", {
           userId: context.user.id,
@@ -278,8 +278,8 @@ export class ThreatAnalyzer {
     const hour = context.environment.currentTime.getHours();
     if (hour < 5 || hour > 22) {
       threats.push({
-        type: ThreatType.SUSPICIOUS_ACCESS_PATTERN,
-        severity: ThreatSeverity.MEDIUM,
+        type: ThreatType._SUSPICIOUS_ACCESS_PATTERN,
+        severity: ThreatSeverity._MEDIUM,
         confidence: 0.6,
         description: "Access during unusual hours",
         evidence: [`Access at ${hour}:00 hours`],
@@ -299,8 +299,8 @@ export class ThreatAnalyzer {
     const recentAccessCount = this.getRecentAccessCount(context.user.id);
     if (recentAccessCount > 10) {
       threats.push({
-        type: ThreatType.BRUTE_FORCE,
-        severity: ThreatSeverity.HIGH,
+        type: ThreatType._BRUTE_FORCE,
+        severity: ThreatSeverity._HIGH,
         confidence: 0.8,
         description: "Potential brute force attack detected",
         evidence: [`${recentAccessCount} requests in short timeframe`],
@@ -322,8 +322,8 @@ export class ThreatAnalyzer {
       context.environment.securityLevel === "high"
     ) {
       threats.push({
-        type: ThreatType.UNAUTHORIZED_ACCESS,
-        severity: ThreatSeverity.HIGH,
+        type: ThreatType._UNAUTHORIZED_ACCESS,
+        severity: ThreatSeverity._HIGH,
         confidence: 0.9,
         description: "Anonymous user attempting high-security operation",
         evidence: ["Anonymous user", "High security level operation"],
@@ -359,8 +359,8 @@ export class ThreatAnalyzer {
 
     if (isAnomalous) {
       threats.push({
-        type: ThreatType.ANOMALOUS_BEHAVIOR,
-        severity: ThreatSeverity.MEDIUM,
+        type: ThreatType._ANOMALOUS_BEHAVIOR,
+        severity: ThreatSeverity._MEDIUM,
         confidence: 0.7,
         description: "User behavior deviates from established patterns",
         evidence: [
@@ -404,8 +404,8 @@ export class ThreatAnalyzer {
       const recentAdminActions = this.getRecentAdminActions(context.user.id);
       if (recentAdminActions > 5) {
         threats.push({
-          type: ThreatType.PRIVILEGE_ESCALATION,
-          severity: ThreatSeverity.HIGH,
+          type: ThreatType._PRIVILEGE_ESCALATION,
+          severity: ThreatSeverity._HIGH,
           confidence: 0.8,
           description: "Excessive administrative actions detected",
           evidence: [`${recentAdminActions} admin actions in short period`],
@@ -428,8 +428,8 @@ export class ThreatAnalyzer {
       context.environment.securityLevel === "critical"
     ) {
       threats.push({
-        type: ThreatType.INSIDER_THREAT,
-        severity: ThreatSeverity.HIGH,
+        type: ThreatType._INSIDER_THREAT,
+        severity: ThreatSeverity._HIGH,
         confidence: 0.6,
         description: "Privileged user performing critical operations",
         evidence: ["System permissions", "Critical operation"],
@@ -458,8 +458,8 @@ export class ThreatAnalyzer {
       const recentFileAccess = this.getRecentFileAccessCount(context.user.id);
       if (recentFileAccess > 20) {
         threats.push({
-          type: ThreatType.DATA_EXFILTRATION,
-          severity: ThreatSeverity.CRITICAL,
+          type: ThreatType._DATA_EXFILTRATION,
+          severity: ThreatSeverity._CRITICAL,
           confidence: 0.9,
           description: "Potential data exfiltration detected",
           evidence: [`${recentFileAccess} file accesses in short period`],
@@ -517,10 +517,10 @@ export class ThreatAnalyzer {
     // Base score from threats
     const threatScore = threats.reduce((total, threat) => {
       const severityWeight = {
-        [ThreatSeverity.LOW]: 10,
-        [ThreatSeverity.MEDIUM]: 25,
-        [ThreatSeverity.HIGH]: 50,
-        [ThreatSeverity.CRITICAL]: 75,
+        [ThreatSeverity._LOW]: 10,
+        [ThreatSeverity._MEDIUM]: 25,
+        [ThreatSeverity._HIGH]: 50,
+        [ThreatSeverity._CRITICAL]: 75,
       };
 
       return total + severityWeight[threat.severity] * threat.confidence;
@@ -562,10 +562,10 @@ export class ThreatAnalyzer {
     score: number,
     config: ThreatAnalysisConfig,
   ): ThreatSeverity {
-    if (score >= config.riskThresholds.critical) return ThreatSeverity.CRITICAL;
-    if (score >= config.riskThresholds.high) return ThreatSeverity.HIGH;
-    if (score >= config.riskThresholds.medium) return ThreatSeverity.MEDIUM;
-    return ThreatSeverity.LOW;
+    if (score >= config.riskThresholds.critical) return ThreatSeverity._CRITICAL;
+    if (score >= config.riskThresholds.high) return ThreatSeverity._HIGH;
+    if (score >= config.riskThresholds.medium) return ThreatSeverity._MEDIUM;
+    return ThreatSeverity._LOW;
   }
 
   /**
@@ -595,7 +595,7 @@ export class ThreatAnalyzer {
     }
 
     const criticalThreats = threats.filter(
-      (t) => t.severity === ThreatSeverity.CRITICAL,
+      (t) => t.severity === ThreatSeverity._CRITICAL,
     );
     if (criticalThreats.length > 0) {
       recommendations.add("Immediate security team notification required");
@@ -614,7 +614,7 @@ export class ThreatAnalyzer {
   ): boolean {
     // Critical threats always require immediate action
     const hasCriticalThreats = threats.some(
-      (t) => t.severity === ThreatSeverity.CRITICAL,
+      (t) => t.severity === ThreatSeverity._CRITICAL,
     );
     if (hasCriticalThreats) return true;
 
@@ -623,7 +623,7 @@ export class ThreatAnalyzer {
 
     // Multiple high-severity threats
     const highSeverityCount = threats.filter(
-      (t) => t.severity === ThreatSeverity.HIGH,
+      (t) => t.severity === ThreatSeverity._HIGH,
     ).length;
     if (highSeverityCount >= 2) return true;
 

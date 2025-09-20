@@ -21,6 +21,30 @@ import { Request } from "express";
 import { Role, Permission } from "../types/rbac.types";
 
 /**
+ * Emergency override context interface
+ */
+export interface EmergencyOverrideContext {
+  /** Override token used for emergency access */
+  token: string;
+  /** User who initiated the emergency override */
+  initiatedBy: string;
+  /** Timestamp when override was initiated */
+  initiatedAt: Date;
+  /** Reason for emergency override */
+  reason: string;
+  /** Override duration in minutes */
+  durationMinutes: number;
+  /** Emergency override status */
+  active: boolean;
+  /** Client IP address */
+  clientIP: string;
+  /** Requesting user/system (alias for initiatedBy) */
+  requestedBy: string;
+  /** Timestamp of emergency access request (alias for initiatedAt) */
+  timestamp: Date;
+}
+
+/**
  * Extended request interface for emergency override context
  */
 interface EmergencyOverrideRequest extends Request {
@@ -53,28 +77,6 @@ export interface EmergencyOverrideConfig {
   auditLogging: boolean;
 }
 
-/**
- * Emergency access context
- */
-export interface EmergencyAccessContext {
-  /** Emergency access reason */
-  reason: string;
-
-  /** Requesting user/system */
-  requestedBy: string;
-
-  /** Emergency access duration */
-  durationMinutes: number;
-
-  /** Client IP address */
-  clientIP: string;
-
-  /** Timestamp of emergency access request */
-  timestamp: Date;
-
-  /** Emergency access token */
-  token: string;
-}
 
 @Injectable()
 export class EmergencyOverrideGuard implements CanActivate {
@@ -128,21 +130,21 @@ export class EmergencyOverrideGuard implements CanActivate {
    */
   private getEmergencyConfig(): EmergencyOverrideConfig {
     return {
-      enabled: this.configService.get<boolean>(
+      enabled: this._configService.get<boolean>(
         "emergency.override.enabled",
         false,
       ),
-      overrideToken: this.configService.get<string>("emergency.override.token"),
-      maxDurationMinutes: this.configService.get<number>(
+      overrideToken: this._configService.get<string>("emergency.override.token"),
+      maxDurationMinutes: this._configService.get<number>(
         "emergency.override.maxDuration",
         60,
       ),
       requiredRoles: [Role._SUPER_ADMIN, Role._ADMIN],
       requiredPermissions: [Permission._ADMIN, Permission._SYSTEM_MANAGEMENT],
-      allowedIPs: this.configService.get<string[]>(
+      allowedIPs: this._configService.get<string[]>(
         "emergency.override.allowedIPs",
       ),
-      auditLogging: this.configService.get<boolean>(
+      auditLogging: this._configService.get<boolean>(
         "emergency.override.auditLogging",
         true,
       ),
@@ -154,7 +156,7 @@ export class EmergencyOverrideGuard implements CanActivate {
    */
   private extractEmergencyContext(
     request: Request,
-  ): EmergencyAccessContext | null {
+  ): EmergencyOverrideContext | null {
     const emergencyHeader = request.headers["x-emergency-override"] as string;
     const emergencyToken = request.headers["x-emergency-token"] as string;
 
@@ -168,10 +170,13 @@ export class EmergencyOverrideGuard implements CanActivate {
       return {
         reason: emergencyData.reason || "Emergency system access",
         requestedBy: emergencyData.requestedBy || "unknown",
+        initiatedBy: emergencyData.requestedBy || "unknown",
         durationMinutes: Math.min(emergencyData.durationMinutes || 30, 120), // Max 2 hours
         clientIP: this.getClientIP(request),
         timestamp: new Date(),
+        initiatedAt: new Date(),
         token: emergencyToken,
+        active: true,
       };
     } catch (error) {
       this.logger.error("Failed to parse emergency override context:", error);
@@ -183,7 +188,7 @@ export class EmergencyOverrideGuard implements CanActivate {
    * Validate emergency access request
    */
   private async validateEmergencyAccess(
-    context: EmergencyAccessContext,
+    context: EmergencyOverrideContext,
     config: EmergencyOverrideConfig,
   ): Promise<boolean> {
     // Validate token
@@ -233,7 +238,7 @@ export class EmergencyOverrideGuard implements CanActivate {
   /**
    * Log emergency access for audit purposes
    */
-  private logEmergencyAccess(context: EmergencyAccessContext): void {
+  private logEmergencyAccess(context: EmergencyOverrideContext): void {
     this.logger.warn("EMERGENCY ACCESS GRANTED", {
       reason: context.reason,
       requestedBy: context.requestedBy,
