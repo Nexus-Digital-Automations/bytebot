@@ -712,7 +712,9 @@ export class EncryptionSecurityService {
     if (request.options?.iv) {
       try {
         // Only GCM deciphers have setAuthTag method
-        (decipher as crypto.DecipherGCM).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag} catch {// Not a GCM decipher, no auth tag needed
+        (decipher as crypto.DecipherGCM).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag
+      } catch {
+        // Not a GCM decipher, no auth tag needed
       }
     }
 
@@ -890,7 +892,17 @@ export class EncryptionSecurityService {
   private mapAlgorithmToCrypto(algorithm: EncryptionAlgorithm): string {
     switch (algorithm) {
       case EncryptionAlgorithm.AES_256_GCM:
-        return 'aes-256-gcm';case EncryptionAlgorithm.AES_256_CBC:return 'aes-256-cbc';case EncryptionAlgorithm.AES_192_GCM:return 'aes-192-gcm';case EncryptionAlgorithm.CHACHA20_POLY1305:return 'chacha20-poly1305';default:return 'aes-256-gcm'; // Default fallback}}
+        return 'aes-256-gcm';
+      case EncryptionAlgorithm.AES_256_CBC:
+        return 'aes-256-cbc';
+      case EncryptionAlgorithm.AES_192_GCM:
+        return 'aes-192-gcm';
+      case EncryptionAlgorithm.CHACHA20_POLY1305:
+        return 'chacha20-poly1305';
+      default:
+        return 'aes-256-gcm'; // Default fallback
+    }
+  }
 
   private mapAlgorithmToHash(algorithm: EncryptionAlgorithm): string {
     // Map encryption algorithms to hash algorithms for digest operations

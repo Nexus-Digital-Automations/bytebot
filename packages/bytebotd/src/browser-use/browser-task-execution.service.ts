@@ -74,11 +74,19 @@ export class BrowserTaskExecutionService {
     this.logger.log(`Navigating forward`, { sessionId });
 
     try {
-      // Implementation would use browser's forward functionalityreturn await this.browserUseService.executeBrowserTask({name: 'Navigate Forward',description: 'Navigate forward in browser history',actions: [{type: 'custom' as any,parameters: { action: 'forward' },
+      // Implementation would use browser's forward functionality
+      return await this.browserUseService.executeBrowserTask({
+        name: 'Navigate Forward',
+        description: 'Navigate forward in browser history',
+        actions: [{
+          type: 'custom' as any,
+          parameters: { action: 'forward' },
         }],
       });
     } catch (error) {
-      this.logger.error(`Navigate forward failed`, error);throw error;}
+      this.logger.error(`Navigate forward failed`, error);
+      throw error;
+    }
   }
 
   /**

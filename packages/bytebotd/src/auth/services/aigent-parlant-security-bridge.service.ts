@@ -638,7 +638,9 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
           justification: (request as any)?.justification,
         
 },
-        actionDescription: `Emergency override: ${(request as any)?.overrideScope} for user ${(request as any)?.userId} - ${(request as any)?.justification}`,context: (request as any)?.context,riskLevel: (RiskLevel as any)?._CRITICAL, // Emergency overrides are CRITICAL risk
+        actionDescription: `Emergency override: ${(request as any)?.overrideScope} for user ${(request as any)?.userId} - ${(request as any)?.justification}`,
+        context: (request as any)?.context,
+        riskLevel: (RiskLevel as any)?._CRITICAL, // Emergency overrides are CRITICAL risk
         operationId,
       };
 
@@ -653,9 +655,9 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
           timestamp: new Date(),
           action: 'OVERRIDE',
           outcome: 'BLOCKED',
-          details: `Emergency override DENIED: ${(validation as any)?.reasoning
-}`,
-          ipAddress: 'system',userAgent: 'emergency-override-system',
+          details: `Emergency override DENIED: ${(validation as any)?.reasoning || 'Unknown reason'}`,
+          ipAddress: 'system',
+          userAgent: 'emergency-override-system',
           conversationId: (validation as any)?.conversationId,
         };
 

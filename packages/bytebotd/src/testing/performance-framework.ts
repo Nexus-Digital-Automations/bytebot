@@ -466,7 +466,9 @@ export class PerformanceTestingFramework extends EventEmitter {
     const recommendations: string[] = [];
 
     if (results.averageExecutionTime > config.maxExecutionTime) {
-      recommendations.push(`Optimize execution time: current ${results.averageExecutionTime.toFixed(2)}ms exceeds target ${config.maxExecutionTime}ms`);}if (results.averageMemoryUsage > config.maxMemoryUsage) {
+      recommendations.push(`Optimize execution time: current ${results.averageExecutionTime.toFixed(2)}ms exceeds target ${config.maxExecutionTime}ms`);
+    }
+    if (results.averageMemoryUsage > config.maxMemoryUsage) {
       recommendations.push(`Reduce memory usage: current ${(results.averageMemoryUsage / 1024 / 1024).toFixed(2)}MB exceeds target ${(config.maxMemoryUsage / 1024 / 1024).toFixed(2)}MB`);
     }
 
@@ -509,8 +511,10 @@ export class PerformanceTestingFramework extends EventEmitter {
 
     slowTests.forEach(test => {
       bottlenecks.push({
-        testName: `${test.testSuite}::${test.testName}`,issue: `Slow execution time: ${test.executionTime.toFixed(2)}ms`,
-        impact: 'Increases overall test suite execution time',recommendation: 'Optimize test logic, reduce I/O operations, or consider mocking'
+        testName: `${test.testSuite}::${test.testName}`,
+        issue: `Slow execution time: ${test.executionTime.toFixed(2)}ms`,
+        impact: 'Increases overall test suite execution time',
+        recommendation: 'Optimize test logic, reduce I/O operations, or consider mocking'
       });
     });
 
@@ -522,8 +526,12 @@ export class PerformanceTestingFramework extends EventEmitter {
 
     memoryIntensiveTests.forEach(test => {
       bottlenecks.push({
-        testName: `${test.testSuite}::${test.testName}`,issue: `High memory usage: ${(test.memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`,
-        impact: 'May cause memory pressure and affect other tests',recommendation: 'Optimize data structures, implement proper cleanup, or reduce test scope'});});
+        testName: `${test.testSuite}::${test.testName}`,
+        issue: `High memory usage: ${(test.memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`,
+        impact: 'May cause memory pressure and affect other tests',
+        recommendation: 'Optimize data structures, implement proper cleanup, or reduce test scope'
+      });
+    });
 
     return bottlenecks;
   }
@@ -539,11 +547,22 @@ export class PerformanceTestingFramework extends EventEmitter {
     const failureRate = metrics.filter(m => !m.passed).length / metrics.length;
 
     if (totalExecutionTime > 60000) { // More than 1 minute total
-      opportunities.push('Implement test parallelization to reduce total execution time');}if (totalMemoryUsage > 500 * 1024 * 1024) { // More than 500MB total
-      opportunities.push('Optimize memory usage through better resource management and cleanup');}if (failureRate > 0.02) { // More than 2% failure rate
-      opportunities.push('Improve test stability and reduce flaky tests');}const avgTestTime = totalExecutionTime / metrics.length;
+      opportunities.push('Implement test parallelization to reduce total execution time');
+    }
+    if (totalMemoryUsage > 500 * 1024 * 1024) { // More than 500MB total
+      opportunities.push('Optimize memory usage through better resource management and cleanup');
+    }
+    if (failureRate > 0.02) { // More than 2% failure rate
+      opportunities.push('Improve test stability and reduce flaky tests');
+    }
+    const avgTestTime = totalExecutionTime / metrics.length;
     if (avgTestTime > 1000) {
-      opportunities.push('Optimize individual test execution time through mocking and test optimization');}opportunities.push('Consider implementing test caching for expensive setup operations');opportunities.push('Evaluate test isolation to reduce inter-test dependencies');return opportunities;}
+      opportunities.push('Optimize individual test execution time through mocking and test optimization');
+    }
+    opportunities.push('Consider implementing test caching for expensive setup operations');
+    opportunities.push('Evaluate test isolation to reduce inter-test dependencies');
+    return opportunities;
+  }
 
   /**
    * Calculate overall performance grade
@@ -567,7 +586,11 @@ export class PerformanceTestingFramework extends EventEmitter {
     if (passRate < 0.95) score -= 30;
     else if (passRate < 0.98) score -= 15;
 
-    if (score >= 90) return 'A+ (Excellent)';if (score >= 80) return 'A (Very Good)';if (score >= 70) return 'B (Good)';if (score >= 60) return 'C (Fair)';return 'D (Needs Improvement)';
+    if (score >= 90) return 'A+ (Excellent)';
+    if (score >= 80) return 'A (Very Good)';
+    if (score >= 70) return 'B (Good)';
+    if (score >= 60) return 'C (Fair)';
+    return 'D (Needs Improvement)';
   }
 }
 
@@ -586,7 +609,9 @@ export function performanceTest(config: Partial<PerformanceTestConfig> = {}) {
     descriptor.value = async function(...args: unknown[]) {
       const testConfig: PerformanceTestConfig = {
         name: propertyName,
-        description: `Performance test for ${propertyName}`,maxExecutionTime: 5000,maxMemoryUsage: 100 * 1024 * 1024, // 100MB
+        description: `Performance test for ${propertyName}`,
+        maxExecutionTime: 5000,
+        maxMemoryUsage: 100 * 1024 * 1024, // 100MB
         maxCpuUsage: 80,
         warmupIterations: 3,
         measurementIterations: 10,
@@ -601,7 +626,9 @@ export function performanceTest(config: Partial<PerformanceTestConfig> = {}) {
         testConfig
       );
 
-      console.log(`📊 [PERF] ${propertyName} benchmark completed: ${benchmark.performanceGrade} grade`);if (!benchmark.passed) {throw new Error(`Performance test failed for ${propertyName}: ${benchmark.recommendations.join(`, ')}`);
+      console.log(`📊 [PERF] ${propertyName} benchmark completed: ${benchmark.performanceGrade} grade`);
+      if (!benchmark.passed) {
+        throw new Error(`Performance test failed for ${propertyName}: ${benchmark.recommendations.join(', ')}`);
       }
 
       return benchmark;

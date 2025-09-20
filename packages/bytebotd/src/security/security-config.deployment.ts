@@ -81,7 +81,9 @@ export class BytebotDSecurityConfigService {
         vnc: true, // BytebotD supports VNC
         computerControl: true,
         taskExecution: true,
-        securityLogging: environment !== 'development',},};
+        securityLogging: environment !== 'development',
+      },
+    };
   }
 }
 
@@ -105,7 +107,10 @@ export class BytebotDSecurityConfigService {
   ],
   exports: [
     BytebotDSecurityConfigService,
-    'BYTEBOT_D_SECURITY_MIDDLEWARE','BYTEBOT_D_VALIDATION_PIPE',],})
+    'BYTEBOT_D_SECURITY_MIDDLEWARE',
+    'BYTEBOT_D_VALIDATION_PIPE',
+  ],
+})
 export class BytebotDSecurityModule implements NestModule {
   constructor(private configService: ConfigService) {}
 

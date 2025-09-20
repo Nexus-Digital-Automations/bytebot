@@ -17,7 +17,12 @@
  * @version 2.0.0
  */
 
-import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { promises as fs } from 'fs';import { createHash } from 'crypto';/*** Test coverage data interface
+import { performance } from 'perf_hooks';
+import { EventEmitter } from 'events';
+import { promises as fs } from 'fs';
+import { createHash } from 'crypto';
+
+/** Test coverage data interface
  */
 interface TestCoverage {
   lines: {
@@ -168,7 +173,9 @@ export class TestExecutionOptimizer extends EventEmitter {
    * Optimize test execution plan
    */
   public async optimizeTestExecution(testFiles: string[]): Promise<TestExecutionPlan> {
-    console.log(`🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`);const optimizationStart = performance.now();try {
+    console.log(`🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`);
+    const optimizationStart = performance.now();
+    try {
       // Load historical metrics and cache
       await this.loadCache();
       await this.loadHistoricalMetrics();
@@ -206,10 +213,19 @@ export class TestExecutionOptimizer extends EventEmitter {
 
       const optimizationTime = performance.now() - optimizationStart;
 
-      console.log(`📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`);console.log(`  Test groups: ${testGroups.length}`);console.log(`  Parallelization: ${parallelizationStrategy}`);console.log(`  Estimated time: ${estimatedExecutionTime.toFixed(2)}ms`);console.log(`  Cache hits: ${cacheStrategy.cacheableTests.length}`);console.log(`  Workers required: ${resourceRequirements.workers}`);
+      console.log(`📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`);
+      console.log(`  Test groups: ${testGroups.length}`);
+      console.log(`  Parallelization: ${parallelizationStrategy}`);
+      console.log(`  Estimated time: ${estimatedExecutionTime.toFixed(2)}ms`);
+      console.log(`  Cache hits: ${cacheStrategy.cacheableTests.length}`);
+      console.log(`  Workers required: ${resourceRequirements.workers}`);
 
-      this.emit('planOptimized', plan);return plan;} catch (error) {
-      console.error('❌ [OPTIMIZER] Test execution optimization failed:', error);throw error;}
+      this.emit('planOptimized', plan);
+      return plan;
+    } catch (error) {
+      console.error('❌ [OPTIMIZER] Test execution optimization failed:', error);
+      throw error;
+    }
   }
 
   /**
@@ -255,9 +271,15 @@ export class TestExecutionOptimizer extends EventEmitter {
         }
       };
 
-      console.log(`✅ [OPTIMIZER] Execution completed with optimizations:`);console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`);console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);console.log(`  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`);
+      console.log(`✅ [OPTIMIZER] Execution completed with optimizations:`);
+      console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`);
+      console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);
+      console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);
+      console.log(`  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`);
 
-      this.emit('executionCompleted', metrics);return metrics;} finally {
+      this.emit('executionCompleted', metrics);
+      return metrics;
+    } finally {
       // Cleanup resources
       this.stopResourceMonitoring();
       await this.cleanupWorkerPool();
@@ -283,23 +305,35 @@ export class TestExecutionOptimizer extends EventEmitter {
     await this.cleanupCache();
     const cacheCleared = cacheSize - this.testCache.size;
     if (cacheCleared > 0) {
-      optimizations.push(`Cleared ${cacheCleared} old cache entries`);}// Clear dependency graph of unused entries
+      optimizations.push(`Cleared ${cacheCleared} old cache entries`);
+    }
+
+    // Clear dependency graph of unused entries
     const dependencySize = this.dependencyGraph.size;
     this.cleanupDependencyGraph();
     const dependenciesCleared = dependencySize - this.dependencyGraph.size;
     if (dependenciesCleared > 0) {
-      optimizations.push(`Cleared ${dependenciesCleared} unused dependencies`);}// Force garbage collection if available
+      optimizations.push(`Cleared ${dependenciesCleared} unused dependencies`);
+    }
+
+    // Force garbage collection if available
     if (global.gc) {
       const gcStart = performance.now();
       global.gc();
       gcCollections = 1;
       const gcTime = performance.now() - gcStart;
-      optimizations.push(`Forced garbage collection (${gcTime.toFixed(2)}ms)`);}// Clear test metrics for very old tests
+      optimizations.push(`Forced garbage collection (${gcTime.toFixed(2)}ms)`);
+    }
+
+    // Clear test metrics for very old tests
     const metricsSize = this.testMetrics.size;
     this.cleanupTestMetrics();
     const metricsCleared = metricsSize - this.testMetrics.size;
     if (metricsCleared > 0) {
-      optimizations.push(`Cleared ${metricsCleared} old test metrics`);}const finalMemory = process.memoryUsage();
+      optimizations.push(`Cleared ${metricsCleared} old test metrics`);
+    }
+
+    const finalMemory = process.memoryUsage();
     const memoryFreed = initialMemory.heapUsed - finalMemory.heapUsed;
 
     console.log(`💾 [OPTIMIZER] Memory optimization completed:`);console.log(`  Memory freed: ${(memoryFreed / 1024 / 1024).toFixed(2)}MB`);console.log(`  Optimizations: ${optimizations.length}`);

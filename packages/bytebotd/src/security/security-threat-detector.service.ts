@@ -886,7 +886,9 @@ export class SecurityThreatDetectorService {
   }
 
   private performBackgroundThreatCheck(): void {
-    this.logger.debug('Performing background threat detection check');// Would implement continuous threat monitoring}
+    this.logger.debug('Performing background threat detection check');
+    // Would implement continuous threat monitoring
+  }
 
   private performBehavioralAnalysisCheck(): void {
     this.logger.debug('Performing behavioral analysis check');

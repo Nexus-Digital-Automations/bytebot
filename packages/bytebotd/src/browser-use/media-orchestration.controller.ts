@@ -636,7 +636,7 @@ import {
 
     if (invalidSessions.length > 0) {
       throw new BadRequestException(
-        `Invalid sessions: ${invalidSessions.join(`, ')}');
+        `Invalid sessions: ${invalidSessions.join(', ')}`);
     }
   }
 
