@@ -8,7 +8,7 @@
  * @fileoverview Enterprise-grade security sanitization pipe
  * @version 1.0.0
  * @author Input Validation & API Security Specialist
- */
+ */;
 
 import {
   PipeTransform,
@@ -16,14 +16,23 @@ import {
   ArgumentMetadata,
   BadRequestException,
   Logger,
-} from '@nestjs/common';import { validate } from 'class-validator';import { plainToClass } from 'class-transformer';import {sanitizeInput,
+
+} from '@nestjs/common';
+import { validate } from 'class-validator';
+import { plainToClass } from 'class-transformer';
+import {
+  sanitizeInput,
   sanitizeObject,
   detectXSS,
   detectSQLInjection,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
   detectAdvancedXSS,
-} from '@bytebot/shared';/*** Security sanitization configuration options
+
+} from '@bytebot/shared';
+
+/**
+ * Security sanitization configuration options
  */
 interface SecuritySanitizationOptions {
   /** Enable input sanitization */
@@ -52,6 +61,8 @@ interface SecuritySanitizationOptions {
 
   /** Enable threat logging for security monitoring */
   enableThreatLogging?: boolean;
+
+
 }
 
 /**
@@ -67,6 +78,7 @@ const DEFAULT_SECURITY_OPTIONS: Required<SecuritySanitizationOptions> = {
   maxInputLength: 10000,
   maxObjectDepth: 10,
   enableThreatLogging: true,
+
 };
 
 /**
@@ -74,11 +86,15 @@ const DEFAULT_SECURITY_OPTIONS: Required<SecuritySanitizationOptions> = {
  */
 interface ThreatDetectionResult {
   hasThreats: boolean;
-  threats: Array<{
-    type:
-      | 'XSS'| 'SQL_INJECTION'| 'MALICIOUS_INPUT'| 'SIZE_VIOLATION'| 'ADVANCED_XSS'| 'FILE_THREAT';field: string;description: string;
+  threats: Array<{;
+  type:
+      | 'XSS'| 'SQL_INJECTION'| 'MALICIOUS_INPUT'| 'SIZE_VIOLATION'| 'ADVANCED_XSS'| 'FILE_THREAT';
+  field: string;
+  description: string;
     sample: string;
-  }>;
+  
+
+}>;
   riskScore: number;
 }
 
@@ -88,63 +104,69 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
   private readonly options: Required<SecuritySanitizationOptions>;
 
   // Security metrics tracking
-  private securityMetrics = {
-    totalRequests: 0,
+  private securityMetrics = {,
+  totalRequests: 0,
     threatsBlocked: 0,
     xssAttemptsBlocked: 0,
     sqlInjectionAttemptsBlocked: 0,
     maliciousInputBlocked: 0,
     lastThreatAt: null as Date | null,
-  };
+  
+};
 
   constructor(options?: Partial<SecuritySanitizationOptions>) {
     this.options = { ...DEFAULT_SECURITY_OPTIONS, ...options };
 
     this.logger.log('Security sanitization pipe initialized', {
-      enableSanitization: this.options.enableSanitization,
+  enableSanitization: this.options.enableSanitization,
       enableXSSDetection: this.options.enableXSSDetection,
       enableSQLInjectionDetection: this.options.enableSQLInjectionDetection,
       strictMode: this.options.strictMode,
       maxInputLength: this.options.maxInputLength,
-    });
+    
+});
   }
 
   /**
    * Transform and sanitize incoming data
    */
-  async transform(
-    value: unknown,
+  async transform(value: unknown,
     metadata: ArgumentMetadata,
-  ): Promise<unknown> {
+  ): Promise<unknown>  {
     const operationId = `security-sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();this.securityMetrics.totalRequests++;
 
     this.logger.debug(`[${operationId}] Security sanitization started`, {
-      operationId,
+  operationId,
       inputType: typeof value,
       metatype: metadata.metatype?.name,
       hasValue: value !== undefined && value !== null,
-    });
+    
+});
 
     try {
-      // Skip sanitization for basic types without metatype
+  // Skip sanitization for basic types without metatype
       if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
         return this.sanitizeBasicValue(value, operationId);
-      }
+      
+}
 
       // Perform comprehensive security checks
       const threatDetection = this.detectSecurityThreats(value, operationId);
 
       if (threatDetection.hasThreats) {
-        this.handleSecurityThreats(threatDetection, operationId);
+  this.handleSecurityThreats(threatDetection, operationId);
         this.securityMetrics.threatsBlocked++;
         this.securityMetrics.lastThreatAt = new Date();
 
-        throw new BadRequestException({
-          error: 'Security Violation',message: 'Malicious input detected and blocked',threats: threatDetection.threats.map((threat) => ({type: threat.type,
+        throw new BadRequestException({,
+  error: 'Security Violation',
+      message: 'Malicious input detected and blocked',
+      threats: threatDetection.threats.map((threat) => ({type: threat.type,
             field: threat.field,
             description: threat.description,
             // Don't include samples in production response for security
-          })),
+          
+})),
           riskScore: threatDetection.riskScore,
           operationId,
           timestamp: new Date().toISOString(),
@@ -154,8 +176,9 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
       // Sanitize input data
       let sanitizedValue = value;
       if (this.options.enableSanitization) {
-        sanitizedValue = this.performSecuritySanitization(value, operationId);
-      }
+  sanitizedValue = this.performSecuritySanitization(value, operationId);
+      
+}
 
       // Validate object depth and size
       this.validateObjectConstraints(sanitizedValue, operationId);
@@ -163,54 +186,63 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
       // Transform to class instance if needed
       let transformedValue = sanitizedValue;
       if (metadata.metatype) {
-        transformedValue = plainToClass(metadata.metatype, sanitizedValue);
+  transformedValue = plainToClass(metadata.metatype, sanitizedValue);
 
         // Perform class-validator validation
-        const validationErrors = await validate(transformedValue as object, {
-          whitelist: this.options.whitelist,
+        const validationErrors = await validate(transformedValue as object, {,
+  whitelist: this.options.whitelist,
           forbidNonWhitelisted: this.options.strictMode,
           skipMissingProperties: false,
-        });
+        
+});
 
         if (validationErrors.length > 0) {
-          this.logger.warn(
-            `[${operationId}] Validation failed after sanitization`,
+  this.logger.warn(
+            `[${operationId
+}] Validation failed after sanitization`,
             {
-              operationId,
+  operationId,
               errorCount: validationErrors.length,
-              errors: validationErrors.map((err) => ({
-                property: err.property,
+              errors: validationErrors.map((err) => ({,
+  property: err.property,
                 constraints: err.constraints,
-              })),
+              
+})),
             },
           );
 
           throw new BadRequestException({
-            error: 'Validation Failed',message: 'Input validation failed after security sanitization',
+  error: 'Validation Failed',
+      message: 'Input validation failed after security sanitization',
             errors: validationErrors,
             operationId,
-          });
+          
+});
         }
       }
 
       const processingTime = Date.now() - startTime;
 
-      this.logger.debug(`[${operationId}] Security sanitization completed`, {operationId,processingTimeMs: processingTime,
+      this.logger.debug(`[${operationId}] Security sanitization completed`, {
+  operationId,processingTimeMs: processingTime,
         threatsDetected: 0,
         sanitized: this.options.enableSanitization,
         validated: true,
-      });
+      
+});
 
       return transformedValue;
     } catch (_error) {
-      const processingTime = Date.now() - startTime;
+  const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Security sanitization failed`, {
-        operationId,
+      this.logger.error(`[${operationId
+}] Security sanitization failed`, {
+  operationId,
         error: _error instanceof Error ? _error.message : String(_error),
         processingTimeMs: processingTime,
         inputType: typeof value,
-      });
+      
+});
 
       // Re-throw the error (it's already properly formatted)throw _error;}
   }
@@ -219,7 +251,7 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
    * Check if the metatype is a basic JavaScript type
    */
   private isBasicType(metatype: unknown): boolean {
-    const basicTypes = [String, Boolean, Number, Array, Object];
+  const basicTypes = [String, Boolean, Number, Array, Object];
     return basicTypes.includes(
       metatype as
         | typeof String
@@ -228,43 +260,49 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
         | typeof Array
         | typeof Object,
     );
-  }
+  
+}
 
   /**
    * Sanitize basic values (strings, numbers, etc.)
    */
   private sanitizeBasicValue(value: unknown, operationId: string): unknown {
-    if (typeof value === 'string') {
+  if (typeof value === 'string') {
       // Check for threats in basic string
       if (this.options.enableXSSDetection && detectXSS(value)) {
         this.logger.warn(
-          `[${operationId}] XSS detected in basic string value`,
+          `[${operationId
+}] XSS detected in basic string value`,
           {
-            operationId,
+  operationId,
             inputLength: value.length,
-            threatType: 'XSS',},);
+            threatType: 'XSS',
+},);
         this.securityMetrics.xssAttemptsBlocked++;
         throw new BadRequestException('XSS attempt detected in input');
       }
 
-      if (
+  if(
         this.options.enableSQLInjectionDetection &&
         detectSQLInjection(value)
       ) {
-        this.logger.warn(
-          `[${operationId}] SQL injection detected in basic string value`,
+  this.logger.warn(
+          `[${operationId
+}] SQL injection detected in basic string value`,
           {
-            operationId,
+  operationId,
             inputLength: value.length,
-            threatType: 'SQL_INJECTION',},);
+            threatType: 'SQL_INJECTION',
+},);
         this.securityMetrics.sqlInjectionAttemptsBlocked++;
         throw new BadRequestException(
           'SQL injection attempt detected in input',);}
 
       // Sanitize if enabled
       if (this.options.enableSanitization) {
-        return sanitizeInput(value, this.options.sanitizationOptions);
-      }
+  return sanitizeInput(value, this.options.sanitizationOptions);
+      
+}
     }
 
     return value;
@@ -277,12 +315,15 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
     value: unknown,
     operationId: string,
   ): ThreatDetectionResult {
-    const threats: ThreatDetectionResult['threats'] = [];let totalRiskScore = 0;// Use enhanced XSS detection for string values
+  const threats: ThreatDetectionResult['threats']  =  [];
+    let totalRiskScore = 0;// Use enhanced XSS detection for string values
     if (typeof value === 'string') {const xssAnalysis = detectAdvancedXSS(value);if (xssAnalysis.hasXSS) {
         xssAnalysis.threats.forEach((threat) => {
-          threats.push({
-            type: 'XSS',field: 'input',
-            description: `Advanced XSS detected: ${threat}`,
+          threats.push({,
+  type: 'XSS',
+      field: 'input',
+            description: `Advanced XSS detected: ${threat
+}`,
             sample: value.substring(0, 100) + '...',});});
         totalRiskScore += xssAnalysis.riskScore * 10; // Scale up for our system
       }
@@ -290,29 +331,40 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
 
     // Perform recursive scanning for complex objects
     this.recursiveSecurityScan(value, '', threats, 0);// Enhanced risk score calculation with new threat patternstotalRiskScore = threats.reduce((score, threat) => {
-      switch (threat.type) {
-        case 'XSS':return score + 8;case 'SQL_INJECTION':return score + 9;case 'MALICIOUS_INPUT':return score + 6;case 'SIZE_VIOLATION':
+  switch (threat.type) {
+
+        case 'XSS':
+        return score + 8;
+        case 'SQL_INJECTION':return score + 9;
+    case 'MALICIOUS_INPUT':
+        return score + 6;
+        case 'SIZE_VIOLATION':
           return score + 3;
         default:
-          return score + 2;
-      }
+        return score + 2;
+        break;
+      
+
+    }
     }, totalRiskScore);
 
     if (threats.length > 0) {
       this.logger.warn(`[${operationId}] Enhanced security threats detected`, {
-        operationId,
+  operationId,
         threatCount: threats.length,
         riskScore: totalRiskScore,
         threatTypes: threats.map((t) => t.type),
         enhancedDetection: true,
-      });
+      
+});
     }
 
     return {
-      hasThreats: threats.length > 0,
+  hasThreats: threats.length > 0,
       threats,
       riskScore: Math.min(10, totalRiskScore), // Cap at 10
-    };
+    
+};
   }
 
   /**
@@ -321,76 +373,101 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
   private recursiveSecurityScan(
     obj: unknown,
     path: string,
-    threats: ThreatDetectionResult['threats'],depth: number,): void {
-    // Check maximum depth
+    threats: ThreatDetectionResult['threats'],
+      depth: number,): void {
+  // Check maximum depth
     if (depth > this.options.maxObjectDepth) {
-      threats.push({
-        type: 'MALICIOUS_INPUT',field: path,description: 'Object nesting too deep - potential DoS attack',sample: '[object depth exceeded]',});return;
+      threats.push({,
+  type: 'MALICIOUS_INPUT',
+      field: path,
+      description: 'Object nesting too deep - potential DoS attack',
+      sample: '[object depth exceeded]',
+});return;
     }
 
-    if (typeof obj === 'string') {// Check string lengthif (obj.length > this.options.maxInputLength) {
-        threats.push({
-          type: 'SIZE_VIOLATION',
+  if(typeof obj === 'string') {
+  // Check string lengthif (obj.length > this.options.maxInputLength) {
+        threats.push({,
+  type: 'SIZE_VIOLATION',
           field: path,
-          description: `Input too long: ${obj.length} characters (max: ${this.options.maxInputLength})`,
+          description: `Input too long: ${obj.length
+}
+
+  characters(max: ${this.options.maxInputLength})`,
           sample: obj.substring(0, 100) + '...',});}
 
       // Enhanced XSS detection
       if (this.options.enableXSSDetection) {
-        const xssAnalysis = detectAdvancedXSS(obj);
+  const xssAnalysis = detectAdvancedXSS(obj);
         if (xssAnalysis.hasXSS) {
           xssAnalysis.threats.forEach((threat) => {
-            threats.push({
-              type: 'XSS',
+            threats.push({,
+  type: 'XSS',
               field: path,
-              description: `Advanced XSS pattern detected: ${threat}`,
+              description: `Advanced XSS pattern detected: ${threat
+}`,
               sample: obj.substring(0, 100) + '...',});});
         }
       }
 
       // SQL injection detection
       if (this.options.enableSQLInjectionDetection && detectSQLInjection(obj)) {
-        threats.push({
-          type: 'SQL_INJECTION',field: path,description: 'Potential SQL injection attack detected',sample: obj.substring(0, 100) + '...',});}
+  threats.push({,
+  type: 'SQL_INJECTION',
+      field: path,
+      description: 'Potential SQL injection attack detected',
+      sample: obj.substring(0, 100) + '...',
+});}
 
       // Additional malicious patterns
       if (this.detectMaliciousPatterns(obj)) {
-        threats.push({
-          type: 'MALICIOUS_INPUT',field: path,description: 'Malicious input pattern detected',sample: obj.substring(0, 100) + '...',});}
+  threats.push({,
+  type: 'MALICIOUS_INPUT',
+      field: path,
+      description: 'Malicious input pattern detected',
+      sample: obj.substring(0, 100) + '...',
+});}
     } else if (Array.isArray(obj)) {
-      // Check array length
+  // Check array length
       if (obj.length > 1000) {
-        threats.push({
-          type: 'SIZE_VIOLATION',
+        threats.push({,
+  type: 'SIZE_VIOLATION',
           field: path,
-          description: `Array too large: ${obj.length} items (max: 1000)`,
+          description: `Array too large: ${obj.length
+}
+
+  items(max: 1000)`,
           sample: '[large array]',
         });
       }
 
       // Scan array elements
       obj.forEach((item, _index) => {
-        this.recursiveSecurityScan(
+  this.recursiveSecurityScan(
           item,
-          `${path}[${_index}]`,
+          `${path
+}[${_index}]`,
           threats,
           depth + 1,
         );
       });
-    } else if (obj && typeof obj === 'object') {// Check object property countconst propCount = Object.keys(obj).length;
+    } else if (obj && typeof obj === 'object') {
+  // Check object property countconst propCount = Object.keys(obj).length;
       if (propCount > 200) {
-        threats.push({
-          type: 'SIZE_VIOLATION',
+        threats.push({,
+  type: 'SIZE_VIOLATION',
           field: path,
-          description: `Too many object properties: ${propCount} (max: 200)`,
+          description: `Too many object properties: ${propCount
+} (max: 200)`,
           sample: '[large object]',});}
 
       // Scan object properties
       for (const [key, value] of Object.entries(obj)) {
-        // Check property name for threats
-        if (typeof key === 'string') {if (detectXSS(key) || detectSQLInjection(key)) {threats.push({
-              type: 'MALICIOUS_INPUT',
-              field: `${path}.${key}`,
+  // Check property name for threats
+        if (typeof key === 'string') {if (detectXSS(key) || detectSQLInjection(key)) {threats.push({,
+  type: 'MALICIOUS_INPUT',
+              field: `${path
+}.${key}`,
               description: 'Malicious property name detected',
               sample: key,
             });
@@ -404,7 +481,7 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
    * Detect additional malicious input patterns
    */
   private detectMaliciousPatterns(input: string): boolean {
-    const maliciousPatterns = [
+  const maliciousPatterns = [
       // Command injection patterns
       /(\||&|;|`|\$\(|\${|<!--)/gi,
 
@@ -412,7 +489,8 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
       /(\.\.[\\/]|\.\.%2f|\.\.%5c)/gi,
 
       // Template injection patterns
-      /(\{\{.*?\}\}|\[\[.*?\]\])/gi,
+      /(\{\{.*?\
+}\}|\[\[.*?\]\])/gi,
 
       // Server-side template injection
       /(<%.*?%>|\${.*?})/gi,
@@ -434,30 +512,38 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
     threatDetection: ThreatDetectionResult,
     operationId: string,
   ): void {
-    // Update specific threat metrics
+  // Update specific threat metrics
     threatDetection.threats.forEach((threat) => {
       switch (threat.type) {
-        case 'XSS':this.securityMetrics.xssAttemptsBlocked++;break;
-        case 'SQL_INJECTION':this.securityMetrics.sqlInjectionAttemptsBlocked++;break;
+
+        case 'XSS':
+        this.securityMetrics.xssAttemptsBlocked++;
+        break;
+        case 'SQL_INJECTION':
+        this.securityMetrics.sqlInjectionAttemptsBlocked++;
+        break;
         case 'MALICIOUS_INPUT':case 'SIZE_VIOLATION':
           this.securityMetrics.maliciousInputBlocked++;
           break;
-      }
+      
+
+    }
     });
 
     // Log detailed threat information for security monitoring
     if (this.options.enableThreatLogging) {
       this.logger.error(`[${operationId}] SECURITY THREAT BLOCKED`, {
-        operationId,
+  operationId,
         threatCount: threatDetection.threats.length,
         riskScore: threatDetection.riskScore,
-        threats: threatDetection.threats.map((threat) => ({
-          type: threat.type,
+        threats: threatDetection.threats.map((threat) => ({,
+  type: threat.type,
           field: threat.field,
           description: threat.description,
-          // Include sample for security team analysis
-          sample: threat.sample.substring(0, 200),
-        })),
+          // Include sample for security team analysis,
+  sample: threat.sample.substring(0, 200),
+        
+})),
         timestamp: new Date().toISOString(),
         blocked: true,
       });
@@ -471,24 +557,28 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
     value: unknown,
     operationId: string,
   ): unknown {
-    const startTime = Date.now();
+  const startTime = Date.now();
 
     let sanitizedValue: unknown;
 
-    if (typeof value === 'string') {sanitizedValue = sanitizeInput(value, this.options.sanitizationOptions);} else if (typeof value === 'object' && value !== null) {
-      sanitizedValue = sanitizeObject(value, this.options.sanitizationOptions);
-    } else {
-      sanitizedValue = value;
-    }
+    if (typeof value === 'string') {sanitizedValue = sanitizeInput(value, this.options.sanitizationOptions);
+} else if (typeof value === 'object' && value !== null) {
+  sanitizedValue = sanitizeObject(value, this.options.sanitizationOptions);
+    
+} else {
+  sanitizedValue = value;
+    
+}
 
     const sanitizationTime = Date.now() - startTime;
 
     this.logger.debug(`[${operationId}] Input sanitization completed`, {
-      operationId,
+  operationId,
       inputType: typeof value,
       sanitizationTimeMs: sanitizationTime,
       hasChanges: JSON.stringify(sanitizedValue) !== JSON.stringify(value),
-    });
+    
+});
 
     return sanitizedValue;
   }
@@ -497,39 +587,47 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
    * Validate object size and depth constraints
    */
   private validateObjectConstraints(value: unknown, operationId: string): void {
-    try {
+  try {
       const serialized = JSON.stringify(value);
       const sizeInBytes = Buffer.byteLength(serialized, 'utf8');
       const maxSizeBytes = 10 * 1024 * 1024; // 10MB
 
       if (sizeInBytes > maxSizeBytes) {
-        this.logger.warn(`[${operationId}] Object size constraint violated`, {
-          operationId,
+        this.logger.warn(`[${operationId
+}] Object size constraint violated`, {
+  operationId,
           actualSizeBytes: sizeInBytes,
           maxSizeBytes,
           violation: 'OBJECT_TOO_LARGE',
-        });
+        
+});
 
         throw new BadRequestException(
-          `Request payload too large: ${sizeInBytes} bytes (max: ${maxSizeBytes} bytes)`,);}
+          `Request payload too large: ${sizeInBytes}
+
+  bytes(max: ${maxSizeBytes} bytes)`,);}
 
       this.logger.debug(
-        `[${operationId}] Object constraints validation passed`,{operationId,
+        `[${operationId}] Object constraints validation passed`,{
+  operationId,
           sizeBytes: sizeInBytes,
           utilizationPercent: ((sizeInBytes / maxSizeBytes) * 100).toFixed(1),
-        },
+        
+},
       );
     } catch (_error) {
-      if (_error instanceof BadRequestException) {
+  if (_error instanceof BadRequestException) {
         throw _error;
-      }
+      
+}
 
       this.logger.warn(
         `[${operationId}] Could not validate object constraints`,
         {
-          operationId,
+  operationId,
           error: _error instanceof Error ? _error.message : String(_error),
-        },
+        
+},
       );
     }
   }
@@ -545,30 +643,33 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
    * Reset security metrics (for testing or periodic reset)
    */
   resetSecurityMetrics(): void {
-    this.securityMetrics = {
-      totalRequests: 0,
+  this.securityMetrics = {,
+  totalRequests: 0,
       threatsBlocked: 0,
       xssAttemptsBlocked: 0,
       sqlInjectionAttemptsBlocked: 0,
       maliciousInputBlocked: 0,
       lastThreatAt: null,
-    };
+    
+};
 
     this.logger.log('Security metrics reset', {
-      resetAt: new Date().toISOString(),
-    });
+  resetAt: new Date().toISOString(),
+    
+});
   }
 }
 
 /**
  * Pre-configured security sanitization pipes for different security levels
- */
+ */;
+
 export const SecuritySanitizationPipes = {
   /**
    * Maximum security - strict sanitization and validation
-   */
-  MAXIMUM_SECURITY: new SecuritySanitizationPipe({
-    enableSanitization: true,
+   */,
+  MAXIMUM_SECURITY: new SecuritySanitizationPipe({,
+  enableSanitization: true,
     enableXSSDetection: true,
     enableSQLInjectionDetection: true,
     whitelist: true,
@@ -580,34 +681,37 @@ export const SecuritySanitizationPipes = {
       stripHtml: true,
       allowHtml: false,
       maxLength: 1000,
-    },
+    
+},
   }),
 
   /**
    * High security - comprehensive protection with some flexibility
    */
   HIGH_SECURITY: new SecuritySanitizationPipe({
-    enableSanitization: true,
+  enableSanitization: true,
     enableXSSDetection: true,
     enableSQLInjectionDetection: true,
     whitelist: true,
     strictMode: true,
     maxInputLength: 5000,
     maxObjectDepth: 8,
-  }),
+  
+}),
 
   /**
    * Standard security - balanced protection for normal operations
    */
   STANDARD: new SecuritySanitizationPipe({
-    enableSanitization: true,
+  enableSanitization: true,
     enableXSSDetection: true,
     enableSQLInjectionDetection: true,
     whitelist: true,
     strictMode: false,
     maxInputLength: 10000,
     maxObjectDepth: 10,
-  }),
+  
+}),
 } as const;
 
 export default SecuritySanitizationPipe;

@@ -28,17 +28,38 @@ import {
   type DatabaseValidationResult as _DatabaseValidationResult,
   type DatabaseBackupInfo as _DatabaseBackupInfo,
   type MultiPartyApprovalRequest as _MultiPartyApprovalRequest,
-} from './conversational-database.service';import { DatabaseModule } from './database.module';import { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';import { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';// Re-export for external consumptionexport { ConversationalDatabaseService } from './conversational-database.service';export { DatabaseModule } from './database.module';// ===== TYPES AND ENUMS =====export {
+} from './conversational-database.service';
+import { DatabaseModule } from './database.module';
+import { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';
+import { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';
+
+// Re-export for external consumption
+export { ConversationalDatabaseService } from './conversational-database.service';
+export { DatabaseModule } from './database.module';
+
+// ===== TYPES AND ENUMS =====
+export {
   DatabaseOperationType,
   DatabaseRiskLevel,
   type DatabaseOperationContext,
   type DatabaseValidationResult,
   type DatabaseBackupInfo,
   type MultiPartyApprovalRequest,
-} from './conversational-database.service';// ===== REPOSITORY SERVICES =====export { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';export { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';export {type RepositoryOperationContext,
+} from './conversational-database.service';
+
+// ===== REPOSITORY SERVICES =====
+export { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';
+export { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';
+export {
+  type RepositoryOperationContext,
   type BusinessValidationResult,
-} from './repositories/base-conversational-repository.service';export {type UserOperationContext,
-} from './repositories/user-conversational-repository.service';// ===== EXAMPLES AND INTEGRATION =====export {
+} from './repositories/base-conversational-repository.service';
+export {
+  type UserOperationContext,
+} from './repositories/user-conversational-repository.service';
+
+// ===== EXAMPLES AND INTEGRATION =====
+export {
   ExampleUserManagementService,
   ConversationalDatabaseUsageExamples,
   ConversationalDatabaseExampleModule,
@@ -120,7 +141,7 @@ export function requiresHighLevelApproval(
   riskLevel: DatabaseRiskLevel,
 ): boolean {
   // Critical risk operations always require high-level approval
-  if (riskLevel === DatabaseRiskLevel._CRITICAL) {
+  if (riskLevel === DatabaseRiskLevel.CRITICAL) {
     return true;
   }
 
@@ -145,13 +166,13 @@ export function getRecommendedBackupRetention(
   riskLevel: DatabaseRiskLevel,
 ): number {
   switch (riskLevel) {
-    case DatabaseRiskLevel._LOW:
+    case DatabaseRiskLevel.LOW:
       return 7; // 1 week
-    case DatabaseRiskLevel._MODERATE:
+    case DatabaseRiskLevel.MEDIUM:
       return 30; // 1 month
-    case DatabaseRiskLevel._HIGH:
+    case DatabaseRiskLevel.HIGH:
       return 90; // 3 months
-    case DatabaseRiskLevel._CRITICAL:
+    case DatabaseRiskLevel.CRITICAL:
       return 365; // 1 year
     default:
       return 30; // Default to 1 month

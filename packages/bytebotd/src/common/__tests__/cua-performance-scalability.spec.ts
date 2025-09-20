@@ -25,12 +25,28 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication, Injectable } from '@nestjs/common';import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';import { ComputerUseService } from '../../computer-use/computer-use.service';import { ComputerUseModule } from '../../computer-use/computer-use.module';import { ComputerUseTools } from '../../mcp/computer-use.tools';import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';import { ParlantIntegrationService } from '../../parlant/parlant-integration.service';import { ParlantModule } from '../../parlant/parlant.module';import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';import { MetricsService } from '../../metrics/metrics.service';import { CacheService } from '../../cache/cache.service';import { NutService } from '../../nut/nut.service';// TypeScript interfaces for performance testinginterface LoadTestResult {
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, Injectable } from '@nestjs/common';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { ComputerUseService } from '../../computer-use/computer-use.service';
+import { ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseTools } from '../../mcp/computer-use.tools';
+import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';
+import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';
+import { ParlantIntegrationService } from '../../parlant/parlant-integration.service';
+import { ParlantModule } from '../../parlant/parlant.module';
+import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';
+import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';
+import { MetricsService } from '../../metrics/metrics.service';
+import { CacheService } from '../../cache/cache.service';
+import { NutService } from '../../nut/nut.service';
+
+// TypeScript interfaces for performance testing
+interface LoadTestResult {
   success: boolean;
   responseTime: number;
   error?: Error;
 }
-
 
 interface TestOperation {
   (): Promise<unknown>;
@@ -229,10 +245,9 @@ export class PerformanceMonitorService {
 export class LoadGeneratorService {
   private activeLoadTests: Map<string, boolean> = new Map();
 
-  async generateConcurrentLoad(
-    operations: TestOperation[],
+  async generateConcurrentLoad(operations: TestOperation[],
     configuration: LoadTestConfiguration
-  ): Promise<LoadTestResult[]> {
+  ): Promise<LoadTestResult[]>  {
     const { concurrentUsers, operationsPerUser, rampUpTime, sustainedLoadTime } = configuration;
     const testId = `load${Date.now()}`;
     
@@ -299,7 +314,9 @@ export class LoadGeneratorService {
         } finally {
           activeOperations--;
           
-          // Continue if we haven't exceeded duration and can handle more operationsif (activeOperations < maxConcurrency && Date.now() - startTime < durationMs) {setImmediate(executeOperation);
+          // Continue if we haven't exceeded duration and can handle more operations
+          if (activeOperations < maxConcurrency && Date.now() - startTime < durationMs) {
+            setImmediate(executeOperation);
           } else if (activeOperations === 0 && Date.now() - startTime > durationMs) {
             resolve(results);
           }
@@ -313,13 +330,12 @@ export class LoadGeneratorService {
     });
   }
 
-  private async simulateUser(
-    userId: number,
+  private async simulateUser(userId: number,
     operations: TestOperation[],
     operationsPerUser: number,
     startDelay: number,
     sustainedLoadTime: number
-  ): Promise<LoadTestResult[]> {
+  ): Promise<LoadTestResult[]>  {
     // Wait for ramp-up delay
     await new Promise(resolve => setTimeout(resolve, startDelay));
     
@@ -354,14 +370,15 @@ export class LoadGeneratorService {
   }
 }
 
-describe('CUA Performance and Scalability Tests', () => {let context: PerformanceContext;let testModule: TestingModule;
+  describe('CUA Performance and Scalability Tests', () => {
+let context: PerformanceContext;let testModule: TestingModule;
   const performanceResults: PerformanceMetrics[] = [];
   const scalabilityResults: ScalabilityTestResult[] = [];
 
   /**
    * Setup performance testing environment
    */
-  beforeAll(async () => {
+  beforeAll(async () => 
     testModule = await Test.createTestingModule({
       imports: [
         EventEmitterModule.forRoot(),
@@ -406,7 +423,12 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
     context.performanceMonitor.clearMetrics();
   });
 
-  describe('Throughput Performance Tests', () => {it('should handle high-throughput computer use operations', async () => {const testConfig: LoadTestConfiguration = {testName: 'high_throughput_computer_use',concurrentUsers: 50,operationsPerUser: 20,
+
+
+  describe('Throughput Performance Tests', () => {
+it('should handle high-throughput computer use operations', async () => const testConfig: LoadTestConfiguration = {testName: 'high_throughput_computer_use',
+      concurrentUsers: 50,
+      operationsPerUser: 20,
         rampUpTime: 5000,
         sustainedLoadTime: 30000,
         rampDownTime: 2000,
@@ -439,7 +461,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       const metrics: PerformanceMetrics = {
         testId,
-        testType: 'throughput',startTime,endTime,
+        testType: 'throughput',
+      startTime,endTime,
         duration,
         totalOperations,
         successfulOperations,
@@ -462,7 +485,12 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       expect(memoryGrowth).toBeLessThan(200 * 1024 * 1024); // Less than 200MB growth
     });
 
-    it('should maintain performance under mixed operation types', async () => {const testConfig: LoadTestConfiguration = {testName: 'mixed_operations_throughput',concurrentUsers: 30,operationsPerUser: 15,
+
+
+    it('should maintain performance under mixed operation types', async () => {
+const testConfig: LoadTestConfiguration = testName: 'mixed_operations_throughput',
+      concurrentUsers: 30,
+      operationsPerUser: 15,
         rampUpTime: 3000,
         sustainedLoadTime: 20000,
         rampDownTime: 1000,
@@ -478,7 +506,10 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       // Mock Parlant validation for performance testing
       jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockResolvedValue({approved: true,
-          conversationId: 'perf-test',validationTimestamp: new Date(),reasoning: 'Performance test validation',confidence: 0.9,});
+          conversationId: 'perf-test',
+      validationTimestamp: new Date(),
+      reasoning: 'Performance test validation',
+      confidence: 0.9,});
 
       // Mixed operations including validated actions
       const operations = [
@@ -492,7 +523,13 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
         
         // Validated operations (with Parlant)
         () => context.parlantValidatedService.action(
-          { action: 'cursor_position' },{userId: 'perf-user',sessionId: 'perf-session',agentRole: 'OPERATOR',securityLevel: 'HIGH',conversationHistory: [],metadata: { operationId: 'perf-op' },recentActions: [],systemState: {
+          { action: 'cursor_position' },{userId: 'perf-user',
+      sessionId: 'perf-session',
+      agentRole: 'OPERATOR',
+      securityLevel: 'HIGH',
+      conversationHistory: [],
+      metadata: { operationId: 'perf-op' },recentActions: [],
+      systemState: {
               cpuUsage: 30,
               memoryUsage: 50,
               networkActivity: false,
@@ -515,7 +552,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       const metrics: PerformanceMetrics = {
         testId,
-        testType: 'throughput',startTime,endTime,
+        testType: 'throughput',
+      startTime,endTime,
         duration: endTime - startTime,
         totalOperations,
         successfulOperations,
@@ -534,7 +572,10 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
     });
   });
 
-  describe('Latency Performance Tests', () => {it('should maintain low latency for critical operations', async () => {const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }), maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }), maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition(), maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }), maxLatency: 150 },
+
+
+  describe('Latency Performance Tests', () => {
+it('should maintain low latency for critical operations', async () => const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }), maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }), maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition(), maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }), maxLatency: 150 },
       ];
 
       const testId = generateTestId();
@@ -575,7 +616,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       const metrics: PerformanceMetrics = {
         testId,
-        testType: 'latency',startTime: Date.now() - 10000, // ApproximateendTime: Date.now(),
+        testType: 'latency',
+      startTime: Date.now() - 10000, // ApproximateendTime: Date.now(),
         duration: 10000,
         totalOperations: Object.values(latencyResults).flat().length,
         successfulOperations: Object.values(latencyResults).flat().length,
@@ -588,7 +630,10 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       performanceResults.push(metrics);
     });
 
-    it('should handle latency under cache pressure', async () => {const testId = generateTestId();const operationCount = 100;
+
+
+    it('should handle latency under cache pressure', async () => {
+const testId = generateTestId();const operationCount = 100;
       const startTime = Date.now();
 
       context.performanceMonitor.startMonitoring(100);
@@ -598,7 +643,7 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       let cacheMisses = 0;
       
       jest.spyOn(context.cacheService, 'get')
-        .mockImplementation(async (key) => {
+        .mockImplementation(async (key) => 
           // Simulate cache hit/miss pattern
           if (Math.random() < 0.7) { // 70% cache hit rate
             cacheHits++;
@@ -635,7 +680,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       const metrics: PerformanceMetrics = {
         testId,
-        testType: 'latency',startTime,endTime,
+        testType: 'latency',
+      startTime,endTime,
         duration: endTime - startTime,
         totalOperations: operationCount,
         successfulOperations: successfulOps,
@@ -649,7 +695,10 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
     });
   });
 
-  describe('Stress Testing', () => {it('should handle extreme concurrent load', async () => {const maxConcurrency = 200;const stressDuration = 30000; // 30 seconds
+
+
+  describe('Stress Testing', () => {
+it('should handle extreme concurrent load', async () => const maxConcurrency = 200;const stressDuration = 30000; // 30 seconds
       const testId = generateTestId();
 
       context.performanceMonitor.startMonitoring(250);
@@ -679,7 +728,9 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       const metrics: PerformanceMetrics = {
         testId,
-        testType: 'stress',startTime: Date.now() - stressDuration,endTime: Date.now(),
+        testType: 'stress',
+      startTime: Date.now() - stressDuration,
+      endTime: Date.now(),
         duration: stressDuration,
         totalOperations,
         successfulOperations,
@@ -698,13 +749,16 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       expect(metrics.cpuUsage.peak).toBeLessThan(100); // Should not max out CPU
     });
 
-    it('should recover gracefully from memory pressure', async () => {const testId = generateTestId();const memoryIntensiveOperations = 500;
+
+
+    it('should recover gracefully from memory pressure', async () => {
+const testId = generateTestId();const memoryIntensiveOperations = 500;
       const startTime = Date.now();
 
       context.performanceMonitor.startMonitoring(500);
 
       // Create memory-intensive operations
-      const largeDataOperations = Array.from({ length: memoryIntensiveOperations }, (_, i) => {
+      const largeDataOperations = Array.from( length: memoryIntensiveOperations }, (_, i) => {
         return async () => {
           // Create large data payload to simulate memory pressure
           const largeData = Buffer.alloc(1024 * 1024, i); // 1MB buffer
@@ -727,7 +781,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
       const successfulOps = results.filter(r => r.status === 'fulfilled').length;const failedOps = results.filter(r => r.status === 'rejected').length;const metrics: PerformanceMetrics = {testId,
-        testType: 'stress',startTime,endTime,
+        testType: 'stress',
+      startTime,endTime,
         duration: endTime - startTime,
         totalOperations: memoryIntensiveOperations,
         successfulOperations: successfulOps,
@@ -745,7 +800,10 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
     });
   });
 
-  describe('Scalability Testing', () => {it('should demonstrate linear scaling characteristics', async () => {
+
+
+  describe('Scalability Testing', () => {
+it('should demonstrate linear scaling characteristics', async () => 
       const scalabilityConfigurations = [
         { concurrentUsers: 10, operationsPerUser: 10, expectedThroughput: 20 },
         { concurrentUsers: 25, operationsPerUser: 10, expectedThroughput: 45 },
@@ -757,7 +815,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
       for (const config of scalabilityConfigurations) {
         const testConfig: LoadTestConfiguration = {
-          testName: `scalability${config.concurrentUsers}_users`,
+          testName: `scalability${config.concurrentUsers}
+_users`,
           concurrentUsers: config.concurrentUsers,
           operationsPerUser: config.operationsPerUser,
           rampUpTime: 2000,
@@ -785,7 +844,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
 
         const metrics: PerformanceMetrics = {
           testId,
-          testType: 'scalability',startTime,endTime,
+          testType: 'scalability',
+      startTime,endTime,
           duration: endTime - startTime,
           totalOperations: loadResults.length,
           successfulOperations: loadResults.filter(r => r.success).length,
@@ -823,7 +883,12 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
       }
     });
 
-    it('should identify performance bottlenecks under load', async () => {const bottleneckTestConfig: LoadTestConfiguration = {testName: 'bottleneck_identification',concurrentUsers: 75,operationsPerUser: 20,
+
+
+    it('should identify performance bottlenecks under load', async () => {
+const bottleneckTestConfig: LoadTestConfiguration = testName: 'bottleneck_identification',
+      concurrentUsers: 75,
+      operationsPerUser: 20,
         rampUpTime: 5000,
         sustainedLoadTime: 25000,
         rampDownTime: 2000,
@@ -906,7 +971,8 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
    * Generate unique test ID
    */
   function generateTestId(): string {
-    return `perf${Date.now()}${Math.random().toString(36).substring(7)}`;
+    return `perf${Date.now()}
+${Math.random().toString(36).substring(7)}`;
   }
 
   /**
@@ -917,9 +983,14 @@ describe('CUA Performance and Scalability Tests', () => {let context: Performanc
     
     // Simple heuristics for bottleneck identification
     if (metrics.cpuUsage.peak > 80) {
-      bottlenecks.push('CPU');}if (metrics.memoryUsage.growth > 100 * 1024 * 1024) { // > 100MB growth
-      bottlenecks.push('Memory');}if (metrics.p95ResponseTime > metrics.averageResponseTime * 3) {
-      bottlenecks.push('ResponseTime');}return bottlenecks;
+      bottlenecks.push('CPU');}
+
+  if(metrics.memoryUsage.growth > 100 * 1024 * 1024) { // > 100MB growth
+      bottlenecks.push('Memory');}
+
+  if(metrics.p95ResponseTime > metrics.averageResponseTime * 3) {
+      bottlenecks.push('ResponseTime');}
+return bottlenecks;
   }
 
   /**

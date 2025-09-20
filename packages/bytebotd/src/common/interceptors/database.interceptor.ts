@@ -18,7 +18,7 @@
  * @version 1.0.0
  */
 
-// TypeScript safety note: Type-safe implementation for database operations
+// TypeScript safety note: Type-safe implementation for database operations;
 
 import {
   CallHandler,
@@ -26,7 +26,13 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
-} from '@nestjs/common';import { Observable, tap, catchError } from 'rxjs';import { Request } from 'express';import { MetricsService } from '../../metrics/metrics.service';import { CacheService } from '../../cache/cache.service';import { CacheKeyGenerator } from '../../cache/cache-key.generator';/*** Database operation metadata
+
+} from '@nestjs/common';
+import { Observable, tap, catchError } from 'rxjs';
+import { Request } from 'express';
+import { MetricsService } from '../../metrics/metrics.service';
+import { CacheService } from '../../cache/cache.service';
+import { CacheKeyGenerator } from '../../cache/cache-key.generator';/*** Database operation metadata
  */
 interface DatabaseOperation {
   operation: string;
@@ -34,6 +40,8 @@ interface DatabaseOperation {
   query?: string;
   params?: Record<string, unknown>;
   executionPlan?: Record<string, unknown>;
+
+
 }
 
 /**
@@ -49,6 +57,8 @@ interface DatabasePerformanceMetrics {
   cacheHit?: boolean;
   connectionId?: string;
   error?: Error;
+
+
 }
 
 /**
@@ -60,29 +70,34 @@ interface DatabaseStats {
   slowQueries: number;
   failedQueries: number;
   cacheHitRate: number;
-  connectionPoolStats: {
-    active: number;
+  connectionPoolStats: {;
+  active: number;
     idle: number;
     total: number;
-  };
+  
+
+};
   topSlowQueries: Array<{
-    operation: string;
+  operation: string;
     table: string;
     avgDuration: number;
     count: number;
-  }>;
+  
+}>;
 }
 
 /**
  * Database performance configuration
  */
 interface DatabaseConfig {
-  slowQueryThreshold: number; // milliseconds
-  criticalQueryThreshold: number; // milliseconds
+  slowQueryThreshold: number; // milliseconds;
+  criticalQueryThreshold: number; // milliseconds;
   enableQueryCaching: boolean;
-  defaultCacheTtl: number; // seconds
+  defaultCacheTtl: number; // seconds;
   maxRetryAttempts: number;
   retryDelay: number; // milliseconds
+
+
 }
 
 /**
@@ -91,43 +106,50 @@ interface DatabaseConfig {
 @Injectable()
 export class DatabaseInterceptor implements NestInterceptor {
   private readonly logger = new Logger(DatabaseInterceptor.name);
-  private readonly stats: DatabaseStats = {
-    totalQueries: 0,
+  private readonly stats: DatabaseStats = {,
+  totalQueries: 0,
     averageQueryTime: 0,
     slowQueries: 0,
     failedQueries: 0,
     cacheHitRate: 0,
     connectionPoolStats: {
-      active: 0,
+  active: 0,
       idle: 0,
       total: 0,
-    },
+    
+},
     topSlowQueries: [],
   };
 
   private readonly slowQueries = new Map<
     string,
     {
-      totalDuration: number;
+  totalDuration: number;
       count: number;
       avgDuration: number;
-    }
+    
+}
   >();
 
   // Database performance configuration
   private readonly config: DatabaseConfig = {
-    slowQueryThreshold: parseInt(
-      process.env.DB_SLOW_QUERY_THRESHOLD ?? '1000',10,), // 1 second
-    criticalQueryThreshold: parseInt(
-      process.env.DB_CRITICAL_QUERY_THRESHOLD ?? '5000',10,), // 5 seconds
-    enableQueryCaching: process.env.DB_ENABLE_QUERY_CACHING !== 'false',defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL ?? '300', 10), // 5 minutesmaxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS ?? '3', 10),retryDelay: parseInt(process.env.DB_RETRY_DELAY ?? '1000', 10), // 1 second};constructor(
+  slowQueryThreshold: parseInt(
+      process.env.DB_SLOW_QUERY_THRESHOLD ?? '1000',10,), // 1 second,
+  criticalQueryThreshold: parseInt(
+      process.env.DB_CRITICAL_QUERY_THRESHOLD ?? '5000',10,), // 5 seconds,
+  enableQueryCaching: process.env.DB_ENABLE_QUERY_CACHING !== 'false',
+      defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL ?? '300', 10), // 5 minutesmaxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS ?? '3', 10),retryDelay: parseInt(process.env.DB_RETRY_DELAY ?? '1000', 10), // 1 second
+};
+constructor(
     private readonly metricsService?: MetricsService,
     private readonly cacheService?: CacheService,
     private readonly keyGenerator?: CacheKeyGenerator,
   ) {
-    this.logger.log('Database Performance Interceptor initialized');
+  this.logger.log('Database Performance Interceptor initialized');
     this.logger.log(
-      `Config: slowQuery=${this.config.slowQueryThreshold}ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
+      `Config: slowQuery=${this.config.slowQueryThreshold
+}
+ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
     this.startPeriodicReporting();
   }
 
@@ -135,13 +157,15 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Intercept database operations for performance monitoring
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<Request>();
+  const request = context.switchToHttp().getRequest<Request>();
     const operationId: string =
-      (request as Request & { operationId?: string }).operationId ??
+      (request as Request & { operationId?: string 
+}).operationId ??
       `db${Date.now()}`;// Extract database operation metadataconst dbOperation = this.extractDatabaseOperation(context, request);
     if (!dbOperation) {
-      return next.handle(); // Not a database operation
-    }
+  return next.handle(); // Not a database operation
+    
+}
 
     const startTime = Date.now();
 
@@ -150,13 +174,14 @@ export class DatabaseInterceptor implements NestInterceptor {
       this.config.enableQueryCaching &&
       this.isCacheableOperation(dbOperation)
     ) {
-      return this.handleCachedDatabaseOperation(
+  return this.handleCachedDatabaseOperation(
         operationId,
         dbOperation,
         startTime,
         next,
       );
-    }
+    
+}
 
     return this.handleDatabaseOperation(
       operationId,
@@ -175,20 +200,22 @@ export class DatabaseInterceptor implements NestInterceptor {
     startTime: number,
     next: CallHandler,
   ): Observable<unknown> {
-    this.logger.debug(
-      `[${operationId}] Database operation: ${dbOperation.operation} on ${dbOperation.table}`,);return next.handle().pipe(
+  this.logger.debug(
+      `[${operationId
+}] Database operation: ${dbOperation.operation} on ${dbOperation.table}`,);return next.handle().pipe(
       tap((result) => {
-        this.recordDatabaseMetrics({
+  this.recordDatabaseMetrics({
           operationId,
           operation: dbOperation,
           startTime,
           endTime: Date.now(),
           duration: Date.now() - startTime,
           resultCount: this.getResultCount(result),
-        });
+        
+});
       }),
       catchError((error: unknown) => {
-        const typedError =
+  const typedError =
           error instanceof Error ? error : new Error(String(error));
         this.recordDatabaseMetrics({
           operationId,
@@ -197,7 +224,8 @@ export class DatabaseInterceptor implements NestInterceptor {
           endTime: Date.now(),
           duration: Date.now() - startTime,
           error: typedError,
-        });
+        
+});
         throw typedError;
       }),
     );
@@ -212,17 +240,18 @@ export class DatabaseInterceptor implements NestInterceptor {
     startTime: number,
     next: CallHandler,
   ): Observable<unknown> {
-    if (!this.cacheService || !this.keyGenerator) {
+  if (!this.cacheService || !this.keyGenerator) {
       return this.handleDatabaseOperation(
         operationId,
         dbOperation,
         startTime,
         next,
       );
-    }
+    
+}
 
     return new Observable((observer) => {
-      const cacheKey = this.generateQueryCacheKey(dbOperation);
+  const cacheKey = this.generateQueryCacheKey(dbOperation);
 
       this.cacheService
         ?.get(cacheKey)
@@ -237,31 +266,34 @@ export class DatabaseInterceptor implements NestInterceptor {
               duration: Date.now() - startTime,
               cacheHit: true,
               resultCount: this.getResultCount(cachedResult),
-            });
+            
+});
 
             this.logger.debug(
               `[${operationId}] Database cache HIT: ${dbOperation.operation}`,);observer.next(cachedResult);
             observer.complete();
           } else {
-            // Cache miss - execute query and cache result
+  // Cache miss - execute query and cache result
             this.handleDatabaseOperationWithCaching(
               operationId,
               dbOperation,
               startTime,
               cacheKey,
               next,
-            ).subscribe({
-              next: (result) => observer.next(result),
+            ).subscribe({,
+  next: (result) => observer.next(result),
               error: (error: unknown) => observer.error(error),
               complete: () => observer.complete(),
-            });
+            
+});
           }
         })
         .catch((error: unknown) => {
-          const errorMessage =
+  const errorMessage =
             error instanceof Error ? error.message : String(error);
           this.logger.error(
-            `[${operationId}] Cache error, falling back to database: ${errorMessage}`,
+            `[${operationId
+}] Cache error, falling back to database: ${errorMessage}`,
           );
 
           this.handleDatabaseOperation(
@@ -270,10 +302,11 @@ export class DatabaseInterceptor implements NestInterceptor {
             startTime,
             next,
           ).subscribe({
-            next: (result) => observer.next(result),
+  next: (result) => observer.next(result),
             error: (error: unknown) => observer.error(error),
             complete: () => observer.complete(),
-          });
+          
+});
         });
     });
   }
@@ -288,34 +321,37 @@ export class DatabaseInterceptor implements NestInterceptor {
     cacheKey: string,
     next: CallHandler,
   ): Observable<unknown> {
-    return next.handle().pipe(
+  return next.handle().pipe(
       tap(async (result) => {
         const duration = Date.now() - startTime;
 
         // Cache the result
         if (this.cacheService) {
-          await this.cacheService.set(cacheKey, result, {
-            ttl: this.config.defaultCacheTtl,
+          await this.cacheService.set(cacheKey, result, {,
+  ttl: this.config.defaultCacheTtl,
             namespace: 'database-queries',
-          });
+          
+});
         }
 
         this.recordDatabaseMetrics({
-          operationId,
+  operationId,
           operation: dbOperation,
           startTime,
           endTime: Date.now(),
           duration,
           cacheHit: false,
           resultCount: this.getResultCount(result),
-        });
+        
+});
 
         this.logger.debug(
-          `[${operationId}] Database cache MISS: ${dbOperation.operation} - cached result (${duration}ms)`,
+          `[${operationId}] Database cache MISS: ${dbOperation.operation} - cached result (${duration}
+ms)`,
         );
       }),
       catchError((error: unknown) => {
-        const typedError =
+  const typedError =
           error instanceof Error ? error : new Error(String(error));
         this.recordDatabaseMetrics({
           operationId,
@@ -324,7 +360,8 @@ export class DatabaseInterceptor implements NestInterceptor {
           endTime: Date.now(),
           duration: Date.now() - startTime,
           error: typedError,
-        });
+        
+});
         throw typedError;
       }),
     );
@@ -337,7 +374,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     context: ExecutionContext,
     _request: Request,
   ): DatabaseOperation | null {
-    // This would need to be customized based on the ORM/database library used
+  // This would need to be customized based on the ORM/database library used
     // For Prisma, we might extract from the handler name or method metadata
 
     const handlerName = context.getHandler().name;
@@ -346,25 +383,32 @@ export class DatabaseInterceptor implements NestInterceptor {
     // Example patterns for different operations
     if (handlerName.includes('find') ?? handlerName.includes('get')) {return {operation: 'SELECT',
         table: this.extractTableName(controllerClass),
-        query: `${handlerName} operation`,
+        query: `${handlerName
+} operation`,
       };
     }
 
-    if (handlerName.includes('create') ?? handlerName.includes('insert')) {return {operation: 'INSERT',
+  if(handlerName.includes('create') ?? handlerName.includes('insert')) {
+  return {operation: 'INSERT',
         table: this.extractTableName(controllerClass),
-        query: `${handlerName} operation`,
+        query: `${handlerName
+} operation`,
       };
     }
 
-    if (handlerName.includes('update')) {return {operation: 'UPDATE',
+  if(handlerName.includes('update')) {
+  return {operation: 'UPDATE',
         table: this.extractTableName(controllerClass),
-        query: `${handlerName} operation`,
+        query: `${handlerName
+} operation`,
       };
     }
 
-    if (handlerName.includes('delete') ?? handlerName.includes('remove')) {return {operation: 'DELETE',
+  if(handlerName.includes('delete') ?? handlerName.includes('remove')) {
+  return {operation: 'DELETE',
         table: this.extractTableName(controllerClass),
-        query: `${handlerName} operation`,
+        query: `${handlerName
+} operation`,
       };
     }
 
@@ -379,18 +423,20 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Check if operation is cacheable
    */
   private isCacheableOperation(dbOperation: DatabaseOperation): boolean {
-    // Only cache read operations
+  // Only cache read operations
     return ['SELECT', 'FIND', 'GET'].includes(
       dbOperation.operation.toUpperCase(),
     );
-  }
+  
+}
 
   /**
    * Generate cache key for database query
    */
   private generateQueryCacheKey(dbOperation: DatabaseOperation): string {
-    if (!this.keyGenerator) {
-      return `db:${dbOperation.operation}:${dbOperation.table}:${Date.now()}`;
+  if (!this.keyGenerator) {
+      return `db:${dbOperation.operation
+}:${dbOperation.table}:${Date.now()}`;
     }
 
     return this.keyGenerator.generateDbKey(
@@ -404,15 +450,17 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Get result count from query result
    */
   private getResultCount(result: unknown): number | undefined {
-    if (result === null || result === undefined) {
+  if (result === null || result === undefined) {
       return 0;
-    }
+    
+}
 
-    if (Array.isArray(result)) {
-      return result.length;
-    }
+  if(Array.isArray(result)) {
+  return result.length;
+    
+}
 
-    if (typeof result === 'object' && result !== null && 'count' in result) {
+  if(typeof result === 'object' && result !== null && 'count' in result) {
       return (result as { count: number }).count;
     }
 
@@ -423,20 +471,22 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Record database performance metrics
    */
   private recordDatabaseMetrics(metrics: DatabasePerformanceMetrics): void {
-    try {
-      const { operation, duration, error, cacheHit } = metrics;
+  try {
+      const { operation, duration, error, cacheHit 
+} = metrics;
 
       // Update internal statistics
       this.stats.totalQueries++;
 
       if (error) {
-        this.stats.failedQueries++;
+  this.stats.failedQueries++;
         this.logger.error(
-          `[${metrics.operationId}] Database operation failed: ${error.message}`,
+          `[${metrics.operationId
+}] Database operation failed: ${error.message}`,
           { operation: operation.operation, table: operation.table, duration },
         );
       } else {
-        // Update average query time
+  // Update average query time
         this.stats.averageQueryTime =
           (this.stats.averageQueryTime * (this.stats.totalQueries - 1) +
             duration) /
@@ -450,45 +500,54 @@ export class DatabaseInterceptor implements NestInterceptor {
           const logLevel =
             duration >= this.config.criticalQueryThreshold ? 'error' : 'warn';
           this.logger[logLevel](
-            `[${metrics.operationId}] Slow database query detected: ${duration}ms`,{ operation: operation.operation, table: operation.table },);
+            `[${metrics.operationId
+}] Slow database query detected: ${duration}
+ms`,{ operation: operation.operation, table: operation.table },);
         }
 
         this.logger.debug(
-          `[${metrics.operationId}] Database operation completed: ${operation.operation} (${duration}ms)`,{table: operation.table,
+          `[${metrics.operationId}] Database operation completed: ${operation.operation} (${duration}
+ms)`,{
+  table: operation.table,
             resultCount: metrics.resultCount,
             cacheHit: cacheHit ?? false,
-          },
+          
+},
         );
       }
 
       // Record metrics with MetricsService
       if (this.metricsService) {
-        if (error) {
+  if (error) {
           this.metricsService.recordDatabaseError(
             operation.operation,
             error.constructor.name,
           );
-        } else {
-          this.metricsService.recordDatabaseQuery(
+        
+} else {
+  this.metricsService.recordDatabaseQuery(
             operation.operation,
             operation.table,
             duration,
           );
-        }
+        
+}
       }
 
       // Update cache hit rate
       if (cacheHit !== undefined) {
-        const totalCacheableQueries = this.stats.totalQueries; // Simplified
+  const totalCacheableQueries = this.stats.totalQueries; // Simplified
         const cacheHits = cacheHit ? 1 : 0;
         this.stats.cacheHitRate =
           (this.stats.cacheHitRate * (totalCacheableQueries - 1) +
             cacheHits * 100) /
           totalCacheableQueries;
-      }
+      
+}
     } catch (_error) {
-      this.logger.error(
-        `Failed to record database metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,);}
+  this.logger.error(
+        `Failed to record database metrics: ${_error instanceof Error ? _error.message : 'Unknown error'
+}`,);}
   }
 
   /**
@@ -501,17 +560,19 @@ export class DatabaseInterceptor implements NestInterceptor {
     const queryKey = `${operation.operation}:${operation.table}`;
 
     if (!this.slowQueries.has(queryKey)) {
-      this.slowQueries.set(queryKey, {
-        totalDuration: duration,
+  this.slowQueries.set(queryKey, {,
+  totalDuration: duration,
         count: 1,
         avgDuration: duration,
-      });
+      
+});
     } else {
-      const slowQuery = this.slowQueries.get(queryKey);
+  const slowQuery = this.slowQueries.get(queryKey);
       if (!slowQuery) {
         // This should not happen due to the check above, but being type-safe
         return;
-      }
+      
+}
       slowQuery.totalDuration += duration;
       slowQuery.count++;
       slowQuery.avgDuration = slowQuery.totalDuration / slowQuery.count;
@@ -525,10 +586,14 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Update top slow queries list
    */
   private updateTopSlowQueries(): void {
-    this.stats.topSlowQueries = Array.from(this.slowQueries.entries())
+  this.stats.topSlowQueries = Array.from(this.slowQueries.entries())
       .map(([key, stats]) => {
-        const [operation, table] = key.split(':');return {operation: operation ?? '',table: table ?? '',avgDuration: stats.avgDuration,count: stats.count,
-        };
+        const [operation, table] = key.split(':');return {operation: operation ?? '',
+      table: table ?? '',
+      avgDuration: stats.avgDuration,
+      count: stats.count,
+        
+};
       })
       .sort((a, b) => b.avgDuration - a.avgDuration)
       .slice(0, 10); // Top 10 slow queries
@@ -538,25 +603,27 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Get current database statistics
    */
   getStats(): DatabaseStats {
-    this.updateTopSlowQueries();
-    return { ...this.stats };
+  this.updateTopSlowQueries();
+    return { ...this.stats 
+};
   }
 
   /**
    * Clear database statistics
    */
   clearStats(): void {
-    Object.assign(this.stats, {
-      totalQueries: 0,
+  Object.assign(this.stats, {,
+  totalQueries: 0,
       averageQueryTime: 0,
       slowQueries: 0,
       failedQueries: 0,
       cacheHitRate: 0,
       connectionPoolStats: {
-        active: 0,
+  active: 0,
         idle: 0,
         total: 0,
-      },
+      
+},
       topSlowQueries: [],
     });
 
@@ -565,12 +632,15 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Start periodic statistics reporting
    */
   private startPeriodicReporting(): void {
-    // Report database stats every 10 minutes
+  // Report database stats every 10 minutes
     setInterval(() => {
       if (this.stats.totalQueries > 0) {
-        this.logger.log('Database Performance Statistics:', {
-          totalQueries: this.stats.totalQueries,
-          averageQueryTime: `${this.stats.averageQueryTime.toFixed(2)}ms`,slowQueries: this.stats.slowQueries,failedQueries: this.stats.failedQueries,
+        this.logger.log('Database Performance Statistics:', {,
+  totalQueries: this.stats.totalQueries,
+          averageQueryTime: `${this.stats.averageQueryTime.toFixed(2)
+}
+ms`,slowQueries: this.stats.slowQueries,
+      failedQueries: this.stats.failedQueries,
           cacheHitRate: `${this.stats.cacheHitRate.toFixed(2)}%`,
           topSlowQueries: this.stats.topSlowQueries.slice(0, 3),
         });

@@ -18,7 +18,18 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { ConversationalDatabaseService } from '../conversational-database.service';import { UserConversationalRepositoryService } from '../repositories/user-conversational-repository.service';// Removed unused import: BaseConversationalRepositoryServiceimport { UserEntity } from '../../test-utils/database-types';import { Repository } from '../../types/index';import { ParlantModule } from '../../parlant/parlant.module';// ===== EXAMPLE SERVICE IMPLEMENTATIONS =====/**
+import { Injectable, Logger, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ConversationalDatabaseService } from '../conversational-database.service';
+import { UserConversationalRepositoryService } from '../repositories/user-conversational-repository.service';
+// Removed unused import: BaseConversationalRepositoryService
+import { UserEntity } from '../../test-utils/database-types';
+import { Repository } from '../../types/index';
+import { ParlantModule } from '../../parlant/parlant.module';
+
+// ===== EXAMPLE SERVICE IMPLEMENTATIONS =====
+
+/**
  * Example User Management Service with Conversational Database Integration
  */
 @Injectable()

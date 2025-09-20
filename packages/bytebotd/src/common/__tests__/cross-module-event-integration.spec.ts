@@ -25,7 +25,24 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication, Injectable } from '@nestjs/common';import { EventEmitter2, EventEmitterModule, OnEvent } from '@nestjs/event-emitter';import { ComputerUseService } from '../../computer-use/computer-use.service';import { ComputerUseModule } from '../../computer-use/computer-use.module';import { ComputerUseTools } from '../../mcp/computer-use.tools';import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';import { ParlantIntegrationService } from '../../parlant/parlant-integration.service';import { ParlantModule } from '../../parlant/parlant.module';import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';import { MetricsService } from '../../metrics/metrics.service';import { CacheService } from '../../cache/cache.service';import { NutService } from '../../nut/nut.service';// Event integration test interfacesinterface EventPayload {
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, Injectable } from '@nestjs/common';
+import { EventEmitter2, EventEmitterModule, OnEvent } from '@nestjs/event-emitter';
+import { ComputerUseService } from '../../computer-use/computer-use.service';
+import { ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseTools } from '../../mcp/computer-use.tools';
+import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';
+import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';
+import { ParlantIntegrationService } from '../../parlant/parlant-integration.service';
+import { ParlantModule } from '../../parlant/parlant.module';
+import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';
+import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';
+import { MetricsService } from '../../metrics/metrics.service';
+import { CacheService } from '../../cache/cache.service';
+import { NutService } from '../../nut/nut.service';
+
+// Event integration test interfaces
+interface EventPayload {
   source?: string;
   target?: string;
   correlationId?: string;
@@ -97,10 +114,13 @@ export class EventCollectorService {
   private eventSequences: Map<string, string[]> = new Map();
   private eventMetrics: Map<string, number> = new Map();
 
-  @OnEvent('**', { async: true })async handleAllEvents(eventName: string, payload: EventPayload): Promise<void> {const event: EventRecord = {
+  @OnEvent('**', { async: true })async handleAllEvents(eventName: string, payload: EventPayload): Promise<void>  {const event: EventRecord = {
       eventId: this.generateEventId(),
       eventName,
-      source: payload?.source ?? 'unknown',target: payload?.target ?? 'all',timestamp: new Date(),payload: payload ?? {},
+      source: payload?.source ?? 'unknown',
+      target: payload?.target ?? 'all',
+      timestamp: new Date(),
+      payload: payload ?? {},
       correlationId: payload?.correlationId,
       sequenceNumber: payload?.sequenceNumber,
       retryCount: payload?.retryCount ?? 0,
@@ -132,7 +152,8 @@ export class EventCollectorService {
   }
 
   private generateEventId(): string {
-    return `evt${Date.now()}${Math.random().toString(36).substring(7)}`;
+    return `evt${Date.now()}
+${Math.random().toString(36).substring(7)}`;
   }
 
   private updateSequenceTracking(event: EventRecord): void {
@@ -149,18 +170,21 @@ export class EventCollectorService {
   }
 }
 
-describe('Cross-Module Event Integration Tests', () => {let context: CrossModuleEventContext;let testModule: TestingModule;
+  describe('Cross-Module Event Integration Tests', () => {
+let context: CrossModuleEventContext;let testModule: TestingModule;
   const eventFlowMetrics: EventFlowMetrics[] = [];
 
   /**
    * Setup cross-module event integration test environment
    */
-  beforeAll(async () => {
+  beforeAll(async () => 
     testModule = await Test.createTestingModule({
       imports: [
         EventEmitterModule.forRoot({
           wildcard: true,
-          delimiter: '.',newListener: false,removeListener: false,
+          delimiter: '.',
+      newListener: false,
+      removeListener: false,
           maxListeners: 20,
           verboseMemoryLeak: false,
           ignoreErrors: false,
@@ -204,7 +228,10 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
     context.eventCollector.clearEvents();
   });
 
-  describe('Core Event Propagation Patterns', () => {it('should propagate events through ComputerUse → MCP workflow', async () => {const correlationId = generateCorrelationId();const flowId = generateFlowId();
+
+
+  describe('Core Event Propagation Patterns', () => {
+it('should propagate events through ComputerUse → MCP workflow', async () => const correlationId = generateCorrelationId();const flowId = generateFlowId();
       
       // Setup event sequence tracking
       const expectedEvents = [
@@ -212,24 +239,34 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       const startTime = Date.now();
       
       // 1. Computer Use Action Started
-      context.eventEmitter.emit('computer-use.action.started', {source: 'ComputerUseService',correlationId,sequenceNumber: 1,
-        action: 'move_mouse',coordinates: { x: 100, y: 200 },});
+      context.eventEmitter.emit('computer-use.action.started', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 1,
+        action: 'move_mouse',
+      coordinates: { x: 100, y: 200 },});
 
       // 2. Action Validating
-      context.eventEmitter.emit('computer-use.action.validating', {source: 'ComputerUseService',correlationId,sequenceNumber: 2,
+      context.eventEmitter.emit('computer-use.action.validating', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 2,
         validationType: 'parameter-validation',});// 3. Action Executing
-      context.eventEmitter.emit('computer-use.action.executing', {source: 'ComputerUseService',correlationId,sequenceNumber: 3,
+      context.eventEmitter.emit('computer-use.action.executing', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 3,
         executionContext: 'direct',});// 4. MCP Tool Invoked
-      context.eventEmitter.emit('mcp.tool.invoked', {source: 'ComputerUseTools',correlationId,sequenceNumber: 4,
-        toolName: 'computer_move_mouse',parameters: { coordinates: { x: 100, y: 200 } },});
+      context.eventEmitter.emit('mcp.tool.invoked', {source: 'ComputerUseTools',
+      correlationId,sequenceNumber: 4,
+        toolName: 'computer_move_mouse',
+      parameters: { coordinates: { x: 100, y: 200 } },});
 
       // 5. MCP Tool Completed
-      context.eventEmitter.emit('mcp.tool.completed', {source: 'ComputerUseTools',correlationId,sequenceNumber: 5,
-        toolName: 'computer_move_mouse',success: true,processingTime: 15,
+      context.eventEmitter.emit('mcp.tool.completed', {source: 'ComputerUseTools',
+      correlationId,sequenceNumber: 5,
+        toolName: 'computer_move_mouse',
+      success: true,
+      processingTime: 15,
       });
 
       // 6. Computer Use Action Completed
-      context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',correlationId,sequenceNumber: 6,
+      context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 6,
         success: true,
         totalTime: Date.now() - startTime,
       });
@@ -252,25 +289,41 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       recordEventFlowMetrics(flowId, startTime, capturedEvents, correlationId);
     });
 
-    it('should handle Parlant → ComputerUse validation event flow', async () => {const correlationId = generateCorrelationId();const flowId = generateFlowId();
+
+
+    it('should handle Parlant → ComputerUse validation event flow', async () => {
+const correlationId = generateCorrelationId();const flowId = generateFlowId();
       
       const expectedEvents = [
         'parlant.validation.requested','parlant.validation.analyzing','parlant.validation.context-evaluated','parlant.validation.decision-made','computer-use.action.approved','computer-use.action.executing','computer-use.action.completed','parlant.validation.completed',];const startTime = Date.now();
 
       // Simulate Parlant validation workflow
-      context.eventEmitter.emit('parlant.validation.requested', {source: 'ParlantValidatedComputerUseService',correlationId,sequenceNumber: 1,
-        action: 'screenshot',validationContext: {userId: 'test-user',securityLevel: 'HIGH',},});
+      context.eventEmitter.emit('parlant.validation.requested', source: 'ParlantValidatedComputerUseService',
+      correlationId,sequenceNumber: 1,
+        action: 'screenshot',
+      validationContext: {userId: 'test-user',
+      securityLevel: 'HIGH',},});
 
-      context.eventEmitter.emit('parlant.validation.analyzing', {source: 'ParlantIntegrationService',correlationId,sequenceNumber: 2,
-        analysisType: 'conversational-intent',conversationHistory: ['User requested screenshot for documentation'],});context.eventEmitter.emit('parlant.validation.context-evaluated', {source: 'ParlantIntegrationService',correlationId,sequenceNumber: 3,
-        riskLevel: 'LOW',contextFactors: ['documentation-purpose', 'safe-operation'],});context.eventEmitter.emit('parlant.validation.decision-made', {source: 'ParlantIntegrationService',correlationId,sequenceNumber: 4,
+      context.eventEmitter.emit('parlant.validation.analyzing', {source: 'ParlantIntegrationService',
+      correlationId,sequenceNumber: 2,
+        analysisType: 'conversational-intent',
+      conversationHistory: ['User requested screenshot for documentation'],});context.eventEmitter.emit('parlant.validation.context-evaluated', {source: 'ParlantIntegrationService',
+      correlationId,sequenceNumber: 3,
+        riskLevel: 'LOW',
+      contextFactors: ['documentation-purpose', 'safe-operation'],});context.eventEmitter.emit('parlant.validation.decision-made', {source: 'ParlantIntegrationService',
+      correlationId,sequenceNumber: 4,
         approved: true,
         confidence: 0.95,
-        reasoning: 'Screenshot approved for documentation purposes',});context.eventEmitter.emit('computer-use.action.approved', {source: 'ParlantValidatedComputerUseService',correlationId,sequenceNumber: 5,
-        action: 'screenshot',validationResult: 'approved',});context.eventEmitter.emit('computer-use.action.executing', {source: 'ComputerUseService',correlationId,sequenceNumber: 6,
-        action: 'screenshot',});context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',correlationId,sequenceNumber: 7,
+        reasoning: 'Screenshot approved for documentation purposes',});context.eventEmitter.emit('computer-use.action.approved', {source: 'ParlantValidatedComputerUseService',
+      correlationId,sequenceNumber: 5,
+        action: 'screenshot',
+      validationResult: 'approved',});context.eventEmitter.emit('computer-use.action.executing', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 6,
+        action: 'screenshot',});context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 7,
         success: true,
-        result: { image: 'base64-screenshot-data' },});context.eventEmitter.emit('parlant.validation.completed', {source: 'ParlantValidatedComputerUseService',correlationId,sequenceNumber: 8,
+        result: { image: 'base64-screenshot-data' },});context.eventEmitter.emit('parlant.validation.completed', {source: 'ParlantValidatedComputerUseService',
+      correlationId,sequenceNumber: 8,
         success: true,
         validationTime: Date.now() - startTime,
       });
@@ -286,44 +339,68 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       expect(actualSequence).toEqual(expectedEvents);
 
       // Verify approval workflow
-      const validationEvents = context.eventCollector.getEventsByPattern('parlant.validation.*');expect(validationEvents).toHaveLength(4);const approvalEvent = context.eventCollector.getEvents().find(
-        e => e.eventName === 'computer-use.action.approved' && e.correlationId === correlationId);expect(approvalEvent).toBeDefined();
-      expect(approvalEvent?.payload.validationResult).toBe('approved');recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);});
+      const validationEvents = context.eventCollector.getEventsByPattern('parlant.validation.*');
+expect(validationEvents).toHaveLength(4);const approvalEvent = context.eventCollector.getEvents().find(
+        e => e.eventName === 'computer-use.action.approved' && e.correlationId === correlationId);
+expect(approvalEvent).toBeDefined();
+      expect(approvalEvent?.payload.validationResult).toBe('approved');
+recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);});
 
-    it('should propagate Enterprise API events with rate limiting context', async () => {const correlationId = generateCorrelationId();const flowId = generateFlowId();
+
+
+    it('should propagate Enterprise API events with rate limiting context', async () => {
+const correlationId = generateCorrelationId();const flowId = generateFlowId();
       
       const expectedEvents = [
         'enterprise-api.request.received','enterprise-api.auth.validating','enterprise-api.auth.approved','enterprise-api.rate-limit.checking','enterprise-api.rate-limit.allowed','enterprise-api.routing.started','computer-use.action.started','computer-use.action.completed','enterprise-api.response.sent','enterprise-api.metrics.recorded',];const startTime = Date.now();
 
       // Simulate Enterprise API request flow
-      context.eventEmitter.emit('enterprise-api.request.received', {source: 'EnterpriseApiGatewayController',correlationId,sequenceNumber: 1,
-        clientId: 'enterprise-client-123',tenantId: 'tenant-enterprise-1',endpoint: '/enterprise/computer-use/action',});context.eventEmitter.emit('enterprise-api.auth.validating', {source: 'JwtAuthGuard',correlationId,sequenceNumber: 2,
-        tokenType: 'JWT',userRole: 'OPERATOR',});context.eventEmitter.emit('enterprise-api.auth.approved', {source: 'JwtAuthGuard',correlationId,sequenceNumber: 3,
-        userId: 'enterprise-user-456',permissions: ['computer-use:execute'],});context.eventEmitter.emit('enterprise-api.rate-limit.checking', {source: 'EnterpriseApiRateLimitService',correlationId,sequenceNumber: 4,
-        rateLimitTier: 'ENTERPRISE',currentUsage: 45,maxAllowed: 1000,
+      context.eventEmitter.emit('enterprise-api.request.received', source: 'EnterpriseApiGatewayController',
+      correlationId,sequenceNumber: 1,
+        clientId: 'enterprise-client-123',
+      tenantId: 'tenant-enterprise-1',
+      endpoint: '/enterprise/computer-use/action',});context.eventEmitter.emit('enterprise-api.auth.validating', {source: 'JwtAuthGuard',
+      correlationId,sequenceNumber: 2,
+        tokenType: 'JWT',
+      userRole: 'OPERATOR',});context.eventEmitter.emit('enterprise-api.auth.approved', {source: 'JwtAuthGuard',
+      correlationId,sequenceNumber: 3,
+        userId: 'enterprise-user-456',
+      permissions: ['computer-use:execute'],});context.eventEmitter.emit('enterprise-api.rate-limit.checking', {source: 'EnterpriseApiRateLimitService',
+      correlationId,sequenceNumber: 4,
+        rateLimitTier: 'ENTERPRISE',
+      currentUsage: 45,
+      maxAllowed: 1000,
       });
 
-      context.eventEmitter.emit('enterprise-api.rate-limit.allowed', {source: 'EnterpriseApiRateLimitService',correlationId,sequenceNumber: 5,
+      context.eventEmitter.emit('enterprise-api.rate-limit.allowed', {source: 'EnterpriseApiRateLimitService',
+      correlationId,sequenceNumber: 5,
         remainingRequests: 955,
         resetTime: Date.now() + 3600000,
       });
 
-      context.eventEmitter.emit('enterprise-api.routing.started', {source: 'EnterpriseApiRoutingService',correlationId,sequenceNumber: 6,
-        targetService: 'ComputerUseService',routingStrategy: 'direct',});context.eventEmitter.emit('computer-use.action.started', {source: 'ComputerUseService',correlationId,sequenceNumber: 7,
-        action: 'cursor_position',enterpriseContext: true,});
+      context.eventEmitter.emit('enterprise-api.routing.started', {source: 'EnterpriseApiRoutingService',
+      correlationId,sequenceNumber: 6,
+        targetService: 'ComputerUseService',
+      routingStrategy: 'direct',});context.eventEmitter.emit('computer-use.action.started', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 7,
+        action: 'cursor_position',
+      enterpriseContext: true,});
 
-      context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',correlationId,sequenceNumber: 8,
+      context.eventEmitter.emit('computer-use.action.completed', {source: 'ComputerUseService',
+      correlationId,sequenceNumber: 8,
         success: true,
         result: { x: 500, y: 600 },
       });
 
-      context.eventEmitter.emit('enterprise-api.response.sent', {source: 'EnterpriseApiGatewayController',correlationId,sequenceNumber: 9,
+      context.eventEmitter.emit('enterprise-api.response.sent', {source: 'EnterpriseApiGatewayController',
+      correlationId,sequenceNumber: 9,
         statusCode: 200,
         responseSize: 124,
         totalTime: Date.now() - startTime,
       });
 
-      context.eventEmitter.emit('enterprise-api.metrics.recorded', {source: 'MetricsService',correlationId,sequenceNumber: 10,
+      context.eventEmitter.emit('enterprise-api.metrics.recorded', {source: 'MetricsService',
+      correlationId,sequenceNumber: 10,
         metrics: {
           requestCount: 1,
           responseTime: Date.now() - startTime,
@@ -342,18 +419,28 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       expect(actualSequence).toEqual(expectedEvents);
 
       // Verify enterprise-specific events
-      const enterpriseEvents = context.eventCollector.getEventsByPattern('enterprise-api.*');expect(enterpriseEvents).toHaveLength(6);const rateLimitEvent = context.eventCollector.getEvents().find(
-        e => e.eventName === 'enterprise-api.rate-limit.allowed' && e.correlationId === correlationId);expect(rateLimitEvent).toBeDefined();
+      const enterpriseEvents = context.eventCollector.getEventsByPattern('enterprise-api.*');
+expect(enterpriseEvents).toHaveLength(6);const rateLimitEvent = context.eventCollector.getEvents().find(
+        e => e.eventName === 'enterprise-api.rate-limit.allowed' && e.correlationId === correlationId);
+expect(rateLimitEvent).toBeDefined();
       expect(rateLimitEvent?.payload.remainingRequests).toBe(955);
 
       recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);
     });
   });
 
-  describe('Event Error Handling and Recovery', () => {it('should handle event processing failures gracefully', async () => {const correlationId = generateCorrelationId();// Setup failing event listener
+
+
+  describe('Event Error Handling and Recovery', () => {
+it('should handle event processing failures gracefully', async () => const correlationId = generateCorrelationId();// Setup failing event listener
       context.eventEmitter.on('test.failing.event', () => {throw new Error('Simulated event processing failure');});// Setup recovery event listener
       const recoveryEvents: EventRecord[] = [];
-      context.eventEmitter.on('test.recovery.event', (payload: EventPayload) => {recoveryEvents.push({eventId: 'recovery-test',eventName: 'test.recovery.event',source: 'test',target: 'test',timestamp: new Date(),payload,
+      context.eventEmitter.on('test.recovery.event', (payload: EventPayload) => {recoveryEvents.push({eventId: 'recovery-test',
+      eventName: 'test.recovery.event',
+      source: 'test',
+      target: 'test',
+      timestamp: new Date(),
+      payload,
           correlationId,
         });
       });
@@ -364,10 +451,19 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       context.eventEmitter.emit('test.recovery.event', { correlationId,message: 'Recovery successful',});await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(recoveryEvents).toHaveLength(1);
-      expect(recoveryEvents[0]?.payload.message).toBe('Recovery successful');});it('should implement dead letter queue for failed events', async () => {const correlationId = generateCorrelationId();const deadLetterEvents: EventRecord[] = [];
+      expect(recoveryEvents[0]?.payload.message).toBe('Recovery successful');});
+
+
+it('should implement dead letter queue for failed events', async () => {
+const correlationId = generateCorrelationId();const deadLetterEvents: EventRecord[] = [];
 
       // Setup dead letter queue listener
-      context.eventEmitter.on('dlq.event.failed', (payload: EventPayload) => {deadLetterEvents.push({eventId: 'dlq-test',eventName: 'dlq.event.failed',source: 'dead-letter-queue',target: 'dlq',timestamp: new Date(),payload,
+      context.eventEmitter.on('dlq.event.failed', (payload: EventPayload) => deadLetterEvents.push({eventId: 'dlq-test',
+      eventName: 'dlq.event.failed',
+      source: 'dead-letter-queue',
+      target: 'dlq',
+      timestamp: new Date(),
+      payload,
           correlationId: payload.originalCorrelationId,
         });
       });
@@ -382,26 +478,38 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
           }, 10);
         } else {
           // Send to dead letter queue
-          context.eventEmitter.emit('dlq.event.failed', {originalEvent: 'test.retryable.event',originalCorrelationId: correlationId,failureReason: 'Max retries exceeded',retryCount: payload.retryCount ?? 0,});
+          context.eventEmitter.emit('dlq.event.failed', {originalEvent: 'test.retryable.event',
+      originalCorrelationId: correlationId,
+      failureReason: 'Max retries exceeded',
+      retryCount: payload.retryCount ?? 0,});
         }
       });
 
       // Emit retryable event
-      context.eventEmitter.emit('test.retryable.event', {correlationId,data: 'test data',retryCount: 0,});
+      context.eventEmitter.emit('test.retryable.event', {correlationId,data: 'test data',
+      retryCount: 0,});
 
       // Wait for retries and DLQ processing
       await new Promise(resolve => setTimeout(resolve, 200));
 
       expect(deadLetterEvents).toHaveLength(1);
       expect(deadLetterEvents[0]?.payload.originalCorrelationId).toBe(correlationId);
-      expect(deadLetterEvents[0]?.payload.failureReason).toBe('Max retries exceeded');});it('should maintain event ordering under high concurrency', async () => {const correlationId = generateCorrelationId();const concurrentEventCount = 50;
+      expect(deadLetterEvents[0]?.payload.failureReason).toBe('Max retries exceeded');});
+
+
+it('should maintain event ordering under high concurrency', async () => {
+const correlationId = generateCorrelationId();const concurrentEventCount = 50;
       const orderedEvents: EventRecord[] = [];
 
       // Setup ordered event collector
-      context.eventEmitter.on('test.ordered.event', (payload: EventPayload) => {
+      context.eventEmitter.on('test.ordered.event', (payload: EventPayload) => 
         orderedEvents.push({
           eventId: `ordered-${payload.sequenceNumber}`,
-          eventName: 'test.ordered.event',source: 'test',target: 'ordering-test',timestamp: new Date(),payload,
+          eventName: 'test.ordered.event',
+      source: 'test',
+      target: 'ordering-test',
+      timestamp: new Date(),
+      payload,
           correlationId,
           sequenceNumber: payload.sequenceNumber,
         });
@@ -446,7 +554,10 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
     });
   });
 
-  describe('Event Performance and Monitoring', () => {it('should monitor event processing performance', async () => {const correlationId = generateCorrelationId();const flowId = generateFlowId();
+
+
+  describe('Event Performance and Monitoring', () => {
+it('should monitor event processing performance', async () => const correlationId = generateCorrelationId();const flowId = generateFlowId();
       const performanceEvents: Array<{ eventName: string; processingTime: number }> = [];
 
       // Setup performance monitoring
@@ -455,7 +566,8 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
         setTimeout(() => {
           const processingTime = Date.now() - startTime;
           performanceEvents.push({
-            eventName: 'performance.test.event',processingTime,});
+            eventName: 'performance.test.event',
+      processingTime,});
 
           context.eventEmitter.emit('performance.test.completed', {correlationId,processingTime,
           });
@@ -507,14 +619,21 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       expect(metrics.successfulEvents / metrics.totalEvents).toBe(1.0); // 100% success rate
     });
 
-    it('should handle high-volume event throughput', async () => {const correlationId = generateCorrelationId();const highVolumeEventCount = 1000;
+
+
+    it('should handle high-volume event throughput', async () => {
+const correlationId = generateCorrelationId();const highVolumeEventCount = 1000;
       const processedEvents: EventRecord[] = [];
 
       // Setup high-throughput event processor
-      context.eventEmitter.on('throughput.test.event', (payload: EventPayload) => {
+      context.eventEmitter.on('throughput.test.event', (payload: EventPayload) => 
         processedEvents.push({
           eventId: `throughput-${payload.eventIndex}`,
-          eventName: 'throughput.test.event',source: 'throughput-test',target: 'performance',timestamp: new Date(),payload,
+          eventName: 'throughput.test.event',
+      source: 'throughput-test',
+      target: 'performance',
+      timestamp: new Date(),
+      payload,
           correlationId,
         });
       });
@@ -554,7 +673,8 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
       if (i >= actual.length) {
         violations.push({
           expected: expected[i],
-          actual: 'missing',position: i,});
+          actual: 'missing',
+      position: i,});
       } else if (expected[i] !== actual[i]) {
         violations.push({
           expected: expected[i],
@@ -619,11 +739,13 @@ describe('Cross-Module Event Integration Tests', () => {let context: CrossModule
    * Generate unique correlation ID
    */
   function generateCorrelationId(): string {
-    return `corr${Date.now()}${Math.random().toString(36).substring(7)}`;}/**
+    return `corr${Date.now()}
+${Math.random().toString(36).substring(7)}`;}/**
    * Generate unique flow ID
    */
   function generateFlowId(): string {
-    return `flow${Date.now()}${Math.random().toString(36).substring(7)}`;
+    return `flow${Date.now()}
+${Math.random().toString(36).substring(7)}`;
   }
 
   /**

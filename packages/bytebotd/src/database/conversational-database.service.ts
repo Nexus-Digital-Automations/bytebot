@@ -25,27 +25,69 @@
  * @version 1.0.0 - MAXIMUM PARLANT INTEGRATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {ParlantIntegrationService,
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import {
+  ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
   // Removed unused import: ParlantValidationResponse
   RiskLevel,
   // Removed unused import: ParlantConversationContext
-} from '../parlant/parlant-integration.service';import {BaseEntity,
+} from '../parlant/parlant-integration.service';
+import {
+  BaseEntity,
   Repository,
   QueryOptions,
   Optional,
   StrictRecord,
-} from '../types/index';// ===== DATABASE OPERATION TYPES =====/**
+} from '../types/index';
+
+// ===== DATABASE OPERATION TYPES =====
+
+/**
  * Database operation types for conversational validation
  */
 export enum DatabaseOperationType {
   // Read Operations (LOW risk)
-  FIND_BY_ID = 'FIND_BY_ID',FIND_ALL = 'FIND_ALL',FIND_MANY = 'FIND_MANY',COUNT = 'COUNT',EXISTS = 'EXISTS',SEARCH = 'SEARCH',// Write Operations (MEDIUM risk)CREATE = 'CREATE',UPDATE = 'UPDATE',UPSERT = 'UPSERT',// Bulk Operations (HIGH risk)BULK_CREATE = 'BULK_CREATE',BULK_UPDATE = 'BULK_UPDATE',BULK_UPSERT = 'BULK_UPSERT',COMPLEX_QUERY = 'COMPLEX_QUERY',// Critical Operations (CRITICAL risk)DELETE = 'DELETE',BULK_DELETE = 'BULK_DELETE',TRUNCATE = 'TRUNCATE',DROP_TABLE = 'DROP_TABLE',ALTER_SCHEMA = 'ALTER_SCHEMA',MIGRATION = 'MIGRATION',}/**
+  FIND_BY_ID = 'FIND_BY_ID',
+  FIND_ALL = 'FIND_ALL',
+  FIND_MANY = 'FIND_MANY',
+  COUNT = 'COUNT',
+  EXISTS = 'EXISTS',
+  SEARCH = 'SEARCH',
+
+  // Write Operations (MEDIUM risk)
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  UPSERT = 'UPSERT',
+
+  // Bulk Operations (HIGH risk)
+  BULK_CREATE = 'BULK_CREATE',
+  BULK_UPDATE = 'BULK_UPDATE',
+  BULK_UPSERT = 'BULK_UPSERT',
+  COMPLEX_QUERY = 'COMPLEX_QUERY',
+
+  // Critical Operations (CRITICAL risk)
+  DELETE = 'DELETE',
+  BULK_DELETE = 'BULK_DELETE',
+  TRUNCATE = 'TRUNCATE',
+  DROP_TABLE = 'DROP_TABLE',
+  ALTER_SCHEMA = 'ALTER_SCHEMA',
+  MIGRATION = 'MIGRATION',
+}
+
+/**
  * Database risk levels for conversational validation
  */
 export enum DatabaseRiskLevel {
-  LOW = 'LOW',MEDIUM = 'MEDIUM',HIGH = 'HIGH',CRITICAL = 'CRITICAL',}/**
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
+/**
  * Database operation context for validation
  */
 export interface DatabaseOperationContext {
@@ -88,12 +130,16 @@ export interface DatabaseValidationResult {
     operationId: string;
     timestamp: Date;
     validator: string;
-    decision: 'APPROVED' | 'REJECTED' | 'ESCALATED' | 'MANUAL_APPROVAL_REQUIRED';reasoning: string;evidence: StrictRecord<unknown>;
+    decision: 'APPROVED' | 'REJECTED' | 'ESCALATED' | 'MANUAL_APPROVAL_REQUIRED';
+    reasoning: string;
+    evidence: StrictRecord<unknown>;
     approvers?: Array<{
       userId: string;
       role: string;
       timestamp: Date;
-      decision: 'APPROVED' | 'REJECTED';reason?: string;}>;
+      decision: 'APPROVED' | 'REJECTED';
+      reason?: string;
+    }>;
   };
   performanceImpact: {
     validationDuration: number;
@@ -133,7 +179,10 @@ export interface MultiPartyApprovalRequest {
     timestamp: Date;
     reason?: string;
   }>;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED';}// ===== MAIN SERVICE =====
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
+}
+
+// ===== MAIN SERVICE =====
 
 @Injectable()
 export class ConversationalDatabaseService {
@@ -166,7 +215,11 @@ export class ConversationalDatabaseService {
     private readonly configService: ConfigService,
   ) {
     this.initializeRiskMappings();
-    this.logger.log('Conversational Database Service initialized');this.logger.log('PARLANT VALIDATION: All database operations now require conversational approval');}// ===== PUBLIC REPOSITORY WRAPPER METHODS =====
+    this.logger.log('Conversational Database Service initialized');
+    this.logger.log('PARLANT VALIDATION: All database operations now require conversational approval');
+  }
+
+  // ===== PUBLIC REPOSITORY WRAPPER METHODS =====
 
   /**
    * Conversationally validated findById operation
@@ -583,7 +636,7 @@ export class ConversationalDatabaseService {
     },
   ): DatabaseOperationContext {
     const operationId = `db${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const riskLevel = this.operationRiskMap.get(operationType) ?? DatabaseRiskLevel._MODERATE;
+    const riskLevel = this.operationRiskMap.get(operationType) ?? DatabaseRiskLevel.MEDIUM;
 
     return {
       operationType,
@@ -594,11 +647,11 @@ export class ConversationalDatabaseService {
       userId: context?.userId,
       userRole: context?.userRole,
       businessPurpose: context?.businessPurpose,
-      requiresApproval: riskLevel !== DatabaseRiskLevel._LOW,
+      requiresApproval: riskLevel !== DatabaseRiskLevel.LOW,
       requiresBackup: ['CREATE', 'UPDATE', 'DELETE', 'BULK_CREATE', 'BULK_UPDATE', 'BULK_DELETE'].some(op =>
         operationType.includes(op)
       ),
-      requiresMultiPartyApproval: riskLevel === DatabaseRiskLevel._CRITICAL,
+      requiresMultiPartyApproval: riskLevel === DatabaseRiskLevel.CRITICAL,
       metadata: {},
     };
   }
@@ -728,29 +781,29 @@ export class ConversationalDatabaseService {
    */
   private initializeRiskMappings(): void {
     // LOW risk operations
-    this.operationRiskMap.set(DatabaseOperationType.FIND_BY_ID, DatabaseRiskLevel._LOW);
-    this.operationRiskMap.set(DatabaseOperationType.FIND_ALL, DatabaseRiskLevel._LOW);
-    this.operationRiskMap.set(DatabaseOperationType.COUNT, DatabaseRiskLevel._LOW);
-    this.operationRiskMap.set(DatabaseOperationType.EXISTS, DatabaseRiskLevel._LOW);
-    this.operationRiskMap.set(DatabaseOperationType.SEARCH, DatabaseRiskLevel._LOW);
+    this.operationRiskMap.set(DatabaseOperationType.FIND_BY_ID, DatabaseRiskLevel.LOW);
+    this.operationRiskMap.set(DatabaseOperationType.FIND_ALL, DatabaseRiskLevel.LOW);
+    this.operationRiskMap.set(DatabaseOperationType.COUNT, DatabaseRiskLevel.LOW);
+    this.operationRiskMap.set(DatabaseOperationType.EXISTS, DatabaseRiskLevel.LOW);
+    this.operationRiskMap.set(DatabaseOperationType.SEARCH, DatabaseRiskLevel.LOW);
 
     // MEDIUM risk operations
-    this.operationRiskMap.set(DatabaseOperationType.CREATE, DatabaseRiskLevel._MODERATE);
-    this.operationRiskMap.set(DatabaseOperationType.UPDATE, DatabaseRiskLevel._MODERATE);
-    this.operationRiskMap.set(DatabaseOperationType.UPSERT, DatabaseRiskLevel._MODERATE);
+    this.operationRiskMap.set(DatabaseOperationType.CREATE, DatabaseRiskLevel.MEDIUM);
+    this.operationRiskMap.set(DatabaseOperationType.UPDATE, DatabaseRiskLevel.MEDIUM);
+    this.operationRiskMap.set(DatabaseOperationType.UPSERT, DatabaseRiskLevel.MEDIUM);
 
     // HIGH risk operations
-    this.operationRiskMap.set(DatabaseOperationType.BULK_CREATE, DatabaseRiskLevel._HIGH);
-    this.operationRiskMap.set(DatabaseOperationType.BULK_UPDATE, DatabaseRiskLevel._HIGH);
-    this.operationRiskMap.set(DatabaseOperationType.COMPLEX_QUERY, DatabaseRiskLevel._HIGH);
+    this.operationRiskMap.set(DatabaseOperationType.BULK_CREATE, DatabaseRiskLevel.HIGH);
+    this.operationRiskMap.set(DatabaseOperationType.BULK_UPDATE, DatabaseRiskLevel.HIGH);
+    this.operationRiskMap.set(DatabaseOperationType.COMPLEX_QUERY, DatabaseRiskLevel.HIGH);
 
     // CRITICAL risk operations
-    this.operationRiskMap.set(DatabaseOperationType.DELETE, DatabaseRiskLevel._CRITICAL);
-    this.operationRiskMap.set(DatabaseOperationType.BULK_DELETE, DatabaseRiskLevel._CRITICAL);
-    this.operationRiskMap.set(DatabaseOperationType.TRUNCATE, DatabaseRiskLevel._CRITICAL);
-    this.operationRiskMap.set(DatabaseOperationType.DROP_TABLE, DatabaseRiskLevel._CRITICAL);
-    this.operationRiskMap.set(DatabaseOperationType.ALTER_SCHEMA, DatabaseRiskLevel._CRITICAL);
-    this.operationRiskMap.set(DatabaseOperationType.MIGRATION, DatabaseRiskLevel._CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.DELETE, DatabaseRiskLevel.CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.BULK_DELETE, DatabaseRiskLevel.CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.TRUNCATE, DatabaseRiskLevel.CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.DROP_TABLE, DatabaseRiskLevel.CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.ALTER_SCHEMA, DatabaseRiskLevel.CRITICAL);
+    this.operationRiskMap.set(DatabaseOperationType.MIGRATION, DatabaseRiskLevel.CRITICAL);
   }
 
   /**
@@ -849,7 +902,7 @@ export class ConversationalDatabaseService {
 
     // Check if cache is still valid (5 minutes for most operations)
     const cacheAge = Date.now() - cached.auditTrail.timestamp.getTime();
-    const maxAge = cached.riskLevel === DatabaseRiskLevel._LOW ? 300000 : 60000; // 5 min for LOW, 1 min for others
+    const maxAge = cached.riskLevel === DatabaseRiskLevel.LOW ? 300000 : 60000; // 5 min for LOW, 1 min for others
 
     if (cacheAge > maxAge) {
       this.validationCache.delete(cacheKey);
@@ -880,11 +933,13 @@ export class ConversationalDatabaseService {
     context: DatabaseOperationContext,
   ): boolean {
     // Don't use cache for critical operations
-    if (context.riskLevel === DatabaseRiskLevel._CRITICAL) {
+    if (context.riskLevel === DatabaseRiskLevel.CRITICAL) {
       return false;
     }
 
-    // Don't use cache for operations with different user contextsif (cached.auditTrail.evidence.operationContext?.userId !== context.userId) {return false;
+    // Don't use cache for operations with different user contexts
+    if (cached.auditTrail.evidence.operationContext?.userId !== context.userId) {
+      return false;
     }
 
     return true;
@@ -898,12 +953,12 @@ export class ConversationalDatabaseService {
     result: DatabaseValidationResult,
   ): boolean {
     // Cache approved low-risk operations
-    if (context.riskLevel === DatabaseRiskLevel._LOW && result.approved) {
+    if (context.riskLevel === DatabaseRiskLevel.LOW && result.approved) {
       return true;
     }
 
     // Cache approved medium-risk read operations
-    if (context.riskLevel === DatabaseRiskLevel._MODERATE &&
+    if (context.riskLevel === DatabaseRiskLevel.MEDIUM &&
         result.approved &&
         ['FIND_', 'COUNT', 'SEARCH'].some(op => context.operationType.includes(op))) {return true;}
 
@@ -919,7 +974,7 @@ export class ConversationalDatabaseService {
   ): DatabaseValidationResult {
     // For critical operations, default to reject
     // For low-risk read operations, default to approve
-    const approved = context.riskLevel === DatabaseRiskLevel._LOW &&
+    const approved = context.riskLevel === DatabaseRiskLevel.LOW &&
                     ['FIND_', 'COUNT', 'SEARCH'].some(op => context.operationType.includes(op));
 
     return {
@@ -948,17 +1003,18 @@ export class ConversationalDatabaseService {
     const entityInfo = context.entityId ? ` (ID: ${context.entityId})` : '';
     const recordInfo = context.affectedRecords ? ` affecting ${context.affectedRecords} records` : '';
 
-    return `${context.operationType.toLowerCase().replace('_', ' ')} operation on ${context.entityType}${entityInfo}${recordInfo}';}
+    return `${context.operationType.toLowerCase().replace('_', ' ')} operation on ${context.entityType}${entityInfo}${recordInfo}`;
+  }
 
   /**
    * Get backup retention days based on risk level
    */
   private getBackupRetentionDays(riskLevel: DatabaseRiskLevel): number {
     switch (riskLevel) {
-      case DatabaseRiskLevel._LOW: return 7;
-      case DatabaseRiskLevel._MODERATE: return 30;
-      case DatabaseRiskLevel._HIGH: return 90;
-      case DatabaseRiskLevel._CRITICAL: return 365;
+      case DatabaseRiskLevel.LOW: return 7;
+      case DatabaseRiskLevel.MEDIUM: return 30;
+      case DatabaseRiskLevel.HIGH: return 90;
+      case DatabaseRiskLevel.CRITICAL: return 365;
       default: return 30;
     }
   }
@@ -1022,7 +1078,7 @@ export class ConversationalDatabaseService {
 
     this.validationCache.forEach((result, key) => {
       const age = now - result.auditTrail.timestamp.getTime();
-      const maxAge = result.riskLevel === DatabaseRiskLevel._LOW ? 300000 : 60000;
+      const maxAge = result.riskLevel === DatabaseRiskLevel.LOW ? 300000 : 60000;
 
       if (age > maxAge) {
         cacheKeysToDelete.push(key);

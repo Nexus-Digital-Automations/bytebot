@@ -19,7 +19,14 @@ import {
   ExecutionContext,
   UnauthorizedException,
   Logger,
-} from '@nestjs/common';import { AuthGuard } from '@nestjs/passport';import { Reflector } from '@nestjs/core';import { Request } from 'express';import { UserRole, Permission } from '@bytebot/shared';import { ClientInfo } from '../../types';/*** User interface for ByteBotd (subset of full User model)
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
+import { UserRole, Permission } from '@bytebot/shared';
+import { ClientInfo } from '../../types';
+
+/** User interface for ByteBotd (subset of full User model)
  */
 export interface ByteBotdUser {
   sub: string; // Required by shared interface compatibility

@@ -42,7 +42,10 @@ import {
   BrowserRiskLevel,
   RateLimitConfig,
   SecurityValidationConfig,
-} from '../decorators/security.decorators';/*** Authenticated user interface for browser automation
+} from '../decorators/security.decorators';
+
+/**
+ * Authenticated user interface for browser automation
  */
 interface BrowserUser {
   id: string;

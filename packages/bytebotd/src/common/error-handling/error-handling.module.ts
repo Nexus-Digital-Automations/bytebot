@@ -1,4 +1,7 @@
-import { Module, Global } from '@nestjs/common';import { AutomationErrorHandlerService } from './automation-error-handler.service';import { ErrorRecoveryInterceptor } from './error-recovery.interceptor';import { ErrorAnalyticsController } from './error-analytics.controller';
+import { Module, Global } from '@nestjs/common';
+import { AutomationErrorHandlerService } from './automation-error-handler.service';
+import { ErrorRecoveryInterceptor } from './error-recovery.interceptor';
+import { ErrorAnalyticsController } from './error-analytics.controller';
 
 /**
  * Error Handling Module

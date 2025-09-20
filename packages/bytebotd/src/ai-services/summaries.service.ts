@@ -185,14 +185,24 @@ export class SummariesService {
         compressionRatio: mockSummary.length / originalLength,
         confidenceScore: 0.85 + Math.random() * 0.1,
       },
-      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',processingTimeMs: 300 + Math.random() * 400,securityFlags: ['parlant_validated', 'content_summarized', 'privacy_protected'],};await new Promise(resolve => setTimeout(resolve, mockResponse.processingTimeMs));
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
+      processingTimeMs: 300 + Math.random() * 400,
+      securityFlags: ['parlant_validated', 'content_summarized', 'privacy_protected'],
+    };
+    await new Promise(resolve => setTimeout(resolve, mockResponse.processingTimeMs));
     return mockResponse;
   }
 
   private assessSummaryRiskLevel(request: SummaryRequest): RiskLevel {
-    if (request.context.sensitivityLevel === 'RESTRICTED') {return RiskLevel._CRITICAL;}
-    if (request.context.sensitivityLevel === 'CONFIDENTIAL') {return RiskLevel._HIGH;}
-    if (request.context.contentType === 'conversation') {return RiskLevel._MODERATE; // Conversations may contain personal info}
+    if (request.context.sensitivityLevel === 'RESTRICTED') {
+      return RiskLevel._CRITICAL;
+    }
+    if (request.context.sensitivityLevel === 'CONFIDENTIAL') {
+      return RiskLevel._HIGH;
+    }
+    if (request.context.contentType === 'conversation') {
+      return RiskLevel._MODERATE; // Conversations may contain personal info
+    }
     return RiskLevel._LOW;
   }
 
@@ -207,15 +217,25 @@ export class SummariesService {
     
     this.logger.log('Summaries AI Service Performance Metrics', {
       requestCount: this.requestCount,
-      validationRate: `${validationRate.toFixed(2)}%`,averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,
+      validationRate: `${validationRate.toFixed(2)}%`,
+      averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,
       contentSummarized: this.contentSummarized,
     });
   }
 
   private isPrivacyProtectionEnabled(): boolean {
-    return this.configService.get<boolean>('SUMMARY_PRIVACY_PROTECTION_ENABLED', true);}getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {const avgProcessingTime = this.averageProcessingTime;const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
+    return this.configService.get<boolean>('SUMMARY_PRIVACY_PROTECTION_ENABLED', true);
+  }
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgProcessingTime > 1000 || validationRate < 95) {status = 'DEGRADED';}if (avgProcessingTime > 2500 || validationRate < 80) {
+  getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {
+    const avgProcessingTime = this.averageProcessingTime;
+    const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
+
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+    if (avgProcessingTime > 1000 || validationRate < 95) {
+      status = 'DEGRADED';
+    }
+    if (avgProcessingTime > 2500 || validationRate < 80) {
       status = 'FAILED';
     }
 
@@ -223,7 +243,8 @@ export class SummariesService {
       status,
       metrics: {
         requestCount: this.requestCount,
-        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,
+        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,
+        validationRate: `${validationRate.toFixed(2)}%`,
         contentSummarized: this.contentSummarized,
         privacyProtectionEnabled: this.isPrivacyProtectionEnabled(),
       },

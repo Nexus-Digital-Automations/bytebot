@@ -15,7 +15,7 @@
  * Security: Enterprise-grade validation with conversational authentication
  * Performance: Sub-500ms validation targets with intelligent caching
  * Compliance: Complete audit trails for SOX, GDPR, HIPAA requirements
- */
+ */;
 
 import {
   Controller,
@@ -32,7 +32,10 @@ import {
   HttpStatus,
   HttpException,
   HttpCode
-} from '@nestjs/common';import {ApiTags,
+
+} from '@nestjs/common';
+import {
+  ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
@@ -40,7 +43,12 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiSecurity
-} from '@nestjs/swagger';// PARLANT Validation Integrationimport {
+
+} from '@nestjs/swagger';
+
+// PARLANT Validation Integration;
+
+import {
   ParlantCritical,
   ParlantSecure,
   ParlantValidated,
@@ -49,11 +57,30 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';// Authentication and Authorizationimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import {OperatorOrAdmin,
+
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+
+// Authentication and Authorization;
+
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import {
+  OperatorOrAdmin,
   AdminOnly,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';// Interceptors and Pipesimport { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';// ===== DATABASE OPERATION DTOS =====/**
+
+} from '../auth/decorators/roles.decorator';
+
+// Interceptors and Pipes;
+
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+
+// ===== DATABASE OPERATION DTOS =====
+
+/**
  * Database query request DTO
  */
 export interface DatabaseQueryDto {
@@ -76,7 +103,11 @@ export interface DatabaseQueryDto {
   readOnly?: boolean;
 
   /** Transaction isolation level */
-  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';}/**
+  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+
+}
+
+/**
  * Database modification request DTO
  */
 export interface DatabaseModificationDto {
@@ -84,7 +115,10 @@ export interface DatabaseModificationDto {
   table: string;
 
   /** Operation type */
-  operation: 'INSERT' | 'UPDATE' | 'DELETE' | 'UPSERT';/** Data to insert/update */data?: Record<string, unknown>;
+  operation: 'INSERT' | 'UPDATE' | 'DELETE' | 'UPSERT';
+
+  /** Data to insert/update */
+  data?: Record<string, unknown>;
 
   /** Conditions for update/delete operations */
   conditions?: Record<string, unknown>;
@@ -97,30 +131,36 @@ export interface DatabaseModificationDto {
 
   /** Backup requirement before modification */
   requireBackup?: boolean;
+
+
 }
 
 /**
  * Database schema operation DTO
- */
+ */;
+
 export interface DatabaseSchemaDto {
-  /** Schema operation type */
+  /** Schema operation type */;
   operation: 'CREATE_TABLE' | 'ALTER_TABLE' | 'DROP_TABLE' | 'CREATE_INDEX' | 'DROP_INDEX';/** SQL DDL statement */ddl: string;
 
-  /** Migration description */
+  /** Migration description */;
   description: string;
 
-  /** Whether operation is reversible */
+  /** Whether operation is reversible */;
   reversible: boolean;
 
   /** Rollback instructions */
   rollbackInstructions?: string;
+
+
 }
 
 /**
  * Database backup request DTO
- */
+ */;
+
 export interface DatabaseBackupDto {
-  /** Backup type */
+  /** Backup type */;
   type: 'FULL' | 'INCREMENTAL' | 'DIFFERENTIAL' | 'TRANSACTION_LOG';/** Tables to include (empty for all) */tables?: string[];
 
   /** Backup location */
@@ -128,13 +168,16 @@ export interface DatabaseBackupDto {
 
   /** Compression level */
   compression?: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';/** Encryption requirement */encrypt?: boolean;
+
+
 }
 
 /**
  * Database analytics request DTO
- */
+ */;
+
 export interface DatabaseAnalyticsDto {
-  /** Time range for analytics */
+  /** Time range for analytics */;
   timeRange: '1h' | '24h' | '7d' | '30d';/** Include performance metrics */includePerformance?: boolean;
 
   /** Include security metrics */
@@ -142,60 +185,72 @@ export interface DatabaseAnalyticsDto {
 
   /** Include usage statistics */
   includeUsage?: boolean;
+
+
 }
 
 // ===== DATABASE API CONTROLLER =====
 
 @ApiTags('Database API - PARLANT Validated')@Controller('database')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UseInterceptors(LoggingInterceptor, ParlantValidationInterceptor)
 @ApiBearerAuth()
-@ApiSecurity('bearer')export class DatabaseApiController {private readonly logger = new Logger(DatabaseApiController.name);
+@ApiSecurity('bearer')export class DatabaseApiController {
+  private readonly logger = new Logger(DatabaseApiController.name);
 
   constructor(
     // Database services would be injected here
   ) {
-    this.logger.log('Database API Controller initialized with comprehensive PARLANT validation');}// ===== READ OPERATIONS (Low to Medium Risk) =====
+    this.logger.log('Database API Controller initialized with comprehensive PARLANT validation');
+}// ===== READ OPERATIONS (Low to Medium Risk) =====
 
   /**
    * Execute read-only database query
    * Safe operations with automatic validation approval
    */
   @Get('query')@OperatorOrAdmin()@ParlantValidated({
-    intent: 'Execute read-only database query for data retrieval and analysis',securityLevel: SecurityLevel.LOW,validationMode: ValidationMode.AUTOMATIC,
+  intent: 'Execute read-only database query for data retrieval and analysis',securityLevel: SecurityLevel.LOW,validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'DATABASE_QUERY',complianceFlags: ['DATA_ACCESS', 'READ_OPERATION'],cacheable: true,timeout: 5000
-  })
+  
+})
   @ApiOperation({
-    summary: 'Execute read-only database query',description: 'Execute parameterized read-only queries with automatic PARLANT validation'})@ApiQuery({ name: 'query', description: 'SQL query string' })@ApiQuery({ name: 'limit', required: false, description: 'Maximum rows to return' })@ApiQuery({ name: 'offset', required: false, description: 'Pagination offset' })@ApiResponse({status: 200,
-    description: 'Query executed successfully',schema: {type: 'object',properties: {data: { type: 'array', items: { type: 'object' } },totalRows: { type: 'number' },executionTime: { type: 'number' },operationId: { type: 'string' }}}
+    summary: 'Execute read-only database query',description: 'Execute parameterized read-only queries with automatic PARLANT validation'})@ApiQuery({ name: 'query', description: 'SQL query string' })@ApiQuery({ name: 'limit', required: false, description: 'Maximum rows to return' })@ApiQuery({ name: 'offset', required: false, description: 'Pagination offset' })@ApiResponse({
+  status: 200,
+    description: 'Query executed successfully',schema: {type: 'object',properties: {data: { type: 'array', items: { type: 'object' 
+} },totalRows: { type: 'number' },executionTime: { type: 'number' },operationId: { type: 'string' }}}
   })
   async executeQuery(
     @Query('query') query: string,@Query('limit') limit?: number,@Query('offset') offset?: number,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    data: unknown[];
+  data: unknown[];
     totalRows: number;
     executionTime: number;
     operationId: string;
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Database query execution`, {operationId,query: query.substring(0, 100),
+    this.logger.log(`[${operationId
+}] Database query execution`, {
+  operationId,query: query.substring(0, 100),
       limit,
       offset,
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true
-    });
+    
+});
 
     try {
-      // Validate query is read-only
+  // Validate query is read-only
       this.validateReadOnlyQuery(query);
 
       // Execute query with timeout and safety checks
       const data = await this.executeReadOnlyQuery({
         query,
-        parameters: {},
+        parameters: {
+},
         limit: limit || 100,
         offset: offset || 0,
         timeout: 30000,
@@ -204,23 +259,29 @@ export interface DatabaseAnalyticsDto {
 
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`[${operationId}] Query executed successfully (${executionTime}ms)`, {operationId,rowCount: data.length,
+      this.logger.log(`[${operationId}] Query executed successfully (${executionTime}ms)`, {
+  operationId,rowCount: data.length,
         executionTime,
         userId: user.id
-      });
+      
+});
 
       return {
-        data,
+  data,
         totalRows: data.length,
         executionTime,
         operationId
-      };
+      
+};
 
     } catch (error) {
-      const executionTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Query execution failed (${executionTime}ms)`, {operationId,error: error instanceof Error ? error.message : String(error),
+  const executionTime = Date.now() - startTime;
+      this.logger.error(`[${operationId
+}] Query execution failed (${executionTime}ms)`, {
+  operationId,error: error instanceof Error ? error.message : String(error),
         userId: user.id
-      });
+      
+});
       throw new HttpException(
         `Query execution failed: ${error instanceof Error ? error.message : String(error)}`,
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -232,35 +293,40 @@ export interface DatabaseAnalyticsDto {
    * Get table schema information
    */
   @Get('schema/:tableName')@OperatorOrAdmin()@ParlantValidated({
-    intent: 'Retrieve database table schema and structure information',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
+  intent: 'Retrieve database table schema and structure information',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'SCHEMA_INSPECTION',complianceFlags: ['SCHEMA_ACCESS', 'METADATA_ACCESS'],cacheable: true,timeout: 3000
-  })
+  
+})
   @ApiOperation({
     summary: 'Get table schema',description: 'Retrieve schema information for specified database table'})@ApiParam({ name: 'tableName', description: 'Name of the table' })async getTableSchema(@Param('tableName') tableName: string,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    tableName: string;
+  tableName: string;
     columns: unknown[];
     indexes: unknown[];
     constraints: unknown[];
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Schema inspection for table: ${tableName}`, {
-      operationId,
+    this.logger.log(`[${operationId
+}] Schema inspection for table: ${tableName}`, {
+  operationId,
       tableName,
       userId: user.id,
       conversationId: conversationContext?.conversationId
-    });
+    
+});
 
     // Mock implementation - would integrate with actual database schema inspection
     return {
-      tableName,
+  tableName,
       columns: [],
       indexes: [],
       constraints: []
-    };
+    
+};
   }
 
   // ===== WRITE OPERATIONS (High to Critical Risk) =====
@@ -270,26 +336,48 @@ export interface DatabaseAnalyticsDto {
    * High-risk operations requiring explicit conversational approval
    */
   @Post('modify')@OperatorOrAdmin()@ParlantCritical(
-    'Execute database modification operation with data validation and backup requirements',{securityLevel: SecurityLevel.CRITICAL,
+    'Execute database modification operation with data validation and backup requirements',{
+  securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'DATABASE_MODIFICATION',complianceFlags: ['DATA_MODIFICATION', 'HIGH_RISK', 'AUDIT_REQUIRED'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 45000,cacheable: false,
+      businessCategory: 'DATABASE_MODIFICATION',
+      complianceFlags: ['DATA_MODIFICATION', 'HIGH_RISK', 'AUDIT_REQUIRED'],
+      requiredRoles: ['OPERATOR', 'ADMIN'],
+      timeout: 45000,
+      cacheable: false,
       customRules: [
+        {,
+  name: 'backup_requirement_validation',
+          condition: 'operation in ["DELETE", "UPDATE"] && requireBackup === true',
+          action: 'APPROVE',
+          priority: 10
+        
+},
         {
-          name: 'backup_requirement_validation',condition: 'operation in ["DELETE", "UPDATE"] && requireBackup === true",action: 'APPROVE',priority: 10},
+  name: 'bulk_operation_validation',
+          condition: 'estimated_affected_rows > 1000',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 9
+        
+},
         {
-          name: 'bulk_operation_validation',condition: 'estimated_affected_rows > 1000',action: 'REQUIRE_CONFIRMATION',priority: 9},
-        {
-          name: 'critical_table_validation',condition: 'table in ["users", "payments", "orders"]",action: 'REQUIRE_CONFIRMATION',priority: 8}
+  name: 'critical_table_validation',
+          condition: 'table in ["users", "payments", "orders"]',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 8
+        
+}
       ]
     }
   )
   @ApiOperation({
     summary: 'Execute database modification',description: 'Execute INSERT, UPDATE, DELETE, or UPSERT operations with comprehensive validation'})@ApiBody({
-    schema: {
-      type: 'object',properties: {table: { type: 'string' },operation: { type: 'string', enum: ['INSERT', 'UPDATE', 'DELETE', 'UPSERT'] },data: { type: 'object' },conditions: { type: 'object' },justification: { type: 'string' },useTransaction: { type: 'boolean' },requireBackup: { type: 'boolean' }},required: ['table', 'operation', 'justification']}})
+  schema: {,
+  type: 'object',properties: {table: { type: 'string' 
+},operation: { type: 'string', enum: ['INSERT', 'UPDATE', 'DELETE', 'UPSERT'] },data: { type: 'object' },conditions: { type: 'object' },justification: { type: 'string' },useTransaction: { type: 'boolean' },requireBackup: { type: 'boolean' }},required: ['table', 'operation', 'justification']}})
   @ApiResponse({
-    status: 200,
-    description: 'Modification executed successfully',schema: {type: 'object',properties: {success: { type: 'boolean' },affectedRows: { type: 'number' },operationId: { type: 'string' },backupId: { type: 'string' }
+  status: 200,
+    description: 'Modification executed successfully',schema: {type: 'object',properties: {success: { type: 'boolean' 
+},affectedRows: { type: 'number' },operationId: { type: 'string' },backupId: { type: 'string' }
       }
     }
   })
@@ -298,55 +386,66 @@ export interface DatabaseAnalyticsDto {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    success: boolean;
+  success: boolean;
     affectedRows: number;
     operationId: string;
     backupId?: string;
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Database modification request`, {operationId,table: modificationDto.table,
+    this.logger.log(`[${operationId
+}] Database modification request`, {
+  operationId,table: modificationDto.table,
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true,
       securityLevel: conversationContext?.securityLevel
-    });
+    
+});
 
     try {
-      // Validate modification request
+  // Validate modification request
       this.validateModificationRequest(modificationDto);
 
       // Execute backup if required
       let backupId: string | undefined;
       if (modificationDto.requireBackup) {
         backupId = await this.createPreModificationBackup(modificationDto.table);
-        this.logger.log(`[${operationId}] Pre-modification backup created: ${backupId}`);}// Execute modification in transaction if requested
+        this.logger.log(`[${operationId
+}] Pre-modification backup created: ${backupId}`);}// Execute modification in transaction if requested
       const result = await this.executeModificationOperation(modificationDto, operationId);
 
       const executionTime = Date.now() - startTime;
-      this.logger.log(`[${operationId}] Modification completed successfully (${executionTime}ms)`, {operationId,affectedRows: result.affectedRows,
+      this.logger.log(`[${operationId}] Modification completed successfully (${executionTime}ms)`, {
+  operationId,affectedRows: result.affectedRows,
         backupId,
         executionTime,
         userId: user.id
-      });
+      
+});
 
       return {
-        success: true,
+  success: true,
         affectedRows: result.affectedRows,
         operationId,
         backupId
-      };
+      
+};
 
     } catch (error) {
-      const executionTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Modification failed (${executionTime}ms)`, {operationId,error: error instanceof Error ? error.message : String(error),
+  const executionTime = Date.now() - startTime;
+      this.logger.error(`[${operationId
+}] Modification failed (${executionTime}ms)`, {
+  operationId,error: error instanceof Error ? error.message : String(error),
         table: modificationDto.table,
         operation: modificationDto.operation,
         userId: user.id
-      });
+      
+});
 
       throw new HttpException(
         `Database modification failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -362,12 +461,14 @@ export interface DatabaseAnalyticsDto {
    * Critical operations requiring administrative approval
    */
   @Post('schema')@AdminOnly()@ParlantAdmin(
-    'Execute database schema modification with DDL operations and migration support',{securityLevel: SecurityLevel.CRITICAL,
+    'Execute database schema modification with DDL operations and migration support',{
+  securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
       businessCategory: 'SCHEMA_MODIFICATION',complianceFlags: ['SCHEMA_CHANGE', 'DDL_OPERATION', 'CRITICAL_SYSTEM_CHANGE'],requiredRoles: ['ADMIN'],timeout: 60000,cacheable: false,
       customRules: [
-        {
-          name: 'drop_operation_validation',condition: 'operation.startsWith("DROP")",action: 'REQUIRE_CONFIRMATION',priority: 10},
+        {,
+  name: 'drop_operation_validation',condition: 'operation.startsWith("DROP")",action: 'REQUIRE_CONFIRMATION',priority: 10
+},
         {
           name: 'production_schema_change',condition: 'environment === "production"",action: 'REQUIRE_CONFIRMATION',priority: 9},
         {
@@ -377,8 +478,9 @@ export interface DatabaseAnalyticsDto {
   )
   @ApiOperation({
     summary: 'Execute schema modification',description: 'Execute DDL operations with comprehensive validation and rollback support'})@ApiBody({
-    schema: {
-      type: 'object',properties: {operation: { type: 'string', enum: ['CREATE_TABLE', 'ALTER_TABLE', 'DROP_TABLE', 'CREATE_INDEX', 'DROP_INDEX'] },ddl: { type: 'string' },description: { type: 'string' },reversible: { type: 'boolean' },rollbackInstructions: { type: 'string' }},required: ['operation', 'ddl', 'description']
+  schema: {,
+  type: 'object',properties: {operation: { type: 'string', enum: ['CREATE_TABLE', 'ALTER_TABLE', 'DROP_TABLE', 'CREATE_INDEX', 'DROP_INDEX'] 
+},ddl: { type: 'string' },description: { type: 'string' },reversible: { type: 'boolean' },rollbackInstructions: { type: 'string' }},required: ['operation', 'ddl', 'description']
     }
   })
   async executeSchemaChange(
@@ -386,22 +488,26 @@ export interface DatabaseAnalyticsDto {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    success: boolean;
+  success: boolean;
     migrationId: string;
     operationId: string;
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Schema modification request`, {operationId,operation: schemaDto.operation,
+    this.logger.log(`[${operationId
+}] Schema modification request`, {
+  operationId,operation: schemaDto.operation,
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true
-    });
+    
+});
 
     try {
-      // Validate DDL operation
+  // Validate DDL operation
       this.validateSchemaOperation(schemaDto);
 
       // Create migration record
@@ -410,22 +516,28 @@ export interface DatabaseAnalyticsDto {
       // Execute schema change
       await this.executeSchemaOperation(schemaDto, migrationId);
 
-      this.logger.log(`[${operationId}] Schema change completed: ${migrationId}`, {operationId,migrationId,
+      this.logger.log(`[${operationId
+}] Schema change completed: ${migrationId}`, {
+  operationId,migrationId,
         operation: schemaDto.operation,
         userId: user.id
-      });
+      
+});
 
       return {
-        success: true,
+  success: true,
         migrationId,
         operationId
-      };
+      
+};
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Schema change failed`, {operationId,error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Schema change failed`, {
+  operationId,error: error instanceof Error ? error.message : String(error),
         operation: schemaDto.operation,
         userId: user.id
-      });
+      
+});
 
       throw new HttpException(
         `Schema modification failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -441,39 +553,47 @@ export interface DatabaseAnalyticsDto {
    * High-risk administrative operation
    */
   @Post('backup')@AdminOnly()@ParlantSecure(
-    'Create database backup with encryption and compression options',{securityLevel: SecurityLevel.HIGH,
+    'Create database backup with encryption and compression options',{
+  securityLevel: SecurityLevel.HIGH,
       validationMode: ValidationMode.CONVERSATIONAL,
       businessCategory: 'DATABASE_BACKUP',complianceFlags: ['BACKUP_OPERATION', 'DATA_PROTECTION'],requiredRoles: ['ADMIN'],timeout: 30000,cacheable: false
-    }
+    
+}
   )
   @ApiOperation({
-    summary: 'Create database backup',description: 'Create full or incremental database backup with encryption'
-  })
+  summary: 'Create database backup',description: 'Create full or incremental database backup with encryption'
+  
+})
   async createBackup(
     @Body() backupDto: DatabaseBackupDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    success: boolean;
+  success: boolean;
     backupId: string;
     location: string;
     size: number;
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Backup creation request`, {operationId,type: backupDto.type,
+    this.logger.log(`[${operationId
+}] Backup creation request`, {
+  operationId,type: backupDto.type,
       encrypt: backupDto.encrypt,
       userId: user.id,
       conversationId: conversationContext?.conversationId
-    });
+    
+});
 
     // Mock backup implementation
     const backupId = `backup_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     return {
-      success: true,
+  success: true,
       backupId,
-      location: backupDto.location || '/backups',size: 1024000 // Mock size};
+      location: backupDto.location || '/backups',size: 1024000 // Mock size
+};
   }
 
   // ===== ANALYTICS AND MONITORING =====
@@ -482,9 +602,10 @@ export interface DatabaseAnalyticsDto {
    * Get database analytics and performance metrics
    */
   @Get('analytics')@OperatorOrAdmin()@ParlantValidated({
-    intent: 'Retrieve database performance analytics and usage statistics',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
+  intent: 'Retrieve database performance analytics and usage statistics',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'DATABASE_ANALYTICS',complianceFlags: ['PERFORMANCE_MONITORING', 'ANALYTICS'],cacheable: true,timeout: 10000
-  })
+  
+})
   @ApiOperation({
     summary: 'Get database analytics',description: 'Retrieve comprehensive database performance and usage analytics'})@ApiQuery({ name: 'timeRange', enum: ['1h', '24h', '7d', '30d'] })
   async getAnalytics(
@@ -492,24 +613,28 @@ export interface DatabaseAnalyticsDto {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: any,
   ): Promise<{
-    timeRange: string;
+  timeRange: string;
     performance: unknown;
     security: unknown;
     usage: unknown;
     timestamp: Date;
-  }> {
-    const operationId = this.generateOperationId();
+  
+}> {
+  const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Analytics request`, {
-      operationId,
+    this.logger.log(`[${operationId
+}] Analytics request`, {
+  operationId,
       timeRange: analyticsDto.timeRange,
       userId: user.id,
       conversationId: conversationContext?.conversationId
-    });
+    
+});
 
     return {
-      timeRange: analyticsDto.timeRange,
-      performance: analyticsDto.includePerformance ? {} : null,
+  timeRange: analyticsDto.timeRange,
+      performance: analyticsDto.includePerformance ? {
+} : null,
       security: analyticsDto.includeSecurity ? {} : null,
       usage: analyticsDto.includeUsage ? {} : null,
       timestamp: new Date()
@@ -519,48 +644,56 @@ export interface DatabaseAnalyticsDto {
   // ===== PRIVATE HELPER METHODS =====
 
   private validateReadOnlyQuery(query: string): void {
-    const lowerQuery = query.toLowerCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
     const writeOperations = ['insert', 'update', 'delete', 'drop', 'create', 'alter', 'truncate'];if (writeOperations.some(op => lowerQuery.includes(op))) {throw new HttpException(
         'Query contains write operations - use modification endpoint instead',HttpStatus.BAD_REQUEST);
-    }
+    
+}
   }
 
   private validateModificationRequest(dto: DatabaseModificationDto): void {
-    if (!dto.justification || dto.justification.length < 10) {
+  if (!dto.justification || dto.justification.length < 10) {
       throw new HttpException(
         'Business justification required for all modifications',HttpStatus.BAD_REQUEST);
-    }
+    
+}
 
     // Additional validation logic would go here
   }
 
   private validateSchemaOperation(dto: DatabaseSchemaDto): void {
-    if (dto.operation.includes('DROP') && !dto.rollbackInstructions) {throw new HttpException('Rollback instructions required for DROP operations',
+  if (dto.operation.includes('DROP') && !dto.rollbackInstructions) {throw new HttpException('Rollback instructions required for DROP operations',
         HttpStatus.BAD_REQUEST
       );
-    }
+    
+}
   }
 
   private async executeReadOnlyQuery(queryDto: DatabaseQueryDto): Promise<unknown[]> {
-    // Mock implementation - would integrate with actual database
+  // Mock implementation - would integrate with actual database
     return [];
-  }
+  
+}
 
   private async executeModificationOperation(
     dto: DatabaseModificationDto,
     operationId: string
   ): Promise<{ affectedRows: number }> {
-    // Mock implementation - would integrate with actual database
-    return { affectedRows: 1 };
+  // Mock implementation - would integrate with actual database
+    return { affectedRows: 1 
+};
   }
 
   private async createPreModificationBackup(tableName: string): Promise<string> {
-    // Mock implementation - would create actual backup
-    return `backup_${tableName}_${Date.now()}`;}private async createMigrationRecord(dto: DatabaseSchemaDto, userId: string): Promise<string> {
-    // Mock implementation - would create migration tracking record
-    return `migration_${Date.now()}_${Math.random().toString(36).substring(7)}`;}private async executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): Promise<void> {
-    // Mock implementation - would execute actual DDL
-    this.logger.log(`Executing schema operation: ${dto.operation} (${migrationId})`);}private generateOperationId(): string {
+  // Mock implementation - would create actual backup
+    return `backup_${tableName
+}_${Date.now()}`;}private async createMigrationRecord(dto: DatabaseSchemaDto, userId: string): Promise<string> {
+  // Mock implementation - would create migration tracking record
+    return `migration_${Date.now()
+}_${Math.random().toString(36).substring(7)}`;}private async executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): Promise<void> {
+  // Mock implementation - would execute actual DDL
+    this.logger.log(`Executing schema operation: ${dto.operation
+} (${migrationId})`);}private generateOperationId(): string {
     return `db_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 }

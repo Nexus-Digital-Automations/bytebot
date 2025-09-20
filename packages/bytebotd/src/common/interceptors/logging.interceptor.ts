@@ -17,7 +17,7 @@
  * @version 1.0.0
  */
 
-// TypeScript safety note: This file uses flexible typing for NestJS integration
+// TypeScript safety note: This file uses flexible typing for NestJS integration;
 
 import {
   Injectable,
@@ -25,24 +25,38 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';import { Observable, throwError } from 'rxjs';import { tap, catchError } from 'rxjs/operators';// Type definitions for explicit any type replacementinterface HttpErrorWithStatus {
+
+} from '@nestjs/common';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+
+// Type definitions for explicit any type replacementinterface HttpErrorWithStatus {
   status?: number;
   statusCode?: number;
   message?: string;
   name?: string;
   stack?: string;
+
+
 }
 
 interface RouteInfo {
   path?: string;
+
+
 }
 
 interface RequestWithRoute {
   route?: RouteInfo;
-}
 
-import { Request, Response } from 'express';import { v4 as _uuidv4 } from 'uuid';import { MetricsService } from '../../metrics/metrics.service';/*** Request context interface for structured logging
- */
+
+};
+
+import { Request, Response } from 'express';
+import { v4 as _uuidv4 } from 'uuid';
+import { MetricsService } from '../../metrics/metrics.service';/*** Request context interface for structured logging
+ */;
+
 export interface RequestContext {
   correlationId: string;
   method: string;
@@ -52,26 +66,34 @@ export interface RequestContext {
   timestamp: string;
   userId?: string;
   sessionId?: string;
+
+
 }
 
 /**
  * Response context interface for structured logging
- */
+ */;
+
 export interface ResponseContext {
   statusCode: number;
   processingTime: number;
   contentLength?: number;
   cacheHit?: boolean;
+
+
 }
 
 /**
  * Error context interface for structured logging
- */
+ */;
+
 export interface ErrorContext {
   name: string;
   message: string;
   stack?: string;
   statusCode?: number;
+
+
 }
 
 /**
@@ -83,7 +105,8 @@ export class LoggingInterceptor implements NestInterceptor {
 
   constructor(private readonly metricsService?: MetricsService) {
     this.logger.log(
-      'Logging Interceptor initialized - Structured logging enabled',);}
+      'Logging Interceptor initialized - Structured logging enabled',);
+}
 
   /**
    * Intercept HTTP requests and responses for comprehensive logging
@@ -93,7 +116,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Observable with logging side effects
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const httpContext = context.switchToHttp();
+  const httpContext = context.switchToHttp();
     const request = httpContext.getRequest<Request>();
     const response = httpContext.getResponse<Response>();
 
@@ -112,11 +135,12 @@ export class LoggingInterceptor implements NestInterceptor {
     // Track request start metrics
     if (this.metricsService) {
       this.metricsService.recordRequestStart(request.method, route);
-    }
+    
+}
 
     return next.handle().pipe(
       tap(() => {
-        // Handle successful response
+  // Handle successful response
         const processingTime = Date.now() - startTime;
         const responseContext = this.createResponseContext(
           response,
@@ -134,10 +158,11 @@ export class LoggingInterceptor implements NestInterceptor {
             processingTime,
           );
           this.metricsService.recordRequestEnd(request.method, route);
-        }
+        
+}
       }),
       catchError((error: Error) => {
-        // Handle error response
+  // Handle error response
         const processingTime = Date.now() - startTime;
         const responseContext = this.createResponseContext(
           response,
@@ -161,7 +186,8 @@ export class LoggingInterceptor implements NestInterceptor {
             processingTime,
           );
           this.metricsService.recordRequestEnd(request.method, route);
-        }
+        
+}
 
         // Re-throw the error to maintain normal error handling using throwError
         return throwError(() => error);
@@ -173,12 +199,14 @@ export class LoggingInterceptor implements NestInterceptor {
    * Generate or retrieve correlation ID from request
    *
    * @param request HTTP request object
-   * @returns Correlation ID string
+   * @return s Correlation ID string
    */
   private generateCorrelationId(request: Request): string {
-    // Check if correlation ID already exists (from upstream service)
+  // Check if correlation ID already exists (from upstream service)
     const existingId =
-      request.headers['x-correlation-id'] ??request.headers['x-request-id'] ??request.headers['x-trace-id'];return (existingId as string) ?? _uuidv4();}
+      request.headers['x-correlation-id'] ??request.headers['x-request-id'] ??request.headers['x-trace-id'];
+    return (existingId as string) ?? _uuidv4();
+}
 
   /**
    * Create structured request context
@@ -191,12 +219,15 @@ export class LoggingInterceptor implements NestInterceptor {
     request: Request,
     correlationId: string,
   ): RequestContext {
-    return {
+  return {
       correlationId,
       method: request.method,
       url: request.originalUrl ?? request.url,
-      userAgent: request.headers['user-agent'],remoteAddress: this.getClientIpAddress(request),timestamp: new Date().toISOString(),
-      userId: (request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
+      userAgent: request.headers['user-agent'],
+      remoteAddress: this.getClientIpAddress(request),
+      timestamp: new Date().toISOString(),
+      userId: (request as Request & { user?: { id: string 
+} }).user?.id, // If authentication is implemented
       sessionId: (request as Request & { session?: { id: string } }).session
         ?.id, // If sessions are used
     };
@@ -213,11 +244,12 @@ export class LoggingInterceptor implements NestInterceptor {
     response: Response,
     processingTime: number,
   ): ResponseContext {
-    return {
-      statusCode: response.statusCode,
+  return {,
+  statusCode: response.statusCode,
       processingTime,
       contentLength:
-        parseInt(response.get('Content-Length') ?? '0', 10) ?? undefined,cacheHit: response.get('X-Cache-Status') === 'HIT',};}
+        parseInt(response.get('Content-Length') ?? '0', 10) ?? undefined,cacheHit: response.get('X-Cache-Status') === 'HIT',
+};}
 
   /**
    * Create structured error context
@@ -226,10 +258,14 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Error context object
    */
   private createErrorContext(error: Error): ErrorContext {
-    return {
-      name: error?.name ?? 'UnknownError',message: error?.message ?? 'An unknown error occurred',stack: error?.stack,statusCode:
+  return {,
+  name: error?.name ?? 'UnknownError',
+      message: error?.message ?? 'An unknown error occurred',
+      stack: error?.stack,
+      statusCode:
         'status' in error && typeof error.status === 'number'? error.status: 'statusCode' in error && typeof error.statusCode === 'number'? error.statusCode: undefined,
-    };
+    
+};
   }
 
   /**
@@ -239,13 +275,14 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Route pattern string
    */
   private extractRoute(request: Request): string {
-    // Try to get route pattern from NestJS route info with safe type checking
+  // Try to get route pattern from NestJS route info with safe type checking
     const requestWithRoute = request as Request & RequestWithRoute;
     const route: unknown = requestWithRoute.route;
     
     if (this.isValidRoute(route)) {
       const routePattern = route.path;
-      if (routePattern && typeof routePattern === 'string') {return routePattern;}
+      if (routePattern && typeof routePattern === 'string') {return routePattern;
+}
     }
 
     // Fallback to URL path with parameter normalization
@@ -257,8 +294,9 @@ export class LoggingInterceptor implements NestInterceptor {
    * Type guard to check if route object is valid
    */
   private isValidRoute(route: unknown): route is RouteInfo {
-    return (
-      typeof route === 'object' &&route !== null &&'path' in route &&typeof (route as RouteInfo).path === 'string');}
+  return (
+      typeof route === 'object' &&route !== null &&'path' in route &&typeof (route as RouteInfo).path === 'string');
+}
 
   /**
    * Normalize URL path for consistent metrics grouping
@@ -267,24 +305,31 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Normalized URL pattern
    */
   private normalizeUrlForMetrics(url: string): string {
-    // Remove query parameters
-    const path = url.split('?')[0];// Replace common ID patterns with placeholdersreturn (path ?? '').replace(/\/\d+/g, '/:id') // Replace numeric IDs.replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs.replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs.replace(/\/$/, ''); // Remove trailing slash}/**
+  // Remove query parameters
+    const path = url.split('?')[0];// Replace common ID patterns with placeholdersreturn (path ?? '').replace(/\/\d+/g, '/:id') // Replace numeric IDs.replace(/\/[a-f0-9-]{36
+}/g, '/:uuid') // Replace UUIDs.replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs.replace(/\/$/, ''); // Remove trailing slash}/**
    * Get client IP address from request
    *
    * @param request HTTP request object
    * @returns Client IP address
    */
   private getClientIpAddress(request: Request): string {
-    return (request.headers['x-forwarded-for'] ??request.headers['x-real-ip'] ??request.connection?.remoteAddress ??request.socket?.remoteAddress ??
-      'unknown') as string;}/**
+  return (request.headers['x-forwarded-for'] ??request.headers['x-real-ip'] ??request.connection?.remoteAddress ??request.socket?.remoteAddress ??
+      'unknown') as string;
+}/**
    * Log successful request
    *
    * @param requestContext Request context information
    */
   private logRequest(requestContext: RequestContext): void {
-    this.logger.log({
-      message: 'HTTP Request Started',level: 'info',type: 'http_request',context: requestContext,timestamp: requestContext.timestamp,
-    });
+  this.logger.log({,
+  message: 'HTTP Request Started',
+      level: 'info',
+      type: 'http_request',
+      context: requestContext,
+      timestamp: requestContext.timestamp,
+    
+});
   }
 
   /**
@@ -297,23 +342,28 @@ export class LoggingInterceptor implements NestInterceptor {
     requestContext: RequestContext,
     responseContext: ResponseContext,
   ): void {
-    const logLevel = responseContext.statusCode >= 400 ? 'warn' : 'info';
-    const message = `HTTP Request Completed - ${requestContext.method} ${requestContext.url} - ${responseContext.statusCode}`;
+  const logLevel = responseContext.statusCode >= 400 ? 'warn' : 'info';
+    const message = `HTTP Request Completed - ${requestContext.method
+} ${requestContext.url} - ${responseContext.statusCode}`;
 
     const logData = {
-      message,
+  message,
       level: logLevel,
-      type: 'http_response',context: {request: requestContext,
+      type: 'http_response',
+      context: {request: requestContext,
         response: responseContext,
-      },
+      
+},
       timestamp: new Date().toISOString(),
     };
 
     if (logLevel === 'warn') {
-      this.logger.warn(logData);
-    } else {
-      this.logger.log(logData);
-    }
+  this.logger.warn(logData);
+    
+} else {
+  this.logger.log(logData);
+    
+}
   }
 
   /**
@@ -328,14 +378,17 @@ export class LoggingInterceptor implements NestInterceptor {
     responseContext: ResponseContext,
     errorContext: ErrorContext,
   ): void {
-    this.logger.error({
-      message: `HTTP Request Failed - ${requestContext.method} ${requestContext.url} - ${errorContext.name}`,
-      level: 'error',type: 'http_error',
+  this.logger.error({,
+  message: `HTTP Request Failed - ${requestContext.method
+} ${requestContext.url} - ${errorContext.name}`,
+      level: 'error',
+      type: 'http_error',
       context: {
-        request: requestContext,
+  request: requestContext,
         response: responseContext,
         error: errorContext,
-      },
+      
+},
       timestamp: new Date().toISOString(),
     });
   }

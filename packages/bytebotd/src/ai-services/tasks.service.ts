@@ -538,12 +538,18 @@ export class TasksService {
   // ===== UTILITY METHODS =====
 
   private assessTaskRiskLevel(request: TaskProcessingRequest): RiskLevel {
-    if (request.context.automationLevel === 'autonomous') {return RiskLevel._CRITICAL; // Autonomous execution requires highest scrutiny}
-    if (request.context.priorityLevel === 'critical') {return RiskLevel._HIGH;}
+    if (request.context.automationLevel === 'autonomous') {
+      return RiskLevel._CRITICAL; // Autonomous execution requires highest scrutiny
+    }
+    if (request.context.priorityLevel === 'critical') {
+      return RiskLevel._HIGH;
+    }
     if (request.tasks.some(t => t.constraints.safetyChecks.length === 0)) {
       return RiskLevel._HIGH; // Tasks without safety checks are risky
     }
-    if (request.context.requiresHumanApproval === false && request.context.automationLevel === 'supervised') {return RiskLevel._MODERATE;}
+    if (request.context.requiresHumanApproval === false && request.context.automationLevel === 'supervised') {
+      return RiskLevel._MODERATE;
+    }
     return RiskLevel._LOW;
   }
 

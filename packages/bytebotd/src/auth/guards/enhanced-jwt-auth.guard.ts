@@ -30,7 +30,10 @@ import {
   SecurityEventType as _SecurityEventType,
   createSecurityEvent as _createSecurityEvent,
   JwtPayload,
-} from '@bytebot/shared';import { ByteBotdUser } from './jwt-auth.guard';/*** Enhanced JWT payload with service authentication and refresh capabilities
+} from '@bytebot/shared';
+import { ByteBotdUser } from './jwt-auth.guard';
+
+/** Enhanced JWT payload with service authentication and refresh capabilities
  */
 interface EnhancedJwtPayload extends JwtPayload {
   /** Service identifier for service-to-service authentication */
@@ -38,7 +41,9 @@ interface EnhancedJwtPayload extends JwtPayload {
   /** Service type (computer-use, agent, ui) */
   serviceType?: string;
   /** Token type (access, refresh, service) */
-  tokenType: 'access' | 'refresh' | 'service';/** Refresh token identifier */refreshTokenId?: string;
+  tokenType: 'access' | 'refresh' | 'service';
+  /** Refresh token identifier */
+  refreshTokenId?: string;
   /** Original client IP for security validation */
   clientIp?: string;
   /** VNC session identifier if applicable */
@@ -46,7 +51,10 @@ interface EnhancedJwtPayload extends JwtPayload {
   /** Computer use permissions bitmap */
   computerUsePermissions?: number;
   /** Screen access level (none, view, control) */
-  screenAccessLevel?: 'none' | 'view' | 'control';}/**
+  screenAccessLevel?: 'none' | 'view' | 'control';
+}
+
+/**
  * Request cookies interface for JWT authentication
  */
 interface JwtCookies {

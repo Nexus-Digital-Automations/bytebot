@@ -19,14 +19,32 @@
  * @since Browser Automation Security Implementation
  */
 
-import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';import { ApiBearerAuth, ApiSecurity, ApiResponse } from '@nestjs/swagger';import { UserRole, Permission } from '@bytebot/shared';/*** Security levels for browser automation operations
+import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
+import { ApiBearerAuth, ApiSecurity, ApiResponse } from '@nestjs/swagger';
+import { UserRole, Permission } from '@bytebot/shared';
+
+/**
+ * Security levels for browser automation operations
  */
 export enum BrowserSecurityLevel {
-  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',}/**
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
  * Browser operation risk levels
  */
 export enum BrowserRiskLevel {
-  SAFE = 'safe',MODERATE = 'moderate',ELEVATED = 'elevated',HIGH = 'high',CRITICAL = 'critical',}/**
+  SAFE = 'safe',
+  MODERATE = 'moderate',
+  ELEVATED = 'elevated',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
  * Rate limiting configurations
  */
 export interface RateLimitConfig {

@@ -26,9 +26,14 @@
  * - Mock service orchestration
  * - Test result aggregation
  * - Failure analysis and reporting
- */
+ */;
 
-import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { promises as fs } from 'fs';import * as path from 'path';// Test Suite Orchestratorclass WebSocketTestOrchestrator extends EventEmitter {
+import { EventEmitter } from 'events';
+import { performance } from 'perf_hooks';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+
+// Test Suite Orchestratorclass WebSocketTestOrchestrator extends EventEmitter {
   private testSuites: Map<string, TestSuiteConfig> = new Map();
   private testResults: Map<string, TestSuiteResult> = new Map();
   private executionHistory: TestExecutionRecord[] = [];
@@ -38,83 +43,157 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
   constructor() {
     super();
     this.initializeTestSuites();
-  }
+  
+}
 
   private initializeTestSuites(): void {
-    // Register all WebSocket test suites
-    this.registerTestSuite({
-      id: 'connection-lifecycle',name: 'WebSocket Connection Lifecycle Tests',filePath: './connection-lifecycle.spec.ts',category: 'core',dependencies: [],executionTime: 180,
+  // Register all WebSocket test suites
+    this.registerTestSuite({,
+  id: 'connection-lifecycle',
+      name: 'WebSocket Connection Lifecycle Tests',
+      filePath: './connection-lifecycle.spec.ts',
+      category: 'core',
+      dependencies: [],
+      executionTime: 180,
       priority: 1,
-      tags: ['connection', 'lifecycle', 'core']});this.registerTestSuite({
-      id: 'realtime-message-flow',name: 'Real-time Message Flow Tests',filePath: './realtime-message-flow.spec.ts',category: 'messaging',dependencies: ['connection-lifecycle'],executionTime: 240,priority: 2,
-      tags: ['messaging', 'realtime', 'flow']});this.registerTestSuite({
-      id: 'concurrent-sessions',name: 'Concurrent Session Management Tests',filePath: './concurrent-session-management.spec.ts',category: 'scalability',dependencies: ['connection-lifecycle'],executionTime: 300,priority: 2,
-      tags: ['sessions', 'concurrency', 'scalability']});this.registerTestSuite({
-      id: 'message-ordering',name: 'Message Ordering and Reliability Tests',filePath: './message-ordering-reliability.spec.ts',category: 'reliability',dependencies: ['realtime-message-flow'],executionTime: 200,priority: 3,
-      tags: ['ordering', 'reliability', 'messaging']});this.registerTestSuite({
-      id: 'performance-benchmarking',name: 'WebSocket Performance Benchmarking',filePath: './performance-benchmarking.spec.ts',category: 'performance',dependencies: ['concurrent-sessions'],executionTime: 600,priority: 4,
-      tags: ['performance', 'benchmarking', 'metrics']});this.registerTestSuite({
-      id: 'error-handling',name: 'Error Handling and Recovery Tests',filePath: './error-handling-recovery.spec.ts',category: 'reliability',dependencies: ['connection-lifecycle'],executionTime: 250,priority: 3,
-      tags: ['errors', 'recovery', 'resilience']});this.registerTestSuite({
-      id: 'security-validation',name: 'WebSocket Security Validation',filePath: './security-validation.spec.ts',category: 'security',dependencies: ['connection-lifecycle'],executionTime: 180,priority: 2,
-      tags: ['security', 'validation', 'auth']});this.registerTestSuite({
-      id: 'parlant-integration',name: 'PARLANT Integration Tests',filePath: './parlant-integration.spec.ts',category: 'integration',dependencies: ['realtime-message-flow', 'message-ordering'],executionTime: 400,priority: 5,
-      tags: ['parlant', 'integration', 'e2e']});this.registerTestSuite({
-      id: 'load-stress-testing',name: 'Load and Stress Testing',filePath: './load-stress-testing.spec.ts',category: 'performance',dependencies: ['performance-benchmarking'],executionTime: 900,priority: 6,
-      tags: ['load', 'stress', 'scalability']});}
+      tags: ['connection', 'lifecycle', 'core']
+});this.registerTestSuite({
+  id: 'realtime-message-flow',
+      name: 'Real-time Message Flow Tests',
+      filePath: './realtime-message-flow.spec.ts',
+      category: 'messaging',
+      dependencies: ['connection-lifecycle'],
+      executionTime: 240,
+      priority: 2,
+      tags: ['messaging', 'realtime', 'flow']
+});this.registerTestSuite({
+  id: 'concurrent-sessions',
+      name: 'Concurrent Session Management Tests',
+      filePath: './concurrent-session-management.spec.ts',
+      category: 'scalability',
+      dependencies: ['connection-lifecycle'],
+      executionTime: 300,
+      priority: 2,
+      tags: ['sessions', 'concurrency', 'scalability']
+});this.registerTestSuite({
+  id: 'message-ordering',
+      name: 'Message Ordering and Reliability Tests',
+      filePath: './message-ordering-reliability.spec.ts',
+      category: 'reliability',
+      dependencies: ['realtime-message-flow'],
+      executionTime: 200,
+      priority: 3,
+      tags: ['ordering', 'reliability', 'messaging']
+});this.registerTestSuite({
+  id: 'performance-benchmarking',
+      name: 'WebSocket Performance Benchmarking',
+      filePath: './performance-benchmarking.spec.ts',
+      category: 'performance',
+      dependencies: ['concurrent-sessions'],
+      executionTime: 600,
+      priority: 4,
+      tags: ['performance', 'benchmarking', 'metrics']
+});this.registerTestSuite({
+  id: 'error-handling',
+      name: 'Error Handling and Recovery Tests',
+      filePath: './error-handling-recovery.spec.ts',
+      category: 'reliability',
+      dependencies: ['connection-lifecycle'],
+      executionTime: 250,
+      priority: 3,
+      tags: ['errors', 'recovery', 'resilience']
+});this.registerTestSuite({
+  id: 'security-validation',
+      name: 'WebSocket Security Validation',
+      filePath: './security-validation.spec.ts',
+      category: 'security',
+      dependencies: ['connection-lifecycle'],
+      executionTime: 180,
+      priority: 2,
+      tags: ['security', 'validation', 'auth']
+});this.registerTestSuite({
+  id: 'parlant-integration',
+      name: 'PARLANT Integration Tests',
+      filePath: './parlant-integration.spec.ts',
+      category: 'integration',
+      dependencies: ['realtime-message-flow', 'message-ordering'],executionTime: 400,
+      priority: 5,
+      tags: ['parlant', 'integration', 'e2e']
+});this.registerTestSuite({
+  id: 'load-stress-testing',
+      name: 'Load and Stress Testing',
+      filePath: './load-stress-testing.spec.ts',
+      category: 'performance',
+      dependencies: ['performance-benchmarking'],
+      executionTime: 900,
+      priority: 6,
+      tags: ['load', 'stress', 'scalability']
+});}
 
   registerTestSuite(config: TestSuiteConfig): void {
-    this.testSuites.set(config.id, config);
-  }
+  this.testSuites.set(config.id, config);
+  
+}
 
-  async executeTestPlan(plan: TestExecutionPlan): Promise<TestPlanResult> {
-    if (this.isRunning) {
+  async executeTestPlan(plan: TestExecutionPlan): Promise<TestPlanResult>  {
+  if (this.isRunning) {
       throw new Error('Test execution already in progress');
-    }
+    
+}
 
     this.isRunning = true;
     const executionStart = performance.now();
 
-    const execution: TestExecution = {
+    const execution: TestExecution  =  {
       id: `exec_${Date.now()}`,
       plan,
       startTime: executionStart,
-      status: 'running',suiteResults: new Map(),environment: plan.environment || 'test'};this.currentExecution = execution;
-    this.emit('execution_started', execution);try {const result = await this.executeTestPlanInternal(plan, execution);
-      execution.status = result.success ? 'completed' : 'failed';execution.endTime = performance.now();this.executionHistory.push({
-        executionId: execution.id,
+      status: 'running',
+      suiteResults: new Map(),
+      environment: plan.environment || 'test'};
+    this.currentExecution = execution;
+    this.emit('execution_started', execution);try {
+  const result = await this.executeTestPlanInternal(plan, execution);
+      execution.status = result.success ? 'completed' : 'failed';
+execution.endTime = performance.now();this.executionHistory.push({,
+  executionId: execution.id,
         plan,
         result,
         timestamp: execution.startTime,
         duration: execution.endTime - execution.startTime
-      });
+      
+});
 
       this.emit('execution_completed', execution, result);return result;} catch (error) {
-      execution.status = 'error';execution.endTime = performance.now();execution.error = error instanceof Error ? error.message : String(error);
+  execution.status = 'error';
+execution.endTime = performance.now();execution.error = error instanceof Error ? error.message : String(error);
 
-      this.emit('execution_failed', execution, error);throw error;} finally {
-      this.isRunning = false;
+      this.emit('execution_failed', execution, error);throw error;
+} finally {
+  this.isRunning = false;
       this.currentExecution = null;
-    }
+    
+}
   }
 
-  private async executeTestPlanInternal(plan: TestExecutionPlan, execution: TestExecution): Promise<TestPlanResult> {
-    const result: TestPlanResult = {
-      planId: plan.id,
+  private async executeTestPlanInternal(plan: TestExecutionPlan, execution: TestExecution): Promise<TestPlanResult>  {
+  const result: TestPlanResult = {,
+  planId: plan.id,
       success: true,
       suiteResults: [],
       startTime: execution.startTime,
       endTime: 0,
       totalDuration: 0,
       summary: {
-        totalSuites: 0,
+  totalSuites: 0,
         passedSuites: 0,
         failedSuites: 0,
         skippedSuites: 0,
         totalTests: 0,
         passedTests: 0,
         failedTests: 0
-      }
+      
+}
     };
 
     // Resolve test execution order based on dependencies
@@ -123,10 +202,12 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
 
     // Execute test suites based on strategy
     if (plan.strategy === 'parallel') {
-      await this.executeParallelSuites(executionOrder, execution, result);
-    } else {
-      await this.executeSequentialSuites(executionOrder, execution, result);
-    }
+  await this.executeParallelSuites(executionOrder, execution, result);
+    
+} else {
+  await this.executeSequentialSuites(executionOrder, execution, result);
+    
+}
 
     result.endTime = performance.now();
     result.totalDuration = result.endTime - result.startTime;
@@ -136,14 +217,16 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
   }
 
   private resolveExecutionOrder(suiteIds: string[]): TestSuiteConfig[] {
-    const resolved: TestSuiteConfig[] = [];
+  const resolved: TestSuiteConfig[] = [];
     const visiting: Set<string> = new Set();
     const visited: Set<string> = new Set();
 
     const visit = (suiteId: string) => {
       if (visited.has(suiteId)) return;
       if (visiting.has(suiteId)) {
-        throw new Error(`Circular dependency detected: ${suiteId}`);}const suite = this.testSuites.get(suiteId);
+        throw new Error(`Circular dependency detected: ${suiteId
+}`);}
+const suite = this.testSuites.get(suiteId);
       if (!suite) {
         throw new Error(`Test suite not found: ${suiteId}`);
       }
@@ -152,8 +235,9 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
 
       // Visit dependencies first
       for (const depId of suite.dependencies) {
-        visit(depId);
-      }
+  visit(depId);
+      
+}
 
       visiting.delete(suiteId);
       visited.add(suiteId);
@@ -161,19 +245,19 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
     };
 
     for (const suiteId of suiteIds) {
-      visit(suiteId);
-    }
+  visit(suiteId);
+    
+}
 
     // Sort by priority within dependency constraints
     return resolved.sort((a, b) => a.priority - b.priority);
   }
 
-  private async executeSequentialSuites(
-    suites: TestSuiteConfig[],
+  private async executeSequentialSuites(suites: TestSuiteConfig[],
     execution: TestExecution,
     result: TestPlanResult
-  ): Promise<void> {
-    for (const suite of suites) {
+  ): Promise<void>  {
+  for (const suite of suites) {
       if (!this.isRunning) break;
 
       const suiteResult = await this.executeSingleSuite(suite, execution);
@@ -183,16 +267,16 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
       this.updateSummary(result.summary, suiteResult);
       this.emit('suite_completed', suite, suiteResult);// Stop on failure if configuredif (!suiteResult.success && execution.plan.failFast) {
         break;
-      }
+      
+}
     }
   }
 
-  private async executeParallelSuites(
-    suites: TestSuiteConfig[],
+  private async executeParallelSuites(suites: TestSuiteConfig[],
     execution: TestExecution,
     result: TestPlanResult
-  ): Promise<void> {
-    // Group suites by dependency level for parallel execution
+  ): Promise<void>  {
+  // Group suites by dependency level for parallel execution
     const dependencyLevels = this.groupByDependencyLevel(suites);
 
     for (const levelSuites of dependencyLevels) {
@@ -207,16 +291,19 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
         const promiseResult = levelResults[i];
 
         let suiteResult: TestSuiteResult;
-        if (promiseResult.status === 'fulfilled') {suiteResult = promiseResult.value;} else {
-          suiteResult = {
-            suiteId: suite.id,
+        if (promiseResult.status === 'fulfilled') {suiteResult = promiseResult.value;
+} else {
+  suiteResult = {,
+  suiteId: suite.id,
             suiteName: suite.name,
             success: false,
             startTime: performance.now(),
             endTime: performance.now(),
             duration: 0,
             testResults: [],
-            error: promiseResult.reason?.message || 'Unknown error',summary: { total: 0, passed: 0, failed: 0, skipped: 0 }};
+            error: promiseResult.reason?.message || 'Unknown error',
+      summary: { total: 0, passed: 0, failed: 0, skipped: 0 
+}};
         }
 
         result.suiteResults.push(suiteResult);
@@ -224,13 +311,14 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
         this.updateSummary(result.summary, suiteResult);
         this.emit('suite_completed', suite, suiteResult);}// Check for failures if fail fast is enabled
       if (execution.plan.failFast && result.summary.failedSuites > 0) {
-        break;
-      }
+  break;
+      
+}
     }
   }
 
   private groupByDependencyLevel(suites: TestSuiteConfig[]): TestSuiteConfig[][] {
-    const levels: TestSuiteConfig[][] = [];
+  const levels: TestSuiteConfig[][] = [];
     const suiteMap = new Map(suites.map(s => [s.id, s]));
     const processed = new Set<string>();
 
@@ -245,18 +333,20 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
         if (dependenciesProcessed) {
           currentLevel.push(suite);
           processed.add(suite.id);
-        }
+        
+}
       }
 
-      if (currentLevel.length === 0) {
-        throw new Error('Circular dependency detected in test suites');}levels.push(currentLevel);
+  if(currentLevel.length === 0) {
+        throw new Error('Circular dependency detected in test suites');}
+levels.push(currentLevel);
     }
 
     return levels;
   }
 
-  private async executeSingleSuite(suite: TestSuiteConfig, execution: TestExecution): Promise<TestSuiteResult> {
-    const startTime = performance.now();
+  private async executeSingleSuite(suite: TestSuiteConfig, execution: TestExecution): Promise<TestSuiteResult>  {
+  const startTime = performance.now();
 
     try {
       this.emit('suite_started', suite);
@@ -265,8 +355,8 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
       const mockTestResult = await this.simulateTestExecution(suite);
 
       const endTime = performance.now();
-      const result: TestSuiteResult = {
-        suiteId: suite.id,
+      const result: TestSuiteResult = {,
+  suiteId: suite.id,
         suiteName: suite.name,
         success: mockTestResult.success,
         startTime,
@@ -274,15 +364,16 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
         duration: endTime - startTime,
         testResults: mockTestResult.tests,
         summary: this.calculateTestSummary(mockTestResult.tests)
-      };
+      
+};
 
       this.testResults.set(suite.id, result);
       return result;
 
     } catch (error) {
-      const endTime = performance.now();
-      return {
-        suiteId: suite.id,
+  const endTime = performance.now();
+      return {,
+  suiteId: suite.id,
         suiteName: suite.name,
         success: false,
         startTime,
@@ -290,13 +381,14 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
         duration: endTime - startTime,
         testResults: [],
         error: error instanceof Error ? error.message : String(error),
-        summary: { total: 0, passed: 0, failed: 0, skipped: 0 }
+        summary: { total: 0, passed: 0, failed: 0, skipped: 0 
+}
       };
     }
   }
 
-  private async simulateTestExecution(suite: TestSuiteConfig): Promise<MockTestResult> {
-    // Simulate test execution time
+  private async simulateTestExecution(suite: TestSuiteConfig): Promise<MockTestResult>  {
+  // Simulate test execution time
     const executionTime = Math.min(suite.executionTime * 1000, 30000); // Cap at 30 seconds for simulation
     await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
 
@@ -307,39 +399,48 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
     for (let i = 0; i < testCount; i++) {
       const success = Math.random() > 0.05; // 95% success rate for simulation
 
-      tests.push({
-        testName: `${suite.category} test ${i + 1}`,success,duration: Math.random() * 5000 + 100,
+      tests.push({,
+  testName: `${suite.category
+} test ${i + 1}`,success,duration: Math.random() * 5000 + 100,
         error: success ? undefined : `Simulated error in ${suite.name}`
       });
     }
 
     return {
-      success: tests.every(t => t.success),
+  success: tests.every(t => t.success),
       tests
-    };
+    
+};
   }
 
   private getExpectedTestCount(suite: TestSuiteConfig): number {
-    // Estimate test count based on suite category
+  // Estimate test count based on suite category
     const testCounts: Record<string, number> = {
-      'core': 15,'messaging': 20,'scalability': 25,'reliability': 18,'performance': 12,'security': 16,'integration': 30};return testCounts[suite.category] || 10;
+
+      'core': 15,'messaging': 20,'scalability': 25,'reliability': 18,'performance': 12,'security': 16,'integration': 30
+
+};
+return testCounts[suite.category] || 10;
   }
 
   private calculateTestSummary(tests: TestResult[]): TestSummary {
-    return {
-      total: tests.length,
+  return {,
+  total: tests.length,
       passed: tests.filter(t => t.success).length,
       failed: tests.filter(t => !t.success).length,
       skipped: 0 // No skipped tests in simulation
-    };
+    
+};
   }
 
   private updateSummary(summary: TestPlanSummary, suiteResult: TestSuiteResult): void {
-    if (suiteResult.success) {
+  if (suiteResult.success) {
       summary.passedSuites++;
-    } else {
-      summary.failedSuites++;
-    }
+    
+} else {
+  summary.failedSuites++;
+    
+}
 
     summary.totalTests += suiteResult.summary.total;
     summary.passedTests += suiteResult.summary.passed;
@@ -347,12 +448,14 @@ import { EventEmitter } from 'events';import { performance } from 'perf_hooks';i
   }
 
   getExecutionHistory(): TestExecutionRecord[] {
-    return [...this.executionHistory];
-  }
+  return [...this.executionHistory];
+  
+}
 
   getCurrentExecution(): TestExecution | null {
-    return this.currentExecution;
-  }
+  return this.currentExecution;
+  
+}
 }
 
 // CI/CD Integration Manager
@@ -361,27 +464,49 @@ class CICDIntegrationManager {
   private configPath: string;
 
   constructor(orchestrator: WebSocketTestOrchestrator, configPath: string = './ci-config') {this.orchestrator = orchestrator;this.configPath = configPath;
-  }
+  
+}
 
-  async generateGitHubActionsWorkflow(): Promise<GitHubWorkflow> {
-    const workflow: GitHubWorkflow = {
-      name: 'WebSocket Test Suite',on: {push: { branches: ['main', 'develop'] },pull_request: { branches: ['main'] },schedule: [{ cron: '0 2 * * *' }] // Daily at 2 AM},jobs: {
-        'websocket-tests': {'runs-on': 'ubuntu-latest',strategy: {matrix: {
-              'node-version': ['18.x', '20.x'],environment: ['test', 'staging']}},
+  async generateGitHubActionsWorkflow(): Promise<GitHubWorkflow>  {
+  const workflow: GitHubWorkflow = {,
+  name: 'WebSocket Test Suite',
+      on: {push: { branches: ['main', 'develop'] 
+},pull_request: { branches: ['main'] },schedule: [{ cron: '0 2 * * *' }] // Daily at 2 AM},jobs: {
+  'websocket-tests': {'runs-on': 'ubuntu-latest',
+      strategy: {matrix: {
+              'node-version': ['18.x', '20.x'],environment: ['test', 'staging']
+}},
           steps: [
+  {
+  ,
+  name: 'Checkout code',
+      uses: 'actions/checkout@v4'
+},{
+              name: 'Setup Node.js',
+      uses: 'actions/setup-node@v4',
+      with: {'node-version': '${{ matrix.node-version }}','cache': 'npm'}},
             {
-              name: 'Checkout code',uses: 'actions/checkout@v4'},{
-              name: 'Setup Node.js',uses: 'actions/setup-node@v4',with: {'node-version': '${{ matrix.node-version }}','cache': 'npm'}},
+              name: 'Install dependencies',
+      run: 'npm ci'},{
+              name: 'Start test services',
+      run: 'docker-compose -f docker-compose.test.yml up -d'},{
+              name: 'Wait for services',
+      run: 'npm run wait-for-services'},{
+              name: 'Run WebSocket tests',
+      run: 'npm run test:websocket',
+      env: {NODE_ENV: '${{ matrix.environment }}',CI: 'true'}},
             {
-              name: 'Install dependencies',run: 'npm ci'},{
-              name: 'Start test services',run: 'docker-compose -f docker-compose.test.yml up -d'},{
-              name: 'Wait for services',run: 'npm run wait-for-services'},{
-              name: 'Run WebSocket tests',run: 'npm run test:websocket',env: {NODE_ENV: '${{ matrix.environment }}',CI: 'true'}},
+              name: 'Generate test report',
+      run: 'npm run test:report',
+      if: 'always()'},{
+              name: 'Upload test results',
+      uses: 'actions/upload-artifact@v4',
+      if: 'always()',
+      with: {name: 'test-results-${{ matrix.node-version }}-${{ matrix.environment }}',path: 'test-results/'}},
             {
-              name: 'Generate test report',run: 'npm run test:report',if: 'always()'},{
-              name: 'Upload test results',uses: 'actions/upload-artifact@v4',if: 'always()',with: {name: 'test-results-${{ matrix.node-version }}-${{ matrix.environment }}',path: 'test-results/'}},
-            {
-              name: 'Cleanup services',run: 'docker-compose -f docker-compose.test.yml down',if: 'always()'}]
+              name: 'Cleanup services',
+      run: 'docker-compose -f docker-compose.test.yml down',
+      if: 'always()'}]
         }
       }
     };
@@ -389,36 +514,69 @@ class CICDIntegrationManager {
     return workflow;
   }
 
-  async generateDockerComposeConfig(): Promise<DockerComposeConfig> {
-    return {
-      version: '3.8',services: {'websocket-server': {build: {context: '.',dockerfile: 'Dockerfile.test'},ports: ['8080:8080'],environment: {NODE_ENV: 'test',WS_PORT: '8080',LOG_LEVEL: 'debug'},healthcheck: {
-            test: ['CMD', 'curl', '-f', 'http://localhost:8080/health'],interval: '30s',timeout: '10s',retries: 3}
+  async generateDockerComposeConfig(): Promise<DockerComposeConfig>  {
+  return {,
+  version: '3.8',
+      services: {'websocket-server': {build: {context: '.',
+      dockerfile: 'Dockerfile.test'
+},ports: ['8080:8080'],
+      environment: {NODE_ENV: 'test',
+      WS_PORT: '8080',
+      LOG_LEVEL: 'debug'},healthcheck: {
+            test: ['CMD', 'curl', '-f', 'http: //localhost:8080/health'],
+      interval: '30s',
+      timeout: '10s',
+      retries: 3}
         },
-        'mock-parlant': {build: {context: './test/mocks',dockerfile: 'Dockerfile.parlant'},ports: ['9090:9090'],environment: {PARLANT_PORT: '9090',LOG_LEVEL: 'info'}},
-        'test-database': {image: 'postgres:15-alpine',environment: {POSTGRES_DB: 'websocket_test',POSTGRES_USER: 'test_user',POSTGRES_PASSWORD: 'test_password'},ports: ['5432:5432'],volumes: ['test_db_data:/var/lib/postgresql/data']}},
+        'mock-parlant': {build: {context: './test/mocks',
+      dockerfile: 'Dockerfile.parlant'},ports: ['9090:9090'],
+      environment: {PARLANT_PORT: '9090',
+      LOG_LEVEL: 'info'}},
+        'test-database': {image: 'postgres:15-alpine',
+      environment: {POSTGRES_DB: 'websocket_test',
+      POSTGRES_USER: 'test_user',
+      POSTGRES_PASSWORD: 'test_password'},ports: ['5432:5432'],
+      volumes: ['test_db_data:/var/lib/postgresql/data']}},
       volumes: {
         'test_db_data': {}},networks: {
-        default: {
-          name: 'websocket-test-network'}}
+  default: {
+  name: 'websocket-test-network'
+}}
     };
   }
 
-  async createTestExecutionPlan(environment: string): Promise<TestExecutionPlan> {
-    const plans: Record<string, TestExecutionPlan> = {
-      development: {
-        id: 'dev-quick',name: 'Development Quick Tests',suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],strategy: 'parallel',environment: 'development',failFast: true,timeout: 300000, // 5 minutes
-        retries: 1
-      },
+  async createTestExecutionPlan(environment: string): Promise<TestExecutionPlan>  {
+  const plans: Record<string, TestExecutionPlan> = {,
+  development: {
+  id: 'dev-quick',
+      name: 'Development Quick Tests',
+      suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],strategy: 'parallel',
+      environment: 'development',
+      failFast: true,
+      timeout: 300000, // 5 minutes,
+  retries: 1
+      
+},
       staging: {
-        id: 'staging-comprehensive',name: 'Staging Comprehensive Tests',suiteIds: ['connection-lifecycle','realtime-message-flow','concurrent-sessions','message-ordering','performance-benchmarking','error-handling','security-validation','parlant-integration'],strategy: 'parallel',environment: 'staging',failFast: false,timeout: 1800000, // 30 minutes
-        retries: 2
-      },
+  id: 'staging-comprehensive',
+      name: 'Staging Comprehensive Tests',
+      suiteIds: ['connection-lifecycle','realtime-message-flow','concurrent-sessions','message-ordering','performance-benchmarking','error-handling','security-validation','parlant-integration'],strategy: 'parallel',
+      environment: 'staging',
+      failFast: false,
+      timeout: 1800000, // 30 minutes,
+  retries: 2
+      
+},
       production: {
-        id: 'production-full',name: 'Production Full Test Suite',suiteIds: ['connection-lifecycle','realtime-message-flow','concurrent-sessions','message-ordering','performance-benchmarking','error-handling','security-validation','parlant-integration','load-stress-testing'],strategy: 'sequential',environment: 'production',
+  id: 'production-full',
+      name: 'Production Full Test Suite',
+      suiteIds: ['connection-lifecycle','realtime-message-flow','concurrent-sessions','message-ordering','performance-benchmarking','error-handling','security-validation','parlant-integration','load-stress-testing'],strategy: 'sequential',
+      environment: 'production',
         failFast: false,
-        timeout: 3600000, // 60 minutes
-        retries: 3
-      }
+        timeout: 3600000, // 60 minutes,
+  retries: 3
+      
+}
     };
 
     return plans[environment] || plans.development;
@@ -427,9 +585,10 @@ class CICDIntegrationManager {
 
 // Test Report Generator
 class TestReportGenerator {
-  async generateComprehensiveReport(results: TestPlanResult[]): Promise<TestReport> {
-    const report: TestReport = {
-      id: `report_${Date.now()}`,
+  async generateComprehensiveReport(results: TestPlanResult[]): Promise<TestReport>  {
+    const report: TestReport = {,
+  id: `report_${Date.now()
+}`,
       timestamp: new Date().toISOString(),
       summary: this.calculateOverallSummary(results),
       executionDetails: results,
@@ -442,33 +601,39 @@ class TestReportGenerator {
   }
 
   private calculateOverallSummary(results: TestPlanResult[]): OverallSummary {
-    const summary: OverallSummary = {
-      totalExecutions: results.length,
+  const summary: OverallSummary = {,
+  totalExecutions: results.length,
       successfulExecutions: results.filter(r => r.success).length,
       failedExecutions: results.filter(r => !r.success).length,
       totalTestSuites: 0,
       totalTests: 0,
       averageExecutionTime: 0,
       successRate: 0
-    };
+    
+};
 
     if (results.length > 0) {
-      summary.totalTestSuites = results.reduce((sum, r) => sum + r.summary.totalSuites, 0);
+  summary.totalTestSuites = results.reduce((sum, r) => sum + r.summary.totalSuites, 0);
       summary.totalTests = results.reduce((sum, r) => sum + r.summary.totalTests, 0);
       summary.averageExecutionTime = results.reduce((sum, r) => sum + r.totalDuration, 0) / results.length;
       summary.successRate = (summary.successfulExecutions / summary.totalExecutions) * 100;
-    }
+    
+}
 
     return summary;
   }
 
-  private async analyzeTrends(results: TestPlanResult[]): Promise<TrendAnalysis> {
-    // Sort results by execution time
+  private async analyzeTrends(results: TestPlanResult[]): Promise<TrendAnalysis>  {
+  // Sort results by execution time
     const sortedResults = results.sort((a, b) => a.startTime - b.startTime);
 
     if (sortedResults.length < 2) {
-      return {
-        executionTimeTrend: 'stable',successRateTrend: 'stable',performanceTrend: 'stable',analysis: 'Insufficient data for trend analysis'};}
+      return {,
+  executionTimeTrend: 'stable',
+      successRateTrend: 'stable',
+      performanceTrend: 'stable',
+      analysis: 'Insufficient data for trend analysis'
+};}
 
     const recent = sortedResults.slice(-5); // Last 5 executions
     const older = sortedResults.slice(-10, -5); // Previous 5 executions
@@ -480,114 +645,148 @@ class TestReportGenerator {
     const olderSuccessRate = older.length > 0 ? (older.filter(r => r.success).length / older.length) * 100 : recentSuccessRate;
 
     return {
-      executionTimeTrend: this.determineTrend(recentAvgTime, olderAvgTime),
+  executionTimeTrend: this.determineTrend(recentAvgTime, olderAvgTime),
       successRateTrend: this.determineTrend(recentSuccessRate, olderSuccessRate, true),
       performanceTrend: this.analyzePerformanceTrend(recent),
       analysis: this.generateTrendAnalysis(recentAvgTime, olderAvgTime, recentSuccessRate, olderSuccessRate)
-    };
+    
+};
   }
 
   private determineTrend(recent: number, older: number, higherIsBetter: boolean = false): string {
-    const threshold = 0.1; // 10% change threshold
+  const threshold = 0.1; // 10% change threshold
     const change = (recent - older) / older;
 
-    if (Math.abs(change) < threshold) return 'stable';if (higherIsBetter) {return change > 0 ? 'improving' : 'declining';} else {return change > 0 ? 'declining' : 'improving';}}
+    if (Math.abs(change) < threshold) return 'stable';
+if (higherIsBetter) {return change > 0 ? 'improving' : 'declining';
+} else {return change > 0 ? 'declining' : 'improving';}}
 
   private analyzePerformanceTrend(results: TestPlanResult[]): string {
-    // Analyze performance-related test results
+  // Analyze performance-related test results
     const performanceSuites = results.flatMap(r =>
       r.suiteResults.filter(sr =>
         sr.suiteId.includes('performance') || sr.suiteId.includes('load')));
 
-    if (performanceSuites.length === 0) return 'no-data';const avgDuration = performanceSuites.reduce((sum, s) => sum + s.duration, 0) / performanceSuites.length;const successRate = (performanceSuites.filter(s => s.success).length / performanceSuites.length) * 100;
+    if (performanceSuites.length === 0) return 'no-data';
+const avgDuration = performanceSuites.reduce((sum, s) => sum + s.duration, 0) / performanceSuites.length;const successRate = (performanceSuites.filter(s => s.success).length / performanceSuites.length) * 100;
 
-    if (successRate >= 95 && avgDuration < 600000) return 'excellent';if (successRate >= 90 && avgDuration < 900000) return 'good';if (successRate >= 80) return 'acceptable';return 'needs-attention';
-  }
+    if (successRate >= 95 && avgDuration < 600000) return 'excellent';
+if (successRate >= 90 && avgDuration < 900000) return 'good';
+if (successRate >= 80) return 'acceptable';
+return 'needs-attention';
+  
+}
 
   private generateTrendAnalysis(recentTime: number, olderTime: number, recentSuccess: number, olderSuccess: number): string {
-    const timeChange = ((recentTime - olderTime) / olderTime) * 100;
+  const timeChange = ((recentTime - olderTime) / olderTime) * 100;
     const successChange = recentSuccess - olderSuccess;
 
-    let analysis = `Execution time changed by ${timeChange.toFixed(1)}%. `;analysis += `Success rate changed by ${successChange.toFixed(1)} percentage points. `;
+    let analysis = `Execution time changed by ${timeChange.toFixed(1)
+}%. `;analysis += `Success rate changed by ${successChange.toFixed(1)} percentage points. `;
 
     if (Math.abs(timeChange) > 20) {
-      analysis += timeChange > 0 ? 'Significant performance degradation detected. ' : 'Notable performance improvement observed. ';}if (Math.abs(successChange) > 10) {
+      analysis += timeChange > 0 ? 'Significant performance degradation detected. ' : 'Notable performance improvement observed. ';}
+
+  if(Math.abs(successChange) > 10) {
       analysis += successChange > 0 ? 'Test reliability has improved. ' : 'Test reliability has declined. ';}return analysis;
   }
 
   private generateRecommendations(results: TestPlanResult[]): string[] {
-    const recommendations: string[] = [];
+  const recommendations: string[] = [];
     const summary = this.calculateOverallSummary(results);
 
     if (summary.successRate < 95) {
-      recommendations.push('Investigate and fix failing tests to improve overall success rate');}if (summary.averageExecutionTime > 1800000) { // 30 minutes
-      recommendations.push('Consider optimizing test execution time or implementing better parallelization');}const recentFailures = results.slice(-5).filter(r => !r.success);
+      recommendations.push('Investigate and fix failing tests to improve overall success rate');
+}
+
+  if(summary.averageExecutionTime > 1800000) {
+  // 30 minutes
+      recommendations.push('Consider optimizing test execution time or implementing better parallelization');
+}const recentFailures = results.slice(-5).filter(r => !r.success);
     if (recentFailures.length >= 2) {
-      recommendations.push('Recent test failures detected - review and stabilize test environment');}const loadTestResults = results.flatMap(r =>
+      recommendations.push('Recent test failures detected - review and stabilize test environment');}
+const loadTestResults = results.flatMap(r =>
       r.suiteResults.filter(sr => sr.suiteId === 'load-stress-testing'));if (loadTestResults.some(r => !r.success)) {
-      recommendations.push('Load testing failures indicate potential scalability issues');}if (recommendations.length === 0) {
-      recommendations.push('Test suite is performing well - continue monitoring');
-    }
+      recommendations.push('Load testing failures indicate potential scalability issues');}
+
+  if(recommendations.length === 0) {
+  recommendations.push('Test suite is performing well - continue monitoring');
+    
+}
 
     return recommendations;
   }
 
-  private async collectArtifacts(results: TestPlanResult[]): Promise<TestArtifacts> {
-    return {
-      screenshots: [], // Would collect actual screenshots in real implementation
-      logs: await this.collectTestLogs(results),
+  private async collectArtifacts(results: TestPlanResult[]): Promise<TestArtifacts>  {
+  return {,
+  screenshots: [], // Would collect actual screenshots in real implementation,
+  logs: await this.collectTestLogs(results),
       metrics: await this.collectPerformanceMetrics(results),
       coverage: await this.collectCoverageData()
-    };
+    
+};
   }
 
-  private async collectTestLogs(results: TestPlanResult[]): Promise<string[]> {
-    // Simulate log collection
-    return results.map(r => `Execution ${r.planId}: ${r.success ? 'SUCCESS' : 'FAILURE'}`);
+  private async collectTestLogs(results: TestPlanResult[]): Promise<string[]>  {
+  // Simulate log collection
+    return results.map(r => `Execution ${r.planId
+}: ${r.success ? 'SUCCESS' : 'FAILURE'}`);
   }
 
-  private async collectPerformanceMetrics(results: TestPlanResult[]): Promise<PerformanceMetrics> {
-    const allSuites = results.flatMap(r => r.suiteResults);
+  private async collectPerformanceMetrics(results: TestPlanResult[]): Promise<PerformanceMetrics>  {
+  const allSuites = results.flatMap(r => r.suiteResults);
 
-    return {
-      averageExecutionTime: allSuites.reduce((sum, s) => sum + s.duration, 0) / allSuites.length,
+    return {,
+  averageExecutionTime: allSuites.reduce((sum, s) => sum + s.duration, 0) / allSuites.length,
       p95ExecutionTime: this.calculatePercentile(allSuites.map(s => s.duration), 95),
-      memoryUsage: Math.random() * 512 + 256, // Simulated
-      cpuUsage: Math.random() * 80 + 10 // Simulated
-    };
+      memoryUsage: Math.random() * 512 + 256, // Simulated,
+  cpuUsage: Math.random() * 80 + 10 // Simulated
+    
+};
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
-    const sorted = values.sort((a, b) => a - b);
+  const sorted = values.sort((a, b) => a - b);
     const index = Math.ceil((percentile / 100) * sorted.length) - 1;
     return sorted[index] || 0;
-  }
+  
+}
 
-  private async collectCoverageData(): Promise<CoverageData> {
-    return {
-      linesCovered: 1250,
+  private async collectCoverageData(): Promise<CoverageData>  {
+  return {,
+  linesCovered: 1250,
       totalLines: 1500,
       branchesCovered: 180,
       totalBranches: 200,
       functionsCovered: 95,
       totalFunctions: 100
-    };
+    
+};
   }
 
-  async exportReport(report: TestReport, format: 'json' | 'html' | 'pdf' = 'json'): Promise<string> {switch (format) {case 'json':return JSON.stringify(report, null, 2);case 'html':return this.generateHTMLReport(report);case 'pdf':return this.generatePDFReport(report);
+  async exportReport(report: TestReport, format: 'json' | 'html' | 'pdf' = 'json'): Promise<string>  {
+  switch (format) {
+case 'json':
+        return JSON.stringify(report, null, 2);
+        case 'html':return this.generateHTMLReport(report);
+    case 'pdf':return this.generatePDFReport(report);
       default:
         return JSON.stringify(report, null, 2);
+        break;
+    
+
     }
   }
 
   private generateHTMLReport(report: TestReport): string {
-    return '
+  return '
 <!DOCTYPE html>
 <html>
 <head>
     <title>WebSocket Test Report</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
+        body { font-family: Arial, sans-serif; margin: 20px; 
+}
         .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
         .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
         .metric { background-color: #e8f4fd; padding: 15px; border-radius: 5px; text-align: center; }
@@ -631,8 +830,10 @@ class TestReportGenerator {
             </tr>
         </thead>
         <tbody>
-            ${report.executionDetails.map(exec => "
-                <tr class="${exec.success ? 'success' : 'failure'}">
+            ${
+  report.executionDetails.map(exec => "
+                <tr class="${exec.success ? 'success' : 'failure'
+}">
                     <td>${exec.planId}</td>
                     <td>${exec.success ? 'SUCCESS' : 'FAILURE'}</td>
                     <td>${(exec.totalDuration / 1000 / 60).toFixed(1)} min</td>
@@ -645,8 +846,9 @@ class TestReportGenerator {
 </html>';}
 
   private generatePDFReport(report: TestReport): string {
-    // In a real implementation, this would generate a PDF using a library like puppeteer
-    return `PDF Report for ${report.id} - ${report.timestamp}`;}}
+  // In a real implementation, this would generate a PDF using a library like puppeteer
+    return `PDF Report for ${report.id
+} - ${report.timestamp}`;}}
 
 // Regression Test Manager
 class RegressionTestManager {
@@ -656,22 +858,24 @@ class RegressionTestManager {
 
   constructor(orchestrator: WebSocketTestOrchestrator) {
     this.orchestrator = orchestrator;
-    this.regressionThresholds = {
-      performanceDegradation: 0.2, // 20% slower is regression
-      successRateDrops: 0.05, // 5% drop in success rate
-      newFailures: 3, // More than 3 new failing tests
-      executionTimeIncrease: 0.3 // 30% increase in execution time
-    };
+    this.regressionThresholds = {,
+  performanceDegradation: 0.2, // 20% slower is regression,
+  successRateDrops: 0.05, // 5% drop in success rate,
+  newFailures: 3, // More than 3 new failing tests,
+  executionTimeIncrease: 0.3 // 30% increase in execution time
+    
+};
   }
 
-  async setBaseline(results: TestPlanResult): Promise<void> {
-    for (const suiteResult of results.suiteResults) {
-      this.baselineResults.set(suiteResult.suiteId, { ...suiteResult });
+  async setBaseline(results: TestPlanResult): Promise<void>  {
+  for (const suiteResult of results.suiteResults) {
+      this.baselineResults.set(suiteResult.suiteId, { ...suiteResult 
+});
     }
   }
 
-  async detectRegressions(currentResults: TestPlanResult): Promise<RegressionReport> {
-    const regressions: RegressionDetection[] = [];
+  async detectRegressions(currentResults: TestPlanResult): Promise<RegressionReport>  {
+  const regressions: RegressionDetection[] = [];
 
     for (const currentSuite of currentResults.suiteResults) {
       const baseline = this.baselineResults.get(currentSuite.suiteId);
@@ -680,25 +884,28 @@ class RegressionTestManager {
       const regression = this.analyzeRegressionForSuite(baseline, currentSuite);
       if (regression) {
         regressions.push(regression);
-      }
+      
+}
     }
 
     return {
-      hasRegressions: regressions.length > 0,
+  hasRegressions: regressions.length > 0,
       regressionCount: regressions.length,
       regressions,
       summary: this.generateRegressionSummary(regressions),
       recommendations: this.generateRegressionRecommendations(regressions)
-    };
+    
+};
   }
 
   private analyzeRegressionForSuite(baseline: TestSuiteResult, current: TestSuiteResult): RegressionDetection | null {
-    const regressionIssues: string[] = [];
+  const regressionIssues: string[] = [];
 
     // Check performance regression
     const performanceChange = (current.duration - baseline.duration) / baseline.duration;
     if (performanceChange > this.regressionThresholds.performanceDegradation) {
-      regressionIssues.push(`Performance degraded by ${(performanceChange * 100).toFixed(1)}%`);}// Check success rate regression
+      regressionIssues.push(`Performance degraded by ${(performanceChange * 100).toFixed(1)
+}%`);}// Check success rate regression
     const baselineSuccessRate = baseline.summary.passed / baseline.summary.total;
     const currentSuccessRate = current.summary.passed / current.summary.total;
     const successRateChange = baselineSuccessRate - currentSuccessRate;
@@ -710,42 +917,60 @@ class RegressionTestManager {
       regressionIssues.push(`${newFailures} new test failures`);
     }
 
-    if (regressionIssues.length === 0) return null;
+  if(regressionIssues.length === 0) return null;
 
     return {
-      suiteId: current.suiteId,
+  suiteId: current.suiteId,
       suiteName: current.suiteName,
       regressionType: this.determineRegressionType(regressionIssues),
       severity: this.determineSeverity(performanceChange, successRateChange, newFailures),
       issues: regressionIssues,
       baseline: {
-        duration: baseline.duration,
+  duration: baseline.duration,
         successRate: baselineSuccessRate,
         totalTests: baseline.summary.total
-      },
+      
+},
       current: {
-        duration: current.duration,
+  duration: current.duration,
         successRate: currentSuccessRate,
         totalTests: current.summary.total
-      }
+      
+}
     };
   }
 
   private determineRegressionType(issues: string[]): string {
-    if (issues.some(i => i.includes('Performance'))) return 'performance';if (issues.some(i => i.includes('Success rate'))) return 'reliability';if (issues.some(i => i.includes('failures'))) return 'functional';return 'unknown';}private determineSeverity(perfChange: number, successChange: number, newFailures: number): 'low' | 'medium' | 'high' | 'critical' {if (perfChange > 0.5 || successChange > 0.2 || newFailures > 10) return 'critical';if (perfChange > 0.3 || successChange > 0.1 || newFailures > 5) return 'high';if (perfChange > 0.2 || successChange > 0.05 || newFailures > 2) return 'medium';return 'low';}private generateRegressionSummary(regressions: RegressionDetection[]): string {
-    if (regressions.length === 0) return 'No regressions detected';
+    if (issues.some(i => i.includes('Performance'))) return 'performance';
+if (issues.some(i => i.includes('Success rate'))) return 'reliability';
+if (issues.some(i => i.includes('failures'))) return 'functional';
+return 'unknown';}private determineSeverity(perfChange: number, successChange: number, newFailures: number): 'low' | 'medium' | 'high' | 'critical' {if (perfChange > 0.5 || successChange > 0.2 || newFailures > 10) return 'critical';
+if (perfChange > 0.3 || successChange > 0.1 || newFailures > 5) return 'high';
+if (perfChange > 0.2 || successChange > 0.05 || newFailures > 2) return 'medium';
+return 'low';}
+private generateRegressionSummary(regressions: RegressionDetection[]): string {
+  if (regressions.length === 0) return 'No regressions detected';
 
     const bySeverity = regressions.reduce((acc, r) => {
       acc[r.severity] = (acc[r.severity] || 0) + 1;
       return acc;
-    }, {} as Record<string, number>);
+    
+}, {} as Record<string, number>);
 
     return `${regressions.length} regressions detected: ${Object.entries(bySeverity).map(([severity, count]) => `${count} ${severity}`).join(`, ')}';}
 
   private generateRegressionRecommendations(regressions: RegressionDetection[]): string[] {
-    const recommendations: string[] = [];
+  const recommendations: string[] = [];
 
-    if (regressions.some(r => r.severity === 'critical')) {recommendations.push('Critical regressions detected - halt deployment and investigate immediately');}if (regressions.some(r => r.regressionType === 'performance')) {recommendations.push('Performance regressions found - review recent changes and optimize');}if (regressions.some(r => r.regressionType === 'reliability')) {recommendations.push('Reliability issues detected - check test environment and infrastructure');}if (regressions.some(r => r.regressionType === 'functional')) {recommendations.push('Functional regressions found - review code changes and fix failing tests');}return recommendations;
+    if (regressions.some(r => r.severity === 'critical')) {recommendations.push('Critical regressions detected - halt deployment and investigate immediately');
+}
+
+  if(regressions.some(r => r.regressionType === 'performance')) {recommendations.push('Performance regressions found - review recent changes and optimize');}
+
+  if(regressions.some(r => r.regressionType === 'reliability')) {recommendations.push('Reliability issues detected - check test environment and infrastructure');}
+
+  if(regressions.some(r => r.regressionType === 'functional')) {recommendations.push('Functional regressions found - review code changes and fix failing tests');}
+return recommendations;
   }
 }
 
@@ -756,18 +981,24 @@ interface TestSuiteConfig {
   filePath: string;
   category: string;
   dependencies: string[];
-  executionTime: number; // seconds
+  executionTime: number; // seconds;
   priority: number;
   tags: string[];
+
+
 }
 
 interface TestExecutionPlan {
   id: string;
   name: string;
   suiteIds: string[];
-  strategy: 'sequential' | 'parallel';environment?: string;failFast?: boolean;
+  strategy: 'sequential' | 'parallel';
+environment?: string;
+  failFast?: boolean;
   timeout?: number;
   retries?: number;
+
+
 }
 
 interface TestExecution {
@@ -775,8 +1006,12 @@ interface TestExecution {
   plan: TestExecutionPlan;
   startTime: number;
   endTime?: number;
-  status: 'running' | 'completed' | 'failed' | 'error';suiteResults: Map<string, TestSuiteResult>;environment: string;
+  status: 'running' | 'completed' | 'failed' | 'error';
+  suiteResults: Map<string, TestSuiteResult>;
+  environment: string;
   error?: string;
+
+
 }
 
 interface TestResult {
@@ -784,6 +1019,8 @@ interface TestResult {
   success: boolean;
   duration: number;
   error?: string;
+
+
 }
 
 interface TestSummary {
@@ -791,6 +1028,8 @@ interface TestSummary {
   passed: number;
   failed: number;
   skipped: number;
+
+
 }
 
 interface TestSuiteResult {
@@ -803,6 +1042,8 @@ interface TestSuiteResult {
   testResults: TestResult[];
   summary: TestSummary;
   error?: string;
+
+
 }
 
 interface TestPlanSummary {
@@ -813,6 +1054,8 @@ interface TestPlanSummary {
   totalTests: number;
   passedTests: number;
   failedTests: number;
+
+
 }
 
 interface TestPlanResult {
@@ -823,6 +1066,8 @@ interface TestPlanResult {
   endTime: number;
   totalDuration: number;
   summary: TestPlanSummary;
+
+
 }
 
 interface TestExecutionRecord {
@@ -831,17 +1076,23 @@ interface TestExecutionRecord {
   result: TestPlanResult;
   timestamp: number;
   duration: number;
+
+
 }
 
 interface MockTestResult {
   success: boolean;
   tests: TestResult[];
+
+
 }
 
 interface GitHubWorkflow {
   name: string;
   on: {
-    push?: { branches: string[] };
+    push?: { branches: string[] 
+
+};
     pull_request?: { branches: string[] };
     schedule?: Array<{ cron: string }>;
   };
@@ -853,6 +1104,8 @@ interface DockerComposeConfig {
   services: Record<string, any>;
   volumes?: Record<string, any>;
   networks?: Record<string, any>;
+
+
 }
 
 interface OverallSummary {
@@ -863,6 +1116,8 @@ interface OverallSummary {
   totalTests: number;
   averageExecutionTime: number;
   successRate: number;
+
+
 }
 
 interface TrendAnalysis {
@@ -870,6 +1125,8 @@ interface TrendAnalysis {
   successRateTrend: string;
   performanceTrend: string;
   analysis: string;
+
+
 }
 
 interface PerformanceMetrics {
@@ -877,6 +1134,8 @@ interface PerformanceMetrics {
   p95ExecutionTime: number;
   memoryUsage: number;
   cpuUsage: number;
+
+
 }
 
 interface CoverageData {
@@ -886,6 +1145,8 @@ interface CoverageData {
   totalBranches: number;
   functionsCovered: number;
   totalFunctions: number;
+
+
 }
 
 interface TestArtifacts {
@@ -893,6 +1154,8 @@ interface TestArtifacts {
   logs: string[];
   metrics: PerformanceMetrics;
   coverage: CoverageData;
+
+
 }
 
 interface TestReport {
@@ -903,6 +1166,8 @@ interface TestReport {
   trends: TrendAnalysis;
   recommendations: string[];
   artifacts: TestArtifacts;
+
+
 }
 
 interface RegressionThresholds {
@@ -910,22 +1175,29 @@ interface RegressionThresholds {
   successRateDrops: number;
   newFailures: number;
   executionTimeIncrease: number;
+
+
 }
 
 interface RegressionDetection {
   suiteId: string;
   suiteName: string;
   regressionType: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';issues: string[];baseline: {
-    duration: number;
-    successRate: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  issues: string[];
+  baseline: {;
+  duration: number;
+  successRate: number;
     totalTests: number;
-  };
+  
+
+};
   current: {
-    duration: number;
-    successRate: number;
+  duration: number;
+  successRate: number;
     totalTests: number;
-  };
+  
+};
 }
 
 interface RegressionReport {
@@ -934,34 +1206,59 @@ interface RegressionReport {
   regressions: RegressionDetection[];
   summary: string;
   recommendations: string[];
+
+
 }
 
 // Test Suite
-describe('Testing Framework Integration and Automation', () => {let orchestrator: WebSocketTestOrchestrator;let cicdManager: CICDIntegrationManager;
+describe('Testing Framework Integration and Automation', () => {
+
+  let orchestrator: WebSocketTestOrchestrator;let cicdManager: CICDIntegrationManager;
   let reportGenerator: TestReportGenerator;
   let regressionManager: RegressionTestManager;
 
-  beforeEach(() => {
+  beforeEach(() => 
     orchestrator = new WebSocketTestOrchestrator();
     cicdManager = new CICDIntegrationManager(orchestrator);
     reportGenerator = new TestReportGenerator();
     regressionManager = new RegressionTestManager(orchestrator);
-  });
+  
+});
 
   afterEach(() => {
-    jest.clearAllTimers();
-  });
+  jest.clearAllTimers();
+  
+});
 
-  describe('Test Orchestration', () => {test('should execute development test plan successfully', async () => {const plan = await cicdManager.createTestExecutionPlan('development');const result = await orchestrator.executeTestPlan(plan);expect(result.success).toBe(true);
-      expect(result.planId).toBe('dev-quick');expect(result.suiteResults.length).toBeGreaterThan(0);expect(result.summary.totalSuites).toBe(plan.suiteIds.length);
-    }, 60000);
 
-    test('should execute staging test plan with comprehensive coverage', async () => {const plan = await cicdManager.createTestExecutionPlan('staging');const result = await orchestrator.executeTestPlan(plan);expect(result.success).toBe(true);
-      expect(result.planId).toBe('staging-comprehensive');expect(result.suiteResults.length).toBe(8); // All major suites except load testingexpect(result.summary.totalTests).toBeGreaterThan(100);
-    }, 120000);
 
-    test('should handle parallel execution correctly', async () => {const plan: TestExecutionPlan = {id: 'parallel-test',name: 'Parallel Execution Test',suiteIds: ['connection-lifecycle', 'security-validation', 'error-handling'],strategy: 'parallel',environment: 'test',failFast: false,timeout: 180000
-      };
+  describe('Test Orchestration', () => {
+
+  test('should execute development test plan successfully', async () => const plan = await cicdManager.createTestExecutionPlan('development');const result = await orchestrator.executeTestPlan(plan);
+expect(result.success).toBe(true);
+      expect(result.planId).toBe('dev-quick');
+expect(result.suiteResults.length).toBeGreaterThan(0);
+expect(result.summary.totalSuites).toBe(plan.suiteIds.length);
+    
+}, 60000);
+
+    test('should execute staging test plan with comprehensive coverage', async () => {
+  const plan = await cicdManager.createTestExecutionPlan('staging');const result = await orchestrator.executeTestPlan(plan);
+expect(result.success).toBe(true);
+      expect(result.planId).toBe('staging-comprehensive');
+expect(result.suiteResults.length).toBe(8); // All major suites except load testingexpect(result.summary.totalTests).toBeGreaterThan(100);
+    
+}, 120000);
+
+    test('should handle parallel execution correctly', async () => {
+  const plan: TestExecutionPlan = {id: 'parallel-test',
+      name: 'Parallel Execution Test',
+      suiteIds: ['connection-lifecycle', 'security-validation', 'error-handling'],strategy: 'parallel',
+      environment: 'test',
+      failFast: false,
+      timeout: 180000
+      
+};
 
       const startTime = performance.now();
       const result = await orchestrator.executeTestPlan(plan);
@@ -973,8 +1270,15 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(duration).toBeLessThan(90000); // Less than 1.5 minutes
     }, 180000);
 
-    test('should handle sequential execution with dependencies', async () => {const plan: TestExecutionPlan = {id: 'sequential-test',name: 'Sequential Execution Test',suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'message-ordering'],strategy: 'sequential',environment: 'test',failFast: true,timeout: 300000
-      };
+    test('should handle sequential execution with dependencies', async () => {
+  const plan: TestExecutionPlan = {id: 'sequential-test',
+      name: 'Sequential Execution Test',
+      suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'message-ordering'],strategy: 'sequential',
+      environment: 'test',
+      failFast: true,
+      timeout: 300000
+      
+};
 
       const result = await orchestrator.executeTestPlan(plan);
 
@@ -983,26 +1287,36 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
 
       // Verify execution order based on dependencies
       const executionOrder = result.suiteResults.map(r => r.suiteId);
-      expect(executionOrder.indexOf('connection-lifecycle')).toBeLessThan(executionOrder.indexOf('realtime-message-flow'));expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOrder.indexOf('message-ordering'));}, 300000);
+      expect(executionOrder.indexOf('connection-lifecycle')).toBeLessThan(executionOrder.indexOf('realtime-message-flow'));
+expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOrder.indexOf('message-ordering'));}, 300000);
 
-    test('should handle fail-fast behavior correctly', async () => {// Mock a failing test suite for this testconst originalExecute = orchestrator['executeSingleSuite'];let callCount = 0;orchestrator['executeSingleSuite'] = async function(suite: TestSuiteConfig) {callCount++;if (callCount === 2) {
+    test('should handle fail-fast behavior correctly', async () => {
+  // Mock a failing test suite for this testconst originalExecute = orchestrator['executeSingleSuite'];let callCount = 0;orchestrator['executeSingleSuite'] = async function(suite: TestSuiteConfig) {callCount++;if (callCount === 2) {
           // Make second suite fail
-          return {
-            suiteId: suite.id,
+          return {,
+  suiteId: suite.id,
             suiteName: suite.name,
             success: false,
             startTime: performance.now(),
             endTime: performance.now(),
             duration: 1000,
             testResults: [],
-            error: 'Simulated failure',summary: { total: 0, passed: 0, failed: 1, skipped: 0 }};
+            error: 'Simulated failure',
+      summary: { total: 0, passed: 0, failed: 1, skipped: 0 
+}};
         }
         return originalExecute.call(this, suite);
       };
 
       const plan: TestExecutionPlan = {
-        id: 'fail-fast-test',name: 'Fail Fast Test',suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],strategy: 'sequential',environment: 'test',failFast: true,timeout: 180000
-      };
+  id: 'fail-fast-test',
+      name: 'Fail Fast Test',
+      suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],strategy: 'sequential',
+      environment: 'test',
+      failFast: true,
+      timeout: 180000
+      
+};
 
       const result = await orchestrator.executeTestPlan(plan);
 
@@ -1012,22 +1326,54 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
     }, 180000);
   });
 
-  describe('CI/CD Integration', () => {test('should generate GitHub Actions workflow', async () => {const workflow = await cicdManager.generateGitHubActionsWorkflow();expect(workflow.name).toBe('WebSocket Test Suite');expect(workflow.on.push).toBeDefined();expect(workflow.on.pull_request).toBeDefined();
+
+
+  describe('CI/CD Integration', () => {
+
+  test('should generate GitHub Actions workflow', async () => const workflow = await cicdManager.generateGitHubActionsWorkflow();
+expect(workflow.name).toBe('WebSocket Test Suite');
+expect(workflow.on.push).toBeDefined();
+expect(workflow.on.pull_request).toBeDefined();
       expect(workflow.on.schedule).toBeDefined();
-      expect(workflow.jobs['websocket-tests']).toBeDefined();const job = workflow.jobs['websocket-tests'];expect(job['runs-on']).toBe('ubuntu-latest');expect(job.strategy.matrix['node-version']).toContain('18.x');expect(job.strategy.matrix['node-version']).toContain('20.x');expect(job.steps.length).toBeGreaterThan(5);});
+      expect(workflow.jobs['websocket-tests']).toBeDefined();const job = workflow.jobs['websocket-tests'];
+expect(job['runs-on']).toBe('ubuntu-latest');
+expect(job.strategy.matrix['node-version']).toContain('18.x');
+expect(job.strategy.matrix['node-version']).toContain('20.x');
+expect(job.steps.length).toBeGreaterThan(5);
+});
 
-    test('should generate Docker Compose configuration', async () => {const config = await cicdManager.generateDockerComposeConfig();expect(config.version).toBe('3.8');expect(config.services['websocket-server']).toBeDefined();expect(config.services['mock-parlant']).toBeDefined();expect(config.services['test-database']).toBeDefined();const wsService = config.services['websocket-server'];expect(wsService.ports).toContain('8080:8080');expect(wsService.environment.NODE_ENV).toBe('test');expect(wsService.healthcheck).toBeDefined();});
+    test('should generate Docker Compose configuration', async () => {const config = await cicdManager.generateDockerComposeConfig();
+expect(config.version).toBe('3.8');
+expect(config.services['websocket-server']).toBeDefined();
+expect(config.services['mock-parlant']).toBeDefined();
+expect(config.services['test-database']).toBeDefined();const wsService = config.services['websocket-server'];
+expect(wsService.ports).toContain('8080:8080');
+expect(wsService.environment.NODE_ENV).toBe('test');
+expect(wsService.healthcheck).toBeDefined();});
 
-    test('should create environment-specific test plans', async () => {const devPlan = await cicdManager.createTestExecutionPlan('development');const stagingPlan = await cicdManager.createTestExecutionPlan('staging');const prodPlan = await cicdManager.createTestExecutionPlan('production');expect(devPlan.strategy).toBe('parallel');expect(devPlan.failFast).toBe(true);expect(devPlan.suiteIds.length).toBe(3);
+    test('should create environment-specific test plans', async () => {
+  const devPlan = await cicdManager.createTestExecutionPlan('development');const stagingPlan = await cicdManager.createTestExecutionPlan('staging');const prodPlan = await cicdManager.createTestExecutionPlan('production');
+expect(devPlan.strategy).toBe('parallel');
+expect(devPlan.failFast).toBe(true);
+expect(devPlan.suiteIds.length).toBe(3);
 
-      expect(stagingPlan.strategy).toBe('parallel');expect(stagingPlan.failFast).toBe(false);expect(stagingPlan.suiteIds.length).toBe(8);
+      expect(stagingPlan.strategy).toBe('parallel');
+expect(stagingPlan.failFast).toBe(false);
+expect(stagingPlan.suiteIds.length).toBe(8);
 
-      expect(prodPlan.strategy).toBe('sequential');expect(prodPlan.failFast).toBe(false);expect(prodPlan.suiteIds.length).toBe(9);
+      expect(prodPlan.strategy).toBe('sequential');
+expect(prodPlan.failFast).toBe(false);
+expect(prodPlan.suiteIds.length).toBe(9);
       expect(prodPlan.timeout).toBe(3600000); // 1 hour
-    });
+    
+});
   });
 
-  describe('Test Reporting', () => {test('should generate comprehensive test report', async () => {const plan = await cicdManager.createTestExecutionPlan('development');const result1 = await orchestrator.executeTestPlan(plan);const result2 = await orchestrator.executeTestPlan(plan);
+
+
+  describe('Test Reporting', () => {
+
+  test('should generate comprehensive test report', async () => const plan = await cicdManager.createTestExecutionPlan('development');const result1 = await orchestrator.executeTestPlan(plan);const result2 = await orchestrator.executeTestPlan(plan);
 
       const report = await reportGenerator.generateComprehensiveReport([result1, result2]);
 
@@ -1038,22 +1384,30 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(report.trends).toBeDefined();
       expect(report.recommendations.length).toBeGreaterThan(0);
       expect(report.artifacts).toBeDefined();
-    }, 180000);
+    
+}, 180000);
 
-    test('should analyze trends correctly', async () => {// Create mock results with different characteristicsconst results: TestPlanResult[] = [
-        {
-          planId: 'test-1',success: true,suiteResults: [],
+    test('should analyze trends correctly', async () => {
+  // Create mock results with different characteristicsconst results: TestPlanResult[] = [
+  {,
+  planId: 'test-1',
+      success: true,
+      suiteResults: [],
           startTime: performance.now() - 10000,
           endTime: performance.now() - 5000,
           totalDuration: 5000,
-          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 50, failedTests: 0 }
+          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 50, failedTests: 0 
+}
         },
         {
-          planId: 'test-2',success: true,suiteResults: [],
+  planId: 'test-2',
+      success: true,
+      suiteResults: [],
           startTime: performance.now() - 8000,
           endTime: performance.now() - 2000,
           totalDuration: 6000,
-          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 48, failedTests: 2 }
+          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 48, failedTests: 2 
+}
         }
       ];
 
@@ -1062,27 +1416,46 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(report.trends.executionTimeTrend).toBeDefined();
       expect(report.trends.successRateTrend).toBeDefined();
       expect(report.trends.performanceTrend).toBeDefined();
-      expect(report.trends.analysis).toContain('%');});test('should export reports in different formats', async () => {const mockReport: TestReport = {id: 'test-report',timestamp: new Date().toISOString(),summary: {
-          totalExecutions: 1,
+      expect(report.trends.analysis).toContain('%');});
+test('should export reports in different formats', async () => {
+  const mockReport: TestReport = {id: 'test-report',
+      timestamp: new Date().toISOString(),
+      summary: {
+  totalExecutions: 1,
           successfulExecutions: 1,
           failedExecutions: 0,
           totalTestSuites: 3,
           totalTests: 50,
           averageExecutionTime: 60000,
           successRate: 100
-        },
+        
+},
         executionDetails: [],
         trends: {
-          executionTimeTrend: 'stable',successRateTrend: 'stable',performanceTrend: 'good',analysis: 'All metrics within normal range'},recommendations: ['Continue monitoring'],artifacts: {screenshots: [],
+          executionTimeTrend: 'stable',
+      successRateTrend: 'stable',
+      performanceTrend: 'good',
+      analysis: 'All metrics within normal range'},recommendations: ['Continue monitoring'],
+      artifacts: {
+  screenshots: [],
           logs: [],
-          metrics: { averageExecutionTime: 60000, p95ExecutionTime: 80000, memoryUsage: 512, cpuUsage: 45 },
+          metrics: { averageExecutionTime: 60000, p95ExecutionTime: 80000, memoryUsage: 512, cpuUsage: 45 
+},
           coverage: { linesCovered: 1200, totalLines: 1500, branchesCovered: 180, totalBranches: 200, functionsCovered: 95, totalFunctions: 100 }
         }
       };
 
-      const jsonReport = await reportGenerator.exportReport(mockReport, 'json');const htmlReport = await reportGenerator.exportReport(mockReport, 'html');const pdfReport = await reportGenerator.exportReport(mockReport, 'pdf');expect(JSON.parse(jsonReport)).toEqual(mockReport);expect(htmlReport).toContain('<!DOCTYPE html>');expect(htmlReport).toContain('WebSocket Test Report');expect(pdfReport).toContain('PDF Report');});});
+      const jsonReport = await reportGenerator.exportReport(mockReport, 'json');const htmlReport = await reportGenerator.exportReport(mockReport, 'html');const pdfReport = await reportGenerator.exportReport(mockReport, 'pdf');
+expect(JSON.parse(jsonReport)).toEqual(mockReport);
+expect(htmlReport).toContain('<!DOCTYPE html>');
+expect(htmlReport).toContain('WebSocket Test Report');
+expect(pdfReport).toContain('PDF Report');});});
 
-  describe('Regression Testing', () => {test('should detect performance regressions', async () => {const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+
+
+  describe('Regression Testing', () => {
+
+  test('should detect performance regressions', async () => const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
 
       // Create a mock current result with performance regression
       const currentResult: TestPlanResult = {
@@ -1090,7 +1463,8 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
         suiteResults: baselineResult.suiteResults.map(suite => ({
           ...suite,
           duration: suite.duration * 1.5 // 50% slower
-        }))
+        
+}))
       };
 
       const regressionReport = await regressionManager.detectRegressions(currentResult);
@@ -1098,9 +1472,11 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(regressionReport.hasRegressions).toBe(true);
       expect(regressionReport.regressionCount).toBeGreaterThan(0);
 
-      const perfRegressions = regressionReport.regressions.filter(r => r.regressionType === 'performance');expect(perfRegressions.length).toBeGreaterThan(0);}, 120000);
+      const perfRegressions = regressionReport.regressions.filter(r => r.regressionType === 'performance');
+expect(perfRegressions.length).toBeGreaterThan(0);}, 120000);
 
-    test('should detect reliability regressions', async () => {const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+    test('should detect reliability regressions', async () => {
+  const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
 
       // Create a mock current result with reliability regression
       const currentResult: TestPlanResult = {
@@ -1111,7 +1487,8 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
             ...suite.summary,
             failed: suite.summary.failed + 5,
             passed: suite.summary.passed - 5
-          }
+          
+}
         }))
       };
 
@@ -1120,33 +1497,41 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(regressionReport.hasRegressions).toBe(true);
 
       const reliabilityRegressions = regressionReport.regressions.filter(r =>
-        r.regressionType === 'reliability' || r.regressionType === 'functional');expect(reliabilityRegressions.length).toBeGreaterThan(0);
+        r.regressionType === 'reliability' || r.regressionType === 'functional');
+expect(reliabilityRegressions.length).toBeGreaterThan(0);
     }, 120000);
 
-    test('should generate appropriate recommendations', async () => {const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+    test('should generate appropriate recommendations', async () => {
+  const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
 
       // Create a mock current result with critical regressions
       const currentResult: TestPlanResult = {
         ...baselineResult,
         suiteResults: baselineResult.suiteResults.map(suite => ({
           ...suite,
-          duration: suite.duration * 2, // 100% slower (critical)
-          summary: {
+          duration: suite.duration * 2, // 100% slower (critical);
+    summary: {
             ...suite.summary,
-            failed: suite.summary.failed + 15, // Many new failures
-            passed: Math.max(0, suite.summary.passed - 15)
-          }
+            failed: suite.summary.failed + 15, // Many new failures,
+  passed: Math.max(0, suite.summary.passed - 15)
+          
+}
         }))
       };
 
       const regressionReport = await regressionManager.detectRegressions(currentResult);
 
       expect(regressionReport.recommendations).toContain(
-        'Critical regressions detected - halt deployment and investigate immediately');expect(regressionReport.recommendations.some(r =>
+        'Critical regressions detected - halt deployment and investigate immediately');
+expect(regressionReport.recommendations.some(r =>
         r.includes('Performance regressions'))).toBe(true);}, 120000);
   });
 
-  describe('Test Automation', () => {test('should track execution history', async () => {const plan = await cicdManager.createTestExecutionPlan('development');await orchestrator.executeTestPlan(plan);await orchestrator.executeTestPlan(plan);
+
+
+  describe('Test Automation', () => {
+
+  test('should track execution history', async () => const plan = await cicdManager.createTestExecutionPlan('development');await orchestrator.executeTestPlan(plan);await orchestrator.executeTestPlan(plan);
 
       const history = orchestrator.getExecutionHistory();
 
@@ -1156,9 +1541,11 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       expect(history[0].result).toBeDefined();
       expect(history[0].timestamp).toBeDefined();
       expect(history[0].duration).toBeGreaterThan(0);
-    }, 180000);
+    
+}, 180000);
 
-    test('should handle concurrent execution attempts', async () => {const plan = await cicdManager.createTestExecutionPlan('development');const execution1Promise = orchestrator.executeTestPlan(plan);// Try to start another execution while first is running
+    test('should handle concurrent execution attempts', async () => {
+  const plan = await cicdManager.createTestExecutionPlan('development');const execution1Promise = orchestrator.executeTestPlan(plan);// Try to start another execution while first is running
       await expect(orchestrator.executeTestPlan(plan)).rejects.toThrow(
         'Test execution already in progress');// Wait for first execution to complete
       await execution1Promise;
@@ -1166,44 +1553,75 @@ describe('Testing Framework Integration and Automation', () => {let orchestrator
       // Now second execution should work
       const result2 = await orchestrator.executeTestPlan(plan);
       expect(result2.success).toBe(true);
-    }, 240000);
+    
+}, 240000);
 
-    test('should provide real-time execution status', async () => {const plan = await cicdManager.createTestExecutionPlan('development');const executionPromise = orchestrator.executeTestPlan(plan);// Check status during execution
+    test('should provide real-time execution status', async () => {
+  const plan = await cicdManager.createTestExecutionPlan('development');const executionPromise = orchestrator.executeTestPlan(plan);// Check status during execution
       const currentExecution = orchestrator.getCurrentExecution();
       expect(currentExecution).toBeDefined();
-      expect(currentExecution?.status).toBe('running');expect(currentExecution?.plan).toEqual(plan);await executionPromise;
+      expect(currentExecution?.status).toBe('running');
+expect(currentExecution?.plan).toEqual(plan);await executionPromise;
 
       // Check status after completion
       const finalExecution = orchestrator.getCurrentExecution();
       expect(finalExecution).toBeNull();
-    }, 120000);
+    
+}, 120000);
 
-    test('should handle test suite registration and management', () => {const customSuite: TestSuiteConfig = {id: 'custom-test',name: 'Custom Test Suite',filePath: './custom-test.spec.ts',category: 'custom',dependencies: ['connection-lifecycle'],executionTime: 120,priority: 10,
-        tags: ['custom', 'experimental']};orchestrator.registerTestSuite(customSuite);
+    test('should handle test suite registration and management', () => {
+  const customSuite: TestSuiteConfig = {
+id: 'custom-test',
+      name: 'Custom Test Suite',
+      filePath: './custom-test.spec.ts',
+      category: 'custom',
+      dependencies: ['connection-lifecycle'],
+      executionTime: 120,
+      priority: 10,
+        tags: ['custom', 'experimental']
+
+};
+orchestrator.registerTestSuite(customSuite);
 
       // Test with custom suite
       const plan: TestExecutionPlan = {
-        id: 'custom-plan',name: 'Custom Test Plan',suiteIds: ['connection-lifecycle', 'custom-test'],strategy: 'sequential',environment: 'test'};expect(async () => {
-        await orchestrator.executeTestPlan(plan);
-      }).not.toThrow();
+        id: 'custom-plan',
+      name: 'Custom Test Plan',
+      suiteIds: ['connection-lifecycle', 'custom-test'],strategy: 'sequential',
+      environment: 'test'};
+expect(async () => {
+  await orchestrator.executeTestPlan(plan);
+      
+}).not.toThrow();
     });
   });
 
-  describe('Integration with External Systems', () => {test('should validate CI/CD configuration files', () => {const workflow = {name: 'WebSocket Test Suite',on: {push: { branches: ['main', 'develop'] },pull_request: { branches: ['main'] }},jobs: {
-          'websocket-tests': {'runs-on': 'ubuntu-latest',steps: []}
+
+
+  describe('Integration with External Systems', () => {
+test('should validate CI/CD configuration files', () => const workflow = {name: 'WebSocket Test Suite',
+      on: {push: { branches: ['main', 'develop'] },pull_request: { branches: ['main'] }},jobs: {
+          'websocket-tests': {'runs-on': 'ubuntu-latest',
+      steps: []}
         }
       };
 
       expect(workflow.name).toBeDefined();
-      expect(workflow.on.push.branches).toContain('main');expect(workflow.jobs['websocket-tests']['runs-on']).toBe('ubuntu-latest');});test('should support multi-environment configurations', async () => {const environments = ['development', 'staging', 'production'];for (const env of environments) {const plan = await cicdManager.createTestExecutionPlan(env);
+      expect(workflow.on.push.branches).toContain('main');
+expect(workflow.jobs['websocket-tests']['runs-on']).toBe('ubuntu-latest');});
+test('should support multi-environment configurations', async () => {
+  const environments = ['development', 'staging', 'production'];for (const env of environments) {const plan = await cicdManager.createTestExecutionPlan(env);
         expect(plan.environment).toBe(env);
         expect(plan.suiteIds.length).toBeGreaterThan(0);
-      }
+      
+}
     });
 
-    test('should handle test data management', async () => {// Simulate test data setup and cleanupconst testData = {
-        users: [
-          { id: 1, name: 'Test User 1' },{ id: 2, name: 'Test User 2' }],sessions: [
+    test('should handle test data management', async () => {
+  // Simulate test data setup and cleanupconst testData = {,
+  users: [
+          { id: 1, name: 'Test User 1' 
+},{ id: 2, name: 'Test User 2' }],sessions: [
           { id: 'session1', userId: 1 },{ id: 'session2', userId: 2 }
         ]
       };

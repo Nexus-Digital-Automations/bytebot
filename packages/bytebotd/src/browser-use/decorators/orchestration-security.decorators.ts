@@ -27,33 +27,74 @@
  * @since Browser Orchestration Security Implementation
  */
 
-import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';import { ApiBearerAuth, ApiSecurity, ApiResponse, ApiOperation } from '@nestjs/swagger';import { UserRole, Permission } from '@bytebot/shared';// Import orchestration guard and typesimport { BrowserOrchestrationSecurityGuard } from '../guards/browser-orchestration-security.guard';import {OrchestrationSecurityLevel,
+import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
+import { ApiBearerAuth, ApiSecurity, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { UserRole, Permission } from '@bytebot/shared';
+
+// Import orchestration guard and types
+import { BrowserOrchestrationSecurityGuard } from '../guards/browser-orchestration-security.guard';
+import {
+  OrchestrationSecurityLevel,
   OrchestrationRiskLevel,
   ResourceSecurityContext,
   OrchestrationRateLimit,
-} from '../guards/browser-orchestration-security.guard';// Import existing browser security decorators for extensionimport {
+} from '../guards/browser-orchestration-security.guard';
+
+// Import existing browser security decorators for extension
+import {
   BrowserAuth,
   BrowserRoles,
   BrowserPermissions,
   BrowserValidation,
   BrowserAuditLog,
   BrowserSessionRequired,
-} from '../../browser/decorators/security.decorators';/*** Orchestration operation types for security classification
+} from '../../browser/decorators/security.decorators';
+
+/**
+ * Orchestration operation types for security classification
  */
-export enum OrchestrationOperationType {
-  CREATE = 'create',COORDINATE = 'coordinate',MONITOR = 'monitor',SCALE = 'scale',TERMINATE = 'terminate',EMERGENCY = 'emergency',}/**
+export enum OrchestrationOperationTypeEnum {
+  CREATE = 'create',
+  COORDINATE = 'coordinate',
+  MONITOR = 'monitor',
+  SCALE = 'scale',
+  TERMINATE = 'terminate',
+  EMERGENCY = 'emergency',
+}
+
+/**
  * Orchestration compliance requirements
  */
-export enum OrchestrationCompliance {
-  SOC2 = 'soc2',GDPR = 'gdpr',HIPAA = 'hipaa',PCI_DSS = 'pci_dss',ISO_27001 = 'iso_27001',}/**
+export enum OrchestrationComplianceEnum {
+  SOC2 = 'soc2',
+  GDPR = 'gdpr',
+  HIPAA = 'hipaa',
+  PCI_DSS = 'pci_dss',
+  ISO_27001 = 'iso_27001',
+}
+
+/**
  * Resource allocation strategies
  */
-export enum ResourceAllocationStrategy {
-  CONSERVATIVE = 'conservative',BALANCED = 'balanced',AGGRESSIVE = 'aggressive',CUSTOM = 'custom',}/**
+export enum ResourceAllocationStrategyEnum {
+  CONSERVATIVE = 'conservative',
+  BALANCED = 'balanced',
+  AGGRESSIVE = 'aggressive',
+  CUSTOM = 'custom',
+}
+
+/**
  * Monitoring levels for orchestration operations
  */
-export enum OrchestrationMonitoringLevel {
-  BASIC = 'basic',STANDARD = 'standard',ENHANCED = 'enhanced',COMPREHENSIVE = 'comprehensive',REAL_TIME = 'real_time',}/**
+export enum OrchestrationMonitoringLevelEnum {
+  BASIC = 'basic',
+  STANDARD = 'standard',
+  ENHANCED = 'enhanced',
+  COMPREHENSIVE = 'comprehensive',
+  REAL_TIME = 'real_time',
+}
+
+/**
  * Resource limit configuration
  */
 export interface OrchestrationResourceConfig {
@@ -64,7 +105,7 @@ export interface OrchestrationResourceConfig {
   maxNetworkMBps: number;
   maxStorageGB: number;
   maxExecutionTimeMs: number;
-  allocationStrategy: ResourceAllocationStrategy;
+  allocationStrategy: ResourceAllocationStrategyEnum;
   enforceHardLimits: boolean;
   escalationThreshold: number;
 }
@@ -73,7 +114,7 @@ export interface OrchestrationResourceConfig {
  * Orchestration monitoring configuration
  */
 export interface OrchestrationMonitoringConfig {
-  level: OrchestrationMonitoringLevel;
+  level: OrchestrationMonitoringLevelEnum;
   realTimeAlerts: boolean;
   performanceMetrics: boolean;
   securityEvents: boolean;
@@ -92,43 +133,66 @@ export interface EmergencyOrchestrationConfig {
   maxEmergencyAgents: number;
   maxEmergencyDuration: number;
   approvalRequired: boolean;
-  auditLevel: 'standard' | 'enhanced' | 'comprehensive';notificationChannels: string[];}
+  auditLevel: 'standard' | 'enhanced' | 'comprehensive';
+  notificationChannels: string[];
+}
 
 // ===== METADATA KEYS =====
 
-export const ORCHESTRATION_SECURITY_LEVEL_KEY = 'orchestration_security_level';export const ORCHESTRATION_RISK_LEVEL_KEY = 'orchestration_risk_level';export const ORCHESTRATION_OPERATION_TYPE_KEY = 'orchestration_operation_type';export const ORCHESTRATION_RESOURCE_CONFIG_KEY = 'orchestration_resource_config';export const ORCHESTRATION_RATE_LIMIT_KEY = 'orchestration_rate_limit';export const ORCHESTRATION_COMPLIANCE_KEY = 'orchestration_compliance';export const ORCHESTRATION_MONITORING_KEY = 'orchestration_monitoring';export const ORCHESTRATION_EMERGENCY_KEY = 'orchestration_emergency';export const ORCHESTRATION_AGENT_COORDINATION_KEY = 'orchestration_agent_coordination';export const ORCHESTRATION_RESOURCE_ISOLATION_KEY = 'orchestration_resource_isolation';// ===== SECURITY LEVEL DECORATORS =====/**
+export const ORCHESTRATION_SECURITY_LEVEL_KEY = 'orchestration_security_level';
+export const ORCHESTRATION_RISK_LEVEL_KEY = 'orchestration_risk_level';
+export const ORCHESTRATION_OPERATION_TYPE_KEY = 'orchestration_operation_type';
+export const ORCHESTRATION_RESOURCE_CONFIG_KEY = 'orchestration_resource_config';
+export const ORCHESTRATION_RATE_LIMIT_KEY = 'orchestration_rate_limit';
+export const ORCHESTRATION_COMPLIANCE_KEY = 'orchestration_compliance';
+export const ORCHESTRATION_MONITORING_KEY = 'orchestration_monitoring';
+export const ORCHESTRATION_EMERGENCY_KEY = 'orchestration_emergency';
+export const ORCHESTRATION_AGENT_COORDINATION_KEY = 'orchestration_agent_coordination';
+export const ORCHESTRATION_RESOURCE_ISOLATION_KEY = 'orchestration_resource_isolation';
+
+// ===== SECURITY LEVEL DECORATORS =====
+
+/**
  * Set orchestration security level
  */
-export const OrchestrationSecurityLevel = (level: OrchestrationSecurityLevel) => {
+export const SetOrchestrationSecurityLevel = (level: OrchestrationSecurityLevel) => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_SECURITY_LEVEL_KEY, level),
     BrowserAuth(),
     UseGuards(BrowserOrchestrationSecurityGuard),
     ApiSecurity('orchestration-security'),
     ApiOperation({
-      summary: `Orchestration operation (Security Level: ${level})`,}),ApiResponse({
+      summary: `Orchestration operation (Security Level: ${level})`,
+    }),
+    ApiResponse({
       status: 403,
-      description: `Forbidden - Operation requires ${level} security clearance`,}),);
+      description: `Forbidden - Operation requires ${level} security clearance`,
+    }),
+  );
 };
 
 /**
  * Set orchestration risk level
  */
-export const OrchestrationRiskLevel = (level: OrchestrationRiskLevel) => {
+export const SetOrchestrationRiskLevel = (level: OrchestrationRiskLevel) => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_RISK_LEVEL_KEY, level),
     ApiOperation({
-      description: `Risk Level: ${level}`,}),);
+      description: `Risk Level: ${level}`,
+    }),
+  );
 };
 
 /**
  * Define orchestration operation type
  */
-export const OrchestrationOperationType = (type: OrchestrationOperationType) => {
+export const SetOrchestrationOperationType = (type: OrchestrationOperationTypeEnum) => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_OPERATION_TYPE_KEY, type),
     ApiOperation({
-      tags: [`Orchestration-${type}`],}),);
+      tags: [`Orchestration-${type}`],
+    }),
+  );
 };
 
 // ===== RESOURCE CONTROL DECORATORS =====
@@ -161,7 +225,7 @@ export const ConservativeResourceAllocation = () => {
     maxNetworkMBps: 100,
     maxStorageGB: 20,
     maxExecutionTimeMs: 1800000, // 30 minutes
-    allocationStrategy: ResourceAllocationStrategy.CONSERVATIVE,
+    allocationStrategy: ResourceAllocationStrategyEnum.CONSERVATIVE,
     enforceHardLimits: true,
     escalationThreshold: 0.8,
   });
@@ -179,7 +243,7 @@ export const BalancedResourceAllocation = () => {
     maxNetworkMBps: 300,
     maxStorageGB: 50,
     maxExecutionTimeMs: 3600000, // 1 hour
-    allocationStrategy: ResourceAllocationStrategy.BALANCED,
+    allocationStrategy: ResourceAllocationStrategyEnum.BALANCED,
     enforceHardLimits: true,
     escalationThreshold: 0.85,
   });
@@ -197,7 +261,7 @@ export const AggressiveResourceAllocation = () => {
     maxNetworkMBps: 1000,
     maxStorageGB: 200,
     maxExecutionTimeMs: 7200000, // 2 hours
-    allocationStrategy: ResourceAllocationStrategy.AGGRESSIVE,
+    allocationStrategy: ResourceAllocationStrategyEnum.AGGRESSIVE,
     enforceHardLimits: false,
     escalationThreshold: 0.9,
   });
@@ -215,7 +279,7 @@ export const EnterpriseResourceAllocation = () => {
     maxNetworkMBps: 2000,
     maxStorageGB: 500,
     maxExecutionTimeMs: 14400000, // 4 hours
-    allocationStrategy: ResourceAllocationStrategy.CUSTOM,
+    allocationStrategy: ResourceAllocationStrategyEnum.CUSTOM,
     enforceHardLimits: false,
     escalationThreshold: 0.95,
   });
@@ -226,7 +290,7 @@ export const EnterpriseResourceAllocation = () => {
 /**
  * Apply orchestration-specific rate limiting
  */
-export const OrchestrationRateLimit = (config: OrchestrationRateLimit) => {
+export const SetOrchestrationRateLimit = (config: OrchestrationRateLimit) => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_RATE_LIMIT_KEY, config),
     ApiResponse({
@@ -242,7 +306,7 @@ export const OrchestrationRateLimit = (config: OrchestrationRateLimit) => {
  * Standard rate limiting for regular orchestration operations
  */
 export const StandardOrchestrationRateLimit = () => {
-  return OrchestrationRateLimit({
+  return SetOrchestrationRateLimit({
     operationsPerMinute: 10,
     agentsPerHour: 100,
     resourcesPerDay: 2000,
@@ -256,7 +320,7 @@ export const StandardOrchestrationRateLimit = () => {
  * Strict rate limiting for high-risk orchestration operations
  */
 export const StrictOrchestrationRateLimit = () => {
-  return OrchestrationRateLimit({
+  return SetOrchestrationRateLimit({
     operationsPerMinute: 3,
     agentsPerHour: 50,
     resourcesPerDay: 500,
@@ -270,7 +334,7 @@ export const StrictOrchestrationRateLimit = () => {
  * Permissive rate limiting for admin orchestration operations
  */
 export const PermissiveOrchestrationRateLimit = () => {
-  return OrchestrationRateLimit({
+  return SetOrchestrationRateLimit({
     operationsPerMinute: 30,
     agentsPerHour: 500,
     resourcesPerDay: 10000,
@@ -285,45 +349,48 @@ export const PermissiveOrchestrationRateLimit = () => {
 /**
  * Enforce compliance requirements for orchestration
  */
-export const OrchestrationCompliance = (...requirements: OrchestrationCompliance[]) => {
+export const SetOrchestrationCompliance = (...requirements: OrchestrationComplianceEnum[]) => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_COMPLIANCE_KEY, requirements),
     ApiOperation({
-      description: `Compliance: ${requirements.join(`, ')}',}),
+      description: `Compliance: ${requirements.join(', ')}`,
+    }),
     ApiResponse({
       status: 422,
-      description: 'Unprocessable Entity - Compliance requirements not met',}),);
+      description: 'Unprocessable Entity - Compliance requirements not met',
+    }),
+  );
 };
 
 /**
  * SOC 2 compliance for orchestration operations
  */
 export const SOC2OrchestrationCompliance = () => {
-  return OrchestrationCompliance(OrchestrationCompliance.SOC2);
+  return SetOrchestrationCompliance(OrchestrationComplianceEnum.SOC2);
 };
 
 /**
  * GDPR compliance for orchestration operations
  */
 export const GDPROrchestrationCompliance = () => {
-  return OrchestrationCompliance(OrchestrationCompliance.GDPR);
+  return SetOrchestrationCompliance(OrchestrationComplianceEnum.GDPR);
 };
 
 /**
  * HIPAA compliance for orchestration operations
  */
 export const HIPAAOrchestrationCompliance = () => {
-  return OrchestrationCompliance(OrchestrationCompliance.HIPAA);
+  return SetOrchestrationCompliance(OrchestrationComplianceEnum.HIPAA);
 };
 
 /**
  * Multi-compliance for critical orchestration operations
  */
 export const CriticalOrchestrationCompliance = () => {
-  return OrchestrationCompliance(
-    OrchestrationCompliance.SOC2,
-    OrchestrationCompliance.GDPR,
-    OrchestrationCompliance.ISO_27001,
+  return SetOrchestrationCompliance(
+    OrchestrationComplianceEnum.SOC2,
+    OrchestrationComplianceEnum.GDPR,
+    OrchestrationComplianceEnum.ISO_27001,
   );
 };
 
@@ -336,7 +403,9 @@ export const OrchestrationMonitoring = (config: OrchestrationMonitoringConfig) =
   return applyDecorators(
     SetMetadata(ORCHESTRATION_MONITORING_KEY, config),
     BrowserAuditLog({
-      logLevel: config.level === OrchestrationMonitoringLevel.COMPREHENSIVE ? 'warn' : 'info',includeRequestBody: config.performanceMetrics,includeResponseBody: config.securityEvents,
+      logLevel: config.level === OrchestrationMonitoringLevelEnum.COMPREHENSIVE ? 'warn' : 'info',
+      includeRequestBody: config.performanceMetrics,
+      includeResponseBody: config.securityEvents,
     }),
   );
 };
@@ -346,7 +415,7 @@ export const OrchestrationMonitoring = (config: OrchestrationMonitoringConfig) =
  */
 export const BasicOrchestrationMonitoring = () => {
   return OrchestrationMonitoring({
-    level: OrchestrationMonitoringLevel.BASIC,
+    level: OrchestrationMonitoringLevelEnum.BASIC,
     realTimeAlerts: false,
     performanceMetrics: true,
     securityEvents: true,
@@ -362,7 +431,7 @@ export const BasicOrchestrationMonitoring = () => {
  */
 export const EnhancedOrchestrationMonitoring = () => {
   return OrchestrationMonitoring({
-    level: OrchestrationMonitoringLevel.ENHANCED,
+    level: OrchestrationMonitoringLevelEnum.ENHANCED,
     realTimeAlerts: true,
     performanceMetrics: true,
     securityEvents: true,
@@ -378,7 +447,7 @@ export const EnhancedOrchestrationMonitoring = () => {
  */
 export const ComprehensiveOrchestrationMonitoring = () => {
   return OrchestrationMonitoring({
-    level: OrchestrationMonitoringLevel.COMPREHENSIVE,
+    level: OrchestrationMonitoringLevelEnum.COMPREHENSIVE,
     realTimeAlerts: true,
     performanceMetrics: true,
     securityEvents: true,
@@ -394,7 +463,7 @@ export const ComprehensiveOrchestrationMonitoring = () => {
  */
 export const RealTimeOrchestrationMonitoring = () => {
   return OrchestrationMonitoring({
-    level: OrchestrationMonitoringLevel.REAL_TIME,
+    level: OrchestrationMonitoringLevelEnum.REAL_TIME,
     realTimeAlerts: true,
     performanceMetrics: true,
     securityEvents: true,
@@ -433,7 +502,10 @@ export const StandardEmergencyOrchestration = () => {
     maxEmergencyAgents: 25,
     maxEmergencyDuration: 3600000, // 1 hour
     approvalRequired: true,
-    auditLevel: 'enhanced',notificationChannels: ['security', 'operations'],});};
+    auditLevel: 'enhanced',
+    notificationChannels: ['security', 'operations'],
+  });
+};
 
 /**
  * Critical emergency orchestration with bypass capabilities
@@ -445,7 +517,10 @@ export const CriticalEmergencyOrchestration = () => {
     maxEmergencyAgents: 100,
     maxEmergencyDuration: 7200000, // 2 hours
     approvalRequired: false,
-    auditLevel: 'comprehensive',notificationChannels: ['security', 'operations', 'executive'],});};
+    auditLevel: 'comprehensive',
+    notificationChannels: ['security', 'operations', 'executive'],
+  });
+};
 
 // ===== AGENT COORDINATION DECORATORS =====
 
@@ -456,8 +531,12 @@ export const EncryptedAgentCoordination = () => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_AGENT_COORDINATION_KEY, {
       encryptionRequired: true,
-      protocol: 'TLS_1_3',certificateValidation: true,}),
-    ApiSecurity('agent-coordination-encryption'),);};
+      protocol: 'TLS_1_3',
+      certificateValidation: true,
+    }),
+    ApiSecurity('agent-coordination-encryption'),
+  );
+};
 
 /**
  * Require agent resource isolation
@@ -465,7 +544,11 @@ export const EncryptedAgentCoordination = () => {
 export const AgentResourceIsolation = () => {
   return applyDecorators(
     SetMetadata(ORCHESTRATION_RESOURCE_ISOLATION_KEY, {
-      isolationLevel: 'STRICT',crossAgentCommunication: 'RESTRICTED',sharedResourceAccess: 'DENIED',}),);
+      isolationLevel: 'STRICT',
+      crossAgentCommunication: 'RESTRICTED',
+      sharedResourceAccess: 'DENIED',
+    }),
+  );
 };
 
 // ===== COMBINED SECURITY DECORATORS =====
@@ -478,9 +561,9 @@ export const BasicOrchestrationSecurity = () => {
     BrowserAuth(),
     BrowserRoles(UserRole._USER, UserRole._OPERATOR),
     BrowserPermissions(Permission.BROWSER_ORCHESTRATION),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.BASIC),
-    OrchestrationRiskLevel(OrchestrationRiskLevel._MINIMAL),
-    OrchestrationOperationType(OrchestrationOperationType.CREATE),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.BASIC),
+    SetOrchestrationRiskLevel(OrchestrationRiskLevel._MINIMAL),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.CREATE),
     ConservativeResourceAllocation(),
     StandardOrchestrationRateLimit(),
     BasicOrchestrationMonitoring(),
@@ -496,9 +579,9 @@ export const CoordinatedOrchestrationSecurity = () => {
     BrowserAuth(),
     BrowserRoles(UserRole._OPERATOR, UserRole._ADMIN),
     BrowserPermissions(Permission.BROWSER_ORCHESTRATION, Permission.AGENT_COORDINATION),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.COORDINATED),
-    OrchestrationRiskLevel(OrchestrationRiskLevel._MODERATE),
-    OrchestrationOperationType(OrchestrationOperationType.COORDINATE),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.COORDINATED),
+    SetOrchestrationRiskLevel(OrchestrationRiskLevel._MODERATE),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.COORDINATE),
     BalancedResourceAllocation(),
     StandardOrchestrationRateLimit(),
     EnhancedOrchestrationMonitoring(),
@@ -524,9 +607,9 @@ export const DistributedOrchestrationSecurity = () => {
       Permission.AGENT_COORDINATION,
       Permission.RESOURCE_MANAGEMENT,
     ),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.DISTRIBUTED),
-    OrchestrationRiskLevel(OrchestrationRiskLevel.ELEVATED),
-    OrchestrationOperationType(OrchestrationOperationType.COORDINATE),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.DISTRIBUTED),
+    SetOrchestrationRiskLevel(OrchestrationRiskLevel.ELEVATED),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.COORDINATE),
     AggressiveResourceAllocation(),
     StrictOrchestrationRateLimit(),
     EnhancedOrchestrationMonitoring(),
@@ -556,8 +639,8 @@ export const EnterpriseOrchestrationSecurity = () => {
       Permission.ENTERPRISE_ORCHESTRATION,
       Permission.SYSTEM_ADMINISTRATION,
     ),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.ENTERPRISE),
-    OrchestrationRiskLevel(OrchestrationRiskLevel._HIGH),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.ENTERPRISE),
+    SetOrchestrationRiskLevel(OrchestrationRiskLevel._HIGH),
     EnterpriseResourceAllocation(),
     StrictOrchestrationRateLimit(),
     ComprehensiveOrchestrationMonitoring(),
@@ -589,8 +672,8 @@ export const CriticalOrchestrationSecurity = () => {
       Permission.CRITICAL_OPERATIONS,
       Permission.SYSTEM_ADMINISTRATION,
     ),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.CRITICAL),
-    OrchestrationRiskLevel(OrchestrationRiskLevel._CRITICAL),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.CRITICAL),
+    SetOrchestrationRiskLevel(OrchestrationRiskLevel._CRITICAL),
     EnterpriseResourceAllocation(),
     StrictOrchestrationRateLimit(),
     RealTimeOrchestrationMonitoring(),
@@ -619,7 +702,7 @@ export const CriticalOrchestrationSecurity = () => {
 export const OrchestrationCreationSecurity = () => {
   return applyDecorators(
     CoordinatedOrchestrationSecurity(),
-    OrchestrationOperationType(OrchestrationOperationType.CREATE),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.CREATE),
     ApiOperation({
       summary: 'Create Orchestration',description: 'Create new multi-agent browser orchestration',}),);
 };
@@ -630,7 +713,7 @@ export const OrchestrationCreationSecurity = () => {
 export const OrchestrationMonitoringSecurity = () => {
   return applyDecorators(
     BasicOrchestrationSecurity(),
-    OrchestrationOperationType(OrchestrationOperationType.MONITOR),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.MONITOR),
     BrowserPermissions(Permission.ORCHESTRATION_MONITORING),
     ConservativeResourceAllocation(),
     PermissiveOrchestrationRateLimit(),
@@ -644,7 +727,7 @@ export const OrchestrationMonitoringSecurity = () => {
 export const OrchestrationScalingSecurity = () => {
   return applyDecorators(
     DistributedOrchestrationSecurity(),
-    OrchestrationOperationType(OrchestrationOperationType.SCALE),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.SCALE),
     BrowserPermissions(
       Permission.BROWSER_ORCHESTRATION_ADMIN,
       Permission.RESOURCE_MANAGEMENT,
@@ -659,7 +742,7 @@ export const OrchestrationScalingSecurity = () => {
 export const OrchestrationTerminationSecurity = () => {
   return applyDecorators(
     EnterpriseOrchestrationSecurity(),
-    OrchestrationOperationType(OrchestrationOperationType.TERMINATE),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.TERMINATE),
     BrowserPermissions(
       Permission.BROWSER_ORCHESTRATION_ADMIN,
       Permission.ORCHESTRATION_TERMINATION,
@@ -676,7 +759,7 @@ export const OrchestrationTerminationSecurity = () => {
 export const EmergencyOrchestrationSecurity = () => {
   return applyDecorators(
     CriticalOrchestrationSecurity(),
-    OrchestrationOperationType(OrchestrationOperationType.EMERGENCY),
+    SetOrchestrationOperationType(OrchestrationOperationTypeEnum.EMERGENCY),
     StandardEmergencyOrchestration(),
     BrowserPermissions(
       Permission.EMERGENCY_ORCHESTRATION,
@@ -705,7 +788,7 @@ export const TestingOrchestrationSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
     BrowserRoles(UserRole._ADMIN),
-    OrchestrationSecurityLevel(OrchestrationSecurityLevel.BASIC),
+    SetOrchestrationSecurityLevel(OrchestrationSecurityLevel.BASIC),
     ConservativeResourceAllocation(),
     PermissiveOrchestrationRateLimit(),
     BasicOrchestrationMonitoring(),

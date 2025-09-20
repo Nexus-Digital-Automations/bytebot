@@ -3357,6 +3357,14 @@
       "category": "error",
       "priority": "normal",
       "id": "error_1758381113223_q8l51jit95k"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T15:58:00.316Z",
+      "title": "Deploy 5 concurrent agents for ESLint parsing error fixes in bytebotd test files",
+      "description": "Fix all syntax errors across multiple test files in bytebotd package - deploy concurrent agents to handle 5 files simultaneously",
+      "category": "error",
+      "id": "error_1758383880316_0av96bx9s0ka"
     }
   ],
   "agents": {
@@ -9235,6 +9243,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-20T15:06:49.682Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758383830400_1_general_45acca67": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T15:57:10.401Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T15:57:10.401Z",
       "sessionId": null,
       "metadata": {}
     }

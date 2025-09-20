@@ -15,7 +15,7 @@
  * @author Claude Code (Testing & QA Specialist)
  * @version 1.0.0
  * @coverage-target 95%+
- */
+ */;
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
@@ -34,45 +34,38 @@ interface UserData {
   id: string;
   email: string;
   passwordHash: string;
-  rol,
-        e: string;
-  createdA,
-      t: Date;
+  role: string;
+  createdAt: Date;
   isActive?: boolean;
 }
 
 interface LoginDto {
-  emai,
-        l: string;
-  passwor,
-      d: string;
+  email: string;
+  password: string;
 }
 
 interface RegisterDto {
-  emai,
-        l: string;
-  passwor,
-      d: string;
+  email: string;
+  password: string;
   role?: string;
 }
 
 interface TokenResponse {
   accessToken: string;
   refreshToken: string;
-  use,
-        r: Omit<UserData, 'passwordHash'>;expiresI,
-      n: number;}
+  user: Omit<UserData, 'passwordHash'>;
+  expiresIn: number;
+}
 
 interface _AuthResult {
-  use,
-      r: Omit<UserData, 'passwordHash'>;tokens?: TokenResponse;}
+  user: Omit<UserData, 'passwordHash'>;
+  tokens?: TokenResponse;
+}
 
 interface JwtPayload {
   sub: string;
-  emai,
-        l: string;
-  rol,
-      e: string;
+  email: string;
+  role: string;
   iat?: number;
   exp?: number;
 }
@@ -80,59 +73,67 @@ interface JwtPayload {
 // Mock implementation for testing Phase 1 requirements
 class MockAuthService {
   constructor(
-    private jwtServic,
-        e: JwtService,
-    private configServic,
-      e: ConfigService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<UserData, 'passwordHash'> | null> {// Mock implementation based on research requirementsconst user = await this.findUserByEmail(email);
+  ): Promise<Omit<UserData, 'passwordHash'> | null> {
+  // Mock implementation based on research requirements
+    const user = await this.findUserByEmail(email);
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
-      const { passwordHas,
-      h: _passwordHash, ...result } = user;
+      const { passwordHash: _passwordHash, ...result } = user;
       return result;
     }
     return null;
   }
 
   async login(loginDto: LoginDto): Promise<TokenResponse> {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+  const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');}return await this.generateTokens(user);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return await this.generateTokens(user);
   }
 
   async register(registerDto: RegisterDto): Promise<TokenResponse> {
-    const existingUser = await this.findUserByEmail(registerDto.email);
+  const existingUser = await this.findUserByEmail(registerDto.email);
     if (existingUser) {
-      throw new BadRequestException('User already exists');}const saltRounds = 12;
+      throw new BadRequestException('User already exists');
+    }
+    const saltRounds = 12;
     const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
 
     const newUser = {
-      id: 'user_' + Date.now(),
-      email: registerDto.email,passwordHash,
-      rol,
-        e: registerDto.role ?? 'viewer',
-      createdA,
-      t: new Date(),};
+  id: 'user_' + Date.now(),
+      email: registerDto.email,
+      passwordHash,
+      role: registerDto.role ?? 'viewer',
+      createdAt: new Date(),
+    };
 
     return this.generateTokens(newUser);
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
-    try {
+  try {
       const payload = this.jwtService.verify(refreshToken, {
-        secre,
-      t: this.configService.get('JWT_REFRESH_SECRET'),}) as JwtPayload;const user = await this.findUserById(payload.sub);
+        secret: this.configService.get('JWT_REFRESH_SECRET')
+      }) as JwtPayload;
+      const user = await this.findUserById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException('Invalid refresh token');}return await this.generateTokens(user);
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+      return await this.generateTokens(user);
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');}}
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
 
   logout(): void {
-    // In real implementation, would invalidate refresh tokens
+  // In real implementation, would invalidate refresh tokens
     return;
   }
 
@@ -141,27 +142,20 @@ class MockAuthService {
   ): Promise<TokenResponse> {
     const payload: JwtPayload = {
       sub: user.id,
-      emai,
-        l: user.email,
-      rol,
-      e: user.role,
+      email: user.email,
+      role: user.role,
     };
 
     const accessToken = this.jwtService.sign(payload, {
-      secre,
-        t: this.configService.get('JWT_SECRET'),
-      expiresI,
-      n: '15m', // 15 minutes as per research spec
+      secret: this.configService.get('JWT_SECRET'),
+      expiresIn: '15m', // 15 minutes as per research spec
     });
 
     const refreshToken = this.jwtService.sign(
-      { su,
-      b: user.id },
+      { sub: user.id },
       {
-        secre,
-        t: this.configService.get('JWT_REFRESH_SECRET'),
-        expiresI,
-      n: '7d', // 7 days as per research spec
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: '7d', // 7 days as per research spec
       }
     );
 
@@ -172,10 +166,8 @@ class MockAuthService {
         id: user.id,
         email: user.email,
         role: user.role,
-        createdA,
-        t: user.createdAt,
-        isActiv,
-      e: user.isActive ?? true,
+        createdAt: user.createdAt,
+        isActive: user.isActive ?? true,
       },
       expiresIn: 900, // 15 minutes
     };
@@ -183,50 +175,46 @@ class MockAuthService {
 
   private getRolePermissions(role: string): string[] {
     const rolePermissions: Record<string, string[]> = {
-      admin: ['task:read', 'task:write', 'computer:control', 'system: admin'],
-      operator: ['task:read', 'task:write', 'computer: control'],
-      viewe,
-        r: ['tas,
-      k:read'],};return rolePermissions[role] ?? ['task: read'];}private async findUserByEmail(email: string): Promise<UserData | null> {
-    // Mock user database - in real implementation would use Prisma
+      admin: ['task:read', 'task:write', 'computer:control', 'system:admin'],
+      operator: ['task:read', 'task:write', 'computer:control'],
+      viewer: ['task:read'],
+    };
+    return rolePermissions[role] ?? ['task:read'];
+  }
+
+  private async findUserByEmail(email: string): Promise<UserData | null> {
+  // Mock user database - in real implementation would use Prisma
     const mockUsers: UserData[] = [
-      {
-        id: 'user_1',
+  {,
+  id: 'user_1',
       email: 'admin@bytebot.ai',
-        passwordHash: await bcrypt.hash('admin123', 12),role: 'admin',
-      createdA,
-        t: new Date(),isActiv,
-      e: true,
-      },
+        passwordHash: await bcrypt.hash('admin123', 12),role: 'admin', createdAt: new Date(), isActive: true,
+      
+},
       {
-        id: 'user_2',
+  id: 'user_2',
       email: 'operator@bytebot.ai',
-        passwordHash: await bcrypt.hash('operator123', 12),role: 'operator',
-      createdA,
-        t: new Date(),isActiv,
-      e: true,
-      },
+        passwordHash: await bcrypt.hash('operator123', 12),role: 'operator', createdAt: new Date(), isActive: true,
+      
+},
     ];
     return mockUsers.find((u) => u.email === email) ?? null;
   }
 
   private async findUserById(
     id: string,
-  ): Promise<Omit<UserData, 'passwordHash'> | null> {const mockUsers: Omit<UserData, 'passwordHash'>[] = [{id: 'user_1',
+  ): Promise<Omit<UserData, 'passwordHash'> | null> {
+  const mockUsers: Omit<UserData, 'passwordHash'>[] = [{id: 'user_1',
       email: 'admin@bytebot.ai',
-        role: 'admin',
-      createdA,
-        t: new Date(),isActiv,
-      e: true,
-      },
+        role: 'admin', createdAt: new Date(), isActive: true,
+      
+},
       {
-        id: 'user_2',
+  id: 'user_2',
       email: 'operator@bytebot.ai',
-        role: 'operator',
-      createdA,
-        t: new Date(),isActiv,
-      e: true,
-      },
+        role: 'operator', createdAt: new Date(), isActive: true,
+      
+},
     ];
     return mockUsers.find((u) => u.id === id) ?? null;
   }
@@ -234,28 +222,26 @@ class MockAuthService {
 
 describe('AuthService', () => {
   let service: MockAuthService;
-  let jwtServic,
-        e: JwtService;
-  let _configServic,
-      e: ConfigService;
+  let jwtService: JwtService;
+  let _configService: ConfigService;
 
-  const operationId = `auth_test${Date.now()}`;beforeEach(async () => {console.log(
+  const operationId = `auth_test_${Date.now()}`;
 
+  beforeEach(async () => {
+    console.log(
+      `[${operationId}] Setting up AuthService test environment`,
     );
-      const module: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provid,
-        e: 'AuthService',
-      useClas,
-      s: MockAuthService,},
+          provide: 'AuthService',
+          useClass: MockAuthService,
+        },
         {
           provide: JwtService,
           useValue: {
-            sig,
-        n: jest.fn(),
-            verif,
-      y: jest.fn(),
+            sign: jest.fn(),
+            verify: jest.fn(),
           },
         },
         {
@@ -264,42 +250,47 @@ describe('AuthService', () => {
             get: jest.fn((key: string) => {
               const config: Record<string, string> = {
                 JWT_SECRET: 'test-secret-key',
-      JWT_REFRESH_SECRET: 'test-refresh-secret-key',
-        JWT_EXPIRES_I,
-        N: '15m',
-      JWT_REFRESH_EXPIRES_I,
-      N: '7d',
+                JWT_REFRESH_SECRET: 'test-refresh-secret-key',
+                JWT_EXPIRES_IN: '15m',
+                JWT_REFRESH_EXPIRES_IN: '7d',
               };
               return config[key as keyof typeof config];
             }),
           },
         },
-      ],
+      ]
     }).compile();
 
     service = new MockAuthService(
       module.get<JwtService>(JwtService),
-      module.get<ConfigService>(ConfigService),
+      module.get<ConfigService>(ConfigService)
     );
     jwtService = module.get<JwtService>(JwtService);
     _configService = module.get<ConfigService>(ConfigService);
 
-    console.log(`[${operationId}] AuthService test setup completed`);});
+    console.log(`[${operationId}] AuthService test setup completed`);
+  });
 
     afterEach(() => {
     console.log(`[${operationId}] AuthService test cleanup completed`);
   });
 
-    describe('User Authentication', () => {it('should authenticate valid user credentials', async () => {
-      const testId = `${operationId}_auth_valid`;console.log(
-
+  describe('User Authentication', () => {
+  it('should authenticate valid user credentials', async () => {
+      const testId = `${operationId
+}_auth_valid`;
+      console.log(
+        `[${testId}] Testing valid authentication credentials`,
       );
       const loginDto = {
-        emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'admin123',};(
-        jest.spyOn(jwtService, 'sign')).mockReturnValue('mocked-jwt-token');const result = await service.login(loginDto);
+  email: 'admin@bytebot.ai',
+        password: 'admin123',
+      
+};
+
+      (jest.spyOn(jwtService, 'sign')).mockReturnValue('mocked-jwt-token');
+
+      const result = await service.login(loginDto);
       expect(result).toBeDefined();
       expect(result.accessToken).toBe('mocked-jwt-token');
       expect(result.refreshToken).toBe('mocked-jwt-token');
@@ -313,19 +304,17 @@ describe('AuthService', () => {
     });
 
     it('should reject invalid user credentials', async () => {
-      const testId = `${operationId}_auth_invalid`;console.log(
-
+      const testId = `${operationId}_auth_invalid`;
+      console.log(
+        `[${testId}] Testing invalid authentication credentials`,
       );
       const loginDto = {
-        emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'wrongpassword',
+        email: 'admin@bytebot.ai',
+        password: 'wrongpassword',
       };
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+        UnauthorizedException);
 
       console.log(
         `[${testId}] Invalid authentication rejection test completed`,
@@ -333,34 +322,35 @@ describe('AuthService', () => {
     });
 
     it('should reject non-existent user', async () => {
-      const testId = `${operationId}_auth_nonexistent`;console.log(
-
+      const testId = `${operationId}_auth_nonexistent`;
+      console.log(
+        `[${testId}] Testing non-existent user authentication`,
       );
       const loginDto = {
-        emai,
-        l: 'nonexistent@bytebot.ai',
-      passwor,
-      d: 'password123',
+        email: 'nonexistent@bytebot.ai',
+        password: 'password123',
       };
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+        UnauthorizedException);
 
       console.log(`[${testId}] Non-existent user rejection test completed`);
     });
   });
 
-    describe('User Registration', () => {it('should register new user with valid data', async () => {
-      const testId = `${operationId}_register_valid`;console.log(
+  describe('User Registration', () => {
+  it('should register new user with valid data', async () => {
+      const testId = `${operationId}_register_valid`;
+      console.log(`[${testId}] Starting user registration test`);
 
-      );
       const registerDto = {
         email: 'newuser@bytebot.ai',
-      passwor,
-        d: 'newpassword123',rol,
-      e: 'operator',};(
-        jest.spyOn(jwtService, 'sign')).mockReturnValue('mocked-jwt-token');const result = await service.register(registerDto);
+        password: 'newpassword123',
+        role: 'operator',
+      };
+
+      jest.spyOn(jwtService, 'sign').mockReturnValue('mocked-jwt-token');
+      const result = await service.register(registerDto);
       expect(result).toBeDefined();
       expect(result.accessToken).toBeDefined();
       expect(result.refreshToken).toBeDefined();
@@ -371,18 +361,17 @@ describe('AuthService', () => {
     });
 
     it('should reject registration for existing user', async () => {
-      const testId = `${operationId}_register_duplicate`;console.log(
-
-      );
+      const testId = `${operationId}_register_duplicate`;
+      console.log(`[${testId}] Starting duplicate user registration test`);
       const registerDto = {
-        email: 'admin@bytebot.ai', // Already exists in mock datapasswor,
-        d: 'password123',
-      rol,
-      e: 'viewer',
-      };
+  email: 'admin@bytebot.ai', // Already exists in mock data,
+  password: 'password123',
+        role: 'viewer',
+      
+};
 
       await expect(service.register(registerDto)).rejects.toThrow(
-        BadRequestException,
+        BadRequestException
       );
 
       console.log(
@@ -391,14 +380,13 @@ describe('AuthService', () => {
     });
 
     it('should default to viewer role when none specified', async () => {
-      const testId = `${operationId}_register_default_role`;console.log(
-
+      const testId = `${operationId}_register_default_role`;
+      console.log(
+        `[${testId}] Testing default role assignment`,
       );
       const registerDto = {
-        emai,
-        l: 'defaultrole@bytebot.ai',
-        passwor,
-      d: 'password123',
+        email: 'defaultrole@bytebot.ai',
+        password: 'password123',
         // No role specified
       };
 
@@ -411,19 +399,17 @@ describe('AuthService', () => {
   });
 
     describe('Token Management', () => {
-    it('should generate JWT tokens with correct structure', async () => {
+  it('should generate JWT tokens with correct structure', async () => {
       const testId = `${operationId}_token_structure`;
       console.log(
-
+        `[${testId}] Testing JWT token structure generation`,
       );
       const mockUser = {
         id: 'user_123',
         email: 'test@bytebot.ai',
         role: 'admin',
-        createdAt: new Date('2023-01-01T00:0,
-        0:00.000Z'),
-        isActiv,
-      e: true,
+        createdAt: new Date('2023-01-01T00:00:00.000Z'),
+        isActive: true,
       };
 
       const _expectedAccessPayload = {
@@ -431,87 +417,93 @@ describe('AuthService', () => {
         email: mockUser.email,
         role: mockUser.role,
         permissions: [
-          'task:read','task:write','compute,
-        r:control','syste,
-      m:admin',],};
+          'task:read',
+          'task:write',
+          'computer:control',
+          'system:admin',
+        ],
+      };
 
       const _expectedRefreshPayload = {
-        su,
-      b: mockUser.id,
-      };
+  sub: mockUser.id,
+      
+};
 
       jest
         .spyOn(jwtService, 'sign').mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');await service['generateTokens'](mockUser);
       expect(jwtService.sign).toHaveBeenCalledWith(_expectedAccessPayload,
         expect.objectContaining({
-          secre,
-        t: 'test-secret-key',
-      expiresI,
-      n: '15m',}),);
+  secret: 'test-secret-key', expiresIn: '15m'
+      
+}),);
       expect(jwtService.sign).toHaveBeenCalledWith(
         _expectedRefreshPayload,
         expect.objectContaining({
-          secre,
-        t: 'test-refresh-secret-key',
-      expiresI,
-      n: '7d',
-        }),
-      );
+  secret: 'test-refresh-secret-key', expiresIn: '7d'
+      
+}));
 
       console.log(`[${testId}] JWT token structure test completed`);
     });
 
     it('should refresh valid tokens', async () => {
-      const testId = `${operationId}_token_refresh`;console.log(
+      const testId = `${operationId}_token_refresh`;
+      console.log(`[${testId}] Starting token refresh test`);
 
-      );
-      const mockPayload = { su,
-      b: 'user_1' };const refreshToken = 'valid-refresh-token';(jest.spyOn(jwtService, 'verify')).mockReturnValue(mockPayload);jest
-        .spyOn(jwtService, 'sign').mockReturnValueOnce('new-access-token').mockReturnValueOnce('new-refresh-token');const result = await service.refreshToken(refreshToken);
+      const mockPayload = { sub: 'user_1' };
+      const refreshToken = 'valid-refresh-token';
+      (jest.spyOn(jwtService, 'verify')).mockReturnValue(mockPayload);
+      jest
+        .spyOn(jwtService, 'sign')
+        .mockReturnValueOnce('new-access-token')
+        .mockReturnValueOnce('new-refresh-token');
+
+      const result = await service.refreshToken(refreshToken);
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
 
       console.log(`[${testId}] Token refresh test completed successfully`);
     });
 
-    it('should reject invalid refresh tokens', async () => {
+    it('should reject invalid refresh tokens'async () => {
       const testId = `${operationId}_token_refresh_invalid`;console.log(
 
       );
-      const invalidToken = 'invalid-refresh-token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {throw new Error('Invalid token');
-      });
+      const invalidToken = 'invalid-refresh-token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {
+  throw new Error('Invalid token');
+      
+});
 
       await expect(service.refreshToken(invalidToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+        UnauthorizedException);
 
       console.log(`[${testId}] Invalid refresh token rejection test completed`);
     });
   });
 
-    describe('Role-Based Permissions', () => {it('should assign correct permissions for admin role', () => {
-      const testId = `${operationId}_permissions_admin`;console.log(
+    describe('Role-Based Permissions', () => {
+  it('should assign correct permissions for admin role'() => {
+      const testId = `${operationId
+}_permissions_admin`;console.log(
 
       );
       const permissions = service['getRolePermissions']('admin');
-      expect(permissions).toEqual(['task:read','task:write','computer:control','system:admin',
-      ]);
+      expect(permissions).toEqual(['task:read','task:write','computer:control','system:admin']);
 
       console.log(`[${testId}] Admin permissions test completed`);
     });
 
-    it('should assign correct permissions for operator role', () => {
+    it('should assign correct permissions for operator role'() => {
       const testId = `${operationId}_permissions_operator`;console.log(
 
       );
       const permissions = service['getRolePermissions']('operator');
-      expect(permissions).toEqual(['task:read','task:write','computer:control',
-      ]);
+      expect(permissions).toEqual(['task:read','task:write','computer:control']);
 
       console.log(`[${testId}] Operator permissions test completed`);
     });
 
-    it('should assign correct permissions for viewer role', () => {
+    it('should assign correct permissions for viewer role'() => {
       const testId = `${operationId}_permissions_viewer`;console.log(
 
       );
@@ -521,7 +513,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Viewer permissions test completed`);
     });
 
-    it('should default to viewer permissions for unknown role', () => {
+    it('should default to viewer permissions for unknown role'() => {
       const testId = `${operationId}_permissions_unknown`;console.log(
 
       );
@@ -532,46 +524,46 @@ describe('AuthService', () => {
     });
   });
 
-    describe('Security Features', () => {it('should use strong password hashing', async () => {
-      const testId = `${operationId}_security_hashing`;console.log(
+    describe('Security Features', () => {
+  it('should use strong password hashing'async () => {
+      const testId = `${operationId
+}_security_hashing`;console.log(
 
       );
       const password = 'testpassword123';const saltRounds = 12;// Mock bcrypt to verify it's called with correct rounds
-      const bcryptSpy = jest.spyOn(bcrypt, 'hash');const registerDto = {emai,
-        l: 'security@bytebot.ai',password,rol,
-      e: 'viewer',
-      };
+      const bcryptSpy = jest.spyOn(bcrypt, 'hash');const registerDto = {
+  email: 'security@bytebot.ai',passwordrole: 'viewer',
+      
+};
 
       await service.register(registerDto);
-      expect(bcryptSpy).toHaveBeenCalledWith(password, saltRounds);
+      expect(bcryptSpy).toHaveBeenCalledWith(passwordsaltRounds);
 
       console.log(`[${testId}] Password hashing security test completed`);
     });
 
-    it('should handle concurrent login attempts safely', async () => {
+    it('should handle concurrent login attempts safely'async () => {
       const testId = `${operationId}_security_concurrent`;console.log(
 
       );
       const loginDto = {
-        emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'admin123',};(
-        jest.spyOn(jwtService, 'sign')).mockReturnValue('concurrent-test-token');// Simulate concurrent login attemptsconst promises = Array(10)
+        email: 'admin@bytebot.ai', password: 'admin123',};(
+        jest.spyOn(jwtService'sign')).mockReturnValue('concurrent-test-token');// Simulate concurrent login attemptsconst promises = Array(10)
         .fill(null)
         .map(() => service.login(loginDto));
       const results = await Promise.all(promises);
 
       // All should succeed with valid tokens
       results.forEach((result) => {
-        expect(result.accessToken).toBe('concurrent-test-token');
+  expect(result.accessToken).toBe('concurrent-test-token');
       expect(result.user.email).toBe(loginDto.email);
-      });
+      
+});
 
       console.log(`[${testId}] Concurrent login safety test completed`);
     });
 
-    it('should validate token expiration correctly', async () => {
+    it('should validate token expiration correctly'async () => {
       const testId = `${operationId}_security_expiration`;console.log(`[${testId}] Testing token expiration handling`);
 
       // Mock expired token verification
@@ -581,23 +573,21 @@ describe('AuthService', () => {
       const expiredToken = 'expired-refresh-token';
 
       await expect(service.refreshToken(expiredToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+        UnauthorizedException);
 
       console.log(`[${testId}] Token expiration test completed`);
     });
   });
 
-    describe('Performance & Reliability', () => {it('should complete authentication within performance threshold', async () => {
-      const testId = `${operationId}_performance_auth`;console.log(
+    describe('Performance & Reliability', () => {
+  it('should complete authentication within performance threshold'async () => {
+      const testId = `${operationId
+}_performance_auth`;console.log(
 
       );
       const loginDto = {
-        emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'admin123',};(
-        jest.spyOn(jwtService, 'sign')).mockReturnValue('performance-test-token');
+        email: 'admin@bytebot.ai', password: 'admin123',};(
+        jest.spyOn(jwtService'sign')).mockReturnValue('performance-test-token');
 
       const startTime = Date.now();
       await service.login(loginDto);
@@ -611,34 +601,27 @@ describe('AuthService', () => {
       );
     });
 
-    it('should handle database connection errors gracefully', async () => {
+    it('should handle database connection errors gracefully'async () => {
       const testId = `${operationId}_reliability_db_error`;console.log(`[${testId}] Testing database error handling`);
 
       // Mock database error
       (
         jest.spyOn(
           service,
-          'findUserByEmail' as keyof MockAuthService,)).mockRejectedValue(new Error('Database connection failed'));const loginDto = {emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'admin123',
-      };
+          'findUserByEmail' as keyof MockAuthService,)).mockRejectedValue(new Error('Database connection failed'));const loginDto = {email: 'admin@bytebot.ai', password: 'admin123'};
 
       await expect(service.login(loginDto)).rejects.toThrow();
 
       console.log(`[${testId}] Database error handling test completed`);
     });
 
-    it('should maintain consistent response format', async () => {
+    it('should maintain consistent response format'async () => {
       const testId = `${operationId}_reliability_response_format`;console.log(
 
       );
       const loginDto = {
-        emai,
-        l: 'admin@bytebot.ai',
-      passwor,
-      d: 'admin123',};(
-        jest.spyOn(jwtService, 'sign')).mockReturnValue('format-test-token');const result = await service.login(loginDto);// Verify consistent response structure
+        email: 'admin@bytebot.ai', password: 'admin123',};(
+        jest.spyOn(jwtService'sign')).mockReturnValue('format-test-token');const result = await service.login(loginDto);// Verify consistent response structure
       expect(result.accessToken).toEqual(expect.stringMatching(/.+/));
       expect(result.refreshToken).toEqual(expect.stringMatching(/.+/));
       expect(result.user.id).toEqual(expect.stringMatching(/.+/));
@@ -650,43 +633,41 @@ describe('AuthService', () => {
     });
   });
 
-    describe('Edge Cases & Error Scenarios', () => {it('should handle malformed token gracefully', async () => {
-      const testId = `${operationId}_edge_malformed_token`;console.log(
+    describe('Edge Cases & Error Scenarios', () => {
+  it('should handle malformed token gracefully'async () => {
+      const testId = `${operationId
+}_edge_malformed_token`;console.log(
 
       );
-      const malformedToken = 'not.a.jwt.token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {throw new Error('Malformed token');
-      });
+      const malformedToken = 'not.a.jwt.token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {
+  throw new Error('Malformed token');
+      
+});
 
       await expect(service.refreshToken(malformedToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+        UnauthorizedException);
 
       console.log(`[${testId}] Malformed token handling test completed`);
     });
 
-    it('should handle empty credentials', async () => {
+    it('should handle empty credentials'async () => {
       const testId = `${operationId}_edge_empty_credentials`;console.log(
 
       );
       const loginDto = {
-        emai,
-        l: '',
-      passwor,
-      d: '',
-      };
+        email: '', password: ''};
 
       await expect(service.login(loginDto)).rejects.toThrow();
 
       console.log(`[${testId}] Empty credentials handling test completed`);
     });
 
-    it('should handle null/undefined inputs', async () => {
+    it('should handle null/undefined inputs'async () => {
       const testId = `${operationId}_edge_null_inputs`;console.log(`[${testId}] Testing null/undefined input handling`);
       await expect(service.login(null as unknown as LoginDto),
       ).rejects.toThrow();
       await expect(
-        service.refreshToken(null as unknown as string),
-      ).rejects.toThrow();
+        service.refreshToken(null as unknown as string)).rejects.toThrow();
 
       console.log(`[${testId}] Null/undefined input handling test completed`);
     });

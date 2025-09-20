@@ -33,15 +33,24 @@ import {
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserPermission,
-} from '../middleware/browser-use-auth.middleware';// Parlant integration for conversational authorizationimport {
+} from '../middleware/browser-use-auth.middleware';
+
+// Parlant integration for conversational authorization
+import {
   ParlantIntegrationService,
   ParlantValidationRequest,
   ConversationalValidationError,
   RiskLevel,
-} from '../parlant/parlant-integration.service';// Security context typesimport {
+} from '../parlant/parlant-integration.service';
+
+// Security context types
+import {
   ParlantUserContext,
   SecurityLevel,
-} from '../../shared/src/types/parlant-integration.types';/*** Role definition with hierarchical inheritance
+} from '../../shared/src/types/parlant-integration.types';
+
+/**
+ * Role definition with hierarchical inheritance
  */
 export interface BrowserUseRole {
   name: string;

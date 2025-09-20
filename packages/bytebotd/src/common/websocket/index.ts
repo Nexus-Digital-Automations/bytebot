@@ -30,7 +30,15 @@ export {
   
   // Default export
   default as WebSocketUtils,
-} from './websocket-types';// Export WebSocket bridge servicesexport { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';export { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';export { ParlantWebSocketIntegrationService } from './parlant-websocket-integration.service';// Export conversational WebSocket typesexport {
+} from './websocket-types';
+
+// Export WebSocket bridge services
+export { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
+export { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';
+export { ParlantWebSocketIntegrationService } from './parlant-websocket-integration.service';
+
+// Export conversational WebSocket types
+export {
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -42,14 +50,22 @@ export {
   ValidationAction,
   SecurityContext,
   ActionImpact,
-} from './conversational-websocket-bridge.service';// Export integration typesexport {
+} from './conversational-websocket-bridge.service';
+
+// Export integration types
+export {
   ParlantValidationRequest,
   ParlantValidationResult,
   ValidationPriority,
   ParlantStreamingOptions,
-} from './parlant-websocket-integration.service';/*** Re-export commonly used WebSocket types for convenience
+} from './parlant-websocket-integration.service';
+
+/*** Re-export commonly used WebSocket types for convenience
  */
-export type { Server as WebSocketServer, RawData as WebSocketRawData } from 'ws';/*** Documentation for resolving WebSocket VerifyClientCallback type issues:
+export type { Server as WebSocketServer, RawData as WebSocketRawData } from 'ws';
+
+/**
+ * Documentation for resolving WebSocket VerifyClientCallback type issues:
  * 
  * PROBLEM:
  * Type '(info: { req: Record<string, unknown> & { headers: Record<string, string>; }; origin?: string; secure?: boolean; }) => boolean' * is not assignable to type 'VerifyClientCallbackAsync<IncomingMessage> | VerifyClientCallbackSync<IncomingMessage>'

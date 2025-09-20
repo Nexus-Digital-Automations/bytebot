@@ -46,13 +46,19 @@ import {
   MultiAgentSession,
   OrchestrationMetrics,
   DistributedTask,
-} from '../types/orchestration.types';// Import security typesimport {
+} from '../types/orchestration.types';
+
+// Import security types
+import {
   AuthenticatedRequest,
   BrowserUseUserContext,
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserPermission,
-} from '../middleware/browser-use-auth.middleware';// Import Parlant integrationimport {
+} from '../middleware/browser-use-auth.middleware';
+
+// Import Parlant integration
+import {
   ParlantIntegrationService,
   ParlantValidationRequest,
   ConversationalValidationError,

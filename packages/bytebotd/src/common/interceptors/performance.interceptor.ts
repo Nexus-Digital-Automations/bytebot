@@ -16,7 +16,7 @@
  *
  * @author Claude Code - Performance Optimization Specialist
  * @version 1.0.0
- */
+ */;
 
 import {
   CallHandler,
@@ -24,7 +24,11 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
-} from '@nestjs/common';import { Observable, tap, catchError } from 'rxjs';import { Request, Response } from 'express';import { MetricsService } from '../../metrics/metrics.service';/*** Performance monitoring data for each request
+
+} from '@nestjs/common';
+import { Observable, tap, catchError } from 'rxjs';
+import { Request, Response } from 'express';
+import { MetricsService } from '../../metrics/metrics.service';/*** Performance monitoring data for each request
  */
 interface PerformanceMetrics {
   operationId: string;
@@ -36,22 +40,26 @@ interface PerformanceMetrics {
   statusCode: number;
   memoryBefore: NodeJS.MemoryUsage;
   memoryAfter: NodeJS.MemoryUsage;
-  memoryDelta: {
-    rss: number;
+  memoryDelta: {;
+  rss: number;
     heapTotal: number;
     heapUsed: number;
     external: number;
-  };
+  
+
+};
 }
 
 /**
  * Performance warning thresholds
  */
 interface PerformanceThresholds {
-  slowRequestWarning: number; // ms
-  slowRequestCritical: number; // ms
-  memoryLeakWarning: number; // bytes
+  slowRequestWarning: number; // ms;
+  slowRequestCritical: number; // ms;
+  memoryLeakWarning: number; // bytes;
   memoryUsageWarning: number; // percentage
+
+
 }
 
 /**
@@ -66,6 +74,8 @@ interface PerformanceStats {
   p90ResponseTime: number;
   p95ResponseTime: number;
   p99ResponseTime: number;
+
+
 }
 
 /**
@@ -75,8 +85,8 @@ interface PerformanceStats {
 export class PerformanceInterceptor implements NestInterceptor {
   private readonly logger = new Logger(PerformanceInterceptor.name);
   private readonly responseTimes: number[] = [];
-  private readonly stats: PerformanceStats = {
-    requestCount: 0,
+  private readonly stats: PerformanceStats = {,
+  requestCount: 0,
     averageResponseTime: 0,
     slowRequests: 0,
     memoryAlerts: 0,
@@ -84,20 +94,26 @@ export class PerformanceInterceptor implements NestInterceptor {
     p90ResponseTime: 0,
     p95ResponseTime: 0,
     p99ResponseTime: 0,
-  };
+  
+};
 
   // Performance thresholds (configurable via environment variables)
   private readonly thresholds: PerformanceThresholds = {
-    slowRequestWarning: parseInt(
-      process.env.SLOW_REQUEST_WARNING ?? '1000',10,), // 1 second
-    slowRequestCritical: parseInt(
-      process.env.SLOW_REQUEST_CRITICAL ?? '5000',10,), // 5 seconds
-    memoryLeakWarning: parseInt(
-      process.env.MEMORY_LEAK_WARNING ?? '50000000',10,), // 50MB
-    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%};constructor(private readonly metricsService?: MetricsService) {
-    this.logger.log('Performance Interceptor initialized');
+  slowRequestWarning: parseInt(
+      process.env.SLOW_REQUEST_WARNING ?? '1000',10,), // 1 second,
+  slowRequestCritical: parseInt(
+      process.env.SLOW_REQUEST_CRITICAL ?? '5000',10,), // 5 seconds,
+  memoryLeakWarning: parseInt(
+      process.env.MEMORY_LEAK_WARNING ?? '50000000',10,), // 50MB,
+  memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%
+};
+constructor(private readonly metricsService?: MetricsService) {
+  this.logger.log('Performance Interceptor initialized');
     this.logger.log(
-      `Thresholds: warning=${this.thresholds.slowRequestWarning}ms, critical=${this.thresholds.slowRequestCritical}ms`,);// Start periodic stats reporting
+      `Thresholds: warning=${this.thresholds.slowRequestWarning
+}
+ms, critical=${this.thresholds.slowRequestCritical}
+ms`,);// Start periodic stats reporting
     this.startPeriodicReporting();
   }
 
@@ -105,11 +121,13 @@ export class PerformanceInterceptor implements NestInterceptor {
    * Intercept HTTP requests to monitor performance
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<Request>();
+  const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
     // Generate unique operation ID for request tracking
-    const operationId = `perf${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const memoryBefore = process.memoryUsage();
+    const operationId = `perf${Date.now()
+}
+${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const memoryBefore = process.memoryUsage();
 
     // Add operation ID to request for downstream services
     (request as Request & { operationId?: string }).operationId = operationId;
@@ -117,7 +135,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     this.logger.debug(
       `[${operationId}] Performance monitoring started: ${request.method} ${request.url}`,);return next.handle().pipe(
       tap((_data) => {
-        // Request completed successfully
+  // Request completed successfully
         this.recordPerformanceMetrics({
           operationId,
           startTime,
@@ -132,10 +150,11 @@ export class PerformanceInterceptor implements NestInterceptor {
             memoryBefore,
             process.memoryUsage(),
           ),
-        });
+        
+});
       }),
       catchError((_error) => {
-        // Request failed - still record performance metrics
+  // Request failed - still record performance metrics
         this.recordPerformanceMetrics({
           operationId,
           startTime,
@@ -150,7 +169,8 @@ export class PerformanceInterceptor implements NestInterceptor {
             memoryBefore,
             process.memoryUsage(),
           ),
-        });
+        
+});
 
         throw _error; // Re-throw the error
       }),
@@ -161,7 +181,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    * Record comprehensive performance metrics for the request
    */
   private recordPerformanceMetrics(metrics: PerformanceMetrics): void {
-    try {
+  try {
       // Log performance information
       this.logPerformanceMetrics(metrics);
 
@@ -173,7 +193,8 @@ export class PerformanceInterceptor implements NestInterceptor {
           metrics.statusCode,
           metrics.duration,
         );
-      }
+      
+}
 
       // Update internal statistics
       this.updateStats(metrics);
@@ -184,28 +205,36 @@ export class PerformanceInterceptor implements NestInterceptor {
       // Store response time for percentile calculations
       this.storeResponseTime(metrics.duration);
     } catch (_error) {
-      this.logger.error(
-        `[${metrics.operationId}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,);}
+  this.logger.error(
+        `[${metrics.operationId
+}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,);}
   }
 
   /**
    * Log detailed performance metrics
    */
   private logPerformanceMetrics(metrics: PerformanceMetrics): void {
-    const logLevel = this.determineLogLevel(metrics.duration);
-    const logData = {
-      operationId: metrics.operationId,
+  const logLevel = this.determineLogLevel(metrics.duration);
+    const logData = {,
+  operationId: metrics.operationId,
       method: metrics.method,
       url: metrics.url,
       statusCode: metrics.statusCode,
-      duration: `${metrics.duration}ms`,memoryDelta: {rss: `${(metrics.memoryDelta.rss / 1024 / 1024).toFixed(2)}MB`,heapUsed: `${(metrics.memoryDelta.heapUsed / 1024 / 1024).toFixed(2)}MB`,
+      duration: `${metrics.duration
+}
+ms`,memoryDelta: {rss: `${(metrics.memoryDelta.rss / 1024 / 1024).toFixed(2)}
+MB`,heapUsed: `${(metrics.memoryDelta.heapUsed / 1024 / 1024).toFixed(2)}
+MB`,
       },
     };
 
     switch (logLevel) {
-      case 'debug':
+
+  case 'debug':
         this.logger.debug(
-          `[${metrics.operationId}] Request completed`,
+          `[${metrics.operationId
+
+    }] Request completed`,
           logData,
         );
         break;
@@ -232,30 +261,40 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private determineLogLevel(
     duration: number,
-  ): 'debug' | 'log' | 'warn' | 'error' {if (duration >= this.thresholds.slowRequestCritical) {return 'error';} else if (duration >= this.thresholds.slowRequestWarning) {return 'warn';} else if (duration >= 500) {return 'log';} else {return 'debug';
-    }
+  ): 'debug' | 'log' | 'warn' | 'error' {if (duration >= this.thresholds.slowRequestCritical) {return 'error';} else if (duration >= this.thresholds.slowRequestWarning) {return 'warn';} else if (duration >= 500) {return 'log';} else {
+  return 'debug';
+    
+}
   }
 
   /**
    * Check performance thresholds and generate alerts
    */
   private checkPerformanceThresholds(metrics: PerformanceMetrics): void {
-    // Check response time thresholds
+  // Check response time thresholds
     if (metrics.duration >= this.thresholds.slowRequestCritical) {
       this.stats.slowRequests++;
       this.logger.error(
-        `[${metrics.operationId}] CRITICAL: Request exceeded ${this.thresholds.slowRequestCritical}ms threshold`,{duration: metrics.duration,
+        `[${metrics.operationId
+}] CRITICAL: Request exceeded ${this.thresholds.slowRequestCritical}
+ms threshold`,{
+  duration: metrics.duration,
           url: metrics.url,
           method: metrics.method,
-        },
+        
+},
       );
     } else if (metrics.duration >= this.thresholds.slowRequestWarning) {
-      this.stats.slowRequests++;
+  this.stats.slowRequests++;
       this.logger.warn(
-        `[${metrics.operationId}] WARNING: Request exceeded ${this.thresholds.slowRequestWarning}ms threshold`,{duration: metrics.duration,
+        `[${metrics.operationId
+}] WARNING: Request exceeded ${this.thresholds.slowRequestWarning}
+ms threshold`,{
+  duration: metrics.duration,
           url: metrics.url,
           method: metrics.method,
-        },
+        
+},
       );
     }
 
@@ -266,12 +305,14 @@ export class PerformanceInterceptor implements NestInterceptor {
     );
 
     if (memoryIncrease > this.thresholds.memoryLeakWarning) {
-      this.stats.memoryAlerts++;
-      this.logger.warn(`[${metrics.operationId}] Memory usage spike detected`, {
-        memoryDelta: metrics.memoryDelta,
+  this.stats.memoryAlerts++;
+      this.logger.warn(`[${metrics.operationId
+}] Memory usage spike detected`, {
+  memoryDelta: metrics.memoryDelta,
         url: metrics.url,
         method: metrics.method,
-      });
+      
+});
     }
   }
 
@@ -281,40 +322,46 @@ export class PerformanceInterceptor implements NestInterceptor {
   private calculateMemoryDelta(
     before: NodeJS.MemoryUsage,
     after: NodeJS.MemoryUsage,
-  ): PerformanceMetrics['memoryDelta'] {return {rss: after.rss - before.rss,
+  ): PerformanceMetrics['memoryDelta'] {
+  return {rss: after.rss - before.rss,
       heapTotal: after.heapTotal - before.heapTotal,
       heapUsed: after.heapUsed - before.heapUsed,
       external: after.external - before.external,
-    };
+    
+};
   }
 
   /**
    * Normalize URL for consistent metrics grouping
    */
   private normalizeUrl(url: string): string {
-    // Remove query parameters and normalize path parameters
-    const cleanUrl = (url ?? '').split('?')[0] ?? '';return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params.replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params}/**
+  // Remove query parameters and normalize path parameters
+    const cleanUrl = (url ?? '').split('?')[0] ?? '';
+return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace(/\/[a-f0-9-]{36
+}/g, '/:uuid') // Replace UUID path params.replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params}/**
    * Store response time for percentile calculations
    */
   private storeResponseTime(duration: number): void {
-    this.responseTimes.push(duration);
+  this.responseTimes.push(duration);
 
     // Keep only last 1000 response times to prevent memory bloat
     if (this.responseTimes.length > 1000) {
       this.responseTimes.shift();
-    }
+    
+}
 
     // Recalculate percentiles periodically
     if (this.responseTimes.length % 50 === 0) {
-      this.calculatePercentiles();
-    }
+  this.calculatePercentiles();
+    
+}
   }
 
   /**
    * Calculate response time percentiles
    */
   private calculatePercentiles(): void {
-    if (this.responseTimes.length === 0) return;
+  if (this.responseTimes.length === 0) return;
 
     const sortedTimes = [...this.responseTimes].sort((a, b) => a - b);
     const _length = sortedTimes.length;
@@ -323,44 +370,48 @@ export class PerformanceInterceptor implements NestInterceptor {
     this.stats.p90ResponseTime = this.getPercentile(sortedTimes, 90);
     this.stats.p95ResponseTime = this.getPercentile(sortedTimes, 95);
     this.stats.p99ResponseTime = this.getPercentile(sortedTimes, 99);
-  }
+  
+}
 
   /**
    * Get specific percentile from sorted array
    */
   private getPercentile(sortedArray: number[], percentile: number): number {
-    if (sortedArray.length === 0) return 0;
+  if (sortedArray.length === 0) return 0;
     const _index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
     return sortedArray[Math.max(0, _index)] ?? 0;
-  }
+  
+}
 
   /**
    * Update internal performance statistics
    */
   private updateStats(metrics: PerformanceMetrics): void {
-    this.stats.requestCount++;
+  this.stats.requestCount++;
 
     // Update average response time
     this.stats.averageResponseTime =
       (this.stats.averageResponseTime * (this.stats.requestCount - 1) +
         metrics.duration) /
       this.stats.requestCount;
-  }
+  
+}
 
   /**
    * Get current performance statistics
    */
   getStats(): PerformanceStats {
-    this.calculatePercentiles();
-    return { ...this.stats };
+  this.calculatePercentiles();
+    return { ...this.stats 
+};
   }
 
   /**
    * Clear performance statistics
    */
   clearStats(): void {
-    Object.assign(this.stats, {
-      requestCount: 0,
+  Object.assign(this.stats, {,
+  requestCount: 0,
       averageResponseTime: 0,
       slowRequests: 0,
       memoryAlerts: 0,
@@ -368,23 +419,31 @@ export class PerformanceInterceptor implements NestInterceptor {
       p90ResponseTime: 0,
       p95ResponseTime: 0,
       p99ResponseTime: 0,
-    });
+    
+});
 
     this.responseTimes.length = 0;
     this.logger.log('Performance statistics cleared');}/**
    * Start periodic performance statistics reporting
    */
   private startPeriodicReporting(): void {
-    // Report stats every 5 minutes
+  // Report stats every 5 minutes
     setInterval(() => {
       if (this.stats.requestCount > 0) {
         this.calculatePercentiles();
 
-        this.logger.log('Performance Statistics Summary:', {
-          requestCount: this.stats.requestCount,
-          averageResponseTime: `${this.stats.averageResponseTime.toFixed(2)}ms`,slowRequests: this.stats.slowRequests,memoryAlerts: this.stats.memoryAlerts,
+        this.logger.log('Performance Statistics Summary:', {,
+  requestCount: this.stats.requestCount,
+          averageResponseTime: `${this.stats.averageResponseTime.toFixed(2)
+}
+ms`,slowRequests: this.stats.slowRequests,
+      memoryAlerts: this.stats.memoryAlerts,
           percentiles: {
-            p50: `${this.stats.p50ResponseTime}ms`,p90: `${this.stats.p90ResponseTime}ms`,p95: `${this.stats.p95ResponseTime}ms`,p99: `${this.stats.p99ResponseTime}ms`,
+            p50: `${this.stats.p50ResponseTime}
+ms`,p90: `${this.stats.p90ResponseTime}
+ms`,p95: `${this.stats.p95ResponseTime}
+ms`,p99: `${this.stats.p99ResponseTime}
+ms`,
           },
         });
       }

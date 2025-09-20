@@ -9,7 +9,10 @@
  * @version 1.0.0
  */
 
-import type { IncomingMessage } from 'http';import * as WebSocket from 'ws';/*** WebSocket verification info structure that bridges IncomingMessage and Record types
+import type { IncomingMessage } from 'http';
+import * as WebSocket from 'ws';
+
+/*** WebSocket verification info structure that bridges IncomingMessage and Record types
  */
 export interface WebSocketVerificationInfo {
   readonly req: IncomingMessage;
@@ -22,7 +25,7 @@ export interface WebSocketVerificationInfo {
 /**
  * Enhanced request info that provides compatibility with both IncomingMessage and Record types
  */
-export interface EnhancedRequestInfo extends Record<string, unknown> {
+export interface EnhancedRequestInfo extends Record<string, unknown>  {
   readonly headers: Record<string, string>;
   readonly url?: string;
   readonly method?: string;
@@ -61,7 +64,9 @@ export interface SafeWebSocketServerOptions {
   port?: number;
   host?: string;
   backlog?: number;
-  server?: import('http').Server | import('https').Server;path?: string;noServer?: boolean;
+  server?: import('http').Server | import('https').Server;
+  path?: string;
+  noServer?: boolean;
   clientTracking?: boolean;
   perMessageDeflate?: WebSocket.PerMessageDeflateOptions | false | true;
   maxPayload?: number;
@@ -96,9 +101,13 @@ export function convertIncomingMessageToRecord(
     origin: headers.origin,
     secure: (req.connection as { encrypted?: boolean })?.encrypted === true,
     remoteAddress: req.connection?.remoteAddress,
-    userAgent: headers['user-agent'],// Add any additional properties from the request...Object.getOwnPropertyNames(req).reduce((acc, key) => {
+    userAgent: headers['user-agent'],
+    // Add any additional properties from the request
+    ...Object.getOwnPropertyNames(req).reduce((acc, key) => {
       const value = (req as unknown as Record<string, unknown>)[key];
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {acc[key] = value;}
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        acc[key] = value;
+      }
       return acc;
     }, {} as Record<string, unknown>),
   };
@@ -173,7 +182,13 @@ export function validateWebSocketHeaders(
   headers: Record<string, string>
 ): { valid: boolean; reason?: string } {
   // Check required WebSocket headers
-  if (!headers.upgrade || headers.upgrade.toLowerCase() !== 'websocket') {return { valid: false, reason: 'Missing or invalid Upgrade header' };}if (!headers.connection?.toLowerCase().includes('upgrade')) {return { valid: false, reason: 'Missing or invalid Connection header' };}if (!headers['sec-websocket-key']) {return { valid: false, reason: 'Missing Sec-WebSocket-Key header' };}if (!headers['sec-websocket-version']) {return { valid: false, reason: 'Missing Sec-WebSocket-Version header' };}return { valid: true };
+  if (!headers.upgrade || headers.upgrade.toLowerCase() !== 'websocket') {return { valid: false, reason: 'Missing or invalid Upgrade header' };}
+
+  if(!headers.connection?.toLowerCase().includes('upgrade')) {return { valid: false, reason: 'Missing or invalid Connection header' };}
+
+  if(!headers['sec-websocket-key']) {return { valid: false, reason: 'Missing Sec-WebSocket-Key header' };}
+
+  if(!headers['sec-websocket-version']) {return { valid: false, reason: 'Missing Sec-WebSocket-Version header' };}return { valid: true };
 }
 
 /**

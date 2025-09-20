@@ -22,11 +22,19 @@ import {
   ArgumentMetadata,
   BadRequestException,
   Logger,
-} from '@nestjs/common';import { validate } from 'class-validator';import { plainToClass } from 'class-transformer';import {BatchJobSubmissionDto,
+} from '@nestjs/common';
+import { validate } from 'class-validator';
+import { plainToClass } from 'class-transformer';
+import {
+  BatchJobSubmissionDto,
   BatchJobSpecDto,
   DependencyType,
   BatchExecutionMode,
-} from '../dto/batch-job.dto';import { JobPriority } from '../dto/async-job.dto';/*** Validation context for tracking validation state
+} from '../dto/batch-job.dto';
+import { JobPriority } from '../dto/async-job.dto';
+
+/**
+ * Validation context for tracking validation state
  */
 interface ValidationContext {
   jobKeys: Set<string>;

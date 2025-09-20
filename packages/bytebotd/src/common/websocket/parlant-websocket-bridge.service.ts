@@ -12,7 +12,10 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import {createSafeWebSocketServer,
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as WebSocket from 'ws';
+import {createSafeWebSocketServer,
   createSecureVerifyCallback,
   SafeWebSocketServerOptions,
   WebSocketVerificationInfo,
@@ -72,7 +75,11 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    * Initialize the WebSocket bridge with proper type-safe verification
    */
   private initializeWebSocketBridge(): void {
-    const operationId = `parlant_ws_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant WebSocket Bridge`, {operationId,port: this.getWebSocketPort(),
+    const operationId = `parlant_ws_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    this.logger.log(`[${operationId}] Initializing Parlant WebSocket Bridge`, {
+      operationId,
+      port: this.getWebSocketPort(),
       securityEnabled: this.isSecurityEnabled(),
     });
 
@@ -101,12 +108,16 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       // Set up event handlers
       this.setupWebSocketEventHandlers();
 
-      this.logger.log(`[${operationId}] Parlant WebSocket Bridge initialized successfully`, {operationId,port: this.getWebSocketPort(),
+      this.logger.log(`[${operationId}] Parlant WebSocket Bridge initialized successfully`, {
+        operationId,
+        port: this.getWebSocketPort(),
         verificationEnabled: true,
       });
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to initialize WebSocket bridge`, {operationId,error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Failed to initialize WebSocket bridge`, {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
       throw error;
@@ -120,7 +131,11 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    * type incompatibility issue mentioned in the task.
    */
   private createParlantVerificationCallback() {
-    const operationId = `parlant_verify_callback_${Date.now()}`;this.logger.log(`[${operationId}] Creating Parlant verification callback`, {operationId,securityEnabled: this.isSecurityEnabled(),
+    const operationId = `parlant_verify_callback_${Date.now()}`;
+
+    this.logger.log(`[${operationId}] Creating Parlant verification callback`, {
+      operationId,
+      securityEnabled: this.isSecurityEnabled(),
       allowedOrigins: this.getAllowedOrigins(),
     });
 
@@ -141,10 +156,14 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    */
   private createManualVerificationCallback() {
     return (info: WebSocketVerificationInfo): boolean => {
-      const operationId = `manual_verify_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {// Convert IncomingMessage to Record<string, unknown> for compatibility
+      const operationId = `manual_verify_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      try {
+        // Convert IncomingMessage to Record<string, unknown> for compatibility
         const requestInfo: EnhancedRequestInfo = convertIncomingMessageToRecord(info.req);
         
-        this.logger.debug(`[${operationId}] Verifying WebSocket connection`, {operationId,origin: info.origin,
+        this.logger.debug(`[${operationId}] Verifying WebSocket connection`, {
+          operationId,
+          origin: info.origin,
           secure: info.secure,
           headers: Object.keys(requestInfo.headers),
           userAgent: requestInfo.userAgent,
@@ -154,7 +173,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
         // Perform verification logic using the converted request info
         const verification = this.performDetailedVerification(requestInfo, info);
         
-        this.logger.log(`[${operationId}] WebSocket verification result: ${verification.allowed}`, {operationId,allowed: verification.allowed,
+        this.logger.log(`[${operationId}] WebSocket verification result: ${verification.allowed}`, {
+          operationId,
+          allowed: verification.allowed,
           reason: verification.reason,
           origin: info.origin,
         });
@@ -162,7 +183,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
         return verification.allowed;
 
       } catch (error) {
-        this.logger.error(`[${operationId}] WebSocket verification error`, {operationId,error: error instanceof Error ? error.message : String(error),
+        this.logger.error(`[${operationId}] WebSocket verification error`, {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
           origin: info.origin,
         });
         return false;
@@ -186,10 +209,17 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
 
     // HTTPS requirement
     if (this.isHttpsRequired() && !wsInfo.secure) {
-      return { allowed: false, reason: 'HTTPS required for WebSocket connections' };}// User agent validation
+      return { allowed: false, reason: 'HTTPS required for WebSocket connections' };
+    }
+
+    // User agent validation
     if (requestInfo.userAgent) {
       const userAgent = requestInfo.userAgent.toLowerCase();
-      const blockedAgents = ['curl', 'wget', 'python-requests'];if (blockedAgents.some(blocked => userAgent.includes(blocked))) {return { allowed: false, reason: 'User agent not allowed' };}}
+      const blockedAgents = ['curl', 'wget', 'python-requests'];
+      if (blockedAgents.some(blocked => userAgent.includes(blocked))) {
+        return { allowed: false, reason: 'User agent not allowed' };
+      }
+    }}
 
     // Header validation
     const requiredHeaders = ['sec-websocket-key', 'sec-websocket-version'];
@@ -202,7 +232,11 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     // Rate limiting check
     if (this.isRateLimitEnabled() && requestInfo.remoteAddress) {
       if (this.isRateLimited(requestInfo.remoteAddress)) {
-        return { allowed: false, reason: 'Rate limit exceeded' };}}
+        return { allowed: false, reason: 'Rate limit exceeded' };
+      }
+    }
+
+    return { allowed: true };
 
     return { allowed: true };
   }
@@ -215,14 +249,21 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       return;
     }
 
-    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {this.handleNewConnection(ws, convertIncomingMessageToRecord(req));});
+    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {
+      this.handleNewConnection(ws, convertIncomingMessageToRecord(req));
+    });
 
-    this.webSocketServer.on('error', (error: Error) => {this.errorCount++;this.logger.error('WebSocket server error', {error: error.message,stack: error.stack,
+    this.webSocketServer.on('error', (error: Error) => {
+      this.errorCount++;
+      this.logger.error('WebSocket server error', {
+        error: error.message,
+      stack: error.stack,
         errorCount: this.errorCount,
       });
     });
 
-    this.webSocketServer.on('close', () => {this.logger.log('WebSocket server closed', {
+    this.webSocketServer.on('close', () => {
+      this.logger.log('WebSocket server closed', {
         finalConnectionCount: this.connectionCount,
         finalMessageCount: this.messageCount,
         finalErrorCount: this.errorCount,
@@ -234,14 +275,17 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    * Handle new WebSocket connection
    */
   private handleNewConnection(ws: WebSocket.WebSocket, req: EnhancedRequestInfo): void {
-    const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(7)}`;const operationId = `connection_${clientId}`;
+    const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `connection_${clientId}`;
     
     this.connectionCount++;
     
     const clientInfo: ClientConnectionInfo = {
       id: clientId,
       connectedAt: new Date(),
-      origin: req.headers?.origin ?? 'unknown',userAgent: req.headers?.['user-agent'] ?? 'unknown',remoteAddress: req.remoteAddress ?? 'unknown',
+      origin: req.headers?.origin ?? 'unknown',
+      userAgent: req.headers?.['user-agent'] ?? 'unknown',
+      remoteAddress: req.remoteAddress ?? 'unknown',
     };
 
     this.clients.set(clientId, ws);
@@ -257,18 +301,27 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     });
 
     // Set up client event handlers
-    ws.on('message', (data: WebSocket.RawData) => {this.handleClientMessage(clientId, data);});
+    ws.on('message', (data: WebSocket.RawData) => {
+      this.handleClientMessage(clientId, data);
+    });
 
-    ws.on('close', (code: number, reason: Buffer) => {this.handleClientDisconnection(clientId, code, reason);});
+    ws.on('close', (code: number, reason: Buffer) => {
+      this.handleClientDisconnection(clientId, code, reason);
+    });
 
-    ws.on('error', (error: Error) => {this.handleClientError(clientId, error);});
+    ws.on('error', (error: Error) => {
+      this.handleClientError(clientId, error);
+    });
 
     // Send welcome message
     this.sendMessageToClient(clientId, {
-      type: 'welcome',session_id: clientId,timestamp: Date.now(),
+      type: 'welcome',
+      session_id: clientId,
+      timestamp: Date.now(),
       payload: {
         clientId,
-        serverVersion: '1.0.0',features: ['conversation', 'validation', 'streaming'],
+        serverVersion: '1.0.0',
+        features: ['conversation', 'validation', 'streaming'],
       },
     });
   }
@@ -283,7 +336,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ParlantWebSocketMessage;
       this.messageCount++;
       
-      this.logger.debug(`[${operationId}] Received message from client`, {operationId,clientId,
+      this.logger.debug(`[${operationId}] Received message from client`, {
+        operationId,
+        clientId,
         messageType: message.type,
         conversationId: message.conversation_id,
         messageCount: this.messageCount,
@@ -303,7 +358,10 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
         operationId,
         clientId,
         error: error instanceof Error ? error.message : String(error),
-        rawData: Buffer.from(data as ArrayBuffer).toString('utf8'),});this.sendErrorToClient(clientId, 'Invalid message format', operationId);}}
+        rawData: Buffer.from(data as ArrayBuffer).toString('utf8'),
+      });
+      this.sendErrorToClient(clientId, 'Invalid message format', operationId);
+    }}
 
   /**
    * Process specific message types
@@ -314,8 +372,13 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     operationId: string
   ): void {
     switch (message.type) {
-      case 'conversation_start':this.handleConversationStart(clientId, message, operationId);break;
-      case 'validation_request':this.handleValidationRequest(clientId, message, operationId);break;
+
+      case 'conversation_start':
+        this.handleConversationStart(clientId, message, operationId);
+        break;
+      case 'validation_request':
+        this.handleValidationRequest(clientId, message, operationId);
+        break;
       case 'ping':
         this.handlePing(clientId, message, operationId);
         break;
@@ -337,7 +400,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       try {
         client.send(JSON.stringify(message));
       } catch (error) {
-        this.logger.error('Failed to send message to client', {clientId,error: error instanceof Error ? error.message : String(error),
+        this.logger.error('Failed to send message to client', {
+          clientId,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -369,19 +434,29 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
     }
 
     this.sendMessageToClient(clientId, {
-      type: 'conversation_started',conversation_id: conversationId,timestamp: Date.now(),
+      type: 'conversation_started',
+      conversation_id: conversationId,
+      timestamp: Date.now(),
       payload: {
         operationId,
-        status: 'ready',},});
+        status: 'ready',
+      },
+    });
   }
 
   private handleValidationRequest(clientId: string, message: ParlantWebSocketMessage, operationId: string): void {
     // Mock validation logic
     const validationResult = {
+
       approved: true,
       confidence: 0.95,
-      reasoning: 'Request validated successfully',};this.sendMessageToClient(clientId, {
-      type: 'validation_result',conversation_id: message.conversation_id,timestamp: Date.now(),
+      reasoning: 'Request validated successfully',
+    };
+
+    this.sendMessageToClient(clientId, {
+      type: 'validation_result',
+      conversation_id: message.conversation_id,
+      timestamp: Date.now(),
       payload: {
         operationId,
         ...validationResult,
@@ -402,7 +477,9 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
   }
 
   private handleClientDisconnection(clientId: string, code: number, reason: Buffer): void {
-    this.logger.log(`Client disconnected: ${clientId}`, {clientId,code,
+    this.logger.log(`Client disconnected: ${clientId}`, {
+      clientId,
+      code,
       reason: reason.toString(),
       remainingConnections: this.clients.size - 1,
     });
@@ -423,12 +500,31 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
 
   // Configuration helpers
   private getWebSocketPort(): number {
-    return this.configService.get<number>('PARLANT_WEBSOCKET_PORT', 8080);}private isSecurityEnabled(): boolean {
-    return this.configService.get<boolean>('PARLANT_WEBSOCKET_SECURITY_ENABLED', true);}private getAllowedOrigins(): string[] {
-    const origins = this.configService.get<string>('PARLANT_ALLOWED_ORIGINS', '');return origins ? origins.split(',').map(o => o.trim()) : [];}private isHttpsRequired(): boolean {
-    return this.configService.get<boolean>('PARLANT_REQUIRE_HTTPS', false);}private getMaxConnectionsPerIP(): number {
-    return this.configService.get<number>('PARLANT_MAX_CONNECTIONS_PER_IP', 10);}private isRateLimitEnabled(): boolean {
-    return this.configService.get<boolean>('PARLANT_RATE_LIMIT_ENABLED', true);}private isRateLimited(_remoteAddress: string): boolean {
+    return this.configService.get<number>('PARLANT_WEBSOCKET_PORT', 8080);
+  }
+
+  private isSecurityEnabled(): boolean {
+    return this.configService.get<boolean>('PARLANT_WEBSOCKET_SECURITY_ENABLED', true);
+  }
+
+  private getAllowedOrigins(): string[] {
+    const origins = this.configService.get<string>('PARLANT_ALLOWED_ORIGINS', '');
+    return origins ? origins.split(',').map(o => o.trim()) : [];
+  }
+
+  private isHttpsRequired(): boolean {
+    return this.configService.get<boolean>('PARLANT_REQUIRE_HTTPS', false);
+  }
+
+  private getMaxConnectionsPerIP(): number {
+    return this.configService.get<number>('PARLANT_MAX_CONNECTIONS_PER_IP', 10);
+  }
+
+  private isRateLimitEnabled(): boolean {
+    return this.configService.get<boolean>('PARLANT_RATE_LIMIT_ENABLED', true);
+  }
+
+  private isRateLimited(_remoteAddress: string): boolean {
     // Simple rate limiting implementation
     return false; // Mock implementation
   }
@@ -461,10 +557,15 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
    * Clean shutdown of WebSocket server
    */
   onApplicationShutdown(): void {
-    this.logger.log('Shutting down Parlant WebSocket Bridge');if (this.webSocketServer) {// Close all client connections
+    this.logger.log('Shutting down Parlant WebSocket Bridge');
+
+    if (this.webSocketServer) {
+      // Close all client connections
       this.clients.forEach((client, _clientId) => {
         if (client.readyState === WebSocket.WebSocket.OPEN) {
-          client.close(1000, 'Server shutting down');}});
+          client.close(1000, 'Server shutting down');
+        }
+      });
 
       // Close the server
       this.webSocketServer.close(() => {
