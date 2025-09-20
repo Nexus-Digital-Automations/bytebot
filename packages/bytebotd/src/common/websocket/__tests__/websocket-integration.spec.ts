@@ -303,19 +303,18 @@ describe('WebSocket Integration Tests', () => {
   const multipleClients: WebSocketTestClient[] = [];
 
   const TEST_PORT = 8081;
-  const TEST_URL = `ws://localhost:$TEST_PORT
-}`;
+  const TEST_URL = `ws://localhost:${TEST_PORT}`;
 
   beforeAll(async () => {
   jest.setTimeout(30000); // 30 seconds for integration tests
 
-    module = await Test.createTestingModule({,
-  providers: [
+    module = await Test.createTestingModule({
+      providers: [
         ConversationalWebSocketBridgeService,
         ParlantWebSocketIntegrationService,
         ParlantWebSocketBridgeService,
-        {,
-  provide: ConfigService,
+        {
+          provide: ConfigService,
           useValue: mockConfigService,
         
 },

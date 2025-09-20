@@ -33,7 +33,8 @@ import { performance } from 'perf_hooks';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-// Test Suite Orchestratorclass WebSocketTestOrchestrator extends EventEmitter {
+// Test Suite Orchestrator
+class WebSocketTestOrchestrator extends EventEmitter {
   private testSuites: Map<string, TestSuiteConfig> = new Map();
   private testResults: Map<string, TestSuiteResult> = new Map();
   private executionHistory: TestExecutionRecord[] = [];

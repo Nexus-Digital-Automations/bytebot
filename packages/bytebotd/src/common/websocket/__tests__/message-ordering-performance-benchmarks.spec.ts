@@ -38,7 +38,9 @@ import {
 
 } from '../conversational-websocket-bridge.service';
 
-// ===== PERFORMANCE TESTING UTILITIES =====/**
+// ===== PERFORMANCE TESTING UTILITIES =====
+
+/**
  * Advanced performance measurement and analysis utilities
  */
 class AdvancedPerformanceAnalyzer {

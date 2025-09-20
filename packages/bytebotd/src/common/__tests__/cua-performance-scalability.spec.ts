@@ -371,14 +371,15 @@ export class LoadGeneratorService {
 }
 
   describe('CUA Performance and Scalability Tests', () => {
-let context: PerformanceContext;let testModule: TestingModule;
+let context: PerformanceContext;
+let testModule: TestingModule;
   const performanceResults: PerformanceMetrics[] = [];
   const scalabilityResults: ScalabilityTestResult[] = [];
 
   /**
    * Setup performance testing environment
    */
-  beforeAll(async () => 
+  beforeAll(async () => {
     testModule = await Test.createTestingModule({
       imports: [
         EventEmitterModule.forRoot(),

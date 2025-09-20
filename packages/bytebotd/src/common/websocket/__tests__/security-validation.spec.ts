@@ -54,7 +54,9 @@ import {
 
 } from '../websocket-types';
 
-// ===== SECURITY TESTING UTILITIES =====/**
+// ===== SECURITY TESTING UTILITIES =====
+
+/**
  * Security test client with authentication capabilities
  */
 class SecurityTestClient extends EventEmitter {

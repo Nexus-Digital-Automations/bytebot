@@ -44,27 +44,25 @@ class MockWebSocketClient {
 
   send(data: string): void {
     this.messages.push(data);
-  
-}
+  }
 
   on(event: string, callback: Function): void {
-  if (!this.eventListeners.has(event)) {
+    if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
-    
-}
+    }
     this.eventListeners.get(event)?.push(callback);
   }
 
   emit(event: string, ...args: unknown[]): void {
-  const listeners = this.eventListeners.get(event) ?? [];
+    const listeners = this.eventListeners.get(event) ?? [];
     listeners.forEach(listener => (listener as (...args: unknown[]) => void)(...args));
-  
-}
+  }
 
   close(code?: number, reason?: string): void {
-  this.readyState = WebSocket.WebSocket.CLOSED;
+    this.readyState = WebSocket.WebSocket.CLOSED;
     this.emit('close', code ?? 1000, Buffer.from(reason ?? 'Test close'));
-}}
+  }
+}
 
 /**
  * Test configuration provider

@@ -41,7 +41,9 @@ import {
 } from '../conversational-websocket-bridge.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
-// ===== PERFORMANCE MONITORING UTILITIES =====/**
+// ===== PERFORMANCE MONITORING UTILITIES =====
+
+/**
  * System resource monitor for tracking CPU and memory usage
  */
 class SystemResourceMonitor {

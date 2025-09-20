@@ -92,12 +92,12 @@ interface ConnectionLifecycleMetrics {
   disconnectionTime: number;
   cleanupTime: number;
 
-  // State transition metrics;
-  stateTransitions: Array<{;
-  from: ConnectionState;
-  to: ConnectionState;
+  // State transition metrics
+  stateTransitions: Array<{
+    from: ConnectionState;
+    to: ConnectionState;
     timestamp: number;
-  duration: number;
+    duration: number;
   
 
 }>;

@@ -46,14 +46,14 @@ function _isMockExecutionContext(context: unknow, n): context is ExecutionContex
 
 // Helper function to create properly typed ByteBotdUser
 function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
-  const baseUser: ByteBotdUser = {,
-  sub: (partial.sub as string) ?? (partial.id as string) ?? '',
-      id: (partial.id as string) ?? '',
-        email: (partial.email as string) ?? 'test@bytebot.ai',
-      username: (partial.username as string) ?? 'testuser',
-        role: (partial.role as UserRole) ?? UserRole._VIEWER,
-        isActive: (partial.isActive as boolean) ?? true,
-        permissions: (partial.permissions as Permission[]) ?? [],
+  const baseUser: ByteBotdUser = {
+    sub: (partial.sub as string) ?? (partial.id as string) ?? '',
+    id: (partial.id as string) ?? '',
+    email: (partial.email as string) ?? 'test@bytebot.ai',
+    username: (partial.username as string) ?? 'testuser',
+    role: (partial.role as UserRole) ?? UserRole._VIEWER,
+    isActive: (partial.isActive as boolean) ?? true,
+    permissions: (partial.permissions as Permission[]) ?? [],
   
 };
   return { ...baseUser, ...partial } as ByteBotdUser;
@@ -61,8 +61,8 @@ function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
 
 // Helper function to create malicious user for security testing
 function _createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
-  const baseUser: MaliciousTestUser = {,
-  id: 'malicious_user',
+  const baseUser: MaliciousTestUser = {
+    id: 'malicious_user',
     email: 'malicious@test.com',
     role: UserRole.VIEWER as UserRole,
     permissions: [] as Permission[],

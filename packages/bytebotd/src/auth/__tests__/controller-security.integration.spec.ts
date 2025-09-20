@@ -39,7 +39,7 @@ import {
 import { ErrorHandlerUtils } from '../../utils/error-handler';/*** Type definitions for safe Express request/response handling
  */
 interface SafeFile {
-  originalname: string;,;
+  originalname: string;
   size: number;
 
 
@@ -53,9 +53,11 @@ interface SafeRequest {
 
 };
   headers: {
-  authorization?: string;
-    'x-filename'?: string;'content-length'?: string;[key: string]: string | undefined;
-};
+    authorization?: string;
+    'x-filename'?: string;
+    'content-length'?: string;
+    [key: string]: string | undefined;
+  };
   user?: JwtPayload;
   params: Record<string, string>;
   body: Record<string, unknown>;
@@ -63,8 +65,8 @@ interface SafeRequest {
 }
 
 interface SafeResponse {
-  setHeader(name: string, value: strin, g): void;
-  status(code: numbe, r): {
+  setHeader(name: string, value: string): void;
+  status(code: number): {
     json(data: Record<string, unknown>): void;
   
 

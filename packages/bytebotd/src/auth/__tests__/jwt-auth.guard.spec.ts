@@ -93,11 +93,11 @@ type _MockReflector = {
 
 interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>;
-  user?: {;
-  id: string;,;
-  email: string;
+  user?: {
+    id: string;
+    email: string;
     role: string;
-  permissions: string[];
+    permissions: string[];
   
 
 };

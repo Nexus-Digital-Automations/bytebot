@@ -72,7 +72,7 @@ interface SecurityTestUser extends Partial<ByteBotdUser> {
 
 // Interface for audit events
 interface AuditEvent {
-  level: string;,;
+  level: string;
   message: string;
   timestamp: number;
 
@@ -93,23 +93,28 @@ describe('Security Penetration Testing Suite', () => {
   let reflector: Reflector;
   let module: TestingModule;
 
-  const operationId = `penetration_test${Date.now()
-}`;const pentestLogger = {
-  info: (message: string, meta?: Record<stringunknown>) =>
+  const operationId = `penetration_test${Date.now()}`;
+  const pentestLogger = {
+    info: (message: string, meta?: Record<string, unknown>) =>
       console.log(`[PENTEST] ${message
 }`, meta ?? ''),
-    warn: (message: string, meta?: Record<stringunknown>) =>
+    warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[PENTEST-WARNING] ${message}`, meta ?? ''),
-    error: (message: string, meta?: Record<stringunknown>) =>
+    error: (message: string, meta?: Record<string, unknown>) =>
       console.error(`[PENTEST-ERROR] ${message}`, meta ?? ''),
-    critical: (message: string, meta?: Record<stringunknown>) =>
-      console.error(`[PENTEST-CRITICAL] ${message}`, meta ?? ''),};// Advanced JWT manipulation toolkit
+    critical: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[PENTEST-CRITICAL] ${message}`, meta ?? ''),
+  };
+
+  // Advanced JWT manipulation toolkit
   const JWTManipulator = {
   // Create JWT with specific vulnerabilities,
-  createVulnerableJWT: (payload: SecurityTestPayloadoption, s: JwtHeaderOptions = {
+  createVulnerableJWT: (payload: SecurityTestPayload, options: JwtHeaderOptions = {
 }) => {
-  const header = {,
-  alg: options.algorithm ?? 'HS256', typ: 'JWT',...options.headerInjection,
+  const header = {
+        alg: options.algorithm ?? 'HS256',
+        typ: 'JWT',
+        ...options.headerInjection,
 };
 
       const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
@@ -248,7 +253,13 @@ describe('Security Penetration Testing Suite', () => {
     > => {
   const replayAttempts = [
         validToken, // Original token
-        validToken.replace(/.$/, '1'), // Modified last charactervalidToken.substring(0, validToken.length - 5) + 'AAAAA', // Modified signaturevalidToken + 'extra', // Appended datavalidToken.replace(/\./g, ''), // Character substitution];const results = [];
+        validToken.replace(/.$/, '1'), // Modified last character
+        validToken.substring(0, validToken.length - 5) + 'AAAAA', // Modified signature
+        validToken + 'extra', // Appended data
+        validToken.replace(/\./g, ''), // Character substitution
+      ];
+
+      const results = [];
 
       for (const token of replayAttempts) {
         try {

@@ -789,7 +789,9 @@ describe('Message Ordering and Reliability Tests', () => {
   // ===== MESSAGE SEQUENCE ORDERING TESTS =====
 
   describe('Message Sequence Ordering', () => {
-it('should maintain perfect message ordering in sequential delivery', async () => const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+    it('should maintain perfect message ordering in sequential delivery', async () => {
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'sequence-test-session';
 const messageCount = 100;// Send sequenced messages

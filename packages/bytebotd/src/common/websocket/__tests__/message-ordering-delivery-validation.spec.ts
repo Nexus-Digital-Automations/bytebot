@@ -40,7 +40,9 @@ import {
 
 } from '../conversational-websocket-bridge.service';
 
-// ===== TEST UTILITIES =====/**
+// ===== TEST UTILITIES =====
+
+/**
  * Message factory for creating test messages
  */
 class TestMessageFactory {

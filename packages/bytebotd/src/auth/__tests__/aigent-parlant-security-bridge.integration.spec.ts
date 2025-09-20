@@ -223,8 +223,8 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     it('should handle RESTRICTED classification with VIEWER role', async () => {
   const payload = createTestJwtPayload(SecurityClassification.RESTRICTED, UserRole._VIEWER);
       // Mock Parlant to require higher confidence for RESTRICTED
-      (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({,
-  approved: true,
+      (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({
+        approved: true,
         conversationId: 'restricted-conversation-456',
         validationTimestamp: new Date(),
         reasoning: 'RESTRICTED access approved with enhanced validation',
@@ -233,14 +233,17 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
 });
 
       const session = await securityBridge.createSecureSessionBridge(payload, {
-  ipAddress: '10.0.3.10', userAgent: 'Mozilla/5.0 Restricted Access Terminal'
+        ipAddress: '10.0.3.10',
+        userAgent: 'Mozilla/5.0 Restricted Access Terminal'
       
 });
       expect(session.securityClassification).toBe(SecurityClassification.RESTRICTED);
-      expect(session.conversationContext.securityLevel).toBe('CRITICAL');});
+      expect(session.conversationContext.securityLevel).toBe('CRITICAL');
+    });
 
     it('should handle CLASSIFIED classification with ADMIN role', async () => {
-  const basePayload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._ADMIN);const payload = {
+      const basePayload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._ADMIN);
+      const payload = {
         ...basePayload,
         permissions: [
           Permission._TASK_READ,
@@ -249,21 +252,24 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
           Permission._COMPUTER_CONTROL,
           Permission._SYSTEM_ADMIN,
           Permission._SECURITY_MANAGEMENT,
-        ], complianceRequirements: [
-        ComplianceFramework.SOX,
-        ComplianceFramework.GDPR,
-        ComplianceFramework.HIPAA,
-        ComplianceFramework.PCI_DSS,
-        ComplianceFramework.ISO_27001,
+        ],
+        complianceRequirements: [
+          ComplianceFramework.SOX,
+          ComplianceFramework.GDPR,
+          ComplianceFramework.HIPAA,
+          ComplianceFramework.PCI_DSS,
+          ComplianceFramework.ISO_27001,
         ]
       
 };
 
       const session = await securityBridge.createSecureSessionBridge(payload, {
-  ipAddress: '10.0.4.5',
-      userAgent: 'Mozilla/5.0 Executive Terminal',
-        sessionMetadata: {executiveAccess: trueauditLeve, l: 'COMPREHENSIVE',
-}
+        ipAddress: '10.0.4.5',
+        userAgent: 'Mozilla/5.0 Executive Terminal',
+        sessionMetadata: {
+          executiveAccess: true,
+          auditLevel: 'COMPREHENSIVE',
+        }
       });
       expect(session.securityClassification).toBe(SecurityClassification.CLASSIFIED);
       expect(session.userRole).toBe(UserRole._ADMIN);
@@ -272,20 +278,24 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     });
 
     it('should downgrade security classification if role lacks authorization', async () => {
-  // User role requesting CLASSIFIED access should be downgradedconst payload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._USER);
+      // User role requesting CLASSIFIED access should be downgraded
+      const payload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._USER);
 
-      const session = await securityBridge.createSecureSessionBridge(payload, {,
-  ipAddress: '192.168.1.200', userAgent: 'Mozilla/5.0 User Browser'
+      const session = await securityBridge.createSecureSessionBridge(payload, {
+        ipAddress: '192.168.1.200',
+        userAgent: 'Mozilla/5.0 User Browser'
       
-});// Should be downgraded to PUBLIC for USER role
+      });
+
+      // Should be downgraded to PUBLIC for USER role
       expect(session.securityClassification).toBe(SecurityClassification.PUBLIC);
     });
   });
 
     describe('Multi-Algorithm JWT Support', () => {
   it('should validate HS256 JWT tokens', async () => {
-        const payload = {,
-  sub: 'user-hs256',
+        const payload = {
+          sub: 'user-hs256',
           email: 'hs256@example.com',
           username: 'hs256user',
           role: UserRole.OPERATOR,
@@ -308,34 +318,43 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       });
 
     it('should support RS256 asymmetric keys', () => {
-  expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_RS256', '');
+      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_RS256', '');
       expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PRIVATE_KEY_RS256', '');
-});
+    });
 
     it('should support ES256 elliptic curve signatures', () => {
-  expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_ES256', '');
+      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_ES256', '');
       expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PRIVATE_KEY_ES256', '');
-});
+    });
 
     it('should support EdDSA Ed25519 signatures', () => {
-  expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_EdDSA', '');
+      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_EdDSA', '');
       expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PRIVATE_KEY_EdDSA', '');
-});});
+    });
+  });
 
     describe('Session Management and Validation', () => {
-  let testSession: Awaited<ReturnType<typeof securityBridge.createSecureSessionBridge>>;beforeEach(async () => {
-      const payload: EnhancedJwtPayload = {,
-  sub: 'session-test-user',
+  let testSession: Awaited<ReturnType<typeof securityBridge.createSecureSessionBridge>>;
+
+  beforeEach(async () => {
+    const payload: EnhancedJwtPayload = {
+      sub: 'session-test-user',
       email: 'session@example.com',
-        username: 'sessionuser',
-      role: UserRole._OPERATORisActiv, e: trueia, t: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        iss: 'aigent-bytebot-system',
+      username: 'sessionuser',
+      role: UserRole._OPERATOR,
+      isActive: true,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iss: 'aigent-bytebot-system',
       aud: 'bytebotd-enterprise-control',
-        securityClassification: SecurityClassification.CONFIDENTIALpermission, s: [Permission._TASK_READ, Permission._TASK_WRITE], complianceRequirements: [ComplianceFramework.GDPR], organizationId: 'org-session-test',
-};
-      testSession = await securityBridge.createSecureSessionBridge(payload, {
-  ipAddress: '10.0.5.50', userAgent: 'Session Test Browser'
+      securityClassification: SecurityClassification.CONFIDENTIAL,
+      permissions: [Permission._TASK_READ, Permission._TASK_WRITE],
+      complianceRequirements: [ComplianceFramework.GDPR],
+      organizationId: 'org-session-test',
+    };
+    testSession = await securityBridge.createSecureSessionBridge(payload, {
+      ipAddress: '10.0.5.50',
+      userAgent: 'Session Test Browser'
       
 });});
 
@@ -375,26 +394,35 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
 });
       expect(validation.valid).toBe(false);
       expect(validation.reasoning).toContain('Session not found');
-      expect(validation.securityViolations).toContain('SESSION_NOT_FOUND');});});
+      expect(validation.securityViolations).toContain('SESSION_NOT_FOUND');
+    });
+  });
 
     describe('Emergency Override System', () => {
-  it('should approve valid emergency override requests', async () => {const overrideRequest: EmergencyOverrideRequest = {operationId: 'emergency-test-123',
-      userId: 'emergency-user-456',
+    it('should approve valid emergency override requests', async () => {
+      const overrideRequest: EmergencyOverrideRequest = {
+        operationId: 'emergency-test-123',
+        userId: 'emergency-user-456',
         justification: 'Critical system maintenance required immediately',
-      approverUserId: 'admin-user-789',
+        approverUserId: 'admin-user-789',
         overrideScope: 'SESSION',
-      durationMinutes: 30,
-        context: {,
-  userId: 'emergency-user-456',
-      agentRole: 'OPERATOR',
-        securityLevel: 'CRITICAL',
-      conversationHistory: [], metadata: { emergencyType: 'system_maintenance' 
-},},};
+        durationMinutes: 30,
+        context: {
+          userId: 'emergency-user-456',
+          agentRole: 'OPERATOR',
+          securityLevel: 'CRITICAL',
+          conversationHistory: [],
+          metadata: { emergencyType: 'system_maintenance' },
+        },
+      };
 
       // Mock approval for emergency override
       (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({
-  approved: trueconversationI, d: 'emergency-conversation-789',
-      validationTimestamp: new Date(), reasoning: 'Emergency override approved for critical system maintenance', confidence: 0.92
+        approved: true,
+        conversationId: 'emergency-conversation-789',
+        validationTimestamp: new Date(),
+        reasoning: 'Emergency override approved for critical system maintenance',
+        confidence: 0.92
       
 });
 
@@ -403,22 +431,24 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       expect(result.overrideId).toBeDefined();
       expect(result.expiresAt).toBeDefined();
       expect(result.auditEntry.action).toBe('OVERRIDE');
-      expect(result.auditEntry.outcome).toBe('SUCCESS');});
+      expect(result.auditEntry.outcome).toBe('SUCCESS');
+    });
 
     it('should deny invalid emergency override requests', async () => {
-  const overrideRequest: EmergencyOverrideRequest = {operationId: 'emergency-deny-test-456',
-      userId: 'suspicious-user-999',
+      const overrideRequest: EmergencyOverrideRequest = {
+        operationId: 'emergency-deny-test-456',
+        userId: 'suspicious-user-999',
         justification: 'Suspicious access attempt',
-      approverUserId: 'fake-admin-000',
+        approverUserId: 'fake-admin-000',
         overrideScope: 'GLOBAL',
-      durationMinutes: 1440, // 24 hours - too long,
-  context: {,
-  userId: 'suspicious-user-999',
-        agentRole: 'USER',
-        securityLevel: 'LOW',
-        conversationHistory: [],
-        metadata: { suspiciousActivity: true 
-},
+        durationMinutes: 1440, // 24 hours - too long
+        context: {
+          userId: 'suspicious-user-999',
+          agentRole: 'USER',
+          securityLevel: 'LOW',
+          conversationHistory: [],
+          metadata: { suspiciousActivity: true },
+        }
       }
     };
 
@@ -691,19 +721,24 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
   
 });
 
-    describe('Multi-Algorithm Token Validation'() => {
-  const _createMockRequest = (algorithm: stringtoke, n: strin, g) => ({,
-  headers: { authorization: `Bearer ${token
-}` },
-      ip: '10.0.1.100','user-agent': 'Test Client',url: '/test',
-      method: 'GET'
-      });
+    describe('Multi-Algorithm Token Validation', () => {
+  const _createMockRequest = (algorithm: string, token: string) => ({
+    headers: { authorization: `Bearer ${token}` },
+    ip: '10.0.1.100',
+    'user-agent': 'Test Client',
+    url: '/test',
+    method: 'GET'
+  });
 
-    it('should extract HS256 algorithm from token header', () => {const hs256Header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');const mockPayload = Buffer.from(JSON.stringify({ sub: 'test' })).toString('base64url');const mockSignature = 'mock-signature';
+    it('should extract HS256 algorithm from token header', () => {
+      const hs256Header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const mockPayload = Buffer.from(JSON.stringify({ sub: 'test' })).toString('base64url');
+      const mockSignature = 'mock-signature';
       const token = `${hs256Header}.${mockPayload}.${mockSignature}`;
 
       // Test algorithm extraction (would be done internally by strategy)
-      expect(token.split('.').length).toBe(3);});
+      expect(token.split('.').length).toBe(3);
+    });
 
     it('should handle RS256 public key configuration', () => {
   expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_RS256', '');

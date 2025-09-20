@@ -89,19 +89,21 @@ const createMockParlantAuthBridge = (): jest.Mocked<ParlantAuthBridgeService> =>
 const createMockEnterpriseAuthService = (): jest.Mocked<EnterpriseAuthService> => ({
   validateJwtToken: jest.fn(),
   refreshToken: jest.fn(),
-  revokeToken: jest.fn(), getUserPermissions: jest.fn(), validateSecurityPolicy: jest.fn()
+  revokeToken: jest.fn(),
+  getUserPermissions: jest.fn(),
+  validateSecurityPolicy: jest.fn()
       
 });
 
 const createMockExecutionContext = (request: Record<string, unknown> = {}): ExecutionContext => ({
-  switchToHttp: () => ({,
-  getRequest: () => ({,
-  headers: { authorization: 'Bearer valid-jwt-token' 
-},
-      user: null,...request
-      }),
+  switchToHttp: () => ({
+    getRequest: () => ({
+      headers: { authorization: 'Bearer valid-jwt-token' },
+      user: null,
+      ...request
+    }),
     getResponse: () => ({})
-      }),
+  }),
   getClass: () => ({}),
   getHandler: () => ({}),
   getArgs: () => [],
@@ -109,10 +111,13 @@ const createMockExecutionContext = (request: Record<string, unknown> = {}): Exec
   switchToRpc: () => ({}),
   switchToWs: () => ({}),
   getType: () => 'http' as const
-      });// ===== JWT AUTH GUARD TESTS =====
+});
+
+// ===== JWT AUTH GUARD TESTS =====
 
 describe('JwtAuthGuard', () => {
-  let guard: JwtAuthGuard;let jwtService: jest.Mocked<JwtService>;
+  let guard: JwtAuthGuard;
+  let jwtService: jest.Mocked<JwtService>;
   let configService: jest.Mocked<ConfigService>;
   let mockLogger: jest.Mocked<Logger>;
   let parlantAuthBridge: jest.Mocked<ParlantAuthBridgeService>;

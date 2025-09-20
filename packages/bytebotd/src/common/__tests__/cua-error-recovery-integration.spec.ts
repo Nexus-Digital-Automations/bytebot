@@ -282,9 +282,8 @@ export class RetryManagerService {
    * Setup error recovery integration test environment
    */
   beforeAll(async () => {
-    testModule = await Test.createTestingModule({;
-
-imports: [
+    testModule = await Test.createTestingModule({
+      imports: [
         EventEmitterModule.forRoot(),
         ComputerUseModule,
         BytebotMcpModule,
@@ -302,7 +301,7 @@ imports: [
     await app.init();
 
     context = {
-  app,
+      app,
       computerUseService: testModule.get<ComputerUseService>(ComputerUseService),
       mcpTools: testModule.get<ComputerUseTools>(ComputerUseTools),
       parlantValidatedService: testModule.get<ParlantValidatedComputerUseService>(ParlantValidatedComputerUseService),

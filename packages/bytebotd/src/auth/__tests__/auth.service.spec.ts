@@ -185,16 +185,22 @@ class MockAuthService {
   private async findUserByEmail(email: string): Promise<UserData | null> {
   // Mock user database - in real implementation would use Prisma
     const mockUsers: UserData[] = [
-  {,
-  id: 'user_1',
-      email: 'admin@bytebot.ai',
-        passwordHash: await bcrypt.hash('admin123', 12),role: 'admin', createdAt: new Date(), isActive: true,
+      {
+        id: 'user_1',
+        email: 'admin@bytebot.ai',
+        passwordHash: await bcrypt.hash('admin123', 12),
+        role: 'admin',
+        createdAt: new Date(),
+        isActive: true,
       
 },
       {
-  id: 'user_2',
-      email: 'operator@bytebot.ai',
-        passwordHash: await bcrypt.hash('operator123', 12),role: 'operator', createdAt: new Date(), isActive: true,
+        id: 'user_2',
+        email: 'operator@bytebot.ai',
+        passwordHash: await bcrypt.hash('operator123', 12),
+        role: 'operator',
+        createdAt: new Date(),
+        isActive: true,
       
 },
     ];

@@ -219,7 +219,7 @@ export class ParlantWebSocketBridgeService implements OnApplicationShutdown {
       if (blockedAgents.some(blocked => userAgent.includes(blocked))) {
         return { allowed: false, reason: 'User agent not allowed' };
       }
-    }}
+    }
 
     // Header validation
     const requiredHeaders = ['sec-websocket-key', 'sec-websocket-version'];

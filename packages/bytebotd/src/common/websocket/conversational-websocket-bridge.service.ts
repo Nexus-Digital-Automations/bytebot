@@ -373,12 +373,12 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   private readonly reconnectionAttempts = new Map<string, number>();
 
   // Performance targets
-  private readonly PERFORMANCE_TARGETS = {,
-  MAX_CONCURRENT_SESSIONS: 1000,
-    TARGET_MESSAGE_LATENCY: 50, // milliseconds,
-  HEARTBEAT_INTERVAL: 30000, // 30 seconds,
-  RECONNECTION_TIMEOUT: 5000, // 5 seconds,
-  MAX_RECONNECTION_ATTEMPTS: 5,
+  private readonly PERFORMANCE_TARGETS = {
+    MAX_CONCURRENT_SESSIONS: 1000,
+    TARGET_MESSAGE_LATENCY: 50, // milliseconds
+    HEARTBEAT_INTERVAL: 30000, // 30 seconds
+    RECONNECTION_TIMEOUT: 5000, // 5 seconds
+    MAX_RECONNECTION_ATTEMPTS: 5,
     MESSAGE_COMPRESSION_THRESHOLD: 1024, // bytes
   
 };
@@ -393,9 +393,10 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Initialize the conversational WebSocket bridge with optimized settings
    */
   private initializeConversationalBridge(): void {
-    const operationId = `conv_ws_init_${Date.now()}
-_${this.generateId()}`;this.logger.log(`[${operationId}] Initializing ConversationalWebSocketBridge`, {
-  operationId,targetConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
+    const operationId = `conv_ws_init_${Date.now()}_${this.generateId()}`;
+    this.logger.log(`[${operationId}] Initializing ConversationalWebSocketBridge`, {
+      operationId,
+      targetConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
       targetLatency: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
       compressionThreshold: this.PERFORMANCE_TARGETS.MESSAGE_COMPRESSION_THRESHOLD,
     

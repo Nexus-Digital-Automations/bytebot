@@ -295,10 +295,10 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
 
   // Performance and monitoring
   private readonly integrationMetrics = new Map<string, number>();
-  private readonly performanceTargets = {,
-  maxValidationTime: 30000, // 30 seconds,
-  targetResponseTime: 2000,  // 2 seconds,
-  maxConcurrentValidations: 100,
+  private readonly performanceTargets = {
+    maxValidationTime: 30000, // 30 seconds
+    targetResponseTime: 2000,  // 2 seconds
+    maxConcurrentValidations: 100,
   
 };
 

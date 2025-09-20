@@ -67,36 +67,46 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
     warn: (message: string, meta?: Record<stringunknown>) =>
       console.warn(`[SECURITY WARNING] ${message}`, meta ?? ''),
     error: (message: string, meta?: Record<stringunknown>) =>
-      console.error(`[SECURITY ERROR] ${message}`, meta ?? ''),};// Mock execution context factory with enhanced security metadata
+      console.error(`[SECURITY ERROR] ${message}`, meta ?? ''),
+    };
+
+    // Mock execution context factory with enhanced security metadata
   const createMockExecutionContext = (
     headers: Record<string, string | null | undefined> = {},
     _isPublic = false,
-    route = 'test-route',ip = '127.0.0.1'): ExecutionContext => {
-  const mockRequest: MockRequest = {,
-  headers: {
-}, user: undefined, url: `/${route}`,
-      method: 'GET', ip, connection: { remoteAddress: ip },
+    route = 'test-route',
+    ip = '127.0.0.1'
+  ): ExecutionContext => {
+    const mockRequest: MockRequest = {
+      headers: {
+        ...headers
+      },
+      user: undefined,
+      url: `/${route}`,
+      method: 'GET',
+      ip,
+      connection: { remoteAddress: ip },
       socket: { remoteAddress: ip },
     };
 
     return {
-  switchToHttp: jest.fn().mockReturnValue({,
-  getRequest: jest.fn().mockReturnValue(
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(
           mockRequest,
-        ), getResponse: jest.fn().mockReturnValue(
-          {
-},
+        ),
+        getResponse: jest.fn().mockReturnValue(
+          {},
         )
       }),
       switchToRpc: jest.fn().mockReturnValue({}),
       switchToWs: jest.fn().mockReturnValue({}),
       getHandler: jest.fn().mockReturnValue({
-  name: 'testHandler'
-      
-}),getClass: jest.fn().mockReturnValue({
-  name: 'TestController'
-      
-}),getArgs: jest.fn().mockReturnValue([]),
+        name: 'testHandler'
+      }),
+      getClass: jest.fn().mockReturnValue({
+        name: 'TestController'
+      }),
+      getArgs: jest.fn().mockReturnValue([]),
       getArgByIndex: jest.fn().mockReturnValue(
         undefined,
       ),

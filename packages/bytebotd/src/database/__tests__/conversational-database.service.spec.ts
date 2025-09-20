@@ -48,7 +48,7 @@ interface TestEntity extends BaseEntity {
 }
 
 interface MockParlantValidationResponse extends ParlantValidationResponse {
-  approved: boolean;,
+  approved: boolean;
   conversationId: string;
   reason?: string;
   recommendations?: string[];

@@ -51,7 +51,9 @@ import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integra
 import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
-// ===== PARLANT INTEGRATION TEST UTILITIES =====/**
+// ===== PARLANT INTEGRATION TEST UTILITIES =====
+
+/**
  * Mock PARLANT service for integration testing
  */
 class MockParlantService {

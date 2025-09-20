@@ -47,7 +47,9 @@ import {
 import { ParlantWebSocketStreamingBridgeService } from '../parlant-websocket-streaming-bridge.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
-// ===== MESSAGE FLOW TEST UTILITIES =====/**
+// ===== MESSAGE FLOW TEST UTILITIES =====
+
+/**
  * Message flow validator for testing bidirectional communication
  */
 class MessageFlowValidator extends EventEmitter {

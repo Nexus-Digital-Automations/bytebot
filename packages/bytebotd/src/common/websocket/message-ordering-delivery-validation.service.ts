@@ -224,8 +224,8 @@ export class MessageOrderingDeliveryValidationService
   private readonly validationEnabled: boolean;
 
   // Performance tracking
-  private readonly metrics: MessageProcessingMetrics = {,
-  totalMessages: 0,
+  private readonly metrics: MessageProcessingMetrics = {
+    totalMessages: 0,
     successfulDeliveries: 0,
     failedDeliveries: 0,
     averageLatency: 0,

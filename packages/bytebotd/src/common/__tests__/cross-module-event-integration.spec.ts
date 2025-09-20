@@ -177,7 +177,7 @@ let context: CrossModuleEventContext;let testModule: TestingModule;
   /**
    * Setup cross-module event integration test environment
    */
-  beforeAll(async () => 
+  beforeAll(async () => {
     testModule = await Test.createTestingModule({
       imports: [
         EventEmitterModule.forRoot({

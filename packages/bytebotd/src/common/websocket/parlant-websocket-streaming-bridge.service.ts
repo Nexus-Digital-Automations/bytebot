@@ -553,17 +553,17 @@ export class ParlantWebSocketStreamingBridgeService
   private readonly reconnectionAttempts = new Map<string, number>();
 
   // Performance targets and configuration
-  private readonly PERFORMANCE_TARGETS = {,
-  MAX_CONCURRENT_SESSIONS: 1000,
+  private readonly PERFORMANCE_TARGETS = {
+    MAX_CONCURRENT_SESSIONS: 1000,
     MAX_STREAMS_PER_SESSION: 50,
-    TARGET_MESSAGE_LATENCY: 50, // milliseconds,
-  TARGET_VALIDATION_LATENCY: 500, // milliseconds,
-  HEARTBEAT_INTERVAL: 30000, // 30 seconds,
-  RECONNECTION_TIMEOUT: 5000, // 5 seconds,
-  MAX_RECONNECTION_ATTEMPTS: 5,
-    MESSAGE_COMPRESSION_THRESHOLD: 1024, // bytes,
-  STREAM_IDLE_TIMEOUT: 300000, // 5 minutes,
-  SESSION_IDLE_TIMEOUT: 900000, // 15 minutes
+    TARGET_MESSAGE_LATENCY: 50, // milliseconds
+    TARGET_VALIDATION_LATENCY: 500, // milliseconds
+    HEARTBEAT_INTERVAL: 30000, // 30 seconds
+    RECONNECTION_TIMEOUT: 5000, // 5 seconds
+    MAX_RECONNECTION_ATTEMPTS: 5,
+    MESSAGE_COMPRESSION_THRESHOLD: 1024, // bytes
+    STREAM_IDLE_TIMEOUT: 300000, // 5 minutes
+    SESSION_IDLE_TIMEOUT: 900000, // 15 minutes
   
 };
 

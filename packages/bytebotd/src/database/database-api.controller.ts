@@ -137,16 +137,18 @@ export interface DatabaseModificationDto {
 
 /**
  * Database schema operation DTO
- */;
-
+ */
 export interface DatabaseSchemaDto {
-  /** Schema operation type */;
-  operation: 'CREATE_TABLE' | 'ALTER_TABLE' | 'DROP_TABLE' | 'CREATE_INDEX' | 'DROP_INDEX';/** SQL DDL statement */ddl: string;
+  /** Schema operation type */
+  operation: 'CREATE_TABLE' | 'ALTER_TABLE' | 'DROP_TABLE' | 'CREATE_INDEX' | 'DROP_INDEX';
 
-  /** Migration description */;
+  /** SQL DDL statement */
+  ddl: string;
+
+  /** Migration description */
   description: string;
 
-  /** Whether operation is reversible */;
+  /** Whether operation is reversible */
   reversible: boolean;
 
   /** Rollback instructions */
@@ -157,11 +159,13 @@ export interface DatabaseSchemaDto {
 
 /**
  * Database backup request DTO
- */;
-
+ */
 export interface DatabaseBackupDto {
-  /** Backup type */;
-  type: 'FULL' | 'INCREMENTAL' | 'DIFFERENTIAL' | 'TRANSACTION_LOG';/** Tables to include (empty for all) */tables?: string[];
+  /** Backup type */
+  type: 'FULL' | 'INCREMENTAL' | 'DIFFERENTIAL' | 'TRANSACTION_LOG';
+
+  /** Tables to include (empty for all) */
+  tables?: string[];
 
   /** Backup location */
   location?: string;
