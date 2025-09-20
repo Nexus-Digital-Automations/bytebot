@@ -22,7 +22,7 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION AUDIT AND COMPLIANCE
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
@@ -32,11 +32,7 @@ import {
   TransactionEvent,
   TransactionAuditEntry,
 } from './parlant-transaction-manager.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import * as crypto from 'crypto';
 
 // ===== AUDIT TRAIL INTERFACES =====
@@ -48,7 +44,7 @@ export interface ComprehensiveAuditEntry {
   readonly auditId: string;
   readonly transactionId: string;
   readonly timestamp: Date;
-  readonly event: TransactionEvent;
+  readonly _event: TransactionEvent;
   readonly eventDescription: string;
   readonly userId: string;
   readonly userRole?: string;
@@ -501,7 +497,7 @@ export class TransactionAuditService {
    */
   async createAuditEntry(
     transactionId: string,
-    event: TransactionEvent,
+    _event: TransactionEvent,
     eventDescription: string,
     userContext: ParlantUserContext,
     additionalContext?: {
@@ -675,7 +671,7 @@ export class TransactionAuditService {
 
     const executionTime = Date.now() - startTime;
 
-    const result: AuditTrailSearchResult = {
+    const _result: AuditTrailSearchResult = {
       entries: paginatedEntries,
       totalCount,
       queryMetadata: {
@@ -819,7 +815,7 @@ export class TransactionAuditService {
         auditId: entry.auditId,
         transactionId: entry.transactionId,
         timestamp: entry.timestamp,
-        event: entry.event,
+        _event: entry.event,
         eventDescription: entry.eventDescription,
         userId: entry.userId,
         previousEntryHash: entry.previousEntryHash,
@@ -827,7 +823,7 @@ export class TransactionAuditService {
 
       if (entry.integrityHash !== expectedHash) {
         this.logger.error(
-          `Integrity breach detected in audit entry: ${entry.auditId}`,
+          `Integrity breach detected in audit _entry: ${entry.auditId}`,
         );
         await this.handleIntegrityBreach(entry, 'HASH_MISMATCH');
         return false;
@@ -857,11 +853,11 @@ export class TransactionAuditService {
     query: AuditTrailQuery,
     format: 'JSON' | 'CSV' | 'XML' | 'PDF',
     userContext: ParlantUserContext,
-  ): Promise<{ data: string; filename: string; contentType: string }> {
+  ): Promise<{ _data: string; filename: string; contentType: string }> {
     const searchResult = await this.searchAuditTrail(query, userContext);
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
-    let data: string;
+    let _data: string;
     let filename: string;
     let contentType: string;
 
@@ -939,11 +935,11 @@ export class TransactionAuditService {
     return `query_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private calculateIntegrityHash(data: {
+  private calculateIntegrityHash(_data: {
     auditId: string;
     transactionId: string;
     timestamp: Date;
-    event: TransactionEvent;
+    _event: TransactionEvent;
     eventDescription: string;
     userId: string;
     previousEntryHash?: string;
@@ -990,7 +986,7 @@ export class TransactionAuditService {
 
   private determineBusinessContext(
     userContext: ParlantUserContext,
-    event: TransactionEvent,
+    _event: TransactionEvent,
   ): BusinessAuditContext {
     return {
       businessUnit: userContext.businessUnit,
@@ -1002,7 +998,7 @@ export class TransactionAuditService {
   }
 
   private async checkComplianceRequirements(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     userContext: ParlantUserContext,
     dataChanges?: DataChangeRecord[],
   ): Promise<ComplianceFlag[]> {
@@ -1042,7 +1038,7 @@ export class TransactionAuditService {
   }
 
   private calculateRiskLevel(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     complianceFlags: ComplianceFlag[],
     dataChanges?: DataChangeRecord[],
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
@@ -1084,7 +1080,7 @@ export class TransactionAuditService {
   }
 
   private determineSecurityLevel(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     complianceFlags: ComplianceFlag[],
   ): SecurityLevel {
     if (
@@ -1115,7 +1111,7 @@ export class TransactionAuditService {
   }
 
   private generateConversationalAuditSummary(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     description: string,
     userContext: ParlantUserContext,
     riskLevel: string,
@@ -1130,7 +1126,7 @@ export class TransactionAuditService {
   }
 
   private async checkForComplianceViolations(
-    entry: ComprehensiveAuditEntry,
+    _entry: ComprehensiveAuditEntry,
   ): Promise<void> {
     // Check for potential violations based on audit entry
     for (const flag of entry.complianceFlags) {
@@ -1141,7 +1137,7 @@ export class TransactionAuditService {
   }
 
   private async createComplianceViolation(
-    entry: ComprehensiveAuditEntry,
+    _entry: ComprehensiveAuditEntry,
     flag: ComplianceFlag,
   ): Promise<void> {
     const violation: ComplianceViolation = {
@@ -1213,12 +1209,12 @@ export class TransactionAuditService {
   }
 
   // Placeholder methods for complete implementation
-  private generateBusinessJustification(event: TransactionEvent): string {
+  private generateBusinessJustification(_event: TransactionEvent): string {
     return `Business operation: ${event}`;
   }
 
   private calculateBusinessImpact(
-    event: TransactionEvent,
+    _event: TransactionEvent,
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     switch (event) {
       case TransactionEvent.ERROR_OCCURRED:
@@ -1232,7 +1228,7 @@ export class TransactionAuditService {
   }
 
   private requiresGDPRCompliance(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     dataChanges?: DataChangeRecord[],
   ): boolean {
     return (
@@ -1243,7 +1239,7 @@ export class TransactionAuditService {
   }
 
   private requiresHIPAACompliance(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     dataChanges?: DataChangeRecord[],
   ): boolean {
     return (
@@ -1256,7 +1252,7 @@ export class TransactionAuditService {
   }
 
   private requiresSOXCompliance(
-    event: TransactionEvent,
+    _event: TransactionEvent,
     dataChanges?: DataChangeRecord[],
   ): boolean {
     return (
@@ -1288,7 +1284,7 @@ export class TransactionAuditService {
   }
 
   private async handleIntegrityBreach(
-    entry: ComprehensiveAuditEntry,
+    _entry: ComprehensiveAuditEntry,
     breachType: string,
   ): Promise<void> {
     this.logger.error(

@@ -16,9 +16,9 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   DatabaseHealthService,
   HealthCheckOptions,
@@ -165,7 +165,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         .fn()
         .mockResolvedValue([{ health_check: 1 }]);
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: true,
         includeDetails: true,
@@ -189,7 +189,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
       const dbError = new Error('Connection failed');
       databaseService.executeRawQuery = jest.fn().mockRejectedValue(dbError);
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: true,
         includeDetails: false,
@@ -208,7 +208,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
     });
 
     it('should perform connection pool health check', async () => {
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: true,
         includeDetails: true,
@@ -240,7 +240,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         issues: ['High utilization detected'],
       });
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: true,
         includeDetails: true,
@@ -261,7 +261,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         });
       });
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: false,
         includeDetails: true,
@@ -289,7 +289,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         });
       });
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: false,
         includeDetails: false,
@@ -313,7 +313,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         .mockResolvedValueOnce([{ table_name: 'User' }])
         .mockResolvedValueOnce([{ table_name: 'Message' }]);
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: false,
         includeDetails: true,
@@ -341,7 +341,7 @@ describe('DatabaseHealthService Comprehensive Test Suite', () => {
         .mockResolvedValueOnce([]) // User table missing
         .mockResolvedValueOnce([{ table_name: 'Message' }]);
 
-      const options: HealthCheckOptions = {
+      const _options: HealthCheckOptions = {
         timeout: 5000,
         critical: false,
         includeDetails: true,

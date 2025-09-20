@@ -17,9 +17,9 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   ParlantValidatedPrismaService,
   PrismaOperationMetadata,
@@ -33,10 +33,7 @@ import {
   ConversationalValidationError,
   ExecutionContext,
 } from '../database/parlant-validated-database.service';
-import {
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== MOCK IMPLEMENTATIONS =====
 
@@ -154,7 +151,7 @@ class PrismaTestDataFactory {
 
   static createCreateArgs() {
     return {
-      data: {
+      _data: {
         name: 'Test User',
         email: 'test@example.com',
         active: true,
@@ -165,7 +162,7 @@ class PrismaTestDataFactory {
   static createUpdateArgs() {
     return {
       where: { id: 123 },
-      data: {
+      _data: {
         name: 'Updated User',
         lastLoginAt: new Date(),
       },
@@ -572,7 +569,7 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
 
       it('should extract data fields from create args', () => {
         const args = {
-          data: {
+          _data: {
             name: 'Test User',
             email: 'test@example.com',
             active: true,
@@ -606,7 +603,7 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
       it('should successfully execute updateMany with backup requirement', async () => {
         const args = {
           where: { active: false },
-          data: { deletedAt: new Date() },
+          _data: { deletedAt: new Date() },
         };
         const mockResult = { count: 5 };
 
@@ -800,11 +797,11 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
 
     it('should successfully wrap executeQuery', async () => {
       const metadata = PrismaTestDataFactory.createPrismaOperationMetadata();
-      const queryFn = jest.fn().mockResolvedValue({ data: 'test' });
+      const queryFn = jest.fn().mockResolvedValue({ _data: 'test' });
 
       const result = await service.executeQuery(queryFn, metadata, userContext);
 
-      expect(result).toEqual({ data: 'test' });
+      expect(result).toEqual({ _data: 'test' });
       expect(queryFn).toHaveBeenCalledWith(mockPrismaClient);
     });
 
@@ -979,14 +976,14 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
       const request1 = {
         functionName: 'findMany',
         prismaOperation: PrismaTestDataFactory.createPrismaOperationMetadata(),
-        context: PrismaTestDataFactory.createUserContext(),
+        _context: PrismaTestDataFactory.createUserContext(),
         riskLevel: RiskLevel.LOW,
       } as ParlantPrismaValidationRequest;
 
       const request2 = {
         functionName: 'findMany',
         prismaOperation: PrismaTestDataFactory.createPrismaOperationMetadata(),
-        context: PrismaTestDataFactory.createUserContext(),
+        _context: PrismaTestDataFactory.createUserContext(),
         riskLevel: RiskLevel.LOW,
       } as ParlantPrismaValidationRequest;
 
@@ -1002,7 +999,7 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
         prismaOperation: PrismaTestDataFactory.createPrismaOperationMetadata({
           operationMethod: 'findMany',
         }),
-        context: PrismaTestDataFactory.createUserContext(),
+        _context: PrismaTestDataFactory.createUserContext(),
         riskLevel: RiskLevel.LOW,
       } as ParlantPrismaValidationRequest;
 
@@ -1011,7 +1008,7 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
         prismaOperation: PrismaTestDataFactory.createPrismaOperationMetadata({
           operationMethod: 'create',
         }),
-        context: PrismaTestDataFactory.createUserContext(),
+        _context: PrismaTestDataFactory.createUserContext(),
         riskLevel: RiskLevel.MEDIUM,
       } as ParlantPrismaValidationRequest;
 
@@ -1100,7 +1097,7 @@ describe('ParlantValidatedPrismaService - Comprehensive Unit Tests', () => {
         where: null,
         select: 'invalid',
         include: 42,
-        data: 'not-object',
+        _data: 'not-object',
       };
 
       expect(() => {

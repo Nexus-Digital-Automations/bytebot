@@ -18,7 +18,7 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { AgentModule } from '../agent.module';
 import { AgentProcessor } from '../agent.processor';

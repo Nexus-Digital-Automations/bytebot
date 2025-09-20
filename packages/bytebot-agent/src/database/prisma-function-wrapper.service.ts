@@ -14,7 +14,7 @@
  * - Performance optimization with sub-500ms validation targets
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -225,7 +225,7 @@ export class PrismaFunctionWrapperService {
     );
 
     // Create metadata for this operation
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       functionName,
       packageName: 'prisma-client',
       category: 'PRISMA',
@@ -439,7 +439,7 @@ export class PrismaFunctionWrapperService {
     modelName: string,
     operation: string,
     args: Record<string, unknown>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<FunctionExecutionResult<T>> {
     const functionName = `${modelName}.${operation}`;
     const wrappedFunction = this.modelOperations.get(functionName);
@@ -469,7 +469,7 @@ export class PrismaFunctionWrapperService {
     modelName: string,
     operation: string,
     args: Record<string, unknown>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Record<string, unknown> {
     const enhanced = { ...args };
 
@@ -528,8 +528,8 @@ export class PrismaFunctionWrapperService {
     modelName: string,
     operation: string,
     args: Record<string, unknown>,
-    context: ParlantUserContext,
-    options: {
+    _context: ParlantUserContext,
+    _options: {
       maxRecords?: number;
       requireConfirmation?: boolean;
       progressCallback?: (progress: number) => void;
@@ -595,7 +595,7 @@ export class PrismaFunctionWrapperService {
       this.logger.warn(
         `Failed to estimate affected records for ${modelName}.${operation}`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
       return 1;
@@ -609,7 +609,7 @@ export class PrismaFunctionWrapperService {
     modelName: string,
     operation: string,
     args: Record<string, unknown>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
     progressCallback: (progress: number) => void,
   ): Promise<FunctionExecutionResult<T>> {
     // TODO: Implement progressive execution for large bulk operations
@@ -635,7 +635,7 @@ export class PrismaFunctionWrapperService {
       operation: string;
       args: Record<string, unknown>;
     }>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<FunctionExecutionResult<T[]>> {
     if (!this.prismaClient) {
       throw new Error('Prisma client not initialized');

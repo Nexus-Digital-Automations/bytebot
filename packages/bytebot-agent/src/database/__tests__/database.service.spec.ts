@@ -16,9 +16,9 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import { PrismaClient } from '@prisma/client';
 import {
   DatabaseService,
@@ -367,7 +367,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         duration: 100,
         timestamp: new Date(),
         success: false,
-        error: 'Syntax error',
+        _error: 'Syntax error',
       };
 
       (service as any).recordQueryMetrics(failedQueryMetrics);
@@ -605,7 +605,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         expect.objectContaining({
           query: 'raw_query',
           success: false,
-          error: 'SQL syntax error',
+          _error: 'SQL syntax error',
           duration: expect.any(Number),
           timestamp: expect.any(Date),
         }),
@@ -775,7 +775,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
     });
 
     it('should execute raw query with full reliability patterns', async () => {
-      const mockResult = [{ data: 'test' }];
+      const mockResult = [{ _data: 'test' }];
       mockPrismaClient.$queryRawUnsafe.mockResolvedValue(mockResult);
 
       circuitBreakerService.execute = jest
@@ -872,7 +872,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         expect.objectContaining({
           query: 'reliable_raw_query',
           success: false,
-          error: 'Connection timeout',
+          _error: 'Connection timeout',
           duration: expect.any(Number),
           timestamp: expect.any(Date),
         }),
@@ -1053,7 +1053,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
       mockPrismaClient.$queryRawUnsafe.mockImplementation(
         () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve([{ result: 'success' }]), 10),
+            setTimeout(() => resolve([{ _result: 'success' }]), 10),
           ) as any,
       );
 
@@ -1065,7 +1065,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(50);
       results.forEach((result) => {
-        expect(result).toEqual([{ result: 'success' }]);
+        expect(result).toEqual([{ _result: 'success' }]);
       });
       expect((service as any).totalQueries).toBe(50);
     });

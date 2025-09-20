@@ -33,7 +33,7 @@
  */
 
 import { TestingModule } from '@nestjs/testing';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { Response } from 'supertest';
 
@@ -186,7 +186,7 @@ describe('Module Integration Tests', () => {
 
       // Seed required test data with comprehensive user profile
       await prismaService.user.create({
-        data: {
+        _data: {
           id: testUser.id,
           email: testUser.email,
           username: testUser.username || `user_${testUser.id}`,
@@ -238,7 +238,7 @@ describe('Module Integration Tests', () => {
         logger.log('🔍 [VALIDATE] Validating response structure and content');
         expect(response.body as Record<string, unknown>).toMatchObject({
           success: true,
-          data: expect.any(Array),
+          _data: expect.any(Array),
         });
         logger.log('✅ [VALIDATE] Response structure validation passed');
 
@@ -268,7 +268,7 @@ describe('Module Integration Tests', () => {
 
         expect(response.body as Record<string, unknown>).toMatchObject({
           success: false,
-          error: expect.objectContaining({
+          _error: expect.objectContaining({
             message: expect.stringContaining('Authentication'),
           }),
         });
@@ -302,7 +302,7 @@ describe('Module Integration Tests', () => {
           `✅ [QUERY] Query parameters processed successfully in ${responseTime.toString()}ms`,
         );
 
-        const responseBody = response.body as { data: unknown[] };
+        const responseBody = response.body as { _data: unknown[] };
         expect(responseBody.data.length).toBeLessThanOrEqual(10);
         logger.log(
           `✅ [VALIDATE] Response data length (${responseBody.data.length.toString()}) respects limit parameter`,
@@ -322,7 +322,7 @@ describe('Module Integration Tests', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(400);
 
-        const responseBody = response.body as { error: { message: string } };
+        const responseBody = response.body as { _error: { message: string } };
         expect(responseBody.error).toMatchObject({
           message: expect.stringContaining('validation'),
         });
@@ -349,7 +349,9 @@ describe('Module Integration Tests', () => {
         );
 
         // expect(response.body).toBeValidApiResponse();
-        const responseBody = response.body as { data: Record<string, unknown> };
+        const responseBody = response.body as {
+          _data: Record<string, unknown>;
+        };
         expect(responseBody.data).toMatchObject(createData);
 
         // Verify data was persisted in database
@@ -372,7 +374,7 @@ describe('Module Integration Tests', () => {
           .expect(400);
 
         const responseBody = response.body as {
-          error: { message: string; details: unknown[] };
+          _error: { message: string; details: unknown[] };
         };
         expect(responseBody.error).toMatchObject({
           message: expect.stringContaining('validation'),
@@ -400,7 +402,7 @@ describe('Module Integration Tests', () => {
           .send(createData)
           .expect(409);
 
-        const responseBody = response.body as { error: { message: string } };
+        const responseBody = response.body as { _error: { message: string } };
         expect(responseBody.error.message).toContain('already exists');
       });
     });
@@ -420,7 +422,7 @@ describe('Module Integration Tests', () => {
           .expect(201);
 
         const createResponseBody = createResponse.body as {
-          data: { id: string };
+          _data: { id: string };
         };
         resourceId = createResponseBody?.data?.id;
       });
@@ -438,7 +440,7 @@ describe('Module Integration Tests', () => {
           .expect(200);
 
         const responseBody = response.body as {
-          data: { id: string } & Record<string, unknown>;
+          _data: { id: string } & Record<string, unknown>;
         };
         expect(responseBody.data).toMatchObject(updateData);
         expect(responseBody.data.id).toBe(resourceId);
@@ -459,7 +461,7 @@ describe('Module Integration Tests', () => {
           .send({ name: 'Updated Name' })
           .expect(404);
 
-        const responseBody = response.body as { error: { message: string } };
+        const responseBody = response.body as { _error: { message: string } };
         expect(responseBody.error.message).toContain('not found');
       });
     });
@@ -479,7 +481,7 @@ describe('Module Integration Tests', () => {
           .expect(201);
 
         const createResponseBody = createResponse.body as {
-          data: { id: string };
+          _data: { id: string };
         };
         resourceId = createResponseBody?.data?.id;
       });
@@ -505,7 +507,7 @@ describe('Module Integration Tests', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(404);
 
-        const responseBody = response.body as { error: { message: string } };
+        const responseBody = response.body as { _error: { message: string } };
         expect(responseBody.error.message).toContain('not found');
       });
     });
@@ -554,7 +556,7 @@ describe('Module Integration Tests', () => {
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
 
-      const responseBody = response.body as { error: { message: string } };
+      const responseBody = response.body as { _error: { message: string } };
       expect(responseBody.error.message).toContain('expired');
     });
 
@@ -602,7 +604,7 @@ describe('Module Integration Tests', () => {
 
       // All should succeed or fail gracefully with detailed result analysis
       const statusCounts = { created: 0, conflict: 0, other: 0 };
-      results.forEach((result: request.Response) => {
+      results.forEach((_result: request.Response) => {
         if (result.status === 201) statusCounts.created++;
         else if (result.status === 409) statusCounts.conflict++;
         else statusCounts.other++;

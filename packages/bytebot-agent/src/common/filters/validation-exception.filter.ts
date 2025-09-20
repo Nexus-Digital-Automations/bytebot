@@ -10,7 +10,6 @@ import {
   Catch,
   ArgumentsHost,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 // ValidationError type not used in production code
@@ -44,7 +43,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     }
   }
 
-  private isValidationError(response: Record<string, unknown>): boolean {
+  private isValidationError(_response: Record<string, unknown>): boolean {
     return (
       response &&
       Array.isArray(response.message) &&
@@ -54,9 +53,9 @@ export class ValidationExceptionFilter implements ExceptionFilter {
 
   private handleValidationError(
     exceptionResponse: Record<string, unknown>,
-    response: Response,
+    _response: Response,
     correlationId: string,
-    request: { correlationId?: string; url?: string },
+    _request: { correlationId?: string; url?: string },
   ) {
     const validationErrors = this.formatValidationErrors(
       Array.isArray(exceptionResponse?.message)
@@ -67,7 +66,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     const errorResponse = {
       statusCode: 400,
       message: 'Validation failed',
-      error: 'Bad Request',
+      _error: 'Bad Request',
       validationErrors,
       timestamp: new Date().toISOString(),
       path: request?.url || 'unknown',
@@ -88,9 +87,9 @@ export class ValidationExceptionFilter implements ExceptionFilter {
 
   private handleGenericBadRequest(
     exception: BadRequestException,
-    response: Response,
+    _response: Response,
     correlationId: string,
-    request: { correlationId?: string; url?: string },
+    _request: { correlationId?: string; url?: string },
   ) {
     const exceptionResponse = exception.getResponse();
 
@@ -100,14 +99,14 @@ export class ValidationExceptionFilter implements ExceptionFilter {
         typeof exceptionResponse === 'string'
           ? exceptionResponse
           : (exceptionResponse as Record<string, unknown>).message,
-      error: 'Bad Request',
+      _error: 'Bad Request',
       timestamp: new Date().toISOString(),
       path: request?.url || 'unknown',
       correlationId,
     };
 
     this.logger.warn(
-      `Bad request: ${exception.message || 'Unknown error'} [${correlationId}]`,
+      `Bad _request: ${exception.message || 'Unknown error'} [${correlationId}]`,
       {
         path: request?.url || 'unknown',
       },

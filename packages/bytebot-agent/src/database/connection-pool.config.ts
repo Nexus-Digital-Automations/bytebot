@@ -4,7 +4,7 @@
  * Based on PostgreSQL best practices and enterprise scaling patterns
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 

@@ -18,9 +18,9 @@
  * Performance: Sub-1000ms P95 targets with 85%+ cache efficiency
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 // Import types
@@ -98,14 +98,7 @@ export interface OptimizationThresholds {
 export interface CacheEntry<T> {
   readonly key: string;
   readonly value: T;
-  readonly level: CacheLevel;
-  readonly createdAt: Date;
-  readonly lastAccessed: Date;
-  readonly accessCount: number;
-  readonly ttl: number;
-  readonly priority: CachePriority;
-  readonly metadata: CacheEntryMetadata;
-  readonly encrypted: boolean;
+  readonly _level: $1,
 }
 
 /**
@@ -139,17 +132,7 @@ export interface CacheEntryMetadata {
  * Performance metrics for cache analysis
  */
 export interface CachePerformanceMetrics {
-  readonly level: CacheLevel;
-  readonly totalEntries: number;
-  readonly hitRate: number;
-  readonly missRate: number;
-  readonly averageAccessTime: number;
-  readonly memoryUsage: number;
-  readonly compressionRatio: number;
-  readonly evictionRate: number;
-  readonly errorRate: number;
-  readonly throughput: number;
-  readonly latencyPercentiles: LatencyPercentiles;
+  readonly _level: $1,
 }
 
 /**
@@ -168,10 +151,7 @@ export interface LatencyPercentiles {
  */
 export interface PredictiveCacheAnalysis {
   readonly patterns: CachePattern[];
-  readonly recommendations: CacheRecommendation[];
-  readonly futureHitRatePrediction: number;
-  readonly warmingCandidates: WarmingCandidate[];
-  readonly optimizationOpportunities: OptimizationOpportunity[];
+  readonly _recommendations: $1,
 }
 
 /**
@@ -220,12 +200,7 @@ export interface EstimatedImpact {
  * Cache warming candidate
  */
 export interface WarmingCandidate {
-  readonly cacheKey: string;
-  readonly priority: CachePriority;
-  readonly estimatedAccessTime: Date;
-  readonly confidence: number;
-  readonly generationCost: number;
-  readonly benefitScore: number;
+  readonly _cacheKey: $1,
 }
 
 /**
@@ -297,10 +272,7 @@ export class ParlantPerformanceOptimizationService {
 
   // Predictive analysis
   private cachePatterns: CachePattern[] = [];
-  private recommendations: CacheRecommendation[] = [];
-
-  constructor(
-    private readonly configService: ConfigService,
+  private _recommendations: $1,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger.log(
@@ -332,7 +304,7 @@ export class ParlantPerformanceOptimizationService {
    * Optimized validation request processing with intelligent caching
    */
   async optimizeValidationRequest(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse | null> {
     const startTime = Date.now();
     const cacheKey = this.generateOptimizedCacheKey(request);
@@ -387,7 +359,7 @@ export class ParlantPerformanceOptimizationService {
       return null;
     } catch (error) {
       this.logger.error('Cache optimization error', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         cacheKey,
         requestId: request.requestId,
       });
@@ -402,8 +374,8 @@ export class ParlantPerformanceOptimizationService {
    * Store validation response in optimized cache hierarchy
    */
   async storeValidationResponse(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
     generationTime: number,
   ): Promise<void> {
     const cacheKey = this.generateOptimizedCacheKey(request);
@@ -429,7 +401,7 @@ export class ParlantPerformanceOptimizationService {
         accessCount: 0,
         ttl,
         priority,
-        metadata: {
+        _metadata: {
           riskClass: request.riskClass,
           userId: request.userContext.userId,
           functionName: request.functionName,
@@ -451,7 +423,7 @@ export class ParlantPerformanceOptimizationService {
       this.updatePredictivePatterns(request, response);
     } catch (error) {
       this.logger.error('Failed to store validation response in cache', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         cacheKey,
         requestId: request.requestId,
       });
@@ -487,7 +459,7 @@ export class ParlantPerformanceOptimizationService {
 
       const optimizationTime = Date.now() - startTime;
 
-      const result: OptimizationResult = {
+      const _result: OptimizationResult = {
         optimizationId: this.generateOptimizationId(),
         timestamp: new Date(),
         currentMetrics,
@@ -513,7 +485,7 @@ export class ParlantPerformanceOptimizationService {
       return result;
     } catch (error) {
       this.logger.error('Adaptive optimization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         optimizationTime: Date.now() - startTime,
       });
 
@@ -527,7 +499,7 @@ export class ParlantPerformanceOptimizationService {
    * Get from L1 memory cache (fastest)
    */
   private async getFromL1Cache(
-    cacheKey: string,
+    _cacheKey: $1,
   ): Promise<EnhancedValidationResponse | null> {
     const entry = this.l1Cache.get(cacheKey);
 
@@ -551,7 +523,7 @@ export class ParlantPerformanceOptimizationService {
    * Get from L2 Redis cache (fast)
    */
   private async getFromL2Cache(
-    cacheKey: string,
+    _cacheKey: $1,
   ): Promise<EnhancedValidationResponse | null> {
     // Simulate Redis access delay
     await this.simulateDelay(10); // 10ms average
@@ -575,7 +547,7 @@ export class ParlantPerformanceOptimizationService {
    * Get from L3 database cache (slower but comprehensive)
    */
   private async getFromL3Cache(
-    cacheKey: string,
+    _cacheKey: $1,
   ): Promise<EnhancedValidationResponse | null> {
     // Simulate database access delay
     await this.simulateDelay(40); // 40ms average
@@ -599,7 +571,7 @@ export class ParlantPerformanceOptimizationService {
    * Get from L4 predictive cache (pre-computed)
    */
   private async getFromL4PredictiveCache(
-    cacheKey: string,
+    _cacheKey: $1,
   ): Promise<EnhancedValidationResponse | null> {
     const entry = this.l4PredictiveCache.get(cacheKey);
 
@@ -616,7 +588,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in cache hierarchy based on strategy
    */
   private async storeInCacheHierarchy(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     switch (this.optimizationConfig.cacheStrategy) {
       case CacheStrategy.AGGRESSIVE:
@@ -647,7 +619,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in all cache levels (aggressive strategy)
    */
   private async storeInAllLevels(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     // Check size limits before storing
     this.enforceL1SizeLimit();
@@ -657,12 +629,12 @@ export class ParlantPerformanceOptimizationService {
     this.l1Cache.set(entry.key, { ...entry, level: CacheLevel.L1_MEMORY });
     this.l2Cache.set(entry.key, {
       ...entry,
-      level: CacheLevel.L2_REDIS,
+      _level: $1,
       ttl: entry.ttl * 2,
     });
     this.l3Cache.set(entry.key, {
       ...entry,
-      level: CacheLevel.L3_DATABASE,
+      _level: $1,
       ttl: entry.ttl * 4,
     });
   }
@@ -671,7 +643,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in balanced levels (balanced strategy)
    */
   private async storeInBalancedLevels(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     // Always store in L1 for immediate access
     this.enforceL1SizeLimit();
@@ -685,7 +657,7 @@ export class ParlantPerformanceOptimizationService {
       this.enforceL2SizeLimit();
       this.l2Cache.set(entry.key, {
         ...entry,
-        level: CacheLevel.L2_REDIS,
+        _level: $1,
         ttl: entry.ttl * 2,
       });
     }
@@ -698,7 +670,7 @@ export class ParlantPerformanceOptimizationService {
       this.enforceL3SizeLimit();
       this.l3Cache.set(entry.key, {
         ...entry,
-        level: CacheLevel.L3_DATABASE,
+        _level: $1,
         ttl: entry.ttl * 4,
       });
     }
@@ -708,7 +680,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in minimal levels (conservative strategy)
    */
   private async storeInMinimalLevels(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     // Only store in L1 unless it's critical
     this.enforceL1SizeLimit();
@@ -719,7 +691,7 @@ export class ParlantPerformanceOptimizationService {
       this.enforceL2SizeLimit();
       this.l2Cache.set(entry.key, {
         ...entry,
-        level: CacheLevel.L2_REDIS,
+        _level: $1,
         ttl: entry.ttl * 2,
       });
     }
@@ -729,7 +701,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in adaptive levels (adaptive strategy)
    */
   private async storeInAdaptiveLevels(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     // Analyze access patterns to determine optimal storage
     const accessPattern = this.analyzeAccessPattern(entry.key);
@@ -747,7 +719,7 @@ export class ParlantPerformanceOptimizationService {
    * Store in predictive levels (predictive strategy)
    */
   private async storeInPredictiveLevels(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     // Use machine learning predictions to determine storage
     const prediction = await this.predictCacheUtility(entry);
@@ -757,7 +729,7 @@ export class ParlantPerformanceOptimizationService {
       // Also store in predictive cache
       this.l4PredictiveCache.set(entry.key, {
         ...entry,
-        level: CacheLevel.L4_PREDICTIVE,
+        _level: $1,
       });
     } else if (prediction.utility > 0.5) {
       await this.storeInBalancedLevels(entry);
@@ -772,13 +744,13 @@ export class ParlantPerformanceOptimizationService {
    * Promote cache entry to L1
    */
   private async promoteToL1Cache(
-    cacheKey: string,
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _cacheKey: $1,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     this.enforceL1SizeLimit();
     this.l1Cache.set(cacheKey, {
       ...entry,
-      level: CacheLevel.L1_MEMORY,
+      _level: $1,
       lastAccessed: new Date(),
     });
   }
@@ -787,13 +759,13 @@ export class ParlantPerformanceOptimizationService {
    * Promote cache entry to L2
    */
   private async promoteToL2Cache(
-    cacheKey: string,
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _cacheKey: $1,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     this.enforceL2SizeLimit();
     this.l2Cache.set(cacheKey, {
       ...entry,
-      level: CacheLevel.L2_REDIS,
+      _level: $1,
       lastAccessed: new Date(),
     });
   }
@@ -802,13 +774,13 @@ export class ParlantPerformanceOptimizationService {
    * Promote cache entry to L3
    */
   private async promoteToL3Cache(
-    cacheKey: string,
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _cacheKey: $1,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<void> {
     this.enforceL3SizeLimit();
     this.l3Cache.set(cacheKey, {
       ...entry,
-      level: CacheLevel.L3_DATABASE,
+      _level: $1,
       lastAccessed: new Date(),
     });
   }
@@ -836,7 +808,7 @@ export class ParlantPerformanceOptimizationService {
       this.generatePerformanceReport();
     } catch (error) {
       this.logger.error('Cache maintenance failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -971,7 +943,7 @@ export class ParlantPerformanceOptimizationService {
    * Generate optimized cache key with intelligent hashing
    */
   private generateOptimizedCacheKey(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): string {
     const keyComponents = [
       request.functionName,
@@ -991,8 +963,8 @@ export class ParlantPerformanceOptimizationService {
    * Determine cache priority based on request and response
    */
   private determineCachePriority(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
   ): CachePriority {
     // Critical operations get highest priority
     if (request.riskClass === ValidationRiskClass.CRITICAL) {
@@ -1017,8 +989,8 @@ export class ParlantPerformanceOptimizationService {
    * Calculate optimal TTL based on multiple factors
    */
   private calculateOptimalTTL(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
     generationTime: number,
   ): number {
     let baseTTL = 300000; // 5 minutes default
@@ -1049,7 +1021,7 @@ export class ParlantPerformanceOptimizationService {
    * Check if cache entry should be encrypted
    */
   private shouldEncryptCacheEntry(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): boolean {
     return (
       request.sensitiveDataInvolved ||
@@ -1063,7 +1035,7 @@ export class ParlantPerformanceOptimizationService {
    */
   private enhanceWithRealTimeData(
     cachedResponse: EnhancedValidationResponse,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): EnhancedValidationResponse {
     // Update timestamps and add real-time context
     return {
@@ -1098,9 +1070,9 @@ export class ParlantPerformanceOptimizationService {
    * Record cache miss for analytics
    */
   private recordCacheMiss(
-    cacheKey: string,
+    _cacheKey: $1,
     searchTime: number,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): void {
     this.cacheAccessLog.push({
       timestamp: new Date(),
@@ -1119,15 +1091,15 @@ export class ParlantPerformanceOptimizationService {
   /**
    * Record cache error
    */
-  private recordCacheError(cacheKey: string, error: unknown): void {
+  private recordCacheError(cacheKey: string, _error: unknown): void {
     this.cacheAccessLog.push({
       timestamp: new Date(),
-      level: CacheLevel.L1_MEMORY,
+      _level: $1,
       type: 'ERROR',
       accessTime: 0,
       success: false,
       cacheKey,
-      error: error instanceof Error ? error.message : String(error),
+      _error: error instanceof Error ? error.message : String(error),
     });
   }
 
@@ -1217,12 +1189,12 @@ export class ParlantPerformanceOptimizationService {
 
   // ===== PLACEHOLDER METHODS (Implementation details) =====
 
-  private isExpired(entry: CacheEntry<EnhancedValidationResponse>): boolean {
+  private isExpired(_entry: CacheEntry<EnhancedValidationResponse>): boolean {
     return Date.now() - entry.createdAt.getTime() > entry.ttl;
   }
 
   private updateAccessMetadata(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): void {
     // In a real implementation, this would update the entry metadata
     entry.metadata.hitCount++;
@@ -1291,14 +1263,14 @@ export class ParlantPerformanceOptimizationService {
 
   // Additional placeholder methods for comprehensive implementation
   private updateCacheStorageMetrics(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): void {
     // Implementation would update storage metrics
   }
 
   private updatePredictivePatterns(
-    request?: ConversationalValidationRequest,
-    response?: EnhancedValidationResponse,
+    _request?: ConversationalValidationRequest,
+    _response?: EnhancedValidationResponse,
   ): void {
     // Implementation would analyze patterns for predictive caching
   }
@@ -1310,19 +1282,19 @@ export class ParlantPerformanceOptimizationService {
   }
 
   private async identifyOptimizationOpportunities(
-    metrics: any,
+    _metrics: $1,
   ): Promise<OptimizationOpportunity[]> {
     return []; // Implementation would return optimization opportunities
   }
 
   private async generateOptimizationRecommendations(
-    opportunities: OptimizationOpportunity[],
+    _opportunities: $1,
   ): Promise<CacheRecommendation[]> {
     return []; // Implementation would generate recommendations
   }
 
   private async applyAutomaticOptimizations(
-    recommendations: CacheRecommendation[],
+    _recommendations: $1,
   ): Promise<any[]> {
     return []; // Implementation would apply safe optimizations
   }
@@ -1331,12 +1303,12 @@ export class ParlantPerformanceOptimizationService {
     return { expectedHitRateImprovement: 0.05 }; // Implementation would predict performance
   }
 
-  private analyzeAccessPattern(cacheKey: string): any {
+  private analyzeAccessPattern(_cacheKey: $1,
     return { frequency: 'MEDIUM' }; // Implementation would analyze access patterns
   }
 
   private async predictCacheUtility(
-    entry: CacheEntry<EnhancedValidationResponse>,
+    _entry: CacheEntry<EnhancedValidationResponse>,
   ): Promise<any> {
     return { utility: 0.7 }; // Implementation would predict cache utility
   }
@@ -1350,7 +1322,7 @@ export class ParlantPerformanceOptimizationService {
   }
 
   private calculateCacheMetrics(
-    level: CacheLevel,
+    _level: $1,
     cache: Map<string, CacheEntry<EnhancedValidationResponse>>,
   ): CachePerformanceMetrics {
     return {
@@ -1405,12 +1377,10 @@ export class ParlantPerformanceOptimizationService {
     return { underutilizedEntries: [], hotEntries: [] };
   }
 
-  private async demoteCacheEntry(cacheKey: string): Promise<void> {
-    // Implementation would demote cache entry
+  private async demoteCacheEntry(_cacheKey: $1,
   }
 
-  private async promoteCacheEntry(cacheKey: string): Promise<void> {
-    // Implementation would promote cache entry
+  private async promoteCacheEntry(_cacheKey: $1,
   }
 
   private async performPredictiveAnalysis(): Promise<void> {
@@ -1434,19 +1404,19 @@ export class ParlantPerformanceOptimizationService {
     return {
       l1Cache: {
         size: this.l1Cache.size,
-        metrics: this.cacheMetrics.get(CacheLevel.L1_MEMORY),
+        _metrics: $1,
       },
       l2Cache: {
         size: this.l2Cache.size,
-        metrics: this.cacheMetrics.get(CacheLevel.L2_REDIS),
+        _metrics: $1,
       },
       l3Cache: {
         size: this.l3Cache.size,
-        metrics: this.cacheMetrics.get(CacheLevel.L3_DATABASE),
+        _metrics: $1,
       },
       l4Cache: {
         size: this.l4PredictiveCache.size,
-        metrics: this.cacheMetrics.get(CacheLevel.L4_PREDICTIVE),
+        _metrics: $1,
       },
       overallMetrics: this.performanceMetrics,
       accessLogSize: this.cacheAccessLog.length,
@@ -1494,23 +1464,12 @@ export class ParlantPerformanceOptimizationService {
 
 interface CacheAccessRecord {
   timestamp: Date;
-  level: CacheLevel;
-  type: 'HIT' | 'MISS' | 'ERROR';
-  accessTime: number;
-  success: boolean;
-  cacheKey?: string;
-  requestId?: string;
-  error?: string;
+  _level: $1,
 }
 
 interface OptimizationResult {
   optimizationId: string;
   timestamp: Date;
   currentMetrics: any;
-  opportunities: OptimizationOpportunity[];
-  recommendations: CacheRecommendation[];
-  appliedOptimizations: any[];
-  performancePrediction: any;
-  optimizationTime: number;
-  success: boolean;
+  _opportunities: $1,
 }

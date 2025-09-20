@@ -8,7 +8,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../secrets.service';
 import { ExternalSecretsService } from '../external-secrets.service';
@@ -303,7 +303,7 @@ describe('Comprehensive Secrets Management', () => {
       // Mock external secrets service
       const mockExternalSecret = {
         value: 'external-secret-value',
-        metadata: {
+        _metadata: {
           name: 'external-test',
           version: 'v1',
           provider: 'vault' as const,

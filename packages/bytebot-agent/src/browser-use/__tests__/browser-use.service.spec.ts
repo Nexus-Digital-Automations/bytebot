@@ -11,10 +11,10 @@
  * - Security validation and access control
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { BrowserUseService } from '../browser-use.service';
-import { Logger } from '@nestjs/common';
+
 import { ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import * as fs from 'fs/promises';
@@ -156,7 +156,7 @@ describe('BrowserUseService', () => {
         name: 'Test Session',
         browserConfig: mockBrowserConfig,
         timeout: 300000,
-        metadata: { purpose: 'testing' },
+        _metadata: { purpose: 'testing' },
       };
 
       it('should create a new browser session successfully', async () => {
@@ -346,7 +346,7 @@ describe('BrowserUseService', () => {
         priority: 1,
         timeout: 30000,
         retryAttempts: 3,
-        metadata: { source: 'api-test' },
+        _metadata: { source: 'api-test' },
       };
 
       it('should create a new task successfully', async () => {
@@ -411,7 +411,7 @@ describe('BrowserUseService', () => {
           mockChildProcess.emit('message', {
             type: 'task_completed',
             taskId: task.id,
-            results: { success: true, data: 'extracted data' },
+            results: { success: true, _data: 'extracted data' },
           });
         }, 100);
 
@@ -566,7 +566,7 @@ describe('BrowserUseService', () => {
               type: 'screenshot_result',
               sessionId,
               imageData: 'base64-encoded-image-data',
-              metadata: { width: 1920, height: 1080 },
+              _metadata: { width: 1920, height: 1080 },
             }),
           );
         }, 100);
@@ -664,14 +664,14 @@ describe('BrowserUseService', () => {
             JSON.stringify({
               type: 'extraction_result',
               sessionId,
-              data: {
+              _data: {
                 title: 'Example Page',
                 links: [
                   'https://example.com/page1',
                   'https://example.com/page2',
                 ],
               },
-              metadata: {
+              _metadata: {
                 url: 'https://example.com',
                 extractionTime: 150,
               },

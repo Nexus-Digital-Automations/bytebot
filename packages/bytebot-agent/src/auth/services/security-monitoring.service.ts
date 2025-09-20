@@ -18,7 +18,7 @@
  * @author Enterprise Security Implementation Specialist
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { createHash } from 'crypto';
@@ -63,7 +63,7 @@ export interface SecurityEvent {
   ipAddress: string;
   userAgent?: string;
   geolocation?: GeolocationData;
-  metadata: Record<string, unknown>;
+  _metadata: Record<string, unknown>;
   riskScore: number;
   actionTaken?: string;
 }
@@ -225,7 +225,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         userAgent,
         geolocation: geolocation || undefined,
         riskScore,
-        metadata: {
+        _metadata: {
           bruteForceAttempts: bruteForceData.attemptCount,
           isIpBlocked: bruteForceData.isBlocked,
           locationAnomaly,
@@ -265,7 +265,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         operationId,
         email,
         ipAddress,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         monitoringTimeMs: monitoringTime,
       });
@@ -283,7 +283,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         ipAddress,
         userAgent,
         riskScore: 0.5, // Default moderate risk when analysis fails
-        metadata: { analysisError: true },
+        _metadata: { analysisError: true },
       };
     }
   }
@@ -363,7 +363,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         `[${operationId}] Security metrics calculation failed`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           metricsTimeMs: metricsTime,
         },
@@ -436,7 +436,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       return geolocation;
     } catch (error) {
       this.logger.warn(`Failed to get geolocation for IP ${ipAddress}`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -633,7 +633,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Log security event with structured data
    */
-  private logSecurityEvent(event: SecurityEvent): void {
+  private logSecurityEvent(_event: SecurityEvent): void {
     // Log to application logger
     const logLevel =
       event.severity === SecurityEventSeverity.CRITICAL
@@ -651,7 +651,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       ipAddress: event.ipAddress,
       riskScore: event.riskScore,
       geolocation: event.geolocation,
-      metadata: event.metadata,
+      _metadata: event.metadata,
     });
 
     // TODO: Implement database storage for security events in production
@@ -668,7 +668,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Take automated security actions for high-risk events
    */
-  private takeAutomatedSecurityAction(event: SecurityEvent): void {
+  private takeAutomatedSecurityAction(_event: SecurityEvent): void {
     const operationId = `security-action-${Date.now()}`;
 
     this.logger.warn(`[${operationId}] Taking automated security action`, {
@@ -703,7 +703,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Notify security team of high-risk events
    */
-  private notifySecurityTeam(event: SecurityEvent, message: string): void {
+  private notifySecurityTeam(_event: SecurityEvent, message: string): void {
     // Log the security alert
     this.logger.error(`SECURITY_ALERT: ${message}`, {
       eventId: event.eventId,

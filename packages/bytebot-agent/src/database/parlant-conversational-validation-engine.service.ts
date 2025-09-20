@@ -19,9 +19,8 @@
  * Performance: Sub-1000ms P95 response times with intelligent optimization
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Import existing Parlant infrastructure
 import { ParlantValidatedDatabaseService } from './parlant-validated-database.service';
@@ -29,7 +28,6 @@ import { ParlantValidatedPrismaService } from '../prisma/parlant-validated-prism
 
 // Import core types
 import {
-  ParlantValidationResponse,
   ParlantUserContext,
   DatabaseOperationMetadata,
   ExecutionContext,
@@ -497,7 +495,7 @@ export class ParlantConversationalValidationEngine {
     } catch (error) {
       this.logger.error(`[${requestId}] Conversational validation failed`, {
         functionName,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         responseTime: Date.now() - startTime,
       });
 
@@ -512,7 +510,7 @@ export class ParlantConversationalValidationEngine {
    * Perform risk-based validation with appropriate workflow
    */
   private async performRiskBasedValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse> {
     this.logger.debug(`Performing ${request.riskClass} risk validation`, {
       functionName: request.functionName,
@@ -546,7 +544,7 @@ export class ParlantConversationalValidationEngine {
    * CRITICAL risk validation - Maximum security, multi-party approval
    */
   private async performCriticalRiskValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse> {
     this.logger.warn(`CRITICAL RISK OPERATION: ${request.functionName}`, {
       requestId: request.requestId,
@@ -608,7 +606,7 @@ export class ParlantConversationalValidationEngine {
    * HIGH risk validation - Enhanced validation, conversational approval
    */
   private async performHighRiskValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse> {
     this.logger.warn(`HIGH RISK OPERATION: ${request.functionName}`, {
       requestId: request.requestId,
@@ -665,7 +663,7 @@ export class ParlantConversationalValidationEngine {
    * MEDIUM risk validation - Standard validation, basic confirmation
    */
   private async performMediumRiskValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse> {
     this.logger.log(`MEDIUM RISK OPERATION: ${request.functionName}`, {
       requestId: request.requestId,
@@ -718,7 +716,7 @@ export class ParlantConversationalValidationEngine {
    * LOW risk validation - Minimal validation, cached responses
    */
   private async performLowRiskValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse> {
     this.logger.debug(`LOW RISK OPERATION: ${request.functionName}`, {
       requestId: request.requestId,
@@ -760,8 +758,8 @@ export class ParlantConversationalValidationEngine {
    * Perform multi-modal validation based on validation mode
    */
   private async performMultiModalValidation(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug(
       `Performing multi-modal validation: ${request.validationMode}`,
@@ -798,7 +796,7 @@ export class ParlantConversationalValidationEngine {
    * Text-based conversational validation
    */
   private async performTextValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     _response: EnhancedValidationResponse,
   ): Promise<void> {
     // Generate conversational prompts based on risk level and operation type
@@ -814,7 +812,7 @@ export class ParlantConversationalValidationEngine {
    * Voice-based validation (future implementation)
    */
   private async performVoiceValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Voice validation placeholder', {
@@ -827,7 +825,7 @@ export class ParlantConversationalValidationEngine {
    * Visual confirmation validation
    */
   private async performVisualValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Visual validation placeholder', {
@@ -840,7 +838,7 @@ export class ParlantConversationalValidationEngine {
    * Biometric validation (future implementation)
    */
   private async performBiometricValidation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Biometric validation placeholder', {
@@ -853,8 +851,8 @@ export class ParlantConversationalValidationEngine {
    * Hybrid multi-modal validation
    */
   private async performHybridValidation(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     // Combine multiple validation modes based on risk level
     await this.performTextValidation(request, response);
@@ -870,7 +868,7 @@ export class ParlantConversationalValidationEngine {
    * Check validation cache for performance optimization
    */
   private async checkValidationCache(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<EnhancedValidationResponse | null> {
     if (!this.isCacheEnabled()) {
       return null;
@@ -905,8 +903,8 @@ export class ParlantConversationalValidationEngine {
    * Cache validation response for performance optimization
    */
   private async cacheValidationResponse(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     if (!this.isCacheEnabled()) {
       return;
@@ -932,7 +930,7 @@ export class ParlantConversationalValidationEngine {
   /**
    * Generate cache key for validation request
    */
-  private generateCacheKey(request: ConversationalValidationRequest): string {
+  private generateCacheKey(_request: ConversationalValidationRequest): string {
     const keyComponents = [
       request.functionName,
       request.riskClass,
@@ -970,8 +968,8 @@ export class ParlantConversationalValidationEngine {
    * Update conversation context with new operation
    */
   private async updateConversationContext(
-    request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _request: ConversationalValidationRequest,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     const operation: ConversationOperation = {
       operationId: request.requestId,
@@ -1016,7 +1014,7 @@ export class ParlantConversationalValidationEngine {
    * Find related operations in conversation chain
    */
   private findRelatedOperations(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): string[] {
     const existingChain =
       this.operationChains.get(request.conversationContext.sessionId) || [];
@@ -1200,7 +1198,7 @@ export class ParlantConversationalValidationEngine {
    * Estimate operation impact
    */
   private estimateOperationImpact(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
     params: Record<string, unknown>,
   ): OperationImpact {
     const isBulk = this.isBatchOperation(metadata, params);
@@ -1333,7 +1331,7 @@ export class ParlantConversationalValidationEngine {
   // ===== MOCK SIMULATION METHODS =====
 
   private async simulateCriticalApproval(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<boolean> {
     // Simulate comprehensive approval process
     await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate processing time
@@ -1341,7 +1339,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private async simulateHighRiskApproval(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 50));
     return (
@@ -1370,7 +1368,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private hasSensitiveData(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
     params: Record<string, unknown>,
   ): boolean {
     const sensitiveKeywords = [
@@ -1387,7 +1385,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private isBatchOperation(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
     params: Record<string, unknown>,
   ): boolean {
     return (
@@ -1410,7 +1408,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private estimateExecutionTime(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
     params: Record<string, unknown>,
   ): number {
     const baseTime = metadata.operationType === 'READ' ? 50 : 200;
@@ -1419,7 +1417,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private assessBusinessCriticality(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (metadata.isDestructive) return 'HIGH';
     if (metadata.operationType === 'WRITE') return 'MEDIUM';
@@ -1427,7 +1425,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private getComplianceRequirements(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
   ): string[] {
     const requirements = [];
     if (metadata.isDestructive) requirements.push('DATA_RETENTION');
@@ -1443,7 +1441,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private async generateContextualInsights(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<ContextualInsight[]> {
     return [
       {
@@ -1469,7 +1467,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private async generateNextSteps(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<NextStep[]> {
     return [
       {
@@ -1493,7 +1491,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private generateConversationalPrompts(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): string[] {
     const prompts = [];
 

@@ -20,7 +20,6 @@
 
 import {
   Injectable,
-  Logger,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
@@ -140,7 +139,7 @@ function safeExtractElement(element: unknown): ElementInfo | null {
   const safeTagName = typeof el.tagName === 'string' ? el.tagName : 'div';
 
   return {
-    index: typeof el.index === 'number' ? el.index : 0,
+    _index: typeof el.index === 'number' ? el._index : 0,
     tagName: safeTagName,
     text:
       typeof el.text === 'string'
@@ -192,7 +191,7 @@ function isBrowserScreenshotResult(
 }
 
 interface ElementInfo {
-  index: number; // Required by DOMElement
+  _index: number; // Required by DOMElement
   tagName: string;
   text: string; // Required by DOMElement
   id?: string;
@@ -233,7 +232,7 @@ interface PageInfo {
 
 // Exported interfaces for use by other services
 export interface PageElement {
-  index: number;
+  _index: number;
   tagName: string;
   text?: string;
   id?: string;
@@ -257,7 +256,7 @@ export interface PageState {
   title: string;
   elements: PageElement[];
   forms: Array<{
-    index: number;
+    _index: number;
     action?: string;
     method?: string;
     fields: PageElement[];
@@ -403,7 +402,7 @@ export class BrowserDomService {
           `${clickDto.coordinates?.x},${clickDto.coordinates?.y}`,
       );
 
-      const response: BrowserElementResponseDto = {
+      const _response: BrowserElementResponseDto = {
         success: true,
         message: 'Element clicked successfully',
         element: elementInfo || undefined,
@@ -473,7 +472,7 @@ export class BrowserDomService {
         ? await this.getElementInfo(browserProcess.id, typeDto.selector)
         : null;
 
-      const response: BrowserElementResponseDto = {
+      const _response: BrowserElementResponseDto = {
         success: true,
         message: 'Text typed successfully',
         element: elementInfo || undefined,
@@ -555,7 +554,7 @@ export class BrowserDomService {
    */
   async getState(
     sessionId: string,
-    options: { includeScreenshot?: boolean } = {},
+    _options: { includeScreenshot?: boolean } = {},
   ): Promise<BrowserStateResponseDto> {
     this.logger.debug(`Getting browser state for session ${sessionId}`);
 
@@ -591,7 +590,7 @@ export class BrowserDomService {
         screenshotData = screenshotResult.data;
       }
 
-      const response: BrowserStateResponseDto = {
+      const _response: BrowserStateResponseDto = {
         success: true,
         sessionId,
         pageInfo: {
@@ -664,10 +663,10 @@ export class BrowserDomService {
               'success' in result
                 ? Boolean((result as { success: unknown }).success)
                 : true,
-            error:
+            _error:
               typeof result === 'object' && result !== null && 'error' in result
                 ? (() => {
-                    const errorValue = (result as { error: unknown }).error;
+                    const errorValue = (result as { _error: unknown }).error;
                     if (typeof errorValue === 'string') {
                       return errorValue;
                     }
@@ -688,7 +687,7 @@ export class BrowserDomService {
                   })()
                 : undefined,
             executionTime,
-            ...(typeof result === 'object' && result !== null ? result : {}),
+            ...(typeof result === 'object' && result !== null ? _result : {}),
           };
           return convertedResult;
         }
@@ -876,7 +875,7 @@ export class BrowserDomService {
    */
   private async captureScreenshot(
     processId: string,
-  ): Promise<{ data: string }> {
+  ): Promise<{ _data: string }> {
     const command = {
       action: 'screenshot',
       parameters: {
@@ -889,17 +888,17 @@ export class BrowserDomService {
     const result = await this.browserUseService.sendCommand(processId, command);
 
     if (!isBrowserScreenshotResult(result)) {
-      return { data: '' };
+      return { _data: '' };
     }
 
     return {
-      data:
+      _data:
         typeof result.screenshot === 'string'
           ? result.screenshot
           : typeof result.screenshot === 'object' &&
               result.screenshot !== null &&
               typeof (result.screenshot as { data?: string }).data === 'string'
-            ? (result.screenshot as { data: string }).data
+            ? (result.screenshot as { _data: string })._data
             : '',
     };
   }
@@ -909,7 +908,7 @@ export class BrowserDomService {
    */
   async typeText(
     sessionId: string,
-    options: {
+    _options: {
       elementIndex?: number;
       selector?: string;
       text: string;
@@ -967,7 +966,7 @@ export class BrowserDomService {
         elementSelector,
       );
 
-      const response: BrowserElementResponseDto = {
+      const _response: BrowserElementResponseDto = {
         success: true,
         message: 'Text typed successfully',
         element: elementInfo || undefined,
@@ -988,7 +987,7 @@ export class BrowserDomService {
    */
   async clickElement(
     sessionId: string,
-    options: {
+    _options: {
       elementIndex?: number;
       selector?: string;
       waitForNavigation?: boolean;
@@ -1042,7 +1041,7 @@ export class BrowserDomService {
         elementSelector,
       );
 
-      const response: BrowserElementResponseDto = {
+      const _response: BrowserElementResponseDto = {
         success: true,
         message: 'Element clicked successfully',
         element: elementInfo || undefined,
@@ -1087,7 +1086,7 @@ export class BrowserDomService {
         title: browserState.pageInfo?.title || '',
         elements:
           browserState.interactiveElements?.map((element) => ({
-            index: element.index,
+            _index: element.index,
             tagName: element.tagName,
             text: element.text,
             id: element.attributes?.id,
@@ -1111,7 +1110,7 @@ export class BrowserDomService {
 
         if (tagName === 'form') {
           pageState.forms.push({
-            index: element.index,
+            _index: element.index,
             action: element.attributes.action,
             method: element.attributes.method,
             fields: [],
@@ -1148,7 +1147,7 @@ export class BrowserDomService {
    */
   async waitForElement(
     sessionId: string,
-    options: {
+    _options: {
       selector: string;
       timeout?: number;
     },
@@ -1183,7 +1182,7 @@ export class BrowserDomService {
         options.selector,
       );
 
-      const response: BrowserElementResponseDto = {
+      const _response: BrowserElementResponseDto = {
         success: true,
         message: 'Element found successfully',
         element: elementInfo || undefined,

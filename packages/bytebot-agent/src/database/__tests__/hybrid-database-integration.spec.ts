@@ -22,9 +22,8 @@
  * - Error handling and fallback mechanisms
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
 
 // Hybrid Database Module and related services
 import {

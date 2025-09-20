@@ -18,8 +18,8 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { ConfigService } from '@nestjs/config';
 import { AgentProcessor } from '../agent.processor';
 import { AgentScheduler } from '../agent.scheduler';
@@ -72,7 +72,7 @@ describe('Agent Performance Tests', () => {
 
   const measurePerformance = async <T>(
     operation: () => Promise<T>,
-  ): Promise<{ result: T; metrics: PerformanceMetrics }> => {
+  ): Promise<{ _result: T; metrics: PerformanceMetrics }> => {
     const startCpuUsage = process.cpuUsage();
     const startTime = performance.now();
     const startMemory = process.memoryUsage();
@@ -107,10 +107,10 @@ describe('Agent Performance Tests', () => {
     size: 'small' | 'medium' | 'large' | 'huge' = 'medium',
   ): Task => {
     const baseSizes = {
-      small: { desc: 100, result: 1000 },
-      medium: { desc: 500, result: 5000 },
-      large: { desc: 2000, result: 20000 },
-      huge: { desc: 10000, result: 100000 },
+      small: { desc: 100, _result: 1000 },
+      medium: { desc: 500, _result: 5000 },
+      large: { desc: 2000, _result: 20000 },
+      huge: { desc: 10000, _result: 100000 },
     };
 
     const { desc, result } = baseSizes[size];
@@ -130,8 +130,8 @@ describe('Agent Performance Tests', () => {
       executedAt: null,
       completedAt: null,
       queuedAt: new Date(),
-      error: null,
-      result: 'Y'.repeat(result),
+      _error: null,
+      _result: 'Y'.repeat(result),
       model: {
         provider: 'anthropic',
         name: 'claude-3-sonnet',
@@ -191,7 +191,7 @@ describe('Agent Performance Tests', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     module = await Test.createTestingModule({
@@ -538,7 +538,7 @@ describe('Agent Performance Tests', () => {
           name: `test-file-${i}.txt`,
           type: 'text/plain',
           size: 1024,
-          data: `RmlsZSAke2l9IGNvbnRlbnQ=`, // Base64 content
+          _data: `RmlsZSAke2l9IGNvbnRlbnQ=`, // Base64 content
           taskId: 'file-io-test',
           createdAt: new Date(),
           updatedAt: new Date(),

@@ -14,9 +14,7 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Logger,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -27,7 +25,7 @@ import { getVersionConfig } from './api-version.decorator';
 /**
  * Safely converts an unknown error to a string representation
  */
-function getSafeErrorMessage(error: unknown): string {
+function getSafeErrorMessage(_error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
@@ -188,7 +186,7 @@ function isErrorWithStack(obj: unknown): obj is ErrorWithStack {
  * @param request - Request to check
  * @returns Whether request has user.id
  */
-function isRequestWithUser(request: Request): request is RequestWithUser {
+function isRequestWithUser(_request: Request): request is RequestWithUser {
   return (
     typeof (request as RequestWithUser).user === 'object' &&
     (request as RequestWithUser).user !== null
@@ -261,7 +259,7 @@ export class DeprecationGuard implements CanActivate {
    * @param context - Execution context
    * @returns Promise<boolean> - Whether request is allowed
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(_context: ExecutionContext): Promise<boolean> {
     const operationId = `deprecation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     const startTime = Date.now();
 
@@ -356,20 +354,20 @@ export class DeprecationGuard implements CanActivate {
       }
 
       return allowed;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
 
       if (isErrorWithStack(error)) {
         this.logger.error(`[${operationId}] Deprecation guard error`, {
           operationId,
-          error: error.message,
+          _error: error.message,
           stack: error.stack,
           processingTimeMs: processingTime,
         });
       } else {
         this.logger.error(`[${operationId}] Deprecation guard error`, {
           operationId,
-          error: getSafeErrorMessage(error),
+          _error: getSafeErrorMessage(error),
           processingTimeMs: processingTime,
         });
       }
@@ -465,7 +463,7 @@ export class DeprecationGuard implements CanActivate {
    */
   private applyEnforcementPolicy(
     deprecationResult: DeprecationResult,
-    request: Request,
+    _request: Request,
     versionConfig: VersionConfig,
     operationId: string,
   ): boolean {
@@ -530,7 +528,7 @@ export class DeprecationGuard implements CanActivate {
    * @param bypassUsed - Whether bypass was used
    */
   private setDeprecationHeaders(
-    response: Response,
+    _response: Response,
     versionConfig: VersionConfig,
     bypassUsed: boolean,
   ): void {
@@ -575,7 +573,7 @@ export class DeprecationGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private trackDeprecatedUsage(
-    request: Request,
+    _request: Request,
     versionConfig: VersionConfig,
     operationId: string,
   ): void {
@@ -602,10 +600,10 @@ export class DeprecationGuard implements CanActivate {
         totalDeprecatedRequests: this.stats.deprecatedRequests,
         uniqueUsers: this.stats.uniqueUsers.size,
       });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       this.logger.error(`[${operationId}] Failed to track deprecated usage`, {
         operationId,
-        error: isErrorWithStack(error)
+        _error: isErrorWithStack(error)
           ? error.message
           : getSafeErrorMessage(error),
       });
@@ -620,7 +618,7 @@ export class DeprecationGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private logDeprecationAccess(
-    request: Request,
+    _request: Request,
     versionConfig: VersionConfig,
     deprecationResult: DeprecationResult,
     operationId: string,
@@ -660,10 +658,10 @@ export class DeprecationGuard implements CanActivate {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       this.logger.error('Failed to log deprecation access security event', {
         operationId,
-        error: isErrorWithStack(error)
+        _error: isErrorWithStack(error)
           ? error.message
           : getSafeErrorMessage(error),
       });
@@ -677,7 +675,7 @@ export class DeprecationGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private logDeprecationBypass(
-    request: Request,
+    _request: Request,
     versionConfig: VersionConfig,
     operationId: string,
   ): void {
@@ -709,10 +707,10 @@ export class DeprecationGuard implements CanActivate {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       this.logger.error('Failed to log deprecation bypass security event', {
         operationId,
-        error: isErrorWithStack(error)
+        _error: isErrorWithStack(error)
           ? error.message
           : getSafeErrorMessage(error),
       });
@@ -737,7 +735,7 @@ export class DeprecationGuard implements CanActivate {
         {
           statusCode: HttpStatus.GONE,
           message: 'API endpoint is deprecated',
-          error: 'Gone',
+          _error: 'Gone',
           operationId,
         },
         HttpStatus.GONE,
@@ -763,7 +761,7 @@ export class DeprecationGuard implements CanActivate {
       {
         statusCode,
         message,
-        error: 'Gone',
+        _error: 'Gone',
         deprecation: {
           since: deprecation.since,
           sunset: deprecation.sunset,

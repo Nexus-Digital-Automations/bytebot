@@ -121,7 +121,7 @@ expect.extend({
       'success' in response && typeof response.success === 'boolean';
     const hasTimestamp = 'timestamp' in response;
     const hasData = (response.success as boolean)
-      ? 'data' in response
+      ? 'data' in _response
       : 'error' in response;
 
     const pass = hasSuccess && hasTimestamp && hasData;

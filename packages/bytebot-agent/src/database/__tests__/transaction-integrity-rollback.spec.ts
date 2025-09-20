@@ -17,7 +17,7 @@
  * Performance: Sub-1000ms transaction validation with rollback testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -28,11 +28,7 @@ import {
 } from '../parlant-validated-database.service';
 import { DatabaseService } from '../database.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== TRANSACTION TESTING INTERFACES =====
 
@@ -245,10 +241,7 @@ const transactionTestScenarios: TransactionTestScenario[] = [
 /**
  * Mock Parlant validation responses for transaction scenarios
  */
-const mockTransactionValidationResponses: Record<
-  string,
-  ParlantValidationResponse
-> = {
+const mockTransactionValidationResponses: Record<string> = {
   TRANSACTION_APPROVED: {
     approved: true,
     conversationId: 'conv_transaction_001',
@@ -265,7 +258,7 @@ const mockTransactionValidationResponses: Record<
       timeoutMs: 30000,
       retryAttempts: 1,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 180,
@@ -299,7 +292,7 @@ const mockTransactionValidationResponses: Record<
       timeoutMs: 0,
       retryAttempts: 0,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 120,

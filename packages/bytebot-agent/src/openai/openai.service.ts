@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import OpenAI, { APIUserAbortError } from 'openai';
@@ -73,7 +73,7 @@ export class OpenAIService implements BytebotAgentService {
       throw new Error('OPENAI_API_KEY is not configured');
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to retrieve OpenAI API key`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -121,7 +121,7 @@ export class OpenAIService implements BytebotAgentService {
           totalTokens: response.usage?.total_tokens || 0,
         },
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       console.log('error', error);
       const errorName = error instanceof Error ? error.name : 'Unknown';
       console.log('error name', errorName);
@@ -184,7 +184,7 @@ export class OpenAIService implements BytebotAgentService {
                 {
                   type: 'input_image',
                   detail: 'high',
-                  image_url: `data:${block.source.media_type};base64,${block.source.data}`,
+                  image_url: `_data: ${block.source.media_type};base64,${block.source.data}`,
                 },
               ],
             } as OpenAI.Responses.ResponseInputItem.Message);
@@ -270,7 +270,7 @@ export class OpenAIService implements BytebotAgentService {
                       {
                         type: 'input_image',
                         detail: 'high',
-                        image_url: `data:${content.source.media_type};base64,${content.source.data}`,
+                        image_url: `_data: ${content.source.media_type};base64,${content.source.data}`,
                       },
                     ],
                   } as OpenAI.Responses.ResponseInputItem.Message);
@@ -300,7 +300,7 @@ export class OpenAIService implements BytebotAgentService {
   }
 
   private formatOpenAIResponse(
-    response: OpenAI.Responses.ResponseOutputItem[],
+    _response: OpenAI.Responses.ResponseOutputItem[],
   ): MessageContentBlock[] {
     const contentBlocks: MessageContentBlock[] = [];
 

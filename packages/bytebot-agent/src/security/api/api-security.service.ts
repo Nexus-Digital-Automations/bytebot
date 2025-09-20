@@ -15,10 +15,10 @@
  * @since Phase 2: Enterprise Security Implementation
  */
 
-import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import * as crypto from 'crypto';
 import { performance } from 'perf_hooks';
 import { User } from '@prisma/client';
@@ -324,7 +324,7 @@ export class ApiSecurityService implements NestMiddleware {
           });
 
           res.status(403).json({
-            error: 'CORS policy violation',
+            _error: 'CORS policy violation',
             code: 'CORS_BLOCKED',
             requestId,
           });
@@ -360,7 +360,7 @@ export class ApiSecurityService implements NestMiddleware {
         });
 
         res.status(429).json({
-          error: 'Rate limit exceeded',
+          _error: 'Rate limit exceeded',
           code: 'RATE_LIMIT_EXCEEDED',
           retryAfter: rateLimitResult.retryAfter,
           requestId,
@@ -413,7 +413,7 @@ export class ApiSecurityService implements NestMiddleware {
 
       this.logger.error('API security middleware error', {
         requestId,
-        error: errorMessage,
+        _error: errorMessage,
         processingTimeMs: processingTime.toFixed(2),
         ipAddress: this.getClientIP(req),
       });
@@ -421,12 +421,12 @@ export class ApiSecurityService implements NestMiddleware {
       // Emit error event
       this.eventEmitter.emit('api.security.error', {
         requestId,
-        error: errorMessage,
+        _error: errorMessage,
         ipAddress: this.getClientIP(req),
       });
 
       res.status(500).json({
-        error: 'Internal server error',
+        _error: 'Internal server error',
         code: 'SECURITY_MIDDLEWARE_ERROR',
         requestId,
       });
@@ -968,7 +968,7 @@ export class ApiSecurityService implements NestMiddleware {
             'default-src': ["'self'"],
             'script-src': ["'self'", "'unsafe-inline'"],
             'style-src': ["'self'", "'unsafe-inline'"],
-            'img-src': ["'self'", 'data:', 'https:'],
+            'img-src': ["'self'", '_data:', 'https:'],
             'font-src': ["'self'"],
             'object-src': ["'none'"],
             'base-uri': ["'self'"],

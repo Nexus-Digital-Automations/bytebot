@@ -9,10 +9,10 @@
  * - Circuit breaker integration
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { AnthropicService } from '../anthropic.service';
-import { Logger } from '@nestjs/common';
+
 import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentType,
@@ -298,7 +298,7 @@ describe('AnthropicService - Integration Tests', () => {
         content: [
           {
             type: 'redacted_thinking',
-            data: 'redacted_data_123',
+            _data: 'redacted_data_123',
           },
         ],
         usage: {
@@ -319,7 +319,7 @@ describe('AnthropicService - Integration Tests', () => {
       expect(result.contentBlocks).toEqual([
         {
           type: MessageContentType._RedactedThinking,
-          data: 'redacted_data_123',
+          _data: 'redacted_data_123',
         },
       ]);
     });

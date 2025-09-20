@@ -17,7 +17,7 @@
  * @version 2.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { ExecutionContext } from '@nestjs/common';
@@ -66,7 +66,7 @@ const createSimpleMockContext = (hasAuth = true): ExecutionContext => {
     getClass: jest.fn(() => class TestController {}),
     getArgs: jest.fn(() => [mockRequest, mockResponse]),
     getArgByIndex: jest.fn(
-      (index: number) => [mockRequest, mockResponse][index],
+      (_index: number) => [mockRequest, mockResponse][index],
     ),
     switchToRpc: jest.fn(() => ({
       getContext: jest.fn(),
@@ -187,7 +187,7 @@ class LoadTestingUtilities {
           return {
             success: false,
             duration: performance.now() - requestStart,
-            error: error as Error,
+            _error: error as Error,
           };
         }
       });
@@ -254,7 +254,7 @@ class LoadTestingUtilities {
             success: false,
             duration: performance.now() - requestStart,
             timestamp: performance.now(),
-            error: error as Error,
+            _error: error as Error,
           };
         }
       });

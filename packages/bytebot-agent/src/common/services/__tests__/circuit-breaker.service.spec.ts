@@ -9,9 +9,9 @@
  * @since Common Services Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import { CircuitBreakerService } from '../circuit-breaker.service';
 
 // Circuit breaker states
@@ -29,7 +29,7 @@ describe('CircuitBreakerService', () => {
   const mockLogger = {
     log: jest.fn(),
     debug: jest.fn(),
-    error: jest.fn(),
+    _error: jest.fn(),
     warn: jest.fn(),
     verbose: jest.fn(),
   };

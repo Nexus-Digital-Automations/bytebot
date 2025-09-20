@@ -16,7 +16,7 @@
  * @service DatabaseMigrationService
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 // import * as fs from 'fs/promises'; // Unused import
@@ -48,7 +48,7 @@ export interface MigrationResult {
   totalExecutionTimeMs: number;
   errors: Array<{
     migration: string;
-    error: string;
+    _error: string;
     timestamp: Date;
   }>;
   rollbackRequired?: boolean;
@@ -197,7 +197,7 @@ export class DatabaseMigrationService {
     const currentVersion = await this.getCurrentVersion();
     const pendingMigrations = this.getPendingMigrations(currentVersion);
 
-    const result: MigrationResult = {
+    const _result: MigrationResult = {
       startVersion: currentVersion,
       endVersion: currentVersion,
       migrationsExecuted: [],
@@ -220,7 +220,7 @@ export class DatabaseMigrationService {
       this.logger.error(errorMsg);
       result.errors.push({
         migration: 'validation',
-        error: errorMsg,
+        _error: errorMsg,
         timestamp: new Date(),
       });
       result.totalExecutionTimeMs = Date.now() - startTime;
@@ -254,7 +254,7 @@ export class DatabaseMigrationService {
 
         result.errors.push({
           migration: migration.version,
-          error: errorMsg,
+          _error: errorMsg,
           timestamp: new Date(),
         });
 
@@ -405,7 +405,7 @@ export class DatabaseMigrationService {
   private async validateMigrations(
     migrations: MigrationDefinition[],
   ): Promise<MigrationValidationResult> {
-    const result: MigrationValidationResult = {
+    const _result: MigrationValidationResult = {
       isValid: true,
       errors: [],
       warnings: [],

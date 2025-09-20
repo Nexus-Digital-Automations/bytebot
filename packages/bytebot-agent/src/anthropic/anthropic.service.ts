@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import Anthropic, { APIUserAbortError } from '@anthropic-ai/sdk';
@@ -75,7 +75,7 @@ export class AnthropicService implements BytebotAgentService {
       this.logger.error(
         `[${operationId}] Failed to retrieve Anthropic API key`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
       throw error;
@@ -236,7 +236,7 @@ export class AnthropicService implements BytebotAgentService {
         case 'redacted_thinking':
           return {
             type: MessageContentType._RedactedThinking,
-            data: block.data,
+            _data: block.data,
           } satisfies RedactedThinkingContentBlock;
       }
     });

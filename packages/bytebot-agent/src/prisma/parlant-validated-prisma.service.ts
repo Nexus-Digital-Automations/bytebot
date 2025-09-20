@@ -16,16 +16,13 @@
  * Performance: Sub-500ms validation with multi-level caching for ORM operations
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from './prisma.service';
 import { PrismaClient } from '@prisma/client';
 
 // Import Parlant types from the shared integration types
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // Import database operation types
 import {
@@ -92,10 +89,7 @@ export interface PrismaModelConfig {
 @Injectable()
 export class ParlantValidatedPrismaService {
   private readonly logger = new Logger(ParlantValidatedPrismaService.name);
-  private readonly validationCache = new Map<
-    string,
-    ParlantValidationResponse
-  >();
+  private readonly validationCache = new Map<string>();
   private readonly auditTrail: DatabaseParlantAuditEntry[] = [];
   private readonly modelConfigurations = new Map<string, PrismaModelConfig>();
 
@@ -238,8 +232,8 @@ export class ParlantValidatedPrismaService {
   async validateAndExecutePrismaOperation<T>(
     operationName: string,
     operation: (client: PrismaClient) => Promise<T>,
-    metadata: PrismaOperationMetadata,
-    context: ParlantUserContext,
+    _metadata: PrismaOperationMetadata,
+    _context: ParlantUserContext,
     params: Record<string, unknown> = {},
   ): Promise<T> {
     const operationId = this.generateOperationId();
@@ -328,7 +322,7 @@ export class ParlantValidatedPrismaService {
       this.logger.error(`[${operationId}] Parlant Prisma operation failed`, {
         operationName,
         modelName: metadata.modelName,
-        error: errorMessage,
+        _error: errorMessage,
         duration: Date.now() - startTime,
         operationId,
       });
@@ -359,7 +353,9 @@ export class ParlantValidatedPrismaService {
   /**
    * Get optimized Prisma client with validation (LOW risk)
    */
-  async getOptimizedClient(context: ParlantUserContext): Promise<PrismaClient> {
+  async getOptimizedClient(
+    _context: ParlantUserContext,
+  ): Promise<PrismaClient> {
     return this.validateAndExecutePrismaOperation(
       'getOptimizedClient',
       () => Promise.resolve(this.prismaService.getOptimizedClient()),
@@ -380,8 +376,8 @@ export class ParlantValidatedPrismaService {
    */
   async executeQuery<T>(
     queryFn: (client: PrismaClient) => Promise<T>,
-    metadata: PrismaOperationMetadata,
-    context: ParlantUserContext,
+    _metadata: PrismaOperationMetadata,
+    _context: ParlantUserContext,
   ): Promise<T> {
     return this.validateAndExecutePrismaOperation(
       'executeQuery',
@@ -398,7 +394,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Get database health status with validation (LOW risk)
    */
-  async getHealthStatus(context: ParlantUserContext) {
+  async getHealthStatus(_context: ParlantUserContext) {
     return this.validateAndExecutePrismaOperation(
       'getHealthStatus',
       () => this.prismaService.getHealthStatus(),
@@ -417,7 +413,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Get database metrics with validation (LOW risk)
    */
-  async getDatabaseMetrics(context: ParlantUserContext) {
+  async getDatabaseMetrics(_context: ParlantUserContext) {
     return this.validateAndExecutePrismaOperation(
       'getDatabaseMetrics',
       () => Promise.resolve(this.prismaService.getDatabaseMetrics()),
@@ -441,9 +437,9 @@ export class ParlantValidatedPrismaService {
   async findMany<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T[]> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'READ',
       operationMethod: 'findMany',
       modelName,
@@ -471,9 +467,9 @@ export class ParlantValidatedPrismaService {
   async findUnique<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T | null> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'READ',
       operationMethod: 'findUnique',
       modelName,
@@ -501,9 +497,9 @@ export class ParlantValidatedPrismaService {
   async create<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'WRITE',
       operationMethod: 'create',
       modelName,
@@ -530,9 +526,9 @@ export class ParlantValidatedPrismaService {
   async update<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'WRITE',
       operationMethod: 'update',
       modelName,
@@ -560,9 +556,9 @@ export class ParlantValidatedPrismaService {
   async updateMany(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<{ count: number }> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'WRITE',
       operationMethod: 'updateMany',
       modelName,
@@ -589,9 +585,9 @@ export class ParlantValidatedPrismaService {
   async delete<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'DELETE',
       operationMethod: 'delete',
       modelName,
@@ -618,9 +614,9 @@ export class ParlantValidatedPrismaService {
   async deleteMany(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<{ count: number }> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'DELETE',
       operationMethod: 'deleteMany',
       modelName,
@@ -646,9 +642,9 @@ export class ParlantValidatedPrismaService {
   async upsert<T>(
     modelName: string,
     args: unknown,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
-    const metadata: PrismaOperationMetadata = {
+    const _metadata: PrismaOperationMetadata = {
       operationType: 'WRITE',
       operationMethod: 'upsert',
       modelName,
@@ -682,7 +678,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Determine risk level for Prisma operations
    */
-  private determineRiskLevel(metadata: PrismaOperationMetadata): RiskLevel {
+  private determineRiskLevel(_metadata: PrismaOperationMetadata): RiskLevel {
     const modelConfig = this.modelConfigurations.get(metadata.modelName || '');
 
     // Base risk on operation type
@@ -744,7 +740,7 @@ export class ParlantValidatedPrismaService {
    * Validate model access permissions
    */
   private validateModelAccess(
-    metadata: PrismaOperationMetadata,
+    _metadata: PrismaOperationMetadata,
     _context: ParlantUserContext,
   ): void {
     const modelConfig = this.modelConfigurations.get(metadata.modelName || '');
@@ -788,7 +784,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Check if operation accesses sensitive data
    */
-  private hasSensitiveDataAccess(metadata: PrismaOperationMetadata): boolean {
+  private hasSensitiveDataAccess(_metadata: PrismaOperationMetadata): boolean {
     const modelConfig = this.modelConfigurations.get(metadata.modelName || '');
 
     if (!modelConfig) return false;
@@ -868,7 +864,7 @@ export class ParlantValidatedPrismaService {
    */
   private generateActionDescription(
     operationName: string,
-    metadata: PrismaOperationMetadata,
+    _metadata: PrismaOperationMetadata,
   ): string {
     const base = `Execute Prisma operation: ${operationName}`;
     const details = [
@@ -891,7 +887,7 @@ export class ParlantValidatedPrismaService {
    * Estimate operation impact for Parlant validation
    */
   private estimateOperationImpact(
-    metadata: PrismaOperationMetadata,
+    _metadata: PrismaOperationMetadata,
   ): 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     const modelConfig = this.modelConfigurations.get(metadata.modelName || '');
 
@@ -920,7 +916,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Extract record count from operation result
    */
-  private extractRecordCount(result: unknown): number | undefined {
+  private extractRecordCount(_result: unknown): number | undefined {
     if (result && typeof result === 'object' && 'count' in result) {
       return result.count as number;
     }
@@ -940,7 +936,7 @@ export class ParlantValidatedPrismaService {
    * Perform Parlant validation (mock implementation)
    */
   private async performParlantValidation(
-    request: ParlantPrismaValidationRequest,
+    _request: ParlantPrismaValidationRequest,
   ): Promise<ParlantValidationResponse> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
@@ -991,7 +987,7 @@ export class ParlantValidatedPrismaService {
    * Mock approval logic for Prisma operations
    */
   private shouldApprovePrismaOperation(
-    request: ParlantPrismaValidationRequest,
+    _request: ParlantPrismaValidationRequest,
   ): boolean {
     // Always approve read operations
     if (
@@ -1021,7 +1017,7 @@ export class ParlantValidatedPrismaService {
    * Generate validation reasoning for Prisma operations
    */
   private generateValidationReasoning(
-    request: ParlantPrismaValidationRequest,
+    _request: ParlantPrismaValidationRequest,
   ): string {
     const operation = request.prismaOperation;
 
@@ -1044,7 +1040,7 @@ export class ParlantValidatedPrismaService {
    * Generate suggested alternatives for Prisma operations
    */
   private generateSuggestedAlternatives(
-    request: ParlantPrismaValidationRequest,
+    _request: ParlantPrismaValidationRequest,
   ): string[] {
     const alternatives: string[] = [];
     const operation = request.prismaOperation;
@@ -1072,11 +1068,11 @@ export class ParlantValidatedPrismaService {
    * Generate execution context for Prisma operations
    */
   private generateExecutionContext(
-    request: ParlantPrismaValidationRequest,
+    _request: ParlantPrismaValidationRequest,
   ): ExecutionContext {
     const operation = request.prismaOperation;
 
-    const context: ExecutionContext = {
+    const _context: ExecutionContext = {
       monitoringLevel: 'COMPREHENSIVE',
       safeguards: [
         'query_logging',
@@ -1161,7 +1157,7 @@ export class ParlantValidatedPrismaService {
       }
     } catch (error) {
       this.logger.error(`[${operationId}] Prisma operation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         executionTime: Date.now() - startTime,
         operationId,
       });
@@ -1179,7 +1175,7 @@ export class ParlantValidatedPrismaService {
     validationRequest: Partial<ParlantPrismaValidationRequest>,
     executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED',
     duration: number,
-    result: unknown,
+    _result: unknown,
     error?: string,
   ): Promise<DatabaseParlantAuditEntry> {
     const performanceMetrics = {
@@ -1220,7 +1216,7 @@ export class ParlantValidatedPrismaService {
   /**
    * Generate cache key for validation requests
    */
-  private generateCacheKey(request: ParlantPrismaValidationRequest): string {
+  private generateCacheKey(_request: ParlantPrismaValidationRequest): string {
     const keyData = {
       functionName: request.functionName,
       modelName: request.prismaOperation.modelName,

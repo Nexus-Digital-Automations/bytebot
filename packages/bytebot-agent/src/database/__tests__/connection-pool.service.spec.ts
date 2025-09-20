@@ -17,9 +17,9 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import { PrismaClient } from '@prisma/client';
 import {
   ConnectionPoolService,

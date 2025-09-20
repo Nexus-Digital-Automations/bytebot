@@ -17,7 +17,7 @@
  * Performance: Complete performance validation against PARLANT Phase 1 targets
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -32,11 +32,7 @@ import {
 } from '../../prisma/parlant-validated-prisma.service';
 import { DatabaseService } from '../database.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== COMPREHENSIVE TESTING INTERFACES =====
 
@@ -404,7 +400,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
       for (const operation of operations) {
         const userContext = comprehensiveTestUserContexts.SYSTEM_ADMIN;
-        const metadata: DatabaseOperationMetadata = {
+        const _metadata: DatabaseOperationMetadata = {
           operationType: operation as any,
           tableName: 'comprehensive_test_table',
           queryDescription: `Comprehensive ${operation} operation testing`,
@@ -425,7 +421,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             timeoutMs: 30000,
             retryAttempts: 1,
           },
-          metadata: {
+          _metadata: {
             startTime: new Date(),
             endTime: new Date(),
             processingTime: Math.random() * 500 + 100, // 100-600ms
@@ -449,7 +445,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
 
         jest
           .spyOn(databaseService, 'executeRawQuery')
-          .mockResolvedValueOnce([{ result: 'success' }]);
+          .mockResolvedValueOnce([{ _result: 'success' }]);
 
         try {
           const result = await parlantDatabaseService.executeRawQuery(
@@ -468,7 +464,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           validationResults.push({
             operation,
             success: false,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -546,7 +542,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             timeoutMs: 30000,
             retryAttempts: 1,
           },
-          metadata: {
+          _metadata: {
             startTime: new Date(),
             endTime: new Date(),
             processingTime: expectedValidationTime,
@@ -580,7 +576,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           securityValidationResults.push({
             securityLevel,
             approved: false,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -663,7 +659,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             timeoutMs: 10000,
             retryAttempts: 3,
           },
-          metadata: {
+          _metadata: {
             startTime: new Date(),
             endTime: new Date(),
             processingTime: Math.random() * 200 + 50, // 50-250ms range
@@ -775,7 +771,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
           comprehensiveTestUserContexts[
             operation.user as keyof typeof comprehensiveTestUserContexts
           ];
-        const metadata: DatabaseOperationMetadata = {
+        const _metadata: DatabaseOperationMetadata = {
           operationType: operation.type as any,
           tableName: 'audit_test_table',
           queryDescription: `Audit trail test: ${operation.type} operation`,
@@ -795,7 +791,7 @@ describe('Comprehensive Database Testing Report and Validation - PARLANT Phase 1
             timeoutMs: 30000,
             retryAttempts: 1,
           },
-          metadata: {
+          _metadata: {
             startTime: new Date(),
             endTime: new Date(),
             processingTime: 200,

@@ -15,12 +15,9 @@
  * - Comprehensive audit trail with conversational metadata
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ParlantValidationResponse,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+
 import {
   RiskLevel,
   ParlantDatabaseValidationRequest,
@@ -78,7 +75,7 @@ export interface RiskAssessment {
   readonly overallRisk: RiskLevel;
   readonly riskFactors: RiskFactor[];
   readonly mitigationStrategies: string[];
-  readonly threatIndicators: ThreatIndicator[];
+  readonly _threatIndicators: ThreatIndicator[];
   readonly businessImpact: BusinessImpact;
   readonly technicalComplexity: TechnicalComplexity;
   readonly dataClassification: DataClassification;
@@ -302,7 +299,7 @@ export class EnhancedParlantValidationService {
    * Perform enhanced validation with conversational AI
    */
   async performEnhancedValidation(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
     executionContext: FunctionExecutionContext,
   ): Promise<EnhancedValidationResult> {
     const validationId = this.generateValidationId();
@@ -397,7 +394,7 @@ export class EnhancedParlantValidationService {
         (this.totalValidations + 1);
 
       this.logger.error(`[${validationId}] Enhanced validation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         validationTime,
         functionName: request.functionName,
       });
@@ -412,7 +409,7 @@ export class EnhancedParlantValidationService {
    * Create or retrieve conversation context
    */
   private async createConversationContext(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
     executionContext: FunctionExecutionContext,
     _validationId: string,
   ): Promise<ConversationContext> {
@@ -426,7 +423,7 @@ export class EnhancedParlantValidationService {
     }
 
     // Create new conversation context
-    const context: ConversationContext = {
+    const _context: ConversationContext = {
       conversationId,
       sessionId: executionContext.sessionId,
       userId: request.userContext.userId,
@@ -447,8 +444,8 @@ export class EnhancedParlantValidationService {
    * Update existing conversation context
    */
   private updateConversationContext(
-    context: ConversationContext,
-    request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
   ): ConversationContext {
     return {
       ...context,
@@ -463,8 +460,8 @@ export class EnhancedParlantValidationService {
    * Perform comprehensive risk assessment
    */
   private async performRiskAssessment(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): Promise<RiskAssessment> {
     const riskFactors = await this.identifyRiskFactors(request, context);
     const threatIndicators = await this.detectThreats(request, context);
@@ -499,7 +496,7 @@ export class EnhancedParlantValidationService {
    * Identify risk factors for the operation
    */
   private async identifyRiskFactors(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
     _context: ConversationContext,
   ): Promise<RiskFactor[]> {
     const factors: RiskFactor[] = [];
@@ -570,8 +567,8 @@ export class EnhancedParlantValidationService {
    * Detect potential threats
    */
   private async detectThreats(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): Promise<ThreatIndicator[]> {
     const indicators: ThreatIndicator[] = [];
 
@@ -628,9 +625,9 @@ export class EnhancedParlantValidationService {
    * Determine appropriate validation strategy
    */
   private determineValidationStrategy(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
     riskAssessment: RiskAssessment,
-    context: ConversationContext,
+    _context: ConversationContext,
   ): ValidationStrategy {
     // Emergency mode
     if (context.environmentContext.emergencyMode) {
@@ -667,8 +664,8 @@ export class EnhancedParlantValidationService {
    */
   private async executeValidationStrategy(
     strategy: ValidationStrategy,
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
     riskAssessment: RiskAssessment,
   ): Promise<ParlantValidationResponse> {
     switch (strategy) {
@@ -710,8 +707,8 @@ export class EnhancedParlantValidationService {
    * Execute immediate validation for low-risk operations
    */
   private async executeImmediateValidation(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): Promise<ParlantValidationResponse> {
     return {
       approved: true,
@@ -724,7 +721,7 @@ export class EnhancedParlantValidationService {
         timeoutMs: 10000,
         retryAttempts: 3,
       },
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 50,
@@ -744,8 +741,8 @@ export class EnhancedParlantValidationService {
    * Execute conversational validation for medium-risk operations
    */
   private async executeConversationalValidation(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
     riskAssessment: RiskAssessment,
   ): Promise<ParlantValidationResponse> {
     // TODO: Implement actual conversational validation
@@ -771,7 +768,7 @@ export class EnhancedParlantValidationService {
         timeoutMs: 30000,
         retryAttempts: 2,
       },
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 1500,
@@ -901,7 +898,7 @@ export class EnhancedParlantValidationService {
   }
 
   private async extractUserIntention(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<string> {
     // TODO: Implement intention extraction from request
     return request.description;
@@ -915,7 +912,7 @@ export class EnhancedParlantValidationService {
       overallRisk: RiskLevel.MEDIUM,
       riskFactors: [],
       mitigationStrategies: [],
-      threatIndicators: [],
+      _threatIndicators: [],
       businessImpact: {} as BusinessImpact,
       technicalComplexity: {} as TechnicalComplexity,
       dataClassification: {} as DataClassification,
@@ -990,7 +987,7 @@ export class EnhancedParlantValidationService {
 
   private calculateOverallRisk(
     riskFactors: RiskFactor[],
-    threatIndicators: ThreatIndicator[],
+    _threatIndicators: ThreatIndicator[],
     businessImpact: BusinessImpact,
     _technicalComplexity: TechnicalComplexity,
   ): RiskLevel {
@@ -1044,8 +1041,8 @@ export class EnhancedParlantValidationService {
   }
 
   private async executeProgressiveValidation(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
     riskAssessment: RiskAssessment,
   ): Promise<ParlantValidationResponse> {
     // TODO: Implement progressive validation
@@ -1057,8 +1054,8 @@ export class EnhancedParlantValidationService {
   }
 
   private async executeCollaborativeValidation(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
     riskAssessment: RiskAssessment,
   ): Promise<ParlantValidationResponse> {
     // TODO: Implement collaborative validation
@@ -1070,15 +1067,15 @@ export class EnhancedParlantValidationService {
   }
 
   private async executeEmergencyValidation(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): Promise<ParlantValidationResponse> {
     // TODO: Implement emergency validation
     return this.executeImmediateValidation(request, context);
   }
 
   private generateConversationPrompt(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
     riskAssessment: RiskAssessment,
   ): string {
     return `Database operation requested: ${request.description}. Risk level: ${riskAssessment.overallRisk}. Approve?`;
@@ -1089,7 +1086,7 @@ export class EnhancedParlantValidationService {
     return 'yes';
   }
 
-  private parseUserResponse(response: string): boolean {
+  private parseUserResponse(_response: string): boolean {
     // TODO: Implement natural language response parsing
     return (
       response.toLowerCase().includes('yes') ||

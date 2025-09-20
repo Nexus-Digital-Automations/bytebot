@@ -142,7 +142,7 @@ export interface AccessContext {
     level?: number;
     metadata?: Record<string, any>;
   };
-  request: {
+  _request: {
     method: string;
     path: string;
     ip: string;
@@ -161,7 +161,7 @@ export interface AccessContext {
  * Condition function type for dynamic access control
  */
 export type AccessCondition = (
-  context: AccessContext,
+  _context: AccessContext,
 ) => boolean | Promise<boolean>;
 
 /**
@@ -376,7 +376,7 @@ export const ROLE_PERMISSIONS = new Map<Role, Permission[]>([
  * @param requireAll - If true, user must have all roles
  */
 export const Roles = (...roles: Role[]) => {
-  const metadata: RBACMetadata = { roles, requireAll: false };
+  const _metadata: RBACMetadata = { roles, requireAll: false };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -385,7 +385,7 @@ export const Roles = (...roles: Role[]) => {
  * @param roles - Required roles (user must have all)
  */
 export const RequireAllRoles = (...roles: Role[]) => {
-  const metadata: RBACMetadata = { roles, requireAll: true };
+  const _metadata: RBACMetadata = { roles, requireAll: true };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -394,7 +394,7 @@ export const RequireAllRoles = (...roles: Role[]) => {
  * @param permissions - Required permissions (user must have at least one)
  */
 export const Permissions = (...permissions: Permission[]) => {
-  const metadata: RBACMetadata = { permissions, requireAll: false };
+  const _metadata: RBACMetadata = { permissions, requireAll: false };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -403,7 +403,7 @@ export const Permissions = (...permissions: Permission[]) => {
  * @param permissions - Required permissions (user must have all)
  */
 export const RequireAllPermissions = (...permissions: Permission[]) => {
-  const metadata: RBACMetadata = { permissions, requireAll: true };
+  const _metadata: RBACMetadata = { permissions, requireAll: true };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -411,7 +411,7 @@ export const RequireAllPermissions = (...permissions: Permission[]) => {
  * Combined role and permission decorator
  * @param options - RBAC configuration options
  */
-export const RBAC = (options: RBACMetadata) => {
+export const RBAC = (_options: RBACMetadata) => {
   return SetMetadata(RBAC_METADATA_KEY, options);
 };
 
@@ -424,7 +424,7 @@ export const ResourceOwnership = (
   resourceType: ResourceType,
   allowSameDepartment: boolean = false,
 ) => {
-  const metadata: RBACMetadata = {
+  const _metadata: RBACMetadata = {
     resourceType,
     allowOwner: true,
     allowSameDepartment,
@@ -441,7 +441,7 @@ export const ConditionalAccess = (
   conditions: AccessCondition[],
   auditLevel: 'none' | 'basic' | 'detailed' = 'basic',
 ) => {
-  const metadata: RBACMetadata = { conditions, auditLevel };
+  const _metadata: RBACMetadata = { conditions, auditLevel };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -454,7 +454,7 @@ export const DepartmentAccess = (
   allowSameDepartment: boolean = true,
   minimumLevel?: number,
 ) => {
-  const metadata: RBACMetadata = { allowSameDepartment, minimumLevel };
+  const _metadata: RBACMetadata = { allowSameDepartment, minimumLevel };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -463,7 +463,7 @@ export const DepartmentAccess = (
  * @param minimumLevel - Minimum user level required
  */
 export const MinimumLevel = (minimumLevel: number) => {
-  const metadata: RBACMetadata = { minimumLevel };
+  const _metadata: RBACMetadata = { minimumLevel };
   return SetMetadata(RBAC_METADATA_KEY, metadata);
 };
 
@@ -504,7 +504,7 @@ export const OperatorOrAbove = () => {
  * User parameter decorator to get current user from request
  */
 export const CurrentUser = createParamDecorator(
-  (data: string | undefined, context: ExecutionContext): unknown => {
+  (_data: string | undefined, _context: ExecutionContext): unknown => {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
 
@@ -516,7 +516,7 @@ export const CurrentUser = createParamDecorator(
  * Security context parameter decorator
  */
 export const SecurityContext = createParamDecorator(
-  (data: string | undefined, context: ExecutionContext): unknown => {
+  (_data: string | undefined, _context: ExecutionContext): unknown => {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const securityContext = request.securityContext;
 
@@ -529,8 +529,8 @@ export const SecurityContext = createParamDecorator(
  */
 export const Resource = createParamDecorator(
   (
-    data: { type: ResourceType; idParam?: string },
-    context: ExecutionContext,
+    _data: { type: ResourceType; idParam?: string },
+    _context: ExecutionContext,
   ) => {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const resourceId = request.params[data.idParam || 'id'];
@@ -552,7 +552,7 @@ export const Audit = (
   level: 'basic' | 'detailed' = 'basic',
   includeRequestBody: boolean = false,
 ) => {
-  const metadata: RBACMetadata = {
+  const _metadata: RBACMetadata = {
     auditLevel: level,
     // Store additional audit options in metadata
     ...(includeRequestBody && { includeRequestBody: true }),
@@ -585,7 +585,7 @@ export const TimeBasedAccess = (
  * @param allowedIPs - Array of allowed IP addresses or CIDR blocks
  */
 export const IPBasedAccess = (allowedIPs: string[]) => {
-  const condition: AccessCondition = (context: AccessContext) => {
+  const condition: AccessCondition = (_context: AccessContext) => {
     const clientIP = context.request.ip;
 
     // Simple IP check (in production, would use proper CIDR matching)
@@ -621,7 +621,7 @@ export const RateLimit = (_maxRequests: number, _windowMs: number) => {
  * @param allowedEnvironments - Allowed environments (development, staging, production)
  */
 export const EnvironmentAccess = (allowedEnvironments: string[]) => {
-  const condition: AccessCondition = (context: AccessContext) => {
+  const condition: AccessCondition = (_context: AccessContext) => {
     return allowedEnvironments.includes(context.environment.nodeEnv);
   };
 
@@ -713,7 +713,7 @@ export const CommonConditions = {
   /**
    * Business hours only (9 AM - 5 PM)
    */
-  businessHoursOnly: (context: AccessContext): boolean => {
+  businessHoursOnly: (_context: AccessContext): boolean => {
     const hour = context.environment.time.getHours();
     return hour >= 9 && hour < 17;
   },
@@ -721,7 +721,7 @@ export const CommonConditions = {
   /**
    * Weekdays only
    */
-  weekdaysOnly: (context: AccessContext): boolean => {
+  weekdaysOnly: (_context: AccessContext): boolean => {
     const day = context.environment.time.getDay();
     return day >= 1 && day <= 5; // Monday to Friday
   },
@@ -729,7 +729,7 @@ export const CommonConditions = {
   /**
    * Same user or admin
    */
-  sameUserOrAdmin: (context: AccessContext): boolean => {
+  sameUserOrAdmin: (_context: AccessContext): boolean => {
     const userRoles = context.user.roles;
     const isAdmin = hasRole(userRoles, Role.ADMIN);
     const isSameUser = context.resource?.ownerId === context.user.id;
@@ -740,14 +740,14 @@ export const CommonConditions = {
   /**
    * Production environment only
    */
-  productionOnly: (context: AccessContext): boolean => {
+  productionOnly: (_context: AccessContext): boolean => {
     return context.environment.nodeEnv === 'production';
   },
 
   /**
    * Non-production environments only
    */
-  nonProductionOnly: (context: AccessContext): boolean => {
+  nonProductionOnly: (_context: AccessContext): boolean => {
     return context.environment.nodeEnv !== 'production';
   },
 };

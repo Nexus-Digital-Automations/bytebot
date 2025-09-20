@@ -16,8 +16,8 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { AgentScheduler } from '../agent.scheduler';
 import { TasksService } from '../../tasks/tasks.service';
 import { AgentProcessor } from '../agent.processor';
@@ -57,8 +57,8 @@ describe('AgentScheduler', () => {
     executedAt: null,
     completedAt: null,
     queuedAt: null,
-    error: null,
-    result: null,
+    _error: null,
+    _result: null,
     model: { provider: 'anthropic', name: 'claude-3-sonnet' },
     files: [],
   };
@@ -78,8 +78,8 @@ describe('AgentScheduler', () => {
     executedAt: null,
     completedAt: null,
     queuedAt: new Date('2024-01-01T10:00:00.000Z'),
-    error: null,
-    result: null,
+    _error: null,
+    _result: null,
     model: { provider: 'anthropic', name: 'claude-3-sonnet' },
     files: [],
   };
@@ -93,7 +93,7 @@ describe('AgentScheduler', () => {
         name: 'document.txt',
         type: 'text/plain',
         size: 1024,
-        data: 'VGVzdCBkb2N1bWVudCBjb250ZW50', // Base64 encoded content
+        _data: 'VGVzdCBkb2N1bWVudCBjb250ZW50', // Base64 encoded content
         taskId: 'task-with-files-789',
         createdAt: new Date('2024-01-01T10:00:00.000Z'),
         updatedAt: new Date('2024-01-01T10:00:00.000Z'),
@@ -103,7 +103,8 @@ describe('AgentScheduler', () => {
         name: 'image.png',
         type: 'image/png',
         size: 2048,
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        _data:
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
         taskId: 'task-with-files-789',
         createdAt: new Date('2024-01-01T10:00:00.000Z'),
         updatedAt: new Date('2024-01-01T10:00:00.000Z'),
@@ -128,7 +129,7 @@ describe('AgentScheduler', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -433,7 +434,7 @@ describe('AgentScheduler', () => {
             name: 'file with spaces & symbols!.txt',
             type: 'text/plain',
             size: 512,
-            data: 'U3BlY2lhbCBmaWxlIGNvbnRlbnQ=',
+            _data: 'U3BlY2lhbCBmaWxlIGNvbnRlbnQ=',
             taskId: mockQueuedTask.id,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -460,7 +461,7 @@ describe('AgentScheduler', () => {
             name: 'large-document.pdf',
             type: 'application/pdf',
             size: 1048576, // 1MB
-            data: 'A'.repeat(1000000), // Large base64 content
+            _data: 'A'.repeat(1000000), // Large base64 content
             taskId: mockQueuedTask.id,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -621,7 +622,7 @@ describe('AgentScheduler', () => {
           name: `document-${i}.txt`,
           type: 'text/plain',
           size: 1024,
-          data: `RmlsZSAke2l9IGNvbnRlbnQ=`,
+          _data: `RmlsZSAke2l9IGNvbnRlbnQ=`,
           taskId: mockQueuedTask.id,
           createdAt: new Date(),
           updatedAt: new Date(),

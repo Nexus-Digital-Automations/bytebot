@@ -6,7 +6,7 @@
  * and result analysis features.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -33,7 +33,7 @@ export interface BrowserAutomationResult {
     | 'batch';
 
   // Core result data
-  data: {
+  _data: {
     url?: string;
     title?: string;
     screenshots?: string[];
@@ -52,7 +52,7 @@ export interface BrowserAutomationResult {
   };
 
   // Execution context
-  context: {
+  _context: {
     userAgent: string;
     viewport: { width: number; height: number };
     locale: string;
@@ -69,7 +69,7 @@ export interface BrowserAutomationResult {
   };
 
   // Metadata
-  metadata: {
+  _metadata: {
     userId?: string;
     agentId?: string;
     tags: string[];
@@ -126,7 +126,7 @@ export interface ResultsAnalytics {
     slowestExecution: BrowserAutomationResult;
     highestQuality: BrowserAutomationResult;
     mostCommonErrors: Array<{
-      error: string;
+      _error: string;
       count: number;
       percentage: number;
     }>;
@@ -140,14 +140,14 @@ export class BrowserResultsService {
   /**
    * Helper method to safely extract error messages
    */
-  private getErrorMessage(error: unknown): string {
+  private getErrorMessage(_error: unknown): string {
     return error instanceof Error ? error.message : 'Unknown error';
   }
 
   /**
    * Helper method to safely extract error stack
    */
-  private getErrorStack(error: unknown): string | undefined {
+  private getErrorStack(_error: unknown): string | undefined {
     return error instanceof Error ? error.stack : undefined;
   }
   private readonly resultsCache = new Map<string, BrowserAutomationResult>();
@@ -178,7 +178,7 @@ export class BrowserResultsService {
    * Store a browser automation result
    */
   async storeResult(
-    result: Omit<BrowserAutomationResult, 'resultId'>,
+    _result: Omit<BrowserAutomationResult, 'resultId'>,
   ): Promise<string> {
     try {
       const resultId = this.generateResultId();
@@ -187,7 +187,7 @@ export class BrowserResultsService {
         resultId,
       };
 
-      this.logger.debug(`Storing result: ${resultId}`);
+      this.logger.debug(`Storing _result: ${resultId}`);
 
       // Store in cache
       this.resultsCache.set(resultId, fullResult);
@@ -203,7 +203,7 @@ export class BrowserResultsService {
       return resultId;
     } catch (error) {
       this.logger.error(
-        `Failed to store result: ${this.getErrorMessage(error)}`,
+        `Failed to store _result: ${this.getErrorMessage(error)}`,
         this.getErrorStack(error),
       );
       throw error;
@@ -364,7 +364,7 @@ export class BrowserResultsService {
   /**
    * Export results in various formats
    */
-  async exportResults(options: ResultsExportOptions): Promise<{
+  async exportResults(_options: ResultsExportOptions): Promise<{
     success: boolean;
     filePath?: string;
     downloadUrl?: string;
@@ -388,7 +388,7 @@ export class BrowserResultsService {
       if (results.length === 0) {
         return {
           success: false,
-          error: 'No results found matching the specified criteria',
+          _error: 'No results found matching the specified criteria',
         };
       }
 
@@ -443,7 +443,7 @@ export class BrowserResultsService {
       );
       return {
         success: false,
-        error: this.getErrorMessage(error),
+        _error: this.getErrorMessage(error),
       };
     }
   }
@@ -652,7 +652,7 @@ export class BrowserResultsService {
           durationMs: result.duration,
           input: { sessionId: result.sessionId },
           output: result.data,
-          error: result.data.errors?.length
+          _error: result.data.errors?.length
             ? {
                 code: 'EXECUTION_ERROR',
                 message: result.data.errors[0],
@@ -679,7 +679,7 @@ export class BrowserResultsService {
         .map((result) => ({
           method: 'ai_query' as const,
           itemCount: result.data.extractedData?.length || 0,
-          data: result.data.extractedData || [],
+          _data: result.data.extractedData || [],
           qualityScore: result.quality.accuracy,
           confidence: result.quality.reliability,
           sourceUrl: result.data.url || 'unknown',
@@ -838,7 +838,7 @@ export class BrowserResultsService {
           headless: true,
         },
         taskConfiguration: {},
-        error: {
+        _error: {
           code: 'RETRIEVAL_ERROR',
           message: this.getErrorMessage(error),
           timestamp: new Date(),
@@ -859,7 +859,7 @@ export class BrowserResultsService {
    */
   async exportTaskResults(
     taskId: string,
-    options: Omit<ResultsExportOptions, 'filters'> & {
+    _options: Omit<ResultsExportOptions, 'filters'> & {
       filters?: Omit<ResultsExportOptions['filters'], 'taskId'>;
     },
   ): Promise<{
@@ -899,7 +899,7 @@ export class BrowserResultsService {
       );
       return {
         success: false,
-        error: this.getErrorMessage(error),
+        _error: this.getErrorMessage(error),
       };
     }
   }
@@ -913,11 +913,11 @@ export class BrowserResultsService {
   ): Promise<{
     deleted: string[];
     archived: string[];
-    errors: Array<{ resultId: string; error: string }>;
+    errors: Array<{ resultId: string; _error: string }>;
   }> {
     const deleted: string[] = [];
     const archived: string[] = [];
-    const errors: Array<{ resultId: string; error: string }> = [];
+    const errors: Array<{ resultId: string; _error: string }> = [];
 
     for (const resultId of resultIds) {
       try {
@@ -930,7 +930,7 @@ export class BrowserResultsService {
         this.resultsCache.delete(resultId);
         deleted.push(resultId);
       } catch (error) {
-        errors.push({ resultId, error: this.getErrorMessage(error) });
+        errors.push({ resultId, _error: this.getErrorMessage(error) });
       }
     }
 
@@ -972,7 +972,7 @@ export class BrowserResultsService {
     }
   }
 
-  private async persistResult(result: BrowserAutomationResult): Promise<void> {
+  private async persistResult(_result: BrowserAutomationResult): Promise<void> {
     const fileName = `${result.resultId}.json`;
     const filePath = path.join(this.resultsDirectory, fileName);
     const data = JSON.stringify(result, null, 2);
@@ -1156,7 +1156,7 @@ export class BrowserResultsService {
 
   private exportToJson(
     results: BrowserAutomationResult[],
-    options: ResultsExportOptions,
+    _options: ResultsExportOptions,
   ): string {
     const exportData = {
       exportInfo: {
@@ -1209,7 +1209,7 @@ export class BrowserResultsService {
 
   private exportToExcel(
     results: BrowserAutomationResult[],
-    options: ResultsExportOptions,
+    _options: ResultsExportOptions,
   ): Buffer {
     // This would require a library like 'xlsx' or 'exceljs'
     // Simplified implementation returning CSV as buffer
@@ -1219,7 +1219,7 @@ export class BrowserResultsService {
 
   private exportToPdf(
     results: BrowserAutomationResult[],
-    options: ResultsExportOptions,
+    _options: ResultsExportOptions,
   ): Buffer {
     // This would require a library like 'puppeteer' or 'jspdf'
     // Simplified implementation
@@ -1289,7 +1289,7 @@ export class BrowserResultsService {
   }
 
   private sanitizeResultForExport(
-    result: BrowserAutomationResult,
+    _result: BrowserAutomationResult,
   ): Partial<BrowserAutomationResult> {
     // Remove sensitive or large data for export
     const sanitized = { ...result };
@@ -1357,7 +1357,7 @@ export class BrowserResultsService {
       }
     } catch (error) {
       this.logger.error(
-        `Periodic cleanup error: ${this.getErrorMessage(error)}`,
+        `Periodic cleanup _error: ${this.getErrorMessage(error)}`,
       );
     }
   }

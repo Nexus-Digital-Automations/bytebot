@@ -18,10 +18,10 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { AgentProcessor } from '../agent.processor';
 import { AgentScheduler } from '../agent.scheduler';
 import { InputCaptureService } from '../input-capture.service';
@@ -90,8 +90,8 @@ describe('Agent Integration Tests', () => {
     executedAt: null,
     completedAt: null,
     queuedAt: new Date('2024-01-01T10:00:00.000Z'),
-    error: null,
-    result: null,
+    _error: null,
+    _result: null,
     model: {
       provider: 'anthropic',
       name: 'claude-3-sonnet',
@@ -196,7 +196,7 @@ describe('Agent Integration Tests', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     module = await Test.createTestingModule({
@@ -275,7 +275,7 @@ describe('Agent Integration Tests', () => {
         {
           type: MessageContentType._Image,
           source: {
-            data: 'base64-screenshot-data',
+            _data: 'base64-screenshot-data',
             media_type: 'image/png',
             type: 'base64',
           },
@@ -345,7 +345,7 @@ describe('Agent Integration Tests', () => {
             name: 'test-document.pdf',
             type: 'application/pdf',
             size: 2048,
-            data: 'base64-file-content',
+            _data: 'base64-file-content',
             taskId: mockTaskId,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -540,7 +540,7 @@ describe('Agent Integration Tests', () => {
             name: 'problematic-file.txt',
             type: 'text/plain',
             size: 1024,
-            data: 'file-content',
+            _data: 'file-content',
             taskId: mockTaskId,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -661,7 +661,7 @@ describe('Agent Integration Tests', () => {
     it('should handle memory pressure with large data sets', async () => {
       const largeTask = {
         ...mockTask,
-        result: 'A'.repeat(100000), // Large result data
+        _result: 'A'.repeat(100000), // Large result data
       };
 
       const largeMessages = Array.from({ length: 1000 }, (_, i) => ({
@@ -792,7 +792,7 @@ describe('Agent Integration Tests', () => {
             {
               type: MessageContentType._Image,
               source: {
-                data: 'base64-screenshot-showing-search-interface',
+                _data: 'base64-screenshot-showing-search-interface',
                 media_type: 'image/png',
                 type: 'base64',
               },

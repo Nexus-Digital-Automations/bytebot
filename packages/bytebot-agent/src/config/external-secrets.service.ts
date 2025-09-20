@@ -17,12 +17,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 
@@ -70,7 +65,7 @@ interface ExternalSecretMetadata {
  */
 interface ExternalSecretValue {
   value: string;
-  metadata: ExternalSecretMetadata;
+  _metadata: ExternalSecretMetadata;
   binary?: boolean;
 }
 
@@ -130,7 +125,7 @@ class VaultProvider implements SecretProviderInterface {
     // const response = await this.client.read(`secret/data/${name}`, { version });
     // return response?.data?.data ? {
     //   value: response.data.data.value,
-    //   metadata: {
+    //   _metadata: {
     //     name,
     //     version: version || 'latest',
     //     provider: 'vault',
@@ -176,7 +171,7 @@ class VaultProvider implements SecretProviderInterface {
       return Promise.resolve(true);
     } catch (error) {
       this.logger.error('Vault health check failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return Promise.resolve(false);
     }
@@ -233,7 +228,7 @@ class AWSSecretsManagerProvider implements SecretProviderInterface {
     // const response = await this.client.send(command);
     // return response.SecretString ? {
     //   value: response.SecretString,
-    //   metadata: {
+    //   _metadata: {
     //     name,
     //     version: response.VersionId || 'latest',
     //     provider: 'aws-secrets-manager',
@@ -278,7 +273,7 @@ class AWSSecretsManagerProvider implements SecretProviderInterface {
       return Promise.resolve(true);
     } catch (error) {
       this.logger.error('AWS Secrets Manager health check failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return Promise.resolve(false);
     }
@@ -337,7 +332,7 @@ export class ExternalSecretsService
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('External Secrets Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;
@@ -383,7 +378,7 @@ export class ExternalSecretsService
         } catch (error) {
           this.logger.warn(`[${operationId}] Primary provider failed`, {
             name,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -407,7 +402,7 @@ export class ExternalSecretsService
         } catch (error) {
           this.logger.warn(`[${operationId}] Fallback provider failed`, {
             name,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -423,7 +418,7 @@ export class ExternalSecretsService
       const retrieveTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Failed to retrieve external secret`, {
         name,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         retrieveTimeMs: retrieveTime,
       });
       return null;
@@ -449,7 +444,7 @@ export class ExternalSecretsService
         );
       } catch (error) {
         this.logger.warn(`Failed to list secrets from ${providerType}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -473,7 +468,7 @@ export class ExternalSecretsService
       } catch (error) {
         health[providerType] = false;
         this.logger.warn(`Health check failed for ${providerType}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -526,7 +521,7 @@ export class ExternalSecretsService
         this.logger.log('HashiCorp Vault provider initialized');
       } catch (error) {
         this.logger.error('Failed to initialize Vault provider', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -547,7 +542,7 @@ export class ExternalSecretsService
         this.logger.log('AWS Secrets Manager provider initialized');
       } catch (error) {
         this.logger.error('Failed to initialize AWS Secrets Manager provider', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -611,7 +606,7 @@ export class ExternalSecretsService
       }
     } catch (error) {
       this.logger.warn(`Failed to get configuration for ${provider}`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
 
@@ -642,7 +637,7 @@ export class ExternalSecretsService
           }
         } catch (error) {
           this.logger.error('Health monitoring failed', {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       })();
@@ -692,7 +687,7 @@ export class ExternalSecretsService
         this.logger.debug(`${providerType} provider destroyed`);
       } catch (error) {
         this.logger.warn(`Failed to destroy ${providerType} provider`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }

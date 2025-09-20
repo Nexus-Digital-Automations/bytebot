@@ -10,14 +10,13 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 
 export interface CacheEntry {
-  data: unknown;
+  _data: unknown;
   timestamp: number;
   ttl: number;
   etag: string;
@@ -71,7 +70,10 @@ export class CacheInterceptor implements NestInterceptor {
     }, 120000);
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -123,7 +125,7 @@ export class CacheInterceptor implements NestInterceptor {
     );
   }
 
-  private shouldCache(request: Request): boolean {
+  private shouldCache(_request: Request): boolean {
     // Only cache GET and HEAD requests by default
     if (!['GET', 'HEAD'].includes(request.method)) {
       return false;
@@ -158,7 +160,7 @@ export class CacheInterceptor implements NestInterceptor {
     );
   }
 
-  private shouldCacheResponse(response: Response, data: unknown): boolean {
+  private shouldCacheResponse(_response: Response, _data: unknown): boolean {
     // Don't cache error responses or empty data
     if (
       !data ||
@@ -194,15 +196,15 @@ export class CacheInterceptor implements NestInterceptor {
 
   private cacheResponse(
     cacheKey: string,
-    data: unknown,
-    response: Response,
+    _data: unknown,
+    _response: Response,
   ): void {
     // Ensure we don't exceed max entries
     if (this.cache.size >= this.config.maxEntries) {
       this.evictOldestEntry();
     }
 
-    const entry: CacheEntry = {
+    const _entry: CacheEntry = {
       data,
       timestamp: Date.now(),
       ttl: this.getTtlForResponse(response),
@@ -219,10 +221,10 @@ export class CacheInterceptor implements NestInterceptor {
     // Set cache headers on the response
     this.setCacheHeaders(response, entry, false);
 
-    this.logger.debug(`Cached response: ${cacheKey} (TTL: ${entry.ttl}ms)`);
+    this.logger.debug(`Cached _response: ${cacheKey} (TTL: ${entry.ttl}ms)`);
   }
 
-  private generateCacheKey(request: Request): string {
+  private generateCacheKey(_request: Request): string {
     const path = this.sanitizePath(request.originalUrl || request.url);
     const method = request.method;
     const userId =
@@ -274,7 +276,7 @@ export class CacheInterceptor implements NestInterceptor {
     return new RegExp(`^${regexPattern}$`).test(path);
   }
 
-  private getTtlForResponse(response: Response): number {
+  private getTtlForResponse(_response: Response): number {
     // Check for Cache-Control header
     const cacheControl = response.getHeader('cache-control') as string;
     if (cacheControl) {
@@ -299,9 +301,9 @@ export class CacheInterceptor implements NestInterceptor {
     return this.config.defaultTtl;
   }
 
-  private generateEtag(data: unknown): string {
+  private generateEtag(_data: unknown): string {
     // Simple ETag generation based on content hash
-    const content = typeof data === 'string' ? data : JSON.stringify(data);
+    const content = typeof data === 'string' ? _data : JSON.stringify(data);
     let hash = 0;
 
     for (let i = 0; i < content.length; i++) {
@@ -314,8 +316,8 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   private handleConditionalRequest(
-    request: Request,
-    response: Response,
+    _request: Request,
+    _response: Response,
     cachedEntry: CacheEntry,
   ): boolean {
     const ifNoneMatch = request.get('if-none-match');
@@ -329,8 +331,8 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   private setCacheHeaders(
-    response: Response,
-    entry: CacheEntry,
+    _response: Response,
+    _entry: CacheEntry,
     isFromCache: boolean,
   ): void {
     if (this.config.enableEtag) {
@@ -360,7 +362,7 @@ export class CacheInterceptor implements NestInterceptor {
     });
   }
 
-  private extractCacheableHeaders(response: Response): Record<string, string> {
+  private extractCacheableHeaders(_response: Response): Record<string, string> {
     const cacheableHeaders = ['content-type', 'last-modified', 'expires'];
     const headers: Record<string, string> = {};
 
@@ -389,7 +391,7 @@ export class CacheInterceptor implements NestInterceptor {
     if (oldestKey) {
       this.cache.delete(oldestKey);
       this.accessTimes.delete(oldestKey);
-      this.logger.debug(`Evicted cache entry: ${oldestKey}`);
+      this.logger.debug(`Evicted cache _entry: ${oldestKey}`);
     }
   }
 

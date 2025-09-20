@@ -31,7 +31,7 @@
  * @compliance Enterprise-grade TypeScript standards
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { Server } from 'http';
@@ -190,22 +190,22 @@ const getHttpServer = (app: INestApplication): Server => {
  * @returns Validated response data
  */
 const validateApiResponse = <T>(
-  response: unknown,
+  _response: unknown,
   expectedKeys: readonly string[] = [],
 ): ApiResponse<T> => {
   if (!response || typeof response !== 'object') {
-    throw new Error('Invalid API response: not an object');
+    throw new Error('Invalid API _response: not an object');
   }
 
   const apiResponse = response as ApiResponse<T>;
 
   if (typeof apiResponse.success !== 'boolean') {
-    throw new Error('Invalid API response: missing success field');
+    throw new Error('Invalid API _response: missing success field');
   }
 
   for (const key of expectedKeys) {
     if (!(key in apiResponse)) {
-      throw new Error(`Invalid API response: missing required key '${key}'`);
+      throw new Error(`Invalid API _response: missing required key '${key}'`);
     }
   }
 
@@ -357,7 +357,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         });
       } catch (error) {
         logTestExecution('USER_REGISTRATION_ERROR', {
-          error: error instanceof Error ? error.message : 'Unknown error',
+          _error: error instanceof Error ? error.message : 'Unknown error',
         });
         throw new Error(
           `User registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -431,7 +431,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         });
       } catch (error) {
         logTestExecution('AUTHENTICATION_FAILURE', {
-          error: error instanceof Error ? error.message : 'Unknown error',
+          _error: error instanceof Error ? error.message : 'Unknown error',
           stage: 'user-authentication',
         });
         throw new Error(
@@ -440,7 +440,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
       }
     } catch (error) {
       logTestExecution('TEST_SETUP_FAILURE', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         stage: 'overall-setup',
       });
       throw error;
@@ -466,7 +466,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
       }
     } catch (error) {
       logTestExecution('TEARDOWN_ERROR', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -529,7 +529,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
 
         expect(registrationBody).toMatchObject({
           success: true,
-          data: {
+          _data: {
             user: {
               email: newUser.email,
               firstName: newUser.firstName,
@@ -575,7 +575,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
 
         expect(loginResponseBody).toMatchObject({
           success: true,
-          data: {
+          _data: {
             token: expect.any(String) as string,
             user: {
               email: newUser.email,
@@ -769,7 +769,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           description:
             'Created during comprehensive E2E testing with enterprise validation',
           category: 'test',
-          metadata: {
+          _metadata: {
             testId,
             createdBy: 'e2e-test-suite',
             version: '1.0.0',
@@ -1040,7 +1040,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           title: `Bulk Resource ${i + 1} - ${bulkTestId}`,
           description: `Bulk created resource ${i + 1} during E2E testing`,
           category: 'bulk',
-          metadata: {
+          _metadata: {
             bulkTestId,
             batchIndex: i,
             createdBy: 'bulk-operation-test',
@@ -1249,7 +1249,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           adminOnly: true,
           securityLevel: 'high',
           classification: 'admin-restricted',
-          metadata: {
+          _metadata: {
             rbacTestId,
             createdBy: 'rbac-test-suite',
             requiredRole: 'ADMIN',
@@ -1438,7 +1438,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           title: `User Owned Resource ${ownershipTestId}`,
           description: 'Owned by regular user - ownership test',
           visibility: 'private',
-          metadata: {
+          _metadata: {
             ownershipTestId,
             createdBy: 'ownership-test-suite',
             ownershipType: 'user-owned',
@@ -2033,7 +2033,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         const errorScenarios = [
           {
             name: 'invalid-payment-method',
-            data: {
+            _data: {
               orderId: 'valid-order-id',
               paymentMethod: 'invalid_method',
               amount: 50.0,
@@ -2042,7 +2042,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
           {
             name: 'negative-amount',
-            data: {
+            _data: {
               orderId: 'valid-order-id',
               paymentMethod: 'credit_card',
               amount: -10.0,
@@ -2051,7 +2051,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
           {
             name: 'missing-amount',
-            data: { orderId: 'valid-order-id', paymentMethod: 'credit_card' },
+            _data: { orderId: 'valid-order-id', paymentMethod: 'credit_card' },
             expectedStatus: 400,
           },
         ];

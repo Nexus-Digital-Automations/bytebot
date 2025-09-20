@@ -16,7 +16,7 @@
  * @service DataExportBackupService
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -125,7 +125,7 @@ export interface BackupResult {
     checksum: string;
   }>;
   baseBackupId?: string; // For incremental/differential
-  metadata: {
+  _metadata: {
     databaseProvider: DatabaseProvider;
     schemaVersion: string;
     totalRecords: number;
@@ -323,7 +323,7 @@ export class DataExportBackupService {
     this.logger.log(`Starting data export: ${exportId}`);
 
     try {
-      const result: ExportResult = {
+      const _result: ExportResult = {
         exportId,
         exportPath,
         format: config.format,
@@ -506,7 +506,7 @@ export class DataExportBackupService {
    */
   restoreFromBackup(
     backupId: string,
-    options: RestoreOptions = {},
+    _options: RestoreOptions = {},
   ): RestoreResult {
     this.logger.log(`Starting restore from backup: ${backupId}`);
 
@@ -515,7 +515,7 @@ export class DataExportBackupService {
       throw new Error(`Backup ${backupId} not found`);
     }
 
-    const result: RestoreResult = {
+    const _result: RestoreResult = {
       backupId,
       startedAt: new Date(),
       restoredTables: [],
@@ -894,7 +894,7 @@ export class DataExportBackupService {
           checksum: await this.calculateFileChecksum(backupFile),
         },
       ],
-      metadata: {
+      _metadata: {
         databaseProvider: this.databaseProvider,
         schemaVersion,
         totalRecords,
@@ -943,7 +943,7 @@ export class DataExportBackupService {
         size: file.fileSize,
         checksum: file.checksum || '',
       })),
-      metadata: {
+      _metadata: {
         databaseProvider: this.databaseProvider,
         schemaVersion,
         totalRecords,
@@ -1011,7 +1011,7 @@ export class DataExportBackupService {
         checksum: file.checksum || '',
       })),
       baseBackupId: lastBackup.backupId,
-      metadata: {
+      _metadata: {
         databaseProvider: this.databaseProvider,
         schemaVersion,
         totalRecords,
@@ -1081,7 +1081,7 @@ export class DataExportBackupService {
         checksum: file.checksum || '',
       })),
       baseBackupId: lastFullBackup.backupId,
-      metadata: {
+      _metadata: {
         databaseProvider: this.databaseProvider,
         schemaVersion,
         totalRecords,
@@ -1102,7 +1102,7 @@ export class DataExportBackupService {
   }
 
   private async createExportManifest(
-    result: ExportResult,
+    _result: ExportResult,
     exportPath: string,
   ): Promise<{
     filename: string;
@@ -1118,7 +1118,7 @@ export class DataExportBackupService {
       totalRecords: result.totalRecords,
       totalSize: result.totalSize,
       files: result.files,
-      metadata: {
+      _metadata: {
         databaseProvider: this.databaseProvider,
         schemaVersion: await this.getCurrentSchemaVersion(),
       },
@@ -1142,7 +1142,7 @@ export class DataExportBackupService {
   }
 
   private formatData(
-    data: Record<string, unknown>[],
+    _data: Record<string, unknown>[],
     format: ExportFormat,
   ): string {
     switch (format) {
@@ -1157,7 +1157,7 @@ export class DataExportBackupService {
     }
   }
 
-  private convertToCSV(data: Record<string, unknown>[]): string {
+  private convertToCSV(_data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
 
     const headers = Object.keys(data[0]);
@@ -1176,7 +1176,7 @@ export class DataExportBackupService {
     return csvLines.join('\n');
   }
 
-  private convertToSQL(data: Record<string, unknown>[]): string {
+  private convertToSQL(_data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
 
     const tableName = this.inferTableName(data[0]);
@@ -1384,7 +1384,7 @@ export class DataExportBackupService {
   private hasMetadataWithSensitivity(
     obj: DomSnapshotWithMetadata,
   ): obj is DomSnapshotWithMetadata & {
-    metadata: { containsSensitiveData?: boolean };
+    _metadata: { containsSensitiveData?: boolean };
   } {
     return obj.metadata !== null && typeof obj.metadata === 'object';
   }
@@ -1426,8 +1426,8 @@ export class DataExportBackupService {
       .map(
         (task): AnonymizedTask => ({
           ...task,
-          result: task.result ? JSON.stringify(task.result) : null,
-          error: task.error ? JSON.stringify(task.error) : null,
+          _result: task.result ? JSON.stringify(task.result) : null,
+          _error: task.error ? JSON.stringify(task.error) : null,
           userId: task.userId
             ? `user_${crypto.randomBytes(4).toString('hex')}`
             : null,
@@ -1603,7 +1603,7 @@ export class DataExportBackupService {
   private restoreFullBackup(
     _backupPath: string,
     _options: RestoreOptions,
-    result: RestoreResult,
+    _result: RestoreResult,
   ): void {
     // Implementation would restore full backup data
     result.restoredTables = [
@@ -1617,14 +1617,14 @@ export class DataExportBackupService {
   private restoreIncrementalBackup(
     _backup: BackupResult,
     _options: RestoreOptions,
-    result: RestoreResult,
+    _result: RestoreResult,
   ): void {
     // Implementation would restore incremental backup data
     result.restoredTables = ['browser_tasks'];
     result.restoredRecords = 100; // Placeholder
   }
 
-  private validateRestoredData(result: RestoreResult): {
+  private validateRestoredData(_result: RestoreResult): {
     integrityChecks: Array<{
       table: string;
       recordCount: number;

@@ -20,7 +20,7 @@
  * Integration: Real-time compliance monitoring and enforcement
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MultiDimensionalRiskAssessment,
@@ -264,7 +264,7 @@ export class EnterpriseComplianceFrameworkService {
    * Perform comprehensive compliance validation for database operation
    */
   async validateCompliance(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<ComplianceValidationResult> {
     const validationId = this.generateValidationId();
     const startTime = Date.now();
@@ -370,7 +370,7 @@ export class EnterpriseComplianceFrameworkService {
       return validationResult;
     } catch (error) {
       this.logger.error(`[${validationId}] Compliance validation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationType: context.operation.operationType,
         validationId,
       });
@@ -385,7 +385,7 @@ export class EnterpriseComplianceFrameworkService {
    */
   async validateFrameworkCompliance(
     framework: RegulatoryFramework,
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<FrameworkComplianceResult> {
     const validationId = this.generateValidationId();
 
@@ -418,7 +418,7 @@ export class EnterpriseComplianceFrameworkService {
    */
   async monitorComplianceDuringExecution(
     operationId: string,
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<ComplianceMonitoringResult> {
     const monitoringId = this.generateMonitoringId();
 
@@ -456,7 +456,7 @@ export class EnterpriseComplianceFrameworkService {
    * Validate GDPR compliance requirements
    */
   private async validateGDPRCompliance(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     validationId: string,
   ): Promise<FrameworkComplianceResult> {
     const requirements: RequirementComplianceResult[] = [];
@@ -542,7 +542,7 @@ export class EnterpriseComplianceFrameworkService {
    * Validate SOX compliance requirements
    */
   private async validateSOXCompliance(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     validationId: string,
   ): Promise<FrameworkComplianceResult> {
     const requirements: RequirementComplianceResult[] = [];
@@ -618,7 +618,7 @@ export class EnterpriseComplianceFrameworkService {
    * Validate HIPAA compliance requirements
    */
   private async validateHIPAACompliance(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     validationId: string,
   ): Promise<FrameworkComplianceResult> {
     const requirements: RequirementComplianceResult[] = [];
@@ -702,7 +702,7 @@ export class EnterpriseComplianceFrameworkService {
    */
   async detectComplianceViolations(
     operation: DatabaseOperationMetadata,
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<ComplianceViolationDetectionResult> {
     const detectionId = this.generateDetectionId();
 
@@ -762,7 +762,7 @@ export class EnterpriseComplianceFrameworkService {
    * Enforce compliance controls and preventive measures
    */
   async enforceComplianceControls(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     violations: DetectedViolation[],
   ): Promise<ComplianceEnforcementResult> {
     const enforcementId = this.generateEnforcementId();
@@ -1091,7 +1091,7 @@ export class EnterpriseComplianceFrameworkService {
   /**
    * Determine if operation involves financial data
    */
-  private isFinancialData(context: ComplianceValidationContext): boolean {
+  private isFinancialData(_context: ComplianceValidationContext): boolean {
     return (
       context.sensitiveDataTypes.includes(SensitiveDataType.FINANCIAL) ||
       context.businessContext.industry === IndustryType.FINANCIAL_SERVICES ||
@@ -1103,7 +1103,7 @@ export class EnterpriseComplianceFrameworkService {
   /**
    * Determine if operation involves healthcare data
    */
-  private isHealthcareData(context: ComplianceValidationContext): boolean {
+  private isHealthcareData(_context: ComplianceValidationContext): boolean {
     return (
       context.sensitiveDataTypes.includes(SensitiveDataType.HEALTH) ||
       context.businessContext.industry === IndustryType.HEALTHCARE ||
@@ -1133,7 +1133,7 @@ export class EnterpriseComplianceFrameworkService {
    * Generate cache key for compliance validation
    */
   private generateComplianceCacheKey(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): string {
     const keyData = {
       operationType: context.operation.operationType,
@@ -1181,7 +1181,7 @@ export class EnterpriseComplianceFrameworkService {
   // These methods contain simplified implementations for the comprehensive framework
 
   private async validateAgainstFrameworks(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     validationId: string,
   ): Promise<FrameworkComplianceResult[]> {
     const results: FrameworkComplianceResult[] = [];
@@ -1208,7 +1208,7 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private async identifyViolationRisks(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     frameworkResults: FrameworkComplianceResult[],
   ): Promise<ComplianceViolationRisk[]> {
     // Placeholder implementation
@@ -1237,10 +1237,10 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private generateFallbackComplianceResult(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
     validationId: string,
   ): ComplianceValidationResult {
-    this.logger.warn(`Generating fallback compliance result: ${validationId}`);
+    this.logger.warn(`Generating fallback compliance _result: ${validationId}`);
 
     return {
       validationId,
@@ -1267,7 +1267,7 @@ export class EnterpriseComplianceFrameworkService {
 
   // Additional stub implementations for comprehensive compliance framework
   private async validateGDPRLawfulnessOfProcessing(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 6',
@@ -1277,14 +1277,14 @@ export class EnterpriseComplianceFrameworkService {
     };
   }
 
-  private requiresConsent(context: ComplianceValidationContext): boolean {
+  private requiresConsent(_context: ComplianceValidationContext): boolean {
     return context.sensitiveDataTypes.includes(
       SensitiveDataType.PERSONAL_IDENTIFIABLE,
     );
   }
 
   private async validateGDPRConsent(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 7',
@@ -1295,7 +1295,7 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private async validateGDPRRightToErasure(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 17',
@@ -1306,7 +1306,7 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private async validateGDPRPrivacyByDesign(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 25',
@@ -1317,7 +1317,7 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private async validateGDPRSecurityOfProcessing(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 32',
@@ -1327,7 +1327,7 @@ export class EnterpriseComplianceFrameworkService {
     };
   }
 
-  private isHighRiskOperation(context: ComplianceValidationContext): boolean {
+  private isHighRiskOperation(_context: ComplianceValidationContext): boolean {
     return (
       context.operation.isDestructive ||
       context.operation.operationType === 'DELETE'
@@ -1335,7 +1335,7 @@ export class EnterpriseComplianceFrameworkService {
   }
 
   private async validateGDPRBreachNotificationReadiness(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<RequirementComplianceResult> {
     return {
       requirement: 'GDPR Article 33/34',
@@ -1347,7 +1347,7 @@ export class EnterpriseComplianceFrameworkService {
 
   private generateGDPRRecommendations(
     gaps: ComplianceGap[],
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): ComplianceRecommendation[] {
     return gaps.map((gap) => ({
       recommendation: `Address ${gap.requirement}`,
@@ -1639,7 +1639,7 @@ export interface ComplianceAuditEntry {
   readonly entryId: string;
   readonly operation: string;
   readonly framework: RegulatoryFramework;
-  readonly result: string;
+  readonly _result: string;
   readonly timestamp: Date;
   readonly evidence: string[];
 }

@@ -28,8 +28,7 @@ import {
   MessageRole,
   Message,
 } from '@prisma/client';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Logger } from '@nestjs/common';
+
 import {
   BytebotAgentResponse,
   BytebotAgentService,
@@ -50,7 +49,7 @@ import {
  * Interface for mock task service methods
  */
 interface MockTasksService {
-  update: (taskId: string, data: Partial<Task>) => Promise<Task>;
+  update: (taskId: string, _data: Partial<Task>) => Promise<Task>;
   findNextTask: () => Promise<Task | null>;
 }
 
@@ -58,8 +57,8 @@ interface MockTasksService {
  * Interface for mock messages service methods
  */
 interface MockMessagesService {
-  create: (data: Partial<Message>) => Promise<Message>;
-  update: (messageId: string, data: Partial<Message>) => Promise<Message>;
+  create: (_data: Partial<Message>) => Promise<Message>;
+  update: (messageId: string, _data: Partial<Message>) => Promise<Message>;
 }
 
 /**
@@ -122,8 +121,8 @@ export class AgentMockDataFactory {
       },
       userId: 'test-user-id',
       control: MessageRole.ASSISTANT,
-      result: null,
-      error: null,
+      _result: null,
+      _error: null,
       ...overrides,
     };
   }
@@ -385,7 +384,7 @@ export class MockAgentProcessor {
   /**
    * Configure mock behavior for testing scenarios
    */
-  configureMockBehavior(options: {
+  configureMockBehavior(_options: {
     processingDelay?: number;
     shouldFailProcessing?: boolean;
     shouldAbort?: boolean;
@@ -609,7 +608,7 @@ abstract class MockAgentService implements BytebotAgentService {
   /**
    * Configure mock behavior
    */
-  configureMockBehavior(options: {
+  configureMockBehavior(_options: {
     shouldFailGeneration?: boolean;
     customResponse?: BytebotAgentResponse;
     generationDelay?: number;
@@ -925,22 +924,22 @@ export const createMockAgentProcessor = (
       .mockImplementation(() => mockProcessor.stopProcessing()),
     handleTaskTakeover: jest
       .fn()
-      .mockImplementation((event: { taskId: string }) =>
+      .mockImplementation((_event: { taskId: string }) =>
         mockProcessor.handleTaskTakeover(event),
       ),
     handleTaskResume: jest
       .fn()
-      .mockImplementation((event: { taskId: string }) =>
+      .mockImplementation((_event: { taskId: string }) =>
         mockProcessor.handleTaskResume(event),
       ),
     handleTaskCancel: jest
       .fn()
-      .mockImplementation((event: { taskId: string }) =>
+      .mockImplementation((_event: { taskId: string }) =>
         mockProcessor.handleTaskCancel(event),
       ),
 
     // Expose mock-specific methods for testing
-    configureMockBehavior: (options: MockBehaviorConfig) =>
+    configureMockBehavior: (_options: MockBehaviorConfig) =>
       mockProcessor.configureMockBehavior(options),
     getProcessingMetrics: () => mockProcessor.getProcessingMetrics(),
     resetMockState: () => mockProcessor.resetMockState(),
@@ -1005,7 +1004,7 @@ export const createMockAgentServices = () => {
               signal,
             ),
         ),
-      configureMockBehavior: (options: MockBehaviorConfig) =>
+      configureMockBehavior: (_options: MockBehaviorConfig) =>
         anthropicService.configureMockBehavior(options),
       resetMockState: () => anthropicService.resetMockState(),
     },
@@ -1028,7 +1027,7 @@ export const createMockAgentServices = () => {
               signal,
             ),
         ),
-      configureMockBehavior: (options: MockBehaviorConfig) =>
+      configureMockBehavior: (_options: MockBehaviorConfig) =>
         openaiService.configureMockBehavior(options),
       resetMockState: () => openaiService.resetMockState(),
     },
@@ -1051,7 +1050,7 @@ export const createMockAgentServices = () => {
               signal,
             ),
         ),
-      configureMockBehavior: (options: MockBehaviorConfig) =>
+      configureMockBehavior: (_options: MockBehaviorConfig) =>
         googleService.configureMockBehavior(options),
       resetMockState: () => googleService.resetMockState(),
     },
@@ -1074,7 +1073,7 @@ export const createMockAgentServices = () => {
               signal,
             ),
         ),
-      configureMockBehavior: (options: MockBehaviorConfig) =>
+      configureMockBehavior: (_options: MockBehaviorConfig) =>
         proxyService.configureMockBehavior(options),
       resetMockState: () => proxyService.resetMockState(),
     },

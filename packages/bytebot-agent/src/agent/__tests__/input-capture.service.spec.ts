@@ -17,10 +17,10 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { ConfigService } from '@nestjs/config';
-import { Socket } from 'socket.io-client';
+
 import { InputCaptureService } from '../input-capture.service';
 import { MessagesService } from '../../messages/messages.service';
 import { MessageRole } from '@prisma/client';
@@ -128,7 +128,7 @@ describe('InputCaptureService', () => {
   const mockBaseUrl = 'http://localhost:8080';
 
   const mockScreenshotData =
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    '_data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
   const mockClickAction = {
     action: 'click_mouse',
@@ -190,7 +190,7 @@ describe('InputCaptureService', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -427,7 +427,7 @@ describe('InputCaptureService', () => {
                 {
                   type: MessageContentType._Image,
                   source: {
-                    data: mockScreenshotData,
+                    _data: mockScreenshotData,
                     media_type: 'image/png',
                     type: 'base64',
                   },
@@ -477,7 +477,7 @@ describe('InputCaptureService', () => {
                   expect.objectContaining({
                     type: MessageContentType._Image,
                     source: expect.objectContaining({
-                      data: mockScreenshotData,
+                      _data: mockScreenshotData,
                     }),
                   }),
                 ]),

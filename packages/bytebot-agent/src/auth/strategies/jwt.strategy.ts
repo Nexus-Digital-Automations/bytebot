@@ -14,7 +14,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -137,7 +137,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // Update last login timestamp
       await this.prismaService.user.update({
         where: { id: user.id },
-        data: { lastLoginAt: new Date() },
+        _data: { lastLoginAt: new Date() },
       });
 
       const validationTime = Date.now() - startTime;
@@ -164,7 +164,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         `[${operationId}] JWT validation failed with unexpected error`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           validationTimeMs: validationTime,
         },

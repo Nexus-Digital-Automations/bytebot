@@ -4,12 +4,7 @@
  * connection authentication, audit logging, and access control for Bytebot API
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantCritical,
@@ -81,7 +76,7 @@ export interface SecurityViolation {
   sourceIp?: string;
   userId?: string;
   sessionId?: string;
-  context: Record<string, any>;
+  _context: Record<string, any>;
   blocked: boolean;
 }
 
@@ -154,7 +149,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   )
   auditOperation(
     operation: string,
-    context: {
+    _context: {
       userId?: string;
       sessionId?: string;
       ipAddress?: string;
@@ -200,8 +195,8 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
         queryText: this.sanitizeQueryText(context.queryText),
         success: context.success,
         duration: context.duration,
-        error: context.error,
-        metadata: {
+        _error: context.error,
+        _metadata: {
           timestamp: new Date().toISOString(),
           serverVersion: process.version,
         },
@@ -220,7 +215,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
           eventType,
           operation,
           success: context.success,
-          error: context.error,
+          _error: context.error,
           userId: context.userId,
         });
       }
@@ -228,7 +223,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       this.logger.error('Failed to audit database operation', {
         operationId,
         operation,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -238,8 +233,8 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
    */
   auditConnection(
     connectionId: string,
-    event: 'connect' | 'disconnect',
-    context: {
+    _event: 'connect' | 'disconnect',
+    _context: {
       userId?: string;
       ipAddress?: string;
       userAgent?: string;
@@ -283,7 +278,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
         operationId,
         connectionId,
         event,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -296,7 +291,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   )
   validateQuerySecurity(
     queryText: string,
-    context: {
+    _context: {
       userId?: string;
       sessionId?: string;
       ipAddress?: string;
@@ -367,7 +362,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       }
     } catch (error) {
       this.logger.error('Failed to validate query security', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         context,
       });
     }
@@ -603,7 +598,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Add audit event to the log
    */
-  private addAuditEvent(event: DatabaseAuditEvent) {
+  private addAuditEvent(_event: DatabaseAuditEvent) {
     this.auditEvents.push(event);
 
     // Maintain maximum audit log size in memory
@@ -617,8 +612,8 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
    * Check for security violations in audit events
    */
   private checkSecurityViolations(
-    event: DatabaseAuditEvent,
-    context: {
+    _event: DatabaseAuditEvent,
+    _context: {
       userId?: string;
       sessionId?: string;
       ipAddress?: string;
@@ -635,7 +630,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
           sessionId: context.sessionId,
           ipAddress: context.ipAddress,
         },
-        { operation: event.operation, error: event.error },
+        { operation: event.operation, _error: event.error },
       );
 
       this.securityViolations.push(violation);
@@ -671,12 +666,12 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
     type: SecurityViolation['type'],
     severity: SecurityViolation['severity'],
     description: string,
-    context: {
+    _context: {
       userId?: string;
       sessionId?: string;
       ipAddress?: string;
     },
-    metadata: Record<string, any> = {},
+    _metadata: Record<string, any> = {},
   ): SecurityViolation {
     return {
       violationId: this.generateOperationId(),
@@ -687,7 +682,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       sourceIp: context.ipAddress,
       userId: context.userId,
       sessionId: context.sessionId,
-      context: metadata,
+      _context: metadata,
       blocked: severity === 'critical' || severity === 'high',
     };
   }

@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 /**
  * PARLANT Phase 1 Cross-Platform Backup Consistency Validation Service
  *
@@ -76,7 +75,7 @@ export interface PlatformBackupInfo {
   checksum: string;
   compressionType: string;
   encryptionType: string;
-  metadata: PlatformSpecificMetadata;
+  _metadata: PlatformSpecificMetadata;
   storageLocation: string;
   retentionPolicy: string;
   performanceMetrics: BackupPerformanceMetrics;
@@ -477,7 +476,7 @@ export interface ParlantConsistencyAnalysis {
   sessionId: string;
   analysisTimestamp: Date;
   prompt: string;
-  response: string;
+  _response: string;
   confidence: number;
   riskAssessment: ParlantRiskAssessment;
   businessImpactAnalysis: ParlantBusinessImpactAnalysis;
@@ -687,7 +686,7 @@ export class CrossPlatformBackupConsistencyService {
    * Performs comprehensive cross-platform backup consistency validation
    */
   async validateCrossPlatformConsistency(
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<ConsistencyValidationResult> {
     const startTime = Date.now();
     this.logger.log(
@@ -698,7 +697,7 @@ export class CrossPlatformBackupConsistencyService {
       const validationId = `cv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Initialize validation result
-      const result: ConsistencyValidationResult = {
+      const _result: ConsistencyValidationResult = {
         validationId,
         requestId: request.requestId,
         startTime: new Date(),
@@ -981,13 +980,13 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validateIndividualPlatform(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<PlatformValidationResult> {
     this.logger.log(
       `🔍 Validating individual platform: ${backup.platform} - ${backup.environment}`,
     );
 
-    const result: PlatformValidationResult = {
+    const _result: PlatformValidationResult = {
       platform: backup.platform,
       environment: backup.environment,
       backupId: backup.backupId,
@@ -1030,7 +1029,7 @@ export class CrossPlatformBackupConsistencyService {
     this.logger.log(`📋 Validating schema for ${backup.platform}`);
 
     // Mock implementation with platform-specific logic
-    const result: SchemaValidationResult = {
+    const _result: SchemaValidationResult = {
       status: 'VALID',
       tablesValidated: 0,
       tablesTotal: 0,
@@ -1095,11 +1094,11 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformData(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<DataValidationResult> {
     this.logger.log(`📊 Validating data for ${backup.platform}`);
 
-    const result: DataValidationResult = {
+    const _result: DataValidationResult = {
       status: 'VALID',
       rowsValidated: 0,
       rowsTotal: 0,
@@ -1163,7 +1162,7 @@ export class CrossPlatformBackupConsistencyService {
   ): Promise<MetadataValidationResult> {
     this.logger.log(`🔧 Validating metadata for ${backup.platform}`);
 
-    const result: MetadataValidationResult = {
+    const _result: MetadataValidationResult = {
       status: 'VALID',
       configurationValidation: true,
       versionCompatibility: true,
@@ -1206,7 +1205,7 @@ export class CrossPlatformBackupConsistencyService {
   ): Promise<PerformanceValidationResult> {
     this.logger.log(`⚡ Validating performance for ${backup.platform}`);
 
-    const result: PerformanceValidationResult = {
+    const _result: PerformanceValidationResult = {
       status: 'ACCEPTABLE',
       benchmarkResults: [],
       performanceScore: 85,
@@ -1277,7 +1276,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async performCrossPlatformComparisons(
     backups: PlatformBackupInfo[],
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<CrossPlatformComparison[]> {
     this.logger.log(
       `🔄 Performing cross-platform comparisons for ${backups.length} backups`,
@@ -1320,7 +1319,7 @@ export class CrossPlatformBackupConsistencyService {
   private async compareTwoBackups(
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<CrossPlatformComparison> {
     const comparisonId = `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -1380,7 +1379,7 @@ export class CrossPlatformBackupConsistencyService {
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
     comparison: CrossPlatformComparison,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<void> {
     this.logger.log(
       `📊 Full database comparison: ${source.platform} ↔ ${target.platform}`,
@@ -1442,8 +1441,8 @@ export class CrossPlatformBackupConsistencyService {
    * Performs PARLANT conversational analysis of consistency results
    */
   private async performParlantConsistencyAnalysis(
-    result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest,
+    _result: ConsistencyValidationResult,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<ParlantConsistencyAnalysis> {
     this.logger.log(`🤖 Performing PARLANT consistency analysis`);
 
@@ -1463,7 +1462,7 @@ export class CrossPlatformBackupConsistencyService {
       sessionId,
       analysisTimestamp: new Date(),
       prompt,
-      response: response.response,
+      _response: response.response,
       confidence: response.confidence,
       riskAssessment: response.riskAssessment,
       businessImpactAnalysis: response.businessImpactAnalysis,
@@ -1483,8 +1482,8 @@ export class CrossPlatformBackupConsistencyService {
    * Generates comprehensive PARLANT analysis prompt
    */
   private generateConsistencyAnalysisPrompt(
-    result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest,
+    _result: ConsistencyValidationResult,
+    _request: CrossPlatformConsistencyRequest,
   ): string {
     return `
 # Cross-Platform Database Backup Consistency Analysis Request
@@ -1539,10 +1538,10 @@ Please analyze this cross-platform backup consistency validation and provide:
    */
   private async mockParlantConsistencyResponse(
     prompt: string,
-    result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest,
+    _result: ConsistencyValidationResult,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<{
-    response: string;
+    _response: string;
     confidence: number;
     riskAssessment: ParlantRiskAssessment;
     businessImpactAnalysis: ParlantBusinessImpactAnalysis;
@@ -1825,7 +1824,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
   // Additional helper methods would continue here with mock implementations...
 
   private determineOverallStatus(
-    result: ConsistencyValidationResult,
+    _result: ConsistencyValidationResult,
   ):
     | 'CONSISTENT'
     | 'INCONSISTENT'
@@ -1843,7 +1842,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
   }
 
   private calculateConsistencyScore(
-    result: ConsistencyValidationResult,
+    _result: ConsistencyValidationResult,
   ): number {
     // Mock calculation based on various factors
     const baseScore = 100;
@@ -1859,7 +1858,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     return Math.max(0, Math.min(100, score));
   }
 
-  private generateNextSteps(result: ConsistencyValidationResult): string[] {
+  private generateNextSteps(_result: ConsistencyValidationResult): string[] {
     const steps: string[] = [];
 
     if (result.executionSummary.criticalIssuesFound > 0) {

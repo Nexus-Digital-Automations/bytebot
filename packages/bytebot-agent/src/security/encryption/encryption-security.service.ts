@@ -15,7 +15,7 @@
  * @since Phase 2: Enterprise Security Implementation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
@@ -111,7 +111,7 @@ export interface EncryptionResult {
     memory?: number;
     parallelism?: number;
   };
-  metadata: {
+  _metadata: {
     timestamp: Date;
     version: string;
     keyId?: string;
@@ -191,7 +191,7 @@ interface KeyInfo {
   usageCount: number;
   rotationDue: Date;
   status: 'active' | 'inactive' | 'compromised' | 'expired';
-  metadata: Record<string, any>;
+  _metadata: Record<string, any>;
 }
 
 /**
@@ -249,7 +249,7 @@ export class EncryptionSecurityService {
    * @returns Promise<EncryptionResult>
    */
   encryptData(
-    data: Buffer | string,
+    _data: Buffer | string,
     password?: string,
     algorithm: EncryptionAlgorithm = EncryptionAlgorithm.AES_256_GCM,
     keyDerivationFunction: KeyDerivationFunction = KeyDerivationFunction.PBKDF2,
@@ -267,7 +267,7 @@ export class EncryptionSecurityService {
 
       // Convert string to buffer
       const dataBuffer = Buffer.isBuffer(data)
-        ? data
+        ? _data
         : Buffer.from(data, 'utf8');
 
       // Generate cryptographic parameters
@@ -316,14 +316,14 @@ export class EncryptionSecurityService {
         tag = cipherWithTag.getAuthTag();
       }
 
-      const result: EncryptionResult = {
+      const _result: EncryptionResult = {
         encrypted,
         algorithm,
         iv,
         tag,
         salt,
         keyDerivationParams,
-        metadata: {
+        _metadata: {
           timestamp: new Date(),
           version: '2.0.0',
           keyId: password ? undefined : this.generateKeyId(encryptionKey),
@@ -351,7 +351,7 @@ export class EncryptionSecurityService {
 
       this.logger.error(`Encryption operation failed: ${operationId}`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         algorithm,
         processingTimeMs: processingTime.toFixed(2),
       });
@@ -443,7 +443,7 @@ export class EncryptionSecurityService {
 
       this.logger.error(`Decryption operation failed: ${operationId}`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         algorithm: params.algorithm,
         processingTimeMs: processingTime.toFixed(2),
       });
@@ -460,11 +460,13 @@ export class EncryptionSecurityService {
    * @returns Buffer
    */
   generateSecureHash(
-    data: Buffer | string,
+    _data: Buffer | string,
     algorithm: HashAlgorithm = HashAlgorithm.SHA256,
     salt?: Buffer,
   ): Buffer {
-    const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+    const dataBuffer = Buffer.isBuffer(data)
+      ? _data
+      : Buffer.from(data, 'utf8');
     const hash = crypto.createHash(algorithm);
 
     if (salt) {
@@ -483,11 +485,13 @@ export class EncryptionSecurityService {
    * @returns Buffer
    */
   generateHMAC(
-    data: Buffer | string,
+    _data: Buffer | string,
     key: Buffer,
     algorithm: HashAlgorithm = HashAlgorithm.SHA256,
   ): Buffer {
-    const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+    const dataBuffer = Buffer.isBuffer(data)
+      ? _data
+      : Buffer.from(data, 'utf8');
     return crypto.createHmac(algorithm, key).update(dataBuffer).digest();
   }
 
@@ -500,7 +504,7 @@ export class EncryptionSecurityService {
    * @returns boolean
    */
   verifyHMAC(
-    data: Buffer | string,
+    _data: Buffer | string,
     signature: Buffer,
     key: Buffer,
     algorithm: HashAlgorithm = HashAlgorithm.SHA256,
@@ -525,7 +529,7 @@ export class EncryptionSecurityService {
       }
     } catch (error) {
       this.logger.error('Failed to generate secure random bytes', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         size,
       });
       throw error;
@@ -622,7 +626,7 @@ export class EncryptionSecurityService {
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Failed to analyze certificate', {
         certificatePath,
-        error: errorMessage,
+        _error: errorMessage,
       });
       throw error;
     }
@@ -728,7 +732,7 @@ export class EncryptionSecurityService {
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Key rotation process failed', {
         keyId,
-        error: errorMessage,
+        _error: errorMessage,
       });
       throw error;
     }
@@ -986,7 +990,7 @@ export class EncryptionSecurityService {
       usageCount: 0,
       rotationDue: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       status: 'active',
-      metadata: {
+      _metadata: {
         previousKeyId: keyId,
         rotationReason: 'scheduled',
       },
@@ -1006,7 +1010,7 @@ export class EncryptionSecurityService {
         this.rotateKeys();
       } catch (error) {
         this.logger.error('Scheduled key rotation failed', {
-          error: error instanceof Error ? error.message : 'Unknown error',
+          _error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }, 3600000); // 1 hour

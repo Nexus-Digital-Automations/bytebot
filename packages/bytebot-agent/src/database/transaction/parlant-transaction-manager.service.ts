@@ -22,7 +22,7 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION MANAGEMENT WITH PARLANT VALIDATION
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantValidatedDatabaseService,
@@ -32,11 +32,7 @@ import {
   ExecutionContext,
   DatabaseParlantAuditEntry,
 } from '../parlant-validated-database.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { PrismaClient } from '@prisma/client';
 import { DatabaseBackupService } from '../database-backup.service';
 
@@ -285,7 +281,7 @@ export interface OperationPerformanceMetrics {
 export interface TransactionAuditEntry {
   readonly timestamp: Date;
   readonly transactionId: string;
-  readonly event: TransactionEvent;
+  readonly _event: TransactionEvent;
   readonly details: string;
   readonly userId: string;
   readonly conversationId?: string;
@@ -701,7 +697,7 @@ export class ParlantTransactionManagerService {
   private async handleTransactionFailure(
     transactionMetadata: TransactionMetadata,
     userContext: ParlantUserContext,
-    error: Error,
+    _error: Error,
   ): Promise<TransactionExecutionResult> {
     const transactionId = transactionMetadata.transactionId;
 
@@ -1004,7 +1000,7 @@ export class ParlantTransactionManagerService {
    */
 
   private generateTransactionDescription(
-    metadata: TransactionMetadata,
+    _metadata: TransactionMetadata,
   ): string {
     return `Transaction: ${metadata.description} (${metadata.operations.length} operations, ${metadata.riskAssessment.overallRisk} risk)`;
   }
@@ -1025,7 +1021,7 @@ export class ParlantTransactionManagerService {
   }
 
   private createTransactionOperationMetadata(
-    metadata: TransactionMetadata,
+    _metadata: TransactionMetadata,
   ): DatabaseOperationMetadata {
     return {
       operationType: 'WRITE',
@@ -1060,7 +1056,7 @@ export class ParlantTransactionManagerService {
       .join(', ');
   }
 
-  private identifyRiskFactors(metadata: TransactionMetadata): string[] {
+  private identifyRiskFactors(_metadata: TransactionMetadata): string[] {
     const factors: string[] = [];
 
     if (metadata.riskAssessment.dataLossRisk) {
@@ -1082,7 +1078,7 @@ export class ParlantTransactionManagerService {
     return factors;
   }
 
-  private calculateEstimatedDuration(metadata: TransactionMetadata): number {
+  private calculateEstimatedDuration(_metadata: TransactionMetadata): number {
     return metadata.operations.reduce(
       (total, op) => total + op.estimatedDuration,
       0,
@@ -1168,7 +1164,7 @@ export class ParlantTransactionManagerService {
         operationId: operation.operationId,
         success: true,
         duration,
-        rowsAffected: typeof result === 'number' ? result : undefined,
+        rowsAffected: typeof result === 'number' ? _result : undefined,
         performanceMetrics: {
           queryPlanningTime: 0, // Would need actual implementation
           queryExecutionTime: duration,
@@ -1207,7 +1203,7 @@ export class ParlantTransactionManagerService {
 
   private async createAuditEntry(
     transactionId: string,
-    event: TransactionEvent,
+    _event: TransactionEvent,
     details: string,
     userId: string,
     conversationId?: string,
@@ -1226,7 +1222,7 @@ export class ParlantTransactionManagerService {
   }
 
   private async createTransactionBackup(
-    metadata: TransactionMetadata,
+    _metadata: TransactionMetadata,
     userContext: ParlantUserContext,
   ): Promise<void> {
     const backupRequest = {
@@ -1244,7 +1240,7 @@ export class ParlantTransactionManagerService {
   }
 
   private generateSuccessfulExecutionSummary(
-    metadata: TransactionMetadata,
+    _metadata: TransactionMetadata,
     operationResults: OperationResult[],
     performanceMetrics: TransactionPerformanceMetrics,
   ): string {
@@ -1265,8 +1261,8 @@ export class ParlantTransactionManagerService {
   }
 
   private generateFailureSummary(
-    metadata: TransactionMetadata,
-    error: Error,
+    _metadata: TransactionMetadata,
+    _error: Error,
   ): string {
     return [
       `❌ Transaction failed`,

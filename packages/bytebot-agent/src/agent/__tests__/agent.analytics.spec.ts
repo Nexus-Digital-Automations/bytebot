@@ -16,8 +16,8 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { ConfigService } from '@nestjs/config';
 import { AgentAnalyticsService } from '../agent.analytics';
 import { TasksService } from '../../tasks/tasks.service';
@@ -61,8 +61,8 @@ describe('AgentAnalyticsService', () => {
     executedAt: new Date('2024-01-01T10:00:00.000Z'),
     completedAt: new Date('2024-01-01T10:05:00.000Z'),
     queuedAt: new Date('2024-01-01T10:00:00.000Z'),
-    error: null,
-    result: 'Task completed successfully',
+    _error: null,
+    _result: 'Task completed successfully',
     model: {
       provider: 'anthropic',
       name: 'claude-3-sonnet',
@@ -126,7 +126,7 @@ describe('AgentAnalyticsService', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -309,7 +309,7 @@ describe('AgentAnalyticsService', () => {
         const failedTask = {
           ...mockTask,
           status: TaskStatus.FAILED,
-          error: 'Task execution failed',
+          _error: 'Task execution failed',
           completedAt: null,
         };
         tasksService.findById.mockResolvedValue(failedTask);
@@ -383,7 +383,7 @@ describe('AgentAnalyticsService', () => {
                 source: {
                   type: 'base64',
                   media_type: 'image/png',
-                  data: 'base64imagedata',
+                  _data: 'base64imagedata',
                 },
               },
               {
@@ -424,7 +424,7 @@ describe('AgentAnalyticsService', () => {
       it('should handle large task data efficiently', async () => {
         const largeTask = {
           ...mockTask,
-          result: 'A'.repeat(10000), // Large result string
+          _result: 'A'.repeat(10000), // Large result string
         };
         const largeMessages = Array.from({ length: 100 }, (_, i) => ({
           ...mockMessages[0],
@@ -554,7 +554,7 @@ describe('AgentAnalyticsService', () => {
           ok: false,
           status: 500,
           statusText: 'Internal Server Error',
-          json: jest.fn().mockResolvedValue({ error: 'Server error' }),
+          json: jest.fn().mockResolvedValue({ _error: 'Server error' }),
         };
         (global.fetch as jest.Mock).mockResolvedValue(errorResponse);
 

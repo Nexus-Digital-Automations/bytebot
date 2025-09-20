@@ -16,7 +16,7 @@
  * @service DataStorageOptimizationService
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageTier, CompressionType } from '@prisma/client';
@@ -106,7 +106,7 @@ type ErrorWithMessage = {
   stack?: string;
 };
 
-function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+function isErrorWithMessage(_error: unknown): error is ErrorWithMessage {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -115,7 +115,7 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
   );
 }
 
-function getErrorMessage(error: unknown): string {
+function getErrorMessage(_error: unknown): string {
   if (isErrorWithMessage(error)) return error.message;
   if (error instanceof Error) return error.message;
   try {
@@ -125,7 +125,7 @@ function getErrorMessage(error: unknown): string {
   }
 }
 
-function getErrorStack(error: unknown): string | undefined {
+function getErrorStack(_error: unknown): string | undefined {
   if (isErrorWithMessage(error)) return error.stack;
   if (error instanceof Error) return error.stack;
   return undefined;
@@ -297,7 +297,7 @@ export class DataStorageOptimizationService {
         sessionId: true,
         accessCount: true,
         storageTier: true,
-        metadata: true,
+        _metadata: true,
         filePath: true,
         compressionType: true,
         checksum: true,
@@ -352,7 +352,7 @@ export class DataStorageOptimizationService {
         storageTier: true,
         originalSize: true,
         htmlContent: true,
-        metadata: true,
+        _metadata: true,
         compressionType: true,
         textContentHash: true,
         formCount: true,
@@ -418,7 +418,7 @@ export class DataStorageOptimizationService {
           // Update database with calculated checksum
           await this.prismaService.browserScreenshot.update({
             where: { id: screenshot.id },
-            data: { checksum },
+            _data: { checksum },
           });
         } catch (error) {
           this.logger.warn(
@@ -549,7 +549,7 @@ export class DataStorageOptimizationService {
           sessionId: true,
           accessCount: true,
           storageTier: true,
-          metadata: true,
+          _metadata: true,
           filePath: true,
           compressionType: true,
           checksum: true,
@@ -576,7 +576,7 @@ export class DataStorageOptimizationService {
             storageTier: true,
             originalSize: true,
             htmlContent: true,
-            metadata: true,
+            _metadata: true,
             compressionType: true,
             textContentHash: true,
             formCount: true,
@@ -816,7 +816,7 @@ export class DataStorageOptimizationService {
       isTestData: metadata.isTestData === true,
       hasBusinessValue: this.assessBusinessValue({
         ...screenshot,
-        metadata: screenshot.metadata,
+        _metadata: screenshot.metadata,
         url: screenshot.url || undefined,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
@@ -882,7 +882,7 @@ export class DataStorageOptimizationService {
       isTestData: metadata.isTestData === true,
       hasBusinessValue: this.assessDomBusinessValue({
         ...domSnapshot,
-        metadata: domSnapshot.metadata,
+        _metadata: domSnapshot.metadata,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
@@ -944,7 +944,7 @@ export class DataStorageOptimizationService {
         // Update database record
         await this.prismaService.browserScreenshot.update({
           where: { id: screenshot.id },
-          data: {
+          _data: {
             storageTier: targetTier,
             compressionType: newCompressionType as CompressionType,
             compressedSize: optimizedSize,
@@ -961,7 +961,7 @@ export class DataStorageOptimizationService {
       // Just update storage tier without compression
       await this.prismaService.browserScreenshot.update({
         where: { id: screenshot.id },
-        data: {
+        _data: {
           storageTier: targetTier,
         },
       });
@@ -1014,7 +1014,7 @@ export class DataStorageOptimizationService {
         // Update database record
         await this.prismaService.browserDomSnapshot.update({
           where: { id: domSnapshot.id },
-          data: {
+          _data: {
             storageTier: targetTier,
             compressionType: newCompressionType as CompressionType,
             htmlCompressed: compressedData,
@@ -1032,7 +1032,7 @@ export class DataStorageOptimizationService {
       // Just update storage tier
       await this.prismaService.browserDomSnapshot.update({
         where: { id: domSnapshot.id },
-        data: {
+        _data: {
           storageTier: targetTier,
         },
       });
@@ -1084,7 +1084,7 @@ export class DataStorageOptimizationService {
     // Assess business value
     const businessValueScore = this.assessBusinessValue({
       ...screenshot,
-      metadata: screenshot.metadata,
+      _metadata: screenshot.metadata,
       url: screenshot.url || undefined,
     })
       ? 0.8
@@ -1279,7 +1279,7 @@ export class DataStorageOptimizationService {
 
   // Helper methods for parsing metadata
   private parseScreenshotMetadata(
-    metadata: Prisma.JsonValue | null | undefined,
+    _metadata: Prisma.JsonValue | null | undefined,
   ): ScreenshotMetadata {
     if (!metadata || typeof metadata !== 'object' || metadata === null) {
       return {};
@@ -1288,7 +1288,7 @@ export class DataStorageOptimizationService {
   }
 
   private parseDomSnapshotMetadata(
-    metadata: Prisma.JsonValue | null | undefined,
+    _metadata: Prisma.JsonValue | null | undefined,
   ): DomSnapshotMetadata {
     if (!metadata || typeof metadata !== 'object' || metadata === null) {
       return {};

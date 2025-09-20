@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import {
@@ -37,10 +37,10 @@ interface Part {
   functionResponse?: {
     id?: string;
     name: string;
-    response: Record<string, unknown>;
+    _response: Record<string, unknown>;
   };
   inlineData?: {
-    data: string;
+    _data: string;
     mimeType: string;
   };
 }
@@ -109,10 +109,10 @@ interface ExtendedPart extends Part {
   functionResponse?: {
     id: string;
     name: string;
-    response: Record<string, unknown>;
+    _response: Record<string, unknown>;
   };
   inlineData?: {
-    data: string;
+    _data: string;
     mimeType: string;
   };
 }
@@ -193,7 +193,7 @@ export class GoogleService implements BytebotAgentService {
       throw error;
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to retrieve Gemini API key`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       if (error instanceof Error) {
         const googleError = error as GoogleApiError;
@@ -220,7 +220,7 @@ export class GoogleService implements BytebotAgentService {
       // Convert our message content blocks to Anthropic's expected format
       const googleMessages = this.formatMessagesForGoogle(messages);
 
-      const response: GenerateContentResponse =
+      const _response: GenerateContentResponse =
         await google.models.generateContent({
           model,
           contents: googleMessages,
@@ -262,7 +262,7 @@ export class GoogleService implements BytebotAgentService {
           totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
         },
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       if (error instanceof Error && error.message.includes('AbortError')) {
         throw new BytebotAgentInterrupt();
       }
@@ -323,7 +323,7 @@ export class GoogleService implements BytebotAgentService {
           } else if (isImageContentBlock(block)) {
             parts.push({
               inlineData: {
-                data: block.source.data,
+                _data: block.source.data,
                 mimeType: block.source.media_type,
               },
             });
@@ -349,7 +349,7 @@ export class GoogleService implements BytebotAgentService {
             case MessageContentType._Image:
               parts.push({
                 inlineData: {
-                  data: block.source.data,
+                  _data: block.source.data,
                   mimeType: block.source.media_type,
                 },
               });
@@ -361,17 +361,17 @@ export class GoogleService implements BytebotAgentService {
                   functionResponse: {
                     id: block.tool_use_id,
                     name: 'screenshot',
-                    response: {
+                    _response: {
                       ...(!block.is_error && {
                         output: 'screenshot successful',
                       }),
-                      ...(block.is_error && { error: block.content[0] }),
+                      ...(block.is_error && { _error: block.content[0] }),
                     },
                   },
                 });
                 parts.push({
                   inlineData: {
-                    data: toolResultContentBlock.source.data,
+                    _data: toolResultContentBlock.source.data,
                     mimeType: toolResultContentBlock.source.media_type,
                   },
                 });
@@ -382,9 +382,9 @@ export class GoogleService implements BytebotAgentService {
                 functionResponse: {
                   id: block.tool_use_id,
                   name: this.getToolName(block.tool_use_id, messages),
-                  response: {
+                  _response: {
                     ...(!block.is_error && { output: block.content[0] }),
-                    ...(block.is_error && { error: block.content[0] }),
+                    ...(block.is_error && { _error: block.content[0] }),
                   },
                 },
               });
@@ -454,7 +454,7 @@ export class GoogleService implements BytebotAgentService {
    * @private
    */
   private isValidGenerateContentResponse(
-    response: GenerateContentResponse,
+    _response: GenerateContentResponse,
   ): response is ValidatedGenerateContentResponse {
     return (
       response &&

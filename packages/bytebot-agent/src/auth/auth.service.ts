@@ -20,7 +20,6 @@ import {
   UnauthorizedException,
   BadRequestException,
   ConflictException,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -172,7 +171,7 @@ export class AuthService {
       // Update last login timestamp
       await this.prismaService.user.update({
         where: { id: user.id },
-        data: { lastLoginAt: new Date() },
+        _data: { lastLoginAt: new Date() },
       });
 
       // Record successful login for security monitoring
@@ -208,7 +207,7 @@ export class AuthService {
       this.logger.error(`[${operationId}] Login failed with unexpected error`, {
         operationId,
         email: loginDto.email,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         loginTimeMs: loginTime,
         ipAddress,
@@ -299,7 +298,7 @@ export class AuthService {
 
       // Create new user
       const user = await this.prismaService.user.create({
-        data: {
+        _data: {
           email: registerDto.email,
           username: registerDto.username,
           firstName: registerDto.firstName,
@@ -344,7 +343,7 @@ export class AuthService {
           operationId,
           email: registerDto.email,
           username: registerDto.username,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           registrationTimeMs: registrationTime,
         },
@@ -423,7 +422,7 @@ export class AuthService {
       // Update session with new refresh token
       await this.prismaService.userSession.update({
         where: { id: session.id },
-        data: {
+        _data: {
           refreshToken: tokens.refreshToken,
           updatedAt: new Date(),
         },
@@ -451,7 +450,7 @@ export class AuthService {
         `[${operationId}] Token refresh failed with unexpected error`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           refreshTimeMs: refreshTime,
         },
@@ -485,7 +484,7 @@ export class AuthService {
       if (session) {
         await this.prismaService.userSession.update({
           where: { id: session.id },
-          data: {
+          _data: {
             isRevoked: true,
             updatedAt: new Date(),
           },
@@ -513,7 +512,7 @@ export class AuthService {
         `[${operationId}] Logout failed with unexpected error`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           logoutTimeMs: logoutTime,
         },
@@ -604,7 +603,7 @@ export class AuthService {
       // Update user password
       await this.prismaService.user.update({
         where: { id: userId },
-        data: {
+        _data: {
           passwordHash: newPasswordHash,
           updatedAt: new Date(),
         },
@@ -613,7 +612,7 @@ export class AuthService {
       // Revoke all existing user sessions for security
       await this.prismaService.userSession.updateMany({
         where: { userId },
-        data: {
+        _data: {
           isRevoked: true,
           updatedAt: new Date(),
         },
@@ -645,7 +644,7 @@ export class AuthService {
         {
           operationId,
           userId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           changeTimeMs: changeTime,
         },
@@ -762,7 +761,7 @@ export class AuthService {
       : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     const session = await this.prismaService.userSession.create({
-      data: {
+      _data: {
         userId,
         refreshToken,
         expiresAt: expirationTime,

@@ -15,9 +15,7 @@
 import {
   Injectable,
   ExecutionContext,
-  Logger,
   HttpException,
-  HttpStatus,
   Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -69,7 +67,7 @@ interface DynamicThrottleConfig {
   keyStrategy?: 'ip' | 'user' | 'ip-user' | 'endpoint' | 'custom';
 
   /** Custom key generator function */
-  customKeyGen?: (request: Request) => string;
+  customKeyGen?: (_request: Request) => string;
 }
 
 /**
@@ -137,7 +135,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
   constructor(
     @Inject('THROTTLER:MODULE_OPTIONS')
-    protected readonly options: ThrottlerModuleOptions,
+    protected readonly _options: ThrottlerModuleOptions,
     @Inject('THROTTLER_STORAGE')
     protected readonly storageService: ThrottlerStorage,
     protected readonly reflector: Reflector,
@@ -157,7 +155,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   /**
    * Enhanced throttle check with role-based and adaptive limiting
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(_context: ExecutionContext): Promise<boolean> {
     const operationId = `throttle-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const startTime = Date.now();
 
@@ -217,7 +215,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
           {
             statusCode: HttpStatus.TOO_MANY_REQUESTS,
             message: `Rate limit exceeded for ${user?.role || 'anonymous'} user`,
-            error: 'Too Many Requests',
+            _error: 'Too Many Requests',
             limits: {
               rpm: limits.rpm,
               burst: limits.burst,
@@ -256,7 +254,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
       this.logger.error(`[${operationId}] Advanced throttle error`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         processingTimeMs: processingTime,
       });
@@ -270,7 +268,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Get throttle configuration for current context
    */
   private getThrottleConfig(
-    context: ExecutionContext,
+    _context: ExecutionContext,
   ): DynamicThrottleConfig | null {
     // Check method-level configuration
     const methodConfig = this.reflector.get<DynamicThrottleConfig>(
@@ -322,7 +320,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Generate throttle key based on strategy
    */
   private generateThrottleKey(
-    request: Request,
+    _request: Request,
     config: DynamicThrottleConfig,
   ): string {
     const extendedRequest = request as Request & {
@@ -429,7 +427,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   private checkThrottleLimits(
     throttleKey: string,
     limits: RoleThrottleConfig,
-    request: Request,
+    _request: Request,
     operationId: string,
   ): boolean {
     const windowMs = 60000; // 1 minute window
@@ -492,7 +490,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
       this.logger.error(`[${operationId}] Error checking throttle limits`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         throttleKey: throttleKey.substring(0, 30) + '...',
       });
 
@@ -526,7 +524,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Log security event for throttle violation
    */
   private logThrottleEvent(
-    request: Request,
+    _request: Request,
     limits: RoleThrottleConfig,
     operationId: string,
   ): void {
@@ -557,7 +555,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
       );
 
       this.logger.warn(
-        `Advanced throttle security event: ${securityEvent.eventId}`,
+        `Advanced throttle security _event: ${securityEvent.eventId}`,
         {
           eventId: securityEvent.eventId,
           riskScore: securityEvent.riskScore,
@@ -570,7 +568,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
       this.logger.error('Failed to log advanced throttle security event', {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
       });
     }
   }
@@ -579,7 +577,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Override the error message generation
    */
   protected generateErrorMessage(
-    context: ExecutionContext,
+    _context: ExecutionContext,
     limit: number,
     ttl: number,
   ): string {

@@ -17,7 +17,7 @@
  * @since Phase 2: Security Monitoring Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import {
   SecurityMonitoringService,

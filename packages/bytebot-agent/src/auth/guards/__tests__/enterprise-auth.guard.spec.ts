@@ -16,7 +16,7 @@
  * @since Phase 2: Enterprise Authentication Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   UnauthorizedException,

@@ -49,7 +49,6 @@
 // ============================================================================
 
 import { TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
 
 // ============================================================================
 // SERVICE IMPORTS - REPLACE WITH ACTUAL SERVICE IMPORTS
@@ -164,7 +163,7 @@ class TestExecutionLogger {
         totalExecutionTimeMs: totalExecutionTime,
         operationId: this.operationId,
         finalMemoryUsage,
-        error: error
+        _error: error
           ? {
               name: error.name,
               message: error.message,
@@ -348,7 +347,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
                   );
                 },
               ),
-            error: jest
+            _error: jest
               .fn()
               .mockImplementation((message: string, error?: Error) => {
                 testLogger.logOperation(`Application ERROR: ${message}`, {
@@ -401,7 +400,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         // service = testingModule.get<[SERVICE_CLASS]>([SERVICE_CLASS]);
       } catch (error) {
         testLogger.logOperation('Service retrieval failed', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
         // Service might not be available in template - this is expected
       }
@@ -415,7 +414,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         // mockPrismaService = testingModule.get(PrismaService);
       } catch (error) {
         testLogger.logOperation('Dependency retrieval failed', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
         // Dependencies might not be available in template - this is expected
       }
@@ -429,7 +428,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       testLogger.completeTest('[SERVICE_NAME] Test Suite Setup', true);
     } catch (error) {
       const typedError =
-        error instanceof Error ? error : new Error(String(error));
+        error instanceof Error ? _error : new Error(String(error));
       testLogger.completeTest(
         '[SERVICE_NAME] Test Suite Setup',
         false,
@@ -481,7 +480,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       testLogger.completeTest('[SERVICE_NAME] Test Suite Cleanup', true);
     } catch (error) {
       const typedError =
-        error instanceof Error ? error : new Error(String(error));
+        error instanceof Error ? _error : new Error(String(error));
       testLogger.completeTest(
         '[SERVICE_NAME] Test Suite Cleanup',
         false,
@@ -550,10 +549,10 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? error : new Error(String(error));
+          error instanceof Error ? _error : new Error(String(error));
         testLogger.logOperation('Service definition validation failed', {
           operationId,
-          error: typedError.message,
+          _error: typedError.message,
         });
         throw typedError;
       } finally {
@@ -596,10 +595,10 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? error : new Error(String(error));
+          error instanceof Error ? _error : new Error(String(error));
         testLogger.logOperation('Dependency injection validation failed', {
           operationId,
-          error: typedError.message,
+          _error: typedError.message,
         });
         throw typedError;
       } finally {
@@ -643,10 +642,10 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? error : new Error(String(error));
+          error instanceof Error ? _error : new Error(String(error));
         testLogger.logOperation('Architecture compliance validation failed', {
           operationId,
-          error: typedError.message,
+          _error: typedError.message,
         });
         throw typedError;
       } finally {
@@ -684,7 +683,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
           id: 'test-enterprise-id',
           name: 'Enterprise Test Data',
           timestamp: new Date().toISOString(),
-          metadata: {
+          _metadata: {
             testMode: true,
             operationId: operationId,
             performanceTracking: true,
@@ -696,7 +695,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
           success: true,
           id: 'test-enterprise-id',
           processedAt: expect.any(String),
-          result: 'processed successfully',
+          _result: 'processed successfully',
           performanceMetrics: expect.any(Object),
         };
 
@@ -705,7 +704,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         // TODO: Replace with actual mock setup
         // mockDependency1.method.mockResolvedValue({
         //   success: true,
-        //   data: expectedResult,
+        //   _data: expectedResult,
         //   performanceMetrics: {
         //     executionTime: 45,
         //     memoryUsage: 1024,
@@ -787,12 +786,12 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? error : new Error(String(error));
+          error instanceof Error ? _error : new Error(String(error));
         testLogger.logOperation(
           '[PRIMARY_METHOD] successful operation test failed',
           {
             operationId,
-            error: typedError.message,
+            _error: typedError.message,
             stack: typedError.stack,
           },
         );
@@ -967,7 +966,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
 
     it('should handle dependency responses correctly', async () => {
       // Test different response scenarios from dependencies
-      const responses = [{ data: 'success' }, null, [], { error: 'failure' }];
+      const responses = [{ _data: 'success' }, null, [], { _error: 'failure' }];
 
       for (const response of responses) {
         // mockDependency1.method.mockResolvedValue(response);
@@ -989,7 +988,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
     it('should handle high-volume operations efficiently', async () => {
       const operations = Array.from({ length: 1000 }, (_, i) => ({
         id: `item-${i}`,
-        data: `test-data-${i}`,
+        _data: `test-data-${i}`,
       }));
 
       const startTime = performance.now();

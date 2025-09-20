@@ -4,12 +4,7 @@
  * circuit breaker protection, and comprehensive health monitoring
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -237,7 +232,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       this.errorCount++;
 
       this.logger.error(`[${operationId}] Database health check failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
     }
@@ -422,11 +417,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         duration,
         timestamp: new Date(),
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       this.logger.error(`[${operationId}] Raw query execution failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration,
         operationId,
       });
@@ -511,7 +506,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       this.logger.error(
         `[${operationId}] Reliable database health check failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           operationId,
         },
       );
@@ -605,13 +600,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           duration,
           timestamp: new Date(),
           success: false,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
 
         this.logger.error(
           `[${operationId}] Reliable raw query execution failed`,
           {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
             duration,
             operationId,
           },

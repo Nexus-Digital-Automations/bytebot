@@ -17,9 +17,9 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   DatabaseMetricsService,
   DatabaseMetricsSnapshot,
@@ -732,7 +732,7 @@ describe('DatabaseMetricsService Comprehensive Test Suite', () => {
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Failed to collect database metrics'),
         expect.objectContaining({
-          error: 'Metrics collection failed',
+          _error: 'Metrics collection failed',
           operationId: expect.stringMatching(/^metrics_\d+_[a-z0-9]{6}$/),
         }),
       );

@@ -16,7 +16,7 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   MessagesService,
   ProcessedMessage,
@@ -55,7 +55,8 @@ describe('MessagesService', () => {
     source: {
       media_type: 'image/png',
       type: 'base64',
-      data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      _data:
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
     },
   };
 
@@ -191,7 +192,7 @@ describe('MessagesService', () => {
       expect(result.performanceMetrics.validationTimeMs).toBeGreaterThan(0);
 
       expect(prismaService.message.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           content: createMessageDto.content,
           role: createMessageDto.role,
           taskId: createMessageDto.taskId,
@@ -217,7 +218,7 @@ describe('MessagesService', () => {
       await service.create(complexDto);
 
       expect(prismaService.message.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           content: complexDto.content,
           role: complexDto.role,
           taskId: complexDto.taskId,
@@ -285,7 +286,7 @@ describe('MessagesService', () => {
       // Verify the original content is not modified
       expect(originalContent).toEqual([mockTextContentBlock]);
       expect(prismaService.message.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           content: originalContent,
           role: dto.role,
           taskId: dto.taskId,
@@ -322,17 +323,17 @@ describe('MessagesService', () => {
         content: [mockTextContentBlock],
         role: MessageRole.USER,
         taskId: mockTaskId,
-        metadata: { source: 'test', priority: 'high' },
+        _metadata: { source: 'test', priority: 'high' },
       };
 
       await service.create(dtoWithMetadata);
 
       expect(prismaService.message.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           content: dtoWithMetadata.content,
           role: dtoWithMetadata.role,
           taskId: dtoWithMetadata.taskId,
-          metadata: dtoWithMetadata.metadata,
+          _metadata: dtoWithMetadata.metadata,
         },
       });
     });
@@ -574,7 +575,7 @@ describe('MessagesService', () => {
 
       expect(prismaService.message.updateMany).toHaveBeenCalledWith({
         where: { taskId: mockTaskId, id: { in: messageIds } },
-        data: { summaryId: mockSummaryId },
+        _data: { summaryId: mockSummaryId },
       });
     });
 
@@ -592,7 +593,7 @@ describe('MessagesService', () => {
 
       expect(prismaService.message.updateMany).toHaveBeenCalledWith({
         where: { taskId: mockTaskId, id: { in: messageIds } },
-        data: { summaryId: mockSummaryId },
+        _data: { summaryId: mockSummaryId },
       });
     });
 

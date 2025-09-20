@@ -8,7 +8,7 @@
  * Usage: Application bootstrap, health checks, status reporting
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { performance } from 'perf_hooks';
 import { randomUUID } from 'crypto';
 
@@ -93,7 +93,7 @@ export class AppService {
       });
 
       return greeting;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -102,7 +102,7 @@ export class AppService {
       this.logger.error('Application greeting request failed', {
         operationId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'AppService',
@@ -176,7 +176,7 @@ export class AppService {
       });
 
       return healthResponse;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -185,7 +185,7 @@ export class AppService {
       this.logger.error('Health status request failed', {
         operationId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'AppService',
@@ -240,7 +240,7 @@ export class AppService {
       });
 
       return statusResponse;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -249,7 +249,7 @@ export class AppService {
       this.logger.error('Application status request failed', {
         operationId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'AppService',

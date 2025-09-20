@@ -20,18 +20,14 @@
  * Performance: Optimized backup operations with minimal disruption
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DatabaseBackupService,
   BackupCreationRequest,
   BackupRestorationRequest,
 } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { RiskLevel } from '../parlant-validated-database.service';
 
 // ===== BACKUP VALIDATION INTERFACES =====
@@ -218,10 +214,7 @@ export interface BusinessContinuityPlan {
 @Injectable()
 export class ParlantBackupValidationService {
   private readonly logger = new Logger(ParlantBackupValidationService.name);
-  private readonly validationCache = new Map<
-    string,
-    ParlantValidationResponse
-  >();
+  private readonly validationCache = new Map<string>();
   private readonly scheduleCache = new Map<string, BackupSchedule>();
   private readonly disasterRecoveryPlans = new Map<
     string,
@@ -256,7 +249,7 @@ export class ParlantBackupValidationService {
    * Validate backup creation with PARLANT conversational approval
    */
   async validateBackupCreation(
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
     userContext: ParlantUserContext,
   ): Promise<ParlantValidationResponse> {
     const operationId = this.generateOperationId();
@@ -326,7 +319,7 @@ export class ParlantBackupValidationService {
       const validationTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Backup creation validation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         validationTime,
         operationId,
       });
@@ -339,7 +332,7 @@ export class ParlantBackupValidationService {
    * Validate backup restoration with multi-step approval
    */
   async validateBackupRestoration(
-    request: BackupRestorationRequest,
+    _request: BackupRestorationRequest,
     userContext: ParlantUserContext,
   ): Promise<ParlantValidationResponse> {
     const operationId = this.generateOperationId();
@@ -398,7 +391,7 @@ export class ParlantBackupValidationService {
       this.logger.error(
         `[${operationId}] Backup restoration validation failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           validationTime,
           operationId,
         },
@@ -483,7 +476,7 @@ export class ParlantBackupValidationService {
       const validationTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Backup schedule validation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         validationTime,
         operationId,
       });
@@ -580,7 +573,7 @@ export class ParlantBackupValidationService {
       this.logger.error(
         `[${operationId}] Disaster recovery validation failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           validationTime,
           operationId,
         },
@@ -596,7 +589,7 @@ export class ParlantBackupValidationService {
    * Create backup validation metadata from request
    */
   private createBackupValidationMetadata(
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
   ): BackupValidationMetadata {
     const tables = request.operationMetadata.tableName
       ? [request.operationMetadata.tableName]
@@ -619,8 +612,8 @@ export class ParlantBackupValidationService {
    * Assess comprehensive backup risks
    */
   private async assessBackupRisks(
-    metadata: BackupValidationMetadata,
-    request: BackupCreationRequest,
+    _metadata: BackupValidationMetadata,
+    _request: BackupCreationRequest,
     _userContext: ParlantUserContext,
   ): Promise<BackupRiskAssessment> {
     const businessImpact = this.assessBusinessImpact(metadata, request);
@@ -653,8 +646,8 @@ export class ParlantBackupValidationService {
    * Assess business impact of backup operation
    */
   private assessBusinessImpact(
-    metadata: BackupValidationMetadata,
-    request: BackupCreationRequest,
+    _metadata: BackupValidationMetadata,
+    _request: BackupCreationRequest,
   ): BusinessImpact {
     const isFullBackup = metadata.backupType === 'FULL';
     const hasHighRisk =
@@ -679,7 +672,7 @@ export class ParlantBackupValidationService {
    * Assess technical risks
    */
   private async assessTechnicalRisks(
-    metadata: BackupValidationMetadata,
+    _metadata: BackupValidationMetadata,
   ): Promise<TechnicalRisk[]> {
     const risks: TechnicalRisk[] = [];
 
@@ -725,8 +718,8 @@ export class ParlantBackupValidationService {
    * Assess compliance risks
    */
   private assessComplianceRisks(
-    metadata: BackupValidationMetadata,
-    request: BackupCreationRequest,
+    _metadata: BackupValidationMetadata,
+    _request: BackupCreationRequest,
   ): ComplianceRisk[] {
     const risks: ComplianceRisk[] = [];
 
@@ -770,7 +763,7 @@ export class ParlantBackupValidationService {
    * Generate conversational prompt for backup creation
    */
   private generateBackupCreationPrompt(
-    metadata: BackupValidationMetadata,
+    _metadata: BackupValidationMetadata,
     riskAssessment: BackupRiskAssessment,
     complianceRequirements: ComplianceRequirement[],
   ): string {
@@ -874,7 +867,7 @@ export class ParlantBackupValidationService {
    * Generate restoration approval workflow
    */
   private generateRestorationApprovalWorkflow(
-    request: BackupRestorationRequest,
+    _request: BackupRestorationRequest,
     risks: BackupRiskAssessment,
   ): ApprovalWorkflow {
     const steps: ApprovalStep[] = [];
@@ -957,7 +950,7 @@ export class ParlantBackupValidationService {
           conversationId: `workflow_${workflow.workflowId}`,
           reason: `Approval workflow failed at step: ${step.title}`,
           confidence: 0.95,
-          metadata: {
+          _metadata: {
             startTime: new Date(),
             endTime: new Date(),
             processingTime: 0,
@@ -974,7 +967,7 @@ export class ParlantBackupValidationService {
       conversationId: `workflow_${workflow.workflowId}`,
       reason: 'All approval steps completed successfully',
       confidence: 0.95,
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 0,
@@ -999,7 +992,7 @@ export class ParlantBackupValidationService {
       conversationId: `step_${step.stepId}_${operationId}`,
       reason: step.prompt,
       confidence: 0.9,
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 100,
@@ -1022,7 +1015,7 @@ export class ParlantBackupValidationService {
    * Perform PARLANT backup validation
    */
   private async performParlantBackupValidation(
-    request: ParlantBackupValidationRequest,
+    _request: ParlantBackupValidationRequest,
   ): Promise<ParlantValidationResponse> {
     const startTime = Date.now();
 
@@ -1040,7 +1033,7 @@ export class ParlantBackupValidationService {
       conversationId: `backup_conv_${request.operationId}`,
       reason: this.generateValidationReasoning(request),
       confidence: 0.95,
-      metadata: {
+      _metadata: {
         startTime: new Date(startTime),
         endTime: new Date(),
         processingTime: Date.now() - startTime,
@@ -1062,7 +1055,7 @@ export class ParlantBackupValidationService {
    * Mock approval logic for backup operations
    */
   private shouldApproveBackupOperation(
-    request: ParlantBackupValidationRequest,
+    _request: ParlantBackupValidationRequest,
   ): boolean {
     // Always approve creation operations with proper encryption
     if (request.operationType === BackupOperationType.CREATE) {
@@ -1095,7 +1088,7 @@ export class ParlantBackupValidationService {
    * Generate validation reasoning
    */
   private generateValidationReasoning(
-    request: ParlantBackupValidationRequest,
+    _request: ParlantBackupValidationRequest,
   ): string {
     const operation = request.operationType.toLowerCase();
     const riskLevel = request.riskAssessment.riskLevel;
@@ -1218,7 +1211,7 @@ export class ParlantBackupValidationService {
   // ===== HELPER METHODS (Simplified implementations) =====
 
   private determineBackupType(
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
   ): 'FULL' | 'INCREMENTAL' | 'PARTIAL' {
     if (request.riskLevel === RiskLevel.CRITICAL) return 'FULL';
     if (request.operationMetadata.tableName) return 'PARTIAL';
@@ -1237,7 +1230,7 @@ export class ParlantBackupValidationService {
     return this.configService.get<string>('DATABASE_NAME', 'aigent_db');
   }
 
-  private generateBackupPath(request: BackupCreationRequest): string {
+  private generateBackupPath(_request: BackupCreationRequest): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return `/backups/${request.operationMetadata.operationType}_${timestamp}.backup`;
   }
@@ -1289,7 +1282,7 @@ export class ParlantBackupValidationService {
   }
 
   private determineComplianceRequirements(
-    metadata: BackupValidationMetadata,
+    _metadata: BackupValidationMetadata,
     _request: BackupCreationRequest,
   ): ComplianceRequirement[] {
     const requirements: ComplianceRequirement[] = [];
@@ -1329,7 +1322,7 @@ export class ParlantBackupValidationService {
     );
   }
 
-  private hasAuditTrail(request: BackupCreationRequest): boolean {
+  private hasAuditTrail(_request: BackupCreationRequest): boolean {
     return (
       request.riskLevel === RiskLevel.HIGH ||
       request.riskLevel === RiskLevel.CRITICAL
@@ -1353,7 +1346,7 @@ export class ParlantBackupValidationService {
   }
 
   private generateValidationCacheKey(
-    request: ParlantBackupValidationRequest,
+    _request: ParlantBackupValidationRequest,
   ): string {
     return `backup_validation_${request.operationType}_${JSON.stringify({
       backupType: request.backupMetadata.backupType,
@@ -1363,7 +1356,7 @@ export class ParlantBackupValidationService {
     })}`;
   }
 
-  private shouldCacheResult(request: ParlantBackupValidationRequest): boolean {
+  private shouldCacheResult(_request: ParlantBackupValidationRequest): boolean {
     // Don't cache critical operations or restoration approvals
     return (
       request.operationType !== BackupOperationType.RESTORE &&
@@ -1624,7 +1617,7 @@ export class ParlantBackupValidationService {
   }
 
   private generateFinalRestorationPrompt(
-    request: BackupRestorationRequest,
+    _request: BackupRestorationRequest,
     risks: BackupRiskAssessment,
   ): string {
     return `Final confirmation: Restore backup ${request.backupId}? This operation will overwrite current data and may cause ${this.formatDuration(risks.businessImpact.estimatedDowntime)} downtime.`;

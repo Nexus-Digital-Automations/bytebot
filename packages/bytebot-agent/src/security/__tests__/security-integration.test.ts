@@ -21,7 +21,7 @@
  * @since Security Integration Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   UnauthorizedException,
@@ -506,7 +506,7 @@ describe('🔐 Security Integration & Performance Testing', () => {
       steps: Array<{ name: string; test: () => Promise<boolean> }>,
     ): Promise<SecurityWorkflowResult> {
       const startTime = Date.now();
-      const result: SecurityWorkflowResult = {
+      const _result: SecurityWorkflowResult = {
         success: true,
         steps: [],
         totalDuration: 0,
@@ -536,7 +536,7 @@ describe('🔐 Security Integration & Performance Testing', () => {
             name: step.name,
             passed: false,
             duration: stepDuration,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
           result.success = false;
         }
@@ -761,7 +761,7 @@ describe('🔐 Security Integration & Performance Testing', () => {
     async function measurePerformance<T>(
       operationName: string,
       operation: () => Promise<T>,
-    ): Promise<PerformanceMetrics & { result: T }> {
+    ): Promise<PerformanceMetrics & { _result: T }> {
       // Force garbage collection if available
       if (global.gc) {
         global.gc();

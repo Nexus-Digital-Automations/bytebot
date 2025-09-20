@@ -21,10 +21,8 @@ import {
   Post,
   Body,
   HttpCode,
-  HttpStatus,
   UseGuards,
   Request,
-  Logger,
   Get,
 } from '@nestjs/common';
 import {
@@ -38,10 +36,11 @@ import { RateLimitGuard, RateLimit } from '../common/guards/rate-limit.guard';
 import { RateLimitPreset } from '@bytebot/shared';
 import {
   ParlantCritical,
-  ParlantSecure,
   ParlantValidated,
-  SecurityLevel,
-} from '@bytebot/shared/dist/index-server';
+  ValidationMode,
+  ConversationContext,
+  ParlantValidationInterceptor,
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';
@@ -62,6 +61,7 @@ import type { User } from '@prisma/client';
 @ApiTags('Authentication')
 @Controller('auth')
 @UseGuards(RateLimitGuard)
+@UseInterceptors(ParlantValidationInterceptor)
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
@@ -81,6 +81,32 @@ export class AuthController {
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for authentication
   @ParlantCritical(
     'User login authentication with credential validation and JWT token generation',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'AUTHENTICATION',
+      complianceFlags: [
+        'AUTHENTICATION',
+        'CREDENTIAL_VALIDATION',
+        'JWT_GENERATION',
+      ],
+      timeout: 20000,
+      cacheable: false,
+      customRules: [
+        {
+          name: 'suspicious_login_detection',
+          condition: 'failed_attempts > 3',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 10,
+        },
+        {
+          name: 'new_device_validation',
+          condition: 'new_device === true',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 8,
+        },
+      ],
+    },
   )
   @ApiOperation({
     summary: 'User login',
@@ -110,13 +136,14 @@ export class AuthController {
       properties: {
         statusCode: { type: 'number', example: 401 },
         message: { type: 'string', example: 'Invalid credentials' },
-        error: { type: 'string', example: 'Unauthorized' },
+        _error: { type: 'string', example: 'Unauthorized' },
       },
     },
   })
   async login(
     @Body() loginDto: LoginDto,
-    @Request() request: AuthenticatedRequest,
+    @Request() _request: AuthenticatedRequest,
+    @ConversationContext() conversationContext?: any,
   ): Promise<TokenPair> {
     const operationId = `auth-login-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -127,6 +154,9 @@ export class AuthController {
       rememberMe: loginDto.rememberMe,
       ipAddress: this.getClientIpAddress(request),
       userAgent: request.headers['user-agent']?.substring(0, 100),
+      conversationId: conversationContext?.conversationId,
+      validationApproved: true,
+      securityLevel: conversationContext?.securityLevel,
     });
 
     try {
@@ -150,7 +180,7 @@ export class AuthController {
       this.logger.warn(`[${operationId}] Login failed`, {
         operationId,
         email: loginDto.email,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         loginTimeMs: loginTime,
         ipAddress: this.getClientIpAddress(request),
       });
@@ -172,6 +202,38 @@ export class AuthController {
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for registration
   @ParlantCritical(
     'User account registration with secure password hashing and user creation',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'USER_REGISTRATION',
+      complianceFlags: [
+        'USER_CREATION',
+        'PASSWORD_HASHING',
+        'ACCOUNT_CREATION',
+      ],
+      timeout: 25000,
+      cacheable: false,
+      customRules: [
+        {
+          name: 'email_domain_validation',
+          condition: 'email_domain in allowed_domains',
+          action: 'APPROVE',
+          priority: 5,
+        },
+        {
+          name: 'password_strength_validation',
+          condition: 'password_strength >= 8',
+          action: 'APPROVE',
+          priority: 7,
+        },
+        {
+          name: 'registration_rate_limiting',
+          condition: 'registrations_per_hour < 10',
+          action: 'APPROVE',
+          priority: 6,
+        },
+      ],
+    },
   )
   @ApiOperation({
     summary: 'User registration',
@@ -211,6 +273,7 @@ export class AuthController {
   })
   async register(
     @Body() registerDto: RegisterDto,
+    @ConversationContext() conversationContext?: any,
   ): Promise<{ message: string; user: Omit<User, 'passwordHash'> }> {
     const operationId = `auth-register-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -221,6 +284,9 @@ export class AuthController {
       username: registerDto.username,
       firstName: registerDto.firstName,
       lastName: registerDto.lastName,
+      conversationId: conversationContext?.conversationId,
+      validationApproved: true,
+      securityLevel: conversationContext?.securityLevel,
     });
 
     try {
@@ -245,7 +311,7 @@ export class AuthController {
         operationId,
         email: registerDto.email,
         username: registerDto.username,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         registrationTimeMs: registrationTime,
       });
 
@@ -264,9 +330,16 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPreset._AUTH) // Rate limiting for token refresh
-  @ParlantSecure(
-    'JWT token refresh operation with refresh token validation and new token generation',
-  )
+  @ParlantValidated({
+    intent:
+      'JWT token refresh operation with refresh token validation and new token generation',
+    securityLevel: SecurityLevel.HIGH,
+    validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'TOKEN_REFRESH',
+    complianceFlags: ['TOKEN_REFRESH', 'JWT_VALIDATION', 'SESSION_EXTENSION'],
+    timeout: 10000,
+    cacheable: false,
+  })
   @ApiOperation({
     summary: 'Refresh JWT tokens',
     description: 'Generate new access token using valid refresh token',
@@ -292,7 +365,10 @@ export class AuthController {
     status: 401,
     description: 'Invalid or expired refresh token',
   })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokenPair> {
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @ConversationContext() _conversationContext?: any,
+  ): Promise<TokenPair> {
     const operationId = `auth-refresh-controller-${Date.now()}`;
     const startTime = Date.now();
 
@@ -316,7 +392,7 @@ export class AuthController {
       const refreshTime = Date.now() - startTime;
       this.logger.warn(`[${operationId}] Token refresh failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         refreshTimeMs: refreshTime,
       });
 
@@ -337,9 +413,12 @@ export class AuthController {
   @ParlantValidated({
     intent:
       'User logout operation with refresh token invalidation and session cleanup',
-    securityLevel: SecurityLevel._MEDIUM,
-    description:
-      'Logout endpoint requiring moderate security validation for session cleanup',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'SESSION_TERMINATION',
+    complianceFlags: ['LOGOUT', 'SESSION_CLEANUP', 'TOKEN_INVALIDATION'],
+    timeout: 5000,
+    cacheable: true,
   })
   @ApiOperation({
     summary: 'User logout',
@@ -357,6 +436,7 @@ export class AuthController {
   })
   async logout(
     @Body() refreshTokenDto: RefreshTokenDto,
+    @ConversationContext() _conversationContext?: any,
   ): Promise<{ message: string }> {
     const operationId = `auth-logout-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -381,7 +461,7 @@ export class AuthController {
         `[${operationId}] Logout processing completed with issues`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           logoutTimeMs: logoutTime,
         },
       );
@@ -405,6 +485,39 @@ export class AuthController {
   @ApiBearerAuth()
   @ParlantCritical(
     'Password change operation with current password verification and secure password update',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'PASSWORD_CHANGE',
+      complianceFlags: [
+        'PASSWORD_CHANGE',
+        'SECURITY_CRITICAL',
+        'CREDENTIAL_UPDATE',
+      ],
+      requiredRoles: ['USER', 'OPERATOR', 'ADMIN'],
+      timeout: 20000,
+      cacheable: false,
+      customRules: [
+        {
+          name: 'current_password_validation',
+          condition: 'current_password_verified === true',
+          action: 'APPROVE',
+          priority: 10,
+        },
+        {
+          name: 'new_password_strength',
+          condition: 'new_password_strength >= 8',
+          action: 'APPROVE',
+          priority: 9,
+        },
+        {
+          name: 'password_reuse_prevention',
+          condition: 'password_not_recently_used === true',
+          action: 'APPROVE',
+          priority: 8,
+        },
+      ],
+    },
   )
   @ApiOperation({
     summary: 'Change user password',
@@ -431,6 +544,7 @@ export class AuthController {
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @CurrentUser() user: User,
+    @ConversationContext() conversationContext?: any,
   ): Promise<{ message: string }> {
     const operationId = `auth-change-password-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -439,6 +553,9 @@ export class AuthController {
       operationId,
       userId: user.id,
       username: user.username,
+      conversationId: conversationContext?.conversationId,
+      validationApproved: true,
+      securityLevel: conversationContext?.securityLevel,
     });
 
     try {
@@ -459,7 +576,7 @@ export class AuthController {
         operationId,
         userId: user.id,
         username: user.username,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         changeTimeMs: changeTime,
       });
 
@@ -480,9 +597,12 @@ export class AuthController {
   @ParlantValidated({
     intent:
       'Retrieve authenticated user profile information and account details',
-    securityLevel: SecurityLevel._MEDIUM,
-    description:
-      'Standard profile retrieval endpoint requiring user authentication',
+    securityLevel: SecurityLevel.LOW,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'PROFILE_ACCESS',
+    complianceFlags: ['PROFILE_ACCESS', 'USER_DATA'],
+    timeout: 3000,
+    cacheable: true,
   })
   @ApiOperation({
     summary: 'Get current user profile',
@@ -511,13 +631,18 @@ export class AuthController {
     status: 401,
     description: 'Authentication required',
   })
-  getProfile(@CurrentUser() user: User): Omit<User, 'passwordHash'> {
+  getProfile(
+    @CurrentUser() user: User,
+    @ConversationContext() conversationContext?: any,
+  ): Omit<User, 'passwordHash'> {
     const operationId = `auth-profile-controller-${Date.now()}`;
 
     this.logger.debug(`[${operationId}] Profile request received`, {
       operationId,
       userId: user.id,
       username: user.username,
+      conversationId: conversationContext?.conversationId,
+      validationApproved: true,
     });
 
     // Remove password hash from response for security using TypeScript omit
@@ -545,7 +670,7 @@ export class AuthController {
    * @returns string - Client IP address
    * @private
    */
-  private getClientIpAddress(request: AuthenticatedRequest): string {
+  private getClientIpAddress(_request: AuthenticatedRequest): string {
     return (
       (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       (request.headers['x-real-ip'] as string) ||

@@ -18,7 +18,7 @@
  * Performance: Template caching and conversation flow optimization
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 // Import types
@@ -127,7 +127,7 @@ export interface GeneratedConversation {
   readonly pattern: ConversationPattern;
   readonly generatedContent: ConversationMessage[];
   readonly flowState: ConversationFlowState;
-  readonly metadata: ConversationMetadata;
+  readonly _metadata: ConversationMetadata;
   readonly personalizations: ConversationPersonalization[];
 }
 
@@ -144,7 +144,7 @@ export interface ConversationMessage {
   readonly requiresResponse: boolean;
   readonly timeout?: number;
   readonly accessibility: AccessibilityFeatures;
-  readonly metadata: MessageMetadata;
+  readonly _metadata: MessageMetadata;
 }
 
 /**
@@ -310,7 +310,7 @@ export class ParlantConversationalPatternsService {
    * Generate conversation for database operation validation
    */
   async generateConversation(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<GeneratedConversation> {
     const conversationId = this.generateConversationId();
@@ -381,7 +381,7 @@ export class ParlantConversationalPatternsService {
       return conversation;
     } catch (error) {
       this.logger.error(`[${conversationId}] Conversation generation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         functionName: request.functionName,
         generationTime: Date.now() - startTime,
       });
@@ -467,7 +467,7 @@ export class ParlantConversationalPatternsService {
    * Generate confirmation request with options
    */
   async generateConfirmationRequest(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage> {
     const messageId = this.generateMessageId();
@@ -505,7 +505,7 @@ export class ParlantConversationalPatternsService {
         content,
         userPreferences,
       ),
-      metadata: {
+      _metadata: {
         estimatedReadingTime: this.estimateReadingTime(content),
         keywords: this.extractKeywords(content),
         sentiment: 'NEUTRAL',
@@ -521,7 +521,7 @@ export class ParlantConversationalPatternsService {
    * Select appropriate conversation pattern
    */
   private async selectConversationPattern(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationPattern> {
     const patternKey = this.generatePatternKey(
@@ -545,7 +545,7 @@ export class ParlantConversationalPatternsService {
    * Create conversation pattern for specific request
    */
   private async createConversationPattern(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationPattern> {
     const patternId = this.generatePatternId();
@@ -767,7 +767,7 @@ export class ParlantConversationalPatternsService {
    */
   private async generateConversationMessages(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage[]> {
     const messages: ConversationMessage[] = [];
@@ -824,7 +824,7 @@ export class ParlantConversationalPatternsService {
    */
   private async generateGreetingMessage(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage> {
     const greetingTemplates = {
@@ -854,7 +854,7 @@ export class ParlantConversationalPatternsService {
         template,
         userPreferences,
       ),
-      metadata: {
+      _metadata: {
         estimatedReadingTime: this.estimateReadingTime(template),
         keywords: ['greeting', 'validation', 'database'],
         sentiment: 'POSITIVE',
@@ -869,7 +869,7 @@ export class ParlantConversationalPatternsService {
    */
   private async generateContextExplanationMessage(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage> {
     const explanation = await this.generateOperationExplanation(
@@ -891,7 +891,7 @@ export class ParlantConversationalPatternsService {
         explanation,
         userPreferences,
       ),
-      metadata: {
+      _metadata: {
         estimatedReadingTime: this.estimateReadingTime(explanation),
         keywords: this.extractKeywords(explanation),
         sentiment: 'NEUTRAL',
@@ -906,7 +906,7 @@ export class ParlantConversationalPatternsService {
    */
   private async generateRiskAssessmentMessage(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage> {
     const riskExplanation = await this.generateRiskAssessmentExplanation(
@@ -927,7 +927,7 @@ export class ParlantConversationalPatternsService {
         riskExplanation,
         userPreferences,
       ),
-      metadata: {
+      _metadata: {
         estimatedReadingTime: this.estimateReadingTime(riskExplanation),
         keywords: this.extractKeywords(riskExplanation),
         sentiment:
@@ -945,7 +945,7 @@ export class ParlantConversationalPatternsService {
    */
   private async generateAlternativeSuggestionsMessage(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationMessage> {
     const suggestions = this.generateAlternativeSuggestions(request);
@@ -967,7 +967,7 @@ export class ParlantConversationalPatternsService {
         suggestionsText,
         userPreferences,
       ),
-      metadata: {
+      _metadata: {
         estimatedReadingTime: this.estimateReadingTime(suggestionsText),
         keywords: ['alternatives', 'options', 'suggestions'],
         sentiment: 'POSITIVE',
@@ -1130,7 +1130,7 @@ export class ParlantConversationalPatternsService {
    * Generate alternative suggestions based on request
    */
   private generateAlternativeSuggestions(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): string[] {
     const suggestions: string[] = [];
 
@@ -1192,7 +1192,7 @@ export class ParlantConversationalPatternsService {
    */
   private generateConversationMetadata(
     messages: ConversationMessage[],
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): ConversationMetadata {
     const totalReadingTime = messages.reduce(
       (sum, msg) => sum + msg.metadata.estimatedReadingTime,
@@ -1216,7 +1216,7 @@ export class ParlantConversationalPatternsService {
    */
   private async applyPersonalizations(
     messages: ConversationMessage[],
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
     userPreferences: UserValidationPreferences,
   ): Promise<ConversationPersonalization[]> {
     const personalizations: ConversationPersonalization[] = [];
@@ -1381,7 +1381,7 @@ export class ParlantConversationalPatternsService {
 
   private calculateComplexityScore(
     messages: ConversationMessage[],
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): number {
     let score = 0;
 
@@ -1413,7 +1413,7 @@ export class ParlantConversationalPatternsService {
   }
 
   private extractComplianceFlags(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): string[] {
     const flags = [];
 
@@ -1469,9 +1469,9 @@ export class ParlantConversationalPatternsService {
     // Simplified template selection
     const templates = {
       READ: 'This operation will retrieve {{queryDescription}} from the database.',
-      WRITE: 'This operation will modify data: {{queryDescription}}.',
+      WRITE: 'This operation will modify _data: {{queryDescription}}.',
       DELETE:
-        'This operation will permanently delete data: {{queryDescription}}.',
+        'This operation will permanently delete _data: {{queryDescription}}.',
     };
 
     return (

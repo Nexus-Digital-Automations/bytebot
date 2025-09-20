@@ -6,7 +6,7 @@
  * @version 2.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import {
   TracingService,

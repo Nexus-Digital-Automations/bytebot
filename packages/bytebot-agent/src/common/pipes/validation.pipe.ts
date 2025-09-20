@@ -15,7 +15,6 @@ import {
   Injectable,
   ArgumentMetadata,
   BadRequestException,
-  Logger,
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { validate, ValidationError } from 'class-validator';
@@ -91,7 +90,7 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
 @Injectable()
 export class GlobalValidationPipe implements PipeTransform<any> {
   private readonly logger = new Logger(GlobalValidationPipe.name);
-  private readonly options: GlobalValidationPipeOptions;
+  private readonly _options: GlobalValidationPipeOptions;
 
   constructor(options?: Partial<GlobalValidationPipeOptions>) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
@@ -111,7 +110,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata from NestJS
    * @returns Validated and transformed value
    */
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  async transform(value: any, _metadata: ArgumentMetadata): Promise<any> {
     const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -196,7 +195,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         operationId,
         type: metadata.type,
         metatype: metadata.metatype?.name,
-        error: errorMessage,
+        _error: errorMessage,
         processingTimeMs: processingTime,
       });
 
@@ -296,7 +295,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           : 'Unknown payload validation error';
       this.logger.warn(`[${operationId}] Could not validate payload size`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
       });
     }
   }
@@ -412,7 +411,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata
    * @returns True if validation should be performed
    */
-  private shouldValidate(metadata: ArgumentMetadata): boolean {
+  private shouldValidate(_metadata: ArgumentMetadata): boolean {
     const { type, metatype } = metadata;
 
     // Skip validation for certain types
@@ -497,9 +496,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    error: any,
+    _error: any,
     value: any,
-    metadata: ArgumentMetadata,
+    _metadata: ArgumentMetadata,
   ): void {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;

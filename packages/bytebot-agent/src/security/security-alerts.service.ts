@@ -15,9 +15,9 @@
  * @since Phase 1: Bytebot API Security Enhancement
  */
 
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   SecuritySeverity,
@@ -104,7 +104,7 @@ export interface SecurityAlert {
   status: AlertStatus;
 
   /** Alert metadata */
-  metadata: Record<string, any>;
+  _metadata: Record<string, any>;
 
   /** Delivery attempts */
   deliveryAttempts: number;
@@ -278,7 +278,7 @@ export class SecurityAlertsService implements OnModuleInit {
         `[${operationId}] Security Alerts Service initialization failed`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           initTimeMs: initTime,
         },
@@ -291,7 +291,7 @@ export class SecurityAlertsService implements OnModuleInit {
    * Process security event and generate alerts
    */
   @OnEvent('security.event.processed')
-  handleSecurityEvent(event: SecurityEvent): void {
+  handleSecurityEvent(_event: SecurityEvent): void {
     if (!this.securityConfig.alerts.enabled) {
       return;
     }
@@ -361,7 +361,7 @@ export class SecurityAlertsService implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to process security alert`, {
         operationId,
         eventId: event.eventId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
     }
@@ -395,7 +395,7 @@ export class SecurityAlertsService implements OnModuleInit {
         timestamp: new Date(),
         channels: this.getAllChannelsForSeverity(incident.severity),
         status: AlertStatus.PENDING,
-        metadata: {
+        _metadata: {
           incidentId: incident.incidentId,
           eventIds: incident.eventIds,
           incidentType: 'security_incident',
@@ -426,7 +426,7 @@ export class SecurityAlertsService implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to process incident alert`, {
         operationId,
         incidentId: incident.incidentId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -590,7 +590,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Find existing alert to prevent duplication
    */
-  private findExistingAlert(event: SecurityEvent): SecurityAlert | null {
+  private findExistingAlert(_event: SecurityEvent): SecurityAlert | null {
     const recentAlerts = Array.from(this.activeAlerts.values()).filter(
       (alert) => {
         const timeDiff = Date.now() - alert.timestamp.getTime();
@@ -612,7 +612,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Generate alert from security event
    */
-  private generateAlert(event: SecurityEvent): SecurityAlert {
+  private generateAlert(_event: SecurityEvent): SecurityAlert {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     // Find matching template
@@ -644,7 +644,7 @@ export class SecurityAlertsService implements OnModuleInit {
       timestamp: new Date(),
       channels: this.getAllChannelsForSeverity(event.severity),
       status: AlertStatus.PENDING,
-      metadata: {
+      _metadata: {
         eventType: event.type,
         sourceIp: event.sourceIp,
         userId: event.userId,
@@ -701,7 +701,7 @@ export class SecurityAlertsService implements OnModuleInit {
             operationId,
             alertId: alert.alertId,
             channel,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           },
         );
         this.deliveryMetrics.deliveryFailures++;
@@ -796,7 +796,7 @@ export class SecurityAlertsService implements OnModuleInit {
       eventId: alert.eventId,
       severity: alert.severity,
       description: alert.description,
-      metadata: alert.metadata,
+      _metadata: alert.metadata,
       emergency: alert.emergency,
       tags: alert.tags,
     };
@@ -852,7 +852,7 @@ export class SecurityAlertsService implements OnModuleInit {
         title: alert.title,
         description: alert.description,
         timestamp: alert.timestamp,
-        metadata: alert.metadata,
+        _metadata: alert.metadata,
       },
     });
   }
@@ -926,7 +926,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Render alert template with event data
    */
-  private renderTemplate(template: string, event: SecurityEvent): string {
+  private renderTemplate(template: string, _event: SecurityEvent): string {
     let rendered = template;
 
     // Replace event fields
@@ -1072,7 +1072,7 @@ export class SecurityAlertsService implements OnModuleInit {
       });
     } catch (error) {
       this.logger.error('Alert cleanup failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }

@@ -6,7 +6,7 @@
  * form automation capabilities with comprehensive error handling and validation.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   FillFormDto,
@@ -139,7 +139,7 @@ export class BrowserFormService {
           fieldResults: [],
           timestamp,
           durationMs: 0,
-          error: {
+          _error: {
             code: 'SESSION_NOT_FOUND',
             message: `Browser session ${sessionId} not found`,
           },
@@ -162,7 +162,7 @@ export class BrowserFormService {
           fieldResults: [],
           timestamp,
           durationMs: Date.now() - startTime,
-          error: {
+          _error: {
             code: 'PAGE_STATE_ERROR',
             message: 'Could not retrieve current page state',
           },
@@ -181,7 +181,7 @@ export class BrowserFormService {
           fieldResults: [],
           timestamp,
           durationMs: Date.now() - startTime,
-          error: {
+          _error: {
             code: 'NO_FORMS_FOUND',
             message: 'No forms found on the current page',
           },
@@ -200,7 +200,7 @@ export class BrowserFormService {
           fieldResults: [],
           timestamp,
           durationMs: Date.now() - startTime,
-          error: {
+          _error: {
             code: 'TARGET_FORM_NOT_FOUND',
             message: 'Could not locate target form using provided selectors',
           },
@@ -252,7 +252,7 @@ export class BrowserFormService {
           field: result.field,
           valid: result.validationPassed,
           value: result.value,
-          error: result.error,
+          _error: result.error,
           found: result.success,
           selector:
             result.elementIndex !== undefined
@@ -271,7 +271,7 @@ export class BrowserFormService {
           requiredFields: targetForm.requiredFields,
           fieldTypes: targetForm.fieldTypes,
         },
-        error:
+        _error:
           !success && failedFields.length > 0
             ? {
                 code: 'FIELD_FILL_ERRORS',
@@ -283,7 +283,7 @@ export class BrowserFormService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Form filling error: ${errorMsg}`, errorStack);
+      this.logger.error(`Form filling _error: ${errorMsg}`, errorStack);
 
       return {
         success: false,
@@ -294,7 +294,7 @@ export class BrowserFormService {
         fieldResults: [],
         timestamp,
         durationMs: Date.now() - startTime,
-        error: {
+        _error: {
           code: 'FORM_FILL_ERROR',
           message: errorMsg,
         },
@@ -355,7 +355,7 @@ export class BrowserFormService {
           fieldResults: [],
           timestamp,
           durationMs: Date.now() - startTime,
-          error: {
+          _error: {
             code: 'SUBMISSION_FAILED',
             message: submitResult.error ?? 'Form submission failed',
           },
@@ -398,7 +398,7 @@ export class BrowserFormService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Form submission error: ${errorMsg}`, errorStack);
+      this.logger.error(`Form submission _error: ${errorMsg}`, errorStack);
 
       return {
         success: false,
@@ -409,7 +409,7 @@ export class BrowserFormService {
         fieldResults: [],
         timestamp,
         durationMs: Date.now() - startTime,
-        error: {
+        _error: {
           code: 'SUBMISSION_ERROR',
           message: errorMsg,
         },
@@ -523,7 +523,7 @@ export class BrowserFormService {
       placeholder,
       required,
       validation: this.extractValidationRules(element),
-      options: this.extractFieldOptions(element),
+      _options: this.extractFieldOptions(element),
     };
   }
 
@@ -630,7 +630,7 @@ export class BrowserFormService {
     sessionId: string,
     form: FormInfo,
     fieldsToFill: FormField[],
-    options: {
+    _options: {
       clearFields: boolean;
       skipMissingFields: boolean;
       fieldDelayMs: number;
@@ -663,7 +663,7 @@ export class BrowserFormService {
     sessionId: string,
     form: FormInfo,
     fieldData: FormField,
-    options: FormFieldFillOptions,
+    _options: FormFieldFillOptions,
   ): Promise<FieldFillResult> {
     try {
       // Find matching form field
@@ -674,7 +674,7 @@ export class BrowserFormService {
             field: fieldData.name,
             success: true,
             value: '',
-            error: 'Field not found but skipped',
+            _error: 'Field not found but skipped',
             validationPassed: false,
           };
         }
@@ -683,7 +683,7 @@ export class BrowserFormService {
           field: fieldData.name,
           success: false,
           value: '',
-          error: 'Field not found on form',
+          _error: 'Field not found on form',
           validationPassed: false,
         };
       }
@@ -696,7 +696,7 @@ export class BrowserFormService {
             field: fieldData.name,
             success: false,
             value: fieldData.value,
-            error: validationResult.error,
+            _error: validationResult.error,
             elementIndex: formField.element.index,
             validationPassed: false,
           };
@@ -718,7 +718,7 @@ export class BrowserFormService {
         field: fieldData.name,
         success: false,
         value: fieldData.value,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         validationPassed: false,
       };
     }
@@ -761,7 +761,7 @@ export class BrowserFormService {
     formField: FormFieldInfo,
   ): FormValidationResult {
     if (formField.required && !fieldData.value) {
-      return { valid: false, error: 'Required field cannot be empty' };
+      return { valid: false, _error: 'Required field cannot be empty' };
     }
 
     if (formField.validation) {
@@ -772,7 +772,7 @@ export class BrowserFormService {
         if (!regex.test(fieldData.value)) {
           return {
             valid: false,
-            error: 'Value does not match required pattern',
+            _error: 'Value does not match required pattern',
           };
         }
       }
@@ -783,7 +783,7 @@ export class BrowserFormService {
       ) {
         return {
           valid: false,
-          error: `Value too short (minimum ${validation.minLength} characters)`,
+          _error: `Value too short (minimum ${validation.minLength} characters)`,
         };
       }
 
@@ -793,7 +793,7 @@ export class BrowserFormService {
       ) {
         return {
           valid: false,
-          error: `Value too long (maximum ${validation.maxLength} characters)`,
+          _error: `Value too long (maximum ${validation.maxLength} characters)`,
         };
       }
 
@@ -803,7 +803,7 @@ export class BrowserFormService {
       ) {
         return {
           valid: false,
-          error: `Value too small (minimum ${validation.min})`,
+          _error: `Value too small (minimum ${validation.min})`,
         };
       }
 
@@ -813,7 +813,7 @@ export class BrowserFormService {
       ) {
         return {
           valid: false,
-          error: `Value too large (maximum ${validation.max})`,
+          _error: `Value too large (maximum ${validation.max})`,
         };
       }
     }
@@ -825,7 +825,7 @@ export class BrowserFormService {
     sessionId: string,
     formField: FormFieldInfo,
     fieldData: FormField,
-    options: FormFieldFillOptions,
+    _options: FormFieldFillOptions,
   ): Promise<void> {
     const elementIndex = formField.element.index;
 
@@ -887,7 +887,7 @@ export class BrowserFormService {
       // Find submit button
       const pageState = await this.domService.getPageState(sessionId);
       if (!pageState) {
-        return { success: false, error: 'Could not get page state' };
+        return { success: false, _error: 'Could not get page state' };
       }
 
       let submitButton: PageElement | undefined;
@@ -906,7 +906,7 @@ export class BrowserFormService {
       }
 
       if (!submitButton) {
-        return { success: false, error: 'Submit button not found' };
+        return { success: false, _error: 'Submit button not found' };
       }
 
       // Click submit button
@@ -917,11 +917,11 @@ export class BrowserFormService {
 
       return {
         success: clickResult.success,
-        error: clickResult.error?.message,
+        _error: clickResult.error?.message,
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      return { success: false, error: errorMsg };
+      return { success: false, _error: errorMsg };
     }
   }
 
@@ -938,11 +938,11 @@ export class BrowserFormService {
 
       return {
         success: Boolean(result?.success),
-        error: typeof result?.error === 'string' ? result.error : undefined,
+        _error: typeof result?.error === 'string' ? result._error : undefined,
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      return { success: false, error: errorMsg };
+      return { success: false, _error: errorMsg };
     }
   }
 
@@ -960,7 +960,7 @@ export class BrowserFormService {
             form.submit();
             return { success: true };
           }
-          return { success: false, error: 'Form not found' };
+          return { success: false, _error: 'Form not found' };
         `,
       });
 
@@ -972,15 +972,15 @@ export class BrowserFormService {
 
       return {
         success: result.success && Boolean(resultData?.success),
-        error:
+        _error:
           result.error ??
           (typeof resultData?.error === 'string'
-            ? resultData.error
+            ? resultData._error
             : undefined),
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      return { success: false, error: errorMsg };
+      return { success: false, _error: errorMsg };
     }
   }
 

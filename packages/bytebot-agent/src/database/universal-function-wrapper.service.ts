@@ -16,7 +16,7 @@
  * - Transaction-aware wrapping for complex database operations
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { DatabaseService, QueryPerformanceMetrics } from './database.service';
@@ -86,7 +86,7 @@ export interface FunctionExecutionResult<T = unknown> {
   readonly validationTime: number;
   readonly cacheHit: boolean;
   readonly bypassUsed: boolean;
-  readonly metadata: {
+  readonly _metadata: {
     readonly functionName: string;
     readonly operationType: string;
     readonly riskLevel: RiskLevel;
@@ -134,7 +134,7 @@ export interface FunctionWrapperConfig {
  * Wrapped function signature for type safety
  */
 export type WrappedFunction<TArgs extends unknown[], TResult> = (
-  context: ParlantUserContext,
+  _context: ParlantUserContext,
   ...args: TArgs
 ) => Promise<FunctionExecutionResult<TResult>>;
 
@@ -142,7 +142,7 @@ export type WrappedFunction<TArgs extends unknown[], TResult> = (
  * Function registry entry
  */
 export interface FunctionRegistryEntry {
-  readonly metadata: UniversalFunctionMetadata;
+  readonly _metadata: UniversalFunctionMetadata;
   readonly originalFunction: (...args: unknown[]) => Promise<unknown>;
   readonly wrappedFunction: WrappedFunction<unknown[], unknown>;
   readonly registeredAt: Date;
@@ -218,8 +218,8 @@ export class UniversalDatabaseFunctionWrapperService {
   async wrapFunction<TArgs extends unknown[], TResult>(
     functionName: string,
     originalFunction: (...args: TArgs) => Promise<TResult>,
-    metadata: UniversalFunctionMetadata,
-    context: ParlantUserContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: ParlantUserContext,
     ...args: TArgs
   ): Promise<FunctionExecutionResult<TResult>> {
     const functionId = this.generateFunctionId();
@@ -333,7 +333,7 @@ export class UniversalDatabaseFunctionWrapperService {
 
       this.logger.error(`[${functionId}] Function execution failed`, {
         functionName,
-        error: errorMessage,
+        _error: errorMessage,
         executionTime,
         userId: context.userId,
       });
@@ -346,7 +346,7 @@ export class UniversalDatabaseFunctionWrapperService {
       const errorResult = this.createErrorResult(
         functionId,
         metadata,
-        error instanceof Error ? error : new Error(errorMessage),
+        error instanceof Error ? _error : new Error(errorMessage),
         executionTime,
         0, // validation time
         false, // cache hit
@@ -371,7 +371,7 @@ export class UniversalDatabaseFunctionWrapperService {
   registerFunction<TArgs extends unknown[], TResult>(
     functionName: string,
     originalFunction: (...args: TArgs) => Promise<TResult>,
-    metadata: UniversalFunctionMetadata,
+    _metadata: UniversalFunctionMetadata,
   ): WrappedFunction<TArgs, TResult> {
     this.logger.log(`Registering function for wrapping: ${functionName}`, {
       category: metadata.category,
@@ -382,7 +382,7 @@ export class UniversalDatabaseFunctionWrapperService {
 
     // Create wrapped function
     const wrappedFunction: WrappedFunction<TArgs, TResult> = async (
-      context: ParlantUserContext,
+      _context: ParlantUserContext,
       ...args: TArgs
     ) => {
       return this.wrapFunction(
@@ -784,7 +784,7 @@ export class UniversalDatabaseFunctionWrapperService {
     // 2. Query validation
     this.registerFunction(
       'validateQuery',
-      (query: string, context: Record<string, unknown>) =>
+      (query: string, _context: Record<string, unknown>) =>
         this.validateQuerySyntax(query, context),
       {
         functionName: 'validateQuery',
@@ -797,7 +797,7 @@ export class UniversalDatabaseFunctionWrapperService {
         cacheable: true,
         requiresBackup: false,
         timeoutMs: 5000,
-        parameters: { query: 'string', context: 'object' },
+        parameters: { query: 'string', _context: 'object' },
         tags: ['validation', 'syntax', 'safety'],
       },
     );
@@ -834,7 +834,7 @@ export class UniversalDatabaseFunctionWrapperService {
       'coordinateTransaction',
       (
         operations: ((...args: unknown[]) => Promise<unknown>)[],
-        options: Record<string, unknown>,
+        _options: Record<string, unknown>,
       ) => this.coordinateComplexTransaction(operations, options),
       {
         functionName: 'coordinateTransaction',
@@ -848,7 +848,7 @@ export class UniversalDatabaseFunctionWrapperService {
         requiresBackup: true,
         timeoutMs: 120000,
         retryAttempts: 1,
-        parameters: { operations: 'function[]', options: 'object' },
+        parameters: { operations: 'function[]', _options: 'object' },
         tags: ['transaction', 'coordination', 'complex', 'atomic'],
       },
     );
@@ -934,7 +934,7 @@ export class UniversalDatabaseFunctionWrapperService {
     // 1. Create database backup
     this.registerFunction(
       'createDatabaseBackup',
-      (options: Record<string, unknown>) => this.createDatabaseBackup(options),
+      (_options: Record<string, unknown>) => this.createDatabaseBackup(options),
       {
         functionName: 'createDatabaseBackup',
         packageName: 'backup-service',
@@ -946,7 +946,7 @@ export class UniversalDatabaseFunctionWrapperService {
         cacheable: false,
         requiresBackup: false,
         timeoutMs: 300000, // 5 minutes
-        parameters: { options: 'object' },
+        parameters: { _options: 'object' },
         tags: ['backup', 'create', 'full'],
       },
     );
@@ -954,7 +954,7 @@ export class UniversalDatabaseFunctionWrapperService {
     // 2. Restore database backup
     this.registerFunction(
       'restoreDatabaseBackup',
-      (backupId: string, options: Record<string, unknown>) =>
+      (backupId: string, _options: Record<string, unknown>) =>
         this.restoreDatabaseBackup(backupId, options),
       {
         functionName: 'restoreDatabaseBackup',
@@ -968,7 +968,7 @@ export class UniversalDatabaseFunctionWrapperService {
         requiresBackup: true,
         timeoutMs: 600000, // 10 minutes
         retryAttempts: 1,
-        parameters: { backupId: 'string', options: 'object' },
+        parameters: { backupId: 'string', _options: 'object' },
         tags: ['backup', 'restore', 'critical'],
       },
     );
@@ -981,7 +981,7 @@ export class UniversalDatabaseFunctionWrapperService {
    */
   private createExecutionContext(
     functionId: string,
-    metadata: UniversalFunctionMetadata,
+    _metadata: UniversalFunctionMetadata,
     userContext: ParlantUserContext,
   ): FunctionExecutionContext {
     return {
@@ -1003,7 +1003,7 @@ export class UniversalDatabaseFunctionWrapperService {
   /**
    * Generate safeguards based on function metadata
    */
-  private generateSafeguards(metadata: UniversalFunctionMetadata): string[] {
+  private generateSafeguards(_metadata: UniversalFunctionMetadata): string[] {
     const safeguards: string[] = [
       'execution_monitoring',
       'performance_tracking',
@@ -1032,7 +1032,7 @@ export class UniversalDatabaseFunctionWrapperService {
    */
   private async checkConcurrencyLimits(
     functionId: string,
-    metadata: UniversalFunctionMetadata,
+    _metadata: UniversalFunctionMetadata,
   ): Promise<void> {
     const activeCount = this.activeExecutions.size;
 
@@ -1056,8 +1056,8 @@ export class UniversalDatabaseFunctionWrapperService {
    */
   private async performPreExecutionValidation(
     functionName: string,
-    metadata: UniversalFunctionMetadata,
-    context: ParlantUserContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: ParlantUserContext,
     args: unknown[],
     executionContext: FunctionExecutionContext,
   ): Promise<{ validationTime: number; bypassUsed: boolean }> {
@@ -1123,7 +1123,7 @@ export class UniversalDatabaseFunctionWrapperService {
         `[${executionContext.functionId}] Pre-execution validation failed`,
         {
           functionName,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           validationTime,
           userId: context.userId,
         },
@@ -1137,8 +1137,8 @@ export class UniversalDatabaseFunctionWrapperService {
    * Check if emergency bypass should be used
    */
   private checkEmergencyBypass(
-    metadata: UniversalFunctionMetadata,
-    context: ParlantUserContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: ParlantUserContext,
   ): string | null {
     if (!this.config.emergencyBypass.enabled) {
       return null;
@@ -1174,7 +1174,7 @@ export class UniversalDatabaseFunctionWrapperService {
    */
   private async executeMonitoredFunction<T>(
     originalFunction: (...args: unknown[]) => Promise<T>,
-    metadata: UniversalFunctionMetadata,
+    _metadata: UniversalFunctionMetadata,
     executionContext: FunctionExecutionContext,
     ...args: unknown[]
   ): Promise<T> {
@@ -1188,7 +1188,7 @@ export class UniversalDatabaseFunctionWrapperService {
     });
 
     try {
-      let result: T;
+      let _result: T;
 
       // Apply timeout wrapper
       if (executionContext.timeoutMs) {
@@ -1228,7 +1228,7 @@ export class UniversalDatabaseFunctionWrapperService {
 
       this.logger.error(`[${functionId}] Function execution failed`, {
         functionName: metadata.functionName,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         executionTime,
       });
 
@@ -1349,7 +1349,7 @@ export class UniversalDatabaseFunctionWrapperService {
 
   private async validateQuerySyntax(
     query: string,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<unknown> {
     // TODO: Implement query syntax validation
     return { valid: true, query, context };
@@ -1362,11 +1362,11 @@ export class UniversalDatabaseFunctionWrapperService {
 
   private async coordinateComplexTransaction(
     operations: ((...args: unknown[]) => Promise<unknown>)[],
-    options: Record<string, unknown>,
+    _options: Record<string, unknown>,
   ): Promise<unknown> {
     // TODO: Implement complex transaction coordination
     return {
-      result: 'Transaction coordination not yet implemented',
+      _result: 'Transaction coordination not yet implemented',
       operations: operations.length,
       options,
     };
@@ -1401,7 +1401,7 @@ export class UniversalDatabaseFunctionWrapperService {
   }
 
   private async createDatabaseBackup(
-    options: Record<string, unknown>,
+    _options: Record<string, unknown>,
   ): Promise<unknown> {
     // TODO: Implement database backup creation
     return { backup: 'Database backup creation not yet implemented', options };
@@ -1409,7 +1409,7 @@ export class UniversalDatabaseFunctionWrapperService {
 
   private async restoreDatabaseBackup(
     backupId: string,
-    options: Record<string, unknown>,
+    _options: Record<string, unknown>,
   ): Promise<unknown> {
     // TODO: Implement database backup restoration
     return {
@@ -1437,7 +1437,9 @@ export class UniversalDatabaseFunctionWrapperService {
     return undefined;
   }
 
-  private isDestructiveOperation(metadata: UniversalFunctionMetadata): boolean {
+  private isDestructiveOperation(
+    _metadata: UniversalFunctionMetadata,
+  ): boolean {
     return (
       ['DELETE', 'WRITE', 'MIGRATION'].includes(metadata.operationType) ||
       metadata.riskLevel === RiskLevel.HIGH ||
@@ -1472,8 +1474,8 @@ export class UniversalDatabaseFunctionWrapperService {
 
   private async auditEmergencyBypass(
     functionName: string,
-    metadata: UniversalFunctionMetadata,
-    context: ParlantUserContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: ParlantUserContext,
     reason: string,
   ): Promise<void> {
     // TODO: Implement emergency bypass auditing
@@ -1488,7 +1490,7 @@ export class UniversalDatabaseFunctionWrapperService {
   private createSuccessResult<T>(
     functionId: string,
     _metadata: UniversalFunctionMetadata,
-    result: T,
+    _result: T,
     executionTime: number,
     validationTime: number,
     cacheHit: boolean,
@@ -1504,7 +1506,7 @@ export class UniversalDatabaseFunctionWrapperService {
       validationTime,
       cacheHit,
       bypassUsed,
-      metadata: {
+      _metadata: {
         functionName: metadata.functionName,
         operationType: metadata.operationType,
         riskLevel: metadata.riskLevel,
@@ -1521,8 +1523,8 @@ export class UniversalDatabaseFunctionWrapperService {
 
   private createErrorResult<T>(
     functionId: string,
-    metadata: UniversalFunctionMetadata,
-    error: Error,
+    _metadata: UniversalFunctionMetadata,
+    _error: Error,
     executionTime: number,
     validationTime: number,
     cacheHit: boolean,
@@ -1538,7 +1540,7 @@ export class UniversalDatabaseFunctionWrapperService {
       validationTime,
       cacheHit,
       bypassUsed,
-      metadata: {
+      _metadata: {
         functionName: metadata.functionName,
         operationType: metadata.operationType,
         riskLevel: metadata.riskLevel,
@@ -1547,7 +1549,7 @@ export class UniversalDatabaseFunctionWrapperService {
           duration: executionTime,
           timestamp: new Date(),
           success: false,
-          error: error.message,
+          _error: error.message,
         },
         auditTrail: {} as DatabaseParlantAuditEntry, // TODO: Create proper audit entry
       },

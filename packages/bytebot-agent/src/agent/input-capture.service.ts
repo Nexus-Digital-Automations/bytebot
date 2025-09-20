@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { io, Socket } from 'socket.io-client';
+import { Injectable } from '@nestjs/common';
+import { io } from 'socket.io-client';
 import { randomUUID } from 'crypto';
 import {
   convertClickMouseActionToToolUseBlock,
@@ -170,7 +170,7 @@ export class InputCaptureService {
             {
               type: MessageContentType._Image,
               source: {
-                data: shot.image,
+                _data: shot.image,
                 media_type: 'image/png',
                 type: 'base64',
               },

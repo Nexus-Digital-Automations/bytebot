@@ -22,10 +22,8 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Logger,
   ServiceUnavailableException,
   UnauthorizedException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -180,7 +178,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Main canActivate method with circuit breaker logic
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(_context: ExecutionContext): Promise<boolean> {
     const operationId = `circuit-breaker-auth-${Date.now()}`;
     const startTime = Date.now();
 
@@ -254,7 +252,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private async attemptAuthentication(
     operationId: string,
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
   ): Promise<AuthAttemptResult> {
     const startTime = Date.now();
 
@@ -333,7 +331,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       return {
         success: false,
         responseTime,
-        error: error as Error,
+        _error: error as Error,
       };
     }
   }
@@ -343,7 +341,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private attemptFallbackAuth(
     operationId: string,
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
   ): AuthAttemptResult {
     this.logger.warn(`[${operationId}] Attempting fallback authentication`, {
       operationId,
@@ -380,13 +378,13 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     } catch (error) {
       this.logger.error(`[${operationId}] Fallback authentication failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       return {
         success: false,
         responseTime: 0,
-        error: error as Error,
+        _error: error as Error,
       };
     }
   }
@@ -396,7 +394,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private handleOpenCircuit(
     operationId: string,
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
   ): void {
     const now = new Date();
     const timeSinceStateChange =
@@ -445,7 +443,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private recordSuccess(
     operationId: string,
-    result: AuthAttemptResult,
+    _result: AuthAttemptResult,
     ipAddress: string,
     userAgent?: string,
   ): void {
@@ -489,7 +487,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private recordFailure(
     operationId: string,
-    error: Error,
+    _error: Error,
     ipAddress: string,
     userAgent?: string,
   ): void {
@@ -521,7 +519,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       operationId,
       state: this.metrics.state,
       failureCount: this.metrics.failureCount,
-      error: error.message,
+      _error: error.message,
     });
   }
 
@@ -577,7 +575,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Utility methods
    */
-  private shouldAttemptFallback(error: Error): boolean {
+  private shouldAttemptFallback(_error: Error): boolean {
     // Determine if error is suitable for fallback attempt
     const fallbackableErrors = [
       'JWT verification timeout',
@@ -604,7 +602,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       this.responseTimeHistory.length;
   }
 
-  private getClientIpAddress(request: ExtendedRequest): string {
+  private getClientIpAddress(_request: ExtendedRequest): string {
     return (
       request.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
       request.headers['x-real-ip'] ||

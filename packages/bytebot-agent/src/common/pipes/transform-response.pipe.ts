@@ -6,7 +6,6 @@
  */
 
 import { Injectable, PipeTransform, ArgumentMetadata } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
 
 export interface StandardizedResponse<T = any> {
   success: boolean;
@@ -25,7 +24,7 @@ export interface StandardizedResponse<T = any> {
 export class TransformResponsePipe implements PipeTransform {
   private readonly logger = new Logger(TransformResponsePipe.name);
 
-  transform(value: any, metadata: ArgumentMetadata): any {
+  transform(value: any, _metadata: ArgumentMetadata): any {
     // Skip transformation for certain types
     if (metadata.type !== 'body' && metadata.type !== 'query') {
       return value;
@@ -36,7 +35,7 @@ export class TransformResponsePipe implements PipeTransform {
       return value;
     }
 
-    this.logger.debug(`Transforming response data: ${metadata.type}`);
+    this.logger.debug(`Transforming response _data: ${metadata.type}`);
 
     return value; // Return as-is for now, transformation happens in interceptor
   }

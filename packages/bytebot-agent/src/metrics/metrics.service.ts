@@ -19,7 +19,7 @@
  * @version 2.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   register,
   collectDefaultMetrics,
@@ -30,7 +30,7 @@ import {
   // Summary, // unused for now
 } from 'prom-client';
 import { v4 as uuidv4 } from 'uuid';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { ConfigService } from '@nestjs/config';
 
 /**
@@ -539,7 +539,7 @@ export class MetricsService {
       this.logger.error(
         `[${operationId}] Failed to collect Prometheus metrics: ${errorMessage}`,
         {
-          error: errorMessage,
+          _error: errorMessage,
           stack: error instanceof Error ? error.stack : undefined,
         },
       );
@@ -923,7 +923,7 @@ export class MetricsService {
   recordAuthorizationCheck(
     resource: string,
     action: string,
-    result: 'allowed' | 'denied',
+    _result: 'allowed' | 'denied',
     duration: number,
   ): void {
     const durationSeconds = duration / 1000;
@@ -960,7 +960,7 @@ export class MetricsService {
   recordPrivilegeEscalation(
     userRole: string,
     targetRole: string,
-    result: 'success' | 'failure',
+    _result: 'success' | 'failure',
   ): void {
     this.privilegeEscalations.labels(userRole, targetRole, result).inc();
 
@@ -1085,7 +1085,7 @@ export class MetricsService {
    */
   recordVulnerabilityScan(
     scanType: string,
-    result: 'clean' | 'vulnerabilities_found',
+    _result: 'clean' | 'vulnerabilities_found',
     severity?: 'low' | 'medium' | 'high' | 'critical',
   ): void {
     this.vulnerabilityScans.labels(scanType, result, severity || 'none').inc();
@@ -1103,7 +1103,7 @@ export class MetricsService {
   recordComplianceCheck(
     framework: string,
     control: string,
-    result: 'compliant' | 'non_compliant',
+    _result: 'compliant' | 'non_compliant',
   ): void {
     this.complianceChecks.labels(framework, control, result).inc();
 
@@ -1215,7 +1215,7 @@ export class MetricsService {
   recordBusinessProcess(
     processName: string,
     processVersion: string,
-    result: 'success' | 'failure',
+    _result: 'success' | 'failure',
     duration: number,
   ): void {
     const durationSeconds = duration / 1000;
@@ -1327,7 +1327,7 @@ export class MetricsService {
       return summary;
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to generate metrics summary`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -1373,7 +1373,7 @@ export class MetricsService {
       this.logger.warn('Failed to record health check metric', {
         service,
         isHealthy,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1394,7 +1394,7 @@ export class MetricsService {
     } catch (error) {
       this.logger.warn('Failed to record dashboard access metric', {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }

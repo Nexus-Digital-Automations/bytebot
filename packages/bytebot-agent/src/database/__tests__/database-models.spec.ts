@@ -14,7 +14,7 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DatabaseService } from '../database.service';
 import {
@@ -99,11 +99,11 @@ describe('Database Models Comprehensive Test Suite', () => {
       jest.spyOn(prismaService.task, 'create').mockImplementation(mockCreate);
 
       const result = await prismaService.task.create({
-        data: taskData,
+        _data: taskData,
       });
 
       expect(mockCreate).toHaveBeenCalledWith({
-        data: taskData,
+        _data: taskData,
       });
       expect(result).toEqual(taskData);
       expect(result.id).toBeDefined();
@@ -172,7 +172,7 @@ describe('Database Models Comprehensive Test Suite', () => {
       jest.spyOn(prismaService.task, 'create').mockImplementation(mockCreate);
 
       const result = await prismaService.task.create({
-        data: taskData,
+        _data: taskData,
       });
 
       expect(result.type).toBe(TaskType.SCHEDULED);
@@ -195,7 +195,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       const result = await prismaService.task.update({
         where: { id: taskData.id },
-        data: {
+        _data: {
           status: TaskStatus.RUNNING,
           executedAt: now,
           queuedAt: taskData.queuedAt,
@@ -237,7 +237,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         jest.spyOn(prismaService.task, 'create').mockImplementation(mockCreate);
 
         const result = await prismaService.task.create({
-          data: taskData,
+          _data: taskData,
         });
 
         expect(result.model).toEqual(model);
@@ -255,7 +255,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         id: uuidv4(),
         description: 'Failed task',
         status: TaskStatus.FAILED,
-        error: 'Task execution failed: Connection timeout',
+        _error: 'Task execution failed: Connection timeout',
         model: { provider: 'test' },
       };
 
@@ -264,9 +264,9 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       const result = await prismaService.task.update({
         where: { id: taskData.id },
-        data: {
+        _data: {
           status: TaskStatus.FAILED,
-          error: taskData.error,
+          _error: taskData.error,
         },
       });
 
@@ -287,7 +287,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         description: 'Completed task',
         status: TaskStatus.COMPLETED,
         completedAt: new Date(),
-        result: completionResult,
+        _result: completionResult,
         model: { provider: 'test' },
       };
 
@@ -296,10 +296,10 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       const result = await prismaService.task.update({
         where: { id: taskData.id },
-        data: {
+        _data: {
           status: TaskStatus.COMPLETED,
           completedAt: taskData.completedAt,
-          result: completionResult,
+          _result: completionResult,
         },
       });
 
@@ -323,7 +323,8 @@ describe('Database Models Comprehensive Test Suite', () => {
           source: {
             type: 'base64',
             media_type: 'image/jpeg',
-            data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAGA',
+            _data:
+              'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAGA',
           },
         },
       ];
@@ -343,7 +344,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.message.create({
-        data: messageData,
+        _data: messageData,
       });
 
       expect(result.content).toEqual(contentBlocks);
@@ -379,7 +380,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.message.create({
-        data: messageData,
+        _data: messageData,
       });
 
       expect(result.summaryId).toBe(summaryId);
@@ -417,7 +418,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.message.create({
-        data: messageData,
+        _data: messageData,
       });
 
       expect(result.content).toEqual(complexContent);
@@ -451,7 +452,7 @@ describe('Database Models Comprehensive Test Suite', () => {
       jest.spyOn(prismaService.user, 'create').mockImplementation(mockCreate);
 
       const result = await prismaService.user.create({
-        data: userData,
+        _data: userData,
       });
 
       expect(result.email).toBe('test@example.com');
@@ -482,7 +483,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       await expect(
         prismaService.user.create({
-          data: {
+          _data: {
             email,
             username: 'user1',
             passwordHash: 'hash1',
@@ -507,7 +508,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       await expect(
         prismaService.user.create({
-          data: {
+          _data: {
             email: 'test@example.com',
             username,
             passwordHash: 'hash1',
@@ -535,7 +536,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       const result = await prismaService.user.update({
         where: { id: userId },
-        data: { lastLoginAt: loginTime },
+        _data: { lastLoginAt: loginTime },
       });
 
       expect(result.lastLoginAt).toEqual(loginTime);
@@ -562,7 +563,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.userSession.create({
-        data: sessionData,
+        _data: sessionData,
       });
 
       expect(result.refreshToken).toBe(sessionData.refreshToken);
@@ -585,7 +586,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       await expect(
         prismaService.userSession.create({
-          data: {
+          _data: {
             userId: uuidv4(),
             refreshToken,
             expiresAt: new Date(),
@@ -612,7 +613,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       const result = await prismaService.userSession.update({
         where: { id: sessionId },
-        data: { isRevoked: true },
+        _data: { isRevoked: true },
       });
 
       expect(result.isRevoked).toBe(true);
@@ -651,7 +652,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.rolePermission.create({
-        data: rolePermissionData,
+        _data: rolePermissionData,
       });
 
       expect(result.role).toBe(UserRole.OPERATOR);
@@ -671,7 +672,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       await expect(
         prismaService.rolePermission.create({
-          data: {
+          _data: {
             userId: uuidv4(),
             role: UserRole.ADMIN,
             permission: Permission.SYSTEM_ADMIN,
@@ -701,7 +702,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.summary.create({
-        data: summaryData,
+        _data: summaryData,
       });
 
       expect(result.content).toBe(
@@ -727,7 +728,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.summary.create({
-        data: childSummaryData,
+        _data: childSummaryData,
       });
 
       expect(result.parentId).toBe(parentSummaryId);
@@ -741,7 +742,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         name: 'test-document.pdf',
         type: 'application/pdf',
         size: 1024576, // 1MB
-        data: 'base64encodedfiledata==',
+        _data: 'base64encodedfiledata==',
         taskId: uuidv4(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -751,7 +752,7 @@ describe('Database Models Comprehensive Test Suite', () => {
       jest.spyOn(prismaService.file, 'create').mockImplementation(mockCreate);
 
       const result = await prismaService.file.create({
-        data: fileData,
+        _data: fileData,
       });
 
       expect(result.name).toBe('test-document.pdf');
@@ -774,7 +775,7 @@ describe('Database Models Comprehensive Test Suite', () => {
           name: fileType.name,
           type: fileType.type,
           size: 1024,
-          data: 'mockdata',
+          _data: 'mockdata',
           taskId: uuidv4(),
         };
 
@@ -782,7 +783,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         jest.spyOn(prismaService.file, 'create').mockImplementation(mockCreate);
 
         const result = await prismaService.file.create({
-          data: fileData,
+          _data: fileData,
         });
 
         expect(result.name).toBe(fileType.name);
@@ -872,7 +873,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
         await expect(
           prismaService.user.create({
-            data: {
+            _data: {
               email,
               username: 'testuser',
               passwordHash: 'hash',
@@ -893,7 +894,7 @@ describe('Database Models Comprehensive Test Suite', () => {
 
       await expect(
         prismaService.task.create({
-          data: {
+          _data: {
             // Missing required description field
             description: 'Test task', // Add required field
             model: { provider: 'test' }, // Add required field
@@ -973,7 +974,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserSession.create({
-        data: sessionData,
+        _data: sessionData,
       });
 
       expect(result.id).toBeDefined();
@@ -1030,7 +1031,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserTask.create({
-        data: taskData,
+        _data: taskData,
       });
 
       expect(result.actions).toEqual(actions);
@@ -1073,7 +1074,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserScreenshot.create({
-        data: screenshotData,
+        _data: screenshotData,
       });
 
       expect(result.filename).toBe('screenshot_001.png');
@@ -1122,7 +1123,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserDomSnapshot.create({
-        data: domSnapshotData,
+        _data: domSnapshotData,
       });
 
       expect(result.url).toBe('https://example.com/page');
@@ -1149,7 +1150,7 @@ describe('Database Models Comprehensive Test Suite', () => {
           errors: [],
           pattern: '^[^@]+@[^@]+\\.[^@]+$',
         },
-        metadata: {
+        _metadata: {
           required: true,
           maxLength: 255,
         },
@@ -1163,7 +1164,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserFormData.create({
-        data: formData,
+        _data: formData,
       });
 
       expect(result.formSelector).toBe('#contact-form');
@@ -1212,7 +1213,7 @@ describe('Database Models Comprehensive Test Suite', () => {
           .mockImplementation(mockCreate);
 
         const result = await prismaService.browserDataExtraction.create({
-          data: extractionData,
+          _data: extractionData,
         });
 
         expect(result.extractionType).toBe(extractionType);
@@ -1241,7 +1242,7 @@ describe('Database Models Comprehensive Test Suite', () => {
           metricValue: 123.45,
           metricUnit: 'ms',
           measurementTime: new Date(),
-          context: {
+          _context: {
             url: 'https://example.com',
             userAgent: 'Test Agent',
           },
@@ -1265,7 +1266,7 @@ describe('Database Models Comprehensive Test Suite', () => {
           .mockImplementation(mockCreate);
 
         const result = await prismaService.browserPerformanceMetric.create({
-          data: metricData,
+          _data: metricData,
         });
 
         expect(result.metricType).toBe(metricType);
@@ -1303,8 +1304,8 @@ describe('Database Models Comprehensive Test Suite', () => {
         startedAt: new Date(Date.now() - 1000),
         completedAt: new Date(),
         durationMs: 1000,
-        result: 'success',
-        metadata: {
+        _result: 'success',
+        _metadata: {
           selector: '#button',
           coordinates: { x: 100, y: 200 },
         },
@@ -1318,7 +1319,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.browserTaskStep.create({
-        data: stepData,
+        _data: stepData,
       });
 
       expect(result.stepNumber).toBe(1);
@@ -1344,12 +1345,12 @@ describe('Database Models Comprehensive Test Suite', () => {
       // Simulate concurrent updates
       const update1 = prismaService.task.update({
         where: { id: taskId },
-        data: { status: TaskStatus.RUNNING },
+        _data: { status: TaskStatus.RUNNING },
       });
 
       const update2 = prismaService.task.update({
         where: { id: taskId },
-        data: { status: TaskStatus.COMPLETED },
+        _data: { status: TaskStatus.COMPLETED },
       });
 
       const [result1, result2] = await Promise.all([update1, update2]);
@@ -1377,7 +1378,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         .mockImplementation(mockCreate);
 
       const result = await prismaService.message.create({
-        data: messageData,
+        _data: messageData,
       });
 
       expect(result.content).toHaveLength(100);
@@ -1398,8 +1399,8 @@ describe('Database Models Comprehensive Test Suite', () => {
         scheduledFor: null,
         executedAt: null,
         completedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: { provider: 'test' },
       };
 
@@ -1407,7 +1408,7 @@ describe('Database Models Comprehensive Test Suite', () => {
       jest.spyOn(prismaService.task, 'create').mockImplementation(mockCreate);
 
       const result = await prismaService.task.create({
-        data: taskData,
+        _data: taskData,
       });
 
       expect(result.userId).toBeNull();

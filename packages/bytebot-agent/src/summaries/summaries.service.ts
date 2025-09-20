@@ -18,7 +18,6 @@
 
 import {
   Injectable,
-  Logger,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
@@ -102,7 +101,7 @@ export class SummariesService {
    * @param data Summary creation request with validation
    * @returns Promise<SummaryAnalysis> Summary with analysis metrics
    */
-  async create(data: CreateSummaryRequest): Promise<SummaryAnalysis> {
+  async create(_data: CreateSummaryRequest): Promise<SummaryAnalysis> {
     const operationId = randomUUID();
     const startTime = performance.now();
 
@@ -131,12 +130,12 @@ export class SummariesService {
       const summary = await this.executeWithRetry(
         () =>
           this.prisma.summary.create({
-            data: {
+            _data: {
               taskId: data.taskId,
               content: data.content,
               ...(data.parentId ? { parentId: data.parentId } : {}),
               ...(data.metadata
-                ? { metadata: data.metadata as Prisma.InputJsonValue }
+                ? { _metadata: data.metadata as Prisma.InputJsonValue }
                 : {}),
             },
           }),
@@ -147,7 +146,7 @@ export class SummariesService {
 
       const processingTime = performance.now() - startTime;
 
-      const result: SummaryAnalysis = {
+      const _result: SummaryAnalysis = {
         ...summary,
         operationId,
         contentMetrics,
@@ -171,7 +170,7 @@ export class SummariesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -181,7 +180,7 @@ export class SummariesService {
         operationId,
         taskId: data.taskId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'SummariesService',
@@ -241,7 +240,7 @@ export class SummariesService {
       });
 
       return summary;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -251,7 +250,7 @@ export class SummariesService {
         operationId,
         taskId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'SummariesService',
@@ -298,7 +297,7 @@ export class SummariesService {
       const databaseResponseTime = performance.now() - databaseStartTime;
       const processingTime = performance.now() - startTime;
 
-      const result: SummaryRetrievalResult = {
+      const _result: SummaryRetrievalResult = {
         summaries,
         operationId,
         totalCount: summaries.length,
@@ -320,7 +319,7 @@ export class SummariesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -330,7 +329,7 @@ export class SummariesService {
         operationId,
         taskId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'SummariesService',
@@ -398,7 +397,7 @@ export class SummariesService {
       });
 
       return summary;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -408,7 +407,7 @@ export class SummariesService {
         operationId,
         summaryId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'SummariesService',
@@ -424,7 +423,7 @@ export class SummariesService {
    * @private
    */
   private validateSummaryData(
-    data: CreateSummaryRequest,
+    _data: CreateSummaryRequest,
     operationId: string,
   ): void {
     this.logger.debug('Validating summary data', {
@@ -537,9 +536,9 @@ export class SummariesService {
         }
 
         return result;
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         lastError =
-          error instanceof Error ? error : new Error('Unknown database error');
+          error instanceof Error ? _error : new Error('Unknown database error');
 
         if (attempt === this.retryConfig.maxAttempts) {
           this.logger.error(
@@ -549,7 +548,7 @@ export class SummariesService {
               operationName,
               attempt,
               maxAttempts: this.retryConfig.maxAttempts,
-              error: lastError.message,
+              _error: lastError.message,
               stack: lastError.stack,
               component: 'SummariesService',
               action: 'executeWithRetry',
@@ -570,7 +569,7 @@ export class SummariesService {
           attempt,
           maxAttempts: this.retryConfig.maxAttempts,
           retryDelayMs: delay,
-          error: lastError.message,
+          _error: lastError.message,
           component: 'SummariesService',
           action: 'executeWithRetry',
         });

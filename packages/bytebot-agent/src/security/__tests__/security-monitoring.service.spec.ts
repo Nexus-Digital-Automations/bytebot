@@ -9,10 +9,9 @@
  * @since Security Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Logger } from '@nestjs/common';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   SecurityMonitoringService,
@@ -31,7 +30,7 @@ describe('SecurityMonitoringService', () => {
   const mockLogger = {
     log: jest.fn(),
     debug: jest.fn(),
-    error: jest.fn(),
+    _error: jest.fn(),
     warn: jest.fn(),
     verbose: jest.fn(),
   };
@@ -57,7 +56,7 @@ describe('SecurityMonitoringService', () => {
     requestUrl: '/api/auth/login',
     httpMethod: 'POST',
     description: 'Failed authentication attempt',
-    metadata: {
+    _metadata: {
       attemptedUsername: 'admin',
       failureReason: 'invalid_password',
     },
@@ -181,7 +180,7 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(mockSecurityEvent);
 
       expect(prismaService.securityEvent.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
+        _data: expect.objectContaining({
           eventId: mockSecurityEvent.eventId,
           type: mockSecurityEvent.type,
           severity: mockSecurityEvent.severity,
@@ -221,7 +220,7 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(highRiskEvent);
 
       expect(prismaService.securityEvent.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
+        _data: expect.objectContaining({
           riskScore: 85,
         }),
       });
@@ -239,7 +238,7 @@ describe('SecurityMonitoringService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to process security event',
         expect.objectContaining({
-          error: 'Database connection failed',
+          _error: 'Database connection failed',
         }),
       );
     });
@@ -271,7 +270,7 @@ describe('SecurityMonitoringService', () => {
         type: SecurityEventType.RATE_LIMIT_EXCEEDED,
         severity: SecuritySeverity.HIGH,
         riskScore: 70,
-        metadata: {
+        _metadata: {
           requestsPerMinute: 150,
           limit: 100,
         },
@@ -290,7 +289,7 @@ describe('SecurityMonitoringService', () => {
         type: SecurityEventType.SQL_INJECTION_ATTEMPT,
         severity: SecuritySeverity.CRITICAL,
         riskScore: 95,
-        metadata: {
+        _metadata: {
           suspiciousPayload: "'; DROP TABLE users; --",
           detectionPattern: 'sql_injection',
         },
@@ -324,7 +323,7 @@ describe('SecurityMonitoringService', () => {
 
       expect(prismaService.securityEvent.create).toHaveBeenCalledTimes(2);
       expect(prismaService.securityEvent.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
+        _data: expect.objectContaining({
           correlationId: 'attack-sequence-123',
         }),
       });
@@ -389,7 +388,7 @@ describe('SecurityMonitoringService', () => {
 
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id: 'compromised-user-123' },
-        data: { isActive: false },
+        _data: { isActive: false },
       });
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(
@@ -472,7 +471,7 @@ describe('SecurityMonitoringService', () => {
         type: SecurityEventType.ANOMALOUS_BEHAVIOR,
         severity: SecuritySeverity.MEDIUM,
         riskScore: 65,
-        metadata: {
+        _metadata: {
           anomalyType: 'unusual_access_pattern',
           confidence: 0.85,
           baseline: { normal_requests_per_hour: 20 },
@@ -506,7 +505,7 @@ describe('SecurityMonitoringService', () => {
       const enrichedEvent = {
         ...mockSecurityEvent,
         sourceIp: '192.168.1.100',
-        metadata: {
+        _metadata: {
           ...mockSecurityEvent.metadata,
           threatIntelligence: {
             reputation: 'suspicious',
@@ -519,8 +518,8 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(enrichedEvent);
 
       expect(prismaService.securityEvent.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          metadata: expect.objectContaining({
+        _data: expect.objectContaining({
+          _metadata: expect.objectContaining({
             threatIntelligence: expect.any(Object),
           }),
         }),
@@ -542,7 +541,7 @@ describe('SecurityMonitoringService', () => {
       const auditEvent = {
         ...mockSecurityEvent,
         type: SecurityEventType.CONFIGURATION_CHANGE,
-        metadata: {
+        _metadata: {
           ...mockSecurityEvent.metadata,
           changeType: 'security_policy_update',
           oldValue: 'policy_v1',
@@ -554,9 +553,9 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(auditEvent);
 
       expect(prismaService.securityEvent.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
+        _data: expect.objectContaining({
           type: SecurityEventType.CONFIGURATION_CHANGE,
-          metadata: expect.objectContaining({
+          _metadata: expect.objectContaining({
             changeType: 'security_policy_update',
           }),
         }),

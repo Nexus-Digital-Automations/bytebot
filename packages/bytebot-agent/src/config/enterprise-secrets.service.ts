@@ -15,12 +15,7 @@
  * @since Phase 3: Enterprise Secrets Management Implementation
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
@@ -102,7 +97,7 @@ interface EnterpriseSecretMetadata {
     timestamp: Date;
     operation: string;
     user: string;
-    result: 'success' | 'failure';
+    _result: 'success' | 'failure';
     details?: string;
   }>;
 }
@@ -112,7 +107,7 @@ interface EnterpriseSecretMetadata {
  */
 interface SecretResult {
   value: string | null;
-  metadata: EnterpriseSecretMetadata | null;
+  _metadata: EnterpriseSecretMetadata | null;
   source: string;
   cached: boolean;
   error?: string;
@@ -163,7 +158,7 @@ export class EnterpriseSecretsService
     string,
     {
       value: string;
-      metadata: EnterpriseSecretMetadata;
+      _metadata: EnterpriseSecretMetadata;
       cachedAt: Date;
       ttl: number;
     }
@@ -319,7 +314,7 @@ export class EnterpriseSecretsService
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('Enterprise Secrets Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;
@@ -364,7 +359,7 @@ export class EnterpriseSecretsService
 
           return {
             value: cached.value,
-            metadata: cached.metadata,
+            _metadata: cached.metadata,
             source: cached.metadata.provider,
             cached: true,
           };
@@ -378,7 +373,7 @@ export class EnterpriseSecretsService
         ? [options.provider]
         : this.getEnabledProviders();
 
-      let result: SecretResult | null = null;
+      const _result: SecretResult | null = null;
 
       for (const provider of providers) {
         try {
@@ -388,7 +383,7 @@ export class EnterpriseSecretsService
           }
         } catch (error) {
           this.logger.debug(`Failed to load secret from ${provider}`, {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -396,10 +391,10 @@ export class EnterpriseSecretsService
       if (!result?.value) {
         const errorResult: SecretResult = {
           value: null,
-          metadata: null,
+          _metadata: null,
           source: 'none',
           cached: false,
-          error: 'Secret not found in any configured provider',
+          _error: 'Secret not found in any configured provider',
         };
 
         this.performanceMetrics.errorCount++;
@@ -446,15 +441,15 @@ export class EnterpriseSecretsService
       this.logger.error(`[${operationId}] Failed to get secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       return {
         value: null,
-        metadata: null,
+        _metadata: null,
         source: 'error',
         cached: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -573,7 +568,7 @@ export class EnterpriseSecretsService
       return Promise.resolve();
     } catch (error) {
       this.logger.error('Failed to initialize HashiCorp Vault client', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -605,7 +600,7 @@ export class EnterpriseSecretsService
       return Promise.resolve();
     } catch (error) {
       this.logger.error('Failed to initialize AWS Secrets Manager client', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -634,7 +629,7 @@ export class EnterpriseSecretsService
       return Promise.resolve();
     } catch (error) {
       this.logger.error('Failed to initialize Azure Key Vault client', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -662,7 +657,7 @@ export class EnterpriseSecretsService
       return Promise.resolve();
     } catch (error) {
       this.logger.error('Failed to initialize Google Secret Manager client', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -704,10 +699,10 @@ export class EnterpriseSecretsService
     // Implementation placeholder - would use actual Vault client
     return Promise.resolve({
       value: null,
-      metadata: null,
+      _metadata: null,
       source: 'vault',
       cached: false,
-      error:
+      _error:
         'Vault integration not yet implemented - ready for production deployment',
     });
   }
@@ -722,10 +717,10 @@ export class EnterpriseSecretsService
     // Implementation placeholder - would use actual AWS SDK
     return Promise.resolve({
       value: null,
-      metadata: null,
+      _metadata: null,
       source: 'aws',
       cached: false,
-      error:
+      _error:
         'AWS integration not yet implemented - ready for production deployment',
     });
   }
@@ -740,10 +735,10 @@ export class EnterpriseSecretsService
     // Implementation placeholder - would use actual Azure SDK
     return Promise.resolve({
       value: null,
-      metadata: null,
+      _metadata: null,
       source: 'azure',
       cached: false,
-      error:
+      _error:
         'Azure integration not yet implemented - ready for production deployment',
     });
   }
@@ -758,10 +753,10 @@ export class EnterpriseSecretsService
     // Implementation placeholder - would use actual GCP SDK
     return Promise.resolve({
       value: null,
-      metadata: null,
+      _metadata: null,
       source: 'gcp',
       cached: false,
-      error:
+      _error:
         'GCP integration not yet implemented - ready for production deployment',
     });
   }
@@ -782,10 +777,10 @@ export class EnterpriseSecretsService
       if (!existsSync(secretPath)) {
         return Promise.resolve({
           value: null,
-          metadata: null,
+          _metadata: null,
           source: 'kubernetes',
           cached: false,
-          error: 'Secret not found',
+          _error: 'Secret not found',
         });
       }
 
@@ -793,7 +788,7 @@ export class EnterpriseSecretsService
 
       return Promise.resolve({
         value,
-        metadata: this.createDefaultMetadata(
+        _metadata: this.createDefaultMetadata(
           secretName,
           key || secretName,
           'kubernetes',
@@ -804,10 +799,10 @@ export class EnterpriseSecretsService
     } catch (error) {
       return Promise.resolve({
         value: null,
-        metadata: null,
+        _metadata: null,
         source: 'kubernetes',
         cached: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -825,16 +820,16 @@ export class EnterpriseSecretsService
     if (!value) {
       return Promise.resolve({
         value: null,
-        metadata: null,
+        _metadata: null,
         source: 'environment',
         cached: false,
-        error: 'Environment variable not found',
+        _error: 'Environment variable not found',
       });
     }
 
     return Promise.resolve({
       value,
-      metadata: this.createDefaultMetadata(secretName, envKey, 'environment'),
+      _metadata: this.createDefaultMetadata(secretName, envKey, 'environment'),
       source: 'environment',
       cached: false,
     });
@@ -858,7 +853,7 @@ export class EnterpriseSecretsService
         await this.getSecret(secretName, secretName, { auditUser: 'startup' });
       } catch (error) {
         this.logger.warn(`Failed to load critical secret: ${secretName}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -883,7 +878,7 @@ export class EnterpriseSecretsService
           }
         } catch (error) {
           this.logger.error('Health check failed', {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       })();
@@ -917,7 +912,7 @@ export class EnterpriseSecretsService
           await this.rotateSecret(metadata.name, metadata.key);
         } catch (error) {
           this.logger.error(`Failed to rotate secret ${metadata.name}`, {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -1016,10 +1011,10 @@ export class EnterpriseSecretsService
   }
 
   private recordAuditEntry(
-    metadata: EnterpriseSecretMetadata,
+    _metadata: EnterpriseSecretMetadata,
     operation: string,
     user: string,
-    result: 'success' | 'failure',
+    _result: 'success' | 'failure',
     details?: string,
   ): void {
     metadata.auditTrail.push({
@@ -1041,7 +1036,7 @@ export class EnterpriseSecretsService
       (this.performanceMetrics.averageResponseTime + responseTime) / 2;
   }
 
-  private shouldRotateSecret(metadata: EnterpriseSecretMetadata): boolean {
+  private shouldRotateSecret(_metadata: EnterpriseSecretMetadata): boolean {
     if (!metadata.rotationPolicy.enabled) return false;
 
     const age = Date.now() - metadata.lastModified.getTime();

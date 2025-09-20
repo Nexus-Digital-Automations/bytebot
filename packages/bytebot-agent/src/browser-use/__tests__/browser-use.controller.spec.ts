@@ -12,7 +12,7 @@
  * - Data extraction and processing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { BrowserUseController } from '../browser-use.controller';
 import { BrowserUseService } from '../browser-use.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -67,7 +67,7 @@ const mockBrowserUseService = {
 
 // Mock JWT Auth Guard
 const mockJwtAuthGuard = {
-  canActivate: jest.fn().mockImplementation((context: ExecutionContext) => {
+  canActivate: jest.fn().mockImplementation((_context: ExecutionContext) => {
     const req = context.switchToHttp().getRequest();
     req.user = {
       id: 'test-user-123',
@@ -139,7 +139,7 @@ describe('BrowserUseController', () => {
         priority: 1,
         timeout: 30000,
         retryAttempts: 3,
-        metadata: { source: 'api-test' },
+        _metadata: { source: 'api-test' },
       };
 
       it('should create a new browser task successfully', async () => {
@@ -261,7 +261,7 @@ describe('BrowserUseController', () => {
           name: 'Test Task',
           url: 'https://example.com',
           status: 'completed',
-          results: { success: true, data: 'extracted data' },
+          results: { success: true, _data: 'extracted data' },
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -374,7 +374,7 @@ describe('BrowserUseController', () => {
           viewport: { width: 1920, height: 1080 },
         },
         timeout: 300000,
-        metadata: { purpose: 'testing' },
+        _metadata: { purpose: 'testing' },
       };
 
       it('should create a new browser session', async () => {
@@ -469,7 +469,7 @@ describe('BrowserUseController', () => {
           imageData: 'base64-encoded-image-data',
           format: 'png',
           timestamp: new Date(),
-          metadata: {
+          _metadata: {
             width: 1920,
             height: 1080,
             fileSize: 245760,
@@ -637,11 +637,11 @@ describe('BrowserUseController', () => {
 
         const expectedResult = {
           sessionId,
-          data: {
+          _data: {
             title: 'Example Page',
             links: ['https://example.com/page1', 'https://example.com/page2'],
           },
-          metadata: {
+          _metadata: {
             url: 'https://example.com',
             timestamp: new Date(),
             extractionTime: 150,
@@ -832,8 +832,8 @@ describe('BrowserUseController', () => {
       const serviceResult = {
         id: taskId,
         internalData: 'should-be-filtered',
-        results: { data: 'public data' },
-        metadata: { publicField: 'visible' },
+        results: { _data: 'public data' },
+        _metadata: { publicField: 'visible' },
       };
 
       mockBrowserUseService.getTask.mockResolvedValue(serviceResult);

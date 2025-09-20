@@ -48,12 +48,12 @@ export interface MockWebSocketClient {
   state: WebSocketState;
   rooms: Set<string>;
   lastActivity: Date;
-  emit: jest.MockedFunction<(event: string, ...args: any[]) => boolean>;
+  emit: jest.MockedFunction<(_event: string, ...args: any[]) => boolean>;
   on: jest.MockedFunction<
-    (event: string, callback: (...args: any[]) => void) => any
+    (_event: string, callback: (...args: any[]) => void) => any
   >;
   off: jest.MockedFunction<
-    (event: string, callback?: (...args: any[]) => void) => any
+    (_event: string, callback?: (...args: any[]) => void) => any
   >;
   join: jest.MockedFunction<(room: string) => Promise<void>>;
   leave: jest.MockedFunction<(room: string) => Promise<void>>;
@@ -68,19 +68,19 @@ export interface MockWebSocketServer {
   rooms: Map<string, Set<string>>;
   eventHistory: Array<{
     timestamp: Date;
-    event: string;
+    _event: string;
     clientId?: string;
     room?: string;
-    data: any;
+    _data: any;
   }>;
-  emit: jest.MockedFunction<(event: string, ...args: any[]) => boolean>;
+  emit: jest.MockedFunction<(_event: string, ...args: any[]) => boolean>;
   to: jest.MockedFunction<(room: string) => any>;
   in: jest.MockedFunction<(room: string) => any>;
   on: jest.MockedFunction<
-    (event: string, callback: (...args: any[]) => void) => any
+    (_event: string, callback: (...args: any[]) => void) => any
   >;
   off: jest.MockedFunction<
-    (event: string, callback?: (...args: any[]) => void) => any
+    (_event: string, callback?: (...args: any[]) => void) => any
   >;
   close: jest.MockedFunction<() => void>;
 }
@@ -107,7 +107,7 @@ export interface TaskWebSocketEvents {
   // Client to Server events
   join_task: (taskId: string) => void;
   leave_task: (taskId: string) => void;
-  task_update: (taskId: string, data: any) => void;
+  task_update: (taskId: string, _data: any) => void;
   add_message: (taskId: string, message: any) => void;
 
   // Server to Client events
@@ -138,13 +138,13 @@ export class MockSocketIOClient
 
   // Mock functions with Jest typing
   public emit = jest.fn() as jest.MockedFunction<
-    (event: string, ...args: any[]) => boolean
+    (_event: string, ...args: any[]) => boolean
   >;
   public on = jest.fn() as jest.MockedFunction<
-    (event: string, callback: (...args: any[]) => void) => this
+    (_event: string, callback: (...args: any[]) => void) => this
   >;
   public off = jest.fn() as jest.MockedFunction<
-    (event: string, callback?: (...args: any[]) => void) => this
+    (_event: string, callback?: (...args: any[]) => void) => this
   >;
   public join = jest.fn() as jest.MockedFunction<
     (room: string) => Promise<void>
@@ -178,7 +178,7 @@ export class MockSocketIOClient
   /**
    * Process event with error simulation
    */
-  private processEvent(event: string, args: any[]): void {
+  private processEvent(_event: string, args: any[]): void {
     if (
       this.config.enableErrorSimulation &&
       Math.random() < (this.config.errorRate || 0)
@@ -207,7 +207,7 @@ export class MockSocketIOClient
    */
   private setupMockBehavior(): void {
     // Mock emit behavior with latency simulation
-    this.emit.mockImplementation((event: string, ...args: any[]) => {
+    this.emit.mockImplementation((_event: string, ...args: any[]) => {
       this.lastActivity = new Date();
 
       if (this.config.enableLatencySimulation && this.config.latencyMs) {
@@ -222,7 +222,7 @@ export class MockSocketIOClient
 
     // Mock on behavior for event registration
     this.on.mockImplementation(
-      (event: string, callback: (...args: any[]) => void) => {
+      (_event: string, callback: (...args: any[]) => void) => {
         if (!this.eventListeners.has(event)) {
           this.eventListeners.set(event, []);
         }
@@ -234,7 +234,7 @@ export class MockSocketIOClient
 
     // Mock off behavior for event deregistration
     this.off.mockImplementation(
-      (event: string, callback?: (...args: any[]) => void) => {
+      (_event: string, callback?: (...args: any[]) => void) => {
         if (callback) {
           const listeners = this.eventListeners.get(event) || [];
           const index = listeners.indexOf(callback);
@@ -331,23 +331,23 @@ export class MockSocketIOServer implements MockWebSocketServer {
   public rooms: Map<string, Set<string>> = new Map();
   public eventHistory: Array<{
     timestamp: Date;
-    event: string;
+    _event: string;
     clientId?: string;
     room?: string;
-    data: any;
+    _data: any;
   }> = [];
 
   // Mock functions with Jest typing
   public emit = jest.fn() as jest.MockedFunction<
-    (event: string, ...args: any[]) => boolean
+    (_event: string, ...args: any[]) => boolean
   >;
   public to = jest.fn() as jest.MockedFunction<(room: string) => any>;
   public in = jest.fn() as jest.MockedFunction<(room: string) => any>;
   public on = jest.fn() as jest.MockedFunction<
-    (event: string, callback: (...args: unknown[]) => void) => this
+    (_event: string, callback: (...args: unknown[]) => void) => this
   >;
   public off = jest.fn() as jest.MockedFunction<
-    (event: string, callback?: (...args: unknown[]) => void) => this
+    (_event: string, callback?: (...args: unknown[]) => void) => this
   >;
   public close = jest.fn() as jest.MockedFunction<() => void>;
 
@@ -375,12 +375,12 @@ export class MockSocketIOServer implements MockWebSocketServer {
    */
   private setupMockBehavior(): void {
     // Mock global emit behavior
-    this.emit.mockImplementation((event: string, ...args: any[]) => {
+    this.emit.mockImplementation((_event: string, ...args: any[]) => {
       if (this.config.enableEventHistory) {
         this.eventHistory.push({
           timestamp: new Date(),
           event,
-          data: args,
+          _data: args,
         });
       }
 
@@ -414,7 +414,7 @@ export class MockSocketIOServer implements MockWebSocketServer {
 
     // Mock event listener registration
     this.on.mockImplementation(
-      (event: string, callback: (...args: any[]) => void) => {
+      (_event: string, callback: (...args: any[]) => void) => {
         if (!this.eventListeners.has(event)) {
           this.eventListeners.set(event, []);
         }
@@ -431,8 +431,8 @@ export class MockSocketIOServer implements MockWebSocketServer {
       if (this.config.enableEventHistory) {
         this.eventHistory.push({
           timestamp: new Date(),
-          event: 'server_close',
-          data: [],
+          _event: 'server_close',
+          _data: [],
         });
       }
     });
@@ -447,15 +447,15 @@ export class MockSocketIOServer implements MockWebSocketServer {
   ): void {
     (
       roomEmitter.emit as jest.MockedFunction<
-        (event: string, ...args: unknown[]) => boolean
+        (_event: string, ...args: unknown[]) => boolean
       >
-    ).mockImplementation((event: string, ...args: unknown[]) => {
+    ).mockImplementation((_event: string, ...args: unknown[]) => {
       if (this.config.enableEventHistory) {
         this.eventHistory.push({
           timestamp: new Date(),
           event,
           room,
-          data: args,
+          _data: args,
         });
       }
 
@@ -620,7 +620,7 @@ export class MockNativeWebSocket extends EventEmitter {
    * Setup mock WebSocket behavior
    */
   private setupMockBehavior(): void {
-    this.send.mockImplementation((data: string | ArrayBuffer | Blob) => {
+    this.send.mockImplementation((_data: string | ArrayBuffer | Blob) => {
       if (this.readyState !== WebSocketState.OPEN) {
         throw new Error('WebSocket is not open');
       }
@@ -691,7 +691,7 @@ export class MockNativeWebSocket extends EventEmitter {
   /**
    * Simulate incoming message
    */
-  public simulateMessage(data: string | ArrayBuffer | Blob): void {
+  public simulateMessage(_data: string | ArrayBuffer | Blob): void {
     if (this.readyState === WebSocketState.OPEN) {
       this.emit('message', { data, type: 'message' });
     }
@@ -700,7 +700,7 @@ export class MockNativeWebSocket extends EventEmitter {
   /**
    * Simulate connection error
    */
-  public simulateError(error: string = 'Mock WebSocket error'): void {
+  public simulateError(_error: string = 'Mock WebSocket error'): void {
     this.emit('error', new Error(error));
   }
 }
@@ -832,12 +832,12 @@ export const resetWebSocketMocks = (): void => {
  */
 export const waitForWebSocketEvent = (
   emitter: EventEmitter,
-  event: string,
+  _event: string,
   timeout: number = 5000,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
-      reject(new Error(`Timeout waiting for WebSocket event: ${event}`));
+      reject(new Error(`Timeout waiting for WebSocket _event: ${event}`));
     }, timeout);
 
     emitter.once(event, (data) => {
@@ -871,20 +871,20 @@ export const createTaskWebSocketHelpers = (
 
   const emitTaskUpdate = (taskId: string, task: unknown): void => {
     const roomEmitter = server.to(`task_${taskId}`) as {
-      emit: (event: string, ...args: unknown[]) => boolean;
+      emit: (_event: string, ...args: unknown[]) => boolean;
     };
     roomEmitter.emit('task_updated', task);
   };
 
   const emitNewMessage = (taskId: string, message: unknown): void => {
     const roomEmitter = server.to(`task_${taskId}`) as {
-      emit: (event: string, ...args: unknown[]) => boolean;
+      emit: (_event: string, ...args: unknown[]) => boolean;
     };
     roomEmitter.emit('new_message', message);
   };
 
   const waitForTaskEvent = (
-    event: string,
+    _event: string,
     timeout: number = 5000,
   ): Promise<any> => {
     // Create a compatible EventEmitter-like object for the client

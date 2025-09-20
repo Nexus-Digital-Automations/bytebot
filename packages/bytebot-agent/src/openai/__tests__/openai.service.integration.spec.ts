@@ -9,11 +9,11 @@
  * - Performance and timeout scenarios
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { OpenAIService } from '../openai.service';
 import { SecretsService } from '../../config/secrets.service';
-import { Logger } from '@nestjs/common';
+
 import { Message, MessageRole } from '@prisma/client';
 import {
   MessageContentType,
@@ -519,7 +519,8 @@ describe('OpenAIService - Integration Tests', () => {
                   source: {
                     type: 'base64',
                     media_type: 'image/png',
-                    data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+                    _data:
+                      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
                   },
                 } as ImageContentBlock,
               ],
@@ -544,7 +545,9 @@ describe('OpenAIService - Integration Tests', () => {
                 expect.objectContaining({
                   type: 'input_image',
                   detail: 'high',
-                  image_url: expect.stringContaining('data:image/png;base64,'),
+                  image_url: expect.stringContaining(
+                    '_data: image/png;base64,',
+                  ),
                 }),
               ]),
             }),
@@ -767,7 +770,7 @@ describe('OpenAIService - Integration Tests', () => {
         output: [
           {
             type: 'unknown_type',
-            data: 'some data',
+            _data: 'some data',
           },
         ],
         usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },

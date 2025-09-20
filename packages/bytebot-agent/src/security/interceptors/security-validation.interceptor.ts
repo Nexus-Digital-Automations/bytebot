@@ -21,7 +21,6 @@ import {
   ExecutionContext,
   CallHandler,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
@@ -126,7 +125,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Main intercept method
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const startTime = performance.now();
     const requestWithId = request as Request & { requestId?: string };
@@ -185,14 +187,14 @@ export class SecurityValidationInterceptor implements NestInterceptor {
                 processingTime,
               );
             }),
-            catchError((error: unknown) => {
+            catchError((_error: unknown) => {
               const processingTime = performance.now() - startTime;
               void this.logSecurityError(metadata, error, processingTime);
               return throwError(() => error);
             }),
           );
         })
-        .catch((error: unknown) => {
+        .catch((_error: unknown) => {
           void this.logSecurityError(
             metadata,
             error,
@@ -206,11 +208,11 @@ export class SecurityValidationInterceptor implements NestInterceptor {
             .handle()
             .pipe(
               map((responseData: unknown) => responseData),
-              catchError((error: unknown) => throwError(() => error)),
+              catchError((_error: unknown) => throwError(() => error)),
             )
             .subscribe(subscriber);
         })
-        .catch((error: unknown) => {
+        .catch((_error: unknown) => {
           subscriber.error(error);
         });
     });
@@ -220,8 +222,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate incoming request
    */
   private async validateRequest(
-    request: Request,
-    metadata: RequestMetadata,
+    _request: Request,
+    _metadata: RequestMetadata,
   ): Promise<ValidationResult> {
     const startTime = performance.now();
     const issues: ValidationResult['issues'] = [];
@@ -278,7 +280,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
       this.logger.error('Request validation error', {
         requestId: metadata.id,
-        error: errorMessage,
+        _error: errorMessage,
         processingTimeMs: processingTime.toFixed(2),
       });
 
@@ -294,8 +296,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate basic request properties
    */
   private validateRequestBasics(
-    request: Request,
-    metadata: RequestMetadata,
+    _request: Request,
+    _metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): void {
     // Content-Type validation
@@ -354,7 +356,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate request headers for security issues
    */
   private validateHeaders(
-    request: Request,
+    _request: Request,
     issues: ValidationResult['issues'],
   ): void {
     const headers = request.headers;
@@ -561,10 +563,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
     // Check for dangerous patterns
     const dangerousPatterns = [
-      /<script[^>]*>.*?<\/script>/gi,
+      /<script[^>]*>.*?</script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /data:text\/html/gi,
+      /_data:text/html/gi,
       /vbscript:/gi,
     ];
 
@@ -581,10 +583,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
     // Sanitize common XSS patterns
     return value
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<script\b[^<]*(?:(?!</script>)<[^<]*)*</script>/gi, '')
       .replace(/javascript:/gi, '')
       .replace(/on\w+\s*=/gi, '')
-      .replace(/data:text\/html/gi, '')
+      .replace(/_data: text/html/gi, '')
       .replace(/vbscript:/gi, '');
   }
 
@@ -659,8 +661,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Perform threat detection using the threat detector service
    */
   private async performThreatDetection(
-    request: Request,
-    metadata: RequestMetadata,
+    _request: Request,
+    _metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): Promise<void> {
     try {
@@ -729,7 +731,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
             endpoint: metadata.path,
             operation: metadata.method,
           },
-          context: {
+          _context: {
             correlationId: metadata.id,
             additionalData: {
               threatTypes: threatAnalysis.threatTypes,
@@ -749,7 +751,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn('Threat detection failed', {
         requestId: metadata.id,
-        error: errorMessage,
+        _error: errorMessage,
       });
 
       issues.push({
@@ -764,8 +766,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Detect suspicious patterns in request
    */
   private detectSuspiciousPatterns(
-    request: Request,
-    metadata: RequestMetadata,
+    _request: Request,
+    _metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): Promise<void> {
     return Promise.resolve().then(() => {
@@ -816,7 +818,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    */
   private processResponse(
     responseData: unknown,
-    metadata: RequestMetadata,
+    _metadata: RequestMetadata,
     processingTime: number,
   ): unknown {
     if (!this.config.enableOutputSanitization) {
@@ -841,7 +843,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Response sanitization failed', {
         requestId: metadata.id,
-        error: errorMessage,
+        _error: errorMessage,
       });
 
       // Return original response if sanitization fails
@@ -852,7 +854,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Sanitize response data to prevent information leakage
    */
-  private sanitizeResponseData(data: unknown): unknown {
+  private sanitizeResponseData(_data: unknown): unknown {
     if (data === null || data === undefined) {
       return data;
     }
@@ -908,7 +910,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Create request metadata
    */
   private createRequestMetadata(
-    request: Request,
+    _request: Request,
     requestId: string,
   ): RequestMetadata {
     const contentLength = parseInt(request.get('Content-Length') || '0', 10);
@@ -932,7 +934,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Generate request hash for deduplication and caching
    */
-  private generateRequestHash(request: Request): string {
+  private generateRequestHash(_request: Request): string {
     const hashData = {
       method: request.method,
       url: request.url,
@@ -950,7 +952,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Get client IP address
    */
-  private getClientIP(request: Request): string {
+  private getClientIP(_request: Request): string {
     return (
       request.get('CF-Connecting-IP') ||
       request.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
@@ -964,7 +966,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Log security violations
    */
   private async logSecurityViolation(
-    metadata: RequestMetadata,
+    _metadata: RequestMetadata,
     validationResult: ValidationResult,
     action: string,
   ): Promise<void> {
@@ -1000,7 +1002,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
           endpoint: metadata.path,
           operation: metadata.method,
         },
-        context: {
+        _context: {
           correlationId: metadata.id,
           additionalData: {
             action,
@@ -1016,8 +1018,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Log security errors
    */
   private async logSecurityError(
-    metadata: RequestMetadata,
-    error: unknown,
+    _metadata: RequestMetadata,
+    _error: unknown,
     processingTime: number,
   ): Promise<void> {
     const errorMessage =
@@ -1025,7 +1027,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
     this.logger.error('Security validation error', {
       requestId: metadata.id,
-      error: errorMessage,
+      _error: errorMessage,
       processingTimeMs: processingTime.toFixed(2),
     });
 
@@ -1043,11 +1045,11 @@ export class SecurityValidationInterceptor implements NestInterceptor {
           endpoint: metadata.path,
           operation: metadata.method,
         },
-        context: {
+        _context: {
           correlationId: metadata.id,
           additionalData: {
             errorType: 'validation_error',
-            error: errorMessage,
+            _error: errorMessage,
             processingTime,
           },
         },
@@ -1125,12 +1127,12 @@ export class SecurityValidationInterceptor implements NestInterceptor {
       ),
       suspiciousPatterns: [
         /\.\./, // Directory traversal
-        /\/etc\/passwd/, // Linux system files
-        /\/windows\/system32/, // Windows system files
+        //etc/passwd/, // Linux system files
+        //windows/system32/, // Windows system files
         /union.*select/i, // SQL injection
         /<script/i, // XSS
         /javascript:/i, // JavaScript protocol
-        /data:text\/html/i, // Data URI XSS
+        /_data:text/html/i, // Data URI XSS
       ],
     };
   }

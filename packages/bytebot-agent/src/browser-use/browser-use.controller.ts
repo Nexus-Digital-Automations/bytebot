@@ -50,10 +50,8 @@ import {
   UseGuards,
   UseInterceptors,
   UsePipes,
-  HttpStatus,
   HttpCode,
   HttpException,
-  Logger,
   Headers,
 } from '@nestjs/common';
 import {
@@ -76,7 +74,6 @@ import {
   ParlantCritical,
   ParlantSecure,
   ParlantValidated,
-  SecurityLevel,
 } from '@bytebot/shared/dist/index-server';
 
 // Authentication and Authorization Guards
@@ -205,7 +202,7 @@ import {
     properties: {
       statusCode: { type: 'number', example: 401 },
       message: { type: 'string', example: 'Unauthorized' },
-      error: { type: 'string', example: 'JWT token invalid' },
+      _error: { type: 'string', example: 'JWT token invalid' },
       timestamp: { type: 'string', format: 'date-time' },
       path: { type: 'string', example: '/api/v1/browser-use/tasks' },
     },
@@ -219,7 +216,7 @@ import {
     properties: {
       statusCode: { type: 'number', example: 403 },
       message: { type: 'string', example: 'Forbidden' },
-      error: { type: 'string', example: 'Insufficient role permissions' },
+      _error: { type: 'string', example: 'Insufficient role permissions' },
       timestamp: { type: 'string', format: 'date-time' },
       path: { type: 'string' },
     },
@@ -246,7 +243,7 @@ import {
     properties: {
       statusCode: { type: 'number', example: 500 },
       message: { type: 'string', example: 'Internal server error' },
-      error: { type: 'string' },
+      _error: { type: 'string' },
       timestamp: { type: 'string', format: 'date-time' },
       correlationId: { type: 'string' },
     },
@@ -1152,7 +1149,7 @@ export class BrowserUseController {
               downloadUrl: exportResult.downloadUrl,
             }
           : undefined,
-        error: exportResult.error
+        _error: exportResult.error
           ? {
               code: 'EXPORT_ERROR',
               message: exportResult.error,
@@ -1389,7 +1386,7 @@ export class BrowserUseController {
         correlationId,
         timestamp: new Date(),
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : JSON.stringify(error);
       const errorStack = error instanceof Error ? error.stack : undefined;

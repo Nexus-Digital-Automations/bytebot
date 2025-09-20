@@ -17,8 +17,8 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import { DatabaseHealthController } from '../database-health.controller';
 import { DatabaseService } from '../database.service';
 import {
@@ -147,7 +147,7 @@ describe('DatabaseHealthController Comprehensive Test Suite', () => {
               success: true,
               responseTime: 25,
               timestamp: new Date(),
-              error: null,
+              _error: null,
             }),
           },
         },
@@ -249,7 +249,7 @@ describe('DatabaseHealthController Comprehensive Test Suite', () => {
       expect(response).toEqual({
         status: 'unhealthy',
         timestamp: expect.any(String),
-        error: 'Health check service unavailable',
+        _error: 'Health check service unavailable',
         checks: {
           connectivity: false,
           performance: false,
@@ -480,7 +480,7 @@ describe('DatabaseHealthController Comprehensive Test Suite', () => {
         success: true,
         responseTime: 25,
         timestamp: expect.any(Date),
-        error: null,
+        _error: null,
         operationId: expect.any(String),
       });
     });
@@ -491,7 +491,7 @@ describe('DatabaseHealthController Comprehensive Test Suite', () => {
         success: false,
         responseTime: 5000,
         timestamp: new Date(),
-        error: 'Database connection timeout',
+        _error: 'Database connection timeout',
       });
 
       const response = await controller.performHealthCheck();
@@ -741,7 +741,7 @@ describe('DatabaseHealthController Comprehensive Test Suite', () => {
       expect(errorResponse).toEqual({
         status: 'unhealthy',
         timestamp: expect.any(String),
-        error: 'Service error',
+        _error: 'Service error',
         checks: {
           connectivity: false,
           performance: false,

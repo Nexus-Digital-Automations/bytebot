@@ -15,9 +15,9 @@
  * @since Orchestrator Test Coverage Enhancement
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
@@ -83,7 +83,7 @@ describe('PrismaService', () => {
 
     const mockLogger = {
       log: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
       verbose: jest.fn(),
@@ -148,7 +148,7 @@ describe('PrismaService', () => {
       );
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Database connection failed'),
-        expect.objectContaining({ error: connectionError }),
+        expect.objectContaining({ _error: connectionError }),
       );
     });
 
@@ -217,7 +217,7 @@ describe('PrismaService', () => {
       // Assert
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error during database disconnection'),
-        expect.objectContaining({ error: disconnectionError }),
+        expect.objectContaining({ _error: disconnectionError }),
       );
     });
 
@@ -286,7 +286,7 @@ describe('PrismaService', () => {
       );
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Transaction failed'),
-        expect.objectContaining({ error: transactionError }),
+        expect.objectContaining({ _error: transactionError }),
       );
     });
 
@@ -393,7 +393,7 @@ describe('PrismaService', () => {
   describe('Connection Health Monitoring', () => {
     it('should provide database health status', async () => {
       // Arrange
-      mockPrismaClient.$queryRaw.mockResolvedValue([{ result: 1 }]);
+      mockPrismaClient.$queryRaw.mockResolvedValue([{ _result: 1 }]);
 
       // Act
       const healthStatus = await service.getHealthStatus();
@@ -429,7 +429,7 @@ describe('PrismaService', () => {
 
     it('should provide database metrics', async () => {
       // Arrange
-      mockPrismaClient.$queryRaw.mockResolvedValue([{ result: 1 }]);
+      mockPrismaClient.$queryRaw.mockResolvedValue([{ _result: 1 }]);
 
       // Act
       const metrics = service.getDatabaseMetrics();
@@ -653,7 +653,7 @@ describe('PrismaService', () => {
       };
 
       (mockPrismaClient.user.create as jest.Mock).mockImplementation(
-        async (data: any) => {
+        async (_data: any) => {
           // Simulate encryption check
           if (data.data.password === 'plaintext-password') {
             throw new Error(
@@ -666,7 +666,7 @@ describe('PrismaService', () => {
 
       // Act & Assert
       await expect(
-        service.user.create({ data: sensitiveUserData } as any),
+        service.user.create({ _data: sensitiveUserData } as any),
       ).rejects.toThrow('encryption required');
 
       expect(logger.warn).toHaveBeenCalledWith(
@@ -688,10 +688,12 @@ describe('PrismaService', () => {
 
       // Act
       await service.user.findMany();
-      await service.user.create({ data: { email: 'test@example.com' } } as any);
+      await service.user.create({
+        _data: { email: 'test@example.com' },
+      } as any);
       await service.user.update({
         where: { id: 'user-123' },
-        data: { name: 'Updated' },
+        _data: { name: 'Updated' },
       } as any);
 
       const metrics = service.getDatabaseMetrics();

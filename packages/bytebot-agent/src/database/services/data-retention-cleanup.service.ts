@@ -16,7 +16,7 @@
  * @service DataRetentionCleanupService
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -59,7 +59,7 @@ export interface CleanupExecutionResult {
   errorsCount: number;
   errorDetails?: Array<{
     entityId: string;
-    error: string;
+    _error: string;
     timestamp: Date;
   }>;
   executionStatus: 'running' | 'completed' | 'failed' | 'cancelled';
@@ -78,7 +78,7 @@ export interface EntityCleanupResult {
   bytesArchived: number;
   errors: Array<{
     entityId: string;
-    error: string;
+    _error: string;
   }>;
 }
 
@@ -175,14 +175,14 @@ interface CleanupExecutionLogData {
   errorsCount: number;
   errorDetails?: Array<{
     entityId: string;
-    error: string;
+    _error: string;
     timestamp: Date;
   }>;
   executionStatus: 'running' | 'completed' | 'failed' | 'cancelled';
 }
 
 // Utility function to safely extract error message
-function getErrorMessage(error: unknown): string {
+function getErrorMessage(_error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
@@ -201,7 +201,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 // Utility function to safely extract error stack
-function getErrorStack(error: unknown): string | undefined {
+function getErrorStack(_error: unknown): string | undefined {
   if (error instanceof Error && error.stack) {
     return error.stack;
   }
@@ -390,7 +390,7 @@ export class DataRetentionCleanupService {
 
     this.logger.log(`Starting cleanup execution for policy: ${policy.id}`);
 
-    const result: CleanupExecutionResult = {
+    const _result: CleanupExecutionResult = {
       policyId: policy.id,
       executionId,
       startTime,
@@ -473,7 +473,7 @@ export class DataRetentionCleanupService {
       result.errorsCount = entityResult.errors.length;
       result.errorDetails = entityResult.errors.map((error) => ({
         entityId: error.entityId,
-        error: error.error,
+        _error: error.error,
         timestamp: new Date(),
       }));
 
@@ -513,7 +513,7 @@ export class DataRetentionCleanupService {
       result.errorsCount++;
       result.errorDetails?.push({
         entityId: 'policy_execution',
-        error: getErrorMessage(error),
+        _error: getErrorMessage(error),
         timestamp: new Date(),
       });
 
@@ -536,7 +536,7 @@ export class DataRetentionCleanupService {
     archiveDate: Date,
     deleteDate: Date,
   ): Promise<EntityCleanupResult> {
-    const result: EntityCleanupResult = {
+    const _result: EntityCleanupResult = {
       recordsProcessed: 0,
       recordsArchived: 0,
       recordsDeleted: 0,
@@ -583,7 +583,7 @@ export class DataRetentionCleanupService {
         } catch (error) {
           result.errors.push({
             entityId: session.id,
-            error: getErrorMessage(error),
+            _error: getErrorMessage(error),
           });
         }
       }
@@ -609,10 +609,10 @@ export class DataRetentionCleanupService {
                 {
                   OR: [
                     {
-                      metadata: { path: ['isProductionData'], equals: false },
+                      _metadata: { path: ['isProductionData'], equals: false },
                     },
                     {
-                      metadata: {
+                      _metadata: {
                         path: ['isProductionData'],
                         equals: Prisma.JsonNull,
                       },
@@ -665,7 +665,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: session.id,
-          error: getErrorMessage(error),
+          _error: getErrorMessage(error),
         });
       }
     }
@@ -683,7 +683,7 @@ export class DataRetentionCleanupService {
     archiveDate: Date,
     deleteDate: Date,
   ): Promise<EntityCleanupResult> {
-    const result: EntityCleanupResult = {
+    const _result: EntityCleanupResult = {
       recordsProcessed: 0,
       recordsArchived: 0,
       recordsDeleted: 0,
@@ -773,7 +773,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: task.id,
-          error: getErrorMessage(error),
+          _error: getErrorMessage(error),
         });
       }
     }
@@ -790,7 +790,7 @@ export class DataRetentionCleanupService {
     archiveDate: Date,
     deleteDate: Date,
   ): Promise<EntityCleanupResult> {
-    const result: EntityCleanupResult = {
+    const _result: EntityCleanupResult = {
       recordsProcessed: 0,
       recordsArchived: 0,
       recordsDeleted: 0,
@@ -822,9 +822,9 @@ export class DataRetentionCleanupService {
           ? [
               {
                 OR: [
-                  { metadata: { path: ['isProductionData'], equals: false } },
+                  { _metadata: { path: ['isProductionData'], equals: false } },
                   {
-                    metadata: {
+                    _metadata: {
                       path: ['isProductionData'],
                       equals: Prisma.JsonNull,
                     },
@@ -864,7 +864,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: screenshot.id,
-          error: getErrorMessage(error),
+          _error: getErrorMessage(error),
         });
       }
     }
@@ -881,7 +881,7 @@ export class DataRetentionCleanupService {
     archiveDate: Date,
     deleteDate: Date,
   ): Promise<EntityCleanupResult> {
-    const result: EntityCleanupResult = {
+    const _result: EntityCleanupResult = {
       recordsProcessed: 0,
       recordsArchived: 0,
       recordsDeleted: 0,
@@ -924,10 +924,13 @@ export class DataRetentionCleanupService {
                   {
                     OR: [
                       {
-                        metadata: { path: ['isProductionData'], equals: false },
+                        _metadata: {
+                          path: ['isProductionData'],
+                          equals: false,
+                        },
                       },
                       {
-                        metadata: {
+                        _metadata: {
                           path: ['isProductionData'],
                           equals: Prisma.JsonNull,
                         },
@@ -955,7 +958,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: domSnapshot.id,
-          error: getErrorMessage(error),
+          _error: getErrorMessage(error),
         });
       }
     }
@@ -972,7 +975,7 @@ export class DataRetentionCleanupService {
     archiveDate: Date,
     deleteDate: Date,
   ): Promise<EntityCleanupResult> {
-    const result: EntityCleanupResult = {
+    const _result: EntityCleanupResult = {
       recordsProcessed: 0,
       recordsArchived: 0,
       recordsDeleted: 0,
@@ -992,10 +995,13 @@ export class DataRetentionCleanupService {
                   {
                     OR: [
                       {
-                        metadata: { path: ['isProductionData'], equals: false },
+                        _metadata: {
+                          path: ['isProductionData'],
+                          equals: false,
+                        },
                       },
                       {
-                        metadata: {
+                        _metadata: {
                           path: ['isProductionData'],
                           equals: Prisma.JsonNull,
                         },
@@ -1026,7 +1032,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: extraction.id,
-          error: getErrorMessage(error),
+          _error: getErrorMessage(error),
         });
       }
     }
@@ -1208,8 +1214,8 @@ export class DataRetentionCleanupService {
     // For now, we'll just mark it as archived in metadata
     await this.prismaService.browserSession.update({
       where: { id: session.id },
-      data: {
-        metadata: {
+      _data: {
+        _metadata: {
           ...(session.metadata as object),
           archived: true,
           archivedAt: new Date(),
@@ -1314,7 +1320,7 @@ export class DataRetentionCleanupService {
     try {
       // Note: cleanupExecutionLog model not available in current schema
       // await this.prismaService.cleanupExecutionLog.create({
-      //   data: {
+      //   _data: {
       //     policyId: result.policyId,
       //     executionStartedAt: result.startTime,
       //     executionCompletedAt: result.endTime,

@@ -9,7 +9,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable, tap, catchError, throwError } from 'rxjs';
@@ -55,7 +54,7 @@ export interface SlowQueryAlert {
   duration: number;
   threshold: number;
   timestamp: Date;
-  context: Record<string, unknown>;
+  _context: Record<string, unknown>;
 }
 
 @Injectable()
@@ -96,7 +95,10 @@ export class QueryLoggingInterceptor implements NestInterceptor {
     });
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const operationId = this.generateOperationId();
     const startTime = performance.now();
     const requestContext = this.extractRequestContext(context);
@@ -153,9 +155,9 @@ export class QueryLoggingInterceptor implements NestInterceptor {
             duration,
             threshold: this.slowQueryThreshold,
             timestamp: new Date(),
-            context: {
+            _context: {
               ...requestContext,
-              result: this.sanitizeResult(result),
+              _result: this.sanitizeResult(result),
             } as Record<string, unknown>,
           });
         }
@@ -172,7 +174,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
           success: false,
           timestamp: new Date(),
           connectionId: queryInfo.connectionId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           queryFingerprint: queryInfo.fingerprint,
           requestContext,
         };
@@ -184,7 +186,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
           operationId,
           queryType: queryInfo.type,
           duration: `${duration.toFixed(2)}ms`,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           requestContext,
         });
@@ -282,7 +284,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
           duration: query.duration,
           timestamp: query.timestamp,
           success: query.success,
-          error: query.error,
+          _error: query.error,
           requestContext: query.requestContext,
         })),
     };
@@ -299,7 +301,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Extract request context from execution context
    */
-  private extractRequestContext(context: ExecutionContext): {
+  private extractRequestContext(_context: ExecutionContext): {
     userId?: string;
     sessionId?: string;
     endpoint?: string;
@@ -332,7 +334,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Extract query information from execution context
    */
-  private extractQueryInfo(context: ExecutionContext) {
+  private extractQueryInfo(_context: ExecutionContext) {
     const handler = context.getHandler();
     const controllerName = context.getClass().name;
     const methodName = handler.name;
@@ -384,7 +386,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Extract rows affected from query result
    */
-  private extractRowsAffected(result: unknown): number | undefined {
+  private extractRowsAffected(_result: unknown): number | undefined {
     if (typeof result === 'object' && result !== null) {
       // Prisma typically returns count for bulk operations
       if (
@@ -411,7 +413,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Sanitize result for logging (remove sensitive data)
    */
-  private sanitizeResult(result: unknown): unknown {
+  private sanitizeResult(_result: unknown): unknown {
     if (typeof result !== 'object' || result === null) {
       return result;
     }
@@ -474,7 +476,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
       duration: `${alert.duration.toFixed(2)}ms`,
       threshold: `${alert.threshold}ms`,
       slowBy: `${(alert.duration - alert.threshold).toFixed(2)}ms`,
-      context: alert.context,
+      _context: alert.context,
     });
 
     // Here you could integrate with alerting systems like:

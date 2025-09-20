@@ -18,14 +18,13 @@
  * @since Phase 2: Authentication Controller Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
-  HttpStatus,
   UnauthorizedException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
+
 import { UserRole } from '@prisma/client';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
@@ -206,7 +205,7 @@ describe('AuthController', () => {
         expect.stringContaining('Login failed'),
         expect.objectContaining({
           email: loginDto.email,
-          error: errorMessage,
+          _error: errorMessage,
           ipAddress: '192.168.1.100',
         }),
       );
@@ -346,7 +345,7 @@ describe('AuthController', () => {
         expect.objectContaining({
           email: registerDto.email,
           username: registerDto.username,
-          error: errorMessage,
+          _error: errorMessage,
         }),
       );
     });
@@ -422,7 +421,7 @@ describe('AuthController', () => {
       expect(loggerSpy).toHaveBeenCalledWith(
         expect.stringContaining('Token refresh failed'),
         expect.objectContaining({
-          error: errorMessage,
+          _error: errorMessage,
         }),
       );
     });
@@ -495,7 +494,7 @@ describe('AuthController', () => {
       expect(loggerSpy).toHaveBeenCalledWith(
         expect.stringContaining('Logout processing completed with issues'),
         expect.objectContaining({
-          error: 'Token not found',
+          _error: 'Token not found',
         }),
       );
     });
@@ -597,7 +596,7 @@ describe('AuthController', () => {
         expect.objectContaining({
           userId: mockUser.id,
           username: mockUser.username,
-          error: errorMessage,
+          _error: errorMessage,
         }),
       );
     });

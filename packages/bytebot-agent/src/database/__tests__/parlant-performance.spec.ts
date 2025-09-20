@@ -19,7 +19,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantValidatedDatabaseService,
@@ -163,7 +163,7 @@ class PerformanceUtils {
    */
   static async measureExecutionTime<T>(
     operation: () => Promise<T>,
-  ): Promise<{ result: T; duration: number }> {
+  ): Promise<{ _result: T; duration: number }> {
     const startTime = process.hrtime.bigint();
     const result = await operation();
     const endTime = process.hrtime.bigint();
@@ -221,7 +221,7 @@ class PerformanceUtils {
     operation: () => Promise<T>,
     samplingInterval: number = 100,
   ): Promise<{
-    result: T;
+    _result: T;
     memoryStats: { peak: number; average: number; samples: number[] };
   }> {
     const memorySamples: number[] = [];
@@ -340,7 +340,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
       uptime: 3600,
     });
     mockDatabaseService.executeRawQuery.mockResolvedValue([
-      { result: 'success' },
+      { _result: 'success' },
     ]);
 
     mockPrismaService.getOptimizedClient.mockReturnValue({
@@ -403,7 +403,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
 
     it('should process LOW risk operations within 100ms', async () => {
       const metadata = PerformanceTestDataFactory.createLowRiskOperation();
-      const mockOperation = jest.fn().mockResolvedValue({ data: 'test' });
+      const mockOperation = jest.fn().mockResolvedValue({ _data: 'test' });
 
       const { duration } = await PerformanceUtils.measureExecutionTime(
         async () => {
@@ -501,7 +501,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
 
     it('should process create operations within performance thresholds', async () => {
       const args = {
-        data: {
+        _data: {
           name: 'Performance Test User',
           email: 'perf@test.com',
         },
@@ -521,7 +521,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
     it('should process update operations on CONFIDENTIAL models efficiently', async () => {
       const args = {
         where: { id: 123 },
-        data: { name: 'Updated User' },
+        _data: { name: 'Updated User' },
       };
 
       const { duration } = await PerformanceUtils.measureExecutionTime(
@@ -592,7 +592,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
 
     it('should maintain high cache hit rate under load', async () => {
       const metadata = PerformanceTestDataFactory.createLowRiskOperation();
-      const mockOperation = jest.fn().mockResolvedValue({ data: 'cached' });
+      const mockOperation = jest.fn().mockResolvedValue({ _data: 'cached' });
 
       // Execute same operation multiple times
       const operations = Array(20)
@@ -862,7 +862,7 @@ describe('PARLANT Performance Tests - Sub-1000ms Validation Target', () => {
         .fill(null)
         .map((_, index) => {
           const riskType = index % 4;
-          let metadata: DatabaseOperationMetadata;
+          let _metadata: DatabaseOperationMetadata;
 
           switch (riskType) {
             case 0:

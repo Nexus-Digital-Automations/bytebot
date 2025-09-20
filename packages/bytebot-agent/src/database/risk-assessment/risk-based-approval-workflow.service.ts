@@ -21,8 +21,8 @@ export interface ApprovalRequest {
   readonly timestamp: Date;
   readonly operation: DatabaseOperation;
   readonly riskAssessment: RiskAssessmentResult;
-  readonly context: OperationContext;
-  readonly metadata: Record<string, unknown>;
+  readonly _context: OperationContext;
+  readonly _metadata: Record<string, unknown>;
   priority: ApprovalPriority;
   status: ApprovalStatus;
   approvers: ApprovalRecord[];
@@ -310,9 +310,9 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   public async submitApprovalRequest(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskAssessment: RiskAssessmentResult,
-    metadata: Record<string, unknown> = {},
+    _metadata: Record<string, unknown> = {},
   ): Promise<ApprovalRequest> {
     const startTime = Date.now();
 
@@ -324,7 +324,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       const priority = this.calculatePriority(riskAssessment, context);
 
       // Create approval request
-      const request: ApprovalRequest = {
+      const _request: ApprovalRequest = {
         id: requestId,
         requesterId: context.userId,
         timestamp: new Date(),
@@ -376,14 +376,14 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       return request;
     } catch (error) {
       this.logAuditEvent('APPROVAL_REQUEST_SUBMISSION_FAILED', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         operation: operation.type,
         requester: context.userId,
         timestamp: new Date(),
       });
 
       throw new Error(
-        `Failed to submit approval request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to submit approval _request: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -484,7 +484,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
       this.logAuditEvent('APPROVAL_DECISION_PROCESSING_FAILED', {
         requestId,
         approverId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date(),
       });
 
@@ -497,7 +497,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Route approval request to appropriate approvers
    */
-  private async routeToApprovers(request: ApprovalRequest): Promise<void> {
+  private async routeToApprovers(_request: ApprovalRequest): Promise<void> {
     const riskLevel = request.riskAssessment.riskLevel;
     const requiredApprovers = this.getRequiredApprovers(riskLevel, request);
 
@@ -522,7 +522,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private getRequiredApprovers(
     riskLevel: string,
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): string[] {
     const thresholds = this.configuration.riskThresholds;
     const approvers: string[] = [];
@@ -559,7 +559,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private calculatePriority(
     riskAssessment: RiskAssessmentResult,
-    context: OperationContext,
+    _context: OperationContext,
   ): ApprovalPriority {
     const riskScore = riskAssessment.overallScore;
     const isEmergency = context.previousActions.includes('EMERGENCY_ACCESS');
@@ -611,7 +611,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Schedule escalation for approval request
    */
-  private scheduleEscalation(request: ApprovalRequest): void {
+  private scheduleEscalation(_request: ApprovalRequest): void {
     if (!request.deadline) return;
 
     const escalationTime = request.deadline.getTime() - Date.now();
@@ -673,7 +673,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    * Evaluate whether approval request is complete
    */
   private async evaluateApprovalDecision(
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): Promise<boolean> {
     const requiredApprovals = this.getRequiredApprovals(request);
     const receivedApprovals = request.approvers.filter(
@@ -699,7 +699,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
   /**
    * Get required number of approvals based on risk level
    */
-  private getRequiredApprovals(request: ApprovalRequest): number {
+  private getRequiredApprovals(_request: ApprovalRequest): number {
     const riskLevel = request.riskAssessment.riskLevel;
     const thresholds = this.configuration.riskThresholds;
 
@@ -722,7 +722,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private isAuthorizedApprover(
     approverId: string,
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): boolean {
     const requiredApprovers = this.getRequiredApprovers(
       request.riskAssessment.riskLevel,
@@ -755,7 +755,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    * Process delegation of approval
    */
   private async processDelegation(
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
     fromApproverId: string,
     toApproverId: string,
   ): Promise<void> {
@@ -775,7 +775,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private async sendApprovalNotification(
     approverId: string,
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): Promise<void> {
     const notification = {
       type: 'APPROVAL_REQUEST',
@@ -796,7 +796,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private async sendUrgentNotification(
     approverId: string,
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): Promise<void> {
     const notification = {
       type: 'URGENT_APPROVAL_REQUEST',
@@ -818,7 +818,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
    */
   private evaluateEscalationConditions(
     conditions: string[],
-    request: ApprovalRequest,
+    _request: ApprovalRequest,
   ): boolean {
     // This would implement condition evaluation logic
     return conditions.length > 0; // Simplified implementation

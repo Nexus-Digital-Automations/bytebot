@@ -6,7 +6,7 @@
  * service interactions, database operations, and local-only architecture compliance.
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import request from 'supertest';
@@ -378,7 +378,7 @@ describe('Browser-Use Integration Tests', () => {
             url: 'https://example.com',
           },
         ],
-        options: {
+        _options: {
           screenshots: true,
         },
       };

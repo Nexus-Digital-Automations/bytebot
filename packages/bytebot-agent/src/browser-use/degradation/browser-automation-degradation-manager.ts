@@ -13,7 +13,7 @@
  * - Recovery and restoration mechanisms
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 // Removed unused imports - these are imported but not used in the current implementation
 import { BrowserAutomationOperationType } from '../response/browser-automation-response-formatter';
 import { BrowserAutomationMonitoringService } from '../monitoring/browser-automation-monitoring.service';
@@ -91,7 +91,7 @@ export interface DegradationState {
   userNotified: boolean;
   recoveryAttempts: number;
   estimatedRecoveryTime?: Date;
-  metadata: Record<string, unknown>;
+  _metadata: Record<string, unknown>;
 }
 
 export interface FallbackOperation {
@@ -302,7 +302,7 @@ export class BrowserAutomationDegradationManager {
           success: false,
           state: {} as DegradationState,
           mitigationsApplied: [],
-          error: `No suitable degradation strategy found for level: ${level}`,
+          _error: `No suitable degradation strategy found for level: ${level}`,
         };
       }
 
@@ -335,7 +335,7 @@ export class BrowserAutomationDegradationManager {
         mitigationsApplied,
         userNotified: false,
         recoveryAttempts: 0,
-        metadata: metadata || {},
+        _metadata: metadata || {},
       };
 
       // Notify users if required
@@ -374,7 +374,7 @@ export class BrowserAutomationDegradationManager {
         success: false,
         state: {} as DegradationState,
         mitigationsApplied: [],
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -391,7 +391,7 @@ export class BrowserAutomationDegradationManager {
       if (!this.currentDegradationState) {
         return {
           success: true,
-          error: 'No active degradation to deactivate',
+          _error: 'No active degradation to deactivate',
         };
       }
 
@@ -459,7 +459,7 @@ export class BrowserAutomationDegradationManager {
 
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -557,7 +557,7 @@ export class BrowserAutomationDegradationManager {
           return {
             success: false,
             degraded: true,
-            error: error instanceof Error ? error : new Error(String(error)),
+            _error: error instanceof Error ? _error : new Error(String(error)),
           };
         }
       }
@@ -573,7 +573,7 @@ export class BrowserAutomationDegradationManager {
       );
 
       return {
-        result: fallbackResult as T,
+        _result: fallbackResult as T,
         success: true,
         degraded: true,
         fallbackUsed: fallback.fallbackMethod,
@@ -583,7 +583,7 @@ export class BrowserAutomationDegradationManager {
       return {
         success: false,
         degraded: !!this.currentDegradationState,
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -1209,6 +1209,6 @@ export class BrowserAutomationDegradationManager {
     _context?: Record<string, unknown>,
   ): Promise<unknown> {
     // Implement cached data extraction logic
-    return { data: 'cached_extracted_data', cached: true };
+    return { _data: 'cached_extracted_data', cached: true };
   }
 }

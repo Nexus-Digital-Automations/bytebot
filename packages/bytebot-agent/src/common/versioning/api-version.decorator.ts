@@ -231,7 +231,7 @@ export const BetaApi = (version: SupportedVersion) => {
 /**
  * Type guard to check if metadata is an ApiVersionConfig
  */
-function isApiVersionConfig(metadata: unknown): metadata is ApiVersionConfig {
+function isApiVersionConfig(_metadata: unknown): metadata is ApiVersionConfig {
   return (
     typeof metadata === 'object' &&
     metadata !== null &&
@@ -246,7 +246,7 @@ function isApiVersionConfig(metadata: unknown): metadata is ApiVersionConfig {
  * @returns Version configuration or null
  */
 export function getVersionConfig(target: object): ApiVersionConfig | null {
-  const metadata: unknown = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
+  const _metadata: unknown = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
   if (isApiVersionConfig(metadata)) {
     return metadata;
   }
@@ -259,7 +259,7 @@ export function getVersionConfig(target: object): ApiVersionConfig | null {
  * @returns API version or null
  */
 export function getApiVersion(target: object): string | null {
-  const metadata: unknown = Reflect.getMetadata(VERSION_METADATA_KEY, target);
+  const _metadata: unknown = Reflect.getMetadata(VERSION_METADATA_KEY, target);
   if (typeof metadata === 'string') {
     return metadata;
   }
@@ -270,7 +270,7 @@ export function getApiVersion(target: object): string | null {
  * Type guard to check if metadata is a valid SupportedVersion array
  */
 function isSupportedVersionArray(
-  metadata: unknown,
+  _metadata: unknown,
 ): metadata is SupportedVersion[] {
   return (
     Array.isArray(metadata) &&
@@ -288,7 +288,7 @@ function isSupportedVersionArray(
  * @returns Array of supported versions or null
  */
 export function getMultiVersions(target: object): SupportedVersion[] | null {
-  const metadata: unknown = Reflect.getMetadata('multi_version', target);
+  const _metadata: unknown = Reflect.getMetadata('multi_version', target);
   if (isSupportedVersionArray(metadata)) {
     return metadata;
   }

@@ -17,7 +17,7 @@
  * Performance: Sub-5000ms migration validation with comprehensive rollback testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -28,11 +28,7 @@ import {
 } from '../parlant-validated-database.service';
 import { DatabaseService } from '../database.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== MIGRATION TESTING INTERFACES =====
 
@@ -343,10 +339,7 @@ const migrationTestScenarios: MigrationTestScenario[] = [
 /**
  * Mock Parlant validation responses for migration scenarios
  */
-const mockMigrationValidationResponses: Record<
-  string,
-  ParlantValidationResponse
-> = {
+const mockMigrationValidationResponses: Record<string> = {
   MIGRATION_APPROVED: {
     approved: true,
     conversationId: 'conv_migration_001',
@@ -364,7 +357,7 @@ const mockMigrationValidationResponses: Record<
       timeoutMs: 60000,
       retryAttempts: 0, // No retries for migrations
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 300,
@@ -399,7 +392,7 @@ const mockMigrationValidationResponses: Record<
       timeoutMs: 0,
       retryAttempts: 0,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 180,
@@ -535,7 +528,7 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
         backupPath: '/tmp/backup_001.sql',
         backupSize: 1024 * 1024, // 1MB
         createdAt: new Date(),
-        metadata: {
+        _metadata: {
           operationType: 'MIGRATION',
           tables: ['users', 'user_preferences'],
           compressionUsed: false,
@@ -577,10 +570,10 @@ describe('Database Migration Testing with Conversational Schema Validation', () 
           if (step.validationQuery) {
             const validationResult =
               await prismaClient.$queryRaw`${step.validationQuery}`;
-            return { step: step.stepNumber, result: validationResult };
+            return { step: step.stepNumber, _result: validationResult };
           }
 
-          return { step: step.stepNumber, result: 'completed' };
+          return { step: step.stepNumber, _result: 'completed' };
         },
       );
 

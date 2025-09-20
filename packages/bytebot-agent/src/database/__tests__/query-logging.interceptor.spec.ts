@@ -17,9 +17,9 @@
  * @since Comprehensive Database Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { ExecutionContext, CallHandler, Logger } from '@nestjs/common';
+import { ExecutionContext, CallHandler } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import {
   QueryLoggingInterceptor,
@@ -72,7 +72,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
 
   // Mock call handler
   const createMockCallHandler = (
-    result: unknown = { data: 'test' },
+    _result: unknown = { _data: 'test' },
     shouldError = false,
   ): jest.Mocked<CallHandler> => {
     const handler = {
@@ -171,7 +171,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].operationId).toMatch(/^query_\d+_[a-z0-9]{6}$/);
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -185,7 +185,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
         next: () => {
           done(new Error('Should not reach success handler'));
         },
-        error: (error) => {
+        _error: (error) => {
           expect(error.message).toBe('Database error');
 
           // Check that error metrics were recorded
@@ -222,7 +222,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           performance.now = originalNow;
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -258,7 +258,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(requestContext?.correlationId).toBe('custom-corr');
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -271,7 +271,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
         getClass: jest.fn().mockReturnValue({ name: 'BackgroundService' }),
       } as unknown as jest.Mocked<ExecutionContext>;
 
-      const callHandler = createMockCallHandler({ result: 'background' });
+      const callHandler = createMockCallHandler({ _result: 'background' });
 
       const result$ = interceptor.intercept(mockContext, callHandler);
 
@@ -285,7 +285,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(requestContext?.method).toBe('internal');
           done();
         },
-        error: done,
+        _error: done,
       });
     });
   });
@@ -314,7 +314,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
             completedTests++;
             if (completedTests === totalTests) done();
           },
-          error: done,
+          _error: done,
         });
       });
     });
@@ -342,7 +342,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
             completedTests++;
             if (completedTests === totalTests) done();
           },
-          error: done,
+          _error: done,
         });
       });
     });
@@ -369,7 +369,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
             completedTests++;
             if (completedTests === totalTests) done();
           },
-          error: done,
+          _error: done,
         });
       });
     });
@@ -397,7 +397,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
             completedTests++;
             if (completedTests === totalTests) done();
           },
-          error: done,
+          _error: done,
         });
       });
     });
@@ -407,7 +407,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
         'CustomController',
         'customOperation',
       );
-      const callHandler = createMockCallHandler({ result: 'custom' });
+      const callHandler = createMockCallHandler({ _result: 'custom' });
 
       const result$ = interceptor.intercept(context, callHandler);
 
@@ -417,7 +417,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].queryType).toBe('UNKNOWN');
           done();
         },
-        error: done,
+        _error: done,
       });
     });
   });
@@ -438,7 +438,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].rowsAffected).toBe(5);
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -458,7 +458,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].rowsAffected).toBe(3);
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -477,7 +477,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].rowsAffected).toBe(1);
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -493,7 +493,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].rowsAffected).toBeUndefined();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
   });
@@ -536,7 +536,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerWarnSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -581,7 +581,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerWarnSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -616,7 +616,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerDebugSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
   });
@@ -628,32 +628,32 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
         {
           controller: 'UserController',
           method: 'findAll',
-          result: [1, 2, 3],
+          _result: [1, 2, 3],
           delay: 100,
         },
         {
           controller: 'UserController',
           method: 'create',
-          result: { id: 1 },
+          _result: { id: 1 },
           delay: 200,
         },
         {
           controller: 'OrderController',
           method: 'update',
-          result: { count: 2 },
+          _result: { count: 2 },
           delay: 1500,
         }, // Slow
         {
           controller: 'ProductController',
           method: 'delete',
-          result: null,
+          _result: null,
           delay: 50,
-          error: true,
+          _error: true,
         },
         {
           controller: 'UserController',
           method: 'findById',
-          result: { id: 1 },
+          _result: { id: 1 },
           delay: 80,
         },
       ];
@@ -680,7 +680,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
             completed++;
             if (completed === queries.length) done();
           },
-          error: () => {
+          _error: () => {
             performance.now = originalNow;
             completed++;
             if (completed === queries.length) done();
@@ -773,7 +773,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
               expect(slowReport.queries[3].duration).toBe(1200);
             }
           },
-          error: () => {
+          _error: () => {
             performance.now = originalNow;
             completed++;
           },
@@ -839,7 +839,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerWarnSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -884,7 +884,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerWarnSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 
@@ -920,7 +920,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           loggerWarnSpy.mockRestore();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
   });
@@ -1008,7 +1008,7 @@ describe('QueryLoggingInterceptor Comprehensive Test Suite', () => {
           expect(metrics[0].rowsAffected).toBeUndefined();
           done();
         },
-        error: done,
+        _error: done,
       });
     });
 

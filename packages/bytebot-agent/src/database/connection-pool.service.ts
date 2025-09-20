@@ -4,12 +4,7 @@
  * for enterprise-grade database operations in the Bytebot API platform
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { ConnectionPoolConfig } from './connection-pool.config';
@@ -494,7 +489,7 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       this.logger.debug('Connection health test failed', {
         connectionId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }

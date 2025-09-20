@@ -11,11 +11,11 @@
  * - Rate limiting and retry logic
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { OpenAIService } from '../openai.service';
 import { SecretsService } from '../../config/secrets.service';
-import { Logger } from '@nestjs/common';
+
 import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentType,
@@ -549,7 +549,7 @@ describe('OpenAIService - Integration Tests', () => {
               source: {
                 type: 'base64',
                 media_type: 'image/png',
-                data: 'base64-image-data',
+                _data: 'base64-image-data',
               },
             },
           ],
@@ -571,7 +571,7 @@ describe('OpenAIService - Integration Tests', () => {
                 expect.objectContaining({
                   type: 'image_url',
                   image_url: expect.objectContaining({
-                    url: expect.stringContaining('data:image/png;base64,'),
+                    url: expect.stringContaining('_data: image/png;base64,'),
                   }),
                 }),
               ]),

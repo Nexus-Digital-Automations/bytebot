@@ -20,7 +20,7 @@
  * Performance: Load-aware scheduling with automatic optimization
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
@@ -32,10 +32,7 @@ import {
   BackupCreationRequest,
   BackupCreationResult,
 } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import {
   DatabaseOperationMetadata,
   RiskLevel,
@@ -178,7 +175,7 @@ export interface ConditionEvaluationResult {
   currentValue: number;
   threshold: number;
   operator: string;
-  result: boolean;
+  _result: boolean;
   evaluationTime: Date;
 }
 
@@ -277,7 +274,7 @@ export class IntelligentBackupSchedulerService {
    * Create new backup schedule with PARLANT approval
    */
   async createSchedule(
-    request: ScheduleCreationRequest,
+    _request: ScheduleCreationRequest,
     userContext: ParlantUserContext,
   ): Promise<{
     scheduleId: string;
@@ -382,7 +379,7 @@ export class IntelligentBackupSchedulerService {
       };
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to create backup schedule`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         scheduleName: request.name,
         operationId,
       });
@@ -533,7 +530,7 @@ export class IntelligentBackupSchedulerService {
 
       this.logger.error(`[${executionId}] Scheduled backup failed`, {
         scheduleId,
-        error: executionResult.errorMessage,
+        _error: executionResult.errorMessage,
         executionDuration: executionResult.executionDuration,
         executionId,
       });
@@ -546,7 +543,7 @@ export class IntelligentBackupSchedulerService {
    * Optimize schedule based on system performance patterns
    */
   async optimizeSchedule(
-    request: ScheduleOptimizationRequest,
+    _request: ScheduleOptimizationRequest,
     userContext: ParlantUserContext,
   ): Promise<{
     optimizedSchedule: BackupSchedule;
@@ -632,7 +629,7 @@ export class IntelligentBackupSchedulerService {
     } catch (error) {
       this.logger.error(`[${operationId}] Schedule optimization failed`, {
         scheduleId: request.scheduleId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
@@ -700,7 +697,7 @@ export class IntelligentBackupSchedulerService {
         this.logger.error(`Failed to execute scheduled backup`, {
           scheduleId: schedule.scheduleId,
           scheduleName: schedule.name,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -720,7 +717,7 @@ export class IntelligentBackupSchedulerService {
         await this.optimizeScheduleAsync(scheduleId);
       } catch (error) {
         this.logger.error(`Failed to optimize schedule ${scheduleId}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -829,7 +826,7 @@ export class IntelligentBackupSchedulerService {
    * Detect potential schedule conflicts
    */
   private async detectScheduleConflicts(
-    request: ScheduleCreationRequest,
+    _request: ScheduleCreationRequest,
     scheduleId: string,
   ): Promise<ScheduleConflict[]> {
     const conflicts: ScheduleConflict[] = [];
@@ -896,7 +893,7 @@ export class IntelligentBackupSchedulerService {
    */
   private async handleScheduleConflicts(
     conflicts: ScheduleConflict[],
-    request: ScheduleCreationRequest,
+    _request: ScheduleCreationRequest,
     _userContext: ParlantUserContext,
   ): Promise<void> {
     for (const conflict of conflicts) {
@@ -921,7 +918,7 @@ export class IntelligentBackupSchedulerService {
    */
   private async autoResolveTimeOverlap(
     conflict: ScheduleConflict,
-    request: ScheduleCreationRequest,
+    _request: ScheduleCreationRequest,
   ): Promise<void> {
     // Simple resolution: add 5 minutes offset to the new schedule
     const originalCron = request.cronExpression;
@@ -968,7 +965,7 @@ export class IntelligentBackupSchedulerService {
         }
       } catch (error) {
         this.logger.error('Failed to collect system metrics', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }, 300000); // 5 minutes
@@ -986,7 +983,7 @@ export class IntelligentBackupSchedulerService {
         await this.performOptimizationAnalysis();
       } catch (error) {
         this.logger.error('Failed to perform optimization analysis', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }, 3600000); // 1 hour
@@ -1040,7 +1037,7 @@ export class IntelligentBackupSchedulerService {
    * Validate schedule parameters
    */
   private async validateScheduleParameters(
-    request: ScheduleCreationRequest,
+    _request: ScheduleCreationRequest,
   ): Promise<void> {
     // Validate cron expression
     if (!this.isValidCronExpression(request.cronExpression)) {
@@ -1189,7 +1186,7 @@ export class IntelligentBackupSchedulerService {
    */
   private updateScheduleAnalytics(
     scheduleId: string,
-    result: ScheduleExecutionResult,
+    _result: ScheduleExecutionResult,
   ): void {
     const analytics = this.performanceMetrics.get(scheduleId);
     if (!analytics) return;
@@ -1226,7 +1223,7 @@ export class IntelligentBackupSchedulerService {
    */
   private recordScheduleExecution(
     scheduleId: string,
-    result: ScheduleExecutionResult,
+    _result: ScheduleExecutionResult,
   ): void {
     const executions = this.scheduleExecutions.get(scheduleId) || [];
     executions.push(result);

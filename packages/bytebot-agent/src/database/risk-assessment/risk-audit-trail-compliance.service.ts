@@ -1310,7 +1310,10 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
         comparison = a.timestamp.getTime() - b.timestamp.getTime();
         break;
       case 'severity':
-        const severityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
+        {
+          const severityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
+          break;
+        }
         comparison = severityOrder[a.severity] - severityOrder[b.severity];
         break;
       case 'riskScore':

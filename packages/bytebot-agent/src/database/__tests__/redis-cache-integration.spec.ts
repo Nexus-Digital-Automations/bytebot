@@ -17,7 +17,7 @@
  * Performance: Sub-1000ms cache operations with intelligent invalidation
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import {
@@ -26,11 +26,7 @@ import {
   RiskLevel,
 } from '../parlant-validated-database.service';
 import { DatabaseService } from '../database.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== CACHE TESTING INTERFACES =====
 
@@ -252,7 +248,7 @@ const mockCachedValidationResponses: Record<string, ParlantValidationResponse> =
         timeoutMs: 10000,
         retryAttempts: 3,
       },
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 25, // Fast cached response
@@ -277,7 +273,7 @@ const mockCachedValidationResponses: Record<string, ParlantValidationResponse> =
         timeoutMs: 15000,
         retryAttempts: 2,
       },
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 45, // Cached response with additional checks
@@ -432,7 +428,7 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
         .spyOn(parlantDatabaseService as any, 'performParlantValidation')
         .mockResolvedValueOnce({
           ...mockCachedValidationResponses.CACHED_READ_RESPONSE,
-          metadata: {
+          _metadata: {
             ...mockCachedValidationResponses.CACHED_READ_RESPONSE.metadata,
             cacheStatus: 'miss',
             processingTime: 150,
@@ -440,7 +436,7 @@ describe('Redis Cache Integration and Invalidation Testing', () => {
         })
         .mockResolvedValueOnce({
           ...mockCachedValidationResponses.CACHED_READ_RESPONSE,
-          metadata: {
+          _metadata: {
             ...mockCachedValidationResponses.CACHED_READ_RESPONSE.metadata,
             cacheStatus: 'hit',
             processingTime: 25,

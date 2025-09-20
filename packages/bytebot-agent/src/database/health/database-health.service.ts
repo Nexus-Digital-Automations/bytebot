@@ -4,12 +4,7 @@
  * with failure recovery and graceful degradation for the Bytebot API platform
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../database.service';
 import { ConnectionPoolService } from '../connection-pool.service';
@@ -55,7 +50,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseHealthService.name);
   private readonly healthChecks = new Map<
     string,
-    (options: HealthCheckOptions) => Promise<HealthCheckResult>
+    (_options: HealthCheckOptions) => Promise<HealthCheckResult>
   >();
   private backgroundMonitoring?: NodeJS.Timeout;
   private lastHealthReport!: HealthReport;
@@ -108,7 +103,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
       // Execute all health checks in parallel with timeout
       const healthCheckPromises = Array.from(this.healthChecks.entries()).map(
         async ([name, checkFn]) => {
-          const options: HealthCheckOptions = {
+          const _options: HealthCheckOptions = {
             timeout: this.configService.get<number>(
               'DB_HEALTH_CHECK_TIMEOUT',
               5000,
@@ -137,7 +132,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
               status: 'unhealthy' as const,
               duration: 0,
               timestamp: new Date(),
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             };
           }
         },
@@ -157,7 +152,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
             status: 'unhealthy',
             duration: 0,
             timestamp: new Date(),
-            error: 'Health check execution failed',
+            _error: 'Health check execution failed',
           });
         }
       });
@@ -178,7 +173,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
       return report;
     } catch (error) {
       this.logger.error(`[${operationId}] Health check failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
@@ -362,7 +357,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
           status: 'unhealthy',
           duration: Date.now() - startTime,
           timestamp: new Date(),
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         };
       }
     });
@@ -401,7 +396,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
           status: 'unhealthy',
           duration: Date.now() - startTime,
           timestamp: new Date(),
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -444,7 +439,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
           status: 'unhealthy',
           duration: Date.now() - startTime,
           timestamp: new Date(),
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         };
       }
     });
@@ -489,7 +484,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
           status: 'unhealthy',
           duration: Date.now() - startTime,
           timestamp: new Date(),
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         };
       }
     });
@@ -505,8 +500,8 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
    */
   private async executeHealthCheckWithRetry(
     name: string,
-    checkFn: (options: HealthCheckOptions) => Promise<HealthCheckResult>,
-    options: HealthCheckOptions,
+    checkFn: (_options: HealthCheckOptions) => Promise<HealthCheckResult>,
+    _options: HealthCheckOptions,
   ): Promise<HealthCheckResult> {
     let lastError: any;
 
@@ -545,7 +540,8 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
       status: 'unhealthy',
       duration: options.timeout,
       timestamp: new Date(),
-      error: lastError instanceof Error ? lastError.message : String(lastError),
+      _error:
+        lastError instanceof Error ? lastError.message : String(lastError),
       retryCount: options.retryAttempts,
     };
   }
@@ -619,7 +615,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
    */
   private generateFallbackReport(
     duration: number,
-    error: string,
+    _error: string,
   ): HealthReport {
     return {
       status: 'unhealthy',

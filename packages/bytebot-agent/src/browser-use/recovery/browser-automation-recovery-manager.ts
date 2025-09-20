@@ -13,7 +13,7 @@
  * - Performance monitoring and optimization
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   BrowserAutomationErrorSeverity,
   BrowserAutomationErrorRecoverability,
@@ -28,7 +28,7 @@ export interface RecoveryContext {
   maxAttempts: number;
   lastError?: Error;
   errorHistory: Array<{
-    error: Error;
+    _error: Error;
     timestamp: Date;
     recoveryAttempted: string;
     outcome: 'success' | 'failure' | 'partial';
@@ -53,7 +53,7 @@ export interface RecoveryStrategy {
     timeWindowMs?: number;
     severityThreshold?: BrowserAutomationErrorSeverity;
   };
-  execute: (context: RecoveryContext) => Promise<RecoveryResult>;
+  execute: (_context: RecoveryContext) => Promise<RecoveryResult>;
 }
 
 export interface RecoveryResult {
@@ -116,7 +116,7 @@ export class BrowserAutomationRecoveryManager {
         timeWindowMs: 300000, // 5 minutes
         severityThreshold: BrowserAutomationErrorSeverity.HIGH,
       },
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeNetworkRecovery(context);
       },
     });
@@ -136,7 +136,7 @@ export class BrowserAutomationRecoveryManager {
       maxDelayMs: 15000,
       jitterEnabled: false,
       circuitBreakerEnabled: true,
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeBrowserProcessRecovery(context);
       },
     });
@@ -153,7 +153,7 @@ export class BrowserAutomationRecoveryManager {
       maxDelayMs: 2000,
       jitterEnabled: false,
       circuitBreakerEnabled: false,
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeSessionRecovery(context);
       },
     });
@@ -170,7 +170,7 @@ export class BrowserAutomationRecoveryManager {
       maxDelayMs: 10000,
       jitterEnabled: true,
       circuitBreakerEnabled: false,
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeElementInteractionRecovery(context);
       },
     });
@@ -188,7 +188,7 @@ export class BrowserAutomationRecoveryManager {
       jitterEnabled: true,
       circuitBreakerEnabled: false,
       fallbackStrategy: 'alternative_navigation',
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executePageLoadRecovery(context);
       },
     });
@@ -205,7 +205,7 @@ export class BrowserAutomationRecoveryManager {
       maxDelayMs: 5000,
       jitterEnabled: false,
       circuitBreakerEnabled: true,
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeMemoryRecovery(context);
       },
     });
@@ -222,7 +222,7 @@ export class BrowserAutomationRecoveryManager {
       maxDelayMs: 10000,
       jitterEnabled: true,
       circuitBreakerEnabled: false,
-      execute: async (context: RecoveryContext) => {
+      execute: async (_context: RecoveryContext) => {
         return this.executeGenericTaskRecovery(context);
       },
     });
@@ -240,7 +240,7 @@ export class BrowserAutomationRecoveryManager {
    * Attempt to recover from a browser automation error
    */
   async attemptRecovery(
-    error: Error,
+    _error: Error,
     operationType: string,
     context?: Record<string, unknown>,
   ): Promise<RecoveryResult> {
@@ -252,9 +252,9 @@ export class BrowserAutomationRecoveryManager {
       context,
     );
     this.logger.warn(
-      `Attempting recovery for error: ${errorClassification.code}`,
+      `Attempting recovery for _error: ${errorClassification.code}`,
       {
-        error: error.message,
+        _error: error.message,
         operationType,
         category: errorClassification.category,
         severity: errorClassification.severity,
@@ -272,7 +272,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: 0,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: new Error(
+        _error: new Error(
           `Error is non-recoverable: ${errorClassification.code}`,
         ),
       };
@@ -284,7 +284,7 @@ export class BrowserAutomationRecoveryManager {
     );
     if (applicableStrategies.length === 0) {
       this.logger.warn(
-        `No recovery strategies found for error: ${errorClassification.code}`,
+        `No recovery strategies found for _error: ${errorClassification.code}`,
       );
       return {
         success: false,
@@ -292,7 +292,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: 0,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: new Error(
+        _error: new Error(
           `No recovery strategies available for: ${errorClassification.code}`,
         ),
       };
@@ -314,7 +314,7 @@ export class BrowserAutomationRecoveryManager {
           outcome: 'failure',
         },
       ],
-      metadata: context,
+      _metadata: context,
     };
 
     // Attempt recovery with strategies in priority order
@@ -379,7 +379,7 @@ export class BrowserAutomationRecoveryManager {
       attemptNumber: recoveryContext.attemptNumber,
       durationMs: Date.now() - startTime,
       nextAction: 'abort',
-      error: new Error(
+      _error: new Error(
         `All recovery strategies failed for: ${errorClassification.code}`,
       ),
     };
@@ -390,7 +390,7 @@ export class BrowserAutomationRecoveryManager {
    */
   private async executeStrategyWithBackoff(
     strategy: RecoveryStrategy,
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     let attempt = 1;
     let lastError: Error | undefined;
@@ -421,7 +421,7 @@ export class BrowserAutomationRecoveryManager {
         lastError = result.error;
         attempt++;
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
+        lastError = error instanceof Error ? _error : new Error(String(error));
         attempt++;
       }
     }
@@ -434,7 +434,7 @@ export class BrowserAutomationRecoveryManager {
       durationMs: 0,
       nextAction: strategy.fallbackStrategy ? 'fallback' : 'abort',
       fallbackStrategy: strategy.fallbackStrategy,
-      error: lastError,
+      _error: lastError,
     };
   }
 
@@ -479,7 +479,7 @@ export class BrowserAutomationRecoveryManager {
    * Network recovery implementation
    */
   private async executeNetworkRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -502,7 +502,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'abort',
-        metadata: {
+        _metadata: {
           networkTest: recoverySuccessful ? 'passed' : 'failed',
           connectivity: 'verified',
         },
@@ -514,7 +514,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -523,7 +523,7 @@ export class BrowserAutomationRecoveryManager {
    * Browser process recovery implementation
    */
   private async executeBrowserProcessRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -544,7 +544,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'escalate',
-        metadata: {
+        _metadata: {
           processRestarted: true,
           memoryCleared: true,
           resourcesFreed: true,
@@ -557,7 +557,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'escalate',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -566,7 +566,7 @@ export class BrowserAutomationRecoveryManager {
    * Session recovery implementation
    */
   private async executeSessionRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -586,7 +586,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'abort',
-        metadata: {
+        _metadata: {
           sessionRecreated: true,
           authenticationRefreshed: recoverySuccessful,
         },
@@ -598,7 +598,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -607,7 +607,7 @@ export class BrowserAutomationRecoveryManager {
    * Element interaction recovery implementation
    */
   private async executeElementInteractionRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -631,7 +631,7 @@ export class BrowserAutomationRecoveryManager {
           : context.attemptNumber < 5
             ? 'retry'
             : 'abort',
-        metadata: {
+        _metadata: {
           waitTimeMs: 500 * context.attemptNumber,
           elementFound: recoverySuccessful,
           alternativeSelectorTried: context.attemptNumber > 2,
@@ -644,7 +644,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: context.attemptNumber < 5 ? 'retry' : 'abort',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -653,7 +653,7 @@ export class BrowserAutomationRecoveryManager {
    * Page load recovery implementation
    */
   private async executePageLoadRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -674,7 +674,7 @@ export class BrowserAutomationRecoveryManager {
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'fallback',
         fallbackStrategy: 'alternative_navigation',
-        metadata: {
+        _metadata: {
           pageLoadOptimized: true,
           timeoutIncreased: true,
           cacheCleared: context.attemptNumber > 1,
@@ -688,7 +688,7 @@ export class BrowserAutomationRecoveryManager {
         durationMs: Date.now() - startTime,
         nextAction: 'fallback',
         fallbackStrategy: 'alternative_navigation',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -697,7 +697,7 @@ export class BrowserAutomationRecoveryManager {
    * Memory recovery implementation
    */
   private async executeMemoryRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -717,7 +717,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'escalate',
-        metadata: {
+        _metadata: {
           memoryFreed: recoverySuccessful,
           garbageCollected: true,
           processRestarted: !recoverySuccessful,
@@ -730,7 +730,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'escalate',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }
@@ -739,7 +739,7 @@ export class BrowserAutomationRecoveryManager {
    * Generic task recovery implementation
    */
   private async executeGenericTaskRecovery(
-    context: RecoveryContext,
+    _context: RecoveryContext,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
@@ -759,7 +759,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: recoverySuccessful ? 'retry' : 'abort',
-        metadata: {
+        _metadata: {
           genericRecoveryApplied: true,
           contextPreserved: true,
         },
@@ -771,7 +771,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error)),
+        _error: error instanceof Error ? _error : new Error(String(error)),
       };
     }
   }

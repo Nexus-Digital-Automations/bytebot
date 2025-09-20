@@ -15,8 +15,8 @@
  * @since Core Application Service Testing Suite
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+
 import * as crypto from 'crypto';
 import {
   AppService,
@@ -572,7 +572,7 @@ describe('AppService', () => {
   describe('TypeScript Interface Compliance', () => {
     it('should return AppHealthResponse with correct structure', () => {
       // Act
-      const result: AppHealthResponse = service.getHealthStatus();
+      const _result: AppHealthResponse = service.getHealthStatus();
 
       // Assert - Verify all required properties exist with correct types
       expect(result.status).toMatch(/^(healthy|degraded|unhealthy)$/);
@@ -587,7 +587,7 @@ describe('AppService', () => {
 
     it('should return AppStatusResponse with correct structure', () => {
       // Act
-      const result: AppStatusResponse = service.getStatus();
+      const _result: AppStatusResponse = service.getStatus();
 
       // Assert - Verify all required properties exist with correct types
       expect(typeof result.service).toBe('string');

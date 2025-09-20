@@ -18,9 +18,9 @@
  * - Integration testing across service boundaries
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 import {
@@ -84,7 +84,7 @@ describe('Data Services Integration', () => {
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     lastActivity: new Date('2024-01-01'),
-    metadata: { isProductionData: false },
+    _metadata: { isProductionData: false },
     tasks: [{ id: 'task-1' }],
     screenshots: [{ id: 'screenshot-1', fileSize: 50000 }],
     domSnapshots: [{ id: 'snapshot-1', fileSize: 25000 }],
@@ -119,7 +119,7 @@ describe('Data Services Integration', () => {
     fileSize: 100000,
     storageTier: StorageTier.HOT,
     accessCount: 5,
-    metadata: { isTestData: true },
+    _metadata: { isTestData: true },
     compressionType: CompressionType.NONE,
     checksum: 'abc123',
     url: 'https://example.com',
@@ -133,7 +133,7 @@ describe('Data Services Integration', () => {
     htmlContent: '<html><body>Test content</body></html>',
     originalSize: 50000,
     storageTier: StorageTier.WARM,
-    metadata: { isTestData: true },
+    _metadata: { isTestData: true },
     compressionType: CompressionType.GZIP,
     textContentHash: 'hash123',
     formCount: 2,
@@ -261,7 +261,7 @@ describe('Data Services Integration', () => {
     // Mock logger for all services
     const mockLogger = {
       log: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
     };
@@ -635,7 +635,7 @@ describe('Data Services Integration', () => {
 
         const sensitiveScreenshot = {
           ...mockScreenshot,
-          metadata: { containsSensitiveData: true },
+          _metadata: { containsSensitiveData: true },
         };
 
         prismaService.browserScreenshot.findMany.mockResolvedValue([
@@ -744,7 +744,7 @@ describe('Data Services Integration', () => {
           size: expect.any(Number),
           compressed: false,
           encrypted: false,
-          metadata: {
+          _metadata: {
             databaseProvider: 'sqlite',
             totalRecords: 130, // Sum of all entity counts
             entityCounts: {
@@ -858,7 +858,7 @@ describe('Data Services Integration', () => {
           encrypted: true,
           createdAt: new Date(),
           files: [],
-          metadata: {
+          _metadata: {
             databaseProvider: 'postgresql',
             schemaVersion: '1.0.0',
             totalRecords: 100,
@@ -1675,7 +1675,7 @@ describe('Data Services Integration', () => {
           encrypted: false,
           createdAt: new Date(),
           files: [],
-          metadata: {
+          _metadata: {
             databaseProvider: 'postgresql',
             schemaVersion: migrationStatus.currentVersion,
             totalRecords: 100,

@@ -22,10 +22,9 @@ import {
   ExecutionContext,
   UnauthorizedException,
   ForbiddenException,
-  Logger,
   Inject,
 } from '@nestjs/common';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -148,7 +147,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @throws HttpException - When rate limits are exceeded
    * @throws ForbiddenException - When security checks fail
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(_context: ExecutionContext): Promise<boolean> {
     const operationId = `enhanced-jwt-guard-${Date.now()}`;
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -272,7 +271,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     err: Error | null,
     user: User | null,
     info: Record<string, unknown> | null,
-    context: ExecutionContext,
+    _context: ExecutionContext,
   ): TUser {
     const operationId = `enhanced-jwt-handle-${Date.now()}`;
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -282,7 +281,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (err) {
       this.logger.error(`[${operationId}] Enhanced authentication error`, {
         operationId,
-        error: err instanceof Error ? err.message : String(err),
+        _error: err instanceof Error ? err.message : String(err),
         errorType: err instanceof Error ? err.constructor.name : 'Unknown',
         stack: err instanceof Error ? err.stack : undefined,
         url: request.url,
@@ -400,7 +399,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns string - Client IP address
    * @private
    */
-  private getClientIpAddress(request: Request): string {
+  private getClientIpAddress(_request: Request): string {
     return (
       (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       (request.headers['x-real-ip'] as string) ||
@@ -418,7 +417,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns string - Route identifier
    * @private
    */
-  private getRouteInfo(context: ExecutionContext): string {
+  private getRouteInfo(_context: ExecutionContext): string {
     const handler = context.getHandler().name;
     const controller = context.getClass().name;
     return `${controller}.${handler}`;
@@ -503,7 +502,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private async performPreValidationChecks(
     operationId: string,
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
     ipAddress: string,
   ): Promise<void> {
     // Rate limiting check
@@ -538,7 +537,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns string | null - Extracted token or null if not found
    * @private
    */
-  private extractTokenFromRequest(request: Request): string | null {
+  private extractTokenFromRequest(_request: Request): string | null {
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -562,11 +561,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private async validateTokenComprehensively(
     operationId: string,
     token: string,
-    request: Request,
+    _request: Request,
   ): Promise<TokenValidationResult> {
     try {
       // Use token validation service for comprehensive validation
-      // const result: TokenValidationResult =
+      // const _result: TokenValidationResult =
       //   await this.tokenValidationService.validateToken(token);
 
       // Validate JWT token structure and signature
@@ -585,7 +584,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const userAgent = request.headers['user-agent'];
 
       // Placeholder token validation with actual implementation
-      const result: TokenValidationResult = {
+      const _result: TokenValidationResult = {
         isValid: true,
         payload: decoded as JwtPayload,
         errorType: undefined,
@@ -604,7 +603,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     } catch (error) {
       this.logger.error(`[${operationId}] Token validation error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       return Promise.resolve({
@@ -628,7 +627,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private async handleTokenValidationFailure(
     operationId: string,
     validationResult: TokenValidationResult,
-    request: Request,
+    _request: Request,
     ipAddress: string,
   ): Promise<void> {
     this.logger.warn(`[${operationId}] Token validation failed`, {
@@ -680,7 +679,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private async performPostValidationChecks(
     operationId: string,
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
   ): Promise<void> {
     const user = request.user;
 
@@ -721,7 +720,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private logSuccessfulAuthentication(
     operationId: string,
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
     authTime: number,
   ): Promise<void> {
     const user = request.user;
@@ -745,7 +744,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     //     ipAddress,
     //     userAgent: request.headers['user-agent'],
     //     endpoint: request.url,
-    //     metadata: {
+    //     _metadata: {
     //       authTime,
     //       sessionId: request.securityContext?.sessionId ?? undefined,
     //       tokenVersion: request.securityContext?.tokenVersion,
@@ -775,8 +774,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private async handleAuthenticationError(
     operationId: string,
-    error: unknown,
-    request: Request,
+    _error: unknown,
+    _request: Request,
     ipAddress: string,
     authTime: number,
   ): Promise<void> {
@@ -784,14 +783,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       error instanceof Error
         ? error.message
         : typeof error === 'string'
-          ? error
+          ? _error
           : JSON.stringify(error);
     const errorType =
       error instanceof Error ? error.constructor.name : 'Unknown';
 
     this.logger.error(`[${operationId}] Authentication error`, {
       operationId,
-      error: errorMessage,
+      _error: errorMessage,
       errorType,
       authTime,
       ipAddress,
@@ -807,7 +806,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     //     userAgent: request.headers['user-agent'],
     //     endpoint: request.url,
     //     errorMessage,
-    //     metadata: {
+    //     _metadata: {
     //       errorType,
     //       authTime,
     //     },

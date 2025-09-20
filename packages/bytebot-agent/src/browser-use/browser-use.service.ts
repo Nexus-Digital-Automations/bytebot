@@ -16,13 +16,7 @@
  * @service BrowserUseService
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
-
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 /**
  * Browser configuration interface for type safety
  */
@@ -78,7 +72,7 @@ interface CommandResponse {
   result?: unknown;
   screenshot?:
     | {
-        data: string;
+        _data: string;
       }
     | string;
   dimensions?: { width: number; height: number };
@@ -231,7 +225,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       this.logger.debug(
         `Working directory initialized: ${this.config.workingDirectory}`,
       );
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
@@ -265,7 +259,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       );
 
       this.logger.log(`Browser-Use version: ${browserUseCheck.stdout.trim()}`);
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
@@ -283,7 +277,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   private async executeCommand(
     command: string,
     args: string[],
-    options: { cwd?: string; timeout?: number } = {},
+    _options: { cwd?: string; timeout?: number } = {},
   ): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
       const process = spawn(command, args, {
@@ -294,11 +288,11 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       let stdout = '';
       let stderr = '';
 
-      process.stdout.on('data', (data: Buffer) => {
+      process.stdout.on('data', (_data: Buffer) => {
         stdout += data.toString();
       });
 
-      process.stderr.on('data', (data: Buffer) => {
+      process.stderr.on('data', (_data: Buffer) => {
         stderr += data.toString();
       });
 
@@ -410,7 +404,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log(`Browser process created successfully: ${processId}`);
       return processId;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
@@ -431,14 +425,14 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
     if (this.config.enableLogging) {
       const logFile = join(this.config.workingDirectory, 'logs', `${id}.log`);
 
-      process.stdout?.on('data', (data: Buffer) => {
+      process.stdout?.on('data', (_data: Buffer) => {
         const output = data.toString();
         this.logger.debug(`[${id}] STDOUT: ${output}`);
         void this.appendToLogFile(logFile, `STDOUT: ${output}`);
         this.updateProcessActivity(id);
       });
 
-      process.stderr?.on('data', (data: Buffer) => {
+      process.stderr?.on('data', (_data: Buffer) => {
         const output = data.toString();
         this.logger.debug(`[${id}] STDERR: ${output}`);
         void this.appendToLogFile(logFile, `STDERR: ${output}`);
@@ -461,7 +455,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       const processInfo = this.processes.get(id);
       if (processInfo) {
         processInfo.status = 'error';
-        this.logger.error(`Browser process ${id} error:`, error);
+        this.logger.error(`Browser process ${id} _error: `, error);
       }
     });
 
@@ -598,7 +592,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       }
 
       this.logger.log(`Browser process cleaned up: ${processId}`);
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
@@ -681,7 +675,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
           '--version',
         ]);
         systemInfo.pythonVersion = pythonResult.stdout.trim();
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
         this.logger.debug('Could not get Python version:', errorMessage);
@@ -695,7 +689,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
           { cwd: this.config.browserUsePath },
         );
         systemInfo.browserUseVersion = browserUseResult.stdout.trim();
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
         this.logger.debug(`Could not get browser-use version: ${errorMessage}`);
@@ -709,7 +703,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
           '--version',
         ]);
         systemInfo.chromeVersion = chromeResult.stdout.trim();
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
         this.logger.debug(`Could not get Chrome version: ${errorMessage}`);
@@ -732,7 +726,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         success: true,
         systemInfo,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
@@ -740,7 +734,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       );
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -836,11 +830,11 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       // Wait for response (simplified for now)
       // In a real implementation, you'd set up proper JSON-RPC communication
-      const response: CommandResponse = await this.waitForResponse(processId);
+      const _response: CommandResponse = await this.waitForResponse(processId);
 
       browserProcess.status = 'ready';
       return response;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       browserProcess.status = 'error';
       this.logger.error(`Command failed for process ${processId}:`, error);
       throw error;
@@ -933,11 +927,11 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         taskId: params.taskId,
         sessionId: params.sessionId,
         actions: params.actions,
-        options: params.options,
+        _options: params.options,
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         processId,
         commands,
       );
@@ -954,7 +948,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         executionTimeMs,
         screenshotsTaken: params.options?.screenshots ? 1 : 0,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const executionTimeMs = Date.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -967,7 +961,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
         executionTimeMs,
         screenshotsTaken: 0,
       };
@@ -977,7 +971,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Select an option from a dropdown
    */
-  async selectOption(options: {
+  async selectOption(_options: {
     sessionId: string;
     elementIndex?: number;
     selector?: string;
@@ -992,7 +986,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1006,22 +1000,22 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
 
       return {
         success: result.success || true,
-        result: result as unknown as Record<string, unknown>,
+        _result: result as unknown as Record<string, unknown>,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Select option failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1029,7 +1023,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Upload a file to a file input
    */
-  async uploadFile(options: {
+  async uploadFile(_options: {
     sessionId: string;
     elementIndex?: number;
     selector?: string;
@@ -1044,7 +1038,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1058,22 +1052,22 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
 
       return {
         success: result.success || true,
-        result: result as unknown as Record<string, unknown>,
+        _result: result as unknown as Record<string, unknown>,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`File upload failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1081,7 +1075,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Take a screenshot of the current page
    */
-  async takeScreenshot(options: {
+  async takeScreenshot(_options: {
     sessionId: string;
     fullPage?: boolean;
     quality?: number;
@@ -1115,7 +1109,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1134,7 +1128,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
@@ -1149,13 +1143,13 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         viewport: result.viewport || { width: 1280, height: 720 },
         devicePixelRatio: result.devicePixelRatio || 1,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Screenshot failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1163,7 +1157,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get current page state information
    */
-  async getPageState(options: {
+  async getPageState(_options: {
     sessionId: string;
     includeScreenshot?: boolean;
     includeDom?: boolean;
@@ -1178,7 +1172,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1191,7 +1185,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
@@ -1201,13 +1195,13 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         currentUrl: result.url || result.currentUrl,
         pageTitle: result.title || result.pageTitle,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Get page state failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1215,7 +1209,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Press a key
    */
-  async keyPress(options: { sessionId: string; key: string }): Promise<{
+  async keyPress(_options: { sessionId: string; key: string }): Promise<{
     success: boolean;
     error?: string;
   }> {
@@ -1224,7 +1218,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1236,7 +1230,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
@@ -1244,13 +1238,13 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       return {
         success: result.success || true,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Key press failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1258,7 +1252,10 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Execute JavaScript in the browser
    */
-  async executeScript(options: { sessionId: string; script: string }): Promise<{
+  async executeScript(_options: {
+    sessionId: string;
+    script: string;
+  }): Promise<{
     success: boolean;
     result?: Record<string, unknown>;
     error?: string;
@@ -1268,7 +1265,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       if (!browserProcess) {
         return {
           success: false,
-          error: `No browser process found for session ${options.sessionId}`,
+          _error: `No browser process found for session ${options.sessionId}`,
         };
       }
 
@@ -1280,22 +1277,24 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date().toISOString(),
       };
 
-      const result: CommandResponse = await this.sendCommand(
+      const _result: CommandResponse = await this.sendCommand(
         browserProcess.id,
         command,
       );
 
       return {
         success: result.success || true,
-        result: result.result as unknown as Record<string, unknown> | undefined,
+        _result: result.result as unknown as
+          | Record<string, unknown>
+          | undefined,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Script execution failed: ${errorMessage}`);
       return {
         success: false,
-        error: errorMessage,
+        _error: errorMessage,
       };
     }
   }
@@ -1324,7 +1323,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         activeSessions,
         errors: errors.length > 0 ? errors : undefined,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       errors.push(errorMessage);
@@ -1352,7 +1351,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       // In a real implementation, you'd use a proper logging system
       // This is simplified for demonstration
       await writeFile(logFile, logEntry, { flag: 'a' });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       // Don't fail the main operation if logging fails
@@ -1366,7 +1365,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   private getCpuCount(): number {
     try {
       return cpus().length;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.debug(`Failed to get CPU count: ${errorMessage}`);

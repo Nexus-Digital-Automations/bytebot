@@ -15,8 +15,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
-  Logger,
   Injectable,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -35,7 +33,7 @@ interface ErrorResponse {
   message: string | string[];
 
   /** Error type/name */
-  error: string;
+  _error: string;
 
   /** Timestamp of error */
   timestamp: string;
@@ -138,21 +136,21 @@ interface ExtendedResponse extends Response {
 /**
  * Type guard to check if error is an Error instance
  */
-function isError(error: unknown): error is Error {
+function isError(_error: unknown): error is Error {
   return error instanceof Error;
 }
 
 /**
  * Type guard to check if error is a structured error with message
  */
-function isStructuredError(error: unknown): error is { message: string } {
+function isStructuredError(_error: unknown): error is { message: string } {
   return typeof error === 'object' && error !== null && 'message' in error;
 }
 
 /**
  * Safely extract error message from unknown error type
  */
-function getErrorMessage(error: unknown): string {
+function getErrorMessage(_error: unknown): string {
   if (isError(error)) {
     return error.message;
   }
@@ -168,7 +166,7 @@ function getErrorMessage(error: unknown): string {
 /**
  * Safely extract error stack from unknown error type
  */
-function getErrorStack(error: unknown): string | undefined {
+function getErrorStack(_error: unknown): string | undefined {
   if (isError(error)) {
     return error.stack;
   }
@@ -266,7 +264,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        error: 'Internal Server Error',
+        _error: 'Internal Server Error',
         timestamp,
         path: request.url,
         method: request.method,
@@ -280,12 +278,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    */
   private analyzeException(
     exception: unknown,
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
   ): {
     statusCode: number;
     message: string | string[];
-    error: string;
-    metadata: ErrorMetadata;
+    _error: string;
+    _metadata: ErrorMetadata;
     validationErrors?: ValidationErrorDetails[];
     rateLimitInfo?: Record<string, unknown>;
   } {
@@ -353,19 +351,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     errorInfo: {
       statusCode: number;
       message: string | string[];
-      error: string;
-      metadata: ErrorMetadata;
+      _error: string;
+      _metadata: ErrorMetadata;
       validationErrors?: ValidationErrorDetails[];
       rateLimitInfo?: Record<string, unknown>;
     },
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
     timestamp: string,
     operationId: string,
   ): ErrorResponse {
     const baseResponse: ErrorResponse = {
       statusCode: errorInfo.statusCode,
       message: errorInfo.message,
-      error: errorInfo.error,
+      _error: errorInfo.error,
       timestamp,
       path: request.url,
       method: request.method,
@@ -406,11 +404,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * Extract validation errors from response
    */
   private extractValidationErrors(
-    response: Record<string, unknown>,
+    _response: Record<string, unknown>,
   ): ValidationErrorDetails[] {
     const errors = (response.errors || response.validation || []) as unknown[];
 
-    return errors.map((error: unknown): ValidationErrorDetails => {
+    return errors.map((_error: unknown): ValidationErrorDetails => {
       const errorObj = error as Record<string, unknown>;
       return {
         field: (errorObj.property || errorObj.field) as string,
@@ -429,7 +427,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private generateErrorMetadata(
     exception: unknown,
     statusCode: number,
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
   ): ErrorMetadata {
     let severity = ErrorSeverity.MEDIUM;
     let riskScore = 30;
@@ -511,17 +509,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     errorInfo: {
       statusCode: number;
       message: string | string[];
-      error: string;
-      metadata: ErrorMetadata;
+      _error: string;
+      _metadata: ErrorMetadata;
       validationErrors?: ValidationErrorDetails[];
     },
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
     operationId: string,
   ): void {
     const logData = {
       operationId,
       statusCode: errorInfo.statusCode,
-      error: errorInfo.error,
+      _error: errorInfo.error,
       message: errorInfo.message,
       method: request.method,
       url: request.url,
@@ -574,12 +572,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     errorInfo: {
       statusCode: number;
       message: string | string[];
-      error: string;
-      metadata: ErrorMetadata;
+      _error: string;
+      _metadata: ErrorMetadata;
       validationErrors?: ValidationErrorDetails[];
       rateLimitInfo?: Record<string, unknown>;
     },
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
     operationId: string,
   ): void {
     try {
@@ -601,7 +599,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         request.url,
         request.method,
         false,
-        `Security error: ${Array.isArray(errorInfo.message) ? errorInfo.message.join('; ') : errorInfo.message}`,
+        `Security _error: ${Array.isArray(errorInfo.message) ? errorInfo.message.join('; ') : errorInfo.message}`,
         {
           operationId,
           statusCode: errorInfo.statusCode,
@@ -630,7 +628,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } catch (securityEventError) {
       this.logger.error('Failed to log security event from exception filter', {
         operationId,
-        error: (securityEventError as Error).message,
+        _error: (securityEventError as Error).message,
       });
     }
   }
@@ -639,7 +637,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * Track error frequency for pattern analysis
    */
   private trackErrorFrequency(
-    errorInfo: { error: string; statusCode: number },
+    errorInfo: { _error: string; statusCode: number },
     operationId: string,
   ): void {
     const errorKey = `${errorInfo.error}:${errorInfo.statusCode}`;
@@ -673,9 +671,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * Set error response headers
    */
   private setErrorHeaders(
-    response: Response,
+    _response: Response,
     errorInfo: {
-      metadata: ErrorMetadata;
+      _metadata: ErrorMetadata;
       statusCode: number;
       rateLimitInfo?: Record<string, unknown> & { retryAfter?: number };
     },

@@ -286,14 +286,14 @@ export class MockJwtService {
   /**
    * Configure mock to throw errors for testing error scenarios
    */
-  mockSignError(error: Error = new Error('JWT sign error')): void {
+  mockSignError(_error: Error = new Error('JWT sign error')): void {
     this.signAsync.mockRejectedValue(error);
   }
 
   /**
    * Configure mock to throw verification errors
    */
-  mockVerifyError(error: Error = new Error('JWT verification failed')): void {
+  mockVerifyError(_error: Error = new Error('JWT verification failed')): void {
     this.verifyAsync.mockRejectedValue(error);
   }
 
@@ -637,7 +637,7 @@ export class MockJwtAuthGuard {
   canActivate = jest.fn<boolean | Promise<boolean>, [any]>();
 
   constructor() {
-    this.canActivate.mockImplementation((context: any) => {
+    this.canActivate.mockImplementation((_context: any) => {
       // Extract request from context
       const request = context.switchToHttp?.()?.getRequest?.();
 
@@ -668,7 +668,7 @@ export class MockJwtAuthGuard {
   }
 
   mockAllow(user: MockUser = createMockUser()): void {
-    this.canActivate.mockImplementation((context: any) => {
+    this.canActivate.mockImplementation((_context: any) => {
       const request = context.switchToHttp?.()?.getRequest?.();
       if (request) {
         request.user = user;
@@ -689,7 +689,7 @@ export class MockRolesGuard {
   canActivate = jest.fn<boolean | Promise<boolean>, [any]>();
 
   constructor() {
-    this.canActivate.mockImplementation((context: any) => {
+    this.canActivate.mockImplementation((_context: any) => {
       const request = context.switchToHttp?.()?.getRequest?.();
       const user = request?.user;
 
@@ -701,7 +701,7 @@ export class MockRolesGuard {
   }
 
   mockAllowRole(role: UserRole): void {
-    this.canActivate.mockImplementation((context: any) => {
+    this.canActivate.mockImplementation((_context: any) => {
       const request = context.switchToHttp?.()?.getRequest?.();
       const user = request?.user;
       return user && user.role === role;

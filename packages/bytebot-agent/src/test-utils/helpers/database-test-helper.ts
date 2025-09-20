@@ -211,7 +211,7 @@ export class DatabaseTestHelper {
         },
       });
     } catch (cleanupError) {
-      console.warn('Failed to cleanup test data:', cleanupError);
+      console.warn('Failed to cleanup test _data: ', cleanupError);
     }
   }
 
@@ -226,7 +226,7 @@ export class DatabaseTestHelper {
     for (const userData of testUsers) {
       try {
         await prisma.user.create({
-          data: userData,
+          _data: userData,
         });
       } catch {
         // User might already exist, skip
@@ -238,7 +238,7 @@ export class DatabaseTestHelper {
     for (const taskData of testTasks) {
       try {
         await prisma.task.create({
-          data: taskData,
+          _data: taskData,
         });
       } catch {
         // Task might already exist, skip
@@ -401,7 +401,7 @@ export class MockPrismaService {
 
     create: jest
       .fn()
-      .mockImplementation(({ data }: { data: Record<string, unknown> }) => {
+      .mockImplementation(({ data }: { _data: Record<string, unknown> }) => {
         const users = this.testData.get('user') || [];
         const newUser = {
           ...data,
@@ -422,7 +422,7 @@ export class MockPrismaService {
           data,
         }: {
           where: Record<string, unknown>;
-          data: Record<string, unknown>;
+          _data: Record<string, unknown>;
         }) => {
           const users = this.testData.get('user') || [];
           const userIndex = users.findIndex((user: Record<string, unknown>) =>
@@ -560,7 +560,7 @@ export class MockPrismaService {
 
     create: jest
       .fn()
-      .mockImplementation(({ data }: { data: Record<string, unknown> }) => {
+      .mockImplementation(({ data }: { _data: Record<string, unknown> }) => {
         const tasks = this.testData.get('task') || [];
         const newTask = {
           ...data,
@@ -581,7 +581,7 @@ export class MockPrismaService {
           data,
         }: {
           where: Record<string, unknown>;
-          data: Record<string, unknown>;
+          _data: Record<string, unknown>;
         }) => {
           const tasks = this.testData.get('task') || [];
           const taskIndex = tasks.findIndex((task: Record<string, unknown>) =>

@@ -6,7 +6,7 @@
  * @version 2.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import { BytebotConfigService } from '../config.service';
@@ -271,7 +271,7 @@ describe('BytebotConfigService', () => {
 
     it('should retrieve secrets from encrypted storage', () => {
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue('encrypted:data:here');
+      mockedFs.readFileSync.mockReturnValue('encrypted:_data: here');
 
       const result = service.getSecret('test-category', 'test-key');
 
@@ -302,7 +302,7 @@ describe('BytebotConfigService', () => {
 
     it('should delete specific secrets from storage', async () => {
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue('encrypted:data:here');
+      mockedFs.readFileSync.mockReturnValue('encrypted:_data: here');
 
       // Mock decipher to return multiple secrets
       const mockDecipher = {
@@ -322,7 +322,7 @@ describe('BytebotConfigService', () => {
 
     it('should delete entire file when no secrets remain', async () => {
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue('encrypted:data:here');
+      mockedFs.readFileSync.mockReturnValue('encrypted:_data: here');
 
       // Mock decipher to return single secret
       const mockDecipher = {
@@ -607,7 +607,7 @@ describe('BytebotConfigService', () => {
       service.on('secret.deleted', listener);
 
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue('encrypted:data:here');
+      mockedFs.readFileSync.mockReturnValue('encrypted:_data: here');
 
       await service.deleteSecret('test-category', 'test-key');
 
@@ -641,7 +641,7 @@ describe('BytebotConfigService', () => {
 
     it('should handle JSON parsing errors in secrets', () => {
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue('encrypted:data:here');
+      mockedFs.readFileSync.mockReturnValue('encrypted:_data: here');
 
       const mockDecipher = {
         setAuthTag: jest.fn(),

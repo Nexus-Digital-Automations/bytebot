@@ -19,7 +19,6 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Logger } from '@nestjs/common';
 import { handleComputerToolUse, writeFile } from '../agent.computer-use';
 import {
   MessageContentType,
@@ -71,7 +70,7 @@ describe('AgentComputerUse', () => {
     status: 200,
     json: jest.fn().mockResolvedValue({
       success: true,
-      data: 'base64-file-content',
+      _data: 'base64-file-content',
       name: 'test-file.txt',
       size: 1024,
       mediaType: 'text/plain',
@@ -93,7 +92,7 @@ describe('AgentComputerUse', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     // Setup default successful mocks
@@ -141,7 +140,7 @@ describe('AgentComputerUse', () => {
           {
             type: MessageContentType._Image,
             source: {
-              data: 'base64-encoded-screenshot-data',
+              _data: 'base64-encoded-screenshot-data',
               media_type: 'image/png',
               type: 'base64',
             },
@@ -190,7 +189,7 @@ describe('AgentComputerUse', () => {
         ok: true,
         status: 200,
         json: jest.fn().mockResolvedValue({
-          data: 'invalid-format',
+          _data: 'invalid-format',
         }),
       };
       (global.fetch as jest.Mock).mockResolvedValue(invalidResponse);
@@ -349,7 +348,7 @@ describe('AgentComputerUse', () => {
       expect(result.content[1]).toEqual({
         type: MessageContentType._Image,
         source: {
-          data: 'base64-encoded-screenshot-data',
+          _data: 'base64-encoded-screenshot-data',
           media_type: 'image/png',
           type: 'base64',
         },
@@ -643,7 +642,7 @@ describe('AgentComputerUse', () => {
             source: {
               type: 'base64',
               media_type: 'text/plain',
-              data: 'base64-file-content',
+              _data: 'base64-file-content',
             },
             name: 'test-file.txt',
             size: 1024,
@@ -701,7 +700,7 @@ describe('AgentComputerUse', () => {
         body: JSON.stringify({
           action: 'write_file',
           path: '/path/to/output.txt',
-          data: 'base64-encoded-content',
+          _data: 'base64-encoded-content',
         }),
       });
 
@@ -961,7 +960,7 @@ describe('AgentComputerUse', () => {
         status: 200,
         json: jest.fn().mockResolvedValue({
           success: true,
-          data: 'A'.repeat(100000), // Large base64 content
+          _data: 'A'.repeat(100000), // Large base64 content
           name: 'large-file.bin',
           size: 100000,
           mediaType: 'application/octet-stream',

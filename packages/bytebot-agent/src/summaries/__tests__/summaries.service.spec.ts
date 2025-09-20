@@ -16,8 +16,8 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Summary, Prisma } from '@prisma/client';
 import {
   SummariesService,
@@ -42,7 +42,7 @@ describe('SummariesService', () => {
     content:
       'This is a comprehensive summary of the task progress. It contains detailed analysis and findings.',
     parentId: null,
-    metadata: { type: 'auto-generated', quality: 'high' },
+    _metadata: { type: 'auto-generated', quality: 'high' },
     createdAt: new Date('2024-01-01T10:00:00.000Z'),
     updatedAt: new Date('2024-01-01T10:00:00.000Z'),
   };
@@ -52,7 +52,7 @@ describe('SummariesService', () => {
     taskId: mockTaskId,
     content: 'Child summary building upon the parent summary.',
     parentId: mockSummaryId,
-    metadata: { type: 'refinement', level: 2 },
+    _metadata: { type: 'refinement', level: 2 },
     createdAt: new Date('2024-01-01T11:00:00.000Z'),
     updatedAt: new Date('2024-01-01T11:00:00.000Z'),
   };
@@ -119,7 +119,7 @@ describe('SummariesService', () => {
       );
 
       expect(prismaService.summary.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           taskId: createSummaryDto.taskId,
           content: createSummaryDto.content,
         },
@@ -136,7 +136,7 @@ describe('SummariesService', () => {
       await service.create(dtoWithParent);
 
       expect(prismaService.summary.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           taskId: dtoWithParent.taskId,
           content: dtoWithParent.content,
           parentId: dtoWithParent.parentId,
@@ -148,16 +148,16 @@ describe('SummariesService', () => {
       const dtoWithMetadata: CreateSummaryRequest = {
         taskId: mockTaskId,
         content: 'Summary with metadata',
-        metadata: { type: 'manual', priority: 'high', source: 'user' },
+        _metadata: { type: 'manual', priority: 'high', source: 'user' },
       };
 
       await service.create(dtoWithMetadata);
 
       expect(prismaService.summary.create).toHaveBeenCalledWith({
-        data: {
+        _data: {
           taskId: dtoWithMetadata.taskId,
           content: dtoWithMetadata.content,
-          metadata: dtoWithMetadata.metadata,
+          _metadata: dtoWithMetadata.metadata,
         },
       });
     });
@@ -218,19 +218,19 @@ describe('SummariesService', () => {
         const testCases = [
           {
             taskId: '',
-            error: 'Task ID is required and must be a non-empty string',
+            _error: 'Task ID is required and must be a non-empty string',
           },
           {
             taskId: '   ',
-            error: 'Task ID is required and must be a non-empty string',
+            _error: 'Task ID is required and must be a non-empty string',
           },
           {
             taskId: null as any,
-            error: 'Task ID is required and must be a non-empty string',
+            _error: 'Task ID is required and must be a non-empty string',
           },
           {
             taskId: undefined as any,
-            error: 'Task ID is required and must be a non-empty string',
+            _error: 'Task ID is required and must be a non-empty string',
           },
         ];
 
@@ -248,19 +248,23 @@ describe('SummariesService', () => {
         const testCases = [
           {
             content: '',
-            error: 'Summary content is required and must be a non-empty string',
+            _error:
+              'Summary content is required and must be a non-empty string',
           },
           {
             content: '   ',
-            error: 'Summary content is required and must be a non-empty string',
+            _error:
+              'Summary content is required and must be a non-empty string',
           },
           {
             content: null as any,
-            error: 'Summary content is required and must be a non-empty string',
+            _error:
+              'Summary content is required and must be a non-empty string',
           },
           {
             content: undefined as any,
-            error: 'Summary content is required and must be a non-empty string',
+            _error:
+              'Summary content is required and must be a non-empty string',
           },
         ];
 
@@ -289,11 +293,11 @@ describe('SummariesService', () => {
         const testCases = [
           {
             parentId: '',
-            error: 'Parent ID must be a valid string if provided',
+            _error: 'Parent ID must be a valid string if provided',
           },
           {
             parentId: '   ',
-            error: 'Parent ID must be a valid string if provided',
+            _error: 'Parent ID must be a valid string if provided',
           },
         ];
 

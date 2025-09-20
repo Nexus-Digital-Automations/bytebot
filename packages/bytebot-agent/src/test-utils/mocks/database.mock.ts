@@ -24,7 +24,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   DatabaseMetrics,
   QueryPerformanceMetrics,
@@ -126,12 +126,12 @@ export class InMemoryDatabase {
       // Simulate query processing delay
       await this.simulateQueryDelay(query);
 
-      let result: QueryResult;
+      let _result: QueryResult;
 
       // Parse and execute mock query based on type
       if (query.includes('SELECT')) {
         const selectResult = this.simulateSelect(query, table);
-        result = { success: true, data: selectResult };
+        result = { success: true, _data: selectResult };
       } else if (query.includes('INSERT')) {
         const insertResult = this.simulateInsert(query, params, table);
         result = insertResult;
@@ -168,7 +168,7 @@ export class InMemoryDatabase {
         duration,
         timestamp: new Date(),
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -407,7 +407,7 @@ export class InMemoryDatabase {
   /**
    * Set mock data for a table
    */
-  setTableData(tableName: string, data: DatabaseRecord[]): void {
+  setTableData(tableName: string, _data: DatabaseRecord[]): void {
     const table = new Map<string, DatabaseRecord>();
     data.forEach((item, index) => {
       if (this.isDatabaseRecord(item)) {
@@ -440,16 +440,16 @@ interface MockPrismaModel {
     (args?: unknown) => Promise<DatabaseRecord | null>
   >;
   create: jest.MockedFunction<
-    (args: { data: unknown }) => Promise<DatabaseRecord>
+    (args: { _data: unknown }) => Promise<DatabaseRecord>
   >;
   createMany: jest.MockedFunction<
-    (args: { data: unknown[] }) => Promise<{ count: number }>
+    (args: { _data: unknown[] }) => Promise<{ count: number }>
   >;
   update: jest.MockedFunction<
-    (args: { data: unknown }) => Promise<QueryResult>
+    (args: { _data: unknown }) => Promise<QueryResult>
   >;
   updateMany: jest.MockedFunction<
-    (args: { data: unknown }) => Promise<QueryResult>
+    (args: { _data: unknown }) => Promise<QueryResult>
   >;
   delete: jest.MockedFunction<(args: unknown) => Promise<QueryResult>>;
   deleteMany: jest.MockedFunction<(args?: unknown) => Promise<QueryResult>>;
@@ -523,7 +523,7 @@ export class MockPrismaClient {
         return data[0] || null;
       }),
 
-      create: jest.fn().mockImplementation(async (args: { data: unknown }) => {
+      create: jest.fn().mockImplementation(async (args: { _data: unknown }) => {
         await this.checkConnectionAndDelay();
         const result = await this.inMemoryDb.executeQuery(
           `INSERT INTO ${tableName}`,
@@ -536,7 +536,7 @@ export class MockPrismaClient {
 
       createMany: jest
         .fn()
-        .mockImplementation(async (args: { data: unknown[] }) => {
+        .mockImplementation(async (args: { _data: unknown[] }) => {
           await this.checkConnectionAndDelay();
           const results: unknown[] = [];
           for (const item of args.data) {
@@ -550,7 +550,7 @@ export class MockPrismaClient {
           return { count: results.length };
         }),
 
-      update: jest.fn().mockImplementation(async (args: { data: unknown }) => {
+      update: jest.fn().mockImplementation(async (args: { _data: unknown }) => {
         await this.checkConnectionAndDelay();
         return this.inMemoryDb.executeQuery(
           `UPDATE ${tableName}`,
@@ -561,7 +561,7 @@ export class MockPrismaClient {
 
       updateMany: jest
         .fn()
-        .mockImplementation(async (args: { data: unknown }) => {
+        .mockImplementation(async (args: { _data: unknown }) => {
           await this.checkConnectionAndDelay();
           return this.inMemoryDb.executeQuery(
             `UPDATE ${tableName}`,
@@ -756,7 +756,7 @@ export class MockPrismaClient {
   /**
    * Mock $on method for event listeners
    */
-  $on(event: string, _callback: unknown): void {
+  $on(_event: string, _callback: unknown): void {
     this.logger.debug(`Mock event listener registered for: ${event}`);
   }
 
@@ -791,7 +791,7 @@ export class MockPrismaClient {
   /**
    * Configure mock behavior for testing scenarios
    */
-  configureMockBehavior(options: MockBehaviorOptions): void {
+  configureMockBehavior(_options: MockBehaviorOptions): void {
     if (options.shouldFailConnection !== undefined) {
       this.shouldFailConnection = options.shouldFailConnection;
     }
@@ -835,7 +835,7 @@ export class MockPrismaClient {
   /**
    * Seed mock data for testing
    */
-  seedMockData(tableName: string, data: DatabaseRecord[]): void {
+  seedMockData(tableName: string, _data: DatabaseRecord[]): void {
     this.inMemoryDb.setTableData(tableName, data);
   }
 
@@ -1041,7 +1041,7 @@ export class MockDatabaseService {
   /**
    * Configure mock behavior for testing scenarios
    */
-  configureMockBehavior(options: DatabaseServiceMockOptions): void {
+  configureMockBehavior(_options: DatabaseServiceMockOptions): void {
     if (options.shouldFailHealthCheck !== undefined) {
       this.shouldFailHealthCheck = options.shouldFailHealthCheck;
       this.isHealthy = !options.shouldFailHealthCheck;
@@ -1112,7 +1112,7 @@ export class MockDatabaseService {
   /**
    * Seed test data across multiple tables
    */
-  seedTestData(data: { [tableName: string]: DatabaseRecord[] }): void {
+  seedTestData(_data: { [tableName: string]: DatabaseRecord[] }): void {
     Object.entries(data).forEach(([tableName, tableData]) => {
       this.mockPrismaClient.seedMockData(tableName, tableData);
     });
@@ -1199,7 +1199,7 @@ export class MockPrismaService extends MockPrismaClient {
         lastHealthCheck: new Date(),
         uptime: 0,
         connectionStatus: 'disconnected',
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -1294,7 +1294,7 @@ export class MockConnectionPoolConfig {
   /**
    * Configure mock behavior
    */
-  configureMockBehavior(options: Partial<ConnectionPoolOptions>): void {
+  configureMockBehavior(_options: Partial<ConnectionPoolOptions>): void {
     this.mockOptions = { ...this.mockOptions, ...options };
   }
 
@@ -1331,7 +1331,7 @@ export class MockConnectionPoolConfig {
 /**
  * Create complete mock Prisma client for Jest tests
  */
-export const createMockPrismaClient = (options: MockBehaviorOptions = {}) => {
+export const createMockPrismaClient = (_options: MockBehaviorOptions = {}) => {
   const mockClient = new MockPrismaClient();
   mockClient.configureMockBehavior(options);
 
@@ -1343,7 +1343,7 @@ export const createMockPrismaClient = (options: MockBehaviorOptions = {}) => {
       mockClient.configureMockBehavior(opts),
     getMockMetrics: () => mockClient.getMockMetrics(),
     resetMockState: () => mockClient.resetMockState(),
-    seedMockData: (tableName: string, data: DatabaseRecord[]) =>
+    seedMockData: (tableName: string, _data: DatabaseRecord[]) =>
       mockClient.seedMockData(tableName, data),
     getInMemoryDb: () => mockClient.getInMemoryDb(),
   };
@@ -1409,12 +1409,12 @@ export const createMockDatabaseService = (
       .mockImplementation(() => mockService.getReliabilityMetrics()),
 
     // Expose mock-specific methods for testing
-    configureMockBehavior: (options: DatabaseServiceMockOptions) =>
+    configureMockBehavior: (_options: DatabaseServiceMockOptions) =>
       mockService.configureMockBehavior(options),
     performMockHealthCheck: () => mockService.performMockHealthCheck(),
     getMockPrismaClient: () => mockService.getMockPrismaClient(),
     resetMockState: () => mockService.resetMockState(),
-    seedTestData: (data: { [tableName: string]: DatabaseRecord[] }) =>
+    seedTestData: (_data: { [tableName: string]: DatabaseRecord[] }) =>
       mockService.seedTestData(data),
   };
 };
@@ -1456,7 +1456,7 @@ export const createMockPrismaService = (
     configureMockBehavior: (opts: MockBehaviorOptions) =>
       mockService.configureMockBehavior(opts),
     resetMockState: () => mockService.resetMockState(),
-    seedMockData: (tableName: string, data: DatabaseRecord[]) =>
+    seedMockData: (tableName: string, _data: DatabaseRecord[]) =>
       mockService.seedMockData(tableName, data),
   };
 };
@@ -1482,7 +1482,7 @@ export const createMockConnectionPoolConfig = () => {
       .mockImplementation(() => mockConfig.getMetricsConfig()),
 
     // Expose mock-specific methods
-    configureMockBehavior: (options: Partial<ConnectionPoolOptions>) =>
+    configureMockBehavior: (_options: Partial<ConnectionPoolOptions>) =>
       mockConfig.configureMockBehavior(options),
     resetMockConfig: () => mockConfig.resetMockConfig(),
   };
@@ -1537,7 +1537,7 @@ export const createMockDatabaseEcosystem = (
       prismaService.resetMockState();
     },
 
-    seedEcosystemData: (data: { [tableName: string]: DatabaseRecord[] }) => {
+    seedEcosystemData: (_data: { [tableName: string]: DatabaseRecord[] }) => {
       databaseService.seedTestData(data);
       Object.entries(data).forEach(([tableName, tableData]) => {
         prismaService.seedMockData(tableName, tableData);
@@ -1649,7 +1649,7 @@ export const DatabaseMockPerformanceUtils = {
           // 30% failure rate
           throw new Error('Mock transaction failure');
         }
-        const result: unknown = originalExecuteRawQuery.call(
+        const _result: unknown = originalExecuteRawQuery.call(
           ecosystem.databaseService,
           query,
           params,

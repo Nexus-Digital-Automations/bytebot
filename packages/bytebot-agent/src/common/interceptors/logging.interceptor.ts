@@ -22,7 +22,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -82,7 +81,7 @@ interface LogEntry {
   timestamp: string;
   correlationId: string;
   level: 'debug' | 'info' | 'warn' | 'error';
-  event: string;
+  _event: string;
   component: 'api' | 'task' | 'auth' | 'database' | 'system';
   method?: string;
   url?: string;
@@ -126,7 +125,10 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Intercept requests and responses for logging
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -174,7 +176,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Get or create correlation ID for request tracking
    */
-  private getOrCreateCorrelationId(request: Request): string {
+  private getOrCreateCorrelationId(_request: Request): string {
     // Check for existing correlation ID in headers
     const existingId =
       request.headers['x-correlation-id'] ||
@@ -192,7 +194,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract user ID from request (JWT token, session, etc.)
    */
-  private extractUserId(request: ExtendedRequest): string | undefined {
+  private extractUserId(_request: ExtendedRequest): string | undefined {
     // Extract from JWT token if available
     if (request.user && typeof request.user === 'object') {
       const user = request.user;
@@ -217,7 +219,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract session ID from request
    */
-  private extractSessionId(request: ExtendedRequest): string | undefined {
+  private extractSessionId(_request: ExtendedRequest): string | undefined {
     if (request.session?.id) {
       return request.session.id;
     }
@@ -233,7 +235,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Calculate request payload size
    */
-  private calculateRequestSize(request: ExtendedRequest): number {
+  private calculateRequestSize(_request: ExtendedRequest): number {
     if (request.body) {
       try {
         return JSON.stringify(request.body).length;
@@ -261,7 +263,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract client IP address
    */
-  private extractClientIP(request: ExtendedRequest): string {
+  private extractClientIP(_request: ExtendedRequest): string {
     return (
       (request.headers['x-forwarded-for'] as string) ||
       (request.headers['x-real-ip'] as string) ||
@@ -275,14 +277,14 @@ export class LoggingInterceptor implements NestInterceptor {
    * Log incoming request
    */
   private logIncomingRequest(
-    request: ExtendedRequest,
-    context: RequestContext,
+    _request: ExtendedRequest,
+    _context: RequestContext,
   ): void {
     const logEntry: LogEntry = {
       timestamp: new Date().toISOString(),
       correlationId: context.correlationId,
       level: 'info',
-      event: 'http_request_incoming',
+      _event: 'http_request_incoming',
       component: 'api',
       method: request.method,
       url: this.sanitizeUrl(request.url),
@@ -290,7 +292,7 @@ export class LoggingInterceptor implements NestInterceptor {
       userAgent: request.headers['user-agent'],
       ip: this.extractClientIP(request),
       requestSize: context.requestSize,
-      metadata: {
+      _metadata: {
         headers: this.sanitizeHeaders(request.headers),
         query: request.query,
         params: request.params,
@@ -312,9 +314,9 @@ export class LoggingInterceptor implements NestInterceptor {
    * Log successful response
    */
   private logSuccessfulResponse(
-    request: ExtendedRequest,
-    response: Response,
-    context: RequestContext,
+    _request: ExtendedRequest,
+    _response: Response,
+    _context: RequestContext,
     responseData: unknown,
   ): void {
     const duration = Date.now() - context.startTime;
@@ -324,7 +326,7 @@ export class LoggingInterceptor implements NestInterceptor {
       timestamp: new Date().toISOString(),
       correlationId: context.correlationId,
       level: 'info',
-      event: 'http_request_completed',
+      _event: 'http_request_completed',
       component: 'api',
       method: request.method,
       url: this.sanitizeUrl(request.url),
@@ -333,7 +335,7 @@ export class LoggingInterceptor implements NestInterceptor {
       duration,
       requestSize: context.requestSize,
       responseSize,
-      metadata: {
+      _metadata: {
         sessionId: context.sessionId,
         responseHeaders: this.sanitizeHeaders(response.getHeaders()),
         performanceCategory: this.categorizePerformance(duration),
@@ -356,10 +358,10 @@ export class LoggingInterceptor implements NestInterceptor {
    * Log error response
    */
   private logErrorResponse(
-    request: ExtendedRequest,
-    response: Response,
-    context: RequestContext,
-    error: StructuredError,
+    _request: ExtendedRequest,
+    _response: Response,
+    _context: RequestContext,
+    _error: StructuredError,
   ): void {
     const duration = Date.now() - context.startTime;
 
@@ -375,7 +377,7 @@ export class LoggingInterceptor implements NestInterceptor {
       timestamp: new Date().toISOString(),
       correlationId: context.correlationId,
       level: 'error',
-      event: 'http_request_error',
+      _event: 'http_request_error',
       component: 'api',
       method: request.method,
       url: this.sanitizeUrl(request.url),
@@ -383,12 +385,12 @@ export class LoggingInterceptor implements NestInterceptor {
       userId: context.userId,
       duration,
       requestSize: context.requestSize,
-      error: {
+      _error: {
         message: errorMessage,
         stack: errorStack,
         type: errorType,
       },
-      metadata: {
+      _metadata: {
         sessionId: context.sessionId,
         errorCode,
         errorDetails,

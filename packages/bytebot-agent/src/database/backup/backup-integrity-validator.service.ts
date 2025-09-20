@@ -20,18 +20,14 @@
  * Performance: Parallel verification with intelligent caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantBackupValidationService,
   BackupOperationType,
 } from './parlant-backup-validation.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { RiskLevel } from '../parlant-validated-database.service';
 import * as crypto from 'crypto';
 
@@ -491,7 +487,7 @@ export class BackupIntegrityValidatorService {
    * Validate backup integrity with PARLANT conversational approval
    */
   async validateBackupIntegrity(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): Promise<IntegrityValidationResult> {
     const validationId = this.generateValidationId();
     const startTime = Date.now();
@@ -560,7 +556,7 @@ export class BackupIntegrityValidatorService {
         `[${validationId}] Backup integrity validation failed`,
         {
           backupId: request.backupId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           validationDuration: Date.now() - startTime,
           validationId,
         },
@@ -580,7 +576,7 @@ export class BackupIntegrityValidatorService {
     backupId: string,
     userContext: ParlantUserContext,
   ): Promise<IntegrityValidationResult> {
-    const request: IntegrityValidationRequest = {
+    const _request: IntegrityValidationRequest = {
       backupId,
       validationType: IntegrityValidationType.COMPREHENSIVE,
       validationLevel: IntegrityValidationLevel.THOROUGH,
@@ -604,7 +600,7 @@ export class BackupIntegrityValidatorService {
    * Validate backup with PARLANT conversational approval
    */
   private async validateIntegrityRequestWithParlant(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
     validationId: string,
   ): Promise<ParlantValidationResponse> {
     // Create conversational prompt for validation request
@@ -669,11 +665,11 @@ export class BackupIntegrityValidatorService {
    * Execute integrity validation based on type and level
    */
   private async executeIntegrityValidation(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
     validationId: string,
     startTime: number,
   ): Promise<IntegrityValidationResult> {
-    const result: IntegrityValidationResult = {
+    const _result: IntegrityValidationResult = {
       validationId,
       backupId: request.backupId,
       validationType: request.validationType,
@@ -783,8 +779,8 @@ export class BackupIntegrityValidatorService {
    * Perform checksum validation
    */
   private async performChecksumValidation(
-    request: IntegrityValidationRequest,
-    result: IntegrityValidationResult,
+    _request: IntegrityValidationRequest,
+    _result: IntegrityValidationResult,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -823,7 +819,7 @@ export class BackupIntegrityValidatorService {
     } catch (error) {
       this.logger.error(`Checksum validation failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       result.issues.push({
@@ -844,8 +840,8 @@ export class BackupIntegrityValidatorService {
    * Perform structure validation
    */
   private async performStructureValidation(
-    request: IntegrityValidationRequest,
-    result: IntegrityValidationResult,
+    _request: IntegrityValidationRequest,
+    _result: IntegrityValidationResult,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -914,7 +910,7 @@ export class BackupIntegrityValidatorService {
     } catch (error) {
       this.logger.error(`Structure validation failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       result.issues.push({
@@ -935,8 +931,8 @@ export class BackupIntegrityValidatorService {
    * Perform data consistency validation
    */
   private async performDataConsistencyValidation(
-    request: IntegrityValidationRequest,
-    result: IntegrityValidationResult,
+    _request: IntegrityValidationRequest,
+    _result: IntegrityValidationResult,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -964,7 +960,7 @@ export class BackupIntegrityValidatorService {
     } catch (error) {
       this.logger.error(`Data consistency validation failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       result.issues.push({
@@ -984,8 +980,8 @@ export class BackupIntegrityValidatorService {
    * Perform restoration test
    */
   private async performRestorationTest(
-    request: IntegrityValidationRequest,
-    result: IntegrityValidationResult,
+    _request: IntegrityValidationRequest,
+    _result: IntegrityValidationResult,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -1011,7 +1007,7 @@ export class BackupIntegrityValidatorService {
     } catch (error) {
       this.logger.error(`Restoration test failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       result.issues.push({
@@ -1032,8 +1028,8 @@ export class BackupIntegrityValidatorService {
    * Perform cross-platform validation
    */
   private async performCrossPlatformValidation(
-    request: IntegrityValidationRequest,
-    result: IntegrityValidationResult,
+    _request: IntegrityValidationRequest,
+    _result: IntegrityValidationResult,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -1074,7 +1070,7 @@ export class BackupIntegrityValidatorService {
     } catch (error) {
       this.logger.error(`Cross-platform validation failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       result.issues.push({
@@ -1126,7 +1122,7 @@ export class BackupIntegrityValidatorService {
    * Generate mock checksum
    */
   private generateMockChecksum(
-    data: string,
+    _data: string,
     algorithm?: ChecksumAlgorithm,
   ): string {
     const hash = crypto.createHash(algorithm?.toLowerCase() || 'sha256');
@@ -1140,7 +1136,7 @@ export class BackupIntegrityValidatorService {
    * Generate integrity validation prompt
    */
   private generateIntegrityValidationPrompt(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): string {
     const validationType = request.validationType
       .replace('_', ' ')
@@ -1190,7 +1186,7 @@ export class BackupIntegrityValidatorService {
    * Determine validation security level
    */
   private determineValidationSecurityLevel(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): SecurityLevel {
     switch (request.validationLevel) {
       case IntegrityValidationLevel.FORENSIC:
@@ -1210,7 +1206,7 @@ export class BackupIntegrityValidatorService {
    * Determine validation risk level
    */
   private determineValidationRiskLevel(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): RiskLevel {
     if (request.verificationOptions.restorationTest) {
       return RiskLevel.MEDIUM; // Restoration tests have some risk
@@ -1222,7 +1218,7 @@ export class BackupIntegrityValidatorService {
    * Generate validation risk factors
    */
   private generateValidationRiskFactors(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): string[] {
     const factors: string[] = [];
 
@@ -1245,7 +1241,7 @@ export class BackupIntegrityValidatorService {
    * Generate validation mitigations
    */
   private generateValidationMitigations(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): string[] {
     const mitigations: string[] = [
       'Validation performed in isolated environment',
@@ -1264,7 +1260,7 @@ export class BackupIntegrityValidatorService {
    * Estimate validation duration
    */
   private estimateValidationDuration(
-    request: IntegrityValidationRequest,
+    _request: IntegrityValidationRequest,
   ): number {
     let baseDuration = 30000; // 30 seconds base
 
@@ -1304,7 +1300,7 @@ export class BackupIntegrityValidatorService {
    * Determine overall validation status
    */
   private determineOverallStatus(
-    result: IntegrityValidationResult,
+    _result: IntegrityValidationResult,
   ): IntegrityStatus {
     // If any critical issues found, overall status is invalid
     const criticalIssues = result.issues.filter(
@@ -1346,7 +1342,9 @@ export class BackupIntegrityValidatorService {
   /**
    * Generate recommendations based on validation results
    */
-  private generateRecommendations(result: IntegrityValidationResult): string[] {
+  private generateRecommendations(
+    _result: IntegrityValidationResult,
+  ): string[] {
     const recommendations: string[] = [];
 
     // Checksum recommendations
@@ -1412,14 +1410,14 @@ export class BackupIntegrityValidatorService {
   /**
    * Generate cache key for validation request
    */
-  private generateCacheKey(request: IntegrityValidationRequest): string {
+  private generateCacheKey(_request: IntegrityValidationRequest): string {
     return `integrity_${request.backupId}_${request.validationType}_${request.validationLevel}_${JSON.stringify(request.verificationOptions)}`;
   }
 
   /**
    * Check if cached result is still valid
    */
-  private isCacheResultValid(result: IntegrityValidationResult): boolean {
+  private isCacheResultValid(_result: IntegrityValidationResult): boolean {
     const maxCacheAge = this.getCacheMaxAge();
     const cacheAge = Date.now() - result.validationEndTime.getTime();
     return cacheAge < maxCacheAge;
@@ -1428,7 +1426,7 @@ export class BackupIntegrityValidatorService {
   /**
    * Check if result should be cached
    */
-  private shouldCacheResult(result: IntegrityValidationResult): boolean {
+  private shouldCacheResult(_result: IntegrityValidationResult): boolean {
     // Cache successful validations and quick validations
     return (
       result.overallStatus === IntegrityStatus.VALID &&
@@ -1439,7 +1437,7 @@ export class BackupIntegrityValidatorService {
   /**
    * Update validation metrics
    */
-  private updateValidationMetrics(result: IntegrityValidationResult): void {
+  private updateValidationMetrics(_result: IntegrityValidationResult): void {
     this.validationCount++;
 
     // Update average validation time

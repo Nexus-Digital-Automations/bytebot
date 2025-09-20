@@ -12,11 +12,7 @@
  * @since Bytebot API Hardening Phase 1
  */
 
-import {
-  Injectable,
-  Logger,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, switchMap, timeout } from 'rxjs/operators';
@@ -198,7 +194,7 @@ export class CircuitBreakerService {
           this.logger.error(`[${operationId}] Fallback execution failed`, {
             circuitName,
             operationId,
-            error:
+            _error:
               fallbackError instanceof Error
                 ? fallbackError.message
                 : String(fallbackError),
@@ -443,7 +439,7 @@ export class CircuitBreakerService {
    */
   private recordFailure(
     circuitName: string,
-    error: unknown,
+    _error: unknown,
     duration: number,
     operationId: string,
   ): void {
@@ -473,7 +469,7 @@ export class CircuitBreakerService {
       timestamp: now,
       success: false,
       duration,
-      error: errorMessage,
+      _error: errorMessage,
     });
 
     this.cleanupOldCalls(circuit);
@@ -482,7 +478,7 @@ export class CircuitBreakerService {
       circuitName,
       operationId,
       state: circuit.state,
-      error: errorMessage,
+      _error: errorMessage,
       duration,
       totalCalls: circuit.totalCalls,
     });

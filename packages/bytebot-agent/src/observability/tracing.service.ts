@@ -19,12 +19,7 @@
  * @version 1.0.0 - Enterprise Implementation
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MetricsService } from '../metrics/metrics.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -166,7 +161,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
       this.logger.error(
         `[${operationId}] Failed to initialize tracing: ${errorMessage}`,
         {
-          error: errorMessage,
+          _error: errorMessage,
           config: this.config,
         },
       );
@@ -290,20 +285,20 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
    */
   setSpanError(
     spanId: string,
-    error: Error | string,
+    _error: Error | string,
     tags: Record<string, any> = {},
   ): void {
     const operationId = this.generateOperationId();
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    this.logger.debug(`[${operationId}] Setting span error: ${spanId}`, {
+    this.logger.debug(`[${operationId}] Setting span _error: ${spanId}`, {
       spanId,
-      error: errorMessage,
+      _error: errorMessage,
     });
 
     const span = this.activeSpans.get(spanId);
     if (!span) {
-      this.logger.warn(`[${operationId}] Span not found for error: ${spanId}`);
+      this.logger.warn(`[${operationId}] Span not found for _error: ${spanId}`);
       return;
     }
 
@@ -312,7 +307,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
     span.tags = {
       ...span.tags,
       ...tags,
-      error: true,
+      _error: true,
       'error.kind': error instanceof Error ? error.constructor.name : 'string',
       'error.message': errorMessage,
     };
@@ -323,7 +318,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
 
     // Add error log
     this.addSpanLog(span, 'error', errorMessage, {
-      error: true,
+      _error: true,
       errorType: error instanceof Error ? error.constructor.name : 'string',
     });
 
@@ -336,7 +331,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
     this.logger.warn(`[${operationId}] Span marked as error`, {
       spanId,
       traceId: span.traceId,
-      error: errorMessage,
+      _error: errorMessage,
       operationName: span.operationName,
     });
   }

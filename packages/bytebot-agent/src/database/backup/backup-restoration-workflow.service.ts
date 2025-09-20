@@ -20,7 +20,7 @@
  * Performance: Parallel processing with intelligent resource management
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ParlantBackupValidationService } from './parlant-backup-validation.service';
 import {
@@ -323,7 +323,7 @@ export enum WorkflowState {
  */
 export interface RestorationWorkflowInstance {
   workflowId: string;
-  request: RestorationWorkflowRequest;
+  _request: RestorationWorkflowRequest;
   currentState: WorkflowState;
   stateHistory: StateTransition[];
   approvals: ApprovalRecord[];
@@ -709,7 +709,7 @@ export class BackupRestorationWorkflowService {
    * Initiate restoration workflow
    */
   async initiateRestorationWorkflow(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): Promise<RestorationWorkflowInstance> {
     const workflowId = request.workflowId || this.generateWorkflowId();
     const startTime = Date.now();
@@ -787,7 +787,7 @@ export class BackupRestorationWorkflowService {
       this.logger.error(
         `[${workflowId}] Failed to initiate restoration workflow`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           duration: Date.now() - startTime,
           workflowId,
         },
@@ -891,7 +891,7 @@ export class BackupRestorationWorkflowService {
       return workflow;
     } catch (error) {
       this.logger.error(`[${workflowId}] Failed to process approval decision`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         approverId,
         decision,
         workflowId,
@@ -973,7 +973,7 @@ export class BackupRestorationWorkflowService {
       this.updateWorkflowMetrics(workflow, executionDuration, false);
 
       this.logger.error(`[${workflowId}] Restoration workflow failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         executionDuration,
         workflowId,
       });
@@ -1090,7 +1090,7 @@ export class BackupRestorationWorkflowService {
    * Perform comprehensive risk assessment
    */
   private async performRiskAssessment(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): Promise<RestorationRiskAssessment> {
     this.logger.debug(`Performing risk assessment for restoration request`, {
       backupId: request.backupId,
@@ -1131,7 +1131,7 @@ export class BackupRestorationWorkflowService {
    * Analyze risk factors
    */
   private async analyzeRiskFactors(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): Promise<RiskFactor[]> {
     const factors: RiskFactor[] = [];
 
@@ -1215,7 +1215,7 @@ export class BackupRestorationWorkflowService {
    */
   private generateApprovalRecommendation(
     overallRisk: RiskLevel,
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
     businessImpact: BusinessImpactAssessment,
     technicalRisks: TechnicalRiskAssessment,
   ): ApprovalRecommendation {
@@ -1359,7 +1359,7 @@ export class BackupRestorationWorkflowService {
         userId: 'system',
         action: 'PRE_RESTORATION_VALIDATION_FAILED',
         details: `Pre-restoration validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        systemState: { error: true },
+        systemState: { _error: true },
       });
 
       throw error;
@@ -1414,7 +1414,7 @@ export class BackupRestorationWorkflowService {
         userId: 'system',
         action: 'RESTORATION_FAILED',
         details: `Restoration execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        systemState: { error: true },
+        systemState: { _error: true },
       });
 
       throw error;
@@ -1472,7 +1472,7 @@ export class BackupRestorationWorkflowService {
         userId: 'system',
         action: 'POST_RESTORATION_TESTING_FAILED',
         details: `Post-restoration testing failed: ${error instanceof Error ? error.message : String(error)}`,
-        systemState: { error: true },
+        systemState: { _error: true },
       });
 
       throw error;
@@ -1554,8 +1554,8 @@ export class BackupRestorationWorkflowService {
       timestamp: new Date(),
       userId: 'system',
       action: 'WORKFLOW_FAILED',
-      details: `Workflow failed with error: ${errorMessage}`,
-      systemState: { error: true, errorMessage },
+      details: `Workflow failed with _error: ${errorMessage}`,
+      systemState: { _error: true, errorMessage },
     });
   }
 
@@ -1607,7 +1607,7 @@ export class BackupRestorationWorkflowService {
   }
 
   private assessBusinessImpact(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): BusinessImpactAssessment {
     return {
       serviceDowntime:

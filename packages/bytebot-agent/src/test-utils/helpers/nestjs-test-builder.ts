@@ -17,7 +17,7 @@
  * @since Bytebot Agent Testing Framework
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -150,7 +150,7 @@ export const createMockExecutionContext = (
     getClass: jest.fn(() => MockController),
     getArgs: jest.fn(() => [mockRequest, mockResponse]),
     getArgByIndex: jest.fn(
-      (index: number) => [mockRequest, mockResponse][index],
+      (_index: number) => [mockRequest, mockResponse][index],
     ),
     switchToRpc: jest.fn(() => ({
       getContext: jest.fn(),
@@ -241,7 +241,7 @@ export class NestJSTestBuilder {
   /**
    * Set test data to be used in mocks
    */
-  withTestData(data: Record<string, any>): this {
+  withTestData(_data: Record<string, any>): this {
     this.config.testData = { ...(this.config.testData || {}), ...data };
     return this;
   }

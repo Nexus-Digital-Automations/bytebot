@@ -20,7 +20,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
   ServiceUnavailableException,
   RequestTimeoutException,
 } from '@nestjs/common';
@@ -56,13 +55,13 @@ interface StructuredError {
  */
 interface CircuitBreakerGuardInterface {
   recordSuccess(circuitName: string): void;
-  recordFailure(circuitName: string, error: StructuredError): void;
+  recordFailure(circuitName: string, _error: StructuredError): void;
 }
 
 /**
  * Type guard to check if an error is a structured error
  */
-function isStructuredError(error: unknown): error is StructuredError {
+function isStructuredError(_error: unknown): error is StructuredError {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -74,7 +73,7 @@ function isStructuredError(error: unknown): error is StructuredError {
 /**
  * Safely converts error to StructuredError format
  */
-function normalizeError(error: unknown): StructuredError {
+function normalizeError(_error: unknown): StructuredError {
   if (isStructuredError(error)) {
     return error;
   }
@@ -102,7 +101,7 @@ function normalizeError(error: unknown): StructuredError {
 /**
  * Safely serializes error object to string
  */
-function serializeError(error: unknown): string {
+function serializeError(_error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
@@ -241,7 +240,10 @@ export class ResilienceInterceptor implements NestInterceptor {
     }, 600000); // Clean every 10 minutes
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const operationId = this.generateOperationId();
     const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
@@ -398,7 +400,7 @@ export class ResilienceInterceptor implements NestInterceptor {
           metrics.httpStatus = response.statusCode;
           this.recordSuccess(config, circuitName, operationId, metrics);
         },
-        error: (_error) => {
+        _error: (_error) => {
           // This will be handled in catchError below
         },
       }),
@@ -436,7 +438,7 @@ export class ResilienceInterceptor implements NestInterceptor {
    * Handle errors with resilience patterns
    */
   private handleError(
-    error: StructuredError,
+    _error: StructuredError,
     config: ResilienceConfig,
     circuitName: string,
     operationId: string,
@@ -516,7 +518,7 @@ export class ResilienceInterceptor implements NestInterceptor {
    */
   private recordCircuitBreakerFailure(
     circuitName: string,
-    error: StructuredError,
+    _error: StructuredError,
     _operationId: string,
   ): void {
     const circuitBreakerGuard = this.getCircuitBreakerGuard();
@@ -528,7 +530,7 @@ export class ResilienceInterceptor implements NestInterceptor {
   /**
    * Classify error type for monitoring
    */
-  private classifyError(error: StructuredError): string {
+  private classifyError(_error: StructuredError): string {
     if (error instanceof TimeoutError) {
       return 'TIMEOUT';
     }
@@ -555,7 +557,7 @@ export class ResilienceInterceptor implements NestInterceptor {
   /**
    * Check if fallback should be used for this error
    */
-  private shouldUseFallback(error: StructuredError): boolean {
+  private shouldUseFallback(_error: StructuredError): boolean {
     // Use fallback for 5xx errors, timeouts, and service unavailable
     const status = error.status ?? error.response?.status;
 

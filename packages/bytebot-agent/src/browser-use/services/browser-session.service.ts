@@ -8,7 +8,6 @@
 
 import {
   Injectable,
-  Logger,
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
@@ -440,7 +439,7 @@ export class BrowserSessionService {
       }
     } catch (error) {
       this.logger.debug(
-        `Failed to refresh session data: ${sessionData.id}`,
+        `Failed to refresh session _data: ${sessionData.id}`,
         error,
       );
       // Don't throw error - session might be in transition state
@@ -620,7 +619,7 @@ export class BrowserSessionService {
       processId: sessionData.processId,
       websocketUrl: sessionData.websocketUrl,
       config: sessionData.config,
-      error: sessionData.error,
+      _error: sessionData.error,
     };
   }
 }

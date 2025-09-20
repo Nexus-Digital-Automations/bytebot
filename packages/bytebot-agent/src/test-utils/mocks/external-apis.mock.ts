@@ -22,7 +22,7 @@
  * @since Bytebot Agent Testing Framework v2
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   MessageContentType,
   TextContentBlock,
@@ -135,7 +135,7 @@ export interface MockHttpConfig {
  * Mock HTTP response for API calls
  */
 export interface MockHttpResponse<T = unknown> {
-  data: T;
+  _data: T;
   status: number;
   statusText: string;
   headers: Record<string, string>;
@@ -233,7 +233,7 @@ export class MockHttpClient {
   /**
    * Type guard to check if data is a record
    */
-  private isRecord(data: unknown): data is Record<string, unknown> {
+  private isRecord(_data: unknown): data is Record<string, unknown> {
     return data !== null && typeof data === 'object' && !Array.isArray(data);
   }
 
@@ -267,7 +267,7 @@ export class MockHttpClient {
     // Simulate errors if configured
     if (Math.random() < DEFAULT_MOCK_CONFIG.errorRate) {
       throw new MockHttpError(MOCK_RESPONSES.ERROR_RESPONSES.NETWORK_ERROR, {
-        data: null,
+        _data: null,
         status: 500,
         statusText: 'Internal Server Error',
         headers: {},
@@ -278,7 +278,9 @@ export class MockHttpClient {
     // Simulate rate limiting if configured
     if (Math.random() < DEFAULT_MOCK_CONFIG.rateLimitRate) {
       throw new MockHttpError(MOCK_RESPONSES.ERROR_RESPONSES.RATE_LIMIT, {
-        data: { error: { message: MOCK_RESPONSES.ERROR_RESPONSES.RATE_LIMIT } },
+        _data: {
+          _error: { message: MOCK_RESPONSES.ERROR_RESPONSES.RATE_LIMIT },
+        },
         status: 429,
         statusText: 'Too Many Requests',
         headers: { 'retry-after': '60' },
@@ -288,10 +290,10 @@ export class MockHttpClient {
 
     // Return successful mock response
     return {
-      data: this.generateMockResponseData<T>(
+      _data: this.generateMockResponseData<T>(
         url,
         method,
-        this.isRecord(data) ? data : undefined,
+        this.isRecord(data) ? _data : undefined,
       ),
       status: 200,
       statusText: 'OK',
@@ -430,7 +432,7 @@ export class MockHttpClient {
             role: 'model',
           },
           finishReason: 'STOP',
-          index: 0,
+          _index: 0,
           safetyRatings: [
             {
               category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',

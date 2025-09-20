@@ -21,7 +21,6 @@
 
 import {
   Injectable,
-  Logger,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
@@ -187,7 +186,7 @@ export class BrowserDataService {
     );
 
     const startTime = Date.now();
-    const context: ExtractionContext = {
+    const _context: ExtractionContext = {
       sessionId,
       url: '',
       title: '',
@@ -303,7 +302,7 @@ export class BrowserDataService {
         );
       }
 
-      const response: DataExtractionResponseDto = {
+      const _response: DataExtractionResponseDto = {
         success: true,
         method: context.method,
         outputFormat: context.outputFormat,
@@ -347,7 +346,7 @@ export class BrowserDataService {
           dataQualityScore: 0,
         },
         timestamp: context.timestamp,
-        error: {
+        _error: {
           code: (error as Error).name || 'EXTRACTION_ERROR',
           message: (error as Error).message,
           details: {
@@ -368,7 +367,7 @@ export class BrowserDataService {
   private async extractWithAI(
     sessionId: string,
     extractDto: ExtractDataDto,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): Promise<ExtractedDataItem[]> {
     if (!extractDto.query) {
       throw new BadRequestException('AI query is required for AI_QUERY method');
@@ -417,7 +416,7 @@ export class BrowserDataService {
   private async extractWithCSSSelectors(
     sessionId: string,
     extractDto: ExtractDataDto,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): Promise<ExtractedDataItem[]> {
     if (!extractDto.rules || extractDto.rules.length === 0) {
       throw new BadRequestException(
@@ -456,7 +455,7 @@ export class BrowserDataService {
       timestamp: context.timestamp.toISOString(),
     };
 
-    const result: { success: boolean; error?: string; data?: unknown } =
+    const _result: { success: boolean; error?: string; data?: unknown } =
       await this.executeWithRetry(browserProcess.id, command);
 
     if (!result.success) {
@@ -475,7 +474,7 @@ export class BrowserDataService {
   private async extractWithXPath(
     sessionId: string,
     extractDto: ExtractDataDto,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): Promise<ExtractedDataItem[]> {
     if (!extractDto.rules || extractDto.rules.length === 0) {
       throw new BadRequestException(
@@ -531,7 +530,7 @@ export class BrowserDataService {
   private async extractWithRegex(
     sessionId: string,
     extractDto: ExtractDataDto,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): Promise<ExtractedDataItem[]> {
     if (!extractDto.rules || extractDto.rules.length === 0) {
       throw new BadRequestException(
@@ -589,7 +588,7 @@ export class BrowserDataService {
           const match = matches[i];
           const matchText = match[0] || '';
           const extractedItem: ExtractedDataItem = {
-            data: {
+            _data: {
               [rule.fieldName]: this.transformValue(matchText, rule.transform),
             },
             source: {
@@ -598,7 +597,7 @@ export class BrowserDataService {
               attributes: {},
             },
             confidence: 0.8, // Regex has good confidence
-            index: i,
+            _index: i,
           };
 
           extractedData.push(extractedItem);
@@ -620,7 +619,7 @@ export class BrowserDataService {
   private async extractStructuredData(
     sessionId: string,
     extractDto: ExtractDataDto,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): Promise<ExtractedDataItem[]> {
     this.logger.debug('Extracting structured data');
 
@@ -678,7 +677,7 @@ export class BrowserDataService {
         // If the result doesn't match expected format, treat as error
         return {
           success: false,
-          error: 'Invalid response format from browser service',
+          _error: 'Invalid response format from browser service',
         };
       } catch (error) {
         this.logger.warn(`Extraction attempt ${attempt} failed:`, error);
@@ -741,7 +740,7 @@ export class BrowserDataService {
         structuredData: [] as Record<string, unknown>[], // Would be extracted from JSON-LD
       };
     } catch (error) {
-      this.logger.warn('Failed to get page metadata:', error);
+      this.logger.warn('Failed to get page _metadata: ', error);
       return {
         url: '',
         title: '',
@@ -898,7 +897,7 @@ export class BrowserDataService {
    * Convert data to specified output format
    */
   private convertToFormat(
-    data: ExtractedDataItem[],
+    _data: ExtractedDataItem[],
     format: OutputFormat,
   ): string {
     try {
@@ -927,7 +926,7 @@ export class BrowserDataService {
   /**
    * Convert data to CSV format
    */
-  private convertToCSV(data: ExtractedDataItem[]): string {
+  private convertToCSV(_data: ExtractedDataItem[]): string {
     if (data.length === 0) {
       return '';
     }
@@ -958,7 +957,7 @@ export class BrowserDataService {
   /**
    * Convert data to XML format
    */
-  private convertToXML(data: ExtractedDataItem[]): string {
+  private convertToXML(_data: ExtractedDataItem[]): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<extracted-data>\n';
 
     data.forEach((item, index) => {
@@ -978,7 +977,7 @@ export class BrowserDataService {
   /**
    * Convert data to plain text format
    */
-  private convertToPlainText(data: ExtractedDataItem[]): string {
+  private convertToPlainText(_data: ExtractedDataItem[]): string {
     return data
       .map((item, index) => {
         const itemText = Object.entries(item.data)
@@ -997,7 +996,7 @@ export class BrowserDataService {
    * Normalize AI extraction results
    */
   private normalizeAIResults(
-    data: unknown,
+    _data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
@@ -1007,7 +1006,7 @@ export class BrowserDataService {
     return data.map((item: unknown, index) => {
       if (!this.isBrowserExtractionItem(item)) {
         return {
-          data:
+          _data:
             typeof item === 'object' && item !== null
               ? (item as Record<string, unknown>)
               : {},
@@ -1023,7 +1022,7 @@ export class BrowserDataService {
 
       const normalizedItem = item;
       return {
-        data:
+        _data:
           (normalizedItem.data as Record<string, unknown>) ||
           (normalizedItem as Record<string, unknown>),
         source: {
@@ -1041,7 +1040,7 @@ export class BrowserDataService {
    * Normalize selector-based extraction results
    */
   private normalizeSelectorResults(
-    data: unknown,
+    _data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
@@ -1051,7 +1050,7 @@ export class BrowserDataService {
     return data.map((item: unknown, index) => {
       if (!this.isBrowserExtractionItem(item)) {
         return {
-          data: {},
+          _data: {},
           source: {
             selector: '',
             xpath: '',
@@ -1066,7 +1065,7 @@ export class BrowserDataService {
 
       const normalizedItem = item;
       return {
-        data: normalizedItem.data || {},
+        _data: normalizedItem.data || {},
         source: {
           selector: this.safeGetString(normalizedItem, 'selector', ''),
           xpath: this.safeGetString(normalizedItem, 'xpath', ''),
@@ -1084,7 +1083,7 @@ export class BrowserDataService {
    * Normalize structured data results
    */
   private normalizeStructuredData(
-    data: unknown,
+    _data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     const items: ExtractedDataItem[] = [];
@@ -1092,9 +1091,9 @@ export class BrowserDataService {
 
     if (structuredData?.jsonLD && Array.isArray(structuredData.jsonLD)) {
       (structuredData.jsonLD as unknown[]).forEach(
-        (item: unknown, index: number) => {
+        (item: unknown, _index: number) => {
           items.push({
-            data: item as Record<string, unknown>,
+            _data: item as Record<string, unknown>,
             source: {
               tagName: 'script',
               textContent: JSON.stringify(item),
@@ -1111,14 +1110,14 @@ export class BrowserDataService {
       (structuredData.microdata as unknown[]).forEach(
         (item: unknown, _index: number) => {
           items.push({
-            data: item as Record<string, unknown>,
+            _data: item as Record<string, unknown>,
             source: {
               tagName: 'div',
               textContent: JSON.stringify(item),
               attributes: { itemscope: 'true' },
             },
             confidence: 0.9,
-            index: items.length,
+            _index: items.length,
           });
         },
       );

@@ -650,7 +650,7 @@ describe('Browser Automation Models', () => {
   describe('Request and Response Models', () => {
     describe('Create Request Models', () => {
       it('should validate CreateBrowserSessionRequest', () => {
-        const request: CreateBrowserSessionRequest = {
+        const _request: CreateBrowserSessionRequest = {
           processId: 'process-123',
           configuration: {
             headless: true,
@@ -674,7 +674,7 @@ describe('Browser Automation Models', () => {
       });
 
       it('should validate CreateBrowserTaskRequest', () => {
-        const request: CreateBrowserTaskRequest = {
+        const _request: CreateBrowserTaskRequest = {
           sessionId: 'session-123',
           type: 'form_automation',
           priority: BrowserTaskPriority.HIGH,
@@ -703,7 +703,7 @@ describe('Browser Automation Models', () => {
       });
 
       it('should validate CreateBrowserScreenshotRequest', () => {
-        const request: CreateBrowserScreenshotRequest = {
+        const _request: CreateBrowserScreenshotRequest = {
           sessionId: 'session-123',
           taskId: 'task-789',
           filename: 'screenshot.png',
@@ -727,7 +727,7 @@ describe('Browser Automation Models', () => {
       });
 
       it('should validate CreateBrowserDataExtractionRequest', () => {
-        const request: CreateBrowserDataExtractionRequest = {
+        const _request: CreateBrowserDataExtractionRequest = {
           taskId: 'task-789',
           extractionType: DataExtractionType.TABLE,
           selector: 'table.results',
@@ -751,7 +751,7 @@ describe('Browser Automation Models', () => {
 
     describe('Update Request Models', () => {
       it('should validate UpdateBrowserSessionRequest', () => {
-        const request: UpdateBrowserSessionRequest = {
+        const _request: UpdateBrowserSessionRequest = {
           status: BrowserSessionStatus.IDLE,
           lastActivity: new Date(),
           memoryUsageMb: 512,
@@ -768,7 +768,7 @@ describe('Browser Automation Models', () => {
       });
 
       it('should validate UpdateBrowserTaskRequest', () => {
-        const request: UpdateBrowserTaskRequest = {
+        const _request: UpdateBrowserTaskRequest = {
           status: BrowserTaskStatus.COMPLETED,
           currentStep: 5,
           totalSteps: 5,
@@ -1035,7 +1035,7 @@ describe('Browser Automation Models', () => {
   describe('Utility Models and Calculations', () => {
     describe('PaginatedResponse', () => {
       it('should create valid paginated response objects', () => {
-        const response: PaginatedResponse<BrowserTask> = {
+        const _response: PaginatedResponse<BrowserTask> = {
           data: [],
           total: 150,
           page: 3,

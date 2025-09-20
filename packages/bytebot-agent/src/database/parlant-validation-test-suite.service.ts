@@ -18,9 +18,8 @@
  * Performance: Load testing up to 10,000 concurrent requests
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Import the services to test
 import { ParlantConversationalValidationEngine } from './parlant-conversational-validation-engine.service';
@@ -350,7 +349,7 @@ export class ParlantValidationTestSuiteService {
       // Emit test completion event
       this.eventEmitter.emit('test.suite.completed', {
         testSuiteId,
-        result: testSuiteResult,
+        _result: testSuiteResult,
         duration: Date.now() - startTime,
       });
 
@@ -366,7 +365,7 @@ export class ParlantValidationTestSuiteService {
       return testSuiteResult;
     } catch (error) {
       this.logger.error(`[${testSuiteId}] Test suite execution failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime,
       });
 
@@ -428,7 +427,7 @@ export class ParlantValidationTestSuiteService {
               this.logger.warn('Performance test request failed', {
                 riskClass,
                 validationMode,
-                error: error instanceof Error ? error.message : String(error),
+                _error: error instanceof Error ? error.message : String(error),
               });
             }
           }
@@ -551,7 +550,7 @@ export class ParlantValidationTestSuiteService {
       };
     } catch (error) {
       this.logger.error(`[${testSuiteId}] Performance tests failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -726,7 +725,7 @@ export class ParlantValidationTestSuiteService {
       };
     } catch (error) {
       this.logger.error(`[${testSuiteId}] Cache tests failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -770,7 +769,7 @@ export class ParlantValidationTestSuiteService {
           } catch (error) {
             multiModalSuccess = false;
             this.logger.warn(`Multi-modal test failed for ${mode}`, {
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             });
           }
           totalTests++;
@@ -807,7 +806,7 @@ export class ParlantValidationTestSuiteService {
               }
             } catch (error) {
               this.logger.warn(`Risk validation test failed for ${riskClass}`, {
-                error: error instanceof Error ? error.message : String(error),
+                _error: error instanceof Error ? error.message : String(error),
               });
             }
             totalTests++;
@@ -930,7 +929,7 @@ export class ParlantValidationTestSuiteService {
       };
     } catch (error) {
       this.logger.error(`[${testSuiteId}] Conversation tests failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -998,7 +997,7 @@ export class ParlantValidationTestSuiteService {
               errors.push(Date.now());
               errorCount++;
               this.logger.debug('Load test request failed', {
-                error: error instanceof Error ? error.message : String(error),
+                _error: error instanceof Error ? error.message : String(error),
               });
             })
             .finally(() => {
@@ -1118,7 +1117,7 @@ export class ParlantValidationTestSuiteService {
       };
     } catch (error) {
       this.logger.error(`[${testSuiteId}] Load tests failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -1616,7 +1615,7 @@ export class ParlantValidationTestSuiteService {
   }
 
   private async executeLoadTestRequest(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<number> {
     const startTime = Date.now();
 
@@ -1722,7 +1721,7 @@ export class ParlantValidationTestSuiteService {
 
   private validateRiskResponse(
     riskClass: ValidationRiskClass,
-    response: EnhancedValidationResponse,
+    _response: EnhancedValidationResponse,
   ): boolean {
     // Validate that the response appropriately handles the risk level
     switch (riskClass) {

@@ -21,7 +21,7 @@
  * @version 1.0.0 - COMPREHENSIVE DEADLOCK DETECTION AND RESOLUTION
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
@@ -32,11 +32,7 @@ import {
   DeadlockChainNode,
   DeadlockResolutionStrategy,
 } from './parlant-transaction-manager.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== DEADLOCK DETECTION INTERFACES =====
 

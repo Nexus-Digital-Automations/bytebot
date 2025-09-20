@@ -17,7 +17,7 @@
  * Monitoring: Comprehensive metrics and alerting for performance degradation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DatabaseOperationMetadata,
@@ -93,7 +93,7 @@ export class DatabasePerformanceOptimizerService {
   private readonly smartCache = new Map<
     string,
     {
-      response: ParlantValidationResponse;
+      _response: ParlantValidationResponse;
       timestamp: Date;
       hitCount: number;
       lastAccess: Date;
@@ -132,7 +132,7 @@ export class DatabasePerformanceOptimizerService {
    * Optimize validation request for performance
    */
   async optimizeValidationRequest(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<{
     optimizedRequest: ParlantDatabaseValidationRequest;
     optimizations: string[];
@@ -193,7 +193,7 @@ export class DatabasePerformanceOptimizerService {
    * Get cached validation result with smart cache management
    */
   getCachedValidationResult(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): ParlantValidationResponse | null {
     const cacheKey = this.generateSmartCacheKey(request);
     const cached = this.smartCache.get(cacheKey);
@@ -230,8 +230,8 @@ export class DatabasePerformanceOptimizerService {
    * Cache validation result with intelligent cache management
    */
   cacheValidationResult(
-    request: ParlantDatabaseValidationRequest,
-    response: ParlantValidationResponse,
+    _request: ParlantDatabaseValidationRequest,
+    _response: ParlantValidationResponse,
   ): void {
     if (!this.shouldCacheResult(request, response)) {
       return;
@@ -262,7 +262,7 @@ export class DatabasePerformanceOptimizerService {
   /**
    * Apply smart caching optimization
    */
-  private applyCacheOptimization(request: ParlantDatabaseValidationRequest): {
+  private applyCacheOptimization(_request: ParlantDatabaseValidationRequest): {
     applied: boolean;
     improvement: number;
   } {
@@ -289,7 +289,7 @@ export class DatabasePerformanceOptimizerService {
    * Apply batch processing optimization
    */
   private async applyBatchOptimization(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<{ applied: boolean; improvement: number }> {
     if (!this.config.batchingEnabled) {
       return { applied: false, improvement: 0 };
@@ -309,7 +309,7 @@ export class DatabasePerformanceOptimizerService {
   /**
    * Apply adaptive validation optimization
    */
-  private applyAdaptiveValidation(request: ParlantDatabaseValidationRequest): {
+  private applyAdaptiveValidation(_request: ParlantDatabaseValidationRequest): {
     applied: boolean;
     improvement: number;
   } {
@@ -336,7 +336,9 @@ export class DatabasePerformanceOptimizerService {
   /**
    * Apply pattern-based optimization
    */
-  private applyPatternOptimization(request: ParlantDatabaseValidationRequest): {
+  private applyPatternOptimization(
+    _request: ParlantDatabaseValidationRequest,
+  ): {
     applied: boolean;
     improvement: number;
   } {
@@ -361,7 +363,7 @@ export class DatabasePerformanceOptimizerService {
    * Generate smart cache key with pattern consideration
    */
   private generateSmartCacheKey(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): string {
     const keyComponents = {
       functionName: request.functionName,
@@ -380,7 +382,7 @@ export class DatabasePerformanceOptimizerService {
    * Generate operation signature for frequency tracking
    */
   private generateOperationSignature(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): string {
     return `${request.functionName}_${request.databaseOperation.operationType}_${request.databaseOperation.tableName || 'any'}`;
   }
@@ -389,8 +391,8 @@ export class DatabasePerformanceOptimizerService {
    * Determine if validation result should be cached
    */
   private shouldCacheResult(
-    request: ParlantDatabaseValidationRequest,
-    response: ParlantValidationResponse,
+    _request: ParlantDatabaseValidationRequest,
+    _response: ParlantValidationResponse,
   ): boolean {
     // Don't cache failed validations
     if (!response.approved) {
@@ -614,7 +616,7 @@ export class DatabasePerformanceOptimizerService {
 
   // ===== HELPER METHOD STUBS =====
 
-  private determineRiskLevel(metadata: DatabaseOperationMetadata): RiskLevel {
+  private determineRiskLevel(_metadata: DatabaseOperationMetadata): RiskLevel {
     // Implementation matches the main service
     switch (metadata.operationType) {
       case 'read':
@@ -633,7 +635,7 @@ export class DatabasePerformanceOptimizerService {
     }
   }
 
-  private getValidationPattern(request: ParlantDatabaseValidationRequest) {
+  private getValidationPattern(_request: ParlantDatabaseValidationRequest) {
     const signature = this.generateOperationSignature(request);
     const occurrences = this.operationFrequency.get(signature) || 0;
 
@@ -645,7 +647,7 @@ export class DatabasePerformanceOptimizerService {
     };
   }
 
-  private identifyOperationPattern(request: ParlantDatabaseValidationRequest) {
+  private identifyOperationPattern(_request: ParlantDatabaseValidationRequest) {
     // Mock pattern identification - in production, this would use ML
     if (request.databaseOperation.operationType === 'read') {
       return { type: 'read_heavy' as const };

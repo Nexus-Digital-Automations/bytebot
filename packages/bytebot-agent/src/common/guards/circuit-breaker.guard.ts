@@ -8,7 +8,6 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -108,7 +107,7 @@ export class CircuitBreakerGuard implements CanActivate {
     this.startCleanupInterval();
   }
 
-  canActivate(context: ExecutionContext): boolean {
+  canActivate(_context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<{
       route?: { path?: string };
       path?: string;
@@ -231,7 +230,7 @@ export class CircuitBreakerGuard implements CanActivate {
       circuitKey,
       state: circuit.state,
       failureCount: circuit.failureCount,
-      error: error?.message,
+      _error: error?.message,
       operationId,
     });
 
@@ -413,7 +412,7 @@ export class CircuitBreakerGuard implements CanActivate {
    * Generate unique circuit key based on request context
    */
   private generateCircuitKey(
-    request: {
+    _request: {
       route?: { path?: string };
       path?: string;
       method?: string;

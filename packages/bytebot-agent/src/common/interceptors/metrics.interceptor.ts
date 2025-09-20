@@ -21,7 +21,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
   Inject,
   Optional,
 } from '@nestjs/common';
@@ -98,7 +97,10 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Intercept requests for metrics collection
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -148,8 +150,8 @@ export class MetricsInterceptor implements NestInterceptor {
    * Extract route pattern from execution context
    */
   private extractRoute(
-    context: ExecutionContext,
-    request: ExtendedRequest,
+    _context: ExecutionContext,
+    _request: ExtendedRequest,
   ): string {
     try {
       // Try to get route from NestJS handler
@@ -161,7 +163,7 @@ export class MetricsInterceptor implements NestInterceptor {
           (Reflect.getMetadata('path', controller) as string) ?? '';
         const handlerPath =
           (Reflect.getMetadata('path', handler) as string) ?? '';
-        const route = `${controllerPath}${handlerPath}`.replace(/\/+/g, '/');
+        const route = `${controllerPath}${handlerPath}`.replace(//+/g, '/');
 
         if (route && route !== '/') {
           return route;
@@ -171,7 +173,7 @@ export class MetricsInterceptor implements NestInterceptor {
       this.logger.debug(
         'Failed to extract route from context, using URL path',
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -192,11 +194,11 @@ export class MetricsInterceptor implements NestInterceptor {
     // Common path normalizations for consistent metrics
     const normalizedPath =
       path
-        .replace(/\/\d+/g, '/:id') // Replace numeric IDs
-        .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
-        .replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
-        .replace(/\/+/g, '/') // Remove duplicate slashes
-        .replace(/\/$/, '') || '/'; // Remove trailing slash
+        .replace(//\d+/g, '/:id') // Replace numeric IDs
+        .replace(//[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
+        .replace(//[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
+        .replace(//+/g, '/') // Remove duplicate slashes
+        .replace(//$/, '') || '/'; // Remove trailing slash
 
     return normalizedPath;
   }
@@ -204,7 +206,7 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Extract user ID from request
    */
-  private extractUserId(request: ExtendedRequest): string | undefined {
+  private extractUserId(_request: ExtendedRequest): string | undefined {
     // Extract from JWT token payload
     if (request.user && typeof request.user === 'object') {
       const user = request.user;
@@ -231,7 +233,7 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Record request start (in-flight tracking)
    */
-  private recordRequestStart(context: MetricsContext): void {
+  private recordRequestStart(_context: MetricsContext): void {
     if (!this.metricsService) return;
 
     try {
@@ -245,7 +247,7 @@ export class MetricsInterceptor implements NestInterceptor {
       this.logger.error(
         `[${context.operationId}] Failed to record request start`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           method: context.method,
           route: context.route,
         },
@@ -257,7 +259,7 @@ export class MetricsInterceptor implements NestInterceptor {
    * Record successful request metrics
    */
   private recordSuccessfulRequest(
-    context: MetricsContext,
+    _context: MetricsContext,
     statusCode: number,
     responseData: unknown,
   ): void {
@@ -290,7 +292,7 @@ export class MetricsInterceptor implements NestInterceptor {
       this.logger.error(
         `[${context.operationId}] Failed to record successful request metrics`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           method: context.method,
           route: context.route,
           statusCode,
@@ -303,8 +305,8 @@ export class MetricsInterceptor implements NestInterceptor {
    * Record error request metrics
    */
   private recordErrorRequest(
-    context: MetricsContext,
-    error: StructuredError,
+    _context: MetricsContext,
+    _error: StructuredError,
   ): void {
     if (!this.metricsService) return;
 
@@ -344,7 +346,7 @@ export class MetricsInterceptor implements NestInterceptor {
       this.logger.error(
         `[${context.operationId}] Failed to record error request metrics`,
         {
-          error:
+          _error:
             metricsError instanceof Error
               ? metricsError.message
               : String(metricsError),
@@ -361,8 +363,8 @@ export class MetricsInterceptor implements NestInterceptor {
    * @deprecated Use recordErrorRequest instead
    */
   private recordErrorRequestOld(
-    context: MetricsContext,
-    error: StructuredError,
+    _context: MetricsContext,
+    _error: StructuredError,
   ): void {
     // Delegate to new error handling method
     this.recordErrorRequest(context, error);
@@ -371,7 +373,7 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Record request end (in-flight cleanup)
    */
-  private recordRequestEnd(context: MetricsContext): void {
+  private recordRequestEnd(_context: MetricsContext): void {
     if (!this.metricsService) return;
 
     try {
@@ -386,7 +388,7 @@ export class MetricsInterceptor implements NestInterceptor {
       this.logger.error(
         `[${context.operationId}] Failed to record request end`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           method: context.method,
           route: context.route,
         },

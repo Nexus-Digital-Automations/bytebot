@@ -20,7 +20,7 @@
  * Integration: PARLANT conversational validation system
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MultiDimensionalRiskAssessment,
@@ -225,7 +225,7 @@ export class DynamicValidationRequirementsService {
    * Compute dynamic validation requirements based on comprehensive risk assessment
    */
   async computeValidationRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
     const computationId = this.generateComputationId();
     const startTime = Date.now();
@@ -303,7 +303,7 @@ export class DynamicValidationRequirementsService {
       return finalRequirements;
     } catch (error) {
       this.logger.error(`[${computationId}] Requirement computation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         riskLevel: context.riskAssessment.riskLevel,
         computationId,
       });
@@ -317,7 +317,7 @@ export class DynamicValidationRequirementsService {
    * Compute base validation requirements from risk assessment
    */
   private async computeBaseRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
     const riskLevel = context.riskAssessment.riskLevel;
     const riskScore = context.riskAssessment.overallRiskScore;
@@ -369,7 +369,7 @@ export class DynamicValidationRequirementsService {
    * Determine conversational validation requirements based on context
    */
   private determineConversationalValidation(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): ConversationalValidationRequirement {
     const riskLevel = context.riskAssessment.riskLevel;
     const baseRequirement =
@@ -421,7 +421,7 @@ export class DynamicValidationRequirementsService {
    * Determine approval workflow requirements
    */
   private determineApprovalWorkflow(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): ApprovalWorkflowRequirement {
     const riskLevel = context.riskAssessment.riskLevel;
     const baseRule =
@@ -487,7 +487,7 @@ export class DynamicValidationRequirementsService {
    * Determine authentication requirements based on risk and context
    */
   private determineAuthenticationRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): AuthenticationRequirement[] {
     const requirements: AuthenticationRequirement[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -559,7 +559,7 @@ export class DynamicValidationRequirementsService {
    * Determine monitoring requirements based on risk and context
    */
   private determineMonitoringRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): MonitoringRequirement[] {
     const requirements: MonitoringRequirement[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -620,7 +620,7 @@ export class DynamicValidationRequirementsService {
    * Determine backup requirements based on risk and operation type
    */
   private determineBackupRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): BackupRequirement {
     const riskLevel = context.riskAssessment.riskLevel;
     const operation = context.operation;
@@ -661,7 +661,7 @@ export class DynamicValidationRequirementsService {
    * Determine audit requirements based on compliance and risk
    */
   private determineAuditRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): AuditRequirement[] {
     const requirements: AuditRequirement[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -709,7 +709,7 @@ export class DynamicValidationRequirementsService {
    * Configure timeout settings based on risk and context
    */
   private configureTimeoutSettings(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): TimeoutSettings {
     const riskLevel = context.riskAssessment.riskLevel;
 
@@ -757,7 +757,7 @@ export class DynamicValidationRequirementsService {
    * Configure retry policies based on risk and operation characteristics
    */
   private configureRetryPolicies(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): RetryPolicy[] {
     const policies: RetryPolicy[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -806,7 +806,7 @@ export class DynamicValidationRequirementsService {
    * Configure emergency procedures based on risk level and context
    */
   private configureEmergencyProcedures(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): EmergencyProcedure[] {
     const procedures: EmergencyProcedure[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -847,7 +847,7 @@ export class DynamicValidationRequirementsService {
    */
   private async applyAdaptiveScaling(
     baseRequirements: DynamicValidationRequirements,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
     let scaledRequirements = { ...baseRequirements };
 
@@ -892,7 +892,7 @@ export class DynamicValidationRequirementsService {
    */
   private async applyIntelligentOptimization(
     requirements: DynamicValidationRequirements,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
     let optimizedRequirements = { ...requirements };
 
@@ -928,7 +928,7 @@ export class DynamicValidationRequirementsService {
    */
   private async applyRealTimeAdjustments(
     requirements: DynamicValidationRequirements,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
     let adjustedRequirements = { ...requirements };
 
@@ -960,7 +960,7 @@ export class DynamicValidationRequirementsService {
    * Check if moderate risk approval is required
    */
   private isModerateRiskApprovalRequired(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Require approval for moderate risk during business hours or if business impact is high
     return (
@@ -1015,7 +1015,7 @@ export class DynamicValidationRequirementsService {
    * Generate fallback requirements when computation fails
    */
   private generateFallbackRequirements(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
     computationId: string,
   ): DynamicValidationRequirements {
     this.logger.warn(
@@ -1262,7 +1262,7 @@ export class DynamicValidationRequirementsService {
    * Generate cache key for requirements
    */
   private generateRequirementCacheKey(
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): string {
     const keyData = {
       riskLevel: context.riskAssessment.riskLevel,
@@ -1384,7 +1384,7 @@ export class DynamicValidationRequirementsService {
 
   private evaluateScalingCondition(
     condition: ScalingCondition,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1393,7 +1393,7 @@ export class DynamicValidationRequirementsService {
   private applyScalingFactor(
     requirements: DynamicValidationRequirements,
     factor: ScalingFactor,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1401,7 +1401,7 @@ export class DynamicValidationRequirementsService {
 
   private shouldApplyContextualModifier(
     modifier: ContextualModifier,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1410,7 +1410,7 @@ export class DynamicValidationRequirementsService {
   private applyContextualModifier(
     requirements: DynamicValidationRequirements,
     modifier: ContextualModifier,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1418,7 +1418,7 @@ export class DynamicValidationRequirementsService {
 
   private evaluateBypassCondition(
     condition: IntelligentBypassCondition,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1427,7 +1427,7 @@ export class DynamicValidationRequirementsService {
   private applyIntelligentBypass(
     requirements: DynamicValidationRequirements,
     condition: IntelligentBypassCondition,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1435,7 +1435,7 @@ export class DynamicValidationRequirementsService {
 
   private shouldApplyOptimizationStrategy(
     strategy: OptimizationStrategy,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1444,7 +1444,7 @@ export class DynamicValidationRequirementsService {
   private applyOptimizationStrategy(
     requirements: DynamicValidationRequirements,
     strategy: OptimizationStrategy,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1452,7 +1452,7 @@ export class DynamicValidationRequirementsService {
 
   private canAutomateRequirement(
     opportunity: AutomationOpportunity,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1461,7 +1461,7 @@ export class DynamicValidationRequirementsService {
   private automateRequirement(
     requirements: DynamicValidationRequirements,
     opportunity: AutomationOpportunity,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1469,7 +1469,7 @@ export class DynamicValidationRequirementsService {
 
   private shouldApplyRealTimeAdjustment(
     rule: RealTimeAdjustmentRule,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
     return false;
@@ -1478,7 +1478,7 @@ export class DynamicValidationRequirementsService {
   private applyRealTimeAdjustment(
     requirements: DynamicValidationRequirements,
     rule: RealTimeAdjustmentRule,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
     return requirements;
@@ -1486,7 +1486,7 @@ export class DynamicValidationRequirementsService {
 
   private async trackRequirementGeneration(
     requirements: DynamicValidationRequirements,
-    context: ValidationRequirementContext,
+    _context: ValidationRequirementContext,
     computationId: string,
   ): Promise<void> {
     // Placeholder implementation for tracking requirement effectiveness

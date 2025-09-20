@@ -14,7 +14,7 @@
  * - Emergency escalation procedures with stakeholder notification
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import {
@@ -310,8 +310,8 @@ export class EmergencyBypassAuditService {
   async requestEmergencyBypass(
     emergencyClassification: EmergencyClassification,
     justification: string,
-    context: ParlantUserContext,
-    options: {
+    _context: ParlantUserContext,
+    _options: {
       expectedDuration?: number;
       affectedSystems?: string[];
       businessImpact?: string;
@@ -465,7 +465,7 @@ export class EmergencyBypassAuditService {
     functionName: string,
     operationType: DatabaseOperationMetadata['operationType'],
     operationFunction: () => Promise<T>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
     _metadata?: UniversalFunctionMetadata,
   ): Promise<FunctionExecutionResult<T>> {
     const operationId = this.generateOperationId();
@@ -576,7 +576,7 @@ export class EmergencyBypassAuditService {
         validationTime: 0, // Bypassed validation
         cacheHit: false,
         bypassUsed: true,
-        metadata: {
+        _metadata: {
           functionName,
           operationType,
           riskLevel: RiskLevel.CRITICAL, // All bypass operations are critical
@@ -620,7 +620,7 @@ export class EmergencyBypassAuditService {
         userId: context.userId,
         userRole: context.role || 'USER',
         action: `Failed to execute ${functionName} under emergency bypass`,
-        details: { operationRecord, error: errorMessage },
+        details: { operationRecord, _error: errorMessage },
         severity: 'ERROR',
         complianceRelevant: true,
         retentionRequired: true,
@@ -629,7 +629,7 @@ export class EmergencyBypassAuditService {
       this.logger.error(
         `[${bypassId}][${operationId}] Emergency bypass operation failed`,
         {
-          error: errorMessage,
+          _error: errorMessage,
           executionDuration,
         },
       );
@@ -647,7 +647,7 @@ export class EmergencyBypassAuditService {
     bypassId: string,
     authorization: BypassAuthorization,
   ): Promise<void> {
-    const context: EmergencyBypassContext = {
+    const _context: EmergencyBypassContext = {
       bypassId,
       activeAuthorizations: [authorization],
       emergencyClassification: EmergencyClassification.SYSTEM_OUTAGE, // TODO: Get from request
@@ -738,7 +738,7 @@ export class EmergencyBypassAuditService {
     bypassContext: EmergencyBypassContext,
     functionName: string,
     operationType: DatabaseOperationMetadata['operationType'],
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<void> {
     for (const restriction of bypassContext.restrictions) {
       const violation = await this.checkRestrictionViolation(
@@ -787,7 +787,7 @@ export class EmergencyBypassAuditService {
     restriction: BypassRestriction,
     functionName: string,
     operationType: DatabaseOperationMetadata['operationType'],
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<string | null> {
     switch (restriction.type) {
       case 'OPERATION_TYPE':
@@ -829,7 +829,7 @@ export class EmergencyBypassAuditService {
    * Collect evidence for bypass request
    */
   private async collectBypassRequestEvidence(
-    request: EmergencyBypassRequest,
+    _request: EmergencyBypassRequest,
     _context: ParlantUserContext,
   ): Promise<void> {
     const evidenceId = this.generateEvidenceId();
@@ -869,7 +869,7 @@ export class EmergencyBypassAuditService {
    * Create comprehensive audit entry
    */
   private async createAuditEntry(
-    entry: Omit<BypassAuditEntry, 'auditId' | 'timestamp' | 'correlationId'>,
+    _entry: Omit<BypassAuditEntry, 'auditId' | 'timestamp' | 'correlationId'>,
   ): Promise<BypassAuditEntry> {
     const auditEntry: BypassAuditEntry = {
       auditId: this.generateAuditId(),
@@ -1033,7 +1033,7 @@ export class EmergencyBypassAuditService {
     return `corr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
-  private calculateHash(data: string): string {
+  private calculateHash(_data: string): string {
     // TODO: Implement actual cryptographic hash
     return `hash_${data.length}_${Date.now()}`;
   }
@@ -1128,7 +1128,7 @@ export class EmergencyBypassAuditService {
   }
 
   private async initiateAuthorizationWorkflow(
-    request: EmergencyBypassRequest,
+    _request: EmergencyBypassRequest,
   ): Promise<void> {
     // TODO: Implement authorization workflow
     this.logger.log(
@@ -1137,7 +1137,7 @@ export class EmergencyBypassAuditService {
   }
 
   private async notifyStakeholders(
-    request: EmergencyBypassRequest,
+    _request: EmergencyBypassRequest,
   ): Promise<void> {
     // TODO: Implement stakeholder notification
     this.logger.log(`Stakeholders notified for bypass ${request.bypassId}`);
@@ -1159,7 +1159,7 @@ export class EmergencyBypassAuditService {
   }
 
   private async createBypassOperationRecord(
-    data: Partial<BypassOperationRecord>,
+    _data: Partial<BypassOperationRecord>,
   ): Promise<BypassOperationRecord> {
     const record: BypassOperationRecord = {
       recordId: this.generateOperationId(),
@@ -1216,7 +1216,7 @@ export class EmergencyBypassAuditService {
 
   private async generatePostBypassReport(
     bypassId: string,
-    context: EmergencyBypassContext,
+    _context: EmergencyBypassContext,
   ): Promise<void> {
     // TODO: Implement post-bypass report generation
     this.logger.log(`Post-bypass report generated for ${bypassId}`, {

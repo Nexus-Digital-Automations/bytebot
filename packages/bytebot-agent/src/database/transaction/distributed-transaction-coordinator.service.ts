@@ -21,7 +21,7 @@
  * @version 1.0.0 - COMPREHENSIVE DISTRIBUTED TRANSACTION COORDINATION
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
@@ -31,11 +31,7 @@ import {
   DeadlockInfo,
   TransactionIsolationLevel,
 } from './parlant-transaction-manager.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { PrismaClient } from '@prisma/client';
 
 // ===== DISTRIBUTED TRANSACTION INTERFACES =====
@@ -166,7 +162,7 @@ export interface DistributedCoordinationMetrics {
 export interface DistributedAuditEntry {
   readonly timestamp: Date;
   readonly distributedTransactionId: string;
-  readonly event: DistributedTransactionEvent;
+  readonly _event: DistributedTransactionEvent;
   readonly participantId?: string;
   readonly details: string;
   readonly userId: string;
@@ -409,7 +405,7 @@ export class DistributedTransactionCoordinatorService {
     } catch (error) {
       return {
         approved: false,
-        reasoning: `Distributed transaction validation error: ${(error as Error).message}`,
+        reasoning: `Distributed transaction validation _error: ${(error as Error).message}`,
         conversationId: distributedMetadata.distributedTransactionId,
         alternatives: [
           'Review transaction complexity',
@@ -615,7 +611,7 @@ export class DistributedTransactionCoordinatorService {
         results.push({
           participantId: participant.participantId,
           success: false,
-          error: (error as Error).message,
+          _error: (error as Error).message,
         });
 
         await this.createDistributedAuditEntry(
@@ -982,7 +978,7 @@ export class DistributedTransactionCoordinatorService {
   private async handleDistributedTransactionFailure(
     distributedMetadata: DistributedTransactionMetadata,
     userContext: ParlantUserContext,
-    error: Error,
+    _error: Error,
   ): Promise<DistributedTransactionResult> {
     const distributedTransactionId =
       distributedMetadata.distributedTransactionId;
@@ -1091,7 +1087,7 @@ export class DistributedTransactionCoordinatorService {
    */
 
   private generateDistributedTransactionValidationPrompt(
-    metadata: DistributedTransactionMetadata,
+    _metadata: DistributedTransactionMetadata,
   ): string {
     return [
       `🌐 DISTRIBUTED TRANSACTION VALIDATION`,
@@ -1148,7 +1144,7 @@ export class DistributedTransactionCoordinatorService {
 
   private async createDistributedAuditEntry(
     distributedTransactionId: string,
-    event: DistributedTransactionEvent,
+    _event: DistributedTransactionEvent,
     details: string,
     userId: string,
     participantId?: string,
@@ -1169,7 +1165,7 @@ export class DistributedTransactionCoordinatorService {
   }
 
   private generateSuccessfulDistributedTransactionSummary(
-    metadata: DistributedTransactionMetadata,
+    _metadata: DistributedTransactionMetadata,
     metrics: DistributedCoordinationMetrics,
   ): string {
     return [
@@ -1183,7 +1179,7 @@ export class DistributedTransactionCoordinatorService {
   }
 
   private generateAbortedTransactionSummary(
-    metadata: DistributedTransactionMetadata,
+    _metadata: DistributedTransactionMetadata,
     prepareResults: {
       participantId: string;
       success: boolean;
@@ -1201,8 +1197,8 @@ export class DistributedTransactionCoordinatorService {
   }
 
   private generateFailedDistributedTransactionSummary(
-    metadata: DistributedTransactionMetadata,
-    error: Error,
+    _metadata: DistributedTransactionMetadata,
+    _error: Error,
   ): string {
     return [
       `❌ Distributed transaction failed`,
@@ -1253,9 +1249,9 @@ export class DistributedTransactionCoordinatorService {
   }
 
   private async executeDistributedCompensation(
-    metadata: DistributedTransactionMetadata,
+    _metadata: DistributedTransactionMetadata,
     userContext: ParlantUserContext,
-    error: Error,
+    _error: Error,
   ): Promise<CompensationResult[]> {
     // Implementation would execute compensation for all participants
     return [];

@@ -12,11 +12,11 @@
  * - Thinking content block handling
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { GoogleService } from '../google.service';
 import { SecretsService } from '../../config/secrets.service';
-import { Logger } from '@nestjs/common';
+
 import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentType,
@@ -153,7 +153,7 @@ describe('GoogleService - Integration Tests', () => {
 
   describe('API Integration - generateMessage', () => {
     const mockSuccessResponse = {
-      response: {
+      _response: {
         text: () => 'Hello! How can I help you?',
         candidates: [
           {
@@ -253,7 +253,7 @@ describe('GoogleService - Integration Tests', () => {
 
     it('should handle function calls in response', async () => {
       const mockFunctionResponse = {
-        response: {
+        _response: {
           text: () => '',
           candidates: [
             {
@@ -298,7 +298,7 @@ describe('GoogleService - Integration Tests', () => {
 
     it('should handle thinking content blocks in response', async () => {
       const mockThinkingResponse = {
-        response: {
+        _response: {
           text: () => '',
           candidates: [
             {
@@ -341,7 +341,7 @@ describe('GoogleService - Integration Tests', () => {
 
     it('should handle mixed content and function calls', async () => {
       const mockMixedResponse = {
-        response: {
+        _response: {
           text: () => '',
           candidates: [
             {
@@ -391,7 +391,7 @@ describe('GoogleService - Integration Tests', () => {
 
     it('should handle empty response gracefully', async () => {
       const emptyResponse = {
-        response: {
+        _response: {
           text: () => '',
           candidates: [
             {
@@ -490,7 +490,7 @@ describe('GoogleService - Integration Tests', () => {
 
     it('should handle missing response candidates', async () => {
       const invalidResponse = {
-        response: {
+        _response: {
           text: () => '',
           candidates: null,
           usageMetadata: {
@@ -515,7 +515,7 @@ describe('GoogleService - Integration Tests', () => {
   describe('Message Formatting and Content Handling', () => {
     beforeEach(() => {
       mockGenerativeModel.generateContent.mockResolvedValue({
-        response: {
+        _response: {
           text: () => 'Response',
           candidates: [
             {
@@ -588,7 +588,7 @@ describe('GoogleService - Integration Tests', () => {
               source: {
                 type: 'base64',
                 media_type: 'image/png',
-                data: 'base64-image-data',
+                _data: 'base64-image-data',
               },
             },
           ],
@@ -609,7 +609,7 @@ describe('GoogleService - Integration Tests', () => {
               parts: expect.arrayContaining([
                 expect.objectContaining({
                   inlineData: expect.objectContaining({
-                    data: 'base64-image-data',
+                    _data: 'base64-image-data',
                     mimeType: 'image/png',
                   }),
                 }),
@@ -761,7 +761,7 @@ describe('GoogleService - Integration Tests', () => {
       mockGenerativeModel.generateContent.mockImplementation(async () => {
         await delay(100); // Simulate network delay
         return {
-          response: {
+          _response: {
             text: () => 'Delayed response',
             candidates: [
               {
@@ -877,7 +877,7 @@ describe('GoogleService - Integration Tests', () => {
       );
 
       mockGenerativeModel.generateContent.mockResolvedValue({
-        response: {
+        _response: {
           text: () => 'Response to large history',
           candidates: [
             {
@@ -920,7 +920,7 @@ describe('GoogleService - Integration Tests', () => {
       // Simulate large operation
       const largeContent = 'x'.repeat(10000);
       const largeResponse = {
-        response: {
+        _response: {
           text: () => largeContent,
           candidates: [
             {
@@ -958,7 +958,7 @@ describe('GoogleService - Integration Tests', () => {
   describe('Tool Integration', () => {
     beforeEach(() => {
       mockGenerativeModel.generateContent.mockResolvedValue({
-        response: {
+        _response: {
           text: () => 'Response',
           candidates: [
             {
@@ -1073,7 +1073,7 @@ describe('GoogleService - Integration Tests', () => {
               content: [
                 {
                   type: MessageContentType._Text,
-                  text: 'Weather data: sunny, 25°C',
+                  text: 'Weather _data: sunny, 25°C',
                 },
               ],
             },
@@ -1099,7 +1099,7 @@ describe('GoogleService - Integration Tests', () => {
                 expect.objectContaining({
                   functionResponse: expect.objectContaining({
                     name: expect.any(String),
-                    response: expect.any(Object),
+                    _response: expect.any(Object),
                   }),
                 }),
               ]),

@@ -8,7 +8,6 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Logger,
   ServiceUnavailableException,
   BadGatewayException,
 } from '@nestjs/common';
@@ -143,7 +142,7 @@ export class DatabaseHealthGuard implements CanActivate {
     });
   }
 
-  canActivate(context: ExecutionContext): boolean {
+  canActivate(_context: ExecutionContext): boolean {
     const request = context
       .switchToHttp()
       .getRequest<Request & { res?: Response }>();
@@ -288,7 +287,7 @@ export class DatabaseHealthGuard implements CanActivate {
 
       const responseTime = Date.now() - startTime;
 
-      const result: HealthCheckResult = {
+      const _result: HealthCheckResult = {
         timestamp: new Date(),
         success: true,
         responseTime,
@@ -307,17 +306,17 @@ export class DatabaseHealthGuard implements CanActivate {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      const result: HealthCheckResult = {
+      const _result: HealthCheckResult = {
         timestamp: new Date(),
         success: false,
         responseTime,
-        error: errorMessage,
+        _error: errorMessage,
       };
 
       this.recordHealthCheckResult(result);
 
       this.logger.error(`[${operationId}] Database health check failed`, {
-        error: errorMessage,
+        _error: errorMessage,
         responseTime,
         operationId,
       });
@@ -402,7 +401,7 @@ export class DatabaseHealthGuard implements CanActivate {
   /**
    * Record health check result and update metrics
    */
-  private recordHealthCheckResult(result: HealthCheckResult) {
+  private recordHealthCheckResult(_result: HealthCheckResult) {
     // Update basic metrics
     this.healthMetrics.lastCheckTime = result.timestamp;
     this.healthMetrics.totalChecks++;

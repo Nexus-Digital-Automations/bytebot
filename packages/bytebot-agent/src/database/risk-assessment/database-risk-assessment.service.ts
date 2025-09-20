@@ -19,12 +19,9 @@
  * Performance: Sub-1000ms risk assessment with ML-enhanced analysis
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { DatabaseOperationMetadata } from '../parlant-validated-database.service';
 
 // ===== RISK ASSESSMENT CORE TYPES =====
@@ -420,7 +417,7 @@ export class DatabaseRiskAssessmentService {
       return assessment;
     } catch (error) {
       this.logger.error(`[${assessmentId}] Risk assessment failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationType: operation.operationType,
         assessmentId,
       });
@@ -574,7 +571,7 @@ export class DatabaseRiskAssessmentService {
    */
   private async assessDataSensitivity(
     operation: DatabaseOperationMetadata,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<DataSensitivityAssessment> {
     // Determine data classification based on table and operation
     const classification = this.classifyDataSensitivity(operation);
@@ -618,7 +615,7 @@ export class DatabaseRiskAssessmentService {
    */
   private async assessOperationImpact(
     operation: DatabaseOperationMetadata,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<OperationImpactAssessment> {
     // Map operation type from metadata
     const operationType = this.mapOperationType(operation.operationType);
@@ -668,7 +665,7 @@ export class DatabaseRiskAssessmentService {
   private async assessUserContext(
     userContext: ParlantUserContext,
     operation: DatabaseOperationMetadata,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<UserContextAssessment> {
     // Build user risk profile
     const userRiskProfile = await this.buildUserRiskProfile(userContext);
@@ -716,7 +713,7 @@ export class DatabaseRiskAssessmentService {
    */
   private async assessTimingFactors(
     operation: DatabaseOperationMetadata,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<TimingFactorAssessment> {
     const now = new Date();
 
@@ -762,7 +759,7 @@ export class DatabaseRiskAssessmentService {
   private async assessComplianceRequirements(
     operation: DatabaseOperationMetadata,
     userContext: ParlantUserContext,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): Promise<ComplianceRequirementAssessment> {
     // Identify applicable regulatory frameworks
     const applicableFrameworks = this.identifyApplicableFrameworks(
@@ -1062,7 +1059,7 @@ export class DatabaseRiskAssessmentService {
 
   private identifySensitiveDataTypes(
     operation: DatabaseOperationMetadata,
-    context: Record<string, unknown>,
+    _context: Record<string, unknown>,
   ): SensitiveDataType[] {
     // Implementation by Agent 1: Data Type Identification Specialist
     return []; // Placeholder

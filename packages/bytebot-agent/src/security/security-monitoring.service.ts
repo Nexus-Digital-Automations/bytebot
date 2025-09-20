@@ -15,9 +15,9 @@
  * @since Phase 1: Bytebot API Security Enhancement
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -84,7 +84,7 @@ export interface SecurityEvent {
   description: string;
 
   /** Additional event metadata */
-  metadata: Record<string, any>;
+  _metadata: Record<string, any>;
 
   /** Risk score (0-100) */
   riskScore: number;
@@ -278,7 +278,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         `[${operationId}] Security Monitoring Service initialization failed`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           initTimeMs: initTime,
         },
@@ -291,7 +291,7 @@ export class SecurityMonitoringService implements OnModuleInit {
    * Process incoming security event for threat detection
    * Main entry point for security event processing
    */
-  processSecurityEvent(event: Partial<SecurityEvent>): SecurityEvent {
+  processSecurityEvent(_event: Partial<SecurityEvent>): SecurityEvent {
     const operationId = `process-security-event-${Date.now()}`;
     const startTime = Date.now();
 
@@ -375,7 +375,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Security event processing failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         processingTimeMs: processingTime,
       });
@@ -472,7 +472,7 @@ export class SecurityMonitoringService implements OnModuleInit {
     ];
 
     knownBadIps.forEach((ip) => {
-      this.ipReputationCache.set(ip, -100); // Negative reputation
+      this.ipReputationCache.set(ip, -100); // Negative _reputation
     });
 
     this.logger.log('IP reputation data loaded', {
@@ -531,7 +531,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Enrich security event with additional context
    */
-  private enrichSecurityEvent(event: Partial<SecurityEvent>): SecurityEvent {
+  private enrichSecurityEvent(_event: Partial<SecurityEvent>): SecurityEvent {
     const eventId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
     const timestamp = new Date();
 
@@ -568,7 +568,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       requestUrl: event.requestUrl || '',
       httpMethod: event.httpMethod || 'UNKNOWN',
       description: event.description || 'Security event detected',
-      metadata: event.metadata || {},
+      _metadata: event.metadata || {},
       riskScore: Math.min(riskScore, 100), // Cap at 100
       responseTriggered: false,
       responseActions: [],
@@ -585,7 +585,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Cache security event for correlation analysis
    */
-  private cacheSecurityEvent(event: SecurityEvent): void {
+  private cacheSecurityEvent(_event: SecurityEvent): void {
     const cacheKey = `${event.sourceIp}-${event.userId || 'anonymous'}`;
 
     if (!this.eventCache.has(cacheKey)) {
@@ -606,7 +606,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Perform threat detection analysis
    */
-  private performThreatDetection(event: SecurityEvent): {
+  private performThreatDetection(_event: SecurityEvent): {
     riskScore: number;
     correlationId?: string;
     responseTriggered: boolean;
@@ -678,7 +678,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Detect anomalous behavior using statistical analysis
    */
-  private detectAnomalies(event: SecurityEvent): {
+  private detectAnomalies(_event: SecurityEvent): {
     riskScore: number;
     responseTriggered: boolean;
     responseActions: string[];
@@ -714,7 +714,7 @@ export class SecurityMonitoringService implements OnModuleInit {
    * Evaluate condition against security event
    */
   private evaluateCondition(
-    event: SecurityEvent,
+    _event: SecurityEvent,
     condition: ThreatCondition,
   ): boolean {
     const fieldValue = this.getFieldValue(event, condition.field);
@@ -756,7 +756,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Get field value from event object
    */
-  private getFieldValue(event: SecurityEvent, field: string): unknown {
+  private getFieldValue(_event: SecurityEvent, field: string): unknown {
     const parts = field.split('.');
     let value: unknown = event;
 
@@ -774,7 +774,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Update security metrics
    */
-  private updateSecurityMetrics(event: SecurityEvent): void {
+  private updateSecurityMetrics(_event: SecurityEvent): void {
     this.securityMetrics.totalEvents++;
 
     // Update event type counters
@@ -797,7 +797,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Trigger automated response actions
    */
-  private triggerAutomatedResponse(event: SecurityEvent): void {
+  private triggerAutomatedResponse(_event: SecurityEvent): void {
     this.logger.warn(`Triggering automated response for security event`, {
       eventId: event.eventId,
       responseActions: event.responseActions,
@@ -811,7 +811,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         this.logger.error(`Failed to execute response action: ${action}`, {
           eventId: event.eventId,
           action,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -820,7 +820,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Execute individual response action
    */
-  private executeResponseAction(action: string, event: SecurityEvent): void {
+  private executeResponseAction(action: string, _event: SecurityEvent): void {
     switch (action) {
       case 'block_ip_temporary':
         // Implement temporary IP blocking (e.g., add to Redis blacklist)
@@ -875,7 +875,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Create security incident for high-severity events
    */
-  private createSecurityIncident(event: SecurityEvent): void {
+  private createSecurityIncident(_event: SecurityEvent): void {
     const incidentId = `inc_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     const incident: SecurityIncident = {
@@ -909,7 +909,7 @@ export class SecurityMonitoringService implements OnModuleInit {
    * Create basic security event when processing fails
    */
   private createBasicSecurityEvent(
-    event: Partial<SecurityEvent>,
+    _event: Partial<SecurityEvent>,
   ): SecurityEvent {
     return {
       eventId: `evt_fallback_${Date.now()}`,
@@ -922,7 +922,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       requestUrl: event.requestUrl || '',
       httpMethod: event.httpMethod || 'UNKNOWN',
       description: event.description || 'Security event (processing failed)',
-      metadata: event.metadata || {},
+      _metadata: event.metadata || {},
       riskScore: 5, // Low default risk
       responseTriggered: false,
       responseActions: [],
@@ -993,7 +993,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       });
     } catch (error) {
       this.logger.error('Security data cleanup failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
     }

@@ -16,7 +16,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -178,7 +178,7 @@ describe('AuthService', () => {
       expect(jest.mocked(prismaService.userSession.create)).toHaveBeenCalled();
       expect(jest.mocked(prismaService.user.update)).toHaveBeenCalledWith({
         where: { id: mockUser.id },
-        data: { lastLoginAt: expect.any(Date) as Date },
+        _data: { lastLoginAt: expect.any(Date) as Date },
       });
     });
 
@@ -275,7 +275,7 @@ describe('AuthService', () => {
         12,
       );
       expect(jest.mocked(prismaService.user.create)).toHaveBeenCalledWith({
-        data: {
+        _data: {
           email: registerDto.email,
           username: registerDto.username,
           firstName: registerDto.firstName,
@@ -460,7 +460,7 @@ describe('AuthService', () => {
         jest.mocked(prismaService.userSession.update),
       ).toHaveBeenCalledWith({
         where: { id: mockSession.id },
-        data: {
+        _data: {
           isRevoked: true,
           updatedAt: expect.any(Date) as Date,
         },
@@ -518,7 +518,7 @@ describe('AuthService', () => {
       );
       expect(jest.mocked(prismaService.user.update)).toHaveBeenCalledWith({
         where: { id: userId },
-        data: {
+        _data: {
           passwordHash: 'new-hashed-password',
           updatedAt: expect.any(Date) as Date,
         },
@@ -527,7 +527,7 @@ describe('AuthService', () => {
         jest.mocked(prismaService.userSession.updateMany),
       ).toHaveBeenCalledWith({
         where: { userId },
-        data: {
+        _data: {
           isRevoked: true,
           updatedAt: expect.any(Date) as Date,
         },

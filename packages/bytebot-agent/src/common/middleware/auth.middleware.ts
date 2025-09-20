@@ -18,7 +18,6 @@ import {
   Injectable,
   NestMiddleware,
   UnauthorizedException,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -185,7 +184,7 @@ export class AuthMiddleware implements NestMiddleware {
               operationId,
               path: req.path,
               method: req.method,
-              error: authResult.error,
+              _error: authResult.error,
               authTimeMs: Date.now() - startTime,
               clientIp: this.getClientIp(req),
               userAgent: req.get('User-Agent')?.substring(0, 100),
@@ -206,7 +205,7 @@ export class AuthMiddleware implements NestMiddleware {
 
       this.logger.error(`[${operationId}] Authentication middleware error`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         path: req.path,
         method: req.method,
         authTimeMs: authTime,
@@ -250,7 +249,7 @@ export class AuthMiddleware implements NestMiddleware {
       if (!token) {
         return {
           success: false,
-          error: 'No authentication token provided',
+          _error: 'No authentication token provided',
         };
       }
 
@@ -259,7 +258,7 @@ export class AuthMiddleware implements NestMiddleware {
       if (!payload) {
         return {
           success: false,
-          error: 'Invalid authentication token',
+          _error: 'Invalid authentication token',
         };
       }
 
@@ -271,7 +270,7 @@ export class AuthMiddleware implements NestMiddleware {
       if (!validationResult.isValid) {
         return {
           success: false,
-          error: validationResult.error || 'User validation failed',
+          _error: validationResult.error || 'User validation failed',
         };
       }
 
@@ -289,7 +288,7 @@ export class AuthMiddleware implements NestMiddleware {
 
       return {
         success: false,
-        error: this.getUserFriendlyErrorMessage(errorMessage),
+        _error: this.getUserFriendlyErrorMessage(errorMessage),
       };
     }
   }
@@ -396,7 +395,7 @@ export class AuthMiddleware implements NestMiddleware {
       });
       return {
         isValid: false,
-        error: 'User account is not active',
+        _error: 'User account is not active',
       };
     }
 
@@ -410,7 +409,7 @@ export class AuthMiddleware implements NestMiddleware {
       });
       return {
         isValid: false,
-        error: 'Invalid user role',
+        _error: 'Invalid user role',
       };
     }
 
@@ -484,7 +483,7 @@ export class AuthMiddleware implements NestMiddleware {
    * @param error - Technical error message
    * @returns string - User-friendly error message
    */
-  private getUserFriendlyErrorMessage(error: string): string {
+  private getUserFriendlyErrorMessage(_error: string): string {
     if (error.includes('jwt expired')) {
       return 'Authentication token has expired';
     }

@@ -6,7 +6,7 @@
  * for actual browser automation while providing enterprise-grade task management.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CreateBrowserTaskDto,
@@ -88,14 +88,14 @@ export interface BrowserTaskExecution {
   estimatedRemainingMs?: number;
   result?: TaskResult;
   error?: TaskError;
-  metadata: TaskMetadata;
+  _metadata: TaskMetadata;
   metrics: TaskMetrics;
   executionSteps: TaskExecutionStep[];
 }
 
 // Type guards for task validation
 function isTaskError(
-  error: unknown,
+  _error: unknown,
 ): error is { message: string; stack?: string } {
   return (
     typeof error === 'object' &&
@@ -196,7 +196,7 @@ export class BrowserTaskService {
         lastActivityAt: now,
         currentStep: 0,
         totalSteps: this.calculateTotalSteps(createTaskDto),
-        metadata: {
+        _metadata: {
           userId,
           agentId,
           retryCount: 0,
@@ -244,7 +244,7 @@ export class BrowserTaskService {
         config: createTaskDto.config,
         tags: createTaskDto.tags,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = isTaskError(error)
         ? error.message
         : 'Unknown error occurred during task creation';
@@ -272,7 +272,7 @@ export class BrowserTaskService {
         success: false,
         taskId,
         found: false,
-        error: {
+        _error: {
           code: 'TASK_NOT_FOUND',
           message: `Task ${taskId} not found`,
           timestamp: new Date(),
@@ -317,8 +317,8 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result?.data as Record<string, unknown> | undefined,
-      error: task.error,
+      _result: task.result?.data as Record<string, unknown> | undefined,
+      _error: task.error,
       timestamp: new Date(),
     };
   }
@@ -376,7 +376,7 @@ export class BrowserTaskService {
         success: true,
         message: `Task ${taskId} cancelled successfully`,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = isTaskError(error)
         ? error.message
         : 'Unknown error occurred while cancelling task';
@@ -423,14 +423,14 @@ export class BrowserTaskService {
         stepNumber: step.stepNumber,
         action: step.action,
         target: 'browser', // Default target since not stored in internal format
-        result: step.result || 'completed',
+        _result: step.result || 'completed',
         timestamp: step.startedAt || new Date(),
         screenshot: '', // Screenshots would need separate handling
         success: step.status === TaskStatus.COMPLETED,
-        error: step.error,
+        _error: step.error,
       })),
-      result: task.result?.data as Record<string, unknown> | undefined,
-      error: task.error
+      _result: task.result?.data as Record<string, unknown> | undefined,
+      _error: task.error
         ? {
             message: task.error.message,
             code: task.error.code,
@@ -533,7 +533,7 @@ export class BrowserTaskService {
     this.logger.log(`Starting task manually: ${taskId}`);
 
     // Execute task immediately
-    void this.executeTask(task).catch((error: unknown) => {
+    void this.executeTask(task).catch((_error: unknown) => {
       const errorMessage = isTaskError(error)
         ? error.message
         : 'Unknown error during task execution';
@@ -557,7 +557,7 @@ export class BrowserTaskService {
     // Try to get task from completed tasks since it was just cancelled
     try {
       return this.getTask(taskId);
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       // If task is not found in completed tasks, create a minimal response
       const errorMessage = isTaskError(error)
         ? error.message
@@ -604,7 +604,7 @@ export class BrowserTaskService {
   /**
    * Get list of all tasks (active and completed) with pagination
    */
-  listTasks(options: {
+  listTasks(_options: {
     status?: TaskStatus;
     page?: number;
     limit?: number;
@@ -638,7 +638,7 @@ export class BrowserTaskService {
       try {
         const taskDto = this.convertToResponseDto(task);
         tasks.push(taskDto);
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = isTaskError(error)
           ? error.message
           : 'Unknown error converting task';
@@ -727,8 +727,8 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result?.data as Record<string, unknown> | undefined,
-      error: task.error,
+      _result: task.result?.data as Record<string, unknown> | undefined,
+      _error: task.error,
       timestamp: new Date(),
     }));
   }
@@ -828,7 +828,7 @@ export class BrowserTaskService {
     for (const taskId of tasksToStart) {
       const task = this.activeTasks.get(taskId);
       if (task) {
-        void this.executeTask(task).catch((error: unknown) => {
+        void this.executeTask(task).catch((_error: unknown) => {
           const errorMessage = isTaskError(error)
             ? error.message
             : 'Unknown error during task execution';
@@ -857,7 +857,7 @@ export class BrowserTaskService {
         taskId: task.taskId,
         sessionId: task.sessionId,
         actions: [], // Would be populated from task configuration
-        options: {
+        _options: {
           timeout: task.metadata.timeoutMs,
           screenshots: true,
           retryOnFailure: task.metadata.maxRetries > 0,
@@ -870,7 +870,7 @@ export class BrowserTaskService {
       task.lastActivityAt = new Date();
       task.result = {
         success: result.success,
-        data: result.results,
+        _data: result.results,
         message: result.success ? 'Task completed successfully' : 'Task failed',
         timestamp: new Date(),
       };
@@ -899,7 +899,7 @@ export class BrowserTaskService {
       this.logger.log(
         `Browser task completed: ${task.taskId} (${task.status})`,
       );
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       task.status = TaskStatus.FAILED;
       task.completedAt = new Date();
       task.lastActivityAt = new Date();
@@ -1063,14 +1063,14 @@ export class BrowserTaskService {
         stepNumber: step.stepNumber,
         action: step.action,
         target: 'browser',
-        result: step.result || 'completed',
+        _result: step.result || 'completed',
         timestamp: step.startedAt || new Date(),
         screenshot: '',
         success: step.status === TaskStatus.COMPLETED,
-        error: step.error,
+        _error: step.error,
       })),
-      result: task.result?.data as Record<string, unknown> | undefined,
-      error: task.error
+      _result: task.result?.data as Record<string, unknown> | undefined,
+      _error: task.error
         ? {
             message: task.error.message,
             code: task.error.code,

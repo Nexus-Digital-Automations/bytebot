@@ -11,7 +11,7 @@
  */
 
 import { DocumentBuilder, SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SUPPORTED_API_VERSIONS } from '../versioning/api-version.decorator';
 
@@ -501,7 +501,7 @@ export function setupApiDocumentation(
 
   // Add JSON endpoint
   app.getHttpAdapter().get(jsonPath, (req: any, res: any) => {
-    (res as { json: (data: any) => void }).json(document);
+    (res as { json: (_data: any) => void }).json(document);
   });
 
   // Add YAML endpoint (if yaml library is available)
@@ -513,11 +513,11 @@ export function setupApiDocumentation(
     const yamlModuleName = 'yaml';
     void (eval('import') as (module: string) => Promise<any>)(yamlModuleName)
       .then((yamlModule) => {
-        const yaml = yamlModule as { stringify: (data: any) => string };
+        const yaml = yamlModule as { stringify: (_data: any) => string };
         app.getHttpAdapter().get(yamlPath, (req: any, res: any) => {
           const typedRes = res as {
             set: (key: string, value: string) => void;
-            send: (data: string) => void;
+            send: (_data: string) => void;
           };
           typedRes.set('Content-Type', 'application/yaml');
           typedRes.send(yaml.stringify(document));
@@ -528,7 +528,7 @@ export function setupApiDocumentation(
       });
   } catch (error) {
     logger.warn('YAML support initialization failed:', {
-      error: error instanceof Error ? error.message : String(error),
+      _error: error instanceof Error ? error.message : String(error),
     });
   }
 

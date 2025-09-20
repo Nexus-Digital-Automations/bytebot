@@ -17,9 +17,8 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TestingModule } from '@nestjs/testing';
+
 import { AgentProcessor } from '../agent.processor';
 import { TasksService } from '../../tasks/tasks.service';
 import { MessagesService } from '../../messages/messages.service';
@@ -84,8 +83,8 @@ describe('AgentProcessor', () => {
     executedAt: new Date('2024-01-01T10:00:00.000Z'),
     completedAt: null,
     queuedAt: new Date('2024-01-01T10:00:00.000Z'),
-    error: null,
-    result: null,
+    _error: null,
+    _result: null,
     model: {
       provider: 'anthropic',
       name: 'claude-3-sonnet',
@@ -174,7 +173,7 @@ describe('AgentProcessor', () => {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

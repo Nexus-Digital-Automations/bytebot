@@ -13,14 +13,9 @@
  * - Trend analysis and anomaly detection
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import {
   BrowserAutomationErrorCategory,
   BrowserAutomationErrorSeverity,
@@ -36,7 +31,7 @@ export interface MonitoringEvent {
   operationType: BrowserAutomationOperationType;
   sessionId?: string;
   taskId?: string;
-  data: Record<string, unknown>;
+  _data: Record<string, unknown>;
   tags: string[];
 }
 
@@ -207,8 +202,8 @@ export class BrowserAutomationMonitoringService
    * Record an error event
    */
   recordError(
-    error: Error,
-    context: {
+    _error: Error,
+    _context: {
       correlationId: string;
       operationType: BrowserAutomationOperationType;
       sessionId?: string;
@@ -227,14 +222,14 @@ export class BrowserAutomationMonitoringService
     );
 
     // Create monitoring event
-    const event: MonitoringEvent = {
+    const _event: MonitoringEvent = {
       type: 'error',
       timestamp: new Date(),
       correlationId: context.correlationId,
       operationType: context.operationType,
       sessionId: context.sessionId,
       taskId: context.taskId,
-      data: {
+      _data: {
         errorCode: errorClassification.code,
         errorMessage: error.message,
         errorCategory: errorClassification.category,
@@ -278,7 +273,7 @@ export class BrowserAutomationMonitoringService
   /**
    * Record a successful operation
    */
-  recordSuccess(context: {
+  recordSuccess(_context: {
     correlationId: string;
     operationType: BrowserAutomationOperationType;
     sessionId?: string;
@@ -288,14 +283,14 @@ export class BrowserAutomationMonitoringService
     cacheHit?: boolean;
     additionalContext?: Record<string, unknown>;
   }): void {
-    const event: MonitoringEvent = {
+    const _event: MonitoringEvent = {
       type: 'success',
       timestamp: new Date(),
       correlationId: context.correlationId,
       operationType: context.operationType,
       sessionId: context.sessionId,
       taskId: context.taskId,
-      data: {
+      _data: {
         durationMs: context.durationMs,
         dataSize: context.dataSize,
         cacheHit: context.cacheHit,
@@ -328,12 +323,12 @@ export class BrowserAutomationMonitoringService
       throughput?: number;
     },
   ): void {
-    const event: MonitoringEvent = {
+    const _event: MonitoringEvent = {
       type: 'performance',
       timestamp: new Date(),
       correlationId: `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       operationType,
-      data: metrics,
+      _data: metrics,
       tags: ['performance', operationType.toLowerCase()],
     };
 
@@ -345,7 +340,7 @@ export class BrowserAutomationMonitoringService
    */
   recordRecovery(
     recoveryResult: RecoveryResult,
-    context: {
+    _context: {
       correlationId: string;
       operationType: BrowserAutomationOperationType;
       sessionId?: string;
@@ -353,14 +348,14 @@ export class BrowserAutomationMonitoringService
       originalError: string;
     },
   ): void {
-    const event: MonitoringEvent = {
+    const _event: MonitoringEvent = {
       type: 'recovery',
       timestamp: new Date(),
       correlationId: context.correlationId,
       operationType: context.operationType,
       sessionId: context.sessionId,
       taskId: context.taskId,
-      data: {
+      _data: {
         recoveryStrategy: recoveryResult.strategy,
         recoverySuccess: recoveryResult.success,
         attemptNumber: recoveryResult.attemptNumber,
@@ -566,7 +561,7 @@ export class BrowserAutomationMonitoringService
    * Private method implementations
    */
 
-  private addEvent(event: MonitoringEvent): void {
+  private addEvent(_event: MonitoringEvent): void {
     this.eventBuffer.push(event);
 
     // Emit event for real-time processing
@@ -581,7 +576,7 @@ export class BrowserAutomationMonitoringService
   private updateErrorMetrics(
     errorCode: string,
     classification: any,
-    context: any,
+    _context: any,
   ): void {
     let metrics = this.errorMetrics.get(errorCode);
 
@@ -706,9 +701,9 @@ export class BrowserAutomationMonitoringService
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('monitoring.event', (event: MonitoringEvent) => {
+    this.eventEmitter.on('monitoring.event', (_event: MonitoringEvent) => {
       // Additional real-time processing can be added here
-      this.logger.debug(`Monitoring event: ${event.type}`, {
+      this.logger.debug(`Monitoring _event: ${event.type}`, {
         correlationId: event.correlationId,
         operationType: event.operationType,
       });
@@ -951,7 +946,7 @@ export class BrowserAutomationMonitoringService
     });
   }
 
-  private convertToPrometheusFormat(data: any): string {
+  private convertToPrometheusFormat(_data: any): string {
     // Convert metrics to Prometheus format
     let prometheus = '';
 
@@ -971,7 +966,7 @@ export class BrowserAutomationMonitoringService
     return prometheus;
   }
 
-  private convertToCsvFormat(data: any): string {
+  private convertToCsvFormat(_data: any): string {
     // Convert metrics to CSV format
     let csv = 'metric_name,value,timestamp\n';
 

@@ -4,16 +4,7 @@
  * for monitoring and operational visibility
  */
 
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  HttpStatus,
-  HttpCode,
-  Logger,
-  Header,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, HttpCode, Header } from '@nestjs/common';
 import { ParlantSecure } from '@bytebot/shared/dist/index-server';
 import { DatabaseService } from './database.service';
 import { DatabaseHealthService } from './health/database-health.service';
@@ -89,14 +80,14 @@ export class DatabaseHealthController {
       return response;
     } catch (error) {
       this.logger.error(`[${operationId}] Database health check failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       };
     }
@@ -177,7 +168,7 @@ export class DatabaseHealthController {
       return response;
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to collect database metrics`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
@@ -241,7 +232,7 @@ export class DatabaseHealthController {
       this.logger.error(
         `[${operationId}] Failed to get circuit breaker status`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           operationId,
         },
       );
@@ -286,7 +277,7 @@ export class DatabaseHealthController {
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to reset circuit breaker`, {
         circuitKey,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
@@ -378,7 +369,7 @@ export class DatabaseHealthController {
       return response;
     } catch (error) {
       this.logger.error(`[${operationId}] Manual health check failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 
@@ -450,7 +441,7 @@ export class DatabaseHealthController {
       this.logger.error(
         `[${operationId}] Failed to get connection pool status`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           operationId,
         },
       );

@@ -16,9 +16,9 @@
  * - Cleanup and maintenance operations
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import * as fs from 'fs';
 import {
   DatabaseSecurityService,
@@ -118,7 +118,7 @@ describe('DatabaseSecurityService', () => {
     // Mock the logger to capture log calls
     mockLogger = {
       log: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
       verbose: jest.fn(),
@@ -367,13 +367,13 @@ describe('DatabaseSecurityService', () => {
         {
           operation: 'select_query',
           success: false,
-          error: 'authentication failed',
+          _error: 'authentication failed',
           expectedSeverity: 'error',
         },
         {
           operation: 'select_query',
           success: false,
-          error: 'syntax error',
+          _error: 'syntax error',
           expectedSeverity: 'warning',
         },
         {
@@ -451,7 +451,7 @@ describe('DatabaseSecurityService', () => {
         'Failed to audit database operation',
         expect.objectContaining({
           operation: 'test_operation',
-          error: 'Categorization failed',
+          _error: 'Categorization failed',
         }),
       );
 
@@ -496,7 +496,7 @@ describe('DatabaseSecurityService', () => {
         'Database connection audited',
         expect.objectContaining({
           connectionId,
-          event: 'connect',
+          _event: 'connect',
           success: true,
           userId: 'user123',
         }),
@@ -506,7 +506,7 @@ describe('DatabaseSecurityService', () => {
         'Database connection audited',
         expect.objectContaining({
           connectionId,
-          event: 'disconnect',
+          _event: 'disconnect',
           success: true,
           userId: 'user123',
         }),
@@ -565,8 +565,8 @@ describe('DatabaseSecurityService', () => {
         'Failed to audit database connection',
         expect.objectContaining({
           connectionId,
-          event: 'connect',
-          error: 'Audit failed',
+          _event: 'connect',
+          _error: 'Audit failed',
         }),
       );
 
@@ -703,7 +703,7 @@ describe('DatabaseSecurityService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to validate query security',
         expect.objectContaining({
-          error: 'Validation failed',
+          _error: 'Validation failed',
         }),
       );
 
@@ -744,7 +744,7 @@ describe('DatabaseSecurityService', () => {
       service.auditOperation('database_connect', {
         duration: 50,
         success: false,
-        error: 'Connection failed',
+        _error: 'Connection failed',
       });
 
       service.validateQuerySecurity('SELECT * FROM users WHERE id = 1 OR 1=1', {
@@ -987,7 +987,7 @@ describe('DatabaseSecurityService', () => {
         sourceIp: '192.168.1.100',
         userId: 'user123',
         sessionId: 'session456',
-        context: { additional: 'metadata' },
+        _context: { additional: 'metadata' },
         blocked: true, // High severity should be blocked
       });
     });
@@ -1020,7 +1020,7 @@ describe('DatabaseSecurityService', () => {
         ipAddress: '192.168.1.100',
         duration: 500,
         success: false,
-        error: 'Invalid credentials',
+        _error: 'Invalid credentials',
       });
 
       const violations = service.getSecurityViolations();

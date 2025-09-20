@@ -14,7 +14,6 @@ import {
   PipeTransform,
   Injectable,
   ArgumentMetadata,
-  Logger,
   BadRequestException,
 } from '@nestjs/common';
 import {
@@ -177,9 +176,9 @@ const SANITIZATION_STRATEGIES: Record<
 @Injectable()
 export class SanitizationPipe implements PipeTransform<any> {
   private readonly logger = new Logger(SanitizationPipe.name);
-  private readonly options: SanitizationPipeOptions;
+  private readonly _options: SanitizationPipeOptions;
 
-  constructor(options: Partial<SanitizationPipeOptions> = {}) {
+  constructor(_options: Partial<SanitizationPipeOptions> = {}) {
     this.options = {
       defaultStrategy: SanitizationStrategy.MODERATE,
       fieldRules: [],
@@ -204,7 +203,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata
    * @returns Sanitized value
    */
-  transform(value: any, metadata: ArgumentMetadata): any {
+  transform(value: any, _metadata: ArgumentMetadata): any {
     const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -262,7 +261,7 @@ export class SanitizationPipe implements PipeTransform<any> {
 
       this.logger.error(`[${operationId}] Sanitization failed`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         processingTimeMs: processingTime,
       });
 
@@ -552,9 +551,9 @@ export class SanitizationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    error: any,
+    _error: any,
     value: any,
-    metadata: ArgumentMetadata,
+    _metadata: ArgumentMetadata,
   ): void {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;
@@ -597,7 +596,7 @@ export class SanitizationPipe implements PipeTransform<any> {
           : 'Unknown logging error';
       this.logger.error('Failed to log security event from sanitization pipe', {
         operationId,
-        error: loggingErrorMessage,
+        _error: loggingErrorMessage,
       });
     }
   }

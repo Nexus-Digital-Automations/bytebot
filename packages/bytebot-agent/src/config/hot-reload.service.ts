@@ -17,12 +17,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -227,7 +222,7 @@ export class ConfigurationHotReloadService
       this.logger.error(
         'Local Configuration Hot-Reload Service initialization failed',
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           initTimeMs: initTime,
         },
       );
@@ -255,7 +250,7 @@ export class ConfigurationHotReloadService
           this.logger.debug(`Closed file watcher for: ${path}`);
         } catch (error) {
           this.logger.warn(`Failed to close watcher for ${path}`, {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -274,7 +269,7 @@ export class ConfigurationHotReloadService
       this.logger.error(
         'Error during Local Configuration Hot-Reload Service destruction',
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -427,7 +422,7 @@ export class ConfigurationHotReloadService
 
         watcher.on('error', (error) => {
           this.logger.error(`File watcher error for ${path}`, {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         });
 
@@ -437,7 +432,7 @@ export class ConfigurationHotReloadService
         this.logger.debug(`Setup file watcher for: ${path} (${type})`);
       } catch (error) {
         this.logger.error(`Failed to setup file watcher for ${path}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -477,7 +472,7 @@ export class ConfigurationHotReloadService
         }
       } catch (error) {
         this.logger.warn(`Failed to initialize metadata for ${filePath}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -522,7 +517,7 @@ export class ConfigurationHotReloadService
           {
             filePath,
             type,
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           },
         );
       }
@@ -622,7 +617,7 @@ export class ConfigurationHotReloadService
         {
           filePath,
           type,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           processingTimeMs: processingTime,
         },
       );
@@ -640,7 +635,7 @@ export class ConfigurationHotReloadService
         changes: [],
         timestamp: new Date(),
         successful: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         deploymentType: 'local',
       } as LocalConfigurationChangeEvent);
     } finally {
@@ -692,7 +687,7 @@ export class ConfigurationHotReloadService
       return hasChanged;
     } catch (error) {
       this.logger.error(`Error validating file change for ${filePath}`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return true; // Assume changed on error
     }
@@ -787,7 +782,7 @@ export class ConfigurationHotReloadService
       return isValid;
     } catch (error) {
       this.logger.error(`[${operationId}] Configuration validation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -824,7 +819,7 @@ export class ConfigurationHotReloadService
     } catch (error) {
       this.logger.error('Failed to create configuration backup', {
         reason,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -859,7 +854,7 @@ export class ConfigurationHotReloadService
     } catch (error) {
       this.logger.error(`[${operationId}] Configuration rollback failed`, {
         reason,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -943,7 +938,7 @@ export class ConfigurationHotReloadService
     } catch (error) {
       this.logger.error(`[${operationId}] Manual reload failed`, {
         filePath,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }

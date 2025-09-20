@@ -10,8 +10,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -47,16 +45,16 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
 
   private handleBrowserUseError(
     exception: BrowserUseError,
-    response: Response,
+    _response: Response,
     correlationId: string,
-    request: { correlationId?: string; url?: string },
+    _request: { correlationId?: string; url?: string },
   ) {
     const statusCode = this.mapErrorCodeToStatus(exception.code);
 
     const errorResponse = {
       statusCode,
       message: exception.message || 'Unknown error',
-      error: 'Browser Automation Error',
+      _error: 'Browser Automation Error',
       code: exception.code,
       recoverable: exception.recoverable,
       details: exception.details,
@@ -67,7 +65,7 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
     };
 
     this.logger.error(
-      `Browser automation error: ${exception.message} [${exception.code}] [${correlationId}]`,
+      `Browser automation _error: ${exception.message} [${exception.code}] [${correlationId}]`,
       exception.stack,
     );
 
@@ -76,9 +74,9 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
 
   private handleHttpException(
     exception: HttpException,
-    response: Response,
+    _response: Response,
     correlationId: string,
-    request: { correlationId?: string; url?: string },
+    _request: { correlationId?: string; url?: string },
   ) {
     const statusCode = exception.getStatus();
     const exceptionResponse = exception.getResponse();
@@ -90,7 +88,7 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
           ? exceptionResponse
           : ((exceptionResponse as Record<string, unknown>)
               ?.message as string) || 'Unknown error',
-      error: exception.name,
+      _error: exception.name,
       timestamp: new Date().toISOString(),
       path: request?.url || 'unknown',
       correlationId,

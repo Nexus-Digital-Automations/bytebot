@@ -19,7 +19,7 @@
  * Performance: Sub-1000ms P95 validation testing with optimization targets
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -37,11 +37,7 @@ import {
 import { DatabaseService } from '../database.service';
 import { DatabaseBackupService } from '../database-backup.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== TESTING FRAMEWORK INTERFACES =====
 
@@ -124,10 +120,7 @@ interface MigrationTestScenario {
 /**
  * Mock Parlant validation responses for testing
  */
-const mockParlantValidationResponses: Record<
-  string,
-  ParlantValidationResponse
-> = {
+const mockParlantValidationResponses: Record<string> = {
   READ_APPROVED: {
     approved: true,
     conversationId: 'conv_read_test_001',
@@ -139,7 +132,7 @@ const mockParlantValidationResponses: Record<
       timeoutMs: 10000,
       retryAttempts: 3,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 150,
@@ -164,7 +157,7 @@ const mockParlantValidationResponses: Record<
       timeoutMs: 15000,
       retryAttempts: 2,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 250,
@@ -190,7 +183,7 @@ const mockParlantValidationResponses: Record<
       timeoutMs: 30000,
       retryAttempts: 1,
     },
-    metadata: {
+    _metadata: {
       startTime: new Date(),
       endTime: new Date(),
       processingTime: 180,

@@ -18,10 +18,10 @@
  * @since Phase 1: Bytebot Core Module Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import {
   Task,
   Message,
@@ -180,8 +180,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: createDto.model as Prisma.JsonValue,
       };
 
@@ -246,7 +246,7 @@ describe('Task Lifecycle Integration Tests', () => {
       const completedUpdate: UpdateTaskDto = {
         status: TaskStatus.COMPLETED,
         completedAt: new Date(),
-        result: { success: true, output: 'Task completed successfully' },
+        _result: { success: true, output: 'Task completed successfully' },
       };
 
       const completedTask = { ...mockTask, ...completedUpdate };
@@ -270,7 +270,7 @@ describe('Task Lifecycle Integration Tests', () => {
         taskId,
         content: summaryContent,
         parentId: null,
-        metadata: { type: 'completion-summary' } as Prisma.JsonValue,
+        _metadata: { type: 'completion-summary' } as Prisma.JsonValue,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -280,7 +280,7 @@ describe('Task Lifecycle Integration Tests', () => {
       const summary = await summariesService.create({
         taskId,
         content: summaryContent,
-        metadata: { type: 'completion-summary' },
+        _metadata: { type: 'completion-summary' },
       });
 
       expect(summary.taskId).toBe(taskId);
@@ -301,13 +301,13 @@ describe('Task Lifecycle Integration Tests', () => {
         files: [
           {
             name: 'data.json',
-            base64: 'data:application/json;base64,eyJkYXRhIjogInRlc3QifQ==',
+            base64: '_data:application/json;base64,eyJkYXRhIjogInRlc3QifQ==',
             type: 'application/json',
             size: 16,
           },
           {
             name: 'config.txt',
-            base64: 'data:text/plain;base64,Y29uZmlnIGRhdGE=',
+            base64: '_data:text/plain;base64,Y29uZmlnIGRhdGE=',
             type: 'text/plain',
             size: 11,
           },
@@ -329,8 +329,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -339,7 +339,7 @@ describe('Task Lifecycle Integration Tests', () => {
         name: file.name,
         type: file.type,
         size: file.size,
-        data: file.base64.split('base64,')[1],
+        _data: file.base64.split('base64,')[1],
         taskId,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -367,11 +367,11 @@ describe('Task Lifecycle Integration Tests', () => {
       // Verify files were processed
       expect(mockPrismaService.file.create).toHaveBeenCalledTimes(2);
       expect(mockPrismaService.file.create).toHaveBeenNthCalledWith(1, {
-        data: expect.objectContaining({
+        _data: expect.objectContaining({
           name: 'data.json',
           type: 'application/json',
           size: 16,
-          data: 'eyJkYXRhIjogInRlc3QifQ==',
+          _data: 'eyJkYXRhIjogInRlc3QifQ==',
           taskId,
         }),
       });
@@ -400,8 +400,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -424,7 +424,7 @@ describe('Task Lifecycle Integration Tests', () => {
       // 2. Task fails during execution
       const failedUpdate: UpdateTaskDto = {
         status: TaskStatus.FAILED,
-        error: 'Execution timeout after 30 seconds',
+        _error: 'Execution timeout after 30 seconds',
         executedAt: new Date(),
       };
 
@@ -475,7 +475,7 @@ describe('Task Lifecycle Integration Tests', () => {
       const completedUpdate: UpdateTaskDto = {
         status: TaskStatus.COMPLETED,
         completedAt: new Date(),
-        result: { success: true, recoveryRequired: true },
+        _result: { success: true, recoveryRequired: true },
       };
 
       const completedTask = { ...mockTask, ...completedUpdate };
@@ -514,8 +514,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -589,8 +589,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: new Date(),
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -652,7 +652,7 @@ describe('Task Lifecycle Integration Tests', () => {
         taskId,
         content: conversationSummary,
         parentId: null,
-        metadata: {
+        _metadata: {
           type: 'conversation-summary',
           messageCount: 3,
         } as Prisma.JsonValue,
@@ -665,7 +665,7 @@ describe('Task Lifecycle Integration Tests', () => {
       const summary = await summariesService.create({
         taskId,
         content: conversationSummary,
-        metadata: { type: 'conversation-summary', messageCount: 3 },
+        _metadata: { type: 'conversation-summary', messageCount: 3 },
       });
 
       expect(summary.contentMetrics.wordCount).toBeGreaterThan(0);
@@ -705,8 +705,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       }));
 
@@ -774,8 +774,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -868,8 +868,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: new Date(),
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       };
 
@@ -891,7 +891,7 @@ describe('Task Lifecycle Integration Tests', () => {
       // Verify task state was still updated correctly
       expect(mockPrismaService.task.update).toHaveBeenCalledWith({
         where: { id: taskId },
-        data: { control: 'USER' },
+        _data: { control: 'USER' },
       });
     });
   });
@@ -940,8 +940,8 @@ describe('Task Lifecycle Integration Tests', () => {
         executedAt: null,
         completedAt: null,
         queuedAt: null,
-        error: null,
-        result: null,
+        _error: null,
+        _result: null,
         model: null,
       }));
 

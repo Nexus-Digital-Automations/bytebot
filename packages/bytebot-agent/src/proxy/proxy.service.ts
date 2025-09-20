@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI, { APIUserAbortError } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
@@ -89,7 +89,7 @@ export class ProxyService implements BytebotAgentService {
           totalTokens: completion.usage?.total_tokens || 0,
         },
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       if (error instanceof APIUserAbortError) {
         this.logger.log('Chat Completion API call aborted');
         throw new BytebotAgentInterrupt();
@@ -160,7 +160,7 @@ export class ProxyService implements BytebotAgentService {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: `data:${block.source.media_type};base64,${block.source.data}`,
+                    url: `_data:${block.source.media_type};base64,${block.source.data}`,
                     detail: 'high',
                   },
                 },
@@ -186,7 +186,7 @@ export class ProxyService implements BytebotAgentService {
                   {
                     type: 'image_url',
                     image_url: {
-                      url: `data:${imageBlock.source.media_type};base64,${imageBlock.source.data}`,
+                      url: `_data:${imageBlock.source.media_type};base64,${imageBlock.source.data}`,
                       detail: 'high',
                     },
                   },
@@ -256,7 +256,7 @@ export class ProxyService implements BytebotAgentService {
                       {
                         type: 'image_url',
                         image_url: {
-                          url: `data:${content.source.media_type};base64,${content.source.data}`,
+                          url: `_data:${content.source.media_type};base64,${content.source.data}`,
                           detail: 'high',
                         },
                       },

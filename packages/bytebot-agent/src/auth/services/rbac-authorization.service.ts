@@ -19,12 +19,7 @@
  * @author Enterprise Security & Authorization Specialist
  */
 
-import {
-  Injectable,
-  Logger,
-  ForbiddenException,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User, UserRole } from '@prisma/client';
@@ -148,8 +143,8 @@ export interface AuthorizationResult {
 export interface AuthorizationAuditEntry {
   auditId: string;
   userId: string;
-  context: PermissionContext;
-  result: 'allowed' | 'denied';
+  _context: PermissionContext;
+  _result: 'allowed' | 'denied';
   reason: string;
   matchedPermissions: string[];
   timestamp: Date;
@@ -339,7 +334,9 @@ export class RBACAuthorizationService implements OnModuleInit {
   /**
    * Check if user is authorized for a specific action on a resource
    */
-  async isAuthorized(context: PermissionContext): Promise<AuthorizationResult> {
+  async isAuthorized(
+    _context: PermissionContext,
+  ): Promise<AuthorizationResult> {
     const operationId = `rbac-check-${Date.now()}`;
     const startTime = Date.now();
 
@@ -409,7 +406,7 @@ export class RBACAuthorizationService implements OnModuleInit {
       this.logger.debug(`[${operationId}] Authorization check completed`, {
         operationId,
         userId: context.userId,
-        result: isAuthorized ? 'ALLOWED' : 'DENIED',
+        _result: isAuthorized ? 'ALLOWED' : 'DENIED',
         reason,
         authTimeMs: authTime,
       });
@@ -433,7 +430,7 @@ export class RBACAuthorizationService implements OnModuleInit {
       this.logger.error(`[${operationId}] Authorization check failed`, {
         operationId,
         userId: context.userId,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         authTimeMs: authTime,
       });
@@ -449,7 +446,7 @@ export class RBACAuthorizationService implements OnModuleInit {
   /**
    * Check authorization and throw exception if denied
    */
-  async requireAuthorization(context: PermissionContext): Promise<void> {
+  async requireAuthorization(_context: PermissionContext): Promise<void> {
     const result = await this.isAuthorized(context);
 
     if (!result.allowed) {
@@ -501,8 +498,8 @@ export class RBACAuthorizationService implements OnModuleInit {
       {
         auditId: this.generateAuditId(),
         userId,
-        context: {} as PermissionContext,
-        result: 'allowed',
+        _context: {} as PermissionContext,
+        _result: 'allowed',
         reason: `Permission granted: ${permission.resource}:${permission.actions.join(',')}`,
         matchedPermissions: [],
         timestamp: new Date(),
@@ -550,8 +547,8 @@ export class RBACAuthorizationService implements OnModuleInit {
       {
         auditId: this.generateAuditId(),
         userId,
-        context: {} as PermissionContext,
-        result: 'allowed',
+        _context: {} as PermissionContext,
+        _result: 'allowed',
         reason: `Permission revoked: ${resource}:${actions.join(',')}`,
         matchedPermissions: [],
         timestamp: new Date(),
@@ -702,7 +699,7 @@ export class RBACAuthorizationService implements OnModuleInit {
     } catch (error) {
       this.logger.error('Failed to get user', {
         userId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -722,7 +719,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private filterApplicablePermissions(
     permissions: Permission[],
-    context: PermissionContext,
+    _context: PermissionContext,
   ): Permission[] {
     return permissions.filter((permission) => {
       // Check resource match
@@ -746,7 +743,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private evaluatePermissionConditions(
     permissions: Permission[],
-    context: PermissionContext,
+    _context: PermissionContext,
   ): Array<{
     permission: Permission;
     allowed: boolean;
@@ -782,7 +779,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private evaluateCondition(
     condition: PermissionCondition,
-    context: PermissionContext,
+    _context: PermissionContext,
   ): boolean {
     switch (condition.type) {
       case 'time':
@@ -800,7 +797,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private evaluateTimeCondition(
     condition: PermissionCondition,
-    context: PermissionContext,
+    _context: PermissionContext,
   ): boolean {
     const now = context.requestTime || new Date();
     const conditionTime = new Date(condition.value as string);
@@ -826,7 +823,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private evaluateResourceOwnerCondition(
     condition: PermissionCondition,
-    context: PermissionContext,
+    _context: PermissionContext,
   ): boolean {
     // Check if user owns the resource
     return condition.value === context.userId;
@@ -843,7 +840,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
   private determineRejectionReason(
     permissions: Permission[],
-    context: PermissionContext,
+    _context: PermissionContext,
   ): string {
     const resourcePermissions = permissions.filter(
       (p) => p.resource === context.resourceType,
@@ -865,7 +862,7 @@ export class RBACAuthorizationService implements OnModuleInit {
   }
 
   private createDeniedResult(
-    context: PermissionContext,
+    _context: PermissionContext,
     reason: string,
     operationId: string,
   ): AuthorizationResult {
@@ -889,8 +886,8 @@ export class RBACAuthorizationService implements OnModuleInit {
   }
 
   private createAuditEntry(
-    context: PermissionContext,
-    result: 'allowed' | 'denied',
+    _context: PermissionContext,
+    _result: 'allowed' | 'denied',
     reason: string,
     matchedPermissions: string[],
     operationId: string,
@@ -907,7 +904,7 @@ export class RBACAuthorizationService implements OnModuleInit {
     };
   }
 
-  private addToAuditLog(entry: AuthorizationAuditEntry): void {
+  private addToAuditLog(_entry: AuthorizationAuditEntry): void {
     this.auditLog.push(entry);
 
     // Trim log if it gets too large
@@ -917,7 +914,7 @@ export class RBACAuthorizationService implements OnModuleInit {
   }
 
   private logSecurityEvent(
-    context: PermissionContext,
+    _context: PermissionContext,
     auditEntry: AuthorizationAuditEntry,
     operationId: string,
   ): void {

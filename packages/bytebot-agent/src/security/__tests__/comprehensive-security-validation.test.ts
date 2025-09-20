@@ -20,7 +20,7 @@
  * @since Security Testing Validation Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   UnauthorizedException,
@@ -30,7 +30,7 @@ import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -559,7 +559,7 @@ describe('Comprehensive Security Validation', () => {
           requestUrl: '/auth/login',
           httpMethod: 'POST',
           description: 'Failed login attempt',
-          metadata: {},
+          _metadata: {},
           riskScore: 20,
           responseTriggered: false,
           responseActions: [],
@@ -584,7 +584,7 @@ describe('Comprehensive Security Validation', () => {
           requestUrl: '/api/search',
           httpMethod: 'POST',
           description: 'Potential SQL injection detected',
-          metadata: { payload: "'; DROP TABLE users; --" },
+          _metadata: { payload: "'; DROP TABLE users; --" },
         };
 
         const processedEvent =
@@ -603,7 +603,7 @@ describe('Comprehensive Security Validation', () => {
           requestUrl: '/api/comments',
           httpMethod: 'POST',
           description: 'Potential XSS attack detected',
-          metadata: { payload: '<script>alert("XSS")</script>' },
+          _metadata: { payload: '<script>alert("XSS")</script>' },
         };
 
         const processedEvent =
@@ -720,7 +720,7 @@ describe('Comprehensive Security Validation', () => {
             requestUrl: '/api/search',
             httpMethod: 'POST',
             description: 'SQL injection attempt detected',
-            metadata: { payload },
+            _metadata: { payload },
           };
 
           const processedEvent =
@@ -753,7 +753,7 @@ describe('Comprehensive Security Validation', () => {
             requestUrl: '/api/comments',
             httpMethod: 'POST',
             description: 'XSS attempt detected',
-            metadata: { payload },
+            _metadata: { payload },
           };
 
           const processedEvent =

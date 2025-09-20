@@ -26,7 +26,7 @@ describe('SanitizationPipe', () => {
 
     it('should sanitize HTML tags from string input', async () => {
       const maliciousInput = '<script>alert("xss")</script>Hello World';
-      const metadata: ArgumentMetadata = { type: 'body' };
+      const _metadata: ArgumentMetadata = { type: 'body' };
 
       const result = await pipe.transform(maliciousInput, metadata);
 
@@ -37,7 +37,7 @@ describe('SanitizationPipe', () => {
 
     it('should sanitize SQL injection attempts', async () => {
       const sqlInjection = "'; DROP TABLE users; --";
-      const metadata: ArgumentMetadata = { type: 'query' };
+      const _metadata: ArgumentMetadata = { type: 'query' };
 
       const result = await pipe.transform(sqlInjection, metadata);
 
@@ -48,7 +48,7 @@ describe('SanitizationPipe', () => {
 
     it('should preserve safe content', async () => {
       const safeInput = 'This is a safe string with normal characters 123';
-      const metadata: ArgumentMetadata = { type: 'body' };
+      const _metadata: ArgumentMetadata = { type: 'body' };
 
       const result = await pipe.transform(safeInput, metadata);
 
@@ -104,17 +104,17 @@ describe('SanitizationPipe', () => {
       }
     });
 
-    it('should sanitize data: URLs with dangerous content', async () => {
+    it('should sanitize _data: URLs with dangerous content', async () => {
       const dataUrls = [
-        'data:text/html,<script>alert(1)</script>',
-        'data:application/javascript,alert(1)',
-        '<img src="data:text/html,<script>alert(1)</script>">',
+        '_data:text/html,<script>alert(1)</script>',
+        '_data:application/javascript,alert(1)',
+        '<img src="_data:text/html,<script>alert(1)</script>">',
       ];
 
       for (const dataUrl of dataUrls) {
         const result = await pipe.transform(dataUrl, { type: 'body' });
-        expect(result).not.toContain('data:text/html');
-        expect(result).not.toContain('data:application/javascript');
+        expect(result).not.toContain('_data: text/html');
+        expect(result).not.toContain('_data: application/javascript');
         expect(result).not.toContain('<script>');
       }
     });
@@ -209,7 +209,7 @@ describe('SanitizationPipe', () => {
             },
           },
         },
-        metadata: {
+        _metadata: {
           source: '<iframe src="javascript:alert(1)"></iframe>',
         },
       };

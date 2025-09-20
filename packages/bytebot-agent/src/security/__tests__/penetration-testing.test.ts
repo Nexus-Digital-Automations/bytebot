@@ -21,7 +21,7 @@
  * @since Security Penetration Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   UnauthorizedException,
@@ -718,7 +718,7 @@ describe('🚨 Penetration Testing Suite', () => {
             requestUrl: '/api/search',
             httpMethod: 'POST',
             description: 'Advanced SQL injection attempt detected',
-            metadata: {
+            _metadata: {
               payload,
               userAgent: 'sqlmap/1.0',
               attackType: 'automated_injection',
@@ -774,7 +774,7 @@ describe('🚨 Penetration Testing Suite', () => {
             requestUrl: '/api/comments',
             httpMethod: 'POST',
             description: 'Advanced XSS attack detected',
-            metadata: {
+            _metadata: {
               payload,
               userAgent: 'XSSHunter/2.0',
               attackType: 'advanced_xss',
@@ -827,7 +827,7 @@ describe('🚨 Penetration Testing Suite', () => {
             requestUrl: '/api/system/execute',
             httpMethod: 'POST',
             description: 'Command injection attempt detected',
-            metadata: {
+            _metadata: {
               payload,
               userAgent: 'CommandBot/1.0',
               attackType: 'command_injection',
@@ -945,7 +945,7 @@ describe('🚨 Penetration Testing Suite', () => {
             requestUrl: '/api/login',
             httpMethod: 'POST',
             description: `Failed login attempt from ${ip}`,
-            metadata: {
+            _metadata: {
               attemptNumber: 5,
               pattern: 'distributed_brute_force',
             },
@@ -984,7 +984,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: '/api/search',
           httpMethod: 'POST',
           description: 'Potential resource exhaustion attack',
-          metadata: {
+          _metadata: {
             requestSize: 10485760, // 10MB payload
             processingTime: 5000, // 5 seconds
             attackType: 'resource_exhaustion',
@@ -1006,7 +1006,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: '/api/upload',
           httpMethod: 'POST',
           description: 'Slowloris-style attack detected',
-          metadata: {
+          _metadata: {
             connectionTime: 300000, // 5 minutes
             bytesTransferred: 1024, // Very slow transfer
             attackType: 'slowloris',
@@ -1032,19 +1032,19 @@ describe('🚨 Penetration Testing Suite', () => {
           {
             type: SecurityEventType.SUSPICIOUS_REQUEST_PATTERN,
             description: 'Port scanning detected',
-            metadata: { ports: [22, 80, 443, 3000, 5432] },
+            _metadata: { ports: [22, 80, 443, 3000, 5432] },
           },
           {
             type: SecurityEventType.SUSPICIOUS_REQUEST_PATTERN,
             description: 'Directory traversal attempts',
-            metadata: {
+            _metadata: {
               paths: ['../../../etc/passwd', '..\\..\\windows\\system32'],
             },
           },
           {
             type: SecurityEventType.SUSPICIOUS_REQUEST_PATTERN,
             description: 'Version fingerprinting',
-            metadata: {
+            _metadata: {
               endpoints: ['/robots.txt', '/.well-known/', '/admin/'],
             },
           },
@@ -1075,19 +1075,19 @@ describe('🚨 Penetration Testing Suite', () => {
           {
             type: SecurityEventType.AUTHENTICATION_FAILURE,
             description: 'Multiple authentication failures',
-            metadata: {
+            _metadata: {
               credentials: ['admin:admin', 'root:password', 'admin:123456'],
             },
           },
           {
             type: SecurityEventType.AUTHORIZATION_DENIED,
             description: 'Unauthorized admin access attempt',
-            metadata: { endpoint: '/api/admin/users', method: 'POST' },
+            _metadata: { endpoint: '/api/admin/users', method: 'POST' },
           },
           {
             type: SecurityEventType.PRIVILEGE_ESCALATION,
             description: 'Attempted privilege escalation',
-            metadata: { from_role: 'VIEWER', to_role: 'ADMIN' },
+            _metadata: { from_role: 'VIEWER', to_role: 'ADMIN' },
           },
         ];
 
@@ -1120,7 +1120,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: '/api/users/export',
           httpMethod: 'GET',
           description: 'Suspicious bulk data access detected',
-          metadata: {
+          _metadata: {
             dataVolume: 1048576, // 1MB of user data
             recordCount: 1000,
             accessPattern: 'bulk_export',
@@ -1148,7 +1148,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: `/api/users/${targetUser.id}/profile`,
           httpMethod: 'GET',
           description: 'Unauthorized access to other user data',
-          metadata: {
+          _metadata: {
             ownUserId: attackerUser.id,
             targetUserId: targetUser.id,
             accessType: 'cross_user_access',
@@ -1178,7 +1178,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: '/api/config/security',
           httpMethod: 'PUT',
           description: 'Attempt to disable security monitoring',
-          metadata: {
+          _metadata: {
             configChanges: {
               'security.monitoring.enabled': false,
               'security.logging.level': 'OFF',
@@ -1210,7 +1210,7 @@ describe('🚨 Penetration Testing Suite', () => {
           requestUrl: '/api/logs/clear',
           httpMethod: 'DELETE',
           description: 'Attempt to clear security logs',
-          metadata: {
+          _metadata: {
             logsAffected: ['security.log', 'auth.log', 'access.log'],
             timeRange: '2024-01-01T00:00:00Z to 2024-12-31T23:59:59Z',
           },

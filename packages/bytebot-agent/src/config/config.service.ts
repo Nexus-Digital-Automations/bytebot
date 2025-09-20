@@ -17,7 +17,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './configuration';
 import {
@@ -97,13 +97,13 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
       } catch (error) {
         this.logger.error('Secrets directory access validation failed', {
           path: this.secretsPath,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     } catch (error) {
       this.logger.error('Failed to initialize secrets directory', {
         path: this.secretsPath,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -161,7 +161,7 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
       this.logger.error(`[${operationId}] Failed to load local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         loadTimeMs: loadTime,
       });
       return null;
@@ -202,7 +202,7 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
             `[${operationId}] Could not load existing secrets, creating new`,
             {
               secretName,
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             },
           );
         }
@@ -229,7 +229,7 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
       this.logger.error(`[${operationId}] Failed to store local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         storeTimeMs: storeTime,
       });
       return false;
@@ -288,7 +288,7 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
       this.logger.error(`[${operationId}] Failed to delete local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -308,7 +308,7 @@ class LocalFileSecretsLoader implements LocalSecretsLoader {
         .map((file: string) => file.replace('.enc', ''));
     } catch (error) {
       this.logger.error('Failed to list secrets', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
@@ -417,7 +417,7 @@ class EnvironmentSecretsLoader implements LocalSecretsLoader {
         `[${operationId}] Failed to load environment variable`,
         {
           key,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           loadTimeMs: loadTime,
         },
       );
@@ -551,7 +551,7 @@ export class BytebotConfigService implements OnModuleInit {
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('Local Configuration Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;
@@ -603,7 +603,7 @@ export class BytebotConfigService implements OnModuleInit {
 
       this.logger.error(`[${operationId}] Failed to retrieve configuration`, {
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         responseTimeMs: responseTime,
       });
 
@@ -665,7 +665,7 @@ export class BytebotConfigService implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to retrieve secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         responseTimeMs: responseTime,
       });
       return null;
@@ -719,7 +719,7 @@ export class BytebotConfigService implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to store secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -765,7 +765,7 @@ export class BytebotConfigService implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to delete secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -783,7 +783,7 @@ export class BytebotConfigService implements OnModuleInit {
       return primaryLoader.listSecrets();
     } catch (error) {
       this.logger.error('Failed to list secrets', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
@@ -827,7 +827,7 @@ export class BytebotConfigService implements OnModuleInit {
    * @param event - Event name
    * @param listener - Event handler function
    */
-  on(event: string, listener: (...args: any[]) => void): void {
+  on(_event: string, listener: (...args: any[]) => void): void {
     this.eventEmitter.on(event, listener);
   }
 
@@ -922,7 +922,7 @@ export class BytebotConfigService implements OnModuleInit {
         this.logger.error(
           `Failed to initialize critical secret: ${name}:${key}`,
           {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           },
         );
       }

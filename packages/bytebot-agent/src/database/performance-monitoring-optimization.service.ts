@@ -15,7 +15,7 @@
  * - Comprehensive performance analytics and reporting
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   UniversalFunctionMetadata,
@@ -55,7 +55,7 @@ export interface PerformanceMetric {
   readonly timestamp: Date;
   readonly tags: Record<string, string>;
   readonly threshold?: PerformanceThreshold;
-  readonly context: MetricContext;
+  readonly _context: MetricContext;
 }
 
 /**
@@ -407,8 +407,8 @@ export class PerformanceMonitoringOptimizationService {
    */
   async recordFunctionExecution<T>(
     executionResult: FunctionExecutionResult<T>,
-    metadata: UniversalFunctionMetadata,
-    context: FunctionExecutionContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: FunctionExecutionContext,
   ): Promise<void> {
     const timestamp = new Date();
     const environmentInfo = await this.getEnvironmentInfo();
@@ -436,7 +436,7 @@ export class PerformanceMonitoringOptimizationService {
         operation: metadata.operationType,
         success: executionResult.success.toString(),
       },
-      context: metricContext,
+      _context: metricContext,
     });
 
     // Record validation time metric
@@ -451,7 +451,7 @@ export class PerformanceMonitoringOptimizationService {
         operation: metadata.operationType,
         bypass_used: executionResult.bypassUsed.toString(),
       },
-      context: metricContext,
+      _context: metricContext,
     });
 
     // Record cache performance metric
@@ -465,7 +465,7 @@ export class PerformanceMonitoringOptimizationService {
         function: metadata.functionName,
         operation: metadata.operationType,
       },
-      context: metricContext,
+      _context: metricContext,
     });
 
     // Update real-time metrics
@@ -586,7 +586,7 @@ export class PerformanceMonitoringOptimizationService {
         operation: operation.toLowerCase(),
         key_hash: this.hashKey(key),
       },
-      context: {
+      _context: {
         functionName: 'cache_operation',
         operationType: 'READ',
         userId: 'system',
@@ -862,7 +862,7 @@ export class PerformanceMonitoringOptimizationService {
    */
   private updateRealTimeMetrics<T>(
     executionResult: FunctionExecutionResult<T>,
-    metadata: UniversalFunctionMetadata,
+    _metadata: UniversalFunctionMetadata,
   ): void {
     // Update operations per second (simplified calculation)
     this.currentMetrics.operationsPerSecond = this.calculateCurrentThroughput();
@@ -1164,8 +1164,8 @@ export class PerformanceMonitoringOptimizationService {
 
   private async checkPerformanceThresholds(
     executionResult: FunctionExecutionResult<unknown>,
-    metadata: UniversalFunctionMetadata,
-    context: MetricContext,
+    _metadata: UniversalFunctionMetadata,
+    _context: MetricContext,
   ): Promise<void> {
     // Check execution time threshold
     const executionThreshold = this.performanceThresholds.get(

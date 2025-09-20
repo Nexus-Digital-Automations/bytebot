@@ -20,9 +20,8 @@
  * - Error handling and fallback mechanisms
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
 
 // Configuration services
 import { DatabaseConfig, DatabaseConfiguration } from '../database.config';
@@ -171,7 +170,7 @@ describe('Database Configuration and Module Components', () => {
     // Mock logger to prevent console output during tests
     const mockLogger = {
       log: jest.fn(),
-      error: jest.fn(),
+      _error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
     };
@@ -349,7 +348,7 @@ describe('Database Configuration and Module Components', () => {
       it('should warn about SSL disabled in production', () => {
         const mockLogger = {
           log: jest.fn(),
-          error: jest.fn(),
+          _error: jest.fn(),
           warn: jest.fn(),
           debug: jest.fn(),
         };
@@ -928,7 +927,7 @@ describe('Database Configuration and Module Components', () => {
 
         const mockLogger = {
           log: jest.fn(),
-          error: jest.fn(),
+          _error: jest.fn(),
           warn: jest.fn(),
           debug: jest.fn(),
         };

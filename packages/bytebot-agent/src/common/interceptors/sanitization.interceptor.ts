@@ -15,7 +15,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
   BadRequestException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
@@ -129,13 +128,13 @@ const CONTROL_CHARS_PATTERN = new RegExp(
  */
 const SECURITY_PATTERNS = {
   xss: [
-    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
+    /<script[\s\S]*?>[\s\S]*?</script>/gi,
     /javascript\s*:/gi,
     /on\w+\s*=\s*["'].*?["']/gi,
     /<iframe[\s\S]*?>/gi,
     /<object[\s\S]*?>/gi,
     /<embed[\s\S]*?>/gi,
-    /data\s*:\s*text\/html/gi,
+    /data\s*:\s*text/html/gi,
     /vbscript\s*:/gi,
     /eval\s*\(/gi,
     /expression\s*\(/gi,
@@ -146,7 +145,7 @@ const SECURITY_PATTERNS = {
     /(script|vbscript|onload|onerror|onclick|onmouseover|onfocus|onblur)/gi,
     /(\\\\['"]|\\\\\\\\|\\\\[nrtbf])/gi,
   ],
-  pathTraversal: [/\.\.\//gi, /%2e%2e%2f|%2e%2e%5c/gi, /\.\.\\/gi],
+  pathTraversal: [/\.\.//gi, /%2e%2e%2f|%2e%2e%5c/gi, /\.\.\/gi],
   commandInjection: [
     /[;&|`$(){}\\[\\]]/g,
     /(rm|del|copy|move|wget|curl|nc|netcat|telnet|ssh|ftp)/gi,
@@ -293,7 +292,7 @@ export class SanitizationInterceptor implements NestInterceptor {
       const errorMessage =
         initError instanceof Error ? initError.message : String(initError);
       this.logger.error('Failed to initialize DOMPurify', {
-        error: errorMessage,
+        _error: errorMessage,
       });
       throw new Error(`DOMPurify initialization failed: ${errorMessage}`);
     }
@@ -311,7 +310,10 @@ export class SanitizationInterceptor implements NestInterceptor {
   /**
    * Intercept incoming requests and sanitize input data
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     if (!this.config.enabled) {
       return next.handle();
     }
@@ -385,7 +387,7 @@ export class SanitizationInterceptor implements NestInterceptor {
         tap(() => {
           this.logger.debug(`[${operationId}] Request processing completed`);
         }),
-        map((data: unknown) => {
+        map((_data: unknown) => {
           // Optionally sanitize response data
           return this.config.sanitizeHtml && data && typeof data === 'object'
             ? this.sanitizeResponseData(
@@ -403,7 +405,7 @@ export class SanitizationInterceptor implements NestInterceptor {
 
       this.logger.error(`[${operationId}] Sanitization failed`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         processingTimeMs: processingTime,
         path: request.path,
@@ -478,7 +480,7 @@ export class SanitizationInterceptor implements NestInterceptor {
             {
               operationId,
               index,
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             },
           );
           throw error;
@@ -508,7 +510,7 @@ export class SanitizationInterceptor implements NestInterceptor {
             {
               operationId,
               key,
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             },
           );
           throw error;
@@ -649,7 +651,7 @@ export class SanitizationInterceptor implements NestInterceptor {
               ? sanitizeError.message
               : String(sanitizeError);
           this.logger.warn('DOMPurify sanitization failed, keeping original', {
-            error: errorMessage,
+            _error: errorMessage,
             operationId,
           });
         }
@@ -692,7 +694,7 @@ export class SanitizationInterceptor implements NestInterceptor {
    * Sanitize response data (optional)
    */
   private sanitizeResponseData(
-    data: Record<string, unknown>,
+    _data: Record<string, unknown>,
     operationId: string,
   ): unknown {
     try {
@@ -701,7 +703,7 @@ export class SanitizationInterceptor implements NestInterceptor {
       const structuredError = error as StructuredError;
       this.logger.warn(`[${operationId}] Failed to sanitize response data`, {
         operationId,
-        error: structuredError.message ?? 'Unknown error',
+        _error: structuredError.message ?? 'Unknown error',
       });
       return data; // Return original data if sanitization fails
     }
@@ -711,7 +713,7 @@ export class SanitizationInterceptor implements NestInterceptor {
    * Log security events for audit trail
    */
   private logSecurityEvent(
-    request: ExtendedRequest,
+    _request: ExtendedRequest,
     eventType: string,
     message: string,
     operationId: string,
@@ -751,7 +753,7 @@ export class SanitizationInterceptor implements NestInterceptor {
       );
 
       this.logger.warn(
-        `Sanitization security event: ${securityEvent.eventId}`,
+        `Sanitization security _event: ${securityEvent.eventId}`,
         {
           eventId: securityEvent.eventId,
           eventType: securityEvent.type,
@@ -763,7 +765,7 @@ export class SanitizationInterceptor implements NestInterceptor {
       const structuredError = error as StructuredError;
       this.logger.error('Failed to log sanitization security event', {
         operationId,
-        error: structuredError.message ?? 'Unknown error',
+        _error: structuredError.message ?? 'Unknown error',
         originalEventType: eventType,
       });
     }

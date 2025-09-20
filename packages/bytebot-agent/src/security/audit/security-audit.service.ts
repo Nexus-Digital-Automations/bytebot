@@ -15,9 +15,9 @@
  * @since Phase 2: Enterprise Security Implementation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { MetricsService } from '../../metrics/metrics.service';
 import * as crypto from 'crypto';
 import { performance } from 'perf_hooks';
@@ -153,7 +153,7 @@ export interface SecurityEvent {
     endpoint?: string;
     operation?: string;
   };
-  context: {
+  _context: {
     correlationId: string;
     requestId?: string;
     transactionId?: string;
@@ -167,7 +167,7 @@ export interface SecurityEvent {
     complianceFramework?: string[];
     detectionMethod?: string;
   };
-  metadata: {
+  _metadata: {
     createdBy: string;
     processingTime: number;
     dataClassification?: string;
@@ -309,7 +309,7 @@ export class SecurityAuditService {
           endpoint: eventData.target?.endpoint,
           operation: eventData.target?.operation,
         },
-        context: {
+        _context: {
           correlationId:
             eventData.context?.correlationId || crypto.randomUUID(),
           requestId: eventData.context?.requestId,
@@ -324,7 +324,7 @@ export class SecurityAuditService {
           complianceFramework: eventData.security?.complianceFramework || [],
           detectionMethod: eventData.security?.detectionMethod,
         },
-        metadata: {
+        _metadata: {
           createdBy: 'SecurityAuditService',
           processingTime: performance.now() - startTime,
           dataClassification:
@@ -360,7 +360,7 @@ export class SecurityAuditService {
       this.logger.error('Failed to record security event', {
         eventId,
         type: eventData.type,
-        error: errorMessage,
+        _error: errorMessage,
         processingTimeMs: (performance.now() - startTime).toFixed(2),
       });
 
@@ -371,11 +371,11 @@ export class SecurityAuditService {
           type: SecurityEventType.SYSTEM_CONFIG_CHANGE,
           severity: SecurityEventSeverity.HIGH,
           outcome: SecurityEventOutcome.FAILURE,
-          context: {
+          _context: {
             correlationId: crypto.randomUUID(),
             additionalData: {
               originalEventType: eventData.type,
-              error: errorMessage,
+              _error: errorMessage,
             },
           },
         });
@@ -508,7 +508,7 @@ export class SecurityAuditService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Failed to query security events', {
-        error: errorMessage,
+        _error: errorMessage,
         filters,
       });
       throw error;
@@ -624,7 +624,7 @@ export class SecurityAuditService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Failed to generate audit statistics', {
-        error: errorMessage,
+        _error: errorMessage,
         timeRange,
       });
       throw error;
@@ -635,7 +635,7 @@ export class SecurityAuditService {
    * Event listeners for automatic audit logging
    */
   @OnEvent('auth.**')
-  async handleAuthEvent(event: BaseSecurityEvent): Promise<void> {
+  async handleAuthEvent(_event: BaseSecurityEvent): Promise<void> {
     let eventType: SecurityEventType;
     let severity: SecurityEventSeverity = SecurityEventSeverity.INFO;
     let outcome: SecurityEventOutcome = SecurityEventOutcome.SUCCESS;
@@ -671,7 +671,7 @@ export class SecurityAuditService {
         ipAddress: event.ipAddress || 'unknown',
         userAgent: event.userAgent,
       },
-      context: {
+      _context: {
         correlationId: event.correlationId || crypto.randomUUID(),
         additionalData: event,
       },
@@ -679,7 +679,7 @@ export class SecurityAuditService {
   }
 
   @OnEvent('api.**')
-  async handleApiEvent(event: BaseSecurityEvent): Promise<void> {
+  async handleApiEvent(_event: BaseSecurityEvent): Promise<void> {
     let eventType: SecurityEventType;
     let severity: SecurityEventSeverity = SecurityEventSeverity.INFO;
 
@@ -709,7 +709,7 @@ export class SecurityAuditService {
         endpoint: event.endpoint,
         operation: event.method,
       },
-      context: {
+      _context: {
         correlationId: event.correlationId || crypto.randomUUID(),
         additionalData: event,
       },
@@ -765,7 +765,7 @@ export class SecurityAuditService {
     };
   }
 
-  private updateSecurityMetrics(event: SecurityEvent): void {
+  private updateSecurityMetrics(_event: SecurityEvent): void {
     try {
       // Record security event metrics
       this.metricsService.recordApplicationError(
@@ -804,12 +804,12 @@ export class SecurityAuditService {
     } catch (error) {
       this.logger.warn('Failed to update security metrics', {
         eventId: event.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
 
-  private async checkRealTimeAlerts(event: SecurityEvent): Promise<void> {
+  private async checkRealTimeAlerts(_event: SecurityEvent): Promise<void> {
     try {
       // Check for critical severity events
       if (event.severity === SecurityEventSeverity.CRITICAL) {
@@ -862,7 +862,7 @@ export class SecurityAuditService {
     } catch (error) {
       this.logger.warn('Failed to check real-time alerts', {
         eventId: event.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -898,7 +898,7 @@ export class SecurityAuditService {
     } catch (error) {
       this.logger.error('Failed to process security event batch', {
         batchSize,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
 
       // Re-queue events on failure

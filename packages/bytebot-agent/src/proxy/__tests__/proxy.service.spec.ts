@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import OpenAI, { APIUserAbortError } from 'openai';
 import { ProxyService } from '../proxy.service';
 import { proxyTools } from '../proxy.tools';
@@ -459,7 +459,8 @@ describe('ProxyService', () => {
               source: {
                 type: 'base64',
                 media_type: 'image/png',
-                data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                _data:
+                  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
               },
             } as ImageContentBlock,
           ],
@@ -488,7 +489,7 @@ describe('ProxyService', () => {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    url: '_data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
                     detail: 'high',
                   },
                 },
@@ -773,7 +774,7 @@ describe('ProxyService', () => {
                   source: {
                     type: 'base64',
                     media_type: 'image/png',
-                    data: 'test_image_data',
+                    _data: 'test_image_data',
                   },
                 } as ImageContentBlock,
               ],
@@ -812,7 +813,7 @@ describe('ProxyService', () => {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: 'data:image/png;base64,test_image_data',
+                    url: '_data:image/png;base64,test_image_data',
                     detail: 'high',
                   },
                 },

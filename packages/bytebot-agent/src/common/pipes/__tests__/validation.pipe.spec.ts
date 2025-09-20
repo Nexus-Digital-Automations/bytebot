@@ -19,7 +19,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
 import { ValidationPipe } from '../validation.pipe';
 import {
@@ -177,7 +177,7 @@ describe('ValidationPipe', () => {
     const bodyMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: CreateUserDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate valid request body', async () => {
@@ -317,7 +317,7 @@ describe('ValidationPipe', () => {
     const queryMetadata: ArgumentMetadata = {
       type: 'query',
       metatype: QueryDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate and transform query parameters', async () => {
@@ -392,7 +392,7 @@ describe('ValidationPipe', () => {
     const paramMetadata: ArgumentMetadata = {
       type: 'param',
       metatype: ParamDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate UUID parameters', async () => {
@@ -431,7 +431,7 @@ describe('ValidationPipe', () => {
     const nestedMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: UserWithAddressDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate nested objects', async () => {
@@ -543,7 +543,7 @@ describe('ValidationPipe', () => {
     const updateMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: UpdateUserDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate array properties', async () => {
@@ -624,7 +624,7 @@ describe('ValidationPipe', () => {
     const bodyMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: CreateUserDto,
-      data: '',
+      _data: '',
     };
 
     it('should provide detailed error messages', async () => {
@@ -648,7 +648,7 @@ describe('ValidationPipe', () => {
             expect.stringContaining('email'),
             expect.stringContaining('password'),
           ]),
-          error: 'Bad Request',
+          _error: 'Bad Request',
         });
       }
     });
@@ -658,7 +658,7 @@ describe('ValidationPipe', () => {
       const primitiveMetadata: ArgumentMetadata = {
         type: 'body',
         metatype: String,
-        data: '',
+        _data: '',
       };
 
       // Act
@@ -673,7 +673,7 @@ describe('ValidationPipe', () => {
       const undefinedMetadata: ArgumentMetadata = {
         type: 'body',
         metatype: undefined,
-        data: '',
+        _data: '',
       };
 
       // Act
@@ -706,7 +706,7 @@ describe('ValidationPipe', () => {
     const bodyMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: CreateUserDto,
-      data: '',
+      _data: '',
     };
 
     it('should prevent script injection in string fields', async () => {
@@ -774,7 +774,7 @@ describe('ValidationPipe', () => {
     const bodyMetadata: ArgumentMetadata = {
       type: 'body',
       metatype: CreateUserDto,
-      data: '',
+      _data: '',
     };
 
     it('should validate within performance threshold', async () => {
@@ -841,7 +841,7 @@ describe('ValidationPipe', () => {
       const nestedMetadata: ArgumentMetadata = {
         type: 'body',
         metatype: UserWithAddressDto,
-        data: '',
+        _data: '',
       };
 
       // Act
@@ -874,7 +874,7 @@ describe('ValidationPipe', () => {
       const bodyMetadata: ArgumentMetadata = {
         type: 'body',
         metatype: CreateUserDto,
-        data: '',
+        _data: '',
       };
 
       // Act

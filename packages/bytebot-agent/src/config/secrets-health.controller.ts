@@ -15,7 +15,7 @@
  * @since Phase 2: Enhanced Enterprise Secrets Management
  */
 
-import { Controller, Get, Logger } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { ParlantSecure } from '@bytebot/shared/dist/index-server';
 import { EnhancedSecretsService } from './secrets-enhanced.service';
@@ -160,7 +160,7 @@ export class SecretsHealthController {
         overallStatus = 'degraded';
       }
 
-      const response: SecretsHealthResponse = {
+      const _response: SecretsHealthResponse = {
         status: overallStatus,
         timestamp,
         uptime,
@@ -205,7 +205,7 @@ export class SecretsHealthController {
       return Promise.resolve(response);
     } catch (error) {
       this.logger.error(`[${operationId}] Health check failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       return {
@@ -312,7 +312,7 @@ export class SecretsHealthController {
       return Promise.resolve(metricsData);
     } catch (error) {
       this.logger.error(`[${operationId}] Metrics generation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -380,7 +380,7 @@ export class SecretsHealthController {
       this.logger.error(
         `[${operationId}] Prometheus metrics generation failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
       return Promise.resolve('# Error generating metrics\n');

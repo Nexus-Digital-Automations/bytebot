@@ -6,7 +6,7 @@
  * service health checks, resource usage tracking, and performance monitoring.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   BrowserMonitoringResponseDto,
@@ -299,7 +299,7 @@ export class BrowserMonitoringService {
             level: 'error',
             message: `Health check failed: ${errorMessage}`,
             source: 'BrowserMonitoringService',
-            details: { error: errorMessage },
+            details: { _error: errorMessage },
           },
         ],
         timestamp,
@@ -341,7 +341,7 @@ export class BrowserMonitoringService {
           },
           executionSteps: [],
           recentLogs: [],
-          error: {
+          _error: {
             code: 'TASK_NOT_FOUND',
             message: `Task ${taskId} not found`,
             timestamp,
@@ -392,8 +392,8 @@ export class BrowserMonitoringService {
         status: step.status as 'pending' | 'running' | 'completed' | 'failed',
         startedAt: step.startedAt,
         completedAt: step.completedAt,
-        result: step.result,
-        error: step.error,
+        _result: step.result,
+        _error: step.error,
       }));
 
       // Generate recent logs (simplified implementation)
@@ -434,7 +434,7 @@ export class BrowserMonitoringService {
         browserState,
         executionSteps,
         recentLogs,
-        error: taskStatus.error
+        _error: taskStatus.error
           ? {
               code: taskStatus.error.code || 'UNKNOWN_ERROR',
               message: taskStatus.error.message || 'Unknown error occurred',
@@ -476,7 +476,7 @@ export class BrowserMonitoringService {
         },
         executionSteps: [],
         recentLogs: [],
-        error: {
+        _error: {
           code: 'STATUS_CHECK_FAILED',
           message: errorMessage,
           timestamp,

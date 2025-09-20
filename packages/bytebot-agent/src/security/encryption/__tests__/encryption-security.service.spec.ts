@@ -9,9 +9,9 @@
  * @since Security Testing Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import {
@@ -75,7 +75,7 @@ describe('EncryptionSecurityService', () => {
   const mockLogger = {
     log: jest.fn(),
     debug: jest.fn(),
-    error: jest.fn(),
+    _error: jest.fn(),
     warn: jest.fn(),
     verbose: jest.fn(),
   };
@@ -328,7 +328,7 @@ describe('EncryptionSecurityService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Encryption operation failed'),
         expect.objectContaining({
-          error: 'Cipher creation failed',
+          _error: 'Cipher creation failed',
         }),
       );
     });
@@ -371,7 +371,7 @@ describe('EncryptionSecurityService', () => {
           function: KeyDerivationFunction.PBKDF2,
           iterations: 100000,
         },
-        metadata: {
+        _metadata: {
           timestamp: new Date(),
           version: '2.0.0',
         },
@@ -532,7 +532,7 @@ describe('EncryptionSecurityService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to generate secure random bytes',
         expect.objectContaining({
-          error: 'Random generation failed',
+          _error: 'Random generation failed',
           size: 32,
         }),
       );
@@ -689,7 +689,7 @@ describe('EncryptionSecurityService', () => {
         'Key rotation process failed',
         expect.objectContaining({
           keyId: 'test-key-id',
-          error: 'Key rotation failed',
+          _error: 'Key rotation failed',
         }),
       );
     });

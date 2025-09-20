@@ -14,9 +14,7 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Logger,
   HttpException,
-  HttpStatus,
   Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -196,7 +194,7 @@ export class RateLimitGuard implements CanActivate {
    * @param context - Execution context
    * @returns Promise<boolean> - Whether request is allowed
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(_context: ExecutionContext): Promise<boolean> {
     const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const startTime = Date.now();
 
@@ -274,7 +272,7 @@ export class RateLimitGuard implements CanActivate {
         {
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
           message: 'Rate limit exceeded',
-          error: 'Too Many Requests',
+          _error: 'Too Many Requests',
           rateLimitInfo: {
             limit: rateLimitInfo.limit,
             remaining: rateLimitInfo.remaining,
@@ -294,7 +292,7 @@ export class RateLimitGuard implements CanActivate {
 
       this.logger.error(`[${operationId}] Rate limiting error`, {
         operationId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
         processingTimeMs: processingTime,
       });
@@ -310,7 +308,7 @@ export class RateLimitGuard implements CanActivate {
    * @returns Rate limit configuration or null
    */
   private getRateLimitConfig(
-    context: ExecutionContext,
+    _context: ExecutionContext,
   ): RateLimitConfig | null {
     // Check method-level decorator
     const methodRateLimit = this.reflector.get<
@@ -367,7 +365,7 @@ export class RateLimitGuard implements CanActivate {
    * @returns Rate limiting key
    */
   private generateRateLimitKey(
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
     config: RateLimitConfig,
   ): string {
     // Use custom key generator if provided
@@ -399,7 +397,7 @@ export class RateLimitGuard implements CanActivate {
   private async checkRateLimit(
     key: string,
     config: RateLimitConfig,
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
     operationId: string,
   ): Promise<RateLimitInfo> {
     const now = Date.now();
@@ -495,7 +493,7 @@ export class RateLimitGuard implements CanActivate {
     } catch (redisError) {
       this.logger.error(`[${operationId}] Redis error in rate limiting`, {
         operationId,
-        error:
+        _error:
           redisError instanceof Error
             ? redisError.message
             : 'Unknown Redis error',
@@ -519,7 +517,7 @@ export class RateLimitGuard implements CanActivate {
    * @param rateLimitInfo - Rate limit information
    */
   private setRateLimitHeaders(
-    response: Response,
+    _response: Response,
     rateLimitInfo: RateLimitInfo,
   ): void {
     response.set({
@@ -559,7 +557,7 @@ export class RateLimitGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private logRateLimitEvent(
-    request: AuthenticatedRequest,
+    _request: AuthenticatedRequest,
     rateLimitInfo: RateLimitInfo,
     operationId: string,
   ): void {
@@ -586,7 +584,7 @@ export class RateLimitGuard implements CanActivate {
         request.get('User-Agent'),
       );
 
-      this.logger.warn(`Rate limit security event: ${securityEvent.eventId}`, {
+      this.logger.warn(`Rate limit security _event: ${securityEvent.eventId}`, {
         eventId: securityEvent.eventId,
         riskScore: securityEvent.riskScore,
         operationId,
@@ -594,7 +592,7 @@ export class RateLimitGuard implements CanActivate {
     } catch (error) {
       this.logger.error('Failed to log rate limit security event', {
         operationId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

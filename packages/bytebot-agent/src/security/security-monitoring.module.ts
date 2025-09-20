@@ -14,7 +14,7 @@
  * @since Phase 1: Bytebot API Security Enhancement
  */
 
-import { Module, Logger } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -132,7 +132,7 @@ import { PrismaModule } from '../prisma/prisma.module';
               ),
             },
           },
-          response: {
+          _response: {
             automated: Boolean(
               configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),
             ),

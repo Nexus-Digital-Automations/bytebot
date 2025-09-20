@@ -15,10 +15,8 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
   BadRequestException,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, map } from 'rxjs';
@@ -36,7 +34,7 @@ import { createSecurityEvent, SecurityEventType } from '@bytebot/shared';
 /**
  * Safely converts an unknown error to a string representation
  */
-function getSafeErrorMessage(error: unknown): string {
+function getSafeErrorMessage(_error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
@@ -129,7 +127,7 @@ function isErrorWithStack(obj: unknown): obj is ErrorWithStack {
  * @param request - Request to check
  * @returns Whether request has user.id
  */
-function isRequestWithUser(request: Request): request is RequestWithVersioning {
+function isRequestWithUser(_request: Request): request is RequestWithVersioning {
   return (
     typeof (request as RequestWithVersioning).user === 'object' &&
     (request as RequestWithVersioning).user !== null
@@ -166,7 +164,10 @@ export class VersionInterceptor implements NestInterceptor {
    * @param next - Call handler
    * @returns Observable with version headers
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const operationId = `version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -195,7 +196,7 @@ export class VersionInterceptor implements NestInterceptor {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Invalid API version',
-          error: 'Bad Request',
+          _error: 'Bad Request',
           details: {
             requestedVersion: negotiation.version,
             supportedVersions: validation.supported,
@@ -223,7 +224,7 @@ export class VersionInterceptor implements NestInterceptor {
       });
 
       return next.handle().pipe(
-        map((data: unknown) => {
+        map((_data: unknown) => {
           // Set response headers
           this.setVersionHeaders(
             response,
@@ -245,7 +246,7 @@ export class VersionInterceptor implements NestInterceptor {
           return data;
         }),
       );
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
 
       if (error instanceof HttpException) {
@@ -255,14 +256,14 @@ export class VersionInterceptor implements NestInterceptor {
       if (isErrorWithStack(error)) {
         this.logger.error(`[${operationId}] Version negotiation error`, {
           operationId,
-          error: error.message,
+          _error: error.message,
           stack: error.stack,
           processingTimeMs: processingTime,
         });
       } else {
         this.logger.error(`[${operationId}] Version negotiation error`, {
           operationId,
-          error: getSafeErrorMessage(error),
+          _error: getSafeErrorMessage(error),
           processingTimeMs: processingTime,
         });
       }
@@ -273,7 +274,7 @@ export class VersionInterceptor implements NestInterceptor {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'API version negotiation failed',
-        error: 'Bad Request',
+        _error: 'Bad Request',
         operationId,
       });
     }
@@ -287,8 +288,8 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Version negotiation result
    */
   private negotiateVersion(
-    request: RequestWithVersioning,
-    context: ExecutionContext,
+    _request: RequestWithVersioning,
+    _context: ExecutionContext,
     operationId: string,
   ): VersionNegotiation {
     const warnings: string[] = [];
@@ -492,7 +493,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @param operationId - Operation ID
    */
   private setVersionHeaders(
-    response: Response,
+    _response: Response,
     negotiation: VersionNegotiation,
     validation: VersionValidation,
     operationId: string,
@@ -572,7 +573,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Extracted version or null
    */
   private extractVersionFromUrl(path: string): string | null {
-    const versionMatch = path.match(/\/v(\d+(?:\.\d+)?)\//);
+    const versionMatch = path.match(//v(\d+(?:\.\d+)?)//);
     return versionMatch ? `v${versionMatch[1]}` : null;
   }
 
@@ -583,7 +584,7 @@ export class VersionInterceptor implements NestInterceptor {
    */
   private extractVersionFromMediaType(accept: string): string | null {
     const mediaTypeMatch = accept.match(
-      /application\/vnd\.bytebot\.v(\d+(?:\.\d+)?)\+json/,
+      /application/vnd\.bytebot\.v(\d+(?:\.\d+)?)\+json/,
     );
     return mediaTypeMatch ? `v${mediaTypeMatch[1]}` : null;
   }
@@ -596,7 +597,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @param operationId - Operation ID
    */
   private logDeprecationEvent(
-    request: RequestWithVersioning,
+    _request: RequestWithVersioning,
     negotiation: VersionNegotiation,
     validation: VersionValidation,
     operationId: string,
@@ -634,10 +635,10 @@ export class VersionInterceptor implements NestInterceptor {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       this.logger.error('Failed to log deprecation security event', {
         operationId,
-        error: isErrorWithStack(error)
+        _error: isErrorWithStack(error)
           ? error.message
           : getSafeErrorMessage(error),
       });
@@ -651,8 +652,8 @@ export class VersionInterceptor implements NestInterceptor {
    * @param operationId - Operation ID
    */
   private logVersionError(
-    request: RequestWithVersioning,
-    error: unknown,
+    _request: RequestWithVersioning,
+    _error: unknown,
     operationId: string,
   ): void {
     try {
@@ -682,15 +683,18 @@ export class VersionInterceptor implements NestInterceptor {
         userAgent,
       );
 
-      this.logger.error(`Version negotiation error: ${securityEvent.eventId}`, {
-        eventId: securityEvent.eventId,
-        riskScore: securityEvent.riskScore,
-        operationId,
-      });
+      this.logger.error(
+        `Version negotiation _error: ${securityEvent.eventId}`,
+        {
+          eventId: securityEvent.eventId,
+          riskScore: securityEvent.riskScore,
+          operationId,
+        },
+      );
     } catch (loggingError: unknown) {
       this.logger.error('Failed to log version error security event', {
         operationId,
-        error: isErrorWithStack(loggingError)
+        _error: isErrorWithStack(loggingError)
           ? loggingError.message
           : getSafeErrorMessage(loggingError),
       });

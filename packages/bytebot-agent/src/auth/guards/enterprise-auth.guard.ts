@@ -21,7 +21,6 @@ import {
   ExecutionContext,
   UnauthorizedException,
   ForbiddenException,
-  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -69,7 +68,7 @@ interface SecurityContext {
     mfaVerified: boolean;
     tokenAge: number;
   };
-  request: {
+  _request: {
     id: string;
     timestamp: Date;
     endpoint: string;
@@ -177,7 +176,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Main guard execution
    */
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+  canActivate(_context: ExecutionContext): boolean | Promise<boolean> {
     const startTime = performance.now();
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
@@ -238,7 +237,7 @@ export class EnterpriseAuthGuard implements CanActivate {
         severity: this.getSecuritySeverity(error),
         request,
         details: {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           processingTimeMs: processingTime.toFixed(2),
         },
         action: 'deny',
@@ -246,7 +245,7 @@ export class EnterpriseAuthGuard implements CanActivate {
 
       this.logger.warn('Authentication failed', {
         requestId: request.requestId!,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime.toFixed(2),
         ipAddress: this.getClientIP(request),
         userAgent: request.get('User-Agent'),
@@ -259,7 +258,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Extract JWT token from request
    */
-  private extractToken(request: Request): string | null {
+  private extractToken(_request: Request): string | null {
     // Check Authorization header (Bearer token)
     const authHeader = request.get('Authorization');
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -362,7 +361,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   private performSecurityChecks(
     payload: EnhancedJwtPayload,
     securityContext: SecurityContext,
-    request: Request,
+    _request: Request,
   ): void {
     // Check rate limiting
     this.checkRateLimit(request, payload.sub);
@@ -392,7 +391,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Check rate limiting
    */
-  private checkRateLimit(request: Request, userId: string): void {
+  private checkRateLimit(_request: Request, userId: string): void {
     const clientIP = this.getClientIP(request);
     const keys = [`rate_limit:user:${userId}`, `rate_limit:ip:${clientIP}`];
 
@@ -459,7 +458,7 @@ export class EnterpriseAuthGuard implements CanActivate {
         this.recordSecurityEvent({
           type: SecurityViolationType.CONCURRENT_SESSION_LIMIT,
           severity: 'medium',
-          request: null,
+          _request: null,
           details: {
             userId,
             sessionCount: userSessions.length,
@@ -477,7 +476,7 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private checkDeviceFingerprint(
     payload: EnhancedJwtPayload,
-    request: Request,
+    _request: Request,
   ): void {
     const currentFingerprint = this.generateDeviceFingerprint(request);
 
@@ -517,7 +516,7 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private checkGeolocationAnomalies(
     payload: EnhancedJwtPayload,
-    request: Request,
+    _request: Request,
   ): void {
     const clientIP = this.getClientIP(request);
 
@@ -543,7 +542,7 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private checkSessionFixation(
     payload: EnhancedJwtPayload,
-    request: Request,
+    _request: Request,
   ): void {
     interface StoredSession {
       createdAt: number;
@@ -655,7 +654,7 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private checkSuspiciousActivity(
     payload: EnhancedJwtPayload,
-    request: Request,
+    _request: Request,
   ): void {
     // Check for rapid sequential requests (potential automation)
     const userKey = `activity:${payload.sub}`;
@@ -687,7 +686,7 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private updateSessionActivity(
     payload: EnhancedJwtPayload,
-    request: Request,
+    _request: Request,
   ): void {
     const existingSession = this.sessionStore.get(payload.sessionId) as
       | { createdAt: number }
@@ -707,7 +706,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Create security context
    */
-  private createSecurityContext(request: Request): SecurityContext {
+  private createSecurityContext(_request: Request): SecurityContext {
     return {
       user: {} as EnhancedJwtPayload, // Will be filled after token validation
       session: {
@@ -725,7 +724,7 @@ export class EnterpriseAuthGuard implements CanActivate {
         mfaVerified: false,
         tokenAge: 0,
       },
-      request: {
+      _request: {
         id:
           (request as Request & { requestId?: string }).requestId || 'unknown',
         timestamp: new Date(),
@@ -741,7 +740,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Check if endpoint is public
    */
-  private isPublicEndpoint(context: ExecutionContext): boolean {
+  private isPublicEndpoint(_context: ExecutionContext): boolean {
     const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
       context.getHandler(),
       context.getClass(),
@@ -753,9 +752,9 @@ export class EnterpriseAuthGuard implements CanActivate {
    * Record security event
    */
   private recordSecurityEvent(
-    event: Partial<SecurityEvent> & {
+    _event: Partial<SecurityEvent> & {
       type: SecurityViolationType;
-      request: Request | null;
+      _request: Request | null;
     },
   ): void {
     const requestWithUser = event.request as
@@ -795,7 +794,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Helper methods
    */
-  private getClientIP(request: Request): string {
+  private getClientIP(_request: Request): string {
     return (
       request.get('CF-Connecting-IP') ||
       request.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
@@ -805,7 +804,7 @@ export class EnterpriseAuthGuard implements CanActivate {
     );
   }
 
-  private generateDeviceFingerprint(request: Request): string {
+  private generateDeviceFingerprint(_request: Request): string {
     const userAgent = request.get('User-Agent') || '';
     const acceptLanguage = request.get('Accept-Language') || '';
     const acceptEncoding = request.get('Accept-Encoding') || '';
@@ -828,7 +827,7 @@ export class EnterpriseAuthGuard implements CanActivate {
     );
   }
 
-  private getViolationTypeFromError(error: any): SecurityViolationType {
+  private getViolationTypeFromError(_error: any): SecurityViolationType {
     if (error instanceof UnauthorizedException) {
       if (error.message.includes('expired')) {
         return SecurityViolationType.EXPIRED_TOKEN;
@@ -842,7 +841,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   }
 
   private getSecuritySeverity(
-    error: any,
+    _error: any,
   ): 'low' | 'medium' | 'high' | 'critical' {
     if (error instanceof ForbiddenException) {
       return 'high';

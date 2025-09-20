@@ -4,7 +4,7 @@
  * monitoring, and performance optimization for the Bytebot API platform
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 

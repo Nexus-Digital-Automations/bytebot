@@ -85,7 +85,7 @@ describe('Authentication Decorators', () => {
     ...overrides,
   });
 
-  const createMockExecutionContext = (request: any): ExecutionContext => ({
+  const createMockExecutionContext = (_request: any): ExecutionContext => ({
     switchToHttp: () => ({
       getRequest: () => request,
       getResponse: () => ({}),

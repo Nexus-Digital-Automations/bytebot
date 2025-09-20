@@ -6,9 +6,9 @@
  * @version 2.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import {
   AlertingService,
   AlertRule,
@@ -398,7 +398,7 @@ describe('AlertingService', () => {
         'alert.acknowledged',
         expect.objectContaining({
           status: 'acknowledged',
-          metadata: expect.objectContaining({
+          _metadata: expect.objectContaining({
             acknowledgedBy: 'event-user',
           }),
         }),
@@ -451,7 +451,7 @@ describe('AlertingService', () => {
         'alert.resolved',
         expect.objectContaining({
           status: 'resolved',
-          metadata: expect.objectContaining({
+          _metadata: expect.objectContaining({
             resolvedBy: 'resolver',
             resolution: 'All fixed',
           }),

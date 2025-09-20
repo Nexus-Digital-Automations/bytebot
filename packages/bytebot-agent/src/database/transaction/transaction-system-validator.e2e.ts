@@ -26,7 +26,7 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION SYSTEM END-TO-END VALIDATION
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -69,10 +69,7 @@ import {
   ParlantValidatedDatabaseService,
   ExecutionContext,
 } from '../parlant-validated-database.service';
-import {
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== E2E TEST CONFIGURATION =====
 
@@ -303,7 +300,7 @@ describe('PARLANT Transaction System E2E Integration Validation', () => {
         confirmationRequired: false,
         detailedLogging: true,
       },
-      metadata: {
+      _metadata: {
         testSuite: 'E2E_VALIDATION',
         environment: testContext.executionEnvironment,
       },
@@ -546,7 +543,7 @@ describe('PARLANT Transaction System E2E Integration Validation', () => {
             description: 'Operation that will fail',
             tableName: 'nonexistent_table',
             query: 'INSERT INTO nonexistent_table (data) VALUES (?)',
-            parameters: { data: 'test' },
+            parameters: { _data: 'test' },
             estimatedDuration: 100,
             affectedRows: 1,
             dependsOn: ['valid_operation'],
@@ -789,7 +786,7 @@ describe('PARLANT Transaction System E2E Integration Validation', () => {
         riskLevel: RiskLevel.LOW,
         complianceFrameworks: [ComplianceFramework.ENTERPRISE_STANDARDS],
         conversationId: testUserContext.conversationId,
-        metadata: {
+        _metadata: {
           testSuite: 'E2E_VALIDATION',
           component: 'AUDIT_SERVICE',
           timestamp: Date.now(),

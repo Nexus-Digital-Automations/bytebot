@@ -18,9 +18,9 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   ParlantValidatedDatabaseService,
   RiskLevel,
@@ -35,10 +35,7 @@ import {
 import { DatabaseBackupService } from '../database-backup.service';
 import { DatabaseService } from '../database.service';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== MOCK IMPLEMENTATIONS =====
 
@@ -298,7 +295,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
       uptime: 3600,
     });
     mockDatabaseService.executeRawQuery.mockResolvedValue([
-      { result: 'success' },
+      { _result: 'success' },
     ]);
 
     mockPrismaService.getOptimizedClient.mockReturnValue({
@@ -422,7 +419,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
         );
         const duration = Date.now() - startTime;
 
-        expect(result).toEqual([{ result: 'success' }]);
+        expect(result).toEqual([{ _result: 'success' }]);
         expect(mockDatabaseService.executeRawQuery).toHaveBeenCalledWith(
           query,
           params,
@@ -546,7 +543,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
           userContext,
         );
 
-        expect(result).toEqual([{ result: 'success' }]);
+        expect(result).toEqual([{ _result: 'success' }]);
         expect(mockDatabaseService.executeRawQuery).toHaveBeenCalledWith(
           query,
           params,
@@ -557,7 +554,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
     describe('Prisma Service - MEDIUM Risk', () => {
       it('should process create operations on INTERNAL models', async () => {
         const args = {
-          data: {
+          _data: {
             userId: 'user-123',
             sessionData: JSON.stringify({ theme: 'dark' }),
           },
@@ -578,7 +575,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
       it('should process update operations on CONFIDENTIAL models with field validation', async () => {
         const args = {
           where: { id: 123 },
-          data: { name: 'Updated Name', lastLoginAt: new Date() },
+          _data: { name: 'Updated Name', lastLoginAt: new Date() },
         };
 
         const result = await prismaService.update('User', args, userContext);
@@ -728,7 +725,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
       it('should process updateMany operations with backup requirement', async () => {
         const args = {
           where: { active: false },
-          data: { deletedAt: new Date() },
+          _data: { deletedAt: new Date() },
         };
 
         const result = await prismaService.updateMany(
@@ -889,7 +886,7 @@ describe('PARLANT Risk Classification Integration Tests', () => {
     describe('Prisma Service - CRITICAL Risk', () => {
       it('should process operations on CLASSIFIED models with maximum security', async () => {
         const args = {
-          data: {
+          _data: {
             auditData: JSON.stringify({ action: 'critical_operation' }),
             userId: userContext.userId,
             timestamp: new Date(),
@@ -959,22 +956,22 @@ describe('PARLANT Risk Classification Integration Tests', () => {
       const operations = [
         {
           name: 'LOW_RISK_READ',
-          metadata: RiskClassificationTestFactory.createLowRiskReadOperation(),
+          _metadata: RiskClassificationTestFactory.createLowRiskReadOperation(),
           expectedMaxTime: 100,
         },
         {
           name: 'MEDIUM_RISK_WRITE',
-          metadata: RiskClassificationTestFactory.createMediumRiskWrite(),
+          _metadata: RiskClassificationTestFactory.createMediumRiskWrite(),
           expectedMaxTime: 300,
         },
         {
           name: 'HIGH_RISK_DELETE',
-          metadata: RiskClassificationTestFactory.createHighRiskDelete(),
+          _metadata: RiskClassificationTestFactory.createHighRiskDelete(),
           expectedMaxTime: 800,
         },
         {
           name: 'CRITICAL_MIGRATION',
-          metadata: RiskClassificationTestFactory.createCriticalMigration(),
+          _metadata: RiskClassificationTestFactory.createCriticalMigration(),
           expectedMaxTime: 1000,
         },
       ];
@@ -1085,15 +1082,15 @@ describe('PARLANT Risk Classification Integration Tests', () => {
       // Execute operations across different risk levels
       const operations = [
         {
-          metadata: RiskClassificationTestFactory.createLowRiskReadOperation(),
+          _metadata: RiskClassificationTestFactory.createLowRiskReadOperation(),
           name: 'lowRead',
         },
         {
-          metadata: RiskClassificationTestFactory.createMediumRiskWrite(),
+          _metadata: RiskClassificationTestFactory.createMediumRiskWrite(),
           name: 'mediumWrite',
         },
         {
-          metadata: RiskClassificationTestFactory.createHighRiskDelete(),
+          _metadata: RiskClassificationTestFactory.createHighRiskDelete(),
           name: 'highDelete',
         },
       ];

@@ -10,7 +10,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -81,7 +80,10 @@ export class PerformanceInterceptor implements NestInterceptor {
     }, 30000);
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -113,8 +115,8 @@ export class PerformanceInterceptor implements NestInterceptor {
   }
 
   private calculateMetrics(
-    request: Request,
-    response: Response,
+    _request: Request,
+    _response: Response,
     responseData: unknown,
     startTime: bigint,
     endTime: bigint,
@@ -203,13 +205,13 @@ export class PerformanceInterceptor implements NestInterceptor {
     // Replace UUIDs and IDs with placeholders
     return basePath
       .replace(
-        /\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
+        //[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
         '/:uuid',
       )
-      .replace(/\/\d+/g, '/:id');
+      .replace(//\d+/g, '/:id');
   }
 
-  private extractClientIP(request: Request): string {
+  private extractClientIP(_request: Request): string {
     return (
       (request.headers['x-forwarded-for'] as string) ||
       (request.headers['x-real-ip'] as string) ||

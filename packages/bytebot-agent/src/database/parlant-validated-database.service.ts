@@ -16,7 +16,7 @@
  * Performance: Sub-1000ms validation with multi-level caching (target: <500ms)
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DatabaseService,
@@ -31,11 +31,7 @@ import {
 } from './database-backup.service';
 
 // Import Parlant types from the shared integration types
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== DATABASE OPERATION INTERFACES =====
 
@@ -142,10 +138,7 @@ export interface DatabaseParlantAuditEntry extends ParlantAuditEntry {
 @Injectable()
 export class ParlantValidatedDatabaseService {
   private readonly logger = new Logger(ParlantValidatedDatabaseService.name);
-  private readonly validationCache = new Map<
-    string,
-    ParlantValidationResponse
-  >();
+  private readonly validationCache = new Map<string>();
   private readonly auditTrail: DatabaseParlantAuditEntry[] = [];
 
   // Performance monitoring
@@ -184,8 +177,8 @@ export class ParlantValidatedDatabaseService {
   async validateAndExecute<T>(
     operationName: string,
     operation: () => Promise<T>,
-    metadata: DatabaseOperationMetadata,
-    context: ParlantUserContext,
+    _metadata: DatabaseOperationMetadata,
+    _context: ParlantUserContext,
     params: Record<string, unknown> = {},
   ): Promise<T> {
     const operationId = this.generateOperationId();
@@ -272,7 +265,7 @@ export class ParlantValidatedDatabaseService {
 
       this.logger.error(`[${operationId}] Parlant database operation failed`, {
         operationName,
-        error: errorMessage,
+        _error: errorMessage,
         duration: Date.now() - startTime,
         operationId,
       });
@@ -303,7 +296,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Get Prisma client with validation (LOW risk)
    */
-  async getPrismaClient(context: ParlantUserContext): Promise<PrismaClient> {
+  async getPrismaClient(_context: ParlantUserContext): Promise<PrismaClient> {
     return this.validateAndExecute(
       'getPrismaClient',
       () => Promise.resolve(this.databaseService.getPrismaClient()),
@@ -320,7 +313,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Get database metrics with validation (LOW risk)
    */
-  async getMetrics(context: ParlantUserContext): Promise<DatabaseMetrics> {
+  async getMetrics(_context: ParlantUserContext): Promise<DatabaseMetrics> {
     return this.validateAndExecute(
       'getMetrics',
       () => Promise.resolve(this.databaseService.getMetrics()),
@@ -337,7 +330,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Get health status with validation (LOW risk)
    */
-  async getHealthStatus(context: ParlantUserContext) {
+  async getHealthStatus(_context: ParlantUserContext) {
     return this.validateAndExecute(
       'getHealthStatus',
       () => Promise.resolve(this.databaseService.getHealthStatus()),
@@ -357,7 +350,7 @@ export class ParlantValidatedDatabaseService {
   async executeRawQuery(
     query: string,
     params: unknown[] | undefined,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<unknown> {
     return this.validateAndExecute(
       'executeRawQuery',
@@ -379,7 +372,7 @@ export class ParlantValidatedDatabaseService {
   async executeRawQueryWithReliability(
     query: string,
     params: unknown[] | undefined,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<unknown> {
     return this.validateAndExecute(
       'executeRawQueryWithReliability',
@@ -401,7 +394,7 @@ export class ParlantValidatedDatabaseService {
   async executeWithCircuitBreaker<T>(
     operation: () => Promise<T>,
     circuitName: string,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
     return this.validateAndExecute(
       'executeWithCircuitBreaker',
@@ -423,7 +416,7 @@ export class ParlantValidatedDatabaseService {
    */
   async executeWithRetry<T>(
     operation: () => Promise<T>,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
     return this.validateAndExecute(
       'executeWithRetry',
@@ -445,7 +438,7 @@ export class ParlantValidatedDatabaseService {
   async executeWithReliability<T>(
     operation: () => Promise<T>,
     circuitName: string,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<T> {
     return this.validateAndExecute(
       'executeWithReliability',
@@ -464,7 +457,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Get reliability metrics with validation (LOW risk)
    */
-  async getReliabilityMetrics(context: ParlantUserContext) {
+  async getReliabilityMetrics(_context: ParlantUserContext) {
     return this.validateAndExecute(
       'getReliabilityMetrics',
       () => Promise.resolve(this.databaseService.getReliabilityMetrics()),
@@ -485,7 +478,7 @@ export class ParlantValidatedDatabaseService {
    * Determine if backup is required for operation
    */
   private shouldCreateBackup(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
     riskLevel: RiskLevel,
   ): boolean {
     // Always backup for critical operations
@@ -515,8 +508,8 @@ export class ParlantValidatedDatabaseService {
    * Create pre-operation backup
    */
   private async createPreOperationBackup(
-    metadata: DatabaseOperationMetadata,
-    context: ParlantUserContext,
+    _metadata: DatabaseOperationMetadata,
+    _context: ParlantUserContext,
     operationId: string,
   ): Promise<BackupCreationResult> {
     const riskLevel = this.determineRiskLevel(metadata);
@@ -543,7 +536,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Determine risk level based on operation metadata
    */
-  private determineRiskLevel(metadata: DatabaseOperationMetadata): RiskLevel {
+  private determineRiskLevel(_metadata: DatabaseOperationMetadata): RiskLevel {
     switch (metadata.operationType) {
       case 'READ':
       case 'HEALTH_CHECK':
@@ -589,7 +582,7 @@ export class ParlantValidatedDatabaseService {
    * Estimate operation impact for Parlant validation
    */
   private estimateOperationImpact(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
   ): 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (
       metadata.operationType === 'SECURITY' ||
@@ -616,7 +609,7 @@ export class ParlantValidatedDatabaseService {
    */
   private generateActionDescription(
     operationName: string,
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
   ): string {
     const base = `Execute database operation: ${operationName}`;
     const details = [
@@ -708,7 +701,7 @@ export class ParlantValidatedDatabaseService {
    * Perform Parlant validation (mock implementation - integrate with actual Parlant service)
    */
   private async performParlantValidation(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<ParlantValidationResponse> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
@@ -738,7 +731,7 @@ export class ParlantValidatedDatabaseService {
       reason: this.generateValidationReasoning(request),
       confidence: 0.95,
       executionContext: this.generateExecutionContext(request),
-      metadata: {
+      _metadata: {
         startTime: new Date(startTime),
         endTime: new Date(),
         processingTime: Date.now() - startTime,
@@ -775,7 +768,7 @@ export class ParlantValidatedDatabaseService {
    * Mock approval logic (replace with actual Parlant decision engine)
    */
   private shouldApproveOperation(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): boolean {
     // Always approve read operations
     if (
@@ -801,7 +794,7 @@ export class ParlantValidatedDatabaseService {
    * Generate validation reasoning
    */
   private generateValidationReasoning(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): string {
     if (request.databaseOperation.operationType === 'READ') {
       return 'Read operation approved - minimal risk to data integrity';
@@ -818,7 +811,7 @@ export class ParlantValidatedDatabaseService {
    * Generate risk factors for the operation
    */
   private generateRiskFactors(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): string[] {
     const factors: string[] = [];
 
@@ -852,7 +845,7 @@ export class ParlantValidatedDatabaseService {
    * Calculate risk score for the operation
    */
   private calculateRiskScore(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): number {
     let score = 0;
 
@@ -897,7 +890,7 @@ export class ParlantValidatedDatabaseService {
    * Generate suggested alternatives for blocked operations
    */
   private generateSuggestedAlternatives(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): string[] {
     const alternatives: string[] = [];
 
@@ -920,9 +913,9 @@ export class ParlantValidatedDatabaseService {
    * Generate execution context for approved operations
    */
   private generateExecutionContext(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): ExecutionContext {
-    const context: ExecutionContext = {
+    const _context: ExecutionContext = {
       monitoringLevel: 'COMPREHENSIVE',
       safeguards: ['query_logging', 'performance_monitoring'],
     };
@@ -1001,7 +994,7 @@ export class ParlantValidatedDatabaseService {
       }
     } catch (error) {
       this.logger.error(`[${operationId}] Database operation failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         executionTime: Date.now() - startTime,
         operationId,
       });
@@ -1019,7 +1012,7 @@ export class ParlantValidatedDatabaseService {
     validationRequest: Partial<ParlantDatabaseValidationRequest>,
     executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED',
     duration: number,
-    result: unknown,
+    _result: unknown,
     error?: string,
   ): Promise<DatabaseParlantAuditEntry> {
     const performanceMetrics: QueryPerformanceMetrics = {
@@ -1060,7 +1053,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Extract affected rows from operation result
    */
-  private extractRowsAffected(result: unknown): number | undefined {
+  private extractRowsAffected(_result: unknown): number | undefined {
     if (result && typeof result === 'object' && 'count' in result) {
       return result.count as number;
     }
@@ -1075,7 +1068,7 @@ export class ParlantValidatedDatabaseService {
   /**
    * Generate cache key for validation requests
    */
-  private generateCacheKey(request: ParlantDatabaseValidationRequest): string {
+  private generateCacheKey(_request: ParlantDatabaseValidationRequest): string {
     const keyData = {
       functionName: request.functionName,
       operationType: request.databaseOperation.operationType,
@@ -1250,8 +1243,8 @@ export class ParlantValidatedDatabaseService {
   async executeWithTransaction<T>(
     operationName: string,
     operations: ((client: PrismaClient) => Promise<T>)[],
-    metadata: DatabaseOperationMetadata,
-    context: ParlantUserContext,
+    _metadata: DatabaseOperationMetadata,
+    _context: ParlantUserContext,
     params: Record<string, unknown> = {},
   ): Promise<T> {
     return this.validateAndExecute(

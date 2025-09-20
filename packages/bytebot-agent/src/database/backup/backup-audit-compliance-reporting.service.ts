@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 /**
  * PARLANT Phase 1 Comprehensive Backup Audit Trail and Compliance Reporting Service
  *
@@ -173,7 +172,7 @@ export interface SecurityContext {
   accessLevel: string;
   authorizationSources: string[];
   securityEvents: SecurityEvent[];
-  threatIndicators: ThreatIndicator[];
+  _threatIndicators: ThreatIndicator[];
   securityValidations: SecurityValidation[];
   encryptionMethods: string[];
   integrityChecks: IntegrityCheck[];
@@ -430,7 +429,7 @@ export interface ParlantComplianceAnalysis {
     | 'RECOMMENDATION_VALIDATION'
     | 'COMPLIANCE_REVIEW';
   prompt: string;
-  response: string;
+  _response: string;
   confidence: number;
   complianceRiskEvaluation: ParlantComplianceRiskEvaluation;
   businessImpactAssessment: ParlantBusinessImpactAssessment;
@@ -569,7 +568,7 @@ export class BackupAuditComplianceReportingService {
    * Creates a comprehensive audit trail entry with cryptographic integrity
    */
   async createAuditTrailEntry(
-    entry: Omit<AuditTrailEntry, 'id' | 'timestamp' | 'cryptographicProof'>,
+    _entry: Omit<AuditTrailEntry, 'id' | 'timestamp' | 'cryptographicProof'>,
   ): Promise<{
     auditId: string;
     timestamp: Date;
@@ -578,7 +577,7 @@ export class BackupAuditComplianceReportingService {
     storageLocation: string;
   }> {
     const startTime = Date.now();
-    this.logger.log(`📝 Creating audit trail entry: ${entry.eventType}`);
+    this.logger.log(`📝 Creating audit trail _entry: ${entry.eventType}`);
 
     try {
       const auditId = `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -641,7 +640,7 @@ export class BackupAuditComplianceReportingService {
   /**
    * Queries audit trail with advanced search and filtering capabilities
    */
-  async queryAuditTrail(request: AuditTrailQueryRequest): Promise<{
+  async queryAuditTrail(_request: AuditTrailQueryRequest): Promise<{
     queryId: string;
     totalResults: number;
     returnedResults: number;
@@ -716,7 +715,7 @@ export class BackupAuditComplianceReportingService {
   /**
    * Generates comprehensive compliance reports with multi-framework support
    */
-  async generateComplianceReport(request: ComplianceReportRequest): Promise<{
+  async generateComplianceReport(_request: ComplianceReportRequest): Promise<{
     reportId: string;
     report: ComplianceReport;
     executiveBriefing: ExecutiveBriefing;
@@ -853,7 +852,7 @@ export class BackupAuditComplianceReportingService {
   /**
    * Establishes real-time compliance monitoring with automated alerting
    */
-  async setupRealTimeMonitoring(request: RealTimeMonitoringRequest): Promise<{
+  async setupRealTimeMonitoring(_request: RealTimeMonitoringRequest): Promise<{
     monitoringId: string;
     activeRules: number;
     alertTargets: number;
@@ -922,7 +921,7 @@ export class BackupAuditComplianceReportingService {
   /**
    * Processes real-time compliance events and triggers appropriate responses
    */
-  async processComplianceEvent(event: AuditTrailEntry): Promise<{
+  async processComplianceEvent(_event: AuditTrailEntry): Promise<{
     eventId: string;
     processingResult: EventProcessingResult;
     triggeredAlerts: Alert[];
@@ -931,7 +930,7 @@ export class BackupAuditComplianceReportingService {
     escalationRequired: boolean;
   }> {
     const startTime = Date.now();
-    this.logger.log(`⚡ Processing compliance event: ${event.eventType}`);
+    this.logger.log(`⚡ Processing compliance _event: ${event.eventType}`);
 
     try {
       // Analyze event for compliance implications
@@ -996,7 +995,7 @@ export class BackupAuditComplianceReportingService {
    * Submits audit entry for PARLANT conversational validation
    */
   private async submitForParlantAuditValidation(
-    entry: AuditTrailEntry,
+    _entry: AuditTrailEntry,
   ): Promise<ParlantAuditValidation> {
     this.logger.log(
       `🤖 Submitting audit entry for PARLANT validation: ${entry.id}`,
@@ -1016,7 +1015,7 @@ export class BackupAuditComplianceReportingService {
       auditEntryId: entry.id,
       validationType: 'CRITICAL_EVENT_VALIDATION',
       prompt,
-      response: response.response,
+      _response: response.response,
       confidence: response.confidence,
       riskAssessment: response.riskAssessment,
       complianceImplications: response.complianceImplications,
@@ -1061,7 +1060,7 @@ export class BackupAuditComplianceReportingService {
       analysisTimestamp: new Date(),
       analysisType: 'COMPLIANCE_REVIEW',
       prompt,
-      response: response.response,
+      _response: response.response,
       confidence: response.confidence,
       complianceRiskEvaluation: response.riskEvaluation,
       businessImpactAssessment: response.businessImpact,
@@ -1085,7 +1084,7 @@ export class BackupAuditComplianceReportingService {
   // ============================================================================
 
   private async generateCryptographicProof(
-    entry: Omit<AuditTrailEntry, 'id' | 'timestamp' | 'cryptographicProof'>,
+    _entry: Omit<AuditTrailEntry, 'id' | 'timestamp' | 'cryptographicProof'>,
     auditId: string,
     timestamp: Date,
   ): Promise<CryptographicProof> {
@@ -1135,7 +1134,7 @@ export class BackupAuditComplianceReportingService {
     };
   }
 
-  private calculateMockHash(data: string): string {
+  private calculateMockHash(_data: string): string {
     // Mock hash calculation - in real implementation, use actual cryptographic library
     let hash = 0;
     for (let i = 0; i < data.length; i++) {
@@ -1147,7 +1146,7 @@ export class BackupAuditComplianceReportingService {
   }
 
   private async validateComplianceRequirements(
-    entry: AuditTrailEntry,
+    _entry: AuditTrailEntry,
   ): Promise<ComplianceValidation[]> {
     const validations: ComplianceValidation[] = [];
 
@@ -1168,20 +1167,20 @@ export class BackupAuditComplianceReportingService {
     return validations;
   }
 
-  private async storeAuditEntry(entry: AuditTrailEntry): Promise<string> {
+  private async storeAuditEntry(_entry: AuditTrailEntry): Promise<string> {
     // Mock storage implementation
     const storageLocation = `audit_storage/year=${entry.timestamp.getFullYear()}/month=${entry.timestamp.getMonth() + 1}/day=${entry.timestamp.getDate()}/${entry.id}.json`;
     this.logger.log(`💾 Storing audit entry at: ${storageLocation}`);
     return storageLocation;
   }
 
-  private async updateEvidenceChain(entry: AuditTrailEntry): Promise<void> {
+  private async updateEvidenceChain(_entry: AuditTrailEntry): Promise<void> {
     // Mock evidence chain update
     this.logger.log(`🔗 Updating evidence chain for: ${entry.id}`);
   }
 
   private async triggerComplianceMonitoring(
-    entry: AuditTrailEntry,
+    _entry: AuditTrailEntry,
   ): Promise<void> {
     // Mock compliance monitoring trigger
     this.logger.log(
@@ -1189,7 +1188,7 @@ export class BackupAuditComplianceReportingService {
     );
   }
 
-  private generateAuditValidationPrompt(entry: AuditTrailEntry): string {
+  private generateAuditValidationPrompt(_entry: AuditTrailEntry): string {
     return `
 # Critical Audit Event Validation Request
 
@@ -1222,9 +1221,9 @@ This critical audit event requires validation. Please analyze:
 
   private async mockParlantAuditResponse(
     prompt: string,
-    entry: AuditTrailEntry,
+    _entry: AuditTrailEntry,
   ): Promise<{
-    response: string;
+    _response: string;
     confidence: number;
     riskAssessment: string;
     complianceImplications: string[];
@@ -1245,8 +1244,8 @@ This critical audit event requires validation. Please analyze:
     const confidence = escalationRecommended ? 0.95 : 0.85;
 
     return {
-      response: `
-Analysis of ${entry.eventType} audit event:
+      _response: `
+Analysis of ${entry.eventType} audit _event:
 
 **Risk Assessment**: ${hasHighRisk ? 'High risk due to compliance implications' : 'Moderate risk within acceptable parameters'}
 **Compliance Impact**: ${entry.complianceImpact.affectedFrameworks.length} framework(s) affected
@@ -1315,7 +1314,7 @@ Please provide comprehensive analysis including:
     prompt: string,
     report: ComplianceReport,
   ): Promise<{
-    response: string;
+    _response: string;
     confidence: number;
     riskEvaluation: ParlantComplianceRiskEvaluation;
     businessImpact: ParlantBusinessImpactAssessment;
@@ -1348,7 +1347,7 @@ Please provide comprehensive analysis including:
     const confidence = approvalDecision === 'APPROVE' ? 0.9 : 0.8;
 
     return {
-      response: `
+      _response: `
 Comprehensive analysis of ${report.framework} compliance report:
 
 **Overall Assessment**: Compliance score of ${complianceScore}/100 with ${criticalFindings} critical findings
@@ -1523,7 +1522,7 @@ interface ParlantAuditValidation {
   auditEntryId: string;
   validationType: string;
   prompt: string;
-  response: string;
+  _response: string;
   confidence: number;
   riskAssessment: string;
   complianceImplications: string[];
@@ -1598,7 +1597,7 @@ interface RecoveryAction {
   action: string;
   status: string;
   completedAt: Date;
-  result: string;
+  _result: string;
 }
 
 interface SecurityEvent {
@@ -1617,14 +1616,14 @@ interface ThreatIndicator {
 
 interface SecurityValidation {
   validationType: string;
-  result: boolean;
+  _result: boolean;
   details: string;
   timestamp: Date;
 }
 
 interface IntegrityCheck {
   checkType: string;
-  result: boolean;
+  _result: boolean;
   checksum: string;
   timestamp: Date;
 }
@@ -1718,7 +1717,7 @@ interface WitnessSignature {
 
 interface CryptographicValidation {
   validationType: string;
-  result: boolean;
+  _result: boolean;
   algorithm: string;
   timestamp: Date;
 }
@@ -1893,7 +1892,7 @@ interface Alert {
 interface AutomatedActionResult {
   actionId: string;
   status: string;
-  result: string;
+  _result: string;
   timestamp: Date;
 }
 

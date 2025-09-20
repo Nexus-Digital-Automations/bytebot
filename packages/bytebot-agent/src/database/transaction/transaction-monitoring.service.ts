@@ -21,7 +21,7 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION MONITORING AND OPTIMIZATION
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
@@ -30,11 +30,7 @@ import {
   TransactionPerformanceMetrics,
   TransactionExecutionResult,
 } from './parlant-transaction-manager.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== TRANSACTION MONITORING INTERFACES =====
 
@@ -466,7 +462,7 @@ export class TransactionMonitoringService {
    */
   async generateTransactionPerformanceReport(
     transactionId: string,
-    result: TransactionExecutionResult,
+    _result: TransactionExecutionResult,
     userContext: ParlantUserContext,
   ): Promise<PerformanceMonitoringReport> {
     const transactionMetrics = this.historicalMetrics.filter(
@@ -926,7 +922,7 @@ export class TransactionMonitoringService {
     };
   }
 
-  private calculateEstimatedDuration(metadata: TransactionMetadata): number {
+  private calculateEstimatedDuration(_metadata: TransactionMetadata): number {
     return metadata.operations.reduce(
       (total, op) => total + op.estimatedDuration,
       0,
@@ -989,7 +985,7 @@ export class TransactionMonitoringService {
 
   private generateConversationalPerformanceSummary(
     metrics: RealTimeTransactionMetrics[],
-    result: TransactionExecutionResult,
+    _result: TransactionExecutionResult,
     bottlenecks: PerformanceBottleneck[],
   ): string {
     const avgDuration =
@@ -1054,7 +1050,7 @@ export class TransactionMonitoringService {
 
   private generateReportSummary(
     metrics: RealTimeTransactionMetrics[],
-    result: TransactionExecutionResult,
+    _result: TransactionExecutionResult,
   ): PerformanceReportSummary {
     return {
       totalTransactions: 1,

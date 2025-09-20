@@ -21,7 +21,6 @@ import {
   Injectable,
   Inject,
   forwardRef,
-  Logger,
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -145,7 +144,7 @@ export class MessagesService {
    * @param data Message creation request with validation
    * @returns Promise<MessageCreationResult> Message with creation metrics
    */
-  async create(data: CreateMessageRequest): Promise<MessageCreationResult> {
+  async create(_data: CreateMessageRequest): Promise<MessageCreationResult> {
     const operationId = randomUUID();
     const startTime = performance.now();
 
@@ -192,12 +191,12 @@ export class MessagesService {
       const message = await this.executeWithRetry(
         () =>
           this.prisma.message.create({
-            data: {
+            _data: {
               content: contentForStorage,
               role: data.role,
               taskId: data.taskId,
               ...(data.metadata
-                ? { metadata: data.metadata as Prisma.InputJsonValue }
+                ? { _metadata: data.metadata as Prisma.InputJsonValue }
                 : {}),
             },
           }),
@@ -208,7 +207,7 @@ export class MessagesService {
 
       const processingTime = performance.now() - startTime;
 
-      const result: MessageCreationResult = {
+      const _result: MessageCreationResult = {
         message,
         operationId,
         contentMetrics,
@@ -238,7 +237,7 @@ export class MessagesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -249,7 +248,7 @@ export class MessagesService {
         taskId: data.taskId,
         role: data.role,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'MessagesService',
@@ -296,7 +295,7 @@ export class MessagesService {
       const databaseResponseTime = performance.now() - databaseStartTime;
       const processingTime = performance.now() - startTime;
 
-      const result: MessageRetrievalResult = {
+      const _result: MessageRetrievalResult = {
         messages,
         operationId,
         retrievalMetrics: {
@@ -318,7 +317,7 @@ export class MessagesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -328,7 +327,7 @@ export class MessagesService {
         operationId,
         taskId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'MessagesService',
@@ -398,7 +397,7 @@ export class MessagesService {
       const databaseResponseTime = performance.now() - databaseStartTime;
       const processingTime = performance.now() - startTime;
 
-      const result: MessageRetrievalResult = {
+      const _result: MessageRetrievalResult = {
         messages,
         operationId,
         retrievalMetrics: {
@@ -423,7 +422,7 @@ export class MessagesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -435,7 +434,7 @@ export class MessagesService {
         limit,
         page,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'MessagesService',
@@ -468,7 +467,7 @@ export class MessagesService {
 
     await this.prisma.message.updateMany({
       where: { taskId, id: { in: messageIds } },
-      data: { summaryId },
+      _data: { summaryId },
     });
   }
 
@@ -671,7 +670,7 @@ export class MessagesService {
       });
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -681,7 +680,7 @@ export class MessagesService {
         operationId,
         taskId,
         processingTimeMs: processingTime,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         timestamp: new Date().toISOString(),
         component: 'MessagesService',
@@ -697,7 +696,7 @@ export class MessagesService {
    * @private
    */
   private validateMessageData(
-    data: CreateMessageRequest,
+    _data: CreateMessageRequest,
     operationId: string,
   ): void {
     this.logger.debug('Validating message data', {
@@ -851,7 +850,7 @@ export class MessagesService {
         component: 'MessagesService',
         action: 'emitNewMessageWithLogging',
       });
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
@@ -860,7 +859,7 @@ export class MessagesService {
         operationId,
         messageId: message.id,
         taskId,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         component: 'MessagesService',
         action: 'emitNewMessageWithLogging',
@@ -905,9 +904,9 @@ export class MessagesService {
         }
 
         return result;
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         lastError =
-          error instanceof Error ? error : new Error('Unknown database error');
+          error instanceof Error ? _error : new Error('Unknown database error');
 
         if (attempt === this.retryConfig.maxAttempts) {
           this.logger.error(
@@ -917,7 +916,7 @@ export class MessagesService {
               operationName,
               attempt,
               maxAttempts: this.retryConfig.maxAttempts,
-              error: lastError.message,
+              _error: lastError.message,
               stack: lastError.stack,
               component: 'MessagesService',
               action: 'executeWithRetry',
@@ -938,7 +937,7 @@ export class MessagesService {
           attempt,
           maxAttempts: this.retryConfig.maxAttempts,
           retryDelayMs: delay,
-          error: lastError.message,
+          _error: lastError.message,
           component: 'MessagesService',
           action: 'executeWithRetry',
         });

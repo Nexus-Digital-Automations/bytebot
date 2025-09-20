@@ -19,7 +19,7 @@
  * Security: Privacy-preserving ML with local model execution
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MultiDimensionalRiskAssessment,
@@ -367,7 +367,7 @@ export class IntelligentRiskScoringService {
       return adjustedPrediction;
     } catch (error) {
       this.logger.error(`[${predictionId}] ML-enhanced scoring failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         baseRiskScore: baseAssessment.overallRiskScore,
         predictionId,
       });

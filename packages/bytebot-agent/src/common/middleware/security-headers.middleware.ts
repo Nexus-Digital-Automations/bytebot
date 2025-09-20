@@ -10,7 +10,7 @@
  * @author Security Headers & CORS Specialist
  */
 
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
@@ -122,8 +122,8 @@ const DEFAULT_CSP_DIRECTIVES = {
     'https://cdn.jsdelivr.net',
   ],
   'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
-  'img-src': ["'self'", 'data:', 'https:', 'blob:'],
+  'font-src': ["'self'", 'https://fonts.gstatic.com', '_data:'],
+  'img-src': ["'self'", '_data:', 'https:', 'blob:'],
   'media-src': ["'self'"],
   'object-src': ["'none'"],
   'base-uri': ["'self'"],
@@ -212,7 +212,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
           this.logger.error(`[${operationId}] Helmet middleware error`, {
             operationId,
-            error: err instanceof Error ? err.message : String(err),
+            _error: err instanceof Error ? err.message : String(err),
             stack: err instanceof Error ? err.stack : undefined,
             processingTimeMs: processingTime,
           });
@@ -256,7 +256,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
       this.logger.error(`[${operationId}] Security headers middleware error`, {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         stack: errorStack,
         processingTimeMs: processingTime,
       });
@@ -514,7 +514,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         req.get('User-Agent'),
       );
 
-      this.logger.warn(`Security headers event: ${securityEvent.eventId}`, {
+      this.logger.warn(`Security headers _event: ${securityEvent.eventId}`, {
         eventId: securityEvent.eventId,
         eventType: securityEvent.type,
         riskScore: securityEvent.riskScore,
@@ -525,7 +525,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         error instanceof Error ? error.message : 'Unknown logging error';
       this.logger.error('Failed to log security headers event', {
         operationId,
-        error: errorMessage,
+        _error: errorMessage,
         originalEventType: eventType,
       });
     }

@@ -6,7 +6,7 @@
  * with optimization, annotation, and comparison capabilities.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -70,7 +70,7 @@ export interface ScreenshotMetadata {
     path: string;
     hash: string;
   };
-  options: {
+  _options: {
     fullPage: boolean;
     quality?: number;
     clip?: {
@@ -148,12 +148,12 @@ export class BrowserScreenshotService {
       if (!session) {
         return {
           id: screenshotId,
-          data: '',
+          _data: '',
           format: ScreenshotFormat.PNG,
           type: ScreenshotType.FULLPAGE,
           sizeBytes: 0,
           dimensions: { width: 0, height: 0 },
-          metadata: {
+          _metadata: {
             capturedAt: timestamp,
             sessionId,
             url: 'unknown',
@@ -164,7 +164,7 @@ export class BrowserScreenshotService {
           success: false,
           timestamp,
           sessionId,
-          error: {
+          _error: {
             code: 'SESSION_NOT_FOUND',
             message: `Browser session ${sessionId} not found`,
             timestamp,
@@ -182,12 +182,12 @@ export class BrowserScreenshotService {
       if (!pageState.success) {
         return {
           id: screenshotId,
-          data: '',
+          _data: '',
           format: ScreenshotFormat.PNG,
           type: ScreenshotType.FULLPAGE,
           sizeBytes: 0,
           dimensions: { width: 0, height: 0 },
-          metadata: {
+          _metadata: {
             capturedAt: timestamp,
             sessionId,
             url: 'unknown',
@@ -198,7 +198,7 @@ export class BrowserScreenshotService {
           success: false,
           timestamp,
           sessionId,
-          error: {
+          _error: {
             code: 'PAGE_STATE_ERROR',
             message: 'Could not retrieve page state for screenshot',
             timestamp,
@@ -222,12 +222,12 @@ export class BrowserScreenshotService {
       if (!screenshotResult.success || !screenshotResult.screenshotData) {
         return {
           id: screenshotId,
-          data: '',
+          _data: '',
           format: ScreenshotFormat.PNG,
           type: ScreenshotType.FULLPAGE,
           sizeBytes: 0,
           dimensions: { width: 0, height: 0 },
-          metadata: {
+          _metadata: {
             capturedAt: timestamp,
             sessionId,
             url: pageState.currentUrl ?? 'unknown',
@@ -238,7 +238,7 @@ export class BrowserScreenshotService {
           success: false,
           timestamp,
           sessionId,
-          error: {
+          _error: {
             code: 'CAPTURE_FAILED',
             message: screenshotResult.error ?? 'Screenshot capture failed',
             timestamp,
@@ -265,7 +265,7 @@ export class BrowserScreenshotService {
       await fs.writeFile(filePath, screenshotBuffer);
 
       // Create screenshot metadata
-      const metadata: ScreenshotMetadata = {
+      const _metadata: ScreenshotMetadata = {
         screenshotId,
         sessionId,
         taskId,
@@ -285,7 +285,7 @@ export class BrowserScreenshotService {
           path: filePath,
           hash: fileHash,
         },
-        options: {
+        _options: {
           fullPage: captureDto.fullPage ?? false,
           quality: captureDto.quality,
           clip: captureDto.clip,
@@ -320,7 +320,7 @@ export class BrowserScreenshotService {
 
       return {
         id: screenshotId,
-        data: screenshotResult.screenshotData,
+        _data: screenshotResult.screenshotData,
         format: metadata.fileInfo.format as ScreenshotFormat,
         type: ScreenshotType.FULLPAGE,
         sizeBytes: metadata.fileInfo.sizeBytes,
@@ -328,7 +328,7 @@ export class BrowserScreenshotService {
           width: metadata.dimensions.width,
           height: metadata.dimensions.height,
         },
-        metadata: {
+        _metadata: {
           capturedAt: metadata.capturedAt,
           sessionId: metadata.sessionId,
           url: metadata.url,
@@ -353,12 +353,12 @@ export class BrowserScreenshotService {
 
       return {
         id: screenshotId,
-        data: '',
+        _data: '',
         format: ScreenshotFormat.PNG,
         type: ScreenshotType.FULLPAGE,
         sizeBytes: 0,
         dimensions: { width: 0, height: 0 },
-        metadata: {
+        _metadata: {
           capturedAt: timestamp,
           sessionId,
           url: 'unknown',
@@ -369,10 +369,10 @@ export class BrowserScreenshotService {
         success: false,
         timestamp,
         sessionId,
-        error: {
+        _error: {
           code: 'CAPTURE_ERROR',
           message: screenshotError.message,
-          details: { sessionId, options: captureDto },
+          details: { sessionId, _options: captureDto },
           timestamp,
         },
       };
@@ -388,12 +388,12 @@ export class BrowserScreenshotService {
       if (!metadata) {
         return {
           id: screenshotId,
-          data: '',
+          _data: '',
           format: ScreenshotFormat.PNG,
           type: ScreenshotType.FULLPAGE,
           sizeBytes: 0,
           dimensions: { width: 0, height: 0 },
-          metadata: {
+          _metadata: {
             capturedAt: new Date(),
             sessionId: '',
             url: '',
@@ -402,7 +402,7 @@ export class BrowserScreenshotService {
           },
           captureDurationMs: 0,
           success: false,
-          error: {
+          _error: {
             code: 'SCREENSHOT_NOT_FOUND',
             message: `Screenshot ${screenshotId} not found`,
           },
@@ -421,7 +421,7 @@ export class BrowserScreenshotService {
         );
         return {
           id: screenshotId,
-          data: '',
+          _data: '',
           format: metadata.fileInfo.format as ScreenshotFormat,
           type: ScreenshotType.FULLPAGE,
           sizeBytes: metadata.fileInfo.sizeBytes,
@@ -429,7 +429,7 @@ export class BrowserScreenshotService {
             width: metadata.dimensions.width,
             height: metadata.dimensions.height,
           },
-          metadata: {
+          _metadata: {
             capturedAt: metadata.capturedAt,
             sessionId: metadata.sessionId,
             url: metadata.url,
@@ -439,7 +439,7 @@ export class BrowserScreenshotService {
           filePath: metadata.fileInfo.path,
           captureDurationMs: 0,
           success: false,
-          error: {
+          _error: {
             code: 'FILE_READ_ERROR',
             message: 'Could not read screenshot file',
           },
@@ -448,7 +448,7 @@ export class BrowserScreenshotService {
 
       return {
         id: screenshotId,
-        data: imageData,
+        _data: imageData,
         format: metadata.fileInfo.format as ScreenshotFormat,
         type: ScreenshotType.FULLPAGE,
         sizeBytes: metadata.fileInfo.sizeBytes,
@@ -456,7 +456,7 @@ export class BrowserScreenshotService {
           width: metadata.dimensions.width,
           height: metadata.dimensions.height,
         },
-        metadata: {
+        _metadata: {
           capturedAt: metadata.capturedAt,
           sessionId: metadata.sessionId,
           url: metadata.url,
@@ -475,12 +475,12 @@ export class BrowserScreenshotService {
       );
       return {
         id: screenshotId,
-        data: '',
+        _data: '',
         format: ScreenshotFormat.PNG,
         type: ScreenshotType.FULLPAGE,
         sizeBytes: 0,
         dimensions: { width: 0, height: 0 },
-        metadata: {
+        _metadata: {
           capturedAt: new Date(),
           sessionId: '',
           url: '',
@@ -489,7 +489,7 @@ export class BrowserScreenshotService {
         },
         captureDurationMs: 0,
         success: false,
-        error: {
+        _error: {
           code: 'RETRIEVAL_ERROR',
           message: screenshotError.message,
         },
@@ -517,7 +517,7 @@ export class BrowserScreenshotService {
       if (!metadata) {
         return {
           success: false,
-          error: {
+          _error: {
             code: 'SCREENSHOT_NOT_FOUND',
             message: `Screenshot ${screenshotId} not found`,
           },
@@ -543,7 +543,7 @@ export class BrowserScreenshotService {
           );
           return {
             success: false,
-            error: {
+            _error: {
               code: 'FILE_READ_ERROR',
               message: 'Could not read screenshot file',
             },
@@ -563,7 +563,7 @@ export class BrowserScreenshotService {
       );
       return {
         success: false,
-        error: {
+        _error: {
           code: 'RETRIEVAL_ERROR',
           message: screenshotError.message,
         },
@@ -825,7 +825,7 @@ export class BrowserScreenshotService {
     } catch (accessError) {
       // Directory doesn't exist, create it
       const fsError = accessError as FileSystemError;
-      this.logger.debug(`Directory access error: ${fsError.message}`);
+      this.logger.debug(`Directory access _error: ${fsError.message}`);
       await fs.mkdir(this.screenshotDirectory, { recursive: true });
       this.logger.log(
         `Created screenshots directory: ${this.screenshotDirectory}`,

@@ -16,7 +16,7 @@
  * @since Phase 2: Circuit Breaker Authentication Testing
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   ServiceUnavailableException,
@@ -70,7 +70,7 @@ describe('CircuitBreakerAuthGuard', () => {
   });
 
   const createMockExecutionContext = (
-    request: any = createMockRequest(),
+    _request: any = createMockRequest(),
   ): ExecutionContext => ({
     switchToHttp: () => ({
       getRequest: () => request,

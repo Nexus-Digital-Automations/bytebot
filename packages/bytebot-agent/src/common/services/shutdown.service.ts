@@ -17,7 +17,6 @@
 
 import {
   Injectable,
-  Logger,
   OnModuleDestroy,
   OnApplicationShutdown,
 } from '@nestjs/common';
@@ -273,7 +272,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       });
     } catch (error) {
       this.logger.error('Error during graceful shutdown', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
 
@@ -316,7 +315,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         'stop_new_connections',
       );
       this.logger.error('Phase 1 failed: Could not stop new connections', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -391,7 +390,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         );
       }
       this.logger.error('Phase 2 failed: Error during connection draining', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -447,7 +446,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         failed.forEach((result) => {
           this.logger.error('Cleanup task failed', {
             taskName: result.taskName,
-            error: result.error,
+            _error: result.error,
           });
         });
       }
@@ -458,7 +457,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         );
       }
       this.logger.error('Phase 3 failed: Error during cleanup task execution', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -487,13 +486,13 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
     } catch (error) {
       this.logger.error('Cleanup task failed', {
         taskName,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
 
       return {
         taskName,
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -523,7 +522,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         );
       }
       this.logger.error('Phase 4 failed: Final cleanup error', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -554,7 +553,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
           // Ignore individual connection cleanup errors during force shutdown
           // Log for debugging purposes
           this.logger.debug('Connection cleanup failed during force shutdown', {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -566,7 +565,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       });
     } catch (error) {
       this.logger.error('Force shutdown failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }

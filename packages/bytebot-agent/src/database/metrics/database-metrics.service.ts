@@ -4,12 +4,7 @@
  * and performance monitoring in the Bytebot API platform
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../database.service';
 import { ConnectionPoolService } from '../connection-pool.service';
@@ -333,7 +328,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
       return this.currentMetrics;
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to collect database metrics`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         operationId,
       });
 

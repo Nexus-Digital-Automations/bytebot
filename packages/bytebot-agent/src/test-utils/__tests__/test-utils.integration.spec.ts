@@ -9,7 +9,7 @@
  * @since Testing Infrastructure Validation Phase
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -234,12 +234,12 @@ describe('Test Utils Integration', () => {
 
       prismaService.user.create.mockResolvedValue(mockUser as any);
       const createdUser = await prismaService.user.create({
-        data: mockUser,
+        _data: mockUser,
       });
 
       expect(createdUser).toEqual(mockUser);
       expect(prismaService.user.create).toHaveBeenCalledWith({
-        data: mockUser,
+        _data: mockUser,
       });
     });
 
@@ -247,8 +247,8 @@ describe('Test Utils Integration', () => {
       const mockPrismaService = MockRegistry.Database.createMockPrismaService();
 
       const transactionResult = await mockPrismaService.$transaction([
-        mockPrismaService.user.create({ data: { username: 'user1' } }),
-        mockPrismaService.user.create({ data: { username: 'user2' } }),
+        mockPrismaService.user.create({ _data: { username: 'user1' } }),
+        mockPrismaService.user.create({ _data: { username: 'user2' } }),
       ]);
 
       expect(transactionResult).toHaveLength(2);
@@ -264,7 +264,7 @@ describe('Test Utils Integration', () => {
       );
 
       await expect(
-        mockPrismaService.user.create({ data: { username: 'test' } }),
+        mockPrismaService.user.create({ _data: { username: 'test' } }),
       ).rejects.toThrow('Database connection failed');
     });
   });
@@ -372,8 +372,8 @@ describe('Test Utils Integration', () => {
       expect(mockClient.join).toHaveBeenCalledWith('test-room');
 
       mockWebSocketGateway.broadcastToRoom('test-room', {
-        event: 'room-message',
-        data: 'Hello room',
+        _event: 'room-message',
+        _data: 'Hello room',
       });
 
       expect(mockClient.to).toHaveBeenCalledWith('test-room');
@@ -552,7 +552,7 @@ describe('Test Utils Integration', () => {
       const mocks = [];
       for (let i = 0; i < 50; i++) {
         const mockService = MockRegistry.Database.createMockPrismaService();
-        mockService.user.create({ data: { username: `user-${i}` } });
+        mockService.user.create({ _data: { username: `user-${i}` } });
         mocks.push(mockService);
       }
 

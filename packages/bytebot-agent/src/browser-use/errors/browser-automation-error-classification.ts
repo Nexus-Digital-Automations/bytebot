@@ -522,10 +522,10 @@ export class BrowserAutomationErrorClassifier {
    * Classify an error based on its message, stack trace, and context
    */
   static classifyError(
-    error: Error | string,
+    _error: Error | string,
     context?: Record<string, unknown>,
   ): BrowserAutomationErrorCode {
-    const errorMessage = typeof error === 'string' ? error : error.message;
+    const errorMessage = typeof error === 'string' ? _error : error.message;
     // Stack trace available for Error objects but not used in current classification logic
 
     // Pattern matching for error classification

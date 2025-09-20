@@ -14,20 +14,11 @@
  * @version 2.0.0
  */
 
-import {
-  Controller,
-  Get,
-  Logger,
-  HttpCode,
-  HttpStatus,
-  Header,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, Header, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import {
   ParlantSecure,
   ParlantValidated,
-  SecurityLevel,
 } from '@bytebot/shared/dist/index-server';
 import { MetricsService } from './metrics.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -75,7 +66,7 @@ export class MetricsController {
   })
   @HttpCode(HttpStatus.OK)
   @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
-  async getMetrics(@Res() response: Response): Promise<void> {
+  async getMetrics(@Res() _response: Response): Promise<void> {
     const operationId = `metrics_${Date.now()}`;
     this.logger.debug(`[${operationId}] Prometheus metrics requested`);
 
@@ -101,7 +92,7 @@ export class MetricsController {
       this.logger.error(
         `[${operationId}] Failed to collect metrics: ${errorMessage}`,
         {
-          error: errorMessage,
+          _error: errorMessage,
           stack: error instanceof Error ? error.stack : undefined,
         },
       );
@@ -174,14 +165,14 @@ export class MetricsController {
       this.logger.error(
         `[${operationId}] Metrics health check failed: ${errorMessage}`,
         {
-          error: errorMessage,
+          _error: errorMessage,
         },
       );
 
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        error: errorMessage,
+        _error: errorMessage,
         operationId,
       };
     }

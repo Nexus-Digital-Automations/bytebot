@@ -20,17 +20,14 @@
  * Performance: Sub-5-minute RTO for critical systems with automated validation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ParlantBackupValidationService } from './parlant-backup-validation.service';
 import { BackupIntegrityValidatorService } from './backup-integrity-validator.service';
 import { BackupRestorationWorkflowService } from './backup-restoration-workflow.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { RiskLevel } from '../parlant-validated-database.service';
 
 // ===== DISASTER RECOVERY INTERFACES =====
@@ -694,7 +691,7 @@ export interface ObjectiveResult {
   objective: string;
   targetValue: number;
   actualValue: number;
-  result: 'PASS' | 'FAIL';
+  _result: 'PASS' | 'FAIL';
   variance: number;
 }
 
@@ -900,7 +897,7 @@ export class DisasterRecoveryAutomationService {
       return incident;
     } catch (error) {
       this.logger.error(`[${incidentId}] Failed to respond to disaster`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime,
         incidentId,
       });
@@ -983,7 +980,7 @@ export class DisasterRecoveryAutomationService {
       this.logger.error(
         `[${incidentId}] Disaster recovery plan execution failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           executionDuration,
           incidentId,
         },
@@ -1083,7 +1080,7 @@ export class DisasterRecoveryAutomationService {
       return testExecution;
     } catch (error) {
       this.logger.error(`[${testId}] Disaster recovery test failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime,
         testId,
       });
@@ -1123,7 +1120,7 @@ export class DisasterRecoveryAutomationService {
       this.lastHealthCheck = currentTime;
     } catch (error) {
       this.logger.error('System health monitoring failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1145,7 +1142,7 @@ export class DisasterRecoveryAutomationService {
       }
     } catch (error) {
       this.logger.error('Scheduled DR testing failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1434,7 +1431,7 @@ export class DisasterRecoveryAutomationService {
         this.logger.error(`Recovery step failed`, {
           stepId: step.stepId,
           stepName: step.stepName,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
 
         // Handle step failure
@@ -1485,7 +1482,7 @@ export class DisasterRecoveryAutomationService {
       conversationId: `disaster_${incident.incidentId}`,
       reason: this.generateDisasterResponseReasoning(incident),
       confidence: 0.95,
-      metadata: {
+      _metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 100,
@@ -2194,7 +2191,7 @@ export class DisasterRecoveryAutomationService {
           objective: 'RTO Target',
           targetValue: 1800,
           actualValue: test.testResults.rtoAchieved,
-          result: test.testResults.rtoAchieved <= 1800 ? 'PASS' : 'FAIL',
+          _result: test.testResults.rtoAchieved <= 1800 ? 'PASS' : 'FAIL',
           variance: ((test.testResults.rtoAchieved - 1800) / 1800) * 100,
         },
       ],
@@ -2226,7 +2223,7 @@ export class DisasterRecoveryAutomationService {
   private async generateTestReport(test: DRTestExecution): Promise<void> {
     this.logger.log(`Generating DR test report for ${test.testId}`, {
       testType: test.testType,
-      result: test.testResults.overallResult,
+      _result: test.testResults.overallResult,
       rtoAchieved: test.testResults.rtoAchieved,
       rpoAchieved: test.testResults.rpoAchieved,
     });

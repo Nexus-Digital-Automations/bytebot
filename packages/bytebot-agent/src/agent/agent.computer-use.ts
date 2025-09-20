@@ -21,7 +21,6 @@ import {
   isPasteTextToolUseBlock,
   isReadFileToolUseBlock,
 } from '@bytebot/shared/dist/index-server';
-import { Logger } from '@nestjs/common';
 
 // Type definitions for computer-use API responses
 interface CursorPositionResponse {
@@ -58,7 +57,7 @@ const BYTEBOT_DESKTOP_BASE_URL = process.env.BYTEBOT_DESKTOP_BASE_URL;
  * @param error - Unknown error value to check
  * @returns True if the value is an Error instance
  */
-function isError(error: unknown): error is Error {
+function isError(_error: unknown): error is Error {
   return error instanceof Error;
 }
 
@@ -67,7 +66,7 @@ function isError(error: unknown): error is Error {
  * @param error - Unknown error value
  * @returns Safe error message string
  */
-function getSafeErrorMessage(error: unknown): string {
+function getSafeErrorMessage(_error: unknown): string {
   if (isError(error)) {
     return error.message;
   }
@@ -86,7 +85,7 @@ function getSafeErrorMessage(error: unknown): string {
  * @param error - Unknown error value
  * @returns Safe error stack string or undefined
  */
-function getSafeErrorStack(error: unknown): string | undefined {
+function getSafeErrorStack(_error: unknown): string | undefined {
   if (isError(error)) {
     return error.stack;
   }
@@ -99,7 +98,7 @@ function getSafeErrorStack(error: unknown): string | undefined {
  * @returns True if data matches CursorPositionResponse structure
  */
 function isCursorPositionResponse(
-  data: unknown,
+  _data: unknown,
 ): data is CursorPositionResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
@@ -113,7 +112,7 @@ function isCursorPositionResponse(
  * @param data - Unknown API response
  * @returns True if data matches ScreenshotResponse structure
  */
-function isScreenshotResponse(data: unknown): data is ScreenshotResponse {
+function isScreenshotResponse(_data: unknown): data is ScreenshotResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -126,7 +125,7 @@ function isScreenshotResponse(data: unknown): data is ScreenshotResponse {
  * @param data - Unknown API response
  * @returns True if data matches ReadFileResponse structure
  */
-function isReadFileResponse(data: unknown): data is ReadFileResponse {
+function isReadFileResponse(_data: unknown): data is ReadFileResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -139,7 +138,7 @@ function isReadFileResponse(data: unknown): data is ReadFileResponse {
  * @param data - Unknown API response
  * @returns True if data matches WriteFileResponse structure
  */
-function isWriteFileResponse(data: unknown): data is WriteFileResponse {
+function isWriteFileResponse(_data: unknown): data is WriteFileResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -170,14 +169,14 @@ export async function handleComputerToolUse(
           {
             type: MessageContentType._Image,
             source: {
-              data: image,
+              _data: image,
               media_type: 'image/png',
               type: 'base64',
             },
           },
         ],
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       logger.error(
         `Screenshot failed: ${getSafeErrorMessage(error)}`,
         getSafeErrorStack(error),
@@ -213,7 +212,7 @@ export async function handleComputerToolUse(
           },
         ],
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       logger.error(
         `Getting cursor position failed: ${getSafeErrorMessage(error)}`,
         getSafeErrorStack(error),
@@ -284,7 +283,7 @@ export async function handleComputerToolUse(
               source: {
                 type: 'base64',
                 media_type: result.mediaType || 'application/octet-stream',
-                data: result.data,
+                _data: result.data,
               },
               name: result.name || 'file',
               size: result.size,
@@ -317,7 +316,7 @@ export async function handleComputerToolUse(
       logger.debug('Taking screenshot');
       image = await screenshot();
       logger.debug('Screenshot captured successfully');
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Failed to take screenshot', error);
     }
 
@@ -337,7 +336,7 @@ export async function handleComputerToolUse(
       toolResult.content.push({
         type: MessageContentType._Image,
         source: {
-          data: image,
+          _data: image,
           media_type: 'image/png',
           type: 'base64',
         },
@@ -345,7 +344,7 @@ export async function handleComputerToolUse(
     }
 
     return toolResult;
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     logger.error(
       `Error executing ${block.name} tool: ${getSafeErrorMessage(error)}`,
       getSafeErrorStack(error),
@@ -641,7 +640,7 @@ async function cursorPosition(): Promise<Coordinates> {
       }),
     });
 
-    const data: unknown = await response.json();
+    const _data: unknown = await response.json();
 
     if (!isCursorPositionResponse(data)) {
       throw new Error('Invalid cursor position response format');
@@ -674,7 +673,7 @@ async function screenshot(): Promise<string> {
       throw new Error(`Failed to take screenshot: ${response.statusText}`);
     }
 
-    const data: unknown = await response.json();
+    const _data: unknown = await response.json();
 
     if (!isScreenshotResponse(data)) {
       throw new Error(
@@ -735,7 +734,7 @@ async function readFile(input: { path: string }): Promise<{
       throw new Error(`Failed to read file: ${response.statusText}`);
     }
 
-    const data: unknown = await response.json();
+    const _data: unknown = await response.json();
 
     if (!isReadFileResponse(data)) {
       throw new Error('Invalid read file response format');
@@ -770,7 +769,7 @@ export async function writeFile(input: {
       body: JSON.stringify({
         action: 'write_file',
         path,
-        data: base64Data,
+        _data: base64Data,
       }),
     });
 
@@ -778,7 +777,7 @@ export async function writeFile(input: {
       throw new Error(`Failed to write file: ${response.statusText}`);
     }
 
-    const data: unknown = await response.json();
+    const _data: unknown = await response.json();
 
     if (!isWriteFileResponse(data)) {
       throw new Error('Invalid write file response format');

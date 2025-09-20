@@ -18,7 +18,7 @@
  * Performance: Optimized backup operations with minimal service disruption
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from './database.service';
 import {
@@ -119,7 +119,7 @@ export class DatabaseBackupService {
    * Create backup before high-risk database operation
    */
   async createPreOperationBackup(
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
   ): Promise<BackupCreationResult> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
@@ -168,7 +168,7 @@ export class DatabaseBackupService {
       const duration = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Pre-operation backup failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration,
         operationId,
       });
@@ -180,7 +180,7 @@ export class DatabaseBackupService {
   /**
    * Restore database from backup
    */
-  async restoreFromBackup(request: BackupRestorationRequest): Promise<{
+  async restoreFromBackup(_request: BackupRestorationRequest): Promise<{
     restored: boolean;
     restorationTime: number;
     recordsRestored: number;
@@ -237,7 +237,7 @@ export class DatabaseBackupService {
 
       this.logger.error(`[${operationId}] Backup restoration failed`, {
         backupId: request.backupId,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         duration,
         operationId,
       });
@@ -252,7 +252,7 @@ export class DatabaseBackupService {
    * Create backup metadata based on operation requirements
    */
   private createBackupMetadata(
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
     operationId: string,
   ): BackupOperationMetadata {
     const backupId = `backup_${Date.now()}_${operationId}`;
@@ -300,7 +300,7 @@ export class DatabaseBackupService {
    * Validate backup prerequisites
    */
   private async validateBackupPrerequisites(
-    metadata: BackupOperationMetadata,
+    _metadata: BackupOperationMetadata,
   ): Promise<void> {
     // Check storage space
     const requiredSpace = metadata.estimatedSize * 1.2; // 20% buffer
@@ -330,7 +330,7 @@ export class DatabaseBackupService {
    * Execute the actual backup operation
    */
   private async executeBackupOperation(
-    metadata: BackupOperationMetadata,
+    _metadata: BackupOperationMetadata,
     _request: BackupCreationRequest,
   ): Promise<BackupCreationResult> {
     const startTime = Date.now();
@@ -539,7 +539,7 @@ export class DatabaseBackupService {
   /**
    * Generate backup file path
    */
-  private generateBackupPath(metadata: BackupOperationMetadata): string {
+  private generateBackupPath(_metadata: BackupOperationMetadata): string {
     const storageLocation = this.getBackupStorageLocation();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return `${storageLocation}/${metadata.backupId}_${timestamp}.backup`;
@@ -548,7 +548,7 @@ export class DatabaseBackupService {
   /**
    * Generate checksum for backup verification
    */
-  private generateChecksum(data: string): string {
+  private generateChecksum(_data: string): string {
     // Mock checksum generation - in production, use actual crypto hash
     const hash = data.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);

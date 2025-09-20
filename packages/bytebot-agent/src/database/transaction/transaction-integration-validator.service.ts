@@ -24,7 +24,7 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION SYSTEM INTEGRATION VALIDATION
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
@@ -64,11 +64,7 @@ import {
   LockInfo,
   DeadlockPreventionRecommendation,
 } from './deadlock-detection.service';
-import {
-  ParlantValidationResponse,
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import {
   RiskLevel,
   ExecutionContext,
@@ -416,7 +412,7 @@ export class TransactionIntegrationValidatorService {
         riskLevel: testsFailedCount > 0 ? RiskLevel.HIGH : RiskLevel.LOW,
         complianceFrameworks: [ComplianceFramework.ENTERPRISE_STANDARDS],
         conversationId: reportId,
-        metadata: {
+        _metadata: {
           overallComplianceScore,
           testResults: testResults.length,
           performanceP95: systemPerformanceSummary.p95TransactionLatency,
@@ -454,7 +450,7 @@ export class TransactionIntegrationValidatorService {
             estimatedEffort: 'HIGH',
           },
         ],
-        conversationalExecutiveSummary: `❌ Integration validation failed with error: ${(error as Error).message}. Immediate system review required.`,
+        conversationalExecutiveSummary: `❌ Integration validation failed with _error: ${(error as Error).message}. Immediate system review required.`,
       };
     }
   }
@@ -1012,7 +1008,7 @@ export class TransactionIntegrationValidatorService {
         riskLevel: RiskLevel.LOW,
         complianceFrameworks: [ComplianceFramework.ENTERPRISE_STANDARDS],
         conversationId: 'test_conversation',
-        metadata: {
+        _metadata: {
           testPurpose: 'integration_validation',
           timestamp: Date.now(),
         },

@@ -16,9 +16,9 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 import {
   ParlantValidatedDatabaseService,
   DatabaseOperationMetadata,
@@ -29,10 +29,7 @@ import {
 } from '../parlant-validated-database.service';
 import { DatabaseService } from '../database.service';
 import { DatabaseBackupService } from '../database-backup.service';
-import {
-  ParlantUserContext,
-  SecurityLevel,
-} from '@shared/types/parlant-integration.types';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 
 // ===== MOCK IMPLEMENTATIONS =====
 
@@ -241,7 +238,7 @@ describe('ParlantValidatedDatabaseService - Comprehensive Unit Tests', () => {
 
       const mockOperation = jest
         .fn()
-        .mockResolvedValue({ data: 'test-result' });
+        .mockResolvedValue({ _data: 'test-result' });
 
       const result = await service.validateAndExecute(
         'testReadOperation',
@@ -250,7 +247,7 @@ describe('ParlantValidatedDatabaseService - Comprehensive Unit Tests', () => {
         userContext,
       );
 
-      expect(result).toEqual({ data: 'test-result' });
+      expect(result).toEqual({ _data: 'test-result' });
       expect(mockOperation).toHaveBeenCalled();
 
       // Verify backup was NOT created for low-risk operation
@@ -782,7 +779,7 @@ describe('ParlantValidatedDatabaseService - Comprehensive Unit Tests', () => {
       const userContext = TestDataFactory.createUserContext();
       const metadata = TestDataFactory.createDatabaseOperationMetadata();
 
-      const mockOperation = jest.fn().mockResolvedValue({ data: 'success' });
+      const mockOperation = jest.fn().mockResolvedValue({ _data: 'success' });
 
       await service.validateAndExecute(
         'testAuditOperation',

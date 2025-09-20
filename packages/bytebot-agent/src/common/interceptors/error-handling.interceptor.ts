@@ -10,9 +10,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
@@ -64,7 +62,10 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     ],
   };
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const request = context.switchToHttp().getRequest<{
       correlationId?: string;
       method?: string;
@@ -84,7 +85,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         {
           statusCode: HttpStatus.SERVICE_UNAVAILABLE,
           message: 'Service temporarily unavailable - circuit breaker open',
-          error: 'Service Unavailable',
+          _error: 'Service Unavailable',
           retryAfter: 30,
           timestamp: new Date().toISOString(),
           correlationId,
@@ -96,7 +97,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       retry({
         count: this.defaultRetryConfig.maxRetries,
-        delay: (error: HandlerError, retryCount: number) => {
+        delay: (_error: HandlerError, retryCount: number) => {
           if (!this.isRetryableError(error)) {
             return throwError(error);
           }
@@ -113,14 +114,14 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
           return timer(delay);
         },
       }),
-      catchError((error: HandlerError) => {
+      catchError((_error: HandlerError) => {
         return this.handleError(error, endpoint, correlationId);
       }),
     );
   }
 
   private handleError(
-    error: HandlerError,
+    _error: HandlerError,
     endpoint: string,
     correlationId: string,
   ): Observable<never> {
@@ -140,7 +141,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   }
 
   private transformError(
-    error: HandlerError,
+    _error: HandlerError,
     correlationId: string,
   ): HttpException {
     // Already an HttpException
@@ -154,7 +155,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         {
           statusCode: this.mapBrowserErrorToStatus(error.code),
           message: error.message,
-          error: 'Browser Automation Error',
+          _error: 'Browser Automation Error',
           code: error.code,
           recoverable: error.recoverable,
           details: error.details,
@@ -172,7 +173,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         {
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Validation failed',
-          error: 'Bad Request',
+          _error: 'Bad Request',
           details: validationError.details || validationError.message,
           timestamp: new Date().toISOString(),
           correlationId,
@@ -187,7 +188,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         {
           statusCode: HttpStatus.SERVICE_UNAVAILABLE,
           message: 'Database temporarily unavailable',
-          error: 'Service Unavailable',
+          _error: 'Service Unavailable',
           retryAfter: 30,
           timestamp: new Date().toISOString(),
           correlationId,
@@ -202,7 +203,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         {
           statusCode: HttpStatus.REQUEST_TIMEOUT,
           message: 'Request timeout',
-          error: 'Request Timeout',
+          _error: 'Request Timeout',
           timestamp: new Date().toISOString(),
           correlationId,
         },
@@ -217,7 +218,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
       {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        error: 'Internal Server Error',
+        _error: 'Internal Server Error',
         details:
           process.env.NODE_ENV === 'development' ? errorMessage : undefined,
         timestamp: new Date().toISOString(),
@@ -227,7 +228,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     );
   }
 
-  private isRetryableError(error: HandlerError): boolean {
+  private isRetryableError(_error: HandlerError): boolean {
     if (error instanceof BrowserUseError) {
       return this.defaultRetryConfig.retryableErrorCodes.includes(error.code);
     }
@@ -257,7 +258,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     return errorCodeMap[code] || HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
-  private isDatabaseError(error: HandlerError): boolean {
+  private isDatabaseError(_error: HandlerError): boolean {
     if (!error || !(error instanceof Error)) return false;
 
     const databaseErrorTypes = [
@@ -274,7 +275,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     );
   }
 
-  private isTimeoutError(error: HandlerError): boolean {
+  private isTimeoutError(_error: HandlerError): boolean {
     if (!error) return false;
 
     // Type guard for timeout errors with code property

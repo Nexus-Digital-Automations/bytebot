@@ -22,13 +22,13 @@ export interface RiskMonitoringEvent {
   readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly source: string;
   readonly operation: DatabaseOperation;
-  readonly context: OperationContext;
+  readonly _context: OperationContext;
   readonly riskMetrics: RiskMetrics;
   readonly anomalyScore: number;
   readonly predictiveIndicators: PredictiveIndicator[];
   readonly correlatedEvents: string[];
   readonly mitigationSuggestions: string[];
-  readonly metadata: Record<string, unknown>;
+  readonly _metadata: Record<string, unknown>;
 }
 
 export interface DatabaseOperation {
@@ -351,7 +351,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
    */
   public async monitorOperation(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<RiskMonitoringEvent> {
     const startTime = Date.now();
@@ -409,7 +409,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
         predictiveIndicators,
         correlatedEvents,
         mitigationSuggestions,
-        metadata: {
+        _metadata: {
           processingTime: Date.now() - startTime,
           anomalyDetection: anomalyResult,
           modelConfidence:
@@ -436,7 +436,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
     } catch (error) {
       this.logSystemEvent('MONITORING_OPERATION_FAILED', {
         operation: operation.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date(),
       });
 
@@ -507,7 +507,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
    */
   private async detectAnomalies(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     const results: AnomalyDetectionResult[] = [];
@@ -521,7 +521,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
         this.logSystemEvent('ANOMALY_DETECTION_FAILED', {
           algorithm: algorithmName,
           operation: operation.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          _error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -535,7 +535,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
    */
   private async generatePredictiveIndicators(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
     anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator[]> {
@@ -558,7 +558,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
           this.logSystemEvent('PREDICTION_GENERATION_FAILED', {
             model: modelName,
             operation: operation.id,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            _error: error instanceof Error ? error.message : 'Unknown error',
           });
         }
       }
@@ -572,7 +572,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
    */
   private async identifyCorrelatedEvents(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
   ): Promise<string[]> {
     if (!this.configuration.correlationSettings.enabled) {
       return [];
@@ -775,7 +775,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
   /**
    * Process alerts based on monitoring event
    */
-  private async processAlerts(event: RiskMonitoringEvent): Promise<void> {
+  private async processAlerts(_event: RiskMonitoringEvent): Promise<void> {
     await this.alertManager.processEvent(event);
 
     if (event.severity === 'HIGH' || event.severity === 'CRITICAL') {
@@ -800,7 +800,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
   /**
    * Store historical data for trend analysis
    */
-  private storeHistoricalData(event: RiskMonitoringEvent): void {
+  private storeHistoricalData(_event: RiskMonitoringEvent): void {
     const key = `${event.operation.type}_${event.context.userId}`;
 
     if (!this.historicalData.has(key)) {
@@ -826,7 +826,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
    * Update monitoring metrics
    */
   private updateMonitoringMetrics(
-    event: RiskMonitoringEvent,
+    _event: RiskMonitoringEvent,
     processingTime: number,
   ): void {
     this.monitoringMetrics.totalEvents++;
@@ -920,7 +920,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
     // Clean up old historical data
     for (const [key, data] of this.historicalData.entries()) {
       const filteredData = (data as unknown[]).filter(
-        (entry: any) => entry.timestamp.getTime() >= cutoffTime,
+        (_entry: any) => entry.timestamp.getTime() >= cutoffTime,
       );
       this.historicalData.set(key, filteredData);
     }
@@ -957,7 +957,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
       } catch (error) {
         this.logSystemEvent('MODEL_RETRAINING_FAILED', {
           model: modelName,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          _error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -971,7 +971,7 @@ export class RealTimeRiskMonitoringService extends EventEmitter {
       this.patternRepository.analyzePatterns(this.historicalData);
     } catch (error) {
       this.logSystemEvent('PATTERN_ANALYSIS_FAILED', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        _error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -1116,7 +1116,7 @@ class StatisticalAnomalyDetector {
 
   async detect(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Statistical anomaly detection implementation
@@ -1140,7 +1140,7 @@ class MLAnomalyDetector {
 
   async detect(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // ML-based anomaly detection implementation
@@ -1164,7 +1164,7 @@ class PatternBasedAnomalyDetector {
 
   async detect(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Pattern-based anomaly detection implementation
@@ -1188,7 +1188,7 @@ class BehavioralAnomalyDetector {
 
   async detect(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Behavioral anomaly detection implementation
@@ -1212,7 +1212,7 @@ class SeasonalAnomalyDetector {
 
   async detect(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Seasonal anomaly detection implementation
@@ -1236,7 +1236,7 @@ class RiskEscalationModel {
 
   async predict(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
     anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
@@ -1244,7 +1244,7 @@ class RiskEscalationModel {
     return null;
   }
 
-  retrain(data: unknown[]): void {
+  retrain(_data: unknown[]): void {
     // Model retraining implementation
   }
 }
@@ -1254,7 +1254,7 @@ class PerformanceDegradationModel {
 
   async predict(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
     anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
@@ -1262,7 +1262,7 @@ class PerformanceDegradationModel {
     return null;
   }
 
-  retrain(data: unknown[]): void {
+  retrain(_data: unknown[]): void {
     // Model retraining implementation
   }
 }
@@ -1272,7 +1272,7 @@ class SecurityThreatModel {
 
   async predict(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
     anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
@@ -1280,7 +1280,7 @@ class SecurityThreatModel {
     return null;
   }
 
-  retrain(data: unknown[]): void {
+  retrain(_data: unknown[]): void {
     // Model retraining implementation
   }
 }
@@ -1290,7 +1290,7 @@ class ComplianceViolationModel {
 
   async predict(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     riskMetrics: RiskMetrics,
     anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
@@ -1298,7 +1298,7 @@ class ComplianceViolationModel {
     return null;
   }
 
-  retrain(data: unknown[]): void {
+  retrain(_data: unknown[]): void {
     // Model retraining implementation
   }
 }
@@ -1308,7 +1308,7 @@ class CorrelationEngine {
 
   async findCorrelations(
     operation: DatabaseOperation,
-    context: OperationContext,
+    _context: OperationContext,
     events: RiskMonitoringEvent[],
   ): Promise<string[]> {
     // Event correlation implementation
@@ -1323,7 +1323,7 @@ class CorrelationEngine {
 class AlertManager {
   constructor(private thresholds: AlertThresholds) {}
 
-  async processEvent(event: RiskMonitoringEvent): Promise<void> {
+  async processEvent(_event: RiskMonitoringEvent): Promise<void> {
     // Alert processing implementation
   }
 
@@ -1341,7 +1341,7 @@ class PatternRepository {
     // Pattern loading implementation
   }
 
-  analyzePatterns(data: Map<string, unknown[]>): void {
+  analyzePatterns(_data: Map<string, unknown[]>): void {
     // Pattern analysis implementation
   }
 }

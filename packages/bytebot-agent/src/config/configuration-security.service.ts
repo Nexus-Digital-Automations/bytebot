@@ -15,7 +15,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
@@ -132,7 +132,7 @@ export class ConfigurationSecurityService
       this.logger.error(
         'Configuration Security Service initialization failed',
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           initTimeMs: initTime,
         },
       );
@@ -208,7 +208,7 @@ export class ConfigurationSecurityService
     } catch (error) {
       const auditTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Security audit failed`, {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         auditTimeMs: auditTime,
       });
       throw error;
@@ -389,9 +389,9 @@ export class ConfigurationSecurityService
 
       // Patterns for insecure protocols
       insecureProtocolPatterns: [
-        /^http:\/\//i, // HTTP instead of HTTPS
-        /^ftp:\/\//i, // FTP instead of SFTP
-        /^telnet:\/\//i, // Telnet instead of SSH
+        /^http:///i, // HTTP instead of HTTPS
+        /^ftp:///i, // FTP instead of SFTP
+        /^telnet:///i, // Telnet instead of SSH
       ],
 
       // Patterns for common default passwords
@@ -497,7 +497,7 @@ export class ConfigurationSecurityService
       }
     } catch (error) {
       this.logger.warn('Failed to audit weak configurations', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
 
@@ -562,7 +562,7 @@ export class ConfigurationSecurityService
       }
     } catch (error) {
       this.logger.warn('Failed to audit insecure defaults', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
 
@@ -678,7 +678,7 @@ export class ConfigurationSecurityService
    * @private
    * @param entry - Audit entry to log
    */
-  private logAuditEntry(entry: ConfigurationAuditEntry): void {
+  private logAuditEntry(_entry: ConfigurationAuditEntry): void {
     this.auditLog.push(entry);
 
     // Trim audit log to prevent memory growth

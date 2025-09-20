@@ -16,7 +16,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   readFileSync,
@@ -51,7 +51,7 @@ interface LocalSecretMetadata {
  */
 interface LocalSecretValue {
   value: string;
-  metadata: LocalSecretMetadata;
+  _metadata: LocalSecretMetadata;
 }
 
 /**
@@ -158,7 +158,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('Local Secrets Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;
@@ -230,7 +230,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       }
 
       // Cache the secret with local metadata
-      const metadata: LocalSecretMetadata = {
+      const _metadata: LocalSecretMetadata = {
         name: secretName,
         key: key || secretName,
         source,
@@ -264,7 +264,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to retrieve local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         loadTimeMs: loadTime,
       });
       return null;
@@ -311,7 +311,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
             `[${operationId}] Could not load existing secrets, creating new`,
             {
               secretName,
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             },
           );
         }
@@ -329,7 +329,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       chmodSync(dirname(secretFile), 0o700);
 
       // Cache the secret with metadata
-      const metadata: LocalSecretMetadata = {
+      const _metadata: LocalSecretMetadata = {
         name: secretName,
         key: secretKey,
         source: 'local-file',
@@ -360,7 +360,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to store local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         storeTimeMs: storeTime,
       });
       return false;
@@ -401,7 +401,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       this.logger.error(`[${operationId}] Failed to rotate local secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -532,13 +532,13 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       } catch (error) {
         this.logger.error('Local secrets directory access validation failed', {
           path: this.localSecretsPath,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     } catch (error) {
       this.logger.error('Failed to initialize local secrets directory', {
         path: this.localSecretsPath,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -571,7 +571,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       this.logger.debug('Failed to load from local file', {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -655,7 +655,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         this.logger.error(
           `Failed to initialize critical local secret: ${name}:${key}`,
           {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           },
         );
       }
@@ -684,7 +684,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         this.performLocalSecretsRotation();
       } catch (error) {
         this.logger.error('Failed to perform local secrets rotation', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }, this.rotationConfig.intervalMs);
@@ -720,7 +720,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         this.rotateLocalSecret(secret.name, secret.key);
       } catch (error) {
         this.logger.error(`Failed to rotate local secret: ${secret.name}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -751,7 +751,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
             this.logger.error(
               `Failed to rotate local secret on file change: ${secretName}`,
               {
-                error: error instanceof Error ? error.message : String(error),
+                _error: error instanceof Error ? error.message : String(error),
               },
             );
           }
@@ -791,7 +791,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
     } catch (error) {
       this.logger.error('Failed to create local secret backup', {
         secretName,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
     }
   }

@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 /**
  * PARLANT Phase 1 Database Backup Retention Policy Management Service
  *
@@ -244,7 +243,7 @@ export interface ParlantValidationRecord {
   policyId: string;
   action: GovernanceAction;
   prompt: string;
-  response: string;
+  _response: string;
   confidence: number;
   validationOutcome: 'APPROVED' | 'REJECTED' | 'CONDITIONAL' | 'ESCALATED';
   recommendedActions: string[];
@@ -408,7 +407,7 @@ export class BackupRetentionPolicyService {
   /**
    * Creates a new retention policy with comprehensive validation and approval workflow
    */
-  async createRetentionPolicy(request: PolicyCreationRequest): Promise<{
+  async createRetentionPolicy(_request: PolicyCreationRequest): Promise<{
     policyId: string;
     workflowId: string;
     status: PolicyStatus;
@@ -510,7 +509,7 @@ export class BackupRetentionPolicyService {
   /**
    * Modifies an existing retention policy with change management controls
    */
-  async modifyRetentionPolicy(request: PolicyModificationRequest): Promise<{
+  async modifyRetentionPolicy(_request: PolicyModificationRequest): Promise<{
     newVersion: string;
     workflowId: string;
     status: PolicyStatus;
@@ -603,7 +602,7 @@ export class BackupRetentionPolicyService {
    * Schedules retention policy enforcement with governance controls
    */
   async scheduleRetentionEnforcement(
-    request: PolicyEnforcementScheduleRequest,
+    _request: PolicyEnforcementScheduleRequest,
   ): Promise<{
     jobIds: string[];
     estimatedCostSavings: number;
@@ -729,7 +728,7 @@ export class BackupRetentionPolicyService {
             issues.push(`Action ${action.type} failed: ${result.errorMessage}`);
           }
         } catch (error) {
-          issues.push(`Action execution error: ${error.message}`);
+          issues.push(`Action execution _error: ${error.message}`);
         }
       }
 
@@ -779,7 +778,7 @@ export class BackupRetentionPolicyService {
    * Generates comprehensive compliance reports with audit trails
    */
   async generateComplianceReport(
-    request: PolicyComplianceReportRequest,
+    _request: PolicyComplianceReportRequest,
   ): Promise<{
     reportId: string;
     complianceStatus: Record<ComplianceFramework, string>;
@@ -938,7 +937,7 @@ export class BackupRetentionPolicyService {
       policyId: policy.id,
       action,
       prompt,
-      response: parlantResponse.response,
+      _response: parlantResponse.response,
       confidence: parlantResponse.confidence,
       validationOutcome: parlantResponse.outcome,
       recommendedActions: parlantResponse.recommendedActions,
@@ -959,7 +958,7 @@ export class BackupRetentionPolicyService {
    * Generates comprehensive PARLANT validation prompt
    */
   private generateParlantValidationPrompt(
-    request: ParlantPolicyValidationRequest,
+    _request: ParlantPolicyValidationRequest,
   ): string {
     return `
 # Database Backup Retention Policy Validation Request
@@ -1003,9 +1002,9 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
    */
   private async mockParlantValidation(
     prompt: string,
-    request: ParlantPolicyValidationRequest,
+    _request: ParlantPolicyValidationRequest,
   ): Promise<{
-    response: string;
+    _response: string;
     confidence: number;
     outcome: 'APPROVED' | 'REJECTED' | 'CONDITIONAL' | 'ESCALATED';
     recommendedActions: string[];
@@ -1042,7 +1041,7 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
     }
 
     const response = `
-Based on comprehensive analysis of the backup retention policy ${request.action.toLowerCase()} request:
+Based on comprehensive analysis of the backup retention policy ${request.action.toLowerCase()} _request:
 
 **Risk Assessment**: ${isHighRisk ? 'High risk due to business criticality and data volume' : 'Moderate risk profile within acceptable parameters'}
 **Cost Analysis**: Monthly impact of $${request.businessContext.budgetConstraints.toLocaleString()} ${isHighCost ? 'requires additional financial approval' : 'within standard operational budgets'}
@@ -1089,7 +1088,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   // ============================================================================
 
   private async validatePolicyRequest(
-    request: PolicyCreationRequest,
+    _request: PolicyCreationRequest,
   ): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
@@ -1141,7 +1140,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   }
 
   private async createApprovalWorkflow(
-    request: PolicyCreationRequest,
+    _request: PolicyCreationRequest,
     costAssessment: CostImpactAssessment,
   ): Promise<ApprovalWorkflow> {
     const isHighCost = costAssessment.estimatedMonthlyCostUSD > 1000;
@@ -1258,7 +1257,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
 
   private async createPolicyVersion(
     existingPolicy: RetentionPolicy,
-    request: PolicyModificationRequest,
+    _request: PolicyModificationRequest,
   ): Promise<RetentionPolicy> {
     const newPolicy = { ...existingPolicy };
     newPolicy.version = request.newVersion;
@@ -1283,7 +1282,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
 
   private async createEnforcementJob(
     policy: RetentionPolicy,
-    request: PolicyEnforcementScheduleRequest,
+    _request: PolicyEnforcementScheduleRequest,
   ): Promise<RetentionEnforcementJob> {
     return {
       id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -1403,6 +1402,6 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
     format: string,
     _data: any,
   ): Promise<any> {
-    return { format, data: 'Formatted report data' };
+    return { format, _data: 'Formatted report data' };
   }
 }

@@ -20,7 +20,7 @@
  * Integration: Real-time application with database operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MultiDimensionalRiskAssessment,
@@ -258,7 +258,7 @@ export class RiskMitigationStrategyService {
    * Generate comprehensive risk mitigation strategy
    */
   async generateMitigationStrategy(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<RiskMitigationStrategy> {
     const strategyId = this.generateStrategyId();
     const startTime = Date.now();
@@ -355,7 +355,7 @@ export class RiskMitigationStrategyService {
       this.logger.error(
         `[${strategyId}] Mitigation strategy generation failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           riskLevel: context.riskAssessment.riskLevel,
           strategyId,
         },
@@ -371,7 +371,7 @@ export class RiskMitigationStrategyService {
    */
   async executeMitigationStrategy(
     strategy: RiskMitigationStrategy,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<MitigationExecutionResult> {
     const executionId = this.generateExecutionId();
     const startTime = Date.now();
@@ -465,7 +465,7 @@ export class RiskMitigationStrategyService {
       this.logger.error(
         `[${executionId}] Mitigation strategy execution failed`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
           strategyId: strategy.mitigationId,
           executionId,
         },
@@ -558,7 +558,7 @@ export class RiskMitigationStrategyService {
    * Generate automated mitigation actions based on context
    */
   private async generateAutomatedMitigationActions(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     mitigationType: MitigationType,
   ): Promise<AutomatedMitigationAction[]> {
     const actions: AutomatedMitigationAction[] = [];
@@ -607,7 +607,7 @@ export class RiskMitigationStrategyService {
    * Generate manual mitigation steps
    */
   private async generateManualMitigationSteps(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     mitigationType: MitigationType,
   ): Promise<ManualMitigationStep[]> {
     const steps: ManualMitigationStep[] = [];
@@ -672,7 +672,7 @@ export class RiskMitigationStrategyService {
    * Configure monitoring enhancements based on risk and context
    */
   private async configureMonitoringEnhancements(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<MonitoringEnhancement[]> {
     const enhancements: MonitoringEnhancement[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -721,7 +721,7 @@ export class RiskMitigationStrategyService {
    * Configure rollback procedures based on operation and risk
    */
   private async configureRollbackProcedures(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<RollbackProcedure[]> {
     const procedures: RollbackProcedure[] = [];
     const operation = context.operation;
@@ -777,7 +777,7 @@ export class RiskMitigationStrategyService {
    * Configure escalation triggers based on risk and context
    */
   private async configureEscalationTriggers(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<EscalationTrigger[]> {
     const triggers: EscalationTrigger[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -824,7 +824,7 @@ export class RiskMitigationStrategyService {
    */
   private async executePreventiveControls(
     strategy: RiskMitigationStrategy,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     executionResult: MitigationExecutionResult,
   ): Promise<void> {
     this.logger.debug('Executing preventive controls', {
@@ -857,7 +857,7 @@ export class RiskMitigationStrategyService {
    */
   private async executeDetectiveControls(
     strategy: RiskMitigationStrategy,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     executionResult: MitigationExecutionResult,
   ): Promise<void> {
     this.logger.debug('Executing detective controls', {
@@ -892,7 +892,7 @@ export class RiskMitigationStrategyService {
    */
   private async executeAutomatedActions(
     actions: AutomatedMitigationAction[],
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     executionResult: MitigationExecutionResult,
   ): Promise<void> {
     this.logger.debug('Executing automated mitigation actions', {
@@ -911,7 +911,7 @@ export class RiskMitigationStrategyService {
    */
   private async executeAutomatedAction(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<AppliedMitigationAction> {
     const actionId = this.generateActionId();
     const startTime = new Date();
@@ -984,7 +984,7 @@ export class RiskMitigationStrategyService {
         `Automated action execution failed: ${action.actionType}`,
         {
           actionId,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         },
       );
 
@@ -1014,7 +1014,7 @@ export class RiskMitigationStrategyService {
    * Determine primary mitigation type based on context
    */
   private determinePrimaryMitigationType(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): MitigationType {
     const riskLevel = context.riskAssessment.riskLevel;
     const operation = context.operation;
@@ -1045,7 +1045,7 @@ export class RiskMitigationStrategyService {
    * Generate low-risk automated actions
    */
   private generateLowRiskActions(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): AutomatedMitigationAction[] {
     return [
       {
@@ -1062,7 +1062,7 @@ export class RiskMitigationStrategyService {
    * Generate moderate-risk automated actions
    */
   private generateModerateRiskActions(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): AutomatedMitigationAction[] {
     return [
       {
@@ -1086,7 +1086,7 @@ export class RiskMitigationStrategyService {
    * Generate high-risk automated actions
    */
   private generateHighRiskActions(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): AutomatedMitigationAction[] {
     return [
       {
@@ -1124,7 +1124,7 @@ export class RiskMitigationStrategyService {
    * Generate critical-risk automated actions
    */
   private generateCriticalRiskActions(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): AutomatedMitigationAction[] {
     return [
       {
@@ -1293,7 +1293,7 @@ export class RiskMitigationStrategyService {
    * Generate cache key for mitigation strategies
    */
   private generateStrategyCacheKey(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): string {
     const keyData = {
       riskLevel: context.riskAssessment.riskLevel,
@@ -1467,7 +1467,7 @@ export class RiskMitigationStrategyService {
   }
 
   private generateFallbackMitigationStrategy(
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
     strategyId: string,
   ): RiskMitigationStrategy {
     this.logger.warn(`Generating fallback mitigation strategy: ${strategyId}`);
@@ -1548,7 +1548,7 @@ export class RiskMitigationStrategyService {
   private async applyAdaptiveLearningEnhancements(
     actions: AutomatedMitigationAction[],
     steps: ManualMitigationStep[],
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<void> {
     // Placeholder implementation
   }
@@ -1595,7 +1595,7 @@ export class RiskMitigationStrategyService {
 
   private createContinuousMonitoringPlan(
     strategy: RiskMitigationStrategy,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): ContinuousMonitoringPlan {
     return {
       monitoringEnabled: true,
@@ -1617,7 +1617,7 @@ export class RiskMitigationStrategyService {
   // Additional method stubs...
   private async executeCreateBackup(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1632,7 +1632,7 @@ export class RiskMitigationStrategyService {
 
   private async executeEnableMonitoring(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1647,7 +1647,7 @@ export class RiskMitigationStrategyService {
 
   private async executeRequireApproval(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1662,7 +1662,7 @@ export class RiskMitigationStrategyService {
 
   private async executeRestrictAccess(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1677,7 +1677,7 @@ export class RiskMitigationStrategyService {
 
   private async executeApplyTimeout(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1692,7 +1692,7 @@ export class RiskMitigationStrategyService {
 
   private async executeEnableTransaction(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1707,7 +1707,7 @@ export class RiskMitigationStrategyService {
 
   private async executeAlertAdministrators(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;
@@ -1722,7 +1722,7 @@ export class RiskMitigationStrategyService {
 
   private async executeScheduleMaintenance(
     action: AutomatedMitigationAction,
-    context: MitigationExecutionContext,
+    _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
     effectiveness: ActionEffectiveness;

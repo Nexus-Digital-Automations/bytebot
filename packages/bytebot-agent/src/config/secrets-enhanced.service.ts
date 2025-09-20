@@ -16,12 +16,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   watchFile,
@@ -62,7 +57,7 @@ interface EnhancedSecretMetadata {
  */
 interface EnhancedSecretValue {
   value: string;
-  metadata: EnhancedSecretMetadata;
+  _metadata: EnhancedSecretMetadata;
 }
 
 /**
@@ -302,7 +297,7 @@ export class EnhancedSecretsService
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('Enhanced Secrets Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;
@@ -389,7 +384,7 @@ export class EnhancedSecretsService
           this.logger.debug(
             `Failed to load from source ${this.getSourceByIndex(index)}`,
             {
-              error: error instanceof Error ? error.message : String(error),
+              _error: error instanceof Error ? error.message : String(error),
             },
           );
         }
@@ -412,7 +407,7 @@ export class EnhancedSecretsService
       }
 
       // Cache the secret with comprehensive metadata
-      const metadata: EnhancedSecretMetadata = {
+      const _metadata: EnhancedSecretMetadata = {
         name: secretName,
         key: key || secretName,
         source,
@@ -471,7 +466,7 @@ export class EnhancedSecretsService
       this.logger.error(`[${operationId}] Failed to retrieve secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         loadTimeMs: loadTime,
       });
       return null;
@@ -591,7 +586,7 @@ export class EnhancedSecretsService
       this.logger.debug('Failed to load from local file storage', {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return Promise.resolve(null);
     }
@@ -632,7 +627,7 @@ export class EnhancedSecretsService
     } catch (error) {
       this.logger.debug('Failed to load from Docker Compose', {
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       return Promise.resolve(null);
     }
@@ -667,13 +662,13 @@ export class EnhancedSecretsService
           return { name, key, loaded: Boolean(result) };
         } catch (error) {
           this.logger.warn(`Failed to load critical secret: ${name}`, {
-            error: error instanceof Error ? error.message : String(error),
+            _error: error instanceof Error ? error.message : String(error),
           });
           return {
             name,
             key,
             loaded: false,
-            error: String(error),
+            _error: String(error),
           };
         }
       }),
@@ -727,7 +722,7 @@ export class EnhancedSecretsService
         );
       } catch (error) {
         this.logger.error(`Failed to initialize local provider '${provider}'`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -804,7 +799,7 @@ export class EnhancedSecretsService
     error?: string,
     metadata?: Record<string, unknown>,
   ): void {
-    const entry: SecretAuditEntry = {
+    const _entry: SecretAuditEntry = {
       timestamp: new Date(),
       operation,
       secretName,
@@ -863,7 +858,7 @@ export class EnhancedSecretsService
    * Get source name by index for local providers
    * @private
    */
-  private getSourceByIndex(index: number): EnhancedSecretMetadata['source'] {
+  private getSourceByIndex(_index: number): EnhancedSecretMetadata['source'] {
     const sources: EnhancedSecretMetadata['source'][] = [
       'local-file',
       'environment',
@@ -884,7 +879,7 @@ export class EnhancedSecretsService
     this.rotationTimer = setInterval(() => {
       this.performSecretsRotation().catch((error) => {
         this.logger.error('Failed to perform secrets rotation', {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       });
     }, this.rotationConfig.intervalMs);
@@ -931,7 +926,7 @@ export class EnhancedSecretsService
         }
       } catch (error) {
         this.logger.error(`Failed to rotate secret: ${secret.name}`, {
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -968,7 +963,7 @@ export class EnhancedSecretsService
             this.logger.error(
               `Failed to rotate secret on file change: ${secretName}`,
               {
-                error: error instanceof Error ? error.message : String(error),
+                _error: error instanceof Error ? error.message : String(error),
               },
             );
           }
@@ -1023,7 +1018,7 @@ export class EnhancedSecretsService
         this.logger.error(`Failed to reload secret during rotation`, {
           secretName,
           key,
-          error: error instanceof Error ? error.message : String(error),
+          _error: error instanceof Error ? error.message : String(error),
         });
       });
 
@@ -1053,7 +1048,7 @@ export class EnhancedSecretsService
       this.logger.error(`[${operationId}] Failed to rotate secret`, {
         secretName,
         key,
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

@@ -14,7 +14,7 @@
  * @since Phase 1: Bytebot API Hardening
  */
 
-import { Module, Global, Logger } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import {
   ConfigModule as NestConfigModule,
   ConfigService,
@@ -141,7 +141,7 @@ export class ConfigurationModule {
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error('Configuration Module initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
       throw error;

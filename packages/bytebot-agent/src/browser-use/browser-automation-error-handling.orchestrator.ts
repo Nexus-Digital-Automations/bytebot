@@ -16,12 +16,10 @@
 
 import {
   Injectable,
-  Logger,
   Inject,
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Core Services
 import {
@@ -66,7 +64,7 @@ export interface ErrorHandlingContext {
 export interface ErrorHandlingResult<T = unknown> {
   success: boolean;
   data?: T;
-  response: BrowserAutomationBaseResponse;
+  _response: BrowserAutomationBaseResponse;
   recoveryApplied: boolean;
   degradationTriggered: boolean;
   fallbackUsed: boolean;
@@ -89,10 +87,10 @@ export class BrowserAutomationErrorHandlingOrchestrator
     BrowserAutomationErrorHandlingOrchestrator.name,
   );
   private readonly errorProcessingQueue: Array<{
-    error: Error;
-    context: ErrorHandlingContext;
-    resolve: (result: ErrorHandlingResult) => void;
-    reject: (error: Error) => void;
+    _error: Error;
+    _context: ErrorHandlingContext;
+    resolve: (_result: ErrorHandlingResult) => void;
+    reject: (_error: Error) => void;
   }> = [];
 
   private processingInterval?: NodeJS.Timeout;
@@ -164,7 +162,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
    */
   async executeWithErrorHandling<T>(
     operation: () => Promise<T>,
-    context: Omit<ErrorHandlingContext, 'startTime'>,
+    _context: Omit<ErrorHandlingContext, 'startTime'>,
   ): Promise<ErrorHandlingResult<T>> {
     const fullContext: ErrorHandlingContext = {
       ...context,
@@ -178,7 +176,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
     const recoveryApplied = false;
     // Track degradation status through execution results
     let fallbackUsed = false;
-    let result: T | undefined;
+    let _result: T | undefined;
     let finalError: Error | undefined;
 
     try {
@@ -229,7 +227,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
               sessionId: fullContext.sessionId,
               taskId: fullContext.taskId,
               durationMs: Date.now() - startTime,
-              metadata: {
+              _metadata: {
                 degraded: executionResult.degraded,
                 fallbackUsed: fallbackUsed,
                 qualityReduction: executionResult.qualityReduction,
@@ -242,7 +240,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
 
         return {
           success: true,
-          data: result,
+          _data: result,
           response,
           recoveryApplied,
           degradationTriggered: executionResult.degraded,
@@ -258,7 +256,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
           executionResult.error || new Error('Unknown execution error');
       }
     } catch (error) {
-      finalError = error instanceof Error ? error : new Error(String(error));
+      finalError = error instanceof Error ? _error : new Error(String(error));
     }
 
     // Error occurred - process through error handling pipeline
@@ -273,15 +271,15 @@ export class BrowserAutomationErrorHandlingOrchestrator
    * Process an error through the complete error handling pipeline
    */
   async processError(
-    error: Error,
-    context: ErrorHandlingContext,
+    _error: Error,
+    _context: ErrorHandlingContext,
   ): Promise<ErrorHandlingResult> {
     const startTime = Date.now();
     let recoveryResult: RecoveryResult | undefined;
     let degradationTriggered = false;
 
     try {
-      this.logger.warn(`Processing error: ${error.message}`, {
+      this.logger.warn(`Processing _error: ${error.message}`, {
         correlationId: context.correlationId,
         operationType: context.operationType,
         sessionId: context.sessionId,
@@ -403,7 +401,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
           severity: errorClassification.severity,
           recoverability: errorClassification.recoverability,
           message: error.message,
-          context: context.metadata,
+          _context: context.metadata,
           recoveryActions: errorClassification.recoveryStrategies,
           troubleshootingSteps: errorClassification.commonCauses.map(
             (cause) => `Check: ${cause}`,
@@ -465,7 +463,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
             sessionId: context.sessionId,
             taskId: context.taskId,
             durationMs: Date.now() - context.startTime,
-            context: {
+            _context: {
               originalError: error.message,
               processingError: String(processingError),
             },
@@ -474,7 +472,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
 
       return {
         success: false,
-        response: fallbackResponse,
+        _response: fallbackResponse,
         recoveryApplied: false,
         degradationTriggered,
         fallbackUsed: false,
@@ -617,7 +615,7 @@ export class BrowserAutomationErrorHandlingOrchestrator
 
   private shouldAttemptRecovery(
     errorClassification: BrowserAutomationErrorCode,
-    context: ErrorHandlingContext,
+    _context: ErrorHandlingContext,
   ): boolean {
     // Don't attempt recovery if max retries exceeded
     if (

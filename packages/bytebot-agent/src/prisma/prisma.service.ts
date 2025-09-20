@@ -8,7 +8,6 @@ import {
   Injectable,
   OnModuleInit,
   OnModuleDestroy,
-  Logger,
   Inject,
   forwardRef,
 } from '@nestjs/common';
@@ -126,7 +125,7 @@ export class PrismaService
         lastHealthCheck: new Date(),
         uptime: 0,
         connectionStatus: 'disconnected',
-        error: error instanceof Error ? error.message : String(error),
+        _error: error instanceof Error ? error.message : String(error),
       };
     }
   }

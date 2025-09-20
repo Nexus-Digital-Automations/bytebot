@@ -278,8 +278,8 @@ export class BrowserAutomationResponseFormatter {
    */
   static createSuccessResponse<T>(
     operationType: BrowserAutomationOperationType,
-    data: T,
-    options: {
+    _data: T,
+    _options: {
       message?: string;
       correlationId?: string;
       sessionId?: string;
@@ -309,7 +309,7 @@ export class BrowserAutomationResponseFormatter {
         ...options.metrics,
       },
       data,
-      metadata: options.metadata,
+      _metadata: options.metadata,
       warnings: options.warnings,
     };
   }
@@ -319,8 +319,8 @@ export class BrowserAutomationResponseFormatter {
    */
   static createErrorResponse(
     operationType: BrowserAutomationOperationType,
-    error: Error | BrowserAutomationErrorDetails,
-    options: {
+    _error: Error | BrowserAutomationErrorDetails,
+    _options: {
       correlationId?: string;
       sessionId?: string;
       taskId?: string;
@@ -348,7 +348,7 @@ export class BrowserAutomationResponseFormatter {
         severity: BrowserAutomationErrorSeverity.MEDIUM,
         recoverability: BrowserAutomationErrorRecoverability.RETRY_POSSIBLE,
         message: error.message,
-        context: options.context,
+        _context: options.context,
         stackTrace: options.includeStackTrace ? error.stack : undefined,
         recoveryActions: [
           'Retry the operation',
@@ -397,7 +397,7 @@ export class BrowserAutomationResponseFormatter {
         recoveryAttempts: options.recoveryAttempt ? 1 : 0,
         ...options.metrics,
       },
-      error: errorDetails,
+      _error: errorDetails,
       partialData: options.partialData,
       errorHistory: options.errorHistory,
     };
@@ -408,9 +408,9 @@ export class BrowserAutomationResponseFormatter {
    */
   static createPartialSuccessResponse<T>(
     operationType: BrowserAutomationOperationType,
-    data: T,
+    _data: T,
     errors: BrowserAutomationErrorDetails[],
-    options: {
+    _options: {
       message?: string;
       correlationId?: string;
       sessionId?: string;
@@ -440,7 +440,7 @@ export class BrowserAutomationResponseFormatter {
   static createTimeoutResponse(
     operationType: BrowserAutomationOperationType,
     timeoutMs: number,
-    options: {
+    _options: {
       correlationId?: string;
       sessionId?: string;
       taskId?: string;
@@ -455,7 +455,7 @@ export class BrowserAutomationResponseFormatter {
       severity: BrowserAutomationErrorSeverity.MEDIUM,
       recoverability: BrowserAutomationErrorRecoverability.RETRY_POSSIBLE,
       message: `Operation timed out after ${timeoutMs}ms`,
-      context: {
+      _context: {
         timeoutMs,
         ...options.context,
       },
@@ -486,7 +486,7 @@ export class BrowserAutomationResponseFormatter {
         recoveryAttempts: 0,
         ...options.metrics,
       },
-      error: errorDetails,
+      _error: errorDetails,
       partialData: options.partialData,
     };
   }
@@ -497,7 +497,7 @@ export class BrowserAutomationResponseFormatter {
   static createCancelledResponse(
     operationType: BrowserAutomationOperationType,
     reason: string,
-    options: {
+    _options: {
       correlationId?: string;
       sessionId?: string;
       taskId?: string;
@@ -512,7 +512,7 @@ export class BrowserAutomationResponseFormatter {
       severity: BrowserAutomationErrorSeverity.LOW,
       recoverability: BrowserAutomationErrorRecoverability.RETRY_POSSIBLE,
       message: `Operation was cancelled: ${reason}`,
-      context: { reason },
+      _context: { reason },
       recoveryActions: [
         'Restart the operation if needed',
         'Check cancellation reason',
@@ -539,7 +539,7 @@ export class BrowserAutomationResponseFormatter {
         recoveryAttempts: 0,
         ...options.metrics,
       },
-      error: errorDetails,
+      _error: errorDetails,
       partialData: options.partialData,
     };
   }
@@ -549,9 +549,9 @@ export class BrowserAutomationResponseFormatter {
    */
   static createDegradedResponse<T>(
     operationType: BrowserAutomationOperationType,
-    data: T,
+    _data: T,
     degradationReason: string,
-    options: {
+    _options: {
       message?: string;
       correlationId?: string;
       sessionId?: string;
@@ -582,8 +582,8 @@ export class BrowserAutomationResponseFormatter {
    * Wrap response with additional context for monitoring and debugging
    */
   static wrapWithMonitoringContext<T extends BrowserAutomationBaseResponse>(
-    response: T,
-    context: {
+    _response: T,
+    _context: {
       requestId?: string;
       userId?: string;
       clientInfo?: Record<string, unknown>;
@@ -605,7 +605,7 @@ export class BrowserAutomationResponseValidator {
   /**
    * Validate response structure
    */
-  static validateResponse(response: BrowserAutomationBaseResponse): {
+  static validateResponse(_response: BrowserAutomationBaseResponse): {
     valid: boolean;
     errors: string[];
   } {
@@ -649,8 +649,8 @@ export class BrowserAutomationResponseValidator {
    * Sanitize response for external consumption
    */
   static sanitizeResponse<T extends BrowserAutomationBaseResponse>(
-    response: T,
-    options: {
+    _response: T,
+    _options: {
       removeStackTrace?: boolean;
       removeSensitiveData?: boolean;
       includeDebugInfo?: boolean;

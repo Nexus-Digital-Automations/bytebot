@@ -18,7 +18,7 @@
  */
 
 import { registerAs } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+
 // import { completeConfigSchema } from './validation.schema'; // Temporarily disabled
 // import * as Joi from 'joi'; // Temporarily commented - joi not installed
 
@@ -371,7 +371,7 @@ function loadConfiguration(): AppConfig {
   } catch (error) {
     const loadTime = Date.now() - startTime;
     logger.error('Configuration loading failed', {
-      error: error instanceof Error ? error.message : String(error),
+      _error: error instanceof Error ? error.message : String(error),
       loadTimeMs: loadTime,
     });
     throw error;

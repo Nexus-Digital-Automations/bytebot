@@ -27,8 +27,7 @@
 
 import { ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
-import { Test, TestingModule } from '@nestjs/testing';
-
+import { TestingModule } from '@nestjs/testing';
 // ============================================================================
 // NestJS Decorator Mocks
 // ============================================================================
@@ -37,7 +36,7 @@ import { Test, TestingModule } from '@nestjs/testing';
  * Mock implementation of NestJS @Module decorator
  * Captures module metadata for testing validation
  */
-export const MockModule = (metadata: {
+export const MockModule = (_metadata: {
   imports?: any[];
   controllers?: any[];
   providers?: any[];
@@ -343,7 +342,7 @@ export interface MockExecutionContext {
   getHandler: jest.MockedFunction<() => Function>;
   getClass: jest.MockedFunction<() => any>;
   getArgs: jest.MockedFunction<any>;
-  getArgByIndex: jest.MockedFunction<(index: number) => any>;
+  getArgByIndex: jest.MockedFunction<(_index: number) => any>;
   switchToRpc: jest.MockedFunction<() => any>;
   switchToWs: jest.MockedFunction<() => any>;
   getType: jest.MockedFunction<any>;
@@ -353,8 +352,8 @@ export interface MockExecutionContext {
  * Create mock ExecutionContext with HTTP context
  */
 export const createMockExecutionContext = (
-  request: MockRequest = createMockRequest(),
-  response: MockResponse = createMockResponse(),
+  _request: MockRequest = createMockRequest(),
+  _response: MockResponse = createMockResponse(),
 ): MockExecutionContext => {
   const mockContext: MockExecutionContext = {
     switchToHttp: jest.fn(() => ({
@@ -365,7 +364,7 @@ export const createMockExecutionContext = (
     getHandler: jest.fn(() => jest.fn()),
     getClass: jest.fn(() => class MockController {}),
     getArgs: jest.fn(() => [request, response]),
-    getArgByIndex: jest.fn((index: number) => [request, response][index]),
+    getArgByIndex: jest.fn((_index: number) => [request, response][index]),
     switchToRpc: jest.fn(() => ({})),
     switchToWs: jest.fn(() => ({})),
     getType: jest.fn(() => 'http'),
@@ -389,7 +388,7 @@ export interface MockCallHandler extends CallHandler {
  * Create mock CallHandler with customizable response
  */
 export const createMockCallHandler = <T = any>(
-  response: T = {} as T,
+  _response: T = {} as T,
 ): MockCallHandler => {
   return {
     handle: jest.fn(() => of(response)),
@@ -528,14 +527,14 @@ export class MockTest {
  * Base mock Guard implementation
  */
 export class MockGuard {
-  canActivate = jest.fn((context: ExecutionContext) => true);
+  canActivate = jest.fn((_context: ExecutionContext) => true);
 }
 
 /**
  * Base mock Interceptor implementation
  */
 export class MockInterceptor {
-  intercept = jest.fn((context: ExecutionContext, next: CallHandler) =>
+  intercept = jest.fn((_context: ExecutionContext, next: CallHandler) =>
     next.handle(),
   );
 }
