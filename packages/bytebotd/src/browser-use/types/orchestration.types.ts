@@ -701,7 +701,7 @@ export interface NetworkSecurityConfig {
   firewallEnabled: boolean;
   allowedCidrs: string[];
   blockedCidrs: string[];
-  intrusion Detection: boolean;
+  intrusionDetection: boolean;
   ddosProtection: boolean;
   webApplicationFirewall: boolean;
 }

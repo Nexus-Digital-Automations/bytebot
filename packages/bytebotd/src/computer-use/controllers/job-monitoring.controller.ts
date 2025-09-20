@@ -596,7 +596,7 @@ export class JobMonitoringController {
 
       // Calculate time range multiplier
       const timeMultipliers = { '1h': 1, '24h': 24, '7d': 168, '30d': 720 };
-      const hours = timeMultipliers[timeRange];
+      const _hours = timeMultipliers[timeRange];
 
       const response = {
         timeRange,
@@ -726,8 +726,8 @@ export class JobMonitoringController {
    * Generate predictive insights for proactive management
    */
   private generatePredictiveInsights(
-    capacityData: any,
-    businessData: any
+    capacityData: CapacityMetricsResponseDto,
+    businessData: BusinessMetricsResponseDto
   ): HealthReportResponseDto['predictiveInsights'] {
     const expectedBottlenecks: string[] = [];
     const capacityRecommendations: string[] = [];
@@ -752,7 +752,7 @@ export class JobMonitoringController {
     );
 
     // Optimization opportunities
-    businessData.costOptimizationOpportunities.forEach((opp: any) => {
+    businessData.costOptimizationOpportunities.forEach((opp) => {
       optimizationOpportunities.push(`${opp.description} (Potential savings: ${opp.potentialSavings})`);
     });
 

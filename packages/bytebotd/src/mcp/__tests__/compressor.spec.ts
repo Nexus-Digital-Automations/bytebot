@@ -144,7 +144,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000); // 2MB
       const targetSizeKB = 1024;
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB,
         format: 'png',
       });
@@ -211,7 +211,7 @@ describe('Base64ImageCompressor', () => {
 
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
         initialQuality: 95,
         minQuality: 10,
@@ -245,7 +245,7 @@ describe('Base64ImageCompressor', () => {
     it('should respect quality constraints', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
         initialQuality: 80,
         minQuality: 20,
@@ -325,8 +325,7 @@ describe('Base64ImageCompressor', () => {
       // Testing with invalid format - intentionally using unsupported type
       await expect(
         Base64ImageCompressor.compressToSize(inputImage, {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-          format: 'gif' as unknown,
+          format: 'gif' as never, // Use 'never' type to indicate intentionally invalid value
         }),
       ).rejects.toThrow('Unsupported format');
     });
@@ -578,7 +577,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle very small target sizes', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1, // Very small target
         minQuality: 1,
       });
@@ -607,7 +606,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle invalid quality ranges', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         initialQuality: 50,
         minQuality: 60, // Min greater than initial
@@ -623,7 +622,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle zero max iterations', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         maxIterations: 0,
       });
@@ -704,7 +703,7 @@ describe('Base64ImageCompressor', () => {
     it('should maintain consistent metadata', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         format: 'jpeg',
       });

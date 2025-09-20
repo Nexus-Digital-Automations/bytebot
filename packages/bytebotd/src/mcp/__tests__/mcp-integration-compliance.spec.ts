@@ -174,7 +174,11 @@ class MockMcpClient extends EventEmitter {
    */
   handleIncomingMessage(message: any) {
     if (message.id && this.pendingRequests.has(message.id)) {
-      const { resolve, reject } = this.pendingRequests.get(message.id)!;
+      const requestHandler = this.pendingRequests.get(message.id);
+      if (!requestHandler) {
+        return; // Safely handle unexpected missing request
+      }
+      const { resolve, reject } = requestHandler;
       this.pendingRequests.delete(message.id);
 
       if (message.error) {

@@ -49,8 +49,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import * as crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import { JobStatus, JobPriority } from '../dto/async-job.dto';
+import { JobStatus } from '../dto/async-job.dto';
 
 // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
 
@@ -871,7 +870,7 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       if (result === 1) {
         this.activeLocks.delete(lockId);
       } else {
-        this.logger.warn(`Lock release failed - lock may have expired: ${lockId}`);
+        this.logger.warn(`Lock release failed - lock may have expired: ${String(lockId)}`);
       }
 
     } catch (error) {
@@ -1005,14 +1004,14 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       const metricsData = await this.redis.hgetall(this.getMetricsKey());
 
       // Update total jobs and priority counts
-      this.metrics.totalJobs = parseInt(metricsData.totalJobs || '0');
+      this.metrics.totalJobs = parseInt(metricsData.totalJobs ?? '0');
 
       for (const priority of Object.values(EnhancedJobPriority)) {
-        this.metrics.jobsByPriority[priority] = parseInt(metricsData[`priority:${priority}`] || '0');
+        this.metrics.jobsByPriority[priority] = parseInt(metricsData[`priority:${priority}`] ?? '0');
       }
 
       for (const status of Object.values(JobStatus)) {
-        this.metrics.jobsByStatus[status] = parseInt(metricsData[`status:${status}`] || '0');
+        this.metrics.jobsByStatus[status] = parseInt(metricsData[`status:${status}`] ?? '0');
       }
 
       // Calculate capacity utilization
@@ -1088,7 +1087,7 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
     try {
       // Simple estimation based on queue position and average processing time
       const position = await this.calculateQueuePosition(priority);
-      const averageProcessingTime = this.metrics.averageExecutionTime || 5000; // Default 5 seconds
+      const averageProcessingTime = this.metrics.averageExecutionTime ?? 5000; // Default 5 seconds
 
       const estimatedDelay = position * averageProcessingTime;
       return new Date(Date.now() + estimatedDelay);
@@ -1129,13 +1128,13 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       payload: JSON.stringify(job.payload),
       status: job.status,
       queuedAt: job.queuedAt.toISOString(),
-      startedAt: job.startedAt?.toISOString() || '',
-      completedAt: job.completedAt?.toISOString() || '',
-      executionTimeMs: job.executionTimeMs?.toString() || '',
-      errorMessage: job.errorMessage || '',
+      startedAt: job.startedAt?.toISOString() ?? '',
+      completedAt: job.completedAt?.toISOString() ?? '',
+      executionTimeMs: job.executionTimeMs?.toString() ?? '',
+      errorMessage: job.errorMessage ?? '',
       result: job.result ? JSON.stringify(job.result) : '',
-      lockId: job.lockId || '',
-      processingNode: job.processingNode || '',
+      lockId: job.lockId ?? '',
+      processingNode: job.processingNode ?? '',
     };
   }
 

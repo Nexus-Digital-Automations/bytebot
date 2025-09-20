@@ -455,7 +455,9 @@ export class DeviceFingerprintingService implements OnModuleInit {
         const reputationData = await this.redisClient.get(`device_reputation:${deviceId}`);
         if (reputationData) {
           reputation = JSON.parse(reputationData);
-          this.deviceCache.set(deviceId, reputation!);
+          if (reputation) {
+            this.deviceCache.set(deviceId, reputation);
+          }
         }
       }
 

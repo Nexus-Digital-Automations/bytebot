@@ -231,9 +231,10 @@ export class AutomationErrorHandlerService {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Operation failed, attempting recovery: ${operationName}`, {
         operationId,
-        error: error.message
+        error: errorMessage
       });
 
       const errorContext = {

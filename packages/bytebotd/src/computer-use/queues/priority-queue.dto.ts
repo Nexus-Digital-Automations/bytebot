@@ -19,7 +19,6 @@ import {
   IsBoolean,
   IsArray,
   IsObject,
-  IsDate,
   Min,
   Max,
   ValidateNested,

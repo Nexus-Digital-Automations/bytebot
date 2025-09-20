@@ -26,6 +26,17 @@ import {
   ForVersion,
   SUPPORTED_API_VERSIONS,
 } from '../common/versioning/api-version.decorator';
+import {
+  ParlantCritical,
+  ParlantSecure,
+  ParlantValidated,
+  ParlantAdmin,
+  ParlantBatch,
+  SecurityLevel,
+  ValidationMode,
+  ConversationContext,
+  ParlantValidationInterceptor
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import {
@@ -212,7 +223,7 @@ type ComputerActionResponse =
 @Controller('computer-use')
 @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
 @UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
-@UseInterceptors(LoggingInterceptor)
+@UseInterceptors(LoggingInterceptor, ParlantValidationInterceptor)
 @ApiBearerAuth('bearer')
 export class ComputerUseController {
   private readonly logger = new Logger(ComputerUseController.name);
@@ -266,7 +277,30 @@ export class ComputerUseController {
     status: 429,
     description: 'Rate limit exceeded',
   })
-  // ParlantCritical: Submits batch computer automation with dependency management - requires validation for system security
+  @ParlantBatch(
+    'Submit batch computer automation actions with dependency management and execution control',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'BATCH_COMPUTER_AUTOMATION',
+      complianceFlags: ['BATCH_PROCESSING', 'SYSTEM_CONTROL', 'HIGH_RISK'],
+      requiredRoles: ['OPERATOR', 'ADMIN'],
+      customRules: [
+        {
+          name: 'batch_size_validation',
+          condition: 'batch_size <= 50',
+          action: 'APPROVE',
+          priority: 5
+        },
+        {
+          name: 'critical_action_detection',
+          condition: 'contains_critical_actions',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 10
+        }
+      ]
+    }
+  )
   async submitBatchActions(
     @Body(new BatchJobValidationPipe()) batchRequest: BatchJobSubmissionDto,
     @CurrentUser() user: ByteBotdUser,
@@ -374,7 +408,15 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  // ParlantSecure: Searches computer automation job history with filtering (SecurityLevel.MEDIUM)
+  @ParlantValidated({
+    intent: 'Search and filter computer automation job history with advanced filtering criteria',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_SEARCH_MONITORING',
+    complianceFlags: ['JOB_MONITORING', 'DATA_ACCESS'],
+    cacheable: true,
+    timeout: 8000
+  })
   async searchJobs(
     @Body() criteria: JobSearchCriteriaDto,
     @CurrentUser() user: ByteBotdUser,
@@ -479,7 +521,15 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  // ParlantSecure: Retrieves real-time progress of computer automation jobs (SecurityLevel.MEDIUM)
+  @ParlantValidated({
+    intent: 'Retrieve real-time progress information for computer automation job execution',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_PROGRESS_MONITORING',
+    complianceFlags: ['REAL_TIME_MONITORING', 'JOB_TRACKING'],
+    cacheable: true,
+    timeout: 5000
+  })
   async getJobProgress(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
@@ -575,7 +625,15 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  // ParlantSecure: Retrieves analytics and performance metrics for computer automation jobs (SecurityLevel.MEDIUM)
+  @ParlantValidated({
+    intent: 'Retrieve comprehensive analytics and performance metrics for computer automation system',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'ANALYTICS_MONITORING',
+    complianceFlags: ['PERFORMANCE_ANALYTICS', 'SYSTEM_METRICS'],
+    cacheable: true,
+    timeout: 10000
+  })
   async getJobAnalytics(
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobAnalyticsDto> {
@@ -797,7 +855,32 @@ export class ComputerUseController {
     status: 503,
     description: 'Job queue full or service temporarily unavailable',
   })
-  // ParlantCritical: Submits computer automation actions for async execution - requires validation for system security and user safety
+  @ParlantCritical(
+    'Submit computer automation action for asynchronous execution with comprehensive security validation',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'ASYNC_COMPUTER_AUTOMATION',
+      complianceFlags: ['ASYNC_EXECUTION', 'SYSTEM_CONTROL', 'SECURITY_CRITICAL'],
+      requiredRoles: ['OPERATOR', 'ADMIN'],
+      timeout: 30000,
+      cacheable: false,
+      customRules: [
+        {
+          name: 'destructive_action_validation',
+          condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 10
+        },
+        {
+          name: 'network_action_validation',
+          condition: 'action_type in ["network_request", "download_file"]',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 8
+        }
+      ]
+    }
+  )
   async submitAsyncAction(
     @Body(new ComputerActionValidationPipe())
     params: ComputerActionDto & AsyncActionSubmissionDto,
@@ -936,7 +1019,15 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  // ParlantSecure: Retrieves status of async computer automation jobs (SecurityLevel.MEDIUM)
+  @ParlantValidated({
+    intent: 'Retrieve current status and progress information for asynchronous computer automation job',
+    securityLevel: SecurityLevel.LOW,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_STATUS_MONITORING',
+    complianceFlags: ['STATUS_MONITORING', 'JOB_TRACKING'],
+    cacheable: true,
+    timeout: 3000
+  })
   async getJobStatus(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
@@ -1045,7 +1136,15 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  // ParlantSecure: Retrieves results of completed computer automation jobs (SecurityLevel.MEDIUM) 
+  @ParlantValidated({
+    intent: 'Retrieve execution results and output data from completed computer automation job',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_RESULT_RETRIEVAL',
+    complianceFlags: ['RESULT_ACCESS', 'DATA_RETRIEVAL'],
+    cacheable: true,
+    timeout: 8000
+  })
   async getJobResult(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
@@ -1305,10 +1404,54 @@ export class ComputerUseController {
     status: 429,
     description: 'Rate limit exceeded',
   })
-  // ParlantCritical: Executes immediate computer automation actions including mouse, keyboard, file operations, and system control
+  @ParlantCritical(
+    'Execute immediate computer automation action with real-time system control and comprehensive validation',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'DIRECT_COMPUTER_AUTOMATION',
+      complianceFlags: ['IMMEDIATE_EXECUTION', 'SYSTEM_CONTROL', 'HIGH_RISK', 'REAL_TIME'],
+      requiredRoles: ['OPERATOR', 'ADMIN'],
+      timeout: 45000,
+      cacheable: false,
+      customRules: [
+        {
+          name: 'screenshot_action_validation',
+          condition: 'action === "screenshot"',
+          action: 'APPROVE',
+          priority: 2
+        },
+        {
+          name: 'file_write_validation',
+          condition: 'action === "write_file"',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 9
+        },
+        {
+          name: 'mouse_click_validation',
+          condition: 'action === "click"',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 7
+        },
+        {
+          name: 'keyboard_input_validation',
+          condition: 'action === "type"',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 8
+        },
+        {
+          name: 'application_launch_validation',
+          condition: 'action === "launch_app"',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 9
+        }
+      ]
+    }
+  )
   async action(
     @Body(new ComputerActionValidationPipe()) params: ComputerActionDto,
     @CurrentUser() user: ByteBotdUser,
+    @ConversationContext() conversationContext?: any,
   ): Promise<ComputerActionResponse> {
     // Generate unique operation ID for tracking this action request
     const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -1329,6 +1472,9 @@ export class ComputerUseController {
           userId: user.id,
           username: user.username,
           userRole: user.role,
+          conversationId: conversationContext?.conversationId,
+          securityLevel: conversationContext?.securityLevel,
+          validationMode: conversationContext?.validationMode
         },
       );
 
@@ -1347,6 +1493,8 @@ export class ComputerUseController {
           processingTime,
           userId: user.id,
           username: user.username,
+          conversationId: conversationContext?.conversationId,
+          validationApproved: true
         },
       );
 
@@ -1365,6 +1513,8 @@ export class ComputerUseController {
           action: params.action,
           processingTime,
           errorType: error?.constructor?.name ?? 'Unknown',
+          conversationId: conversationContext?.conversationId,
+          securityLevel: conversationContext?.securityLevel
         },
       );
 

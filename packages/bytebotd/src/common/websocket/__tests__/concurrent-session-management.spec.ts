@@ -45,6 +45,45 @@ import {
 import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
+// ===== TYPE DEFINITIONS =====
+
+/**
+ * Represents the payload of a validation response message
+ */
+interface ValidationResponsePayload {
+  validationId: string;
+  approved: boolean;
+  confidence: number;
+  reasoning: string;
+  conversationId: string;
+  requiresUserConfirmation: boolean;
+  metadata: {
+    processingTime: number;
+    sessionId: string;
+    userId: string;
+  };
+}
+
+/**
+ * Details of an isolation violation for testing purposes
+ */
+interface IsolationViolationDetails {
+  receivedData?: string;
+  fromSession?: string;
+  expectedSessionId?: string;
+  foundMessages?: ConversationalMessage[];
+}
+
+/**
+ * Result of a validation operation for concurrent testing
+ */
+interface ValidationResult {
+  sessionId: string;
+  success: boolean;
+  response?: ValidationResponsePayload;
+  error?: Error;
+}
+
 // ===== SESSION MANAGEMENT TEST UTILITIES =====
 
 /**
@@ -57,7 +96,7 @@ class TestSession extends EventEmitter {
     lastActivity: number;
     messageCount: number;
     messagesReceived: ConversationalMessage[];
-    validations: Map<string, any>;
+    validations: Map<string, ValidationResponsePayload>;
     deviceSessions: string[];
   } = {
     connected: false,
@@ -198,7 +237,7 @@ class TestSession extends EventEmitter {
     return validationId;
   }
 
-  async waitForValidationResponse(validationId: string, timeout = 5000): Promise<any> {
+  async waitForValidationResponse(validationId: string, timeout = 5000): Promise<ValidationResponsePayload> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {
@@ -256,7 +295,7 @@ class ConcurrentSessionManager {
 
   async createSession(userId: string, deviceId?: string): Promise<TestSession> {
     const sessionId = randomUUID();
-    const actualDeviceId = deviceId || `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const actualDeviceId = deviceId ?? `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');
 
     // Track user sessions
@@ -332,9 +371,9 @@ class ConcurrentSessionManager {
 
   async testSessionIsolation(sessions: TestSession[]): Promise<{
     isolationIntegrity: number;
-    violations: Array<{ sessionId: string; violation: string; details: any }>;
+    violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails }>;
   }> {
-    const violations: Array<{ sessionId: string; violation: string; details: any }> = [];
+    const violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails }> = [];
     let totalTests = 0;
     let passedTests = 0;
 
@@ -435,7 +474,7 @@ class ConcurrentSessionManager {
     averageValidationTime: number;
     concurrencyIssues: number;
   }> {
-    const validationPromises: Promise<any>[] = [];
+    const validationPromises: Promise<ValidationResult>[] = [];
     const validationResults: Array<{ sessionId: string; success: boolean; duration: number }> = [];
 
     // Start concurrent validations
@@ -542,7 +581,7 @@ class ConcurrentSessionManager {
   }
 
   getSessionsByUser(userId: string): TestSession[] {
-    const sessionIds = this.userSessions.get(userId) || [];
+    const sessionIds = this.userSessions.get(userId) ?? [];
     return sessionIds.map(id => this.sessions.get(id)).filter((session): session is TestSession => !!session);
   }
 }
@@ -638,7 +677,7 @@ describe('Concurrent Session Management Tests', () => {
               await handleValidationRequest(sessionInfo, message as ValidationRequestMessage);
               break;
 
-            case ConversationalMessageType.STATUS_UPDATE:
+            case ConversationalMessageType.STATUS_UPDATE: {
               // Echo back the status update with session confirmation
               const statusResponse: ConversationalMessage = {
                 messageId: randomUUID(),
@@ -661,8 +700,9 @@ describe('Concurrent Session Management Tests', () => {
 
               ws.send(JSON.stringify(statusResponse));
               break;
+            }
 
-            default:
+            default: {
               // Send acknowledgment for other message types
               const ackMessage: ConversationalMessage = {
                 messageId: randomUUID(),
@@ -681,6 +721,7 @@ describe('Concurrent Session Management Tests', () => {
 
               ws.send(JSON.stringify(ackMessage));
               break;
+            }
           }
         } catch (error) {
           console.error(`Error processing message in session ${sessionId}:`, error);
@@ -952,7 +993,7 @@ describe('Concurrent Session Management Tests', () => {
           if (message.payload?.sensitiveData && message.payload.sensitiveData !== ownSecretData) {
             leakageDetected++;
             leakageDetails.push({
-              fromSession: message.payload.sessionOwner || 'unknown',
+              fromSession: message.payload.sessionOwner ?? 'unknown',
               toSession: session.sessionId,
               data: message.payload.sensitiveData,
             });
@@ -1009,7 +1050,8 @@ describe('Concurrent Session Management Tests', () => {
 
         // Override userId for consistency
         userSessions.forEach(session => {
-          (session as any).userId = `multi-user-${userId}`;
+          // Use type assertion to safely access userId property
+          (session as TestSession & { userId: string }).userId = `multi-user-${userId}`;
         });
 
         sessions.push(...userSessions);
@@ -1020,7 +1062,7 @@ describe('Concurrent Session Management Tests', () => {
       // Verify user session distribution
       const userSessionCounts = new Map<string, number>();
       for (const session of connectedSessions) {
-        const count = userSessionCounts.get(session.userId) || 0;
+        const count = userSessionCounts.get(session.userId) ?? 0;
         userSessionCounts.set(session.userId, count + 1);
       }
 

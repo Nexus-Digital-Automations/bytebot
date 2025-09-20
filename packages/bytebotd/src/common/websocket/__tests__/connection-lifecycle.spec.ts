@@ -34,12 +34,39 @@ import {
   ConversationalMessage,
   ConversationalMessageType,
 } from '../conversational-websocket-bridge.service';
+
+// ===== TYPE DEFINITIONS =====
+
+/**
+ * Connection metrics interface for type safety
+ */
+interface ConnectionMetrics {
+  connectionTime?: number;
+  disconnectionTime?: number;
+  reconnectionCount: number;
+  totalConnections: number;
+  lastConnectionError?: Error;
+}
+
+/**
+ * Type-safe parsed message interface
+ */
+interface ParsedMessage {
+  sessionId?: string;
+  sequence?: number;
+  messageId?: string;
+  type?: ConversationalMessageType;
+  payload?: {
+    originalMessage?: ParsedMessage;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
 import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';
 import {
   createSafeWebSocketServer,
   createSecureVerifyCallback,
   validateWebSocketHeaders,
-  type WebSocketVerificationInfo,
 } from '../websocket-types';
 
 // ===== CONNECTION LIFECYCLE TEST UTILITIES =====
@@ -53,13 +80,7 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   private reconnectionAttempts = 0;
   private maxReconnectionAttempts = 5;
   private reconnectionDelay = 1000;
-  private connectionMetrics: {
-    connectionTime?: number;
-    disconnectionTime?: number;
-    reconnectionCount: number;
-    totalConnections: number;
-    lastConnectionError?: Error;
-  } = {
+  private connectionMetrics: ConnectionMetrics = {
     reconnectionCount: 0,
     totalConnections: 0,
   };
@@ -108,7 +129,7 @@ class ConnectionLifecycleTestClient extends EventEmitter {
           this.connectionMetrics.connectionTime = performance.now() - startTime;
           this.connectionMetrics.totalConnections++;
           this.reconnectionAttempts = 0;
-          this.emit('connected', this.connectionMetrics);
+          this.emit('connected', this.connectionMetrics as ConnectionMetrics);
           resolve();
         });
 
@@ -222,7 +243,7 @@ class ConnectionPoolTester {
         headers: { 'X-Client-ID': `pool-client-${i}` },
       });
 
-      client.on('connected', (metrics) => {
+      client.on('connected', (metrics: ConnectionMetrics) => {
         this.poolMetrics.activeConnections++;
         this.poolMetrics.totalConnections++;
         if (metrics.connectionTime) {
@@ -340,14 +361,14 @@ describe('WebSocket Connection Lifecycle Tests', () => {
 
       ws.on('message', (data: WebSocket.RawData) => {
         try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));
+          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ParsedMessage;
 
           // Echo back with confirmation
           const response: ConversationalMessage = {
             messageId: `response_${Date.now()}`,
-            sessionId: message.sessionId || 'test-session',
+            sessionId: message.sessionId ?? 'test-session',
             timestamp: Date.now(),
-            sequence: (message.sequence || 0) + 1,
+            sequence: (message.sequence ?? 0) + 1,
             type: ConversationalMessageType.STATUS_UPDATE,
             payload: {
               status: 'received',
@@ -362,7 +383,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
           };
 
           ws.send(JSON.stringify(response));
-        } catch (error) {
+        } catch (_error) {
           ws.send(JSON.stringify({ error: 'Invalid message format' }));
         }
       });
@@ -400,9 +421,9 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   describe('Basic Connection Establishment', () => {
     it('should establish WebSocket connection successfully', async () => {
       const client = new ConnectionLifecycleTestClient(TEST_URL);
-      let connectionEvent: any = null;
+      let connectionEvent: ConnectionMetrics | null = null;
 
-      client.on('connected', (metrics) => {
+      client.on('connected', (metrics: ConnectionMetrics) => {
         connectionEvent = metrics;
       });
 
@@ -411,8 +432,8 @@ describe('WebSocket Connection Lifecycle Tests', () => {
       expect(client.isConnected()).toBe(true);
       expect(client.getConnectionState()).toBe('connected');
       expect(connectionEvent).toBeTruthy();
-      expect(connectionEvent.connectionTime).toBeLessThan(1000); // Sub-1000ms connection
-      expect(connectionEvent.totalConnections).toBe(1);
+      expect(connectionEvent?.connectionTime).toBeLessThan(1000); // Sub-1000ms connection
+      expect(connectionEvent?.totalConnections).toBe(1);
 
       await client.disconnect();
     });
@@ -676,9 +697,9 @@ describe('WebSocket Connection Lifecycle Tests', () => {
         },
       });
 
-      let receivedMessage: any = null;
+      let receivedMessage: ParsedMessage | null = null;
 
-      client.on('message', (message) => {
+      client.on('message', (message: ParsedMessage) => {
         receivedMessage = message;
       });
 
@@ -706,8 +727,10 @@ describe('WebSocket Connection Lifecycle Tests', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       expect(receivedMessage).toBeTruthy();
-      expect(receivedMessage.sessionId).toBe(sessionId);
-      expect(receivedMessage.payload.originalMessage.sessionId).toBe(sessionId);
+      expect(receivedMessage?.sessionId).toBe(sessionId);
+      if (receivedMessage?.payload?.originalMessage) {
+        expect((receivedMessage.payload.originalMessage as ParsedMessage).sessionId).toBe(sessionId);
+      }
 
       await client.disconnect();
     });

@@ -542,8 +542,11 @@ describe('MCP Protocol Validation', () => {
       if (!parseResult.success) {
         expect(parseResult.error.issues).toBeDefined();
         expect(parseResult.error.issues.length).toBeGreaterThan(0);
-        
-        const firstIssue = parseResult.error.issues[0]!;
+
+        const firstIssue = parseResult.error.issues[0];
+        if (!firstIssue) {
+          throw new Error('Expected at least one validation issue');
+        }
         expect(firstIssue).toHaveProperty('path');
         expect(firstIssue).toHaveProperty('message');
         expect(firstIssue.path).toContain('coordinates');
