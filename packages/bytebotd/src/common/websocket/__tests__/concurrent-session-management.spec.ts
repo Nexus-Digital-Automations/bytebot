@@ -101,7 +101,7 @@ class TestSession extends EventEmitter {
 
       this.ws.on('message', (data: WebSocket.RawData) => {
         try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
+          const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
           this.sessionState.messagesReceived.push(message);
           this.sessionState.messageCount++;
           this.sessionState.lastActivity = Date.now();
@@ -624,7 +624,7 @@ describe('Concurrent Session Management Tests', () => {
 
       ws.on('message', async (data: WebSocket.RawData) => {
         try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
+          const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
           sessionInfo.messageCount++;
 
           // Verify session isolation - message should belong to this session

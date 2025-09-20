@@ -206,7 +206,7 @@ describe('JwtAuthGuard', () => {
       );
 
       // Verify user is attached to request
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as { user?: { id: string; parlantSessionId: string } };
       expect(request.user).toEqual(expect.objectContaining({
         id: 'user-123',
         parlantSessionId: 'parlant-session-123',
@@ -294,8 +294,8 @@ describe('JwtAuthGuard', () => {
         expect.any(String)
       );
 
-      const request = context.switchToHttp().getRequest();
-      expect(request.user.parlantSessionId).toBeUndefined();
+      const request = context.switchToHttp().getRequest() as { user?: { parlantSessionId?: string } };
+      expect(request.user?.parlantSessionId).toBeUndefined();
     });
 
     it('should validate token signatures correctly', async () => {
@@ -340,7 +340,7 @@ describe('JwtAuthGuard', () => {
         'JWT_AUTH_SUCCESS',
         'user-123',
         expect.objectContaining({
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date) as Date,
           sessionId: 'parlant-session-123',
         })
       );
@@ -570,7 +570,7 @@ describe('RolesGuard', () => {
         expect.objectContaining({
           requiredRoles: ['admin'],
           userRoles: ['admin'],
-          resource: expect.any(String),
+          resource: expect.any(String) as string,
         })
       );
     });
@@ -785,7 +785,7 @@ describe('JwtStrategy', () => {
 describe('Authentication Integration', () => {
   let jwtAuthGuard: JwtAuthGuard;
   let rolesGuard: RolesGuard;
-  let jwtStrategy: JwtStrategy;
+  let _jwtStrategy: JwtStrategy;
   let module: TestingModule;
 
   beforeEach(async () => {
@@ -843,7 +843,7 @@ describe('Authentication Integration', () => {
 
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
-    jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
+    _jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
   });
 
   afterEach(async () => {
@@ -855,7 +855,7 @@ describe('Authentication Integration', () => {
     const context = createMockExecutionContext();
 
     // Mock Parlant services
-    const parlantBridge = module.get('ParlantAuthBridgeService');
+    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;
     parlantBridge.syncParlantSession.mockResolvedValue({ sessionId: 'parlant-123' });
     parlantBridge.validateParlantPermissions.mockResolvedValue(true);
 
@@ -868,7 +868,7 @@ describe('Authentication Integration', () => {
     expect(roleResult).toBe(true);
 
     // Assert
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest() as { user?: { id: string; parlantSessionId: string } };
     expect(request.user).toEqual(
       expect.objectContaining({
         id: 'user-123',
@@ -881,7 +881,7 @@ describe('Authentication Integration', () => {
     // Arrange
     const contexts = Array.from({ length: 50 }, () => createMockExecutionContext());
 
-    const parlantBridge = module.get('ParlantAuthBridgeService');
+    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;
     parlantBridge.syncParlantSession.mockResolvedValue({ sessionId: 'parlant-123' });
     parlantBridge.validateParlantPermissions.mockResolvedValue(true);
 

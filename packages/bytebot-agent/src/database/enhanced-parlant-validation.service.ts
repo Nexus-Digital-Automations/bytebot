@@ -19,22 +19,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantValidationResponse,
-  ParlantUserContext,
   SecurityLevel,
 } from '@shared/types/parlant-integration.types';
 import {
-  DatabaseOperationMetadata,
   RiskLevel,
   ParlantDatabaseValidationRequest,
 } from './parlant-validated-database.service';
-import {
-  UniversalFunctionMetadata,
-  FunctionExecutionContext,
-} from './universal-function-wrapper.service';
-import {
-  ModelSecurity,
-  PrismaOperationMetadata,
-} from './prisma-function-wrapper.service';
+import { FunctionExecutionContext } from './universal-function-wrapper.service';
+// Removed unused imports
 
 // ===== ENHANCED VALIDATION INTERFACES =====
 
@@ -422,7 +414,7 @@ export class EnhancedParlantValidationService {
   private async createConversationContext(
     request: ParlantDatabaseValidationRequest,
     executionContext: FunctionExecutionContext,
-    validationId: string,
+    _validationId: string,
   ): Promise<ConversationContext> {
     const conversationId = executionContext.sessionId;
 
@@ -508,7 +500,7 @@ export class EnhancedParlantValidationService {
    */
   private async identifyRiskFactors(
     request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _context: ConversationContext,
   ): Promise<RiskFactor[]> {
     const factors: RiskFactor[] = [];
 
@@ -831,14 +823,9 @@ export class EnhancedParlantValidationService {
    * Clean up old conversation contexts
    */
   private cleanupOldContexts(): void {
-    const cutoffTime = Date.now() - 30 * 60 * 1000; // 30 minutes ago
-
-    for (const [
-      conversationId,
-      context,
-    ] of this.conversationContexts.entries()) {
-      // Remove contexts older than 30 minutes with no recent activity
-      // TODO: Implement proper cleanup logic based on last activity
+    // Remove contexts older than 30 minutes with no recent activity
+    // TODO: Implement proper cleanup logic based on last activity
+    for (const [conversationId] of this.conversationContexts.entries()) {
       if (Math.random() < 0.1) {
         // Randomly clean up 10% for demo
         this.conversationContexts.delete(conversationId);
@@ -907,7 +894,7 @@ export class EnhancedParlantValidationService {
   // These would be implemented based on actual business requirements
 
   private async getConversationHistory(
-    conversationId: string,
+    _conversationId: string,
   ): Promise<ConversationMessage[]> {
     // TODO: Implement conversation history retrieval
     return [];
@@ -921,7 +908,7 @@ export class EnhancedParlantValidationService {
   }
 
   private async performInitialRiskAssessment(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<RiskAssessment> {
     // TODO: Implement initial risk assessment
     return {
@@ -936,7 +923,7 @@ export class EnhancedParlantValidationService {
   }
 
   private async findSimilarPastDecisions(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<PastDecision[]> {
     // TODO: Implement similar decision retrieval
     return [];
@@ -956,8 +943,8 @@ export class EnhancedParlantValidationService {
   }
 
   private async assessBusinessImpact(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): Promise<BusinessImpact> {
     // TODO: Implement business impact assessment
     return {
@@ -972,7 +959,7 @@ export class EnhancedParlantValidationService {
   }
 
   private async assessTechnicalComplexity(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<TechnicalComplexity> {
     // TODO: Implement technical complexity assessment
     return {
@@ -987,7 +974,7 @@ export class EnhancedParlantValidationService {
   }
 
   private async classifyDataSensitivity(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<DataClassification> {
     // TODO: Implement data sensitivity classification
     return {
@@ -1005,7 +992,7 @@ export class EnhancedParlantValidationService {
     riskFactors: RiskFactor[],
     threatIndicators: ThreatIndicator[],
     businessImpact: BusinessImpact,
-    technicalComplexity: TechnicalComplexity,
+    _technicalComplexity: TechnicalComplexity,
   ): RiskLevel {
     // TODO: Implement sophisticated risk calculation
     if (threatIndicators.some((t) => t.severity === 'CRITICAL'))
@@ -1016,15 +1003,15 @@ export class EnhancedParlantValidationService {
   }
 
   private async generateMitigationStrategies(
-    riskFactors: RiskFactor[],
-    threatIndicators: ThreatIndicator[],
+    _riskFactors: RiskFactor[],
+    _threatIndicators: ThreatIndicator[],
   ): Promise<string[]> {
     // TODO: Implement mitigation strategy generation
     return ['Enhanced monitoring', 'Backup verification', 'User confirmation'];
   }
 
   private involvesSensitiveData(
-    request: ParlantDatabaseValidationRequest,
+    _request: ParlantDatabaseValidationRequest,
   ): boolean {
     // TODO: Implement sensitive data detection
     return false;
@@ -1036,21 +1023,21 @@ export class EnhancedParlantValidationService {
   }
 
   private isUnusualBehavior(
-    request: ParlantDatabaseValidationRequest,
-    userProfile: UserBehaviorProfile,
+    _request: ParlantDatabaseValidationRequest,
+    _userProfile: UserBehaviorProfile,
   ): boolean {
     // TODO: Implement behavior analysis
     return false;
   }
 
-  private isRapidOperationPattern(context: ConversationContext): boolean {
+  private isRapidOperationPattern(_context: ConversationContext): boolean {
     // TODO: Implement rapid operation detection
     return false;
   }
 
   private isPrivilegeEscalationAttempt(
-    request: ParlantDatabaseValidationRequest,
-    context: ConversationContext,
+    _request: ParlantDatabaseValidationRequest,
+    _context: ConversationContext,
   ): boolean {
     // TODO: Implement privilege escalation detection
     return false;
@@ -1097,7 +1084,7 @@ export class EnhancedParlantValidationService {
     return `Database operation requested: ${request.description}. Risk level: ${riskAssessment.overallRisk}. Approve?`;
   }
 
-  private async simulateUserResponse(prompt: string): Promise<string> {
+  private async simulateUserResponse(_prompt: string): Promise<string> {
     // TODO: Implement actual user interaction
     return 'yes';
   }
@@ -1125,7 +1112,7 @@ export class EnhancedParlantValidationService {
     }
   }
 
-  private calculateRiskScore(riskAssessment: RiskAssessment): number {
+  private calculateRiskScore(_riskAssessment: RiskAssessment): number {
     // TODO: Implement risk score calculation
     return 50;
   }
@@ -1134,8 +1121,8 @@ export class EnhancedParlantValidationService {
     validationResult: ParlantValidationResponse,
     strategy: ValidationStrategy,
     conversationContext: ConversationContext,
-    riskAssessment: RiskAssessment,
-    request: ParlantDatabaseValidationRequest,
+    _riskAssessment: RiskAssessment,
+    _request: ParlantDatabaseValidationRequest,
   ): Promise<EnhancedValidationResult> {
     // TODO: Implement enhanced result creation
     return {
@@ -1151,18 +1138,18 @@ export class EnhancedParlantValidationService {
   }
 
   private async recordValidationOutcome(
-    validationId: string,
-    request: ParlantDatabaseValidationRequest,
-    result: EnhancedValidationResult,
-    validationTime: number,
+    _validationId: string,
+    _request: ParlantDatabaseValidationRequest,
+    _result: EnhancedValidationResult,
+    _validationTime: number,
   ): Promise<void> {
     // TODO: Implement validation outcome recording
   }
 
   private async updateUserBehaviorProfile(
-    userId: string,
-    request: ParlantDatabaseValidationRequest,
-    result: EnhancedValidationResult,
+    _userId: string,
+    _request: ParlantDatabaseValidationRequest,
+    _result: EnhancedValidationResult,
   ): Promise<void> {
     // TODO: Implement user behavior profile updating
   }

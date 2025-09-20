@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FormAutomationController } from './form-automation.controller';
 import { FormAutomationService } from './form-automation.service';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { BrowserUseModule } from '../browser-use/browser-use.module';
 
 /**
  * Form Automation Module
@@ -15,11 +15,11 @@ import { ComputerUseModule } from '../computer-use/computer-use.module';
  * - Screenshot capture for debugging
  *
  * Dependencies:
- * - ComputerUseModule: For browser automation and computer vision
+ * - BrowserUseModule: For browser automation and form interaction
  * - Common modules: Security, validation, and authentication
  */
 @Module({
-  imports: [ComputerUseModule],
+  imports: [BrowserUseModule],
   controllers: [FormAutomationController],
   providers: [FormAutomationService],
   exports: [FormAutomationService],

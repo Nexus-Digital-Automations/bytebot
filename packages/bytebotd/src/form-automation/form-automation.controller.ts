@@ -42,7 +42,8 @@ import {
   FormSubmissionDto,
   FormValidationDto,
   FormAutoCompleteDto,
-  FormActionType
+  FormActionType,
+  FormFieldType
 } from './dto/form-action.dto';
 import {
   FormDetectionResponseDto,
@@ -127,7 +128,7 @@ export class FormAutomationController {
   async executeFormAction(
     @Body() params: FormActionDto,
     @CurrentUser() user: ByteBotdUser,
-  ): Promise<any> {
+  ): Promise<FormDetectionResponseDto | FormAutomationResponseDto | FormSubmissionResponseDto | FormAutoCompleteResponseDto> {
     const operationId = `form_action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
@@ -138,7 +139,7 @@ export class FormAutomationController {
           operationId,
           action: params.action,
           formSelector: params.formSelector,
-          fieldsCount: params.fields?.length || 0,
+          fieldsCount: params.fields?.length ?? 0,
           userId: user.id,
           username: user.username,
           userRole: user.role,
@@ -154,7 +155,7 @@ export class FormAutomationController {
           operationId,
           action: params.action,
           processingTime,
-          success: result.success !== false,
+          success: 'success' in result ? result.success !== false : true,
           userId: user.id,
           username: user.username,
         },
@@ -408,8 +409,8 @@ export class FormAutomationController {
       {
         operationId,
         formSelector: params.formSelector,
-        fieldsCount: params.fields?.length || 0,
-        hasCustomRules: !!params.validationRules,
+        fieldsCount: params.fields?.length ?? 0,
+        hasCustomRules: Boolean(params.validationRules),
         userId: user.id,
         username: user.username,
       },
@@ -517,7 +518,7 @@ export class FormAutomationController {
       {
         operationId,
         formSelector,
-        fieldSelectorsCount: fieldSelectors?.length || 0,
+        fieldSelectorsCount: fieldSelectors?.length ?? 0,
         userId: user.id,
         username: user.username,
       },
@@ -528,7 +529,7 @@ export class FormAutomationController {
       formSelector,
       fields: fieldSelectors?.map(selector => ({
         selector,
-        type: 'text' as any // Will be determined dynamically
+        type: 'text' as FormFieldType // Will be determined dynamically
       }))
     };
 
@@ -591,7 +592,7 @@ export class FormAutomationController {
       {
         operationId,
         formSelector,
-        timeout: timeout || 10000,
+        timeout: timeout ?? 10000,
         userId: user.id,
         username: user.username,
       },
@@ -601,7 +602,7 @@ export class FormAutomationController {
       action: FormActionType.WAIT_FOR_FORM,
       formSelector,
       config: {
-        timeout: timeout || 10000
+        timeout: timeout ?? 10000
       }
     };
 

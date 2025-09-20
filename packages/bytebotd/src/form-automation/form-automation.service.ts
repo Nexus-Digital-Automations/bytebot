@@ -1,5 +1,6 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use/computer-use.service';
+import { BrowserInteractionService } from '../browser-use/browser-interaction.service';
+import { BrowserUseService } from '../browser-use/browser-use.service';
 import {
   FormActionDto,
   FormDetectionDto,
@@ -8,7 +9,9 @@ import {
   FormValidationDto,
   FormAutoCompleteDto,
   FormActionType,
-  FormFieldType
+  FormFieldType,
+  FormFieldDto,
+  FormAutomationConfigDto
 } from './dto/form-action.dto';
 import {
   FormDetectionResponseDto,
@@ -37,13 +40,14 @@ export class FormAutomationService {
   private readonly logger = new Logger(FormAutomationService.name);
 
   constructor(
-    private readonly computerUseService: ComputerUseService,
+    private readonly browserInteractionService: BrowserInteractionService,
+    private readonly browserUseService: BrowserUseService,
   ) {}
 
   /**
    * Execute form automation action
    */
-  async executeFormAction(action: FormActionDto): Promise<any> {
+  async executeFormAction(action: FormActionDto): Promise<FormDetectionResponseDto | FormAutomationResponseDto | FormSubmissionResponseDto | FormAutoCompleteResponseDto> {
     const startTime = Date.now();
     const operationId = `form_${action.action}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -51,11 +55,11 @@ export class FormAutomationService {
       operationId,
       action: action.action,
       formSelector: action.formSelector,
-      fieldCount: action.fields?.length || 0
+      fieldCount: action.fields?.length ?? 0
     });
 
     try {
-      let result: any;
+      let result: FormDetectionResponseDto | FormAutomationResponseDto | FormSubmissionResponseDto | FormAutoCompleteResponseDto;
 
       switch (action.action) {
         case FormActionType.DETECT_FORM:
@@ -83,7 +87,7 @@ export class FormAutomationService {
           result = await this.waitForForm(action, operationId);
           break;
         default:
-          throw new Error(`Unsupported form action: ${action.action}`);
+          throw new Error(`Unsupported form action: ${action.action as string}`);
       }
 
       const processingTime = Date.now() - startTime;
@@ -91,7 +95,7 @@ export class FormAutomationService {
         operationId,
         action: action.action,
         processingTime,
-        success: result.success !== false
+        success: 'success' in result ? result.success !== false : true
       });
 
       return result;
@@ -119,14 +123,14 @@ export class FormAutomationService {
     }
 
     // Take screenshot for analysis
-    const screenshot = await this.captureScreenshot(operationId);
+    const screenshot = await this.captureScreenshot(operationId, action.sessionId);
 
     // Use computer vision to detect forms
     const formElements = await this.findFormElements(operationId);
     const detectedForms: DetectedFormDto[] = [];
 
     for (const formElement of formElements) {
-      const form = await this.analyzeForm(formElement, action.analyzeFields || true, operationId);
+      const form = await this.analyzeForm(formElement, action.analyzeFields ?? true, operationId);
       detectedForms.push(form);
     }
 
@@ -150,17 +154,17 @@ export class FormAutomationService {
     const fieldResults: FormFillingResultDto[] = [];
 
     const screenshotBefore = action.config?.captureScreenshots
-      ? await this.captureScreenshot(operationId)
+      ? await this.captureScreenshot(operationId, action.sessionId)
       : undefined;
 
     // Wait for form if selector provided
     if (action.formSelector) {
-      await this.waitForElement(action.formSelector, action.config?.timeout || 10000, operationId);
+      await this.waitForElement(action.formSelector, action.config?.timeout ?? 10000, operationId);
     }
 
     // Fill each field
     for (const field of action.fields) {
-      const fieldResult = await this.fillFormField(field, action.config, operationId);
+      const fieldResult = await this.fillFormField(field, action.config, operationId, action.sessionId);
       fieldResults.push(fieldResult);
 
       // Add delay between fields if configured
@@ -181,7 +185,7 @@ export class FormAutomationService {
     }
 
     const screenshotAfter = action.config?.captureScreenshots
-      ? await this.captureScreenshot(operationId)
+      ? await this.captureScreenshot(operationId, action.sessionId)
       : undefined;
 
     const processingTime = Date.now() - startTime;
@@ -209,15 +213,15 @@ export class FormAutomationService {
     try {
       // Wait for form if selector provided
       if (action.formSelector) {
-        await this.waitForElement(action.formSelector, action.config?.timeout || 10000, operationId);
+        await this.waitForElement(action.formSelector, action.config?.timeout ?? 10000, operationId);
       }
 
       // Find and click submit button
-      const submitSelector = action.submitSelector ||
+      const submitSelector = action.submitSelector ??
         'button[type="submit"], input[type="submit"], button:contains("Submit"), button:contains("Send")';
 
       await this.waitForElement(submitSelector, 5000, operationId);
-      await this.clickElement(submitSelector, operationId);
+      await this.clickElement(submitSelector, operationId, action.sessionId);
 
       // Wait for submission to complete
       if (action.config?.waitForSubmission) {
@@ -227,7 +231,7 @@ export class FormAutomationService {
       // Check for redirect or success
       const currentUrl = await this.getCurrentUrl(operationId);
       const screenshot = action.config?.captureScreenshots
-        ? await this.captureScreenshot(operationId)
+        ? await this.captureScreenshot(operationId, action.sessionId)
         : undefined;
 
       const submissionTime = Date.now() - startTime;
@@ -238,12 +242,12 @@ export class FormAutomationService {
         submissionTimeMs: submissionTime,
         screenshot,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       const submissionTime = Date.now() - startTime;
       return {
         submitted: false,
         submissionTimeMs: submissionTime,
-        errorMessage: error.message
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -255,7 +259,7 @@ export class FormAutomationService {
     const startTime = Date.now();
 
     // Get form fields to validate
-    const fields = action.fields || [];
+    const fields = action.fields ?? [];
     const validationResults = await this.validateFormFields(fields, operationId, action.validationRules);
 
     const processingTime = Date.now() - startTime;
@@ -279,11 +283,11 @@ export class FormAutomationService {
     const fieldResults: FormFillingResultDto[] = [];
 
     if (action.formSelector) {
-      await this.waitForElement(action.formSelector, action.config?.timeout || 10000, operationId);
+      await this.waitForElement(action.formSelector, action.config?.timeout ?? 10000, operationId);
     }
 
     // Clear each field
-    for (const field of action.fields || []) {
+    for (const field of action.fields ?? []) {
       const fieldStartTime = Date.now();
       try {
         await this.clearField(field.selector, operationId);
@@ -334,7 +338,7 @@ export class FormAutomationService {
     }
 
     const form = action.formSelector
-      ? detection.forms.find(f => f.selector === action.formSelector) || detection.forms[0]
+      ? detection.forms.find(f => f.selector === action.formSelector) ?? detection.forms[0]
       : detection.forms[0];
 
     // Map profile data to form fields
@@ -351,7 +355,7 @@ export class FormAutomationService {
           selector: field.selector,
           type: field.type,
           value: mappedValue
-        }, action.config, operationId);
+        }, action.config, operationId, action.sessionId);
         fieldResults.push(fieldResult);
       } else {
         skippedFields.push(field.selector);
@@ -359,7 +363,7 @@ export class FormAutomationService {
     }
 
     const screenshot = action.config?.captureScreenshots
-      ? await this.captureScreenshot(operationId)
+      ? await this.captureScreenshot(operationId, action.sessionId)
       : undefined;
 
     const completionTime = Date.now() - startTime;
@@ -407,7 +411,7 @@ export class FormAutomationService {
    */
   private async waitForForm(action: FormActionDto, operationId: string): Promise<FormAutomationResponseDto> {
     const startTime = Date.now();
-    const timeout = action.config?.timeout || 10000;
+    const timeout = action.config?.timeout ?? 10000;
 
     try {
       if (action.formSelector) {
@@ -447,23 +451,29 @@ export class FormAutomationService {
     // For now, this is a placeholder
   }
 
-  private async captureScreenshot(operationId: string): Promise<string> {
+  private async captureScreenshot(operationId: string, sessionId?: string): Promise<string> {
     try {
-      const result = await this.computerUseService.action({ action: 'screenshot' });
-      return (result as any)?.image || '';
-    } catch (error) {
-      this.logger.warn(`[${operationId}] Failed to capture screenshot: ${error.message}`);
+      if (!sessionId) {
+        this.logger.warn(`[${operationId}] No session ID provided for screenshot capture`);
+        return '';
+      }
+
+      // Use browser service to capture screenshot
+      const result = await this.browserUseService.captureScreenshot({ sessionId });
+      return result?.screenshot ?? '';
+    } catch (error: unknown) {
+      this.logger.warn(`[${operationId}] Failed to capture screenshot: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return '';
     }
   }
 
-  private async findFormElements(operationId: string): Promise<string[]> {
+  private async findFormElements(_operationId: string): Promise<string[]> {
     // This would use browser automation to find form elements
     // Return CSS selectors for detected forms
     return ['#mainForm', '.contact-form', 'form[name="registration"]'];
   }
 
-  private async analyzeForm(formSelector: string, analyzeFields: boolean, operationId: string): Promise<DetectedFormDto> {
+  private async analyzeForm(formSelector: string, _analyzeFields: boolean, _operationId: string): Promise<DetectedFormDto> {
     // This would analyze the form structure and return detailed information
     return {
       selector: formSelector,
@@ -490,23 +500,38 @@ export class FormAutomationService {
     };
   }
 
-  private async waitForElement(selector: string, timeout: number, operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Waiting for element: ${selector} (timeout: ${timeout}ms)`);
+  private async waitForElement(selector: string, timeout: number, _operationId: string): Promise<void> {
+    this.logger.log(`[${_operationId}] Waiting for element: ${selector} (timeout: ${timeout}ms)`);
     // Implementation would wait for element to appear
   }
 
-  private async fillFormField(field: any, config: any, operationId: string): Promise<FormFillingResultDto> {
+  private async fillFormField(field: FormFieldDto, config: FormAutomationConfigDto | undefined, operationId: string, sessionId?: string): Promise<FormFillingResultDto> {
     const startTime = Date.now();
 
     try {
-      // Wait for field to be available
-      await this.waitForElement(field.selector, 5000, operationId);
+      if (!sessionId) {
+        throw new Error('Session ID is required for form field interaction');
+      }
 
-      // Clear field first
-      await this.clearField(field.selector, operationId);
+      if (!field.value) {
+        throw new Error('Field value is required for filling');
+      }
 
-      // Type the value
-      await this.typeInField(field.selector, field.value, operationId);
+      // Use browser interaction service to type in the field
+      const typeResult = await this.browserInteractionService.type({
+        sessionId,
+        selector: field.selector,
+        text: field.value,
+        clearFirst: true,
+        timeout: config?.timeout ?? 5000,
+        delay: config?.fillDelay ?? 100,
+        pressTab: false,
+        pressEnter: false
+      });
+
+      if (!typeResult.success) {
+        throw new Error(typeResult.errorMessage ?? 'Failed to fill field');
+      }
 
       return {
         selector: field.selector,
@@ -514,37 +539,56 @@ export class FormAutomationService {
         value: field.value,
         fillTimeMs: Date.now() - startTime
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         selector: field.selector,
         filled: false,
-        errorMessage: error.message,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
         fillTimeMs: Date.now() - startTime
       };
     }
   }
 
-  private async clearField(selector: string, operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Clearing field: ${selector}`);
+  private async clearField(selector: string, _operationId: string): Promise<void> {
+    this.logger.log(`[${_operationId}] Clearing field: ${selector}`);
     // Implementation would clear the form field
   }
 
-  private async typeInField(selector: string, value: string, operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Typing in field: ${selector}`);
+  private async typeInField(_selector: string, _value: string, _operationId: string): Promise<void> {
+    this.logger.log(`[${_operationId}] Typing in field: ${_selector}`);
     // Implementation would type the value in the field
   }
 
-  private async clickElement(selector: string, operationId: string): Promise<void> {
+  private async clickElement(selector: string, operationId: string, sessionId?: string): Promise<void> {
     this.logger.log(`[${operationId}] Clicking element: ${selector}`);
-    // Implementation would click the element
+
+    if (!sessionId) {
+      throw new Error('Session ID is required for clicking elements');
+    }
+
+    try {
+      const clickResult = await this.browserInteractionService.click({
+        sessionId,
+        selector,
+        timeout: 5000,
+        waitForElement: true
+      });
+
+      if (!clickResult.success) {
+        throw new Error(clickResult.errorMessage ?? 'Failed to click element');
+      }
+    } catch (error: unknown) {
+      this.logger.error(`[${operationId}] Failed to click element: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
+    }
   }
 
-  private async getCurrentUrl(operationId: string): Promise<string> {
+  private async getCurrentUrl(_operationId: string): Promise<string> {
     // Implementation would get current browser URL
     return 'https://example.com/current';
   }
 
-  private async validateFormFields(fields: any[], operationId: string, customRules?: Record<string, string>): Promise<FieldValidationResultDto[]> {
+  private async validateFormFields(fields: FormFieldDto[], operationId: string, customRules?: Record<string, string>): Promise<FieldValidationResultDto[]> {
     const results: FieldValidationResultDto[] = [];
 
     for (const field of fields) {
@@ -562,39 +606,39 @@ export class FormAutomationService {
     return results;
   }
 
-  private async getFieldValue(selector: string, operationId: string): Promise<string> {
+  private async getFieldValue(_selector: string, _operationId: string): Promise<string> {
     // Implementation would get current field value
     return 'field_value';
   }
 
-  private validateFieldValue(value: string, field: any, customRules?: Record<string, string>): boolean {
+  private validateFieldValue(_value: string, _field: FormFieldDto, _customRules?: Record<string, string>): boolean {
     // Implementation would validate field value against rules
     return true;
   }
 
-  private getAppliedRules(field: any, customRules?: Record<string, string>): string[] {
+  private getAppliedRules(field: FormFieldDto, customRules?: Record<string, string>): string[] {
     const rules: string[] = [];
     if (field.required) rules.push('required');
     if (field.validationPattern) rules.push('pattern');
-    if (customRules && customRules[field.selector]) rules.push('custom');
+    if (customRules?.[field.selector]) rules.push('custom');
     return rules;
   }
 
-  private async submitFormBySelector(formSelector: string | undefined, config: any, operationId: string): Promise<void> {
+  private async submitFormBySelector(formSelector: string | undefined, _config: FormAutomationConfigDto | undefined, operationId: string): Promise<void> {
     if (formSelector) {
       const submitSelector = `${formSelector} button[type="submit"], ${formSelector} input[type="submit"]`;
-      await this.clickElement(submitSelector, operationId);
+      await this.clickElement(submitSelector, operationId, action.sessionId);
     }
   }
 
-  private mapProfileDataToFields(fields: DetectedFormFieldDto[], profileData: Record<string, any>, fieldMapping?: Record<string, string>): Record<string, string> {
+  private mapProfileDataToFields(fields: DetectedFormFieldDto[], profileData: Record<string, unknown>, fieldMapping?: Record<string, string>): Record<string, string> {
     const mappedFields: Record<string, string> = {};
 
     for (const field of fields) {
       let value: string | undefined;
 
       // Use custom mapping if provided
-      if (fieldMapping && fieldMapping[field.selector]) {
+      if (fieldMapping?.[field.selector]) {
         value = this.getNestedValue(profileData, fieldMapping[field.selector]);
       } else {
         // Auto-map based on field type and label
@@ -609,38 +653,56 @@ export class FormAutomationService {
     return mappedFields;
   }
 
-  private getNestedValue(obj: any, path: string): string | undefined {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  private getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
+    const result = path.split('.').reduce((current: unknown, key: string) => {
+      if (current && typeof current === 'object' && key in current) {
+        return (current as Record<string, unknown>)[key];
+      }
+      return undefined;
+    }, obj);
+    return typeof result === 'string' ? result : undefined;
   }
 
-  private autoMapFieldValue(field: DetectedFormFieldDto, profileData: Record<string, any>): string | undefined {
+  private autoMapFieldValue(field: DetectedFormFieldDto, profileData: Record<string, unknown>): string | undefined {
     const label = field.label?.toLowerCase() || '';
     const selector = field.selector.toLowerCase();
 
     // Email fields
     if (field.type === FormFieldType.EMAIL || label.includes('email') || selector.includes('email')) {
-      return profileData.email;
+      return typeof profileData.email === 'string' ? profileData.email : undefined;
     }
 
     // Name fields
     if (label.includes('name') || selector.includes('name')) {
       if (label.includes('first') || selector.includes('first')) {
-        return profileData.firstName || profileData.name?.first;
+        const firstName = typeof profileData.firstName === 'string' ? profileData.firstName : undefined;
+        const nameFirst = profileData.name && typeof profileData.name === 'object' && 'first' in profileData.name ?
+          (typeof (profileData.name as Record<string, unknown>).first === 'string' ? (profileData.name as Record<string, unknown>).first : undefined) : undefined;
+        return firstName ?? nameFirst;
       }
       if (label.includes('last') || selector.includes('last')) {
-        return profileData.lastName || profileData.name?.last;
+        const lastName = typeof profileData.lastName === 'string' ? profileData.lastName : undefined;
+        const nameLast = profileData.name && typeof profileData.name === 'object' && 'last' in profileData.name ?
+          (typeof (profileData.name as Record<string, unknown>).last === 'string' ? (profileData.name as Record<string, unknown>).last : undefined) : undefined;
+        return lastName ?? nameLast;
       }
-      return profileData.fullName || profileData.name || `${profileData.firstName} ${profileData.lastName}`;
+      const fullName = typeof profileData.fullName === 'string' ? profileData.fullName : undefined;
+      const name = typeof profileData.name === 'string' ? profileData.name : undefined;
+      const firstName = typeof profileData.firstName === 'string' ? profileData.firstName : '';
+      const lastName = typeof profileData.lastName === 'string' ? profileData.lastName : '';
+      return fullName ?? name ?? (firstName && lastName ? `${firstName} ${lastName}` : undefined);
     }
 
     // Phone fields
     if (field.type === FormFieldType.TEL || label.includes('phone') || selector.includes('phone')) {
-      return profileData.phone || profileData.phoneNumber;
+      const phone = typeof profileData.phone === 'string' ? profileData.phone : undefined;
+      const phoneNumber = typeof profileData.phoneNumber === 'string' ? profileData.phoneNumber : undefined;
+      return phone ?? phoneNumber;
     }
 
     // Address fields
     if (label.includes('address') || selector.includes('address')) {
-      return profileData.address;
+      return typeof profileData.address === 'string' ? profileData.address : undefined;
     }
 
     return undefined;

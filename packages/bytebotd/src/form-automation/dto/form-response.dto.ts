@@ -153,7 +153,7 @@ export class FormDetectionResponseDto {
     description: 'Additional metadata about the detection',
     example: { url: 'https://example.com/contact', userAgent: 'Mozilla/5.0...' }
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -291,7 +291,7 @@ export class FormAutomationResponseDto {
       redirectUrl: 'https://example.com/success'
     }
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

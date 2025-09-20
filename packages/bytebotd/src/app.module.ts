@@ -23,6 +23,8 @@ import { FileManagementModule } from './file-management/file-management.module';
 import { ContentMonitoringModule } from './content-monitoring/content-monitoring.module';
 import { ErrorHandlingModule } from './common/error-handling/error-handling.module';
 import { AutomationTestingModule } from './automation-testing/automation-testing.module';
+import { BrowserUseModule } from './browser-use/browser-use.module';
+import { BrowserModule } from './browser/browser.module';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { AutomationTestingModule } from './automation-testing/automation-testing
     FileManagementModule, // File upload/download automation with validation and security scanning
     ContentMonitoringModule, // Page content monitoring with change detection and alert systems
     AutomationTestingModule, // Comprehensive testing suite for all automation APIs
+    BrowserUseModule, // Browser automation with enhanced features and Parlant validation
+    BrowserModule, // Dedicated browser session management with enterprise features
   ],
   controllers: [AppController],
   providers: [

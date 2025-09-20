@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 
 /**
  * Automation Error Categories
@@ -51,7 +50,7 @@ export interface AutomationError {
   readonly severity: ErrorSeverity;
   readonly message: string;
   readonly originalError?: Error;
-  readonly context: Record<string, any>;
+  readonly context: Record<string, unknown>;
   readonly timestamp: Date;
   readonly operationId?: string;
   readonly userId?: string;
@@ -78,8 +77,8 @@ export interface RecoveryAction {
   readonly maxRetries: number;
   readonly backoffMs?: number;
   readonly maxBackoffMs?: number;
-  readonly fallbackAction?: () => Promise<any>;
-  readonly customRecovery?: (error: AutomationError) => Promise<any>;
+  readonly fallbackAction?: () => Promise<unknown>;
+  readonly customRecovery?: (error: AutomationError) => Promise<unknown>;
   readonly circuitBreakerThreshold?: number;
   readonly condition?: (error: AutomationError) => boolean;
 }
@@ -92,10 +91,10 @@ export interface ErrorHandlingResult {
   readonly recovered: boolean;
   readonly strategy: RecoveryStrategy;
   readonly retryCount: number;
-  readonly result?: any;
+  readonly result?: unknown;
   readonly finalError?: AutomationError;
   readonly recoveryTime: number;
-  readonly metadata: Record<string, any>;
+  readonly metadata: Record<string, unknown>;
 }
 
 /**
@@ -137,7 +136,7 @@ export class AutomationErrorHandlerService {
    */
   async handleError(
     error: Error | AutomationError,
-    context: Record<string, any>,
+    context: Record<string, unknown>,
     recoveryAction?: RecoveryAction
   ): Promise<ErrorHandlingResult> {
     const startTime = Date.now();
@@ -157,7 +156,7 @@ export class AutomationErrorHandlerService {
       this.errorRegistry.set(errorId, automationError);
 
       // Determine recovery strategy
-      const strategy = recoveryAction || await this.determineRecoveryStrategy(automationError);
+      const strategy = recoveryAction ?? await this.determineRecoveryStrategy(automationError);
 
       // Execute recovery
       const result = await this.executeRecovery(automationError, strategy);
@@ -184,10 +183,11 @@ export class AutomationErrorHandlerService {
 
     } catch (recoveryError) {
       const recoveryTime = Date.now() - startTime;
+      const recoveryErrorTyped = recoveryError as Error;
 
       this.logger.error(`Error recovery failed for: ${errorId}`, {
-        originalError: error.message,
-        recoveryError: recoveryError.message,
+        originalError: (error as { message?: string }).message ?? 'Unknown error',
+        recoveryError: recoveryErrorTyped.message,
         recoveryTime
       });
 
@@ -196,7 +196,7 @@ export class AutomationErrorHandlerService {
         recovered: false,
         strategy: RecoveryStrategy.ABORT,
         retryCount: 0,
-        finalError: await this.classifyError(recoveryError, context, errorId),
+        finalError: await this.classifyError(recoveryErrorTyped, context, errorId),
         recoveryTime,
         metadata: { errorId, recoveryFailed: true }
       };
@@ -209,7 +209,7 @@ export class AutomationErrorHandlerService {
   async executeWithRecovery<T>(
     operation: () => Promise<T>,
     operationName: string,
-    context: Record<string, any>,
+    context: Record<string, unknown>,
     recoveryConfig?: RecoveryAction
   ): Promise<T> {
     const operationId = this.generateOperationId();
@@ -246,12 +246,13 @@ export class AutomationErrorHandlerService {
       const handlingResult = await this.handleError(error, errorContext, recoveryConfig);
 
       if (handlingResult.success && handlingResult.result !== undefined) {
-        return handlingResult.result;
+        return handlingResult.result as T;
       }
 
       // If recovery failed, throw enhanced error
+      const errorToThrow = handlingResult.finalError ?? (error as Error);
       throw this.createEnhancedError(
-        handlingResult.finalError || error,
+        errorToThrow,
         operationName,
         errorContext
       );
@@ -347,7 +348,7 @@ export class AutomationErrorHandlerService {
    * Clear error history (for maintenance)
    */
   clearErrorHistory(olderThan?: Date): void {
-    const cutoffTime = olderThan || new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours default
+    const cutoffTime = olderThan ?? new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours default
 
     let clearedCount = 0;
     for (const [errorId, error] of this.errorRegistry.entries()) {
@@ -368,7 +369,7 @@ export class AutomationErrorHandlerService {
    */
   private async classifyError(
     error: Error | AutomationError,
-    context: Record<string, any>,
+    context: Record<string, unknown>,
     errorId: string
   ): Promise<AutomationError> {
     // If already an AutomationError, return enhanced version
@@ -393,19 +394,19 @@ export class AutomationErrorHandlerService {
       originalError: error,
       context,
       timestamp: new Date(),
-      operationId: context.operationId,
-      userId: context.userId,
-      sessionId: context.sessionId,
+      operationId: context.operationId as string | undefined,
+      userId: context.userId as string | undefined,
+      sessionId: context.sessionId as string | undefined,
       stackTrace: error.stack,
       metadata: {
-        component: context.component || 'unknown',
-        method: context.method || 'unknown',
-        url: context.url,
-        selector: context.selector,
-        userAgent: context.userAgent,
-        browserVersion: context.browserVersion,
-        retryCount: context.retryCount || 0,
-        maxRetries: context.maxRetries
+        component: (context.component as string) ?? 'unknown',
+        method: (context.method as string) ?? 'unknown',
+        url: context.url as string | undefined,
+        selector: context.selector as string | undefined,
+        userAgent: context.userAgent as string | undefined,
+        browserVersion: context.browserVersion as string | undefined,
+        retryCount: (context.retryCount as number) ?? 0,
+        maxRetries: context.maxRetries as number | undefined
       }
     };
   }
@@ -483,7 +484,7 @@ export class AutomationErrorHandlerService {
     recoveryAction: RecoveryAction
   ): Promise<ErrorHandlingResult> {
     const startTime = Date.now();
-    let retryCount = 0;
+    const _retryCount = 0;
 
     this.logger.log(`Executing recovery strategy: ${recoveryAction.strategy}`, {
       errorId: error.errorId,
@@ -533,8 +534,8 @@ export class AutomationErrorHandlerService {
    * Execute simple retry strategy
    */
   private async executeRetry(
-    error: AutomationError,
-    recoveryAction: RecoveryAction
+    _error: AutomationError,
+    _recoveryAction: RecoveryAction
   ): Promise<ErrorHandlingResult> {
     // Implementation would include actual retry logic
     // For now, return a mock successful recovery
@@ -553,8 +554,8 @@ export class AutomationErrorHandlerService {
    * Execute retry with exponential backoff
    */
   private async executeRetryWithBackoff(
-    error: AutomationError,
-    recoveryAction: RecoveryAction
+    _error: AutomationError,
+    _recoveryAction: RecoveryAction
   ): Promise<ErrorHandlingResult> {
     // Implementation would include exponential backoff logic
     // For now, return a mock result
@@ -588,7 +589,7 @@ export class AutomationErrorHandlerService {
           recoveryTime: 150,
           metadata: { fallbackUsed: true }
         };
-      } catch (fallbackError) {
+      } catch (_fallbackError) {
         return {
           success: false,
           recovered: false,
@@ -616,8 +617,8 @@ export class AutomationErrorHandlerService {
    * Execute graceful degradation
    */
   private async executeGracefulDegradation(
-    error: AutomationError,
-    recoveryAction: RecoveryAction
+    _error: AutomationError,
+    _recoveryAction: RecoveryAction
   ): Promise<ErrorHandlingResult> {
     // Provide degraded functionality
     return {
@@ -642,7 +643,7 @@ export class AutomationErrorHandlerService {
   /**
    * Helper methods for error classification
    */
-  private categorizeError(error: Error, context: Record<string, any>): AutomationErrorCategory {
+  private categorizeError(error: Error, context: Record<string, unknown>): AutomationErrorCategory {
     const message = error.message.toLowerCase();
 
     if (message.includes('network') || message.includes('timeout') || message.includes('connection')) {
@@ -677,9 +678,9 @@ export class AutomationErrorHandlerService {
   }
 
   private determineSeverity(
-    error: Error,
+    _error: Error,
     category: AutomationErrorCategory,
-    context: Record<string, any>
+    _context: Record<string, unknown>
   ): ErrorSeverity {
     // Critical errors that require immediate attention
     if (category === AutomationErrorCategory.SYSTEM_ERROR) {
@@ -702,11 +703,11 @@ export class AutomationErrorHandlerService {
     return ErrorSeverity.LOW;
   }
 
-  private isAutomationError(error: any): error is AutomationError {
+  private isAutomationError(error: unknown): error is AutomationError {
     return error && typeof error.errorId === 'string' && typeof error.category === 'string';
   }
 
-  private createEnhancedError(error: Error | AutomationError, operationName: string, context: Record<string, any>): HttpException {
+  private createEnhancedError(error: Error | AutomationError, operationName: string, _context: Record<string, unknown>): HttpException {
     const enhancedMessage = `Operation '${operationName}' failed: ${error.message}`;
 
     if (this.isAutomationError(error)) {
@@ -734,14 +735,14 @@ export class AutomationErrorHandlerService {
   // Analytics helper methods (simplified implementations)
   private groupErrorsByCategory(errors: AutomationError[]): Record<string, number> {
     return errors.reduce((acc, error) => {
-      acc[error.category] = (acc[error.category] || 0) + 1;
+      acc[error.category] = (acc[error.category] ?? 0) + 1;
       return acc;
     }, {} as Record<string, number>);
   }
 
   private groupErrorsBySeverity(errors: AutomationError[]): Record<string, number> {
     return errors.reduce((acc, error) => {
-      acc[error.severity] = (acc[error.severity] || 0) + 1;
+      acc[error.severity] = (acc[error.severity] ?? 0) + 1;
       return acc;
     }, {} as Record<string, number>);
   }
@@ -749,14 +750,14 @@ export class AutomationErrorHandlerService {
   private groupErrorsByComponent(errors: AutomationError[]): Record<string, number> {
     return errors.reduce((acc, error) => {
       const component = error.metadata.component;
-      acc[component] = (acc[component] || 0) + 1;
+      acc[component] = (acc[component] ?? 0) + 1;
       return acc;
     }, {} as Record<string, number>);
   }
 
   private getTopErrorMessages(errors: AutomationError[]): Array<{ message: string; count: number }> {
     const messageCounts = errors.reduce((acc, error) => {
-      acc[error.message] = (acc[error.message] || 0) + 1;
+      acc[error.message] = (acc[error.message] ?? 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -766,7 +767,7 @@ export class AutomationErrorHandlerService {
       .slice(0, 10);
   }
 
-  private calculateRecoverySuccessRate(errors: AutomationError[]): number {
+  private calculateRecoverySuccessRate(_errors: AutomationError[]): number {
     // Mock implementation
     return 85.5;
   }
@@ -784,7 +785,11 @@ export class AutomationErrorHandlerService {
     }));
   }
 
-  private calculateErrorTrends(errors: AutomationError[]): any {
+  private calculateErrorTrends(errors: AutomationError[]): {
+    last24Hours: number;
+    previousPeriod: number;
+    trend: string;
+  } {
     // Mock implementation for error trends
     return {
       last24Hours: errors.filter(e => e.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
@@ -889,7 +894,11 @@ interface ErrorAnalytics {
   recoverySuccessRate: number;
   averageRecoveryTime: number;
   circuitBreakerStatus: Array<{ component: string; status: string; failures: number }>;
-  errorTrends: any;
+  errorTrends: {
+    last24Hours: number;
+    previousPeriod: number;
+    trend: string;
+  };
   recommendations: string[];
   generatedAt: Date;
   processingTime: number;

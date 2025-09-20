@@ -830,7 +830,7 @@ export class EmergencyBypassAuditService {
    */
   private async collectBypassRequestEvidence(
     request: EmergencyBypassRequest,
-    context: ParlantUserContext,
+    _context: ParlantUserContext,
   ): Promise<void> {
     const evidenceId = this.generateEvidenceId();
 
@@ -1071,7 +1071,7 @@ export class EmergencyBypassAuditService {
     return ['WRITE', 'DELETE', 'MIGRATION'].includes(operationType);
   }
 
-  private extractRecordsAffected(result: unknown): number {
+  private extractRecordsAffected(_result: unknown): number {
     // TODO: Implement result analysis to extract affected record count
     return 1;
   }
@@ -1121,7 +1121,7 @@ export class EmergencyBypassAuditService {
   // ===== PLACEHOLDER IMPLEMENTATIONS =====
 
   private async getStakeholdersToNotify(
-    classification: EmergencyClassification,
+    _classification: EmergencyClassification,
   ): Promise<string[]> {
     // TODO: Implement stakeholder notification mapping
     return ['security-team', 'compliance-team'];
@@ -1144,15 +1144,15 @@ export class EmergencyBypassAuditService {
   }
 
   private async collectAuthorizationEvidence(
-    authorization: BypassAuthorization,
+    _authorization: BypassAuthorization,
   ): Promise<void> {
     // TODO: Implement authorization evidence collection
   }
 
   private async executeMonitoredBypassOperation<T>(
     operation: () => Promise<T>,
-    context: EmergencyBypassContext,
-    operationId: string,
+    _context: EmergencyBypassContext,
+    _operationId: string,
   ): Promise<T> {
     // TODO: Implement monitored execution with enhanced logging
     return await operation();
@@ -1182,34 +1182,34 @@ export class EmergencyBypassAuditService {
   }
 
   private async collectPreExecutionEvidence(
-    bypassId: string,
-    operationId: string,
-    functionName: string,
-    context: ParlantUserContext,
+    _bypassId: string,
+    _operationId: string,
+    _functionName: string,
+    _context: ParlantUserContext,
   ): Promise<void> {
     // TODO: Implement pre-execution evidence collection
   }
 
   private async collectPostExecutionEvidence(
-    bypassId: string,
-    operationId: string,
-    result: unknown,
+    _bypassId: string,
+    _operationId: string,
+    _result: unknown,
   ): Promise<void> {
     // TODO: Implement post-execution evidence collection
   }
 
   private async collectFailureEvidence(
-    bypassId: string,
-    operationId: string,
-    error: unknown,
+    _bypassId: string,
+    _operationId: string,
+    _error: unknown,
   ): Promise<void> {
     // TODO: Implement failure evidence collection
   }
 
   private async collectExpiryEvidence(
-    bypassId: string,
-    context: EmergencyBypassContext,
-    reason: string,
+    _bypassId: string,
+    _context: EmergencyBypassContext,
+    _reason: string,
   ): Promise<void> {
     // TODO: Implement expiry evidence collection
   }

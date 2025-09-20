@@ -8,7 +8,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
-import { catchError, timeout, retry, delay } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { AutomationErrorHandlerService, AutomationErrorCategory, ErrorSeverity } from './automation-error-handler.service';
 
 /**
@@ -36,8 +36,16 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     this.logger.log('ErrorRecoveryInterceptor initialized');
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest() as {
+      url: string;
+      method: string;
+      headers?: Record<string, string>;
+      user?: { id: string };
+      sessionID?: string;
+      body?: unknown;
+      query?: unknown;
+    };
     const operationContext = this.extractOperationContext(context, request);
 
     return next.handle().pipe(
@@ -47,14 +55,14 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   }
 
   private async handleError(
-    error: any,
-    operationContext: Record<string, any>,
-    executionContext: ExecutionContext
+    error: unknown,
+    operationContext: Record<string, unknown>,
+    _executionContext: ExecutionContext
   ): Promise<Observable<never>> {
     const startTime = Date.now();
 
     this.logger.warn('Interceptor handling error', {
-      error: error.message,
+      error: (error as { message?: string }).message ?? 'Unknown error',
       operation: operationContext.operationName,
       url: operationContext.url
     });
@@ -92,7 +100,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
       // Recovery failed, create enhanced error response
       const enhancedError = this.createEnhancedErrorResponse(
-        handlingResult.finalError || error,
+        handlingResult.finalError ?? (error as { category?: string; message?: string; severity?: string; errorId?: string }),
         operationContext,
         handlingResult
       );
@@ -108,8 +116,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
     } catch (handlerError) {
       this.logger.error('Error handler itself failed', {
-        originalError: error.message,
-        handlerError: handlerError.message,
+        originalError: (error as { message?: string }).message ?? 'Unknown error',
+        handlerError: (handlerError as Error).message,
         operation: operationContext.operationName
       });
 
@@ -121,8 +129,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
   private extractOperationContext(
     context: ExecutionContext,
-    request: any
-  ): Record<string, any> {
+    request: { url: string; method: string; headers?: Record<string, string>; user?: { id: string }; sessionID?: string; body?: unknown; query?: unknown }
+  ): Record<string, unknown> {
     const controllerClass = context.getClass().name;
     const handlerMethod = context.getHandler().name;
 
@@ -152,8 +160,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     return 'unknown';
   }
 
-  private sanitizeHeaders(headers: any): Record<string, string> {
-    const sanitized = { ...headers };
+  private sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+    const sanitized = { ...headers } as Record<string, string>;
 
     // Remove sensitive headers
     delete sanitized.authorization;
@@ -164,16 +172,16 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   }
 
   private createEnhancedErrorResponse(
-    error: any,
-    operationContext: Record<string, any>,
-    handlingResult: any
+    error: { category?: string; message?: string; severity?: string; errorId?: string },
+    operationContext: Record<string, unknown>,
+    handlingResult: { strategy: string; retryCount: number; recoveryTime: number; success: boolean }
   ): HttpException {
     const errorResponse = {
       success: false,
       error: {
-        type: error.category || AutomationErrorCategory.UNKNOWN_ERROR,
-        message: error.message || 'An automation error occurred',
-        severity: error.severity || ErrorSeverity.MEDIUM,
+        type: error.category ?? AutomationErrorCategory.UNKNOWN_ERROR,
+        message: error.message ?? 'An automation error occurred',
+        severity: error.severity ?? ErrorSeverity.MEDIUM,
         operation: operationContext.operationName,
         component: operationContext.component,
         timestamp: new Date().toISOString(),
@@ -187,7 +195,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
         }
       },
       metadata: {
-        errorId: error.errorId,
+        errorId: error.errorId ?? 'unknown',
         url: operationContext.url,
         method: operationContext.httpMethod,
         userAgent: operationContext.userAgent
@@ -201,8 +209,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   }
 
   private createFallbackErrorResponse(
-    error: any,
-    operationContext: Record<string, any>
+    error: { message?: string },
+    operationContext: Record<string, unknown>
   ): HttpException {
     const fallbackResponse = {
       success: false,
@@ -220,7 +228,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
         }
       },
       metadata: {
-        originalError: error.message,
+        originalError: error.message ?? 'Unknown error',
         url: operationContext.url,
         method: operationContext.httpMethod
       }
@@ -229,7 +237,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     return new HttpException(fallbackResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  private determineHttpStatus(error: any): HttpStatus {
+  private determineHttpStatus(error: { category?: string; severity?: string }): HttpStatus {
     if (error.category) {
       switch (error.category) {
         case AutomationErrorCategory.AUTHENTICATION_ERROR:

@@ -174,6 +174,14 @@ export class FormActionDto {
   action: FormActionType;
 
   @ApiPropertyOptional({
+    description: 'Browser session ID for the automation',
+    example: 'session_123456789'
+  })
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
+
+  @ApiPropertyOptional({
     description: 'Form selector (CSS, XPath, or ID)',
     example: '#loginForm, form[name="login"], //form[@id="registration"]'
   })
@@ -206,7 +214,7 @@ export class FormActionDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -342,7 +350,7 @@ export class FormAutoCompleteDto extends FormActionDto {
     }
   })
   @IsObject()
-  profileData: Record<string, any>;
+  profileData: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Field mapping for profile data',

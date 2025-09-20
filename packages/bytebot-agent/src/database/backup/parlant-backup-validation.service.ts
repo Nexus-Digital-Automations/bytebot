@@ -25,7 +25,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   DatabaseBackupService,
   BackupCreationRequest,
-  BackupCreationResult,
   BackupRestorationRequest,
 } from '../database-backup.service';
 import {
@@ -33,10 +32,7 @@ import {
   ParlantUserContext,
   SecurityLevel,
 } from '@shared/types/parlant-integration.types';
-import {
-  DatabaseOperationMetadata,
-  RiskLevel,
-} from '../parlant-validated-database.service';
+import { RiskLevel } from '../parlant-validated-database.service';
 
 // ===== BACKUP VALIDATION INTERFACES =====
 
@@ -625,7 +621,7 @@ export class ParlantBackupValidationService {
   private async assessBackupRisks(
     metadata: BackupValidationMetadata,
     request: BackupCreationRequest,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<BackupRiskAssessment> {
     const businessImpact = this.assessBusinessImpact(metadata, request);
     const technicalRisks = await this.assessTechnicalRisks(metadata);
@@ -836,7 +832,7 @@ export class ParlantBackupValidationService {
   private generateDisasterRecoveryPrompt(
     plan: DisasterRecoveryPlan,
     triggerReason: string,
-    systemState: any,
+    _systemState: any,
   ): string {
     const prompt = [
       `🚨 DISASTER RECOVERY EXECUTION REQUEST`,
@@ -1229,11 +1225,11 @@ export class ParlantBackupValidationService {
     return 'INCREMENTAL';
   }
 
-  private estimateBackupSize(request: BackupCreationRequest): number {
+  private estimateBackupSize(_request: BackupCreationRequest): number {
     return Math.floor(Math.random() * 1000000) + 500000; // 500KB - 1.5MB
   }
 
-  private estimateBackupDuration(request: BackupCreationRequest): number {
+  private estimateBackupDuration(_request: BackupCreationRequest): number {
     return Math.floor(Math.random() * 30000) + 10000; // 10-40 seconds
   }
 
@@ -1294,7 +1290,7 @@ export class ParlantBackupValidationService {
 
   private determineComplianceRequirements(
     metadata: BackupValidationMetadata,
-    request: BackupCreationRequest,
+    _request: BackupCreationRequest,
   ): ComplianceRequirement[] {
     const requirements: ComplianceRequirement[] = [];
 
@@ -1381,15 +1377,15 @@ export class ParlantBackupValidationService {
   }
 
   // Additional helper methods for restoration, scheduling, and disaster recovery...
-  private async analyzeBackupForRestoration(backupId: string): Promise<any> {
+  private async analyzeBackupForRestoration(_backupId: string): Promise<any> {
     // Mock implementation
     return { valid: true, size: 1000000, tables: ['users', 'sessions'] };
   }
 
   private async assessRestorationRisks(
-    request: BackupRestorationRequest,
-    analysis: any,
-    userContext: ParlantUserContext,
+    _request: BackupRestorationRequest,
+    _analysis: any,
+    _userContext: ParlantUserContext,
   ): Promise<BackupRiskAssessment> {
     // Mock implementation
     return {
@@ -1460,15 +1456,15 @@ export class ParlantBackupValidationService {
   }
 
   private async analyzeScheduleFeasibility(
-    schedule: BackupSchedule,
+    _schedule: BackupSchedule,
   ): Promise<any> {
     // Mock implementation
     return { feasible: true, conflicts: [], recommendations: [] };
   }
 
   private async assessScheduleRisks(
-    schedule: BackupSchedule,
-    analysis: any,
+    _schedule: BackupSchedule,
+    _analysis: any,
   ): Promise<BackupRiskAssessment> {
     // Mock implementation
     return {
@@ -1489,8 +1485,8 @@ export class ParlantBackupValidationService {
 
   private generateScheduleValidationPrompt(
     schedule: BackupSchedule,
-    analysis: any,
-    risks: BackupRiskAssessment,
+    _analysis: any,
+    _risks: BackupRiskAssessment,
   ): string {
     return `Approve backup schedule "${schedule.name}" with cron expression "${schedule.cronExpression}"?`;
   }
@@ -1543,7 +1539,7 @@ export class ParlantBackupValidationService {
   private validateRecoveryTrigger(
     plan: DisasterRecoveryPlan,
     reason: string,
-    systemState: any,
+    _systemState: any,
   ): { valid: boolean; reason?: string } {
     if (
       plan.triggerConditions.some((condition) => reason.includes(condition))
@@ -1574,7 +1570,7 @@ export class ParlantBackupValidationService {
 
   private createRecoveryRiskAssessment(
     plan: DisasterRecoveryPlan,
-    systemState: any,
+    _systemState: any,
   ): BackupRiskAssessment {
     return {
       riskLevel: RiskLevel.CRITICAL,
@@ -1609,7 +1605,7 @@ export class ParlantBackupValidationService {
   }
 
   private getRecoveryComplianceRequirements(
-    plan: DisasterRecoveryPlan,
+    _plan: DisasterRecoveryPlan,
   ): ComplianceRequirement[] {
     return [
       {

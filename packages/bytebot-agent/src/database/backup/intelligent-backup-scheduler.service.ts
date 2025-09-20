@@ -1001,8 +1001,8 @@ export class IntelligentBackupSchedulerService {
     // Analyze system load patterns
     if (this.systemLoadHistory.length >= 48) {
       // At least 4 hours of data
-      this.systemLoadHistory.reduce((sum, load) => sum + load, 0) /
-        this.systemLoadHistory.length;
+      // Calculate average load for analysis (future use)
+      // this.systemLoadHistory.reduce((sum, load) => sum + load, 0) / this.systemLoadHistory.length;
       const lowLoadPeriods = this.identifyLowLoadPeriods();
 
       if (lowLoadPeriods.length > 0) {
@@ -1247,7 +1247,7 @@ export class IntelligentBackupSchedulerService {
   ): BackupSchedule[] {
     const priorityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
-    return schedules.sort((a, b) => {
+    return schedules.sort((_a, _b) => {
       // Mock priority - in production, this would be stored with schedule
       const aPriority = priorityOrder['MEDIUM'] || 2;
       const bPriority = priorityOrder['MEDIUM'] || 2;
@@ -1351,9 +1351,9 @@ export class IntelligentBackupSchedulerService {
   }
 
   private async analyzeOptimizationOpportunities(
-    schedule: BackupSchedule,
-    analytics: ScheduleAnalytics,
-    request: ScheduleOptimizationRequest,
+    _schedule: BackupSchedule,
+    _analytics: ScheduleAnalytics,
+    _request: ScheduleOptimizationRequest,
   ): Promise<{ improvements: string[] }> {
     // Mock optimization analysis
     return {
@@ -1367,8 +1367,8 @@ export class IntelligentBackupSchedulerService {
 
   private async createOptimizedSchedule(
     currentSchedule: BackupSchedule,
-    analysis: { improvements: string[] },
-    request: ScheduleOptimizationRequest,
+    _analysis: { improvements: string[] },
+    _request: ScheduleOptimizationRequest,
   ): Promise<BackupSchedule> {
     // Return optimized schedule (mock implementation)
     return {

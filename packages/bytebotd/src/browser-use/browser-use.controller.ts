@@ -11,6 +11,7 @@ import {
   Logger,
   NotFoundException,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +20,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { BrowserUseService } from './browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
@@ -35,33 +37,52 @@ import {
   BrowserSessionStatus,
 } from './dto/browser-session.dto';
 import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
-// Note: ResponseInterceptor and SecurityLoggingInterceptor imports removed as they don't exist in shared package
+import { BrowserSecurityGuard } from '../browser/guards/browser-security.guard';
+import {
+  BrowserTaskSecurity,
+  BrowserSessionSecurity,
+  BrowserBasicSecurity,
+  BrowserExtractionSecurity,
+  BrowserScreenshotSecurity,
+  BrowserNavigationSecurity,
+  BrowserAdminSecurity,
+  BrowserPublic,
+} from '../browser/decorators/security.decorators';
 
 /**
- * Browser Automation Controller
+ * Browser Automation Controller - Enhanced Security Implementation
  *
  * REST API endpoints for browser automation using the browser-use Python library.
- * Provides comprehensive local-only browser automation capabilities with no cloud dependencies.
+ * Provides comprehensive local-only browser automation capabilities with enterprise-grade security.
  *
  * Key Features:
- * - Task-based browser automation
- * - Session lifecycle management
+ * - Task-based browser automation with security validation
+ * - Secure session lifecycle management
  * - Async job processing with real-time monitoring
- * - Screenshot and DOM extraction
- * - Form automation and data extraction
- * - Multi-tab session management
- * - Comprehensive error handling and logging
+ * - Screenshot and DOM extraction with validation
+ * - Form automation and data extraction with security controls
+ * - Multi-tab session management with access control
+ * - Comprehensive error handling and security logging
  *
- * Security:
- * - All operations are local-only
- * - No external API calls or cloud dependencies
- * - Comprehensive input validation
- * - Request/response logging for audit trails
- * - Rate limiting and resource management
+ * Security Features:
+ * - JWT authentication for all endpoints
+ * - Role-based access control (RBAC)
+ * - Permission-based authorization
+ * - Input validation and sanitization
+ * - Rate limiting and request throttling
+ * - Security audit logging
+ * - XSS and injection attack prevention
+ * - URL and selector validation
+ * - Session security enforcement
+ *
+ * @author API Security Specialist
+ * @version 2.0.0 - Security Enhanced
+ * @since Browser Automation Security Implementation
  */
 @ApiTags('Browser Automation')
 @Controller('browser-use')
-// Note: Interceptors removed - ResponseInterceptor and SecurityLoggingInterceptor not available in shared package
+@UseGuards(BrowserSecurityGuard)
+@ApiBearerAuth()
 export class BrowserUseController {
   private readonly logger = new Logger(BrowserUseController.name);
 
@@ -78,18 +99,25 @@ export class BrowserUseController {
   // ===========================
 
   /**
-   * Execute browser automation task
+   * Execute browser automation task with comprehensive security validation
+   *
+   * SECURITY LEVEL: MEDIUM
+   * RISK LEVEL: ELEVATED
+   *
+   * Requires authentication and input validation. All task data is validated
+   * for security threats including XSS, injection attacks, and dangerous URLs.
    */
   @Post('tasks')
   @HttpCode(HttpStatus.CREATED)
+  @BrowserTaskSecurity()
   @ApiOperation({
     summary: 'Execute browser automation task',
     description:
-      'Create and execute a browser automation task with specified actions. Returns task ID for monitoring progress.',
+      'Create and execute a browser automation task with specified actions. Requires authentication and comprehensive security validation. Returns task ID for monitoring progress.',
   })
   @ApiBody({
     type: CreateBrowserTaskDto,
-    description: 'Browser task configuration and actions',
+    description: 'Browser task configuration and actions (security validated)',
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -98,7 +126,19 @@ export class BrowserUseController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid task configuration',
+    description: 'Invalid task configuration or security validation failed',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Insufficient permissions or security policy violation',
+  })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'Rate limit exceeded',
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -141,13 +181,19 @@ export class BrowserUseController {
   }
 
   /**
-   * Get task status and results
+   * Get task status and results with security validation
+   *
+   * SECURITY LEVEL: LOW
+   * RISK LEVEL: SAFE
+   *
+   * Requires authentication and validates task ownership.
    */
   @Get('tasks/:taskId')
+  @BrowserBasicSecurity()
   @ApiOperation({
     summary: 'Get task status and results',
     description:
-      'Retrieve the current status, progress, and results of a browser automation task.',
+      'Retrieve the current status, progress, and results of a browser automation task. Requires authentication and validates task ownership.',
   })
   @ApiParam({
     name: 'taskId',
@@ -177,13 +223,19 @@ export class BrowserUseController {
   }
 
   /**
-   * Get all tasks with optional filtering
+   * Get all tasks with optional filtering and security validation
+   *
+   * SECURITY LEVEL: LOW
+   * RISK LEVEL: SAFE
+   *
+   * Requires authentication and returns only user's own tasks.
    */
   @Get('tasks')
+  @BrowserBasicSecurity()
   @ApiOperation({
     summary: 'Get all tasks',
     description:
-      'Retrieve all browser automation tasks with optional status filtering.',
+      'Retrieve all browser automation tasks with optional status filtering. Requires authentication and returns only tasks owned by the authenticated user.',
   })
   @ApiQuery({
     name: 'status',
@@ -223,13 +275,19 @@ export class BrowserUseController {
   }
 
   /**
-   * Cancel running task
+   * Cancel running task with security validation
+   *
+   * SECURITY LEVEL: MEDIUM
+   * RISK LEVEL: MODERATE
+   *
+   * Requires authentication and validates task ownership before cancellation.
    */
   @Delete('tasks/:taskId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @BrowserBasicSecurity()
   @ApiOperation({
     summary: 'Cancel task',
-    description: 'Cancel a running or pending browser automation task.',
+    description: 'Cancel a running or pending browser automation task. Requires authentication and validates task ownership.',
   })
   @ApiParam({
     name: 'taskId',
@@ -294,14 +352,20 @@ export class BrowserUseController {
   // ===========================
 
   /**
-   * Create browser session
+   * Create browser session with security validation
+   *
+   * SECURITY LEVEL: MEDIUM
+   * RISK LEVEL: MODERATE
+   *
+   * Requires authentication and validates session configuration for security.
    */
   @Post('sessions')
   @HttpCode(HttpStatus.CREATED)
+  @BrowserSessionSecurity()
   @ApiOperation({
     summary: 'Create browser session',
     description:
-      'Create a new browser session with specified configuration. Session can be reused for multiple tasks.',
+      'Create a new browser session with specified configuration. Requires authentication and validates configuration for security. Session can be reused for multiple tasks.',
   })
   @ApiBody({
     type: CreateBrowserSessionDto,
@@ -688,13 +752,19 @@ export class BrowserUseController {
   // ===========================
 
   /**
-   * Take screenshot
+   * Take screenshot with session security validation
+   *
+   * SECURITY LEVEL: MEDIUM
+   * RISK LEVEL: MODERATE
+   *
+   * Requires authentication and validates session ownership.
    */
   @Post('sessions/:sessionId/screenshot')
+  @BrowserScreenshotSecurity()
   @ApiOperation({
     summary: 'Take screenshot',
     description:
-      'Capture a screenshot of the current page in the specified session.',
+      'Capture a screenshot of the current page in the specified session. Requires authentication and validates session ownership.',
   })
   @ApiParam({
     name: 'sessionId',
@@ -769,13 +839,19 @@ export class BrowserUseController {
   }
 
   /**
-   * Extract page data
+   * Extract page data with comprehensive security validation
+   *
+   * SECURITY LEVEL: HIGH
+   * RISK LEVEL: HIGH
+   *
+   * Requires authentication and comprehensive validation of selectors for security.
    */
   @Post('sessions/:sessionId/extract')
+  @BrowserExtractionSecurity()
   @ApiOperation({
     summary: 'Extract page data',
     description:
-      'Extract structured data from the current page using CSS selectors or XPath.',
+      'Extract structured data from the current page using CSS selectors or XPath. Requires authentication and comprehensive security validation.',
   })
   @ApiParam({
     name: 'sessionId',
@@ -852,13 +928,19 @@ export class BrowserUseController {
   }
 
   /**
-   * Health check endpoint
+   * Health check endpoint - Public access
+   *
+   * SECURITY LEVEL: PUBLIC
+   * RISK LEVEL: SAFE
+   *
+   * Public endpoint for health monitoring - no authentication required.
    */
   @Get('health')
+  @BrowserPublic()
   @ApiOperation({
     summary: 'Health check',
     description:
-      'Check the health and status of the browser automation service.',
+      'Check the health and status of the browser automation service. Public endpoint for monitoring.',
   })
   @ApiResponse({
     status: HttpStatus.OK,

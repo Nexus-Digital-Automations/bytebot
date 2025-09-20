@@ -2,10 +2,20 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BrowserUseController } from './browser-use.controller';
 import { ParlantValidatedBrowserUseController } from './parlant-validated-browser-use.controller';
+import { EnhancedBrowserAutomationController } from './enhanced-browser-automation.controller';
+import { BrowserTaskExecutionController } from './browser-task-execution.controller';
+import { BrowserInteractionController } from './browser-interaction.controller';
 import { BrowserUseService } from './browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import { BrowserAsyncJobService } from './browser-async-job.service';
+import { BrowserTaskExecutionService } from './browser-task-execution.service';
+import { BrowserInteractionService } from './browser-interaction.service';
+import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';
+import { MediaController } from './media.controller';
+import { MediaService } from './media.service';
+import { ExtractionController } from './extraction.controller';
+import { ExtractionService } from './extraction.service';
 
 // Parlant-validated browser services imports
 import { ParlantModule } from '../parlant/parlant.module';
@@ -26,6 +36,7 @@ import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-brow
  * - Session creation, management, and cleanup with conversational approval
  * - Screenshot capture and DOM manipulation with risk assessment
  * - Form automation and data extraction with user intent verification
+ * - Comprehensive data extraction APIs (text, tables, links, images, structured data, XPath)
  * - Real-time status monitoring and logs with audit trails
  * - Results retrieval and export with compliance validation
  *
@@ -54,6 +65,16 @@ import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-brow
     BrowserUseController,
     // Parlant-validated browser controller with conversational AI validation
     ParlantValidatedBrowserUseController,
+    // Enhanced browser automation controller with advanced features
+    EnhancedBrowserAutomationController,
+    // Browser task execution controller with specialized endpoints
+    BrowserTaskExecutionController,
+    // Browser interaction controller with individual DOM action endpoints
+    BrowserInteractionController,
+    // Media controller with screenshot and media management endpoints
+    MediaController,
+    // Data extraction controller with comprehensive extraction endpoints
+    ExtractionController,
   ],
   providers: [
     // Original browser services
@@ -61,7 +82,17 @@ import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-brow
     BrowserSessionService,
     BrowserTaskService,
     BrowserAsyncJobService,
-    
+    // Browser task execution service for specialized operations
+    BrowserTaskExecutionService,
+    // Browser interaction service for individual DOM actions
+    BrowserInteractionService,
+    // Enhanced browser automation service for advanced features
+    EnhancedBrowserAutomationService,
+    // Media service for screenshot and media management
+    MediaService,
+    // Data extraction service for comprehensive web scraping
+    ExtractionService,
+
     // Parlant-validated browser services with conversational AI validation
     ParlantValidatedBrowserUseService,
     ParlantValidatedBrowserSessionService,
@@ -74,7 +105,17 @@ import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-brow
     BrowserSessionService,
     BrowserTaskService,
     BrowserAsyncJobService,
-    
+    // Export browser task execution service
+    BrowserTaskExecutionService,
+    // Export browser interaction service
+    BrowserInteractionService,
+    // Export enhanced browser automation service
+    EnhancedBrowserAutomationService,
+    // Export media service
+    MediaService,
+    // Export data extraction service
+    ExtractionService,
+
     // Export Parlant-validated services as primary interfaces
     ParlantValidatedBrowserUseService,
     ParlantValidatedBrowserSessionService,

@@ -6,7 +6,6 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
   Logger,
@@ -21,7 +20,7 @@ import {
   ApiBody,
   ApiBearerAuth
 } from '@nestjs/swagger';
-import { AutomationErrorHandlerService, AutomationErrorCategory, ErrorSeverity } from './automation-error-handler.service';
+import { AutomationErrorHandlerService } from './automation-error-handler.service';
 
 /**
  * Error Analytics Controller
@@ -177,7 +176,16 @@ export class ErrorAnalyticsController {
   async getErrorAnalytics(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data: unknown;
+    metadata: {
+      generatedAt: string;
+      processingTime: number;
+      timeRange: string;
+      requestProcessingTime: number;
+    };
+  }> {
     const requestStartTime = Date.now();
     this.logger.log('Getting error analytics', { startDate, endDate });
 
@@ -213,7 +221,7 @@ export class ErrorAnalyticsController {
 
     } catch (error) {
       this.logger.error('Failed to get error analytics', {
-        error: error.message,
+        error: (error as Error).message,
         startDate,
         endDate,
         duration: Date.now() - requestStartTime
@@ -269,7 +277,28 @@ export class ErrorAnalyticsController {
   })
   async getErrorStatisticsByCategory(
     @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number = 7
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data: {
+      categories: Array<{
+        category: string;
+        count: number;
+        percentage: number;
+        trend: string;
+        averageRecoveryTime: number;
+      }>;
+      totalErrors: number;
+      periodDays: number;
+    };
+    metadata: {
+      generatedAt: string;
+      processingTime: number;
+      dateRange: {
+        start: string;
+        end: string;
+      };
+    };
+  }> {
     const startTime = Date.now();
     this.logger.log(`Getting error statistics by category for ${days} days`);
 
@@ -314,7 +343,7 @@ export class ErrorAnalyticsController {
 
     } catch (error) {
       this.logger.error('Failed to get category statistics', {
-        error: error.message,
+        error: (error as Error).message,
         days,
         duration: Date.now() - startTime
       });
@@ -368,7 +397,29 @@ export class ErrorAnalyticsController {
       }
     }
   })
-  async getCircuitBreakerStatus(): Promise<any> {
+  async getCircuitBreakerStatus(): Promise<{
+    success: boolean;
+    data: {
+      circuitBreakers: Array<{
+        component: string;
+        status: string;
+        failures: number;
+        threshold: number;
+        lastFailure: string;
+        timeToNextRetry: number | null;
+      }>;
+      summary: {
+        totalBreakers: number;
+        openBreakers: number;
+        halfOpenBreakers: number;
+        closedBreakers: number;
+      };
+    };
+    metadata: {
+      generatedAt: string;
+      processingTime: number;
+    };
+  }> {
     const startTime = Date.now();
     this.logger.log('Getting circuit breaker status');
 
@@ -412,7 +463,7 @@ export class ErrorAnalyticsController {
 
     } catch (error) {
       this.logger.error('Failed to get circuit breaker status', {
-        error: error.message,
+        error: (error as Error).message,
         duration: Date.now() - startTime
       });
       throw error;
@@ -463,7 +514,19 @@ export class ErrorAnalyticsController {
   })
   async clearErrorHistory(
     @Body() clearRequest: { olderThanDays: number }
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data: {
+      clearedErrors: number;
+      remainingErrors: number;
+      cutoffDate: string;
+    };
+    metadata: {
+      operationTime: number;
+      requestedDays: number;
+      executedAt: string;
+    };
+  }> {
     const startTime = Date.now();
     this.logger.log(`Clearing error history older than ${clearRequest.olderThanDays} days`);
 
@@ -507,7 +570,7 @@ export class ErrorAnalyticsController {
 
     } catch (error) {
       this.logger.error('Failed to clear error history', {
-        error: error.message,
+        error: (error as Error).message,
         olderThanDays: clearRequest.olderThanDays,
         duration: Date.now() - startTime
       });
@@ -561,7 +624,30 @@ export class ErrorAnalyticsController {
       }
     }
   })
-  async getRecommendations(): Promise<any> {
+  async getRecommendations(): Promise<{
+    success: boolean;
+    data: {
+      recommendations: Array<{
+        category: string;
+        priority: string;
+        description: string;
+        impact: string;
+        implementation: string;
+        estimatedEffort: string;
+      }>;
+      systemHealth: {
+        overallScore: number;
+        trend: string;
+        criticalIssues: number;
+        nextReviewDate: string;
+      };
+    };
+    metadata: {
+      generatedAt: string;
+      processingTime: number;
+      basedOnErrors: number;
+    };
+  }> {
     const startTime = Date.now();
     this.logger.log('Getting error recovery recommendations');
 
@@ -598,7 +684,7 @@ export class ErrorAnalyticsController {
 
       const systemHealth = {
         overallScore: analytics.recoverySuccessRate,
-        trend: analytics.errorTrends.trend || 'stable',
+        trend: analytics.errorTrends.trend ?? 'stable',
         criticalIssues: analytics.errorsBySeverity?.critical || 0,
         nextReviewDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       };
@@ -625,7 +711,7 @@ export class ErrorAnalyticsController {
 
     } catch (error) {
       this.logger.error('Failed to get recommendations', {
-        error: error.message,
+        error: (error as Error).message,
         duration: Date.now() - startTime
       });
       throw error;
