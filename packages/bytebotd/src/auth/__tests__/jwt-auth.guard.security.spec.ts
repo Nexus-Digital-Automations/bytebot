@@ -360,7 +360,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       );
     });
 
-    it('should implement rate limiting for failed authentication attempts'async () => {
+    it('should implement rate limiting for failed authentication attempts', async () => {
       const testId = `${operationId}_auth_rate_limiting`;securityLogger.info(`[${testId}] Testing authentication rate limiting`);
 
       const context = createMockExecutionContext(

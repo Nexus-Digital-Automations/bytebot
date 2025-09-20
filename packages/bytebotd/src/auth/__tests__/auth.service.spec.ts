@@ -616,27 +616,36 @@ describe('AuthService', () => {
       );
     });
 
-    it('should handle database connection errors gracefully'async () => {
+    it('should handle database connection errors gracefully', async () => {
       const testId = `${operationId}_reliability_db_error`;console.log(`[${testId}] Testing database error handling`);
 
       // Mock database error
       (
         jest.spyOn(
           service,
-          'findUserByEmail' as keyof MockAuthService,)).mockRejectedValue(new Error('Database connection failed'));const loginDto = {email: 'admin@bytebot.ai', password: 'admin123'};
+          'findUserByEmail' as keyof MockAuthService,)).mockRejectedValue(new Error('Database connection failed'));
+
+      const loginDto = {email: 'admin@bytebot.ai', password: 'admin123'};
 
       await expect(service.login(loginDto)).rejects.toThrow();
 
       console.log(`[${testId}] Database error handling test completed`);
     });
 
-    it('should maintain consistent response format'async () => {
-      const testId = `${operationId}_reliability_response_format`;console.log(
-
+    it('should maintain consistent response format', async () => {
+      const testId = `${operationId}_reliability_response_format`;
+      console.log(
+        `[${testId}] Testing response format consistency`
       );
       const loginDto = {
-        email: 'admin@bytebot.ai', password: 'admin123',};(
-        jest.spyOn(jwtService'sign')).mockReturnValue('format-test-token');const result = await service.login(loginDto);// Verify consistent response structure
+        email: 'admin@bytebot.ai',
+        password: 'admin123',
+      };
+
+      jest.spyOn(jwtService, 'sign').mockReturnValue('format-test-token');
+      const result = await service.login(loginDto);
+
+      // Verify consistent response structure
       expect(result.accessToken).toEqual(expect.stringMatching(/.+/));
       expect(result.refreshToken).toEqual(expect.stringMatching(/.+/));
       expect(result.user.id).toEqual(expect.stringMatching(/.+/));
@@ -649,7 +658,7 @@ describe('AuthService', () => {
   });
 
     describe('Edge Cases & Error Scenarios', () => {
-  it('should handle malformed token gracefully'async () => {
+  it('should handle malformed token gracefully', async () => {
       const testId = `${operationId
 }_edge_malformed_token`;console.log(
 
@@ -665,7 +674,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Malformed token handling test completed`);
     });
 
-    it('should handle empty credentials'async () => {
+    it('should handle empty credentials', async () => {
       const testId = `${operationId}_edge_empty_credentials`;console.log(
 
       );

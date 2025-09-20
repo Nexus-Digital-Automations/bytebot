@@ -103,7 +103,7 @@ interface CacheInterceptorStats {
   averageResponseTime: number;
   endpointStats: Map<
     string,
-    {;
+    {
   hits: number;
       misses: number;
       hitRate: number;

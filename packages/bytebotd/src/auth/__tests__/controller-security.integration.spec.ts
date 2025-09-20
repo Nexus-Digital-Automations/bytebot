@@ -392,13 +392,13 @@ describe('Controller Security Integration Tests', () => {
             next();
           
 } else {
-  return res.status(401).json({,
+  return res.status(401).json({
   message: 'Invalid token payload structure', error: 'TOKEN_INVALID'
       
 });}
         } catch (error: unknown) {
   const safeError = ErrorHandlerUtils.transformError(error);
-          return res.status(401).json({,
+          return res.status(401).json({
   message: 'Invalid or expired token', error: 'TOKEN_INVALID', code: safeError.code
       
 });
@@ -410,7 +410,7 @@ describe('Controller Security Integration Tests', () => {
     const checkRole = (requiredRole: UserRol, e) => {
   return (req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunctio, n) => {
         if (!req.user) {
-          return res.status(403).json({,
+          return res.status(403).json({
   message: 'Access forbidden - authentication required', error: 'FORBIDDEN'
       
 });

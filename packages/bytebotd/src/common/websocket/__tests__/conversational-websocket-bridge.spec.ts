@@ -34,7 +34,9 @@ import {
 
 } from '../conversational-websocket-bridge.service';
 
-// ===== TEST UTILITIES =====/**
+// ===== TEST UTILITIES =====
+
+/**
  * Mock WebSocket client for testing
  */
 class MockWebSocketClient {

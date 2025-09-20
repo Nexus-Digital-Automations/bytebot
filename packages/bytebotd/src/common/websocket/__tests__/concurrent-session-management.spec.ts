@@ -45,7 +45,9 @@ import {
 import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
-// ===== TYPE DEFINITIONS =====/**
+// ===== TYPE DEFINITIONS =====
+
+/**
  * Represents the payload of a validation response message
  */
 interface ValidationResponsePayload {

@@ -429,7 +429,7 @@ describe('Security Penetration Testing Suite', () => {
   });
 
     describe('JWT Token Manipulation Attacks', () => {
-  it('should resist algorithm confusion attacks'async () => {
+  it('should resist algorithm confusion attacks', async () => {
       const testId = `${operationId
 }_algorithm_confusion`;pentestLogger.warn(`[${testId}] EXECUTING: Algorithm confusion attack simulation`,
       );

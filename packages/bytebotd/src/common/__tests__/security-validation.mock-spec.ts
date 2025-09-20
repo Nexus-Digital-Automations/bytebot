@@ -41,7 +41,7 @@ describe('Security Validation Mock Tests', () => {
       it(`should block XSS payload #${_index + 1}: ${_payload.substring(0, 30)}...`, () => {
   expect(() => {
           sanitizationPipe.transform(
-            {,
+            {
   action: 'type_text',
       text: _payload,
 },
@@ -54,7 +54,7 @@ describe('Security Validation Mock Tests', () => {
     it('should allow safe text inputs', () => {const _safeInput = {action: 'type_text',
       text: 'This is safe text input',};
 expect(() => {
-  sanitizationPipe.transform(_safeInput, {,
+  sanitizationPipe.transform(_safeInput, {
   metatype: Object,
           type: 'body',
       data: undefined,

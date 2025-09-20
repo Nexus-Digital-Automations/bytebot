@@ -30,7 +30,8 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
-// Type definitions for explicit any type replacementinterface HttpErrorWithStatus {
+// Type definitions for explicit any type replacement
+interface HttpErrorWithStatus {
   status?: number;
   statusCode?: number;
   message?: string;

@@ -637,7 +637,9 @@ return Promise.resolve({
 
       expect(result).toBeDefined();
       expect(result.content[0]?.text).toBe('mouse moved');
-expect(connectionAttempts).toBe(4); // 3 failures + 1 successrecordRecoveryMetrics(scenario, startTime, endTime, {
+expect(connectionAttempts).toBe(4); // 3 failures + 1 success
+
+      recordRecoveryMetrics(scenario, startTime, endTime, {
   totalFailures: 3,
         successfulRecoveries: 1,
         retryAttempts: 4,

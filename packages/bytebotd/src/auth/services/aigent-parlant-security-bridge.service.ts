@@ -770,7 +770,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     totalValidationsPerformed: number;
     totalEmergencyOverrides: number;
     averageValidationTime: number;
-    sessionHealth: {,
+    sessionHealth: {
   healthy: number;
       suspended: number;
       expired: number;

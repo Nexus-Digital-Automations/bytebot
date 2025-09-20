@@ -37,10 +37,10 @@ import { Request } from 'express';
  * Rate limiting configuration per endpoint type
  */
 interface RateLimitConfig {
-  /** Maximum requests per time window */;
+  /** Maximum requests per time window */
   limit: number;
 
-  /** Time window in seconds */;
+  /** Time window in seconds */
   windowSeconds: number;
 
   /** Rate limit tier (for logging/monitoring) */;

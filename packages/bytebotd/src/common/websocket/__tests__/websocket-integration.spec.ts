@@ -394,12 +394,13 @@ describe('WebSocket Integration Tests', () => {
 
   // ===== VALIDATION WORKFLOW TESTS =====
 
-  describe('Complete Validation Workflows', () => 
+  describe('Complete Validation Workflows', () => {
 
-  const testActions: ValidationAction[] = [,
-  actionType: 'file_write',
-      parameters: { path: '/tmp/test.txt', content: 'test data' 
-},expectedOutcome: 'File written successfully',
+  const testActions: ValidationAction[] = [{
+    actionType: 'file_write',
+      parameters: { path: '/tmp/test.txt', content: 'test data'
+    },
+    expectedOutcome: 'File written successfully',
       reversible: true,
       impact: {
   scope: 'local',

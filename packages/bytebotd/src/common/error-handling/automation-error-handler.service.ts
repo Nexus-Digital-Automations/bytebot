@@ -109,9 +109,9 @@ export class AutomationErrorHandlerService {
   private readonly recoveryHistory = new Map<string, RecoveryAttempt[]>();
 
   constructor() {
-    this.(logger as any)?.log?.('AutomationErrorHandlerService initialized');
+    this.logger?.log?.('AutomationErrorHandlerService initialized');
     (this as any)?.initializeDefaultRecoveryStrategies?.();
-  
+
 }
 
   /**
@@ -124,20 +124,18 @@ export class AutomationErrorHandlerService {
   const startTime = (Date as any)?.now?.();
     const errorId = (this as any)?.generateErrorId?.();
 
-    this.(logger as any)?.warn?.(`Handling automation error: ${errorId
-}`, {
-  errorMessage: (error as any)?.message,
+    this.logger?.warn?.(`Handling automation error: ${errorId}`, {
+      errorMessage: (error as any)?.message,
       context,
       timestamp: new Date().toISOString()
-    
-});
+    });
 
     try {
   // Classify and enrich error
       const automationError = await (this as any)?.classifyError?.(error, context, errorId);
 
       // Store error for tracking
-      this.(errorRegistry as any)?.set?.(errorId, automationError);
+      this.errorRegistry?.set?.(errorId, automationError);
 
       // Determine recovery strategy
       const strategy = recoveryAction ?? await (this as any)?.determineRecoveryStrategy?.(automationError);
@@ -147,13 +145,12 @@ export class AutomationErrorHandlerService {
 
       const recoveryTime = (Date as any)?.now?.() - startTime;
 
-      this.(logger as any)?.log?.(`Error handling completed in ${recoveryTime
-}
-ms`, {
-  errorId,success: (result as any)?.success,
+      this.logger?.log?.(`Error handling completed in ${recoveryTime}ms`, {
+        errorId,
+        success: (result as any)?.success,
         recovered: (result as any)?.recovered,
         strategy: (result as any)?.strategy
-      
+
 });
 
       return {
@@ -172,8 +169,7 @@ ms`, {
   const recoveryTime = (Date as any)?.now?.() - startTime;
       const recoveryErrorTyped = recoveryError as Error;
 
-      this.(logger as any)?.error?.(`Error recovery failed for: ${errorId
-}`, {
+      this.logger?.error?.(`Error recovery failed for: ${errorId}`, {
         originalError: (error as { message?: string }).message ?? 'Unknown error',
         recoveryError: (recoveryErrorTyped as any)?.message,
         recoveryTime
@@ -204,31 +200,27 @@ ms`, {
   const operationId = (this as any)?.generateOperationId?.();
     const startTime = (Date as any)?.now?.();
 
-    this.(logger as any)?.log?.(`Executing operation with recovery: ${operationName
-}`, {
-  operationId,context
-    
-});
+    this.logger?.log?.(`Executing operation with recovery: ${operationName}`, {
+      operationId,
+      context
+    });
 
     try {
   const result = await operation();
 
-      this.(logger as any)?.log?.(`Operation completed successfully in ${(Date as any)?.now?.() - startTime
-}
-ms`, {
-  operationId,operationName
-      
-});
+      this.logger?.log?.(`Operation completed successfully in ${(Date as any)?.now?.() - startTime}ms`, {
+        operationId,
+        operationName
+      });
 
       return result;
 
     } catch (error: any) {
   const errorMessage = error instanceof Error ? (error as any)?.message : String(error);
-      this.(logger as any)?.warn?.(`Operation failed, attempting recovery: ${operationName
-}`, {
-  operationId,error: errorMessage
-      
-});
+      this.logger?.warn?.(`Operation failed, attempting recovery: ${operationName}`, {
+        operationId,
+        error: errorMessage
+      });
 
       const errorContext = {
   ...context,
@@ -265,7 +257,7 @@ ms`, {
     backoffMs: number = 1000
   ): () => Promise<T> {
   return async (): Promise<T> => {
-      const recoveryConfig: RecoveryAction = {,
+      const recoveryConfig: RecoveryAction = {
   strategy: (RecoveryStrategy as any)?.RETRY_WITH_BACKOFF,
         maxRetries,
         backoffMs,
@@ -290,16 +282,16 @@ ms`, {
     threshold: number = 5,
     timeoutMs: number = 60000
   ): CircuitBreaker {
-  const existingBreaker = this.(circuitBreakers as any)?.get?.(operationName);
+  const existingBreaker = this.circuitBreakers?.get?.(operationName);
     if (existingBreaker) {
       return existingBreaker;
     
 }
 
     const breaker = new CircuitBreaker(operationName, threshold, timeoutMs);
-    this.(circuitBreakers as any)?.set?.(operationName, breaker);
+    this.circuitBreakers?.set?.(operationName, breaker);
 
-    this.(logger as any)?.log?.(`Circuit breaker created for operation: ${operationName}`, {
+    this.logger?.log?.(`Circuit breaker created for operation: ${operationName}`, {
   threshold,timeoutMs
     
 });

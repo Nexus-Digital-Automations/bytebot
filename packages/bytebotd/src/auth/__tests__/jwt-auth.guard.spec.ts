@@ -303,7 +303,7 @@ describe('JwtAuthGuard', () => {
   });
 
     describe('Token Extraction', () => {
-  it('should extract valid Bearer token from Authorization header'async () => {
+  it('should extract valid Bearer token from Authorization header', async () => {
       const testId = `${operationId
 }_token_extraction_valid`;console.log(
 

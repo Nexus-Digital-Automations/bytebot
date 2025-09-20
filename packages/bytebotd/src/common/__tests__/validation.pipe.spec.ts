@@ -139,7 +139,7 @@ class MockValidationPipe {
 
   if(
         typeof instance.priority === 'string' &&!['low', 'medium', 'high'].includes(instance.priority)) {
-  errors.push({,
+  errors.push({
   property: 'priority',
       constraints: { isEnum: 'priority must be one of: low, medium, high' 
 },});}
@@ -228,10 +228,9 @@ afterEach(() => {
 
   describe('Basic Validation', () => {
 
-  it('should validate and transform valid user data', async () => 
-      const testId = `${operationId
-}
-_valid_user_data`;console.log(`[${testId}] Testing valid user data validation`);
+  it('should validate and transform valid user data', async () => {
+      const testId = `${operationId}_valid_user_data`;
+      console.log(`[${testId}] Testing valid user data validation`);
 
       const validUserData = {
 

@@ -228,7 +228,8 @@ return {
   ): SecureErrorResponse {
   const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Base secure responseconst response: SecureErrorResponse = {,
+// Base secure response
+    const response: SecureErrorResponse = {
   statusCode: errorAnalysis.statusCode,
       error: this.getSecureErrorName(errorAnalysis.statusCode),
       message: this.getSecureErrorMessage(exception, errorAnalysis),

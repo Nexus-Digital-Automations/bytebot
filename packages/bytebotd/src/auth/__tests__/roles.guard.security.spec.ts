@@ -275,7 +275,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
     });
 
-    it('should prevent inactive user role escalation'async () => {
+    it('should prevent inactive user role escalation', async () => {
       const testId = `${operationId}_inactive_escalation`;securityLogger.info(`[${testId}] Testing inactive user role escalation prevention`,
       );
 

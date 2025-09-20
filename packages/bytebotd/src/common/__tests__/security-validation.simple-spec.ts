@@ -53,7 +53,8 @@ expect(isXSSPayload(safeText)).toBe(false);});
 
   describe('SQL Injection Protection Logic Tests', () => {
 
-  const isSQLInjection = (text: string): boolean => const sqlPatterns = [
+  const isSQLInjection = (text: string): boolean => {
+    const sqlPatterns = [
         /('|")(\s)*(or|and)(\s)+/gi,/(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi,/--/g,
         /\/\*/
 g,

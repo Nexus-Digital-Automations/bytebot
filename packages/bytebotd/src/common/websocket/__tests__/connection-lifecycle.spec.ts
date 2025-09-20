@@ -75,15 +75,18 @@ import {
 
 } from '../websocket-types';
 
-// ===== CONNECTION LIFECYCLE TEST UTILITIES =====/**
+// ===== CONNECTION LIFECYCLE TEST UTILITIES =====
+
+/**
  * Advanced WebSocket client for connection lifecycle testing
  */
 class ConnectionLifecycleTestClient extends EventEmitter {
   private ws: WebSocket.WebSocket | null = null;
   private connectionState: 'disconnected' | 'connecting' | 'connected' | 'reconnecting' = 'disconnected';
-private reconnectionAttempts = 0;private maxReconnectionAttempts = 5;
+  private reconnectionAttempts = 0;
+  private maxReconnectionAttempts = 5;
   private reconnectionDelay = 1000;
-  private connectionMetrics: ConnectionMetrics = {,
+  private connectionMetrics: ConnectionMetrics = {
   reconnectionCount: 0,
     totalConnections: 0,
   

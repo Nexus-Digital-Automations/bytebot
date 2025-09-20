@@ -232,8 +232,8 @@ describe('JwtAuthGuard', () => {
 
     it('should reject access with malformed authorization header', async () => {
   // Arrange
-      const context = createMockExecutionContext({,
-  headers: {,
+      const context = createMockExecutionContext({
+  headers: {
   authorization: 'InvalidFormat token', // Should be "Bearer token"
         
 }
@@ -262,7 +262,7 @@ describe('JwtAuthGuard', () => {
 
     it('should handle Parlant session sync failures gracefully', async () => {
   // Arrange
-      const mockUser = {,
+      const mockUser = {
   id: 'user-123',
         email: 'test@example.com',
         roles: ['user'],

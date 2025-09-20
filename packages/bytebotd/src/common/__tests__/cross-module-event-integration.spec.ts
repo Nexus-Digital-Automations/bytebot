@@ -358,7 +358,7 @@ const correlationId = generateCorrelationId();const flowId = generateFlowId();
         'enterprise-api.request.received','enterprise-api.auth.validating','enterprise-api.auth.approved','enterprise-api.rate-limit.checking','enterprise-api.rate-limit.allowed','enterprise-api.routing.started','computer-use.action.started','computer-use.action.completed','enterprise-api.response.sent','enterprise-api.metrics.recorded',];const startTime = Date.now();
 
       // Simulate Enterprise API request flow
-      context.eventEmitter.emit('enterprise-api.request.received', source: 'EnterpriseApiGatewayController',
+      context.eventEmitter.emit('enterprise-api.request.received', { source: 'EnterpriseApiGatewayController',
       correlationId,sequenceNumber: 1,
         clientId: 'enterprise-client-123',
       tenantId: 'tenant-enterprise-1',
@@ -435,10 +435,19 @@ expect(rateLimitEvent).toBeDefined();
 
 
   describe('Event Error Handling and Recovery', () => {
-it('should handle event processing failures gracefully', async () => const correlationId = generateCorrelationId();// Setup failing event listener
-      context.eventEmitter.on('test.failing.event', () => {throw new Error('Simulated event processing failure');});// Setup recovery event listener
+it('should handle event processing failures gracefully', async () => {
+      const correlationId = generateCorrelationId();
+
+      // Setup failing event listener
+      context.eventEmitter.on('test.failing.event', () => {
+        throw new Error('Simulated event processing failure');
+      });
+
+      // Setup recovery event listener
       const recoveryEvents: EventRecord[] = [];
-      context.eventEmitter.on('test.recovery.event', (payload: EventPayload) => {recoveryEvents.push({eventId: 'recovery-test',
+      context.eventEmitter.on('test.recovery.event', (payload: EventPayload) => {
+        recoveryEvents.push({
+          eventId: 'recovery-test',
       eventName: 'test.recovery.event',
       source: 'test',
       target: 'test',

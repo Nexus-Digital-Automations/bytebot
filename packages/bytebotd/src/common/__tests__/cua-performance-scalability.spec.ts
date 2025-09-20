@@ -579,7 +579,8 @@ let testModule: TestingModule;
 
 
   describe('Latency Performance Tests', () => {
-it('should maintain low latency for critical operations', async () => const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }), maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }), maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition(), maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }), maxLatency: 150 },
+it('should maintain low latency for critical operations', async () => {
+      const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }), maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }), maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition(), maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }), maxLatency: 150 },
       ];
 
       const testId = generateTestId();
@@ -647,7 +648,7 @@ const testId = generateTestId();const operationCount = 100;
       let cacheMisses = 0;
       
       jest.spyOn(context.cacheService, 'get')
-        .mockImplementation(async (key) => 
+        .mockImplementation(async (key) => {
           // Simulate cache hit/miss pattern
           if (Math.random() < 0.7) { // 70% cache hit rate
             cacheHits++;
@@ -702,7 +703,9 @@ const testId = generateTestId();const operationCount = 100;
 
 
   describe('Stress Testing', () => {
-it('should handle extreme concurrent load', async () => const maxConcurrency = 200;const stressDuration = 30000; // 30 seconds
+it('should handle extreme concurrent load', async () => {
+      const maxConcurrency = 200;
+      const stressDuration = 30000; // 30 seconds
       const testId = generateTestId();
 
       context.performanceMonitor.startMonitoring(250);
