@@ -130,12 +130,21 @@ import { Test, TestingModule } from '@nestjs/testing';import { performanceFramew
         expect(report.modulePerformance).toBeDefined();
         expect(report.recommendations).toBeDefined();
 
-        console.log(`📊 [INTEGRATION] Load test report generated successfully`);console.log(`  Total scenarios: ${report.summary.totalScenarios}`);console.log(`  Pass rate: ${(report.summary.passedScenarios / report.summary.totalScenarios * 100).toFixed(1)}%`);console.log(`  Overall grade: ${report.summary.overallGrade}`);} catch (error) {console.warn(`⚠️ [INTEGRATION] Load test report generation failed: ${error}`);
+        console.log(`📊 [INTEGRATION] Load test report generated successfully`);
+        console.log(`  Total scenarios: ${report.summary.totalScenarios}`);
+        console.log(`  Pass rate: ${(report.summary.passedScenarios / report.summary.totalScenarios * 100).toFixed(1)}%`);
+        console.log(`  Overall grade: ${report.summary.overallGrade}`);
+      } catch (error) {
+        console.warn(`⚠️ [INTEGRATION] Load test report generation failed: ${error}`);
       }
     }, 10000);
   });
 
-  describe('Test Execution Validation', () => {it('should validate test execution configuration', async () => {console.log('🔍 [INTEGRATION] Testing test execution validation...');const config = {testPattern: '**/*.spec.ts',
+  describe('Test Execution Validation', () => {
+    it('should validate test execution configuration', async () => {
+      console.log('🔍 [INTEGRATION] Testing test execution validation...');
+      const config = {
+        testPattern: '**/*.spec.ts',
         maxWorkers: 2,
         timeout: 10000,
         retries: 0,

@@ -22,9 +22,9 @@
     "jsxImportSource": "react",
     
     // Compilation and Build Settings
-    "noEmit": true,
+    "noEmit": false,
     "incremental": true,
-    "composite": false,
+    "composite": true,
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     
     // ENTERPRISE-GRADE STRICT TYPE CHECKING (Maximum Safety)

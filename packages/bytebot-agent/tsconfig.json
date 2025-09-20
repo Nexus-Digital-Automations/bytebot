@@ -18,7 +18,7 @@
     "baseUrl": "./",
     "rootDir": "./src",
     "incremental": false,
-    "composite": false,
+    "composite": true,
     "skipLibCheck": true,
     "noImplicitOverride": false,
     "strict": false,
