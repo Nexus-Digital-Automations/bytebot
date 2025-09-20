@@ -91,21 +91,27 @@ interface App {
         next?: SafeNextFunction,
       ) => void,
     ): void;
-    post(;
-  path: string, handler: (;
-  req: SafeRequest, res: SafeResponse,
+    post(
+      path: string,
+      handler: (
+        req: SafeRequest,
+        res: SafeResponse,
         next?: SafeNextFunction,
       ) => void,
     ): void;
-    put(;
-  path: string, handler: (;
-  req: SafeRequest, res: SafeResponse,
+    put(
+      path: string,
+      handler: (
+        req: SafeRequest,
+        res: SafeResponse,
         next?: SafeNextFunction,
       ) => void,
     ): void;
-    delete(;
-  path: string, handler: (;
-  req: SafeRequest, res: SafeResponse,
+    delete(
+      path: string,
+      handler: (
+        req: SafeRequest,
+        res: SafeResponse,
         next?: SafeNextFunction,
       ) => void,
     ): void;
@@ -114,7 +120,9 @@ interface App {
 };
   use(
     middleware: (
-      req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunction,
+      req: SafeRequest,
+      res: SafeResponse,
+      next: SafeNextFunction,
     ) => void,
   ): void;
   use(
@@ -139,14 +147,16 @@ interface App {
 class MockSecureController {
   // Public endpoint (no authentication required)
   getPublicData() {
-    return { message: 'Public data', timestamp: Date.now() 
-};
+    return {
+      message: 'Public data',
+      timestamp: Date.now()
+    };
   }
 
   // Protected endpoint (authentication required)
   getProtectedData(user: JwtPayload) {
-  return {,
-  message: 'Protected data',
+    return {
+      message: 'Protected data',
       userId: user.sub,
       role: user.role,
       timestamp: Date.now(),
@@ -156,8 +166,8 @@ class MockSecureController {
 
   // Role-restricted endpoint (admin only)
   getAdminData(user: JwtPayload) {
-  return {,
-  message: 'Admin data',
+    return {
+      message: 'Admin data',
       userId: user.sub,
       sensitiveInfo: 'classified',
       timestamp: Date.now(),
@@ -167,8 +177,8 @@ class MockSecureController {
 
   // Permission-restricted endpoint
   getSystemData(user: JwtPayload) {
-  return {,
-  message: 'System data',
+    return {
+      message: 'System data',
       userId: user.sub,
       systemConfig: 'sensitive-config',
       timestamp: Date.now(),
@@ -178,8 +188,8 @@ class MockSecureController {
 
   // Data modification endpoint
   createResource(user: JwtPayload, data: Record<string, unknown>) {
-  return {,
-  id: 'new-resource-id',
+    return {
+      id: 'new-resource-id',
       ...data,
       createdBy: user.sub,
       createdAt: Date.now(),

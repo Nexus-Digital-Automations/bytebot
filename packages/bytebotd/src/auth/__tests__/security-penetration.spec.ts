@@ -118,8 +118,13 @@ describe('Security Penetration Testing Suite', () => {
 };
 
       const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
-        'base64url',);const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-        'base64url');if (options.algorithm === 'none') {
+        'base64url',
+      );
+      const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
+        'base64url'
+      );
+
+      if (options.algorithm === 'none') {
         return `${encodedHeader}.${encodedPayload}.`;
       }
 

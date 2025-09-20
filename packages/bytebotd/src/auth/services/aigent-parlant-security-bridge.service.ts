@@ -905,11 +905,13 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       maxSessionDuration: 30 * 60 * 1000, // 30 minutes,
   requiresMultiFactor: false,
       auditLevel: 'MINIMAL',
-});return mappings;
+    });
+
+    return mappings;
   }
 
   private async initializeRedisCluster(): Promise<void> {
-  if (!(this as any)?.bridgeConfig.sessionClusteringEnabled) {
+    if (!(this as any)?.bridgeConfig.sessionClusteringEnabled) {
       (this.logger as any)?.log?.('Redis session clustering disabled');
       return;
 }
@@ -962,7 +964,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     permissions: Permission[];
   
 }> {
-  // Validate and extract security context from JWT
+    // Validate and extract security context from JWT
     const roleMapping = (this.roleClassificationMappings as any)?.get?.((jwtPayload as any)?.role);
     if (!roleMapping) {
       throw new Error(`Unsupported user role: ${(jwtPayload as any)?.role}`);
@@ -971,7 +973,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     // Determine security classification
     let securityClassification = (jwtPayload as any)?.securityClassification;
     if (!(roleMapping.allowedClassifications as any)?.includes?.(securityClassification)) {
-  (this.logger as any)?.warn?.(
+      (this.logger as any)?.warn?.(
         `[${operationId
 }] User role ${(jwtPayload as any)?.role} not authorized for ${securityClassification}, defaulting to ${(roleMapping as any)?.defaultClassification}`
       );
