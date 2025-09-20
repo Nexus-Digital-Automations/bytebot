@@ -1025,7 +1025,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformSchema(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<SchemaValidationResult> {
     this.logger.log(`📋 Validating schema for ${backup.platform}`);
 
@@ -1159,7 +1159,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformMetadata(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<MetadataValidationResult> {
     this.logger.log(`🔧 Validating metadata for ${backup.platform}`);
 
@@ -1202,7 +1202,7 @@ export class CrossPlatformBackupConsistencyService {
    */
   private async validatePlatformPerformance(
     backup: PlatformBackupInfo,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<PerformanceValidationResult> {
     this.logger.log(`⚡ Validating performance for ${backup.platform}`);
 
@@ -1398,11 +1398,7 @@ export class CrossPlatformBackupConsistencyService {
     );
 
     // Metadata comparison
-    const metadataScore = await this.compareMetadata(
-      source,
-      target,
-      comparison,
-    );
+    await this.compareMetadata(source, target, comparison);
 
     // Performance comparison
     const performanceScore = await this.comparePerformance(
@@ -1771,7 +1767,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   private async generateRemediationSuggestions(
     discrepancies: ConsistencyDiscrepancy[],
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
@@ -1887,8 +1883,8 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   // Mock helper methods for demonstration
   private async validateComplianceRequirements(
-    result: ConsistencyValidationResult,
-    request: CrossPlatformConsistencyRequest,
+    _result: ConsistencyValidationResult,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<ComplianceValidationStatus> {
     return {
       overallStatus: 'COMPLIANT',
@@ -1906,7 +1902,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
     comparison: CrossPlatformComparison,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<void> {
     comparison.comparisonType = 'SCHEMA';
     comparison.consistencyScore = 95; // Mock
@@ -1916,7 +1912,7 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
     comparison: CrossPlatformComparison,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<void> {
     comparison.comparisonType = 'DATA';
     comparison.consistencyScore = 90; // Mock
@@ -1926,41 +1922,41 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     source: PlatformBackupInfo,
     target: PlatformBackupInfo,
     comparison: CrossPlatformComparison,
-    request: CrossPlatformConsistencyRequest,
+    _request: CrossPlatformConsistencyRequest,
   ): Promise<void> {
     comparison.comparisonType = 'METADATA';
     comparison.consistencyScore = 88; // Mock
   }
 
   private async compareSchemas(
-    source: PlatformBackupInfo,
-    target: PlatformBackupInfo,
-    comparison: CrossPlatformComparison,
+    _source: PlatformBackupInfo,
+    _target: PlatformBackupInfo,
+    _comparison: CrossPlatformComparison,
   ): Promise<number> {
     return 95; // Mock score
   }
 
   private async compareData(
-    source: PlatformBackupInfo,
-    target: PlatformBackupInfo,
-    comparison: CrossPlatformComparison,
-    criteria: ComparisonCriteria,
+    _source: PlatformBackupInfo,
+    _target: PlatformBackupInfo,
+    _comparison: CrossPlatformComparison,
+    _criteria: ComparisonCriteria,
   ): Promise<number> {
     return 90; // Mock score
   }
 
   private async compareMetadata(
-    source: PlatformBackupInfo,
-    target: PlatformBackupInfo,
-    comparison: CrossPlatformComparison,
+    _source: PlatformBackupInfo,
+    _target: PlatformBackupInfo,
+    _comparison: CrossPlatformComparison,
   ): Promise<number> {
     return 88; // Mock score
   }
 
   private async comparePerformance(
-    source: PlatformBackupInfo,
-    target: PlatformBackupInfo,
-    comparison: CrossPlatformComparison,
+    _source: PlatformBackupInfo,
+    _target: PlatformBackupInfo,
+    _comparison: CrossPlatformComparison,
   ): Promise<number> {
     return 85; // Mock score
   }
@@ -1969,14 +1965,14 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
     return version >= minVersion;
   }
 
-  private areExtensionsCompatible(extensions: string[]): boolean {
+  private areExtensionsCompatible(_extensions: string[]): boolean {
     return true; // Mock implementation
   }
 
   private async analyzePlatformCompatibility(
-    source: DatabasePlatform,
-    target: DatabasePlatform,
-    backups: PlatformBackupInfo[],
+    _source: DatabasePlatform,
+    _target: DatabasePlatform,
+    _backups: PlatformBackupInfo[],
   ): Promise<CompatibilityAssessment> {
     return {
       overallCompatibility: 85,
@@ -1991,18 +1987,18 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
   }
 
   private async generateMigrationPlan(
-    source: DatabasePlatform,
-    target: DatabasePlatform,
-    backups: PlatformBackupInfo[],
-    rules: CustomComparisonRule[],
+    _source: DatabasePlatform,
+    _target: DatabasePlatform,
+    _backups: PlatformBackupInfo[],
+    _rules: CustomComparisonRule[],
   ): Promise<RemediationSuggestion[]> {
     return []; // Mock implementation
   }
 
   private async assessMigrationRisks(
-    source: DatabasePlatform,
-    target: DatabasePlatform,
-    compatibility: CompatibilityAssessment,
+    _source: DatabasePlatform,
+    _target: DatabasePlatform,
+    _compatibility: CompatibilityAssessment,
   ): Promise<ParlantRiskAssessment> {
     return {
       overallRisk: 'MEDIUM',
@@ -2018,22 +2014,22 @@ Based on comprehensive analysis of the cross-platform backup consistency validat
 
   private calculateMigrationFeasibility(
     compatibility: CompatibilityAssessment,
-    plan: RemediationSuggestion[],
+    _plan: RemediationSuggestion[],
   ): number {
     return compatibility.overallCompatibility;
   }
 
   private estimateMigrationTime(
-    plan: RemediationSuggestion[],
-    backups: PlatformBackupInfo[],
+    _plan: RemediationSuggestion[],
+    _backups: PlatformBackupInfo[],
   ): number {
     return 8; // 8 hours mock estimate
   }
 
   private identifyDataLossScenarios(
-    source: DatabasePlatform,
-    target: DatabasePlatform,
-    backups: PlatformBackupInfo[],
+    _source: DatabasePlatform,
+    _target: DatabasePlatform,
+    _backups: PlatformBackupInfo[],
   ): string[] {
     return [
       'Potential precision loss in numeric data types',

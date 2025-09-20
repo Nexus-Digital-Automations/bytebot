@@ -677,8 +677,7 @@ export class BackupAuditComplianceReportingService {
       );
 
       // Validate cryptographic integrity of results
-      const _integrityValidation =
-        await this.validateResultIntegrity(filteredResults);
+      await this.validateResultIntegrity(filteredResults);
 
       // Generate search statistics
       const searchStatistics = await this.generateSearchStatistics(
@@ -870,8 +869,7 @@ export class BackupAuditComplianceReportingService {
 
     try {
       // Initialize monitoring infrastructure
-      const _monitoringSystem =
-        await this.initializeMonitoringInfrastructure(request);
+      await this.initializeMonitoringInfrastructure(request);
 
       // Deploy monitoring rules
       const deployedRules = await this.deployMonitoringRules(

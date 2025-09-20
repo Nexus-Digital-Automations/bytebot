@@ -22,9 +22,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ParlantBackupValidationService,
-} from './parlant-backup-validation.service';
+import { ParlantBackupValidationService } from './parlant-backup-validation.service';
 import {
   BackupIntegrityValidatorService,
   IntegrityValidationRequest,
@@ -36,12 +34,8 @@ import {
   DatabaseBackupService,
   BackupRestorationRequest,
 } from '../database-backup.service';
-import {
-  ParlantUserContext,
-} from '@shared/types/parlant-integration.types';
-import {
-  RiskLevel,
-} from '../parlant-validated-database.service';
+import { ParlantUserContext } from '@shared/types/parlant-integration.types';
+import { RiskLevel } from '../parlant-validated-database.service';
 
 // ===== RESTORATION WORKFLOW INTERFACES =====
 
@@ -1630,7 +1624,7 @@ export class BackupRestorationWorkflowService {
   }
 
   private assessTechnicalRisks(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): TechnicalRiskAssessment {
     return {
       systemStability: RiskLevel.MEDIUM,
@@ -1642,7 +1636,7 @@ export class BackupRestorationWorkflowService {
   }
 
   private assessComplianceRisks(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): ComplianceRiskAssessment {
     return {
       regulatoryRisk: RiskLevel.LOW,
@@ -1654,7 +1648,7 @@ export class BackupRestorationWorkflowService {
   }
 
   private async createExecutionPlan(
-    request: RestorationWorkflowRequest,
+    _request: RestorationWorkflowRequest,
   ): Promise<ExecutionPlan> {
     return {
       planId: this.generatePlanId(),

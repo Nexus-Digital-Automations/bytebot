@@ -26,17 +26,13 @@ import {
   ParlantBackupValidationService,
   BackupOperationType,
 } from './parlant-backup-validation.service';
-import {
-  DatabaseBackupService,
-} from '../database-backup.service';
+import { DatabaseBackupService } from '../database-backup.service';
 import {
   ParlantValidationResponse,
   ParlantUserContext,
   SecurityLevel,
 } from '@shared/types/parlant-integration.types';
-import {
-  RiskLevel,
-} from '../parlant-validated-database.service';
+import { RiskLevel } from '../parlant-validated-database.service';
 import * as crypto from 'crypto';
 
 // ===== INTEGRITY VALIDATION INTERFACES =====

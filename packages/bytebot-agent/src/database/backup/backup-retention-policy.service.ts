@@ -1214,7 +1214,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   private async createAuditRecord(
     policy: RetentionPolicy,
     action: GovernanceAction,
-    description: string,
+    _description: string,
   ): Promise<void> {
     this.logger.log(
       `📝 Creating audit record: ${action} for policy ${policy.id}`,
@@ -1250,8 +1250,8 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   }
 
   private async validatePolicyModification(
-    policy: RetentionPolicy,
-    request: PolicyModificationRequest,
+    _policy: RetentionPolicy,
+    _request: PolicyModificationRequest,
   ): Promise<{ isValid: boolean; errors: string[] }> {
     return { isValid: true, errors: [] };
   }
@@ -1302,7 +1302,7 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   }
 
   private async submitEnforcementForParlantApproval(
-    job: RetentionEnforcementJob,
+    _job: RetentionEnforcementJob,
   ): Promise<string> {
     const sessionId = `enf_parlant_${Date.now()}`;
     this.logger.log(
@@ -1356,29 +1356,29 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   }
 
   private async getPoliciesForCompliance(
-    request: PolicyComplianceReportRequest,
+    _request: PolicyComplianceReportRequest,
   ): Promise<RetentionPolicy[]> {
     return [];
   }
 
   private async analyzeFrameworkCompliance(
-    framework: ComplianceFramework,
-    policies: RetentionPolicy[],
-    period: any,
+    _framework: ComplianceFramework,
+    _policies: RetentionPolicy[],
+    _period: any,
   ): Promise<{ overallStatus: string }> {
     return { overallStatus: 'COMPLIANT' };
   }
 
   private async analyzePolicyCompliance(
-    policy: RetentionPolicy,
-    period: any,
+    _policy: RetentionPolicy,
+    _period: any,
   ): Promise<any> {
     return { status: 'COMPLIANT', details: 'Policy meets all requirements' };
   }
 
   private async generateComplianceRecommendations(
-    complianceStatus: any,
-    policyCompliance: any,
+    _complianceStatus: any,
+    _policyCompliance: any,
   ): Promise<string[]> {
     return [
       'Continue monitoring compliance status',
@@ -1387,21 +1387,21 @@ Based on comprehensive analysis of the backup retention policy ${request.action.
   }
 
   private async getAuditTrailForPeriod(
-    period: any,
+    _period: any,
   ): Promise<PolicyAuditRecord[]> {
     return [];
   }
 
   private async performComplianceCostAnalysis(
-    policies: RetentionPolicy[],
-    period: any,
+    _policies: RetentionPolicy[],
+    _period: any,
   ): Promise<any> {
     return { totalCost: 0, recommendations: [] };
   }
 
   private async formatComplianceReport(
     format: string,
-    data: any,
+    _data: any,
   ): Promise<any> {
     return { format, data: 'Formatted report data' };
   }
