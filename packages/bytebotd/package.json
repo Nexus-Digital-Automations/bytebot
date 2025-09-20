@@ -41,6 +41,8 @@
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.1",
     "@nestjs/core": "^11.1.6",
+    "@nestjs/event-emitter": "^2.1.1",
+    "@nestjs/schedule": "^4.1.2",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.3",
