@@ -35,7 +35,9 @@ export interface AsyncValidationRequest {
   readonly operationType: string;
   readonly functionName: string;
   readonly parameters: Record<string, unknown>;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly userId: string;readonly sessionId: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly userId: string;
+  readonly sessionId: string;
   readonly timeout: number;
   readonly requiresProgress: boolean;
   readonly deferrable: boolean;
@@ -103,7 +105,8 @@ export interface WebSocketClient {
  */
 export interface BackgroundJob {
   readonly jobId: string;
-  readonly type: 'VALIDATION' | 'ANALYTICS' | 'AUDIT' | 'CLEANUP';readonly priority: number; // 1-10 scalereadonly payload: Record<string, unknown>;
+  readonly type: 'VALIDATION' | 'ANALYTICS' | 'AUDIT' | 'CLEANUP';
+  readonly priority: number; // 1-10 scalereadonly payload: Record<string, unknown>;
   readonly scheduledFor: Date;
   readonly createdAt: Date;
   readonly attempts: number;
@@ -138,7 +141,8 @@ export interface RealtimeAnalytics {
   readonly throughputPerSecond: number;
   readonly errorRate: number;
   readonly cacheHitRate: number;
-  readonly systemHealth: 'HEALTHY' | 'WARNING' | 'CRITICAL';readonly performanceMetrics: {cpuUsage: number;
+  readonly systemHealth: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+  readonly performanceMetrics: {cpuUsage: number;
     memoryUsage: number;
     networkLatency: number;
     diskUsage: number;

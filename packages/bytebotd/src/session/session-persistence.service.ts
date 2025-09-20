@@ -65,7 +65,9 @@ export interface SessionPersistenceConfig {
  */
 export interface StorageNodeConfig {
   readonly nodeId: string;
-  readonly nodeType: 'primary' | 'replica' | 'backup';readonly endpoint: string;readonly region: string;
+  readonly nodeType: 'primary' | 'replica' | 'backup';
+  readonly endpoint: string;
+  readonly region: string;
   readonly availabilityZone: string;
   readonly capacity: StorageCapacity;
   readonly performance: StoragePerformance;
@@ -97,7 +99,8 @@ export interface StoragePerformance {
   readonly maxBandwidthMBps: number;
   readonly averageLatencyMs: number;
   readonly p99LatencyMs: number;
-  readonly consistencyLevel: 'strong' | 'eventual' | 'session';readonly durabilityLevel: number; // 9s of durability (e.g., 11 = 99.999999999%)}
+  readonly consistencyLevel: 'strong' | 'eventual' | 'session';
+  readonly durabilityLevel: number; // 9s of durability (e.g., 11 = 99.999999999%)}
 
 /**
  * Storage reliability specifications
@@ -197,7 +200,9 @@ export interface BackupRetention {
  */
 export interface BackupDestination {
   readonly destinationId: string;
-  readonly destinationType: 'local' | 'network' | 'cloud' | 'tape';readonly endpoint: string;readonly credentials: StorageCredentials;
+  readonly destinationType: 'local' | 'network' | 'cloud' | 'tape';
+  readonly endpoint: string;
+  readonly credentials: StorageCredentials;
   readonly capacity: StorageCapacity;
   readonly encryption: boolean;
   readonly compression: boolean;
@@ -211,7 +216,9 @@ export interface BackupDestination {
 export interface BackupEncryption {
   readonly enabled: boolean;
   readonly algorithm: string;
-  readonly keyManagement: 'local' | 'kms' | 'hsm';readonly keyRotationDays: number;readonly encryptInTransit: boolean;
+  readonly keyManagement: 'local' | 'kms' | 'hsm';
+  readonly keyRotationDays: number;
+  readonly encryptInTransit: boolean;
   readonly encryptAtRest: boolean;
 }
 
@@ -220,7 +227,9 @@ export interface BackupEncryption {
  */
 export interface BackupCompression {
   readonly enabled: boolean;
-  readonly algorithm: 'gzip' | 'lz4' | 'zstd' | 'brotli';readonly compressionLevel: number;readonly chunkSizeMB: number;
+  readonly algorithm: 'gzip' | 'lz4' | 'zstd' | 'brotli';
+  readonly compressionLevel: number;
+  readonly chunkSizeMB: number;
   readonly parallelCompression: boolean;
 }
 
@@ -292,7 +301,9 @@ export interface HealthMonitoringConfig {
  */
 export interface HealthCheck {
   readonly checkId: string;
-  readonly checkType: 'connectivity' | 'performance' | 'capacity' | 'integrity' | 'replication';readonly enabled: boolean;readonly intervalMs: number;
+  readonly checkType: 'connectivity' | 'performance' | 'capacity' | 'integrity' | 'replication';
+  readonly enabled: boolean;
+  readonly intervalMs: number;
   readonly timeoutMs: number;
   readonly retryAttempts: number;
   readonly criticalFailureThreshold: number;
@@ -331,7 +342,9 @@ export interface AutoRecoveryConfig {
 export interface EscalationRule {
   readonly ruleId: string;
   readonly condition: string;
-  readonly action: 'alert' | 'failover' | 'manual_intervention' | 'shutdown';readonly delay: number;readonly recipients: string[];
+  readonly action: 'alert' | 'failover' | 'manual_intervention' | 'shutdown';
+  readonly delay: number;
+  readonly recipients: string[];
 }
 
 /**
@@ -351,7 +364,9 @@ export interface MetricsCollectionConfig {
  */
 export interface AggregationRule {
   readonly metric: string;
-  readonly aggregationType: 'sum' | 'avg' | 'min' | 'max' | 'count';readonly timeWindow: string;readonly groupBy: string[];
+  readonly aggregationType: 'sum' | 'avg' | 'min' | 'max' | 'count';
+  readonly timeWindow: string;
+  readonly groupBy: string[];
 }
 
 /**
@@ -359,7 +374,9 @@ export interface AggregationRule {
  */
 export interface MetricsExportTarget {
   readonly targetId: string;
-  readonly targetType: 'prometheus' | 'grafana' | 'elasticsearch' | 'cloudwatch';readonly endpoint: string;readonly credentials: StorageCredentials;
+  readonly targetType: 'prometheus' | 'grafana' | 'elasticsearch' | 'cloudwatch';
+  readonly endpoint: string;
+  readonly credentials: StorageCredentials;
   readonly enabled: boolean;
 }
 
@@ -371,7 +388,9 @@ export interface PerformanceTargets {
   readonly readLatencyP99Ms: number;
   readonly throughputMBps: number;
   readonly availabilityPercent: number;
-  readonly consistencyLevel: 'strong' | 'eventual' | 'session';readonly durabilityTarget: number;readonly recoveryTimeTargetMs: number;
+  readonly consistencyLevel: 'strong' | 'eventual' | 'session';
+  readonly durabilityTarget: number;
+  readonly recoveryTimeTargetMs: number;
   readonly recoveryPointTargetMs: number;
 }
 
@@ -416,7 +435,9 @@ export interface ReplicationStatus {
   readonly primaryNode: string;
   readonly replicaNodes: string[];
   readonly replicationLagMs: number;
-  readonly consistencyStatus: 'consistent' | 'inconsistent' | 'repairing';readonly lastReplicationTime: Date;readonly replicationErrors: ReplicationError[];
+  readonly consistencyStatus: 'consistent' | 'inconsistent' | 'repairing';
+  readonly lastReplicationTime: Date;
+  readonly replicationErrors: ReplicationError[];
   readonly replicationHealth: PersistenceHealthStatus;
 }
 
@@ -436,8 +457,12 @@ export interface ReplicationError {
  */
 export interface RecoveryOperation {
   readonly operationId: string;
-  readonly operationType: 'node_recovery' | 'data_recovery' | 'full_restore' | 'point_in_time_recovery';readonly startTime: Date;readonly endTime?: Date;
-  readonly status: 'running' | 'completed' | 'failed' | 'cancelled';readonly progress: RecoveryProgress;readonly affectedSessions: string[];
+  readonly operationType: 'node_recovery' | 'data_recovery' | 'full_restore' | 'point_in_time_recovery';
+  readonly startTime: Date;
+  readonly endTime?: Date;
+  readonly status: 'running' | 'completed' | 'failed' | 'cancelled';
+  readonly progress: RecoveryProgress;
+  readonly affectedSessions: string[];
   readonly recoveryPoint: Date;
   readonly sourceNodes: string[];
   readonly targetNodes: string[];
@@ -559,7 +584,8 @@ export interface NodeError {
   readonly errorType: string;
   readonly message: string;
   readonly timestamp: Date;
-  readonly severity: 'info' | 'warning' | 'error' | 'critical';readonly resolved: boolean;}
+  readonly severity: 'info' | 'warning' | 'error' | 'critical';
+  readonly resolved: boolean;}
 
 /**
  * Replication health report
@@ -598,7 +624,9 @@ export interface CapacityReport {
   readonly usedCapacity: number;
   readonly availableCapacity: number;
   readonly utilizationPercent: number;
-  readonly growthTrend: 'increasing' | 'decreasing' | 'stable';readonly projectedFullDate?: Date;readonly recommendedActions: string[];
+  readonly growthTrend: 'increasing' | 'decreasing' | 'stable';
+  readonly projectedFullDate?: Date;
+  readonly recommendedActions: string[];
 }
 
 /**
@@ -632,7 +660,9 @@ export interface AlertInfo {
 export interface HealthRecommendation {
   readonly recommendationId: string;
   readonly category: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly title: string;readonly description: string;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly title: string;
+  readonly description: string;
   readonly impact: string;
   readonly effort: string;
   readonly timeline: string;

@@ -91,7 +91,8 @@ export interface ConversationalMessage {
 
 export interface ConversationalMessageMetadata {
   readonly priority: 'low' | 'normal' | 'high' | 'critical';
-readonly requiresAck: boolean;readonly timeout?: number;
+readonly requiresAck: boolean;
+  readonly timeout?: number;
   readonly retryCount?: number;
   readonly compression?: boolean;
   readonly routingHints?: string[];
@@ -134,7 +135,8 @@ export interface ValidationContext {
 
 export interface SecurityContext {
   readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';
-readonly permissions: string[];readonly auditRequired: boolean;
+readonly permissions: string[];
+  readonly auditRequired: boolean;
   readonly complianceFlags: string[];
 
 
@@ -160,7 +162,8 @@ export interface ValidationAction {
 
 export interface ActionImpact {
   readonly scope: 'local' | 'system' | 'network' | 'external';
-readonly dataAccess: boolean;readonly stateChanges: boolean;
+readonly dataAccess: boolean;
+  readonly stateChanges: boolean;
   readonly userInteraction: boolean;
 
 

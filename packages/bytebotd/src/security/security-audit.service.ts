@@ -17,24 +17,57 @@
  * Performance: Sub-200ms audit logging with enterprise-scale retention
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';// ===== SECURITY AUDIT INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+
+// ===== SECURITY AUDIT INTERFACES =====
+/**
  * Audit event types for comprehensive tracking
  */
 export enum AuditEventType {
-  AUTHENTICATION_EVENT = 'AUTHENTICATION_EVENT',AUTHORIZATION_EVENT = 'AUTHORIZATION_EVENT',DATA_ACCESS_EVENT = 'DATA_ACCESS_EVENT',DATA_MODIFICATION_EVENT = 'DATA_MODIFICATION_EVENT',SYSTEM_CONFIGURATION_CHANGE = 'SYSTEM_CONFIGURATION_CHANGE',SECURITY_POLICY_CHANGE = 'SECURITY_POLICY_CHANGE',PRIVILEGE_ESCALATION_EVENT = 'PRIVILEGE_ESCALATION_EVENT',SECURITY_INCIDENT_RESPONSE = 'SECURITY_INCIDENT_RESPONSE',COMPLIANCE_VIOLATION = 'COMPLIANCE_VIOLATION',ADMINISTRATIVE_ACTION = 'ADMINISTRATIVE_ACTION'}/**
+  AUTHENTICATION_EVENT = 'AUTHENTICATION_EVENT',
+  AUTHORIZATION_EVENT = 'AUTHORIZATION_EVENT',
+  DATA_ACCESS_EVENT = 'DATA_ACCESS_EVENT',
+  DATA_MODIFICATION_EVENT = 'DATA_MODIFICATION_EVENT',
+  SYSTEM_CONFIGURATION_CHANGE = 'SYSTEM_CONFIGURATION_CHANGE',
+  SECURITY_POLICY_CHANGE = 'SECURITY_POLICY_CHANGE',
+  PRIVILEGE_ESCALATION_EVENT = 'PRIVILEGE_ESCALATION_EVENT',
+  SECURITY_INCIDENT_RESPONSE = 'SECURITY_INCIDENT_RESPONSE',
+  COMPLIANCE_VIOLATION = 'COMPLIANCE_VIOLATION',
+  ADMINISTRATIVE_ACTION = 'ADMINISTRATIVE_ACTION'
+}
+
+/**
  * Audit severity levels
  */
 export enum AuditSeverity {
-  CRITICAL = 'CRITICAL',HIGH = 'HIGH',MEDIUM = 'MEDIUM',LOW = 'LOW',INFORMATIONAL = 'INFORMATIONAL'}/**
+  CRITICAL = 'CRITICAL',
+  HIGH = 'HIGH',
+  MEDIUM = 'MEDIUM',
+  LOW = 'LOW',
+  INFORMATIONAL = 'INFORMATIONAL'
+}
+
+/**
  * Compliance frameworks supported
  */
 export enum ComplianceFramework {
-  SOX = 'SOX',               // Sarbanes-OxleyGDPR = 'GDPR',             // General Data Protection RegulationHIPAA = 'HIPAA',           // Health Insurance Portability and Accountability ActPCI_DSS = 'PCI_DSS',       // Payment Card Industry Data Security StandardISO_27001 = 'ISO_27001',   // ISO 27001 Information Security ManagementNIST_CSF = 'NIST_CSF',     // NIST Cybersecurity FrameworkCIS_CONTROLS = 'CIS_CONTROLS' // CIS Critical Security Controls}/**
+  SOX = 'SOX',               // Sarbanes-Oxley
+  GDPR = 'GDPR',             // General Data Protection Regulation
+  HIPAA = 'HIPAA',           // Health Insurance Portability and Accountability Act
+  PCI_DSS = 'PCI_DSS',       // Payment Card Industry Data Security Standard
+  ISO_27001 = 'ISO_27001',   // ISO 27001 Information Security Management
+  NIST_CSF = 'NIST_CSF',     // NIST Cybersecurity Framework
+  CIS_CONTROLS = 'CIS_CONTROLS' // CIS Critical Security Controls
+}
+
+/**
  * Audit configuration for service
  */
 export interface SecurityAuditConfig {
@@ -62,7 +95,9 @@ export interface SecurityAuditEntry {
   readonly userAgent: string;
   readonly resource: string;
   readonly action: string;
-  readonly outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'BLOCKED';readonly details: Record<string, unknown>;readonly complianceFrameworks: ComplianceFramework[];
+  readonly outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'BLOCKED';
+  readonly details: Record<string, unknown>;
+  readonly complianceFrameworks: ComplianceFramework[];
   readonly conversationId?: string;
   readonly validated: boolean;
   readonly forensicData?: ForensicData;
@@ -158,7 +193,9 @@ export interface ComplianceViolation {
  */
 export interface AuditAnomaly {
   readonly anomalyId: string;
-  readonly type: 'UNUSUAL_ACCESS_PATTERN' | 'PRIVILEGE_ABUSE' | 'DATA_EXFILTRATION' | 'SYSTEM_COMPROMISE';readonly confidence: number;readonly description: string;
+  readonly type: 'UNUSUAL_ACCESS_PATTERN' | 'PRIVILEGE_ABUSE' | 'DATA_EXFILTRATION' | 'SYSTEM_COMPROMISE';
+  readonly confidence: number;
+  readonly description: string;
   readonly affectedEntries: string[];
   readonly riskScore: number;
   readonly recommendedActions: string[];
@@ -169,7 +206,10 @@ export interface AuditAnomaly {
  */
 export interface AuditReportRequest {
   readonly operationId: string;
-  readonly reportType: 'COMPLIANCE' | 'SECURITY_INCIDENTS' | 'USER_ACTIVITY' | 'SYSTEM_CHANGES' | 'FORENSIC';readonly timeframe: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM';readonly startDate?: Date;readonly endDate?: Date;
+  readonly reportType: 'COMPLIANCE' | 'SECURITY_INCIDENTS' | 'USER_ACTIVITY' | 'SYSTEM_CHANGES' | 'FORENSIC';
+  readonly timeframe: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM';
+  readonly startDate?: Date;
+  readonly endDate?: Date;
   readonly complianceFrameworks?: ComplianceFramework[];
   readonly includeForensicData: boolean;
   readonly context: ParlantConversationContext;
@@ -209,7 +249,9 @@ export interface AuditReportSummary {
  */
 export interface SecurityInsight {
   readonly insightId: string;
-  readonly category: 'RISK' | 'TREND' | 'ANOMALY' | 'COMPLIANCE';readonly title: string;readonly description: string;
+  readonly category: 'RISK' | 'TREND' | 'ANOMALY' | 'COMPLIANCE';
+  readonly title: string;
+  readonly description: string;
   readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly confidence: number;
   readonly supportingData: Record<string, unknown>;

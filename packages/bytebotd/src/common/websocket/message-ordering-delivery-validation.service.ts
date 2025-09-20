@@ -112,7 +112,8 @@ export interface MessageValidationError {
   readonly errorCode: string;
   readonly message: string;
   readonly severity: 'warning' | 'error' | 'critical';
-readonly recoverable: boolean;readonly timestamp: number;
+readonly recoverable: boolean;
+  readonly timestamp: number;
 
 
 }
@@ -141,7 +142,8 @@ export interface MessageBuffer {
   readonly messages: MessageSequence[];
   readonly capacity: number;
   readonly overflowStrategy: 'drop_oldest' | 'drop_newest' | 'drop_lowest_priority';
-readonly currentSize: number;readonly highWaterMark: number;
+readonly currentSize: number;
+  readonly highWaterMark: number;
   readonly lowWaterMark: number;
 
 

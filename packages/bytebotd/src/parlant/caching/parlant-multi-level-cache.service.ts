@@ -42,7 +42,8 @@ export interface L2CacheConfig {
   };
   readonly compression: {
     readonly enabled: boolean;
-    readonly algorithm: 'gzip';readonly level: number;};
+    readonly algorithm: 'gzip';
+  readonly level: number;};
 }
 
 export interface ValidationPattern {
@@ -57,7 +58,8 @@ export interface ValidationPattern {
  * L3 Cache: Long-Term Persistent Cache
  */
 export interface L3CacheConfig {
-  readonly database: 'sqlite' | 'postgresql';readonly retention: {readonly successful: number;   // 1 hour for successful validations
+  readonly database: 'sqlite' | 'postgresql';
+  readonly retention: {readonly successful: number;   // 1 hour for successful validations
     readonly failed: number;       // 5 minutes for failed validations
   };
   readonly compression: {
@@ -74,7 +76,9 @@ export interface ValidationMetadata {
   readonly timestamp: Date;
   readonly context: Record<string, unknown>;
   readonly cacheHit: boolean;
-  readonly cacheLevel?: 'L1' | 'L2' | 'L3';readonly batchProcessed: boolean;readonly batchId?: string;
+  readonly cacheLevel?: 'L1' | 'L2' | 'L3';
+  readonly batchProcessed: boolean;
+  readonly batchId?: string;
   readonly circuitBreakerUsed: boolean;
   readonly degradedMode: boolean;
   readonly retryAttempts: number;

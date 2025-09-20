@@ -171,7 +171,9 @@ export interface BatchJobConfig {
   readonly name: string;
   readonly description: string;
   readonly jobs: JobLifecycleData[];
-  readonly strategy: 'parallel' | 'sequential' | 'mixed';readonly maxConcurrency?: number;readonly failurePolicy: 'fail_fast' | 'continue' | 'retry_failed';
+  readonly strategy: 'parallel' | 'sequential' | 'mixed';
+  readonly maxConcurrency?: number;
+  readonly failurePolicy: 'fail_fast' | 'continue' | 'retry_failed';
   readonly timeout: number;
   readonly webhooks: string[];
 }

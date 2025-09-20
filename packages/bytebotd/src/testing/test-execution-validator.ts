@@ -81,7 +81,8 @@ export interface PerformanceValidationResult {
   readonly memoryEfficiency: number;
   readonly reliabilityScore: number;
   readonly parallelizationEffectiveness: number;
-  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';readonly bottlenecks: Array<{type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';description: string;impact: 'high' | 'medium' | 'low';recommendation: string;}>;
+  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  readonly bottlenecks: Array<{type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';description: string;impact: 'high' | 'medium' | 'low';recommendation: string;}>;
   readonly optimizationOpportunities: string[];
   readonly regressions: Array<{
     test: string;

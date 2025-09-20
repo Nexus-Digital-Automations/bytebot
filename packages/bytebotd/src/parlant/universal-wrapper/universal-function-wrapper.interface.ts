@@ -24,7 +24,9 @@ export interface UniversalFunctionMetadata {
   readonly functionId: string;
   readonly functionName: string;
   readonly packageName: string;
-  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';readonly category: FunctionCategory;readonly riskClassification: RiskLevel;
+  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';
+  readonly category: FunctionCategory;
+  readonly riskClassification: RiskLevel;
   readonly description: string;
   readonly parameters: FunctionParameterMetadata[];
   readonly returnType: FunctionReturnMetadata;
@@ -105,7 +107,11 @@ export interface PerformanceMetadata {
   readonly averageExecutionTimeMs: number;
   readonly maxExecutionTimeMs: number;
   readonly resourceIntensive: boolean;
-  readonly cpuUsage: 'low' | 'medium' | 'high';readonly memoryUsage: 'low' | 'medium' | 'high';readonly networkUsage: 'none' | 'low' | 'medium' | 'high';readonly concurrencyLimit: number;readonly rateLimitPerMinute: number;
+  readonly cpuUsage: 'low' | 'medium' | 'high';
+  readonly memoryUsage: 'low' | 'medium' | 'high';
+  readonly networkUsage: 'none' | 'low' | 'medium' | 'high';
+  readonly concurrencyLimit: number;
+  readonly rateLimitPerMinute: number;
   readonly batchable: boolean;
   readonly preferredBatchSize: number;
 }
@@ -116,7 +122,11 @@ export interface PerformanceMetadata {
 export interface SecurityContext {
   readonly requiresAuthentication: boolean;
   readonly requiredPermissions: string[];
-  readonly dataClassification: 'public' | 'internal' | 'confidential' | 'restricted' | 'classified';readonly encryptionRequired: boolean;readonly auditLevel: 'none' | 'basic' | 'detailed' | 'comprehensive';readonly complianceFrameworks: string[];readonly threatModel: ThreatModel;
+  readonly dataClassification: 'public' | 'internal' | 'confidential' | 'restricted' | 'classified';
+  readonly encryptionRequired: boolean;
+  readonly auditLevel: 'none' | 'basic' | 'detailed' | 'comprehensive';
+  readonly complianceFrameworks: string[];
+  readonly threatModel: ThreatModel;
 }
 
 /**
@@ -202,7 +212,10 @@ export interface FunctionAuditEntry {
   readonly timestamp: Date;
   readonly parameters: Record<string, unknown>;
   readonly result: unknown;
-  readonly validationDecision: 'approved' | 'denied' | 'error';readonly executionStatus: 'success' | 'failure' | 'timeout' | 'cancelled';readonly riskLevel: RiskLevel;readonly conversationId: string;
+  readonly validationDecision: 'approved' | 'denied' | 'error';
+  readonly executionStatus: 'success' | 'failure' | 'timeout' | 'cancelled';
+  readonly riskLevel: RiskLevel;
+  readonly conversationId: string;
   readonly approvalChain: ApprovalChainEntry[];
   readonly complianceFlags: string[];
 }
@@ -213,7 +226,9 @@ export interface FunctionAuditEntry {
 export interface ApprovalChainEntry {
   readonly approver: string;
   readonly timestamp: Date;
-  readonly decision: 'approved' | 'denied' | 'escalated';readonly reasoning: string;readonly approvalLevel: string;
+  readonly decision: 'approved' | 'denied' | 'escalated';
+  readonly reasoning: string;
+  readonly approvalLevel: string;
 }
 
 /**
@@ -224,7 +239,9 @@ export interface CacheInfo {
   readonly key: string;
   readonly ttl: number;
   readonly size: number;
-  readonly level: 'l1' | 'l2' | 'l3' | 'distributed';readonly createdAt?: Date;readonly lastAccessed?: Date;
+  readonly level: 'l1' | 'l2' | 'l3' | 'distributed';
+  readonly createdAt?: Date;
+  readonly lastAccessed?: Date;
 }
 
 // ===== SERVICE INTERFACES =====
@@ -292,7 +309,9 @@ export interface SystemState {
  */
 export interface SecurityAlert {
   readonly id: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly type: string;readonly description: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly type: string;
+  readonly description: string;
   readonly timestamp: Date;
   readonly resolved: boolean;
 }
@@ -395,7 +414,11 @@ export interface AveragePerformanceMetrics {
  */
 export interface PerformanceTrend {
   readonly metric: string;
-  readonly direction: 'improving' | 'degrading' | 'stable';readonly changePercent: number;readonly significance: 'low' | 'medium' | 'high';readonly timeframe: string;readonly lastUpdated: Date;
+  readonly direction: 'improving' | 'degrading' | 'stable';
+  readonly changePercent: number;
+  readonly significance: 'low' | 'medium' | 'high';
+  readonly timeframe: string;
+  readonly lastUpdated: Date;
 }
 
 /**
@@ -404,7 +427,10 @@ export interface PerformanceTrend {
 export interface PerformanceAnomaly {
   readonly id: string;
   readonly functionId: string;
-  readonly anomalyType: 'latency_spike' | 'error_surge' | 'resource_exhaustion' | 'throughput_drop';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly detectedAt: Date;
+  readonly anomalyType: 'latency_spike' | 'error_surge' | 'resource_exhaustion' | 'throughput_drop';
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly detectedAt: Date;
   readonly affectedMetrics: string[];
   readonly suggestedActions: string[];
   readonly autoResolved: boolean;
@@ -437,7 +463,10 @@ export interface AuditSearchCriteria {
   readonly userIds?: string[];
   readonly timeRange?: { start: Date; end: Date };
   readonly riskLevels?: RiskLevel[];
-  readonly validationDecisions?: ('approved' | 'denied' | 'error')[];readonly executionStatuses?: ('success' | 'failure' | 'timeout' | 'cancelled')[];readonly complianceFrameworks?: string[];readonly dataClassifications?: string[];
+  readonly validationDecisions?: ('approved' | 'denied' | 'error')[];
+  readonly executionStatuses?: ('success' | 'failure' | 'timeout' | 'cancelled')[];
+  readonly complianceFrameworks?: string[];
+  readonly dataClassifications?: string[];
   readonly limit?: number;
   readonly offset?: number;
   readonly sortBy?: string;
@@ -478,7 +507,9 @@ export interface ComplianceReportSummary {
  */
 export interface ComplianceFinding {
   readonly id: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly category: string;readonly description: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly category: string;
+  readonly description: string;
   readonly requirement: string;
   readonly evidence: string[];
   readonly remediation: string;
@@ -561,7 +592,9 @@ export interface CacheOptimizationResult {
  * Cache recommendation for performance improvement
  */
 export interface CacheRecommendation {
-  readonly type: 'increase_ttl' | 'decrease_ttl' | 'remove_cache' | 'add_cache' | 'optimize_key';readonly functionId: string;readonly reasoning: string;
+  readonly type: 'increase_ttl' | 'decrease_ttl' | 'remove_cache' | 'add_cache' | 'optimize_key';
+  readonly functionId: string;
+  readonly reasoning: string;
   readonly expectedImprovement: number;
   readonly implementationPriority: 'low' | 'medium' | 'high';
   readonly estimatedEffort: string;

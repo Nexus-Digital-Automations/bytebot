@@ -3407,12 +3407,14 @@
       "id": "subtask_1758406869133_w44uhsi4g6r"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-20T22:23:02.841Z",
       "title": "Cleanup build artifacts and TypeScript declaration files",
       "description": "Remove TypeScript declaration files from dist/, clean cache directories, remove .tsbuildinfo files, and delete large temporary lint/report files. Target: ~150MB+ storage recovery",
       "category": "subtask",
-      "id": "subtask_1758406982841_9yx053tv4g"
+      "id": "subtask_1758406982841_9yx053tv4g",
+      "completed_at": "2025-09-20T22:25:11.591Z",
+      "updated_at": "2025-09-20T22:25:11.591Z"
     },
     {
       "status": "pending",
@@ -9422,6 +9424,111 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-20T22:23:08.992Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758407130268_1_general_ee8c806d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:25:30.269Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:25:30.269Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758407140405_1_general_0e47bb27": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:25:40.407Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:25:40.407Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758407150544_1_general_6f3abf3f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:25:50.545Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:25:50.545Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758407160692_1_general_37aecb04": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:26:00.693Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:26:00.693Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758407170851_1_general_4a55105c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:26:10.853Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:26:10.853Z",
       "sessionId": null,
       "metadata": {}
     }

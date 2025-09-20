@@ -39,7 +39,8 @@ export interface AsyncJobValidationContext extends ParlantConversationContext {
   readonly estimatedDurationMs?: number;
   readonly maxRetries?: number;
   readonly resourceRequirements: AsyncJobResourceRequirements;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly queueState: AsyncJobQueueInfo;}
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly queueState: AsyncJobQueueInfo;}
 
 /**
  * Resource requirements for async job validation
@@ -70,8 +71,13 @@ export interface AsyncJobAuditEntry {
   readonly timestamp: Date;
   readonly jobId: string;
   readonly jobType: AsyncJobType;
-  readonly operation: 'CREATE' | 'CANCEL' | 'DELETE' | 'RETRIEVE' | 'CLEANUP';readonly description: string;readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly estimatedDurationMs?: number;
+  readonly operation: 'CREATE' | 'CANCEL' | 'DELETE' | 'RETRIEVE' | 'CLEANUP';
+  readonly description: string;
+  readonly riskLevel: RiskLevel;
+  readonly validationResult: 'APPROVED' | 'DENIED';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
+  readonly conversationId: string;
+  readonly estimatedDurationMs?: number;
   readonly actualDurationMs?: number;
 }
 
@@ -83,7 +89,9 @@ export interface AsyncJobRiskAssessment {
   readonly riskFactors: string[];
   readonly mitigationStrategies: string[];
   readonly requiresApproval: boolean;
-  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';readonly resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT';
+  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
+  readonly resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT';
 }
 
 /**

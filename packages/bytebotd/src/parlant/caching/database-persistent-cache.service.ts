@@ -74,7 +74,8 @@ export interface SchemaConfig {
   readonly indexes: IndexConfig[];
   readonly partitioning: {
     readonly enabled: boolean;
-    readonly strategy: 'time' | 'hash' | 'range';readonly intervalHours?: number;};
+    readonly strategy: 'time' | 'hash' | 'range';
+  readonly intervalHours?: number;};
   readonly constraints: {
     readonly maxKeyLength: number;
     readonly maxValueSize: number;
@@ -97,7 +98,8 @@ export interface IndexConfig {
   };
   readonly transactions: {
     readonly enabled: boolean;
-    readonly isolation: 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';readonly timeoutMs: number;};
+    readonly isolation: 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  readonly timeoutMs: number;};
   readonly optimization: {
     readonly preparedStatements: boolean;
     readonly queryPlanning: boolean;
@@ -127,7 +129,9 @@ export interface MaintenanceConfig {
 export interface DatabaseCompressionConfig {
   readonly enabled: boolean;
   readonly threshold: number; // bytes
-  readonly algorithm: 'gzip' | 'lz4' | 'zstd';readonly level: number;readonly autoAnalysis: boolean;
+  readonly algorithm: 'gzip' | 'lz4' | 'zstd';
+  readonly level: number;
+  readonly autoAnalysis: boolean;
 }
 
 export interface AnalyticsConfig {
@@ -167,9 +171,13 @@ export interface DatabaseCacheEntry {
 
 export interface DatabaseCacheMetadata {
   readonly operationType: string;
-  readonly cacheLevel: 'L3';readonly promotionCount: number;readonly hitCount: number;
+  readonly cacheLevel: 'L3';
+  readonly promotionCount: number;
+  readonly hitCount: number;
   readonly lastPromotedAt?: Date;
-  readonly sourceLevel?: 'L1' | 'L2';readonly tags?: string[];readonly context?: Record<string, unknown>;
+  readonly sourceLevel?: 'L1' | 'L2';
+  readonly tags?: string[];
+  readonly context?: Record<string, unknown>;
 }
 
 /**

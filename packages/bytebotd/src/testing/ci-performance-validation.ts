@@ -114,7 +114,8 @@ export interface CIPerformanceResult {
   readonly branch: string;
   readonly commitHash: string;
   readonly timestamp: number;
-  readonly overallStatus: 'passed' | 'failed' | 'warning';readonly testResults: {totalTests: number;
+  readonly overallStatus: 'passed' | 'failed' | 'warning';
+  readonly testResults: {totalTests: number;
     passedTests: number;
     failedTests: number;
     executionTime: number;
@@ -138,7 +139,9 @@ export interface CIPerformanceResult {
     previousValue: number;
     currentValue: number;
     change: number; // percentage
-    severity: 'critical' | 'high' | 'medium' | 'low';}>;readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';readonly recommendations: string[];readonly artifacts: {
+    severity: 'critical' | 'high' | 'medium' | 'low';}>;readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  readonly recommendations: string[];
+  readonly artifacts: {
     htmlReport?: string;
     jsonReport?: string;
     benchmarkData?: string;

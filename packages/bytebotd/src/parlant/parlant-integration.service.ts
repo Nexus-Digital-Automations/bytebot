@@ -56,7 +56,9 @@ export interface ParlantConversationContext {
   readonly userId: string;
   readonly sessionId?: string; // Optional for creation, required after session created
   readonly agentRole: string;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly conversationHistory: ConversationEntry[];readonly metadata: Record<string, unknown>;
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly conversationHistory: ConversationEntry[];
+  readonly metadata: Record<string, unknown>;
 }
 
 /**
@@ -64,7 +66,9 @@ export interface ParlantConversationContext {
  */
 export interface ConversationEntry {
   readonly timestamp: Date;
-  readonly speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';readonly message: string;readonly intent?: string;
+  readonly speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
+  readonly message: string;
+  readonly intent?: string;
   readonly confidence?: number;
 }
 
@@ -127,7 +131,8 @@ export interface ParlantAuditEntry {
   readonly conversationId: string;
   readonly functionName: string;
   readonly actionDescription: string;
-  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';
+  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';
   readonly timestamp: Date;
   readonly duration: number;
   readonly userId: string;

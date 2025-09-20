@@ -48,7 +48,8 @@ export interface OperationContext {
 export interface UserSecurityContext {
   readonly userId: string;
   readonly userRole: string;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly permissionLevel: number; // 1-10 scalereadonly trustScore: number; // 0-1 scale based on behavior
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly permissionLevel: number; // 1-10 scalereadonly trustScore: number; // 0-1 scale based on behavior
   readonly recentActivity: ActivityPattern[];
   readonly preferenceProfile: UserPreferences;
   readonly sessionContext: SessionInfo;
@@ -59,7 +60,9 @@ export interface UserSecurityContext {
  */
 export interface SystemContext {
   readonly systemLoad: number; // 0-1 scale
-  readonly securityAlertLevel: 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';readonly maintenanceMode: boolean;readonly emergencyMode: boolean;
+  readonly securityAlertLevel: 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';
+  readonly maintenanceMode: boolean;
+  readonly emergencyMode: boolean;
   readonly performanceMetrics: {
     cpuUsage: number;
     memoryUsage: number;
@@ -87,7 +90,9 @@ export interface HistoricalContext {
 export interface BusinessContext {
   readonly businessHours: boolean;
   readonly criticalPeriod: boolean;
-  readonly businessImpactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly complianceRequirement: ComplianceLevel;readonly auditMode: boolean;
+  readonly businessImpactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly complianceRequirement: ComplianceLevel;
+  readonly auditMode: boolean;
 }
 
 /**
@@ -101,15 +106,20 @@ export interface RiskAssessmentResult {
   readonly recommendation: ValidationRecommendation;
   readonly bypassEligible: boolean;
   readonly cacheEligible: boolean;
-  readonly monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';readonly assessmentTime: number; // millisecondsreadonly metadata: Record<string, unknown>;
+  readonly monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
+  readonly assessmentTime: number; // millisecondsreadonly metadata: Record<string, unknown>;
 }
 
 /**
  * Individual risk factors contributing to assessment
  */
 export interface RiskFactor {
-  readonly category: 'USER' | 'OPERATION' | 'SYSTEM' | 'HISTORICAL' | 'BUSINESS';readonly factor: string;readonly weight: number; // 0-1 scale
-  readonly impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';readonly value: number;readonly description: string;
+  readonly category: 'USER' | 'OPERATION' | 'SYSTEM' | 'HISTORICAL' | 'BUSINESS';
+  readonly factor: string;
+  readonly weight: number; // 0-1 scale
+  readonly impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  readonly value: number;
+  readonly description: string;
 }
 
 /**
@@ -121,7 +131,9 @@ export interface ValidationRecommendation {
   readonly requiresHumanApproval: boolean;
   readonly validationTimeout: number;
   readonly retryAttempts: number;
-  readonly auditLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';readonly safeguards: string[];readonly alternatives: string[];
+  readonly auditLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
+  readonly safeguards: string[];
+  readonly alternatives: string[];
 }
 
 /**
@@ -139,8 +151,11 @@ interface ActivityPattern {
  * User preferences for validation customization
  */
 interface UserPreferences {
-  readonly validationSensitivity: 'LOW' | 'MEDIUM' | 'HIGH';readonly autoApprovePatterns: string[];readonly requireApprovalPatterns: string[];
-  readonly preferredValidationSpeed: 'FAST' | 'BALANCED' | 'THOROUGH';readonly learningEnabled: boolean;}
+  readonly validationSensitivity: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly autoApprovePatterns: string[];
+  readonly requireApprovalPatterns: string[];
+  readonly preferredValidationSpeed: 'FAST' | 'BALANCED' | 'THOROUGH';
+  readonly learningEnabled: boolean;}
 
 /**
  * Session context information
@@ -204,14 +219,18 @@ interface ApprovalPattern {
 interface AnomalyEvent {
   readonly timestamp: Date;
   readonly anomalyType: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly resolved: boolean;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly description: string;
+  readonly resolved: boolean;
 }
 
 /**
  * Compliance level requirements
  */
 interface ComplianceLevel {
-  readonly level: 'BASIC' | 'STANDARD' | 'ENHANCED' | 'MAXIMUM';readonly requirements: string[];readonly auditTrailRequired: boolean;
+  readonly level: 'BASIC' | 'STANDARD' | 'ENHANCED' | 'MAXIMUM';
+  readonly requirements: string[];
+  readonly auditTrailRequired: boolean;
   readonly approvalRequired: boolean;
 }
 

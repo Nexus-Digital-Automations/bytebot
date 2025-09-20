@@ -48,7 +48,10 @@ export interface BrowserSessionAuditEntry {
   readonly sessionId: string;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly sessionConfig?: Partial<CreateBrowserSessionDto>;
+  readonly validationResult: 'APPROVED' | 'DENIED';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
+  readonly conversationId: string;
+  readonly sessionConfig?: Partial<CreateBrowserSessionDto>;
   readonly resourceImpact?: ResourceImpactInfo;
 }
 

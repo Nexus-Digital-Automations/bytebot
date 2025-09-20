@@ -57,11 +57,14 @@ export interface RedisClusterConfig {
 export interface RedisNodeConfig {
   readonly host: string;
   readonly port: number;
-  readonly role: 'master' | 'slave';readonly weight: number;  // Load balancing weight}
+  readonly role: 'master' | 'slave';
+  readonly weight: number;  // Load balancing weight}
 
 export interface CompressionConfig {
   readonly enabled: boolean;
-  readonly algorithm: 'gzip' | 'lz4';readonly level: number;readonly threshold: number;  // Compress payloads > threshold bytes
+  readonly algorithm: 'gzip' | 'lz4';
+  readonly level: number;
+  readonly threshold: number;  // Compress payloads > threshold bytes
   readonly ratio: number;      // Expected compression ratio
 }
 
@@ -143,7 +146,8 @@ export interface RedisClusterMetrics {
   readonly health: {
     readonly uptime: number;
     readonly lastFailure?: Date;
-    readonly circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';readonly errorRate: number;};
+    readonly circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  readonly errorRate: number;};
 }
 
 /**

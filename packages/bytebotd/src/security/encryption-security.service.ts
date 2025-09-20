@@ -17,12 +17,18 @@
  * Performance: Sub-100ms encryption with secure key caching and HSM integration
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import * as crypto from 'crypto';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';// ===== ENCRYPTION SECURITY INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+
+// ===== ENCRYPTION SECURITY INTERFACES =====
+/**
  * Supported encryption algorithms
  */
 export enum EncryptionAlgorithm {
@@ -34,7 +40,13 @@ export enum KeyType {
  * Key security levels
  */
 export enum KeySecurityLevel {
-  HARDWARE_HSM = 'HARDWARE_HSM',         // Hardware Security ModuleSOFTWARE_SECURE = 'SOFTWARE_SECURE',   // Secure software storageENCRYPTED_STORAGE = 'ENCRYPTED_STORAGE', // Encrypted at restSTANDARD = 'STANDARD'                   // Standard security}/**
+  HARDWARE_HSM = 'HARDWARE_HSM',         // Hardware Security Module
+  SOFTWARE_SECURE = 'SOFTWARE_SECURE',   // Secure software storage
+  ENCRYPTED_STORAGE = 'ENCRYPTED_STORAGE', // Encrypted at rest
+  STANDARD = 'STANDARD'                   // Standard security
+}
+
+/**
  * Cryptographic operation types
  */
 export enum CryptographicOperation {
@@ -92,7 +104,8 @@ export interface CryptographicOptions {
   readonly iterations?: number;
   readonly salt?: Buffer;
   readonly iv?: Buffer;
-  readonly encoding?: 'hex' | 'base64' | 'utf8';readonly padding?: string;}
+  readonly encoding?: 'hex' | 'base64' | 'utf8';
+  readonly padding?: string;}
 
 /**
  * Encryption operation result
@@ -170,7 +183,8 @@ export interface CryptographicPolicy {
  */
 export interface CryptographicThreat {
   readonly threatId: string;
-  readonly type: 'WEAK_ALGORITHM' | 'KEY_COMPROMISE' | 'TIMING_ATTACK' | 'SIDE_CHANNEL' | 'QUANTUM_THREAT';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly type: 'WEAK_ALGORITHM' | 'KEY_COMPROMISE' | 'TIMING_ATTACK' | 'SIDE_CHANNEL' | 'QUANTUM_THREAT';
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly description: string;
   readonly affectedKeys: string[];
   readonly detectedAt: Date;

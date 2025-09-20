@@ -121,7 +121,8 @@ export interface LoadTestScenario {
   readonly userJourneys: UserJourney[];
   readonly peakLoad: number;           // Peak concurrent users
   readonly duration: number;           // Test duration in seconds
-  readonly rampPattern: 'linear' | 'exponential' | 'step';readonly expectedMetrics: {readonly averageLatency: number;
+  readonly rampPattern: 'linear' | 'exponential' | 'step';
+  readonly expectedMetrics: {readonly averageLatency: number;
     readonly throughput: number;
     readonly errorRate: number;
   };

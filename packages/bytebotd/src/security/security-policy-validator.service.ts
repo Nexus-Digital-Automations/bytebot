@@ -19,15 +19,30 @@
  * Performance: Sub-500ms validation with multi-level caching for policy operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';// ===== SECURITY POLICY INTEGRATION INTERFACES =====export interface SecurityPolicyContext extends ParlantConversationContext {
-  readonly policyDomain: 'password' | 'access_control' | 'encryption' | 'audit' | 'network' | 'data_protection';readonly policyScope: 'organization' | 'department' | 'application' | 'user_group' | 'individual';readonly changeType: 'create' | 'update' | 'delete' | 'activate' | 'deactivate' | 'review';readonly complianceFramework?: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST';readonly businessJustification: string;readonly approvalRequired: boolean;
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+
+// ===== SECURITY POLICY INTEGRATION INTERFACES =====
+export interface SecurityPolicyContext extends ParlantConversationContext {
+  readonly policyDomain: 'password' | 'access_control' | 'encryption' | 'audit' | 'network' | 'data_protection';
+  readonly policyScope: 'organization' | 'department' | 'application' | 'user_group' | 'individual';
+  readonly changeType: 'create' | 'update' | 'delete' | 'activate' | 'deactivate' | 'review';
+  readonly complianceFramework?: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST';
+  readonly businessJustification: string;
+  readonly approvalRequired: boolean;
 }
 
 export interface SecurityPolicy {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly domain: SecurityPolicyContext['policyDomain'];readonly scope: SecurityPolicyContext['policyScope'];readonly version: string;readonly status: 'draft' | 'active' | 'inactive' | 'deprecated';readonly rules: PolicyRule[];readonly metadata: {
+  readonly domain: SecurityPolicyContext['policyDomain'];
+  readonly scope: SecurityPolicyContext['policyScope'];
+  readonly version: string;
+  readonly status: 'draft' | 'active' | 'inactive' | 'deprecated';
+  readonly rules: PolicyRule[];
+  readonly metadata: {
     readonly createdBy: string;
     readonly createdAt: Date;
     readonly lastModifiedBy: string;
@@ -48,21 +63,30 @@ export interface PolicyRule {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly ruleType: 'allow' | 'deny' | 'require' | 'recommend' | 'monitor';readonly conditions: PolicyCondition[];readonly actions: PolicyAction[];
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly enabled: boolean;}
+  readonly ruleType: 'allow' | 'deny' | 'require' | 'recommend' | 'monitor';
+  readonly conditions: PolicyCondition[];
+  readonly actions: PolicyAction[];
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly enabled: boolean;}
 
 export interface PolicyCondition {
   readonly field: string;
-  readonly operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'regex';readonly value: unknown;readonly description: string;
+  readonly operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'regex';
+  readonly value: unknown;
+  readonly description: string;
 }
 
 export interface PolicyAction {
-  readonly type: 'log' | 'alert' | 'block' | 'redirect' | 'escalate' | 'audit';readonly parameters: Record<string, unknown>;readonly description: string;
+  readonly type: 'log' | 'alert' | 'block' | 'redirect' | 'escalate' | 'audit';
+  readonly parameters: Record<string, unknown>;
+  readonly description: string;
 }
 
 export interface PolicyValidationRequest {
   readonly policy: SecurityPolicy;
-  readonly changeType: SecurityPolicyContext['changeType'];readonly context: SecurityPolicyContext;readonly operationId: string;
+  readonly changeType: SecurityPolicyContext['changeType'];
+  readonly context: SecurityPolicyContext;
+  readonly operationId: string;
 }
 
 export interface PolicyValidationResponse {

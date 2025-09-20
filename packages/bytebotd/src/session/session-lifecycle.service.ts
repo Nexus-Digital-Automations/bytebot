@@ -90,14 +90,19 @@ export interface LifecyclePolicyRule {
  * Policy condition for rule evaluation
  */
 export interface PolicyCondition {
-  readonly type: 'session_age' | 'activity_level' | 'resource_usage' | 'user_role' | 'time_of_day' | 'custom';readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'contains';readonly value: any;readonly metadata?: Record<string, any>;
+  readonly type: 'session_age' | 'activity_level' | 'resource_usage' | 'user_role' | 'time_of_day' | 'custom';
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'contains';
+  readonly value: any;
+  readonly metadata?: Record<string, any>;
 }
 
 /**
  * Policy action for rule execution
  */
 export interface PolicyAction {
-  readonly type: 'extend_timeout' | 'force_cleanup' | 'hibernate' | 'alert' | 'log' | 'custom';readonly parameters: Record<string, any>;readonly delay?: number;
+  readonly type: 'extend_timeout' | 'force_cleanup' | 'hibernate' | 'alert' | 'log' | 'custom';
+  readonly parameters: Record<string, any>;
+  readonly delay?: number;
   readonly conditions?: PolicyCondition[];
 }
 
@@ -124,7 +129,9 @@ export interface AgeRange {
  * Resource usage range specification
  */
 export interface ResourceUsageRange {
-  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';readonly minUsage: number;readonly maxUsage?: number;
+  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';
+  readonly minUsage: number;
+  readonly maxUsage?: number;
 }
 
 /**
@@ -199,7 +206,9 @@ export interface ResourceConstraintsConfig {
  * Pressure response rule
  */
 export interface PressureResponseRule {
-  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';readonly threshold: number;readonly actions: string[];
+  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';
+  readonly threshold: number;
+  readonly actions: string[];
   readonly priority: number;
   readonly cooldownPeriod: number;
 }
@@ -264,9 +273,13 @@ export interface ConditionEvaluationResult {
  * Lifecycle action recommendation
  */
 export interface LifecycleAction {
-  readonly action: 'maintain' | 'extend' | 'warn' | 'hibernate' | 'cleanup' | 'terminate';readonly parameters: Record<string, any>;readonly confidence: number;
+  readonly action: 'maintain' | 'extend' | 'warn' | 'hibernate' | 'cleanup' | 'terminate';
+  readonly parameters: Record<string, any>;
+  readonly confidence: number;
   readonly reasoning: string[];
-  readonly urgency: 'low' | 'medium' | 'high' | 'critical';readonly estimatedImpact: string;readonly alternatives: LifecycleAction[];
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
+  readonly estimatedImpact: string;
+  readonly alternatives: LifecycleAction[];
 }
 
 /**
@@ -287,7 +300,8 @@ export interface PredictionFactor {
   readonly factor: string;
   readonly weight: number;
   readonly value: any;
-  readonly trend: 'increasing' | 'decreasing' | 'stable';readonly influence: 'positive' | 'negative' | 'neutral';}/**
+  readonly trend: 'increasing' | 'decreasing' | 'stable';
+  readonly influence: 'positive' | 'negative' | 'neutral';}/**
  * Expiration scenario
  */
 export interface ExpirationScenario {
@@ -303,7 +317,9 @@ export interface ExpirationScenario {
  */
 export interface LifecycleRiskFactor {
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly likelihood: number;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly likelihood: number;
   readonly impact: number;
   readonly mitigation: string[];
   readonly monitoring: boolean;

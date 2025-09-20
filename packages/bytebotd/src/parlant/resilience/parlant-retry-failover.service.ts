@@ -126,7 +126,9 @@ interface MutableRetryAnalytics {
  * Graceful degradation strategy
  */
 export interface DegradationStrategy {
-  readonly level: 'NONE' | 'PARTIAL' | 'MINIMAL' | 'EMERGENCY';readonly cacheOnly: boolean;readonly reduceValidation: boolean;
+  readonly level: 'NONE' | 'PARTIAL' | 'MINIMAL' | 'EMERGENCY';
+  readonly cacheOnly: boolean;
+  readonly reduceValidation: boolean;
   readonly allowBypass: boolean;
   readonly notifyUsers: boolean;
   readonly fallbackResponse: ParlantValidationResponse;

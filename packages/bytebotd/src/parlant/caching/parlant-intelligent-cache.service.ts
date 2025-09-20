@@ -64,7 +64,9 @@ export interface CacheStats {
  */
 export interface CacheWarmingConfig {
   readonly enabled: boolean;
-  readonly strategies: ('popular_functions' | 'recent_patterns' | 'predictive_preload')[];readonly warmingIntervalMinutes: number;readonly maxWarmingOperations: number;
+  readonly strategies: ('popular_functions' | 'recent_patterns' | 'predictive_preload')[];
+  readonly warmingIntervalMinutes: number;
+  readonly maxWarmingOperations: number;
   readonly priorityFunctions: string[];
 }
 
@@ -72,7 +74,8 @@ export interface CacheWarmingConfig {
  * Intelligent cache recommendation
  */
 export interface CacheRecommendation {
-  readonly category: 'ttl' | 'size' | 'warming' | 'eviction' | 'compression';readonly priority: 'critical' | 'high' | 'medium' | 'low';
+  readonly category: 'ttl' | 'size' | 'warming' | 'eviction' | 'compression';
+  readonly priority: 'critical' | 'high' | 'medium' | 'low';
   readonly currentValue: string;
   readonly recommendedValue: string;
   readonly expectedImprovement: string;

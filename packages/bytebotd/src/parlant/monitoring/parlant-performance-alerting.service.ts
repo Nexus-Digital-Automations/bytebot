@@ -51,7 +51,10 @@ export interface AlertRule {
  * Alert condition types
  */
 export interface AlertCondition {
-  readonly type: 'THRESHOLD' | 'ANOMALY' | 'TREND' | 'COMPOSITE' | 'PREDICTIVE';readonly operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';readonly aggregation: 'AVG' | 'MAX' | 'MIN' | 'SUM' | 'COUNT' | 'P95' | 'P99';readonly timeWindow: string; // e.g., '5m', '1h', '1d'readonly evaluationFrequency: string; // e.g., '30s', '1m', '5m'readonly dataPoints: number; // Number of data points to evaluatereadonly missingSDataBehavior: 'IGNORE' | 'TREAT_AS_ZERO' | 'ALERT';}/**
+  readonly type: 'THRESHOLD' | 'ANOMALY' | 'TREND' | 'COMPOSITE' | 'PREDICTIVE';
+  readonly operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';
+  readonly aggregation: 'AVG' | 'MAX' | 'MIN' | 'SUM' | 'COUNT' | 'P95' | 'P99';
+  readonly timeWindow: string; // e.g., '5m', '1h', '1d'readonly evaluationFrequency: string; // e.g., '30s', '1m', '5m'readonly dataPoints: number; // Number of data points to evaluatereadonly missingSDataBehavior: 'IGNORE' | 'TREAT_AS_ZERO' | 'ALERT';}/**
  * Alert thresholds with dynamic adjustment
  */
 export interface AlertThresholds {
@@ -60,7 +63,8 @@ export interface AlertThresholds {
   readonly emergency?: number;
   readonly dynamicAdjustment: {
     readonly enabled: boolean;
-    readonly algorithm: 'STATISTICAL' | 'MACHINE_LEARNING' | 'SEASONAL';readonly learningPeriod: string; // e.g., '7d', '30d'readonly adjustmentFactor: number; // 0.1 = 10% adjustmentreadonly minThreshold: number;
+    readonly algorithm: 'STATISTICAL' | 'MACHINE_LEARNING' | 'SEASONAL';
+  readonly learningPeriod: string; // e.g., '7d', '30d'readonly adjustmentFactor: number; // 0.1 = 10% adjustmentreadonly minThreshold: number;
     readonly maxThreshold: number;
   };
   readonly percentileThresholds?: {
@@ -102,7 +106,8 @@ export interface EscalationStep {
  * Escalation target
  */
 export interface EscalationTarget {
-  readonly type: 'USER' | 'TEAM' | 'EXTERNAL_SYSTEM';readonly identifier: string; // User ID, team ID, or system identifierreadonly contactMethods: string[]; // email, sms, push, webhook
+  readonly type: 'USER' | 'TEAM' | 'EXTERNAL_SYSTEM';
+  readonly identifier: string; // User ID, team ID, or system identifierreadonly contactMethods: string[]; // email, sms, push, webhook
   readonly priority: number; // Lower number = higher priority
 }
 
@@ -110,7 +115,9 @@ export interface EscalationTarget {
  * Escalation action
  */
 export interface EscalationAction {
-  readonly type: 'NOTIFY' | 'CREATE_INCIDENT' | 'RUN_AUTOMATION' | 'SCALE_RESOURCES';readonly config: Record<string, unknown>;readonly conditions?: string[]; // Conditions that must be met to execute action
+  readonly type: 'NOTIFY' | 'CREATE_INCIDENT' | 'RUN_AUTOMATION' | 'SCALE_RESOURCES';
+  readonly config: Record<string, unknown>;
+  readonly conditions?: string[]; // Conditions that must be met to execute action
 }
 
 /**
@@ -118,14 +125,18 @@ export interface EscalationAction {
  */
 export interface EscalationCondition {
   readonly metric: string;
-  readonly operator: 'GT' | 'LT' | 'EQ';readonly value: number;readonly timeWindow: string;
+  readonly operator: 'GT' | 'LT' | 'EQ';
+  readonly value: number;
+  readonly timeWindow: string;
 }
 
 /**
  * Notification channel configuration
  */
 export interface NotificationChannel {
-  readonly type: 'EMAIL' | 'SMS' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY' | 'TEAMS';readonly config: Record<string, unknown>;readonly enabled: boolean;
+  readonly type: 'EMAIL' | 'SMS' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY' | 'TEAMS';
+  readonly config: Record<string, unknown>;
+  readonly enabled: boolean;
   readonly priority: number;
   readonly rateLimiting: {
     readonly maxPerHour: number;
@@ -141,18 +152,23 @@ export interface NotificationChannel {
 export interface NotificationTemplate {
   readonly subject: string;
   readonly body: string;
-  readonly format: 'TEXT' | 'HTML' | 'MARKDOWN' | 'JSON';readonly variables: string[]; // Available template variables}
+  readonly format: 'TEXT' | 'HTML' | 'MARKDOWN' | 'JSON';
+  readonly variables: string[]; // Available template variables}
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpact {
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'PERFORMANCE' | 'AVAILABILITY' | 'SECURITY' | 'COMPLIANCE';readonly affectedServices: string[];readonly estimatedUserImpact: number; // Number of affected users
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: 'PERFORMANCE' | 'AVAILABILITY' | 'SECURITY' | 'COMPLIANCE';
+  readonly affectedServices: string[];
+  readonly estimatedUserImpact: number; // Number of affected users
   readonly revenueImpact: {
     readonly currency: string;
     readonly amountPerHour: number;
     readonly calculationMethod: 'ESTIMATED' | 'HISTORICAL' | 'CALCULATED';};readonly complianceRisk: {
-    readonly level: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly regulations: string[]; // e.g., ['GDPR', 'SOX', 'HIPAA']readonly penalties: string[];};
+    readonly level: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly regulations: string[]; // e.g., ['GDPR', 'SOX', 'HIPAA']readonly penalties: string[];};
 }
 
 /**
@@ -181,14 +197,17 @@ export interface AutoResolutionConfig {
  */
 export interface AutoResolutionCondition {
   readonly metric: string;
-  readonly operator: 'GT' | 'LT' | 'EQ';readonly value: number;readonly duration: number; // Minutes the condition must be met
+  readonly operator: 'GT' | 'LT' | 'EQ';
+  readonly value: number;
+  readonly duration: number; // Minutes the condition must be met
 }
 
 /**
  * Auto-resolution action
  */
 export interface AutoResolutionAction {
-  readonly type: 'RESOLVE_ALERT' | 'SEND_NOTIFICATION' | 'RUN_SCRIPT' | 'UPDATE_STATUS';readonly config: Record<string, unknown>;}
+  readonly type: 'RESOLVE_ALERT' | 'SEND_NOTIFICATION' | 'RUN_SCRIPT' | 'UPDATE_STATUS';
+  readonly config: Record<string, unknown>;}
 
 /**
  * Active alert instance
@@ -230,7 +249,9 @@ export interface EscalationEvent {
   readonly fromLevel: number;
   readonly toLevel: number;
   readonly reason: string;
-  readonly triggeredBy: 'SYSTEM' | 'USER';readonly targets: EscalationTarget[];readonly actions: EscalationAction[];
+  readonly triggeredBy: 'SYSTEM' | 'USER';
+  readonly targets: EscalationTarget[];
+  readonly actions: EscalationAction[];
 }
 
 /**
@@ -251,7 +272,8 @@ export interface AlertContext {
   readonly triggeringEvent: {
     readonly timestamp: Date;
     readonly value: number;
-    readonly trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';readonly changeRate: number; // Rate of changereadonly historicalComparison: {
+    readonly trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';
+  readonly changeRate: number; // Rate of changereadonly historicalComparison: {
       readonly samePeriodLastWeek: number;
       readonly samePeriodLastMonth: number;
       readonly percentChange: number;
@@ -283,7 +305,8 @@ export interface DeploymentEvent {
   readonly timestamp: Date;
   readonly service: string;
   readonly version: string;
-  readonly type: 'DEPLOYMENT' | 'ROLLBACK' | 'CONFIG_CHANGE';readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
+  readonly type: 'DEPLOYMENT' | 'ROLLBACK' | 'CONFIG_CHANGE';
+  readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Configuration change event
  */
 export interface ConfigChangeEvent {
@@ -311,7 +334,8 @@ export interface AlertCorrelation {
   readonly rootCauseCandidate: boolean;
   readonly correlationScore: number; // 0 to 1
   readonly timeCorrelation: {
-    readonly type: 'SIMULTANEOUS' | 'CASCADING' | 'PERIODIC';readonly timeDelta: number; // Milliseconds between related alerts};
+    readonly type: 'SIMULTANEOUS' | 'CASCADING' | 'PERIODIC';
+  readonly timeDelta: number; // Milliseconds between related alerts};
   readonly metricCorrelation: {
     readonly strongCorrelations: string[]; // Metrics with strong correlation
     readonly weakCorrelations: string[]; // Metrics with weak correlation
@@ -325,18 +349,22 @@ export interface AlertCorrelation {
  */
 export interface AlertImpactChain {
   readonly metric: string;
-  readonly impact: 'CAUSE' | 'EFFECT' | 'AMPLIFIER' | 'DAMPENER';readonly confidence: number; // 0 to 1readonly evidence: string[];
+  readonly impact: 'CAUSE' | 'EFFECT' | 'AMPLIFIER' | 'DAMPENER';
+  readonly confidence: number; // 0 to 1readonly evidence: string[];
 }
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
-  readonly overallImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly affectedUsers: number;readonly affectedServices: string[];
+  readonly overallImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly affectedUsers: number;
+  readonly affectedServices: string[];
   readonly affectedRevenue: number;
   readonly slaViolations: string[];
   readonly complianceRisks: string[];
-  readonly reputationImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly customerSatisfactionImpact: number; // -100 to 100readonly recoveryTimeEstimate: number; // Minutes
+  readonly reputationImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly customerSatisfactionImpact: number; // -100 to 100readonly recoveryTimeEstimate: number; // Minutes
   readonly mitigationActions: string[];
 }
 
@@ -374,7 +402,10 @@ export interface AlertAnalytics {
  */
 export interface AlertingRecommendation {
   readonly id: string;
-  readonly type: 'THRESHOLD_ADJUSTMENT' | 'RULE_OPTIMIZATION' | 'NOISE_REDUCTION' | 'ESCALATION_TUNING';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH';readonly title: string;readonly description: string;
+  readonly type: 'THRESHOLD_ADJUSTMENT' | 'RULE_OPTIMIZATION' | 'NOISE_REDUCTION' | 'ESCALATION_TUNING';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly title: string;
+  readonly description: string;
   readonly impact: {
     readonly falsePositiveReduction: number; // Percentage
     readonly detectionImprovement: number; // Percentage

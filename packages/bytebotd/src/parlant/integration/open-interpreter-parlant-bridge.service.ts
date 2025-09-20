@@ -37,11 +37,15 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { HttpS
  * Open-Interpreter execution request
  */
 export interface OpenInterpreterExecutionRequest {
-  readonly language: 'python' | 'javascript' | 'bash' | 'shell' | 'sql' | 'r' | 'go' | 'rust' | 'java' | 'cpp';readonly code: string;readonly context?: Record<string, unknown>;
+  readonly language: 'python' | 'javascript' | 'bash' | 'shell' | 'sql' | 'r' | 'go' | 'rust' | 'java' | 'cpp';
+  readonly code: string;
+  readonly context?: Record<string, unknown>;
   readonly timeout?: number;
   readonly validation?: {
     readonly enableParlantValidation: boolean;
-    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];readonly riskLevel?: RiskLevel;readonly maxValidationLatency?: number;
+    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];
+  readonly riskLevel?: RiskLevel;
+  readonly maxValidationLatency?: number;
   };
 }
 
@@ -50,7 +54,8 @@ export interface OpenInterpreterExecutionRequest {
  */
 export interface OpenInterpreterExecutionResponse {
   readonly jobId: string;
-  readonly status: 'submitted' | 'running' | 'completed' | 'failed' | 'timeout';readonly result?: {readonly stdout: string;
+  readonly status: 'submitted' | 'running' | 'completed' | 'failed' | 'timeout';
+  readonly result?: {readonly stdout: string;
     readonly stderr: string;
     readonly exitCode: number;
     readonly files: Array<{
@@ -100,7 +105,9 @@ export interface CodeExecutionRiskAssessment {
  */
 export interface OpenInterpreterJobStatus {
   readonly jobId: string;
-  readonly status: 'submitted' | 'running' | 'completed' | 'failed' | 'timeout';readonly progress?: number;readonly estimatedCompletion?: Date;
+  readonly status: 'submitted' | 'running' | 'completed' | 'failed' | 'timeout';
+  readonly progress?: number;
+  readonly estimatedCompletion?: Date;
   readonly currentStep?: string;
   readonly logs: string[];
 }

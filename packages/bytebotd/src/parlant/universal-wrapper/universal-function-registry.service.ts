@@ -34,7 +34,9 @@ import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';impor
 export interface FunctionRegistrationRequest {
   readonly functionName: string;
   readonly packageName: string;
-  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';readonly category: FunctionCategory;readonly description: string;
+  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';
+  readonly category: FunctionCategory;
+  readonly description: string;
   readonly parameters: FunctionParameterMetadata[];
   readonly returnType: FunctionReturnMetadata;
   readonly tags?: string[];
@@ -52,10 +54,15 @@ export interface FunctionRegistrationRequest {
 export interface FunctionSearchCriteria {
   readonly functionName?: string | RegExp;
   readonly packageName?: string | string[];
-  readonly language?: ('typescript' | 'python' | 'ruby' | 'javascript')[];readonly categories?: FunctionCategory[];readonly riskLevels?: RiskLevel[];
+  readonly language?: ('typescript' | 'python' | 'ruby' | 'javascript')[];
+  readonly categories?: FunctionCategory[];
+  readonly riskLevels?: RiskLevel[];
   readonly tags?: string[];
   readonly hasValidationRequirements?: boolean;
-  readonly performanceRating?: 'excellent' | 'good' | 'average' | 'poor';readonly securityRating?: 'high' | 'medium' | 'low';readonly lastUpdatedAfter?: Date;readonly lastUpdatedBefore?: Date;
+  readonly performanceRating?: 'excellent' | 'good' | 'average' | 'poor';
+  readonly securityRating?: 'high' | 'medium' | 'low';
+  readonly lastUpdatedAfter?: Date;
+  readonly lastUpdatedBefore?: Date;
   readonly limit?: number;
   readonly offset?: number;
   readonly sortBy?: keyof UniversalFunctionMetadata;
@@ -72,19 +79,27 @@ export interface RegistryStatistics {
   readonly averagePerformanceRating: number;
   readonly securityComplianceRate: number;
   readonly lastUpdated: Date;
-  readonly registryHealth: 'healthy' | 'degraded' | 'critical';readonly indexingStatus: 'complete' | 'in_progress' | 'failed';}/**
+  readonly registryHealth: 'healthy' | 'degraded' | 'critical';
+  readonly indexingStatus: 'complete' | 'in_progress' | 'failed';}/**
  * Function health status for monitoring
  */
 export interface FunctionHealthStatus {
   readonly functionId: string;
   readonly healthScore: number;
-  readonly status: 'healthy' | 'warning' | 'critical' | 'unknown';readonly issues: HealthIssue[];readonly lastHealthCheck: Date;
+  readonly status: 'healthy' | 'warning' | 'critical' | 'unknown';
+  readonly issues: HealthIssue[];
+  readonly lastHealthCheck: Date;
   readonly nextHealthCheck: Date;
-  readonly performanceTrend: 'improving' | 'stable' | 'degrading';readonly securityStatus: 'secure' | 'vulnerable' | 'unknown';readonly complianceStatus: 'compliant' | 'non_compliant' | 'unknown';}/**
+  readonly performanceTrend: 'improving' | 'stable' | 'degrading';
+  readonly securityStatus: 'secure' | 'vulnerable' | 'unknown';
+  readonly complianceStatus: 'compliant' | 'non_compliant' | 'unknown';}/**
  * Health issue for function monitoring
  */
 export interface HealthIssue {
-  readonly type: 'performance' | 'security' | 'compliance' | 'availability' | 'configuration';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly impact: string;
+  readonly type: 'performance' | 'security' | 'compliance' | 'availability' | 'configuration';
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly impact: string;
   readonly recommendation: string;
   readonly detectedAt: Date;
   readonly resolvedAt?: Date;

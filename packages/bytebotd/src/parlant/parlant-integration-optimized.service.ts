@@ -58,7 +58,9 @@ export interface OptimizedValidationResult extends ParlantValidationResponse {
  */
 export interface BulkValidationRequest {
   readonly requests: ParlantValidationRequest[];
-  readonly priority: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL';readonly batchSize?: number;readonly maxConcurrency?: number;
+  readonly priority: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL';
+  readonly batchSize?: number;
+  readonly maxConcurrency?: number;
   readonly failFastThreshold?: number;
 }
 

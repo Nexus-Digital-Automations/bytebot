@@ -65,7 +65,8 @@ export interface ChaosEngineeringConfig {
   readonly enabled: boolean;
   readonly scenarios: ChaosScenario[];
   readonly frequency: number; // milliseconds between chaos events
-  readonly intensity: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';readonly recoveryValidation: boolean;}
+  readonly intensity: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
+  readonly recoveryValidation: boolean;}
 
 /**
  * Chaos engineering scenario

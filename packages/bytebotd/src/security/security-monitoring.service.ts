@@ -17,12 +17,17 @@
  * Performance: Sub-1000ms monitoring with intelligent alert aggregation
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';// ===== SECURITY MONITORING INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+
+// ===== SECURITY MONITORING INTERFACES =====
+/**
  * Security event severity levels
  */
 export enum SecurityEventSeverity {
@@ -72,7 +77,9 @@ export interface SecurityMonitoringRequest {
   readonly operationId: string;
   readonly monitoringAction: string;
   readonly targetResources: string[];
-  readonly monitoringScope: 'SYSTEM' | 'APPLICATION' | 'NETWORK' | 'USER' | 'DATA';readonly duration?: number;readonly alertConfiguration: AlertConfiguration;
+  readonly monitoringScope: 'SYSTEM' | 'APPLICATION' | 'NETWORK' | 'USER' | 'DATA';
+  readonly duration?: number;
+  readonly alertConfiguration: AlertConfiguration;
   readonly context: ParlantConversationContext;
 }
 
@@ -81,7 +88,9 @@ export interface SecurityMonitoringRequest {
  */
 export interface AlertConfiguration {
   readonly enableRealTimeAlerts: boolean;
-  readonly alertChannels: ('EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK')[];readonly alertThresholds: Record<SecurityEventSeverity, number>;readonly escalationRules: EscalationRule[];
+  readonly alertChannels: ('EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK')[];
+  readonly alertThresholds: Record<SecurityEventSeverity, number>;
+  readonly escalationRules: EscalationRule[];
 }
 
 /**

@@ -44,7 +44,8 @@ export interface UltraOptimizedValidationRequest extends OptimizedValidationRequ
     readonly enableL0Cache?: boolean;
     readonly enablePredictiveLoading?: boolean;
     readonly enableMicroBatching?: boolean;
-    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];readonly maxLatencyMs?: number; // Default 500msreadonly priorityLevel?: 'ULTRA' | 'HIGH' | 'NORMAL';};}
+    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];
+  readonly maxLatencyMs?: number; // Default 500msreadonly priorityLevel?: 'ULTRA' | 'HIGH' | 'NORMAL';};}
 
 /**
  * Ultra-performance validation response with detailed timing

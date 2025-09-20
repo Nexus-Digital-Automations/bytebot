@@ -99,14 +99,16 @@ export enum AuthenticationType {
 
 export interface RetryPolicyConfig {
   readonly maxRetries: number;
-  readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';readonly baseDelay: number; // secondsreadonly maxDelay: number; // seconds
+  readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';
+  readonly baseDelay: number; // secondsreadonly maxDelay: number; // seconds
   readonly retryableErrors: string[];
 }
 
 export interface EncryptionConfig {
   readonly enabled: boolean;
   readonly algorithm: string;
-  readonly keyManagement: 'internal' | 'external' | 'hsm';readonly keyRotation: {readonly enabled: boolean;
+  readonly keyManagement: 'internal' | 'external' | 'hsm';
+  readonly keyRotation: {readonly enabled: boolean;
     readonly interval: number; // days
   };
 }
@@ -132,13 +134,16 @@ export enum DataFormat {
 export interface ValidationRule {
   readonly ruleId: string;
   readonly field: string;
-  readonly ruleType: 'required' | 'format' | 'range' | 'custom';readonly parameters: Record<string, any>;readonly errorMessage: string;
+  readonly ruleType: 'required' | 'format' | 'range' | 'custom';
+  readonly parameters: Record<string, any>;
+  readonly errorMessage: string;
 }
 
 export enum IntegrationOperation {
   PUSH_EVENTS = 'push-events',PULL_EVENTS = 'pull-events',PUSH_ALERTS = 'push-alerts',PULL_ALERTS = 'pull-alerts',SYNC_USERS = 'sync-users',SYNC_POLICIES = 'sync-policies',SUBMIT_REPORTS = 'submit-reports',QUERY_DATA = 'query-data',HEALTH_CHECK = 'health-check',BIDIRECTIONAL_SYNC = 'bidirectional-sync'}export enum SyncFrequency {
   REAL_TIME = 'real-time',EVERY_MINUTE = 'every-minute',EVERY_5_MINUTES = 'every-5-minutes',EVERY_15_MINUTES = 'every-15-minutes',EVERY_HOUR = 'every-hour',EVERY_6_HOURS = 'every-6-hours',DAILY = 'daily',WEEKLY = 'weekly',MONTHLY = 'monthly',ON_DEMAND = 'on-demand'}export interface ErrorHandlingConfig {
-  readonly strategy: 'fail-fast' | 'retry' | 'continue' | 'dead-letter';readonly deadLetterQueue: {readonly enabled: boolean;
+  readonly strategy: 'fail-fast' | 'retry' | 'continue' | 'dead-letter';
+  readonly deadLetterQueue: {readonly enabled: boolean;
     readonly queueName?: string;
     readonly retentionDays?: number;
   };
@@ -157,11 +162,15 @@ export interface MonitoringConfig {
 }
 
 export interface PrivacyControl {
-  readonly controlType: 'anonymization' | 'pseudonymization' | 'encryption' | 'masking';readonly fields: string[];readonly parameters: Record<string, any>;
+  readonly controlType: 'anonymization' | 'pseudonymization' | 'encryption' | 'masking';
+  readonly fields: string[];
+  readonly parameters: Record<string, any>;
 }
 
 export interface AccessControl {
-  readonly principalType: 'user' | 'service' | 'system';readonly principalId: string;readonly permissions: string[];
+  readonly principalType: 'user' | 'service' | 'system';
+  readonly principalId: string;
+  readonly permissions: string[];
   readonly conditions: Record<string, any>;
 }
 
@@ -207,7 +216,9 @@ export enum HealthStatus {
   readonly errorType: string;
   readonly errorMessage: string;
   readonly operation: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly retryable: boolean;readonly context: Record<string, any>;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly retryable: boolean;
+  readonly context: Record<string, any>;
 }
 
 /**
@@ -219,7 +230,9 @@ export interface SyncOperation {
   readonly operationType: IntegrationOperation;
   readonly startTime: Date;
   readonly endTime?: Date;
-  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';readonly direction: 'inbound' | 'outbound' | 'bidirectional';readonly dataScope: {readonly recordCount: number;
+  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  readonly direction: 'inbound' | 'outbound' | 'bidirectional';
+  readonly dataScope: {readonly recordCount: number;
     readonly dataSize: number; // bytes
     readonly timeRange?: { start: Date; end: Date };
     readonly filters?: Record<string, any>;
@@ -299,7 +312,9 @@ export interface DataFlow {
 export interface FlowCondition {
   readonly conditionId: string;
   readonly field: string;
-  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'contains' | 'regex';readonly value: any;readonly action: 'include' | 'exclude' | 'transform' | 'route';}export interface OrchestrationRule {
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'contains' | 'regex';
+  readonly value: any;
+  readonly action: 'include' | 'exclude' | 'transform' | 'route';}export interface OrchestrationRule {
   readonly ruleId: string;
   readonly ruleName: string;
   readonly trigger: OrchestrationTrigger;
@@ -310,10 +325,13 @@ export interface FlowCondition {
 }
 
 export interface OrchestrationTrigger {
-  readonly triggerType: 'event' | 'schedule' | 'threshold' | 'error';readonly parameters: Record<string, any>;}
+  readonly triggerType: 'event' | 'schedule' | 'threshold' | 'error';
+  readonly parameters: Record<string, any>;}
 
 export interface OrchestrationAction {
-  readonly actionType: 'sync' | 'transform' | 'alert' | 'retry' | 'pause' | 'escalate';readonly parameters: Record<string, any>;readonly timeout: number; // seconds
+  readonly actionType: 'sync' | 'transform' | 'alert' | 'retry' | 'pause' | 'escalate';
+  readonly parameters: Record<string, any>;
+  readonly timeout: number; // seconds
 }
 
 // ==================== MAIN SERVICE CLASS ====================

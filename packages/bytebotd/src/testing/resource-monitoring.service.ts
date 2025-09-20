@@ -316,7 +316,9 @@ export interface DatabaseTransactionMetrics {
  */
 export interface DatabaseReplicationMetrics {
   readonly replicationLag: number; // milliseconds
-  readonly replicationStatus: 'healthy' | 'lagging' | 'broken';readonly replicaCount: number;readonly replicationErrors: number;
+  readonly replicationStatus: 'healthy' | 'lagging' | 'broken';
+  readonly replicaCount: number;
+  readonly replicationErrors: number;
 }
 
 /**

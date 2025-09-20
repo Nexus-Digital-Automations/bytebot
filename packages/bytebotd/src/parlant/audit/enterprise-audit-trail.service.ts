@@ -52,7 +52,11 @@ export interface ImmutableAuditEvent {
   readonly eventData: {
     readonly functionName: string;
     readonly parameters: Record<string, any>;
-    readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';readonly duration: number;readonly clientInfo: {
+    readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';
+  readonly duration: number;
+  readonly clientInfo: {
       readonly ipAddress?: string;
       readonly userAgent?: string;
       readonly geolocation?: string;
@@ -64,12 +68,14 @@ export interface ImmutableAuditEvent {
     readonly authenticationMethod: string;
     readonly authorizationLevel: string;
     readonly accessControls: string[];
-    readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';readonly threatLevel: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};// Compliance Context
+    readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
+  readonly threatLevel: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};// Compliance Context
   readonly complianceContext: {
     readonly applicableRegulations: ComplianceRegulation[];
     readonly dataProtectionFlags: DataProtectionFlag[];
     readonly retentionPeriod: number;
-    readonly privacyImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly consentRequired: boolean;};
+    readonly privacyImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly consentRequired: boolean;};
 
   // Cryptographic Integrity
   readonly integrity: {
@@ -104,7 +110,9 @@ export enum ComplianceRegulation {
 export interface DataProtectionFlag {
   readonly regulation: ComplianceRegulation;
   readonly requirement: string;
-  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW' | 'PENDING';readonly evidence: string[];readonly assessmentDate: Date;
+  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW' | 'PENDING';
+  readonly evidence: string[];
+  readonly assessmentDate: Date;
   readonly reviewDate?: Date;
   readonly remediationActions?: string[];
 }
@@ -114,7 +122,9 @@ export interface DataProtectionFlag {
  */
 export interface ForensicContext {
   readonly investigationId: string;
-  readonly investigationType: 'SECURITY_INCIDENT' | 'COMPLIANCE_AUDIT' | 'INTERNAL_INVESTIGATION' | 'LEGAL_DISCOVERY';readonly initiatedBy: string;readonly initiatedAt: Date;
+  readonly investigationType: 'SECURITY_INCIDENT' | 'COMPLIANCE_AUDIT' | 'INTERNAL_INVESTIGATION' | 'LEGAL_DISCOVERY';
+  readonly initiatedBy: string;
+  readonly initiatedAt: Date;
   readonly scope: {
     readonly timeRange: { start: Date; end: Date };
     readonly userIds?: string[];
@@ -132,7 +142,9 @@ export interface ChainOfCustodyEntry {
   readonly entryId: string;
   readonly timestamp: Date;
   readonly custodian: string;
-  readonly action: 'COLLECTED' | 'TRANSFERRED' | 'ANALYZED' | 'RETURNED' | 'DESTROYED';readonly location: string;readonly hash: string;
+  readonly action: 'COLLECTED' | 'TRANSFERRED' | 'ANALYZED' | 'RETURNED' | 'DESTROYED';
+  readonly location: string;
+  readonly hash: string;
   readonly signature: string;
   readonly witnessSignature?: string;
 }
@@ -142,7 +154,9 @@ export interface ChainOfCustodyEntry {
  */
 export interface AuditAnalyticsResult {
   readonly analysisId: string;
-  readonly analysisType: 'PATTERN_DETECTION' | 'ANOMALY_DETECTION' | 'THREAT_ANALYSIS' | 'COMPLIANCE_ASSESSMENT';readonly timestamp: Date;readonly scope: {
+  readonly analysisType: 'PATTERN_DETECTION' | 'ANOMALY_DETECTION' | 'THREAT_ANALYSIS' | 'COMPLIANCE_ASSESSMENT';
+  readonly timestamp: Date;
+  readonly scope: {
     readonly timeRange: { start: Date; end: Date };
     readonly eventCount: number;
     readonly uniqueUsers: number;
@@ -158,7 +172,10 @@ export interface AuditAnalyticsResult {
  */
 export interface AnalyticsFinding {
   readonly findingId: string;
-  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'UNUSUAL_ACTIVITY' | 'POLICY_VIOLATION' | 'SECURITY_THREAT' | 'COMPLIANCE_RISK';readonly description: string;readonly affectedEvents: string[];
+  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: 'UNUSUAL_ACTIVITY' | 'POLICY_VIOLATION' | 'SECURITY_THREAT' | 'COMPLIANCE_RISK';
+  readonly description: string;
+  readonly affectedEvents: string[];
   readonly patternMatches: Record<string, any>;
   readonly mitigation: string[];
 }
@@ -169,9 +186,11 @@ export interface AnalyticsFinding {
 export interface ComplianceReport {
   readonly reportId: string;
   readonly regulation: ComplianceRegulation;
-  readonly reportType: 'PERIODIC' | 'INCIDENT' | 'CERTIFICATION' | 'AUDIT';readonly reportPeriod: { start: Date; end: Date };readonly generatedAt: Date;
+  readonly reportType: 'PERIODIC' | 'INCIDENT' | 'CERTIFICATION' | 'AUDIT';
+  readonly reportPeriod: { start: Date; end: Date };readonly generatedAt: Date;
   readonly generatedBy: string;
-  readonly status: 'DRAFT' | 'FINAL' | 'SUBMITTED' | 'APPROVED';readonly executiveSummary: {readonly complianceScore: number;
+  readonly status: 'DRAFT' | 'FINAL' | 'SUBMITTED' | 'APPROVED';
+  readonly executiveSummary: {readonly complianceScore: number;
     readonly totalEvents: number;
     readonly compliantEvents: number;
     readonly violations: number;
@@ -188,7 +207,10 @@ export interface ComplianceFinding {
   readonly findingId: string;
   readonly regulation: ComplianceRegulation;
   readonly requirement: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK';readonly description: string;readonly evidence: string[];
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK';
+  readonly description: string;
+  readonly evidence: string[];
   readonly affectedSystems: string[];
   readonly remediationPlan: string[];
   readonly dueDate?: Date;
@@ -200,9 +222,14 @@ export interface ComplianceFinding {
  */
 export interface ComplianceRecommendation {
   readonly recommendationId: string;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING' | 'GOVERNANCE';readonly title: string;readonly description: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING' | 'GOVERNANCE';
+  readonly title: string;
+  readonly description: string;
   readonly implementationSteps: string[];
-  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';readonly expectedBenefit: string;readonly riskReduction: number;
+  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly expectedBenefit: string;
+  readonly riskReduction: number;
 }
 
 /**
@@ -227,15 +254,20 @@ export interface IntegrityVerificationResult {
 export interface IntegrityViolation {
   readonly violationId: string;
   readonly eventId: string;
-  readonly violationType: 'TAMPERED' | 'CORRUPTED' | 'MISSING' | 'INVALID_HASH' | 'BROKEN_CHAIN';readonly description: string;readonly detectedAt: Date;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly evidence: string[];}
+  readonly violationType: 'TAMPERED' | 'CORRUPTED' | 'MISSING' | 'INVALID_HASH' | 'BROKEN_CHAIN';
+  readonly description: string;
+  readonly detectedAt: Date;
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly evidence: string[];}
 
 /**
  * Certification status
  */
 export interface CertificationStatus {
   readonly regulation: ComplianceRegulation;
-  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'CONDITIONAL' | 'PENDING';readonly validUntil?: Date;readonly certificationBody?: string;
+  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'CONDITIONAL' | 'PENDING';
+  readonly validUntil?: Date;
+  readonly certificationBody?: string;
   readonly certificationNumber?: string;
   readonly conditions?: string[];
   readonly nextReview: Date;

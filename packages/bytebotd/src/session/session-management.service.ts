@@ -122,7 +122,9 @@ export interface SessionConflict {
   readonly userId: string;
   readonly existingSessions: SessionMetadata[];
   readonly newSessionRequest: Partial<SessionMetadata>;
-  readonly conflictType: 'max_sessions_exceeded' | 'duplicate_device' | 'security_violation';readonly recommendedAction: ConflictResolutionStrategy;readonly detectedAt: Date;
+  readonly conflictType: 'max_sessions_exceeded' | 'duplicate_device' | 'security_violation';
+  readonly recommendedAction: ConflictResolutionStrategy;
+  readonly detectedAt: Date;
 }
 
 /**

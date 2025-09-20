@@ -91,7 +91,8 @@ export interface OrchestrationErrorAnalytics {
     readonly last24Hours: number;
     readonly last7Days: number;
     readonly last30Days: number;
-    readonly trendDirection: 'increasing' | 'decreasing' | 'stable';readonly projectedNext7Days: number;};
+    readonly trendDirection: 'increasing' | 'decreasing' | 'stable';
+  readonly projectedNext7Days: number;};
 }
 
 /**
@@ -101,7 +102,9 @@ export interface OrchestrationMonitoringData {
   readonly activeOrchestrations: Array<{
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed';readonly progress: number;readonly startTime: Date;
+    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed';
+  readonly progress: number;
+  readonly startTime: Date;
     readonly estimatedCompletion?: Date;
     readonly resourceUsage: {
       readonly browsers: number;
@@ -132,7 +135,10 @@ export interface OrchestrationMonitoringData {
   };
   readonly alerts: Array<{
     readonly alertId: string;
-    readonly type: 'performance' | 'error' | 'resource' | 'coordination';readonly severity: 'info' | 'warning' | 'error' | 'critical';readonly message: string;readonly timestamp: Date;
+    readonly type: 'performance' | 'error' | 'resource' | 'coordination';
+  readonly severity: 'info' | 'warning' | 'error' | 'critical';
+  readonly message: string;
+  readonly timestamp: Date;
     readonly orchestrationId?: string;
     readonly acknowledged: boolean;
   }>;
@@ -143,9 +149,14 @@ export interface OrchestrationMonitoringData {
  */
 export interface OrchestrationAnalyticsRecommendations {
   readonly performanceRecommendations: Array<{
-    readonly category: 'throughput' | 'latency' | 'resource_optimization' | 'coordination';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly title: string;readonly description: string;
+    readonly category: 'throughput' | 'latency' | 'resource_optimization' | 'coordination';
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly title: string;
+  readonly description: string;
     readonly expectedImpact: string;
-    readonly implementationComplexity: 'low' | 'medium' | 'high';readonly estimatedEffort: string;readonly resourcesRequired: string[];
+    readonly implementationComplexity: 'low' | 'medium' | 'high';
+  readonly estimatedEffort: string;
+  readonly resourcesRequired: string[];
   }>;
   readonly errorReduction: Array<{
     readonly errorCategory: OrchestrationErrorCategory;
@@ -155,16 +166,22 @@ export interface OrchestrationAnalyticsRecommendations {
     readonly preventiveActions: string[];
   }>;
   readonly resourceOptimization: Array<{
-    readonly resourceType: 'browsers' | 'memory' | 'cpu' | 'network';readonly currentUtilization: number;readonly optimalUtilization: number;
+    readonly resourceType: 'browsers' | 'memory' | 'cpu' | 'network';
+  readonly currentUtilization: number;
+  readonly optimalUtilization: number;
     readonly actions: string[];
     readonly expectedSavings: string;
   }>;
   readonly systemHealth: {
     readonly overallScore: number;
-    readonly trend: 'improving' | 'stable' | 'degrading';readonly criticalIssues: number;readonly nextReviewDate: Date;
+    readonly trend: 'improving' | 'stable' | 'degrading';
+  readonly criticalIssues: number;
+  readonly nextReviewDate: Date;
     readonly healthIndicators: Array<{
       readonly indicator: string;
-      readonly status: 'healthy' | 'warning' | 'critical';readonly value: number;readonly threshold: number;
+      readonly status: 'healthy' | 'warning' | 'critical';
+  readonly value: number;
+  readonly threshold: number;
     }>;
   };
 }

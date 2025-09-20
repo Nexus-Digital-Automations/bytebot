@@ -37,7 +37,10 @@ export interface ComplianceFrameworkConfig {
   readonly enabled: boolean;
   readonly version: string;
   readonly requirements: ComplianceRequirement[];
-  readonly assessmentFrequency: 'REAL_TIME' | 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';readonly criticalityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly automatedRemediation: boolean;readonly reportingSchedule: ReportingSchedule;
+  readonly assessmentFrequency: 'REAL_TIME' | 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  readonly criticalityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly automatedRemediation: boolean;
+  readonly reportingSchedule: ReportingSchedule;
 }
 
 /**
@@ -51,7 +54,9 @@ export interface ComplianceRequirement {
   readonly description: string;
   readonly applicabilityConditions: ApplicabilityCondition[];
   readonly validationRules: ValidationRule[];
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly automatedCheck: boolean;readonly evidenceRequirements: string[];
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly automatedCheck: boolean;
+  readonly evidenceRequirements: string[];
   readonly remediationGuidance: string[];
 }
 
@@ -60,12 +65,16 @@ export interface ComplianceRequirement {
  */
 export interface ApplicabilityCondition {
   readonly field: string;
-  readonly operator: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN';readonly value: any;readonly logicalOperator?: 'AND' | 'OR';}/**
+  readonly operator: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN';
+  readonly value: any;
+  readonly logicalOperator?: 'AND' | 'OR';}/**
  * Validation rule for compliance checking
  */
 export interface ValidationRule {
   readonly ruleId: string;
-  readonly ruleType: 'PATTERN' | 'THRESHOLD' | 'EXISTENCE' | 'FREQUENCY' | 'CUSTOM';readonly expression: string;readonly expectedResult: any;
+  readonly ruleType: 'PATTERN' | 'THRESHOLD' | 'EXISTENCE' | 'FREQUENCY' | 'CUSTOM';
+  readonly expression: string;
+  readonly expectedResult: any;
   readonly tolerance?: number;
   readonly weight: number; // For scoring
 }
@@ -97,15 +106,20 @@ export interface RequirementAssessmentResult {
   readonly section: string;
   readonly title: string;
   readonly score: number;
-  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT' | 'NOT_APPLICABLE';readonly evidence: EvidenceItem[];readonly violations: ComplianceViolation[];
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly lastAssessment: Date;}
+  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT' | 'NOT_APPLICABLE';
+  readonly evidence: EvidenceItem[];
+  readonly violations: ComplianceViolation[];
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly lastAssessment: Date;}
 
 /**
  * Evidence item for compliance validation
  */
 export interface EvidenceItem {
   readonly evidenceId: string;
-  readonly type: 'AUDIT_EVENT' | 'CONFIGURATION' | 'POLICY' | 'PROCEDURE' | 'DOCUMENTATION';readonly description: string;readonly source: string;
+  readonly type: 'AUDIT_EVENT' | 'CONFIGURATION' | 'POLICY' | 'PROCEDURE' | 'DOCUMENTATION';
+  readonly description: string;
+  readonly source: string;
   readonly timestamp: Date;
   readonly hash: string;
   readonly relevantRequirements: string[];
@@ -118,7 +132,10 @@ export interface ComplianceViolation {
   readonly violationId: string;
   readonly regulation: ComplianceRegulation;
   readonly requirementId: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK' | 'FALSE_POSITIVE';readonly description: string;readonly detectedAt: Date;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK' | 'FALSE_POSITIVE';
+  readonly description: string;
+  readonly detectedAt: Date;
   readonly affectedEvents: string[];
   readonly riskScore: number;
   readonly businessImpact: string;
@@ -133,8 +150,13 @@ export interface ComplianceViolation {
  */
 export interface RemediationAction {
   readonly actionId: string;
-  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM' | 'STRATEGIC';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly steps: string[];
-  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';readonly cost?: string;readonly timeline: string;
+  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM' | 'STRATEGIC';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly description: string;
+  readonly steps: string[];
+  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly cost?: string;
+  readonly timeline: string;
   readonly responsible: string[];
   readonly dependencies: string[];
 }
@@ -146,7 +168,9 @@ export interface ViolationResolution {
   readonly resolutionId: string;
   readonly resolvedAt: Date;
   readonly resolvedBy: string;
-  readonly resolutionMethod: 'FIXED' | 'MITIGATED' | 'ACCEPTED' | 'FALSE_POSITIVE';readonly description: string;readonly evidence: string[];
+  readonly resolutionMethod: 'FIXED' | 'MITIGATED' | 'ACCEPTED' | 'FALSE_POSITIVE';
+  readonly description: string;
+  readonly evidence: string[];
   readonly verificationRequired: boolean;
   readonly followUpRequired: boolean;
 }
@@ -155,9 +179,12 @@ export interface ViolationResolution {
  * Reporting schedule configuration
  */
 export interface ReportingSchedule {
-  readonly frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';readonly dayOfWeek?: number; // For weekly reportsreadonly dayOfMonth?: number; // For monthly reports
+  readonly frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
+  readonly dayOfWeek?: number; // For weekly reportsreadonly dayOfMonth?: number; // For monthly reports
   readonly recipients: string[];
-  readonly format: 'PDF' | 'JSON' | 'CSV' | 'DASHBOARD';readonly includeExecutiveSummary: boolean;readonly includeDetailedFindings: boolean;
+  readonly format: 'PDF' | 'JSON' | 'CSV' | 'DASHBOARD';
+  readonly includeExecutiveSummary: boolean;
+  readonly includeDetailedFindings: boolean;
   readonly includeRecommendations: boolean;
 }
 
@@ -171,7 +198,10 @@ export interface ComplianceDashboardMetrics {
   readonly totalViolations: number;
   readonly criticalViolations: number;
   readonly openViolations: number;
-  readonly violationTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly recentAlerts: ComplianceAlert[];readonly upcomingDeadlines: ComplianceDeadline[];
+  readonly violationTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly recentAlerts: ComplianceAlert[];
+  readonly upcomingDeadlines: ComplianceDeadline[];
 }
 
 /**
@@ -179,7 +209,10 @@ export interface ComplianceDashboardMetrics {
  */
 export interface ComplianceAlert {
   readonly alertId: string;
-  readonly type: 'VIOLATION' | 'DEADLINE' | 'RISK_INCREASE' | 'SYSTEM_ISSUE';readonly severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';readonly title: string;readonly description: string;
+  readonly type: 'VIOLATION' | 'DEADLINE' | 'RISK_INCREASE' | 'SYSTEM_ISSUE';
+  readonly severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+  readonly title: string;
+  readonly description: string;
   readonly regulation?: ComplianceRegulation;
   readonly timestamp: Date;
   readonly acknowledged: boolean;
@@ -196,7 +229,9 @@ export interface ComplianceDeadline {
   readonly title: string;
   readonly dueDate: Date;
   readonly daysRemaining: number;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly responsible: string[];readonly completionStatus: number; // 0-100%
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly responsible: string[];
+  readonly completionStatus: number; // 0-100%
 }
 
 // ===== COMPLIANCE MONITORING SERVICE =====

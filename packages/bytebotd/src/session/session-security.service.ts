@@ -55,7 +55,9 @@ export interface SessionEncryptionConfig {
   readonly keySize: number;
   readonly ivSize: number;
   readonly tagSize: number;
-  readonly keyDerivationFunction: 'pbkdf2' | 'scrypt' | 'argon2';readonly keyDerivationIterations: number;readonly saltSize: number;
+  readonly keyDerivationFunction: 'pbkdf2' | 'scrypt' | 'argon2';
+  readonly keyDerivationIterations: number;
+  readonly saltSize: number;
   readonly compressionEnabled: boolean;
   readonly integrityValidation: boolean;
 }
@@ -157,7 +159,9 @@ export interface ThreatIndicator {
  * Automatic response trigger
  */
 export interface AutomaticResponseTrigger {
-  readonly action: 'terminate' | 'suspend' | 'challenge' | 'monitor' | 'alert';readonly condition: string;readonly threshold: number;
+  readonly action: 'terminate' | 'suspend' | 'challenge' | 'monitor' | 'alert';
+  readonly condition: string;
+  readonly threshold: number;
   readonly delay: number;
   readonly recurring: boolean;
 }
@@ -199,7 +203,9 @@ export interface NetworkTrafficData {
   readonly protocol: string;
   readonly port: number;
   readonly dataSize: number;
-  readonly direction: 'inbound' | 'outbound';readonly encrypted: boolean;readonly suspicious: boolean;
+  readonly direction: 'inbound' | 'outbound';
+  readonly encrypted: boolean;
+  readonly suspicious: boolean;
 }
 
 /**
@@ -355,7 +361,9 @@ export interface NetworkConnection {
  */
 export interface FileSystemChange {
   readonly path: string;
-  readonly operation: 'create' | 'modify' | 'delete' | 'rename';readonly timestamp: Date;readonly oldValue?: string;
+  readonly operation: 'create' | 'modify' | 'delete' | 'rename';
+  readonly timestamp: Date;
+  readonly oldValue?: string;
   readonly newValue?: string;
   readonly checksum?: string;
 }
@@ -366,7 +374,9 @@ export interface FileSystemChange {
 export interface RegistryChange {
   readonly key: string;
   readonly value: string;
-  readonly operation: 'create' | 'modify' | 'delete';readonly timestamp: Date;readonly oldData?: any;
+  readonly operation: 'create' | 'modify' | 'delete';
+  readonly timestamp: Date;
+  readonly oldData?: any;
   readonly newData?: any;
 }
 

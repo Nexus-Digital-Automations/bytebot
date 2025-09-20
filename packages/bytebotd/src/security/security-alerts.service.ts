@@ -17,12 +17,18 @@
  * Performance: Sub-500ms alert processing with intelligent batching
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';import { SecurityEvent, SecurityEventType } from './security-monitoring.service';// ===== SECURITY ALERTS INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+import { SecurityEvent, SecurityEventType } from './security-monitoring.service';
+
+// ===== SECURITY ALERTS INTERFACES =====
+/**
  * Alert channel types for multi-channel distribution
  */
 export enum AlertChannel {

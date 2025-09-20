@@ -87,7 +87,9 @@ export interface RequestContext {
   readonly id: string;
   readonly method: string;
   readonly endpoint: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly timeout?: number;readonly retries?: number;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly timeout?: number;
+  readonly retries?: number;
   readonly sessionAffinity?: string;
   readonly metadata: Record<string, unknown>;
 }

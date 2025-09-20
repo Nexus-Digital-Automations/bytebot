@@ -36,7 +36,10 @@ export interface AnalyticsConfiguration {
   readonly realTimeAnalysis: boolean;
   readonly batchAnalysis: boolean;
   readonly machineLearningEnabled: boolean;
-  readonly anomalyDetectionSensitivity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly patternDetectionDepth: 'SHALLOW' | 'MODERATE' | 'DEEP' | 'COMPREHENSIVE';readonly threatIntelligenceEnabled: boolean;readonly behavioralProfilingEnabled: boolean;
+  readonly anomalyDetectionSensitivity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly patternDetectionDepth: 'SHALLOW' | 'MODERATE' | 'DEEP' | 'COMPREHENSIVE';
+  readonly threatIntelligenceEnabled: boolean;
+  readonly behavioralProfilingEnabled: boolean;
   readonly predictiveAnalyticsEnabled: boolean;
   readonly retentionPeriodDays: number;
   readonly analysisFrequency: 'REAL_TIME' | 'MINUTELY' | 'HOURLY' | 'DAILY';}/**
@@ -83,7 +86,9 @@ export interface AnalysisScope {
 export interface AnalyticsFinding {
   readonly findingId: string;
   readonly type: FindingType;
-  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly confidence: number;readonly title: string;
+  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly confidence: number;
+  readonly title: string;
   readonly description: string;
   readonly evidence: EvidenceItem[];
   readonly affectedEntities: AffectedEntity[];
@@ -114,7 +119,10 @@ export interface EvidenceItem {
  * Affected entity
  */
 export interface AffectedEntity {
-  readonly entityType: 'USER' | 'SYSTEM' | 'RESOURCE' | 'NETWORK' | 'APPLICATION';readonly entityId: string;readonly impactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;}
+  readonly entityType: 'USER' | 'SYSTEM' | 'RESOURCE' | 'NETWORK' | 'APPLICATION';
+  readonly entityId: string;
+  readonly impactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly description: string;}
 
 /**
  * Analytics pattern
@@ -176,7 +184,9 @@ export interface PatternCharacteristic {
 export interface Anomaly {
   readonly anomalyId: string;
   readonly type: AnomalyType;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly detectionMethod: DetectionMethod;readonly detectedAt: Date;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly detectionMethod: DetectionMethod;
+  readonly detectedAt: Date;
   readonly affectedEvents: string[];
   readonly baselineDeviation: number;
   readonly statisticalSignificance: number;
@@ -220,7 +230,8 @@ export enum PredictionType {
 export interface PredictionCondition {
   readonly condition: string;
   readonly probability: number;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly mitigation: string[];}
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly mitigation: string[];}
 
 /**
  * Analytics recommendation
@@ -228,10 +239,14 @@ export interface PredictionCondition {
 export interface AnalyticsRecommendation {
   readonly recommendationId: string;
   readonly category: RecommendationCategory;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';readonly title: string;readonly description: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  readonly title: string;
+  readonly description: string;
   readonly actionItems: ActionItem[];
   readonly expectedBenefit: string;
-  readonly implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH';readonly estimatedCost: string;readonly timeline: string;
+  readonly implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly estimatedCost: string;
+  readonly timeline: string;
   readonly dependencies: string[];
   readonly riskReduction: number;
 }
@@ -248,7 +263,9 @@ export interface ActionItem {
   readonly description: string;
   readonly responsible: string[];
   readonly deadline: Date;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';readonly dependencies: string[];readonly successCriteria: string[];
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  readonly dependencies: string[];
+  readonly successCriteria: string[];
 }
 
 /**
@@ -344,7 +361,9 @@ export interface CommunicationPattern {
  * Seasonality pattern
  */
 export interface SeasonalityPattern {
-  readonly period: 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY';readonly multiplier: number;readonly confidence: number;
+  readonly period: 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY';
+  readonly multiplier: number;
+  readonly confidence: number;
 }
 
 /**

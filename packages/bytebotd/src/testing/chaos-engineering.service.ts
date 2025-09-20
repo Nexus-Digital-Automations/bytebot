@@ -47,7 +47,9 @@ export interface SteadyStateDefinition {
  */
 export interface ToleranceDefinition {
   readonly name: string;
-  readonly type: 'probe' | 'range' | 'regex';readonly target: string | number;readonly provider: ProviderDefinition;
+  readonly type: 'probe' | 'range' | 'regex';
+  readonly target: string | number;
+  readonly provider: ProviderDefinition;
 }
 
 /**
@@ -55,7 +57,9 @@ export interface ToleranceDefinition {
  */
 export interface ProbeDefinition {
   readonly name: string;
-  readonly type: 'http' | 'process' | 'python' | 'action';readonly provider: ProviderDefinition;readonly secrets?: Record<string, string>;
+  readonly type: 'http' | 'process' | 'python' | 'action';
+  readonly provider: ProviderDefinition;
+  readonly secrets?: Record<string, string>;
   readonly configuration?: Record<string, unknown>;
 }
 
@@ -74,7 +78,9 @@ export interface ProviderDefinition {
  */
 export interface ChaosMethod {
   readonly name: string;
-  readonly type: 'action' | 'probe';readonly provider: ProviderDefinition;readonly pauses?: PauseDefinition;
+  readonly type: 'action' | 'probe';
+  readonly provider: ProviderDefinition;
+  readonly pauses?: PauseDefinition;
   readonly background?: boolean;
   readonly controls?: ControlDefinition[];
 }
@@ -108,13 +114,16 @@ export interface RollbackCriteria {
 export interface RollbackMetric {
   readonly name: string;
   readonly threshold: number;
-  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';readonly duration: number; // seconds}
+  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';
+  readonly duration: number; // seconds}
 
 /**
  * Blast radius definition for impact scope
  */
 export interface BlastRadius {
-  readonly scope: 'component' | 'service' | 'system' | 'global';readonly components: string[];readonly percentage: number; // 0-100
+  readonly scope: 'component' | 'service' | 'system' | 'global';
+  readonly components: string[];
+  readonly percentage: number; // 0-100
   readonly isolation: boolean;
 }
 
@@ -123,7 +132,9 @@ export interface BlastRadius {
  */
 export interface ChaosExperimentResult {
   readonly experiment: ChaosExperiment;
-  readonly status: 'completed' | 'failed' | 'aborted' | 'deviated';readonly start: Date;readonly end: Date;
+  readonly status: 'completed' | 'failed' | 'aborted' | 'deviated';
+  readonly start: Date;
+  readonly end: Date;
   readonly duration: number;
   readonly steady_states: SteadyStateResult;
   readonly run: RunResult[];
@@ -148,7 +159,9 @@ export interface ProbeResult {
   readonly start: Date;
   readonly end: Date;
   readonly duration: number;
-  readonly status: 'succeeded' | 'failed';readonly output?: unknown;readonly exception?: string;
+  readonly status: 'succeeded' | 'failed';
+  readonly output?: unknown;
+  readonly exception?: string;
   readonly tolerance_met: boolean;
 }
 
@@ -160,7 +173,9 @@ export interface RunResult {
   readonly start: Date;
   readonly end: Date;
   readonly duration: number;
-  readonly status: 'succeeded' | 'failed';readonly output?: unknown;readonly exception?: string;
+  readonly status: 'succeeded' | 'failed';
+  readonly output?: unknown;
+  readonly exception?: string;
   readonly activity: ActivityResult[];
 }
 
@@ -172,7 +187,9 @@ export interface ActivityResult {
   readonly start: Date;
   readonly end: Date;
   readonly duration: number;
-  readonly status: 'succeeded' | 'failed';readonly output?: unknown;readonly exception?: string;
+  readonly status: 'succeeded' | 'failed';
+  readonly output?: unknown;
+  readonly exception?: string;
 }
 
 /**
@@ -183,7 +200,9 @@ export interface RollbackResult {
   readonly start: Date;
   readonly end: Date;
   readonly duration: number;
-  readonly status: 'succeeded' | 'failed';readonly output?: unknown;readonly exception?: string;
+  readonly status: 'succeeded' | 'failed';
+  readonly output?: unknown;
+  readonly exception?: string;
 }
 
 /**
@@ -194,7 +213,9 @@ export interface ExtensionResult {
   readonly start: Date;
   readonly end: Date;
   readonly duration: number;
-  readonly status: 'succeeded' | 'failed';readonly output?: unknown;readonly exception?: string;
+  readonly status: 'succeeded' | 'failed';
+  readonly output?: unknown;
+  readonly exception?: string;
 }
 
 // ===== PARLANT-SPECIFIC CHAOS SCENARIOS =====

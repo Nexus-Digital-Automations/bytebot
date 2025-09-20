@@ -21,7 +21,9 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';import axios, { AxiosInstance } from 'axios';import WebSocket from 'ws';import { EventEmitter } from 'events';/*** Health check result for different validation types
  */
 export interface HealthCheckResult {
-  readonly type: 'connectivity' | 'api' | 'websocket' | 'performance' | 'comprehensive';readonly success: boolean;readonly responseTime: number;
+  readonly type: 'connectivity' | 'api' | 'websocket' | 'performance' | 'comprehensive';
+  readonly success: boolean;
+  readonly responseTime: number;
   readonly timestamp: Date;
   readonly details: Record<string, unknown>;
   readonly errors?: string[];
@@ -32,7 +34,9 @@ export interface HealthCheckResult {
  * Comprehensive health status for Parlant server
  */
 export interface ParlantHealthStatus {
-  readonly overall: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';readonly lastCheck: Date;readonly uptime: number;
+  readonly overall: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+  readonly lastCheck: Date;
+  readonly uptime: number;
   readonly availability: number; // Percentage over last 24 hours
   readonly connectivity: HealthCheckResult;
   readonly api: HealthCheckResult;
@@ -57,7 +61,9 @@ export interface ParlantHealthStatus {
  * Circuit breaker state information
  */
 export interface CircuitBreakerStatus {
-  readonly state: 'closed' | 'open' | 'half-open';readonly failureCount: number;readonly lastFailure: Date | null;
+  readonly state: 'closed' | 'open' | 'half-open';
+  readonly failureCount: number;
+  readonly lastFailure: Date | null;
   readonly nextRetryTime: Date | null;
   readonly failureThreshold: number;
   readonly timeoutDuration: number;
@@ -93,7 +99,10 @@ export interface HealthMonitorConfig {
  */
 export interface HealthAlert {
   readonly id: string;
-  readonly severity: 'info' | 'warning' | 'critical';readonly type: 'connectivity' | 'performance' | 'availability' | 'circuit_breaker';readonly message: string;readonly timestamp: Date;
+  readonly severity: 'info' | 'warning' | 'critical';
+  readonly type: 'connectivity' | 'performance' | 'availability' | 'circuit_breaker';
+  readonly message: string;
+  readonly timestamp: Date;
   readonly details: Record<string, unknown>;
   readonly resolved: boolean;
   readonly resolvedAt?: Date;

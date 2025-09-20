@@ -46,7 +46,9 @@ export interface OptimizedValidationResponse extends ParlantValidationResponse {
   readonly performanceMetadata: {
     readonly totalLatencyMs: number;
     readonly cacheHit: boolean;
-    readonly cacheLevel?: 'L1' | 'L2' | 'L3';readonly batchProcessed: boolean;readonly batchId?: string;
+    readonly cacheLevel?: 'L1' | 'L2' | 'L3';
+  readonly batchProcessed: boolean;
+  readonly batchId?: string;
     readonly retryAttempts: number;
     readonly circuitBreakerUsed: boolean;
     readonly degradedMode: boolean;
@@ -101,7 +103,8 @@ export interface OptimizationStrategy {
     readonly recoveryTimeoutMs: number;
   };
   readonly degradation: {
-    readonly strategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';readonly fallbackTimeout: number;};
+    readonly strategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';
+  readonly fallbackTimeout: number;};
 }
 
 /**
@@ -109,7 +112,9 @@ export interface OptimizationStrategy {
  */
 export interface PerformanceAlert {
   readonly id: string;
-  readonly level: 'warning' | 'error' | 'critical';readonly metric: string;readonly threshold: number;
+  readonly level: 'warning' | 'error' | 'critical';
+  readonly metric: string;
+  readonly threshold: number;
   readonly currentValue: number;
   readonly message: string;
   readonly timestamp: Date;
@@ -120,9 +125,13 @@ export interface PerformanceAlert {
  * Optimization recommendation
  */
 export interface OptimizationRecommendation {
-  readonly category: 'caching' | 'batching' | 'circuit-breaker' | 'infrastructure';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly title: string;readonly description: string;
+  readonly category: 'caching' | 'batching' | 'circuit-breaker' | 'infrastructure';
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly title: string;
+  readonly description: string;
   readonly expectedImprovement: string;
-  readonly implementationComplexity: 'low' | 'medium' | 'high';readonly estimatedTimeToValue: string;}
+  readonly implementationComplexity: 'low' | 'medium' | 'high';
+  readonly estimatedTimeToValue: string;}
 
 // ===== PERFORMANCE ORCHESTRATOR SERVICE =====
 

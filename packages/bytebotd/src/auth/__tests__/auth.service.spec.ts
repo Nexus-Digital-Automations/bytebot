@@ -546,7 +546,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Password hashing security test completed`);
     });
 
-    it('should handle concurrent login attempts safely'async () => {
+    it('should handle concurrent login attempts safely', async () => {
       const testId = `${operationId}_security_concurrent`;console.log(
 
       );

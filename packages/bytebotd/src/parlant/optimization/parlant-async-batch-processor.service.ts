@@ -114,7 +114,9 @@ export interface AsyncPerformanceMetrics {
  * Batch optimization recommendation
  */
 export interface BatchOptimizationRecommendation {
-  readonly type: 'optimize_batching' | 'scale_workers' | 'adjust_timeouts' | 'tune_priorities';readonly metric: string;readonly currentValue: number;
+  readonly type: 'optimize_batching' | 'scale_workers' | 'adjust_timeouts' | 'tune_priorities';
+  readonly metric: string;
+  readonly currentValue: number;
   readonly targetValue: number;
   readonly action: string;
   readonly priority: 'critical' | 'high' | 'medium' | 'low';}// ===== ASYNC BATCH PROCESSOR SERVICE =====

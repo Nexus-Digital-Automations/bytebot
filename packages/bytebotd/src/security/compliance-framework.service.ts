@@ -38,7 +38,9 @@ export interface ComplianceFramework {
   readonly id: string;
   readonly name: string;
   readonly version: string;
-  readonly type: ComplianceContext['frameworkType'];readonly description: string;readonly requirements: ComplianceRequirement[];
+  readonly type: ComplianceContext['frameworkType'];
+  readonly description: string;
+  readonly requirements: ComplianceRequirement[];
   readonly controls: ComplianceControl[];
   readonly assessmentCriteria: AssessmentCriteria[];
   readonly metadata: {
@@ -56,7 +58,10 @@ export interface ComplianceRequirement {
   readonly section: string;
   readonly title: string;
   readonly description: string;
-  readonly category: 'governance' | 'risk_management' | 'data_protection' | 'access_control' | 'monitoring' | 'incident_response';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly mandatory: boolean;readonly applicableControls: string[];
+  readonly category: 'governance' | 'risk_management' | 'data_protection' | 'access_control' | 'monitoring' | 'incident_response';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly mandatory: boolean;
+  readonly applicableControls: string[];
   readonly evidenceRequirements: string[];
 }
 
@@ -64,14 +69,21 @@ export interface ComplianceControl {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly controlType: 'preventive' | 'detective' | 'corrective' | 'compensating';readonly implementationStatus: 'not_implemented' | 'partially_implemented' | 'implemented' | 'not_applicable';readonly effectivenessRating: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';readonly testingFrequency: 'continuous' | 'monthly' | 'quarterly' | 'annually';readonly owner: string;readonly lastTested: Date;
+  readonly controlType: 'preventive' | 'detective' | 'corrective' | 'compensating';
+  readonly implementationStatus: 'not_implemented' | 'partially_implemented' | 'implemented' | 'not_applicable';
+  readonly effectivenessRating: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';
+  readonly testingFrequency: 'continuous' | 'monthly' | 'quarterly' | 'annually';
+  readonly owner: string;
+  readonly lastTested: Date;
   readonly nextTest: Date;
   readonly evidence: ComplianceEvidence[];
 }
 
 export interface ComplianceEvidence {
   readonly id: string;
-  readonly type: 'document' | 'screenshot' | 'log' | 'certificate' | 'attestation' | 'test_result';readonly description: string;readonly location: string;
+  readonly type: 'document' | 'screenshot' | 'log' | 'certificate' | 'attestation' | 'test_result';
+  readonly description: string;
+  readonly location: string;
   readonly collectedBy: string;
   readonly collectedAt: Date;
   readonly validUntil?: Date;
@@ -84,10 +96,13 @@ export interface AssessmentCriteria {
   readonly description: string;
   readonly passingScore: number;
   readonly weightage: number;
-  readonly evaluationMethod: 'automated' | 'manual' | 'hybrid';readonly testProcedures: string[];}
+  readonly evaluationMethod: 'automated' | 'manual' | 'hybrid';
+  readonly testProcedures: string[];}
 
 export interface ComplianceAssessmentRequest {
-  readonly framework: ComplianceContext['frameworkType'];readonly scope: ComplianceContext['scope'];readonly requirements: string[]; // Requirement IDs to assessreadonly context: ComplianceContext;
+  readonly framework: ComplianceContext['frameworkType'];
+  readonly scope: ComplianceContext['scope'];
+  readonly requirements: string[]; // Requirement IDs to assessreadonly context: ComplianceContext;
   readonly operationId: string;
 }
 
@@ -96,10 +111,13 @@ export interface ComplianceAssessmentResponse {
   readonly processedAt: Date;
   readonly operationId: string;
   readonly conversationId: string;
-  readonly framework: ComplianceContext['frameworkType'];readonly assessmentResults: {readonly overallScore: number;
+  readonly framework: ComplianceContext['frameworkType'];
+  readonly assessmentResults: {readonly overallScore: number;
     readonly maxScore: number;
     readonly percentage: number;
-    readonly status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'under_review';readonly requirementResults: RequirementAssessmentResult[];readonly controlResults: ControlAssessmentResult[];
+    readonly status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'under_review';
+  readonly requirementResults: RequirementAssessmentResult[];
+  readonly controlResults: ControlAssessmentResult[];
   };
   readonly findings: ComplianceFinding[];
   readonly recommendations: ComplianceRecommendation[];
@@ -126,7 +144,9 @@ export interface ComplianceAssessmentResponse {
 
 export interface RequirementAssessmentResult {
   readonly requirementId: string;
-  readonly status: 'met' | 'not_met' | 'partially_met' | 'not_applicable';readonly score: number;readonly maxScore: number;
+  readonly status: 'met' | 'not_met' | 'partially_met' | 'not_applicable';
+  readonly score: number;
+  readonly maxScore: number;
   readonly evidence: string[];
   readonly gaps: string[];
   readonly recommendations: string[];
@@ -134,13 +154,18 @@ export interface RequirementAssessmentResult {
 
 export interface ControlAssessmentResult {
   readonly controlId: string;
-  readonly effectiveness: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';readonly testResults: string[];readonly deficiencies: string[];
+  readonly effectiveness: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';
+  readonly testResults: string[];
+  readonly deficiencies: string[];
   readonly recommendations: string[];
 }
 
 export interface ComplianceFinding {
   readonly id: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'gap' | 'deficiency' | 'weakness' | 'non_compliance';readonly description: string;readonly requirement: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: 'gap' | 'deficiency' | 'weakness' | 'non_compliance';
+  readonly description: string;
+  readonly requirement: string;
   readonly control?: string;
   readonly riskRating: number;
   readonly remediation: string;
@@ -149,7 +174,8 @@ export interface ComplianceFinding {
 
 export interface ComplianceRecommendation {
   readonly id: string;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'process_improvement' | 'control_enhancement' | 'policy_update' | 'training' | 'technology';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: 'process_improvement' | 'control_enhancement' | 'policy_update' | 'training' | 'technology';
   readonly description: string;
   readonly justification: string;
   readonly estimatedEffort: string;

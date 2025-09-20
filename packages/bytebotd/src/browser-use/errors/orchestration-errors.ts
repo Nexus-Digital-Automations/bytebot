@@ -26,7 +26,9 @@ export enum OrchestrationErrorSeverity {
  * Orchestration-specific error interface extending BaseError
  */
 export interface OrchestrationError extends BaseError {
-  readonly name: 'OrchestrationError';readonly category: OrchestrationErrorCategory;readonly severity: OrchestrationErrorSeverity;
+  readonly name: 'OrchestrationError';
+  readonly category: OrchestrationErrorCategory;
+  readonly severity: OrchestrationErrorSeverity;
   readonly operationType: OrchestrationOperationType;
   readonly orchestrationId: string;
   readonly workflowId?: string;
@@ -46,7 +48,9 @@ export interface OrchestrationError extends BaseError {
   };
   readonly affectedOperations: Array<{
     readonly operationId: string;
-    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';readonly errorMessage?: string;readonly retryCount?: number;
+    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  readonly errorMessage?: string;
+  readonly retryCount?: number;
   }>;
   readonly dependencies: {
     readonly requiredOperations: string[];
@@ -68,9 +72,11 @@ export interface DistributedOperationError extends OrchestrationError {
   readonly category: OrchestrationErrorCategory.DISTRIBUTED_TASK_ERROR | OrchestrationErrorCategory.PARALLEL_EXECUTION_ERROR;
   readonly distributedError: {
     readonly nodeId: string;
-    readonly nodeType: 'coordinator' | 'worker' | 'aggregator';readonly taskDistribution: Array<{readonly nodeId: string;
+    readonly nodeType: 'coordinator' | 'worker' | 'aggregator';
+  readonly taskDistribution: Array<{readonly nodeId: string;
       readonly taskCount: number;
-      readonly status: 'pending' | 'running' | 'completed' | 'failed';readonly errorDetails?: string;}>;
+      readonly status: 'pending' | 'running' | 'completed' | 'failed';
+  readonly errorDetails?: string;}>;
     readonly coordinationFailure: boolean;
     readonly partialResults: boolean;
   };
@@ -110,7 +116,9 @@ export interface ResourceAllocationError extends OrchestrationError {
       readonly memory: number;
       readonly connections: number;
     };
-    readonly allocationStrategy: 'round_robin' | 'least_loaded' | 'resource_based' | 'priority_based';readonly queuePosition?: number;readonly estimatedWaitTime?: number;
+    readonly allocationStrategy: 'round_robin' | 'least_loaded' | 'resource_based' | 'priority_based';
+  readonly queuePosition?: number;
+  readonly estimatedWaitTime?: number;
   };
 }
 
@@ -120,11 +128,15 @@ export interface ResourceAllocationError extends OrchestrationError {
 export interface AggregationError extends OrchestrationError {
   readonly category: OrchestrationErrorCategory.RESULT_AGGREGATION_ERROR | OrchestrationErrorCategory.DATA_MERGE_ERROR | OrchestrationErrorCategory.OUTPUT_COORDINATION_ERROR;
   readonly aggregationError: {
-    readonly aggregationType: 'data_merge' | 'result_collection' | 'output_formatting' | 'report_generation';readonly partialResults: Array<{readonly operationId: string;
-      readonly status: 'success' | 'partial' | 'failed';readonly dataSize: number;readonly dataType: string;
+    readonly aggregationType: 'data_merge' | 'result_collection' | 'output_formatting' | 'report_generation';
+  readonly partialResults: Array<{readonly operationId: string;
+      readonly status: 'success' | 'partial' | 'failed';
+  readonly dataSize: number;
+  readonly dataType: string;
       readonly mergeStatus: 'pending' | 'merged' | 'failed';}>;readonly mergeConflicts: Array<{
       readonly field: string;
-      readonly conflictType: 'type_mismatch' | 'value_conflict' | 'structure_mismatch';readonly resolution: 'manual' | 'automatic' | 'skip';}>;readonly dataIntegrity: {
+      readonly conflictType: 'type_mismatch' | 'value_conflict' | 'structure_mismatch';
+  readonly resolution: 'manual' | 'automatic' | 'skip';}>;readonly dataIntegrity: {
       readonly checksumValid: boolean;
       readonly completenessScore: number;
       readonly consistencyScore: number;

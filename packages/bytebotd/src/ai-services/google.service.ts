@@ -58,7 +58,8 @@ export interface GeminiContentPart {
  * Google AI content interface
  */
 export interface GeminiContent {
-  readonly role: 'user' | 'model';readonly parts: GeminiContentPart[];}
+  readonly role: 'user' | 'model';
+  readonly parts: GeminiContentPart[];}
 
 /**
  * Google AI chat completion request
@@ -70,7 +71,8 @@ export interface GeminiChatRequest {
   readonly tools?: GeminiFunctionDeclaration[];
   readonly toolConfig?: {
     readonly functionCallingConfig: {
-      readonly mode: 'AUTO' | 'ANY' | 'NONE';readonly allowedFunctionNames?: string[];};
+      readonly mode: 'AUTO' | 'ANY' | 'NONE';
+  readonly allowedFunctionNames?: string[];};
   };
   readonly context: ParlantConversationContext;
   readonly operationId: string;
@@ -123,7 +125,8 @@ export interface GeminiCandidate {
  * Google AI safety rating interface
  */
 export interface GeminiSafetyRating {
-  readonly category: 'HARM_CATEGORY_HARASSMENT' | 'HARM_CATEGORY_HATE_SPEECH' | 'HARM_CATEGORY_SEXUALLY_EXPLICIT' | 'HARM_CATEGORY_DANGEROUS_CONTENT';readonly probability: 'HARM_PROBABILITY_UNSPECIFIED' | 'NEGLIGIBLE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
+  readonly category: 'HARM_CATEGORY_HARASSMENT' | 'HARM_CATEGORY_HATE_SPEECH' | 'HARM_CATEGORY_SEXUALLY_EXPLICIT' | 'HARM_CATEGORY_DANGEROUS_CONTENT';
+  readonly probability: 'HARM_PROBABILITY_UNSPECIFIED' | 'NEGLIGIBLE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Google AI chat completion response
  */
 export interface GeminiChatResponse {

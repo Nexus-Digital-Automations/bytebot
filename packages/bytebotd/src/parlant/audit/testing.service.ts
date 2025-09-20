@@ -80,7 +80,9 @@ export enum TestType {
 }
 
 export interface EnvironmentRequirement {
-  readonly requirementType: 'system' | 'network' | 'data' | 'service';readonly name: string;readonly specification: Record<string, any>;
+  readonly requirementType: 'system' | 'network' | 'data' | 'service';
+  readonly name: string;
+  readonly specification: Record<string, any>;
   readonly mandatory: boolean;
 }
 
@@ -90,7 +92,8 @@ export enum ReportFormat {
   readonly ruleId: string;
   readonly regulation: ComplianceRegulation;
   readonly requirement: string;
-  readonly validationMethod: 'automated' | 'manual' | 'hybrid';readonly acceptanceCriteria: string[];}
+  readonly validationMethod: 'automated' | 'manual' | 'hybrid';
+  readonly acceptanceCriteria: string[];}
 
 /**
  * Individual test case definition and execution
@@ -167,7 +170,9 @@ export enum ActionType {
 
 export interface ContentValidation {
   readonly field: string;
-  readonly operator: 'equals' | 'contains' | 'matches' | 'exists' | 'type';readonly value: any;readonly caseSensitive?: boolean;
+  readonly operator: 'equals' | 'contains' | 'matches' | 'exists' | 'type';
+  readonly value: any;
+  readonly caseSensitive?: boolean;
 }
 
 export interface TestCondition {
@@ -185,7 +190,11 @@ export interface ExpectedResult {
 }
 
 export interface ValidationCriteria {
-  readonly criteriaType: 'functional' | 'performance' | 'security' | 'compliance';readonly metric: string;readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'between';readonly value: any;readonly unit?: string;
+  readonly criteriaType: 'functional' | 'performance' | 'security' | 'compliance';
+  readonly metric: string;
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'between';
+  readonly value: any;
+  readonly unit?: string;
 }
 
 export interface ToleranceConfig {
@@ -196,12 +205,17 @@ export interface ToleranceConfig {
 
 export interface TestData {
   readonly dataId: string;
-  readonly dataType: 'input' | 'mock' | 'reference' | 'baseline';readonly source: 'generated' | 'file' | 'database' | 'api';readonly content: any;readonly encryption: boolean;
+  readonly dataType: 'input' | 'mock' | 'reference' | 'baseline';
+  readonly source: 'generated' | 'file' | 'database' | 'api';
+  readonly content: any;
+  readonly encryption: boolean;
   readonly temporary: boolean;
 }
 
 export interface EnvironmentConfig {
-  readonly environmentType: 'local' | 'development' | 'staging' | 'production' | 'isolated';readonly services: ServiceConfig[];readonly databases: DatabaseConfig[];
+  readonly environmentType: 'local' | 'development' | 'staging' | 'production' | 'isolated';
+  readonly services: ServiceConfig[];
+  readonly databases: DatabaseConfig[];
   readonly network: NetworkConfig;
   readonly security: SecurityConfig;
 }
@@ -392,7 +406,8 @@ export interface PerformanceBottleneck {
   readonly metric: string;
   readonly threshold: number;
   readonly actual: number;
-  readonly impact: 'low' | 'medium' | 'high' | 'critical';readonly recommendation: string;}
+  readonly impact: 'low' | 'medium' | 'high' | 'critical';
+  readonly recommendation: string;}
 
 export interface SecurityAssessment {
   readonly vulnerabilities: SecurityVulnerability[];
@@ -406,7 +421,9 @@ export interface SecurityAssessment {
 
 export interface SecurityVulnerability {
   readonly vulnerabilityId: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly category: string;readonly description: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly category: string;
+  readonly description: string;
   readonly location: string;
   readonly remediation: string;
   readonly cve?: string;
@@ -452,21 +469,28 @@ export interface ComplianceTestReport {
 export interface RequirementResult {
   readonly regulation: ComplianceRegulation;
   readonly requirement: string;
-  readonly status: 'compliant' | 'non-compliant' | 'partial' | 'not-applicable';readonly evidence: string[];readonly gaps: string[];
+  readonly status: 'compliant' | 'non-compliant' | 'partial' | 'not-applicable';
+  readonly evidence: string[];
+  readonly gaps: string[];
 }
 
 export interface ComplianceViolation {
   readonly violationId: string;
   readonly regulation: ComplianceRegulation;
   readonly requirement: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly remediation: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly remediation: string;
   readonly timeline: number; // days
 }
 
 export interface ComplianceRecommendation {
   readonly recommendationId: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly implementation: string;
-  readonly effort: 'low' | 'medium' | 'high';readonly timeline: number; // days}
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly implementation: string;
+  readonly effort: 'low' | 'medium' | 'high';
+  readonly timeline: number; // days}
 
 export interface FailureAnalysis {
   readonly rootCauses: RootCause[];
@@ -479,7 +503,8 @@ export interface RootCause {
   readonly category: string;
   readonly description: string;
   readonly frequency: number;
-  readonly impact: 'low' | 'medium' | 'high' | 'critical';readonly remediation: string;}
+  readonly impact: 'low' | 'medium' | 'high' | 'critical';
+  readonly remediation: string;}
 
 export interface FailurePattern {
   readonly pattern: string;
@@ -490,21 +515,31 @@ export interface FailurePattern {
 
 export interface FailureTrend {
   readonly metric: string;
-  readonly direction: 'improving' | 'stable' | 'degrading';readonly rate: number;readonly prediction: string;
+  readonly direction: 'improving' | 'stable' | 'degrading';
+  readonly rate: number;
+  readonly prediction: string;
 }
 
 export interface FailureRecommendation {
   readonly category: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly implementation: string;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly implementation: string;
   readonly expectedImpact: string;
 }
 
 export interface TestRecommendation {
-  readonly recommendationType: 'performance' | 'security' | 'reliability' | 'compliance';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly implementation: string;
-  readonly effort: 'low' | 'medium' | 'high';readonly expectedBenefit: string;}
+  readonly recommendationType: 'performance' | 'security' | 'reliability' | 'compliance';
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly implementation: string;
+  readonly effort: 'low' | 'medium' | 'high';
+  readonly expectedBenefit: string;}
 
 export interface TestArtifact {
-  readonly artifactType: 'log' | 'screenshot' | 'video' | 'report' | 'data' | 'config';readonly name: string;readonly path: string;
+  readonly artifactType: 'log' | 'screenshot' | 'video' | 'report' | 'data' | 'config';
+  readonly name: string;
+  readonly path: string;
   readonly size: number; // bytes
   readonly checksum: string;
   readonly description: string;

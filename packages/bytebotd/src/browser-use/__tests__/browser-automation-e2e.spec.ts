@@ -35,12 +35,21 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     await app.close();
   });
 
-  describe('Complete Web Scraping Workflow', () => {let sessionId: string;let taskId: string;
+  describe('Complete Web Scraping Workflow', () => {
+    let sessionId: string;
+    let taskId: string;
 
-    it('should complete full web scraping workflow', async () => {// Step 1: Create browser sessionconst createSessionDto: CreateBrowserSessionDto = {
-        name: 'E2E Web Scraping Session',headless: true,viewportWidth: 1280,
+    it('should complete full web scraping workflow', async () => {
+      // Step 1: Create browser session
+      const createSessionDto: CreateBrowserSessionDto = {
+        name: 'E2E Web Scraping Session',
+        headless: true,
+        viewportWidth: 1280,
         viewportHeight: 720,
-        initialUrls: ['https://example.com'],};const sessionResponse = await request(app.getHttpServer())
+        initialUrls: ['https://example.com'],
+      };
+
+      const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions').set('Authorization', `Bearer ${authToken}`)
         .send(createSessionDto)
         .expect(HttpStatus.CREATED);

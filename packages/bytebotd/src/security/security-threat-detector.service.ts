@@ -17,12 +17,17 @@
  * Performance: Sub-200ms threat detection with intelligent analysis caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';// ===== THREAT DETECTION INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+
+// ===== THREAT DETECTION INTERFACES =====
+/**
  * Threat types for detection and classification
  */
 export enum ThreatType {
@@ -98,7 +103,11 @@ export interface ThreatSourceDetails {
  * Threat indicator of compromise (IoC)
  */
 export interface ThreatIndicator {
-  readonly type: 'IP' | 'DOMAIN' | 'URL' | 'FILE_HASH' | 'EMAIL' | 'REGISTRY_KEY' | 'PROCESS';readonly value: string;readonly category: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';readonly firstSeen: Date;readonly lastSeen: Date;
+  readonly type: 'IP' | 'DOMAIN' | 'URL' | 'FILE_HASH' | 'EMAIL' | 'REGISTRY_KEY' | 'PROCESS';
+  readonly value: string;
+  readonly category: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+  readonly firstSeen: Date;
+  readonly lastSeen: Date;
   readonly confidence: ThreatConfidence;
   readonly reputation: number;
   readonly context: string;
@@ -109,7 +118,8 @@ export interface ThreatIndicator {
  */
 export interface ThreatDetectionRequest {
   readonly operationId: string;
-  readonly detectionScope: 'SYSTEM_WIDE' | 'NETWORK' | 'ENDPOINT' | 'APPLICATION' | 'USER_BEHAVIOR';readonly timeRange?: { start: Date; end: Date };readonly targetAssets?: string[];
+  readonly detectionScope: 'SYSTEM_WIDE' | 'NETWORK' | 'ENDPOINT' | 'APPLICATION' | 'USER_BEHAVIOR';
+  readonly timeRange?: { start: Date; end: Date };readonly targetAssets?: string[];
   readonly threatTypes?: ThreatType[];
   readonly minConfidence?: ThreatConfidence;
   readonly context: ParlantConversationContext;
@@ -135,7 +145,9 @@ export interface ThreatDetectionResult {
 export interface ThreatResponseRequest {
   readonly operationId: string;
   readonly threatId: string;
-  readonly responseType: 'CONTAIN' | 'QUARANTINE' | 'BLOCK' | 'INVESTIGATE' | 'ALERT_ONLY';readonly automatedResponse: boolean;readonly customActions?: string[];
+  readonly responseType: 'CONTAIN' | 'QUARANTINE' | 'BLOCK' | 'INVESTIGATE' | 'ALERT_ONLY';
+  readonly automatedResponse: boolean;
+  readonly customActions?: string[];
   readonly context: ParlantConversationContext;
 }
 
@@ -148,16 +160,20 @@ export interface ThreatResponseResult {
   readonly responseType: string;
   readonly actionsExecuted: ThreatResponseAction[];
   readonly responseEffective: boolean;
-  readonly containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';readonly conversationId: string;}
+  readonly containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';
+  readonly conversationId: string;}
 
 /**
  * Threat response action
  */
 export interface ThreatResponseAction {
   readonly actionId: string;
-  readonly actionType: 'NETWORK_BLOCK' | 'PROCESS_KILL' | 'USER_DISABLE' | 'QUARANTINE' | 'ALERT';readonly target: string;readonly executed: boolean;
+  readonly actionType: 'NETWORK_BLOCK' | 'PROCESS_KILL' | 'USER_DISABLE' | 'QUARANTINE' | 'ALERT';
+  readonly target: string;
+  readonly executed: boolean;
   readonly executedAt?: Date;
-  readonly result: 'SUCCESS' | 'FAILED' | 'PARTIAL';readonly details: string;}
+  readonly result: 'SUCCESS' | 'FAILED' | 'PARTIAL';
+  readonly details: string;}
 
 /**
  * Behavioral analysis profile
@@ -165,7 +181,9 @@ export interface ThreatResponseAction {
 export interface BehavioralAnalysisProfile {
   readonly profileId: string;
   readonly entityId: string;
-  readonly entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK';readonly baselineProfile: BehavioralBaseline;readonly currentBehavior: BehavioralMetrics;
+  readonly entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK';
+  readonly baselineProfile: BehavioralBaseline;
+  readonly currentBehavior: BehavioralMetrics;
   readonly anomalies: BehavioralAnomaly[];
   readonly riskScore: number;
   readonly lastUpdated: Date;

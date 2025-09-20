@@ -143,16 +143,21 @@ export interface ReturnTypeValidation {
  * Type validation error
  */
 export interface TypeValidationError {
-  readonly errorType: 'parameter_type_mismatch' | 'return_type_mismatch' | 'signature_mismatch' | 'type_coercion_failed';readonly message: string;readonly location: string;
+  readonly errorType: 'parameter_type_mismatch' | 'return_type_mismatch' | 'signature_mismatch' | 'type_coercion_failed';
+  readonly message: string;
+  readonly location: string;
   readonly expectedType: string;
   readonly actualType: string;
-  readonly severity: 'error' | 'warning' | 'info';readonly suggestions: string[];}
+  readonly severity: 'error' | 'warning' | 'info';
+  readonly suggestions: string[];}
 
 /**
  * Type validation warning
  */
 export interface TypeValidationWarning {
-  readonly warningType: 'type_coercion' | 'nullable_parameter' | 'any_type_usage' | 'performance_impact';readonly message: string;readonly location: string;
+  readonly warningType: 'type_coercion' | 'nullable_parameter' | 'any_type_usage' | 'performance_impact';
+  readonly message: string;
+  readonly location: string;
   readonly recommendation: string;
   readonly impact: 'low' | 'medium' | 'high';}/**
  * Runtime type information
@@ -186,7 +191,9 @@ export interface RuntimeTypeDescriptor {
  * Type check result
  */
 export interface TypeCheckResult {
-  readonly checkType: 'parameter' | 'return' | 'generic' | 'constraint';readonly success: boolean;readonly location: string;
+  readonly checkType: 'parameter' | 'return' | 'generic' | 'constraint';
+  readonly success: boolean;
+  readonly location: string;
   readonly message: string;
   readonly performanceImpact: number;
 }
@@ -197,7 +204,9 @@ export interface TypeCheckResult {
 export interface TypeInferenceResult {
   readonly inferredType: string;
   readonly confidence: number;
-  readonly method: 'static_analysis' | 'runtime_inspection' | 'duck_typing' | 'structural_typing';readonly evidence: string[];readonly alternatives: string[];
+  readonly method: 'static_analysis' | 'runtime_inspection' | 'duck_typing' | 'structural_typing';
+  readonly evidence: string[];
+  readonly alternatives: string[];
 }
 
 /**
@@ -215,7 +224,9 @@ export interface GeneratedTypeInfo {
  * Type constraint
  */
 export interface TypeConstraint {
-  readonly constraintType: 'extends' | 'keyof' | 'typeof' | 'in' | 'instanceof' | 'custom';readonly expression: string;readonly description: string;
+  readonly constraintType: 'extends' | 'keyof' | 'typeof' | 'in' | 'instanceof' | 'custom';
+  readonly expression: string;
+  readonly description: string;
   readonly enforceable: boolean;
 }
 
@@ -223,7 +234,9 @@ export interface TypeConstraint {
  * Type validation rule
  */
 export interface TypeValidationRule {
-  readonly ruleType: 'required' | 'optional' | 'nullable' | 'range' | 'pattern' | 'custom';readonly expression: string;readonly errorMessage: string;
+  readonly ruleType: 'required' | 'optional' | 'nullable' | 'range' | 'pattern' | 'custom';
+  readonly expression: string;
+  readonly errorMessage: string;
   readonly enforceable: boolean;
 }
 

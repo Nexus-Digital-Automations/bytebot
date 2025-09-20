@@ -90,7 +90,9 @@ export interface DependencyConfig {
     readonly enabled: boolean;
     readonly maxDependencies: number;
     readonly storage: 'memory' | 'redis' | 'database';};readonly resolution: {
-    readonly strategy: 'breadth-first' | 'depth-first';readonly maxDepth: number;readonly timeout: number;
+    readonly strategy: 'breadth-first' | 'depth-first';
+  readonly maxDepth: number;
+  readonly timeout: number;
   };
   readonly circular: {
     readonly detection: boolean;
@@ -112,11 +114,14 @@ export interface EventConfig {
 
 export interface EventSourceConfig {
   readonly name: string;
-  readonly type: 'user_permission' | 'system_config' | 'data_change' | 'security_update';readonly priority: number;readonly patterns: string[];
+  readonly type: 'user_permission' | 'system_config' | 'data_change' | 'security_update';
+  readonly priority: number;
+  readonly patterns: string[];
   readonly invalidationStrategy: 'immediate' | 'lazy' | 'scheduled';}export interface EventFilterRule {
   readonly name: string;
   readonly condition: string; // JSONPath or similar
-  readonly action: 'include' | 'exclude' | 'modify';readonly parameters?: Record<string, unknown>;}
+  readonly action: 'include' | 'exclude' | 'modify';
+  readonly parameters?: Record<string, unknown>;}
 
 export interface InvalidationPerformanceConfig {
   readonly batching: {
@@ -159,13 +164,18 @@ export interface InvalidationRequest {
   readonly strategy: InvalidationStrategy;
   readonly target: InvalidationTarget;
   readonly context: InvalidationContext;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly metadata: Record<string, unknown>;}
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly metadata: Record<string, unknown>;}
 
-export type InvalidationStrategy = 'immediate' | 'lazy' | 'scheduled' | 'predictive' | 'dependency';export interface InvalidationTarget {readonly type: 'key' | 'pattern' | 'function' | 'user' | 'session' | 'risk_level';readonly value: string | string[];readonly scope: 'L1' | 'L2' | 'L3' | 'all';readonly conditions?: InvalidationCondition[];}
+export type InvalidationStrategy = 'immediate' | 'lazy' | 'scheduled' | 'predictive' | 'dependency';export interface InvalidationTarget {readonly type: 'key' | 'pattern' | 'function' | 'user' | 'session' | 'risk_level';
+  readonly value: string | string[];
+  readonly scope: 'L1' | 'L2' | 'L3' | 'all';
+  readonly conditions?: InvalidationCondition[];}
 
 export interface InvalidationCondition {
   readonly field: string;
-  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'in' | 'contains' | 'matches';readonly value: unknown;}
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'in' | 'contains' | 'matches';
+  readonly value: unknown;}
 
 export interface InvalidationContext {
   readonly requestId: string;
@@ -174,7 +184,8 @@ export interface InvalidationContext {
   readonly functionName?: string;
   readonly riskLevel?: RiskLevel;
   readonly timestamp: Date;
-  readonly source: 'manual' | 'automatic' | 'event' | 'predicted';readonly reason: string;}
+  readonly source: 'manual' | 'automatic' | 'event' | 'predicted';
+  readonly reason: string;}
 
 /**
  * Invalidation Result
@@ -187,7 +198,9 @@ export interface InvalidationResult {
   readonly errors: InvalidationError[];
   readonly performance: {
     readonly duration: number;
-    readonly cacheLevel: ('L1' | 'L2' | 'L3')[];readonly batchSize?: number;readonly parallelWorkers?: number;
+    readonly cacheLevel: ('L1' | 'L2' | 'L3')[];
+  readonly batchSize?: number;
+  readonly parallelWorkers?: number;
   };
   readonly dependencies?: {
     readonly triggered: string[];
@@ -197,7 +210,9 @@ export interface InvalidationResult {
 }
 
 export interface InvalidationError {
-  readonly level: 'L1' | 'L2' | 'L3';readonly type: string;readonly message: string;
+  readonly level: 'L1' | 'L2' | 'L3';
+  readonly type: string;
+  readonly message: string;
   readonly key?: string;
   readonly retryable: boolean;
 }
@@ -226,7 +241,8 @@ export interface InvalidationAnalytics {
     readonly strategiesUsed: Record<InvalidationStrategy, number>;
   };
   readonly performance: {
-    readonly cacheLevel: Record<'L1' | 'L2' | 'L3', {readonly requests: number;readonly success: number;
+    readonly cacheLevel: Record<'L1' | 'L2' | 'L3', {readonly requests: number;
+  readonly success: number;
       readonly avgDuration: number;
     }>;
     readonly patterns: Array<{

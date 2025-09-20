@@ -74,13 +74,15 @@ export enum EncryptionStandard {
   readonly enabled: boolean;
   readonly authorizationRequired: AuthorizationLevel[];
   readonly timeLimit: number; // hours
-  readonly auditIntensity: 'standard' | 'enhanced' | 'maximum';readonly approvalWorkflow: boolean;}
+  readonly auditIntensity: 'standard' | 'enhanced' | 'maximum';
+  readonly approvalWorkflow: boolean;}
 
 export interface CrossJurisdictionConfig {
   readonly enabled: boolean;
   readonly primaryJurisdiction: string;
   readonly secondaryJurisdictions: string[];
-  readonly conflictResolution: 'strictest' | 'primary' | 'manual';readonly treatyCompliance: string[];}
+  readonly conflictResolution: 'strictest' | 'primary' | 'manual';
+  readonly treatyCompliance: string[];}
 
 /**
  * Archived audit data with metadata and retrieval information
@@ -174,9 +176,14 @@ export interface RetentionAnalysis {
 
 export interface RetentionRecommendation {
   readonly recommendationId: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly category: 'storage' | 'compliance' | 'performance' | 'cost' | 'security';readonly title: string;readonly description: string;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly category: 'storage' | 'compliance' | 'performance' | 'cost' | 'security';
+  readonly title: string;
+  readonly description: string;
   readonly implementation: {
-    readonly effort: 'low' | 'medium' | 'high';readonly timeline: string;readonly dependencies: string[];
+    readonly effort: 'low' | 'medium' | 'high';
+  readonly timeline: string;
+  readonly dependencies: string[];
     readonly riskLevel: RiskLevel;
   };
   readonly impact: {
@@ -204,15 +211,19 @@ export interface RetrievalRequest {
     readonly complianceContext?: ComplianceRegulation[];
   };
   readonly deliveryPreferences: {
-    readonly format: 'json' | 'csv' | 'pdf' | 'native';readonly encryption: boolean;readonly compressionPreferred: boolean;
+    readonly format: 'json' | 'csv' | 'pdf' | 'native';
+  readonly encryption: boolean;
+  readonly compressionPreferred: boolean;
     readonly maxSize: number; // MB
   };
-  readonly urgency: 'routine' | 'expedited' | 'emergency';readonly requestDate: Date;}
+  readonly urgency: 'routine' | 'expedited' | 'emergency';
+  readonly requestDate: Date;}
 
 export interface RetrievalResponse {
   readonly responseId: string;
   readonly requestId: string;
-  readonly status: 'pending' | 'processing' | 'ready' | 'delivered' | 'failed';readonly progress: number; // percentagereadonly estimatedCompletion?: Date;
+  readonly status: 'pending' | 'processing' | 'ready' | 'delivered' | 'failed';
+  readonly progress: number; // percentagereadonly estimatedCompletion?: Date;
   readonly retrievedData?: {
     readonly eventCount: number;
     readonly dataSize: number;

@@ -131,7 +131,9 @@ export interface AutomatedResponse {
 export interface ResponseThreshold {
   readonly thresholdId: string;
   readonly metricType: string;
-  readonly operator: 'gt' | 'lt' | 'eq' | 'ne' | 'gte' | 'lte';readonly value: number;readonly timeWindow: number; // seconds
+  readonly operator: 'gt' | 'lt' | 'eq' | 'ne' | 'gte' | 'lte';
+  readonly value: number;
+  readonly timeWindow: number; // seconds
   readonly responseActions: string[];
 }
 
@@ -149,7 +151,8 @@ export interface ResponseAction {
   readonly timeout: number; // seconds
   readonly retryPolicy: {
     readonly maxRetries: number;
-    readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';readonly baseDelay: number; // seconds};
+    readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';
+  readonly baseDelay: number; // seconds};
 }
 
 export enum ActionType {
@@ -219,7 +222,9 @@ export interface ComplianceImpact {
 }
 
 export interface AlertResolution {
-  readonly resolutionType: 'false-positive' | 'mitigated' | 'accepted-risk' | 'escalated';readonly description: string;readonly actionsTaken: string[];
+  readonly resolutionType: 'false-positive' | 'mitigated' | 'accepted-risk' | 'escalated';
+  readonly description: string;
+  readonly actionsTaken: string[];
   readonly lessonsLearned: string[];
   readonly preventiveMeasures: string[];
 }
@@ -228,7 +233,9 @@ export interface ExecutedAction {
   readonly actionId: string;
   readonly actionType: ActionType;
   readonly executedAt: Date;
-  readonly executionStatus: 'success' | 'failed' | 'partial';readonly result: any;readonly executionTime: number; // milliseconds
+  readonly executionStatus: 'success' | 'failed' | 'partial';
+  readonly result: any;
+  readonly executionTime: number; // milliseconds
   readonly errors?: string[];
 }
 
@@ -280,7 +287,9 @@ export interface MonitoringMetrics {
  */
 export interface BehavioralBaseline {
   readonly baselineId: string;
-  readonly entityType: 'user' | 'system' | 'application' | 'resource';readonly entityId: string;readonly timeRange: { start: Date; end: Date };
+  readonly entityType: 'user' | 'system' | 'application' | 'resource';
+  readonly entityId: string;
+  readonly timeRange: { start: Date; end: Date };
   readonly learningPeriod: number; // days
   readonly behaviorProfile: {
     readonly accessPatterns: AccessPattern[];

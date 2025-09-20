@@ -31,7 +31,11 @@ export interface BatchRequest {
   readonly operationType: string;
   readonly functionName: string;
   readonly parameters: Record<string, unknown>;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly userId: string;readonly submittedAt: Date;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX';
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly userId: string;
+  readonly submittedAt: Date;
   readonly timeoutMs: number;
   readonly retryAttempts: number;
   readonly metadata: Record<string, unknown>;

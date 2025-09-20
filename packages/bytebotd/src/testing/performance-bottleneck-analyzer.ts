@@ -21,7 +21,9 @@ import { performance, PerformanceObserver, PerformanceEntry } from 'perf_hooks';
  */
 export interface PerformanceBottleneck {
   readonly id: string;
-  readonly type: 'cpu' | 'memory' | 'io' | 'network' | 'concurrency' | 'algorithm';readonly severity: 'critical' | 'high' | 'medium' | 'low';readonly location: {file: string;
+  readonly type: 'cpu' | 'memory' | 'io' | 'network' | 'concurrency' | 'algorithm';
+  readonly severity: 'critical' | 'high' | 'medium' | 'low';
+  readonly location: {file: string;
     function: string;
     line?: number;
   };
@@ -59,7 +61,8 @@ export interface ProfilingSession {
   readonly duration: number;
   readonly samplesCollected: number;
   readonly bottlenecksDetected: PerformanceBottleneck[];
-  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';readonly overallImpact: {executionTimeImpact: number;
+  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  readonly overallImpact: {executionTimeImpact: number;
     memoryImpact: number;
     reliabilityImpact: number;
   };

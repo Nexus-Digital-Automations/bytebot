@@ -46,7 +46,9 @@ export interface TaskExecutionContextInfo {
   readonly estimatedExecutionTime?: number;
   readonly maxExecutionTime?: number;
   readonly actionsCount: number;
-  readonly actionsComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'HIGHLY_COMPLEX';readonly targetsExternalDomains: boolean;readonly requiresUserInput: boolean;
+  readonly actionsComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'HIGHLY_COMPLEX';
+  readonly targetsExternalDomains: boolean;
+  readonly requiresUserInput: boolean;
   readonly modifiesData: boolean;
 }
 
@@ -77,7 +79,10 @@ export interface BrowserTaskAuditEntry {
   readonly taskId: string;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';readonly conversationId: string;readonly taskMetadata?: TaskExecutionMetadata;
+  readonly validationResult: 'APPROVED' | 'DENIED';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';
+  readonly conversationId: string;
+  readonly taskMetadata?: TaskExecutionMetadata;
   readonly performanceMetrics?: TaskPerformanceMetrics;
 }
 
@@ -103,7 +108,9 @@ export interface TaskResourceConstraints {
  * Task security profile for risk assessment
  */
 export interface TaskSecurityProfile {
-  readonly userTrustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'MAXIMUM';readonly recentViolations: number;readonly suspiciousActivityScore: number;
+  readonly userTrustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'MAXIMUM';
+  readonly recentViolations: number;
+  readonly suspiciousActivityScore: number;
   readonly lastSecurityCheck: Date;
   readonly allowedOperations: TaskOperation[];
   readonly restrictedOperations: TaskOperation[];

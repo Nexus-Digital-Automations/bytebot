@@ -84,7 +84,9 @@ export interface SubnetConfiguration {
 }
 
 export interface SecurityRule {
-  readonly direction: 'inbound' | 'outbound';readonly protocol: string;readonly portRange: string;
+  readonly direction: 'inbound' | 'outbound';
+  readonly protocol: string;
+  readonly portRange: string;
   readonly sourceDestination: string;
   readonly description: string;
 }
@@ -103,12 +105,16 @@ export interface RouteEntry {
 export interface FirewallRule {
   readonly ruleName: string;
   readonly priority: number;
-  readonly action: 'allow' | 'deny';readonly protocol: string;readonly sourceRanges: string[];
+  readonly action: 'allow' | 'deny';
+  readonly protocol: string;
+  readonly sourceRanges: string[];
   readonly targetTags: string[];
 }
 
 export interface VpnConfiguration {
-  readonly vpnType: 'site-to-site' | 'client-to-site';readonly gatewayId: string;readonly tunnelConfiguration: TunnelConfiguration[];
+  readonly vpnType: 'site-to-site' | 'client-to-site';
+  readonly gatewayId: string;
+  readonly tunnelConfiguration: TunnelConfiguration[];
 }
 
 export interface TunnelConfiguration {
@@ -140,17 +146,22 @@ export interface AutoScalingGroupConfiguration {
   readonly maxSize: number;
   readonly desiredCapacity: number;
   readonly scalingPolicies: ScalingPolicy[];
-  readonly healthCheckType: 'EC2' | 'ELB' | 'custom';readonly healthCheckGracePeriod: number;}
+  readonly healthCheckType: 'EC2' | 'ELB' | 'custom';
+  readonly healthCheckGracePeriod: number;}
 
 export interface ScalingPolicy {
   readonly policyName: string;
-  readonly policyType: 'target-tracking' | 'step' | 'simple';readonly metricName: string;readonly targetValue: number;
+  readonly policyType: 'target-tracking' | 'step' | 'simple';
+  readonly metricName: string;
+  readonly targetValue: number;
   readonly scaleOutCooldown: number;
   readonly scaleInCooldown: number;
 }
 
 export interface ContainerConfiguration {
-  readonly orchestrator: 'kubernetes' | 'ecs' | 'docker-swarm';readonly clusterName: string;readonly nodeGroups: NodeGroupConfiguration[];
+  readonly orchestrator: 'kubernetes' | 'ecs' | 'docker-swarm';
+  readonly clusterName: string;
+  readonly nodeGroups: NodeGroupConfiguration[];
   readonly serviceConfigurations: ContainerServiceConfiguration[];
 }
 
@@ -181,7 +192,9 @@ export interface PortConfiguration {
   readonly containerPort: number;
   readonly servicePort: number;
   readonly protocol: 'TCP' | 'UDP';}export interface ServerlessConfiguration {
-  readonly platform: 'lambda' | 'azure-functions' | 'cloud-functions';readonly functions: FunctionConfiguration[];readonly apiGateway?: ApiGatewayConfiguration;
+  readonly platform: 'lambda' | 'azure-functions' | 'cloud-functions';
+  readonly functions: FunctionConfiguration[];
+  readonly apiGateway?: ApiGatewayConfiguration;
 }
 
 export interface FunctionConfiguration {
@@ -213,7 +226,8 @@ export interface RouteConfiguration {
 }
 
 export interface AuthenticationConfiguration {
-  readonly authType: 'jwt' | 'api-key' | 'oauth2' | 'custom';readonly configuration: Record<string, any>;}
+  readonly authType: 'jwt' | 'api-key' | 'oauth2' | 'custom';
+  readonly configuration: Record<string, any>;}
 
 export interface RateLimitingConfiguration {
   readonly requestsPerSecond: number;
@@ -235,18 +249,24 @@ export interface StorageConfiguration {
 }
 
 export interface StorageTypeConfiguration {
-  readonly storageType: 'block' | 'object' | 'file' | 'archive';readonly size: string;readonly performanceTier: 'standard' | 'high-performance' | 'archive';readonly replicationFactor: number;readonly durability: number; // 9's of durability
+  readonly storageType: 'block' | 'object' | 'file' | 'archive';
+  readonly size: string;
+  readonly performanceTier: 'standard' | 'high-performance' | 'archive';
+  readonly replicationFactor: number;
+  readonly durability: number; // 9's of durability
 }
 
 export interface StorageBackupConfiguration {
-  readonly backupFrequency: 'hourly' | 'daily' | 'weekly' | 'monthly';readonly retentionPeriod: number; // daysreadonly crossRegionReplication: boolean;
+  readonly backupFrequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  readonly retentionPeriod: number; // daysreadonly crossRegionReplication: boolean;
   readonly encryptionEnabled: boolean;
 }
 
 export interface StorageEncryptionConfiguration {
   readonly encryptionAtRest: boolean;
   readonly encryptionInTransit: boolean;
-  readonly keyManagement: 'provider-managed' | 'customer-managed' | 'hsm';readonly keyRotationEnabled: boolean;}
+  readonly keyManagement: 'provider-managed' | 'customer-managed' | 'hsm';
+  readonly keyRotationEnabled: boolean;}
 
 export interface StorageAccessConfiguration {
   readonly accessControlLists: AccessControlList[];
@@ -281,7 +301,9 @@ export interface DatabaseInstanceConfiguration {
   readonly version: string;
   readonly instanceClass: string;
   readonly allocatedStorage: number;
-  readonly storageType: 'gp2' | 'gp3' | 'io1' | 'io2';readonly multiAz: boolean;readonly encryptionEnabled: boolean;
+  readonly storageType: 'gp2' | 'gp3' | 'io1' | 'io2';
+  readonly multiAz: boolean;
+  readonly encryptionEnabled: boolean;
 }
 
 export interface ClusteringConfiguration {
@@ -339,7 +361,10 @@ export interface LoadBalancingConfiguration {
 
 export interface LoadBalancerConfiguration {
   readonly loadBalancerId: string;
-  readonly loadBalancerType: 'application' | 'network' | 'gateway';readonly scheme: 'internet-facing' | 'internal';readonly ipAddressType: 'ipv4' | 'dualstack';readonly listeners: ListenerConfiguration[];}
+  readonly loadBalancerType: 'application' | 'network' | 'gateway';
+  readonly scheme: 'internet-facing' | 'internal';
+  readonly ipAddressType: 'ipv4' | 'dualstack';
+  readonly listeners: ListenerConfiguration[];}
 
 export interface ListenerConfiguration {
   readonly listenerId: string;
@@ -350,7 +375,9 @@ export interface ListenerConfiguration {
 }
 
 export interface ActionConfiguration {
-  readonly actionType: 'forward' | 'redirect' | 'fixed-response';readonly targetGroupArn?: string;readonly redirectConfig?: RedirectConfiguration;
+  readonly actionType: 'forward' | 'redirect' | 'fixed-response';
+  readonly targetGroupArn?: string;
+  readonly redirectConfig?: RedirectConfiguration;
   readonly fixedResponseConfig?: FixedResponseConfiguration;
 }
 
@@ -371,7 +398,9 @@ export interface FixedResponseConfiguration {
 
 export interface TargetGroupConfiguration {
   readonly targetGroupId: string;
-  readonly targetType: 'instance' | 'ip' | 'lambda';readonly protocol: string;readonly port: number;
+  readonly targetType: 'instance' | 'ip' | 'lambda';
+  readonly protocol: string;
+  readonly port: number;
   readonly healthCheckPath: string;
   readonly targets: TargetConfiguration[];
 }
@@ -446,7 +475,9 @@ export interface NetworkAclConfiguration {
 export interface NetworkAclRule {
   readonly ruleNumber: number;
   readonly protocol: string;
-  readonly ruleAction: 'allow' | 'deny';readonly cidrBlock: string;readonly portRange?: string;
+  readonly ruleAction: 'allow' | 'deny';
+  readonly cidrBlock: string;
+  readonly portRange?: string;
 }
 
 export interface WafConfiguration {
@@ -456,7 +487,8 @@ export interface WafConfiguration {
   readonly ruleId: string;
   readonly ruleName: string;
   readonly priority: number;
-  readonly action: 'allow' | 'block' | 'count';readonly conditions: WafCondition[];}
+  readonly action: 'allow' | 'block' | 'count';
+  readonly conditions: WafCondition[];}
 
 export interface WafCondition {
   readonly conditionType: string;
@@ -493,7 +525,8 @@ export enum ServiceType {
 
 export interface ServiceDependency {
   readonly serviceName: string;
-  readonly dependencyType: 'required' | 'optional';readonly healthCheckRequired: boolean;}
+  readonly dependencyType: 'required' | 'optional';
+  readonly healthCheckRequired: boolean;}
 
 export interface ServiceHealthCheckConfiguration {
   readonly enabled: boolean;
@@ -577,7 +610,8 @@ export interface AuthorizationPolicy {
 export interface AuthorizationRule {
   readonly resource: string;
   readonly action: string;
-  readonly effect: 'allow' | 'deny';readonly conditions?: Record<string, any>;}
+  readonly effect: 'allow' | 'deny';
+  readonly conditions?: Record<string, any>;}
 
 export interface ComplianceConfiguration {
   readonly regulations: string[];
@@ -641,7 +675,9 @@ export interface MetricsCollectionConfiguration {
 
 export interface MetricConfiguration {
   readonly metricName: string;
-  readonly metricType: 'counter' | 'gauge' | 'histogram' | 'summary';readonly labels: string[];readonly description: string;
+  readonly metricType: 'counter' | 'gauge' | 'histogram' | 'summary';
+  readonly labels: string[];
+  readonly description: string;
 }
 
 export interface MetricsRetentionConfiguration {
@@ -660,7 +696,9 @@ export interface AlertRule {
   readonly ruleName: string;
   readonly expression: string;
   readonly forDuration: string;
-  readonly severity: 'info' | 'warning' | 'critical';readonly labels: Record<string, string>;readonly annotations: Record<string, string>;
+  readonly severity: 'info' | 'warning' | 'critical';
+  readonly labels: Record<string, string>;
+  readonly annotations: Record<string, string>;
 }
 
 export interface AlertNotificationChannel {
@@ -672,12 +710,16 @@ export interface AlertNotificationChannel {
 
 export interface DashboardConfiguration {
   readonly dashboardName: string;
-  readonly dashboardType: 'operational' | 'business' | 'technical';readonly panels: DashboardPanel[];readonly refreshInterval: number;
+  readonly dashboardType: 'operational' | 'business' | 'technical';
+  readonly panels: DashboardPanel[];
+  readonly refreshInterval: number;
 }
 
 export interface DashboardPanel {
   readonly panelName: string;
-  readonly panelType: 'graph' | 'table' | 'stat' | 'heatmap';readonly query: string;readonly visualization: VisualizationConfiguration;
+  readonly panelType: 'graph' | 'table' | 'stat' | 'heatmap';
+  readonly query: string;
+  readonly visualization: VisualizationConfiguration;
 }
 
 export interface VisualizationConfiguration {
@@ -693,12 +735,17 @@ export interface AxisConfiguration {
   readonly unit: string;
   readonly scale: 'linear' | 'logarithmic';}export interface LegendConfiguration {
   readonly enabled: boolean;
-  readonly position: 'top' | 'bottom' | 'left' | 'right';readonly alignment: 'left' | 'center' | 'right';}export interface LoggingConfiguration {
+  readonly position: 'top' | 'bottom' | 'left' | 'right';
+  readonly alignment: 'left' | 'center' | 'right';}export interface LoggingConfiguration {
   readonly enabled: boolean;
-  readonly logLevel: 'debug' | 'info' | 'warn' | 'error';readonly logDestination: LogDestination[];readonly logFormat: 'text' | 'json' | 'structured';readonly logRetention: LogRetentionConfiguration;}
+  readonly logLevel: 'debug' | 'info' | 'warn' | 'error';
+  readonly logDestination: LogDestination[];
+  readonly logFormat: 'text' | 'json' | 'structured';
+  readonly logRetention: LogRetentionConfiguration;}
 
 export interface LogDestination {
-  readonly destinationType: 'file' | 'console' | 'syslog' | 'cloudwatch' | 'elasticsearch';readonly configuration: Record<string, any>;}
+  readonly destinationType: 'file' | 'console' | 'syslog' | 'cloudwatch' | 'elasticsearch';
+  readonly configuration: Record<string, any>;}
 
 export interface LogRetentionConfiguration {
   readonly retentionDays: number;
@@ -741,7 +788,9 @@ export interface ScalingStep {
 
 export interface ScalingPolicyConfiguration {
   readonly policyName: string;
-  readonly policyType: 'target-tracking' | 'step-scaling' | 'simple-scaling';readonly adjustmentType: 'change-in-capacity' | 'exact-capacity' | 'percent-change';readonly cooldown: number;}
+  readonly policyType: 'target-tracking' | 'step-scaling' | 'simple-scaling';
+  readonly adjustmentType: 'change-in-capacity' | 'exact-capacity' | 'percent-change';
+  readonly cooldown: number;}
 
 export interface BackupConfiguration {
   readonly backupStrategy: BackupStrategy;
@@ -753,7 +802,9 @@ export interface BackupConfiguration {
 export enum BackupStrategy {
   FULL = 'full',INCREMENTAL = 'incremental',DIFFERENTIAL = 'differential',CONTINUOUS = 'continuous'}export interface BackupSchedule {
   readonly scheduleId: string;
-  readonly frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';readonly time: string;readonly includedServices: string[];
+  readonly frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  readonly time: string;
+  readonly includedServices: string[];
   readonly backupType: BackupStrategy;
 }
 
@@ -774,7 +825,9 @@ export interface RecoveryConfiguration {
 
 export interface RecoveryProcedure {
   readonly procedureName: string;
-  readonly scenarioType: 'component-failure' | 'data-corruption' | 'disaster' | 'security-incident';readonly steps: RecoveryStep[];readonly estimatedTime: number;
+  readonly scenarioType: 'component-failure' | 'data-corruption' | 'disaster' | 'security-incident';
+  readonly steps: RecoveryStep[];
+  readonly estimatedTime: number;
   readonly automationLevel: 'manual' | 'semi-automated' | 'automated';}export interface RecoveryStep {
   readonly stepName: string;
   readonly description: string;
@@ -784,7 +837,9 @@ export interface RecoveryProcedure {
 }
 
 export interface RecoveryTestingSchedule {
-  readonly testingFrequency: 'monthly' | 'quarterly' | 'semi-annually' | 'annually';readonly testTypes: RecoveryTestType[];readonly validationCriteria: ValidationCriteria[];
+  readonly testingFrequency: 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
+  readonly testTypes: RecoveryTestType[];
+  readonly validationCriteria: ValidationCriteria[];
 }
 
 export enum RecoveryTestType {
@@ -814,7 +869,9 @@ export interface MaintenanceWindow {
 export enum MaintenanceOperation {
   SECURITY_UPDATES = 'security-updates',SYSTEM_UPDATES = 'system-updates',CONFIGURATION_CHANGES = 'configuration-changes',BACKUP_OPERATIONS = 'backup-operations',PERFORMANCE_TUNING = 'performance-tuning',CAPACITY_PLANNING = 'capacity-planning'}export interface UpdatePolicy {
   readonly policyName: string;
-  readonly updateType: 'security' | 'feature' | 'configuration' | 'infrastructure';readonly approvalRequired: boolean;readonly testingRequired: boolean;
+  readonly updateType: 'security' | 'feature' | 'configuration' | 'infrastructure';
+  readonly approvalRequired: boolean;
+  readonly testingRequired: boolean;
   readonly rollbackPlan: boolean;
   readonly automationLevel: 'manual' | 'semi-automated' | 'automated';}export interface MaintenanceProcedure {
   readonly procedureName: string;
@@ -841,7 +898,8 @@ export interface EmergencyMaintenanceConfiguration {
 export interface ComplianceRequirement {
   readonly regulation: string;
   readonly requirements: RegulationRequirement[];
-  readonly validationMethod: 'automated' | 'manual' | 'hybrid';readonly reportingRequired: boolean;}
+  readonly validationMethod: 'automated' | 'manual' | 'hybrid';
+  readonly reportingRequired: boolean;}
 
 export interface RegulationRequirement {
   readonly requirementId: string;
@@ -861,7 +919,9 @@ export interface RollbackConfiguration {
 export enum RollbackStrategy {
   AUTOMATIC = 'automatic',MANUAL = 'manual',CONDITIONAL = 'conditional'}export interface RollbackTrigger {
   readonly triggerId: string;
-  readonly triggerType: 'health-check-failure' | 'error-rate-threshold' | 'performance-degradation' | 'manual';readonly threshold: number;readonly timeWindow: number;
+  readonly triggerType: 'health-check-failure' | 'error-rate-threshold' | 'performance-degradation' | 'manual';
+  readonly threshold: number;
+  readonly timeWindow: number;
   readonly cooldownPeriod: number;
 }
 
@@ -892,7 +952,9 @@ export interface HealthCheckConfiguration {
 export interface HealthCheck {
   readonly checkId: string;
   readonly checkName: string;
-  readonly checkType: 'endpoint' | 'database' | 'service' | 'external-dependency';readonly target: string;readonly intervalSeconds: number;
+  readonly checkType: 'endpoint' | 'database' | 'service' | 'external-dependency';
+  readonly target: string;
+  readonly intervalSeconds: number;
   readonly timeoutSeconds: number;
   readonly successThreshold: number;
   readonly failureThreshold: number;
@@ -904,12 +966,16 @@ export interface HealthCheckRetryConfiguration {
   readonly retryDelay: number;
   readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';}export interface AggregatedHealthCheckConfiguration {
   readonly enabled: boolean;
-  readonly aggregationMethod: 'all-healthy' | 'majority-healthy' | 'weighted-average';readonly healthyThreshold: number;readonly unhealthyThreshold: number;
+  readonly aggregationMethod: 'all-healthy' | 'majority-healthy' | 'weighted-average';
+  readonly healthyThreshold: number;
+  readonly unhealthyThreshold: number;
 }
 
 export interface HealthCheckDependency {
   readonly dependencyName: string;
-  readonly dependencyType: 'required' | 'optional';readonly healthCheckId: string;readonly timeoutSeconds: number;
+  readonly dependencyType: 'required' | 'optional';
+  readonly healthCheckId: string;
+  readonly timeoutSeconds: number;
 }
 
 export interface DeploymentValidation {
@@ -922,7 +988,9 @@ export interface DeploymentValidation {
 
 export interface ValidationStep {
   readonly stepName: string;
-  readonly validationType: 'functional' | 'performance' | 'security' | 'compliance';readonly validationScript: string;readonly expectedResults: ValidationResult[];
+  readonly validationType: 'functional' | 'performance' | 'security' | 'compliance';
+  readonly validationScript: string;
+  readonly expectedResults: ValidationResult[];
   readonly timeout: number;
   readonly mandatory: boolean;
 }
@@ -964,7 +1032,8 @@ export interface LoadTestOperation {
 export interface PerformanceThreshold {
   readonly metricName: string;
   readonly threshold: number;
-  readonly operator: 'lt' | 'lte' | 'gt' | 'gte';readonly unit: string;}
+  readonly operator: 'lt' | 'lte' | 'gt' | 'gte';
+  readonly unit: string;}
 
 export interface SecurityValidationConfiguration {
   readonly enabled: boolean;
@@ -974,7 +1043,9 @@ export interface SecurityValidationConfiguration {
 
 export interface SecurityTest {
   readonly testName: string;
-  readonly testType: 'authentication' | 'authorization' | 'encryption' | 'injection' | 'xss';readonly testScript: string;readonly expectedResults: SecurityTestResult[];
+  readonly testType: 'authentication' | 'authorization' | 'encryption' | 'injection' | 'xss';
+  readonly testScript: string;
+  readonly expectedResults: SecurityTestResult[];
 }
 
 export interface SecurityTestResult {
@@ -983,7 +1054,8 @@ export interface SecurityTestResult {
   readonly failureAction: 'warn' | 'fail' | 'block';}export interface VulnerabilityScanConfiguration {
   readonly enabled: boolean;
   readonly scanTools: string[];
-  readonly scanScope: 'infrastructure' | 'application' | 'both';readonly severityThreshold: 'low' | 'medium' | 'high' | 'critical';}export interface ComplianceValidationConfiguration {
+  readonly scanScope: 'infrastructure' | 'application' | 'both';
+  readonly severityThreshold: 'low' | 'medium' | 'high' | 'critical';}export interface ComplianceValidationConfiguration {
   readonly enabled: boolean;
   readonly regulations: string[];
   readonly complianceChecks: ComplianceCheck[];
@@ -999,14 +1071,18 @@ export interface ComplianceCheck {
 }
 
 export interface OperationalSettings {
-  readonly operationMode: 'development' | 'staging' | 'production';readonly debugMode: boolean;readonly maintenanceMode: boolean;
+  readonly operationMode: 'development' | 'staging' | 'production';
+  readonly debugMode: boolean;
+  readonly maintenanceMode: boolean;
   readonly resourceLimits: ResourceLimit[];
   readonly featureFlags: FeatureFlag[];
   readonly operationalProcedures: OperationalProcedure[];
 }
 
 export interface ResourceLimit {
-  readonly resourceType: 'cpu' | 'memory' | 'storage' | 'network';readonly limit: number;readonly unit: string;
+  readonly resourceType: 'cpu' | 'memory' | 'storage' | 'network';
+  readonly limit: number;
+  readonly unit: string;
   readonly enforcement: 'warn' | 'throttle' | 'block';}export interface FeatureFlag {
   readonly flagName: string;
   readonly enabled: boolean;
@@ -1050,7 +1126,9 @@ export enum DeploymentStatus {
   PENDING = 'pending',INITIALIZING = 'initializing',DEPLOYING = 'deploying',VALIDATING = 'validating',COMPLETED = 'completed',FAILED = 'failed',ROLLING_BACK = 'rolling-back',ROLLED_BACK = 'rolled-back',CANCELLED = 'cancelled'}export enum DeploymentPhase {
   PRE_DEPLOYMENT = 'pre-deployment',INFRASTRUCTURE_PROVISIONING = 'infrastructure-provisioning',SERVICE_DEPLOYMENT = 'service-deployment',CONFIGURATION_DEPLOYMENT = 'configuration-deployment',POST_DEPLOYMENT_VALIDATION = 'post-deployment-validation',HEALTH_VERIFICATION = 'health-verification',PERFORMANCE_VALIDATION = 'performance-validation',SECURITY_VALIDATION = 'security-validation',COMPLIANCE_VALIDATION = 'compliance-validation',OPERATIONAL_HANDOVER = 'operational-handover'}export interface PhaseResult {
   readonly phase: DeploymentPhase;
-  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';readonly startTime: Date;readonly endTime?: Date;
+  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  readonly startTime: Date;
+  readonly endTime?: Date;
   readonly duration?: number;
   readonly details: PhaseExecutionDetails;
   readonly artifacts: string[];
@@ -1069,17 +1147,23 @@ export interface PhaseExecutionDetails {
 export interface ResourceProvisioningResult {
   readonly resourceType: string;
   readonly resourceId: string;
-  readonly status: 'provisioned' | 'failed' | 'skipped';readonly provisioningTime: number;readonly configuration: Record<string, any>;
+  readonly status: 'provisioned' | 'failed' | 'skipped';
+  readonly provisioningTime: number;
+  readonly configuration: Record<string, any>;
 }
 
 export interface ServiceDeploymentResult {
   readonly serviceName: string;
   readonly serviceVersion: string;
-  readonly status: 'deployed' | 'failed' | 'skipped';readonly deploymentTime: number;readonly instanceCount: number;
+  readonly status: 'deployed' | 'failed' | 'skipped';
+  readonly deploymentTime: number;
+  readonly instanceCount: number;
   readonly healthStatus: 'healthy' | 'unhealthy' | 'unknown';}export interface ValidationExecutionResult {
   readonly validationType: string;
   readonly validationName: string;
-  readonly status: 'passed' | 'failed' | 'skipped';readonly executionTime: number;readonly details: Record<string, any>;
+  readonly status: 'passed' | 'failed' | 'skipped';
+  readonly executionTime: number;
+  readonly details: Record<string, any>;
 }
 
 export interface DeploymentMetrics {
@@ -1115,39 +1199,52 @@ export interface DeploymentCostMetrics {
 }
 
 export interface SystemHealthStatus {
-  readonly overallHealth: 'healthy' | 'degraded' | 'unhealthy';readonly serviceHealth: ServiceHealthStatus[];readonly infrastructureHealth: InfrastructureHealthStatus[];
+  readonly overallHealth: 'healthy' | 'degraded' | 'unhealthy';
+  readonly serviceHealth: ServiceHealthStatus[];
+  readonly infrastructureHealth: InfrastructureHealthStatus[];
   readonly dependencyHealth: DependencyHealthStatus[];
   readonly lastHealthCheck: Date;
 }
 
 export interface ServiceHealthStatus {
   readonly serviceName: string;
-  readonly health: 'healthy' | 'degraded' | 'unhealthy';readonly responseTime: number;readonly errorRate: number;
+  readonly health: 'healthy' | 'degraded' | 'unhealthy';
+  readonly responseTime: number;
+  readonly errorRate: number;
   readonly availability: number;
   readonly instances: InstanceHealthStatus[];
 }
 
 export interface InstanceHealthStatus {
   readonly instanceId: string;
-  readonly health: 'healthy' | 'degraded' | 'unhealthy';readonly cpuUsage: number;readonly memoryUsage: number;
+  readonly health: 'healthy' | 'degraded' | 'unhealthy';
+  readonly cpuUsage: number;
+  readonly memoryUsage: number;
   readonly diskUsage: number;
   readonly networkConnectivity: boolean;
 }
 
 export interface InfrastructureHealthStatus {
   readonly component: string;
-  readonly health: 'healthy' | 'degraded' | 'unhealthy';readonly metrics: Record<string, number>;readonly lastCheck: Date;
+  readonly health: 'healthy' | 'degraded' | 'unhealthy';
+  readonly metrics: Record<string, number>;
+  readonly lastCheck: Date;
 }
 
 export interface DependencyHealthStatus {
   readonly dependencyName: string;
-  readonly dependencyType: 'database' | 'external-service' | 'message-queue' | 'cache';readonly health: 'healthy' | 'degraded' | 'unhealthy';readonly responseTime: number;readonly connectionStatus: 'connected' | 'disconnected' | 'timeout';}export interface DeploymentError {
+  readonly dependencyType: 'database' | 'external-service' | 'message-queue' | 'cache';
+  readonly health: 'healthy' | 'degraded' | 'unhealthy';
+  readonly responseTime: number;
+  readonly connectionStatus: 'connected' | 'disconnected' | 'timeout';}export interface DeploymentError {
   readonly errorId: string;
   readonly phase: DeploymentPhase;
   readonly errorType: string;
   readonly errorMessage: string;
   readonly timestamp: Date;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly impact: string;readonly resolution: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly impact: string;
+  readonly resolution: string;
   readonly stackTrace?: string;
 }
 
@@ -1156,37 +1253,49 @@ export interface RollbackStatus {
   readonly rollbackReason: string;
   readonly rollbackStartTime: Date;
   readonly rollbackEndTime?: Date;
-  readonly rollbackStatus: 'initiated' | 'in-progress' | 'completed' | 'failed';readonly rollbackSteps: RollbackStepResult[];readonly dataLoss: boolean;
+  readonly rollbackStatus: 'initiated' | 'in-progress' | 'completed' | 'failed';
+  readonly rollbackSteps: RollbackStepResult[];
+  readonly dataLoss: boolean;
   readonly recoveryTime: number;
 }
 
 export interface RollbackStepResult {
   readonly stepName: string;
-  readonly status: 'completed' | 'failed' | 'skipped';readonly executionTime: number;readonly details: string;
+  readonly status: 'completed' | 'failed' | 'skipped';
+  readonly executionTime: number;
+  readonly details: string;
 }
 
 export interface DeploymentValidationResult {
   readonly validationType: string;
   readonly validationName: string;
-  readonly status: 'passed' | 'failed' | 'warning';readonly executionTime: number;readonly results: ValidationTestResult[];
+  readonly status: 'passed' | 'failed' | 'warning';
+  readonly executionTime: number;
+  readonly results: ValidationTestResult[];
   readonly recommendations: string[];
 }
 
 export interface ValidationTestResult {
   readonly testName: string;
-  readonly status: 'passed' | 'failed' | 'skipped';readonly expected: any;readonly actual: any;
+  readonly status: 'passed' | 'failed' | 'skipped';
+  readonly expected: any;
+  readonly actual: any;
   readonly message: string;
 }
 
 export interface DeploymentArtifact {
-  readonly artifactType: 'logs' | 'configuration' | 'metrics' | 'reports' | 'certificates';readonly artifactName: string;readonly artifactPath: string;
+  readonly artifactType: 'logs' | 'configuration' | 'metrics' | 'reports' | 'certificates';
+  readonly artifactName: string;
+  readonly artifactPath: string;
   readonly artifactSize: number;
   readonly checksum: string;
   readonly createdAt: Date;
 }
 
 export interface OperationalStatus {
-  readonly operationMode: 'normal' | 'maintenance' | 'emergency' | 'recovery';readonly activeMaintenanceWindows: MaintenanceWindowStatus[];readonly scheduledOperations: ScheduledOperation[];
+  readonly operationMode: 'normal' | 'maintenance' | 'emergency' | 'recovery';
+  readonly activeMaintenanceWindows: MaintenanceWindowStatus[];
+  readonly scheduledOperations: ScheduledOperation[];
   readonly systemCapacity: SystemCapacityStatus;
   readonly alertingStatus: AlertingStatus;
 }
@@ -1194,24 +1303,30 @@ export interface OperationalStatus {
 export interface MaintenanceWindowStatus {
   readonly windowId: string;
   readonly windowName: string;
-  readonly status: 'scheduled' | 'active' | 'completed' | 'cancelled';readonly startTime: Date;readonly endTime: Date;
+  readonly status: 'scheduled' | 'active' | 'completed' | 'cancelled';
+  readonly startTime: Date;
+  readonly endTime: Date;
   readonly operations: MaintenanceOperationStatus[];
 }
 
 export interface MaintenanceOperationStatus {
   readonly operationName: string;
-  readonly status: 'pending' | 'running' | 'completed' | 'failed';readonly progress: number;readonly estimatedCompletion: Date;
+  readonly status: 'pending' | 'running' | 'completed' | 'failed';
+  readonly progress: number;
+  readonly estimatedCompletion: Date;
 }
 
 export interface ScheduledOperation {
   readonly operationId: string;
   readonly operationName: string;
   readonly scheduledTime: Date;
-  readonly operationType: 'backup' | 'update' | 'scaling' | 'maintenance';readonly status: 'scheduled' | 'running' | 'completed' | 'failed';}export interface SystemCapacityStatus {
+  readonly operationType: 'backup' | 'update' | 'scaling' | 'maintenance';
+  readonly status: 'scheduled' | 'running' | 'completed' | 'failed';}export interface SystemCapacityStatus {
   readonly currentCapacity: number;
   readonly maxCapacity: number;
   readonly utilizationPercentage: number;
-  readonly scalingStatus: 'stable' | 'scaling-up' | 'scaling-down';readonly projectedCapacityNeeds: CapacityProjection[];}
+  readonly scalingStatus: 'stable' | 'scaling-up' | 'scaling-down';
+  readonly projectedCapacityNeeds: CapacityProjection[];}
 
 export interface CapacityProjection {
   readonly timeHorizon: string;

@@ -116,7 +116,8 @@ export interface ParlantStreamingMessage {
 
 export interface ParlantStreamingMetadata {
   readonly priority: 'low' | 'normal' | 'high' | 'critical';
-readonly requiresAck: boolean;readonly compressed: boolean;
+readonly requiresAck: boolean;
+  readonly compressed: boolean;
   readonly encrypted: boolean;
   readonly timeout?: number;
   readonly retryCount?: number;
@@ -137,7 +138,8 @@ export interface ParlantValidationStreamRequest {
   readonly context: ParlantValidationContext;
   readonly action: ParlantValidationAction;
   readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';
-readonly streamingOptions: ValidationStreamingOptions;readonly requiresUserConfirmation: boolean;
+readonly streamingOptions: ValidationStreamingOptions;
+  readonly requiresUserConfirmation: boolean;
 
 
 }
@@ -164,7 +166,8 @@ export interface ParlantValidationContext {
 
 export interface SecurityValidationContext {
   readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';
-readonly permissions: string[];readonly roles: string[];
+readonly permissions: string[];
+  readonly roles: string[];
   readonly auditTrailRequired: boolean;
   readonly complianceFlags: string[];
   readonly riskAssessment: SecurityRiskAssessment;
@@ -203,7 +206,8 @@ export interface BusinessValidationContext {
 
 export interface BusinessImpactAssessment {
   readonly impactLevel: 'minimal' | 'moderate' | 'significant' | 'critical';
-readonly affectedSystems: string[];readonly estimatedDowntime?: number;
+readonly affectedSystems: string[];
+  readonly estimatedDowntime?: number;
   readonly financialImpact?: number;
   readonly customerImpact?: string;
 
@@ -216,7 +220,8 @@ readonly affectedSystems: string[];readonly estimatedDowntime?: number;
 
 export interface ApprovalWorkflowConfig {
   readonly workflowType: 'auto' | 'single_approval' | 'multi_approval' | 'committee';
-readonly approvers: string[];readonly escalationPath: string[];
+readonly approvers: string[];
+  readonly escalationPath: string[];
   readonly timeoutMinutes: number;
   readonly fallbackAction: 'deny' | 'escalate' | 'defer';
 
@@ -227,7 +232,8 @@ readonly approvers: string[];readonly escalationPath: string[];
 export interface ConversationHistoryEntry {
   readonly timestamp: number;
   readonly speaker: 'user' | 'assistant' | 'system';
-readonly message: string;readonly intent?: string;
+readonly message: string;
+  readonly intent?: string;
   readonly confidence?: number;
   readonly metadata?: Record<string, unknown>;
 
@@ -241,7 +247,8 @@ readonly message: string;readonly intent?: string;
 export interface ParlantValidationAction {
   readonly actionType: string;
   readonly actionCategory: 'read' | 'write' | 'execute' | 'delete' | 'admin';
-readonly parameters: Record<string, unknown>;readonly expectedOutcome: string;
+readonly parameters: Record<string, unknown>;
+  readonly expectedOutcome: string;
   readonly reversible: boolean;
   readonly impact: ActionImpactAssessment;
   readonly prerequisites: ActionPrerequisite[];
@@ -255,7 +262,8 @@ readonly parameters: Record<string, unknown>;readonly expectedOutcome: string;
 
 export interface ActionImpactAssessment {
   readonly scope: 'local' | 'system' | 'network' | 'external';
-readonly dataAccess: boolean;readonly stateChanges: boolean;
+readonly dataAccess: boolean;
+  readonly stateChanges: boolean;
   readonly userInteraction: boolean;
   readonly systemResources: boolean;
   readonly networkAccess: boolean;
@@ -302,7 +310,8 @@ export interface ParlantValidationStreamResponse {
   readonly validationId: string;
   readonly operationId: string;
   readonly status: 'pending' | 'approved' | 'denied' | 'escalated' | 'timeout';
-readonly reasoning: string;readonly confidence: number;
+readonly reasoning: string;
+  readonly confidence: number;
   readonly riskAssessment: ResponseRiskAssessment;
   readonly conditions?: ValidationCondition[];
   readonly auditTrail: AuditTrailEntry[];
@@ -376,7 +385,8 @@ export interface ValidationResponseMetadata {
 export interface StreamInfo {
   readonly streamId: string;
   readonly streamType: 'validation' | 'progress' | 'confirmation' | 'monitoring';
-readonly participants: string[];readonly createdAt: Date;
+readonly participants: string[];
+  readonly createdAt: Date;
   lastActivity: Date;
   messageCount: number;
   status: StreamStatus;
@@ -508,7 +518,8 @@ export interface SessionSecurityInfo {
   readonly permissions: string[];
   readonly roles: string[];
   readonly securityLevel: 'basic' | 'enhanced' | 'maximum';
-readonly auditTrailEnabled: boolean;readonly encryptionLevel: 'none' | 'transport' | 'end_to_end';
+readonly auditTrailEnabled: boolean;
+  readonly encryptionLevel: 'none' | 'transport' | 'end_to_end';
 
 }// ===== PARLANT WEBSOCKET STREAMING BRIDGE SERVICE =====
 

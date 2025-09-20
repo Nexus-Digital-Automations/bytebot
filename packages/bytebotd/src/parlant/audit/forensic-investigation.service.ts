@@ -163,7 +163,9 @@ export interface ForensicAnalysisResult {
   readonly conclusions: {
     readonly summary: string;
     readonly keyFindings: string[];
-    readonly evidenceQuality: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';readonly confidence: number;readonly limitations: string[];
+    readonly evidenceQuality: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
+  readonly confidence: number;
+  readonly limitations: string[];
     readonly recommendations: string[];
   };
 
@@ -187,7 +189,9 @@ export enum ForensicAnalysisType {
 export interface ForensicFinding {
   readonly findingId: string;
   readonly type: FindingType;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly confidence: number;readonly description: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly confidence: number;
+  readonly description: string;
   readonly evidence: string[];
   readonly supportingAnalysis: string;
   readonly implications: string[];
@@ -210,7 +214,8 @@ export interface TimelineEvent {
   readonly action: string;
   readonly outcome: string;
   readonly evidence: string[];
-  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly verified: boolean;}
+  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly verified: boolean;}
 
 /**
  * Evidence relationship
@@ -254,7 +259,9 @@ export interface ForensicReport {
   readonly reportId: string;
   readonly investigationId: string;
   readonly reportType: ReportType;
-  readonly classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';readonly createdAt: Date;readonly createdBy: string;
+  readonly classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
+  readonly createdAt: Date;
+  readonly createdBy: string;
   readonly approvedBy?: string;
   readonly approvedAt?: Date;
 
@@ -284,7 +291,9 @@ export enum ReportType {
 export interface ReportAppendix {
   readonly appendixId: string;
   readonly title: string;
-  readonly type: 'EVIDENCE' | 'ANALYSIS' | 'METHODOLOGY' | 'REFERENCE';readonly content: string;readonly attachments: string[];
+  readonly type: 'EVIDENCE' | 'ANALYSIS' | 'METHODOLOGY' | 'REFERENCE';
+  readonly content: string;
+  readonly attachments: string[];
 }
 
 // ===== FORENSIC INVESTIGATION SERVICE =====

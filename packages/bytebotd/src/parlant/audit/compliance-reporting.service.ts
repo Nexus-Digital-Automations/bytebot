@@ -41,7 +41,9 @@ export interface ComplianceReportConfig {
   readonly reportFrequency: ReportFrequency;
   readonly recipients: Recipient[];
   readonly format: ReportFormat[];
-  readonly language: 'EN' | 'DE' | 'FR' | 'ES' | 'IT';readonly templateId: string;readonly autoSubmission: boolean;
+  readonly language: 'EN' | 'DE' | 'FR' | 'ES' | 'IT';
+  readonly templateId: string;
+  readonly autoSubmission: boolean;
   readonly digitalSignature: boolean;
   readonly encryptionRequired: boolean;
   readonly customFields: CustomField[];
@@ -67,13 +69,19 @@ export interface Recipient {
   readonly recipientId: string;
   readonly name: string;
   readonly email: string;
-  readonly role: 'EXECUTIVE' | 'COMPLIANCE_OFFICER' | 'AUDITOR' | 'SECURITY_OFFICER' | 'BOARD_MEMBER';readonly reportTypes: ReportType[];readonly deliveryMethod: 'EMAIL' | 'SECURE_PORTAL' | 'API' | 'WEBHOOK';readonly pgpKey?: string;readonly accessLevel: 'FULL' | 'SUMMARY' | 'METRICS_ONLY';}/**
+  readonly role: 'EXECUTIVE' | 'COMPLIANCE_OFFICER' | 'AUDITOR' | 'SECURITY_OFFICER' | 'BOARD_MEMBER';
+  readonly reportTypes: ReportType[];
+  readonly deliveryMethod: 'EMAIL' | 'SECURE_PORTAL' | 'API' | 'WEBHOOK';
+  readonly pgpKey?: string;
+  readonly accessLevel: 'FULL' | 'SUMMARY' | 'METRICS_ONLY';}/**
  * Custom field for reports
  */
 export interface CustomField {
   readonly fieldId: string;
   readonly fieldName: string;
-  readonly fieldType: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'LIST';readonly required: boolean;readonly defaultValue?: any;
+  readonly fieldType: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'LIST';
+  readonly required: boolean;
+  readonly defaultValue?: any;
   readonly validation?: string;
 }
 
@@ -152,8 +160,13 @@ export interface ReportContent {
  */
 export interface ExecutiveSummary {
   readonly overallComplianceScore: number;
-  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT';readonly keyFindings: string[];readonly criticalIssues: number;
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly improvementTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';readonly executiveRecommendations: string[];readonly nextSteps: string[];
+  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT';
+  readonly keyFindings: string[];
+  readonly criticalIssues: number;
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly improvementTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  readonly executiveRecommendations: string[];
+  readonly nextSteps: string[];
 }
 
 /**
@@ -190,7 +203,9 @@ export interface TestResult {
   readonly testId: string;
   readonly testName: string;
   readonly testDate: Date;
-  readonly result: 'PASS' | 'FAIL' | 'PARTIAL' | 'NOT_TESTED';readonly score: number;readonly evidence: string[];
+  readonly result: 'PASS' | 'FAIL' | 'PARTIAL' | 'NOT_TESTED';
+  readonly score: number;
+  readonly evidence: string[];
   readonly notes: string;
 }
 
@@ -242,7 +257,9 @@ export interface EvidenceCategory {
  */
 export interface EvidenceItem {
   readonly itemId: string;
-  readonly type: 'AUDIT_LOG' | 'DOCUMENT' | 'SCREENSHOT' | 'CONFIGURATION' | 'TEST_RESULT';readonly description: string;readonly timestamp: Date;
+  readonly type: 'AUDIT_LOG' | 'DOCUMENT' | 'SCREENSHOT' | 'CONFIGURATION' | 'TEST_RESULT';
+  readonly description: string;
+  readonly timestamp: Date;
   readonly hash: string;
   readonly location: string;
   readonly relevance: number;
@@ -265,7 +282,9 @@ export interface EvidenceIntegrity {
 export interface ReportAppendix {
   readonly appendixId: string;
   readonly title: string;
-  readonly type: 'EVIDENCE' | 'METHODOLOGY' | 'GLOSSARY' | 'REFERENCES' | 'TECHNICAL_DETAILS';readonly content: string;readonly attachments: AttachmentInfo[];
+  readonly type: 'EVIDENCE' | 'METHODOLOGY' | 'GLOSSARY' | 'REFERENCES' | 'TECHNICAL_DETAILS';
+  readonly content: string;
+  readonly attachments: AttachmentInfo[];
 }
 
 /**
@@ -285,7 +304,9 @@ export interface AttachmentInfo {
  */
 export interface CertificationInfo {
   readonly regulation: ComplianceRegulation;
-  readonly currentStatus: 'CERTIFIED' | 'PENDING' | 'EXPIRED' | 'NON_COMPLIANT';readonly certificationDate?: Date;readonly expirationDate?: Date;
+  readonly currentStatus: 'CERTIFIED' | 'PENDING' | 'EXPIRED' | 'NON_COMPLIANT';
+  readonly certificationDate?: Date;
+  readonly expirationDate?: Date;
   readonly certifyingBody?: string;
   readonly certificateNumber?: string;
   readonly nextAssessment: Date;
@@ -329,8 +350,12 @@ export interface SubmissionInfo {
   readonly submissionId: string;
   readonly submittedAt: Date;
   readonly submittedBy: string;
-  readonly submissionMethod: 'API' | 'PORTAL' | 'EMAIL' | 'MANUAL';readonly recipientOrganization: string;readonly confirmationNumber?: string;
-  readonly status: 'SUBMITTED' | 'ACKNOWLEDGED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';readonly feedback?: string;readonly nextSubmissionDue?: Date;
+  readonly submissionMethod: 'API' | 'PORTAL' | 'EMAIL' | 'MANUAL';
+  readonly recipientOrganization: string;
+  readonly confirmationNumber?: string;
+  readonly status: 'SUBMITTED' | 'ACKNOWLEDGED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
+  readonly feedback?: string;
+  readonly nextSubmissionDue?: Date;
 }
 
 /**
@@ -367,7 +392,9 @@ export interface TemplateSubsection {
   readonly subsectionId: string;
   readonly title: string;
   readonly content: string;
-  readonly contentType: 'TEXT' | 'TABLE' | 'CHART' | 'IMAGE';readonly dataSource: string;readonly formatting: SectionFormatting;
+  readonly contentType: 'TEXT' | 'TABLE' | 'CHART' | 'IMAGE';
+  readonly dataSource: string;
+  readonly formatting: SectionFormatting;
 }
 
 /**
@@ -385,7 +412,9 @@ export interface DataBinding {
  * Formatting options
  */
 export interface FormattingOptions {
-  readonly pageSize: 'A4' | 'LETTER' | 'LEGAL';readonly orientation: 'PORTRAIT' | 'LANDSCAPE';readonly margins: { top: number; bottom: number; left: number; right: number };readonly fonts: FontConfig[];
+  readonly pageSize: 'A4' | 'LETTER' | 'LEGAL';
+  readonly orientation: 'PORTRAIT' | 'LANDSCAPE';
+  readonly margins: { top: number; bottom: number; left: number; right: number };readonly fonts: FontConfig[];
   readonly colors: ColorScheme;
   readonly logoUrl?: string;
   readonly watermark?: string;
@@ -397,7 +426,8 @@ export interface FormattingOptions {
 export interface FontConfig {
   readonly name: string;
   readonly size: number;
-  readonly style: 'NORMAL' | 'BOLD' | 'ITALIC' | 'BOLD_ITALIC';readonly usage: 'HEADER' | 'BODY' | 'FOOTER' | 'CAPTION';}/**
+  readonly style: 'NORMAL' | 'BOLD' | 'ITALIC' | 'BOLD_ITALIC';
+  readonly usage: 'HEADER' | 'BODY' | 'FOOTER' | 'CAPTION';}/**
  * Color scheme
  */
 export interface ColorScheme {
@@ -416,7 +446,9 @@ export interface ColorScheme {
  */
 export interface SectionFormatting {
   readonly fontSize: number;
-  readonly fontWeight: 'NORMAL' | 'BOLD';readonly alignment: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFY';readonly spacing: { before: number; after: number };readonly indentation: number;
+  readonly fontWeight: 'NORMAL' | 'BOLD';
+  readonly alignment: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFY';
+  readonly spacing: { before: number; after: number };readonly indentation: number;
 }
 
 /**
@@ -424,7 +456,9 @@ export interface SectionFormatting {
  */
 export interface TemplateVariable {
   readonly variableName: string;
-  readonly variableType: 'STRING' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';readonly defaultValue?: any;readonly required: boolean;
+  readonly variableType: 'STRING' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';
+  readonly defaultValue?: any;
+  readonly required: boolean;
   readonly description: string;
 }
 
@@ -434,7 +468,9 @@ export interface TemplateVariable {
 export interface ValidationRule {
   readonly ruleId: string;
   readonly field: string;
-  readonly ruleType: 'REQUIRED' | 'MIN_LENGTH' | 'MAX_LENGTH' | 'RANGE' | 'PATTERN' | 'CUSTOM';readonly value: any;readonly errorMessage: string;
+  readonly ruleType: 'REQUIRED' | 'MIN_LENGTH' | 'MAX_LENGTH' | 'RANGE' | 'PATTERN' | 'CUSTOM';
+  readonly value: any;
+  readonly errorMessage: string;
 }
 
 // ===== COMPLIANCE REPORTING SERVICE =====
@@ -1243,7 +1279,8 @@ interface ReportGenerationJob {
   readonly reportPeriod: { start: Date; end: Date };
   readonly generatedBy: string;
   readonly options: any;
-  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';readonly createdAt: Date;readonly priority: 'LOW' | 'NORMAL' | 'HIGH';
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';readonly createdAt: Date;
+  readonly priority: 'LOW' | 'NORMAL' | 'HIGH';
 }
 
 interface ReportScheduleInfo {

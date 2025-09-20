@@ -34,7 +34,8 @@ import {
 interface AggregatedErrorInfo {
   readonly primaryError: OrchestrationErrorType;
   readonly relatedErrors: OrchestrationErrorType[];
-  readonly errorPattern: 'cascade' | 'parallel' | 'resource_contention' | 'coordination_failure' | 'isolated';readonly impactAssessment: {readonly totalAffectedOperations: number;
+  readonly errorPattern: 'cascade' | 'parallel' | 'resource_contention' | 'coordination_failure' | 'isolated';
+  readonly impactAssessment: {readonly totalAffectedOperations: number;
     readonly criticalPathAffected: boolean;
     readonly systemWideImpact: boolean;
     readonly dataIntegrityRisk: boolean;
@@ -56,7 +57,10 @@ interface AggregatedErrorInfo {
  * Error recovery strategy with orchestration-specific logic
  */
 interface OrchestrationRecoveryStrategy {
-  readonly strategy: 'isolate_and_retry' | 'partial_rollback' | 'full_rollback' | 'compensate' | 'degrade_gracefully' | 'manual_intervention' | 'system_restart';readonly priority: 'immediate' | 'high' | 'medium' | 'low' | 'deferred';readonly estimatedRecoveryTime: number;readonly resourceRequirements: {
+  readonly strategy: 'isolate_and_retry' | 'partial_rollback' | 'full_rollback' | 'compensate' | 'degrade_gracefully' | 'manual_intervention' | 'system_restart';
+  readonly priority: 'immediate' | 'high' | 'medium' | 'low' | 'deferred';
+  readonly estimatedRecoveryTime: number;
+  readonly resourceRequirements: {
     readonly additionalBrowsers?: number;
     readonly memoryReallocation?: number;
     readonly networkBandwidth?: number;

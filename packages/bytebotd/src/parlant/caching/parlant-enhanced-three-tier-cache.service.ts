@@ -29,7 +29,8 @@ export interface L1CacheConfig {
   readonly enabled: boolean;
   readonly maxSize: number;           // 50,000 entries for high capacity
   readonly ttlSeconds: number;        // 5-30s adaptive TTL based on usage
-  readonly evictionPolicy: 'LRU' | 'LFU';readonly compressionThreshold: number;  // Compress entries > 10KBreadonly memoryLimitMB: number;     // 512MB memory limit
+  readonly evictionPolicy: 'LRU' | 'LFU';
+  readonly compressionThreshold: number;  // Compress entries > 10KBreadonly memoryLimitMB: number;     // 512MB memory limit
 }
 
 /**
@@ -42,7 +43,8 @@ export interface L2CacheConfig {
   readonly ttlMinutes: number;        // 1-60min adaptive TTL
   readonly compression: {
     readonly enabled: boolean;
-    readonly algorithm: 'gzip' | 'lz4';readonly level: number;           // 1-9 compression level};
+    readonly algorithm: 'gzip' | 'lz4';
+  readonly level: number;           // 1-9 compression level};
   readonly retry: {
     readonly maxAttempts: number;
     readonly delayMs: number;
@@ -59,7 +61,8 @@ export interface L2CacheConfig {
  */
 export interface L3CacheConfig {
   readonly enabled: boolean;
-  readonly database: 'postgresql' | 'sqlite' | 'mongodb';readonly ttlHours: number;          // 1+ hour persistent storagereadonly tableName: string;
+  readonly database: 'postgresql' | 'sqlite' | 'mongodb';
+  readonly ttlHours: number;          // 1+ hour persistent storagereadonly tableName: string;
   readonly indexing: {
     readonly functionName: boolean;
     readonly riskLevel: boolean;
@@ -146,7 +149,9 @@ export interface CachePerformanceMetrics {
  * Cache Invalidation Strategy
  */
 export interface InvalidationStrategy {
-  readonly type: 'immediate' | 'lazy' | 'scheduled' | 'pattern-based';readonly patterns: string[];readonly conditions: {
+  readonly type: 'immediate' | 'lazy' | 'scheduled' | 'pattern-based';
+  readonly patterns: string[];
+  readonly conditions: {
     readonly timeBasedMs?: number;
     readonly accessCountThreshold?: number;
     readonly riskLevelChanges?: boolean;

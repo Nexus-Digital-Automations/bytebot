@@ -77,7 +77,8 @@ export interface ParlantValidationContext extends ValidationContext  {
 export interface UserProfile {
   readonly userId: string;
   readonly trustLevel: 'low' | 'medium' | 'high' | 'enterprise';
-readonly preferences: ValidationPreferences;readonly authorizedActions: string[];
+readonly preferences: ValidationPreferences;
+  readonly authorizedActions: string[];
   readonly restrictions: ValidationRestriction[];
 
 
@@ -91,7 +92,8 @@ export interface ValidationPreferences {
   readonly autoApprovalEnabled: boolean;
   readonly maxAutoApprovalRisk: 'low' | 'medium' | 'high';
 readonly confirmationStyle: 'detailed' | 'summary' | 'minimal';
-readonly progressUpdatesEnabled: boolean;readonly notificationChannels: string[];
+readonly progressUpdatesEnabled: boolean;
+  readonly notificationChannels: string[];
 
 
 }
@@ -102,7 +104,8 @@ readonly progressUpdatesEnabled: boolean;readonly notificationChannels: string[]
 
 export interface ValidationRestriction {
   readonly type: 'action' | 'time' | 'resource' | 'scope';
-readonly pattern: string;readonly reason: string;
+readonly pattern: string;
+  readonly reason: string;
   readonly expiresAt?: number;
 
 
@@ -115,7 +118,8 @@ readonly pattern: string;readonly reason: string;
 export interface ConversationEntry {
   readonly timestamp: number;
   readonly speaker: 'user' | 'assistant' | 'system';
-readonly message: string;readonly metadata: Record<string, unknown>;
+readonly message: string;
+  readonly metadata: Record<string, unknown>;
 
 
 }
@@ -126,7 +130,8 @@ readonly message: string;readonly metadata: Record<string, unknown>;
 
 export interface RiskAssessment {
   readonly level: 'low' | 'medium' | 'high' | 'critical';
-readonly factors: RiskFactor[];readonly score: number;
+readonly factors: RiskFactor[];
+  readonly score: number;
   readonly confidence: number;
   readonly mitigations: RiskMitigation[];
 
@@ -208,7 +213,8 @@ export interface ParlantStreamingOptions {
   readonly enableConversationalUpdates: boolean;
   readonly conversationStyle: 'formal' | 'casual' | 'technical';
 readonly updateFrequency: 'real_time' | 'periodic' | 'on_demand';
-readonly includeReasoning: boolean;readonly includeAlternatives: boolean;
+readonly includeReasoning: boolean;
+  readonly includeAlternatives: boolean;
 
 
 }

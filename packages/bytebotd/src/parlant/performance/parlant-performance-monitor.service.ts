@@ -26,7 +26,9 @@ export interface ParlantPerformanceMetrics {
   readonly startTime: number;
   readonly endTime: number;
   readonly duration: number;
-  readonly validationType: 'cache_hit' | 'cache_miss' | 'real_time' | 'circuit_breaker';readonly cacheHit: boolean;readonly errorOccurred: boolean;
+  readonly validationType: 'cache_hit' | 'cache_miss' | 'real_time' | 'circuit_breaker';
+  readonly cacheHit: boolean;
+  readonly errorOccurred: boolean;
   readonly throughputRpm: number; // Requests per minute
   readonly memoryUsage: NodeJS.MemoryUsage;
   readonly timestamp: Date;
@@ -36,7 +38,9 @@ export interface ParlantPerformanceMetrics {
  * Aggregated performance statistics
  */
 export interface ParlantPerformanceStats {
-  readonly period: 'minute' | 'hour' | 'day';readonly totalOperations: number;readonly averageLatency: number;
+  readonly period: 'minute' | 'hour' | 'day';
+  readonly totalOperations: number;
+  readonly averageLatency: number;
   readonly medianLatency: number;
   readonly p95Latency: number;
   readonly p99Latency: number;
@@ -70,7 +74,10 @@ export interface PerformanceAlertConfig {
  * Performance optimization recommendation
  */
 export interface PerformanceRecommendation {
-  readonly category: 'caching' | 'concurrency' | 'memory' | 'network' | 'algorithm';readonly priority: 'critical' | 'high' | 'medium' | 'low';readonly issue: string;readonly recommendation: string;
+  readonly category: 'caching' | 'concurrency' | 'memory' | 'network' | 'algorithm';
+  readonly priority: 'critical' | 'high' | 'medium' | 'low';
+  readonly issue: string;
+  readonly recommendation: string;
   readonly expectedImprovement: string;
   readonly implementationComplexity: 'low' | 'medium' | 'high';
 }

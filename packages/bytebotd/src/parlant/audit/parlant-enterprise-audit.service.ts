@@ -32,7 +32,10 @@ export interface ParlantAuditEntry {
   readonly riskLevel: RiskLevel;
   readonly validationRequest: ParlantValidationRequest;
   readonly validationResponse: ParlantValidationResponse | null;
-  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED' | 'PENDING';readonly duration: number;readonly ipAddress?: string;
+  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED' | 'PENDING';
+  readonly duration: number;
+  readonly ipAddress?: string;
   readonly userAgent?: string;
   readonly geoLocation?: string;
   readonly complianceFlags: ComplianceFlag[];
@@ -45,7 +48,11 @@ export interface ParlantAuditEntry {
  * Compliance flag for regulatory requirements
  */
 export interface ComplianceFlag {
-  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'ISO27001' | 'PCI_DSS';readonly requirement: string;readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW';readonly evidence: string[];readonly assessedAt: Date;
+  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'ISO27001' | 'PCI_DSS';
+  readonly requirement: string;
+  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW';
+  readonly evidence: string[];
+  readonly assessedAt: Date;
   readonly expiresAt?: Date;
 }
 
@@ -56,7 +63,9 @@ export interface SecurityContext {
   readonly authenticationMethod: string;
   readonly authorizationLevel: string;
   readonly encryptionUsed: boolean;
-  readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';readonly accessControls: string[];readonly threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
+  readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+  readonly accessControls: string[];
+  readonly threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Audit query parameters for compliance reporting
  */
 export interface AuditQuery {
@@ -95,7 +104,9 @@ export interface ComplianceReport {
  */
 export interface ComplianceFinding {
   readonly findingId: string;
-  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';readonly regulation: string;readonly requirement: string;
+  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly regulation: string;
+  readonly requirement: string;
   readonly description: string;
   readonly affectedOperations: string[];
   readonly remediationRequired: boolean;
@@ -107,7 +118,10 @@ export interface ComplianceFinding {
  * Compliance recommendation
  */
 export interface ComplianceRecommendation {
-  readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING';readonly priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';readonly recommendation: string;readonly expectedBenefit: string;
+  readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING';
+  readonly priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly recommendation: string;
+  readonly expectedBenefit: string;
   readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';
   readonly estimatedCost?: string;
 }

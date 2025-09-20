@@ -42,7 +42,8 @@ export interface ParlantDashboardData {
  * Performance overview summary
  */
 export interface PerformanceOverview {
-  readonly status: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN';readonly overallScore: number; // 0-100readonly responseTime: {
+  readonly status: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN';
+  readonly overallScore: number; // 0-100readonly responseTime: {
     readonly current: number;
     readonly target: number;
     readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly throughput: {
@@ -101,9 +102,12 @@ export interface TrendData {
  */
 export interface RegressionAnalysis {
   readonly detected: boolean;
-  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly affectedMetrics: string[];readonly impactAssessment: {
+  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly affectedMetrics: string[];
+  readonly impactAssessment: {
     readonly performanceImpact: number; // percentage
-    readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly estimatedRecoveryTime: number; // minutes};
+    readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly estimatedRecoveryTime: number; // minutes};
   readonly rootCauseAnalysis: string[];
   readonly recommendedActions: string[];
 }
@@ -123,12 +127,17 @@ export interface AlertsAndAnomalies {
  */
 export interface PerformanceAlert {
   readonly id: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly type: 'RESPONSE_TIME' | 'THROUGHPUT' | 'ERROR_RATE' | 'AVAILABILITY' | 'CACHE_PERFORMANCE' | 'ANOMALY';readonly title: string;readonly description: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly type: 'RESPONSE_TIME' | 'THROUGHPUT' | 'ERROR_RATE' | 'AVAILABILITY' | 'CACHE_PERFORMANCE' | 'ANOMALY';
+  readonly title: string;
+  readonly description: string;
   readonly triggeredAt: Date;
   readonly metric: string;
   readonly currentValue: number;
   readonly threshold: number;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly acknowledgedBy?: string;readonly acknowledgedAt?: Date;
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly acknowledgedBy?: string;
+  readonly acknowledgedAt?: Date;
   readonly resolvedAt?: Date;
   readonly escalated: boolean;
   readonly escalationLevel: number;
@@ -157,7 +166,9 @@ export interface PerformanceAnomaly {
 export interface AlertHistoryEntry {
   readonly id: string;
   readonly alertId: string;
-  readonly action: 'TRIGGERED' | 'ACKNOWLEDGED' | 'ESCALATED' | 'RESOLVED' | 'AUTO_RESOLVED';readonly timestamp: Date;readonly userId?: string;
+  readonly action: 'TRIGGERED' | 'ACKNOWLEDGED' | 'ESCALATED' | 'RESOLVED' | 'AUTO_RESOLVED';
+  readonly timestamp: Date;
+  readonly userId?: string;
   readonly details: string;
   readonly systemAction: boolean;
 }
@@ -167,7 +178,8 @@ export interface AlertHistoryEntry {
  */
 export interface EscalationStatus {
   readonly activeEscalations: number;
-  readonly highestSeverity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly escalationPolicy: {readonly level1TimeoutMinutes: number;
+  readonly highestSeverity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly escalationPolicy: {readonly level1TimeoutMinutes: number;
     readonly level2TimeoutMinutes: number;
     readonly level3TimeoutMinutes: number;
     readonly autoEscalationEnabled: boolean;
@@ -238,7 +250,9 @@ export interface SystemHealthMetrics {
     };
   };
   readonly dependencyHealth: {
-    readonly database: 'HEALTHY' | 'DEGRADED' | 'DOWN';readonly cache: 'HEALTHY' | 'DEGRADED' | 'DOWN';readonly externalServices: Record<string, 'HEALTHY' | 'DEGRADED' | 'DOWN'>;};readonly healthScore: number; // 0-100
+    readonly database: 'HEALTHY' | 'DEGRADED' | 'DOWN';
+  readonly cache: 'HEALTHY' | 'DEGRADED' | 'DOWN';
+  readonly externalServices: Record<string, 'HEALTHY' | 'DEGRADED' | 'DOWN'>;};readonly healthScore: number; // 0-100
   readonly lastHealthCheck: Date;
 }
 
@@ -281,10 +295,15 @@ export interface BusinessMetrics {
  */
 export interface PerformanceRecommendation {
   readonly id: string;
-  readonly category: 'OPTIMIZATION' | 'SCALING' | 'CONFIGURATION' | 'ARCHITECTURE' | 'MAINTENANCE';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly title: string;readonly description: string;
+  readonly category: 'OPTIMIZATION' | 'SCALING' | 'CONFIGURATION' | 'ARCHITECTURE' | 'MAINTENANCE';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly title: string;
+  readonly description: string;
   readonly impact: {
     readonly performanceImprovement: number; // percentage
-    readonly costImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    readonly costImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   };
   readonly implementation: {
     readonly steps: string[];

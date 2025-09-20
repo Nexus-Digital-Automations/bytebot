@@ -45,7 +45,9 @@ export interface SessionConflictDetails {
   readonly suggestedResolution: ConflictResolutionAction;
   readonly alternativeResolutions: ConflictResolutionAction[];
   readonly businessImpact: BusinessImpactAssessment;
-  readonly urgency: 'low' | 'medium' | 'high' | 'critical';readonly detectedAt: Date;readonly autoResolutionEnabled: boolean;
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
+  readonly detectedAt: Date;
+  readonly autoResolutionEnabled: boolean;
   readonly resolutionDeadline: Date;
   readonly stakeholders: string[];
 }
@@ -72,7 +74,9 @@ export interface SessionCreationRequest {
 export interface BusinessContext {
   readonly department: string;
   readonly role: string;
-  readonly criticality: 'low' | 'medium' | 'high' | 'critical';readonly projectId?: string;readonly costCenter?: string;
+  readonly criticality: 'low' | 'medium' | 'high' | 'critical';
+  readonly projectId?: string;
+  readonly costCenter?: string;
   readonly complianceRequirements: string[];
   readonly budgetAllocation: number;
   readonly slaRequirements: ServiceLevelAgreement;
@@ -129,14 +133,20 @@ export interface ClientSecurityContext {
   readonly trustLevel: number;
   readonly certificateValidated: boolean;
   readonly encryptionEnabled: boolean;
-  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';readonly complianceMode: boolean;}
+  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';
+  readonly complianceMode: boolean;}
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
   readonly financialImpact: number;
-  readonly operationalImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly customerImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly complianceImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly reputationRisk: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly businessJustification: string;readonly alternativeOptions: string[];
+  readonly operationalImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
+  readonly customerImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
+  readonly complianceImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
+  readonly reputationRisk: 'none' | 'low' | 'medium' | 'high' | 'severe';
+  readonly businessJustification: string;
+  readonly alternativeOptions: string[];
   readonly mitigationStrategies: string[];
 }
 
@@ -191,7 +201,8 @@ export interface SessionAllocationAuditTrail {
   readonly action: string;
   readonly actor: string;
   readonly details: Record<string, any>;
-  readonly outcome: 'success' | 'failure' | 'partial';readonly reasoning: string;}
+  readonly outcome: 'success' | 'failure' | 'partial';
+  readonly reasoning: string;}
 
 /**
  * Session resource monitoring
@@ -239,7 +250,9 @@ export interface SessionPerformanceMetrics {
  */
 export interface SessionAlert {
   readonly alertId: string;
-  readonly severity: 'info' | 'warning' | 'error' | 'critical';readonly type: string;readonly message: string;
+  readonly severity: 'info' | 'warning' | 'error' | 'critical';
+  readonly type: string;
+  readonly message: string;
   readonly threshold: number;
   readonly currentValue: number;
   readonly triggeredAt: Date;

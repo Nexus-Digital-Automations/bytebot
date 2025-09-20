@@ -37,7 +37,10 @@ export interface ParlantStressScenario {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly category: 'LOAD' | 'RESILIENCE' | 'CHAOS' | 'RECOVERY' | 'PERFORMANCE';readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';readonly dependencies: string[];readonly stressConfig: StressTestConfig;
+  readonly category: 'LOAD' | 'RESILIENCE' | 'CHAOS' | 'RECOVERY' | 'PERFORMANCE';
+  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly dependencies: string[];
+  readonly stressConfig: StressTestConfig;
   readonly chaosExperiments: ChaosExperiment[];
   readonly successCriteria: SuccessCriteria;
   readonly rollbackConfig: RollbackConfig;
@@ -84,7 +87,9 @@ export interface ResourceSuccessThresholds {
  */
 export interface CustomMetricThreshold {
   readonly metricName: string;
-  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';readonly threshold: number;readonly duration: number; // milliseconds
+  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';
+  readonly threshold: number;
+  readonly duration: number; // milliseconds
   readonly critical: boolean;
 }
 
@@ -142,7 +147,9 @@ export interface RollbackVerification {
  */
 export interface VerificationCheck {
   readonly name: string;
-  readonly type: 'health' | 'metric' | 'custom';readonly target: string;readonly expectedValue: unknown;
+  readonly type: 'health' | 'metric' | 'custom';
+  readonly target: string;
+  readonly expectedValue: unknown;
   readonly tolerance: number;
 }
 
@@ -211,7 +218,9 @@ export interface ReportingConfig {
  * Report format definition
  */
 export interface ReportFormat {
-  readonly type: 'HTML' | 'PDF' | 'JSON' | 'CSV' | 'MARKDOWN';readonly template?: string;readonly options: Record<string, unknown>;
+  readonly type: 'HTML' | 'PDF' | 'JSON' | 'CSV' | 'MARKDOWN';
+  readonly template?: string;
+  readonly options: Record<string, unknown>;
 }
 
 /**
@@ -287,7 +296,9 @@ export interface ParlantStressTestSummary {
   readonly peakConcurrency: number;
   readonly averageResponseTime: number;
   readonly maxResponseTime: number;
-  readonly systemStability: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'CRITICAL';readonly resilienceScore: number; // 0-100readonly performanceGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';readonly resourceEfficiency: number; // percentagereadonly chaosResistance: number; // percentage
+  readonly systemStability: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'CRITICAL';
+  readonly resilienceScore: number; // 0-100readonly performanceGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  readonly resourceEfficiency: number; // percentagereadonly chaosResistance: number; // percentage
   readonly recoveryPerformance: RecoveryPerformanceMetrics;
   readonly bottlenecks: SystemBottleneck[];
   readonly criticalIssues: CriticalIssue[];
@@ -310,7 +321,9 @@ export interface RecoveryPerformanceMetrics {
 export interface SystemBottleneck {
   readonly component: string;
   readonly metric: string;
-  readonly severity: 'HIGH' | 'MEDIUM' | 'LOW';readonly impact: string;readonly recommendedAction: string;
+  readonly severity: 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly impact: string;
+  readonly recommendedAction: string;
   readonly timeDetected: Date;
   readonly duration: number; // milliseconds
 }
@@ -322,7 +335,9 @@ export interface CriticalIssue {
   readonly id: string;
   readonly title: string;
   readonly description: string;
-  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';readonly component: string;readonly impact: string;
+  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+  readonly component: string;
+  readonly impact: string;
   readonly immediateAction: string;
   readonly longTermSolution: string;
   readonly timeDetected: Date;
@@ -332,7 +347,10 @@ export interface CriticalIssue {
  * Stress test recommendation
  */
 export interface StressTestRecommendation {
-  readonly category: 'PERFORMANCE' | 'SCALABILITY' | 'RESILIENCE' | 'ARCHITECTURE' | 'CONFIGURATION';readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';readonly title: string;readonly description: string;
+  readonly category: 'PERFORMANCE' | 'SCALABILITY' | 'RESILIENCE' | 'ARCHITECTURE' | 'CONFIGURATION';
+  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  readonly title: string;
+  readonly description: string;
   readonly recommendation: string;
   readonly implementation: string;
   readonly expectedImpact: string;

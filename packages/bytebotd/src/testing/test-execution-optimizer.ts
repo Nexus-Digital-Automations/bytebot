@@ -86,7 +86,9 @@ export interface OptimizationConfig {
 export interface TestExecutionPlan {
   readonly testGroups: TestGroup[];
   readonly executionOrder: string[];
-  readonly parallelizationStrategy: 'none' | 'file-level' | 'test-level' | 'adaptive';readonly estimatedExecutionTime: number;readonly resourceRequirements: {
+  readonly parallelizationStrategy: 'none' | 'file-level' | 'test-level' | 'adaptive';
+  readonly estimatedExecutionTime: number;
+  readonly resourceRequirements: {
     memory: number;
     cpu: number;
     workers: number;

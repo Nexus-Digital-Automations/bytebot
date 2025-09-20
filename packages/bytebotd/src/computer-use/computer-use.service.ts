@@ -109,7 +109,9 @@ export interface FileReadResult {
  */
 export interface SpawnOptions {
   readonly env?: Record<string, string>;
-  readonly stdio?: 'ignore' | 'pipe' | 'inherit';readonly detached?: boolean;readonly [key: string]: unknown;
+  readonly stdio?: 'ignore' | 'pipe' | 'inherit';
+  readonly detached?: boolean;
+  readonly [key: string]: unknown;
 }
 
 /**
@@ -135,7 +137,8 @@ export interface MimeTypeMap {
  * Wait action parameters interface
  */
 export interface WaitActionParams {
-  readonly action: 'wait';readonly duration: number;}
+  readonly action: 'wait';
+  readonly duration: number;}
 
 /**
  * Error handling utilities for consistent error processing

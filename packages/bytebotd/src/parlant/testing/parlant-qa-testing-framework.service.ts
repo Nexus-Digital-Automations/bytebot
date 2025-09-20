@@ -47,7 +47,10 @@ export interface TestCase {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly category: 'unit' | 'integration' | 'performance' | 'compliance' | 'security' | 'e2e';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly tags: string[];readonly expectedDuration: number; // milliseconds
+  readonly category: 'unit' | 'integration' | 'performance' | 'compliance' | 'security' | 'e2e';
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly tags: string[];
+  readonly expectedDuration: number; // milliseconds
   readonly timeout: number; // milliseconds
   readonly retryAttempts: number;
   readonly setupMethod?: string;
@@ -60,7 +63,10 @@ export interface TestCase {
  * Test assertion configuration
  */
 export interface TestAssertion {
-  readonly type: 'response_time' | 'success_rate' | 'compliance' | 'cache_hit' | 'custom';readonly condition: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'neq' | 'contains' | 'matches';readonly expectedValue: unknown;readonly tolerancePercent?: number;
+  readonly type: 'response_time' | 'success_rate' | 'compliance' | 'cache_hit' | 'custom';
+  readonly condition: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'neq' | 'contains' | 'matches';
+  readonly expectedValue: unknown;
+  readonly tolerancePercent?: number;
   readonly description: string;
 }
 
@@ -81,7 +87,9 @@ export interface TestSuite {
 export interface TestResult {
   readonly testCaseId: string;
   readonly testSuiteId: string;
-  readonly status: 'passed' | 'failed' | 'skipped' | 'timeout' | 'error';readonly startTime: Date;readonly endTime: Date;
+  readonly status: 'passed' | 'failed' | 'skipped' | 'timeout' | 'error';
+  readonly startTime: Date;
+  readonly endTime: Date;
   readonly duration: number;
   readonly assertionResults: AssertionResult[];
   readonly errorMessage?: string;
@@ -146,7 +154,8 @@ export interface PerformanceBenchmark {
   readonly concurrentRequests: number;
   readonly testDurationMs: number;
   readonly requestPatterns: string[];
-  readonly loadProfile: 'constant' | 'ramp-up' | 'spike' | 'stress';readonly thresholds: {readonly p95ResponseTime: number;
+  readonly loadProfile: 'constant' | 'ramp-up' | 'spike' | 'stress';
+  readonly thresholds: {readonly p95ResponseTime: number;
     readonly p99ResponseTime: number;
     readonly throughputPerSecond: number;
     readonly errorRate: number;
@@ -158,7 +167,9 @@ export interface PerformanceBenchmark {
  * Compliance test configuration
  */
 export interface ComplianceTest {
-  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS';readonly testScenarios: ComplianceScenario[];readonly validationCriteria: string[];
+  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS';
+  readonly testScenarios: ComplianceScenario[];
+  readonly validationCriteria: string[];
   readonly auditRequirements: string[];
 }
 

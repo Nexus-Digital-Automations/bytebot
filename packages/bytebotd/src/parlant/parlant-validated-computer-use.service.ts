@@ -50,7 +50,8 @@ export interface ComputerActionAuditEntry {
   readonly actionType: string;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
+  readonly validationResult: 'APPROVED' | 'DENIED';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
   readonly conversationId: string;
 }
 

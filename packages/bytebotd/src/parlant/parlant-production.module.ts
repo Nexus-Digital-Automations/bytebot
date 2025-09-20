@@ -24,7 +24,9 @@ import { Module, DynamicModule, Logger } from '@nestjs/common';import { ConfigMo
 export interface ParlantProductionModuleOptions {
   // Core configuration
   readonly enabled?: boolean;
-  readonly environment?: 'development' | 'staging' | 'production';readonly serverUrl?: string;readonly apiKey?: string;
+  readonly environment?: 'development' | 'staging' | 'production';
+  readonly serverUrl?: string;
+  readonly apiKey?: string;
   readonly wsUrl?: string;
 
   // Feature toggles

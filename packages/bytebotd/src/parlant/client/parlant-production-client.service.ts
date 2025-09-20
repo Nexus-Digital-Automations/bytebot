@@ -23,7 +23,9 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';import https from 'https';import WebSocket from 'ws';import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';/*** Parlant API request configuration
  */
 export interface ParlantApiRequest {
-  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';readonly endpoint: string;readonly data?: Record<string, unknown>;
+  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  readonly endpoint: string;
+  readonly data?: Record<string, unknown>;
   readonly params?: Record<string, string | number>;
   readonly headers?: Record<string, string>;
   readonly timeout?: number;
@@ -90,7 +92,9 @@ export interface ParlantSession {
   readonly agentId: string;
   readonly customerId: string;
   readonly title: string;
-  readonly status: 'active' | 'inactive' | 'completed' | 'error';readonly createdAt: Date;readonly lastActivity: Date;
+  readonly status: 'active' | 'inactive' | 'completed' | 'error';
+  readonly createdAt: Date;
+  readonly lastActivity: Date;
   readonly metadata: Record<string, unknown>;
 }
 
@@ -101,7 +105,9 @@ export interface ParlantConversation {
   readonly id: string;
   readonly sessionId: string;
   readonly messages: ParlantConversationMessage[];
-  readonly status: 'active' | 'waiting' | 'completed' | 'error';readonly createdAt: Date;readonly lastMessage: Date;
+  readonly status: 'active' | 'waiting' | 'completed' | 'error';
+  readonly createdAt: Date;
+  readonly lastMessage: Date;
 }
 
 /**
@@ -110,7 +116,9 @@ export interface ParlantConversation {
 export interface ParlantConversationMessage {
   readonly id: string;
   readonly conversationId: string;
-  readonly sender: 'user' | 'assistant' | 'system';readonly content: string;readonly timestamp: Date;
+  readonly sender: 'user' | 'assistant' | 'system';
+  readonly content: string;
+  readonly timestamp: Date;
   readonly metadata?: Record<string, unknown>;
 }
 
@@ -122,7 +130,9 @@ export interface ParlantValidationRequest {
   readonly intent: string;
   readonly context: string;
   readonly parameters: Record<string, unknown>;
-  readonly riskLevel: 'minimal' | 'low' | 'medium' | 'high' | 'critical';readonly requiresConfirmation: boolean;readonly userContext: Record<string, unknown>;
+  readonly riskLevel: 'minimal' | 'low' | 'medium' | 'high' | 'critical';
+  readonly requiresConfirmation: boolean;
+  readonly userContext: Record<string, unknown>;
   readonly guidelines?: Array<{
     condition: string;
     action: string;

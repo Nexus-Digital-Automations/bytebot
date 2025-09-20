@@ -28,7 +28,9 @@ import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';impor
  * Language-specific bridge configuration
  */
 export interface LanguageBridgeConfig {
-  readonly language: 'python' | 'ruby' | 'javascript' | 'go' | 'rust';readonly bridgeUrl: string;readonly bridgePort: number;
+  readonly language: 'python' | 'ruby' | 'javascript' | 'go' | 'rust';
+  readonly bridgeUrl: string;
+  readonly bridgePort: number;
   readonly authenticationKey: string;
   readonly timeout: number;
   readonly retryAttempts: number;
@@ -118,7 +120,9 @@ export interface CrossLanguageCacheInfo {
   readonly hit: boolean;
   readonly key: string;
   readonly ttl: number;
-  readonly level: 'local' | 'distributed' | 'bridge';readonly serializationTime: number;readonly deserializationTime: number;
+  readonly level: 'local' | 'distributed' | 'bridge';
+  readonly serializationTime: number;
+  readonly deserializationTime: number;
 }
 
 /**
@@ -150,7 +154,9 @@ export interface CrossLanguageError {
  */
 export interface BridgeHealthStatus {
   readonly language: string;
-  readonly status: 'healthy' | 'degraded' | 'unavailable' | 'unknown';readonly responseTime: number;readonly successRate: number;
+  readonly status: 'healthy' | 'degraded' | 'unavailable' | 'unknown';
+  readonly responseTime: number;
+  readonly successRate: number;
   readonly errorRate: number;
   readonly lastHealthCheck: Date;
   readonly activeConnections: number;

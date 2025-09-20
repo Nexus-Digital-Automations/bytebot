@@ -28,7 +28,8 @@ export interface OrchestrationResponse<T = unknown> {
   readonly orchestration: {
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed' | 'cancelled';readonly progress: {readonly totalOperations: number;
+    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed' | 'cancelled';
+  readonly progress: {readonly totalOperations: number;
       readonly completedOperations: number;
       readonly failedOperations: number;
       readonly remainingOperations: number;
@@ -60,7 +61,9 @@ export interface OrchestrationResponse<T = unknown> {
   };
   readonly operations?: Array<{
     readonly operationId: string;
-    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';readonly startTime?: Date;readonly endTime?: Date;
+    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  readonly startTime?: Date;
+  readonly endTime?: Date;
     readonly duration?: number;
     readonly result?: unknown;
     readonly error?: string;
@@ -111,7 +114,9 @@ export interface OrchestrationResult<T = unknown> {
   readonly orchestrationContext: {
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly distributedContext: OrchestrationError['distributedContext'];readonly resourceContext: OrchestrationError['resourceContext'];readonly performanceMetrics: OrchestrationError['performanceMetrics'];};readonly operationResults?: Array<{
+    readonly distributedContext: OrchestrationError['distributedContext'];
+  readonly resourceContext: OrchestrationError['resourceContext'];
+  readonly performanceMetrics: OrchestrationError['performanceMetrics'];};readonly operationResults?: Array<{
     readonly operationId: string;
     readonly result: unknown;
     readonly metadata: Record<string, unknown>;

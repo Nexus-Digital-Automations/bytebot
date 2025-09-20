@@ -44,7 +44,10 @@ export interface BrowserActionAuditEntry {
   readonly actionType: BrowserActionType;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly targetUrl?: string;
+  readonly validationResult: 'APPROVED' | 'DENIED';
+  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
+  readonly conversationId: string;
+  readonly targetUrl?: string;
   readonly extractedDataSize?: number;
 }
 

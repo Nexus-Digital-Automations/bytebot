@@ -137,7 +137,10 @@ export interface JobQueryOptions {
   readonly endDate?: Date;
   readonly limit?: number;
   readonly offset?: number;
-  readonly sortBy?: 'submittedAt' | 'startedAt' | 'completedAt' | 'priority';readonly sortOrder?: 'asc' | 'desc';readonly includeResult?: boolean;readonly useCache?: boolean;
+  readonly sortBy?: 'submittedAt' | 'startedAt' | 'completedAt' | 'priority';
+  readonly sortOrder?: 'asc' | 'desc';
+  readonly includeResult?: boolean;
+  readonly useCache?: boolean;
   readonly timeoutMs?: number;
 }
 

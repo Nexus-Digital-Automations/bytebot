@@ -34,7 +34,9 @@ export interface PerformanceMetrics {
   readonly functionName: string;
   readonly riskLevel: string;
   readonly duration: number;
-  readonly cacheLevel?: 'L1' | 'L2' | 'L3' | 'MISS';readonly approved: boolean;readonly validationDuration: number;
+  readonly cacheLevel?: 'L1' | 'L2' | 'L3' | 'MISS';
+  readonly approved: boolean;
+  readonly validationDuration: number;
   readonly executionDuration?: number;
   readonly resourceUsage: {
     cpuUsage: number;
@@ -86,14 +88,20 @@ export interface PerformanceStats {
 export interface AlertThreshold {
   readonly metricName: string;
   readonly threshold: number;
-  readonly operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly enabled: boolean;readonly cooldownMs: number;
+  readonly operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly enabled: boolean;
+  readonly cooldownMs: number;
 }
 
 /**
  * Performance optimization recommendation
  */
 export interface OptimizationRecommendation {
-  readonly type: 'CACHE_TUNING' | 'BATCH_SIZE' | 'THRESHOLD_ADJUSTMENT' | 'RESOURCE_SCALING';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly expectedImpact: string;
+  readonly type: 'CACHE_TUNING' | 'BATCH_SIZE' | 'THRESHOLD_ADJUSTMENT' | 'RESOURCE_SCALING';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly description: string;
+  readonly expectedImpact: string;
   readonly implementation: string;
   readonly estimatedEffort: string;
   readonly metadata: Record<string, unknown>;
@@ -103,7 +111,9 @@ export interface OptimizationRecommendation {
  * Cache performance metrics
  */
 export interface CacheMetrics {
-  readonly level: 'L1' | 'L2' | 'L3';readonly hitCount: number;readonly missCount: number;
+  readonly level: 'L1' | 'L2' | 'L3';
+  readonly hitCount: number;
+  readonly missCount: number;
   readonly hitRate: number;
   readonly averageAccessTime: number;
   readonly size: number;

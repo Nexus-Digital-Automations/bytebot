@@ -61,23 +61,34 @@ export interface OrchestrationRecoveryContext {
  * Distributed recovery strategy configuration
  */
 export interface DistributedRecoveryConfig {
-  readonly isolationLevel: 'operation' | 'node' | 'cluster';readonly redistributionStrategy: 'even' | 'load_based' | 'capability_based' | 'priority_based';readonly nodeSelectionCriteria: {readonly preferredNodes?: string[];
+  readonly isolationLevel: 'operation' | 'node' | 'cluster';
+  readonly redistributionStrategy: 'even' | 'load_based' | 'capability_based' | 'priority_based';
+  readonly nodeSelectionCriteria: {readonly preferredNodes?: string[];
     readonly excludedNodes?: string[];
     readonly minResourceThreshold: number;
     readonly maxLoadThreshold: number;
   };
-  readonly coordinationProtocol: 'leader_follower' | 'consensus' | 'master_slave' | 'peer_to_peer';readonly checkpointingEnabled: boolean;readonly rollbackToLastCheckpoint: boolean;
+  readonly coordinationProtocol: 'leader_follower' | 'consensus' | 'master_slave' | 'peer_to_peer';
+  readonly checkpointingEnabled: boolean;
+  readonly rollbackToLastCheckpoint: boolean;
 }
 
 /**
  * Workflow recovery strategy configuration
  */
 export interface WorkflowRecoveryConfig {
-  readonly recoveryScope: 'step' | 'stage' | 'workflow' | 'cascade';readonly compensationOrder: 'reverse' | 'dependency' | 'priority';readonly statePreservation: 'full' | 'partial' | 'minimal';readonly rollbackDepth: number;readonly reexecutionStrategy: 'from_failure' | 'from_checkpoint' | 'full_restart';readonly dependencyHandling: 'block' | 'skip' | 'substitute';}/**
+  readonly recoveryScope: 'step' | 'stage' | 'workflow' | 'cascade';
+  readonly compensationOrder: 'reverse' | 'dependency' | 'priority';
+  readonly statePreservation: 'full' | 'partial' | 'minimal';
+  readonly rollbackDepth: number;
+  readonly reexecutionStrategy: 'from_failure' | 'from_checkpoint' | 'full_restart';
+  readonly dependencyHandling: 'block' | 'skip' | 'substitute';}/**
  * Resource recovery strategy configuration
  */
 export interface ResourceRecoveryConfig {
-  readonly reallocationStrategy: 'immediate' | 'gradual' | 'queued';readonly resourcePoolExpansion: boolean;readonly degradationAcceptable: boolean;
+  readonly reallocationStrategy: 'immediate' | 'gradual' | 'queued';
+  readonly resourcePoolExpansion: boolean;
+  readonly degradationAcceptable: boolean;
   readonly priorityReallocation: boolean;
   readonly temporaryResourceBorrowing: boolean;
   readonly resourceCleanupRequired: boolean;
@@ -87,7 +98,11 @@ export interface ResourceRecoveryConfig {
  * Aggregation recovery strategy configuration
  */
 export interface AggregationRecoveryConfig {
-  readonly partialResultHandling: 'salvage' | 'recompute' | 'interpolate';readonly conflictResolution: 'manual' | 'automatic' | 'weighted_merge';readonly dataValidationLevel: 'strict' | 'relaxed' | 'disabled';readonly outputFormat: 'original' | 'degraded' | 'summary';readonly qualityThreshold: number;}
+  readonly partialResultHandling: 'salvage' | 'recompute' | 'interpolate';
+  readonly conflictResolution: 'manual' | 'automatic' | 'weighted_merge';
+  readonly dataValidationLevel: 'strict' | 'relaxed' | 'disabled';
+  readonly outputFormat: 'original' | 'degraded' | 'summary';
+  readonly qualityThreshold: number;}
 
 /**
  * Recovery operation statistics

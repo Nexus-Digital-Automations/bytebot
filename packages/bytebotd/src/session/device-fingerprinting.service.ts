@@ -135,7 +135,10 @@ export interface GeoLocation {
  * Device risk factors for security analysis
  */
 export interface DeviceRiskFactor {
-  readonly type: 'suspicious_location' | 'user_agent_change' | 'fingerprint_mismatch' | 'unusual_activity' | 'known_threat';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly detectedAt: Date;
+  readonly type: 'suspicious_location' | 'user_agent_change' | 'fingerprint_mismatch' | 'unusual_activity' | 'known_threat';
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly detectedAt: Date;
   readonly evidence: Record<string, any>;
   readonly resolved: boolean;
   readonly resolvedAt?: Date;
@@ -151,7 +154,9 @@ export interface FingerprintAnalysis {
   readonly confidence: number;
   readonly anomalies: FingerprintAnomaly[];
   readonly riskScore: number;
-  readonly recommendation: 'allow' | 'challenge' | 'block';readonly reasoning: string[];readonly validationStatus: FingerprintValidationStatus;
+  readonly recommendation: 'allow' | 'challenge' | 'block';
+  readonly reasoning: string[];
+  readonly validationStatus: FingerprintValidationStatus;
   readonly processedAt: Date;
 }
 
@@ -160,7 +165,9 @@ export interface FingerprintAnalysis {
  */
 export interface FingerprintAnomaly {
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high';readonly field: string;readonly expectedValue: any;
+  readonly severity: 'low' | 'medium' | 'high';
+  readonly field: string;
+  readonly expectedValue: any;
   readonly actualValue: any;
   readonly confidence: number;
   readonly description: string;
@@ -188,7 +195,9 @@ export interface DeviceSession {
   readonly isPrimary: boolean;
   readonly connectedAt: Date;
   readonly lastActivity: Date;
-  readonly syncStatus: 'active' | 'passive' | 'disconnected';readonly capabilities: string[];readonly restrictions: string[];
+  readonly syncStatus: 'active' | 'passive' | 'disconnected';
+  readonly capabilities: string[];
+  readonly restrictions: string[];
 }
 
 // ===== DEVICE FINGERPRINTING SERVICE =====

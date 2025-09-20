@@ -55,7 +55,9 @@ export interface ProductionValidationMetrics {
  */
 interface FallbackValidationConfig {
   readonly enabled: boolean;
-  readonly strategy: 'conservative' | 'permissive' | 'risk_based';readonly maxFailuresBeforeFallback: number;readonly fallbackDuration: number;
+  readonly strategy: 'conservative' | 'permissive' | 'risk_based';
+  readonly maxFailuresBeforeFallback: number;
+  readonly fallbackDuration: number;
   readonly allowedRiskLevels: RiskLevel[];
 }
 
