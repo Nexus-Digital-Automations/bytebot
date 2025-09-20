@@ -226,7 +226,7 @@ export class EnterpriseRateLimitGuard
       }
 
       // Re-throw other errors
-      throw _error;
+      throw _error instanceof Error ? _error : new Error(String(_error));
     }
   }
 
