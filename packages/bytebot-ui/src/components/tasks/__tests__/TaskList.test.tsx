@@ -481,8 +481,8 @@ describe("TaskList Component", () => {
   });
 
   describe("Pagination", () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const manyTasks = Array.from(
+     
+    const _manyTasks = Array.from(
       { length: PAGINATION_DEFAULT_PAGE_SIZE * DEFAULT_TASK_LIST_LIMIT },
       (_, i) => ({
         id: `task-${i}`,
@@ -597,8 +597,8 @@ describe("TaskList Component", () => {
 
       expect(screen.getByTestId("task-item-task-1")).toBeInTheDocument();
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const updatedTasks = [
+       
+      const _updatedTasks = [
         {
           ...mockTasks[0],
           status: TaskStatus.COMPLETED,
@@ -625,8 +625,8 @@ describe("TaskList Component", () => {
 
       expect(screen.getByTestId("task-item-task-1")).toHaveClass("selected");
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const updatedTasks = [
+       
+      const _updatedTasks = [
         {
           ...mockTasks[0],
           title: "Updated First Task",
@@ -657,8 +657,8 @@ describe("TaskList Component", () => {
         _TEST_TASK_COUNT_SMALL,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const newTask = {
+       
+      const _newTask = {
         id: "task-4",
         title: "New Task",
         description: "New task description",
@@ -716,8 +716,8 @@ describe("TaskList Component", () => {
     });
 
     it("handles large task lists efficiently", () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const largeTaskList = Array.from(
+       
+      const _largeTaskList = Array.from(
         { length: LARGE_DATASET_SIZE },
         (_, i) => ({
           id: `task-${i}`,
@@ -815,7 +815,7 @@ describe("TaskList Component", () => {
     });
 
     it("provides skip links for large lists", () => {
-      const _manyTasks = Array.from({ length: 50 }, (_, i) => ({
+      const __manyTasks = Array.from({ length: 50 }, (_, i) => ({
         ...mockTasks[0],
         id: `task-${i}`,
         title: `Task ${i}`,

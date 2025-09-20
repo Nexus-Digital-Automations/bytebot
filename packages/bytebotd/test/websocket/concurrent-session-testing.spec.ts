@@ -453,7 +453,7 @@ class ConcurrentSessionClient extends EventEmitter {
       this.metrics.validationsFailed++;
     }
 
-    this.recordError('server_error', errorPayload.error || 'Unknown server error');
+    this.recordError('server_error', errorPayload.error ?? 'Unknown server error');
   }
 
   async sendValidationRequest(action: ValidationAction, context: ValidationContext): Promise<string> {
@@ -982,9 +982,9 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     allLatencies.sort((a, b) => a - b);
 
     const latencyDistribution = {
-      p50: allLatencies[Math.floor(allLatencies.length * 0.5)] || 0,
-      p95: allLatencies[Math.floor(allLatencies.length * 0.95)] || 0,
-      p99: allLatencies[Math.floor(allLatencies.length * 0.99)] || 0,
+      p50: allLatencies[Math.floor(allLatencies.length * 0.5)] ?? 0,
+      p95: allLatencies[Math.floor(allLatencies.length * 0.95)] ?? 0,
+      p99: allLatencies[Math.floor(allLatencies.length * 0.99)] ?? 0,
       max: Math.max(...allLatencies) || 0,
     };
 

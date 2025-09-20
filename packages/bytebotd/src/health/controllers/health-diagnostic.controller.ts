@@ -63,8 +63,8 @@ import { LoggingInterceptor } from '../../common/interceptors/logging.intercepto
  * Diagnostic request DTO
  */
 export class DiagnosticRequestDto {
-  diagnosticType!: DiagnosticType;
-  scope!: DiagnosticScope;
+  diagnosticType: DiagnosticType = DiagnosticType.QUICK;
+  scope: DiagnosticScope = DiagnosticScope.APPLICATION;
   includePerformanceAnalysis?: boolean = true;
   includeResourceUsage?: boolean = true;
   includeNetworkDiagnostics?: boolean = false;
@@ -80,14 +80,14 @@ export class DiagnosticRequestDto {
  * Quick health check response DTO
  */
 export class QuickHealthResponseDto {
-  status!: DiagnosticStatus;
-  healthScore!: number;
-  timestamp!: Date;
-  componentCount!: number;
-  issuesFound!: number;
-  criticalIssues!: number;
-  uptime!: number;
-  responseTime!: number;
+  status: DiagnosticStatus = DiagnosticStatus.HEALTHY;
+  healthScore: number = 0;
+  timestamp: Date = new Date();
+  componentCount: number = 0;
+  issuesFound: number = 0;
+  criticalIssues: number = 0;
+  uptime: number = 0;
+  responseTime: number = 0;
 }
 
 /**
@@ -95,10 +95,10 @@ export class QuickHealthResponseDto {
  */
 export class ComponentHealthSummaryDto {
   componentName!: string;
-  status!: DiagnosticStatus;
-  healthScore!: number;
-  responseTime!: number;
-  uptime!: number;
+  status: DiagnosticStatus = DiagnosticStatus.HEALTHY;
+  healthScore: number = 0;
+  responseTime: number = 0;
+  uptime: number = 0;
   errorRate!: number;
   lastCheck!: Date;
 }

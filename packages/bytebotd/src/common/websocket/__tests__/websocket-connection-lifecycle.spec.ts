@@ -626,7 +626,11 @@ class ConnectionLifecycleTestClient extends EventEmitter {
     const serialized = JSON.stringify(message);
 
     return new Promise((resolve, reject) => {
-      this.ws!.send(serialized, (error) => {
+      if (!this.ws) {
+        reject(new Error('WebSocket connection not available'));
+        return;
+      }
+      this.ws.send(serialized, (error) => {
         if (error) {
           this.recordError('message_send_error', error.message);
           reject(error);
@@ -646,19 +650,25 @@ class ConnectionLifecycleTestClient extends EventEmitter {
     this.setState(ConnectionState.CLOSING);
 
     return new Promise((resolve) => {
-      this.ws!.close(1000, 'Normal closure');
+      if (this.ws) {
+        this.ws.close(1000, 'Normal closure');
+      }
 
       const timeout = setTimeout(() => {
         this.setState(ConnectionState.CLOSED);
         resolve();
       }, 5000);
 
-      this.ws!.on('close', () => {
+      if (this.ws) {
+        this.ws.on('close', () => {
         clearTimeout(timeout);
         this.metrics.disconnectionTime = performance.now() - disconnectionStartTime;
         this.setState(ConnectionState.CLOSED);
+          resolve();
+        });
+      } else {
         resolve();
-      });
+      }
     });
   }
 

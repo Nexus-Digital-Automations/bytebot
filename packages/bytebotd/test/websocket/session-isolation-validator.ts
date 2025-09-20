@@ -191,7 +191,7 @@ export class SessionIsolationValidator extends EventEmitter {
     const violations: IsolationViolation[] = [];
 
     // Track message for this session
-    const sessionMessages = this.messageTracking.get(message.sessionId) || [];
+    const sessionMessages = this.messageTracking.get(message.sessionId) ?? [];
     sessionMessages.push(message);
     this.messageTracking.set(message.sessionId, sessionMessages);
 
@@ -317,7 +317,7 @@ export class SessionIsolationValidator extends EventEmitter {
   private validateConversationStateIsolation(message: ConversationalMessage): IsolationViolation[] {
     const violations: IsolationViolation[] = [];
 
-    const sessionState = this.conversationStates.get(message.sessionId) || {};
+    const sessionState = this.conversationStates.get(message.sessionId) ?? {};
 
     // Check for conversation state mutations that affect other sessions
     if (message.type === ConversationalMessageType.VALIDATION_RESPONSE) {
@@ -381,7 +381,7 @@ export class SessionIsolationValidator extends EventEmitter {
         }
 
         // Update tracked user profile for this session
-        const trackedProfile = this.userProfiles.get(message.sessionId) || {};
+        const trackedProfile = this.userProfiles.get(message.sessionId) ?? {};
         Object.assign(trackedProfile, userProfile);
         this.userProfiles.set(message.sessionId, trackedProfile);
       }
@@ -602,7 +602,7 @@ export class SessionIsolationValidator extends EventEmitter {
       ],
     };
 
-    return recommendations[violationType] || ['Implement general isolation mechanisms'];
+    return recommendations[violationType] ?? ['Implement general isolation mechanisms'];
   }
 
   /**

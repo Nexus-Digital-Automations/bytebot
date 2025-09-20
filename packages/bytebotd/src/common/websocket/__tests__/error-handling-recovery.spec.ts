@@ -245,7 +245,7 @@ class RecoveryMetricsTracker {
 
     const recoveryTimes = successfulRecoveries
       .filter(r => r.duration !== undefined)
-      .map(r => r.duration!);
+      .map(r => r.duration || 0);
 
     const faultTypeBreakdown: Record<string, number> = {};
     failures.forEach(f => {
@@ -254,7 +254,7 @@ class RecoveryMetricsTracker {
 
     const recoveryAttempts = successfulRecoveries
       .filter(r => r.attempt !== undefined)
-      .map(r => r.attempt!);
+      .map(r => r.attempt || 0);
 
     return {
       totalFailures: failures.length,

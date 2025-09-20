@@ -389,10 +389,14 @@ class WebSocketManager {
 
       switch (message.type) {
         case StreamingMessageType.SUBSCRIBE:
-          this.subscribe(clientId, message.streamId!);
+          if (message.streamId) {
+            this.subscribe(clientId, message.streamId);
+          }
           break;
         case StreamingMessageType.UNSUBSCRIBE:
-          this.unsubscribe(clientId, message.streamId!);
+          if (message.streamId) {
+            this.unsubscribe(clientId, message.streamId);
+          }
           break;
         case StreamingMessageType.HEARTBEAT:
           this.handleHeartbeat(clientId);

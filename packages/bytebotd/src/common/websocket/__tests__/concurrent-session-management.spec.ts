@@ -112,7 +112,7 @@ class TestSession extends EventEmitter {
             this.sessionState.validations.set(message.payload.validationId, message.payload);
           }
         } catch (error) {
-          this.emit('error', new Error(`Failed to parse message: ${error}`));
+          this.emit('error', new Error(`Failed to parse message: ${String(error)}`));
         }
       });
 

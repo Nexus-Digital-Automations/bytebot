@@ -618,8 +618,8 @@ export class PerformanceBenchmarker extends EventEmitter {
         violationCount: isolationResults.totalViolations,
         violationRate: isolationResults.totalViolations / sessionCount,
         isolationScore: isolationResults.sessionIsolationScore,
-        crossSessionLeaks: isolationResults.violationsByType.message_routing_leak || 0,
-        dataContamination: isolationResults.violationsByType.conversation_contamination || 0,
+        crossSessionLeaks: isolationResults.violationsByType.message_routing_leak ?? 0,
+        dataContamination: isolationResults.violationsByType.conversation_contamination ?? 0,
       };
     }
 
@@ -669,7 +669,7 @@ export class PerformanceBenchmarker extends EventEmitter {
 
     return {
       mean,
-      median: percentiles[50] || mean,
+      median: percentiles[50] ?? mean,
       percentiles,
       minimum: Math.max(10, mean - standardDeviation * 2),
       maximum: mean + standardDeviation * 3,
@@ -1188,7 +1188,7 @@ export class PerformanceBenchmarker extends EventEmitter {
     const keyFindings = [
       `System can handle ${this.config.scalabilityTestPoints[this.config.scalabilityTestPoints.length - 1]} concurrent sessions`,
       `Average performance score: ${(performanceScore * 100).toFixed(1)}%`,
-      `Linear scaling maintained up to ${this.benchmarkResults.find(r => r.scalabilityEfficiency < 0.8)?.sessionCount || 'maximum tested'} sessions`,
+      `Linear scaling maintained up to ${this.benchmarkResults.find(r => r.scalabilityEfficiency < 0.8)?.sessionCount ?? 'maximum tested'} sessions`,
       `Overall compliance rate: ${(this.calculateOverallComplianceRate() * 100).toFixed(1)}%`,
     ];
 

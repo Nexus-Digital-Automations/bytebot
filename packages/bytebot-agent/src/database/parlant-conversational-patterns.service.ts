@@ -25,7 +25,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   ValidationRiskClass,
   ConversationalValidationRequest,
-  ConversationContext,
   UserValidationPreferences,
   OperationImpact,
 } from './parlant-conversational-validation-engine.service';
@@ -991,16 +990,9 @@ export class ParlantConversationalPatternsService {
     const languages = ['en', 'es', 'fr', 'de']; // Expandable
     const confirmationStyles = ['MINIMAL', 'DETAILED', 'COMPREHENSIVE'];
 
-    let patternCount = 0;
-    for (const riskClass of riskClasses) {
-      for (const language of languages) {
-        for (const style of confirmationStyles) {
-          const patternKey = `${riskClass}_${language}_${style}`;
-          // Patterns will be created on-demand to save memory
-          patternCount++;
-        }
-      }
-    }
+    // Calculate total patterns: riskClasses * languages * confirmationStyles
+    const patternCount =
+      riskClasses.length * languages.length * confirmationStyles.length;
 
     this.logger.log('Conversation patterns initialized', {
       availablePatterns: patternCount,
@@ -1173,7 +1165,7 @@ export class ParlantConversationalPatternsService {
    */
   private createConversationFlowState(
     pattern: ConversationPattern,
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): ConversationFlowState {
     return {
       currentPhase: ConversationPhase.GREETING,
@@ -1382,7 +1374,7 @@ export class ParlantConversationalPatternsService {
   private generateScreenReaderText(content: string): string {
     // Generate screen reader friendly version
     return content
-      .replace(/[🚨⚠️📝✅]/g, '') // Remove emojis
+      .replace(/🚨|⚠️|📝|✅/gu, '') // Remove emojis
       .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
       .replace(/\n\n/g, '. '); // Convert paragraphs to sentences
   }
@@ -1471,8 +1463,8 @@ export class ParlantConversationalPatternsService {
 
   private getOperationExplanationTemplate(
     operationType: string,
-    language: string,
-    technicalLevel: string,
+    _language: string,
+    _technicalLevel: string,
   ): string {
     // Simplified template selection
     const templates = {
@@ -1489,8 +1481,8 @@ export class ParlantConversationalPatternsService {
 
   private getConfirmationTemplate(
     riskClass: ValidationRiskClass,
-    confirmationStyle: string,
-    language: string,
+    _confirmationStyle: string,
+    _language: string,
   ): string {
     const templates = {
       [ValidationRiskClass.CRITICAL]:
@@ -1505,8 +1497,8 @@ export class ParlantConversationalPatternsService {
   }
 
   private createPhaseTemplates(
-    request: ConversationalValidationRequest,
-    userPreferences: UserValidationPreferences,
+    _request: ConversationalValidationRequest,
+    _userPreferences: UserValidationPreferences,
   ): Promise<ConversationTemplate[]> {
     // Return empty array for now - templates are created on-demand
     return Promise.resolve([]);

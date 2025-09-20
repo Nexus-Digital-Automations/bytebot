@@ -418,7 +418,10 @@ export class WorkflowAutomationService {
   }
 
   private async executeStepWithLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto): Promise<void> {
-    const loop = step.loop!;
+    if (!step.loop) {
+      throw new Error('Loop configuration is required for loop step');
+    }
+    const loop = step.loop;
     const loopInfo: LoopExecutionInfoDto = {
       currentIteration: 0,
       totalIterations: 0,
@@ -491,12 +494,16 @@ export class WorkflowAutomationService {
   // Loop execution methods
 
   private async executeForEachLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
-    const iterateOver = this.getVariableValue(loop.iterateOver!, context.variables);
+    if (!loop.iterateOver) {
+      throw new Error('iterateOver is required for forEach loop');
+    }
+    const iterateOver = this.getVariableValue(loop.iterateOver, context.variables);
     if (!Array.isArray(iterateOver)) {
       throw new Error(`Loop iterate value is not an array: ${loop.iterateOver}`);
     }
 
-    for (let i = 0; i < iterateOver.length && i < loopInfo.maxIterations!; i++) {
+    const maxIterations = loopInfo.maxIterations || 50;
+    for (let i = 0; i < iterateOver.length && i < maxIterations; i++) {
       const item = iterateOver[i];
 
       // Set loop variables
@@ -513,7 +520,11 @@ export class WorkflowAutomationService {
   }
 
   private async executeWhileLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
-    while (this.evaluateCondition(loop.condition!, context.variables) && loopInfo.totalIterations < loopInfo.maxIterations!) {
+    if (!loop.condition) {
+      throw new Error('Condition is required for while loop');
+    }
+    const maxIterations = loopInfo.maxIterations || 50;
+    while (this.evaluateCondition(loop.condition, context.variables) && loopInfo.totalIterations < maxIterations) {
       loopInfo.currentIteration = loopInfo.totalIterations + 1;
 
       await this.executeStepAction(step, context, stepResult);
@@ -523,7 +534,11 @@ export class WorkflowAutomationService {
   }
 
   private async executeUntilLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
-    while (!this.evaluateCondition(loop.condition!, context.variables) && loopInfo.totalIterations < loopInfo.maxIterations!) {
+    if (!loop.condition) {
+      throw new Error('Condition is required for until loop');
+    }
+    const maxIterations = loopInfo.maxIterations || 50;
+    while (!this.evaluateCondition(loop.condition, context.variables) && loopInfo.totalIterations < maxIterations) {
       loopInfo.currentIteration = loopInfo.totalIterations + 1;
 
       await this.executeStepAction(step, context, stepResult);
@@ -533,7 +548,8 @@ export class WorkflowAutomationService {
   }
 
   private async executeFixedCountLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
-    const count = Math.min(loop.count || 1, loopInfo.maxIterations!);
+    const maxIterations = loopInfo.maxIterations || 50;
+    const count = Math.min(loop.count || 1, maxIterations);
 
     for (let i = 0; i < count; i++) {
       context.variables[loop.indexVariable || 'index'] = i;

@@ -43,7 +43,7 @@ async function apiRequest<T>(
     }
 
     return (await response.json()) as T;
-  } catch (error) {
+  } catch (error: unknown) {
     logError(`Error in API request to ${endpoint}`, error, "taskUtils");
     return null;
   }
@@ -232,7 +232,7 @@ export async function fetchTaskCounts(): Promise<Record<string, number>> {
     });
 
     return counts;
-  } catch (error) {
+  } catch (error: unknown) {
     logError("Failed to fetch task counts", error, "taskUtils");
     return {
       ALL: 0,
@@ -254,7 +254,7 @@ export async function fetchModels(): Promise<Model[]> {
       throw new Error("Failed to fetch models");
     }
     return (await response.json()) as Model[];
-  } catch (error) {
+  } catch (error: unknown) {
     logError("Error fetching models", error, "taskUtils");
     return [];
   }

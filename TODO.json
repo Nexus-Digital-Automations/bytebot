@@ -2045,6 +2045,34 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-20T06:32:55.707Z",
+      "title": "Fix Critical ESLint Violations in Bytebot Packages",
+      "description": "Fix 327+ ESLint errors across bytebot-agent and bytebotd packages including TypeScript strict compliance violations, unused variables, unsafe assignments, and syntax errors. Deploy concurrent agents to fix errors by category for maximum parallel efficiency.",
+      "category": "error",
+      "id": "error_1758349975707_w149ojlm4jn",
+      "assigned_agent": "dev_session_1758348688945_1_general_2b6edad8",
+      "started_at": "2025-09-20T06:33:15.856Z",
+      "claimed_by": "dev_session_1758348688945_1_general_2b6edad8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758348688945_1_general_2b6edad8",
+          "role": "primary",
+          "assignedAt": "2025-09-20T06:33:15.856Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:39:48.740Z",
+      "title": "TypeScript Safety Specialist - bytebot-agent-cc Critical Violations",
+      "description": "Fix 32 critical errors and 124 warnings in bytebot-agent-cc package. Focus on TypeScript strict mode violations, unsafe type operations, error handling type safety, Prisma type safety, and null/undefined guards. Target files: src/tasks/tasks.service.ts (21 errors, 78 warnings), src/messages/messages.service.ts (8 errors, 10 warnings), src/agent/agent.scheduler.ts (1 error, 20 warnings)",
+      "category": "error",
+      "id": "error_1758350388739_tf6rtvfj2m"
     }
   ],
   "agents": {},

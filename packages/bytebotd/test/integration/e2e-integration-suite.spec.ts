@@ -1044,7 +1044,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       expect(computerUseJourney).toBeDefined();
 
       const result = await E2EIntegrationTestUtils.executeUserJourney(
-        computerUseJourney!,
+        computerUseJourney,
         app,
         context,
         logger
@@ -1057,7 +1057,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       }, null, 2)}`);
 
       expect(result.success).toBe(true);
-      expect(result.totalDuration).toBeLessThan(computerUseJourney!.expectedDurationMs + 1000); // Allow 1s buffer
+      expect(result.totalDuration).toBeLessThan((computerUseJourney?.expectedDurationMs || 5000) + 1000); // Allow 1s buffer
       expect(result.errors).toHaveLength(0);
       expect(result.validationResults['required_step_authenticate_user']).toBe(true);
       expect(result.validationResults['required_step_parlant_conversational_validation']).toBe(true);
@@ -1071,7 +1071,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       expect(browserJourney).toBeDefined();
 
       const result = await E2EIntegrationTestUtils.executeUserJourney(
-        browserJourney!,
+        browserJourney,
         app,
         context,
         logger
@@ -1085,7 +1085,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       }, null, 2)}`);
 
       expect(result.success).toBe(true);
-      expect(result.totalDuration).toBeLessThan(browserJourney!.expectedDurationMs + 1000);
+      expect(result.totalDuration).toBeLessThan((browserJourney?.expectedDurationMs || 5000) + 1000);
       expect(result.performanceMetrics['initialize_browser_session']).toBeLessThan(1200);
       expect(result.performanceMetrics['stream_validation_conversation']).toBeLessThan(1400);
       expect(result.errors.length).toBeLessThanOrEqual(1); // Allow minor non-critical errors

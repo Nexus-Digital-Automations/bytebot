@@ -494,7 +494,7 @@ export const useParlantWebSocket = (
         connectionStartTime.current = new Date();
         
         startHeartbeat();
-        processOfflineQueue().catch((error) => {
+        processOfflineQueue().catch((error: unknown) => {
           logError('Failed to process offline queue', error, 'useParlantWebSocket');
         });
         onConnected?.();
@@ -588,7 +588,7 @@ export const useParlantWebSocket = (
       
       socketRef.current = socket;
       
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Failed to initialize Parlant WebSocket', error, 'useParlantWebSocket');
       setConnectionError('Failed to initialize connection');
       errorCount.current++;
@@ -1037,7 +1037,7 @@ export const useParlantWebSocket = (
         // Using await in loop is intentional for sequential processing
         await sendMessage(offlineMessage.message.content, offlineMessage.message.type); // eslint-disable-line no-await-in-loop
         logDebug('Offline message sent successfully', { messageId: offlineMessage.id }, 'useParlantWebSocket');
-      } catch (error) {
+      } catch (error: unknown) {
         logError('Failed to send offline message', error, 'useParlantWebSocket');
         // Re-queue message if retry limit not reached
         const MAX_RETRY_COUNT = 3;
@@ -1170,7 +1170,7 @@ export const useParlantWebSocket = (
   // Process offline queue when connection is restored
   useEffect(() => {
     if (isConnected && !isOffline && offlineQueue.length > 0) {
-      processOfflineQueue().catch((error) => {
+      processOfflineQueue().catch((error: unknown) => {
         logError('Failed to process offline queue in effect', error, 'useParlantWebSocket');
       });
     }

@@ -440,7 +440,10 @@ describe('MCP Computer Use Integration Tests', () => {
       expect(screenshotOperation.result.content[0]).toHaveProperty('data');
       
       // Verify compression occurred
-      const compressedData = screenshotOperation.result.content[0]!.data!;
+      const content = screenshotOperation.result.content[0];
+      expect(content).toBeDefined();
+      expect(content?.data).toBeDefined();
+      const compressedData = content?.data || '';
       expect(compressedData.length).toBeLessThan(largePngData.length);
       
       // Test compression utility directly

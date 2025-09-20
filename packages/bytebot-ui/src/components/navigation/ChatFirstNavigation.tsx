@@ -901,7 +901,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         logWarn('Command not understood', { command: commandText, confidence: result.confidence }, 'ChatFirstNavigation');
       }
       
-    } catch (error) {
+    } catch (error: unknown) {
       logWarn('Command processing failed', error, 'ChatFirstNavigation');
       onError?.('Sorry, there was an error processing your command.');
     } finally {
@@ -1102,7 +1102,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
           } else if (action.path !== undefined) {
             try {
               router.push(action.path);
-            } catch (error) {
+            } catch (error: unknown) {
               logWarn('Navigation failed', { error: (error as Error).message }, 'ChatFirstNavigation');
             }
             onNavigate?.(action.path);

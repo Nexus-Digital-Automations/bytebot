@@ -685,7 +685,7 @@ export class ErrorAnalyticsController {
       const systemHealth = {
         overallScore: analytics.recoverySuccessRate,
         trend: analytics.errorTrends.trend ?? 'stable',
-        criticalIssues: analytics.errorsBySeverity?.critical || 0,
+        criticalIssues: analytics.errorsBySeverity?.critical ?? 0,
         nextReviewDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       };
 

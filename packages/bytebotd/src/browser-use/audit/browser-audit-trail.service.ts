@@ -814,7 +814,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
     return {
       eventId,
-      eventType: eventData.eventType!,
+      eventType: eventData.eventType || 'UNKNOWN',
       timestamp: now,
       severity: eventData.severity || AuditEventSeverity.INFO,
       userId: eventData.userId,
@@ -833,7 +833,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       metadata: this.createEventMetadata(eventData),
       hash: '', // Will be set later
       signature: eventData.signature,
-      retentionCategory: this.determineRetentionCategory(eventData.eventType!, eventData.severity!),
+      retentionCategory: this.determineRetentionCategory(eventData.eventType || 'UNKNOWN', eventData.severity || AuditEventSeverity.INFO),
       complianceFlags: eventData.complianceFlags || [],
       parentEventId: eventData.parentEventId,
       correlationId: eventData.correlationId,
@@ -856,7 +856,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
         memoryUsage: process.memoryUsage().heapUsed,
         cpuUsage: process.cpuUsage().user,
       },
-      securityClassification: this.determineSecurityClassification(eventData.eventType!, eventData.data || {}),
+      securityClassification: this.determineSecurityClassification(eventData.eventType || 'UNKNOWN', eventData.data || {}),
       dataCategories: this.identifyDataCategories(eventData.data || {}),
       additionalContext: {
         nodeVersion: process.version,
@@ -1022,11 +1022,11 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
     // Apply filters
     if (params.startTime) {
-      events = events.filter(event => event.timestamp >= params.startTime!);
+      events = events.filter(event => params.startTime && event.timestamp >= params.startTime);
     }
 
     if (params.endTime) {
-      events = events.filter(event => event.timestamp <= params.endTime!);
+      events = events.filter(event => params.endTime && event.timestamp <= params.endTime);
     }
 
     if (params.userId) {
@@ -1038,15 +1038,15 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     }
 
     if (params.eventTypes && params.eventTypes.length > 0) {
-      events = events.filter(event => params.eventTypes!.includes(event.eventType));
+      events = events.filter(event => params.eventTypes?.includes(event.eventType));
     }
 
     if (params.severity && params.severity.length > 0) {
-      events = events.filter(event => params.severity!.includes(event.severity));
+      events = events.filter(event => params.severity?.includes(event.severity));
     }
 
     if (params.outcome && params.outcome.length > 0) {
-      events = events.filter(event => params.outcome!.includes(event.outcome));
+      events = events.filter(event => params.outcome?.includes(event.outcome));
     }
 
     if (params.searchText) {

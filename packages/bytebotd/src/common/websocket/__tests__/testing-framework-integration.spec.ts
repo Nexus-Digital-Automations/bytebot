@@ -1698,8 +1698,8 @@ describe('Testing Framework Integration and Automation', () => {
       // Check status during execution
       const currentExecution = orchestrator.getCurrentExecution();
       expect(currentExecution).toBeDefined();
-      expect(currentExecution!.status).toBe('running');
-      expect(currentExecution!.plan).toEqual(plan);
+      expect(currentExecution?.status).toBe('running');
+      expect(currentExecution?.plan).toEqual(plan);
 
       await executionPromise;
 

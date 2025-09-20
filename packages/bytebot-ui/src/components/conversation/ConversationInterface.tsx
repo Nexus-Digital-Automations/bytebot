@@ -397,7 +397,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
       onValidationResponse(decision, reasoning);
       // Validation response submitted successfully
       logInfo('Validation response submitted', { messageId: safeMessage.id, decision }, 'ConversationInterface');
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to submit validation response', { error: errorMessage }, 'ConversationInterface');
     } finally {
@@ -814,7 +814,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       await sendMessage(messageContent, MessageType._TEXT);
       logDebug('Message sent successfully', { content: messageContent.substring(0, UI_CONSTANTS.MAGIC_OFFSET) }, 'ConversationInterface');
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to send message', { error: errorMessage }, 'ConversationInterface');
       // Re-populate input on failure
@@ -852,7 +852,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           logInfo('Validation response sent', { decision, requestId: safeValidationMessage.metadata.requestId }, 'ConversationInterface');
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to send validation response', { error: errorMessage }, 'ConversationInterface');
     }
@@ -862,7 +862,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       const newConversationId = await startConversation(initialTopic, initialPriority);
       logInfo('New conversation started', { conversationId: newConversationId }, 'ConversationInterface');
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to start conversation', { error: errorMessage }, 'ConversationInterface');
     }
@@ -872,7 +872,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       await joinConversation(id);
       logInfo('Joined conversation', { conversationId: id }, 'ConversationInterface');
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to join conversation', { error: errorMessage }, 'ConversationInterface');
     }
@@ -899,7 +899,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       URL.revokeObjectURL(url);
       
       logInfo('Conversation exported', { conversationId: safeCurrentConversation.conversationId }, 'ConversationInterface');
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
     }

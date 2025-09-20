@@ -830,7 +830,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       expect(results.phases).toHaveLength(5);
       expect(results.phases[0].phase).toBe('baseline');
       expect(results.overallMetrics).toBeDefined();
-      expect(results.overallMetrics!.totalConnections).toBeGreaterThan(0);
+      expect(results.overallMetrics?.totalConnections).toBeGreaterThan(0);
     }, 300000); // 5 minute timeout
 
     test('should handle ramp-up phase correctly', async () => {
@@ -848,8 +848,8 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       const rampUpPhase = results.phases.find(p => p.phase === 'ramp_up');
 
       expect(rampUpPhase).toBeDefined();
-      expect(rampUpPhase!.metrics.activeConnections).toBeGreaterThan(50);
-      expect(rampUpPhase!.metrics.totalMessagesSent).toBeGreaterThan(0);
+      expect(rampUpPhase?.metrics.activeConnections).toBeGreaterThan(50);
+      expect(rampUpPhase?.metrics.totalMessagesSent).toBeGreaterThan(0);
     }, 180000);
 
     test('should execute stress test with increased load', async () => {
@@ -867,7 +867,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       const stressPhase = results.phases.find(p => p.phase === 'stress_test');
 
       expect(stressPhase).toBeDefined();
-      expect(stressPhase!.metrics.activeConnections).toBeGreaterThan(300);
+      expect(stressPhase?.metrics.activeConnections).toBeGreaterThan(300);
       expect(results.success).toBe(true);
     }, 240000);
 
@@ -886,8 +886,8 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       const recoveryPhase = results.phases.find(p => p.phase === 'recovery');
 
       expect(recoveryPhase).toBeDefined();
-      expect(recoveryPhase!.metrics.activeConnections).toBeLessThanOrEqual(150);
-      expect(recoveryPhase!.metrics.totalErrors).toBeLessThanOrEqual(5); // Allow some errors during recovery
+      expect(recoveryPhase?.metrics.activeConnections).toBeLessThanOrEqual(150);
+      expect(recoveryPhase?.metrics.totalErrors).toBeLessThanOrEqual(5); // Allow some errors during recovery
     }, 180000);
   });
 

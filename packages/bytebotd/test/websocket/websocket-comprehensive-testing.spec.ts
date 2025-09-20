@@ -90,7 +90,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
             'User-Agent': 'WebSocket-Testing-Framework/1.0',
             'X-Client-ID': this.clientId,
             'X-Session-ID': this.sessionId,
-            ...(this.options.headers || {}),
+            ...(this.options.headers ?? {}),
           },
         });
 
@@ -124,7 +124,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
             metrics: this.getMetrics()
           });
 
-          if (this.options.autoReconnect && this.reconnectAttempts < (this.options.maxReconnectAttempts || 5)) {
+          if (this.options.autoReconnect && this.reconnectAttempts < (this.options.maxReconnectAttempts ?? 5)) {
             this.attemptReconnection();
           }
         });
@@ -207,7 +207,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
     if (this.options.enableHeartbeat !== false) {
       this.heartbeatInterval = setInterval(() => {
         this.sendHeartbeat();
-      }, this.options.heartbeatInterval || 30000);
+      }, this.options.heartbeatInterval ?? 30000);
     }
   }
 
@@ -765,11 +765,11 @@ class ConcurrentConnectionManager extends EventEmitter {
       messageCount,
       totalTime,
       averageLatency: latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length,
-      medianLatency: latencies[Math.floor(latencies.length / 2)] || 0,
-      p95Latency: latencies[Math.floor(latencies.length * 0.95)] || 0,
-      p99Latency: latencies[Math.floor(latencies.length * 0.99)] || 0,
-      minLatency: latencies[0] || 0,
-      maxLatency: latencies[latencies.length - 1] || 0,
+      medianLatency: latencies[Math.floor(latencies.length / 2)] ?? 0,
+      p95Latency: latencies[Math.floor(latencies.length * 0.95)] ?? 0,
+      p99Latency: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
+      minLatency: latencies[0] ?? 0,
+      maxLatency: latencies[latencies.length - 1] ?? 0,
       errorCount: errors.length,
       successRate: ((messageCount - errors.length) / messageCount) * 100,
       messagesPerSecond: messageCount / (totalTime / 1000),

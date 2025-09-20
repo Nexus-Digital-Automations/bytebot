@@ -1,0 +1,245 @@
+# Base Configuration for PARLANT Database Function Wrapping System
+# This configuration serves as the foundation for all environments
+
+environment: development
+region: us-east-1
+functionCount: 500
+complianceLevel: basic
+
+# Database configuration (PostgreSQL)
+database:
+  host: localhost
+  port: 5432
+  name: parlant_functions
+  maxConnections: 100
+  poolSize: 10
+  timeout: 30000
+  ssl: false
+  replication:
+    enabled: false
+    readReplicas: 0
+  backup:
+    enabled: true
+    retentionDays: 7
+    schedule: "0 2 * * *"  # Daily at 2 AM
+  maintenance:
+    window: "sun:04:00-sun:05:00"
+    autoMinorVersionUpgrade: true
+
+# Redis configuration
+redis:
+  host: localhost
+  port: 6379
+  cluster: false
+  maxMemory: 256mb
+  evictionPolicy: allkeys-lru
+  persistence: true
+  backup:
+    enabled: true
+    retentionDays: 3
+    schedule: "0 3 * * *"  # Daily at 3 AM
+
+# Kubernetes configuration
+kubernetes:
+  namespace: parlant-functions
+  replicas:
+    min: 1
+    max: 5
+    target: 2
+  resources:
+    cpu:
+      request: 100m
+      limit: 500m
+    memory:
+      request: 128Mi
+      limit: 512Mi
+  scaling:
+    cpuThreshold: 80
+    memoryThreshold: 80
+    scaleUpCooldown: 300    # 5 minutes
+    scaleDownCooldown: 600  # 10 minutes
+  probes:
+    readiness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    liveness:
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
+
+# Security configuration
+security:
+  enableWAF: false
+  enableGuardDuty: false
+  enableShield: false
+  encryptionAtRest: true
+  encryptionInTransit: true
+  auditLogging: false
+  complianceMonitoring: false
+  authentication:
+    method: jwt
+    tokenExpiry: 3600      # 1 hour
+    refreshTokenExpiry: 604800  # 1 week
+  authorization:
+    rbacEnabled: true
+    defaultRole: user
+  rateLimit:
+    enabled: false
+    requestsPerMinute: 1000
+    burstLimit: 100
+
+# Monitoring configuration
+monitoring:
+  metricsRetentionDays: 7
+  logRetentionDays: 14
+  enableDetailedMonitoring: false
+  alertChannels:
+    - email
+  anomalyDetection: false
+  predictiveScaling: false
+  healthChecks:
+    interval: 30
+    timeout: 10
+    retries: 3
+  metrics:
+    enabled: true
+    collection:
+      - cpu
+      - memory
+      - disk
+      - network
+      - custom
+
+# Performance configuration
+performance:
+  maxResponseTimeMs: 2000
+  minThroughputRps: 100
+  maxErrorRate: 0.05      # 5%
+  minAvailability: 99.0   # 99%
+  caching:
+    l1CacheTtl: 300       # 5 minutes
+    l2CacheTtl: 1800      # 30 minutes
+    l3CacheTtl: 3600      # 1 hour
+    hitRateTarget: 80     # 80%
+  optimization:
+    enableGzip: true
+    enableBrotli: false
+    connectionPooling: true
+    keepAliveTimeout: 65000
+
+# Feature flags
+features:
+  enableExperimentalFeatures: false
+  enableBetaApis: false
+  enableDebugEndpoints: false
+  enableMockServices: false
+  enableHotReload: false
+  enableMetrics: true
+  enableTracing: false
+  enableProfiling: false
+
+# Networking configuration
+networking:
+  enablePublicAccess: false
+  allowedCidrBlocks:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+  enableVpn: false
+  enablePrivateEndpoints: false
+  loadBalancer:
+    algorithm: round_robin
+    sessionAffinity: false
+    healthCheckPath: /health
+
+# Backup and disaster recovery
+backup:
+  enabled: true
+  schedule: "0 1 * * *"    # Daily at 1 AM
+  retentionDays: 7
+  encryption: true
+  compression: true
+  verification: true
+
+# Logging configuration
+logging:
+  level: info
+  format: json
+  destinations:
+    - console
+    - file
+  rotation:
+    maxSize: 100MB
+    maxAge: 7
+    maxBackups: 3
+  fields:
+    timestamp: true
+    level: true
+    caller: true
+    message: true
+
+# Function execution configuration
+functions:
+  timeout: 300            # 5 minutes
+  memory: 128             # MB
+  concurrency: 10         # Max concurrent executions per function
+  retries: 3
+  deadLetterQueue: true
+  warmup:
+    enabled: false
+    instances: 0
+  environment:
+    NODE_ENV: development
+    LOG_LEVEL: info
+
+# API configuration
+api:
+  version: v1
+  basePath: /api/v1
+  cors:
+    enabled: true
+    origins:
+      - http://localhost:3000
+      - http://localhost:8080
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    headers:
+      - Content-Type
+      - Authorization
+      - X-Requested-With
+  swagger:
+    enabled: true
+    path: /docs
+
+# Message queue configuration
+messageQueue:
+  provider: redis          # redis, rabbitmq, sqs
+  maxRetries: 3
+  retryDelay: 1000        # milliseconds
+  deadLetterQueue: true
+  visibility: 30          # seconds
+
+# Storage configuration
+storage:
+  provider: local         # local, s3, gcs
+  basePath: ./data
+  encryption: false
+  compression: false
+  cleanup:
+    enabled: true
+    maxAge: 30            # days
+
+# Development tools
+development:
+  hotReload: false
+  debugMode: false
+  profiling: false
+  mockServices: false
+  testData: false

@@ -32,7 +32,6 @@ import {
   ParlantValidationResponse,
   ParlantUserContext,
   DatabaseOperationMetadata,
-  RiskLevel,
   ExecutionContext,
   ConversationalValidationError,
 } from './parlant-validated-database.service';
@@ -419,7 +418,7 @@ export class ParlantConversationalValidationEngine {
   /**
    * Primary validation method with comprehensive conversational integration
    */
-  async validateFunctionExecution<T>(
+  async validateFunctionExecution(
     functionName: string,
     functionParams: Record<string, unknown>,
     operationMetadata: DatabaseOperationMetadata,
@@ -800,7 +799,7 @@ export class ParlantConversationalValidationEngine {
    */
   private async performTextValidation(
     request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     // Generate conversational prompts based on risk level and operation type
     const conversationalPrompts = this.generateConversationalPrompts(request);
@@ -816,7 +815,7 @@ export class ParlantConversationalValidationEngine {
    */
   private async performVoiceValidation(
     request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Voice validation placeholder', {
       requestId: request.requestId,
@@ -829,7 +828,7 @@ export class ParlantConversationalValidationEngine {
    */
   private async performVisualValidation(
     request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Visual validation placeholder', {
       requestId: request.requestId,
@@ -842,7 +841,7 @@ export class ParlantConversationalValidationEngine {
    */
   private async performBiometricValidation(
     request: ConversationalValidationRequest,
-    response: EnhancedValidationResponse,
+    _response: EnhancedValidationResponse,
   ): Promise<void> {
     this.logger.debug('Biometric validation placeholder', {
       requestId: request.requestId,
@@ -1351,7 +1350,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private async simulateMediumRiskApproval(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 25));
     return true; // Most medium-risk operations approved
@@ -1437,7 +1436,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private identifyDependentSystems(
-    metadata: DatabaseOperationMetadata,
+    _metadata: DatabaseOperationMetadata,
   ): string[] {
     // Mock dependent systems identification
     return ['audit_system', 'backup_service'];
@@ -1457,7 +1456,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private async generateRecommendedActions(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): Promise<RecommendedAction[]> {
     return [
       {
@@ -1483,7 +1482,7 @@ export class ParlantConversationalValidationEngine {
   }
 
   private generateExecutionContext(
-    request: ConversationalValidationRequest,
+    _request: ConversationalValidationRequest,
   ): ExecutionContext {
     return {
       monitoringLevel: 'COMPREHENSIVE',

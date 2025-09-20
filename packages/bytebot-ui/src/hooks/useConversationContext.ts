@@ -1042,7 +1042,7 @@ export const useConversationContext = ({
       onContextSaved?.(currentContext);
       logInfo('Context saved successfully', { contextId: currentContext.conversationId }, 'useConversationContext');
 
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Failed to save context', error, 'useConversationContext');
       onError?.('Failed to save conversation context');
     } finally {
@@ -1100,7 +1100,7 @@ export const useConversationContext = ({
       
       return null;
       
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Failed to load context', error, 'useConversationContext');
       onError?.('Failed to load conversation context');
       return null;
@@ -1118,7 +1118,7 @@ export const useConversationContext = ({
       }
       
       logInfo('Context deleted successfully', { contextId: conversationId }, 'useConversationContext');
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Failed to delete context', error, 'useConversationContext');
       onError?.('Failed to delete conversation context');
     }
@@ -1220,7 +1220,7 @@ export const useConversationContext = ({
       const results = await storage.current.searchSnapshots(options);
       logDebug('Context search completed', { resultCount: results.length }, 'useConversationContext');
       return results;
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Context search failed', error, 'useConversationContext');
       onError?.('Failed to search conversation contexts');
       return [];
@@ -1390,7 +1390,7 @@ export const useConversationContext = ({
       setSyncStatus(null);
       
       logInfo('All contexts cleared', null, 'useConversationContext');
-    } catch (error) {
+    } catch (error: unknown) {
       logError('Failed to clear contexts', error, 'useConversationContext');
       onError?.('Failed to clear conversation contexts');
     }
@@ -1405,7 +1405,7 @@ export const useConversationContext = ({
     if (config.enablePersistence && config.autoSaveInterval > 0) {
       autoSaveTimer.current = setInterval(() => {
         if (currentContext && !isSaving) {
-          saveContext().catch((error) => {
+          saveContext().catch((error: unknown) => {
             logError('Auto-save failed', error, 'useConversationContext');
           });
         }
@@ -1422,7 +1422,7 @@ export const useConversationContext = ({
   // Auto-load on mount
   useEffect(() => {
     if (autoLoad !== null && autoLoad !== undefined && autoLoad.length > 0 && config.enablePersistence) {
-      loadContext(autoLoad).catch((error) => {
+      loadContext(autoLoad).catch((error: unknown) => {
         logError('Auto-load failed', error, 'useConversationContext');
       });
     }

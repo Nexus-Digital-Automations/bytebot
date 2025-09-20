@@ -117,7 +117,7 @@ class ConnectionLifecycleTestClient extends EventEmitter {
             const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));
             this.emit('message', message);
           } catch (error) {
-            this.emit('error', new Error(`Failed to parse message: ${error}`));
+            this.emit('error', new Error(`Failed to parse message: ${String(error)}`));
           }
         });
 

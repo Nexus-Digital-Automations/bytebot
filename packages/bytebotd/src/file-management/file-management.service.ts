@@ -300,7 +300,8 @@ export class FileManagementService {
 
           if (needsSync) {
             // Perform synchronization based on direction
-            await this.synchronizeFile(sourceFile, targetPath, syncOperation.direction!);
+            const direction = syncOperation.direction || 'source-to-target';
+            await this.synchronizeFile(sourceFile, targetPath, direction);
 
             synchronizedFiles.push(sourceFile);
             filesSync++;
@@ -1023,7 +1024,7 @@ export class FileManagementService {
       const targetStats = await fs.stat(targetPath);
 
       // Compare file timestamps or sizes to determine if sync is needed
-      const sourceTime = new Date(sourceFile.modifiedAt!).getTime();
+      const sourceTime = sourceFile.modifiedAt ? new Date(sourceFile.modifiedAt).getTime() : 0;
       const targetTime = targetStats.mtime.getTime();
 
       return sourceTime > targetTime || sourceFile.size !== targetStats.size;

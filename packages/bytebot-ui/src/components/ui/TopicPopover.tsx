@@ -66,7 +66,7 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
   };
 
   // Create a modified version of the button with updated text color
-  const modifiedChildren = React.Children.map(children, (child) => {
+  const modifiedChildren = React.Children.map(children, (child): React.ReactNode => {
     // Only process React elements (not strings, numbers, etc.)
     if (!React.isValidElement(child)) {
       return child;

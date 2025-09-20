@@ -1045,6 +1045,128 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-20T06:34:50.322Z",
+      "title": "Fix TypeScript unused variables and imports cleanup",
+      "description": "Fix all @typescript-eslint/no-unused-vars and import/export related ESLint violations across the codebase, specifically targeting: unused variables, parameters, imports, interface/type definitions, function parameters, and imported modules. Focus on bytebot/packages/bytebot-agent/src/database/transaction/*.ts and bytebot/packages/bytebotd/src/common/websocket/**/*.ts files.",
+      "category": "error",
+      "id": "error_1758350090322_2kedhzgtyfh",
+      "assigned_agent": "dev_session_1758350074911_1_general_4ee45150",
+      "started_at": "2025-09-20T06:35:11.441Z",
+      "claimed_by": "dev_session_1758350074911_1_general_4ee45150",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758350074911_1_general_4ee45150",
+          "role": "primary",
+          "assignedAt": "2025-09-20T06:35:11.441Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:50.699Z",
+      "title": "Fix TypeScript type safety violations and eliminate any types",
+      "description": "Specialized agent to fix @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, and @typescript-eslint/restrict-template-expressions violations",
+      "category": "error",
+      "id": "error_1758350090699_pe17lu71ex"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:50.986Z",
+      "title": "ESLint Validation Coordination and Final Verification",
+      "description": "Progressive ESLint validation, final verification across all packages, and quality assurance for linter fixes",
+      "category": "error",
+      "id": "error_1758350090986_7arqwdl6lc"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T06:34:51.425Z",
+      "title": "Fix @typescript-eslint/prefer-nullish-coalescing violations",
+      "description": "Replace logical OR operators (||) with nullish coalescing operators (??) where appropriate to fix ESLint violations. Focus on null/undefined checking vs falsy value checking. Analyze context to preserve intentional falsy value handling while improving null safety.",
+      "category": "error",
+      "id": "error_1758350091425_7zria2ynrub",
+      "completed_at": "2025-09-20T06:41:54.450Z",
+      "updated_at": "2025-09-20T06:41:54.450Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:51.485Z",
+      "title": "Fix TypeScript template expression safety violations",
+      "description": "Fix @typescript-eslint/restrict-template-expressions violations in websocket spec files and other locations, ensuring template literals use safe types",
+      "category": "error",
+      "id": "error_1758350091485_sea7oixvr9s"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:51.545Z",
+      "title": "Fix TypeScript explicit-function-return-type violations",
+      "description": "Add explicit return type annotations to all functions and methods missing them to resolve @typescript-eslint/explicit-function-return-type violations",
+      "category": "error",
+      "id": "error_1758350091544_1lopjbf8wl9"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:51.625Z",
+      "title": "Fix syntax errors and parsing issues preventing compilation",
+      "description": "Fix all syntax errors and parsing issues, particularly in transaction-integration-validator.service.ts line 1405 and other files with parsing errors. Focus on property assignment expected errors, malformed code structures, and TypeScript syntax issues.",
+      "category": "error",
+      "id": "error_1758350091625_qh90iws4p9"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-20T06:34:51.890Z",
+      "title": "Fix @typescript-eslint/no-unsafe-member-access violations",
+      "description": "Fix TypeScript linting errors related to unsafe member access, unsafe calls, and unsafe returns by adding proper type guards and type annotations",
+      "category": "error",
+      "id": "error_1758350091889_zpwprpldmj",
+      "assigned_agent": "dev_session_1758350076516_1_general_89251458",
+      "started_at": "2025-09-20T06:40:31.687Z",
+      "claimed_by": "dev_session_1758350076516_1_general_89251458",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758350076516_1_general_89251458",
+          "role": "primary",
+          "assignedAt": "2025-09-20T06:40:31.687Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:52.334Z",
+      "title": "Fix Error Handling Type Safety - Unsafe Error Assignments",
+      "description": "Fix @typescript-eslint/no-unsafe-assignment errors in error handling code, specifically in automation-error-handler.service.ts and websocket spec files. Implement proper error type definitions, safe error assignments in catch blocks, and type-safe error propagation.",
+      "category": "error",
+      "id": "error_1758350092334_zaxp47yhrr"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:34:59.549Z",
+      "title": "Fix TypeScript non-null assertion violations",
+      "description": "Remove non-null assertion violations by replacing operators with safe property access patterns",
+      "category": "error",
+      "id": "error_1758350099548_kmhel929iy"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:40:06.045Z",
+      "title": "ESLint Configuration Specialist - bytebot-ui Setup Resolution",
+      "description": "Resolve ESLint v9 configuration issues in bytebot-ui package. Fix Next.js 15+ compatibility problems, migrate to flat config format, update dependencies, and resolve version conflicts. Ensure proper React/TypeScript linting setup and validate configuration works correctly",
+      "category": "error",
+      "id": "error_1758350406045_rdcwvemnx19"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T06:40:26.552Z",
+      "title": "Final ESLint Validation Specialist - Comprehensive Verification",
+      "description": "Perform final comprehensive ESLint validation across all packages after fixes are complete. Run full linting, TypeScript compilation, build processes, and generate final validation report. Ensure zero violations across entire ecosystem and document completion evidence",
+      "category": "test",
+      "id": "test_1758350426551_l5srczorhq9"
     }
   ],
   "agents": {
@@ -2788,6 +2910,216 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T15:20:06.268Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350074911_1_general_4ee45150": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:34.912Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:34.912Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350075305_1_general_0f39fb42": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:35.306Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:35.306Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350075366_1_general_b717ec6c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:35.367Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:35.367Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350075453_1_general_975bc52f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:35.454Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:35.454Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350075732_1_general_41389b68": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:35.742Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:35.742Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350075865_1_general_495145b3": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:35.866Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:35.866Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350076039_1_general_81579150": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:36.039Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:36.039Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350076242_1_general_7a301dc9": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:36.244Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:36.244Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350076424_1_general_ed941d60": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:36.425Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:36.426Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758350076516_1_general_89251458": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T06:34:36.517Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T06:34:36.517Z",
       "sessionId": null,
       "metadata": {}
     }

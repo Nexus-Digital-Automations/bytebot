@@ -394,7 +394,7 @@ describe("useChatSession Hook", () => {
       mockTaskUtils.addMessage.mockResolvedValue({
         success: true,
         message: "Message added successfully",
-      } as Awaited<ReturnType<typeof mockTaskUtils.addMessage>>);
+      } as unknown as Awaited<ReturnType<typeof mockTaskUtils.addMessage>>);
 
       const { result } = renderHook(() =>
         useChatSession({ initialTaskId: "task-123" }),
@@ -506,7 +506,7 @@ describe("useChatSession Hook", () => {
 
       act(() => {
         if (resolveAddMessage !== undefined) {
-          resolveAddMessage({ success: true, message: "Success" });
+          resolveAddMessage({ success: true, message: "Success" } as unknown as Task);
         }
       });
 
