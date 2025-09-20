@@ -49,6 +49,7 @@
 // ============================================================================
 
 import { TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 
 // ============================================================================
 // SERVICE IMPORTS - REPLACE WITH ACTUAL SERVICE IMPORTS
@@ -428,7 +429,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       testLogger.completeTest('[SERVICE_NAME] Test Suite Setup', true);
     } catch (error) {
       const typedError =
-        error instanceof Error ? _error : new Error(String(error));
+        error instanceof Error ? error : new Error(String(error));
       testLogger.completeTest(
         '[SERVICE_NAME] Test Suite Setup',
         false,
@@ -480,7 +481,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       testLogger.completeTest('[SERVICE_NAME] Test Suite Cleanup', true);
     } catch (error) {
       const typedError =
-        error instanceof Error ? _error : new Error(String(error));
+        error instanceof Error ? error : new Error(String(error));
       testLogger.completeTest(
         '[SERVICE_NAME] Test Suite Cleanup',
         false,
@@ -549,7 +550,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? _error : new Error(String(error));
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Service definition validation failed', {
           operationId,
           _error: typedError.message,
@@ -595,7 +596,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? _error : new Error(String(error));
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Dependency injection validation failed', {
           operationId,
           _error: typedError.message,
@@ -642,7 +643,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? _error : new Error(String(error));
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Architecture compliance validation failed', {
           operationId,
           _error: typedError.message,
@@ -786,7 +787,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
       } catch (error) {
         testMetrics.totalTestsFailed++;
         const typedError =
-          error instanceof Error ? _error : new Error(String(error));
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation(
           '[PRIMARY_METHOD] successful operation test failed',
           {

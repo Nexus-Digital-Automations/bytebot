@@ -12,7 +12,11 @@
  * @since Bytebot API Hardening Phase 1
  */
 
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  ServiceUnavailableException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, switchMap, timeout } from 'rxjs/operators';
@@ -454,11 +458,11 @@ export class CircuitBreakerService {
     circuit.lastFailureTime = new Date(now);
 
     const errorMessage =
-      error instanceof Error
-        ? error.message
+      _error instanceof Error
+        ? _error.message
         : (() => {
             try {
-              return JSON.stringify(error);
+              return JSON.stringify(_error);
             } catch {
               return '[Unserializable Error]';
             }
@@ -469,7 +473,7 @@ export class CircuitBreakerService {
       timestamp: now,
       success: false,
       duration,
-      _error: errorMessage,
+      error: errorMessage,
     });
 
     this.cleanupOldCalls(circuit);

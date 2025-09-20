@@ -23,16 +23,16 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MultiDimensionalRiskAssessment,
-  RiskLevel,
-  DataSensitivityAssessment,
-  OperationImpactAssessment,
-  UserContextAssessment,
-  TimingFactorAssessment,
+  _RiskLevel,
+  _DataSensitivityAssessment,
+  _OperationImpactAssessment,
+  _UserContextAssessment,
+  _TimingFactorAssessment,
   ComplianceRequirementAssessment,
-  BehaviorAnalysis,
+  _BehaviorAnalysis,
   DatabaseOperationType,
-  DataClassification,
-  SensitiveDataType,
+  _DataClassification,
+  _SensitiveDataType,
 } from './database-risk-assessment.service';
 import { DatabaseOperationMetadata } from '../parlant-validated-database.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
@@ -469,7 +469,7 @@ export class IntelligentRiskScoringService {
     assessment: MultiDimensionalRiskAssessment,
     operation: DatabaseOperationMetadata,
     userContext: ParlantUserContext,
-    additionalContext: Record<string, unknown>,
+    _additionalContext: Record<string, unknown>,
   ): Promise<RiskScoringFeatures> {
     // Historical features
     const userHistoricalRisk = await this.calculateUserHistoricalRisk(
@@ -727,7 +727,7 @@ export class IntelligentRiskScoringService {
    */
   private applyNeuralNetworkModel(
     features: RiskScoringFeatures,
-    behaviorAnalysis: BehaviorPatternAnalysis,
+    _behaviorAnalysis: BehaviorPatternAnalysis,
   ): number {
     // Simplified neural network implementation
     // In production, this would use a trained neural network
@@ -780,7 +780,7 @@ export class IntelligentRiskScoringService {
    * Get or create user baseline profile
    */
   private async getUserBaselineProfile(
-    userId: string,
+    _userId: string,
   ): Promise<UserBaselineProfile> {
     // In production, this would query historical data
     // For now, return a mock baseline profile
@@ -873,7 +873,7 @@ export class IntelligentRiskScoringService {
     baseline: UserBaselineProfile,
     current: CurrentBehaviorProfile,
     operation: DatabaseOperationMetadata,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<BehaviorAnomaly[]> {
     const anomalies: BehaviorAnomaly[] = [];
 
@@ -1173,7 +1173,7 @@ export class IntelligentRiskScoringService {
   // ===== STUB IMPLEMENTATIONS =====
   // These methods contain simplified implementations and would be fully developed by specialized agents
 
-  private async calculateUserHistoricalRisk(userId: string): Promise<number> {
+  private async calculateUserHistoricalRisk(_userId: string): Promise<number> {
     // Placeholder implementation
     return Math.random() * 30; // 0-30 risk score
   }
@@ -1213,32 +1213,32 @@ export class IntelligentRiskScoringService {
   }
 
   private async calculateUserDeviationScore(
-    userId: string,
-    operation: DatabaseOperationMetadata,
+    _userId: string,
+    _operation: DatabaseOperationMetadata,
   ): Promise<number> {
     // Placeholder implementation
     return Math.random() * 50;
   }
 
   private async calculateOperationFrequency(
-    userId: string,
-    operationType: string,
+    _userId: string,
+    _operationType: string,
   ): Promise<number> {
     // Placeholder implementation
     return Math.floor(Math.random() * 20) + 1;
   }
 
   private async calculateAccessPatternAnomaly(
-    userContext: ParlantUserContext,
-    operation: DatabaseOperationMetadata,
+    _userContext: ParlantUserContext,
+    _operation: DatabaseOperationMetadata,
   ): Promise<number> {
     // Placeholder implementation
     return Math.random() * 25;
   }
 
   private calculateTimingAnomaly(
-    userContext: ParlantUserContext,
-    date: Date,
+    _userContext: ParlantUserContext,
+    _date: Date,
   ): number {
     // Placeholder implementation
     return Math.random() * 15;
@@ -1279,7 +1279,7 @@ export class IntelligentRiskScoringService {
     return requirements.auditRequirements.length * 5;
   }
 
-  private async calculateRiskVelocity(userId: string): Promise<number> {
+  private async calculateRiskVelocity(_userId: string): Promise<number> {
     // Placeholder implementation - rate of risk change
     return Math.random() * 10;
   }
@@ -1293,7 +1293,7 @@ export class IntelligentRiskScoringService {
 
   private applyDecisionTree1(
     features: RiskScoringFeatures,
-    behavior: BehaviorPatternAnalysis,
+    _behavior: BehaviorPatternAnalysis,
   ): number {
     // Simplified decision tree
     if (features.dataSensitivityScore > 70) return 80;
@@ -1303,7 +1303,7 @@ export class IntelligentRiskScoringService {
 
   private applyDecisionTree2(
     features: RiskScoringFeatures,
-    behavior: BehaviorPatternAnalysis,
+    _behavior: BehaviorPatternAnalysis,
   ): number {
     // Simplified decision tree
     if (features.operationComplexity > 60) return 70;
@@ -1323,7 +1323,7 @@ export class IntelligentRiskScoringService {
 
   private applyDecisionTree4(
     features: RiskScoringFeatures,
-    behavior: BehaviorPatternAnalysis,
+    _behavior: BehaviorPatternAnalysis,
   ): number {
     // Simplified decision tree
     if (features.userHistoricalRisk > 50) return 65;
@@ -1333,7 +1333,7 @@ export class IntelligentRiskScoringService {
 
   private applyDecisionTree5(
     features: RiskScoringFeatures,
-    behavior: BehaviorPatternAnalysis,
+    _behavior: BehaviorPatternAnalysis,
   ): number {
     // Simplified decision tree
     if (features.accessPatternAnomaly > 20) return 60;
@@ -1437,7 +1437,7 @@ export class IntelligentRiskScoringService {
   private generateMLRecommendedActions(
     predictedScore: number,
     anomalyScore: number,
-    factors: RiskContributingFactor[],
+    _factors: RiskContributingFactor[],
   ): MLRecommendedAction[] {
     const actions: MLRecommendedAction[] = [];
 
@@ -1465,27 +1465,27 @@ export class IntelligentRiskScoringService {
   }
 
   private identifyBehaviorRiskFactors(
-    baseline: UserBaselineProfile,
-    current: CurrentBehaviorProfile,
-    anomalies: BehaviorAnomaly[],
+    _baseline: UserBaselineProfile,
+    _current: CurrentBehaviorProfile,
+    _anomalies: BehaviorAnomaly[],
   ): BehaviorRiskFactor[] {
     // Placeholder implementation
     return [];
   }
 
   private generateAdaptiveAdjustments(
-    baseline: UserBaselineProfile,
-    current: CurrentBehaviorProfile,
-    riskFactors: BehaviorRiskFactor[],
+    _baseline: UserBaselineProfile,
+    _current: CurrentBehaviorProfile,
+    _riskFactors: BehaviorRiskFactor[],
   ): AdaptiveAdjustment[] {
     // Placeholder implementation
     return [];
   }
 
   private calculateAnalysisConfidence(
-    baseline: UserBaselineProfile,
-    current: CurrentBehaviorProfile,
-    anomalies: BehaviorAnomaly[],
+    _baseline: UserBaselineProfile,
+    _current: CurrentBehaviorProfile,
+    _anomalies: BehaviorAnomaly[],
   ): number {
     // Placeholder implementation
     return 0.85;

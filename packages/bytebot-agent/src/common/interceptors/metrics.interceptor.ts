@@ -163,7 +163,7 @@ export class MetricsInterceptor implements NestInterceptor {
           (Reflect.getMetadata('path', controller) as string) ?? '';
         const handlerPath =
           (Reflect.getMetadata('path', handler) as string) ?? '';
-        const route = `${controllerPath}${handlerPath}`.replace(//+/g, '/');
+        const route = `${controllerPath}${handlerPath}`.replace(/\/+/g, '/');
 
         if (route && route !== '/') {
           return route;
@@ -194,11 +194,11 @@ export class MetricsInterceptor implements NestInterceptor {
     // Common path normalizations for consistent metrics
     const normalizedPath =
       path
-        .replace(//\d+/g, '/:id') // Replace numeric IDs
-        .replace(//[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
-        .replace(//[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
-        .replace(//+/g, '/') // Remove duplicate slashes
-        .replace(//$/, '') || '/'; // Remove trailing slash
+        .replace(/\/\d+/g, '/:id') // Replace numeric IDs
+        .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
+        .replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
+        .replace(/\/+/g, '/') // Remove duplicate slashes
+        .replace(/\/$/, '') || '/'; // Remove trailing slash
 
     return normalizedPath;
   }

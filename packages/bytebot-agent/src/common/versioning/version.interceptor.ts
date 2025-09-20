@@ -127,7 +127,9 @@ function isErrorWithStack(obj: unknown): obj is ErrorWithStack {
  * @param request - Request to check
  * @returns Whether request has user.id
  */
-function isRequestWithUser(_request: Request): request is RequestWithVersioning {
+function isRequestWithUser(
+  _request: Request,
+): request is RequestWithVersioning {
   return (
     typeof (request as RequestWithVersioning).user === 'object' &&
     (request as RequestWithVersioning).user !== null
@@ -573,7 +575,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Extracted version or null
    */
   private extractVersionFromUrl(path: string): string | null {
-    const versionMatch = path.match(//v(\d+(?:\.\d+)?)//);
+    const versionMatch = path.match(/\/v(\d+(?:\.\d+)?)\//);
     return versionMatch ? `v${versionMatch[1]}` : null;
   }
 
@@ -584,7 +586,7 @@ export class VersionInterceptor implements NestInterceptor {
    */
   private extractVersionFromMediaType(accept: string): string | null {
     const mediaTypeMatch = accept.match(
-      /application/vnd\.bytebot\.v(\d+(?:\.\d+)?)\+json/,
+      /application\/vnd\.bytebot\.v(\d+(?:\.\d+)?)\+json/,
     );
     return mediaTypeMatch ? `v${mediaTypeMatch[1]}` : null;
   }

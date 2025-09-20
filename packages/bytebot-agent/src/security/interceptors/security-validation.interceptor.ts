@@ -21,6 +21,7 @@ import {
   ExecutionContext,
   CallHandler,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
@@ -125,10 +126,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Main intercept method
    */
-  intercept(
-    _context: ExecutionContext,
-    next: CallHandler,
-  ): Observable<unknown> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const startTime = performance.now();
     const requestWithId = request as Request & { requestId?: string };
@@ -222,8 +220,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate incoming request
    */
   private async validateRequest(
-    _request: Request,
-    _metadata: RequestMetadata,
+    request: Request,
+    metadata: RequestMetadata,
   ): Promise<ValidationResult> {
     const startTime = performance.now();
     const issues: ValidationResult['issues'] = [];
@@ -296,8 +294,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate basic request properties
    */
   private validateRequestBasics(
-    _request: Request,
-    _metadata: RequestMetadata,
+    request: Request,
+    metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): void {
     // Content-Type validation
@@ -356,7 +354,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Validate request headers for security issues
    */
   private validateHeaders(
-    _request: Request,
+    request: Request,
     issues: ValidationResult['issues'],
   ): void {
     const headers = request.headers;
@@ -563,10 +561,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
     // Check for dangerous patterns
     const dangerousPatterns = [
-      /<script[^>]*>.*?</script>/gi,
+      /<script[^>]*>.*?<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /_data:text/html/gi,
+      /data:text\/html/gi,
       /vbscript:/gi,
     ];
 
@@ -583,10 +581,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
     // Sanitize common XSS patterns
     return value
-      .replace(/<script\b[^<]*(?:(?!</script>)<[^<]*)*</script>/gi, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/javascript:/gi, '')
       .replace(/on\w+\s*=/gi, '')
-      .replace(/_data: text/html/gi, '')
+      .replace(/data:text\/html/gi, '')
       .replace(/vbscript:/gi, '');
   }
 
@@ -661,8 +659,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Perform threat detection using the threat detector service
    */
   private async performThreatDetection(
-    _request: Request,
-    _metadata: RequestMetadata,
+    request: Request,
+    metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): Promise<void> {
     try {
@@ -766,8 +764,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Detect suspicious patterns in request
    */
   private detectSuspiciousPatterns(
-    _request: Request,
-    _metadata: RequestMetadata,
+    request: Request,
+    metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): Promise<void> {
     return Promise.resolve().then(() => {
@@ -818,7 +816,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    */
   private processResponse(
     responseData: unknown,
-    _metadata: RequestMetadata,
+    metadata: RequestMetadata,
     processingTime: number,
   ): unknown {
     if (!this.config.enableOutputSanitization) {
@@ -854,7 +852,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Sanitize response data to prevent information leakage
    */
-  private sanitizeResponseData(_data: unknown): unknown {
+  private sanitizeResponseData(data: unknown): unknown {
     if (data === null || data === undefined) {
       return data;
     }
@@ -910,7 +908,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Create request metadata
    */
   private createRequestMetadata(
-    _request: Request,
+    request: Request,
     requestId: string,
   ): RequestMetadata {
     const contentLength = parseInt(request.get('Content-Length') || '0', 10);
@@ -934,7 +932,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Generate request hash for deduplication and caching
    */
-  private generateRequestHash(_request: Request): string {
+  private generateRequestHash(request: Request): string {
     const hashData = {
       method: request.method,
       url: request.url,
@@ -952,7 +950,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
   /**
    * Get client IP address
    */
-  private getClientIP(_request: Request): string {
+  private getClientIP(request: Request): string {
     return (
       request.get('CF-Connecting-IP') ||
       request.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
@@ -966,7 +964,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Log security violations
    */
   private async logSecurityViolation(
-    _metadata: RequestMetadata,
+    metadata: RequestMetadata,
     validationResult: ValidationResult,
     action: string,
   ): Promise<void> {
@@ -1018,8 +1016,8 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    * Log security errors
    */
   private async logSecurityError(
-    _metadata: RequestMetadata,
-    _error: unknown,
+    metadata: RequestMetadata,
+    error: unknown,
     processingTime: number,
   ): Promise<void> {
     const errorMessage =
@@ -1132,7 +1130,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
         /union.*select/i, // SQL injection
         /<script/i, // XSS
         /javascript:/i, // JavaScript protocol
-        /_data:text/html/i, // Data URI XSS
+        /data:text\/html/i, // Data URI XSS
       ],
     };
   }

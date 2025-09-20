@@ -30,7 +30,7 @@ import {
   RiskLevel,
   ConversationalValidationError,
   ExecutionContext,
-  DatabaseParlantAuditEntry,
+  _DatabaseParlantAuditEntry,
 } from '../parlant-validated-database.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import { PrismaClient } from '@prisma/client';
@@ -386,7 +386,7 @@ export class ParlantTransactionManagerService {
       safeguards: ['BACKUP', 'AUDIT', 'ROLLBACK'],
     },
   ): Promise<TransactionExecutionResult> {
-    const startTime = new Date();
+    const _startTime = new Date();
     const transactionId = transactionMetadata.transactionId;
 
     this.logger.log(
@@ -575,7 +575,7 @@ export class ParlantTransactionManagerService {
   private async executeTransactionOperations(
     transactionMetadata: TransactionMetadata,
     userContext: ParlantUserContext,
-    executionContext: ExecutionContext,
+    _executionContext: ExecutionContext,
   ): Promise<TransactionExecutionResult> {
     const startTime = new Date();
     const transactionId = transactionMetadata.transactionId;
@@ -612,7 +612,7 @@ export class ParlantTransactionManagerService {
       );
 
       for (const operation of sortedOperations) {
-        const operationStart = Date.now();
+        const _operationStart = Date.now();
 
         try {
           // Check for deadlocks before executing operation
@@ -1147,7 +1147,7 @@ export class ParlantTransactionManagerService {
 
   private async executeOperation(
     operation: TransactionOperation,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<OperationResult> {
     const startTime = Date.now();
 
@@ -1193,8 +1193,8 @@ export class ParlantTransactionManagerService {
   }
 
   private async checkForDeadlocks(
-    transactionId: string,
-    operation: TransactionOperation,
+    _transactionId: string,
+    _operation: TransactionOperation,
   ): Promise<{ hasDeadlock: boolean; description?: string }> {
     // Implementation would check for actual deadlocks
     // This is a simplified version
@@ -1208,7 +1208,7 @@ export class ParlantTransactionManagerService {
     userId: string,
     conversationId?: string,
   ): Promise<void> {
-    const auditEntry: TransactionAuditEntry = {
+    const _auditEntry: TransactionAuditEntry = {
       timestamp: new Date(),
       transactionId,
       event,
@@ -1279,7 +1279,7 @@ export class ParlantTransactionManagerService {
     return [];
   }
 
-  private analyzeForDeadlocks(lockInfo: any[]): DeadlockInfo[] {
+  private analyzeForDeadlocks(_lockInfo: any[]): DeadlockInfo[] {
     // Implementation would analyze lock information for deadlocks
     return [];
   }
@@ -1292,7 +1292,7 @@ export class ParlantTransactionManagerService {
   }
 
   private async collectTransactionMetrics(
-    transactionId: string,
+    _transactionId: string,
   ): Promise<TransactionPerformanceMetrics> {
     // Implementation would collect actual performance metrics
     return {

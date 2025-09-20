@@ -758,7 +758,7 @@ export class DatabaseRiskAssessmentService {
    */
   private async assessComplianceRequirements(
     operation: DatabaseOperationMetadata,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
     _context: Record<string, unknown>,
   ): Promise<ComplianceRequirementAssessment> {
     // Identify applicable regulatory frameworks
@@ -1043,22 +1043,22 @@ export class DatabaseRiskAssessmentService {
   // These will be implemented by specialized agents
 
   private classifyDataSensitivity(
-    operation: DatabaseOperationMetadata,
+    _operation: DatabaseOperationMetadata,
   ): DataClassification {
     // Implementation by Agent 1: Data Classification Specialist
     return DataClassification.INTERNAL; // Placeholder
   }
 
   private calculateSensitivityScore(
-    classification: DataClassification,
-    operation: DatabaseOperationMetadata,
+    _classification: DataClassification,
+    _operation: DatabaseOperationMetadata,
   ): number {
     // Implementation by Agent 1: Sensitivity Scoring Specialist
     return 50; // Placeholder
   }
 
   private identifySensitiveDataTypes(
-    operation: DatabaseOperationMetadata,
+    _operation: DatabaseOperationMetadata,
     _context: Record<string, unknown>,
   ): SensitiveDataType[] {
     // Implementation by Agent 1: Data Type Identification Specialist
@@ -1066,24 +1066,24 @@ export class DatabaseRiskAssessmentService {
   }
 
   private determineProtectionRequirements(
-    classification: DataClassification,
-    dataTypes: SensitiveDataType[],
+    _classification: DataClassification,
+    _dataTypes: SensitiveDataType[],
   ): ProtectionRequirement[] {
     // Implementation by Agent 1: Protection Requirements Specialist
     return []; // Placeholder
   }
 
   private determineRetentionPeriod(
-    classification: DataClassification,
-    dataTypes: SensitiveDataType[],
+    _classification: DataClassification,
+    _dataTypes: SensitiveDataType[],
   ): number {
     // Implementation by Agent 1: Retention Policy Specialist
     return 365; // Placeholder
   }
 
   private identifyRegulatoryScope(
-    dataTypes: SensitiveDataType[],
-    operation: DatabaseOperationMetadata,
+    _dataTypes: SensitiveDataType[],
+    _operation: DatabaseOperationMetadata,
   ): RegulatoryFramework[] {
     // Implementation by Agent 5: Compliance Specialist
     return []; // Placeholder

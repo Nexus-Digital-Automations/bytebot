@@ -2777,7 +2777,7 @@ export class URLNavigationSafetyGuard implements CanActivate {
     }
 
     // Clean reputation cache
-    for (const [domain, reputation] of this.reputationCache.entries()) {
+    for (const [domain, _reputation] of this.reputationCache.entries()) {
       // Simple cleanup - in production would check timestamps
       if (this.reputationCache.size > 1000) {
         this.reputationCache.delete(domain);

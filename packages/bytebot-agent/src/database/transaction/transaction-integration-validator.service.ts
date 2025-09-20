@@ -24,45 +24,45 @@
  * @version 1.0.0 - COMPREHENSIVE TRANSACTION SYSTEM INTEGRATION VALIDATION
  */
 
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
   TransactionMetadata,
-  TransactionOperation,
+  _TransactionOperation,
   TransactionOperationType,
   TransactionState,
   TransactionIsolationLevel,
-  TransactionExecutionResult,
-  RollbackStep,
+  _TransactionExecutionResult,
+  _RollbackStep,
 } from './parlant-transaction-manager.service';
 import {
   DistributedTransactionCoordinatorService,
   DistributedTransactionMetadata,
   DistributedTransactionParticipant,
   TwoPhaseCommitState,
-  DistributedTransactionResult,
-  SagaStep,
+  _DistributedTransactionResult,
+  _SagaStep,
 } from './distributed-transaction-coordinator.service';
 import {
   TransactionMonitoringService,
-  RealTimeTransactionMetrics,
-  PerformanceBottleneck,
-  OptimizationRecommendation,
+  _RealTimeTransactionMetrics,
+  _PerformanceBottleneck,
+  _OptimizationRecommendation,
   TransactionMonitoringContext,
 } from './transaction-monitoring.service';
 import {
   TransactionAuditService,
   ComprehensiveAuditEntry,
-  ComplianceReport,
-  AuditTrailQuery,
+  _ComplianceReport,
+  _AuditTrailQuery,
   ComplianceFramework,
 } from './transaction-audit.service';
 import {
   DeadlockDetectionService,
-  DeadlockCycle,
+  _DeadlockCycle,
   LockInfo,
-  DeadlockPreventionRecommendation,
+  _DeadlockPreventionRecommendation,
 } from './deadlock-detection.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import {
@@ -1584,8 +1584,8 @@ export class TransactionIntegrationValidatorService {
   }
 
   private async executeBenchmarkSuite(
-    userContext: ParlantUserContext,
-    executionContext: ExecutionContext,
+    _userContext: ParlantUserContext,
+    _executionContext: ExecutionContext,
   ): Promise<{
     p95Latency: number;
     throughputTPS: number;
@@ -1602,7 +1602,7 @@ export class TransactionIntegrationValidatorService {
   private async validateEnterpriseStandard(
     standard: EnterpriseStandard,
     validationResults: ValidationResult[],
-    performanceMetrics: IntegrationPerformanceMetrics,
+    _performanceMetrics: IntegrationPerformanceMetrics,
   ): Promise<ComplianceResult> {
     // Simplified compliance validation
     const passedValidations = validationResults.filter((v) => v.passed).length;
@@ -1824,7 +1824,7 @@ export class TransactionIntegrationValidatorService {
    * Get integration validation report by ID
    */
   async getValidationReport(
-    reportId: string,
+    _reportId: string,
   ): Promise<IntegrationValidationReport | null> {
     // Implementation would retrieve from persistent storage
     return null;

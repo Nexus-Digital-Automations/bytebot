@@ -1220,7 +1220,7 @@ This critical audit event requires validation. Please analyze:
   }
 
   private async mockParlantAuditResponse(
-    prompt: string,
+    _prompt: string,
     _entry: AuditTrailEntry,
   ): Promise<{
     _response: string;

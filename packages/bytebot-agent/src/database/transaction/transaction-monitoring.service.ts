@@ -27,7 +27,7 @@ import {
   ParlantTransactionManagerService,
   TransactionMetadata,
   TransactionState,
-  TransactionPerformanceMetrics,
+  _TransactionPerformanceMetrics,
   TransactionExecutionResult,
 } from './parlant-transaction-manager.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
@@ -364,7 +364,7 @@ export class TransactionMonitoringService {
   async startTransactionMonitoring(
     transactionId: string,
     transactionMetadata: TransactionMetadata,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<void> {
     this.logger.log(
       `Starting real-time monitoring for transaction ${transactionId}`,
@@ -463,7 +463,7 @@ export class TransactionMonitoringService {
   async generateTransactionPerformanceReport(
     transactionId: string,
     _result: TransactionExecutionResult,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<PerformanceMonitoringReport> {
     const transactionMetrics = this.historicalMetrics.filter(
       (m) => m.transactionId === transactionId,
@@ -505,7 +505,7 @@ export class TransactionMonitoringService {
    * Generate real-time performance dashboard
    */
   async generateRealTimeDashboard(
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<PerformanceMonitoringReport> {
     const currentTime = new Date();
     const dashboardPeriod = 15 * 60 * 1000; // 15 minutes
@@ -695,7 +695,7 @@ export class TransactionMonitoringService {
    */
   private async generateBottleneckRecommendations(
     type: BottleneckType,
-    metrics: RealTimeTransactionMetrics,
+    _metrics: RealTimeTransactionMetrics,
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
 
@@ -957,7 +957,7 @@ export class TransactionMonitoringService {
 
   private calculatePerformanceImpact(
     metrics: RealTimeTransactionMetrics,
-    type: BottleneckType,
+    _type: BottleneckType,
   ): PerformanceImpact {
     return {
       throughputReduction: 25,
@@ -1106,7 +1106,7 @@ export class TransactionMonitoringService {
   }
 
   private calculateSLACompliance(
-    metrics: RealTimeTransactionMetrics[],
+    _metrics: RealTimeTransactionMetrics[],
   ): SLAComplianceMetrics[] {
     // Implementation would calculate actual SLA compliance
     return [];
@@ -1161,15 +1161,15 @@ export class TransactionMonitoringService {
   }
 
   private async generateGeneralOptimizationRecommendations(
-    metrics: RealTimeTransactionMetrics[],
+    _metrics: RealTimeTransactionMetrics[],
   ): Promise<OptimizationRecommendation[]> {
     // Implementation would generate general optimization recommendations
     return [];
   }
 
   private async generateRealtimeRecommendations(
-    activeTransactions: RealTimeTransactionMetrics[],
-    recentBottlenecks: PerformanceBottleneck[],
+    _activeTransactions: RealTimeTransactionMetrics[],
+    _recentBottlenecks: PerformanceBottleneck[],
   ): Promise<OptimizationRecommendation[]> {
     // Implementation would generate real-time recommendations
     return [];
@@ -1242,7 +1242,7 @@ export class TransactionMonitoringService {
   }
 
   private async checkPerformanceThresholds(
-    metrics: RealTimeTransactionMetrics,
+    _metrics: RealTimeTransactionMetrics,
   ): Promise<void> {
     // Implementation would check performance thresholds and generate alerts
   }

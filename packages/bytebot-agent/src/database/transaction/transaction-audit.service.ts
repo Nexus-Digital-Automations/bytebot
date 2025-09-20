@@ -26,11 +26,11 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
-  TransactionMetadata,
+  _TransactionMetadata,
   TransactionState,
-  TransactionExecutionResult,
+  _TransactionExecutionResult,
   TransactionEvent,
-  TransactionAuditEntry,
+  _TransactionAuditEntry,
 } from './parlant-transaction-manager.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
 import * as crypto from 'crypto';
@@ -595,7 +595,7 @@ export class TransactionAuditService {
    */
   async searchAuditTrail(
     query: AuditTrailQuery,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<AuditTrailSearchResult> {
     const queryId = this.generateQueryId();
     const startTime = Date.now();
@@ -697,7 +697,7 @@ export class TransactionAuditService {
    */
   async generateComplianceReport(
     config: ComplianceReportConfig,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<ComplianceReport> {
     const reportGenerationStart = Date.now();
 
@@ -1305,7 +1305,7 @@ export class TransactionAuditService {
 
   private generateExecutiveSummary(
     entries: ComprehensiveAuditEntry[],
-    regulations: ComplianceRegulation[],
+    _regulations: ComplianceRegulation[],
   ): ComplianceExecutiveSummary {
     const criticalViolations = this.complianceViolations.filter(
       (v) => v.severity === 'CRITICAL',
@@ -1332,8 +1332,8 @@ export class TransactionAuditService {
   }
 
   private calculateComplianceMetrics(
-    entries: ComprehensiveAuditEntry[],
-    regulations: ComplianceRegulation[],
+    _entries: ComprehensiveAuditEntry[],
+    _regulations: ComplianceRegulation[],
   ): ComplianceMetrics {
     return {
       regulationMetrics: new Map(),
@@ -1364,9 +1364,9 @@ export class TransactionAuditService {
   }
 
   private async generateComplianceRecommendations(
-    metrics: ComplianceMetrics,
-    violations: ComplianceViolation[],
-    riskAssessment: ComplianceRiskAssessment,
+    _metrics: ComplianceMetrics,
+    _violations: ComplianceViolation[],
+    _riskAssessment: ComplianceRiskAssessment,
   ): Promise<ComplianceRecommendation[]> {
     return [];
   }
@@ -1428,18 +1428,18 @@ export class TransactionAuditService {
     return actionItems;
   }
 
-  private convertToCSV(entries: ComprehensiveAuditEntry[]): string {
+  private convertToCSV(_entries: ComprehensiveAuditEntry[]): string {
     // Implementation would convert entries to CSV format
     return 'CSV data would be generated here';
   }
 
-  private convertToXML(entries: ComprehensiveAuditEntry[]): string {
+  private convertToXML(_entries: ComprehensiveAuditEntry[]): string {
     // Implementation would convert entries to XML format
     return '<audit-trail>XML data would be generated here</audit-trail>';
   }
 
   private async generatePDFReport(
-    searchResult: AuditTrailSearchResult,
+    _searchResult: AuditTrailSearchResult,
   ): Promise<string> {
     // Implementation would generate PDF report
     return 'PDF data would be generated here';

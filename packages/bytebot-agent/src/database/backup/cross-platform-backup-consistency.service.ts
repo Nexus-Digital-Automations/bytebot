@@ -1537,7 +1537,7 @@ Please analyze this cross-platform backup consistency validation and provide:
    * Mock PARLANT consistency response (replace with actual PARLANT integration)
    */
   private async mockParlantConsistencyResponse(
-    prompt: string,
+    _prompt: string,
     _result: ConsistencyValidationResult,
     _request: CrossPlatformConsistencyRequest,
   ): Promise<{

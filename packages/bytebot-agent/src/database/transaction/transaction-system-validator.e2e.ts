@@ -31,14 +31,14 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import {
   TransactionIntegrationValidatorService,
-  IntegrationTestType,
-  IntegrationValidationReport,
-  IntegrationTestResult,
+  _IntegrationTestType,
+  _IntegrationValidationReport,
+  _IntegrationTestResult,
 } from './transaction-integration-validator.service';
 import {
   ParlantTransactionManagerService,
   TransactionMetadata,
-  TransactionOperation,
+  _TransactionOperation,
   TransactionOperationType,
   TransactionState,
   TransactionIsolationLevel,
@@ -52,7 +52,7 @@ import {
 } from './distributed-transaction-coordinator.service';
 import {
   TransactionMonitoringService,
-  RealTimeTransactionMetrics,
+  _RealTimeTransactionMetrics,
   TransactionMonitoringContext,
 } from './transaction-monitoring.service';
 import {
@@ -63,7 +63,7 @@ import {
 import {
   DeadlockDetectionService,
   LockInfo,
-  DeadlockCycle,
+  _DeadlockCycle,
 } from './deadlock-detection.service';
 import {
   ParlantValidatedDatabaseService,

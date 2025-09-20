@@ -19,7 +19,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigService as _ConfigService } from '@nestjs/config';
 
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -98,7 +98,7 @@ export interface OptimizationThresholds {
 export interface CacheEntry<T> {
   readonly key: string;
   readonly value: T;
-  readonly _level: $1,
+  readonly level: CacheLevel;
 }
 
 /**
@@ -132,7 +132,7 @@ export interface CacheEntryMetadata {
  * Performance metrics for cache analysis
  */
 export interface CachePerformanceMetrics {
-  readonly _level: $1,
+  readonly level: CacheLevel;
 }
 
 /**
@@ -151,7 +151,7 @@ export interface LatencyPercentiles {
  */
 export interface PredictiveCacheAnalysis {
   readonly patterns: CachePattern[];
-  readonly _recommendations: $1,
+  readonly recommendations: OptimizationOpportunity[];
 }
 
 /**
@@ -200,7 +200,7 @@ export interface EstimatedImpact {
  * Cache warming candidate
  */
 export interface WarmingCandidate {
-  readonly _cacheKey: $1,
+  readonly cacheKey: string;
 }
 
 /**
@@ -272,9 +272,8 @@ export class ParlantPerformanceOptimizationService {
 
   // Predictive analysis
   private cachePatterns: CachePattern[] = [];
-  private _recommendations: $1,
-    private readonly eventEmitter: EventEmitter2,
-  ) {
+
+  constructor(private readonly eventEmitter: EventEmitter2) {
     this.logger.log(
       '⚡ PARLANT Performance Optimization Service - MAXIMUM IMPLEMENTATION',
     );
@@ -1303,7 +1302,7 @@ export class ParlantPerformanceOptimizationService {
     return { expectedHitRateImprovement: 0.05 }; // Implementation would predict performance
   }
 
-  private analyzeAccessPattern(_cacheKey: $1,
+  private analyzeAccessPattern(_cacheKey: string): any {
     return { frequency: 'MEDIUM' }; // Implementation would analyze access patterns
   }
 
@@ -1313,11 +1312,11 @@ export class ParlantPerformanceOptimizationService {
     return { utility: 0.7 }; // Implementation would predict cache utility
   }
 
-  private updateCacheHitMetrics(level: CacheLevel, accessTime: number): void {
+  private updateCacheHitMetrics(_level: CacheLevel, _accessTime: number): void {
     // Implementation would update hit metrics
   }
 
-  private updateCacheMissMetrics(searchTime: number): void {
+  private updateCacheMissMetrics(_searchTime: number): void {
     // Implementation would update miss metrics
   }
 
@@ -1377,10 +1376,12 @@ export class ParlantPerformanceOptimizationService {
     return { underutilizedEntries: [], hotEntries: [] };
   }
 
-  private async demoteCacheEntry(_cacheKey: $1,
+  private async demoteCacheEntry(_cacheKey: string): Promise<void> {
+    // Implementation would demote cache entry
   }
 
-  private async promoteCacheEntry(_cacheKey: $1,
+  private async promoteCacheEntry(_cacheKey: string): Promise<void> {
+    // Implementation would promote cache entry
   }
 
   private async performPredictiveAnalysis(): Promise<void> {
@@ -1464,12 +1465,12 @@ export class ParlantPerformanceOptimizationService {
 
 interface CacheAccessRecord {
   timestamp: Date;
-  _level: $1,
+  _level: $1;
 }
 
 interface OptimizationResult {
   optimizationId: string;
   timestamp: Date;
   currentMetrics: any;
-  _opportunities: $1,
+  opportunities: OptimizationOpportunity[];
 }

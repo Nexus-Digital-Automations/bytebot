@@ -16,7 +16,7 @@
  * @since Bytebot API Hardening Phase 1
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable, throwError, timer } from 'rxjs';
 import { mergeMap, retryWhen, tap } from 'rxjs/operators';
@@ -46,14 +46,14 @@ export interface RetryConfig {
 
 /** Safe error message extraction */
 function getErrorMessage(_error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
+  if (_error instanceof Error) {
+    return _error.message;
   }
-  if (typeof error === 'string') {
-    return error;
+  if (typeof _error === 'string') {
+    return _error;
   }
   try {
-    return JSON.stringify(error);
+    return JSON.stringify(_error);
   } catch {
     return '[Unserializable Error]';
   }
@@ -195,8 +195,8 @@ export class RetryService {
 
         return result;
       } catch (_error: unknown) {
-        lastError = error;
-        const errorMessage = getErrorMessage(error);
+        lastError = _error;
+        const errorMessage = getErrorMessage(_error);
         retryState.errors.push(errorMessage);
 
         this.logger.warn(
@@ -204,16 +204,16 @@ export class RetryService {
           {
             operationId,
             attempt,
-            _error: errorMessage,
+            error: errorMessage,
           },
         );
 
         // Check if we should retry this error
-        if (!finalConfig.retryCondition(error, attempt)) {
+        if (!finalConfig.retryCondition(_error, attempt)) {
           this.logger.debug('Error not retryable, stopping attempts', {
             operationId,
             attempt,
-            _error: errorMessage,
+            error: errorMessage,
           });
           break;
         }
@@ -286,7 +286,7 @@ export class RetryService {
               {
                 operationId,
                 attempt,
-                _error: errorMessage,
+                error: errorMessage,
               },
             );
 
@@ -306,7 +306,7 @@ export class RetryService {
               this.logger.debug('Observable error not retryable', {
                 operationId,
                 attempt,
-                _error: errorMessage,
+                error: errorMessage,
               });
               return throwError(() => error as Error);
             }
@@ -397,7 +397,7 @@ export class RetryService {
       backoffMultiplier: 2,
       retryCondition: (_error: unknown): boolean => {
         // Retry on connection errors, timeouts, and temporary failures
-        const errorMessage = getErrorMessage(error).toLowerCase();
+        const errorMessage = getErrorMessage(_error).toLowerCase();
         return (
           errorMessage.includes('connection') ||
           errorMessage.includes('timeout') ||
@@ -418,7 +418,7 @@ export class RetryService {
       backoffMultiplier: 2,
       retryCondition: (_error: unknown): boolean => {
         // Retry on 5xx errors, network errors, timeouts
-        const errorObj = error as {
+        const errorObj = _error as {
           status?: number;
           response?: { status?: number };
           code?: string;
@@ -482,7 +482,7 @@ export class RetryService {
    * Default retry condition - retry most errors except explicit business logic errors
    */
   private defaultRetryCondition(_error: unknown, _attempt: number): boolean {
-    const errorObj = error as {
+    const errorObj = _error as {
       status?: number;
       retryable?: boolean;
     };

@@ -11,7 +11,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash, createCipher, createDecipher } from 'crypto';
+import { createHash, createCipher, _createDecipher } from 'crypto';
 
 /**
  * Core audit trail interfaces and types
@@ -997,7 +997,7 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
     record.encryptionKey = encryptionKey;
 
     // Encrypt sensitive fields
-    const cipher = createCipher('aes-256-cbc', encryptionKey);
+    const _cipher = createCipher('aes-256-cbc', encryptionKey);
 
     // Store encrypted key separately
     this.encryptionKeys.set(record.id, encryptionKey);
@@ -1311,7 +1311,7 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
         break;
       case 'severity':
         {
-          const severityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
+          const _severityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
           break;
         }
         comparison = severityOrder[a.severity] - severityOrder[b.severity];
@@ -1459,12 +1459,12 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
   }
 
   // Implementation methods
-  private async checkComplianceViolations(record: AuditRecord): Promise<void> {
+  private async checkComplianceViolations(_record: AuditRecord): Promise<void> {
     // Check for compliance violations in the audit record
     // This would implement specific compliance checks
   }
 
-  private async processRealTimeMonitoring(record: AuditRecord): Promise<void> {
+  private async processRealTimeMonitoring(_record: AuditRecord): Promise<void> {
     // Process real-time monitoring alerts
     // This would implement real-time alerting logic
   }
@@ -1527,7 +1527,9 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
   }
 
   // Additional utility methods
-  private getFrameworkRequirements(framework: string): ComplianceRequirement[] {
+  private getFrameworkRequirements(
+    _framework: string,
+  ): ComplianceRequirement[] {
     // Return framework-specific requirements
     return [];
   }
@@ -1560,7 +1562,7 @@ export class RiskAuditTrailComplianceService extends EventEmitter {
     ];
   }
 
-  private generateComplianceTables(records: AuditRecord[]): Table[] {
+  private generateComplianceTables(_records: AuditRecord[]): Table[] {
     return [
       {
         title: 'Compliance Status by Framework',

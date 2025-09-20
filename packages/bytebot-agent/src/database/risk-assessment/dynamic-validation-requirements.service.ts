@@ -37,17 +37,17 @@ import {
   TimeoutSettings,
   RetryPolicy,
   EmergencyProcedure,
-  ConversationalContextRequirement,
-  EscalationProcedure,
-  ComplianceRequirementAssessment,
+  _ConversationalContextRequirement,
+  _EscalationProcedure,
+  _ComplianceRequirementAssessment,
   RegulatoryFramework,
 } from './database-risk-assessment.service';
 import {
   MLRiskPrediction,
   BehaviorPatternAnalysis,
   AnomalyType,
-  AnomalySeverity,
-  MLActionType,
+  _AnomalySeverity,
+  _MLActionType,
 } from './intelligent-risk-scoring.service';
 import { DatabaseOperationMetadata } from '../parlant-validated-database.service';
 import { ParlantUserContext } from '@shared/types/parlant-integration.types';
@@ -319,8 +319,8 @@ export class DynamicValidationRequirementsService {
   private async computeBaseRequirements(
     _context: ValidationRequirementContext,
   ): Promise<DynamicValidationRequirements> {
-    const riskLevel = context.riskAssessment.riskLevel;
-    const riskScore = context.riskAssessment.overallRiskScore;
+    const _riskLevel = context.riskAssessment._riskLevel;
+    const _riskScore = context.riskAssessment.overallRiskScore;
 
     // Determine conversational validation requirements
     const conversationalValidation =
@@ -424,7 +424,7 @@ export class DynamicValidationRequirementsService {
     _context: ValidationRequirementContext,
   ): ApprovalWorkflowRequirement {
     const riskLevel = context.riskAssessment.riskLevel;
-    const baseRule =
+    const _baseRule =
       this.determinationRules.approvalRules.riskLevelMappings[riskLevel];
 
     let required = false;
@@ -951,7 +951,7 @@ export class DynamicValidationRequirementsService {
   /**
    * Calculate user trust factor from context
    */
-  private calculateUserTrustFactor(userContext: ParlantUserContext): number {
+  private calculateUserTrustFactor(_userContext: ParlantUserContext): number {
     // Placeholder implementation - would calculate based on user history
     return 0.75;
   }
@@ -1336,7 +1336,7 @@ export class DynamicValidationRequirementsService {
 
   private reduceConversationalRequirements(
     requirement: ConversationalValidationRequirement,
-    reductionFactor: number,
+    _reductionFactor: number,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
@@ -1344,7 +1344,7 @@ export class DynamicValidationRequirementsService {
 
   private enhanceConversationalRequirements(
     requirement: ConversationalValidationRequirement,
-    enhancementFactor: number,
+    _enhancementFactor: number,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
@@ -1352,7 +1352,7 @@ export class DynamicValidationRequirementsService {
 
   private adjustForBusinessImpact(
     requirement: ConversationalValidationRequirement,
-    businessImpact: BusinessImpactLevel,
+    _businessImpact: BusinessImpactLevel,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
@@ -1360,7 +1360,7 @@ export class DynamicValidationRequirementsService {
 
   private adjustForTemporalContext(
     requirement: ConversationalValidationRequirement,
-    temporalContext: TemporalContextFactors,
+    _temporalContext: TemporalContextFactors,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
@@ -1368,7 +1368,7 @@ export class DynamicValidationRequirementsService {
 
   private adjustForMLPrediction(
     requirement: ConversationalValidationRequirement,
-    mlPrediction: MLRiskPrediction,
+    _mlPrediction: MLRiskPrediction,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
@@ -1376,14 +1376,14 @@ export class DynamicValidationRequirementsService {
 
   private adjustForBehaviorAnalysis(
     requirement: ConversationalValidationRequirement,
-    behaviorAnalysis: BehaviorPatternAnalysis,
+    _behaviorAnalysis: BehaviorPatternAnalysis,
   ): ConversationalValidationRequirement {
     // Placeholder implementation
     return requirement;
   }
 
   private evaluateScalingCondition(
-    condition: ScalingCondition,
+    _condition: ScalingCondition,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1392,7 +1392,7 @@ export class DynamicValidationRequirementsService {
 
   private applyScalingFactor(
     requirements: DynamicValidationRequirements,
-    factor: ScalingFactor,
+    _factor: ScalingFactor,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1400,7 +1400,7 @@ export class DynamicValidationRequirementsService {
   }
 
   private shouldApplyContextualModifier(
-    modifier: ContextualModifier,
+    _modifier: ContextualModifier,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1409,7 +1409,7 @@ export class DynamicValidationRequirementsService {
 
   private applyContextualModifier(
     requirements: DynamicValidationRequirements,
-    modifier: ContextualModifier,
+    _modifier: ContextualModifier,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1417,7 +1417,7 @@ export class DynamicValidationRequirementsService {
   }
 
   private evaluateBypassCondition(
-    condition: IntelligentBypassCondition,
+    _condition: IntelligentBypassCondition,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1426,7 +1426,7 @@ export class DynamicValidationRequirementsService {
 
   private applyIntelligentBypass(
     requirements: DynamicValidationRequirements,
-    condition: IntelligentBypassCondition,
+    _condition: IntelligentBypassCondition,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1434,7 +1434,7 @@ export class DynamicValidationRequirementsService {
   }
 
   private shouldApplyOptimizationStrategy(
-    strategy: OptimizationStrategy,
+    _strategy: OptimizationStrategy,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1443,7 +1443,7 @@ export class DynamicValidationRequirementsService {
 
   private applyOptimizationStrategy(
     requirements: DynamicValidationRequirements,
-    strategy: OptimizationStrategy,
+    _strategy: OptimizationStrategy,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1451,7 +1451,7 @@ export class DynamicValidationRequirementsService {
   }
 
   private canAutomateRequirement(
-    opportunity: AutomationOpportunity,
+    _opportunity: AutomationOpportunity,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1460,7 +1460,7 @@ export class DynamicValidationRequirementsService {
 
   private automateRequirement(
     requirements: DynamicValidationRequirements,
-    opportunity: AutomationOpportunity,
+    _opportunity: AutomationOpportunity,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1468,7 +1468,7 @@ export class DynamicValidationRequirementsService {
   }
 
   private shouldApplyRealTimeAdjustment(
-    rule: RealTimeAdjustmentRule,
+    _rule: RealTimeAdjustmentRule,
     _context: ValidationRequirementContext,
   ): boolean {
     // Placeholder implementation
@@ -1477,7 +1477,7 @@ export class DynamicValidationRequirementsService {
 
   private applyRealTimeAdjustment(
     requirements: DynamicValidationRequirements,
-    rule: RealTimeAdjustmentRule,
+    _rule: RealTimeAdjustmentRule,
     _context: ValidationRequirementContext,
   ): DynamicValidationRequirements {
     // Placeholder implementation
@@ -1485,9 +1485,9 @@ export class DynamicValidationRequirementsService {
   }
 
   private async trackRequirementGeneration(
-    requirements: DynamicValidationRequirements,
+    _requirements: DynamicValidationRequirements,
     _context: ValidationRequirementContext,
-    computationId: string,
+    _computationId: string,
   ): Promise<void> {
     // Placeholder implementation for tracking requirement effectiveness
   }

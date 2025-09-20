@@ -524,7 +524,7 @@ export class RiskBasedApprovalWorkflowService extends EventEmitter {
     riskLevel: string,
     _request: ApprovalRequest,
   ): string[] {
-    const thresholds = this.configuration.riskThresholds;
+    const _thresholds = this.configuration.riskThresholds;
     const approvers: string[] = [];
 
     switch (riskLevel) {

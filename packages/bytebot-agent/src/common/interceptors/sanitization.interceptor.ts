@@ -128,13 +128,13 @@ const CONTROL_CHARS_PATTERN = new RegExp(
  */
 const SECURITY_PATTERNS = {
   xss: [
-    /<script[\s\S]*?>[\s\S]*?</script>/gi,
+    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
     /javascript\s*:/gi,
     /on\w+\s*=\s*["'].*?["']/gi,
     /<iframe[\s\S]*?>/gi,
     /<object[\s\S]*?>/gi,
     /<embed[\s\S]*?>/gi,
-    /data\s*:\s*text/html/gi,
+    /data\s*:\s*text\/html/gi,
     /vbscript\s*:/gi,
     /eval\s*\(/gi,
     /expression\s*\(/gi,
@@ -145,7 +145,7 @@ const SECURITY_PATTERNS = {
     /(script|vbscript|onload|onerror|onclick|onmouseover|onfocus|onblur)/gi,
     /(\\\\['"]|\\\\\\\\|\\\\[nrtbf])/gi,
   ],
-  pathTraversal: [/\.\.//gi, /%2e%2e%2f|%2e%2e%5c/gi, /\.\.\/gi],
+  pathTraversal: [/\.\.\//gi, /%2e%2e%2f|%2e%2e%5c/gi, /\.\.\//gi],
   commandInjection: [
     /[;&|`$(){}\\[\\]]/g,
     /(rm|del|copy|move|wget|curl|nc|netcat|telnet|ssh|ftp)/gi,

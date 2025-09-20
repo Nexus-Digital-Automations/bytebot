@@ -24,7 +24,17 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      'eslint.config.mjs',
+      'dist/**',
+      'temp_build/**',
+      'build/**',
+      'node_modules/**',
+      '*.js',
+      '!src/**/*.js', // Allow JS files in src
+      'test-*.js',
+      'fix-*.js',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
@@ -64,6 +74,25 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  // Script file specific rules
+  {
+    files: [
+      'scripts/**/*.js',
+      '*.js',
+    ],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_'
+        },
+      ],
     },
   },
 );

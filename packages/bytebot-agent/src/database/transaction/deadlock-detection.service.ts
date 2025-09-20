@@ -25,10 +25,10 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantTransactionManagerService,
-  TransactionMetadata,
-  TransactionState,
-  TransactionExecutionResult,
-  DeadlockInfo,
+  _TransactionMetadata,
+  _TransactionState,
+  _TransactionExecutionResult,
+  _DeadlockInfo,
   DeadlockChainNode,
   DeadlockResolutionStrategy,
 } from './parlant-transaction-manager.service';
@@ -643,7 +643,7 @@ export class DeadlockDetectionService {
   async generateDeadlockAnalysisReport(
     periodStart: Date,
     periodEnd: Date,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<DeadlockAnalysisReport> {
     const reportId = this.generateReportId();
 
@@ -980,7 +980,7 @@ export class DeadlockDetectionService {
 
   private async selectVictimTransaction(
     deadlock: DeadlockCycle,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<string> {
     // Use recommended victim from cycle analysis
     return deadlock.recommendedVictim;
@@ -989,7 +989,7 @@ export class DeadlockDetectionService {
   private async createDeadlockNotification(
     deadlock: DeadlockCycle,
     victim: string,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<DeadlockUserNotification> {
     const affectedUsers = await this.getAffectedUsers(
       deadlock.involvedTransactions,
@@ -1015,8 +1015,8 @@ export class DeadlockDetectionService {
 
   private async createRecoveryAction(
     victim: string,
-    deadlock: DeadlockCycle,
-    userContext: ParlantUserContext,
+    _deadlock: DeadlockCycle,
+    _userContext: ParlantUserContext,
   ): Promise<RecoveryAction> {
     return {
       actionId: `recovery_${Date.now()}_${victim}`,
@@ -1102,16 +1102,16 @@ export class DeadlockDetectionService {
   }
 
   // Placeholder methods for complete implementation
-  private calculateTransactionPriority(transactionId: string): number {
+  private calculateTransactionPriority(_transactionId: string): number {
     return Math.floor(Math.random() * 100);
   }
 
-  private getTransactionStartTime(transactionId: string): Date {
+  private getTransactionStartTime(_transactionId: string): Date {
     return new Date(Date.now() - Math.random() * 60000);
   }
 
   private calculateBusinessImportance(
-    transactionId: string,
+    _transactionId: string,
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     return 'MEDIUM';
   }
@@ -1132,23 +1132,23 @@ export class DeadlockDetectionService {
     return locks[0]?.holdingQuery || 'Unknown operation';
   }
 
-  private calculateBusinessImpact(transactionId: string): number {
+  private calculateBusinessImpact(_transactionId: string): number {
     return Math.floor(Math.random() * 100);
   }
 
   private calculateRetryComplexity(
-    transactionId: string,
+    _transactionId: string,
   ): 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'CRITICAL' {
     return 'MODERATE';
   }
 
   private calculateUserImpact(
-    transactionId: string,
+    _transactionId: string,
   ): 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'SEVERE' {
     return 'MODERATE';
   }
 
-  private calculateTotalCost(transactionId: string): number {
+  private calculateTotalCost(_transactionId: string): number {
     return Math.floor(Math.random() * 100);
   }
 
@@ -1282,7 +1282,7 @@ export class DeadlockDetectionService {
 
   private generateTrendAnalysis(
     deadlocks: DeadlockCycle[],
-    resolutions: DeadlockResolutionResult[],
+    _resolutions: DeadlockResolutionResult[],
   ): DeadlockTrendAnalysis {
     return {
       frequencyTrend: 'STABLE',
@@ -1293,7 +1293,7 @@ export class DeadlockDetectionService {
   }
 
   private generateResolutionAnalysis(
-    resolutions: DeadlockResolutionResult[],
+    _resolutions: DeadlockResolutionResult[],
   ): ResolutionAnalysis {
     return {
       strategyEffectiveness: new Map(),
@@ -1366,7 +1366,7 @@ export class DeadlockDetectionService {
     ].join('\n');
   }
 
-  private async getAffectedUsers(transactionIds: string[]): Promise<string[]> {
+  private async getAffectedUsers(_transactionIds: string[]): Promise<string[]> {
     // Implementation would get actual affected users
     return ['user1', 'user2'];
   }

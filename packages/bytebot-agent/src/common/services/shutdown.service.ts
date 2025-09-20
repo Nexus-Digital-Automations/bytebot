@@ -19,6 +19,7 @@ import {
   Injectable,
   OnModuleDestroy,
   OnApplicationShutdown,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -492,7 +493,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       return {
         taskName,
         success: false,
-        _error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

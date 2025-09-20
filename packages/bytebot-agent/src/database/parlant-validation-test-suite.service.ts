@@ -32,7 +32,7 @@ import {
   ValidationMode,
   ConversationalValidationRequest,
   EnhancedValidationResponse,
-  ValidationPerformanceMetrics,
+  _ValidationPerformanceMetrics,
 } from './parlant-conversational-validation-engine.service';
 
 import {
@@ -745,8 +745,8 @@ export class ParlantValidationTestSuiteService {
 
     try {
       const conversationConfig = config.conversationTestConfig;
-      let testsPassed = 0;
-      let totalTests = 0;
+      let _testsPassed = 0;
+      let _totalTests = 0;
 
       // Test 1: Multi-modal validation
       let multiModalSuccess = true;
@@ -802,14 +802,14 @@ export class ParlantValidationTestSuiteService {
               // Validate that response matches expected risk handling
               if (this.validateRiskResponse(riskClass, response)) {
                 correctValidations++;
-                testsPassed++;
+                _testsPassed++;
               }
             } catch (error) {
               this.logger.warn(`Risk validation test failed for ${riskClass}`, {
                 _error: error instanceof Error ? error.message : String(error),
               });
             }
-            totalTests++;
+            _totalTests++;
           }
         }
 
@@ -967,7 +967,7 @@ export class ParlantValidationTestSuiteService {
 
       // Ramp up gradually
       const rampUpTime = loadConfig.rampUpTimeSeconds * 1000;
-      const requestsPerSecond = maxConcurrent / loadConfig.rampUpTimeSeconds;
+      const _requestsPerSecond = maxConcurrent / loadConfig.rampUpTimeSeconds;
 
       while (Date.now() - startTime < testDuration * 1000) {
         const currentTime = Date.now() - startTime;
@@ -1619,19 +1619,15 @@ export class ParlantValidationTestSuiteService {
   ): Promise<number> {
     const startTime = Date.now();
 
-    try {
-      await this.validationEngine.validateFunctionExecution(
-        request.functionName,
-        {},
-        request.operationMetadata,
-        request.userContext,
-        request.validationMode,
-      );
+    await this.validationEngine.validateFunctionExecution(
+      _request.functionName,
+      {},
+      _request.operationMetadata,
+      _request.userContext,
+      _request.validationMode,
+    );
 
-      return Date.now() - startTime;
-    } catch (error) {
-      throw error;
-    }
+    return Date.now() - startTime;
   }
 
   // Additional helper methods
@@ -1704,7 +1700,7 @@ export class ParlantValidationTestSuiteService {
     return ((missTestTime - hitTestTime) / missTestTime) * 100;
   }
 
-  private calculateMemoryEfficiency(cacheStats: any): number {
+  private calculateMemoryEfficiency(_cacheStats: any): number {
     // Simulate memory efficiency calculation
     return 0.8; // 80% efficiency
   }

@@ -979,7 +979,7 @@ export class BrowserSessionSecurityMiddleware implements NestMiddleware {
     }
 
     // Try to extract from path
-    const pathMatch = req.path.match(//sessions/([^/]+)/);
+    const pathMatch = req.path.match(/\/sessions\/([^/]+)/);
     if (pathMatch) {
       return pathMatch[1];
     }
@@ -1543,12 +1543,12 @@ export class BrowserSessionSecurityMiddleware implements NestMiddleware {
 
     if (userAgent.includes('Chrome')) {
       name = 'Chrome';
-      const match = userAgent.match(/Chrome/([0-9.]+)/);
+      const match = userAgent.match(/Chrome\/([0-9.]+)/);
       version = match ? match[1] : 'unknown';
       engine = 'Blink';
     } else if (userAgent.includes('Firefox')) {
       name = 'Firefox';
-      const match = userAgent.match(/Firefox/([0-9.]+)/);
+      const match = userAgent.match(/Firefox\/([0-9.]+)/);
       version = match ? match[1] : 'unknown';
       engine = 'Gecko';
     }

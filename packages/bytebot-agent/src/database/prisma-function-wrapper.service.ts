@@ -535,7 +535,7 @@ export class PrismaFunctionWrapperService {
       progressCallback?: (progress: number) => void;
     } = {},
   ): Promise<FunctionExecutionResult<T>> {
-    const { maxRecords = 1000, requireConfirmation = true } = options;
+    const { maxRecords = 1000, _requireConfirmation = true } = options;
 
     // Estimate affected records
     const estimatedCount = await this.estimateAffectedRecords(
@@ -737,7 +737,7 @@ export class PrismaFunctionWrapperService {
       }
     > = {};
 
-    for (const [functionName, entry] of registry.entries()) {
+    for (const [_functionName, entry] of registry.entries()) {
       if (entry.metadata.category === 'PRISMA') {
         const metadata = entry.metadata as PrismaOperationMetadata;
         const modelName = metadata.modelName;

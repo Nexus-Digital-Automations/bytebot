@@ -23,9 +23,9 @@ import {
   FunctionExecutionResult,
 } from './universal-function-wrapper.service';
 import {
-  DatabaseOperationMetadata,
+  _DatabaseOperationMetadata,
   RiskLevel,
-  ParlantUserContext,
+  _ParlantUserContext,
 } from './parlant-validated-database.service';
 
 // ===== PERFORMANCE MONITORING INTERFACES =====
@@ -528,7 +528,7 @@ export class PerformanceMonitoringOptimizationService {
     operation: 'HIT' | 'MISS' | 'SET' | 'EVICT',
     key: string,
     responseTime: number,
-    dataSize?: number,
+    _dataSize?: number,
   ): Promise<void> {
     const timestamp = new Date();
 
@@ -710,7 +710,7 @@ export class PerformanceMonitoringOptimizationService {
    */
   private async generateOptimizationRecommendations(
     metrics: PerformanceMetric[],
-    bottleneckAnalysis: BottleneckAnalysis,
+    _bottleneckAnalysis: BottleneckAnalysis,
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
 
@@ -1191,7 +1191,7 @@ export class PerformanceMonitoringOptimizationService {
   }
 
   private checkThresholdViolation(
-    metric: PerformanceMetric,
+    _metric: PerformanceMetric,
   ): PerformanceAlert | null {
     // TODO: Implement threshold violation checking
     return null;
@@ -1249,8 +1249,8 @@ export class PerformanceMonitoringOptimizationService {
   }
 
   private async generateTrendAnalysis(
-    metrics: PerformanceMetric[],
-    timeRange: DateRange,
+    _metrics: PerformanceMetric[],
+    _timeRange: DateRange,
   ): Promise<TrendAnalysis> {
     // TODO: Implement sophisticated trend analysis
     return {
@@ -1270,7 +1270,7 @@ export class PerformanceMonitoringOptimizationService {
   }
 
   private async generateBottleneckAnalysis(
-    metrics: PerformanceMetric[],
+    _metrics: PerformanceMetric[],
   ): Promise<BottleneckAnalysis> {
     // TODO: Implement bottleneck analysis
     return {

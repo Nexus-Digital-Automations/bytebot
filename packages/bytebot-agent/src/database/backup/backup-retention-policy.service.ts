@@ -1001,7 +1001,7 @@ Please analyze this backup retention policy ${request.action.toLowerCase()} requ
    * Mock PARLANT validation (replace with actual PARLANT integration)
    */
   private async mockParlantValidation(
-    prompt: string,
+    _prompt: string,
     _request: ParlantPolicyValidationRequest,
   ): Promise<{
     _response: string;

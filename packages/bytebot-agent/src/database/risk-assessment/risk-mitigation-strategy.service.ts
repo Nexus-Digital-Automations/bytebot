@@ -33,21 +33,21 @@ import {
   MonitoringEnhancement,
   RollbackProcedure,
   EscalationTrigger,
-  MitigationCondition,
-  ComplianceRequirementAssessment,
+  _MitigationCondition,
+  _ComplianceRequirementAssessment,
   RegulatoryFramework,
 } from './database-risk-assessment.service';
 import {
   MLRiskPrediction,
   BehaviorPatternAnalysis,
-  AnomalyType,
-  AnomalySeverity,
-  MLActionType,
+  _AnomalyType,
+  _AnomalySeverity,
+  _MLActionType,
   MLRecommendedAction,
 } from './intelligent-risk-scoring.service';
 import {
   DynamicValidationRequirements,
-  ValidationRequirementContext,
+  _ValidationRequirementContext,
   BusinessImpactLevel,
 } from './dynamic-validation-requirements.service';
 import { DatabaseOperationMetadata } from '../parlant-validated-database.service';
@@ -559,7 +559,7 @@ export class RiskMitigationStrategyService {
    */
   private async generateAutomatedMitigationActions(
     _context: MitigationExecutionContext,
-    mitigationType: MitigationType,
+    _mitigationType: MitigationType,
   ): Promise<AutomatedMitigationAction[]> {
     const actions: AutomatedMitigationAction[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -608,7 +608,7 @@ export class RiskMitigationStrategyService {
    */
   private async generateManualMitigationSteps(
     _context: MitigationExecutionContext,
-    mitigationType: MitigationType,
+    _mitigationType: MitigationType,
   ): Promise<ManualMitigationStep[]> {
     const steps: ManualMitigationStep[] = [];
     const riskLevel = context.riskAssessment.riskLevel;
@@ -1389,21 +1389,21 @@ export class RiskMitigationStrategyService {
   // These methods contain simplified implementations for the comprehensive framework
 
   private generateBehaviorBasedActions(
-    behaviorAnalysis: BehaviorPatternAnalysis,
+    _behaviorAnalysis: BehaviorPatternAnalysis,
   ): AutomatedMitigationAction[] {
     // Placeholder implementation
     return [];
   }
 
   private generateComplianceBasedActions(
-    complianceContext: ComplianceMitigationContext,
+    _complianceContext: ComplianceMitigationContext,
   ): AutomatedMitigationAction[] {
     // Placeholder implementation
     return [];
   }
 
   private generateBusinessContextActions(
-    businessContext: BusinessMitigationContext,
+    _businessContext: BusinessMitigationContext,
   ): AutomatedMitigationAction[] {
     // Placeholder implementation
     return [];
@@ -1539,22 +1539,22 @@ export class RiskMitigationStrategyService {
 
   // Additional stub methods for comprehensive implementation...
   private async applyMLRecommendations(
-    actions: AutomatedMitigationAction[],
-    recommendations: MLRecommendedAction[],
+    _actions: AutomatedMitigationAction[],
+    _recommendations: MLRecommendedAction[],
   ): Promise<void> {
     // Placeholder implementation
   }
 
   private async applyAdaptiveLearningEnhancements(
-    actions: AutomatedMitigationAction[],
-    steps: ManualMitigationStep[],
+    _actions: AutomatedMitigationAction[],
+    _steps: ManualMitigationStep[],
     _context: MitigationExecutionContext,
   ): Promise<void> {
     // Placeholder implementation
   }
 
   private initializeExecutionMetrics(
-    startTime: number,
+    _startTime: number,
   ): MitigationExecutionMetrics {
     return {
       totalExecutionTime: 0,
@@ -1594,7 +1594,7 @@ export class RiskMitigationStrategyService {
   }
 
   private createContinuousMonitoringPlan(
-    strategy: RiskMitigationStrategy,
+    _strategy: RiskMitigationStrategy,
     _context: MitigationExecutionContext,
   ): ContinuousMonitoringPlan {
     return {
@@ -1616,7 +1616,7 @@ export class RiskMitigationStrategyService {
 
   // Additional method stubs...
   private async executeCreateBackup(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1631,7 +1631,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeEnableMonitoring(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1646,7 +1646,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeRequireApproval(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1661,7 +1661,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeRestrictAccess(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1676,7 +1676,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeApplyTimeout(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1691,7 +1691,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeEnableTransaction(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1706,7 +1706,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeAlertAdministrators(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;
@@ -1721,7 +1721,7 @@ export class RiskMitigationStrategyService {
   }
 
   private async executeScheduleMaintenance(
-    action: AutomatedMitigationAction,
+    _action: AutomatedMitigationAction,
     _context: MitigationExecutionContext,
   ): Promise<{
     executionStatus: ActionExecutionStatus;

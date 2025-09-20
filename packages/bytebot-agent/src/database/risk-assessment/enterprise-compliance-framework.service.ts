@@ -23,16 +23,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  MultiDimensionalRiskAssessment,
-  RiskLevel,
-  ComplianceRequirementAssessment,
+  _MultiDimensionalRiskAssessment,
+  _RiskLevel,
+  _ComplianceRequirementAssessment,
   RegulatoryFramework,
-  ComplianceLevel,
-  AuditRequirement,
-  DataProtectionRequirement,
-  RetentionPolicy,
-  ComplianceApprovalRequirement,
-  DocumentationRequirement,
+  _ComplianceLevel,
+  _AuditRequirement,
+  _DataProtectionRequirement,
+  _RetentionPolicy,
+  _ComplianceApprovalRequirement,
+  _DocumentationRequirement,
   SensitiveDataType,
   DataClassification,
 } from './database-risk-assessment.service';
@@ -1182,7 +1182,7 @@ export class EnterpriseComplianceFrameworkService {
 
   private async validateAgainstFrameworks(
     _context: ComplianceValidationContext,
-    validationId: string,
+    _validationId: string,
   ): Promise<FrameworkComplianceResult[]> {
     const results: FrameworkComplianceResult[] = [];
     const enabledFrameworks = this.getEnabledFrameworks();
@@ -1209,7 +1209,7 @@ export class EnterpriseComplianceFrameworkService {
 
   private async identifyViolationRisks(
     _context: ComplianceValidationContext,
-    frameworkResults: FrameworkComplianceResult[],
+    _frameworkResults: FrameworkComplianceResult[],
   ): Promise<ComplianceViolationRisk[]> {
     // Placeholder implementation
     return [];

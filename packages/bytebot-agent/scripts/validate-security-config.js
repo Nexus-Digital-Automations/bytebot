@@ -19,7 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 // ANSI color codes for console output
 const colors = {

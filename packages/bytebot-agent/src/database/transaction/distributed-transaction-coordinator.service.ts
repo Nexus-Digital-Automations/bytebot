@@ -263,7 +263,7 @@ export class DistributedTransactionCoordinatorService {
     distributedMetadata: DistributedTransactionMetadata,
     userContext: ParlantUserContext,
   ): Promise<DistributedTransactionResult> {
-    const startTime = new Date();
+    const _startTime = new Date();
     const distributedTransactionId =
       distributedMetadata.distributedTransactionId;
 
@@ -1150,7 +1150,7 @@ export class DistributedTransactionCoordinatorService {
     participantId?: string,
     coordinationPhase?: 'PHASE_ONE' | 'PHASE_TWO' | 'COMPENSATION',
   ): Promise<void> {
-    const auditEntry: DistributedAuditEntry = {
+    const _auditEntry: DistributedAuditEntry = {
       timestamp: new Date(),
       distributedTransactionId,
       event,
@@ -1221,8 +1221,8 @@ export class DistributedTransactionCoordinatorService {
   // Placeholder methods for complete implementation
   private async prepareParticipant(
     participant: DistributedTransactionParticipant,
-    localTransaction: TransactionMetadata,
-    userContext: ParlantUserContext,
+    _localTransaction: TransactionMetadata,
+    _userContext: ParlantUserContext,
   ): Promise<void> {
     // Implementation would prepare the specific participant for transaction
     this.logger.log(`Preparing participant ${participant.participantId}`);
@@ -1242,7 +1242,7 @@ export class DistributedTransactionCoordinatorService {
 
   private async abortParticipant(
     participant: DistributedTransactionParticipant,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<void> {
     // Implementation would abort the transaction for this participant
     this.logger.log(`Aborting participant ${participant.participantId}`);
@@ -1250,7 +1250,7 @@ export class DistributedTransactionCoordinatorService {
 
   private async executeDistributedCompensation(
     _metadata: DistributedTransactionMetadata,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
     _error: Error,
   ): Promise<CompensationResult[]> {
     // Implementation would execute compensation for all participants
@@ -1258,7 +1258,7 @@ export class DistributedTransactionCoordinatorService {
   }
 
   private async detectDistributedDeadlocks(
-    distributedTransactionId: string,
+    _distributedTransactionId: string,
   ): Promise<DeadlockInfo[]> {
     // Implementation would detect deadlocks across participants
     return [];

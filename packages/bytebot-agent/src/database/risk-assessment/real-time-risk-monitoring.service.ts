@@ -1115,9 +1115,9 @@ class StatisticalAnomalyDetector {
   constructor(private settings: AnomalyDetectionSettings) {}
 
   async detect(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
+    _riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Statistical anomaly detection implementation
     return {
@@ -1139,9 +1139,9 @@ class MLAnomalyDetector {
   constructor(private settings: AnomalyDetectionSettings) {}
 
   async detect(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
+    _riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // ML-based anomaly detection implementation
     return {
@@ -1163,9 +1163,9 @@ class PatternBasedAnomalyDetector {
   constructor(private settings: AnomalyDetectionSettings) {}
 
   async detect(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
+    _riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Pattern-based anomaly detection implementation
     return {
@@ -1187,9 +1187,9 @@ class BehavioralAnomalyDetector {
   constructor(private settings: AnomalyDetectionSettings) {}
 
   async detect(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
+    _riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Behavioral anomaly detection implementation
     return {
@@ -1211,9 +1211,9 @@ class SeasonalAnomalyDetector {
   constructor(private settings: AnomalyDetectionSettings) {}
 
   async detect(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
+    _riskMetrics: RiskMetrics,
   ): Promise<AnomalyDetectionResult> {
     // Seasonal anomaly detection implementation
     return {
@@ -1235,10 +1235,10 @@ class RiskEscalationModel {
   constructor(private settings: PredictiveSettings) {}
 
   async predict(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
-    anomalyResult: AnomalyDetectionResult,
+    _riskMetrics: RiskMetrics,
+    _anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
     // Risk escalation prediction implementation
     return null;
@@ -1253,10 +1253,10 @@ class PerformanceDegradationModel {
   constructor(private settings: PredictiveSettings) {}
 
   async predict(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
-    anomalyResult: AnomalyDetectionResult,
+    _riskMetrics: RiskMetrics,
+    _anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
     // Performance degradation prediction implementation
     return null;
@@ -1271,10 +1271,10 @@ class SecurityThreatModel {
   constructor(private settings: PredictiveSettings) {}
 
   async predict(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
-    anomalyResult: AnomalyDetectionResult,
+    _riskMetrics: RiskMetrics,
+    _anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
     // Security threat prediction implementation
     return null;
@@ -1289,10 +1289,10 @@ class ComplianceViolationModel {
   constructor(private settings: PredictiveSettings) {}
 
   async predict(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    riskMetrics: RiskMetrics,
-    anomalyResult: AnomalyDetectionResult,
+    _riskMetrics: RiskMetrics,
+    _anomalyResult: AnomalyDetectionResult,
   ): Promise<PredictiveIndicator | null> {
     // Compliance violation prediction implementation
     return null;
@@ -1307,9 +1307,9 @@ class CorrelationEngine {
   constructor(private settings: CorrelationSettings) {}
 
   async findCorrelations(
-    operation: DatabaseOperation,
+    _operation: DatabaseOperation,
     _context: OperationContext,
-    events: RiskMonitoringEvent[],
+    _events: RiskMonitoringEvent[],
   ): Promise<string[]> {
     // Event correlation implementation
     return [];

@@ -389,9 +389,9 @@ export class ConfigurationSecurityService
 
       // Patterns for insecure protocols
       insecureProtocolPatterns: [
-        /^http:///i, // HTTP instead of HTTPS
-        /^ftp:///i, // FTP instead of SFTP
-        /^telnet:///i, // Telnet instead of SSH
+        /^http:/i, // HTTP instead of HTTPS
+        /^ftp:/i, // FTP instead of SFTP
+        /^telnet:/i, // Telnet instead of SSH
       ],
 
       // Patterns for common default passwords
