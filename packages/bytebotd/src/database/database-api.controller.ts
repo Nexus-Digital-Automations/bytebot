@@ -418,7 +418,7 @@ export interface DatabaseAnalyticsDto {
       // Execute backup if required
       let backupId: string | undefined;
       if (modificationDto.requireBackup) {
-        backupId = await this.createPreModificationBackup(modificationDto.table);
+        backupId = this.createPreModificationBackup(modificationDto.table);
         this.logger.log(`[${operationId
 }] Pre-modification backup created: ${backupId}`);}// Execute modification in transaction if requested
       const result = await this.executeModificationOperation(modificationDto, operationId);
@@ -515,10 +515,10 @@ export interface DatabaseAnalyticsDto {
       this.validateSchemaOperation(schemaDto);
 
       // Create migration record
-      const migrationId = await this.createMigrationRecord(schemaDto, user.id);
+      const migrationId = this.createMigrationRecord(schemaDto, user.id);
 
       // Execute schema change
-      await this.executeSchemaOperation(schemaDto, migrationId);
+      this.executeSchemaOperation(schemaDto, migrationId);
 
       this.logger.log(`[${operationId
 }] Schema change completed: ${migrationId}`, {
@@ -688,16 +688,16 @@ export interface DatabaseAnalyticsDto {
 };
   }
 
-  private async createPreModificationBackup(tableName: string): Promise<string> {
-  // Mock implementation - would create actual backup
-    return `backup_${tableName
-}_${Date.now()}`;}private async createMigrationRecord(dto: DatabaseSchemaDto, userId: string): Promise<string> {
-  // Mock implementation - would create migration tracking record
-    return `migration_${Date.now()
-}_${Math.random().toString(36).substring(7)}`;}private async executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): Promise<void> {
-  // Mock implementation - would execute actual DDL
-    this.logger.log(`Executing schema operation: ${dto.operation
-} (${migrationId})`);}private generateOperationId(): string {
+  private createPreModificationBackup(tableName: string): string {
+    // Mock implementation - would create actual backup
+    return `backup_${tableName}_${Date.now()}`;
+  }  private createMigrationRecord(dto: DatabaseSchemaDto, userId: string): string {
+    // Mock implementation - would create migration tracking record
+    return `migration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }  private executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): void {
+    // Mock implementation - would execute actual DDL
+    this.logger.log(`Executing schema operation: ${dto.operation} (${migrationId})`);
+  }}private generateOperationId(): string {
     return `db_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 }

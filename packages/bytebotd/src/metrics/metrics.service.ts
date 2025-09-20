@@ -539,12 +539,12 @@ export class BytebotMetricsService {
   /**
    * Get current system metrics
    */
-  async getSystemMetrics(): Promise<{
+  getSystemMetrics(): {
     cpuUsage: number;
     memoryUsage: number;
     activeConnections: number;
     requestsPerSecond: number;
-  }> {
+  } {
     try {
       const memoryUsage = process.memoryUsage();
       const memoryUtilization = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;

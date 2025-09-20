@@ -748,31 +748,35 @@ _${Math.random().toString(36).substring(7)}`;
     }
   }
 
-  private async getCurrentConfigValue(key: string): Promise<unknown>  {
+  private getCurrentConfigValue(key: string): unknown {
     // Mock implementation - would retrieve current value
     return null;
   }
 
-  private async createConfigurationChangeRecord(dto: ConfigurationSettingDto, userId: string): Promise<string>  {
+  private createConfigurationChangeRecord(dto: ConfigurationSettingDto, userId: string): string {
     // Mock implementation - would create change tracking record
-    return `change_${Date.now()}
-_${Math.random().toString(36).substring(7)}`;}
-private async createSecurityChangeRecord(policyName: string,
+    return `change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
+  private createSecurityChangeRecord(
+    policyName: string,
     dto: SecurityConfigurationDto,
     userId: string
-  ): Promise<string>  {
+  ): string {
     // Mock implementation - would create security change record
-    return `sec_change_${Date.now()}
-_${Math.random().toString(36).substring(7)}`;}
-private async applyConfigurationChange(key: string, value: unknown, changeId: string): Promise<void>  {
+    return `sec_change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
+  private applyConfigurationChange(key: string, value: unknown, changeId: string): void {
     // Mock implementation - would apply actual configuration change
-    this.logger.log(`Applying configuration change: ${key} (${changeId})`);}
-private async applySecurityConfiguration(policyName: string,
+    this.logger.log(`Applying configuration change: ${key} (${changeId})`);
+  }}
+  private applySecurityConfiguration(
+    policyName: string,
     dto: SecurityConfigurationDto,
     changeId: string
-  ): Promise<void>  {
+  ): void {
     // Mock implementation - would apply security configuration
-    this.logger.log(`Applying security configuration: ${policyName} (${changeId})`);}
+    this.logger.log(`Applying security configuration: ${policyName} (${changeId})`);
+  }}
 private generateOperationId(): string {
     return `config_${Date.now()}
 _${Math.random().toString(36).substring(2, 15)}`;
