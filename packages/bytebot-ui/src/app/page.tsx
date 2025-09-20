@@ -244,7 +244,7 @@ export default function Home(): React.JSX.Element {
                 </h1>
               </div>
 
-              <div className="bg-bytebot-bronze-light-2 border-bytebot-bronze-light-5 borderw-full mb-10 rounded-2xl p-2">
+              <div className="bg-bytebot-bronze-light-2 border-bytebot-bronze-light-5 border w-full mb-10 rounded-2xl p-2">
                 <ChatInput
                   input={input}
                   isLoading={isLoading}

@@ -985,15 +985,29 @@ export const useConversationContext = ({
   const generateContextSummary = useCallback((
     messageList: ConversationMessage[],
     context: ParlantConversationContext | null
-  ): string => {
-    if (!context) {return '';}
+  ): ContextSummary | null => {
+    if (!context) {return null;}
 
     const messageCount = messageList.length;
     const participantCount = participants.length;
     const duration = context.updatedAt.getTime() - context.createdAt.getTime();
     const durationHours = Math.round(duration / (MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR) * DECIMAL_PRECISION_MULTIPLIER) / DECIMAL_PRECISION_DIVISOR;
 
-    return `${messageCount} messages from ${participantCount} participants over ${durationHours}h`;
+    return {
+      topics: [], // TODO: Implement topic extraction
+      decisions: [], // TODO: Implement decision tracking
+      pendingActions: [], // TODO: Implement action item extraction
+      keyParticipants: participants.map(p => p.name || 'Anonymous'),
+      sentiment: 'neutral' as const,
+      complexity: ((): 'simple' | 'moderate' | 'complex' => {
+        const COMPLEX_THRESHOLD = 10;
+        const MODERATE_THRESHOLD = 5;
+        if (messageCount > COMPLEX_THRESHOLD) {return 'complex';}
+        if (messageCount > MODERATE_THRESHOLD) {return 'moderate';}
+        return 'simple';
+      })(),
+      summary: `${messageCount} messages from ${participantCount} participants over ${durationHours}h`
+    };
   }, [participants]);
 
   const saveContext = useCallback(async () => {
@@ -1023,7 +1037,15 @@ export const useConversationContext = ({
         conversation: currentContext,
         messages,
         participants,
-        contextSummary: summary,
+        contextSummary: summary ?? {
+          topics: [],
+          decisions: [],
+          pendingActions: [],
+          keyParticipants: [],
+          sentiment: 'neutral' as const,
+          complexity: 'simple' as const,
+          summary: 'No summary available'
+        },
         snapshotAt: new Date(),
         lastActivity: new Date(),
         analytics: analytics ?? ConversationAnalyticsEngine.calculateAnalytics(messages, participants, 0),

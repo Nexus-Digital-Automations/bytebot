@@ -82,7 +82,7 @@
     
     // Source Map and Debugging
     "sourceMap": false,
-    "declaration": false,
+    "declaration": true,
     "declarationMap": false,
     
     // Import/Export Handling

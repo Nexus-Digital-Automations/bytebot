@@ -49,6 +49,28 @@ global.fetch = jest.fn();
 // Type the mocked fetch
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
+// Helper function to create proper Response mocks
+const createMockResponse = (data: unknown, ok = true): Response => {
+  const HTTP_BAD_REQUEST = 400;
+  return {
+    ok,
+    status: ok ? HTTP_OK : HTTP_BAD_REQUEST,
+    statusText: ok ? 'OK' : 'Bad Request',
+    headers: new Headers(),
+    redirected: false,
+    type: 'basic' as ResponseType,
+    url: '',
+    clone: jest.fn(),
+    text: jest.fn(),
+    blob: jest.fn(),
+    arrayBuffer: jest.fn(),
+    formData: jest.fn(),
+    body: null,
+    bodyUsed: false,
+    json: jest.fn().mockResolvedValue(data),
+  } as unknown as Response;
+};
+
 // Mock console methods
 const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {
   /* Mock implementation */
@@ -78,10 +100,7 @@ describe("TaskUtils", () => {
         },
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       const result = await addMessage("task-123", "Test message");
 
@@ -100,11 +119,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles API errors gracefully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null, false));
 
       const result = await addMessage("task-123", "Test message");
 
@@ -140,10 +155,7 @@ describe("TaskUtils", () => {
 
     it("trims whitespace from message content", async () => {
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       await addMessage("task-123", "  Test message  ");
 
@@ -163,10 +175,7 @@ describe("TaskUtils", () => {
       const specialMessage =
         'Test with "quotes" and \nline breaks and emoji 😀';
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       await addMessage("task-123", specialMessage);
 
@@ -185,10 +194,7 @@ describe("TaskUtils", () => {
     it("handles very long messages", async () => {
       const longMessage = "A".repeat(LONG_MESSAGE_LENGTH);
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       await addMessage("task-123", longMessage);
 
@@ -222,10 +228,7 @@ describe("TaskUtils", () => {
     ];
 
     it("fetches task messages successfully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ messages: mockMessages }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ messages: mockMessages }));
 
       const result = await fetchTaskMessages("task-123");
 
@@ -234,10 +237,7 @@ describe("TaskUtils", () => {
     });
 
     it("fetches messages with pagination options", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ messages: mockMessages }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ messages: mockMessages }));
 
       const result = await fetchTaskMessages("task-123", {
         limit: 20,
@@ -251,11 +251,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles API errors gracefully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null, false));
 
       const result = await fetchTaskMessages("task-123");
 
@@ -286,10 +282,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles malformed API response", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ invalid: "response" }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ invalid: "response" }));
 
       const result = await fetchTaskMessages("task-123");
 
@@ -330,10 +323,7 @@ describe("TaskUtils", () => {
     ];
 
     it("fetches processed messages successfully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ groupedMessages: mockGroupedMessages }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ groupedMessages: mockGroupedMessages }));
 
       const result = await fetchTaskProcessedMessages("task-123");
 
@@ -344,10 +334,7 @@ describe("TaskUtils", () => {
     });
 
     it("fetches processed messages with options", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ groupedMessages: mockGroupedMessages }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ groupedMessages: mockGroupedMessages }));
 
       const result = await fetchTaskProcessedMessages("task-123", {
         limit: API_TIMEOUT_MS,
@@ -361,11 +348,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles API errors gracefully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null, false));
 
       const result = await fetchTaskProcessedMessages("task-123");
 
@@ -393,10 +376,7 @@ describe("TaskUtils", () => {
     };
 
     it("fetches task by ID successfully", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ task: mockTask }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockTask }));
 
       const result = await fetchTaskById("task-123");
 
@@ -405,11 +385,7 @@ describe("TaskUtils", () => {
     });
 
     it("returns null when task not found", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null, false));
 
       const result = await fetchTaskById("task-123");
 
@@ -440,10 +416,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles malformed API response", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ invalid: "response" }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ invalid: "response" }));
 
       const result = await fetchTaskById("task-123");
 
@@ -467,10 +440,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully takes over a task", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ task: mockUpdatedTask }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockUpdatedTask }));
 
       const result = await takeOverTask("task-123");
 
@@ -524,10 +494,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully resumes a task", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ task: mockResumedTask }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockResumedTask }));
 
       const result = await resumeTask("task-123");
 
@@ -574,10 +541,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully cancels a task", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ task: mockCancelledTask }),
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockCancelledTask }));
 
       const result = await cancelTask("task-123");
 
@@ -611,10 +575,7 @@ describe("TaskUtils", () => {
   describe("Performance and Caching", () => {
     it("handles multiple concurrent API calls", async () => {
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValue(createMockResponse(mockResponse));
 
       const promises = [
         addMessage("task-1", "Message 1"),
@@ -653,10 +614,7 @@ describe("TaskUtils", () => {
     it("efficiently handles large message payloads", async () => {
       const largeMessage = "x".repeat(LARGE_DATA_SIZE); // 1MB message
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       const startTime = performance.now();
       const result = await addMessage("task-123", largeMessage);
@@ -672,10 +630,7 @@ describe("TaskUtils", () => {
       // First call fails, second succeeds
       mockFetch
         .mockRejectedValueOnce(new Error("Network error"))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => ({ success: true }),
-        } as Response);
+        .mockResolvedValueOnce(createMockResponse({ success: true }));
 
       const result1 = await addMessage("task-123", "Test message");
       const result2 = await addMessage("task-123", "Test message");
@@ -685,11 +640,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles server errors with appropriate logging", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null, false));
 
       const result = await fetchTaskById("task-123");
 
@@ -722,10 +673,7 @@ describe("TaskUtils", () => {
     it("sanitizes and validates message content", async () => {
       const maliciousContent = '<script>alert("xss")</script>Hello';
       const mockResponse = { success: true };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => mockResponse,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse));
 
       await addMessage("task-123", maliciousContent);
 
@@ -786,20 +734,14 @@ describe("TaskUtils", () => {
     });
 
     it("handles null API responses", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => null,
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse(null));
 
       const result = await fetchTaskById("task-123");
       expect(result).toBeNull();
     });
 
     it("handles API responses with missing fields", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => ({ task: { id: "task-123" } }), // Missing required fields
-      } as Response);
+      mockFetch.mockResolvedValueOnce(createMockResponse({ task: { id: "task-123" } })); // Missing required fields
 
       const result = await fetchTaskById("task-123");
       expect(result).toEqual({ id: "task-123" }); // Should return partial data

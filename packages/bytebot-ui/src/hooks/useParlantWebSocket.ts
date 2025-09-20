@@ -452,7 +452,78 @@ export const useParlantWebSocket = (
     reject: (error: Error) => void;
     timestamp: Date;
   }>>(new Map());
-  
+
+  // ===========================
+  // HELPER FUNCTIONS (moved to resolve hoisting issues)
+  // ===========================
+
+  const updatePerformanceMetrics = useCallback(() => {
+    if (!config.enablePerformanceTracking) {
+      return;
+    }
+
+    const newMetrics = calculateMetrics(messages, connectionStartTime.current, errorCount.current);
+    setMetrics(newMetrics);
+    onPerformanceUpdate?.(newMetrics);
+  }, [config.enablePerformanceTracking, messages, onPerformanceUpdate]);
+
+  const startHeartbeat = useCallback(() => {
+    if (heartbeatTimer.current) {
+      clearInterval(heartbeatTimer.current);
+    }
+
+    heartbeatTimer.current = setInterval(() => {
+      if (socketRef.current?.connected === true) {
+        socketRef.current.emit('parlant:heartbeat', { timestamp: Date.now() });
+      }
+    }, config.heartbeatInterval);
+  }, [config.heartbeatInterval]);
+
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatTimer.current) {
+      clearInterval(heartbeatTimer.current);
+      heartbeatTimer.current = null;
+    }
+  }, []);
+
+  const stopMetricsTracking = useCallback(() => {
+    if (metricsTimer.current) {
+      clearInterval(metricsTimer.current);
+      metricsTimer.current = null;
+    }
+  }, []);
+
+  const processOfflineQueue = useCallback(async () => {
+    if (!isConnected || !socketRef.current || offlineQueue.length === 0) {
+      return;
+    }
+
+    logInfo('Processing offline message queue', { queueSize: offlineQueue.length }, 'useParlantWebSocket');
+    setIsOffline(false);
+
+    const messagesToProcess = [...offlineQueue];
+    setOfflineQueue([]);
+
+    // Process messages sequentially to avoid overwhelming the server
+    for (const offlineMessage of messagesToProcess) {
+      try {
+        // Using await in loop is intentional for sequential processing
+        await sendMessage(offlineMessage.message.content, offlineMessage.message.type); // eslint-disable-line no-await-in-loop
+        logDebug('Offline message sent successfully', { messageId: offlineMessage.id }, 'useParlantWebSocket');
+      } catch (error: unknown) {
+        logError('Failed to send offline message', error, 'useParlantWebSocket');
+        // Re-queue message if retry limit not reached
+        const MAX_RETRY_COUNT = 3;
+        if (offlineMessage.retryCount < MAX_RETRY_COUNT) {
+          setOfflineQueue(prev => [...prev, {
+            ...offlineMessage,
+            retryCount: offlineMessage.retryCount + 1,
+          }]);
+        }
+      }
+    }
+  }, [isConnected, offlineQueue]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ===========================
   // CONNECTION MANAGEMENT
   // ===========================
@@ -1019,101 +1090,34 @@ export const useParlantWebSocket = (
   // ===========================
   // OFFLINE CAPABILITIES
   // ===========================
-  
-  const processOfflineQueue = useCallback(async () => {
-    if (!isConnected || !socketRef.current || offlineQueue.length === 0) {
-      return;
-    }
-    
-    logInfo('Processing offline message queue', { queueSize: offlineQueue.length }, 'useParlantWebSocket');
-    setIsOffline(false);
-    
-    const messagesToProcess = [...offlineQueue];
-    setOfflineQueue([]);
-    
-    // Process messages sequentially to avoid overwhelming the server
-    for (const offlineMessage of messagesToProcess) {
-      try {
-        // Using await in loop is intentional for sequential processing
-        await sendMessage(offlineMessage.message.content, offlineMessage.message.type); // eslint-disable-line no-await-in-loop
-        logDebug('Offline message sent successfully', { messageId: offlineMessage.id }, 'useParlantWebSocket');
-      } catch (error: unknown) {
-        logError('Failed to send offline message', error, 'useParlantWebSocket');
-        // Re-queue message if retry limit not reached
-        const MAX_RETRY_COUNT = 3;
-        if (offlineMessage.retryCount < MAX_RETRY_COUNT) {
-          setOfflineQueue(prev => [...prev, {
-            ...offlineMessage,
-            retryCount: offlineMessage.retryCount + 1,
-          }]);
-        }
-      }
-    }
-  }, [isConnected, offlineQueue, sendMessage]);
-  
+
   const clearOfflineQueue = useCallback(() => {
     setOfflineQueue([]);
     logInfo('Offline message queue cleared', null, 'useParlantWebSocket');
   }, []);
-  
+
   const retryFailedMessages = useCallback(async () => {
     await processOfflineQueue();
   }, [processOfflineQueue]);
-  
+
   // ===========================
   // PERFORMANCE TRACKING
   // ===========================
-  
-  const updatePerformanceMetrics = useCallback(() => {
-    if (!config.enablePerformanceTracking) {
-      return;
-    }
-    
-    const newMetrics = calculateMetrics(messages, connectionStartTime.current, errorCount.current);
-    setMetrics(newMetrics);
-    onPerformanceUpdate?.(newMetrics);
-  }, [config.enablePerformanceTracking, messages, onPerformanceUpdate]);
-  
-  const startHeartbeat = useCallback(() => {
-    if (heartbeatTimer.current) {
-      clearInterval(heartbeatTimer.current);
-    }
-    
-    heartbeatTimer.current = setInterval(() => {
-      if (socketRef.current?.connected === true) {
-        socketRef.current.emit('parlant:heartbeat', { timestamp: Date.now() });
-      }
-    }, config.heartbeatInterval);
-  }, [config.heartbeatInterval]);
-  
-  const stopHeartbeat = useCallback(() => {
-    if (heartbeatTimer.current) {
-      clearInterval(heartbeatTimer.current);
-      heartbeatTimer.current = null;
-    }
-  }, []);
-  
+
   const startMetricsTracking = useCallback(() => {
     if (!config.enablePerformanceTracking) {
       return;
     }
-    
+
     if (metricsTimer.current) {
       clearInterval(metricsTimer.current);
     }
-    
+
     const METRICS_UPDATE_INTERVAL = 5000; // Update metrics every 5 seconds
     metricsTimer.current = setInterval(() => {
       updatePerformanceMetrics();
     }, METRICS_UPDATE_INTERVAL);
   }, [config.enablePerformanceTracking, updatePerformanceMetrics]);
-  
-  const stopMetricsTracking = useCallback(() => {
-    if (metricsTimer.current) {
-      clearInterval(metricsTimer.current);
-      metricsTimer.current = null;
-    }
-  }, []);
   
   // ===========================
   // CONFIGURATION MANAGEMENT

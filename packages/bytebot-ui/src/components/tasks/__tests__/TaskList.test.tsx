@@ -481,7 +481,7 @@ describe("TaskList Component", () => {
   });
 
   describe("Pagination", () => {
-     
+
     const _manyTasks = Array.from(
       { length: PAGINATION_DEFAULT_PAGE_SIZE * DEFAULT_TASK_LIST_LIMIT },
       (_, i) => ({
@@ -815,7 +815,7 @@ describe("TaskList Component", () => {
     });
 
     it("provides skip links for large lists", () => {
-      const __manyTasks = Array.from({ length: 50 }, (_, i) => ({
+      const _manyTasks = Array.from({ length: 50 }, (_, i) => ({
         ...mockTasks[0],
         id: `task-${i}`,
         title: `Task ${i}`,
