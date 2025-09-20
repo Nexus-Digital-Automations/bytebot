@@ -42,10 +42,7 @@ import {
   JobCleanupManager,
   JobStatus,
   JobPriority,
-  JobResult,
-  JobError,
   JobOptions,
-  WorkerStats,
 } from '../job-management.service';
 import { ComputerUseService } from '../computer-use.service';
 import { ComputerAction } from '@bytebot/shared';
@@ -213,12 +210,12 @@ const mockRedisPipeline = {
 
 describe('Enhanced JobManagementService', () => {
   let service: JobManagementService;
-  let jobStorage: JobStorage;
+  let _jobStorage: JobStorage;
   let backgroundWorker: BackgroundWorker;
   let cleanupManager: JobCleanupManager;
   let computerUseService: jest.Mocked<ComputerUseService>;
-  let configService: jest.Mocked<ConfigService>;
-  let redisClient: jest.Mocked<Redis>;
+  let _configService: jest.Mocked<ConfigService>;
+  let _redisClient: jest.Mocked<Redis>;
   let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
@@ -250,7 +247,7 @@ describe('Enhanced JobManagementService', () => {
           'JOB_RETENTION_CANCELLED': 12 * 60 * 60 * 1000, // 12 hours
           'JOB_CLEANUP_BATCH_SIZE': 100,
         };
-        return config[key] ?? defaultValue;
+        return config[key as keyof typeof config] ?? defaultValue;
       }),
     };
 
@@ -286,12 +283,12 @@ describe('Enhanced JobManagementService', () => {
     }).compile();
 
     service = module.get<JobManagementService>(JobManagementService);
-    jobStorage = module.get<JobStorage>(JobStorage);
+    _jobStorage = module.get<JobStorage>(JobStorage);
     backgroundWorker = module.get<BackgroundWorker>(BackgroundWorker);
     cleanupManager = module.get<JobCleanupManager>(JobCleanupManager);
     computerUseService = module.get(ComputerUseService);
-    configService = module.get(ConfigService);
-    redisClient = mockRedisInstance as jest.Mocked<Redis>;
+    _configService = module.get(ConfigService);
+    _redisClient = mockRedisInstance as jest.Mocked<Redis>;
     logger = module.get(Logger);
 
     // Initialize the service
