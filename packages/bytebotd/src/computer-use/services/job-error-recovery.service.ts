@@ -211,7 +211,7 @@ export class ErrorClassifier {
     const operationId = `classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     this.logger.debug(`[${operationId}] Classifying error`, {
-      jobId: jobContext.jobId,
+      jobId: _jobContext.jobId,
       errorCode: error.code,
       errorMessage: error.message,
     });
@@ -240,7 +240,7 @@ export class ErrorClassifier {
   /**
    * Categorize error based on characteristics
    */
-  private categorizeError(error: JobError, jobContext: JobResult): ErrorCategory {
+  private categorizeError(error: JobError, _jobContext: JobResult): ErrorCategory {
     const errorMessage = error.message.toLowerCase();
     const errorCode = error.code.toLowerCase();
 
@@ -719,11 +719,11 @@ export class FailureAnalyzer {
     jobId: string,
     error: JobError,
   ): void {
-    if (this.errorPatterns.has(signature)) {
-      const pattern = this.errorPatterns.get(signature) as ErrorPattern;
-      pattern.frequency++;
-      pattern.lastSeen = new Date();
-      pattern.affectedJobs.push(jobId);
+    const existingPattern = this.errorPatterns.get(signature);
+    if (existingPattern) {
+      existingPattern.frequency++;
+      existingPattern.lastSeen = new Date();
+      existingPattern.affectedJobs.push(jobId);
     } else {
       const newPattern: ErrorPattern = {
         patternId: signature,
@@ -805,10 +805,10 @@ export class FailureAnalyzer {
     // Error context factors
     if (error.context) {
       if (error.context.workerId) {
-        factors.push(`Specific worker involved: ${error.context.workerId}`);
+        factors.push(`Specific worker involved: ${String(error.context.workerId)}`);
       }
       if (error.context.executionTimeMs) {
-        factors.push(`Execution time: ${error.context.executionTimeMs}ms`);
+        factors.push(`Execution time: ${String(error.context.executionTimeMs)}ms`);
       }
     }
 
@@ -971,7 +971,7 @@ export class FailureAnalyzer {
    */
   private estimateRecoveryTime(
     strategy: RecoveryStrategy,
-    previousAttempts: RecoveryAttempt[],
+    _previousAttempts: RecoveryAttempt[],
   ): number {
     const baseTime = 30000; // 30 seconds
 
@@ -1015,9 +1015,9 @@ export class FailureAnalyzer {
 
     // Pattern matching
     const signature = this.generateErrorSignature(error);
-    if (this.errorPatterns.has(signature)) {
-      const pattern = this.errorPatterns.get(signature) as ErrorPattern;
-      if (pattern.frequency > 3) confidence += 0.1;
+    const existingPattern = this.errorPatterns.get(signature);
+    if (existingPattern && existingPattern.frequency > 3) {
+      confidence += 0.1;
     }
 
     return Math.min(confidence, 1.0);
@@ -1147,7 +1147,7 @@ export class RecoveryStrategyManager {
           break;
 
         default:
-          throw new Error(`Unknown recovery strategy: ${strategy}`);
+          throw new Error(`Unknown recovery strategy: ${String(strategy)}`);
       }
 
       attempt.success = true;
@@ -1188,7 +1188,7 @@ export class RecoveryStrategyManager {
    */
   private async executeDelayedRetry(
     job: JobResult,
-    analysis: FailureAnalysis,
+    _analysis: FailureAnalysis,
   ): Promise<void> {
     const delay = this.retryManager.calculateRetryDelay(job.retryCount);
 
@@ -1207,7 +1207,7 @@ export class RecoveryStrategyManager {
       metadata: {
         ...job.metadata,
         alternativeWorker: true,
-        excludeWorkers: [job.error?.context?.workerId],
+        excludeWorkers: [job.error?.context?.workerId ?? 'unknown'],
       },
     };
 
@@ -1266,11 +1266,11 @@ export class RecoveryStrategyManager {
    */
   private async executeManualReview(
     job: JobResult,
-    analysis: FailureAnalysis,
+    _analysis: FailureAnalysis,
   ): Promise<void> {
     this.logger.log('Manual review strategy executed', {
       jobId: job.jobId,
-      analysisId: analysis.analysisId,
+      analysisId: _analysis.analysisId,
     });
 
     // Update job with manual review flag
@@ -1280,9 +1280,9 @@ export class RecoveryStrategyManager {
       timestamp: new Date(),
       retryable: false,
       context: {
-        analysisId: analysis.analysisId,
-        rootCause: analysis.rootCause,
-        recommendedActions: analysis.preventionMeasures,
+        analysisId: _analysis.analysisId,
+        rootCause: _analysis.rootCause,
+        recommendedActions: _analysis.preventionMeasures,
       },
     };
 
@@ -1299,11 +1299,11 @@ export class RecoveryStrategyManager {
    */
   private async executeDeadLetter(
     job: JobResult,
-    analysis: FailureAnalysis,
+    _analysis: FailureAnalysis,
   ): Promise<void> {
     this.logger.log('Dead letter queue strategy executed', {
       jobId: job.jobId,
-      analysisId: analysis.analysisId,
+      analysisId: _analysis.analysisId,
     });
 
     const deadLetterError: JobError = {
@@ -1312,8 +1312,8 @@ export class RecoveryStrategyManager {
       timestamp: new Date(),
       retryable: false,
       context: {
-        analysisId: analysis.analysisId,
-        rootCause: analysis.rootCause,
+        analysisId: _analysis.analysisId,
+        rootCause: _analysis.rootCause,
         deadLetterQueue: true,
       },
     };
@@ -1520,7 +1520,7 @@ export class DeadLetterQueueService {
         return b.escalationLevel - a.escalationLevel;
       }
 
-      const priorityOrder = {
+      const priorityOrder: Record<JobPriority, number> = {
         [JobPriority.URGENT]: 0,
         [JobPriority.HIGH]: 1,
         [JobPriority.NORMAL]: 2,
@@ -1582,7 +1582,7 @@ export class DeadLetterQueueService {
         requiresManualReview++;
       }
 
-      escalationLevels[item.escalationLevel] = (escalationLevels[item.escalationLevel] || 0) + 1;
+      escalationLevels[item.escalationLevel] = (escalationLevels[item.escalationLevel] ?? 0) + 1;
     });
 
     return {
@@ -1702,7 +1702,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Get or initialize recovery attempts for this job
-    const attempts = this.recoveryAttempts.get(job.jobId) || [];
+    const attempts = this.recoveryAttempts.get(job.jobId) ?? [];
 
     try {
       // Step 1: Classify error and determine recovery strategy
@@ -1814,7 +1814,13 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     failedRecoveries: number;
     strategiesByType: Record<RecoveryStrategy, number>;
     circuitBreakerStates: Record<string, CircuitBreaker>;
-    deadLetterQueueStats: any;
+    deadLetterQueueStats: {
+      totalItems: number;
+      byPriority: Record<JobPriority, number>;
+      byCategory: Record<ErrorCategory, number>;
+      requiresManualReview: number;
+      escalationLevels: Record<number, number>;
+    };
     errorPatterns: ErrorPattern[];
   } {
     const allAttempts = Array.from(this.recoveryAttempts.values()).flat();
@@ -1841,7 +1847,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
    * Get recovery attempts for a specific job
    */
   getJobRecoveryAttempts(jobId: string): RecoveryAttempt[] {
-    return this.recoveryAttempts.get(jobId) || [];
+    return this.recoveryAttempts.get(jobId) ?? [];
   }
 
   /**

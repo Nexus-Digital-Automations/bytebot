@@ -1166,12 +1166,12 @@ export class JobMonitoringService {
       // Note: In production, use a proper safe expression evaluator
       return new Function('return ' + expression)();
     } catch (error) {
-      this.logger.warn(`Alert condition evaluation error: ${error}`);
+      this.logger.warn(`Alert condition evaluation error: ${String(error)}`);
       return false;
     }
   }
 
-  private generateAlertRecommendations(alertId: string, metrics: Record<string, number>): string[] {
+  private generateAlertRecommendations(alertId: string, _metrics: Record<string, number>): string[] {
     const recommendations: string[] = [];
 
     switch (alertId) {

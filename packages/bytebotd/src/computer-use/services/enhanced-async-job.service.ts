@@ -827,7 +827,13 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     jobId: string,
     submittedAt: Date,
     cachedResult: unknown,
-    options: any
+    options: {
+      priority?: JobPriority;
+      timeout?: number;
+      metadata?: Record<string, unknown>;
+      userId?: string;
+      sessionId?: string;
+    }
   ): JobSubmissionResponseDto {
     const cachedJob: EnhancedJobData = {
       jobId,

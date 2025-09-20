@@ -42,15 +42,11 @@ import { promisify } from 'util';
 import {
   RedisClusterCacheService,
   CacheOperationResult,
-  RedisClusterConfig,
   RedisCacheEntry,
 } from '../../parlant/caching/redis-cluster-cache.service';
 import {
   JobStatus,
   JobPriority,
-  JobSubmissionResponseDto,
-  JobStatusResponseDto,
-  JobResultResponseDto,
 } from '../dto/async-job.dto';
 import { ComputerActionDto } from '../dto/computer-action.dto';
 
@@ -416,7 +412,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
             compressed: false,
             retryCount: 0,
           },
-        } as CacheOperationResult<RedisJobData>;
+        };
       }
 
       // Parse and decompress job data
@@ -1097,7 +1093,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
     return jobs;
   }
 
-  private async findExpiredJobs(cutoffDate: Date): Promise<string[]> {
+  private async findExpiredJobs(_cutoffDate: Date): Promise<string[]> {
     // This would use Redis date indexes to find expired jobs
     // For now, simulate finding expired job IDs
     const expiredJobIds: string[] = [];

@@ -58,8 +58,6 @@ import { MetricsService } from '../../metrics/metrics.service';
 import {
   JobStatus,
   JobPriority,
-  JobStatusResponseDto,
-  JobResultResponseDto,
 } from '../dto/async-job.dto';
 
 // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
