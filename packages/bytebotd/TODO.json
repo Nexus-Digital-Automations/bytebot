@@ -3477,13 +3477,25 @@
       "updated_at": "2025-09-20T22:24:29.167Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T22:30:39.553Z",
       "title": "CRITICAL: Fix systematic syntax errors in aigent-parlant-security-bridge.integration.spec.ts",
       "description": "Multiple parsing errors preventing TypeScript compilation in auth test file: TS1135 Argument expression expected, TS1005 comma/semicolon expected. File has malformed Jest mock structure and Test.createTestingModule syntax. Requires systematic syntax repair to enable proper compilation.",
       "category": "error",
       "priority": "normal",
-      "id": "error_1758407439553_2mj9sjgxl6o"
+      "id": "error_1758407439553_2mj9sjgxl6o",
+      "assigned_agent": "dev_session_1758408856086_1_general_26d43519",
+      "started_at": "2025-09-20T23:03:27.617Z",
+      "claimed_by": "dev_session_1758408856086_1_general_26d43519",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758408856086_1_general_26d43519",
+          "role": "primary",
+          "assignedAt": "2025-09-20T23:03:27.617Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {

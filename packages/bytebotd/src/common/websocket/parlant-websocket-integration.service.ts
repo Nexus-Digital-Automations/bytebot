@@ -477,9 +477,10 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     message: ValidationRequestMessage
   ): Promise<ParlantValidationRequest>  {
   const conversationId = this.conversationMappings.get(sessionId) ??
-                          `conv_${Date.now()
-}
-_${Math.random().toString(36).substring(7)}`;// Create enhanced validation contextconst parlantContext: ParlantValidationContext = {
+                          `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    // Create enhanced validation context
+    const parlantContext: ParlantValidationContext = {
   ...message.payload.context,
       parlantConversationId: conversationId,
       userProfile: await this.getUserProfile(message.payload.context.userId),
@@ -518,7 +519,7 @@ _${Math.random().toString(36).substring(7)}`,
       action: parlantAction,
       priority: this.mapRiskToPriority(message.payload.riskLevel),
       streamingOptions: parlantStreamingOptions,
-      auditTrail: [{,
+      auditTrail: [{
   timestamp: Date.now(),
         event: 'validation_request_created',
       actor: 'parlant_integration_service',
@@ -566,7 +567,7 @@ _${Math.random().toString(36).substring(7)}`,
       conditions: validationResult.conditions,
       auditTrail: [
         ...request.auditTrail,
-        {,
+        {
   timestamp: Date.now(),
           event: 'validation_completed',
       actor: 'parlant_validation_service',
@@ -642,7 +643,7 @@ if (riskScore < 30 && userTrustLevel === 'enterprise') {approved = true;confiden
     result: ParlantValidationResult
   ): Promise<void>  {
   // Create conversational response message
-    const responseMessage: ConversationalMessage = {,
+    const responseMessage: ConversationalMessage = {
   type: ConversationalMessageType.VALIDATION_RESPONSE,
       messageId: `result_${validationId
 }
@@ -687,7 +688,7 @@ _${Date.now()}`,
     validationId: string,
     error: unknown
   ): Promise<void>  {
-  const errorMessage: ConversationalMessage = {,
+  const errorMessage: ConversationalMessage = {
   type: ConversationalMessageType.ERROR_STREAM,
       messageId: `error_${validationId
 }
@@ -755,7 +756,7 @@ _${Date.now()}`,
     approved: boolean
   ): Promise<void>  {
   // Add audit entry for user confirmation
-    const auditEntry: AuditEntry = {,
+    const auditEntry: AuditEntry = {
   timestamp: Date.now(),
       event: 'user_confirmation',
       actor: validation.context.userId,
@@ -785,7 +786,7 @@ _${Date.now()}`,
    * Handle session connected event
    */
   private handleSessionConnected(event: { sessionId: string; clientId: string; session: ConversationalSession }): void {
-  this.logger.log('Conversational session connected', {,
+  this.logger.log('Conversational session connected', {
   sessionId: event.sessionId,
       clientId: event.clientId,
       origin: event.session.connectionInfo.origin,
@@ -857,7 +858,7 @@ _metrics`, Date.now());
    * Collect integration metrics
    */
   private collectIntegrationMetrics(): void {
-  const metrics = {,
+  const metrics = {
   activeValidations: this.activeValidations.size,
       completedValidations: this.validationResults.size,
       activeSessions: this.conversationMappings.size,
@@ -931,7 +932,7 @@ _metrics`, Date.now());
   // Mock implementation - would integrate with risk assessment service
     const baseScore = action.reversible ? 20 : 60;
     const impactScore = action.impact.scope === 'external' ? 40 : 20;return {level: baseScore + impactScore > 50 ? 'high' : 'medium',
-      factors: [{,
+      factors: [{
   type: 'reversibility',
       impact: action.reversible ? 0.2 : 0.8,
       probability: 1.0,
@@ -949,7 +950,7 @@ _metrics`, Date.now());
   private async getComplianceRequirements(_context: ValidationContext): Promise<ComplianceRequirement[]>  {
   // Mock implementation - would integrate with compliance service
     return [
-      {,
+      {
   framework: 'GDPR',
       requirement: 'User consent required for data processing',
       mandatory: true,
@@ -979,7 +980,7 @@ _metrics`, Date.now());
    */
   private async generateFallbackActions(_action: ValidationAction): Promise<FallbackAction[]>  {
   return [
-      {,
+      {
   actionType: 'cancel',
       parameters: {
 },condition: 'user_rejects',
@@ -1029,7 +1030,7 @@ _metrics`, Date.now());
    * Get integration statistics
    */
   getIntegrationStatistics() {
-  return {,
+  return {
   activeValidations: this.activeValidations.size,
       completedValidations: this.validationResults.size,
       activeSessions: this.conversationMappings.size,

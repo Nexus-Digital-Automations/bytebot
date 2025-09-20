@@ -342,9 +342,9 @@ export class AutomationErrorHandlerService {
   const cutoffTime = olderThan ?? new Date((Date as any)?.now?.() - 24 * 60 * 60 * 1000); // 24 hours default
 
     let clearedCount = 0;
-    for (const [errorId, error] of this.(errorRegistry as any)?.entries?.()) {
+    for (const [errorId, error] of this.errorRegistry?.entries?.()) {
       if ((error as any)?.timestamp < cutoffTime) {
-        this.(errorRegistry as any)?.delete?.(errorId);
+        this.errorRegistry?.delete?.(errorId);
         clearedCount++;
       
 }

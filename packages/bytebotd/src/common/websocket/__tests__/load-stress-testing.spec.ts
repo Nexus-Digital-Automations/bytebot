@@ -27,7 +27,8 @@
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 
-// Core Load Testing Clientclass LoadTestingWebSocketClient extends EventEmitter {
+// Core Load Testing Client
+class LoadTestingWebSocketClient extends EventEmitter {
   private connectionId: string;
   private isConnected: boolean = false;
   private messagesSent: number = 0;
@@ -93,10 +94,8 @@ reject(error);
   const promises: Promise<void>[] = [];
 
     for (let i = 0; i < count; i++) {
-      const message = {,
-  id: `burst_${this.connectionId
-}
-_${i}`,
+      const message = {
+        id: `burst_${this.connectionId}_${i}`,
         timestamp: performance.now(),
         data: 'x'.repeat(messageSize),
       sequence: i};
@@ -126,8 +125,8 @@ _${i}`,
     this.emit('disconnected');}
 
   getStats(): ConnectionStats {
-  return {,
-  connectionId: this.connectionId,
+  return {
+    connectionId: this.connectionId,
       isConnected: this.isConnected,
       messagesSent: this.messagesSent,
       messagesReceived: this.messagesReceived,
@@ -147,7 +146,7 @@ class LoadTestMetrics {
   private startTime: number;
   private testPhase: string = 'initialization';
 constructor() {this.startTime = performance.now();
-    this.systemMetrics = {,
+    this.systemMetrics = {
   memoryUsage: process.memoryUsage(),
       cpuUsage: process.cpuUsage(),
       timestamp: this.startTime
@@ -208,7 +207,7 @@ constructor() {this.startTime = performance.now();
   }
 
   updateSystemMetrics(): void {
-  this.systemMetrics = {,
+  this.systemMetrics = {
   memoryUsage: process.memoryUsage(),
       cpuUsage: process.cpuUsage(),
       timestamp: performance.now()
@@ -228,7 +227,7 @@ constructor() {this.startTime = performance.now();
     const totalBytes = connectionMetrics.reduce((sum, c) => sum + c.bytesTransferred, 0);
     const totalErrors = connectionMetrics.reduce((sum, c) => sum + c.errors.length, 0);
 
-    return {,
+    return {
   testPhase: this.testPhase,
       totalConnections: connectionMetrics.length,
       activeConnections,
@@ -255,7 +254,7 @@ constructor(metrics: LoadTestMetrics) {this.metrics = metrics;
 
   async executeLoadTest(config: LoadTestConfig): Promise<LoadTestResults>  {
   this.isRunning = true;
-    const results: LoadTestResults = {,
+    const results: LoadTestResults = {
   phases: [],
       overallMetrics: null,
       success: false,
@@ -468,7 +467,7 @@ class MemoryLeakDetector {
 
   private captureMemorySnapshot(): void {
   const memUsage = process.memoryUsage();
-    const snapshot: MemorySnapshot = {,
+    const snapshot: MemorySnapshot = {
   timestamp: performance.now(),
       heapUsed: memUsage.heapUsed,
       heapTotal: memUsage.heapTotal,
@@ -482,7 +481,7 @@ class MemoryLeakDetector {
 
   private analyzeMemoryLeaks(): MemoryLeakAnalysis {
   if (this.memorySnapshots.length < 2) {
-      return {,
+      return {
   hasMemoryLeak: false,
         analysis: 'Insufficient data for analysis',
         snapshots: this.memorySnapshots
@@ -624,7 +623,10 @@ class ResourceExhaustionTester {
       // Send messages rapidly to cause queue overflow
       while (!overflowDetected && messagesSent < 100000) {
         const batchSize = 1000;
-        const largeMessage = 'x'.repeat(10240); // 10KB messagesfor (let i = 0; i < batchSize; i++) {await client.sendMessage({,
+        const largeMessage = 'x'.repeat(10240); // 10KB messages
+
+        for (let i = 0; i < batchSize; i++) {
+          await client.sendMessage({
   id: messagesSent + i,
             data: largeMessage,
             timestamp: performance.now()
@@ -665,7 +667,7 @@ class ResourceExhaustionTester {
     this.memoryDetector.startMonitoring(10000); // Monitor every 10 seconds
 
     const loadGenerator = new ProgressiveLoadGenerator(this.metrics);
-    const sustainedConfig: LoadTestConfig = {,
+    const sustainedConfig: LoadTestConfig = {
   baselineConnections: 1000,
       targetConnections: 5000,
       peakRPS: 25000,
@@ -815,15 +817,15 @@ interface SustainedLoadResult {
 // Test Suite
 describe('WebSocket Load Testing and Stress Testing', () => {
 
-  let metrics: LoadTestMetrics;let loadGenerator: ProgressiveLoadGenerator;
+  let metrics: LoadTestMetrics;
+  let loadGenerator: ProgressiveLoadGenerator;
   let resourceTester: ResourceExhaustionTester;
 
-  beforeEach(() => 
+  beforeEach(() => {
     metrics = new LoadTestMetrics();
     loadGenerator = new ProgressiveLoadGenerator(metrics);
     resourceTester = new ResourceExhaustionTester(metrics);
-  
-});
+  });
 
   afterEach(async () => {
   // Cleanup any running tests
@@ -835,7 +837,9 @@ describe('WebSocket Load Testing and Stress Testing', () => {
 
   describe('Progressive Load Testing', () => {
 
-  test('should execute baseline load test successfully', async () => const config: LoadTestConfig = {baselineConnections: 100,
+  test('should execute baseline load test successfully', async () => {
+    const config: LoadTestConfig = {
+      baselineConnections: 100,
         targetConnections: 500,
         peakRPS: 5000,
         baselineRPS: 1000,
@@ -913,8 +917,9 @@ expect(recoveryPhase?.metrics.activeConnections).toBeLessThanOrEqual(150);
 
   describe('Resource Exhaustion Testing', () => {
 
-  test('should detect connection pool exhaustion point', async () => const result = await resourceTester.testConnectionPoolExhaustion();
-expect(result.success).toBe(true);
+  test('should detect connection pool exhaustion point', async () => {
+    const result = await resourceTester.testConnectionPoolExhaustion();
+    expect(result.success).toBe(true);
       expect(result.exhaustionPoint).toBeGreaterThan(0);
       expect(result.maxConnections).toBeGreaterThan(100);
       expect(result.testType).toBe('connection_pool_exhaustion');
@@ -1111,7 +1116,7 @@ expect(recoveryPhase).toBeDefined();// System should stabilize during recovery
 
   describe('Resource Cleanup Validation', () => {
 
-  test('should properly cleanup resources after load test', async () => const initialMemory = process.memoryUsage().heapUsed;const config: LoadTestConfig = {,
+  test('should properly cleanup resources after load test', async () => const initialMemory = process.memoryUsage().heapUsed;const config: LoadTestConfig = {
   baselineConnections: 200,
         targetConnections: 500,
         peakRPS: 3000,
