@@ -133,7 +133,11 @@ export interface IntegrationTestConfig {
 export interface ValidationCriteria {
   readonly criteriaId: string;
   readonly description: string;
-  readonly metricType: 'PERFORMANCE' | 'CORRECTNESS' | 'COMPLIANCE' | 'SECURITY';
+  readonly metricType:
+    | 'PERFORMANCE'
+    | 'CORRECTNESS'
+    | 'COMPLIANCE'
+    | 'SECURITY';
   readonly threshold: number;
   readonly unit: string;
   readonly required: boolean;
@@ -272,7 +276,9 @@ export interface SystemRecommendation {
 
 @Injectable()
 export class TransactionIntegrationValidatorService {
-  private readonly logger = new Logger(TransactionIntegrationValidatorService.name);
+  private readonly logger = new Logger(
+    TransactionIntegrationValidatorService.name,
+  );
 
   private readonly integrationTestSuite: IntegrationTestConfig[] = [];
   private readonly validationResults = new Map<string, IntegrationTestResult>();
@@ -320,7 +326,9 @@ export class TransactionIntegrationValidatorService {
     const reportId = `integration_validation_${Date.now()}`;
     const executionTimestamp = new Date();
 
-    this.logger.log(`Starting comprehensive integration validation: ${reportId}`);
+    this.logger.log(
+      `Starting comprehensive integration validation: ${reportId}`,
+    );
 
     const testResults: IntegrationTestResult[] = [];
     let testsPassedCount = 0;
@@ -353,10 +361,12 @@ export class TransactionIntegrationValidatorService {
       }
 
       // Generate comprehensive performance summary
-      const systemPerformanceSummary = this.generateSystemPerformanceSummary(testResults);
+      const systemPerformanceSummary =
+        this.generateSystemPerformanceSummary(testResults);
 
       // Generate enterprise compliance summary
-      const enterpriseComplianceSummary = this.generateEnterpriseComplianceSummary(testResults);
+      const enterpriseComplianceSummary =
+        this.generateEnterpriseComplianceSummary(testResults);
 
       // Calculate overall compliance score
       const overallComplianceScore = this.calculateOverallComplianceScore(
@@ -437,7 +447,8 @@ export class TransactionIntegrationValidatorService {
             recommendationId: 'emergency_fix',
             category: 'RECOVERY',
             priority: 'CRITICAL',
-            description: 'Integration validation failed - immediate system review required',
+            description:
+              'Integration validation failed - immediate system review required',
             implementation: 'Review system logs and component health',
             expectedImpact: 'System stability and reliability',
             estimatedEffort: 'HIGH',
@@ -543,7 +554,8 @@ export class TransactionIntegrationValidatorService {
       }
 
       const endTime = new Date();
-      performanceMetrics.totalExecutionTime = endTime.getTime() - startTime.getTime();
+      performanceMetrics.totalExecutionTime =
+        endTime.getTime() - startTime.getTime();
 
       return {
         testId: testConfig.testId,
@@ -679,7 +691,10 @@ export class TransactionIntegrationValidatorService {
       );
 
       const transactionDuration = Date.now() - transactionStart;
-      performanceMetrics.componentResponseTimes.set('transaction_manager', transactionDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'transaction_manager',
+        transactionDuration,
+      );
 
       // Validate transaction execution results
       const successValidation: ValidationResult = {
@@ -694,7 +709,8 @@ export class TransactionIntegrationValidatorService {
 
       const latencyValidation: ValidationResult = {
         criteriaId: 'transaction_latency',
-        passed: transactionDuration < this.enterpriseTargets.transactionLatencyP95,
+        passed:
+          transactionDuration < this.enterpriseTargets.transactionLatencyP95,
         actualValue: transactionDuration,
         expectedThreshold: this.enterpriseTargets.transactionLatencyP95,
         unit: 'ms',
@@ -712,7 +728,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(auditValidation);
 
-      return successValidation.passed && latencyValidation.passed && auditValidation.passed;
+      return (
+        successValidation.passed &&
+        latencyValidation.passed &&
+        auditValidation.passed
+      );
     } catch (error) {
       this.logger.error('Transaction lifecycle validation failed:', error);
 
@@ -792,19 +812,24 @@ export class TransactionIntegrationValidatorService {
 
     try {
       // Execute distributed transaction
-      const result = await this.distributedCoordinator.executeDistributedTransaction(
-        distributedTransaction,
-        userContext,
-      );
+      const result =
+        await this.distributedCoordinator.executeDistributedTransaction(
+          distributedTransaction,
+          userContext,
+        );
 
       const coordinationDuration = Date.now() - coordinationStart;
-      performanceMetrics.componentResponseTimes.set('distributed_coordinator', coordinationDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'distributed_coordinator',
+        coordinationDuration,
+      );
 
       // Validate coordination results
       const successValidation: ValidationResult = {
         criteriaId: 'coordination_success',
         passed: result.finalState === TwoPhaseCommitState.COMMITTED,
-        actualValue: result.finalState === TwoPhaseCommitState.COMMITTED ? 1 : 0,
+        actualValue:
+          result.finalState === TwoPhaseCommitState.COMMITTED ? 1 : 0,
         expectedThreshold: 1,
         unit: 'boolean',
         details: `Coordination state: ${result.finalState}`,
@@ -813,7 +838,9 @@ export class TransactionIntegrationValidatorService {
 
       const latencyValidation: ValidationResult = {
         criteriaId: 'coordination_latency',
-        passed: coordinationDuration < (this.enterpriseTargets.transactionLatencyP95 * 2),
+        passed:
+          coordinationDuration <
+          this.enterpriseTargets.transactionLatencyP95 * 2,
         actualValue: coordinationDuration,
         expectedThreshold: this.enterpriseTargets.transactionLatencyP95 * 2,
         unit: 'ms',
@@ -831,7 +858,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(participantValidation);
 
-      return successValidation.passed && latencyValidation.passed && participantValidation.passed;
+      return (
+        successValidation.passed &&
+        latencyValidation.passed &&
+        participantValidation.passed
+      );
     } catch (error) {
       this.logger.error('Two-phase commit validation failed:', error);
 
@@ -884,9 +915,10 @@ export class TransactionIntegrationValidatorService {
         },
       };
 
-      const monitoringResult = await this.monitoringService.startTransactionMonitoring(
-        monitoringContext,
-      );
+      const monitoringResult =
+        await this.monitoringService.startTransactionMonitoring(
+          monitoringContext,
+        );
 
       // Simulate transaction load and monitor
       await this.simulateTransactionLoad(userContext, 10, 100); // 10 transactions, 100ms each
@@ -897,7 +929,10 @@ export class TransactionIntegrationValidatorService {
       );
 
       const monitoringDuration = Date.now() - monitoringStart;
-      performanceMetrics.componentResponseTimes.set('monitoring_service', monitoringDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'monitoring_service',
+        monitoringDuration,
+      );
 
       // Validate monitoring functionality
       const metricsValidation: ValidationResult = {
@@ -930,7 +965,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(responseTimeValidation);
 
-      return metricsValidation.passed && alertingValidation.passed && responseTimeValidation.passed;
+      return (
+        metricsValidation.passed &&
+        alertingValidation.passed &&
+        responseTimeValidation.passed
+      );
     } catch (error) {
       this.logger.error('Real-time monitoring validation failed:', error);
 
@@ -990,7 +1029,10 @@ export class TransactionIntegrationValidatorService {
       });
 
       const auditDuration = Date.now() - auditStart;
-      performanceMetrics.componentResponseTimes.set('audit_service', auditDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'audit_service',
+        auditDuration,
+      );
 
       // Validate audit functionality
       const integrityValidation: ValidationResult = {
@@ -1023,7 +1065,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(performanceValidation);
 
-      return integrityValidation.passed && completenessValidation.passed && performanceValidation.passed;
+      return (
+        integrityValidation.passed &&
+        completenessValidation.passed &&
+        performanceValidation.passed
+      );
     } catch (error) {
       this.logger.error('Audit trail integrity validation failed:', error);
 
@@ -1076,20 +1122,25 @@ export class TransactionIntegrationValidatorService {
       ];
 
       // Test deadlock detection
-      const deadlockCycles = await this.deadlockService.detectDeadlocks(testLocks);
+      const deadlockCycles =
+        await this.deadlockService.detectDeadlocks(testLocks);
 
       // Generate prevention recommendations
-      const preventionRecommendations = await this.deadlockService.generatePreventionRecommendations(
-        testLocks,
-        {
-          analysisDepth: 'COMPREHENSIVE',
-          includeStatistics: true,
-          recommendationLevel: 'DETAILED',
-        },
-      );
+      const preventionRecommendations =
+        await this.deadlockService.generatePreventionRecommendations(
+          testLocks,
+          {
+            analysisDepth: 'COMPREHENSIVE',
+            includeStatistics: true,
+            recommendationLevel: 'DETAILED',
+          },
+        );
 
       const deadlockDuration = Date.now() - deadlockStart;
-      performanceMetrics.componentResponseTimes.set('deadlock_service', deadlockDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'deadlock_service',
+        deadlockDuration,
+      );
 
       // Validate deadlock detection functionality
       const detectionValidation: ValidationResult = {
@@ -1104,8 +1155,11 @@ export class TransactionIntegrationValidatorService {
 
       const preventionValidation: ValidationResult = {
         criteriaId: 'prevention_recommendations',
-        passed: preventionRecommendations && preventionRecommendations.length > 0,
-        actualValue: preventionRecommendations ? preventionRecommendations.length : 0,
+        passed:
+          preventionRecommendations && preventionRecommendations.length > 0,
+        actualValue: preventionRecommendations
+          ? preventionRecommendations.length
+          : 0,
         expectedThreshold: 1,
         unit: 'recommendations',
         details: `Generated ${preventionRecommendations ? preventionRecommendations.length : 0} prevention recommendations`,
@@ -1122,7 +1176,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(responseTimeValidation);
 
-      return detectionValidation.passed && preventionValidation.passed && responseTimeValidation.passed;
+      return (
+        detectionValidation.passed &&
+        preventionValidation.passed &&
+        responseTimeValidation.passed
+      );
     } catch (error) {
       this.logger.error('Deadlock detection validation failed:', error);
 
@@ -1153,15 +1211,23 @@ export class TransactionIntegrationValidatorService {
 
     try {
       // Execute performance benchmark
-      const benchmarkResults = await this.executeBenchmarkSuite(userContext, executionContext);
+      const benchmarkResults = await this.executeBenchmarkSuite(
+        userContext,
+        executionContext,
+      );
 
       const performanceDuration = Date.now() - performanceStart;
-      performanceMetrics.componentResponseTimes.set('performance_benchmark', performanceDuration);
+      performanceMetrics.componentResponseTimes.set(
+        'performance_benchmark',
+        performanceDuration,
+      );
 
       // Validate P95 latency target
       const p95Validation: ValidationResult = {
         criteriaId: 'p95_latency',
-        passed: benchmarkResults.p95Latency < this.enterpriseTargets.transactionLatencyP95,
+        passed:
+          benchmarkResults.p95Latency <
+          this.enterpriseTargets.transactionLatencyP95,
         actualValue: benchmarkResults.p95Latency,
         expectedThreshold: this.enterpriseTargets.transactionLatencyP95,
         unit: 'ms',
@@ -1172,7 +1238,9 @@ export class TransactionIntegrationValidatorService {
       // Validate throughput target
       const throughputValidation: ValidationResult = {
         criteriaId: 'throughput_tps',
-        passed: benchmarkResults.throughputTPS >= this.enterpriseTargets.throughputTPS,
+        passed:
+          benchmarkResults.throughputTPS >=
+          this.enterpriseTargets.throughputTPS,
         actualValue: benchmarkResults.throughputTPS,
         expectedThreshold: this.enterpriseTargets.throughputTPS,
         unit: 'TPS',
@@ -1191,7 +1259,11 @@ export class TransactionIntegrationValidatorService {
       };
       validationResults.push(errorRateValidation);
 
-      return p95Validation.passed && throughputValidation.passed && errorRateValidation.passed;
+      return (
+        p95Validation.passed &&
+        throughputValidation.passed &&
+        errorRateValidation.passed
+      );
     } catch (error) {
       this.logger.error('Enterprise performance validation failed:', error);
 
@@ -1218,11 +1290,16 @@ export class TransactionIntegrationValidatorService {
       {
         testId: 'test_transaction_lifecycle',
         testType: IntegrationTestType.TRANSACTION_LIFECYCLE,
-        description: 'Validate end-to-end transaction lifecycle with PARLANT integration',
-        expectedOutcome: 'Transaction executes successfully with proper validation and audit trail',
+        description:
+          'Validate end-to-end transaction lifecycle with PARLANT integration',
+        expectedOutcome:
+          'Transaction executes successfully with proper validation and audit trail',
         timeout: 30000,
         retryAttempts: 3,
-        prerequisites: ['Transaction Manager Service', 'PARLANT Validation Service'],
+        prerequisites: [
+          'Transaction Manager Service',
+          'PARLANT Validation Service',
+        ],
         validationCriteria: [
           {
             criteriaId: 'transaction_success',
@@ -1246,7 +1323,12 @@ export class TransactionIntegrationValidatorService {
             standardId: 'acid_compliance',
             name: 'ACID Compliance',
             category: 'ACID',
-            requirements: ['Atomicity', 'Consistency', 'Isolation', 'Durability'],
+            requirements: [
+              'Atomicity',
+              'Consistency',
+              'Isolation',
+              'Durability',
+            ],
             validationMethod: 'Transaction state verification',
           },
         ],
@@ -1256,11 +1338,16 @@ export class TransactionIntegrationValidatorService {
       {
         testId: 'test_two_phase_commit',
         testType: IntegrationTestType.TWO_PHASE_COMMIT,
-        description: 'Validate distributed transaction coordination with two-phase commit',
-        expectedOutcome: 'Distributed transaction coordinates successfully across multiple participants',
+        description:
+          'Validate distributed transaction coordination with two-phase commit',
+        expectedOutcome:
+          'Distributed transaction coordinates successfully across multiple participants',
         timeout: 60000,
         retryAttempts: 2,
-        prerequisites: ['Distributed Coordinator Service', 'Multiple Database Connections'],
+        prerequisites: [
+          'Distributed Coordinator Service',
+          'Multiple Database Connections',
+        ],
         validationCriteria: [
           {
             criteriaId: 'coordination_success',
@@ -1284,7 +1371,11 @@ export class TransactionIntegrationValidatorService {
             standardId: 'xa_protocol_compliance',
             name: 'XA Protocol Compliance',
             category: 'ACID',
-            requirements: ['Two-phase commit', 'Global transaction consistency', 'Coordinator reliability'],
+            requirements: [
+              'Two-phase commit',
+              'Global transaction consistency',
+              'Coordinator reliability',
+            ],
             validationMethod: 'XA transaction state verification',
           },
         ],
@@ -1295,7 +1386,8 @@ export class TransactionIntegrationValidatorService {
         testId: 'test_real_time_monitoring',
         testType: IntegrationTestType.REAL_TIME_MONITORING,
         description: 'Validate real-time transaction monitoring and alerting',
-        expectedOutcome: 'Monitoring system captures metrics and generates alerts properly',
+        expectedOutcome:
+          'Monitoring system captures metrics and generates alerts properly',
         timeout: 45000,
         retryAttempts: 2,
         prerequisites: ['Monitoring Service', 'Alerting System'],
@@ -1332,8 +1424,10 @@ export class TransactionIntegrationValidatorService {
       {
         testId: 'test_audit_trail_integrity',
         testType: IntegrationTestType.AUDIT_TRAIL_INTEGRITY,
-        description: 'Validate comprehensive audit trail integrity and compliance',
-        expectedOutcome: 'Audit trail maintains integrity and supports compliance reporting',
+        description:
+          'Validate comprehensive audit trail integrity and compliance',
+        expectedOutcome:
+          'Audit trail maintains integrity and supports compliance reporting',
         timeout: 30000,
         retryAttempts: 2,
         prerequisites: ['Audit Service', 'Compliance Framework'],
@@ -1360,7 +1454,11 @@ export class TransactionIntegrationValidatorService {
             standardId: 'audit_compliance',
             name: 'Audit Compliance',
             category: 'AUDIT',
-            requirements: ['Tamper-evident', 'Complete coverage', 'Compliance reporting'],
+            requirements: [
+              'Tamper-evident',
+              'Complete coverage',
+              'Compliance reporting',
+            ],
             validationMethod: 'Cryptographic integrity verification',
           },
         ],
@@ -1371,7 +1469,8 @@ export class TransactionIntegrationValidatorService {
         testId: 'test_deadlock_detection',
         testType: IntegrationTestType.DEADLOCK_DETECTION,
         description: 'Validate deadlock detection and resolution mechanisms',
-        expectedOutcome: 'Deadlock detection system identifies and resolves deadlocks effectively',
+        expectedOutcome:
+          'Deadlock detection system identifies and resolves deadlocks effectively',
         timeout: 30000,
         retryAttempts: 2,
         prerequisites: ['Deadlock Detection Service', 'Lock Management'],
@@ -1402,7 +1501,7 @@ export class TransactionIntegrationValidatorService {
             validationMethod: 'Lock dependency analysis',
           },
         ],
-      ),
+      },
 
       // Enterprise performance test
       {
@@ -1451,7 +1550,9 @@ export class TransactionIntegrationValidatorService {
       },
     );
 
-    this.logger.log(`Initialized integration test suite with ${this.integrationTestSuite.length} tests`);
+    this.logger.log(
+      `Initialized integration test suite with ${this.integrationTestSuite.length} tests`,
+    );
   }
 
   /**
@@ -1466,7 +1567,9 @@ export class TransactionIntegrationValidatorService {
     this.performanceBaselines.set('audit_write_latency', 100);
     this.performanceBaselines.set('deadlock_detection_latency', 1000);
 
-    this.logger.log('Performance baselines established for integration validation');
+    this.logger.log(
+      'Performance baselines established for integration validation',
+    );
   }
 
   /**
@@ -1480,7 +1583,7 @@ export class TransactionIntegrationValidatorService {
   ): Promise<void> {
     for (let i = 0; i < transactionCount; i++) {
       // Simulate transaction execution
-      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
@@ -1506,12 +1609,15 @@ export class TransactionIntegrationValidatorService {
     performanceMetrics: IntegrationPerformanceMetrics,
   ): Promise<ComplianceResult> {
     // Simplified compliance validation
-    const passedValidations = validationResults.filter(v => v.passed).length;
+    const passedValidations = validationResults.filter((v) => v.passed).length;
     const totalValidations = validationResults.length;
-    const complianceScore = totalValidations > 0 ? (passedValidations / totalValidations) * 100 : 0;
+    const complianceScore =
+      totalValidations > 0 ? (passedValidations / totalValidations) * 100 : 0;
 
     const failedRequirements = standard.requirements.filter((req, index) => {
-      return index < validationResults.length && !validationResults[index].passed;
+      return (
+        index < validationResults.length && !validationResults[index].passed
+      );
     });
 
     return {
@@ -1519,7 +1625,9 @@ export class TransactionIntegrationValidatorService {
       compliant: complianceScore >= 80, // 80% threshold for compliance
       complianceScore,
       failedRequirements,
-      recommendations: failedRequirements.map(req => `Improve ${req} implementation`),
+      recommendations: failedRequirements.map(
+        (req) => `Improve ${req} implementation`,
+      ),
     };
   }
 
@@ -1529,7 +1637,7 @@ export class TransactionIntegrationValidatorService {
     validationResults: ValidationResult[],
     performanceMetrics: IntegrationPerformanceMetrics,
   ): string {
-    const passedCriteria = validationResults.filter(v => v.passed).length;
+    const passedCriteria = validationResults.filter((v) => v.passed).length;
     const totalCriteria = validationResults.length;
 
     return [
@@ -1544,15 +1652,17 @@ export class TransactionIntegrationValidatorService {
   private generateSystemPerformanceSummary(
     testResults: IntegrationTestResult[],
   ): SystemPerformanceSummary {
-    const durations = testResults.map(r => r.duration);
-    const successfulTests = testResults.filter(r => r.success);
+    const durations = testResults.map((r) => r.duration);
+    const successfulTests = testResults.filter((r) => r.success);
 
     return {
-      averageTransactionLatency: durations.reduce((a, b) => a + b, 0) / durations.length,
+      averageTransactionLatency:
+        durations.reduce((a, b) => a + b, 0) / durations.length,
       p95TransactionLatency: this.calculatePercentile(durations, 95),
       p99TransactionLatency: this.calculatePercentile(durations, 99),
       throughputTPS: 120, // Mock calculation
-      errorRate: (testResults.length - successfulTests.length) / testResults.length,
+      errorRate:
+        (testResults.length - successfulTests.length) / testResults.length,
       resourceUtilization: {
         cpuUtilization: 45, // Mock values
         memoryUtilization: 60,
@@ -1567,12 +1677,13 @@ export class TransactionIntegrationValidatorService {
     testResults: IntegrationTestResult[],
   ): EnterpriseComplianceSummary {
     const complianceScores = testResults
-      .flatMap(r => r.enterpriseComplianceResults)
-      .map(c => c.complianceScore);
+      .flatMap((r) => r.enterpriseComplianceResults)
+      .map((c) => c.complianceScore);
 
-    const averageCompliance = complianceScores.length > 0
-      ? complianceScores.reduce((a, b) => a + b, 0) / complianceScores.length
-      : 0;
+    const averageCompliance =
+      complianceScores.length > 0
+        ? complianceScores.reduce((a, b) => a + b, 0) / complianceScores.length
+        : 0;
 
     return {
       acidCompliance: averageCompliance,
@@ -1588,7 +1699,11 @@ export class TransactionIntegrationValidatorService {
     performanceSummary: SystemPerformanceSummary,
     complianceSummary: EnterpriseComplianceSummary,
   ): number {
-    const performanceScore = performanceSummary.p95TransactionLatency < this.enterpriseTargets.transactionLatencyP95 ? 100 : 0;
+    const performanceScore =
+      performanceSummary.p95TransactionLatency <
+      this.enterpriseTargets.transactionLatencyP95
+        ? 100
+        : 0;
     const averageCompliance = complianceSummary.overallCompliance;
 
     return (performanceScore + averageCompliance) / 2;
@@ -1602,13 +1717,17 @@ export class TransactionIntegrationValidatorService {
     const recommendations: SystemRecommendation[] = [];
 
     // Performance recommendations
-    if (performanceSummary.p95TransactionLatency > this.enterpriseTargets.transactionLatencyP95) {
+    if (
+      performanceSummary.p95TransactionLatency >
+      this.enterpriseTargets.transactionLatencyP95
+    ) {
       recommendations.push({
         recommendationId: 'optimize_p95_latency',
         category: 'PERFORMANCE',
         priority: 'HIGH',
         description: 'P95 transaction latency exceeds enterprise target',
-        implementation: 'Optimize query performance and reduce validation overhead',
+        implementation:
+          'Optimize query performance and reduce validation overhead',
         expectedImpact: 'Reduce P95 latency to sub-1000ms target',
         estimatedEffort: 'MEDIUM',
       });
@@ -1636,7 +1755,7 @@ export class TransactionIntegrationValidatorService {
     complianceSummary: EnterpriseComplianceSummary,
     overallComplianceScore: number,
   ): string {
-    const successfulTests = testResults.filter(r => r.success).length;
+    const successfulTests = testResults.filter((r) => r.success).length;
     const totalTests = testResults.length;
 
     return [
@@ -1708,7 +1827,9 @@ export class TransactionIntegrationValidatorService {
   /**
    * Get integration validation report by ID
    */
-  async getValidationReport(reportId: string): Promise<IntegrationValidationReport | null> {
+  async getValidationReport(
+    reportId: string,
+  ): Promise<IntegrationValidationReport | null> {
     // Implementation would retrieve from persistent storage
     return null;
   }
