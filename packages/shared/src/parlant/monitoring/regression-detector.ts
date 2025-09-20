@@ -34,8 +34,8 @@
  * @author Performance Monitoring Agent
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 
 /**
  * Regression detector configuration
@@ -60,7 +60,11 @@ export interface RegressionDetectorConfig {
  */
 export interface BaselineSettings {
   /** Baseline calculation method */
-  method: 'ROLLING_WINDOW' | 'SEASONAL_DECOMPOSITION' | 'ADAPTIVE_BASELINE' | 'DEPLOYMENT_BASED';
+  method:
+    | "ROLLING_WINDOW"
+    | "SEASONAL_DECOMPOSITION"
+    | "ADAPTIVE_BASELINE"
+    | "DEPLOYMENT_BASED";
   /** Window size for baseline calculation */
   windowSize: number;
   /** Minimum samples required for baseline */
@@ -81,9 +85,9 @@ export interface BaselineSettings {
 export interface SensitivitySettings {
   /** Detection thresholds by severity */
   thresholds: {
-    minor: number;    // e.g., 5% degradation
+    minor: number; // e.g., 5% degradation
     moderate: number; // e.g., 15% degradation
-    major: number;    // e.g., 30% degradation
+    major: number; // e.g., 30% degradation
     critical: number; // e.g., 50% degradation
   };
   /** Minimum change duration for detection */
@@ -93,7 +97,7 @@ export interface SensitivitySettings {
   /** Enable multi-metric correlation detection */
   enableCorrelation: boolean;
   /** Metric-specific sensitivity overrides */
-  metricOverrides: Record<string, Partial<SensitivitySettings['thresholds']>>;
+  metricOverrides: Record<string, Partial<SensitivitySettings["thresholds"]>>;
 }
 
 /**
@@ -107,13 +111,13 @@ export interface PreventionSettings {
     /** Alert stakeholders */
     alerting: {
       enabled: boolean;
-      escalationLevels: ('INFO' | 'WARNING' | 'CRITICAL')[];
+      escalationLevels: ("INFO" | "WARNING" | "CRITICAL")[];
       recipients: string[];
     };
     /** Automated rollback */
     rollback: {
       enabled: boolean;
-      triggerThreshold: 'moderate' | 'major' | 'critical';
+      triggerThreshold: "moderate" | "major" | "critical";
       confirmationRequired: boolean;
     };
     /** Traffic shifting */
@@ -155,7 +159,7 @@ export interface IntegrationSettings {
   /** Deployment tracking */
   deploymentTracking: {
     enabled: boolean;
-    trackingMethod: 'WEBHOOK' | 'POLLING' | 'MANUAL';
+    trackingMethod: "WEBHOOK" | "POLLING" | "MANUAL";
     deploymentMarkers: boolean;
   };
   /** External monitoring systems */
@@ -172,18 +176,18 @@ export interface IntegrationSettings {
 export interface StatisticalTestSettings {
   /** Change point detection settings */
   changePoint: {
-    algorithm: 'CUSUM' | 'PELT' | 'BINARY_SEGMENTATION';
+    algorithm: "CUSUM" | "PELT" | "BINARY_SEGMENTATION";
     penalty: number;
     minSegmentLength: number;
   };
   /** Distribution comparison settings */
   distributionTest: {
-    method: 'MANN_WHITNEY' | 'KOLMOGOROV_SMIRNOV' | 'T_TEST';
+    method: "MANN_WHITNEY" | "KOLMOGOROV_SMIRNOV" | "T_TEST";
     significanceLevel: number;
   };
   /** Control chart settings */
   controlChart: {
-    type: 'XBAR' | 'EWMA' | 'CUSUM_CHART';
+    type: "XBAR" | "EWMA" | "CUSUM_CHART";
     limitMultiplier: number;
     sensitivityParameter: number;
   };
@@ -246,7 +250,7 @@ export interface RegressionDetection {
   /** Affected metric */
   metric: string;
   /** Regression severity */
-  severity: 'MINOR' | 'MODERATE' | 'MAJOR' | 'CRITICAL';
+  severity: "MINOR" | "MODERATE" | "MAJOR" | "CRITICAL";
   /** Detection method used */
   detectionMethod: string;
   /** Statistical confidence */
@@ -262,7 +266,7 @@ export interface RegressionDetection {
     /** Absolute change */
     absoluteChange: number;
     /** Change direction */
-    direction: 'DEGRADATION' | 'IMPROVEMENT';
+    direction: "DEGRADATION" | "IMPROVEMENT";
   };
   /** Detection context */
   context: {
@@ -305,7 +309,7 @@ export interface RegressionDetection {
     /** Estimated affected users */
     affectedUsers?: number;
     /** Business impact level */
-    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    businessImpact: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     /** SLA breach risk */
     slaBreachRisk: number;
   };
@@ -332,7 +336,12 @@ export interface RegressionDetection {
   /** Status tracking */
   status: {
     /** Detection status */
-    status: 'DETECTED' | 'INVESTIGATING' | 'MITIGATING' | 'RESOLVED' | 'FALSE_POSITIVE';
+    status:
+      | "DETECTED"
+      | "INVESTIGATING"
+      | "MITIGATING"
+      | "RESOLVED"
+      | "FALSE_POSITIVE";
     /** Actions taken */
     actionsTaken: string[];
     /** Resolution timestamp */
@@ -356,7 +365,7 @@ export interface PerformanceBudget {
       target: number;
       tolerance: number;
       unit: string;
-      priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     };
   };
   /** Budget scope */
@@ -396,7 +405,7 @@ export interface DeploymentInfo {
   /** Component or service */
   component: string;
   /** Deployment type */
-  type: 'FULL' | 'CANARY' | 'BLUE_GREEN' | 'ROLLING';
+  type: "FULL" | "CANARY" | "BLUE_GREEN" | "ROLLING";
   /** Deployment metadata */
   metadata: {
     initiatedBy: string;
@@ -420,7 +429,8 @@ export class RegressionDetector extends EventEmitter {
   private detections: Map<string, RegressionDetection> = new Map();
   private budgets: Map<string, PerformanceBudget> = new Map();
   private deployments: Map<string, DeploymentInfo> = new Map();
-  private metricHistory: Map<string, { value: number; timestamp: Date }[]> = new Map();
+  private metricHistory: Map<string, { value: number; timestamp: Date }[]> =
+    new Map();
 
   private detectionInterval?: NodeJS.Timeout;
   private baselineUpdateInterval?: NodeJS.Timeout;
@@ -440,27 +450,27 @@ export class RegressionDetector extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('Regression detector is already running');
+      this.logger.warn("Regression detector is already running");
       return;
     }
 
-    this.logger.log('Starting PARLANT Performance Regression Detector');
+    this.logger.log("Starting PARLANT Performance Regression Detector");
 
     // Start detection processing
     this.detectionInterval = setInterval(
       () => this.performDetection(),
-      this.config.detectionInterval
+      this.config.detectionInterval,
     );
 
     // Start baseline updates
     this.baselineUpdateInterval = setInterval(
       () => this.updateBaselines(),
-      this.config.baseline.updateFrequency
+      this.config.baseline.updateFrequency,
     );
 
     this.isRunning = true;
-    this.emit('detector.started');
-    this.logger.log('Regression detector started successfully');
+    this.emit("detector.started");
+    this.logger.log("Regression detector started successfully");
   }
 
   /**
@@ -468,11 +478,11 @@ export class RegressionDetector extends EventEmitter {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Regression detector is not running');
+      this.logger.warn("Regression detector is not running");
       return;
     }
 
-    this.logger.log('Stopping PARLANT Performance Regression Detector');
+    this.logger.log("Stopping PARLANT Performance Regression Detector");
 
     if (this.detectionInterval) {
       clearInterval(this.detectionInterval);
@@ -485,14 +495,18 @@ export class RegressionDetector extends EventEmitter {
     }
 
     this.isRunning = false;
-    this.emit('detector.stopped');
-    this.logger.log('Regression detector stopped successfully');
+    this.emit("detector.stopped");
+    this.logger.log("Regression detector stopped successfully");
   }
 
   /**
    * Record metric value for regression detection
    */
-  recordMetric(metric: string, value: number, context: Record<string, unknown> = {}): void {
+  recordMetric(
+    metric: string,
+    value: number,
+    context: Record<string, unknown> = {},
+  ): void {
     const timestamp = new Date();
 
     if (!this.metricHistory.has(metric)) {
@@ -504,9 +518,12 @@ export class RegressionDetector extends EventEmitter {
 
     // Keep only recent history
     const cutoffTime = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
-    this.metricHistory.set(metric, history.filter(entry => entry.timestamp >= cutoffTime));
+    this.metricHistory.set(
+      metric,
+      history.filter((entry) => entry.timestamp >= cutoffTime),
+    );
 
-    this.emit('metric.recorded', { metric, value, timestamp, context });
+    this.emit("metric.recorded", { metric, value, timestamp, context });
 
     // Immediate regression check for critical metrics
     if (this.isCriticalMetric(metric)) {
@@ -520,13 +537,15 @@ export class RegressionDetector extends EventEmitter {
   createBaseline(
     metric: string,
     data: { value: number; timestamp: Date }[],
-    context: Partial<PerformanceBaseline['context']> = {}
+    context: Partial<PerformanceBaseline["context"]> = {},
   ): PerformanceBaseline {
     const baseline = this.calculateBaseline(metric, data, context);
     this.baselines.set(metric, baseline);
 
-    this.emit('baseline.created', baseline);
-    this.logger.log(`Baseline created for ${metric}: ${baseline.value.toFixed(2)}`);
+    this.emit("baseline.created", baseline);
+    this.logger.log(
+      `Baseline created for ${metric}: ${baseline.value.toFixed(2)}`,
+    );
 
     return baseline;
   }
@@ -534,10 +553,10 @@ export class RegressionDetector extends EventEmitter {
   /**
    * Register deployment for tracking
    */
-  registerDeployment(deployment: Omit<DeploymentInfo, 'id'>): DeploymentInfo {
+  registerDeployment(deployment: Omit<DeploymentInfo, "id">): DeploymentInfo {
     const fullDeployment: DeploymentInfo = {
       id: `deploy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...deployment
+      ...deployment,
     };
 
     this.deployments.set(fullDeployment.id, fullDeployment);
@@ -545,8 +564,10 @@ export class RegressionDetector extends EventEmitter {
     // Create new baselines for post-deployment monitoring
     this.schedulePostDeploymentBaseline(fullDeployment);
 
-    this.emit('deployment.registered', fullDeployment);
-    this.logger.log(`Deployment registered: ${fullDeployment.id} (${fullDeployment.version})`);
+    this.emit("deployment.registered", fullDeployment);
+    this.logger.log(
+      `Deployment registered: ${fullDeployment.id} (${fullDeployment.version})`,
+    );
 
     return fullDeployment;
   }
@@ -554,15 +575,15 @@ export class RegressionDetector extends EventEmitter {
   /**
    * Create performance budget
    */
-  createBudget(budget: Omit<PerformanceBudget, 'id'>): PerformanceBudget {
+  createBudget(budget: Omit<PerformanceBudget, "id">): PerformanceBudget {
     const fullBudget: PerformanceBudget = {
       id: `budget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...budget
+      ...budget,
     };
 
     this.budgets.set(fullBudget.id, fullBudget);
 
-    this.emit('budget.created', fullBudget);
+    this.emit("budget.created", fullBudget);
     this.logger.log(`Performance budget created: ${fullBudget.name}`);
 
     return fullBudget;
@@ -573,7 +594,11 @@ export class RegressionDetector extends EventEmitter {
    */
   getActiveRegressions(): RegressionDetection[] {
     return Array.from(this.detections.values())
-      .filter(detection => detection.status.status === 'DETECTED' || detection.status.status === 'INVESTIGATING')
+      .filter(
+        (detection) =>
+          detection.status.status === "DETECTED" ||
+          detection.status.status === "INVESTIGATING",
+      )
       .sort((a, b) => {
         const severityOrder = { CRITICAL: 4, MAJOR: 3, MODERATE: 2, MINOR: 1 };
         return severityOrder[b.severity] - severityOrder[a.severity];
@@ -585,18 +610,36 @@ export class RegressionDetector extends EventEmitter {
    */
   getBaselines(): PerformanceBaseline[] {
     return Array.from(this.baselines.values())
-      .filter(baseline => baseline.validity.isValid)
-      .sort((a, b) => b.metadata.lastUpdated.getTime() - a.metadata.lastUpdated.getTime());
+      .filter((baseline) => baseline.validity.isValid)
+      .sort(
+        (a, b) =>
+          b.metadata.lastUpdated.getTime() - a.metadata.lastUpdated.getTime(),
+      );
   }
 
   /**
    * Check performance budget compliance
    */
-  checkBudgetCompliance(metric: string, value: number): {
+  checkBudgetCompliance(
+    metric: string,
+    value: number,
+  ): {
     compliant: boolean;
-    violations: { budgetId: string; metric: string; threshold: number; actual: number; severity: string }[];
+    violations: {
+      budgetId: string;
+      metric: string;
+      threshold: number;
+      actual: number;
+      severity: string;
+    }[];
   } {
-    const violations: { budgetId: string; metric: string; threshold: number; actual: number; severity: string }[] = [];
+    const violations: {
+      budgetId: string;
+      metric: string;
+      threshold: number;
+      actual: number;
+      severity: string;
+    }[] = [];
 
     for (const [budgetId, budget] of this.budgets) {
       if (!budget.enforcement.enabled) continue;
@@ -608,36 +651,43 @@ export class RegressionDetector extends EventEmitter {
       const tolerance = metricBudget.tolerance;
 
       if (value > threshold + tolerance) {
-        const severity = value > threshold + (tolerance * 2) ? 'CRITICAL' : 'WARNING';
+        const severity =
+          value > threshold + tolerance * 2 ? "CRITICAL" : "WARNING";
         violations.push({
           budgetId,
           metric,
           threshold,
           actual: value,
-          severity
+          severity,
         });
       }
     }
 
     return {
       compliant: violations.length === 0,
-      violations
+      violations,
     };
   }
 
   /**
    * Resolve regression detection
    */
-  resolveRegression(detectionId: string, resolution: string, resolvedBy: string): boolean {
+  resolveRegression(
+    detectionId: string,
+    resolution: string,
+    resolvedBy: string,
+  ): boolean {
     const detection = this.detections.get(detectionId);
     if (!detection) return false;
 
-    detection.status.status = 'RESOLVED';
+    detection.status.status = "RESOLVED";
     detection.status.resolvedAt = new Date();
     detection.status.resolutionMethod = resolution;
-    detection.status.actionsTaken.push(`Resolved by ${resolvedBy}: ${resolution}`);
+    detection.status.actionsTaken.push(
+      `Resolved by ${resolvedBy}: ${resolution}`,
+    );
 
-    this.emit('regression.resolved', detection);
+    this.emit("regression.resolved", detection);
     this.logger.log(`Regression resolved: ${detectionId}`);
 
     return true;
@@ -645,57 +695,59 @@ export class RegressionDetector extends EventEmitter {
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<RegressionDetectorConfig>): RegressionDetectorConfig {
+  private mergeConfig(
+    userConfig: Partial<RegressionDetectorConfig>,
+  ): RegressionDetectorConfig {
     const defaultConfig: RegressionDetectorConfig = {
       detectionInterval: 60000, // 1 minute
       baseline: {
-        method: 'ROLLING_WINDOW',
+        method: "ROLLING_WINDOW",
         windowSize: 100,
         minSamples: 30,
         updateFrequency: 300000, // 5 minutes
         stabilityThreshold: 0.1,
         excludeOutliers: true,
-        confidenceLevel: 0.95
+        confidenceLevel: 0.95,
       },
       sensitivity: {
         thresholds: {
-          minor: 0.05,    // 5%
+          minor: 0.05, // 5%
           moderate: 0.15, // 15%
-          major: 0.30,    // 30%
-          critical: 0.50  // 50%
+          major: 0.3, // 30%
+          critical: 0.5, // 50%
         },
         minDuration: 60000, // 1 minute
         confidenceLevel: 0.95,
         enableCorrelation: true,
-        metricOverrides: {}
+        metricOverrides: {},
       },
       prevention: {
         enableAutomatedResponse: true,
         responses: {
           alerting: {
             enabled: true,
-            escalationLevels: ['WARNING', 'CRITICAL'],
-            recipients: []
+            escalationLevels: ["WARNING", "CRITICAL"],
+            recipients: [],
           },
           rollback: {
             enabled: false,
-            triggerThreshold: 'major',
-            confirmationRequired: true
+            triggerThreshold: "major",
+            confirmationRequired: true,
           },
           trafficShifting: {
             enabled: false,
             gradualReduction: true,
-            minTrafficPercentage: 10
+            minTrafficPercentage: 10,
           },
           budgetEnforcement: {
             enabled: true,
             budgets: {},
-            blockDeployment: false
-          }
+            blockDeployment: false,
+          },
         },
         deploymentIntegration: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       integration: {
         cicd: {
@@ -704,137 +756,140 @@ export class RegressionDetector extends EventEmitter {
             responseTime: 1000,
             throughput: 1000,
             errorRate: 0.01,
-            cacheHitRate: 0.85
-          }
+            cacheHitRate: 0.85,
+          },
         },
         deploymentTracking: {
           enabled: true,
-          trackingMethod: 'WEBHOOK',
-          deploymentMarkers: true
+          trackingMethod: "WEBHOOK",
+          deploymentMarkers: true,
         },
-        externalSystems: {}
+        externalSystems: {},
       },
       statisticalTests: {
         changePoint: {
-          algorithm: 'CUSUM',
+          algorithm: "CUSUM",
           penalty: 10,
-          minSegmentLength: 5
+          minSegmentLength: 5,
         },
         distributionTest: {
-          method: 'MANN_WHITNEY',
-          significanceLevel: 0.05
+          method: "MANN_WHITNEY",
+          significanceLevel: 0.05,
         },
         controlChart: {
-          type: 'EWMA',
+          type: "EWMA",
           limitMultiplier: 3,
-          sensitivityParameter: 0.1
-        }
-      }
+          sensitivityParameter: 0.1,
+        },
+      },
     };
 
     return { ...defaultConfig, ...userConfig };
   }
 
   private initializeDefaultBudgets(): void {
-    const defaultBudgets: Omit<PerformanceBudget, 'id'>[] = [
+    const defaultBudgets: Omit<PerformanceBudget, "id">[] = [
       {
-        name: 'Response Time Budget',
+        name: "Response Time Budget",
         metrics: {
-          'p95_response_time': {
+          p95_response_time: {
             target: 1000,
             tolerance: 200,
-            unit: 'ms',
-            priority: 'HIGH'
+            unit: "ms",
+            priority: "HIGH",
           },
-          'p99_response_time': {
+          p99_response_time: {
             target: 2000,
             tolerance: 500,
-            unit: 'ms',
-            priority: 'MEDIUM'
-          }
+            unit: "ms",
+            priority: "MEDIUM",
+          },
         },
         scope: {
-          environment: 'production'
+          environment: "production",
         },
         enforcement: {
           enabled: true,
           blockOnViolation: false,
           warningThreshold: 0.8,
-          criticalThreshold: 1.2
+          criticalThreshold: 1.2,
         },
         metadata: {
-          owner: 'performance-team',
+          owner: "performance-team",
           createdAt: new Date(),
           lastUpdated: new Date(),
-          description: 'Response time performance budget'
-        }
+          description: "Response time performance budget",
+        },
       },
       {
-        name: 'Cache Performance Budget',
+        name: "Cache Performance Budget",
         metrics: {
-          'cache_hit_rate': {
+          cache_hit_rate: {
             target: 0.85,
             tolerance: 0.05,
-            unit: '%',
-            priority: 'MEDIUM'
-          }
+            unit: "%",
+            priority: "MEDIUM",
+          },
         },
         scope: {
-          environment: 'production'
+          environment: "production",
         },
         enforcement: {
           enabled: true,
           blockOnViolation: false,
           warningThreshold: 0.9,
-          criticalThreshold: 0.8
+          criticalThreshold: 0.8,
         },
         metadata: {
-          owner: 'performance-team',
+          owner: "performance-team",
           createdAt: new Date(),
           lastUpdated: new Date(),
-          description: 'Cache performance budget'
-        }
-      }
+          description: "Cache performance budget",
+        },
+      },
     ];
 
-    defaultBudgets.forEach(budget => {
+    defaultBudgets.forEach((budget) => {
       this.createBudget(budget);
     });
   }
 
   private async performDetection(): Promise<void> {
     try {
-      this.logger.log('Performing regression detection');
+      this.logger.log("Performing regression detection");
 
       for (const [metric, history] of this.metricHistory) {
         const baseline = this.baselines.get(metric);
-        if (!baseline || history.length < this.config.baseline.minSamples) continue;
+        if (!baseline || history.length < this.config.baseline.minSamples)
+          continue;
 
         await this.detectRegressionForMetric(metric, history, baseline);
       }
 
-      this.emit('detection.completed');
-
+      this.emit("detection.completed");
     } catch (error) {
-      this.logger.error('Error during regression detection:', error);
-      this.emit('detection.error', error);
+      this.logger.error("Error during regression detection:", error);
+      this.emit("detection.error", error);
     }
   }
 
   private async detectRegressionForMetric(
     metric: string,
     history: { value: number; timestamp: Date }[],
-    baseline: PerformanceBaseline
+    baseline: PerformanceBaseline,
   ): Promise<void> {
     const recentData = history.slice(-50); // Last 50 data points
     if (recentData.length < 10) return;
 
-    const recentValues = recentData.map(entry => entry.value);
+    const recentValues = recentData.map((entry) => entry.value);
     const baselineValue = baseline.value;
 
     // Statistical tests
     const changePoint = this.detectChangePoint(recentValues);
-    const distributionTest = this.performDistributionTest(recentValues, baseline);
+    const distributionTest = this.performDistributionTest(
+      recentValues,
+      baseline,
+    );
     const controlChart = this.checkControlChart(recentValues, baseline);
 
     // Determine if regression exists
@@ -843,7 +898,7 @@ export class RegressionDetector extends EventEmitter {
       baseline,
       changePoint,
       distributionTest,
-      controlChart
+      controlChart,
     );
 
     if (regressionDetected) {
@@ -854,13 +909,13 @@ export class RegressionDetector extends EventEmitter {
         {
           changePoint,
           distributionTest,
-          controlChart
-        }
+          controlChart,
+        },
       );
 
       if (detection) {
         this.detections.set(detection.id, detection);
-        this.emit('regression.detected', detection);
+        this.emit("regression.detected", detection);
 
         // Trigger automated responses
         if (this.config.prevention.enableAutomatedResponse) {
@@ -879,7 +934,7 @@ export class RegressionDetector extends EventEmitter {
     // Simplified CUSUM-based change point detection
     const algorithm = this.config.statisticalTests.changePoint.algorithm;
 
-    if (algorithm === 'CUSUM') {
+    if (algorithm === "CUSUM") {
       return this.cusumChangePoint(values);
     }
 
@@ -888,7 +943,7 @@ export class RegressionDetector extends EventEmitter {
       detected: false,
       location: new Date(),
       confidence: 0,
-      algorithm
+      algorithm,
     };
   }
 
@@ -899,7 +954,12 @@ export class RegressionDetector extends EventEmitter {
     algorithm: string;
   } {
     if (values.length < 10) {
-      return { detected: false, location: new Date(), confidence: 0, algorithm: 'CUSUM' };
+      return {
+        detected: false,
+        location: new Date(),
+        confidence: 0,
+        algorithm: "CUSUM",
+      };
     }
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
@@ -925,19 +985,21 @@ export class RegressionDetector extends EventEmitter {
     }
 
     const detected = maxDeviation > threshold;
-    const confidence = detected ? Math.min(1, maxDeviation / (threshold * 2)) : 0;
+    const confidence = detected
+      ? Math.min(1, maxDeviation / (threshold * 2))
+      : 0;
 
     return {
       detected,
       location: new Date(Date.now() - (values.length - changePoint) * 60000), // Approximate
       confidence,
-      algorithm: 'CUSUM'
+      algorithm: "CUSUM",
     };
   }
 
   private performDistributionTest(
     recentValues: number[],
-    baseline: PerformanceBaseline
+    baseline: PerformanceBaseline,
   ): {
     statistic: number;
     pValue: number;
@@ -946,7 +1008,7 @@ export class RegressionDetector extends EventEmitter {
   } {
     const method = this.config.statisticalTests.distributionTest.method;
 
-    if (method === 'MANN_WHITNEY') {
+    if (method === "MANN_WHITNEY") {
       return this.mannWhitneyTest(recentValues, baseline);
     }
 
@@ -955,13 +1017,13 @@ export class RegressionDetector extends EventEmitter {
       statistic: 0,
       pValue: 1,
       significant: false,
-      method
+      method,
     };
   }
 
   private mannWhitneyTest(
     recentValues: number[],
-    baseline: PerformanceBaseline
+    baseline: PerformanceBaseline,
   ): {
     statistic: number;
     pValue: number;
@@ -969,16 +1031,24 @@ export class RegressionDetector extends EventEmitter {
     method: string;
   } {
     // Simplified Mann-Whitney U test
-    const baselineValues = this.generateBaselineValues(baseline, recentValues.length);
+    const baselineValues = this.generateBaselineValues(
+      baseline,
+      recentValues.length,
+    );
 
     if (baselineValues.length === 0 || recentValues.length === 0) {
-      return { statistic: 0, pValue: 1, significant: false, method: 'MANN_WHITNEY' };
+      return {
+        statistic: 0,
+        pValue: 1,
+        significant: false,
+        method: "MANN_WHITNEY",
+      };
     }
 
     // Combine and rank values
     const combined = [
-      ...baselineValues.map(val => ({ value: val, group: 'baseline' })),
-      ...recentValues.map(val => ({ value: val, group: 'recent' }))
+      ...baselineValues.map((val) => ({ value: val, group: "baseline" })),
+      ...recentValues.map((val) => ({ value: val, group: "recent" })),
     ].sort((a, b) => a.value - b.value);
 
     // Assign ranks
@@ -986,7 +1056,7 @@ export class RegressionDetector extends EventEmitter {
     let recentRankSum = 0;
 
     for (let i = 0; i < combined.length; i++) {
-      if (combined[i].group === 'recent') {
+      if (combined[i].group === "recent") {
         recentRankSum += rank;
       }
       rank++;
@@ -1005,34 +1075,37 @@ export class RegressionDetector extends EventEmitter {
     const z = Math.abs(u - meanU) / stdU;
     const pValue = 2 * (1 - this.normalCDF(z));
 
-    const significant = pValue < this.config.statisticalTests.distributionTest.significanceLevel;
+    const significant =
+      pValue < this.config.statisticalTests.distributionTest.significanceLevel;
 
     return {
       statistic: u,
       pValue,
       significant,
-      method: 'MANN_WHITNEY'
+      method: "MANN_WHITNEY",
     };
   }
 
   private checkControlChart(
     recentValues: number[],
-    baseline: PerformanceBaseline
+    baseline: PerformanceBaseline,
   ): {
     outOfControl: boolean;
     violationType: string;
     consecutiveViolations: number;
   } {
     const chartType = this.config.statisticalTests.controlChart.type;
-    const limitMultiplier = this.config.statisticalTests.controlChart.limitMultiplier;
+    const limitMultiplier =
+      this.config.statisticalTests.controlChart.limitMultiplier;
 
     const centerLine = baseline.value;
-    const controlLimit = baseline.statistics.standardDeviation * limitMultiplier;
+    const controlLimit =
+      baseline.statistics.standardDeviation * limitMultiplier;
     const upperLimit = centerLine + controlLimit;
     const lowerLimit = centerLine - controlLimit;
 
     let consecutiveViolations = 0;
-    let violationType = 'NONE';
+    let violationType = "NONE";
     let outOfControl = false;
 
     // Check for violations
@@ -1041,7 +1114,7 @@ export class RegressionDetector extends EventEmitter {
 
       if (value > upperLimit || value < lowerLimit) {
         consecutiveViolations++;
-        violationType = value > upperLimit ? 'UPPER_LIMIT' : 'LOWER_LIMIT';
+        violationType = value > upperLimit ? "UPPER_LIMIT" : "LOWER_LIMIT";
         outOfControl = true;
       } else {
         break; // Stop counting if no violation
@@ -1051,7 +1124,7 @@ export class RegressionDetector extends EventEmitter {
     return {
       outOfControl,
       violationType,
-      consecutiveViolations
+      consecutiveViolations,
     };
   }
 
@@ -1060,14 +1133,15 @@ export class RegressionDetector extends EventEmitter {
     baseline: PerformanceBaseline,
     changePoint: any,
     distributionTest: any,
-    controlChart: any
+    controlChart: any,
   ): boolean {
     // Multiple criteria for regression detection
     const criteria = {
       changePoint: changePoint.detected && changePoint.confidence > 0.7,
       distributionTest: distributionTest.significant,
-      controlChart: controlChart.outOfControl && controlChart.consecutiveViolations >= 3,
-      magnitudeCheck: this.checkMagnitudeRegression(recentValues, baseline)
+      controlChart:
+        controlChart.outOfControl && controlChart.consecutiveViolations >= 3,
+      magnitudeCheck: this.checkMagnitudeRegression(recentValues, baseline),
     };
 
     // Require at least 2 criteria to be met
@@ -1075,9 +1149,15 @@ export class RegressionDetector extends EventEmitter {
     return metCriteria >= 2;
   }
 
-  private checkMagnitudeRegression(recentValues: number[], baseline: PerformanceBaseline): boolean {
-    const recentMean = recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
-    const percentageChange = Math.abs((recentMean - baseline.value) / baseline.value);
+  private checkMagnitudeRegression(
+    recentValues: number[],
+    baseline: PerformanceBaseline,
+  ): boolean {
+    const recentMean =
+      recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
+    const percentageChange = Math.abs(
+      (recentMean - baseline.value) / baseline.value,
+    );
 
     return percentageChange > this.config.sensitivity.thresholds.minor;
   }
@@ -1086,9 +1166,10 @@ export class RegressionDetector extends EventEmitter {
     metric: string,
     recentValues: number[],
     baseline: PerformanceBaseline,
-    statisticalTests: any
+    statisticalTests: any,
   ): Promise<RegressionDetection | null> {
-    const recentMean = recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
+    const recentMean =
+      recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
     const percentageChange = (recentMean - baseline.value) / baseline.value;
     const absoluteChange = recentMean - baseline.value;
 
@@ -1096,7 +1177,10 @@ export class RegressionDetector extends EventEmitter {
     const severity = this.determineSeverity(Math.abs(percentageChange));
 
     // Check if this is a meaningful regression
-    if (severity === 'MINOR' && Math.abs(percentageChange) < this.config.sensitivity.thresholds.minor) {
+    if (
+      severity === "MINOR" &&
+      Math.abs(percentageChange) < this.config.sensitivity.thresholds.minor
+    ) {
       return null;
     }
 
@@ -1105,56 +1189,62 @@ export class RegressionDetector extends EventEmitter {
       timestamp: new Date(),
       metric,
       severity,
-      detectionMethod: 'STATISTICAL_ANALYSIS',
+      detectionMethod: "STATISTICAL_ANALYSIS",
       confidence: this.calculateDetectionConfidence(statisticalTests),
       change: {
         baseline: baseline.value,
         current: recentMean,
         percentageChange,
         absoluteChange,
-        direction: recentMean > baseline.value ? 'DEGRADATION' : 'IMPROVEMENT'
+        direction: recentMean > baseline.value ? "DEGRADATION" : "IMPROVEMENT",
       },
       context: {
         timeWindow: {
           start: new Date(Date.now() - recentValues.length * 60000),
-          end: new Date()
+          end: new Date(),
         },
         sampleSizes: {
           baseline: baseline.metadata.sampleSize,
-          current: recentValues.length
+          current: recentValues.length,
         },
         deployments: this.getRecentDeployments(),
-        components: []
+        components: [],
       },
       statisticalTests,
       impact: await this.assessImpact(metric, severity, percentageChange),
       rootCause: this.analyzeRootCause(metric, percentageChange),
       mitigation: this.generateMitigationPlan(metric, severity),
       status: {
-        status: 'DETECTED',
+        status: "DETECTED",
         actionsTaken: [],
-      }
+      },
     };
 
     return detection;
   }
 
-  private checkImmedateRegression(metric: string, value: number, context: Record<string, unknown>): void {
+  private checkImmedateRegression(
+    metric: string,
+    value: number,
+    context: Record<string, unknown>,
+  ): void {
     const baseline = this.baselines.get(metric);
     if (!baseline) return;
 
-    const percentageChange = Math.abs((value - baseline.value) / baseline.value);
+    const percentageChange = Math.abs(
+      (value - baseline.value) / baseline.value,
+    );
     const severity = this.determineSeverity(percentageChange);
 
-    if (severity === 'CRITICAL' || severity === 'MAJOR') {
+    if (severity === "CRITICAL" || severity === "MAJOR") {
       // Immediate alert for critical regressions
-      this.emit('immediate.regression', {
+      this.emit("immediate.regression", {
         metric,
         value,
         baseline: baseline.value,
         percentageChange,
         severity,
-        context
+        context,
       });
     }
   }
@@ -1169,14 +1259,14 @@ export class RegressionDetector extends EventEmitter {
       if (shouldUpdate) {
         const newBaseline = this.calculateBaseline(metric, history);
         this.baselines.set(metric, newBaseline);
-        this.emit('baseline.updated', newBaseline);
+        this.emit("baseline.updated", newBaseline);
       }
     }
   }
 
   private shouldUpdateBaseline(
     baseline: PerformanceBaseline | undefined,
-    history: { value: number; timestamp: Date }[]
+    history: { value: number; timestamp: Date }[],
   ): boolean {
     if (!baseline) return true;
 
@@ -1187,8 +1277,11 @@ export class RegressionDetector extends EventEmitter {
     if (ageMs > maxAge) return true;
 
     // Check if data has significantly changed
-    const recentValues = history.slice(-this.config.baseline.windowSize).map(entry => entry.value);
-    const recentMean = recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
+    const recentValues = history
+      .slice(-this.config.baseline.windowSize)
+      .map((entry) => entry.value);
+    const recentMean =
+      recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
     const drift = Math.abs((recentMean - baseline.value) / baseline.value);
 
     return drift > this.config.baseline.stabilityThreshold;
@@ -1197,9 +1290,9 @@ export class RegressionDetector extends EventEmitter {
   private calculateBaseline(
     metric: string,
     data: { value: number; timestamp: Date }[],
-    context: Partial<PerformanceBaseline['context']> = {}
+    context: Partial<PerformanceBaseline["context"]> = {},
   ): PerformanceBaseline {
-    const values = data.map(entry => entry.value);
+    const values = data.map((entry) => entry.value);
 
     // Remove outliers if configured
     const cleanValues = this.config.baseline.excludeOutliers
@@ -1213,8 +1306,8 @@ export class RegressionDetector extends EventEmitter {
       metric,
       value: statistics.mean,
       bounds: {
-        upper: statistics.mean + (statistics.standardDeviation * 2),
-        lower: statistics.mean - (statistics.standardDeviation * 2)
+        upper: statistics.mean + statistics.standardDeviation * 2,
+        lower: statistics.mean - statistics.standardDeviation * 2,
       },
       statistics: {
         mean: statistics.mean,
@@ -1223,8 +1316,8 @@ export class RegressionDetector extends EventEmitter {
         percentiles: {
           p50: statistics.median,
           p95: this.calculatePercentile(cleanValues, 95),
-          p99: this.calculatePercentile(cleanValues, 99)
-        }
+          p99: this.calculatePercentile(cleanValues, 99),
+        },
       },
       metadata: {
         calculationMethod: this.config.baseline.method,
@@ -1234,17 +1327,17 @@ export class RegressionDetector extends EventEmitter {
         lastUpdated: new Date(),
         dataRange: {
           start: data[0].timestamp,
-          end: data[data.length - 1].timestamp
-        }
+          end: data[data.length - 1].timestamp,
+        },
       },
       context: {
-        environment: 'production',
-        ...context
+        environment: "production",
+        ...context,
       },
       validity: {
         isValid: cleanValues.length >= this.config.baseline.minSamples,
-        confidence: this.calculateBaselineConfidence(cleanValues)
-      }
+        confidence: this.calculateBaselineConfidence(cleanValues),
+      },
     };
 
     return baseline;
@@ -1252,58 +1345,75 @@ export class RegressionDetector extends EventEmitter {
 
   private schedulePostDeploymentBaseline(deployment: DeploymentInfo): void {
     // Schedule baseline creation after deployment settles
-    setTimeout(() => {
-      this.createPostDeploymentBaselines(deployment);
-    }, 15 * 60 * 1000); // 15 minutes after deployment
+    setTimeout(
+      () => {
+        this.createPostDeploymentBaselines(deployment);
+      },
+      15 * 60 * 1000,
+    ); // 15 minutes after deployment
   }
 
   private createPostDeploymentBaselines(deployment: DeploymentInfo): void {
     const deploymentTime = deployment.timestamp.getTime();
-    const cutoffTime = new Date(deploymentTime + (30 * 60 * 1000)); // 30 minutes after deployment
+    const cutoffTime = new Date(deploymentTime + 30 * 60 * 1000); // 30 minutes after deployment
 
     for (const [metric, history] of this.metricHistory) {
-      const postDeploymentData = history.filter(entry =>
-        entry.timestamp.getTime() >= deploymentTime &&
-        entry.timestamp.getTime() <= cutoffTime.getTime()
+      const postDeploymentData = history.filter(
+        (entry) =>
+          entry.timestamp.getTime() >= deploymentTime &&
+          entry.timestamp.getTime() <= cutoffTime.getTime(),
       );
 
       if (postDeploymentData.length >= this.config.baseline.minSamples) {
         const baseline = this.calculateBaseline(metric, postDeploymentData, {
           deployment: deployment.id,
           version: deployment.version,
-          component: deployment.component
+          component: deployment.component,
         });
 
         this.baselines.set(`${metric}:${deployment.id}`, baseline);
-        this.emit('post-deployment.baseline.created', { baseline, deployment });
+        this.emit("post-deployment.baseline.created", { baseline, deployment });
       }
     }
   }
 
-  private async triggerAutomatedResponse(detection: RegressionDetection): Promise<void> {
+  private async triggerAutomatedResponse(
+    detection: RegressionDetection,
+  ): Promise<void> {
     const responses = this.config.prevention.responses;
 
     // Alerting
     if (responses.alerting.enabled) {
-      this.emit('automated.alert', detection);
+      this.emit("automated.alert", detection);
     }
 
     // Rollback recommendation
-    if (responses.rollback.enabled &&
-        this.shouldTriggerRollback(detection.severity, responses.rollback.triggerThreshold)) {
-      this.emit('automated.rollback.recommended', detection);
+    if (
+      responses.rollback.enabled &&
+      this.shouldTriggerRollback(
+        detection.severity,
+        responses.rollback.triggerThreshold,
+      )
+    ) {
+      this.emit("automated.rollback.recommended", detection);
     }
 
     // Traffic shifting
     if (responses.trafficShifting.enabled) {
-      this.emit('automated.traffic.shift', detection);
+      this.emit("automated.traffic.shift", detection);
     }
 
     // Budget enforcement
     if (responses.budgetEnforcement.enabled) {
-      const budgetViolations = this.checkBudgetCompliance(detection.metric, detection.change.current);
+      const budgetViolations = this.checkBudgetCompliance(
+        detection.metric,
+        detection.change.current,
+      );
       if (!budgetViolations.compliant) {
-        this.emit('automated.budget.violation', { detection, violations: budgetViolations.violations });
+        this.emit("automated.budget.violation", {
+          detection,
+          violations: budgetViolations.violations,
+        });
       }
     }
   }
@@ -1311,41 +1421,50 @@ export class RegressionDetector extends EventEmitter {
   // ===== UTILITY METHODS =====
 
   private isCriticalMetric(metric: string): boolean {
-    const criticalMetrics = ['p95_response_time', 'p99_response_time', 'error_rate', 'throughput'];
+    const criticalMetrics = [
+      "p95_response_time",
+      "p99_response_time",
+      "error_rate",
+      "throughput",
+    ];
     return criticalMetrics.includes(metric);
   }
 
-  private determineSeverity(percentageChange: number): RegressionDetection['severity'] {
+  private determineSeverity(
+    percentageChange: number,
+  ): RegressionDetection["severity"] {
     const thresholds = this.config.sensitivity.thresholds;
 
-    if (percentageChange >= thresholds.critical) return 'CRITICAL';
-    if (percentageChange >= thresholds.major) return 'MAJOR';
-    if (percentageChange >= thresholds.moderate) return 'MODERATE';
-    return 'MINOR';
+    if (percentageChange >= thresholds.critical) return "CRITICAL";
+    if (percentageChange >= thresholds.major) return "MAJOR";
+    if (percentageChange >= thresholds.moderate) return "MODERATE";
+    return "MINOR";
   }
 
   private calculateDetectionConfidence(statisticalTests: any): number {
     const confidences = [
       statisticalTests.changePoint?.confidence || 0,
       statisticalTests.distributionTest?.significant ? 0.95 : 0.5,
-      statisticalTests.controlChart?.outOfControl ? 0.9 : 0.5
+      statisticalTests.controlChart?.outOfControl ? 0.9 : 0.5,
     ];
 
-    return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
+    return (
+      confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
+    );
   }
 
   private getRecentDeployments(): string[] {
     const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
     return Array.from(this.deployments.values())
-      .filter(deployment => deployment.timestamp >= cutoffTime)
-      .map(deployment => deployment.id);
+      .filter((deployment) => deployment.timestamp >= cutoffTime)
+      .map((deployment) => deployment.id);
   }
 
   private async assessImpact(
     metric: string,
-    severity: RegressionDetection['severity'],
-    percentageChange: number
-  ): Promise<RegressionDetection['impact']> {
+    severity: RegressionDetection["severity"],
+    percentageChange: number,
+  ): Promise<RegressionDetection["impact"]> {
     const riskScore = this.calculateRiskScore(severity, percentageChange);
     const businessImpact = this.determineBusinessImpact(metric, severity);
     const slaBreachRisk = this.calculateSLABreachRisk(metric, percentageChange);
@@ -1353,12 +1472,20 @@ export class RegressionDetector extends EventEmitter {
     return {
       riskScore,
       businessImpact,
-      slaBreachRisk
+      slaBreachRisk,
     };
   }
 
-  private calculateRiskScore(severity: RegressionDetection['severity'], percentageChange: number): number {
-    const severityScores = { MINOR: 25, MODERATE: 50, MAJOR: 75, CRITICAL: 100 };
+  private calculateRiskScore(
+    severity: RegressionDetection["severity"],
+    percentageChange: number,
+  ): number {
+    const severityScores = {
+      MINOR: 25,
+      MODERATE: 50,
+      MAJOR: 75,
+      CRITICAL: 100,
+    };
     const baseScore = severityScores[severity];
     const magnitudeMultiplier = Math.min(2, Math.abs(percentageChange) * 2);
 
@@ -1367,25 +1494,31 @@ export class RegressionDetector extends EventEmitter {
 
   private determineBusinessImpact(
     metric: string,
-    severity: RegressionDetection['severity']
-  ): RegressionDetection['impact']['businessImpact'] {
-    const criticalMetrics = ['p95_response_time', 'error_rate', 'throughput'];
+    severity: RegressionDetection["severity"],
+  ): RegressionDetection["impact"]["businessImpact"] {
+    const criticalMetrics = ["p95_response_time", "error_rate", "throughput"];
 
-    if (criticalMetrics.includes(metric) && (severity === 'CRITICAL' || severity === 'MAJOR')) {
-      return 'CRITICAL';
+    if (
+      criticalMetrics.includes(metric) &&
+      (severity === "CRITICAL" || severity === "MAJOR")
+    ) {
+      return "CRITICAL";
     }
 
-    if (severity === 'MAJOR') return 'HIGH';
-    if (severity === 'MODERATE') return 'MEDIUM';
-    return 'LOW';
+    if (severity === "MAJOR") return "HIGH";
+    if (severity === "MODERATE") return "MEDIUM";
+    return "LOW";
   }
 
-  private calculateSLABreachRisk(metric: string, percentageChange: number): number {
+  private calculateSLABreachRisk(
+    metric: string,
+    percentageChange: number,
+  ): number {
     const slaThresholds: Record<string, number> = {
-      'p95_response_time': 1000,
-      'p99_response_time': 2000,
-      'error_rate': 0.01,
-      'cache_hit_rate': 0.85
+      p95_response_time: 1000,
+      p99_response_time: 2000,
+      error_rate: 0.01,
+      cache_hit_rate: 0.85,
     };
 
     const threshold = slaThresholds[metric];
@@ -1394,87 +1527,92 @@ export class RegressionDetector extends EventEmitter {
     return Math.min(100, Math.abs(percentageChange) * 100);
   }
 
-  private analyzeRootCause(metric: string, percentageChange: number): RegressionDetection['rootCause'] {
+  private analyzeRootCause(
+    metric: string,
+    percentageChange: number,
+  ): RegressionDetection["rootCause"] {
     const likelyCauses: string[] = [];
 
-    if (metric.includes('response_time')) {
-      likelyCauses.push('Database query performance degradation');
-      likelyCauses.push('Increased system load or traffic');
-      likelyCauses.push('Network latency issues');
-      likelyCauses.push('Code changes affecting performance');
+    if (metric.includes("response_time")) {
+      likelyCauses.push("Database query performance degradation");
+      likelyCauses.push("Increased system load or traffic");
+      likelyCauses.push("Network latency issues");
+      likelyCauses.push("Code changes affecting performance");
     }
 
-    if (metric.includes('cache')) {
-      likelyCauses.push('Cache configuration changes');
-      likelyCauses.push('Cache invalidation issues');
-      likelyCauses.push('Memory pressure affecting cache');
+    if (metric.includes("cache")) {
+      likelyCauses.push("Cache configuration changes");
+      likelyCauses.push("Cache invalidation issues");
+      likelyCauses.push("Memory pressure affecting cache");
     }
 
-    if (metric.includes('error_rate')) {
-      likelyCauses.push('Recent code deployment');
-      likelyCauses.push('External service failures');
-      likelyCauses.push('Configuration changes');
+    if (metric.includes("error_rate")) {
+      likelyCauses.push("Recent code deployment");
+      likelyCauses.push("External service failures");
+      likelyCauses.push("Configuration changes");
     }
 
     return {
       likelyCauses,
       correlatedChanges: this.getRecentDeployments(),
       investigations: [
-        'Review recent deployments and changes',
-        'Check system resource utilization',
-        'Analyze error logs and patterns',
-        'Verify external service dependencies'
-      ]
+        "Review recent deployments and changes",
+        "Check system resource utilization",
+        "Analyze error logs and patterns",
+        "Verify external service dependencies",
+      ],
     };
   }
 
   private generateMitigationPlan(
     metric: string,
-    severity: RegressionDetection['severity']
-  ): RegressionDetection['mitigation'] {
+    severity: RegressionDetection["severity"],
+  ): RegressionDetection["mitigation"] {
     const immediateActions: string[] = [];
     const longTermFixes: string[] = [];
 
-    if (severity === 'CRITICAL' || severity === 'MAJOR') {
-      immediateActions.push('Alert on-call team');
-      immediateActions.push('Consider rolling back recent deployment');
-      immediateActions.push('Scale up resources if applicable');
+    if (severity === "CRITICAL" || severity === "MAJOR") {
+      immediateActions.push("Alert on-call team");
+      immediateActions.push("Consider rolling back recent deployment");
+      immediateActions.push("Scale up resources if applicable");
     }
 
-    if (metric.includes('response_time')) {
-      immediateActions.push('Check database performance');
-      longTermFixes.push('Optimize slow queries');
-      longTermFixes.push('Implement additional caching');
+    if (metric.includes("response_time")) {
+      immediateActions.push("Check database performance");
+      longTermFixes.push("Optimize slow queries");
+      longTermFixes.push("Implement additional caching");
     }
 
-    if (metric.includes('cache')) {
-      immediateActions.push('Review cache configuration');
-      longTermFixes.push('Optimize cache TTL settings');
-      longTermFixes.push('Implement cache warming strategies');
+    if (metric.includes("cache")) {
+      immediateActions.push("Review cache configuration");
+      longTermFixes.push("Optimize cache TTL settings");
+      longTermFixes.push("Implement cache warming strategies");
     }
 
     return {
       immediateActions,
       longTermFixes,
-      rollbackRecommended: severity === 'CRITICAL' || severity === 'MAJOR',
-      estimatedRecoveryTime: this.estimateRecoveryTime(severity)
+      rollbackRecommended: severity === "CRITICAL" || severity === "MAJOR",
+      estimatedRecoveryTime: this.estimateRecoveryTime(severity),
     };
   }
 
-  private estimateRecoveryTime(severity: RegressionDetection['severity']): number {
+  private estimateRecoveryTime(
+    severity: RegressionDetection["severity"],
+  ): number {
     const recoveryTimes = {
-      MINOR: 30,      // 30 minutes
-      MODERATE: 60,   // 1 hour
-      MAJOR: 180,     // 3 hours
-      CRITICAL: 60    // 1 hour (urgent)
+      MINOR: 30, // 30 minutes
+      MODERATE: 60, // 1 hour
+      MAJOR: 180, // 3 hours
+      CRITICAL: 60, // 1 hour (urgent)
     };
 
     return recoveryTimes[severity] * 60 * 1000; // Convert to milliseconds
   }
 
   private shouldTriggerRollback(
-    severity: RegressionDetection['severity'],
-    triggerThreshold: 'moderate' | 'major' | 'critical'
+    severity: RegressionDetection["severity"],
+    triggerThreshold: "moderate" | "major" | "critical",
   ): boolean {
     const severityLevels = { moderate: 2, major: 3, critical: 4 };
     const severityValues = { MINOR: 1, MODERATE: 2, MAJOR: 3, CRITICAL: 4 };
@@ -1488,8 +1626,9 @@ export class RegressionDetector extends EventEmitter {
     if (values.length <= 1) return 0;
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
-    const variance = squaredDiffs.reduce((sum, val) => sum + val, 0) / (values.length - 1);
+    const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
+    const variance =
+      squaredDiffs.reduce((sum, val) => sum + val, 0) / (values.length - 1);
 
     return Math.sqrt(variance);
   }
@@ -1511,7 +1650,10 @@ export class RegressionDetector extends EventEmitter {
     return { mean, median, standardDeviation };
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
     if (sortedValues.length === 0) return 0;
 
     const index = (percentile / 100) * (sortedValues.length - 1);
@@ -1534,10 +1676,13 @@ export class RegressionDetector extends EventEmitter {
     const lowerBound = q1 - 1.5 * iqr;
     const upperBound = q3 + 1.5 * iqr;
 
-    return values.filter(val => val >= lowerBound && val <= upperBound);
+    return values.filter((val) => val >= lowerBound && val <= upperBound);
   }
 
-  private generateBaselineValues(baseline: PerformanceBaseline, count: number): number[] {
+  private generateBaselineValues(
+    baseline: PerformanceBaseline,
+    count: number,
+  ): number[] {
     // Generate synthetic baseline values for comparison
     const values: number[] = [];
     const mean = baseline.value;
@@ -1572,7 +1717,9 @@ export class RegressionDetector extends EventEmitter {
     x = Math.abs(x);
 
     const t = 1.0 / (1.0 + p * x);
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    const y =
+      1.0 -
+      ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
 
     return sign * y;
   }
@@ -1582,10 +1729,22 @@ export class RegressionDetector extends EventEmitter {
     const minConfidence = 0.5;
     const maxConfidence = 0.95;
 
-    const sizeConfidence = Math.min(1, values.length / this.config.baseline.windowSize);
-    const stabilityConfidence = 1 - Math.min(1, this.calculateStandardDeviation(values) / (values.reduce((sum, val) => sum + val, 0) / values.length));
+    const sizeConfidence = Math.min(
+      1,
+      values.length / this.config.baseline.windowSize,
+    );
+    const stabilityConfidence =
+      1 -
+      Math.min(
+        1,
+        this.calculateStandardDeviation(values) /
+          (values.reduce((sum, val) => sum + val, 0) / values.length),
+      );
 
-    return Math.max(minConfidence, Math.min(maxConfidence, (sizeConfidence + stabilityConfidence) / 2));
+    return Math.max(
+      minConfidence,
+      Math.min(maxConfidence, (sizeConfidence + stabilityConfidence) / 2),
+    );
   }
 }
 

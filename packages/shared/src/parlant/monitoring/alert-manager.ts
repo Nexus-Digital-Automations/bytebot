@@ -26,8 +26,8 @@
  * @author Performance Monitoring Agent
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 
 /**
  * Alert manager configuration
@@ -77,7 +77,7 @@ export interface NotificationConfig {
     enabled: boolean;
     endpoints: {
       url: string;
-      method: 'POST' | 'PUT';
+      method: "POST" | "PUT";
       headers: Record<string, string>;
       severities: AlertSeverity[];
     }[];
@@ -124,23 +124,23 @@ export interface EscalationConfig {
  * Escalation actions
  */
 export type EscalationAction =
-  | 'NOTIFY_ONCALL'
-  | 'CREATE_INCIDENT'
-  | 'AUTO_SCALE'
-  | 'RESTART_SERVICE'
-  | 'ENABLE_CIRCUIT_BREAKER'
-  | 'CLEAR_CACHE'
-  | 'CUSTOM_WEBHOOK';
+  | "NOTIFY_ONCALL"
+  | "CREATE_INCIDENT"
+  | "AUTO_SCALE"
+  | "RESTART_SERVICE"
+  | "ENABLE_CIRCUIT_BREAKER"
+  | "CLEAR_CACHE"
+  | "CUSTOM_WEBHOOK";
 
 /**
  * Alert severity levels
  */
-export type AlertSeverity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+export type AlertSeverity = "INFO" | "WARNING" | "ERROR" | "CRITICAL";
 
 /**
  * Alert status
  */
-export type AlertStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED' | 'SUPPRESSED';
+export type AlertStatus = "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "SUPPRESSED";
 
 /**
  * Performance alert definition
@@ -168,7 +168,7 @@ export interface PerformanceAlert {
   /** Alert source component */
   source: {
     component: string;
-    level?: 'L1' | 'L2' | 'L3';
+    level?: "L1" | "L2" | "L3";
     functionName?: string;
     userId?: string;
   };
@@ -191,7 +191,7 @@ export interface PerformanceAlert {
   recommendations: string[];
   /** Impact assessment */
   impact: {
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     affectedUsers?: number;
     estimatedDowntime?: number;
     businessImpact?: string;
@@ -210,19 +210,19 @@ export interface PerformanceAlert {
  * Alert type classification
  */
 export type AlertType =
-  | 'RESPONSE_TIME_DEGRADATION'
-  | 'THROUGHPUT_DEGRADATION'
-  | 'CACHE_HIT_RATE_LOW'
-  | 'CACHE_LATENCY_HIGH'
-  | 'MEMORY_USAGE_HIGH'
-  | 'CPU_USAGE_HIGH'
-  | 'ERROR_RATE_HIGH'
-  | 'PARLANT_LATENCY_HIGH'
-  | 'REGRESSION_DETECTED'
-  | 'SYSTEM_OVERLOAD'
-  | 'BOTTLENECK_DETECTED'
-  | 'CONNECTION_ISSUES'
-  | 'CUSTOM_THRESHOLD';
+  | "RESPONSE_TIME_DEGRADATION"
+  | "THROUGHPUT_DEGRADATION"
+  | "CACHE_HIT_RATE_LOW"
+  | "CACHE_LATENCY_HIGH"
+  | "MEMORY_USAGE_HIGH"
+  | "CPU_USAGE_HIGH"
+  | "ERROR_RATE_HIGH"
+  | "PARLANT_LATENCY_HIGH"
+  | "REGRESSION_DETECTED"
+  | "SYSTEM_OVERLOAD"
+  | "BOTTLENECK_DETECTED"
+  | "CONNECTION_ISSUES"
+  | "CUSTOM_THRESHOLD";
 
 /**
  * Threshold definition
@@ -233,7 +233,7 @@ export interface PerformanceThreshold {
   /** Metric name */
   metricName: string;
   /** Threshold type */
-  type: 'STATIC' | 'DYNAMIC' | 'PERCENTILE' | 'RATE_OF_CHANGE';
+  type: "STATIC" | "DYNAMIC" | "PERCENTILE" | "RATE_OF_CHANGE";
   /** Threshold configuration */
   config: {
     /** Static threshold value */
@@ -250,13 +250,13 @@ export interface PerformanceThreshold {
     rateThreshold?: number;
   };
   /** Comparison operator */
-  operator: 'GT' | 'LT' | 'GTE' | 'LTE' | 'EQ' | 'NEQ' | 'BETWEEN' | 'OUTSIDE';
+  operator: "GT" | "LT" | "GTE" | "LTE" | "EQ" | "NEQ" | "BETWEEN" | "OUTSIDE";
   /** Alert severity when threshold is breached */
   severity: AlertSeverity;
   /** Threshold scope */
   scope: {
     component?: string;
-    level?: 'L1' | 'L2' | 'L3';
+    level?: "L1" | "L2" | "L3";
     functionPattern?: string;
   };
   /** Threshold evaluation settings */
@@ -295,7 +295,7 @@ export interface AlertCorrelationRule {
   /** Minimum alerts required for correlation */
   minAlerts: number;
   /** Correlation logic */
-  logic: 'AND' | 'OR' | 'SEQUENCE';
+  logic: "AND" | "OR" | "SEQUENCE";
   /** Actions to take when correlation is detected */
   actions: {
     /** Suppress individual alerts */
@@ -341,7 +341,7 @@ export interface AlertSuppressionRule {
  */
 export interface PredictiveAlertConfig {
   /** Prediction model type */
-  modelType: 'LINEAR_REGRESSION' | 'EXPONENTIAL_SMOOTHING' | 'ARIMA' | 'CUSTOM';
+  modelType: "LINEAR_REGRESSION" | "EXPONENTIAL_SMOOTHING" | "ARIMA" | "CUSTOM";
   /** Prediction horizon in minutes */
   horizonMinutes: number;
   /** Historical data window for training */
@@ -367,7 +367,8 @@ export class AlertManager extends EventEmitter {
   private evaluationInterval?: NodeJS.Timeout;
   private escalationInterval?: NodeJS.Timeout;
 
-  private metricBuffer: Map<string, { value: number; timestamp: Date }[]> = new Map();
+  private metricBuffer: Map<string, { value: number; timestamp: Date }[]> =
+    new Map();
   private correlationBuffer: Map<string, PerformanceAlert[]> = new Map();
 
   private isRunning = false;
@@ -386,27 +387,27 @@ export class AlertManager extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('Alert manager is already running');
+      this.logger.warn("Alert manager is already running");
       return;
     }
 
-    this.logger.log('Starting PARLANT Performance Alert Manager');
+    this.logger.log("Starting PARLANT Performance Alert Manager");
 
     // Start threshold evaluation
     this.evaluationInterval = setInterval(
       () => this.evaluateThresholds(),
-      this.config.evaluationInterval
+      this.config.evaluationInterval,
     );
 
     // Start escalation processing
     this.escalationInterval = setInterval(
       () => this.processEscalations(),
-      60000 // Check every minute
+      60000, // Check every minute
     );
 
     this.isRunning = true;
-    this.emit('manager.started');
-    this.logger.log('Alert manager started successfully');
+    this.emit("manager.started");
+    this.logger.log("Alert manager started successfully");
   }
 
   /**
@@ -414,11 +415,11 @@ export class AlertManager extends EventEmitter {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Alert manager is not running');
+      this.logger.warn("Alert manager is not running");
       return;
     }
 
-    this.logger.log('Stopping PARLANT Performance Alert Manager');
+    this.logger.log("Stopping PARLANT Performance Alert Manager");
 
     if (this.evaluationInterval) {
       clearInterval(this.evaluationInterval);
@@ -431,8 +432,8 @@ export class AlertManager extends EventEmitter {
     }
 
     this.isRunning = false;
-    this.emit('manager.stopped');
-    this.logger.log('Alert manager stopped successfully');
+    this.emit("manager.stopped");
+    this.logger.log("Alert manager stopped successfully");
   }
 
   /**
@@ -440,8 +441,10 @@ export class AlertManager extends EventEmitter {
    */
   addThreshold(threshold: PerformanceThreshold): void {
     this.thresholds.set(threshold.id, threshold);
-    this.emit('threshold.added', threshold);
-    this.logger.log(`Threshold added: ${threshold.metricName} (${threshold.type})`);
+    this.emit("threshold.added", threshold);
+    this.logger.log(
+      `Threshold added: ${threshold.metricName} (${threshold.type})`,
+    );
   }
 
   /**
@@ -450,7 +453,7 @@ export class AlertManager extends EventEmitter {
   removeThreshold(thresholdId: string): boolean {
     const removed = this.thresholds.delete(thresholdId);
     if (removed) {
-      this.emit('threshold.removed', thresholdId);
+      this.emit("threshold.removed", thresholdId);
       this.logger.log(`Threshold removed: ${thresholdId}`);
     }
     return removed;
@@ -459,7 +462,11 @@ export class AlertManager extends EventEmitter {
   /**
    * Record metric value for threshold evaluation
    */
-  recordMetric(metricName: string, value: number, context: Record<string, unknown> = {}): void {
+  recordMetric(
+    metricName: string,
+    value: number,
+    context: Record<string, unknown> = {},
+  ): void {
     const timestamp = new Date();
 
     // Store in metric buffer
@@ -472,7 +479,10 @@ export class AlertManager extends EventEmitter {
 
     // Keep only recent values
     const cutoffTime = new Date(Date.now() - this.config.aggregationWindow);
-    this.metricBuffer.set(metricName, buffer.filter(entry => entry.timestamp >= cutoffTime));
+    this.metricBuffer.set(
+      metricName,
+      buffer.filter((entry) => entry.timestamp >= cutoffTime),
+    );
 
     // Immediate threshold evaluation for critical metrics
     this.evaluateMetricThresholds(metricName, value, context);
@@ -483,35 +493,37 @@ export class AlertManager extends EventEmitter {
    */
   createAlert(alertData: Partial<PerformanceAlert>): PerformanceAlert {
     const alert: PerformanceAlert = {
-      id: alertData.id || `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: alertData.type || 'CUSTOM_THRESHOLD',
-      severity: alertData.severity || 'WARNING',
-      status: 'OPEN',
-      title: alertData.title || 'Performance Alert',
-      description: alertData.description || 'Performance threshold exceeded',
+      id:
+        alertData.id ||
+        `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: alertData.type || "CUSTOM_THRESHOLD",
+      severity: alertData.severity || "WARNING",
+      status: "OPEN",
+      title: alertData.title || "Performance Alert",
+      description: alertData.description || "Performance threshold exceeded",
       metric: alertData.metric || {
-        name: 'unknown',
+        name: "unknown",
         currentValue: 0,
         thresholdValue: 0,
-        unit: ''
+        unit: "",
       },
-      source: alertData.source || { component: 'unknown' },
+      source: alertData.source || { component: "unknown" },
       timestamps: {
         created: new Date(),
-        lastTriggered: new Date()
+        lastTriggered: new Date(),
       },
       correlation: {
-        relatedAlerts: []
+        relatedAlerts: [],
       },
       context: alertData.context || {},
       recommendations: alertData.recommendations || [],
       impact: alertData.impact || {
-        severity: 'MEDIUM'
+        severity: "MEDIUM",
       },
       escalation: {
-        level: 0
+        level: 0,
       },
-      performanceSnapshot: alertData.performanceSnapshot || {}
+      performanceSnapshot: alertData.performanceSnapshot || {},
     };
 
     return this.processNewAlert(alert);
@@ -522,16 +534,16 @@ export class AlertManager extends EventEmitter {
    */
   acknowledgeAlert(alertId: string, acknowledgedBy: string): boolean {
     const alert = this.alerts.get(alertId);
-    if (!alert || alert.status !== 'OPEN') {
+    if (!alert || alert.status !== "OPEN") {
       return false;
     }
 
-    alert.status = 'ACKNOWLEDGED';
+    alert.status = "ACKNOWLEDGED";
     alert.timestamps.acknowledged = new Date();
     alert.context.acknowledgedBy = acknowledgedBy;
 
-    this.emit('alert.acknowledged', alert);
-    this.sendNotification(alert, 'acknowledged');
+    this.emit("alert.acknowledged", alert);
+    this.sendNotification(alert, "acknowledged");
 
     this.logger.log(`Alert acknowledged: ${alertId} by ${acknowledgedBy}`);
     return true;
@@ -540,13 +552,17 @@ export class AlertManager extends EventEmitter {
   /**
    * Resolve alert
    */
-  resolveAlert(alertId: string, resolvedBy: string, resolution?: string): boolean {
+  resolveAlert(
+    alertId: string,
+    resolvedBy: string,
+    resolution?: string,
+  ): boolean {
     const alert = this.alerts.get(alertId);
-    if (!alert || alert.status === 'RESOLVED') {
+    if (!alert || alert.status === "RESOLVED") {
       return false;
     }
 
-    alert.status = 'RESOLVED';
+    alert.status = "RESOLVED";
     alert.timestamps.resolved = new Date();
     alert.context.resolvedBy = resolvedBy;
     if (resolution) {
@@ -557,8 +573,8 @@ export class AlertManager extends EventEmitter {
     this.alertHistory.push(alert);
     this.alerts.delete(alertId);
 
-    this.emit('alert.resolved', alert);
-    this.sendNotification(alert, 'resolved');
+    this.emit("alert.resolved", alert);
+    this.sendNotification(alert, "resolved");
 
     this.logger.log(`Alert resolved: ${alertId} by ${resolvedBy}`);
     return true;
@@ -572,17 +588,23 @@ export class AlertManager extends EventEmitter {
     type?: AlertType[];
     component?: string;
   }): PerformanceAlert[] {
-    let alerts = Array.from(this.alerts.values()).filter(alert => alert.status === 'OPEN');
+    let alerts = Array.from(this.alerts.values()).filter(
+      (alert) => alert.status === "OPEN",
+    );
 
     if (filters) {
       if (filters.severity) {
-        alerts = alerts.filter(alert => filters.severity!.includes(alert.severity));
+        alerts = alerts.filter((alert) =>
+          filters.severity!.includes(alert.severity),
+        );
       }
       if (filters.type) {
-        alerts = alerts.filter(alert => filters.type!.includes(alert.type));
+        alerts = alerts.filter((alert) => filters.type!.includes(alert.type));
       }
       if (filters.component) {
-        alerts = alerts.filter(alert => alert.source.component === filters.component);
+        alerts = alerts.filter(
+          (alert) => alert.source.component === filters.component,
+        );
       }
     }
 
@@ -606,14 +628,16 @@ export class AlertManager extends EventEmitter {
     const cutoffTime = new Date(Date.now() - timeWindow);
     const recentAlerts = [
       ...Array.from(this.alerts.values()),
-      ...this.alertHistory.filter(alert => alert.timestamps.created >= cutoffTime)
+      ...this.alertHistory.filter(
+        (alert) => alert.timestamps.created >= cutoffTime,
+      ),
     ];
 
     const bySeverity: Record<AlertSeverity, number> = {
       INFO: 0,
       WARNING: 0,
       ERROR: 0,
-      CRITICAL: 0
+      CRITICAL: 0,
     };
 
     const byType: Record<string, number> = {};
@@ -621,16 +645,19 @@ export class AlertManager extends EventEmitter {
     let totalResolutionTime = 0;
     let resolvedCount = 0;
 
-    recentAlerts.forEach(alert => {
+    recentAlerts.forEach((alert) => {
       bySeverity[alert.severity]++;
 
       byType[alert.type] = (byType[alert.type] || 0) + 1;
 
-      sourceCount[alert.source.component] = (sourceCount[alert.source.component] || 0) + 1;
+      sourceCount[alert.source.component] =
+        (sourceCount[alert.source.component] || 0) + 1;
 
-      if (alert.status === 'RESOLVED' && alert.timestamps.resolved) {
+      if (alert.status === "RESOLVED" && alert.timestamps.resolved) {
         resolvedCount++;
-        totalResolutionTime += alert.timestamps.resolved.getTime() - alert.timestamps.created.getTime();
+        totalResolutionTime +=
+          alert.timestamps.resolved.getTime() -
+          alert.timestamps.created.getTime();
       }
     });
 
@@ -644,14 +671,17 @@ export class AlertManager extends EventEmitter {
       bySeverity,
       byType,
       resolved: resolvedCount,
-      averageResolutionTime: resolvedCount > 0 ? totalResolutionTime / resolvedCount : 0,
-      topSources
+      averageResolutionTime:
+        resolvedCount > 0 ? totalResolutionTime / resolvedCount : 0,
+      topSources,
     };
   }
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<AlertManagerConfig>): AlertManagerConfig {
+  private mergeConfig(
+    userConfig: Partial<AlertManagerConfig>,
+  ): AlertManagerConfig {
     const defaultConfig: AlertManagerConfig = {
       evaluationInterval: 5000, // 5 seconds
       aggregationWindow: 300000, // 5 minutes
@@ -664,35 +694,35 @@ export class AlertManager extends EventEmitter {
         email: {
           enabled: false,
           smtp: {
-            host: 'localhost',
+            host: "localhost",
             port: 587,
             secure: false,
-            auth: { user: '', pass: '' }
+            auth: { user: "", pass: "" },
           },
           recipients: {
             critical: [],
             warnings: [],
-            info: []
-          }
+            info: [],
+          },
         },
         webhook: {
           enabled: false,
-          endpoints: []
+          endpoints: [],
         },
         slack: {
           enabled: false,
-          webhookUrl: '',
+          webhookUrl: "",
           channels: {
-            critical: '#alerts-critical',
-            warnings: '#alerts-warnings',
-            info: '#alerts-info'
-          }
+            critical: "#alerts-critical",
+            warnings: "#alerts-warnings",
+            info: "#alerts-info",
+          },
         },
         sms: {
           enabled: false,
-          service: '',
-          recipients: []
-        }
+          service: "",
+          recipients: [],
+        },
       },
       escalation: {
         enabled: true,
@@ -700,21 +730,21 @@ export class AlertManager extends EventEmitter {
           {
             level: 1,
             delayMinutes: 5,
-            actions: ['NOTIFY_ONCALL'],
-            recipients: []
+            actions: ["NOTIFY_ONCALL"],
+            recipients: [],
           },
           {
             level: 2,
             delayMinutes: 15,
-            actions: ['CREATE_INCIDENT', 'NOTIFY_ONCALL'],
-            recipients: []
-          }
+            actions: ["CREATE_INCIDENT", "NOTIFY_ONCALL"],
+            recipients: [],
+          },
         ],
         autoResolve: {
           enabled: true,
-          timeoutMinutes: 60
-        }
-      }
+          timeoutMinutes: 60,
+        },
+      },
     };
 
     return { ...defaultConfig, ...userConfig };
@@ -723,74 +753,74 @@ export class AlertManager extends EventEmitter {
   private initializeDefaultThresholds(): void {
     const defaultThresholds: PerformanceThreshold[] = [
       {
-        id: 'p95-response-time',
-        metricName: 'p95_response_time',
-        type: 'STATIC',
+        id: "p95-response-time",
+        metricName: "p95_response_time",
+        type: "STATIC",
         config: { value: 1000 },
-        operator: 'GT',
-        severity: 'WARNING',
+        operator: "GT",
+        severity: "WARNING",
         scope: {},
         evaluation: {
           minDuration: 30000,
           interval: 5000,
-          consecutiveBreaches: 3
+          consecutiveBreaches: 3,
         },
         enabled: true,
         metadata: {
-          description: 'P95 response time threshold',
-          owner: 'performance-team',
+          description: "P95 response time threshold",
+          owner: "performance-team",
           createdAt: new Date(),
           lastModified: new Date(),
-          tags: ['response-time', 'critical']
-        }
+          tags: ["response-time", "critical"],
+        },
       },
       {
-        id: 'cache-hit-rate',
-        metricName: 'cache_hit_rate',
-        type: 'STATIC',
+        id: "cache-hit-rate",
+        metricName: "cache_hit_rate",
+        type: "STATIC",
         config: { value: 0.85 },
-        operator: 'LT',
-        severity: 'WARNING',
+        operator: "LT",
+        severity: "WARNING",
         scope: {},
         evaluation: {
           minDuration: 60000,
           interval: 30000,
-          consecutiveBreaches: 2
+          consecutiveBreaches: 2,
         },
         enabled: true,
         metadata: {
-          description: 'Cache hit rate threshold',
-          owner: 'performance-team',
+          description: "Cache hit rate threshold",
+          owner: "performance-team",
           createdAt: new Date(),
           lastModified: new Date(),
-          tags: ['cache', 'efficiency']
-        }
+          tags: ["cache", "efficiency"],
+        },
       },
       {
-        id: 'error-rate',
-        metricName: 'error_rate',
-        type: 'STATIC',
+        id: "error-rate",
+        metricName: "error_rate",
+        type: "STATIC",
         config: { value: 0.01 },
-        operator: 'GT',
-        severity: 'ERROR',
+        operator: "GT",
+        severity: "ERROR",
         scope: {},
         evaluation: {
           minDuration: 10000,
           interval: 5000,
-          consecutiveBreaches: 2
+          consecutiveBreaches: 2,
         },
         enabled: true,
         metadata: {
-          description: 'Error rate threshold',
-          owner: 'reliability-team',
+          description: "Error rate threshold",
+          owner: "reliability-team",
           createdAt: new Date(),
           lastModified: new Date(),
-          tags: ['errors', 'reliability']
-        }
-      }
+          tags: ["errors", "reliability"],
+        },
+      },
     ];
 
-    defaultThresholds.forEach(threshold => {
+    defaultThresholds.forEach((threshold) => {
       this.thresholds.set(threshold.id, threshold);
     });
   }
@@ -798,44 +828,49 @@ export class AlertManager extends EventEmitter {
   private initializeDefaultCorrelationRules(): void {
     const defaultRules: AlertCorrelationRule[] = [
       {
-        id: 'response-time-and-cache',
-        name: 'Response Time and Cache Performance Correlation',
-        alertTypes: ['RESPONSE_TIME_DEGRADATION', 'CACHE_HIT_RATE_LOW'],
+        id: "response-time-and-cache",
+        name: "Response Time and Cache Performance Correlation",
+        alertTypes: ["RESPONSE_TIME_DEGRADATION", "CACHE_HIT_RATE_LOW"],
         timeWindow: 300000, // 5 minutes
         minAlerts: 2,
-        logic: 'AND',
+        logic: "AND",
         actions: {
           suppressIndividual: false,
           createCombined: true,
           combinedTemplate: {
-            title: 'Performance Degradation: Response Time and Cache Issues',
-            description: 'Both response time and cache performance are degraded',
-            severity: 'ERROR'
-          }
+            title: "Performance Degradation: Response Time and Cache Issues",
+            description:
+              "Both response time and cache performance are degraded",
+            severity: "ERROR",
+          },
         },
-        enabled: true
+        enabled: true,
       },
       {
-        id: 'system-overload',
-        name: 'System Overload Detection',
-        alertTypes: ['CPU_USAGE_HIGH', 'MEMORY_USAGE_HIGH', 'THROUGHPUT_DEGRADATION'],
+        id: "system-overload",
+        name: "System Overload Detection",
+        alertTypes: [
+          "CPU_USAGE_HIGH",
+          "MEMORY_USAGE_HIGH",
+          "THROUGHPUT_DEGRADATION",
+        ],
         timeWindow: 180000, // 3 minutes
         minAlerts: 2,
-        logic: 'OR',
+        logic: "OR",
         actions: {
           suppressIndividual: false,
           createCombined: true,
           combinedTemplate: {
-            title: 'System Overload Detected',
-            description: 'Multiple system resources are under stress',
-            severity: 'CRITICAL'
-          }
+            title: "System Overload Detected",
+            description: "Multiple system resources are under stress",
+            severity: "CRITICAL",
+          },
         },
-        enabled: true
-      }
+        enabled: true,
+      },
     ];
 
-    defaultRules.forEach(rule => {
+    defaultRules.forEach((rule) => {
       this.correlationRules.set(rule.id, rule);
     });
   }
@@ -848,17 +883,21 @@ export class AlertManager extends EventEmitter {
         await this.evaluateThreshold(threshold);
       }
     } catch (error) {
-      this.logger.error('Error evaluating thresholds:', error);
+      this.logger.error("Error evaluating thresholds:", error);
     }
   }
 
-  private async evaluateThreshold(threshold: PerformanceThreshold): Promise<void> {
+  private async evaluateThreshold(
+    threshold: PerformanceThreshold,
+  ): Promise<void> {
     const metricBuffer = this.metricBuffer.get(threshold.metricName);
     if (!metricBuffer || metricBuffer.length === 0) return;
 
     const now = Date.now();
     const evaluationWindow = new Date(now - threshold.evaluation.interval);
-    const recentValues = metricBuffer.filter(entry => entry.timestamp >= evaluationWindow);
+    const recentValues = metricBuffer.filter(
+      (entry) => entry.timestamp >= evaluationWindow,
+    );
 
     if (recentValues.length === 0) return;
 
@@ -866,28 +905,42 @@ export class AlertManager extends EventEmitter {
     let currentValue = 0;
 
     switch (threshold.type) {
-      case 'STATIC':
+      case "STATIC":
         currentValue = recentValues[recentValues.length - 1].value;
-        thresholdBreached = this.evaluateStaticThreshold(currentValue, threshold);
+        thresholdBreached = this.evaluateStaticThreshold(
+          currentValue,
+          threshold,
+        );
         break;
 
-      case 'DYNAMIC':
+      case "DYNAMIC":
         // Dynamic thresholds would require baseline calculation
         currentValue = recentValues[recentValues.length - 1].value;
         // Placeholder for dynamic threshold logic
         break;
 
-      case 'PERCENTILE':
+      case "PERCENTILE":
         if (threshold.config.percentile) {
-          const values = recentValues.map(entry => entry.value).sort((a, b) => a - b);
-          currentValue = this.calculatePercentile(values, threshold.config.percentile);
-          thresholdBreached = this.evaluateStaticThreshold(currentValue, threshold);
+          const values = recentValues
+            .map((entry) => entry.value)
+            .sort((a, b) => a - b);
+          currentValue = this.calculatePercentile(
+            values,
+            threshold.config.percentile,
+          );
+          thresholdBreached = this.evaluateStaticThreshold(
+            currentValue,
+            threshold,
+          );
         }
         break;
 
-      case 'RATE_OF_CHANGE':
+      case "RATE_OF_CHANGE":
         if (threshold.config.timeWindow && threshold.config.rateThreshold) {
-          const rate = this.calculateRateOfChange(recentValues, threshold.config.timeWindow);
+          const rate = this.calculateRateOfChange(
+            recentValues,
+            threshold.config.timeWindow,
+          );
           currentValue = rate;
           thresholdBreached = Math.abs(rate) > threshold.config.rateThreshold;
         }
@@ -899,27 +952,49 @@ export class AlertManager extends EventEmitter {
     }
   }
 
-  private evaluateStaticThreshold(value: number, threshold: PerformanceThreshold): boolean {
+  private evaluateStaticThreshold(
+    value: number,
+    threshold: PerformanceThreshold,
+  ): boolean {
     const thresholdValue = threshold.config.value || 0;
     const upperValue = threshold.config.upperValue;
     const lowerValue = threshold.config.lowerValue;
 
     switch (threshold.operator) {
-      case 'GT': return value > thresholdValue;
-      case 'GTE': return value >= thresholdValue;
-      case 'LT': return value < thresholdValue;
-      case 'LTE': return value <= thresholdValue;
-      case 'EQ': return value === thresholdValue;
-      case 'NEQ': return value !== thresholdValue;
-      case 'BETWEEN': return upperValue !== undefined && lowerValue !== undefined &&
-                             value >= lowerValue && value <= upperValue;
-      case 'OUTSIDE': return upperValue !== undefined && lowerValue !== undefined &&
-                             (value < lowerValue || value > upperValue);
-      default: return false;
+      case "GT":
+        return value > thresholdValue;
+      case "GTE":
+        return value >= thresholdValue;
+      case "LT":
+        return value < thresholdValue;
+      case "LTE":
+        return value <= thresholdValue;
+      case "EQ":
+        return value === thresholdValue;
+      case "NEQ":
+        return value !== thresholdValue;
+      case "BETWEEN":
+        return (
+          upperValue !== undefined &&
+          lowerValue !== undefined &&
+          value >= lowerValue &&
+          value <= upperValue
+        );
+      case "OUTSIDE":
+        return (
+          upperValue !== undefined &&
+          lowerValue !== undefined &&
+          (value < lowerValue || value > upperValue)
+        );
+      default:
+        return false;
     }
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
     if (sortedValues.length === 0) return 0;
 
     const index = (percentile / 100) * (sortedValues.length - 1);
@@ -932,66 +1007,88 @@ export class AlertManager extends EventEmitter {
     return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
   }
 
-  private calculateRateOfChange(values: { value: number; timestamp: Date }[], timeWindow: number): number {
+  private calculateRateOfChange(
+    values: { value: number; timestamp: Date }[],
+    timeWindow: number,
+  ): number {
     if (values.length < 2) return 0;
 
     const cutoffTime = new Date(Date.now() - timeWindow);
-    const windowValues = values.filter(entry => entry.timestamp >= cutoffTime);
+    const windowValues = values.filter(
+      (entry) => entry.timestamp >= cutoffTime,
+    );
 
     if (windowValues.length < 2) return 0;
 
     const firstValue = windowValues[0].value;
     const lastValue = windowValues[windowValues.length - 1].value;
-    const timeDiff = windowValues[windowValues.length - 1].timestamp.getTime() - windowValues[0].timestamp.getTime();
+    const timeDiff =
+      windowValues[windowValues.length - 1].timestamp.getTime() -
+      windowValues[0].timestamp.getTime();
 
     return timeDiff > 0 ? (lastValue - firstValue) / (timeDiff / 1000) : 0; // Change per second
   }
 
-  private async handleThresholdBreach(threshold: PerformanceThreshold, currentValue: number): Promise<void> {
+  private async handleThresholdBreach(
+    threshold: PerformanceThreshold,
+    currentValue: number,
+  ): Promise<void> {
     const alertType = this.mapThresholdToAlertType(threshold.metricName);
-    const thresholdValue = threshold.config.value || threshold.config.upperValue || threshold.config.lowerValue || 0;
+    const thresholdValue =
+      threshold.config.value ||
+      threshold.config.upperValue ||
+      threshold.config.lowerValue ||
+      0;
 
     const alert: PerformanceAlert = {
       id: `threshold-${threshold.id}-${Date.now()}`,
       type: alertType,
       severity: threshold.severity,
-      status: 'OPEN',
+      status: "OPEN",
       title: `${threshold.metricName} threshold exceeded`,
       description: `${threshold.metricName} value ${currentValue} ${threshold.operator} ${thresholdValue}`,
       metric: {
         name: threshold.metricName,
         currentValue,
         thresholdValue,
-        unit: this.getMetricUnit(threshold.metricName)
+        unit: this.getMetricUnit(threshold.metricName),
       },
       source: {
-        component: threshold.scope.component || 'performance-monitor',
+        component: threshold.scope.component || "performance-monitor",
         level: threshold.scope.level,
-        functionName: threshold.scope.functionPattern
+        functionName: threshold.scope.functionPattern,
       },
       timestamps: {
         created: new Date(),
-        lastTriggered: new Date()
+        lastTriggered: new Date(),
       },
       correlation: {
-        relatedAlerts: []
+        relatedAlerts: [],
       },
       context: {
         thresholdId: threshold.id,
-        thresholdType: threshold.type
+        thresholdType: threshold.type,
       },
-      recommendations: this.generateRecommendations(alertType, threshold.metricName, currentValue),
+      recommendations: this.generateRecommendations(
+        alertType,
+        threshold.metricName,
+        currentValue,
+      ),
       impact: this.assessImpact(alertType, threshold.severity),
       escalation: {
-        level: 0
+        level: 0,
       },
-      performanceSnapshot: await this.capturePerformanceSnapshot()
+      performanceSnapshot: await this.capturePerformanceSnapshot(),
     };
 
     this.processNewAlert(alert);
   }
 
-  private evaluateMetricThresholds(metricName: string, value: number, context: Record<string, unknown>): void {
+  private evaluateMetricThresholds(
+    metricName: string,
+    value: number,
+    context: Record<string, unknown>,
+  ): void {
     for (const [thresholdId, threshold] of this.thresholds) {
       if (threshold.metricName === metricName && threshold.enabled) {
         if (this.evaluateStaticThreshold(value, threshold)) {
@@ -1015,7 +1112,7 @@ export class AlertManager extends EventEmitter {
 
     // Check suppression rules
     if (this.shouldSuppressAlert(alert)) {
-      alert.status = 'SUPPRESSED';
+      alert.status = "SUPPRESSED";
       this.logger.log(`Alert suppressed: ${alert.id}`);
       return alert;
     }
@@ -1024,15 +1121,17 @@ export class AlertManager extends EventEmitter {
     this.alerts.set(alert.id, alert);
 
     // Send notifications
-    this.sendNotification(alert, 'created');
+    this.sendNotification(alert, "created");
 
     // Schedule escalation if enabled
     if (this.config.escalation.enabled) {
       this.scheduleEscalation(alert);
     }
 
-    this.emit('alert.created', alert);
-    this.logger.log(`Alert created: ${alert.id} [${alert.severity}] ${alert.title}`);
+    this.emit("alert.created", alert);
+    this.logger.log(
+      `Alert created: ${alert.id} [${alert.severity}] ${alert.title}`,
+    );
 
     return alert;
   }
@@ -1051,7 +1150,9 @@ export class AlertManager extends EventEmitter {
 
       // Keep only alerts within the correlation window
       const cutoffTime = new Date(Date.now() - rule.timeWindow);
-      const recentAlerts = buffer.filter(a => a.timestamps.created >= cutoffTime);
+      const recentAlerts = buffer.filter(
+        (a) => a.timestamps.created >= cutoffTime,
+      );
       this.correlationBuffer.set(correlationId, recentAlerts);
 
       // Check if correlation conditions are met
@@ -1061,57 +1162,64 @@ export class AlertManager extends EventEmitter {
     }
   }
 
-  private processCorrelation(rule: AlertCorrelationRule, alerts: PerformanceAlert[]): void {
+  private processCorrelation(
+    rule: AlertCorrelationRule,
+    alerts: PerformanceAlert[],
+  ): void {
     if (rule.actions.createCombined && rule.combinedTemplate) {
       const combinedAlert: PerformanceAlert = {
         id: `correlated-${rule.id}-${Date.now()}`,
-        type: 'CUSTOM_THRESHOLD',
+        type: "CUSTOM_THRESHOLD",
         severity: rule.combinedTemplate.severity,
-        status: 'OPEN',
+        status: "OPEN",
         title: rule.combinedTemplate.title,
         description: rule.combinedTemplate.description,
         metric: {
-          name: 'correlation',
+          name: "correlation",
           currentValue: alerts.length,
           thresholdValue: rule.minAlerts,
-          unit: 'alerts'
+          unit: "alerts",
         },
         source: {
-          component: 'correlation-engine'
+          component: "correlation-engine",
         },
         timestamps: {
           created: new Date(),
-          lastTriggered: new Date()
+          lastTriggered: new Date(),
         },
         correlation: {
           correlationId: rule.id,
-          relatedAlerts: alerts.map(a => a.id)
+          relatedAlerts: alerts.map((a) => a.id),
         },
         context: {
           correlationRule: rule.id,
-          correlatedAlerts: alerts.map(a => ({ id: a.id, type: a.type, severity: a.severity }))
+          correlatedAlerts: alerts.map((a) => ({
+            id: a.id,
+            type: a.type,
+            severity: a.severity,
+          })),
         },
         recommendations: [
-          `Investigate correlation between ${alerts.map(a => a.type).join(', ')}`,
-          'Check for common root cause',
-          'Consider system-wide performance analysis'
+          `Investigate correlation between ${alerts.map((a) => a.type).join(", ")}`,
+          "Check for common root cause",
+          "Consider system-wide performance analysis",
         ],
         impact: {
-          severity: 'HIGH'
+          severity: "HIGH",
         },
         escalation: {
-          level: 0
+          level: 0,
         },
-        performanceSnapshot: {}
+        performanceSnapshot: {},
       };
 
       this.processNewAlert(combinedAlert);
 
       // Suppress individual alerts if configured
       if (rule.actions.suppressIndividual) {
-        alerts.forEach(alert => {
+        alerts.forEach((alert) => {
           if (this.alerts.has(alert.id)) {
-            alert.status = 'SUPPRESSED';
+            alert.status = "SUPPRESSED";
             alert.context.suppressedBy = combinedAlert.id;
           }
         });
@@ -1124,18 +1232,30 @@ export class AlertManager extends EventEmitter {
       if (!rule.enabled) continue;
 
       // Check criteria
-      if (rule.criteria.alertTypes && !rule.criteria.alertTypes.includes(alert.type)) continue;
-      if (rule.criteria.severities && !rule.criteria.severities.includes(alert.severity)) continue;
-      if (rule.criteria.sources && !rule.criteria.sources.includes(alert.source.component)) continue;
+      if (
+        rule.criteria.alertTypes &&
+        !rule.criteria.alertTypes.includes(alert.type)
+      )
+        continue;
+      if (
+        rule.criteria.severities &&
+        !rule.criteria.severities.includes(alert.severity)
+      )
+        continue;
+      if (
+        rule.criteria.sources &&
+        !rule.criteria.sources.includes(alert.source.component)
+      )
+        continue;
 
       // Check time windows
       if (rule.criteria.timeWindows) {
         const now = new Date();
         const currentTime = now.getHours() * 60 + now.getMinutes();
 
-        const inTimeWindow = rule.criteria.timeWindows.some(window => {
-          const [startHour, startMin] = window.start.split(':').map(Number);
-          const [endHour, endMin] = window.end.split(':').map(Number);
+        const inTimeWindow = rule.criteria.timeWindows.some((window) => {
+          const [startHour, startMin] = window.start.split(":").map(Number);
+          const [endHour, endMin] = window.end.split(":").map(Number);
           const startTime = startHour * 60 + startMin;
           const endTime = endHour * 60 + endMin;
 
@@ -1151,7 +1271,10 @@ export class AlertManager extends EventEmitter {
     return false;
   }
 
-  private async sendNotification(alert: PerformanceAlert, action: 'created' | 'acknowledged' | 'resolved'): Promise<void> {
+  private async sendNotification(
+    alert: PerformanceAlert,
+    action: "created" | "acknowledged" | "resolved",
+  ): Promise<void> {
     try {
       const notifications = this.config.notifications;
 
@@ -1171,28 +1294,46 @@ export class AlertManager extends EventEmitter {
       }
 
       // SMS notification for critical alerts
-      if (notifications.sms.enabled && alert.severity === 'CRITICAL' && action === 'created') {
+      if (
+        notifications.sms.enabled &&
+        alert.severity === "CRITICAL" &&
+        action === "created"
+      ) {
         await this.sendSMSNotification(alert);
       }
-
     } catch (error) {
-      this.logger.error('Failed to send notification:', error);
+      this.logger.error("Failed to send notification:", error);
     }
   }
 
-  private async sendEmailNotification(alert: PerformanceAlert, action: string): Promise<void> {
+  private async sendEmailNotification(
+    alert: PerformanceAlert,
+    action: string,
+  ): Promise<void> {
     // Email notification implementation would go here
-    this.logger.log(`Email notification sent for alert ${alert.id} (${action})`);
+    this.logger.log(
+      `Email notification sent for alert ${alert.id} (${action})`,
+    );
   }
 
-  private async sendWebhookNotification(alert: PerformanceAlert, action: string): Promise<void> {
+  private async sendWebhookNotification(
+    alert: PerformanceAlert,
+    action: string,
+  ): Promise<void> {
     // Webhook notification implementation would go here
-    this.logger.log(`Webhook notification sent for alert ${alert.id} (${action})`);
+    this.logger.log(
+      `Webhook notification sent for alert ${alert.id} (${action})`,
+    );
   }
 
-  private async sendSlackNotification(alert: PerformanceAlert, action: string): Promise<void> {
+  private async sendSlackNotification(
+    alert: PerformanceAlert,
+    action: string,
+  ): Promise<void> {
     // Slack notification implementation would go here
-    this.logger.log(`Slack notification sent for alert ${alert.id} (${action})`);
+    this.logger.log(
+      `Slack notification sent for alert ${alert.id} (${action})`,
+    );
   }
 
   private async sendSMSNotification(alert: PerformanceAlert): Promise<void> {
@@ -1201,17 +1342,24 @@ export class AlertManager extends EventEmitter {
   }
 
   private scheduleEscalation(alert: PerformanceAlert): void {
-    if (!this.config.escalation.enabled || this.config.escalation.levels.length === 0) return;
+    if (
+      !this.config.escalation.enabled ||
+      this.config.escalation.levels.length === 0
+    )
+      return;
 
     const firstLevel = this.config.escalation.levels[0];
-    alert.escalation.nextEscalationAt = new Date(Date.now() + firstLevel.delayMinutes * 60 * 1000);
+    alert.escalation.nextEscalationAt = new Date(
+      Date.now() + firstLevel.delayMinutes * 60 * 1000,
+    );
   }
 
   private async processEscalations(): Promise<void> {
     const now = new Date();
 
     for (const [alertId, alert] of this.alerts) {
-      if (alert.status !== 'OPEN' || !alert.escalation.nextEscalationAt) continue;
+      if (alert.status !== "OPEN" || !alert.escalation.nextEscalationAt)
+        continue;
 
       if (now >= alert.escalation.nextEscalationAt) {
         await this.escalateAlert(alert);
@@ -1221,7 +1369,9 @@ export class AlertManager extends EventEmitter {
 
   private async escalateAlert(alert: PerformanceAlert): Promise<void> {
     const nextLevel = alert.escalation.level + 1;
-    const escalationLevel = this.config.escalation.levels.find(level => level.level === nextLevel);
+    const escalationLevel = this.config.escalation.levels.find(
+      (level) => level.level === nextLevel,
+    );
 
     if (!escalationLevel) {
       // No more escalation levels
@@ -1238,169 +1388,188 @@ export class AlertManager extends EventEmitter {
     }
 
     // Schedule next escalation
-    const nextLevelConfig = this.config.escalation.levels.find(level => level.level === nextLevel + 1);
+    const nextLevelConfig = this.config.escalation.levels.find(
+      (level) => level.level === nextLevel + 1,
+    );
     if (nextLevelConfig) {
-      alert.escalation.nextEscalationAt = new Date(Date.now() + nextLevelConfig.delayMinutes * 60 * 1000);
+      alert.escalation.nextEscalationAt = new Date(
+        Date.now() + nextLevelConfig.delayMinutes * 60 * 1000,
+      );
     } else {
       alert.escalation.nextEscalationAt = undefined;
     }
 
-    this.emit('alert.escalated', alert);
+    this.emit("alert.escalated", alert);
     this.logger.log(`Alert escalated to level ${nextLevel}: ${alert.id}`);
   }
 
-  private async executeEscalationAction(action: EscalationAction, alert: PerformanceAlert): Promise<void> {
-    this.logger.log(`Executing escalation action: ${action} for alert ${alert.id}`);
+  private async executeEscalationAction(
+    action: EscalationAction,
+    alert: PerformanceAlert,
+  ): Promise<void> {
+    this.logger.log(
+      `Executing escalation action: ${action} for alert ${alert.id}`,
+    );
 
     switch (action) {
-      case 'NOTIFY_ONCALL':
-        await this.sendNotification(alert, 'created');
+      case "NOTIFY_ONCALL":
+        await this.sendNotification(alert, "created");
         break;
 
-      case 'CREATE_INCIDENT':
+      case "CREATE_INCIDENT":
         // Create incident in incident management system
         break;
 
-      case 'AUTO_SCALE':
+      case "AUTO_SCALE":
         // Trigger auto-scaling
         break;
 
-      case 'RESTART_SERVICE':
+      case "RESTART_SERVICE":
         // Restart affected service
         break;
 
-      case 'ENABLE_CIRCUIT_BREAKER':
+      case "ENABLE_CIRCUIT_BREAKER":
         // Enable circuit breaker
         break;
 
-      case 'CLEAR_CACHE':
+      case "CLEAR_CACHE":
         // Clear relevant caches
         break;
 
-      case 'CUSTOM_WEBHOOK':
-        await this.sendWebhookNotification(alert, 'escalated');
+      case "CUSTOM_WEBHOOK":
+        await this.sendWebhookNotification(alert, "escalated");
         break;
     }
   }
 
   private mapThresholdToAlertType(metricName: string): AlertType {
     const mapping: Record<string, AlertType> = {
-      'p95_response_time': 'RESPONSE_TIME_DEGRADATION',
-      'p99_response_time': 'RESPONSE_TIME_DEGRADATION',
-      'throughput': 'THROUGHPUT_DEGRADATION',
-      'cache_hit_rate': 'CACHE_HIT_RATE_LOW',
-      'cache_latency': 'CACHE_LATENCY_HIGH',
-      'memory_usage': 'MEMORY_USAGE_HIGH',
-      'cpu_usage': 'CPU_USAGE_HIGH',
-      'error_rate': 'ERROR_RATE_HIGH',
-      'parlant_latency': 'PARLANT_LATENCY_HIGH'
+      p95_response_time: "RESPONSE_TIME_DEGRADATION",
+      p99_response_time: "RESPONSE_TIME_DEGRADATION",
+      throughput: "THROUGHPUT_DEGRADATION",
+      cache_hit_rate: "CACHE_HIT_RATE_LOW",
+      cache_latency: "CACHE_LATENCY_HIGH",
+      memory_usage: "MEMORY_USAGE_HIGH",
+      cpu_usage: "CPU_USAGE_HIGH",
+      error_rate: "ERROR_RATE_HIGH",
+      parlant_latency: "PARLANT_LATENCY_HIGH",
     };
 
-    return mapping[metricName] || 'CUSTOM_THRESHOLD';
+    return mapping[metricName] || "CUSTOM_THRESHOLD";
   }
 
   private getMetricUnit(metricName: string): string {
     const units: Record<string, string> = {
-      'p95_response_time': 'ms',
-      'p99_response_time': 'ms',
-      'throughput': 'ops/sec',
-      'cache_hit_rate': '%',
-      'cache_latency': 'ms',
-      'memory_usage': 'MB',
-      'cpu_usage': '%',
-      'error_rate': '%',
-      'parlant_latency': 'ms'
+      p95_response_time: "ms",
+      p99_response_time: "ms",
+      throughput: "ops/sec",
+      cache_hit_rate: "%",
+      cache_latency: "ms",
+      memory_usage: "MB",
+      cpu_usage: "%",
+      error_rate: "%",
+      parlant_latency: "ms",
     };
 
-    return units[metricName] || '';
+    return units[metricName] || "";
   }
 
-  private generateRecommendations(alertType: AlertType, metricName: string, currentValue: number): string[] {
+  private generateRecommendations(
+    alertType: AlertType,
+    metricName: string,
+    currentValue: number,
+  ): string[] {
     const recommendations: string[] = [];
 
     switch (alertType) {
-      case 'RESPONSE_TIME_DEGRADATION':
+      case "RESPONSE_TIME_DEGRADATION":
         recommendations.push(
-          'Check database query performance and indexes',
-          'Review cache hit rates and TTL settings',
-          'Analyze network latency and connectivity',
-          'Consider scaling infrastructure resources'
+          "Check database query performance and indexes",
+          "Review cache hit rates and TTL settings",
+          "Analyze network latency and connectivity",
+          "Consider scaling infrastructure resources",
         );
         break;
 
-      case 'CACHE_HIT_RATE_LOW':
+      case "CACHE_HIT_RATE_LOW":
         recommendations.push(
-          'Review cache TTL settings and expiration policies',
-          'Analyze cache key patterns and distribution',
-          'Consider increasing cache size if memory allows',
-          'Implement cache warming strategies for frequently accessed data'
+          "Review cache TTL settings and expiration policies",
+          "Analyze cache key patterns and distribution",
+          "Consider increasing cache size if memory allows",
+          "Implement cache warming strategies for frequently accessed data",
         );
         break;
 
-      case 'ERROR_RATE_HIGH':
+      case "ERROR_RATE_HIGH":
         recommendations.push(
-          'Review recent code deployments and changes',
-          'Check service dependencies and external API status',
-          'Analyze error logs for common failure patterns',
-          'Verify system resource availability'
+          "Review recent code deployments and changes",
+          "Check service dependencies and external API status",
+          "Analyze error logs for common failure patterns",
+          "Verify system resource availability",
         );
         break;
 
-      case 'SYSTEM_OVERLOAD':
+      case "SYSTEM_OVERLOAD":
         recommendations.push(
-          'Scale infrastructure resources immediately',
-          'Review resource allocation and limits',
-          'Implement circuit breakers for external dependencies',
-          'Analyze traffic patterns and consider load balancing'
+          "Scale infrastructure resources immediately",
+          "Review resource allocation and limits",
+          "Implement circuit breakers for external dependencies",
+          "Analyze traffic patterns and consider load balancing",
         );
         break;
 
       default:
         recommendations.push(
-          'Monitor trend patterns for the affected metric',
-          'Review recent system changes and deployments',
-          'Check related performance metrics for correlation'
+          "Monitor trend patterns for the affected metric",
+          "Review recent system changes and deployments",
+          "Check related performance metrics for correlation",
         );
     }
 
     return recommendations;
   }
 
-  private assessImpact(alertType: AlertType, severity: AlertSeverity): {
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  private assessImpact(
+    alertType: AlertType,
+    severity: AlertSeverity,
+  ): {
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     affectedUsers?: number;
     estimatedDowntime?: number;
     businessImpact?: string;
   } {
     const severityMapping = {
-      INFO: 'LOW',
-      WARNING: 'MEDIUM',
-      ERROR: 'HIGH',
-      CRITICAL: 'CRITICAL'
+      INFO: "LOW",
+      WARNING: "MEDIUM",
+      ERROR: "HIGH",
+      CRITICAL: "CRITICAL",
     } as const;
 
     const impact = {
-      severity: severityMapping[severity]
+      severity: severityMapping[severity],
     };
 
     switch (alertType) {
-      case 'RESPONSE_TIME_DEGRADATION':
+      case "RESPONSE_TIME_DEGRADATION":
         return {
           ...impact,
-          businessImpact: 'User experience degradation, potential customer satisfaction impact'
+          businessImpact:
+            "User experience degradation, potential customer satisfaction impact",
         };
 
-      case 'ERROR_RATE_HIGH':
+      case "ERROR_RATE_HIGH":
         return {
           ...impact,
-          businessImpact: 'Service reliability issues, potential data loss or corruption'
+          businessImpact:
+            "Service reliability issues, potential data loss or corruption",
         };
 
-      case 'SYSTEM_OVERLOAD':
+      case "SYSTEM_OVERLOAD":
         return {
           ...impact,
-          estimatedDowntime: severity === 'CRITICAL' ? 15 : 0,
-          businessImpact: 'System instability, potential service unavailability'
+          estimatedDowntime: severity === "CRITICAL" ? 15 : 0,
+          businessImpact:
+            "System instability, potential service unavailability",
         };
 
       default:

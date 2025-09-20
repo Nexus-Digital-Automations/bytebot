@@ -26,8 +26,8 @@
  * @author Performance Monitoring Agent
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 
 /**
  * Performance monitoring configuration
@@ -106,7 +106,13 @@ export interface PerformanceMetric {
   /** Metric timestamp */
   timestamp: Date;
   /** Metric category */
-  category: 'FUNCTION_EXECUTION' | 'CACHE_PERFORMANCE' | 'PARLANT_COMMUNICATION' | 'SYSTEM_RESOURCE' | 'THROUGHPUT' | 'ERROR_TRACKING';
+  category:
+    | "FUNCTION_EXECUTION"
+    | "CACHE_PERFORMANCE"
+    | "PARLANT_COMMUNICATION"
+    | "SYSTEM_RESOURCE"
+    | "THROUGHPUT"
+    | "ERROR_TRACKING";
   /** Metric name */
   metricName: string;
   /** Metric value */
@@ -162,9 +168,9 @@ export interface FunctionPerformanceData {
  */
 export interface CachePerformanceData {
   /** Cache level (L1, L2, L3) */
-  level: 'L1' | 'L2' | 'L3';
+  level: "L1" | "L2" | "L3";
   /** Cache operation type */
-  operation: 'GET' | 'SET' | 'DELETE' | 'INVALIDATE';
+  operation: "GET" | "SET" | "DELETE" | "INVALIDATE";
   /** Cache key */
   key: string;
   /** Operation duration in milliseconds */
@@ -188,7 +194,7 @@ export interface CachePerformanceData {
  */
 export interface ParlantPerformanceData {
   /** Operation type */
-  operation: 'VALIDATE' | 'AUDIT' | 'STREAM' | 'BATCH';
+  operation: "VALIDATE" | "AUDIT" | "STREAM" | "BATCH";
   /** Communication latency in milliseconds */
   latency: number;
   /** Message size in bytes */
@@ -243,9 +249,14 @@ export interface PerformanceAlert {
   /** Alert identifier */
   id: string;
   /** Alert type */
-  type: 'THRESHOLD_EXCEEDED' | 'REGRESSION_DETECTED' | 'BOTTLENECK_IDENTIFIED' | 'CACHE_PERFORMANCE' | 'SYSTEM_OVERLOAD';
+  type:
+    | "THRESHOLD_EXCEEDED"
+    | "REGRESSION_DETECTED"
+    | "BOTTLENECK_IDENTIFIED"
+    | "CACHE_PERFORMANCE"
+    | "SYSTEM_OVERLOAD";
   /** Alert severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** Alert message */
   message: string;
   /** Metric that triggered the alert */
@@ -273,15 +284,20 @@ export interface PerformanceOptimization {
   /** Optimization identifier */
   id: string;
   /** Optimization type */
-  type: 'CACHE_TTL_ADJUSTMENT' | 'BATCH_SIZE_OPTIMIZATION' | 'MEMORY_OPTIMIZATION' | 'CONCURRENCY_TUNING' | 'QUERY_OPTIMIZATION';
+  type:
+    | "CACHE_TTL_ADJUSTMENT"
+    | "BATCH_SIZE_OPTIMIZATION"
+    | "MEMORY_OPTIMIZATION"
+    | "CONCURRENCY_TUNING"
+    | "QUERY_OPTIMIZATION";
   /** Priority level */
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** Optimization description */
   description: string;
   /** Expected performance improvement */
   expectedImprovement: string;
   /** Implementation complexity */
-  complexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  complexity: "LOW" | "MEDIUM" | "HIGH";
   /** Affected components */
   affectedComponents: string[];
   /** Implementation steps */
@@ -356,33 +372,33 @@ export class PerformanceMonitor extends EventEmitter {
    */
   async startMonitoring(): Promise<void> {
     if (this.isMonitoring) {
-      this.logger.warn('Performance monitoring is already running');
+      this.logger.warn("Performance monitoring is already running");
       return;
     }
 
-    this.logger.log('Starting PARLANT Phase 1 Performance Monitoring System');
+    this.logger.log("Starting PARLANT Phase 1 Performance Monitoring System");
 
     // Start metrics collection
     this.monitoringInterval = setInterval(
       () => this.collectMetrics(),
-      this.config.collectInterval
+      this.config.collectInterval,
     );
 
     // Start cleanup scheduler
     this.cleanupInterval = setInterval(
       () => this.cleanupOldMetrics(),
-      60 * 60 * 1000 // Every hour
+      60 * 60 * 1000, // Every hour
     );
 
     // Start GC monitoring
     this.gcMonitoringInterval = setInterval(
       () => this.collectGCMetrics(),
-      30 * 1000 // Every 30 seconds
+      30 * 1000, // Every 30 seconds
     );
 
     this.isMonitoring = true;
-    this.emit('monitoring.started');
-    this.logger.log('Performance monitoring started successfully');
+    this.emit("monitoring.started");
+    this.logger.log("Performance monitoring started successfully");
   }
 
   /**
@@ -390,11 +406,11 @@ export class PerformanceMonitor extends EventEmitter {
    */
   async stopMonitoring(): Promise<void> {
     if (!this.isMonitoring) {
-      this.logger.warn('Performance monitoring is not running');
+      this.logger.warn("Performance monitoring is not running");
       return;
     }
 
-    this.logger.log('Stopping PARLANT Phase 1 Performance Monitoring System');
+    this.logger.log("Stopping PARLANT Phase 1 Performance Monitoring System");
 
     // Clear intervals
     if (this.monitoringInterval) {
@@ -413,8 +429,8 @@ export class PerformanceMonitor extends EventEmitter {
     }
 
     this.isMonitoring = false;
-    this.emit('monitoring.stopped');
-    this.logger.log('Performance monitoring stopped successfully');
+    this.emit("monitoring.stopped");
+    this.logger.log("Performance monitoring stopped successfully");
   }
 
   /**
@@ -431,37 +447,37 @@ export class PerformanceMonitor extends EventEmitter {
       {
         id: `func-exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date(),
-        category: 'FUNCTION_EXECUTION',
-        metricName: 'execution_time',
+        category: "FUNCTION_EXECUTION",
+        metricName: "execution_time",
         value: data.executionTime,
-        unit: 'ms',
+        unit: "ms",
         tags: {
           functionName: data.functionName,
           cached: data.cached.toString(),
-          success: data.success.toString()
+          success: data.success.toString(),
         },
         context: {
           parlantTime: data.parlantTime,
           overheadTime: data.overheadTime,
           parametersHash: data.parametersHash,
-          memoryDelta: data.memoryDelta
-        }
+          memoryDelta: data.memoryDelta,
+        },
       },
       {
         id: `func-overhead-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date(),
-        category: 'FUNCTION_EXECUTION',
-        metricName: 'overhead_time',
+        category: "FUNCTION_EXECUTION",
+        metricName: "overhead_time",
         value: data.overheadTime,
-        unit: 'ms',
+        unit: "ms",
         tags: {
-          functionName: data.functionName
+          functionName: data.functionName,
         },
         context: {
           executionTime: data.executionTime,
-          overheadPercentage: (data.overheadTime / data.executionTime) * 100
-        }
-      }
+          overheadPercentage: (data.overheadTime / data.executionTime) * 100,
+        },
+      },
     ];
 
     // Add metrics to collection
@@ -471,11 +487,14 @@ export class PerformanceMonitor extends EventEmitter {
     this.checkFunctionThresholds(data);
 
     // Emit event
-    this.emit('function.executed', data);
+    this.emit("function.executed", data);
 
     const recordingTime = performance.now() - startTime;
-    if (recordingTime > 5) { // Alert if recording takes more than 5ms
-      this.logger.warn(`Performance recording took ${recordingTime.toFixed(2)}ms`);
+    if (recordingTime > 5) {
+      // Alert if recording takes more than 5ms
+      this.logger.warn(
+        `Performance recording took ${recordingTime.toFixed(2)}ms`,
+      );
     }
   }
 
@@ -488,22 +507,22 @@ export class PerformanceMonitor extends EventEmitter {
     const metric: PerformanceMetric = {
       id: `cache-${data.operation.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: data.timestamp,
-      category: 'CACHE_PERFORMANCE',
+      category: "CACHE_PERFORMANCE",
       metricName: `cache_${data.operation.toLowerCase()}_time`,
       value: data.duration,
-      unit: 'ms',
+      unit: "ms",
       tags: {
         level: data.level,
         operation: data.operation,
         success: data.success.toString(),
-        hit: data.hit?.toString() || 'n/a'
+        hit: data.hit?.toString() || "n/a",
       },
       context: {
         key: data.key,
         dataSize: data.dataSize,
         ttl: data.ttl,
-        functionName: data.functionName
-      }
+        functionName: data.functionName,
+      },
     };
 
     this.metrics.push(metric);
@@ -511,7 +530,7 @@ export class PerformanceMonitor extends EventEmitter {
     // Check cache performance thresholds
     this.checkCacheThresholds(data);
 
-    this.emit('cache.operation', data);
+    this.emit("cache.operation", data);
   }
 
   /**
@@ -523,20 +542,20 @@ export class PerformanceMonitor extends EventEmitter {
     const metric: PerformanceMetric = {
       id: `parlant-${data.operation.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: data.timestamp,
-      category: 'PARLANT_COMMUNICATION',
-      metricName: 'parlant_latency',
+      category: "PARLANT_COMMUNICATION",
+      metricName: "parlant_latency",
       value: data.latency,
-      unit: 'ms',
+      unit: "ms",
       tags: {
         operation: data.operation,
-        success: data.success.toString()
+        success: data.success.toString(),
       },
       context: {
         messageSize: data.messageSize,
         responseSize: data.responseSize,
         sessionId: data.sessionId,
-        ...data.context
-      }
+        ...data.context,
+      },
     };
 
     this.metrics.push(metric);
@@ -544,7 +563,7 @@ export class PerformanceMonitor extends EventEmitter {
     // Check PARLANT thresholds
     this.checkParlantThresholds(data);
 
-    this.emit('parlant.communication', data);
+    this.emit("parlant.communication", data);
   }
 
   /**
@@ -552,16 +571,18 @@ export class PerformanceMonitor extends EventEmitter {
    */
   getCurrentStats(timeWindow: number = 5 * 60 * 1000): PerformanceStats | null {
     const cutoffTime = new Date(Date.now() - timeWindow);
-    const recentMetrics = this.functionMetrics.filter(m =>
-      new Date(m.startTime) >= cutoffTime
+    const recentMetrics = this.functionMetrics.filter(
+      (m) => new Date(m.startTime) >= cutoffTime,
     );
 
     if (recentMetrics.length === 0) {
       return null;
     }
 
-    const executionTimes = recentMetrics.map(m => m.executionTime).sort((a, b) => a - b);
-    const errorCount = recentMetrics.filter(m => !m.success).length;
+    const executionTimes = recentMetrics
+      .map((m) => m.executionTime)
+      .sort((a, b) => a - b);
+    const errorCount = recentMetrics.filter((m) => !m.success).length;
 
     return {
       periodStart: cutoffTime,
@@ -575,32 +596,44 @@ export class PerformanceMonitor extends EventEmitter {
       standardDeviation: this.calculateStandardDeviation(executionTimes),
       min: Math.min(...executionTimes),
       max: Math.max(...executionTimes),
-      throughput: (executionTimes.length / (timeWindow / 1000)),
-      errorRate: errorCount / executionTimes.length
+      throughput: executionTimes.length / (timeWindow / 1000),
+      errorRate: errorCount / executionTimes.length,
     };
   }
 
   /**
    * Get cache performance statistics
    */
-  getCacheStats(timeWindow: number = 5 * 60 * 1000): Record<string, { hitRate: number; avgDuration: number; operations: number }> {
+  getCacheStats(
+    timeWindow: number = 5 * 60 * 1000,
+  ): Record<
+    string,
+    { hitRate: number; avgDuration: number; operations: number }
+  > {
     const cutoffTime = new Date(Date.now() - timeWindow);
-    const recentCacheMetrics = this.cacheMetrics.filter(m => m.timestamp >= cutoffTime);
+    const recentCacheMetrics = this.cacheMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
 
-    const stats: Record<string, { hitRate: number; avgDuration: number; operations: number }> = {};
+    const stats: Record<
+      string,
+      { hitRate: number; avgDuration: number; operations: number }
+    > = {};
 
-    ['L1', 'L2', 'L3'].forEach(level => {
-      const levelMetrics = recentCacheMetrics.filter(m => m.level === level);
-      const getOperations = levelMetrics.filter(m => m.operation === 'GET');
-      const hits = getOperations.filter(m => m.hit === true).length;
-      const avgDuration = levelMetrics.length > 0
-        ? levelMetrics.reduce((sum, m) => sum + m.duration, 0) / levelMetrics.length
-        : 0;
+    ["L1", "L2", "L3"].forEach((level) => {
+      const levelMetrics = recentCacheMetrics.filter((m) => m.level === level);
+      const getOperations = levelMetrics.filter((m) => m.operation === "GET");
+      const hits = getOperations.filter((m) => m.hit === true).length;
+      const avgDuration =
+        levelMetrics.length > 0
+          ? levelMetrics.reduce((sum, m) => sum + m.duration, 0) /
+            levelMetrics.length
+          : 0;
 
       stats[level] = {
         hitRate: getOperations.length > 0 ? hits / getOperations.length : 0,
         avgDuration,
-        operations: levelMetrics.length
+        operations: levelMetrics.length,
       };
     });
 
@@ -611,7 +644,7 @@ export class PerformanceMonitor extends EventEmitter {
    * Get active alerts
    */
   getActiveAlerts(): PerformanceAlert[] {
-    return this.alerts.filter(alert => !alert.resolved);
+    return this.alerts.filter((alert) => !alert.resolved);
   }
 
   /**
@@ -629,7 +662,10 @@ export class PerformanceMonitor extends EventEmitter {
    */
   generateReport(timeWindow: number = 60 * 60 * 1000): {
     summary: PerformanceStats | null;
-    cacheStats: Record<string, { hitRate: number; avgDuration: number; operations: number }>;
+    cacheStats: Record<
+      string,
+      { hitRate: number; avgDuration: number; operations: number }
+    >;
     alerts: PerformanceAlert[];
     optimizations: PerformanceOptimization[];
     recommendations: string[];
@@ -645,13 +681,15 @@ export class PerformanceMonitor extends EventEmitter {
       cacheStats,
       alerts,
       optimizations,
-      recommendations
+      recommendations,
     };
   }
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<PerformanceMonitorConfig>): PerformanceMonitorConfig {
+  private mergeConfig(
+    userConfig: Partial<PerformanceMonitorConfig>,
+  ): PerformanceMonitorConfig {
     const defaultConfig: PerformanceMonitorConfig = {
       collectInterval: 5000, // 5 seconds
       retentionPeriod: 24 * 60 * 60 * 1000, // 24 hours
@@ -665,7 +703,7 @@ export class PerformanceMonitor extends EventEmitter {
         throughput: 1000, // 1000 ops/sec
         errorRate: 0.01, // 1%
         cpuUsage: 0.8, // 80%
-        concurrentOps: 100 // 100 concurrent operations
+        concurrentOps: 100, // 100 concurrent operations
       },
       enableDetailedMetrics: true,
       enableCacheMonitoring: true,
@@ -678,8 +716,8 @@ export class PerformanceMonitor extends EventEmitter {
         throughput: 1500,
         errorRate: 0.005,
         timestamp: new Date(),
-        sampleSize: 1000
-      }
+        sampleSize: 1000,
+      },
     };
 
     return { ...defaultConfig, ...userConfig };
@@ -687,7 +725,7 @@ export class PerformanceMonitor extends EventEmitter {
 
   private initializeBaseline(): void {
     // Initialize baseline values from config
-    this.logger.log('Performance baseline initialized', this.config.baseline);
+    this.logger.log("Performance baseline initialized", this.config.baseline);
   }
 
   private async collectMetrics(): Promise<void> {
@@ -705,9 +743,9 @@ export class PerformanceMonitor extends EventEmitter {
         await this.generateOptimizations();
       }
 
-      this.emit('metrics.collected');
+      this.emit("metrics.collected");
     } catch (error) {
-      this.logger.error('Error collecting performance metrics:', error);
+      this.logger.error("Error collecting performance metrics:", error);
     }
   }
 
@@ -724,9 +762,9 @@ export class PerformanceMonitor extends EventEmitter {
         totalTime: 0,
         frequency: 0,
         heapBefore: memUsage.heapUsed / 1024 / 1024,
-        heapAfter: memUsage.heapUsed / 1024 / 1024
+        heapAfter: memUsage.heapUsed / 1024 / 1024,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.systemMetrics.push(systemData);
@@ -736,23 +774,23 @@ export class PerformanceMonitor extends EventEmitter {
       {
         id: `sys-memory-${Date.now()}`,
         timestamp: systemData.timestamp,
-        category: 'SYSTEM_RESOURCE',
-        metricName: 'memory_usage',
+        category: "SYSTEM_RESOURCE",
+        metricName: "memory_usage",
         value: systemData.memoryUsage,
-        unit: 'MB',
-        tags: { type: 'heap' },
-        context: { available: systemData.availableMemory }
+        unit: "MB",
+        tags: { type: "heap" },
+        context: { available: systemData.availableMemory },
       },
       {
         id: `sys-cpu-${Date.now()}`,
         timestamp: systemData.timestamp,
-        category: 'SYSTEM_RESOURCE',
-        metricName: 'cpu_usage',
+        category: "SYSTEM_RESOURCE",
+        metricName: "cpu_usage",
         value: systemData.cpuUsage,
-        unit: 'ms',
-        tags: { type: 'user' },
-        context: {}
-      }
+        unit: "ms",
+        tags: { type: "user" },
+        context: {},
+      },
     ];
 
     this.metrics.push(...systemMetrics);
@@ -770,39 +808,39 @@ export class PerformanceMonitor extends EventEmitter {
     // Check execution time threshold
     if (data.executionTime > this.config.alertThresholds.p95ResponseTime) {
       this.createAlert(
-        'THRESHOLD_EXCEEDED',
-        'HIGH',
+        "THRESHOLD_EXCEEDED",
+        "HIGH",
         `Function execution time exceeded P95 threshold: ${data.executionTime}ms`,
-        'execution_time',
+        "execution_time",
         data.executionTime,
         this.config.alertThresholds.p95ResponseTime,
-        { functionName: data.functionName }
+        { functionName: data.functionName },
       );
     }
 
     // Check overhead threshold
     if (data.overheadTime > this.config.alertThresholds.functionOverhead) {
       this.createAlert(
-        'THRESHOLD_EXCEEDED',
-        'MEDIUM',
+        "THRESHOLD_EXCEEDED",
+        "MEDIUM",
         `Function overhead exceeded threshold: ${data.overheadTime}ms`,
-        'overhead_time',
+        "overhead_time",
         data.overheadTime,
         this.config.alertThresholds.functionOverhead,
-        { functionName: data.functionName }
+        { functionName: data.functionName },
       );
     }
 
     // Check PARLANT latency threshold
     if (data.parlantTime > this.config.alertThresholds.parlantLatency) {
       this.createAlert(
-        'THRESHOLD_EXCEEDED',
-        'MEDIUM',
+        "THRESHOLD_EXCEEDED",
+        "MEDIUM",
         `PARLANT communication latency exceeded threshold: ${data.parlantTime}ms`,
-        'parlant_latency',
+        "parlant_latency",
         data.parlantTime,
         this.config.alertThresholds.parlantLatency,
-        { functionName: data.functionName }
+        { functionName: data.functionName },
       );
     }
   }
@@ -810,22 +848,22 @@ export class PerformanceMonitor extends EventEmitter {
   private checkCacheThresholds(data: CachePerformanceData): void {
     // Calculate recent cache hit rate
     const recentCacheOps = this.cacheMetrics
-      .filter(m => m.level === data.level && m.operation === 'GET')
+      .filter((m) => m.level === data.level && m.operation === "GET")
       .slice(-100); // Last 100 operations
 
     if (recentCacheOps.length >= 10) {
-      const hits = recentCacheOps.filter(m => m.hit).length;
+      const hits = recentCacheOps.filter((m) => m.hit).length;
       const hitRate = hits / recentCacheOps.length;
 
       if (hitRate < this.config.alertThresholds.cacheHitRate) {
         this.createAlert(
-          'CACHE_PERFORMANCE',
-          'MEDIUM',
+          "CACHE_PERFORMANCE",
+          "MEDIUM",
           `Cache hit rate below threshold: ${(hitRate * 100).toFixed(1)}%`,
-          'cache_hit_rate',
+          "cache_hit_rate",
           hitRate,
           this.config.alertThresholds.cacheHitRate,
-          { level: data.level }
+          { level: data.level },
         );
       }
     }
@@ -834,13 +872,13 @@ export class PerformanceMonitor extends EventEmitter {
   private checkParlantThresholds(data: ParlantPerformanceData): void {
     if (data.latency > this.config.alertThresholds.parlantLatency) {
       this.createAlert(
-        'THRESHOLD_EXCEEDED',
-        'MEDIUM',
+        "THRESHOLD_EXCEEDED",
+        "MEDIUM",
         `PARLANT communication latency exceeded threshold: ${data.latency}ms`,
-        'parlant_latency',
+        "parlant_latency",
         data.latency,
         this.config.alertThresholds.parlantLatency,
-        { operation: data.operation }
+        { operation: data.operation },
       );
     }
   }
@@ -848,37 +886,38 @@ export class PerformanceMonitor extends EventEmitter {
   private checkSystemThresholds(data: SystemResourceData): void {
     if (data.memoryUsage > this.config.alertThresholds.memoryUsage) {
       this.createAlert(
-        'SYSTEM_OVERLOAD',
-        'HIGH',
+        "SYSTEM_OVERLOAD",
+        "HIGH",
         `Memory usage exceeded threshold: ${data.memoryUsage.toFixed(1)}MB`,
-        'memory_usage',
+        "memory_usage",
         data.memoryUsage,
         this.config.alertThresholds.memoryUsage,
-        {}
+        {},
       );
     }
 
-    if (data.cpuUsage > this.config.alertThresholds.cpuUsage * 1000) { // Convert to ms for comparison
+    if (data.cpuUsage > this.config.alertThresholds.cpuUsage * 1000) {
+      // Convert to ms for comparison
       this.createAlert(
-        'SYSTEM_OVERLOAD',
-        'HIGH',
+        "SYSTEM_OVERLOAD",
+        "HIGH",
         `CPU usage exceeded threshold: ${(data.cpuUsage / 1000).toFixed(1)}ms`,
-        'cpu_usage',
+        "cpu_usage",
         data.cpuUsage,
         this.config.alertThresholds.cpuUsage * 1000,
-        {}
+        {},
       );
     }
   }
 
   private createAlert(
-    type: PerformanceAlert['type'],
-    severity: PerformanceAlert['severity'],
+    type: PerformanceAlert["type"],
+    severity: PerformanceAlert["severity"],
     message: string,
     metricName: string,
     currentValue: number,
     thresholdValue: number,
-    context: Record<string, unknown>
+    context: Record<string, unknown>,
   ): void {
     const alert: PerformanceAlert = {
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -891,57 +930,62 @@ export class PerformanceMonitor extends EventEmitter {
       timestamp: new Date(),
       resolved: false,
       context,
-      recommendations: this.generateAlertRecommendations(type, metricName, currentValue, thresholdValue)
+      recommendations: this.generateAlertRecommendations(
+        type,
+        metricName,
+        currentValue,
+        thresholdValue,
+      ),
     };
 
     this.alerts.push(alert);
-    this.emit('alert.created', alert);
+    this.emit("alert.created", alert);
 
     this.logger.warn(`Performance Alert [${severity}]: ${message}`);
   }
 
   private generateAlertRecommendations(
-    type: PerformanceAlert['type'],
+    type: PerformanceAlert["type"],
     metricName: string,
     currentValue: number,
-    thresholdValue: number
+    thresholdValue: number,
   ): string[] {
     const recommendations: string[] = [];
 
     switch (type) {
-      case 'THRESHOLD_EXCEEDED':
-        if (metricName === 'execution_time') {
+      case "THRESHOLD_EXCEEDED":
+        if (metricName === "execution_time") {
           recommendations.push(
-            'Review function implementation for optimization opportunities',
-            'Consider implementing response caching',
-            'Analyze database queries for performance bottlenecks',
-            'Check for memory leaks or excessive object creation'
+            "Review function implementation for optimization opportunities",
+            "Consider implementing response caching",
+            "Analyze database queries for performance bottlenecks",
+            "Check for memory leaks or excessive object creation",
           );
-        } else if (metricName === 'parlant_latency') {
+        } else if (metricName === "parlant_latency") {
           recommendations.push(
-            'Review PARLANT server configuration and connectivity',
-            'Consider implementing request batching',
-            'Check network latency and bandwidth',
-            'Optimize PARLANT request payload size'
+            "Review PARLANT server configuration and connectivity",
+            "Consider implementing request batching",
+            "Check network latency and bandwidth",
+            "Optimize PARLANT request payload size",
           );
         }
         break;
 
-      case 'CACHE_PERFORMANCE':
+      case "CACHE_PERFORMANCE":
         recommendations.push(
-          'Review cache TTL settings for optimal hit rates',
-          'Analyze cache key patterns for better distribution',
-          'Consider increasing cache size if memory allows',
-          'Review cache invalidation strategy'
+          "Review cache TTL settings for optimal hit rates",
+          "Analyze cache key patterns for better distribution",
+          "Consider increasing cache size if memory allows",
+          "Review cache invalidation strategy",
         );
         break;
 
-      case 'SYSTEM_OVERLOAD':
+      case "SYSTEM_OVERLOAD":
         recommendations.push(
-          'Monitor resource usage trends',
-          'Consider scaling infrastructure',
-          'Review memory management and garbage collection',
-          'Analyze system bottlenecks and optimize accordingly'
+          "Monitor resource usage trends",
+          "Consider scaling infrastructure",
+          "Review memory management and garbage collection",
+          "Analyze system bottlenecks and optimize accordingly",
         );
         break;
     }
@@ -956,31 +1000,45 @@ export class PerformanceMonitor extends EventEmitter {
     const baseline = this.config.baseline;
 
     // Check for performance regressions
-    if (currentStats.p95 > baseline.p95ResponseTime * 1.2) { // 20% regression threshold
+    if (currentStats.p95 > baseline.p95ResponseTime * 1.2) {
+      // 20% regression threshold
       this.createAlert(
-        'REGRESSION_DETECTED',
-        'HIGH',
+        "REGRESSION_DETECTED",
+        "HIGH",
         `P95 response time regression detected: ${currentStats.p95.toFixed(0)}ms vs baseline ${baseline.p95ResponseTime.toFixed(0)}ms`,
-        'p95_response_time',
+        "p95_response_time",
         currentStats.p95,
         baseline.p95ResponseTime,
-        { regressionPercentage: ((currentStats.p95 / baseline.p95ResponseTime - 1) * 100).toFixed(1) }
+        {
+          regressionPercentage: (
+            (currentStats.p95 / baseline.p95ResponseTime - 1) *
+            100
+          ).toFixed(1),
+        },
       );
     }
 
     // Check cache hit rate regression
     const cacheStats = this.getCacheStats();
-    const avgHitRate = Object.values(cacheStats).reduce((sum, stats) => sum + stats.hitRate, 0) / Object.keys(cacheStats).length;
+    const avgHitRate =
+      Object.values(cacheStats).reduce((sum, stats) => sum + stats.hitRate, 0) /
+      Object.keys(cacheStats).length;
 
-    if (avgHitRate < baseline.cacheHitRate * 0.9) { // 10% degradation threshold
+    if (avgHitRate < baseline.cacheHitRate * 0.9) {
+      // 10% degradation threshold
       this.createAlert(
-        'REGRESSION_DETECTED',
-        'MEDIUM',
+        "REGRESSION_DETECTED",
+        "MEDIUM",
         `Cache hit rate regression detected: ${(avgHitRate * 100).toFixed(1)}% vs baseline ${(baseline.cacheHitRate * 100).toFixed(1)}%`,
-        'cache_hit_rate',
+        "cache_hit_rate",
         avgHitRate,
         baseline.cacheHitRate,
-        { regressionPercentage: ((avgHitRate / baseline.cacheHitRate - 1) * 100).toFixed(1) }
+        {
+          regressionPercentage: (
+            (avgHitRate / baseline.cacheHitRate - 1) *
+            100
+          ).toFixed(1),
+        },
       );
     }
   }
@@ -995,42 +1053,52 @@ export class PerformanceMonitor extends EventEmitter {
     if (currentStats.p95 > this.config.alertThresholds.p95ResponseTime * 0.8) {
       this.addOptimization({
         id: `opt-response-time-${Date.now()}`,
-        type: 'CACHE_TTL_ADJUSTMENT',
-        priority: 'HIGH',
-        description: 'Optimize cache TTL settings to improve response times',
-        expectedImprovement: '15-25% reduction in P95 response time',
-        complexity: 'LOW',
-        affectedComponents: ['Cache Layer', 'Function Wrappers'],
+        type: "CACHE_TTL_ADJUSTMENT",
+        priority: "HIGH",
+        description: "Optimize cache TTL settings to improve response times",
+        expectedImprovement: "15-25% reduction in P95 response time",
+        complexity: "LOW",
+        affectedComponents: ["Cache Layer", "Function Wrappers"],
         implementationSteps: [
-          'Analyze cache hit patterns by function type',
-          'Increase TTL for frequently accessed, stable data',
-          'Implement adaptive TTL based on data volatility',
-          'Monitor cache performance after changes'
+          "Analyze cache hit patterns by function type",
+          "Increase TTL for frequently accessed, stable data",
+          "Implement adaptive TTL based on data volatility",
+          "Monitor cache performance after changes",
         ],
-        monitoringMetrics: ['cache_hit_rate', 'p95_response_time', 'cache_memory_usage'],
-        timestamp: new Date()
+        monitoringMetrics: [
+          "cache_hit_rate",
+          "p95_response_time",
+          "cache_memory_usage",
+        ],
+        timestamp: new Date(),
       });
     }
 
     // Cache-specific optimizations
     Object.entries(cacheStats).forEach(([level, stats]) => {
-      if (stats.hitRate < this.config.alertThresholds.cacheHitRate && stats.operations > 100) {
+      if (
+        stats.hitRate < this.config.alertThresholds.cacheHitRate &&
+        stats.operations > 100
+      ) {
         this.addOptimization({
           id: `opt-cache-${level.toLowerCase()}-${Date.now()}`,
-          type: 'CACHE_TTL_ADJUSTMENT',
-          priority: 'MEDIUM',
+          type: "CACHE_TTL_ADJUSTMENT",
+          priority: "MEDIUM",
           description: `Optimize ${level} cache configuration to improve hit rate`,
           expectedImprovement: `10-20% improvement in ${level} cache hit rate`,
-          complexity: 'MEDIUM',
+          complexity: "MEDIUM",
           affectedComponents: [`${level} Cache`],
           implementationSteps: [
             `Analyze ${level} cache access patterns`,
-            'Adjust cache size and TTL settings',
-            'Implement intelligent cache warming',
-            'Monitor performance improvements'
+            "Adjust cache size and TTL settings",
+            "Implement intelligent cache warming",
+            "Monitor performance improvements",
           ],
-          monitoringMetrics: [`${level.toLowerCase()}_cache_hit_rate`, 'cache_operation_latency'],
-          timestamp: new Date()
+          monitoringMetrics: [
+            `${level.toLowerCase()}_cache_hit_rate`,
+            "cache_operation_latency",
+          ],
+          timestamp: new Date(),
         });
       }
     });
@@ -1038,61 +1106,82 @@ export class PerformanceMonitor extends EventEmitter {
 
   private addOptimization(optimization: PerformanceOptimization): void {
     // Check if similar optimization already exists
-    const exists = this.optimizations.some(opt =>
-      opt.type === optimization.type &&
-      JSON.stringify(opt.affectedComponents) === JSON.stringify(optimization.affectedComponents)
+    const exists = this.optimizations.some(
+      (opt) =>
+        opt.type === optimization.type &&
+        JSON.stringify(opt.affectedComponents) ===
+          JSON.stringify(optimization.affectedComponents),
     );
 
     if (!exists) {
       this.optimizations.push(optimization);
-      this.emit('optimization.generated', optimization);
+      this.emit("optimization.generated", optimization);
     }
   }
 
   private generateRecommendations(
     stats: PerformanceStats | null,
-    cacheStats: Record<string, { hitRate: number; avgDuration: number; operations: number }>
+    cacheStats: Record<
+      string,
+      { hitRate: number; avgDuration: number; operations: number }
+    >,
   ): string[] {
     const recommendations: string[] = [];
 
     if (!stats) {
-      recommendations.push('Insufficient data for performance analysis. Continue monitoring to gather baseline metrics.');
+      recommendations.push(
+        "Insufficient data for performance analysis. Continue monitoring to gather baseline metrics.",
+      );
       return recommendations;
     }
 
     // Response time recommendations
     if (stats.p95 > this.config.alertThresholds.p95ResponseTime) {
-      recommendations.push(`P95 response time (${stats.p95.toFixed(0)}ms) exceeds target. Consider function optimization and caching improvements.`);
+      recommendations.push(
+        `P95 response time (${stats.p95.toFixed(0)}ms) exceeds target. Consider function optimization and caching improvements.`,
+      );
     }
 
     if (stats.p99 > this.config.alertThresholds.p99ResponseTime) {
-      recommendations.push(`P99 response time (${stats.p99.toFixed(0)}ms) indicates performance outliers. Investigate edge cases and error handling.`);
+      recommendations.push(
+        `P99 response time (${stats.p99.toFixed(0)}ms) indicates performance outliers. Investigate edge cases and error handling.`,
+      );
     }
 
     // Error rate recommendations
     if (stats.errorRate > this.config.alertThresholds.errorRate) {
-      recommendations.push(`Error rate (${(stats.errorRate * 100).toFixed(2)}%) is above threshold. Focus on improving system reliability and error handling.`);
+      recommendations.push(
+        `Error rate (${(stats.errorRate * 100).toFixed(2)}%) is above threshold. Focus on improving system reliability and error handling.`,
+      );
     }
 
     // Throughput recommendations
     if (stats.throughput < this.config.alertThresholds.throughput * 0.8) {
-      recommendations.push(`Throughput (${stats.throughput.toFixed(0)} ops/sec) is below optimal levels. Consider performance optimization and scaling.`);
+      recommendations.push(
+        `Throughput (${stats.throughput.toFixed(0)} ops/sec) is below optimal levels. Consider performance optimization and scaling.`,
+      );
     }
 
     // Cache recommendations
     Object.entries(cacheStats).forEach(([level, levelStats]) => {
       if (levelStats.hitRate < this.config.alertThresholds.cacheHitRate) {
-        recommendations.push(`${level} cache hit rate (${(levelStats.hitRate * 100).toFixed(1)}%) is below target. Review caching strategy and TTL settings.`);
+        recommendations.push(
+          `${level} cache hit rate (${(levelStats.hitRate * 100).toFixed(1)}%) is below target. Review caching strategy and TTL settings.`,
+        );
       }
     });
 
     // General performance recommendations
     if (stats.standardDeviation > stats.mean * 0.5) {
-      recommendations.push('High performance variability detected. Investigate inconsistent execution patterns and system load fluctuations.');
+      recommendations.push(
+        "High performance variability detected. Investigate inconsistent execution patterns and system load fluctuations.",
+      );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Performance metrics are within acceptable ranges. Continue monitoring for optimization opportunities.');
+      recommendations.push(
+        "Performance metrics are within acceptable ranges. Continue monitoring for optimization opportunities.",
+      );
     }
 
     return recommendations;
@@ -1106,46 +1195,62 @@ export class PerformanceMonitor extends EventEmitter {
       functionMetrics: this.functionMetrics.length,
       cacheMetrics: this.cacheMetrics.length,
       parlantMetrics: this.parlantMetrics.length,
-      systemMetrics: this.systemMetrics.length
+      systemMetrics: this.systemMetrics.length,
     };
 
     // Clean up old metrics
-    this.metrics = this.metrics.filter(m => m.timestamp >= cutoffTime);
-    this.functionMetrics = this.functionMetrics.filter(m => new Date(m.startTime) >= cutoffTime);
-    this.cacheMetrics = this.cacheMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.parlantMetrics = this.parlantMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.systemMetrics = this.systemMetrics.filter(m => m.timestamp >= cutoffTime);
+    this.metrics = this.metrics.filter((m) => m.timestamp >= cutoffTime);
+    this.functionMetrics = this.functionMetrics.filter(
+      (m) => new Date(m.startTime) >= cutoffTime,
+    );
+    this.cacheMetrics = this.cacheMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
+    this.parlantMetrics = this.parlantMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
+    this.systemMetrics = this.systemMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
 
     // Clean up resolved alerts
-    this.alerts = this.alerts.filter(a => !a.resolved || a.timestamp >= cutoffTime);
+    this.alerts = this.alerts.filter(
+      (a) => !a.resolved || a.timestamp >= cutoffTime,
+    );
 
     const finalCount = {
       metrics: this.metrics.length,
       functionMetrics: this.functionMetrics.length,
       cacheMetrics: this.cacheMetrics.length,
       parlantMetrics: this.parlantMetrics.length,
-      systemMetrics: this.systemMetrics.length
+      systemMetrics: this.systemMetrics.length,
     };
 
-    this.logger.log('Performance metrics cleanup completed', {
+    this.logger.log("Performance metrics cleanup completed", {
       removed: {
         metrics: initialCount.metrics - finalCount.metrics,
-        functionMetrics: initialCount.functionMetrics - finalCount.functionMetrics,
+        functionMetrics:
+          initialCount.functionMetrics - finalCount.functionMetrics,
         cacheMetrics: initialCount.cacheMetrics - finalCount.cacheMetrics,
         parlantMetrics: initialCount.parlantMetrics - finalCount.parlantMetrics,
-        systemMetrics: initialCount.systemMetrics - finalCount.systemMetrics
+        systemMetrics: initialCount.systemMetrics - finalCount.systemMetrics,
       },
-      remaining: finalCount
+      remaining: finalCount,
     });
   }
 
   // ===== STATISTICAL CALCULATION METHODS =====
 
   private calculateMean(values: number[]): number {
-    return values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+    return values.length > 0
+      ? values.reduce((sum, val) => sum + val, 0) / values.length
+      : 0;
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
     if (sortedValues.length === 0) return 0;
 
     const index = (percentile / 100) * (sortedValues.length - 1);
@@ -1162,7 +1267,7 @@ export class PerformanceMonitor extends EventEmitter {
     if (values.length <= 1) return 0;
 
     const mean = this.calculateMean(values);
-    const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
+    const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
     const variance = this.calculateMean(squaredDiffs);
 
     return Math.sqrt(variance);
@@ -1178,7 +1283,11 @@ export const performanceMonitor = new PerformanceMonitor();
  * Performance monitoring decorator for functions
  */
 export function monitorPerformance(functionName?: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
     const name = functionName || `${target.constructor.name}.${propertyName}`;
 
@@ -1214,7 +1323,7 @@ export function monitorPerformance(functionName?: string) {
           error,
           parametersHash: JSON.stringify(args).substring(0, 100),
           memoryDelta: (memoryAfter - memoryBefore) / 1024 / 1024, // Convert to MB
-          cpuUsage: 0 // Would need actual CPU monitoring
+          cpuUsage: 0, // Would need actual CPU monitoring
         };
 
         performanceMonitor.recordFunctionExecution(perfData);
