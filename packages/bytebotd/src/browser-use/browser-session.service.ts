@@ -1,14 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  CreateBrowserSessionDto,
+import { Injectable, Logger } from '@nestjs/common';import { v4 as uuidv4 } from 'uuid';import {CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserSessionStatus,
   BrowserTabInfoDto,
-} from './dto/browser-session.dto';
-
-/**
- * Browser Session Service - Session Lifecycle Management
+} from './dto/browser-session.dto';/*** Browser Session Service - Session Lifecycle Management
  *
  * Manages browser session creation, monitoring, and cleanup for the
  * browser-use integration. Provides local-only session management
@@ -45,14 +39,9 @@ export class BrowserSessionService {
     const sessionId = uuidv4();
     const now = new Date();
 
-    this.logger.log(`Creating new browser session: ${sessionId}`, {
-      sessionId,
-      name: dto.name,
+    this.logger.log(`Creating new browser session: ${sessionId}`, {sessionId,name: dto.name,
       headless: dto.headless,
-      viewport: `${dto.viewportWidth}x${dto.viewportHeight}`,
-    });
-
-    try {
+      viewport: `${dto.viewportWidth}x${dto.viewportHeight}`,});try {
       // Create initial session object
       const session: BrowserSessionDto = {
         sessionId,
@@ -78,9 +67,7 @@ export class BrowserSessionService {
           profilePath: dto.profilePath,
         },
         tabs: [],
-        activeTabId: '',
-        statistics: {
-          totalTabs: 0,
+        activeTabId: '',statistics: {totalTabs: 0,
           totalPageLoads: 0,
           totalScreenshots: 0,
           totalActions: 0,
@@ -109,8 +96,7 @@ export class BrowserSessionService {
       } else {
         // Create default blank tab
         const tab = this.createTab(sessionId, {
-          url: 'about:blank',
-          title: 'New Tab',
+          url: 'about:blank',title: 'New Tab',
           makeActive: true,
         });
         session.activeTabId = tab.tabId;
@@ -120,9 +106,7 @@ export class BrowserSessionService {
       session.status = BrowserSessionStatus.ACTIVE;
       this.sessions.set(sessionId, session);
 
-      this.logger.log(`Browser session created successfully: ${sessionId}`, {
-        sessionId,
-        tabsCreated: session.tabs.length,
+      this.logger.log(`Browser session created successfully: ${sessionId}`, {sessionId,tabsCreated: session.tabs.length,
         status: session.status,
       });
 
@@ -183,14 +167,8 @@ export class BrowserSessionService {
    * Close browser session
    */
   async closeSession(_sessionId: string): Promise<void> {
-    this.logger.log(`Closing browser session: ${_sessionId}`);
-
-    const session = this.sessions.get(_sessionId);
-    if (!session) {
-      throw new Error(`Session not found: ${_sessionId}`);
-    }
-
-    try {
+    this.logger.log(`Closing browser session: ${_sessionId}`);const session = this.sessions.get(_sessionId);if (!session) {
+      throw new Error(`Session not found: ${_sessionId}`);}try {
       // Update session status
       session.status = BrowserSessionStatus.CLOSING;
       session.lastActivityAt = new Date();
@@ -207,9 +185,7 @@ export class BrowserSessionService {
       session.status = BrowserSessionStatus.CLOSED;
       session.closedAt = new Date();
 
-      this.logger.log(`Browser session closed successfully: ${_sessionId}`, {
-        sessionId: _sessionId,
-        upTimeMs: session.statistics.upTimeMs,
+      this.logger.log(`Browser session closed successfully: ${_sessionId}`, {sessionId: _sessionId,upTimeMs: session.statistics.upTimeMs,
         tabsProcessed: session.statistics.totalTabs,
       });
     } catch (error) {
@@ -247,10 +223,7 @@ export class BrowserSessionService {
 
     const tab: BrowserTabInfoDto = {
       tabId,
-      url: options?.url ?? 'about:blank',
-      title: options?.title ?? 'New Tab',
-      active: options?.makeActive ?? false,
-      loading: options?.url !== 'about:blank',
+      url: options?.url ?? 'about:blank',title: options?.title ?? 'New Tab',active: options?.makeActive ?? false,loading: options?.url !== 'about:blank',
       faviconUrl: undefined,
       createdAt: now,
       lastActivityAt: now,
@@ -273,9 +246,7 @@ export class BrowserSessionService {
 
     this.sessions.set(sessionId, session);
 
-    this.logger.log(`Created new tab: ${tabId}`, {
-      sessionId,
-      tabId,
+    this.logger.log(`Created new tab: ${tabId}`, {sessionId,tabId,
       url: tab.url,
       active: tab.active,
     });
@@ -289,10 +260,7 @@ export class BrowserSessionService {
   closeTab(_sessionId: string, tabId: string): void {
     const session = this.sessions.get(_sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${_sessionId}`);
-    }
-
-    const tabIndex = session.tabs.findIndex((t) => t.tabId === tabId);
+      throw new Error(`Session not found: ${_sessionId}`);}const tabIndex = session.tabs.findIndex((t) => t.tabId === tabId);
     if (tabIndex === -1) {
       throw new Error(`Tab not found: ${tabId}`);
     }
@@ -317,9 +285,7 @@ export class BrowserSessionService {
 
     this.sessions.set(_sessionId, session);
 
-    this.logger.log(`Closed tab: ${tabId}`, {
-      sessionId: _sessionId,
-      tabId,
+    this.logger.log(`Closed tab: ${tabId}`, {sessionId: _sessionId,tabId,
       remainingTabs: session.tabs.length,
     });
   }
@@ -330,15 +296,9 @@ export class BrowserSessionService {
   switchTab(_sessionId: string, tabId: string): void {
     const session = this.sessions.get(_sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${_sessionId}`);
-    }
-
-    const tab = session.tabs.find((t) => t.tabId === tabId);
+      throw new Error(`Session not found: ${_sessionId}`);}const tab = session.tabs.find((t) => t.tabId === tabId);
     if (!tab) {
-      throw new Error(`Tab not found: ${tabId}`);
-    }
-
-    // Deactivate all tabs
+      throw new Error(`Tab not found: ${tabId}`);}// Deactivate all tabs
     session.tabs.forEach((t) => {
       t.active = false;
     });
@@ -350,9 +310,7 @@ export class BrowserSessionService {
 
     this.sessions.set(_sessionId, session);
 
-    this.logger.log(`Switched to tab: ${tabId}`, {
-      sessionId: _sessionId,
-      tabId,
+    this.logger.log(`Switched to tab: ${tabId}`, {sessionId: _sessionId,tabId,
       url: tab.url,
     });
   }
@@ -404,9 +362,7 @@ export class BrowserSessionService {
     session.browserPid = Math.floor(Math.random() * 10000) + 1000;
 
     this.logger.log(
-      `Mock browser initialized with PID: ${session.browserPid}`,
-      {
-        sessionId: session.sessionId,
+      `Mock browser initialized with PID: ${session.browserPid}`,{sessionId: session.sessionId,
         config: session.config,
       },
     );
@@ -422,9 +378,7 @@ export class BrowserSessionService {
     // 3. Terminate browser process
     // 4. Clean up temporary files
 
-    this.logger.log(`Mock browser terminated PID: ${_session.browserPid}`, {
-      sessionId: _session.sessionId,
-    });
+    this.logger.log(`Mock browser terminated PID: ${_session.browserPid}`, {sessionId: _session.sessionId,});
   }
 
   /**
@@ -456,20 +410,14 @@ export class BrowserSessionService {
         closedTime > maxClosedTime
       ) {
         this.sessions.delete(sessionId);
-        this.logger.log(`Removed old closed session: ${sessionId}`);
-      }
-    }
+        this.logger.log(`Removed old closed session: ${sessionId}`);}}
 
     // Close expired sessions
     for (const sessionId of expiredSessions) {
       try {
         await this.closeSession(sessionId);
-        this.logger.log(`Cleaned up expired session: ${sessionId}`);
-      } catch (error) {
-        this.logger.error(
-          `Failed to cleanup expired session: ${sessionId}`,
-          error,
-        );
+        this.logger.log(`Cleaned up expired session: ${sessionId}`);} catch (error) {this.logger.error(
+          `Failed to cleanup expired session: ${sessionId}`,error,);
       }
     }
   }

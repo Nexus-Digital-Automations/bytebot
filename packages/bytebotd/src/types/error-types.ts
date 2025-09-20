@@ -205,7 +205,6 @@ export function getErrorCode(error: unknown): string {
   if (error instanceof Error) {
     return error.name ?? 'UNKNOWN_ERROR';
   }
-
   return 'UNKNOWN_ERROR';
 }
 

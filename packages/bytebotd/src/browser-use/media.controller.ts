@@ -12,27 +12,19 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
-} from '@nestjs/swagger';
-import { MediaService } from './media.service';
-import {
-  ScreenshotCaptureDto,
+} from '@nestjs/swagger';import { MediaService } from './media.service';import {ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,
   BatchScreenshotResultDto,
   ScreenshotFormat,
   ScreenshotType,
-} from './dto/screenshot.dto';
-
-/**
- * Media Controller
+} from './dto/screenshot.dto';/*** Media Controller
  *
  * Specialized REST API endpoints for media capture and management.
  * Focuses on screenshot handling, image processing, and media storage operations.
@@ -58,10 +50,7 @@ import {
  * - Efficient memory management
  * - Concurrent screenshot capture support
  */
-@ApiTags('Media Management')
-@Controller('browser/media')
-export class MediaController {
-  private readonly logger = new Logger(MediaController.name);
+@ApiTags('Media Management')@Controller('browser/media')export class MediaController {private readonly logger = new Logger(MediaController.name);
 
   constructor(private readonly mediaService: MediaService) {}
 
@@ -71,32 +60,21 @@ export class MediaController {
    * Captures a screenshot of the entire page content, including areas
    * outside the current viewport. Supports various formats and quality settings.
    */
-  @Post('screenshot/full-page')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Capture full page screenshot',
-    description: 'Capture a screenshot of the entire page including content below the fold',
-  })
-  @ApiBody({ type: ScreenshotCaptureDto })
+  @Post('screenshot/full-page')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Capture full page screenshot',description: 'Capture a screenshot of the entire page including content below the fold',})@ApiBody({ type: ScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Full page screenshot captured successfully',
-    type: ScreenshotResultDto,
-  })
+    description: 'Full page screenshot captured successfully',type: ScreenshotResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid capture configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid capture configuration',})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Browser session not found',
   })
   async captureFullPageScreenshot(
     @Body() captureDto: ScreenshotCaptureDto,
   ): Promise<ScreenshotResultDto> {
-    this.logger.log(`Capturing full page screenshot for session: ${captureDto.sessionId}`, {
-      sessionId: captureDto.sessionId,
-      format: captureDto.format,
+    this.logger.log(`Capturing full page screenshot for session: ${captureDto.sessionId}`, {sessionId: captureDto.sessionId,format: captureDto.format,
       quality: captureDto.quality,
     });
 
@@ -109,9 +87,7 @@ export class MediaController {
 
       const result = await this.mediaService.captureScreenshot(fullPageConfig);
 
-      this.logger.log(`Full page screenshot captured: ${result.screenshotId}`, {
-        screenshotId: result.screenshotId,
-        dimensions: result.dimensions,
+      this.logger.log(`Full page screenshot captured: ${result.screenshotId}`, {screenshotId: result.screenshotId,dimensions: result.dimensions,
         fileSize: result.fileSizeBytes,
       });
 
@@ -122,9 +98,7 @@ export class MediaController {
         error.stack,
       );
       throw new InternalServerErrorException({
-        message: 'Full page screenshot capture failed',
-        sessionId: captureDto.sessionId,
-      });
+        message: 'Full page screenshot capture failed',sessionId: captureDto.sessionId,});
     }
   }
 
@@ -134,36 +108,23 @@ export class MediaController {
    * Captures a screenshot of a specific DOM element identified by CSS selector.
    * Includes options for padding, scroll positioning, and element visibility waiting.
    */
-  @Post('screenshot/element')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Capture element screenshot',
-    description: 'Capture a screenshot of a specific DOM element using CSS selector',
-  })
-  @ApiBody({ type: ScreenshotCaptureDto })
+  @Post('screenshot/element')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Capture element screenshot',description: 'Capture a screenshot of a specific DOM element using CSS selector',})@ApiBody({ type: ScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Element screenshot captured successfully',
-    type: ScreenshotResultDto,
-  })
+    description: 'Element screenshot captured successfully',type: ScreenshotResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid element selector or configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid element selector or configuration',})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Element or session not found',
-  })
-  async captureElementScreenshot(
+    description: 'Element or session not found',})async captureElementScreenshot(
     @Body() captureDto: ScreenshotCaptureDto,
   ): Promise<ScreenshotResultDto> {
     if (!captureDto.elementSelector?.selector) {
       throw new BadRequestException('Element selector is required for element screenshots');
     }
 
-    this.logger.log(`Capturing element screenshot for session: ${captureDto.sessionId}`, {
-      sessionId: captureDto.sessionId,
-      selector: captureDto.elementSelector.selector,
+    this.logger.log(`Capturing element screenshot for session: ${captureDto.sessionId}`, {sessionId: captureDto.sessionId,selector: captureDto.elementSelector.selector,
       format: captureDto.format,
     });
 
@@ -176,9 +137,7 @@ export class MediaController {
 
       const result = await this.mediaService.captureScreenshot(elementConfig);
 
-      this.logger.log(`Element screenshot captured: ${result.screenshotId}`, {
-        screenshotId: result.screenshotId,
-        selector: captureDto.elementSelector.selector,
+      this.logger.log(`Element screenshot captured: ${result.screenshotId}`, {screenshotId: result.screenshotId,selector: captureDto.elementSelector.selector,
         elementBounds: result.elementBounds,
       });
 
@@ -189,9 +148,7 @@ export class MediaController {
         error.stack,
       );
       throw new InternalServerErrorException({
-        message: 'Element screenshot capture failed',
-        sessionId: captureDto.sessionId,
-        selector: captureDto.elementSelector?.selector,
+        message: 'Element screenshot capture failed',sessionId: captureDto.sessionId,selector: captureDto.elementSelector?.selector,
       });
     }
   }
@@ -202,46 +159,30 @@ export class MediaController {
    * Captures a screenshot of a specific rectangular area defined by coordinates.
    * Useful for capturing specific regions without relying on DOM elements.
    */
-  @Post('screenshot/area')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Capture area screenshot',
-    description: 'Capture a screenshot of a specific rectangular area by coordinates',
-  })
-  @ApiBody({ type: ScreenshotCaptureDto })
+  @Post('screenshot/area')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Capture area screenshot',description: 'Capture a screenshot of a specific rectangular area by coordinates',})@ApiBody({ type: ScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Area screenshot captured successfully',
-    type: ScreenshotResultDto,
-  })
+    description: 'Area screenshot captured successfully',type: ScreenshotResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid area coordinates',
-  })
-  async captureAreaScreenshot(
+    description: 'Invalid area coordinates',})async captureAreaScreenshot(
     @Body() captureDto: ScreenshotCaptureDto,
   ): Promise<ScreenshotResultDto> {
     if (!captureDto.captureArea) {
-      throw new BadRequestException('Capture area coordinates are required');
-    }
-
-    const { x, y, width, height } = captureDto.captureArea;
+      throw new BadRequestException('Capture area coordinates are required');}const { x, y, width, height } = captureDto.captureArea;
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
       throw new BadRequestException('Invalid area coordinates');
     }
 
-    this.logger.log(`Capturing area screenshot for session: ${captureDto.sessionId}`, {
-      sessionId: captureDto.sessionId,
-      area: captureDto.captureArea,
+    this.logger.log(`Capturing area screenshot for session: ${captureDto.sessionId}`, {sessionId: captureDto.sessionId,area: captureDto.captureArea,
       format: captureDto.format,
     });
 
     try {
       const result = await this.mediaService.captureAreaScreenshot(captureDto);
 
-      this.logger.log(`Area screenshot captured: ${result.screenshotId}`, {
-        screenshotId: result.screenshotId,
-        area: captureDto.captureArea,
+      this.logger.log(`Area screenshot captured: ${result.screenshotId}`, {screenshotId: result.screenshotId,area: captureDto.captureArea,
       });
 
       return result;
@@ -251,9 +192,7 @@ export class MediaController {
         error.stack,
       );
       throw new InternalServerErrorException({
-        message: 'Area screenshot capture failed',
-        sessionId: captureDto.sessionId,
-        area: captureDto.captureArea,
+        message: 'Area screenshot capture failed',sessionId: captureDto.sessionId,area: captureDto.captureArea,
       });
     }
   }
@@ -264,13 +203,8 @@ export class MediaController {
    * Captures multiple screenshots with different configurations in a single operation.
    * Supports parallel processing and error handling for individual failures.
    */
-  @Post('screenshot/batch')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Batch screenshot capture',
-    description: 'Capture multiple screenshots with different configurations',
-  })
-  @ApiBody({ type: BatchScreenshotCaptureDto })
+  @Post('screenshot/batch')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Batch screenshot capture',description: 'Capture multiple screenshots with different configurations',})@ApiBody({ type: BatchScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Batch screenshots captured',
@@ -279,18 +213,14 @@ export class MediaController {
   async batchCaptureScreenshots(
     @Body() batchDto: BatchScreenshotCaptureDto,
   ): Promise<BatchScreenshotResultDto> {
-    this.logger.log(`Batch screenshot capture for session: ${batchDto.sessionId}`, {
-      sessionId: batchDto.sessionId,
-      screenshotCount: batchDto.screenshots.length,
+    this.logger.log(`Batch screenshot capture for session: ${batchDto.sessionId}`, {sessionId: batchDto.sessionId,screenshotCount: batchDto.screenshots.length,
       intervalMs: batchDto.intervalMs,
     });
 
     try {
       const result = await this.mediaService.batchCaptureScreenshots(batchDto);
 
-      this.logger.log(`Batch screenshots completed: ${result.batchId}`, {
-        batchId: result.batchId,
-        totalRequested: result.totalRequested,
+      this.logger.log(`Batch screenshots completed: ${result.batchId}`, {batchId: result.batchId,totalRequested: result.totalRequested,
         successful: result.successfulCaptures,
         failed: result.failedCaptures,
       });
@@ -302,9 +232,7 @@ export class MediaController {
         error.stack,
       );
       throw new InternalServerErrorException({
-        message: 'Batch screenshot capture failed',
-        sessionId: batchDto.sessionId,
-      });
+        message: 'Batch screenshot capture failed',sessionId: batchDto.sessionId,});
     }
   }
 
@@ -314,38 +242,19 @@ export class MediaController {
    * Retrieves a previously captured screenshot by its unique identifier.
    * Returns the image data along with metadata.
    */
-  @Get('screenshot/:screenshotId')
-  @ApiOperation({
-    summary: 'Retrieve screenshot',
-    description: 'Retrieve a previously captured screenshot by ID',
-  })
-  @ApiParam({
-    name: 'screenshotId',
-    description: 'Unique screenshot identifier',
-    example: 'screenshot_xyz789',
-  })
-  @ApiResponse({
+  @Get('screenshot/:screenshotId')@ApiOperation({summary: 'Retrieve screenshot',description: 'Retrieve a previously captured screenshot by ID',})@ApiParam({
+    name: 'screenshotId',description: 'Unique screenshot identifier',example: 'screenshot_xyz789',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Screenshot retrieved successfully',
-    type: ScreenshotResultDto,
-  })
+    description: 'Screenshot retrieved successfully',type: ScreenshotResultDto,})
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Screenshot not found',
-  })
-  async getScreenshot(
+    description: 'Screenshot not found',})async getScreenshot(
     @Param('screenshotId') screenshotId: string,
   ): Promise<ScreenshotResultDto> {
-    this.logger.log(`Retrieving screenshot: ${screenshotId}`);
-
-    try {
-      const screenshot = await this.mediaService.getStoredScreenshot(screenshotId);
+    this.logger.log(`Retrieving screenshot: ${screenshotId}`);try {const screenshot = await this.mediaService.getStoredScreenshot(screenshotId);
 
       if (!screenshot) {
-        throw new NotFoundException(`Screenshot not found: ${screenshotId}`);
-      }
-
-      return screenshot;
+        throw new NotFoundException(`Screenshot not found: ${screenshotId}`);}return screenshot;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -353,9 +262,7 @@ export class MediaController {
 
       this.logger.error(`Failed to retrieve screenshot: ${screenshotId}`, error.stack);
       throw new InternalServerErrorException({
-        message: 'Failed to retrieve screenshot',
-        screenshotId,
-      });
+        message: 'Failed to retrieve screenshot',screenshotId,});
     }
   }
 
@@ -365,59 +272,20 @@ export class MediaController {
    * Lists all stored screenshots with optional filtering by session or date range.
    * Supports pagination for large screenshot collections.
    */
-  @Get('screenshots')
-  @ApiOperation({
-    summary: 'List screenshots',
-    description: 'List stored screenshots with optional filtering',
-  })
-  @ApiQuery({
-    name: 'sessionId',
-    required: false,
-    description: 'Filter by session ID',
-  })
-  @ApiQuery({
-    name: 'format',
-    required: false,
-    enum: ScreenshotFormat,
-    description: 'Filter by image format',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Maximum number of results',
-  })
-  @ApiQuery({
-    name: 'offset',
-    required: false,
-    type: Number,
-    description: 'Number of results to skip',
-  })
-  @ApiResponse({
+  @Get('screenshots')@ApiOperation({summary: 'List screenshots',description: 'List stored screenshots with optional filtering',})@ApiQuery({
+    name: 'sessionId',required: false,description: 'Filter by session ID',})@ApiQuery({
+    name: 'format',required: false,enum: ScreenshotFormat,
+    description: 'Filter by image format',})@ApiQuery({
+    name: 'limit',required: false,type: Number,
+    description: 'Maximum number of results',})@ApiQuery({
+    name: 'offset',required: false,type: Number,
+    description: 'Number of results to skip',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Screenshots listed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        screenshots: {
-          type: 'array',
-          items: { $ref: '#/components/schemas/ScreenshotResultDto' },
-        },
-        total: { type: 'number' },
-        limit: { type: 'number' },
-        offset: { type: 'number' },
-      },
-    },
+    description: 'Screenshots listed successfully',schema: {type: 'object',properties: {screenshots: {
+          type: 'array',items: { $ref: '#/components/schemas/ScreenshotResultDto' },},total: { type: 'number' },limit: { type: 'number' },offset: { type: 'number' },},},
   })
   async listScreenshots(
-    @Query('sessionId') sessionId?: string,
-    @Query('format') format?: ScreenshotFormat,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
-  ) {
-    this.logger.log('Listing screenshots', {
-      sessionId,
-      format,
+    @Query('sessionId') sessionId?: string,@Query('format') format?: ScreenshotFormat,@Query('limit') limit?: number,@Query('offset') offset?: number,) {this.logger.log('Listing screenshots', {sessionId,format,
       limit,
       offset,
     });
@@ -432,11 +300,7 @@ export class MediaController {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to list screenshots', error.stack);
-      throw new InternalServerErrorException({
-        message: 'Failed to list screenshots',
-      });
-    }
+      this.logger.error('Failed to list screenshots', error.stack);throw new InternalServerErrorException({message: 'Failed to list screenshots',});}
   }
 
   /**
@@ -445,45 +309,23 @@ export class MediaController {
    * Deletes a stored screenshot and its associated files from the system.
    * This operation is irreversible.
    */
-  @Delete('screenshot/:screenshotId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Delete screenshot',
-    description: 'Delete a stored screenshot and its files',
-  })
-  @ApiParam({
-    name: 'screenshotId',
-    description: 'Unique screenshot identifier',
-  })
-  @ApiResponse({
+  @Delete('screenshot/:screenshotId')@HttpCode(HttpStatus.NO_CONTENT)@ApiOperation({
+    summary: 'Delete screenshot',description: 'Delete a stored screenshot and its files',})@ApiParam({
+    name: 'screenshotId',description: 'Unique screenshot identifier',})@ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Screenshot deleted successfully',
-  })
-  @ApiResponse({
+    description: 'Screenshot deleted successfully',})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Screenshot not found',
-  })
-  async deleteScreenshot(@Param('screenshotId') screenshotId: string): Promise<void> {
-    this.logger.log(`Deleting screenshot: ${screenshotId}`);
-
-    try {
-      const deleted = await this.mediaService.deleteStoredScreenshot(screenshotId);
+    description: 'Screenshot not found',})async deleteScreenshot(@Param('screenshotId') screenshotId: string): Promise<void> {
+    this.logger.log(`Deleting screenshot: ${screenshotId}`);try {const deleted = await this.mediaService.deleteStoredScreenshot(screenshotId);
 
       if (!deleted) {
-        throw new NotFoundException(`Screenshot not found: ${screenshotId}`);
-      }
-
-      this.logger.log(`Screenshot deleted: ${screenshotId}`);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
+        throw new NotFoundException(`Screenshot not found: ${screenshotId}`);}this.logger.log(`Screenshot deleted: ${screenshotId}`);} catch (error) {if (error instanceof NotFoundException) {
         throw error;
       }
 
       this.logger.error(`Failed to delete screenshot: ${screenshotId}`, error.stack);
       throw new InternalServerErrorException({
-        message: 'Failed to delete screenshot',
-        screenshotId,
-      });
+        message: 'Failed to delete screenshot',screenshotId,});
     }
   }
 
@@ -493,29 +335,12 @@ export class MediaController {
    * Removes temporary screenshot files older than the specified age.
    * Helps maintain storage efficiency and system performance.
    */
-  @Post('cleanup')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Cleanup temporary files',
-    description: 'Remove old temporary screenshot files',
-  })
-  @ApiQuery({
-    name: 'maxAgeHours',
-    required: false,
-    type: Number,
-    description: 'Maximum age in hours for temporary files',
-  })
-  @ApiResponse({
+  @Post('cleanup')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Cleanup temporary files',description: 'Remove old temporary screenshot files',})@ApiQuery({
+    name: 'maxAgeHours',required: false,type: Number,
+    description: 'Maximum age in hours for temporary files',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Cleanup completed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        filesRemoved: { type: 'number' },
-        bytesFreed: { type: 'number' },
-        cleanupDurationMs: { type: 'number' },
-      },
-    },
+    description: 'Cleanup completed successfully',schema: {type: 'object',properties: {filesRemoved: { type: 'number' },bytesFreed: { type: 'number' },cleanupDurationMs: { type: 'number' },},},
   })
   async cleanupTempFiles(@Query('maxAgeHours') maxAgeHours?: number) {
     const maxAge = maxAgeHours ?? 24; // Default to 24 hours
@@ -525,19 +350,13 @@ export class MediaController {
     try {
       const result = await this.mediaService.cleanupTempFiles(maxAge);
 
-      this.logger.log('Temporary file cleanup completed', {
-        filesRemoved: result.filesRemoved,
-        bytesFreed: result.bytesFreed,
+      this.logger.log('Temporary file cleanup completed', {filesRemoved: result.filesRemoved,bytesFreed: result.bytesFreed,
         duration: result.cleanupDurationMs,
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Temporary file cleanup failed', error.stack);
-      throw new InternalServerErrorException({
-        message: 'Temporary file cleanup failed',
-      });
-    }
+      this.logger.error('Temporary file cleanup failed', error.stack);throw new InternalServerErrorException({message: 'Temporary file cleanup failed',});}
   }
 
   /**
@@ -546,41 +365,15 @@ export class MediaController {
    * Returns information about stored media files, storage usage,
    * and system performance metrics.
    */
-  @Get('stats')
-  @ApiOperation({
-    summary: 'Get media statistics',
-    description: 'Retrieve media storage and performance statistics',
-  })
-  @ApiResponse({
+  @Get('stats')@ApiOperation({summary: 'Get media statistics',description: 'Retrieve media storage and performance statistics',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Media statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        totalScreenshots: { type: 'number' },
-        totalStorageBytes: { type: 'number' },
-        averageFileSize: { type: 'number' },
-        formatDistribution: {
-          type: 'object',
-          additionalProperties: { type: 'number' },
-        },
-        averageCaptureTime: { type: 'number' },
-        lastCleanup: { type: 'string', format: 'date-time' },
-      },
-    },
+    description: 'Media statistics retrieved successfully',schema: {type: 'object',properties: {totalScreenshots: { type: 'number' },totalStorageBytes: { type: 'number' },averageFileSize: { type: 'number' },formatDistribution: {type: 'object',additionalProperties: { type: 'number' },},averageCaptureTime: { type: 'number' },lastCleanup: { type: 'string', format: 'date-time' },},},
   })
   async getMediaStats() {
-    this.logger.log('Retrieving media statistics');
-
-    try {
-      const stats = await this.mediaService.getMediaStatistics();
+    this.logger.log('Retrieving media statistics');try {const stats = await this.mediaService.getMediaStatistics();
       return stats;
     } catch (error) {
-      this.logger.error('Failed to retrieve media statistics', error.stack);
-      throw new InternalServerErrorException({
-        message: 'Failed to retrieve media statistics',
-      });
-    }
+      this.logger.error('Failed to retrieve media statistics', error.stack);throw new InternalServerErrorException({message: 'Failed to retrieve media statistics',});}
   }
 
   /**
@@ -589,58 +382,27 @@ export class MediaController {
    * Applies compression and optimization to stored images to reduce storage usage.
    * Can be run on specific screenshots or in batch mode.
    */
-  @Post('optimize')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Optimize stored images',
-    description: 'Apply compression and optimization to stored images',
-  })
-  @ApiQuery({
-    name: 'screenshotId',
-    required: false,
-    description: 'Optimize specific screenshot (if not provided, optimizes all)',
-  })
-  @ApiQuery({
-    name: 'quality',
-    required: false,
-    type: Number,
-    description: 'Target quality level (0-100)',
-  })
-  @ApiResponse({
+  @Post('optimize')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Optimize stored images',description: 'Apply compression and optimization to stored images',})@ApiQuery({
+    name: 'screenshotId',required: false,description: 'Optimize specific screenshot (if not provided, optimizes all)',})@ApiQuery({
+    name: 'quality',required: false,type: Number,
+    description: 'Target quality level (0-100)',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Image optimization completed',
-    schema: {
-      type: 'object',
-      properties: {
-        optimizedCount: { type: 'number' },
-        bytesFreed: { type: 'number' },
-        optimizationDurationMs: { type: 'number' },
-      },
-    },
+    description: 'Image optimization completed',schema: {type: 'object',properties: {optimizedCount: { type: 'number' },bytesFreed: { type: 'number' },optimizationDurationMs: { type: 'number' },},},
   })
   async optimizeImages(
-    @Query('screenshotId') screenshotId?: string,
-    @Query('quality') quality?: number,
-  ) {
-    this.logger.log('Starting image optimization', { screenshotId, quality });
-
-    try {
-      const result = await this.mediaService.optimizeStoredImages({
+    @Query('screenshotId') screenshotId?: string,@Query('quality') quality?: number,) {this.logger.log('Starting image optimization', { screenshotId, quality });try {const result = await this.mediaService.optimizeStoredImages({
         screenshotId,
         targetQuality: quality ?? 85,
       });
 
-      this.logger.log('Image optimization completed', {
-        optimizedCount: result.optimizedCount,
-        bytesFreed: result.bytesFreed,
+      this.logger.log('Image optimization completed', {optimizedCount: result.optimizedCount,bytesFreed: result.bytesFreed,
         duration: result.optimizationDurationMs,
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Image optimization failed', error.stack);
-      throw new InternalServerErrorException({
-        message: 'Image optimization failed',
+      this.logger.error('Image optimization failed', error.stack);throw new InternalServerErrorException({message: 'Image optimization failed',
       });
     }
   }

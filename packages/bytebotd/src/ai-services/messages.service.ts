@@ -23,7 +23,6 @@ import { ConfigService } from '@nestjs/config';
 import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== MESSAGES AI INTEGRATION INTERFACES =====
-
 /**
  * AI message processing context
  */
@@ -41,9 +40,7 @@ export interface MessageProcessingContext extends ParlantConversationContext {
  */
 export interface MessageContent {
   readonly id: string;
-  readonly type: 'text' | 'image' | 'file' | 'code' | 'structured';
-  readonly content: string | Buffer | Record<string, unknown>;
-  readonly metadata?: {
+  readonly type: 'text' | 'image' | 'file' | 'code' | 'structured';readonly content: string | Buffer | Record<string, unknown>;readonly metadata?: {
     readonly size?: number;
     readonly mimeType?: string;
     readonly language?: string;
@@ -56,13 +53,9 @@ export interface MessageContent {
  */
 export interface MessageProcessingRequest {
   readonly messages: MessageContent[];
-  readonly processingType: 'analyze' | 'generate' | 'translate' | 'classify' | 'summarize' | 'enhance';
-  readonly parameters?: {
-    readonly targetLanguage?: string;
+  readonly processingType: 'analyze' | 'generate' | 'translate' | 'classify' | 'summarize' | 'enhance';readonly parameters?: {readonly targetLanguage?: string;
     readonly maxLength?: number;
-    readonly tone?: 'formal' | 'casual' | 'professional' | 'friendly';
-    readonly style?: string;
-    readonly template?: string;
+    readonly tone?: 'formal' | 'casual' | 'professional' | 'friendly';readonly style?: string;readonly template?: string;
   };
   readonly context: MessageProcessingContext;
   readonly operationId: string;
@@ -73,9 +66,7 @@ export interface MessageProcessingRequest {
  */
 export interface MessageAnalysisResult {
   readonly messageId: string;
-  readonly sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';
-  readonly topics: string[];
-  readonly intent: {
+  readonly sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';readonly topics: string[];readonly intent: {
     readonly primary: string;
     readonly confidence: number;
     readonly alternatives: Array<{ intent: string; confidence: number }>;
@@ -154,7 +145,6 @@ export class MessagesService {
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `messages_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
     this.logger.log(`[${operationId}] Messages AI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
       validationRequired: true,
@@ -188,9 +178,7 @@ export class MessagesService {
         processingType: request.processingType,
         userId: request.context.userId,
         contentSensitivity: request.context.contentSensitivity,
-        aiModelPreference: request.context.aiModelPreference ?? 'auto',
-      }
-    );
+        aiModelPreference: request.context.aiModelPreference ?? 'auto',});
 
     try {
       // CRITICAL: Parlant conversational validation for AI message analysis
@@ -209,28 +197,17 @@ export class MessagesService {
         operationId: request.operationId,
       };
 
-      this.logger.log(`[${request.operationId}] Requesting Parlant validation for AI message analysis`);
-      
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
-      this.validationCount++;
+      this.logger.log(`[${request.operationId}] Requesting Parlant validation for AI message analysis`);const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);this.validationCount++;
 
       if (!validationResponse.approved) {
         this.logger.warn(
-          `[${request.operationId}] AI message analysis denied by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] AI message analysis denied by Parlant validation`,{operationId: request.operationId,
             reasoning: validationResponse.reasoning,
             alternatives: validationResponse.suggestedAlternatives,
           }
         );
 
-        throw new Error(`Message AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
-      }
-
-      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with AI message analysis`);
-
-      // Execute AI message analysis with validated parameters
-      const response = await this.performMessageAnalysis(request, validationResponse.conversationId);
+        throw new Error(`Message AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with AI message analysis`);// Execute AI message analysis with validated parametersconst response = await this.performMessageAnalysis(request, validationResponse.conversationId);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -238,9 +215,7 @@ export class MessagesService {
 
       // Log successful completion with comprehensive audit trail
       this.logger.log(
-        `[${request.operationId}] AI message analysis completed successfully with Parlant validation`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] AI message analysis completed successfully with Parlant validation`,{operationId: request.operationId,
           responseId: response.id,
           processingType: response.processingType,
           aiModelUsed: response.aiModelUsed,
@@ -290,10 +265,7 @@ export class MessagesService {
    * for content creation and enhancement operations.
    */
   async generateMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_generate`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_generate`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting AI message generation with Parlant validation`,
       {
         operationId,
@@ -317,17 +289,14 @@ export class MessagesService {
         },
         actionDescription: `Generate AI messages with ${request.processingType} processing and ${request.parameters?.tone ?? 'default'} tone`,
         context: request.context,
-        riskLevel: RiskLevel.HIGH, // Content generation is HIGH risk
+        riskLevel: RiskLevel._HIGH, // Content generation is HIGH risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Message generation operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute AI message generation with validation approval
+        throw new Error(`Message generation operation blocked: ${validationResponse.reasoning}`);}// Execute AI message generation with validation approval
       const response = await this.performMessageGeneration(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
@@ -346,9 +315,7 @@ export class MessagesService {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] AI message generation failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] AI message generation failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,error: error instanceof Error ? error.message : String(error),
         duration,
       });
       throw error;
@@ -362,10 +329,7 @@ export class MessagesService {
    * approval for cross-language communication operations.
    */
   async translateMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_translate`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_translate`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting AI message translation with Parlant validation`,
       {
         operationId,
@@ -378,34 +342,24 @@ export class MessagesService {
     try {
       // Parlant validation for AI translation (MEDIUM risk level)
       const validationRequest: ParlantValidationRequest = {
-        functionName: 'MessagesService.translateMessages',
-        functionParams: {
-          messageCount: request.messages.length,
-          sourceLanguage: request.context.languageCode ?? 'auto-detect',
-          targetLanguage: request.parameters?.targetLanguage ?? 'en',
+        functionName: 'MessagesService.translateMessages',functionParams: {messageCount: request.messages.length,
+          sourceLanguage: request.context.languageCode ?? 'auto-detect',targetLanguage: request.parameters?.targetLanguage ?? 'en',
           contentSensitivity: request.context.contentSensitivity,
         },
-        actionDescription: `Translate ${request.messages.length} messages from ${request.context.languageCode ?? 'auto-detect'} to ${request.parameters?.targetLanguage ?? 'en'}`,
-        context: request.context,
-        riskLevel: RiskLevel.MEDIUM, // Translation is MEDIUM risk
+        actionDescription: `Translate ${request.messages.length} messages from ${request.context.languageCode ?? 'auto-detect'} to ${request.parameters?.targetLanguage ?? 'en'}`,context: request.context,riskLevel: RiskLevel._MODERATE, // Translation is MEDIUM risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Translation operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute AI message translation with validation approval
+        throw new Error(`Translation operation blocked: ${validationResponse.reasoning}`);}// Execute AI message translation with validation approval
       const response = await this.performMessageTranslation(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.tokensUsed);
 
-      this.logger.log(`[${operationId}] AI message translation completed successfully`, {
-        operationId,
-        responseId: response.id,
+      this.logger.log(`[${operationId}] AI message translation completed successfully`, {operationId,responseId: response.id,
         messageCount: request.messages.length,
         targetLanguage: request.parameters?.targetLanguage,
         aiModelUsed: response.aiModelUsed,
@@ -417,9 +371,7 @@ export class MessagesService {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] AI message translation failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] AI message translation failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,error: error instanceof Error ? error.message : String(error),
         duration,
       });
       throw error;
@@ -433,10 +385,7 @@ export class MessagesService {
    * approval for content categorization and filtering operations.
    */
   async classifyMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_classify`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_classify`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting AI message classification with Parlant validation`,
       {
         operationId,
@@ -454,27 +403,20 @@ export class MessagesService {
           contentFilteringRequired: request.context.contentFilteringRequired,
           contentSensitivity: request.context.contentSensitivity,
         },
-        actionDescription: `Classify ${request.messages.length} messages with AI content analysis and filtering`,
-        context: request.context,
-        riskLevel: RiskLevel.MEDIUM, // Classification is MEDIUM risk
+        actionDescription: `Classify ${request.messages.length} messages with AI content analysis and filtering`,context: request.context,riskLevel: RiskLevel._MODERATE, // Classification is MEDIUM risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Classification operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute AI message classification with validation approval
+        throw new Error(`Classification operation blocked: ${validationResponse.reasoning}`);}// Execute AI message classification with validation approval
       const response = await this.performMessageClassification(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.tokensUsed);
 
-      this.logger.log(`[${operationId}] AI message classification completed successfully`, {
-        operationId,
-        responseId: response.id,
+      this.logger.log(`[${operationId}] AI message classification completed successfully`, {operationId,responseId: response.id,
         classificationsPerformed: request.messages.length,
         primaryCategory: response.results.classification?.category,
         confidence: response.results.classification?.confidence,
@@ -509,29 +451,16 @@ export class MessagesService {
     
     const mockAnalysis: MessageAnalysisResult[] = request.messages.map((message, index) => ({
       messageId: message.id,
-      sentiment: (['positive', 'negative', 'neutral', 'mixed'] as const)[index % 4] as 'positive' | 'negative' | 'neutral' | 'mixed',
-      topics: [['technology', 'business', 'communication', 'support'][index % 4] ?? 'general'],
-      intent: {
-        primary: 'information_request',
-        confidence: 0.85 + Math.random() * 0.1,
-        alternatives: [
-          { intent: 'question', confidence: 0.7 },
-          { intent: 'support_request', confidence: 0.6 }
-        ]
-      },
+      sentiment: (['positive', 'negative', 'neutral', 'mixed'] as const)[index % 4] as 'positive' | 'negative' | 'neutral' | 'mixed',topics: [['technology', 'business', 'communication', 'support'][index % 4] ?? 'general'],intent: {primary: 'information_request',confidence: 0.85 + Math.random() * 0.1,alternatives: [
+          { intent: 'question', confidence: 0.7 },{ intent: 'support_request', confidence: 0.6 }]},
       language: {
-        detected: request.context.languageCode ?? 'en',
-        confidence: 0.95
-      },
+        detected: request.context.languageCode ?? 'en',confidence: 0.95},
       contentSafety: {
         safe: true,
         categories: [],
-        severity: 'low'
-      },
-      entities: [
+        severity: 'low'},entities: [
         {
-          type: 'person',
-          value: 'user',
+          type: 'person',value: 'user',
           confidence: 0.8
         }
       ]
@@ -546,9 +475,7 @@ export class MessagesService {
       results: {
         analysis: mockAnalysis,
       },
-      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
-      processingTimeMs: 150 + Math.random() * 200,
-      tokensUsed: {
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',processingTimeMs: 150 + Math.random() * 200,tokensUsed: {
         input: this.estimateInputTokens(request),
         output: 80 + Math.random() * 40,
       },
@@ -571,17 +498,13 @@ export class MessagesService {
     // TODO: Implement actual AI message generation
     
     const mockResponse: MessageProcessingResponse = {
-      id: `generation${Date.now()}${Math.random().toString(36).substring(7)}`,
-      processedAt: new Date(),
-      operationId: request.operationId,
+      id: `generation${Date.now()}${Math.random().toString(36).substring(7)}`,processedAt: new Date(),operationId: request.operationId,
       conversationId,
       processingType: request.processingType,
       results: {
         generatedContent: `Mock AI-generated content with ${request.parameters?.tone ?? 'default'} tone. This is a sample response that would be generated based on the input parameters and requirements.`,
       },
-      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
-      processingTimeMs: 200 + Math.random() * 300,
-      tokensUsed: {
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',processingTimeMs: 200 + Math.random() * 300,tokensUsed: {
         input: this.estimateInputTokens(request),
         output: 120 + Math.random() * 80,
       },
@@ -602,17 +525,13 @@ export class MessagesService {
     // TODO: Implement actual AI translation
     
     const mockResponse: MessageProcessingResponse = {
-      id: `translation${Date.now()}${Math.random().toString(36).substring(7)}`,
-      processedAt: new Date(),
-      operationId: request.operationId,
+      id: `translation${Date.now()}${Math.random().toString(36).substring(7)}`,processedAt: new Date(),operationId: request.operationId,
       conversationId,
       processingType: request.processingType,
       results: {
         translatedContent: `Mock translated content to ${request.parameters?.targetLanguage ?? 'en'} language. Translation would preserve meaning and context while adapting to target language conventions.`,
       },
-      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
-      processingTimeMs: 180 + Math.random() * 220,
-      tokensUsed: {
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',processingTimeMs: 180 + Math.random() * 220,tokensUsed: {
         input: this.estimateInputTokens(request),
         output: 100 + Math.random() * 60,
       },
@@ -640,40 +559,23 @@ export class MessagesService {
       processingType: request.processingType,
       results: {
         classification: {
-          category: 'business_communication',
-          confidence: 0.88 + Math.random() * 0.1,
-          subcategories: ['professional', 'informational', 'request'],
-        },
-      },
-      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
-      processingTimeMs: 120 + Math.random() * 180,
-      tokensUsed: {
+          category: 'business_communication',confidence: 0.88 + Math.random() * 0.1,subcategories: ['professional', 'informational', 'request'],},},
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',processingTimeMs: 120 + Math.random() * 180,tokensUsed: {
         input: this.estimateInputTokens(request),
         output: 40 + Math.random() * 30,
       },
-      securityFlags: ['parlant_validated', 'ai_classified', 'content_categorized'],
-    };
-
-    await new Promise(resolve => setTimeout(resolve, mockResponse.processingTimeMs));
+      securityFlags: ['parlant_validated', 'ai_classified', 'content_categorized'],};await new Promise(resolve => setTimeout(resolve, mockResponse.processingTimeMs));
     return mockResponse;
   }
 
   // ===== UTILITY METHODS =====
 
   private assessMessageRiskLevel(request: MessageProcessingRequest): RiskLevel {
-    if (request.context.contentSensitivity === 'RESTRICTED') {
-      return RiskLevel.CRITICAL;
-    }
-    if (request.context.contentSensitivity === 'CONFIDENTIAL') {
-      return RiskLevel.HIGH;
-    }
-    if (request.processingType === 'generate') {
-      return RiskLevel.HIGH; // Content generation is inherently risky
-    }
-    if (request.messages.some(m => m.type !== 'text')) {
-      return RiskLevel.MEDIUM; // Multimedia content requires more scrutiny
-    }
-    return RiskLevel.LOW;
+    if (request.context.contentSensitivity === 'RESTRICTED') {return RiskLevel._CRITICAL;}
+    if (request.context.contentSensitivity === 'CONFIDENTIAL') {return RiskLevel._HIGH;}
+    if (request.processingType === 'generate') {return RiskLevel._HIGH; // Content generation is inherently risky}
+    if (request.messages.some(m => m.type !== 'text')) {return RiskLevel._MODERATE; // Multimedia content requires more scrutiny}
+    return RiskLevel._LOW;
   }
 
   private estimateInputTokens(request: MessageProcessingRequest): number {
@@ -682,9 +584,7 @@ export class MessagesService {
       .filter(m => m.type === 'text' && typeof m.content === 'string')
       .map(m => m.content as string)
       .join(' ');
-    
     const parametersContent = JSON.stringify(request.parameters ?? {});
-    
     return Math.ceil((textContent.length + parametersContent.length) / 4);
   }
 
@@ -703,38 +603,25 @@ export class MessagesService {
     
     this.logger.log('Messages AI Service Performance Metrics', {
       requestCount: this.requestCount,
-      validationRate: `${validationRate.toFixed(2)}%`,
-      averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,
+      validationRate: `${validationRate.toFixed(2)}%`,averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,
       totalInputTokens: this.tokensProcessed.input,
       totalOutputTokens: this.tokensProcessed.output,
-      tokenRatio: this.tokensProcessed.input > 0 ? (this.tokensProcessed.output / this.tokensProcessed.input).toFixed(2) : '0',
-    });
-  }
+      tokenRatio: this.tokensProcessed.input > 0 ? (this.tokensProcessed.output / this.tokensProcessed.input).toFixed(2) : '0',});}
 
   // ===== CONFIGURATION HELPERS =====
 
   private isContentFilteringEnabled(): boolean {
-    return this.configService.get<boolean>('MESSAGE_CONTENT_FILTERING_ENABLED', true);
-  }
-
-  // ===== PUBLIC UTILITY METHODS =====
+    return this.configService.get<boolean>('MESSAGE_CONTENT_FILTERING_ENABLED', true);}// ===== PUBLIC UTILITY METHODS =====
 
   /**
    * Get current service health with performance metrics
    */
   getServiceHealth(): {
-    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-    metrics: Record<string, unknown>;
-  } {
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';metrics: Record<string, unknown>;} {
     const avgProcessingTime = this.averageProcessingTime;
     const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
-    if (avgProcessingTime > 800 || validationRate < 95) {
-      status = 'DEGRADED';
-    }
-    if (avgProcessingTime > 2000 || validationRate < 80) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgProcessingTime > 800 || validationRate < 95) {status = 'DEGRADED';}if (avgProcessingTime > 2000 || validationRate < 80) {
       status = 'FAILED';
     }
 
@@ -742,8 +629,7 @@ export class MessagesService {
       status,
       metrics: {
         requestCount: this.requestCount,
-        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,
-        validationRate: `${validationRate.toFixed(2)}%`,
+        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,
         tokensProcessed: this.tokensProcessed,
         contentFilteringEnabled: this.isContentFilteringEnabled(),
       },

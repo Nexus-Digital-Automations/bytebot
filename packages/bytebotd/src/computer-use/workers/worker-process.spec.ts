@@ -8,64 +8,28 @@
  * @version 1.0.0
  */
 
-import { fork, ChildProcess } from 'child_process';
-import * as path from 'path';
-import { EventEmitter } from 'events';
-
-// Message types for worker communication
-const WorkerMessageType = {
-  EXECUTE_JOB: 'execute_job',
-  JOB_PROGRESS: 'job_progress',
-  JOB_COMPLETED: 'job_completed',
-  JOB_FAILED: 'job_failed',
-  HEARTBEAT: 'heartbeat',
-  SHUTDOWN: 'shutdown',
-  WORKER_READY: 'worker_ready',
-  HEALTH_CHECK: 'health_check',
-};
-
-describe('Worker Process Integration Tests', () => {
-  let workerProcess: ChildProcess;
-  let workerMessages: any[] = [];
+import { fork, ChildProcess } from 'child_process';import * as path from 'path';import { EventEmitter } from 'events';// Message types for worker communicationconst WorkerMessageType = {
+  EXECUTE_JOB: 'execute_job',JOB_PROGRESS: 'job_progress',JOB_COMPLETED: 'job_completed',JOB_FAILED: 'job_failed',HEARTBEAT: 'heartbeat',SHUTDOWN: 'shutdown',WORKER_READY: 'worker_ready',HEALTH_CHECK: 'health_check',};describe('Worker Process Integration Tests', () => {let workerProcess: ChildProcess;let workerMessages: any[] = [];
 
   const createWorkerProcess = (): Promise<ChildProcess> => {
     return new Promise((resolve, reject) => {
-      const workerScriptPath = path.join(__dirname, 'worker-process.js');
-
-      const worker = fork(workerScriptPath, [], {
-        silent: false,
+      const workerScriptPath = path.join(__dirname, 'worker-process.js');const worker = fork(workerScriptPath, [], {silent: false,
         env: {
           ...process.env,
-          WORKER_ID: 'test-worker-' + Date.now(),
-          WORKER_TIMEOUT_MS: '30000',
-          NODE_ENV: 'test',
-        },
-        execArgv: [
-          '--max-old-space-size=512',
-          '--expose-gc',
-        ],
-      });
+          WORKER_ID: 'test-worker-' + Date.now(),WORKER_TIMEOUT_MS: '30000',NODE_ENV: 'test',},execArgv: [
+          '--max-old-space-size=512','--expose-gc',],});
 
       // Collect messages
-      worker.on('message', (message) => {
-        workerMessages.push(message);
-      });
+      worker.on('message', (message) => {workerMessages.push(message);});
 
       // Handle worker ready
-      worker.once('message', (message) => {
-        if (message.type === WorkerMessageType.WORKER_READY) {
-          resolve(worker);
+      worker.once('message', (message) => {if (message.type === WorkerMessageType.WORKER_READY) {resolve(worker);
         }
       });
 
       // Handle errors
-      worker.on('error', reject);
-
-      // Timeout if worker doesn't start
-      setTimeout(() => {
-        reject(new Error('Worker failed to start within 10 seconds'));
-      }, 10000);
-    });
+      worker.on('error', reject);// Timeout if worker doesn't startsetTimeout(() => {
+        reject(new Error('Worker failed to start within 10 seconds'));}, 10000);});
   };
 
   beforeEach(async () => {
@@ -74,18 +38,10 @@ describe('Worker Process Integration Tests', () => {
 
   afterEach(async () => {
     if (workerProcess && !workerProcess.killed) {
-      workerProcess.kill('SIGTERM');
-      await new Promise((resolve) => {
-        workerProcess.once('exit', resolve);
-      });
-    }
+      workerProcess.kill('SIGTERM');await new Promise((resolve) => {workerProcess.once('exit', resolve);});}
   });
 
-  describe('Worker Initialization', () => {
-    it('should start worker process and send ready message', async () => {
-      workerProcess = await createWorkerProcess();
-
-      expect(workerProcess).toBeDefined();
+  describe('Worker Initialization', () => {it('should start worker process and send ready message', async () => {workerProcess = await createWorkerProcess();expect(workerProcess).toBeDefined();
       expect(workerProcess.pid).toBeGreaterThan(0);
 
       const readyMessage = workerMessages.find(m => m.type === WorkerMessageType.WORKER_READY);
@@ -98,10 +54,7 @@ describe('Worker Process Integration Tests', () => {
       });
     }, 15000);
 
-    it('should start sending heartbeat messages', async () => {
-      workerProcess = await createWorkerProcess();
-
-      // Wait for heartbeat messages
+    it('should start sending heartbeat messages', async () => {workerProcess = await createWorkerProcess();// Wait for heartbeat messages
       await new Promise(resolve => setTimeout(resolve, 6000));
 
       const heartbeatMessages = workerMessages.filter(m => m.type === WorkerMessageType.HEARTBEAT);
@@ -127,19 +80,11 @@ describe('Worker Process Integration Tests', () => {
     }, 15000);
   });
 
-  describe('Job Execution', () => {
-    beforeEach(async () => {
-      workerProcess = await createWorkerProcess();
+  describe('Job Execution', () => {beforeEach(async () => {workerProcess = await createWorkerProcess();
     });
 
-    it('should execute screenshot job successfully', async () => {
-      const jobId = 'test-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'screenshot' },
-        priority: 'normal',
-        timeout: 30000,
-        metadata: { test: true },
+    it('should execute screenshot job successfully', async () => {const jobId = 'test-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'screenshot' },priority: 'normal',timeout: 30000,metadata: { test: true },
         submittedAt: new Date(),
         assignedAt: new Date(),
       };
@@ -147,9 +92,7 @@ describe('Worker Process Integration Tests', () => {
       // Send job execution message
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -184,22 +127,14 @@ describe('Worker Process Integration Tests', () => {
       });
     }, 15000);
 
-    it('should execute mouse action job successfully', async () => {
-      const jobId = 'test-mouse-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'click_mouse', x: 100, y: 200 },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+    it('should execute mouse action job successfully', async () => {const jobId = 'test-mouse-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'click_mouse', x: 100, y: 200 },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -232,22 +167,14 @@ describe('Worker Process Integration Tests', () => {
       });
     }, 15000);
 
-    it('should handle file operation jobs', async () => {
-      const jobId = 'test-file-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'write_file', path: '/tmp/test.txt', content: 'test content' },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+    it('should handle file operation jobs', async () => {const jobId = 'test-file-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'write_file', path: '/tmp/test.txt', content: 'test content' },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -275,28 +202,18 @@ describe('Worker Process Integration Tests', () => {
       expect(completionMessage.data).toMatchObject({
         success: true,
         message: expect.any(String),
-        path: '/tmp/test.txt',
-        size: expect.any(Number),
-        operationId: expect.any(String),
+        path: '/tmp/test.txt',size: expect.any(Number),operationId: expect.any(String),
       });
     }, 15000);
 
-    it('should send progress updates for long-running jobs', async () => {
-      const jobId = 'test-long-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'write_file', path: '/tmp/large_file.txt', content: 'x'.repeat(10000) },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+    it('should send progress updates for long-running jobs', async () => {const jobId = 'test-long-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'write_file', path: '/tmp/large_file.txt', content: 'x'.repeat(10000) },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -331,22 +248,14 @@ describe('Worker Process Integration Tests', () => {
       });
     }, 15000);
 
-    it('should handle job timeouts', async () => {
-      const jobId = 'test-timeout-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'screenshot' },
-        priority: 'normal',
-        timeout: 100, // Very short timeout
-        submittedAt: new Date(),
+    it('should handle job timeouts', async () => {const jobId = 'test-timeout-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'screenshot' },priority: 'normal',timeout: 100, // Very short timeoutsubmittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -371,46 +280,28 @@ describe('Worker Process Integration Tests', () => {
       );
 
       expect(failureMessage).toBeDefined();
-      expect(failureMessage.data).toBe('Job execution timed out');
-    }, 15000);
-
-    it('should reject multiple concurrent jobs', async () => {
-      const jobId1 = 'test-job-1-' + Date.now();
-      const jobId2 = 'test-job-2-' + Date.now();
-
-      const jobContext1 = {
-        jobId: jobId1,
-        action: { action: 'screenshot' },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+      expect(failureMessage.data).toBe('Job execution timed out');}, 15000);it('should reject multiple concurrent jobs', async () => {const jobId1 = 'test-job-1-' + Date.now();const jobId2 = 'test-job-2-' + Date.now();const jobContext1 = {jobId: jobId1,
+        action: { action: 'screenshot' },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       const jobContext2 = {
         jobId: jobId2,
-        action: { action: 'click_mouse', x: 100, y: 200 },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+        action: { action: 'click_mouse', x: 100, y: 200 },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       // Send first job
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId: jobId1,
-        data: jobContext1,
+        workerId: 'test-worker',jobId: jobId1,data: jobContext1,
         timestamp: new Date(),
       });
 
       // Immediately send second job
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId: jobId2,
-        data: jobContext2,
+        workerId: 'test-worker',jobId: jobId2,data: jobContext2,
         timestamp: new Date(),
       });
 
@@ -420,10 +311,7 @@ describe('Worker Process Integration Tests', () => {
           const rejectionMessage = workerMessages.find(m =>
             m.type === WorkerMessageType.JOB_FAILED &&
             m.jobId === jobId2 &&
-            m.data.includes('Worker busy')
-          );
-
-          if (rejectionMessage) {
+            m.data.includes('Worker busy'));if (rejectionMessage) {
             resolve(rejectionMessage);
           } else {
             setTimeout(checkRejection, 100);
@@ -438,18 +326,12 @@ describe('Worker Process Integration Tests', () => {
       );
 
       expect(rejectionMessage).toBeDefined();
-      expect(rejectionMessage.data).toContain('Worker busy with another job');
-    }, 15000);
-  });
+      expect(rejectionMessage.data).toContain('Worker busy with another job');}, 15000);});
 
-  describe('Resource Monitoring', () => {
-    beforeEach(async () => {
-      workerProcess = await createWorkerProcess();
+  describe('Resource Monitoring', () => {beforeEach(async () => {workerProcess = await createWorkerProcess();
     });
 
-    it('should monitor memory usage', async () => {
-      // Wait for a few heartbeats
-      await new Promise(resolve => setTimeout(resolve, 6000));
+    it('should monitor memory usage', async () => {// Wait for a few heartbeatsawait new Promise(resolve => setTimeout(resolve, 6000));
 
       const heartbeatMessages = workerMessages.filter(m => m.type === WorkerMessageType.HEARTBEAT);
       expect(heartbeatMessages.length).toBeGreaterThan(0);
@@ -466,23 +348,14 @@ describe('Worker Process Integration Tests', () => {
       expect(memoryUsage.rss).toBeLessThan(512 * 1024 * 1024);
     }, 15000);
 
-    it('should monitor CPU usage', async () => {
-      // Execute a job to generate some CPU usage
-      const jobId = 'cpu-test-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'screenshot' },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+    it('should monitor CPU usage', async () => {// Execute a job to generate some CPU usageconst jobId = 'cpu-test-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'screenshot' },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
@@ -497,13 +370,9 @@ describe('Worker Process Integration Tests', () => {
       expect(cpuUsage.system).toBeGreaterThanOrEqual(0);
     }, 15000);
 
-    it('should respond to health check requests', async () => {
-      // Send health check request
-      workerProcess.send({
+    it('should respond to health check requests', async () => {// Send health check requestworkerProcess.send({
         type: WorkerMessageType.HEALTH_CHECK,
-        workerId: 'test-worker',
-        timestamp: new Date(),
-      });
+        workerId: 'test-worker',timestamp: new Date(),});
 
       // Wait for health check response
       await new Promise((resolve) => {
@@ -531,34 +400,20 @@ describe('Worker Process Integration Tests', () => {
     }, 15000);
   });
 
-  describe('Error Handling', () => {
-    beforeEach(async () => {
-      workerProcess = await createWorkerProcess();
+  describe('Error Handling', () => {beforeEach(async () => {workerProcess = await createWorkerProcess();
     });
 
-    it('should handle invalid messages gracefully', async () => {
-      // Send invalid message
-      workerProcess.send({
-        type: 'invalid_message_type',
-        data: 'invalid data',
-      });
-
-      // Worker should continue to send heartbeats
+    it('should handle invalid messages gracefully', async () => {// Send invalid messageworkerProcess.send({
+        type: 'invalid_message_type',data: 'invalid data',});// Worker should continue to send heartbeats
       await new Promise(resolve => setTimeout(resolve, 6000));
 
       const heartbeatMessages = workerMessages.filter(m => m.type === WorkerMessageType.HEARTBEAT);
       expect(heartbeatMessages.length).toBeGreaterThan(0);
     }, 15000);
 
-    it('should handle malformed job data', async () => {
-      const jobId = 'malformed-job-' + Date.now();
-
-      // Send job with malformed data
-      workerProcess.send({
+    it('should handle malformed job data', async () => {const jobId = 'malformed-job-' + Date.now();// Send job with malformed dataworkerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: null, // Invalid job context
+        workerId: 'test-worker',jobId,data: null, // Invalid job context
         timestamp: new Date(),
       });
 
@@ -571,59 +426,38 @@ describe('Worker Process Integration Tests', () => {
     }, 15000);
   });
 
-  describe('Graceful Shutdown', () => {
-    beforeEach(async () => {
-      workerProcess = await createWorkerProcess();
+  describe('Graceful Shutdown', () => {beforeEach(async () => {workerProcess = await createWorkerProcess();
     });
 
-    it('should handle graceful shutdown request', async () => {
-      // Send shutdown request
-      workerProcess.send({
+    it('should handle graceful shutdown request', async () => {// Send shutdown requestworkerProcess.send({
         type: WorkerMessageType.SHUTDOWN,
-        workerId: 'test-worker',
-        timestamp: new Date(),
-      });
+        workerId: 'test-worker',timestamp: new Date(),});
 
       // Wait for shutdown message and process exit
       await new Promise((resolve) => {
-        workerProcess.once('exit', resolve);
-      });
-
-      const shutdownMessage = workerMessages.find(m => m.type === WorkerMessageType.SHUTDOWN);
+        workerProcess.once('exit', resolve);});const shutdownMessage = workerMessages.find(m => m.type === WorkerMessageType.SHUTDOWN);
       expect(shutdownMessage).toBeDefined();
       expect(shutdownMessage.data).toMatchObject({
-        reason: 'graceful_shutdown',
-        performance: expect.any(Object),
-        uptime: expect.any(Number),
+        reason: 'graceful_shutdown',performance: expect.any(Object),uptime: expect.any(Number),
       });
     }, 15000);
 
-    it('should complete current job before shutdown', async () => {
-      const jobId = 'shutdown-job-' + Date.now();
-      const jobContext = {
-        jobId,
-        action: { action: 'write_file', path: '/tmp/shutdown_test.txt', content: 'test' },
-        priority: 'normal',
-        timeout: 30000,
-        submittedAt: new Date(),
+    it('should complete current job before shutdown', async () => {const jobId = 'shutdown-job-' + Date.now();const jobContext = {jobId,
+        action: { action: 'write_file', path: '/tmp/shutdown_test.txt', content: 'test' },priority: 'normal',timeout: 30000,submittedAt: new Date(),
         assignedAt: new Date(),
       };
 
       // Start a job
       workerProcess.send({
         type: WorkerMessageType.EXECUTE_JOB,
-        workerId: 'test-worker',
-        jobId,
-        data: jobContext,
+        workerId: 'test-worker',jobId,data: jobContext,
         timestamp: new Date(),
       });
 
       // Immediately request shutdown
       workerProcess.send({
         type: WorkerMessageType.SHUTDOWN,
-        workerId: 'test-worker',
-        timestamp: new Date(),
-      });
+        workerId: 'test-worker',timestamp: new Date(),});
 
       // Wait for job completion and then shutdown
       await new Promise((resolve) => {

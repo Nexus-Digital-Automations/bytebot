@@ -17,23 +17,11 @@
  * Performance: Sub-100ms circuit breaker decisions
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-
-// ===== CIRCUIT BREAKER INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';// ===== CIRCUIT BREAKER INTERFACES =====/**
  * Circuit breaker state types
  */
 export enum CircuitBreakerState {
-  CLOSED = 'CLOSED',     // Normal operation
-  OPEN = 'OPEN',         // Failing fast
-  HALF_OPEN = 'HALF_OPEN' // Testing recovery
-}
-
-/**
+  CLOSED = 'CLOSED',     // Normal operationOPEN = 'OPEN',         // Failing fastHALF_OPEN = 'HALF_OPEN' // Testing recovery}/**
  * Circuit breaker configuration
  */
 export interface CircuitBreakerConfig {
@@ -166,32 +154,11 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     super();
     
     this.circuitConfig = {
-      failureThreshold: this.configService.get<number>('PARLANT_CIRCUIT_FAILURE_THRESHOLD', 5),
-      recoveryTimeout: this.configService.get<number>('PARLANT_CIRCUIT_RECOVERY_TIMEOUT_MS', 60000),
-      successThreshold: this.configService.get<number>('PARLANT_CIRCUIT_SUCCESS_THRESHOLD', 3),
-      timeWindow: this.configService.get<number>('PARLANT_CIRCUIT_TIME_WINDOW_MS', 60000),
-      minimumRequests: this.configService.get<number>('PARLANT_CIRCUIT_MIN_REQUESTS', 10),
-      enabled: this.configService.get<boolean>('PARLANT_CIRCUIT_BREAKER_ENABLED', true),
-    };
-    
-    this.poolConfig = {
-      maxConnections: this.configService.get<number>('PARLANT_POOL_MAX_CONNECTIONS', 20),
-      minConnections: this.configService.get<number>('PARLANT_POOL_MIN_CONNECTIONS', 5),
-      acquireTimeoutMs: this.configService.get<number>('PARLANT_POOL_ACQUIRE_TIMEOUT_MS', 5000),
-      idleTimeoutMs: this.configService.get<number>('PARLANT_POOL_IDLE_TIMEOUT_MS', 300000),
-      retryAttempts: this.configService.get<number>('PARLANT_POOL_RETRY_ATTEMPTS', 3),
-      healthCheckIntervalMs: this.configService.get<number>('PARLANT_POOL_HEALTH_CHECK_MS', 30000),
-    };
-    
-    this.parlantEndpoints = this.configService.get<string[]>('PARLANT_API_ENDPOINTS', [
-      'http://localhost:8000',
+      failureThreshold: this.configService.get<number>('PARLANT_CIRCUIT_FAILURE_THRESHOLD', 5),recoveryTimeout: this.configService.get<number>('PARLANT_CIRCUIT_RECOVERY_TIMEOUT_MS', 60000),successThreshold: this.configService.get<number>('PARLANT_CIRCUIT_SUCCESS_THRESHOLD', 3),timeWindow: this.configService.get<number>('PARLANT_CIRCUIT_TIME_WINDOW_MS', 60000),minimumRequests: this.configService.get<number>('PARLANT_CIRCUIT_MIN_REQUESTS', 10),enabled: this.configService.get<boolean>('PARLANT_CIRCUIT_BREAKER_ENABLED', true),};this.poolConfig = {
+      maxConnections: this.configService.get<number>('PARLANT_POOL_MAX_CONNECTIONS', 20),minConnections: this.configService.get<number>('PARLANT_POOL_MIN_CONNECTIONS', 5),acquireTimeoutMs: this.configService.get<number>('PARLANT_POOL_ACQUIRE_TIMEOUT_MS', 5000),idleTimeoutMs: this.configService.get<number>('PARLANT_POOL_IDLE_TIMEOUT_MS', 300000),retryAttempts: this.configService.get<number>('PARLANT_POOL_RETRY_ATTEMPTS', 3),healthCheckIntervalMs: this.configService.get<number>('PARLANT_POOL_HEALTH_CHECK_MS', 30000),};this.parlantEndpoints = this.configService.get<string[]>('PARLANT_API_ENDPOINTS', ['http://localhost:8000',
     ]);
     
-    const operationId = `circuit_breaker_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant Circuit Breaker Service`, {
-      circuitConfig: this.circuitConfig,
-      poolConfig: this.poolConfig,
+    const operationId = `circuit_breaker_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant Circuit Breaker Service`, {circuitConfig: this.circuitConfig,poolConfig: this.poolConfig,
       endpoints: this.parlantEndpoints,
       initialState: this.state,
     });
@@ -219,9 +186,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     if (!this.canExecute()) {
       return {
         success: false,
-        error: new Error(`Circuit breaker is ${this.state} - operation blocked`),
-        fromCache: false,
-        retryAttempt: 0,
+        error: new Error(`Circuit breaker is ${this.state} - operation blocked`),fromCache: false,retryAttempt: 0,
         responseTime: performance.now() - startTime,
       };
     }
@@ -234,11 +199,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
       // Record success
       this.recordSuccess(responseTime);
       
-      this.logger.debug(`[${operationId}] Circuit breaker operation succeeded`, {
-        operationId,
-        responseTime: `${responseTime.toFixed(2)}ms`,
-        state: this.state,
-        consecutiveSuccesses: this.consecutiveSuccesses,
+      this.logger.debug(`[${operationId}] Circuit breaker operation succeeded`, {operationId,responseTime: `${responseTime.toFixed(2)}ms`,state: this.state,consecutiveSuccesses: this.consecutiveSuccesses,
       });
       
       return {
@@ -255,12 +216,8 @@ export class ParlantCircuitBreakerService extends EventEmitter {
       // Record failure
       this.recordFailure(error as Error, responseTime);
       
-      this.logger.error(`[${operationId}] Circuit breaker operation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        responseTime: `${responseTime.toFixed(2)}ms`,
-        state: this.state,
-        consecutiveFailures: this.consecutiveFailures,
+      this.logger.error(`[${operationId}] Circuit breaker operation failed`, {operationId,error: error instanceof Error ? error.message : String(error),
+        responseTime: `${responseTime.toFixed(2)}ms`,state: this.state,consecutiveFailures: this.consecutiveFailures,
       });
       
       return {
@@ -283,19 +240,14 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     const startTime = performance.now();
     
     if (!this.canExecute()) {
-      throw new Error(`Circuit breaker is ${this.state} - connection acquisition blocked`);
-    }
-
-    return new Promise((resolve, reject) => {
+      throw new Error(`Circuit breaker is ${this.state} - connection acquisition blocked`);}return new Promise((resolve, reject) => {
       // Check for available connections
       const availableConnection = this.findAvailableConnection();
       if (availableConnection) {
         this.activeConnections.add(availableConnection.id);
         const acquireTime = performance.now() - startTime;
         
-        this.logger.debug(`[${operationId}] Connection acquired from pool`, {
-          operationId,
-          connectionId: availableConnection.id,
+        this.logger.debug(`[${operationId}] Connection acquired from pool`, {operationId,connectionId: availableConnection.id,
           acquireTime: `${acquireTime.toFixed(2)}ms`,
           activeConnections: this.activeConnections.size,
         });
@@ -330,19 +282,13 @@ export class ParlantCircuitBreakerService extends EventEmitter {
           this.activeConnections.add(connection.id);
           const acquireTime = performance.now() - startTime;
           
-          this.logger.debug(`[${operationId}] New connection created`, {
-            operationId,
-            connectionId: connection.id,
-            acquireTime: `${acquireTime.toFixed(2)}ms`,
-            totalConnections: this.connectionPool.size,
-          });
+          this.logger.debug(`[${operationId}] New connection created`, {operationId,connectionId: connection.id,
+            acquireTime: `${acquireTime.toFixed(2)}ms`,totalConnections: this.connectionPool.size,});
           
           resolve(connection);
         })
         .catch(error => {
-          this.logger.error(`[${operationId}] Failed to create connection:`, error);
-          reject(error);
-        });
+          this.logger.error(`[${operationId}] Failed to create connection:`, error);reject(error);});
     });
   }
 
@@ -354,9 +300,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
    */
   async releaseConnection(connection: Connection, operationId: string): Promise<void> {
     if (!connection?.id) {
-      this.logger.warn(`[${operationId}] Invalid connection for release`);
-      return;
-    }
+      this.logger.warn(`[${operationId}] Invalid connection for release`);return;}
 
     this.activeConnections.delete(connection.id);
     
@@ -367,9 +311,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         this.activeConnections.add(connection.id);
         pendingRequest.resolve(connection);
         
-        this.logger.debug(`[${operationId}] Connection reassigned to pending request`, {
-          operationId,
-          connectionId: connection.id,
+        this.logger.debug(`[${operationId}] Connection reassigned to pending request`, {operationId,connectionId: connection.id,
           pendingRequests: this.pendingRequests.length,
         });
         
@@ -377,9 +319,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
       }
     }
 
-    this.logger.debug(`[${operationId}] Connection released to pool`, {
-      operationId,
-      connectionId: connection.id,
+    this.logger.debug(`[${operationId}] Connection released to pool`, {operationId,connectionId: connection.id,
       activeConnections: this.activeConnections.size,
       idleConnections: this.connectionPool.size - this.activeConnections.size,
     });
@@ -574,9 +514,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         timestamp: this.stateChangedAt.toISOString(),
       });
       
-      this.emit('stateChanged', {
-        previousState,
-        newState,
+      this.emit('stateChanged', {previousState,newState,
         timestamp: this.stateChangedAt,
         consecutiveFailures: this.consecutiveFailures,
         consecutiveSuccesses: this.consecutiveSuccesses,
@@ -610,11 +548,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     for (let i = 0; i < this.poolConfig.minConnections; i++) {
       try {
         const connection = await this.createConnection();
-        this.logger.debug(`Initial connection ${i + 1} created: ${connection.id}`);
-      } catch (error) {
-        this.logger.error(`Failed to create initial connection ${i + 1}:`, error);
-      }
-    }
+        this.logger.debug(`Initial connection ${i + 1} created: ${connection.id}`);} catch (error) {this.logger.error(`Failed to create initial connection ${i + 1}:`, error);}}
   }
 
   private async createConnection(): Promise<Connection> {
@@ -654,10 +588,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     
     if (healthyEndpoints.length === 0) {
       // Fallback to first endpoint if none are marked healthy
-      return this.parlantEndpoints[0] ?? '';
-    }
-    
-    // Simple round-robin selection
+      return this.parlantEndpoints[0] ?? '';}// Simple round-robin selection
     return healthyEndpoints[Math.floor(Math.random() * healthyEndpoints.length)] ?? '';
   }
 
@@ -685,10 +616,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         const startTime = performance.now();
         
         // TODO: Implement actual health check
-        // const response = await fetch(`${endpoint}/health`);
-        const responseTime = performance.now() - startTime;
-        
-        this.endpointHealth.set(endpoint, {
+        // const response = await fetch(`${endpoint}/health`);const responseTime = performance.now() - startTime;this.endpointHealth.set(endpoint, {
           url: endpoint,
           healthy: true,
           lastCheck: new Date(),
@@ -707,9 +635,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
           lastError: error instanceof Error ? error.message : String(error),
         });
         
-        this.logger.warn(`Health check failed for endpoint ${endpoint}:`, error);
-      }
-    }
+        this.logger.warn(`Health check failed for endpoint ${endpoint}:`, error);}}
   }
 
   private startPoolMaintenance(): void {

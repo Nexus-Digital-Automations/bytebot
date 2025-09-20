@@ -1,18 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Observable, Subject, BehaviorSubject, MessageEvent } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
-import { spawn, ChildProcess } from 'child_process';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-
-// Import existing services
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-
-// Import enhanced DTOs
-import {
+import { Injectable, Logger } from '@nestjs/common';import { Observable, Subject, BehaviorSubject, MessageEvent } from 'rxjs';import { filter, map } from 'rxjs/operators';import { v4 as uuidv4 } from 'uuid';import { spawn, ChildProcess } from 'child_process';import { promises as fs } from 'fs';import * as path from 'path';// Import existing servicesimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';// Import enhanced DTOsimport {
   ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,
@@ -20,26 +6,20 @@ import {
   ScreenshotFormat,
   ScreenshotType,
   ScreenshotQuality,
-} from './dto/screenshot.dto';
-import {
-  DOMInteractionDto,
+} from './dto/screenshot.dto';import {DOMInteractionDto,
   BatchDOMInteractionDto,
   DOMInteractionResultDto,
   BatchDOMInteractionResultDto,
   DOMActionType,
   SelectorType,
-} from './dto/dom-interaction.dto';
-import {
-  ElementDetectionDto,
+} from './dto/dom-interaction.dto';import {ElementDetectionDto,
   BatchElementDetectionDto,
   ElementDetectionResultDto,
   BatchElementDetectionResultDto,
   DetectionStrategy,
   DetectedElementDto,
   WaitCondition,
-} from './dto/element-detection.dto';
-import {
-  OCRExtractionDto,
+} from './dto/element-detection.dto';import {OCRExtractionDto,
   VisualElementInteractionDto,
   ImageComparisonDto,
   OCRExtractionResultDto,
@@ -48,9 +28,7 @@ import {
   OCREngine,
   VisualElementType,
   ImageComparisonAlgorithm,
-} from './dto/visual-automation.dto';
-import {
-  RealtimeSubscriptionDto,
+} from './dto/visual-automation.dto';import {RealtimeSubscriptionDto,
   SSEConfigDto,
   RealtimeConnectionStatusDto,
   RealtimeEventStatsDto,
@@ -58,10 +36,7 @@ import {
   RealtimeEventType,
   WebSocketState,
   SubscriptionType,
-} from './dto/realtime-updates.dto';
-
-/**
- * Real-time connection manager
+} from './dto/realtime-updates.dto';/*** Real-time connection manager
  */
 interface RealtimeConnection {
   connectionId: string;
@@ -192,9 +167,7 @@ export class EnhancedBrowserAutomationService {
     const startTime = Date.now();
     const screenshotId = uuidv4();
 
-    this.logger.log(`Capturing enhanced screenshot: ${screenshotId}`, {
-      sessionId: captureDto.sessionId,
-      type: captureDto.type,
+    this.logger.log(`Capturing enhanced screenshot: ${screenshotId}`, {sessionId: captureDto.sessionId,type: captureDto.type,
       format: captureDto.format,
     });
 
@@ -202,10 +175,7 @@ export class EnhancedBrowserAutomationService {
       // Validate session exists
       const session = this.sessionService.getSession(captureDto.sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${captureDto.sessionId}`);
-      }
-
-      // Execute screenshot capture based on type
+        throw new Error(`Session not found: ${captureDto.sessionId}`);}// Execute screenshot capture based on type
       let imageData: string;
       let dimensions: { width: number; height: number };
       let elementBounds: any;
@@ -237,9 +207,7 @@ export class EnhancedBrowserAutomationService {
         format: captureDto.format || ScreenshotFormat.PNG,
         imageData,
         dimensions,
-        fileSizeBytes: Buffer.byteLength(imageData, 'base64'),
-        capturedAt: new Date(),
-        captureDurationMs,
+        fileSizeBytes: Buffer.byteLength(imageData, 'base64'),capturedAt: new Date(),captureDurationMs,
         elementSelector: captureDto.elementSelector?.selector,
         elementBounds,
         pageUrl: pageInfo.url,
@@ -258,9 +226,7 @@ export class EnhancedBrowserAutomationService {
         eventType: RealtimeEventType.SCREENSHOT_CAPTURED,
         sessionId: captureDto.sessionId,
         timestamp: new Date(),
-        severity: 'info',
-        sourceUrl: pageInfo.url,
-        title: 'Screenshot Captured',
+        severity: 'info',sourceUrl: pageInfo.url,title: 'Screenshot Captured',
         payload: {
           screenshotId,
           type: captureDto.type,
@@ -271,9 +237,7 @@ export class EnhancedBrowserAutomationService {
         screenshot: captureDto.includeDeviceScaling ? imageData : undefined,
       });
 
-      this.logger.log(`Screenshot captured successfully: ${screenshotId}`, {
-        dimensions,
-        format: result.format,
+      this.logger.log(`Screenshot captured successfully: ${screenshotId}`, {dimensions,format: result.format,
         fileSizeBytes: result.fileSizeBytes,
         captureDurationMs,
       });
@@ -288,9 +252,7 @@ export class EnhancedBrowserAutomationService {
         eventType: RealtimeEventType.SCREENSHOT_FAILED,
         sessionId: captureDto.sessionId,
         timestamp: new Date(),
-        severity: 'error',
-        sourceUrl: '',
-        title: 'Screenshot Capture Failed',
+        severity: 'error',sourceUrl: '',title: 'Screenshot Capture Failed',
         payload: {
           screenshotId,
           error: error instanceof Error ? error.message : String(error),
@@ -313,9 +275,7 @@ export class EnhancedBrowserAutomationService {
     const batchId = uuidv4();
     const startTime = Date.now();
 
-    this.logger.log(`Starting batch screenshot capture: ${batchId}`, {
-      sessionId: batchDto.sessionId,
-      screenshotCount: batchDto.screenshots.length,
+    this.logger.log(`Starting batch screenshot capture: ${batchId}`, {sessionId: batchDto.sessionId,screenshotCount: batchDto.screenshots.length,
     });
 
     const results: ScreenshotResultDto[] = [];
@@ -342,10 +302,7 @@ export class EnhancedBrowserAutomationService {
       } catch (error) {
         failedCaptures++;
         const errorMessage = error instanceof Error ? error.message : String(error);
-        errors.push(`Screenshot ${i + 1}: ${errorMessage}`);
-
-        if (!batchDto.continueOnError) {
-          break;
+        errors.push(`Screenshot ${i + 1}: ${errorMessage}`);if (!batchDto.continueOnError) {break;
         }
       }
     }
@@ -369,9 +326,7 @@ export class EnhancedBrowserAutomationService {
       },
     };
 
-    this.logger.log(`Batch screenshot capture completed: ${batchId}`, {
-      totalRequested: batchResult.totalRequested,
-      successfulCaptures: batchResult.successfulCaptures,
+    this.logger.log(`Batch screenshot capture completed: ${batchId}`, {totalRequested: batchResult.totalRequested,successfulCaptures: batchResult.successfulCaptures,
       failedCaptures: batchResult.failedCaptures,
     });
 
@@ -389,19 +344,14 @@ export class EnhancedBrowserAutomationService {
     const interactionId = uuidv4();
     const startTime = Date.now();
 
-    this.logger.log(`Performing DOM interaction: ${interactionId}`, {
-      sessionId: interactionDto.sessionId,
-      action: interactionDto.action,
+    this.logger.log(`Performing DOM interaction: ${interactionId}`, {sessionId: interactionDto.sessionId,action: interactionDto.action,
     });
 
     try {
       // Validate session
       const session = this.sessionService.getSession(interactionDto.sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${interactionDto.sessionId}`);
-      }
-
-      // Execute interaction based on action type
+        throw new Error(`Session not found: ${interactionDto.sessionId}`);}// Execute interaction based on action type
       let targetElement: any;
       let coordinates: { x: number; y: number } | undefined;
       let resultData: Record<string, unknown> | undefined;
@@ -431,15 +381,11 @@ export class EnhancedBrowserAutomationService {
           break;
         case DOMActionType.TYPE:
           if (!interactionDto.typing) {
-            throw new Error('Typing configuration required for TYPE action');
-          }
-          await this.performTypeAction(interactionDto.sessionId, targetElement, interactionDto.typing);
+            throw new Error('Typing configuration required for TYPE action');}await this.performTypeAction(interactionDto.sessionId, targetElement, interactionDto.typing);
           break;
         case DOMActionType.SCROLL:
           if (!interactionDto.scroll) {
-            throw new Error('Scroll configuration required for SCROLL action');
-          }
-          await this.performScrollAction(interactionDto.sessionId, interactionDto.scroll);
+            throw new Error('Scroll configuration required for SCROLL action');}await this.performScrollAction(interactionDto.sessionId, interactionDto.scroll);
           break;
         case DOMActionType.DRAG_AND_DROP:
           if (!interactionDto.dragDrop) {
@@ -483,9 +429,7 @@ export class EnhancedBrowserAutomationService {
         eventType: RealtimeEventType.ELEMENT_INTERACTION,
         sessionId: interactionDto.sessionId,
         timestamp: new Date(),
-        severity: 'info',
-        sourceUrl: pageInfo.url,
-        title: 'DOM Interaction Completed',
+        severity: 'info',sourceUrl: pageInfo.url,title: 'DOM Interaction Completed',
         payload: {
           interactionId,
           action: interactionDto.action,
@@ -496,9 +440,7 @@ export class EnhancedBrowserAutomationService {
         elementInfo: targetElement,
       });
 
-      this.logger.log(`DOM interaction completed successfully: ${interactionId}`, {
-        action: result.action,
-        durationMs: result.durationMs,
+      this.logger.log(`DOM interaction completed successfully: ${interactionId}`, {action: result.action,durationMs: result.durationMs,
       });
 
       return result;
@@ -523,10 +465,7 @@ export class EnhancedBrowserAutomationService {
           message: error.message,
           stack: error.stack,
         } : { error: String(error) },
-        pageUrl: '',
-        pageTitle: '',
-        metadata: interactionDto.metadata,
-      };
+        pageUrl: '',pageTitle: '',metadata: interactionDto.metadata,};
 
       // Update metrics
       this.updateDOMInteractionMetrics(result);
@@ -537,9 +476,7 @@ export class EnhancedBrowserAutomationService {
         eventType: RealtimeEventType.ELEMENT_INTERACTION,
         sessionId: interactionDto.sessionId,
         timestamp: new Date(),
-        severity: 'error',
-        sourceUrl: '',
-        title: 'DOM Interaction Failed',
+        severity: 'error',sourceUrl: '',title: 'DOM Interaction Failed',
         payload: {
           interactionId,
           action: interactionDto.action,
@@ -564,9 +501,7 @@ export class EnhancedBrowserAutomationService {
     const batchId = uuidv4();
     const startTime = Date.now();
 
-    this.logger.log(`Starting batch DOM interactions: ${batchId}`, {
-      sessionId: batchDto.sessionId,
-      interactionCount: batchDto.interactions.length,
+    this.logger.log(`Starting batch DOM interactions: ${batchId}`, {sessionId: batchDto.sessionId,interactionCount: batchDto.interactions.length,
     });
 
     const results: DOMInteractionResultDto[] = [];
@@ -590,9 +525,7 @@ export class EnhancedBrowserAutomationService {
         } else {
           failedInteractions++;
           if (result.errorMessage) {
-            errors.push(`Interaction ${i + 1}: ${result.errorMessage}`);
-          }
-        }
+            errors.push(`Interaction ${i + 1}: ${result.errorMessage}`);}}
 
         // Capture screenshot if requested
         if (batchDto.captureScreenshots) {
@@ -604,9 +537,7 @@ export class EnhancedBrowserAutomationService {
               metadata: { interactionIndex: i, interactionId: result.interactionId },
             });
           } catch (screenshotError) {
-            this.logger.warn(`Screenshot capture failed for interaction ${i + 1}`, screenshotError);
-          }
-        }
+            this.logger.warn(`Screenshot capture failed for interaction ${i + 1}`, screenshotError);}}
 
         // Wait between interactions if specified
         if (i < batchDto.interactions.length - 1 && batchDto.intervalMs && batchDto.intervalMs > 0) {
@@ -620,10 +551,7 @@ export class EnhancedBrowserAutomationService {
       } catch (error) {
         failedInteractions++;
         const errorMessage = error instanceof Error ? error.message : String(error);
-        errors.push(`Interaction ${i + 1}: ${errorMessage}`);
-
-        if (!batchDto.continueOnError) {
-          break;
+        errors.push(`Interaction ${i + 1}: ${errorMessage}`);if (!batchDto.continueOnError) {break;
         }
       }
     }
@@ -648,9 +576,7 @@ export class EnhancedBrowserAutomationService {
       },
     };
 
-    this.logger.log(`Batch DOM interactions completed: ${batchId}`, {
-      totalRequested: batchResult.totalRequested,
-      successfulInteractions: batchResult.successfulInteractions,
+    this.logger.log(`Batch DOM interactions completed: ${batchId}`, {totalRequested: batchResult.totalRequested,successfulInteractions: batchResult.successfulInteractions,
       failedInteractions: batchResult.failedInteractions,
     });
 
@@ -668,19 +594,14 @@ export class EnhancedBrowserAutomationService {
     const detectionId = uuidv4();
     const startTime = Date.now();
 
-    this.logger.log(`Detecting elements: ${detectionId}`, {
-      sessionId: detectionDto.sessionId,
-      strategy: detectionDto.criteria.strategy,
+    this.logger.log(`Detecting elements: ${detectionId}`, {sessionId: detectionDto.sessionId,strategy: detectionDto.criteria.strategy,
     });
 
     try {
       // Validate session
       const session = this.sessionService.getSession(detectionDto.sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${detectionDto.sessionId}`);
-      }
-
-      // Execute detection based on strategy
+        throw new Error(`Session not found: ${detectionDto.sessionId}`);}// Execute detection based on strategy
       let elements: DetectedElementDto[] = [];
 
       switch (detectionDto.criteria.strategy) {
@@ -753,9 +674,7 @@ export class EnhancedBrowserAutomationService {
         eventType: RealtimeEventType.ELEMENT_DETECTED,
         sessionId: detectionDto.sessionId,
         timestamp: new Date(),
-        severity: 'info',
-        sourceUrl: pageInfo.url,
-        title: 'Elements Detected',
+        severity: 'info',sourceUrl: pageInfo.url,title: 'Elements Detected',
         payload: {
           detectionId,
           strategy: detectionDto.criteria.strategy,
@@ -764,9 +683,7 @@ export class EnhancedBrowserAutomationService {
         },
       });
 
-      this.logger.log(`Element detection completed: ${detectionId}`, {
-        strategy: result.strategy,
-        elementsFound: result.elementsFound,
+      this.logger.log(`Element detection completed: ${detectionId}`, {strategy: result.strategy,elementsFound: result.elementsFound,
         durationMs: result.durationMs,
       });
 
@@ -793,8 +710,7 @@ export class EnhancedBrowserAutomationService {
           message: error.message,
           stack: error.stack,
         } : { error: String(error) },
-        pageUrl: '',
-        pageTitle: '',
+        pageUrl: '',pageTitle: '',
         metadata: detectionDto.metadata,
       };
 
@@ -815,9 +731,7 @@ export class EnhancedBrowserAutomationService {
   async subscribeToRealtimeEvents(subscriptionDto: RealtimeSubscriptionDto): Promise<RealtimeConnectionStatusDto> {
     const connectionId = uuidv4();
 
-    this.logger.log(`Creating real-time subscription: ${connectionId}`, {
-      sessionId: subscriptionDto.sessionId,
-      subscriptionTypes: subscriptionDto.subscriptionTypes,
+    this.logger.log(`Creating real-time subscription: ${connectionId}`, {sessionId: subscriptionDto.sessionId,subscriptionTypes: subscriptionDto.subscriptionTypes,
     });
 
     const connection: RealtimeConnection = {
@@ -862,9 +776,7 @@ export class EnhancedBrowserAutomationService {
     // Update metrics
     this.realtimeMetrics.activeConnections = this.connections.size;
 
-    this.logger.log(`Real-time subscription created: ${connectionId}`, {
-      activeSubscriptions: status.activeSubscriptions,
-      totalConnections: this.connections.size,
+    this.logger.log(`Real-time subscription created: ${connectionId}`, {activeSubscriptions: status.activeSubscriptions,totalConnections: this.connections.size,
     });
 
     return status;
@@ -874,9 +786,7 @@ export class EnhancedBrowserAutomationService {
    * Create Server-Sent Events stream
    */
   createSSEStream(sseConfig: SSEConfigDto): Observable<MessageEvent> {
-    this.logger.log(`Creating SSE stream for session: ${sseConfig.sessionId}`, {
-      eventTypes: sseConfig.eventTypes,
-      streamId: sseConfig.streamId,
+    this.logger.log(`Creating SSE stream for session: ${sseConfig.sessionId}`, {eventTypes: sseConfig.eventTypes,streamId: sseConfig.streamId,
     });
 
     return this.eventSubject.pipe(
@@ -943,10 +853,7 @@ export class EnhancedBrowserAutomationService {
   async closeRealtimeConnection(connectionId: string): Promise<void> {
     const connection = this.connections.get(connectionId);
     if (!connection) {
-      throw new Error(`Connection not found: ${connectionId}`);
-    }
-
-    this.connections.delete(connectionId);
+      throw new Error(`Connection not found: ${connectionId}`);}this.connections.delete(connectionId);
     this.eventBuffer.delete(connectionId);
 
     // Update metrics
@@ -992,46 +899,33 @@ export class EnhancedBrowserAutomationService {
   private async captureFullPageScreenshot(captureDto: ScreenshotCaptureDto): Promise<{ imageData: string; dimensions: { width: number; height: number } }> {
     // Implementation would use browser automation library
     return {
-      imageData: 'base64_encoded_screenshot_data',
-      dimensions: { width: 1920, height: 1080 }
-    };
+      imageData: 'base64_encoded_screenshot_data',dimensions: { width: 1920, height: 1080 }};
   }
 
   private async captureViewportScreenshot(captureDto: ScreenshotCaptureDto): Promise<{ imageData: string; dimensions: { width: number; height: number } }> {
     // Implementation would use browser automation library
     return {
-      imageData: 'base64_encoded_screenshot_data',
-      dimensions: { width: 1920, height: 1080 }
-    };
+      imageData: 'base64_encoded_screenshot_data',dimensions: { width: 1920, height: 1080 }};
   }
 
   private async captureElementScreenshot(captureDto: ScreenshotCaptureDto): Promise<{ imageData: string; dimensions: { width: number; height: number }; elementBounds: any }> {
     // Implementation would use browser automation library
     return {
-      imageData: 'base64_encoded_screenshot_data',
-      dimensions: { width: 200, height: 100 },
-      elementBounds: { x: 100, y: 200, width: 200, height: 100 }
+      imageData: 'base64_encoded_screenshot_data',dimensions: { width: 200, height: 100 },elementBounds: { x: 100, y: 200, width: 200, height: 100 }
     };
   }
 
   private async getPageInfo(sessionId: string): Promise<{ url: string; title: string; devicePixelRatio: number; viewport: { width: number; height: number } }> {
     // Implementation would get actual page info
     return {
-      url: 'https://example.com',
-      title: 'Example Page',
-      devicePixelRatio: 1.0,
-      viewport: { width: 1920, height: 1080 }
+      url: 'https://example.com',title: 'Example Page',devicePixelRatio: 1.0,viewport: { width: 1920, height: 1080 }
     };
   }
 
   private async findElement(sessionId: string, selector: any): Promise<any> {
     // Implementation would find actual element
     return {
-      tagName: 'button',
-      id: 'submit-btn',
-      textContent: 'Submit',
-      boundingBox: { x: 100, y: 200, width: 80, height: 40 }
-    };
+      tagName: 'button',id: 'submit-btn',textContent: 'Submit',boundingBox: { x: 100, y: 200, width: 80, height: 40 }};
   }
 
   private async performClickAction(sessionId: string, element: any, coordinates?: { x: number; y: number }): Promise<void> {

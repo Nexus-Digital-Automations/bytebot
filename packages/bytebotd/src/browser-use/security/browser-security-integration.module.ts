@@ -23,24 +23,7 @@ import {
   Provider,
   Global,
   Logger,
-} from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-
-// Core security components
-import { BrowserUseAuthMiddleware } from '../middleware/browser-use-auth.middleware';
-import { BrowserUseRbacGuard } from '../guards/browser-use-rbac.guard';
-import { BrowserRequestValidatorService } from '../validators/browser-request-validator.service';
-import { BrowserRateLimiterService } from '../rate-limiters/browser-rate-limiter.service';
-import { BrowserAuditTrailService } from '../audit/browser-audit-trail.service';
-
-// Parlant authentication integration
-import { ParlantAuthenticationBridgeService } from '../../../shared/src/parlant/security/authentication-bridge.service';
-import { EnhancedJwtParlantBridgeService } from '../../../shared/src/services/enhanced-jwt-parlant-bridge.service';
-import { ParlantIntegrationService } from '../parlant/parlant-integration.service';
-
-// Security services (defined in this file)
-// These will be extracted to separate files in production
+} from '@nestjs/common';import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';import { ConfigModule, ConfigService } from '@nestjs/config';// Core security componentsimport { BrowserUseAuthMiddleware } from '../middleware/browser-use-auth.middleware';import { BrowserUseRbacGuard } from '../guards/browser-use-rbac.guard';import { BrowserRequestValidatorService } from '../validators/browser-request-validator.service';import { BrowserRateLimiterService } from '../rate-limiters/browser-rate-limiter.service';import { BrowserAuditTrailService } from '../audit/browser-audit-trail.service';// Parlant authentication integrationimport { ParlantAuthenticationBridgeService } from '../../../shared/src/parlant/security/authentication-bridge.service';import { EnhancedJwtParlantBridgeService } from '../../../shared/src/services/enhanced-jwt-parlant-bridge.service';import { ParlantIntegrationService } from '../parlant/parlant-integration.service';// Security services (defined in this file)// These will be extracted to separate files in production
 
 /**
  * Browser security configuration interface
@@ -201,14 +184,12 @@ export class BrowserSecurityIntegrationModule {
     const securityConfig = { ...DEFAULT_SECURITY_CONFIG, ...config };
 
     this.logger.log('🔐 Initializing Browser Security Integration Module');
-    this.logger.log(`🛡️ Security features enabled: ${this.getEnabledFeatures(securityConfig).join(', ')}`);
+    this.logger.log(`🛡️ Security features enabled: ${this.getEnabledFeatures(securityConfig).join(`, ')}`);
 
     const providers: Provider[] = [
       // Configuration provider
       {
-        provide: 'BROWSER_SECURITY_CONFIG',
-        useValue: securityConfig,
-      },
+        provide: 'BROWSER_SECURITY_CONFIG',useValue: securityConfig,},
 
       // Core security services
       SecurityConfigurationService,
@@ -290,9 +271,7 @@ export class BrowserSecurityIntegrationModule {
       ],
       providers,
       exports: [
-        'BROWSER_SECURITY_CONFIG',
-        SecurityConfigurationService,
-        BrowserUseAuthMiddleware,
+        'BROWSER_SECURITY_CONFIG',SecurityConfigurationService,BrowserUseAuthMiddleware,
         BrowserUseRbacGuard,
         BrowserRequestValidatorService,
         BrowserRateLimiterService,
@@ -318,9 +297,7 @@ export class BrowserSecurityIntegrationModule {
       imports: [ConfigModule],
       providers: [
         {
-          provide: 'BROWSER_SECURITY_CONFIG',
-          useFactory: async (...args: any[]) => {
-            const userConfig = await configFactory.useFactory(...args);
+          provide: 'BROWSER_SECURITY_CONFIG',useFactory: async (...args: any[]) => {const userConfig = await configFactory.useFactory(...args);
             return { ...DEFAULT_SECURITY_CONFIG, ...userConfig };
           },
           inject: configFactory.inject || [],
@@ -350,9 +327,7 @@ export class BrowserSecurityIntegrationModule {
         },
       ],
       exports: [
-        'BROWSER_SECURITY_CONFIG',
-        SecurityConfigurationService,
-        BrowserUseAuthMiddleware,
+        'BROWSER_SECURITY_CONFIG',SecurityConfigurationService,BrowserUseAuthMiddleware,
         BrowserUseRbacGuard,
         BrowserRequestValidatorService,
         BrowserRateLimiterService,
@@ -372,18 +347,7 @@ export class BrowserSecurityIntegrationModule {
   private static getEnabledFeatures(config: BrowserSecurityConfig): string[] {
     const features: string[] = [];
 
-    if (config.authentication.enabled) features.push('Authentication');
-    if (config.authorization.enabled) features.push('Authorization (RBAC)');
-    if (config.validation.enabled) features.push('Request Validation');
-    if (config.rateLimiting.enabled) features.push('Rate Limiting');
-    if (config.auditTrail.enabled) features.push('Audit Trail');
-    if (config.monitoring.enabled) features.push('Security Monitoring');
-    if (config.monitoring.threatDetection) features.push('Threat Detection');
-    if (config.compliance.gdprMode) features.push('GDPR Compliance');
-    if (config.compliance.soc2Mode) features.push('SOC 2 Compliance');
-
-    return features;
-  }
+    if (config.authentication.enabled) features.push('Authentication');if (config.authorization.enabled) features.push('Authorization (RBAC)');if (config.validation.enabled) features.push('Request Validation');if (config.rateLimiting.enabled) features.push('Rate Limiting');if (config.auditTrail.enabled) features.push('Audit Trail');if (config.monitoring.enabled) features.push('Security Monitoring');if (config.monitoring.threatDetection) features.push('Threat Detection');if (config.compliance.gdprMode) features.push('GDPR Compliance');if (config.compliance.soc2Mode) features.push('SOC 2 Compliance');return features;}
 }
 
 /**
@@ -409,25 +373,16 @@ export class SecurityMetricsInterceptor {
       const processingTime = performance.now() - startTime;
 
       // Record successful operation metrics
-      await this.recordOperationMetrics(request, 'SUCCESS', processingTime);
-
-      return result;
-
-    } catch (error) {
+      await this.recordOperationMetrics(request, 'SUCCESS', processingTime);return result;} catch (error) {
       const processingTime = performance.now() - startTime;
 
       // Record failed operation metrics
-      await this.recordOperationMetrics(request, 'FAILURE', processingTime, error);
-
-      throw error;
-    }
+      await this.recordOperationMetrics(request, 'FAILURE', processingTime, error);throw error;}
   }
 
   private async recordOperationMetrics(
     request: any,
-    outcome: 'SUCCESS' | 'FAILURE',
-    processingTime: number,
-    error?: any
+    outcome: 'SUCCESS' | 'FAILURE',processingTime: number,error?: any
   ): Promise<void> {
     try {
       // Update security dashboard metrics
@@ -443,9 +398,7 @@ export class SecurityMetricsInterceptor {
       });
 
     } catch (metricsError) {
-      this.logger.error('Failed to record operation metrics', metricsError);
-    }
-  }
+      this.logger.error('Failed to record operation metrics', metricsError);}}
 }
 
 /**
@@ -532,22 +485,10 @@ export class ComplianceMonitoringInterceptor {
         severity: AuditEventSeverity.HIGH,
         userId: request.user?.userId,
         sessionId: request.session?.sessionId,
-        description: 'Compliance violation detected',
-        resource: request.url,
-        action: request.method,
-        outcome: 'FAILURE',
-        ipAddress: request.ip,
-        userAgent: request.get('User-Agent'),
-        data: {
-          error: error instanceof Error ? error.message : String(error),
-          compliance_check: 'pre_operation',
-        },
-        complianceFlags: ['COMPLIANCE_VIOLATION'],
-      });
-    } catch (auditError) {
-      this.logger.error('Failed to record compliance failure', auditError);
-    }
-  }
+        description: 'Compliance violation detected',resource: request.url,action: request.method,
+        outcome: 'FAILURE',ipAddress: request.ip,userAgent: request.get('User-Agent'),data: {error: error instanceof Error ? error.message : String(error),
+          compliance_check: 'pre_operation',},complianceFlags: ['COMPLIANCE_VIOLATION'],});} catch (auditError) {
+      this.logger.error('Failed to record compliance failure', auditError);}}
 }
 
 /**
@@ -565,9 +506,7 @@ export class ThreatDetectionService {
   private readonly anomalyDetectors = new Map<string, AnomalyDetector>();
 
   constructor() {
-    this.logger.log('🛡️ Threat Detection Service initialized');
-    this.initializeAnomalyDetectors();
-  }
+    this.logger.log('🛡️ Threat Detection Service initialized');this.initializeAnomalyDetectors();}
 
   /**
    * Analyze request for threats
@@ -622,9 +561,7 @@ export class ThreatDetectionService {
       endpoint: request.url,
       method: request.method,
       timestamp: new Date(),
-      userAgent: request.get('User-Agent'),
-      ipAddress: request.ip,
-    });
+      userAgent: request.get('User-Agent'),ipAddress: request.ip,});
 
     // Keep only recent patterns (last 100)
     if (profile.requestPatterns.length > 100) {
@@ -657,14 +594,7 @@ export class ThreatDetectionService {
     return [];
   }
 
-  private calculateThreatLevel(threats: ThreatIndicator[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (threats.some(t => t.severity === 'CRITICAL')) return 'CRITICAL';
-    if (threats.some(t => t.severity === 'HIGH')) return 'HIGH';
-    if (threats.some(t => t.severity === 'MEDIUM')) return 'MEDIUM';
-    return 'LOW';
-  }
-
-  private calculateRiskScore(threats: ThreatIndicator[]): number {
+  private calculateThreatLevel(threats: ThreatIndicator[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (threats.some(t => t.severity === 'CRITICAL')) return 'CRITICAL';if (threats.some(t => t.severity === 'HIGH')) return 'HIGH';if (threats.some(t => t.severity === 'MEDIUM')) return 'MEDIUM';return 'LOW';}private calculateRiskScore(threats: ThreatIndicator[]): number {
     return threats.reduce((score, threat) => {
       const severityScore = { LOW: 1, MEDIUM: 3, HIGH: 7, CRITICAL: 10 };
       return score + (severityScore[threat.severity] * threat.confidence);
@@ -673,12 +603,7 @@ export class ThreatDetectionService {
 
   private determineRecommendedAction(threatLevel: string): string {
     switch (threatLevel) {
-      case 'CRITICAL': return 'BLOCK_REQUEST';
-      case 'HIGH': return 'REQUIRE_MFA';
-      case 'MEDIUM': return 'ENHANCED_MONITORING';
-      default: return 'ALLOW';
-    }
-  }
+      case 'CRITICAL': return 'BLOCK_REQUEST';case 'HIGH': return 'REQUIRE_MFA';case 'MEDIUM': return 'ENHANCED_MONITORING';default: return 'ALLOW';}}
 
   private calculateConfidence(threats: ThreatIndicator[]): number {
     if (threats.length === 0) return 1.0;
@@ -701,12 +626,7 @@ export class SecurityConfigurationService {
   private readonly logger = new Logger(SecurityConfigurationService.name);
 
   constructor(
-    @Inject('BROWSER_SECURITY_CONFIG') private readonly config: BrowserSecurityConfig,
-  ) {
-    this.logger.log('⚙️ Security Configuration Service initialized');
-  }
-
-  getConfig(): BrowserSecurityConfig {
+    @Inject('BROWSER_SECURITY_CONFIG') private readonly config: BrowserSecurityConfig,) {this.logger.log('⚙️ Security Configuration Service initialized');}getConfig(): BrowserSecurityConfig {
     return this.config;
   }
 
@@ -794,15 +714,10 @@ export class SecurityDashboardService {
   };
 
   constructor() {
-    this.logger.log('📊 Security Dashboard Service initialized');
-  }
-
-  recordOperationMetric(metric: OperationMetric): void {
+    this.logger.log('📊 Security Dashboard Service initialized');}recordOperationMetric(metric: OperationMetric): void {
     this.metrics.operations.total++;
 
-    if (metric.outcome === 'SUCCESS') {
-      this.metrics.operations.successful++;
-    } else {
+    if (metric.outcome === 'SUCCESS') {this.metrics.operations.successful++;} else {
       this.metrics.operations.failed++;
     }
 
@@ -824,17 +739,8 @@ export class SecurityDashboardService {
     const authSuccessRate = this.metrics.authentication.successful + this.metrics.authentication.failed > 0 ?
       (this.metrics.authentication.successful / (this.metrics.authentication.successful + this.metrics.authentication.failed)) * 100 : 100;
 
-    let overallStatus: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
-
-    if (successRate < 95 || authSuccessRate < 98) {
-      overallStatus = 'WARNING';
-    }
-
-    if (successRate < 90 || authSuccessRate < 95 || this.metrics.threats.detected > 10) {
-      overallStatus = 'CRITICAL';
-    }
-
-    return {
+    let overallStatus: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';if (successRate < 95 || authSuccessRate < 98) {overallStatus = 'WARNING';}if (successRate < 90 || authSuccessRate < 95 || this.metrics.threats.detected > 10) {
+      overallStatus = 'CRITICAL';}return {
       status: overallStatus,
       successRate,
       authSuccessRate,
@@ -848,17 +754,13 @@ export class SecurityDashboardService {
 // Supporting interfaces
 interface ThreatIndicator {
   type: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  confidence: number;
-  description: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';confidence: number;description: string;
   source: string;
 }
 
 interface ThreatAnalysisResult {
   threats: ThreatIndicator[];
-  threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  riskScore: number;
-  recommended_action: string;
+  threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';riskScore: number;recommended_action: string;
   confidence: number;
 }
 
@@ -888,26 +790,21 @@ interface AnomalyDetector {
 interface OperationMetric {
   endpoint: string;
   method: string;
-  outcome: 'SUCCESS' | 'FAILURE';
-  processingTime: number;
-  timestamp: Date;
+  outcome: 'SUCCESS' | 'FAILURE';processingTime: number;timestamp: Date;
   userId?: string;
   sessionId?: string;
   error?: string;
 }
 
 interface SecurityStatus {
-  status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-  successRate: number;
-  authSuccessRate: number;
+  status: 'HEALTHY' | 'WARNING' | 'CRITICAL';successRate: number;authSuccessRate: number;
   threatsDetected: number;
   complianceViolations: number;
   lastUpdate: Date;
 }
 
 // Import statement for audit event types
-import { BrowserAuditEventType, AuditEventSeverity } from '../audit/browser-audit-trail.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { BrowserAuditEventType, AuditEventSeverity } from '../audit/browser-audit-trail.service';import { Inject, Injectable } from '@nestjs/common';
 
 /**
  * Export the module and all related types for external use

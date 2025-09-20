@@ -13,59 +13,37 @@ import {
   InternalServerErrorException,
   Sse,
   MessageEvent,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
-} from '@nestjs/swagger';
-import { Observable } from 'rxjs';
-
-// Existing imports
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-import {
-  CreateBrowserTaskDto,
+} from '@nestjs/swagger';import { Observable } from 'rxjs';// Existing importsimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import {CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
-} from './dto/browser-task.dto';
-import {
-  CreateBrowserSessionDto,
+} from './dto/browser-task.dto';import {CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserSessionStatus,
-} from './dto/browser-session.dto';
-import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
-
-// New enhanced DTOs
-import {
+} from './dto/browser-session.dto';import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';// New enhanced DTOsimport {
   ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,
   BatchScreenshotResultDto,
   ScreenshotFormat,
   ScreenshotType,
-} from './dto/screenshot.dto';
-import {
-  DOMInteractionDto,
+} from './dto/screenshot.dto';import {DOMInteractionDto,
   BatchDOMInteractionDto,
   DOMInteractionResultDto,
   BatchDOMInteractionResultDto,
   DOMActionType,
-} from './dto/dom-interaction.dto';
-import {
-  ElementDetectionDto,
+} from './dto/dom-interaction.dto';import {ElementDetectionDto,
   BatchElementDetectionDto,
   ElementDetectionResultDto,
   BatchElementDetectionResultDto,
   DetectionStrategy,
-} from './dto/element-detection.dto';
-import {
-  OCRExtractionDto,
+} from './dto/element-detection.dto';import {OCRExtractionDto,
   VisualElementInteractionDto,
   ImageComparisonDto,
   OCRExtractionResultDto,
@@ -73,18 +51,13 @@ import {
   ImageComparisonResultDto,
   OCREngine,
   VisualElementType,
-} from './dto/visual-automation.dto';
-import {
-  RealtimeSubscriptionDto,
+} from './dto/visual-automation.dto';import {RealtimeSubscriptionDto,
   SSEConfigDto,
   RealtimeConnectionStatusDto,
   RealtimeEventStatsDto,
   RealtimeEventType,
   SubscriptionType,
-} from './dto/realtime-updates.dto';
-
-/**
- * Enhanced Browser Automation Controller
+} from './dto/realtime-updates.dto';/*** Enhanced Browser Automation Controller
  *
  * Comprehensive REST API endpoints for advanced browser automation with:
  * - Multi-format screenshot capture (PNG, JPEG, WebP)
@@ -96,33 +69,22 @@ import {
  *
  * All operations are local-only with enterprise-grade performance and security.
  */
-@ApiTags('Enhanced Browser Automation')
-@Controller('browser-automation')
-export class EnhancedBrowserAutomationController {
-  private readonly logger = new Logger(EnhancedBrowserAutomationController.name);
+@ApiTags('Enhanced Browser Automation')@Controller('browser-automation')export class EnhancedBrowserAutomationController {private readonly logger = new Logger(EnhancedBrowserAutomationController.name);
 
   constructor(
     private readonly browserUseService: BrowserUseService,
     private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
   ) {
-    this.logger.log('Enhanced Browser Automation Controller initialized');
-  }
-
-  // ===========================
+    this.logger.log('Enhanced Browser Automation Controller initialized');}// ===========================
   // ENHANCED SCREENSHOT ENDPOINTS
   // ===========================
 
   /**
    * Capture single screenshot with advanced options
    */
-  @Post('screenshots/capture')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Capture enhanced screenshot',
-    description: 'Capture screenshot with multiple format support, element targeting, and quality options',
-  })
-  @ApiBody({ type: ScreenshotCaptureDto })
+  @Post('screenshots/capture')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Capture enhanced screenshot',description: 'Capture screenshot with multiple format support, element targeting, and quality options',})@ApiBody({ type: ScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Screenshot captured successfully',
@@ -131,18 +93,14 @@ export class EnhancedBrowserAutomationController {
   async captureScreenshot(
     @Body() captureDto: ScreenshotCaptureDto,
   ): Promise<ScreenshotResultDto> {
-    this.logger.log(`Capturing screenshot for session: ${captureDto.sessionId}`, {
-      type: captureDto.type,
-      format: captureDto.format,
+    this.logger.log(`Capturing screenshot for session: ${captureDto.sessionId}`, {type: captureDto.type,format: captureDto.format,
       quality: captureDto.quality,
     });
 
     try {
       const result = await this.browserUseService.captureEnhancedScreenshot(captureDto);
 
-      this.logger.log(`Screenshot captured: ${result.screenshotId}`, {
-        format: result.format,
-        dimensions: result.dimensions,
+      this.logger.log(`Screenshot captured: ${result.screenshotId}`, {format: result.format,dimensions: result.dimensions,
         fileSizeBytes: result.fileSizeBytes,
       });
 
@@ -154,9 +112,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Screenshot capture failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: captureDto.sessionId,
+        message: 'Screenshot capture failed',error: error instanceof Error ? error.message : String(error),sessionId: captureDto.sessionId,
       });
     }
   }
@@ -164,13 +120,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Capture multiple screenshots in batch
    */
-  @Post('screenshots/batch')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Batch screenshot capture',
-    description: 'Capture multiple screenshots with different configurations in a single request',
-  })
-  @ApiBody({ type: BatchScreenshotCaptureDto })
+  @Post('screenshots/batch')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Batch screenshot capture',description: 'Capture multiple screenshots with different configurations in a single request',})@ApiBody({ type: BatchScreenshotCaptureDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Batch screenshots captured',
@@ -179,17 +130,13 @@ export class EnhancedBrowserAutomationController {
   async batchCaptureScreenshots(
     @Body() batchDto: BatchScreenshotCaptureDto,
   ): Promise<BatchScreenshotResultDto> {
-    this.logger.log(`Batch screenshot capture for session: ${batchDto.sessionId}`, {
-      screenshotCount: batchDto.screenshots.length,
-      intervalMs: batchDto.intervalMs,
+    this.logger.log(`Batch screenshot capture for session: ${batchDto.sessionId}`, {screenshotCount: batchDto.screenshots.length,intervalMs: batchDto.intervalMs,
     });
 
     try {
       const result = await this.browserUseService.batchCaptureScreenshots(batchDto);
 
-      this.logger.log(`Batch screenshots completed: ${result.batchId}`, {
-        totalRequested: result.totalRequested,
-        successfulCaptures: result.successfulCaptures,
+      this.logger.log(`Batch screenshots completed: ${result.batchId}`, {totalRequested: result.totalRequested,successfulCaptures: result.successfulCaptures,
         failedCaptures: result.failedCaptures,
       });
 
@@ -201,9 +148,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Batch screenshot capture failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: batchDto.sessionId,
+        message: 'Batch screenshot capture failed',error: error instanceof Error ? error.message : String(error),sessionId: batchDto.sessionId,
       });
     }
   }
@@ -215,13 +160,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Perform DOM interaction
    */
-  @Post('dom/interact')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Perform DOM interaction',
-    description: 'Execute precise DOM interactions with element or coordinate targeting',
-  })
-  @ApiBody({ type: DOMInteractionDto })
+  @Post('dom/interact')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Perform DOM interaction',description: 'Execute precise DOM interactions with element or coordinate targeting',})@ApiBody({ type: DOMInteractionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'DOM interaction completed',
@@ -230,18 +170,14 @@ export class EnhancedBrowserAutomationController {
   async performDOMInteraction(
     @Body() interactionDto: DOMInteractionDto,
   ): Promise<DOMInteractionResultDto> {
-    this.logger.log(`Performing DOM interaction for session: ${interactionDto.sessionId}`, {
-      action: interactionDto.action,
-      selector: interactionDto.selector?.value,
+    this.logger.log(`Performing DOM interaction for session: ${interactionDto.sessionId}`, {action: interactionDto.action,selector: interactionDto.selector?.value,
       coordinates: interactionDto.coordinates,
     });
 
     try {
       const result = await this.browserUseService.performDOMInteraction(interactionDto);
 
-      this.logger.log(`DOM interaction completed: ${result.interactionId}`, {
-        success: result.success,
-        action: result.action,
+      this.logger.log(`DOM interaction completed: ${result.interactionId}`, {success: result.success,action: result.action,
         durationMs: result.durationMs,
       });
 
@@ -253,9 +189,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'DOM interaction failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: interactionDto.sessionId,
+        message: 'DOM interaction failed',error: error instanceof Error ? error.message : String(error),sessionId: interactionDto.sessionId,
       });
     }
   }
@@ -263,13 +197,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Perform batch DOM interactions
    */
-  @Post('dom/batch-interact')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Perform batch DOM interactions',
-    description: 'Execute multiple DOM interactions sequentially with optional screenshots',
-  })
-  @ApiBody({ type: BatchDOMInteractionDto })
+  @Post('dom/batch-interact')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Perform batch DOM interactions',description: 'Execute multiple DOM interactions sequentially with optional screenshots',})@ApiBody({ type: BatchDOMInteractionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Batch DOM interactions completed',
@@ -278,18 +207,14 @@ export class EnhancedBrowserAutomationController {
   async performBatchDOMInteractions(
     @Body() batchDto: BatchDOMInteractionDto,
   ): Promise<BatchDOMInteractionResultDto> {
-    this.logger.log(`Batch DOM interactions for session: ${batchDto.sessionId}`, {
-      interactionCount: batchDto.interactions.length,
-      continueOnError: batchDto.continueOnError,
+    this.logger.log(`Batch DOM interactions for session: ${batchDto.sessionId}`, {interactionCount: batchDto.interactions.length,continueOnError: batchDto.continueOnError,
       captureScreenshots: batchDto.captureScreenshots,
     });
 
     try {
       const result = await this.browserUseService.performBatchDOMInteractions(batchDto);
 
-      this.logger.log(`Batch DOM interactions completed: ${result.batchId}`, {
-        totalRequested: result.totalRequested,
-        successfulInteractions: result.successfulInteractions,
+      this.logger.log(`Batch DOM interactions completed: ${result.batchId}`, {totalRequested: result.totalRequested,successfulInteractions: result.successfulInteractions,
         failedInteractions: result.failedInteractions,
       });
 
@@ -301,9 +226,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Batch DOM interactions failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: batchDto.sessionId,
+        message: 'Batch DOM interactions failed',error: error instanceof Error ? error.message : String(error),sessionId: batchDto.sessionId,
       });
     }
   }
@@ -315,13 +238,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Detect elements with advanced strategies
    */
-  @Post('elements/detect')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Detect elements',
-    description: 'Detect elements using CSS selectors, XPath, text content, AI description, or visual similarity',
-  })
-  @ApiBody({ type: ElementDetectionDto })
+  @Post('elements/detect')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Detect elements',description: 'Detect elements using CSS selectors, XPath, text content, AI description, or visual similarity',})@ApiBody({ type: ElementDetectionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Element detection completed',
@@ -330,18 +248,14 @@ export class EnhancedBrowserAutomationController {
   async detectElements(
     @Body() detectionDto: ElementDetectionDto,
   ): Promise<ElementDetectionResultDto> {
-    this.logger.log(`Detecting elements for session: ${detectionDto.sessionId}`, {
-      strategy: detectionDto.criteria.strategy,
-      waitConfig: detectionDto.waitConfig?.condition,
+    this.logger.log(`Detecting elements for session: ${detectionDto.sessionId}`, {strategy: detectionDto.criteria.strategy,waitConfig: detectionDto.waitConfig?.condition,
       includeScreenshot: detectionDto.includeScreenshot,
     });
 
     try {
       const result = await this.browserUseService.detectElements(detectionDto);
 
-      this.logger.log(`Element detection completed: ${result.detectionId}`, {
-        success: result.success,
-        strategy: result.strategy,
+      this.logger.log(`Element detection completed: ${result.detectionId}`, {success: result.success,strategy: result.strategy,
         elementsFound: result.elementsFound,
       });
 
@@ -353,9 +267,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Element detection failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: detectionDto.sessionId,
+        message: 'Element detection failed',error: error instanceof Error ? error.message : String(error),sessionId: detectionDto.sessionId,
       });
     }
   }
@@ -363,13 +275,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Batch element detection
    */
-  @Post('elements/batch-detect')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Batch element detection',
-    description: 'Detect multiple elements concurrently with different criteria',
-  })
-  @ApiBody({ type: BatchElementDetectionDto })
+  @Post('elements/batch-detect')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Batch element detection',description: 'Detect multiple elements concurrently with different criteria',})@ApiBody({ type: BatchElementDetectionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Batch element detection completed',
@@ -378,18 +285,14 @@ export class EnhancedBrowserAutomationController {
   async batchDetectElements(
     @Body() batchDto: BatchElementDetectionDto,
   ): Promise<BatchElementDetectionResultDto> {
-    this.logger.log(`Batch element detection for session: ${batchDto.sessionId}`, {
-      detectionCount: batchDto.detections.length,
-      maxConcurrent: batchDto.maxConcurrent,
+    this.logger.log(`Batch element detection for session: ${batchDto.sessionId}`, {detectionCount: batchDto.detections.length,maxConcurrent: batchDto.maxConcurrent,
       continueOnError: batchDto.continueOnError,
     });
 
     try {
       const result = await this.browserUseService.batchDetectElements(batchDto);
 
-      this.logger.log(`Batch element detection completed: ${result.batchId}`, {
-        totalRequested: result.totalRequested,
-        successfulDetections: result.successfulDetections,
+      this.logger.log(`Batch element detection completed: ${result.batchId}`, {totalRequested: result.totalRequested,successfulDetections: result.successfulDetections,
         totalElementsFound: result.totalElementsFound,
       });
 
@@ -401,9 +304,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Batch element detection failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: batchDto.sessionId,
+        message: 'Batch element detection failed',error: error instanceof Error ? error.message : String(error),sessionId: batchDto.sessionId,
       });
     }
   }
@@ -415,13 +316,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Extract text using OCR
    */
-  @Post('visual/ocr-extract')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'OCR text extraction',
-    description: 'Extract text from screenshots using various OCR engines and preprocessing options',
-  })
-  @ApiBody({ type: OCRExtractionDto })
+  @Post('visual/ocr-extract')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'OCR text extraction',description: 'Extract text from screenshots using various OCR engines and preprocessing options',})@ApiBody({ type: OCRExtractionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'OCR extraction completed',
@@ -430,18 +326,14 @@ export class EnhancedBrowserAutomationController {
   async extractTextOCR(
     @Body() ocrDto: OCRExtractionDto,
   ): Promise<OCRExtractionResultDto> {
-    this.logger.log(`OCR text extraction for session: ${ocrDto.sessionId}`, {
-      engine: ocrDto.ocrConfig?.engine,
-      language: ocrDto.ocrConfig?.language,
+    this.logger.log(`OCR text extraction for session: ${ocrDto.sessionId}`, {engine: ocrDto.ocrConfig?.engine,language: ocrDto.ocrConfig?.language,
       regionsCount: ocrDto.regions?.length || 0,
     });
 
     try {
       const result = await this.browserUseService.extractTextOCR(ocrDto);
 
-      this.logger.log(`OCR extraction completed: ${result.extractionId}`, {
-        success: result.success,
-        textBlocksDetected: result.textBlocksDetected,
+      this.logger.log(`OCR extraction completed: ${result.extractionId}`, {success: result.success,textBlocksDetected: result.textBlocksDetected,
         overallConfidence: result.overallConfidence,
       });
 
@@ -453,9 +345,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'OCR text extraction failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: ocrDto.sessionId,
+        message: 'OCR text extraction failed',error: error instanceof Error ? error.message : String(error),sessionId: ocrDto.sessionId,
       });
     }
   }
@@ -463,13 +353,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Interact with visual elements
    */
-  @Post('visual/element-interact')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Visual element interaction',
-    description: 'Detect and interact with visual elements using AI, template matching, or description',
-  })
-  @ApiBody({ type: VisualElementInteractionDto })
+  @Post('visual/element-interact')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Visual element interaction',description: 'Detect and interact with visual elements using AI, template matching, or description',})@ApiBody({ type: VisualElementInteractionDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Visual element interaction completed',
@@ -478,18 +363,14 @@ export class EnhancedBrowserAutomationController {
   async interactWithVisualElement(
     @Body() interactionDto: VisualElementInteractionDto,
   ): Promise<VisualElementDetectionResultDto> {
-    this.logger.log(`Visual element interaction for session: ${interactionDto.sessionId}`, {
-      elementType: interactionDto.elementDetection.elementType,
-      interactionType: interactionDto.interactionType,
+    this.logger.log(`Visual element interaction for session: ${interactionDto.sessionId}`, {elementType: interactionDto.elementDetection.elementType,interactionType: interactionDto.interactionType,
       description: interactionDto.elementDetection.description,
     });
 
     try {
       const result = await this.browserUseService.interactWithVisualElement(interactionDto);
 
-      this.logger.log(`Visual element interaction completed: ${result.detectionId}`, {
-        success: result.success,
-        elementType: result.elementType,
+      this.logger.log(`Visual element interaction completed: ${result.detectionId}`, {success: result.success,elementType: result.elementType,
         confidence: result.confidence,
       });
 
@@ -501,9 +382,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Visual element interaction failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: interactionDto.sessionId,
+        message: 'Visual element interaction failed',error: error instanceof Error ? error.message : String(error),sessionId: interactionDto.sessionId,
       });
     }
   }
@@ -511,13 +390,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Compare images for similarity
    */
-  @Post('visual/image-compare')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Image comparison',
-    description: 'Compare screenshots with reference images using various algorithms',
-  })
-  @ApiBody({ type: ImageComparisonDto })
+  @Post('visual/image-compare')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Image comparison',description: 'Compare screenshots with reference images using various algorithms',})@ApiBody({ type: ImageComparisonDto })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Image comparison completed',
@@ -526,18 +400,14 @@ export class EnhancedBrowserAutomationController {
   async compareImages(
     @Body() comparisonDto: ImageComparisonDto,
   ): Promise<ImageComparisonResultDto> {
-    this.logger.log(`Image comparison for session: ${comparisonDto.sessionId}`, {
-      algorithm: comparisonDto.comparisonConfig.algorithm,
-      similarityThreshold: comparisonDto.comparisonConfig.similarityThreshold,
+    this.logger.log(`Image comparison for session: ${comparisonDto.sessionId}`, {algorithm: comparisonDto.comparisonConfig.algorithm,similarityThreshold: comparisonDto.comparisonConfig.similarityThreshold,
       returnDifferenceImage: comparisonDto.returnDifferenceImage,
     });
 
     try {
       const result = await this.browserUseService.compareImages(comparisonDto);
 
-      this.logger.log(`Image comparison completed: ${result.comparisonId}`, {
-        success: result.success,
-        similarityScore: result.similarityScore,
+      this.logger.log(`Image comparison completed: ${result.comparisonId}`, {success: result.success,similarityScore: result.similarityScore,
         isMatch: result.isMatch,
       });
 
@@ -549,9 +419,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Image comparison failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: comparisonDto.sessionId,
+        message: 'Image comparison failed',error: error instanceof Error ? error.message : String(error),sessionId: comparisonDto.sessionId,
       });
     }
   }
@@ -563,13 +431,8 @@ export class EnhancedBrowserAutomationController {
   /**
    * Subscribe to real-time browser events via WebSocket
    */
-  @Post('realtime/subscribe')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Subscribe to real-time events',
-    description: 'Subscribe to real-time browser events via WebSocket connection',
-  })
-  @ApiBody({ type: RealtimeSubscriptionDto })
+  @Post('realtime/subscribe')@HttpCode(HttpStatus.CREATED)@ApiOperation({
+    summary: 'Subscribe to real-time events',description: 'Subscribe to real-time browser events via WebSocket connection',})@ApiBody({ type: RealtimeSubscriptionDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Real-time subscription created',
@@ -578,18 +441,14 @@ export class EnhancedBrowserAutomationController {
   async subscribeToRealtimeEvents(
     @Body() subscriptionDto: RealtimeSubscriptionDto,
   ): Promise<RealtimeConnectionStatusDto> {
-    this.logger.log(`Creating real-time subscription for session: ${subscriptionDto.sessionId}`, {
-      subscriptionTypes: subscriptionDto.subscriptionTypes,
-      includeScreenshots: subscriptionDto.includeScreenshots,
+    this.logger.log(`Creating real-time subscription for session: ${subscriptionDto.sessionId}`, {subscriptionTypes: subscriptionDto.subscriptionTypes,includeScreenshots: subscriptionDto.includeScreenshots,
       clientId: subscriptionDto.clientId,
     });
 
     try {
       const result = await this.browserUseService.subscribeToRealtimeEvents(subscriptionDto);
 
-      this.logger.log(`Real-time subscription created: ${result.connectionId}`, {
-        activeSubscriptions: result.activeSubscriptions,
-        state: result.state,
+      this.logger.log(`Real-time subscription created: ${result.connectionId}`, {activeSubscriptions: result.activeSubscriptions,state: result.state,
       });
 
       return result;
@@ -600,9 +459,7 @@ export class EnhancedBrowserAutomationController {
       );
 
       throw new InternalServerErrorException({
-        message: 'Real-time subscription failed',
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: subscriptionDto.sessionId,
+        message: 'Real-time subscription failed',error: error instanceof Error ? error.message : String(error),sessionId: subscriptionDto.sessionId,
       });
     }
   }
@@ -610,24 +467,12 @@ export class EnhancedBrowserAutomationController {
   /**
    * Get real-time connection status
    */
-  @Get('realtime/connections/:connectionId')
-  @ApiOperation({
-    summary: 'Get connection status',
-    description: 'Retrieve status and metrics for a real-time connection',
-  })
-  @ApiParam({ name: 'connectionId', description: 'Connection identifier' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Connection status retrieved',
-    type: RealtimeConnectionStatusDto,
-  })
+  @Get('realtime/connections/:connectionId')@ApiOperation({summary: 'Get connection status',description: 'Retrieve status and metrics for a real-time connection',})@ApiParam({ name: 'connectionId', description: 'Connection identifier' })@ApiResponse({status: HttpStatus.OK,
+    description: 'Connection status retrieved',type: RealtimeConnectionStatusDto,})
   async getConnectionStatus(
     @Param('connectionId') connectionId: string,
   ): Promise<RealtimeConnectionStatusDto> {
-    this.logger.log(`Getting connection status: ${connectionId}`);
-
-    const status = await this.browserUseService.getConnectionStatus(connectionId);
-    if (!status) {
+    this.logger.log(`Getting connection status: ${connectionId}`);const status = await this.browserUseService.getConnectionStatus(connectionId);if (!status) {
       throw new NotFoundException(`Connection not found: ${connectionId}`);
     }
 
@@ -637,24 +482,12 @@ export class EnhancedBrowserAutomationController {
   /**
    * Close real-time connection
    */
-  @Delete('realtime/connections/:connectionId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Close real-time connection',
-    description: 'Close a real-time WebSocket connection',
-  })
-  @ApiParam({ name: 'connectionId', description: 'Connection identifier' })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'Connection closed successfully',
-  })
-  async closeRealtimeConnection(
+  @Delete('realtime/connections/:connectionId')@HttpCode(HttpStatus.NO_CONTENT)@ApiOperation({
+    summary: 'Close real-time connection',description: 'Close a real-time WebSocket connection',})@ApiParam({ name: 'connectionId', description: 'Connection identifier' })@ApiResponse({status: HttpStatus.NO_CONTENT,
+    description: 'Connection closed successfully',})async closeRealtimeConnection(
     @Param('connectionId') connectionId: string,
   ): Promise<void> {
-    this.logger.log(`Closing real-time connection: ${connectionId}`);
-
-    try {
-      await this.browserUseService.closeRealtimeConnection(connectionId);
+    this.logger.log(`Closing real-time connection: ${connectionId}`);try {await this.browserUseService.closeRealtimeConnection(connectionId);
       this.logger.log(`Real-time connection closed: ${connectionId}`);
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -667,31 +500,14 @@ export class EnhancedBrowserAutomationController {
   /**
    * Server-Sent Events stream for real-time updates
    */
-  @Sse('realtime/events/:sessionId')
-  @ApiOperation({
-    summary: 'Real-time events stream',
-    description: 'Server-Sent Events stream for real-time browser automation updates',
-  })
-  @ApiParam({ name: 'sessionId', description: 'Browser session identifier' })
-  @ApiQuery({ name: 'eventTypes', required: false, description: 'Comma-separated event types to stream' })
-  @ApiQuery({ name: 'includeScreenshots', required: false, type: Boolean, description: 'Include screenshots in events' })
-  async streamRealtimeEvents(
-    @Param('sessionId') sessionId: string,
-    @Query('eventTypes') eventTypes?: string,
-    @Query('includeScreenshots') includeScreenshots?: boolean,
+  @Sse('realtime/events/:sessionId')@ApiOperation({summary: 'Real-time events stream',description: 'Server-Sent Events stream for real-time browser automation updates',})@ApiParam({ name: 'sessionId', description: 'Browser session identifier' })@ApiQuery({ name: 'eventTypes', required: false, description: 'Comma-separated event types to stream' })@ApiQuery({ name: 'includeScreenshots', required: false, type: Boolean, description: 'Include screenshots in events' })async streamRealtimeEvents(@Param('sessionId') sessionId: string,@Query('eventTypes') eventTypes?: string,@Query('includeScreenshots') includeScreenshots?: boolean,
   ): Promise<Observable<MessageEvent>> {
     this.logger.log(`Starting SSE stream for session: ${sessionId}`, {
-      eventTypes: eventTypes?.split(',') || 'all',
-      includeScreenshots: includeScreenshots || false,
-    });
+      eventTypes: eventTypes?.split(',') || 'all',includeScreenshots: includeScreenshots || false,});
 
     const sseConfig: SSEConfigDto = {
       sessionId,
-      eventTypes: eventTypes ? eventTypes.split(',') as RealtimeEventType[] : undefined,
-      filter: {
-        includeEventTypes: eventTypes ? eventTypes.split(',') as RealtimeEventType[] : undefined,
-      },
-      keepAlive: true,
+      eventTypes: eventTypes ? eventTypes.split(',') as RealtimeEventType[] : undefined,filter: {includeEventTypes: eventTypes ? eventTypes.split(',') as RealtimeEventType[] : undefined,},keepAlive: true,
       heartbeatInterval: 30,
       includeRetry: true,
       metadata: {
@@ -705,25 +521,12 @@ export class EnhancedBrowserAutomationController {
   /**
    * Get real-time event statistics
    */
-  @Get('realtime/stats/:sessionId')
-  @ApiOperation({
-    summary: 'Get real-time event statistics',
-    description: 'Retrieve statistics for real-time events in a session',
-  })
-  @ApiParam({ name: 'sessionId', description: 'Browser session identifier' })
-  @ApiQuery({ name: 'period', required: false, description: 'Statistics period in minutes', type: Number })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Event statistics retrieved',
-    type: RealtimeEventStatsDto,
-  })
+  @Get('realtime/stats/:sessionId')@ApiOperation({summary: 'Get real-time event statistics',description: 'Retrieve statistics for real-time events in a session',})@ApiParam({ name: 'sessionId', description: 'Browser session identifier' })@ApiQuery({ name: 'period', required: false, description: 'Statistics period in minutes', type: Number })@ApiResponse({status: HttpStatus.OK,
+    description: 'Event statistics retrieved',type: RealtimeEventStatsDto,})
   async getRealtimeEventStats(
-    @Param('sessionId') sessionId: string,
-    @Query('period') period?: number,
+    @Param('sessionId') sessionId: string,@Query('period') period?: number,
   ): Promise<RealtimeEventStatsDto> {
-    this.logger.log(`Getting real-time event stats for session: ${sessionId}`, {
-      period: period || 60,
-    });
+    this.logger.log(`Getting real-time event stats for session: ${sessionId}`, {period: period || 60,});
 
     const stats = await this.browserUseService.getRealtimeEventStats(sessionId, period || 60);
     if (!stats) {
@@ -740,20 +543,10 @@ export class EnhancedBrowserAutomationController {
   /**
    * Enhanced health check with detailed metrics
    */
-  @Get('health')
-  @ApiOperation({
-    summary: 'Enhanced health check',
-    description: 'Comprehensive health check with detailed metrics for all automation components',
-  })
-  @ApiResponse({
+  @Get('health')@ApiOperation({summary: 'Enhanced health check',description: 'Comprehensive health check with detailed metrics for all automation components',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Service health information',
-  })
-  async getEnhancedHealth() {
-    this.logger.log('Enhanced health check requested');
-
-    const activeSessions = await this.sessionService.getAllSessions();
-    const runningTasks = await this.taskService.getTasksByStatus(BrowserTaskStatus.RUNNING);
+    description: 'Service health information',})async getEnhancedHealth() {
+    this.logger.log('Enhanced health check requested');const activeSessions = await this.sessionService.getAllSessions();const runningTasks = await this.taskService.getTasksByStatus(BrowserTaskStatus.RUNNING);
     const taskMetrics = await this.taskService.getTaskMetrics();
 
     // Get additional metrics for enhanced endpoints
@@ -764,12 +557,7 @@ export class EnhancedBrowserAutomationController {
     const realtimeMetrics = await this.browserUseService.getRealtimeMetrics();
 
     const healthData = {
-      status: 'healthy',
-      service: 'Enhanced Browser Automation Controller',
-      timestamp: new Date().toISOString(),
-      version: '3.0.0',
-      capabilities: {
-        multiFormatScreenshots: true,
+      status: 'healthy',service: 'Enhanced Browser Automation Controller',timestamp: new Date().toISOString(),version: '3.0.0',capabilities: {multiFormatScreenshots: true,
         advancedDOMInteraction: true,
         aiElementDetection: true,
         ocrTextExtraction: true,
@@ -801,9 +589,7 @@ export class EnhancedBrowserAutomationController {
       uptime: process.uptime(),
     };
 
-    this.logger.log('Enhanced health check completed', {
-      activeSessions: healthData.statistics.activeSessions,
-      capabilities: Object.keys(healthData.capabilities).length,
+    this.logger.log('Enhanced health check completed', {activeSessions: healthData.statistics.activeSessions,capabilities: Object.keys(healthData.capabilities).length,
     });
 
     return healthData;
@@ -812,84 +598,33 @@ export class EnhancedBrowserAutomationController {
   /**
    * Get comprehensive automation capabilities
    */
-  @Get('capabilities')
-  @ApiOperation({
-    summary: 'Get automation capabilities',
-    description: 'Retrieve detailed information about available automation capabilities and features',
-  })
-  @ApiResponse({
+  @Get('capabilities')@ApiOperation({summary: 'Get automation capabilities',description: 'Retrieve detailed information about available automation capabilities and features',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Automation capabilities information',
-  })
-  async getAutomationCapabilities() {
-    this.logger.log('Automation capabilities requested');
-
-    return {
-      screenshots: {
+    description: 'Automation capabilities information',})async getAutomationCapabilities() {
+    this.logger.log('Automation capabilities requested');return {screenshots: {
         formats: Object.values(ScreenshotFormat),
         types: Object.values(ScreenshotType),
         features: [
-          'Full page capture',
-          'Element-specific capture',
-          'Viewport capture',
-          'Custom region capture',
-          'Multi-format support',
-          'Quality control',
-          'Batch operations',
-        ],
-      },
+          'Full page capture','Element-specific capture','Viewport capture','Custom region capture','Multi-format support','Quality control','Batch operations',],},
       domInteraction: {
         actions: Object.values(DOMActionType),
         targeting: [
-          'CSS selectors',
-          'XPath expressions',
-          'Coordinate-based',
-          'Text content matching',
-          'Attribute filtering',
-        ],
-        features: [
-          'Typing with delays',
-          'Scroll control',
-          'Drag and drop',
-          'File uploads',
-          'Key combinations',
-          'Batch operations',
-        ],
-      },
+          'CSS selectors','XPath expressions','Coordinate-based','Text content matching','Attribute filtering',],features: [
+          'Typing with delays','Scroll control','Drag and drop','File uploads','Key combinations','Batch operations',],},
       elementDetection: {
         strategies: Object.values(DetectionStrategy),
         features: [
-          'Wait conditions',
-          'Stability checks',
-          'Visibility detection',
-          'Interactability detection',
-          'AI-powered detection',
-          'Visual similarity matching',
-          'Batch detection',
-        ],
-      },
+          'Wait conditions','Stability checks','Visibility detection','Interactability detection','AI-powered detection','Visual similarity matching','Batch detection',],},
       visualAutomation: {
         ocrEngines: Object.values(OCREngine),
         elementTypes: Object.values(VisualElementType),
         features: [
-          'Multi-language OCR',
-          'Template matching',
-          'Image comparison',
-          'Visual element interaction',
-          'Preprocessing options',
-          'Confidence scoring',
-        ],
-      },
+          'Multi-language OCR','Template matching','Image comparison','Visual element interaction','Preprocessing options','Confidence scoring',],},
       realtimeUpdates: {
         eventTypes: Object.values(RealtimeEventType),
         subscriptionTypes: Object.values(SubscriptionType),
         features: [
-          'WebSocket connections',
-          'Server-Sent Events',
-          'Event filtering',
-          'Auto-reconnection',
-          'Event buffering',
-          'Statistics tracking',
+          'WebSocket connections','Server-Sent Events','Event filtering','Auto-reconnection','Event buffering','Statistics tracking',
         ],
       },
       general: {

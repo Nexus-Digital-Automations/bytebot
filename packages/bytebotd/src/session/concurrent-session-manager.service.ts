@@ -14,68 +14,23 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
-import { SessionMetadata, SessionState, SessionPriority, ConflictResolutionStrategy } from './session-management.service';
-
-// ===== CONCURRENT SESSION ENUMS =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import { v4 as uuidv4 } from 'uuid';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';import { SessionMetadata, SessionState, SessionPriority, ConflictResolutionStrategy } from './session-management.service';// ===== CONCURRENT SESSION ENUMS =====/**
  * Session conflict types for intelligent resolution
  */
 export enum SessionConflictType {
-  MAX_SESSIONS_EXCEEDED = 'MAX_SESSIONS_EXCEEDED',
-  DUPLICATE_DEVICE = 'DUPLICATE_DEVICE',
-  RESOURCE_EXHAUSTION = 'RESOURCE_EXHAUSTION',
-  SECURITY_VIOLATION = 'SECURITY_VIOLATION',
-  BUSINESS_RULE_VIOLATION = 'BUSINESS_RULE_VIOLATION',
-  GEOGRAPHIC_RESTRICTION = 'GEOGRAPHIC_RESTRICTION',
-  TIME_RESTRICTION = 'TIME_RESTRICTION',
-  LICENSE_LIMITATION = 'LICENSE_LIMITATION'
-}
-
-/**
+  MAX_SESSIONS_EXCEEDED = 'MAX_SESSIONS_EXCEEDED',DUPLICATE_DEVICE = 'DUPLICATE_DEVICE',RESOURCE_EXHAUSTION = 'RESOURCE_EXHAUSTION',SECURITY_VIOLATION = 'SECURITY_VIOLATION',BUSINESS_RULE_VIOLATION = 'BUSINESS_RULE_VIOLATION',GEOGRAPHIC_RESTRICTION = 'GEOGRAPHIC_RESTRICTION',TIME_RESTRICTION = 'TIME_RESTRICTION',LICENSE_LIMITATION = 'LICENSE_LIMITATION'}/**
  * Session allocation strategies
  */
 export enum SessionAllocationStrategy {
-  FIRST_COME_FIRST_SERVE = 'FIRST_COME_FIRST_SERVE',
-  PRIORITY_BASED = 'PRIORITY_BASED',
-  RESOURCE_OPTIMIZED = 'RESOURCE_OPTIMIZED',
-  BUSINESS_CRITICAL = 'BUSINESS_CRITICAL',
-  LOAD_BALANCED = 'LOAD_BALANCED',
-  GEOGRAPHIC_DISTRIBUTED = 'GEOGRAPHIC_DISTRIBUTED'
-}
-
-/**
+  FIRST_COME_FIRST_SERVE = 'FIRST_COME_FIRST_SERVE',PRIORITY_BASED = 'PRIORITY_BASED',RESOURCE_OPTIMIZED = 'RESOURCE_OPTIMIZED',BUSINESS_CRITICAL = 'BUSINESS_CRITICAL',LOAD_BALANCED = 'LOAD_BALANCED',GEOGRAPHIC_DISTRIBUTED = 'GEOGRAPHIC_DISTRIBUTED'}/**
  * Session monitoring status
  */
 export enum SessionMonitoringStatus {
-  HEALTHY = 'HEALTHY',
-  WARNING = 'WARNING',
-  CRITICAL = 'CRITICAL',
-  DEGRADED = 'DEGRADED',
-  MAINTENANCE = 'MAINTENANCE'
-}
-
-/**
+  HEALTHY = 'HEALTHY',WARNING = 'WARNING',CRITICAL = 'CRITICAL',DEGRADED = 'DEGRADED',MAINTENANCE = 'MAINTENANCE'}/**
  * Conflict resolution actions
  */
 export enum ConflictResolutionAction {
-  TERMINATE_OLDEST = 'TERMINATE_OLDEST',
-  TERMINATE_NEWEST = 'TERMINATE_NEWEST',
-  TERMINATE_LOWEST_PRIORITY = 'TERMINATE_LOWEST_PRIORITY',
-  SUSPEND_IDLE = 'SUSPEND_IDLE',
-  QUEUE_REQUEST = 'QUEUE_REQUEST',
-  DENY_REQUEST = 'DENY_REQUEST',
-  ESCALATE_TO_ADMIN = 'ESCALATE_TO_ADMIN',
-  USER_CHOICE = 'USER_CHOICE'
-}
-
-// ===== CONCURRENT SESSION INTERFACES =====
+  TERMINATE_OLDEST = 'TERMINATE_OLDEST',TERMINATE_NEWEST = 'TERMINATE_NEWEST',TERMINATE_LOWEST_PRIORITY = 'TERMINATE_LOWEST_PRIORITY',SUSPEND_IDLE = 'SUSPEND_IDLE',QUEUE_REQUEST = 'QUEUE_REQUEST',DENY_REQUEST = 'DENY_REQUEST',ESCALATE_TO_ADMIN = 'ESCALATE_TO_ADMIN',USER_CHOICE = 'USER_CHOICE'}// ===== CONCURRENT SESSION INTERFACES =====
 
 /**
  * Session conflict detailed information
@@ -90,9 +45,7 @@ export interface SessionConflictDetails {
   readonly suggestedResolution: ConflictResolutionAction;
   readonly alternativeResolutions: ConflictResolutionAction[];
   readonly businessImpact: BusinessImpactAssessment;
-  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
-  readonly detectedAt: Date;
-  readonly autoResolutionEnabled: boolean;
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';readonly detectedAt: Date;readonly autoResolutionEnabled: boolean;
   readonly resolutionDeadline: Date;
   readonly stakeholders: string[];
 }
@@ -119,9 +72,7 @@ export interface SessionCreationRequest {
 export interface BusinessContext {
   readonly department: string;
   readonly role: string;
-  readonly criticality: 'low' | 'medium' | 'high' | 'critical';
-  readonly projectId?: string;
-  readonly costCenter?: string;
+  readonly criticality: 'low' | 'medium' | 'high' | 'critical';readonly projectId?: string;readonly costCenter?: string;
   readonly complianceRequirements: string[];
   readonly budgetAllocation: number;
   readonly slaRequirements: ServiceLevelAgreement;
@@ -135,10 +86,7 @@ export interface ServiceLevelAgreement {
   readonly responseTime: number; // milliseconds
   readonly throughput: number; // requests per second
   readonly downtime: number; // milliseconds per month
-  readonly support: 'basic' | 'standard' | 'premium' | 'enterprise';
-}
-
-/**
+  readonly support: 'basic' | 'standard' | 'premium' | 'enterprise';}/**
  * Geographic location information
  */
 export interface GeographicLocation {
@@ -181,21 +129,14 @@ export interface ClientSecurityContext {
   readonly trustLevel: number;
   readonly certificateValidated: boolean;
   readonly encryptionEnabled: boolean;
-  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';
-  readonly complianceMode: boolean;
-}
+  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';readonly complianceMode: boolean;}
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
   readonly financialImpact: number;
-  readonly operationalImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
-  readonly customerImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
-  readonly complianceImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';
-  readonly reputationRisk: 'none' | 'low' | 'medium' | 'high' | 'severe';
-  readonly businessJustification: string;
-  readonly alternativeOptions: string[];
+  readonly operationalImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly customerImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly complianceImpact: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly reputationRisk: 'none' | 'low' | 'medium' | 'high' | 'severe';readonly businessJustification: string;readonly alternativeOptions: string[];
   readonly mitigationStrategies: string[];
 }
 
@@ -228,10 +169,7 @@ export interface ResourceAllocation {
   readonly allocatedStorageMB: number;
   readonly reservedCapacity: number;
   readonly allocationExpiry: Date;
-  readonly scalingPolicy: 'none' | 'manual' | 'automatic';
-}
-
-/**
+  readonly scalingPolicy: 'none' | 'manual' | 'automatic';}/**
  * Business approval status
  */
 export interface BusinessApprovalStatus {
@@ -253,9 +191,7 @@ export interface SessionAllocationAuditTrail {
   readonly action: string;
   readonly actor: string;
   readonly details: Record<string, any>;
-  readonly outcome: 'success' | 'failure' | 'partial';
-  readonly reasoning: string;
-}
+  readonly outcome: 'success' | 'failure' | 'partial';readonly reasoning: string;}
 
 /**
  * Session resource monitoring
@@ -303,9 +239,7 @@ export interface SessionPerformanceMetrics {
  */
 export interface SessionAlert {
   readonly alertId: string;
-  readonly severity: 'info' | 'warning' | 'error' | 'critical';
-  readonly type: string;
-  readonly message: string;
+  readonly severity: 'info' | 'warning' | 'error' | 'critical';readonly type: string;readonly message: string;
   readonly threshold: number;
   readonly currentValue: number;
   readonly triggeredAt: Date;
@@ -347,21 +281,9 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
     private readonly auditService: SecurityAuditService
   ) {
     // Initialize configuration
-    this.maxConcurrentSessions = this.configService.get<number>('MAX_CONCURRENT_SESSIONS', 100);
-    this.defaultSessionTimeout = this.configService.get<number>('DEFAULT_SESSION_TIMEOUT_MS', 3600000);
-    this.resourceMonitoringIntervalMs = this.configService.get<number>('RESOURCE_MONITORING_INTERVAL_MS', 30000);
-    this.conflictResolutionTimeoutMs = this.configService.get<number>('CONFLICT_RESOLUTION_TIMEOUT_MS', 300000);
-    this.defaultAllocationStrategy = this.configService.get<SessionAllocationStrategy>(
-      'DEFAULT_ALLOCATION_STRATEGY',
-      SessionAllocationStrategy.PRIORITY_BASED
-    );
-    this.autoResolutionEnabled = this.configService.get<boolean>('AUTO_RESOLUTION_ENABLED', true);
-
-    // Initialize Redis client
-    this.redisClient = new Redis(
-      this.configService.get<string>('SESSION_REDIS_URL', 'redis://localhost:6379'),
-      {
-        retryDelayOnFailover: 100,
+    this.maxConcurrentSessions = this.configService.get<number>('MAX_CONCURRENT_SESSIONS', 100);this.defaultSessionTimeout = this.configService.get<number>('DEFAULT_SESSION_TIMEOUT_MS', 3600000);this.resourceMonitoringIntervalMs = this.configService.get<number>('RESOURCE_MONITORING_INTERVAL_MS', 30000);this.conflictResolutionTimeoutMs = this.configService.get<number>('CONFLICT_RESOLUTION_TIMEOUT_MS', 300000);this.defaultAllocationStrategy = this.configService.get<SessionAllocationStrategy>('DEFAULT_ALLOCATION_STRATEGY',SessionAllocationStrategy.PRIORITY_BASED);
+    this.autoResolutionEnabled = this.configService.get<boolean>('AUTO_RESOLUTION_ENABLED', true);// Initialize Redis clientthis.redisClient = new Redis(
+      this.configService.get<string>('SESSION_REDIS_URL', 'redis://localhost:6379'),{retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         enableOfflineQueue: false,
         lazyConnect: true,
@@ -371,9 +293,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
     );
 
     this.logger.log('Concurrent Session Manager Service initialized');
-    this.logger.log(`Max concurrent sessions: ${this.maxConcurrentSessions}`);
-    this.logger.log(`Default allocation strategy: ${this.defaultAllocationStrategy}`);
-    this.logger.log(`Auto resolution enabled: ${this.autoResolutionEnabled}`);
+    this.logger.log(`Max concurrent sessions: ${this.maxConcurrentSessions}`);this.logger.log(`Default allocation strategy: ${this.defaultAllocationStrategy}`);this.logger.log(`Auto resolution enabled: ${this.autoResolutionEnabled}`);
   }
 
   /**
@@ -382,10 +302,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
   async onModuleInit(): Promise<void> {
     try {
       await this.redisClient.connect();
-      this.logger.log('Connected to Redis for concurrent session management');
-
-      // Load existing sessions
-      await this.loadExistingSessions();
+      this.logger.log('Connected to Redis for concurrent session management');// Load existing sessionsawait this.loadExistingSessions();
 
       // Start monitoring and resolution intervals
       this.startResourceMonitoring();
@@ -394,11 +311,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       // Initialize event handlers
       this.initializeEventHandlers();
 
-      this.logger.log('Concurrent Session Manager Service fully initialized');
-    } catch (error) {
-      this.logger.error('Failed to initialize Concurrent Session Manager Service', error);
-      throw error;
-    }
+      this.logger.log('Concurrent Session Manager Service fully initialized');} catch (error) {this.logger.error('Failed to initialize Concurrent Session Manager Service', error);throw error;}
   }
 
   /**
@@ -422,9 +335,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       // Disconnect from Redis
       await this.redisClient.disconnect();
 
-      this.logger.log('Concurrent Session Manager Service shutdown completed');
-    } catch (error) {
-      this.logger.error('Error during Concurrent Session Manager Service shutdown', error);
+      this.logger.log('Concurrent Session Manager Service shutdown completed');} catch (error) {this.logger.error('Error during Concurrent Session Manager Service shutdown', error);
     }
   }
 
@@ -443,11 +354,8 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       // Record request audit
       auditTrail.push({
         timestamp: new Date(),
-        action: 'session_allocation_requested',
-        actor: request.userId,
-        details: { request },
-        outcome: 'success',
-        reasoning: 'Session allocation request received and validated'
+        action: 'session_allocation_requested',actor: request.userId,details: { request },
+        outcome: 'success',reasoning: 'Session allocation request received and validated'
       });
 
       // Check existing sessions for user
@@ -462,10 +370,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         // Record conflict audit
         auditTrail.push({
           timestamp: new Date(),
-          action: 'conflict_detected',
-          actor: 'system',
-          details: { conflictDetails },
-          outcome: 'success',
+          action: 'conflict_detected',actor: 'system',details: { conflictDetails },outcome: 'success',
           reasoning: `Conflict detected: ${conflictDetails.conflictReason}`
         });
 
@@ -475,14 +380,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
 
           auditTrail.push({
             timestamp: new Date(),
-            action: 'conflict_auto_resolved',
-            actor: 'system',
-            details: { resolutionResult },
-            outcome: resolutionResult.success ? 'success' : 'failure',
-            reasoning: 'Automatic conflict resolution applied'
-          });
-
-          if (!resolutionResult.success) {
+            action: 'conflict_auto_resolved',actor: 'system',details: { resolutionResult },outcome: resolutionResult.success ? 'success' : 'failure',reasoning: 'Automatic conflict resolution applied'});if (!resolutionResult.success) {
             return {
               success: false,
               conflictResolutionApplied: true,
@@ -520,18 +418,8 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       // Check resource availability
       const resourceCheck = await this.checkResourceAvailability(request);
       if (!resourceCheck.available) {
-        this.logger.warn('Insufficient resources for session allocation');
-
-        auditTrail.push({
-          timestamp: new Date(),
-          action: 'resource_check_failed',
-          actor: 'system',
-          details: { resourceCheck },
-          outcome: 'failure',
-          reasoning: 'Insufficient resources available for session allocation'
-        });
-
-        return {
+        this.logger.warn('Insufficient resources for session allocation');auditTrail.push({timestamp: new Date(),
+          action: 'resource_check_failed',actor: 'system',details: { resourceCheck },outcome: 'failure',reasoning: 'Insufficient resources available for session allocation'});return {
           success: false,
           conflictResolutionApplied: false,
           resolutionActions: [],
@@ -547,18 +435,8 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       // Check business approval if required
       const businessApproval = await this.checkBusinessApproval(request);
       if (businessApproval.required && !businessApproval.approved) {
-        this.logger.debug('Business approval required for session allocation');
-
-        auditTrail.push({
-          timestamp: new Date(),
-          action: 'business_approval_required',
-          actor: 'system',
-          details: { businessApproval },
-          outcome: 'success',
-          reasoning: 'Business approval required for session allocation'
-        });
-
-        return {
+        this.logger.debug('Business approval required for session allocation');auditTrail.push({timestamp: new Date(),
+          action: 'business_approval_required',actor: 'system',details: { businessApproval },outcome: 'success',reasoning: 'Business approval required for session allocation'});return {
           success: false,
           conflictResolutionApplied: false,
           resolutionActions: [],
@@ -586,14 +464,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
 
       auditTrail.push({
         timestamp: new Date(),
-        action: 'session_allocated',
-        actor: 'system',
-        details: { sessionId, resourceAllocation },
-        outcome: 'success',
-        reasoning: 'Session successfully allocated with resources'
-      });
-
-      // Emit session allocated event
+        action: 'session_allocated',actor: 'system',details: { sessionId, resourceAllocation },outcome: 'success',reasoning: 'Session successfully allocated with resources'});// Emit session allocated event
       this.eventEmitter.emit('session.allocated', sessionMetadata);
 
       // Audit session allocation
@@ -610,10 +481,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         metadata: { sessionMetadata, auditTrail }
       });
 
-      this.logger.log(`Session allocated successfully: ${sessionId} for user: ${request.userId}`);
-
-      return {
-        success: true,
+      this.logger.log(`Session allocated successfully: ${sessionId} for user: ${request.userId}`);return {success: true,
         sessionId,
         conflictResolutionApplied: false,
         resolutionActions: [],
@@ -629,10 +497,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
 
       auditTrail.push({
         timestamp: new Date(),
-        action: 'session_allocation_failed',
-        actor: 'system',
-        details: { error: error.message },
-        outcome: 'failure',
+        action: 'session_allocation_failed',actor: 'system',details: { error: error.message },outcome: 'failure',
         reasoning: `Session allocation failed: ${error.message}`
       });
 
@@ -655,9 +520,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         SessionConflictType.MAX_SESSIONS_EXCEEDED,
         request,
         existingSessions,
-        'Maximum concurrent sessions limit exceeded',
-        ConflictResolutionAction.TERMINATE_OLDEST
-      );
+        'Maximum concurrent sessions limit exceeded',ConflictResolutionAction.TERMINATE_OLDEST);
     }
 
     // Check duplicate device
@@ -667,9 +530,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         SessionConflictType.DUPLICATE_DEVICE,
         request,
         existingSessions,
-        'Duplicate device session detected',
-        ConflictResolutionAction.USER_CHOICE
-      );
+        'Duplicate device session detected',ConflictResolutionAction.USER_CHOICE);
     }
 
     // Check resource exhaustion
@@ -714,17 +575,13 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         case ConflictResolutionAction.TERMINATE_OLDEST:
           const oldestSession = this.findOldestSession(conflictDetails.existingSessions);
           if (oldestSession) {
-            await this.terminateSession(oldestSession.sessionId, 'conflict_resolution');
-            appliedActions.push(ConflictResolutionAction.TERMINATE_OLDEST);
-          }
+            await this.terminateSession(oldestSession.sessionId, 'conflict_resolution');appliedActions.push(ConflictResolutionAction.TERMINATE_OLDEST);}
           break;
 
         case ConflictResolutionAction.TERMINATE_LOWEST_PRIORITY:
           const lowestPrioritySession = this.findLowestPrioritySession(conflictDetails.existingSessions);
           if (lowestPrioritySession) {
-            await this.terminateSession(lowestPrioritySession.sessionId, 'conflict_resolution');
-            appliedActions.push(ConflictResolutionAction.TERMINATE_LOWEST_PRIORITY);
-          }
+            await this.terminateSession(lowestPrioritySession.sessionId, 'conflict_resolution');appliedActions.push(ConflictResolutionAction.TERMINATE_LOWEST_PRIORITY);}
           break;
 
         case ConflictResolutionAction.SUSPEND_IDLE:
@@ -736,16 +593,12 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
           break;
 
         default:
-          this.logger.warn(`Unsupported automatic resolution action: ${conflictDetails.suggestedResolution}`);
-          return { success: false, actions: appliedActions };
-      }
+          this.logger.warn(`Unsupported automatic resolution action: ${conflictDetails.suggestedResolution}`);return { success: false, actions: appliedActions };}
 
       // Remove conflict from queue
       this.conflictQueue.delete(conflictDetails.conflictId);
 
-      this.logger.log(`Session conflict resolved: ${conflictDetails.conflictId}`);
-      return { success: true, actions: appliedActions };
-    } catch (error) {
+      this.logger.log(`Session conflict resolved: ${conflictDetails.conflictId}`);return { success: true, actions: appliedActions };} catch (error) {
       this.logger.error(`Failed to resolve session conflict: ${conflictDetails.conflictId}`, error);
       return { success: false, actions: appliedActions };
     }
@@ -791,9 +644,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         }
       }
     } catch (error) {
-      this.logger.error('Failed to perform resource monitoring', error);
-    }
-  }
+      this.logger.error('Failed to perform resource monitoring', error);}}
 
   /**
    * Start conflict resolution processing
@@ -805,9 +656,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       try {
         await this.processConflictQueue();
       } catch (error) {
-        this.logger.error('Error during conflict resolution processing', error);
-      }
-    }, 60000); // Process every minute
+        this.logger.error('Error during conflict resolution processing', error);}}, 60000); // Process every minute
 
     this.logger.log('Conflict resolution processing started');
   }
@@ -836,9 +685,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
         }
       }
     } catch (error) {
-      this.logger.error('Failed to process conflict queue', error);
-    }
-  }
+      this.logger.error('Failed to process conflict queue', error);}}
 
   // ===== PLACEHOLDER AND HELPER METHODS =====
 
@@ -885,21 +732,14 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
    */
   private async loadExistingSessions(): Promise<void> {
     // Implementation placeholder
-    this.logger.log('Loading existing sessions from Redis...');
-  }
-
-  /**
+    this.logger.log('Loading existing sessions from Redis...');}/**
    * Initialize event handlers
    */
   private initializeEventHandlers(): void {
-    this.eventEmitter.on('session.terminated', (sessionId: string) => {
-      this.sessionRegistry.delete(sessionId);
-      this.resourceMonitoring.delete(sessionId);
+    this.eventEmitter.on('session.terminated', (sessionId: string) => {this.sessionRegistry.delete(sessionId);this.resourceMonitoring.delete(sessionId);
     });
 
-    this.eventEmitter.on('session.suspended', (sessionId: string) => {
-      const session = this.sessionRegistry.get(sessionId);
-      if (session) {
+    this.eventEmitter.on('session.suspended', (sessionId: string) => {const session = this.sessionRegistry.get(sessionId);if (session) {
         session.sessionState = SessionState.SUSPENDED;
       }
     });
@@ -910,10 +750,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
    */
   private async persistSessionState(): Promise<void> {
     // Implementation placeholder
-    this.logger.log('Persisting session state to Redis...');
-  }
-
-  // Additional placeholder methods...
+    this.logger.log('Persisting session state to Redis...');}// Additional placeholder methods...
   private async checkResourceAvailability(request: SessionCreationRequest): Promise<{ available: boolean }> {
     return { available: true };
   }
@@ -952,9 +789,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       allocatedStorageMB: 0,
       reservedCapacity: 0,
       allocationExpiry: new Date(),
-      scalingPolicy: 'none'
-    };
-  }
+      scalingPolicy: 'none'};}
 
   private createEmptyBusinessApproval(): BusinessApprovalStatus {
     return {
@@ -1011,41 +846,23 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
     const session = this.sessionRegistry.get(sessionId);
     if (session) {
       session.sessionState = SessionState.TERMINATED;
-      this.eventEmitter.emit('session.terminated', sessionId, reason);
-    }
-  }
+      this.eventEmitter.emit('session.terminated', sessionId, reason);}}
 
   private async suspendSession(sessionId: string, reason: string): Promise<void> {
     const session = this.sessionRegistry.get(sessionId);
     if (session) {
       session.sessionState = SessionState.SUSPENDED;
-      this.eventEmitter.emit('session.suspended', sessionId, reason);
-    }
-  }
+      this.eventEmitter.emit('session.suspended', sessionId, reason);}}
 
   private assessBusinessImpact(request: SessionCreationRequest, conflictType: SessionConflictType): BusinessImpactAssessment {
     return {
       financialImpact: 0,
-      operationalImpact: 'low',
-      customerImpact: 'none',
-      complianceImpact: 'none',
-      reputationRisk: 'none',
-      businessJustification: 'Session allocation conflict',
-      alternativeOptions: [],
-      mitigationStrategies: []
+      operationalImpact: 'low',customerImpact: 'none',complianceImpact: 'none',reputationRisk: 'none',businessJustification: 'Session allocation conflict',alternativeOptions: [],mitigationStrategies: []
     };
   }
 
-  private determineUrgency(request: SessionCreationRequest, conflictType: SessionConflictType): 'low' | 'medium' | 'high' | 'critical' {
-    switch (request.priority) {
-      case SessionPriority.EMERGENCY:
-        return 'critical';
-      case SessionPriority.CRITICAL:
-        return 'high';
-      case SessionPriority.HIGH:
-        return 'medium';
-      default:
-        return 'low';
+  private determineUrgency(request: SessionCreationRequest, conflictType: SessionConflictType): 'low' | 'medium' | 'high' | 'critical' {switch (request.priority) {case SessionPriority.EMERGENCY:
+        return 'critical';case SessionPriority.CRITICAL:return 'high';case SessionPriority.HIGH:return 'medium';default:return 'low';
     }
   }
 
@@ -1073,15 +890,10 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
 
   private handleResourceAlerts(sessionId: string, alerts: SessionAlert[]): void {
     alerts.forEach(alert => {
-      this.logger.warn(`Session resource alert: ${sessionId} - ${alert.message}`);
-    });
-  }
+      this.logger.warn(`Session resource alert: ${sessionId} - ${alert.message}`);});}
 
   private handleCriticalSession(sessionId: string, monitoring: SessionResourceMonitoring): void {
-    this.logger.error(`Critical session detected: ${sessionId} - Health: ${monitoring.healthStatus}`);
-  }
-
-  private escalateConflictToAdmin(conflictDetails: SessionConflictDetails): void {
+    this.logger.error(`Critical session detected: ${sessionId} - Health: ${monitoring.healthStatus}`);}private escalateConflictToAdmin(conflictDetails: SessionConflictDetails): void {
     this.logger.warn(`Escalating conflict to admin: ${conflictDetails.conflictId}`);
     // Implementation for admin escalation
   }

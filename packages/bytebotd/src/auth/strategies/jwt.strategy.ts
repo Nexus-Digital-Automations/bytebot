@@ -13,14 +13,7 @@
  * @since ByteBotd Authentication Hardening
  */
 
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserRole } from '@bytebot/shared';
-import { ByteBotdUser } from '../guards/jwt-auth.guard';
-
-/**
- * JWT payload interface for ByteBotd authentication
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';import { PassportStrategy } from '@nestjs/passport';import { ExtractJwt, Strategy } from 'passport-jwt';import { UserRole } from '@bytebot/shared';import { ByteBotdUser } from '../guards/jwt-auth.guard';/*** JWT payload interface for ByteBotd authentication
  */
 interface JwtPayload {
   sub: string; // User ID
@@ -47,8 +40,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey:
-        process.env.JWT_SECRET ?? 'bytebot-default-secret-change-in-production',
-      algorithms: ['HS256'],
+        process.env.JWT_SECRET ?? 'bytebot-default-secret-change-in-production',algorithms: ['HS256'],
     });
   }
 
@@ -61,10 +53,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @throws UnauthorizedException - When user is invalid or inactive
    */
   validate(payload: JwtPayload): ByteBotdUser {
-    const operationId = `bytebotd-jwt-validate-${Date.now()}`;
-
-    this.logger.debug(
-      `[${operationId}] JWT payload validation for computer control`,
+    const operationId = `bytebotd-jwt-validate-${Date.now()}`;this.logger.debug(`[${operationId}] JWT payload validation for computer control`,
       {
         operationId,
         userId: payload.sub,
@@ -87,9 +76,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           hasEmail: !!payload.email,
           hasUsername: !!payload.username,
           hasRole: !!payload.role,
-          securityEvent: 'computer_control_invalid_jwt_payload',
-        },
-      );
+          securityEvent: 'computer_control_invalid_jwt_payload',},);
       throw new UnauthorizedException('Invalid token payload');
     }
 
@@ -102,9 +89,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           userId: payload.sub,
           username: payload.username,
           role: payload.role,
-          securityEvent: 'computer_control_inactive_user_access',
-          riskScore: 75,
-        },
+          securityEvent: 'computer_control_inactive_user_access',riskScore: 75,},
       );
       throw new UnauthorizedException('Account is inactive');
     }

@@ -29,12 +29,7 @@ declare global {
 }
 
 // Set test environment variables
-process.env.NODE_ENV = 'test';
-process.env.LOG_LEVEL = 'error'; // Reduce log noise during tests
-process.env.JEST_WORKER_ID = process.env.JEST_WORKER_ID ?? '1';
-
-// Increase test timeout for integration tests
-jest.setTimeout(30000);
+process.env.NODE_ENV = 'test';process.env.LOG_LEVEL = 'error'; // Reduce log noise during testsprocess.env.JEST_WORKER_ID = process.env.JEST_WORKER_ID ?? '1';// Increase test timeout for integration testsjest.setTimeout(30000);
 
 // Configure global test utilities
 global.console = {
@@ -48,9 +43,7 @@ global.console = {
 };
 
 // Mock external dependencies that should not run in test environment
-jest.mock('child_process', () => ({
-  exec: jest.fn(),
-  spawn: jest.fn(() => ({
+jest.mock('child_process', () => ({exec: jest.fn(),spawn: jest.fn(() => ({
     unref: jest.fn(),
     on: jest.fn(),
     kill: jest.fn(),
@@ -60,11 +53,7 @@ jest.mock('child_process', () => ({
 }));
 
 // Mock file system operations with safe test behavior
-jest.mock('fs/promises', () => ({
-  writeFile: jest.fn().mockResolvedValue(undefined),
-  readFile: jest.fn().mockResolvedValue(Buffer.from('test file content')),
-  unlink: jest.fn().mockResolvedValue(undefined),
-  mkdir: jest.fn().mockResolvedValue(undefined),
+jest.mock('fs/promises', () => ({writeFile: jest.fn().mockResolvedValue(undefined),readFile: jest.fn().mockResolvedValue(Buffer.from('test file content')),unlink: jest.fn().mockResolvedValue(undefined),mkdir: jest.fn().mockResolvedValue(undefined),
   stat: jest.fn().mockResolvedValue({
     isFile: () => true,
     isDirectory: () => false,
@@ -76,20 +65,12 @@ jest.mock('fs/promises', () => ({
 }));
 
 // Mock util promisify for exec operations
-jest.mock('util', () => ({
-  ...(jest.requireActual('util') as Record<string, unknown>),
-  promisify: jest.fn((): jest.MockedFunction<() => Promise<{ stdout: string; stderr: string }>> =>
-    jest.fn().mockResolvedValue({
-      stdout: 'mocked command output',
-      stderr: '',
-    }),
-  ),
+jest.mock('util', () => ({...(jest.requireActual('util') as Record<string, unknown>),promisify: jest.fn((): jest.MockedFunction<() => Promise<{ stdout: string; stderr: string }>> =>jest.fn().mockResolvedValue({
+      stdout: 'mocked command output',stderr: '',}),),
 }));
 
 // Mock @nut-tree-fork/nut-js library for computer automation
-jest.mock('@nut-tree-fork/nut-js', () => ({
-  keyboard: {
-    pressKey: jest.fn().mockResolvedValue(undefined),
+jest.mock('@nut-tree-fork/nut-js', () => ({keyboard: {pressKey: jest.fn().mockResolvedValue(undefined),
     releaseKey: jest.fn().mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
@@ -111,64 +92,9 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
   Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     // Essential keys for testing
-    A: 'A',
-    B: 'B',
-    C: 'C',
-    D: 'D',
-    E: 'E',
-    F: 'F',
-    G: 'G',
-    H: 'H',
-    I: 'I',
-    J: 'J',
-    K: 'K',
-    L: 'L',
-    M: 'M',
-    N: 'N',
-    O: 'O',
-    P: 'P',
-    Q: 'Q',
-    R: 'R',
-    S: 'S',
-    T: 'T',
-    U: 'U',
-    V: 'V',
-    W: 'W',
-    X: 'X',
-    Y: 'Y',
-    Z: 'Z',
-    Num0: 'Num0',
-    Num1: 'Num1',
-    Num2: 'Num2',
-    Num3: 'Num3',
-    Num4: 'Num4',
-    Num5: 'Num5',
-    Num6: 'Num6',
-    Num7: 'Num7',
-    Num8: 'Num8',
-    Num9: 'Num9',
-    Space: 'Space',
-    Enter: 'Enter',
-    Backspace: 'Backspace',
-    Delete: 'Delete',
-    Tab: 'Tab',
-    Escape: 'Escape',
-    LeftShift: 'LeftShift',
-    RightShift: 'RightShift',
-    LeftControl: 'LeftControl',
-    RightControl: 'RightControl',
-    LeftAlt: 'LeftAlt',
-    RightAlt: 'RightAlt',
-  },
-  Button: {
-    LEFT: 'LEFT',
-    RIGHT: 'RIGHT',
-    MIDDLE: 'MIDDLE',
-  },
-  FileType: {
-    PNG: 'PNG',
-  },
-}));
+    A: 'A',B: 'B',C: 'C',D: 'D',E: 'E',F: 'F',G: 'G',H: 'H',I: 'I',J: 'J',K: 'K',L: 'L',M: 'M',N: 'N',O: 'O',P: 'P',Q: 'Q',R: 'R',S: 'S',T: 'T',U: 'U',V: 'V',W: 'W',X: 'X',Y: 'Y',Z: 'Z',Num0: 'Num0',Num1: 'Num1',Num2: 'Num2',Num3: 'Num3',Num4: 'Num4',Num5: 'Num5',Num6: 'Num6',Num7: 'Num7',Num8: 'Num8',Num9: 'Num9',Space: 'Space',Enter: 'Enter',Backspace: 'Backspace',Delete: 'Delete',Tab: 'Tab',Escape: 'Escape',LeftShift: 'LeftShift',RightShift: 'RightShift',LeftControl: 'LeftControl',RightControl: 'RightControl',LeftAlt: 'LeftAlt',RightAlt: 'RightAlt',},Button: {
+    LEFT: 'LEFT',RIGHT: 'RIGHT',MIDDLE: 'MIDDLE',},FileType: {
+    PNG: 'PNG',},}));
 
 // Performance monitoring setup
 const performanceMetrics = {
@@ -179,9 +105,7 @@ const performanceMetrics = {
 
 // Global performance tracking
 beforeEach(() => {
-  const testName = expect.getState().currentTestName ?? 'unknown';
-  performanceMetrics.memoryUsage.set(testName, process.memoryUsage());
-});
+  const testName = expect.getState().currentTestName ?? 'unknown';performanceMetrics.memoryUsage.set(testName, process.memoryUsage());});
 
 afterEach(() => {
   const testName = expect.getState().currentTestName ?? 'unknown';
@@ -194,22 +118,14 @@ afterEach(() => {
     // Log memory leaks exceeding 10MB
     if (memoryDelta > 10 * 1024 * 1024) {
       console.warn(
-        `Potential memory leak detected in test "${testName}": ${Math.round(memoryDelta / 1024 / 1024)}MB`,
+        `Potential memory leak detected in test "${testName}": ${Math.round(memoryDelta / 1024 / 1024)}MB",
       );
     }
   }
 });
 
 // Global error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-process.on('uncaughtException', (_error) => {
-  console.error('Uncaught Exception:', _error);
-});
-
-// Test utilities for global access
+process.on('unhandledRejection', (reason, promise) => {console.error('Unhandled Rejection at:', promise, 'reason:', reason);});process.on('uncaughtException', (_error) => {console.error('Uncaught Exception:', _error);});// Test utilities for global access
 global.testUtils = {
   performanceMetrics,
 
@@ -226,9 +142,7 @@ global.testUtils = {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     if (!condition()) {
-      throw new Error(`Timeout waiting for condition after ${timeout}ms`);
-    }
-  },
+      throw new Error(`Timeout waiting for condition after ${timeout}ms`);}},
 
   // Utility to generate unique test IDs
   generateTestId: (prefix: string): string => {

@@ -151,9 +151,7 @@ export function createNutMock(): MockNutInterface {
       waitFor: createMockFunction(),
       highlight: createMockFunction(),
       config: {
-        resourceDirectory: '/tmp/nut-resources',
-        confidence: 0.99,
-      },
+        resourceDirectory: '/tmp/nut-resources',confidence: 0.99,},
     },
     mouse: {
       move: createMockFunction(),
@@ -181,22 +179,7 @@ export function createNutMock(): MockNutInterface {
       },
     },
     Key: {
-      Escape: 'Escape',
-      Enter: 'Return',
-      Space: 'space',
-      Tab: 'Tab',
-      Shift: 'shift',
-      Control: 'ctrl',
-      Alt: 'alt',
-      Meta: 'cmd',
-      F1: 'F1',
-      F12: 'F12',
-      Up: 'up',
-      Down: 'down',
-      Left: 'left',
-      Right: 'right',
-    },
-    Button: {
+      Escape: 'Escape',Enter: 'Return',Space: 'space',Tab: 'Tab',Shift: 'shift',Control: 'ctrl',Alt: 'alt',Meta: 'cmd',F1: 'F1',F12: 'F12',Up: 'up',Down: 'down',Left: 'left',Right: 'right',},Button: {
       LEFT: 0,
       MIDDLE: 1,
       RIGHT: 2,
@@ -208,10 +191,7 @@ export function createNutMock(): MockNutInterface {
     straightTo: createMockFunction(),
     linear: createMockFunction(),
     PROVIDER: {
-      CV: 'opencv',
-      TEMPLATE_MATCHING: 'template',
-    },
-  };
+      CV: 'opencv',TEMPLATE_MATCHING: 'template',},};
 }
 
 /**

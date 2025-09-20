@@ -28,31 +28,10 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-
-import { PriorityJobQueueService, EnhancedJobPriority } from './priority-job-queue.service';
-import { JobManagementService, JobResult, JobStatus } from '../job-management.service';
-import { ComputerUseService } from '../computer-use.service';
-import { MetricsService } from '../../metrics/metrics.service';
-
-/**
- * Job processing events for real-time coordination
+} from '@nestjs/common';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import { PriorityJobQueueService, EnhancedJobPriority } from './priority-job-queue.service';import { JobManagementService, JobResult, JobStatus } from '../job-management.service';import { ComputerUseService } from '../computer-use.service';import { MetricsService } from '../../metrics/metrics.service';/*** Job processing events for real-time coordination
  */
 export enum JobProcessingEvent {
-  JOB_STARTED = 'job.started',
-  JOB_PROGRESS = 'job.progress',
-  JOB_COMPLETED = 'job.completed',
-  JOB_FAILED = 'job.failed',
-  JOB_TIMEOUT = 'job.timeout',
-  WORKER_AVAILABLE = 'worker.available',
-  WORKER_BUSY = 'worker.busy',
-  QUEUE_BACKPRESSURE = 'queue.backpressure',
-  SYSTEM_HEALTH_CHECK = 'system.health_check',
-}
-
-/**
+  JOB_STARTED = 'job.started',JOB_PROGRESS = 'job.progress',JOB_COMPLETED = 'job.completed',JOB_FAILED = 'job.failed',JOB_TIMEOUT = 'job.timeout',WORKER_AVAILABLE = 'worker.available',WORKER_BUSY = 'worker.busy',QUEUE_BACKPRESSURE = 'queue.backpressure',SYSTEM_HEALTH_CHECK = 'system.health_check',}/**
  * Worker capability and status tracking
  */
 export interface WorkerInfo {
@@ -66,10 +45,7 @@ export interface WorkerInfo {
     successRate: number;
     totalJobsProcessed: number;
   };
-  readonly status: 'available' | 'busy' | 'offline' | 'maintenance';
-}
-
-/**
+  readonly status: 'available' | 'busy' | 'offline' | 'maintenance';}/**
  * Job processing metrics and analytics
  */
 export interface ProcessingMetrics {
@@ -158,10 +134,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
   // ===== LIFECYCLE MANAGEMENT =====
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Priority Queue Integration Service...');
-
-    try {
-      // Start background processing
+    this.logger.log('Initializing Priority Queue Integration Service...');try {// Start background processing
       await this.startProcessingLoop();
 
       // Start health monitoring
@@ -170,18 +143,11 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       // Start rebalancing
       this.startRebalancing();
 
-      this.logger.log('Priority Queue Integration Service initialized successfully');
-    } catch (error) {
-      this.logger.error('Failed to initialize Priority Queue Integration Service:', error);
-      throw error;
-    }
+      this.logger.log('Priority Queue Integration Service initialized successfully');} catch (error) {this.logger.error('Failed to initialize Priority Queue Integration Service:', error);throw error;}
   }
 
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Priority Queue Integration Service...');
-
-    try {
-      // Stop processing
+    this.logger.log('Shutting down Priority Queue Integration Service...');try {// Stop processing
       this.isProcessing = false;
 
       // Clear timers
@@ -198,9 +164,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       // Wait for current jobs to complete (with timeout)
       await this.gracefulShutdown();
 
-      this.logger.log('Priority Queue Integration Service shutdown completed');
-    } catch (error) {
-      this.logger.error('Error during Priority Queue Integration Service shutdown:', error);
+      this.logger.log('Priority Queue Integration Service shutdown completed');} catch (error) {this.logger.error('Error during Priority Queue Integration Service shutdown:', error);
     }
   }
 
@@ -223,10 +187,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       metadata?: Record<string, unknown>;
     } = {},
   ): Promise<{ jobId: string; queuePosition: number; estimatedStartTime: Date }> {
-    this.logger.debug(`Submitting job with priority: ${priority}`);
-
-    try {
-      // Generate unique job ID
+    this.logger.debug(`Submitting job with priority: ${priority}`);try {// Generate unique job ID
       const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Submit to priority queue
@@ -246,10 +207,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       });
 
       if (!queueResult.success || !queueResult.data) {
-        throw new Error(`Failed to submit job to queue: ${queueResult.error}`);
-      }
-
-      // Create job tracking entry in job management system
+        throw new Error(`Failed to submit job to queue: ${queueResult.error}`);}// Create job tracking entry in job management system
       const jobResult: JobResult = {
         jobId,
         status: JobStatus.PENDING,
@@ -357,10 +315,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       // Clean up worker mapping
       this.jobWorkerMapping.delete(jobId);
 
-      this.logger.log(`Job cancelled successfully: ${jobId}`);
-      return true;
-
-    } catch (error) {
+      this.logger.log(`Job cancelled successfully: ${jobId}`);return true;} catch (error) {
       this.logger.error(`Failed to cancel job ${jobId}:`, error);
       return false;
     }
@@ -422,17 +377,13 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       this.processingLoop = setTimeout(() => this.processNextJob(), 100);
 
     } catch (error) {
-      this.logger.error('Error in processing loop:', error);
-      // Continue processing with delay on error
-      this.processingLoop = setTimeout(() => this.processNextJob(), 5000);
+      this.logger.error('Error in processing loop:', error);// Continue processing with delay on errorthis.processingLoop = setTimeout(() => this.processNextJob(), 5000);
     }
   }
 
   private findAvailableWorker(payload: unknown): WorkerInfo | null {
     for (const worker of this.workers.values()) {
-      if (worker.status === 'available' &&
-          worker.currentJobs < worker.maxConcurrentJobs &&
-          this.isWorkerCapable(worker, payload)) {
+      if (worker.status === 'available' &&worker.currentJobs < worker.maxConcurrentJobs &&this.isWorkerCapable(worker, payload)) {
         return worker;
       }
     }
@@ -475,10 +426,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Executing job ${job.metadata.jobId} on worker ${worker.workerId}`);
-
-      // Update job status to in progress
-      await this.priorityQueue.updateJobStatus(job.metadata.jobId, JobStatus.IN_PROGRESS);
+      this.logger.debug(`Executing job ${job.metadata.jobId} on worker ${worker.workerId}`);// Update job status to in progressawait this.priorityQueue.updateJobStatus(job.metadata.jobId, JobStatus.IN_PROGRESS);
       await this.jobManagement.updateJobStatus(job.metadata.jobId, JobStatus.IN_PROGRESS);
 
       // Execute the job using computer use service
@@ -496,10 +444,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       // Update worker performance
       this.updateWorkerPerformance(worker.workerId, true, executionTime);
 
-      this.logger.log(`Job completed successfully: ${job.metadata.jobId} (${executionTime}ms)`);
-
-      // Emit completion event
-      this.eventEmitter.emit(JobProcessingEvent.JOB_COMPLETED, {
+      this.logger.log(`Job completed successfully: ${job.metadata.jobId} (${executionTime}ms)`);// Emit completion eventthis.eventEmitter.emit(JobProcessingEvent.JOB_COMPLETED, {
         jobId: job.metadata.jobId,
         executionTime,
         result,
@@ -511,9 +456,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       this.logger.error(`Job execution failed: ${job.metadata.jobId}:`, error);
 
       // Update job status to failed
-      const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';
-      await this.priorityQueue.updateJobStatus(job.metadata.jobId, JobStatus.FAILED, undefined, errorMessage);
-      await this.jobManagement.updateJobStatus(job.metadata.jobId, JobStatus.FAILED, errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';await this.priorityQueue.updateJobStatus(job.metadata.jobId, JobStatus.FAILED, undefined, errorMessage);await this.jobManagement.updateJobStatus(job.metadata.jobId, JobStatus.FAILED, errorMessage);
 
       // Update metrics
       this.updateProcessingMetrics(false, executionTime);
@@ -545,9 +488,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
         const updatedWorker: WorkerInfo = {
           ...worker,
           currentJobs: Math.max(0, worker.currentJobs - 1),
-          status: worker.currentJobs > 1 ? 'busy' : 'available',
-          lastHeartbeat: new Date(),
-        };
+          status: worker.currentJobs > 1 ? 'busy' : 'available',lastHeartbeat: new Date(),};
         this.workers.set(workerId, updatedWorker);
 
         // Emit worker available event
@@ -578,10 +519,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
     };
 
     this.workers.set(worker.workerId, worker);
-    this.logger.log(`Worker registered: ${worker.workerId} (Capabilities: ${worker.capabilities.join(', ')})`);
-
-    this.eventEmitter.emit(JobProcessingEvent.WORKER_AVAILABLE, { workerId: worker.workerId });
-  }
+    this.logger.log(`Worker registered: ${worker.workerId} (Capabilities: ${worker.capabilities.join(`, ')})`);this.eventEmitter.emit(JobProcessingEvent.WORKER_AVAILABLE, { workerId: worker.workerId });}
 
   /**
    * Unregister a worker
@@ -590,10 +528,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
     const worker = this.workers.get(workerId);
     if (worker) {
       this.workers.delete(workerId);
-      this.logger.log(`Worker unregistered: ${workerId}`);
-
-      // Handle any active jobs assigned to this worker
-      for (const [jobId, assignedWorkerId] of this.jobWorkerMapping.entries()) {
+      this.logger.log(`Worker unregistered: ${workerId}`);// Handle any active jobs assigned to this workerfor (const [jobId, assignedWorkerId] of this.jobWorkerMapping.entries()) {
         if (assignedWorkerId === workerId) {
           this.handleWorkerFailure(jobId, workerId);
         }
@@ -603,10 +538,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
 
   private async handleWorkerFailure(jobId: string, workerId: string): Promise<void> {
     try {
-      this.logger.warn(`Handling worker failure: ${workerId} for job: ${jobId}`);
-
-      // Remove job from worker mapping
-      this.jobWorkerMapping.delete(jobId);
+      this.logger.warn(`Handling worker failure: ${workerId} for job: ${jobId}`);// Remove job from worker mappingthis.jobWorkerMapping.delete(jobId);
 
       // Get job details
       const job = await this.priorityQueue.getJob(jobId);
@@ -625,14 +557,11 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
         this.logger.log(`Job re-queued due to worker failure: ${jobId} (Retry: ${job.metadata.retryCount + 1})`);
       } else {
         // Max retries exceeded, mark as failed
-        await this.priorityQueue.updateJobStatus(jobId, JobStatus.FAILED, undefined, 'Worker failure - max retries exceeded');
-        await this.jobManagement.updateJobStatus(jobId, JobStatus.FAILED, 'Worker failure - max retries exceeded');
+        await this.priorityQueue.updateJobStatus(jobId, JobStatus.FAILED, undefined, 'Worker failure - max retries exceeded');await this.jobManagement.updateJobStatus(jobId, JobStatus.FAILED, 'Worker failure - max retries exceeded');
       }
 
     } catch (error) {
-      this.logger.error(`Failed to handle worker failure for job ${jobId}:`, error);
-    }
-  }
+      this.logger.error(`Failed to handle worker failure for job ${jobId}:`, error);}}
 
   // ===== MONITORING AND HEALTH CHECKS =====
 
@@ -657,9 +586,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
           // Mark worker as offline
           const updatedWorker: WorkerInfo = {
             ...worker,
-            status: 'offline',
-          };
-          this.workers.set(workerId, updatedWorker);
+            status: 'offline',};this.workers.set(workerId, updatedWorker);
 
           // Handle any active jobs
           for (const [jobId, assignedWorkerId] of this.jobWorkerMapping.entries()) {
@@ -692,9 +619,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
       });
 
     } catch (error) {
-      this.logger.error('Health check failed:', error);
-    }
-  }
+      this.logger.error('Health check failed:', error);}}
 
   // ===== METRICS AND ANALYTICS =====
 
@@ -742,9 +667,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
     return failures / Math.max(1, this.processingMetrics.totalJobsProcessed + 1);
   }
 
-  private calculateSuccessRate(performance: WorkerInfo['performance'], success: boolean): number {
-    const totalJobs = performance.totalJobsProcessed + 1;
-    const currentSuccesses = performance.successRate * performance.totalJobsProcessed;
+  private calculateSuccessRate(performance: WorkerInfo['performance'], success: boolean): number {const totalJobs = performance.totalJobsProcessed + 1;const currentSuccesses = performance.successRate * performance.totalJobsProcessed;
     const newSuccesses = currentSuccesses + (success ? 1 : 0);
     return newSuccesses / totalJobs;
   }
@@ -752,14 +675,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
   private async updateSystemMetrics(): Promise<void> {
     try {
       // Send metrics to metrics service
-      await this.metricsService.recordMetric('queue.jobs.processed', this.processingMetrics.totalJobsProcessed);
-      await this.metricsService.recordMetric('queue.processing.average_time', this.processingMetrics.averageProcessingTime);
-      await this.metricsService.recordMetric('queue.error.rate', this.processingMetrics.errorRate);
-      await this.metricsService.recordMetric('workers.count', this.workers.size);
-      await this.metricsService.recordMetric('jobs.active', this.jobWorkerMapping.size);
-
-    } catch (error) {
-      this.logger.error('Failed to update system metrics:', error);
+      await this.metricsService.recordMetric('queue.jobs.processed', this.processingMetrics.totalJobsProcessed);await this.metricsService.recordMetric('queue.processing.average_time', this.processingMetrics.averageProcessingTime);await this.metricsService.recordMetric('queue.error.rate', this.processingMetrics.errorRate);await this.metricsService.recordMetric('workers.count', this.workers.size);await this.metricsService.recordMetric('jobs.active', this.jobWorkerMapping.size);} catch (error) {this.logger.error('Failed to update system metrics:', error);
     }
   }
 
@@ -818,9 +734,7 @@ export class PriorityQueueIntegrationService implements OnModuleInit, OnModuleDe
     const startTime = Date.now();
 
     while (this.jobWorkerMapping.size > 0 && Date.now() - startTime < shutdownTimeout) {
-      this.logger.log(`Waiting for ${this.jobWorkerMapping.size} jobs to complete...`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+      this.logger.log(`Waiting for ${this.jobWorkerMapping.size} jobs to complete...`);await new Promise(resolve => setTimeout(resolve, 1000));}
 
     if (this.jobWorkerMapping.size > 0) {
       this.logger.warn(`Forced shutdown with ${this.jobWorkerMapping.size} jobs still active`);

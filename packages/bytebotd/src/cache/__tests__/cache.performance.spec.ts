@@ -21,14 +21,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { CacheService } from '../cache.service';
-import { CacheKeyGenerator } from '../cache-key.generator';
-import { MetricsService } from '../../metrics/metrics.service';
-
-describe('Cache Performance Tests', () => {
+import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Cache } from 'cache-manager';import { CacheService } from '../cache.service';import { CacheKeyGenerator } from '../cache-key.generator';import { MetricsService } from '../../metrics/metrics.service';describe('Cache Performance Tests', () => {
   let module: TestingModule;
   let cacheService: CacheService;
   let keyGenerator: jest.Mocked<CacheKeyGenerator>;
@@ -97,11 +90,8 @@ describe('Cache Performance Tests', () => {
 
     // Setup fast mock behaviors for performance testing
     keyGenerator.generate.mockImplementation((key: string | string[] | Record<string, unknown>, namespace?: string) => 
-      `${namespace || 'bytebot'}:${typeof key === 'string' ? key : JSON.stringify(key)}`
-    );
-    cacheManager.get.mockResolvedValue('"test-value"');
-    cacheManager.set.mockResolvedValue(undefined);
-    cacheManager.del.mockResolvedValue(true);
+      `${namespace || 'bytebot'}:${typeof key === 'string' ? key : JSON.stringify(key)}');
+    cacheManager.get.mockResolvedValue('"test-value"');cacheManager.set.mockResolvedValue(undefined);cacheManager.del.mockResolvedValue(true);
   });
 
   afterEach(async () => {
@@ -109,16 +99,12 @@ describe('Cache Performance Tests', () => {
     jest.clearAllMocks();
   });
 
-  describe('Single Operation Performance', () => {
-    it('should perform get operations with low latency', async () => {
+  describe('Single Operation Performance', () => {it('should perform get operations with low latency', async () => {
       const operations = 1000;
       const startTime = performance.now();
 
       for (let i = 0; i < operations; i++) {
-        await cacheService.get(`perf-key-${i}`);
-      }
-
-      const endTime = performance.now();
+        await cacheService.get(`perf-key-${i}`);}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgLatency = totalTime / operations;
 
@@ -133,10 +119,7 @@ describe('Cache Performance Tests', () => {
       const startTime = performance.now();
 
       for (let i = 0; i < operations; i++) {
-        await cacheService.set(`perf-set-key-${i}`, `value-${i}`);
-      }
-
-      const endTime = performance.now();
+        await cacheService.set(`perf-set-key-${i}`, `value-${i}`);}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgLatency = totalTime / operations;
 
@@ -150,10 +133,7 @@ describe('Cache Performance Tests', () => {
       const startTime = performance.now();
 
       for (let i = 0; i < operations; i++) {
-        await cacheService.del(`perf-del-key-${i}`);
-      }
-
-      const endTime = performance.now();
+        await cacheService.del(`perf-del-key-${i}`);}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgLatency = totalTime / operations;
 
@@ -163,12 +143,8 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Bulk Operations Performance', () => {
-    it('should handle bulk get operations efficiently', async () => {
-      const keys = Array.from({ length: PERFORMANCE_CONFIG.MEDIUM_DATASET }, (_, i) => `bulk-key-${i}`);
-      
-      const startTime = performance.now();
-      const results = await cacheService.mget(keys);
+  describe('Bulk Operations Performance', () => {it('should handle bulk get operations efficiently', async () => {
+      const keys = Array.from({ length: PERFORMANCE_CONFIG.MEDIUM_DATASET }, (_, i) => `bulk-key-${i}`);const startTime = performance.now();const results = await cacheService.mget(keys);
       const endTime = performance.now();
       
       const totalTime = endTime - startTime;
@@ -182,11 +158,7 @@ describe('Cache Performance Tests', () => {
 
     it('should handle bulk set operations efficiently', async () => {
       const entries = Array.from({ length: PERFORMANCE_CONFIG.MEDIUM_DATASET }, (_, i) => ({
-        key: `bulk-set-key-${i}`,
-        value: `bulk-value-${i}`,
-      }));
-      
-      const startTime = performance.now();
+        key: `bulk-set-key-${i}`,value: `bulk-value-${i}`,}));const startTime = performance.now();
       await cacheService.mset(entries);
       const endTime = performance.now();
       
@@ -199,11 +171,7 @@ describe('Cache Performance Tests', () => {
     });
 
     it('should efficiently handle cache warming operations', async () => {
-      const keys = Array.from({ length: PERFORMANCE_CONFIG.SMALL_DATASET }, (_, i) => `warm-key-${i}`);
-      const dataProvider = jest.fn((key: string) => Promise.resolve(`data-for-${key}`));
-      
-      const startTime = performance.now();
-      await cacheService.warmCache(dataProvider, keys);
+      const keys = Array.from({ length: PERFORMANCE_CONFIG.SMALL_DATASET }, (_, i) => `warm-key-${i}`);const dataProvider = jest.fn((key: string) => Promise.resolve(`data-for-${key}`));const startTime = performance.now();await cacheService.warmCache(dataProvider, keys);
       const endTime = performance.now();
       
       const totalTime = endTime - startTime;
@@ -216,17 +184,14 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Concurrent Operations Performance', () => {
-    it('should handle concurrent get operations', async () => {
+  describe('Concurrent Operations Performance', () => {it('should handle concurrent get operations', async () => {
       const concurrency = PERFORMANCE_CONFIG.CONCURRENT_OPERATIONS;
       const operationsPerWorker = 100;
       
       const workers = Array.from({ length: concurrency }, async (_, i) => {
         const operations = [];
         for (let j = 0; j < operationsPerWorker; j++) {
-          operations.push(cacheService.get(`concurrent-get-${i}-${j}`));
-        }
-        return Promise.all(operations);
+          operations.push(cacheService.get(`concurrent-get-${i}-${j}`));}return Promise.all(operations);
       });
 
       const startTime = performance.now();
@@ -249,9 +214,7 @@ describe('Cache Performance Tests', () => {
       const workers = Array.from({ length: concurrency }, async (_, i) => {
         const operations = [];
         for (let j = 0; j < operationsPerWorker; j++) {
-          operations.push(cacheService.set(`concurrent-set-${i}-${j}`, `value-${i}-${j}`));
-        }
-        return Promise.all(operations);
+          operations.push(cacheService.set(`concurrent-set-${i}-${j}`, `value-${i}-${j}`));}return Promise.all(operations);
       });
 
       const startTime = performance.now();
@@ -275,13 +238,7 @@ describe('Cache Performance Tests', () => {
         // Mix of get, set, and delete operations
         for (let j = 0; j < 20; j++) {
           if (j % 3 === 0) {
-            operations.push(cacheService.get(`mixed-${i}-${j}`));
-          } else if (j % 3 === 1) {
-            operations.push(cacheService.set(`mixed-${i}-${j}`, `value-${i}-${j}`));
-          } else {
-            operations.push(cacheService.del(`mixed-${i}-${j}`));
-          }
-        }
+            operations.push(cacheService.get(`mixed-${i}-${j}`));} else if (j % 3 === 1) {operations.push(cacheService.set(`mixed-${i}-${j}`, `value-${i}-${j}`));} else {operations.push(cacheService.del(`mixed-${i}-${j}`));}}
         return Promise.all(operations);
       });
 
@@ -299,24 +256,18 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Large Dataset Performance', () => {
-    it('should handle large value storage efficiently', async () => {
+  describe('Large Dataset Performance', () => {it('should handle large value storage efficiently', async () => {
       const largeValue = {
         data: Array.from({ length: 10000 }, (_, i) => ({
           id: i,
-          value: `large-data-item-${i}`,
-          metadata: { timestamp: Date.now(), index: i }
-        }))
+          value: `large-data-item-${i}`,metadata: { timestamp: Date.now(), index: i }}))
       };
 
       const iterations = 10;
       const startTime = performance.now();
 
       for (let i = 0; i < iterations; i++) {
-        await cacheService.set(`large-value-${i}`, largeValue);
-      }
-
-      const endTime = performance.now();
+        await cacheService.set(`large-value-${i}`, largeValue);}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgTime = totalTime / iterations;
 
@@ -327,11 +278,7 @@ describe('Cache Performance Tests', () => {
 
     it('should handle large key sets efficiently', async () => {
       const keyCount = PERFORMANCE_CONFIG.LARGE_DATASET;
-      const keys = Array.from({ length: keyCount }, (_, i) => `large-set-key-${i}`);
-      
-      const startTime = performance.now();
-      
-      // Process in chunks to avoid overwhelming the system
+      const keys = Array.from({ length: keyCount }, (_, i) => `large-set-key-${i}`);const startTime = performance.now();// Process in chunks to avoid overwhelming the system
       const chunkSize = 1000;
       for (let i = 0; i < keys.length; i += chunkSize) {
         const chunk = keys.slice(i, i + chunkSize);
@@ -348,17 +295,13 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Key Generation Performance', () => {
-    it('should generate keys efficiently', async () => {
+  describe('Key Generation Performance', () => {it('should generate keys efficiently', async () => {
       const operations = PERFORMANCE_CONFIG.LARGE_DATASET;
       
       const startTime = performance.now();
       
       for (let i = 0; i < operations; i++) {
-        keyGenerator.generate(`perf-key-${i}`);
-      }
-      
-      const endTime = performance.now();
+        keyGenerator.generate(`perf-key-${i}`);}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const throughput = operations / (totalTime / 1000);
 
@@ -367,17 +310,10 @@ describe('Cache Performance Tests', () => {
       expect(throughput).toBeGreaterThan(10000); // Key generation should be very fast
     });
 
-    it('should generate complex keys efficiently', async () => {
-      const operations = PERFORMANCE_CONFIG.MEDIUM_DATASET;
-      
-      const complexKeys = Array.from({ length: operations }, (_, i) => ({
+    it('should generate complex keys efficiently', async () => {const operations = PERFORMANCE_CONFIG.MEDIUM_DATASET;const complexKeys = Array.from({ length: operations }, (_, i) => ({
         type: 'complex',
         id: i,
-        metadata: { timestamp: Date.now(), user: `user-${i}` },
-        tags: [`tag-${i % 10}`, `category-${i % 5}`]
-      }));
-
-      const startTime = performance.now();
+        metadata: { timestamp: Date.now(), user: `user-${i}` },tags: [`tag-${i % 10}`, `category-${i % 5}`]}));const startTime = performance.now();
       
       for (const key of complexKeys) {
         keyGenerator.generate(key);
@@ -392,10 +328,7 @@ describe('Cache Performance Tests', () => {
       expect(throughput).toBeGreaterThan(1000);
     });
 
-    it('should handle specialized key generation efficiently', async () => {
-      const operations = PERFORMANCE_CONFIG.MEDIUM_DATASET;
-      
-      const startTime = performance.now();
+    it('should handle specialized key generation efficiently', async () => {const operations = PERFORMANCE_CONFIG.MEDIUM_DATASET;const startTime = performance.now();
       
       for (let i = 0; i < operations; i++) {
         // Mix of different key types
@@ -418,17 +351,14 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Memory and Resource Usage', () => {
-    it('should not leak memory during intensive operations', async () => {
+  describe('Memory and Resource Usage', () => {it('should not leak memory during intensive operations', async () => {
       const initialMemory = process.memoryUsage();
       
       // Perform intensive operations
       for (let batch = 0; batch < 10; batch++) {
         const operations = [];
         for (let i = 0; i < 1000; i++) {
-          operations.push(cacheService.get(`memory-test-${batch}-${i}`));
-        }
-        await Promise.all(operations);
+          operations.push(cacheService.get(`memory-test-${batch}-${i}`));}await Promise.all(operations);
       }
 
       // Force garbage collection if available
@@ -451,10 +381,7 @@ describe('Cache Performance Tests', () => {
       const operations = 1000;
       
       for (let i = 0; i < operations; i++) {
-        await cacheService.get(`cleanup-test-${i}`);
-      }
-
-      const statsBeforeClear = cacheService.getStats();
+        await cacheService.get(`cleanup-test-${i}`);}const statsBeforeClear = cacheService.getStats();
       expect(statsBeforeClear.totalOperations).toBe(operations);
 
       // Clear statistics (simulating cleanup)
@@ -471,19 +398,13 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Error Handling Performance', () => {
-    it('should handle errors efficiently without performance degradation', async () => {
-      // Configure cache manager to throw errors
-      cacheManager.get.mockRejectedValue(new Error('Simulated error'));
+  describe('Error Handling Performance', () => {it('should handle errors efficiently without performance degradation', async () => {// Configure cache manager to throw errorscacheManager.get.mockRejectedValue(new Error('Simulated error'));
       
       const operations = 1000;
       const startTime = performance.now();
       
       for (let i = 0; i < operations; i++) {
-        await cacheService.get(`error-test-${i}`); // Should handle errors gracefully
-      }
-      
-      const endTime = performance.now();
+        await cacheService.get(`error-test-${i}`); // Should handle errors gracefully}const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgTime = totalTime / operations;
 
@@ -493,21 +414,13 @@ describe('Cache Performance Tests', () => {
       expect(avgTime).toBeLessThan(10);
     });
 
-    it('should recover from errors without memory leaks', async () => {
-      const initialMemory = process.memoryUsage();
-      
-      // Simulate alternating success and error conditions
+    it('should recover from errors without memory leaks', async () => {const initialMemory = process.memoryUsage();// Simulate alternating success and error conditions
       for (let i = 0; i < 1000; i++) {
         if (i % 2 === 0) {
-          cacheManager.get.mockResolvedValueOnce('"success"');
-        } else {
-          cacheManager.get.mockRejectedValueOnce(new Error('Error'));
+          cacheManager.get.mockResolvedValueOnce('"success"');} else {cacheManager.get.mockRejectedValueOnce(new Error('Error'));
         }
         
-        await cacheService.get(`recovery-test-${i}`);
-      }
-
-      if (global.gc) {
+        await cacheService.get(`recovery-test-${i}`);}if (global.gc) {
         global.gc();
       }
 
@@ -521,8 +434,7 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Stress Testing', () => {
-    it('should survive sustained high-load operations', async () => {
+  describe('Stress Testing', () => {it('should survive sustained high-load operations', async () => {
       const duration = 5000; // 5 seconds
       const startTime = Date.now();
       let operations = 0;
@@ -531,9 +443,7 @@ describe('Cache Performance Tests', () => {
       while ((Date.now() - startTime) < duration) {
         const promises = [];
         for (let i = 0; i < 10; i++) {
-          promises.push(cacheService.get(`stress-test-${operations + i}`));
-        }
-        await Promise.all(promises);
+          promises.push(cacheService.get(`stress-test-${operations + i}`));}await Promise.all(promises);
         operations += 10;
       }
       
@@ -557,10 +467,7 @@ describe('Cache Performance Tests', () => {
         // Create burst of operations
         const operations = [];
         for (let i = 0; i < burstSize; i++) {
-          operations.push(cacheService.get(`burst-${burst}-${i}`));
-        }
-        
-        await Promise.all(operations);
+          operations.push(cacheService.get(`burst-${burst}-${i}`));}await Promise.all(operations);
         
         // Brief pause between bursts
         if (burst < burstCount - 1) {
@@ -579,8 +486,7 @@ describe('Cache Performance Tests', () => {
     });
   });
 
-  describe('Performance Regression Detection', () => {
-    it('should maintain consistent performance across test runs', async () => {
+  describe('Performance Regression Detection', () => {it('should maintain consistent performance across test runs', async () => {
       const testRuns = 5;
       const operationsPerRun = 200;
       const times: number[] = [];
@@ -589,10 +495,7 @@ describe('Cache Performance Tests', () => {
         const startTime = performance.now();
         
         for (let i = 0; i < operationsPerRun; i++) {
-          await cacheService.get(`regression-test-${run}-${i}`);
-        }
-        
-        const endTime = performance.now();
+          await cacheService.get(`regression-test-${run}-${i}`);}const endTime = performance.now();
         times.push(endTime - startTime);
       }
       

@@ -24,26 +24,14 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
-} from '@nestjs/common';
-import { Observable, from } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { Request, Response } from 'express';
-import { gzip, brotliCompress, deflate, constants as zlibConstants } from 'zlib';
-import { promisify } from 'util';
-import { MetricsService } from '../../metrics/metrics.service';
-
-// Promisify compression functions
-const gzipAsync = promisify(gzip);
+} from '@nestjs/common';import { Observable, from } from 'rxjs';import { mergeMap } from 'rxjs/operators';import { Request, Response } from 'express';import { gzip, brotliCompress, deflate, constants as zlibConstants } from 'zlib';import { promisify } from 'util';import { MetricsService } from '../../metrics/metrics.service';// Promisify compression functionsconst gzipAsync = promisify(gzip);
 const brotliCompressAsync = promisify(brotliCompress);
 const deflateAsync = promisify(deflate);
 
 /**
  * Compression algorithm types
  */
-type CompressionAlgorithm = 'gzip' | 'brotli' | 'deflate' | 'identity';
-
-/**
- * Compression configuration
+type CompressionAlgorithm = 'gzip' | 'brotli' | 'deflate' | 'identity';/*** Compression configuration
  */
 interface CompressionConfig {
   minSize: number; // Minimum response size to compress (bytes)
@@ -101,22 +89,7 @@ export class CompressionInterceptor implements NestInterceptor {
 
   // Compression configuration (configurable via environment variables)
   private readonly config: CompressionConfig = {
-    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE ?? '1024', 10), // 1KB
-    level: parseInt(process.env.COMPRESSION_LEVEL ?? '6', 10), // Balanced compression
-    threshold: parseFloat(process.env.COMPRESSION_THRESHOLD ?? '0.8'), // 20% minimum reduction
-    maxSize: parseInt(process.env.COMPRESSION_MAX_SIZE ?? '10485760', 10), // 10MB
-    compressibleTypes: new Set([
-      'application/json',
-      'application/javascript',
-      'application/xml',
-      'text/plain',
-      'text/html',
-      'text/css',
-      'text/javascript',
-      'text/xml',
-      'image/svg+xml',
-    ]),
-  };
+    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE ?? '1024', 10), // 1KBlevel: parseInt(process.env.COMPRESSION_LEVEL ?? '6', 10), // Balanced compressionthreshold: parseFloat(process.env.COMPRESSION_THRESHOLD ?? '0.8'), // 20% minimum reductionmaxSize: parseInt(process.env.COMPRESSION_MAX_SIZE ?? '10485760', 10), // 10MBcompressibleTypes: new Set(['application/json','application/javascript','application/xml','text/plain','text/html','text/css','text/javascript','text/xml','image/svg+xml',]),};
 
   constructor(private readonly metricsService?: MetricsService) {
     this.logger.log('Compression Interceptor initialized');
@@ -151,11 +124,7 @@ export class CompressionInterceptor implements NestInterceptor {
     response: Response,
   ): Promise<unknown> {
     // Skip compression if already handled by middleware
-    if (response.get('Content-Encoding')) {
-      this.updateStats({
-        algorithm: 'identity',
-        originalSize: 0,
-        compressedSize: 0,
+    if (response.get('Content-Encoding')) {this.updateStats({algorithm: 'identity',originalSize: 0,compressedSize: 0,
         ratio: 1,
         compressionTime: 0,
         applied: false,
@@ -172,18 +141,11 @@ export class CompressionInterceptor implements NestInterceptor {
 
     if (
       compressionResult.applied &&
-      compressionResult.algorithm !== 'identity'
-    ) {
-      // Set compression headers
-      response.set('Content-Encoding', compressionResult.algorithm);
-      response.set('Vary', 'Accept-Encoding');
+      compressionResult.algorithm !== 'identity') {// Set compression headers
+      response.set('Content-Encoding', compressionResult.algorithm);response.set('Vary', 'Accept-Encoding');
 
       this.logger.debug(
-        `Response compressed: ${compressionResult.algorithm}, ` +
-          `${compressionResult.originalSize}b → ${compressionResult.compressedSize}b ` +
-          `(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,
-      );
-    }
+        `Response compressed: ${compressionResult.algorithm}, ` +`${compressionResult.originalSize}b → ${compressionResult.compressedSize}b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
 
     this.updateStats(compressionResult);
     return data;
@@ -210,9 +172,7 @@ export class CompressionInterceptor implements NestInterceptor {
       // Check if compression should be applied
       if (!this.shouldCompress(responseBuffer, response)) {
         return {
-          algorithm: 'identity',
-          originalSize,
-          compressedSize: originalSize,
+          algorithm: 'identity',originalSize,compressedSize: originalSize,
           ratio: 1,
           compressionTime: 0,
           applied: false,
@@ -234,9 +194,7 @@ export class CompressionInterceptor implements NestInterceptor {
       if (ratio > this.config.threshold) {
         // Compression not beneficial enough
         return {
-          algorithm: 'identity',
-          originalSize,
-          compressedSize: originalSize,
+          algorithm: 'identity',originalSize,compressedSize: originalSize,
           ratio: 1,
           compressionTime: Date.now() - startTime,
           applied: false,
@@ -265,9 +223,7 @@ export class CompressionInterceptor implements NestInterceptor {
 
       // Return uncompressed data on error
       return {
-        algorithm: 'identity',
-        originalSize: this.dataToBuffer(data).length,
-        compressedSize: this.dataToBuffer(data).length,
+        algorithm: 'identity',originalSize: this.dataToBuffer(data).length,compressedSize: this.dataToBuffer(data).length,
         ratio: 1,
         compressionTime,
         applied: false,
@@ -290,29 +246,13 @@ export class CompressionInterceptor implements NestInterceptor {
     }
 
     // Check content type
-    const contentType = response.get('Content-Type') ?? '';
-    const baseType = contentType.split(';')[0]?.toLowerCase() ?? '';
-
-    return this.config.compressibleTypes.has(baseType);
-  }
+    const contentType = response.get('Content-Type') ?? '';const baseType = contentType.split(';')[0]?.toLowerCase() ?? '';return this.config.compressibleTypes.has(baseType);}
 
   /**
    * Select optimal compression algorithm based on client support
    */
   private selectCompressionAlgorithm(request: Request): CompressionAlgorithm {
-    const acceptEncoding = request.get('Accept-Encoding') ?? '';
-
-    // Priority order: brotli (best compression) → gzip (widely supported) → deflate
-    if (acceptEncoding.includes('br')) {
-      return 'brotli';
-    } else if (acceptEncoding.includes('gzip')) {
-      return 'gzip';
-    } else if (acceptEncoding.includes('deflate')) {
-      return 'deflate';
-    } else {
-      return 'identity';
-    }
-  }
+    const acceptEncoding = request.get('Accept-Encoding') ?? '';// Priority order: brotli (best compression) → gzip (widely supported) → deflateif (acceptEncoding.includes('br')) {return 'brotli';} else if (acceptEncoding.includes('gzip')) {return 'gzip';} else if (acceptEncoding.includes('deflate')) {return 'deflate';} else {return 'identity';}}
 
   /**
    * Apply compression using specified algorithm
@@ -322,20 +262,12 @@ export class CompressionInterceptor implements NestInterceptor {
     algorithm: CompressionAlgorithm,
   ): Promise<Buffer> {
     switch (algorithm) {
-      case 'brotli':
-        return await brotliCompressAsync(data, {
-          params: {
+      case 'brotli':return await brotliCompressAsync(data, {params: {
             [zlibConstants.BROTLI_PARAM_QUALITY as number]: this.config.level,
           },
         });
 
-      case 'gzip':
-        return await gzipAsync(data, { level: this.config.level });
-
-      case 'deflate':
-        return await deflateAsync(data, { level: this.config.level });
-
-      default:
+      case 'gzip':return await gzipAsync(data, { level: this.config.level });case 'deflate':return await deflateAsync(data, { level: this.config.level });default:
         return data;
     }
   }
@@ -348,18 +280,7 @@ export class CompressionInterceptor implements NestInterceptor {
       return data;
     }
 
-    if (typeof data === 'string') {
-      return Buffer.from(data, 'utf8');
-    }
-
-    if (typeof data === 'object') {
-      return Buffer.from(JSON.stringify(data), 'utf8');
-    }
-
-    return Buffer.from(String(data), 'utf8');
-  }
-
-  /**
+    if (typeof data === 'string') {return Buffer.from(data, 'utf8');}if (typeof data === 'object') {return Buffer.from(JSON.stringify(data), 'utf8');}return Buffer.from(String(data), 'utf8');}/**
    * Update compression statistics
    */
   private updateStats(result: CompressionResult): void {
@@ -437,10 +358,7 @@ export class CompressionInterceptor implements NestInterceptor {
       },
     });
 
-    this.logger.log('Compression statistics cleared');
-  }
-
-  /**
+    this.logger.log('Compression statistics cleared');}/**
    * Start periodic statistics reporting
    */
   private startPeriodicReporting(): void {
@@ -450,10 +368,7 @@ export class CompressionInterceptor implements NestInterceptor {
         this.logger.log('Compression Statistics Summary:', {
           totalRequests: this.stats.totalRequests,
           compressedRequests: this.stats.compressedRequests,
-          compressionRate: `${((this.stats.compressedRequests / this.stats.totalRequests) * 100).toFixed(1)}%`,
-          overallCompressionRatio: `${(this.stats.compressionRatio * 100).toFixed(1)}%`,
-          bytesSaved: `${((this.stats.bytesOriginal - this.stats.bytesCompressed) / 1024 / 1024).toFixed(2)}MB`,
-          averageCompressionTime: `${this.stats.averageCompressionTime.toFixed(2)}ms`,
+          compressionRate: `${((this.stats.compressedRequests / this.stats.totalRequests) * 100).toFixed(1)}%`,overallCompressionRatio: `${(this.stats.compressionRatio * 100).toFixed(1)}%`,bytesSaved: `${((this.stats.bytesOriginal - this.stats.bytesCompressed) / 1024 / 1024).toFixed(2)}MB`,averageCompressionTime: `${this.stats.averageCompressionTime.toFixed(2)}ms`,
           algorithmUsage: this.stats.algorithmUsage,
         });
       }

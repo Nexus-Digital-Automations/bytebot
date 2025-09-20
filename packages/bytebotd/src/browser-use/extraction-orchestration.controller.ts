@@ -39,29 +39,17 @@ import {
   NotFoundException,
   UseGuards,
   UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
   ApiParam,
   ApiQuery,
   ApiBearerAuth,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
-import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
-import {
-  OperatorOrAdmin,
+} from '@nestjs/swagger';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { ExtractionService } from './extraction.service';
-// Note: BrowserResultsService would need to be properly imported or reimplemented
-// For now, we'll create a mock interface to demonstrate the concept
+} from '../auth/decorators/roles.decorator';import { ExtractionService } from './extraction.service';// Note: BrowserResultsService would need to be properly imported or reimplemented// For now, we'll create a mock interface to demonstrate the concept
 
 interface MockBrowserResultsService {
   searchResults(filters?: any, pagination?: any, sorting?: any): Promise<{
@@ -90,14 +78,9 @@ import {
   AggregatedResultsResponseDto,
   DataValidationResponseDto,
   ExtractionOrchestratorStatsDto,
-} from './dto/extraction-orchestration.dto';
-
-interface ExtractionAgent {
-  agentId: string;
+} from './dto/extraction-orchestration.dto';interface ExtractionAgent {agentId: string;
   sessionId: string;
-  status: 'idle' | 'busy' | 'error' | 'offline';
-  capabilities: string[];
-  load: number; // 0-100
+  status: 'idle' | 'busy' | 'error' | 'offline';capabilities: string[];load: number; // 0-100
   lastActivity: Date;
   resourceUsage: {
     cpu: number;
@@ -109,10 +92,7 @@ interface ExtractionAgent {
 interface ExtractionJob {
   jobId: string;
   taskId: string;
-  type: 'distributed-scraping' | 'multi-source' | 'data-validation';
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  priority: number; // 1-10
-  startTime?: Date;
+  type: 'distributed-scraping' | 'multi-source' | 'data-validation';status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';priority: number; // 1-10startTime?: Date;
   endTime?: Date;
   assignedAgents: string[];
   progress: {
@@ -127,18 +107,11 @@ interface ExtractionJob {
 }
 
 interface AggregationStrategy {
-  type: 'merge' | 'deduplicate' | 'validate' | 'transform';
-  config: Record<string, unknown>;
-  weight: number;
+  type: 'merge' | 'deduplicate' | 'validate' | 'transform';config: Record<string, unknown>;weight: number;
 }
 
-@ApiTags('Extraction Orchestration')
-@Controller('extraction-orchestration')
-@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UseInterceptors(LoggingInterceptor)
-@ApiBearerAuth('bearer')
-export class ExtractionOrchestrationController {
-  private readonly logger = new Logger(ExtractionOrchestrationController.name);
+@ApiTags('Extraction Orchestration')@Controller('extraction-orchestration')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UseInterceptors(LoggingInterceptor)
+@ApiBearerAuth('bearer')export class ExtractionOrchestrationController {private readonly logger = new Logger(ExtractionOrchestrationController.name);
 
   // In-memory stores (would be replaced with Redis/database in production)
   private readonly extractionAgents = new Map<string, ExtractionAgent>();
@@ -158,14 +131,10 @@ export class ExtractionOrchestrationController {
   /**
    * Coordinate large-scale distributed web scraping across multiple browser agents
    */
-  @Post('distributed-scraping')
-  @OperatorOrAdmin()
-  @HttpCode(HttpStatus.OK)
+  @Post('distributed-scraping')@OperatorOrAdmin()@HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Coordinate distributed web scraping',
-    description: `
-Orchestrate large-scale data extraction across multiple browser agents for maximum throughput
-and reliability. Automatically distributes URLs across available agents, monitors progress,
+    description: `Orchestrate large-scale data extraction across multiple browser agents for maximum throughputand reliability. Automatically distributes URLs across available agents, monitors progress,
 and aggregates results with intelligent deduplication and validation.
 
 Features:
@@ -188,26 +157,12 @@ Use Cases:
   })
   @ApiBody({
     type: DistributedScrapingRequestDto,
-    description: 'Distributed scraping configuration',
-    examples: {
-      ecommerce: {
-        summary: 'E-commerce product scraping',
-        description: 'Extract product data from multiple e-commerce sites',
-        value: {
-          urls: [
-            'https://example-store.com/products',
-            'https://competitor1.com/catalog',
-            'https://competitor2.com/items',
-          ],
-          extractionConfig: {
-            selectors: ['.product-item', '.product-card'],
-            dataFields: ['name', 'price', 'description', 'rating'],
-            pagination: {
-              enabled: true,
+    description: 'Distributed scraping configuration',examples: {ecommerce: {
+        summary: 'E-commerce product scraping',description: 'Extract product data from multiple e-commerce sites',value: {urls: [
+            'https://example-store.com/products','https://competitor1.com/catalog','https://competitor2.com/items',],extractionConfig: {
+            selectors: ['.product-item', '.product-card'],dataFields: ['name', 'price', 'description', 'rating'],pagination: {enabled: true,
               maxPages: 50,
-              nextButtonSelector: '.next-page',
-            },
-          },
+              nextButtonSelector: '.next-page',},},
           orchestrationConfig: {
             maxConcurrentAgents: 5,
             retryAttempts: 3,
@@ -220,22 +175,13 @@ Use Cases:
           aggregationStrategy: {
             deduplication: {
               enabled: true,
-              keyFields: ['name', 'url'],
-              similarity: 0.85,
-            },
+              keyFields: ['name', 'url'],similarity: 0.85,},
             validation: {
               enabled: true,
-              requiredFields: ['name', 'price'],
-              dataTypes: {
-                price: 'number',
-                rating: 'number',
-              },
-            },
+              requiredFields: ['name', 'price'],dataTypes: {price: 'number',rating: 'number',},},
           },
           exportOptions: {
-            format: 'csv',
-            includeMetadata: true,
-            compress: true,
+            format: 'csv',includeMetadata: true,compress: true,
           },
         },
       },
@@ -243,14 +189,10 @@ Use Cases:
   })
   @ApiResponse({
     status: 200,
-    description: 'Distributed scraping initiated successfully',
-    type: DistributedScrapingResponseDto,
-  })
+    description: 'Distributed scraping initiated successfully',type: DistributedScrapingResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid scraping configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid scraping configuration',})@ApiResponse({
     status: 429,
     description: 'Rate limit exceeded or insufficient resources',
   })
@@ -258,10 +200,7 @@ Use Cases:
     @Body() request: DistributedScrapingRequestDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<DistributedScrapingResponseDto> {
-    const operationId = `dist_scrape_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Initiating distributed scraping`, {
+    const operationId = `dist_scrape_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Initiating distributed scraping`, {
       operationId,
       urlCount: request.urls.length,
       maxConcurrentAgents: request.orchestrationConfig?.maxConcurrentAgents,
@@ -276,14 +215,8 @@ Use Cases:
       const availableAgents = this.getAvailableAgents(request.orchestrationConfig?.maxConcurrentAgents || 3);
 
       if (availableAgents.length === 0) {
-        throw new BadRequestException('No available browser agents for distributed scraping');
-      }
-
-      // Create extraction job
-      const job = this.createExtractionJob('distributed-scraping', request, availableAgents);
-
-      // Distribute URLs across agents
-      const urlBatches = this.distributeUrls(request.urls, availableAgents.length);
+        throw new BadRequestException('No available browser agents for distributed scraping');}// Create extraction job
+      const job = this.createExtractionJob('distributed-scraping', request, availableAgents);// Distribute URLs across agentsconst urlBatches = this.distributeUrls(request.urls, availableAgents.length);
 
       // Execute distributed extraction
       const extractionPromises = urlBatches.map(async (batch, index) => {
@@ -303,9 +236,7 @@ Use Cases:
       // Store results
       const resultId = await this.storeOrchestrationResults({
         operationId,
-        type: 'distributed-scraping',
-        results: aggregatedResults,
-        metadata: {
+        type: 'distributed-scraping',results: aggregatedResults,metadata: {
           urlCount: request.urls.length,
           agentCount: availableAgents.length,
           executionTime: Date.now() - startTime,
@@ -338,12 +269,7 @@ Use Cases:
           request.exportOptions,
           operationId,
         ) : undefined,
-        progressTrackingUrl: `/extraction-orchestration/progress/${job.jobId}`,
-      };
-
-      this.logger.log(`[${operationId}] Distributed scraping completed successfully`, {
-        operationId,
-        itemsExtracted: aggregatedResults.length,
+        progressTrackingUrl: `/extraction-orchestration/progress/${job.jobId}`,};this.logger.log(`[${operationId}] Distributed scraping completed successfully`, {operationId,itemsExtracted: aggregatedResults.length,
         agentsUsed: availableAgents.length,
         executionTime: Date.now() - startTime,
       });
@@ -352,9 +278,7 @@ Use Cases:
     } catch (error) {
       this.logger.error(`[${operationId}] Distributed scraping failed`, error);
       throw new InternalServerErrorException({
-        message: 'Distributed scraping failed',
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Distributed scraping failed',operationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -362,14 +286,10 @@ Use Cases:
   /**
    * Extract data from multiple sources simultaneously with result correlation
    */
-  @Post('multi-source-extraction')
-  @OperatorOrAdmin()
-  @HttpCode(HttpStatus.OK)
+  @Post('multi-source-extraction')@OperatorOrAdmin()@HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Extract from multiple sources simultaneously',
-    description: `
-Perform coordinated data extraction from multiple sources with automatic result correlation
-and cross-validation. Ideal for comprehensive data collection that requires information
+    description: `Perform coordinated data extraction from multiple sources with automatic result correlationand cross-validation. Ideal for comprehensive data collection that requires information
 from multiple websites or data sources to build complete datasets.
 
 Features:
@@ -392,9 +312,7 @@ Use Cases:
   })
   @ApiBody({
     type: MultiSourceExtractionRequestDto,
-    description: 'Multi-source extraction configuration',
-  })
-  @ApiResponse({
+    description: 'Multi-source extraction configuration',})@ApiResponse({
     status: 200,
     description: 'Multi-source extraction completed successfully',
     type: MultiSourceExtractionResponseDto,
@@ -403,10 +321,7 @@ Use Cases:
     @Body() request: MultiSourceExtractionRequestDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<MultiSourceExtractionResponseDto> {
-    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Starting multi-source extraction`, {
+    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting multi-source extraction`, {
       operationId,
       sourceCount: request.sources.length,
       correlationEnabled: !!request.correlationConfig,
@@ -421,10 +336,7 @@ Use Cases:
       const sourceAgents = await this.assignSourceAgents(request.sources);
 
       // Create extraction job
-      const job = this.createExtractionJob('multi-source', request, Object.values(sourceAgents));
-
-      // Execute parallel extractions
-      const sourceResults = await Promise.all(
+      const job = this.createExtractionJob('multi-source', request, Object.values(sourceAgents));// Execute parallel extractionsconst sourceResults = await Promise.all(
         request.sources.map(async (source, index) => {
           const agent = sourceAgents[source.sourceId];
           return this.executeSourceExtraction(agent, source, operationId);
@@ -445,9 +357,7 @@ Use Cases:
       // Store results
       const resultId = await this.storeOrchestrationResults({
         operationId,
-        type: 'multi-source',
-        results: processedResults,
-        metadata: {
+        type: 'multi-source',results: processedResults,metadata: {
           sourceCount: request.sources.length,
           correlationApplied: !!request.correlationConfig,
           executionTime: Date.now() - startTime,
@@ -484,9 +394,7 @@ Use Cases:
         ) : undefined,
       };
 
-      this.logger.log(`[${operationId}] Multi-source extraction completed`, {
-        operationId,
-        sourcesProcessed: request.sources.length,
+      this.logger.log(`[${operationId}] Multi-source extraction completed`, {operationId,sourcesProcessed: request.sources.length,
         totalItems: response.totalItemsExtracted,
         executionTime: Date.now() - startTime,
       });
@@ -495,9 +403,7 @@ Use Cases:
     } catch (error) {
       this.logger.error(`[${operationId}] Multi-source extraction failed`, error);
       throw new InternalServerErrorException({
-        message: 'Multi-source extraction failed',
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Multi-source extraction failed',operationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -505,14 +411,10 @@ Use Cases:
   /**
    * Get aggregated extraction results with advanced filtering and analysis
    */
-  @Post('aggregated-results')
-  @OperatorOrAdmin()
-  @HttpCode(HttpStatus.OK)
+  @Post('aggregated-results')@OperatorOrAdmin()@HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get aggregated extraction results',
-    description: `
-Retrieve and analyze aggregated extraction results with advanced filtering, analytics,
-and reporting capabilities. Provides comprehensive insights into extraction performance,
+    description: `Retrieve and analyze aggregated extraction results with advanced filtering, analytics,and reporting capabilities. Provides comprehensive insights into extraction performance,
 data quality, and operational metrics.
 
 Features:
@@ -535,9 +437,7 @@ Use Cases:
   })
   @ApiBody({
     type: AggregatedResultsRequestDto,
-    description: 'Aggregated results request configuration',
-  })
-  @ApiResponse({
+    description: 'Aggregated results request configuration',})@ApiResponse({
     status: 200,
     description: 'Aggregated results retrieved successfully',
     type: AggregatedResultsResponseDto,
@@ -546,11 +446,7 @@ Use Cases:
     @Body() request: AggregatedResultsRequestDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<AggregatedResultsResponseDto> {
-    const operationId = `agg_results_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Retrieving aggregated results`, {
-      operationId,
-      filters: request.filters,
+    const operationId = `agg_results_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Retrieving aggregated results`, {operationId,filters: request.filters,
       aggregations: request.aggregations,
       userId: user.id,
     });
@@ -612,9 +508,7 @@ Use Cases:
         retrievedAt: new Date(),
       };
 
-      this.logger.log(`[${operationId}] Aggregated results retrieved successfully`, {
-        operationId,
-        totalResults: response.totalResults,
+      this.logger.log(`[${operationId}] Aggregated results retrieved successfully`, {operationId,totalResults: response.totalResults,
         aggregations: Object.keys(aggregatedData).length,
       });
 
@@ -622,9 +516,7 @@ Use Cases:
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to retrieve aggregated results`, error);
       throw new InternalServerErrorException({
-        message: 'Failed to retrieve aggregated results',
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Failed to retrieve aggregated results',operationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -632,32 +524,18 @@ Use Cases:
   /**
    * Track extraction progress in real-time
    */
-  @Get('progress/:extractionId')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Track extraction progress',
-    description: 'Get real-time progress information for ongoing extraction operations',
-  })
-  @ApiParam({
-    name: 'extractionId',
-    description: 'Extraction job ID or operation ID',
-  })
-  @ApiResponse({
+  @Get('progress/:extractionId')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Track extraction progress',description: 'Get real-time progress information for ongoing extraction operations',})@ApiParam({
+    name: 'extractionId',description: 'Extraction job ID or operation ID',})@ApiResponse({
     status: 200,
-    description: 'Progress information retrieved successfully',
-    type: ExtractionProgressDto,
-  })
+    description: 'Progress information retrieved successfully',type: ExtractionProgressDto,})
   @ApiResponse({
     status: 404,
-    description: 'Extraction job not found',
-  })
-  async getExtractionProgress(
+    description: 'Extraction job not found',})async getExtractionProgress(
     @Param('extractionId') extractionId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<ExtractionProgressDto> {
-    this.logger.debug(`Getting progress for extraction: ${extractionId}`, {
-      extractionId,
-      userId: user.id,
+    this.logger.debug(`Getting progress for extraction: ${extractionId}`, {extractionId,userId: user.id,
     });
 
     try {
@@ -682,9 +560,7 @@ Use Cases:
           const agent = this.extractionAgents.get(agentId);
           return {
             agentId,
-            status: agent?.status || 'unknown',
-            load: agent?.load || 0,
-            currentTask: agent?.status === 'busy' ? 'Processing...' : undefined,
+            status: agent?.status || 'unknown',load: agent?.load || 0,currentTask: agent?.status === 'busy' ? 'Processing...' : undefined,
           };
         }),
         startTime: job.startTime,
@@ -706,9 +582,7 @@ Use Cases:
 
       this.logger.error(`Failed to get extraction progress: ${extractionId}`, error);
       throw new InternalServerErrorException({
-        message: 'Failed to retrieve extraction progress',
-        extractionId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Failed to retrieve extraction progress',extractionId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -716,14 +590,10 @@ Use Cases:
   /**
    * Validate and process extracted data with quality assurance
    */
-  @Post('data-validation')
-  @OperatorOrAdmin()
-  @HttpCode(HttpStatus.OK)
+  @Post('data-validation')@OperatorOrAdmin()@HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Validate and process extracted data',
-    description: `
-Comprehensive data validation and quality assurance for extracted data with advanced
-processing capabilities, schema validation, and quality scoring.
+    description: `Comprehensive data validation and quality assurance for extracted data with advancedprocessing capabilities, schema validation, and quality scoring.
 
 Features:
 - Schema validation and type checking
@@ -745,9 +615,7 @@ Use Cases:
   })
   @ApiBody({
     type: DataValidationRequestDto,
-    description: 'Data validation configuration',
-  })
-  @ApiResponse({
+    description: 'Data validation configuration',})@ApiResponse({
     status: 200,
     description: 'Data validation completed successfully',
     type: DataValidationResponseDto,
@@ -756,12 +624,7 @@ Use Cases:
     @Body() request: DataValidationRequestDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<DataValidationResponseDto> {
-    const operationId = `data_val_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Starting data validation`, {
-      operationId,
-      dataCount: request.data.length,
+    const operationId = `data_val_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting data validation`, {operationId,dataCount: request.data.length,
       validationRules: Object.keys(request.validationConfig),
       userId: user.id,
     });
@@ -825,9 +688,7 @@ Use Cases:
         validatedAt: new Date(),
       };
 
-      this.logger.log(`[${operationId}] Data validation completed`, {
-        operationId,
-        itemCount: request.data.length,
+      this.logger.log(`[${operationId}] Data validation completed`, {operationId,itemCount: request.data.length,
         qualityScore: overallQualityScore,
         processingTime: Date.now() - startTime,
       });
@@ -836,9 +697,7 @@ Use Cases:
     } catch (error) {
       this.logger.error(`[${operationId}] Data validation failed`, error);
       throw new InternalServerErrorException({
-        message: 'Data validation failed',
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Data validation failed',operationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -846,23 +705,11 @@ Use Cases:
   /**
    * Get extraction orchestrator statistics and performance metrics
    */
-  @Get('stats')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Get orchestrator statistics',
-    description: 'Retrieve comprehensive statistics and performance metrics for the extraction orchestrator',
-  })
-  @ApiQuery({
-    name: 'period',
-    required: false,
-    description: 'Time period for statistics (1h, 24h, 7d, 30d)',
-    enum: ['1h', '24h', '7d', '30d'],
-  })
-  @ApiResponse({
+  @Get('stats')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Get orchestrator statistics',description: 'Retrieve comprehensive statistics and performance metrics for the extraction orchestrator',})@ApiQuery({
+    name: 'period',required: false,description: 'Time period for statistics (1h, 24h, 7d, 30d)',enum: ['1h', '24h', '7d', '30d'],})@ApiResponse({
     status: 200,
-    description: 'Statistics retrieved successfully',
-    type: ExtractionOrchestratorStatsDto,
-  })
+    description: 'Statistics retrieved successfully',type: ExtractionOrchestratorStatsDto,})
   async getOrchestratorStats(
     @Query('period') period: string = '24h',
     @CurrentUser() user: ByteBotdUser,
@@ -881,18 +728,11 @@ Use Cases:
         timeRange,
         agentMetrics: {
           totalAgents: this.extractionAgents.size,
-          activeAgents: Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length,
-          busyAgents: Array.from(this.extractionAgents.values()).filter(a => a.status === 'busy').length,
-          averageLoad: this.calculateAverageAgentLoad(),
-          resourceUtilization: this.calculateResourceUtilization(),
+          activeAgents: Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length,busyAgents: Array.from(this.extractionAgents.values()).filter(a => a.status === 'busy').length,averageLoad: this.calculateAverageAgentLoad(),resourceUtilization: this.calculateResourceUtilization(),
         },
         jobMetrics: {
           totalJobs: this.extractionJobs.size,
-          activeJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'running').length,
-          completedJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'completed').length,
-          failedJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'failed').length,
-          averageJobDuration: this.calculateAverageJobDuration(),
-          jobThroughput: this.calculateJobThroughput(timeRange),
+          activeJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'running').length,completedJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'completed').length,failedJobs: Array.from(this.extractionJobs.values()).filter(j => j.status === 'failed').length,averageJobDuration: this.calculateAverageJobDuration(),jobThroughput: this.calculateJobThroughput(timeRange),
         },
         extractionMetrics: {
           totalItemsExtracted: analytics.summary.totalDataExtracted,
@@ -917,21 +757,14 @@ Use Cases:
 
       return stats;
     } catch (error) {
-      this.logger.error('Failed to get orchestrator stats', error);
-      throw new InternalServerErrorException({
-        message: 'Failed to retrieve orchestrator statistics',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to get orchestrator stats', error);throw new InternalServerErrorException({message: 'Failed to retrieve orchestrator statistics',error: error instanceof Error ? error.message : String(error),});
     }
   }
 
   // Private helper methods
 
   private initializeOrchestrator(): void {
-    this.logger.log('Initializing extraction orchestrator');
-
-    // Initialize mock agents (in production, these would come from agent registry)
-    this.createMockAgents();
+    this.logger.log('Initializing extraction orchestrator');// Initialize mock agents (in production, these would come from agent registry)this.createMockAgents();
 
     // Start background processes
     this.startHealthMonitoring();
@@ -944,12 +777,8 @@ Use Cases:
     // Create some mock agents for demonstration
     for (let i = 1; i <= 5; i++) {
       const agent: ExtractionAgent = {
-        agentId: `agent_${i}`,
-        sessionId: `session_${i}_${Date.now()}`,
-        status: 'idle',
-        capabilities: ['text-extraction', 'table-extraction', 'link-extraction', 'image-extraction'],
-        load: 0,
-        lastActivity: new Date(),
+        agentId: `agent_${i}`,sessionId: `session_${i}_${Date.now()}`,
+        status: 'idle',capabilities: ['text-extraction', 'table-extraction', 'link-extraction', 'image-extraction'],load: 0,lastActivity: new Date(),
         resourceUsage: {
           cpu: Math.random() * 20,
           memory: Math.random() * 30,
@@ -962,10 +791,7 @@ Use Cases:
 
   private validateDistributedScrapingRequest(request: DistributedScrapingRequestDto): void {
     if (!request.urls || request.urls.length === 0) {
-      throw new BadRequestException('URLs array cannot be empty');
-    }
-
-    if (request.urls.length > 1000) {
+      throw new BadRequestException('URLs array cannot be empty');}if (request.urls.length > 1000) {
       throw new BadRequestException('Maximum 1000 URLs allowed per request');
     }
 
@@ -981,19 +807,11 @@ Use Cases:
 
   private validateMultiSourceRequest(request: MultiSourceExtractionRequestDto): void {
     if (!request.sources || request.sources.length === 0) {
-      throw new BadRequestException('Sources array cannot be empty');
-    }
-
-    if (request.sources.length > 50) {
-      throw new BadRequestException('Maximum 50 sources allowed per request');
-    }
-
-    // Validate source configurations
+      throw new BadRequestException('Sources array cannot be empty');}if (request.sources.length > 50) {
+      throw new BadRequestException('Maximum 50 sources allowed per request');}// Validate source configurations
     for (const source of request.sources) {
       if (!source.sourceId || !source.url) {
-        throw new BadRequestException('Each source must have sourceId and url');
-      }
-    }
+        throw new BadRequestException('Each source must have sourceId and url');}}
   }
 
   private getAvailableAgents(maxAgents: number): ExtractionAgent[] {
@@ -1007,12 +825,9 @@ Use Cases:
 
   private createExtractionJob(type: string, request: any, agents: ExtractionAgent[]): ExtractionJob {
     const job: ExtractionJob = {
-      jobId: `job_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      taskId: `task_${Date.now()}`,
+      jobId: `job_${Date.now()}_${Math.random().toString(36).substring(7)}`,taskId: `task_${Date.now()}`,
       type: type as any,
-      status: 'pending',
-      priority: 5,
-      startTime: new Date(),
+      status: 'pending',priority: 5,startTime: new Date(),
       assignedAgents: agents.map(a => a.agentId),
       progress: {
         totalTasks: type === 'distributed-scraping' ? request.urls.length : request.sources?.length || 1,
@@ -1046,10 +861,7 @@ Use Cases:
   ): Promise<any[]> {
     this.logger.debug(`[${operationId}] Agent ${agent.agentId} processing ${urls.length} URLs`);
 
-    agent.status = 'busy';
-    agent.load = Math.min(agent.load + 50, 100);
-
-    try {
+    agent.status = 'busy';agent.load = Math.min(agent.load + 50, 100);try {
       const results = [];
 
       for (const url of urls) {
@@ -1068,9 +880,7 @@ Use Cases:
         await this.delay(Math.random() * 1000 + 500);
       }
 
-      agent.status = 'idle';
-      agent.load = Math.max(agent.load - 50, 0);
-      agent.lastActivity = new Date();
+      agent.status = 'idle';agent.load = Math.max(agent.load - 50, 0);agent.lastActivity = new Date();
 
       return results;
     } catch (error) {
@@ -1093,9 +903,7 @@ Use Cases:
             case 'name':
               item.name = `Product ${i + 1}_${Date.now()}`;
               break;
-            case 'price':
-              item.price = Math.floor(Math.random() * 1000) + 10;
-              break;
+            case 'price':item.price = Math.floor(Math.random() * 1000) + 10;break;
             case 'description':
               item.description = `Description for product ${i + 1}`;
               break;
@@ -1118,28 +926,19 @@ Use Cases:
     const results: any[] = [];
     let completed = 0;
 
-    job.status = 'running';
-
-    try {
-      const settledResults = await Promise.allSettled(promises);
+    job.status = 'running';try {const settledResults = await Promise.allSettled(promises);
 
       for (const result of settledResults) {
-        if (result.status === 'fulfilled') {
-          results.push(...result.value);
-          completed++;
+        if (result.status === 'fulfilled') {results.push(...result.value);completed++;
         } else {
-          job.errors.push(result.reason.message || 'Unknown error');
-          job.progress.failedTasks++;
-        }
+          job.errors.push(result.reason.message || 'Unknown error');job.progress.failedTasks++;}
 
         job.progress.completedTasks = completed;
       }
 
       return results;
     } catch (error) {
-      job.status = 'failed';
-      throw error;
-    }
+      job.status = 'failed';throw error;}
   }
 
   private async applyAggregationStrategies(results: any[], strategies: any): Promise<any[]> {
@@ -1169,10 +968,7 @@ Use Cases:
     const deduped = [];
 
     for (const result of results) {
-      const key = config.keyFields.map((field: string) => result[field]).join('|');
-
-      if (!seen.has(key)) {
-        seen.add(key);
+      const key = config.keyFields.map((field: string) => result[field]).join('|');if (!seen.has(key)) {seen.add(key);
         deduped.push(result);
       }
     }
@@ -1204,13 +1000,8 @@ Use Cases:
     metadata: Record<string, unknown>;
   }): Promise<string> {
     // Store in cache
-    const resultId = `result_${data.operationId}`;
-    this.resultCache.set(resultId, data);
-
-    // In production, would store in database or file system
-    this.logger.debug(`Stored orchestration results: ${resultId}`, {
-      resultId,
-      type: data.type,
+    const resultId = `result_${data.operationId}`;this.resultCache.set(resultId, data);// In production, would store in database or file system
+    this.logger.debug(`Stored orchestration results: ${resultId}`, {resultId,type: data.type,
       itemCount: data.results.length,
     });
 
@@ -1221,11 +1012,7 @@ Use Cases:
     // Simplified export generation
     return {
       format: options.format,
-      filename: `extraction_${operationId}.${options.format}`,
-      size: JSON.stringify(data).length,
-      downloadUrl: `/api/exports/extraction_${operationId}.${options.format}`,
-      generatedAt: new Date(),
-    };
+      filename: `extraction_${operationId}.${options.format}`,size: JSON.stringify(data).length,downloadUrl: `/api/exports/extraction_${operationId}.${options.format}`,generatedAt: new Date(),};
   }
 
   private async assignSourceAgents(sources: any[]): Promise<Record<string, ExtractionAgent>> {
@@ -1247,10 +1034,7 @@ Use Cases:
     // Mock source extraction
     const startTime = Date.now();
 
-    agent.status = 'busy';
-    await this.delay(Math.random() * 3000 + 1000);
-
-    const result = {
+    agent.status = 'busy';await this.delay(Math.random() * 3000 + 1000);const result = {
       sourceId: source.sourceId,
       items: this.generateMockExtractionData(source.extractionConfig),
       processingTimeMs: Date.now() - startTime,
@@ -1262,10 +1046,7 @@ Use Cases:
       errors: [],
     };
 
-    agent.status = 'idle';
-    agent.lastActivity = new Date();
-
-    return result;
+    agent.status = 'idle';agent.lastActivity = new Date();return result;
   }
 
   private async correlateSourceResults(sourceResults: any[], correlationConfig: any): Promise<any[]> {
@@ -1315,11 +1096,7 @@ Use Cases:
 
   private async generateDataInsights(aggregatedData: any, analytics: any): Promise<any> {
     return {
-      trends: ['Data quality improving', 'Processing speed increasing'],
-      anomalies: ['Unusual spike in error rate', 'Performance degradation detected'],
-      recommendations: ['Optimize extraction selectors', 'Increase agent capacity'],
-    };
-  }
+      trends: ['Data quality improving', 'Processing speed increasing'],anomalies: ['Unusual spike in error rate', 'Performance degradation detected'],recommendations: ['Optimize extraction selectors', 'Increase agent capacity'],};}
 
   private calculateDataCompleteness(results: any[]): number {
     return Math.random() * 0.3 + 0.7;
@@ -1369,9 +1146,7 @@ Use Cases:
     return {
       valid: Math.floor(data.length * (Math.random() * 0.3 + 0.7)),
       invalid: Math.floor(data.length * (Math.random() * 0.3)),
-      errors: ['Missing required field: name', 'Invalid type for field: price'],
-    };
-  }
+      errors: ['Missing required field: name', 'Invalid type for field: price'],};}
 
   private async assessDataQuality(data: any[], rules: any): Promise<any> {
     return {
@@ -1379,17 +1154,13 @@ Use Cases:
       completeness: Math.random() * 0.3 + 0.7,
       accuracy: Math.random() * 0.3 + 0.7,
       consistency: Math.random() * 0.3 + 0.7,
-      issues: ['Inconsistent date formats', 'Missing values in critical fields'],
-    };
-  }
+      issues: ['Inconsistent date formats', 'Missing values in critical fields'],};}
 
   private async validateDataContent(data: any[], config: any): Promise<any> {
     return {
       validatedItems: Math.floor(data.length * 0.9),
       flaggedItems: Math.floor(data.length * 0.1),
-      contentIssues: ['Potential spam content detected', 'Unusual pattern in descriptions'],
-    };
-  }
+      contentIssues: ['Potential spam content detected', 'Unusual pattern in descriptions'],};}
 
   private async detectDuplicates(data: any[], config: any): Promise<any> {
     const duplicateCount = Math.floor(data.length * 0.1);
@@ -1413,10 +1184,7 @@ Use Cases:
         outlierThreshold: 2.5,
       },
       correlationAnalysis: {
-        strongCorrelations: ['price-rating', 'category-description'],
-        weakCorrelations: ['name-price'],
-      },
-    };
+        strongCorrelations: ['price-rating', 'category-description'],weakCorrelations: ['name-price'],},};
   }
 
   private async transformValidatedData(data: any[], config: any): Promise<any[]> {
@@ -1438,14 +1206,8 @@ Use Cases:
     const recommendations = [];
 
     if (schemaValidation.invalid > 0) {
-      recommendations.push('Fix schema validation errors to improve data quality');
-    }
-
-    if (qualityAssessment.qualityScore < 0.8) {
-      recommendations.push('Improve extraction selectors to increase data quality');
-    }
-
-    return recommendations;
+      recommendations.push('Fix schema validation errors to improve data quality');}if (qualityAssessment.qualityScore < 0.8) {
+      recommendations.push('Improve extraction selectors to increase data quality');}return recommendations;
   }
 
   // System metrics and monitoring methods
@@ -1455,18 +1217,10 @@ Use Cases:
     let startDate: Date;
 
     switch (period) {
-      case '1h':
-        startDate = new Date(now.getTime() - 60 * 60 * 1000);
-        break;
-      case '24h':
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        break;
-      case '7d':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '30d':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
+      case '1h':startDate = new Date(now.getTime() - 60 * 60 * 1000);break;
+      case '24h':startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);break;
+      case '7d':startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);break;
+      case '30d':startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);break;
       default:
         startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
@@ -1502,11 +1256,7 @@ Use Cases:
 
   private calculateAverageJobDuration(): number {
     const completedJobs = Array.from(this.extractionJobs.values())
-      .filter(job => job.status === 'completed' && job.startTime && job.endTime);
-
-    if (completedJobs.length === 0) return 0;
-
-    const totalDuration = completedJobs.reduce((sum, job) => {
+      .filter(job => job.status === 'completed' && job.startTime && job.endTime);if (completedJobs.length === 0) return 0;const totalDuration = completedJobs.reduce((sum, job) => {
       return sum + (job.endTime!.getTime() - job.startTime!.getTime());
     }, 0);
 
@@ -1532,9 +1282,7 @@ Use Cases:
 
     if (jobs.length === 0) return 0;
 
-    const failedJobs = jobs.filter(job => job.status === 'failed').length;
-    return (failedJobs / jobs.length) * 100;
-  }
+    const failedJobs = jobs.filter(job => job.status === 'failed').length;return (failedJobs / jobs.length) * 100;}
 
   private calculateOverallThroughput(analytics: any): number {
     return analytics.summary.totalDataExtracted / Math.max(analytics.summary.averageDuration / 1000, 1);
@@ -1542,10 +1290,7 @@ Use Cases:
 
   private calculateSystemEfficiency(): number {
     const totalAgents = this.extractionAgents.size;
-    const activeAgents = Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length;
-
-    return totalAgents > 0 ? (activeAgents / totalAgents) * 100 : 0;
-  }
+    const activeAgents = Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length;return totalAgents > 0 ? (activeAgents / totalAgents) * 100 : 0;}
 
   private calculateResourceOptimization(): number {
     // Mock calculation based on resource utilization efficiency
@@ -1553,24 +1298,14 @@ Use Cases:
   }
 
   private getSystemHealthStatus(): string {
-    const activeAgents = Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length;
-    const totalAgents = this.extractionAgents.size;
-    const healthPercentage = totalAgents > 0 ? (activeAgents / totalAgents) * 100 : 0;
+    const activeAgents = Array.from(this.extractionAgents.values()).filter(a => a.status !== 'offline').length;const totalAgents = this.extractionAgents.size;const healthPercentage = totalAgents > 0 ? (activeAgents / totalAgents) * 100 : 0;
 
-    if (healthPercentage >= 90) return 'healthy';
-    if (healthPercentage >= 70) return 'warning';
-    return 'critical';
-  }
-
-  private getSystemAlerts(): string[] {
+    if (healthPercentage >= 90) return 'healthy';if (healthPercentage >= 70) return 'warning';return 'critical';}private getSystemAlerts(): string[] {
     const alerts = [];
 
     const errorAgents = Array.from(this.extractionAgents.values()).filter(a => a.status === 'error').length;
     if (errorAgents > 0) {
-      alerts.push(`${errorAgents} agents in error state`);
-    }
-
-    const highLoadAgents = Array.from(this.extractionAgents.values()).filter(a => a.load > 90).length;
+      alerts.push(`${errorAgents} agents in error state`);}const highLoadAgents = Array.from(this.extractionAgents.values()).filter(a => a.load > 90).length;
     if (highLoadAgents > 0) {
       alerts.push(`${highLoadAgents} agents with high load`);
     }
@@ -1583,15 +1318,7 @@ Use Cases:
 
     const avgLoad = this.calculateAverageAgentLoad();
     if (avgLoad > 80) {
-      recommendations.push('Consider adding more extraction agents to handle increased load');
-    }
-
-    const offlineAgents = Array.from(this.extractionAgents.values()).filter(a => a.status === 'offline').length;
-    if (offlineAgents > 0) {
-      recommendations.push('Investigate and restore offline agents');
-    }
-
-    return recommendations;
+      recommendations.push('Consider adding more extraction agents to handle increased load');}const offlineAgents = Array.from(this.extractionAgents.values()).filter(a => a.status === 'offline').length;if (offlineAgents > 0) {recommendations.push('Investigate and restore offline agents');}return recommendations;
   }
 
   private startHealthMonitoring(): void {
@@ -1616,9 +1343,7 @@ Use Cases:
       const timeSinceActivity = now.getTime() - agent.lastActivity.getTime();
 
       if (timeSinceActivity > 300000) { // 5 minutes
-        agent.status = 'offline';
-      }
-    }
+        agent.status = 'offline';}}
 
     // Clean up old jobs
     const oldJobs = Array.from(this.extractionJobs.entries())
@@ -1643,18 +1368,14 @@ Use Cases:
       .sort((a, b) => a.load - b.load);
 
     // In a real implementation, this would redistribute tasks
-    this.logger.debug('Resource optimization completed', {
-      busyAgents: busyAgents.length,
-      idleAgents: idleAgents.length,
+    this.logger.debug('Resource optimization completed', {busyAgents: busyAgents.length,idleAgents: idleAgents.length,
     });
   }
 
   // Utility methods
   private groupByType(results: any[]): Record<string, any[]> {
     return results.reduce((groups, result) => {
-      const type = result.type || 'unknown';
-      if (!groups[type]) groups[type] = [];
-      groups[type].push(result);
+      const type = result.type || 'unknown';if (!groups[type]) groups[type] = [];groups[type].push(result);
       return groups;
     }, {});
   }
@@ -1685,9 +1406,7 @@ Use Cases:
         // Mock implementation for demonstration
         const mockResults = Array.from({ length: 50 }, (_, i) => ({
           id: `result_${i}`,
-          status: Math.random() > 0.1 ? 'success' : 'failed',
-          timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-          duration: Math.random() * 10000 + 1000,
+          status: Math.random() > 0.1 ? 'success' : 'failed',timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),duration: Math.random() * 10000 + 1000,
           type: ['extraction', 'navigation', 'interaction'][Math.floor(Math.random() * 3)],
           quality: Math.random() * 0.3 + 0.7,
         }));

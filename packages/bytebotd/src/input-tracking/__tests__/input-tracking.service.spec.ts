@@ -19,11 +19,7 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-
-// Define types that would come from uiohook-napi
-interface UiohookMouseEvent {
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';// Define types that would come from uiohook-napiinterface UiohookMouseEvent {
   type: number;
   time: number;
   x: number;
@@ -90,9 +86,7 @@ const mockUIOhook = {
 
 const mockEventListeners: { [key: string]: Function } = {};
 
-jest.mock('uiohook-napi', () => ({
-  uIOhook: {
-    ...mockUIOhook,
+jest.mock('uiohook-napi', () => ({uIOhook: {...mockUIOhook,
     on: jest.fn((event: string, callback: Function) => {
       mockEventListeners[event] = callback;
     }),
@@ -130,28 +124,19 @@ jest.mock('uiohook-napi', () => ({
 }));
 
 // Import service and dependencies AFTER mock
-import { InputTrackingService } from '../input-tracking.service';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-import { InputTrackingGateway } from '../input-tracking.gateway';
-import {
-  ComputerAction as _ComputerAction,
+import { InputTrackingService } from '../input-tracking.service';import { ComputerUseService } from '../../computer-use/computer-use.service';import { InputTrackingGateway } from '../input-tracking.gateway';import {ComputerAction as _ComputerAction,
   ClickMouseAction,
   DragMouseAction as _DragMouseAction,
   ScrollAction,
   TypeTextAction as _TypeTextAction,
   TypeKeysAction as _TypeKeysAction,
-} from '@bytebot/shared';
-
-describe('InputTrackingService', () => {
+} from '@bytebot/shared';describe('InputTrackingService', () => {
   let service: InputTrackingService;
   let computerUseService: ComputerUseService;
   let gateway: InputTrackingGateway;
   let logger: Logger;
 
-  const operationId = `input_tracking_service_test${Date.now()}`;
-
-  // Define proper handler type for better type safety
-  type EventHandler = (event: unknown) => void;
+  const operationId = `input_tracking_service_test${Date.now()}`;// Define proper handler type for better type safetytype EventHandler = (event: unknown) => void;
   type MockCall = [string, EventHandler];
 
   // Mock event objects for testing
@@ -244,10 +229,7 @@ describe('InputTrackingService', () => {
     // Reset mock implementations
     jest.clearAllMocks();
 
-    console.log(`[${operationId}] InputTrackingService test setup completed`);
-  });
-
-  afterEach(async () => {
+    console.log(`[${operationId}] InputTrackingService test setup completed`);});afterEach(async () => {
     // Ensure tracking is stopped and cleaned up
     service.stopTracking();
     await new Promise((resolve) => setTimeout(resolve, 10)); // Allow cleanup
@@ -255,13 +237,8 @@ describe('InputTrackingService', () => {
     console.log(`[${operationId}] InputTrackingService test cleanup completed`);
   });
 
-  describe('Service Initialization', () => {
-    it('should be defined', () => {
-      const testId = `${operationId}_service_defined`;
-      console.log(`[${testId}] Testing service initialization`);
-
-      expect(service).toBeDefined();
-      expect(computerUseService).toBeDefined();
+  describe('Service Initialization', () => {it('should be defined', () => {
+      const testId = `${operationId}_service_defined`;console.log(`[${testId}] Testing service initialization`);expect(service).toBeDefined();expect(computerUseService).toBeDefined();
       expect(gateway).toBeDefined();
       expect(logger).toBeDefined();
 
@@ -269,45 +246,35 @@ describe('InputTrackingService', () => {
     });
 
     it('should initialize with correct dependencies', () => {
-      const testId = `${operationId}_dependency_injection`;
-      console.log(`[${testId}] Testing dependency injection`);
+      const testId = `${operationId}_dependency_injection`;console.log(`[${testId}] Testing dependency injection`);
 
-      expect(service['computerUseService']).toBeDefined();
-      expect(service['gateway']).toBeDefined();
+      expect(service['computerUseService']).toBeDefined();expect(service['gateway']).toBeDefined();
 
       console.log(`[${testId}] Dependency injection test completed`);
     });
 
     it('should start in non-tracking state', () => {
-      const testId = `${operationId}_initial_state`;
-      console.log(`[${testId}] Testing initial service state`);
+      const testId = `${operationId}_initial_state`;console.log(`[${testId}] Testing initial service state`);
 
-      expect(service['isTracking']).toBe(false);
-      expect(service['isDragging']).toBe(false);
-      expect(service['pressedKeys'].size).toBe(0);
-      expect(service['typingBuffer']).toEqual([]);
+      expect(service['isTracking']).toBe(false);expect(service['isDragging']).toBe(false);expect(service['pressedKeys'].size).toBe(0);expect(service['typingBuffer']).toEqual([]);
 
       console.log(`[${testId}] Initial service state test completed`);
     });
   });
 
-  describe('Tracking Lifecycle Management', () => {
-    it('should start tracking successfully', () => {
-      const testId = `${operationId}_start_tracking`;
-      console.log(`[${testId}] Testing start tracking`);
+  describe('Tracking Lifecycle Management', () => {it('should start tracking successfully', () => {
+      const testId = `${operationId}_start_tracking`;console.log(`[${testId}] Testing start tracking`);
 
       service.startTracking();
 
       expect(mockUIOhook.start).toHaveBeenCalledTimes(1);
-      expect(service['isTracking']).toBe(true);
-      expect(logger.log).toHaveBeenCalledWith('Starting input tracking');
+      expect(service['isTracking']).toBe(true);expect(logger.log).toHaveBeenCalledWith('Starting input tracking');
 
       console.log(`[${testId}] Start tracking test completed`);
     });
 
     it('should not start tracking if already running', () => {
-      const testId = `${operationId}_start_tracking_idempotent`;
-      console.log(`[${testId}] Testing start tracking idempotency`);
+      const testId = `${operationId}_start_tracking_idempotent`;console.log(`[${testId}] Testing start tracking idempotency`);
 
       service.startTracking();
       service.startTracking(); // Second call should be ignored
@@ -319,35 +286,27 @@ describe('InputTrackingService', () => {
     });
 
     it('should stop tracking successfully', () => {
-      const testId = `${operationId}_stop_tracking`;
-      console.log(`[${testId}] Testing stop tracking`);
+      const testId = `${operationId}_stop_tracking`;console.log(`[${testId}] Testing stop tracking`);
 
       service.startTracking();
       service.stopTracking();
 
       expect(mockUIOhook.stop).toHaveBeenCalledTimes(1);
       expect(mockUIOhook.removeAllListeners).toHaveBeenCalledTimes(1);
-      expect(service['isTracking']).toBe(false);
-      expect(logger.log).toHaveBeenCalledWith('Stopping input tracking');
+      expect(service['isTracking']).toBe(false);expect(logger.log).toHaveBeenCalledWith('Stopping input tracking');
 
       console.log(`[${testId}] Stop tracking test completed`);
     });
 
     it('should not stop tracking if not running', () => {
-      const testId = `${operationId}_stop_tracking_idempotent`;
-      console.log(`[${testId}] Testing stop tracking idempotency`);
-
-      service.stopTracking(); // Should not call uIOhook methods
-
-      expect(mockUIOhook.stop).not.toHaveBeenCalled();
+      const testId = `${operationId}_stop_tracking_idempotent`;console.log(`[${testId}] Testing stop tracking idempotency`);service.stopTracking(); // Should not call uIOhook methodsexpect(mockUIOhook.stop).not.toHaveBeenCalled();
       expect(mockUIOhook.removeAllListeners).not.toHaveBeenCalled();
 
       console.log(`[${testId}] Stop tracking idempotency test completed`);
     });
 
     it('should clean up on module destroy', () => {
-      const testId = `${operationId}_module_destroy_cleanup`;
-      console.log(`[${testId}] Testing module destroy cleanup`);
+      const testId = `${operationId}_module_destroy_cleanup`;console.log(`[${testId}] Testing module destroy cleanup`);
 
       service.startTracking();
       service.onModuleDestroy();
@@ -359,14 +318,11 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Mouse Event Processing', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Mouse Event Processing', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should process click mouse events', () => {
-      const testId = `${operationId}_process_click_events`;
-      console.log(`[${testId}] Testing click mouse event processing`);
+      const testId = `${operationId}_process_click_events`;console.log(`[${testId}] Testing click mouse event processing`);
 
       const mockEvent = createMockMouseEvent({
         x: 300,
@@ -392,8 +348,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should process drag mouse events', () => {
-      const testId = `${operationId}_process_drag_events`;
-      console.log(`[${testId}] Testing drag mouse event processing`);
+      const testId = `${operationId}_process_drag_events`;console.log(`[${testId}] Testing drag mouse event processing`);
 
       const startEvent = createMockMouseEvent({ x: 100, y: 100 });
       const moveEvent = createMockMouseEvent({ x: 150, y: 150 });
@@ -402,16 +357,9 @@ describe('InputTrackingService', () => {
       // Get event handlers
       const mouseDownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mousedown')?.[1];
-      const mouseMoveHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];
-      const mouseUpHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mouseup')?.[1];
-
-      expect(mouseDownHandler).toBeDefined();
-      expect(mouseMoveHandler).toBeDefined();
+      ).find((call: [string, Function]) => call[0] === 'mousedown')?.[1];const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];const mouseUpHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'mouseup')?.[1];expect(mouseDownHandler).toBeDefined();expect(mouseMoveHandler).toBeDefined();
       expect(mouseUpHandler).toBeDefined();
 
       // Simulate drag sequence
@@ -426,8 +374,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle double-click events', () => {
-      const testId = `${operationId}_double_click_events`;
-      console.log(`[${testId}] Testing double-click event processing`);
+      const testId = `${operationId}_double_click_events`;console.log(`[${testId}] Testing double-click event processing`);
 
       const singleClickEvent = createMockMouseEvent({ clicks: 1 });
       const doubleClickEvent = createMockMouseEvent({ clicks: 2 });
@@ -456,8 +403,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should process mouse wheel events', () => {
-      const testId = `${operationId}_mouse_wheel_events`;
-      console.log(`[${testId}] Testing mouse wheel event processing`);
+      const testId = `${operationId}_mouse_wheel_events`;console.log(`[${testId}] Testing mouse wheel event processing`);
 
       const wheelEvent = createMockWheelEvent({
         direction: WheelDirection.VERTICAL,
@@ -481,8 +427,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should map button codes correctly', () => {
-      const testId = `${operationId}_button_mapping`;
-      console.log(`[${testId}] Testing button code mapping`);
+      const testId = `${operationId}_button_mapping`;console.log(`[${testId}] Testing button code mapping`);
 
       const leftClick = createMockMouseEvent({ button: 1 });
       const rightClick = createMockMouseEvent({ button: 2 });
@@ -490,10 +435,7 @@ describe('InputTrackingService', () => {
 
       const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'click')?.[1];
-
-      clickHandler?.(leftClick);
-      jest.runAllTimers();
+      ).find((call: [string, Function]) => call[0] === 'click')?.[1];clickHandler?.(leftClick);jest.runAllTimers();
 
       clickHandler?.(rightClick);
       jest.runAllTimers();
@@ -504,32 +446,21 @@ describe('InputTrackingService', () => {
       const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
         [ClickMouseAction]
       >;
-      expect(emitCalls[0]?.[0]?.button).toBe('left');
-      expect(emitCalls[1]?.[0]?.button).toBe('right');
-      expect(emitCalls[2]?.[0]?.button).toBe('middle');
+      expect(emitCalls[0]?.[0]?.button).toBe('left');expect(emitCalls[1]?.[0]?.button).toBe('right');expect(emitCalls[2]?.[0]?.button).toBe('middle');
 
       console.log(`[${testId}] Button code mapping test completed`);
     });
   });
 
-  describe('Keyboard Event Processing', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Keyboard Event Processing', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should process printable character typing', () => {
-      const testId = `${operationId}_printable_character_typing`;
-      console.log(`[${testId}] Testing printable character typing`);
+      const testId = `${operationId}_printable_character_typing`;console.log(`[${testId}] Testing printable character typing`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
-
-      expect(keydownHandler).toBeDefined();
-
-      // Type 'hello'
-      const chars = [72, 69, 76, 76, 79]; // H, E, L, L, O keycodes
-      chars.forEach((keycode) => {
+      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];expect(keydownHandler).toBeDefined();// Type 'hello'const chars = [72, 69, 76, 76, 79]; // H, E, L, L, O keycodeschars.forEach((keycode) => {
         keydownHandler?.(createMockKeyboardEvent({ keycode }));
       });
 
@@ -549,14 +480,11 @@ describe('InputTrackingService', () => {
     });
 
     it('should process key combinations with modifiers', () => {
-      const testId = `${operationId}_key_combinations`;
-      console.log(`[${testId}] Testing key combinations with modifiers`);
+      const testId = `${operationId}_key_combinations`;console.log(`[${testId}] Testing key combinations with modifiers`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
-      const keyupHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];const keyupHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
       ).find((call: [string, Function]) => call[0] === 'keyup')?.[1];
 
       // Ctrl+C combination
@@ -587,15 +515,11 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle key repeat suppression', () => {
-      const testId = `${operationId}_key_repeat_suppression`;
-      console.log(`[${testId}] Testing key repeat suppression`);
+      const testId = `${operationId}_key_repeat_suppression`;console.log(`[${testId}] Testing key repeat suppression`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
-
-      const keyEvent = createMockKeyboardEvent({
-        keycode: 32, // Space
+      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];const keyEvent = createMockKeyboardEvent({keycode: 32, // Space
       });
 
       // Send multiple identical keydown events (auto-repeat)
@@ -610,18 +534,14 @@ describe('InputTrackingService', () => {
     });
 
     it('should detect modifier keys correctly', () => {
-      const testId = `${operationId}_modifier_key_detection`;
-      console.log(`[${testId}] Testing modifier key detection`);
+      const testId = `${operationId}_modifier_key_detection`;console.log(`[${testId}] Testing modifier key detection`);
 
       const modifierEvent = createMockKeyboardEvent({
         keycode: 17, // Ctrl
         ctrlKey: true,
       });
 
-      const result = service['isModifierKey'](modifierEvent);
-      expect(result).toBe(true);
-
-      const nonModifierEvent = createMockKeyboardEvent({
+      const result = service['isModifierKey'](modifierEvent);expect(result).toBe(true);const nonModifierEvent = createMockKeyboardEvent({
         keycode: 65, // A
       });
 
@@ -632,15 +552,11 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle unknown key codes', () => {
-      const testId = `${operationId}_unknown_key_codes`;
-      console.log(`[${testId}] Testing unknown key code handling`);
+      const testId = `${operationId}_unknown_key_codes`;console.log(`[${testId}] Testing unknown key code handling`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
-
-      const unknownKeyEvent = createMockKeyboardEvent({
-        keycode: 999, // Non-existent key
+      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];const unknownKeyEvent = createMockKeyboardEvent({keycode: 999, // Non-existent key
       });
 
       keydownHandler?.(unknownKeyEvent);
@@ -651,14 +567,11 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Screenshot Integration', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Screenshot Integration', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should capture screenshot on mouse movement', async () => {
-      const testId = `${operationId}_screenshot_on_mouse_move`;
-      console.log(`[${testId}] Testing screenshot capture on mouse movement`);
+      const testId = `${operationId}_screenshot_on_mouse_move`;console.log(`[${testId}] Testing screenshot capture on mouse movement`);
 
       const mouseMoveHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -679,16 +592,12 @@ describe('InputTrackingService', () => {
     });
 
     it('should emit screenshot with mouse actions', async () => {
-      const testId = `${operationId}_screenshot_with_actions`;
-      console.log(`[${testId}] Testing screenshot emission with actions`);
+      const testId = `${operationId}_screenshot_with_actions`;console.log(`[${testId}] Testing screenshot emission with actions`);
 
       // First trigger a screenshot
       const mouseMoveHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];
-      mouseMoveHandler?.(createMockMouseEvent());
-
-      jest.runAllTimers();
+      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];mouseMoveHandler?.(createMockMouseEvent());jest.runAllTimers();
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Then trigger a click
@@ -705,34 +614,23 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle screenshot capture errors', async () => {
-      const testId = `${operationId}_screenshot_error_handling`;
-      console.log(`[${testId}] Testing screenshot capture error handling`);
+      const testId = `${operationId}_screenshot_error_handling`;console.log(`[${testId}] Testing screenshot capture error handling`);
 
       // Mock screenshot to fail
       jest
-        .spyOn(computerUseService, 'screenshot')
-        .mockRejectedValueOnce(new Error('Screenshot failed'));
-
-      const mouseMoveHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];
-      mouseMoveHandler?.(createMockMouseEvent());
-
-      jest.runAllTimers();
+        .spyOn(computerUseService, 'screenshot').mockRejectedValueOnce(new Error('Screenshot failed'));const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];mouseMoveHandler?.(createMockMouseEvent());jest.runAllTimers();
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to take screenshot for action',
-        'Screenshot failed',
+        'Failed to take screenshot for action','Screenshot failed',
       );
 
       console.log(`[${testId}] Screenshot error handling test completed`);
     });
   });
 
-  describe('Event Buffering and Debouncing', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Event Buffering and Debouncing', () => {beforeEach(() => {service.startTracking();
       jest.useFakeTimers();
     });
 
@@ -741,8 +639,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should debounce typing events', () => {
-      const testId = `${operationId}_typing_debounce`;
-      console.log(`[${testId}] Testing typing event debouncing`);
+      const testId = `${operationId}_typing_debounce`;console.log(`[${testId}] Testing typing event debouncing`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -768,8 +665,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should debounce click events', () => {
-      const testId = `${operationId}_click_debounce`;
-      console.log(`[${testId}] Testing click event debouncing`);
+      const testId = `${operationId}_click_debounce`;console.log(`[${testId}] Testing click event debouncing`);
 
       const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -797,8 +693,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should debounce screenshot capture', () => {
-      const testId = `${operationId}_screenshot_debounce`;
-      console.log(`[${testId}] Testing screenshot capture debouncing`);
+      const testId = `${operationId}_screenshot_debounce`;console.log(`[${testId}] Testing screenshot capture debouncing`);
 
       const mouseMoveHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -822,14 +717,11 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Performance and Memory Management', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Performance and Memory Management', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should handle high-frequency input events', () => {
-      const testId = `${operationId}_high_frequency_input`;
-      console.log(`[${testId}] Testing high-frequency input handling`);
+      const testId = `${operationId}_high_frequency_input`;console.log(`[${testId}] Testing high-frequency input handling`);
 
       const mouseMoveHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -853,15 +745,11 @@ describe('InputTrackingService', () => {
     });
 
     it('should clean up timers properly', () => {
-      const testId = `${operationId}_timer_cleanup`;
-      console.log(`[${testId}] Testing timer cleanup`);
+      const testId = `${operationId}_timer_cleanup`;console.log(`[${testId}] Testing timer cleanup`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
-
-      // Start typing to create a timer
-      keydownHandler?.(createMockKeyboardEvent({ keycode: 65 }));
+      ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];// Start typing to create a timerkeydownHandler?.(createMockKeyboardEvent({ keycode: 65 }));
 
       // Stop tracking should clean up
       service.stopTracking();
@@ -873,17 +761,12 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle concurrent event processing', () => {
-      const testId = `${operationId}_concurrent_event_processing`;
-      console.log(`[${testId}] Testing concurrent event processing`);
+      const testId = `${operationId}_concurrent_event_processing`;console.log(`[${testId}] Testing concurrent event processing`);
 
       const mouseMoveHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];
-      const clickHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'click')?.[1];
-      const keydownHandler = (
-        (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'mousemove')?.[1];const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
+      ).find((call: [string, Function]) => call[0] === 'click')?.[1];const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
       ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
 
       // Simulate concurrent events
@@ -900,14 +783,11 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Edge Cases and Error Scenarios', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Edge Cases and Error Scenarios', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should handle invalid mouse coordinates', () => {
-      const testId = `${operationId}_invalid_mouse_coordinates`;
-      console.log(`[${testId}] Testing invalid mouse coordinates`);
+      const testId = `${operationId}_invalid_mouse_coordinates`;console.log(`[${testId}] Testing invalid mouse coordinates`);
 
       const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -927,8 +807,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle malformed keyboard events', () => {
-      const testId = `${operationId}_malformed_keyboard_events`;
-      console.log(`[${testId}] Testing malformed keyboard events`);
+      const testId = `${operationId}_malformed_keyboard_events`;console.log(`[${testId}] Testing malformed keyboard events`);
 
       const keydownHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
@@ -947,20 +826,12 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle gateway emission errors', () => {
-      const testId = `${operationId}_gateway_emission_errors`;
-      console.log(`[${testId}] Testing gateway emission error handling`);
+      const testId = `${operationId}_gateway_emission_errors`;console.log(`[${testId}] Testing gateway emission error handling`);
 
       // Mock gateway to throw error
-      jest.spyOn(gateway, 'emitAction').mockImplementationOnce(() => {
-        throw new Error('Gateway error');
-      });
-
-      const clickHandler = (
+      jest.spyOn(gateway, 'emitAction').mockImplementationOnce(() => {throw new Error('Gateway error');});const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'click')?.[1];
-
-      expect(() => {
-        clickHandler?.(createMockMouseEvent());
+      ).find((call: [string, Function]) => call[0] === 'click')?.[1];expect(() => {clickHandler?.(createMockMouseEvent());
         jest.runAllTimers();
       }).toThrow('Gateway error');
 
@@ -968,15 +839,11 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle uiohook start/stop errors', () => {
-      const testId = `${operationId}_uiohook_errors`;
-      console.log(`[${testId}] Testing uiohook error handling`);
+      const testId = `${operationId}_uiohook_errors`;console.log(`[${testId}] Testing uiohook error handling`);
 
       // Mock uiohook to throw on start
       mockUIOhook.start.mockImplementationOnce(() => {
-        throw new Error('uiohook start failed');
-      });
-
-      expect(() => {
+        throw new Error('uiohook start failed');});expect(() => {
         service.startTracking();
       }).toThrow('uiohook start failed');
 
@@ -984,8 +851,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should handle rapid start/stop cycles', () => {
-      const testId = `${operationId}_rapid_start_stop_cycles`;
-      console.log(`[${testId}] Testing rapid start/stop cycles`);
+      const testId = `${operationId}_rapid_start_stop_cycles`;console.log(`[${testId}] Testing rapid start/stop cycles`);
 
       // Rapid cycles
       for (let i = 0; i < 10; i++) {
@@ -999,21 +865,15 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Action Conversion and Mapping', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Action Conversion and Mapping', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should convert mouse events to computer actions correctly', () => {
-      const testId = `${operationId}_mouse_action_conversion`;
-      console.log(`[${testId}] Testing mouse event to action conversion`);
+      const testId = `${operationId}_mouse_action_conversion`;console.log(`[${testId}] Testing mouse event to action conversion`);
 
       const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'click')?.[1];
-
-      const mouseEvent = createMockMouseEvent({
-        x: 150,
+      ).find((call: [string, Function]) => call[0] === 'click')?.[1];const mouseEvent = createMockMouseEvent({x: 150,
         y: 250,
         button: 1,
         clicks: 1,
@@ -1028,26 +888,17 @@ describe('InputTrackingService', () => {
         [ClickMouseAction]
       >;
       const emitCall = emitCalls[0]?.[0];
-      expect(emitCall?.action).toBe('click_mouse');
-      expect(emitCall?.coordinates).toEqual({ x: 150, y: 250 });
-      expect(emitCall?.button).toBe('left');
-      expect(emitCall?.clickCount).toBe(1);
-      expect(emitCall?.holdKeys).toContain('ctrl');
-      expect(emitCall?.holdKeys).toContain('shift');
+      expect(emitCall?.action).toBe('click_mouse');expect(emitCall?.coordinates).toEqual({ x: 150, y: 250 });expect(emitCall?.button).toBe('left');expect(emitCall?.clickCount).toBe(1);expect(emitCall?.holdKeys).toContain('ctrl');expect(emitCall?.holdKeys).toContain('shift');
 
       console.log(`[${testId}] Mouse action conversion test completed`);
     });
 
     it('should convert scroll events to scroll actions', () => {
-      const testId = `${operationId}_scroll_action_conversion`;
-      console.log(`[${testId}] Testing scroll event to action conversion`);
+      const testId = `${operationId}_scroll_action_conversion`;console.log(`[${testId}] Testing scroll event to action conversion`);
 
       const wheelHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'wheel')?.[1];
-
-      const wheelEvent = createMockWheelEvent({
-        x: 200,
+      ).find((call: [string, Function]) => call[0] === 'wheel')?.[1];const wheelEvent = createMockWheelEvent({x: 200,
         y: 300,
         direction: WheelDirection.VERTICAL,
         rotation: 3, // Scroll down
@@ -1062,23 +913,18 @@ describe('InputTrackingService', () => {
         [ScrollAction]
       >;
       const emitCall = emitCalls[0]?.[0];
-      expect(emitCall?.action).toBe('scroll');
-      expect(emitCall?.direction).toBe('down');
+      expect(emitCall?.action).toBe('scroll');expect(emitCall?.direction).toBe('down');
       expect(emitCall?.coordinates).toEqual({ x: 200, y: 300 });
 
       console.log(`[${testId}] Scroll action conversion test completed`);
     });
 
     it('should handle horizontal scrolling', () => {
-      const testId = `${operationId}_horizontal_scroll`;
-      console.log(`[${testId}] Testing horizontal scroll handling`);
+      const testId = `${operationId}_horizontal_scroll`;console.log(`[${testId}] Testing horizontal scroll handling`);
 
       const wheelHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'wheel')?.[1];
-
-      const horizontalWheelEvent = createMockWheelEvent({
-        direction: WheelDirection.HORIZONTAL,
+      ).find((call: [string, Function]) => call[0] === 'wheel')?.[1];const horizontalWheelEvent = createMockWheelEvent({direction: WheelDirection.HORIZONTAL,
         rotation: -2, // Scroll left
       });
 
@@ -1096,10 +942,8 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Integration with Dependencies', () => {
-    it('should integrate with computer use service for screenshots', async () => {
-      const testId = `${operationId}_computer_use_integration`;
-      console.log(`[${testId}] Testing computer use service integration`);
+  describe('Integration with Dependencies', () => {it('should integrate with computer use service for screenshots', async () => {
+      const testId = `${operationId}_computer_use_integration`;console.log(`[${testId}] Testing computer use service integration`);
 
       service.startTracking();
 
@@ -1120,8 +964,7 @@ describe('InputTrackingService', () => {
     });
 
     it('should integrate with gateway for event emission', () => {
-      const testId = `${operationId}_gateway_integration`;
-      console.log(`[${testId}] Testing gateway integration`);
+      const testId = `${operationId}_gateway_integration`;console.log(`[${testId}] Testing gateway integration`);
 
       service.startTracking();
 
@@ -1138,21 +981,15 @@ describe('InputTrackingService', () => {
     });
   });
 
-  describe('Logging and Debugging', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Logging and Debugging', () => {beforeEach(() => {service.startTracking();
     });
 
     it('should log detected actions', () => {
-      const testId = `${operationId}_action_logging`;
-      console.log(`[${testId}] Testing action logging`);
+      const testId = `${operationId}_action_logging`;console.log(`[${testId}] Testing action logging`);
 
       const clickHandler = (
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
-      ).find((call: [string, Function]) => call[0] === 'click')?.[1];
-
-      clickHandler?.(createMockMouseEvent());
-      jest.runAllTimers();
+      ).find((call: [string, Function]) => call[0] === 'click')?.[1];clickHandler?.(createMockMouseEvent());jest.runAllTimers();
 
       expect(logger.log).toHaveBeenCalledWith(
         expect.stringContaining('Detected action:'),
@@ -1163,14 +1000,12 @@ describe('InputTrackingService', () => {
     });
 
     it('should log service lifecycle events', () => {
-      const testId = `${operationId}_lifecycle_logging`;
-      console.log(`[${testId}] Testing lifecycle event logging`);
+      const testId = `${operationId}_lifecycle_logging`;console.log(`[${testId}] Testing lifecycle event logging`);
 
       service.stopTracking();
       service.startTracking();
 
-      expect(logger.log).toHaveBeenCalledWith('Starting input tracking');
-      expect(logger.log).toHaveBeenCalledWith('Stopping input tracking');
+      expect(logger.log).toHaveBeenCalledWith('Starting input tracking');expect(logger.log).toHaveBeenCalledWith('Stopping input tracking');
 
       console.log(`[${testId}] Lifecycle event logging test completed`);
     });

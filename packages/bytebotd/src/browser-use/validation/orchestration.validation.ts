@@ -34,10 +34,7 @@ import {
   BadRequestException,
   UnprocessableEntityException,
   Logger,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  validate,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {validate,
   ValidationError,
   ValidatorOptions,
   IsInt,
@@ -52,21 +49,14 @@ import {
   IsObject,
   ArrayMaxSize,
   ArrayMinSize,
-} from 'class-validator';
-import { Transform, Type, plainToClass } from 'class-transformer';
-
-// Import base validation components
-import {
+} from 'class-validator';import { Transform, Type, plainToClass } from 'class-transformer';// Import base validation componentsimport {
   BrowserValidationService,
   ValidationResult,
   ValidationIssue,
   IsSafeBrowserSelector,
   IsSafeUrl,
   SanitizeHtml,
-} from '../../browser/validation.service';
-
-// Import orchestration types
-import {
+} from '../../browser/validation.service';// Import orchestration typesimport {
   OrchestrationStrategy,
   TaskPriority,
   ResourceLimits,
@@ -77,17 +67,11 @@ import {
   CoordinationMode,
   TaskDistributionStrategy,
   FailoverConfig,
-} from '../types/orchestration.types';
-
-// Import security types
-import {
+} from '../types/orchestration.types';// Import security typesimport {
   OrchestrationSecurityLevel,
   OrchestrationRiskLevel,
   OrchestrationCompliance,
-} from '../decorators/orchestration-security.decorators';
-
-/**
- * Orchestration validation configuration
+} from '../decorators/orchestration-security.decorators';/*** Orchestration validation configuration
  */
 interface OrchestrationValidationConfig {
   enableStrategyValidation: boolean;
@@ -138,16 +122,10 @@ interface OrchestrationValidationResult extends ValidationResult {
  * Optimization recommendation
  */
 interface OptimizationRecommendation {
-  type: 'PERFORMANCE' | 'RESOURCE' | 'SECURITY' | 'STRATEGY';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  impact: string;
+  type: 'PERFORMANCE' | 'RESOURCE' | 'SECURITY' | 'STRATEGY';priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;impact: string;
   implementation: string;
   estimatedImprovement: number; // percentage
-  costBenefit: 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-/**
+  costBenefit: 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Resource usage estimate
  */
 interface ResourceUsageEstimate {
@@ -199,10 +177,7 @@ interface StrategyValidationAnalysis {
  * Bottleneck analysis
  */
 interface BottleneckAnalysis {
-  component: 'CPU' | 'MEMORY' | 'NETWORK' | 'STORAGE' | 'COORDINATION' | 'TASK_DISTRIBUTION';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  impact: string;
+  component: 'CPU' | 'MEMORY' | 'NETWORK' | 'STORAGE' | 'COORDINATION' | 'TASK_DISTRIBUTION';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;impact: string;
   resolution: string;
   priority: number;
 }
@@ -211,10 +186,7 @@ interface BottleneckAnalysis {
  * Security vulnerability
  */
 interface SecurityVulnerability {
-  type: 'AUTHENTICATION' | 'AUTHORIZATION' | 'COMMUNICATION' | 'DATA' | 'CONFIGURATION';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  affected: string[];
+  type: 'AUTHENTICATION' | 'AUTHORIZATION' | 'COMMUNICATION' | 'DATA' | 'CONFIGURATION';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;affected: string[];
   mitigation: string;
   cveScore?: number;
 }
@@ -224,9 +196,7 @@ interface SecurityVulnerability {
  */
 interface ComplianceStatus {
   requirement: OrchestrationCompliance;
-  status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL' | 'UNKNOWN';
-  score: number; // 0-100
-  gaps: string[];
+  status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL' | 'UNKNOWN';score: number; // 0-100gaps: string[];
   remediation: string[];
 }
 
@@ -234,9 +204,7 @@ interface ComplianceStatus {
  * Risk factor
  */
 interface RiskFactor {
-  category: 'OPERATIONAL' | 'SECURITY' | 'COMPLIANCE' | 'PERFORMANCE' | 'FINANCIAL';
-  risk: string;
-  probability: number; // 0-100
+  category: 'OPERATIONAL' | 'SECURITY' | 'COMPLIANCE' | 'PERFORMANCE' | 'FINANCIAL';risk: string;probability: number; // 0-100
   impact: number; // 0-100
   riskScore: number; // 0-100
   mitigation: string;
@@ -246,26 +214,17 @@ interface RiskFactor {
  * Security recommendation
  */
 interface SecurityRecommendation {
-  category: 'AUTHENTICATION' | 'AUTHORIZATION' | 'ENCRYPTION' | 'MONITORING' | 'COMPLIANCE';
-  recommendation: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  implementation: string;
-  benefit: string;
+  category: 'AUTHENTICATION' | 'AUTHORIZATION' | 'ENCRYPTION' | 'MONITORING' | 'COMPLIANCE';recommendation: string;priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';implementation: string;benefit: string;
 }
 
 /**
  * Strategic recommendation
  */
 interface StrategicRecommendation {
-  aspect: 'COORDINATION' | 'DISTRIBUTION' | 'FAILOVER' | 'SCALING' | 'OPTIMIZATION';
-  recommendation: string;
-  rationale: string;
+  aspect: 'COORDINATION' | 'DISTRIBUTION' | 'FAILOVER' | 'SCALING' | 'OPTIMIZATION';recommendation: string;rationale: string;
   implementation: string;
   expectedBenefit: string;
-  effort: 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-// ===== VALIDATION DTOs =====
+  effort: 'LOW' | 'MEDIUM' | 'HIGH';}// ===== VALIDATION DTOs =====
 
 /**
  * Orchestration strategy validation DTO
@@ -327,10 +286,7 @@ export class FailoverConfigDto {
   enabled: boolean;
 
   @IsString()
-  @IsEnum(['IMMEDIATE', 'GRACEFUL', 'MANUAL'])
-  strategy: string;
-
-  @IsInt()
+  @IsEnum(['IMMEDIATE', 'GRACEFUL', 'MANUAL'])strategy: string;@IsInt()
   @Min(1000)
   @Max(300000)
   timeoutMs: number;
@@ -418,10 +374,7 @@ export class DistributedTaskDto {
  */
 export class TaskActionDto {
   @IsString()
-  @IsEnum(['navigate', 'click', 'type', 'extract', 'screenshot', 'wait', 'custom'])
-  type: string;
-
-  @IsString()
+  @IsEnum(['navigate', 'click', 'type', 'extract', 'screenshot', 'wait', 'custom'])type: string;@IsString()
   @IsOptional()
   @IsSafeBrowserSelector()
   selector?: string;
@@ -510,14 +463,8 @@ export class OrchestrationValidationService {
 
   // Security baselines
   private readonly securityBaselines = {
-    minimumEncryption: 'TLS_1_2',
-    requiredIsolationLevel: 'BASIC',
-    mandatoryMonitoring: true,
-    complianceScoreThreshold: 80,
-    vulnerabilityThreshold: 'MEDIUM',
-  };
-
-  constructor(
+    minimumEncryption: 'TLS_1_2',requiredIsolationLevel: 'BASIC',mandatoryMonitoring: true,complianceScoreThreshold: 80,
+    vulnerabilityThreshold: 'MEDIUM',};constructor(
     private readonly configService: ConfigService,
     private readonly baseValidationService: BrowserValidationService,
   ) {
@@ -543,10 +490,7 @@ export class OrchestrationValidationService {
     config: any,
     context: OrchestrationValidationContext,
   ): Promise<OrchestrationValidationResult> {
-    const operationId = `validate_orchestration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating orchestration configuration`, {
+    const operationId = `validate_orchestration_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating orchestration configuration`, {
       operationId,
       agentCount: config.strategy?.maxAgents,
       sessionCount: config.strategy?.maxSessions,
@@ -561,9 +505,7 @@ export class OrchestrationValidationService {
       const cachedResult = this.getFromCache(cacheKey);
 
       if (cachedResult) {
-        this.logger.debug(`[${operationId}] Validation cache hit`, { operationId, cacheKey });
-        return { ...cachedResult, cacheHit: true };
-      }
+        this.logger.debug(`[${operationId}] Validation cache hit`, { operationId, cacheKey });return { ...cachedResult, cacheHit: true };}
 
       const errors: ValidationIssue[] = [];
       const warnings: ValidationIssue[] = [];
@@ -666,9 +608,7 @@ export class OrchestrationValidationService {
         this.setCache(cacheKey, result);
       }
 
-      this.logger.log(`[${operationId}] Orchestration validation completed`, {
-        operationId,
-        isValid: result.isValid,
+      this.logger.log(`[${operationId}] Orchestration validation completed`, {operationId,isValid: result.isValid,
         errorsCount: errors.length,
         warningsCount: warnings.length,
         optimizationsCount: optimizationRecommendations.length,
@@ -690,9 +630,7 @@ export class OrchestrationValidationService {
       });
 
       throw new UnprocessableEntityException({
-        message: 'Orchestration validation processing failed',
-        error: error instanceof Error ? error.message : String(error),
-        operationId,
+        message: 'Orchestration validation processing failed',error: error instanceof Error ? error.message : String(error),operationId,
       });
     }
   }
@@ -718,8 +656,7 @@ export class OrchestrationValidationService {
       errors.push({
         field: 'strategy.maxAgents',
         message: `Agent count exceeds maximum allowed: ${this.config.maxAgentCount}`,
-        code: 'AGENT_COUNT_EXCEEDED',
-        severity: 'error',
+        code: 'AGENT_COUNT_EXCEEDED',severity: 'error',
         value: strategy.maxAgents,
         constraint: `maxAgents <= ${this.config.maxAgentCount}`,
       });
@@ -730,33 +667,13 @@ export class OrchestrationValidationService {
     coordinationComplexity = this.calculateCoordinationComplexity(strategy);
     if (coordinationComplexity > 80 && strategy.maxAgents > 20) {
       warnings.push({
-        field: 'strategy.coordinationMode',
-        message: 'High coordination complexity with many agents may impact performance',
-        code: 'HIGH_COORDINATION_COMPLEXITY',
-        severity: 'warning',
-        context: { complexity: coordinationComplexity },
-      });
+        field: 'strategy.coordinationMode',message: 'High coordination complexity with many agents may impact performance',code: 'HIGH_COORDINATION_COMPLEXITY',severity: 'warning',context: { complexity: coordinationComplexity },});
 
       strategicRecommendations.push({
-        aspect: 'COORDINATION',
-        recommendation: 'Consider hierarchical coordination for large agent counts',
-        rationale: 'Reduces coordination overhead and improves scalability',
-        implementation: 'Switch to HIERARCHICAL coordination mode',
-        expectedBenefit: 'Improved performance and reduced coordination overhead',
-        effort: 'LOW',
-      });
-    }
+        aspect: 'COORDINATION',recommendation: 'Consider hierarchical coordination for large agent counts',rationale: 'Reduces coordination overhead and improves scalability',implementation: 'Switch to HIERARCHICAL coordination mode',expectedBenefit: 'Improved performance and reduced coordination overhead',effort: 'LOW',});}
 
     // Validate task distribution strategy
-    if (strategy.taskDistribution === 'CUSTOM' && !strategy.customDistributionLogic) {
-      errors.push({
-        field: 'strategy.taskDistribution',
-        message: 'Custom task distribution requires distribution logic',
-        code: 'MISSING_DISTRIBUTION_LOGIC',
-        severity: 'error',
-        constraint: 'customDistributionLogic required for CUSTOM distribution',
-      });
-      strategyViability -= 20;
+    if (strategy.taskDistribution === 'CUSTOM' && !strategy.customDistributionLogic) {errors.push({field: 'strategy.taskDistribution',message: 'Custom task distribution requires distribution logic',code: 'MISSING_DISTRIBUTION_LOGIC',severity: 'error',constraint: 'customDistributionLogic required for CUSTOM distribution',});strategyViability -= 20;
     }
 
     // Validate failover configuration
@@ -769,22 +686,8 @@ export class OrchestrationValidationService {
       );
     } else if (strategy.maxAgents > 10) {
       warnings.push({
-        field: 'strategy.failoverConfig',
-        message: 'No failover configuration for multi-agent operation',
-        code: 'MISSING_FAILOVER_CONFIG',
-        severity: 'warning',
-        constraint: 'failoverConfig recommended for maxAgents > 10',
-      });
-
-      strategicRecommendations.push({
-        aspect: 'FAILOVER',
-        recommendation: 'Implement failover configuration for robust operation',
-        rationale: 'Prevents operation failure when individual agents fail',
-        implementation: 'Add failover configuration with graceful strategy',
-        expectedBenefit: 'Improved reliability and fault tolerance',
-        effort: 'MEDIUM',
-      });
-    }
+        field: 'strategy.failoverConfig',message: 'No failover configuration for multi-agent operation',code: 'MISSING_FAILOVER_CONFIG',severity: 'warning',constraint: 'failoverConfig recommended for maxAgents > 10',});strategicRecommendations.push({
+        aspect: 'FAILOVER',recommendation: 'Implement failover configuration for robust operation',rationale: 'Prevents operation failure when individual agents fail',implementation: 'Add failover configuration with graceful strategy',expectedBenefit: 'Improved reliability and fault tolerance',effort: 'MEDIUM',});}
 
     // Calculate scalability potential
     scalabilityPotential = this.calculateScalabilityPotential(strategy);
@@ -792,27 +695,11 @@ export class OrchestrationValidationService {
     // Security recommendations
     if (!strategy.encryptedCommunication && strategy.maxAgents > 5) {
       optimizations.push({
-        type: 'SECURITY',
-        priority: 'HIGH',
-        description: 'Enable encrypted communication for multi-agent operations',
-        impact: 'Improved security and data protection',
-        implementation: 'Set encryptedCommunication: true in strategy',
-        estimatedImprovement: 25,
-        costBenefit: 'HIGH',
-      });
-    }
+        type: 'SECURITY',priority: 'HIGH',description: 'Enable encrypted communication for multi-agent operations',impact: 'Improved security and data protection',implementation: 'Set encryptedCommunication: true in strategy',estimatedImprovement: 25,costBenefit: 'HIGH',});}
 
     if (!strategy.agentIsolation && strategy.maxAgents > 10) {
       optimizations.push({
-        type: 'SECURITY',
-        priority: 'MEDIUM',
-        description: 'Enable agent isolation for large-scale operations',
-        impact: 'Prevents cross-agent contamination and improves security',
-        implementation: 'Set agentIsolation: true in strategy',
-        estimatedImprovement: 15,
-        costBenefit: 'MEDIUM',
-      });
-    }
+        type: 'SECURITY',priority: 'MEDIUM',description: 'Enable agent isolation for large-scale operations',impact: 'Prevents cross-agent contamination and improves security',implementation: 'Set agentIsolation: true in strategy',estimatedImprovement: 15,costBenefit: 'MEDIUM',});}
 
     return {
       strategyViability,
@@ -841,8 +728,7 @@ export class OrchestrationValidationService {
       errors.push({
         field: 'resourceLimits.maxMemoryGB',
         message: `Memory allocation exceeds maximum: ${maxLimits.maxMemoryGB}GB`,
-        code: 'MEMORY_LIMIT_EXCEEDED',
-        severity: 'error',
+        code: 'MEMORY_LIMIT_EXCEEDED',severity: 'error',
         value: resourceLimits.maxMemoryGB,
         constraint: `maxMemoryGB <= ${maxLimits.maxMemoryGB}`,
       });
@@ -852,8 +738,7 @@ export class OrchestrationValidationService {
       errors.push({
         field: 'resourceLimits.maxCpuCores',
         message: `CPU allocation exceeds maximum: ${maxLimits.maxCpuCores} cores`,
-        code: 'CPU_LIMIT_EXCEEDED',
-        severity: 'error',
+        code: 'CPU_LIMIT_EXCEEDED',severity: 'error',
         value: resourceLimits.maxCpuCores,
         constraint: `maxCpuCores <= ${maxLimits.maxCpuCores}`,
       });
@@ -879,15 +764,7 @@ export class OrchestrationValidationService {
 
     if (resourceEfficiency < this.performanceBenchmarks.resourceUtilizationOptimal) {
       optimizations.push({
-        type: 'RESOURCE',
-        priority: 'MEDIUM',
-        description: 'Resource allocation can be optimized for better efficiency',
-        impact: 'Reduced costs and improved performance',
-        implementation: 'Adjust resource limits based on actual usage patterns',
-        estimatedImprovement: (this.performanceBenchmarks.resourceUtilizationOptimal - resourceEfficiency) * 100,
-        costBenefit: 'HIGH',
-      });
-    }
+        type: 'RESOURCE',priority: 'MEDIUM',description: 'Resource allocation can be optimized for better efficiency',impact: 'Reduced costs and improved performance',implementation: 'Adjust resource limits based on actual usage patterns',estimatedImprovement: (this.performanceBenchmarks.resourceUtilizationOptimal - resourceEfficiency) * 100,costBenefit: 'HIGH',});}
 
     const scalabilityFactor = this.calculateResourceScalabilityFactor(resourceLimits, agentCount);
 
@@ -916,59 +793,23 @@ export class OrchestrationValidationService {
     const agentCount = strategy.maxAgents || 1;
 
     // Validate coordination protocol
-    const supportedProtocols = ['HTTP', 'WEBSOCKET', 'GRPC', 'MQTT'];
-    if (strategy.coordinationProtocol && !supportedProtocols.includes(strategy.coordinationProtocol)) {
-      errors.push({
+    const supportedProtocols = ['HTTP', 'WEBSOCKET', 'GRPC', 'MQTT'];if (strategy.coordinationProtocol && !supportedProtocols.includes(strategy.coordinationProtocol)) {errors.push({
         field: 'strategy.coordinationProtocol',
         message: `Unsupported coordination protocol: ${strategy.coordinationProtocol}`,
-        code: 'UNSUPPORTED_PROTOCOL',
-        severity: 'error',
+        code: 'UNSUPPORTED_PROTOCOL',severity: 'error',
         value: strategy.coordinationProtocol,
-        constraint: `protocol must be one of: ${supportedProtocols.join(', ')}`,
-      });
+        constraint: `protocol must be one of: ${supportedProtocols.join(`, ')}',});
     }
 
     // Validate coordination mode vs agent count
-    if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount > 20) {
-      warnings.push({
-        field: 'strategy.coordinationMode',
-        message: 'Peer-to-peer coordination may not scale well with many agents',
-        code: 'SCALING_CONCERN',
-        severity: 'warning',
-        context: { agentCount, recommendedMode: 'HIERARCHICAL' },
-      });
-
-      optimizations.push({
-        type: 'STRATEGY',
-        priority: 'MEDIUM',
-        description: 'Switch to hierarchical coordination for better scalability',
-        impact: 'Improved coordination efficiency at scale',
-        implementation: 'Change coordinationMode to HIERARCHICAL',
-        estimatedImprovement: 30,
-        costBenefit: 'HIGH',
-      });
-    }
+    if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount > 20) {warnings.push({field: 'strategy.coordinationMode',message: 'Peer-to-peer coordination may not scale well with many agents',code: 'SCALING_CONCERN',severity: 'warning',context: { agentCount, recommendedMode: 'HIERARCHICAL' },});optimizations.push({
+        type: 'STRATEGY',priority: 'MEDIUM',description: 'Switch to hierarchical coordination for better scalability',impact: 'Improved coordination efficiency at scale',implementation: 'Change coordinationMode to HIERARCHICAL',estimatedImprovement: 30,costBenefit: 'HIGH',});}
 
     // Validate monitoring requirements
     if (!strategy.monitoringEnabled && agentCount > 5) {
       warnings.push({
-        field: 'strategy.monitoringEnabled',
-        message: 'Monitoring recommended for multi-agent operations',
-        code: 'MONITORING_RECOMMENDED',
-        severity: 'warning',
-        constraint: 'monitoringEnabled: true recommended for maxAgents > 5',
-      });
-
-      optimizations.push({
-        type: 'STRATEGY',
-        priority: 'HIGH',
-        description: 'Enable monitoring for better observability',
-        impact: 'Improved debugging and performance insights',
-        implementation: 'Set monitoringEnabled: true',
-        estimatedImprovement: 20,
-        costBenefit: 'HIGH',
-      });
-    }
+        field: 'strategy.monitoringEnabled',message: 'Monitoring recommended for multi-agent operations',code: 'MONITORING_RECOMMENDED',severity: 'warning',constraint: 'monitoringEnabled: true recommended for maxAgents > 5',});optimizations.push({
+        type: 'STRATEGY',priority: 'HIGH',description: 'Enable monitoring for better observability',impact: 'Improved debugging and performance insights',implementation: 'Set monitoringEnabled: true',estimatedImprovement: 20,costBenefit: 'HIGH',});}
   }
 
   /**
@@ -984,13 +825,7 @@ export class OrchestrationValidationService {
   ): Promise<void> {
     if (!Array.isArray(tasks) || tasks.length === 0) {
       errors.push({
-        field: 'tasks',
-        message: 'At least one task is required for orchestration',
-        code: 'NO_TASKS',
-        severity: 'error',
-        constraint: 'tasks.length >= 1',
-      });
-      return;
+        field: 'tasks',message: 'At least one task is required for orchestration',code: 'NO_TASKS',severity: 'error',constraint: 'tasks.length >= 1',});return;
     }
 
     // Validate task count vs agent capacity
@@ -1000,21 +835,10 @@ export class OrchestrationValidationService {
 
     if (tasksPerAgent > 10) {
       warnings.push({
-        field: 'tasks',
-        message: 'High task-to-agent ratio may impact performance',
-        code: 'HIGH_TASK_RATIO',
-        severity: 'warning',
-        context: { tasksPerAgent: Math.round(tasksPerAgent * 100) / 100 },
-      });
+        field: 'tasks',message: 'High task-to-agent ratio may impact performance',code: 'HIGH_TASK_RATIO',severity: 'warning',context: { tasksPerAgent: Math.round(tasksPerAgent * 100) / 100 },});
 
       optimizations.push({
-        type: 'STRATEGY',
-        priority: 'MEDIUM',
-        description: 'Increase agent count or reduce task complexity',
-        impact: 'Better task distribution and performance',
-        implementation: 'Increase maxAgents or split complex tasks',
-        estimatedImprovement: 25,
-        costBenefit: 'MEDIUM',
+        type: 'STRATEGY',priority: 'MEDIUM',description: 'Increase agent count or reduce task complexity',impact: 'Better task distribution and performance',implementation: 'Increase maxAgents or split complex tasks',estimatedImprovement: 25,costBenefit: 'MEDIUM',
       });
     }
 
@@ -1027,18 +851,14 @@ export class OrchestrationValidationService {
       if (!task.name || typeof task.name !== 'string' || task.name.trim().length === 0) {
         errors.push({
           field: `${taskPrefix}.name`,
-          message: 'Task name is required',
-          code: 'MISSING_TASK_NAME',
-          severity: 'error',
+          message: 'Task name is required',code: 'MISSING_TASK_NAME',severity: 'error',
         });
       }
 
       if (!task.actions || !Array.isArray(task.actions) || task.actions.length === 0) {
         errors.push({
           field: `${taskPrefix}.actions`,
-          message: 'Task must have at least one action',
-          code: 'NO_TASK_ACTIONS',
-          severity: 'error',
+          message: 'Task must have at least one action',code: 'NO_TASK_ACTIONS',severity: 'error',
         });
       }
 
@@ -1046,10 +866,7 @@ export class OrchestrationValidationService {
       if (task.actions && Array.isArray(task.actions)) {
         for (let j = 0; j < task.actions.length; j++) {
           const action = task.actions[j];
-          const actionPrefix = `${taskPrefix}.actions[${j}]`;
-
-          // Use base validation service for action validation
-          const actionValidation = await this.baseValidationService.validateBrowserTask(
+          const actionPrefix = `${taskPrefix}.actions[${j}]`;// Use base validation service for action validationconst actionValidation = await this.baseValidationService.validateBrowserTask(
             { actions: [action] },
             {
               userId: context.userId,
@@ -1064,9 +881,7 @@ export class OrchestrationValidationService {
           actionValidation.errors.forEach(error => {
             errors.push({
               ...error,
-              field: `${actionPrefix}.${error.field}`,
-            });
-          });
+              field: `${actionPrefix}.${error.field}`,});});
 
           actionValidation.warnings.forEach(warning => {
             warnings.push({
@@ -1083,23 +898,14 @@ export class OrchestrationValidationService {
           if (typeof dep !== 'string') {
             errors.push({
               field: `${taskPrefix}.dependencies[${depIndex}]`,
-              message: 'Task dependency must be a string',
-              code: 'INVALID_DEPENDENCY_TYPE',
-              severity: 'error',
-              value: dep,
-            });
+              message: 'Task dependency must be a string',code: 'INVALID_DEPENDENCY_TYPE',severity: 'error',value: dep,});
           }
         });
 
         // Check for circular dependencies
         if (this.hasCircularDependencies(tasks)) {
           errors.push({
-            field: 'tasks',
-            message: 'Circular dependencies detected in task configuration',
-            code: 'CIRCULAR_DEPENDENCIES',
-            severity: 'error',
-          });
-        }
+            field: 'tasks',message: 'Circular dependencies detected in task configuration',code: 'CIRCULAR_DEPENDENCIES',severity: 'error',});}
       }
     }
 
@@ -1107,23 +913,10 @@ export class OrchestrationValidationService {
     const taskComplexityAnalysis = this.analyzeTaskComplexity(tasks);
     if (taskComplexityAnalysis.averageComplexity > this.config.maxTaskComplexity) {
       warnings.push({
-        field: 'tasks',
-        message: 'Task complexity may impact performance',
-        code: 'HIGH_TASK_COMPLEXITY',
-        severity: 'warning',
-        context: taskComplexityAnalysis,
-      });
+        field: 'tasks',message: 'Task complexity may impact performance',code: 'HIGH_TASK_COMPLEXITY',severity: 'warning',context: taskComplexityAnalysis,});
 
       optimizations.push({
-        type: 'PERFORMANCE',
-        priority: 'MEDIUM',
-        description: 'Simplify complex tasks or increase resource allocation',
-        impact: 'Better performance and reliability',
-        implementation: 'Break down complex tasks or increase timeout values',
-        estimatedImprovement: 20,
-        costBenefit: 'MEDIUM',
-      });
-    }
+        type: 'PERFORMANCE',priority: 'MEDIUM',description: 'Simplify complex tasks or increase resource allocation',impact: 'Better performance and reliability',implementation: 'Break down complex tasks or increase timeout values',estimatedImprovement: 20,costBenefit: 'MEDIUM',});}
   }
 
   /**
@@ -1146,46 +939,22 @@ export class OrchestrationValidationService {
     if (!config.strategy?.encryptedCommunication) {
       overallSecurityScore -= 20;
       vulnerabilities.push({
-        type: 'COMMUNICATION',
-        severity: 'HIGH',
-        description: 'Agent communication is not encrypted',
-        affected: ['agent_coordination', 'data_transfer'],
-        mitigation: 'Enable encrypted communication in strategy configuration',
-      });
-
-      securityRecommendations.push({
-        category: 'ENCRYPTION',
-        recommendation: 'Enable encrypted communication for agent coordination',
-        priority: 'HIGH',
-        implementation: 'Set strategy.encryptedCommunication: true',
-        benefit: 'Protects sensitive data during agent coordination',
-      });
-    }
+        type: 'COMMUNICATION',severity: 'HIGH',description: 'Agent communication is not encrypted',affected: ['agent_coordination', 'data_transfer'],mitigation: 'Enable encrypted communication in strategy configuration',});securityRecommendations.push({
+        category: 'ENCRYPTION',recommendation: 'Enable encrypted communication for agent coordination',priority: 'HIGH',implementation: 'Set strategy.encryptedCommunication: true',benefit: 'Protects sensitive data during agent coordination',});}
 
     // Validate agent isolation
     if (!config.strategy?.agentIsolation && config.strategy?.maxAgents > 5) {
       overallSecurityScore -= 15;
       vulnerabilities.push({
-        type: 'CONFIGURATION',
-        severity: 'MEDIUM',
-        description: 'Agent isolation not enabled for multi-agent operation',
-        affected: ['agent_runtime', 'resource_sharing'],
-        mitigation: 'Enable agent isolation to prevent cross-contamination',
-      });
-    }
+        type: 'CONFIGURATION',severity: 'MEDIUM',description: 'Agent isolation not enabled for multi-agent operation',affected: ['agent_runtime', 'resource_sharing'],mitigation: 'Enable agent isolation to prevent cross-contamination',});}
 
     // Validate monitoring configuration
     if (!config.strategy?.monitoringEnabled) {
       overallSecurityScore -= 10;
       riskFactors.push({
-        category: 'SECURITY',
-        risk: 'Limited visibility into orchestration operations',
-        probability: 70,
-        impact: 60,
+        category: 'SECURITY',risk: 'Limited visibility into orchestration operations',probability: 70,impact: 60,
         riskScore: 42,
-        mitigation: 'Enable comprehensive monitoring and logging',
-      });
-    }
+        mitigation: 'Enable comprehensive monitoring and logging',});}
 
     // Validate compliance requirements
     if (context.complianceRequirements) {
@@ -1193,9 +962,7 @@ export class OrchestrationValidationService {
         const complianceResult = this.validateComplianceRequirement(requirement, config);
         complianceStatus.push(complianceResult);
 
-        if (complianceResult.status !== 'COMPLIANT') {
-          overallSecurityScore -= (100 - complianceResult.score) * 0.3;
-        }
+        if (complianceResult.status !== 'COMPLIANT') {overallSecurityScore -= (100 - complianceResult.score) * 0.3;}
       }
     }
 
@@ -1203,14 +970,9 @@ export class OrchestrationValidationService {
     const resourceLimits = config.resourceLimits;
     if (resourceLimits?.maxMemoryGB > 64 || resourceLimits?.maxCpuCores > 16) {
       riskFactors.push({
-        category: 'OPERATIONAL',
-        risk: 'High resource allocation may indicate security risk',
-        probability: 30,
-        impact: 40,
+        category: 'OPERATIONAL',risk: 'High resource allocation may indicate security risk',probability: 30,impact: 40,
         riskScore: 12,
-        mitigation: 'Review resource allocation and implement monitoring',
-      });
-    }
+        mitigation: 'Review resource allocation and implement monitoring',});}
 
     // Security score adjustments based on security level
     if (context.securityLevel) {
@@ -1228,15 +990,7 @@ export class OrchestrationValidationService {
     // Generate optimization recommendations
     if (overallSecurityScore < 80) {
       optimizations.push({
-        type: 'SECURITY',
-        priority: 'HIGH',
-        description: 'Security configuration requires improvement',
-        impact: 'Enhanced security posture and compliance',
-        implementation: 'Address identified vulnerabilities and enable security features',
-        estimatedImprovement: 100 - overallSecurityScore,
-        costBenefit: 'HIGH',
-      });
-    }
+        type: 'SECURITY',priority: 'HIGH',description: 'Security configuration requires improvement',impact: 'Enhanced security posture and compliance',implementation: 'Address identified vulnerabilities and enable security features',estimatedImprovement: 100 - overallSecurityScore,costBenefit: 'HIGH',});}
 
     return {
       overallSecurityScore: Math.min(100, Math.max(0, overallSecurityScore)),
@@ -1280,36 +1034,18 @@ export class OrchestrationValidationService {
     // Generate performance warnings
     if (scalabilityScore < 70) {
       warnings.push({
-        field: 'strategy',
-        message: 'Configuration may not scale well under load',
-        code: 'POOR_SCALABILITY',
-        severity: 'warning',
-        context: { scalabilityScore },
-      });
+        field: 'strategy',message: 'Configuration may not scale well under load',code: 'POOR_SCALABILITY',severity: 'warning',context: { scalabilityScore },});
     }
 
     if (efficiencyRating < 60) {
       warnings.push({
-        field: 'resourceLimits',
-        message: 'Resource allocation efficiency is below optimal',
-        code: 'POOR_EFFICIENCY',
-        severity: 'warning',
-        context: { efficiencyRating },
-      });
+        field: 'resourceLimits',message: 'Resource allocation efficiency is below optimal',code: 'POOR_EFFICIENCY',severity: 'warning',context: { efficiencyRating },});
     }
 
     // Generate performance optimizations
     if (optimizationPotential > 30) {
       optimizations.push({
-        type: 'PERFORMANCE',
-        priority: 'HIGH',
-        description: 'Significant performance optimization opportunities identified',
-        impact: 'Improved throughput and reduced latency',
-        implementation: 'Address identified bottlenecks and optimize resource allocation',
-        estimatedImprovement: optimizationPotential,
-        costBenefit: 'HIGH',
-      });
-    }
+        type: 'PERFORMANCE',priority: 'HIGH',description: 'Significant performance optimization opportunities identified',impact: 'Improved throughput and reduced latency',implementation: 'Address identified bottlenecks and optimize resource allocation',estimatedImprovement: optimizationPotential,costBenefit: 'HIGH',});}
 
     return {
       expectedThroughput,
@@ -1339,12 +1075,7 @@ export class OrchestrationValidationService {
       return configDto;
     } catch (error) {
       errors.push({
-        field: 'configuration',
-        message: 'Invalid configuration structure',
-        code: 'INVALID_CONFIG_STRUCTURE',
-        severity: 'error',
-        value: error instanceof Error ? error.message : String(error),
-      });
+        field: 'configuration',message: 'Invalid configuration structure',code: 'INVALID_CONFIG_STRUCTURE',severity: 'error',value: error instanceof Error ? error.message : String(error),});
       return {} as OrchestrationConfigDto;
     }
   }
@@ -1358,9 +1089,7 @@ export class OrchestrationValidationService {
           field,
           message,
           code: constraint.toUpperCase(),
-          severity: 'error',
-          value: error.value,
-          constraint,
+          severity: 'error',value: error.value,constraint,
         });
       });
     }
@@ -1381,23 +1110,11 @@ export class OrchestrationValidationService {
 
     // Coordination mode complexity
     const coordinationComplexity = {
-      'SIMPLE': 0,
-      'PEER_TO_PEER': agentCount > 10 ? 20 : 10,
-      'HIERARCHICAL': Math.min(agentCount * 0.5, 15),
-      'CUSTOM': 25,
-    }[strategy.coordinationMode] || 0;
-
-    complexity += coordinationComplexity;
+      'SIMPLE': 0,'PEER_TO_PEER': agentCount > 10 ? 20 : 10,'HIERARCHICAL': Math.min(agentCount * 0.5, 15),'CUSTOM': 25,}[strategy.coordinationMode] || 0;complexity += coordinationComplexity;
 
     // Task distribution complexity
     const distributionComplexity = {
-      'ROUND_ROBIN': 0,
-      'WEIGHTED': 5,
-      'PRIORITY': 10,
-      'CUSTOM': 20,
-    }[strategy.taskDistribution] || 0;
-
-    complexity += distributionComplexity;
+      'ROUND_ROBIN': 0,'WEIGHTED': 5,'PRIORITY': 10,'CUSTOM': 20,}[strategy.taskDistribution] || 0;complexity += distributionComplexity;
 
     return Math.min(complexity, 100);
   }
@@ -1412,37 +1129,22 @@ export class OrchestrationValidationService {
 
     if (!failoverConfig.enabled) {
       warnings.push({
-        field: 'strategy.failoverConfig.enabled',
-        message: 'Failover is disabled',
-        code: 'FAILOVER_DISABLED',
-        severity: 'warning',
-      });
-      return 0;
+        field: 'strategy.failoverConfig.enabled',message: 'Failover is disabled',code: 'FAILOVER_DISABLED',severity: 'warning',});return 0;
     }
 
     // Validate timeout
     if (failoverConfig.timeoutMs < 1000 || failoverConfig.timeoutMs > 300000) {
       errors.push({
-        field: 'strategy.failoverConfig.timeoutMs',
-        message: 'Failover timeout must be between 1 second and 5 minutes',
-        code: 'INVALID_FAILOVER_TIMEOUT',
-        severity: 'error',
-        value: failoverConfig.timeoutMs,
-      });
+        field: 'strategy.failoverConfig.timeoutMs',message: 'Failover timeout must be between 1 second and 5 minutes',code: 'INVALID_FAILOVER_TIMEOUT',severity: 'error',value: failoverConfig.timeoutMs,});
     } else {
       robustness += 20;
     }
 
     // Validate strategy
-    const validStrategies = ['IMMEDIATE', 'GRACEFUL', 'MANUAL'];
-    if (!validStrategies.includes(failoverConfig.strategy)) {
-      errors.push({
+    const validStrategies = ['IMMEDIATE', 'GRACEFUL', 'MANUAL'];if (!validStrategies.includes(failoverConfig.strategy)) {errors.push({
         field: 'strategy.failoverConfig.strategy',
         message: `Invalid failover strategy: ${failoverConfig.strategy}`,
-        code: 'INVALID_FAILOVER_STRATEGY',
-        severity: 'error',
-        value: failoverConfig.strategy,
-      });
+        code: 'INVALID_FAILOVER_STRATEGY',severity: 'error',value: failoverConfig.strategy,});
     } else {
       robustness += 15;
     }
@@ -1450,12 +1152,7 @@ export class OrchestrationValidationService {
     // Validate retry configuration
     if (failoverConfig.maxRetries < 1 || failoverConfig.maxRetries > 5) {
       warnings.push({
-        field: 'strategy.failoverConfig.maxRetries',
-        message: 'Consider 1-5 retries for optimal failover behavior',
-        code: 'SUBOPTIMAL_RETRY_COUNT',
-        severity: 'warning',
-        value: failoverConfig.maxRetries,
-      });
+        field: 'strategy.failoverConfig.maxRetries',message: 'Consider 1-5 retries for optimal failover behavior',code: 'SUBOPTIMAL_RETRY_COUNT',severity: 'warning',value: failoverConfig.maxRetries,});
     } else {
       robustness += 15;
     }
@@ -1469,23 +1166,11 @@ export class OrchestrationValidationService {
 
     // Coordination mode scalability
     const coordinationScalability = {
-      'SIMPLE': agentCount <= 5 ? 30 : 10,
-      'PEER_TO_PEER': agentCount <= 10 ? 25 : 5,
-      'HIERARCHICAL': agentCount <= 50 ? 30 : 20,
-      'CUSTOM': 15,
-    }[strategy.coordinationMode] || 0;
-
-    potential += coordinationScalability;
+      'SIMPLE': agentCount <= 5 ? 30 : 10,'PEER_TO_PEER': agentCount <= 10 ? 25 : 5,'HIERARCHICAL': agentCount <= 50 ? 30 : 20,'CUSTOM': 15,}[strategy.coordinationMode] || 0;potential += coordinationScalability;
 
     // Task distribution scalability
     const distributionScalability = {
-      'ROUND_ROBIN': 20,
-      'WEIGHTED': 15,
-      'PRIORITY': 10,
-      'CUSTOM': 5,
-    }[strategy.taskDistribution] || 0;
-
-    potential += distributionScalability;
+      'ROUND_ROBIN': 20,'WEIGHTED': 15,'PRIORITY': 10,'CUSTOM': 5,}[strategy.taskDistribution] || 0;potential += distributionScalability;
 
     // Monitoring and isolation boost scalability
     if (strategy.monitoringEnabled) potential += 10;
@@ -1607,16 +1292,7 @@ export class OrchestrationValidationService {
       if (task.actions) {
         task.actions.forEach(action => {
           const actionComplexity = {
-            'navigate': 1,
-            'click': 0.5,
-            'type': 0.5,
-            'extract': 1.5,
-            'screenshot': 0.3,
-            'wait': 0.2,
-            'custom': 2,
-          }[action.type] || 1;
-
-          complexity += actionComplexity;
+            'navigate': 1,'click': 0.5,'type': 0.5,'extract': 1.5,'screenshot': 0.3,'wait': 0.2,'custom': 2,}[action.type] || 1;complexity += actionComplexity;
         });
       }
 
@@ -1647,47 +1323,26 @@ export class OrchestrationValidationService {
       case OrchestrationCompliance.SOC2:
         if (!config.strategy?.monitoringEnabled) {
           score -= 30;
-          gaps.push('Monitoring not enabled');
-          remediation.push('Enable comprehensive monitoring');
-        }
-        if (!config.strategy?.encryptedCommunication) {
+          gaps.push('Monitoring not enabled');remediation.push('Enable comprehensive monitoring');}if (!config.strategy?.encryptedCommunication) {
           score -= 25;
-          gaps.push('Communication not encrypted');
-          remediation.push('Enable encrypted communication');
-        }
-        break;
+          gaps.push('Communication not encrypted');remediation.push('Enable encrypted communication');}break;
 
       case OrchestrationCompliance.GDPR:
         if (!config.strategy?.agentIsolation) {
           score -= 20;
-          gaps.push('Agent isolation not configured');
-          remediation.push('Enable agent isolation for data protection');
-        }
-        if (config.resourceLimits?.maxStorageGB > 100) {
+          gaps.push('Agent isolation not configured');remediation.push('Enable agent isolation for data protection');}if (config.resourceLimits?.maxStorageGB > 100) {
           score -= 15;
-          gaps.push('High storage allocation may indicate data retention issues');
-          remediation.push('Review data retention policies');
-        }
-        break;
+          gaps.push('High storage allocation may indicate data retention issues');remediation.push('Review data retention policies');}break;
 
       case OrchestrationCompliance.HIPAA:
         if (!config.strategy?.encryptedCommunication) {
           score -= 40;
-          gaps.push('Unencrypted communication violates HIPAA requirements');
-          remediation.push('Enable end-to-end encryption');
-        }
-        if (!config.strategy?.agentIsolation) {
+          gaps.push('Unencrypted communication violates HIPAA requirements');remediation.push('Enable end-to-end encryption');}if (!config.strategy?.agentIsolation) {
           score -= 30;
-          gaps.push('Agent isolation required for PHI protection');
-          remediation.push('Enable strict agent isolation');
-        }
-        break;
+          gaps.push('Agent isolation required for PHI protection');remediation.push('Enable strict agent isolation');}break;
     }
 
-    const status = score >= 90 ? 'COMPLIANT' : score >= 70 ? 'PARTIAL' : 'NON_COMPLIANT';
-
-    return {
-      requirement,
+    const status = score >= 90 ? 'COMPLIANT' : score >= 70 ? 'PARTIAL' : 'NON_COMPLIANT';return {requirement,
       status,
       score: Math.max(0, score),
       gaps,
@@ -1708,23 +1363,11 @@ export class OrchestrationValidationService {
 
     // Coordination overhead
     const coordinationLatency = {
-      'SIMPLE': 10,
-      'PEER_TO_PEER': agentCount * 5,
-      'HIERARCHICAL': Math.log(agentCount) * 20,
-      'CUSTOM': 50,
-    }[strategy?.coordinationMode] || 20;
-
-    baseLatency += coordinationLatency;
+      'SIMPLE': 10,'PEER_TO_PEER': agentCount * 5,'HIERARCHICAL': Math.log(agentCount) * 20,'CUSTOM': 50,}[strategy?.coordinationMode] || 20;baseLatency += coordinationLatency;
 
     // Communication protocol overhead
     const protocolLatency = {
-      'HTTP': 50,
-      'WEBSOCKET': 20,
-      'GRPC': 15,
-      'MQTT': 30,
-    }[strategy?.coordinationProtocol] || 50;
-
-    baseLatency += protocolLatency;
+      'HTTP': 50,'WEBSOCKET': 20,'GRPC': 15,'MQTT': 30,}[strategy?.coordinationProtocol] || 50;baseLatency += protocolLatency;
 
     // Encryption overhead
     if (strategy?.encryptedCommunication) {
@@ -1740,12 +1383,7 @@ export class OrchestrationValidationService {
     const agentCount = strategy.maxAgents || 1;
 
     // Coordination mode scalability
-    if (strategy.coordinationMode === 'HIERARCHICAL') score += 20;
-    else if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount <= 10) score += 15;
-    else if (strategy.coordinationMode === 'SIMPLE' && agentCount <= 5) score += 10;
-
-    // Monitoring and isolation improve scalability
-    if (strategy.monitoringEnabled) score += 10;
+    if (strategy.coordinationMode === 'HIERARCHICAL') score += 20;else if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount <= 10) score += 15;else if (strategy.coordinationMode === 'SIMPLE' && agentCount <= 5) score += 10;// Monitoring and isolation improve scalabilityif (strategy.monitoringEnabled) score += 10;
     if (strategy.agentIsolation) score += 10;
 
     // Failover configuration
@@ -1773,9 +1411,7 @@ export class OrchestrationValidationService {
     if (tasksPerAgent >= 2 && tasksPerAgent <= 8) efficiency += 10; // Optimal range
 
     // Configuration efficiency
-    if (strategy.taskDistribution === 'WEIGHTED' || strategy.taskDistribution === 'PRIORITY') {
-      efficiency += 10;
-    }
+    if (strategy.taskDistribution === 'WEIGHTED' || strategy.taskDistribution === 'PRIORITY') {efficiency += 10;}
 
     return Math.min(efficiency, 100);
   }
@@ -1790,51 +1426,25 @@ export class OrchestrationValidationService {
     const cpuPerAgent = resourceLimits.maxCpuCores / agentCount;
     if (cpuPerAgent < 0.5) {
       bottlenecks.push({
-        component: 'CPU',
-        severity: 'HIGH',
-        description: 'Insufficient CPU allocation per agent',
-        impact: 'Reduced performance and increased latency',
-        resolution: 'Increase CPU allocation or reduce agent count',
-        priority: 1,
-      });
+        component: 'CPU',severity: 'HIGH',description: 'Insufficient CPU allocation per agent',impact: 'Reduced performance and increased latency',resolution: 'Increase CPU allocation or reduce agent count',priority: 1,});
     }
 
     // Memory bottleneck analysis
     const memoryPerAgent = resourceLimits.maxMemoryGB / agentCount;
     if (memoryPerAgent < 1) {
       bottlenecks.push({
-        component: 'MEMORY',
-        severity: 'HIGH',
-        description: 'Insufficient memory allocation per agent',
-        impact: 'Potential out-of-memory errors and crashes',
-        resolution: 'Increase memory allocation or reduce agent count',
-        priority: 1,
-      });
+        component: 'MEMORY',severity: 'HIGH',description: 'Insufficient memory allocation per agent',impact: 'Potential out-of-memory errors and crashes',resolution: 'Increase memory allocation or reduce agent count',priority: 1,});
     }
 
     // Coordination bottleneck analysis
-    if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount > 20) {
-      bottlenecks.push({
-        component: 'COORDINATION',
-        severity: 'MEDIUM',
-        description: 'Peer-to-peer coordination may not scale efficiently',
-        impact: 'Increased coordination overhead and latency',
-        resolution: 'Consider switching to hierarchical coordination',
-        priority: 2,
-      });
+    if (strategy.coordinationMode === 'PEER_TO_PEER' && agentCount > 20) {bottlenecks.push({component: 'COORDINATION',severity: 'MEDIUM',description: 'Peer-to-peer coordination may not scale efficiently',impact: 'Increased coordination overhead and latency',resolution: 'Consider switching to hierarchical coordination',priority: 2,});
     }
 
     // Network bottleneck analysis
     const networkPerAgent = resourceLimits.maxNetworkMBps / agentCount;
     if (networkPerAgent < 5) {
       bottlenecks.push({
-        component: 'NETWORK',
-        severity: 'MEDIUM',
-        description: 'Insufficient network bandwidth per agent',
-        impact: 'Slow data transfer and increased latency',
-        resolution: 'Increase network allocation or optimize data transfer',
-        priority: 3,
-      });
+        component: 'NETWORK',severity: 'MEDIUM',description: 'Insufficient network bandwidth per agent',impact: 'Slow data transfer and increased latency',resolution: 'Increase network allocation or optimize data transfer',priority: 3,});
     }
 
     return bottlenecks.sort((a, b) => a.priority - b.priority);
@@ -1850,10 +1460,7 @@ export class OrchestrationValidationService {
 
     const bottleneckPotential = bottlenecks.reduce((total, bottleneck) => {
       const severityWeight = {
-        'LOW': 5,
-        'MEDIUM': 15,
-        'HIGH': 25,
-        'CRITICAL': 40,
+        'LOW': 5,'MEDIUM': 15,'HIGH': 25,'CRITICAL': 40,
       }[bottleneck.severity];
 
       return total + severityWeight;
@@ -2027,25 +1634,7 @@ export class OrchestrationValidationService {
 
   private loadOrchestrationValidationConfig(): OrchestrationValidationConfig {
     return {
-      enableStrategyValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_STRATEGY', true),
-      enableResourceValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_RESOURCE', true),
-      enableAgentValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_AGENT', true),
-      enableTaskValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_TASK', true),
-      enableSecurityValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_SECURITY', true),
-      enablePerformanceValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_PERFORMANCE', true),
-      maxValidationCacheSize: this.configService.get<number>('ORCHESTRATION_VALIDATION_CACHE_SIZE', 500),
-      validationCacheTtl: this.configService.get<number>('ORCHESTRATION_VALIDATION_CACHE_TTL', 600000), // 10 minutes
-      strictValidationMode: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_STRICT', true),
-      enableOptimizationRecommendations: this.configService.get<boolean>('ORCHESTRATION_OPTIMIZATION_ENABLED', true),
-      maxAgentCount: this.configService.get<number>('ORCHESTRATION_MAX_AGENTS', 100),
-      maxSessionCount: this.configService.get<number>('ORCHESTRATION_MAX_SESSIONS', 250),
-      maxTaskComplexity: this.configService.get<number>('ORCHESTRATION_MAX_TASK_COMPLEXITY', 10),
-      maxResourceAllocation: {
-        maxMemoryGB: this.configService.get<number>('ORCHESTRATION_MAX_MEMORY_GB', 128),
-        maxCpuCores: this.configService.get<number>('ORCHESTRATION_MAX_CPU_CORES', 32),
-        maxNetworkMBps: this.configService.get<number>('ORCHESTRATION_MAX_NETWORK_MBPS', 2000),
-        maxStorageGB: this.configService.get<number>('ORCHESTRATION_MAX_STORAGE_GB', 500),
-        maxExecutionTimeMs: this.configService.get<number>('ORCHESTRATION_MAX_EXECUTION_TIME_MS', 14400000), // 4 hours
+      enableStrategyValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_STRATEGY', true),enableResourceValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_RESOURCE', true),enableAgentValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_AGENT', true),enableTaskValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_TASK', true),enableSecurityValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_SECURITY', true),enablePerformanceValidation: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_PERFORMANCE', true),maxValidationCacheSize: this.configService.get<number>('ORCHESTRATION_VALIDATION_CACHE_SIZE', 500),validationCacheTtl: this.configService.get<number>('ORCHESTRATION_VALIDATION_CACHE_TTL', 600000), // 10 minutesstrictValidationMode: this.configService.get<boolean>('ORCHESTRATION_VALIDATION_STRICT', true),enableOptimizationRecommendations: this.configService.get<boolean>('ORCHESTRATION_OPTIMIZATION_ENABLED', true),maxAgentCount: this.configService.get<number>('ORCHESTRATION_MAX_AGENTS', 100),maxSessionCount: this.configService.get<number>('ORCHESTRATION_MAX_SESSIONS', 250),maxTaskComplexity: this.configService.get<number>('ORCHESTRATION_MAX_TASK_COMPLEXITY', 10),maxResourceAllocation: {maxMemoryGB: this.configService.get<number>('ORCHESTRATION_MAX_MEMORY_GB', 128),maxCpuCores: this.configService.get<number>('ORCHESTRATION_MAX_CPU_CORES', 32),maxNetworkMBps: this.configService.get<number>('ORCHESTRATION_MAX_NETWORK_MBPS', 2000),maxStorageGB: this.configService.get<number>('ORCHESTRATION_MAX_STORAGE_GB', 500),maxExecutionTimeMs: this.configService.get<number>('ORCHESTRATION_MAX_EXECUTION_TIME_MS', 14400000), // 4 hours
       },
     };
   }

@@ -16,26 +16,7 @@
  * @author Security Integration Test Engineer
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import * as request from 'supertest';
-import { performance } from 'perf_hooks';
-
-// Security components
-import { BrowserSecurityIntegrationModule } from '../browser-security-integration.module';
-import { BrowserUseAuthMiddleware } from '../../middleware/browser-use-auth.middleware';
-import { BrowserUseRbacGuard } from '../../guards/browser-use-rbac.guard';
-import { BrowserRequestValidatorService } from '../../validators/browser-request-validator.service';
-import { BrowserRateLimiterService } from '../../rate-limiters/browser-rate-limiter.service';
-import { BrowserAuditTrailService } from '../../audit/browser-audit-trail.service';
-
-// Mock services
-import { ParlantAuthenticationBridgeService } from '../../../../shared/src/parlant/security/authentication-bridge.service';
-import { EnhancedJwtParlantBridgeService } from '../../../../shared/src/services/enhanced-jwt-parlant-bridge.service';
-
-/**
- * Test configuration for security framework
+import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, INestApplication } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import * as request from 'supertest';import { performance } from 'perf_hooks';// Security componentsimport { BrowserSecurityIntegrationModule } from '../browser-security-integration.module';import { BrowserUseAuthMiddleware } from '../../middleware/browser-use-auth.middleware';import { BrowserUseRbacGuard } from '../../guards/browser-use-rbac.guard';import { BrowserRequestValidatorService } from '../../validators/browser-request-validator.service';import { BrowserRateLimiterService } from '../../rate-limiters/browser-rate-limiter.service';import { BrowserAuditTrailService } from '../../audit/browser-audit-trail.service';// Mock servicesimport { ParlantAuthenticationBridgeService } from '../../../../shared/src/parlant/security/authentication-bridge.service';import { EnhancedJwtParlantBridgeService } from '../../../../shared/src/services/enhanced-jwt-parlant-bridge.service';/*** Test configuration for security framework
  */
 const TEST_SECURITY_CONFIG = {
   authentication: {
@@ -99,24 +80,10 @@ const TEST_SECURITY_CONFIG = {
 /**
  * Mock test data
  */
-const VALID_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJ1c2VySWQiOiJ0ZXN0LXVzZXItaWQiLCJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJicm93c2VyOnRhc2s6Y3JlYXRlIiwiYnJvd3Nlcjp0YXNrOnZpZXciLCJicm93c2VyOnRhc2s6c3RvcCJdLCJpYXQiOjE2MzAwMDAwMDAsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
-
-const INVALID_JWT_TOKEN = 'invalid.jwt.token';
-
-const MALICIOUS_PAYLOAD = {
-  url: 'https://evil.com',
-  task: "'; DROP TABLE users; --",
-  script: '<script>alert("xss")</script>',
-  command: 'rm -rf /',
-};
-
-const VALID_PAYLOAD = {
-  url: 'https://example.com',
-  task: 'navigate_to_page',
-  parameters: {
-    waitForSelector: '.content',
-    timeout: 5000,
-  },
+const VALID_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJ1c2VySWQiOiJ0ZXN0LXVzZXItaWQiLCJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJicm93c2VyOnRhc2s6Y3JlYXRlIiwiYnJvd3Nlcjp0YXNrOnZpZXciLCJicm93c2VyOnRhc2s6c3RvcCJdLCJpYXQiOjE2MzAwMDAwMDAsImV4cCI6OTk5OTk5OTk5OX0.test-signature';const INVALID_JWT_TOKEN = 'invalid.jwt.token';const MALICIOUS_PAYLOAD = {url: 'https://evil.com',
+  task: ""; DROP TABLE users; --",
+  script: '<script>alert("xss")</script>",command: 'rm -rf /',};const VALID_PAYLOAD = {
+  url: 'https://example.com',task: 'navigate_to_page',parameters: {waitForSelector: '.content',timeout: 5000,},
 };
 
 /**
@@ -173,9 +140,7 @@ class PerformanceMeasurement {
   }
 }
 
-describe('Browser Security Integration Tests', () => {
-  let app: INestApplication;
-  let module: TestingModule;
+describe('Browser Security Integration Tests', () => {let app: INestApplication;let module: TestingModule;
   let performanceTracker: PerformanceMeasurement;
 
   // Service instances
@@ -216,23 +181,12 @@ describe('Browser Security Integration Tests', () => {
     await app.close();
 
     // Log performance results
-    console.log('\n🚀 SECURITY FRAMEWORK PERFORMANCE RESULTS:');
-    console.log('='.repeat(60));
+    console.log('\n🚀 SECURITY FRAMEWORK PERFORMANCE RESULTS:');console.log('='.repeat(60));
     const allStats = performanceTracker.getAllStats();
     for (const [operation, stats] of Object.entries(allStats)) {
-      console.log(`\n📊 ${operation}:`);
-      console.log(`   Count: ${stats.count}`);
-      console.log(`   Average: ${stats.average.toFixed(2)}ms`);
-      console.log(`   P95: ${stats.p95.toFixed(2)}ms`);
-      console.log(`   P99: ${stats.p99.toFixed(2)}ms`);
-      console.log(`   Min/Max: ${stats.min.toFixed(2)}ms / ${stats.max.toFixed(2)}ms`);
+      console.log(`\n📊 ${operation}:`);console.log(`   Count: ${stats.count}`);console.log(`   Average: ${stats.average.toFixed(2)}ms`);console.log(`   P95: ${stats.p95.toFixed(2)}ms`);console.log(`   P99: ${stats.p99.toFixed(2)}ms`);console.log(`   Min/Max: ${stats.min.toFixed(2)}ms / ${stats.max.toFixed(2)}ms`);
     }
-    console.log('='.repeat(60));
-  });
-
-  describe('Authentication Middleware Integration', () => {
-    it('should successfully authenticate valid JWT tokens', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('authentication_valid');
+    console.log('='.repeat(60));});describe('Authentication Middleware Integration', () => {it('should successfully authenticate valid JWT tokens', async () => {const endMeasurement = performanceTracker.startMeasurement('authentication_valid');
 
       const mockRequest = createMockRequest({
         headers: { authorization: `Bearer ${VALID_JWT_TOKEN}` },
@@ -246,12 +200,7 @@ describe('Browser Security Integration Tests', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRequest.user).toBeDefined();
-      expect(mockRequest.user.userId).toBe('test-user-id');
-      expect(mockRequest.user.role).toBe('ADMIN');
-    });
-
-    it('should reject invalid JWT tokens', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('authentication_invalid');
+      expect(mockRequest.user.userId).toBe('test-user-id');expect(mockRequest.user.role).toBe('ADMIN');});it('should reject invalid JWT tokens', async () => {const endMeasurement = performanceTracker.startMeasurement('authentication_invalid');
 
       const mockRequest = createMockRequest({
         headers: { authorization: `Bearer ${INVALID_JWT_TOKEN}` },
@@ -268,179 +217,64 @@ describe('Browser Security Integration Tests', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should meet authentication performance targets', () => {
-      const stats = performanceTracker.getStats('authentication_valid');
-      expect(stats.p95).toBeLessThan(50); // < 50ms target
-      expect(stats.average).toBeLessThan(25); // Average should be even faster
+    it('should meet authentication performance targets', () => {const stats = performanceTracker.getStats('authentication_valid');expect(stats.p95).toBeLessThan(50); // < 50ms targetexpect(stats.average).toBeLessThan(25); // Average should be even faster
     });
   });
 
-  describe('Authorization Guard Integration', () => {
-    it('should grant access to users with proper permissions', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('authorization_granted');
-
-      const mockContext = createMockExecutionContext({
-        user: {
-          userId: 'test-user-id',
-          role: 'ADMIN',
-          permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],
-        },
-        route: { handler: { name: 'createBrowserTask' } },
-      });
-
-      const canActivate = await rbacGuard.canActivate(mockContext);
+  describe('Authorization Guard Integration', () => {it('should grant access to users with proper permissions', async () => {const endMeasurement = performanceTracker.startMeasurement('authorization_granted');const mockContext = createMockExecutionContext({user: {
+          userId: 'test-user-id',role: 'ADMIN',permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],},route: { handler: { name: 'createBrowserTask' } },});const canActivate = await rbacGuard.canActivate(mockContext);
 
       endMeasurement();
 
       expect(canActivate).toBe(true);
     });
 
-    it('should deny access to users without proper permissions', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('authorization_denied');
-
-      const mockContext = createMockExecutionContext({
-        user: {
-          userId: 'test-user-id',
-          role: 'USER',
-          permissions: ['browser:task:view'],
-        },
-        route: { handler: { name: 'createBrowserTask' } },
-      });
-
-      const canActivate = await rbacGuard.canActivate(mockContext);
+    it('should deny access to users without proper permissions', async () => {const endMeasurement = performanceTracker.startMeasurement('authorization_denied');const mockContext = createMockExecutionContext({user: {
+          userId: 'test-user-id',role: 'USER',permissions: ['browser:task:view'],},route: { handler: { name: 'createBrowserTask' } },});const canActivate = await rbacGuard.canActivate(mockContext);
 
       endMeasurement();
 
       expect(canActivate).toBe(false);
     });
 
-    it('should meet authorization performance targets', () => {
-      const stats = performanceTracker.getStats('authorization_granted');
-      expect(stats.p95).toBeLessThan(30); // < 30ms target
-    });
+    it('should meet authorization performance targets', () => {const stats = performanceTracker.getStats('authorization_granted');expect(stats.p95).toBeLessThan(30); // < 30ms target});
   });
 
-  describe('Request Validation Integration', () => {
-    it('should pass valid requests through validation', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('validation_valid');
-
-      const result = await validator.validateRequest(VALID_PAYLOAD, {
-        contentType: 'application/json',
-        userAgent: 'test-agent',
-        ipAddress: '127.0.0.1',
-      });
-
-      endMeasurement();
+  describe('Request Validation Integration', () => {it('should pass valid requests through validation', async () => {const endMeasurement = performanceTracker.startMeasurement('validation_valid');const result = await validator.validateRequest(VALID_PAYLOAD, {contentType: 'application/json',userAgent: 'test-agent',ipAddress: '127.0.0.1',});endMeasurement();
 
       expect(result.isValid).toBe(true);
       expect(result.violations).toHaveLength(0);
     });
 
-    it('should detect and block malicious requests', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('validation_malicious');
-
-      const result = await validator.validateRequest(MALICIOUS_PAYLOAD, {
-        contentType: 'application/json',
-        userAgent: 'test-agent',
-        ipAddress: '127.0.0.1',
-      });
-
-      endMeasurement();
+    it('should detect and block malicious requests', async () => {const endMeasurement = performanceTracker.startMeasurement('validation_malicious');const result = await validator.validateRequest(MALICIOUS_PAYLOAD, {contentType: 'application/json',userAgent: 'test-agent',ipAddress: '127.0.0.1',});endMeasurement();
 
       expect(result.isValid).toBe(false);
       expect(result.violations.length).toBeGreaterThan(0);
-      expect(result.violations.some(v => v.type === 'SQL_INJECTION')).toBe(true);
-      expect(result.violations.some(v => v.type === 'XSS')).toBe(true);
-    });
-
-    it('should meet validation performance targets', () => {
-      const stats = performanceTracker.getStats('validation_valid');
-      expect(stats.p95).toBeLessThan(100); // < 100ms target
-    });
+      expect(result.violations.some(v => v.type === 'SQL_INJECTION')).toBe(true);expect(result.violations.some(v => v.type === 'XSS')).toBe(true);});it('should meet validation performance targets', () => {const stats = performanceTracker.getStats('validation_valid');expect(stats.p95).toBeLessThan(100); // < 100ms target});
   });
 
-  describe('Rate Limiting Integration', () => {
-    it('should allow requests within rate limits', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('rate_limiting_allowed');
-
-      const result = await rateLimiter.checkRateLimit({
-        userId: 'test-user-1',
-        ipAddress: '127.0.0.1',
-        endpoint: '/api/browser/task',
-        operation: 'create_task',
-      });
-
-      endMeasurement();
+  describe('Rate Limiting Integration', () => {it('should allow requests within rate limits', async () => {const endMeasurement = performanceTracker.startMeasurement('rate_limiting_allowed');const result = await rateLimiter.checkRateLimit({userId: 'test-user-1',ipAddress: '127.0.0.1',endpoint: '/api/browser/task',operation: 'create_task',});endMeasurement();
 
       expect(result.allowed).toBe(true);
       expect(result.remainingRequests).toBeGreaterThan(0);
     });
 
-    it('should block requests exceeding rate limits', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('rate_limiting_blocked');
-
-      // Exhaust rate limit
-      for (let i = 0; i < 10; i++) {
+    it('should block requests exceeding rate limits', async () => {const endMeasurement = performanceTracker.startMeasurement('rate_limiting_blocked');// Exhaust rate limitfor (let i = 0; i < 10; i++) {
         await rateLimiter.checkRateLimit({
-          userId: 'test-user-2',
-          ipAddress: '127.0.0.2',
-          endpoint: '/api/browser/task',
-          operation: 'create_task',
-        });
-      }
+          userId: 'test-user-2',ipAddress: '127.0.0.2',endpoint: '/api/browser/task',operation: 'create_task',});}
 
       // This should be blocked
       const result = await rateLimiter.checkRateLimit({
-        userId: 'test-user-2',
-        ipAddress: '127.0.0.2',
-        endpoint: '/api/browser/task',
-        operation: 'create_task',
-      });
-
-      endMeasurement();
+        userId: 'test-user-2',ipAddress: '127.0.0.2',endpoint: '/api/browser/task',operation: 'create_task',});endMeasurement();
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('rate limit exceeded');
-    });
-
-    it('should meet rate limiting performance targets', () => {
-      const stats = performanceTracker.getStats('rate_limiting_allowed');
-      expect(stats.p95).toBeLessThan(10); // < 10ms target
-    });
+      expect(result.reason).toContain('rate limit exceeded');});it('should meet rate limiting performance targets', () => {const stats = performanceTracker.getStats('rate_limiting_allowed');expect(stats.p95).toBeLessThan(10); // < 10ms target});
   });
 
-  describe('Audit Trail Integration', () => {
-    it('should record security events with cryptographic integrity', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('audit_trail_recording');
-
-      const eventId = await auditTrail.recordEvent({
-        eventType: 'BROWSER_TASK_CREATED',
-        severity: 'MEDIUM',
-        userId: 'test-user-id',
-        sessionId: 'test-session-id',
-        description: 'User created a new browser automation task',
-        resource: '/api/browser/task',
-        action: 'POST',
-        outcome: 'SUCCESS',
-        ipAddress: '127.0.0.1',
-        userAgent: 'test-agent',
-        data: VALID_PAYLOAD,
-        complianceFlags: ['GDPR', 'SOC2'],
-      });
-
-      endMeasurement();
+  describe('Audit Trail Integration', () => {it('should record security events with cryptographic integrity', async () => {const endMeasurement = performanceTracker.startMeasurement('audit_trail_recording');const eventId = await auditTrail.recordEvent({eventType: 'BROWSER_TASK_CREATED',severity: 'MEDIUM',userId: 'test-user-id',sessionId: 'test-session-id',description: 'User created a new browser automation task',resource: '/api/browser/task',action: 'POST',outcome: 'SUCCESS',ipAddress: '127.0.0.1',userAgent: 'test-agent',data: VALID_PAYLOAD,complianceFlags: ['GDPR', 'SOC2'],});endMeasurement();
 
       expect(eventId).toBeDefined();
-      expect(typeof eventId).toBe('string');
-    });
-
-    it('should retrieve audit events with integrity verification', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('audit_trail_retrieval');
-
-      const events = await auditTrail.getEvents({
-        userId: 'test-user-id',
-        startTime: new Date(Date.now() - 3600000), // Last hour
-        endTime: new Date(),
+      expect(typeof eventId).toBe('string');});it('should retrieve audit events with integrity verification', async () => {const endMeasurement = performanceTracker.startMeasurement('audit_trail_retrieval');const events = await auditTrail.getEvents({userId: 'test-user-id',startTime: new Date(Date.now() - 3600000), // Last hourendTime: new Date(),
         verifyIntegrity: true,
       });
 
@@ -448,29 +282,16 @@ describe('Browser Security Integration Tests', () => {
 
       expect(events).toBeDefined();
       expect(Array.isArray(events.events)).toBe(true);
-      expect(events.integrityStatus).toBe('VERIFIED');
-    });
-
-    it('should meet audit trail performance targets', () => {
-      const stats = performanceTracker.getStats('audit_trail_recording');
-      expect(stats.p95).toBeLessThan(200); // < 200ms target
-    });
+      expect(events.integrityStatus).toBe('VERIFIED');});it('should meet audit trail performance targets', () => {const stats = performanceTracker.getStats('audit_trail_recording');expect(stats.p95).toBeLessThan(200); // < 200ms target});
   });
 
-  describe('End-to-End Security Framework Integration', () => {
-    it('should complete full security workflow within performance targets', async () => {
-      const endMeasurement = performanceTracker.startMeasurement('e2e_security_workflow');
+  describe('End-to-End Security Framework Integration', () => {it('should complete full security workflow within performance targets', async () => {const endMeasurement = performanceTracker.startMeasurement('e2e_security_workflow');
 
       // Simulate a complete request through all security layers
       const mockRequest = createMockRequest({
         headers: { authorization: `Bearer ${VALID_JWT_TOKEN}` },
         body: VALID_PAYLOAD,
-        url: '/api/browser/task',
-        method: 'POST',
-        ip: '127.0.0.1',
-      });
-
-      // 1. Authentication
+        url: '/api/browser/task',method: 'POST',ip: '127.0.0.1',});// 1. Authentication
       const mockResponse = createMockResponse();
       const mockNext = jest.fn();
       await authMiddleware.use(mockRequest, mockResponse, mockNext);
@@ -478,42 +299,22 @@ describe('Browser Security Integration Tests', () => {
       // 2. Authorization
       const mockContext = createMockExecutionContext({
         user: mockRequest.user,
-        route: { handler: { name: 'createBrowserTask' } },
-      });
-      const authorized = await rbacGuard.canActivate(mockContext);
+        route: { handler: { name: 'createBrowserTask' } },});const authorized = await rbacGuard.canActivate(mockContext);
 
       // 3. Validation
       const validation = await validator.validateRequest(mockRequest.body, {
-        contentType: 'application/json',
-        userAgent: mockRequest.get('User-Agent'),
-        ipAddress: mockRequest.ip,
-      });
+        contentType: 'application/json',userAgent: mockRequest.get('User-Agent'),ipAddress: mockRequest.ip,});
 
       // 4. Rate limiting
       const rateLimit = await rateLimiter.checkRateLimit({
         userId: mockRequest.user.userId,
         ipAddress: mockRequest.ip,
         endpoint: mockRequest.url,
-        operation: 'create_task',
-      });
-
-      // 5. Audit trail
+        operation: 'create_task',});// 5. Audit trail
       const auditEventId = await auditTrail.recordEvent({
-        eventType: 'BROWSER_TASK_CREATED',
-        severity: 'MEDIUM',
-        userId: mockRequest.user.userId,
-        sessionId: mockRequest.session?.sessionId,
-        description: 'Complete security workflow test',
-        resource: mockRequest.url,
-        action: mockRequest.method,
-        outcome: 'SUCCESS',
-        ipAddress: mockRequest.ip,
-        userAgent: mockRequest.get('User-Agent'),
-        data: mockRequest.body,
-        complianceFlags: ['TEST'],
-      });
-
-      endMeasurement();
+        eventType: 'BROWSER_TASK_CREATED',severity: 'MEDIUM',userId: mockRequest.user.userId,sessionId: mockRequest.session?.sessionId,
+        description: 'Complete security workflow test',resource: mockRequest.url,action: mockRequest.method,
+        outcome: 'SUCCESS',ipAddress: mockRequest.ip,userAgent: mockRequest.get('User-Agent'),data: mockRequest.body,complianceFlags: ['TEST'],});endMeasurement();
 
       // Verify all components succeeded
       expect(mockNext).toHaveBeenCalled();
@@ -523,15 +324,10 @@ describe('Browser Security Integration Tests', () => {
       expect(auditEventId).toBeDefined();
     });
 
-    it('should meet overall end-to-end performance targets', () => {
-      const stats = performanceTracker.getStats('e2e_security_workflow');
-      expect(stats.p95).toBeLessThan(1000); // < 1000ms P95 target
-      expect(stats.average).toBeLessThan(500); // Average should be much faster
+    it('should meet overall end-to-end performance targets', () => {const stats = performanceTracker.getStats('e2e_security_workflow');expect(stats.p95).toBeLessThan(1000); // < 1000ms P95 targetexpect(stats.average).toBeLessThan(500); // Average should be much faster
     });
 
-    it('should maintain performance under load', async () => {
-      const iterations = 50;
-      const promises: Promise<void>[] = [];
+    it('should maintain performance under load', async () => {const iterations = 50;const promises: Promise<void>[] = [];
 
       for (let i = 0; i < iterations; i++) {
         promises.push((async () => {
@@ -540,44 +336,25 @@ describe('Browser Security Integration Tests', () => {
           const mockRequest = createMockRequest({
             headers: { authorization: `Bearer ${VALID_JWT_TOKEN}` },
             body: VALID_PAYLOAD,
-            url: '/api/browser/task',
-            method: 'POST',
-            ip: '127.0.0.1',
-          });
-
-          // Simulate abbreviated security workflow
+            url: '/api/browser/task',method: 'POST',ip: '127.0.0.1',});// Simulate abbreviated security workflow
           await validator.validateRequest(mockRequest.body, {
-            contentType: 'application/json',
-            userAgent: 'test-agent',
-            ipAddress: '127.0.0.1',
+            contentType: 'application/json',userAgent: 'test-agent',ipAddress: '127.0.0.1',
           });
 
           await rateLimiter.checkRateLimit({
             userId: `load-test-user-${i}`,
-            ipAddress: '127.0.0.1',
-            endpoint: '/api/browser/task',
-            operation: 'create_task',
-          });
-
-          endMeasurement();
+            ipAddress: '127.0.0.1',endpoint: '/api/browser/task',operation: 'create_task',});endMeasurement();
         })());
       }
 
       await Promise.all(promises);
 
-      const stats = performanceTracker.getStats('load_test_iteration');
-      expect(stats.p95).toBeLessThan(1000); // Performance should not degrade significantly
-      expect(stats.count).toBe(iterations);
+      const stats = performanceTracker.getStats('load_test_iteration');expect(stats.p95).toBeLessThan(1000); // Performance should not degrade significantlyexpect(stats.count).toBe(iterations);
     });
   });
 
-  describe('Error Handling and Resilience', () => {
-    it('should handle authentication service failures gracefully', async () => {
-      // Test with service failure simulation
-      const mockRequest = createMockRequest({
-        headers: { authorization: 'Bearer error-token' },
-      });
-      const mockResponse = createMockResponse();
+  describe('Error Handling and Resilience', () => {it('should handle authentication service failures gracefully', async () => {// Test with service failure simulationconst mockRequest = createMockRequest({
+        headers: { authorization: 'Bearer error-token' },});const mockResponse = createMockResponse();
       const mockNext = jest.fn();
 
       await expect(
@@ -587,24 +364,9 @@ describe('Browser Security Integration Tests', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should maintain audit trail during component failures', async () => {
-      // Even if other components fail, audit trail should record the failure
-      const eventId = await auditTrail.recordEvent({
-        eventType: 'AUTHENTICATION_FAILURE',
-        severity: 'HIGH',
-        userId: null,
-        sessionId: null,
-        description: 'Authentication failed for invalid token',
-        resource: '/api/browser/task',
-        action: 'POST',
-        outcome: 'FAILURE',
-        ipAddress: '127.0.0.1',
-        userAgent: 'test-agent',
-        data: { error: 'Invalid JWT token' },
-        complianceFlags: ['SECURITY_INCIDENT'],
-      });
-
-      expect(eventId).toBeDefined();
+    it('should maintain audit trail during component failures', async () => {// Even if other components fail, audit trail should record the failureconst eventId = await auditTrail.recordEvent({
+        eventType: 'AUTHENTICATION_FAILURE',severity: 'HIGH',userId: null,sessionId: null,
+        description: 'Authentication failed for invalid token',resource: '/api/browser/task',action: 'POST',outcome: 'FAILURE',ipAddress: '127.0.0.1',userAgent: 'test-agent',data: { error: 'Invalid JWT token' },complianceFlags: ['SECURITY_INCIDENT'],});expect(eventId).toBeDefined();
     });
   });
 });
@@ -619,19 +381,10 @@ function createMockParlantAuthService() {
         return Promise.resolve({
           valid: true,
           payload: {
-            sub: 'test-user',
-            userId: 'test-user-id',
-            role: 'ADMIN',
-            permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],
-          },
-        });
+            sub: 'test-user',userId: 'test-user-id',role: 'ADMIN',permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],},});
       }
-      return Promise.reject(new Error('Invalid token'));
-    }),
-    refreshToken: jest.fn(),
-    getUserPermissions: jest.fn().mockResolvedValue(['browser:task:create', 'browser:task:view', 'browser:task:stop']),
-  };
-}
+      return Promise.reject(new Error('Invalid token'));}),refreshToken: jest.fn(),
+    getUserPermissions: jest.fn().mockResolvedValue(['browser:task:create', 'browser:task:view', 'browser:task:stop']),};}
 
 function createMockJwtBridgeService() {
   return {
@@ -640,28 +393,16 @@ function createMockJwtBridgeService() {
         return Promise.resolve({
           valid: true,
           decoded: {
-            sub: 'test-user',
-            userId: 'test-user-id',
-            role: 'ADMIN',
-            permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],
-          },
-        });
+            sub: 'test-user',userId: 'test-user-id',role: 'ADMIN',permissions: ['browser:task:create', 'browser:task:view', 'browser:task:stop'],},});
       }
-      return Promise.reject(new Error('Invalid token'));
-    }),
-  };
+      return Promise.reject(new Error('Invalid token'));}),};
 }
 
 function createMockRequest(overrides: any = {}) {
   return {
     headers: {},
     body: {},
-    url: '/api/test',
-    method: 'GET',
-    ip: '127.0.0.1',
-    get: jest.fn().mockReturnValue('test-agent'),
-    ...overrides,
-  };
+    url: '/api/test',method: 'GET',ip: '127.0.0.1',get: jest.fn().mockReturnValue('test-agent'),...overrides,};
 }
 
 function createMockResponse() {
@@ -677,8 +418,7 @@ function createMockExecutionContext(overrides: any = {}) {
     switchToHttp: jest.fn().mockReturnValue({
       getRequest: jest.fn().mockReturnValue({
         user: overrides.user || {},
-        url: '/api/test',
-        method: 'GET',
+        url: '/api/test',method: 'GET',
       }),
     }),
     getHandler: jest.fn().mockReturnValue(overrides.route?.handler || {}),

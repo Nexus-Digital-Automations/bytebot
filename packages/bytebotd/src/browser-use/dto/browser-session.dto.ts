@@ -1,6 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -10,64 +8,27 @@ import {
   IsUrl,
   Min,
   Max,
-} from 'class-validator';
-
-/**
- * Browser session status
+} from 'class-validator';/*** Browser session status
  */
 export enum BrowserSessionStatus {
-  CREATING = 'creating',
-  ACTIVE = 'active',
-  IDLE = 'idle',
-  BUSY = 'busy',
-  CLOSING = 'closing',
-  CLOSED = 'closed',
-  ERROR = 'error',
-}
-
-/**
+  CREATING = 'creating',ACTIVE = 'active',IDLE = 'idle',BUSY = 'busy',CLOSING = 'closing',CLOSED = 'closed',ERROR = 'error',}/**
  * Browser tab information
  */
 export class BrowserTabInfoDto {
   @ApiProperty({
-    description: 'Unique tab identifier',
-  })
-  tabId: string = '';
+    description: 'Unique tab identifier',})tabId: string = '';@ApiProperty({description: 'Current tab URL',})url: string = '';@ApiProperty({description: 'Tab title',})title: string = '';@ApiProperty({description: 'Whether tab is currently active/focused',})active: boolean = false;
 
   @ApiProperty({
-    description: 'Current tab URL',
-  })
-  url: string = '';
-
-  @ApiProperty({
-    description: 'Tab title',
-  })
-  title: string = '';
-
-  @ApiProperty({
-    description: 'Whether tab is currently active/focused',
-  })
-  active: boolean = false;
-
-  @ApiProperty({
-    description: 'Tab loading status',
-  })
-  loading: boolean = false;
+    description: 'Tab loading status',})loading: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Tab favicon URL',
-  })
-  faviconUrl?: string;
+    description: 'Tab favicon URL',})faviconUrl?: string;
 
   @ApiProperty({
-    description: 'Tab creation timestamp',
-  })
-  createdAt: Date = new Date();
+    description: 'Tab creation timestamp',})createdAt: Date = new Date();
 
   @ApiProperty({
-    description: 'Last activity timestamp',
-  })
-  lastActivityAt: Date = new Date();
+    description: 'Last activity timestamp',})lastActivityAt: Date = new Date();
 }
 
 /**
@@ -75,17 +36,12 @@ export class BrowserTabInfoDto {
  */
 export class CreateBrowserSessionDto {
   @ApiPropertyOptional({
-    description: 'Session _name for identification',
-    example: 'E-commerce data extraction session',
-  })
-  @IsOptional()
+    description: 'Session _name for identification',example: 'E-commerce data extraction session',})@IsOptional()
   @IsString()
   name?: string;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport width',
-    minimum: 320,
-    maximum: 3840,
+    description: 'Browser viewport width',minimum: 320,maximum: 3840,
     default: 1920,
   })
   @IsOptional()
@@ -95,9 +51,7 @@ export class CreateBrowserSessionDto {
   viewportWidth?: number = 1920;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport height',
-    minimum: 240,
-    maximum: 2160,
+    description: 'Browser viewport height',minimum: 240,maximum: 2160,
     default: 1080,
   })
   @IsOptional()
@@ -107,42 +61,31 @@ export class CreateBrowserSessionDto {
   viewportHeight?: number = 1080;
 
   @ApiPropertyOptional({
-    description: 'Run browser in headless mode',
-    default: false,
-  })
+    description: 'Run browser in headless mode',default: false,})
   @IsOptional()
   @IsBoolean()
   headless?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Enable browser developer tools',
-    default: false,
-  })
+    description: 'Enable browser developer tools',default: false,})
   @IsOptional()
   @IsBoolean()
   devtools?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Custom user agent string',
-  })
-  @IsOptional()
+    description: 'Custom user agent string',})@IsOptional()
   @IsString()
   userAgent?: string;
 
   @ApiPropertyOptional({
-    description: 'Additional Chrome launch arguments',
-    type: [String],
-  })
+    description: 'Additional Chrome launch arguments',type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   additionalArgs?: string[];
 
   @ApiPropertyOptional({
-    description: 'Proxy configuration',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Proxy configuration',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   proxy?: {
@@ -152,16 +95,12 @@ export class CreateBrowserSessionDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Browser profile directory path (local filesystem)',
-  })
-  @IsOptional()
+    description: 'Browser profile directory path (local filesystem)',})@IsOptional()
   @IsString()
   profilePath?: string;
 
   @ApiPropertyOptional({
-    description: 'Session timeout in milliseconds',
-    minimum: 60000, // 1 minute
-    maximum: 7200000, // 2 hours
+    description: 'Session timeout in milliseconds',minimum: 60000, // 1 minutemaximum: 7200000, // 2 hours
     default: 1800000, // 30 minutes
   })
   @IsOptional()
@@ -171,26 +110,20 @@ export class CreateBrowserSessionDto {
   sessionTimeoutMs?: number = 1800000;
 
   @ApiPropertyOptional({
-    description: 'Initial URLs to open in tabs',
-    type: [String],
-  })
+    description: 'Initial URLs to open in tabs',type: [String],})
   @IsOptional()
   @IsArray()
   @IsUrl({ require_protocol: true }, { each: true })
   initialUrls?: string[];
 
   @ApiPropertyOptional({
-    description: 'Enable automatic screenshot capture',
-    default: true,
-  })
+    description: 'Enable automatic screenshot capture',default: true,})
   @IsOptional()
   @IsBoolean()
   enableScreenshots?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Screenshot capture interval in milliseconds',
-    minimum: 1000,
-    maximum: 60000,
+    description: 'Screenshot capture interval in milliseconds',minimum: 1000,maximum: 60000,
     default: 5000,
   })
   @IsOptional()
@@ -200,10 +133,7 @@ export class CreateBrowserSessionDto {
   screenshotIntervalMs?: number = 5000;
 
   @ApiPropertyOptional({
-    description: 'Custom session metadata',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Custom session metadata',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
@@ -214,56 +144,30 @@ export class CreateBrowserSessionDto {
  */
 export class BrowserSessionDto {
   @ApiProperty({
-    description: 'Unique session identifier',
-  })
-  sessionId: string = '';
-
-  @ApiProperty({
-    description: 'Session _name',
-  })
-  name: string = '';
-
-  @ApiProperty({
-    description: 'Current session status',
-    enum: BrowserSessionStatus,
-  })
+    description: 'Unique session identifier',})sessionId: string = '';@ApiProperty({description: 'Session _name',})name: string = '';@ApiProperty({description: 'Current session status',enum: BrowserSessionStatus,})
   status: BrowserSessionStatus = BrowserSessionStatus.CREATING;
 
   @ApiProperty({
-    description: 'Browser process ID',
-  })
-  browserPid: number = 0;
+    description: 'Browser process ID',})browserPid: number = 0;
 
   @ApiProperty({
-    description: 'Session creation timestamp',
-  })
-  createdAt: Date = new Date();
+    description: 'Session creation timestamp',})createdAt: Date = new Date();
 
   @ApiProperty({
-    description: 'Last activity timestamp',
-  })
-  lastActivityAt: Date = new Date();
+    description: 'Last activity timestamp',})lastActivityAt: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Session closure timestamp',
-  })
-  closedAt?: Date;
+    description: 'Session closure timestamp',})closedAt?: Date;
 
   @ApiProperty({
-    description: 'Browser viewport dimensions',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Browser viewport dimensions',type: 'object',additionalProperties: true,})
   viewport: {
     width: number;
     height: number;
   } = { width: 1920, height: 1080 };
 
   @ApiProperty({
-    description: 'Browser configuration',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Browser configuration',type: 'object',additionalProperties: true,})
   config: {
     headless: boolean;
     devtools: boolean;
@@ -276,21 +180,11 @@ export class BrowserSessionDto {
   } = { headless: true, devtools: false };
 
   @ApiProperty({
-    description: 'Active browser tabs',
-    type: [BrowserTabInfoDto],
-  })
+    description: 'Active browser tabs',type: [BrowserTabInfoDto],})
   tabs: BrowserTabInfoDto[] = [];
 
   @ApiProperty({
-    description: 'Current active tab ID',
-  })
-  activeTabId: string = '';
-
-  @ApiProperty({
-    description: 'Session statistics',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Current active tab ID',})activeTabId: string = '';@ApiProperty({description: 'Session statistics',type: 'object',additionalProperties: true,})
   statistics: {
     totalTabs: number;
     totalPageLoads: number;
@@ -306,10 +200,7 @@ export class BrowserSessionDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Session error information if in error state',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Session error information if in error state',type: 'object',additionalProperties: true,})
   errorInfo?: {
     message: string;
     code: string;
@@ -318,10 +209,7 @@ export class BrowserSessionDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Custom session metadata',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Custom session metadata',type: 'object',additionalProperties: true,})
   metadata?: Record<string, unknown>;
 }
 
@@ -330,23 +218,17 @@ export class BrowserSessionDto {
  */
 export class TabOperationDto {
   @ApiPropertyOptional({
-    description: 'URL to navigate to (for create/navigate operations)',
-  })
-  @IsOptional()
+    description: 'URL to navigate to (for create/navigate operations)',})@IsOptional()
   @IsUrl({ require_protocol: true })
   url?: string;
 
   @ApiPropertyOptional({
-    description: 'Tab title (for create operations)',
-  })
-  @IsOptional()
+    description: 'Tab title (for create operations)',})@IsOptional()
   @IsString()
   title?: string;
 
   @ApiPropertyOptional({
-    description: 'Make tab active after operation',
-    default: true,
-  })
+    description: 'Make tab active after operation',default: true,})
   @IsOptional()
   @IsBoolean()
   makeActive?: boolean = true;
@@ -357,32 +239,24 @@ export class TabOperationDto {
  */
 export class DomExtractionDto {
   @ApiPropertyOptional({
-    description: 'CSS selector to extract specific elements',
-  })
-  @IsOptional()
+    description: 'CSS selector to extract specific elements',})@IsOptional()
   @IsString()
   selector?: string;
 
   @ApiPropertyOptional({
-    description: 'Include element attributes in extraction',
-    default: true,
-  })
+    description: 'Include element attributes in extraction',default: true,})
   @IsOptional()
   @IsBoolean()
   includeAttributes?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Include element text content',
-    default: true,
-  })
+    description: 'Include element text content',default: true,})
   @IsOptional()
   @IsBoolean()
   includeText?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Maximum depth for DOM tree extraction',
-    minimum: 1,
-    maximum: 10,
+    description: 'Maximum depth for DOM tree extraction',minimum: 1,maximum: 10,
     default: 5,
   })
   @IsOptional()
@@ -392,9 +266,7 @@ export class DomExtractionDto {
   maxDepth?: number = 5;
 
   @ApiPropertyOptional({
-    description: 'Filter out hidden elements',
-    default: true,
-  })
+    description: 'Filter out hidden elements',default: true,})
   @IsOptional()
   @IsBoolean()
   excludeHidden?: boolean = true;
@@ -405,18 +277,8 @@ export class DomExtractionDto {
  */
 export class ScreenshotConfigDto {
   @ApiPropertyOptional({
-    description: 'Screenshot format',
-    enum: ['png', 'jpeg'],
-    default: 'png',
-  })
-  @IsOptional()
-  @IsEnum(['png', 'jpeg'])
-  format?: 'png' | 'jpeg' = 'png';
-
-  @ApiPropertyOptional({
-    description: 'Screenshot quality (for JPEG)',
-    minimum: 10,
-    maximum: 100,
+    description: 'Screenshot format',enum: ['png', 'jpeg'],default: 'png',})@IsOptional()
+  @IsEnum(['png', 'jpeg'])format?: 'png' | 'jpeg' = 'png';@ApiPropertyOptional({description: 'Screenshot quality (for JPEG)',minimum: 10,maximum: 100,
     default: 85,
   })
   @IsOptional()
@@ -426,24 +288,18 @@ export class ScreenshotConfigDto {
   quality?: number = 85;
 
   @ApiPropertyOptional({
-    description: 'Capture full page (vs viewport only)',
-    default: false,
-  })
+    description: 'Capture full page (vs viewport only)',default: false,})
   @IsOptional()
   @IsBoolean()
   fullPage?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'CSS selector to capture specific element',
-  })
-  @IsOptional()
+    description: 'CSS selector to capture specific element',})@IsOptional()
   @IsString()
   elementSelector?: string;
 
   @ApiPropertyOptional({
-    description: 'Return screenshot as base64 string',
-    default: true,
-  })
+    description: 'Return screenshot as base64 string',default: true,})
   @IsOptional()
   @IsBoolean()
   returnBase64?: boolean = true;
@@ -454,44 +310,22 @@ export class ScreenshotConfigDto {
  */
 export class SessionHealthCheckDto {
   @ApiProperty({
-    description: 'Session identifier',
-  })
-  sessionId: string = '';
-
-  @ApiProperty({
-    description: 'Overall health status',
-    enum: ['healthy', 'warning', 'critical'],
-  })
-  status: 'healthy' | 'warning' | 'critical' = 'healthy';
-
-  @ApiProperty({
-    description: 'Health score (0-100)',
-    minimum: 0,
-    maximum: 100,
+    description: 'Session identifier',})sessionId: string = '';@ApiProperty({description: 'Overall health status',enum: ['healthy', 'warning', 'critical'],})status: 'healthy' | 'warning' | 'critical' = 'healthy';@ApiProperty({description: 'Health score (0-100)',minimum: 0,maximum: 100,
   })
   healthScore: number = 100;
 
   @ApiProperty({
-    description: 'Health check timestamp',
-  })
-  checkTimestamp: Date = new Date();
+    description: 'Health check timestamp',})checkTimestamp: Date = new Date();
 
   @ApiProperty({
-    description: 'Health check duration in milliseconds',
-  })
-  checkDurationMs: number = 0;
+    description: 'Health check duration in milliseconds',})checkDurationMs: number = 0;
 
   @ApiPropertyOptional({
-    description: 'List of health issues found',
-    type: [String],
-  })
+    description: 'List of health issues found',type: [String],})
   issues?: string[];
 
   @ApiPropertyOptional({
-    description: 'Detailed health metrics',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Detailed health metrics',type: 'object',additionalProperties: true,})
   metrics?: {
     processHealth: boolean;
     memoryUsageMB: number;
@@ -507,25 +341,10 @@ export class SessionHealthCheckDto {
  */
 export class SessionMetricsDto {
   @ApiProperty({
-    description: 'Session identifier',
-  })
-  sessionId: string = '';
+    description: 'Session identifier',})sessionId: string = '';@ApiProperty({description: 'Metrics timeframe',})timeframe: string = '';@ApiProperty({description: 'Metrics generation timestamp',})generatedAt: Date = new Date();
 
   @ApiProperty({
-    description: 'Metrics timeframe',
-  })
-  timeframe: string = '';
-
-  @ApiProperty({
-    description: 'Metrics generation timestamp',
-  })
-  generatedAt: Date = new Date();
-
-  @ApiProperty({
-    description: 'Session information',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Session information',type: 'object',additionalProperties: true,})
   session: {
     upTimeMs: number;
     status: BrowserSessionStatus;
@@ -539,10 +358,7 @@ export class SessionMetricsDto {
   };
 
   @ApiProperty({
-    description: 'Performance metrics',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Performance metrics',type: 'object',additionalProperties: true,})
   performance: {
     averageResponseTimeMs: number;
     peakMemoryUsageMB: number;
@@ -560,10 +376,7 @@ export class SessionMetricsDto {
   };
 
   @ApiProperty({
-    description: 'Resource usage metrics',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Resource usage metrics',type: 'object',additionalProperties: true,})
   resources: {
     memoryMB: number;
     cpuUsagePercent: number;
@@ -573,10 +386,7 @@ export class SessionMetricsDto {
   };
 
   @ApiProperty({
-    description: 'Activity metrics',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Activity metrics',type: 'object',additionalProperties: true,})
   activity: {
     recentEvents: number;
     activityScore: number;
@@ -588,29 +398,16 @@ export class SessionMetricsDto {
   };
 
   @ApiProperty({
-    description: 'Trend analysis',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Trend analysis',type: 'object',additionalProperties: true,})
   trends: {
-    memoryTrend: 'increasing' | 'decreasing' | 'stable';
-    cpuTrend: 'increasing' | 'decreasing' | 'stable';
-    activityTrend: 'increasing' | 'decreasing' | 'stable';
-  } = {
-    memoryTrend: 'stable',
-    cpuTrend: 'stable',
-    activityTrend: 'stable',
-  };
-}
+    memoryTrend: 'increasing' | 'decreasing' | 'stable';cpuTrend: 'increasing' | 'decreasing' | 'stable';activityTrend: 'increasing' | 'decreasing' | 'stable';} = {memoryTrend: 'stable',cpuTrend: 'stable',activityTrend: 'stable',};}
 
 /**
  * Session configuration update DTO
  */
 export class SessionConfigUpdateDto {
   @ApiPropertyOptional({
-    description: 'Update session timeout in milliseconds',
-    minimum: 60000,
-    maximum: 7200000,
+    description: 'Update session timeout in milliseconds',minimum: 60000,maximum: 7200000,
   })
   @IsOptional()
   @IsNumber()
@@ -619,10 +416,7 @@ export class SessionConfigUpdateDto {
   sessionTimeoutMs?: number;
 
   @ApiPropertyOptional({
-    description: 'Update session metadata',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Update session metadata',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
@@ -633,41 +427,26 @@ export class SessionConfigUpdateDto {
  */
 export class BulkSessionOperationDto {
   @ApiProperty({
-    description: 'Operation to perform',
-    enum: ['create', 'close', 'health_check', 'update'],
-  })
-  @IsEnum(['create', 'close', 'health_check', 'update'])
-  operation: 'create' | 'close' | 'health_check' | 'update' = 'health_check';
-
-  @ApiPropertyOptional({
-    description: 'Session IDs for operations (required for close, health_check, update)',
-    type: [String],
-  })
+    description: 'Operation to perform',enum: ['create', 'close', 'health_check', 'update'],})@IsEnum(['create', 'close', 'health_check', 'update'])operation: 'create' | 'close' | 'health_check' | 'update' = 'health_check';@ApiPropertyOptional({description: 'Session IDs for operations (required for close, health_check, update)',type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   sessionIds?: string[];
 
   @ApiPropertyOptional({
-    description: 'Session configurations for bulk create operation',
-    type: [CreateBrowserSessionDto],
-  })
+    description: 'Session configurations for bulk create operation',type: [CreateBrowserSessionDto],})
   @IsOptional()
   @IsArray()
   sessionConfigs?: CreateBrowserSessionDto[];
 
   @ApiPropertyOptional({
-    description: 'Execute operations in parallel',
-    default: true,
-  })
+    description: 'Execute operations in parallel',default: true,})
   @IsOptional()
   @IsBoolean()
   parallel?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Maximum concurrent operations (when parallel=true)',
-    minimum: 1,
-    maximum: 20,
+    description: 'Maximum concurrent operations (when parallel=true)',minimum: 1,maximum: 20,
     default: 5,
   })
   @IsOptional()
@@ -682,42 +461,22 @@ export class BulkSessionOperationDto {
  */
 export class BulkSessionResultDto {
   @ApiProperty({
-    description: 'Operation that was performed',
-  })
-  operation: string = '';
+    description: 'Operation that was performed',})operation: string = '';@ApiProperty({description: 'Total number of sessions processed',})totalSessions: number = 0;
 
   @ApiProperty({
-    description: 'Total number of sessions processed',
-  })
-  totalSessions: number = 0;
-
-  @ApiProperty({
-    description: 'Successfully processed session IDs',
-    type: [String],
-  })
+    description: 'Successfully processed session IDs',type: [String],})
   successful: string[] = [];
 
   @ApiProperty({
-    description: 'Failed operations with error details',
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        sessionId: { type: 'string' },
-        error: { type: 'string' },
-      },
-    },
+    description: 'Failed operations with error details',type: 'array',items: {type: 'object',properties: {sessionId: { type: 'string' },error: { type: 'string' },},},
   })
   failed: Array<{ sessionId: string; error: string }> = [];
 
   @ApiProperty({
-    description: 'Total execution time in milliseconds',
-  })
-  executionTimeMs: number = 0;
+    description: 'Total execution time in milliseconds',})executionTimeMs: number = 0;
 
   @ApiProperty({
-    description: 'Operation summary statistics',
-    type: 'object',
+    description: 'Operation summary statistics',type: 'object',
     additionalProperties: true,
   })
   summary: {

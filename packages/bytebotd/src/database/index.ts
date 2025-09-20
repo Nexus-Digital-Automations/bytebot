@@ -28,43 +28,17 @@ import {
   type DatabaseValidationResult as _DatabaseValidationResult,
   type DatabaseBackupInfo as _DatabaseBackupInfo,
   type MultiPartyApprovalRequest as _MultiPartyApprovalRequest,
-} from './conversational-database.service';
-import { DatabaseModule } from './database.module';
-import { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';
-import { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';
-
-// Re-export for external consumption
-export { ConversationalDatabaseService } from './conversational-database.service';
-export { DatabaseModule } from './database.module';
-
-// ===== TYPES AND ENUMS =====
-
-export {
+} from './conversational-database.service';import { DatabaseModule } from './database.module';import { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';import { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';// Re-export for external consumptionexport { ConversationalDatabaseService } from './conversational-database.service';export { DatabaseModule } from './database.module';// ===== TYPES AND ENUMS =====export {
   DatabaseOperationType,
   DatabaseRiskLevel,
   type DatabaseOperationContext,
   type DatabaseValidationResult,
   type DatabaseBackupInfo,
   type MultiPartyApprovalRequest,
-} from './conversational-database.service';
-
-// ===== REPOSITORY SERVICES =====
-
-export { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';
-export { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';
-
-export {
-  type RepositoryOperationContext,
+} from './conversational-database.service';// ===== REPOSITORY SERVICES =====export { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';export { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';export {type RepositoryOperationContext,
   type BusinessValidationResult,
-} from './repositories/base-conversational-repository.service';
-
-export {
-  type UserOperationContext,
-} from './repositories/user-conversational-repository.service';
-
-// ===== EXAMPLES AND INTEGRATION =====
-
-export {
+} from './repositories/base-conversational-repository.service';export {type UserOperationContext,
+} from './repositories/user-conversational-repository.service';// ===== EXAMPLES AND INTEGRATION =====export {
   ExampleUserManagementService,
   ConversationalDatabaseUsageExamples,
   ConversationalDatabaseExampleModule,
@@ -132,8 +106,7 @@ export function createOperationContext(
     userId,
     userRole,
     businessPurpose,
-    sessionId: additional?.sessionId ?? `session_${Date.now()}`,
-    correlationId: additional?.correlationId ?? `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    sessionId: additional?.sessionId ?? `session_${Date.now()}`,correlationId: additional?.correlationId ?? `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
     metadata: additional?.metadata ?? {},
     ...additional,
   };
@@ -147,7 +120,7 @@ export function requiresHighLevelApproval(
   riskLevel: DatabaseRiskLevel,
 ): boolean {
   // Critical risk operations always require high-level approval
-  if (riskLevel === DatabaseRiskLevel.CRITICAL) {
+  if (riskLevel === DatabaseRiskLevel._CRITICAL) {
     return true;
   }
 
@@ -172,13 +145,13 @@ export function getRecommendedBackupRetention(
   riskLevel: DatabaseRiskLevel,
 ): number {
   switch (riskLevel) {
-    case DatabaseRiskLevel.LOW:
+    case DatabaseRiskLevel._LOW:
       return 7; // 1 week
-    case DatabaseRiskLevel.MEDIUM:
+    case DatabaseRiskLevel._MODERATE:
       return 30; // 1 month
-    case DatabaseRiskLevel.HIGH:
+    case DatabaseRiskLevel._HIGH:
       return 90; // 3 months
-    case DatabaseRiskLevel.CRITICAL:
+    case DatabaseRiskLevel._CRITICAL:
       return 365; // 1 year
     default:
       return 30; // Default to 1 month
@@ -203,36 +176,15 @@ export function createDefaultValidationConfig(): ConversationalValidationConfig 
  * Sanitize operation data for logging (remove sensitive information)
  */
 export function sanitizeOperationData(data: unknown): unknown {
-  if (!data || typeof data !== 'object') {
-    return data;
-  }
+  if (!data || typeof data !== 'object') {return data;}
 
   const sensitiveFields = [
-    'password',
-    'passwordHash',
-    'token',
-    'secret',
-    'key',
-    'apiKey',
-    'accessToken',
-    'refreshToken',
-    'sessionToken',
-    'authToken',
-    'privateKey',
-    'publicKey',
-    'salt',
-    'hash',
-  ];
-
-  const sanitized = { ...data as Record<string, unknown> };
+    'password','passwordHash','token','secret','key','apiKey','accessToken','refreshToken','sessionToken','authToken','privateKey','publicKey','salt','hash',];const sanitized = { ...data as Record<string, unknown> };
 
   Object.keys(sanitized).forEach(key => {
     const lowerKey = key.toLowerCase();
     if (sensitiveFields.some(field => lowerKey.includes(field))) {
-      sanitized[key] = '[REDACTED]';
-    } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
-      sanitized[key] = sanitizeOperationData(sanitized[key]);
-    }
+      sanitized[key] = '[REDACTED]';} else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {sanitized[key] = sanitizeOperationData(sanitized[key]);}
   });
 
   return sanitized;
@@ -251,23 +203,11 @@ export function validateOperationContext(context: StandardOperationContext): {
 
   // Required fields
   if (!context.userId) {
-    errors.push('userId is required');
-  }
-
-  if (!context.userRole) {
-    errors.push('userRole is required');
-  }
-
-  if (!context.businessPurpose) {
-    errors.push('businessPurpose is required');
-  }
-
-  // Warnings for missing optional fields
+    errors.push('userId is required');}if (!context.userRole) {
+    errors.push('userRole is required');}if (!context.businessPurpose) {
+    errors.push('businessPurpose is required');}// Warnings for missing optional fields
   if (!context.sessionId) {
-    warnings.push('sessionId not provided - using generated value');
-  }
-
-  if (!context.correlationId) {
+    warnings.push('sessionId not provided - using generated value');}if (!context.correlationId) {
     warnings.push('correlationId not provided - using generated value');
   }
 

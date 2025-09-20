@@ -25,22 +25,12 @@ import {
   Logger,
   ForbiddenException,
   BadRequestException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '@nestjs/passport';
-import { Reflector } from '@nestjs/core';
-import { Request, Response } from 'express';
-import {
-  UserRole,
+} from '@nestjs/common';import { JwtService } from '@nestjs/jwt';import { AuthGuard } from '@nestjs/passport';import { Reflector } from '@nestjs/core';import { Request, Response } from 'express';import {UserRole,
   Permission as _Permission,
   SecurityEventType as _SecurityEventType,
   createSecurityEvent as _createSecurityEvent,
   JwtPayload,
-} from '@bytebot/shared';
-import { ByteBotdUser } from './jwt-auth.guard';
-
-/**
- * Enhanced JWT payload with service authentication and refresh capabilities
+} from '@bytebot/shared';import { ByteBotdUser } from './jwt-auth.guard';/*** Enhanced JWT payload with service authentication and refresh capabilities
  */
 interface EnhancedJwtPayload extends JwtPayload {
   /** Service identifier for service-to-service authentication */
@@ -48,9 +38,7 @@ interface EnhancedJwtPayload extends JwtPayload {
   /** Service type (computer-use, agent, ui) */
   serviceType?: string;
   /** Token type (access, refresh, service) */
-  tokenType: 'access' | 'refresh' | 'service';
-  /** Refresh token identifier */
-  refreshTokenId?: string;
+  tokenType: 'access' | 'refresh' | 'service';/** Refresh token identifier */refreshTokenId?: string;
   /** Original client IP for security validation */
   clientIp?: string;
   /** VNC session identifier if applicable */
@@ -58,10 +46,7 @@ interface EnhancedJwtPayload extends JwtPayload {
   /** Computer use permissions bitmap */
   computerUsePermissions?: number;
   /** Screen access level (none, view, control) */
-  screenAccessLevel?: 'none' | 'view' | 'control';
-}
-
-/**
+  screenAccessLevel?: 'none' | 'view' | 'control';}/**
  * Request cookies interface for JWT authentication
  */
 interface JwtCookies {
@@ -183,9 +168,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     if (isPublic) {
       this.logger.debug(
-        `[${operationId}] Public route, skipping authentication`,
-      );
-      return true;
+        `[${operationId}] Public route, skipping authentication`,);return true;
     }
 
     const request = context
@@ -223,9 +206,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     );
     if (!securityCheck.passed) {
       throw new UnauthorizedException(
-        `Enhanced security check failed: ${securityCheck.reason}`,
-      );
-    }
+        `Enhanced security check failed: ${securityCheck.reason}`,);}
 
     try {
       // Attempt primary authentication
@@ -311,9 +292,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     if (!refreshToken) {
       this.logger.debug(
-        `[${operationId}] No refresh token available for automatic refresh`,
-      );
-      return false;
+        `[${operationId}] No refresh token available for automatic refresh`,);return false;
     }
 
     // Check refresh attempt rate limiting
@@ -327,13 +306,8 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
           operationId,
           clientIp: clientId,
           attempts,
-          securityEvent: 'excessive_refresh_attempts',
-        },
-      );
-      throw new UnauthorizedException('Too many refresh attempts');
-    }
-
-    try {
+          securityEvent: 'excessive_refresh_attempts',},);
+      throw new UnauthorizedException('Too many refresh attempts');}try {
       // Increment refresh attempts
       this.refreshAttempts.set(clientId, attempts + 1);
 
@@ -343,11 +317,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
           secret: process.env.JWT_REFRESH_SECRET ?? process.env.JWT_SECRET,
         });
 
-      if (refreshPayload.tokenType !== 'refresh') {
-        throw new UnauthorizedException('Invalid token type for refresh');
-      }
-
-      // Generate new access token
+      if (refreshPayload.tokenType !== 'refresh') {throw new UnauthorizedException('Invalid token type for refresh');}// Generate new access token
       const newAccessToken = await this.generateAccessToken(refreshPayload);
 
       // Set new token in response header
@@ -355,8 +325,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
       // Create user object for request context
       // Ensure email and id exist, provide fallbacks if not available
-      const userId = refreshPayload.sub ?? `user-${Date.now()}`;
-      const email = refreshPayload.email ?? `${userId}@unknown.local`;
+      const userId = refreshPayload.sub ?? `user-${Date.now()}`;const email = refreshPayload.email ?? `${userId}@unknown.local`;
       const user: ByteBotdUser = {
         sub: userId, // Required by interface compatibility
         id: userId,
@@ -383,10 +352,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       this.logger.warn(`[${operationId}] Token refresh failed`, {
         operationId,
         error: _error instanceof Error ? _error.message : String(_error),
-        securityEvent: 'token_refresh_failed',
-      });
-
-      return false;
+        securityEvent: 'token_refresh_failed',});return false;
     }
   }
 
@@ -396,22 +362,13 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   private extractRefreshToken(request: Request): string | null {
     // Check refresh token in cookies (most secure)
     const cookies = request.cookies as JwtCookies | undefined;
-    if (cookies?.refreshToken && typeof cookies.refreshToken === 'string') {
-      return cookies.refreshToken;
-    }
+    if (cookies?.refreshToken && typeof cookies.refreshToken === 'string') {return cookies.refreshToken;}
 
     // Check refresh token in secure headers
-    const refreshTokenHeader = request.headers['x-refresh-token'];
-    if (refreshTokenHeader && typeof refreshTokenHeader === 'string') {
-      return refreshTokenHeader;
-    }
+    const refreshTokenHeader = request.headers['x-refresh-token'];if (refreshTokenHeader && typeof refreshTokenHeader === 'string') {return refreshTokenHeader;}
 
     // Check refresh token in request body (for specific endpoints)
-    if (request.method === 'POST' && request.body) {
-      const body = request.body as JwtRequestBody;
-      if (body.refreshToken && typeof body.refreshToken === 'string') {
-        return body.refreshToken;
-      }
+    if (request.method === 'POST' && request.body) {const body = request.body as JwtRequestBody;if (body.refreshToken && typeof body.refreshToken === 'string') {return body.refreshToken;}
     }
 
     return null;
@@ -428,19 +385,13 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       email: refreshPayload.email,
       role: refreshPayload.role,
       permissions: refreshPayload.permissions,
-      tokenType: 'access',
-      vncSessionId: refreshPayload.vncSessionId,
-      clientIp: refreshPayload.clientIp,
+      tokenType: 'access',vncSessionId: refreshPayload.vncSessionId,clientIp: refreshPayload.clientIp,
       computerUsePermissions: refreshPayload.computerUsePermissions,
       screenAccessLevel: refreshPayload.screenAccessLevel,
     };
 
     return this.jwtService.signAsync(accessPayload, {
-      expiresIn: process.env.JWT_ACCESS_EXPIRY ?? '15m',
-      issuer: 'bytebotd-enhanced',
-      audience: 'computer-control',
-    });
-  }
+      expiresIn: process.env.JWT_ACCESS_EXPIRY ?? '15m',issuer: 'bytebotd-enhanced',audience: 'computer-control',});}
 
   /**
    * Perform enhanced security checks beyond basic JWT validation
@@ -450,39 +401,23 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     operationId: string,
   ): Promise<{ passed: boolean; reason?: string }> {
     // Check for service-to-service authentication tokens
-    const serviceToken = request.headers['x-service-token'] as string;
-    if (
-      serviceToken &&
+    const serviceToken = request.headers['x-service-token'] as string;if (serviceToken &&
       !(await this.validateServiceToken(serviceToken, operationId))
     ) {
-      return { passed: false, reason: 'Invalid service authentication token' };
-    }
-
-    // Validate cross-origin requests for computer control
+      return { passed: false, reason: 'Invalid service authentication token' };}// Validate cross-origin requests for computer control
     if (
-      request.method !== 'GET' &&
-      !this.validateCorsForComputerControl(request)
-    ) {
+      request.method !== 'GET' &&!this.validateCorsForComputerControl(request)) {
       return {
         passed: false,
-        reason: 'CORS validation failed for computer control operation',
-      };
-    }
+        reason: 'CORS validation failed for computer control operation',};}
 
     // Check for suspicious request patterns
     if (this.detectSuspiciousPatterns(request)) {
-      return { passed: false, reason: 'Suspicious request pattern detected' };
-    }
-
-    // Validate request size for computer control operations
-    const contentLength = parseInt(request.headers['content-length'] ?? '0');
-    if (contentLength > 10 * 1024 * 1024) {
-      // 10MB limit
+      return { passed: false, reason: 'Suspicious request pattern detected' };}// Validate request size for computer control operations
+    const contentLength = parseInt(request.headers['content-length'] ?? '0');if (contentLength > 10 * 1024 * 1024) {// 10MB limit
       return {
         passed: false,
-        reason: 'Request payload too large for computer control',
-      };
-    }
+        reason: 'Request payload too large for computer control',};}
 
     return { passed: true };
   }
@@ -505,9 +440,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         token,
         {
           secret: process.env.SERVICE_JWT_SECRET ?? process.env.JWT_SECRET,
-          audience: 'service-to-service',
-        },
-      );
+          audience: 'service-to-service',},);
 
       const isValid = !!(
         payload.tokenType === 'service' &&
@@ -522,9 +455,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       });
 
       if (isValid) {
-        this.logger.debug(`[${operationId}] Service authentication validated`, {
-          operationId,
-          serviceId: payload.serviceId,
+        this.logger.debug(`[${operationId}] Service authentication validated`, {operationId,serviceId: payload.serviceId,
           serviceType: payload.serviceType,
         });
       }
@@ -552,14 +483,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   private validateCorsForComputerControl(request: Request): boolean {
     const origin = request.headers.origin;
     const allowedOrigins = process.env.COMPUTER_CONTROL_ALLOWED_ORIGINS?.split(
-      ',',
-    ) ?? [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://app.bytebot.ai',
-    ];
-
-    // Allow same-origin requests
+      ',',) ?? ['http://localhost:3000','http://localhost:3001','https://app.bytebot.ai',];// Allow same-origin requests
     if (!origin) {
       return true;
     }
@@ -572,10 +496,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    * Detect suspicious request patterns
    */
   private detectSuspiciousPatterns(request: Request): boolean {
-    const userAgent = request.headers['user-agent'] ?? '';
-    const path = request.url;
-
-    // Check for automation tools that shouldn't be used for computer control
+    const userAgent = request.headers['user-agent'] ?? '';const path = request.url;// Check for automation tools that shouldn't be used for computer control
     const suspiciousUserAgents = [
       /selenium/gi,
       /playwright/gi,
@@ -590,14 +511,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check for suspicious path patterns
-    if (path.includes('../') || path.includes('..\\')) {
-      return true;
-    }
+    if (path.includes('../') || path.includes('..\\')) {return true;}
 
     // Check for SQL injection patterns in query strings
-    const queryString = request.url.split('?')[1] ?? '';
-    const sqlPatterns = [
-      /union\s+select/gi,
+    const queryString = request.url.split('?')[1] ?? '';const sqlPatterns = [/union\s+select/gi,
       /drop\s+table/gi,
       /insert\s+into/gi,
       /delete\s+from/gi,
@@ -623,17 +540,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const requiredRoles: UserRole[] = [UserRole._ADMIN, UserRole._OPERATOR];
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException(
-        'Insufficient role for computer control access',
-      );
-    }
+        'Insufficient role for computer control access',);}
 
     // Validate session consistency if available
-    const sessionId = request.headers['x-session-id'] as string;
-    if (sessionId && !this.validateSessionConsistency(user.id, sessionId)) {
-      throw new UnauthorizedException('Session consistency validation failed');
-    }
-
-    // Check for concurrent session limits
+    const sessionId = request.headers['x-session-id'] as string;if (sessionId && !this.validateSessionConsistency(user.id, sessionId)) {throw new UnauthorizedException('Session consistency validation failed');}// Check for concurrent session limits
     if (await this.exceedsConcurrentSessionLimit(user.id)) {
       throw new ForbiddenException('Maximum concurrent sessions exceeded');
     }
@@ -659,29 +569,17 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     let requiredPermissions = ComputerUsePermission.NONE;
 
     // Determine required permissions based on endpoint
-    if (path.includes('/screenshot') || path.includes('/screen')) {
-      requiredPermissions |= ComputerUsePermission.VIEW_SCREEN;
-    }
+    if (path.includes('/screenshot') || path.includes('/screen')) {requiredPermissions |= ComputerUsePermission.VIEW_SCREEN;}
 
-    if (path.includes('/mouse') || path.includes('/click')) {
-      requiredPermissions |= ComputerUsePermission.MOUSE_CONTROL;
-    }
+    if (path.includes('/mouse') || path.includes('/click')) {requiredPermissions |= ComputerUsePermission.MOUSE_CONTROL;}
 
-    if (path.includes('/keyboard') || path.includes('/type')) {
-      requiredPermissions |= ComputerUsePermission.KEYBOARD_CONTROL;
-    }
+    if (path.includes('/keyboard') || path.includes('/type')) {requiredPermissions |= ComputerUsePermission.KEYBOARD_CONTROL;}
 
-    if (path.includes('/file') || path.includes('/upload')) {
-      requiredPermissions |= ComputerUsePermission.FILE_ACCESS;
-    }
+    if (path.includes('/file') || path.includes('/upload')) {requiredPermissions |= ComputerUsePermission.FILE_ACCESS;}
 
-    if (path.includes('/clipboard')) {
-      requiredPermissions |= ComputerUsePermission.CLIPBOARD_ACCESS;
-    }
+    if (path.includes('/clipboard')) {requiredPermissions |= ComputerUsePermission.CLIPBOARD_ACCESS;}
 
-    if (path.includes('/vnc')) {
-      requiredPermissions |= ComputerUsePermission.VNC_CONNECTION;
-    }
+    if (path.includes('/vnc')) {requiredPermissions |= ComputerUsePermission.VNC_CONNECTION;}
 
     // For ADMIN users, grant full permissions
     if (request.user.role === UserRole._ADMIN) {
@@ -724,10 +622,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     request: EnhancedAuthenticatedRequest,
     operationId: string,
   ): Promise<void> {
-    const vncSessionId = request.headers['x-vnc-session'] as string;
-
-    if (!vncSessionId) {
-      // VNC session not required for all operations
+    const vncSessionId = request.headers['x-vnc-session'] as string;if (!vncSessionId) {// VNC session not required for all operations
       return Promise.resolve();
     }
 
@@ -774,13 +669,9 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     // Increase risk based on endpoint sensitivity
     const path = request.url.toLowerCase();
-    if (path.includes('/file') || path.includes('/upload')) {
-      riskScore += 25;
-    }
+    if (path.includes('/file') || path.includes('/upload')) {riskScore += 25;}
 
-    if (path.includes('/vnc')) {
-      riskScore += 30;
-    }
+    if (path.includes('/vnc')) {riskScore += 30;}
 
     return Math.min(100, Math.max(0, riskScore));
   }
@@ -813,14 +704,8 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
-      (request.headers['x-real-ip'] as string) ??
-      (request.headers['x-client-ip'] as string) ??
-      request.connection?.remoteAddress ??
-      request.socket?.remoteAddress ??
-      'unknown'
-    );
-  }
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??(request.headers['x-real-ip'] as string) ??(request.headers['x-client-ip'] as string) ??request.connection?.remoteAddress ??request.socket?.remoteAddress ??
+      'unknown');}
 
   /**
    * Clean up expired cache entries
@@ -858,9 +743,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
      * @param user - User object from JWT strategy validation
      * @returns {TUser} Typed user object
      */
-    const operationId = `enhanced-jwt-handle-${Date.now()}`;
-    const request = context
-      .switchToHttp()
+    const operationId = `enhanced-jwt-handle-${Date.now()}`;const request = context.switchToHttp()
       .getRequest<EnhancedAuthenticatedRequest>();
 
     if (err) {
@@ -870,9 +753,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         stack: err instanceof Error ? err.stack : undefined,
         url: request.url,
         method: request.method,
-        securityEvent: 'enhanced_auth_error',
-      });
-      throw new UnauthorizedException('Enhanced authentication failed');
+        securityEvent: 'enhanced_auth_error',});throw new UnauthorizedException('Enhanced authentication failed');
     }
 
     if (!user) {
@@ -913,28 +794,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    */
   private getEnhancedAuthErrorMessage(info: JwtAuthInfo | null): string {
     if (!info) {
-      return 'Enhanced authentication required for computer control';
-    }
-
-    const message = info.message ?? info.name ?? String(info);
+      return 'Enhanced authentication required for computer control';}const message = info.message ?? info.name ?? String(info);
 
     switch (message) {
-      case 'TokenExpiredError':
-      case 'jwt expired':
-        return 'Access token has expired - refresh required';
-
-      case 'JsonWebTokenError':
-      case 'invalid token':
-        return 'Invalid access token format';
-
-      case 'NotBeforeError':
-        return 'Token not yet valid';
-
-      case 'No auth token':
-        return 'Access token required for computer control operations';
-
-      default:
-        return 'Enhanced authentication failed for computer control';
+      case 'TokenExpiredError':case 'jwt expired':return 'Access token has expired - refresh required';case 'JsonWebTokenError':case 'invalid token':return 'Invalid access token format';case 'NotBeforeError':return 'Token not yet valid';case 'No auth token':return 'Access token required for computer control operations';default:return 'Enhanced authentication failed for computer control';
     }
   }
 }

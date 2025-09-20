@@ -17,11 +17,7 @@ import {
   BadRequestException,
   Logger,
   PayloadTooLargeException,
-} from '@nestjs/common';
-import { validate, ValidationError } from 'class-validator';
-import { plainToClass } from 'class-transformer';
-import {
-  sanitizeInput,
+} from '@nestjs/common';import { validate, ValidationError } from 'class-validator';import { plainToClass } from 'class-transformer';import {sanitizeInput,
   sanitizeObject,
   detectXSS,
   detectSQLInjection,
@@ -29,10 +25,7 @@ import {
   SecurityEventType,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
-} from '@bytebot/shared';
-
-/**
- * Configuration options for the global validation pipe
+} from '@bytebot/shared';/*** Configuration options for the global validation pipe
  */
 interface GlobalValidationPipeOptions {
   /** Transform input to target class instance */
@@ -105,12 +98,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
     value: unknown,
     metadata: ArgumentMetadata,
   ): Promise<unknown> {
-    const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Starting BytebotD validation`, {
-      operationId,
-      type: metadata.type,
+    const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Starting BytebotD validation`, {operationId,type: metadata.type,
       metatype: metadata.metatype?.name,
       hasValue: value !== undefined && value !== null,
       valueType: typeof value,
@@ -130,8 +118,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
         return this.sanitizeBasicValue(value, operationId);
       }
 
-      // Check payload size if it's an object
-      if (typeof value === 'object' && value !== null) {
+      // Check payload size if it's an objectif (typeof value === 'object' && value !== null) {
         this.validatePayloadSize(value, operationId);
       }
 
@@ -163,9 +150,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       const processingTime = Date.now() - startTime;
 
       this.logger.debug(
-        `[${operationId}] BytebotD validation completed successfully`,
-        {
-          operationId,
+        `[${operationId}] BytebotD validation completed successfully`,{operationId,
           type: metadata.type,
           metatype: metadata.metatype?.name,
           processingTimeMs: processingTime,
@@ -196,9 +181,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
   /**
    * Check if the metatype is a basic JavaScript type
    * @param metatype - The metatype to check
-   * @returns True if it's a basic type
-   */
-  private isBasicType(
+   * @returns True if it's a basic type*/private isBasicType(
     metatype: unknown,
   ): metatype is
     | ArrayConstructor
@@ -234,9 +217,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       const sanitized = sanitizeInput(value, this.options.sanitizationOptions);
 
       if (sanitized !== value) {
-        this.logger.debug(`[${operationId}] Basic value sanitized`, {
-          operationId,
-          originalLength: value.length,
+        this.logger.debug(`[${operationId}] Basic value sanitized`, {operationId,originalLength: value.length,
           sanitizedLength: sanitized.length,
           changed: true,
         });
@@ -258,17 +239,13 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       const payloadSize = JSON.stringify(value).length;
 
       if (payloadSize > (this.options.maxPayloadSize ?? 0)) {
-        this.logger.warn(`[${operationId}] Payload size limit exceeded`, {
-          operationId,
-          payloadSize,
+        this.logger.warn(`[${operationId}] Payload size limit exceeded`, {operationId,payloadSize,
           maxPayloadSize: this.options.maxPayloadSize,
           ratio: (payloadSize / (this.options.maxPayloadSize ?? 1)).toFixed(2),
         });
 
         throw new PayloadTooLargeException(
-          `Request _payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,
-        );
-      }
+          `Request _payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,);}
 
       this.logger.debug(`[${operationId}] Payload size validation passed`, {
         operationId,
@@ -302,19 +279,12 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
     // Convert value to string for pattern analysis
     const stringValue =
-      typeof value === 'string' ? value : JSON.stringify(value);
-
-    // Detect XSS attempts
-    if (detectXSS(stringValue)) {
+      typeof value === 'string' ? value : JSON.stringify(value);// Detect XSS attemptsif (detectXSS(stringValue)) {
       threats.push('XSS');
 
       this.logger.warn(`[${operationId}] XSS attempt detected`, {
         operationId,
-        threatType: 'XSS',
-        inputLength: stringValue.length,
-        inputPreview: stringValue.substring(0, 100) + '...',
-      });
-    }
+        threatType: 'XSS',inputLength: stringValue.length,inputPreview: stringValue.substring(0, 100) + '...',});}
 
     // Detect SQL injection attempts
     if (detectSQLInjection(stringValue)) {
@@ -322,19 +292,13 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
       this.logger.warn(`[${operationId}] SQL injection attempt detected`, {
         operationId,
-        threatType: 'SQL_INJECTION',
-        inputLength: stringValue.length,
-        inputPreview: stringValue.substring(0, 100) + '...',
-      });
-    }
+        threatType: 'SQL_INJECTION',inputLength: stringValue.length,inputPreview: stringValue.substring(0, 100) + '...',});}
 
     // Throw error if threats detected
     if (threats.length > 0) {
       const threatTypes = threats.join(', ');
 
-      this.logger.error(`[${operationId}] Security threats blocked`, {
-        operationId,
-        threatTypes: threatTypes,
+      this.logger.error(`[${operationId}] Security threats blocked`, {operationId,threatTypes: threatTypes,
         threatCount: threats.length,
         blocked: true,
       });
@@ -355,9 +319,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
     const startTime = Date.now();
     let sanitized: unknown;
 
-    if (typeof value === 'string') {
-      sanitized = sanitizeInput(value, this.options.sanitizationOptions);
-    } else if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'string') {sanitized = sanitizeInput(value, this.options.sanitizationOptions);} else if (typeof value === 'object' && value !== null) {
       sanitized = sanitizeObject(value, this.options.sanitizationOptions);
     } else {
       sanitized = value;
@@ -371,9 +333,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       {
         operationId,
         inputType: typeof value,
-        isObject: typeof value === 'object',
-        sanitizationTimeMs: sanitizationTime,
-        hasChanges,
+        isObject: typeof value === 'object',sanitizationTimeMs: sanitizationTime,hasChanges,
         originalSize: JSON.stringify(value).length,
         sanitizedSize: JSON.stringify(sanitized).length,
       },
@@ -424,16 +384,12 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
       this.logger.warn(`[${operationId}] BytebotD class validation failed`, {
         operationId,
-        metatype: (metatype as { name?: string }).name ?? 'unknown',
-        errorCount: errors.length,
-        validationTimeMs: validationTime,
+        metatype: (metatype as { name?: string }).name ?? 'unknown',errorCount: errors.length,validationTimeMs: validationTime,
         errors: formattedErrors,
       });
 
       throw new BadRequestException({
-        message: 'Validation failed',
-        errors: formattedErrors,
-        timestamp: new Date().toISOString(),
+        message: 'Validation failed',errors: formattedErrors,timestamp: new Date().toISOString(),
         operationId,
         service: 'BytebotD',
       });
@@ -441,9 +397,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
     this.logger.debug(`[${operationId}] BytebotD class validation passed`, {
       operationId,
-      metatype: (metatype as { name?: string }).name ?? 'unknown',
-      validationTimeMs: validationTime,
-      errorCount: 0,
+      metatype: (metatype as { name?: string }).name ?? 'unknown',validationTimeMs: validationTime,errorCount: 0,
     });
   }
 
@@ -487,23 +441,15 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      if (errorMessage?.includes('XSS')) {
-        eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
-      } else if (errorMessage?.includes('SQL')) {
+      if (errorMessage?.includes('XSS')) {eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;} else if (errorMessage?.includes('SQL')) {
         eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
       const securityEvent = createSecurityEvent(
         eventType,
         `validation-pipe-${metadata.type}`,
-        'POST',
-        false,
-        errorMessage ?? 'Validation failed',
-        {
-          operationId,
-          service: 'BytebotD',
-          inputType: typeof value,
-          metatype: metadata.metatype?.name,
+        'POST',false,errorMessage ?? 'Validation failed',{operationId,
+          service: 'BytebotD',inputType: typeof value,metatype: metadata.metatype?.name,
           errorType:
             error instanceof Error ? error.constructor.name : 'unknown',
           threatDetection: this.options.enableThreatDetection,

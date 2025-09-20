@@ -1,9 +1,4 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { FormAutomationService } from '../form-automation/form-automation.service';
-import { DataExtractionService } from '../data-extraction/data-extraction.service';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import {
-  WorkflowDto,
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';import { FormAutomationService } from '../form-automation/form-automation.service';import { DataExtractionService } from '../data-extraction/data-extraction.service';import { ComputerUseService } from '../computer-use/computer-use.service';import {WorkflowDto,
   WorkflowExecutionDto,
   WorkflowStepDto,
   WorkflowStepType,
@@ -12,9 +7,7 @@ import {
   LoopConfigDto,
   LoopType,
   WorkflowExecutionMode
-} from './dto/workflow.dto';
-import {
-  WorkflowExecutionResponseDto,
+} from './dto/workflow.dto';import {WorkflowExecutionResponseDto,
   WorkflowValidationResultDto,
   StepExecutionResultDto,
   StepExecutionStatus,
@@ -52,12 +45,7 @@ export class WorkflowAutomationService {
    * Execute a workflow
    */
   async executeWorkflow(execution: WorkflowExecutionDto): Promise<WorkflowExecutionResponseDto> {
-    const executionId = `exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${executionId}] Starting workflow execution: ${execution.workflow.name}`, {
-      executionId,
-      workflowId: execution.workflow.id,
+    const executionId = `exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${executionId}] Starting workflow execution: ${execution.workflow.name}`, {executionId,workflowId: execution.workflow.id,
       workflowName: execution.workflow.name,
       stepCount: execution.workflow.steps.length,
       executionMode: execution.workflow.config?.executionMode || WorkflowExecutionMode.SEQUENTIAL
@@ -67,10 +55,7 @@ export class WorkflowAutomationService {
       // Validate workflow before execution
       const validation = await this.validateWorkflow(execution.workflow);
       if (!validation.isValid) {
-        throw new Error(`Workflow validation failed: ${validation.errors?.join(', ')}`);
-      }
-
-      // Initialize execution context
+        throw new Error(`Workflow validation failed: ${validation.errors?.join(`, ')}`);}// Initialize execution context
       const executionContext = this.initializeExecutionContext(execution, executionId);
       this.activeExecutions.set(executionId, executionContext);
 
@@ -103,9 +88,7 @@ export class WorkflowAutomationService {
 
       this.activeExecutions.delete(executionId);
 
-      this.logger.log(`[${executionId}] Workflow execution completed: ${result.status} (${durationMs}ms)`, {
-        executionId,
-        status: result.status,
+      this.logger.log(`[${executionId}] Workflow execution completed: ${result.status} (${durationMs}ms)`, {executionId,status: result.status,
         durationMs,
         completedSteps: result.progress.completedSteps,
         failedSteps: result.progress.failedSteps
@@ -114,14 +97,8 @@ export class WorkflowAutomationService {
       return response;
     } catch (error) {
       const durationMs = Date.now() - startTime;
-      this.logger.error(`[${executionId}] Workflow execution failed (${durationMs}ms)`, error);
-
-      this.activeExecutions.delete(executionId);
-
-      throw new HttpException(
-        `Workflow execution failed: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      this.logger.error(`[${executionId}] Workflow execution failed (${durationMs}ms)`, error);this.activeExecutions.delete(executionId);throw new HttpException(
+        `Workflow execution failed: ${error.message}`,HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -144,16 +121,11 @@ export class WorkflowAutomationService {
     for (const step of workflow.steps) {
       // Check for duplicate step IDs
       if (stepIds.has(step.id)) {
-        errors.push(`Duplicate step ID: ${step.id}`);
-      }
-      stepIds.add(step.id);
+        errors.push(`Duplicate step ID: ${step.id}`);}stepIds.add(step.id);
 
       // Validate step configuration
       if (!step.config || Object.keys(step.config).length === 0) {
-        errors.push(`Step ${step.id} has empty configuration`);
-      }
-
-      // Count configuration types
+        errors.push(`Step ${step.id} has empty configuration`);}// Count configuration types
       if (step.errorHandling) validationStats.stepsWithErrorHandling++;
       if (step.timeout) validationStats.stepsWithTimeouts++;
       if (step.condition) validationStats.conditionalSteps++;
@@ -175,10 +147,7 @@ export class WorkflowAutomationService {
     // Validate dependency cycles
     const dependencyValidation = this.validateDependencies(workflow.steps);
     if (dependencyValidation.hasCircularDependencies) {
-      errors.push('Circular dependencies detected in workflow');
-    }
-
-    // Generate recommendations
+      errors.push('Circular dependencies detected in workflow');}// Generate recommendations
     const recommendations = this.generateRecommendations(workflow, validationStats);
 
     return {
@@ -197,10 +166,7 @@ export class WorkflowAutomationService {
   async getExecutionStatus(executionId: string): Promise<Partial<WorkflowExecutionResponseDto>> {
     const execution = this.activeExecutions.get(executionId);
     if (!execution) {
-      throw new HttpException('Execution not found', HttpStatus.NOT_FOUND);
-    }
-
-    return {
+      throw new HttpException('Execution not found', HttpStatus.NOT_FOUND);}return {
       executionId,
       status: execution.status,
       progress: execution.progress,
@@ -288,15 +254,11 @@ export class WorkflowAutomationService {
 
       // Check step dependencies
       if (!this.areDependenciesMet(step, context.stepResults)) {
-        this.skipStep(step, context, 'Dependencies not met');
-        continue;
-      }
+        this.skipStep(step, context, 'Dependencies not met');continue;}
 
       // Evaluate step condition
       if (step.condition && !this.evaluateCondition(step.condition, context.variables)) {
-        this.skipStep(step, context, 'Condition not met');
-        continue;
-      }
+        this.skipStep(step, context, 'Condition not met');continue;}
 
       // Execute step (with loop if configured)
       await this.executeStep(step, context);
@@ -507,11 +469,7 @@ export class WorkflowAutomationService {
       const item = iterateOver[i];
 
       // Set loop variables
-      context.variables[loop.iteratorVariable || 'item'] = item;
-      context.variables[loop.indexVariable || 'index'] = i;
-
-      loopInfo.currentIteration = i + 1;
-      loopInfo.currentIterationData = { item, index: i };
+      context.variables[loop.iteratorVariable || 'item'] = item;context.variables[loop.indexVariable || 'index'] = i;loopInfo.currentIteration = i + 1;loopInfo.currentIterationData = { item, index: i };
 
       await this.executeStepAction(step, context, stepResult);
 
@@ -521,9 +479,7 @@ export class WorkflowAutomationService {
 
   private async executeWhileLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
     if (!loop.condition) {
-      throw new Error('Condition is required for while loop');
-    }
-    const maxIterations = loopInfo.maxIterations || 50;
+      throw new Error('Condition is required for while loop');}const maxIterations = loopInfo.maxIterations || 50;
     while (this.evaluateCondition(loop.condition, context.variables) && loopInfo.totalIterations < maxIterations) {
       loopInfo.currentIteration = loopInfo.totalIterations + 1;
 
@@ -535,9 +491,7 @@ export class WorkflowAutomationService {
 
   private async executeUntilLoop(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, loop: LoopConfigDto, loopInfo: LoopExecutionInfoDto): Promise<void> {
     if (!loop.condition) {
-      throw new Error('Condition is required for until loop');
-    }
-    const maxIterations = loopInfo.maxIterations || 50;
+      throw new Error('Condition is required for until loop');}const maxIterations = loopInfo.maxIterations || 50;
     while (!this.evaluateCondition(loop.condition, context.variables) && loopInfo.totalIterations < maxIterations) {
       loopInfo.currentIteration = loopInfo.totalIterations + 1;
 
@@ -552,10 +506,7 @@ export class WorkflowAutomationService {
     const count = Math.min(loop.count || 1, maxIterations);
 
     for (let i = 0; i < count; i++) {
-      context.variables[loop.indexVariable || 'index'] = i;
-
-      loopInfo.currentIteration = i + 1;
-      loopInfo.currentIterationData = { index: i };
+      context.variables[loop.indexVariable || 'index'] = i;loopInfo.currentIteration = i + 1;loopInfo.currentIterationData = { index: i };
 
       await this.executeStepAction(step, context, stepResult);
 
@@ -596,12 +547,8 @@ export class WorkflowAutomationService {
         result = value === undefined || value === null;
         break;
       case ConditionalOperator.IS_EMPTY:
-        result = !value || (Array.isArray(value) && value.length === 0) || (typeof value === 'string' && value.trim() === '');
-        break;
-      case ConditionalOperator.IS_NOT_EMPTY:
-        result = !!value && !(Array.isArray(value) && value.length === 0) && !(typeof value === 'string' && value.trim() === '');
-        break;
-      case ConditionalOperator.MATCHES_REGEX:
+        result = !value || (Array.isArray(value) && value.length === 0) || (typeof value === 'string' && value.trim() === '');break;case ConditionalOperator.IS_NOT_EMPTY:
+        result = !!value && !(Array.isArray(value) && value.length === 0) && !(typeof value === 'string' && value.trim() === '');break;case ConditionalOperator.MATCHES_REGEX:
         result = new RegExp(String(condition.value)).test(String(value));
         break;
     }
@@ -619,13 +566,8 @@ export class WorkflowAutomationService {
   }
 
   private getVariableValue(path: string, variables: Record<string, any>): any {
-    const keys = path.split('.');
-    let value = variables;
-
-    for (const key of keys) {
-      if (value && typeof value === 'object') {
-        value = value[key];
-      } else {
+    const keys = path.split('.');let value = variables;for (const key of keys) {
+      if (value && typeof value === 'object') {value = value[key];} else {
         return undefined;
       }
     }
@@ -645,13 +587,7 @@ export class WorkflowAutomationService {
 
   private async captureScreenshot(): Promise<string> {
     try {
-      const result = await this.computerUseService.action({ action: 'screenshot' });
-      return (result as any)?.image || '';
-    } catch (error) {
-      this.logger.warn('Failed to capture screenshot', error);
-      return '';
-    }
-  }
+      const result = await this.computerUseService.action({ action: 'screenshot' });return (result as any)?.image || '';} catch (error) {this.logger.warn('Failed to capture screenshot', error);return '';}}
 
   private areDependenciesMet(step: WorkflowStepDto, stepResults: StepExecutionResultDto[]): boolean {
     if (!step.dependencies || step.dependencies.length === 0) return true;
@@ -734,9 +670,7 @@ export class WorkflowAutomationService {
   // Placeholder implementations for specific step types
 
   private async executeNavigation(config: any): Promise<any> {
-    this.logger.log('Executing navigation step', config);
-    return { navigated: true, url: config.url };
-  }
+    this.logger.log('Executing navigation step', config);return { navigated: true, url: config.url };}
 
   private async executeWait(config: any): Promise<any> {
     const duration = config.duration || 1000;
@@ -745,19 +679,13 @@ export class WorkflowAutomationService {
   }
 
   private async executeNotification(config: any): Promise<any> {
-    this.logger.log('Sending notification', config);
-    return { notificationSent: true, message: config.message };
-  }
+    this.logger.log('Sending notification', config);return { notificationSent: true, message: config.message };}
 
   private async executeApiCall(config: any): Promise<any> {
-    this.logger.log('Making API call', config);
-    return { apiCallMade: true, endpoint: config.url };
-  }
+    this.logger.log('Making API call', config);return { apiCallMade: true, endpoint: config.url };}
 
   private async executeFileOperation(config: any): Promise<any> {
-    this.logger.log('Executing file operation', config);
-    return { fileOperationCompleted: true, operation: config.operation };
-  }
+    this.logger.log('Executing file operation', config);return { fileOperationCompleted: true, operation: config.operation };}
 
   private async executeCustomScript(config: any, variables: Record<string, any>): Promise<any> {
     this.logger.log('Executing custom script', config);
@@ -771,10 +699,7 @@ export class WorkflowAutomationService {
 
   private async applyDataTransformation(transformation: any, context: any): Promise<void> {
     // Implement data transformation logic
-    this.logger.log('Applying data transformation', transformation);
-  }
-
-  private validateStepConfiguration(step: WorkflowStepDto, errors: string[], warnings: string[]): Promise<void> {
+    this.logger.log('Applying data transformation', transformation);}private validateStepConfiguration(step: WorkflowStepDto, errors: string[], warnings: string[]): Promise<void> {
     // Validate step-specific configuration
     return Promise.resolve();
   }

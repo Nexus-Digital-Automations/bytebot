@@ -30,15 +30,7 @@ export {
   
   // Default export
   default as WebSocketUtils,
-} from './websocket-types';
-
-// Export WebSocket bridge services
-export { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
-export { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';
-export { ParlantWebSocketIntegrationService } from './parlant-websocket-integration.service';
-
-// Export conversational WebSocket types
-export {
+} from './websocket-types';// Export WebSocket bridge servicesexport { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';export { ConversationalWebSocketBridgeService } from './conversational-websocket-bridge.service';export { ParlantWebSocketIntegrationService } from './parlant-websocket-integration.service';// Export conversational WebSocket typesexport {
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -50,35 +42,20 @@ export {
   ValidationAction,
   SecurityContext,
   ActionImpact,
-} from './conversational-websocket-bridge.service';
-
-// Export integration types
-export {
+} from './conversational-websocket-bridge.service';// Export integration typesexport {
   ParlantValidationRequest,
   ParlantValidationResult,
   ValidationPriority,
   ParlantStreamingOptions,
-} from './parlant-websocket-integration.service';
-
-/**
- * Re-export commonly used WebSocket types for convenience
+} from './parlant-websocket-integration.service';/*** Re-export commonly used WebSocket types for convenience
  */
-export type { Server as WebSocketServer, RawData as WebSocketRawData } from 'ws';
-
-/**
- * Documentation for resolving WebSocket VerifyClientCallback type issues:
+export type { Server as WebSocketServer, RawData as WebSocketRawData } from 'ws';/*** Documentation for resolving WebSocket VerifyClientCallback type issues:
  * 
  * PROBLEM:
- * Type '(info: { req: Record<string, unknown> & { headers: Record<string, string>; }; origin?: string; secure?: boolean; }) => boolean' 
- * is not assignable to type 'VerifyClientCallbackAsync<IncomingMessage> | VerifyClientCallbackSync<IncomingMessage>'
+ * Type '(info: { req: Record<string, unknown> & { headers: Record<string, string>; }; origin?: string; secure?: boolean; }) => boolean' * is not assignable to type 'VerifyClientCallbackAsync<IncomingMessage> | VerifyClientCallbackSync<IncomingMessage>'
  * 
  * SOLUTION:
- * 1. Use `createSafeWebSocketServer` instead of `new WebSocket.Server`
- * 2. Use `SafeVerifyClientCallback` types instead of raw callback functions
- * 3. Use `createWebSocketVerifyAdapter` to convert between type systems
- * 4. Use `convertIncomingMessageToRecord` for manual type conversion
- * 
- * EXAMPLE:
+ * 1. Use `createSafeWebSocketServer` instead of `new WebSocket.Server`* 2. Use `SafeVerifyClientCallback` types instead of raw callback functions* 3. Use `createWebSocketVerifyAdapter` to convert between type systems* 4. Use `convertIncomingMessageToRecord` for manual type conversion* * EXAMPLE:
  * ```typescript
  * import { createSafeWebSocketServer, SafeVerifyClientCallback } from './websocket';
  * 

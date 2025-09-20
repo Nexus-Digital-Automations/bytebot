@@ -24,33 +24,11 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as WebSocket from 'ws';
-import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import * as path from 'path';
-import { promisify } from 'util';
-
-// ===== THROUGHPUT TESTING TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as WebSocket from 'ws';import { performance } from 'perf_hooks';import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';import * as path from 'path';import { promisify } from 'util';// ===== THROUGHPUT TESTING TYPES =====/**
  * Throughput test scenario types
  */
 export enum ThroughputTestScenario {
-  BASELINE_THROUGHPUT = 'baseline_throughput',
-  BURST_THROUGHPUT = 'burst_throughput',
-  SUSTAINED_THROUGHPUT = 'sustained_throughput',
-  PEAK_CAPACITY = 'peak_capacity',
-  VARIABLE_PAYLOAD = 'variable_payload',
-  CONNECTION_SCALING = 'connection_scaling',
-  MESSAGE_BATCHING = 'message_batching',
-  LOAD_RAMP_UP = 'load_ramp_up',
-  STRESS_TESTING = 'stress_testing',
-}
-
-/**
+  BASELINE_THROUGHPUT = 'baseline_throughput',BURST_THROUGHPUT = 'burst_throughput',SUSTAINED_THROUGHPUT = 'sustained_throughput',PEAK_CAPACITY = 'peak_capacity',VARIABLE_PAYLOAD = 'variable_payload',CONNECTION_SCALING = 'connection_scaling',MESSAGE_BATCHING = 'message_batching',LOAD_RAMP_UP = 'load_ramp_up',STRESS_TESTING = 'stress_testing',}/**
  * Throughput test configuration
  */
 export interface ThroughputTestConfig {
@@ -72,9 +50,7 @@ export interface ThroughputTestConfig {
   cooldownDuration: number;       // Cooldown period (ms)
 
   // Load pattern parameters
-  loadPattern: 'constant' | 'ramp' | 'burst' | 'sine_wave' | 'step';
-  burstSettings?: {
-    burstDuration: number;        // Duration of each burst (ms)
+  loadPattern: 'constant' | 'ramp' | 'burst' | 'sine_wave' | 'step';burstSettings?: {burstDuration: number;        // Duration of each burst (ms)
     burstInterval: number;        // Interval between bursts (ms)
     burstMultiplier: number;      // Throughput multiplier during burst
   };
@@ -138,10 +114,7 @@ export interface ThroughputTestResults {
 
   // Bottleneck analysis
   bottlenecks: {
-    type: 'cpu' | 'memory' | 'network' | 'connection' | 'application';
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    description: string;
-    recommendation: string;
+    type: 'cpu' | 'memory' | 'network' | 'connection' | 'application';severity: 'low' | 'medium' | 'high' | 'critical';description: string;recommendation: string;
   }[];
 
   // Time-series data
@@ -150,9 +123,7 @@ export interface ThroughputTestResults {
   // Comparative analysis
   baselineComparison?: {
     improvementPercentage: number;
-    performanceTrend: 'improving' | 'degrading' | 'stable';
-  };
-}
+    performanceTrend: 'improving' | 'degrading' | 'stable';};}
 
 /**
  * Connection worker data for distributed testing
@@ -174,10 +145,7 @@ export interface PayloadConfig {
   baseSize: number;               // Base payload size in bytes
   variability: number;            // Size variability percentage
   compressionRatio: number;       // Expected compression ratio
-  contentType: 'random' | 'structured' | 'compressible' | 'binary';
-}
-
-// ===== THROUGHPUT TESTING SERVICE =====
+  contentType: 'random' | 'structured' | 'compressible' | 'binary';}// ===== THROUGHPUT TESTING SERVICE =====
 
 @Injectable()
 export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
@@ -208,26 +176,14 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 WebSocket Throughput Testing Service initializing...');
-  }
-
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing WebSocket Throughput Testing Framework');
-
-    // Initialize worker pool for distributed load generation
-    await this.initializeWorkerPool();
+    this.logger.log('🚀 WebSocket Throughput Testing Service initializing...');}async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing WebSocket Throughput Testing Framework');// Initialize worker pool for distributed load generationawait this.initializeWorkerPool();
 
     // Load baseline results if available
     await this.loadBaselineResults();
 
-    this.logger.log('✅ WebSocket Throughput Testing Framework ready');
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down WebSocket Throughput Testing Framework');
-
-    // Stop all active tests
-    for (const testId of this.activeTests.keys()) {
+    this.logger.log('✅ WebSocket Throughput Testing Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down WebSocket Throughput Testing Framework');// Stop all active testsfor (const testId of this.activeTests.keys()) {
       await this.stopThroughputTest(testId);
     }
 
@@ -237,20 +193,14 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
     // Stop metrics collection
     this.stopMetricsCollection();
 
-    this.logger.log('✅ WebSocket Throughput Testing Framework shutdown complete');
-  }
-
-  // ===== BASELINE THROUGHPUT TESTING =====
+    this.logger.log('✅ WebSocket Throughput Testing Framework shutdown complete');}// ===== BASELINE THROUGHPUT TESTING =====
 
   /**
    * Execute baseline throughput test with standard parameters
    * TARGET: Establish 5000+ msg/sec baseline performance
    */
   async executeBaselineThroughputTest(): Promise<ThroughputTestResults> {
-    this.logger.log('🧪 Starting baseline throughput test (target: 5000+ msg/sec)');
-
-    const config: ThroughputTestConfig = {
-      scenario: ThroughputTestScenario.BASELINE_THROUGHPUT,
+    this.logger.log('🧪 Starting baseline throughput test (target: 5000+ msg/sec)');const config: ThroughputTestConfig = {scenario: ThroughputTestScenario.BASELINE_THROUGHPUT,
       maxConnections: 100,
       connectionRampRate: 10,
       targetThroughput: this.THROUGHPUT_TARGETS.MINIMUM_TARGET,
@@ -260,13 +210,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       warmupDuration: 20000,       // 20 seconds warmup
       measurementDuration: 60000,  // 60 seconds measurement
       cooldownDuration: 20000,     // 20 seconds cooldown
-      loadPattern: 'constant',
-    };
-
-    const results = await this.executeThroughputTest('baseline', config);
-
-    // Store as baseline for future comparisons
-    this.baselineResults = results;
+      loadPattern: 'constant',};const results = await this.executeThroughputTest('baseline', config);// Store as baseline for future comparisonsthis.baselineResults = results;
 
     this.logThroughputResults(results);
     return results;
@@ -276,10 +220,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    * Execute burst throughput test for peak capacity validation
    */
   async executeBurstThroughputTest(): Promise<ThroughputTestResults> {
-    this.logger.log('💥 Starting burst throughput test');
-
-    const config: ThroughputTestConfig = {
-      scenario: ThroughputTestScenario.BURST_THROUGHPUT,
+    this.logger.log('💥 Starting burst throughput test');const config: ThroughputTestConfig = {scenario: ThroughputTestScenario.BURST_THROUGHPUT,
       maxConnections: 200,
       connectionRampRate: 20,
       targetThroughput: this.THROUGHPUT_TARGETS.PEAK_TARGET,
@@ -289,9 +230,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       warmupDuration: 30000,       // 30 seconds warmup
       measurementDuration: 90000,  // 90 seconds measurement
       cooldownDuration: 30000,     // 30 seconds cooldown
-      loadPattern: 'burst',
-      burstSettings: {
-        burstDuration: 5000,       // 5-second bursts
+      loadPattern: 'burst',burstSettings: {burstDuration: 5000,       // 5-second bursts
         burstInterval: 10000,      // 10-second intervals
         burstMultiplier: 3.0,      // 3x throughput during bursts
       },
@@ -317,13 +256,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       warmupDuration: 30000,
       measurementDuration: (durationMinutes - 2) * 60000,
       cooldownDuration: 30000,
-      loadPattern: 'constant',
-    };
-
-    return await this.executeThroughputTest('sustained', config);
-  }
-
-  // ===== VARIABLE PAYLOAD TESTING =====
+      loadPattern: 'constant',};return await this.executeThroughputTest('sustained', config);}// ===== VARIABLE PAYLOAD TESTING =====
 
   /**
    * Execute variable payload size throughput testing
@@ -352,9 +285,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       };
 
       const testResult = await this.executeThroughputTest(
-        `payload_${payloadSize}`,
-        config
-      );
+        `payload_${payloadSize}`,config);
 
       results.set(payloadSize, testResult);
 
@@ -396,9 +327,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       };
 
       const testResult = await this.executeThroughputTest(
-        `connections_${connectionCount}`,
-        config
-      );
+        `connections_${connectionCount}`,config);
 
       results.set(connectionCount, testResult);
 
@@ -441,16 +370,11 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       };
 
       const testResult = await this.executeThroughputTest(
-        `batch_${batchSize}`,
-        config
-      );
+        `batch_${batchSize}`,config);
 
       results.set(batchSize, testResult);
 
-      this.logger.log(`Batch size ${batchSize}: ${testResult.averageThroughput.toFixed(0)} msg/sec`);
-    }
-
-    // Find optimal batch size
+      this.logger.log(`Batch size ${batchSize}: ${testResult.averageThroughput.toFixed(0)} msg/sec`);}// Find optimal batch size
     const optimalBatch = this.findOptimalBatchSize(results);
     this.logger.log(`🎯 Optimal batch size: ${optimalBatch.batchSize} (${optimalBatch.throughput.toFixed(0)} msg/sec)`);
 
@@ -463,10 +387,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    * Execute load ramp-up testing
    */
   async executeLoadRampUpTest(): Promise<ThroughputTestResults> {
-    this.logger.log('📈 Starting load ramp-up throughput testing');
-
-    const config: ThroughputTestConfig = {
-      scenario: ThroughputTestScenario.LOAD_RAMP_UP,
+    this.logger.log('📈 Starting load ramp-up throughput testing');const config: ThroughputTestConfig = {scenario: ThroughputTestScenario.LOAD_RAMP_UP,
       maxConnections: 200,
       connectionRampRate: 10,
       targetThroughput: this.THROUGHPUT_TARGETS.PEAK_TARGET,
@@ -476,25 +397,17 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       warmupDuration: 30000,
       measurementDuration: 240000,
       cooldownDuration: 30000,
-      loadPattern: 'ramp',
-      rampSettings: {
-        startRate: 1000,           // Start at 1000 msg/sec
+      loadPattern: 'ramp',rampSettings: {startRate: 1000,           // Start at 1000 msg/sec
         endRate: 15000,            // Ramp to 15000 msg/sec
         rampDuration: 240000,      // Over 4 minutes
       },
     };
 
-    return await this.executeThroughputTest('ramp_up', config);
-  }
-
-  /**
+    return await this.executeThroughputTest('ramp_up', config);}/**
    * Execute stress testing to find breaking point
    */
   async executeStressTest(): Promise<ThroughputTestResults> {
-    this.logger.log('💪 Starting stress test to find throughput limits');
-
-    const config: ThroughputTestConfig = {
-      scenario: ThroughputTestScenario.STRESS_TESTING,
+    this.logger.log('💪 Starting stress test to find throughput limits');const config: ThroughputTestConfig = {scenario: ThroughputTestScenario.STRESS_TESTING,
       maxConnections: 1000,
       connectionRampRate: 50,
       targetThroughput: 25000,     // Deliberately high target
@@ -504,10 +417,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       warmupDuration: 30000,
       measurementDuration: 120000,
       cooldownDuration: 30000,
-      loadPattern: 'constant',
-    };
-
-    return await this.executeThroughputTest('stress', config);
+      loadPattern: 'constant',};return await this.executeThroughputTest('stress', config);
   }
 
   // ===== CORE TESTING INFRASTRUCTURE =====
@@ -520,11 +430,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
     config: ThroughputTestConfig
   ): Promise<ThroughputTestResults> {
     const fullTestId = this.generateTestId(testId);
-    this.logger.log(`🧪 Executing throughput test: ${fullTestId}`);
-
-    this.activeTests.set(fullTestId, config);
-
-    const startTime = new Date();
+    this.logger.log(`🧪 Executing throughput test: ${fullTestId}`);this.activeTests.set(fullTestId, config);const startTime = new Date();
     let testResults: ThroughputTestResults;
 
     try {
@@ -548,14 +454,8 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       // Store results
       this.testResults.set(fullTestId, testResults);
 
-      this.logger.log(`✅ Throughput test completed: ${fullTestId}`);
-
-      return testResults;
-
-    } catch (error) {
-      this.logger.error(`❌ Throughput test failed: ${fullTestId}`, error.stack);
-      throw error;
-    } finally {
+      this.logger.log(`✅ Throughput test completed: ${fullTestId}`);return testResults;} catch (error) {
+      this.logger.error(`❌ Throughput test failed: ${fullTestId}`, error.stack);throw error;} finally {
       this.activeTests.delete(fullTestId);
       this.stopMetricsCollection();
     }
@@ -581,9 +481,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
     // Cooldown phase
     if (config.cooldownDuration > 0) {
       this.logger.log(`❄️ Cooldown phase: ${config.cooldownDuration}ms`);
-      await this.executeTestPhase(testId, config, 'cooldown');
-    }
-  }
+      await this.executeTestPhase(testId, config, 'cooldown');}}
 
   /**
    * Execute individual test phase
@@ -652,31 +550,17 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
   private async startWorker(worker: Worker, duration: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error('Worker timeout'));
-      }, duration + 10000); // 10-second buffer
-
-      worker.on('message', (message) => {
-        if (message.type === 'metrics') {
-          // Collect worker metrics
-          this.processWorkerMetrics(message.data);
-        } else if (message.type === 'completed') {
-          clearTimeout(timeout);
-          resolve();
-        } else if (message.type === 'error') {
-          clearTimeout(timeout);
-          reject(new Error(message.data));
+        reject(new Error('Worker timeout'));}, duration + 10000); // 10-second bufferworker.on('message', (message) => {if (message.type === 'metrics') {// Collect worker metricsthis.processWorkerMetrics(message.data);
+        } else if (message.type === 'completed') {clearTimeout(timeout);resolve();
+        } else if (message.type === 'error') {clearTimeout(timeout);reject(new Error(message.data));
         }
       });
 
-      worker.on('error', (error) => {
-        clearTimeout(timeout);
-        reject(error);
+      worker.on('error', (error) => {clearTimeout(timeout);reject(error);
       });
 
       // Start worker
-      worker.postMessage({ type: 'start' });
-    });
-  }
+      worker.postMessage({ type: 'start' });});}
 
   // ===== METRICS AND ANALYSIS =====
 
@@ -761,55 +645,39 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
   private analyzeBottlenecks(
     metrics: ThroughputMetrics[],
     config: ThroughputTestConfig
-  ): ThroughputTestResults['bottlenecks'] {
-    const bottlenecks: ThroughputTestResults['bottlenecks'] = [];
-
-    const avgCpu = this.calculateMean(metrics.map(m => m.cpuUsage));
-    const avgMemory = this.calculateMean(metrics.map(m => m.memoryUsage));
+  ): ThroughputTestResults['bottlenecks'] {const bottlenecks: ThroughputTestResults['bottlenecks'] = [];const avgCpu = this.calculateMean(metrics.map(m => m.cpuUsage));const avgMemory = this.calculateMean(metrics.map(m => m.memoryUsage));
     const avgThroughput = this.calculateMean(metrics.map(m => m.instantThroughput));
 
     // CPU bottleneck analysis
     if (avgCpu > 80) {
       bottlenecks.push({
-        type: 'cpu',
-        severity: avgCpu > 95 ? 'critical' : avgCpu > 90 ? 'high' : 'medium',
+        type: 'cpu',severity: avgCpu > 95 ? 'critical' : avgCpu > 90 ? 'high' : 'medium',
         description: `High CPU utilization: ${avgCpu.toFixed(1)}%`,
-        recommendation: 'Consider CPU optimization or horizontal scaling',
-      });
-    }
+        recommendation: 'Consider CPU optimization or horizontal scaling',});}
 
     // Memory bottleneck analysis
     const memoryMB = avgMemory / 1024 / 1024;
     if (memoryMB > 1000) { // 1GB threshold
       bottlenecks.push({
-        type: 'memory',
-        severity: memoryMB > 2000 ? 'high' : 'medium',
+        type: 'memory',severity: memoryMB > 2000 ? 'high' : 'medium',
         description: `High memory usage: ${memoryMB.toFixed(0)}MB`,
-        recommendation: 'Optimize memory usage or increase available memory',
-      });
-    }
+        recommendation: 'Optimize memory usage or increase available memory',});}
 
     // Connection efficiency analysis
     const efficiency = avgThroughput / config.maxConnections;
     if (efficiency < this.THROUGHPUT_TARGETS.EFFICIENCY_TARGET) {
       bottlenecks.push({
-        type: 'connection',
-        severity: efficiency < 25 ? 'high' : 'medium',
+        type: 'connection',severity: efficiency < 25 ? 'high' : 'medium',
         description: `Low connection efficiency: ${efficiency.toFixed(1)} msg/sec per connection`,
-        recommendation: 'Optimize connection management or reduce connection count',
-      });
-    }
+        recommendation: 'Optimize connection management or reduce connection count',});}
 
     // Network utilization analysis
     const avgNetwork = this.calculateMean(metrics.map(m => m.networkUtilization));
     if (avgNetwork > 80) {
       bottlenecks.push({
-        type: 'network',
-        severity: avgNetwork > 95 ? 'critical' : 'high',
+        type: 'network',severity: avgNetwork > 95 ? 'critical' : 'high',
         description: `High network utilization: ${avgNetwork.toFixed(1)}%`,
-        recommendation: 'Consider message compression or network optimization',
-      });
-    }
+        recommendation: 'Consider message compression or network optimization',});}
 
     return bottlenecks;
   }
@@ -851,8 +719,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       current.efficiency > max.efficiency ? current : max
     );
 
-    this.logger.log(`   Optimal for throughput: ${optimalForThroughput.payloadSize}B (${optimalForThroughput.throughput.toFixed(0)} msg/sec)`);
-    this.logger.log(`   Optimal for efficiency: ${optimalForEfficiency.payloadSize}B (${optimalForEfficiency.efficiency.toFixed(3)} msg/byte)`);
+    this.logger.log(`   Optimal for throughput: ${optimalForThroughput.payloadSize}B (${optimalForThroughput.throughput.toFixed(0)} msg/sec)`);this.logger.log(`   Optimal for efficiency: ${optimalForEfficiency.payloadSize}B (${optimalForEfficiency.efficiency.toFixed(3)} msg/byte)`);
   }
 
   /**
@@ -873,10 +740,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
       current.totalThroughput > max.totalThroughput ? current : max
     );
 
-    this.logger.log(`   Optimal connection count: ${optimalConnections.connections} (${optimalConnections.totalThroughput.toFixed(0)} msg/sec total)`);
-
-    // Analyze scaling linearity
-    const firstResult = analysis[0];
+    this.logger.log(`   Optimal connection count: ${optimalConnections.connections} (${optimalConnections.totalThroughput.toFixed(0)} msg/sec total)`);// Analyze scaling linearityconst firstResult = analysis[0];
     const lastResult = analysis[analysis.length - 1];
     const scalingRatio = (lastResult.totalThroughput / firstResult.totalThroughput) / (lastResult.connections / firstResult.connections);
 
@@ -930,11 +794,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    */
   private getPhaseDuration(config: ThroughputTestConfig, phase: string): number {
     switch (phase) {
-      case 'warmup': return config.warmupDuration;
-      case 'measurement': return config.measurementDuration;
-      case 'cooldown': return config.cooldownDuration;
-      default: return 0;
-    }
+      case 'warmup': return config.warmupDuration;case 'measurement': return config.measurementDuration;case 'cooldown': return config.cooldownDuration;default: return 0;}
   }
 
   /**
@@ -942,11 +802,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    */
   private getPhaseTargetThroughput(config: ThroughputTestConfig, phase: string): number {
     switch (phase) {
-      case 'warmup': return config.targetThroughput * 0.5; // 50% during warmup
-      case 'measurement': return config.targetThroughput;
-      case 'cooldown': return config.targetThroughput * 0.3; // 30% during cooldown
-      default: return 0;
-    }
+      case 'warmup': return config.targetThroughput * 0.5; // 50% during warmupcase 'measurement': return config.targetThroughput;case 'cooldown': return config.targetThroughput * 0.3; // 30% during cooldowndefault: return 0;}
   }
 
   /**
@@ -955,15 +811,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
   private determinePerformanceTrend(
     current: number,
     baseline: number
-  ): 'improving' | 'degrading' | 'stable' {
-    const difference = ((current - baseline) / baseline) * 100;
-
-    if (difference > 5) return 'improving';
-    if (difference < -5) return 'degrading';
-    return 'stable';
-  }
-
-  /**
+  ): 'improving' | 'degrading' | 'stable' {const difference = ((current - baseline) / baseline) * 100;if (difference > 5) return 'improving';if (difference < -5) return 'degrading';return 'stable';}/**
    * Calculate arithmetic mean
    */
   private calculateMean(values: number[]): number {
@@ -986,21 +834,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    */
   private logThroughputResults(results: ThroughputTestResults): void {
     this.logger.log('📊 Throughput Test Results:');
-    this.logger.log(`   Test ID: ${results.testId}`);
-    this.logger.log(`   Scenario: ${results.scenario}`);
-    this.logger.log(`   Peak Throughput: ${results.peakThroughput.toFixed(0)} msg/sec`);
-    this.logger.log(`   Average Throughput: ${results.averageThroughput.toFixed(0)} msg/sec`);
-    this.logger.log(`   Sustained Throughput: ${results.sustainedThroughput.toFixed(0)} msg/sec`);
-    this.logger.log(`   Target Achievement: ${results.targetAchieved ? '✅' : '❌'} (${results.targetPercentage.toFixed(1)}%)`);
-    this.logger.log(`   Connection Efficiency: ${results.connectionEfficiency.toFixed(1)} msg/sec per connection`);
-    this.logger.log(`   Total Messages: ${results.totalMessagesProcessed.toLocaleString()}`);
-
-    if (results.bottlenecks.length > 0) {
-      this.logger.log(`   Bottlenecks Detected: ${results.bottlenecks.length}`);
-      results.bottlenecks.forEach((bottleneck, index) => {
-        this.logger.log(`     ${index + 1}. ${bottleneck.type}: ${bottleneck.description}`);
-      });
-    }
+    this.logger.log(`   Test ID: ${results.testId}`);this.logger.log(`   Scenario: ${results.scenario}`);this.logger.log(`   Peak Throughput: ${results.peakThroughput.toFixed(0)} msg/sec`);this.logger.log(`   Average Throughput: ${results.averageThroughput.toFixed(0)} msg/sec`);this.logger.log(`   Sustained Throughput: ${results.sustainedThroughput.toFixed(0)} msg/sec`);this.logger.log(`   Target Achievement: ${results.targetAchieved ? '✅' : '❌'} (${results.targetPercentage.toFixed(1)}%)`);this.logger.log(`   Connection Efficiency: ${results.connectionEfficiency.toFixed(1)} msg/sec per connection`);this.logger.log(`   Total Messages: ${results.totalMessagesProcessed.toLocaleString()}`);if (results.bottlenecks.length > 0) {this.logger.log(`   Bottlenecks Detected: ${results.bottlenecks.length}`);results.bottlenecks.forEach((bottleneck, index) => {this.logger.log(`     ${index + 1}. ${bottleneck.type}: ${bottleneck.description}`);});}
 
     if (results.baselineComparison) {
       const trend = results.baselineComparison.performanceTrend;
@@ -1080,10 +914,7 @@ export class ThroughputTestingService implements OnModuleInit, OnModuleDestroy {
    * Get WebSocket URL for testing
    */
   private getWebSocketUrl(): string {
-    return this.configService.get<string>('WEBSOCKET_TEST_URL', 'ws://localhost:8080');
-  }
-
-  /**
+    return this.configService.get<string>('WEBSOCKET_TEST_URL', 'ws://localhost:8080');}/**
    * Load baseline results
    */
   private async loadBaselineResults(): Promise<void> {

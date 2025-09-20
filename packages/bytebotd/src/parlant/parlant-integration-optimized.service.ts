@@ -17,25 +17,12 @@
  * Availability: 99.9%+ with automatic failover and degraded mode support
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ParlantPerformanceMonitorService } from './performance/parlant-performance-monitor.service';
-import { ParlantIntelligentCacheService } from './caching/parlant-intelligent-cache.service';
-import { ParlantCircuitBreakerService } from './resilience/parlant-circuit-breaker.service';
-import { ParlantRetryFailoverService } from './resilience/parlant-retry-failover.service';
-import { ParlantEnterpriseAuditService, ParlantAuditEntry } from './audit/parlant-enterprise-audit.service';
-
-// Import interfaces from original service
-import {
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantPerformanceMonitorService } from './performance/parlant-performance-monitor.service';import { ParlantIntelligentCacheService } from './caching/parlant-intelligent-cache.service';import { ParlantCircuitBreakerService } from './resilience/parlant-circuit-breaker.service';import { ParlantRetryFailoverService } from './resilience/parlant-retry-failover.service';import { ParlantEnterpriseAuditService, ParlantAuditEntry } from './audit/parlant-enterprise-audit.service';// Import interfaces from original serviceimport {
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ConversationalValidationError
-} from './parlant-integration.service';
-
-// ===== OPTIMIZED INTEGRATION INTERFACES =====
-
-/**
+} from './parlant-integration.service';// ===== OPTIMIZED INTEGRATION INTERFACES =====/**
  * Optimized validation configuration
  */
 export interface OptimizedValidationConfig {
@@ -51,10 +38,7 @@ export interface OptimizedValidationConfig {
     readonly cacheHitRate: number;        // 95%
     readonly availability: number;        // 99.9%
   };
-  readonly degradationStrategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';
-}
-
-/**
+  readonly degradationStrategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';}/**
  * Validation result with performance metadata
  */
 export interface OptimizedValidationResult extends ParlantValidationResponse {
@@ -74,9 +58,7 @@ export interface OptimizedValidationResult extends ParlantValidationResponse {
  */
 export interface BulkValidationRequest {
   readonly requests: ParlantValidationRequest[];
-  readonly priority: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL';
-  readonly batchSize?: number;
-  readonly maxConcurrency?: number;
+  readonly priority: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL';readonly batchSize?: number;readonly maxConcurrency?: number;
   readonly failFastThreshold?: number;
 }
 
@@ -123,26 +105,10 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     private readonly enterpriseAudit: ParlantEnterpriseAuditService
   ) {
     this.optimizedConfig = {
-      enableIntelligentCaching: this.configService.get<boolean>('PARLANT_INTELLIGENT_CACHE_ENABLED', true),
-      enableCircuitBreaker: this.configService.get<boolean>('PARLANT_CIRCUIT_BREAKER_ENABLED', true),
-      enableRetryFailover: this.configService.get<boolean>('PARLANT_RETRY_FAILOVER_ENABLED', true),
-      enablePerformanceMonitoring: this.configService.get<boolean>('PARLANT_PERFORMANCE_MONITORING_ENABLED', true),
-      enableEnterpriseAudit: this.configService.get<boolean>('PARLANT_ENTERPRISE_AUDIT_ENABLED', true),
-      performanceTargets: {
-        averageLatency: this.configService.get<number>('PARLANT_TARGET_AVG_LATENCY_MS', 500),
-        p95Latency: this.configService.get<number>('PARLANT_TARGET_P95_LATENCY_MS', 1000),
-        throughput: this.configService.get<number>('PARLANT_TARGET_THROUGHPUT_RPS', 25),
-        cacheHitRate: this.configService.get<number>('PARLANT_TARGET_CACHE_HIT_RATE', 95),
-        availability: this.configService.get<number>('PARLANT_TARGET_AVAILABILITY', 99.9),
-      },
-      degradationStrategy: this.configService.get<'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY'>('PARLANT_DEGRADATION_STRATEGY', 'GRACEFUL_DEGRADATION'),
+      enableIntelligentCaching: this.configService.get<boolean>('PARLANT_INTELLIGENT_CACHE_ENABLED', true),enableCircuitBreaker: this.configService.get<boolean>('PARLANT_CIRCUIT_BREAKER_ENABLED', true),enableRetryFailover: this.configService.get<boolean>('PARLANT_RETRY_FAILOVER_ENABLED', true),enablePerformanceMonitoring: this.configService.get<boolean>('PARLANT_PERFORMANCE_MONITORING_ENABLED', true),enableEnterpriseAudit: this.configService.get<boolean>('PARLANT_ENTERPRISE_AUDIT_ENABLED', true),performanceTargets: {averageLatency: this.configService.get<number>('PARLANT_TARGET_AVG_LATENCY_MS', 500),p95Latency: this.configService.get<number>('PARLANT_TARGET_P95_LATENCY_MS', 1000),throughput: this.configService.get<number>('PARLANT_TARGET_THROUGHPUT_RPS', 25),cacheHitRate: this.configService.get<number>('PARLANT_TARGET_CACHE_HIT_RATE', 95),availability: this.configService.get<number>('PARLANT_TARGET_AVAILABILITY', 99.9),},degradationStrategy: this.configService.get<'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY'>('PARLANT_DEGRADATION_STRATEGY', 'GRACEFUL_DEGRADATION'),
     };
     
-    const operationId = `parlant_optimized_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Optimized Parlant Integration Service`, {
-      optimizedConfig: this.optimizedConfig,
-      servicesEnabled: {
+    const operationId = `parlant_optimized_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Optimized Parlant Integration Service`, {optimizedConfig: this.optimizedConfig,servicesEnabled: {
         intelligentCache: this.optimizedConfig.enableIntelligentCaching,
         circuitBreaker: this.optimizedConfig.enableCircuitBreaker,
         retryFailover: this.optimizedConfig.enableRetryFailover,
@@ -155,29 +121,13 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     // Initialize all services and warm up caches
-    const operationId = `module_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Starting module initialization`);
-    
-    try {
-      // Warm up intelligent cache if enabled
+    const operationId = `module_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Starting module initialization`);try {// Warm up intelligent cache if enabled
       if (this.optimizedConfig.enableIntelligentCaching) {
         await this.intelligentCache.warmCache();
-        this.logger.log(`[${operationId}] Intelligent cache warmed up`);
-      }
-      
-      // Start performance monitoring
+        this.logger.log(`[${operationId}] Intelligent cache warmed up`);}// Start performance monitoring
       if (this.optimizedConfig.enablePerformanceMonitoring) {
         setInterval(() => this.reportPerformanceMetrics(), 60000); // Every minute
-        this.logger.log(`[${operationId}] Performance monitoring started`);
-      }
-      
-      this.logger.log(`[${operationId}] Module initialization completed successfully`);
-      
-    } catch (error) {
-      this.logger.error(`[${operationId}] Module initialization failed:`, {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        this.logger.log(`[${operationId}] Performance monitoring started`);}this.logger.log(`[${operationId}] Module initialization completed successfully`);} catch (error) {this.logger.error(`[${operationId}] Module initialization failed:`, {error: error instanceof Error ? error.message : String(error),stack: error instanceof Error ? error.stack : undefined,
       });
       throw error;
     }
@@ -244,15 +194,10 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           );
           
           if (failoverResult.success) {
-            validationResponse = failoverResult.data ?? { approved: false, conversationId: 'failover', validationTimestamp: new Date(), reasoning: 'No data returned from failover', confidence: 0 };
-            retryAttempts = failoverResult.totalAttempts - 1;
-            endpointUsed = failoverResult.successfulEndpoint;
+            validationResponse = failoverResult.data ?? { approved: false, conversationId: 'failover', validationTimestamp: new Date(), reasoning: 'No data returned from failover', confidence: 0 };retryAttempts = failoverResult.totalAttempts - 1;endpointUsed = failoverResult.successfulEndpoint;
             degradedMode = failoverResult.degradedMode;
           } else {
-            throw failoverResult.error ?? new Error('Validation failed after all retry attempts');
-          }
-          
-        } else if (this.optimizedConfig.enableCircuitBreaker) {
+            throw failoverResult.error ?? new Error('Validation failed after all retry attempts');}} else if (this.optimizedConfig.enableCircuitBreaker) {
           // Use circuit breaker for protection
           const circuitResult = await this.circuitBreaker.executeWithProtection(
             () => this.executeValidationOperation(request),
@@ -262,12 +207,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           circuitBreakerState = this.circuitBreaker.getCircuitBreakerStats().state;
           
           if (circuitResult.success) {
-            validationResponse = circuitResult.data ?? { approved: false, conversationId: 'circuit-breaker', validationTimestamp: new Date(), reasoning: 'No data returned from circuit breaker', confidence: 0 };
-          } else {
-            throw circuitResult.error ?? new Error('Circuit breaker blocked validation');
-          }
-          
-        } else {
+            validationResponse = circuitResult.data ?? { approved: false, conversationId: 'circuit-breaker', validationTimestamp: new Date(), reasoning: 'No data returned from circuit breaker', confidence: 0 };} else {throw circuitResult.error ?? new Error('Circuit breaker blocked validation');}} else {
           // Direct validation execution
           validationResponse = await this.executeValidationOperation(request);
         }
@@ -283,30 +223,22 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       if (this.optimizedConfig.enablePerformanceMonitoring) {
         performanceMetrics = this.performanceMonitor.completePerformanceTracking(
           request.operationId,
-          cacheHit ? 'cache_hit' : 'real_time',
-          cacheHit,
-          false
+          cacheHit ? 'cache_hit' : 'real_time',cacheHit,false
         );
       }
 
       // Ensure validationResponse was assigned
       if (!validationResponse) {
-        throw new Error('Validation response was not properly assigned in any execution path');
-      }
-
-      // Step 5: Create enterprise audit entry (if enabled)
+        throw new Error('Validation response was not properly assigned in any execution path');}// Step 5: Create enterprise audit entry (if enabled)
       let auditEntry: ParlantAuditEntry | undefined;
       if (this.optimizedConfig.enableEnterpriseAudit) {
         const totalTime = Date.now() - operationStartTime;
         auditEntry = await this.enterpriseAudit.createAuditEntry(
           request,
           validationResponse,
-          'SUCCESS',
-          totalTime,
-          {
+          'SUCCESS',totalTime,{
             // Additional context from optimization
-            ipAddress: '127.0.0.1', // TODO: Get from request
-            userAgent: 'Optimized Parlant Client',
+            ipAddress: '127.0.0.1', // TODO: Get from requestuserAgent: 'Optimized Parlant Client',
           }
         );
       }
@@ -331,18 +263,13 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       // Step 7: Performance target validation
       this.validatePerformanceTargets(totalTime, cacheHit);
 
-      this.logger.debug(`[${request.operationId}] Optimized validation completed successfully`, {
-        operationId: request.operationId,
-        approved: validationResponse.approved,
+      this.logger.debug(`[${request.operationId}] Optimized validation completed successfully`, {operationId: request.operationId,approved: validationResponse.approved,
         totalTime: `${totalTime.toFixed(2)}ms`,
         cacheHit,
         retryAttempts,
         circuitBreakerState,
         degradedMode,
-        performanceTarget: totalTime < this.optimizedConfig.performanceTargets.averageLatency ? 'MET' : 'EXCEEDED',
-      });
-
-      return optimizedResult;
+        performanceTarget: totalTime < this.optimizedConfig.performanceTargets.averageLatency ? 'MET' : 'EXCEEDED',});return optimizedResult;
 
     } catch (error) {
       const totalTime = Date.now() - operationStartTime;
@@ -351,9 +278,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       if (this.optimizedConfig.enablePerformanceMonitoring) {
         this.performanceMonitor.completePerformanceTracking(
           request.operationId,
-          'real_time',
-          false,
-          true
+          'real_time',false,true
         );
       }
 
@@ -368,9 +293,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
         );
       }
 
-      this.logger.error(`[${request.operationId}] Optimized validation failed`, {
-        operationId: request.operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${request.operationId}] Optimized validation failed`, {operationId: request.operationId,error: error instanceof Error ? error.message : String(error),
         totalTime: `${totalTime.toFixed(2)}ms`,
         stack: error instanceof Error ? error.stack : undefined,
       });
@@ -392,10 +315,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   async validateBulkOperationsOptimized(
     bulkRequest: BulkValidationRequest
   ): Promise<BulkValidationResult> {
-    const operationId = `bulk${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    
-    this.logger.log(`[${operationId}] Starting bulk validation`, {
+    const operationId = `bulk${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting bulk validation`, {
       totalRequests: bulkRequest.requests.length,
       priority: bulkRequest.priority,
       batchSize: bulkRequest.batchSize ?? 10,
@@ -431,9 +351,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
             // Return error response
             return {
               approved: false,
-              conversationId: `bulk_error${Date.now()}`,
-              validationTimestamp: new Date(),
-              reasoning: `Bulk validation failed: ${result?.error?.message ?? 'Unknown error'}`,
+              conversationId: `bulk_error${Date.now()}`,validationTimestamp: new Date(),reasoning: `Bulk validation failed: ${result?.error?.message ?? 'Unknown error'}`,
               confidence: 0,
               performanceMetrics: {
                 totalTime: result?.totalTime ?? 0,
@@ -455,9 +373,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           } catch (error) {
             results.push({
               approved: false,
-              conversationId: `error${Date.now()}`,
-              validationTimestamp: new Date(),
-              reasoning: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
+              conversationId: `error${Date.now()}`,validationTimestamp: new Date(),reasoning: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
               confidence: 0,
               performanceMetrics: {
                 totalTime: 0,
@@ -488,13 +404,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       // Performance analysis
       const performanceAnalysis = this.analyzeBulkPerformance(summary, results);
 
-      this.logger.log(`[${operationId}] Bulk validation completed`, {
-        ...summary,
-        totalTime: `${totalTime.toFixed(2)}ms`,
-        throughput: `${summary.throughput.toFixed(1)} req/s`,
-        cacheHitRate: `${summary.cacheHitRate.toFixed(1)}%`,
-        targetsMet: performanceAnalysis.targetsMet,
-      });
+      this.logger.log(`[${operationId}] Bulk validation completed`, {...summary,totalTime: `${totalTime.toFixed(2)}ms`,throughput: `${summary.throughput.toFixed(1)} req/s`,cacheHitRate: `${summary.cacheHitRate.toFixed(1)}%`,targetsMet: performanceAnalysis.targetsMet,});
 
       return {
         results,
@@ -565,18 +475,12 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     
     return {
       approved,
-      conversationId: `conv${Date.now()}${Math.random().toString(36).substring(7)}`,
-      validationTimestamp: new Date(),
-      reasoning: approved 
-        ? `Operation approved: ${request.actionDescription} meets security requirements`
-        : `Operation denied: ${request.actionDescription} requires additional authorization`,
+      conversationId: `conv${Date.now()}${Math.random().toString(36).substring(7)}`,validationTimestamp: new Date(),reasoning: approved 
+        ? `Operation approved: ${request.actionDescription} meets security requirements`: `Operation denied: ${request.actionDescription} requires additional authorization`,
       confidence: 0.85 + Math.random() * 0.14, // 0.85-0.99
-      suggestedAlternatives: approved ? [] : ['Request explicit user authorization', 'Use alternative approach'],
-      executionContext: approved ? {
-        timeoutMs: this.getTimeoutForRiskLevel(request.riskLevel),
+      suggestedAlternatives: approved ? [] : ['Request explicit user authorization', 'Use alternative approach'],executionContext: approved ? {timeoutMs: this.getTimeoutForRiskLevel(request.riskLevel),
         retryAttempts: 1,
-        monitoringLevel: 'DETAILED',
-        safeguards: ['audit_trail', 'permission_check'],
+        monitoringLevel: 'DETAILED',safeguards: ['audit_trail', 'permission_check'],
       } : undefined,
     };
   }
@@ -584,11 +488,11 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   private calculateProcessingDelay(riskLevel: RiskLevel): number {
     // Simulate realistic processing delays based on risk level
     switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 20 + Math.random() * 30;   // 20-50ms
-      case RiskLevel.LOW: return 50 + Math.random() * 50;       // 50-100ms
-      case RiskLevel.MEDIUM: return 100 + Math.random() * 100;  // 100-200ms
-      case RiskLevel.HIGH: return 200 + Math.random() * 200;    // 200-400ms
-      case RiskLevel.CRITICAL: return 300 + Math.random() * 300; // 300-600ms
+      case RiskLevel._MINIMAL: return 20 + Math.random() * 30;   // 20-50ms
+      case RiskLevel._LOW: return 50 + Math.random() * 50;       // 50-100ms
+      case RiskLevel._MODERATE: return 100 + Math.random() * 100;  // 100-200ms
+      case RiskLevel._HIGH: return 200 + Math.random() * 200;    // 200-400ms
+      case RiskLevel._CRITICAL: return 300 + Math.random() * 300; // 300-600ms
       default: return 100;
     }
   }
@@ -596,14 +500,14 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   private simulateValidationLogic(request: ParlantValidationRequest): boolean {
     // Simulate approval logic based on risk level and context
     switch (request.riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW:
+      case RiskLevel._MINIMAL:
+      case RiskLevel._LOW:
         return Math.random() > 0.05; // 95% approval rate
-      case RiskLevel.MEDIUM:
+      case RiskLevel._MODERATE:
         return Math.random() > 0.2;  // 80% approval rate
-      case RiskLevel.HIGH:
+      case RiskLevel._HIGH:
         return Math.random() > 0.5;  // 50% approval rate
-      case RiskLevel.CRITICAL:
+      case RiskLevel._CRITICAL:
         return Math.random() > 0.8;  // 20% approval rate
       default:
         return false;
@@ -612,11 +516,11 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   private getTimeoutForRiskLevel(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 5000;
-      case RiskLevel.LOW: return 10000;
-      case RiskLevel.MEDIUM: return 30000;
-      case RiskLevel.HIGH: return 60000;
-      case RiskLevel.CRITICAL: return 120000;
+      case RiskLevel._MINIMAL: return 5000;
+      case RiskLevel._LOW: return 10000;
+      case RiskLevel._MODERATE: return 30000;
+      case RiskLevel._HIGH: return 60000;
+      case RiskLevel._CRITICAL: return 120000;
       default: return 10000;
     }
   }
@@ -628,9 +532,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   }
 
   private analyzeBulkPerformance(
-    summary: BulkValidationResult['summary'],
-    results: OptimizedValidationResult[]
-  ): BulkValidationResult['performanceAnalysis'] {
+    summary: BulkValidationResult['summary'],results: OptimizedValidationResult[]): BulkValidationResult['performanceAnalysis'] {
     const bottlenecks: string[] = [];
     const recommendations: string[] = [];
     
@@ -647,10 +549,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     
     if (summary.throughput < this.optimizedConfig.performanceTargets.throughput) {
       bottlenecks.push(`Throughput ${summary.throughput.toFixed(1)} req/s below target ${this.optimizedConfig.performanceTargets.throughput} req/s`);
-      recommendations.push('Increase concurrency and enable connection pooling');
-    }
-    
-    const targetsMet = bottlenecks.length === 0;
+      recommendations.push('Increase concurrency and enable connection pooling');}const targetsMet = bottlenecks.length === 0;
     
     return {
       bottlenecks,
@@ -664,10 +563,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       return true; // Cannot assess without monitoring
     }
     
-    const stats = this.performanceMonitor.getPerformanceStats('hour');
-    
-    return (
-      stats.averageLatency < this.optimizedConfig.performanceTargets.averageLatency &&
+    const stats = this.performanceMonitor.getPerformanceStats('hour');return (stats.averageLatency < this.optimizedConfig.performanceTargets.averageLatency &&
       stats.p95Latency < this.optimizedConfig.performanceTargets.p95Latency &&
       stats.throughputRpm / 60 > this.optimizedConfig.performanceTargets.throughput &&
       stats.cacheHitRate > this.optimizedConfig.performanceTargets.cacheHitRate
@@ -678,9 +574,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     const status = this.getOptimizationStatus();
     
     this.logger.log('Optimized Parlant Integration Performance Report', {
-      uptime: `${Math.floor(status.uptime / 1000 / 60)} minutes`,
-      totalValidations: this.totalValidations,
-      successRate: `${((this.successfulValidations / Math.max(this.totalValidations, 1)) * 100).toFixed(2)}%`,
+      uptime: `${Math.floor(status.uptime / 1000 / 60)} minutes`,totalValidations: this.totalValidations,successRate: `${((this.successfulValidations / Math.max(this.totalValidations, 1)) * 100).toFixed(2)}%`,
       targetsMet: status.targetsMet,
       servicesEnabled: {
         cache: this.optimizedConfig.enableIntelligentCaching,

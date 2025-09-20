@@ -19,69 +19,30 @@
 
 // ===== CORE SERVICES =====
 
-export { ParlantIntegrationService } from './parlant-integration.service';
-export { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
-
-// ===== CONTROLLERS =====
-
-export { ParlantComputerUseController } from './parlant-computer-use.controller';
-
-// ===== MODULES =====
-
-export { ParlantModule } from './parlant.module';
-export { parlantConfigFactory } from './parlant.module';
-
-// ===== INTERFACES AND TYPES =====
-
-// Core integration interfaces
+export { ParlantIntegrationService } from './parlant-integration.service';export { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';// ===== CONTROLLERS =====export { ParlantComputerUseController } from './parlant-computer-use.controller';// ===== MODULES =====export { ParlantModule } from './parlant.module';export { parlantConfigFactory } from './parlant.module';// ===== INTERFACES AND TYPES =====// Core integration interfaces
 export type {
   ParlantConversationContext,
   ConversationEntry,
   ParlantValidationRequest,
   ParlantValidationResponse,
   ExecutionContext,
-} from './parlant-integration.service';
-
-// Service-specific interfaces
-export type {
+} from './parlant-integration.service';// Service-specific interfacesexport type {
   ComputerActionValidationContext,
   ComputerActionAuditEntry,
   SystemStateInfo,
   ActionRiskAssessment,
-} from './parlant-validated-computer-use.service';
-
-// Controller DTOs
-export type {
+} from './parlant-validated-computer-use.service';// Controller DTOsexport type {
   ParlantComputerActionDto,
   ParlantValidationResponseDto,
   ParlantComputerActionResultDto,
   ParlantSystemStatusDto,
-} from './parlant-computer-use.controller';
-
-// Module configuration
-export type {
+} from './parlant-computer-use.controller';// Module configurationexport type {
   ParlantModuleConfig,
   ParlantHealthStatus,
-} from './parlant.module';
-
-// ===== ENUMS =====
-
-export { RiskLevel } from './parlant-integration.service';
-
-// ===== EXCEPTIONS =====
-
-export { ConversationalValidationError } from './parlant-integration.service';
-
-// ===== CONFIGURATION =====
-
-export { 
+} from './parlant.module';// ===== ENUMS =====export { RiskLevel } from './parlant-integration.service';// ===== EXCEPTIONS =====export { ConversationalValidationError } from './parlant-integration.service';// ===== CONFIGURATION =====export { 
   defaultParlantConfig,
   PARLANT_ENVIRONMENT_VARIABLES,
-} from './parlant.module';
-
-// ===== UTILITIES =====
-
-/**
+} from './parlant.module';// ===== UTILITIES =====/**
  * Parlant integration utility functions
  */
 export const ParlantUtils = {
@@ -96,9 +57,7 @@ export const ParlantUtils = {
    * Validate conversation context structure
    */
   validateConversationContext: (context: unknown): boolean => {
-    if (!context || typeof context !== 'object') return false;
-    const ctx = context as Record<string, unknown>;
-    return !!(ctx.userId && 
+    if (!context || typeof context !== 'object') return false;const ctx = context as Record<string, unknown>;return !!(ctx.userId && 
              ctx.sessionId && 
              Array.isArray(ctx.conversationHistory));
   },
@@ -110,20 +69,11 @@ export const ParlantUtils = {
     const sanitized = { ...params };
     
     // Remove or mask sensitive fields
-    const sensitiveFields = ['password', 'token', 'key', 'secret', 'credential'];
-    
-    for (const field of sensitiveFields) {
-      if (sanitized[field]) {
-        sanitized[field] = '[REDACTED]';
-      }
-    }
+    const sensitiveFields = ['password', 'token', 'key', 'secret', 'credential'];for (const field of sensitiveFields) {if (sanitized[field]) {
+        sanitized[field] = '[REDACTED]';}}
     
     // Truncate long text fields
-    if (sanitized.text && typeof sanitized.text === 'string' && sanitized.text.length > 200) {
-      sanitized.text = sanitized.text.substring(0, 200) + '...';
-    }
-    
-    return sanitized;
+    if (sanitized.text && typeof sanitized.text === 'string' && sanitized.text.length > 200) {sanitized.text = sanitized.text.substring(0, 200) + '...';}return sanitized;
   },
 
   /**
@@ -189,14 +139,7 @@ export const PARLANT_CONSTANTS = {
   
   // Risk level thresholds
   RISK_LEVELS: {
-    MINIMAL: 'MINIMAL',
-    LOW: 'LOW',
-    MEDIUM: 'MEDIUM',
-    HIGH: 'HIGH',
-    CRITICAL: 'CRITICAL',
-  },
-  
-  // Validation confidence thresholds
+    MINIMAL: 'MINIMAL',LOW: 'LOW',MEDIUM: 'MEDIUM',HIGH: 'HIGH',CRITICAL: 'CRITICAL',},// Validation confidence thresholds
   CONFIDENCE_THRESHOLDS: {
     AUTO_APPROVE: 0.9,
     MANUAL_REVIEW: 0.7,
@@ -231,30 +174,13 @@ export const PARLANT_CONSTANTS = {
  * Parlant integration version information
  */
 export const PARLANT_VERSION = {
-  version: '1.0.0',
-  implementation: 'MAXIMUM',
-  features: [
-    'Function-level conversational validation',
-    'Enterprise-grade audit trails',
-    'Real-time risk assessment',
-    'Performance optimization with caching',
-    'Multi-level security validation',
-    'Context-aware intent analysis',
-  ],
-  compatibility: {
-    aiAgent: '>=1.0.0',
-    nestjs: '>=9.0.0',
-    typescript: '>=4.5.0',
-  },
-  buildDate: new Date().toISOString(),
+  version: '1.0.0',implementation: 'MAXIMUM',features: ['Function-level conversational validation','Enterprise-grade audit trails','Real-time risk assessment','Performance optimization with caching','Multi-level security validation','Context-aware intent analysis',],compatibility: {
+    aiAgent: '>=1.0.0',nestjs: '>=9.0.0',typescript: '>=4.5.0',},buildDate: new Date().toISOString(),
 } as const;
 
 // ===== DEFAULT EXPORT =====
 
-import { ParlantIntegrationService, ConversationalValidationError } from './parlant-integration.service';
-import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
-import { ParlantComputerUseController } from './parlant-computer-use.controller';
-import { ParlantModule } from './parlant.module';
+import { ParlantIntegrationService, ConversationalValidationError } from './parlant-integration.service';import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';import { ParlantComputerUseController } from './parlant-computer-use.controller';import { ParlantModule } from './parlant.module';
 
 /**
  * Default export with all Parlant integration components

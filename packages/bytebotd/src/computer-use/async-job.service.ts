@@ -17,23 +17,12 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as _uuidv4 } from 'uuid';
-import {
-  JobStatus,
+import { Injectable, Logger } from '@nestjs/common';import { v4 as _uuidv4 } from 'uuid';import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from './dto/async-job.dto';
-import { ComputerActionDto } from './dto/computer-action.dto';
-import { ComputerUseService } from './computer-use.service';
-import { CacheService } from '../cache/cache.service';
-import { MetricsService } from '../metrics/metrics.service';
-import { JobMonitoringService } from './services/job-monitoring.service';
-
-/**
- * Internal job data structure for queue management
+} from './dto/async-job.dto';import { ComputerActionDto } from './dto/computer-action.dto';import { ComputerUseService } from './computer-use.service';import { CacheService } from '../cache/cache.service';import { MetricsService } from '../metrics/metrics.service';import { JobMonitoringService } from './services/job-monitoring.service';/*** Internal job data structure for queue management
  */
 interface JobData {
   jobId: string;
@@ -116,10 +105,7 @@ export class AsyncJobService {
     if (options.useCache) {
       const cachedResult = await this.getCachedResult(action);
       if (cachedResult) {
-        this.logger.log(`Cache hit for job ${jobId}, returning cached result`);
-
-        // Create completed job from cache
-        const cachedJob: JobData = {
+        this.logger.log(`Cache hit for job ${jobId}, returning cached result`);// Create completed job from cacheconst cachedJob: JobData = {
           jobId,
           status: JobStatus.COMPLETED,
           priority: options.priority ?? JobPriority.NORMAL,
@@ -214,10 +200,7 @@ export class AsyncJobService {
     const job = this.jobs.get(jobId);
 
     if (!job) {
-      throw new Error(`Job not found: ${jobId}`);
-    }
-
-    return {
+      throw new Error(`Job not found: ${jobId}`);}return {
       jobId: job.jobId,
       status: job.status,
       progress: job.progress,
@@ -239,14 +222,9 @@ export class AsyncJobService {
     const job = this.jobs.get(jobId);
 
     if (!job) {
-      throw new Error(`Job not found: ${jobId}`);
-    }
-
-    if (job.status !== JobStatus.COMPLETED && job.status !== JobStatus.FAILED) {
+      throw new Error(`Job not found: ${jobId}`);}if (job.status !== JobStatus.COMPLETED && job.status !== JobStatus.FAILED) {
       throw new Error(
-        `Job ${jobId} has not completed yet. Current status: ${job.status}`,
-      );
-    }
+        `Job ${jobId} has not completed yet. Current status: ${job.status}`,);}
 
     const executionTime =
       job.completedAt && job.startedAt
@@ -302,9 +280,7 @@ export class AsyncJobService {
     job.completedAt = new Date();
     job.progress = 0;
 
-    this.logger.log(`Job ${jobId} cancelled`);
-    return true;
-  }
+    this.logger.log(`Job ${jobId} cancelled`);return true;}
 
   /**
    * Get current job queue statistics
@@ -344,10 +320,7 @@ export class AsyncJobService {
    * @returns string Unique job ID
    */
   private generateJobId(): string {
-    return `job${Date.now()}${_uuidv4().substring(0, 8)}`;
-  }
-
-  /**
+    return `job${Date.now()}${_uuidv4().substring(0, 8)}`;}/**
    * Add job to priority queue
    *
    * @param queueItem Job queue item
@@ -377,10 +350,7 @@ export class AsyncJobService {
     queueItem.resolve(null);
 
     this.logger.log(
-      `Job ${queueItem.jobData.jobId} added to queue (priority: ${queueItem.jobData.priority}, position: ${insertIndex === -1 ? this.queue.length : insertIndex + 1})`,
-    );
-
-    // Start processing if not already running
+      `Job ${queueItem.jobData.jobId} added to queue (priority: ${queueItem.jobData.priority}, position: ${insertIndex === -1 ? this.queue.length : insertIndex + 1})`,);// Start processing if not already running
     if (!this.isProcessing) {
       this.processQueue();
     }
@@ -423,19 +393,14 @@ export class AsyncJobService {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Starting job execution: ${jobData.jobId}`);
-
-      // Update job status
-      jobData.status = JobStatus.IN_PROGRESS;
+      this.logger.log(`Starting job execution: ${jobData.jobId}`);// Update job statusjobData.status = JobStatus.IN_PROGRESS;
       jobData.startedAt = new Date();
       jobData.progress = 10;
 
       // Set up timeout
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
-          reject(new Error(`Job timeout after ${jobData.timeout}ms`));
-        }, jobData.timeout);
-      });
+          reject(new Error(`Job timeout after ${jobData.timeout}ms`));}, jobData.timeout);});
 
       // Execute the action with timeout
       const executionPromise = this.computerUseService.action(jobData.action);
@@ -479,10 +444,7 @@ export class AsyncJobService {
       const executionTime = Date.now() - startTime;
 
       this.logger.error(
-        `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,
-      );
-
-      // Check if we should retry
+        `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,);// Check if we should retry
       if (jobData.retryCount < jobData.maxRetries) {
         jobData.retryCount++;
         jobData.status = JobStatus.PENDING;
@@ -522,9 +484,7 @@ export class AsyncJobService {
         startedAt: jobData.startedAt,
         completedAt: jobData.completedAt,
         retryCount: jobData.retryCount,
-        errorType: 'execution_failure',
-        errorMessage: errorMessage,
-        metadata: jobData.metadata,
+        errorType: 'execution_failure',errorMessage: errorMessage,metadata: jobData.metadata,
       });
     }
   }
@@ -585,10 +545,7 @@ export class AsyncJobService {
     // Create deterministic cache key based on action content
     const actionString = JSON.stringify(action);
     const hash = Buffer.from(actionString).toString('base64');
-    return `action${hash.substring(0, 32)}`;
-  }
-
-  /**
+    return `action${hash.substring(0, 32)}`;}/**
    * Record job execution metrics
    *
    * @param jobData Job data
@@ -610,9 +567,7 @@ export class AsyncJobService {
       );
     } catch (_error) {
       this.logger.debug(
-        `Failed to record job metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
-      );
-    }
+        `Failed to record job metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,);}
   }
 
   /**

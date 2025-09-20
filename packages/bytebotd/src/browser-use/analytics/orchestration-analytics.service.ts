@@ -10,18 +10,11 @@
  * @security-focus Critical
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import {
-  OrchestrationErrorType,
+import { Injectable, Logger } from '@nestjs/common';import {OrchestrationErrorType,
   OrchestrationErrorCategory,
   OrchestrationErrorSeverity,
   OrchestrationOperationType,
-} from '../errors/orchestration-errors';
-import { AutomationErrorHandlerService } from '../../common/error-handling/automation-error-handler.service';
-import { OrchestrationErrorRecoveryService } from '../errors/orchestration-error-recovery.service';
-
-/**
- * Orchestration performance metrics
+} from '../errors/orchestration-errors';import { AutomationErrorHandlerService } from '../../common/error-handling/automation-error-handler.service';import { OrchestrationErrorRecoveryService } from '../errors/orchestration-error-recovery.service';/*** Orchestration performance metrics
  */
 export interface OrchestrationPerformanceMetrics {
   readonly operationType: OrchestrationOperationType;
@@ -98,9 +91,7 @@ export interface OrchestrationErrorAnalytics {
     readonly last24Hours: number;
     readonly last7Days: number;
     readonly last30Days: number;
-    readonly trendDirection: 'increasing' | 'decreasing' | 'stable';
-    readonly projectedNext7Days: number;
-  };
+    readonly trendDirection: 'increasing' | 'decreasing' | 'stable';readonly projectedNext7Days: number;};
 }
 
 /**
@@ -110,9 +101,7 @@ export interface OrchestrationMonitoringData {
   readonly activeOrchestrations: Array<{
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed';
-    readonly progress: number;
-    readonly startTime: Date;
+    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed';readonly progress: number;readonly startTime: Date;
     readonly estimatedCompletion?: Date;
     readonly resourceUsage: {
       readonly browsers: number;
@@ -143,10 +132,7 @@ export interface OrchestrationMonitoringData {
   };
   readonly alerts: Array<{
     readonly alertId: string;
-    readonly type: 'performance' | 'error' | 'resource' | 'coordination';
-    readonly severity: 'info' | 'warning' | 'error' | 'critical';
-    readonly message: string;
-    readonly timestamp: Date;
+    readonly type: 'performance' | 'error' | 'resource' | 'coordination';readonly severity: 'info' | 'warning' | 'error' | 'critical';readonly message: string;readonly timestamp: Date;
     readonly orchestrationId?: string;
     readonly acknowledged: boolean;
   }>;
@@ -157,14 +143,9 @@ export interface OrchestrationMonitoringData {
  */
 export interface OrchestrationAnalyticsRecommendations {
   readonly performanceRecommendations: Array<{
-    readonly category: 'throughput' | 'latency' | 'resource_optimization' | 'coordination';
-    readonly priority: 'low' | 'medium' | 'high' | 'critical';
-    readonly title: string;
-    readonly description: string;
+    readonly category: 'throughput' | 'latency' | 'resource_optimization' | 'coordination';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly title: string;readonly description: string;
     readonly expectedImpact: string;
-    readonly implementationComplexity: 'low' | 'medium' | 'high';
-    readonly estimatedEffort: string;
-    readonly resourcesRequired: string[];
+    readonly implementationComplexity: 'low' | 'medium' | 'high';readonly estimatedEffort: string;readonly resourcesRequired: string[];
   }>;
   readonly errorReduction: Array<{
     readonly errorCategory: OrchestrationErrorCategory;
@@ -174,22 +155,16 @@ export interface OrchestrationAnalyticsRecommendations {
     readonly preventiveActions: string[];
   }>;
   readonly resourceOptimization: Array<{
-    readonly resourceType: 'browsers' | 'memory' | 'cpu' | 'network';
-    readonly currentUtilization: number;
-    readonly optimalUtilization: number;
+    readonly resourceType: 'browsers' | 'memory' | 'cpu' | 'network';readonly currentUtilization: number;readonly optimalUtilization: number;
     readonly actions: string[];
     readonly expectedSavings: string;
   }>;
   readonly systemHealth: {
     readonly overallScore: number;
-    readonly trend: 'improving' | 'stable' | 'degrading';
-    readonly criticalIssues: number;
-    readonly nextReviewDate: Date;
+    readonly trend: 'improving' | 'stable' | 'degrading';readonly criticalIssues: number;readonly nextReviewDate: Date;
     readonly healthIndicators: Array<{
       readonly indicator: string;
-      readonly status: 'healthy' | 'warning' | 'critical';
-      readonly value: number;
-      readonly threshold: number;
+      readonly status: 'healthy' | 'warning' | 'critical';readonly value: number;readonly threshold: number;
     }>;
   };
 }
@@ -215,15 +190,10 @@ export class OrchestrationAnalyticsService {
   private readonly orchestrationMetrics = new Map<string, OrchestrationPerformanceMetrics>();
   private readonly errorHistory = new Map<string, OrchestrationErrorType[]>();
   private readonly performanceHistory = new Map<string, number[]>();
-  private readonly activeMonitoring = new Map<string, OrchestrationMonitoringData['activeOrchestrations'][0]>();
-
-  constructor(
-    private readonly errorHandlerService: AutomationErrorHandlerService,
+  private readonly activeMonitoring = new Map<string, OrchestrationMonitoringData['activeOrchestrations'][0]>();constructor(private readonly errorHandlerService: AutomationErrorHandlerService,
     private readonly recoveryService: OrchestrationErrorRecoveryService
   ) {
-    this.logger.log('OrchestrationAnalyticsService initialized');
-    this.initializeMetricsCollection();
-  }
+    this.logger.log('OrchestrationAnalyticsService initialized');this.initializeMetricsCollection();}
 
   /**
    * Get comprehensive orchestration analytics
@@ -274,10 +244,7 @@ export class OrchestrationAnalyticsService {
       };
 
     } catch (error) {
-      this.logger.error('Failed to generate orchestration analytics', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timeRange,
-        operationType,
+      this.logger.error('Failed to generate orchestration analytics', {error: error instanceof Error ? error.message : 'Unknown error',timeRange,operationType,
         duration: Date.now() - startTime,
       });
       throw error;
@@ -317,8 +284,7 @@ export class OrchestrationAnalyticsService {
     });
 
     // Store performance data for analytics
-    const performanceKey = `${operationType}_${startTime.toISOString().split('T')[0]}`;
-    const existing = this.performanceHistory.get(performanceKey) || [];
+    const performanceKey = `${operationType}_${startTime.toISOString().split('T')[0]}';const existing = this.performanceHistory.get(performanceKey) || [];
     existing.push(executionTime);
     this.performanceHistory.set(performanceKey, existing);
 
@@ -352,8 +318,7 @@ export class OrchestrationAnalyticsService {
     });
 
     // Store error for analytics
-    const errorKey = `${context.operationType}_${error.timestamp.toISOString().split('T')[0]}`;
-    const existing = this.errorHistory.get(errorKey) || [];
+    const errorKey = `${context.operationType}_${error.timestamp.toISOString().split('T')[0]}';const existing = this.errorHistory.get(errorKey) || [];
     existing.push(error);
     this.errorHistory.set(errorKey, existing);
 
@@ -405,9 +370,7 @@ export class OrchestrationAnalyticsService {
    * Export analytics data for external systems
    */
   async exportAnalyticsData(
-    format: 'json' | 'csv' | 'excel',
-    timeRange: { start: Date; end: Date },
-    includeRawData: boolean = false
+    format: 'json' | 'csv' | 'excel',timeRange: { start: Date; end: Date },includeRawData: boolean = false
   ): Promise<{
     format: string;
     data: unknown;
@@ -553,19 +516,12 @@ export class OrchestrationAnalyticsService {
         averageRecoveryTime: recoveryStats.averageRecoveryTime,
         recoverySuccessRate: recoveryStats.recoverySuccessRate,
         recoveryStrategies: {
-          'isolate_and_retry': 45,
-          'partial_rollback': 25,
-          'resource_reallocation': 18,
-          'graceful_degradation': 12,
-        },
-      },
+          'isolate_and_retry': 45,'partial_rollback': 25,'resource_reallocation': 18,'graceful_degradation': 12,},},
       errorTrends: {
         last24Hours: 15,
         last7Days: 85,
         last30Days: 320,
-        trendDirection: 'decreasing',
-        projectedNext7Days: 65,
-      },
+        trendDirection: 'decreasing',projectedNext7Days: 65,},
     };
 
     return errorAnalytics;
@@ -592,12 +548,7 @@ export class OrchestrationAnalyticsService {
       },
       alerts: [
         {
-          alertId: 'alert_001',
-          type: 'performance',
-          severity: 'warning',
-          message: 'Average operation time increasing beyond threshold',
-          timestamp: new Date(),
-          acknowledged: false,
+          alertId: 'alert_001',type: 'performance',severity: 'warning',message: 'Average operation time increasing beyond threshold',timestamp: new Date(),acknowledged: false,
         },
       ],
     };
@@ -611,60 +562,30 @@ export class OrchestrationAnalyticsService {
     return {
       performanceRecommendations: [
         {
-          category: 'throughput',
-          priority: 'high',
-          title: 'Optimize Browser Pool Management',
-          description: 'Implement dynamic browser pool scaling based on workload',
-          expectedImpact: 'Could increase throughput by 40% during peak hours',
-          implementationComplexity: 'medium',
-          estimatedEffort: '1-2 weeks',
-          resourcesRequired: ['browser-pool-manager', 'monitoring-dashboard'],
-        },
-      ],
+          category: 'throughput',priority: 'high',title: 'Optimize Browser Pool Management',description: 'Implement dynamic browser pool scaling based on workload',expectedImpact: 'Could increase throughput by 40% during peak hours',implementationComplexity: 'medium',estimatedEffort: '1-2 weeks',resourcesRequired: ['browser-pool-manager', 'monitoring-dashboard'],},],
       errorReduction: [
         {
           errorCategory: OrchestrationErrorCategory.DISTRIBUTED_TASK_ERROR,
           currentRate: 0.28,
           targetRate: 0.15,
           recommendations: [
-            'Implement better node health monitoring',
-            'Add redundancy for critical operations',
-          ],
-          preventiveActions: [
-            'Regular node health checks',
-            'Proactive node replacement',
-          ],
-        },
+            'Implement better node health monitoring','Add redundancy for critical operations',],preventiveActions: [
+            'Regular node health checks','Proactive node replacement',],},
       ],
       resourceOptimization: [
         {
-          resourceType: 'browsers',
-          currentUtilization: 0.75,
-          optimalUtilization: 0.85,
+          resourceType: 'browsers',currentUtilization: 0.75,optimalUtilization: 0.85,
           actions: [
-            'Implement browser session sharing',
-            'Optimize browser lifecycle management',
-          ],
-          expectedSavings: '20% reduction in browser resource usage',
-        },
-      ],
+            'Implement browser session sharing','Optimize browser lifecycle management',],expectedSavings: '20% reduction in browser resource usage',},],
       systemHealth: {
         overallScore: 87.5,
-        trend: 'improving',
-        criticalIssues: 2,
-        nextReviewDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        trend: 'improving',criticalIssues: 2,nextReviewDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         healthIndicators: [
           {
-            indicator: 'error_rate',
-            status: 'warning',
-            value: 0.12,
-            threshold: 0.10,
+            indicator: 'error_rate',status: 'warning',value: 0.12,threshold: 0.10,
           },
           {
-            indicator: 'recovery_rate',
-            status: 'healthy',
-            value: 0.85,
-            threshold: 0.80,
+            indicator: 'recovery_rate',status: 'healthy',value: 0.85,threshold: 0.80,
           },
         ],
       },
@@ -701,9 +622,7 @@ export class OrchestrationAnalyticsService {
     context: { operationType: OrchestrationOperationType }
   ): void {
     // Real-time error pattern analysis
-    this.logger.debug('Analyzing error pattern', {
-      errorCategory: error.category,
-      errorSeverity: error.severity,
+    this.logger.debug('Analyzing error pattern', {errorCategory: error.category,errorSeverity: error.severity,
       operationType: context.operationType,
     });
   }

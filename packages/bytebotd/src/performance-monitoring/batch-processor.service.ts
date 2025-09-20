@@ -23,14 +23,7 @@
  * @version 1.0.0 - ENTERPRISE BATCH PROCESSING FRAMEWORK
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PerformanceMonitoringService } from './performance-monitoring.service';
-
-// ===== BATCH PROCESSING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { PerformanceMonitoringService } from './performance-monitoring.service';// ===== BATCH PROCESSING INTERFACES =====/**
  * Batch processing request structure
  */
 export interface BatchRequest {
@@ -38,11 +31,7 @@ export interface BatchRequest {
   readonly operationType: string;
   readonly functionName: string;
   readonly parameters: Record<string, unknown>;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX';
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly userId: string;
-  readonly submittedAt: Date;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly userId: string;readonly submittedAt: Date;
   readonly timeoutMs: number;
   readonly retryAttempts: number;
   readonly metadata: Record<string, unknown>;
@@ -162,19 +151,13 @@ class BatchWorker {
       const batchResults: BatchResult[] = results.map((result, index) => {
         const request = requests[index];
 
-        if (result.status === 'fulfilled') {
-          return result.value;
-        } else {
+        if (result.status === 'fulfilled') {return result.value;} else {
           return {
             requestId: request.id,
             success: false,
             error: result.reason instanceof Error ? result.reason.message : String(result.reason),
             processingTime: Date.now() - startTime,
-            workerIndex: parseInt(this.id.split('-')[1]) || 0,
-            cacheHit: false,
-            metadata: { error: 'processing_failed' },
-          };
-        }
+            workerIndex: parseInt(this.id.split('-')[1]) || 0,cacheHit: false,metadata: { error: 'processing_failed' },};}
       });
 
       this.requestsProcessed += requests.length;
@@ -202,9 +185,7 @@ class BatchWorker {
         success: true,
         data: { processed: true, operationType: request.operationType },
         processingTime: Date.now() - startTime,
-        workerIndex: parseInt(this.id.split('-')[1]) || 0,
-        cacheHit: Math.random() > 0.3, // 70% cache hit rate simulation
-        metadata: { complexity: request.complexity, priority: request.priority },
+        workerIndex: parseInt(this.id.split('-')[1]) || 0,cacheHit: Math.random() > 0.3, // 70% cache hit rate simulationmetadata: { complexity: request.complexity, priority: request.priority },
       };
 
       return result;
@@ -215,20 +196,12 @@ class BatchWorker {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         processingTime: Date.now() - startTime,
-        workerIndex: parseInt(this.id.split('-')[1]) || 0,
-        cacheHit: false,
-        metadata: { error: 'request_processing_failed' },
-      };
-    }
+        workerIndex: parseInt(this.id.split('-')[1]) || 0,cacheHit: false,metadata: { error: 'request_processing_failed' },};}
   }
 
   private getProcessingTime(complexity: string): number {
     switch (complexity) {
-      case 'SIMPLE': return Math.random() * 10 + 5; // 5-15ms
-      case 'MEDIUM': return Math.random() * 30 + 20; // 20-50ms
-      case 'COMPLEX': return Math.random() * 80 + 50; // 50-130ms
-      default: return 25;
-    }
+      case 'SIMPLE': return Math.random() * 10 + 5; // 5-15mscase 'MEDIUM': return Math.random() * 30 + 20; // 20-50mscase 'COMPLEX': return Math.random() * 80 + 50; // 50-130msdefault: return 25;}
   }
 
   private delay(ms: number): Promise<void> {
@@ -265,16 +238,11 @@ class BatchWorker {
 class WorkerLoadBalancer {
   private readonly workers: BatchWorker[] = [];
   private roundRobinIndex = 0;
-  private readonly logger = new Logger('WorkerLoadBalancer');
-
-  constructor(private readonly strategy: 'ROUND_ROBIN' | 'COMPLEXITY_AWARE' | 'LEAST_LOADED') {}
+  private readonly logger = new Logger('WorkerLoadBalancer');constructor(private readonly strategy: 'ROUND_ROBIN' | 'COMPLEXITY_AWARE' | 'LEAST_LOADED') {}
 
   addWorker(worker: BatchWorker): void {
     this.workers.push(worker);
-    this.logger.debug(`Worker ${worker.id} added to pool. Total workers: ${this.workers.length}`);
-  }
-
-  removeWorker(workerId: string): boolean {
+    this.logger.debug(`Worker ${worker.id} added to pool. Total workers: ${this.workers.length}`);}removeWorker(workerId: string): boolean {
     const index = this.workers.findIndex(w => w.id === workerId);
     if (index !== -1) {
       this.workers.splice(index, 1);
@@ -288,17 +256,8 @@ class WorkerLoadBalancer {
     const distribution = new Map<BatchWorker, BatchRequest[]>();
 
     if (this.workers.length === 0) {
-      throw new Error('No workers available for work distribution');
-    }
-
-    switch (this.strategy) {
-      case 'ROUND_ROBIN':
-        return this.distributeRoundRobin(requests);
-      case 'COMPLEXITY_AWARE':
-        return this.distributeByComplexity(requests);
-      case 'LEAST_LOADED':
-        return this.distributeByLoad(requests);
-      default:
+      throw new Error('No workers available for work distribution');}switch (this.strategy) {
+      case 'ROUND_ROBIN':return this.distributeRoundRobin(requests);case 'COMPLEXITY_AWARE':return this.distributeByComplexity(requests);case 'LEAST_LOADED':return this.distributeByLoad(requests);default:
         return this.distributeRoundRobin(requests);
     }
   }
@@ -371,9 +330,7 @@ class WorkerLoadBalancer {
     return distribution;
   }
 
-  getWorkerMetrics(): Array<{ workerId: string; metrics: ReturnType<BatchWorker['getMetrics']> }> {
-    return this.workers.map(worker => ({
-      workerId: worker.id,
+  getWorkerMetrics(): Array<{ workerId: string; metrics: ReturnType<BatchWorker['getMetrics']> }> {return this.workers.map(worker => ({workerId: worker.id,
       metrics: worker.getMetrics(),
     }));
   }
@@ -451,9 +408,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
     });
 
     // Emit event for real-time monitoring
-    this.eventEmitter.emit('batch.request.submitted', {
-      requestId: request.id,
-      operationType,
+    this.eventEmitter.emit('batch.request.submitted', {requestId: request.id,operationType,
       queueSize: this.pendingRequests.get(operationType)!.length,
     });
 
@@ -464,9 +419,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
    * Get processing status for a batch or request
    */
   getProcessingStatus(identifier: string): {
-    status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'NOT_FOUND';
-    batchId?: string;
-    progress?: number;
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'NOT_FOUND';batchId?: string;progress?: number;
     estimatedCompletion?: Date;
   } {
     // Check if it's a batch ID
@@ -477,9 +430,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
         : 0;
 
       return {
-        status: 'PROCESSING',
-        batchId: batch.batchId,
-        progress,
+        status: 'PROCESSING',batchId: batch.batchId,progress,
         estimatedCompletion: new Date(Date.now() + (batch.averageProcessingTime * (1 - progress))),
       };
     }
@@ -488,9 +439,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
     for (const [operationType, requests] of this.pendingRequests.entries()) {
       if (requests.some(r => r.id === identifier)) {
         return {
-          status: 'PENDING',
-          batchId: undefined,
-          progress: 0,
+          status: 'PENDING',batchId: undefined,progress: 0,
         };
       }
     }
@@ -499,16 +448,11 @@ export class BatchProcessorService implements OnApplicationShutdown {
     const completedBatch = this.completedBatches.find(b => b.batchId === identifier);
     if (completedBatch) {
       return {
-        status: 'COMPLETED',
-        batchId: completedBatch.batchId,
-        progress: 1,
+        status: 'COMPLETED',batchId: completedBatch.batchId,progress: 1,
       };
     }
 
-    return { status: 'NOT_FOUND' };
-  }
-
-  /**
+    return { status: 'NOT_FOUND' };}/**
    * Get batch processing performance metrics
    */
   getPerformanceMetrics(): {
@@ -550,10 +494,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
    * Force process all pending requests immediately
    */
   async flushAllQueues(): Promise<void> {
-    this.logger.log('Flushing all pending queues...');
-
-    for (const operationType of this.pendingRequests.keys()) {
-      await this.processBatchForOperationType(operationType, true);
+    this.logger.log('Flushing all pending queues...');for (const operationType of this.pendingRequests.keys()) {await this.processBatchForOperationType(operationType, true);
     }
 
     this.logger.log('All queues flushed');
@@ -584,47 +525,29 @@ export class BatchProcessorService implements OnApplicationShutdown {
 
   private initializeBatchConfigs(): void {
     // Database operations configuration
-    this.batchConfigs.set('DATABASE_OPERATION', {
-      operationType: 'DATABASE_OPERATION',
-      minBatchSize: 5,
-      maxBatchSize: 50,
+    this.batchConfigs.set('DATABASE_OPERATION', {operationType: 'DATABASE_OPERATION',minBatchSize: 5,maxBatchSize: 50,
       maxWaitTimeMs: 100,
       complexityWeights: { SIMPLE: 1, MEDIUM: 2, COMPLEX: 4 },
       priorityBoosts: { LOW: 1, MEDIUM: 1.5, HIGH: 2, CRITICAL: 3 },
     });
 
     // Validation operations configuration
-    this.batchConfigs.set('VALIDATION_OPERATION', {
-      operationType: 'VALIDATION_OPERATION',
-      minBatchSize: 10,
-      maxBatchSize: 100,
+    this.batchConfigs.set('VALIDATION_OPERATION', {operationType: 'VALIDATION_OPERATION',minBatchSize: 10,maxBatchSize: 100,
       maxWaitTimeMs: 50,
       complexityWeights: { SIMPLE: 0.5, MEDIUM: 1, COMPLEX: 2 },
       priorityBoosts: { LOW: 1, MEDIUM: 1.2, HIGH: 1.5, CRITICAL: 2 },
     });
 
     // Cache operations configuration
-    this.batchConfigs.set('CACHE_OPERATION', {
-      operationType: 'CACHE_OPERATION',
-      minBatchSize: 20,
-      maxBatchSize: 200,
+    this.batchConfigs.set('CACHE_OPERATION', {operationType: 'CACHE_OPERATION',minBatchSize: 20,maxBatchSize: 200,
       maxWaitTimeMs: 25,
       complexityWeights: { SIMPLE: 0.2, MEDIUM: 0.5, COMPLEX: 1 },
       priorityBoosts: { LOW: 1, MEDIUM: 1.1, HIGH: 1.2, CRITICAL: 1.5 },
     });
 
-    this.logger.log('Batch configurations initialized for all operation types');
-  }
-
-  private getWorkerPoolConfig(): WorkerPoolConfig {
+    this.logger.log('Batch configurations initialized for all operation types');}private getWorkerPoolConfig(): WorkerPoolConfig {
     return {
-      minWorkers: this.configService.get<number>('BATCH_MIN_WORKERS', 5),
-      maxWorkers: this.configService.get<number>('BATCH_MAX_WORKERS', 50),
-      scaleUpThreshold: this.configService.get<number>('BATCH_SCALE_UP_THRESHOLD', 0.8),
-      scaleDownThreshold: this.configService.get<number>('BATCH_SCALE_DOWN_THRESHOLD', 0.3),
-      workerIdleTimeout: this.configService.get<number>('BATCH_WORKER_IDLE_TIMEOUT', 60000),
-      loadBalancingStrategy: this.configService.get<'ROUND_ROBIN' | 'COMPLEXITY_AWARE' | 'LEAST_LOADED'>(
-        'BATCH_LOAD_BALANCING', 'COMPLEXITY_AWARE'
+      minWorkers: this.configService.get<number>('BATCH_MIN_WORKERS', 5),maxWorkers: this.configService.get<number>('BATCH_MAX_WORKERS', 50),scaleUpThreshold: this.configService.get<number>('BATCH_SCALE_UP_THRESHOLD', 0.8),scaleDownThreshold: this.configService.get<number>('BATCH_SCALE_DOWN_THRESHOLD', 0.3),workerIdleTimeout: this.configService.get<number>('BATCH_WORKER_IDLE_TIMEOUT', 60000),loadBalancingStrategy: this.configService.get<'ROUND_ROBIN' | 'COMPLEXITY_AWARE' | 'LEAST_LOADED'>('BATCH_LOAD_BALANCING', 'COMPLEXITY_AWARE'
       ),
     };
   }
@@ -635,14 +558,8 @@ export class BatchProcessorService implements OnApplicationShutdown {
       await this.addWorker();
     }
 
-    this.logger.log(`Worker pool initialized with ${this.workerPool.length} workers`);
-  }
-
-  private async addWorker(): Promise<void> {
-    const workerId = `worker-${this.currentWorkerCount++}`;
-    const worker = new BatchWorker(workerId);
-
-    this.workerPool.push(worker);
+    this.logger.log(`Worker pool initialized with ${this.workerPool.length} workers`);}private async addWorker(): Promise<void> {
+    const workerId = `worker-${this.currentWorkerCount++}`;const worker = new BatchWorker(workerId);this.workerPool.push(worker);
     this.loadBalancer.addWorker(worker);
 
     this.logger.debug(`Added worker ${workerId}. Total workers: ${this.workerPool.length}`);
@@ -701,9 +618,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
 
     const config = this.batchConfigs.get(operationType);
     if (!config) {
-      this.logger.warn(`No batch configuration found for operation type: ${operationType}`);
-      return;
-    }
+      this.logger.warn(`No batch configuration found for operation type: ${operationType}`);return;}
 
     const shouldProcess = force ||
       requests.length >= config.minBatchSize ||
@@ -719,10 +634,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
 
     // Extract batch from queue
     const batchRequests = requests.splice(0, batchSize);
-    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    // Create execution context
-    const executionContext: BatchExecutionContext = {
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;// Create execution contextconst executionContext: BatchExecutionContext = {
       batchId,
       requests: batchRequests,
       startTime: new Date(),
@@ -736,9 +648,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
 
     this.processingBatches.set(batchId, executionContext);
 
-    this.logger.debug(`Processing batch ${batchId}`, {
-      operationType,
-      batchSize: batchRequests.length,
+    this.logger.debug(`Processing batch ${batchId}`, {operationType,batchSize: batchRequests.length,
       queueRemaining: requests.length,
     });
 
@@ -782,9 +692,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
       // Consolidate results
       const allResults: BatchResult[] = [];
       workerResults.forEach(result => {
-        if (result.status === 'fulfilled') {
-          allResults.push(...result.value);
-        }
+        if (result.status === 'fulfilled') {allResults.push(...result.value);}
       });
 
       // Update execution context
@@ -839,9 +747,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
         results: allResults,
       });
 
-      this.logger.debug(`Batch ${context.batchId} completed`, {
-        totalRequests: context.totalRequests,
-        successfulRequests: context.successfulRequests,
+      this.logger.debug(`Batch ${context.batchId} completed`, {totalRequests: context.totalRequests,successfulRequests: context.successfulRequests,
         failedRequests: context.failedRequests,
         efficiency: context.batchEfficiency,
         processingTime: Date.now() - startTime,
@@ -877,9 +783,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
     const total = requests.length;
     if (total === 0) return { simple: 0, medium: 0, complex: 0 };
 
-    const simple = requests.filter(r => r.complexity === 'SIMPLE').length / total;
-    const medium = requests.filter(r => r.complexity === 'MEDIUM').length / total;
-    const complex = requests.filter(r => r.complexity === 'COMPLEX').length / total;
+    const simple = requests.filter(r => r.complexity === 'SIMPLE').length / total;const medium = requests.filter(r => r.complexity === 'MEDIUM').length / total;const complex = requests.filter(r => r.complexity === 'COMPLEX').length / total;
 
     return { simple, medium, complex };
   }
@@ -899,9 +803,7 @@ export class BatchProcessorService implements OnApplicationShutdown {
       );
 
       this.scaleWorkerPool(targetCount);
-      this.logger.log(`Auto-scaling UP: ${currentWorkerCount} -> ${targetCount} workers (utilization: ${currentUtilization.toFixed(2)})`);
-    }
-    // Scale down if utilization is low
+      this.logger.log(`Auto-scaling UP: ${currentWorkerCount} -> ${targetCount} workers (utilization: ${currentUtilization.toFixed(2)})`);}// Scale down if utilization is low
     else if (currentUtilization < this.workerPoolConfig.scaleDownThreshold &&
              currentWorkerCount > this.workerPoolConfig.minWorkers) {
 
@@ -919,16 +821,11 @@ export class BatchProcessorService implements OnApplicationShutdown {
     const metrics = this.getPerformanceMetrics();
 
     // Emit metrics for monitoring
-    this.eventEmitter.emit('batch.metrics.collected', metrics);
-
-    // Log summary periodically
-    if (this.totalBatchesProcessed % 100 === 0 && this.totalBatchesProcessed > 0) {
+    this.eventEmitter.emit('batch.metrics.collected', metrics);// Log summary periodicallyif (this.totalBatchesProcessed % 100 === 0 && this.totalBatchesProcessed > 0) {
       this.logger.log('Batch Processing Performance Summary', {
         totalRequestsProcessed: metrics.totalRequestsProcessed,
         totalBatchesProcessed: metrics.totalBatchesProcessed,
-        averageBatchEfficiency: `${(metrics.averageBatchEfficiency * 100).toFixed(1)}%`,
-        currentThroughput: `${metrics.currentThroughput.toFixed(0)} requests/sec`,
-        workerUtilization: `${(metrics.workerUtilization * 100).toFixed(1)}%`,
+        averageBatchEfficiency: `${(metrics.averageBatchEfficiency * 100).toFixed(1)}%`,currentThroughput: `${metrics.currentThroughput.toFixed(0)} requests/sec`,workerUtilization: `${(metrics.workerUtilization * 100).toFixed(1)}%`,
         activeWorkers: this.workerPool.length,
       });
     }

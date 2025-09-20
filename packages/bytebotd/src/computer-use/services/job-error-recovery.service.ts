@@ -33,63 +33,27 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  JobResult,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { v4 as uuidv4 } from 'uuid';import {JobResult,
   JobError,
   JobStatus,
   JobPriority,
   JobStorage,
-} from '../job-management.service';
-import {
-  getErrorMessage,
+} from '../job-management.service';import {getErrorMessage,
   getErrorSeverity,
   ErrorSeverity,
-} from '../../types/error-types';
-
-// ===== ERROR CLASSIFICATION & RECOVERY TYPES =====
-
-/**
+} from '../../types/error-types';// ===== ERROR CLASSIFICATION & RECOVERY TYPES =====/**
  * Comprehensive error classification for intelligent recovery
  */
 export enum ErrorCategory {
-  TRANSIENT = 'transient',           // Temporary issues (network, resource)
-  PERMANENT = 'permanent',           // Non-recoverable errors (logic, validation)
-  NETWORK = 'network',               // Network connectivity issues
-  SYSTEM = 'system',                 // System resource exhaustion
-  USER = 'user',                     // User input or permission errors
-  TIMEOUT = 'timeout',               // Execution timeout errors
-  SECURITY = 'security',             // Security violations
-  DEPENDENCY = 'dependency',         // External service failures
-  RESOURCE = 'resource',             // Resource allocation failures
-  BUSINESS_LOGIC = 'business_logic', // Business rule violations
-}
-
-/**
+  TRANSIENT = 'transient',           // Temporary issues (network, resource)PERMANENT = 'permanent',           // Non-recoverable errors (logic, validation)NETWORK = 'network',               // Network connectivity issuesSYSTEM = 'system',                 // System resource exhaustionUSER = 'user',                     // User input or permission errorsTIMEOUT = 'timeout',               // Execution timeout errorsSECURITY = 'security',             // Security violationsDEPENDENCY = 'dependency',         // External service failuresRESOURCE = 'resource',             // Resource allocation failuresBUSINESS_LOGIC = 'business_logic', // Business rule violations}/**
  * Recovery strategy types based on error analysis
  */
 export enum RecoveryStrategy {
-  IMMEDIATE_RETRY = 'immediate_retry',         // Retry immediately
-  DELAYED_RETRY = 'delayed_retry',             // Retry with exponential backoff
-  ALTERNATIVE_WORKER = 'alternative_worker',   // Try different worker/resource
-  JOB_SPLITTING = 'job_splitting',             // Break job into smaller parts
-  MANUAL_REVIEW = 'manual_review',             // Require human intervention
-  DEAD_LETTER = 'dead_letter',                 // Move to dead letter queue
-  CIRCUIT_BREAKER = 'circuit_breaker',         // Activate circuit breaker
-  ESCALATION = 'escalation',                   // Escalate to administrators
-  RESOURCE_SCALING = 'resource_scaling',       // Scale resources
-  CONFIGURATION_UPDATE = 'configuration_update', // Update configuration
-}
-
-/**
+  IMMEDIATE_RETRY = 'immediate_retry',         // Retry immediatelyDELAYED_RETRY = 'delayed_retry',             // Retry with exponential backoffALTERNATIVE_WORKER = 'alternative_worker',   // Try different worker/resourceJOB_SPLITTING = 'job_splitting',             // Break job into smaller partsMANUAL_REVIEW = 'manual_review',             // Require human interventionDEAD_LETTER = 'dead_letter',                 // Move to dead letter queueCIRCUIT_BREAKER = 'circuit_breaker',         // Activate circuit breakerESCALATION = 'escalation',                   // Escalate to administratorsRESOURCE_SCALING = 'resource_scaling',       // Scale resourcesCONFIGURATION_UPDATE = 'configuration_update', // Update configuration}/**
  * Circuit breaker states for cascading failure prevention
  */
 export enum CircuitBreakerState {
-  CLOSED = 'closed',       // Normal operation
-  OPEN = 'open',           // Failing fast
-  HALF_OPEN = 'half_open', // Testing recovery
+  CLOSED = 'closed',       // Normal operationOPEN = 'open',           // Failing fastHALF_OPEN = 'half_open', // Testing recovery
 }
 
 /**
@@ -208,11 +172,7 @@ export class ErrorClassifier {
     confidence: number;
     reasoning: string;
   } {
-    const operationId = `classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.debug(`[${operationId}] Classifying error`, {
-      jobId: _jobContext.jobId,
-      errorCode: error.code,
+    const operationId = `classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Classifying error`, {jobId: _jobContext.jobId,errorCode: error.code,
       errorMessage: error.message,
     });
 
@@ -246,89 +206,42 @@ export class ErrorClassifier {
 
     // Network-related errors
     if (
-      errorMessage.includes('network') ||
-      errorMessage.includes('connection') ||
-      errorCode.includes('econnreset') ||
-      errorCode.includes('econnrefused') ||
-      errorCode.includes('enotfound')
-    ) {
-      return ErrorCategory.NETWORK;
+      errorMessage.includes('network') ||errorMessage.includes('connection') ||errorCode.includes('econnreset') ||errorCode.includes('econnrefused') ||errorCode.includes('enotfound')) {return ErrorCategory.NETWORK;
     }
 
     // Timeout errors
     if (
-      errorMessage.includes('timeout') ||
-      errorCode.includes('timeout') ||
-      error.code === 'JOB_TIMEOUT'
-    ) {
-      return ErrorCategory.TIMEOUT;
+      errorMessage.includes('timeout') ||errorCode.includes('timeout') ||error.code === 'JOB_TIMEOUT') {return ErrorCategory.TIMEOUT;
     }
 
     // System resource errors
     if (
-      errorMessage.includes('memory') ||
-      errorMessage.includes('disk') ||
-      errorMessage.includes('cpu') ||
-      errorMessage.includes('resource') ||
-      errorCode.includes('enomem') ||
-      errorCode.includes('enospc')
-    ) {
-      return ErrorCategory.SYSTEM;
+      errorMessage.includes('memory') ||errorMessage.includes('disk') ||errorMessage.includes('cpu') ||errorMessage.includes('resource') ||errorCode.includes('enomem') ||errorCode.includes('enospc')) {return ErrorCategory.SYSTEM;
     }
 
     // Security errors
     if (
-      errorMessage.includes('unauthorized') ||
-      errorMessage.includes('forbidden') ||
-      errorMessage.includes('permission') ||
-      errorCode.includes('auth') ||
-      errorCode.includes('security')
-    ) {
-      return ErrorCategory.SECURITY;
+      errorMessage.includes('unauthorized') ||errorMessage.includes('forbidden') ||errorMessage.includes('permission') ||errorCode.includes('auth') ||errorCode.includes('security')) {return ErrorCategory.SECURITY;
     }
 
     // User input errors
     if (
-      errorMessage.includes('invalid') ||
-      errorMessage.includes('validation') ||
-      errorMessage.includes('bad request') ||
-      errorCode.includes('validation') ||
-      errorCode.includes('invalid')
-    ) {
-      return ErrorCategory.USER;
+      errorMessage.includes('invalid') ||errorMessage.includes('validation') ||errorMessage.includes('bad request') ||errorCode.includes('validation') ||errorCode.includes('invalid')) {return ErrorCategory.USER;
     }
 
     // Dependency service errors
     if (
-      errorMessage.includes('service unavailable') ||
-      errorMessage.includes('external service') ||
-      errorMessage.includes('api error') ||
-      error.code === 'EXTERNAL_SERVICE_ERROR'
-    ) {
-      return ErrorCategory.DEPENDENCY;
+      errorMessage.includes('service unavailable') ||errorMessage.includes('external service') ||errorMessage.includes('api error') ||error.code === 'EXTERNAL_SERVICE_ERROR') {return ErrorCategory.DEPENDENCY;
     }
 
     // Business logic errors
     if (
-      errorMessage.includes('business rule') ||
-      errorMessage.includes('constraint') ||
-      errorMessage.includes('workflow') ||
-      error.code === 'BUSINESS_LOGIC_ERROR'
-    ) {
-      return ErrorCategory.BUSINESS_LOGIC;
+      errorMessage.includes('business rule') ||errorMessage.includes('constraint') ||errorMessage.includes('workflow') ||error.code === 'BUSINESS_LOGIC_ERROR') {return ErrorCategory.BUSINESS_LOGIC;
     }
 
     // Determine if error is likely transient
     const transientIndicators = [
-      'temporary',
-      'retry',
-      'unavailable',
-      'busy',
-      'throttled',
-      'rate limit',
-    ];
-
-    const isTransient = transientIndicators.some(indicator =>
+      'temporary','retry','unavailable','busy','throttled','rate limit',];const isTransient = transientIndicators.some(indicator =>
       errorMessage.includes(indicator) || errorCode.includes(indicator)
     );
 
@@ -420,9 +333,7 @@ export class ErrorClassifier {
     const errorCode = error.code.toLowerCase();
 
     // Strong indicators increase confidence
-    if (errorCode.includes('timeout')) confidence += 0.3;
-    if (errorMessage.includes('network')) confidence += 0.3;
-    if (errorMessage.includes('unauthorized')) confidence += 0.4;
+    if (errorCode.includes('timeout')) confidence += 0.3;if (errorMessage.includes('network')) confidence += 0.3;if (errorMessage.includes('unauthorized')) confidence += 0.4;
     if (error.retryable !== undefined) confidence += 0.2;
 
     // Context factors
@@ -450,14 +361,9 @@ export class ErrorClassifier {
     }
 
     if (jobContext.retryCount > 0) {
-      reasons.push(`Previous retry attempts: ${jobContext.retryCount}`);
-    }
+      reasons.push(`Previous retry attempts: ${jobContext.retryCount}`);}reasons.push(`Recommended strategy: ${strategy}`);
 
-    reasons.push(`Recommended strategy: ${strategy}`);
-
-    return reasons.join('. ');
-  }
-}
+    return reasons.join('. ');}}
 
 // ===== RETRY MANAGER SERVICE =====
 
@@ -475,13 +381,7 @@ export class RetryManager {
    * Calculate retry delay with exponential backoff and jitter
    */
   calculateRetryDelay(retryCount: number, baseDelay?: number): number {
-    const base = baseDelay ?? this.config.get<number>('ERROR_RECOVERY_BASE_RETRY_DELAY', 1000);
-    const multiplier = this.config.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2);
-    const maxDelay = this.config.get<number>('ERROR_RECOVERY_MAX_RETRY_DELAY', 60000);
-    const jitterPercent = this.config.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10);
-
-    // Exponential backoff
-    const exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
+    const base = baseDelay ?? this.config.get<number>('ERROR_RECOVERY_BASE_RETRY_DELAY', 1000);const multiplier = this.config.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2);const maxDelay = this.config.get<number>('ERROR_RECOVERY_MAX_RETRY_DELAY', 60000);const jitterPercent = this.config.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10);// Exponential backoffconst exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
 
     // Add jitter to prevent thundering herd
     const jitterRange = exponentialDelay * (jitterPercent / 100);
@@ -519,17 +419,13 @@ export class RetryManager {
       if (circuitBreaker.state === CircuitBreakerState.OPEN) {
         return {
           shouldRetry: false,
-          reason: 'Circuit breaker is open',
-        };
-      }
+          reason: 'Circuit breaker is open',};}
 
       if (circuitBreaker.state === CircuitBreakerState.HALF_OPEN) {
         if (circuitBreaker.halfOpenCalls >= circuitBreaker.halfOpenMaxCalls) {
           return {
             shouldRetry: false,
-            reason: 'Circuit breaker half-open limit reached',
-          };
-        }
+            reason: 'Circuit breaker half-open limit reached',};}
         circuitBreaker.halfOpenCalls++;
       }
     }
@@ -549,10 +445,7 @@ export class RetryManager {
    */
   recordRetrySuccess(errorCategory: ErrorCategory): void {
     if (errorCategory === ErrorCategory.NETWORK || errorCategory === ErrorCategory.DEPENDENCY) {
-      const circuitBreakerKey = `${errorCategory}_circuit`;
-      const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);
-
-      circuitBreaker.successCount++;
+      const circuitBreakerKey = `${errorCategory}_circuit`;const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.successCount++;
       circuitBreaker.lastSuccessTime = new Date();
 
       if (circuitBreaker.state === CircuitBreakerState.HALF_OPEN) {
@@ -561,9 +454,7 @@ export class RetryManager {
           circuitBreaker.state = CircuitBreakerState.CLOSED;
           circuitBreaker.failureCount = 0;
           circuitBreaker.halfOpenCalls = 0;
-          this.logger.log(`Circuit breaker ${circuitBreakerKey} closed`);
-        }
-      }
+          this.logger.log(`Circuit breaker ${circuitBreakerKey} closed`);}}
     }
   }
 
@@ -572,19 +463,13 @@ export class RetryManager {
    */
   recordRetryFailure(errorCategory: ErrorCategory): void {
     if (errorCategory === ErrorCategory.NETWORK || errorCategory === ErrorCategory.DEPENDENCY) {
-      const circuitBreakerKey = `${errorCategory}_circuit`;
-      const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);
-
-      circuitBreaker.failureCount++;
+      const circuitBreakerKey = `${errorCategory}_circuit`;const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.failureCount++;
       circuitBreaker.lastFailureTime = new Date();
 
       // Open circuit breaker if threshold exceeded
       if (circuitBreaker.failureCount >= circuitBreaker.failureThreshold) {
         circuitBreaker.state = CircuitBreakerState.OPEN;
-        this.logger.warn(`Circuit breaker ${circuitBreakerKey} opened`);
-
-        // Schedule half-open transition
-        setTimeout(() => {
+        this.logger.warn(`Circuit breaker ${circuitBreakerKey} opened`);// Schedule half-open transitionsetTimeout(() => {
           if (circuitBreaker.state === CircuitBreakerState.OPEN) {
             circuitBreaker.state = CircuitBreakerState.HALF_OPEN;
             circuitBreaker.halfOpenCalls = 0;
@@ -605,9 +490,7 @@ export class RetryManager {
         state: CircuitBreakerState.CLOSED,
         failureCount: 0,
         successCount: 0,
-        failureThreshold: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_THRESHOLD', 5),
-        recoveryTimeout: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_TIMEOUT', 60000),
-        halfOpenMaxCalls: this.config.get<number>('ERROR_RECOVERY_HALF_OPEN_MAX_CALLS', 3),
+        failureThreshold: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_THRESHOLD', 5),recoveryTimeout: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_TIMEOUT', 60000),halfOpenMaxCalls: this.config.get<number>('ERROR_RECOVERY_HALF_OPEN_MAX_CALLS', 3),
         halfOpenCalls: 0,
       };
       this.circuitBreakers.set(key, circuitBreaker);
@@ -645,11 +528,7 @@ export class FailureAnalyzer {
     error: JobError,
     recoveryAttempts: RecoveryAttempt[],
   ): FailureAnalysis {
-    const operationId = `analyze_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Analyzing failure`, {
-      jobId: job.jobId,
-      errorCode: error.code,
+    const operationId = `analyze_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing failure`, {jobId: job.jobId,errorCode: error.code,
     });
 
     // Generate error signature for pattern matching
@@ -704,14 +583,7 @@ export class FailureAnalyzer {
   private generateErrorSignature(error: JobError): string {
     const components = [
       error.code,
-      error.message.split(' ').slice(0, 5).join(' '), // First 5 words
-      Object.keys(error.context || {}).sort().join(','),
-    ];
-
-    return Buffer.from(components.join('|')).toString('base64').substring(0, 16);
-  }
-
-  /**
+      error.message.split(' ').slice(0, 5).join(' '), // First 5 wordsObject.keys(error.context || {}).sort().join(','),];return Buffer.from(components.join('|')).toString('base64').substring(0, 16);}/**
    * Update error pattern tracking
    */
   private updateErrorPattern(
@@ -753,37 +625,12 @@ export class FailureAnalyzer {
     const errorCode = error.code.toLowerCase();
 
     // Analyze based on error patterns
-    if (errorCode.includes('timeout')) {
-      return 'Job execution exceeded time limit due to long-running operation or resource contention';
-    }
-
-    if (errorMessage.includes('network') || errorMessage.includes('connection')) {
-      return 'Network connectivity issue preventing communication with required services';
-    }
-
-    if (errorMessage.includes('memory') || errorMessage.includes('out of memory')) {
-      return 'Insufficient memory allocation causing job execution failure';
-    }
-
-    if (errorMessage.includes('permission') || errorMessage.includes('unauthorized')) {
-      return 'Insufficient permissions or expired credentials preventing job execution';
-    }
-
-    if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {
-      return 'Invalid input data or parameters causing validation failure';
-    }
-
-    if (recoveryAttempts.length > 0) {
+    if (errorCode.includes('timeout')) {return 'Job execution exceeded time limit due to long-running operation or resource contention';}if (errorMessage.includes('network') || errorMessage.includes('connection')) {return 'Network connectivity issue preventing communication with required services';}if (errorMessage.includes('memory') || errorMessage.includes('out of memory')) {return 'Insufficient memory allocation causing job execution failure';}if (errorMessage.includes('permission') || errorMessage.includes('unauthorized')) {return 'Insufficient permissions or expired credentials preventing job execution';}if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {return 'Invalid input data or parameters causing validation failure';}if (recoveryAttempts.length > 0) {
       const lastAttempt = recoveryAttempts[recoveryAttempts.length - 1];
       if (lastAttempt.strategy === RecoveryStrategy.DELAYED_RETRY) {
-        return 'Persistent transient failure indicating possible system instability';
-      }
-    }
+        return 'Persistent transient failure indicating possible system instability';}}
 
-    return 'Unknown error condition requiring detailed investigation';
-  }
-
-  /**
+    return 'Unknown error condition requiring detailed investigation';}/**
    * Identify contributing factors
    */
   private identifyContributingFactors(
@@ -799,18 +646,11 @@ export class FailureAnalyzer {
     }
 
     if (job.retryCount > 0) {
-      factors.push(`Previous ${job.retryCount} retry attempts indicate recurring issue`);
-    }
-
-    // Error context factors
+      factors.push(`Previous ${job.retryCount} retry attempts indicate recurring issue`);}// Error context factors
     if (error.context) {
       if (error.context.workerId) {
-        factors.push(`Specific worker involved: ${String(error.context.workerId)}`);
-      }
-      if (error.context.executionTimeMs) {
-        factors.push(`Execution time: ${String(error.context.executionTimeMs)}ms`);
-      }
-    }
+        factors.push(`Specific worker involved: ${String(error.context.workerId)}`);}if (error.context.executionTimeMs) {
+        factors.push(`Execution time: ${String(error.context.executionTimeMs)}ms`);}}
 
     // Recovery attempt factors
     if (recoveryAttempts.length > 0) {
@@ -819,17 +659,14 @@ export class FailureAnalyzer {
         .map(attempt => attempt.strategy);
 
       if (failedStrategies.length > 0) {
-        factors.push(`Failed recovery strategies: ${failedStrategies.join(', ')}`);
+        factors.push(`Failed recovery strategies: ${failedStrategies.join(`, ')}`);
       }
     }
 
     // Timing factors
     const currentHour = new Date().getHours();
     if (currentHour >= 9 && currentHour <= 17) {
-      factors.push('Failure occurred during peak business hours');
-    }
-
-    return factors;
+      factors.push('Failure occurred during peak business hours');}return factors;
   }
 
   /**
@@ -840,14 +677,7 @@ export class FailureAnalyzer {
     const errorMessage = error.message.toLowerCase();
     const errorCode = error.code.toLowerCase();
 
-    if (errorCode.includes('timeout')) return ErrorCategory.TIMEOUT;
-    if (errorMessage.includes('network')) return ErrorCategory.NETWORK;
-    if (errorMessage.includes('memory')) return ErrorCategory.SYSTEM;
-    if (errorMessage.includes('permission')) return ErrorCategory.SECURITY;
-    if (errorMessage.includes('validation')) return ErrorCategory.USER;
-
-    return ErrorCategory.PERMANENT;
-  }
+    if (errorCode.includes('timeout')) return ErrorCategory.TIMEOUT;if (errorMessage.includes('network')) return ErrorCategory.NETWORK;if (errorMessage.includes('memory')) return ErrorCategory.SYSTEM;if (errorMessage.includes('permission')) return ErrorCategory.SECURITY;if (errorMessage.includes('validation')) return ErrorCategory.USER;return ErrorCategory.PERMANENT;}
 
   /**
    * Recommend recovery strategy based on analysis
@@ -928,30 +758,7 @@ export class FailureAnalyzer {
   ): string[] {
     const measures: string[] = [];
 
-    if (rootCause.includes('timeout')) {
-      measures.push('Implement job timeout monitoring and alerting');
-      measures.push('Optimize job execution performance');
-      measures.push('Consider job splitting for long-running operations');
-    }
-
-    if (rootCause.includes('network')) {
-      measures.push('Implement network connectivity monitoring');
-      measures.push('Add circuit breaker patterns for external dependencies');
-      measures.push('Configure network retry policies');
-    }
-
-    if (rootCause.includes('memory')) {
-      measures.push('Monitor memory usage and implement limits');
-      measures.push('Add memory cleanup procedures');
-      measures.push('Implement resource scaling triggers');
-    }
-
-    if (contributingFactors.some(factor => factor.includes('peak'))) {
-      measures.push('Implement load balancing during peak hours');
-      measures.push('Add capacity planning and scaling policies');
-    }
-
-    return measures;
+    if (rootCause.includes('timeout')) {measures.push('Implement job timeout monitoring and alerting');measures.push('Optimize job execution performance');measures.push('Consider job splitting for long-running operations');}if (rootCause.includes('network')) {measures.push('Implement network connectivity monitoring');measures.push('Add circuit breaker patterns for external dependencies');measures.push('Configure network retry policies');}if (rootCause.includes('memory')) {measures.push('Monitor memory usage and implement limits');measures.push('Add memory cleanup procedures');measures.push('Implement resource scaling triggers');}if (contributingFactors.some(factor => factor.includes('peak'))) {measures.push('Implement load balancing during peak hours');measures.push('Add capacity planning and scaling policies');}return measures;
   }
 
   /**
@@ -1006,10 +813,7 @@ export class FailureAnalyzer {
     let confidence = 0.5;
 
     // Error specificity
-    if (error.code && error.code !== 'UNKNOWN_ERROR') confidence += 0.2;
-    if (error.context && Object.keys(error.context).length > 0) confidence += 0.1;
-
-    // Historical data
+    if (error.code && error.code !== 'UNKNOWN_ERROR') confidence += 0.2;if (error.context && Object.keys(error.context).length > 0) confidence += 0.1;// Historical data
     if (recoveryAttempts.length > 0) confidence += 0.1;
     if (job.retryCount > 0) confidence += 0.1;
 
@@ -1030,19 +834,7 @@ export class FailureAnalyzer {
     const actions: string[] = [];
     const errorMessage = error.message.toLowerCase();
 
-    if (errorMessage.includes('timeout')) {
-      actions.push('Increase job timeout limits');
-      actions.push('Optimize job execution performance');
-    }
-
-    if (errorMessage.includes('network')) {
-      actions.push('Check network connectivity');
-      actions.push('Verify external service availability');
-    }
-
-    if (errorMessage.includes('memory')) {
-      actions.push('Increase memory allocation');
-      actions.push('Check for memory leaks');
+    if (errorMessage.includes('timeout')) {actions.push('Increase job timeout limits');actions.push('Optimize job execution performance');}if (errorMessage.includes('network')) {actions.push('Check network connectivity');actions.push('Verify external service availability');}if (errorMessage.includes('memory')) {actions.push('Increase memory allocation');actions.push('Check for memory leaks');
     }
 
     return actions;
@@ -1080,12 +872,7 @@ export class RecoveryStrategyManager {
     strategy: RecoveryStrategy,
     analysis: FailureAnalysis,
   ): Promise<RecoveryAttempt> {
-    const operationId = `recovery_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Executing recovery strategy`, {
-      jobId: job.jobId,
-      strategy,
+    const operationId = `recovery_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Executing recovery strategy`, {jobId: job.jobId,strategy,
       errorCategory: analysis.errorCategory,
     });
 
@@ -1147,10 +934,7 @@ export class RecoveryStrategyManager {
           break;
 
         default:
-          throw new Error(`Unknown recovery strategy: ${String(strategy)}`);
-      }
-
-      attempt.success = true;
+          throw new Error(`Unknown recovery strategy: ${String(strategy)}`);}attempt.success = true;
       this.logger.log(`[${operationId}] Recovery strategy succeeded`, {
         jobId: job.jobId,
         strategy,
@@ -1207,9 +991,7 @@ export class RecoveryStrategyManager {
       metadata: {
         ...job.metadata,
         alternativeWorker: true,
-        excludeWorkers: [job.error?.context?.workerId ?? 'unknown'],
-      },
-    };
+        excludeWorkers: [job.error?.context?.workerId ?? 'unknown'],},};
 
     await this.jobStorage.saveJob(updatedJob);
     await this.jobStorage.updateJobStatus(job.jobId, JobStatus.PENDING);
@@ -1220,20 +1002,13 @@ export class RecoveryStrategyManager {
    */
   private async executeJobSplitting(job: JobResult): Promise<void> {
     // For demonstration - in reality this would split the job into smaller parts
-    this.logger.log('Job splitting strategy executed', {
-      jobId: job.jobId,
-      note: 'Job marked for splitting into smaller components',
-    });
-
-    // Mark job for manual splitting
+    this.logger.log('Job splitting strategy executed', {jobId: job.jobId,note: 'Job marked for splitting into smaller components',});// Mark job for manual splitting
     const updatedJob = {
       ...job,
       metadata: {
         ...job.metadata,
         requiresSplitting: true,
-        splittingReason: 'timeout_recovery',
-      },
-    };
+        splittingReason: 'timeout_recovery',},};
 
     await this.jobStorage.saveJob(updatedJob);
   }
@@ -1242,20 +1017,13 @@ export class RecoveryStrategyManager {
    * Execute resource scaling strategy
    */
   private async executeResourceScaling(job: JobResult): Promise<void> {
-    this.logger.log('Resource scaling strategy executed', {
-      jobId: job.jobId,
-      note: 'Requesting additional resources for job execution',
-    });
-
-    // Mark job for high-resource execution
+    this.logger.log('Resource scaling strategy executed', {jobId: job.jobId,note: 'Requesting additional resources for job execution',});// Mark job for high-resource execution
     const updatedJob = {
       ...job,
       metadata: {
         ...job.metadata,
         requiresScaling: true,
-        scalingReason: 'resource_exhaustion_recovery',
-      },
-    };
+        scalingReason: 'resource_exhaustion_recovery',},};
 
     await this.jobStorage.saveJob(updatedJob);
     await this.jobStorage.updateJobStatus(job.jobId, JobStatus.PENDING);
@@ -1268,17 +1036,12 @@ export class RecoveryStrategyManager {
     job: JobResult,
     _analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Manual review strategy executed', {
-      jobId: job.jobId,
-      analysisId: _analysis.analysisId,
+    this.logger.log('Manual review strategy executed', {jobId: job.jobId,analysisId: _analysis.analysisId,
     });
 
     // Update job with manual review flag
     const reviewError: JobError = {
-      code: 'REQUIRES_MANUAL_REVIEW',
-      message: 'Job requires manual intervention for recovery',
-      timestamp: new Date(),
-      retryable: false,
+      code: 'REQUIRES_MANUAL_REVIEW',message: 'Job requires manual intervention for recovery',timestamp: new Date(),retryable: false,
       context: {
         analysisId: _analysis.analysisId,
         rootCause: _analysis.rootCause,
@@ -1301,16 +1064,11 @@ export class RecoveryStrategyManager {
     job: JobResult,
     _analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Dead letter queue strategy executed', {
-      jobId: job.jobId,
-      analysisId: _analysis.analysisId,
+    this.logger.log('Dead letter queue strategy executed', {jobId: job.jobId,analysisId: _analysis.analysisId,
     });
 
     const deadLetterError: JobError = {
-      code: 'MOVED_TO_DEAD_LETTER',
-      message: 'Job moved to dead letter queue for permanent failure',
-      timestamp: new Date(),
-      retryable: false,
+      code: 'MOVED_TO_DEAD_LETTER',message: 'Job moved to dead letter queue for permanent failure',timestamp: new Date(),retryable: false,
       context: {
         analysisId: _analysis.analysisId,
         rootCause: _analysis.rootCause,
@@ -1333,19 +1091,14 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Circuit breaker strategy executed', {
-      jobId: job.jobId,
-      errorCategory: analysis.errorCategory,
+    this.logger.log('Circuit breaker strategy executed', {jobId: job.jobId,errorCategory: analysis.errorCategory,
     });
 
     // Record failure for circuit breaker
     this.retryManager.recordRetryFailure(analysis.errorCategory);
 
     const circuitError: JobError = {
-      code: 'CIRCUIT_BREAKER_ACTIVATED',
-      message: 'Circuit breaker activated due to repeated failures',
-      timestamp: new Date(),
-      retryable: true, // Can be retried when circuit closes
+      code: 'CIRCUIT_BREAKER_ACTIVATED',message: 'Circuit breaker activated due to repeated failures',timestamp: new Date(),retryable: true, // Can be retried when circuit closes
       context: {
         errorCategory: analysis.errorCategory,
         circuitBreakerActivated: true,
@@ -1367,22 +1120,15 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.warn('Escalation strategy executed - URGENT ATTENTION REQUIRED', {
-      jobId: job.jobId,
-      priority: job.priority,
+    this.logger.warn('Escalation strategy executed - URGENT ATTENTION REQUIRED', {jobId: job.jobId,priority: job.priority,
       rootCause: analysis.rootCause,
       analysisId: analysis.analysisId,
     });
 
     const escalationError: JobError = {
-      code: 'ESCALATED_TO_ADMIN',
-      message: 'Job failure escalated to administrator for immediate attention',
-      timestamp: new Date(),
-      retryable: false,
+      code: 'ESCALATED_TO_ADMIN',message: 'Job failure escalated to administrator for immediate attention',timestamp: new Date(),retryable: false,
       context: {
-        escalationLevel: 'CRITICAL',
-        requiresImmediateAttention: true,
-        analysisId: analysis.analysisId,
+        escalationLevel: 'CRITICAL',requiresImmediateAttention: true,analysisId: analysis.analysisId,
         rootCause: analysis.rootCause,
         adminNotificationSent: true,
       },
@@ -1403,14 +1149,11 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Configuration update strategy executed', {
-      jobId: job.jobId,
-      analysisId: analysis.analysisId,
+    this.logger.log('Configuration update strategy executed', {jobId: job.jobId,analysisId: analysis.analysisId,
     });
 
     const configError: JobError = {
-      code: 'REQUIRES_CONFIG_UPDATE',
-      message: 'Job requires configuration update for successful execution',
+      code: 'REQUIRES_CONFIG_UPDATE',message: 'Job requires configuration update for successful execution',
       timestamp: new Date(),
       retryable: true,
       context: {
@@ -1450,11 +1193,7 @@ export class DeadLetterQueueService {
     recoveryAttempts: RecoveryAttempt[],
     analysis: FailureAnalysis,
   ): Promise<string> {
-    const operationId = `dlq_add_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Adding job to dead letter queue`, {
-      jobId: job.jobId,
-      errorCode: finalError.code,
+    const operationId = `dlq_add_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Adding job to dead letter queue`, {jobId: job.jobId,errorCode: finalError.code,
       analysisId: analysis.analysisId,
     });
 
@@ -1543,10 +1282,7 @@ export class DeadLetterQueueService {
     this.deadLetterItems.delete(deadLetterId);
 
     if (existed) {
-      this.logger.log('Item removed from dead letter queue', { deadLetterId });
-    }
-
-    return existed;
+      this.logger.log('Item removed from dead letter queue', { deadLetterId });}return existed;
   }
 
   /**
@@ -1655,25 +1391,8 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     private readonly deadLetterQueue: DeadLetterQueueService,
   ) {
     this.config = {
-      maxRetryAttempts: this.configService.get<number>('ERROR_RECOVERY_MAX_RETRIES', 3),
-      baseRetryDelay: this.configService.get<number>('ERROR_RECOVERY_BASE_DELAY', 1000),
-      maxRetryDelay: this.configService.get<number>('ERROR_RECOVERY_MAX_DELAY', 60000),
-      exponentialBackoffMultiplier: this.configService.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2),
-      jitterMaxPercent: this.configService.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10),
-      circuitBreakerFailureThreshold: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_THRESHOLD', 5),
-      circuitBreakerRecoveryTimeout: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_TIMEOUT', 60000),
-      deadLetterQueueMaxSize: this.configService.get<number>('ERROR_RECOVERY_DLQ_MAX_SIZE', 1000),
-      errorPatternAnalysisWindow: this.configService.get<number>('ERROR_RECOVERY_PATTERN_WINDOW', 3600000),
-      manualReviewEscalationTime: this.configService.get<number>('ERROR_RECOVERY_ESCALATION_TIME', 1800000),
-    };
-
-    this.logger.log('JobErrorRecoveryService initialized', this.config);
-  }
-
-  onModuleInit(): void {
-    this.logger.log('Job Error Recovery Service starting...');
-    this.startErrorPatternCleanup();
-  }
+      maxRetryAttempts: this.configService.get<number>('ERROR_RECOVERY_MAX_RETRIES', 3),baseRetryDelay: this.configService.get<number>('ERROR_RECOVERY_BASE_DELAY', 1000),maxRetryDelay: this.configService.get<number>('ERROR_RECOVERY_MAX_DELAY', 60000),exponentialBackoffMultiplier: this.configService.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2),jitterMaxPercent: this.configService.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10),circuitBreakerFailureThreshold: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_THRESHOLD', 5),circuitBreakerRecoveryTimeout: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_TIMEOUT', 60000),deadLetterQueueMaxSize: this.configService.get<number>('ERROR_RECOVERY_DLQ_MAX_SIZE', 1000),errorPatternAnalysisWindow: this.configService.get<number>('ERROR_RECOVERY_PATTERN_WINDOW', 3600000),manualReviewEscalationTime: this.configService.get<number>('ERROR_RECOVERY_ESCALATION_TIME', 1800000),};this.logger.log('JobErrorRecoveryService initialized', this.config);}onModuleInit(): void {
+    this.logger.log('Job Error Recovery Service starting...');this.startErrorPatternCleanup();}
 
   onModuleDestroy(): void {
     this.logger.log('Job Error Recovery Service shutting down...');
@@ -1689,9 +1408,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     deadLetterId?: string;
     nextAction: string;
   }> {
-    const operationId = `handle_failure_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Handling job failure`, {
+    const operationId = `handle_failure_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Handling job failure`, {
       jobId: job.jobId,
       errorCode: job.error?.code,
       retryCount: job.retryCount,
@@ -1708,9 +1425,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
       // Step 1: Classify error and determine recovery strategy
       const classification = this.errorClassifier.classifyError(job.error, job);
 
-      this.logger.log(`[${operationId}] Error classified`, {
-        jobId: job.jobId,
-        category: classification.category,
+      this.logger.log(`[${operationId}] Error classified`, {jobId: job.jobId,category: classification.category,
         strategy: classification.strategy,
         confidence: classification.confidence,
       });
@@ -1750,9 +1465,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
       // Step 3: Perform failure analysis
       const analysis = this.failureAnalyzer.analyzeFailure(job, job.error, attempts);
 
-      this.logger.log(`[${operationId}] Failure analysis completed`, {
-        jobId: job.jobId,
-        analysisId: analysis.analysisId,
+      this.logger.log(`[${operationId}] Failure analysis completed`, {jobId: job.jobId,analysisId: analysis.analysisId,
         rootCause: analysis.rootCause,
         recommendedStrategy: analysis.recommendedStrategy,
       });
@@ -1788,8 +1501,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
         strategy,
         analysisId: analysis.analysisId,
         nextAction: recoveryAttempt.success
-          ? 'Recovery successful - job will be retried'
-          : 'Recovery failed - job may require manual intervention',
+          ? 'Recovery successful - job will be retried': 'Recovery failed - job may require manual intervention',
       };
 
     } catch (error) {
@@ -1876,18 +1588,14 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
    * Force circuit breaker state change (for testing/admin purposes)
    */
   setCircuitBreakerState(category: ErrorCategory, state: CircuitBreakerState): void {
-    this.logger.log('Manually setting circuit breaker state', { category, state });
-    // This would be implemented in the RetryManager
-    // For now, just log the action
+    this.logger.log('Manually setting circuit breaker state', { category, state });// This would be implemented in the RetryManager// For now, just log the action
   }
 
   /**
    * Get comprehensive error recovery health status
    */
   getHealthStatus(): {
-    status: 'healthy' | 'degraded' | 'critical';
-    details: {
-      circuitBreakers: Record<string, string>;
+    status: 'healthy' | 'degraded' | 'critical';details: {circuitBreakers: Record<string, string>;
       deadLetterQueueSize: number;
       recentFailureRate: number;
       errorPatternCount: number;
@@ -1909,17 +1617,8 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
 
     const dlqSize = stats.deadLetterQueueStats.totalItems;
 
-    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
-
-    if (openCircuitBreakers > 0 || recentFailureRate > 0.5 || dlqSize > 100) {
-      status = 'degraded';
-    }
-
-    if (openCircuitBreakers > 2 || recentFailureRate > 0.8 || dlqSize > 500) {
-      status = 'critical';
-    }
-
-    const circuitBreakerDetails: Record<string, string> = {};
+    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';if (openCircuitBreakers > 0 || recentFailureRate > 0.5 || dlqSize > 100) {status = 'degraded';}if (openCircuitBreakers > 2 || recentFailureRate > 0.8 || dlqSize > 500) {
+      status = 'critical';}const circuitBreakerDetails: Record<string, string> = {};
     Object.entries(stats.circuitBreakerStates).forEach(([name, cb]) => {
       circuitBreakerDetails[name] = cb.state;
     });

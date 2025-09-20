@@ -18,16 +18,7 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import { EventEmitter } from 'events';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import * as os from 'os';
-import * as cluster from 'cluster';
-
-// ===== STRESS TESTING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';import * as os from 'os';import * as cluster from 'cluster';// ===== STRESS TESTING INTERFACES =====/**
  * Stress test configuration for high-load scenarios
  */
 export interface StressTestConfig {
@@ -74,9 +65,7 @@ export interface ChaosEngineeringConfig {
   readonly enabled: boolean;
   readonly scenarios: ChaosScenario[];
   readonly frequency: number; // milliseconds between chaos events
-  readonly intensity: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
-  readonly recoveryValidation: boolean;
-}
+  readonly intensity: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';readonly recoveryValidation: boolean;}
 
 /**
  * Chaos engineering scenario
@@ -94,19 +83,7 @@ export interface ChaosScenario {
  * Types of chaos engineering scenarios
  */
 export enum ChaosType {
-  MEMORY_PRESSURE = 'MEMORY_PRESSURE',
-  CPU_SPIKE = 'CPU_SPIKE',
-  NETWORK_PARTITION = 'NETWORK_PARTITION',
-  DISK_FULL = 'DISK_FULL',
-  SERVICE_FAILURE = 'SERVICE_FAILURE',
-  DATABASE_LATENCY = 'DATABASE_LATENCY',
-  CACHE_FLUSH = 'CACHE_FLUSH',
-  CONNECTION_DROP = 'CONNECTION_DROP',
-  AUTH_SERVICE_DOWN = 'AUTH_SERVICE_DOWN',
-  RATE_LIMIT_BREACH = 'RATE_LIMIT_BREACH'
-}
-
-/**
+  MEMORY_PRESSURE = 'MEMORY_PRESSURE',CPU_SPIKE = 'CPU_SPIKE',NETWORK_PARTITION = 'NETWORK_PARTITION',DISK_FULL = 'DISK_FULL',SERVICE_FAILURE = 'SERVICE_FAILURE',DATABASE_LATENCY = 'DATABASE_LATENCY',CACHE_FLUSH = 'CACHE_FLUSH',CONNECTION_DROP = 'CONNECTION_DROP',AUTH_SERVICE_DOWN = 'AUTH_SERVICE_DOWN',RATE_LIMIT_BREACH = 'RATE_LIMIT_BREACH'}/**
  * Real-time stress testing metrics
  */
 export interface StressTestMetrics {
@@ -270,12 +247,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
    * Execute comprehensive stress test suite
    */
   async executeStressTest(config: StressTestConfig): Promise<StressTestResult> {
-    const testId = `stress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = new Date();
-
-    this.logger.log(`🚀 [STRESS] Starting stress test: ${config.name}`, {
-      testId,
-      targetConcurrency: config.targetConcurrency,
+    const testId = `stress_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = new Date();this.logger.log(`🚀 [STRESS] Starting stress test: ${config.name}`, {testId,targetConcurrency: config.targetConcurrency,
       duration: config.duration,
       chaosEnabled: config.chaosEngineering.enabled,
     });
@@ -285,36 +257,18 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
 
     try {
       // Phase 1: Initialize monitoring and baseline measurement
-      this.logger.log(`📊 [STRESS] Phase 1: Initialize monitoring and baseline`, { testId });
-      await this.initializeMonitoring(testId, config);
-      const baseline = await this.measureSystemBaseline();
+      this.logger.log(`📊 [STRESS] Phase 1: Initialize monitoring and baseline`, { testId });await this.initializeMonitoring(testId, config);const baseline = await this.measureSystemBaseline();
 
       // Phase 2: Ramp up load gradually
-      this.logger.log(`📈 [STRESS] Phase 2: Ramp up load to ${config.targetConcurrency} concurrent sessions`, { testId });
-      await this.rampUpLoad(execution, config);
-
-      // Phase 3: Sustain peak load with chaos engineering
-      this.logger.log(`⚡ [STRESS] Phase 3: Sustain peak load with chaos engineering`, { testId });
-      const peakLoadResults = await this.sustainPeakLoad(execution, config);
-
-      // Phase 4: Chaos engineering validation
+      this.logger.log(`📈 [STRESS] Phase 2: Ramp up load to ${config.targetConcurrency} concurrent sessions`, { testId });await this.rampUpLoad(execution, config);// Phase 3: Sustain peak load with chaos engineering
+      this.logger.log(`⚡ [STRESS] Phase 3: Sustain peak load with chaos engineering`, { testId });const peakLoadResults = await this.sustainPeakLoad(execution, config);// Phase 4: Chaos engineering validation
       if (config.chaosEngineering.enabled) {
-        this.logger.log(`🔥 [STRESS] Phase 4: Chaos engineering validation`, { testId });
-        await this.executeChaosEngineering(execution, config);
-      }
+        this.logger.log(`🔥 [STRESS] Phase 4: Chaos engineering validation`, { testId });await this.executeChaosEngineering(execution, config);}
 
       // Phase 5: Recovery and resilience validation
-      this.logger.log(`🔄 [STRESS] Phase 5: Recovery and resilience validation`, { testId });
-      const recoveryResults = await this.validateSystemRecovery(execution, config);
-
-      // Phase 6: Gradual ramp down
-      this.logger.log(`📉 [STRESS] Phase 6: Gradual ramp down`, { testId });
-      await this.rampDownLoad(execution, config);
-
-      // Phase 7: Analysis and reporting
-      this.logger.log(`📋 [STRESS] Phase 7: Analysis and reporting`, { testId });
-      const endTime = new Date();
-      const result = await this.generateStressTestResult({
+      this.logger.log(`🔄 [STRESS] Phase 5: Recovery and resilience validation`, { testId });const recoveryResults = await this.validateSystemRecovery(execution, config);// Phase 6: Gradual ramp down
+      this.logger.log(`📉 [STRESS] Phase 6: Gradual ramp down`, { testId });await this.rampDownLoad(execution, config);// Phase 7: Analysis and reporting
+      this.logger.log(`📋 [STRESS] Phase 7: Analysis and reporting`, { testId });const endTime = new Date();const result = await this.generateStressTestResult({
         testId,
         config,
         startTime,
@@ -325,9 +279,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
         recoveryResults,
       });
 
-      this.logger.log(`✅ [STRESS] Stress test completed: ${result.passed ? 'PASSED' : 'FAILED'}`, {
-        testId,
-        duration: result.duration,
+      this.logger.log(`✅ [STRESS] Stress test completed: ${result.passed ? 'PASSED' : 'FAILED'}`, {testId,duration: result.duration,
         successRate: result.summary.overallSuccessRate,
         resilienceScore: result.summary.resilienceScore,
         systemStability: result.summary.systemStability,
@@ -336,9 +288,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
       return result;
 
     } catch (error) {
-      this.logger.error(`❌ [STRESS] Stress test failed: ${error instanceof Error ? error.message : String(error)}`, {
-        testId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`❌ [STRESS] Stress test failed: ${error instanceof Error ? error.message : String(error)}`, {testId,error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
 
@@ -359,10 +309,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
     const stressTestConfigs: StressTestConfig[] = [
       // Scenario 1: Massive Concurrent Conversational Sessions
       {
-        name: 'PARLANT_MASSIVE_CONVERSATIONS',
-        description: 'Test 10,000+ concurrent conversational validation sessions',
-        duration: 600000, // 10 minutes
-        targetConcurrency: 10000,
+        name: 'PARLANT_MASSIVE_CONVERSATIONS',description: 'Test 10,000+ concurrent conversational validation sessions',duration: 600000, // 10 minutestargetConcurrency: 10000,
         rampUpDuration: 120000, // 2 minutes
         rampDownDuration: 60000, // 1 minute
         resourceLimits: {
@@ -386,34 +333,23 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
           enabled: true,
           scenarios: [
             {
-              name: 'Parlant API Latency Spike',
-              type: ChaosType.SERVICE_FAILURE,
-              probability: 0.3,
+              name: 'Parlant API Latency Spike',type: ChaosType.SERVICE_FAILURE,probability: 0.3,
               duration: 30000,
               parameters: { latencyMs: 5000 },
               recoveryValidation: true,
             },
             {
-              name: 'Conversation Cache Flush',
-              type: ChaosType.CACHE_FLUSH,
-              probability: 0.2,
+              name: 'Conversation Cache Flush',type: ChaosType.CACHE_FLUSH,probability: 0.2,
               duration: 10000,
-              parameters: { cacheType: 'conversation' },
-              recoveryValidation: true,
-            },
+              parameters: { cacheType: 'conversation' },recoveryValidation: true,},
           ],
           frequency: 60000, // 1 minute
-          intensity: 'HIGH',
-          recoveryValidation: true,
-        },
+          intensity: 'HIGH',recoveryValidation: true,},
       },
 
       // Scenario 2: Resource Exhaustion and Memory Pressure
       {
-        name: 'PARLANT_RESOURCE_EXHAUSTION',
-        description: 'Test system behavior under extreme resource constraints',
-        duration: 480000, // 8 minutes
-        targetConcurrency: 5000,
+        name: 'PARLANT_RESOURCE_EXHAUSTION',description: 'Test system behavior under extreme resource constraints',duration: 480000, // 8 minutestargetConcurrency: 5000,
         rampUpDuration: 60000, // 1 minute
         rampDownDuration: 60000, // 1 minute
         resourceLimits: {
@@ -437,34 +373,25 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
           enabled: true,
           scenarios: [
             {
-              name: 'Memory Pressure Injection',
-              type: ChaosType.MEMORY_PRESSURE,
-              probability: 0.5,
+              name: 'Memory Pressure Injection',type: ChaosType.MEMORY_PRESSURE,probability: 0.5,
               duration: 45000,
               parameters: { pressureMB: 2048 },
               recoveryValidation: true,
             },
             {
-              name: 'CPU Spike Simulation',
-              type: ChaosType.CPU_SPIKE,
-              probability: 0.4,
+              name: 'CPU Spike Simulation',type: ChaosType.CPU_SPIKE,probability: 0.4,
               duration: 30000,
               parameters: { cpuPercent: 98 },
               recoveryValidation: true,
             },
           ],
           frequency: 45000, // 45 seconds
-          intensity: 'EXTREME',
-          recoveryValidation: true,
-        },
+          intensity: 'EXTREME',recoveryValidation: true,},
       },
 
       // Scenario 3: Network and Connection Resilience
       {
-        name: 'PARLANT_NETWORK_RESILIENCE',
-        description: 'Test network partition recovery and connection management',
-        duration: 420000, // 7 minutes
-        targetConcurrency: 3000,
+        name: 'PARLANT_NETWORK_RESILIENCE',description: 'Test network partition recovery and connection management',duration: 420000, // 7 minutestargetConcurrency: 3000,
         rampUpDuration: 45000,
         rampDownDuration: 45000,
         resourceLimits: {
@@ -488,34 +415,23 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
           enabled: true,
           scenarios: [
             {
-              name: 'Network Partition Simulation',
-              type: ChaosType.NETWORK_PARTITION,
-              probability: 0.4,
+              name: 'Network Partition Simulation',type: ChaosType.NETWORK_PARTITION,probability: 0.4,
               duration: 20000,
-              parameters: { partitionType: 'partial' },
-              recoveryValidation: true,
-            },
+              parameters: { partitionType: 'partial' },recoveryValidation: true,},
             {
-              name: 'Connection Drop Storm',
-              type: ChaosType.CONNECTION_DROP,
-              probability: 0.3,
+              name: 'Connection Drop Storm',type: ChaosType.CONNECTION_DROP,probability: 0.3,
               duration: 15000,
               parameters: { dropRate: 0.1 },
               recoveryValidation: true,
             },
           ],
           frequency: 30000, // 30 seconds
-          intensity: 'MEDIUM',
-          recoveryValidation: true,
-        },
+          intensity: 'MEDIUM',recoveryValidation: true,},
       },
 
       // Scenario 4: Database and Cache Stress
       {
-        name: 'PARLANT_DATABASE_CACHE_STRESS',
-        description: 'Test database connection pooling and cache performance under load',
-        duration: 360000, // 6 minutes
-        targetConcurrency: 7500,
+        name: 'PARLANT_DATABASE_CACHE_STRESS',description: 'Test database connection pooling and cache performance under load',duration: 360000, // 6 minutestargetConcurrency: 7500,
         rampUpDuration: 90000,
         rampDownDuration: 30000,
         resourceLimits: {
@@ -539,17 +455,13 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
           enabled: true,
           scenarios: [
             {
-              name: 'Database Connection Exhaustion',
-              type: ChaosType.DATABASE_LATENCY,
-              probability: 0.35,
+              name: 'Database Connection Exhaustion',type: ChaosType.DATABASE_LATENCY,probability: 0.35,
               duration: 25000,
               parameters: { latencyMs: 2000, connectionLimit: 50 },
               recoveryValidation: true,
             },
             {
-              name: 'Cache Invalidation Storm',
-              type: ChaosType.CACHE_FLUSH,
-              probability: 0.25,
+              name: 'Cache Invalidation Storm',type: ChaosType.CACHE_FLUSH,probability: 0.25,
               duration: 20000,
               parameters: { flushPercent: 0.8 },
               recoveryValidation: true,
@@ -570,10 +482,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
         results.push(result);
 
         // Brief cooldown between tests
-        this.logger.log(`😴 [PARLANT-STRESS] Cooldown period before next test...`);
-        await this.sleep(30000); // 30 seconds
-
-      } catch (error) {
+        this.logger.log(`😴 [PARLANT-STRESS] Cooldown period before next test...`);await this.sleep(30000); // 30 seconds} catch (error) {
         this.logger.error(`❌ [PARLANT-STRESS] Test ${config.name} failed: ${error instanceof Error ? error.message : String(error)}`);
 
         // Continue with next test even if one fails
@@ -592,9 +501,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
             peakConcurrency: 0,
             averageResponseTime: 0,
             maxResponseTime: 0,
-            systemStability: 'FAILED',
-            resourceEfficiency: 0,
-            resilienceScore: 0,
+            systemStability: 'FAILED',resourceEfficiency: 0,resilienceScore: 0,
             bottlenecks: [],
             criticalIssues: [error instanceof Error ? error.message : String(error)],
           },
@@ -607,9 +514,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
     // Generate comprehensive PARLANT stress testing report
     await this.generateParlantStressTestReport(results);
 
-    this.logger.log(`🏁 [PARLANT-STRESS] All PARLANT stress tests completed`, {
-      totalTests: results.length,
-      passedTests: results.filter(r => r.passed).length,
+    this.logger.log(`🏁 [PARLANT-STRESS] All PARLANT stress tests completed`, {totalTests: results.length,passedTests: results.filter(r => r.passed).length,
       failedTests: results.filter(r => !r.passed).length,
     });
 
@@ -620,10 +525,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
    * Initialize comprehensive monitoring for stress testing
    */
   private async initializeMonitoring(testId: string, config: StressTestConfig): Promise<void> {
-    this.logger.log(`📊 [STRESS] Initializing monitoring for test ${testId}`);
-
-    // Start resource monitoring
-    await this.resourceMonitor.initialize({
+    this.logger.log(`📊 [STRESS] Initializing monitoring for test ${testId}`);// Start resource monitoringawait this.resourceMonitor.initialize({
       interval: config.monitoringInterval,
       resourceLimits: config.resourceLimits,
       testId,
@@ -650,13 +552,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
    * Measure system baseline performance before stress testing
    */
   private async measureSystemBaseline(): Promise<StressTestMetrics> {
-    this.logger.log(`📏 [STRESS] Measuring system baseline performance`);
-
-    const baseline = await this.resourceMonitor.captureMetrics();
-
-    this.logger.log(`📊 [STRESS] Baseline captured`, {
-      cpuUsage: baseline.systemResources.cpuUsage,
-      memoryUsedMB: baseline.systemResources.memoryUsage.used,
+    this.logger.log(`📏 [STRESS] Measuring system baseline performance`);const baseline = await this.resourceMonitor.captureMetrics();this.logger.log(`📊 [STRESS] Baseline captured`, {cpuUsage: baseline.systemResources.cpuUsage,memoryUsedMB: baseline.systemResources.memoryUsage.used,
       activeConnections: baseline.systemResources.networkConnections.active,
     });
 
@@ -670,10 +566,7 @@ export class StressTestingFramework extends EventEmitter implements OnApplicatio
    * Cleanup stress test resources
    */
   private async cleanupStressTest(testId: string): Promise<void> {
-    this.logger.log(`🧹 [STRESS] Cleaning up stress test resources for ${testId}`);
-
-    // Stop workers
-    await Promise.all(this.workers.map(worker => this.stopWorker(worker)));
+    this.logger.log(`🧹 [STRESS] Cleaning up stress test resources for ${testId}`);// Stop workersawait Promise.all(this.workers.map(worker => this.stopWorker(worker)));
     this.workers.length = 0;
 
     // Stop monitoring

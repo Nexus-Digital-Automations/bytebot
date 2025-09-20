@@ -537,7 +537,7 @@ class MalformedMessageTester {
           if (message.type === 'error_stream') {
             errorsHandled++;
           }
-        } catch (error) {
+        } catch (_error) {
           // Ignore parsing errors in response
         }
       });

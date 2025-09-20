@@ -17,20 +17,10 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { InputTrackingController } from '../input-tracking.controller';
-import { InputTrackingService } from '../input-tracking.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { UserRole, Permission } from '@bytebot/shared';
-import {
-  MockByteBotdUser,
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { InputTrackingController } from '../input-tracking.controller';import { InputTrackingService } from '../input-tracking.service';import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';import { RolesGuard } from '../../auth/guards/roles.guard';import { UserRole, Permission } from '@bytebot/shared';import {MockByteBotdUser,
   MockInputTrackingService,
   MockLogger,
-} from '../input-tracking.types';
-
-describe('InputTrackingController', () => {
+} from '../input-tracking.types';describe('InputTrackingController', () => {
   let controller: InputTrackingController;
   let service: MockInputTrackingService;
   let logger: MockLogger;
@@ -39,12 +29,7 @@ describe('InputTrackingController', () => {
 
   // Mock users for testing
   const mockAdminUser: MockByteBotdUser = {
-    id: 'admin_user_1',
-    sub: 'admin_user_1',
-    username: 'admin',
-    email: 'admin@bytebot.ai',
-    role: UserRole._ADMIN,
-    permissions: [
+    id: 'admin_user_1',sub: 'admin_user_1',username: 'admin',email: 'admin@bytebot.ai',role: UserRole._ADMIN,permissions: [
       Permission._TASK_READ,
       Permission._TASK_WRITE,
       Permission._COMPUTER_CONTROL,
@@ -54,12 +39,7 @@ describe('InputTrackingController', () => {
   };
 
   const mockOperatorUser: MockByteBotdUser = {
-    id: 'operator_user_1',
-    sub: 'operator_user_1',
-    username: 'operator',
-    email: 'operator@bytebot.ai',
-    role: UserRole._OPERATOR,
-    permissions: [
+    id: 'operator_user_1',sub: 'operator_user_1',username: 'operator',email: 'operator@bytebot.ai',role: UserRole._OPERATOR,permissions: [
       Permission._TASK_READ,
       Permission._TASK_WRITE,
       Permission._COMPUTER_CONTROL,
@@ -68,10 +48,7 @@ describe('InputTrackingController', () => {
   };
 
   const _mockViewerUser: MockByteBotdUser = {
-    id: 'viewer_user_1',
-    sub: 'viewer_user_1',
-    username: 'viewer',
-    email: 'viewer@bytebot.ai',
+    id: 'viewer_user_1',sub: 'viewer_user_1',username: 'viewer',email: 'viewer@bytebot.ai',
     role: UserRole._VIEWER,
     permissions: [Permission._TASK_READ],
     isActive: true,
@@ -79,10 +56,7 @@ describe('InputTrackingController', () => {
 
   beforeEach(async () => {
     console.log(
-      `[${operationId}] Setting up InputTrackingController test module`,
-    );
-
-    const module: TestingModule = await Test.createTestingModule({
+      `[${operationId}] Setting up InputTrackingController test module`,);const module: TestingModule = await Test.createTestingModule({
       controllers: [InputTrackingController],
       providers: [
         {
@@ -120,9 +94,7 @@ describe('InputTrackingController', () => {
     logger = module.get<MockLogger>(Logger);
 
     console.log(
-      `[${operationId}] InputTrackingController test setup completed`,
-    );
-  });
+      `[${operationId}] InputTrackingController test setup completed`,);});
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -131,50 +103,36 @@ describe('InputTrackingController', () => {
     );
   });
 
-  describe('Controller Initialization', () => {
-    it('should be defined', () => {
-      const testId = `${operationId}_controller_defined`;
-      console.log(`[${testId}] Testing controller initialization`);
-
-      expect(controller).toBeDefined();
-      expect(service).toBeDefined();
+  describe('Controller Initialization', () => {it('should be defined', () => {
+      const testId = `${operationId}_controller_defined`;console.log(`[${testId}] Testing controller initialization`);expect(controller).toBeDefined();expect(service).toBeDefined();
       expect(logger).toBeDefined();
 
       console.log(`[${testId}] Controller initialization test completed`);
     });
 
     it('should have correct decorators and metadata', () => {
-      const testId = `${operationId}_decorators_metadata`;
-      console.log(`[${testId}] Testing controller decorators and metadata`);
+      const testId = `${operationId}_decorators_metadata`;console.log(`[${testId}] Testing controller decorators and metadata`);
 
       const controllerMetadata = Reflect.getMetadata(
-        'path',
-        InputTrackingController,
-      ) as string;
+        'path',InputTrackingController,) as string;
       expect(controllerMetadata).toBe('input-tracking');
 
       console.log(`[${testId}] Decorators and metadata test completed`);
     });
   });
 
-  describe('Start Tracking Endpoint', () => {
-    it('should start tracking with admin user', () => {
-      const testId = `${operationId}_start_admin`;
-      console.log(`[${testId}] Testing start tracking with admin user`);
+  describe('Start Tracking Endpoint', () => {it('should start tracking with admin user', () => {
+      const testId = `${operationId}_start_admin`;console.log(`[${testId}] Testing start tracking with admin user`);
 
       const result = controller.start(mockAdminUser);
 
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        status: 'started',
-        timestamp: expect.any(String) as unknown,
-        userId: mockAdminUser.id,
+        status: 'started',timestamp: expect.any(String) as unknown,userId: mockAdminUser.id,
       });
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting input tracking'),
-        expect.objectContaining({
-          userId: mockAdminUser.id,
+        expect.stringContaining('Starting input tracking'),expect.objectContaining({userId: mockAdminUser.id,
           username: mockAdminUser.username,
           userRole: mockAdminUser.role,
           securityEvent: 'input_tracking_started',
@@ -185,22 +143,17 @@ describe('InputTrackingController', () => {
     });
 
     it('should start tracking with operator user', () => {
-      const testId = `${operationId}_start_operator`;
-      console.log(`[${testId}] Testing start tracking with operator user`);
+      const testId = `${operationId}_start_operator`;console.log(`[${testId}] Testing start tracking with operator user`);
 
       const result = controller.start(mockOperatorUser);
 
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        status: 'started',
-        timestamp: expect.any(String) as unknown,
-        userId: mockOperatorUser.id,
+        status: 'started',timestamp: expect.any(String) as unknown,userId: mockOperatorUser.id,
       });
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting input tracking'),
-        expect.objectContaining({
-          userId: mockOperatorUser.id,
+        expect.stringContaining('Starting input tracking'),expect.objectContaining({userId: mockOperatorUser.id,
           username: mockOperatorUser.username,
           userRole: mockOperatorUser.role,
           securityEvent: 'input_tracking_started',
@@ -213,11 +166,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should generate unique operation ID for each request', () => {
-      const testId = `${operationId}_unique_operation_id`;
-      console.log(`[${testId}] Testing unique operation ID generation`);
-
-      // Mock Date.now to return different values
-      const originalDateNow = Date.now;
+      const testId = `${operationId}_unique_operation_id`;console.log(`[${testId}] Testing unique operation ID generation`);// Mock Date.now to return different valuesconst originalDateNow = Date.now;
       let callCount = 0;
       Date.now = jest.fn(() => originalDateNow() + callCount++);
 
@@ -242,8 +191,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should return ISO timestamp format', () => {
-      const testId = `${operationId}_timestamp_format`;
-      console.log(`[${testId}] Testing timestamp format validation`);
+      const testId = `${operationId}_timestamp_format`;console.log(`[${testId}] Testing timestamp format validation`);
 
       const result = controller.start(mockAdminUser);
       const timestamp = result.timestamp;
@@ -258,24 +206,18 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Stop Tracking Endpoint', () => {
-    it('should stop tracking with admin user', () => {
-      const testId = `${operationId}_stop_admin`;
-      console.log(`[${testId}] Testing stop tracking with admin user`);
+  describe('Stop Tracking Endpoint', () => {it('should stop tracking with admin user', () => {
+      const testId = `${operationId}_stop_admin`;console.log(`[${testId}] Testing stop tracking with admin user`);
 
       const result = controller.stop(mockAdminUser);
 
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        status: 'stopped',
-        timestamp: expect.any(String) as unknown,
-        userId: mockAdminUser.id,
+        status: 'stopped',timestamp: expect.any(String) as unknown,userId: mockAdminUser.id,
       });
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Stopping input tracking'),
-        expect.objectContaining({
-          userId: mockAdminUser.id,
+        expect.stringContaining('Stopping input tracking'),expect.objectContaining({userId: mockAdminUser.id,
           username: mockAdminUser.username,
           userRole: mockAdminUser.role,
           securityEvent: 'input_tracking_stopped',
@@ -286,22 +228,17 @@ describe('InputTrackingController', () => {
     });
 
     it('should stop tracking with operator user', () => {
-      const testId = `${operationId}_stop_operator`;
-      console.log(`[${testId}] Testing stop tracking with operator user`);
+      const testId = `${operationId}_stop_operator`;console.log(`[${testId}] Testing stop tracking with operator user`);
 
       const result = controller.stop(mockOperatorUser);
 
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        status: 'stopped',
-        timestamp: expect.any(String) as unknown,
-        userId: mockOperatorUser.id,
+        status: 'stopped',timestamp: expect.any(String) as unknown,userId: mockOperatorUser.id,
       });
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Stopping input tracking'),
-        expect.objectContaining({
-          userId: mockOperatorUser.id,
+        expect.stringContaining('Stopping input tracking'),expect.objectContaining({userId: mockOperatorUser.id,
           username: mockOperatorUser.username,
           userRole: mockOperatorUser.role,
           securityEvent: 'input_tracking_stopped',
@@ -314,17 +251,11 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Service Integration', () => {
-    it('should handle service errors gracefully', () => {
-      const testId = `${operationId}_service_error_handling`;
-      console.log(`[${testId}] Testing service error handling`);
+  describe('Service Integration', () => {it('should handle service errors gracefully', () => {
+      const testId = `${operationId}_service_error_handling`;console.log(`[${testId}] Testing service error handling`);
 
       // Mock service to throw an error
-      jest.spyOn(service, 'startTracking').mockImplementation(() => {
-        throw new Error('Service unavailable');
-      });
-
-      expect(() => controller.start(mockAdminUser)).toThrow(
+      jest.spyOn(service, 'startTracking').mockImplementation(() => {throw new Error('Service unavailable');});expect(() => controller.start(mockAdminUser)).toThrow(
         'Service unavailable',
       );
 
@@ -332,11 +263,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should call service methods with correct parameters', () => {
-      const testId = `${operationId}_service_method_calls`;
-      console.log(`[${testId}] Testing service method calls`);
-
-      controller.start(mockAdminUser);
-      controller.stop(mockOperatorUser);
+      const testId = `${operationId}_service_method_calls`;console.log(`[${testId}] Testing service method calls`);controller.start(mockAdminUser);controller.stop(mockOperatorUser);
 
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(service.startTracking).toHaveBeenCalledWith();
@@ -347,10 +274,8 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Response Format Consistency', () => {
-    it('should maintain consistent response structure for start', () => {
-      const testId = `${operationId}_response_structure_start`;
-      console.log(`[${testId}] Testing start response structure consistency`);
+  describe('Response Format Consistency', () => {it('should maintain consistent response structure for start', () => {
+      const testId = `${operationId}_response_structure_start`;console.log(`[${testId}] Testing start response structure consistency`);
 
       const result = controller.start(mockAdminUser);
 
@@ -360,15 +285,13 @@ describe('InputTrackingController', () => {
         userId: expect.any(String) as unknown,
       });
 
-      expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);
-      expect(result.status).toBe('started');
+      expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);expect(result.status).toBe('started');
 
       console.log(`[${testId}] Start response structure test completed`);
     });
 
     it('should maintain consistent response structure for stop', () => {
-      const testId = `${operationId}_response_structure_stop`;
-      console.log(`[${testId}] Testing stop response structure consistency`);
+      const testId = `${operationId}_response_structure_stop`;console.log(`[${testId}] Testing stop response structure consistency`);
 
       const result = controller.stop(mockOperatorUser);
 
@@ -378,24 +301,19 @@ describe('InputTrackingController', () => {
         userId: expect.any(String) as unknown,
       });
 
-      expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);
-      expect(result.status).toBe('stopped');
+      expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);expect(result.status).toBe('stopped');
 
       console.log(`[${testId}] Stop response structure test completed`);
     });
   });
 
-  describe('Logging and Auditing', () => {
-    it('should log comprehensive security information', () => {
-      const testId = `${operationId}_security_logging`;
-      console.log(`[${testId}] Testing comprehensive security logging`);
+  describe('Logging and Auditing', () => {it('should log comprehensive security information', () => {
+      const testId = `${operationId}_security_logging`;console.log(`[${testId}] Testing comprehensive security logging`);
 
       controller.start(mockAdminUser);
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting input tracking'),
-        expect.objectContaining({
-          operationId: expect.any(String) as unknown,
+        expect.stringContaining('Starting input tracking'),expect.objectContaining({operationId: expect.any(String) as unknown,
           userId: mockAdminUser.id,
           username: mockAdminUser.username,
           userRole: mockAdminUser.role,
@@ -407,11 +325,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should include operation ID in all log entries', () => {
-      const testId = `${operationId}_operation_id_logging`;
-      console.log(`[${testId}] Testing operation ID logging`);
-
-      controller.start(mockOperatorUser);
-      controller.stop(mockOperatorUser);
+      const testId = `${operationId}_operation_id_logging`;console.log(`[${testId}] Testing operation ID logging`);controller.start(mockOperatorUser);controller.stop(mockOperatorUser);
 
       const startLogCall = (logger.log as jest.Mock).mock.calls[0];
       const stopLogCall = (logger.log as jest.Mock).mock.calls[1];
@@ -427,13 +341,8 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Performance Testing', () => {
-    it('should complete requests within performance threshold', () => {
-      const testId = `${operationId}_performance_threshold`;
-      console.log(`[${testId}] Testing request performance`);
-
-      const startTime = Date.now();
-      controller.start(mockAdminUser);
+  describe('Performance Testing', () => {it('should complete requests within performance threshold', () => {
+      const testId = `${operationId}_performance_threshold`;console.log(`[${testId}] Testing request performance`);const startTime = Date.now();controller.start(mockAdminUser);
       const executionTime = Date.now() - startTime;
 
       // Should complete within 50ms (very fast for controller logic)
@@ -445,12 +354,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should handle concurrent requests efficiently', async () => {
-      const testId = `${operationId}_concurrent_requests`;
-      console.log(`[${testId}] Testing concurrent request handling`);
-
-      const startTime = Date.now();
-
-      // Simulate 10 concurrent requests
+      const testId = `${operationId}_concurrent_requests`;console.log(`[${testId}] Testing concurrent request handling`);const startTime = Date.now();// Simulate 10 concurrent requests
       const promises = Array(10)
         .fill(null)
         .map((_, _index) => {
@@ -469,10 +373,7 @@ describe('InputTrackingController', () => {
       expect(results).toHaveLength(10);
       results.forEach((result, _index) => {
         expect(result.status).toBe('started');
-        expect(result.userId).toBe(`user${_index}`);
-      });
-
-      // Should complete within 100ms total (very efficient)
+        expect(result.userId).toBe(`user${_index}`);});// Should complete within 100ms total (very efficient)
       expect(totalTime).toBeLessThan(100);
 
       console.log(
@@ -481,55 +382,33 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Edge Cases and Error Scenarios', () => {
-    it('should handle null user object gracefully', () => {
-      const testId = `${operationId}_null_user`;
-      console.log(`[${testId}] Testing null user handling`);
-
-      expect(() =>
-        controller.start(null as unknown as MockByteBotdUser),
+  describe('Edge Cases and Error Scenarios', () => {it('should handle null user object gracefully', () => {
+      const testId = `${operationId}_null_user`;console.log(`[${testId}] Testing null user handling`);expect(() =>controller.start(null as unknown as MockByteBotdUser),
       ).toThrow();
 
       console.log(`[${testId}] Null user handling test completed`);
     });
 
     it('should handle undefined user properties', () => {
-      const testId = `${operationId}_undefined_user_properties`;
-      console.log(`[${testId}] Testing undefined user properties`);
+      const testId = `${operationId}_undefined_user_properties`;console.log(`[${testId}] Testing undefined user properties`);
 
       const incompleteUser = {
-        id: 'test_user',
-        sub: 'test_user',
-        // missing username, email, role
-      } as Partial<MockByteBotdUser>;
+        id: 'test_user',sub: 'test_user',// missing username, email, role} as Partial<MockByteBotdUser>;
 
       const result = controller.start(incompleteUser as MockByteBotdUser);
 
-      expect(result.userId).toBe('test_user');
-      expect(result.status).toBe('started');
+      expect(result.userId).toBe('test_user');expect(result.status).toBe('started');
 
       console.log(`[${testId}] Undefined user properties test completed`);
     });
 
     it('should handle service method exceptions', () => {
-      const testId = `${operationId}_service_exceptions`;
-      console.log(`[${testId}] Testing service method exceptions`);
+      const testId = `${operationId}_service_exceptions`;console.log(`[${testId}] Testing service method exceptions`);
 
       // Test startTracking exception
-      jest.spyOn(service, 'startTracking').mockImplementation(() => {
-        throw new Error('Hardware not available');
-      });
-
-      expect(() => controller.start(mockAdminUser)).toThrow(
-        'Hardware not available',
-      );
-
-      // Test stopTracking exception
-      jest.spyOn(service, 'stopTracking').mockImplementation(() => {
-        throw new Error('Cannot stop tracking');
-      });
-
-      expect(() => controller.stop(mockAdminUser)).toThrow(
+      jest.spyOn(service, 'startTracking').mockImplementation(() => {throw new Error('Hardware not available');});expect(() => controller.start(mockAdminUser)).toThrow(
+        'Hardware not available',);// Test stopTracking exception
+      jest.spyOn(service, 'stopTracking').mockImplementation(() => {throw new Error('Cannot stop tracking');});expect(() => controller.stop(mockAdminUser)).toThrow(
         'Cannot stop tracking',
       );
 
@@ -537,16 +416,14 @@ describe('InputTrackingController', () => {
     });
 
     it('should handle rapid start/stop sequences', () => {
-      const testId = `${operationId}_rapid_start_stop`;
-      console.log(`[${testId}] Testing rapid start/stop sequences`);
+      const testId = `${operationId}_rapid_start_stop`;console.log(`[${testId}] Testing rapid start/stop sequences`);
 
       // Rapid sequence of operations
       for (let i = 0; i < 5; i++) {
         const startResult = controller.start(mockAdminUser);
         const stopResult = controller.stop(mockAdminUser);
 
-        expect(startResult.status).toBe('started');
-        expect(stopResult.status).toBe('stopped');
+        expect(startResult.status).toBe('started');expect(stopResult.status).toBe('stopped');
       }
 
       expect(service.startTracking).toHaveBeenCalledTimes(5);
@@ -556,10 +433,8 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Security Testing', () => {
-    it('should log security events for audit trail', () => {
-      const testId = `${operationId}_security_audit_trail`;
-      console.log(`[${testId}] Testing security audit trail`);
+  describe('Security Testing', () => {it('should log security events for audit trail', () => {
+      const testId = `${operationId}_security_audit_trail`;console.log(`[${testId}] Testing security audit trail`);
 
       controller.start(mockAdminUser);
       controller.stop(mockOperatorUser);
@@ -567,9 +442,7 @@ describe('InputTrackingController', () => {
       const logCalls = (logger.log as jest.Mock).mock.calls;
 
       expect((logCalls[0]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
-        'input_tracking_started',
-      );
-      expect((logCalls[1]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
+        'input_tracking_started',);expect((logCalls[1]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
         'input_tracking_stopped',
       );
 
@@ -577,12 +450,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should include user context in all operations', () => {
-      const testId = `${operationId}_user_context_security`;
-      console.log(`[${testId}] Testing user context security`);
-
-      controller.start(mockOperatorUser);
-
-      expect(logger.log).toHaveBeenCalledWith(
+      const testId = `${operationId}_user_context_security`;console.log(`[${testId}] Testing user context security`);controller.start(mockOperatorUser);expect(logger.log).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           userId: mockOperatorUser.id,
@@ -595,14 +463,10 @@ describe('InputTrackingController', () => {
     });
 
     it('should validate user object structure', () => {
-      const testId = `${operationId}_user_object_validation`;
-      console.log(`[${testId}] Testing user object structure validation`);
+      const testId = `${operationId}_user_object_validation`;console.log(`[${testId}] Testing user object structure validation`);
 
       const malformedUser = {
-        id: 'test',
-        sub: 'test',
-        // Missing required properties
-      };
+        id: 'test',sub: 'test',// Missing required properties};
 
       // Controller should handle gracefully (guards would prevent this in real scenario)
       const result = controller.start(
@@ -616,21 +480,15 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Integration with Guards', () => {
-    it('should be protected by JWT auth guard', () => {
-      const testId = `${operationId}_jwt_guard_protection`;
-      console.log(`[${testId}] Testing JWT auth guard protection`);
-
-      // In real scenario, this would be enforced by NestJS
-      // Here we just verify the controller expects authentication
+  describe('Integration with Guards', () => {it('should be protected by JWT auth guard', () => {
+      const testId = `${operationId}_jwt_guard_protection`;console.log(`[${testId}] Testing JWT auth guard protection`);// In real scenario, this would be enforced by NestJS// Here we just verify the controller expects authentication
       expect(controller).toBeDefined();
 
       console.log(`[${testId}] JWT guard protection test completed`);
     });
 
     it('should be protected by roles guard', () => {
-      const testId = `${operationId}_roles_guard_protection`;
-      console.log(`[${testId}] Testing roles guard protection`);
+      const testId = `${operationId}_roles_guard_protection`;console.log(`[${testId}] Testing roles guard protection`);
 
       // Controller should work with properly authenticated users
       const result = controller.start(mockAdminUser);
@@ -640,10 +498,8 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Method Signature Validation', () => {
-    it('should have correct start method signature', () => {
-      const testId = `${operationId}_start_method_signature`;
-      console.log(`[${testId}] Testing start method signature`);
+  describe('Method Signature Validation', () => {it('should have correct start method signature', () => {
+      const testId = `${operationId}_start_method_signature`;console.log(`[${testId}] Testing start method signature`);
 
       expect(typeof controller.start).toBe('function');
       expect(controller.start.length).toBe(1); // Should accept 1 parameter (user)
@@ -652,8 +508,7 @@ describe('InputTrackingController', () => {
     });
 
     it('should have correct stop method signature', () => {
-      const testId = `${operationId}_stop_method_signature`;
-      console.log(`[${testId}] Testing stop method signature`);
+      const testId = `${operationId}_stop_method_signature`;console.log(`[${testId}] Testing stop method signature`);
 
       expect(typeof controller.stop).toBe('function');
       expect(controller.stop.length).toBe(1); // Should accept 1 parameter (user)
@@ -662,29 +517,21 @@ describe('InputTrackingController', () => {
     });
   });
 
-  describe('Reliability and Resilience', () => {
-    it('should maintain state consistency across operations', () => {
-      const testId = `${operationId}_state_consistency`;
-      console.log(`[${testId}] Testing state consistency`);
+  describe('Reliability and Resilience', () => {it('should maintain state consistency across operations', () => {
+      const testId = `${operationId}_state_consistency`;console.log(`[${testId}] Testing state consistency`);
 
       // Multiple operations should not interfere with each other
       const result1 = controller.start(mockAdminUser);
       const result2 = controller.start(mockOperatorUser);
       const result3 = controller.stop(mockAdminUser);
 
-      expect(result1.status).toBe('started');
-      expect(result2.status).toBe('started');
-      expect(result3.status).toBe('stopped');
+      expect(result1.status).toBe('started');expect(result2.status).toBe('started');expect(result3.status).toBe('stopped');
 
       console.log(`[${testId}] State consistency test completed`);
     });
 
     it('should handle high-frequency operations', () => {
-      const testId = `${operationId}_high_frequency_operations`;
-      console.log(`[${testId}] Testing high-frequency operations`);
-
-      const operationCount = 100;
-      const startTime = Date.now();
+      const testId = `${operationId}_high_frequency_operations`;console.log(`[${testId}] Testing high-frequency operations`);const operationCount = 100;const startTime = Date.now();
 
       for (let i = 0; i < operationCount; i++) {
         if (i % 2 === 0) {

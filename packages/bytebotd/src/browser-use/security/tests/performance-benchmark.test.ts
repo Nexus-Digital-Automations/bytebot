@@ -14,21 +14,7 @@
  * @author Performance Engineering Team
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import * as os from 'os';
-
-// Security components
-import { BrowserSecurityIntegrationModule } from '../browser-security-integration.module';
-import { BrowserUseAuthMiddleware } from '../../middleware/browser-use-auth.middleware';
-import { BrowserUseRbacGuard } from '../../guards/browser-use-rbac.guard';
-import { BrowserRequestValidatorService } from '../../validators/browser-request-validator.service';
-import { BrowserRateLimiterService } from '../../rate-limiters/browser-rate-limiter.service';
-import { BrowserAuditTrailService } from '../../audit/browser-audit-trail.service';
-
-/**
- * Performance measurement and analysis utilities
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { performance } from 'perf_hooks';import * as os from 'os';// Security componentsimport { BrowserSecurityIntegrationModule } from '../browser-security-integration.module';import { BrowserUseAuthMiddleware } from '../../middleware/browser-use-auth.middleware';import { BrowserUseRbacGuard } from '../../guards/browser-use-rbac.guard';import { BrowserRequestValidatorService } from '../../validators/browser-request-validator.service';import { BrowserRateLimiterService } from '../../rate-limiters/browser-rate-limiter.service';import { BrowserAuditTrailService } from '../../audit/browser-audit-trail.service';/*** Performance measurement and analysis utilities
  */
 class PerformanceBenchmark {
   private logger = new Logger(PerformanceBenchmark.name);
@@ -91,17 +77,8 @@ class PerformanceBenchmark {
 
     this.logger.log(`\n🚀 PERFORMANCE BENCHMARK: ${this.testName}`);
     this.logger.log('='.repeat(60));
-    this.logger.log(`📊 Samples: ${stats.count}`);
-    this.logger.log(`⚡ Mean: ${stats.mean.toFixed(2)}ms`);
-    this.logger.log(`📈 Median: ${stats.median.toFixed(2)}ms`);
-    this.logger.log(`🎯 P95: ${stats.p95.toFixed(2)}ms ${stats.p95 < 1000 ? '✅' : '❌'}`);
-    this.logger.log(`🔥 P99: ${stats.p99.toFixed(2)}ms`);
-    this.logger.log(`📏 Range: ${stats.min.toFixed(2)}ms - ${stats.max.toFixed(2)}ms`);
-    this.logger.log(`📊 StdDev: ${stats.stdDev.toFixed(2)}ms`);
-    this.logger.log('='.repeat(60));
-  }
-
-  validateP95Requirement(): boolean {
+    this.logger.log(`📊 Samples: ${stats.count}`);this.logger.log(`⚡ Mean: ${stats.mean.toFixed(2)}ms`);this.logger.log(`📈 Median: ${stats.median.toFixed(2)}ms`);this.logger.log(`🎯 P95: ${stats.p95.toFixed(2)}ms ${stats.p95 < 1000 ? '✅' : '❌'}`);this.logger.log(`🔥 P99: ${stats.p99.toFixed(2)}ms`);this.logger.log(`📏 Range: ${stats.min.toFixed(2)}ms - ${stats.max.toFixed(2)}ms`);this.logger.log(`📊 StdDev: ${stats.stdDev.toFixed(2)}ms`);
+    this.logger.log('='.repeat(60));}validateP95Requirement(): boolean {
     const stats = this.getStatistics();
     return stats.p95 < 1000;
   }
@@ -135,13 +112,7 @@ class ResourceMonitor {
     const freeMemory = os.freemem();
 
     this.logger.log('🖥️  SYSTEM INFORMATION');
-    this.logger.log(`CPU: ${cpus[0].model} (${cpus.length} cores)`);
-    this.logger.log(`Memory: ${(memory / 1024 / 1024 / 1024).toFixed(1)}GB total, ${(freeMemory / 1024 / 1024 / 1024).toFixed(1)}GB free`);
-    this.logger.log(`Platform: ${os.platform()} ${os.arch()}`);
-    this.logger.log(`Node.js: ${process.version}`);
-  }
-
-  getCurrentMemoryUsage(): NodeJS.MemoryUsage {
+    this.logger.log(`CPU: ${cpus[0].model} (${cpus.length} cores)`);this.logger.log(`Memory: ${(memory / 1024 / 1024 / 1024).toFixed(1)}GB total, ${(freeMemory / 1024 / 1024 / 1024).toFixed(1)}GB free`);this.logger.log(`Platform: ${os.platform()} ${os.arch()}`);this.logger.log(`Node.js: ${process.version}`);}getCurrentMemoryUsage(): NodeJS.MemoryUsage {
     return process.memoryUsage();
   }
 
@@ -154,9 +125,7 @@ class ResourceMonitor {
   }
 }
 
-describe('Security Framework Performance Benchmarks', () => {
-  let module: TestingModule;
-  let benchmark: PerformanceBenchmark;
+describe('Security Framework Performance Benchmarks', () => {let module: TestingModule;let benchmark: PerformanceBenchmark;
   let resourceMonitor: ResourceMonitor;
 
   // Service instances
@@ -204,15 +173,8 @@ describe('Security Framework Performance Benchmarks', () => {
     console.log(`\n💾 Memory Usage Change: ${memoryIncrease}`);
   });
 
-  describe('🎯 Critical P95 Latency Requirement', () => {
-    it('should meet <1000ms P95 latency for complete security workflow (100 samples)', async () => {
-      benchmark = new PerformanceBenchmark('Complete Security Workflow');
-
-      const samples = 100;
-      const testPayload = {
-        url: 'https://example.com/test',
-        task: 'navigate_and_click',
-        parameters: { selector: '.button', timeout: 5000 }
+  describe('🎯 Critical P95 Latency Requirement', () => {it('should meet <1000ms P95 latency for complete security workflow (100 samples)', async () => {benchmark = new PerformanceBenchmark('Complete Security Workflow');const samples = 100;const testPayload = {
+        url: 'https://example.com/test',task: 'navigate_and_click',parameters: { selector: '.button', timeout: 5000 }
       };
 
       for (let i = 0; i < samples; i++) {
@@ -222,8 +184,7 @@ describe('Security Framework Performance Benchmarks', () => {
         const mockRequest = createMockRequest({
           headers: { authorization: `Bearer ${VALID_JWT_TOKEN}` },
           body: testPayload,
-          url: '/api/browser/task',
-          method: 'POST',
+          url: '/api/browser/task',method: 'POST',
           ip: `127.0.0.${Math.floor(i / 50) + 1}`, // Vary IP addresses
         });
 
@@ -236,14 +197,11 @@ describe('Security Framework Performance Benchmarks', () => {
           // 2. Authorization check
           const mockContext = createMockExecutionContext({
             user: mockRequest.user,
-            route: { handler: { name: 'createBrowserTask' } },
-          });
-          await rbacGuard.canActivate(mockContext);
+            route: { handler: { name: 'createBrowserTask' } },});await rbacGuard.canActivate(mockContext);
 
           // 3. Request validation (typically slowest)
           await validator.validateRequest(testPayload, {
-            contentType: 'application/json',
-            userAgent: 'performance-test-agent',
+            contentType: 'application/json',userAgent: 'performance-test-agent',
             ipAddress: mockRequest.ip,
           });
 
@@ -251,24 +209,11 @@ describe('Security Framework Performance Benchmarks', () => {
           await rateLimiter.checkRateLimit({
             userId: `perf-user-${i % 10}`, // 10 different users
             ipAddress: mockRequest.ip,
-            endpoint: '/api/browser/task',
-            operation: 'create_task',
-          });
-
-          // 5. Audit trail recording
+            endpoint: '/api/browser/task',operation: 'create_task',});// 5. Audit trail recording
           await auditTrail.recordEvent({
-            eventType: 'BROWSER_TASK_CREATED',
-            severity: 'MEDIUM',
-            userId: `perf-user-${i % 10}`,
-            sessionId: `session-${i}`,
-            description: 'Performance test browser task creation',
-            resource: '/api/browser/task',
-            action: 'POST',
-            outcome: 'SUCCESS',
-            ipAddress: mockRequest.ip,
-            userAgent: 'performance-test-agent',
-            data: testPayload,
-            complianceFlags: ['PERFORMANCE_TEST'],
+            eventType: 'BROWSER_TASK_CREATED',severity: 'MEDIUM',
+            userId: `perf-user-${i % 10}`,sessionId: `session-${i}`,
+            description: 'Performance test browser task creation',resource: '/api/browser/task',action: 'POST',outcome: 'SUCCESS',ipAddress: mockRequest.ip,userAgent: 'performance-test-agent',data: testPayload,complianceFlags: ['PERFORMANCE_TEST'],
           });
 
           benchmark.end();
@@ -296,9 +241,7 @@ describe('Security Framework Performance Benchmarks', () => {
     }, 30000); // 30 second timeout for this test
   });
 
-  describe('🚀 High Concurrency Performance', () => {
-    it('should maintain performance under concurrent load (50 concurrent requests)', async () => {
-      benchmark = new PerformanceBenchmark('Concurrent Load Test');
+  describe('🚀 High Concurrency Performance', () => {it('should maintain performance under concurrent load (50 concurrent requests)', async () => {benchmark = new PerformanceBenchmark('Concurrent Load Test');
 
       const concurrency = 50;
       const promises: Promise<void>[] = [];
@@ -309,26 +252,15 @@ describe('Security Framework Performance Benchmarks', () => {
 
           const testPayload = {
             url: `https://example.com/concurrent-test-${index}`,
-            task: 'concurrent_navigation',
-            parameters: { index }
-          };
+            task: 'concurrent_navigation',parameters: { index }};
 
           try {
             // Simplified workflow for concurrency test
             await validator.validateRequest(testPayload, {
               contentType: 'application/json',
-              userAgent: `concurrent-agent-${index}`,
-              ipAddress: `127.0.${Math.floor(index / 50)}.${index % 255}`,
-            });
-
-            await rateLimiter.checkRateLimit({
-              userId: `concurrent-user-${index}`,
-              ipAddress: `127.0.${Math.floor(index / 50)}.${index % 255}`,
-              endpoint: '/api/browser/task',
-              operation: 'create_task',
-            });
-
-          } catch (error) {
+              userAgent: `concurrent-agent-${index}`,ipAddress: `127.0.${Math.floor(index / 50)}.${index % 255}`,});await rateLimiter.checkRateLimit({
+              userId: `concurrent-user-${index}`,ipAddress: `127.0.${Math.floor(index / 50)}.${index % 255}`,
+              endpoint: '/api/browser/task',operation: 'create_task',});} catch (error) {
             // Continue test even if some requests fail
           }
 
@@ -347,12 +279,7 @@ describe('Security Framework Performance Benchmarks', () => {
     }, 20000);
   });
 
-  describe('⚡ Cold Start Performance', () => {
-    it('should handle cold start scenarios efficiently', async () => {
-      benchmark = new PerformanceBenchmark('Cold Start Performance');
-
-      // Simulate cold start by creating fresh service instances
-      const coldModule = await Test.createTestingModule({
+  describe('⚡ Cold Start Performance', () => {it('should handle cold start scenarios efficiently', async () => {benchmark = new PerformanceBenchmark('Cold Start Performance');// Simulate cold start by creating fresh service instancesconst coldModule = await Test.createTestingModule({
         imports: [
           BrowserSecurityIntegrationModule.forRoot({
             authentication: { enabled: true, requireMfa: false, allowAnonymous: false },
@@ -372,15 +299,7 @@ describe('Security Framework Performance Benchmarks', () => {
       benchmark.start();
 
       await coldValidator.validateRequest({
-        url: 'https://example.com/cold-start',
-        task: 'cold_start_test',
-      }, {
-        contentType: 'application/json',
-        userAgent: 'cold-start-agent',
-        ipAddress: '127.0.0.1',
-      });
-
-      benchmark.end();
+        url: 'https://example.com/cold-start',task: 'cold_start_test',}, {contentType: 'application/json',userAgent: 'cold-start-agent',ipAddress: '127.0.0.1',});benchmark.end();
 
       await coldModule.close();
 
@@ -392,9 +311,7 @@ describe('Security Framework Performance Benchmarks', () => {
     });
   });
 
-  describe('📈 Sustained Load Performance', () => {
-    it('should maintain consistent performance over sustained operations', async () => {
-      benchmark = new PerformanceBenchmark('Sustained Load Performance');
+  describe('📈 Sustained Load Performance', () => {it('should maintain consistent performance over sustained operations', async () => {benchmark = new PerformanceBenchmark('Sustained Load Performance');
 
       const duration = 10000; // 10 seconds
       const interval = 100; // Request every 100ms
@@ -407,22 +324,16 @@ describe('Security Framework Performance Benchmarks', () => {
 
         const testPayload = {
           url: `https://example.com/sustained-${requestCount}`,
-          task: 'sustained_test',
-          parameters: { requestId: requestCount }
-        };
+          task: 'sustained_test',parameters: { requestId: requestCount }};
 
         try {
           await validator.validateRequest(testPayload, {
-            contentType: 'application/json',
-            userAgent: 'sustained-load-agent',
-            ipAddress: '127.0.0.1',
+            contentType: 'application/json',userAgent: 'sustained-load-agent',ipAddress: '127.0.0.1',
           });
 
           await rateLimiter.checkRateLimit({
             userId: `sustained-user`,
-            ipAddress: '127.0.0.1',
-            endpoint: '/api/browser/task',
-            operation: 'create_task',
+            ipAddress: '127.0.0.1',endpoint: '/api/browser/task',operation: 'create_task',
           });
 
         } catch (error) {
@@ -444,27 +355,21 @@ describe('Security Framework Performance Benchmarks', () => {
       expect(stats.p95).toBeLessThan(1000);
       expect(requestCount).toBeGreaterThan(50); // Should have processed many requests
 
-      console.log(`\n📊 Sustained load: ${requestCount} requests over ${duration/1000}s`);
-      console.log(`📈 Average throughput: ${(requestCount / (duration/1000)).toFixed(1)} requests/second`);
+      console.log(`\n📊 Sustained load: ${requestCount} requests over ${duration/1000}s`);console.log(`📈 Average throughput: ${(requestCount / (duration/1000)).toFixed(1)} requests/second`);
     }, 15000);
   });
 
-  describe('🧠 Memory Efficiency', () => {
-    it('should not have significant memory leaks during extended operation', async () => {
+  describe('🧠 Memory Efficiency', () => {it('should not have significant memory leaks during extended operation', async () => {
       const initialMemory = process.memoryUsage();
       const iterations = 200;
 
       for (let i = 0; i < iterations; i++) {
         const testPayload = {
           url: `https://example.com/memory-test-${i}`,
-          task: 'memory_efficiency_test',
-          parameters: { iteration: i }
-        };
+          task: 'memory_efficiency_test',parameters: { iteration: i }};
 
         await validator.validateRequest(testPayload, {
-          contentType: 'application/json',
-          userAgent: 'memory-test-agent',
-          ipAddress: '127.0.0.1',
+          contentType: 'application/json',userAgent: 'memory-test-agent',ipAddress: '127.0.0.1',
         });
 
         // Force garbage collection periodically (if available)
@@ -477,9 +382,7 @@ describe('Security Framework Performance Benchmarks', () => {
       const heapIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
       const heapIncreaseeMB = heapIncrease / 1024 / 1024;
 
-      console.log(`\n💾 Memory analysis after ${iterations} operations:`);
-      console.log(`📈 Heap increase: ${heapIncreaseeMB.toFixed(1)}MB`);
-      console.log(`📊 Per operation: ${(heapIncreaseeMB / iterations * 1024).toFixed(1)}KB`);
+      console.log(`\n💾 Memory analysis after ${iterations} operations:`);console.log(`📈 Heap increase: ${heapIncreaseeMB.toFixed(1)}MB`);console.log(`📊 Per operation: ${(heapIncreaseeMB / iterations * 1024).toFixed(1)}KB`);
 
       // Memory increase should be reasonable (less than 100MB for 200 operations)
       expect(heapIncreaseeMB).toBeLessThan(100);
@@ -494,19 +397,8 @@ function createMockRequest(overrides: any = {}) {
   return {
     headers: {},
     body: {},
-    url: '/api/test',
-    method: 'GET',
-    ip: '127.0.0.1',
-    get: jest.fn().mockReturnValue('test-agent'),
-    user: {
-      userId: 'test-user-id',
-      role: 'ADMIN',
-      permissions: ['browser:task:create', 'browser:task:view'],
-    },
-    session: {
-      sessionId: 'test-session-id',
-    },
-    ...overrides,
+    url: '/api/test',method: 'GET',ip: '127.0.0.1',get: jest.fn().mockReturnValue('test-agent'),user: {userId: 'test-user-id',role: 'ADMIN',permissions: ['browser:task:create', 'browser:task:view'],},session: {
+      sessionId: 'test-session-id',},...overrides,
   };
 }
 
@@ -523,8 +415,7 @@ function createMockExecutionContext(overrides: any = {}) {
     switchToHttp: jest.fn().mockReturnValue({
       getRequest: jest.fn().mockReturnValue({
         user: overrides.user || {},
-        url: '/api/test',
-        method: 'GET',
+        url: '/api/test',method: 'GET',
       }),
     }),
     getHandler: jest.fn().mockReturnValue(overrides.route?.handler || {}),

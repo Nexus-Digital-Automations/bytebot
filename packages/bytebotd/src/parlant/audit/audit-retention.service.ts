@@ -19,17 +19,7 @@
  * @created 2024-01-19
  */
 
-import { Logger } from '../../../logger';
-import { ImmutableAuditEvent } from './enterprise-audit-trail.service';
-import { ComplianceRegulation } from './compliance-monitoring.service';
-import * as crypto from 'crypto';
-import * as zlib from 'zlib';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-
-// ==================== TYPES AND INTERFACES ====================
-
-/**
+import { Logger } from '../../../logger';import { ImmutableAuditEvent } from './enterprise-audit-trail.service';import { ComplianceRegulation } from './compliance-monitoring.service';import * as crypto from 'crypto';import * as zlib from 'zlib';import { promises as fs } from 'fs';import * as path from 'path';// ==================== TYPES AND INTERFACES ====================/**
  * Comprehensive retention policy configuration
  */
 export interface RetentionPolicy {
@@ -69,66 +59,28 @@ export interface RetentionPolicy {
 }
 
 export enum RiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
+  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}
 
 export enum TieringStrategy {
-  HOT_WARM_COLD = 'hot-warm-cold',
-  HOT_COLD = 'hot-cold',
-  IMMEDIATE_ARCHIVE = 'immediate-archive',
-  REGULATORY_OPTIMIZED = 'regulatory-optimized'
-}
+  HOT_WARM_COLD = 'hot-warm-cold',HOT_COLD = 'hot-cold',IMMEDIATE_ARCHIVE = 'immediate-archive',REGULATORY_OPTIMIZED = 'regulatory-optimized'}
 
 export enum CompressionLevel {
-  NONE = 'none',
-  STANDARD = 'standard',
-  MAXIMUM = 'maximum',
-  ADAPTIVE = 'adaptive'
-}
+  NONE = 'none',STANDARD = 'standard',MAXIMUM = 'maximum',ADAPTIVE = 'adaptive'}
 
 export enum EncryptionStandard {
-  AES_256_GCM = 'aes-256-gcm',
-  CHACHA20_POLY1305 = 'chacha20-poly1305',
-  AES_256_CBC = 'aes-256-cbc',
-  QUANTUM_RESISTANT = 'quantum-resistant'
-}
-
-export enum GeographicRegion {
-  US_EAST = 'us-east',
-  US_WEST = 'us-west',
-  EU_CENTRAL = 'eu-central',
-  ASIA_PACIFIC = 'asia-pacific',
-  CANADA = 'canada',
-  UK = 'uk'
-}
-
-export enum AuthorizationLevel {
-  AUDIT_VIEWER = 'audit-viewer',
-  COMPLIANCE_OFFICER = 'compliance-officer',
-  FORENSIC_INVESTIGATOR = 'forensic-investigator',
-  LEGAL_COUNSEL = 'legal-counsel',
-  SYSTEM_ADMINISTRATOR = 'system-administrator',
-  EMERGENCY_RESPONDER = 'emergency-responder'
-}
-
-export interface EmergencyAccessConfig {
+  AES_256_GCM = 'aes-256-gcm',CHACHA20_POLY1305 = 'chacha20-poly1305',AES_256_CBC = 'aes-256-cbc',QUANTUM_RESISTANT = 'quantum-resistant'}export enum GeographicRegion {
+  US_EAST = 'us-east',US_WEST = 'us-west',EU_CENTRAL = 'eu-central',ASIA_PACIFIC = 'asia-pacific',CANADA = 'canada',UK = 'uk'}export enum AuthorizationLevel {
+  AUDIT_VIEWER = 'audit-viewer',COMPLIANCE_OFFICER = 'compliance-officer',FORENSIC_INVESTIGATOR = 'forensic-investigator',LEGAL_COUNSEL = 'legal-counsel',SYSTEM_ADMINISTRATOR = 'system-administrator',EMERGENCY_RESPONDER = 'emergency-responder'}export interface EmergencyAccessConfig {
   readonly enabled: boolean;
   readonly authorizationRequired: AuthorizationLevel[];
   readonly timeLimit: number; // hours
-  readonly auditIntensity: 'standard' | 'enhanced' | 'maximum';
-  readonly approvalWorkflow: boolean;
-}
+  readonly auditIntensity: 'standard' | 'enhanced' | 'maximum';readonly approvalWorkflow: boolean;}
 
 export interface CrossJurisdictionConfig {
   readonly enabled: boolean;
   readonly primaryJurisdiction: string;
   readonly secondaryJurisdictions: string[];
-  readonly conflictResolution: 'strictest' | 'primary' | 'manual';
-  readonly treatyCompliance: string[];
-}
+  readonly conflictResolution: 'strictest' | 'primary' | 'manual';readonly treatyCompliance: string[];}
 
 /**
  * Archived audit data with metadata and retrieval information
@@ -165,14 +117,7 @@ export interface ArchivedAuditData {
 }
 
 export enum StorageTier {
-  HOT = 'hot',
-  WARM = 'warm',
-  COLD = 'cold',
-  GLACIER = 'glacier',
-  DEEP_ARCHIVE = 'deep-archive'
-}
-
-export interface LegalHoldStatus {
+  HOT = 'hot',WARM = 'warm',COLD = 'cold',GLACIER = 'glacier',DEEP_ARCHIVE = 'deep-archive'}export interface LegalHoldStatus {
   readonly isOnHold: boolean;
   readonly holdId?: string;
   readonly holdReason?: string;
@@ -229,14 +174,9 @@ export interface RetentionAnalysis {
 
 export interface RetentionRecommendation {
   readonly recommendationId: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
-  readonly category: 'storage' | 'compliance' | 'performance' | 'cost' | 'security';
-  readonly title: string;
-  readonly description: string;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly category: 'storage' | 'compliance' | 'performance' | 'cost' | 'security';readonly title: string;readonly description: string;
   readonly implementation: {
-    readonly effort: 'low' | 'medium' | 'high';
-    readonly timeline: string;
-    readonly dependencies: string[];
+    readonly effort: 'low' | 'medium' | 'high';readonly timeline: string;readonly dependencies: string[];
     readonly riskLevel: RiskLevel;
   };
   readonly impact: {
@@ -264,21 +204,15 @@ export interface RetrievalRequest {
     readonly complianceContext?: ComplianceRegulation[];
   };
   readonly deliveryPreferences: {
-    readonly format: 'json' | 'csv' | 'pdf' | 'native';
-    readonly encryption: boolean;
-    readonly compressionPreferred: boolean;
+    readonly format: 'json' | 'csv' | 'pdf' | 'native';readonly encryption: boolean;readonly compressionPreferred: boolean;
     readonly maxSize: number; // MB
   };
-  readonly urgency: 'routine' | 'expedited' | 'emergency';
-  readonly requestDate: Date;
-}
+  readonly urgency: 'routine' | 'expedited' | 'emergency';readonly requestDate: Date;}
 
 export interface RetrievalResponse {
   readonly responseId: string;
   readonly requestId: string;
-  readonly status: 'pending' | 'processing' | 'ready' | 'delivered' | 'failed';
-  readonly progress: number; // percentage
-  readonly estimatedCompletion?: Date;
+  readonly status: 'pending' | 'processing' | 'ready' | 'delivered' | 'failed';readonly progress: number; // percentagereadonly estimatedCompletion?: Date;
   readonly retrievedData?: {
     readonly eventCount: number;
     readonly dataSize: number;
@@ -309,29 +243,21 @@ export interface RetrievalResponse {
  * automated lifecycle management, storage optimization, and efficient retrieval capabilities.
  */
 export class AuditRetentionService {
-  private readonly logger = Logger.getInstance().child({ service: 'AuditRetentionService' });
-  private readonly policies: Map<string, RetentionPolicy> = new Map();
-  private readonly archives: Map<string, ArchivedAuditData> = new Map();
+  private readonly logger = Logger.getInstance().child({ service: 'AuditRetentionService' });private readonly policies: Map<string, RetentionPolicy> = new Map();private readonly archives: Map<string, ArchivedAuditData> = new Map();
   private readonly activeRetrievals: Map<string, RetrievalResponse> = new Map();
 
   constructor() {
-    this.logger.info('Initializing PARLANT Audit Retention Service');
-    this.initializeDefaultPolicies();
-  }
+    this.logger.info('Initializing PARLANT Audit Retention Service');this.initializeDefaultPolicies();}
 
   // ==================== RETENTION POLICY MANAGEMENT ====================
 
   /**
    * Create comprehensive retention policy with regulatory compliance
    */
-  async createRetentionPolicy(policyConfig: Omit<RetentionPolicy, 'policyId' | 'createdAt' | 'lastModified' | 'version'>): Promise<RetentionPolicy> {
-    const startTime = Date.now();
-    const policyId = this.generatePolicyId();
+  async createRetentionPolicy(policyConfig: Omit<RetentionPolicy, 'policyId' | 'createdAt' | 'lastModified' | 'version'>): Promise<RetentionPolicy> {const startTime = Date.now();const policyId = this.generatePolicyId();
 
     try {
-      this.logger.info('Creating retention policy', {
-        policyId,
-        policyName: policyConfig.policyName,
+      this.logger.info('Creating retention policy', {policyId,policyName: policyConfig.policyName,
         regulations: policyConfig.regulations.length
       });
 
@@ -347,19 +273,11 @@ export class AuditRetentionService {
         policyId,
         createdAt: new Date(),
         lastModified: new Date(),
-        version: '1.0.0'
-      };
-
-      // Store policy
+        version: '1.0.0'};// Store policy
       this.policies.set(policyId, policy);
 
       // Log policy creation
-      await this.logPolicyOperation('create', policy);
-
-      const duration = Date.now() - startTime;
-      this.logger.info('Retention policy created successfully', {
-        policyId,
-        duration,
+      await this.logPolicyOperation('create', policy);const duration = Date.now() - startTime;this.logger.info('Retention policy created successfully', {policyId,duration,
         regulations: policy.regulations.length,
         retentionDays: policy.retentionPeriod.totalDays
       });
@@ -383,9 +301,7 @@ export class AuditRetentionService {
     const startTime = Date.now();
 
     try {
-      this.logger.info('Applying retention policies to events', {
-        eventCount: events.length,
-        activePolicies: this.policies.size
+      this.logger.info('Applying retention policies to events', {eventCount: events.length,activePolicies: this.policies.size
       });
 
       const policyGroups = new Map<string, ImmutableAuditEvent[]>();
@@ -402,9 +318,7 @@ export class AuditRetentionService {
       }
 
       const duration = Date.now() - startTime;
-      this.logger.info('Retention policies applied successfully', {
-        duration,
-        eventCount: events.length,
+      this.logger.info('Retention policies applied successfully', {duration,eventCount: events.length,
         policyGroups: policyGroups.size
       });
 
@@ -434,30 +348,21 @@ export class AuditRetentionService {
     const archiveId = this.generateArchiveId();
 
     try {
-      this.logger.info('Starting audit event archival', {
-        archiveId,
-        eventCount: events.length,
+      this.logger.info('Starting audit event archival', {archiveId,eventCount: events.length,
         policyId: retentionPolicy.policyId,
         compressionLevel: retentionPolicy.storageConfiguration.compressionLevel
       });
 
       // Prepare events for archival
       const serializedEvents = JSON.stringify(events);
-      const originalSize = Buffer.byteLength(serializedEvents, 'utf8');
-
-      // Apply compression based on policy
-      const compressedData = await this.compressData(serializedEvents, retentionPolicy.storageConfiguration.compressionLevel);
+      const originalSize = Buffer.byteLength(serializedEvents, 'utf8');// Apply compression based on policyconst compressedData = await this.compressData(serializedEvents, retentionPolicy.storageConfiguration.compressionLevel);
       const compressionRatio = originalSize / compressedData.length;
 
       // Apply encryption based on policy
       const encryptionResult = await this.encryptData(compressedData, retentionPolicy.storageConfiguration.encryptionStandard);
 
       // Generate checksums for integrity verification
-      const checksumMD5 = crypto.createHash('md5').update(encryptedData.data).digest('hex');
-      const checksumSHA256 = crypto.createHash('sha256').update(encryptedData.data).digest('hex');
-
-      // Determine storage location and tier
-      const storageLocation = archiveLocation || await this.determineStorageLocation(retentionPolicy);
+      const checksumMD5 = crypto.createHash('md5').update(encryptedData.data).digest('hex');const checksumSHA256 = crypto.createHash('sha256').update(encryptedData.data).digest('hex');// Determine storage location and tierconst storageLocation = archiveLocation || await this.determineStorageLocation(retentionPolicy);
       const storageTier = await this.determineStorageTier(retentionPolicy, events);
 
       // Create search index for efficient retrieval
@@ -503,12 +408,7 @@ export class AuditRetentionService {
       this.archives.set(archiveId, archivedData);
 
       // Log archival completion
-      await this.logArchivalOperation('create', archivedData);
-
-      const duration = Date.now() - startTime;
-      this.logger.info('Audit events archived successfully', {
-        archiveId,
-        duration,
+      await this.logArchivalOperation('create', archivedData);const duration = Date.now() - startTime;this.logger.info('Audit events archived successfully', {archiveId,duration,
         eventCount: events.length,
         originalSize,
         compressedSize: compressedData.length,
@@ -538,9 +438,7 @@ export class AuditRetentionService {
     const startTime = Date.now();
 
     try {
-      this.logger.info('Processing retrieval request', {
-        requestId: request.requestId,
-        requestedBy: request.requestedBy,
+      this.logger.info('Processing retrieval request', {requestId: request.requestId,requestedBy: request.requestedBy,
         authorizationLevel: request.authorizationLevel,
         urgency: request.urgency
       });
@@ -558,16 +456,9 @@ export class AuditRetentionService {
       const response: RetrievalResponse = {
         responseId: this.generateResponseId(),
         requestId: request.requestId,
-        status: 'pending',
-        progress: 0,
-        estimatedCompletion,
+        status: 'pending',progress: 0,estimatedCompletion,
         auditTrail: {
-          processedBy: 'AuditRetentionService',
-          processingTime: 0,
-          validationSteps: ['authorization-validated'],
-          complianceChecks: ['access-level-verified']
-        }
-      };
+          processedBy: 'AuditRetentionService',processingTime: 0,validationSteps: ['authorization-validated'],complianceChecks: ['access-level-verified']}};
 
       // Store active retrieval
       this.activeRetrievals.set(response.responseId, response);
@@ -576,9 +467,7 @@ export class AuditRetentionService {
       this.processRetrievalRequest(request, response);
 
       const duration = Date.now() - startTime;
-      this.logger.info('Retrieval request submitted successfully', {
-        requestId: request.requestId,
-        responseId: response.responseId,
+      this.logger.info('Retrieval request submitted successfully', {requestId: request.requestId,responseId: response.responseId,
         matchingArchives: matchingArchives.length,
         duration
       });
@@ -603,9 +492,7 @@ export class AuditRetentionService {
       const response = this.activeRetrievals.get(responseId);
 
       if (response) {
-        this.logger.debug('Retrieved retrieval status', {
-          responseId,
-          status: response.status,
+        this.logger.debug('Retrieved retrieval status', {responseId,status: response.status,
           progress: response.progress
         });
       }
@@ -633,9 +520,7 @@ export class AuditRetentionService {
     const analysisId = this.generateAnalysisId();
 
     try {
-      this.logger.info('Starting retention analysis', {
-        analysisId,
-        timeRange: scope.timeRange,
+      this.logger.info('Starting retention analysis', {analysisId,timeRange: scope.timeRange,
         regulations: scope.regulations?.length || 0
       });
 
@@ -670,9 +555,7 @@ export class AuditRetentionService {
       };
 
       const duration = Date.now() - startTime;
-      this.logger.info('Retention analysis completed', {
-        analysisId,
-        duration,
+      this.logger.info('Retention analysis completed', {analysisId,duration,
         eventCount,
         archiveCount: scopedArchives.length,
         recommendationCount: recommendations.length
@@ -738,17 +621,13 @@ export class AuditRetentionService {
 
         } catch (error) {
           results.errors.push(`Archive ${archiveId}: ${error.message}`);
-          this.logger.warn('Lifecycle operation failed for archive', {
-            archiveId,
-            error: error.message
+          this.logger.warn('Lifecycle operation failed for archive', {archiveId,error: error.message
           });
         }
       }
 
       const duration = Date.now() - startTime;
-      this.logger.info('Lifecycle operations completed', {
-        duration,
-        ...results
+      this.logger.info('Lifecycle operations completed', {duration,...results
       });
 
       return results;
@@ -758,25 +637,14 @@ export class AuditRetentionService {
         error: error.message,
         duration: Date.now() - startTime
       });
-      throw new Error(`Lifecycle operations failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Lifecycle operations failed: ${error.message}`);}}
 
   // ==================== PRIVATE HELPER METHODS ====================
 
   private generatePolicyId(): string {
-    return `pol_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateArchiveId(): string {
-    return `arc_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateResponseId(): string {
-    return `ret_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateAnalysisId(): string {
+    return `pol_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateArchiveId(): string {
+    return `arc_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateResponseId(): string {
+    return `ret_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateAnalysisId(): string {
     return `ana_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
   }
 
@@ -784,17 +652,9 @@ export class AuditRetentionService {
     // Initialize default retention policies for common regulatory frameworks
     const defaultPolicies = [
       {
-        policyName: 'GDPR Standard Retention',
-        description: 'Standard GDPR compliance retention policy',
-        regulations: [ComplianceRegulation.GDPR],
-        retentionPeriod: { years: 6, months: 0, days: 0, totalDays: 2190 },
+        policyName: 'GDPR Standard Retention',description: 'Standard GDPR compliance retention policy',regulations: [ComplianceRegulation.GDPR],retentionPeriod: { years: 6, months: 0, days: 0, totalDays: 2190 },
         triggers: {
-          eventTypes: ['authentication', 'authorization', 'data-access'],
-          complianceContexts: ['personal-data', 'sensitive-data'],
-          riskLevels: [RiskLevel.MEDIUM, RiskLevel.HIGH],
-          businessUnits: ['all']
-        },
-        storageConfiguration: {
+          eventTypes: ['authentication', 'authorization', 'data-access'],complianceContexts: ['personal-data', 'sensitive-data'],riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH],businessUnits: ['all']},storageConfiguration: {
           tieringStrategy: TieringStrategy.HOT_WARM_COLD,
           compressionLevel: CompressionLevel.STANDARD,
           encryptionStandard: EncryptionStandard.AES_256_GCM,
@@ -808,19 +668,12 @@ export class AuditRetentionService {
             enabled: true,
             authorizationRequired: [AuthorizationLevel.LEGAL_COUNSEL],
             timeLimit: 24,
-            auditIntensity: 'enhanced',
-            approvalWorkflow: true
-          }
+            auditIntensity: 'enhanced',approvalWorkflow: true}
         },
         legalHoldSupport: true,
         crossJurisdictionCompliance: {
           enabled: true,
-          primaryJurisdiction: 'EU',
-          secondaryJurisdictions: ['US', 'UK'],
-          conflictResolution: 'strictest',
-          treatyCompliance: ['GDPR-ADEQUACY']
-        }
-      }
+          primaryJurisdiction: 'EU',secondaryJurisdictions: ['US', 'UK'],conflictResolution: 'strictest',treatyCompliance: ['GDPR-ADEQUACY']}}
     ];
 
     for (const policyConfig of defaultPolicies) {
@@ -831,17 +684,9 @@ export class AuditRetentionService {
   private async validatePolicyConfiguration(config: any): Promise<void> {
     // Validate retention policy configuration
     if (!config.policyName || config.policyName.trim().length === 0) {
-      throw new Error('Policy name is required');
-    }
-
-    if (!config.retentionPeriod || config.retentionPeriod.totalDays <= 0) {
-      throw new Error('Valid retention period is required');
-    }
-
-    if (!config.regulations || config.regulations.length === 0) {
-      throw new Error('At least one regulation must be specified');
-    }
-  }
+      throw new Error('Policy name is required');}if (!config.retentionPeriod || config.retentionPeriod.totalDays <= 0) {
+      throw new Error('Valid retention period is required');}if (!config.regulations || config.regulations.length === 0) {
+      throw new Error('At least one regulation must be specified');}}
 
   private async detectPolicyConflicts(config: any): Promise<void> {
     // Check for conflicts with existing policies
@@ -850,12 +695,8 @@ export class AuditRetentionService {
       const hasConflictingRetention = config.retentionPeriod.totalDays !== existingPolicy.retentionPeriod.totalDays;
 
       if (hasOverlappingTriggers && hasConflictingRetention) {
-        this.logger.warn('Potential policy conflict detected', {
-          newPolicy: config.policyName,
-          existingPolicy: existingPolicy.policyName,
-          conflictType: 'retention-period'
-        });
-      }
+        this.logger.warn('Potential policy conflict detected', {newPolicy: config.policyName,existingPolicy: existingPolicy.policyName,
+          conflictType: 'retention-period'});}
     }
   }
 
@@ -878,19 +719,13 @@ export class AuditRetentionService {
   }
 
   private isEventMatchingPolicy(event: ImmutableAuditEvent, policy: RetentionPolicy): boolean {
-    const eventTypeMatch = policy.triggers.eventTypes.includes('all') ||
-                          policy.triggers.eventTypes.includes(event.operationType);
-
-    const riskLevelMatch = policy.triggers.riskLevels.includes(event.securityContext.riskLevel as RiskLevel);
+    const eventTypeMatch = policy.triggers.eventTypes.includes('all') ||policy.triggers.eventTypes.includes(event.operationType);const riskLevelMatch = policy.triggers.riskLevels.includes(event.securityContext.riskLevel as RiskLevel);
 
     return eventTypeMatch && riskLevelMatch;
   }
 
   private async compressData(data: string, compressionLevel: CompressionLevel): Promise<Buffer> {
-    const inputBuffer = Buffer.from(data, 'utf8');
-
-    switch (compressionLevel) {
-      case CompressionLevel.NONE:
+    const inputBuffer = Buffer.from(data, 'utf8');switch (compressionLevel) {case CompressionLevel.NONE:
         return inputBuffer;
       case CompressionLevel.STANDARD:
         return zlib.gzipSync(inputBuffer, { level: 6 });
@@ -922,16 +757,11 @@ export class AuditRetentionService {
         };
 
       default:
-        throw new Error(`Unsupported encryption standard: ${encryptionStandard}`);
-    }
-  }
+        throw new Error(`Unsupported encryption standard: ${encryptionStandard}`);}}
 
   private async determineStorageLocation(policy: RetentionPolicy): Promise<string> {
     const primaryRegion = policy.storageConfiguration.geographicDistribution[0];
-    return `/archives/${primaryRegion}/${policy.policyId}`;
-  }
-
-  private async determineStorageTier(policy: RetentionPolicy, events: ImmutableAuditEvent[]): Promise<StorageTier> {
+    return `/archives/${primaryRegion}/${policy.policyId}`;}private async determineStorageTier(policy: RetentionPolicy, events: ImmutableAuditEvent[]): Promise<StorageTier> {
     const eventAge = Date.now() - events[0].timestamp.getTime();
     const daysSinceEvent = eventAge / (1000 * 60 * 60 * 24);
 
@@ -964,26 +794,14 @@ export class AuditRetentionService {
     };
 
     indexEntries.push(
-      { key: `user:${Array.from(uniqueUserIds).join(',')}`, value: archiveId },
-      { key: `event:${Array.from(uniqueEventTypes).join(',')}`, value: archiveId },
-      { key: `time:${timeRange.start.toISOString()}:${timeRange.end.toISOString()}`, value: archiveId }
-    );
-
-    return indexEntries;
+      { key: `user:${Array.from(uniqueUserIds).join(`,')}', value: archiveId },{ key: `event:${Array.from(uniqueEventTypes).join(`,')}', value: archiveId },{ key: `time:${timeRange.start.toISOString()}:${timeRange.end.toISOString()}`, value: archiveId });return indexEntries;
   }
 
   private generateSearchTags(events: ImmutableAuditEvent[]): string[] {
     const tags = new Set<string>();
 
     events.forEach(event => {
-      tags.add(`type:${event.operationType}`);
-      tags.add(`user:${event.userId}`);
-      tags.add(`risk:${event.securityContext.riskLevel}`);
-      tags.add(`year:${event.timestamp.getFullYear()}`);
-      tags.add(`month:${event.timestamp.getFullYear()}-${String(event.timestamp.getMonth() + 1).padStart(2, '0')}`);
-    });
-
-    return Array.from(tags);
+      tags.add(`type:${event.operationType}`);tags.add(`user:${event.userId}`);tags.add(`risk:${event.securityContext.riskLevel}`);tags.add(`year:${event.timestamp.getFullYear()}`);tags.add(`month:${event.timestamp.getFullYear()}-${String(event.timestamp.getMonth() + 1).padStart(2, '0')}`);});return Array.from(tags);
   }
 
   private calculateRetrievalTime(tier: StorageTier, dataSize: number): number {
@@ -1015,9 +833,7 @@ export class AuditRetentionService {
   }
 
   private async logPolicyOperation(operation: string, policy: RetentionPolicy): Promise<void> {
-    this.logger.info('Retention policy operation', {
-      operation,
-      policyId: policy.policyId,
+    this.logger.info('Retention policy operation', {operation,policyId: policy.policyId,
       policyName: policy.policyName,
       regulations: policy.regulations,
       retentionDays: policy.retentionPeriod.totalDays
@@ -1049,8 +865,7 @@ export class AuditRetentionService {
     }
 
     // Additional validation based on request scope and sensitivity
-    if (request.urgency === 'emergency' && !request.legalBasis) {
-      throw new Error('Legal basis required for emergency retrieval requests');
+    if (request.urgency === 'emergency' && !request.legalBasis) {throw new Error('Legal basis required for emergency retrieval requests');
     }
   }
 
@@ -1078,9 +893,7 @@ export class AuditRetentionService {
     // Check event types
     if (criteria.eventTypes && criteria.eventTypes.length > 0) {
       const hasMatchingType = criteria.eventTypes.some((type: string) =>
-        archive.retrievalMetadata.searchTags.includes(`type:${type}`)
-      );
-      if (!hasMatchingType) {
+        archive.retrievalMetadata.searchTags.includes(`type:${type}`));if (!hasMatchingType) {
         return false;
       }
     }
@@ -1103,10 +916,7 @@ export class AuditRetentionService {
       total + archive.retrievalMetadata.estimatedRetrievalTime, 0
     );
 
-    const urgencyMultiplier = urgency === 'emergency' ? 0.5 : urgency === 'expedited' ? 0.75 : 1.0;
-    const estimatedSeconds = baseProcessingTime * urgencyMultiplier;
-
-    const completion = new Date();
+    const urgencyMultiplier = urgency === 'emergency' ? 0.5 : urgency === 'expedited' ? 0.75 : 1.0;const estimatedSeconds = baseProcessingTime * urgencyMultiplier;const completion = new Date();
     completion.setSeconds(completion.getSeconds() + estimatedSeconds);
     return completion;
   }
@@ -1116,18 +926,13 @@ export class AuditRetentionService {
     setTimeout(async () => {
       try {
         // Update status to processing
-        response.status = 'processing';
-        response.progress = 25;
-
-        // Simulate retrieval processing
+        response.status = 'processing';response.progress = 25;// Simulate retrieval processing
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         response.progress = 75;
 
         // Complete retrieval
-        response.status = 'ready';
-        response.progress = 100;
-        response.retrievedData = {
+        response.status = 'ready';response.progress = 100;response.retrievedData = {
           eventCount: 150,
           dataSize: 1024 * 1024, // 1MB
           archiveSources: ['archive1', 'archive2'],
@@ -1139,14 +944,8 @@ export class AuditRetentionService {
           secureDownloadUrl: `https://secure-api.domain.com/download/${response.responseId}`,
           expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
           accessToken: crypto.randomUUID(),
-          checksumValidation: crypto.randomBytes(32).toString('hex')
-        };
-
-      } catch (error) {
-        response.status = 'failed';
-        this.logger.error('Retrieval processing failed', {
-          requestId: request.requestId,
-          responseId: response.responseId,
+          checksumValidation: crypto.randomBytes(32).toString('hex')};} catch (error) {
+        response.status = 'failed';this.logger.error('Retrieval processing failed', {requestId: request.requestId,responseId: response.responseId,
           error: error.message
         });
       }
@@ -1257,16 +1056,7 @@ export class AuditRetentionService {
     if (storageAnalysis.compressionEfficiency < 0.6) {
       recommendations.push({
         recommendationId: crypto.randomUUID(),
-        priority: 'medium',
-        category: 'storage',
-        title: 'Improve Data Compression',
-        description: 'Current compression efficiency is below optimal. Consider upgrading compression algorithms.',
-        implementation: {
-          effort: 'medium',
-          timeline: '2-4 weeks',
-          dependencies: ['storage-system-upgrade'],
-          riskLevel: RiskLevel.LOW
-        },
+        priority: 'medium',category: 'storage',title: 'Improve Data Compression',description: 'Current compression efficiency is below optimal. Consider upgrading compression algorithms.',implementation: {effort: 'medium',timeline: '2-4 weeks',dependencies: ['storage-system-upgrade'],riskLevel: RiskLevel._LOW},
         impact: {
           costSavings: costAnalysis.totalAnnualCost * 0.15,
           performanceImprovement: 10,
@@ -1280,16 +1070,7 @@ export class AuditRetentionService {
     if (complianceAnalysis.conflictsDetected > 0) {
       recommendations.push({
         recommendationId: crypto.randomUUID(),
-        priority: 'high',
-        category: 'compliance',
-        title: 'Resolve Policy Conflicts',
-        description: 'Multiple retention policies are creating conflicts that may impact compliance.',
-        implementation: {
-          effort: 'high',
-          timeline: '4-6 weeks',
-          dependencies: ['legal-review', 'policy-analysis'],
-          riskLevel: RiskLevel.MEDIUM
-        },
+        priority: 'high',category: 'compliance',title: 'Resolve Policy Conflicts',description: 'Multiple retention policies are creating conflicts that may impact compliance.',implementation: {effort: 'high',timeline: '4-6 weeks',dependencies: ['legal-review', 'policy-analysis'],riskLevel: RiskLevel._MODERATE},
         impact: {
           costSavings: 0,
           performanceImprovement: 0,
@@ -1323,9 +1104,7 @@ export class AuditRetentionService {
   }
 
   private async migrateArchiveTier(archive: ArchivedAuditData, targetTier: StorageTier): Promise<void> {
-    this.logger.info('Migrating archive tier', {
-      archiveId: archive.archiveId,
-      fromTier: archive.storageMetadata.tier,
+    this.logger.info('Migrating archive tier', {archiveId: archive.archiveId,fromTier: archive.storageMetadata.tier,
       toTier: targetTier
     });
 
@@ -1341,10 +1120,7 @@ export class AuditRetentionService {
     this.archives.set(archive.archiveId, updatedArchive);
 
     // Log tier migration
-    await this.logArchivalOperation('tier-migration', updatedArchive);
-  }
-
-  private async checkPurgeEligibility(archive: ArchivedAuditData): Promise<boolean> {
+    await this.logArchivalOperation('tier-migration', updatedArchive);}private async checkPurgeEligibility(archive: ArchivedAuditData): Promise<boolean> {
     // Cannot purge if on legal hold
     if (archive.complianceMetadata.legalHoldStatus.isOnHold) {
       return false;
@@ -1355,9 +1131,7 @@ export class AuditRetentionService {
   }
 
   private async purgeArchive(archive: ArchivedAuditData): Promise<void> {
-    this.logger.info('Purging archive', {
-      archiveId: archive.archiveId,
-      purgeDate: new Date(),
+    this.logger.info('Purging archive', {archiveId: archive.archiveId,purgeDate: new Date(),
       retentionPeriodExpired: true
     });
 

@@ -19,9 +19,7 @@
  * Performance: Zero-overhead type abstractions with optimized runtime validation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import {
-  UniversalFunctionMetadata,
+import { Injectable, Logger } from '@nestjs/common';import {UniversalFunctionMetadata,
   FunctionParameterMetadata,
   FunctionReturnMetadata,
   ParameterValidationResult,
@@ -145,27 +143,18 @@ export interface ReturnTypeValidation {
  * Type validation error
  */
 export interface TypeValidationError {
-  readonly errorType: 'parameter_type_mismatch' | 'return_type_mismatch' | 'signature_mismatch' | 'type_coercion_failed';
-  readonly message: string;
-  readonly location: string;
+  readonly errorType: 'parameter_type_mismatch' | 'return_type_mismatch' | 'signature_mismatch' | 'type_coercion_failed';readonly message: string;readonly location: string;
   readonly expectedType: string;
   readonly actualType: string;
-  readonly severity: 'error' | 'warning' | 'info';
-  readonly suggestions: string[];
-}
+  readonly severity: 'error' | 'warning' | 'info';readonly suggestions: string[];}
 
 /**
  * Type validation warning
  */
 export interface TypeValidationWarning {
-  readonly warningType: 'type_coercion' | 'nullable_parameter' | 'any_type_usage' | 'performance_impact';
-  readonly message: string;
-  readonly location: string;
+  readonly warningType: 'type_coercion' | 'nullable_parameter' | 'any_type_usage' | 'performance_impact';readonly message: string;readonly location: string;
   readonly recommendation: string;
-  readonly impact: 'low' | 'medium' | 'high';
-}
-
-/**
+  readonly impact: 'low' | 'medium' | 'high';}/**
  * Runtime type information
  */
 export interface RuntimeTypeInfo {
@@ -197,9 +186,7 @@ export interface RuntimeTypeDescriptor {
  * Type check result
  */
 export interface TypeCheckResult {
-  readonly checkType: 'parameter' | 'return' | 'generic' | 'constraint';
-  readonly success: boolean;
-  readonly location: string;
+  readonly checkType: 'parameter' | 'return' | 'generic' | 'constraint';readonly success: boolean;readonly location: string;
   readonly message: string;
   readonly performanceImpact: number;
 }
@@ -210,9 +197,7 @@ export interface TypeCheckResult {
 export interface TypeInferenceResult {
   readonly inferredType: string;
   readonly confidence: number;
-  readonly method: 'static_analysis' | 'runtime_inspection' | 'duck_typing' | 'structural_typing';
-  readonly evidence: string[];
-  readonly alternatives: string[];
+  readonly method: 'static_analysis' | 'runtime_inspection' | 'duck_typing' | 'structural_typing';readonly evidence: string[];readonly alternatives: string[];
 }
 
 /**
@@ -230,9 +215,7 @@ export interface GeneratedTypeInfo {
  * Type constraint
  */
 export interface TypeConstraint {
-  readonly constraintType: 'extends' | 'keyof' | 'typeof' | 'in' | 'instanceof' | 'custom';
-  readonly expression: string;
-  readonly description: string;
+  readonly constraintType: 'extends' | 'keyof' | 'typeof' | 'in' | 'instanceof' | 'custom';readonly expression: string;readonly description: string;
   readonly enforceable: boolean;
 }
 
@@ -240,9 +223,7 @@ export interface TypeConstraint {
  * Type validation rule
  */
 export interface TypeValidationRule {
-  readonly ruleType: 'required' | 'optional' | 'nullable' | 'range' | 'pattern' | 'custom';
-  readonly expression: string;
-  readonly errorMessage: string;
+  readonly ruleType: 'required' | 'optional' | 'nullable' | 'range' | 'pattern' | 'custom';readonly expression: string;readonly errorMessage: string;
   readonly enforceable: boolean;
 }
 
@@ -380,11 +361,7 @@ export class TypeSafetyPreservingWrapperService {
   private readonly config: TypeAnalyzerConfig;
 
   constructor() {
-    const operationId = `type_safety_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Type Safety Preserving Wrapper Service`, {
-      strictTypeChecking: true,
-      typeInferenceEnabled: true,
+    const operationId = `type_safety_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Type Safety Preserving Wrapper Service`, {strictTypeChecking: true,typeInferenceEnabled: true,
       typeCoercionEnabled: false,
       runtimeValidationEnabled: true,
       cacheEnabled: true,
@@ -421,14 +398,10 @@ export class TypeSafetyPreservingWrapperService {
     originalFunction: TFunction,
     metadata: UniversalFunctionMetadata
   ): Promise<TypeSafeWrapper<TFunction>> {
-    const operationId = `create_type_safe_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.typeValidationCount++;
+    const operationId = `create_type_safe_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.typeValidationCount++;
 
     this.logger.log(
-      `[${operationId}] Creating type-safe wrapper for function: ${metadata.functionName}`,
-      {
-        operationId,
+      `[${operationId}] Creating type-safe wrapper for function: ${metadata.functionName}`,{operationId,
         functionId: metadata.functionId,
         functionName: metadata.functionName,
         parameterCount: metadata.parameters.length,
@@ -467,9 +440,7 @@ export class TypeSafetyPreservingWrapperService {
       this.updateTypeValidationMetrics(creationTime);
 
       this.logger.log(
-        `[${operationId}] Type-safe wrapper created successfully`,
-        {
-          operationId,
+        `[${operationId}] Type-safe wrapper created successfully`,{operationId,
           functionId: metadata.functionId,
           creationTime,
           typeComplexity: typeSafeMetadata.complexityScore,
@@ -484,9 +455,7 @@ export class TypeSafetyPreservingWrapperService {
       const creationTime = Date.now() - startTime;
 
       this.logger.error(
-        `[${operationId}] Type-safe wrapper creation failed`,
-        {
-          operationId,
+        `[${operationId}] Type-safe wrapper creation failed`,{operationId,
           functionId: metadata.functionId,
           error: error instanceof Error ? error.message : String(error),
           creationTime,
@@ -514,13 +483,8 @@ export class TypeSafetyPreservingWrapperService {
     metadata: UniversalFunctionMetadata,
     signature: ExtractFunctionSignature<TFunction>
   ): Promise<ParameterTypeValidation[]> {
-    const operationId = `validate_params_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(
-      `[${operationId}] Validating parameters with type safety`,
-      {
-        operationId,
+    const operationId = `validate_params_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(
+      `[${operationId}] Validating parameters with type safety`,{operationId,
         functionId: metadata.functionId,
         parameterCount: parameters.length,
         expectedParameterCount: metadata.parameters.length,
@@ -544,9 +508,7 @@ export class TypeSafetyPreservingWrapperService {
             actualType: typeof paramValue,
             valid: false,
             coerced: false,
-            validationErrors: [`Unexpected parameter at index ${i}`],
-          });
-          continue;
+            validationErrors: [`Unexpected parameter at index ${i}`],});continue;
         }
 
         const paramValidation = await this.validateSingleParameter(
@@ -561,9 +523,7 @@ export class TypeSafetyPreservingWrapperService {
       const validationTime = Date.now() - startTime;
 
       this.logger.debug(
-        `[${operationId}] Parameter type validation completed`,
-        {
-          operationId,
+        `[${operationId}] Parameter type validation completed`,{operationId,
           validationTime,
           totalParameters: validationResults.length,
           validParameters: validationResults.filter(r => r.valid).length,
@@ -575,9 +535,7 @@ export class TypeSafetyPreservingWrapperService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parameter type validation failed`,
-        {
-          operationId,
+        `[${operationId}] Parameter type validation failed`,{operationId,
           error: error instanceof Error ? error.message : String(error),
         }
       );
@@ -597,12 +555,7 @@ export class TypeSafetyPreservingWrapperService {
     returnValue: TReturn,
     metadata: UniversalFunctionMetadata
   ): Promise<ReturnTypeValidation> {
-    const operationId = `validate_return_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.debug(
-      `[${operationId}] Validating return type with type safety`,
-      {
-        operationId,
+    const operationId = `validate_return_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Validating return type with type safety`,{operationId,
         functionId: metadata.functionId,
         expectedReturnType: metadata.returnType.type,
         actualReturnType: typeof returnValue,
@@ -625,14 +578,10 @@ export class TypeSafetyPreservingWrapperService {
         nullable: metadata.returnType.nullable,
         asyncReturn: metadata.returnType.asyncReturn,
         validationErrors: typeCompatible ? [] : [
-          `Return type mismatch: expected ${expectedType}, got ${actualType}`
-        ],
-      };
+          `Return type mismatch: expected ${expectedType}, got ${actualType}`],};
 
       this.logger.debug(
-        `[${operationId}] Return type validation completed`,
-        {
-          operationId,
+        `[${operationId}] Return type validation completed`,{operationId,
           valid: validation.valid,
           typeCompatible,
         }
@@ -655,9 +604,7 @@ export class TypeSafetyPreservingWrapperService {
         valid: false,
         nullable: metadata.returnType.nullable,
         asyncReturn: metadata.returnType.asyncReturn,
-        validationErrors: [`Return type validation failed: ${error instanceof Error ? error.message : String(error)}`],
-      };
-    }
+        validationErrors: [`Return type validation failed: ${error instanceof Error ? error.message : String(error)}`],};}
   }
 
   /**
@@ -671,12 +618,7 @@ export class TypeSafetyPreservingWrapperService {
     metadata: UniversalFunctionMetadata,
     signature: ExtractFunctionSignature<TFunction>
   ): Promise<string[]> {
-    const operationId = `generate_types_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.debug(
-      `[${operationId}] Generating TypeScript type definitions`,
-      {
-        operationId,
+    const operationId = `generate_types_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Generating TypeScript type definitions`,{operationId,
         functionId: metadata.functionId,
         parameterCount: metadata.parameters.length,
       }
@@ -687,9 +629,7 @@ export class TypeSafetyPreservingWrapperService {
       const cached = this.typeDefinitionCache.get(cacheKey);
 
       if (cached && this.config.cacheTypeResults) {
-        this.logger.debug(`[${operationId}] Using cached type definitions`);
-        return cached;
-      }
+        this.logger.debug(`[${operationId}] Using cached type definitions`);return cached;}
 
       const typeDefinitions: string[] = [];
 
@@ -731,16 +671,12 @@ export class TypeSafetyPreservingWrapperService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Type definition generation failed`,
-        {
-          operationId,
+        `[${operationId}] Type definition generation failed`,{operationId,
           error: error instanceof Error ? error.message : String(error),
         }
       );
 
-      return [`// Type definition generation failed: ${error instanceof Error ? error.message : String(error)}`];
-    }
-  }
+      return [`// Type definition generation failed: ${error instanceof Error ? error.message : String(error)}`];}}
 
   // ===== PRIVATE HELPER METHODS =====
 
@@ -861,10 +797,7 @@ export class TypeSafetyPreservingWrapperService {
   ): Promise<(...args: Parameters<TFunction>) => Promise<TypeSafeWrapperResult<Awaited<ReturnType<TFunction>>>>> {
 
     return async (...args: Parameters<TFunction>): Promise<TypeSafeWrapperResult<Awaited<ReturnType<TFunction>>>> => {
-      const executionId = `type_safe_exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      const startTime = Date.now();
-
-      this.logger.debug(
+      const executionId = `type_safe_exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(
         `[${executionId}] Executing type-safe wrapped function: ${metadata.functionName}`,
         {
           executionId,
@@ -897,12 +830,9 @@ export class TypeSafetyPreservingWrapperService {
         if (parameterErrors.length > 0) {
           const error: TypeSafeError = {
             type: 'parameter_type_validation_failed',
-            message: `Parameter type validation failed: ${parameterErrors.map(e => e.validationErrors.join(', ')).join('; ')}`,
-            typeValidationFailed: true,
+            message: `Parameter type validation failed: ${parameterErrors.map(e => e.validationErrors.join(`, ')).join('; ')}',typeValidationFailed: true,
             suggestions: parameterErrors.flatMap(e => [
-              `Ensure parameter '${e.parameterName}' is of type '${e.expectedType}'`,
-              `Received type '${e.actualType}' for parameter '${e.parameterName}'`
-            ]),
+              `Ensure parameter '${e.parameterName}' is of type '${e.expectedType}'',`Received type '${e.actualType}' for parameter '${e.parameterName}'']),
           };
 
           return {
@@ -913,16 +843,11 @@ export class TypeSafetyPreservingWrapperService {
               parameterValidation,
               returnTypeValidation: {
                 expectedType: metadata.returnType.type,
-                actualType: 'unknown',
-                valid: false,
-                nullable: metadata.returnType.nullable,
+                actualType: 'unknown',valid: false,nullable: metadata.returnType.nullable,
                 asyncReturn: metadata.returnType.asyncReturn,
-                validationErrors: ['Function not executed due to parameter validation failure'],
-              },
-              signatureMatch: false,
+                validationErrors: ['Function not executed due to parameter validation failure'],},signatureMatch: false,
               typeErrors: parameterErrors.map(e => ({
-                errorType: 'parameter_type_mismatch' as const,
-                message: e.validationErrors.join(', '),
+                errorType: 'parameter_type_mismatch' as const,message: e.validationErrors.join(', '),
                 location: `parameter[${e.parameterIndex}]`,
                 expectedType: e.expectedType,
                 actualType: e.actualType,
@@ -949,10 +874,7 @@ export class TypeSafetyPreservingWrapperService {
             message: `Function execution failed: ${executionError instanceof Error ? executionError.message : String(executionError)}`,
             stackTrace: executionError instanceof Error ? executionError.stack : undefined,
             typeValidationFailed: false,
-            suggestions: ['Check function implementation', 'Verify parameter values'],
-          };
-
-          return {
+            suggestions: ['Check function implementation', 'Verify parameter values'],};return {
             success: false,
             error,
             typeValidation: {
@@ -960,13 +882,9 @@ export class TypeSafetyPreservingWrapperService {
               parameterValidation,
               returnTypeValidation: {
                 expectedType: metadata.returnType.type,
-                actualType: 'unknown',
-                valid: false,
-                nullable: metadata.returnType.nullable,
+                actualType: 'unknown',valid: false,nullable: metadata.returnType.nullable,
                 asyncReturn: metadata.returnType.asyncReturn,
-                validationErrors: ['Function execution failed'],
-              },
-              signatureMatch: true,
+                validationErrors: ['Function execution failed'],},signatureMatch: true,
               typeErrors: [],
               typeWarnings: [],
             },
@@ -990,15 +908,9 @@ export class TypeSafetyPreservingWrapperService {
           returnTypeValidation,
           signatureMatch: true,
           typeErrors: returnTypeValidation.valid ? [] : [{
-            errorType: 'return_type_mismatch' as const,
-            message: returnTypeValidation.validationErrors.join(', '),
-            location: 'return_value',
-            expectedType: returnTypeValidation.expectedType,
-            actualType: returnTypeValidation.actualType,
+            errorType: 'return_type_mismatch' as const,message: returnTypeValidation.validationErrors.join(', '),location: 'return_value',expectedType: returnTypeValidation.expectedType,actualType: returnTypeValidation.actualType,
             severity: 'error' as const,
-            suggestions: [`Ensure function returns ${returnTypeValidation.expectedType}`],
-          }],
-          typeWarnings: [],
+            suggestions: [`Ensure function returns ${returnTypeValidation.expectedType}`],}],typeWarnings: [],
         };
 
         this.logger.debug(
@@ -1044,22 +956,11 @@ export class TypeSafetyPreservingWrapperService {
             parameterValidation: [],
             returnTypeValidation: {
               expectedType: metadata.returnType.type,
-              actualType: 'unknown',
-              valid: false,
-              nullable: metadata.returnType.nullable,
+              actualType: 'unknown',valid: false,nullable: metadata.returnType.nullable,
               asyncReturn: metadata.returnType.asyncReturn,
-              validationErrors: ['Wrapper execution failed'],
-            },
-            signatureMatch: false,
+              validationErrors: ['Wrapper execution failed'],},signatureMatch: false,
             typeErrors: [{
-              errorType: 'signature_mismatch' as const,
-              message: error.message,
-              location: 'wrapper',
-              expectedType: 'valid_wrapper',
-              actualType: 'failed_wrapper',
-              severity: 'error' as const,
-              suggestions: error.suggestions,
-            }],
+              errorType: 'signature_mismatch' as const,message: error.message,location: 'wrapper',expectedType: 'valid_wrapper',actualType: 'failed_wrapper',severity: 'error' as const,suggestions: error.suggestions,}],
             typeWarnings: [],
           },
           runtimeTypeInfo: await this.generateRuntimeTypeInfo(args, metadata),
@@ -1103,10 +1004,7 @@ export class TypeSafetyPreservingWrapperService {
     const validationErrors: string[] = [];
 
     if (!typeCompatible && !coerced) {
-      validationErrors.push(`Type mismatch: expected ${expectedType}, got ${actualType}`);
-    }
-
-    if (!nullCheckPassed) {
+      validationErrors.push(`Type mismatch: expected ${expectedType}, got ${actualType}`);}if (!nullCheckPassed) {
       validationErrors.push(`Required parameter is null or undefined`);
     }
 
@@ -1125,12 +1023,7 @@ export class TypeSafetyPreservingWrapperService {
   // ===== TYPE ANALYSIS HELPER METHODS =====
 
   private isAsyncFunction(func: Function): boolean {
-    return func.constructor.name === 'AsyncFunction' ||
-           func.toString().includes('async ') ||
-           func.toString().includes('return Promise');
-  }
-
-  private extractParameterNames(func: Function): string[] {
+    return func.constructor.name === 'AsyncFunction' ||func.toString().includes('async ') ||func.toString().includes('return Promise');}private extractParameterNames(func: Function): string[] {
     const funcString = func.toString();
     const match = funcString.match(/\(([^)]*)\)/);
     if (!match) return [];
@@ -1138,18 +1031,9 @@ export class TypeSafetyPreservingWrapperService {
     const paramString = match[1];
     if (!paramString.trim()) return [];
 
-    return paramString.split(',').map(param => param.trim().split('=')[0].trim());
-  }
-
-  private hasRestParameters(funcString: string): boolean {
-    return funcString.includes('...') && funcString.includes('args');
-  }
-
-  private hasGenericTypes(funcString: string): boolean {
-    return funcString.includes('<') && funcString.includes('>');
-  }
-
-  private calculateTypeComplexity(
+    return paramString.split(',').map(param => param.trim().split('=')[0].trim());}private hasRestParameters(funcString: string): boolean {
+    return funcString.includes('...') && funcString.includes('args');}private hasGenericTypes(funcString: string): boolean {
+    return funcString.includes('<') && funcString.includes('>');}private calculateTypeComplexity(
     metadata: UniversalFunctionMetadata,
     signature: ExtractFunctionSignature<any>
   ): number {
@@ -1160,18 +1044,8 @@ export class TypeSafetyPreservingWrapperService {
 
     // Type complexity
     metadata.parameters.forEach(param => {
-      if (param.type.includes('|')) complexity += 5; // Union types
-      if (param.type.includes('<')) complexity += 3; // Generic types
-      if (param.type.includes('[]')) complexity += 2; // Array types
-      if (param.type === 'any') complexity += 10; // Any type penalty
-    });
-
-    // Return type complexity
-    if (metadata.returnType.type.includes('|')) complexity += 5;
-    if (metadata.returnType.type.includes('<')) complexity += 3;
-    if (metadata.returnType.asyncReturn) complexity += 2;
-
-    return Math.min(complexity, 100); // Cap at 100
+      if (param.type.includes('|')) complexity += 5; // Union typesif (param.type.includes('<')) complexity += 3; // Generic typesif (param.type.includes('[]')) complexity += 2; // Array typesif (param.type === 'any') complexity += 10; // Any type penalty});// Return type complexity
+    if (metadata.returnType.type.includes('|')) complexity += 5;if (metadata.returnType.type.includes('<')) complexity += 3;if (metadata.returnType.asyncReturn) complexity += 2;return Math.min(complexity, 100); // Cap at 100
   }
 
   private estimateTypeValidationCost(metadata: UniversalFunctionMetadata): number {
@@ -1215,10 +1089,7 @@ export class TypeSafetyPreservingWrapperService {
   private async analyzeTypeCompatibility(metadata: UniversalFunctionMetadata): Promise<TypeCompatibilityInfo> {
     return {
       strictModeCompatible: true,
-      nodeVersionRequirements: ['>=14.0.0'],
-      typescriptVersionRequirements: ['>=4.0.0'],
-      requiredTypeLibraries: [],
-      knownCompatibilityIssues: [],
+      nodeVersionRequirements: ['>=14.0.0'],typescriptVersionRequirements: ['>=4.0.0'],requiredTypeLibraries: [],knownCompatibilityIssues: [],
       recommendedSettings: {
         strict: true,
         noImplicitAny: true,
@@ -1261,19 +1132,7 @@ export class TypeSafetyPreservingWrapperService {
   }
 
   private async inferActualType(value: unknown): Promise<string> {
-    if (value === null) return 'null';
-    if (value === undefined) return 'undefined';
-
-    const basicType = typeof value;
-
-    if (basicType === 'object') {
-      if (Array.isArray(value)) return 'array';
-      if (value instanceof Date) return 'Date';
-      if (value instanceof Promise) return 'Promise';
-      return 'object';
-    }
-
-    return basicType;
+    if (value === null) return 'null';if (value === undefined) return 'undefined';const basicType = typeof value;if (basicType === 'object') {if (Array.isArray(value)) return 'array';if (value instanceof Date) return 'Date';if (value instanceof Promise) return 'Promise';return 'object';}return basicType;
   }
 
   private async checkTypeCompatibility(actualType: string, expectedType: string): Promise<boolean> {
@@ -1282,16 +1141,7 @@ export class TypeSafetyPreservingWrapperService {
 
     // Handle common compatible types
     const compatibilityMap: Record<string, string[]> = {
-      'string': ['string'],
-      'number': ['number'],
-      'boolean': ['boolean'],
-      'object': ['object', 'Object'],
-      'array': ['array', 'Array', 'object'],
-      'Date': ['Date', 'object'],
-      'Promise': ['Promise', 'object'],
-    };
-
-    const compatibleTypes = compatibilityMap[actualType] || [actualType];
+      'string': ['string'],'number': ['number'],'boolean': ['boolean'],'object': ['object', 'Object'],'array': ['array', 'Array', 'object'],'Date': ['Date', 'object'],'Promise': ['Promise', 'object'],};const compatibleTypes = compatibilityMap[actualType] || [actualType];
     return compatibleTypes.some(type => expectedType.includes(type));
   }
 
@@ -1299,11 +1149,7 @@ export class TypeSafetyPreservingWrapperService {
     // Simplified type coercion
     try {
       switch (targetType) {
-        case 'string':
-          return { success: true, value: String(value) };
-        case 'number':
-          const num = Number(value);
-          return { success: !isNaN(num), value: num };
+        case 'string':return { success: true, value: String(value) };case 'number':const num = Number(value);return { success: !isNaN(num), value: num };
         case 'boolean':
           return { success: true, value: Boolean(value) };
         default:
@@ -1326,15 +1172,8 @@ export class TypeSafetyPreservingWrapperService {
 
       parameterTypes.push({
         name: paramMeta?.name || `param${i}`,
-        type: paramMeta?.type || 'unknown',
-        jsType: typeof param,
-        tsType: paramMeta?.type || 'unknown',
-        nullable: param === null || param === undefined,
-        optional: !paramMeta?.required,
-        union: paramMeta?.type.includes('|') || false,
-        unionTypes: paramMeta?.type.includes('|') ? paramMeta.type.split('|').map(t => t.trim()) : undefined,
-        genericTypes: [],
-        constraints: [],
+        type: paramMeta?.type || 'unknown',jsType: typeof param,tsType: paramMeta?.type || 'unknown',nullable: param === null || param === undefined,optional: !paramMeta?.required,
+        union: paramMeta?.type.includes('|') || false,unionTypes: paramMeta?.type.includes('|') ? paramMeta.type.split('|').map(t => t.trim()) : undefined,genericTypes: [],constraints: [],
         validationRules: [],
       });
     }
@@ -1342,14 +1181,9 @@ export class TypeSafetyPreservingWrapperService {
     return {
       parameterTypes,
       returnType: {
-        name: 'return',
-        type: metadata.returnType.type,
-        jsType: 'unknown',
-        tsType: metadata.returnType.type,
-        nullable: metadata.returnType.nullable,
+        name: 'return',type: metadata.returnType.type,jsType: 'unknown',tsType: metadata.returnType.type,nullable: metadata.returnType.nullable,
         optional: false,
-        union: metadata.returnType.type.includes('|'),
-        unionTypes: metadata.returnType.type.includes('|') ? metadata.returnType.type.split('|').map(t => t.trim()) : undefined,
+        union: metadata.returnType.type.includes('|'),unionTypes: metadata.returnType.type.includes('|') ? metadata.returnType.type.split('|').map(t => t.trim()) : undefined,
         genericTypes: [],
         constraints: [],
         validationRules: [],
@@ -1369,17 +1203,10 @@ export class TypeSafetyPreservingWrapperService {
       return `  readonly ${param.name}${optional}: ${param.type};`;
     }).join('\n');
 
-    return `interface ${interfaceName} {\n${properties}\n}`;
-  }
+    return `interface ${interfaceName} {${properties}\n}`;}
 
   private generateReturnTypeInterface(metadata: UniversalFunctionMetadata): string {
-    const interfaceName = `${this.toPascalCase(metadata.functionName)}ReturnType`;
-    const returnType = metadata.returnType.type;
-
-    return `type ${interfaceName} = ${returnType};`;
-  }
-
-  private generateFunctionSignatureType(metadata: UniversalFunctionMetadata): string {
+    const interfaceName = `${this.toPascalCase(metadata.functionName)}ReturnType`;const returnType = metadata.returnType.type;return `type ${interfaceName} = ${returnType};`;}private generateFunctionSignatureType(metadata: UniversalFunctionMetadata): string {
     const typeName = `${this.toPascalCase(metadata.functionName)}Signature`;
     const params = metadata.parameters.map(param => {
       const optional = param.required ? '' : '?';
@@ -1387,25 +1214,13 @@ export class TypeSafetyPreservingWrapperService {
     }).join(', ');
 
     const returnType = metadata.returnType.asyncReturn
-      ? `Promise<${metadata.returnType.type}>`
-      : metadata.returnType.type;
-
-    return `type ${typeName} = (${params}) => ${returnType};`;
-  }
-
-  private generateWrapperType(metadata: UniversalFunctionMetadata): string {
-    const typeName = `${this.toPascalCase(metadata.functionName)}Wrapper`;
-    const signatureType = `${this.toPascalCase(metadata.functionName)}Signature`;
-
-    return `type ${typeName} = TypeSafeWrapper<${signatureType}>;`;
-  }
-
-  private generateTypeGuards(metadata: UniversalFunctionMetadata): string[] {
+      ? `Promise<${metadata.returnType.type}>`: metadata.returnType.type;return `type ${typeName} = (${params}) => ${returnType};`;}private generateWrapperType(metadata: UniversalFunctionMetadata): string {
+    const typeName = `${this.toPascalCase(metadata.functionName)}Wrapper`;const signatureType = `${this.toPascalCase(metadata.functionName)}Signature`;return `type ${typeName} = TypeSafeWrapper<${signatureType}>;`;}private generateTypeGuards(metadata: UniversalFunctionMetadata): string[] {
     const guards: string[] = [];
 
     metadata.parameters.forEach(param => {
-      const guardName = `is${this.toPascalCase(param.name)}Valid`;
-      const guard = `function ${guardName}(value: unknown): value is ${param.type} {\n  // Type guard implementation\n  return typeof value === '${this.getJSType(param.type)}';\n}`;
+      const guardName = `is${this.toPascalCase(param.name)}Valid`;const guard = `function ${guardName}(value: unknown): value is ${param.type} {\n  // Type guard implementation
+  return typeof value === '${this.getJSType(param.type)}';\n}`;
       guards.push(guard);
     });
 
@@ -1420,14 +1235,7 @@ export class TypeSafetyPreservingWrapperService {
 
   private getJSType(tsType: string): string {
     const typeMap: Record<string, string> = {
-      'string': 'string',
-      'number': 'number',
-      'boolean': 'boolean',
-      'object': 'object',
-      'undefined': 'undefined',
-    };
-
-    return typeMap[tsType] || 'object';
+      'string': 'string','number': 'number','boolean': 'boolean','object': 'object','undefined': 'undefined',};return typeMap[tsType] || 'object';
   }
 
   private generateSignatureCacheKey(functionString: string): string {
@@ -1438,10 +1246,7 @@ export class TypeSafetyPreservingWrapperService {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
-    return `signature_${Math.abs(hash).toString(16)}`;
-  }
-
-  private generateTypeDefinitionCacheKey(metadata: UniversalFunctionMetadata): string {
+    return `signature_${Math.abs(hash).toString(16)}`;}private generateTypeDefinitionCacheKey(metadata: UniversalFunctionMetadata): string {
     return `typedefs_${metadata.functionId}_${metadata.version}`;
   }
 

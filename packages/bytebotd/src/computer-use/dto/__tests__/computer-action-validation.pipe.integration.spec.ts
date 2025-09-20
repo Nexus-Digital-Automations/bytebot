@@ -13,17 +13,10 @@
  * @author Security Event Validation Pipeline Subagent
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
-import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
-
-/**
- * Interface for typed argument metadata used in tests
+import { Test, TestingModule } from '@nestjs/testing';import { BadRequestException, ArgumentMetadata } from '@nestjs/common';import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';/*** Interface for typed argument metadata used in tests
  */
 interface TypedArgumentMetadata extends ArgumentMetadata {
-  type: 'body' | 'query' | 'param' | 'custom';
-  metatype?: new (...args: unknown[]) => unknown;
-  data?: string;
+  type: 'body' | 'query' | 'param' | 'custom';metatype?: new (...args: unknown[]) => unknown;data?: string;
 }
 
 /**
@@ -33,69 +26,47 @@ function createArgumentMetadata(
   overrides: Partial<TypedArgumentMetadata> = {},
 ): TypedArgumentMetadata {
   return {
-    type: 'body',
-    metatype: Object,
-    data: undefined,
+    type: 'body',metatype: Object,data: undefined,
     ...overrides,
   };
 }
 
 // Mock the security utils to avoid compilation issues
-jest.mock('@bytebot/shared/utils/security.utils', () => ({
-  detectXSS: jest.fn().mockReturnValue(false), // Legacy function for decorators
-  detectSQLInjection: jest.fn().mockReturnValue({
+jest.mock('@bytebot/shared/utils/security.utils', () => ({detectXSS: jest.fn().mockReturnValue(false), // Legacy function for decoratorsdetectSQLInjection: jest.fn().mockReturnValue({
     hasInjection: false,
     threats: [],
     riskScore: 0,
-    severity: 'low',
-    confidence: 100,
-    detectionContext: [],
+    severity: 'low',confidence: 100,detectionContext: [],
   }),
   detectAdvancedXSS: jest.fn().mockReturnValue({
     hasXSS: false,
     threats: [],
     riskScore: 0,
-    severity: 'low',
-    confidence: 100,
-    detectionContext: [],
+    severity: 'low',confidence: 100,detectionContext: [],
   }),
   detectCommandInjection: jest.fn().mockReturnValue({
     hasInjection: false,
     threats: [],
     riskScore: 0,
-    severity: 'low',
-    confidence: 100,
-    detectionContext: [],
+    severity: 'low',confidence: 100,detectionContext: [],
     attackVectors: [],
-    platform: 'unix',
-  }),
-  detectMaliciousFileContent: jest.fn().mockReturnValue(false),
+    platform: 'unix',}),detectMaliciousFileContent: jest.fn().mockReturnValue(false),
   validateFilePath: jest.fn().mockImplementation(() => ({
     isValid: true,
     errors: [],
     riskScore: 0,
-    severity: 'low',
-    detectionContext: [],
-  })),
+    severity: 'low',detectionContext: [],})),
   validateCoordinates: jest.fn().mockImplementation(() => ({
     isValid: true,
     errors: [],
     riskScore: 0,
-    severity: 'low',
-    isOverflow: false,
-    normalizedCoordinates: { x: 100, y: 200 },
+    severity: 'low',isOverflow: false,normalizedCoordinates: { x: 100, y: 200 },
   })),
   createSecurityEvent: jest.fn().mockReturnValue({
-    eventId: 'test-event-id',
-    type: 'suspicious_activity',
-    timestamp: new Date(),
-    riskScore: 0,
+    eventId: 'test-event-id',type: 'suspicious_activity',timestamp: new Date(),riskScore: 0,
   }),
   SecurityEventType: {
-    SUSPICIOUS_ACTIVITY: 'suspicious_activity',
-    VALIDATION_FAILED: 'validation_failed',
-  },
-}));
+    SUSPICIOUS_ACTIVITY: 'suspicious_activity',VALIDATION_FAILED: 'validation_failed',},}));
 
 /**
  * Security validation error response interface
@@ -111,9 +82,7 @@ interface SecurityValidationErrorResponse {
   timestamp: string;
 }
 
-describe('ComputerActionValidationPipe - Integration Tests', () => {
-  let pipe: ComputerActionValidationPipe;
-  let mockDetectAdvancedXSS: jest.Mock;
+describe('ComputerActionValidationPipe - Integration Tests', () => {let pipe: ComputerActionValidationPipe;let mockDetectAdvancedXSS: jest.Mock;
   let mockDetectSQLInjection: jest.Mock;
   let mockDetectCommandInjection: jest.Mock;
 
@@ -127,9 +96,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
     );
 
     // Get mocked functions
-    const securityUtils = require('@bytebot/shared/utils/security.utils') as {
-      detectAdvancedXSS: jest.Mock;
-      detectSQLInjection: jest.Mock;
+    const securityUtils = require('@bytebot/shared/utils/security.utils') as {detectAdvancedXSS: jest.Mock;detectSQLInjection: jest.Mock;
       detectCommandInjection: jest.Mock;
     };
     mockDetectAdvancedXSS = securityUtils.detectAdvancedXSS as jest.Mock;
@@ -142,125 +109,61 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
     jest.clearAllMocks();
   });
 
-  describe('Enhanced Security Pipeline Integration', () => {
-    it('should integrate all security functions in the validation pipeline', async () => {
-      const validInput = {
-        action: 'type_text',
-        text: 'Hello World',
-      };
-
-      const result = await pipe.transform(validInput, createArgumentMetadata());
+  describe('Enhanced Security Pipeline Integration', () => {it('should integrate all security functions in the validation pipeline', async () => {const validInput = {action: 'type_text',text: 'Hello World',};const result = await pipe.transform(validInput, createArgumentMetadata());
 
       expect(result).toBeDefined();
-      expect(result.action).toBe('type_text');
-
-      // Verify that security functions were called
-      expect(mockDetectAdvancedXSS).toHaveBeenCalled();
+      expect(result.action).toBe('type_text');// Verify that security functions were calledexpect(mockDetectAdvancedXSS).toHaveBeenCalled();
       expect(mockDetectSQLInjection).toHaveBeenCalled();
       expect(mockDetectCommandInjection).toHaveBeenCalledWith(
         expect.any(String),
-        { strictMode: true, contextType: 'form' },
-      );
-    });
+        { strictMode: true, contextType: 'form' },);});
 
-    it('should block requests when XSS threats are detected', async () => {
-      // Mock XSS detection to return threat
-      mockDetectAdvancedXSS.mockReturnValueOnce({
+    it('should block requests when XSS threats are detected', async () => {// Mock XSS detection to return threatmockDetectAdvancedXSS.mockReturnValueOnce({
         hasXSS: true,
-        threats: ['Script Injection'],
-        riskScore: 85,
-        severity: 'high',
-        confidence: 95,
-        detectionContext: ['html-injection'],
-      });
-
-      const maliciousInput = {
-        action: 'type_text',
-        text: '<script>alert("xss")</script>',
-      };
+        threats: ['Script Injection'],riskScore: 85,severity: 'high',confidence: 95,detectionContext: ['html-injection'],});const maliciousInput = {
+        action: 'type_text',text: '<script>alert("xss")</script>",};
 
       await expect(
         pipe.transform(
           maliciousInput,
           createArgumentMetadata({
-            type: 'body',
-            metatype: Object,
-            data: undefined,
+            type: 'body',metatype: Object,data: undefined,
           }),
         ),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should block requests when SQL injection threats are detected', async () => {
-      // Mock SQL injection detection to return threat
-      mockDetectSQLInjection.mockReturnValueOnce({
+    it('should block requests when SQL injection threats are detected', async () => {// Mock SQL injection detection to return threatmockDetectSQLInjection.mockReturnValueOnce({
         hasInjection: true,
-        threats: ['Boolean Blind Injection'],
-        riskScore: 90,
-        severity: 'critical',
-        confidence: 98,
-        detectionContext: ['mysql-injection'],
-        databaseType: 'mysql',
-      });
-
-      const maliciousInput = {
+        threats: ['Boolean Blind Injection'],riskScore: 90,severity: 'critical',confidence: 98,detectionContext: ['mysql-injection'],databaseType: 'mysql',});const maliciousInput = {
         action: 'type_text',
-        text: "'; DROP TABLE users; --",
+        text: ""; DROP TABLE users; --",
       };
 
       await expect(
         pipe.transform(
           maliciousInput,
           createArgumentMetadata({
-            type: 'body',
-            metatype: Object,
-            data: undefined,
+            type: 'body',metatype: Object,data: undefined,
           }),
         ),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should block requests when command injection threats are detected', async () => {
-      // Mock command injection detection to return threat
-      mockDetectCommandInjection.mockReturnValueOnce({
+    it('should block requests when command injection threats are detected', async () => {// Mock command injection detection to return threatmockDetectCommandInjection.mockReturnValueOnce({
         hasInjection: true,
-        threats: ['Shell Command Separator'],
-        riskScore: 95,
-        severity: 'critical',
-        confidence: 97,
-        detectionContext: ['unix-commands'],
-        attackVectors: ['shell-separator'],
-        platform: 'unix',
-      });
-
-      const maliciousInput = {
-        action: 'type_text',
-        text: 'test; rm -rf /',
-      };
-
-      await expect(
+        threats: ['Shell Command Separator'],riskScore: 95,severity: 'critical',confidence: 97,detectionContext: ['unix-commands'],attackVectors: ['shell-separator'],platform: 'unix',});const maliciousInput = {
+        action: 'type_text',text: 'test; rm -rf /',};await expect(
         pipe.transform(
           maliciousInput,
           createArgumentMetadata({
-            type: 'body',
-            metatype: Object,
-            data: undefined,
+            type: 'body',metatype: Object,data: undefined,
           }),
         ),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should use correct security context for different action types', async () => {
-      const testCases = [
-        { action: 'write_file', expectedContext: 'file' },
-        { action: 'read_file', expectedContext: 'file' },
-        { action: 'type_text', expectedContext: 'form' },
-        { action: 'paste_text', expectedContext: 'form' },
-        { action: 'application', expectedContext: 'url' },
-        { action: 'move_mouse', expectedContext: 'api' },
-      ];
-
-      for (const testCase of testCases) {
+    it('should use correct security context for different action types', async () => {const testCases = [{ action: 'write_file', expectedContext: 'file' },{ action: 'read_file', expectedContext: 'file' },{ action: 'type_text', expectedContext: 'form' },{ action: 'paste_text', expectedContext: 'form' },{ action: 'application', expectedContext: 'url' },{ action: 'move_mouse', expectedContext: 'api' },];for (const testCase of testCases) {
         const input = { action: testCase.action };
 
         try {
@@ -278,126 +181,54 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       }
     });
 
-    it('should aggregate multiple threats correctly', async () => {
-      // Mock multiple threat detections
-      mockDetectAdvancedXSS.mockReturnValueOnce({
+    it('should aggregate multiple threats correctly', async () => {// Mock multiple threat detectionsmockDetectAdvancedXSS.mockReturnValueOnce({
         hasXSS: true,
-        threats: ['Script Injection'],
-        riskScore: 40,
-        severity: 'medium',
-        confidence: 90,
-        detectionContext: ['html-injection'],
-      });
-
-      mockDetectSQLInjection.mockReturnValueOnce({
+        threats: ['Script Injection'],riskScore: 40,severity: 'medium',confidence: 90,detectionContext: ['html-injection'],});mockDetectSQLInjection.mockReturnValueOnce({
         hasInjection: true,
-        threats: ['Union Injection'],
-        riskScore: 50,
-        severity: 'high',
-        confidence: 95,
-        detectionContext: ['union-based'],
-        databaseType: 'postgresql',
-      });
-
-      const maliciousInput = {
-        action: 'type_text',
-        text: '<script>alert(1)</script> UNION SELECT * FROM users',
-      };
-
-      try {
+        threats: ['Union Injection'],riskScore: 50,severity: 'high',confidence: 95,detectionContext: ['union-based'],databaseType: 'postgresql',});const maliciousInput = {
+        action: 'type_text',text: '<script>alert(1)</script> UNION SELECT * FROM users',};try {
         await pipe.transform(maliciousInput, createArgumentMetadata());
-        fail('Should have thrown BadRequestException');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
+        fail('Should have thrown BadRequestException');} catch (error) {expect(error).toBeInstanceOf(BadRequestException);
         const badRequestError = error as BadRequestException;
         const response =
           badRequestError.getResponse() as SecurityValidationErrorResponse;
-        expect(response.message).toContain('security threats detected');
-        expect(response.threatTypes).toContain('ADVANCED_XSS');
-        expect(response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
-        expect(response.totalRiskScore).toBeGreaterThan(0);
-      }
+        expect(response.message).toContain('security threats detected');expect(response.threatTypes).toContain('ADVANCED_XSS');expect(response.threatTypes).toContain('ADVANCED_SQL_INJECTION');expect(response.totalRiskScore).toBeGreaterThan(0);}
     });
 
-    it('should provide comprehensive _error response structure', async () => {
-      // Mock threat detection
-      mockDetectAdvancedXSS.mockReturnValueOnce({
+    it('should provide comprehensive _error response structure', async () => {// Mock threat detectionmockDetectAdvancedXSS.mockReturnValueOnce({
         hasXSS: true,
-        threats: ['Script Injection'],
-        riskScore: 75,
-        severity: 'high',
-        confidence: 93,
-        detectionContext: ['html-injection'],
-      });
-
-      const maliciousInput = {
-        action: 'type_text',
-        text: '<script>malicious()</script>',
-      };
-
-      try {
+        threats: ['Script Injection'],riskScore: 75,severity: 'high',confidence: 93,detectionContext: ['html-injection'],});const maliciousInput = {
+        action: 'type_text',text: '<script>malicious()</script>',};try {
         await pipe.transform(maliciousInput, createArgumentMetadata());
-        fail('Should have thrown BadRequestException');
-      } catch (error) {
-        const badRequestError = error as BadRequestException;
+        fail('Should have thrown BadRequestException');} catch (error) {const badRequestError = error as BadRequestException;
         const response =
           badRequestError.getResponse() as SecurityValidationErrorResponse;
-        expect(response).toHaveProperty('message');
-        expect(response).toHaveProperty('operationId');
-        expect(response).toHaveProperty('threatTypes');
-        expect(response).toHaveProperty('totalRiskScore');
-        expect(response).toHaveProperty('threatLevel');
-        expect(response).toHaveProperty('validationStages');
-        expect(response).toHaveProperty('detectionCount');
-        expect(response).toHaveProperty('timestamp');
-
-        expect(Array.isArray(response.threatTypes)).toBe(true);
-        expect(Array.isArray(response.validationStages)).toBe(true);
-        expect(typeof response.totalRiskScore).toBe('number');
-        expect(response.detectionCount).toBeGreaterThan(0);
-      }
+        expect(response).toHaveProperty('message');expect(response).toHaveProperty('operationId');expect(response).toHaveProperty('threatTypes');expect(response).toHaveProperty('totalRiskScore');expect(response).toHaveProperty('threatLevel');expect(response).toHaveProperty('validationStages');expect(response).toHaveProperty('detectionCount');expect(response).toHaveProperty('timestamp');expect(Array.isArray(response.threatTypes)).toBe(true);expect(Array.isArray(response.validationStages)).toBe(true);
+        expect(typeof response.totalRiskScore).toBe('number');expect(response.detectionCount).toBeGreaterThan(0);}
     });
 
-    it('should handle valid inputs without false positives', async () => {
-      // Reset all mocks to ensure clean state
-      jest.clearAllMocks();
+    it('should handle valid inputs without false positives', async () => {// Reset all mocks to ensure clean statejest.clearAllMocks();
 
       const validInputs = [
-        { action: 'type_text', text: 'Hello World' },
-        { action: 'wait', duration: 1000 },
-        { action: 'screenshot' },
-      ];
-
-      for (const input of validInputs) {
+        { action: 'type_text', text: 'Hello World' },{ action: 'wait', duration: 1000 },{ action: 'screenshot' },];for (const input of validInputs) {
         const result = await pipe.transform(input, createArgumentMetadata());
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }
     });
 
-    it('should enforce _payload size limits', async () => {
-      const largePayload = {
-        action: 'type_text',
-        text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
-      };
-
-      await expect(
+    it('should enforce _payload size limits', async () => {const largePayload = {action: 'type_text',text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload};await expect(
         _pipe.transform(
           largePayload,
           createArgumentMetadata({
-            type: 'body',
-            metatype: Object,
-            data: undefined,
+            type: 'body',metatype: Object,data: undefined,
           }),
         ),
       ).rejects.toThrow(BadRequestException);
     });
   });
 
-  describe('Security Pipeline Performance', () => {
-    it('should complete security validation within reasonable time', async () => {
-      const input = {
-        action: 'screenshot',
+  describe('Security Pipeline Performance', () => {it('should complete security validation within reasonable time', async () => {const input = {action: 'screenshot',
       };
 
       const start = Date.now();

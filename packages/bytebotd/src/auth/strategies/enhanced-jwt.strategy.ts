@@ -2,27 +2,13 @@
  * Enhanced JWT Strategy - TEMPORARY SIMPLIFIED VERSION FOR BUILD FIX
  */
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { Request as Express } from 'express';
-import { ByteBotdUser } from '../entities/auth-user.entity';
-
-@Injectable()
-export class EnhancedJwtStrategy extends PassportStrategy(Strategy, 'enhanced-jwt') {
-  constructor(
-    private readonly configService: ConfigService,
+import { Injectable, UnauthorizedException } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { JwtService } from '@nestjs/jwt';import { PassportStrategy } from '@nestjs/passport';import { Strategy, ExtractJwt } from 'passport-jwt';import { Request as Express } from 'express';import { ByteBotdUser } from '../entities/auth-user.entity';@Injectable()export class EnhancedJwtStrategy extends PassportStrategy(Strategy, 'enhanced-jwt') {constructor(private readonly configService: ConfigService,
     private readonly jwtService: JwtService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),
-      algorithms: ['HS256'],
-      passReqToCallback: true,
-    });
+      secretOrKey: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),algorithms: ['HS256'],passReqToCallback: true,});
   }
 
   async validate(request: Express.Request, payload: Record<string, unknown>): Promise<ByteBotdUser> {

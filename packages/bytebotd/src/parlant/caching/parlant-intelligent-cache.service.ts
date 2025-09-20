@@ -17,14 +17,7 @@
  * Scalability: Redis cluster support for enterprise deployment
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-
-// ===== CACHING INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { createHash } from 'crypto';import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';// ===== CACHING INTERFACES =====/**
  * Cache configuration for different operation types
  */
 export interface CacheConfig {
@@ -71,9 +64,7 @@ export interface CacheStats {
  */
 export interface CacheWarmingConfig {
   readonly enabled: boolean;
-  readonly strategies: ('popular_functions' | 'recent_patterns' | 'predictive_preload')[];
-  readonly warmingIntervalMinutes: number;
-  readonly maxWarmingOperations: number;
+  readonly strategies: ('popular_functions' | 'recent_patterns' | 'predictive_preload')[];readonly warmingIntervalMinutes: number;readonly maxWarmingOperations: number;
   readonly priorityFunctions: string[];
 }
 
@@ -81,8 +72,7 @@ export interface CacheWarmingConfig {
  * Intelligent cache recommendation
  */
 export interface CacheRecommendation {
-  readonly category: 'ttl' | 'size' | 'warming' | 'eviction' | 'compression';
-  readonly priority: 'critical' | 'high' | 'medium' | 'low';
+  readonly category: 'ttl' | 'size' | 'warming' | 'eviction' | 'compression';readonly priority: 'critical' | 'high' | 'medium' | 'low';
   readonly currentValue: string;
   readonly recommendedValue: string;
   readonly expectedImprovement: string;
@@ -101,35 +91,35 @@ export class ParlantIntelligentCacheService {
   
   // Cache configuration by risk level
   private readonly cacheConfigs: Map<RiskLevel, CacheConfig> = new Map([
-    [RiskLevel.MINIMAL, {
+    [RiskLevel._MINIMAL, {
       ttlSeconds: 3600, // 1 hour for minimal risk
       maxEntries: 5000,
       compressionEnabled: true,
       encryptionEnabled: false,
       autoWarming: true,
     }],
-    [RiskLevel.LOW, {
+    [RiskLevel._LOW, {
       ttlSeconds: 1800, // 30 minutes for low risk
       maxEntries: 3000,
       compressionEnabled: true,
       encryptionEnabled: false,
       autoWarming: true,
     }],
-    [RiskLevel.MEDIUM, {
+    [RiskLevel._MODERATE, {
       ttlSeconds: 600, // 10 minutes for medium risk
       maxEntries: 2000,
       compressionEnabled: true,
       encryptionEnabled: true,
       autoWarming: false,
     }],
-    [RiskLevel.HIGH, {
+    [RiskLevel._HIGH, {
       ttlSeconds: 300, // 5 minutes for high risk
       maxEntries: 1000,
       compressionEnabled: false,
       encryptionEnabled: true,
       autoWarming: false,
     }],
-    [RiskLevel.CRITICAL, {
+    [RiskLevel._CRITICAL, {
       ttlSeconds: 60, // 1 minute for critical risk
       maxEntries: 100,
       compressionEnabled: false,
@@ -159,20 +149,11 @@ export class ParlantIntelligentCacheService {
     const operationId = `cache_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.warmingConfig = {
-      enabled: this.configService.get<boolean>('PARLANT_CACHE_WARMING_ENABLED', true),
-      strategies: ['popular_functions', 'recent_patterns'],
-      warmingIntervalMinutes: this.configService.get<number>('PARLANT_CACHE_WARMING_INTERVAL', 15),
-      maxWarmingOperations: this.configService.get<number>('PARLANT_CACHE_WARMING_MAX_OPS', 100),
-      priorityFunctions: this.configService.get<string[]>('PARLANT_CACHE_PRIORITY_FUNCTIONS', [
-        'computer_use_click',
-        'computer_use_type',
-        'security_validation',
+      enabled: this.configService.get<boolean>('PARLANT_CACHE_WARMING_ENABLED', true),strategies: ['popular_functions', 'recent_patterns'],warmingIntervalMinutes: this.configService.get<number>('PARLANT_CACHE_WARMING_INTERVAL', 15),maxWarmingOperations: this.configService.get<number>('PARLANT_CACHE_WARMING_MAX_OPS', 100),priorityFunctions: this.configService.get<string[]>('PARLANT_CACHE_PRIORITY_FUNCTIONS', ['computer_use_click','computer_use_type','security_validation',
       ]),
     };
 
-    this.logger.log(`[${operationId}] Initializing Parlant Intelligent Cache Service`, {
-      redisEnabled: this.isRedisEnabled(),
-      warmingEnabled: this.warmingConfig.enabled,
+    this.logger.log(`[${operationId}] Initializing Parlant Intelligent Cache Service`, {redisEnabled: this.isRedisEnabled(),warmingEnabled: this.warmingConfig.enabled,
       cacheConfigs: Object.fromEntries(this.cacheConfigs),
       estimatedMemoryUsage: this.calculateEstimatedMemoryUsage(),
     });
@@ -243,9 +224,7 @@ export class ParlantIntelligentCacheService {
         this.incrementCacheHits();
         this.updateAverageLookupTime(Date.now() - startTime);
         
-        this.logger.debug(`[${request.operationId}] Cache HIT (memory): ${cacheKey}`);
-        return memoryCacheEntry.value;
-      }
+        this.logger.debug(`[${request.operationId}] Cache HIT (memory): ${cacheKey}`);return memoryCacheEntry.value;}
 
       // Check Redis cache (distributed)
       if (this.isRedisEnabled()) {
@@ -257,9 +236,7 @@ export class ParlantIntelligentCacheService {
           this.incrementCacheHits();
           this.updateAverageLookupTime(Date.now() - startTime);
           
-          this.logger.debug(`[${request.operationId}] Cache HIT (Redis): ${cacheKey}`);
-          return redisCacheEntry.value;
-        }
+          this.logger.debug(`[${request.operationId}] Cache HIT (Redis): ${cacheKey}`);return redisCacheEntry.value;}
       }
 
       // Cache miss
@@ -267,13 +244,8 @@ export class ParlantIntelligentCacheService {
       this.updateAverageLookupTime(Date.now() - startTime);
       this.updateCacheHitRate();
 
-      this.logger.debug(`[${request.operationId}] Cache MISS: ${cacheKey}`);
-      return null;
-
-    } catch (error) {
-      this.logger.error(`Cache lookup error: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId: request.operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.debug(`[${request.operationId}] Cache MISS: ${cacheKey}`);return null;} catch (error) {
+      this.logger.error(`Cache lookup error: ${error instanceof Error ? error.message : String(error)}`, {operationId: request.operationId,error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
       
@@ -297,10 +269,8 @@ export class ParlantIntelligentCacheService {
       const config = this.getCacheConfigForRiskLevel(request.riskLevel);
 
       // Only cache successful, approved responses for better performance
-      if (!response.approved && request.riskLevel !== RiskLevel.MINIMAL) {
-        this.logger.debug(`[${request.operationId}] Skipping cache for denied ${request.riskLevel} risk operation`);
-        return;
-      }
+      if (!response.approved && request.riskLevel !== RiskLevel._MINIMAL) {
+        this.logger.debug(`[${request.operationId}] Skipping cache for denied ${request.riskLevel} risk operation`);return;}
 
       // Set in memory cache first
       await this.setMemoryCache(cacheKey, response, config);
@@ -310,9 +280,7 @@ export class ParlantIntelligentCacheService {
         await this.setRedisCache(cacheKey, response, config);
       }
 
-      this.logger.debug(`[${request.operationId}] Cached validation response: ${cacheKey}`, {
-        riskLevel: request.riskLevel,
-        ttlSeconds: config.ttlSeconds,
+      this.logger.debug(`[${request.operationId}] Cached validation response: ${cacheKey}`, {riskLevel: request.riskLevel,ttlSeconds: config.ttlSeconds,
         redisEnabled: this.isRedisEnabled(),
         compressionEnabled: config.compressionEnabled,
       });
@@ -351,50 +319,26 @@ export class ParlantIntelligentCacheService {
     // Hit rate recommendations
     if (stats.hitRate < 95) {
       recommendations.push({
-        category: 'ttl',
-        priority: 'high',
-        currentValue: 'Variable TTL by risk level',
-        recommendedValue: 'Increase TTL for popular functions by 50%',
+        category: 'ttl',priority: 'high',currentValue: 'Variable TTL by risk level',recommendedValue: 'Increase TTL for popular functions by 50%',
         expectedImprovement: `${(95 - stats.hitRate).toFixed(1)}% hit rate increase`,
-        reasoning: 'Low cache hit rate indicates TTL may be too aggressive',
-      });
-    }
+        reasoning: 'Low cache hit rate indicates TTL may be too aggressive',});}
 
     // Memory usage recommendations
     if (stats.memoryUsage > 100 * 1024 * 1024) { // 100MB
       recommendations.push({
-        category: 'size',
-        priority: 'medium',
+        category: 'size',priority: 'medium',
         currentValue: `${Math.round(stats.memoryUsage / 1024 / 1024)}MB`,
-        recommendedValue: 'Enable compression for low-risk operations',
-        expectedImprovement: '40-60% memory reduction',
-        reasoning: 'High memory usage can be reduced with compression',
-      });
-    }
+        recommendedValue: 'Enable compression for low-risk operations',expectedImprovement: '40-60% memory reduction',reasoning: 'High memory usage can be reduced with compression',});}
 
     // Cache warming recommendations
     if (stats.hitRate < 90 && !this.warmingConfig.enabled) {
       recommendations.push({
-        category: 'warming',
-        priority: 'medium',
-        currentValue: 'Disabled',
-        recommendedValue: 'Enable predictive cache warming',
-        expectedImprovement: '10-15% hit rate increase',
-        reasoning: 'Cache warming can preload frequently accessed validations',
-      });
-    }
+        category: 'warming',priority: 'medium',currentValue: 'Disabled',recommendedValue: 'Enable predictive cache warming',expectedImprovement: '10-15% hit rate increase',reasoning: 'Cache warming can preload frequently accessed validations',});}
 
     // Lookup time recommendations
     if (stats.averageLookupTime > 50) {
       recommendations.push({
-        category: 'eviction',
-        priority: 'low',
-        currentValue: 'LRU eviction',
-        recommendedValue: 'Implement smart eviction based on access patterns',
-        expectedImprovement: '20-30% lookup time reduction',
-        reasoning: 'Slow lookups may indicate inefficient cache organization',
-      });
-    }
+        category: 'eviction',priority: 'low',currentValue: 'LRU eviction',recommendedValue: 'Implement smart eviction based on access patterns',expectedImprovement: '20-30% lookup time reduction',reasoning: 'Slow lookups may indicate inefficient cache organization',});}
 
     return recommendations;
   }
@@ -410,13 +354,7 @@ export class ParlantIntelligentCacheService {
       return;
     }
 
-    const operationId = `cache_warm${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const functionsToWarm = functionNames ?? this.warmingConfig.priorityFunctions;
-
-    this.logger.log(`[${operationId}] Starting cache warming for ${functionsToWarm.length} functions`);
-
-    let warmedCount = 0;
-    const maxOperations = this.warmingConfig.maxWarmingOperations;
+    const operationId = `cache_warm${Date.now()}${Math.random().toString(36).substring(7)}`;const functionsToWarm = functionNames ?? this.warmingConfig.priorityFunctions;this.logger.log(`[${operationId}] Starting cache warming for ${functionsToWarm.length} functions`);let warmedCount = 0;const maxOperations = this.warmingConfig.maxWarmingOperations;
 
     for (const functionName of functionsToWarm) {
       if (warmedCount >= maxOperations) break;
@@ -439,14 +377,9 @@ export class ParlantIntelligentCacheService {
         }
 
       } catch (error) {
-        this.logger.error(`Cache warming error for ${functionName}:`, error);
-      }
-    }
+        this.logger.error(`Cache warming error for ${functionName}:`, error);}}
 
-    this.logger.log(`[${operationId}] Cache warming completed: ${warmedCount} operations warmed`);
-  }
-
-  /**
+    this.logger.log(`[${operationId}] Cache warming completed: ${warmedCount} operations warmed`);}/**
    * Clear cache entries based on criteria
    * 
    * @param criteria - Cache clearing criteria
@@ -485,9 +418,7 @@ export class ParlantIntelligentCacheService {
       function: request.functionName,
       risk: request.riskLevel,
       // Hash parameters to allow caching while maintaining uniqueness
-      paramsHash: createHash('sha256')
-        .update(JSON.stringify(request.functionParams))
-        .digest('hex')
+      paramsHash: createHash('sha256').update(JSON.stringify(request.functionParams)).digest('hex')
         .substring(0, 16),
       // Include user security level for permission-aware caching
       securityLevel: request.context.securityLevel,
@@ -497,7 +428,7 @@ export class ParlantIntelligentCacheService {
   }
 
   private getCacheConfigForRiskLevel(riskLevel: RiskLevel): CacheConfig {
-    return this.cacheConfigs.get(riskLevel) ?? this.cacheConfigs.get(RiskLevel.MEDIUM) as CacheConfig;
+    return this.cacheConfigs.get(riskLevel) ?? this.cacheConfigs.get(RiskLevel._MODERATE) as CacheConfig;
   }
 
   private getFromMemoryCache(key: string): CacheEntry<ParlantValidationResponse> | null {
@@ -518,10 +449,7 @@ export class ParlantIntelligentCacheService {
       lastAccessed: new Date(),
       compressionEnabled: config.compressionEnabled,
       size: this.calculateEntrySize(value),
-      operationType: 'validation',
-    };
-
-    this.memoryCache.set(key, entry);
+      operationType: 'validation',};this.memoryCache.set(key, entry);
 
     // Ensure cache size limits
     if (this.memoryCache.size > config.maxEntries) {
@@ -571,8 +499,8 @@ export class ParlantIntelligentCacheService {
 
   private shouldCacheInRedis(request: ParlantValidationRequest, _config: CacheConfig): boolean {
     // Cache in Redis for operations that benefit from distributed caching
-    return request.riskLevel === RiskLevel.MINIMAL || 
-           request.riskLevel === RiskLevel.LOW ||
+    return request.riskLevel === RiskLevel._MINIMAL || 
+           request.riskLevel === RiskLevel._LOW ||
            _config.autoWarming;
   }
 
@@ -617,10 +545,7 @@ export class ParlantIntelligentCacheService {
     for (const [_riskLevel, config] of this.cacheConfigs) {
       totalEstimate += config.maxEntries * 1024; // Rough estimate per entry
     }
-    return `${Math.round(totalEstimate / 1024 / 1024)}MB`;
-  }
-
-  private async evictOldestEntries(count: number): Promise<void> {
+    return `${Math.round(totalEstimate / 1024 / 1024)}MB`;}private async evictOldestEntries(count: number): Promise<void> {
     const entries = Array.from(this.memoryCache.entries());
     entries.sort(([, a], [, b]) => a.lastAccessed.getTime() - b.lastAccessed.getTime());
     
@@ -642,19 +567,14 @@ export class ParlantIntelligentCacheService {
   private generateWarmupResponse(request: ParlantValidationRequest): ParlantValidationResponse {
     // Generate warm-up response for cache preloading
     return {
-      approved: request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW,
+      approved: request.riskLevel === RiskLevel._MINIMAL || request.riskLevel === RiskLevel._LOW,
       conversationId: `warmup${Date.now()}`,
       validationTimestamp: new Date(),
-      reasoning: 'Cache warm-up validation - pre-approved low-risk operation',
-      confidence: 0.95,
-      suggestedAlternatives: [],
+      reasoning: 'Cache warm-up validation - pre-approved low-risk operation',confidence: 0.95,suggestedAlternatives: [],
       executionContext: {
         timeoutMs: 5000,
         retryAttempts: 1,
-        monitoringLevel: 'BASIC',
-        safeguards: ['basic_validation'],
-      },
-    };
+        monitoringLevel: 'BASIC',safeguards: ['basic_validation'],},};
   }
 
   private shouldClearEntry(
@@ -663,25 +583,18 @@ export class ParlantIntelligentCacheService {
   ): boolean {
     // TODO: Implement cache clearing logic based on criteria
     if (criteria.expired) {
-      const config = this.getCacheConfigForRiskLevel(RiskLevel.MEDIUM);
+      const config = this.getCacheConfigForRiskLevel(RiskLevel._MODERATE);
       return !this.isCacheEntryValid(entry, config);
     }
     return false;
   }
 
   private isRedisEnabled(): boolean {
-    return this.configService.get<boolean>('PARLANT_REDIS_ENABLED', false);
-  }
-
-  private async initializeRedisConnection(): Promise<void> {
+    return this.configService.get<boolean>('PARLANT_REDIS_ENABLED', false);}private async initializeRedisConnection(): Promise<void> {
     if (this.isRedisEnabled()) {
       // TODO: Initialize Redis client
       // this.redisClient = new Redis({
-      //   host: this.configService.get('REDIS_HOST'),
-      //   port: this.configService.get('REDIS_PORT'),
-      //   password: this.configService.get('REDIS_PASSWORD'),
-      // });
-      this.logger.log('Redis connection initialized for cache clustering');
+      //   host: this.configService.get('REDIS_HOST'),//   port: this.configService.get('REDIS_PORT'),//   password: this.configService.get('REDIS_PASSWORD'),// });this.logger.log('Redis connection initialized for cache clustering');
     }
   }
 
@@ -698,10 +611,7 @@ export class ParlantIntelligentCacheService {
     setInterval(() => {
       const stats = this.getCacheStatistics();
       this.logger.log('Cache Performance Statistics', {
-        hitRate: `${stats.hitRate.toFixed(2)}%`,
-        totalEntries: stats.totalEntries,
-        memoryUsage: `${Math.round(stats.memoryUsage / 1024 / 1024)}MB`,
-        averageLookupTime: `${stats.averageLookupTime.toFixed(2)}ms`,
+        hitRate: `${stats.hitRate.toFixed(2)}%`,totalEntries: stats.totalEntries,memoryUsage: `${Math.round(stats.memoryUsage / 1024 / 1024)}MB`,averageLookupTime: `${stats.averageLookupTime.toFixed(2)}ms`,
       });
     }, 10 * 60 * 1000);
   }

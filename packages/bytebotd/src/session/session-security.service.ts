@@ -14,29 +14,11 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import * as crypto from 'crypto';
-import * as jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
-import { SessionMetadata, SessionState } from './session-management.service';
-
-// ===== SESSION SECURITY ENUMS =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import * as crypto from 'crypto';import * as jwt from 'jsonwebtoken';import { v4 as uuidv4 } from 'uuid';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';import { SessionMetadata, SessionState } from './session-management.service';// ===== SESSION SECURITY ENUMS =====/**
  * Encryption algorithms supported for session security
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes-256-gcm',
-  AES_256_CBC = 'aes-256-cbc',
-  CHACHA20_POLY1305 = 'chacha20-poly1305',
-  AES_128_GCM = 'aes-128-gcm'
-}
-
-/**
+  AES_256_GCM = 'aes-256-gcm',AES_256_CBC = 'aes-256-cbc',CHACHA20_POLY1305 = 'chacha20-poly1305',AES_128_GCM = 'aes-128-gcm'}/**
  * Session security levels for different threat scenarios
  */
 export enum SessionSecurityLevel {
@@ -51,57 +33,19 @@ export enum SessionSecurityLevel {
  * Threat detection severity levels
  */
 export enum ThreatSeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY'
-}
-
-/**
+  INFO = 'INFO',LOW = 'LOW',MEDIUM = 'MEDIUM',HIGH = 'HIGH',CRITICAL = 'CRITICAL',EMERGENCY = 'EMERGENCY'}/**
  * Session validation result statuses
  */
 export enum ValidationResult {
-  VALID = 'VALID',
-  INVALID = 'INVALID',
-  EXPIRED = 'EXPIRED',
-  SUSPICIOUS = 'SUSPICIOUS',
-  COMPROMISED = 'COMPROMISED',
-  BLOCKED = 'BLOCKED'
-}
-
-/**
+  VALID = 'VALID',INVALID = 'INVALID',EXPIRED = 'EXPIRED',SUSPICIOUS = 'SUSPICIOUS',COMPROMISED = 'COMPROMISED',BLOCKED = 'BLOCKED'}/**
  * Authentication factor types
  */
 export enum AuthenticationFactor {
-  PASSWORD = 'PASSWORD',
-  TOTP = 'TOTP',
-  SMS = 'SMS',
-  EMAIL = 'EMAIL',
-  BIOMETRIC = 'BIOMETRIC',
-  HARDWARE_TOKEN = 'HARDWARE_TOKEN',
-  PUSH_NOTIFICATION = 'PUSH_NOTIFICATION',
-  BEHAVIORAL = 'BEHAVIORAL'
-}
-
-/**
+  PASSWORD = 'PASSWORD',TOTP = 'TOTP',SMS = 'SMS',EMAIL = 'EMAIL',BIOMETRIC = 'BIOMETRIC',HARDWARE_TOKEN = 'HARDWARE_TOKEN',PUSH_NOTIFICATION = 'PUSH_NOTIFICATION',BEHAVIORAL = 'BEHAVIORAL'}/**
  * Intrusion detection event types
  */
 export enum IntrusionEventType {
-  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',
-  SESSION_HIJACKING = 'SESSION_HIJACKING',
-  CREDENTIAL_STUFFING = 'CREDENTIAL_STUFFING',
-  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',
-  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
-  ANOMALOUS_BEHAVIOR = 'ANOMALOUS_BEHAVIOR',
-  GEOLOCATION_ANOMALY = 'GEOLOCATION_ANOMALY',
-  DEVICE_FINGERPRINT_MISMATCH = 'DEVICE_FINGERPRINT_MISMATCH',
-  CONCURRENT_SESSION_ABUSE = 'CONCURRENT_SESSION_ABUSE',
-  DATA_EXFILTRATION_ATTEMPT = 'DATA_EXFILTRATION_ATTEMPT'
-}
-
-// ===== SESSION SECURITY INTERFACES =====
+  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',SESSION_HIJACKING = 'SESSION_HIJACKING',CREDENTIAL_STUFFING = 'CREDENTIAL_STUFFING',PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',ANOMALOUS_BEHAVIOR = 'ANOMALOUS_BEHAVIOR',GEOLOCATION_ANOMALY = 'GEOLOCATION_ANOMALY',DEVICE_FINGERPRINT_MISMATCH = 'DEVICE_FINGERPRINT_MISMATCH',CONCURRENT_SESSION_ABUSE = 'CONCURRENT_SESSION_ABUSE',DATA_EXFILTRATION_ATTEMPT = 'DATA_EXFILTRATION_ATTEMPT'}// ===== SESSION SECURITY INTERFACES =====
 
 /**
  * Session encryption configuration
@@ -111,9 +55,7 @@ export interface SessionEncryptionConfig {
   readonly keySize: number;
   readonly ivSize: number;
   readonly tagSize: number;
-  readonly keyDerivationFunction: 'pbkdf2' | 'scrypt' | 'argon2';
-  readonly keyDerivationIterations: number;
-  readonly saltSize: number;
+  readonly keyDerivationFunction: 'pbkdf2' | 'scrypt' | 'argon2';readonly keyDerivationIterations: number;readonly saltSize: number;
   readonly compressionEnabled: boolean;
   readonly integrityValidation: boolean;
 }
@@ -215,9 +157,7 @@ export interface ThreatIndicator {
  * Automatic response trigger
  */
 export interface AutomaticResponseTrigger {
-  readonly action: 'terminate' | 'suspend' | 'challenge' | 'monitor' | 'alert';
-  readonly condition: string;
-  readonly threshold: number;
+  readonly action: 'terminate' | 'suspend' | 'challenge' | 'monitor' | 'alert';readonly condition: string;readonly threshold: number;
   readonly delay: number;
   readonly recurring: boolean;
 }
@@ -259,9 +199,7 @@ export interface NetworkTrafficData {
   readonly protocol: string;
   readonly port: number;
   readonly dataSize: number;
-  readonly direction: 'inbound' | 'outbound';
-  readonly encrypted: boolean;
-  readonly suspicious: boolean;
+  readonly direction: 'inbound' | 'outbound';readonly encrypted: boolean;readonly suspicious: boolean;
 }
 
 /**
@@ -308,10 +246,7 @@ export interface ClickPattern {
   readonly timestamp: Date;
   readonly duration: number;
   readonly pressure?: number;
-  readonly button: 'left' | 'right' | 'middle';
-}
-
-/**
+  readonly button: 'left' | 'right' | 'middle';}/**
  * Scroll behavior analysis
  */
 export interface ScrollBehavior {
@@ -420,9 +355,7 @@ export interface NetworkConnection {
  */
 export interface FileSystemChange {
   readonly path: string;
-  readonly operation: 'create' | 'modify' | 'delete' | 'rename';
-  readonly timestamp: Date;
-  readonly oldValue?: string;
+  readonly operation: 'create' | 'modify' | 'delete' | 'rename';readonly timestamp: Date;readonly oldValue?: string;
   readonly newValue?: string;
   readonly checksum?: string;
 }
@@ -433,9 +366,7 @@ export interface FileSystemChange {
 export interface RegistryChange {
   readonly key: string;
   readonly value: string;
-  readonly operation: 'create' | 'modify' | 'delete';
-  readonly timestamp: Date;
-  readonly oldData?: any;
+  readonly operation: 'create' | 'modify' | 'delete';readonly timestamp: Date;readonly oldData?: any;
   readonly newData?: any;
 }
 
@@ -518,27 +449,9 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   ) {
     // Initialize encryption configuration
     this.defaultEncryptionConfig = {
-      algorithm: this.configService.get<EncryptionAlgorithm>('SESSION_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),
-      keySize: this.configService.get<number>('SESSION_KEY_SIZE', 32),
-      ivSize: this.configService.get<number>('SESSION_IV_SIZE', 16),
-      tagSize: this.configService.get<number>('SESSION_TAG_SIZE', 16),
-      keyDerivationFunction: this.configService.get<'pbkdf2' | 'scrypt' | 'argon2'>('SESSION_KDF', 'pbkdf2'),
-      keyDerivationIterations: this.configService.get<number>('SESSION_KDF_ITERATIONS', 100000),
-      saltSize: this.configService.get<number>('SESSION_SALT_SIZE', 32),
-      compressionEnabled: this.configService.get<boolean>('SESSION_COMPRESSION_ENABLED', true),
-      integrityValidation: this.configService.get<boolean>('SESSION_INTEGRITY_VALIDATION', true)
-    };
-
-    // Initialize security configuration
-    this.defaultSecurityLevel = this.configService.get<SessionSecurityLevel>('DEFAULT_SECURITY_LEVEL', SessionSecurityLevel.ENHANCED);
-    this.threatDetectionEnabled = this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true);
-    this.behavioralAnalysisEnabled = this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true);
-
-    // Initialize multi-factor authentication configuration
-    this.multiFactorAuthConfig = {
-      requiredFactors: this.configService.get<number>('MFA_REQUIRED_FACTORS', 2),
-      availableFactors: [AuthenticationFactor.PASSWORD, AuthenticationFactor.TOTP, AuthenticationFactor.BIOMETRIC],
-      stepUpConditions: [],
+      algorithm: this.configService.get<EncryptionAlgorithm>('SESSION_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),keySize: this.configService.get<number>('SESSION_KEY_SIZE', 32),ivSize: this.configService.get<number>('SESSION_IV_SIZE', 16),tagSize: this.configService.get<number>('SESSION_TAG_SIZE', 16),keyDerivationFunction: this.configService.get<'pbkdf2' | 'scrypt' | 'argon2'>('SESSION_KDF', 'pbkdf2'),keyDerivationIterations: this.configService.get<number>('SESSION_KDF_ITERATIONS', 100000),saltSize: this.configService.get<number>('SESSION_SALT_SIZE', 32),compressionEnabled: this.configService.get<boolean>('SESSION_COMPRESSION_ENABLED', true),integrityValidation: this.configService.get<boolean>('SESSION_INTEGRITY_VALIDATION', true)};// Initialize security configuration
+    this.defaultSecurityLevel = this.configService.get<SessionSecurityLevel>('DEFAULT_SECURITY_LEVEL', SessionSecurityLevel.ENHANCED);this.threatDetectionEnabled = this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true);this.behavioralAnalysisEnabled = this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true);// Initialize multi-factor authentication configurationthis.multiFactorAuthConfig = {
+      requiredFactors: this.configService.get<number>('MFA_REQUIRED_FACTORS', 2),availableFactors: [AuthenticationFactor.PASSWORD, AuthenticationFactor.TOTP, AuthenticationFactor.BIOMETRIC],stepUpConditions: [],
       timeoutSettings: {
         singleFactorTimeout: 300000, // 5 minutes
         multiFactorTimeout: 600000, // 10 minutes
@@ -552,9 +465,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
 
     // Initialize Redis client
     this.redisClient = new Redis(
-      this.configService.get<string>('SESSION_SECURITY_REDIS_URL', 'redis://localhost:6379'),
-      {
-        retryDelayOnFailover: 100,
+      this.configService.get<string>('SESSION_SECURITY_REDIS_URL', 'redis://localhost:6379'),{retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         enableOfflineQueue: false,
         lazyConnect: true,
@@ -564,10 +475,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
     );
 
     this.logger.log('Session Security Service initialized');
-    this.logger.log(`Default encryption: ${this.defaultEncryptionConfig.algorithm}`);
-    this.logger.log(`Default security level: ${this.defaultSecurityLevel}`);
-    this.logger.log(`Threat detection enabled: ${this.threatDetectionEnabled}`);
-    this.logger.log(`Behavioral analysis enabled: ${this.behavioralAnalysisEnabled}`);
+    this.logger.log(`Default encryption: ${this.defaultEncryptionConfig.algorithm}`);this.logger.log(`Default security level: ${this.defaultSecurityLevel}`);this.logger.log(`Threat detection enabled: ${this.threatDetectionEnabled}`);this.logger.log(`Behavioral analysis enabled: ${this.behavioralAnalysisEnabled}`);
   }
 
   /**
@@ -576,10 +484,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   async onModuleInit(): Promise<void> {
     try {
       await this.redisClient.connect();
-      this.logger.log('Connected to Redis for session security data');
-
-      // Initialize encryption keys
-      await this.initializeEncryptionKeys();
+      this.logger.log('Connected to Redis for session security data');// Initialize encryption keysawait this.initializeEncryptionKeys();
 
       // Start monitoring intervals
       if (this.threatDetectionEnabled) {
@@ -596,11 +501,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       // Initialize event handlers
       this.initializeEventHandlers();
 
-      this.logger.log('Session Security Service fully initialized');
-    } catch (error) {
-      this.logger.error('Failed to initialize Session Security Service', error);
-      throw error;
-    }
+      this.logger.log('Session Security Service fully initialized');} catch (error) {this.logger.error('Failed to initialize Session Security Service', error);throw error;}
   }
 
   /**
@@ -629,9 +530,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       // Disconnect from Redis
       await this.redisClient.disconnect();
 
-      this.logger.log('Session Security Service shutdown completed');
-    } catch (error) {
-      this.logger.error('Error during Session Security Service shutdown', error);
+      this.logger.log('Session Security Service shutdown completed');} catch (error) {this.logger.error('Error during Session Security Service shutdown', error);
     }
   }
 
@@ -670,27 +569,14 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
 
       // Encrypt data
       const cipher = crypto.createCipher(encryptionConfig.algorithm, derivedKey);
-      let encryptedData = cipher.update(serializedData, 'utf8', 'hex');
-      encryptedData += cipher.final('hex');
-
-      // Get authentication tag for GCM modes
-      let tag = '';
-      if (encryptionConfig.algorithm.includes('gcm')) {
-        tag = (cipher as any).getAuthTag().toString('hex');
-      }
-
-      // Calculate integrity hash
+      let encryptedData = cipher.update(serializedData, 'utf8', 'hex');encryptedData += cipher.final('hex');// Get authentication tag for GCM modeslet tag = '';if (encryptionConfig.algorithm.includes('gcm')) {tag = (cipher as any).getAuthTag().toString('hex');}// Calculate integrity hash
       const integrityHash = this.calculateIntegrityHash(encryptedData, iv, salt, derivedKey);
 
       const result: EncryptedSessionData = {
         sessionId,
         algorithm: encryptionConfig.algorithm,
         encryptedData,
-        iv: iv.toString('hex'),
-        tag,
-        salt: salt.toString('hex'),
-        keyId: this.getKeyId(sessionId),
-        timestamp: new Date(),
+        iv: iv.toString('hex'),tag,salt: salt.toString('hex'),keyId: this.getKeyId(sessionId),timestamp: new Date(),
         integrityHash,
         compressionApplied: encryptionConfig.compressionEnabled
       };
@@ -710,12 +596,8 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
         metadata: { encryptionConfig }
       });
 
-      this.logger.debug(`Session data encrypted successfully: ${sessionId}`);
-      return result;
-    } catch (error) {
-      this.logger.error(`Failed to encrypt session data: ${sessionId}`, error);
-      throw error;
-    }
+      this.logger.debug(`Session data encrypted successfully: ${sessionId}`);return result;} catch (error) {
+      this.logger.error(`Failed to encrypt session data: ${sessionId}`, error);throw error;}
   }
 
   /**
@@ -725,21 +607,13 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Decrypting session data for session: ${encryptedSessionData.sessionId}`);
-
-      // Get encryption key
-      const encryptionKey = await this.getEncryptionKey(encryptedSessionData.sessionId, encryptedSessionData.keyId);
+      this.logger.debug(`Decrypting session data for session: ${encryptedSessionData.sessionId}`);// Get encryption keyconst encryptionKey = await this.getEncryptionKey(encryptedSessionData.sessionId, encryptedSessionData.keyId);
       if (!encryptionKey) {
         throw new Error(`Encryption key not found for session: ${encryptedSessionData.sessionId}`);
       }
 
       // Convert hex strings back to buffers
-      const iv = Buffer.from(encryptedSessionData.iv, 'hex');
-      const salt = Buffer.from(encryptedSessionData.salt, 'hex');
-      const tag = encryptedSessionData.tag ? Buffer.from(encryptedSessionData.tag, 'hex') : undefined;
-
-      // Derive decryption key
-      const derivedKey = await this.deriveKey(encryptionKey, salt, {
+      const iv = Buffer.from(encryptedSessionData.iv, 'hex');const salt = Buffer.from(encryptedSessionData.salt, 'hex');const tag = encryptedSessionData.tag ? Buffer.from(encryptedSessionData.tag, 'hex') : undefined;// Derive decryption keyconst derivedKey = await this.deriveKey(encryptionKey, salt, {
         keyDerivationFunction: this.defaultEncryptionConfig.keyDerivationFunction,
         keyDerivationIterations: this.defaultEncryptionConfig.keyDerivationIterations
       } as SessionEncryptionConfig);
@@ -747,20 +621,11 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       // Verify integrity
       const expectedIntegrityHash = this.calculateIntegrityHash(encryptedSessionData.encryptedData, iv, salt, derivedKey);
       if (expectedIntegrityHash !== encryptedSessionData.integrityHash) {
-        throw new Error('Session data integrity verification failed');
-      }
-
-      // Decrypt data
+        throw new Error('Session data integrity verification failed');}// Decrypt data
       const decipher = crypto.createDecipher(encryptedSessionData.algorithm, derivedKey);
-      if (tag && encryptedSessionData.algorithm.includes('gcm')) {
-        (decipher as any).setAuthTag(tag);
-      }
+      if (tag && encryptedSessionData.algorithm.includes('gcm')) {(decipher as any).setAuthTag(tag);}
 
-      let decryptedData = decipher.update(encryptedSessionData.encryptedData, 'hex', 'utf8');
-      decryptedData += decipher.final('utf8');
-
-      // Decompress if compression was applied
-      if (encryptedSessionData.compressionApplied) {
+      let decryptedData = decipher.update(encryptedSessionData.encryptedData, 'hex', 'utf8');decryptedData += decipher.final('utf8');// Decompress if compression was appliedif (encryptedSessionData.compressionApplied) {
         decryptedData = await this.decompressData(decryptedData);
       }
 
@@ -780,9 +645,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
         }
       });
 
-      this.logger.debug(`Session data decrypted successfully: ${encryptedSessionData.sessionId}`);
-      return result;
-    } catch (error) {
+      this.logger.debug(`Session data decrypted successfully: ${encryptedSessionData.sessionId}`);return result;} catch (error) {
       this.logger.error(`Failed to decrypt session data: ${encryptedSessionData.sessionId}`, error);
 
       // Audit decryption failure
@@ -810,10 +673,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Validating session security: ${context.sessionId}`);
-
-      const validationResults = {
-        sessionExists: await this.validateSessionExists(context.sessionId),
+      this.logger.debug(`Validating session security: ${context.sessionId}`);const validationResults = {sessionExists: await this.validateSessionExists(context.sessionId),
         deviceFingerprint: await this.validateDeviceFingerprint(context),
         geolocation: await this.validateGeolocation(context),
         authenticationFactors: await this.validateAuthenticationFactors(context),
@@ -840,16 +700,11 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
         metadata: { context }
       });
 
-      this.logger.debug(`Session validation completed: ${context.sessionId}, Result: ${overallResult}`);
-
-      return {
-        result: overallResult,
+      this.logger.debug(`Session validation completed: ${context.sessionId}, Result: ${overallResult}`);return {result: overallResult,
         details: validationResults
       };
     } catch (error) {
-      this.logger.error(`Failed to validate session: ${context.sessionId}`, error);
-      throw error;
-    }
+      this.logger.error(`Failed to validate session: ${context.sessionId}`, error);throw error;}
   }
 
   // ===== THREAT DETECTION =====
@@ -861,11 +716,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Performing threat detection for session: ${context.sessionId}`);
-
-      const threats: ThreatDetectionResult[] = [];
-
-      // Check for various threat patterns
+      this.logger.debug(`Performing threat detection for session: ${context.sessionId}`);const threats: ThreatDetectionResult[] = [];// Check for various threat patterns
       const bruteForceCheck = await this.detectBruteForceAttack(context);
       if (bruteForceCheck) threats.push(bruteForceCheck);
 
@@ -891,10 +742,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
         await this.triggerAutomaticResponse(threat);
       }
 
-      this.logger.debug(`Threat detection completed: ${context.sessionId}, Threats found: ${threats.length}`);
-
-      return threats;
-    } catch (error) {
+      this.logger.debug(`Threat detection completed: ${context.sessionId}, Threats found: ${threats.length}`);return threats;} catch (error) {
       this.logger.error(`Failed to perform threat detection: ${context.sessionId}`, error);
       return [];
     }
@@ -908,13 +756,9 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   private async initializeEncryptionKeys(): Promise<void> {
     try {
       // Load existing keys from Redis
-      const keyIds = await this.redisClient.keys('encryption_key:*');
-
-      for (const keyId of keyIds) {
-        const keyData = await this.redisClient.get(keyId);
+      const keyIds = await this.redisClient.keys('encryption_key:*');for (const keyId of keyIds) {const keyData = await this.redisClient.get(keyId);
         if (keyData) {
-          const sessionId = keyId.replace('encryption_key:', '');
-          this.encryptionKeys.set(sessionId, Buffer.from(keyData, 'hex'));
+          const sessionId = keyId.replace('encryption_key:', '');this.encryptionKeys.set(sessionId, Buffer.from(keyData, 'hex'));
         }
       }
 
@@ -942,10 +786,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
         key.toString('hex')
       );
 
-      this.logger.debug(`Generated new encryption key for session: ${sessionId}`);
-    }
-
-    return key;
+      this.logger.debug(`Generated new encryption key for session: ${sessionId}`);}return key;
   }
 
   /**
@@ -958,9 +799,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       // Try to load from Redis
       const keyData = await this.redisClient.get(`encryption_key:${sessionId}`);
       if (keyData) {
-        key = Buffer.from(keyData, 'hex');
-        this.encryptionKeys.set(sessionId, key);
-      }
+        key = Buffer.from(keyData, 'hex');this.encryptionKeys.set(sessionId, key);}
     }
 
     return key || null;
@@ -970,10 +809,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
    * Get key ID for session
    */
   private getKeyId(sessionId: string): string {
-    return crypto.createHash('sha256').update(sessionId).digest('hex').substring(0, 16);
-  }
-
-  /**
+    return crypto.createHash('sha256').update(sessionId).digest('hex').substring(0, 16);}/**
    * Derive key using configured KDF
    */
   private async deriveKey(
@@ -982,13 +818,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
     config: SessionEncryptionConfig
   ): Promise<Buffer> {
     switch (config.keyDerivationFunction) {
-      case 'pbkdf2':
-        return crypto.pbkdf2Sync(masterKey, salt, config.keyDerivationIterations, config.keySize, 'sha256');
-      case 'scrypt':
-        return crypto.scryptSync(masterKey, salt, config.keySize);
-      case 'argon2':
-        // Would need argon2 library - using pbkdf2 as fallback
-        return crypto.pbkdf2Sync(masterKey, salt, config.keyDerivationIterations, config.keySize, 'sha256');
+      case 'pbkdf2':return crypto.pbkdf2Sync(masterKey, salt, config.keyDerivationIterations, config.keySize, 'sha256');case 'scrypt':return crypto.scryptSync(masterKey, salt, config.keySize);case 'argon2':// Would need argon2 library - using pbkdf2 as fallbackreturn crypto.pbkdf2Sync(masterKey, salt, config.keyDerivationIterations, config.keySize, 'sha256');
       default:
         throw new Error(`Unsupported key derivation function: ${config.keyDerivationFunction}`);
     }
@@ -998,11 +828,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
    * Calculate integrity hash
    */
   private calculateIntegrityHash(encryptedData: string, iv: Buffer, salt: Buffer, key: Buffer): string {
-    const data = encryptedData + iv.toString('hex') + salt.toString('hex');
-    return crypto.createHmac('sha256', key).update(data).digest('hex');
-  }
-
-  /**
+    const data = encryptedData + iv.toString('hex') + salt.toString('hex');return crypto.createHmac('sha256', key).update(data).digest('hex');}/**
    * Compress data (placeholder implementation)
    */
   private async compressData(data: string): Promise<string> {
@@ -1028,14 +854,9 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       try {
         await this.performContinuousThreatMonitoring();
       } catch (error) {
-        this.logger.error('Error during threat monitoring', error);
-      }
-    }, 30000); // Every 30 seconds
+        this.logger.error('Error during threat monitoring', error);}}, 30000); // Every 30 seconds
 
-    this.logger.log('Threat monitoring started');
-  }
-
-  /**
+    this.logger.log('Threat monitoring started');}/**
    * Start key rotation
    */
   private startKeyRotation(): void {
@@ -1045,20 +866,13 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       try {
         await this.performKeyRotation();
       } catch (error) {
-        this.logger.error('Error during key rotation', error);
-      }
-    }, 3600000); // Every hour
+        this.logger.error('Error during key rotation', error);}}, 3600000); // Every hour
 
-    this.logger.log('Key rotation started');
-  }
-
-  /**
+    this.logger.log('Key rotation started');}/**
    * Initialize event handlers
    */
   private initializeEventHandlers(): void {
-    this.eventEmitter.on('session.terminated', (sessionId: string) => {
-      // Clean up encryption keys and threat data
-      this.encryptionKeys.delete(sessionId);
+    this.eventEmitter.on('session.terminated', (sessionId: string) => {// Clean up encryption keys and threat datathis.encryptionKeys.delete(sessionId);
       this.threatDetectionCache.forEach((threat, threatId) => {
         if (threat.sessionId === sessionId) {
           this.threatDetectionCache.delete(threatId);

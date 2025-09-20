@@ -25,24 +25,11 @@
  * @version 1.0.0 - INTELLIGENT SELECTIVE VALIDATION FRAMEWORK
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
-// ===== RISK ASSESSMENT INTERFACES =====
-
-/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';// ===== RISK ASSESSMENT INTERFACES =====/**
  * Risk levels for validation operations
  */
 export enum ValidationRiskLevel {
-  MINIMAL = 'MINIMAL',     // Auto-approve, no validation needed
-  LOW = 'LOW',             // Basic validation, cached results acceptable
-  MEDIUM = 'MEDIUM',       // Standard validation with optimization
-  HIGH = 'HIGH',           // Enhanced validation, limited caching
-  CRITICAL = 'CRITICAL'    // Full validation always required, no shortcuts
-}
-
-/**
+  MINIMAL = 'MINIMAL',     // Auto-approve, no validation neededLOW = 'LOW',             // Basic validation, cached results acceptableMEDIUM = 'MEDIUM',       // Standard validation with optimizationHIGH = 'HIGH',           // Enhanced validation, limited cachingCRITICAL = 'CRITICAL'    // Full validation always required, no shortcuts}/**
  * Operation classification context
  */
 export interface OperationContext {
@@ -61,9 +48,7 @@ export interface OperationContext {
 export interface UserSecurityContext {
   readonly userId: string;
   readonly userRole: string;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly permissionLevel: number; // 1-10 scale
-  readonly trustScore: number; // 0-1 scale based on behavior
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly permissionLevel: number; // 1-10 scalereadonly trustScore: number; // 0-1 scale based on behavior
   readonly recentActivity: ActivityPattern[];
   readonly preferenceProfile: UserPreferences;
   readonly sessionContext: SessionInfo;
@@ -74,9 +59,7 @@ export interface UserSecurityContext {
  */
 export interface SystemContext {
   readonly systemLoad: number; // 0-1 scale
-  readonly securityAlertLevel: 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';
-  readonly maintenanceMode: boolean;
-  readonly emergencyMode: boolean;
+  readonly securityAlertLevel: 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';readonly maintenanceMode: boolean;readonly emergencyMode: boolean;
   readonly performanceMetrics: {
     cpuUsage: number;
     memoryUsage: number;
@@ -104,9 +87,7 @@ export interface HistoricalContext {
 export interface BusinessContext {
   readonly businessHours: boolean;
   readonly criticalPeriod: boolean;
-  readonly businessImpactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly complianceRequirement: ComplianceLevel;
-  readonly auditMode: boolean;
+  readonly businessImpactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly complianceRequirement: ComplianceLevel;readonly auditMode: boolean;
 }
 
 /**
@@ -120,21 +101,15 @@ export interface RiskAssessmentResult {
   readonly recommendation: ValidationRecommendation;
   readonly bypassEligible: boolean;
   readonly cacheEligible: boolean;
-  readonly monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
-  readonly assessmentTime: number; // milliseconds
-  readonly metadata: Record<string, unknown>;
+  readonly monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';readonly assessmentTime: number; // millisecondsreadonly metadata: Record<string, unknown>;
 }
 
 /**
  * Individual risk factors contributing to assessment
  */
 export interface RiskFactor {
-  readonly category: 'USER' | 'OPERATION' | 'SYSTEM' | 'HISTORICAL' | 'BUSINESS';
-  readonly factor: string;
-  readonly weight: number; // 0-1 scale
-  readonly impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
-  readonly value: number;
-  readonly description: string;
+  readonly category: 'USER' | 'OPERATION' | 'SYSTEM' | 'HISTORICAL' | 'BUSINESS';readonly factor: string;readonly weight: number; // 0-1 scale
+  readonly impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';readonly value: number;readonly description: string;
 }
 
 /**
@@ -146,9 +121,7 @@ export interface ValidationRecommendation {
   readonly requiresHumanApproval: boolean;
   readonly validationTimeout: number;
   readonly retryAttempts: number;
-  readonly auditLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
-  readonly safeguards: string[];
-  readonly alternatives: string[];
+  readonly auditLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';readonly safeguards: string[];readonly alternatives: string[];
 }
 
 /**
@@ -166,12 +139,8 @@ interface ActivityPattern {
  * User preferences for validation customization
  */
 interface UserPreferences {
-  readonly validationSensitivity: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly autoApprovePatterns: string[];
-  readonly requireApprovalPatterns: string[];
-  readonly preferredValidationSpeed: 'FAST' | 'BALANCED' | 'THOROUGH';
-  readonly learningEnabled: boolean;
-}
+  readonly validationSensitivity: 'LOW' | 'MEDIUM' | 'HIGH';readonly autoApprovePatterns: string[];readonly requireApprovalPatterns: string[];
+  readonly preferredValidationSpeed: 'FAST' | 'BALANCED' | 'THOROUGH';readonly learningEnabled: boolean;}
 
 /**
  * Session context information
@@ -235,18 +204,14 @@ interface ApprovalPattern {
 interface AnomalyEvent {
   readonly timestamp: Date;
   readonly anomalyType: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly resolved: boolean;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly resolved: boolean;
 }
 
 /**
  * Compliance level requirements
  */
 interface ComplianceLevel {
-  readonly level: 'BASIC' | 'STANDARD' | 'ENHANCED' | 'MAXIMUM';
-  readonly requirements: string[];
-  readonly auditTrailRequired: boolean;
+  readonly level: 'BASIC' | 'STANDARD' | 'ENHANCED' | 'MAXIMUM';readonly requirements: string[];readonly auditTrailRequired: boolean;
   readonly approvalRequired: boolean;
 }
 
@@ -270,10 +235,7 @@ class RiskClassificationModel {
    */
   predict(features: number[]): { riskLevel: ValidationRiskLevel; confidence: number } {
     if (features.length !== this.featureCount) {
-      throw new Error(`Expected ${this.featureCount} features, got ${features.length}`);
-    }
-
-    // Simple neural network simulation
+      throw new Error(`Expected ${this.featureCount} features, got ${features.length}`);}// Simple neural network simulation
     const score = features.reduce((sum, feature, index) => {
       return sum + (feature * (this.modelWeights[index] || 0.5));
     }, 0);
@@ -286,19 +248,19 @@ class RiskClassificationModel {
     let confidence: number;
 
     if (normalizedScore < 0.2) {
-      riskLevel = ValidationRiskLevel.MINIMAL;
+      riskLevel = ValidationRiskLevel._MINIMAL;
       confidence = 1 - normalizedScore * 5; // Higher confidence for lower scores
     } else if (normalizedScore < 0.4) {
-      riskLevel = ValidationRiskLevel.LOW;
+      riskLevel = ValidationRiskLevel._LOW;
       confidence = 0.9 - Math.abs(normalizedScore - 0.3) * 10;
     } else if (normalizedScore < 0.6) {
-      riskLevel = ValidationRiskLevel.MEDIUM;
+      riskLevel = ValidationRiskLevel._MODERATE;
       confidence = 0.8 - Math.abs(normalizedScore - 0.5) * 10;
     } else if (normalizedScore < 0.8) {
-      riskLevel = ValidationRiskLevel.HIGH;
+      riskLevel = ValidationRiskLevel._HIGH;
       confidence = 0.7 + (normalizedScore - 0.6) * 5;
     } else {
-      riskLevel = ValidationRiskLevel.CRITICAL;
+      riskLevel = ValidationRiskLevel._CRITICAL;
       confidence = 0.9 + (normalizedScore - 0.8) * 0.5;
     }
 
@@ -336,16 +298,13 @@ class RiskClassificationModel {
   private initializeModel(): void {
     // Initialize with random weights
     this.modelWeights = Array.from({ length: this.featureCount }, () => Math.random() * 0.1 + 0.45);
-    this.logger.log('Risk classification model initialized');
-  }
-
-  private calculateError(predicted: ValidationRiskLevel, actual: ValidationRiskLevel): number {
+    this.logger.log('Risk classification model initialized');}private calculateError(predicted: ValidationRiskLevel, actual: ValidationRiskLevel): number {
     const riskValues = {
-      [ValidationRiskLevel.MINIMAL]: 0,
-      [ValidationRiskLevel.LOW]: 1,
-      [ValidationRiskLevel.MEDIUM]: 2,
-      [ValidationRiskLevel.HIGH]: 3,
-      [ValidationRiskLevel.CRITICAL]: 4,
+      [ValidationRiskLevel._MINIMAL]: 0,
+      [ValidationRiskLevel._LOW]: 1,
+      [ValidationRiskLevel._MODERATE]: 2,
+      [ValidationRiskLevel._HIGH]: 3,
+      [ValidationRiskLevel._CRITICAL]: 4,
     };
 
     return riskValues[actual] - riskValues[predicted];
@@ -413,9 +372,7 @@ class AnomalyDetectionSystem {
     const anomalyFactors: string[] = [];
     deviations.forEach((deviation, index) => {
       if (deviation > this.anomalyThreshold) {
-        anomalyFactors.push(`Behavior pattern ${index} deviation: ${(deviation * 100).toFixed(1)}%`);
-      }
-    });
+        anomalyFactors.push(`Behavior pattern ${index} deviation: ${(deviation * 100).toFixed(1)}%`);}});
 
     // Update baseline with new data (exponential moving average)
     const alpha = 0.1; // Learning rate
@@ -494,10 +451,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     this.systemContext = this.initializeSystemContext();
 
     this.startSystemMonitoring();
-    this.logger.log('Risk Assessment Service initialized with AI-powered classification and optimization');
-  }
-
-  // ===== PUBLIC API METHODS =====
+    this.logger.log('Risk Assessment Service initialized with AI-powered classification and optimization');}// ===== PUBLIC API METHODS =====
 
   /**
    * Assess risk level for an operation with comprehensive analysis
@@ -581,9 +535,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
       return result;
 
     } catch (error) {
-      this.logger.error('Risk assessment failed', {
-        functionName: context.functionName,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Risk assessment failed', {functionName: context.functionName,error: error instanceof Error ? error.message : String(error),
       });
 
       // Return conservative assessment on error
@@ -631,12 +583,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     // Train the model with feedback
     if (outcome.userFeedback) {
       // This would require storing the original features and retraining
-      this.logger.debug(`User feedback received for ${userId}: ${outcome.userFeedback}`);
-    }
-
-    this.logger.debug(`User profile updated for ${userId}`, {
-      trustScore: newTrustScore.toFixed(3),
-      activityCount: history.length,
+      this.logger.debug(`User feedback received for ${userId}: ${outcome.userFeedback}`);}this.logger.debug(`User profile updated for ${userId}`, {trustScore: newTrustScore.toFixed(3),activityCount: history.length,
       recentSuccess: outcome.approved,
     });
   }
@@ -659,13 +606,13 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     // Determine user risk level based on trust score and behavior
     let riskLevel: ValidationRiskLevel;
     if (trustScore > 0.8 && behaviorPattern.consistencyScore > 0.7) {
-      riskLevel = ValidationRiskLevel.LOW;
+      riskLevel = ValidationRiskLevel._LOW;
     } else if (trustScore > 0.6) {
-      riskLevel = ValidationRiskLevel.MEDIUM;
+      riskLevel = ValidationRiskLevel._MODERATE;
     } else if (trustScore > 0.3) {
-      riskLevel = ValidationRiskLevel.HIGH;
+      riskLevel = ValidationRiskLevel._HIGH;
     } else {
-      riskLevel = ValidationRiskLevel.CRITICAL;
+      riskLevel = ValidationRiskLevel._CRITICAL;
     }
 
     // Generate recommendations
@@ -719,13 +666,9 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     this.emergencyBypassMode = enabled;
 
     this.logger.warn(`Emergency bypass mode ${enabled ? 'ENABLED' : 'DISABLED'}`, {
-      reason: reason || 'Manual override',
-      timestamp: new Date(),
-    });
+      reason: reason || 'Manual override',timestamp: new Date(),});
 
-    this.eventEmitter.emit('risk.emergency.bypass', {
-      enabled,
-      reason,
+    this.eventEmitter.emit('risk.emergency.bypass', {enabled,reason,
       timestamp: new Date(),
     });
   }
@@ -771,20 +714,14 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // Trust score analysis
     factors.push({
-      category: 'USER',
-      factor: 'trust_score',
-      weight: 0.3,
-      impact: userContext.trustScore > 0.7 ? 'POSITIVE' : userContext.trustScore < 0.3 ? 'NEGATIVE' : 'NEUTRAL',
+      category: 'USER',factor: 'trust_score',weight: 0.3,impact: userContext.trustScore > 0.7 ? 'POSITIVE' : userContext.trustScore < 0.3 ? 'NEGATIVE' : 'NEUTRAL',
       value: userContext.trustScore,
       description: `User trust score: ${(userContext.trustScore * 100).toFixed(1)}%`,
     });
 
     // Permission level analysis
     factors.push({
-      category: 'USER',
-      factor: 'permission_level',
-      weight: 0.2,
-      impact: userContext.permissionLevel > 7 ? 'POSITIVE' : userContext.permissionLevel < 3 ? 'NEGATIVE' : 'NEUTRAL',
+      category: 'USER',factor: 'permission_level',weight: 0.2,impact: userContext.permissionLevel > 7 ? 'POSITIVE' : userContext.permissionLevel < 3 ? 'NEGATIVE' : 'NEUTRAL',
       value: userContext.permissionLevel / 10,
       description: `Permission level: ${userContext.permissionLevel}/10`,
     });
@@ -795,10 +732,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
       : 0.5;
 
     factors.push({
-      category: 'USER',
-      factor: 'recent_success_rate',
-      weight: 0.15,
-      impact: recentSuccessRate > 0.8 ? 'POSITIVE' : recentSuccessRate < 0.5 ? 'NEGATIVE' : 'NEUTRAL',
+      category: 'USER',factor: 'recent_success_rate',weight: 0.15,impact: recentSuccessRate > 0.8 ? 'POSITIVE' : recentSuccessRate < 0.5 ? 'NEGATIVE' : 'NEUTRAL',
       value: recentSuccessRate,
       description: `Recent success rate: ${(recentSuccessRate * 100).toFixed(1)}%`,
     });
@@ -811,27 +745,15 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // System load analysis
     factors.push({
-      category: 'SYSTEM',
-      factor: 'system_load',
-      weight: 0.2,
-      impact: systemContext.systemLoad > 0.8 ? 'NEGATIVE' : systemContext.systemLoad < 0.3 ? 'POSITIVE' : 'NEUTRAL',
+      category: 'SYSTEM',factor: 'system_load',weight: 0.2,impact: systemContext.systemLoad > 0.8 ? 'NEGATIVE' : systemContext.systemLoad < 0.3 ? 'POSITIVE' : 'NEUTRAL',
       value: systemContext.systemLoad,
       description: `System load: ${(systemContext.systemLoad * 100).toFixed(1)}%`,
     });
 
     // Security alert level
     const alertLevelWeight = {
-      'GREEN': 0,
-      'YELLOW': 0.3,
-      'ORANGE': 0.7,
-      'RED': 1.0,
-    };
-
-    factors.push({
-      category: 'SYSTEM',
-      factor: 'security_alert_level',
-      weight: 0.25,
-      impact: systemContext.securityAlertLevel === 'GREEN' ? 'POSITIVE' : 'NEGATIVE',
+      'GREEN': 0,'YELLOW': 0.3,'ORANGE': 0.7,'RED': 1.0,};factors.push({
+      category: 'SYSTEM',factor: 'security_alert_level',weight: 0.25,impact: systemContext.securityAlertLevel === 'GREEN' ? 'POSITIVE' : 'NEGATIVE',
       value: alertLevelWeight[systemContext.securityAlertLevel],
       description: `Security alert level: ${systemContext.securityAlertLevel}`,
     });
@@ -843,10 +765,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     ) / 200; // Normalized to 0-1
 
     factors.push({
-      category: 'SYSTEM',
-      factor: 'performance_metrics',
-      weight: 0.15,
-      impact: avgPerformance > 0.8 ? 'NEGATIVE' : avgPerformance < 0.4 ? 'POSITIVE' : 'NEUTRAL',
+      category: 'SYSTEM',factor: 'performance_metrics',weight: 0.15,impact: avgPerformance > 0.8 ? 'NEGATIVE' : avgPerformance < 0.4 ? 'POSITIVE' : 'NEUTRAL',
       value: avgPerformance,
       description: `Average resource usage: ${(avgPerformance * 100).toFixed(1)}%`,
     });
@@ -859,21 +778,10 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // Operation type analysis
     const operationRiskMap = {
-      'READ': 0.1,
-      'create': 0.4,
-      'update': 0.5,
-      'delete': 0.9,
-      'admin': 0.8,
-      'system': 0.9,
-    };
-
-    const operationRisk = operationRiskMap[context.operationType.toLowerCase()] || 0.5;
+      'READ': 0.1,'create': 0.4,'update': 0.5,'delete': 0.9,'admin': 0.8,'system': 0.9,};const operationRisk = operationRiskMap[context.operationType.toLowerCase()] || 0.5;
 
     factors.push({
-      category: 'OPERATION',
-      factor: 'operation_type',
-      weight: 0.3,
-      impact: operationRisk < 0.3 ? 'POSITIVE' : operationRisk > 0.7 ? 'NEGATIVE' : 'NEUTRAL',
+      category: 'OPERATION',factor: 'operation_type',weight: 0.3,impact: operationRisk < 0.3 ? 'POSITIVE' : operationRisk > 0.7 ? 'NEGATIVE' : 'NEUTRAL',
       value: operationRisk,
       description: `Operation type risk: ${context.operationType}`,
     });
@@ -883,10 +791,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     const complexityScore = Math.min(1, parameterCount / 20);
 
     factors.push({
-      category: 'OPERATION',
-      factor: 'parameter_complexity',
-      weight: 0.15,
-      impact: complexityScore > 0.7 ? 'NEGATIVE' : complexityScore < 0.3 ? 'POSITIVE' : 'NEUTRAL',
+      category: 'OPERATION',factor: 'parameter_complexity',weight: 0.15,impact: complexityScore > 0.7 ? 'NEGATIVE' : complexityScore < 0.3 ? 'POSITIVE' : 'NEUTRAL',
       value: complexityScore,
       description: `Parameter complexity: ${parameterCount} parameters`,
     });
@@ -899,20 +804,14 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // Anomaly score analysis
     factors.push({
-      category: 'HISTORICAL',
-      factor: 'anomaly_score',
-      weight: 0.25,
-      impact: historicalContext.anomalyScore > 0.7 ? 'NEGATIVE' : historicalContext.anomalyScore < 0.3 ? 'POSITIVE' : 'NEUTRAL',
+      category: 'HISTORICAL',factor: 'anomaly_score',weight: 0.25,impact: historicalContext.anomalyScore > 0.7 ? 'NEGATIVE' : historicalContext.anomalyScore < 0.3 ? 'POSITIVE' : 'NEUTRAL',
       value: historicalContext.anomalyScore,
       description: `Anomaly score: ${(historicalContext.anomalyScore * 100).toFixed(1)}%`,
     });
 
     // Behavior consistency
     factors.push({
-      category: 'HISTORICAL',
-      factor: 'behavior_consistency',
-      weight: 0.2,
-      impact: historicalContext.userBehaviorPattern.consistencyScore > 0.8 ? 'POSITIVE' : 'NEUTRAL',
+      category: 'HISTORICAL',factor: 'behavior_consistency',weight: 0.2,impact: historicalContext.userBehaviorPattern.consistencyScore > 0.8 ? 'POSITIVE' : 'NEUTRAL',
       value: historicalContext.userBehaviorPattern.consistencyScore,
       description: `Behavior consistency: ${(historicalContext.userBehaviorPattern.consistencyScore * 100).toFixed(1)}%`,
     });
@@ -925,27 +824,15 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // Business impact level
     const impactLevelWeight = {
-      'LOW': 0.1,
-      'MEDIUM': 0.4,
-      'HIGH': 0.7,
-      'CRITICAL': 1.0,
-    };
-
-    factors.push({
-      category: 'BUSINESS',
-      factor: 'business_impact',
-      weight: 0.3,
-      impact: businessContext.businessImpactLevel === 'LOW' ? 'POSITIVE' : 'NEGATIVE',
+      'LOW': 0.1,'MEDIUM': 0.4,'HIGH': 0.7,'CRITICAL': 1.0,};factors.push({
+      category: 'BUSINESS',factor: 'business_impact',weight: 0.3,impact: businessContext.businessImpactLevel === 'LOW' ? 'POSITIVE' : 'NEGATIVE',
       value: impactLevelWeight[businessContext.businessImpactLevel],
       description: `Business impact: ${businessContext.businessImpactLevel}`,
     });
 
     // Critical period
     factors.push({
-      category: 'BUSINESS',
-      factor: 'critical_period',
-      weight: 0.2,
-      impact: businessContext.criticalPeriod ? 'NEGATIVE' : 'POSITIVE',
+      category: 'BUSINESS',factor: 'critical_period',weight: 0.2,impact: businessContext.criticalPeriod ? 'NEGATIVE' : 'POSITIVE',
       value: businessContext.criticalPeriod ? 1 : 0,
       description: `Critical period: ${businessContext.criticalPeriod ? 'Yes' : 'No'}`,
     });
@@ -962,29 +849,27 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
     // Emergency bypass rule
     if (this.emergencyBypassMode) {
-      return ValidationRiskLevel.MINIMAL;
+      return ValidationRiskLevel._MINIMAL;
     }
 
     // Critical system alert overrides
-    if (context.systemContext.securityAlertLevel === 'RED') {
-      finalRisk = ValidationRiskLevel.CRITICAL;
-    }
+    if (context.systemContext.securityAlertLevel === 'RED') {finalRisk = ValidationRiskLevel._CRITICAL;}
 
     // High-trust user in business hours
     if (context.userContext.trustScore > 0.9 &&
         context.businessContext.businessHours &&
         !context.businessContext.criticalPeriod) {
 
-      if (finalRisk === ValidationRiskLevel.MEDIUM) {
-        finalRisk = ValidationRiskLevel.LOW;
-      } else if (finalRisk === ValidationRiskLevel.LOW) {
-        finalRisk = ValidationRiskLevel.MINIMAL;
+      if (finalRisk === ValidationRiskLevel._MODERATE) {
+        finalRisk = ValidationRiskLevel._LOW;
+      } else if (finalRisk === ValidationRiskLevel._LOW) {
+        finalRisk = ValidationRiskLevel._MINIMAL;
       }
     }
 
     // Maintenance mode rule
     if (context.systemContext.maintenanceMode) {
-      finalRisk = ValidationRiskLevel.HIGH;
+      finalRisk = ValidationRiskLevel._HIGH;
     }
 
     return finalRisk;
@@ -996,113 +881,76 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     context: OperationContext
   ): ValidationRecommendation {
     switch (riskLevel) {
-      case ValidationRiskLevel.MINIMAL:
+      case ValidationRiskLevel._MINIMAL:
         return {
           skipValidation: true,
           useCachedResult: true,
           requiresHumanApproval: false,
           validationTimeout: 1000,
           retryAttempts: 1,
-          auditLevel: 'BASIC',
-          safeguards: ['basic_logging'],
-          alternatives: [],
-        };
+          auditLevel: 'BASIC',safeguards: ['basic_logging'],alternatives: [],};
 
-      case ValidationRiskLevel.LOW:
+      case ValidationRiskLevel._LOW:
         return {
           skipValidation: false,
           useCachedResult: true,
           requiresHumanApproval: false,
           validationTimeout: 2000,
           retryAttempts: 2,
-          auditLevel: 'BASIC',
-          safeguards: ['basic_logging', 'parameter_validation'],
-          alternatives: ['Use cached validation if available'],
-        };
-
-      case ValidationRiskLevel.MEDIUM:
+          auditLevel: 'BASIC',safeguards: ['basic_logging', 'parameter_validation'],alternatives: ['Use cached validation if available'],};case ValidationRiskLevel._MODERATE:
         return {
           skipValidation: false,
           useCachedResult: false,
           requiresHumanApproval: false,
           validationTimeout: 5000,
           retryAttempts: 2,
-          auditLevel: 'DETAILED',
-          safeguards: ['detailed_logging', 'parameter_validation', 'context_verification'],
-          alternatives: ['Request additional user confirmation'],
-        };
-
-      case ValidationRiskLevel.HIGH:
+          auditLevel: 'DETAILED',safeguards: ['detailed_logging', 'parameter_validation', 'context_verification'],alternatives: ['Request additional user confirmation'],};case ValidationRiskLevel._HIGH:
         return {
           skipValidation: false,
           useCachedResult: false,
           requiresHumanApproval: true,
           validationTimeout: 10000,
           retryAttempts: 1,
-          auditLevel: 'COMPREHENSIVE',
-          safeguards: ['comprehensive_logging', 'multi_factor_validation', 'approval_workflow'],
-          alternatives: ['Escalate to administrator', 'Use alternative safer method'],
-        };
-
-      case ValidationRiskLevel.CRITICAL:
+          auditLevel: 'COMPREHENSIVE',safeguards: ['comprehensive_logging', 'multi_factor_validation', 'approval_workflow'],alternatives: ['Escalate to administrator', 'Use alternative safer method'],};case ValidationRiskLevel._CRITICAL:
         return {
           skipValidation: false,
           useCachedResult: false,
           requiresHumanApproval: true,
           validationTimeout: 30000,
           retryAttempts: 1,
-          auditLevel: 'COMPREHENSIVE',
-          safeguards: ['maximum_logging', 'multi_party_approval', 'security_review'],
-          alternatives: ['Require administrator approval', 'Use manual process', 'Defer to maintenance window'],
-        };
-
-      default:
+          auditLevel: 'COMPREHENSIVE',safeguards: ['maximum_logging', 'multi_party_approval', 'security_review'],alternatives: ['Require administrator approval', 'Use manual process', 'Defer to maintenance window'],};default:
         return {
           skipValidation: false,
           useCachedResult: false,
           requiresHumanApproval: false,
           validationTimeout: 5000,
           retryAttempts: 2,
-          auditLevel: 'DETAILED',
-          safeguards: ['basic_logging'],
-          alternatives: [],
-        };
+          auditLevel: 'DETAILED',safeguards: ['basic_logging'],alternatives: [],};
     }
   }
 
   private determineBypassEligibility(riskLevel: ValidationRiskLevel, context: OperationContext): boolean {
-    return riskLevel === ValidationRiskLevel.MINIMAL &&
+    return riskLevel === ValidationRiskLevel._MINIMAL &&
            !context.businessContext.auditMode &&
            context.userContext.trustScore > 0.8;
   }
 
   private determineCacheEligibility(riskLevel: ValidationRiskLevel, context: OperationContext): boolean {
-    return [ValidationRiskLevel.MINIMAL, ValidationRiskLevel.LOW].includes(riskLevel) &&
+    return [ValidationRiskLevel._MINIMAL, ValidationRiskLevel._LOW].includes(riskLevel) &&
            !context.businessContext.criticalPeriod;
   }
 
-  private getMonitoringLevel(riskLevel: ValidationRiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
-    switch (riskLevel) {
-      case ValidationRiskLevel.MINIMAL:
-      case ValidationRiskLevel.LOW:
-        return 'BASIC';
-      case ValidationRiskLevel.MEDIUM:
-        return 'ENHANCED';
-      case ValidationRiskLevel.HIGH:
-      case ValidationRiskLevel.CRITICAL:
-        return 'COMPREHENSIVE';
-      default:
-        return 'ENHANCED';
+  private getMonitoringLevel(riskLevel: ValidationRiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {switch (riskLevel) {case ValidationRiskLevel._MINIMAL:
+      case ValidationRiskLevel._LOW:
+        return 'BASIC';case ValidationRiskLevel._MODERATE:return 'ENHANCED';case ValidationRiskLevel._HIGH:case ValidationRiskLevel._CRITICAL:
+        return 'COMPREHENSIVE';default:return 'ENHANCED';
     }
   }
 
   private generateReasoning(riskFactors: RiskFactor[], prediction: { riskLevel: ValidationRiskLevel; confidence: number }): string[] {
     const reasoning: string[] = [];
 
-    reasoning.push(`AI model prediction: ${prediction.riskLevel} (confidence: ${(prediction.confidence * 100).toFixed(1)}%)`);
-
-    // Add top risk factors
-    const topFactors = riskFactors
+    reasoning.push(`AI model prediction: ${prediction.riskLevel} (confidence: ${(prediction.confidence * 100).toFixed(1)}%)`);// Add top risk factorsconst topFactors = riskFactors
       .filter(f => f.weight > 0.2)
       .sort((a, b) => b.weight - a.weight)
       .slice(0, 3);
@@ -1138,32 +986,17 @@ export class RiskAssessmentService implements OnApplicationShutdown {
 
   private createFailsafeAssessment(context: OperationContext, assessmentTime: number): RiskAssessmentResult {
     return {
-      riskLevel: ValidationRiskLevel.MEDIUM, // Conservative default
+      riskLevel: ValidationRiskLevel._MODERATE, // Conservative default
       confidence: 0.5,
-      reasoning: ['Failsafe assessment due to error in risk analysis'],
-      factors: [{
-        category: 'SYSTEM',
-        factor: 'failsafe_mode',
-        weight: 1.0,
-        impact: 'NEGATIVE',
-        value: 1,
-        description: 'Risk assessment system error - using failsafe mode',
-      }],
-      recommendation: {
+      reasoning: ['Failsafe assessment due to error in risk analysis'],factors: [{category: 'SYSTEM',factor: 'failsafe_mode',weight: 1.0,impact: 'NEGATIVE',value: 1,description: 'Risk assessment system error - using failsafe mode',}],recommendation: {
         skipValidation: false,
         useCachedResult: false,
         requiresHumanApproval: false,
         validationTimeout: 5000,
         retryAttempts: 2,
-        auditLevel: 'DETAILED',
-        safeguards: ['failsafe_logging'],
-        alternatives: ['Manual validation'],
-      },
-      bypassEligible: false,
+        auditLevel: 'DETAILED',safeguards: ['failsafe_logging'],alternatives: ['Manual validation'],},bypassEligible: false,
       cacheEligible: false,
-      monitoringLevel: 'ENHANCED',
-      assessmentTime,
-      metadata: { failsafeMode: true },
+      monitoringLevel: 'ENHANCED',assessmentTime,metadata: { failsafeMode: true },
     };
   }
 
@@ -1233,86 +1066,54 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     const recommendations: string[] = [];
 
     if (trustScore < 0.5) {
-      recommendations.push('Complete security training to improve trust score');
-      recommendations.push('Follow recommended security practices');
-    }
-
-    if (behaviorPattern.consistencyScore < 0.7) {
-      recommendations.push('Maintain consistent operation patterns');
-      recommendations.push('Avoid unusual system access patterns');
-    }
-
-    if (trustScore > 0.8 && behaviorPattern.consistencyScore > 0.8) {
-      recommendations.push('Consider requesting elevated permissions');
-      recommendations.push('Eligible for fast-track validation options');
-    }
-
-    return recommendations;
+      recommendations.push('Complete security training to improve trust score');recommendations.push('Follow recommended security practices');}if (behaviorPattern.consistencyScore < 0.7) {
+      recommendations.push('Maintain consistent operation patterns');recommendations.push('Avoid unusual system access patterns');}if (trustScore > 0.8 && behaviorPattern.consistencyScore > 0.8) {
+      recommendations.push('Consider requesting elevated permissions');recommendations.push('Eligible for fast-track validation options');}return recommendations;
   }
 
   // ===== ENCODING HELPER METHODS =====
 
   private encodeSecurityLevel(level: string): number {
-    const levelMap = { 'LOW': 0.25, 'MEDIUM': 0.5, 'HIGH': 0.75, 'CRITICAL': 1.0 };
-    return levelMap[level] || 0.5;
-  }
+    const levelMap = { 'LOW': 0.25, 'MEDIUM': 0.5, 'HIGH': 0.75, 'CRITICAL': 1.0 };return levelMap[level] || 0.5;}
 
   private encodeOperationType(type: string): number {
     const typeMap = {
-      'read': 0.1, 'query': 0.1, 'search': 0.1,
-      'create': 0.4, 'insert': 0.4, 'add': 0.4,
-      'update': 0.5, 'modify': 0.5, 'edit': 0.5,
-      'delete': 0.9, 'remove': 0.9, 'destroy': 0.9,
-      'admin': 0.8, 'system': 0.9, 'config': 0.7,
-    };
-    return typeMap[type.toLowerCase()] || 0.5;
+      'read': 0.1, 'query': 0.1, 'search': 0.1,'create': 0.4, 'insert': 0.4, 'add': 0.4,'update': 0.5, 'modify': 0.5, 'edit': 0.5,'delete': 0.9, 'remove': 0.9, 'destroy': 0.9,'admin': 0.8, 'system': 0.9, 'config': 0.7,};return typeMap[type.toLowerCase()] || 0.5;
   }
 
   private encodeFunctionComplexity(functionName: string): number {
     // Simple heuristic based on function name
-    const complexityIndicators = ['admin', 'system', 'delete', 'destroy', 'modify', 'update'];
-    const found = complexityIndicators.filter(indicator =>
-      functionName.toLowerCase().includes(indicator)
+    const complexityIndicators = ['admin', 'system', 'delete', 'destroy', 'modify', 'update'];const found = complexityIndicators.filter(indicator =>functionName.toLowerCase().includes(indicator)
     ).length;
     return Math.min(1, found * 0.3);
   }
 
   private encodeBusinessImpact(impact: string): number {
-    const impactMap = { 'LOW': 0.25, 'MEDIUM': 0.5, 'HIGH': 0.75, 'CRITICAL': 1.0 };
-    return impactMap[impact] || 0.5;
-  }
+    const impactMap = { 'LOW': 0.25, 'MEDIUM': 0.5, 'HIGH': 0.75, 'CRITICAL': 1.0 };return impactMap[impact] || 0.5;}
 
   private encodeSecurityAlertLevel(level: string): number {
-    const levelMap = { 'GREEN': 0, 'YELLOW': 0.33, 'ORANGE': 0.67, 'RED': 1.0 };
-    return levelMap[level] || 0.5;
-  }
+    const levelMap = { 'GREEN': 0, 'YELLOW': 0.33, 'ORANGE': 0.67, 'RED': 1.0 };return levelMap[level] || 0.5;}
 
   // ===== INITIALIZATION AND MONITORING =====
 
   private initializeRiskThresholds(): Record<ValidationRiskLevel, number> {
     return {
-      [ValidationRiskLevel.MINIMAL]: 0.1,
-      [ValidationRiskLevel.LOW]: 0.3,
-      [ValidationRiskLevel.MEDIUM]: 0.6,
-      [ValidationRiskLevel.HIGH]: 0.8,
-      [ValidationRiskLevel.CRITICAL]: 1.0,
+      [ValidationRiskLevel._MINIMAL]: 0.1,
+      [ValidationRiskLevel._LOW]: 0.3,
+      [ValidationRiskLevel._MODERATE]: 0.6,
+      [ValidationRiskLevel._HIGH]: 0.8,
+      [ValidationRiskLevel._CRITICAL]: 1.0,
     };
   }
 
   private getOptimizationTargets(): { overheadReduction: number; accuracyTarget: number; falsePositiveRate: number } {
     return {
-      overheadReduction: this.configService.get<number>('RISK_OVERHEAD_REDUCTION_TARGET', 0.65), // 65%
-      accuracyTarget: this.configService.get<number>('RISK_ACCURACY_TARGET', 0.95), // 95%
-      falsePositiveRate: this.configService.get<number>('RISK_FALSE_POSITIVE_TARGET', 0.05), // 5%
-    };
-  }
+      overheadReduction: this.configService.get<number>('RISK_OVERHEAD_REDUCTION_TARGET', 0.65), // 65%accuracyTarget: this.configService.get<number>('RISK_ACCURACY_TARGET', 0.95), // 95%falsePositiveRate: this.configService.get<number>('RISK_FALSE_POSITIVE_TARGET', 0.05), // 5%};}
 
   private initializeSystemContext(): SystemContext {
     return {
       systemLoad: 0.5,
-      securityAlertLevel: 'GREEN',
-      maintenanceMode: false,
-      emergencyMode: false,
+      securityAlertLevel: 'GREEN',maintenanceMode: false,emergencyMode: false,
       performanceMetrics: {
         cpuUsage: 50,
         memoryUsage: 60,
@@ -1335,10 +1136,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
       this.emitPerformanceMetrics();
     }, 60000);
 
-    this.logger.log('System monitoring started for risk assessment');
-  }
-
-  private updateSystemContext(): void {
+    this.logger.log('System monitoring started for risk assessment');}private updateSystemContext(): void {
     // Mock system metrics update - in production, this would gather real metrics
     this.systemContext = {
       ...this.systemContext,
@@ -1359,9 +1157,7 @@ export class RiskAssessmentService implements OnApplicationShutdown {
     const modelStats = this.riskModel.getModelStats();
     const anomalyStats = this.anomalyDetector.getAnomalyStats();
 
-    this.eventEmitter.emit('risk.performance.metrics', {
-      ...metrics,
-      modelStats,
+    this.eventEmitter.emit('risk.performance.metrics', {...metrics,modelStats,
       anomalyStats,
       timestamp: new Date(),
     });

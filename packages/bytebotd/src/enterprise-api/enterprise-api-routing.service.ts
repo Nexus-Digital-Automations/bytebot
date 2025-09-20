@@ -23,43 +23,28 @@
  * Intelligence: Conversation-driven routing optimization and adaptation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {ParlantIntegrationService,
   ConversationalValidationError as _ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as _ParlantConversationContext,
-} from '../parlant/parlant-integration.service';
-
-// ===== ROUTING TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== ROUTING TYPES =====/**
  * Service endpoint configuration with Parlant context
  */
 export interface ServiceEndpoint {
   id: string;
   url: string;
   weight: number;
-  health: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-  
-  /** Service capabilities */
-  capabilities: {
+  health: 'HEALTHY' | 'DEGRADED' | 'FAILED';/** Service capabilities */capabilities: {
     maxConcurrency: number;
     averageResponseTime: number;
     supportedOperations: string[];
-    businessPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  };
-  
-  /** Parlant routing context */
+    businessPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};/** Parlant routing context */
   parlantContext: {
     conversationalCapabilities: string[];
     businessContext: Record<string, unknown>;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    preferredForOperations: string[];
-  };
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';preferredForOperations: string[];};
   
   /** Load balancing metrics */
   metrics: {
@@ -84,9 +69,7 @@ export interface RoutingRequest {
   metadata: {
     ipAddress: string;
     userAgent: string;
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    expectedResponseTime?: number;
-    requiresSpecialHandling?: boolean;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';expectedResponseTime?: number;requiresSpecialHandling?: boolean;
   };
   
   /** Parlant conversational context */
@@ -96,9 +79,7 @@ export interface RoutingRequest {
     businessJustification: string;
     conversationHistory: Array<{
       timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
     routingPreferences?: {
       preferredService?: string;
       avoidServices?: string[];
@@ -133,9 +114,7 @@ export interface RoutingDecision {
   metadata: {
     operationId: string;
     timestamp: Date;
-    routingStrategy: 'ROUND_ROBIN' | 'WEIGHTED' | 'CONVERSATION_BASED' | 'HEALTH_AWARE';
-    expectedPerformance: {
-      responseTime: number;
+    routingStrategy: 'ROUND_ROBIN' | 'WEIGHTED' | 'CONVERSATION_BASED' | 'HEALTH_AWARE';expectedPerformance: {responseTime: number;
       reliability: number;
       businessPriority: string;
     };
@@ -151,12 +130,7 @@ export interface RoutingDecision {
  * Load balancing configuration with Parlant integration
  */
 export interface LoadBalancingConfig {
-  strategy: 'ROUND_ROBIN' | 'WEIGHTED' | 'LEAST_CONNECTIONS' | 'CONVERSATION_BASED';
-  healthCheckInterval: number;
-  failoverPolicy: 'IMMEDIATE' | 'GRACEFUL' | 'CONVERSATION_VALIDATED';
-  
-  /** Parlant-enhanced configuration */
-  conversationalSettings: {
+  strategy: 'ROUND_ROBIN' | 'WEIGHTED' | 'LEAST_CONNECTIONS' | 'CONVERSATION_BASED';healthCheckInterval: number;failoverPolicy: 'IMMEDIATE' | 'GRACEFUL' | 'CONVERSATION_VALIDATED';/** Parlant-enhanced configuration */conversationalSettings: {
     enableConversationalRouting: boolean;
     businessPriorityWeighting: number;
     userIntentWeighting: number;
@@ -219,11 +193,7 @@ export class EnterpriseApiRoutingService {
   
   /** Load balancing configuration */
   private loadBalancingConfig: LoadBalancingConfig = {
-    strategy: 'CONVERSATION_BASED',
-    healthCheckInterval: 30000, // 30 seconds
-    failoverPolicy: 'CONVERSATION_VALIDATED',
-    conversationalSettings: {
-      enableConversationalRouting: true,
+    strategy: 'CONVERSATION_BASED',healthCheckInterval: 30000, // 30 secondsfailoverPolicy: 'CONVERSATION_VALIDATED',conversationalSettings: {enableConversationalRouting: true,
       businessPriorityWeighting: 0.4,
       userIntentWeighting: 0.3,
       performanceWeighting: 0.3,
@@ -277,14 +247,9 @@ export class EnterpriseApiRoutingService {
    * Route request with comprehensive Parlant validation
    */
   async routeRequest(request: RoutingRequest): Promise<RoutingDecision> {
-    const operationId = `route${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
+    const operationId = `route${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.analytics.totalRoutings++;
     
-    this.analytics.totalRoutings++;
-    
-    this.logger.debug(`[${operationId}] Routing request with Parlant validation`, {
-      operationId,
-      operation: request.operation,
+    this.logger.debug(`[${operationId}] Routing request with Parlant validation`, {operationId,operation: request.operation,
       endpoint: request.endpoint,
       userId: request.userId,
       priority: request.metadata.priority,
@@ -295,10 +260,7 @@ export class EnterpriseApiRoutingService {
       const availableEndpoints = this.getAvailableEndpoints(request.operation);
       
       if (availableEndpoints.length === 0) {
-        throw new Error(`No available endpoints for operation: ${request.operation}`);
-      }
-
-      // Perform Parlant validation for routing decision
+        throw new Error(`No available endpoints for operation: ${request.operation}`);}// Perform Parlant validation for routing decision
       const parlantValidation = await this.validateRoutingDecision(
         request,
         availableEndpoints,
@@ -318,9 +280,7 @@ export class EnterpriseApiRoutingService {
       // Update analytics
       this.updateRoutingAnalytics(decision, Date.now() - startTime);
 
-      this.logger.debug(`[${operationId}] Routing decision completed`, {
-        operationId,
-        selectedEndpoint: decision.selectedEndpoint.id,
+      this.logger.debug(`[${operationId}] Routing decision completed`, {operationId,selectedEndpoint: decision.selectedEndpoint.id,
         routingStrategy: decision.metadata.routingStrategy,
         parlantApproved: decision.parlantValidation.validationApproved,
         processingTime: Date.now() - startTime,
@@ -354,11 +314,7 @@ export class EnterpriseApiRoutingService {
       details: Record<string, unknown>;
     }
   ): Promise<void> {
-    const operationId = `health_update${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.debug(`[${operationId}] Updating service health with Parlant validation`, {
-      operationId,
-      serviceId,
+    const operationId = `health_update${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Updating service health with Parlant validation`, {operationId,serviceId,
       health,
       responseTime: healthData.responseTime,
       errorRate: healthData.errorRate,
@@ -377,9 +333,7 @@ export class EnterpriseApiRoutingService {
         );
         
         if (!validationResult.approved) {
-          this.logger.warn(`[${operationId}] Health update denied by Parlant validation`, {
-            operationId,
-            serviceId,
+          this.logger.warn(`[${operationId}] Health update denied by Parlant validation`, {operationId,serviceId,
             reasoning: validationResult.reasoning,
           });
           return;
@@ -390,9 +344,7 @@ export class EnterpriseApiRoutingService {
       await this.performHealthUpdate(serviceId, health, healthData, operationId);
       
     } catch (error) {
-      this.logger.error(`[${operationId}] Health update failed`, {
-        operationId,
-        serviceId,
+      this.logger.error(`[${operationId}] Health update failed`, {operationId,serviceId,
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -444,9 +396,7 @@ export class EnterpriseApiRoutingService {
     const riskLevel = this.assessRoutingRisk(request, availableEndpoints);
     
     const validationRequest: ParlantValidationRequest = {
-      functionName: `RoutingService.Decision.${this.sanitizeOperationForFunction(request.operation)}`,
-      functionParams: {
-        operation: request.operation,
+      functionName: `RoutingService.Decision.${this.sanitizeOperationForFunction(request.operation)}`,functionParams: {operation: request.operation,
         endpoint: request.endpoint,
         userId: request.userId,
         priority: request.metadata.priority,
@@ -462,9 +412,7 @@ export class EnterpriseApiRoutingService {
       context: {
         userId: request.userId,
         sessionId: request.conversationalContext.sessionId,
-        agentRole: 'ROUTER',
-        securityLevel: this.mapPriorityToSecurityLevel(request.metadata.priority),
-        conversationHistory: request.conversationalContext.conversationHistory.map(h => ({
+        agentRole: 'ROUTER',securityLevel: this.mapPriorityToSecurityLevel(request.metadata.priority),conversationHistory: request.conversationalContext.conversationHistory.map(h => ({
           timestamp: new Date(h.timestamp),
           speaker: h.speaker,
           message: h.message,
@@ -495,10 +443,7 @@ export class EnterpriseApiRoutingService {
     operationId: string
   ): Promise<RoutingDecision> {
     let selectedEndpoint: ServiceEndpoint;
-    let routingStrategy: RoutingDecision['metadata']['routingStrategy'];
-    let routingReason: string;
-
-    if (parlantValidation.approved && this.loadBalancingConfig.conversationalSettings.enableConversationalRouting) {
+    let routingStrategy: RoutingDecision['metadata']['routingStrategy'];let routingReason: string;if (parlantValidation.approved && this.loadBalancingConfig.conversationalSettings.enableConversationalRouting) {
       // Use conversational routing
       selectedEndpoint = this.selectEndpointByConversationalContext(
         request,
@@ -506,10 +451,7 @@ export class EnterpriseApiRoutingService {
         parlantValidation
       );
       routingStrategy = 'CONVERSATION_BASED';
-      routingReason = `Conversational routing based on user intent: ${request.conversationalContext.userIntent}`;
-      
-      this.analytics.conversationalMetrics.userIntentMatches++;
-    } else {
+      routingReason = `Conversational routing based on user intent: ${request.conversationalContext.userIntent}`;this.analytics.conversationalMetrics.userIntentMatches++;} else {
       // Fall back to traditional load balancing
       selectedEndpoint = this.selectEndpointByLoadBalancing(request.operation, availableEndpoints);
       routingStrategy = this.mapLoadBalancingStrategyToRoutingStrategy(this.loadBalancingConfig.strategy);
@@ -531,8 +473,7 @@ export class EnterpriseApiRoutingService {
         validationApproved: parlantValidation.approved,
         reasoning: parlantValidation.reasoning,
         confidence: parlantValidation.confidence,
-        businessAnalysis: `Business analysis for ${request.operation} routing`,
-        riskAssessment: `Risk assessment: ${this.assessRoutingRisk(request, availableEndpoints)}`,
+        businessAnalysis: `Business analysis for ${request.operation} routing`,riskAssessment: `Risk assessment: ${this.assessRoutingRisk(request, availableEndpoints)}`,
         routingOptimizations: parlantValidation.suggestedAlternatives ?? [],
       },
       metadata: {
@@ -545,11 +486,7 @@ export class EnterpriseApiRoutingService {
           businessPriority: selectedEndpoint.capabilities.businessPriority,
         },
         fallbackPlan: {
-          primaryFailover: alternativeEndpoints[0]?.id ?? 'none',
-          secondaryFailover: alternativeEndpoints[1]?.id ?? 'none',
-          emergencyFallback: 'circuit_breaker',
-        },
-      },
+          primaryFailover: alternativeEndpoints[0]?.id ?? 'none',secondaryFailover: alternativeEndpoints[1]?.id ?? 'none',emergencyFallback: 'circuit_breaker',},},
     };
   }
 
@@ -577,55 +514,30 @@ export class EnterpriseApiRoutingService {
       score += intentScore * this.loadBalancingConfig.conversationalSettings.userIntentWeighting;
       
       // Health penalty
-      if (endpoint.health === 'DEGRADED') score *= 0.7;
-      if (endpoint.health === 'FAILED') score = 0;
-      
-      return { endpoint, score };
-    });
+      if (endpoint.health === 'DEGRADED') score *= 0.7;if (endpoint.health === 'FAILED') score = 0;return { endpoint, score };});
     
     scores.sort((a, b) => b.score - a.score);
     const selectedEndpoint = scores[0]?.endpoint ?? availableEndpoints[0];
     
     if (!selectedEndpoint) {
-      throw new Error('No available endpoints for routing');
-    }
-    
-    return selectedEndpoint;
+      throw new Error('No available endpoints for routing');}return selectedEndpoint;
   }
 
   /**
    * Select endpoint using traditional load balancing
    */
   private selectEndpointByLoadBalancing(operation: string, availableEndpoints: ServiceEndpoint[]): ServiceEndpoint {
-    const healthyEndpoints = availableEndpoints.filter(e => e.health === 'HEALTHY');
-    
-    if (healthyEndpoints.length === 0) {
-      // Use degraded endpoints if no healthy ones available
-      const degradedEndpoints = availableEndpoints.filter(e => e.health === 'DEGRADED');
-      if (degradedEndpoints.length > 0) {
-        this.analytics.loadBalancingMetrics.failoverEvents++;
+    const healthyEndpoints = availableEndpoints.filter(e => e.health === 'HEALTHY');if (healthyEndpoints.length === 0) {// Use degraded endpoints if no healthy ones available
+      const degradedEndpoints = availableEndpoints.filter(e => e.health === 'DEGRADED');if (degradedEndpoints.length > 0) {this.analytics.loadBalancingMetrics.failoverEvents++;
         const endpoint = degradedEndpoints[0];
         if (!endpoint) {
-          throw new Error('Degraded endpoint is undefined');
-        }
-        return endpoint;
+          throw new Error('Degraded endpoint is undefined');}return endpoint;
       }
-      throw new Error('No healthy endpoints available');
-    }
-
-    switch (this.loadBalancingConfig.strategy) {
-      case 'ROUND_ROBIN':
-        return this.selectRoundRobinEndpoint(operation, healthyEndpoints);
-      case 'WEIGHTED':
-        return this.selectWeightedEndpoint(healthyEndpoints);
-      case 'LEAST_CONNECTIONS':
-        return this.selectLeastConnectionsEndpoint(healthyEndpoints);
-      default: {
+      throw new Error('No healthy endpoints available');}switch (this.loadBalancingConfig.strategy) {
+      case 'ROUND_ROBIN':return this.selectRoundRobinEndpoint(operation, healthyEndpoints);case 'WEIGHTED':return this.selectWeightedEndpoint(healthyEndpoints);case 'LEAST_CONNECTIONS':return this.selectLeastConnectionsEndpoint(healthyEndpoints);default: {
         const endpoint = healthyEndpoints[0];
         if (!endpoint) {
-          throw new Error('No healthy endpoints available');
-        }
-        return endpoint;
+          throw new Error('No healthy endpoints available');}return endpoint;
       }
     }
   }
@@ -640,9 +552,7 @@ export class EnterpriseApiRoutingService {
     operationId: string
   ): Promise<ParlantValidationResponse> {
     const validationRequest: ParlantValidationRequest = {
-      functionName: `RoutingService.HealthUpdate.${serviceId}`,
-      functionParams: {
-        serviceId,
+      functionName: `RoutingService.HealthUpdate.${serviceId}`,functionParams: {serviceId,
         health,
         responseTime: healthData.responseTime,
         errorRate: healthData.errorRate,
@@ -652,10 +562,7 @@ export class EnterpriseApiRoutingService {
       context: {
         userId: 'routing_service',
         sessionId: `health_session${Date.now()}`,
-        agentRole: 'HEALTH_MONITOR',
-        securityLevel: health === 'FAILED' ? 'CRITICAL' : 'MEDIUM',
-        conversationHistory: [],
-        metadata: {
+        agentRole: 'HEALTH_MONITOR',securityLevel: health === 'FAILED' ? 'CRITICAL' : 'MEDIUM',conversationHistory: [],metadata: {
           operationId,
           healthUpdate: true,
           serviceId,
@@ -663,9 +570,7 @@ export class EnterpriseApiRoutingService {
           criticalService: this.isCriticalService(serviceId),
         },
       },
-      riskLevel: health === 'FAILED' ? RiskLevel.CRITICAL : RiskLevel.MEDIUM,
-      operationId,
-    };
+      riskLevel: health === 'FAILED' ? RiskLevel._CRITICAL : RiskLevel._MODERATE,operationId,};
 
     return await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
   }
@@ -683,22 +588,13 @@ export class EnterpriseApiRoutingService {
   private createEmergencyFallbackDecision(request: RoutingRequest, operationId: string): RoutingDecision {
     // Create a fallback endpoint
     const fallbackEndpoint: ServiceEndpoint = {
-      id: 'emergency_fallback',
-      url: 'http://localhost:3000/fallback',
-      weight: 1,
-      health: 'DEGRADED',
-      capabilities: {
-        maxConcurrency: 10,
+      id: 'emergency_fallback',url: 'http://localhost:3000/fallback',weight: 1,health: 'DEGRADED',capabilities: {maxConcurrency: 10,
         averageResponseTime: 5000,
         supportedOperations: [request.operation],
-        businessPriority: 'LOW',
-      },
-      parlantContext: {
+        businessPriority: 'LOW',},parlantContext: {
         conversationalCapabilities: [],
         businessContext: { emergency: true },
-        riskLevel: 'HIGH',
-        preferredForOperations: [],
-      },
+        riskLevel: 'HIGH',preferredForOperations: [],},
       metrics: {
         currentConnections: 0,
         requestCount: 0,
@@ -711,31 +607,13 @@ export class EnterpriseApiRoutingService {
     return {
       selectedEndpoint: fallbackEndpoint,
       alternativeEndpoints: [],
-      routingReason: 'Emergency fallback due to routing failure',
-      parlantValidation: {
-        conversationId: 'emergency',
-        validationApproved: false,
-        reasoning: 'Emergency fallback - normal routing failed',
-        confidence: 0.1,
-        businessAnalysis: 'Emergency routing to maintain service availability',
-        riskAssessment: 'HIGH - Emergency fallback mode',
-        routingOptimizations: ['Restore normal routing', 'Check service health'],
-      },
-      metadata: {
+      routingReason: 'Emergency fallback due to routing failure',parlantValidation: {conversationId: 'emergency',validationApproved: false,reasoning: 'Emergency fallback - normal routing failed',confidence: 0.1,businessAnalysis: 'Emergency routing to maintain service availability',riskAssessment: 'HIGH - Emergency fallback mode',routingOptimizations: ['Restore normal routing', 'Check service health'],},metadata: {
         operationId,
         timestamp: new Date(),
-        routingStrategy: 'ROUND_ROBIN', // Fallback strategy
-        expectedPerformance: {
-          responseTime: 5000,
+        routingStrategy: 'ROUND_ROBIN', // Fallback strategyexpectedPerformance: {responseTime: 5000,
           reliability: 50,
-          businessPriority: 'LOW',
-        },
-        fallbackPlan: {
-          primaryFailover: 'none',
-          secondaryFailover: 'none',
-          emergencyFallback: 'active',
-        },
-      },
+          businessPriority: 'LOW',},fallbackPlan: {
+          primaryFailover: 'none',secondaryFailover: 'none',emergencyFallback: 'active',},},
     };
   }
 
@@ -745,30 +623,19 @@ export class EnterpriseApiRoutingService {
   private initializeServiceEndpoints(): void {
     // Initialize endpoints for common operations
     const operations = [
-      'computer-use',
-      'browser-use',
-      'authentication',
-      'health-check',
-      'metrics',
+      'computer-use','browser-use','authentication','health-check','metrics',
     ];
 
     operations.forEach(operation => {
       const endpoints: ServiceEndpoint[] = [
         {
-          id: `${operation}_primary`,
-          url: `http://localhost:3000/${operation}/primary`,
+          id: `${operation}_primary`,url: `http://localhost:3000/${operation}/primary`,
           weight: 100,
-          health: 'HEALTHY',
-          capabilities: {
-            maxConcurrency: 100,
+          health: 'HEALTHY',capabilities: {maxConcurrency: 100,
             averageResponseTime: 500,
             supportedOperations: [operation],
-            businessPriority: 'HIGH',
-          },
-          parlantContext: {
-            conversationalCapabilities: ['business_context', 'user_intent'],
-            businessContext: { priority: 'primary' },
-            riskLevel: 'MEDIUM',
+            businessPriority: 'HIGH',},parlantContext: {
+            conversationalCapabilities: ['business_context', 'user_intent'],businessContext: { priority: 'primary' },riskLevel: 'MEDIUM',
             preferredForOperations: [operation],
           },
           metrics: {
@@ -780,20 +647,13 @@ export class EnterpriseApiRoutingService {
           },
         },
         {
-          id: `${operation}_secondary`,
-          url: `http://localhost:3001/${operation}/secondary`,
+          id: `${operation}_secondary`,url: `http://localhost:3001/${operation}/secondary`,
           weight: 50,
-          health: 'HEALTHY',
-          capabilities: {
-            maxConcurrency: 50,
+          health: 'HEALTHY',capabilities: {maxConcurrency: 50,
             averageResponseTime: 800,
             supportedOperations: [operation],
-            businessPriority: 'MEDIUM',
-          },
-          parlantContext: {
-            conversationalCapabilities: ['basic_validation'],
-            businessContext: { priority: 'secondary' },
-            riskLevel: 'LOW',
+            businessPriority: 'MEDIUM',},parlantContext: {
+            conversationalCapabilities: ['basic_validation'],businessContext: { priority: 'secondary' },riskLevel: 'LOW',
             preferredForOperations: [],
           },
           metrics: {
@@ -825,10 +685,7 @@ export class EnterpriseApiRoutingService {
       }
     }, this.loadBalancingConfig.healthCheckInterval);
 
-    this.logger.log('Health check interval started');
-  }
-
-  /**
+    this.logger.log('Health check interval started');}/**
    * Perform health check on endpoint
    */
   private async performHealthCheck(endpoint: ServiceEndpoint): Promise<void> {
@@ -842,12 +699,7 @@ export class EnterpriseApiRoutingService {
       endpoint.metrics.lastResponseTime = responseTime;
       
       if (isHealthy) {
-        endpoint.health = responseTime > 2000 ? 'DEGRADED' : 'HEALTHY';
-      } else {
-        endpoint.health = 'FAILED';
-      }
-      
-    } catch (error) {
+        endpoint.health = responseTime > 2000 ? 'DEGRADED' : 'HEALTHY';} else {endpoint.health = 'FAILED';}} catch (error) {
       endpoint.health = 'FAILED';
       this.logger.warn(`Health check failed for endpoint ${endpoint.id}`, {
         error: error instanceof Error ? error.message : String(error),
@@ -857,18 +709,7 @@ export class EnterpriseApiRoutingService {
 
   // ===== UTILITY METHODS =====
 
-  private assessRoutingRisk(request: RoutingRequest, availableEndpoints: ServiceEndpoint[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (request.metadata.priority === 'CRITICAL') return 'CRITICAL';
-    if (availableEndpoints.length === 1) return 'HIGH';
-    if (request.metadata.requiresSpecialHandling) return 'MEDIUM';
-    return 'LOW';
-  }
-
-  private shouldValidateHealthUpdate(serviceId: string, health: 'HEALTHY' | 'DEGRADED' | 'FAILED'): boolean {
-    return health === 'FAILED' || this.isCriticalService(serviceId);
-  }
-
-  private async performHealthUpdate(
+  private assessRoutingRisk(request: RoutingRequest, availableEndpoints: ServiceEndpoint[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (request.metadata.priority === 'CRITICAL') return 'CRITICAL';if (availableEndpoints.length === 1) return 'HIGH';if (request.metadata.requiresSpecialHandling) return 'MEDIUM';return 'LOW';}private shouldValidateHealthUpdate(serviceId: string, health: 'HEALTHY' | 'DEGRADED' | 'FAILED'): boolean {return health === 'FAILED' || this.isCriticalService(serviceId);}private async performHealthUpdate(
     serviceId: string,
     health: 'HEALTHY' | 'DEGRADED' | 'FAILED',
     healthData: { responseTime?: number; [key: string]: unknown },
@@ -901,13 +742,9 @@ export class EnterpriseApiRoutingService {
       (this.analytics.averageRoutingTime * (this.analytics.totalRoutings - 1) + processingTime) / 
       this.analytics.totalRoutings;
 
-    if (decision.metadata.routingStrategy === 'CONVERSATION_BASED') {
-      this.analytics.conversationalMetrics.businessOptimizations++;
-    }
+    if (decision.metadata.routingStrategy === 'CONVERSATION_BASED') {this.analytics.conversationalMetrics.businessOptimizations++;}
 
-    if (decision.selectedEndpoint.health !== 'HEALTHY') {
-      this.analytics.loadBalancingMetrics.healthAwareDecisions++;
-    }
+    if (decision.selectedEndpoint.health !== 'HEALTHY') {this.analytics.loadBalancingMetrics.healthAwareDecisions++;}
   }
 
   private calculateDistributionEfficiency(): number {
@@ -919,11 +756,7 @@ export class EnterpriseApiRoutingService {
     let score = 0;
     
     // Health score
-    if (endpoint.health === 'HEALTHY') score += 100;
-    else if (endpoint.health === 'DEGRADED') score += 50;
-    else score += 0;
-    
-    // Performance score
+    if (endpoint.health === 'HEALTHY') score += 100;else if (endpoint.health === 'DEGRADED') score += 50;else score += 0;// Performance score
     score += Math.max(0, 100 - (endpoint.capabilities.averageResponseTime / 10));
     
     // Business priority score
@@ -949,9 +782,7 @@ export class EnterpriseApiRoutingService {
     this.roundRobinCounters.set(operation, counter + 1);
     const endpoint = endpoints[selectedIndex];
     if (!endpoint) {
-      throw new Error('Selected endpoint is undefined');
-    }
-    return endpoint;
+      throw new Error('Selected endpoint is undefined');}return endpoint;
   }
 
   private selectWeightedEndpoint(endpoints: ServiceEndpoint[]): ServiceEndpoint {
@@ -968,9 +799,7 @@ export class EnterpriseApiRoutingService {
     
     const endpoint = endpoints[0];
     if (!endpoint) {
-      throw new Error('No endpoints available for weighted selection');
-    }
-    return endpoint;
+      throw new Error('No endpoints available for weighted selection');}return endpoint;
   }
 
   private selectLeastConnectionsEndpoint(endpoints: ServiceEndpoint[]): ServiceEndpoint {
@@ -979,44 +808,19 @@ export class EnterpriseApiRoutingService {
     );
   }
 
-  private mapPriorityToSecurityLevel(priority: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (priority) {
-      case 'LOW': return 'LOW';
-      case 'MEDIUM': return 'MEDIUM';
-      case 'HIGH': return 'HIGH';
-      case 'CRITICAL': return 'CRITICAL';
-      default: return 'MEDIUM';
-    }
-  }
+  private mapPriorityToSecurityLevel(priority: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (priority) {case 'LOW': return 'LOW';case 'MEDIUM': return 'MEDIUM';case 'HIGH': return 'HIGH';case 'CRITICAL': return 'CRITICAL';default: return 'MEDIUM';}}
 
   private mapBusinessPriorityToScore(priority: string): number {
     switch (priority) {
-      case 'CRITICAL': return 100;
-      case 'HIGH': return 75;
-      case 'MEDIUM': return 50;
-      case 'LOW': return 25;
-      default: return 50;
-    }
+      case 'CRITICAL': return 100;case 'HIGH': return 75;case 'MEDIUM': return 50;case 'LOW': return 25;default: return 50;}
   }
 
   private isCriticalService(serviceId: string): boolean {
-    return serviceId.includes('primary') || serviceId.includes('auth');
-  }
-
-  private sanitizeOperationForFunction(operation: string): string {
-    return operation.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
-  }
-
-  /**
+    return serviceId.includes('primary') || serviceId.includes('auth');}private sanitizeOperationForFunction(operation: string): string {
+    return operation.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');}/**
    * Map load balancing strategy to routing strategy
    */
-  private mapLoadBalancingStrategyToRoutingStrategy(strategy: string): 'ROUND_ROBIN' | 'WEIGHTED' | 'CONVERSATION_BASED' | 'HEALTH_AWARE' {
-    switch (strategy) {
-      case 'ROUND_ROBIN': return 'ROUND_ROBIN';
-      case 'WEIGHTED': return 'WEIGHTED';
-      case 'CONVERSATION_BASED': return 'CONVERSATION_BASED';
-      case 'LEAST_CONNECTIONS': return 'HEALTH_AWARE'; // Map LEAST_CONNECTIONS to HEALTH_AWARE
-      default: return 'ROUND_ROBIN'; // Default fallback
+  private mapLoadBalancingStrategyToRoutingStrategy(strategy: string): 'ROUND_ROBIN' | 'WEIGHTED' | 'CONVERSATION_BASED' | 'HEALTH_AWARE' {switch (strategy) {case 'ROUND_ROBIN': return 'ROUND_ROBIN';case 'WEIGHTED': return 'WEIGHTED';case 'CONVERSATION_BASED': return 'CONVERSATION_BASED';case 'LEAST_CONNECTIONS': return 'HEALTH_AWARE'; // Map LEAST_CONNECTIONS to HEALTH_AWAREdefault: return 'ROUND_ROBIN'; // Default fallback
     }
   }
 }

@@ -1,47 +1,15 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-
-/**
- * Automation Error Categories
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';/*** Automation Error Categories
  */
 export enum AutomationErrorCategory {
-  BROWSER_ERROR = 'browser_error',
-  FORM_ERROR = 'form_error',
-  DATA_EXTRACTION_ERROR = 'data_extraction_error',
-  WORKFLOW_ERROR = 'workflow_error',
-  FILE_OPERATION_ERROR = 'file_operation_error',
-  MONITORING_ERROR = 'monitoring_error',
-  NETWORK_ERROR = 'network_error',
-  VALIDATION_ERROR = 'validation_error',
-  AUTHENTICATION_ERROR = 'authentication_error',
-  RATE_LIMIT_ERROR = 'rate_limit_error',
-  SYSTEM_ERROR = 'system_error',
-  UNKNOWN_ERROR = 'unknown_error'
-}
-
-/**
+  BROWSER_ERROR = 'browser_error',FORM_ERROR = 'form_error',DATA_EXTRACTION_ERROR = 'data_extraction_error',WORKFLOW_ERROR = 'workflow_error',FILE_OPERATION_ERROR = 'file_operation_error',MONITORING_ERROR = 'monitoring_error',NETWORK_ERROR = 'network_error',VALIDATION_ERROR = 'validation_error',AUTHENTICATION_ERROR = 'authentication_error',RATE_LIMIT_ERROR = 'rate_limit_error',SYSTEM_ERROR = 'system_error',UNKNOWN_ERROR = 'unknown_error'}/**
  * Error Severity Levels
  */
 export enum ErrorSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
-
-/**
+  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}/**
  * Recovery Strategy Types
  */
 export enum RecoveryStrategy {
-  RETRY = 'retry',
-  RETRY_WITH_BACKOFF = 'retry_with_backoff',
-  FALLBACK = 'fallback',
-  CIRCUIT_BREAKER = 'circuit_breaker',
-  GRACEFUL_DEGRADATION = 'graceful_degradation',
-  MANUAL_INTERVENTION = 'manual_intervention',
-  ABORT = 'abort'
-}
-
-/**
+  RETRY = 'retry',RETRY_WITH_BACKOFF = 'retry_with_backoff',FALLBACK = 'fallback',CIRCUIT_BREAKER = 'circuit_breaker',GRACEFUL_DEGRADATION = 'graceful_degradation',MANUAL_INTERVENTION = 'manual_intervention',ABORT = 'abort'}/**
  * Comprehensive automation error interface
  */
 export interface AutomationError {
@@ -142,9 +110,7 @@ export class AutomationErrorHandlerService {
     const startTime = Date.now();
     const errorId = this.generateErrorId();
 
-    this.logger.warn(`Handling automation error: ${errorId}`, {
-      errorMessage: error.message,
-      context,
+    this.logger.warn(`Handling automation error: ${errorId}`, {errorMessage: error.message,context,
       timestamp: new Date().toISOString()
     });
 
@@ -163,9 +129,7 @@ export class AutomationErrorHandlerService {
 
       const recoveryTime = Date.now() - startTime;
 
-      this.logger.log(`Error handling completed in ${recoveryTime}ms`, {
-        errorId,
-        success: result.success,
+      this.logger.log(`Error handling completed in ${recoveryTime}ms`, {errorId,success: result.success,
         recovered: result.recovered,
         strategy: result.strategy
       });
@@ -215,26 +179,20 @@ export class AutomationErrorHandlerService {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logger.log(`Executing operation with recovery: ${operationName}`, {
-      operationId,
-      context
+    this.logger.log(`Executing operation with recovery: ${operationName}`, {operationId,context
     });
 
     try {
       const result = await operation();
 
-      this.logger.log(`Operation completed successfully in ${Date.now() - startTime}ms`, {
-        operationId,
-        operationName
+      this.logger.log(`Operation completed successfully in ${Date.now() - startTime}ms`, {operationId,operationName
       });
 
       return result;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Operation failed, attempting recovery: ${operationName}`, {
-        operationId,
-        error: errorMessage
+      this.logger.warn(`Operation failed, attempting recovery: ${operationName}`, {operationId,error: errorMessage
       });
 
       const errorContext = {
@@ -302,9 +260,7 @@ export class AutomationErrorHandlerService {
     const breaker = new CircuitBreaker(operationName, threshold, timeoutMs);
     this.circuitBreakers.set(operationName, breaker);
 
-    this.logger.log(`Circuit breaker created for operation: ${operationName}`, {
-      threshold,
-      timeoutMs
+    this.logger.log(`Circuit breaker created for operation: ${operationName}`, {threshold,timeoutMs
     });
 
     return breaker;
@@ -337,9 +293,7 @@ export class AutomationErrorHandlerService {
       processingTime: Date.now() - startTime
     };
 
-    this.logger.log(`Error analytics generated in ${analytics.processingTime}ms`, {
-      totalErrors: analytics.totalErrors,
-      timeRange: timeRange ? `${timeRange.start.toISOString()} - ${timeRange.end.toISOString()}` : 'all time'
+    this.logger.log(`Error analytics generated in ${analytics.processingTime}ms`, {totalErrors: analytics.totalErrors,timeRange: timeRange ? `${timeRange.start.toISOString()} - ${timeRange.end.toISOString()}` : 'all time'
     });
 
     return analytics;
@@ -400,8 +354,7 @@ export class AutomationErrorHandlerService {
       sessionId: context.sessionId as string | undefined,
       stackTrace: error.stack,
       metadata: {
-        component: (context.component as string) ?? 'unknown',
-        method: (context.method as string) ?? 'unknown',
+        component: (context.component as string) ?? 'unknown',method: (context.method as string) ?? 'unknown',
         url: context.url as string | undefined,
         selector: context.selector as string | undefined,
         userAgent: context.userAgent as string | undefined,
@@ -638,42 +591,21 @@ export class AutomationErrorHandlerService {
    */
   private initializeDefaultRecoveryStrategies(): void {
     // Register default error patterns and recovery strategies
-    this.logger.log('Default recovery strategies initialized');
-  }
-
-  /**
+    this.logger.log('Default recovery strategies initialized');}/**
    * Helper methods for error classification
    */
   private categorizeError(error: Error, context: Record<string, unknown>): AutomationErrorCategory {
     const message = error.message.toLowerCase();
 
-    if (message.includes('network') || message.includes('timeout') || message.includes('connection')) {
-      return AutomationErrorCategory.NETWORK_ERROR;
-    }
-    if (message.includes('element not found') || message.includes('selector')) {
-      return AutomationErrorCategory.FORM_ERROR;
-    }
-    if (message.includes('rate limit') || message.includes('too many requests')) {
-      return AutomationErrorCategory.RATE_LIMIT_ERROR;
-    }
-    if (message.includes('validation') || message.includes('invalid')) {
-      return AutomationErrorCategory.VALIDATION_ERROR;
-    }
-    if (context.component === 'form-automation') {
-      return AutomationErrorCategory.FORM_ERROR;
-    }
-    if (context.component === 'data-extraction') {
-      return AutomationErrorCategory.DATA_EXTRACTION_ERROR;
-    }
-    if (context.component === 'workflow-automation') {
-      return AutomationErrorCategory.WORKFLOW_ERROR;
-    }
-    if (context.component === 'file-management') {
-      return AutomationErrorCategory.FILE_OPERATION_ERROR;
-    }
-    if (context.component === 'content-monitoring') {
-      return AutomationErrorCategory.MONITORING_ERROR;
-    }
+    if (message.includes('network') || message.includes('timeout') || message.includes('connection')) {return AutomationErrorCategory.NETWORK_ERROR;}
+    if (message.includes('element not found') || message.includes('selector')) {return AutomationErrorCategory.FORM_ERROR;}
+    if (message.includes('rate limit') || message.includes('too many requests')) {return AutomationErrorCategory.RATE_LIMIT_ERROR;}
+    if (message.includes('validation') || message.includes('invalid')) {return AutomationErrorCategory.VALIDATION_ERROR;}
+    if (context.component === 'form-automation') {return AutomationErrorCategory.FORM_ERROR;}
+    if (context.component === 'data-extraction') {return AutomationErrorCategory.DATA_EXTRACTION_ERROR;}
+    if (context.component === 'workflow-automation') {return AutomationErrorCategory.WORKFLOW_ERROR;}
+    if (context.component === 'file-management') {return AutomationErrorCategory.FILE_OPERATION_ERROR;}
+    if (context.component === 'content-monitoring') {return AutomationErrorCategory.MONITORING_ERROR;}
 
     return AutomationErrorCategory.UNKNOWN_ERROR;
   }
@@ -709,9 +641,7 @@ export class AutomationErrorHandlerService {
   }
 
   private createEnhancedError(error: Error | AutomationError, operationName: string, _context: Record<string, unknown>): HttpException {
-    const enhancedMessage = `Operation '${operationName}' failed: ${error.message}`;
-
-    if (this.isAutomationError(error)) {
+    const enhancedMessage = `Operation '${operationName}' failed: ${error.message}';if (this.isAutomationError(error)) {
       switch (error.severity) {
         case ErrorSeverity.CRITICAL:
           return new HttpException(enhancedMessage, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -726,10 +656,7 @@ export class AutomationErrorHandlerService {
   }
 
   private generateErrorId(): string {
-    return `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private generateOperationId(): string {
+    return `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;}private generateOperationId(): string {
     return `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
@@ -795,9 +722,7 @@ export class AutomationErrorHandlerService {
     return {
       last24Hours: errors.filter(e => e.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
       previousPeriod: Math.floor(Math.random() * 50),
-      trend: 'decreasing'
-    };
-  }
+      trend: 'decreasing'};}
 
   private generateRecommendations(errors: AutomationError[]): string[] {
     const recommendations: string[] = [];
@@ -805,18 +730,9 @@ export class AutomationErrorHandlerService {
     const categoryStats = this.groupErrorsByCategory(errors);
 
     if (categoryStats[AutomationErrorCategory.NETWORK_ERROR] > 10) {
-      recommendations.push('Consider implementing connection pooling and timeout optimization');
-    }
-
-    if (categoryStats[AutomationErrorCategory.FORM_ERROR] > 5) {
-      recommendations.push('Review form selectors and add fallback strategies');
-    }
-
-    if (recommendations.length === 0) {
-      recommendations.push('Error patterns are within normal ranges');
-    }
-
-    return recommendations;
+      recommendations.push('Consider implementing connection pooling and timeout optimization');}if (categoryStats[AutomationErrorCategory.FORM_ERROR] > 5) {
+      recommendations.push('Review form selectors and add fallback strategies');}if (recommendations.length === 0) {
+      recommendations.push('Error patterns are within normal ranges');}return recommendations;
   }
 }
 
@@ -826,21 +742,14 @@ export class AutomationErrorHandlerService {
 class CircuitBreaker {
   private failureCount: number = 0;
   private lastFailureTime?: Date;
-  private state: 'closed' | 'open' | 'half-open' = 'closed';
-
-  constructor(
-    private readonly operationName: string,
+  private state: 'closed' | 'open' | 'half-open' = 'closed';constructor(private readonly operationName: string,
     private readonly threshold: number,
     private readonly timeoutMs: number
   ) {}
 
   isOpen(): boolean {
-    if (this.state === 'open') {
-      if (this.lastFailureTime &&
-          Date.now() - this.lastFailureTime.getTime() > this.timeoutMs) {
-        this.state = 'half-open';
-        return false;
-      }
+    if (this.state === 'open') {if (this.lastFailureTime &&Date.now() - this.lastFailureTime.getTime() > this.timeoutMs) {
+        this.state = 'half-open';return false;}
       return true;
     }
     return false;
@@ -848,10 +757,7 @@ class CircuitBreaker {
 
   recordSuccess(): void {
     this.failureCount = 0;
-    this.state = 'closed';
-  }
-
-  recordFailure(): void {
+    this.state = 'closed';}recordFailure(): void {
     this.failureCount++;
     this.lastFailureTime = new Date();
 

@@ -1,21 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  ScreenshotCaptureDto,
+import { Injectable, Logger } from '@nestjs/common';import { promises as fs } from 'fs';import * as path from 'path';import { v4 as uuidv4 } from 'uuid';import {ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,
   BatchScreenshotResultDto,
   ScreenshotFormat,
   ScreenshotType,
-} from './dto/screenshot.dto';
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';
-
-/**
- * Interface for media storage configuration
+} from './dto/screenshot.dto';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';/*** Interface for media storage configuration
  */
 interface MediaStorageConfig {
   storagePath: string;
@@ -136,14 +125,7 @@ export class MediaService {
   ) {
     // Initialize storage configuration
     this.storageConfig = {
-      storagePath: process.env.SCREENSHOT_STORAGE_PATH ?? './storage/screenshots',
-      maxFileSize: parseInt(process.env.MAX_SCREENSHOT_SIZE ?? '50000000'), // 50MB default
-      allowedFormats: [ScreenshotFormat.PNG, ScreenshotFormat.JPEG, ScreenshotFormat.WEBP],
-      compressionEnabled: process.env.ENABLE_COMPRESSION !== 'false',
-      defaultQuality: parseInt(process.env.DEFAULT_QUALITY ?? '85'),
-    };
-
-    this.initializeStorage();
+      storagePath: process.env.SCREENSHOT_STORAGE_PATH ?? './storage/screenshots',maxFileSize: parseInt(process.env.MAX_SCREENSHOT_SIZE ?? '50000000'), // 50MB defaultallowedFormats: [ScreenshotFormat.PNG, ScreenshotFormat.JPEG, ScreenshotFormat.WEBP],compressionEnabled: process.env.ENABLE_COMPRESSION !== 'false',defaultQuality: parseInt(process.env.DEFAULT_QUALITY ?? '85'),};this.initializeStorage();
   }
 
   /**
@@ -153,15 +135,11 @@ export class MediaService {
     try {
       await fs.mkdir(this.storageConfig.storagePath, { recursive: true });
       await this.loadExistingMetadata();
-      this.logger.log('Media storage initialized', {
-        storagePath: this.storageConfig.storagePath,
-        maxFileSize: this.storageConfig.maxFileSize,
+      this.logger.log('Media storage initialized', {storagePath: this.storageConfig.storagePath,maxFileSize: this.storageConfig.maxFileSize,
         compressionEnabled: this.storageConfig.compressionEnabled,
       });
     } catch (error) {
-      this.logger.error('Failed to initialize media storage', error.stack);
-      throw error;
-    }
+      this.logger.error('Failed to initialize media storage', error.stack);throw error;}
   }
 
   /**
@@ -169,10 +147,7 @@ export class MediaService {
    */
   private async loadExistingMetadata(): Promise<void> {
     try {
-      const metadataPath = path.join(this.storageConfig.storagePath, 'metadata.json');
-
-      try {
-        const metadataContent = await fs.readFile(metadataPath, 'utf-8');
+      const metadataPath = path.join(this.storageConfig.storagePath, 'metadata.json');try {const metadataContent = await fs.readFile(metadataPath, 'utf-8');
         const metadata = JSON.parse(metadataContent) as Record<string, ScreenshotMetadata>;
 
         for (const [id, data] of Object.entries(metadata)) {
@@ -181,22 +156,15 @@ export class MediaService {
 
         this.logger.log(`Loaded ${this.screenshotMetadata.size} screenshot metadata entries`);
       } catch (_error) {
-        // Metadata file doesn't exist or is invalid - start fresh
-        this.logger.log('No existing metadata found, starting fresh');
-      }
-    } catch (error) {
-      this.logger.warn('Failed to load existing metadata', error.stack);
-    }
-  }
+        // Metadata file doesn't exist or is invalid - start freshthis.logger.log('No existing metadata found, starting fresh');}} catch (error) {
+      this.logger.warn('Failed to load existing metadata', error.stack);}}
 
   /**
    * Save screenshot metadata to persistent storage
    */
   private async saveMetadata(): Promise<void> {
     try {
-      const metadataPath = path.join(this.storageConfig.storagePath, 'metadata.json');
-      const metadata = Object.fromEntries(this.screenshotMetadata);
-      await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+      const metadataPath = path.join(this.storageConfig.storagePath, 'metadata.json');const metadata = Object.fromEntries(this.screenshotMetadata);await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
     } catch (error) {
       this.logger.error('Failed to save metadata', error.stack);
     }
@@ -209,9 +177,7 @@ export class MediaService {
     const startTime = Date.now();
     const screenshotId = uuidv4();
 
-    this.logger.log(`Capturing screenshot: ${screenshotId}`, {
-      sessionId: captureDto.sessionId,
-      type: captureDto.type,
+    this.logger.log(`Capturing screenshot: ${screenshotId}`, {sessionId: captureDto.sessionId,type: captureDto.type,
       format: captureDto.format,
     });
 
@@ -219,10 +185,7 @@ export class MediaService {
       // Validate session exists
       const session = this.sessionService.getSession(captureDto.sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${captureDto.sessionId}`);
-      }
-
-      // Capture screenshot using appropriate method
+        throw new Error(`Session not found: ${captureDto.sessionId}`);}// Capture screenshot using appropriate method
       let result: ScreenshotResultDto;
 
       switch (captureDto.type) {
@@ -267,9 +230,7 @@ export class MediaService {
 
       result.captureDurationMs = captureDuration;
 
-      this.logger.log(`Screenshot captured successfully: ${screenshotId}`, {
-        screenshotId,
-        fileSize: result.fileSizeBytes,
+      this.logger.log(`Screenshot captured successfully: ${screenshotId}`, {screenshotId,fileSize: result.fileSizeBytes,
         dimensions: result.dimensions,
         duration: captureDuration,
       });
@@ -366,9 +327,7 @@ export class MediaService {
 
       return croppedResult;
     } catch (error) {
-      this.logger.error(`Area screenshot capture failed: ${screenshotId}`, error.stack);
-      throw error;
-    }
+      this.logger.error(`Area screenshot capture failed: ${screenshotId}`, error.stack);throw error;}
   }
 
   /**
@@ -405,9 +364,7 @@ export class MediaService {
     const batchId = uuidv4();
     const startTime = Date.now();
 
-    this.logger.log(`Starting batch screenshot capture: ${batchId}`, {
-      sessionId: batchDto.sessionId,
-      screenshotCount: batchDto.screenshots.length,
+    this.logger.log(`Starting batch screenshot capture: ${batchId}`, {sessionId: batchDto.sessionId,screenshotCount: batchDto.screenshots.length,
     });
 
     const results: ScreenshotResultDto[] = [];
@@ -436,10 +393,7 @@ export class MediaService {
           successfulCaptures++;
         } catch (error) {
           failedCaptures++;
-          const errorMessage = `Screenshot ${i + 1} failed: ${error.message}`;
-          errors.push(errorMessage);
-
-          if (!batchDto.continueOnError) {
+          const errorMessage = `Screenshot ${i + 1} failed: ${error.message}`;errors.push(errorMessage);if (!batchDto.continueOnError) {
             break;
           }
         }
@@ -461,18 +415,14 @@ export class MediaService {
         errors: errors.length > 0 ? errors : undefined,
       };
 
-      this.logger.log(`Batch screenshot capture completed: ${batchId}`, {
-        totalRequested: batchResult.totalRequested,
-        successful: successfulCaptures,
+      this.logger.log(`Batch screenshot capture completed: ${batchId}`, {totalRequested: batchResult.totalRequested,successful: successfulCaptures,
         failed: failedCaptures,
         duration: totalDurationMs,
       });
 
       return batchResult;
     } catch (error) {
-      this.logger.error(`Batch screenshot capture failed: ${batchId}`, error.stack);
-      throw error;
-    }
+      this.logger.error(`Batch screenshot capture failed: ${batchId}`, error.stack);throw error;}
   }
 
   /**
@@ -488,15 +438,10 @@ export class MediaService {
 
       // Validate file size
       if (imageBuffer.length > this.storageConfig.maxFileSize) {
-        throw new Error(`Screenshot exceeds maximum file size: ${imageBuffer.length} bytes`);
-      }
-
-      // Write file to storage
+        throw new Error(`Screenshot exceeds maximum file size: ${imageBuffer.length} bytes`);}// Write file to storage
       await fs.writeFile(filePath, imageBuffer);
 
-      this.logger.log(`Screenshot stored: ${fileName}`, {
-        filePath,
-        fileSize: imageBuffer.length,
+      this.logger.log(`Screenshot stored: ${fileName}`, {filePath,fileSize: imageBuffer.length,
       });
 
       return filePath;
@@ -523,10 +468,7 @@ export class MediaService {
 
       // Read image file
       const imageBuffer = await fs.readFile(metadata.filePath);
-      const imageData = imageBuffer.toString('base64');
-
-      const result: ScreenshotResultDto = {
-        screenshotId: metadata.screenshotId,
+      const imageData = imageBuffer.toString('base64');const result: ScreenshotResultDto = {screenshotId: metadata.screenshotId,
         sessionId: metadata.sessionId,
         type: metadata.type,
         format: metadata.format,
@@ -535,16 +477,13 @@ export class MediaService {
         fileSizeBytes: metadata.fileSize,
         capturedAt: metadata.capturedAt,
         captureDurationMs: 0, // Not tracked for stored screenshots
-        pageUrl: '', // Not stored in metadata currently
-        pageTitle: '', // Not stored in metadata currently
+        pageUrl: '', // Not stored in metadata currentlypageTitle: '', // Not stored in metadata currently
         metadata: metadata.metadata,
       };
 
       return result;
     } catch (error) {
-      this.logger.error(`Failed to retrieve stored screenshot: ${screenshotId}`, error.stack);
-      return null;
-    }
+      this.logger.error(`Failed to retrieve stored screenshot: ${screenshotId}`, error.stack);return null;}
   }
 
   /**
@@ -612,15 +551,11 @@ export class MediaService {
       this.screenshotMetadata.delete(screenshotId);
       await this.saveMetadata();
 
-      this.logger.log(`Screenshot deleted: ${screenshotId}`, {
-        filePath: metadata.filePath,
-      });
+      this.logger.log(`Screenshot deleted: ${screenshotId}`, {filePath: metadata.filePath,});
 
       return true;
     } catch (error) {
-      this.logger.error(`Failed to delete screenshot: ${screenshotId}`, error.stack);
-      return false;
-    }
+      this.logger.error(`Failed to delete screenshot: ${screenshotId}`, error.stack);return false;}
   }
 
   /**
@@ -631,10 +566,7 @@ export class MediaService {
     let filesRemoved = 0;
     let bytesFreed = 0;
 
-    this.logger.log(`Starting cleanup of files older than ${maxAgeHours} hours`);
-
-    try {
-      const cutoffTime = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+    this.logger.log(`Starting cleanup of files older than ${maxAgeHours} hours`);try {const cutoffTime = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
       const screenshotsToRemove: string[] = [];
 
       // Find old screenshots
@@ -670,12 +602,8 @@ export class MediaService {
         cleanupDurationMs: Date.now() - startTime,
       };
 
-      this.logger.log('Cleanup completed', result);
-      return result;
-    } catch (error) {
-      this.logger.error('Cleanup failed', error.stack);
-      throw error;
-    }
+      this.logger.log('Cleanup completed', result);return result;} catch (error) {
+      this.logger.error('Cleanup failed', error.stack);throw error;}
   }
 
   /**
@@ -752,9 +680,7 @@ export class MediaService {
         optimizationDurationMs: Date.now() - startTime,
       };
 
-      this.logger.log('Image optimization completed', result);
-      return result;
-    } catch (error) {
+      this.logger.log('Image optimization completed', result);return result;} catch (error) {
       this.logger.error('Image optimization failed', error.stack);
       throw error;
     }

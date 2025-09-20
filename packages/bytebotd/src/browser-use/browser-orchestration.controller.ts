@@ -15,40 +15,23 @@ import {
   Injectable,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
-} from '@nestjs/swagger';
-import {
-  ConnectedSocket,
+} from '@nestjs/swagger';import {ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { spawn, ChildProcess } from 'child_process';
-import { join } from 'path';
-import { existsSync } from 'fs';
-
-// Existing imports
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-import {
-  CreateBrowserTaskDto,
+} from '@nestjs/websockets';import { Server, Socket } from 'socket.io';import { spawn, ChildProcess } from 'child_process';import { join } from 'path';import { existsSync } from 'fs';// Existing importsimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import {CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
   BrowserActionDto,
-} from './dto/browser-task.dto';
-import {
-  BrowserOrchestrationDto,
+} from './dto/browser-task.dto';import {BrowserOrchestrationDto,
   BrowserOrchestrationResultDto,
   OrchestrationProgressUpdateDto,
   OrchestrationSubscriptionDto,
@@ -56,12 +39,7 @@ import {
   MultiAgentConfigDto,
   OrchestrationStrategy,
   OrchestrationStatus,
-} from './dto/browser-orchestration.dto';
-
-
-
-/**
- * Browser Task Orchestration Controller
+} from './dto/browser-orchestration.dto';/*** Browser Task Orchestration Controller
  *
  * Advanced controller for orchestrating browser automation tasks across multiple
  * browser-use agents with intelligent distribution, session coordination, and
@@ -83,12 +61,7 @@ import {
  * - Request/response logging
  * - Resource usage monitoring
  */
-@ApiTags('Browser Task Orchestration')
-@Controller('browser-orchestration')
-@WebSocketGateway({
-  namespace: '/browser-orchestration',
-  cors: {
-    origin: false, // Local-only access
+@ApiTags('Browser Task Orchestration')@Controller('browser-orchestration')@WebSocketGateway({namespace: '/browser-orchestration',cors: {origin: false, // Local-only access
   },
 })
 @Injectable()
@@ -125,29 +98,12 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     // Initialize Python BrowserOrchestrator path
     this.browserOrchestratorPath = join(
       process.cwd(),
-      '..',
-      '..',
-      'orchestrator',
-      'browser_orchestration',
-      'browser_orchestrator.py'
-    );
-
-    this.logger.log('Browser Orchestration Controller initialized');
-  }
-
-  async onModuleInit() {
-    this.logger.log('Browser Orchestration module initializing');
-
-    // Verify Python BrowserOrchestrator availability
-    if (!existsSync(this.browserOrchestratorPath)) {
+      '..','..','orchestrator','browser_orchestration','browser_orchestrator.py');this.logger.log('Browser Orchestration Controller initialized');}async onModuleInit() {
+    this.logger.log('Browser Orchestration module initializing');// Verify Python BrowserOrchestrator availabilityif (!existsSync(this.browserOrchestratorPath)) {
       this.logger.warn(
-        'Python BrowserOrchestrator not found, orchestration will use fallback implementation',
-        { expectedPath: this.browserOrchestratorPath }
-      );
+        'Python BrowserOrchestrator not found, orchestration will use fallback implementation',{ expectedPath: this.browserOrchestratorPath });
     } else {
-      this.logger.log('Python BrowserOrchestrator detected', {
-        path: this.browserOrchestratorPath,
-      });
+      this.logger.log('Python BrowserOrchestrator detected', {path: this.browserOrchestratorPath,});
     }
 
     // Initialize WebSocket event handlers
@@ -168,14 +124,9 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       const process = this.pythonProcesses.get(id);
       if (process) {
         this.logger.log(`Terminating Python process for orchestration: ${id}`);
-        process.kill('SIGTERM');
-      }
-    }
+        process.kill('SIGTERM');}}
 
-    this.logger.log('Browser Orchestration module shutdown complete');
-  }
-
-  /**
+    this.logger.log('Browser Orchestration module shutdown complete');}/**
    * Execute orchestrated browser tasks
    *
    * Primary endpoint for executing browser automation tasks across multiple agents
@@ -186,9 +137,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
   async executeOrchestration(
     @Body() orchestrationDto: BrowserOrchestrationDto,
   ): Promise<BrowserOrchestrationResultDto> {
-    const orchestrationId = `orch_${Date.now()}_${++this.orchestrationCounter}`;
-
-    this.logger.log(`Starting browser task orchestration: ${orchestrationId}`, {
+    const orchestrationId = `orch_${Date.now()}_${++this.orchestrationCounter}`;this.logger.log(`Starting browser task orchestration: ${orchestrationId}`, {
       totalTasks: orchestrationDto.tasks.length,
       strategy: orchestrationDto.strategy,
       multiAgentConfig: orchestrationDto.multiAgentConfig,
@@ -214,9 +163,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       taskResults: [],
       logs: [{
         timestamp: new Date(),
-        level: 'info',
-        message: 'Orchestration initialized',
-        component: 'orchestrator',
+        level: 'info',message: 'Orchestration initialized',component: 'orchestrator',
         metadata: {
           orchestrationId,
           totalTasks: orchestrationDto.tasks.length,
@@ -252,9 +199,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       this.logger.error(`Failed to start orchestration: ${orchestrationId}`, error);
 
       throw new InternalServerErrorException({
-        message: 'Failed to start browser task orchestration',
-        error: error instanceof Error ? error.message : String(error),
-        orchestrationId,
+        message: 'Failed to start browser task orchestration',error: error instanceof Error ? error.message : String(error),orchestrationId,
       });
     }
   }
@@ -264,14 +209,9 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
    *
    * Retrieve current status and progress of a browser task orchestration.
    */
-  @Get('tasks/:orchestrationId/status')
-  async getOrchestrationStatus(
-    @Param('orchestrationId') orchestrationId: string,
+  @Get('tasks/:orchestrationId/status')async getOrchestrationStatus(@Param('orchestrationId') orchestrationId: string,
   ): Promise<BrowserOrchestrationResultDto> {
-    this.logger.log(`Getting orchestration status: ${orchestrationId}`);
-
-    const orchestration = this.activeOrchestrations.get(orchestrationId);
-    if (orchestration) {
+    this.logger.log(`Getting orchestration status: ${orchestrationId}`);const orchestration = this.activeOrchestrations.get(orchestrationId);if (orchestration) {
       return orchestration;
     }
 
@@ -291,15 +231,10 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
    *
    * Cancel an active browser task orchestration and cleanup resources.
    */
-  @Delete('tasks/:orchestrationId/cancel')
-  @HttpCode(HttpStatus.OK)
-  async cancelOrchestration(
+  @Delete('tasks/:orchestrationId/cancel')@HttpCode(HttpStatus.OK)async cancelOrchestration(
     @Param('orchestrationId') orchestrationId: string,
   ): Promise<{ cancelled: boolean; message: string; orchestrationId: string }> {
-    this.logger.log(`Cancelling orchestration: ${orchestrationId}`);
-
-    const orchestration = this.activeOrchestrations.get(orchestrationId);
-    if (!orchestration) {
+    this.logger.log(`Cancelling orchestration: ${orchestrationId}`);const orchestration = this.activeOrchestrations.get(orchestrationId);if (!orchestration) {
       throw new NotFoundException(`Active orchestration not found: ${orchestrationId}`);
     }
 
@@ -319,27 +254,22 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       });
 
       // Move to history and remove from active
-      const finalResult = this.activeOrchestrations.get(orchestrationId)!;
-      this.orchestrationHistory.push(finalResult);
+      const finalResult = this.activeOrchestrations.get(orchestrationId);
+      if (finalResult) {
+        this.orchestrationHistory.push(finalResult);
+      }
       this.activeOrchestrations.delete(orchestrationId);
 
       // Broadcast update
       this.broadcastOrchestrationUpdate(orchestrationId);
 
-      this.logger.log(`Orchestration cancelled successfully: ${orchestrationId}`);
-
-      return {
-        cancelled: true,
-        message: `Orchestration ${orchestrationId} cancelled successfully`,
-        orchestrationId,
-      };
+      this.logger.log(`Orchestration cancelled successfully: ${orchestrationId}`);return {cancelled: true,
+        message: `Orchestration ${orchestrationId} cancelled successfully`,orchestrationId,};
     } catch (error: unknown) {
       this.logger.error(`Failed to cancel orchestration: ${orchestrationId}`, error);
 
       throw new InternalServerErrorException({
-        message: 'Failed to cancel orchestration',
-        error: error instanceof Error ? error.message : String(error),
-        orchestrationId,
+        message: 'Failed to cancel orchestration',error: error instanceof Error ? error.message : String(error),orchestrationId,
       });
     }
   }
@@ -349,14 +279,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
    *
    * Retrieve comprehensive metrics and analytics for orchestration performance.
    */
-  @Get('metrics')
-  async getOrchestrationMetrics(
-    @Query('period') period?: number,
-  ): Promise<OrchestrationMetricsSummaryDto> {
-    this.logger.log('Getting orchestration metrics', { period });
-
-    const now = new Date();
-    const periodHours = period || 24;
+  @Get('metrics')async getOrchestrationMetrics(@Query('period') period?: number,): Promise<OrchestrationMetricsSummaryDto> {this.logger.log('Getting orchestration metrics', { period });const now = new Date();const periodHours = period || 24;
     const cutoffTime = new Date(now.getTime() - periodHours * 60 * 60 * 1000);
 
     // Filter recent orchestrations
@@ -427,14 +350,15 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     if (!this.clientSubscriptions.has(client.id)) {
       this.clientSubscriptions.set(client.id, new Set());
     }
-    this.clientSubscriptions.get(client.id)!.add(orchestrationId);
+    const clientSubscriptions = this.clientSubscriptions.get(client.id);
+    if (clientSubscriptions) {
+      clientSubscriptions.add(orchestrationId);
+    }
 
     // Send current status if available
     const orchestration = this.activeOrchestrations.get(orchestrationId);
     if (orchestration) {
-      client.emit('orchestration_update', {
-        orchestrationId,
-        status: orchestration.status,
+      client.emit('orchestration_update', {orchestrationId,status: orchestration.status,
         progress: {
           completedTasks: orchestration.successfulTasks + orchestration.failedTasks,
           totalTasks: orchestration.totalTasks,
@@ -446,10 +370,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       });
     }
 
-    client.emit('subscription_confirmed', { orchestrationId });
-  }
-
-  @SubscribeMessage('unsubscribe_orchestration')
+    client.emit('subscription_confirmed', { orchestrationId });}@SubscribeMessage('unsubscribe_orchestration')
   handleUnsubscribeOrchestration(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { orchestrationId: string },
@@ -465,10 +386,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       subscriptions.delete(orchestrationId);
     }
 
-    client.emit('unsubscription_confirmed', { orchestrationId });
-  }
-
-  // ===========================
+    client.emit('unsubscription_confirmed', { orchestrationId });}// ===========================
   // PRIVATE HELPER METHODS
   // ===========================
 
@@ -477,10 +395,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
   ): Promise<void> {
     // Validate tasks array
     if (!orchestrationDto.tasks || orchestrationDto.tasks.length === 0) {
-      throw new BadRequestException('At least one task is required for orchestration');
-    }
-
-    if (orchestrationDto.tasks.length > 50) {
+      throw new BadRequestException('At least one task is required for orchestration');}if (orchestrationDto.tasks.length > 50) {
       throw new BadRequestException('Maximum 50 tasks allowed per orchestration');
     }
 
@@ -496,10 +411,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     const config = orchestrationDto.multiAgentConfig;
     if (config) {
       if (config.maxConcurrentAgents && (config.maxConcurrentAgents < 1 || config.maxConcurrentAgents > 10)) {
-        throw new BadRequestException('maxConcurrentAgents must be between 1 and 10');
-      }
-
-      if (config.maxConcurrentSessions && (config.maxConcurrentSessions < 1 || config.maxConcurrentSessions > 20)) {
+        throw new BadRequestException('maxConcurrentAgents must be between 1 and 10');}if (config.maxConcurrentSessions && (config.maxConcurrentSessions < 1 || config.maxConcurrentSessions > 20)) {
         throw new BadRequestException('maxConcurrentSessions must be between 1 and 20');
       }
     }
@@ -507,13 +419,8 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     // Validate individual tasks
     for (const [index, task] of orchestrationDto.tasks.entries()) {
       if (!task.name || !task.description) {
-        throw new BadRequestException(`Task at index ${index} is missing required name or description`);
-      }
-
-      if (!task.actions || task.actions.length === 0) {
-        throw new BadRequestException(`Task at index ${index} must have at least one action`);
-      }
-    }
+        throw new BadRequestException(`Task at index ${index} is missing required name or description`);}if (!task.actions || task.actions.length === 0) {
+        throw new BadRequestException(`Task at index ${index} must have at least one action`);}}
   }
 
   private async executeAsyncOrchestration(
@@ -546,9 +453,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       // Final broadcast
       this.broadcastOrchestrationUpdate(orchestrationId);
 
-      this.logger.log(`Orchestration completed: ${orchestrationId}`, {
-        totalTasks: orchestrationResult.totalTasks,
-        successfulTasks: orchestrationResult.successfulTasks,
+      this.logger.log(`Orchestration completed: ${orchestrationId}`, {totalTasks: orchestrationResult.totalTasks,successfulTasks: orchestrationResult.successfulTasks,
         failedTasks: orchestrationResult.failedTasks,
         durationMs: orchestrationResult.durationMs,
         successRate: orchestrationResult.successRate,
@@ -562,9 +467,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
         durationMs: Date.now() - orchestrationResult.startedAt.getTime(),
         error: {
           message: error instanceof Error ? error.message : String(error),
-          code: 'EXECUTION_ERROR',
-          details: {
-            type: error instanceof Error ? error.constructor.name : 'UnknownError',
+          code: 'EXECUTION_ERROR',details: {type: error instanceof Error ? error.constructor.name : 'UnknownError',
             stack: error instanceof Error ? error.stack : undefined,
           },
         },
@@ -580,58 +483,30 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     orchestrationDto: BrowserOrchestrationDto,
     orchestrationResult: BrowserOrchestrationResultDto,
   ): Promise<void> {
-    this.logger.log(`Executing Python orchestration: ${orchestrationId}`);
-
-    return new Promise((resolve, reject) => {
-      // Prepare Python orchestration configuration
+    this.logger.log(`Executing Python orchestration: ${orchestrationId}`);return new Promise((resolve, reject) => {// Prepare Python orchestration configuration
       const pythonConfig = {
         orchestration_id: orchestrationId,
         tasks: orchestrationDto.tasks.map(task => ({
           task_id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-          task_type: 'browser_automation',
-          url: task.actions.find(a => a.url)?.url || '',
-          instructions: task.description,
-          priority: task.priority || 'normal',
-          timeout_seconds: Math.floor((task.maxExecutionTimeMs || 300000) / 1000),
-          metadata: task.metadata || {},
+          task_type: 'browser_automation',url: task.actions.find(a => a.url)?.url || '',instructions: task.description,priority: task.priority || 'normal',timeout_seconds: Math.floor((task.maxExecutionTimeMs || 300000) / 1000),metadata: task.metadata || {},
         })),
         strategy: orchestrationDto.strategy,
         config: {
           max_concurrent_agents: orchestrationDto.multiAgentConfig?.maxConcurrentAgents || 3,
           max_concurrent_sessions: orchestrationDto.multiAgentConfig?.maxConcurrentSessions || 5,
           task_timeout_seconds: Math.floor((orchestrationDto.orchestrationTimeoutMs || 600000) / 1000),
-          retry_failed_tasks: orchestrationDto.failureStrategy === 'retry_failed',
-          max_retry_attempts: orchestrationDto.maxRetryAttempts || 2,
-        },
+          retry_failed_tasks: orchestrationDto.failureStrategy === 'retry_failed',max_retry_attempts: orchestrationDto.maxRetryAttempts || 2,},
       };
 
       // Spawn Python BrowserOrchestrator process
-      const pythonProcess = spawn('python3', [
-        this.browserOrchestratorPath,
-        '--config',
-        JSON.stringify(pythonConfig),
-      ], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env },
-      });
+      const pythonProcess = spawn('python3', [this.browserOrchestratorPath,'--config',JSON.stringify(pythonConfig),], {
+        stdio: ['pipe', 'pipe', 'pipe'],env: { ...process.env },});
 
       this.pythonProcesses.set(orchestrationId, pythonProcess);
 
-      let stdoutData = '';
-      let stderrData = '';
-
-      pythonProcess.stdout?.on('data', (data) => {
-        stdoutData += data.toString();
-
-        // Try to parse progress updates
-        const lines = stdoutData.split('\n');
-        for (const line of lines) {
-          if (line.trim().startsWith('{')) {
-            try {
-              const update = JSON.parse(line.trim());
-              if (update.type === 'progress') {
-                this.handlePythonProgressUpdate(orchestrationId, update);
-              }
+      let stdoutData = '';let stderrData = '';pythonProcess.stdout?.on('data', (data) => {stdoutData += data.toString();// Try to parse progress updates
+        const lines = stdoutData.split('\n');for (const line of lines) {if (line.trim().startsWith('{')) {try {const update = JSON.parse(line.trim());
+              if (update.type === 'progress') {this.handlePythonProgressUpdate(orchestrationId, update);}
             } catch (e) {
               // Ignore invalid JSON lines
             }
@@ -644,10 +519,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
         this.logger.warn(`Python orchestrator stderr: ${data.toString()}`);
       });
 
-      pythonProcess.on('close', (code) => {
-        this.pythonProcesses.delete(orchestrationId);
-
-        if (code === 0) {
+      pythonProcess.on('close', (code) => {this.pythonProcesses.delete(orchestrationId);if (code === 0) {
           try {
             // Parse final result from stdout
             const result = JSON.parse(stdoutData.split('\n').pop() || '{}');
@@ -667,18 +539,14 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
             reject(new Error('Failed to parse orchestration result'));
           }
         } else {
-          this.logger.error(`Python orchestration failed with code ${code}: ${orchestrationId}`, {
-            stderr: stderrData,
-          });
+          this.logger.error(`Python orchestration failed with code ${code}: ${orchestrationId}`, {stderr: stderrData,});
           reject(new Error(`Python orchestration failed with exit code ${code}`));
         }
       });
 
       pythonProcess.on('error', (error) => {
         this.pythonProcesses.delete(orchestrationId);
-        this.logger.error(`Python orchestration process error: ${orchestrationId}`, error);
-        reject(error);
-      });
+        this.logger.error(`Python orchestration process error: ${orchestrationId}`, error);reject(error);});
 
       // Update status to executing
       this.updateOrchestrationStatus(orchestrationId, OrchestrationStatus.EXECUTING);
@@ -691,10 +559,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     orchestrationDto: BrowserOrchestrationDto,
     orchestrationResult: BrowserOrchestrationResultDto,
   ): Promise<void> {
-    this.logger.log(`Executing fallback orchestration: ${orchestrationId}`);
-
-    // Update status to executing
-    this.updateOrchestrationStatus(orchestrationId, OrchestrationStatus.EXECUTING);
+    this.logger.log(`Executing fallback orchestration: ${orchestrationId}`);// Update status to executingthis.updateOrchestrationStatus(orchestrationId, OrchestrationStatus.EXECUTING);
     this.broadcastOrchestrationUpdate(orchestrationId);
 
     const startTime = Date.now();
@@ -704,10 +569,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     // Simple sequential execution as fallback
     for (const [index, task] of orchestrationDto.tasks.entries()) {
       try {
-        this.logger.log(`Executing fallback task ${index + 1}/${orchestrationDto.tasks.length}: ${task.name}`);
-
-        // Convert to browser task format
-        const browserTask = await this.taskService.createTask({
+        this.logger.log(`Executing fallback task ${index + 1}/${orchestrationDto.tasks.length}: ${task.name}`);// Convert to browser task formatconst browserTask = await this.taskService.createTask({
           name: task.name,
           description: task.description,
           actions: task.actions,
@@ -779,15 +641,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
 
   private mapPythonStatusToOrchestrationStatus(pythonStatus: string): OrchestrationStatus {
     const statusMap: Record<string, OrchestrationStatus> = {
-      'pending': OrchestrationStatus.PENDING,
-      'initializing': OrchestrationStatus.INITIALIZING,
-      'executing': OrchestrationStatus.EXECUTING,
-      'completed': OrchestrationStatus.COMPLETED,
-      'failed': OrchestrationStatus.FAILED,
-      'cancelled': OrchestrationStatus.CANCELLED,
-    };
-
-    return statusMap[pythonStatus] || OrchestrationStatus.EXECUTING;
+      'pending': OrchestrationStatus.PENDING,'initializing': OrchestrationStatus.INITIALIZING,'executing': OrchestrationStatus.EXECUTING,'completed': OrchestrationStatus.COMPLETED,'failed': OrchestrationStatus.FAILED,'cancelled': OrchestrationStatus.CANCELLED,};return statusMap[pythonStatus] || OrchestrationStatus.EXECUTING;
   }
 
   private updateOrchestrationStatus(
@@ -808,9 +662,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
           timestamp: new Date(),
           level: status === OrchestrationStatus.FAILED ? 'error' as const : 'info' as const,
           message: `Status updated to ${status}`,
-          component: 'orchestrator',
-          metadata: { status, ...updates },
-        },
+          component: 'orchestrator',metadata: { status, ...updates },},
       ],
     };
 
@@ -826,9 +678,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       if (subscriptions.has(orchestrationId)) {
         const client = this.connectedClients.get(clientId);
         if (client) {
-          client.emit('orchestration_update', {
-            orchestrationId,
-            status: orchestration.status,
+          client.emit('orchestration_update', {orchestrationId,status: orchestration.status,
             progress: {
               completedTasks: orchestration.successfulTasks + orchestration.failedTasks,
               totalTasks: orchestration.totalTasks,
@@ -852,9 +702,7 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
       if (subscriptions.has(orchestrationId)) {
         const client = this.connectedClients.get(clientId);
         if (client) {
-          client.emit('progress_update', {
-            orchestrationId,
-            progress,
+          client.emit('progress_update', {orchestrationId,progress,
             timestamp: new Date(),
           });
         }

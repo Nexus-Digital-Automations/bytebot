@@ -23,81 +23,36 @@
  */
 
 // Mock dependencies before imports
-jest.mock('../computer-use.service');
-jest.mock('../../cache/cache.service');
-jest.mock('../../metrics/metrics.service');
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-12345'),
-}));
-
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { AsyncJobService } from '../async-job.service';
-import { ComputerUseService, ScreenshotResult, CursorPositionResult, FileWriteResult, FileReadResult } from '../computer-use.service';
-import { CacheService } from '../../cache/cache.service';
-import { MetricsService } from '../../metrics/metrics.service';
-import {
-  JobStatus,
+jest.mock('../computer-use.service');jest.mock('../../cache/cache.service');jest.mock('../../metrics/metrics.service');jest.mock('uuid', () => ({v4: jest.fn(() => 'mock-uuid-12345'),}));import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { AsyncJobService } from '../async-job.service';import { ComputerUseService, ScreenshotResult, CursorPositionResult, FileWriteResult, FileReadResult } from '../computer-use.service';import { CacheService } from '../../cache/cache.service';import { MetricsService } from '../../metrics/metrics.service';import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from '../dto/async-job.dto';
-import { ComputerActionDto } from '../dto/computer-action.dto';
-
-/**
- * Mock computer action for testing
+} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';/*** Mock computer action for testing
  */
 const mockComputerAction: ComputerActionDto = {
-  action: 'screenshot',
-};
-
-const mockMoveAction: ComputerActionDto = {
-  action: 'move_mouse',
-  coordinates: { x: 100, y: 200 },
-};
+  action: 'screenshot',};const mockMoveAction: ComputerActionDto = {
+  action: 'move_mouse',coordinates: { x: 100, y: 200 },};
 
 const mockClickAction: ComputerActionDto = {
-  action: 'click_mouse',
-  coordinates: { x: 150, y: 250 },
-  clickCount: 1,
-  button: 'left',
-};
-
-/**
+  action: 'click_mouse',coordinates: { x: 150, y: 250 },clickCount: 1,
+  button: 'left',};/**
  * Mock action results
  */
 const mockScreenshotResult: ScreenshotResult = {
-  operationId: 'screenshot_123',
-  success: true,
-  image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-  screenshotData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-  screenshotPath: '/tmp/screenshot_123.png',
-  fileSize: 1024,
-  quality: 95,
+  operationId: 'screenshot_123',success: true,image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',screenshotData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',screenshotPath: '/tmp/screenshot_123.png',fileSize: 1024,quality: 95,
   metadata: {
     width: 1920,
     height: 1080,
-    format: 'png',
-    fileSize: 1024,
-    quality: 95,
+    format: 'png',fileSize: 1024,quality: 95,
     captureTime: new Date(),
-    operationId: 'screenshot_123',
-  },
-};
+    operationId: 'screenshot_123',},};
 
 const mockFileWriteResult: FileWriteResult = {
-  operationId: 'write_123',
-  success: true,
-  timestamp: new Date(),
-  message: 'File written successfully',
-  path: '/tmp/test.txt',
-  size: 100,
-};
+  operationId: 'write_123',success: true,timestamp: new Date(),
+  message: 'File written successfully',path: '/tmp/test.txt',size: 100,};
 
-describe('AsyncJobService', () => {
-  let service: AsyncJobService;
-  let computerUseService: jest.Mocked<ComputerUseService>;
+describe('AsyncJobService', () => {let service: AsyncJobService;let computerUseService: jest.Mocked<ComputerUseService>;
   let cacheService: jest.Mocked<CacheService>;
   let metricsService: jest.Mocked<MetricsService>;
   let logger: jest.Mocked<Logger>;
@@ -168,110 +123,53 @@ describe('AsyncJobService', () => {
     jest.clearAllMocks();
   });
 
-  describe('Initialization', () => {
-    it('should initialize service with required dependencies', () => {
-      expect(service).toBeDefined();
-      expect(computerUseService).toBeDefined();
+  describe('Initialization', () => {it('should initialize service with required dependencies', () => {expect(service).toBeDefined();expect(computerUseService).toBeDefined();
       expect(cacheService).toBeDefined();
       expect(metricsService).toBeDefined();
       expect(logger).toBeDefined();
     });
 
-    it('should initialize with empty job queue', () => {
-      // Service should start with no active jobs
-      expect(service).toBeDefined();
+    it('should initialize with empty job queue', () => {// Service should start with no active jobsexpect(service).toBeDefined();
     });
   });
 
-  describe('Job Submission', () => {
-    const userId = 'user-123';
-    const mockOptions = {
-      priority: 'high' as JobPriority,
-      timeout: 30000,
-      useCache: true,
-      metadata: { source: 'test' },
-    };
-
-    it('should submit job successfully with default options', async () => {
-      const result = await service.submitAction(mockComputerAction, userId);
-
-      expect(result).toMatchObject({
-        jobId: 'mock-uuid-12345',
-        status: 'queued',
-        submittedAt: expect.any(String),
-        estimatedDuration: expect.any(Number),
+  describe('Job Submission', () => {const userId = 'user-123';const mockOptions = {priority: 'high' as JobPriority,timeout: 30000,useCache: true,
+      metadata: { source: 'test' },};it('should submit job successfully with default options', async () => {const result = await service.submitAction(mockComputerAction, userId);expect(result).toMatchObject({
+        jobId: 'mock-uuid-12345',status: 'queued',submittedAt: expect.any(String),estimatedDuration: expect.any(Number),
       });
 
       expect(metricsService.recordJobSubmission).toHaveBeenCalledWith(
-        'mock-uuid-12345',
-        mockComputerAction.action,
-        'normal'
-      );
-    });
+        'mock-uuid-12345',mockComputerAction.action,'normal');});
 
-    it('should submit job with custom options', async () => {
-      const result = await service.submitAction(mockComputerAction, mockOptions);
-
-      expect(result).toMatchObject({
-        jobId: 'mock-uuid-12345',
-        status: 'queued',
-        submittedAt: expect.any(String),
-        estimatedDuration: expect.any(Number),
+    it('should submit job with custom options', async () => {const result = await service.submitAction(mockComputerAction, mockOptions);expect(result).toMatchObject({
+        jobId: 'mock-uuid-12345',status: 'queued',submittedAt: expect.any(String),estimatedDuration: expect.any(Number),
       });
 
       expect(metricsService.recordJobSubmission).toHaveBeenCalledWith(
-        'mock-uuid-12345',
-        mockComputerAction.action,
-        'high'
-      );
-    });
+        'mock-uuid-12345',mockComputerAction.action,'high');});
 
-    it('should handle multiple job submissions correctly', async () => {
-      const result1 = await service.submitAction(mockComputerAction, userId);
-      const result2 = await service.submitAction(mockMoveAction, userId);
+    it('should handle multiple job submissions correctly', async () => {const result1 = await service.submitAction(mockComputerAction, userId);const result2 = await service.submitAction(mockMoveAction, userId);
 
-      expect(result1.jobId).toBe('mock-uuid-12345');
-      expect(result2.jobId).toBe('mock-uuid-12345');
-      expect(metricsService.recordJobSubmission).toHaveBeenCalledTimes(2);
-    });
+      expect(result1.jobId).toBe('mock-uuid-12345');expect(result2.jobId).toBe('mock-uuid-12345');expect(metricsService.recordJobSubmission).toHaveBeenCalledTimes(2);});
 
-    it('should validate action before submission', async () => {
-      const invalidAction = { action: 'invalid_action' } as ComputerActionDto;
-
-      await expect(
-        service.submitAction(invalidAction, userId)
+    it('should validate action before submission', async () => {const invalidAction = { action: 'invalid_action' } as ComputerActionDto;await expect(service.submitAction(invalidAction, userId)
       ).rejects.toThrow();
     });
 
-    it('should handle submission errors gracefully', async () => {
-      // Mock an internal error during submission
-      metricsService.recordJobSubmission.mockImplementation(() => {
-        throw new Error('Metrics service unavailable');
-      });
-
-      // Should still succeed but handle the metrics error
+    it('should handle submission errors gracefully', async () => {// Mock an internal error during submissionmetricsService.recordJobSubmission.mockImplementation(() => {
+        throw new Error('Metrics service unavailable');});// Should still succeed but handle the metrics error
       const result = await service.submitAction(mockComputerAction, userId);
 
       expect(result).toMatchObject({
-        jobId: 'mock-uuid-12345',
-        status: 'queued',
-      });
-    });
+        jobId: 'mock-uuid-12345',status: 'queued',});});
   });
 
-  describe('Job Execution', () => {
-    const userId = 'user-123';
-    let jobId: string;
-
-    beforeEach(async () => {
+  describe('Job Execution', () => {const userId = 'user-123';let jobId: string;beforeEach(async () => {
       const submission = await service.submitAction(mockComputerAction, userId);
       jobId = submission.jobId;
     });
 
-    it('should execute job and update status', async () => {
-      computerUseService.action.mockResolvedValue(mockScreenshotResult);
-
-      // Allow time for job processing
+    it('should execute job and update status', async () => {computerUseService.action.mockResolvedValue(mockScreenshotResult);// Allow time for job processing
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const status = await service.getJobStatus(jobId);
@@ -281,9 +179,7 @@ describe('AsyncJobService', () => {
       expect(status.progress).toBeLessThanOrEqual(100);
     });
 
-    it('should handle job execution with caching', async () => {
-      computerUseService.action.mockResolvedValue(mockScreenshotResult);
-      cacheService.get.mockResolvedValue(null);
+    it('should handle job execution with caching', async () => {computerUseService.action.mockResolvedValue(mockScreenshotResult);cacheService.get.mockResolvedValue(null);
       cacheService.set.mockResolvedValue(undefined);
 
       // Submit job with caching enabled
@@ -297,9 +193,7 @@ describe('AsyncJobService', () => {
       expect(cacheService.get).toHaveBeenCalled();
     });
 
-    it('should handle cached results', async () => {
-      const cachedResult = { ...mockScreenshotResult, cached: true };
-      cacheService.get.mockResolvedValue(cachedResult);
+    it('should handle cached results', async () => {const cachedResult = { ...mockScreenshotResult, cached: true };cacheService.get.mockResolvedValue(cachedResult);
 
       const submission = await service.submitAction(mockComputerAction, {
         useCache: true,
@@ -312,24 +206,15 @@ describe('AsyncJobService', () => {
       expect(cacheService.get).toHaveBeenCalled();
     });
 
-    it('should handle job execution errors', async () => {
-      const executionError = new Error('Computer action failed');
-      computerUseService.action.mockRejectedValue(executionError);
-
-      // Allow time for job processing
+    it('should handle job execution errors', async () => {const executionError = new Error('Computer action failed');computerUseService.action.mockRejectedValue(executionError);// Allow time for job processing
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const status = await service.getJobStatus(jobId);
 
       // Job should eventually be marked as failed
-      expect(['queued', 'running', 'failed']).toContain(status.status);
+      expect(['queued', 'running', 'failed']).toContain(status.status);expect(metricsService.recordJobError).toHaveBeenCalled();});
 
-      expect(metricsService.recordJobError).toHaveBeenCalled();
-    });
-
-    it('should handle job timeout scenarios', async () => {
-      // Mock a long-running operation
-      computerUseService.action.mockImplementation(
+    it('should handle job timeout scenarios', async () => {// Mock a long-running operationcomputerUseService.action.mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve(mockScreenshotResult), 50000))
       );
 
@@ -343,23 +228,14 @@ describe('AsyncJobService', () => {
       const status = await service.getJobStatus(submission.jobId);
 
       // Job should be timed out or cancelled
-      expect(['failed', 'cancelled', 'timeout']).toContain(status.status);
-    });
-  });
+      expect(['failed', 'cancelled', 'timeout']).toContain(status.status);});});
 
-  describe('Job Status and Progress Tracking', () => {
-    const userId = 'user-123';
-    let jobId: string;
-
-    beforeEach(async () => {
+  describe('Job Status and Progress Tracking', () => {const userId = 'user-123';let jobId: string;beforeEach(async () => {
       const submission = await service.submitAction(mockComputerAction, userId);
       jobId = submission.jobId;
     });
 
-    it('should get job status successfully', async () => {
-      const status = await service.getJobStatus(jobId);
-
-      expect(status).toMatchObject({
+    it('should get job status successfully', async () => {const status = await service.getJobStatus(jobId);expect(status).toMatchObject({
         jobId: jobId,
         status: expect.any(String),
         progress: expect.any(Number),
@@ -367,30 +243,12 @@ describe('AsyncJobService', () => {
         estimatedTimeRemaining: expect.any(Number),
       });
 
-      expect(['queued', 'running', 'completed', 'failed', 'cancelled']).toContain(status.status);
-      expect(status.progress).toBeGreaterThanOrEqual(0);
-      expect(status.progress).toBeLessThanOrEqual(100);
+      expect(['queued', 'running', 'completed', 'failed', 'cancelled']).toContain(status.status);expect(status.progress).toBeGreaterThanOrEqual(0);expect(status.progress).toBeLessThanOrEqual(100);
     });
 
-    it('should handle non-existent job status requests', async () => {
-      const invalidJobId = 'non-existent-job';
-
-      await expect(
-        service.getJobStatus(invalidJobId)
-      ).rejects.toThrow('Job not found');
-    });
-
-    it('should handle unauthorized job status requests', async () => {
-      const unauthorizedUserId = 'other-user-456';
-
-      await expect(
-        service.getJobStatus(jobId)
-      ).rejects.toThrow('Unauthorized');
-    });
-
-    it('should track progress updates during execution', async () => {
-      computerUseService.action.mockImplementation(async () => {
-        // Simulate progress updates
+    it('should handle non-existent job status requests', async () => {const invalidJobId = 'non-existent-job';await expect(service.getJobStatus(invalidJobId)
+      ).rejects.toThrow('Job not found');});it('should handle unauthorized job status requests', async () => {const unauthorizedUserId = 'other-user-456';await expect(service.getJobStatus(jobId)
+      ).rejects.toThrow('Unauthorized');});it('should track progress updates during execution', async () => {computerUseService.action.mockImplementation(async () => {// Simulate progress updates
         await new Promise(resolve => setTimeout(resolve, 50));
         return mockScreenshotResult;
       });
@@ -405,19 +263,13 @@ describe('AsyncJobService', () => {
     });
   });
 
-  describe('Job Result Retrieval', () => {
-    const userId = 'user-123';
-    let jobId: string;
-
-    beforeEach(async () => {
+  describe('Job Result Retrieval', () => {const userId = 'user-123';let jobId: string;beforeEach(async () => {
       const submission = await service.submitAction(mockComputerAction, userId);
       jobId = submission.jobId;
       computerUseService.action.mockResolvedValue(mockScreenshotResult);
     });
 
-    it('should get job result after completion', async () => {
-      // Allow time for job completion
-      await new Promise(resolve => setTimeout(resolve, 200));
+    it('should get job result after completion', async () => {// Allow time for job completionawait new Promise(resolve => setTimeout(resolve, 200));
 
       const result = await service.getJobResult(jobId);
 
@@ -428,71 +280,33 @@ describe('AsyncJobService', () => {
         duration: expect.any(Number),
       });
 
-      if (result.status === 'completed') {
-        expect(result.result).toBeDefined();
-        expect(result.completedAt).toBeDefined();
+      if (result.status === 'completed') {expect(result.result).toBeDefined();expect(result.completedAt).toBeDefined();
       }
     });
 
-    it('should handle result requests for pending jobs', async () => {
-      // Immediately request result before completion
-      await expect(
+    it('should handle result requests for pending jobs', async () => {// Immediately request result before completionawait expect(
         service.getJobResult(jobId)
-      ).rejects.toThrow('Job not completed');
-    });
-
-    it('should handle result requests for failed jobs', async () => {
-      const executionError = new Error('Computer action failed');
-      computerUseService.action.mockRejectedValue(executionError);
-
-      // Allow time for job failure
+      ).rejects.toThrow('Job not completed');});it('should handle result requests for failed jobs', async () => {const executionError = new Error('Computer action failed');computerUseService.action.mockRejectedValue(executionError);// Allow time for job failure
       await new Promise(resolve => setTimeout(resolve, 200));
 
       const result = await service.getJobResult(jobId);
 
-      expect(result.status).toBe('failed');
-      expect(result.result).toBeUndefined();
-    });
+      expect(result.status).toBe('failed');expect(result.result).toBeUndefined();});
 
-    it('should handle unauthorized result requests', async () => {
-      const unauthorizedUserId = 'other-user-456';
+    it('should handle unauthorized result requests', async () => {const unauthorizedUserId = 'other-user-456';await expect(service.getJobResult(jobId)
+      ).rejects.toThrow('Unauthorized');});it('should handle non-existent job result requests', async () => {const invalidJobId = 'non-existent-job';await expect(service.getJobResult(invalidJobId)
+      ).rejects.toThrow('Job not found');});});
 
-      await expect(
-        service.getJobResult(jobId)
-      ).rejects.toThrow('Unauthorized');
-    });
-
-    it('should handle non-existent job result requests', async () => {
-      const invalidJobId = 'non-existent-job';
-
-      await expect(
-        service.getJobResult(invalidJobId)
-      ).rejects.toThrow('Job not found');
-    });
-  });
-
-  describe('Job Cancellation', () => {
-    const userId = 'user-123';
-    let jobId: string;
-
-    beforeEach(async () => {
+  describe('Job Cancellation', () => {const userId = 'user-123';let jobId: string;beforeEach(async () => {
       const submission = await service.submitAction(mockComputerAction, userId);
       jobId = submission.jobId;
     });
 
-    it('should cancel queued job successfully', async () => {
-      const result = await service.cancelJob(jobId);
-
-      expect(result).toBe(true);
+    it('should cancel queued job successfully', async () => {const result = await service.cancelJob(jobId);expect(result).toBe(true);
       expect(metricsService.recordJobCancellation).toHaveBeenCalledWith(jobId);
 
       const status = await service.getJobStatus(jobId);
-      expect(status.status).toBe('cancelled');
-    });
-
-    it('should handle cancellation of running jobs', async () => {
-      // Mock a long-running operation
-      computerUseService.action.mockImplementation(
+      expect(status.status).toBe('cancelled');});it('should handle cancellation of running jobs', async () => {// Mock a long-running operationcomputerUseService.action.mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve(mockScreenshotResult), 1000))
       );
 
@@ -505,10 +319,7 @@ describe('AsyncJobService', () => {
       expect(metricsService.recordJobCancellation).toHaveBeenCalledWith(jobId);
     });
 
-    it('should handle cancellation of completed jobs', async () => {
-      computerUseService.action.mockResolvedValue(mockScreenshotResult);
-
-      // Allow job to complete
+    it('should handle cancellation of completed jobs', async () => {computerUseService.action.mockResolvedValue(mockScreenshotResult);// Allow job to complete
       await new Promise(resolve => setTimeout(resolve, 200));
 
       const result = await service.cancelJob(jobId);
@@ -516,41 +327,14 @@ describe('AsyncJobService', () => {
       expect(result).toBe(false); // Cannot cancel completed jobs
     });
 
-    it('should handle unauthorized cancellation requests', async () => {
-      const unauthorizedUserId = 'other-user-456';
+    it('should handle unauthorized cancellation requests', async () => {const unauthorizedUserId = 'other-user-456';await expect(service.cancelJob(jobId)
+      ).rejects.toThrow('Unauthorized');});it('should handle cancellation of non-existent jobs', async () => {const invalidJobId = 'non-existent-job';await expect(service.cancelJob(invalidJobId)
+      ).rejects.toThrow('Job not found');});});
 
-      await expect(
-        service.cancelJob(jobId)
-      ).rejects.toThrow('Unauthorized');
-    });
-
-    it('should handle cancellation of non-existent jobs', async () => {
-      const invalidJobId = 'non-existent-job';
-
-      await expect(
-        service.cancelJob(invalidJobId)
-      ).rejects.toThrow('Job not found');
-    });
-  });
-
-  describe('Priority Queue Management', () => {
-    const userId = 'user-123';
-
-    it('should handle priority-based job ordering', async () => {
-      // Submit jobs with different priorities
-      const lowPriorityJob = await service.submitAction(mockComputerAction, {
-        priority: 'low',
-      });
-
-      const highPriorityJob = await service.submitAction(mockMoveAction, {
-        priority: 'high',
-      });
-
-      const normalPriorityJob = await service.submitAction(mockClickAction, {
-        priority: 'normal',
-      });
-
-      expect(lowPriorityJob.jobId).toBeDefined();
+  describe('Priority Queue Management', () => {const userId = 'user-123';it('should handle priority-based job ordering', async () => {// Submit jobs with different prioritiesconst lowPriorityJob = await service.submitAction(mockComputerAction, {
+        priority: 'low',});const highPriorityJob = await service.submitAction(mockMoveAction, {
+        priority: 'high',});const normalPriorityJob = await service.submitAction(mockClickAction, {
+        priority: 'normal',});expect(lowPriorityJob.jobId).toBeDefined();
       expect(highPriorityJob.jobId).toBeDefined();
       expect(normalPriorityJob.jobId).toBeDefined();
 
@@ -558,64 +342,37 @@ describe('AsyncJobService', () => {
       expect(metricsService.recordJobSubmission).toHaveBeenCalledTimes(3);
     });
 
-    it('should execute high priority jobs first', async () => {
-      computerUseService.action.mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+    it('should execute high priority jobs first', async () => {computerUseService.action.mockImplementation(async () => {await new Promise(resolve => setTimeout(resolve, 100));
         return mockScreenshotResult;
       });
 
       // Submit multiple jobs with different priorities
-      await service.submitAction(mockComputerAction, { priority: 'low' });
-      await service.submitAction(mockMoveAction, { priority: 'high' });
-      await service.submitAction(mockClickAction, { priority: 'normal' });
-
-      // Allow time for processing
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await service.submitAction(mockComputerAction, { priority: 'low' });await service.submitAction(mockMoveAction, { priority: 'high' });await service.submitAction(mockClickAction, { priority: 'normal' });// Allow time for processingawait new Promise(resolve => setTimeout(resolve, 300));
 
       // Verify metrics were recorded for job execution
       expect(metricsService.recordJobSubmission).toHaveBeenCalledTimes(3);
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    const userId = 'user-123';
-
-    it('should handle service unavailability gracefully', async () => {
-      computerUseService.action.mockRejectedValue(new Error('Service unavailable'));
-
-      const submission = await service.submitAction(mockComputerAction, userId);
-
-      // Service should handle the error gracefully
+  describe('Error Handling and Edge Cases', () => {const userId = 'user-123';it('should handle service unavailability gracefully', async () => {computerUseService.action.mockRejectedValue(new Error('Service unavailable'));const submission = await service.submitAction(mockComputerAction, userId);// Service should handle the error gracefully
       expect(submission).toBeDefined();
       expect(submission.jobId).toBeDefined();
     });
 
-    it('should handle cache service failures', async () => {
-      cacheService.get.mockRejectedValue(new Error('Cache unavailable'));
-      cacheService.set.mockRejectedValue(new Error('Cache unavailable'));
-
-      const submission = await service.submitAction(mockComputerAction, {
-        useCache: true,
+    it('should handle cache service failures', async () => {cacheService.get.mockRejectedValue(new Error('Cache unavailable'));cacheService.set.mockRejectedValue(new Error('Cache unavailable'));const submission = await service.submitAction(mockComputerAction, {useCache: true,
       });
 
       expect(submission).toBeDefined();
       // Should continue without cache
     });
 
-    it('should handle metrics service failures', async () => {
-      metricsService.recordJobSubmission.mockImplementation(() => {
-        throw new Error('Metrics unavailable');
-      });
-
-      const submission = await service.submitAction(mockComputerAction, userId);
+    it('should handle metrics service failures', async () => {metricsService.recordJobSubmission.mockImplementation(() => {throw new Error('Metrics unavailable');});const submission = await service.submitAction(mockComputerAction, userId);
 
       expect(submission).toBeDefined();
       // Should continue without metrics
     });
 
-    it('should handle concurrent job operations', async () => {
-      const submissions = await Promise.all([
-        service.submitAction(mockComputerAction, userId),
+    it('should handle concurrent job operations', async () => {const submissions = await Promise.all([service.submitAction(mockComputerAction, userId),
         service.submitAction(mockMoveAction, userId),
         service.submitAction(mockClickAction, userId),
       ]);
@@ -629,30 +386,19 @@ describe('AsyncJobService', () => {
     });
   });
 
-  describe('Performance and Metrics', () => {
-    const userId = 'user-123';
-
-    it('should record performance metrics correctly', async () => {
-      computerUseService.action.mockResolvedValue(mockScreenshotResult);
-
-      const submission = await service.submitAction(mockComputerAction, userId);
+  describe('Performance and Metrics', () => {const userId = 'user-123';it('should record performance metrics correctly', async () => {computerUseService.action.mockResolvedValue(mockScreenshotResult);const submission = await service.submitAction(mockComputerAction, userId);
 
       expect(metricsService.recordJobSubmission).toHaveBeenCalledWith(
         submission.jobId,
         mockComputerAction.action,
-        'normal'
-      );
-
-      // Allow time for execution
+        'normal');// Allow time for execution
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Should record execution and completion metrics
       expect(metricsService.recordJobExecution).toHaveBeenCalled();
     });
 
-    it('should track job duration accurately', async () => {
-      computerUseService.action.mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+    it('should track job duration accurately', async () => {computerUseService.action.mockImplementation(async () => {await new Promise(resolve => setTimeout(resolve, 100));
         return mockScreenshotResult;
       });
 

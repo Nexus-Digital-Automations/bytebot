@@ -1,16 +1,11 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import {
-  ContentMonitoringDto,
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';import { ComputerUseService } from '../computer-use/computer-use.service';import {ContentMonitoringDto,
   MonitorOperationDto,
   BulkMonitorOperationDto,
   MonitoringType,
   ChangeDetectionMethod,
   NotificationMethod,
   AlertSeverity
-} from './dto/monitoring.dto';
-import {
-  MonitorStatus,
+} from './dto/monitoring.dto';import {MonitorStatus,
   ChangeDetectionResultDto,
   NotificationResultDto,
   MonitorCheckResultDto,
@@ -20,10 +15,7 @@ import {
   BulkMonitorOperationResponseDto,
   MonitorListResponseDto,
   ChangeHistoryResponseDto
-} from './dto/monitoring-response.dto';
-
-/**
- * Content Monitoring Service
+} from './dto/monitoring-response.dto';/*** Content Monitoring Service
  *
  * Provides comprehensive content monitoring capabilities including:
  * - Real-time page content monitoring with change detection
@@ -62,9 +54,7 @@ export class ContentMonitoringService {
    */
   async createMonitor(config: ContentMonitoringDto): Promise<MonitorStatusResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Creating monitor: ${config.id}`, {
-      url: config.url,
-      type: config.type,
+    this.logger.log(`Creating monitor: ${config.id}`, {url: config.url,type: config.type,
       interval: config.frequency.interval
     });
 
@@ -87,17 +77,13 @@ export class ContentMonitoringService {
 
       const response = await this.getMonitorStatus(config.id);
 
-      this.logger.log(`Monitor created successfully in ${Date.now() - startTime}ms`, {
-        monitorId: config.id,
-        status: response.status
+      this.logger.log(`Monitor created successfully in ${Date.now() - startTime}ms`, {monitorId: config.id,status: response.status
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to create monitor: ${config.id}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to create monitor: ${config.id}`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -108,17 +94,11 @@ export class ContentMonitoringService {
    */
   async getMonitorStatus(monitorId: string): Promise<MonitorStatusResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Getting monitor status: ${monitorId}`);
-
-    try {
-      const monitor = this.getMonitor(monitorId);
+    this.logger.log(`Getting monitor status: ${monitorId}`);try {const monitor = this.getMonitor(monitorId);
       const stats = this.monitorStats.get(monitorId);
 
       if (!stats) {
-        throw new NotFoundException(`Statistics not found for monitor: ${monitorId}`);
-      }
-
-      const response: MonitorStatusResponseDto = {
+        throw new NotFoundException(`Statistics not found for monitor: ${monitorId}`);}const response: MonitorStatusResponseDto = {
         monitorId: monitor.config.id,
         monitorName: monitor.config.name,
         status: monitor.status,
@@ -138,17 +118,13 @@ export class ContentMonitoringService {
         }
       };
 
-      this.logger.log(`Monitor status retrieved in ${Date.now() - startTime}ms`, {
-        monitorId,
-        status: response.status
+      this.logger.log(`Monitor status retrieved in ${Date.now() - startTime}ms`, {monitorId,status: response.status
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get monitor status: ${monitorId}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to get monitor status: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -164,10 +140,7 @@ export class ContentMonitoringService {
     pageSize: number = 20
   ): Promise<MonitorListResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Listing monitors`, { status, type, page, pageSize });
-
-    try {
-      let monitors = Array.from(this.monitors.values());
+    this.logger.log(`Listing monitors`, { status, type, page, pageSize });try {let monitors = Array.from(this.monitors.values());
 
       // Apply filters
       if (status) {
@@ -211,17 +184,13 @@ export class ContentMonitoringService {
         timestamp: new Date().toISOString()
       };
 
-      this.logger.log(`Listed ${monitorResponses.length} monitors in ${Date.now() - startTime}ms`, {
-        totalCount,
-        filteredCount: monitorResponses.length
+      this.logger.log(`Listed ${monitorResponses.length} monitors in ${Date.now() - startTime}ms`, {totalCount,filteredCount: monitorResponses.length
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to list monitors`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to list monitors`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -245,54 +214,22 @@ export class ContentMonitoringService {
       let message: string;
 
       switch (operation.operation) {
-        case 'start':
-          await monitor.start();
-          newStatus = MonitorStatus.ACTIVE;
-          message = 'Monitor started successfully';
-          break;
-
-        case 'stop':
-          await monitor.stop();
-          newStatus = MonitorStatus.STOPPED;
-          message = 'Monitor stopped successfully';
-          break;
-
-        case 'pause':
-          await monitor.pause();
-          newStatus = MonitorStatus.PAUSED;
-          message = 'Monitor paused successfully';
-          break;
-
-        case 'resume':
-          await monitor.resume();
-          newStatus = MonitorStatus.ACTIVE;
-          message = 'Monitor resumed successfully';
-          break;
-
-        case 'reset':
-          await monitor.reset();
-          // Clear history and statistics
+        case 'start':await monitor.start();newStatus = MonitorStatus.ACTIVE;
+          message = 'Monitor started successfully';break;case 'stop':await monitor.stop();newStatus = MonitorStatus.STOPPED;
+          message = 'Monitor stopped successfully';break;case 'pause':await monitor.pause();newStatus = MonitorStatus.PAUSED;
+          message = 'Monitor paused successfully';break;case 'resume':await monitor.resume();newStatus = MonitorStatus.ACTIVE;
+          message = 'Monitor resumed successfully';break;case 'reset':await monitor.reset();// Clear history and statistics
           this.changeHistory.set(monitorId, []);
           this.monitorStats.set(monitorId, new MonitorStatistics(monitorId));
           newStatus = monitor.status;
-          message = 'Monitor reset successfully';
-          break;
-
-        case 'update':
-          if (!operation.config) {
-            throw new BadRequestException('Configuration required for update operation');
-          }
-          await this.validateMonitorConfig(operation.config);
+          message = 'Monitor reset successfully';break;case 'update':if (!operation.config) {throw new BadRequestException('Configuration required for update operation');}await this.validateMonitorConfig(operation.config);
           await monitor.updateConfig(operation.config);
           newStatus = monitor.status;
           message = 'Monitor configuration updated successfully';
           break;
 
         default:
-          throw new BadRequestException(`Unknown operation: ${operation.operation}`);
-      }
-
-      const response: MonitorOperationResponseDto = {
+          throw new BadRequestException(`Unknown operation: ${operation.operation}`);}const response: MonitorOperationResponseDto = {
         success: true,
         operation: operation.operation,
         monitorId,
@@ -306,9 +243,7 @@ export class ContentMonitoringService {
         }
       };
 
-      this.logger.log(`Operation completed successfully in ${Date.now() - startTime}ms`, {
-        operation: operation.operation,
-        monitorId,
+      this.logger.log(`Operation completed successfully in ${Date.now() - startTime}ms`, {operation: operation.operation,monitorId,
         previousStatus,
         newStatus
       });
@@ -316,9 +251,7 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Operation failed: ${operation.operation} on monitor: ${monitorId}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Operation failed: ${operation.operation} on monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
       });
 
       return {
@@ -343,9 +276,7 @@ export class ContentMonitoringService {
     operation: BulkMonitorOperationDto
   ): Promise<BulkMonitorOperationResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Performing bulk operation: ${operation.operation}`, {
-      monitorCount: operation.monitorIds.length,
-      continueOnError: operation.continueOnError
+    this.logger.log(`Performing bulk operation: ${operation.operation}`, {monitorCount: operation.monitorIds.length,continueOnError: operation.continueOnError
     });
 
     const results: MonitorOperationResponseDto[] = [];
@@ -395,14 +326,10 @@ export class ContentMonitoringService {
       timestamp: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,
       summary: {
-        [`monitors${operation.operation.charAt(0).toUpperCase() + operation.operation.slice(1)}ed`]: successCount,
-        monitorsErrored: failCount
-      }
+        [`monitors${operation.operation.charAt(0).toUpperCase() + operation.operation.slice(1)}ed`]: successCount,monitorsErrored: failCount}
     };
 
-    this.logger.log(`Bulk operation completed in ${Date.now() - startTime}ms`, {
-      operation: operation.operation,
-      totalMonitors: operation.monitorIds.length,
+    this.logger.log(`Bulk operation completed in ${Date.now() - startTime}ms`, {operation: operation.operation,totalMonitors: operation.monitorIds.length,
       successCount,
       failCount
     });
@@ -421,9 +348,7 @@ export class ContentMonitoringService {
     pageSize: number = 50
   ): Promise<ChangeHistoryResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Getting change history for monitor: ${monitorId}`, {
-      dateFrom,
-      dateTo,
+    this.logger.log(`Getting change history for monitor: ${monitorId}`, {dateFrom,dateTo,
       page,
       pageSize
     });
@@ -462,17 +387,13 @@ export class ContentMonitoringService {
         timestamp: new Date().toISOString()
       };
 
-      this.logger.log(`Retrieved ${paginatedChanges.length} changes in ${Date.now() - startTime}ms`, {
-        monitorId,
-        totalChanges
+      this.logger.log(`Retrieved ${paginatedChanges.length} changes in ${Date.now() - startTime}ms`, {monitorId,totalChanges
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get change history for monitor: ${monitorId}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to get change history for monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -483,10 +404,7 @@ export class ContentMonitoringService {
    */
   async deleteMonitor(monitorId: string): Promise<void> {
     const startTime = Date.now();
-    this.logger.log(`Deleting monitor: ${monitorId}`);
-
-    try {
-      const monitor = this.getMonitor(monitorId);
+    this.logger.log(`Deleting monitor: ${monitorId}`);try {const monitor = this.getMonitor(monitorId);
 
       // Stop monitor if running
       if (monitor.status === MonitorStatus.ACTIVE) {
@@ -498,14 +416,10 @@ export class ContentMonitoringService {
       this.changeHistory.delete(monitorId);
       this.monitorStats.delete(monitorId);
 
-      this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {
-        monitorId
-      });
+      this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {monitorId});
 
     } catch (error) {
-      this.logger.error(`Failed to delete monitor: ${monitorId}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to delete monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -516,10 +430,7 @@ export class ContentMonitoringService {
    */
   async triggerCheck(monitorId: string): Promise<MonitorCheckResultDto> {
     const startTime = Date.now();
-    this.logger.log(`Triggering immediate check for monitor: ${monitorId}`);
-
-    try {
-      const monitor = this.getMonitor(monitorId);
+    this.logger.log(`Triggering immediate check for monitor: ${monitorId}`);try {const monitor = this.getMonitor(monitorId);
       const result = await monitor.performCheck();
 
       // Update statistics
@@ -535,18 +446,14 @@ export class ContentMonitoringService {
         this.changeHistory.set(monitorId, changes.slice(0, 1000)); // Keep last 1000 changes
       }
 
-      this.logger.log(`Check completed in ${Date.now() - startTime}ms`, {
-        monitorId,
-        changeDetected: result.changeDetection.detected,
+      this.logger.log(`Check completed in ${Date.now() - startTime}ms`, {monitorId,changeDetected: result.changeDetection.detected,
         confidence: result.changeDetection.confidence
       });
 
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to trigger check for monitor: ${monitorId}`, {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error(`Failed to trigger check for monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -558,9 +465,7 @@ export class ContentMonitoringService {
   private getMonitor(monitorId: string): MonitorInstance {
     const monitor = this.monitors.get(monitorId);
     if (!monitor) {
-      throw new NotFoundException(`Monitor not found: ${monitorId}`);
-    }
-    return monitor;
+      throw new NotFoundException(`Monitor not found: ${monitorId}`);}return monitor;
   }
 
   /**
@@ -575,8 +480,7 @@ export class ContentMonitoringService {
     // Validate URL accessibility
     try {
       const url = new URL(config.url);
-      if (!['http:', 'https:'].includes(url.protocol)) {
-        throw new BadRequestException('Only HTTP and HTTPS URLs are supported');
+      if (!['http:', 'https:'].includes(url.protocol)) {throw new BadRequestException('Only HTTP and HTTPS URLs are supported');
       }
     } catch (error) {
       throw new BadRequestException(`Invalid URL: ${config.url}`);
@@ -585,12 +489,8 @@ export class ContentMonitoringService {
     // Validate notification configuration
     for (const notification of config.notifications) {
       if (notification.method === NotificationMethod.EMAIL && !notification.target) {
-        throw new BadRequestException('Email notification requires target email address');
-      }
-      if (notification.method === NotificationMethod.WEBHOOK && !notification.target) {
-        throw new BadRequestException('Webhook notification requires target URL');
-      }
-    }
+        throw new BadRequestException('Email notification requires target email address');}if (notification.method === NotificationMethod.WEBHOOK && !notification.target) {
+        throw new BadRequestException('Webhook notification requires target URL');}}
 
     // Validate frequency limits
     if (config.frequency.interval < 1000) {
@@ -613,10 +513,7 @@ class MonitorInstance {
 
   private intervalId?: NodeJS.Timeout;
   private checkCount: number = 0;
-  private readonly logger = new Logger(`Monitor:${this.config.id}`);
-
-  constructor(
-    public config: ContentMonitoringDto,
+  private readonly logger = new Logger(`Monitor:${this.config.id}`);constructor(public config: ContentMonitoringDto,
     private readonly computerUse: ComputerUseService
   ) {
     this.logger.log(`Monitor instance created: ${config.name}`);
@@ -638,14 +535,9 @@ class MonitorInstance {
       this.scheduleNextCheck();
 
       this.status = MonitorStatus.ACTIVE;
-      this.logger.log(`Monitor started successfully`);
-
-    } catch (error) {
-      this.status = MonitorStatus.ERROR;
+      this.logger.log(`Monitor started successfully`);} catch (error) {this.status = MonitorStatus.ERROR;
       this.lastError = error;
-      this.logger.error(`Failed to start monitor`, { error: error.message });
-      throw error;
-    }
+      this.logger.error(`Failed to start monitor`, { error: error.message });throw error;}
   }
 
   async stop(): Promise<void> {
@@ -686,19 +578,13 @@ class MonitorInstance {
     this.status = MonitorStatus.ACTIVE;
     this.scheduleNextCheck();
     this.updatedAt = new Date();
-    this.logger.log(`Monitor resumed`);
-  }
-
-  async reset(): Promise<void> {
+    this.logger.log(`Monitor resumed`);}async reset(): Promise<void> {
     this.checkCount = 0;
     this.lastContent = undefined;
     this.lastScreenshot = undefined;
     this.lastError = undefined;
     this.updatedAt = new Date();
-    this.logger.log(`Monitor reset`);
-  }
-
-  async updateConfig(newConfig: ContentMonitoringDto): Promise<void> {
+    this.logger.log(`Monitor reset`);}async updateConfig(newConfig: ContentMonitoringDto): Promise<void> {
     const wasActive = this.status === MonitorStatus.ACTIVE;
 
     if (wasActive) {
@@ -712,14 +598,8 @@ class MonitorInstance {
       await this.resume();
     }
 
-    this.logger.log(`Monitor configuration updated`);
-  }
-
-  async performCheck(): Promise<MonitorCheckResultDto> {
-    const checkId = `check_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`Performing check: ${checkId}`);
+    this.logger.log(`Monitor configuration updated`);}async performCheck(): Promise<MonitorCheckResultDto> {
+    const checkId = `check_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();this.logger.log(`Performing check: ${checkId}`);
 
     try {
       this.checkCount++;
@@ -757,9 +637,7 @@ class MonitorInstance {
             });
             notifications.push({
               method: notificationConfig.method,
-              target: notificationConfig.target || 'unknown',
-              delivered: false,
-              deliveredAt: new Date().toISOString(),
+              target: notificationConfig.target || 'unknown',delivered: false,deliveredAt: new Date().toISOString(),
               errorMessage: error.message,
               attemptNumber: 1
             });
@@ -792,9 +670,7 @@ class MonitorInstance {
         }
       };
 
-      this.logger.log(`Check completed successfully in ${result.durationMs}ms`, {
-        checkId,
-        changeDetected: changeDetection.detected,
+      this.logger.log(`Check completed successfully in ${result.durationMs}ms`, {checkId,changeDetected: changeDetection.detected,
         notificationsSent: notifications.length
       });
 
@@ -867,17 +743,12 @@ class MonitorInstance {
         const newHash = this.calculateHash(currentContent);
         detected = oldHash !== newHash;
         confidence = detected ? 100 : 0;
-        description = detected ? 'Content hash changed' : 'Content hash unchanged';
-        break;
-
-      case ChangeDetectionMethod.VISUAL_DIFF:
+        description = detected ? 'Content hash changed' : 'Content hash unchanged';break;case ChangeDetectionMethod.VISUAL_DIFF:
         if (currentScreenshot && this.lastScreenshot) {
           // Basic visual comparison (would need more sophisticated implementation)
           detected = currentScreenshot !== this.lastScreenshot;
           confidence = detected ? 95 : 100;
-          description = detected ? 'Visual changes detected' : 'No visual changes';
-        }
-        break;
+          description = detected ? 'Visual changes detected' : 'No visual changes';}break;
 
       default:
         // Default to text comparison
@@ -959,16 +830,12 @@ class MonitorInstance {
       target: config.target || 'mock-target',
       delivered: true,
       deliveredAt: new Date().toISOString(),
-      deliveryId: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      attemptNumber: 1
-    };
+      deliveryId: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,attemptNumber: 1};
 
     // Simulate notification delay
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    this.logger.log(`Notification sent successfully`, {
-      method: config.method,
-      target: config.target,
+    this.logger.log(`Notification sent successfully`, {method: config.method,target: config.target,
       duration: Date.now() - startTime
     });
 
@@ -983,15 +850,8 @@ class MonitorInstance {
 
     switch (this.config.type) {
       case MonitoringType.TEXT_CHANGE:
-        return `Sample text content - ${timestamp} - Value: ${randomValue}`;
-      case MonitoringType.ELEMENT_CHANGE:
-        return `<div class="monitor-element">Content ${randomValue}</div>`;
-      case MonitoringType.PAGE_CHANGE:
-        return `Full page content simulation - ${timestamp} - Random: ${randomValue}`;
-      default:
-        return `Generic content simulation - ${timestamp} - Value: ${randomValue}`;
-    }
-  }
+        return `Sample text content - ${timestamp} - Value: ${randomValue}`;case MonitoringType.ELEMENT_CHANGE:return `<div class="monitor-element">Content ${randomValue}</div>";case MonitoringType.PAGE_CHANGE:
+        return `Full page content simulation - ${timestamp} - Random: ${randomValue}`;default:return `Generic content simulation - ${timestamp} - Value: ${randomValue}`;}}
 
   private scheduleNextCheck(): void {
     if (this.intervalId) {

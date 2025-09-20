@@ -352,7 +352,7 @@ class StreamingTestUtils {
                 resolve(metrics);
               }
             }
-          } catch (error) {
+          } catch (_error) {
             // Ignore non-JSON messages
           }
         };
@@ -605,7 +605,7 @@ class StreamingTestUtils {
           if (message.messageId) {
             messagesReceived.push(message.messageId);
           }
-        } catch (error) {
+        } catch (_error) {
           // Ignore parsing errors
         }
       };

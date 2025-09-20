@@ -23,21 +23,13 @@
  * Intelligence: Conversation-driven security policy optimization
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { JwtService } from '@nestjs/jwt';import {ParlantIntegrationService,
   ConversationalValidationError as _ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as _ParlantConversationContext,
-} from '../parlant/parlant-integration.service';
-
-// ===== AUTHENTICATION TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== AUTHENTICATION TYPES =====/**
  * Authentication request with conversational context
  */
 export interface AuthenticationRequest {
@@ -66,12 +58,8 @@ export interface AuthenticationRequest {
     sessionId: string;
     userIntent?: string;
     businessJustification?: string;
-    urgencyLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    conversationHistory?: Array<{
-      timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+    urgencyLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';conversationHistory?: Array<{timestamp: string;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
     authenticationContext?: {
       reason: string;
       expectedDuration: number;
@@ -95,12 +83,8 @@ export interface AuthorizationRequest {
     sessionId: string;
     userIntent: string;
     businessJustification: string;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    conversationHistory: Array<{
-      timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';conversationHistory: Array<{timestamp: string;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
   };
 }
 
@@ -121,19 +105,13 @@ export interface AuthenticationDecision {
     confidence: number;
     riskAssessment: string;
     securityRecommendations: string[];
-    adaptiveSecurityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  };
-  
-  /** Authentication metadata */
+    adaptiveSecurityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};/** Authentication metadata */
   metadata: {
     operationId: string;
     timestamp: Date;
     authenticationMethod: string;
     securityEnhancements: string[];
-    monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
-  };
-  
-  /** Security requirements */
+    monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';};/** Security requirements */
   securityRequirements?: {
     requiresMfa: boolean;
     requiresAdditionalVerification: boolean;
@@ -176,12 +154,7 @@ export interface AuthorizationDecision {
 export interface SecurityEvent {
   eventId: string;
   userId: string;
-  eventType: 'LOGIN_SUCCESS' | 'LOGIN_FAILURE' | 'AUTHORIZATION_DENIED' | 'SUSPICIOUS_ACTIVITY' | 'POLICY_VIOLATION';
-  timestamp: Date;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
-  /** Parlant conversational analysis */
-  conversationalAnalysis: {
+  eventType: 'LOGIN_SUCCESS' | 'LOGIN_FAILURE' | 'AUTHORIZATION_DENIED' | 'SUSPICIOUS_ACTIVITY' | 'POLICY_VIOLATION';timestamp: Date;severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';/** Parlant conversational analysis */conversationalAnalysis: {
     conversationId: string;
     userIntentAssessment: string;
     legitimacyScore: number;
@@ -283,10 +256,7 @@ export class EnterpriseApiAuthService {
    * Authenticate user with comprehensive Parlant validation
    */
   async authenticateUser(request: AuthenticationRequest): Promise<AuthenticationDecision> {
-    const operationId = `auth${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    
-    this.analytics.totalAuthentications++;
+    const operationId = `auth${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.analytics.totalAuthentications++;
     
     this.logger.debug(`[${operationId}] Authenticating user with Parlant validation`, {
       operationId,
@@ -301,20 +271,13 @@ export class EnterpriseApiAuthService {
       
       if (!credentialValidation.valid) {
         await this.createSecurityEvent(
-          'LOGIN_FAILURE',
-          request.username,
-          'MEDIUM',
-          'Invalid credentials provided',
-          request,
-          operationId
+          'LOGIN_FAILURE',request.username,'MEDIUM','Invalid credentials provided',request,operationId
         );
         
         this.analytics.failedAuthentications++;
         
         return this.createFailedAuthenticationDecision(
-          'Invalid credentials',
-          operationId,
-          credentialValidation.parlantValidation
+          'Invalid credentials',operationId,credentialValidation.parlantValidation
         );
       }
 
@@ -343,17 +306,12 @@ export class EnterpriseApiAuthService {
       this.updateAuthenticationAnalytics(decision);
       
       await this.createSecurityEvent(
-        decision.authenticated ? 'LOGIN_SUCCESS' : 'LOGIN_FAILURE',
-        credentialValidation.userId,
-        decision.authenticated ? 'LOW' : 'MEDIUM',
-        decision.authenticated ? 'User authenticated successfully' : 'Authentication denied by Parlant validation',
+        decision.authenticated ? 'LOGIN_SUCCESS' : 'LOGIN_FAILURE',credentialValidation.userId,decision.authenticated ? 'LOW' : 'MEDIUM',decision.authenticated ? 'User authenticated successfully' : 'Authentication denied by Parlant validation',
         request,
         operationId
       );
 
-      this.logger.debug(`[${operationId}] Authentication completed`, {
-        operationId,
-        authenticated: decision.authenticated,
+      this.logger.debug(`[${operationId}] Authentication completed`, {operationId,authenticated: decision.authenticated,
         userId: credentialValidation.userId,
         parlantApproved: decision.parlantValidation.validationApproved,
         processingTime: Date.now() - startTime,
@@ -364,16 +322,12 @@ export class EnterpriseApiAuthService {
     } catch (error) {
       this.analytics.failedAuthentications++;
       
-      this.logger.error(`[${operationId}] Authentication failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Authentication failed`, {operationId,error: error instanceof Error ? error.message : String(error),
         username: request.username,
       });
 
       return this.createFailedAuthenticationDecision(
-        `Authentication error: ${error instanceof Error ? error.message : String(error)}`,
-        operationId
-      );
+        `Authentication error: ${error instanceof Error ? error.message : String(error)}`,operationId);
     }
   }
 
@@ -381,11 +335,7 @@ export class EnterpriseApiAuthService {
    * Authorize user action with Parlant validation
    */
   async authorizeUserAction(request: AuthorizationRequest): Promise<AuthorizationDecision> {
-    const operationId = `authz${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.debug(`[${operationId}] Authorizing user action with Parlant validation`, {
-      operationId,
-      userId: request.userId,
+    const operationId = `authz${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Authorizing user action with Parlant validation`, {operationId,userId: request.userId,
       resource: request.resource,
       action: request.action,
     });
@@ -397,9 +347,7 @@ export class EnterpriseApiAuthService {
       // Make authorization decision based on Parlant validation
       const decision = this.makeAuthorizationDecision(request, parlantValidation, operationId);
 
-      this.logger.debug(`[${operationId}] Authorization completed`, {
-        operationId,
-        authorized: decision.authorized,
+      this.logger.debug(`[${operationId}] Authorization completed`, {operationId,authorized: decision.authorized,
         permissions: decision.permissions,
         parlantApproved: decision.parlantValidation.validationApproved,
       });
@@ -416,23 +364,14 @@ export class EnterpriseApiAuthService {
       return {
         authorized: false,
         permissions: [],
-        restrictions: ['Authorization validation failed'],
-        parlantValidation: {
-          conversationId: 'error',
+        restrictions: ['Authorization validation failed'],parlantValidation: {conversationId: 'error',
           validationApproved: false,
           reasoning: `Authorization error: ${error instanceof Error ? error.message : String(error)}`,
           confidence: 0,
-          businessContextAnalysis: 'Unable to analyze due to error',
-          riskMitigation: ['Deny access', 'Review system health'],
-        },
-        metadata: {
+          businessContextAnalysis: 'Unable to analyze due to error',riskMitigation: ['Deny access', 'Review system health'],},metadata: {
           operationId,
           timestamp: new Date(),
-          authorizationPolicy: 'error_fallback',
-          businessContext: { error: true },
-          complianceFlags: ['authorization_failure'],
-        },
-      };
+          authorizationPolicy: 'error_fallback',businessContext: { error: true },complianceFlags: ['authorization_failure'],},};
     }
   }
 
@@ -499,10 +438,7 @@ export class EnterpriseApiAuthService {
     
     // For now, perform basic validation
     if (!request.username || !request.credentials.password) {
-      return { valid: false, userId: '' };
-    }
-
-    // Simulate credential validation
+      return { valid: false, userId: '' };}// Simulate credential validation
     const isValid = request.credentials.password === 'valid_password'; // Mock validation
     const userId = isValid ? `user${request.username}` : '';
 
@@ -520,9 +456,7 @@ export class EnterpriseApiAuthService {
     const riskLevel = this.assessAuthenticationRisk(request);
     
     const validationRequest: ParlantValidationRequest = {
-      functionName: `AuthService.Authentication.${this.sanitizeUsernameForFunction(request.username)}`,
-      functionParams: {
-        username: request.username,
+      functionName: `AuthService.Authentication.${this.sanitizeUsernameForFunction(request.username)}`,functionParams: {username: request.username,
         userId,
         ipAddress: request.metadata.ipAddress,
         userAgent: request.metadata.userAgent,
@@ -531,13 +465,9 @@ export class EnterpriseApiAuthService {
         conversationalContext: request.conversationalContext,
         riskLevel,
       },
-      actionDescription: `Authenticate user ${request.username} for system access`,
-      context: {
-        userId,
+      actionDescription: `Authenticate user ${request.username} for system access`,context: {userId,
         sessionId: request.conversationalContext?.sessionId ?? `auth_session${Date.now()}`,
-        agentRole: 'AUTHENTICATOR',
-        securityLevel: this.mapRiskLevelToSecurityLevel(riskLevel),
-        conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
+        agentRole: 'AUTHENTICATOR',securityLevel: this.mapRiskLevelToSecurityLevel(riskLevel),conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
           timestamp: new Date(h.timestamp),
           speaker: h.speaker,
           message: h.message,
@@ -606,9 +536,7 @@ export class EnterpriseApiAuthService {
       metadata: {
         operationId,
         timestamp: new Date(),
-        authenticationMethod: request.credentials.password ? 'password' : 'token',
-        securityEnhancements: this.determineSecurityEnhancements(parlantValidation, request),
-        monitoringLevel: this.mapMonitoringLevel(parlantValidation.executionContext?.monitoringLevel) ?? 'BASIC',
+        authenticationMethod: request.credentials.password ? 'password' : 'token',securityEnhancements: this.determineSecurityEnhancements(parlantValidation, request),monitoringLevel: this.mapMonitoringLevel(parlantValidation.executionContext?.monitoringLevel) ?? 'BASIC',
       },
       securityRequirements: authenticated ? {
         requiresMfa: this.shouldRequireMfa(parlantValidation, request),
@@ -627,9 +555,7 @@ export class EnterpriseApiAuthService {
     operationId: string
   ): Promise<ParlantValidationResponse> {
     const validationRequest: ParlantValidationRequest = {
-      functionName: `AuthService.Authorization.${this.sanitizeResourceForFunction(request.resource)}`,
-      functionParams: {
-        userId: request.userId,
+      functionName: `AuthService.Authorization.${this.sanitizeResourceForFunction(request.resource)}`,functionParams: {userId: request.userId,
         resource: request.resource,
         action: request.action,
         context: request.context,
@@ -688,57 +614,41 @@ export class EnterpriseApiAuthService {
       metadata: {
         operationId,
         timestamp: new Date(),
-        authorizationPolicy: 'parlant_validated',
-        businessContext: {
-          resource: request.resource,
+        authorizationPolicy: 'parlant_validated',businessContext: {resource: request.resource,
           action: request.action,
           userIntent: request.conversationalContext.userIntent,
         },
-        complianceFlags: authorized ? [] : ['access_denied'],
-      },
-    };
+        complianceFlags: authorized ? [] : ['access_denied'],},};
   }
 
   /**
    * Create security event with Parlant analysis
    */
   private async createSecurityEvent(
-    eventType: SecurityEvent['eventType'],
-    userId: string,
-    severity: SecurityEvent['severity'],
+    eventType: SecurityEvent['eventType'],userId: string,severity: SecurityEvent['severity'],
     description: string,
     request: AuthenticationRequest,
     operationId: string
   ): Promise<void> {
-    const eventId = `sec_event${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    try {
-      // Analyze security event through Parlant
+    const eventId = `sec_event${Date.now()}${Math.random().toString(36).substring(7)}`;try {// Analyze security event through Parlant
       const analysisRequest: ParlantValidationRequest = {
-        functionName: `AuthService.SecurityEvent.${eventType}`,
-        functionParams: {
-          eventType,
+        functionName: `AuthService.SecurityEvent.${eventType}`,functionParams: {eventType,
           userId,
           severity,
           description,
           ipAddress: request.metadata.ipAddress,
           userAgent: request.metadata.userAgent,
         },
-        actionDescription: `Analyze security event: ${eventType} for user ${userId}`,
-        context: {
-          userId,
+        actionDescription: `Analyze security event: ${eventType} for user ${userId}`,context: {userId,
           sessionId: `security${Date.now()}`,
-          agentRole: 'SECURITY_ANALYST',
-          securityLevel: severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
-          conversationHistory: [],
-          metadata: {
+          agentRole: 'SECURITY_ANALYST',securityLevel: severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',conversationHistory: [],metadata: {
             operationId,
             securityEvent: true,
             eventType,
             severity,
           },
         },
-        riskLevel: severity === 'CRITICAL' ? RiskLevel.CRITICAL : RiskLevel.HIGH,
+        riskLevel: severity === 'CRITICAL' ? RiskLevel._CRITICAL : RiskLevel._HIGH,
         operationId: eventId,
       };
 
@@ -754,16 +664,12 @@ export class EnterpriseApiAuthService {
           conversationId: analysis.conversationId,
           userIntentAssessment: analysis.reasoning,
           legitimacyScore: analysis.confidence,
-          behavioralAnalysis: `Behavioral analysis for ${eventType}`,
-          recommendedActions: analysis.suggestedAlternatives ?? [],
-        },
+          behavioralAnalysis: `Behavioral analysis for ${eventType}`,recommendedActions: analysis.suggestedAlternatives ?? [],},
         details: {
           ipAddress: request.metadata.ipAddress,
           userAgent: request.metadata.userAgent,
           location: request.metadata.location ? 
-            `${request.metadata.location.city}, ${request.metadata.location.region}, ${request.metadata.location.country}` : 
-            undefined,
-          additionalContext: { operationId, description },
+            `${request.metadata.location.city}, ${request.metadata.location.region}, ${request.metadata.location.country}` : undefined,additionalContext: { operationId, description },
         },
       };
 
@@ -812,26 +718,12 @@ export class EnterpriseApiAuthService {
         validationApproved: false,
         reasoning: reason,
         confidence: parlantValidation.confidence,
-        riskAssessment: 'Authentication failed',
-        securityRecommendations: parlantValidation.suggestedAlternatives ?? [],
-        adaptiveSecurityLevel: 'HIGH',
-      } : {
-        conversationId: 'failed',
-        validationApproved: false,
-        reasoning: reason,
+        riskAssessment: 'Authentication failed',securityRecommendations: parlantValidation.suggestedAlternatives ?? [],adaptiveSecurityLevel: 'HIGH',} : {conversationId: 'failed',validationApproved: false,reasoning: reason,
         confidence: 0,
-        riskAssessment: 'Authentication failed',
-        securityRecommendations: [],
-        adaptiveSecurityLevel: 'HIGH',
-      },
-      metadata: {
+        riskAssessment: 'Authentication failed',securityRecommendations: [],adaptiveSecurityLevel: 'HIGH',},metadata: {
         operationId,
         timestamp: new Date(),
-        authenticationMethod: 'failed',
-        securityEnhancements: [],
-        monitoringLevel: 'COMPREHENSIVE',
-      },
-    };
+        authenticationMethod: 'failed',securityEnhancements: [],monitoringLevel: 'COMPREHENSIVE',},};
   }
 
   /**
@@ -856,14 +748,8 @@ export class EnterpriseApiAuthService {
   /**
    * Map parlant monitoring level to enterprise API monitoring level
    */
-  private mapMonitoringLevel(parlantLevel?: string): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' | undefined {
-    if (!parlantLevel) return undefined;
-    
-    switch (parlantLevel) {
-      case 'BASIC': return 'BASIC';
-      case 'DETAILED': return 'ENHANCED'; // Map DETAILED to ENHANCED
-      case 'COMPREHENSIVE': return 'COMPREHENSIVE';
-      default: return 'BASIC'; // Default fallback
+  private mapMonitoringLevel(parlantLevel?: string): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' | undefined {if (!parlantLevel) return undefined;switch (parlantLevel) {
+      case 'BASIC': return 'BASIC';case 'DETAILED': return 'ENHANCED'; // Map DETAILED to ENHANCEDcase 'COMPREHENSIVE': return 'COMPREHENSIVE';default: return 'BASIC'; // Default fallback
     }
   }
 
@@ -890,39 +776,17 @@ export class EnterpriseApiAuthService {
 
   // ===== UTILITY METHODS =====
 
-  private assessAuthenticationRisk(request: AuthenticationRequest): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    // TODO: Implement comprehensive risk assessment
-    return request.conversationalContext?.urgencyLevel ?? 'MEDIUM';
-  }
-
-  private mapRiskLevelToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    return riskLevel as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  }
-
-  private determineAdaptiveSecurityLevel(
+  private assessAuthenticationRisk(request: AuthenticationRequest): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {// TODO: Implement comprehensive risk assessmentreturn request.conversationalContext?.urgencyLevel ?? 'MEDIUM';}private mapRiskLevelToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {return riskLevel as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}private determineAdaptiveSecurityLevel(
     parlantValidation: ParlantValidationResponse,
     request: AuthenticationRequest
-  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (parlantValidation.confidence < 0.7) return 'HIGH';
-    if (request.conversationalContext?.urgencyLevel === 'CRITICAL') return 'CRITICAL';
-    return 'MEDIUM';
-  }
-
-  private determineSecurityEnhancements(
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (parlantValidation.confidence < 0.7) return 'HIGH';if (request.conversationalContext?.urgencyLevel === 'CRITICAL') return 'CRITICAL';return 'MEDIUM';}private determineSecurityEnhancements(
     parlantValidation: ParlantValidationResponse,
     request: AuthenticationRequest
   ): string[] {
     const enhancements: string[] = [];
     
     if (parlantValidation.confidence < 0.8) {
-      enhancements.push('additional_monitoring');
-    }
-    
-    if (request.conversationalContext?.urgencyLevel === 'CRITICAL') {
-      enhancements.push('enhanced_logging');
-    }
-    
-    return enhancements;
+      enhancements.push('additional_monitoring');}if (request.conversationalContext?.urgencyLevel === 'CRITICAL') {enhancements.push('enhanced_logging');}return enhancements;
   }
 
   private shouldRequireMfa(
@@ -930,10 +794,7 @@ export class EnterpriseApiAuthService {
     request: AuthenticationRequest
   ): boolean {
     return parlantValidation.confidence < 0.9 ||
-           request.conversationalContext?.urgencyLevel === 'CRITICAL';
-  }
-
-  private calculateSessionTimeout(
+           request.conversationalContext?.urgencyLevel === 'CRITICAL';}private calculateSessionTimeout(
     parlantValidation: ParlantValidationResponse,
     request: AuthenticationRequest
   ): number {
@@ -946,9 +807,7 @@ export class EnterpriseApiAuthService {
     }
     
     // Reduce timeout for high-risk contexts
-    if (request.conversationalContext?.urgencyLevel === 'CRITICAL') {
-      timeout = timeout / 4;
-    }
+    if (request.conversationalContext?.urgencyLevel === 'CRITICAL') {timeout = timeout / 4;}
     
     return Math.max(timeout, 30 * 60 * 1000); // Minimum 30 minutes
   }
@@ -960,10 +819,7 @@ export class EnterpriseApiAuthService {
     const restrictions: string[] = [];
     
     if (parlantValidation.confidence < 0.7) {
-      restrictions.push('limited_resource_access');
-    }
-    
-    if (request.metadata.location && 
+      restrictions.push('limited_resource_access');}if (request.metadata.location && 
         !this.isKnownLocation(request.metadata.location)) {
       restrictions.push('location_restricted');
     }
@@ -983,19 +839,13 @@ export class EnterpriseApiAuthService {
     request: AuthorizationRequest,
     parlantValidation: ParlantValidationResponse
   ): string[] {
-    return parlantValidation.approved ? [] : ['access_denied_by_policy'];
-  }
-
-  private isKnownLocation(location: { country: string; region: string; city: string }): boolean {
+    return parlantValidation.approved ? [] : ['access_denied_by_policy'];}private isKnownLocation(location: { country: string; region: string; city: string }): boolean {
     // TODO: Implement location verification
     return true;
   }
 
   private sanitizeUsernameForFunction(username: string): string {
-    return username.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
-  }
-
-  private sanitizeResourceForFunction(resource: string): string {
+    return username.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');}private sanitizeResourceForFunction(resource: string): string {
     return resource.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 }

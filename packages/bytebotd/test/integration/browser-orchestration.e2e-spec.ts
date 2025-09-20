@@ -795,7 +795,7 @@ describe('Browser Orchestration Integration (E2E)', () => {
         if (response.body.components?.pythonOrchestrator?.status === 'connected') {
           return;
         }
-      } catch (error) {
+      } catch (_error) {
         // Continue waiting
       }
 

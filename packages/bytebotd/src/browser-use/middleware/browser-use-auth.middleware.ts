@@ -29,32 +29,16 @@ import {
   ForbiddenException,
   TooManyRequestsException,
   BadRequestException,
-} from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
-import { Reflector } from '@nestjs/core';
-
-// Parlant Authentication Bridge Integration
-import {
+} from '@nestjs/common';import { Request, Response, NextFunction } from 'express';import { performance } from 'perf_hooks';import * as crypto from 'crypto';import { Reflector } from '@nestjs/core';// Parlant Authentication Bridge Integrationimport {
   ParlantAuthenticationBridgeService,
   AuthenticationRequest,
   AuthenticationResult,
   SessionInformation,
-} from '../../shared/src/parlant/security/authentication-bridge.service';
-
-// Enhanced JWT Bridge for session management
-import { EnhancedJwtParlantBridgeService } from '../../shared/src/services/enhanced-jwt-parlant-bridge.service';
-
-// Security context and types
-import {
+} from '../../shared/src/parlant/security/authentication-bridge.service';// Enhanced JWT Bridge for session managementimport { EnhancedJwtParlantBridgeService } from '../../shared/src/services/enhanced-jwt-parlant-bridge.service';// Security context and typesimport {
   ParlantUserContext,
   SecurityLevel,
   ParlantIntegrationError,
-} from '../../shared/src/types/parlant-integration.types';
-
-/**
- * Extended Express Request with authentication context
+} from '../../shared/src/types/parlant-integration.types';/*** Extended Express Request with authentication context
  */
 export interface AuthenticatedRequest extends Request {
   user: BrowserUseUserContext;
@@ -68,9 +52,7 @@ export interface AuthenticatedRequest extends Request {
  */
 export interface BrowserUseUserContext extends ParlantUserContext {
   permissions: BrowserPermission[];
-  trustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  mfaVerified: boolean;
-  lastActivity: Date;
+  trustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';mfaVerified: boolean;lastActivity: Date;
   failedAttempts: number;
   deviceFingerprint: string;
 }
@@ -96,15 +78,10 @@ export interface BrowserUseSessionContext {
  */
 export interface BrowserUseSecurityContext {
   riskScore: number;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  riskFactors: SecurityRiskFactor[];
-  securityControls: SecurityControl[];
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';riskFactors: SecurityRiskFactor[];securityControls: SecurityControl[];
   threatIndicators: ThreatIndicator[];
   complianceFlags: ComplianceFlag[];
-  monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
-}
-
-/**
+  monitoringLevel: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';}/**
  * Browser use audit context
  */
 export interface BrowserUseAuditContext {
@@ -125,28 +102,12 @@ export interface BrowserUseAuditContext {
  * Browser operation permissions
  */
 export enum BrowserPermission {
-  CREATE_TASK = 'browser:task:create',
-  VIEW_TASK = 'browser:task:view',
-  STOP_TASK = 'browser:task:stop',
-  DELETE_TASK = 'browser:task:delete',
-  CREATE_SESSION = 'browser:session:create',
-  MANAGE_SESSION = 'browser:session:manage',
-  EXTRACT_DATA = 'browser:data:extract',
-  UPLOAD_FILES = 'browser:files:upload',
-  EXTERNAL_DOMAINS = 'browser:domains:external',
-  ADMIN_OPERATIONS = 'browser:admin:all',
-  ASYNC_JOBS = 'browser:jobs:async',
-  BULK_OPERATIONS = 'browser:operations:bulk',
-}
-
-/**
+  CREATE_TASK = 'browser:task:create',VIEW_TASK = 'browser:task:view',STOP_TASK = 'browser:task:stop',DELETE_TASK = 'browser:task:delete',CREATE_SESSION = 'browser:session:create',MANAGE_SESSION = 'browser:session:manage',EXTRACT_DATA = 'browser:data:extract',UPLOAD_FILES = 'browser:files:upload',EXTERNAL_DOMAINS = 'browser:domains:external',ADMIN_OPERATIONS = 'browser:admin:all',ASYNC_JOBS = 'browser:jobs:async',BULK_OPERATIONS = 'browser:operations:bulk',}/**
  * Active browser operation tracking
  */
 export interface ActiveBrowserOperation {
   operationId: string;
-  type: 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA_EXTRACTION';
-  startTime: Date;
-  resourceUsage: {
+  type: 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA_EXTRACTION';startTime: Date;resourceUsage: {
     memoryMB: number;
     cpuPercent: number;
     networkConnections: number;
@@ -169,10 +130,7 @@ export interface RateLimitCounters {
  * Security risk factor
  */
 export interface SecurityRiskFactor {
-  type: 'LOCATION' | 'DEVICE' | 'BEHAVIOR' | 'CONTENT' | 'FREQUENCY';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  value: number;
+  type: 'LOCATION' | 'DEVICE' | 'BEHAVIOR' | 'CONTENT' | 'FREQUENCY';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;value: number;
   source: string;
   timestamp: Date;
 }
@@ -181,10 +139,7 @@ export interface SecurityRiskFactor {
  * Security control
  */
 export interface SecurityControl {
-  type: 'MFA' | 'IP_RESTRICTION' | 'DEVICE_BINDING' | 'CONTENT_FILTER' | 'RATE_LIMIT';
-  status: 'ACTIVE' | 'INACTIVE' | 'BYPASSED';
-  description: string;
-  appliedAt: Date;
+  type: 'MFA' | 'IP_RESTRICTION' | 'DEVICE_BINDING' | 'CONTENT_FILTER' | 'RATE_LIMIT';status: 'ACTIVE' | 'INACTIVE' | 'BYPASSED';description: string;appliedAt: Date;
   parameters: Record<string, unknown>;
 }
 
@@ -192,10 +147,7 @@ export interface SecurityControl {
  * Threat indicator
  */
 export interface ThreatIndicator {
-  type: 'SUSPICIOUS_IP' | 'MALICIOUS_CONTENT' | 'ANOMALOUS_BEHAVIOR' | 'KNOWN_THREAT';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  source: string;
+  type: 'SUSPICIOUS_IP' | 'MALICIOUS_CONTENT' | 'ANOMALOUS_BEHAVIOR' | 'KNOWN_THREAT';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;source: string;
   confidence: number;
   detectedAt: Date;
 }
@@ -204,11 +156,7 @@ export interface ThreatIndicator {
  * Compliance flag
  */
 export interface ComplianceFlag {
-  regulation: 'GDPR' | 'HIPAA' | 'SOX' | 'PCI_DSS' | 'SOC2';
-  requirement: string;
-  status: 'COMPLIANT' | 'VIOLATION' | 'REVIEW_REQUIRED';
-  description: string;
-  evidence: Record<string, unknown>;
+  regulation: 'GDPR' | 'HIPAA' | 'SOX' | 'PCI_DSS' | 'SOC2';requirement: string;status: 'COMPLIANT' | 'VIOLATION' | 'REVIEW_REQUIRED';description: string;evidence: Record<string, unknown>;
 }
 
 /**
@@ -225,9 +173,7 @@ export interface SecurityValidationResult {
  * Individual security validation
  */
 export interface SecurityValidation {
-  type: 'AUTHENTICATION' | 'AUTHORIZATION' | 'INPUT_VALIDATION' | 'RATE_LIMITING' | 'THREAT_DETECTION';
-  passed: boolean;
-  score: number;
+  type: 'AUTHENTICATION' | 'AUTHORIZATION' | 'INPUT_VALIDATION' | 'RATE_LIMITING' | 'THREAT_DETECTION';passed: boolean;score: number;
   details: string;
   evidence: Record<string, unknown>;
 }
@@ -275,11 +221,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       global: { windowMs: 60000, maxRequests: 100 }, // 100 requests per minute
       perUser: { windowMs: 60000, maxRequests: 50 }, // 50 requests per minute per user
       perEndpoint: {
-        'POST /browser-use/tasks': { windowMs: 60000, maxRequests: 10 },
-        'POST /browser-use/sessions': { windowMs: 60000, maxRequests: 5 },
-        'POST /browser-use/async-jobs': { windowMs: 300000, maxRequests: 3 }, // 3 per 5 minutes
-      },
-    },
+        'POST /browser-use/tasks': { windowMs: 60000, maxRequests: 10 },'POST /browser-use/sessions': { windowMs: 60000, maxRequests: 5 },'POST /browser-use/async-jobs': { windowMs: 300000, maxRequests: 3 }, // 3 per 5 minutes},},
     threatDetection: {
       enabled: true,
       suspiciousIpThreshold: 0.7,
@@ -309,8 +251,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     private readonly jwtBridgeService: EnhancedJwtParlantBridgeService,
     private readonly reflector: Reflector,
   ) {
-    this.logger.log('🔐 Browser Use Authentication Middleware initialized');
-    this.logger.log('🛡️ Security features enabled: JWT validation, RBAC, rate limiting, threat detection');
+    this.logger.log('🔐 Browser Use Authentication Middleware initialized');this.logger.log('🛡️ Security features enabled: JWT validation, RBAC, rate limiting, threat detection');
 
     // Start periodic cleanup tasks
     setInterval(() => this.performSecurityCleanup(), 300000); // Every 5 minutes
@@ -331,9 +272,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       {
         method: req.method,
         url: req.url,
-        userAgent: req.get('User-Agent'),
-        ipAddress: this.getClientIpAddress(req),
-      }
+        userAgent: req.get('User-Agent'),ipAddress: this.getClientIpAddress(req),}
     );
 
     try {
@@ -383,16 +322,8 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     deviceFingerprint?: string;
     apiKey?: string;
   }> {
-    const authHeader = req.get('Authorization');
-    const sessionHeader = req.get('X-Session-ID');
-    const deviceHeader = req.get('X-Device-Fingerprint');
-    const apiKeyHeader = req.get('X-API-Key');
-
-    // Extract Bearer token
-    let token: string | undefined;
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.substring(7);
-    }
+    const authHeader = req.get('Authorization');const sessionHeader = req.get('X-Session-ID');const deviceHeader = req.get('X-Device-Fingerprint');const apiKeyHeader = req.get('X-API-Key');// Extract Bearer tokenlet token: string | undefined;
+    if (authHeader?.startsWith('Bearer ')) {token = authHeader.substring(7);}
 
     // Generate device fingerprint if not provided
     const deviceFingerprint = deviceHeader || this.generateDeviceFingerprint(req);
@@ -413,24 +344,16 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     req: Request
   ): Promise<AuthenticationResult> {
     if (!credentials.token && !credentials.apiKey) {
-      throw new UnauthorizedException('Authentication token or API key required');
-    }
-
-    // Prepare authentication request
+      throw new UnauthorizedException('Authentication token or API key required');}// Prepare authentication request
     const authRequest: AuthenticationRequest = {
       userId: this.extractUserIdFromToken(credentials.token),
-      method: credentials.token ? 'jwt' : 'api_key',
-      factor: 'primary',
-      credentials: {
-        token: credentials.token,
+      method: credentials.token ? 'jwt' : 'api_key',factor: 'primary',credentials: {token: credentials.token,
         apiKey: credentials.apiKey,
         sessionId: credentials.sessionId,
       },
       metadata: {
         ipAddress: this.getClientIpAddress(req),
-        userAgent: req.get('User-Agent') || '',
-        deviceFingerprint: credentials.deviceFingerprint,
-        timestamp: new Date(),
+        userAgent: req.get('User-Agent') || '',deviceFingerprint: credentials.deviceFingerprint,timestamp: new Date(),
         source: 'browser_use_api',
         riskIndicators: await this.detectRiskIndicators(req),
       },
@@ -440,10 +363,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const authResult = await this.authBridgeService.authenticate(authRequest);
 
     if (!authResult.success) {
-      throw new UnauthorizedException(`Authentication failed: ${authResult.errors.join(', ')}`);
-    }
-
-    return authResult;
+      throw new UnauthorizedException(`Authentication failed: ${authResult.errors.join(`, ')}`);}return authResult;
   }
 
   /**
@@ -454,19 +374,14 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     req: Request
   ): Promise<void> {
     const userContext = authResult.userContext!;
-    const endpoint = `${req.method} ${req.route?.path || req.url}`;
-
-    // Get required permissions for endpoint
-    const requiredPermissions = this.getRequiredPermissions(endpoint);
+    const endpoint = `${req.method} ${req.route?.path || req.url}`;// Get required permissions for endpointconst requiredPermissions = this.getRequiredPermissions(endpoint);
 
     // Check if user has required permissions
     const userPermissions = this.getUserPermissions(userContext);
 
     for (const permission of requiredPermissions) {
       if (!userPermissions.includes(permission)) {
-        throw new ForbiddenException(`Insufficient permissions: ${permission} required`);
-      }
-    }
+        throw new ForbiddenException(`Insufficient permissions: ${permission} required`);}}
 
     // Additional security checks based on endpoint
     await this.validateEndpointSpecificSecurity(endpoint, userContext, req);
@@ -480,9 +395,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     req: Request
   ): Promise<void> {
     const now = Date.now();
-    const endpoint = `${req.method} ${req.route?.path || req.url}`;
-    const userKey = `user:${userContext.userId}`;
-    const ipKey = `ip:${this.getClientIpAddress(req)}`;
+    const endpoint = `${req.method} ${req.route?.path || req.url}`;const userKey = `user:${userContext.userId}`;const ipKey = `ip:${this.getClientIpAddress(req)}`;
 
     // Check global rate limit
     await this.checkRateLimit('global', this.securityConfig.rateLimiting.global, now);
@@ -536,10 +449,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
 
     if (!passed) {
       this.metrics.securityViolations++;
-      throw new ForbiddenException('Request failed security validation');
-    }
-
-    return {
+      throw new ForbiddenException('Request failed security validation');}return {
       passed,
       validations,
       overallScore: Math.max(0, overallScore),
@@ -563,11 +473,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       endpoint: `${req.method} ${req.route?.path || req.url}`,
       method: req.method,
       parameters: this.sanitizeParametersForAudit(req),
-      userAgent: req.get('User-Agent') || '',
-      ipAddress: this.getClientIpAddress(req),
-      sessionId: authResult.session?.sessionId || 'unknown',
-      authenticationMethod: authResult.metadata.methodUsed,
-      securityValidation,
+      userAgent: req.get('User-Agent') || '',ipAddress: this.getClientIpAddress(req),sessionId: authResult.session?.sessionId || 'unknown',authenticationMethod: authResult.metadata.methodUsed,securityValidation,
     };
   }
 
@@ -589,19 +495,14 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       lastActivity: new Date(),
       failedAttempts: 0,
       deviceFingerprint: authResult.metadata.riskAssessment.factors
-        .find(f => f.type === 'device')?.description || 'unknown',
-    };
-
-    // Create session context
+        .find(f => f.type === 'device')?.description || 'unknown',};// Create session context
     req.session = {
       sessionId: authResult.session!.sessionId,
       createdAt: authResult.session!.createdAt,
       expiresAt: authResult.session!.expiresAt,
       securityLevel: authResult.session!.securityLevel,
       ipAddress: this.getClientIpAddress(req),
-      userAgent: req.get('User-Agent') || '',
-      deviceBinding: authResult.session!.deviceBinding,
-      ipBinding: authResult.session!.ipBinding,
+      userAgent: req.get('User-Agent') || '',deviceBinding: authResult.session!.deviceBinding,ipBinding: authResult.session!.ipBinding,
       activeOperations: [],
       rateLimitCounters: this.getRateLimitCounters(req.user.userId),
     };
@@ -621,9 +522,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       securityControls: authResult.metadata.securityControls.map(control => ({
         type: control.toUpperCase() as any,
         status: 'ACTIVE',
-        description: `Security control: ${control}`,
-        appliedAt: new Date(),
-        parameters: {},
+        description: `Security control: ${control}`,appliedAt: new Date(),parameters: {},
       })),
       threatIndicators: this.getThreatIndicators(req.user.userId),
       complianceFlags: [],
@@ -647,28 +546,14 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
    * Get client IP address
    */
   private getClientIpAddress(req: Request): string {
-    return (req.get('X-Forwarded-For') ||
-            req.get('X-Real-IP') ||
-            req.ip ||
-            req.connection.remoteAddress ||
-            'unknown').split(',')[0].trim();
-  }
-
-  /**
+    return (req.get('X-Forwarded-For') ||req.get('X-Real-IP') ||req.ip ||req.connection.remoteAddress ||
+            'unknown').split(',')[0].trim();}/**
    * Generate device fingerprint
    */
   private generateDeviceFingerprint(req: Request): string {
-    const userAgent = req.get('User-Agent') || '';
-    const acceptLanguage = req.get('Accept-Language') || '';
-    const acceptEncoding = req.get('Accept-Encoding') || '';
-
-    const fingerprint = crypto
-      .createHash('sha256')
+    const userAgent = req.get('User-Agent') || '';const acceptLanguage = req.get('Accept-Language') || '';const acceptEncoding = req.get('Accept-Encoding') || '';const fingerprint = crypto.createHash('sha256')
       .update(`${userAgent}:${acceptLanguage}:${acceptEncoding}`)
-      .digest('hex')
-      .substring(0, 16);
-
-    return fingerprint;
+      .digest('hex').substring(0, 16);return fingerprint;
   }
 
   /**
@@ -676,19 +561,10 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
    */
   private extractUserIdFromToken(token?: string): string {
     if (!token) {
-      throw new UnauthorizedException('Token required for user identification');
-    }
-
-    try {
+      throw new UnauthorizedException('Token required for user identification');}try {
       // Decode JWT payload (without verification for ID extraction)
       const payload = JSON.parse(
-        Buffer.from(token.split('.')[1], 'base64').toString()
-      );
-      return payload.sub || payload.userId || 'unknown';
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token format');
-    }
-  }
+        Buffer.from(token.split('.')[1], 'base64').toString());return payload.sub || payload.userId || 'unknown';} catch (error) {throw new UnauthorizedException('Invalid token format');}}
 
   /**
    * Detect risk indicators from request
@@ -696,17 +572,9 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
   private async detectRiskIndicators(req: Request): Promise<string[]> {
     const indicators: string[] = [];
 
-    const userAgent = req.get('User-Agent') || '';
-    if (userAgent.includes('bot') || userAgent.includes('crawler')) {
-      indicators.push('automated_client');
-    }
-
-    const ipAddress = this.getClientIpAddress(req);
+    const userAgent = req.get('User-Agent') || '';if (userAgent.includes('bot') || userAgent.includes('crawler')) {indicators.push('automated_client');}const ipAddress = this.getClientIpAddress(req);
     if (this.isKnownSuspiciousIp(ipAddress)) {
-      indicators.push('suspicious_ip');
-    }
-
-    return indicators;
+      indicators.push('suspicious_ip');}return indicators;
   }
 
   /**
@@ -714,14 +582,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
    */
   private getRequiredPermissions(endpoint: string): BrowserPermission[] {
     const permissionMap: Record<string, BrowserPermission[]> = {
-      'POST /parlant/browser-use/tasks': [BrowserPermission.CREATE_TASK],
-      'GET /parlant/browser-use/tasks/:taskId': [BrowserPermission.VIEW_TASK],
-      'POST /parlant/browser-use/sessions': [BrowserPermission.CREATE_SESSION],
-      'POST /parlant/browser-use/async-jobs': [BrowserPermission.ASYNC_JOBS],
-      'GET /parlant/browser-use/async-jobs/:jobId': [BrowserPermission.VIEW_TASK],
-    };
-
-    return permissionMap[endpoint] || [BrowserPermission.VIEW_TASK];
+      'POST /parlant/browser-use/tasks': [BrowserPermission.CREATE_TASK],'GET /parlant/browser-use/tasks/:taskId': [BrowserPermission.VIEW_TASK],'POST /parlant/browser-use/sessions': [BrowserPermission.CREATE_SESSION],'POST /parlant/browser-use/async-jobs': [BrowserPermission.ASYNC_JOBS],'GET /parlant/browser-use/async-jobs/:jobId': [BrowserPermission.VIEW_TASK],};return permissionMap[endpoint] || [BrowserPermission.VIEW_TASK];
   }
 
   /**
@@ -731,9 +592,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const permissions: BrowserPermission[] = [];
 
     // Map roles to permissions
-    if (userContext.roles.includes('admin')) {
-      permissions.push(BrowserPermission.ADMIN_OPERATIONS);
-      permissions.push(...Object.values(BrowserPermission));
+    if (userContext.roles.includes('admin')) {permissions.push(BrowserPermission.ADMIN_OPERATIONS);permissions.push(...Object.values(BrowserPermission));
     } else if (userContext.roles.includes('user')) {
       permissions.push(
         BrowserPermission.CREATE_TASK,
@@ -790,23 +649,12 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const body = JSON.stringify(req.body || {});
     if (this.containsSqlInjection(body)) {
       passed = false;
-      details.push('SQL injection detected');
-    }
-
-    // Check for XSS patterns
+      details.push('SQL injection detected');}// Check for XSS patterns
     if (this.containsXssAttack(body)) {
       passed = false;
-      details.push('XSS attack detected');
-    }
-
-    return {
-      type: 'INPUT_VALIDATION',
-      passed,
-      score: passed ? 100 : 0,
-      details: details.join(', ') || 'Input validation passed',
-      evidence: { body: body.length > 1000 ? '[TRUNCATED]' : body },
-    };
-  }
+      details.push('XSS attack detected');}return {
+      type: 'INPUT_VALIDATION',passed,score: passed ? 100 : 0,
+      details: details.join(', ') || 'Input validation passed',evidence: { body: body.length > 1000 ? '[TRUNCATED]' : body },};}
 
   /**
    * Detect threats in request
@@ -820,23 +668,12 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     // Check for known malicious IPs
     const ipAddress = this.getClientIpAddress(req);
     if (this.isKnownMaliciousIp(ipAddress)) {
-      threats.push('malicious_ip');
-    }
-
-    // Check for suspicious user agent
-    const userAgent = req.get('User-Agent') || '';
-    if (this.isSuspiciousUserAgent(userAgent)) {
-      threats.push('suspicious_user_agent');
-    }
-
-    const passed = threats.length === 0;
+      threats.push('malicious_ip');}// Check for suspicious user agent
+    const userAgent = req.get('User-Agent') || '';if (this.isSuspiciousUserAgent(userAgent)) {threats.push('suspicious_user_agent');}const passed = threats.length === 0;
 
     return {
-      type: 'THREAT_DETECTION',
-      passed,
-      score: passed ? 100 : Math.max(0, 100 - (threats.length * 30)),
-      details: passed ? 'No threats detected' : `Threats: ${threats.join(', ')}`,
-      evidence: { threats, ipAddress, userAgent },
+      type: 'THREAT_DETECTION',passed,score: passed ? 100 : Math.max(0, 100 - (threats.length * 30)),
+      details: passed ? 'No threats detected' : `Threats: ${threats.join(`, ')}',evidence: { threats, ipAddress, userAgent },
     };
   }
 
@@ -859,12 +696,8 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     }
 
     return {
-      type: 'INPUT_VALIDATION',
-      passed,
-      score: passed ? 100 : 50,
-      details: passed ? 'Content validation passed' : issues.join(', '),
-      evidence: { issues },
-    };
+      type: 'INPUT_VALIDATION',passed,score: passed ? 100 : 50,
+      details: passed ? 'Content validation passed' : issues.join(', '),evidence: { issues },};
   }
 
   /**
@@ -888,15 +721,9 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const userRequests = this.rateLimitStore.get(`user:${userContext.userId}`);
     if (userRequests && userRequests.requestsPerMinute > 30) {
       passed = false;
-      anomalies.push('high_frequency_requests');
-    }
-
-    return {
-      type: 'THREAT_DETECTION',
-      passed,
-      score: passed ? 100 : 70,
-      details: passed ? 'Behavior analysis passed' : `Anomalies: ${anomalies.join(', ')}`,
-      evidence: { anomalies, hour, requestCount: userRequests?.requestsPerMinute || 0 },
+      anomalies.push('high_frequency_requests');}return {
+      type: 'THREAT_DETECTION',passed,score: passed ? 100 : 70,
+      details: passed ? 'Behavior analysis passed' : `Anomalies: ${anomalies.join(`, ')}',evidence: { anomalies, hour, requestCount: userRequests?.requestsPerMinute || 0 },
     };
   }
 
@@ -904,9 +731,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
 
   private containsSqlInjection(input: string): boolean {
     const sqlPatterns = [
-      /('|(\\')|(;)|(--)|(\/\*)|(\*\/)/gi,
-      /(union|select|insert|update|delete|drop|create|alter)/gi,
-    ];
+      /('|(\\')|(;)|(--)|(\/\*)|(\*\/)/gi,/(union|select|insert|update|delete|drop|create|alter)/gi,];
     return sqlPatterns.some(pattern => pattern.test(input));
   }
 
@@ -921,9 +746,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
 
   private isKnownSuspiciousIp(ipAddress: string): boolean {
     // Placeholder - would integrate with threat intelligence services
-    const suspiciousRanges = ['192.168.1.100', '10.0.0.100'];
-    return suspiciousRanges.includes(ipAddress);
-  }
+    const suspiciousRanges = ['192.168.1.100', '10.0.0.100'];return suspiciousRanges.includes(ipAddress);}
 
   private isKnownMaliciousIp(ipAddress: string): boolean {
     // Placeholder - would integrate with threat intelligence feeds
@@ -943,9 +766,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
   private isSuspiciousUrl(url: string): boolean {
     try {
       const urlObj = new URL(url);
-      const suspiciousDomains = ['malicious.com', 'phishing.net'];
-      return suspiciousDomains.includes(urlObj.hostname);
-    } catch {
+      const suspiciousDomains = ['malicious.com', 'phishing.net'];return suspiciousDomains.includes(urlObj.hostname);} catch {
       return true; // Invalid URLs are suspicious
     }
   }
@@ -954,26 +775,16 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const params = { ...req.body, ...req.query, ...req.params };
 
     // Remove sensitive data
-    const sensitiveKeys = ['password', 'token', 'secret', 'key'];
-    const sanitized: Record<string, unknown> = {};
-
-    for (const [key, value] of Object.entries(params)) {
+    const sensitiveKeys = ['password', 'token', 'secret', 'key'];const sanitized: Record<string, unknown> = {};for (const [key, value] of Object.entries(params)) {
       if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive))) {
-        sanitized[key] = '[REDACTED]';
-      } else {
-        sanitized[key] = value;
+        sanitized[key] = '[REDACTED]';} else {sanitized[key] = value;
       }
     }
 
     return sanitized;
   }
 
-  private calculateUserTrustLevel(authResult: AuthenticationResult): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const score = authResult.score;
-    if (score >= 90) return 'CRITICAL';
-    if (score >= 70) return 'HIGH';
-    if (score >= 50) return 'MEDIUM';
-    return 'LOW';
+  private calculateUserTrustLevel(authResult: AuthenticationResult): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {const score = authResult.score;if (score >= 90) return 'CRITICAL';if (score >= 70) return 'HIGH';if (score >= 50) return 'MEDIUM';return 'LOW';
   }
 
   private getRateLimitCounters(userId: string): RateLimitCounters {
@@ -986,26 +797,11 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     };
   }
 
-  private mapRiskSeverity(weight: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (weight >= 0.8) return 'CRITICAL';
-    if (weight >= 0.6) return 'HIGH';
-    if (weight >= 0.4) return 'MEDIUM';
-    return 'LOW';
-  }
-
-  private getThreatIndicators(userId: string): ThreatIndicator[] {
+  private mapRiskSeverity(weight: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (weight >= 0.8) return 'CRITICAL';if (weight >= 0.6) return 'HIGH';if (weight >= 0.4) return 'MEDIUM';return 'LOW';}private getThreatIndicators(userId: string): ThreatIndicator[] {
     return this.threatDetectionCache.get(userId) || [];
   }
 
-  private getMonitoringLevel(riskLevel: string): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
-    switch (riskLevel.toLowerCase()) {
-      case 'critical':
-      case 'high':
-        return 'COMPREHENSIVE';
-      case 'medium':
-        return 'ENHANCED';
-      default:
-        return 'BASIC';
+  private getMonitoringLevel(riskLevel: string): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {switch (riskLevel.toLowerCase()) {case 'critical':case 'high':return 'COMPREHENSIVE';case 'medium':return 'ENHANCED';default:return 'BASIC';
     }
   }
 
@@ -1030,13 +826,9 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     req: Request
   ): void {
     this.logger.log(
-      `[${operationId}] Browser use authentication successful`,
-      {
-        userId: authResult.userContext!.userId,
+      `[${operationId}] Browser use authentication successful`,{userId: authResult.userContext!.userId,
         sessionId: authResult.session?.sessionId,
-        endpoint: `${req.method} ${req.url}`,
-        riskScore: authResult.score,
-        securityLevel: authResult.session?.securityLevel,
+        endpoint: `${req.method} ${req.url}`,riskScore: authResult.score,securityLevel: authResult.session?.securityLevel,
       }
     );
   }
@@ -1052,48 +844,35 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     this.updatePerformanceMetrics(processingTime);
 
     this.logger.error(
-      `[${operationId}] Browser use authentication failed`,
-      {
-        error: error instanceof Error ? error.message : String(error),
+      `[${operationId}] Browser use authentication failed`,{error: error instanceof Error ? error.message : String(error),
         endpoint: `${req.method} ${req.url}`,
         ipAddress: this.getClientIpAddress(req),
-        userAgent: req.get('User-Agent'),
-        processingTime,
-      }
+        userAgent: req.get('User-Agent'),processingTime,}
     );
 
     // Return appropriate error response
     if (error instanceof UnauthorizedException) {
       res.status(401).json({
         success: false,
-        error: 'Authentication failed',
-        message: error.message,
-        operationId,
+        error: 'Authentication failed',message: error.message,operationId,
         timestamp: new Date().toISOString(),
       });
     } else if (error instanceof ForbiddenException) {
       res.status(403).json({
         success: false,
-        error: 'Access forbidden',
-        message: error.message,
-        operationId,
+        error: 'Access forbidden',message: error.message,operationId,
         timestamp: new Date().toISOString(),
       });
     } else if (error instanceof TooManyRequestsException) {
       res.status(429).json({
         success: false,
-        error: 'Rate limit exceeded',
-        message: error.message,
-        operationId,
+        error: 'Rate limit exceeded',message: error.message,operationId,
         timestamp: new Date().toISOString(),
       });
     } else {
       res.status(500).json({
         success: false,
-        error: 'Internal server error',
-        message: 'Authentication processing failed',
-        operationId,
-        timestamp: new Date().toISOString(),
+        error: 'Internal server error',message: 'Authentication processing failed',operationId,timestamp: new Date().toISOString(),
       });
     }
   }
@@ -1112,9 +891,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     // Clean old security cache entries
     this.securityCache.clear();
 
-    this.logger.debug('Security cache cleanup completed', {
-      rateLimitEntries: this.rateLimitStore.size,
-      securityCacheEntries: this.securityCache.size,
+    this.logger.debug('Security cache cleanup completed', {rateLimitEntries: this.rateLimitStore.size,securityCacheEntries: this.securityCache.size,
     });
   }
 
@@ -1125,8 +902,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       deniedRequests: this.metrics.deniedRequests,
       rateLimitedRequests: this.metrics.rateLimitedRequests,
       securityViolations: this.metrics.securityViolations,
-      averageProcessingTime: `${this.metrics.averageProcessingTime.toFixed(2)}ms`,
-      authenticationSuccessRate: `${((this.metrics.authenticatedRequests / this.metrics.totalRequests) * 100).toFixed(2)}%`,
+      averageProcessingTime: `${this.metrics.averageProcessingTime.toFixed(2)}ms`,authenticationSuccessRate: `${((this.metrics.authenticatedRequests / this.metrics.totalRequests) * 100).toFixed(2)}%`,
     });
   }
 

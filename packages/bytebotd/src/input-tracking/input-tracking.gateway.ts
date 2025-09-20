@@ -3,13 +3,7 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Injectable, Logger } from '@nestjs/common';
-import { ComputerAction } from '@bytebot/shared';
-
-// Interface for input event data
-interface InputEventData {
+} from '@nestjs/websockets';import { Server, Socket } from 'socket.io';import { Injectable, Logger } from '@nestjs/common';import { ComputerAction } from '@bytebot/shared';// Interface for input event datainterface InputEventData {
   type: string;
   timestamp: number;
   data?: Record<string, unknown>;
@@ -25,8 +19,7 @@ interface ActionEventData {
 @Injectable()
 @WebSocketGateway({
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
+    origin: '*',methods: ['GET', 'POST'],
   },
 })
 export class InputTrackingGateway
@@ -39,33 +32,21 @@ export class InputTrackingGateway
   server!: Server;
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
-  }
-
-  handleDisconnect(client: Socket) {
+    this.logger.log(`Client connected: ${client.id}`);}handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   emitAction(action: ComputerAction) {
-    this.server.emit('action', action);
-  }
-
-  emitScreenshotAndAction(
+    this.server.emit('action', action);}emitScreenshotAndAction(
     screenshot: { image: string },
     action: ComputerAction,
   ) {
-    this.server.emit('screenshotAndAction', screenshot, action);
-  }
-
-  /**
+    this.server.emit('screenshotAndAction', screenshot, action);}/**
    * Broadcast input event to all connected clients
    * @param inputData - Input event data to broadcast
    */
   broadcastInputEvent(inputData: InputEventData) {
-    this.server.emit('inputEvent', inputData);
-  }
-
-  /**
+    this.server.emit('inputEvent', inputData);}/**
    * Broadcast action event to all connected clients
    * @param actionData - Action event data to broadcast
    */
@@ -98,10 +79,7 @@ export class InputTrackingGateway
    */
   joinRoom(client: Socket, room: string) {
     client.join(room);
-    this.logger.log(`Client ${client.id} joined room: ${room}`);
-  }
-
-  /**
+    this.logger.log(`Client ${client.id} joined room: ${room}`);}/**
    * Remove a client from a room
    * @param client - Socket client
    * @param room - Room name

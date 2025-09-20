@@ -18,11 +18,7 @@ import {
   HttpStatus,
   Logger,
   Injectable,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Observable, throwError } from 'rxjs';
-import {
-  OrchestrationError,
+} from '@nestjs/common';import { Request, Response } from 'express';import { Observable, throwError } from 'rxjs';import {OrchestrationError,
   OrchestrationErrorType,
   OrchestrationErrorCategory,
   OrchestrationErrorSeverity,
@@ -33,18 +29,12 @@ import {
   isResourceAllocationError,
   isAggregationError,
   OrchestrationErrorAnalyzer,
-} from '../errors/orchestration-errors';
-import { OrchestrationResponse } from '../interceptors/orchestration-response.interceptor';
-
-/**
- * Aggregated error information for multi-operation failures
+} from '../errors/orchestration-errors';import { OrchestrationResponse } from '../interceptors/orchestration-response.interceptor';/*** Aggregated error information for multi-operation failures
  */
 interface AggregatedErrorInfo {
   readonly primaryError: OrchestrationErrorType;
   readonly relatedErrors: OrchestrationErrorType[];
-  readonly errorPattern: 'cascade' | 'parallel' | 'resource_contention' | 'coordination_failure' | 'isolated';
-  readonly impactAssessment: {
-    readonly totalAffectedOperations: number;
+  readonly errorPattern: 'cascade' | 'parallel' | 'resource_contention' | 'coordination_failure' | 'isolated';readonly impactAssessment: {readonly totalAffectedOperations: number;
     readonly criticalPathAffected: boolean;
     readonly systemWideImpact: boolean;
     readonly dataIntegrityRisk: boolean;
@@ -56,24 +46,17 @@ interface AggregatedErrorInfo {
       readonly timestamp: Date;
       readonly errorId: string;
       readonly category: string;
-      readonly causality: 'root_cause' | 'cascaded' | 'parallel' | 'unrelated';
-    }>;
-    readonly dependencyGraph: Array<{
+      readonly causality: 'root_cause' | 'cascaded' | 'parallel' | 'unrelated';}>;readonly dependencyGraph: Array<{
       readonly sourceOperation: string;
       readonly targetOperation: string;
-      readonly relationshipType: 'blocks' | 'depends_on' | 'coordinates_with' | 'shares_resource';
-    }>;
-  };
+      readonly relationshipType: 'blocks' | 'depends_on' | 'coordinates_with' | 'shares_resource';}>;};
 }
 
 /**
  * Error recovery strategy with orchestration-specific logic
  */
 interface OrchestrationRecoveryStrategy {
-  readonly strategy: 'isolate_and_retry' | 'partial_rollback' | 'full_rollback' | 'compensate' | 'degrade_gracefully' | 'manual_intervention' | 'system_restart';
-  readonly priority: 'immediate' | 'high' | 'medium' | 'low' | 'deferred';
-  readonly estimatedRecoveryTime: number;
-  readonly resourceRequirements: {
+  readonly strategy: 'isolate_and_retry' | 'partial_rollback' | 'full_rollback' | 'compensate' | 'degrade_gracefully' | 'manual_intervention' | 'system_restart';readonly priority: 'immediate' | 'high' | 'medium' | 'low' | 'deferred';readonly estimatedRecoveryTime: number;readonly resourceRequirements: {
     readonly additionalBrowsers?: number;
     readonly memoryReallocation?: number;
     readonly networkBandwidth?: number;
@@ -84,9 +67,7 @@ interface OrchestrationRecoveryStrategy {
       readonly stepId: string;
       readonly action: string;
       readonly estimatedTime: number;
-      readonly criticalityLevel: 'critical' | 'high' | 'medium' | 'low';
-    }>;
-    readonly dataBackupRequired: boolean;
+      readonly criticalityLevel: 'critical' | 'high' | 'medium' | 'low';}>;readonly dataBackupRequired: boolean;
     readonly serviceInterruption: boolean;
   };
   readonly compensationActions?: Array<{
@@ -121,9 +102,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
   private readonly errorPatterns = new Map<string, number>();
 
   constructor() {
-    this.logger.log('OrchestrationExceptionFilter initialized');
-    this.initializeErrorPatternDatabase();
-  }
+    this.logger.log('OrchestrationExceptionFilter initialized');this.initializeErrorPatternDatabase();}
 
   /**
    * Main exception handling entry point
@@ -136,15 +115,10 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     const startTime = Date.now();
     const requestContext = this.extractRequestContext(request);
 
-    this.logger.error('Orchestration exception caught', {
-      url: request.url,
-      method: request.method,
+    this.logger.error('Orchestration exception caught', {url: request.url,method: request.method,
       orchestrationId: requestContext.orchestrationId,
       operationType: requestContext.operationType,
-      exception: exception instanceof Error ? exception.message : 'Unknown exception',
-    });
-
-    try {
+      exception: exception instanceof Error ? exception.message : 'Unknown exception',});try {
       // Process and analyze the exception
       const processedError = this.processException(exception, requestContext);
 
@@ -173,11 +147,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
 
     } catch (processingError) {
       // Fallback error handling
-      this.logger.error('Exception processing failed', {
-        originalException: exception instanceof Error ? exception.message : 'Unknown',
-        processingError: processingError instanceof Error ? processingError.message : 'Unknown',
-        url: request.url,
-      });
+      this.logger.error('Exception processing failed', {originalException: exception instanceof Error ? exception.message : 'Unknown',processingError: processingError instanceof Error ? processingError.message : 'Unknown',url: request.url,});
 
       const fallbackResponse = this.createFallbackErrorResponse(
         exception,
@@ -249,10 +219,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     // System-wide failures require immediate intervention
     if (impactAssessment.systemWideImpact) {
       return {
-        strategy: 'system_restart',
-        priority: 'immediate',
-        estimatedRecoveryTime: 60000, // 60 seconds
-        resourceRequirements: {
+        strategy: 'system_restart',priority: 'immediate',estimatedRecoveryTime: 60000, // 60 secondsresourceRequirements: {
           coordinatorNodes: 1,
         },
       };
@@ -285,10 +252,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
 
     // Default recovery strategy
     return {
-      strategy: 'isolate_and_retry',
-      priority: 'medium',
-      estimatedRecoveryTime: 10000, // 10 seconds
-      resourceRequirements: {},
+      strategy: 'isolate_and_retry',priority: 'medium',estimatedRecoveryTime: 10000, // 10 secondsresourceRequirements: {},
     };
   }
 
@@ -309,9 +273,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
       orchestration: {
         orchestrationId: primaryError.orchestrationId,
         operationType: primaryError.operationType,
-        status: 'failed',
-        progress: {
-          totalOperations: primaryError.distributedContext.totalOperations,
+        status: 'failed',progress: {totalOperations: primaryError.distributedContext.totalOperations,
           completedOperations: primaryError.distributedContext.completedOperations,
           failedOperations: primaryError.distributedContext.failedOperations,
           remainingOperations: primaryError.distributedContext.remainingOperations,
@@ -365,10 +327,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         requestId: requestContext.requestId || this.generateRequestId(),
         timestamp: new Date(),
         processingTime,
-        version: '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        traceId: requestContext.traceId,
-        userId: requestContext.userId,
+        version: '1.0.0',environment: process.env.NODE_ENV || 'development',traceId: requestContext.traceId,userId: requestContext.userId,
         sessionId: requestContext.sessionId,
       },
       // Additional orchestration-specific error metadata
@@ -376,9 +335,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         correlationId: correlationMetadata.errorCorrelationId,
         errorPattern: aggregatedError.errorPattern,
         relatedErrors: relatedErrors.map(err => ({
-          errorId: err.errorId || 'unknown',
-          category: err.category,
-          severity: err.severity,
+          errorId: err.errorId || 'unknown',category: err.category,severity: err.severity,
           operationType: err.operationType,
         })),
         impactAssessment,
@@ -396,12 +353,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
           severity: string;
           operationType: string;
         }>;
-        impactAssessment: AggregatedErrorInfo['impactAssessment'];
-        recoveryStrategy: OrchestrationRecoveryStrategy;
-        timeline: AggregatedErrorInfo['correlationMetadata']['timelineAnalysis'];
-        dependencyGraph: AggregatedErrorInfo['correlationMetadata']['dependencyGraph'];
-      };
-    };
+        impactAssessment: AggregatedErrorInfo['impactAssessment'];recoveryStrategy: OrchestrationRecoveryStrategy;timeline: AggregatedErrorInfo['correlationMetadata']['timelineAnalysis'];dependencyGraph: AggregatedErrorInfo['correlationMetadata']['dependencyGraph'];};};
   }
 
   /**
@@ -415,11 +367,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     return {
       success: false,
       orchestration: {
-        orchestrationId: requestContext.orchestrationId || 'unknown',
-        operationType: requestContext.operationType || OrchestrationOperationType.WORKFLOW_EXECUTION,
-        status: 'failed',
-        progress: {
-          totalOperations: 1,
+        orchestrationId: requestContext.orchestrationId || 'unknown',operationType: requestContext.operationType || OrchestrationOperationType.WORKFLOW_EXECUTION,status: 'failed',progress: {totalOperations: 1,
           completedOperations: 0,
           failedOperations: 1,
           remainingOperations: 0,
@@ -430,9 +378,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
           endTime: new Date(),
           duration: processingTime,
           parallelExecutions: 0,
-          coordinationState: 'failed',
-        },
-        resources: {
+          coordinationState: 'failed',},resources: {
           browserSessions: 0,
           activeTasks: 0,
         },
@@ -441,30 +387,15 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         },
       },
       error: {
-        type: 'system_error',
-        message: 'Exception processing failed - system error',
-        severity: 'critical',
-        category: 'system_error',
-        orchestrationId: requestContext.orchestrationId || 'unknown',
-        affectedOperations: [],
-        recovery: {
+        type: 'system_error',message: 'Exception processing failed - system error',severity: 'critical',category: 'system_error',orchestrationId: requestContext.orchestrationId || 'unknown',affectedOperations: [],recovery: {
           attempted: false,
-          strategy: 'manual_intervention',
-        },
-        recommendations: [
-          'Contact system administrator',
-          'Check system logs for detailed error information',
-          'Consider system restart if error persists',
-        ],
-      },
+          strategy: 'manual_intervention',},recommendations: [
+          'Contact system administrator','Check system logs for detailed error information','Consider system restart if error persists',],},
       metadata: {
         requestId: requestContext.requestId || this.generateRequestId(),
         timestamp: new Date(),
         processingTime,
-        version: '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        traceId: requestContext.traceId,
-        userId: requestContext.userId,
+        version: '1.0.0',environment: process.env.NODE_ENV || 'development',traceId: requestContext.traceId,userId: requestContext.userId,
         sessionId: requestContext.sessionId,
       },
     };
@@ -476,15 +407,10 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     return {
       url: request.url,
       method: request.method,
-      orchestrationId: request.headers['x-orchestration-id'] as string ||
-                      (request.body as { orchestrationId?: string })?.orchestrationId ||
-                      (request.query as { orchestrationId?: string })?.orchestrationId,
+      orchestrationId: request.headers['x-orchestration-id'] as string ||(request.body as { orchestrationId?: string })?.orchestrationId ||(request.query as { orchestrationId?: string })?.orchestrationId,
       operationType: (request.body as { operationType?: string })?.operationType as OrchestrationOperationType ||
                     (request.query as { operationType?: string })?.operationType as OrchestrationOperationType,
-      requestId: request.headers['x-request-id'] as string,
-      traceId: request.headers['x-trace-id'] as string,
-      userId: (request as { user?: { id: string } }).user?.id,
-      sessionId: (request as { sessionID?: string }).sessionID,
+      requestId: request.headers['x-request-id'] as string,traceId: request.headers['x-trace-id'] as string,userId: (request as { user?: { id: string } }).user?.id,sessionId: (request as { sessionID?: string }).sessionID,
     };
   }
 
@@ -512,10 +438,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
   ): OrchestrationError {
     const status = exception.getStatus();
     const response = exception.getResponse();
-    const message = typeof response === 'string' ? response :
-                   (response as { message?: string }).message || exception.message;
-
-    return {
+    const message = typeof response === 'string' ? response :(response as { message?: string }).message || exception.message;return {
       name: 'OrchestrationError',
       message,
       code: `HTTP_${status}`,
@@ -530,9 +453,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         failedOperations: 1,
         remainingOperations: 0,
         parallelExecutions: 0,
-        coordinationState: 'failed',
-      },
-      resourceContext: {
+        coordinationState: 'failed',},resourceContext: {
         browserSessions: 0,
         activeTasks: 0,
       },
@@ -559,11 +480,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     requestContext: RequestContext
   ): OrchestrationError {
     return {
-      name: 'OrchestrationError',
-      message: error.message,
-      code: error.name || 'UNKNOWN_ERROR',
-      timestamp: new Date(),
-      category: this.categorizeErrorMessage(error.message),
+      name: 'OrchestrationError',message: error.message,code: error.name || 'UNKNOWN_ERROR',timestamp: new Date(),category: this.categorizeErrorMessage(error.message),
       severity: OrchestrationErrorSeverity.MEDIUM,
       operationType: requestContext.operationType || OrchestrationOperationType.WORKFLOW_EXECUTION,
       orchestrationId: requestContext.orchestrationId || this.generateOrchestrationId(),
@@ -573,9 +490,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         failedOperations: 1,
         remainingOperations: 0,
         parallelExecutions: 0,
-        coordinationState: 'failed',
-      },
-      resourceContext: {
+        coordinationState: 'failed',},resourceContext: {
         browserSessions: 0,
         activeTasks: 0,
       },
@@ -602,11 +517,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     requestContext: RequestContext
   ): OrchestrationError {
     return {
-      name: 'OrchestrationError',
-      message: 'Unknown exception occurred',
-      code: 'UNKNOWN_EXCEPTION',
-      timestamp: new Date(),
-      category: OrchestrationErrorCategory.DISTRIBUTED_TASK_ERROR,
+      name: 'OrchestrationError',message: 'Unknown exception occurred',code: 'UNKNOWN_EXCEPTION',timestamp: new Date(),category: OrchestrationErrorCategory.DISTRIBUTED_TASK_ERROR,
       severity: OrchestrationErrorSeverity.HIGH,
       operationType: requestContext.operationType || OrchestrationOperationType.WORKFLOW_EXECUTION,
       orchestrationId: requestContext.orchestrationId || this.generateOrchestrationId(),
@@ -616,9 +527,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
         failedOperations: 1,
         remainingOperations: 0,
         parallelExecutions: 0,
-        coordinationState: 'failed',
-      },
-      resourceContext: {
+        coordinationState: 'failed',},resourceContext: {
         browserSessions: 0,
         activeTasks: 0,
       },
@@ -644,22 +553,12 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
   // (Due to length constraints, providing key structure points)
 
   private initializeErrorPatternDatabase(): void {
-    this.logger.log('Error pattern database initialized');
-  }
-
-  private findRelatedErrors(primaryError: OrchestrationErrorType, correlationId: string): OrchestrationErrorType[] {
+    this.logger.log('Error pattern database initialized');}private findRelatedErrors(primaryError: OrchestrationErrorType, correlationId: string): OrchestrationErrorType[] {
     // Implementation for finding related errors
     return [];
   }
 
-  private analyzeErrorPattern(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['errorPattern'] {
-    // Implementation for error pattern analysis
-    return 'isolated';
-  }
-
-  private assessErrorImpact(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['impactAssessment'] {
-    return {
-      totalAffectedOperations: primaryError.affectedOperations.length + relatedErrors.reduce((sum, err) => sum + err.affectedOperations.length, 0),
+  private analyzeErrorPattern(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['errorPattern'] {// Implementation for error pattern analysisreturn 'isolated';}private assessErrorImpact(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['impactAssessment'] {return {totalAffectedOperations: primaryError.affectedOperations.length + relatedErrors.reduce((sum, err) => sum + err.affectedOperations.length, 0),
       criticalPathAffected: primaryError.dependencies.criticalPath,
       systemWideImpact: primaryError.severity === OrchestrationErrorSeverity.SYSTEM_WIDE,
       dataIntegrityRisk: false,
@@ -667,43 +566,26 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private buildCorrelationMetadata(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[], correlationId: string): AggregatedErrorInfo['correlationMetadata'] {
-    return {
-      errorCorrelationId: correlationId,
+  private buildCorrelationMetadata(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[], correlationId: string): AggregatedErrorInfo['correlationMetadata'] {return {errorCorrelationId: correlationId,
       timelineAnalysis: [
         {
           timestamp: primaryError.timestamp,
-          errorId: primaryError.errorId || 'unknown',
-          category: primaryError.category,
-          causality: 'root_cause',
-        },
-      ],
+          errorId: primaryError.errorId || 'unknown',category: primaryError.category,causality: 'root_cause',},],
       dependencyGraph: [],
     };
   }
 
-  private createCriticalPathRecoveryStrategy(primaryError: OrchestrationErrorType, impactAssessment: AggregatedErrorInfo['impactAssessment']): OrchestrationRecoveryStrategy {
-    return {
-      strategy: 'partial_rollback',
-      priority: 'immediate',
-      estimatedRecoveryTime: 20000,
-      resourceRequirements: {},
+  private createCriticalPathRecoveryStrategy(primaryError: OrchestrationErrorType, impactAssessment: AggregatedErrorInfo['impactAssessment']): OrchestrationRecoveryStrategy {return {strategy: 'partial_rollback',priority: 'immediate',estimatedRecoveryTime: 20000,resourceRequirements: {},
     };
   }
 
-  private createDistributedOperationRecoveryStrategy(primaryError: OrchestrationErrorType, errorPattern: AggregatedErrorInfo['errorPattern']): OrchestrationRecoveryStrategy {
-    return {
-      strategy: 'isolate_and_retry',
-      priority: 'high',
-      estimatedRecoveryTime: 15000,
-      resourceRequirements: {},
+  private createDistributedOperationRecoveryStrategy(primaryError: OrchestrationErrorType, errorPattern: AggregatedErrorInfo['errorPattern']): OrchestrationRecoveryStrategy {return {strategy: 'isolate_and_retry',priority: 'high',estimatedRecoveryTime: 15000,resourceRequirements: {},
     };
   }
 
   private createWorkflowRecoveryStrategy(primaryError: WorkflowCoordinationError): OrchestrationRecoveryStrategy {
     return {
-      strategy: primaryError.workflowError.rollbackRequired ? 'full_rollback' : 'compensate',
-      priority: 'high',
+      strategy: primaryError.workflowError.rollbackRequired ? 'full_rollback' : 'compensate',priority: 'high',
       estimatedRecoveryTime: 25000,
       resourceRequirements: {},
       rollbackPlan: primaryError.workflowError.rollbackRequired ? {
@@ -711,9 +593,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
           stepId: `rollback_${index}`,
           action: action,
           estimatedTime: 3000,
-          criticalityLevel: 'high' as const,
-        })),
-        dataBackupRequired: true,
+          criticalityLevel: 'high' as const,})),dataBackupRequired: true,
         serviceInterruption: true,
       } : undefined,
     };
@@ -721,10 +601,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
 
   private createResourceRecoveryStrategy(primaryError: ResourceAllocationError): OrchestrationRecoveryStrategy {
     return {
-      strategy: 'degrade_gracefully',
-      priority: 'medium',
-      estimatedRecoveryTime: 10000,
-      resourceRequirements: {
+      strategy: 'degrade_gracefully',priority: 'medium',estimatedRecoveryTime: 10000,resourceRequirements: {
         additionalBrowsers: primaryError.resourceError.requestedResources.browsers - primaryError.resourceError.availableResources.browsers,
         memoryReallocation: primaryError.resourceError.requestedResources.memory - primaryError.resourceError.availableResources.memory,
       },
@@ -733,10 +610,7 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
 
   private createAggregationRecoveryStrategy(primaryError: AggregationError): OrchestrationRecoveryStrategy {
     return {
-      strategy: 'isolate_and_retry',
-      priority: 'medium',
-      estimatedRecoveryTime: 8000,
-      resourceRequirements: {},
+      strategy: 'isolate_and_retry',priority: 'medium',estimatedRecoveryTime: 8000,resourceRequirements: {},
     };
   }
 
@@ -759,15 +633,9 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
 
   private categorizeErrorMessage(message: string): OrchestrationErrorCategory {
     const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('timeout') || lowerMessage.includes('coordination')) {
-      return OrchestrationErrorCategory.COORDINATION_TIMEOUT_ERROR;
-    }
-    if (lowerMessage.includes('resource') || lowerMessage.includes('memory') || lowerMessage.includes('browser')) {
-      return OrchestrationErrorCategory.RESOURCE_ALLOCATION_ERROR;
-    }
-    if (lowerMessage.includes('aggregate') || lowerMessage.includes('merge') || lowerMessage.includes('combine')) {
-      return OrchestrationErrorCategory.RESULT_AGGREGATION_ERROR;
-    }
+    if (lowerMessage.includes('timeout') || lowerMessage.includes('coordination')) {return OrchestrationErrorCategory.COORDINATION_TIMEOUT_ERROR;}
+    if (lowerMessage.includes('resource') || lowerMessage.includes('memory') || lowerMessage.includes('browser')) {return OrchestrationErrorCategory.RESOURCE_ALLOCATION_ERROR;}
+    if (lowerMessage.includes('aggregate') || lowerMessage.includes('merge') || lowerMessage.includes('combine')) {return OrchestrationErrorCategory.RESULT_AGGREGATION_ERROR;}
     return OrchestrationErrorCategory.DISTRIBUTED_TASK_ERROR;
   }
 
@@ -812,14 +680,8 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
   }
 
   private generateCorrelationId(error: OrchestrationErrorType, requestContext: RequestContext): string {
-    return `corr_${error.orchestrationId}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-  }
-
-  private generateOrchestrationId(): string {
-    return `orch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private generateRequestId(): string {
+    return `corr_${error.orchestrationId}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;}private generateOrchestrationId(): string {
+    return `orch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;}private generateRequestId(): string {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

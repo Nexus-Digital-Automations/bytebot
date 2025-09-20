@@ -17,13 +17,7 @@
  * @version 2.0.0
  */
 
-import { performance } from 'perf_hooks';
-import { EventEmitter } from 'events';
-import { promises as fs } from 'fs';
-import { createHash } from 'crypto';
-
-/**
- * Test coverage data interface
+import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { promises as fs } from 'fs';import { createHash } from 'crypto';/*** Test coverage data interface
  */
 interface TestCoverage {
   lines: {
@@ -92,9 +86,7 @@ export interface OptimizationConfig {
 export interface TestExecutionPlan {
   readonly testGroups: TestGroup[];
   readonly executionOrder: string[];
-  readonly parallelizationStrategy: 'none' | 'file-level' | 'test-level' | 'adaptive';
-  readonly estimatedExecutionTime: number;
-  readonly resourceRequirements: {
+  readonly parallelizationStrategy: 'none' | 'file-level' | 'test-level' | 'adaptive';readonly estimatedExecutionTime: number;readonly resourceRequirements: {
     memory: number;
     cpu: number;
     workers: number;
@@ -174,11 +166,7 @@ export class TestExecutionOptimizer extends EventEmitter {
    * Optimize test execution plan
    */
   public async optimizeTestExecution(testFiles: string[]): Promise<TestExecutionPlan> {
-    console.log(`🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`);
-
-    const optimizationStart = performance.now();
-
-    try {
+    console.log(`🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`);const optimizationStart = performance.now();try {
       // Load historical metrics and cache
       await this.loadCache();
       await this.loadHistoricalMetrics();
@@ -216,20 +204,10 @@ export class TestExecutionOptimizer extends EventEmitter {
 
       const optimizationTime = performance.now() - optimizationStart;
 
-      console.log(`📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`);
-      console.log(`  Test groups: ${testGroups.length}`);
-      console.log(`  Parallelization: ${parallelizationStrategy}`);
-      console.log(`  Estimated time: ${estimatedExecutionTime.toFixed(2)}ms`);
-      console.log(`  Cache hits: ${cacheStrategy.cacheableTests.length}`);
-      console.log(`  Workers required: ${resourceRequirements.workers}`);
+      console.log(`📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`);console.log(`  Test groups: ${testGroups.length}`);console.log(`  Parallelization: ${parallelizationStrategy}`);console.log(`  Estimated time: ${estimatedExecutionTime.toFixed(2)}ms`);console.log(`  Cache hits: ${cacheStrategy.cacheableTests.length}`);console.log(`  Workers required: ${resourceRequirements.workers}`);
 
-      this.emit('planOptimized', plan);
-      return plan;
-
-    } catch (error) {
-      console.error('❌ [OPTIMIZER] Test execution optimization failed:', error);
-      throw error;
-    }
+      this.emit('planOptimized', plan);return plan;} catch (error) {
+      console.error('❌ [OPTIMIZER] Test execution optimization failed:', error);throw error;}
   }
 
   /**
@@ -275,16 +253,9 @@ export class TestExecutionOptimizer extends EventEmitter {
         }
       };
 
-      console.log(`✅ [OPTIMIZER] Execution completed with optimizations:`);
-      console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`);
-      console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);
-      console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);
-      console.log(`  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`);
+      console.log(`✅ [OPTIMIZER] Execution completed with optimizations:`);console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`);console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);console.log(`  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`);
 
-      this.emit('executionCompleted', metrics);
-      return metrics;
-
-    } finally {
+      this.emit('executionCompleted', metrics);return metrics;} finally {
       // Cleanup resources
       this.stopResourceMonitoring();
       await this.cleanupWorkerPool();
@@ -310,40 +281,26 @@ export class TestExecutionOptimizer extends EventEmitter {
     await this.cleanupCache();
     const cacheCleared = cacheSize - this.testCache.size;
     if (cacheCleared > 0) {
-      optimizations.push(`Cleared ${cacheCleared} old cache entries`);
-    }
-
-    // Clear dependency graph of unused entries
+      optimizations.push(`Cleared ${cacheCleared} old cache entries`);}// Clear dependency graph of unused entries
     const dependencySize = this.dependencyGraph.size;
     this.cleanupDependencyGraph();
     const dependenciesCleared = dependencySize - this.dependencyGraph.size;
     if (dependenciesCleared > 0) {
-      optimizations.push(`Cleared ${dependenciesCleared} unused dependencies`);
-    }
-
-    // Force garbage collection if available
+      optimizations.push(`Cleared ${dependenciesCleared} unused dependencies`);}// Force garbage collection if available
     if (global.gc) {
       const gcStart = performance.now();
       global.gc();
       gcCollections = 1;
       const gcTime = performance.now() - gcStart;
-      optimizations.push(`Forced garbage collection (${gcTime.toFixed(2)}ms)`);
-    }
-
-    // Clear test metrics for very old tests
+      optimizations.push(`Forced garbage collection (${gcTime.toFixed(2)}ms)`);}// Clear test metrics for very old tests
     const metricsSize = this.testMetrics.size;
     this.cleanupTestMetrics();
     const metricsCleared = metricsSize - this.testMetrics.size;
     if (metricsCleared > 0) {
-      optimizations.push(`Cleared ${metricsCleared} old test metrics`);
-    }
-
-    const finalMemory = process.memoryUsage();
+      optimizations.push(`Cleared ${metricsCleared} old test metrics`);}const finalMemory = process.memoryUsage();
     const memoryFreed = initialMemory.heapUsed - finalMemory.heapUsed;
 
-    console.log(`💾 [OPTIMIZER] Memory optimization completed:`);
-    console.log(`  Memory freed: ${(memoryFreed / 1024 / 1024).toFixed(2)}MB`);
-    console.log(`  Optimizations: ${optimizations.length}`);
+    console.log(`💾 [OPTIMIZER] Memory optimization completed:`);console.log(`  Memory freed: ${(memoryFreed / 1024 / 1024).toFixed(2)}MB`);console.log(`  Optimizations: ${optimizations.length}`);
 
     return {
       memoryFreed,
@@ -356,19 +313,9 @@ export class TestExecutionOptimizer extends EventEmitter {
    * Get optimization recommendations
    */
   public getOptimizationRecommendations(): Array<{
-    category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';
-    recommendation: string;
-    impact: 'high' | 'medium' | 'low';
-    effort: 'low' | 'medium' | 'high';
-    implementation: string;
-  }> {
+    category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';recommendation: string;impact: 'high' | 'medium' | 'low';effort: 'low' | 'medium' | 'high';implementation: string;}> {
     const recommendations: Array<{
-      category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';
-      recommendation: string;
-      impact: 'high' | 'medium' | 'low';
-      effort: 'low' | 'medium' | 'high';
-      implementation: string;
-    }> = [];
+      category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';recommendation: string;impact: 'high' | 'medium' | 'low';effort: 'low' | 'medium' | 'high';implementation: string;}> = [];
 
     // Analyze current performance and suggest improvements
     const avgTestTime = Array.from(this.testMetrics.values())
@@ -380,57 +327,27 @@ export class TestExecutionOptimizer extends EventEmitter {
     // Caching recommendations
     if (!this.config.enableCaching) {
       recommendations.push({
-        category: 'caching',
-        recommendation: 'Enable test result caching to skip unchanged tests',
-        impact: 'high',
-        effort: 'low',
-        implementation: 'Set enableCaching: true in optimization config'
-      });
-    }
+        category: 'caching',recommendation: 'Enable test result caching to skip unchanged tests',impact: 'high',effort: 'low',implementation: 'Set enableCaching: true in optimization config'});}
 
     // Parallelization recommendations
     if (!this.config.enableParallelization || this.config.maxWorkers < 4) {
       recommendations.push({
-        category: 'parallelization',
-        recommendation: 'Increase parallel worker count for better performance',
-        impact: 'high',
-        effort: 'low',
-        implementation: 'Increase maxWorkers to match CPU cores'
-      });
-    }
+        category: 'parallelization',recommendation: 'Increase parallel worker count for better performance',impact: 'high',effort: 'low',implementation: 'Increase maxWorkers to match CPU cores'});}
 
     // Memory recommendations
     if (avgMemoryUsage > 100 * 1024 * 1024) { // 100MB
       recommendations.push({
-        category: 'memory',
-        recommendation: 'Optimize memory usage in tests',
-        impact: 'medium',
-        effort: 'medium',
-        implementation: 'Implement proper cleanup and reduce test data size'
-      });
-    }
+        category: 'memory',recommendation: 'Optimize memory usage in tests',impact: 'medium',effort: 'medium',implementation: 'Implement proper cleanup and reduce test data size'});}
 
     // Scheduling recommendations
     if (avgTestTime > 2000) {
       recommendations.push({
-        category: 'scheduling',
-        recommendation: 'Optimize slow tests or implement better scheduling',
-        impact: 'high',
-        effort: 'medium',
-        implementation: 'Profile slow tests and optimize or mock dependencies'
-      });
-    }
+        category: 'scheduling',recommendation: 'Optimize slow tests or implement better scheduling',impact: 'high',effort: 'medium',implementation: 'Profile slow tests and optimize or mock dependencies'});}
 
     // Dependency recommendations
     if (this.dependencyGraph.size > 50) {
       recommendations.push({
-        category: 'dependencies',
-        recommendation: 'Reduce test dependencies for better parallelization',
-        impact: 'medium',
-        effort: 'high',
-        implementation: 'Refactor tests to reduce inter-test dependencies'
-      });
-    }
+        category: 'dependencies',recommendation: 'Reduce test dependencies for better parallelization',impact: 'medium',effort: 'high',implementation: 'Refactor tests to reduce inter-test dependencies'});}
 
     return recommendations;
   }
@@ -439,16 +356,11 @@ export class TestExecutionOptimizer extends EventEmitter {
    * Initialize optimizer
    */
   private async initializeOptimizer(): Promise<void> {
-    console.log('🔧 [OPTIMIZER] Initializing test execution optimizer...');
-
-    // Create cache directory if it doesn't exist
+    console.log('🔧 [OPTIMIZER] Initializing test execution optimizer...');// Create cache directory if it doesn't exist
     try {
       await fs.mkdir(this.config.cacheDirectory, { recursive: true });
     } catch (error) {
-      console.warn(`⚠️ [OPTIMIZER] Failed to create cache directory: ${error}`);
-    }
-
-    // Load existing cache and metrics
+      console.warn(`⚠️ [OPTIMIZER] Failed to create cache directory: ${error}`);}// Load existing cache and metrics
     try {
       await this.loadCache();
       await this.loadHistoricalMetrics();
@@ -456,18 +368,11 @@ export class TestExecutionOptimizer extends EventEmitter {
       console.warn(`⚠️ [OPTIMIZER] Failed to load historical data: ${error}`);
     }
 
-    console.log('✅ [OPTIMIZER] Optimizer initialized successfully');
-  }
-
-  /**
+    console.log('✅ [OPTIMIZER] Optimizer initialized successfully');}/**
    * Analyze test dependencies
    */
   private async analyzeDependencies(testFiles: string[]): Promise<Map<string, string[]>> {
-    console.log('🔍 [OPTIMIZER] Analyzing test dependencies...');
-
-    const dependencyMap = new Map<string, string[]>();
-
-    for (const testFile of testFiles) {
+    console.log('🔍 [OPTIMIZER] Analyzing test dependencies...');const dependencyMap = new Map<string, string[]>();for (const testFile of testFiles) {
       try {
         // Read and analyze test file for dependencies
         const content = await fs.readFile(testFile, 'utf-8');
@@ -481,9 +386,7 @@ export class TestExecutionOptimizer extends EventEmitter {
         dependencies.forEach(dep => this.dependencyGraph.get(testFile)!.add(dep));
 
       } catch (error) {
-        console.warn(`⚠️ [OPTIMIZER] Failed to analyze dependencies for ${testFile}: ${error}`);
-        dependencyMap.set(testFile, []);
-      }
+        console.warn(`⚠️ [OPTIMIZER] Failed to analyze dependencies for ${testFile}: ${error}`);dependencyMap.set(testFile, []);}
     }
 
     console.log(`📊 [OPTIMIZER] Dependency analysis completed: ${dependencyMap.size} files analyzed`);
@@ -513,10 +416,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       }
     }
 
-    return dependencies.filter(dep => !dep.startsWith('.') && !dep.startsWith('node_modules'));
-  }
-
-  /**
+    return dependencies.filter(dep => !dep.startsWith('.') && !dep.startsWith('node_modules'));}/**
    * Create optimal test groups for parallel execution
    */
   private async createOptimalTestGroups(
@@ -547,9 +447,7 @@ export class TestExecutionOptimizer extends EventEmitter {
 
       // Create test group
       const group: TestGroup = {
-        id: `group${testGroups.length + 1}`,
-        tests: [testFile],
-        estimatedTime,
+        id: `group${testGroups.length + 1}`,tests: [testFile],estimatedTime,
         memoryRequirement,
         dependencies,
         canRunInParallel,
@@ -625,33 +523,15 @@ export class TestExecutionOptimizer extends EventEmitter {
   /**
    * Select parallelization strategy
    */
-  private selectParallelizationStrategy(testGroups: TestGroup[]): 'none' | 'file-level' | 'test-level' | 'adaptive' {
-    if (!this.config.enableParallelization) return 'none';
-
-    const totalTests = testGroups.reduce((sum, group) => sum + group.tests.length, 0);
-    const parallelGroups = testGroups.filter(group => group.canRunInParallel).length;
+  private selectParallelizationStrategy(testGroups: TestGroup[]): 'none' | 'file-level' | 'test-level' | 'adaptive' {if (!this.config.enableParallelization) return 'none';const totalTests = testGroups.reduce((sum, group) => sum + group.tests.length, 0);const parallelGroups = testGroups.filter(group => group.canRunInParallel).length;
 
     if (parallelGroups / testGroups.length > 0.8) {
-      return 'adaptive'; // Most tests can run in parallel
-    } else if (totalTests > 20) {
-      return 'file-level'; // Many tests, use file-level parallelization
-    } else if (totalTests > 5) {
-      return 'test-level'; // Moderate number, use test-level parallelization
-    }
-
-    return 'none';
-  }
-
-  /**
+      return 'adaptive'; // Most tests can run in parallel} else if (totalTests > 20) {return 'file-level'; // Many tests, use file-level parallelization} else if (totalTests > 5) {return 'test-level'; // Moderate number, use test-level parallelization}return 'none';}/**
    * Estimate execution time
    */
   private estimateExecutionTime(
     testGroups: TestGroup[],
-    strategy: 'none' | 'file-level' | 'test-level' | 'adaptive'
-  ): number {
-    if (strategy === 'none') {
-      return testGroups.reduce((sum, group) => sum + group.estimatedTime, 0);
-    }
+    strategy: 'none' | 'file-level' | 'test-level' | 'adaptive'): number {if (strategy === 'none') {return testGroups.reduce((sum, group) => sum + group.estimatedTime, 0);}
 
     // For parallel execution, estimate based on longest group
     const maxGroupTime = Math.max(...testGroups.map(group => group.estimatedTime));
@@ -732,12 +612,7 @@ export class TestExecutionOptimizer extends EventEmitter {
    */
   private async calculateFileHash(filePath: string): Promise<string> {
     try {
-      const content = await fs.readFile(filePath, 'utf-8');
-      return createHash('sha256').update(content).digest('hex');
-    } catch (error) {
-      return '';
-    }
-  }
+      const content = await fs.readFile(filePath, 'utf-8');return createHash('sha256').update(content).digest('hex');} catch (error) {return '';}}
 
   /**
    * Determine if test can run in parallel
@@ -745,15 +620,7 @@ export class TestExecutionOptimizer extends EventEmitter {
   private canRunInParallel(testFile: string, dependencies: string[]): boolean {
     // Tests with shared state or global dependencies shouldn't run in parallel
     const sharedStateIndicators = [
-      'process.env',
-      'global.',
-      'beforeAll',
-      'afterAll',
-      'database',
-      'singleton'
-    ];
-
-    // Check if file content indicates shared state (simplified check)
+      'process.env','global.','beforeAll','afterAll','database','singleton'];// Check if file content indicates shared state (simplified check)
     return dependencies.length < 5 && // Few dependencies
            !sharedStateIndicators.some(indicator => testFile.includes(indicator));
   }
@@ -761,27 +628,12 @@ export class TestExecutionOptimizer extends EventEmitter {
   /**
    * Determine priority based on test characteristics
    */
-  private determinePriority(testFile: string, estimatedTime: number): 'high' | 'medium' | 'low' {
-    // Critical tests (auth, security) get high priority
-    if (testFile.includes('auth') || testFile.includes('security')) {
-      return 'high';
-    }
-
-    // Fast tests get high priority for quick feedback
+  private determinePriority(testFile: string, estimatedTime: number): 'high' | 'medium' | 'low' {// Critical tests (auth, security) get high priorityif (testFile.includes('auth') || testFile.includes('security')) {return 'high';}// Fast tests get high priority for quick feedback
     if (estimatedTime < 1000) {
-      return 'high';
-    }
-
-    // Medium priority for normal tests
+      return 'high';}// Medium priority for normal tests
     if (estimatedTime < 5000) {
-      return 'medium';
-    }
-
-    // Low priority for slow tests
-    return 'low';
-  }
-
-  /**
+      return 'medium';}// Low priority for slow tests
+    return 'low';}/**
    * Check if tests are compatible for grouping
    */
   private areTestsCompatible(
@@ -793,9 +645,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     // Tests are compatible if they don't share conflicting dependencies
     const sharedDeps = deps1.filter(dep => deps2.includes(dep));
     
-    // If they share dependencies, check if they're safe to run together
-    if (sharedDeps.length > 0) {
-      const conflictingDeps = ['database', 'redis', 'filesystem', 'process'];
+    // If they share dependencies, check if they're safe to run togetherif (sharedDeps.length > 0) {const conflictingDeps = ['database', 'redis', 'filesystem', 'process'];
       return !sharedDeps.some(dep => conflictingDeps.some(conflict => dep.includes(conflict)));
     }
 
@@ -871,25 +721,17 @@ export class TestExecutionOptimizer extends EventEmitter {
       }
     }
 
-    console.log(`✅ [OPTIMIZER] Test execution completed: ${results.length} results`);
-    return results;
-  }
+    console.log(`✅ [OPTIMIZER] Test execution completed: ${results.length} results`);return results;}
 
   /**
    * Execute a single test group
    */
   private async executeTestGroup(group: TestGroup): Promise<any[]> {
-    console.log(`🧪 [OPTIMIZER] Executing test group ${group.id} (${group.tests.length} tests)...`);
-
-    const results: any[] = [];
-
-    for (const testFile of group.tests) {
+    console.log(`🧪 [OPTIMIZER] Executing test group ${group.id} (${group.tests.length} tests)...`);const results: any[] = [];for (const testFile of group.tests) {
       // Check cache first
       const cacheEntry = this.testCache.get(testFile);
       if (cacheEntry && this.config.enableCaching) {
-        console.log(`💾 [OPTIMIZER] Using cached result for ${testFile}`);
-        results.push({
-          testFile,
+        console.log(`💾 [OPTIMIZER] Using cached result for ${testFile}`);results.push({testFile,
           cached: true,
           result: cacheEntry.result
         });
@@ -991,17 +833,11 @@ export class TestExecutionOptimizer extends EventEmitter {
    */
   private async saveCache(): Promise<void> {
     try {
-      const cachePath = `${this.config.cacheDirectory}/test-cache.json`;
-      const cacheData = JSON.stringify(Object.fromEntries(this.testCache), null, 2);
-      await fs.writeFile(cachePath, cacheData);
+      const cachePath = `${this.config.cacheDirectory}/test-cache.json`;const cacheData = JSON.stringify(Object.fromEntries(this.testCache), null, 2);await fs.writeFile(cachePath, cacheData);
       
-      const metricsPath = `${this.config.cacheDirectory}/test-metrics.json`;
-      const metricsData = JSON.stringify(Object.fromEntries(this.testMetrics), null, 2);
-      await fs.writeFile(metricsPath, metricsData);
+      const metricsPath = `${this.config.cacheDirectory}/test-metrics.json`;const metricsData = JSON.stringify(Object.fromEntries(this.testMetrics), null, 2);await fs.writeFile(metricsPath, metricsData);
     } catch (error) {
-      console.warn(`⚠️ [OPTIMIZER] Failed to save cache: ${error}`);
-    }
-  }
+      console.warn(`⚠️ [OPTIMIZER] Failed to save cache: ${error}`);}}
 
   /**
    * Initialize worker pool
@@ -1035,9 +871,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       
       if (memory.heapUsed > this.config.memoryThreshold * 1024 * 1024 * 0.8) {
         console.warn(`⚠️ [OPTIMIZER] High memory usage: ${(memory.heapUsed / 1024 / 1024).toFixed(2)}MB`);
-        this.emit('highMemoryUsage', memory);
-      }
-    }, 5000); // Check every 5 seconds
+        this.emit('highMemoryUsage', memory);}}, 5000); // Check every 5 seconds
   }
 
   /**
@@ -1132,9 +966,7 @@ export function createTestExecutionOptimizer(config: Partial<OptimizationConfig>
   const defaultConfig: OptimizationConfig = {
     enableCaching: true,
     enableParallelization: true,
-    maxWorkers: Math.max(1, require('os').cpus().length - 1),
-    memoryThreshold: 512, // 512MB
-    cacheDirectory: './node_modules/.cache/jest-optimizer',
+    maxWorkers: Math.max(1, require('os').cpus().length - 1),memoryThreshold: 512, // 512MBcacheDirectory: './node_modules/.cache/jest-optimizer',
     incrementalTesting: true,
     dependencyAnalysis: true,
     resourceManagement: true,

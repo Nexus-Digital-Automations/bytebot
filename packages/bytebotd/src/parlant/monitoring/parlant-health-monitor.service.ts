@@ -18,19 +18,10 @@
  * Performance: Optimized monitoring with minimal impact on production systems
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';
-import axios, { AxiosInstance } from 'axios';
-import WebSocket from 'ws';
-import { EventEmitter } from 'events';
-
-/**
- * Health check result for different validation types
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';import axios, { AxiosInstance } from 'axios';import WebSocket from 'ws';import { EventEmitter } from 'events';/*** Health check result for different validation types
  */
 export interface HealthCheckResult {
-  readonly type: 'connectivity' | 'api' | 'websocket' | 'performance' | 'comprehensive';
-  readonly success: boolean;
-  readonly responseTime: number;
+  readonly type: 'connectivity' | 'api' | 'websocket' | 'performance' | 'comprehensive';readonly success: boolean;readonly responseTime: number;
   readonly timestamp: Date;
   readonly details: Record<string, unknown>;
   readonly errors?: string[];
@@ -41,9 +32,7 @@ export interface HealthCheckResult {
  * Comprehensive health status for Parlant server
  */
 export interface ParlantHealthStatus {
-  readonly overall: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
-  readonly lastCheck: Date;
-  readonly uptime: number;
+  readonly overall: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';readonly lastCheck: Date;readonly uptime: number;
   readonly availability: number; // Percentage over last 24 hours
   readonly connectivity: HealthCheckResult;
   readonly api: HealthCheckResult;
@@ -68,9 +57,7 @@ export interface ParlantHealthStatus {
  * Circuit breaker state information
  */
 export interface CircuitBreakerStatus {
-  readonly state: 'closed' | 'open' | 'half-open';
-  readonly failureCount: number;
-  readonly lastFailure: Date | null;
+  readonly state: 'closed' | 'open' | 'half-open';readonly failureCount: number;readonly lastFailure: Date | null;
   readonly nextRetryTime: Date | null;
   readonly failureThreshold: number;
   readonly timeoutDuration: number;
@@ -106,10 +93,7 @@ export interface HealthMonitorConfig {
  */
 export interface HealthAlert {
   readonly id: string;
-  readonly severity: 'info' | 'warning' | 'critical';
-  readonly type: 'connectivity' | 'performance' | 'availability' | 'circuit_breaker';
-  readonly message: string;
-  readonly timestamp: Date;
+  readonly severity: 'info' | 'warning' | 'critical';readonly type: 'connectivity' | 'performance' | 'availability' | 'circuit_breaker';readonly message: string;readonly timestamp: Date;
   readonly details: Record<string, unknown>;
   readonly resolved: boolean;
   readonly resolvedAt?: Date;
@@ -119,9 +103,7 @@ export interface HealthAlert {
  * Advanced circuit breaker implementation
  */
 class AdvancedCircuitBreaker extends EventEmitter {
-  private state: 'closed' | 'open' | 'half-open' = 'closed';
-  private failureCount = 0;
-  private lastFailure: Date | null = null;
+  private state: 'closed' | 'open' | 'half-open' = 'closed';private failureCount = 0;private lastFailure: Date | null = null;
   private nextRetryTime: Date | null = null;
 
   constructor(
@@ -137,15 +119,7 @@ class AdvancedCircuitBreaker extends EventEmitter {
    * Check if operation can be executed
    */
   canExecute(): boolean {
-    if (this.state === 'closed') return true;
-
-    if (this.state === 'open') {
-      if (this.shouldAttemptReset()) {
-        this.state = 'half-open';
-        this.emit('state-change', this.state);
-        this.logger.log('Circuit breaker transitioning to half-open');
-        return true;
-      }
+    if (this.state === 'closed') return true;if (this.state === 'open') {if (this.shouldAttemptReset()) {this.state = 'half-open';this.emit('state-change', this.state);this.logger.log('Circuit breaker transitioning to half-open');return true;}
       return false;
     }
 
@@ -160,12 +134,7 @@ class AdvancedCircuitBreaker extends EventEmitter {
     this.lastFailure = null;
     this.nextRetryTime = null;
 
-    if (this.state !== 'closed') {
-      this.state = 'closed';
-      this.emit('state-change', this.state);
-      this.logger.log('Circuit breaker reset to closed state');
-    }
-  }
+    if (this.state !== 'closed') {this.state = 'closed';this.emit('state-change', this.state);this.logger.log('Circuit breaker reset to closed state');}}
 
   /**
    * Record failed operation
@@ -175,12 +144,7 @@ class AdvancedCircuitBreaker extends EventEmitter {
     this.lastFailure = new Date();
 
     if (this.failureCount >= this.failureThreshold) {
-      this.state = 'open';
-      this.nextRetryTime = new Date(Date.now() + this.resetTimeout);
-      this.emit('state-change', this.state);
-      this.logger.warn('Circuit breaker opened due to consecutive failures', {
-        failureCount: this.failureCount,
-        threshold: this.failureThreshold,
+      this.state = 'open';this.nextRetryTime = new Date(Date.now() + this.resetTimeout);this.emit('state-change', this.state);this.logger.warn('Circuit breaker opened due to consecutive failures', {failureCount: this.failureCount,threshold: this.failureThreshold,
         nextRetryTime: this.nextRetryTime,
       });
     }
@@ -221,14 +185,9 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
 
   // Health status tracking
   private healthStatus: ParlantHealthStatus = {
-    overall: 'unknown',
-    lastCheck: new Date(),
-    uptime: 0,
+    overall: 'unknown',lastCheck: new Date(),uptime: 0,
     availability: 0,
-    connectivity: this.createEmptyHealthCheck('connectivity'),
-    api: this.createEmptyHealthCheck('api'),
-    websocket: this.createEmptyHealthCheck('websocket'),
-    performance: this.createEmptyHealthCheck('performance'),
+    connectivity: this.createEmptyHealthCheck('connectivity'),api: this.createEmptyHealthCheck('api'),websocket: this.createEmptyHealthCheck('websocket'),performance: this.createEmptyHealthCheck('performance'),
     serverInfo: {},
     metrics: {
       totalChecks: 0,
@@ -256,18 +215,10 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
    * Initialize health monitoring service
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `health_monitor_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Parlant Health Monitor Service`);
-
-      // Load configuration
-      this.config = this.configService.getConfiguration();
+    const operationId = `health_monitor_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Initializing Parlant Health Monitor Service`);// Load configurationthis.config = this.configService.getConfiguration();
 
       if (!this.config.enabled || !this.config.monitoring.healthCheckEnabled) {
-        this.logger.warn(`[${operationId}] Health monitoring is disabled`);
-        return;
-      }
+        this.logger.warn(`[${operationId}] Health monitoring is disabled`);return;}
 
       // Initialize HTTP client for health checks
       this.initializeHttpClient();
@@ -289,9 +240,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       // Start periodic monitoring
       this.startPeriodicMonitoring();
 
-      this.logger.log(`[${operationId}] Parlant Health Monitor Service initialized successfully`, {
-        monitoringEnabled: this.config.monitoring.healthCheckEnabled,
-        circuitBreakerEnabled: this.config.circuitBreaker.enabled,
+      this.logger.log(`[${operationId}] Parlant Health Monitor Service initialized successfully`, {monitoringEnabled: this.config.monitoring.healthCheckEnabled,circuitBreakerEnabled: this.config.circuitBreaker.enabled,
         checkInterval: this.config.monitoring.healthCheckInterval,
         alertsEnabled: this.config.monitoring.alertsEnabled,
       });
@@ -309,10 +258,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
    * Clean up monitoring resources
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Parlant Health Monitor Service');
-
-    if (this.monitoringInterval) {
-      clearInterval(this.monitoringInterval);
+    this.logger.log('Shutting down Parlant Health Monitor Service');if (this.monitoringInterval) {clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
 
@@ -358,9 +304,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
    * Force a comprehensive health check
    */
   async performComprehensiveHealthCheck(): Promise<ParlantHealthStatus> {
-    const operationId = `comprehensive_check_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Performing comprehensive health check`);
+    const operationId = `comprehensive_check_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Performing comprehensive health check`);
 
     try {
       // Run all health checks in parallel
@@ -372,10 +316,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       ]);
 
       // Update health status
-      this.healthStatus.connectivity = this.extractResult(connectivity, 'connectivity');
-      this.healthStatus.api = this.extractResult(api, 'api');
-      this.healthStatus.websocket = this.extractResult(websocket, 'websocket');
-      this.healthStatus.performance = this.extractResult(performance, 'performance');
+      this.healthStatus.connectivity = this.extractResult(connectivity, 'connectivity');this.healthStatus.api = this.extractResult(api, 'api');this.healthStatus.websocket = this.extractResult(websocket, 'websocket');this.healthStatus.performance = this.extractResult(performance, 'performance');
       this.healthStatus.lastCheck = new Date();
 
       // Determine overall health
@@ -406,9 +347,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         error: error instanceof Error ? error.message : String(error),
       });
 
-      this.healthStatus.overall = 'unhealthy';
-      this.healthStatus.lastCheck = new Date();
-      this.healthStatus.metrics.consecutiveFailures++;
+      this.healthStatus.overall = 'unhealthy';this.healthStatus.lastCheck = new Date();this.healthStatus.metrics.consecutiveFailures++;
 
       throw error;
     }
@@ -422,19 +361,12 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
 
     try {
       if (!this.httpClient || !this.config) {
-        throw new Error('HTTP client or configuration not available');
-      }
-
-      const response = await this.httpClient.get('/health', {
-        timeout: this.config.monitoring.healthCheckTimeout,
-      });
+        throw new Error('HTTP client or configuration not available');}const response = await this.httpClient.get('/health', {timeout: this.config.monitoring.healthCheckTimeout,});
 
       const responseTime = Date.now() - startTime;
 
       return {
-        type: 'connectivity',
-        success: response.status >= 200 && response.status < 300,
-        responseTime,
+        type: 'connectivity',success: response.status >= 200 && response.status < 300,responseTime,
         timestamp: new Date(),
         details: {
           status: response.status,
@@ -447,9 +379,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       const responseTime = Date.now() - startTime;
 
       return {
-        type: 'connectivity',
-        success: false,
-        responseTime,
+        type: 'connectivity',success: false,responseTime,
         timestamp: new Date(),
         details: {
           error: error instanceof Error ? error.message : String(error),
@@ -467,13 +397,8 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
 
     try {
       if (!this.httpClient || !this.config) {
-        throw new Error('HTTP client or configuration not available');
-      }
-
-      // Test multiple API endpoints
-      const endpoints = ['/health', '/api/info', '/api/capabilities'];
-      const results = await Promise.allSettled(
-        endpoints.map(endpoint =>
+        throw new Error('HTTP client or configuration not available');}// Test multiple API endpoints
+      const endpoints = ['/health', '/api/info', '/api/capabilities'];const results = await Promise.allSettled(endpoints.map(endpoint =>
           this.httpClient!.get(endpoint, {
             timeout: this.config!.monitoring.healthCheckTimeout,
           })
@@ -481,37 +406,25 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       );
 
       const responseTime = Date.now() - startTime;
-      const successfulEndpoints = results.filter(result => result.status === 'fulfilled').length;
-      const success = successfulEndpoints > 0;
-
-      // Extract server information
+      const successfulEndpoints = results.filter(result => result.status === 'fulfilled').length;const success = successfulEndpoints > 0;// Extract server information
       const serverInfo: Record<string, unknown> = {};
       results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          serverInfo[endpoints[index]] = result.value.data;
-        }
+        if (result.status === 'fulfilled') {serverInfo[endpoints[index]] = result.value.data;}
       });
 
       return {
-        type: 'api',
-        success,
-        responseTime,
+        type: 'api',success,responseTime,
         timestamp: new Date(),
         details: {
           endpointsTested: endpoints.length,
           successfulEndpoints,
           serverInfo,
         },
-        warnings: successfulEndpoints < endpoints.length ? ['Some API endpoints unavailable'] : undefined,
-      };
-
-    } catch (error) {
+        warnings: successfulEndpoints < endpoints.length ? ['Some API endpoints unavailable'] : undefined,};} catch (error) {
       const responseTime = Date.now() - startTime;
 
       return {
-        type: 'api',
-        success: false,
-        responseTime,
+        type: 'api',success: false,responseTime,
         timestamp: new Date(),
         details: {
           error: error instanceof Error ? error.message : String(error),
@@ -531,14 +444,9 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       try {
         if (!this.config?.wsUrl) {
           resolve({
-            type: 'websocket',
-            success: false,
-            responseTime: 0,
+            type: 'websocket',success: false,responseTime: 0,
             timestamp: new Date(),
-            details: { error: 'WebSocket URL not configured' },
-            warnings: ['WebSocket URL not configured'],
-          });
-          return;
+            details: { error: 'WebSocket URL not configured' },warnings: ['WebSocket URL not configured'],});return;
         }
 
         const ws = new WebSocket(this.config.wsUrl, {
@@ -548,24 +456,15 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         const timeout = setTimeout(() => {
           ws.terminate();
           resolve({
-            type: 'websocket',
-            success: false,
-            responseTime: Date.now() - startTime,
+            type: 'websocket',success: false,responseTime: Date.now() - startTime,
             timestamp: new Date(),
-            details: { error: 'WebSocket connection timeout' },
-            errors: ['WebSocket connection timeout'],
-          });
-        }, this.config.monitoring.healthCheckTimeout);
+            details: { error: 'WebSocket connection timeout' },errors: ['WebSocket connection timeout'],});}, this.config.monitoring.healthCheckTimeout);
 
-        ws.on('open', () => {
-          clearTimeout(timeout);
-          const responseTime = Date.now() - startTime;
+        ws.on('open', () => {clearTimeout(timeout);const responseTime = Date.now() - startTime;
           ws.close();
 
           resolve({
-            type: 'websocket',
-            success: true,
-            responseTime,
+            type: 'websocket',success: true,responseTime,
             timestamp: new Date(),
             details: {
               url: this.config!.wsUrl,
@@ -574,14 +473,10 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
           });
         });
 
-        ws.on('error', (error) => {
-          clearTimeout(timeout);
-          const responseTime = Date.now() - startTime;
+        ws.on('error', (error) => {clearTimeout(timeout);const responseTime = Date.now() - startTime;
 
           resolve({
-            type: 'websocket',
-            success: false,
-            responseTime,
+            type: 'websocket',success: false,responseTime,
             timestamp: new Date(),
             details: {
               error: error.message,
@@ -594,9 +489,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         const responseTime = Date.now() - startTime;
 
         resolve({
-          type: 'websocket',
-          success: false,
-          responseTime,
+          type: 'websocket',success: false,responseTime,
           timestamp: new Date(),
           details: {
             error: error instanceof Error ? error.message : String(error),
@@ -615,46 +508,29 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
 
     try {
       if (!this.httpClient || !this.config) {
-        throw new Error('HTTP client or configuration not available');
-      }
-
-      // Perform multiple requests to measure performance
+        throw new Error('HTTP client or configuration not available');}// Perform multiple requests to measure performance
       const requests = Array(5).fill(null).map(() =>
-        this.httpClient!.get('/health', {
-          timeout: this.config!.monitoring.healthCheckTimeout,
-        })
+        this.httpClient!.get('/health', {timeout: this.config!.monitoring.healthCheckTimeout,})
       );
 
       const results = await Promise.allSettled(requests);
       const responseTime = Date.now() - startTime;
 
-      const successfulRequests = results.filter(r => r.status === 'fulfilled').length;
-      const averageLatency = responseTime / requests.length;
-
-      const success = successfulRequests >= requests.length * 0.8; // 80% success rate required
+      const successfulRequests = results.filter(r => r.status === 'fulfilled').length;const averageLatency = responseTime / requests.length;const success = successfulRequests >= requests.length * 0.8; // 80% success rate required
 
       return {
-        type: 'performance',
-        success,
-        responseTime: averageLatency,
+        type: 'performance',success,responseTime: averageLatency,
         timestamp: new Date(),
         details: {
           totalRequests: requests.length,
           successfulRequests,
-          successRate: (successfulRequests / requests.length * 100).toFixed(2) + '%',
-          averageLatency,
-          totalTime: responseTime,
+          successRate: (successfulRequests / requests.length * 100).toFixed(2) + '%',averageLatency,totalTime: responseTime,
         },
-        warnings: successfulRequests < requests.length ? ['Some performance test requests failed'] : undefined,
-      };
-
-    } catch (error) {
+        warnings: successfulRequests < requests.length ? ['Some performance test requests failed'] : undefined,};} catch (error) {
       const responseTime = Date.now() - startTime;
 
       return {
-        type: 'performance',
-        success: false,
-        responseTime,
+        type: 'performance',success: false,responseTime,
         timestamp: new Date(),
         details: {
           error: error instanceof Error ? error.message : String(error),
@@ -669,17 +545,11 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
    */
   private initializeHttpClient(): void {
     if (!this.config) {
-      throw new Error('Configuration not available');
-    }
-
-    this.httpClient = axios.create({
+      throw new Error('Configuration not available');}this.httpClient = axios.create({
       baseURL: this.config.serverUrl,
       timeout: this.config.monitoring.healthCheckTimeout,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Bytebot-Health-Monitor/1.0',
-        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Health-Monitor/1.0',...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
       },
     });
   }
@@ -690,20 +560,15 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
   private setupCircuitBreakerHandlers(): void {
     if (!this.circuitBreaker) return;
 
-    this.circuitBreaker.on('state-change', (newState: string) => {
-      this.emit('circuit-breaker-state-change', newState);
+    this.circuitBreaker.on('state-change', (newState: string) => {this.emit('circuit-breaker-state-change', newState);
 
       const alert: HealthAlert = {
         id: `circuit-breaker-${Date.now()}`,
-        severity: newState === 'open' ? 'critical' : 'info',
-        type: 'circuit_breaker',
+        severity: newState === 'open' ? 'critical' : 'info',type: 'circuit_breaker',
         message: `Circuit breaker state changed to: ${newState}`,
         timestamp: new Date(),
         details: this.circuitBreaker!.getStatus(),
-        resolved: newState === 'closed',
-      };
-
-      this.addOrUpdateAlert(alert);
+        resolved: newState === 'closed',};this.addOrUpdateAlert(alert);
     });
   }
 
@@ -715,9 +580,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
 
     this.monitoringInterval = setInterval(() => {
       this.performComprehensiveHealthCheck().catch(error => {
-        this.logger.error('Periodic health check failed', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        this.logger.error('Periodic health check failed', {error: error instanceof Error ? error.message : String(error),});
       });
     }, this.config.monitoring.healthCheckInterval);
   }
@@ -737,18 +600,9 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
     const totalChecks = checks.length;
 
     if (successfulChecks === totalChecks) {
-      this.healthStatus.overall = 'healthy';
-    } else if (successfulChecks >= totalChecks * 0.5) {
-      this.healthStatus.overall = 'degraded';
-    } else {
-      this.healthStatus.overall = 'unhealthy';
-    }
-
-    // Update circuit breaker
+      this.healthStatus.overall = 'healthy';} else if (successfulChecks >= totalChecks * 0.5) {this.healthStatus.overall = 'degraded';} else {this.healthStatus.overall = 'unhealthy';}// Update circuit breaker
     if (this.circuitBreaker) {
-      if (this.healthStatus.overall === 'healthy') {
-        this.circuitBreaker.onSuccess();
-      } else {
+      if (this.healthStatus.overall === 'healthy') {this.circuitBreaker.onSuccess();} else {
         this.circuitBreaker.onFailure();
       }
     }
@@ -760,9 +614,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
   private updateHealthMetrics(): void {
     this.healthStatus.metrics.totalChecks++;
 
-    if (this.healthStatus.overall === 'healthy') {
-      this.healthStatus.metrics.successfulChecks++;
-      this.healthStatus.metrics.lastSuccessfulCheck = new Date();
+    if (this.healthStatus.overall === 'healthy') {this.healthStatus.metrics.successfulChecks++;this.healthStatus.metrics.lastSuccessfulCheck = new Date();
       this.healthStatus.metrics.consecutiveFailures = 0;
     } else {
       this.healthStatus.metrics.consecutiveFailures++;
@@ -787,10 +639,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
     // Update availability
     this.availabilityHistory.push({
       timestamp: new Date(),
-      success: this.healthStatus.overall === 'healthy',
-    });
-
-    // Keep only last 24 hours of data
+      success: this.healthStatus.overall === 'healthy',});// Keep only last 24 hours of data
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     this.availabilityHistory = this.availabilityHistory.filter(entry => entry.timestamp > oneDayAgo);
 
@@ -814,9 +663,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
     // Response time alerts
     if (this.healthStatus.metrics.averageResponseTime > thresholds.failureAlertThreshold * 1000) {
       this.addOrUpdateAlert({
-        id: 'high-response-time',
-        severity: 'critical',
-        type: 'performance',
+        id: 'high-response-time',severity: 'critical',type: 'performance',
         message: `High response time: ${this.healthStatus.metrics.averageResponseTime.toFixed(2)}ms`,
         timestamp: new Date(),
         details: {
@@ -826,15 +673,10 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         resolved: false,
       });
     } else {
-      this.resolveAlert('high-response-time');
-    }
-
-    // Availability alerts
+      this.resolveAlert('high-response-time');}// Availability alerts
     if (this.healthStatus.availability < 95) {
       this.addOrUpdateAlert({
-        id: 'low-availability',
-        severity: this.healthStatus.availability < 90 ? 'critical' : 'warning',
-        type: 'availability',
+        id: 'low-availability',severity: this.healthStatus.availability < 90 ? 'critical' : 'warning',type: 'availability',
         message: `Low availability: ${this.healthStatus.availability.toFixed(2)}%`,
         timestamp: new Date(),
         details: {
@@ -844,34 +686,21 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         resolved: false,
       });
     } else {
-      this.resolveAlert('low-availability');
-    }
-
-    // Connectivity alerts
+      this.resolveAlert('low-availability');}// Connectivity alerts
     if (!this.healthStatus.connectivity.success) {
       this.addOrUpdateAlert({
-        id: 'connectivity-failure',
-        severity: 'critical',
-        type: 'connectivity',
-        message: 'Parlant server connectivity failed',
-        timestamp: new Date(),
-        details: this.healthStatus.connectivity.details,
+        id: 'connectivity-failure',severity: 'critical',type: 'connectivity',message: 'Parlant server connectivity failed',timestamp: new Date(),details: this.healthStatus.connectivity.details,
         resolved: false,
       });
     } else {
-      this.resolveAlert('connectivity-failure');
-    }
-  }
+      this.resolveAlert('connectivity-failure');}}
 
   /**
    * Add or update health alert
    */
   private addOrUpdateAlert(alert: HealthAlert): void {
     this.activeAlerts.set(alert.id, alert);
-    this.emit('health-alert', alert);
-  }
-
-  /**
+    this.emit('health-alert', alert);}/**
    * Resolve health alert
    */
   private resolveAlert(alertId: string): void {
@@ -883,20 +712,14 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         resolvedAt: new Date(),
       };
       this.activeAlerts.set(alertId, resolvedAlert);
-      this.emit('health-alert-resolved', resolvedAlert);
-    }
-  }
+      this.emit('health-alert-resolved', resolvedAlert);}}
 
   /**
    * Extract result from Promise.allSettled
    */
   private extractResult(
     result: PromiseSettledResult<HealthCheckResult>,
-    type: 'connectivity' | 'api' | 'websocket' | 'performance'
-  ): HealthCheckResult {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    } else {
+    type: 'connectivity' | 'api' | 'websocket' | 'performance'): HealthCheckResult {if (result.status === 'fulfilled') {return result.value;} else {
       return {
         type,
         success: false,

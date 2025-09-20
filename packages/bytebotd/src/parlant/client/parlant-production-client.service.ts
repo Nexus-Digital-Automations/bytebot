@@ -20,19 +20,10 @@
  * Performance: Connection pooling, caching, compression
  */
 
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import https from 'https';
-import WebSocket from 'ws';
-import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';
-
-/**
- * Parlant API request configuration
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';import https from 'https';import WebSocket from 'ws';import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';/*** Parlant API request configuration
  */
 export interface ParlantApiRequest {
-  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  readonly endpoint: string;
-  readonly data?: Record<string, unknown>;
+  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';readonly endpoint: string;readonly data?: Record<string, unknown>;
   readonly params?: Record<string, string | number>;
   readonly headers?: Record<string, string>;
   readonly timeout?: number;
@@ -99,9 +90,7 @@ export interface ParlantSession {
   readonly agentId: string;
   readonly customerId: string;
   readonly title: string;
-  readonly status: 'active' | 'inactive' | 'completed' | 'error';
-  readonly createdAt: Date;
-  readonly lastActivity: Date;
+  readonly status: 'active' | 'inactive' | 'completed' | 'error';readonly createdAt: Date;readonly lastActivity: Date;
   readonly metadata: Record<string, unknown>;
 }
 
@@ -112,9 +101,7 @@ export interface ParlantConversation {
   readonly id: string;
   readonly sessionId: string;
   readonly messages: ParlantConversationMessage[];
-  readonly status: 'active' | 'waiting' | 'completed' | 'error';
-  readonly createdAt: Date;
-  readonly lastMessage: Date;
+  readonly status: 'active' | 'waiting' | 'completed' | 'error';readonly createdAt: Date;readonly lastMessage: Date;
 }
 
 /**
@@ -123,9 +110,7 @@ export interface ParlantConversation {
 export interface ParlantConversationMessage {
   readonly id: string;
   readonly conversationId: string;
-  readonly sender: 'user' | 'assistant' | 'system';
-  readonly content: string;
-  readonly timestamp: Date;
+  readonly sender: 'user' | 'assistant' | 'system';readonly content: string;readonly timestamp: Date;
   readonly metadata?: Record<string, unknown>;
 }
 
@@ -137,9 +122,7 @@ export interface ParlantValidationRequest {
   readonly intent: string;
   readonly context: string;
   readonly parameters: Record<string, unknown>;
-  readonly riskLevel: 'minimal' | 'low' | 'medium' | 'high' | 'critical';
-  readonly requiresConfirmation: boolean;
-  readonly userContext: Record<string, unknown>;
+  readonly riskLevel: 'minimal' | 'low' | 'medium' | 'high' | 'critical';readonly requiresConfirmation: boolean;readonly userContext: Record<string, unknown>;
   readonly guidelines?: Array<{
     condition: string;
     action: string;
@@ -168,21 +151,13 @@ export interface ParlantValidationResponse {
 class CircuitBreaker {
   private failures = 0;
   private lastFailure?: Date;
-  private state: 'closed' | 'open' | 'half-open' = 'closed';
-
-  constructor(
-    private readonly failureThreshold: number,
+  private state: 'closed' | 'open' | 'half-open' = 'closed';constructor(private readonly failureThreshold: number,
     private readonly timeout: number,
     private readonly resetTimeout: number
   ) {}
 
   canExecute(): boolean {
-    if (this.state === 'closed') return true;
-    if (this.state === 'open') {
-      if (this.shouldAttemptReset()) {
-        this.state = 'half-open';
-        return true;
-      }
+    if (this.state === 'closed') return true;if (this.state === 'open') {if (this.shouldAttemptReset()) {this.state = 'half-open';return true;}
       return false;
     }
     return true; // half-open
@@ -190,18 +165,14 @@ class CircuitBreaker {
 
   onSuccess(): void {
     this.failures = 0;
-    this.state = 'closed';
-    this.lastFailure = undefined;
-  }
+    this.state = 'closed';this.lastFailure = undefined;}
 
   onFailure(): void {
     this.failures++;
     this.lastFailure = new Date();
 
     if (this.failures >= this.failureThreshold) {
-      this.state = 'open';
-    }
-  }
+      this.state = 'open';}}
 
   getState(): 'closed' | 'open' | 'half-open' {
     return this.state;
@@ -289,18 +260,10 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    * Initialize the Parlant production client
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `client_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Parlant Production Client`);
-
-      // Load configuration
-      this.config = this.configService.getConfiguration();
+    const operationId = `client_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Initializing Parlant Production Client`);// Load configurationthis.config = this.configService.getConfiguration();
 
       if (!this.config.enabled) {
-        this.logger.warn(`[${operationId}] Parlant integration is disabled`);
-        return;
-      }
+        this.logger.warn(`[${operationId}] Parlant integration is disabled`);return;}
 
       // Initialize circuit breaker
       this.circuitBreaker = new CircuitBreaker(
@@ -329,9 +292,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
       // Set up periodic health checks
       this.setupHealthCheckInterval();
 
-      this.logger.log(`[${operationId}] Parlant Production Client initialized successfully`, {
-        serverUrl: this.config.serverUrl,
-        wsUrl: this.config.wsUrl,
+      this.logger.log(`[${operationId}] Parlant Production Client initialized successfully`, {serverUrl: this.config.serverUrl,wsUrl: this.config.wsUrl,
         circuitBreakerEnabled: this.config.circuitBreaker.enabled,
         cacheEnabled: this.config.performance.cacheEnabled,
         healthCheckEnabled: this.config.monitoring.healthCheckEnabled,
@@ -350,10 +311,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    * Clean up resources on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Parlant Production Client');
-
-    // Close WebSocket connection
-    if (this.wsClient) {
+    this.logger.log('Shutting down Parlant Production Client');// Close WebSocket connectionif (this.wsClient) {
       this.wsClient.close();
       this.wsClient = null;
     }
@@ -391,9 +349,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
     title: string;
     metadata?: Record<string, unknown>;
   }): Promise<ParlantSession> {
-    const operationId = `create_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Creating Parlant session`, {
+    const operationId = `create_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Creating Parlant session`, {
       agentId: params.agentId,
       customerId: params.customerId,
       title: params.title,
@@ -408,10 +364,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         status: string;
         created_at: string;
       }>({
-        method: 'POST',
-        endpoint: '/api/sessions',
-        data: {
-          agent_id: params.agentId,
+        method: 'POST',endpoint: '/api/sessions',data: {agent_id: params.agentId,
           customer_id: params.customerId,
           title: params.title,
           metadata: params.metadata ?? {},
@@ -431,32 +384,22 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
 
       this.activeSessions.set(session.id, session);
 
-      this.logger.log(`[${operationId}] Parlant session created successfully`, {
-        sessionId: session.id,
-        status: session.status,
+      this.logger.log(`[${operationId}] Parlant session created successfully`, {sessionId: session.id,status: session.status,
       });
 
       return session;
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to create Parlant session`, {
-        error: error instanceof Error ? error.message : String(error),
-        agentId: params.agentId,
+      this.logger.error(`[${operationId}] Failed to create Parlant session`, {error: error instanceof Error ? error.message : String(error),agentId: params.agentId,
         customerId: params.customerId,
       });
-      throw new Error(`Failed to create Parlant session: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Failed to create Parlant session: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Submit a validation request to Parlant server
    */
   async submitValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
-    const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Submitting validation request`, {
-      sessionId: request.sessionId,
-      intent: request.intent,
+    const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Submitting validation request`, {sessionId: request.sessionId,intent: request.intent,
       riskLevel: request.riskLevel,
       requiresConfirmation: request.requiresConfirmation,
     });
@@ -481,8 +424,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         request_id: string;
         processing_time: number;
       }>({
-        method: 'POST',
-        endpoint: '/api/validate',
+        method: 'POST',endpoint: '/api/validate',
         data: {
           session_id: request.sessionId,
           intent: request.intent,
@@ -513,9 +455,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         this.requestCache.set(cacheKey, validationResponse, this.config.performance.cacheMaxAge);
       }
 
-      this.logger.log(`[${operationId}] Validation completed`, {
-        approved: validationResponse.approved,
-        confidence: validationResponse.confidence,
+      this.logger.log(`[${operationId}] Validation completed`, {approved: validationResponse.approved,confidence: validationResponse.confidence,
         conversationId: validationResponse.conversationId,
         processingTime: validationResponse.processingTime,
       });
@@ -523,14 +463,10 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
       return validationResponse;
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Validation request failed`, {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId: request.sessionId,
+      this.logger.error(`[${operationId}] Validation request failed`, {error: error instanceof Error ? error.message : String(error),sessionId: request.sessionId,
         intent: request.intent,
       });
-      throw new Error(`Validation request failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Validation request failed: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Perform NLP intent analysis
@@ -546,9 +482,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
     reasoning: string;
     alternatives: Array<{ intent: string; confidence: number }>;
   }> {
-    const operationId = `intent_analysis_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Analyzing intent`, {
+    const operationId = `intent_analysis_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing intent`, {
       textLength: params.text.length,
       conversationId: params.conversationId,
       expectedIntents: params.expectedIntents?.length ?? 0,
@@ -561,8 +495,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         reasoning: string;
         alternatives: Array<{ intent: string; confidence: number }>;
       }>({
-        method: 'POST',
-        endpoint: '/api/nlp/analyze-intent',
+        method: 'POST',endpoint: '/api/nlp/analyze-intent',
         data: {
           text: params.text,
           conversation_id: params.conversationId,
@@ -571,18 +504,14 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         },
       });
 
-      this.logger.log(`[${operationId}] Intent analysis completed`, {
-        detectedIntent: response.data.intent,
-        confidence: response.data.confidence,
+      this.logger.log(`[${operationId}] Intent analysis completed`, {detectedIntent: response.data.intent,confidence: response.data.confidence,
         alternativesCount: response.data.alternatives?.length ?? 0,
       });
 
       return response.data;
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Intent analysis failed`, {
-        error: error instanceof Error ? error.message : String(error),
-        textLength: params.text.length,
+      this.logger.error(`[${operationId}] Intent analysis failed`, {error: error instanceof Error ? error.message : String(error),textLength: params.text.length,
       });
       throw new Error(`Intent analysis failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -619,9 +548,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         agentId: response.data.agent_id,
         customerId: response.data.customer_id,
         title: response.data.title,
-        status: response.data.status as 'active' | 'inactive' | 'completed' | 'error',
-        createdAt: new Date(response.data.created_at),
-        lastActivity: new Date(response.data.last_activity),
+        status: response.data.status as 'active' | 'inactive' | 'completed' | 'error',createdAt: new Date(response.data.created_at),lastActivity: new Date(response.data.last_activity),
         metadata: response.data.metadata,
       };
 
@@ -629,9 +556,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
       return session;
 
     } catch (error) {
-      this.logger.error('Failed to get session', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
+      this.logger.error('Failed to get session', {error: error instanceof Error ? error.message : String(error),sessionId,
       });
       return null;
     }
@@ -645,10 +570,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
 
     try {
       if (!this.config) {
-        throw new Error('Configuration not initialized');
-      }
-
-      if (!this.circuitBreaker?.canExecute()) {
+        throw new Error('Configuration not initialized');}if (!this.circuitBreaker?.canExecute()) {
         this.healthStatus = {
           ...this.healthStatus,
           healthy: false,
@@ -664,10 +586,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         version?: string;
         timestamp: string;
       }>({
-        method: 'GET',
-        endpoint: '/health',
-        timeout: this.config.monitoring.healthCheckTimeout,
-      });
+        method: 'GET',endpoint: '/health',timeout: this.config.monitoring.healthCheckTimeout,});
 
       const responseTime = Date.now() - startTime;
 
@@ -685,9 +604,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         this.circuitBreaker.onSuccess();
       }
 
-      this.logger.debug('Health check successful', {
-        responseTime,
-        serverStatus: response.data.status,
+      this.logger.debug('Health check successful', {responseTime,serverStatus: response.data.status,
         serverVersion: response.data.version,
       });
 
@@ -701,16 +618,11 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         responseTime,
         lastCheck: new Date(),
         errorCount: this.errorCount,
-        circuitBreakerOpen: this.circuitBreaker?.getState() === 'open',
-      };
-
-      if (this.circuitBreaker) {
+        circuitBreakerOpen: this.circuitBreaker?.getState() === 'open',};if (this.circuitBreaker) {
         this.circuitBreaker.onFailure();
       }
 
-      this.logger.error('Health check failed', {
-        error: error instanceof Error ? error.message : String(error),
-        responseTime,
+      this.logger.error('Health check failed', {error: error instanceof Error ? error.message : String(error),responseTime,
         errorCount: this.errorCount,
       });
     }
@@ -723,22 +635,14 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    */
   private async initializeHttpClient(): Promise<void> {
     if (!this.config) {
-      throw new Error('Configuration not available');
-    }
-
-    const httpsAgent = this.config.security.tlsEnabled ? this.connectionPool : undefined;
+      throw new Error('Configuration not available');}const httpsAgent = this.config.security.tlsEnabled ? this.connectionPool : undefined;
 
     this.httpClient = axios.create({
       baseURL: this.config.serverUrl,
       timeout: this.config.connection.timeout,
       httpsAgent,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Bytebot-Parlant-Client/1.0',
-        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
-      },
-    });
+        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Parlant-Client/1.0',...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),},});
 
     // Add request interceptor for logging and metrics
     this.httpClient.interceptors.request.use(
@@ -746,18 +650,14 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         config.metadata = { requestId, startTime: Date.now() };
 
-        this.logger.debug('HTTP request started', {
-          requestId,
-          method: config.method?.toUpperCase(),
+        this.logger.debug('HTTP request started', {requestId,method: config.method?.toUpperCase(),
           url: config.url,
         });
 
         return config;
       },
       (error) => {
-        this.logger.error('HTTP request setup failed', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        this.logger.error('HTTP request setup failed', {error: error instanceof Error ? error.message : String(error),});
         return Promise.reject(error);
       }
     );
@@ -771,9 +671,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         this.requestCount++;
         this.totalResponseTime += responseTime;
 
-        this.logger.debug('HTTP request completed', {
-          requestId,
-          status: response.status,
+        this.logger.debug('HTTP request completed', {requestId,status: response.status,
           responseTime,
         });
 
@@ -787,9 +685,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
         this.errorCount++;
         this.totalResponseTime += responseTime;
 
-        this.logger.error('HTTP request failed', {
-          requestId,
-          status: error.response?.status,
+        this.logger.error('HTTP request failed', {requestId,status: error.response?.status,
           responseTime,
           error: error.message,
         });
@@ -804,9 +700,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    */
   private async initializeWebSocketClient(): Promise<void> {
     if (!this.config?.wsUrl) {
-      this.logger.warn('WebSocket URL not configured, skipping WebSocket initialization');
-      return;
-    }
+      this.logger.warn('WebSocket URL not configured, skipping WebSocket initialization');return;}
 
     try {
       const headers: Record<string, string> = {};
@@ -816,47 +710,29 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
 
       this.wsClient = new WebSocket(this.config.wsUrl, { headers });
 
-      this.wsClient.on('open', () => {
-        this.logger.log('WebSocket connection established');
-      });
-
-      this.wsClient.on('message', (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
+      this.wsClient.on('open', () => {this.logger.log('WebSocket connection established');});this.wsClient.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
           this.handleWebSocketMessage(message);
         } catch (error) {
-          this.logger.error('Failed to parse WebSocket message', {
-            error: error instanceof Error ? error.message : String(error),
-          });
+          this.logger.error('Failed to parse WebSocket message', {error: error instanceof Error ? error.message : String(error),});
         }
       });
 
-      this.wsClient.on('error', (error: Error) => {
-        this.logger.error('WebSocket error', {
-          error: error.message,
-        });
+      this.wsClient.on('error', (error: Error) => {this.logger.error('WebSocket error', {error: error.message,});
       });
 
-      this.wsClient.on('close', (code: number, reason: Buffer) => {
-        this.logger.warn('WebSocket connection closed', {
-          code,
-          reason: reason.toString(),
+      this.wsClient.on('close', (code: number, reason: Buffer) => {this.logger.warn('WebSocket connection closed', {code,reason: reason.toString(),
         });
 
         // Attempt to reconnect after delay
         setTimeout(() => {
           this.initializeWebSocketClient().catch(error => {
-            this.logger.error('WebSocket reconnection failed', {
-              error: error instanceof Error ? error.message : String(error),
-            });
+            this.logger.error('WebSocket reconnection failed', {error: error instanceof Error ? error.message : String(error),});
           });
         }, 5000);
       });
 
     } catch (error) {
-      this.logger.error('Failed to initialize WebSocket client', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to initialize WebSocket client', {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -864,25 +740,19 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    * Handle incoming WebSocket messages
    */
   private handleWebSocketMessage(message: ParlantWebSocketMessage): void {
-    this.logger.debug('WebSocket message received', {
-      type: message.type,
-      sessionId: message.sessionId,
+    this.logger.debug('WebSocket message received', {type: message.type,sessionId: message.sessionId,
       conversationId: message.conversationId,
     });
 
     // Handle session updates
-    if (message.type === 'session_update' && message.sessionId) {
-      // Update local session cache
-      const session = this.activeSessions.get(message.sessionId);
+    if (message.type === 'session_update' && message.sessionId) {// Update local session cacheconst session = this.activeSessions.get(message.sessionId);
       if (session && message.data) {
         Object.assign(session, message.data);
       }
     }
 
     // Handle conversation updates
-    if (message.type === 'conversation_update' && message.conversationId) {
-      // Update local conversation cache
-      const conversation = this.activeConversations.get(message.conversationId);
+    if (message.type === 'conversation_update' && message.conversationId) {// Update local conversation cacheconst conversation = this.activeConversations.get(message.conversationId);
       if (conversation && message.data) {
         Object.assign(conversation, message.data);
       }
@@ -894,14 +764,8 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
    */
   private async makeRequest<T>(request: ParlantApiRequest): Promise<ParlantApiResponse<T>> {
     if (!this.httpClient || !this.config) {
-      throw new Error('HTTP client not initialized');
-    }
-
-    if (!this.circuitBreaker?.canExecute()) {
-      throw new Error('Circuit breaker is open');
-    }
-
-    const requestConfig: AxiosRequestConfig = {
+      throw new Error('HTTP client not initialized');}if (!this.circuitBreaker?.canExecute()) {
+      throw new Error('Circuit breaker is open');}const requestConfig: AxiosRequestConfig = {
       method: request.method,
       url: request.endpoint,
       data: request.data,
@@ -977,8 +841,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
       // Include some user context but not sensitive data
       userRole: request.userContext.role,
     };
-    return `validation:${Buffer.from(JSON.stringify(key)).toString('base64')}`;
-  }
+    return `validation:${Buffer.from(JSON.stringify(key)).toString('base64')}';}
 
   /**
    * Set up periodic health check interval

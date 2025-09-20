@@ -21,17 +21,7 @@
  * @created 2024-01-19
  */
 
-import { Logger } from '../../../logger';
-import { ImmutableAuditEvent } from './enterprise-audit-trail.service';
-import { ComplianceAssessmentResult, ComplianceRegulation } from './compliance-monitoring.service';
-import { RealTimeAlert } from './real-time-monitoring.service';
-import { GeneratedComplianceReport } from './compliance-reporting.service';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-
-// ==================== TYPES AND INTERFACES ====================
-
-/**
+import { Logger } from '../../../logger';import { ImmutableAuditEvent } from './enterprise-audit-trail.service';import { ComplianceAssessmentResult, ComplianceRegulation } from './compliance-monitoring.service';import { RealTimeAlert } from './real-time-monitoring.service';import { GeneratedComplianceReport } from './compliance-reporting.service';import { EventEmitter } from 'events';import * as crypto from 'crypto';// ==================== TYPES AND INTERFACES ====================/**
  * Integration configuration for external systems
  */
 export interface IntegrationConfiguration {
@@ -81,50 +71,10 @@ export interface IntegrationConfiguration {
 }
 
 export enum IntegrationType {
-  SIEM_PLATFORM = 'siem-platform',
-  SOAR_SYSTEM = 'soar-system',
-  GRC_PLATFORM = 'grc-platform',
-  IAM_SYSTEM = 'iam-system',
-  AUDIT_TOOL = 'audit-tool',
-  REPORTING_SYSTEM = 'reporting-system',
-  TICKETING_SYSTEM = 'ticketing-system',
-  NOTIFICATION_SERVICE = 'notification-service',
-  DATA_WAREHOUSE = 'data-warehouse',
-  ANALYTICS_PLATFORM = 'analytics-platform',
-  THREAT_INTELLIGENCE = 'threat-intelligence',
-  COMPLIANCE_TOOL = 'compliance-tool'
-}
-
-export enum SystemCategory {
-  SECURITY = 'security',
-  COMPLIANCE = 'compliance',
-  ANALYTICS = 'analytics',
-  REPORTING = 'reporting',
-  MONITORING = 'monitoring',
-  GOVERNANCE = 'governance'
-}
-
-export enum SystemCriticality {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
-
-export enum ConnectionProtocol {
-  HTTPS_REST = 'https-rest',
-  WEBSOCKET = 'websocket',
-  KAFKA = 'kafka',
-  RABBITMQ = 'rabbitmq',
-  GRPC = 'grpc',
-  GRAPHQL = 'graphql',
-  SOAP = 'soap',
-  SYSLOG = 'syslog',
-  SNMP = 'snmp',
-  FTP_SFTP = 'ftp-sftp'
-}
-
-export interface AuthenticationConfig {
+  SIEM_PLATFORM = 'siem-platform',SOAR_SYSTEM = 'soar-system',GRC_PLATFORM = 'grc-platform',IAM_SYSTEM = 'iam-system',AUDIT_TOOL = 'audit-tool',REPORTING_SYSTEM = 'reporting-system',TICKETING_SYSTEM = 'ticketing-system',NOTIFICATION_SERVICE = 'notification-service',DATA_WAREHOUSE = 'data-warehouse',ANALYTICS_PLATFORM = 'analytics-platform',THREAT_INTELLIGENCE = 'threat-intelligence',COMPLIANCE_TOOL = 'compliance-tool'}export enum SystemCategory {
+  SECURITY = 'security',COMPLIANCE = 'compliance',ANALYTICS = 'analytics',REPORTING = 'reporting',MONITORING = 'monitoring',GOVERNANCE = 'governance'}export enum SystemCriticality {
+  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}export enum ConnectionProtocol {
+  HTTPS_REST = 'https-rest',WEBSOCKET = 'websocket',KAFKA = 'kafka',RABBITMQ = 'rabbitmq',GRPC = 'grpc',GRAPHQL = 'graphql',SOAP = 'soap',SYSLOG = 'syslog',SNMP = 'snmp',FTP_SFTP = 'ftp-sftp'}export interface AuthenticationConfig {
   readonly authType: AuthenticationType;
   readonly credentials: Record<string, string>;
   readonly tokenRefresh: {
@@ -141,17 +91,7 @@ export interface AuthenticationConfig {
 }
 
 export enum AuthenticationType {
-  API_KEY = 'api-key',
-  BEARER_TOKEN = 'bearer-token',
-  OAUTH2 = 'oauth2',
-  BASIC_AUTH = 'basic-auth',
-  JWT = 'jwt',
-  SAML = 'saml',
-  CERTIFICATE = 'certificate',
-  CUSTOM = 'custom'
-}
-
-export interface TimeoutConfig {
+  API_KEY = 'api-key',BEARER_TOKEN = 'bearer-token',OAUTH2 = 'oauth2',BASIC_AUTH = 'basic-auth',JWT = 'jwt',SAML = 'saml',CERTIFICATE = 'certificate',CUSTOM = 'custom'}export interface TimeoutConfig {
   readonly connectionTimeout: number; // seconds
   readonly requestTimeout: number; // seconds
   readonly keepAliveTimeout: number; // seconds
@@ -159,18 +99,14 @@ export interface TimeoutConfig {
 
 export interface RetryPolicyConfig {
   readonly maxRetries: number;
-  readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';
-  readonly baseDelay: number; // seconds
-  readonly maxDelay: number; // seconds
+  readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';readonly baseDelay: number; // secondsreadonly maxDelay: number; // seconds
   readonly retryableErrors: string[];
 }
 
 export interface EncryptionConfig {
   readonly enabled: boolean;
   readonly algorithm: string;
-  readonly keyManagement: 'internal' | 'external' | 'hsm';
-  readonly keyRotation: {
-    readonly enabled: boolean;
+  readonly keyManagement: 'internal' | 'external' | 'hsm';readonly keyRotation: {readonly enabled: boolean;
     readonly interval: number; // days
   };
 }
@@ -185,17 +121,7 @@ export interface DataTransformation {
 }
 
 export enum DataFormat {
-  JSON = 'json',
-  XML = 'xml',
-  CSV = 'csv',
-  CEF = 'cef',
-  LEEF = 'leef',
-  SYSLOG = 'syslog',
-  STIX = 'stix',
-  CUSTOM = 'custom'
-}
-
-export interface FieldMapping {
+  JSON = 'json',XML = 'xml',CSV = 'csv',CEF = 'cef',LEEF = 'leef',SYSLOG = 'syslog',STIX = 'stix',CUSTOM = 'custom'}export interface FieldMapping {
   readonly sourceField: string;
   readonly targetField: string;
   readonly transformation?: string;
@@ -206,41 +132,13 @@ export interface FieldMapping {
 export interface ValidationRule {
   readonly ruleId: string;
   readonly field: string;
-  readonly ruleType: 'required' | 'format' | 'range' | 'custom';
-  readonly parameters: Record<string, any>;
-  readonly errorMessage: string;
+  readonly ruleType: 'required' | 'format' | 'range' | 'custom';readonly parameters: Record<string, any>;readonly errorMessage: string;
 }
 
 export enum IntegrationOperation {
-  PUSH_EVENTS = 'push-events',
-  PULL_EVENTS = 'pull-events',
-  PUSH_ALERTS = 'push-alerts',
-  PULL_ALERTS = 'pull-alerts',
-  SYNC_USERS = 'sync-users',
-  SYNC_POLICIES = 'sync-policies',
-  SUBMIT_REPORTS = 'submit-reports',
-  QUERY_DATA = 'query-data',
-  HEALTH_CHECK = 'health-check',
-  BIDIRECTIONAL_SYNC = 'bidirectional-sync'
-}
-
-export enum SyncFrequency {
-  REAL_TIME = 'real-time',
-  EVERY_MINUTE = 'every-minute',
-  EVERY_5_MINUTES = 'every-5-minutes',
-  EVERY_15_MINUTES = 'every-15-minutes',
-  EVERY_HOUR = 'every-hour',
-  EVERY_6_HOURS = 'every-6-hours',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  ON_DEMAND = 'on-demand'
-}
-
-export interface ErrorHandlingConfig {
-  readonly strategy: 'fail-fast' | 'retry' | 'continue' | 'dead-letter';
-  readonly deadLetterQueue: {
-    readonly enabled: boolean;
+  PUSH_EVENTS = 'push-events',PULL_EVENTS = 'pull-events',PUSH_ALERTS = 'push-alerts',PULL_ALERTS = 'pull-alerts',SYNC_USERS = 'sync-users',SYNC_POLICIES = 'sync-policies',SUBMIT_REPORTS = 'submit-reports',QUERY_DATA = 'query-data',HEALTH_CHECK = 'health-check',BIDIRECTIONAL_SYNC = 'bidirectional-sync'}export enum SyncFrequency {
+  REAL_TIME = 'real-time',EVERY_MINUTE = 'every-minute',EVERY_5_MINUTES = 'every-5-minutes',EVERY_15_MINUTES = 'every-15-minutes',EVERY_HOUR = 'every-hour',EVERY_6_HOURS = 'every-6-hours',DAILY = 'daily',WEEKLY = 'weekly',MONTHLY = 'monthly',ON_DEMAND = 'on-demand'}export interface ErrorHandlingConfig {
+  readonly strategy: 'fail-fast' | 'retry' | 'continue' | 'dead-letter';readonly deadLetterQueue: {readonly enabled: boolean;
     readonly queueName?: string;
     readonly retentionDays?: number;
   };
@@ -259,15 +157,11 @@ export interface MonitoringConfig {
 }
 
 export interface PrivacyControl {
-  readonly controlType: 'anonymization' | 'pseudonymization' | 'encryption' | 'masking';
-  readonly fields: string[];
-  readonly parameters: Record<string, any>;
+  readonly controlType: 'anonymization' | 'pseudonymization' | 'encryption' | 'masking';readonly fields: string[];readonly parameters: Record<string, any>;
 }
 
 export interface AccessControl {
-  readonly principalType: 'user' | 'service' | 'system';
-  readonly principalId: string;
-  readonly permissions: string[];
+  readonly principalType: 'user' | 'service' | 'system';readonly principalId: string;readonly permissions: string[];
   readonly conditions: Record<string, any>;
 }
 
@@ -306,29 +200,14 @@ export interface IntegrationStatus {
 }
 
 export enum HealthStatus {
-  HEALTHY = 'healthy',
-  DEGRADED = 'degraded',
-  UNHEALTHY = 'unhealthy',
-  UNKNOWN = 'unknown'
-}
-
-export enum ConnectionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected',
-  CONNECTING = 'connecting',
-  ERROR = 'error',
-  MAINTENANCE = 'maintenance'
-}
-
-export interface IntegrationError {
+  HEALTHY = 'healthy',DEGRADED = 'degraded',UNHEALTHY = 'unhealthy',UNKNOWN = 'unknown'}export enum ConnectionStatus {
+  CONNECTED = 'connected',DISCONNECTED = 'disconnected',CONNECTING = 'connecting',ERROR = 'error',MAINTENANCE = 'maintenance'}export interface IntegrationError {
   readonly errorId: string;
   readonly timestamp: Date;
   readonly errorType: string;
   readonly errorMessage: string;
   readonly operation: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly retryable: boolean;
-  readonly context: Record<string, any>;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly retryable: boolean;readonly context: Record<string, any>;
 }
 
 /**
@@ -340,10 +219,7 @@ export interface SyncOperation {
   readonly operationType: IntegrationOperation;
   readonly startTime: Date;
   readonly endTime?: Date;
-  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  readonly direction: 'inbound' | 'outbound' | 'bidirectional';
-  readonly dataScope: {
-    readonly recordCount: number;
+  readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';readonly direction: 'inbound' | 'outbound' | 'bidirectional';readonly dataScope: {readonly recordCount: number;
     readonly dataSize: number; // bytes
     readonly timeRange?: { start: Date; end: Date };
     readonly filters?: Record<string, any>;
@@ -423,12 +299,7 @@ export interface DataFlow {
 export interface FlowCondition {
   readonly conditionId: string;
   readonly field: string;
-  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'contains' | 'regex';
-  readonly value: any;
-  readonly action: 'include' | 'exclude' | 'transform' | 'route';
-}
-
-export interface OrchestrationRule {
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'contains' | 'regex';readonly value: any;readonly action: 'include' | 'exclude' | 'transform' | 'route';}export interface OrchestrationRule {
   readonly ruleId: string;
   readonly ruleName: string;
   readonly trigger: OrchestrationTrigger;
@@ -439,14 +310,10 @@ export interface OrchestrationRule {
 }
 
 export interface OrchestrationTrigger {
-  readonly triggerType: 'event' | 'schedule' | 'threshold' | 'error';
-  readonly parameters: Record<string, any>;
-}
+  readonly triggerType: 'event' | 'schedule' | 'threshold' | 'error';readonly parameters: Record<string, any>;}
 
 export interface OrchestrationAction {
-  readonly actionType: 'sync' | 'transform' | 'alert' | 'retry' | 'pause' | 'escalate';
-  readonly parameters: Record<string, any>;
-  readonly timeout: number; // seconds
+  readonly actionType: 'sync' | 'transform' | 'alert' | 'retry' | 'pause' | 'escalate';readonly parameters: Record<string, any>;readonly timeout: number; // seconds
 }
 
 // ==================== MAIN SERVICE CLASS ====================
@@ -458,9 +325,7 @@ export interface OrchestrationAction {
  * with enterprise security infrastructure and compliance frameworks.
  */
 export class IntegrationService extends EventEmitter {
-  private readonly logger = Logger.getInstance().child({ service: 'IntegrationService' });
-  private readonly integrations: Map<string, IntegrationConfiguration> = new Map();
-  private readonly integrationStatus: Map<string, IntegrationStatus> = new Map();
+  private readonly logger = Logger.getInstance().child({ service: 'IntegrationService' });private readonly integrations: Map<string, IntegrationConfiguration> = new Map();private readonly integrationStatus: Map<string, IntegrationStatus> = new Map();
   private readonly activeSyncOperations: Map<string, SyncOperation> = new Map();
   private readonly integrationHubs: Map<string, IntegrationHub> = new Map();
 
@@ -469,9 +334,7 @@ export class IntegrationService extends EventEmitter {
 
   constructor() {
     super();
-    this.logger.info('Initializing PARLANT Integration Service');
-    this.initializeDefaultIntegrations();
-    this.startMonitoring();
+    this.logger.info('Initializing PARLANT Integration Service');this.initializeDefaultIntegrations();this.startMonitoring();
   }
 
   // ==================== INTEGRATION CONFIGURATION ====================
@@ -480,15 +343,11 @@ export class IntegrationService extends EventEmitter {
    * Create and configure integration with external system
    */
   async createIntegration(
-    integrationData: Omit<IntegrationConfiguration, 'configurationId' | 'isActive' | 'createdAt' | 'lastModified' | 'version'>
-  ): Promise<IntegrationConfiguration> {
-    const startTime = Date.now();
+    integrationData: Omit<IntegrationConfiguration, 'configurationId' | 'isActive' | 'createdAt' | 'lastModified' | 'version'>): Promise<IntegrationConfiguration> {const startTime = Date.now();
     const configurationId = this.generateConfigurationId();
 
     try {
-      this.logger.info('Creating integration configuration', {
-        configurationId,
-        configurationName: integrationData.configurationName,
+      this.logger.info('Creating integration configuration', {configurationId,configurationName: integrationData.configurationName,
         integrationType: integrationData.integrationType,
         systemName: integrationData.systemDetails.systemName
       });
@@ -506,19 +365,14 @@ export class IntegrationService extends EventEmitter {
         isActive: true,
         createdAt: new Date(),
         lastModified: new Date(),
-        version: '1.0.0'
-      };
-
-      // Store integration
+        version: '1.0.0'};// Store integration
       this.integrations.set(configurationId, integration);
 
       // Initialize integration status
       await this.initializeIntegrationStatus(integration);
 
       const duration = Date.now() - startTime;
-      this.logger.info('Integration configuration created successfully', {
-        configurationId,
-        duration,
+      this.logger.info('Integration configuration created successfully', {configurationId,duration,
         integrationType: integration.integrationType
       });
 
@@ -530,9 +384,7 @@ export class IntegrationService extends EventEmitter {
         error: error.message,
         duration: Date.now() - startTime
       });
-      throw new Error(`Integration configuration creation failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Integration configuration creation failed: ${error.message}`);}}
 
   /**
    * Activate integration and start data synchronization
@@ -544,9 +396,7 @@ export class IntegrationService extends EventEmitter {
         throw new Error(`Integration configuration not found: ${configurationId}`);
       }
 
-      this.logger.info('Activating integration', {
-        configurationId,
-        configurationName: integration.configurationName,
+      this.logger.info('Activating integration', {configurationId,configurationName: integration.configurationName,
         integrationType: integration.integrationType
       });
 
@@ -568,10 +418,7 @@ export class IntegrationService extends EventEmitter {
         connectionStatus: ConnectionStatus.CONNECTED
       });
 
-      this.logger.info('Integration activated successfully', { configurationId });
-
-    } catch (error) {
-      this.logger.error('Failed to activate integration', {
+      this.logger.info('Integration activated successfully', { configurationId });} catch (error) {this.logger.error('Failed to activate integration', {
         configurationId,
         error: error.message
       });
@@ -582,9 +429,7 @@ export class IntegrationService extends EventEmitter {
         connectionStatus: ConnectionStatus.ERROR
       });
 
-      throw new Error(`Integration activation failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Integration activation failed: ${error.message}`);}}
 
   // ==================== DATA SYNCHRONIZATION ====================
 
@@ -605,9 +450,7 @@ export class IntegrationService extends EventEmitter {
         throw new Error(`Integration not found or inactive: ${configurationId}`);
       }
 
-      this.logger.info('Starting audit event synchronization', {
-        operationId,
-        configurationId,
+      this.logger.info('Starting audit event synchronization', {operationId,configurationId,
         eventCount: events.length,
         systemName: integration.systemDetails.systemName
       });
@@ -618,10 +461,7 @@ export class IntegrationService extends EventEmitter {
         configurationId,
         operationType: IntegrationOperation.PUSH_EVENTS,
         startTime: new Date(startTime),
-        status: 'running',
-        direction: 'outbound',
-        dataScope: {
-          recordCount: events.length,
+        status: 'running',direction: 'outbound',dataScope: {recordCount: events.length,
           dataSize: this.calculateDataSize(events),
           timeRange: this.extractTimeRange(events)
         },
@@ -658,13 +498,8 @@ export class IntegrationService extends EventEmitter {
 
       // Complete operation
       syncOperation.endTime = new Date();
-      syncOperation.status = 'completed';
-      syncOperation.performanceMetrics.totalDuration = Date.now() - startTime;
-
-      const duration = syncOperation.performanceMetrics.totalDuration;
-      this.logger.info('Audit event synchronization completed', {
-        operationId,
-        duration,
+      syncOperation.status = 'completed';syncOperation.performanceMetrics.totalDuration = Date.now() - startTime;const duration = syncOperation.performanceMetrics.totalDuration;
+      this.logger.info('Audit event synchronization completed', {operationId,duration,
         processed: syncOperation.processingResults.processed,
         successful: syncOperation.processingResults.successful,
         failed: syncOperation.processingResults.failed
@@ -673,9 +508,7 @@ export class IntegrationService extends EventEmitter {
       return syncOperation;
 
     } catch (error) {
-      this.logger.error('Failed to synchronize audit events', {
-        operationId,
-        configurationId,
+      this.logger.error('Failed to synchronize audit events', {operationId,configurationId,
         error: error.message,
         duration: Date.now() - startTime
       });
@@ -702,9 +535,7 @@ export class IntegrationService extends EventEmitter {
     const operations: SyncOperation[] = [];
 
     try {
-      this.logger.info('Starting compliance report synchronization', {
-        configurationId,
-        reportCount: reports.length,
+      this.logger.info('Starting compliance report synchronization', {configurationId,reportCount: reports.length,
         targetSystems: targetSystems.length
       });
 
@@ -715,22 +546,15 @@ export class IntegrationService extends EventEmitter {
         }
       }
 
-      this.logger.info('Compliance report synchronization completed', {
-        configurationId,
-        operationsCompleted: operations.length,
-        successful: operations.filter(op => op.status === 'completed').length
-      });
-
-      return operations;
+      this.logger.info('Compliance report synchronization completed', {configurationId,operationsCompleted: operations.length,
+        successful: operations.filter(op => op.status === 'completed').length});return operations;
 
     } catch (error) {
       this.logger.error('Failed to synchronize compliance reports', {
         configurationId,
         error: error.message
       });
-      throw new Error(`Compliance report synchronization failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Compliance report synchronization failed: ${error.message}`);}}
 
   /**
    * Synchronize security alerts with external systems
@@ -748,9 +572,7 @@ export class IntegrationService extends EventEmitter {
         throw new Error(`Integration not found or inactive: ${configurationId}`);
       }
 
-      this.logger.info('Starting security alert synchronization', {
-        operationId,
-        configurationId,
+      this.logger.info('Starting security alert synchronization', {operationId,configurationId,
         alertCount: alerts.length,
         systemName: integration.systemDetails.systemName
       });
@@ -768,10 +590,7 @@ export class IntegrationService extends EventEmitter {
         operationType: IntegrationOperation.PUSH_ALERTS,
         startTime: new Date(startTime),
         endTime: new Date(),
-        status: 'completed',
-        direction: 'outbound',
-        dataScope: {
-          recordCount: alerts.length,
+        status: 'completed',direction: 'outbound',dataScope: {recordCount: alerts.length,
           dataSize: this.calculateDataSize(alerts),
         },
         processingResults: results,
@@ -792,9 +611,7 @@ export class IntegrationService extends EventEmitter {
         }
       };
 
-      this.logger.info('Security alert synchronization completed', {
-        operationId,
-        duration: syncOperation.performanceMetrics.totalDuration,
+      this.logger.info('Security alert synchronization completed', {operationId,duration: syncOperation.performanceMetrics.totalDuration,
         successful: results.successful,
         failed: results.failed
       });
@@ -840,10 +657,7 @@ export class IntegrationService extends EventEmitter {
    */
   async performHealthCheck(): Promise<{ healthy: number; unhealthy: number; total: number }> {
     try {
-      this.logger.debug('Performing integration health checks');
-
-      let healthy = 0;
-      let unhealthy = 0;
+      this.logger.debug('Performing integration health checks');let healthy = 0;let unhealthy = 0;
 
       for (const [configurationId, integration] of this.integrations) {
         if (!integration.isActive) {
@@ -867,33 +681,22 @@ export class IntegrationService extends EventEmitter {
           }
         } catch (error) {
           unhealthy++;
-          this.logger.warn('Health check failed for integration', {
-            configurationId,
-            error: error.message
+          this.logger.warn('Health check failed for integration', {configurationId,error: error.message
           });
         }
       }
 
       const total = healthy + unhealthy;
-      this.logger.info('Health check completed', { healthy, unhealthy, total });
-
-      return { healthy, unhealthy, total };
-
-    } catch (error) {
+      this.logger.info('Health check completed', { healthy, unhealthy, total });return { healthy, unhealthy, total };} catch (error) {
       this.logger.error('Failed to perform health check', {
         error: error.message
       });
-      throw new Error(`Health check failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Health check failed: ${error.message}`);}}
 
   // ==================== PRIVATE HELPER METHODS ====================
 
   private generateConfigurationId(): string {
-    return `int_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateOperationId(): string {
+    return `int_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateOperationId(): string {
     return `op_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
   }
 
@@ -901,24 +704,13 @@ export class IntegrationService extends EventEmitter {
     // Initialize default integrations for common enterprise systems
     const defaultIntegrations = [
       {
-        configurationName: 'Enterprise SIEM Integration',
-        description: 'Integration with enterprise SIEM platform for security event correlation',
-        integrationType: IntegrationType.SIEM_PLATFORM,
-        systemDetails: {
-          systemName: 'Enterprise SIEM',
-          systemVersion: '2024.1',
-          vendor: 'Security Corp',
-          category: SystemCategory.SECURITY,
-          criticality: SystemCriticality.HIGH
+        configurationName: 'Enterprise SIEM Integration',description: 'Integration with enterprise SIEM platform for security event correlation',integrationType: IntegrationType.SIEM_PLATFORM,systemDetails: {
+          systemName: 'Enterprise SIEM',systemVersion: '2024.1',vendor: 'Security Corp',category: SystemCategory.SECURITY,criticality: SystemCriticality.HIGH
         },
         connectionSettings: {
           protocol: ConnectionProtocol.HTTPS_REST,
-          endpoint: 'https://siem.enterprise.local/api/v1',
-          authentication: {
-            authType: AuthenticationType.API_KEY,
-            credentials: { apiKey: 'placeholder-key' },
-            tokenRefresh: { enabled: false, refreshInterval: 0 },
-            mTLS: { enabled: false }
+          endpoint: 'https://siem.enterprise.local/api/v1',authentication: {authType: AuthenticationType.API_KEY,
+            credentials: { apiKey: 'placeholder-key' },tokenRefresh: { enabled: false, refreshInterval: 0 },mTLS: { enabled: false }
           },
           timeouts: {
             connectionTimeout: 30,
@@ -927,56 +719,29 @@ export class IntegrationService extends EventEmitter {
           },
           retryPolicy: {
             maxRetries: 3,
-            backoffStrategy: 'exponential',
-            baseDelay: 5,
-            maxDelay: 60,
-            retryableErrors: ['ECONNRESET', 'ETIMEDOUT', '500', '502', '503']
-          },
-          encryption: {
+            backoffStrategy: 'exponential',baseDelay: 5,maxDelay: 60,
+            retryableErrors: ['ECONNRESET', 'ETIMEDOUT', '500', '502', '503']},encryption: {
             enabled: true,
-            algorithm: 'AES-256-GCM',
-            keyManagement: 'internal',
-            keyRotation: { enabled: true, interval: 90 }
-          }
+            algorithm: 'AES-256-GCM',keyManagement: 'internal',keyRotation: { enabled: true, interval: 90 }}
         },
         dataMapping: {
           inboundTransformations: [],
           outboundTransformations: [
             {
-              transformationId: 'audit-to-siem',
-              transformationName: 'Audit Event to SIEM Format',
-              sourceFormat: DataFormat.JSON,
-              targetFormat: DataFormat.CEF,
-              transformationScript: 'transform-audit-to-cef.js',
-              validationEnabled: true
-            }
+              transformationId: 'audit-to-siem',transformationName: 'Audit Event to SIEM Format',sourceFormat: DataFormat.JSON,targetFormat: DataFormat.CEF,
+              transformationScript: 'transform-audit-to-cef.js',validationEnabled: true}
           ],
           fieldMappings: [
-            { sourceField: 'eventId', targetField: 'event_id', required: true },
-            { sourceField: 'timestamp', targetField: 'event_time', required: true },
-            { sourceField: 'operationType', targetField: 'event_type', required: true },
-            { sourceField: 'userId', targetField: 'user_id', required: true },
-            { sourceField: 'clientIpAddress', targetField: 'source_ip', required: false }
-          ],
-          validationRules: [
+            { sourceField: 'eventId', targetField: 'event_id', required: true },{ sourceField: 'timestamp', targetField: 'event_time', required: true },{ sourceField: 'operationType', targetField: 'event_type', required: true },{ sourceField: 'userId', targetField: 'user_id', required: true },{ sourceField: 'clientIpAddress', targetField: 'source_ip', required: false }],validationRules: [
             {
-              ruleId: 'event-id-required',
-              field: 'event_id',
-              ruleType: 'required',
-              parameters: {},
-              errorMessage: 'Event ID is required'
-            }
-          ]
+              ruleId: 'event-id-required',field: 'event_id',ruleType: 'required',parameters: {},errorMessage: 'Event ID is required'}]
         },
         operationalSettings: {
           enabledOperations: [IntegrationOperation.PUSH_EVENTS, IntegrationOperation.PUSH_ALERTS],
           syncFrequency: SyncFrequency.REAL_TIME,
           batchSize: 100,
           errorHandling: {
-            strategy: 'retry',
-            deadLetterQueue: { enabled: true, queueName: 'siem-dlq', retentionDays: 7 },
-            alerting: { enabled: true, thresholds: { errorRate: 5, consecutiveFailures: 3 } }
-          },
+            strategy: 'retry',deadLetterQueue: { enabled: true, queueName: 'siem-dlq', retentionDays: 7 },alerting: { enabled: true, thresholds: { errorRate: 5, consecutiveFailures: 3 } }},
           monitoring: {
             enabled: true,
             metricsCollection: true,
@@ -986,23 +751,12 @@ export class IntegrationService extends EventEmitter {
           }
         },
         complianceSettings: {
-          dataResidency: ['US', 'EU'],
-          privacyControls: [
-            {
-              controlType: 'pseudonymization',
-              fields: ['userId', 'clientIpAddress'],
-              parameters: { algorithm: 'SHA-256', salt: 'enterprise-salt' }
-            }
-          ],
+          dataResidency: ['US', 'EU'],privacyControls: [{
+              controlType: 'pseudonymization',fields: ['userId', 'clientIpAddress'],parameters: { algorithm: 'SHA-256', salt: 'enterprise-salt' }}],
           auditLogging: true,
           accessControls: [
             {
-              principalType: 'service',
-              principalId: 'integration-service',
-              permissions: ['read', 'write'],
-              conditions: { ipWhitelist: ['10.0.0.0/8'] }
-            }
-          ]
+              principalType: 'service',principalId: 'integration-service',permissions: ['read', 'write'],conditions: { ipWhitelist: ['10.0.0.0/8'] }}]
         }
       }
     ];
@@ -1011,9 +765,7 @@ export class IntegrationService extends EventEmitter {
       try {
         await this.createIntegration(integrationData);
       } catch (error) {
-        this.logger.warn('Failed to create default integration', {
-          configurationName: integrationData.configurationName,
-          error: error.message
+        this.logger.warn('Failed to create default integration', {configurationName: integrationData.configurationName,error: error.message
         });
       }
     }
@@ -1025,53 +777,33 @@ export class IntegrationService extends EventEmitter {
       try {
         await this.performHealthCheck();
       } catch (error) {
-        this.logger.error('Scheduled health check failed', { error: error.message });
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+        this.logger.error('Scheduled health check failed', { error: error.message });}}, 5 * 60 * 1000); // Every 5 minutes
 
     // Start metrics collection
     this.metricsCollectionInterval = setInterval(async () => {
       try {
         await this.collectIntegrationMetrics();
       } catch (error) {
-        this.logger.error('Metrics collection failed', { error: error.message });
-      }
-    }, 60 * 1000); // Every minute
+        this.logger.error('Metrics collection failed', { error: error.message });}}, 60 * 1000); // Every minute
   }
 
   private async validateIntegrationConfiguration(config: any): Promise<void> {
     if (!config.configurationName || config.configurationName.trim().length === 0) {
-      throw new Error('Configuration name is required');
-    }
-
-    if (!config.integrationType) {
-      throw new Error('Integration type is required');
-    }
-
-    if (!config.connectionSettings || !config.connectionSettings.endpoint) {
-      throw new Error('Connection endpoint is required');
-    }
-
-    if (!config.systemDetails || !config.systemDetails.systemName) {
-      throw new Error('System name is required');
-    }
-  }
+      throw new Error('Configuration name is required');}if (!config.integrationType) {
+      throw new Error('Integration type is required');}if (!config.connectionSettings || !config.connectionSettings.endpoint) {
+      throw new Error('Connection endpoint is required');}if (!config.systemDetails || !config.systemDetails.systemName) {
+      throw new Error('System name is required');}}
 
   private async testConnectivity(integration: any): Promise<void> {
     try {
-      this.logger.debug('Testing connectivity', {
-        endpoint: integration.connectionSettings.endpoint,
-        protocol: integration.connectionSettings.protocol
+      this.logger.debug('Testing connectivity', {endpoint: integration.connectionSettings.endpoint,protocol: integration.connectionSettings.protocol
       });
 
       // Simulate connectivity test
       // In real implementation, this would make actual connection attempts
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      this.logger.debug('Connectivity test successful');
-
-    } catch (error) {
-      this.logger.error('Connectivity test failed', {
+      this.logger.debug('Connectivity test successful');} catch (error) {this.logger.error('Connectivity test failed', {
         endpoint: integration.connectionSettings.endpoint,
         error: error.message
       });
@@ -1126,9 +858,7 @@ export class IntegrationService extends EventEmitter {
   }
 
   private async startSyncOperations(integration: IntegrationConfiguration): Promise<void> {
-    this.logger.debug('Starting sync operations', {
-      configurationId: integration.configurationId,
-      operations: integration.operationalSettings.enabledOperations
+    this.logger.debug('Starting sync operations', {configurationId: integration.configurationId,operations: integration.operationalSettings.enabledOperations
     });
 
     // Set up scheduled sync operations based on frequency
@@ -1139,9 +869,7 @@ export class IntegrationService extends EventEmitter {
   }
 
   private async setupDataFlows(integration: IntegrationConfiguration): Promise<void> {
-    this.logger.debug('Setting up data flows', {
-      configurationId: integration.configurationId
-    });
+    this.logger.debug('Setting up data flows', {configurationId: integration.configurationId});
 
     // Set up data transformation pipelines and routing
     // Implementation would configure data flow processors
@@ -1149,9 +877,7 @@ export class IntegrationService extends EventEmitter {
 
   private async configureMonitoring(integration: IntegrationConfiguration): Promise<void> {
     if (integration.operationalSettings.monitoring.enabled) {
-      this.logger.debug('Configuring monitoring', {
-        configurationId: integration.configurationId,
-        monitoring: integration.operationalSettings.monitoring
+      this.logger.debug('Configuring monitoring', {configurationId: integration.configurationId,monitoring: integration.operationalSettings.monitoring
       });
 
       // Set up monitoring dashboards and alerting
@@ -1187,9 +913,7 @@ export class IntegrationService extends EventEmitter {
         operation.processingResults.processed += batch.length;
 
       } catch (error) {
-        this.logger.warn('Batch processing failed', {
-          operationId: operation.operationId,
-          batchSize: batch.length,
+        this.logger.warn('Batch processing failed', {operationId: operation.operationId,batchSize: batch.length,
           error: error.message
         });
         operation.processingResults.failed += batch.length;
@@ -1268,8 +992,7 @@ export class IntegrationService extends EventEmitter {
       operationType: IntegrationOperation.SUBMIT_REPORTS,
       startTime: new Date(startTime),
       endTime: new Date(),
-      status: 'completed',
-      direction: 'outbound',
+      status: 'completed',direction: 'outbound',
       dataScope: {
         recordCount: 1,
         dataSize: this.calculateDataSize([report])
@@ -1390,10 +1113,7 @@ export class IntegrationService extends EventEmitter {
   }
 
   private async collectIntegrationMetrics(): Promise<void> {
-    this.logger.debug('Collecting integration metrics');
-
-    // Collect and update metrics for all active integrations
-    for (const [configurationId, integration] of this.integrations) {
+    this.logger.debug('Collecting integration metrics');// Collect and update metrics for all active integrationsfor (const [configurationId, integration] of this.integrations) {
       if (integration.isActive && integration.operationalSettings.monitoring.metricsCollection) {
         await this.updateIntegrationMetrics(configurationId);
       }
@@ -1440,9 +1160,7 @@ export class IntegrationService extends EventEmitter {
   private async applyValidationRule(event: ImmutableAuditEvent, rule: ValidationRule): Promise<void> {
     // Apply validation rule logic
     switch (rule.ruleType) {
-      case 'required':
-        const value = this.getFieldValue(event, rule.field);
-        if (value === undefined || value === null || value === '') {
+      case 'required':const value = this.getFieldValue(event, rule.field);if (value === undefined || value === null || value === '') {
           throw new Error(`Required field ${rule.field} is missing`);
         }
         break;

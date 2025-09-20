@@ -19,12 +19,7 @@
  * Performance: Optimized real server connections with intelligent caching
  */
 
-import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
-import { ParlantProductionClientService } from './client/parlant-production-client.service';
-import { ParlantEnvironmentConfigService } from './config/parlant-environment.config';
-
-// Re-export interfaces from the original service for compatibility
-export {
+import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';import { ParlantProductionClientService } from './client/parlant-production-client.service';import { ParlantEnvironmentConfigService } from './config/parlant-environment.config';// Re-export interfaces from the original service for compatibilityexport {
   ParlantConversationContext,
   ConversationEntry,
   ParlantValidationRequest,
@@ -33,10 +28,7 @@ export {
   ExecutionContext,
   ConversationalValidationError,
   ParlantAuditEntry,
-} from './parlant-integration.service';
-
-import {
-  ParlantConversationContext,
+} from './parlant-integration.service';import {ParlantConversationContext,
   ConversationEntry,
   ParlantValidationRequest,
   RiskLevel,
@@ -44,10 +36,7 @@ import {
   ExecutionContext,
   ConversationalValidationError,
   ParlantAuditEntry,
-} from './parlant-integration.service';
-
-/**
- * Production validation metrics for monitoring
+} from './parlant-integration.service';/*** Production validation metrics for monitoring
  */
 export interface ProductionValidationMetrics {
   readonly totalValidations: number;
@@ -66,9 +55,7 @@ export interface ProductionValidationMetrics {
  */
 interface FallbackValidationConfig {
   readonly enabled: boolean;
-  readonly strategy: 'conservative' | 'permissive' | 'risk_based';
-  readonly maxFailuresBeforeFallback: number;
-  readonly fallbackDuration: number;
+  readonly strategy: 'conservative' | 'permissive' | 'risk_based';readonly maxFailuresBeforeFallback: number;readonly fallbackDuration: number;
   readonly allowedRiskLevels: RiskLevel[];
 }
 
@@ -99,7 +86,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
     strategy: 'risk_based',
     maxFailuresBeforeFallback: 5,
     fallbackDuration: 300000, // 5 minutes
-    allowedRiskLevels: [RiskLevel.MINIMAL, RiskLevel.LOW],
+    allowedRiskLevels: [RiskLevel._MINIMAL, RiskLevel._LOW],
   };
 
   // State management
@@ -116,16 +103,8 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
    * Initialize the production integration service
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `prod_integration_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Parlant Production Integration Service`);
-
-      // Verify configuration
-      if (!this.configService.isEnabled()) {
-        this.logger.warn(`[${operationId}] Parlant integration is disabled`);
-        return;
-      }
+    const operationId = `prod_integration_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Initializing Parlant Production Integration Service`);// Verify configurationif (!this.configService.isEnabled()) {
+        this.logger.warn(`[${operationId}] Parlant integration is disabled`);return;}
 
       // Test initial connection
       const healthStatus = await this.productionClient.performHealthCheck();
@@ -133,14 +112,10 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
 
       if (healthStatus.healthy) {
         this.validationMetrics.lastSuccessfulConnection = new Date();
-        this.logger.log(`[${operationId}] Successfully connected to Parlant production server`, {
-          serverVersion: healthStatus.serverVersion,
-          responseTime: healthStatus.responseTime,
+        this.logger.log(`[${operationId}] Successfully connected to Parlant production server`, {serverVersion: healthStatus.serverVersion,responseTime: healthStatus.responseTime,
         });
       } else {
-        this.logger.warn(`[${operationId}] Parlant production server health check failed`, {
-          errorCount: healthStatus.errorCount,
-          circuitBreakerOpen: healthStatus.circuitBreakerOpen,
+        this.logger.warn(`[${operationId}] Parlant production server health check failed`, {errorCount: healthStatus.errorCount,circuitBreakerOpen: healthStatus.circuitBreakerOpen,
         });
       }
 
@@ -150,10 +125,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       // Set up metrics reporting
       this.setupMetricsReporting();
 
-      this.logger.log(`[${operationId}] Parlant Production Integration Service initialized successfully`);
-
-    } catch (error) {
-      this.logger.error(`[${operationId}] Failed to initialize Parlant Production Integration Service`, {
+      this.logger.log(`[${operationId}] Parlant Production Integration Service initialized successfully`);} catch (error) {this.logger.error(`[${operationId}] Failed to initialize Parlant Production Integration Service`, {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
@@ -212,8 +184,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
         conversationId: validationResponse.conversationId,
         functionName: request.functionName,
         actionDescription: request.actionDescription,
-        validationResult: validationResponse.approved ? 'APPROVED' : 'DENIED',
-        executionResult: 'SUCCESS',
+        validationResult: validationResponse.approved ? 'APPROVED' : 'DENIED',executionResult: 'SUCCESS',
         timestamp: new Date(),
         duration,
         userId: request.context.userId,
@@ -245,19 +216,13 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       // Create error audit entry
       await this.createAuditEntry({
         operationId: request.operationId,
-        conversationId: 'ERROR',
-        functionName: request.functionName,
-        actionDescription: request.actionDescription,
-        validationResult: 'ERROR',
-        executionResult: 'FAILURE',
+        conversationId: 'ERROR',functionName: request.functionName,actionDescription: request.actionDescription,
+        validationResult: 'ERROR',executionResult: 'FAILURE',
         timestamp: new Date(),
         duration,
         userId: request.context.userId,
         riskLevel: request.riskLevel,
-        conversationSummary: `Production server error: ${error instanceof Error ? error.message : String(error)}`,
-      });
-
-      // Decide whether to use fallback or propagate error
+        conversationSummary: `Production server error: ${error instanceof Error ? error.message : String(error)}`,});// Decide whether to use fallback or propagate error
       if (this.shouldActivateFallback(request)) {
         this.logger.warn(`[${operationId}] Activating fallback mode due to consecutive failures`);
         this.activateFallbackMode();
@@ -267,9 +232,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       throw new ConversationalValidationError(
         'PRODUCTION_ERROR',
         `Production Parlant server error: ${error instanceof Error ? error.message : String(error)}`,
-        ['Retry the operation', 'Check Parlant server status', 'Contact system administrator']
-      );
-    }
+        ['Retry the operation', 'Check Parlant server status', 'Contact system administrator']);}
   }
 
   /**
@@ -301,9 +264,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
 
       return healthStatus.healthy;
     } catch (error) {
-      this.logger.error('Health check failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Health check failed', {error: error instanceof Error ? error.message : String(error),});
       this.validationMetrics.serverHealthy = false;
       return false;
     }
@@ -316,14 +277,10 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
     // Step 1: Create or get Parlant session
     let session;
     try {
-      session = await this.productionClient.getSession(request.context.sessionId ?? '');
-      if (!session) {
-        session = await this.productionClient.createSession({
+      session = await this.productionClient.getSession(request.context.sessionId ?? '');if (!session) {session = await this.productionClient.createSession({
           agentId: 'bytebot-validation-agent',
           customerId: request.context.userId,
-          title: `Bytebot Function Validation - ${request.functionName}`,
-          metadata: {
-            functionName: request.functionName,
+          title: `Bytebot Function Validation - ${request.functionName}`,metadata: {functionName: request.functionName,
             riskLevel: request.riskLevel,
             agentRole: request.context.agentRole,
             securityLevel: request.context.securityLevel,
@@ -331,18 +288,13 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
         });
       }
     } catch (error) {
-      throw new Error(`Failed to create/get Parlant session: ${error instanceof Error ? error.message : String(error)}`);
-    }
-
-    // Step 2: Submit validation request to production server
+      throw new Error(`Failed to create/get Parlant session: ${error instanceof Error ? error.message : String(error)}`);}// Step 2: Submit validation request to production server
     const validationRequest = {
       sessionId: session.id,
       intent: `Execute function: ${request.functionName}`,
       context: request.actionDescription,
       parameters: request.functionParams,
-      riskLevel: request.riskLevel.toLowerCase() as 'minimal' | 'low' | 'medium' | 'high' | 'critical',
-      requiresConfirmation: request.riskLevel === RiskLevel.HIGH || request.riskLevel === RiskLevel.CRITICAL,
-      userContext: {
+      riskLevel: request.riskLevel.toLowerCase() as 'minimal' | 'low' | 'medium' | 'high' | 'critical',requiresConfirmation: request.riskLevel === RiskLevel._HIGH || request.riskLevel === RiskLevel._CRITICAL,userContext: {
         userId: request.context.userId,
         role: request.context.agentRole,
         securityLevel: request.context.securityLevel,
@@ -363,11 +315,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
         userRole: request.context.agentRole,
       },
       expectedIntents: [
-        'function_execution_request',
-        'system_modification',
-        'data_access',
-        'security_operation',
-        'automation_command',
+        'function_execution_request','system_modification','data_access','security_operation','automation_command',
       ],
     });
 
@@ -390,32 +338,25 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
    */
   private async performFallbackValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
     this.validationMetrics.fallbackUsage++;
-    const conversationId = `fallback_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.warn(`Performing fallback validation for ${request.functionName}`, {
+    const conversationId = `fallback_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.warn(`Performing fallback validation for ${request.functionName}`, {
       riskLevel: request.riskLevel,
       strategy: this.fallbackConfig.strategy,
       operationId: request.operationId,
     });
 
     let approved = false;
-    let reasoning = '';
-
-    switch (this.fallbackConfig.strategy) {
-      case 'conservative':
+    let reasoning = '';switch (this.fallbackConfig.strategy) {case 'conservative':
         // Only approve minimal and low risk operations
-        approved = request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW;
+        approved = request.riskLevel === RiskLevel._MINIMAL || request.riskLevel === RiskLevel._LOW;
         reasoning = approved
-          ? `Approved by conservative fallback policy (${request.riskLevel} risk)`
-          : `Denied by conservative fallback policy (${request.riskLevel} risk exceeds threshold)`;
+          ? `Approved by conservative fallback policy (${request.riskLevel} risk)`: `Denied by conservative fallback policy (${request.riskLevel} risk exceeds threshold)`;
         break;
 
       case 'permissive':
         // Approve all except critical operations
-        approved = request.riskLevel !== RiskLevel.CRITICAL;
+        approved = request.riskLevel !== RiskLevel._CRITICAL;
         reasoning = approved
-          ? `Approved by permissive fallback policy (${request.riskLevel} risk)`
-          : `Denied by permissive fallback policy (CRITICAL risk requires production server)`;
+          ? `Approved by permissive fallback policy (${request.riskLevel} risk)`: `Denied by permissive fallback policy (CRITICAL risk requires production server)`;
         break;
 
       case 'risk_based':
@@ -423,10 +364,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
         // Risk-based approval with context analysis
         approved = this.assessRiskBasedFallbackApproval(request);
         reasoning = approved
-          ? `Approved by risk-based fallback analysis (${request.riskLevel} risk with context validation)`
-          : `Denied by risk-based fallback analysis (${request.riskLevel} risk failed context validation)`;
-        break;
-    }
+          ? `Approved by risk-based fallback analysis (${request.riskLevel} risk with context validation)`: `Denied by risk-based fallback analysis (${request.riskLevel} risk failed context validation)`;break;}
 
     return {
       approved,
@@ -435,11 +373,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       reasoning: `${reasoning} [FALLBACK MODE - Production server unavailable]`,
       confidence: approved ? 0.7 : 0.9, // Lower confidence for approvals, higher for denials
       suggestedAlternatives: approved ? [] : [
-        'Wait for Parlant production server to become available',
-        'Request manual approval for this operation',
-        'Use a lower-risk alternative approach',
-      ],
-      executionContext: approved ? this.generateExecutionContext(request) : undefined,
+        'Wait for Parlant production server to become available','Request manual approval for this operation','Use a lower-risk alternative approach',],executionContext: approved ? this.generateExecutionContext(request) : undefined,
     };
   }
 
@@ -481,9 +415,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
    */
   private activateFallbackMode(): void {
     this.fallbackModeUntil = new Date(Date.now() + this.fallbackConfig.fallbackDuration);
-    this.logger.warn('Fallback mode activated', {
-      duration: this.fallbackConfig.fallbackDuration,
-      until: this.fallbackModeUntil,
+    this.logger.warn('Fallback mode activated', {duration: this.fallbackConfig.fallbackDuration,until: this.fallbackModeUntil,
       consecutiveFailures: this.consecutiveFailures,
     });
   }
@@ -505,16 +437,13 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
    */
   private assessRiskBasedFallbackApproval(request: ParlantValidationRequest): boolean {
     // Risk level assessment
-    if (request.riskLevel === RiskLevel.CRITICAL) return false;
-    if (request.riskLevel === RiskLevel.MINIMAL) return true;
+    if (request.riskLevel === RiskLevel._CRITICAL) return false;
+    if (request.riskLevel === RiskLevel._MINIMAL) return true;
 
     // Context-based assessment
     const hasValidContext = request.context.conversationHistory.length > 0;
     const recentUserActivity = request.context.conversationHistory.some(
-      entry => entry.speaker === 'USER' && Date.now() - entry.timestamp.getTime() < 300000 // 5 minutes
-    );
-
-    // Security level assessment
+      entry => entry.speaker === 'USER' && Date.now() - entry.timestamp.getTime() < 300000 // 5 minutes);// Security level assessment
     const securityLevelOk = request.context.securityLevel !== 'LOW';
 
     // Function pattern assessment
@@ -526,7 +455,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       recentUserActivity &&
       securityLevelOk &&
       (isReadOnlyFunction || !isSystemCritical) &&
-      request.riskLevel !== RiskLevel.HIGH
+      request.riskLevel !== RiskLevel._HIGH
     );
   }
 
@@ -536,25 +465,17 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
   private generateValidationGuidelines(riskLevel: RiskLevel): Array<{ condition: string; action: string; priority: number }> {
     const guidelines = [
       {
-        condition: `risk_level == '${RiskLevel.CRITICAL}'`,
-        action: 'require_explicit_confirmation',
+        condition: `risk_level == '${RiskLevel._CRITICAL}'',action: 'require_explicit_confirmation',
         priority: 10,
       },
       {
-        condition: `risk_level == '${RiskLevel.HIGH}' && security_level != 'CRITICAL'`,
-        action: 'deny_with_explanation',
+        condition: `risk_level == '${RiskLevel._HIGH}' && security_level != 'CRITICAL'',action: 'deny_with_explanation',
         priority: 8,
       },
       {
-        condition: `risk_level == '${RiskLevel.MEDIUM}' && security_level == 'LOW'`,
-        action: 'deny_with_alternatives',
-        priority: 6,
-      },
+        condition: `risk_level == '${RiskLevel._MODERATE}' && security_level == 'LOW'',action: 'deny_with_alternatives',priority: 6,},
       {
-        condition: 'risk_level == "MINIMAL" || risk_level == "LOW"',
-        action: 'approve_with_monitoring',
-        priority: 2,
-      },
+        condition: 'risk_level == "MINIMAL" || risk_level == "LOW"",action: 'approve_with_monitoring',priority: 2,},
     ];
 
     return guidelines;
@@ -604,9 +525,7 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
       try {
         await this.performHealthCheck();
       } catch (error) {
-        this.logger.error('Periodic health check failed', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        this.logger.error('Periodic health check failed', {error: error instanceof Error ? error.message : String(error),});
       }
     }, config.monitoring.healthCheckInterval);
   }
@@ -616,11 +535,8 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
    */
   private setupMetricsReporting(): void {
     setInterval(() => {
-      this.logger.log('Parlant Production Integration Metrics', {
-        totalValidations: this.validationMetrics.totalValidations,
-        successRate: this.validationMetrics.totalValidations > 0
-          ? (this.validationMetrics.successfulValidations / this.validationMetrics.totalValidations * 100).toFixed(2) + '%'
-          : '0%',
+      this.logger.log('Parlant Production Integration Metrics', {totalValidations: this.validationMetrics.totalValidations,successRate: this.validationMetrics.totalValidations > 0
+          ? (this.validationMetrics.successfulValidations / this.validationMetrics.totalValidations * 100).toFixed(2) + '%': '0%',
         averageResponseTime: `${this.validationMetrics.averageResponseTime.toFixed(2)}ms`,
         fallbackUsage: this.validationMetrics.fallbackUsage,
         serverHealthy: this.validationMetrics.serverHealthy,
@@ -633,45 +549,32 @@ export class ParlantProductionIntegrationService implements OnModuleInit, OnAppl
   // Helper methods for risk assessment
   private getTimeoutForRiskLevel(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 5000;
-      case RiskLevel.LOW: return 10000;
-      case RiskLevel.MEDIUM: return 30000;
-      case RiskLevel.HIGH: return 60000;
-      case RiskLevel.CRITICAL: return 120000;
+      case RiskLevel._MINIMAL: return 5000;
+      case RiskLevel._LOW: return 10000;
+      case RiskLevel._MODERATE: return 30000;
+      case RiskLevel._HIGH: return 60000;
+      case RiskLevel._CRITICAL: return 120000;
       default: return 10000;
     }
   }
 
   private getRetryAttemptsForRiskLevel(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW: return 3;
-      case RiskLevel.MEDIUM: return 2;
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 1;
+      case RiskLevel._MINIMAL:
+      case RiskLevel._LOW: return 3;
+      case RiskLevel._MODERATE: return 2;
+      case RiskLevel._HIGH:
+      case RiskLevel._CRITICAL: return 1;
       default: return 1;
     }
   }
 
-  private getMonitoringLevelForRiskLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW: return 'BASIC';
-      case RiskLevel.MEDIUM: return 'DETAILED';
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 'COMPREHENSIVE';
-      default: return 'BASIC';
-    }
-  }
+  private getMonitoringLevelForRiskLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {switch (riskLevel) {case RiskLevel._MINIMAL:
+      case RiskLevel._LOW: return 'BASIC';case RiskLevel._MODERATE: return 'DETAILED';case RiskLevel._HIGH:case RiskLevel._CRITICAL: return 'COMPREHENSIVE';default: return 'BASIC';}}
 
   private getSafeguardsForFunction(functionName: string): string[] {
-    return ['operation_logging', 'permission_verification', 'state_monitoring', 'production_validation'];
-  }
-
-  private isReadOnlyFunction(functionName: string): boolean {
-    const readOnlyPatterns = ['get', 'read', 'list', 'show', 'display', 'view', 'query'];
-    return readOnlyPatterns.some(pattern => functionName.toLowerCase().includes(pattern));
-  }
+    return ['operation_logging', 'permission_verification', 'state_monitoring', 'production_validation'];}private isReadOnlyFunction(functionName: string): boolean {
+    const readOnlyPatterns = ['get', 'read', 'list', 'show', 'display', 'view', 'query'];return readOnlyPatterns.some(pattern => functionName.toLowerCase().includes(pattern));}
 
   private isSystemCriticalFunction(functionName: string): boolean {
     const criticalPatterns = ['delete', 'remove', 'destroy', 'shutdown', 'restart', 'format', 'reset'];

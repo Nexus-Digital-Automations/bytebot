@@ -1,15 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  BrowserTaskResultDto,
+import { Injectable, Logger } from '@nestjs/common';import { v4 as uuidv4 } from 'uuid';import {BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
   CreateBrowserTaskDto,
   BrowserActionType,
-} from './dto/browser-task.dto';
-
-/**
- * Browser automation action interface
+} from './dto/browser-task.dto';/*** Browser automation action interface
  */
 export interface BrowserAction {
   type: BrowserActionType;
@@ -144,9 +138,7 @@ export class BrowserTaskService {
     this.tasks.set(task.taskId, task);
     this.taskMetrics.totalTasks++;
 
-    this.logger.log(`Created browser task: ${task.taskId}`, {
-      taskId: task.taskId,
-      name: _taskData.name,
+    this.logger.log(`Created browser task: ${task.taskId}`, {taskId: task.taskId,name: _taskData.name,
       totalActions: task.totalActions,
       priority: _taskData.priority,
       status: task.status,
@@ -195,10 +187,7 @@ export class BrowserTaskService {
   updateTaskStatus(taskId: string, updates: Partial<BrowserTaskResultDto>): void {
     const task = this.tasks.get(taskId);
     if (!task) {
-      throw new Error(`Task not found: ${taskId}`);
-    }
-
-    // Update task fields
+      throw new Error(`Task not found: ${taskId}`);}// Update task fields
     if (updates.status) {
       task.status = updates.status;
     }
@@ -294,9 +283,7 @@ export class BrowserTaskService {
 
     this.tasks.set(taskId, task);
 
-    this.logger.debug(`Updated task progress: ${taskId}`, {
-      taskId,
-      actionsCompleted: task.actionsCompleted,
+    this.logger.debug(`Updated task progress: ${taskId}`, {taskId,actionsCompleted: task.actionsCompleted,
       totalActions: task.totalActions,
       progress: progress.progress,
     });
@@ -345,9 +332,7 @@ export class BrowserTaskService {
     task.startedAt = new Date();
     this.tasks.set(taskId, task);
 
-    this.logger.log(`Started queued task: ${taskId}`, {
-      taskId,
-      queuePosition: 0,
+    this.logger.log(`Started queued task: ${taskId}`, {taskId,queuePosition: 0,
       remainingInQueue: this.taskQueue.length,
     });
 
@@ -360,10 +345,7 @@ export class BrowserTaskService {
   cancelTask(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
-      throw new Error(`Task not found: ${taskId}`);
-    }
-
-    if (
+      throw new Error(`Task not found: ${taskId}`);}if (
       task.status === BrowserTaskStatus.COMPLETED ||
       task.status === BrowserTaskStatus.FAILED ||
       task.status === BrowserTaskStatus.CANCELLED
@@ -382,10 +364,7 @@ export class BrowserTaskService {
     // Add cancellation log
     task.logs.push({
       timestamp: new Date(),
-      level: 'warn',
-      message: 'Task cancelled by user',
-      metadata: {
-        reason: 'user_cancellation',
+      level: 'warn',message: 'Task cancelled by user',metadata: {reason: 'user_cancellation',
         actionsCompleted: task.actionsCompleted,
       },
     });
@@ -398,9 +377,7 @@ export class BrowserTaskService {
 
     this.tasks.set(taskId, task);
 
-    this.logger.log(`Cancelled task: ${taskId}`, {
-      taskId,
-      actionsCompleted: task.actionsCompleted,
+    this.logger.log(`Cancelled task: ${taskId}`, {taskId,actionsCompleted: task.actionsCompleted,
       totalActions: task.totalActions,
       executionTimeMs: task.executionTimeMs,
     });
@@ -420,10 +397,7 @@ export class BrowserTaskService {
       task.status === BrowserTaskStatus.RUNNING ||
       task.status === BrowserTaskStatus.PENDING
     ) {
-      throw new Error(`Cannot delete task in status: ${task.status}`);
-    }
-
-    // Remove from queue if present
+      throw new Error(`Cannot delete task in status: ${task.status}`);}// Remove from queue if present
     const queueIndex = this.taskQueue.indexOf(taskId);
     if (queueIndex >= 0) {
       this.taskQueue.splice(queueIndex, 1);
@@ -432,9 +406,7 @@ export class BrowserTaskService {
     // Delete task
     this.tasks.delete(taskId);
 
-    this.logger.log(`Deleted task: ${taskId}`, {
-      taskId,
-      status: task.status,
+    this.logger.log(`Deleted task: ${taskId}`, {taskId,status: task.status,
     });
   }
 
@@ -513,9 +485,7 @@ export class BrowserTaskService {
     }
 
     if (cleanedCount > 0) {
-      this.logger.log(`Cleaned up ${cleanedCount} old tasks`, {
-        cleanedCount,
-        maxAgeHours: _maxAge / (1000 * 60 * 60),
+      this.logger.log(`Cleaned up ${cleanedCount} old tasks`, {cleanedCount,maxAgeHours: _maxAge / (1000 * 60 * 60),
         remainingTasks: this.tasks.size,
       });
     }

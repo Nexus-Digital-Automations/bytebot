@@ -27,70 +27,17 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   OnApplicationShutdown,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as WebSocket from 'ws';
-import * as _jwt from 'jsonwebtoken';
-import { performance } from 'perf_hooks';
-import { promisify } from 'util';
-import * as zlib from 'zlib';
-import {
-  createSafeWebSocketServer,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as WebSocket from 'ws';import * as _jwt from 'jsonwebtoken';import { performance } from 'perf_hooks';import { promisify } from 'util';import * as zlib from 'zlib';import {createSafeWebSocketServer,
   createSecureVerifyCallback,
   SafeWebSocketServerOptions,
   EnhancedRequestInfo,
   convertIncomingMessageToRecord,
-} from './websocket-types';
-
-// ===== PARLANT STREAMING TYPES =====
-
-/**
+} from './websocket-types';// ===== PARLANT STREAMING TYPES =====/**
  * Parlant WebSocket message types for real-time streaming validation
  */
 export enum ParlantStreamingMessageType {
   // Connection and session management
-  CONNECTION_ESTABLISHED = 'connection_established',
-  CONNECTION_READY = 'connection_ready',
-  CONNECTION_CLOSE = 'connection_close',
-
-  // Bidirectional streaming validation
-  VALIDATION_REQUEST_STREAM = 'validation_request_stream',
-  VALIDATION_RESPONSE_STREAM = 'validation_response_stream',
-  VALIDATION_PROGRESS_UPDATE = 'validation_progress_update',
-  VALIDATION_COMPLETE = 'validation_complete',
-
-  // Interactive user confirmations
-  USER_CONFIRMATION_REQUEST = 'user_confirmation_request',
-  USER_CONFIRMATION_RESPONSE = 'user_confirmation_response',
-  CONFIRMATION_TIMEOUT = 'confirmation_timeout',
-
-  // Stream multiplexing and management
-  STREAM_CREATE = 'stream_create',
-  STREAM_JOIN = 'stream_join',
-  STREAM_LEAVE = 'stream_leave',
-  STREAM_STATUS = 'stream_status',
-  STREAM_MULTIPLEXED_DATA = 'stream_multiplexed_data',
-
-  // Real-time progress and status
-  PROGRESS_UPDATE = 'progress_update',
-  STATUS_BROADCAST = 'status_broadcast',
-  ERROR_NOTIFICATION = 'error_notification',
-
-  // Connection health and monitoring
-  HEARTBEAT_PING = 'heartbeat_ping',
-  HEARTBEAT_PONG = 'heartbeat_pong',
-  CONNECTION_HEALTH = 'connection_health',
-  RECONNECTION_REQUEST = 'reconnection_request',
-
-  // Security and authentication
-  AUTH_CHALLENGE = 'auth_challenge',
-  AUTH_RESPONSE = 'auth_response',
-  AUTH_SUCCESS = 'auth_success',
-  AUTH_FAILURE = 'auth_failure',
-}
-
-/**
+  CONNECTION_ESTABLISHED = 'connection_established',CONNECTION_READY = 'connection_ready',CONNECTION_CLOSE = 'connection_close',// Bidirectional streaming validationVALIDATION_REQUEST_STREAM = 'validation_request_stream',VALIDATION_RESPONSE_STREAM = 'validation_response_stream',VALIDATION_PROGRESS_UPDATE = 'validation_progress_update',VALIDATION_COMPLETE = 'validation_complete',// Interactive user confirmationsUSER_CONFIRMATION_REQUEST = 'user_confirmation_request',USER_CONFIRMATION_RESPONSE = 'user_confirmation_response',CONFIRMATION_TIMEOUT = 'confirmation_timeout',// Stream multiplexing and managementSTREAM_CREATE = 'stream_create',STREAM_JOIN = 'stream_join',STREAM_LEAVE = 'stream_leave',STREAM_STATUS = 'stream_status',STREAM_MULTIPLEXED_DATA = 'stream_multiplexed_data',// Real-time progress and statusPROGRESS_UPDATE = 'progress_update',STATUS_BROADCAST = 'status_broadcast',ERROR_NOTIFICATION = 'error_notification',// Connection health and monitoringHEARTBEAT_PING = 'heartbeat_ping',HEARTBEAT_PONG = 'heartbeat_pong',CONNECTION_HEALTH = 'connection_health',RECONNECTION_REQUEST = 'reconnection_request',// Security and authenticationAUTH_CHALLENGE = 'auth_challenge',AUTH_RESPONSE = 'auth_response',AUTH_SUCCESS = 'auth_success',AUTH_FAILURE = 'auth_failure',}/**
  * Base streaming message structure
  */
 export interface ParlantStreamingMessage {
@@ -108,9 +55,7 @@ export interface ParlantStreamingMessage {
  * Message metadata for streaming optimization
  */
 export interface ParlantStreamingMetadata {
-  readonly priority: 'low' | 'normal' | 'high' | 'critical';
-  readonly requiresAck: boolean;
-  readonly compressed: boolean;
+  readonly priority: 'low' | 'normal' | 'high' | 'critical';readonly requiresAck: boolean;readonly compressed: boolean;
   readonly encrypted: boolean;
   readonly timeout?: number;
   readonly retryCount?: number;
@@ -127,9 +72,7 @@ export interface ParlantValidationStreamRequest {
   readonly operationId: string;
   readonly context: ParlantValidationContext;
   readonly action: ParlantValidationAction;
-  readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  readonly streamingOptions: ValidationStreamingOptions;
-  readonly requiresUserConfirmation: boolean;
+  readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';readonly streamingOptions: ValidationStreamingOptions;readonly requiresUserConfirmation: boolean;
 }
 
 /**
@@ -149,9 +92,7 @@ export interface ParlantValidationContext {
  * Security context for validation requests
  */
 export interface SecurityValidationContext {
-  readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';
-  readonly permissions: string[];
-  readonly roles: string[];
+  readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';readonly permissions: string[];readonly roles: string[];
   readonly auditTrailRequired: boolean;
   readonly complianceFlags: string[];
   readonly riskAssessment: SecurityRiskAssessment;
@@ -165,10 +106,7 @@ export interface SecurityRiskAssessment {
   readonly riskFactors: string[];
   readonly mitigationRequired: boolean;
   readonly escalationRequired: boolean;
-  readonly auditLevel: 'standard' | 'enhanced' | 'forensic';
-}
-
-/**
+  readonly auditLevel: 'standard' | 'enhanced' | 'forensic';}/**
  * Business context for validation
  */
 export interface BusinessValidationContext {
@@ -183,9 +121,7 @@ export interface BusinessValidationContext {
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
-  readonly impactLevel: 'minimal' | 'moderate' | 'significant' | 'critical';
-  readonly affectedSystems: string[];
-  readonly estimatedDowntime?: number;
+  readonly impactLevel: 'minimal' | 'moderate' | 'significant' | 'critical';readonly affectedSystems: string[];readonly estimatedDowntime?: number;
   readonly financialImpact?: number;
   readonly customerImpact?: string;
 }
@@ -194,21 +130,14 @@ export interface BusinessImpactAssessment {
  * Approval workflow configuration
  */
 export interface ApprovalWorkflowConfig {
-  readonly workflowType: 'auto' | 'single_approval' | 'multi_approval' | 'committee';
-  readonly approvers: string[];
-  readonly escalationPath: string[];
+  readonly workflowType: 'auto' | 'single_approval' | 'multi_approval' | 'committee';readonly approvers: string[];readonly escalationPath: string[];
   readonly timeoutMinutes: number;
-  readonly fallbackAction: 'deny' | 'escalate' | 'defer';
-}
-
-/**
+  readonly fallbackAction: 'deny' | 'escalate' | 'defer';}/**
  * Conversation history entry
  */
 export interface ConversationHistoryEntry {
   readonly timestamp: number;
-  readonly speaker: 'user' | 'assistant' | 'system';
-  readonly message: string;
-  readonly intent?: string;
+  readonly speaker: 'user' | 'assistant' | 'system';readonly message: string;readonly intent?: string;
   readonly confidence?: number;
   readonly metadata?: Record<string, unknown>;
 }
@@ -218,9 +147,7 @@ export interface ConversationHistoryEntry {
  */
 export interface ParlantValidationAction {
   readonly actionType: string;
-  readonly actionCategory: 'read' | 'write' | 'execute' | 'delete' | 'admin';
-  readonly parameters: Record<string, unknown>;
-  readonly expectedOutcome: string;
+  readonly actionCategory: 'read' | 'write' | 'execute' | 'delete' | 'admin';readonly parameters: Record<string, unknown>;readonly expectedOutcome: string;
   readonly reversible: boolean;
   readonly impact: ActionImpactAssessment;
   readonly prerequisites: ActionPrerequisite[];
@@ -230,9 +157,7 @@ export interface ParlantValidationAction {
  * Action impact assessment
  */
 export interface ActionImpactAssessment {
-  readonly scope: 'local' | 'system' | 'network' | 'external';
-  readonly dataAccess: boolean;
-  readonly stateChanges: boolean;
+  readonly scope: 'local' | 'system' | 'network' | 'external';readonly dataAccess: boolean;readonly stateChanges: boolean;
   readonly userInteraction: boolean;
   readonly systemResources: boolean;
   readonly networkAccess: boolean;
@@ -269,9 +194,7 @@ export interface ValidationStreamingOptions {
 export interface ParlantValidationStreamResponse {
   readonly validationId: string;
   readonly operationId: string;
-  readonly status: 'pending' | 'approved' | 'denied' | 'escalated' | 'timeout';
-  readonly reasoning: string;
-  readonly confidence: number;
+  readonly status: 'pending' | 'approved' | 'denied' | 'escalated' | 'timeout';readonly reasoning: string;readonly confidence: number;
   readonly riskAssessment: ResponseRiskAssessment;
   readonly conditions?: ValidationCondition[];
   readonly auditTrail: AuditTrailEntry[];
@@ -329,9 +252,7 @@ export interface ValidationResponseMetadata {
  */
 export interface StreamInfo {
   readonly streamId: string;
-  readonly streamType: 'validation' | 'progress' | 'confirmation' | 'monitoring';
-  readonly participants: string[];
-  readonly createdAt: Date;
+  readonly streamType: 'validation' | 'progress' | 'confirmation' | 'monitoring';readonly participants: string[];readonly createdAt: Date;
   lastActivity: Date;
   messageCount: number;
   status: StreamStatus;
@@ -343,16 +264,7 @@ export interface StreamInfo {
  * Stream status enumeration
  */
 export enum StreamStatus {
-  CREATING = 'creating',
-  ACTIVE = 'active',
-  IDLE = 'idle',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  ERROR = 'error',
-  CLOSED = 'closed',
-}
-
-/**
+  CREATING = 'creating',ACTIVE = 'active',IDLE = 'idle',PROCESSING = 'processing',COMPLETED = 'completed',ERROR = 'error',CLOSED = 'closed',}/**
  * Stream capabilities
  */
 export interface StreamCapabilities {
@@ -411,18 +323,7 @@ export interface StreamingConnectionInfo {
  * Streaming session status
  */
 export enum StreamingSessionStatus {
-  CONNECTING = 'connecting',
-  AUTHENTICATING = 'authenticating',
-  ACTIVE = 'active',
-  IDLE = 'idle',
-  STREAMING = 'streaming',
-  DISCONNECTING = 'disconnecting',
-  DISCONNECTED = 'disconnected',
-  ERROR = 'error',
-  SUSPENDED = 'suspended',
-}
-
-/**
+  CONNECTING = 'connecting',AUTHENTICATING = 'authenticating',ACTIVE = 'active',IDLE = 'idle',STREAMING = 'streaming',DISCONNECTING = 'disconnecting',DISCONNECTED = 'disconnected',ERROR = 'error',SUSPENDED = 'suspended',}/**
  * Streaming session capabilities
  */
 export interface StreamingSessionCapabilities {
@@ -459,12 +360,7 @@ export interface SessionSecurityInfo {
   readonly authenticationTime: Date;
   readonly permissions: string[];
   readonly roles: string[];
-  readonly securityLevel: 'basic' | 'enhanced' | 'maximum';
-  readonly auditTrailEnabled: boolean;
-  readonly encryptionLevel: 'none' | 'transport' | 'end_to_end';
-}
-
-// ===== PARLANT WEBSOCKET STREAMING BRIDGE SERVICE =====
+  readonly securityLevel: 'basic' | 'enhanced' | 'maximum';readonly auditTrailEnabled: boolean;readonly encryptionLevel: 'none' | 'transport' | 'end_to_end';}// ===== PARLANT WEBSOCKET STREAMING BRIDGE SERVICE =====
 
 /**
  * Parlant WebSocket Streaming Bridge Service
@@ -529,11 +425,7 @@ export class ParlantWebSocketStreamingBridgeService
    * Initialize the Parlant WebSocket Streaming Bridge
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `parlant_ws_init_${Date.now()}_${this.generateId()}`;
-
-    this.logger.log(`[${operationId}] Starting Parlant WebSocket Streaming Bridge initialization...`, {
-      operationId,
-      targetSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
+    const operationId = `parlant_ws_init_${Date.now()}_${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSocket Streaming Bridge initialization...`, {operationId,targetSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
       targetLatency: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
       maxStreamsPerSession: this.PERFORMANCE_TARGETS.MAX_STREAMS_PER_SESSION,
     });
@@ -555,9 +447,7 @@ export class ParlantWebSocketStreamingBridgeService
       this.emit('bridge:initialized', { operationId, port: this.getStreamingPort() });
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to initialize Parlant WebSocket Streaming Bridge`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Failed to initialize Parlant WebSocket Streaming Bridge`, {operationId,error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
       throw error;
@@ -570,10 +460,7 @@ export class ParlantWebSocketStreamingBridgeService
   private async initializeStreamingServer(): Promise<void> {
     const port = this.getStreamingPort();
 
-    this.logger.log(`🌐 Creating enterprise-grade WebSocket streaming server on port ${port}`);
-
-    const serverOptions: SafeWebSocketServerOptions = {
-      port,
+    this.logger.log(`🌐 Creating enterprise-grade WebSocket streaming server on port ${port}`);const serverOptions: SafeWebSocketServerOptions = {port,
       // High-performance compression configuration
       perMessageDeflate: {
         zlibDeflateOptions: {
@@ -622,32 +509,18 @@ export class ParlantWebSocketStreamingBridgeService
   private setupStreamingEventHandlers(): void {
     if (!this.webSocketServer) return;
 
-    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {
-      this.handleNewStreamingConnection(ws, convertIncomingMessageToRecord(req));
-    });
+    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {this.handleNewStreamingConnection(ws, convertIncomingMessageToRecord(req));});
 
-    this.webSocketServer.on('error', (error: Error) => {
-      this.logger.error('WebSocket streaming server error', {
-        error: error.message,
-        stack: error.stack,
+    this.webSocketServer.on('error', (error: Error) => {this.logger.error('WebSocket streaming server error', {error: error.message,stack: error.stack,
         timestamp: Date.now(),
         activeSessions: this.sessions.size,
         activeStreams: this.streams.size,
       });
-      this.emit('server_error', error);
-    });
-
-    this.webSocketServer.on('close', () => {
-      this.logger.log('WebSocket streaming server closed', {
-        totalSessions: this.sessions.size,
-        totalStreams: this.streams.size,
+      this.emit('server_error', error);});this.webSocketServer.on('close', () => {this.logger.log('WebSocket streaming server closed', {totalSessions: this.sessions.size,totalStreams: this.streams.size,
         activeConnections: this.clients.size,
         timestamp: Date.now(),
       });
-      this.emit('server_closed');
-    });
-
-    this.logger.log('✅ Streaming event handlers configured');
+      this.emit('server_closed');});this.logger.log('✅ Streaming event handlers configured');
   }
 
   /**
@@ -669,12 +542,7 @@ export class ParlantWebSocketStreamingBridgeService
         sessionId,
         clientId,
         connectionInfo: {
-          origin: req.headers?.origin ?? 'unknown',
-          userAgent: req.headers?.['user-agent'] ?? 'unknown',
-          remoteAddress: req.remoteAddress ?? 'unknown',
-          protocol: 'ws',
-          compression: true,
-          encryption: this.isEncryptionEnabled(),
+          origin: req.headers?.origin ?? 'unknown',userAgent: req.headers?.['user-agent'] ?? 'unknown',remoteAddress: req.remoteAddress ?? 'unknown',protocol: 'ws',compression: true,encryption: this.isEncryptionEnabled(),
           heartbeatInterval: this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL,
           maxStreamCount: this.PERFORMANCE_TARGETS.MAX_STREAMS_PER_SESSION,
         },
@@ -706,13 +574,9 @@ export class ParlantWebSocketStreamingBridgeService
         },
         security: {
           authenticated: false,
-          authenticationMethod: 'none',
-          authenticationTime: new Date(),
-          permissions: [],
+          authenticationMethod: 'none',authenticationTime: new Date(),permissions: [],
           roles: [],
-          securityLevel: 'basic',
-          auditTrailEnabled: true,
-          encryptionLevel: this.isEncryptionEnabled() ? 'transport' : 'none',
+          securityLevel: 'basic',auditTrailEnabled: true,encryptionLevel: this.isEncryptionEnabled() ? 'transport' : 'none',
         },
       };
 
@@ -759,9 +623,7 @@ export class ParlantWebSocketStreamingBridgeService
 
       // Clean up failed connection
       this.cleanupSession(sessionId);
-      ws.close(1011, 'Connection setup failed');
-    }
-  }
+      ws.close(1011, 'Connection setup failed');}}
 
   /**
    * Set up comprehensive client event handlers for streaming
@@ -772,20 +634,14 @@ export class ParlantWebSocketStreamingBridgeService
     ws: WebSocket.WebSocket
   ): void {
     // Message handler with streaming optimization
-    ws.on('message', async (data: WebSocket.RawData) => {
-      const startTime = performance.now();
-      await this.handleStreamingMessage(sessionId, data, startTime);
+    ws.on('message', async (data: WebSocket.RawData) => {const startTime = performance.now();await this.handleStreamingMessage(sessionId, data, startTime);
     });
 
     // Close handler with stream cleanup
-    ws.on('close', (code: number, reason: Buffer) => {
-      this.handleStreamingDisconnection(sessionId, code, reason);
-    });
+    ws.on('close', (code: number, reason: Buffer) => {this.handleStreamingDisconnection(sessionId, code, reason);});
 
     // Error handler with recovery
-    ws.on('error', (error: Error) => {
-      this.handleStreamingError(sessionId, error);
-    });
+    ws.on('error', (error: Error) => {this.handleStreamingError(sessionId, error);});
 
     // Pong handler for heartbeat
     ws.on('pong', () => {
@@ -809,12 +665,7 @@ export class ParlantWebSocketStreamingBridgeService
       // Handle compression if the message is compressed
       if (this.isMessageCompressed(data)) {
         const decompressed = await promisify(zlib.inflate)(data as Buffer);
-        rawMessage = decompressed.toString('utf8');
-      } else {
-        rawMessage = Buffer.from(data as ArrayBuffer).toString('utf8');
-      }
-
-      const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
+        rawMessage = decompressed.toString('utf8');} else {rawMessage = Buffer.from(data as ArrayBuffer).toString('utf8');}const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
 
       // Validate message structure
       if (!this.validateStreamingMessageStructure(message)) {
@@ -833,9 +684,7 @@ export class ParlantWebSocketStreamingBridgeService
       const processingTime = performance.now() - startTime;
       this.updateSessionPerformanceMetrics(sessionId, processingTime);
 
-      this.logger.debug(`[${operationId}] Processed streaming message`, {
-        operationId,
-        sessionId,
+      this.logger.debug(`[${operationId}] Processed streaming message`, {operationId,sessionId,
         messageType: message.type,
         streamId: message.streamId,
         processingTime,
@@ -898,9 +747,7 @@ export class ParlantWebSocketStreamingBridgeService
         break;
 
       default:
-        this.logger.warn(`[${operationId}] Unknown streaming message type: ${message.type}`, {
-          operationId,
-          sessionId,
+        this.logger.warn(`[${operationId}] Unknown streaming message type: ${message.type}`, {operationId,sessionId,
           messageType: message.type,
           streamId: message.streamId,
           processingTime: performance.now() - startTime,
@@ -936,28 +783,16 @@ export class ParlantWebSocketStreamingBridgeService
     await this.sendValidationResponseStream(sessionId, {
       validationId,
       operationId: request.operationId,
-      status: 'pending',
-      reasoning: 'Validation request received and queued for processing',
-      confidence: 0,
-      riskAssessment: {
+      status: 'pending',reasoning: 'Validation request received and queued for processing',confidence: 0,riskAssessment: {
         finalRiskScore: 0,
         riskMitigation: [],
         monitoringRequired: true,
-        followUpActions: ['Initial processing'],
-      },
-      conditions: [],
+        followUpActions: ['Initial processing'],},conditions: [],
       auditTrail: [{
         timestamp: Date.now(),
-        action: 'validation_received',
-        actor: 'system',
-        details: { validationId, operationId: request.operationId },
-        outcome: 'success',
-      }],
-      metadata: {
+        action: 'validation_received',actor: 'system',details: { validationId, operationId: request.operationId },outcome: 'success',}],metadata: {
         processingTime: 0,
-        validationMethod: 'streaming',
-        humanReviewed: false,
-        complianceFlags: request.context.securityContext.complianceFlags,
+        validationMethod: 'streaming',humanReviewed: false,complianceFlags: request.context.securityContext.complianceFlags,
       },
     });
 
@@ -979,10 +814,7 @@ export class ParlantWebSocketStreamingBridgeService
     // Update session validation count
     this.updateSessionValidationCount(sessionId);
 
-    this.emit('validation_request_stream', { sessionId, validationId, request, streamId: message.streamId });
-  }
-
-  /**
+    this.emit('validation_request_stream', { sessionId, validationId, request, streamId: message.streamId });}/**
    * Start validation progress streaming with real-time updates
    */
   private startValidationProgressStreaming(
@@ -1004,15 +836,12 @@ export class ParlantWebSocketStreamingBridgeService
       progress = Math.min(100, progress + (100 / options.maxProgressUpdates));
       updateCount++;
 
-      const progressStatus: 'pending' | 'approved' | 'denied' | 'escalated' | 'timeout' =
-        progress >= 100 ? 'approved' : 'pending';
+      const progressStatus: 'pending' | 'approved' | 'denied' | 'escalated' | 'timeout' =progress >= 100 ? 'approved' : 'pending';
 
       await this.sendValidationProgressUpdate(sessionId, {
         validationId,
         operationId: validationId,
-        stage: `validation_step_${updateCount}`,
-        progress,
-        status: progressStatus,
+        stage: `validation_step_${updateCount}`,progress,status: progressStatus,
         details: {
           currentStep: `Processing validation step ${updateCount}`,
           totalSteps: options.maxProgressUpdates,
@@ -1040,10 +869,7 @@ export class ParlantWebSocketStreamingBridgeService
     operationId: string
   ): Promise<void> {
     const streamId = this.generateStreamId();
-    const streamType = message.payload.streamType as StreamInfo['streamType'];
-
-    const streamInfo: StreamInfo = {
-      streamId,
+    const streamType = message.payload.streamType as StreamInfo['streamType'];const streamInfo: StreamInfo = {streamId,
       streamType,
       participants: [sessionId],
       createdAt: new Date(),
@@ -1110,9 +936,7 @@ export class ParlantWebSocketStreamingBridgeService
     const stream = this.streams.get(streamId);
 
     if (!stream) {
-      await this.sendErrorNotification(sessionId, `Stream not found: ${streamId}`, operationId);
-      return;
-    }
+      await this.sendErrorNotification(sessionId, `Stream not found: ${streamId}`, operationId);return;}
 
     const participants = this.streamParticipants.get(streamId) ?? new Set();
 
@@ -1172,9 +996,7 @@ export class ParlantWebSocketStreamingBridgeService
       .find(([, sid]) => sid === sessionId)?.[0];
 
     if (!clientId) {
-      this.logger.warn(`Client not found for session: ${sessionId}`);
-      return;
-    }
+      this.logger.warn(`Client not found for session: ${sessionId}`);return;}
 
     const client = this.clients.get(clientId);
     if (!client || client.readyState !== WebSocket.WebSocket.OPEN) {
@@ -1239,14 +1061,10 @@ export class ParlantWebSocketStreamingBridgeService
       sequence: ++this.sequence,
       payload: response as unknown as Record<string, unknown>,
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compressed: true,
+        priority: 'high',requiresAck: true,compressed: true,
         encrypted: false,
         streamMultiplexed: false,
-        routingHints: ['validation', 'response'],
-        auditRequired: true,
-      },
+        routingHints: ['validation', 'response'],auditRequired: true,},
     };
 
     await this.sendMessage(sessionId, message);
@@ -1276,14 +1094,10 @@ export class ParlantWebSocketStreamingBridgeService
       sequence: ++this.sequence,
       payload: update,
       metadata: {
-        priority: 'normal',
-        requiresAck: false,
-        compressed: true,
+        priority: 'normal',requiresAck: false,compressed: true,
         encrypted: false,
         streamMultiplexed: !!streamId,
-        routingHints: ['validation', 'progress'],
-        auditRequired: false,
-      },
+        routingHints: ['validation', 'progress'],auditRequired: false,},
     };
 
     await this.sendMessage(sessionId, message, streamId);
@@ -1308,12 +1122,8 @@ export class ParlantWebSocketStreamingBridgeService
         validationId,
         completedAt: Date.now(),
         totalUpdates: this.sequence,
-        finalStatus: 'completed',
-      },
-      metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compressed: false,
+        finalStatus: 'completed',},metadata: {
+        priority: 'high',requiresAck: true,compressed: false,
         encrypted: false,
         streamMultiplexed: !!streamId,
         routingHints: ['validation', 'completion'],
@@ -1330,18 +1140,9 @@ export class ParlantWebSocketStreamingBridgeService
    * Generate unique identifiers
    */
   private generateClientId(): string {
-    return `client_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateSessionId(): string {
-    return `session_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateStreamId(): string {
-    return `stream_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateMessageId(): string {
+    return `client_${Date.now()}_${this.generateId()}`;}private generateSessionId(): string {
+    return `session_${Date.now()}_${this.generateId()}`;}private generateStreamId(): string {
+    return `stream_${Date.now()}_${this.generateId()}`;}private generateMessageId(): string {
     return `msg_${Date.now()}_${this.generateId()}`;
   }
 
@@ -1353,35 +1154,18 @@ export class ParlantWebSocketStreamingBridgeService
    * Configuration getters
    */
   private getStreamingPort(): number {
-    return this.configService.get<number>('PARLANT_STREAMING_PORT', 8082);
-  }
-
-  private getAllowedOrigins(): string[] {
-    const origins = this.configService.get<string>('PARLANT_ALLOWED_ORIGINS', '');
-    return origins ? origins.split(',').map(o => o.trim()) : [];
-  }
-
-  private isHttpsRequired(): boolean {
-    return this.configService.get<boolean>('PARLANT_REQUIRE_HTTPS', false);
-  }
-
-  private isEncryptionEnabled(): boolean {
-    return this.configService.get<boolean>('PARLANT_ENCRYPTION_ENABLED', true);
-  }
-
-  /**
+    return this.configService.get<number>('PARLANT_STREAMING_PORT', 8082);}private getAllowedOrigins(): string[] {
+    const origins = this.configService.get<string>('PARLANT_ALLOWED_ORIGINS', '');return origins ? origins.split(',').map(o => o.trim()) : [];}private isHttpsRequired(): boolean {
+    return this.configService.get<boolean>('PARLANT_REQUIRE_HTTPS', false);}private isEncryptionEnabled(): boolean {
+    return this.configService.get<boolean>('PARLANT_ENCRYPTION_ENABLED', true);}/**
    * Validation and utility methods
    */
   private validateStreamingMessageStructure(message: unknown): message is ParlantStreamingMessage {
-    if (typeof message !== 'object' || message === null) return false;
-
-    const msg = message as Record<string, unknown>;
-    return !!(
+    if (typeof message !== 'object' || message === null) return false;const msg = message as Record<string, unknown>;return !!(
       msg.type &&
       msg.messageId &&
       msg.sessionId &&
-      typeof msg.timestamp === 'number' &&
-      typeof msg.sequence === 'number' &&
+      typeof msg.timestamp === 'number' &&typeof msg.sequence === 'number' &&
       msg.payload &&
       msg.metadata
     );
@@ -1458,13 +1242,7 @@ export class ParlantWebSocketStreamingBridgeService
     compressed: boolean,
     originalSize: number
   ): void {
-    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);
-
-    if (compressed) {
-      this.performanceMetrics.set(`compression_${sessionId}`, originalSize);
-    }
-
-    // Log performance warning if delivery exceeds target
+    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);if (compressed) {this.performanceMetrics.set(`compression_${sessionId}`, originalSize);}// Log performance warning if delivery exceeds target
     if (deliveryTime > this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY) {
       this.logger.warn(`Message delivery exceeded target latency`, {
         sessionId,
@@ -1480,114 +1258,70 @@ export class ParlantWebSocketStreamingBridgeService
 
   private async initializeHeartbeatSystem(): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.log('📡 Heartbeat system initialized');
-  }
-
-  private async initializePerformanceMonitoring(): Promise<void> {
+    this.logger.log('📡 Heartbeat system initialized');}private async initializePerformanceMonitoring(): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.log('📊 Performance monitoring initialized');
-  }
-
-  private async initializeSecuritySystems(): Promise<void> {
+    this.logger.log('📊 Performance monitoring initialized');}private async initializeSecuritySystems(): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
     this.logger.log('🔐 Security systems initialized');
   }
 
   private async initiateAuthentication(sessionId: string): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔐 Authentication initiated for session: ${sessionId}`);
-  }
-
-  private startSessionHeartbeat(sessionId: string): void {
+    this.logger.debug(`🔐 Authentication initiated for session: ${sessionId}`);}private startSessionHeartbeat(sessionId: string): void {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`💓 Heartbeat started for session: ${sessionId}`);
-  }
-
-  private async sendConnectionEstablished(sessionId: string, _connectionTime: number): Promise<void> {
+    this.logger.debug(`💓 Heartbeat started for session: ${sessionId}`);}private async sendConnectionEstablished(sessionId: string, _connectionTime: number): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔗 Connection established notification sent: ${sessionId}`);
-  }
-
-  private handleHeartbeatResponse(sessionId: string): void {
+    this.logger.debug(`🔗 Connection established notification sent: ${sessionId}`);}private handleHeartbeatResponse(sessionId: string): void {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`💓 Heartbeat response received: ${sessionId}`);
-  }
-
-  private handleStreamingDisconnection(sessionId: string, code: number, _reason: Buffer): void {
+    this.logger.debug(`💓 Heartbeat response received: ${sessionId}`);}private handleStreamingDisconnection(sessionId: string, code: number, _reason: Buffer): void {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.log(`🔌 Streaming disconnection handled: ${sessionId}, code: ${code}`);
-    this.cleanupSession(sessionId);
-  }
+    this.logger.log(`🔌 Streaming disconnection handled: ${sessionId}, code: ${code}`);this.cleanupSession(sessionId);}
 
   private handleStreamingError(sessionId: string, error: Error): void {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.error(`❌ Streaming error handled: ${sessionId}`, error);
-  }
-
-  private async handleUserConfirmationResponse(
+    this.logger.error(`❌ Streaming error handled: ${sessionId}`, error);}private async handleUserConfirmationResponse(
     sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`✅ User confirmation response handled: ${operationId}`);
-  }
-
-  private async handleStreamLeave(
+    this.logger.debug(`✅ User confirmation response handled: ${operationId}`);}private async handleStreamLeave(
     sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`👋 Stream leave handled: ${operationId}`);
-  }
-
-  private async handleHeartbeatPing(
+    this.logger.debug(`👋 Stream leave handled: ${operationId}`);}private async handleHeartbeatPing(
     sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`💓 Heartbeat ping handled: ${operationId}`);
-  }
-
-  private async handleAuthResponse(
+    this.logger.debug(`💓 Heartbeat ping handled: ${operationId}`);}private async handleAuthResponse(
     sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔐 Auth response handled: ${operationId}`);
-  }
-
-  private handleConnectionCloseRequest(
+    this.logger.debug(`🔐 Auth response handled: ${operationId}`);}private handleConnectionCloseRequest(
     sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
   ): void {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔌 Connection close request handled: ${operationId}`);
-  }
-
-  private async requestUserConfirmation(
+    this.logger.debug(`🔌 Connection close request handled: ${operationId}`);}private async requestUserConfirmation(
     sessionId: string,
     _request: ParlantValidationStreamRequest,
     _streamId?: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`❓ User confirmation requested for session: ${sessionId}`);
-  }
-
-  private async sendErrorNotification(
+    this.logger.debug(`❓ User confirmation requested for session: ${sessionId}`);}private async sendErrorNotification(
     sessionId: string,
     errorMessage: string,
     _operationId?: string
   ): Promise<void> {
     // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`❌ Error notification sent: ${sessionId} - ${errorMessage}`);
-  }
-
-  private async sendStreamStatus(
+    this.logger.debug(`❌ Error notification sent: ${sessionId} - ${errorMessage}`);}private async sendStreamStatus(
     sessionId: string,
     _status: Record<string, unknown>
   ): Promise<void> {
@@ -1656,14 +1390,10 @@ export class ParlantWebSocketStreamingBridgeService
    * Clean shutdown of the streaming bridge
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down Parlant WebSocket Streaming Bridge...');
-    await this.performGracefulShutdown();
-  }
+    this.logger.log('🔄 Shutting down Parlant WebSocket Streaming Bridge...');await this.performGracefulShutdown();}
 
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('🔄 Application shutdown - cleaning up Parlant WebSocket Streaming Bridge...');
-    await this.performGracefulShutdown();
-  }
+    this.logger.log('🔄 Application shutdown - cleaning up Parlant WebSocket Streaming Bridge...');await this.performGracefulShutdown();}
 
   /**
    * Perform graceful shutdown with resource cleanup
@@ -1684,17 +1414,13 @@ export class ParlantWebSocketStreamingBridgeService
     // Close all client connections gracefully
     this.clients.forEach((client, _clientId) => {
       if (client.readyState === WebSocket.WebSocket.OPEN) {
-        client.close(1000, 'Server shutting down');
-      }
-    });
+        client.close(1000, 'Server shutting down');}});
 
     // Close the WebSocket server
     if (this.webSocketServer) {
       await new Promise<void>((resolve) => {
         this.webSocketServer?.close(() => {
-          this.logger.log('✅ Parlant WebSocket Streaming Bridge shutdown complete');
-          resolve();
-        });
+          this.logger.log('✅ Parlant WebSocket Streaming Bridge shutdown complete');resolve();});
       });
     }
 
@@ -1721,18 +1447,11 @@ export class ParlantWebSocketStreamingBridgeService
     const shutdownMessage: ParlantStreamingMessage = {
       type: ParlantStreamingMessageType.CONNECTION_CLOSE,
       messageId: this.generateMessageId(),
-      sessionId: 'system',
-      timestamp: Date.now(),
-      sequence: ++this.sequence,
+      sessionId: 'system',timestamp: Date.now(),sequence: ++this.sequence,
       payload: {
-        reason: 'server_shutdown',
-        message: 'Parlant WebSocket Streaming Bridge is shutting down',
-        reconnectDelay: 5000,
-      },
+        reason: 'server_shutdown',message: 'Parlant WebSocket Streaming Bridge is shutting down',reconnectDelay: 5000,},
       metadata: {
-        priority: 'critical',
-        requiresAck: false,
-        compressed: false,
+        priority: 'critical',requiresAck: false,compressed: false,
         encrypted: false,
         routingHints: ['shutdown'],
         auditRequired: true,
@@ -1818,8 +1537,7 @@ export class ParlantWebSocketStreamingBridgeService
       auditTrailEnabled: true,
     }
   ): Promise<unknown> {
-    const validationId = `validation_${Date.now()}_${this.generateId()}`;
-    const operationId = `operation_${Date.now()}_${this.generateId()}`;
+    const validationId = `validation_${Date.now()}_${this.generateId()}`;const operationId = `operation_${Date.now()}_${this.generateId()}`;
 
     return new Promise((resolve, reject) => {
       // Store callback for when validation completes
@@ -1829,9 +1547,7 @@ export class ParlantWebSocketStreamingBridgeService
       setTimeout(() => {
         if (this.validationCallbacks.has(validationId)) {
           this.validationCallbacks.delete(validationId);
-          reject(new Error('Validation request timeout'));
-        }
-      }, 30000); // 30 second timeout
+          reject(new Error('Validation request timeout'));}}, 30000); // 30 second timeout
 
       // Create and send validation request
       const request: ParlantValidationStreamRequest = {
@@ -1852,14 +1568,10 @@ export class ParlantWebSocketStreamingBridgeService
         sequence: ++this.sequence,
         payload: request as unknown as Record<string, unknown>,
         metadata: {
-          priority: 'high',
-          requiresAck: true,
-          compressed: true,
+          priority: 'high',requiresAck: true,compressed: true,
           encrypted: false,
           streamMultiplexed: streamingOptions.multiplexingEnabled,
-          routingHints: ['validation', 'api'],
-          auditRequired: streamingOptions.auditTrailEnabled,
-        },
+          routingHints: ['validation', 'api'],auditRequired: streamingOptions.auditTrailEnabled,},
       };
 
       this.sendMessage(sessionId, message);
@@ -1869,26 +1581,12 @@ export class ParlantWebSocketStreamingBridgeService
   /**
    * Assess risk level for validation action
    */
-  private assessRiskLevel(action: ParlantValidationAction): 'low' | 'medium' | 'high' | 'critical' {
-    if (action.impact.scope === 'external' || !action.reversible) {
-      return 'critical';
-    }
-    if (action.actionCategory === 'delete' || action.actionCategory === 'admin') {
-      return 'high';
-    }
-    if (action.impact.stateChanges || action.impact.networkAccess) {
-      return 'medium';
-    }
-    return 'low';
-  }
-
-  /**
+  private assessRiskLevel(action: ParlantValidationAction): 'low' | 'medium' | 'high' | 'critical' {if (action.impact.scope === 'external' || !action.reversible) {return 'critical';}if (action.actionCategory === 'delete' || action.actionCategory === 'admin') {return 'high';}if (action.impact.stateChanges || action.impact.networkAccess) {
+      return 'medium';}return 'low';}/**
    * Determine if action requires user confirmation
    */
   private requiresUserConfirmation(action: ParlantValidationAction): boolean {
-    return action.actionCategory === 'delete' ||
-           action.actionCategory === 'admin' ||
-           action.impact.scope === 'external' ||
+    return action.actionCategory === 'delete' ||action.actionCategory === 'admin' ||action.impact.scope === 'external' ||
            !action.reversible;
   }
 }

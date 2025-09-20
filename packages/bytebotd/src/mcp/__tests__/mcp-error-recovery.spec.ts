@@ -22,23 +22,12 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import { EventEmitter } from 'events';
-import { ComputerUseTools } from '../computer-use.tools';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-import { McpSchemas, McpToolResponse, McpError } from '../types';
-import {
-  createMockService,
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { ComputerUseTools } from '../computer-use.tools';import { ComputerUseService } from '../../computer-use/computer-use.service';import { McpSchemas, McpToolResponse, McpError } from '../types';import {createMockService,
   createMockLogger,
   TestUtils,
   AssertionHelpers,
   MockDataProviders,
-} from '../../test-utils';
-
-/**
- * Error Scenario Generator for comprehensive testing
+} from '../../test-utils';/*** Error Scenario Generator for comprehensive testing
  */
 class ErrorScenarioGenerator {
   /**
@@ -47,40 +36,15 @@ class ErrorScenarioGenerator {
   static generateSystemErrors() {
     return [
       {
-        name: 'ENOENT',
-        message: 'No such file or directory',
-        code: 'ENOENT',
-        category: 'file_system',
-        recoverable: false,
-      },
+        name: 'ENOENT',message: 'No such file or directory',code: 'ENOENT',category: 'file_system',recoverable: false,},
       {
-        name: 'EACCES',
-        message: 'Permission denied',
-        code: 'EACCES',
-        category: 'permissions',
-        recoverable: false,
-      },
+        name: 'EACCES',message: 'Permission denied',code: 'EACCES',category: 'permissions',recoverable: false,},
       {
-        name: 'ETIMEDOUT',
-        message: 'Operation timed out',
-        code: 'ETIMEDOUT',
-        category: 'network',
-        recoverable: true,
-      },
+        name: 'ETIMEDOUT',message: 'Operation timed out',code: 'ETIMEDOUT',category: 'network',recoverable: true,},
       {
-        name: 'ECONNREFUSED',
-        message: 'Connection refused',
-        code: 'ECONNREFUSED',
-        category: 'network',
-        recoverable: true,
-      },
+        name: 'ECONNREFUSED',message: 'Connection refused',code: 'ECONNREFUSED',category: 'network',recoverable: true,},
       {
-        name: 'ENOMEM',
-        message: 'Cannot allocate memory',
-        code: 'ENOMEM',
-        category: 'resource',
-        recoverable: false,
-      },
+        name: 'ENOMEM',message: 'Cannot allocate memory',code: 'ENOMEM',category: 'resource',recoverable: false,},
     ];
   }
 
@@ -91,39 +55,19 @@ class ErrorScenarioGenerator {
     return [
       {
         code: -32700,
-        message: 'Parse error',
-        data: { description: 'Invalid JSON was received by the server' },
-        category: 'parse',
-        recoverable: false,
-      },
+        message: 'Parse error',data: { description: 'Invalid JSON was received by the server' },category: 'parse',recoverable: false,},
       {
         code: -32600,
-        message: 'Invalid Request',
-        data: { description: 'The JSON sent is not a valid Request object' },
-        category: 'request',
-        recoverable: false,
-      },
+        message: 'Invalid Request',data: { description: 'The JSON sent is not a valid Request object' },category: 'request',recoverable: false,},
       {
         code: -32601,
-        message: 'Method not found',
-        data: { description: 'The method does not exist / is not available' },
-        category: 'method',
-        recoverable: false,
-      },
+        message: 'Method not found',data: { description: 'The method does not exist / is not available' },category: 'method',recoverable: false,},
       {
         code: -32602,
-        message: 'Invalid params',
-        data: { description: 'Invalid method parameter(s)' },
-        category: 'params',
-        recoverable: true,
-      },
+        message: 'Invalid params',data: { description: 'Invalid method parameter(s)' },category: 'params',recoverable: true,},
       {
         code: -32603,
-        message: 'Internal error',
-        data: { description: 'Internal JSON-RPC error' },
-        category: 'internal',
-        recoverable: true,
-      },
+        message: 'Internal error',data: { description: 'Internal JSON-RPC error' },category: 'internal',recoverable: true,},
     ];
   }
 
@@ -133,39 +77,19 @@ class ErrorScenarioGenerator {
   static generateToolErrors() {
     return [
       {
-        tool: 'screenshot',
-        error: new Error('Display not available'),
-        category: 'hardware',
-        recoverable: true,
-        retryable: true,
+        tool: 'screenshot',error: new Error('Display not available'),category: 'hardware',recoverable: true,retryable: true,
       },
       {
-        tool: 'move_mouse',
-        error: new Error('Mouse not detected'),
-        category: 'hardware',
-        recoverable: true,
-        retryable: true,
+        tool: 'move_mouse',error: new Error('Mouse not detected'),category: 'hardware',recoverable: true,retryable: true,
       },
       {
-        tool: 'type_text',
-        error: new Error('Keyboard input blocked'),
-        category: 'security',
-        recoverable: false,
-        retryable: false,
+        tool: 'type_text',error: new Error('Keyboard input blocked'),category: 'security',recoverable: false,retryable: false,
       },
       {
-        tool: 'read_file',
-        error: new Error('File locked by another process'),
-        category: 'concurrency',
-        recoverable: true,
-        retryable: true,
+        tool: 'read_file',error: new Error('File locked by another process'),category: 'concurrency',recoverable: true,retryable: true,
       },
       {
-        tool: 'write_file',
-        error: new Error('Disk full'),
-        category: 'resource',
-        recoverable: false,
-        retryable: false,
+        tool: 'write_file',error: new Error('Disk full'),category: 'resource',recoverable: false,retryable: false,
       },
     ];
   }
@@ -176,29 +100,13 @@ class ErrorScenarioGenerator {
   static generateResourceExhaustionScenarios() {
     return [
       {
-        type: 'memory',
-        description: 'Out of memory condition',
-        simulate: () => new Error('ENOMEM: Cannot allocate memory'),
-        critical: true,
-      },
+        type: 'memory',description: 'Out of memory condition',simulate: () => new Error('ENOMEM: Cannot allocate memory'),critical: true,},
       {
-        type: 'file_descriptors',
-        description: 'Too many open files',
-        simulate: () => new Error('EMFILE: Too many open files'),
-        critical: true,
-      },
+        type: 'file_descriptors',description: 'Too many open files',simulate: () => new Error('EMFILE: Too many open files'),critical: true,},
       {
-        type: 'disk_space',
-        description: 'No space left on device',
-        simulate: () => new Error('ENOSPC: No space left on device'),
-        critical: true,
-      },
+        type: 'disk_space',description: 'No space left on device',simulate: () => new Error('ENOSPC: No space left on device'),critical: true,},
       {
-        type: 'cpu_throttling',
-        description: 'CPU throttling due to high load',
-        simulate: () => new Error('Process CPU limit exceeded'),
-        critical: false,
-      },
+        type: 'cpu_throttling',description: 'CPU throttling due to high load',simulate: () => new Error('Process CPU limit exceeded'),critical: false,},
     ];
   }
 
@@ -208,24 +116,9 @@ class ErrorScenarioGenerator {
   static generateConcurrentErrorScenarios() {
     return [
       {
-        name: 'race_condition',
-        description: 'Multiple tools accessing same resource',
-        tools: ['read_file', 'write_file'],
-        expectedBehavior: 'serialization or graceful failure',
-      },
-      {
-        name: 'deadlock_prevention',
-        description: 'Circular dependency between tools',
-        tools: ['move_mouse', 'click_mouse'],
-        expectedBehavior: 'timeout and recovery',
-      },
-      {
-        name: 'resource_contention',
-        description: 'Multiple screenshot requests',
-        tools: ['screenshot', 'screenshot'],
-        expectedBehavior: 'queue management',
-      },
-    ];
+        name: 'race_condition',description: 'Multiple tools accessing same resource',tools: ['read_file', 'write_file'],expectedBehavior: 'serialization or graceful failure',},{
+        name: 'deadlock_prevention',description: 'Circular dependency between tools',tools: ['move_mouse', 'click_mouse'],expectedBehavior: 'timeout and recovery',},{
+        name: 'resource_contention',description: 'Multiple screenshot requests',tools: ['screenshot', 'screenshot'],expectedBehavior: 'queue management',},];
   }
 }
 
@@ -286,16 +179,10 @@ class ErrorRecoveryManager {
     const breaker = this.circuitBreakers.get(serviceId) || {
       failures: 0,
       lastFailure: 0,
-      state: 'closed' as const,
-    };
-
-    const now = Date.now();
+      state: 'closed' as const,};const now = Date.now();
 
     // Check if we should reset the circuit breaker
-    if (breaker.state === 'open' && now - breaker.lastFailure > timeoutWindow) {
-      breaker.state = 'half-open';
-      breaker.failures = 0;
-    }
+    if (breaker.state === 'open' && now - breaker.lastFailure > timeoutWindow) {breaker.state = 'half-open';breaker.failures = 0;}
 
     // Reject if circuit is open
     if (breaker.state === 'open') {
@@ -306,10 +193,7 @@ class ErrorRecoveryManager {
       const result = await operation();
       
       // Reset on success
-      if (breaker.state === 'half-open') {
-        breaker.state = 'closed';
-        breaker.failures = 0;
-      }
+      if (breaker.state === 'half-open') {breaker.state = 'closed';breaker.failures = 0;}
       
       this.circuitBreakers.set(serviceId, breaker);
       return result;
@@ -318,10 +202,7 @@ class ErrorRecoveryManager {
       breaker.lastFailure = now;
 
       if (breaker.failures >= failureThreshold) {
-        breaker.state = 'open';
-      }
-
-      this.circuitBreakers.set(serviceId, breaker);
+        breaker.state = 'open';}this.circuitBreakers.set(serviceId, breaker);
       throw error;
     }
   }
@@ -433,9 +314,7 @@ class ResourceMonitor {
   }
 }
 
-describe('MCP Error Handling and Recovery', () => {
-  let module: TestingModule;
-  let computerUseTools: ComputerUseTools;
+describe('MCP Error Handling and Recovery', () => {let module: TestingModule;let computerUseTools: ComputerUseTools;
   let mockComputerUseService: jest.Mocked<ComputerUseService>;
   let recoveryManager: ErrorRecoveryManager;
   let resourceMonitor: ResourceMonitor;
@@ -448,25 +327,7 @@ describe('MCP Error Handling and Recovery', () => {
     // Create mock service with error simulation capabilities
     mockComputerUseService = {
       ...createMockService([
-        'action',
-        'screenshot',
-        'moveMouse',
-        'clickMouse',
-        'traceMouse',
-        'dragMouse',
-        'pressMouse',
-        'scroll',
-        'typeKeys',
-        'pressKeys',
-        'typeText',
-        'pasteText',
-        'wait',
-        'application',
-        'cursorPosition',
-        'writeFile',
-        'readFile',
-        'initializeNutJS',
-        'validateCoordinates',
+        'action','screenshot','moveMouse','clickMouse','traceMouse','dragMouse','pressMouse','scroll','typeKeys','pressKeys','typeText','pasteText','wait','application','cursorPosition','writeFile','readFile','initializeNutJS','validateCoordinates',
       ]),
       logger: createMockLogger(),
       cuaEnabled: true,
@@ -491,10 +352,7 @@ describe('MCP Error Handling and Recovery', () => {
     // Take initial memory snapshot
     resourceMonitor.takeMemorySnapshot();
 
-    console.log(`[${testId}] MCP error handling and recovery test setup completed`);
-  });
-
-  afterEach(() => {
+    console.log(`[${testId}] MCP error handling and recovery test setup completed`);});afterEach(() => {
     console.log(`[${testId}] MCP error handling and recovery test cleanup completed`);
     recoveryManager.reset();
     resourceMonitor.reset();
@@ -503,17 +361,13 @@ describe('MCP Error Handling and Recovery', () => {
   /**
    * Test Suite: Connection Error Handling
    */
-  describe('Connection Error Handling', () => {
-    it('should handle connection timeouts gracefully', async () => {
-      const operationId = `${testId}_connection_timeout`;
-      console.log(`[${operationId}] Testing connection timeout handling`);
+  describe('Connection Error Handling', () => {it('should handle connection timeouts gracefully', async () => {
+      const operationId = `${testId}_connection_timeout`;console.log(`[${operationId}] Testing connection timeout handling`);
 
       // Mock service to simulate timeout
       mockComputerUseService.screenshot.mockImplementation(() => 
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('ETIMEDOUT: Operation timed out')), 100)
-        )
-      );
+          setTimeout(() => reject(new Error('ETIMEDOUT: Operation timed out')), 100)));
 
       const startTime = performance.now();
       
@@ -535,8 +389,7 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should implement exponential backoff for retry attempts', async () => {
-      const operationId = `${testId}_exponential_backoff`;
-      console.log(`[${operationId}] Testing exponential backoff retry mechanism`);
+      const operationId = `${testId}_exponential_backoff`;console.log(`[${operationId}] Testing exponential backoff retry mechanism`);
 
       let attemptCount = 0;
       const attemptTimes: number[] = [];
@@ -577,15 +430,10 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should implement circuit breaker pattern for failing services', async () => {
-      const operationId = `${testId}_circuit_breaker`;
-      console.log(`[${operationId}] Testing circuit breaker pattern`);
+      const operationId = `${testId}_circuit_breaker`;console.log(`[${operationId}] Testing circuit breaker pattern`);
 
       // Mock service to always fail
-      mockComputerUseService.typeText.mockRejectedValue(new Error('Service unavailable'));
-
-      const serviceId = 'type_text_service';
-      const failureThreshold = 3;
-      let failureCount = 0;
+      mockComputerUseService.typeText.mockRejectedValue(new Error('Service unavailable'));const serviceId = 'type_text_service';const failureThreshold = 3;let failureCount = 0;
 
       // Trigger circuit breaker
       for (let i = 0; i < failureThreshold + 1; i++) {
@@ -605,9 +453,7 @@ describe('MCP Error Handling and Recovery', () => {
       // Next call should fail immediately due to open circuit
       try {
         await recoveryManager.executeWithCircuitBreaker(
-          () => computerUseTools.typeText({ text: 'test' }),
-          serviceId,
-          failureThreshold,
+          () => computerUseTools.typeText({ text: 'test' }),serviceId,failureThreshold,
           1000
         );
       } catch (error) {
@@ -617,21 +463,13 @@ describe('MCP Error Handling and Recovery', () => {
 
       const stats = recoveryManager.getRecoveryStats();
       const circuitBreaker = stats.circuitBreakers.find(cb => cb.serviceId === serviceId);
-      expect(circuitBreaker?.state).toBe('open');
-    });
-  });
+      expect(circuitBreaker?.state).toBe('open');});});
 
   /**
    * Test Suite: Tool Execution Error Recovery
    */
-  describe('Tool Execution Error Recovery', () => {
-    it('should handle tool-specific errors with appropriate recovery strategies', async () => {
-      const operationId = `${testId}_tool_error_recovery`;
-      console.log(`[${operationId}] Testing tool-specific error recovery`);
-
-      const toolErrors = ErrorScenarioGenerator.generateToolErrors();
-
-      for (const errorScenario of toolErrors) {
+  describe('Tool Execution Error Recovery', () => {it('should handle tool-specific errors with appropriate recovery strategies', async () => {
+      const operationId = `${testId}_tool_error_recovery`;console.log(`[${operationId}] Testing tool-specific error recovery`);const toolErrors = ErrorScenarioGenerator.generateToolErrors();for (const errorScenario of toolErrors) {
         const mockMethod = mockComputerUseService[errorScenario.tool as keyof typeof mockComputerUseService] as jest.MockedFunction<any>;
         
         if (mockMethod) {
@@ -649,18 +487,12 @@ describe('MCP Error Handling and Recovery', () => {
             try {
               const result = await recoveryManager.retryWithBackoff(
                 () => (computerUseTools as unknown)[errorScenario.tool]({ test: true }),
-                `${operationId}${errorScenario.tool}`,
-                3,
-                50
+                `${operationId}${errorScenario.tool}`,3,50
               );
 
               expect(result).toBeDefined();
               expect(result.recovered).toBe(true);
-              console.log(`[${operationId}] Tool ${errorScenario.tool} recovered successfully`);
-            } catch (error) {
-              console.log(`[${operationId}] Tool ${errorScenario.tool} failed to recover: ${error.message}`);
-            }
-          } else {
+              console.log(`[${operationId}] Tool ${errorScenario.tool} recovered successfully`);} catch (error) {console.log(`[${operationId}] Tool ${errorScenario.tool} failed to recover: ${error.message}`);}} else {
             // Non-retryable errors should fail immediately
             try {
               await (computerUseTools as unknown)[errorScenario.tool]({ test: true });
@@ -674,8 +506,7 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should implement fallback mechanisms for critical tools', async () => {
-      const operationId = `${testId}_fallback_mechanisms`;
-      console.log(`[${operationId}] Testing fallback mechanisms for critical tools`);
+      const operationId = `${testId}_fallback_mechanisms`;console.log(`[${operationId}] Testing fallback mechanisms for critical tools`);
 
       // Primary screenshot method fails
       mockComputerUseService.screenshot.mockRejectedValue(new Error('Primary screenshot failed'));
@@ -689,13 +520,9 @@ describe('MCP Error Handling and Recovery', () => {
           
           // Simulate fallback method (e.g., alternative capture mechanism)
           return {
-            image: 'fallback_screenshot_data',
-            metadata: {
-              width: 1024,
+            image: 'fallback_screenshot_data',metadata: {width: 1024,
               height: 768,
-              format: 'png' as const,
-              captureTime: new Date(),
-              operationId: 'fallback_op',
+              format: 'png' as const,captureTime: new Date(),operationId: 'fallback_op',
               fallback: true,
             },
           };
@@ -710,30 +537,13 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should handle resource cleanup on error', async () => {
-      const operationId = `${testId}_resource_cleanup`;
-      console.log(`[${operationId}] Testing resource cleanup on error`);
+      const operationId = `${testId}_resource_cleanup`;console.log(`[${operationId}] Testing resource cleanup on error`);
 
-      resourceMonitor.trackResourceAllocation('file_handles', 5);
-      resourceMonitor.trackResourceAllocation('memory_buffers', 3);
-
-      // Mock service that allocates resources then fails
-      mockComputerUseService.readFile.mockImplementation(async () => {
-        resourceMonitor.trackResourceAllocation('temp_files', 1);
-        throw new Error('Read operation failed');
-      });
-
-      try {
-        await computerUseTools.readFile({ path: '/test/file.txt' });
-      } catch (error) {
-        // Simulate cleanup
-        resourceMonitor.trackResourceDeallocation('temp_files', 1);
-        resourceMonitor.trackResourceDeallocation('file_handles', 1);
-        
-        expect(error.message).toBe('Read operation failed');
-        console.log(`[${operationId}] Error handled with proper resource cleanup`);
-      }
-
-      const summary = resourceMonitor.getResourceSummary();
+      resourceMonitor.trackResourceAllocation('file_handles', 5);resourceMonitor.trackResourceAllocation('memory_buffers', 3);// Mock service that allocates resources then failsmockComputerUseService.readFile.mockImplementation(async () => {
+        resourceMonitor.trackResourceAllocation('temp_files', 1);throw new Error('Read operation failed');});try {
+        await computerUseTools.readFile({ path: '/test/file.txt' });} catch (error) {// Simulate cleanup
+        resourceMonitor.trackResourceDeallocation('temp_files', 1);resourceMonitor.trackResourceDeallocation('file_handles', 1);expect(error.message).toBe('Read operation failed');
+        console.log(`[${operationId}] Error handled with proper resource cleanup`);}const summary = resourceMonitor.getResourceSummary();
       expect(summary.resourceAllocations.temp_files).toBe(0); // Should be cleaned up
       
       console.log(`[${operationId}] Resource cleanup verified: ${JSON.stringify(summary.resourceAllocations)}`);
@@ -743,10 +553,8 @@ describe('MCP Error Handling and Recovery', () => {
   /**
    * Test Suite: Protocol Error Handling
    */
-  describe('Protocol Error Handling', () => {
-    it('should format protocol errors according to JSON-RPC 2.0 specification', () => {
-      const operationId = `${testId}_protocol_error_format`;
-      console.log(`[${operationId}] Testing protocol error formatting`);
+  describe('Protocol Error Handling', () => {it('should format protocol errors according to JSON-RPC 2.0 specification', () => {
+      const operationId = `${testId}_protocol_error_format`;console.log(`[${operationId}] Testing protocol error formatting`);
 
       const protocolErrors = ErrorScenarioGenerator.generateProtocolErrors();
 
@@ -758,10 +566,7 @@ describe('MCP Error Handling and Recovery', () => {
         };
 
         const jsonRpcError = {
-          jsonrpc: '2.0',
-          id: 'test-id',
-          error: {
-            code: errorSpec.code,
+          jsonrpc: '2.0',id: 'test-id',error: {code: errorSpec.code,
             message: errorSpec.message,
             data: errorSpec.data,
           },
@@ -777,15 +582,10 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should handle malformed protocol messages gracefully', async () => {
-      const operationId = `${testId}_malformed_messages`;
-      console.log(`[${operationId}] Testing malformed protocol message handling`);
+      const operationId = `${testId}_malformed_messages`;console.log(`[${operationId}] Testing malformed protocol message handling`);
 
       const malformedMessages = [
-        '{"invalid": "json"', // Invalid JSON
-        '{"jsonrpc": "1.0", "method": "test"}', // Wrong version
-        '{"jsonrpc": "2.0"}', // Missing method
-        '{"jsonrpc": "2.0", "method": 123}', // Invalid method type
-        null,
+        '{"invalid": "json"", // Invalid JSON'{"jsonrpc": "1.0", "method": "test"}', // Wrong version'{"jsonrpc": "2.0"}', // Missing method'{"jsonrpc": "2.0", "method": 123}", // Invalid method typenull,
         undefined,
         {},
       ];
@@ -793,30 +593,18 @@ describe('MCP Error Handling and Recovery', () => {
       malformedMessages.forEach((message, index) => {
         try {
           // Simulate protocol message validation
-          if (typeof message !== 'object' || message === null) {
-            throw new Error('Invalid message format');
+          if (typeof message !== 'object' || message === null) {throw new Error('Invalid message format');}const msg = message as Record<string, unknown>;
+          if (msg.jsonrpc !== '2.0') {throw new Error('Invalid JSON-RPC version');}if (!msg.method || typeof msg.method !== 'string') {throw new Error('Invalid or missing method');
           }
 
-          const msg = message as Record<string, unknown>;
-          if (msg.jsonrpc !== '2.0') {
-            throw new Error('Invalid JSON-RPC version');
-          }
-
-          if (!msg.method || typeof msg.method !== 'string') {
-            throw new Error('Invalid or missing method');
-          }
-
-          console.log(`[${operationId}] Message ${index} unexpectedly passed validation`);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
+          console.log(`[${operationId}] Message ${index} unexpectedly passed validation`);} catch (error) {expect(error).toBeInstanceOf(Error);
           console.log(`[${operationId}] Malformed message ${index} correctly rejected: ${error.message}`);
         }
       });
     });
 
     it('should implement error response throttling', async () => {
-      const operationId = `${testId}_error_throttling`;
-      console.log(`[${operationId}] Testing error response throttling`);
+      const operationId = `${testId}_error_throttling`;console.log(`[${operationId}] Testing error response throttling`);
 
       const errorCounts = new Map<string, number>();
       const errorWindows = new Map<string, number>();
@@ -863,10 +651,8 @@ describe('MCP Error Handling and Recovery', () => {
   /**
    * Test Suite: Resource Exhaustion Handling
    */
-  describe('Resource Exhaustion Handling', () => {
-    it('should handle memory exhaustion gracefully', async () => {
-      const operationId = `${testId}_memory_exhaustion`;
-      console.log(`[${operationId}] Testing memory exhaustion handling`);
+  describe('Resource Exhaustion Handling', () => {it('should handle memory exhaustion gracefully', async () => {
+      const operationId = `${testId}_memory_exhaustion`;console.log(`[${operationId}] Testing memory exhaustion handling`);
 
       // Take initial memory snapshot
       const initialMemory = resourceMonitor.takeMemorySnapshot();
@@ -874,22 +660,12 @@ describe('MCP Error Handling and Recovery', () => {
       // Simulate memory-intensive operation
       mockComputerUseService.screenshot.mockImplementation(async () => {
         // Simulate large memory allocation
-        resourceMonitor.trackResourceAllocation('large_buffers', 100);
-        
-        // Check if we would exceed memory limits
-        const currentMemory = process.memoryUsage();
+        resourceMonitor.trackResourceAllocation('large_buffers', 100);// Check if we would exceed memory limitsconst currentMemory = process.memoryUsage();
         if (currentMemory.heapUsed > initialMemory.heapUsed * 2) {
-          throw new Error('ENOMEM: Cannot allocate memory');
-        }
-
-        return {
-          image: 'A'.repeat(1024 * 1024), // 1MB string
-          metadata: {
-            width: 1920,
+          throw new Error('ENOMEM: Cannot allocate memory');}return {
+          image: 'A'.repeat(1024 * 1024), // 1MB stringmetadata: {width: 1920,
             height: 1080,
-            format: 'png' as const,
-            captureTime: new Date(),
-            operationId: 'memory_test',
+            format: 'png' as const,captureTime: new Date(),operationId: 'memory_test',
           },
         };
       });
@@ -902,9 +678,7 @@ describe('MCP Error Handling and Recovery', () => {
         const leakCheck = resourceMonitor.checkForMemoryLeaks();
         
         if (leakCheck.hasLeak) {
-          console.warn(`[${operationId}] Potential memory leak detected: ${leakCheck.details}`);
-        } else {
-          console.log(`[${operationId}] No memory leaks detected`);
+          console.warn(`[${operationId}] Potential memory leak detected: ${leakCheck.details}`);} else {console.log(`[${operationId}] No memory leaks detected`);
         }
 
       } catch (error) {
@@ -915,13 +689,10 @@ describe('MCP Error Handling and Recovery', () => {
         }
       } finally {
         // Cleanup allocated resources
-        resourceMonitor.trackResourceDeallocation('large_buffers', 100);
-      }
-    });
+        resourceMonitor.trackResourceDeallocation('large_buffers', 100);}});
 
     it('should implement resource pooling and limits', async () => {
-      const operationId = `${testId}_resource_pooling`;
-      console.log(`[${operationId}] Testing resource pooling and limits`);
+      const operationId = `${testId}_resource_pooling`;console.log(`[${operationId}] Testing resource pooling and limits`);
 
       const resourcePool = {
         maxConcurrentOperations: 3,
@@ -942,9 +713,7 @@ describe('MCP Error Handling and Recovery', () => {
               const index = resourcePool.queue.indexOf(resolve);
               if (index > -1) {
                 resourcePool.queue.splice(index, 1);
-                reject(new Error('Resource acquisition timeout'));
-              }
-            }, 1000);
+                reject(new Error('Resource acquisition timeout'));}}, 1000);
           }
         });
       };
@@ -976,16 +745,14 @@ describe('MCP Error Handling and Recovery', () => {
       }
 
       const results = await Promise.allSettled(operations);
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
+      const successful = results.filter(r => r.status === 'fulfilled').length;const failed = results.filter(r => r.status === 'rejected').length;
 
       expect(successful).toBeGreaterThan(0);
       console.log(`[${operationId}] Resource pooling: ${successful} successful, ${failed} failed operations`);
     });
 
     it('should handle disk space exhaustion', async () => {
-      const operationId = `${testId}_disk_exhaustion`;
-      console.log(`[${operationId}] Testing disk space exhaustion handling`);
+      const operationId = `${testId}_disk_exhaustion`;console.log(`[${operationId}] Testing disk space exhaustion handling`);
 
       // Mock file operations to simulate disk full condition
       mockComputerUseService.writeFile.mockImplementation(async (params) => {
@@ -994,32 +761,17 @@ describe('MCP Error Handling and Recovery', () => {
         const contentSize = params.content?.length ?? 0;
 
         if (contentSize > fakeAvailableSpace) {
-          throw new Error('ENOSPC: No space left on device');
-        }
-
-        return {
+          throw new Error('ENOSPC: No space left on device');}return {
           success: true,
-          message: 'File written successfully',
-          operationId: 'write_test',
-          timestamp: new Date().toISOString(),
-        };
+          message: 'File written successfully',operationId: 'write_test',timestamp: new Date().toISOString(),};
       });
 
       try {
         // Try to write large content
         await computerUseTools.writeFile({
-          path: '/test/large-file.txt',
-          content: 'x'.repeat(2048), // 2KB content
-        });
-      } catch (error) {
+          path: '/test/large-file.txt',content: 'x'.repeat(2048), // 2KB content});} catch (error) {
         expect(error.message).toContain('ENOSPC');
-        console.log(`[${operationId}] Disk space exhaustion properly handled: ${error.message}`);
-
-        // Implement cleanup strategy
-        console.log(`[${operationId}] Implementing cleanup strategy...`);
-        
-        // Could implement: temp file cleanup, compression, alternative storage, etc.
-        const cleanupResult = { freedSpace: 1024, tempFilesRemoved: 5 };
+        console.log(`[${operationId}] Disk space exhaustion properly handled: ${error.message}`);// Implement cleanup strategyconsole.log(`[${operationId}] Implementing cleanup strategy...`);// Could implement: temp file cleanup, compression, alternative storage, etc.const cleanupResult = { freedSpace: 1024, tempFilesRemoved: 5 };
         expect(cleanupResult.freedSpace).toBeGreaterThan(0);
         
         console.log(`[${operationId}] Cleanup completed: ${cleanupResult.freedSpace} bytes freed`);
@@ -1030,22 +782,14 @@ describe('MCP Error Handling and Recovery', () => {
   /**
    * Test Suite: Concurrent Error Scenarios
    */
-  describe('Concurrent Error Scenarios', () => {
-    it('should handle race conditions between tools', async () => {
-      const operationId = `${testId}_race_conditions`;
-      console.log(`[${operationId}] Testing race condition handling`);
-
-      const sharedResource = { locked: false, value: 0 };
-      const results: Array<{ success: boolean; value: number }> = [];
+  describe('Concurrent Error Scenarios', () => {it('should handle race conditions between tools', async () => {
+      const operationId = `${testId}_race_conditions`;console.log(`[${operationId}] Testing race condition handling`);const sharedResource = { locked: false, value: 0 };const results: Array<{ success: boolean; value: number }> = [];
 
       // Mock operations that compete for shared resource
       const competingOperation = async (operationName: string) => {
         // Simulate resource acquisition
         if (sharedResource.locked) {
-          throw new Error(`Resource locked by another operation`);
-        }
-
-        sharedResource.locked = true;
+          throw new Error(`Resource locked by another operation`);}sharedResource.locked = true;
         
         try {
           // Simulate work
@@ -1060,9 +804,7 @@ describe('MCP Error Handling and Recovery', () => {
 
       // Start multiple competing operations
       const operations = Array(5).fill(null).map((_, index) =>
-        competingOperation(`operation${index}`)
-          .then(result => {
-            results.push(result);
+        competingOperation(`operation${index}`).then(result => {results.push(result);
             return result;
           })
           .catch(error => {
@@ -1083,16 +825,14 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should prevent deadlocks in tool dependencies', async () => {
-      const operationId = `${testId}_deadlock_prevention`;
-      console.log(`[${operationId}] Testing deadlock prevention`);
+      const operationId = `${testId}_deadlock_prevention`;console.log(`[${operationId}] Testing deadlock prevention`);
 
       const resources = {
         resourceA: { locked: false, owner: null as string | null },
         resourceB: { locked: false, owner: null as string | null },
       };
 
-      const acquireResources = async (toolId: string, resourceOrder: Array<'resourceA' | 'resourceB'>) => {
-        const acquired: Array<'resourceA' | 'resourceB'> = [];
+      const acquireResources = async (toolId: string, resourceOrder: Array<'resourceA' | 'resourceB'>) => {const acquired: Array<'resourceA' | 'resourceB'> = [];
         const timeout = 1000; // 1 second timeout
         const startTime = Date.now();
 
@@ -1125,14 +865,7 @@ describe('MCP Error Handling and Recovery', () => {
       };
 
       // Simulate potential deadlock scenario
-      const tool1Promise = acquireResources('tool1', ['resourceA', 'resourceB']);
-      const tool2Promise = acquireResources('tool2', ['resourceB', 'resourceA']); // Reverse order
-
-      const results = await Promise.allSettled([tool1Promise, tool2Promise]);
-
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const deadlocked = results.filter(r => 
-        r.status === 'rejected' && r.reason.message.includes('Deadlock detected')
+      const tool1Promise = acquireResources('tool1', ['resourceA', 'resourceB']);const tool2Promise = acquireResources('tool2', ['resourceB', 'resourceA']); // Reverse orderconst results = await Promise.allSettled([tool1Promise, tool2Promise]);const successful = results.filter(r => r.status === 'fulfilled').length;const deadlocked = results.filter(r => r.status === 'rejected' && r.reason.message.includes('Deadlock detected')
       ).length;
 
       // At least one should succeed, or both should detect deadlock
@@ -1142,25 +875,16 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should handle error cascades and prevent system failure', async () => {
-      const operationId = `${testId}_error_cascades`;
-      console.log(`[${operationId}] Testing error cascade prevention`);
+      const operationId = `${testId}_error_cascades`;console.log(`[${operationId}] Testing error cascade prevention`);
 
       const systemComponents = {
-        database: { status: 'healthy', errorCount: 0 },
-        fileSystem: { status: 'healthy', errorCount: 0 },
-        network: { status: 'healthy', errorCount: 0 },
-      };
-
-      const errorThreshold = 3;
+        database: { status: 'healthy', errorCount: 0 },fileSystem: { status: 'healthy', errorCount: 0 },network: { status: 'healthy', errorCount: 0 },};const errorThreshold = 3;
 
       const simulateComponentFailure = (component: keyof typeof systemComponents) => {
         systemComponents[component].errorCount++;
         
         if (systemComponents[component].errorCount >= errorThreshold) {
-          systemComponents[component].status = 'failed';
-          
-          // Simulate cascade effect
-          Object.keys(systemComponents).forEach(comp => {
+          systemComponents[component].status = 'failed';// Simulate cascade effectObject.keys(systemComponents).forEach(comp => {
             if (comp !== component) {
               systemComponents[comp as keyof typeof systemComponents].errorCount++;
             }
@@ -1169,10 +893,7 @@ describe('MCP Error Handling and Recovery', () => {
       };
 
       const checkSystemHealth = () => {
-        const failedComponents = Object.values(systemComponents).filter(c => c.status === 'failed').length;
-        const totalComponents = Object.keys(systemComponents).length;
-        
-        return {
+        const failedComponents = Object.values(systemComponents).filter(c => c.status === 'failed').length;const totalComponents = Object.keys(systemComponents).length;return {
           healthy: failedComponents < totalComponents * 0.5, // System fails if >50% components fail
           failedComponents,
           totalComponents,
@@ -1180,23 +901,16 @@ describe('MCP Error Handling and Recovery', () => {
       };
 
       // Simulate errors
-      simulateComponentFailure('database');
-      simulateComponentFailure('database');
-      simulateComponentFailure('database'); // This should trigger failure
+      simulateComponentFailure('database');simulateComponentFailure('database');simulateComponentFailure('database'); // This should trigger failure
 
       const healthCheck1 = checkSystemHealth();
       console.log(`[${operationId}] After database failure: ${healthCheck1.failedComponents}/${healthCheck1.totalComponents} components failed`);
 
       // Simulate more errors to test cascade
-      simulateComponentFailure('fileSystem');
-      simulateComponentFailure('fileSystem');
-      simulateComponentFailure('fileSystem');
+      simulateComponentFailure('fileSystem');simulateComponentFailure('fileSystem');simulateComponentFailure('fileSystem');
 
       const healthCheck2 = checkSystemHealth();
-      console.log(`[${operationId}] After cascade: ${healthCheck2.failedComponents}/${healthCheck2.totalComponents} components failed`);
-
-      // System should implement circuit breakers to prevent total failure
-      expect(healthCheck2.totalComponents).toBeGreaterThan(0);
+      console.log(`[${operationId}] After cascade: ${healthCheck2.failedComponents}/${healthCheck2.totalComponents} components failed`);// System should implement circuit breakers to prevent total failureexpect(healthCheck2.totalComponents).toBeGreaterThan(0);
       
       console.log(`[${operationId}] Error cascade test completed: system ${healthCheck2.healthy ? 'stable' : 'failed'}`);
     });
@@ -1205,44 +919,26 @@ describe('MCP Error Handling and Recovery', () => {
   /**
    * Test Suite: Recovery Verification
    */
-  describe('Recovery Verification', () => {
-    it('should verify complete recovery after error resolution', async () => {
-      const operationId = `${testId}_recovery_verification`;
-      console.log(`[${operationId}] Testing complete recovery verification`);
+  describe('Recovery Verification', () => {it('should verify complete recovery after error resolution', async () => {
+      const operationId = `${testId}_recovery_verification`;console.log(`[${operationId}] Testing complete recovery verification`);
 
       // Simulate service degradation and recovery
       let serviceHealth = 0; // 0 = failed, 1 = degraded, 2 = healthy
 
       mockComputerUseService.screenshot.mockImplementation(async () => {
         if (serviceHealth === 0) {
-          throw new Error('Service completely failed');
-        } else if (serviceHealth === 1) {
-          // Degraded mode - slower response
+          throw new Error('Service completely failed');} else if (serviceHealth === 1) {// Degraded mode - slower response
           await new Promise(resolve => setTimeout(resolve, 500));
           return {
-            image: 'degraded_quality_image',
-            metadata: {
-              width: 640,
+            image: 'degraded_quality_image',metadata: {width: 640,
               height: 480,
-              format: 'png' as const,
-              captureTime: new Date(),
-              operationId: 'degraded_op',
-              quality: 'degraded',
-            },
-          };
+              format: 'png' as const,captureTime: new Date(),operationId: 'degraded_op',quality: 'degraded',},};
         } else {
           // Healthy mode
           return {
-            image: 'full_quality_image',
-            metadata: {
-              width: 1920,
+            image: 'full_quality_image',metadata: {width: 1920,
               height: 1080,
-              format: 'png' as const,
-              captureTime: new Date(),
-              operationId: 'healthy_op',
-              quality: 'full',
-            },
-          };
+              format: 'png' as const,captureTime: new Date(),operationId: 'healthy_op',quality: 'full',},};
         }
       });
 
@@ -1265,10 +961,7 @@ describe('MCP Error Handling and Recovery', () => {
       serviceHealth = 2;
       const healthyResult = await computerUseTools.screenshot({ display: 0 });
       expect(healthyResult.metadata.quality).toBe('full');
-      console.log(`[${operationId}] Full recovery verified - service healthy`);
-
-      // Verify performance recovery
-      const performanceTest = async () => {
+      console.log(`[${operationId}] Full recovery verified - service healthy`);// Verify performance recoveryconst performanceTest = async () => {
         const startTime = performance.now();
         await computerUseTools.screenshot({ display: 0 });
         return performance.now() - startTime;
@@ -1281,8 +974,7 @@ describe('MCP Error Handling and Recovery', () => {
     });
 
     it('should maintain service level objectives during recovery', async () => {
-      const operationId = `${testId}_slo_maintenance`;
-      console.log(`[${operationId}] Testing SLO maintenance during recovery`);
+      const operationId = `${testId}_slo_maintenance`;console.log(`[${operationId}] Testing SLO maintenance during recovery`);
 
       const sloTargets = {
         availability: 0.95, // 95% availability
@@ -1341,9 +1033,7 @@ describe('MCP Error Handling and Recovery', () => {
       const avgResponseTime = metrics.totalResponseTime / metrics.successfulRequests;
       const errorRate = metrics.errors / metrics.totalRequests;
 
-      console.log(`[${operationId}] SLO Metrics - Availability: ${(availability * 100).toFixed(1)}% (target: ${(sloTargets.availability * 100).toFixed(1)}%)`);
-      console.log(`[${operationId}] SLO Metrics - Avg Response Time: ${avgResponseTime.toFixed(2)}ms (target: <${sloTargets.responseTime}ms)`);
-      console.log(`[${operationId}] SLO Metrics - Error Rate: ${(errorRate * 100).toFixed(1)}% (target: <${(sloTargets.errorRate * 100).toFixed(1)}%)`);
+      console.log(`[${operationId}] SLO Metrics - Availability: ${(availability * 100).toFixed(1)}% (target: ${(sloTargets.availability * 100).toFixed(1)}%)`);console.log(`[${operationId}] SLO Metrics - Avg Response Time: ${avgResponseTime.toFixed(2)}ms (target: <${sloTargets.responseTime}ms)`);console.log(`[${operationId}] SLO Metrics - Error Rate: ${(errorRate * 100).toFixed(1)}% (target: <${(sloTargets.errorRate * 100).toFixed(1)}%)`);
 
       // SLOs might be temporarily violated during recovery, but should trend toward targets
       expect(availability).toBeGreaterThan(0.5); // At least 50% during recovery

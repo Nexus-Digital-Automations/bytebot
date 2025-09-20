@@ -24,11 +24,7 @@
  * - <5 second recovery time after overload
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-
-// Core Load Testing Client
-class LoadTestingWebSocketClient extends EventEmitter {
+import { EventEmitter } from 'events';import { performance } from 'perf_hooks';// Core Load Testing Clientclass LoadTestingWebSocketClient extends EventEmitter {
   private connectionId: string;
   private isConnected: boolean = false;
   private messagesSent: number = 0;
@@ -49,9 +45,7 @@ class LoadTestingWebSocketClient extends EventEmitter {
     this.metrics = metrics;
   }
 
-  async connect(url: string = 'ws://localhost:8080/ws'): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.connectionStartTime = performance.now();
+  async connect(url: string = 'ws://localhost:8080/ws'): Promise<void> {return new Promise((resolve, reject) => {this.connectionStartTime = performance.now();
 
       try {
         // Simulate WebSocket connection
@@ -59,31 +53,20 @@ class LoadTestingWebSocketClient extends EventEmitter {
           this.isConnected = true;
           this.lastActivityTime = performance.now();
           this.metrics.recordConnection(this.connectionId, true);
-          this.emit('connected');
-
-          // Start ping mechanism
-          this.startPingInterval();
+          this.emit('connected');// Start ping mechanismthis.startPingInterval();
           resolve();
         }, Math.random() * 100); // Simulate connection latency
 
       } catch (error) {
         this.metrics.recordConnection(this.connectionId, false);
-        this.emit('connection_error', error);
-        reject(error);
-      }
+        this.emit('connection_error', error);reject(error);}
     });
   }
 
   async sendMessage(message: any): Promise<void> {
     if (!this.isConnected) {
-      throw new Error('Connection not established');
-    }
-
-    const messageData = JSON.stringify(message);
-    const messageSize = Buffer.byteLength(messageData, 'utf8');
-
-    this.messagesSent++;
-    this.bytesTransferred += messageSize;
+      throw new Error('Connection not established');}const messageData = JSON.stringify(message);
+    const messageSize = Buffer.byteLength(messageData, 'utf8');this.messagesSent++;this.bytesTransferred += messageSize;
     this.lastActivityTime = performance.now();
 
     this.metrics.recordMessageSent(this.connectionId, messageSize);
@@ -103,9 +86,7 @@ class LoadTestingWebSocketClient extends EventEmitter {
       const message = {
         id: `burst_${this.connectionId}_${i}`,
         timestamp: performance.now(),
-        data: 'x'.repeat(messageSize),
-        sequence: i
-      };
+        data: 'x'.repeat(messageSize),sequence: i};
 
       promises.push(this.sendMessage(message));
     }
@@ -116,9 +97,7 @@ class LoadTestingWebSocketClient extends EventEmitter {
   private startPingInterval(): void {
     this.pingInterval = setInterval(() => {
       if (this.isConnected) {
-        this.sendMessage({ type: 'ping', timestamp: performance.now() });
-      }
-    }, 30000); // 30 second ping
+        this.sendMessage({ type: 'ping', timestamp: performance.now() });}}, 30000); // 30 second ping
   }
 
   async disconnect(): Promise<void> {
@@ -129,10 +108,7 @@ class LoadTestingWebSocketClient extends EventEmitter {
 
     this.isConnected = false;
     this.metrics.recordDisconnection(this.connectionId);
-    this.emit('disconnected');
-  }
-
-  getStats(): ConnectionStats {
+    this.emit('disconnected');}getStats(): ConnectionStats {
     return {
       connectionId: this.connectionId,
       isConnected: this.isConnected,
@@ -151,10 +127,7 @@ class LoadTestMetrics {
   private connections: Map<string, ConnectionMetrics> = new Map();
   private systemMetrics: SystemMetrics;
   private startTime: number;
-  private testPhase: string = 'initialization';
-
-  constructor() {
-    this.startTime = performance.now();
+  private testPhase: string = 'initialization';constructor() {this.startTime = performance.now();
     this.systemMetrics = {
       memoryUsage: process.memoryUsage(),
       cpuUsage: process.cpuUsage(),
@@ -247,10 +220,7 @@ class ProgressiveLoadGenerator {
   private clients: Map<string, LoadTestingWebSocketClient> = new Map();
   private metrics: LoadTestMetrics;
   private isRunning: boolean = false;
-  private currentPhase: string = 'idle';
-
-  constructor(metrics: LoadTestMetrics) {
-    this.metrics = metrics;
+  private currentPhase: string = 'idle';constructor(metrics: LoadTestMetrics) {this.metrics = metrics;
   }
 
   async executeLoadTest(config: LoadTestConfig): Promise<LoadTestResults> {
@@ -265,27 +235,10 @@ class ProgressiveLoadGenerator {
 
     try {
       // Phase 1: Baseline Load
-      await this.executePhase('baseline', config.baselineConnections, config.baselineRPS, 60000);
-      results.phases.push(this.capturePhaseResults('baseline'));
-
-      // Phase 2: Ramp Up
-      await this.executeRampUp(config.baselineConnections, config.targetConnections, config.rampUpDuration);
-      results.phases.push(this.capturePhaseResults('ramp_up'));
-
-      // Phase 3: Peak Load
-      await this.executePhase('peak_load', config.targetConnections, config.peakRPS, config.peakDuration);
-      results.phases.push(this.capturePhaseResults('peak_load'));
-
-      // Phase 4: Stress Test
-      await this.executeStressTest(config.targetConnections, config.stressMultiplier);
-      results.phases.push(this.capturePhaseResults('stress_test'));
-
-      // Phase 5: Recovery Test
-      await this.executeRecoveryTest(config.targetConnections, config.baselineConnections);
-      results.phases.push(this.capturePhaseResults('recovery'));
-
-      results.success = true;
-      results.overallMetrics = this.metrics.getAggregatedMetrics();
+      await this.executePhase('baseline', config.baselineConnections, config.baselineRPS, 60000);results.phases.push(this.capturePhaseResults('baseline'));// Phase 2: Ramp Upawait this.executeRampUp(config.baselineConnections, config.targetConnections, config.rampUpDuration);
+      results.phases.push(this.capturePhaseResults('ramp_up'));// Phase 3: Peak Loadawait this.executePhase('peak_load', config.targetConnections, config.peakRPS, config.peakDuration);results.phases.push(this.capturePhaseResults('peak_load'));// Phase 4: Stress Testawait this.executeStressTest(config.targetConnections, config.stressMultiplier);
+      results.phases.push(this.capturePhaseResults('stress_test'));// Phase 5: Recovery Testawait this.executeRecoveryTest(config.targetConnections, config.baselineConnections);
+      results.phases.push(this.capturePhaseResults('recovery'));results.success = true;results.overallMetrics = this.metrics.getAggregatedMetrics();
 
     } catch (error) {
       results.success = false;
@@ -316,11 +269,7 @@ class ProgressiveLoadGenerator {
   }
 
   private async executeRampUp(startConnections: number, endConnections: number, duration: number): Promise<void> {
-    this.currentPhase = 'ramp_up';
-    this.metrics.setTestPhase('ramp_up');
-
-    const connectionIncrement = Math.max(1, Math.floor((endConnections - startConnections) / (duration / 5000)));
-    const intervalDuration = Math.floor(duration / Math.ceil((endConnections - startConnections) / connectionIncrement));
+    this.currentPhase = 'ramp_up';this.metrics.setTestPhase('ramp_up');const connectionIncrement = Math.max(1, Math.floor((endConnections - startConnections) / (duration / 5000)));const intervalDuration = Math.floor(duration / Math.ceil((endConnections - startConnections) / connectionIncrement));
 
     let currentConnections = startConnections;
     while (currentConnections < endConnections && this.isRunning) {
@@ -334,11 +283,7 @@ class ProgressiveLoadGenerator {
   }
 
   private async executeStressTest(baseConnections: number, stressMultiplier: number): Promise<void> {
-    this.currentPhase = 'stress_test';
-    this.metrics.setTestPhase('stress_test');
-
-    const stressConnections = Math.floor(baseConnections * stressMultiplier);
-    const additionalConnections = stressConnections - baseConnections;
+    this.currentPhase = 'stress_test';this.metrics.setTestPhase('stress_test');const stressConnections = Math.floor(baseConnections * stressMultiplier);const additionalConnections = stressConnections - baseConnections;
 
     // Rapidly create additional connections
     await this.createConnections(additionalConnections);
@@ -356,8 +301,7 @@ class ProgressiveLoadGenerator {
   }
 
   private async executeRecoveryTest(currentConnections: number, targetConnections: number): Promise<void> {
-    this.currentPhase = 'recovery';
-    this.metrics.setTestPhase('recovery');
+    this.currentPhase = 'recovery';this.metrics.setTestPhase('recovery');
 
     // Reduce connections to target level
     const connectionsToRemove = currentConnections - targetConnections;
@@ -527,11 +471,7 @@ class MemoryLeakDetector {
 
   private generateMemoryAnalysis(growthPercentage: number, hasLeak: boolean): string {
     if (hasLeak) {
-      return `Potential memory leak detected: ${growthPercentage.toFixed(2)}% heap growth with consistent increase pattern`;
-    } else if (growthPercentage > 20) {
-      return `Elevated memory usage: ${growthPercentage.toFixed(2)}% heap growth, monitor closely`;
-    } else {
-      return `Normal memory usage: ${growthPercentage.toFixed(2)}% heap growth within acceptable range`;
+      return `Potential memory leak detected: ${growthPercentage.toFixed(2)}% heap growth with consistent increase pattern`;} else if (growthPercentage > 20) {return `Elevated memory usage: ${growthPercentage.toFixed(2)}% heap growth, monitor closely`;} else {return `Normal memory usage: ${growthPercentage.toFixed(2)}% heap growth within acceptable range`;
     }
   }
 
@@ -539,21 +479,9 @@ class MemoryLeakDetector {
     const recommendations: string[] = [];
 
     if (hasLeak) {
-      recommendations.push('Investigate connection cleanup procedures');
-      recommendations.push('Review event listener removal');
-      recommendations.push('Check for unclosed resources');
-      recommendations.push('Implement garbage collection monitoring');
-    }
-
-    if (growthPercentage > 30) {
-      recommendations.push('Consider implementing connection pooling');
-      recommendations.push('Add memory usage alerts');
-      recommendations.push('Review message buffer management');
-    }
-
-    if (recommendations.length === 0) {
-      recommendations.push('Memory usage within normal parameters');
-      recommendations.push('Continue monitoring during peak load');
+      recommendations.push('Investigate connection cleanup procedures');recommendations.push('Review event listener removal');recommendations.push('Check for unclosed resources');recommendations.push('Implement garbage collection monitoring');}if (growthPercentage > 30) {
+      recommendations.push('Consider implementing connection pooling');recommendations.push('Add memory usage alerts');recommendations.push('Review message buffer management');}if (recommendations.length === 0) {
+      recommendations.push('Memory usage within normal parameters');recommendations.push('Continue monitoring during peak load');
     }
 
     return recommendations;
@@ -611,9 +539,7 @@ class ResourceExhaustionTester {
     await Promise.allSettled(cleanupPromises);
 
     return {
-      testType: 'connection_pool_exhaustion',
-      maxConnections,
-      exhaustionPoint,
+      testType: 'connection_pool_exhaustion',maxConnections,exhaustionPoint,
       testDuration: performance.now() - startTime,
       finalMetrics: this.metrics.getAggregatedMetrics(),
       success: exhaustionPoint > 0
@@ -622,21 +548,14 @@ class ResourceExhaustionTester {
 
   async testMessageQueueOverflow(): Promise<ExhaustionTestResult> {
     const startTime = performance.now();
-    const client = new LoadTestingWebSocketClient('overflow_test', this.metrics);
-
-    await client.connect();
-
-    let messagesSent = 0;
+    const client = new LoadTestingWebSocketClient('overflow_test', this.metrics);await client.connect();let messagesSent = 0;
     let overflowDetected = false;
 
     try {
       // Send messages rapidly to cause queue overflow
       while (!overflowDetected && messagesSent < 100000) {
         const batchSize = 1000;
-        const largeMessage = 'x'.repeat(10240); // 10KB messages
-
-        for (let i = 0; i < batchSize; i++) {
-          await client.sendMessage({
+        const largeMessage = 'x'.repeat(10240); // 10KB messagesfor (let i = 0; i < batchSize; i++) {await client.sendMessage({
             id: messagesSent + i,
             data: largeMessage,
             timestamp: performance.now()
@@ -658,9 +577,7 @@ class ResourceExhaustionTester {
     await client.disconnect();
 
     return {
-      testType: 'message_queue_overflow',
-      maxConnections: 1,
-      exhaustionPoint: messagesSent,
+      testType: 'message_queue_overflow',maxConnections: 1,exhaustionPoint: messagesSent,
       testDuration: performance.now() - startTime,
       finalMetrics: this.metrics.getAggregatedMetrics(),
       success: overflowDetected
@@ -796,9 +713,7 @@ interface SustainedLoadResult {
 }
 
 // Test Suite
-describe('WebSocket Load Testing and Stress Testing', () => {
-  let metrics: LoadTestMetrics;
-  let loadGenerator: ProgressiveLoadGenerator;
+describe('WebSocket Load Testing and Stress Testing', () => {let metrics: LoadTestMetrics;let loadGenerator: ProgressiveLoadGenerator;
   let resourceTester: ResourceExhaustionTester;
 
   beforeEach(() => {
@@ -812,10 +727,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
     jest.clearAllTimers();
   });
 
-  describe('Progressive Load Testing', () => {
-    test('should execute baseline load test successfully', async () => {
-      const config: LoadTestConfig = {
-        baselineConnections: 100,
+  describe('Progressive Load Testing', () => {test('should execute baseline load test successfully', async () => {const config: LoadTestConfig = {baselineConnections: 100,
         targetConnections: 500,
         peakRPS: 5000,
         baselineRPS: 1000,
@@ -828,14 +740,10 @@ describe('WebSocket Load Testing and Stress Testing', () => {
 
       expect(results.success).toBe(true);
       expect(results.phases).toHaveLength(5);
-      expect(results.phases[0].phase).toBe('baseline');
-      expect(results.overallMetrics).toBeDefined();
-      expect(results.overallMetrics?.totalConnections).toBeGreaterThan(0);
+      expect(results.phases[0].phase).toBe('baseline');expect(results.overallMetrics).toBeDefined();expect(results.overallMetrics?.totalConnections).toBeGreaterThan(0);
     }, 300000); // 5 minute timeout
 
-    test('should handle ramp-up phase correctly', async () => {
-      const config: LoadTestConfig = {
-        baselineConnections: 50,
+    test('should handle ramp-up phase correctly', async () => {const config: LoadTestConfig = {baselineConnections: 50,
         targetConnections: 200,
         peakRPS: 2000,
         baselineRPS: 500,
@@ -845,16 +753,11 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       };
 
       const results = await loadGenerator.executeLoadTest(config);
-      const rampUpPhase = results.phases.find(p => p.phase === 'ramp_up');
-
-      expect(rampUpPhase).toBeDefined();
-      expect(rampUpPhase?.metrics.activeConnections).toBeGreaterThan(50);
+      const rampUpPhase = results.phases.find(p => p.phase === 'ramp_up');expect(rampUpPhase).toBeDefined();expect(rampUpPhase?.metrics.activeConnections).toBeGreaterThan(50);
       expect(rampUpPhase?.metrics.totalMessagesSent).toBeGreaterThan(0);
     }, 180000);
 
-    test('should execute stress test with increased load', async () => {
-      const config: LoadTestConfig = {
-        baselineConnections: 100,
+    test('should execute stress test with increased load', async () => {const config: LoadTestConfig = {baselineConnections: 100,
         targetConnections: 300,
         peakRPS: 3000,
         baselineRPS: 1000,
@@ -864,16 +767,11 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       };
 
       const results = await loadGenerator.executeLoadTest(config);
-      const stressPhase = results.phases.find(p => p.phase === 'stress_test');
-
-      expect(stressPhase).toBeDefined();
-      expect(stressPhase?.metrics.activeConnections).toBeGreaterThan(300);
+      const stressPhase = results.phases.find(p => p.phase === 'stress_test');expect(stressPhase).toBeDefined();expect(stressPhase?.metrics.activeConnections).toBeGreaterThan(300);
       expect(results.success).toBe(true);
     }, 240000);
 
-    test('should validate recovery after stress', async () => {
-      const config: LoadTestConfig = {
-        baselineConnections: 50,
+    test('should validate recovery after stress', async () => {const config: LoadTestConfig = {baselineConnections: 50,
         targetConnections: 150,
         peakRPS: 2000,
         baselineRPS: 500,
@@ -883,36 +781,19 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       };
 
       const results = await loadGenerator.executeLoadTest(config);
-      const recoveryPhase = results.phases.find(p => p.phase === 'recovery');
-
-      expect(recoveryPhase).toBeDefined();
-      expect(recoveryPhase?.metrics.activeConnections).toBeLessThanOrEqual(150);
+      const recoveryPhase = results.phases.find(p => p.phase === 'recovery');expect(recoveryPhase).toBeDefined();expect(recoveryPhase?.metrics.activeConnections).toBeLessThanOrEqual(150);
       expect(recoveryPhase?.metrics.totalErrors).toBeLessThanOrEqual(5); // Allow some errors during recovery
     }, 180000);
   });
 
-  describe('Resource Exhaustion Testing', () => {
-    test('should detect connection pool exhaustion point', async () => {
-      const result = await resourceTester.testConnectionPoolExhaustion();
-
-      expect(result.success).toBe(true);
+  describe('Resource Exhaustion Testing', () => {test('should detect connection pool exhaustion point', async () => {const result = await resourceTester.testConnectionPoolExhaustion();expect(result.success).toBe(true);
       expect(result.exhaustionPoint).toBeGreaterThan(0);
       expect(result.maxConnections).toBeGreaterThan(100);
-      expect(result.testType).toBe('connection_pool_exhaustion');
-      expect(result.finalMetrics).toBeDefined();
-    }, 120000);
+      expect(result.testType).toBe('connection_pool_exhaustion');expect(result.finalMetrics).toBeDefined();}, 120000);
 
-    test('should detect message queue overflow', async () => {
-      const result = await resourceTester.testMessageQueueOverflow();
-
-      expect(result.success).toBe(true);
+    test('should detect message queue overflow', async () => {const result = await resourceTester.testMessageQueueOverflow();expect(result.success).toBe(true);
       expect(result.exhaustionPoint).toBeGreaterThan(0);
-      expect(result.testType).toBe('message_queue_overflow');
-    }, 60000);
-
-    test('should perform sustained load test with memory monitoring', async () => {
-      const sustainedDuration = 120000; // 2 minutes for testing
-      const result = await resourceTester.testSustainedLoad(sustainedDuration);
+      expect(result.testType).toBe('message_queue_overflow');}, 60000);test('should perform sustained load test with memory monitoring', async () => {const sustainedDuration = 120000; // 2 minutes for testingconst result = await resourceTester.testSustainedLoad(sustainedDuration);
 
       expect(result.success).toBe(true);
       expect(result.loadTestResults.success).toBe(true);
@@ -922,8 +803,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
     }, 180000);
   });
 
-  describe('Memory Leak Detection', () => {
-    test('should monitor memory usage over time', async () => {
+  describe('Memory Leak Detection', () => {test('should monitor memory usage over time', async () => {
       const detector = new MemoryLeakDetector();
 
       detector.startMonitoring(1000); // Monitor every second
@@ -949,18 +829,12 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       await Promise.all(clients.map(client => client.disconnect()));
     }, 30000);
 
-    test('should detect consistent memory growth patterns', async () => {
-      const detector = new MemoryLeakDetector();
-
-      detector.startMonitoring(500);
+    test('should detect consistent memory growth patterns', async () => {const detector = new MemoryLeakDetector();detector.startMonitoring(500);
 
       // Simulate gradual memory growth
       const largeObjects: any[] = [];
       const growthInterval = setInterval(() => {
-        largeObjects.push(new Array(10000).fill('memory-leak-test'));
-      }, 1000);
-
-      await new Promise(resolve => setTimeout(resolve, 8000));
+        largeObjects.push(new Array(10000).fill('memory-leak-test'));}, 1000);await new Promise(resolve => setTimeout(resolve, 8000));
       clearInterval(growthInterval);
 
       const analysis = detector.stopMonitoring();
@@ -968,20 +842,12 @@ describe('WebSocket Load Testing and Stress Testing', () => {
       expect(analysis.snapshots.length).toBeGreaterThan(10);
       if (analysis.hasMemoryLeak) {
         expect(analysis.heapGrowthPercentage).toBeGreaterThan(20);
-        expect(analysis.recommendations).toContain('Investigate connection cleanup procedures');
-      }
-
-      // Cleanup
+        expect(analysis.recommendations).toContain('Investigate connection cleanup procedures');}// Cleanup
       largeObjects.length = 0;
     }, 20000);
   });
 
-  describe('Performance Under Load', () => {
-    test('should maintain performance under 80% of max load', async () => {
-      const testClient = new LoadTestingWebSocketClient('perf_test', metrics);
-      await testClient.connect();
-
-      const startTime = performance.now();
+  describe('Performance Under Load', () => {test('should maintain performance under 80% of max load', async () => {const testClient = new LoadTestingWebSocketClient('perf_test', metrics);await testClient.connect();const startTime = performance.now();
       const messageCount = 1000;
 
       // Send burst of messages
@@ -1036,10 +902,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
     }, 60000);
   });
 
-  describe('System Recovery Testing', () => {
-    test('should recover from overload conditions', async () => {
-      const config: LoadTestConfig = {
-        baselineConnections: 100,
+  describe('System Recovery Testing', () => {test('should recover from overload conditions', async () => {const config: LoadTestConfig = {baselineConnections: 100,
         targetConnections: 200,
         peakRPS: 5000,
         baselineRPS: 1000,
@@ -1052,10 +915,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
 
       expect(results.success).toBe(true);
 
-      const recoveryPhase = results.phases.find(p => p.phase === 'recovery');
-      expect(recoveryPhase).toBeDefined();
-
-      // System should stabilize during recovery
+      const recoveryPhase = results.phases.find(p => p.phase === 'recovery');expect(recoveryPhase).toBeDefined();// System should stabilize during recovery
       const finalMetrics = results.overallMetrics;
       expect(finalMetrics!.totalErrors / finalMetrics!.totalConnections).toBeLessThan(0.1); // <10% error rate
     }, 120000);
@@ -1090,11 +950,7 @@ describe('WebSocket Load Testing and Stress Testing', () => {
     }, 60000);
   });
 
-  describe('Resource Cleanup Validation', () => {
-    test('should properly cleanup resources after load test', async () => {
-      const initialMemory = process.memoryUsage().heapUsed;
-
-      const config: LoadTestConfig = {
+  describe('Resource Cleanup Validation', () => {test('should properly cleanup resources after load test', async () => {const initialMemory = process.memoryUsage().heapUsed;const config: LoadTestConfig = {
         baselineConnections: 200,
         targetConnections: 500,
         peakRPS: 3000,

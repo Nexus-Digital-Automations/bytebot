@@ -21,30 +21,16 @@
  * @version 1.0.0
  */
 
-import { performance } from 'perf_hooks';
-import {
-  TestUtils as _TestUtils,
+import { performance } from 'perf_hooks';import {TestUtils as _TestUtils,
   AssertionHelpers as _AssertionHelpers,
   MockDataProviders as _MockDataProviders,
   TestEnvironment as _TestEnvironment,
   createMockLogger,
-} from '../../test-utils';
-
-// Import all exports from the MCP index module
-import * as McpIndex from '../index';
-
-// Import individual modules for comparison testing
-import { BytebotMcpModule } from '../bytebot-mcp.module';
-import { ComputerUseTools } from '../computer-use.tools';
-import {
-  Base64ImageCompressor,
+} from '../../test-utils';// Import all exports from the MCP index moduleimport * as McpIndex from '../index';// Import individual modules for comparison testingimport { BytebotMcpModule } from '../bytebot-mcp.module';import { ComputerUseTools } from '../computer-use.tools';import {Base64ImageCompressor,
   compressPngBase64Under1MB,
   CompressionOptions as _CompressionOptions,
   CompressionResult as _CompressionResult,
-} from '../compressor';
-
-/**
- * Test utilities for index module testing
+} from '../compressor';/*** Test utilities for index module testing
  */
 class IndexTestUtils {
   /**
@@ -59,18 +45,14 @@ class IndexTestUtils {
     expect(exportObj).toBeDefined();
     expect(typeof exportObj).toBe(expectedType);
 
-    if (expectedConstructor && expectedType === 'function') {
-      expect(exportObj).toBe(expectedConstructor);
-    }
+    if (expectedConstructor && expectedType === 'function') {expect(exportObj).toBe(expectedConstructor);}
   }
 
   /**
    * Check if an object is a constructor function
    */
   static isConstructor(obj: unknown): boolean {
-    return (typeof obj === 'function' &&
-      obj.prototype &&
-      (obj as { prototype: { constructor: unknown } }).prototype.constructor === obj) as boolean;
+    return (typeof obj === 'function' &&obj.prototype &&(obj as { prototype: { constructor: unknown } }).prototype.constructor === obj) as boolean;
   }
 
   /**
@@ -99,9 +81,7 @@ class IndexTestUtils {
     const visited = new WeakSet();
 
     function calculateSize(value: unknown): number {
-      if (value === null || typeof value !== 'object') {
-        return 8; // Approximate size for primitives
-      }
+      if (value === null || typeof value !== 'object') {return 8; // Approximate size for primitives}
 
       if (visited.has(value)) {
         return 0; // Already counted
@@ -124,10 +104,7 @@ class IndexTestUtils {
   }
 }
 
-describe('MCP Index Module', () => {
-  let mockLogger: Record<string, jest.Mock>;
-
-  beforeEach(() => {
+describe('MCP Index Module', () => {let mockLogger: Record<string, jest.Mock>;beforeEach(() => {
     jest.clearAllMocks();
     mockLogger = createMockLogger() as unknown as Record<string, jest.Mock>;
   });
@@ -136,21 +113,9 @@ describe('MCP Index Module', () => {
     jest.restoreAllMocks();
   });
 
-  describe('Export Availability and Validation', () => {
-    /**
-     * Test that all expected exports are available
+  describe('Export Availability and Validation', () => {/*** Test that all expected exports are available
      */
-    it('should export all expected modules and components', () => {
-      const expectedExports = [
-        'BytebotMcpModule',
-        'ComputerUseTools',
-        'Base64ImageCompressor',
-        'compressPngBase64Under1MB',
-        'CompressionOptions',
-        'CompressionResult',
-      ];
-
-      expectedExports.forEach((exportName) => {
+    it('should export all expected modules and components', () => {const expectedExports = ['BytebotMcpModule','ComputerUseTools','Base64ImageCompressor','compressPngBase64Under1MB','CompressionOptions','CompressionResult',];expectedExports.forEach((exportName) => {
         expect(McpIndex).toHaveProperty(exportName);
         expect(McpIndex[exportName as keyof typeof McpIndex]).toBeDefined();
       });
@@ -159,13 +124,8 @@ describe('MCP Index Module', () => {
     /**
      * Test that BytebotMcpModule is correctly exported
      */
-    it('should export BytebotMcpModule correctly', () => {
-      IndexTestUtils.validateExport(
-        McpIndex.BytebotMcpModule,
-        'BytebotMcpModule',
-        'function',
-        BytebotMcpModule,
-      );
+    it('should export BytebotMcpModule correctly', () => {IndexTestUtils.validateExport(McpIndex.BytebotMcpModule,
+        'BytebotMcpModule','function',BytebotMcpModule,);
 
       expect(IndexTestUtils.isConstructor(McpIndex.BytebotMcpModule)).toBe(
         true,
@@ -176,13 +136,8 @@ describe('MCP Index Module', () => {
     /**
      * Test that ComputerUseTools is correctly exported
      */
-    it('should export ComputerUseTools correctly', () => {
-      IndexTestUtils.validateExport(
-        McpIndex.ComputerUseTools,
-        'ComputerUseTools',
-        'function',
-        ComputerUseTools,
-      );
+    it('should export ComputerUseTools correctly', () => {IndexTestUtils.validateExport(McpIndex.ComputerUseTools,
+        'ComputerUseTools','function',ComputerUseTools,);
 
       expect(IndexTestUtils.isConstructor(McpIndex.ComputerUseTools)).toBe(
         true,
@@ -193,13 +148,8 @@ describe('MCP Index Module', () => {
     /**
      * Test that Base64ImageCompressor is correctly exported
      */
-    it('should export Base64ImageCompressor correctly', () => {
-      IndexTestUtils.validateExport(
-        McpIndex.Base64ImageCompressor,
-        'Base64ImageCompressor',
-        'function',
-        Base64ImageCompressor,
-      );
+    it('should export Base64ImageCompressor correctly', () => {IndexTestUtils.validateExport(McpIndex.Base64ImageCompressor,
+        'Base64ImageCompressor','function',Base64ImageCompressor,);
 
       expect(IndexTestUtils.isConstructor(McpIndex.Base64ImageCompressor)).toBe(
         true,
@@ -210,13 +160,8 @@ describe('MCP Index Module', () => {
     /**
      * Test that utility function is correctly exported
      */
-    it('should export compressPngBase64Under1MB utility function correctly', () => {
-      IndexTestUtils.validateExport(
-        McpIndex.compressPngBase64Under1MB,
-        'compressPngBase64Under1MB',
-        'function',
-        compressPngBase64Under1MB,
-      );
+    it('should export compressPngBase64Under1MB utility function correctly', () => {IndexTestUtils.validateExport(McpIndex.compressPngBase64Under1MB,
+        'compressPngBase64Under1MB','function',compressPngBase64Under1MB,);
 
       expect(McpIndex.compressPngBase64Under1MB).toBe(
         compressPngBase64Under1MB,
@@ -226,9 +171,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that TypeScript interfaces are exported (types only)
      */
-    it('should export TypeScript types correctly', () => {
-      // Import types directly for testing
-      type TestCompressionOptions = McpIndex.CompressionOptions;
+    it('should export TypeScript types correctly', () => {// Import types directly for testingtype TestCompressionOptions = McpIndex.CompressionOptions;
       type TestCompressionResult = McpIndex.CompressionResult;
 
       // Test type compatibility by creating typed variables
@@ -236,61 +179,35 @@ describe('MCP Index Module', () => {
         targetSizeKB: 1024,
         initialQuality: 95,
         minQuality: 10,
-        format: 'png',
-        maxIterations: 10,
-      };
+        format: 'png',maxIterations: 10,};
 
       const testResult: TestCompressionResult = {
-        base64: 'test-base64-string',
-        sizeBytes: 1024,
-        sizeKB: 1,
+        base64: 'test-base64-string',sizeBytes: 1024,sizeKB: 1,
         sizeMB: 0.001,
         quality: 85,
-        format: 'png',
-        iterations: 3,
-      };
+        format: 'png',iterations: 3,};
 
       // Verify the objects conform to the expected type structure
       expect(testOptions).toBeDefined();
       expect(testOptions.targetSizeKB).toBe(1024);
       expect(testResult).toBeDefined();
-      expect(testResult.base64).toBe('test-base64-string');
-    });
-  });
+      expect(testResult.base64).toBe('test-base64-string');});});
 
-  describe('Re-export Functionality', () => {
-    /**
-     * Test that re-exports maintain original functionality
+  describe('Re-export Functionality', () => {/*** Test that re-exports maintain original functionality
      */
-    it('should maintain original functionality through re-exports', () => {
-      // Test that exported classes can be instantiated
-      expect(() => new McpIndex.BytebotMcpModule()).not.toThrow();
+    it('should maintain original functionality through re-exports', () => {// Test that exported classes can be instantiatedexpect(() => new McpIndex.BytebotMcpModule()).not.toThrow();
 
       // Test that static methods work correctly
       expect(typeof McpIndex.Base64ImageCompressor.compressToSize).toBe(
-        'function',
-      );
-      expect(typeof McpIndex.Base64ImageCompressor.getBase64SizeInfo).toBe(
-        'function',
-      );
-
-      // Test that utility function can be called
-      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');
-    });
-
-    /**
+        'function',);expect(typeof McpIndex.Base64ImageCompressor.getBase64SizeInfo).toBe(
+        'function',);// Test that utility function can be called
+      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');});/**
      * Test that re-exported modules preserve metadata
      */
-    it('should preserve module metadata through re-exports', () => {
-      // Test that decorator metadata is preserved
-      const moduleMetadata = Reflect.getMetadata(
-        'imports',
-        McpIndex.BytebotMcpModule,
-      ) as unknown[];
+    it('should preserve module metadata through re-exports', () => {// Test that decorator metadata is preservedconst moduleMetadata = Reflect.getMetadata(
+        'imports',McpIndex.BytebotMcpModule,) as unknown[];
       const providersMetadata = Reflect.getMetadata(
-        'providers',
-        McpIndex.BytebotMcpModule,
-      ) as unknown[];
+        'providers',McpIndex.BytebotMcpModule,) as unknown[];
 
       expect(moduleMetadata).toBeDefined();
       expect(providersMetadata).toBeDefined();
@@ -303,9 +220,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that prototype chains are maintained
      */
-    it('should maintain prototype chains in re-exports', () => {
-      const moduleInstance = new McpIndex.BytebotMcpModule();
-      expect(moduleInstance).toBeInstanceOf(McpIndex.BytebotMcpModule);
+    it('should maintain prototype chains in re-exports', () => {const moduleInstance = new McpIndex.BytebotMcpModule();expect(moduleInstance).toBeInstanceOf(McpIndex.BytebotMcpModule);
       expect(moduleInstance).toBeInstanceOf(BytebotMcpModule);
 
       expect(McpIndex.BytebotMcpModule.prototype).toBe(
@@ -314,22 +229,10 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Public API Surface Validation', () => {
-    /**
-     * Test that the API surface is clean and well-defined
+  describe('Public API Surface Validation', () => {/*** Test that the API surface is clean and well-defined
      */
-    it('should have a clean public API surface', () => {
-      const exportNames = Object.keys(McpIndex);
-      const expectedExports = [
-        'BytebotMcpModule',
-        'ComputerUseTools',
-        'Base64ImageCompressor',
-        'compressPngBase64Under1MB',
-        'CompressionOptions',
-        'CompressionResult',
-      ];
-
-      // Should not export more than expected
+    it('should have a clean public API surface', () => {const exportNames = Object.keys(McpIndex);const expectedExports = [
+        'BytebotMcpModule','ComputerUseTools','Base64ImageCompressor','compressPngBase64Under1MB','CompressionOptions','CompressionResult',];// Should not export more than expected
       expect(exportNames.length).toBeLessThanOrEqual(
         expectedExports.length + 2,
       );
@@ -343,9 +246,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that no internal implementation details are exposed
      */
-    it('should not expose internal implementation details', () => {
-      const exportNames = Object.keys(McpIndex);
-      const forbiddenPatterns = [
+    it('should not expose internal implementation details', () => {const exportNames = Object.keys(McpIndex);const forbiddenPatterns = [
         /^_/, // Private properties
         /test/i, // Test utilities
         /mock/i, // Mock implementations
@@ -363,10 +264,7 @@ describe('MCP Index Module', () => {
     /**
      * Test export naming conventions
      */
-    it('should follow consistent naming conventions', () => {
-      const exports = McpIndex;
-
-      // Classes should be PascalCase
+    it('should follow consistent naming conventions', () => {const exports = McpIndex;// Classes should be PascalCase
       expect(exports.BytebotMcpModule.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
       expect(exports.ComputerUseTools.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
       expect(exports.Base64ImageCompressor.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
@@ -378,32 +276,18 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Integration Consistency', () => {
-    /**
-     * Test that exports work together correctly
+  describe('Integration Consistency', () => {/*** Test that exports work together correctly
      */
-    it('should allow seamless integration between exported components', () => {
-      // Test that module can be used with tools
-      const module = new McpIndex.BytebotMcpModule();
+    it('should allow seamless integration between exported components', () => {// Test that module can be used with toolsconst module = new McpIndex.BytebotMcpModule();
       expect(module).toBeDefined();
 
       // Test that compression utilities work with expected inputs
-      const testBase64 = Buffer.alloc(1024, 'A').toString('base64');
-      const sizeInfo =
-        McpIndex.Base64ImageCompressor.getBase64SizeInfo(testBase64);
+      const testBase64 = Buffer.alloc(1024, 'A').toString('base64');const sizeInfo =McpIndex.Base64ImageCompressor.getBase64SizeInfo(testBase64);
 
-      expect(sizeInfo).toHaveProperty('bytes');
-      expect(sizeInfo).toHaveProperty('kb');
-      expect(sizeInfo).toHaveProperty('mb');
-      expect(sizeInfo).toHaveProperty('formatted');
-    });
-
-    /**
+      expect(sizeInfo).toHaveProperty('bytes');expect(sizeInfo).toHaveProperty('kb');expect(sizeInfo).toHaveProperty('mb');expect(sizeInfo).toHaveProperty('formatted');});/**
      * Test that all exports can be imported simultaneously
      */
-    it('should support simultaneous import of all exports', () => {
-      const allExports = [
-        McpIndex.BytebotMcpModule,
+    it('should support simultaneous import of all exports', () => {const allExports = [McpIndex.BytebotMcpModule,
         McpIndex.ComputerUseTools,
         McpIndex.Base64ImageCompressor,
         McpIndex.compressPngBase64Under1MB,
@@ -411,19 +295,14 @@ describe('MCP Index Module', () => {
 
       allExports.forEach((exportItem) => {
         expect(exportItem).toBeDefined();
-        expect(typeof exportItem).toBe('function');
-      });
-
-      // All should be importable without conflicts
+        expect(typeof exportItem).toBe('function');});// All should be importable without conflicts
       expect(allExports.length).toBe(4);
     });
 
     /**
      * Test version consistency across exports
      */
-    it('should maintain version consistency across exports', () => {
-      // All exports should be from the same version/build
-      // This is more of a build-time concern, but we can test basic consistency
+    it('should maintain version consistency across exports', () => {// All exports should be from the same version/build// This is more of a build-time concern, but we can test basic consistency
       expect(McpIndex.BytebotMcpModule).toBeDefined();
       expect(McpIndex.ComputerUseTools).toBeDefined();
       expect(McpIndex.Base64ImageCompressor).toBeDefined();
@@ -432,14 +311,9 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Performance and Memory Impact', () => {
-    /**
-     * Test that importing the _index doesn't cause excessive memory usage
+  describe('Performance and Memory Impact', () => {/*** Test that importing the _index doesn't cause excessive memory usage
      */
-    it('should have minimal memory footprint when imported', () => {
-      const memoryBefore = process.memoryUsage();
-
-      // Import and use exports
+    it('should have minimal memory footprint when imported', () => {const memoryBefore = process.memoryUsage();// Import and use exports
       const { BytebotMcpModule, ComputerUseTools, Base64ImageCompressor } =
         McpIndex;
 
@@ -458,9 +332,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that re-exports don't create unnecessary object copies
      */
-    it('should not create unnecessary object copies in re-exports', () => {
-      // Re-exported items should be the same reference as original
-      expect(McpIndex.BytebotMcpModule === BytebotMcpModule).toBe(true);
+    it('should not create unnecessary object copies in re-exports', () => {// Re-exported items should be the same reference as originalexpect(McpIndex.BytebotMcpModule === BytebotMcpModule).toBe(true);
       expect(McpIndex.ComputerUseTools === ComputerUseTools).toBe(true);
       expect(McpIndex.Base64ImageCompressor === Base64ImageCompressor).toBe(
         true,
@@ -473,10 +345,7 @@ describe('MCP Index Module', () => {
     /**
      * Test import performance
      */
-    it('should import quickly without blocking', () => {
-      const startTime = performance.now();
-
-      // Simulate re-importing (accessing exports)
+    it('should import quickly without blocking', () => {const startTime = performance.now();// Simulate re-importing (accessing exports)
       const exports = {
         BytebotMcpModule: McpIndex.BytebotMcpModule,
         ComputerUseTools: McpIndex.ComputerUseTools,
@@ -497,35 +366,23 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Tree-shaking and Bundle Optimization', () => {
-    /**
-     * Test that exports support tree-shaking
+  describe('Tree-shaking and Bundle Optimization', () => {/*** Test that exports support tree-shaking
      */
-    it('should support tree-shaking optimization', () => {
-      // Test that individual exports can be imported without bringing in others
-      // This is more of a build-time test, but we can verify the structure
+    it('should support tree-shaking optimization', () => {// Test that individual exports can be imported without bringing in others// This is more of a build-time test, but we can verify the structure
 
       const bytebotModule = McpIndex.BytebotMcpModule;
       expect(bytebotModule).toBeDefined();
-      expect(typeof bytebotModule).toBe('function');
-
-      // Should be able to use one export without others
-      const moduleInstance = new bytebotModule();
+      expect(typeof bytebotModule).toBe('function');// Should be able to use one export without othersconst moduleInstance = new bytebotModule();
       expect(moduleInstance).toBeInstanceOf(bytebotModule);
     });
 
     /**
      * Test export structure for bundler compatibility
      */
-    it('should be compatible with modern bundlers', () => {
-      // Test that exports are properly structured for bundlers
-      const indexModule = McpIndex;
+    it('should be compatible with modern bundlers', () => {// Test that exports are properly structured for bundlersconst indexModule = McpIndex;
 
       // Should be an object with named exports
-      expect(typeof indexModule).toBe('object');
-      expect(indexModule).not.toBeNull();
-
-      // Each export should be directly accessible
+      expect(typeof indexModule).toBe('object');expect(indexModule).not.toBeNull();// Each export should be directly accessible
       const exportNames = Object.keys(indexModule);
       exportNames.forEach((_name) => {
         expect(indexModule[_name as keyof typeof indexModule]).toBeDefined();
@@ -533,13 +390,9 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Circular Dependency Detection', () => {
-    /**
-     * Test that there are no circular dependencies
+  describe('Circular Dependency Detection', () => {/*** Test that there are no circular dependencies
      */
-    it('should not have circular dependencies', () => {
-      // Test that importing doesn't cause circular dependency issues
-      expect(() => {
+    it('should not have circular dependencies', () => {// Test that importing doesn't cause circular dependency issuesexpect(() => {
         const { BytebotMcpModule } = McpIndex;
         new BytebotMcpModule();
       }).not.toThrow();
@@ -548,16 +401,12 @@ describe('MCP Index Module', () => {
       const exportValues = Object.values(McpIndex);
       exportValues.forEach((value) => {
         expect(value).toBeDefined();
-        expect(value).not.toBe('[Circular]');
-      });
-    });
+        expect(value).not.toBe('[Circular]');});});
 
     /**
      * Test module initialization order
      */
-    it('should handle module initialization correctly', () => {
-      // Test that modules can be instantiated in any order
-      const instances = [
+    it('should handle module initialization correctly', () => {// Test that modules can be instantiated in any orderconst instances = [
         new McpIndex.BytebotMcpModule(),
         McpIndex.Base64ImageCompressor,
         McpIndex.compressPngBase64Under1MB,
@@ -569,13 +418,9 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    /**
-     * Test behavior with malformed imports
+  describe('Error Handling and Edge Cases', () => {/*** Test behavior with malformed imports
      */
-    it('should handle missing exports gracefully', () => {
-      // Test accessing non-existent export
-      const nonExistent = (McpIndex as Record<string, unknown>)
+    it('should handle missing exports gracefully', () => {// Test accessing non-existent exportconst nonExistent = (McpIndex as Record<string, unknown>)
         .NonExistentExport;
       expect(nonExistent).toBeUndefined();
     });
@@ -583,10 +428,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that exports are immutable from external access
      */
-    it('should protect exports from external modification', () => {
-      const originalModule = McpIndex.BytebotMcpModule;
-
-      // Attempt to modify export
+    it('should protect exports from external modification', () => {const originalModule = McpIndex.BytebotMcpModule;// Attempt to modify export
       try {
         (McpIndex as Record<string, unknown>).BytebotMcpModule = null;
       } catch {
@@ -601,9 +443,7 @@ describe('MCP Index Module', () => {
     /**
      * Test exports with null/undefined values
      */
-    it('should handle edge cases in export values', () => {
-      // All exports should be properly defined
-      const exportEntries = Object.entries(McpIndex);
+    it('should handle edge cases in export values', () => {// All exports should be properly definedconst exportEntries = Object.entries(McpIndex);
       exportEntries.forEach(([_name, value]) => {
         expect(value).not.toBeNull();
         expect(value).not.toBeUndefined();
@@ -611,13 +451,9 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('TypeScript Integration', () => {
-    /**
-     * Test that TypeScript types are properly exposed
+  describe('TypeScript Integration', () => {/*** Test that TypeScript types are properly exposed
      */
-    it('should properly expose TypeScript types', () => {
-      // Test that types can be used (compile-time test)
-      type ModuleType = typeof McpIndex.BytebotMcpModule;
+    it('should properly expose TypeScript types', () => {// Test that types can be used (compile-time test)type ModuleType = typeof McpIndex.BytebotMcpModule;
       type ToolsType = typeof McpIndex.ComputerUseTools;
       type CompressorType = typeof McpIndex.Base64ImageCompressor;
 
@@ -634,9 +470,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that interface types are available at compile time
      */
-    it('should make interface types available', () => {
-      // These are compile-time only, but we can verify they exist in the module structure
-      // In a real TypeScript environment, you would test:
+    it('should make interface types available', () => {// These are compile-time only, but we can verify they exist in the module structure// In a real TypeScript environment, you would test:
       // type OptionsType = McpIndex.CompressionOptions;
       // type ResultType = McpIndex.CompressionResult;
 
@@ -644,21 +478,9 @@ describe('MCP Index Module', () => {
     });
   });
 
-  describe('Documentation and API Contract', () => {
-    /**
-     * Test that exports match documented API
+  describe('Documentation and API Contract', () => {/*** Test that exports match documented API
      */
-    it('should match documented public API', () => {
-      const documentedExports = [
-        'BytebotMcpModule',
-        'ComputerUseTools',
-        'Base64ImageCompressor',
-        'compressPngBase64Under1MB',
-        'CompressionOptions',
-        'CompressionResult',
-      ];
-
-      documentedExports.forEach((exportName) => {
+    it('should match documented public API', () => {const documentedExports = ['BytebotMcpModule','ComputerUseTools','Base64ImageCompressor','compressPngBase64Under1MB','CompressionOptions','CompressionResult',];documentedExports.forEach((exportName) => {
         expect(McpIndex).toHaveProperty(exportName);
       });
 
@@ -672,28 +494,15 @@ describe('MCP Index Module', () => {
     /**
      * Test that export signatures are stable
      */
-    it('should maintain stable export signatures', () => {
-      // Test that constructor signatures are preserved
-      expect(McpIndex.BytebotMcpModule.length).toBe(0); // Constructor takes no parameters
-      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');
-
-      // Test that static methods exist
-      expect(typeof McpIndex.Base64ImageCompressor.compressToSize).toBe(
-        'function',
-      );
-      expect(typeof McpIndex.Base64ImageCompressor.getBase64SizeInfo).toBe(
-        'function',
-      );
-    });
+    it('should maintain stable export signatures', () => {// Test that constructor signatures are preservedexpect(McpIndex.BytebotMcpModule.length).toBe(0); // Constructor takes no parameters
+      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');// Test that static methods existexpect(typeof McpIndex.Base64ImageCompressor.compressToSize).toBe(
+        'function',);expect(typeof McpIndex.Base64ImageCompressor.getBase64SizeInfo).toBe(
+        'function',);});
   });
 
-  describe('Compatibility and Versioning', () => {
-    /**
-     * Test backward compatibility
+  describe('Compatibility and Versioning', () => {/*** Test backward compatibility
      */
-    it('should maintain backward compatibility', () => {
-      // Test that old import patterns still work
-      const { BytebotMcpModule } = McpIndex;
+    it('should maintain backward compatibility', () => {// Test that old import patterns still workconst { BytebotMcpModule } = McpIndex;
       expect(BytebotMcpModule).toBeDefined();
 
       // Test that class instantiation works as expected
@@ -704,9 +513,7 @@ describe('MCP Index Module', () => {
     /**
      * Test forward compatibility considerations
      */
-    it('should be prepared for future extensions', () => {
-      // Test that the export structure can accommodate new exports
-      const currentExportCount = Object.keys(McpIndex).length;
+    it('should be prepared for future extensions', () => {// Test that the export structure can accommodate new exportsconst currentExportCount = Object.keys(McpIndex).length;
       expect(currentExportCount).toBeGreaterThan(0);
 
       // Test that adding new exports wouldn't break existing structure

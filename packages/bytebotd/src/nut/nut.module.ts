@@ -25,11 +25,7 @@
  * @version 1.1.0
  */
 
-import { Module } from '@nestjs/common';
-import { NutService } from './nut.service';
-
-/**
- * NUT Module configuration
+import { Module } from '@nestjs/common';import { NutService } from './nut.service';/*** NUT Module configuration
  *
  * Exports NutService for use in other modules while keeping all
  * implementation details encapsulated within the service.

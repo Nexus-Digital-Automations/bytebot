@@ -26,19 +26,7 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as os from 'os';
-import * as fs from 'fs';
-import * as path from 'path';
-import { promisify } from 'util';
-import { performance } from 'perf_hooks';
-// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring instead
-
-// ===== RESOURCE MONITORING TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as os from 'os';import * as fs from 'fs';import * as path from 'path';import { promisify } from 'util';import { performance } from 'perf_hooks';// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring instead// ===== RESOURCE MONITORING TYPES =====/**
  * CPU utilization metrics
  */
 export interface CPUMetrics {
@@ -159,17 +147,13 @@ export interface NetworkMetrics {
  * Network interface metrics
  */
 export interface NetworkInterface {
-  name: string;                // Interface name (e.g., 'eth0', 'wlan0')
-  bytesReceived: number;       // Bytes received on this interface
-  bytesSent: number;          // Bytes sent on this interface
+  name: string;                // Interface name (e.g., 'eth0', 'wlan0')bytesReceived: number;       // Bytes received on this interfacebytesSent: number;          // Bytes sent on this interface
   packetsReceived: number;     // Packets received
   packetsSent: number;        // Packets sent
   errors: number;             // Network errors
   dropped: number;            // Dropped packets
   speed: number;              // Interface speed (Mbps)
-  duplex: string;             // Duplex mode ('full', 'half')
-  mtu: number;                // Maximum Transmission Unit
-}
+  duplex: string;             // Duplex mode ('full', 'half')mtu: number;                // Maximum Transmission Unit}
 
 /**
  * Disk I/O metrics
@@ -245,17 +229,11 @@ export interface ResourceMetrics {
  * Resource bottleneck analysis
  */
 export interface ResourceBottleneck {
-  type: 'cpu' | 'memory' | 'network' | 'disk' | 'composite';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  metric: string;              // Specific metric causing bottleneck
-  currentValue: number;        // Current value of the metric
+  type: 'cpu' | 'memory' | 'network' | 'disk' | 'composite';severity: 'low' | 'medium' | 'high' | 'critical';metric: string;              // Specific metric causing bottleneckcurrentValue: number;        // Current value of the metric
   threshold: number;           // Threshold that was exceeded
   impact: string;              // Impact description
   recommendation: string;      // Optimization recommendation
-  urgency: 'low' | 'medium' | 'high' | 'immediate';
-}
-
-/**
+  urgency: 'low' | 'medium' | 'high' | 'immediate';}/**
  * Resource monitoring configuration
  */
 export interface ResourceMonitoringConfig {
@@ -347,10 +325,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 Resource Monitoring Service initializing...');
-
-    // Initialize configuration
-    this.config = {
+    this.logger.log('🚀 Resource Monitoring Service initializing...');// Initialize configurationthis.config = {
       collectionInterval: 1000,        // 1 second
       historyRetention: 3600000,       // 1 hour
       thresholds: this.DEFAULT_THRESHOLDS,
@@ -361,42 +336,25 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Resource Monitoring Framework');
-
-    // Start monitoring
-    await this.startResourceMonitoring();
+    this.logger.log('Initializing Resource Monitoring Framework');// Start monitoringawait this.startResourceMonitoring();
 
     // Collect baseline metrics
     await this.collectBaselineMetrics();
 
-    this.logger.log('✅ Resource Monitoring Framework ready');
-  }
+    this.logger.log('✅ Resource Monitoring Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down Resource Monitoring Framework');// Stop monitoringthis.stopResourceMonitoring();
 
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Resource Monitoring Framework');
-
-    // Stop monitoring
-    this.stopResourceMonitoring();
-
-    this.logger.log('✅ Resource Monitoring Framework shutdown complete');
-  }
-
-  // ===== RESOURCE COLLECTION =====
+    this.logger.log('✅ Resource Monitoring Framework shutdown complete');}// ===== RESOURCE COLLECTION =====
 
   /**
    * Start comprehensive resource monitoring
    */
   async startResourceMonitoring(): Promise<void> {
-    this.logger.log('Starting resource monitoring');
-
-    // Start main monitoring loop
-    this.monitoringInterval = setInterval(async () => {
+    this.logger.log('Starting resource monitoring');// Start main monitoring loopthis.monitoringInterval = setInterval(async () => {
       try {
         await this.collectResourceMetrics();
       } catch (error) {
-        this.logger.error('Error collecting resource metrics', error.stack);
-      }
-    }, this.config.collectionInterval);
+        this.logger.error('Error collecting resource metrics', error.stack);}}, this.config.collectionInterval);
 
     // Start detailed monitoring if enabled
     if (this.config.enableDetailedMonitoring) {
@@ -404,15 +362,10 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
         try {
           await this.collectDetailedMetrics();
         } catch (error) {
-          this.logger.error('Error collecting detailed metrics', error.stack);
-        }
-      }, this.config.collectionInterval * 5); // 5x less frequent
+          this.logger.error('Error collecting detailed metrics', error.stack);}}, this.config.collectionInterval * 5); // 5x less frequent
     }
 
-    this.logger.log('Resource monitoring started');
-  }
-
-  /**
+    this.logger.log('Resource monitoring started');}/**
    * Stop resource monitoring
    */
   stopResourceMonitoring(): void {
@@ -426,10 +379,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
       this.detailedMonitoringInterval = undefined;
     }
 
-    this.logger.log('Resource monitoring stopped');
-  }
-
-  /**
+    this.logger.log('Resource monitoring stopped');}/**
    * Collect comprehensive resource metrics
    */
   async collectResourceMetrics(): Promise<ResourceMetrics> {
@@ -477,9 +427,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
       return metrics;
 
     } catch (error) {
-      this.logger.error('Failed to collect resource metrics', error.stack);
-      throw error;
-    }
+      this.logger.error('Failed to collect resource metrics', error.stack);throw error;}
   }
 
   /**
@@ -618,9 +566,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
               errors: 0,
               dropped: 0,
               speed: 1000, // Default to 1Gbps
-              duplex: 'full',
-              mtu: 1500,
-            };
+              duplex: 'full',mtu: 1500,};
 
             interfaces.push(networkInterface);
           }
@@ -705,53 +651,23 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
     // CPU bottleneck analysis
     if (metrics.cpu.usage > this.config.thresholds.cpu.critical) {
       bottlenecks.push({
-        type: 'cpu',
-        severity: 'critical',
-        metric: 'cpu.usage',
-        currentValue: metrics.cpu.usage,
-        threshold: this.config.thresholds.cpu.critical,
-        impact: 'Severe performance degradation, request timeouts likely',
-        recommendation: 'Scale horizontally or optimize CPU-intensive operations',
-        urgency: 'immediate',
-      });
-    } else if (metrics.cpu.usage > this.config.thresholds.cpu.warning) {
+        type: 'cpu',severity: 'critical',metric: 'cpu.usage',currentValue: metrics.cpu.usage,threshold: this.config.thresholds.cpu.critical,
+        impact: 'Severe performance degradation, request timeouts likely',recommendation: 'Scale horizontally or optimize CPU-intensive operations',urgency: 'immediate',});} else if (metrics.cpu.usage > this.config.thresholds.cpu.warning) {
       bottlenecks.push({
-        type: 'cpu',
-        severity: 'medium',
-        metric: 'cpu.usage',
-        currentValue: metrics.cpu.usage,
-        threshold: this.config.thresholds.cpu.warning,
-        impact: 'Performance degradation, increased latency',
-        recommendation: 'Monitor closely, consider scaling or optimization',
-        urgency: 'medium',
-      });
-    }
+        type: 'cpu',severity: 'medium',metric: 'cpu.usage',currentValue: metrics.cpu.usage,threshold: this.config.thresholds.cpu.warning,
+        impact: 'Performance degradation, increased latency',recommendation: 'Monitor closely, consider scaling or optimization',urgency: 'medium',});}
 
     // Memory bottleneck analysis
     if (metrics.memory.utilization > this.config.thresholds.memory.critical) {
       bottlenecks.push({
-        type: 'memory',
-        severity: 'critical',
-        metric: 'memory.utilization',
-        currentValue: metrics.memory.utilization,
-        threshold: this.config.thresholds.memory.critical,
-        impact: 'Risk of OOM, application instability',
-        recommendation: 'Increase memory or optimize memory usage immediately',
-        urgency: 'immediate',
-      });
-    }
+        type: 'memory',severity: 'critical',metric: 'memory.utilization',currentValue: metrics.memory.utilization,threshold: this.config.thresholds.memory.critical,
+        impact: 'Risk of OOM, application instability',recommendation: 'Increase memory or optimize memory usage immediately',urgency: 'immediate',});}
 
     // Network bottleneck analysis
     if (metrics.network.bandwidth.utilization > this.config.thresholds.network.critical) {
       bottlenecks.push({
-        type: 'network',
-        severity: 'critical',
-        metric: 'network.bandwidth.utilization',
-        currentValue: metrics.network.bandwidth.utilization,
-        threshold: this.config.thresholds.network.critical,
-        impact: 'Network congestion, message delivery delays',
-        recommendation: 'Upgrade network capacity or implement QoS',
-        urgency: 'high',
+        type: 'network',severity: 'critical',metric: 'network.bandwidth.utilization',currentValue: metrics.network.bandwidth.utilization,threshold: this.config.thresholds.network.critical,
+        impact: 'Network congestion, message delivery delays',recommendation: 'Upgrade network capacity or implement QoS',urgency: 'high',
       });
     }
 
@@ -791,24 +707,19 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
    * Send bottleneck alert
    */
   private sendBottleneckAlert(bottleneck: ResourceBottleneck): void {
-    this.eventEmitter.emit('resource_bottleneck', {
-      type: 'bottleneck_detected',
+    this.eventEmitter.emit('resource_bottleneck', {type: 'bottleneck_detected',
       bottleneck,
       timestamp: Date.now(),
     });
 
-    this.logger.warn(`🚨 Resource bottleneck detected: ${bottleneck.type} (${bottleneck.severity})`);
-    this.logger.warn(`   Metric: ${bottleneck.metric} = ${bottleneck.currentValue.toFixed(1)}% (threshold: ${bottleneck.threshold}%)`);
-    this.logger.warn(`   Impact: ${bottleneck.impact}`);
-    this.logger.warn(`   Recommendation: ${bottleneck.recommendation}`);
+    this.logger.warn(`🚨 Resource bottleneck detected: ${bottleneck.type} (${bottleneck.severity})`);this.logger.warn(`   Metric: ${bottleneck.metric} = ${bottleneck.currentValue.toFixed(1)}% (threshold: ${bottleneck.threshold}%)`);this.logger.warn(`   Impact: ${bottleneck.impact}`);this.logger.warn(`   Recommendation: ${bottleneck.recommendation}`);
   }
 
   /**
    * Send bottleneck resolved alert
    */
   private sendBottleneckResolvedAlert(bottleneck: ResourceBottleneck): void {
-    this.eventEmitter.emit('resource_bottleneck', {
-      type: 'bottleneck_resolved',
+    this.eventEmitter.emit('resource_bottleneck', {type: 'bottleneck_resolved',
       bottleneck,
       timestamp: Date.now(),
     });
@@ -824,20 +735,11 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
   private checkThresholds(metrics: ResourceMetrics): void {
     // CPU threshold check
     if (metrics.cpu.usage > this.config.thresholds.cpu.warning) {
-      this.sendThresholdAlert('cpu', 'usage', metrics.cpu.usage, this.config.thresholds.cpu.warning);
-    }
-
-    // Memory threshold check
+      this.sendThresholdAlert('cpu', 'usage', metrics.cpu.usage, this.config.thresholds.cpu.warning);}// Memory threshold check
     if (metrics.memory.utilization > this.config.thresholds.memory.warning) {
-      this.sendThresholdAlert('memory', 'utilization', metrics.memory.utilization, this.config.thresholds.memory.warning);
-    }
-
-    // Network threshold check
+      this.sendThresholdAlert('memory', 'utilization', metrics.memory.utilization, this.config.thresholds.memory.warning);}// Network threshold check
     if (metrics.network.bandwidth.utilization > this.config.thresholds.network.warning) {
-      this.sendThresholdAlert('network', 'bandwidth', metrics.network.bandwidth.utilization, this.config.thresholds.network.warning);
-    }
-
-    // Disk threshold check
+      this.sendThresholdAlert('network', 'bandwidth', metrics.network.bandwidth.utilization, this.config.thresholds.network.warning);}// Disk threshold check
     metrics.disk.disks.forEach(disk => {
       if (disk.utilization > this.config.thresholds.disk.warning) {
         this.sendThresholdAlert('disk', `${disk.device}_utilization`, disk.utilization, this.config.thresholds.disk.warning);
@@ -856,9 +758,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
   ): void {
     const severity = this.determineAlertSeverity(resource, currentValue);
 
-    this.eventEmitter.emit('resource_threshold', {
-      resource,
-      metric,
+    this.eventEmitter.emit('resource_threshold', {resource,metric,
       currentValue,
       threshold,
       severity,
@@ -869,12 +769,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
   /**
    * Determine alert severity based on current value
    */
-  private determineAlertSeverity(resource: string, currentValue: number): 'warning' | 'critical' {
-    const thresholds = this.config.thresholds[resource as keyof typeof this.config.thresholds];
-    return currentValue > thresholds.critical ? 'critical' : 'warning';
-  }
-
-  // ===== OPTIMIZATION RECOMMENDATIONS =====
+  private determineAlertSeverity(resource: string, currentValue: number): 'warning' | 'critical' {const thresholds = this.config.thresholds[resource as keyof typeof this.config.thresholds];return currentValue > thresholds.critical ? 'critical' : 'warning';}// ===== OPTIMIZATION RECOMMENDATIONS =====
 
   /**
    * Generate optimization recommendations based on current metrics
@@ -883,10 +778,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
     const currentMetrics = metrics || this.currentMetrics;
 
     if (!currentMetrics) {
-      throw new Error('No metrics available for optimization analysis');
-    }
-
-    const recommendations: OptimizationRecommendations = {
+      throw new Error('No metrics available for optimization analysis');}const recommendations: OptimizationRecommendations = {
       cpu: [],
       memory: [],
       network: [],
@@ -897,32 +789,13 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
 
     // CPU optimization recommendations
     if (currentMetrics.cpu.usage > 80) {
-      recommendations.cpu.push('Consider horizontal scaling to distribute CPU load');
-      recommendations.cpu.push('Profile application for CPU-intensive operations');
-      recommendations.cpu.push('Implement connection pooling to reduce per-request overhead');
-    }
-
-    if (currentMetrics.cpu.loadAverage.oneMinute > os.cpus().length) {
-      recommendations.cpu.push('System is overloaded - consider reducing concurrent operations');
-    }
-
-    // Memory optimization recommendations
+      recommendations.cpu.push('Consider horizontal scaling to distribute CPU load');recommendations.cpu.push('Profile application for CPU-intensive operations');recommendations.cpu.push('Implement connection pooling to reduce per-request overhead');}if (currentMetrics.cpu.loadAverage.oneMinute > os.cpus().length) {
+      recommendations.cpu.push('System is overloaded - consider reducing concurrent operations');}// Memory optimization recommendations
     if (currentMetrics.memory.utilization > 80) {
-      recommendations.memory.push('Increase available memory or optimize memory usage');
-      recommendations.memory.push('Implement object pooling to reduce GC pressure');
-      recommendations.memory.push('Review memory leaks and unnecessary object retention');
-    }
-
-    if (currentMetrics.memory.gc.timeSpent > 100) {
-      recommendations.memory.push('Optimize garbage collection by tuning GC parameters');
-      recommendations.memory.push('Reduce object allocation in hot paths');
-    }
-
-    // Network optimization recommendations
+      recommendations.memory.push('Increase available memory or optimize memory usage');recommendations.memory.push('Implement object pooling to reduce GC pressure');recommendations.memory.push('Review memory leaks and unnecessary object retention');}if (currentMetrics.memory.gc.timeSpent > 100) {
+      recommendations.memory.push('Optimize garbage collection by tuning GC parameters');recommendations.memory.push('Reduce object allocation in hot paths');}// Network optimization recommendations
     if (currentMetrics.network.bandwidth.utilization > 70) {
-      recommendations.network.push('Implement message compression to reduce bandwidth usage');
-      recommendations.network.push('Consider connection multiplexing to reduce overhead');
-      recommendations.network.push('Optimize message serialization format');
+      recommendations.network.push('Implement message compression to reduce bandwidth usage');recommendations.network.push('Consider connection multiplexing to reduce overhead');recommendations.network.push('Optimize message serialization format');
     }
 
     // Disk optimization recommendations
@@ -933,25 +806,13 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
     });
 
     if (currentMetrics.disk.io.utilization > 80) {
-      recommendations.disk.push('High disk I/O detected - consider SSD upgrade or I/O optimization');
-    }
-
-    // Scaling recommendations
+      recommendations.disk.push('High disk I/O detected - consider SSD upgrade or I/O optimization');}// Scaling recommendations
     const bottleneckCount = this.activeBottlenecks.size;
     if (bottleneckCount > 2) {
-      recommendations.scaling.push('Multiple resource bottlenecks detected - consider vertical scaling');
-    }
-
-    // Configuration recommendations
+      recommendations.scaling.push('Multiple resource bottlenecks detected - consider vertical scaling');}// Configuration recommendations
     if (currentMetrics.cpu.usage > 70 && currentMetrics.memory.utilization < 50) {
-      recommendations.configuration.push('CPU-bound workload detected - consider CPU-optimized instance types');
-    }
-
-    if (currentMetrics.memory.utilization > 70 && currentMetrics.cpu.usage < 50) {
-      recommendations.configuration.push('Memory-bound workload detected - consider memory-optimized instance types');
-    }
-
-    return recommendations;
+      recommendations.configuration.push('CPU-bound workload detected - consider CPU-optimized instance types');}if (currentMetrics.memory.utilization > 70 && currentMetrics.cpu.usage < 50) {
+      recommendations.configuration.push('Memory-bound workload detected - consider memory-optimized instance types');}return recommendations;
   }
 
   // ===== HELPER METHODS =====
@@ -999,16 +860,10 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
    * Collect baseline metrics
    */
   private async collectBaselineMetrics(): Promise<void> {
-    this.logger.log('Collecting baseline resource metrics');
-
-    // Collect metrics when system is idle
-    const metrics = await this.collectResourceMetrics();
+    this.logger.log('Collecting baseline resource metrics');// Collect metrics when system is idleconst metrics = await this.collectResourceMetrics();
     this.baselineMetrics = metrics;
 
-    this.logger.log('Baseline resource metrics collected');
-  }
-
-  /**
+    this.logger.log('Baseline resource metrics collected');}/**
    * Get additional memory information (platform-specific)
    */
   private async getAdditionalMemoryInfo() {
@@ -1139,10 +994,7 @@ export class ResourceMonitoringService implements OnModuleInit, OnModuleDestroy 
    */
   updateConfiguration(config: Partial<ResourceMonitoringConfig>): void {
     this.config = { ...this.config, ...config };
-    this.logger.log('Resource monitoring configuration updated');
-  }
-
-  /**
+    this.logger.log('Resource monitoring configuration updated');}/**
    * Force metrics collection
    */
   async forceMetricsCollection(): Promise<ResourceMetrics> {

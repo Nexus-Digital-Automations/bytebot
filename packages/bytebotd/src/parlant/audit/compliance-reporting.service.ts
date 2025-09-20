@@ -25,27 +25,13 @@
  * @version 1.0.0 - Enterprise Compliance Reporting Framework
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as PDFDocument from 'pdfkit';
-import {
-  ImmutableAuditEvent,
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as crypto from 'crypto';import * as fs from 'fs/promises';import * as path from 'path';import * as PDFDocument from 'pdfkit';import {ImmutableAuditEvent,
   ComplianceRegulation,
   AuditOperationType
-} from './enterprise-audit-trail.service';
-import {
-  ComplianceAssessmentResult,
+} from './enterprise-audit-trail.service';import {ComplianceAssessmentResult,
   ComplianceViolation,
   ComplianceRecommendation
-} from './compliance-monitoring.service';
-
-// ===== REPORTING INTERFACES =====
-
-/**
+} from './compliance-monitoring.service';// ===== REPORTING INTERFACES =====/**
  * Compliance report configuration
  */
 export interface ComplianceReportConfig {
@@ -55,9 +41,7 @@ export interface ComplianceReportConfig {
   readonly reportFrequency: ReportFrequency;
   readonly recipients: Recipient[];
   readonly format: ReportFormat[];
-  readonly language: 'EN' | 'DE' | 'FR' | 'ES' | 'IT';
-  readonly templateId: string;
-  readonly autoSubmission: boolean;
+  readonly language: 'EN' | 'DE' | 'FR' | 'ES' | 'IT';readonly templateId: string;readonly autoSubmission: boolean;
   readonly digitalSignature: boolean;
   readonly encryptionRequired: boolean;
   readonly customFields: CustomField[];
@@ -68,67 +52,28 @@ export interface ComplianceReportConfig {
  * Report types
  */
 export enum ReportType {
-  EXECUTIVE_SUMMARY = 'executive_summary',
-  DETAILED_TECHNICAL = 'detailed_technical',
-  AUDIT_COMPLIANCE = 'audit_compliance',
-  VIOLATION_SUMMARY = 'violation_summary',
-  RISK_ASSESSMENT = 'risk_assessment',
-  REMEDIATION_STATUS = 'remediation_status',
-  CERTIFICATION_PREPARATION = 'certification_preparation',
-  REGULATORY_SUBMISSION = 'regulatory_submission',
-}
-
-/**
+  EXECUTIVE_SUMMARY = 'executive_summary',DETAILED_TECHNICAL = 'detailed_technical',AUDIT_COMPLIANCE = 'audit_compliance',VIOLATION_SUMMARY = 'violation_summary',RISK_ASSESSMENT = 'risk_assessment',REMEDIATION_STATUS = 'remediation_status',CERTIFICATION_PREPARATION = 'certification_preparation',REGULATORY_SUBMISSION = 'regulatory_submission',}/**
  * Report frequency
  */
 export enum ReportFrequency {
-  REAL_TIME = 'real_time',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  QUARTERLY = 'quarterly',
-  SEMI_ANNUALLY = 'semi_annually',
-  ANNUALLY = 'annually',
-  ON_DEMAND = 'on_demand',
-  EVENT_TRIGGERED = 'event_triggered',
-}
-
-/**
+  REAL_TIME = 'real_time',DAILY = 'daily',WEEKLY = 'weekly',MONTHLY = 'monthly',QUARTERLY = 'quarterly',SEMI_ANNUALLY = 'semi_annually',ANNUALLY = 'annually',ON_DEMAND = 'on_demand',EVENT_TRIGGERED = 'event_triggered',}/**
  * Report formats
  */
 export enum ReportFormat {
-  PDF = 'pdf',
-  JSON = 'json',
-  CSV = 'csv',
-  XML = 'xml',
-  HTML = 'html',
-  EXCEL = 'excel',
-  DASHBOARD = 'dashboard',
-}
-
-/**
+  PDF = 'pdf',JSON = 'json',CSV = 'csv',XML = 'xml',HTML = 'html',EXCEL = 'excel',DASHBOARD = 'dashboard',}/**
  * Report recipient
  */
 export interface Recipient {
   readonly recipientId: string;
   readonly name: string;
   readonly email: string;
-  readonly role: 'EXECUTIVE' | 'COMPLIANCE_OFFICER' | 'AUDITOR' | 'SECURITY_OFFICER' | 'BOARD_MEMBER';
-  readonly reportTypes: ReportType[];
-  readonly deliveryMethod: 'EMAIL' | 'SECURE_PORTAL' | 'API' | 'WEBHOOK';
-  readonly pgpKey?: string;
-  readonly accessLevel: 'FULL' | 'SUMMARY' | 'METRICS_ONLY';
-}
-
-/**
+  readonly role: 'EXECUTIVE' | 'COMPLIANCE_OFFICER' | 'AUDITOR' | 'SECURITY_OFFICER' | 'BOARD_MEMBER';readonly reportTypes: ReportType[];readonly deliveryMethod: 'EMAIL' | 'SECURE_PORTAL' | 'API' | 'WEBHOOK';readonly pgpKey?: string;readonly accessLevel: 'FULL' | 'SUMMARY' | 'METRICS_ONLY';}/**
  * Custom field for reports
  */
 export interface CustomField {
   readonly fieldId: string;
   readonly fieldName: string;
-  readonly fieldType: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'LIST';
-  readonly required: boolean;
-  readonly defaultValue?: any;
+  readonly fieldType: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'LIST';readonly required: boolean;readonly defaultValue?: any;
   readonly validation?: string;
 }
 
@@ -188,16 +133,7 @@ export interface GeneratedComplianceReport {
  * Report status
  */
 export enum ReportStatus {
-  GENERATING = 'generating',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  SUBMITTED = 'submitted',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  ARCHIVED = 'archived',
-}
-
-/**
+  GENERATING = 'generating',COMPLETED = 'completed',FAILED = 'failed',SUBMITTED = 'submitted',APPROVED = 'approved',REJECTED = 'rejected',ARCHIVED = 'archived',}/**
  * Report content structure
  */
 export interface ReportContent {
@@ -216,13 +152,8 @@ export interface ReportContent {
  */
 export interface ExecutiveSummary {
   readonly overallComplianceScore: number;
-  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT';
-  readonly keyFindings: string[];
-  readonly criticalIssues: number;
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly improvementTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';
-  readonly executiveRecommendations: string[];
-  readonly nextSteps: string[];
+  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT';readonly keyFindings: string[];readonly criticalIssues: number;
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly improvementTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';readonly executiveRecommendations: string[];readonly nextSteps: string[];
 }
 
 /**
@@ -259,9 +190,7 @@ export interface TestResult {
   readonly testId: string;
   readonly testName: string;
   readonly testDate: Date;
-  readonly result: 'PASS' | 'FAIL' | 'PARTIAL' | 'NOT_TESTED';
-  readonly score: number;
-  readonly evidence: string[];
+  readonly result: 'PASS' | 'FAIL' | 'PARTIAL' | 'NOT_TESTED';readonly score: number;readonly evidence: string[];
   readonly notes: string;
 }
 
@@ -273,10 +202,7 @@ export interface TrendData {
   readonly metric: string;
   readonly value: number;
   readonly variance: number;
-  readonly trend: 'UP' | 'DOWN' | 'STABLE';
-}
-
-/**
+  readonly trend: 'UP' | 'DOWN' | 'STABLE';}/**
  * Benchmark data
  */
 export interface BenchmarkData {
@@ -316,9 +242,7 @@ export interface EvidenceCategory {
  */
 export interface EvidenceItem {
   readonly itemId: string;
-  readonly type: 'AUDIT_LOG' | 'DOCUMENT' | 'SCREENSHOT' | 'CONFIGURATION' | 'TEST_RESULT';
-  readonly description: string;
-  readonly timestamp: Date;
+  readonly type: 'AUDIT_LOG' | 'DOCUMENT' | 'SCREENSHOT' | 'CONFIGURATION' | 'TEST_RESULT';readonly description: string;readonly timestamp: Date;
   readonly hash: string;
   readonly location: string;
   readonly relevance: number;
@@ -341,9 +265,7 @@ export interface EvidenceIntegrity {
 export interface ReportAppendix {
   readonly appendixId: string;
   readonly title: string;
-  readonly type: 'EVIDENCE' | 'METHODOLOGY' | 'GLOSSARY' | 'REFERENCES' | 'TECHNICAL_DETAILS';
-  readonly content: string;
-  readonly attachments: AttachmentInfo[];
+  readonly type: 'EVIDENCE' | 'METHODOLOGY' | 'GLOSSARY' | 'REFERENCES' | 'TECHNICAL_DETAILS';readonly content: string;readonly attachments: AttachmentInfo[];
 }
 
 /**
@@ -363,9 +285,7 @@ export interface AttachmentInfo {
  */
 export interface CertificationInfo {
   readonly regulation: ComplianceRegulation;
-  readonly currentStatus: 'CERTIFIED' | 'PENDING' | 'EXPIRED' | 'NON_COMPLIANT';
-  readonly certificationDate?: Date;
-  readonly expirationDate?: Date;
+  readonly currentStatus: 'CERTIFIED' | 'PENDING' | 'EXPIRED' | 'NON_COMPLIANT';readonly certificationDate?: Date;readonly expirationDate?: Date;
   readonly certifyingBody?: string;
   readonly certificateNumber?: string;
   readonly nextAssessment: Date;
@@ -409,12 +329,8 @@ export interface SubmissionInfo {
   readonly submissionId: string;
   readonly submittedAt: Date;
   readonly submittedBy: string;
-  readonly submissionMethod: 'API' | 'PORTAL' | 'EMAIL' | 'MANUAL';
-  readonly recipientOrganization: string;
-  readonly confirmationNumber?: string;
-  readonly status: 'SUBMITTED' | 'ACKNOWLEDGED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
-  readonly feedback?: string;
-  readonly nextSubmissionDue?: Date;
+  readonly submissionMethod: 'API' | 'PORTAL' | 'EMAIL' | 'MANUAL';readonly recipientOrganization: string;readonly confirmationNumber?: string;
+  readonly status: 'SUBMITTED' | 'ACKNOWLEDGED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';readonly feedback?: string;readonly nextSubmissionDue?: Date;
 }
 
 /**
@@ -451,9 +367,7 @@ export interface TemplateSubsection {
   readonly subsectionId: string;
   readonly title: string;
   readonly content: string;
-  readonly contentType: 'TEXT' | 'TABLE' | 'CHART' | 'IMAGE';
-  readonly dataSource: string;
-  readonly formatting: SectionFormatting;
+  readonly contentType: 'TEXT' | 'TABLE' | 'CHART' | 'IMAGE';readonly dataSource: string;readonly formatting: SectionFormatting;
 }
 
 /**
@@ -471,10 +385,7 @@ export interface DataBinding {
  * Formatting options
  */
 export interface FormattingOptions {
-  readonly pageSize: 'A4' | 'LETTER' | 'LEGAL';
-  readonly orientation: 'PORTRAIT' | 'LANDSCAPE';
-  readonly margins: { top: number; bottom: number; left: number; right: number };
-  readonly fonts: FontConfig[];
+  readonly pageSize: 'A4' | 'LETTER' | 'LEGAL';readonly orientation: 'PORTRAIT' | 'LANDSCAPE';readonly margins: { top: number; bottom: number; left: number; right: number };readonly fonts: FontConfig[];
   readonly colors: ColorScheme;
   readonly logoUrl?: string;
   readonly watermark?: string;
@@ -486,11 +397,7 @@ export interface FormattingOptions {
 export interface FontConfig {
   readonly name: string;
   readonly size: number;
-  readonly style: 'NORMAL' | 'BOLD' | 'ITALIC' | 'BOLD_ITALIC';
-  readonly usage: 'HEADER' | 'BODY' | 'FOOTER' | 'CAPTION';
-}
-
-/**
+  readonly style: 'NORMAL' | 'BOLD' | 'ITALIC' | 'BOLD_ITALIC';readonly usage: 'HEADER' | 'BODY' | 'FOOTER' | 'CAPTION';}/**
  * Color scheme
  */
 export interface ColorScheme {
@@ -509,10 +416,7 @@ export interface ColorScheme {
  */
 export interface SectionFormatting {
   readonly fontSize: number;
-  readonly fontWeight: 'NORMAL' | 'BOLD';
-  readonly alignment: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFY';
-  readonly spacing: { before: number; after: number };
-  readonly indentation: number;
+  readonly fontWeight: 'NORMAL' | 'BOLD';readonly alignment: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFY';readonly spacing: { before: number; after: number };readonly indentation: number;
 }
 
 /**
@@ -520,9 +424,7 @@ export interface SectionFormatting {
  */
 export interface TemplateVariable {
   readonly variableName: string;
-  readonly variableType: 'STRING' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';
-  readonly defaultValue?: any;
-  readonly required: boolean;
+  readonly variableType: 'STRING' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';readonly defaultValue?: any;readonly required: boolean;
   readonly description: string;
 }
 
@@ -532,9 +434,7 @@ export interface TemplateVariable {
 export interface ValidationRule {
   readonly ruleId: string;
   readonly field: string;
-  readonly ruleType: 'REQUIRED' | 'MIN_LENGTH' | 'MAX_LENGTH' | 'RANGE' | 'PATTERN' | 'CUSTOM';
-  readonly value: any;
-  readonly errorMessage: string;
+  readonly ruleType: 'REQUIRED' | 'MIN_LENGTH' | 'MAX_LENGTH' | 'RANGE' | 'PATTERN' | 'CUSTOM';readonly value: any;readonly errorMessage: string;
 }
 
 // ===== COMPLIANCE REPORTING SERVICE =====
@@ -553,10 +453,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   // Configuration
   private readonly config = {
-    reportsDirectory: '/secure/reports',
-    templatesDirectory: '/templates/compliance',
-    maxConcurrentGenerations: 5,
-    reportRetentionDays: 2555, // 7 years
+    reportsDirectory: '/secure/reports',templatesDirectory: '/templates/compliance',maxConcurrentGenerations: 5,reportRetentionDays: 2555, // 7 years
     autoArchiveDays: 365, // 1 year
     encryptionEnabled: true,
     digitalSigningEnabled: true,
@@ -588,9 +485,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     // Initialize cryptographic keys
     this.signingKeys = this.initializeSigningKeys();
 
-    this.logger.log('Compliance Reporting Service initialized', {
-      reportsDirectory: this.config.reportsDirectory,
-      encryptionEnabled: this.config.encryptionEnabled,
+    this.logger.log('Compliance Reporting Service initialized', {reportsDirectory: this.config.reportsDirectory,encryptionEnabled: this.config.encryptionEnabled,
       digitalSigningEnabled: this.config.digitalSigningEnabled,
     });
   }
@@ -600,10 +495,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
    */
   async onModuleInit(): Promise<void> {
     try {
-      this.logger.log('Starting Compliance Reporting Service...');
-
-      // Initialize directories
-      await this.initializeDirectories();
+      this.logger.log('Starting Compliance Reporting Service...');// Initialize directoriesawait this.initializeDirectories();
 
       // Load report templates
       await this.loadReportTemplates();
@@ -613,10 +505,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       this.startReportProcessor();
       this.startReportArchiver();
 
-      this.logger.log('Compliance Reporting Service started successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to start Compliance Reporting Service', {
+      this.logger.log('Compliance Reporting Service started successfully');} catch (error) {this.logger.error('Failed to start Compliance Reporting Service', {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -650,9 +539,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       this.emit('reportConfigured', config);
 
     } catch (error) {
-      this.logger.error(`Failed to configure report: ${config.reportId}`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`Failed to configure report: ${config.reportId}`, {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -672,16 +559,12 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       urgentGeneration?: boolean;
     } = {}
   ): Promise<GeneratedComplianceReport> {
-    const generationId = `gen_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-    const startTime = Date.now();
+    const generationId = `gen_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';const startTime = Date.now();
 
     try {
       const config = this.reportConfigs.get(reportConfigId);
       if (!config) {
-        throw new Error(`Report configuration not found: ${reportConfigId}`);
-      }
-
-      this.logger.log(`Generating compliance report: ${generationId}`, {
+        throw new Error(`Report configuration not found: ${reportConfigId}`);}this.logger.log(`Generating compliance report: ${generationId}`, {
         reportConfigId,
         regulation: config.regulation,
         reportType: config.reportType,
@@ -696,9 +579,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         reportPeriod,
         generatedBy,
         options,
-        status: 'QUEUED',
-        createdAt: new Date(),
-        priority: options.urgentGeneration ? 'HIGH' : 'NORMAL',
+        status: 'QUEUED',createdAt: new Date(),priority: options.urgentGeneration ? 'HIGH' : 'NORMAL',
       };
 
       // Queue the job
@@ -736,15 +617,10 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       contactPerson?: string;
     }
   ): Promise<SubmissionInfo> {
-    const submissionId = `sub_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-
-    try {
+    const submissionId = `sub_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';try {
       const report = this.generatedReports.get(reportId);
       if (!report) {
-        throw new Error(`Report not found: ${reportId}`);
-      }
-
-      this.logger.log(`Submitting report: ${submissionId}`, {
+        throw new Error(`Report not found: ${reportId}`);}this.logger.log(`Submitting report: ${submissionId}`, {
         reportId,
         recipientOrganization: submissionConfig.recipientOrganization,
         submissionMethod: submissionConfig.submissionMethod,
@@ -757,10 +633,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         submittedBy: report.generatedBy,
         submissionMethod: submissionConfig.submissionMethod,
         recipientOrganization: submissionConfig.recipientOrganization,
-        status: 'SUBMITTED',
-      };
-
-      // Perform submission based on method
+        status: 'SUBMITTED',};// Perform submission based on method
       const submissionResult = await this.performSubmission(report, submissionConfig);
 
       // Update submission info with result
@@ -785,9 +658,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         submissionInfo,
       });
 
-      this.logger.log(`Report submitted: ${submissionId}`, {
-        reportId,
-        status: submissionInfo.status,
+      this.logger.log(`Report submitted: ${submissionId}`, {reportId,status: submissionInfo.status,
         confirmationNumber: submissionInfo.confirmationNumber,
       });
 
@@ -863,12 +734,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     try {
       const report = this.generatedReports.get(reportId);
       if (!report) {
-        throw new Error(`Report not found: ${reportId}`);
-      }
-
-      this.logger.log(`Exporting report: ${reportId}`, {
-        format,
-        originalFormat: report.format,
+        throw new Error(`Report not found: ${reportId}`);}this.logger.log(`Exporting report: ${reportId}`, {format,originalFormat: report.format,
         includeAttachments: options.includeAttachments,
       });
 
@@ -905,12 +771,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
           break;
 
         default:
-          throw new Error(`Unsupported export format: ${format}`);
-      }
-
-      this.logger.log(`Report exported: ${reportId}`, {
-        format,
-        fileName: exportedFile.fileName,
+          throw new Error(`Unsupported export format: ${format}`);}this.logger.log(`Report exported: ${reportId}`, {format,fileName: exportedFile.fileName,
         fileSize: exportedFile.fileSize,
       });
 
@@ -931,13 +792,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
    * Initialize cryptographic signing keys
    */
   private initializeSigningKeys(): typeof this.signingKeys {
-    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
-    });
-
-    return {
+    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {modulusLength: 2048,publicKeyEncoding: { type: 'spki', format: 'pem' },privateKeyEncoding: { type: 'pkcs8', format: 'pem' },});return {
       privateKey: crypto.createPrivateKey(privateKey),
       publicKey: crypto.createPublicKey(publicKey),
     };
@@ -950,18 +805,11 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     try {
       await fs.mkdir(this.config.reportsDirectory, { recursive: true });
       await fs.mkdir(this.config.templatesDirectory, { recursive: true });
-      await fs.mkdir(path.join(this.config.reportsDirectory, 'exports'), { recursive: true });
-      await fs.mkdir(path.join(this.config.reportsDirectory, 'archive'), { recursive: true });
-
-      this.logger.log('Report directories initialized', {
-        reportsDirectory: this.config.reportsDirectory,
-        templatesDirectory: this.config.templatesDirectory,
+      await fs.mkdir(path.join(this.config.reportsDirectory, 'exports'), { recursive: true });await fs.mkdir(path.join(this.config.reportsDirectory, 'archive'), { recursive: true });this.logger.log('Report directories initialized', {reportsDirectory: this.config.reportsDirectory,templatesDirectory: this.config.templatesDirectory,
       });
 
     } catch (error) {
-      this.logger.error('Failed to initialize directories', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to initialize directories', {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -979,14 +827,10 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         }
       }
 
-      this.logger.log('Report templates loaded', {
-        totalTemplates: this.reportTemplates.size,
-      });
+      this.logger.log('Report templates loaded', {totalTemplates: this.reportTemplates.size,});
 
     } catch (error) {
-      this.logger.error('Failed to load report templates', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to load report templates', {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -997,24 +841,17 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
   private async validateReportConfig(config: ComplianceReportConfig): Promise<void> {
     // Validate recipients
     if (config.recipients.length === 0) {
-      throw new Error('At least one recipient is required');
-    }
-
-    // Validate schedule
+      throw new Error('At least one recipient is required');}// Validate schedule
     if (config.schedule.enabled) {
       if (config.schedule.hour < 0 || config.schedule.hour > 23) {
-        throw new Error('Invalid schedule hour');
-      }
-      if (config.schedule.minute < 0 || config.schedule.minute > 59) {
+        throw new Error('Invalid schedule hour');}if (config.schedule.minute < 0 || config.schedule.minute > 59) {
         throw new Error('Invalid schedule minute');
       }
     }
 
     // Validate template exists
     if (!this.reportTemplates.has(config.templateId)) {
-      throw new Error(`Template not found: ${config.templateId}`);
-    }
-  }
+      throw new Error(`Template not found: ${config.templateId}`);}}
 
   /**
    * Schedule report generation
@@ -1037,10 +874,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       const config = this.reportConfigs.get(job.reportConfigId)!;
 
       // Update job status
-      job.status = 'PROCESSING';
-
-      // Collect compliance data
-      const complianceData = await this.collectComplianceData(config, job.reportPeriod);
+      job.status = 'PROCESSING';// Collect compliance dataconst complianceData = await this.collectComplianceData(config, job.reportPeriod);
 
       // Generate report content
       const content = await this.generateReportContent(config, complianceData, job.options);
@@ -1068,17 +902,12 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         language: job.options.language || config.language,
         content,
         metadata: {
-          version: '1.0.0',
-          templateVersion: '1.0.0',
-          generationTime: Date.now() - startTime,
-          dataQuality: 0.95,
+          version: '1.0.0',templateVersion: '1.0.0',generationTime: Date.now() - startTime,dataQuality: 0.95,
           completeness: 1.0,
           confidenceLevel: 0.90,
           limitations: [],
           assumptions: [],
-          methodology: ['Automated compliance analysis'],
-        },
-        signature,
+          methodology: ['Automated compliance analysis'],},signature,
         fileInfo,
       };
 
@@ -1091,11 +920,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         (this.metrics.averageGenerationTime + (Date.now() - startTime)) / 2;
 
       // Emit completion event
-      this.emit('reportGenerated', report);
-
-      return report;
-
-    } catch (error) {
+      this.emit('reportGenerated', report);return report;} catch (error) {
       this.metrics.errorRate++;
       throw error;
     }
@@ -1123,23 +948,13 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       language: config.language,
       content: {} as ReportContent, // Empty for placeholder
       metadata: {
-        version: '1.0.0',
-        templateVersion: '1.0.0',
-        generationTime: 0,
-        dataQuality: 0,
+        version: '1.0.0',templateVersion: '1.0.0',generationTime: 0,dataQuality: 0,
         completeness: 0,
         confidenceLevel: 0,
-        limitations: ['Report generation in progress'],
-        assumptions: [],
-        methodology: [],
+        limitations: ['Report generation in progress'],assumptions: [],methodology: [],
       },
       fileInfo: {
-        fileName: '',
-        filePath: '',
-        fileSize: 0,
-        checksum: '',
-        encrypted: false,
-      },
+        fileName: '',filePath: '',fileSize: 0,checksum: '',encrypted: false,},
     };
   }
 
@@ -1171,15 +986,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     return {
       executiveSummary: {
         overallComplianceScore: 95,
-        complianceStatus: 'COMPLIANT',
-        keyFindings: ['Strong compliance posture maintained'],
-        criticalIssues: 0,
-        riskLevel: 'LOW',
-        improvementTrend: 'STABLE',
-        executiveRecommendations: ['Continue current practices'],
-        nextSteps: ['Maintain monitoring'],
-      },
-      complianceMetrics: {
+        complianceStatus: 'COMPLIANT',keyFindings: ['Strong compliance posture maintained'],criticalIssues: 0,riskLevel: 'LOW',improvementTrend: 'STABLE',executiveRecommendations: ['Continue current practices'],nextSteps: ['Maintain monitoring'],},complianceMetrics: {
         reportPeriod: options.reportPeriod,
         totalAuditEvents: 1000,
         compliantEvents: 950,
@@ -1189,10 +996,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         controlEffectiveness: [],
         trendAnalysis: [],
         benchmarking: {
-          industry: 'Technology',
-          organizationSize: 'Large',
-          industryAverage: 85,
-          topQuartile: 92,
+          industry: 'Technology',organizationSize: 'Large',industryAverage: 85,topQuartile: 92,
           ourPerformance: 95,
           ranking: 'Top 10%',
           improvementOpportunity: 5,
@@ -1218,9 +1022,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       appendices: [],
       certificationStatus: {
         regulation: config.regulation,
-        currentStatus: 'CERTIFIED',
-        nextAssessment: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        readinessScore: 95,
+        currentStatus: 'CERTIFIED',nextAssessment: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),readinessScore: 95,
         gaps: [],
       },
     };
@@ -1242,10 +1044,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     await fs.writeFile(filePath, reportData);
 
     // Calculate checksum
-    const checksum = crypto.createHash('sha256').update(reportData).digest('hex');
-
-    return {
-      fileName,
+    const checksum = crypto.createHash('sha256').update(reportData).digest('hex');return {fileName,
       filePath,
       fileSize: Buffer.byteLength(reportData),
       checksum,
@@ -1267,9 +1066,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
       signatureId: `sig_${Date.now()}`,
       signedBy,
       signedAt: new Date(),
-      algorithm: 'SHA256withRSA',
-      signature,
-      certificate: 'certificate-placeholder',
+      algorithm: 'SHA256withRSA',signature,certificate: 'certificate-placeholder',
       timestamp: new Date().toISOString(),
       verified: true,
     };
@@ -1292,13 +1089,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
   // Export format implementations (simplified)
   private async exportToPDF(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.pdf`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    // Simplified PDF generation
-    const pdfContent = 'PDF content placeholder';
-    await fs.writeFile(filePath, pdfContent);
-
-    return {
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);// Simplified PDF generationconst pdfContent = 'PDF content placeholder';await fs.writeFile(filePath, pdfContent);return {
       filePath,
       fileName,
       fileSize: Buffer.byteLength(pdfContent),
@@ -1308,10 +1099,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   private async exportToJSON(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.json`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    const jsonContent = JSON.stringify(report, null, 2);
-    await fs.writeFile(filePath, jsonContent);
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);const jsonContent = JSON.stringify(report, null, 2);await fs.writeFile(filePath, jsonContent);
 
     return {
       filePath,
@@ -1323,13 +1111,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   private async exportToCSV(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.csv`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    // Simplified CSV generation
-    const csvContent = 'CSV content placeholder';
-    await fs.writeFile(filePath, csvContent);
-
-    return {
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);// Simplified CSV generationconst csvContent = 'CSV content placeholder';await fs.writeFile(filePath, csvContent);return {
       filePath,
       fileName,
       fileSize: Buffer.byteLength(csvContent),
@@ -1339,11 +1121,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   private async exportToXML(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.xml`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    // Simplified XML generation
-    const xmlContent = '<?xml version="1.0"?><report>XML content placeholder</report>';
-    await fs.writeFile(filePath, xmlContent);
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);// Simplified XML generationconst xmlContent = '<?xml version="1.0"?><report>XML content placeholder</report>";await fs.writeFile(filePath, xmlContent);
 
     return {
       filePath,
@@ -1355,13 +1133,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   private async exportToHTML(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.html`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    // Simplified HTML generation
-    const htmlContent = '<html><body>HTML content placeholder</body></html>';
-    await fs.writeFile(filePath, htmlContent);
-
-    return {
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);// Simplified HTML generationconst htmlContent = '<html><body>HTML content placeholder</body></html>';await fs.writeFile(filePath, htmlContent);return {
       filePath,
       fileName,
       fileSize: Buffer.byteLength(htmlContent),
@@ -1371,13 +1143,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
 
   private async exportToExcel(report: GeneratedComplianceReport, options: any): Promise<any> {
     const fileName = `${report.reportId}.xlsx`;
-    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);
-
-    // Simplified Excel generation
-    const excelContent = 'Excel content placeholder';
-    await fs.writeFile(filePath, excelContent);
-
-    return {
+    const filePath = path.join(this.config.reportsDirectory, 'exports', fileName);// Simplified Excel generationconst excelContent = 'Excel content placeholder';await fs.writeFile(filePath, excelContent);return {
       filePath,
       fileName,
       fileSize: Buffer.byteLength(excelContent),
@@ -1390,28 +1156,13 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
    */
   private createDefaultTemplate(regulation: ComplianceRegulation, reportType: ReportType): ReportTemplate {
     return {
-      templateId: `${regulation}_${reportType}_default`,
-      name: `${regulation} ${reportType} Report`,
+      templateId: `${regulation}_${reportType}_default`,name: `${regulation} ${reportType} Report`,
       regulation,
       reportType,
-      version: '1.0.0',
-      sections: [],
-      formatting: {
-        pageSize: 'A4',
-        orientation: 'PORTRAIT',
-        margins: { top: 72, bottom: 72, left: 72, right: 72 },
-        fonts: [],
+      version: '1.0.0',sections: [],formatting: {
+        pageSize: 'A4',orientation: 'PORTRAIT',margins: { top: 72, bottom: 72, left: 72, right: 72 },fonts: [],
         colors: {
-          primary: '#2563eb',
-          secondary: '#64748b',
-          accent: '#0ea5e9',
-          background: '#ffffff',
-          text: '#1e293b',
-          warning: '#f59e0b',
-          error: '#ef4444',
-          success: '#10b981',
-        },
-      },
+          primary: '#2563eb',secondary: '#64748b',accent: '#0ea5e9',background: '#ffffff',text: '#1e293b',warning: '#f59e0b',error: '#ef4444',success: '#10b981',},},
       variables: [],
       validationRules: [],
     };
@@ -1422,12 +1173,8 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
     return 95; // Simplified
   }
 
-  private getRegulationStatus(): Record<ComplianceRegulation, 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL'> {
-    const status: any = {};
-    for (const regulation of Object.values(ComplianceRegulation)) {
-      status[regulation] = 'COMPLIANT';
-    }
-    return status;
+  private getRegulationStatus(): Record<ComplianceRegulation, 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL'> {const status: any = {};for (const regulation of Object.values(ComplianceRegulation)) {
+      status[regulation] = 'COMPLIANT';}return status;
   }
 
   private countCriticalIssues(): number {
@@ -1446,9 +1193,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
   private startReportScheduler(): void {
     setInterval(() => {
       // Check for scheduled reports
-      this.logger.debug('Checking scheduled reports');
-    }, 60000); // Every minute
-  }
+      this.logger.debug('Checking scheduled reports');}, 60000); // Every minute}
 
   private startReportProcessor(): void {
     setInterval(() => {
@@ -1474,9 +1219,7 @@ export class ComplianceReportingService extends EventEmitter implements OnModule
         await this.processReportGeneration(job);
         this.reportQueue.delete(job.jobId);
       } catch (error) {
-        this.logger.error(`Failed to process queued report: ${job.jobId}`, {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        this.logger.error(`Failed to process queued report: ${job.jobId}`, {error: error instanceof Error ? error.message : String(error),});
       }
     }
   }
@@ -1500,9 +1243,7 @@ interface ReportGenerationJob {
   readonly reportPeriod: { start: Date; end: Date };
   readonly generatedBy: string;
   readonly options: any;
-  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
-  readonly createdAt: Date;
-  readonly priority: 'LOW' | 'NORMAL' | 'HIGH';
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';readonly createdAt: Date;readonly priority: 'LOW' | 'NORMAL' | 'HIGH';
 }
 
 interface ReportScheduleInfo {

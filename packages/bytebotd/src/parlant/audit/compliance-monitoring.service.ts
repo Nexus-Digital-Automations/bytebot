@@ -23,21 +23,13 @@
  * @version 1.0.0 - Enterprise Compliance Framework
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import {
-  ImmutableAuditEvent,
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import {ImmutableAuditEvent,
   ComplianceRegulation,
   DataProtectionFlag,
   ComplianceReport,
   ComplianceFinding,
   ComplianceRecommendation
-} from './enterprise-audit-trail.service';
-
-// ===== COMPLIANCE INTERFACES =====
-
-/**
+} from './enterprise-audit-trail.service';// ===== COMPLIANCE INTERFACES =====/**
  * Compliance framework configuration
  */
 export interface ComplianceFrameworkConfig {
@@ -45,10 +37,7 @@ export interface ComplianceFrameworkConfig {
   readonly enabled: boolean;
   readonly version: string;
   readonly requirements: ComplianceRequirement[];
-  readonly assessmentFrequency: 'REAL_TIME' | 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
-  readonly criticalityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly automatedRemediation: boolean;
-  readonly reportingSchedule: ReportingSchedule;
+  readonly assessmentFrequency: 'REAL_TIME' | 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';readonly criticalityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly automatedRemediation: boolean;readonly reportingSchedule: ReportingSchedule;
 }
 
 /**
@@ -62,9 +51,7 @@ export interface ComplianceRequirement {
   readonly description: string;
   readonly applicabilityConditions: ApplicabilityCondition[];
   readonly validationRules: ValidationRule[];
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly automatedCheck: boolean;
-  readonly evidenceRequirements: string[];
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly automatedCheck: boolean;readonly evidenceRequirements: string[];
   readonly remediationGuidance: string[];
 }
 
@@ -73,19 +60,12 @@ export interface ComplianceRequirement {
  */
 export interface ApplicabilityCondition {
   readonly field: string;
-  readonly operator: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN';
-  readonly value: any;
-  readonly logicalOperator?: 'AND' | 'OR';
-}
-
-/**
+  readonly operator: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN';readonly value: any;readonly logicalOperator?: 'AND' | 'OR';}/**
  * Validation rule for compliance checking
  */
 export interface ValidationRule {
   readonly ruleId: string;
-  readonly ruleType: 'PATTERN' | 'THRESHOLD' | 'EXISTENCE' | 'FREQUENCY' | 'CUSTOM';
-  readonly expression: string;
-  readonly expectedResult: any;
+  readonly ruleType: 'PATTERN' | 'THRESHOLD' | 'EXISTENCE' | 'FREQUENCY' | 'CUSTOM';readonly expression: string;readonly expectedResult: any;
   readonly tolerance?: number;
   readonly weight: number; // For scoring
 }
@@ -117,21 +97,15 @@ export interface RequirementAssessmentResult {
   readonly section: string;
   readonly title: string;
   readonly score: number;
-  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT' | 'NOT_APPLICABLE';
-  readonly evidence: EvidenceItem[];
-  readonly violations: ComplianceViolation[];
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly lastAssessment: Date;
-}
+  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIALLY_COMPLIANT' | 'NOT_APPLICABLE';readonly evidence: EvidenceItem[];readonly violations: ComplianceViolation[];
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly lastAssessment: Date;}
 
 /**
  * Evidence item for compliance validation
  */
 export interface EvidenceItem {
   readonly evidenceId: string;
-  readonly type: 'AUDIT_EVENT' | 'CONFIGURATION' | 'POLICY' | 'PROCEDURE' | 'DOCUMENTATION';
-  readonly description: string;
-  readonly source: string;
+  readonly type: 'AUDIT_EVENT' | 'CONFIGURATION' | 'POLICY' | 'PROCEDURE' | 'DOCUMENTATION';readonly description: string;readonly source: string;
   readonly timestamp: Date;
   readonly hash: string;
   readonly relevantRequirements: string[];
@@ -144,10 +118,7 @@ export interface ComplianceViolation {
   readonly violationId: string;
   readonly regulation: ComplianceRegulation;
   readonly requirementId: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK' | 'FALSE_POSITIVE';
-  readonly description: string;
-  readonly detectedAt: Date;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED_RISK' | 'FALSE_POSITIVE';readonly description: string;readonly detectedAt: Date;
   readonly affectedEvents: string[];
   readonly riskScore: number;
   readonly businessImpact: string;
@@ -162,13 +133,8 @@ export interface ComplianceViolation {
  */
 export interface RemediationAction {
   readonly actionId: string;
-  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM' | 'STRATEGIC';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly steps: string[];
-  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly cost?: string;
-  readonly timeline: string;
+  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM' | 'STRATEGIC';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly steps: string[];
+  readonly estimatedEffort: 'LOW' | 'MEDIUM' | 'HIGH';readonly cost?: string;readonly timeline: string;
   readonly responsible: string[];
   readonly dependencies: string[];
 }
@@ -180,9 +146,7 @@ export interface ViolationResolution {
   readonly resolutionId: string;
   readonly resolvedAt: Date;
   readonly resolvedBy: string;
-  readonly resolutionMethod: 'FIXED' | 'MITIGATED' | 'ACCEPTED' | 'FALSE_POSITIVE';
-  readonly description: string;
-  readonly evidence: string[];
+  readonly resolutionMethod: 'FIXED' | 'MITIGATED' | 'ACCEPTED' | 'FALSE_POSITIVE';readonly description: string;readonly evidence: string[];
   readonly verificationRequired: boolean;
   readonly followUpRequired: boolean;
 }
@@ -191,13 +155,9 @@ export interface ViolationResolution {
  * Reporting schedule configuration
  */
 export interface ReportingSchedule {
-  readonly frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
-  readonly dayOfWeek?: number; // For weekly reports
-  readonly dayOfMonth?: number; // For monthly reports
+  readonly frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';readonly dayOfWeek?: number; // For weekly reportsreadonly dayOfMonth?: number; // For monthly reports
   readonly recipients: string[];
-  readonly format: 'PDF' | 'JSON' | 'CSV' | 'DASHBOARD';
-  readonly includeExecutiveSummary: boolean;
-  readonly includeDetailedFindings: boolean;
+  readonly format: 'PDF' | 'JSON' | 'CSV' | 'DASHBOARD';readonly includeExecutiveSummary: boolean;readonly includeDetailedFindings: boolean;
   readonly includeRecommendations: boolean;
 }
 
@@ -211,10 +171,7 @@ export interface ComplianceDashboardMetrics {
   readonly totalViolations: number;
   readonly criticalViolations: number;
   readonly openViolations: number;
-  readonly violationTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly recentAlerts: ComplianceAlert[];
-  readonly upcomingDeadlines: ComplianceDeadline[];
+  readonly violationTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly recentAlerts: ComplianceAlert[];readonly upcomingDeadlines: ComplianceDeadline[];
 }
 
 /**
@@ -222,10 +179,7 @@ export interface ComplianceDashboardMetrics {
  */
 export interface ComplianceAlert {
   readonly alertId: string;
-  readonly type: 'VIOLATION' | 'DEADLINE' | 'RISK_INCREASE' | 'SYSTEM_ISSUE';
-  readonly severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  readonly title: string;
-  readonly description: string;
+  readonly type: 'VIOLATION' | 'DEADLINE' | 'RISK_INCREASE' | 'SYSTEM_ISSUE';readonly severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';readonly title: string;readonly description: string;
   readonly regulation?: ComplianceRegulation;
   readonly timestamp: Date;
   readonly acknowledged: boolean;
@@ -242,9 +196,7 @@ export interface ComplianceDeadline {
   readonly title: string;
   readonly dueDate: Date;
   readonly daysRemaining: number;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly responsible: string[];
-  readonly completionStatus: number; // 0-100%
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly responsible: string[];readonly completionStatus: number; // 0-100%
 }
 
 // ===== COMPLIANCE MONITORING SERVICE =====
@@ -288,9 +240,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     // Initialize compliance frameworks
     this.initializeComplianceFrameworks();
 
-    this.logger.log('Compliance Monitoring Service initialized', {
-      enabledFrameworks: Array.from(this.frameworkConfigs.keys()),
-      realTimeMonitoring: this.config.realTimeMonitoring,
+    this.logger.log('Compliance Monitoring Service initialized', {enabledFrameworks: Array.from(this.frameworkConfigs.keys()),realTimeMonitoring: this.config.realTimeMonitoring,
       automatedRemediation: this.config.automatedRemediation,
     });
   }
@@ -300,18 +250,12 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
    */
   async onModuleInit(): Promise<void> {
     try {
-      this.logger.log('Starting Compliance Monitoring Service...');
-
-      // Start monitoring processes
-      this.startRealTimeMonitoring();
+      this.logger.log('Starting Compliance Monitoring Service...');// Start monitoring processesthis.startRealTimeMonitoring();
       this.startPeriodicAssessments();
       this.startViolationTracking();
       this.startAlertProcessing();
 
-      this.logger.log('Compliance Monitoring Service started successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to start Compliance Monitoring Service', {
+      this.logger.log('Compliance Monitoring Service started successfully');} catch (error) {this.logger.error('Failed to start Compliance Monitoring Service', {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -328,13 +272,8 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       events: ImmutableAuditEvent[];
     }
   ): Promise<ComplianceAssessmentResult> {
-    const assessmentId = `assess_${regulation}_${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
-      this.logger.log(`Starting compliance assessment: ${assessmentId}`, {
-        regulation,
-        timeRange: scope.timeRange,
+    const assessmentId = `assess_${regulation}_${Date.now()}`;const startTime = Date.now();try {
+      this.logger.log(`Starting compliance assessment: ${assessmentId}`, {regulation,timeRange: scope.timeRange,
         eventCount: scope.events.length,
       });
 
@@ -393,14 +332,9 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       // Emit assessment event
       this.emit('complianceAssessed', result);
 
-      this.logger.log(`Compliance assessment completed: ${assessmentId}`, {
-        regulation,
-        overallScore: overallScore.toFixed(2),
+      this.logger.log(`Compliance assessment completed: ${assessmentId}`, {regulation,overallScore: overallScore.toFixed(2),
         violations: violations.length,
-        assessmentTime: `${assessmentTime}ms`,
-      });
-
-      return result;
+        assessmentTime: `${assessmentTime}ms`,});return result;
 
     } catch (error) {
       this.logger.error(`Compliance assessment failed: ${assessmentId}`, {
@@ -426,9 +360,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     try {
       // Check against all enabled regulations
       for (const [regulation, config] of this.frameworkConfigs) {
-        if (!config.enabled || config.assessmentFrequency !== 'REAL_TIME') {
-          continue;
-        }
+        if (!config.enabled || config.assessmentFrequency !== 'REAL_TIME') {continue;}
 
         // Check applicable requirements
         for (const requirement of config.requirements) {
@@ -442,8 +374,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
             violations.push(violation);
 
             // Create alert if critical
-            if (violation.severity === 'CRITICAL') {
-              alerts.push(await this.createAlert('VIOLATION', violation));
+            if (violation.severity === 'CRITICAL') {alerts.push(await this.createAlert('VIOLATION', violation));
             }
           }
         }
@@ -464,9 +395,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       return { compliant, violations, alerts };
 
     } catch (error) {
-      this.logger.error('Real-time compliance check failed', {
-        eventId: event.eventId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Real-time compliance check failed', {eventId: event.eventId,error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -493,11 +422,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     // Violation statistics
     const activeViolationList = Array.from(this.activeViolations.values());
     const totalViolations = activeViolationList.length;
-    const criticalViolations = activeViolationList.filter(v => v.severity === 'CRITICAL').length;
-    const openViolations = activeViolationList.filter(v => v.status === 'OPEN').length;
-
-    // Calculate trend
-    const violationTrend = this.calculateViolationTrend();
+    const criticalViolations = activeViolationList.filter(v => v.severity === 'CRITICAL').length;const openViolations = activeViolationList.filter(v => v.status === 'OPEN').length;// Calculate trendconst violationTrend = this.calculateViolationTrend();
 
     // Risk level
     const riskLevel = this.calculateOverallRiskLevel(overallComplianceScore, criticalViolations);
@@ -582,9 +507,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       // Update violation with resolution
       const resolvedViolation: ComplianceViolation = {
         ...violation,
-        status: 'RESOLVED',
-        resolution,
-      };
+        status: 'RESOLVED',resolution,};
 
       this.activeViolations.set(violationId, resolvedViolation);
 
@@ -594,9 +517,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       // Emit resolution event
       this.emit('violationResolved', resolvedViolation);
 
-      this.logger.log(`Violation resolved: ${violationId}`, {
-        violationId,
-        regulation: violation.regulation,
+      this.logger.log(`Violation resolved: ${violationId}`, {violationId,regulation: violation.regulation,
         resolutionMethod: resolution.resolutionMethod,
         resolvedBy: resolution.resolvedBy,
       });
@@ -619,17 +540,8 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     this.frameworkConfigs.set(ComplianceRegulation.GDPR, {
       regulation: ComplianceRegulation.GDPR,
       enabled: true,
-      version: '2018',
-      requirements: this.getGDPRRequirements(),
-      assessmentFrequency: 'REAL_TIME',
-      criticalityLevel: 'HIGH',
-      automatedRemediation: false,
-      reportingSchedule: {
-        frequency: 'MONTHLY',
-        recipients: ['compliance@company.com'],
-        format: 'PDF',
-        includeExecutiveSummary: true,
-        includeDetailedFindings: true,
+      version: '2018',requirements: this.getGDPRRequirements(),assessmentFrequency: 'REAL_TIME',criticalityLevel: 'HIGH',automatedRemediation: false,reportingSchedule: {
+        frequency: 'MONTHLY',recipients: ['compliance@company.com'],format: 'PDF',includeExecutiveSummary: true,includeDetailedFindings: true,
         includeRecommendations: true,
       },
     });
@@ -638,17 +550,8 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     this.frameworkConfigs.set(ComplianceRegulation.SOX, {
       regulation: ComplianceRegulation.SOX,
       enabled: true,
-      version: '2002',
-      requirements: this.getSOXRequirements(),
-      assessmentFrequency: 'DAILY',
-      criticalityLevel: 'CRITICAL',
-      automatedRemediation: false,
-      reportingSchedule: {
-        frequency: 'MONTHLY',
-        recipients: ['audit@company.com'],
-        format: 'PDF',
-        includeExecutiveSummary: true,
-        includeDetailedFindings: true,
+      version: '2002',requirements: this.getSOXRequirements(),assessmentFrequency: 'DAILY',criticalityLevel: 'CRITICAL',automatedRemediation: false,reportingSchedule: {
+        frequency: 'MONTHLY',recipients: ['audit@company.com'],format: 'PDF',includeExecutiveSummary: true,includeDetailedFindings: true,
         includeRecommendations: true,
       },
     });
@@ -657,17 +560,8 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     this.frameworkConfigs.set(ComplianceRegulation.HIPAA, {
       regulation: ComplianceRegulation.HIPAA,
       enabled: true,
-      version: '1996',
-      requirements: this.getHIPAARequirements(),
-      assessmentFrequency: 'REAL_TIME',
-      criticalityLevel: 'HIGH',
-      automatedRemediation: true,
-      reportingSchedule: {
-        frequency: 'MONTHLY',
-        recipients: ['privacy@company.com'],
-        format: 'PDF',
-        includeExecutiveSummary: true,
-        includeDetailedFindings: true,
+      version: '1996',requirements: this.getHIPAARequirements(),assessmentFrequency: 'REAL_TIME',criticalityLevel: 'HIGH',automatedRemediation: true,reportingSchedule: {
+        frequency: 'MONTHLY',recipients: ['privacy@company.com'],format: 'PDF',includeExecutiveSummary: true,includeDetailedFindings: true,
         includeRecommendations: true,
       },
     });
@@ -676,24 +570,13 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     this.frameworkConfigs.set(ComplianceRegulation.PCI_DSS, {
       regulation: ComplianceRegulation.PCI_DSS,
       enabled: true,
-      version: '4.0',
-      requirements: this.getPCIDSSRequirements(),
-      assessmentFrequency: 'REAL_TIME',
-      criticalityLevel: 'CRITICAL',
-      automatedRemediation: true,
-      reportingSchedule: {
-        frequency: 'MONTHLY',
-        recipients: ['security@company.com'],
-        format: 'PDF',
-        includeExecutiveSummary: true,
-        includeDetailedFindings: true,
+      version: '4.0',requirements: this.getPCIDSSRequirements(),assessmentFrequency: 'REAL_TIME',criticalityLevel: 'CRITICAL',automatedRemediation: true,reportingSchedule: {
+        frequency: 'MONTHLY',recipients: ['security@company.com'],format: 'PDF',includeExecutiveSummary: true,includeDetailedFindings: true,
         includeRecommendations: true,
       },
     });
 
-    this.logger.log('Compliance frameworks initialized', {
-      frameworks: Array.from(this.frameworkConfigs.keys()),
-      totalRequirements: Array.from(this.frameworkConfigs.values())
+    this.logger.log('Compliance frameworks initialized', {frameworks: Array.from(this.frameworkConfigs.keys()),totalRequirements: Array.from(this.frameworkConfigs.values())
         .reduce((sum, config) => sum + config.requirements.length, 0),
     });
   }
@@ -704,60 +587,22 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
   private getGDPRRequirements(): ComplianceRequirement[] {
     return [
       {
-        requirementId: 'GDPR_ART_30',
-        regulation: ComplianceRegulation.GDPR,
-        section: 'Article 30',
-        title: 'Records of processing activities',
-        description: 'Maintain records of all data processing activities',
-        applicabilityConditions: [
-          {
-            field: 'operationType',
-            operator: 'IN',
-            value: ['DATA_ACCESS', 'DATA_MODIFICATION'],
-          },
-        ],
+        requirementId: 'GDPR_ART_30',regulation: ComplianceRegulation.GDPR,section: 'Article 30',title: 'Records of processing activities',description: 'Maintain records of all data processing activities',applicabilityConditions: [{
+            field: 'operationType',operator: 'IN',value: ['DATA_ACCESS', 'DATA_MODIFICATION'],},],
         validationRules: [
           {
-            ruleId: 'GDPR_ART_30_LOGGING',
-            ruleType: 'EXISTENCE',
-            expression: 'audit_event_exists',
-            expectedResult: true,
-            weight: 1.0,
+            ruleId: 'GDPR_ART_30_LOGGING',ruleType: 'EXISTENCE',expression: 'audit_event_exists',expectedResult: true,weight: 1.0,
           },
         ],
-        severity: 'HIGH',
-        automatedCheck: true,
-        evidenceRequirements: ['Audit log entry', 'Processing purpose', 'Legal basis'],
-        remediationGuidance: ['Ensure all data processing is logged', 'Document processing purpose'],
-      },
-      {
-        requirementId: 'GDPR_ART_25',
-        regulation: ComplianceRegulation.GDPR,
-        section: 'Article 25',
-        title: 'Data protection by design and by default',
-        description: 'Implement appropriate technical and organizational measures',
-        applicabilityConditions: [
-          {
-            field: 'securityContext.dataClassification',
-            operator: 'IN',
-            value: ['CONFIDENTIAL', 'SECRET'],
-          },
-        ],
+        severity: 'HIGH',automatedCheck: true,evidenceRequirements: ['Audit log entry', 'Processing purpose', 'Legal basis'],remediationGuidance: ['Ensure all data processing is logged', 'Document processing purpose'],},{
+        requirementId: 'GDPR_ART_25',regulation: ComplianceRegulation.GDPR,section: 'Article 25',title: 'Data protection by design and by default',description: 'Implement appropriate technical and organizational measures',applicabilityConditions: [{
+            field: 'securityContext.dataClassification',operator: 'IN',value: ['CONFIDENTIAL', 'SECRET'],},],
         validationRules: [
           {
-            ruleId: 'GDPR_ART_25_PROTECTION',
-            ruleType: 'PATTERN',
-            expression: 'encryption_enabled',
-            expectedResult: true,
-            weight: 1.0,
+            ruleId: 'GDPR_ART_25_PROTECTION',ruleType: 'PATTERN',expression: 'encryption_enabled',expectedResult: true,weight: 1.0,
           },
         ],
-        severity: 'CRITICAL',
-        automatedCheck: true,
-        evidenceRequirements: ['Encryption status', 'Access controls', 'Data minimization'],
-        remediationGuidance: ['Enable encryption', 'Implement access controls', 'Apply data minimization'],
-      },
-    ];
+        severity: 'CRITICAL',automatedCheck: true,evidenceRequirements: ['Encryption status', 'Access controls', 'Data minimization'],remediationGuidance: ['Enable encryption', 'Implement access controls', 'Apply data minimization'],},];
   }
 
   /**
@@ -766,33 +611,14 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
   private getSOXRequirements(): ComplianceRequirement[] {
     return [
       {
-        requirementId: 'SOX_404',
-        regulation: ComplianceRegulation.SOX,
-        section: 'Section 404',
-        title: 'Management Assessment of Internal Controls',
-        description: 'Assessment of the effectiveness of internal control structure',
-        applicabilityConditions: [
-          {
-            field: 'operationType',
-            operator: 'IN',
-            value: ['SYSTEM_CONFIGURATION', 'PRIVILEGE_ESCALATION'],
-          },
-        ],
+        requirementId: 'SOX_404',regulation: ComplianceRegulation.SOX,section: 'Section 404',title: 'Management Assessment of Internal Controls',description: 'Assessment of the effectiveness of internal control structure',applicabilityConditions: [{
+            field: 'operationType',operator: 'IN',value: ['SYSTEM_CONFIGURATION', 'PRIVILEGE_ESCALATION'],},],
         validationRules: [
           {
-            ruleId: 'SOX_404_CONTROLS',
-            ruleType: 'EXISTENCE',
-            expression: 'approval_required',
-            expectedResult: true,
-            weight: 1.0,
+            ruleId: 'SOX_404_CONTROLS',ruleType: 'EXISTENCE',expression: 'approval_required',expectedResult: true,weight: 1.0,
           },
         ],
-        severity: 'CRITICAL',
-        automatedCheck: true,
-        evidenceRequirements: ['Control documentation', 'Approval evidence', 'Testing results'],
-        remediationGuidance: ['Implement control testing', 'Document control procedures'],
-      },
-    ];
+        severity: 'CRITICAL',automatedCheck: true,evidenceRequirements: ['Control documentation', 'Approval evidence', 'Testing results'],remediationGuidance: ['Implement control testing', 'Document control procedures'],},];
   }
 
   /**
@@ -801,33 +627,14 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
   private getHIPAARequirements(): ComplianceRequirement[] {
     return [
       {
-        requirementId: 'HIPAA_164_312',
-        regulation: ComplianceRegulation.HIPAA,
-        section: '164.312',
-        title: 'Technical Safeguards',
-        description: 'Technical safeguards for electronic protected health information',
-        applicabilityConditions: [
-          {
-            field: 'securityContext.dataClassification',
-            operator: 'EQUALS',
-            value: 'SECRET',
-          },
-        ],
+        requirementId: 'HIPAA_164_312',regulation: ComplianceRegulation.HIPAA,section: '164.312',title: 'Technical Safeguards',description: 'Technical safeguards for electronic protected health information',applicabilityConditions: [{
+            field: 'securityContext.dataClassification',operator: 'EQUALS',value: 'SECRET',},],
         validationRules: [
           {
-            ruleId: 'HIPAA_164_312_ACCESS',
-            ruleType: 'PATTERN',
-            expression: 'unique_user_identification',
-            expectedResult: true,
-            weight: 1.0,
+            ruleId: 'HIPAA_164_312_ACCESS',ruleType: 'PATTERN',expression: 'unique_user_identification',expectedResult: true,weight: 1.0,
           },
         ],
-        severity: 'HIGH',
-        automatedCheck: true,
-        evidenceRequirements: ['User identification', 'Access controls', 'Audit logs'],
-        remediationGuidance: ['Implement unique user identification', 'Enable audit logging'],
-      },
-    ];
+        severity: 'HIGH',automatedCheck: true,evidenceRequirements: ['User identification', 'Access controls', 'Audit logs'],remediationGuidance: ['Implement unique user identification', 'Enable audit logging'],},];
   }
 
   /**
@@ -836,33 +643,14 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
   private getPCIDSSRequirements(): ComplianceRequirement[] {
     return [
       {
-        requirementId: 'PCI_REQ_10',
-        regulation: ComplianceRegulation.PCI_DSS,
-        section: 'Requirement 10',
-        title: 'Track and monitor all access to network resources and cardholder data',
-        description: 'Logging mechanisms and the ability to track user activities',
-        applicabilityConditions: [
-          {
-            field: 'operationType',
-            operator: 'IN',
-            value: ['DATA_ACCESS', 'AUTHENTICATION', 'AUTHORIZATION'],
-          },
-        ],
+        requirementId: 'PCI_REQ_10',regulation: ComplianceRegulation.PCI_DSS,section: 'Requirement 10',title: 'Track and monitor all access to network resources and cardholder data',description: 'Logging mechanisms and the ability to track user activities',applicabilityConditions: [{
+            field: 'operationType',operator: 'IN',value: ['DATA_ACCESS', 'AUTHENTICATION', 'AUTHORIZATION'],},],
         validationRules: [
           {
-            ruleId: 'PCI_REQ_10_LOGGING',
-            ruleType: 'EXISTENCE',
-            expression: 'comprehensive_logging',
-            expectedResult: true,
-            weight: 1.0,
+            ruleId: 'PCI_REQ_10_LOGGING',ruleType: 'EXISTENCE',expression: 'comprehensive_logging',expectedResult: true,weight: 1.0,
           },
         ],
-        severity: 'CRITICAL',
-        automatedCheck: true,
-        evidenceRequirements: ['Audit logs', 'Access records', 'Monitoring evidence'],
-        remediationGuidance: ['Enable comprehensive logging', 'Implement real-time monitoring'],
-      },
-    ];
+        severity: 'CRITICAL',automatedCheck: true,evidenceRequirements: ['Audit logs', 'Access records', 'Monitoring evidence'],remediationGuidance: ['Enable comprehensive logging', 'Implement real-time monitoring'],},];
   }
 
   /**
@@ -902,14 +690,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     const score = maxScore > 0 ? (totalScore / maxScore) * 100 : 100;
 
     // Determine status
-    let status: RequirementAssessmentResult['status'];
-    if (score >= 95) status = 'COMPLIANT';
-    else if (score >= 70) status = 'PARTIALLY_COMPLIANT';
-    else if (applicableEvents.length === 0) status = 'NOT_APPLICABLE';
-    else status = 'NON_COMPLIANT';
-
-    // Determine risk level
-    const riskLevel = this.calculateRiskLevel(score, violations.length, requirement.severity);
+    let status: RequirementAssessmentResult['status'];if (score >= 95) status = 'COMPLIANT';else if (score >= 70) status = 'PARTIALLY_COMPLIANT';else if (applicableEvents.length === 0) status = 'NOT_APPLICABLE';else status = 'NON_COMPLIANT';// Determine risk levelconst riskLevel = this.calculateRiskLevel(score, violations.length, requirement.severity);
 
     return {
       requirementId: requirement.requirementId,
@@ -940,19 +721,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     const fieldValue = this.getFieldValue(condition.field, event);
 
     switch (condition.operator) {
-      case 'EQUALS':
-        return fieldValue === condition.value;
-      case 'CONTAINS':
-        return String(fieldValue).includes(String(condition.value));
-      case 'IN':
-        return Array.isArray(condition.value) && condition.value.includes(fieldValue);
-      case 'NOT_IN':
-        return Array.isArray(condition.value) && !condition.value.includes(fieldValue);
-      case 'GREATER_THAN':
-        return Number(fieldValue) > Number(condition.value);
-      case 'LESS_THAN':
-        return Number(fieldValue) < Number(condition.value);
-      default:
+      case 'EQUALS':return fieldValue === condition.value;case 'CONTAINS':return String(fieldValue).includes(String(condition.value));case 'IN':return Array.isArray(condition.value) && condition.value.includes(fieldValue);case 'NOT_IN':return Array.isArray(condition.value) && !condition.value.includes(fieldValue);case 'GREATER_THAN':return Number(fieldValue) > Number(condition.value);case 'LESS_THAN':return Number(fieldValue) < Number(condition.value);default:
         return false;
     }
   }
@@ -961,10 +730,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
    * Get field value from event using dot notation
    */
   private getFieldValue(fieldPath: string, event: ImmutableAuditEvent): any {
-    const parts = fieldPath.split('.');
-    let value: any = event;
-
-    for (const part of parts) {
+    const parts = fieldPath.split('.');let value: any = event;for (const part of parts) {
       value = value?.[part];
     }
 
@@ -986,33 +752,23 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     const evidence: EvidenceItem[] = [];
 
     switch (rule.ruleType) {
-      case 'EXISTENCE':
-        // Check if all events meet the existence criteria
-        for (const event of events) {
+      case 'EXISTENCE':// Check if all events meet the existence criteriafor (const event of events) {
           const exists = await this.checkExistence(rule.expression, event);
           if (!exists) {
             failedEvents.push(event);
           } else {
-            evidence.push(await this.createEvidenceItem('AUDIT_EVENT', event, rule));
-          }
-        }
+            evidence.push(await this.createEvidenceItem('AUDIT_EVENT', event, rule));}}
         break;
 
-      case 'PATTERN':
-        // Check if events match the required pattern
-        for (const event of events) {
+      case 'PATTERN':// Check if events match the required patternfor (const event of events) {
           const matches = await this.checkPattern(rule.expression, event);
           if (!matches) {
             failedEvents.push(event);
           } else {
-            evidence.push(await this.createEvidenceItem('AUDIT_EVENT', event, rule));
-          }
-        }
+            evidence.push(await this.createEvidenceItem('AUDIT_EVENT', event, rule));}}
         break;
 
-      case 'THRESHOLD':
-        // Check if events meet threshold criteria
-        const thresholdMet = await this.checkThreshold(rule.expression, events, rule.expectedResult);
+      case 'THRESHOLD':// Check if events meet threshold criteriaconst thresholdMet = await this.checkThreshold(rule.expression, events, rule.expectedResult);
         if (!thresholdMet) {
           failedEvents.push(...events);
         } else {
@@ -1020,9 +776,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
         }
         break;
 
-      case 'FREQUENCY':
-        // Check event frequency requirements
-        const frequencyMet = await this.checkFrequency(rule.expression, events, rule.expectedResult);
+      case 'FREQUENCY':// Check event frequency requirementsconst frequencyMet = await this.checkFrequency(rule.expression, events, rule.expectedResult);
         if (!frequencyMet) {
           failedEvents.push(...events);
         } else {
@@ -1030,9 +784,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
         }
         break;
 
-      case 'CUSTOM':
-        // Execute custom validation logic
-        const customResult = await this.executeCustomRule(rule.expression, events);
+      case 'CUSTOM':// Execute custom validation logicconst customResult = await this.executeCustomRule(rule.expression, events);
         failedEvents.push(...customResult.failedEvents);
         evidence.push(...customResult.evidence);
         break;
@@ -1073,11 +825,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
 
   private async createEvidenceItem(type: EvidenceItem['type'], event: ImmutableAuditEvent, rule: ValidationRule): Promise<EvidenceItem> {
     return {
-      evidenceId: `evidence_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type,
-      description: `Evidence for rule ${rule.ruleId}`,
-      source: event.eventId,
-      timestamp: event.timestamp,
+      evidenceId: `evidence_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,type,description: `Evidence for rule ${rule.ruleId}`,source: event.eventId,timestamp: event.timestamp,
       hash: event.integrity.eventHash,
       relevantRequirements: [],
     };
@@ -1087,8 +835,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     return {
       evidenceId: `threshold_evidence_${Date.now()}`,
       type: 'AUDIT_EVENT',
-      description: `Threshold evidence for rule ${rule.ruleId}`,
-      source: `${events.length} events`,
+      description: `Threshold evidence for rule ${rule.ruleId}`,source: `${events.length} events`,
       timestamp: new Date(),
       hash: 'threshold_hash',
       relevantRequirements: [],
@@ -1099,12 +846,9 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     return {
       evidenceId: `frequency_evidence_${Date.now()}`,
       type: 'AUDIT_EVENT',
-      description: `Frequency evidence for rule ${rule.ruleId}`,
-      source: `${events.length} events`,
+      description: `Frequency evidence for rule ${rule.ruleId}`,source: `${events.length} events`,
       timestamp: new Date(),
-      hash: 'frequency_hash',
-      relevantRequirements: [],
-    };
+      hash: 'frequency_hash',relevantRequirements: [],};
   }
 
   private calculateOverallScore(results: RequirementAssessmentResult[]): number {
@@ -1123,20 +867,8 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     return [];
   }
 
-  private calculateNextAssessment(frequency: ComplianceFrameworkConfig['assessmentFrequency']): Date {
-    const now = new Date();
-    switch (frequency) {
-      case 'REAL_TIME':
-        return new Date(now.getTime() + 60000); // 1 minute
-      case 'HOURLY':
-        return new Date(now.getTime() + 3600000); // 1 hour
-      case 'DAILY':
-        return new Date(now.getTime() + 86400000); // 1 day
-      case 'WEEKLY':
-        return new Date(now.getTime() + 604800000); // 1 week
-      case 'MONTHLY':
-        return new Date(now.getTime() + 2592000000); // 30 days
-      default:
+  private calculateNextAssessment(frequency: ComplianceFrameworkConfig['assessmentFrequency']): Date {const now = new Date();switch (frequency) {
+      case 'REAL_TIME':return new Date(now.getTime() + 60000); // 1 minutecase 'HOURLY':return new Date(now.getTime() + 3600000); // 1 hourcase 'DAILY':return new Date(now.getTime() + 86400000); // 1 daycase 'WEEKLY':return new Date(now.getTime() + 604800000); // 1 weekcase 'MONTHLY':return new Date(now.getTime() + 2592000000); // 30 daysdefault:
         return new Date(now.getTime() + 86400000); // Default to daily
     }
   }
@@ -1156,8 +888,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
     for (const violation of violations) {
       this.activeViolations.set(violation.violationId, violation);
 
-      if (violation.severity === 'CRITICAL') {
-        await this.createAlert('VIOLATION', violation);
+      if (violation.severity === 'CRITICAL') {await this.createAlert('VIOLATION', violation);
       }
     }
   }
@@ -1198,19 +929,10 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       detectedAt: new Date(),
       affectedEvents: failedEvents.map(e => e.eventId),
       riskScore: this.calculateViolationRiskScore(requirement.severity),
-      businessImpact: 'Compliance rule violation detected',
-      remediationPlan: [],
-    };
+      businessImpact: 'Compliance rule violation detected',remediationPlan: [],};
   }
 
-  private calculateRiskLevel(score: number, violationCount: number, severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (score < 50 || (violationCount > 0 && severity === 'CRITICAL')) return 'CRITICAL';
-    if (score < 70 || violationCount > 3) return 'HIGH';
-    if (score < 90 || violationCount > 0) return 'MEDIUM';
-    return 'LOW';
-  }
-
-  private calculateViolationRiskScore(severity: string): number {
+  private calculateRiskLevel(score: number, violationCount: number, severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (score < 50 || (violationCount > 0 && severity === 'CRITICAL')) return 'CRITICAL';if (score < 70 || violationCount > 3) return 'HIGH';if (score < 90 || violationCount > 0) return 'MEDIUM';return 'LOW';}private calculateViolationRiskScore(severity: string): number {
     const scores = { LOW: 25, MEDIUM: 50, HIGH: 75, CRITICAL: 100 };
     return scores[severity as keyof typeof scores] || 50;
   }
@@ -1221,18 +943,13 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
       type,
       severity: context.severity || 'WARNING',
       title: `Compliance Alert: ${type}`,
-      description: context.description || 'Compliance alert triggered',
-      regulation: context.regulation,
-      timestamp: new Date(),
+      description: context.description || 'Compliance alert triggered',regulation: context.regulation,timestamp: new Date(),
       acknowledged: false,
       actionRequired: true,
     };
 
     this.complianceAlerts.push(alert);
-    this.emit('complianceAlert', alert);
-
-    return alert;
-  }
+    this.emit('complianceAlert', alert);return alert;}
 
   // Additional helper methods (simplified implementations)
   private getLatestComplianceScore(regulation: ComplianceRegulation): number {
@@ -1245,18 +962,7 @@ export class ComplianceMonitoringService extends EventEmitter implements OnModul
 
   private getActiveViolationCount(regulation: ComplianceRegulation): number {
     return Array.from(this.activeViolations.values())
-      .filter(v => v.regulation === regulation && v.status !== 'RESOLVED').length;
-  }
-
-  private calculateViolationTrend(): 'IMPROVING' | 'STABLE' | 'DECLINING' {
-    return 'STABLE'; // Simplified
-  }
-
-  private calculateOverallRiskLevel(score: number, criticalViolations: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (criticalViolations > 0 || score < 70) return 'CRITICAL';
-    if (score < 85) return 'HIGH';
-    if (score < 95) return 'MEDIUM';
-    return 'LOW';
+      .filter(v => v.regulation === regulation && v.status !== 'RESOLVED').length;}private calculateViolationTrend(): 'IMPROVING' | 'STABLE' | 'DECLINING' {return 'STABLE'; // Simplified}private calculateOverallRiskLevel(score: number, criticalViolations: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (criticalViolations > 0 || score < 70) return 'CRITICAL';if (score < 85) return 'HIGH';if (score < 95) return 'MEDIUM';return 'LOW';
   }
 
   private getUpcomingDeadlines(): ComplianceDeadline[] {

@@ -24,55 +24,18 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';
-
-/**
- * Error categories for classification
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';/*** Error categories for classification
  */
 export enum BrowserErrorCategory {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  VALIDATION = 'validation',
-  RATE_LIMITING = 'rate_limiting',
-  SECURITY_VIOLATION = 'security_violation',
-  BUSINESS_LOGIC = 'business_logic',
-  TECHNICAL = 'technical',
-  EXTERNAL_SERVICE = 'external_service',
-  BROWSER_ENGINE = 'browser_engine',
-  TIMEOUT = 'timeout',
-  RESOURCE_EXHAUSTION = 'resource_exhaustion',
-  CONFIGURATION = 'configuration',
-}
-
-/**
+  AUTHENTICATION = 'authentication',AUTHORIZATION = 'authorization',VALIDATION = 'validation',RATE_LIMITING = 'rate_limiting',SECURITY_VIOLATION = 'security_violation',BUSINESS_LOGIC = 'business_logic',TECHNICAL = 'technical',EXTERNAL_SERVICE = 'external_service',BROWSER_ENGINE = 'browser_engine',TIMEOUT = 'timeout',RESOURCE_EXHAUSTION = 'resource_exhaustion',CONFIGURATION = 'configuration',}/**
  * Error severity levels
  */
 export enum ErrorSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-
-/**
+  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',}/**
  * Security incident types
  */
 export enum SecurityIncidentType {
-  BRUTE_FORCE_ATTACK = 'brute_force_attack',
-  INJECTION_ATTEMPT = 'injection_attempt',
-  XSS_ATTEMPT = 'xss_attempt',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  SUSPICIOUS_BEHAVIOR = 'suspicious_behavior',
-  MALICIOUS_PAYLOAD = 'malicious_payload',
-  RATE_LIMIT_ABUSE = 'rate_limit_abuse',
-  SESSION_HIJACKING = 'session_hijacking',
-}
-
-/**
+  BRUTE_FORCE_ATTACK = 'brute_force_attack',INJECTION_ATTEMPT = 'injection_attempt',XSS_ATTEMPT = 'xss_attempt',UNAUTHORIZED_ACCESS = 'unauthorized_access',PRIVILEGE_ESCALATION = 'privilege_escalation',DATA_EXFILTRATION = 'data_exfiltration',SUSPICIOUS_BEHAVIOR = 'suspicious_behavior',MALICIOUS_PAYLOAD = 'malicious_payload',RATE_LIMIT_ABUSE = 'rate_limit_abuse',SESSION_HIJACKING = 'session_hijacking',}/**
  * Error context for comprehensive tracking
  */
 interface BrowserErrorContext {
@@ -144,9 +107,7 @@ interface ErrorRecoveryStrategy {
   automatic: boolean;
   retryable: boolean;
   maxRetries?: number;
-  backoffStrategy?: 'linear' | 'exponential' | 'fixed';
-  fallbackAction?: string;
-  userNotification: boolean;
+  backoffStrategy?: 'linear' | 'exponential' | 'fixed';fallbackAction?: string;userNotification: boolean;
   escalationRequired: boolean;
 }
 
@@ -181,11 +142,8 @@ export class BrowserErrorHandlingService {
     setInterval(() => this.cleanupOldErrors(), 3600000); // Every hour
     setInterval(() => this.analyzeErrorPatterns(), 600000); // Every 10 minutes
 
-    this.logger.log('Browser Error Handling Service initialized', {
-      errorHistorySize: this.errorHistory.length,
-      securityIncidentsCount: this.securityIncidents.length,
-      cleanupInterval: '1 hour',
-      analysisInterval: '10 minutes',
+    this.logger.log('Browser Error Handling Service initialized', {errorHistorySize: this.errorHistory.length,securityIncidentsCount: this.securityIncidents.length,
+      cleanupInterval: '1 hour',analysisInterval: '10 minutes',
     });
   }
 
@@ -196,12 +154,7 @@ export class BrowserErrorHandlingService {
     error: Error | HttpException,
     context: BrowserErrorContext,
   ): Promise<BrowserErrorInfo> {
-    const operationId = `error_handle_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Processing browser automation error`, {
-      operationId,
-      errorType: error.constructor.name,
+    const operationId = `error_handle_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Processing browser automation error`, {operationId,errorType: error.constructor.name,
       message: error.message,
       requestId: context.requestId,
       userId: context.userId,
@@ -240,9 +193,7 @@ export class BrowserErrorHandlingService {
       }
 
       const duration = Date.now() - startTime;
-      this.logger.debug(`[${operationId}] Error processing completed`, {
-        operationId,
-        errorId: errorInfo.id,
+      this.logger.debug(`[${operationId}] Error processing completed`, {operationId,errorId: errorInfo.id,
         category: errorInfo.category,
         severity: errorInfo.severity,
         securityIncident: !!errorInfo.securityIncident,
@@ -254,9 +205,7 @@ export class BrowserErrorHandlingService {
     } catch (processingError) {
       const duration = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Error processing failed`, {
-        operationId,
-        originalError: error.message,
+      this.logger.error(`[${operationId}] Error processing failed`, {operationId,originalError: error.message,
         processingError: processingError instanceof Error ? processingError.message : String(processingError),
         duration,
       });
@@ -266,9 +215,7 @@ export class BrowserErrorHandlingService {
         id: `error_${Date.now()}`,
         category: BrowserErrorCategory.TECHNICAL,
         severity: ErrorSeverity.HIGH,
-        code: 'ERROR_PROCESSING_FAILED',
-        message: 'Failed to process error information',
-        userMessage: 'An unexpected error occurred',
+        code: 'ERROR_PROCESSING_FAILED',message: 'Failed to process error information',userMessage: 'An unexpected error occurred',
         details: { originalError: error.message },
         context,
       };
@@ -285,9 +232,7 @@ export class BrowserErrorHandlingService {
     indicators: string[] = [],
   ): Promise<SecurityIncident> {
     const incident: SecurityIncident = {
-      id: `incident_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      type,
-      severity: this.getIncidentSeverity(type),
+      id: `incident_${Date.now()}_${Math.random().toString(36).substring(7)}`,type,severity: this.getIncidentSeverity(type),
       description,
       indicators,
       attackVector: this.determineAttackVector(type, context),
@@ -299,9 +244,7 @@ export class BrowserErrorHandlingService {
 
     this.securityIncidents.push(incident);
 
-    this.logger.warn(`Security incident reported`, {
-      incidentId: incident.id,
-      type: incident.type,
+    this.logger.warn(`Security incident reported`, {incidentId: incident.id,type: incident.type,
       severity: incident.severity,
       description: incident.description,
       userId: context.userId,
@@ -407,11 +350,7 @@ export class BrowserErrorHandlingService {
 
     let category = BrowserErrorCategory.TECHNICAL;
     let severity = ErrorSeverity.MEDIUM;
-    let code = 'UNKNOWN_ERROR';
-    let userMessage = 'An unexpected error occurred';
-    const details: Record<string, unknown> = {};
-
-    // Classify by error type and message
+    let code = 'UNKNOWN_ERROR';let userMessage = 'An unexpected error occurred';const details: Record<string, unknown> = {};// Classify by error type and message
     if (error instanceof HttpException) {
       const status = error.getStatus();
       const response = error.getResponse();
@@ -420,45 +359,22 @@ export class BrowserErrorHandlingService {
         case HttpStatus.UNAUTHORIZED:
           category = BrowserErrorCategory.AUTHENTICATION;
           severity = ErrorSeverity.HIGH;
-          code = 'AUTHENTICATION_FAILED';
-          userMessage = 'Authentication failed';
-          break;
-
-        case HttpStatus.FORBIDDEN:
+          code = 'AUTHENTICATION_FAILED';userMessage = 'Authentication failed';break;case HttpStatus.FORBIDDEN:
           category = BrowserErrorCategory.AUTHORIZATION;
           severity = ErrorSeverity.HIGH;
-          code = 'AUTHORIZATION_FAILED';
-          userMessage = 'Access denied';
-          break;
-
-        case HttpStatus.BAD_REQUEST:
+          code = 'AUTHORIZATION_FAILED';userMessage = 'Access denied';break;case HttpStatus.BAD_REQUEST:
           category = BrowserErrorCategory.VALIDATION;
           severity = ErrorSeverity.MEDIUM;
-          code = 'VALIDATION_FAILED';
-          userMessage = 'Invalid request data';
-          break;
-
-        case HttpStatus.TOO_MANY_REQUESTS:
+          code = 'VALIDATION_FAILED';userMessage = 'Invalid request data';break;case HttpStatus.TOO_MANY_REQUESTS:
           category = BrowserErrorCategory.RATE_LIMITING;
           severity = ErrorSeverity.MEDIUM;
-          code = 'RATE_LIMIT_EXCEEDED';
-          userMessage = 'Too many requests';
-          break;
-
-        case HttpStatus.REQUEST_TIMEOUT:
+          code = 'RATE_LIMIT_EXCEEDED';userMessage = 'Too many requests';break;case HttpStatus.REQUEST_TIMEOUT:
           category = BrowserErrorCategory.TIMEOUT;
           severity = ErrorSeverity.MEDIUM;
-          code = 'REQUEST_TIMEOUT';
-          userMessage = 'Request timeout';
-          break;
-
-        case HttpStatus.INTERNAL_SERVER_ERROR:
+          code = 'REQUEST_TIMEOUT';userMessage = 'Request timeout';break;case HttpStatus.INTERNAL_SERVER_ERROR:
           category = BrowserErrorCategory.TECHNICAL;
           severity = ErrorSeverity.HIGH;
-          code = 'INTERNAL_SERVER_ERROR';
-          userMessage = 'Internal server error';
-          break;
-      }
+          code = 'INTERNAL_SERVER_ERROR';userMessage = 'Internal server error';break;}
 
       details.httpStatus = status;
       details.httpResponse = response;
@@ -467,34 +383,13 @@ export class BrowserErrorHandlingService {
     // Check error message for specific patterns
     const message = error.message.toLowerCase();
 
-    if (message.includes('browser') || message.includes('selenium') || message.includes('chromium')) {
-      category = BrowserErrorCategory.BROWSER_ENGINE;
-      code = 'BROWSER_ENGINE_ERROR';
-    } else if (message.includes('timeout')) {
-      category = BrowserErrorCategory.TIMEOUT;
-      code = 'OPERATION_TIMEOUT';
-    } else if (message.includes('memory') || message.includes('resource')) {
-      category = BrowserErrorCategory.RESOURCE_EXHAUSTION;
-      severity = ErrorSeverity.HIGH;
-      code = 'RESOURCE_EXHAUSTED';
-    } else if (message.includes('permission') || message.includes('unauthorized')) {
-      category = BrowserErrorCategory.AUTHORIZATION;
-      severity = ErrorSeverity.HIGH;
-      code = 'PERMISSION_DENIED';
-    } else if (message.includes('validation') || message.includes('invalid')) {
-      category = BrowserErrorCategory.VALIDATION;
-      code = 'VALIDATION_ERROR';
-    }
-
-    // Check for security-related errors
+    if (message.includes('browser') || message.includes('selenium') || message.includes('chromium')) {category = BrowserErrorCategory.BROWSER_ENGINE;code = 'BROWSER_ENGINE_ERROR';} else if (message.includes('timeout')) {category = BrowserErrorCategory.TIMEOUT;code = 'OPERATION_TIMEOUT';} else if (message.includes('memory') || message.includes('resource')) {category = BrowserErrorCategory.RESOURCE_EXHAUSTION;severity = ErrorSeverity.HIGH;
+      code = 'RESOURCE_EXHAUSTED';} else if (message.includes('permission') || message.includes('unauthorized')) {category = BrowserErrorCategory.AUTHORIZATION;severity = ErrorSeverity.HIGH;
+      code = 'PERMISSION_DENIED';} else if (message.includes('validation') || message.includes('invalid')) {category = BrowserErrorCategory.VALIDATION;code = 'VALIDATION_ERROR';}// Check for security-related errors
     if (this.isSecurityRelatedError(error, context)) {
       category = BrowserErrorCategory.SECURITY_VIOLATION;
       severity = ErrorSeverity.CRITICAL;
-      code = 'SECURITY_VIOLATION';
-      userMessage = 'Security policy violation';
-    }
-
-    return {
+      code = 'SECURITY_VIOLATION';userMessage = 'Security policy violation';}return {
       id: errorId,
       category,
       severity,
@@ -540,26 +435,17 @@ export class BrowserErrorHandlingService {
       const payload = JSON.stringify(errorInfo.context.requestData || {}).toLowerCase();
 
       const injectionPatterns = [
-        'script', 'javascript:', 'vbscript:', 'onload', 'onerror',
-        'union select', 'drop table', 'insert into', '--', '/*',
-        '../', '..\\', '/etc/passwd', 'cmd.exe', 'powershell'
-      ];
-
-      const foundPatterns = injectionPatterns.filter(pattern =>
+        'script', 'javascript:', 'vbscript:', 'onload', 'onerror','union select', 'drop table', 'insert into', '--', '/*','../', '..\\', '/etc/passwd', 'cmd.exe', 'powershell'];const foundPatterns = injectionPatterns.filter(pattern =>
         errorMessage.includes(pattern) || payload.includes(pattern)
       );
 
       if (foundPatterns.length > 0) {
-        if (foundPatterns.some(p => ['script', 'javascript:', 'onload'].includes(p))) {
-          incidentType = SecurityIncidentType.XSS_ATTEMPT;
-        } else if (foundPatterns.some(p => ['union select', 'drop table'].includes(p))) {
+        if (foundPatterns.some(p => ['script', 'javascript:', 'onload'].includes(p))) {incidentType = SecurityIncidentType.XSS_ATTEMPT;} else if (foundPatterns.some(p => ['union select', 'drop table'].includes(p))) {
           incidentType = SecurityIncidentType.INJECTION_ATTEMPT;
         } else {
           incidentType = SecurityIncidentType.MALICIOUS_PAYLOAD;
         }
-        indicators.push(...foundPatterns.map(p => `injection_pattern_${p}`));
-      }
-    }
+        indicators.push(...foundPatterns.map(p => `injection_pattern_${p}`));}}
 
     if (errorInfo.category === BrowserErrorCategory.RATE_LIMITING) {
       // Check for rate limit abuse
@@ -571,9 +457,7 @@ export class BrowserErrorHandlingService {
 
       if (recentRateLimitErrors >= 3) {
         incidentType = SecurityIncidentType.RATE_LIMIT_ABUSE;
-        indicators.push(`${recentRateLimitErrors}_rate_limit_violations_in_10_minutes`);
-      }
-    }
+        indicators.push(`${recentRateLimitErrors}_rate_limit_violations_in_10_minutes`);}}
 
     // Create security incident if detected
     if (incidentType) {
@@ -591,12 +475,7 @@ export class BrowserErrorHandlingService {
   private isSecurityRelatedError(error: Error | HttpException, context: BrowserErrorContext): boolean {
     const message = error.message.toLowerCase();
     const securityKeywords = [
-      'security', 'violation', 'unauthorized', 'forbidden',
-      'injection', 'xss', 'script', 'malicious', 'attack',
-      'suspicious', 'threat', 'breach', 'compromise'
-    ];
-
-    return securityKeywords.some(keyword => message.includes(keyword));
+      'security', 'violation', 'unauthorized', 'forbidden','injection', 'xss', 'script', 'malicious', 'attack','suspicious', 'threat', 'breach', 'compromise'];return securityKeywords.some(keyword => message.includes(keyword));
   }
 
   private determineRecoveryStrategy(errorInfo: BrowserErrorInfo): ErrorRecoveryStrategy {
@@ -613,33 +492,23 @@ export class BrowserErrorHandlingService {
         strategy.automatic = true;
         strategy.retryable = true;
         strategy.maxRetries = 3;
-        strategy.backoffStrategy = 'exponential';
-        break;
-
-      case BrowserErrorCategory.RATE_LIMITING:
+        strategy.backoffStrategy = 'exponential';break;case BrowserErrorCategory.RATE_LIMITING:
         strategy.retryable = true;
         strategy.maxRetries = 1;
-        strategy.backoffStrategy = 'fixed';
-        strategy.userNotification = false;
-        break;
+        strategy.backoffStrategy = 'fixed';strategy.userNotification = false;break;
 
       case BrowserErrorCategory.BROWSER_ENGINE:
         strategy.automatic = true;
         strategy.retryable = true;
         strategy.maxRetries = 2;
-        strategy.fallbackAction = 'restart_browser_session';
-        break;
-
-      case BrowserErrorCategory.SECURITY_VIOLATION:
+        strategy.fallbackAction = 'restart_browser_session';break;case BrowserErrorCategory.SECURITY_VIOLATION:
         strategy.escalationRequired = true;
         strategy.userNotification = false;
         break;
 
       case BrowserErrorCategory.RESOURCE_EXHAUSTION:
         strategy.escalationRequired = true;
-        strategy.fallbackAction = 'reduce_resource_usage';
-        break;
-    }
+        strategy.fallbackAction = 'reduce_resource_usage';break;}
 
     // Adjust based on severity
     if (errorInfo.severity === ErrorSeverity.CRITICAL) {
@@ -693,30 +562,20 @@ export class BrowserErrorHandlingService {
         this.logger.error(`Browser Automation Error: ${errorInfo.message}`, logData);
         break;
       case 'warn':
-        this.logger.warn(`Browser Automation Warning: ${errorInfo.message}`, logData);
-        break;
-      default:
+        this.logger.warn(`Browser Automation Warning: ${errorInfo.message}`, logData);break;default:
         this.logger.log(`Browser Automation Error: ${errorInfo.message}`, logData);
         break;
     }
   }
 
-  private getLogLevel(severity: ErrorSeverity): 'error' | 'warn' | 'log' {
-    switch (severity) {
-      case ErrorSeverity.CRITICAL:
+  private getLogLevel(severity: ErrorSeverity): 'error' | 'warn' | 'log' {switch (severity) {case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
-        return 'error';
-      case ErrorSeverity.MEDIUM:
-        return 'warn';
-      default:
-        return 'log';
+        return 'error';case ErrorSeverity.MEDIUM:return 'warn';default:return 'log';
     }
   }
 
   private async sendSecurityAlert(incident: SecurityIncident, context: BrowserErrorContext): Promise<void> {
-    this.logger.warn(`🚨 SECURITY ALERT: ${incident.type}`, {
-      incidentId: incident.id,
-      type: incident.type,
+    this.logger.warn(`🚨 SECURITY ALERT: ${incident.type}`, {incidentId: incident.id,type: incident.type,
       severity: incident.severity,
       description: incident.description,
       indicators: incident.indicators,
@@ -731,9 +590,7 @@ export class BrowserErrorHandlingService {
   }
 
   private async applyAutomaticRecovery(errorInfo: BrowserErrorInfo, strategy: ErrorRecoveryStrategy): Promise<void> {
-    this.logger.log(`Applying automatic recovery for error ${errorInfo.id}`, {
-      errorId: errorInfo.id,
-      strategy: strategy.fallbackAction,
+    this.logger.log(`Applying automatic recovery for error ${errorInfo.id}`, {errorId: errorInfo.id,strategy: strategy.fallbackAction,
       retryable: strategy.retryable,
       maxRetries: strategy.maxRetries,
     });
@@ -779,49 +636,17 @@ export class BrowserErrorHandlingService {
   private determineAttackVector(type: SecurityIncidentType, context: BrowserErrorContext): string {
     switch (type) {
       case SecurityIncidentType.BRUTE_FORCE_ATTACK:
-        return 'Authentication endpoint';
-      case SecurityIncidentType.INJECTION_ATTEMPT:
-        return 'Input validation bypass';
-      case SecurityIncidentType.XSS_ATTEMPT:
-        return 'Client-side injection';
-      case SecurityIncidentType.RATE_LIMIT_ABUSE:
-        return 'API endpoint flooding';
-      default:
-        return 'Unknown';
-    }
-  }
+        return 'Authentication endpoint';case SecurityIncidentType.INJECTION_ATTEMPT:return 'Input validation bypass';case SecurityIncidentType.XSS_ATTEMPT:return 'Client-side injection';case SecurityIncidentType.RATE_LIMIT_ABUSE:return 'API endpoint flooding';default:return 'Unknown';}}
 
   private assessPotentialImpact(type: SecurityIncidentType): string {
     switch (type) {
       case SecurityIncidentType.BRUTE_FORCE_ATTACK:
-        return 'Account compromise, unauthorized access';
-      case SecurityIncidentType.INJECTION_ATTEMPT:
-        return 'Data breach, system compromise';
-      case SecurityIncidentType.XSS_ATTEMPT:
-        return 'Session hijacking, data theft';
-      case SecurityIncidentType.PRIVILEGE_ESCALATION:
-        return 'Administrative access, system control';
-      case SecurityIncidentType.DATA_EXFILTRATION:
-        return 'Sensitive data theft, privacy violation';
-      default:
-        return 'Service disruption, security policy violation';
-    }
-  }
+        return 'Account compromise, unauthorized access';case SecurityIncidentType.INJECTION_ATTEMPT:return 'Data breach, system compromise';case SecurityIncidentType.XSS_ATTEMPT:return 'Session hijacking, data theft';case SecurityIncidentType.PRIVILEGE_ESCALATION:return 'Administrative access, system control';case SecurityIncidentType.DATA_EXFILTRATION:return 'Sensitive data theft, privacy violation';default:return 'Service disruption, security policy violation';}}
 
   private getRecommendedActions(type: SecurityIncidentType): string[] {
     switch (type) {
       case SecurityIncidentType.BRUTE_FORCE_ATTACK:
-        return ['Block IP address', 'Implement account lockout', 'Require MFA', 'Review logs'];
-      case SecurityIncidentType.INJECTION_ATTEMPT:
-        return ['Block malicious requests', 'Review input validation', 'Audit database access', 'Update WAF rules'];
-      case SecurityIncidentType.XSS_ATTEMPT:
-        return ['Sanitize input', 'Review CSP headers', 'Update XSS protection', 'Audit client-side code'];
-      case SecurityIncidentType.RATE_LIMIT_ABUSE:
-        return ['Implement stricter rate limits', 'Block abusive IPs', 'Review API usage patterns'];
-      default:
-        return ['Monitor closely', 'Review security policies', 'Consider additional protections'];
-    }
-  }
+        return ['Block IP address', 'Implement account lockout', 'Require MFA', 'Review logs'];case SecurityIncidentType.INJECTION_ATTEMPT:return ['Block malicious requests', 'Review input validation', 'Audit database access', 'Update WAF rules'];case SecurityIncidentType.XSS_ATTEMPT:return ['Sanitize input', 'Review CSP headers', 'Update XSS protection', 'Audit client-side code'];case SecurityIncidentType.RATE_LIMIT_ABUSE:return ['Implement stricter rate limits', 'Block abusive IPs', 'Review API usage patterns'];default:return ['Monitor closely', 'Review security policies', 'Consider additional protections'];}}
 
   private shouldAutoRespond(type: SecurityIncidentType): boolean {
     return [
@@ -860,9 +685,7 @@ export class BrowserErrorHandlingService {
     );
 
     if (recentErrors.length > 100) {
-      this.logger.warn('High error rate detected', {
-        errorsInLastHour: recentErrors.length,
-        totalErrors: this.totalErrors,
+      this.logger.warn('High error rate detected', {errorsInLastHour: recentErrors.length,totalErrors: this.totalErrors,
       });
     }
 
@@ -875,9 +698,7 @@ export class BrowserErrorHandlingService {
 
     ipErrorCounts.forEach((count, ip) => {
       if (count > 20) {
-        this.logger.warn('Suspicious error pattern detected', {
-          ipAddress: ip,
-          errorCount: count,
+        this.logger.warn('Suspicious error pattern detected', {ipAddress: ip,errorCount: count,
           timeWindow: '1 hour',
         });
       }

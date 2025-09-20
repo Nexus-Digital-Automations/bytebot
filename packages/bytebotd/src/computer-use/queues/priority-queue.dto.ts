@@ -22,51 +22,23 @@ import {
   Min,
   Max,
   ValidateNested,
-} from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { JobStatus } from '../dto/async-job.dto';
-
-/**
- * Enhanced job priority enumeration with execution targets
+} from 'class-validator';import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import { Type } from 'class-transformer';import { JobStatus } from '../dto/async-job.dto';/*** Enhanced job priority enumeration with execution targets
  */
 export enum EnhancedJobPriority {
-  URGENT = 'urgent',      // System-critical operations (immediate execution)
-  HIGH = 'high',          // User-interactive operations (< 5 second target)
-  NORMAL = 'normal',      // Standard automation tasks (< 30 second target)
-  LOW = 'low',            // Batch operations (< 5 minute target)
-  BACKGROUND = 'background', // Maintenance tasks (best effort)
-}
-
-/**
+  URGENT = 'urgent',      // System-critical operations (immediate execution)HIGH = 'high',          // User-interactive operations (< 5 second target)NORMAL = 'normal',      // Standard automation tasks (< 30 second target)LOW = 'low',            // Batch operations (< 5 minute target)BACKGROUND = 'background', // Maintenance tasks (best effort)}/**
  * Queue operation types for metrics and monitoring
  */
 export enum QueueOperation {
-  ENQUEUE = 'enqueue',
-  DEQUEUE = 'dequeue',
-  PEEK = 'peek',
-  REMOVE = 'remove',
-  CLEAR = 'clear',
-  REQUEUE = 'requeue',
-  BATCH_ENQUEUE = 'batch_enqueue',
-  BATCH_DEQUEUE = 'batch_dequeue',
-}
-
-/**
+  ENQUEUE = 'enqueue',DEQUEUE = 'dequeue',PEEK = 'peek',REMOVE = 'remove',CLEAR = 'clear',REQUEUE = 'requeue',BATCH_ENQUEUE = 'batch_enqueue',BATCH_DEQUEUE = 'batch_dequeue',}/**
  * Queue job submission DTO with comprehensive metadata
  */
 export class QueueJobSubmissionDto {
   @ApiProperty({
-    description: 'Job payload data to be processed',
-    example: { action: 'screenshot', options: { format: 'png' } },
-  })
-  @IsObject()
+    description: 'Job payload data to be processed',example: { action: 'screenshot', options: { format: 'png' } },})@IsObject()
   payload: unknown;
 
   @ApiPropertyOptional({
-    description: 'Job priority level for queue management',
-    enum: EnhancedJobPriority,
-    example: EnhancedJobPriority.NORMAL,
+    description: 'Job priority level for queue management',enum: EnhancedJobPriority,example: EnhancedJobPriority.NORMAL,
     default: EnhancedJobPriority.NORMAL,
   })
   @IsOptional()
@@ -74,9 +46,7 @@ export class QueueJobSubmissionDto {
   priority?: EnhancedJobPriority = EnhancedJobPriority.NORMAL;
 
   @ApiPropertyOptional({
-    description: 'Estimated job execution duration in milliseconds',
-    example: 15000,
-    minimum: 1000,
+    description: 'Estimated job execution duration in milliseconds',example: 15000,minimum: 1000,
     maximum: 1800000, // 30 minutes
   })
   @IsOptional()
@@ -86,9 +56,7 @@ export class QueueJobSubmissionDto {
   estimatedDuration?: number;
 
   @ApiPropertyOptional({
-    description: 'Maximum number of retry attempts',
-    example: 3,
-    minimum: 0,
+    description: 'Maximum number of retry attempts',example: 3,minimum: 0,
     maximum: 10,
     default: 3,
   })
@@ -99,9 +67,7 @@ export class QueueJobSubmissionDto {
   maxRetries?: number = 3;
 
   @ApiPropertyOptional({
-    description: 'Job execution timeout in milliseconds',
-    example: 30000,
-    minimum: 5000,
+    description: 'Job execution timeout in milliseconds',example: 30000,minimum: 5000,
     maximum: 1800000, // 30 minutes
   })
   @IsOptional()
@@ -111,54 +77,36 @@ export class QueueJobSubmissionDto {
   timeout?: number;
 
   @ApiPropertyOptional({
-    description: 'Job classification tags for filtering and monitoring',
-    example: ['automation', 'user-initiated', 'high-priority'],
-    type: [String],
-  })
+    description: 'Job classification tags for filtering and monitoring',example: ['automation', 'user-initiated', 'high-priority'],type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[] = [];
 
   @ApiPropertyOptional({
-    description: 'User ID associated with the job',
-    example: 'user_123456789',
-  })
-  @IsOptional()
+    description: 'User ID associated with the job',example: 'user_123456789',})@IsOptional()
   @IsString()
   userId?: string;
 
   @ApiPropertyOptional({
-    description: 'Session ID for job tracking',
-    example: 'session_987654321',
-  })
-  @IsOptional()
+    description: 'Session ID for job tracking',example: 'session_987654321',})@IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Parent job ID for dependent jobs',
-    example: 'job_parent_123',
-  })
-  @IsOptional()
+    description: 'Parent job ID for dependent jobs',example: 'job_parent_123',})@IsOptional()
   @IsString()
   parentJobId?: string;
 
   @ApiPropertyOptional({
-    description: 'List of job IDs that must complete before this job can start',
-    example: ['job_dep_1', 'job_dep_2'],
-    type: [String],
-  })
+    description: 'List of job IDs that must complete before this job can start',example: ['job_dep_1', 'job_dep_2'],type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   dependencies?: string[] = [];
 
   @ApiPropertyOptional({
-    description: 'Additional job metadata',
-    example: { department: 'operations', cost_center: 'automation' },
-  })
-  @IsOptional()
+    description: 'Additional job metadata',example: { department: 'operations', cost_center: 'automation' },})@IsOptional()
   @IsObject()
   metadata?: Record<string, unknown> = {};
 }
@@ -168,72 +116,46 @@ export class QueueJobSubmissionDto {
  */
 export class QueueJobResponseDto {
   @ApiProperty({
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @IsString()
-  @IsUUID('4')
-  jobId: string;
-
-  @ApiProperty({
-    description: 'Current job status',
-    enum: JobStatus,
-    example: JobStatus.PENDING,
+    description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@IsString()
+  @IsUUID('4')jobId: string;@ApiProperty({
+    description: 'Current job status',enum: JobStatus,example: JobStatus.PENDING,
   })
   @IsEnum(JobStatus)
   status: JobStatus;
 
   @ApiProperty({
-    description: 'Job priority level',
-    enum: EnhancedJobPriority,
-    example: EnhancedJobPriority.NORMAL,
+    description: 'Job priority level',enum: EnhancedJobPriority,example: EnhancedJobPriority.NORMAL,
   })
   @IsEnum(EnhancedJobPriority)
   priority: EnhancedJobPriority;
 
   @ApiProperty({
-    description: 'Job submission timestamp',
-    example: '2023-12-19T10:30:45.789Z',
-  })
-  @IsString()
+    description: 'Job submission timestamp',example: '2023-12-19T10:30:45.789Z',})@IsString()
   submittedAt: string;
 
   @ApiPropertyOptional({
-    description: 'Job processing start timestamp',
-    example: '2023-12-19T10:30:50.123Z',
-  })
-  @IsOptional()
+    description: 'Job processing start timestamp',example: '2023-12-19T10:30:50.123Z',})@IsOptional()
   @IsString()
   startedAt?: string;
 
   @ApiPropertyOptional({
-    description: 'Job completion timestamp',
-    example: '2023-12-19T10:31:15.456Z',
-  })
-  @IsOptional()
+    description: 'Job completion timestamp',example: '2023-12-19T10:31:15.456Z',})@IsOptional()
   @IsString()
   completedAt?: string;
 
   @ApiProperty({
-    description: 'Current position in the queue (0-based)',
-    example: 5,
-    minimum: 0,
+    description: 'Current position in the queue (0-based)',example: 5,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   queuePosition: number;
 
   @ApiProperty({
-    description: 'Estimated start time for job processing',
-    example: '2023-12-19T10:32:00.000Z',
-  })
-  @IsString()
+    description: 'Estimated start time for job processing',example: '2023-12-19T10:32:00.000Z',})@IsString()
   estimatedStartTime: string;
 
   @ApiPropertyOptional({
-    description: 'Job execution duration in milliseconds',
-    example: 15750,
-    minimum: 0,
+    description: 'Job execution duration in milliseconds',example: 15750,minimum: 0,
   })
   @IsOptional()
   @IsNumber()
@@ -241,44 +163,30 @@ export class QueueJobResponseDto {
   executionTimeMs?: number;
 
   @ApiPropertyOptional({
-    description: 'Job execution result data',
-    example: { success: true, data: 'screenshot_base64_data' },
-  })
-  @IsOptional()
+    description: 'Job execution result data',example: { success: true, data: 'screenshot_base64_data' },})@IsOptional()
   result?: unknown;
 
   @ApiPropertyOptional({
-    description: 'Error message if job failed',
-    example: 'Action execution failed: Timeout waiting for element',
-  })
-  @IsOptional()
+    description: 'Error message if job failed',example: 'Action execution failed: Timeout waiting for element',})@IsOptional()
   @IsString()
   errorMessage?: string;
 
   @ApiProperty({
-    description: 'Number of retry attempts made',
-    example: 1,
-    minimum: 0,
+    description: 'Number of retry attempts made',example: 1,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   retryCount: number;
 
   @ApiPropertyOptional({
-    description: 'Job classification tags',
-    example: ['automation', 'screenshot'],
-    type: [String],
-  })
+    description: 'Job classification tags',example: ['automation', 'screenshot'],type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
 
   @ApiPropertyOptional({
-    description: 'Additional job metadata',
-    example: { userId: 'user_123', sessionId: 'session_456' },
-  })
-  @IsOptional()
+    description: 'Additional job metadata',example: { userId: 'user_123', sessionId: 'session_456' },})@IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }
@@ -288,18 +196,14 @@ export class QueueJobResponseDto {
  */
 export class QueueMetricsDto {
   @ApiProperty({
-    description: 'Total number of jobs in the queue system',
-    example: 1250,
-    minimum: 0,
+    description: 'Total number of jobs in the queue system',example: 1250,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   totalJobs: number;
 
   @ApiProperty({
-    description: 'Job count by priority level',
-    example: {
-      urgent: 5,
+    description: 'Job count by priority level',example: {urgent: 5,
       high: 25,
       normal: 100,
       low: 75,
@@ -310,9 +214,7 @@ export class QueueMetricsDto {
   jobsByPriority: Record<EnhancedJobPriority, number>;
 
   @ApiProperty({
-    description: 'Job count by status',
-    example: {
-      pending: 200,
+    description: 'Job count by status',example: {pending: 200,
       in_progress: 50,
       completed: 800,
       failed: 15,
@@ -323,45 +225,35 @@ export class QueueMetricsDto {
   jobsByStatus: Record<JobStatus, number>;
 
   @ApiProperty({
-    description: 'Average job wait time in milliseconds',
-    example: 5500,
-    minimum: 0,
+    description: 'Average job wait time in milliseconds',example: 5500,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   averageWaitTime: number;
 
   @ApiProperty({
-    description: 'Average job execution time in milliseconds',
-    example: 12300,
-    minimum: 0,
+    description: 'Average job execution time in milliseconds',example: 12300,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   averageExecutionTime: number;
 
   @ApiProperty({
-    description: 'Job processing throughput per minute',
-    example: 24.5,
-    minimum: 0,
+    description: 'Job processing throughput per minute',example: 24.5,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   throughputPerMinute: number;
 
   @ApiProperty({
-    description: 'Maximum queue capacity',
-    example: 10000,
-    minimum: 1,
+    description: 'Maximum queue capacity',example: 10000,minimum: 1,
   })
   @IsNumber()
   @Min(1)
   queueCapacity: number;
 
   @ApiProperty({
-    description: 'Current queue capacity utilization (0.0 to 1.0)',
-    example: 0.125,
-    minimum: 0,
+    description: 'Current queue capacity utilization (0.0 to 1.0)',example: 0.125,minimum: 0,
     maximum: 1,
   })
   @IsNumber()
@@ -370,52 +262,40 @@ export class QueueMetricsDto {
   capacityUtilization: number;
 
   @ApiProperty({
-    description: 'Age of oldest job in queue (milliseconds)',
-    example: 45000,
-    minimum: 0,
+    description: 'Age of oldest job in queue (milliseconds)',example: 45000,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   oldestJobAge: number;
 
   @ApiProperty({
-    description: 'Whether backpressure is currently active',
-    example: false,
-  })
+    description: 'Whether backpressure is currently active',example: false,})
   @IsBoolean()
   backpressureActive: boolean;
 
   @ApiProperty({
-    description: 'Number of lock contention events',
-    example: 12,
-    minimum: 0,
+    description: 'Number of lock contention events',example: 12,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   lockContention: number;
 
   @ApiProperty({
-    description: 'Number of deadlock events detected',
-    example: 0,
-    minimum: 0,
+    description: 'Number of deadlock events detected',example: 0,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   deadlockCount: number;
 
   @ApiProperty({
-    description: 'Job retry rate (retries per completed job)',
-    example: 0.12,
-    minimum: 0,
+    description: 'Job retry rate (retries per completed job)',example: 0.12,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   retryRate: number;
 
   @ApiProperty({
-    description: 'Job error rate (failures per total jobs)',
-    example: 0.015,
-    minimum: 0,
+    description: 'Job error rate (failures per total jobs)',example: 0.015,minimum: 0,
     maximum: 1,
   })
   @IsNumber()
@@ -424,10 +304,7 @@ export class QueueMetricsDto {
   errorRate: number;
 
   @ApiProperty({
-    description: 'Timestamp of last metrics update',
-    example: '2023-12-19T10:45:30.789Z',
-  })
-  @IsString()
+    description: 'Timestamp of last metrics update',example: '2023-12-19T10:45:30.789Z',})@IsString()
   lastUpdated: string;
 }
 
@@ -436,62 +313,43 @@ export class QueueMetricsDto {
  */
 export class QueueOperationResultDto<T = unknown> {
   @ApiProperty({
-    description: 'Whether the operation was successful',
-    example: true,
-  })
+    description: 'Whether the operation was successful',example: true,})
   @IsBoolean()
   success: boolean;
 
   @ApiProperty({
-    description: 'Type of queue operation performed',
-    enum: QueueOperation,
-    example: QueueOperation.ENQUEUE,
+    description: 'Type of queue operation performed',enum: QueueOperation,example: QueueOperation.ENQUEUE,
   })
   @IsEnum(QueueOperation)
   operation: QueueOperation;
 
   @ApiProperty({
-    description: 'Operation execution timestamp',
-    example: '2023-12-19T10:30:45.789Z',
-  })
-  @IsString()
+    description: 'Operation execution timestamp',example: '2023-12-19T10:30:45.789Z',})@IsString()
   timestamp: string;
 
   @ApiProperty({
-    description: 'Operation execution duration in milliseconds',
-    example: 125,
-    minimum: 0,
+    description: 'Operation execution duration in milliseconds',example: 125,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   duration: number;
 
   @ApiPropertyOptional({
-    description: 'Operation result data (type varies by operation)',
-    example: { jobId: 'job_123', queuePosition: 5 },
-  })
-  @IsOptional()
+    description: 'Operation result data (type varies by operation)',example: { jobId: 'job_123', queuePosition: 5 },})@IsOptional()
   data?: T;
 
   @ApiPropertyOptional({
-    description: 'Error message if operation failed',
-    example: 'Queue capacity exceeded',
-  })
-  @IsOptional()
+    description: 'Error message if operation failed',example: 'Queue capacity exceeded',})@IsOptional()
   @IsString()
   error?: string;
 
   @ApiProperty({
-    description: 'Whether a distributed lock was acquired for the operation',
-    example: true,
-  })
+    description: 'Whether a distributed lock was acquired for the operation',example: true,})
   @IsBoolean()
   lockAcquired: boolean;
 
   @ApiPropertyOptional({
-    description: 'Time spent waiting for and holding the lock (milliseconds)',
-    example: 45,
-    minimum: 0,
+    description: 'Time spent waiting for and holding the lock (milliseconds)',example: 45,minimum: 0,
   })
   @IsOptional()
   @IsNumber()
@@ -499,19 +357,14 @@ export class QueueOperationResultDto<T = unknown> {
   lockDuration?: number;
 
   @ApiProperty({
-    description: 'Current queue size at operation time',
-    example: 125,
-    minimum: 0,
+    description: 'Current queue size at operation time',example: 125,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   queueSize: number;
 
   @ApiProperty({
-    description: 'Additional operation metadata',
-    example: { priority: 'normal', retryAttempt: 1 },
-  })
-  @IsObject()
+    description: 'Additional operation metadata',example: { priority: 'normal', retryAttempt: 1 },})@IsObject()
   metadata: Record<string, unknown>;
 }
 
@@ -520,9 +373,7 @@ export class QueueOperationResultDto<T = unknown> {
  */
 export class BatchJobSubmissionDto {
   @ApiProperty({
-    description: 'Array of jobs to submit to the queue',
-    type: [QueueJobSubmissionDto],
-    minItems: 1,
+    description: 'Array of jobs to submit to the queue',type: [QueueJobSubmissionDto],minItems: 1,
     maxItems: 100, // Limit batch size for performance
   })
   @IsArray()
@@ -531,18 +382,14 @@ export class BatchJobSubmissionDto {
   jobs: QueueJobSubmissionDto[];
 
   @ApiPropertyOptional({
-    description: 'Whether to execute all jobs atomically (all or none)',
-    example: false,
-    default: false,
+    description: 'Whether to execute all jobs atomically (all or none)',example: false,default: false,
   })
   @IsOptional()
   @IsBoolean()
   atomic?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Maximum time to wait for batch submission (milliseconds)',
-    example: 30000,
-    minimum: 1000,
+    description: 'Maximum time to wait for batch submission (milliseconds)',example: 30000,minimum: 1000,
     maximum: 300000, // 5 minutes
   })
   @IsOptional()
@@ -557,63 +404,44 @@ export class BatchJobSubmissionDto {
  */
 export class BatchJobSubmissionResultDto {
   @ApiProperty({
-    description: 'Whether the entire batch operation was successful',
-    example: true,
-  })
+    description: 'Whether the entire batch operation was successful',example: true,})
   @IsBoolean()
   success: boolean;
 
   @ApiProperty({
-    description: 'Number of jobs successfully submitted',
-    example: 8,
-    minimum: 0,
+    description: 'Number of jobs successfully submitted',example: 8,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   successCount: number;
 
   @ApiProperty({
-    description: 'Number of jobs that failed to submit',
-    example: 2,
-    minimum: 0,
+    description: 'Number of jobs that failed to submit',example: 2,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   failureCount: number;
 
   @ApiProperty({
-    description: 'Total batch processing time in milliseconds',
-    example: 1250,
-    minimum: 0,
+    description: 'Total batch processing time in milliseconds',example: 1250,minimum: 0,
   })
   @IsNumber()
   @Min(0)
   processingTimeMs: number;
 
   @ApiProperty({
-    description: 'Array of successfully submitted job IDs',
-    example: ['job_1', 'job_2', 'job_3'],
-    type: [String],
-  })
+    description: 'Array of successfully submitted job IDs',example: ['job_1', 'job_2', 'job_3'],type: [String],})
   @IsArray()
   @IsString({ each: true })
   successfulJobIds: string[];
 
   @ApiProperty({
-    description: 'Array of submission failures with error details',
-    example: [
-      { index: 3, error: 'Invalid priority value' },
-      { index: 7, error: 'Queue capacity exceeded' }
-    ],
-  })
+    description: 'Array of submission failures with error details',example: [{ index: 3, error: 'Invalid priority value' },{ index: 7, error: 'Queue capacity exceeded' }],})
   @IsArray()
   failures: Array<{ index: number; error: string }>;
 
   @ApiProperty({
-    description: 'Batch submission timestamp',
-    example: '2023-12-19T10:30:45.789Z',
-  })
-  @IsString()
+    description: 'Batch submission timestamp',example: '2023-12-19T10:30:45.789Z',})@IsString()
   submittedAt: string;
 }
 
@@ -622,9 +450,7 @@ export class BatchJobSubmissionResultDto {
  */
 export class QueueConfigurationDto {
   @ApiPropertyOptional({
-    description: 'Maximum queue size',
-    example: 10000,
-    minimum: 100,
+    description: 'Maximum queue size',example: 10000,minimum: 100,
     maximum: 100000,
   })
   @IsOptional()
@@ -634,9 +460,7 @@ export class QueueConfigurationDto {
   maxQueueSize?: number;
 
   @ApiPropertyOptional({
-    description: 'Maximum jobs per priority level',
-    example: 2000,
-    minimum: 10,
+    description: 'Maximum jobs per priority level',example: 2000,minimum: 10,
     maximum: 20000,
   })
   @IsOptional()
@@ -646,9 +470,7 @@ export class QueueConfigurationDto {
   maxJobsPerPriority?: number;
 
   @ApiPropertyOptional({
-    description: 'Backpressure activation threshold (0.0 to 1.0)',
-    example: 0.8,
-    minimum: 0.1,
+    description: 'Backpressure activation threshold (0.0 to 1.0)',example: 0.8,minimum: 0.1,
     maximum: 1.0,
   })
   @IsOptional()
@@ -658,9 +480,7 @@ export class QueueConfigurationDto {
   backpressureThreshold?: number;
 
   @ApiPropertyOptional({
-    description: 'Lock timeout in milliseconds',
-    example: 30000,
-    minimum: 1000,
+    description: 'Lock timeout in milliseconds',example: 30000,minimum: 1000,
     maximum: 300000,
   })
   @IsOptional()
@@ -670,17 +490,13 @@ export class QueueConfigurationDto {
   lockTimeout?: number;
 
   @ApiPropertyOptional({
-    description: 'Enable starvation prevention mechanism',
-    example: true,
-  })
+    description: 'Enable starvation prevention mechanism',example: true,})
   @IsOptional()
   @IsBoolean()
   starvationPreventionEnabled?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Starvation prevention threshold in milliseconds',
-    example: 300000,
-    minimum: 60000,  // 1 minute
+    description: 'Starvation prevention threshold in milliseconds',example: 300000,minimum: 60000,  // 1 minute
     maximum: 3600000, // 1 hour
   })
   @IsOptional()
@@ -695,45 +511,20 @@ export class QueueConfigurationDto {
  */
 export class QueueHealthStatusDto {
   @ApiProperty({
-    description: 'Overall queue system health status',
-    example: 'healthy',
-    enum: ['healthy', 'degraded', 'critical', 'maintenance'],
-  })
-  @IsEnum(['healthy', 'degraded', 'critical', 'maintenance'])
-  status: 'healthy' | 'degraded' | 'critical' | 'maintenance';
-
-  @ApiProperty({
-    description: 'Detailed health check results',
-    example: {
-      redis_connection: 'healthy',
-      queue_capacity: 'healthy',
-      lock_system: 'healthy',
-      deadlock_detection: 'healthy'
-    },
-  })
+    description: 'Overall queue system health status',example: 'healthy',enum: ['healthy', 'degraded', 'critical', 'maintenance'],})@IsEnum(['healthy', 'degraded', 'critical', 'maintenance'])status: 'healthy' | 'degraded' | 'critical' | 'maintenance';@ApiProperty({description: 'Detailed health check results',example: {redis_connection: 'healthy',queue_capacity: 'healthy',lock_system: 'healthy',deadlock_detection: 'healthy'},})
   @IsObject()
-  checks: Record<string, 'healthy' | 'degraded' | 'critical'>;
-
-  @ApiProperty({
-    description: 'Health check timestamp',
-    example: '2023-12-19T10:45:30.789Z',
-  })
-  @IsString()
+  checks: Record<string, 'healthy' | 'degraded' | 'critical'>;@ApiProperty({description: 'Health check timestamp',example: '2023-12-19T10:45:30.789Z',})@IsString()
   lastChecked: string;
 
   @ApiPropertyOptional({
-    description: 'Health check warnings',
-    example: ['High queue utilization detected'],
-    type: [String],
-  })
+    description: 'Health check warnings',example: ['High queue utilization detected'],type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   warnings?: string[];
 
   @ApiPropertyOptional({
-    description: 'Health check errors',
-    example: ['Redis connection timeout'],
+    description: 'Health check errors',example: ['Redis connection timeout'],
     type: [String],
   })
   @IsOptional()

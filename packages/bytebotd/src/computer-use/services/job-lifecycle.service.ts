@@ -34,70 +34,20 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
-import * as crypto from 'crypto';
-import * as zlib from 'zlib';
-import { promisify } from 'util';
-import { CronJob } from 'cron';
-import {
-  JobStatus,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import { v4 as uuidv4 } from 'uuid';import * as crypto from 'crypto';import * as zlib from 'zlib';import { promisify } from 'util';import { CronJob } from 'cron';import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from '../dto/async-job.dto';
-import { ComputerActionDto } from '../dto/computer-action.dto';
-
-// ===== ENHANCED TYPE DEFINITIONS =====
-
-/**
+} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';// ===== ENHANCED TYPE DEFINITIONS =====/**
  * Enhanced job lifecycle states with comprehensive transitions
  */
 export enum JobLifecycleState {
-  SUBMITTED = 'submitted',
-  QUEUED = 'queued',
-  SCHEDULED = 'scheduled',
-  WAITING_DEPENDENCIES = 'waiting_dependencies',
-  READY = 'ready',
-  RUNNING = 'running',
-  PAUSED = 'paused',
-  COMPLETING = 'completing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout',
-  RETRYING = 'retrying',
-  EXPIRED = 'expired',
-}
-
-/**
+  SUBMITTED = 'submitted',QUEUED = 'queued',SCHEDULED = 'scheduled',WAITING_DEPENDENCIES = 'waiting_dependencies',READY = 'ready',RUNNING = 'running',PAUSED = 'paused',COMPLETING = 'completing',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',RETRYING = 'retrying',EXPIRED = 'expired',}/**
  * Job lifecycle events for monitoring and webhooks
  */
 export enum JobLifecycleEvent {
-  JOB_SUBMITTED = 'job.submitted',
-  JOB_QUEUED = 'job.queued',
-  JOB_SCHEDULED = 'job.scheduled',
-  JOB_DEPENDENCIES_RESOLVED = 'job.dependencies_resolved',
-  JOB_STARTED = 'job.started',
-  JOB_PROGRESS_UPDATED = 'job.progress_updated',
-  JOB_PAUSED = 'job.paused',
-  JOB_RESUMED = 'job.resumed',
-  JOB_COMPLETED = 'job.completed',
-  JOB_FAILED = 'job.failed',
-  JOB_CANCELLED = 'job.cancelled',
-  JOB_TIMEOUT = 'job.timeout',
-  JOB_RETRYING = 'job.retrying',
-  JOB_EXPIRED = 'job.expired',
-  BATCH_STARTED = 'batch.started',
-  BATCH_COMPLETED = 'batch.completed',
-  BATCH_FAILED = 'batch.failed',
-}
-
-/**
+  JOB_SUBMITTED = 'job.submitted',JOB_QUEUED = 'job.queued',JOB_SCHEDULED = 'job.scheduled',JOB_DEPENDENCIES_RESOLVED = 'job.dependencies_resolved',JOB_STARTED = 'job.started',JOB_PROGRESS_UPDATED = 'job.progress_updated',JOB_PAUSED = 'job.paused',JOB_RESUMED = 'job.resumed',JOB_COMPLETED = 'job.completed',JOB_FAILED = 'job.failed',JOB_CANCELLED = 'job.cancelled',JOB_TIMEOUT = 'job.timeout',JOB_RETRYING = 'job.retrying',JOB_EXPIRED = 'job.expired',BATCH_STARTED = 'batch.started',BATCH_COMPLETED = 'batch.completed',BATCH_FAILED = 'batch.failed',}/**
  * Job scheduling configuration with cron-like capabilities
  */
 export interface JobScheduleConfig {
@@ -114,9 +64,7 @@ export interface JobScheduleConfig {
  */
 export interface JobDependency {
   readonly jobId: string; // Dependent job ID
-  readonly type: 'completion' | 'success' | 'failure'; // Dependency type
-  readonly timeout?: number; // Dependency timeout
-}
+  readonly type: 'completion' | 'success' | 'failure'; // Dependency typereadonly timeout?: number; // Dependency timeout}
 
 /**
  * Enhanced job configuration with lifecycle features
@@ -223,9 +171,7 @@ export interface BatchJobConfig {
   readonly name: string;
   readonly description: string;
   readonly jobs: JobLifecycleData[];
-  readonly strategy: 'parallel' | 'sequential' | 'mixed';
-  readonly maxConcurrency?: number;
-  readonly failurePolicy: 'fail_fast' | 'continue' | 'retry_failed';
+  readonly strategy: 'parallel' | 'sequential' | 'mixed';readonly maxConcurrency?: number;readonly failurePolicy: 'fail_fast' | 'continue' | 'retry_failed';
   readonly timeout: number;
   readonly webhooks: string[];
 }
@@ -276,10 +222,7 @@ export class JobLifecycleStateMachine {
     const isValid = validStates.includes(toState);
 
     if (!isValid) {
-      this.logger.warn(`Invalid state transition attempted: ${fromState} -> ${toState}`);
-    }
-
-    return isValid;
+      this.logger.warn(`Invalid state transition attempted: ${fromState} -> ${toState}`);}return isValid;
   }
 
   /**
@@ -325,20 +268,14 @@ export class JobDependencyManager {
     }
     this.reverseDependencyGraph.get(dependsOnJobId)!.add(jobId);
 
-    this.logger.debug(`Added dependency: ${jobId} depends on ${dependsOnJobId}`);
-  }
-
-  /**
+    this.logger.debug(`Added dependency: ${jobId} depends on ${dependsOnJobId}`);}/**
    * Remove job dependency
    */
   public removeDependency(jobId: string, dependsOnJobId: string): void {
     this.dependencyGraph.get(jobId)?.delete(dependsOnJobId);
     this.reverseDependencyGraph.get(dependsOnJobId)?.delete(jobId);
 
-    this.logger.debug(`Removed dependency: ${jobId} no longer depends on ${dependsOnJobId}`);
-  }
-
-  /**
+    this.logger.debug(`Removed dependency: ${jobId} no longer depends on ${dependsOnJobId}`);}/**
    * Get job dependencies
    */
   public getDependencies(jobId: string): string[] {
@@ -515,13 +452,7 @@ export class JobResultManager {
 
   constructor(private readonly configService: ConfigService) {
     this.redis = new Redis({
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-      db: this.configService.get<number>('REDIS_JOB_RESULTS_DB', 1),
-      keyPrefix: 'bytebot:job:results:',
-    });
-  }
+      host: this.configService.get<string>('REDIS_HOST', 'localhost'),port: this.configService.get<number>('REDIS_PORT', 6379),password: this.configService.get<string>('REDIS_PASSWORD'),db: this.configService.get<number>('REDIS_JOB_RESULTS_DB', 1),keyPrefix: 'bytebot:job:results:',});}
 
   /**
    * Store job result with compression and encryption
@@ -536,15 +467,12 @@ export class JobResultManager {
       let data = JSON.stringify(result);
 
       if (compress) {
-        const compressed = await this.compress(Buffer.from(data, 'utf8'));
-        data = compressed.toString('base64');
+        const compressed = await this.compress(Buffer.from(data, 'utf8'));data = compressed.toString('base64');
       }
 
       await this.redis.setex(jobId, ttl, data);
 
-      this.logger.debug(`Stored result for job ${jobId} (TTL: ${ttl}s, compressed: ${compress})`);
-    } catch (error) {
-      this.logger.error(`Failed to store result for job ${jobId}:`, error);
+      this.logger.debug(`Stored result for job ${jobId} (TTL: ${ttl}s, compressed: ${compress})`);} catch (error) {this.logger.error(`Failed to store result for job ${jobId}:`, error);
       throw error;
     }
   }
@@ -559,15 +487,12 @@ export class JobResultManager {
 
       let jsonData = data;
       if (compressed) {
-        const decompressed = await this.decompress(Buffer.from(data, 'base64'));
-        jsonData = decompressed.toString('utf8');
+        const decompressed = await this.decompress(Buffer.from(data, 'base64'));jsonData = decompressed.toString('utf8');
       }
 
       return JSON.parse(jsonData);
     } catch (error) {
-      this.logger.error(`Failed to retrieve result for job ${jobId}:`, error);
-      return null;
-    }
+      this.logger.error(`Failed to retrieve result for job ${jobId}:`, error);return null;}
   }
 
   /**
@@ -618,12 +543,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
-    this.logger.log('Job Lifecycle Service initializing...');
-    this.startCleanupProcess();
-    this.logger.log('Job Lifecycle Service initialized successfully');
-  }
-
-  async onModuleDestroy() {
+    this.logger.log('Job Lifecycle Service initializing...');this.startCleanupProcess();this.logger.log('Job Lifecycle Service initialized successfully');}async onModuleDestroy() {
     this.logger.log('Job Lifecycle Service shutting down...');
 
     // Stop all scheduled jobs
@@ -673,9 +593,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       config: fullConfig,
       progress: {
         percentage: 0,
-        currentStep: 'Submitted',
-        totalSteps: 1,
-        completedSteps: 0,
+        currentStep: 'Submitted',totalSteps: 1,completedSteps: 0,
         estimatedTimeRemaining: 0,
         averageStepTime: 0,
         startedAt: now,
@@ -691,10 +609,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
         fromState: JobLifecycleState.SUBMITTED,
         toState: JobLifecycleState.SUBMITTED,
         timestamp: now,
-        reason: 'Job submitted',
-        triggeredBy: 'user',
-      }],
-    };
+        reason: 'Job submitted',triggeredBy: 'user',}],};
 
     // Store job
     this.jobs.set(jobId, jobData);
@@ -766,13 +681,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
         timestamp: new Date(),
       });
 
-      this.logger.log(`Batch ${batchId} submitted with ${jobIds.length} jobs`);
-
-      return { batchId, jobIds };
-    } catch (error) {
-      this.logger.error(`Failed to submit batch ${batchId}:`, error);
-      throw error;
-    }
+      this.logger.log(`Batch ${batchId} submitted with ${jobIds.length} jobs`);return { batchId, jobIds };} catch (error) {
+      this.logger.error(`Failed to submit batch ${batchId}:`, error);throw error;}
   }
 
   /**
@@ -781,10 +691,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   public getJobStatus(jobId: string): JobStatusResponseDto {
     const job = this.jobs.get(jobId);
     if (!job) {
-      throw new Error(`Job not found: ${jobId}`);
-    }
-
-    const progress = this.progressTracker.getProgress(jobId) || job.progress;
+      throw new Error(`Job not found: ${jobId}`);}const progress = this.progressTracker.getProgress(jobId) || job.progress;
 
     return {
       jobId: job.jobId,
@@ -813,10 +720,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   public async getJobResult(jobId: string): Promise<JobResultResponseDto> {
     const job = this.jobs.get(jobId);
     if (!job) {
-      throw new Error(`Job not found: ${jobId}`);
-    }
-
-    if (!this.stateMachine.isTerminalState(job.state) && job.state !== JobLifecycleState.COMPLETED) {
+      throw new Error(`Job not found: ${jobId}`);}if (!this.stateMachine.isTerminalState(job.state) && job.state !== JobLifecycleState.COMPLETED) {
       throw new Error(`Job ${jobId} has not completed yet. Current state: ${job.state}`);
     }
 
@@ -874,9 +778,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
         await this.cancelJob(dependentId);
       }
 
-      this.logger.log(`Job ${jobId} cancelled successfully`);
-      return true;
-    } catch (error) {
+      this.logger.log(`Job ${jobId} cancelled successfully`);return true;} catch (error) {
       this.logger.error(`Failed to cancel job ${jobId}:`, error);
       return false;
     }
@@ -893,9 +795,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
 
     try {
       await this.transitionState(jobId, JobLifecycleState.PAUSED, 'Job paused by user');
-      this.logger.log(`Job ${jobId} paused successfully`);
-      return true;
-    } catch (error) {
+      this.logger.log(`Job ${jobId} paused successfully`);return true;} catch (error) {
       this.logger.error(`Failed to pause job ${jobId}:`, error);
       return false;
     }
@@ -913,12 +813,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.transitionState(jobId, JobLifecycleState.RUNNING, 'Job resumed by user');
       await this.emitLifecycleEvent(JobLifecycleEvent.JOB_RESUMED, job);
-      this.logger.log(`Job ${jobId} resumed successfully`);
-      return true;
-    } catch (error) {
-      this.logger.error(`Failed to resume job ${jobId}:`, error);
-      return false;
-    }
+      this.logger.log(`Job ${jobId} resumed successfully`);return true;} catch (error) {
+      this.logger.error(`Failed to resume job ${jobId}:`, error);return false;}
   }
 
   /**
@@ -974,10 +870,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       // Update job data
       job.result = result;
       job.progress.percentage = 100;
-      job.progress.currentStep = 'Completed';
-
-      // Transition to completed state
-      await this.transitionState(jobId, JobLifecycleState.COMPLETED, 'Job completed successfully');
+      job.progress.currentStep = 'Completed';// Transition to completed stateawait this.transitionState(jobId, JobLifecycleState.COMPLETED, 'Job completed successfully');
 
       // Mark as completed for dependency resolution
       this.completedJobs.add(jobId);
@@ -985,9 +878,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       // Check and start dependent jobs
       await this.processDependentJobs(jobId);
 
-      this.logger.log(`Job ${jobId} completed successfully`);
-    } catch (error) {
-      this.logger.error(`Failed to complete job ${jobId}:`, error);
+      this.logger.log(`Job ${jobId} completed successfully`);} catch (error) {this.logger.error(`Failed to complete job ${jobId}:`, error);
       await this.failJob(jobId, error instanceof Error ? error : new Error(String(error)));
     }
   }
@@ -1028,9 +919,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       this.logger.warn(`Job ${jobId} failed, retrying (attempt ${job.metrics.retryCount + 1}/${job.config.maxRetries + 1})`);
     } else {
       await this.transitionState(jobId, JobLifecycleState.FAILED, 'Job failed permanently');
-      this.logger.error(`Job ${jobId} failed permanently:`, error);
-    }
-  }
+      this.logger.error(`Job ${jobId} failed permanently:`, error);}}
 
   /**
    * Get job statistics
@@ -1084,17 +973,11 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
    * Generate unique job ID
    */
   private generateJobId(): string {
-    return `job_${Date.now()}_${uuidv4().substring(0, 8)}`;
-  }
-
-  /**
+    return `job_${Date.now()}_${uuidv4().substring(0, 8)}`;}/**
    * Generate unique batch ID
    */
   private generateBatchId(): string {
-    return `batch_${Date.now()}_${uuidv4().substring(0, 8)}`;
-  }
-
-  /**
+    return `batch_${Date.now()}_${uuidv4().substring(0, 8)}`;}/**
    * Validate and merge job configuration
    */
   private validateAndMergeConfig(config: Partial<JobLifecycleConfig>): JobLifecycleConfig {
@@ -1124,10 +1007,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job) {
-      throw new Error(`Job not found: ${jobId}`);
-    }
-
-    const oldState = job.state;
+      throw new Error(`Job not found: ${jobId}`);}const oldState = job.state;
 
     // Validate transition
     if (!this.stateMachine.validateTransition(oldState, newState)) {
@@ -1178,10 +1058,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       await this.emitLifecycleEvent(event, job);
     }
 
-    this.logger.debug(`Job ${jobId} transitioned from ${oldState} to ${newState}: ${reason}`);
-  }
-
-  /**
+    this.logger.debug(`Job ${jobId} transitioned from ${oldState} to ${newState}: ${reason}`);}/**
    * Emit lifecycle event
    */
   private async emitLifecycleEvent(
@@ -1204,9 +1081,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
 
         // Note: Webhook delivery would be implemented here
         // For now, just log the webhook payload
-        this.logger.debug(`Webhook payload for ${event}:`, payload);
-      }
-    } catch (error) {
+        this.logger.debug(`Webhook payload for ${event}:`, payload);}} catch (error) {
       this.logger.error(`Failed to emit lifecycle event ${event}:`, error);
     }
   }
@@ -1294,11 +1169,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
           this.progressTracker.clearProgress(jobId);
           await this.resultManager.deleteResult(jobId);
 
-          this.logger.debug(`Cleaned up expired job: ${jobId}`);
-        } catch (error) {
-          this.logger.error(`Failed to cleanup job ${jobId}:`, error);
-        }
-      }
+          this.logger.debug(`Cleaned up expired job: ${jobId}`);} catch (error) {this.logger.error(`Failed to cleanup job ${jobId}:`, error);}}
 
       if (expiredJobs.length > 0) {
         this.logger.log(`Cleaned up ${expiredJobs.length} expired jobs`);

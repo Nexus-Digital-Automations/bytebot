@@ -17,10 +17,7 @@
  * @since 2024-01-01
  */
 
-import { z } from 'zod';
-
-// ==========================================
-// Core MCP Protocol Types
+import { z } from 'zod';// ==========================================// Core MCP Protocol Types
 // ==========================================
 
 /**
@@ -36,9 +33,7 @@ export interface McpToolConfig {
  * MCP content item structure
  */
 export interface McpContentItem {
-  type: 'text' | 'image' | 'resource';
-  text?: string;
-  mimeType?: string;
+  type: 'text' | 'image' | 'resource';text?: string;mimeType?: string;
   data?: string;
   uri?: string;
 }
@@ -102,9 +97,7 @@ export interface MouseClickParams {
     x: number;
     y: number;
   };
-  button?: 'left' | 'right' | 'middle';
-  clickCount?: number;
-}
+  button?: 'left' | 'right' | 'middle';clickCount?: number;}
 
 /**
  * Mouse scroll operation parameters
@@ -114,9 +107,7 @@ export interface MouseScrollParams {
     x: number;
     y: number;
   };
-  scrollDirection: 'up' | 'down' | 'left' | 'right';
-  clicks?: number;
-}
+  scrollDirection: 'up' | 'down' | 'left' | 'right';clicks?: number;}
 
 /**
  * Keyboard typing operation parameters
@@ -180,9 +171,7 @@ export interface ScreenshotResult {
   originalSizeKB: number;
   compressedSizeKB?: number;
   compressionRatio?: number;
-  format: 'png' | 'jpeg' | 'webp';
-  dimensions: {
-    width: number;
+  format: 'png' | 'jpeg' | 'webp';dimensions: {width: number;
     height: number;
   };
 }
@@ -213,9 +202,7 @@ export interface DirectoryOperationResult {
  */
 export interface DirectoryEntry {
   name: string;
-  type: 'file' | 'directory';
-  size?: number;
-  lastModified?: string;
+  type: 'file' | 'directory';size?: number;lastModified?: string;
 }
 
 /**
@@ -241,9 +228,7 @@ export interface CompressionOptions {
   targetSizeKB?: number;
   initialQuality?: number;
   minQuality?: number;
-  format?: 'png' | 'jpeg' | 'webp';
-  maxIterations?: number;
-}
+  format?: 'png' | 'jpeg' | 'webp';maxIterations?: number;}
 
 /**
  * Image compression operation result
@@ -300,29 +285,14 @@ export interface MockComputerUseService {
  * Computer action parameters union type
  */
 export type ComputerActionParams =
-  | { action: 'move_mouse'; coordinates: { x: number; y: number } }
-  | {
-      action: 'click';
-      coordinates: { x: number; y: number };
-      button?: string;
+  | { action: 'move_mouse'; coordinates: { x: number; y: number } }| {action: 'click';coordinates: { x: number; y: number };button?: string;
       clickCount?: number;
     }
   | {
-      action: 'scroll';
-      coordinates: { x: number; y: number };
-      scrollDirection: string;
+      action: 'scroll';coordinates: { x: number; y: number };scrollDirection: string;
       clicks?: number;
     }
-  | { action: 'type'; text: string }
-  | { action: 'key'; key: string }
-  | { action: 'screenshot'; display?: number }
-  | { action: 'read_file'; path: string }
-  | { action: 'write_file'; path: string; content: string }
-  | { action: 'list_directory'; path: string }
-  | { action: 'create_directory'; path: string };
-
-/**
- * Mock module structure for testing
+  | { action: 'type'; text: string }| { action: 'key'; key: string }| { action: 'screenshot'; display?: number }| { action: 'read_file'; path: string }| { action: 'write_file'; path: string; content: string }| { action: 'list_directory'; path: string }| { action: 'create_directory'; path: string };/*** Mock module structure for testing
  */
 export interface MockModule {
   [key: string]: unknown;
@@ -348,110 +318,41 @@ export interface TestContext {
 export const McpSchemas = {
   mouseMove: z.object({
     coordinates: z.object({
-      x: z.number().describe('The x-coordinate to move the mouse to.'),
-      y: z.number().describe('The y-coordinate to move the mouse to.'),
-    }),
-  }),
+      x: z.number().describe('The x-coordinate to move the mouse to.'),y: z.number().describe('The y-coordinate to move the mouse to.'),}),}),
 
   mouseClick: z.object({
     coordinates: z.object({
-      x: z.number().describe('The x-coordinate to click.'),
-      y: z.number().describe('The y-coordinate to click.'),
-    }),
-    button: z
-      .enum(['left', 'right', 'middle'])
-      .optional()
-      .describe('Mouse button to click.'),
-    clickCount: z.number().optional().describe('Number of clicks to perform.'),
-  }),
-
-  mouseClickAdvanced: z.object({
+      x: z.number().describe('The x-coordinate to click.'),y: z.number().describe('The y-coordinate to click.'),}),button: z
+      .enum(['left', 'right', 'middle']).optional().describe('Mouse button to click.'),clickCount: z.number().optional().describe('Number of clicks to perform.'),}),mouseClickAdvanced: z.object({
     coordinates: z
       .object({
-        x: z.number().describe('The x-coordinate to move the mouse to.'),
-        y: z.number().describe('The y-coordinate to move the mouse to.'),
-      })
-      .optional()
+        x: z.number().describe('The x-coordinate to move the mouse to.'),y: z.number().describe('The y-coordinate to move the mouse to.'),}).optional()
       .describe(
-        'Optional coordinates for the click. If not provided, clicks at the current mouse position.',
-      ),
-    button: z
-      .enum(['left', 'right', 'middle'])
-      .describe('The mouse button to click.'),
-    holdKeys: z
-      .array(z.string())
+        'Optional coordinates for the click. If not provided, clicks at the current mouse position.',),button: z
+      .enum(['left', 'right', 'middle']).describe('The mouse button to click.'),holdKeys: z.array(z.string())
       .optional()
-      .describe('Optional array of keys to hold during the click.'),
-    clickCount: z
-      .number()
-      .describe('Number of clicks to perform (e.g., 2 for double-click).'),
-  }),
-
-  mouseScroll: z.object({
+      .describe('Optional array of keys to hold during the click.'),clickCount: z.number()
+      .describe('Number of clicks to perform (e.g., 2 for double-click).'),}),mouseScroll: z.object({
     coordinates: z.object({
-      x: z.number().describe('The x-coordinate for scroll center.'),
-      y: z.number().describe('The y-coordinate for scroll center.'),
-    }),
-    scrollDirection: z
-      .enum(['up', 'down', 'left', 'right'])
-      .describe('Direction to scroll.'),
-    clicks: z.number().optional().describe('Number of scroll clicks.'),
-  }),
-
-  keyboardType: z.object({
-    text: z.string().describe('Text to type.'),
-  }),
-
-  keyboardKey: z.object({
-    key: z.string().describe('Key to press.'),
-  }),
-
-  screenshot: z.object({
-    display: z.number().optional().describe('Display number to capture.'),
-  }),
-
-  fileRead: z.object({
-    path: z.string().describe('Path to the file to read.'),
-  }),
-
-  fileWrite: z.object({
-    path: z.string().describe('Path to the file to write.'),
-    content: z.string().describe('Content to write to the file.'),
-  }),
-
-  directoryList: z.object({
-    path: z.string().describe('Path to the directory to list.'),
-  }),
-
-  directoryCreate: z.object({
-    path: z.string().describe('Path to the directory to create.'),
-  }),
-
-  mouseTrace: z.object({
+      x: z.number().describe('The x-coordinate for scroll center.'),y: z.number().describe('The y-coordinate for scroll center.'),}),scrollDirection: z
+      .enum(['up', 'down', 'left', 'right']).describe('Direction to scroll.'),clicks: z.number().optional().describe('Number of scroll clicks.'),}),keyboardType: z.object({
+    text: z.string().describe('Text to type.'),}),keyboardKey: z.object({
+    key: z.string().describe('Key to press.'),}),screenshot: z.object({
+    display: z.number().optional().describe('Display number to capture.'),}),fileRead: z.object({
+    path: z.string().describe('Path to the file to read.'),}),fileWrite: z.object({
+    path: z.string().describe('Path to the file to write.'),content: z.string().describe('Content to write to the file.'),}),directoryList: z.object({
+    path: z.string().describe('Path to the directory to list.'),}),directoryCreate: z.object({
+    path: z.string().describe('Path to the directory to create.'),}),mouseTrace: z.object({
     path: z
       .array(
         z.object({
-          x: z.number().describe('The x-coordinate to move the mouse to.'),
-          y: z.number().describe('The y-coordinate to move the mouse to.'),
-        }),
-      )
-      .describe('An array of coordinate objects representing the path.'),
-    holdKeys: z
-      .array(z.string())
+          x: z.number().describe('The x-coordinate to move the mouse to.'),y: z.number().describe('The y-coordinate to move the mouse to.'),}),)
+      .describe('An array of coordinate objects representing the path.'),holdKeys: z.array(z.string())
       .optional()
-      .describe('Optional array of keys to hold during the trace.'),
-  }),
-
-  mouseDrag: z.object({
+      .describe('Optional array of keys to hold during the trace.'),}),mouseDrag: z.object({
     startCoordinates: z.object({
-      x: z.number().describe('The starting x-coordinate.'),
-      y: z.number().describe('The starting y-coordinate.'),
-    }),
-    endCoordinates: z.object({
-      x: z.number().describe('The ending x-coordinate.'),
-      y: z.number().describe('The ending y-coordinate.'),
-    }),
-  }),
+      x: z.number().describe('The starting x-coordinate.'),y: z.number().describe('The starting y-coordinate.'),}),endCoordinates: z.object({
+      x: z.number().describe('The ending x-coordinate.'),y: z.number().describe('The ending y-coordinate.'),}),}),
 
   mouseDragPath: z.object({
     path: z
@@ -459,152 +360,67 @@ export const McpSchemas = {
         z.object({
           x: z
             .number()
-            .describe('The x-coordinate of a point in the drag path.'),
-          y: z
-            .number()
-            .describe('The y-coordinate of a point in the drag path.'),
-        }),
-      )
+            .describe('The x-coordinate of a point in the drag path.'),y: z.number()
+            .describe('The y-coordinate of a point in the drag path.'),}),)
       .describe(
-        'An array of coordinate objects representing the drag path. The first coordinate is the start point.',
-      ),
-    button: z
-      .enum(['left', 'right', 'middle'])
-      .describe('The mouse button to hold while dragging.'),
-    holdKeys: z
-      .array(z.string())
+        'An array of coordinate objects representing the drag path. The first coordinate is the start point.',),button: z
+      .enum(['left', 'right', 'middle']).describe('The mouse button to hold while dragging.'),holdKeys: z.array(z.string())
       .optional()
-      .describe('Optional array of keys to hold during the drag.'),
-  }),
-
-  keyboardHotkey: z.object({
+      .describe('Optional array of keys to hold during the drag.'),}),keyboardHotkey: z.object({
     keys: z
       .array(z.string())
-      .describe('Array of keys to press simultaneously.'),
-  }),
-
-  screenshotElement: z.object({
+      .describe('Array of keys to press simultaneously.'),}),screenshotElement: z.object({
     selector: z
       .string()
-      .describe('CSS selector for the element to screenshot.'),
-  }),
-
-  executeCommand: z.object({
-    command: z.string().describe('Command to execute.'),
-    args: z.array(z.string()).optional().describe('Command arguments.'),
-    workingDirectory: z
-      .string()
+      .describe('CSS selector for the element to screenshot.'),}),executeCommand: z.object({
+    command: z.string().describe('Command to execute.'),args: z.array(z.string()).optional().describe('Command arguments.'),workingDirectory: z.string()
       .optional()
-      .describe('Working directory for the command.'),
-  }),
-
-  mousePress: z.object({
+      .describe('Working directory for the command.'),}),mousePress: z.object({
     coordinates: z
       .object({
-        x: z.number().describe('The x-coordinate for the mouse action.'),
-        y: z.number().describe('The y-coordinate for the mouse action.'),
-      })
-      .optional()
+        x: z.number().describe('The x-coordinate for the mouse action.'),y: z.number().describe('The y-coordinate for the mouse action.'),}).optional()
       .describe(
-        'Optional coordinates for the mouse press/release. If not provided, uses the current mouse position.',
-      ),
-    button: z
-      .enum(['left', 'right', 'middle'])
-      .describe('The mouse button to press or release.'),
-    press: z
-      .enum(['down', 'up'])
-      .describe('The action to perform (press or release).'),
-  }),
-
-  scrollAdvanced: z.object({
+        'Optional coordinates for the mouse press/release. If not provided, uses the current mouse position.',),button: z
+      .enum(['left', 'right', 'middle']).describe('The mouse button to press or release.'),press: z.enum(['down', 'up']).describe('The action to perform (press or release).'),}),scrollAdvanced: z.object({
     coordinates: z
       .object({
         x: z
           .number()
-          .describe('The x-coordinate for the scroll action (if applicable).'),
-        y: z
-          .number()
-          .describe('The y-coordinate for the scroll action (if applicable).'),
-      })
-      .optional()
+          .describe('The x-coordinate for the scroll action (if applicable).'),y: z.number()
+          .describe('The y-coordinate for the scroll action (if applicable).'),}).optional()
       .describe(
-        'Coordinates for where the scroll should occur. Behavior might depend on the OS/application.',
-      ),
-    direction: z
-      .enum(['up', 'down', 'left', 'right'])
-      .describe('The direction to scroll the mouse wheel.'),
-    scrollCount: z
-      .number()
-      .describe('The number of times to scroll the mouse wheel.'),
-    holdKeys: z
-      .array(z.string())
+        'Coordinates for where the scroll should occur. Behavior might depend on the OS/application.',),direction: z
+      .enum(['up', 'down', 'left', 'right']).describe('The direction to scroll the mouse wheel.'),scrollCount: z.number()
+      .describe('The number of times to scroll the mouse wheel.'),holdKeys: z.array(z.string())
       .optional()
-      .describe('Optional array of keys to hold during the scroll.'),
-  }),
-
-  typeKeysAdvanced: z.object({
+      .describe('Optional array of keys to hold during the scroll.'),}),typeKeysAdvanced: z.object({
     keys: z
       .array(z.string())
       .describe(
-        'An array of key names to type in sequence (e.g., ["control", "c"]).',
-      ),
+        'An array of key names to type in sequence (e.g., ["control", "c"]).",),
     delay: z
       .number()
       .optional()
-      .describe('Optional delay in milliseconds between key presses.'),
-  }),
-
-  pressKeysAdvanced: z.object({
+      .describe('Optional delay in milliseconds between key presses.'),}),pressKeysAdvanced: z.object({
     keys: z
       .array(z.string())
-      .describe('An array of key names to press or release (e.g., ["shift"]).'),
-    press: z
-      .enum(['down', 'up'])
-      .describe('Whether to press the keys down or release them up.'),
-  }),
-
-  typeTextAdvanced: z.object({
-    text: z.string().describe('The text string to type.'),
-    delay: z
-      .number()
+      .describe('An array of key names to press or release (e.g., ["shift"]).'),press: z.enum(['down', 'up']).describe('Whether to press the keys down or release them up.'),}),typeTextAdvanced: z.object({
+    text: z.string().describe('The text string to type.'),delay: z.number()
       .optional()
-      .describe('Optional delay in milliseconds between key presses.'),
-  }),
-
-  pasteText: z.object({
-    text: z.string().describe('The text string to paste.'),
-  }),
-
-  wait: z.object({
+      .describe('Optional delay in milliseconds between key presses.'),}),pasteText: z.object({
+    text: z.string().describe('The text string to paste.'),}),wait: z.object({
     duration: z
       .number()
       .default(500)
-      .describe('The duration to wait in milliseconds.'),
-  }),
-
-  application: z.object({
+      .describe('The duration to wait in milliseconds.'),}),application: z.object({
     application: z.enum([
-      'firefox',
-      '1password',
-      'thunderbird',
-      'vscode',
-      'terminal',
-      'desktop',
-      'directory',
-    ]),
-  }),
+      'firefox','1password','thunderbird','vscode','terminal','desktop','directory',]),}),
 
   writeFile: z.object({
     path: z
       .string()
-      .describe('The file path where the file should be written.'),
-    data: z.string().describe('Base64 encoded file data to write.'),
-  }),
-
-  readFile: z.object({
-    path: z.string().describe('The file path to read from.'),
-  }),
-} as const;
+      .describe('The file path where the file should be written.'),data: z.string().describe('Base64 encoded file data to write.'),}),readFile: z.object({
+    path: z.string().describe('The file path to read from.'),}),} as const;
 
 // ==========================================
 // Type Guards and Utilities
@@ -615,12 +431,7 @@ export const McpSchemas = {
  */
 export function isMcpResponse(value: unknown): value is McpResponse {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'success' in value &&
-    typeof (value as McpResponse).success === 'boolean'
-  );
-}
+    typeof value === 'object' &&value !== null &&'success' in value &&typeof (value as McpResponse).success === 'boolean');}
 
 /**
  * Type guard to check if a value is a compression result
@@ -629,11 +440,7 @@ export function isCompressionResult(
   value: unknown,
 ): value is CompressionResult {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'base64' in value &&
-    'originalSizeKB' in value &&
-    'compressedSizeKB' in value
+    typeof value === 'object' &&value !== null &&'base64' in value &&'originalSizeKB' in value &&'compressedSizeKB' in value
   );
 }
 

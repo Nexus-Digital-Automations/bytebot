@@ -6,13 +6,7 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
-import { AutomationErrorHandlerService, AutomationErrorCategory, ErrorSeverity } from './automation-error-handler.service';
-
-/**
- * Error Recovery Interceptor
+} from '@nestjs/common';import { Observable, throwError } from 'rxjs';import { catchError, timeout } from 'rxjs/operators';import { AutomationErrorHandlerService, AutomationErrorCategory, ErrorSeverity } from './automation-error-handler.service';/*** Error Recovery Interceptor
  *
  * Automatically handles errors in automation endpoints with intelligent recovery strategies.
  * This interceptor integrates with the AutomationErrorHandlerService to provide:
@@ -33,10 +27,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ErrorRecoveryInterceptor.name);
 
   constructor(private readonly errorHandler: AutomationErrorHandlerService) {
-    this.logger.log('ErrorRecoveryInterceptor initialized');
-  }
-
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    this.logger.log('ErrorRecoveryInterceptor initialized');}intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest() as {
       url: string;
       method: string;
@@ -61,10 +52,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   ): Promise<Observable<never>> {
     const startTime = Date.now();
 
-    this.logger.warn('Interceptor handling error', {
-      error: (error as { message?: string }).message ?? 'Unknown error',
-      operation: operationContext.operationName,
-      url: operationContext.url
+    this.logger.warn('Interceptor handling error', {error: (error as { message?: string }).message ?? 'Unknown error',operation: operationContext.operationName,url: operationContext.url
     });
 
     try {
@@ -75,9 +63,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
       // If recovery was successful, return the recovered result
       if (handlingResult.success && handlingResult.result !== undefined) {
-        this.logger.log('Error recovery successful via interceptor', {
-          operation: operationContext.operationName,
-          strategy: handlingResult.strategy,
+        this.logger.log('Error recovery successful via interceptor', {operation: operationContext.operationName,strategy: handlingResult.strategy,
           retryCount: handlingResult.retryCount,
           processingTime
         });
@@ -105,9 +91,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
         handlingResult
       );
 
-      this.logger.error('Error recovery failed via interceptor', {
-        operation: operationContext.operationName,
-        strategy: handlingResult.strategy,
+      this.logger.error('Error recovery failed via interceptor', {operation: operationContext.operationName,strategy: handlingResult.strategy,
         processingTime,
         errorCategory: handlingResult.finalError?.category
       });
@@ -115,8 +99,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       return throwError(() => enhancedError);
 
     } catch (handlerError) {
-      this.logger.error('Error handler itself failed', {
-        originalError: (error as { message?: string }).message ?? 'Unknown error',
+      this.logger.error('Error handler itself failed', {originalError: (error as { message?: string }).message ?? 'Unknown error',
         handlerError: (handlerError as Error).message,
         operation: operationContext.operationName
       });
@@ -140,36 +123,21 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       method: handlerMethod,
       url: request.url,
       httpMethod: request.method,
-      userAgent: request.headers?.['user-agent'],
-      userId: request.user?.id,
-      sessionId: request.sessionID,
-      requestId: request.headers?.['x-request-id'],
-      timestamp: new Date().toISOString(),
-      requestBody: request.body,
+      userAgent: request.headers?.['user-agent'],userId: request.user?.id,sessionId: request.sessionID,
+      requestId: request.headers?.['x-request-id'],timestamp: new Date().toISOString(),requestBody: request.body,
       queryParams: request.query,
       headers: this.sanitizeHeaders(request.headers)
     };
   }
 
   private extractComponentName(controllerClass: string): string {
-    if (controllerClass.includes('FormAutomation')) return 'form-automation';
-    if (controllerClass.includes('DataExtraction')) return 'data-extraction';
-    if (controllerClass.includes('WorkflowAutomation')) return 'workflow-automation';
-    if (controllerClass.includes('FileManagement')) return 'file-management';
-    if (controllerClass.includes('ContentMonitoring')) return 'content-monitoring';
-    return 'unknown';
-  }
-
-  private sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+    if (controllerClass.includes('FormAutomation')) return 'form-automation';if (controllerClass.includes('DataExtraction')) return 'data-extraction';if (controllerClass.includes('WorkflowAutomation')) return 'workflow-automation';if (controllerClass.includes('FileManagement')) return 'file-management';if (controllerClass.includes('ContentMonitoring')) return 'content-monitoring';return 'unknown';}private sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
     const sanitized = { ...headers } as Record<string, string>;
 
     // Remove sensitive headers
     delete sanitized.authorization;
     delete sanitized.cookie;
-    delete sanitized['x-api-key'];
-
-    return sanitized;
-  }
+    delete sanitized['x-api-key'];return sanitized;}
 
   private createEnhancedErrorResponse(
     error: { category?: string; message?: string; severity?: string; errorId?: string },
@@ -180,9 +148,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       success: false,
       error: {
         type: error.category ?? AutomationErrorCategory.UNKNOWN_ERROR,
-        message: error.message ?? 'An automation error occurred',
-        severity: error.severity ?? ErrorSeverity.MEDIUM,
-        operation: operationContext.operationName,
+        message: error.message ?? 'An automation error occurred',severity: error.severity ?? ErrorSeverity.MEDIUM,operation: operationContext.operationName,
         component: operationContext.component,
         timestamp: new Date().toISOString(),
         requestId: operationContext.requestId,
@@ -195,9 +161,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
         }
       },
       metadata: {
-        errorId: error.errorId ?? 'unknown',
-        url: operationContext.url,
-        method: operationContext.httpMethod,
+        errorId: error.errorId ?? 'unknown',url: operationContext.url,method: operationContext.httpMethod,
         userAgent: operationContext.userAgent
       }
     };
@@ -215,18 +179,12 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     const fallbackResponse = {
       success: false,
       error: {
-        type: 'system_error',
-        message: 'An unexpected error occurred during automation operation',
-        severity: 'high',
-        operation: operationContext.operationName,
-        component: operationContext.component,
+        type: 'system_error',message: 'An unexpected error occurred during automation operation',severity: 'high',operation: operationContext.operationName,component: operationContext.component,
         timestamp: new Date().toISOString(),
         requestId: operationContext.requestId,
         recovery: {
           attempted: false,
-          reason: 'Error handler failure'
-        }
-      },
+          reason: 'Error handler failure'}},
       metadata: {
         originalError: error.message ?? 'Unknown error',
         url: operationContext.url,

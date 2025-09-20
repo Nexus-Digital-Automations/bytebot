@@ -20,10 +20,7 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  SystemDiagnosticRequest,
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {SystemDiagnosticRequest,
   SystemDiagnosticResult,
   DiagnosticType,
   DiagnosticScope,
@@ -43,16 +40,9 @@ import {
   RecommendationPriority,
   TrendAnalysis,
   ReliabilityMetrics,
-} from '../interfaces/health-diagnostic.interfaces';
-import {
-  ParlantHealthMetricsValidationService,
+} from '../interfaces/health-diagnostic.interfaces';import {ParlantHealthMetricsValidationService,
   HealthOperationType,
-} from '../../parlant/services/parlant-health-metrics-validation.service';
-import { HealthService } from '../health.service';
-import { BytebotMetricsService } from '../../metrics/metrics.service';
-
-/**
- * Diagnostic configuration options
+} from '../../parlant/services/parlant-health-metrics-validation.service';import { HealthService } from '../health.service';import { BytebotMetricsService } from '../../metrics/metrics.service';/*** Diagnostic configuration options
  */
 interface DiagnosticConfig {
   /** Performance thresholds */
@@ -143,9 +133,7 @@ export class HealthDiagnosticService {
 
     this.activeDiagnostics.set(request.operationId, context);
 
-    this.logger.log(`[${request.operationId}] Starting system diagnostic`, {
-      operationId: request.operationId,
-      type: request.diagnosticType,
+    this.logger.log(`[${request.operationId}] Starting system diagnostic`, {operationId: request.operationId,type: request.diagnosticType,
       scope: request.scope,
       requester: request.userContext.userId,
     });
@@ -155,9 +143,7 @@ export class HealthDiagnosticService {
       if (request.parlantPreferences.requireValidation) {
         const validation = await this.validateDiagnosticOperation(request);
         if (!validation.approved) {
-          throw new Error(`Diagnostic operation denied by Parlant validation: ${validation.reason}`);
-        }
-        context.parlantConversationId = validation.conversationId;
+          throw new Error(`Diagnostic operation denied by Parlant validation: ${validation.reason}`);}context.parlantConversationId = validation.conversationId;
       }
 
       // Execute diagnostic based on type and scope
@@ -202,10 +188,7 @@ export class HealthDiagnosticService {
    * Get diagnostic history for trend analysis
    */
   getDiagnosticHistory(component?: string, timeRange?: { start: Date; end: Date }): SystemDiagnosticResult[] {
-    const historyKey = component ?? 'system';
-    const history = this.diagnosticHistory.get(historyKey) ?? [];
-
-    if (!timeRange) {
+    const historyKey = component ?? 'system';const history = this.diagnosticHistory.get(historyKey) ?? [];if (!timeRange) {
       return [...history];
     }
 
@@ -247,9 +230,7 @@ export class HealthDiagnosticService {
         scope: request.scope,
         executionTime: 0,
         timestamp: new Date(),
-        executor: 'HealthDiagnosticService',
-      },
-      status: DiagnosticStatus.UNKNOWN,
+        executor: 'HealthDiagnosticService',},status: DiagnosticStatus.UNKNOWN,
       healthScore: 0,
       componentResults: new Map(),
       performanceAnalysis: {} as PerformanceDiagnosticResult,
@@ -354,9 +335,7 @@ export class HealthDiagnosticService {
         result.componentResults.set(componentName, componentResult);
       }
 
-      this.logger.debug(`[${request.operationId}] Component diagnostics completed`, {
-        componentsAnalyzed: result.componentResults.size,
-      });
+      this.logger.debug(`[${request.operationId}] Component diagnostics completed`, {componentsAnalyzed: result.componentResults.size,});
 
     } catch (error) {
       this.logger.error(`[${request.operationId}] Component diagnostics failed`, {
@@ -398,9 +377,7 @@ export class HealthDiagnosticService {
         totalErrors: Math.floor(Math.random() * 10),
         criticalErrors: Math.floor(Math.random() * 2),
         errorTypes: new Map([
-          ['TimeoutError', Math.floor(Math.random() * 5)],
-          ['ConnectionError', Math.floor(Math.random() * 3)],
-          ['ValidationError', Math.floor(Math.random() * 4)],
+          ['TimeoutError', Math.floor(Math.random() * 5)],['ConnectionError', Math.floor(Math.random() * 3)],['ValidationError', Math.floor(Math.random() * 4)],
         ]),
         recentErrors: [],
       },
@@ -453,9 +430,7 @@ export class HealthDiagnosticService {
           p95: 300,
           p99: 500,
           max: 1000,
-          trend: 'STABLE',
-        },
-        throughput: {
+          trend: 'STABLE',},throughput: {
           requestsPerSecond: 850,
           peakThroughput: 1200,
           sustainedThroughput: 800,
@@ -465,47 +440,23 @@ export class HealthDiagnosticService {
         errorRate: {
           overall: 1.2,
           byEndpoint: new Map([
-            ['/api/health', 0.1],
-            ['/api/metrics', 0.5],
-            ['/api/diagnostic', 2.0],
-          ]),
-          byErrorType: new Map([
-            ['TimeoutError', 0.5],
-            ['ValidationError', 0.4],
-            ['ConnectionError', 0.3],
-          ]),
-          trend: 'IMPROVING',
-        },
-        bottlenecks: [
+            ['/api/health', 0.1],['/api/metrics', 0.5],['/api/diagnostic', 2.0],]),byErrorType: new Map([
+            ['TimeoutError', 0.5],['ValidationError', 0.4],['ConnectionError', 0.3],]),trend: 'IMPROVING',},bottlenecks: [
           {
-            location: 'Database Connection Pool',
-            type: 'DATABASE',
-            severity: 60,
-            impact: 'Increased response time during peak load',
-            recommendations: ['Increase connection pool size', 'Optimize query performance'],
-          },
-        ],
+            location: 'Database Connection Pool',type: 'DATABASE',severity: 60,impact: 'Increased response time during peak load',recommendations: ['Increase connection pool size', 'Optimize query performance'],},],
         optimizations: [
           {
-            area: 'Response Caching',
-            type: 'CACHING',
-            effort: 'MEDIUM',
-            expectedGain: 25,
-            description: 'Implement response caching for frequently accessed data',
+            area: 'Response Caching',type: 'CACHING',effort: 'MEDIUM',expectedGain: 25,description: 'Implement response caching for frequently accessed data',
           },
         ],
       };
 
-      this.logger.debug(`[${request.operationId}] Performance analysis completed`, {
-        overallScore: result.performanceAnalysis.overallScore,
-        bottlenecksFound: result.performanceAnalysis.bottlenecks.length,
+      this.logger.debug(`[${request.operationId}] Performance analysis completed`, {overallScore: result.performanceAnalysis.overallScore,bottlenecksFound: result.performanceAnalysis.bottlenecks.length,
         optimizationsIdentified: result.performanceAnalysis.optimizations.length,
       });
 
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Performance analysis failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`[${request.operationId}] Performance analysis failed`, {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -529,32 +480,21 @@ export class HealthDiagnosticService {
           peakUsage: 85,
           cores: 8,
           processes: [
-            { processName: 'bytebotd', pid: 1234, cpuUsage: 15, memoryUsage: 512, priority: 20 },
-            { processName: 'postgres', pid: 1235, cpuUsage: 10, memoryUsage: 256, priority: 20 },
-          ],
-          recommendations: ['Monitor CPU usage during peak hours'],
-        },
-        memory: {
+            { processName: 'bytebotd', pid: 1234, cpuUsage: 15, memoryUsage: 512, priority: 20 },{ processName: 'postgres', pid: 1235, cpuUsage: 10, memoryUsage: 256, priority: 20 },],recommendations: ['Monitor CPU usage during peak hours'],},memory: {
           totalMemory: 16384, // 16GB
           usedMemory: 8192,   // 8GB
           availableMemory: 8192, // 8GB
           cacheMemory: 2048,  // 2GB
           swapUsage: 0,
           memoryLeaks: [],
-          recommendations: ['Memory usage is within normal range'],
-        },
-        storage: {
+          recommendations: ['Memory usage is within normal range'],},storage: {
           totalSpace: 1000000, // 1TB
           usedSpace: 400000,   // 400GB
           availableSpace: 600000, // 600GB
           iops: 1500,
           throughput: 120, // MB/s
           hotspots: [
-            { path: '/var/log', usage: 15000, growth: 100, type: 'LOGS', cleanupRecommended: true },
-          ],
-          recommendations: ['Clean up old log files', 'Monitor disk space growth'],
-        },
-        network: {
+            { path: '/var/log', usage: 15000, growth: 100, type: 'LOGS', cleanupRecommended: true },],recommendations: ['Clean up old log files', 'Monitor disk space growth'],},network: {
           bandwidth: 1000, // Mbps
           latency: 2,      // ms
           packetLoss: 0.01, // %
@@ -564,16 +504,12 @@ export class HealthDiagnosticService {
         },
       };
 
-      this.logger.debug(`[${request.operationId}] Resource analysis completed`, {
-        cpuUsage: result.resourceAnalysis.cpu.currentUsage,
-        memoryUsage: (result.resourceAnalysis.memory.usedMemory / result.resourceAnalysis.memory.totalMemory) * 100,
+      this.logger.debug(`[${request.operationId}] Resource analysis completed`, {cpuUsage: result.resourceAnalysis.cpu.currentUsage,memoryUsage: (result.resourceAnalysis.memory.usedMemory / result.resourceAnalysis.memory.totalMemory) * 100,
         diskUsage: (result.resourceAnalysis.storage.usedSpace / result.resourceAnalysis.storage.totalSpace) * 100,
       });
 
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Resource analysis failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`[${request.operationId}] Resource analysis failed`, {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -586,10 +522,7 @@ export class HealthDiagnosticService {
     result: SystemDiagnosticResult,
     request: SystemDiagnosticRequest,
   ): Promise<void> {
-    this.logger.debug(`[${request.operationId}] Performing network diagnostics`);
-
-    try {
-      // Simulate network diagnostics
+    this.logger.debug(`[${request.operationId}] Performing network diagnostics`);try {// Simulate network diagnostics
       result.networkDiagnostics = {
         connectivity: {
           internalConnectivity: true,
@@ -624,9 +557,7 @@ export class HealthDiagnosticService {
       });
 
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Network diagnostics failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`[${request.operationId}] Network diagnostics failed`, {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -645,11 +576,7 @@ export class HealthDiagnosticService {
       // Simulate dependency analysis
       result.dependencyResults = [
         {
-          name: 'PostgreSQL Database',
-          type: ComponentType.DATABASE,
-          endpoint: 'postgresql://localhost:5432',
-          status: DiagnosticStatus.HEALTHY,
-          responseTime: 25,
+          name: 'PostgreSQL Database',type: ComponentType.DATABASE,endpoint: 'postgresql://localhost:5432',status: DiagnosticStatus.HEALTHY,responseTime: 25,
           availability: {
             uptime: 99.8,
             downtime: 0.2,
@@ -657,10 +584,7 @@ export class HealthDiagnosticService {
             mttr: 15,  // minutes
           },
           version: {
-            current: '13.7',
-            required: '13.0',
-            compatible: true,
-            updateAvailable: true,
+            current: '13.7',required: '13.0',compatible: true,updateAvailable: true,
           },
           connectionPool: {
             active: 15,
@@ -670,11 +594,7 @@ export class HealthDiagnosticService {
           },
         },
         {
-          name: 'Redis Cache',
-          type: ComponentType.CACHE,
-          endpoint: 'redis://localhost:6379',
-          status: DiagnosticStatus.HEALTHY,
-          responseTime: 5,
+          name: 'Redis Cache',type: ComponentType.CACHE,endpoint: 'redis://localhost:6379',status: DiagnosticStatus.HEALTHY,responseTime: 5,
           availability: {
             uptime: 99.9,
             downtime: 0.1,
@@ -682,23 +602,18 @@ export class HealthDiagnosticService {
             mttr: 5,    // minutes
           },
           version: {
-            current: '6.2.6',
-            required: '6.0',
+            current: '6.2.6',required: '6.0',
             compatible: true,
             updateAvailable: false,
           },
         },
       ];
 
-      this.logger.debug(`[${request.operationId}] Dependency analysis completed`, {
-        dependenciesChecked: result.dependencyResults.length,
-        healthyDependencies: result.dependencyResults.filter(d => d.status === DiagnosticStatus.HEALTHY).length,
+      this.logger.debug(`[${request.operationId}] Dependency analysis completed`, {dependenciesChecked: result.dependencyResults.length,healthyDependencies: result.dependencyResults.filter(d => d.status === DiagnosticStatus.HEALTHY).length,
       });
 
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Dependency analysis failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`[${request.operationId}] Dependency analysis failed`, {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -722,25 +637,10 @@ export class HealthDiagnosticService {
           high: [],
           medium: [
             {
-              id: 'SEC-001',
-              type: 'Outdated Dependency',
-              description: 'Node.js dependency has known security vulnerability',
-              cveId: 'CVE-2023-12345',
-              score: 5.5,
-              exploitability: 'MEDIUM',
-              remediation: ['Update dependency to latest version', 'Apply security patches'],
-            },
-          ],
+              id: 'SEC-001',type: 'Outdated Dependency',description: 'Node.js dependency has known security vulnerability',cveId: 'CVE-2023-12345',score: 5.5,exploitability: 'MEDIUM',remediation: ['Update dependency to latest version', 'Apply security patches'],},],
           low: [
             {
-              id: 'SEC-002',
-              type: 'Configuration Issue',
-              description: 'Security headers could be improved',
-              score: 2.1,
-              exploitability: 'LOW',
-              remediation: ['Configure additional security headers', 'Review CSP policies'],
-            },
-          ],
+              id: 'SEC-002',type: 'Configuration Issue',description: 'Security headers could be improved',score: 2.1,exploitability: 'LOW',remediation: ['Configure additional security headers', 'Review CSP policies'],},],
         },
         accessControl: {
           authenticationEnabled: true,
@@ -751,8 +651,7 @@ export class HealthDiagnosticService {
         encryption: {
           dataAtRest: true,
           dataInTransit: true,
-          certificateStatus: 'VALID',
-          tlsVersion: 'TLS 1.3',
+          certificateStatus: 'VALID',tlsVersion: 'TLS 1.3',
         },
         compliance: {
           gdprCompliant: true,
@@ -762,15 +661,11 @@ export class HealthDiagnosticService {
         },
       };
 
-      this.logger.debug(`[${request.operationId}] Security assessment completed`, {
-        securityScore: result.securityAssessment.securityScore,
-        vulnerabilitiesFound: Object.values(result.securityAssessment.vulnerabilities).flat().length,
+      this.logger.debug(`[${request.operationId}] Security assessment completed`, {securityScore: result.securityAssessment.securityScore,vulnerabilitiesFound: Object.values(result.securityAssessment.vulnerabilities).flat().length,
       });
 
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Security assessment failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`[${request.operationId}] Security assessment failed`, {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -789,25 +684,15 @@ export class HealthDiagnosticService {
     result.componentResults.forEach((component, name) => {
       if (component.status === DiagnosticStatus.CRITICAL || component.status === DiagnosticStatus.FAILED) {
         issues.push({
-          id: `COMP-${name}-${Date.now()}`,
-          type: IssueType.SERVICE_UNAVAILABILITY,
-          severity: component.status === DiagnosticStatus.FAILED ? IssueSeverity.CRITICAL : IssueSeverity.HIGH,
-          title: `${component.componentName} Component Health Issue`,
-          description: `Component ${component.componentName} is in ${component.status} state`,
+          id: `COMP-${name}-${Date.now()}`,type: IssueType.SERVICE_UNAVAILABILITY,severity: component.status === DiagnosticStatus.FAILED ? IssueSeverity.CRITICAL : IssueSeverity.HIGH,
+          title: `${component.componentName} Component Health Issue`,description: `Component ${component.componentName} is in ${component.status} state`,
           affectedComponents: [component.componentName],
           impact: {
-            businessImpact: component.status === DiagnosticStatus.FAILED ? 'CRITICAL' : 'HIGH',
-            userImpact: component.status === DiagnosticStatus.FAILED ? 'SEVERE' : 'MODERATE',
-            performanceImpact: 100 - component.healthScore,
-            availabilityImpact: 100 - component.performance.availability,
+            businessImpact: component.status === DiagnosticStatus.FAILED ? 'CRITICAL' : 'HIGH',userImpact: component.status === DiagnosticStatus.FAILED ? 'SEVERE' : 'MODERATE',performanceImpact: 100 - component.healthScore,availabilityImpact: 100 - component.performance.availability,
           },
           detected: new Date(),
           estimatedResolution: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours
-          urgency: component.status === DiagnosticStatus.FAILED ? 'CRITICAL' : 'HIGH',
-          resolution: {
-            status: 'IDENTIFIED',
-            steps: ['Investigate component logs', 'Check resource availability', 'Restart service if necessary'],
-            owner: 'SRE Team',
+          urgency: component.status === DiagnosticStatus.FAILED ? 'CRITICAL' : 'HIGH',resolution: {status: 'IDENTIFIED',steps: ['Investigate component logs', 'Check resource availability', 'Restart service if necessary'],owner: 'SRE Team',
             estimatedEffort: 2,
           },
         });
@@ -822,20 +707,11 @@ export class HealthDiagnosticService {
         severity: result.performanceAnalysis.overallScore < 50 ? IssueSeverity.CRITICAL : IssueSeverity.HIGH,
         title: 'System Performance Degradation',
         description: `Overall performance score is ${result.performanceAnalysis.overallScore}, below acceptable threshold`,
-        affectedComponents: ['system'],
-        impact: {
-          businessImpact: result.performanceAnalysis.overallScore < 50 ? 'HIGH' : 'MEDIUM',
-          userImpact: result.performanceAnalysis.overallScore < 50 ? 'SEVERE' : 'MODERATE',
-          performanceImpact: 100 - result.performanceAnalysis.overallScore,
-          availabilityImpact: 0,
+        affectedComponents: ['system'],impact: {businessImpact: result.performanceAnalysis.overallScore < 50 ? 'HIGH' : 'MEDIUM',userImpact: result.performanceAnalysis.overallScore < 50 ? 'SEVERE' : 'MODERATE',performanceImpact: 100 - result.performanceAnalysis.overallScore,availabilityImpact: 0,
         },
         detected: new Date(),
         estimatedResolution: new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
-        urgency: result.performanceAnalysis.overallScore < 50 ? 'CRITICAL' : 'HIGH',
-        resolution: {
-          status: 'IDENTIFIED',
-          steps: ['Analyze performance bottlenecks', 'Optimize critical paths', 'Scale resources if needed'],
-          owner: 'Performance Team',
+        urgency: result.performanceAnalysis.overallScore < 50 ? 'CRITICAL' : 'HIGH',resolution: {status: 'IDENTIFIED',steps: ['Analyze performance bottlenecks', 'Optimize critical paths', 'Scale resources if needed'],owner: 'Performance Team',
           estimatedEffort: 4,
         },
       });
@@ -852,20 +728,11 @@ export class HealthDiagnosticService {
         severity: criticalVulns > 0 ? IssueSeverity.CRITICAL : IssueSeverity.HIGH,
         title: 'Security Vulnerabilities Detected',
         description: `Found ${criticalVulns} critical and ${highVulns} high severity vulnerabilities`,
-        affectedComponents: ['security'],
-        impact: {
-          businessImpact: criticalVulns > 0 ? 'CRITICAL' : 'HIGH',
-          userImpact: criticalVulns > 0 ? 'SEVERE' : 'MODERATE',
-          performanceImpact: 0,
-          availabilityImpact: 0,
+        affectedComponents: ['security'],impact: {businessImpact: criticalVulns > 0 ? 'CRITICAL' : 'HIGH',userImpact: criticalVulns > 0 ? 'SEVERE' : 'MODERATE',performanceImpact: 0,availabilityImpact: 0,
         },
         detected: new Date(),
         estimatedResolution: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours
-        urgency: criticalVulns > 0 ? 'CRITICAL' : 'HIGH',
-        resolution: {
-          status: 'IDENTIFIED',
-          steps: ['Apply security patches', 'Update dependencies', 'Review security configurations'],
-          owner: 'Security Team',
+        urgency: criticalVulns > 0 ? 'CRITICAL' : 'HIGH',resolution: {status: 'IDENTIFIED',steps: ['Apply security patches', 'Update dependencies', 'Review security configurations'],owner: 'Security Team',
           estimatedEffort: 8,
         },
       });
@@ -891,38 +758,15 @@ export class HealthDiagnosticService {
         id: `PERF-REC-${Date.now()}`,
         type: RecommendationType.PERFORMANCE_OPTIMIZATION,
         priority: RecommendationPriority.HIGH,
-        title: 'Implement Response Caching',
-        description: 'Add response caching to improve performance and reduce backend load',
-        reasoning: 'Analysis shows high response times and repeated requests for similar data',
-        implementation: {
-          effort: 'MEDIUM',
-          timeframe: 'SHORT_TERM',
-          complexity: 'MODERATE',
-          cost: 'LOW',
-        },
-        benefits: {
+        title: 'Implement Response Caching',description: 'Add response caching to improve performance and reduce backend load',reasoning: 'Analysis shows high response times and repeated requests for similar data',implementation: {effort: 'MEDIUM',timeframe: 'SHORT_TERM',complexity: 'MODERATE',cost: 'LOW',},benefits: {
           performanceImprovement: 30,
           reliabilityImprovement: 15,
           costSavings: 20,
           riskReduction: 10,
         },
         actionItems: [
-          'Identify cacheable endpoints',
-          'Implement Redis caching layer',
-          'Configure cache invalidation strategies',
-          'Monitor cache hit rates',
-        ],
-        prerequisites: ['Redis instance available', 'Cache strategy approved'],
-        risks: ['Cache invalidation complexity', 'Memory usage increase'],
-        parlantContext: {
-          conversationId: result.parlantContext.conversationId,
-          aiReasoning: 'AI analysis indicates significant performance gains from caching implementation',
-          alternativeOptions: ['CDN implementation', 'Database query optimization', 'Load balancing'],
-          businessJustification: 'Improved user experience and reduced infrastructure costs',
-          implementationGuidance: [
-            'Start with read-heavy endpoints',
-            'Use TTL-based expiration',
-            'Monitor cache performance metrics',
+          'Identify cacheable endpoints','Implement Redis caching layer','Configure cache invalidation strategies','Monitor cache hit rates',],prerequisites: ['Redis instance available', 'Cache strategy approved'],risks: ['Cache invalidation complexity', 'Memory usage increase'],parlantContext: {conversationId: result.parlantContext.conversationId,
+          aiReasoning: 'AI analysis indicates significant performance gains from caching implementation',alternativeOptions: ['CDN implementation', 'Database query optimization', 'Load balancing'],businessJustification: 'Improved user experience and reduced infrastructure costs',implementationGuidance: ['Start with read-heavy endpoints','Use TTL-based expiration','Monitor cache performance metrics',
           ],
         },
       });
@@ -937,38 +781,18 @@ export class HealthDiagnosticService {
         id: `SCALE-REC-${Date.now()}`,
         type: RecommendationType.RESOURCE_SCALING,
         priority: RecommendationPriority.MEDIUM,
-        title: 'Scale System Resources',
-        description: 'Increase CPU and memory allocation to handle current load',
+        title: 'Scale System Resources',description: 'Increase CPU and memory allocation to handle current load',
         reasoning: `Current usage: CPU ${cpuUsage}%, Memory ${memoryUsage}% - approaching capacity limits`,
         implementation: {
-          effort: 'LOW',
-          timeframe: 'IMMEDIATE',
-          complexity: 'SIMPLE',
-          cost: 'MEDIUM',
-        },
-        benefits: {
+          effort: 'LOW',timeframe: 'IMMEDIATE',complexity: 'SIMPLE',cost: 'MEDIUM',},benefits: {
           performanceImprovement: 25,
           reliabilityImprovement: 35,
           costSavings: 0,
           riskReduction: 40,
         },
         actionItems: [
-          'Analyze resource utilization patterns',
-          'Calculate required resource increase',
-          'Schedule scaling operation',
-          'Monitor post-scaling performance',
-        ],
-        prerequisites: ['Budget approval', 'Maintenance window'],
-        risks: ['Temporary service disruption', 'Increased operational costs'],
-        parlantContext: {
-          conversationId: result.parlantContext.conversationId,
-          aiReasoning: 'Proactive scaling will prevent performance degradation and service outages',
-          alternativeOptions: ['Horizontal scaling', 'Optimization before scaling', 'Load balancing'],
-          businessJustification: 'Prevent service degradation and maintain SLA compliance',
-          implementationGuidance: [
-            'Scale gradually to minimize impact',
-            'Monitor key performance indicators',
-            'Plan rollback strategy',
+          'Analyze resource utilization patterns','Calculate required resource increase','Schedule scaling operation','Monitor post-scaling performance',],prerequisites: ['Budget approval', 'Maintenance window'],risks: ['Temporary service disruption', 'Increased operational costs'],parlantContext: {conversationId: result.parlantContext.conversationId,
+          aiReasoning: 'Proactive scaling will prevent performance degradation and service outages',alternativeOptions: ['Horizontal scaling', 'Optimization before scaling', 'Load balancing'],businessJustification: 'Prevent service degradation and maintain SLA compliance',implementationGuidance: ['Scale gradually to minimize impact','Monitor key performance indicators','Plan rollback strategy',
           ],
         },
       });
@@ -1004,9 +828,7 @@ export class HealthDiagnosticService {
       return {
         approved: false,
         reason: `Validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        conversationId: '',
-      };
-    }
+        conversationId: '',};}
   }
 
   /**
@@ -1015,36 +837,11 @@ export class HealthDiagnosticService {
   private async enhanceWithAIInsights(result: SystemDiagnosticResult, _context: DiagnosticContext): Promise<void> {
     // Simulate AI enhancement - in production, this would use actual ML models
     result.parlantContext.conversationalInsights.push(
-      'AI analysis indicates stable system performance with minor optimization opportunities',
-      'Resource utilization patterns suggest predictable load with potential for efficiency improvements',
-      'Security posture is strong with only minor configuration recommendations',
-    );
-
-    result.parlantContext.aiRecommendations.push(
-      'Consider implementing predictive scaling based on historical patterns',
-      'Optimize database queries to reduce response time variability',
-      'Enhance monitoring coverage for better issue detection',
-    );
-
-    result.parlantContext.riskAssessment = {
-      riskLevel: result.healthScore > 90 ? 'LOW' : result.healthScore > 70 ? 'MEDIUM' : 'HIGH',
-      riskFactors: [
-        'Resource utilization approaching warning thresholds',
-        'Minor security vulnerabilities present',
-        'Performance variability in peak load scenarios',
-      ],
-      businessImpact: {
-        revenue: 'LOW',
-        operations: 'LOW',
-        reputation: 'LOW',
-        compliance: 'LOW',
-      },
-      mitigationStrategies: [
-        'Implement proactive monitoring and alerting',
-        'Establish automated scaling policies',
-        'Regular security assessments and patches',
-      ],
-      confidenceLevel: 85,
+      'AI analysis indicates stable system performance with minor optimization opportunities','Resource utilization patterns suggest predictable load with potential for efficiency improvements','Security posture is strong with only minor configuration recommendations',);result.parlantContext.aiRecommendations.push(
+      'Consider implementing predictive scaling based on historical patterns','Optimize database queries to reduce response time variability','Enhance monitoring coverage for better issue detection',);result.parlantContext.riskAssessment = {
+      riskLevel: result.healthScore > 90 ? 'LOW' : result.healthScore > 70 ? 'MEDIUM' : 'HIGH',riskFactors: ['Resource utilization approaching warning thresholds','Minor security vulnerabilities present','Performance variability in peak load scenarios',],businessImpact: {
+        revenue: 'LOW',operations: 'LOW',reputation: 'LOW',compliance: 'LOW',},mitigationStrategies: [
+        'Implement proactive monitoring and alerting','Establish automated scaling policies','Regular security assessments and patches',],confidenceLevel: 85,
     };
   }
 
@@ -1095,27 +892,15 @@ export class HealthDiagnosticService {
     // Simulate trend analysis - in production, this would analyze historical data
     return {
       healthScoreTrend: {
-        direction: 'STABLE',
-        rate: 0.2,
-        confidence: 85,
+        direction: 'STABLE',rate: 0.2,confidence: 85,
         dataPoints: 48,
-        timespan: '48 hours',
-      },
-      performanceTrend: {
-        direction: 'IMPROVING',
-        rate: 1.5,
-        confidence: 90,
+        timespan: '48 hours',},performanceTrend: {
+        direction: 'IMPROVING',rate: 1.5,confidence: 90,
         dataPoints: 24,
-        timespan: '24 hours',
-      },
-      resourceTrend: {
-        direction: 'STABLE',
-        rate: 0.1,
-        confidence: 95,
+        timespan: '24 hours',},resourceTrend: {
+        direction: 'STABLE',rate: 0.1,confidence: 95,
         dataPoints: 72,
-        timespan: '72 hours',
-      },
-      reliability: {
+        timespan: '72 hours',},reliability: {
         mtbf: 720, // 30 days
         mttr: 15,  // 15 minutes
         availability: 99.9,
@@ -1129,10 +914,7 @@ export class HealthDiagnosticService {
    * Store diagnostic result for historical analysis
    */
   private storeDiagnosticResult(result: SystemDiagnosticResult): void {
-    const historyKey = 'system';
-    let history = this.diagnosticHistory.get(historyKey) ?? [];
-
-    history.push(result);
+    const historyKey = 'system';let history = this.diagnosticHistory.get(historyKey) ?? [];history.push(result);
 
     // Keep only last 100 results
     if (history.length > 100) {
@@ -1174,39 +956,17 @@ export class HealthDiagnosticService {
           severity: IssueSeverity.CRITICAL,
           title: 'Diagnostic System Failure',
           description: `Diagnostic operation failed: ${errorMessage}`,
-          affectedComponents: ['diagnostic_system'],
-          impact: {
-            businessImpact: 'HIGH',
-            userImpact: 'MODERATE',
-            performanceImpact: 0,
-            availabilityImpact: 0,
+          affectedComponents: ['diagnostic_system'],impact: {businessImpact: 'HIGH',userImpact: 'MODERATE',performanceImpact: 0,availabilityImpact: 0,
           },
           detected: new Date(),
           estimatedResolution: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-          urgency: 'HIGH',
-          resolution: {
-            status: 'IDENTIFIED',
-            steps: ['Check diagnostic service health', 'Review system logs', 'Restart diagnostic service'],
-            owner: 'SRE Team',
-            estimatedEffort: 1,
-          },
+          urgency: 'HIGH',resolution: {status: 'IDENTIFIED',steps: ['Check diagnostic service health', 'Review system logs', 'Restart diagnostic service'],owner: 'SRE Team',estimatedEffort: 1,},
         },
       ],
       recommendations: [],
       parlantContext: {
-        conversationId: context.parlantConversationId ?? '',
-        validationApproved: false,
-        conversationalInsights: ['Diagnostic operation failed - manual investigation required'],
-        riskAssessment: {
-          riskLevel: 'HIGH',
-          riskFactors: ['Diagnostic system unavailable'],
-          businessImpact: { revenue: 'LOW', operations: 'MEDIUM', reputation: 'LOW', compliance: 'LOW' },
-          mitigationStrategies: ['Restore diagnostic capabilities', 'Manual system checks'],
-          confidenceLevel: 100,
-        },
-        aiRecommendations: ['Investigate diagnostic service dependencies'],
-        followUpActions: [],
-      },
+        conversationId: context.parlantConversationId ?? '',validationApproved: false,conversationalInsights: ['Diagnostic operation failed - manual investigation required'],riskAssessment: {riskLevel: 'HIGH',riskFactors: ['Diagnostic system unavailable'],businessImpact: { revenue: 'LOW', operations: 'MEDIUM', reputation: 'LOW', compliance: 'LOW' },mitigationStrategies: ['Restore diagnostic capabilities', 'Manual system checks'],confidenceLevel: 100,},
+        aiRecommendations: ['Investigate diagnostic service dependencies'],followUpActions: [],},
       trends: {
         healthScoreTrend: {} as TrendAnalysis,
         performanceTrend: {} as TrendAnalysis,
@@ -1268,9 +1028,6 @@ export class HealthDiagnosticService {
    */
   private initializePerformanceBaselines(): void {
     // Set default performance baselines
-    this.performanceBaselines.set('responseTime', 1000); // 1 second
-    this.performanceBaselines.set('throughput', 1000);   // 1000 req/s
-    this.performanceBaselines.set('errorRate', 1);       // 1%
-    this.performanceBaselines.set('availability', 99.9); // 99.9%
+    this.performanceBaselines.set('responseTime', 1000); // 1 secondthis.performanceBaselines.set('throughput', 1000);   // 1000 req/sthis.performanceBaselines.set('errorRate', 1);       // 1%this.performanceBaselines.set('availability', 99.9); // 99.9%
   }
 }

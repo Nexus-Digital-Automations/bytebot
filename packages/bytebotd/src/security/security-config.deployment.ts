@@ -14,18 +14,12 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-} from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import {
-  StandardizedSecurityMiddleware,
+} from '@nestjs/common';import { ConfigModule, ConfigService } from '@nestjs/config';import {StandardizedSecurityMiddleware,
   ServiceType,
   StandardizedValidationPipe,
   StandardizedRateLimitGuard,
   StandardizedValidationPipes,
-} from '@bytebot/shared/dist/index-server';
-
-/**
- * BytebotD Security Configuration Service
+} from '@bytebot/shared/dist/index-server';/*** BytebotD Security Configuration Service
  * Provides MAXIMUM SECURITY configuration for computer control operations
  */
 @Injectable()
@@ -46,11 +40,7 @@ export class BytebotDSecurityConfigService {
    */
   createValidationPipe(): StandardizedValidationPipe {
     const environment = this.configService.get<string>(
-      'NODE_ENV',
-      'development',
-    );
-
-    // Use maximum security pipe for BytebotD
+      'NODE_ENV','development',);// Use maximum security pipe for BytebotD
     return StandardizedValidationPipes.MAXIMUM_SECURITY(environment);
   }
 
@@ -62,9 +52,7 @@ export class BytebotDSecurityConfigService {
     _redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     return StandardizedRateLimitGuard.createBytebotDGuard(
-      this.configService.get<string>('NODE_ENV', 'development'),
-      {
-        // Additional configuration can be added here if needed
+      this.configService.get<string>('NODE_ENV', 'development'),{// Additional configuration can be added here if needed
       },
     );
   }
@@ -74,36 +62,15 @@ export class BytebotDSecurityConfigService {
    */
   getSecurityConfig() {
     const environment = this.configService.get<string>(
-      'NODE_ENV',
-      'development',
-    );
-
-    return {
+      'NODE_ENV','development',);return {
       serviceType: ServiceType._BYTEBOTD,
       environment,
-      securityLevel: 'MAXIMUM',
-      description: 'Computer Control Service - Maximum Security Configuration',
-      middleware: {
-        enabled: true,
-        csp: environment === 'production',
-        hsts: environment === 'production',
-        frameOptions: 'SAMEORIGIN', // Allow VNC embedding
-        corsOrigins:
-          environment === 'production'
-            ? ['https://app.bytebot.ai', 'https://bytebot.ai']
-            : [
-                'http://localhost:3000',
-                'http://localhost:3001',
-                'http://localhost:8080',
-              ],
-      },
+      securityLevel: 'MAXIMUM',description: 'Computer Control Service - Maximum Security Configuration',middleware: {enabled: true,
+        csp: environment === 'production',hsts: environment === 'production',frameOptions: 'SAMEORIGIN', // Allow VNC embeddingcorsOrigins:environment === 'production'? ['https://app.bytebot.ai', 'https://bytebot.ai']: ['http://localhost:3000','http://localhost:3001','http://localhost:8080',],},
       validation: {
         enableSanitization: true,
         enableThreatDetection: true,
-        maxPayloadSize: '50mb',
-        securityLevel: 'MAXIMUM',
-      },
-      rateLimiting: {
+        maxPayloadSize: '50mb',securityLevel: 'MAXIMUM',},rateLimiting: {
         authRequests: 3, // Very strict for computer control
         computerOperations: 50,
         taskOperations: 20,
@@ -114,9 +81,7 @@ export class BytebotDSecurityConfigService {
         vnc: true, // BytebotD supports VNC
         computerControl: true,
         taskExecution: true,
-        securityLogging: environment !== 'development',
-      },
-    };
+        securityLogging: environment !== 'development',},};
   }
 }
 
@@ -129,27 +94,18 @@ export class BytebotDSecurityConfigService {
   providers: [
     BytebotDSecurityConfigService,
     {
-      provide: 'BYTEBOT_D_SECURITY_MIDDLEWARE',
-      useFactory: (configService: ConfigService) =>
-        StandardizedSecurityMiddleware.createBytebotDMiddleware(configService),
+      provide: 'BYTEBOT_D_SECURITY_MIDDLEWARE',useFactory: (configService: ConfigService) =>StandardizedSecurityMiddleware.createBytebotDMiddleware(configService),
       inject: [ConfigService],
     },
     {
-      provide: 'BYTEBOT_D_VALIDATION_PIPE',
-      useFactory: (configService: ConfigService) => {
-        const environment =
-          configService.get<string>('NODE_ENV', 'development') ?? 'development';
-        return StandardizedValidationPipes.MAXIMUM_SECURITY(environment);
-      },
+      provide: 'BYTEBOT_D_VALIDATION_PIPE',useFactory: (configService: ConfigService) => {const environment =
+          configService.get<string>('NODE_ENV', 'development') ?? 'development';return StandardizedValidationPipes.MAXIMUM_SECURITY(environment);},
       inject: [ConfigService],
     },
   ],
   exports: [
     BytebotDSecurityConfigService,
-    'BYTEBOT_D_SECURITY_MIDDLEWARE',
-    'BYTEBOT_D_VALIDATION_PIPE',
-  ],
-})
+    'BYTEBOT_D_SECURITY_MIDDLEWARE','BYTEBOT_D_VALIDATION_PIPE',],})
 export class BytebotDSecurityModule implements NestModule {
   constructor(private configService: ConfigService) {}
 
@@ -162,9 +118,7 @@ export class BytebotDSecurityModule implements NestModule {
 
     consumer
       .apply(securityMiddleware.use.bind(securityMiddleware))
-      .forRoutes('*');
-  }
-}
+      .forRoutes('*');}}
 
 /**
  * BytebotD Security Deployment Helper
@@ -184,23 +138,14 @@ export class BytebotDSecurityDeployment {
     configService: ConfigService,
   ): void {
     const environment =
-      configService.get<string>('NODE_ENV', 'development') ?? 'development';
-
-    // Apply global validation pipe with maximum security
-    app.useGlobalPipes(
+      configService.get<string>('NODE_ENV', 'development') ?? 'development';// Apply global validation pipe with maximum securityapp.useGlobalPipes(
       StandardizedValidationPipes.MAXIMUM_SECURITY(environment),
     );
 
     // Log security deployment
-    const logger = app.get('Logger') as
-      | { log: (message: string, context?: unknown) => void }
-      | undefined;
+    const logger = app.get('Logger') as| { log: (message: string, context?: unknown) => void }| undefined;
     if (logger) {
-      logger.log('BytebotD security middleware deployed successfully', {
-        service: 'BytebotD',
-        securityLevel: 'MAXIMUM',
-        environment,
-        features: {
+      logger.log('BytebotD security middleware deployed successfully', {service: 'BytebotD',securityLevel: 'MAXIMUM',environment,features: {
           vnc: true,
           computerControl: true,
           maximumSecurity: true,
@@ -213,22 +158,7 @@ export class BytebotDSecurityDeployment {
    * Get security headers for BytebotD
    */
   static getSecurityHeaders(environment: string) {
-    const isProd = environment === 'production';
-
-    return {
-      'X-Service': 'BytebotD',
-      'X-Security-Level': 'MAXIMUM',
-      'X-Computer-Control': 'true',
-      'X-VNC-Enabled': 'true',
-      'X-Frame-Options': 'SAMEORIGIN', // Allow VNC embedding
-      ...(isProd && {
-        'Strict-Transport-Security':
-          'max-age=31536000; includeSubDomains; preload',
-        'X-Content-Type-Options': 'nosniff',
-        'X-XSS-Protection': '1; mode=block',
-        'Referrer-Policy': 'same-origin',
-      }),
-    };
+    const isProd = environment === 'production';return {'X-Service': 'BytebotD','X-Security-Level': 'MAXIMUM','X-Computer-Control': 'true','X-VNC-Enabled': 'true','X-Frame-Options': 'SAMEORIGIN', // Allow VNC embedding...(isProd && {'Strict-Transport-Security':'max-age=31536000; includeSubDomains; preload','X-Content-Type-Options': 'nosniff','X-XSS-Protection': '1; mode=block','Referrer-Policy': 'same-origin',}),};
   }
 
   /**
@@ -241,37 +171,22 @@ export class BytebotDSecurityDeployment {
     errors: string[];
   } {
     const environment =
-      configService.get<string>('NODE_ENV', 'development') ?? 'development';
-    const corsOrigins = configService.get<string[]>('CORS_ORIGINS', []) ?? [];
-
-    const validationResults = {
-      environment,
+      configService.get<string>('NODE_ENV', 'development') ?? 'development';const corsOrigins = configService.get<string[]>('CORS_ORIGINS', []) ?? [];const validationResults = {environment,
       valid: true,
       warnings: [] as string[],
       errors: [] as string[],
     };
 
     // Check CORS configuration
-    if (environment === 'production' && corsOrigins.includes('*')) {
-      validationResults.errors.push(
-        'Wildcard CORS origins not allowed in production',
-      );
-      validationResults.valid = false;
+    if (environment === 'production' && corsOrigins.includes('*')) {validationResults.errors.push('Wildcard CORS origins not allowed in production',);validationResults.valid = false;
     }
 
     // Check VNC configuration
-    const vncUrl = configService.get<string>('BYTEBOT_DESKTOP_VNC_URL');
-    if (!vncUrl) {
-      validationResults.warnings.push(
-        'VNC URL not configured - computer control may not work',
-      );
-    }
+    const vncUrl = configService.get<string>('BYTEBOT_DESKTOP_VNC_URL');if (!vncUrl) {validationResults.warnings.push(
+        'VNC URL not configured - computer control may not work',);}
 
     // Check Redis configuration for rate limiting
-    const redisHost = configService.get<string>('REDIS_HOST');
-    if (!redisHost && environment !== 'development') {
-      validationResults.warnings.push(
-        'Redis not configured - rate limiting will use fallback',
+    const redisHost = configService.get<string>('REDIS_HOST');if (!redisHost && environment !== 'development') {validationResults.warnings.push('Redis not configured - rate limiting will use fallback',
       );
     }
 

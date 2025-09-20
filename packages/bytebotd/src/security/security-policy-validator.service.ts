@@ -19,31 +19,15 @@
  * Performance: Sub-500ms validation with multi-level caching for policy operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
-
-// ===== SECURITY POLICY INTEGRATION INTERFACES =====
-
-export interface SecurityPolicyContext extends ParlantConversationContext {
-  readonly policyDomain: 'password' | 'access_control' | 'encryption' | 'audit' | 'network' | 'data_protection';
-  readonly policyScope: 'organization' | 'department' | 'application' | 'user_group' | 'individual';
-  readonly changeType: 'create' | 'update' | 'delete' | 'activate' | 'deactivate' | 'review';
-  readonly complianceFramework?: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST';
-  readonly businessJustification: string;
-  readonly approvalRequired: boolean;
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';// ===== SECURITY POLICY INTEGRATION INTERFACES =====export interface SecurityPolicyContext extends ParlantConversationContext {
+  readonly policyDomain: 'password' | 'access_control' | 'encryption' | 'audit' | 'network' | 'data_protection';readonly policyScope: 'organization' | 'department' | 'application' | 'user_group' | 'individual';readonly changeType: 'create' | 'update' | 'delete' | 'activate' | 'deactivate' | 'review';readonly complianceFramework?: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST';readonly businessJustification: string;readonly approvalRequired: boolean;
 }
 
 export interface SecurityPolicy {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly domain: SecurityPolicyContext['policyDomain'];
-  readonly scope: SecurityPolicyContext['policyScope'];
-  readonly version: string;
-  readonly status: 'draft' | 'active' | 'inactive' | 'deprecated';
-  readonly rules: PolicyRule[];
-  readonly metadata: {
+  readonly domain: SecurityPolicyContext['policyDomain'];readonly scope: SecurityPolicyContext['policyScope'];readonly version: string;readonly status: 'draft' | 'active' | 'inactive' | 'deprecated';readonly rules: PolicyRule[];readonly metadata: {
     readonly createdBy: string;
     readonly createdAt: Date;
     readonly lastModifiedBy: string;
@@ -64,31 +48,21 @@ export interface PolicyRule {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly ruleType: 'allow' | 'deny' | 'require' | 'recommend' | 'monitor';
-  readonly conditions: PolicyCondition[];
-  readonly actions: PolicyAction[];
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly enabled: boolean;
-}
+  readonly ruleType: 'allow' | 'deny' | 'require' | 'recommend' | 'monitor';readonly conditions: PolicyCondition[];readonly actions: PolicyAction[];
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly enabled: boolean;}
 
 export interface PolicyCondition {
   readonly field: string;
-  readonly operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'regex';
-  readonly value: unknown;
-  readonly description: string;
+  readonly operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'regex';readonly value: unknown;readonly description: string;
 }
 
 export interface PolicyAction {
-  readonly type: 'log' | 'alert' | 'block' | 'redirect' | 'escalate' | 'audit';
-  readonly parameters: Record<string, unknown>;
-  readonly description: string;
+  readonly type: 'log' | 'alert' | 'block' | 'redirect' | 'escalate' | 'audit';readonly parameters: Record<string, unknown>;readonly description: string;
 }
 
 export interface PolicyValidationRequest {
   readonly policy: SecurityPolicy;
-  readonly changeType: SecurityPolicyContext['changeType'];
-  readonly context: SecurityPolicyContext;
-  readonly operationId: string;
+  readonly changeType: SecurityPolicyContext['changeType'];readonly context: SecurityPolicyContext;readonly operationId: string;
 }
 
 export interface PolicyValidationResponse {
@@ -145,11 +119,7 @@ export class SecurityPolicyValidatorService {
     private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `policy_validator_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Security Policy Validator Service initialized with MAXIMUM Parlant integration`, {
-      parlantEnabled: true,
-      validationRequired: true,
+    const operationId = `policy_validator_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Security Policy Validator Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,
       auditTrailEnabled: true,
       complianceFrameworksEnabled: this.getEnabledComplianceFrameworks(),
     });
@@ -188,8 +158,7 @@ export class SecurityPolicyValidatorService {
           requiresApproval: request.context.approvalRequired,
           rulesCount: request.policy.rules.length,
         },
-        actionDescription: `${request.changeType} security policy '${request.policy.name}' for ${request.context.policyDomain} domain with ${request.context.policyScope} scope`,
-        context: request.context,
+        actionDescription: `${request.changeType} security policy '${request.policy.name}' for ${request.context.policyDomain} domain with ${request.context.policyScope} scope',context: request.context,
         riskLevel: this.assessPolicyChangeRiskLevel(request),
         operationId: request.operationId,
       };
@@ -197,18 +166,13 @@ export class SecurityPolicyValidatorService {
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Security policy change blocked by conversational validation: ${validationResponse.reasoning}`);
-      }
-
-      const response = await this.performPolicyValidation(request, validationResponse.conversationId);
+        throw new Error(`Security policy change blocked by conversational validation: ${validationResponse.reasoning}`);}const response = await this.performPolicyValidation(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.validationResult.violations.length);
 
       this.logger.log(
-        `[${request.operationId}] Security policy validation completed successfully with Parlant validation`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security policy validation completed successfully with Parlant validation`,{operationId: request.operationId,
           responseId: response.id,
           valid: response.validationResult.valid,
           violations: response.validationResult.violations.length,
@@ -253,24 +217,14 @@ export class SecurityPolicyValidatorService {
       conditionsChecked += rule.conditions.length;
       
       // Simulate some validation logic that might find violations
-      if (rule.severity === 'CRITICAL' && !rule.enabled) {
-        violations.push({
-          ruleId: rule.id,
+      if (rule.severity === 'CRITICAL' && !rule.enabled) {violations.push({ruleId: rule.id,
           severity: 'HIGH',
-          description: `Critical security rule '${rule.name}' is disabled`,
-          recommendation: 'Enable critical security rules or provide business justification',
-          complianceImpact: `May violate ${request.context.complianceFramework} requirements`,
-        });
-      }
+          description: `Critical security rule '${rule.name}' is disabled',recommendation: 'Enable critical security rules or provide business justification',
+          complianceImpact: `May violate ${request.context.complianceFramework} requirements`,});}
     }
 
     // Add some recommendations based on policy domain
-    recommendations.push(`Consider regular review cycles for ${request.context.policyDomain} policies`);
-    if (request.context.complianceFramework) {
-      recommendations.push(`Ensure compliance with ${request.context.complianceFramework} framework requirements`);
-    }
-
-    const complianceStatus = request.context.complianceFramework ? [{
+    recommendations.push(`Consider regular review cycles for ${request.context.policyDomain} policies`);if (request.context.complianceFramework) {recommendations.push(`Ensure compliance with ${request.context.complianceFramework} framework requirements`);}const complianceStatus = request.context.complianceFramework ? [{
       framework: request.context.complianceFramework,
       compliant: violations.length === 0,
       gaps: violations.map(v => v.description),
@@ -295,9 +249,7 @@ export class SecurityPolicyValidatorService {
         mitigations: this.suggestMitigations(request),
       },
       auditTrail: {
-        validatedBy: 'SecurityPolicyValidatorService',
-        approvalRequired: request.context.approvalRequired,
-        reviewers: request.context.approvalRequired ? ['security_team', 'compliance_officer'] : [],
+        validatedBy: 'SecurityPolicyValidatorService',approvalRequired: request.context.approvalRequired,reviewers: request.context.approvalRequired ? ['security_team', 'compliance_officer'] : [],
         comments: [`Policy validation completed for ${request.changeType} operation`],
       },
       performanceMetrics: {
@@ -311,37 +263,17 @@ export class SecurityPolicyValidatorService {
   }
 
   private assessPolicyChangeRiskLevel(request: PolicyValidationRequest): RiskLevel {
-    if (request.changeType === 'delete' || 
-        request.context.policyScope === 'organization' ||
-        request.policy.rules.some(r => r.severity === 'CRITICAL')) {
-      return RiskLevel.CRITICAL;
-    }
-    if (request.changeType === 'update' && request.context.policyScope === 'department') {
-      return RiskLevel.HIGH;
-    }
-    if (request.changeType === 'create' || request.context.policyScope === 'application') {
-      return RiskLevel.MEDIUM;
-    }
-    return RiskLevel.LOW;
+    if (request.changeType === 'delete' || request.context.policyScope === 'organization' ||request.policy.rules.some(r => r.severity === 'CRITICAL')) {return RiskLevel._CRITICAL;}
+    if (request.changeType === 'update' && request.context.policyScope === 'department') {return RiskLevel._HIGH;}
+    if (request.changeType === 'create' || request.context.policyScope === 'application') {return RiskLevel._MODERATE;}
+    return RiskLevel._LOW;
   }
 
   private identifyRiskFactors(request: PolicyValidationRequest): string[] {
     const factors: string[] = [];
     
-    if (request.context.policyScope === 'organization') {
-      factors.push('Organization-wide policy scope');
-    }
-    if (request.policy.rules.some(r => r.severity === 'CRITICAL')) {
-      factors.push('Contains critical security rules');
-    }
-    if (request.changeType === 'delete') {
-      factors.push('Policy deletion operation');
-    }
-    if (!request.context.businessJustification) {
-      factors.push('Insufficient business justification');
-    }
-    
-    return factors;
+    if (request.context.policyScope === 'organization') {factors.push('Organization-wide policy scope');}if (request.policy.rules.some(r => r.severity === 'CRITICAL')) {factors.push('Contains critical security rules');}if (request.changeType === 'delete') {factors.push('Policy deletion operation');}if (!request.context.businessJustification) {
+      factors.push('Insufficient business justification');}return factors;
   }
 
   private suggestMitigations(request: PolicyValidationRequest): string[] {
@@ -353,11 +285,7 @@ export class SecurityPolicyValidatorService {
     if (request.context.complianceFramework) {
       mitigations.push(`Compliance review for ${request.context.complianceFramework} framework`);
     }
-    mitigations.push('Comprehensive audit trail maintained');
-    mitigations.push('Rollback capability available');
-    
-    return mitigations;
-  }
+    mitigations.push('Comprehensive audit trail maintained');mitigations.push('Rollback capability available');return mitigations;}
 
   private updatePerformanceMetrics(duration: number, violationsFound: number): void {
     this.averageValidationTime = 
@@ -377,28 +305,15 @@ export class SecurityPolicyValidatorService {
     this.logger.log('Security Policy Validator Service Performance Metrics', {
       validationCount: this.validationCount,
       policyChanges: this.policyChanges,
-      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
-      complianceViolations: this.complianceViolations,
-      violationRate: `${violationRate.toFixed(2)}%`,
-      validationRate: `${validationRate.toFixed(2)}%`,
+      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,complianceViolations: this.complianceViolations,violationRate: `${violationRate.toFixed(2)}%`,validationRate: `${validationRate.toFixed(2)}%`,
     });
   }
 
   private getEnabledComplianceFrameworks(): string[] {
     // TODO: Read from configuration
-    return ['SOX', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO27001', 'NIST'];
-  }
+    return ['SOX', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO27001', 'NIST'];}getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {const avgValidationTime = this.averageValidationTime;const violationRate = this.validationCount > 0 ? (this.complianceViolations / this.validationCount) * 100 : 0;
 
-  getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {
-    const avgValidationTime = this.averageValidationTime;
-    const violationRate = this.validationCount > 0 ? (this.complianceViolations / this.validationCount) * 100 : 0;
-
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
-    if (avgValidationTime > 1000 || violationRate > 20) {
-      status = 'DEGRADED';
-    }
-    if (avgValidationTime > 3000 || violationRate > 50) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgValidationTime > 1000 || violationRate > 20) {status = 'DEGRADED';}if (avgValidationTime > 3000 || violationRate > 50) {
       status = 'FAILED';
     }
 
@@ -407,9 +322,7 @@ export class SecurityPolicyValidatorService {
       metrics: {
         validationCount: this.validationCount,
         policyChanges: this.policyChanges,
-        averageValidationTime: `${avgValidationTime.toFixed(2)}ms`,
-        complianceViolations: this.complianceViolations,
-        violationRate: `${violationRate.toFixed(2)}%`,
+        averageValidationTime: `${avgValidationTime.toFixed(2)}ms`,complianceViolations: this.complianceViolations,violationRate: `${violationRate.toFixed(2)}%`,
         parlantIntegrationEnabled: true,
       },
     };

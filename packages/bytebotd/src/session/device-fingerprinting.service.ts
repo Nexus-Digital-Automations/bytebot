@@ -14,17 +14,7 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import * as crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
-
-// ===== DEVICE FINGERPRINTING ENUMS =====
-
-/**
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import * as crypto from 'crypto';import { v4 as uuidv4 } from 'uuid';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';// ===== DEVICE FINGERPRINTING ENUMS =====/**
  * Device trust levels based on fingerprint analysis
  */
 export enum DeviceTrustLevel {
@@ -40,25 +30,11 @@ export enum DeviceTrustLevel {
  * Device fingerprint validation status
  */
 export enum FingerprintValidationStatus {
-  VALID = 'VALID',
-  SUSPICIOUS = 'SUSPICIOUS',
-  INVALID = 'INVALID',
-  SPOOFED = 'SPOOFED',
-  BLOCKED = 'BLOCKED'
-}
-
-/**
+  VALID = 'VALID',SUSPICIOUS = 'SUSPICIOUS',INVALID = 'INVALID',SPOOFED = 'SPOOFED',BLOCKED = 'BLOCKED'}/**
  * Device activity patterns for behavioral analysis
  */
 export enum DeviceActivityPattern {
-  NORMAL = 'NORMAL',
-  SUSPICIOUS = 'SUSPICIOUS',
-  BOT_LIKE = 'BOT_LIKE',
-  AUTOMATED = 'AUTOMATED',
-  HUMAN_VERIFIED = 'HUMAN_VERIFIED'
-}
-
-// ===== DEVICE INTERFACES =====
+  NORMAL = 'NORMAL',SUSPICIOUS = 'SUSPICIOUS',BOT_LIKE = 'BOT_LIKE',AUTOMATED = 'AUTOMATED',HUMAN_VERIFIED = 'HUMAN_VERIFIED'}// ===== DEVICE INTERFACES =====
 
 /**
  * Comprehensive device characteristics for fingerprinting
@@ -159,10 +135,7 @@ export interface GeoLocation {
  * Device risk factors for security analysis
  */
 export interface DeviceRiskFactor {
-  readonly type: 'suspicious_location' | 'user_agent_change' | 'fingerprint_mismatch' | 'unusual_activity' | 'known_threat';
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly description: string;
-  readonly detectedAt: Date;
+  readonly type: 'suspicious_location' | 'user_agent_change' | 'fingerprint_mismatch' | 'unusual_activity' | 'known_threat';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly detectedAt: Date;
   readonly evidence: Record<string, any>;
   readonly resolved: boolean;
   readonly resolvedAt?: Date;
@@ -178,9 +151,7 @@ export interface FingerprintAnalysis {
   readonly confidence: number;
   readonly anomalies: FingerprintAnomaly[];
   readonly riskScore: number;
-  readonly recommendation: 'allow' | 'challenge' | 'block';
-  readonly reasoning: string[];
-  readonly validationStatus: FingerprintValidationStatus;
+  readonly recommendation: 'allow' | 'challenge' | 'block';readonly reasoning: string[];readonly validationStatus: FingerprintValidationStatus;
   readonly processedAt: Date;
 }
 
@@ -189,9 +160,7 @@ export interface FingerprintAnalysis {
  */
 export interface FingerprintAnomaly {
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high';
-  readonly field: string;
-  readonly expectedValue: any;
+  readonly severity: 'low' | 'medium' | 'high';readonly field: string;readonly expectedValue: any;
   readonly actualValue: any;
   readonly confidence: number;
   readonly description: string;
@@ -209,10 +178,7 @@ export interface MultiDeviceSession {
   readonly syncEnabled: boolean;
   readonly contextSharing: boolean;
   readonly maxDevices: number;
-  readonly sessionPolicy: 'exclusive' | 'concurrent' | 'limited';
-}
-
-/**
+  readonly sessionPolicy: 'exclusive' | 'concurrent' | 'limited';}/**
  * Individual device session within multi-device context
  */
 export interface DeviceSession {
@@ -222,9 +188,7 @@ export interface DeviceSession {
   readonly isPrimary: boolean;
   readonly connectedAt: Date;
   readonly lastActivity: Date;
-  readonly syncStatus: 'active' | 'passive' | 'disconnected';
-  readonly capabilities: string[];
-  readonly restrictions: string[];
+  readonly syncStatus: 'active' | 'passive' | 'disconnected';readonly capabilities: string[];readonly restrictions: string[];
 }
 
 // ===== DEVICE FINGERPRINTING SERVICE =====
@@ -250,9 +214,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
   ) {
     // Initialize Redis client for device data persistence
     this.redisClient = new Redis(
-      this.configService.get<string>('DEVICE_REDIS_URL', 'redis://localhost:6379'),
-      {
-        retryDelayOnFailover: 100,
+      this.configService.get<string>('DEVICE_REDIS_URL', 'redis://localhost:6379'),{retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         enableOfflineQueue: false,
         lazyConnect: true,
@@ -261,25 +223,15 @@ export class DeviceFingerprintingService implements OnModuleInit {
       }
     );
 
-    this.logger.log('Device Fingerprinting Service initialized');
-  }
-
-  /**
+    this.logger.log('Device Fingerprinting Service initialized');}/**
    * Module initialization
    */
   async onModuleInit(): Promise<void> {
     try {
       await this.redisClient.connect();
-      this.logger.log('Connected to Redis for device fingerprinting data');
+      this.logger.log('Connected to Redis for device fingerprinting data');// Load existing device reputationsawait this.loadDeviceReputations();
 
-      // Load existing device reputations
-      await this.loadDeviceReputations();
-
-      this.logger.log('Device Fingerprinting Service fully initialized');
-    } catch (error) {
-      this.logger.error('Failed to initialize Device Fingerprinting Service', error);
-      throw error;
-    }
+      this.logger.log('Device Fingerprinting Service fully initialized');} catch (error) {this.logger.error('Failed to initialize Device Fingerprinting Service', error);throw error;}
   }
 
   // ===== DEVICE FINGERPRINT GENERATION =====
@@ -291,27 +243,15 @@ export class DeviceFingerprintingService implements OnModuleInit {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Generating device fingerprint');
-
-      // Create complete device characteristics
-      const deviceCharacteristics: DeviceCharacteristics = {
+      this.logger.debug('Generating device fingerprint');// Create complete device characteristicsconst deviceCharacteristics: DeviceCharacteristics = {
         deviceId: characteristics.deviceId || uuidv4(),
-        userAgent: characteristics.userAgent || 'unknown',
-        screenResolution: characteristics.screenResolution || 'unknown',
-        availableScreenResolution: characteristics.availableScreenResolution || 'unknown',
-        colorDepth: characteristics.colorDepth || 24,
-        pixelRatio: characteristics.pixelRatio || 1,
+        userAgent: characteristics.userAgent || 'unknown',screenResolution: characteristics.screenResolution || 'unknown',availableScreenResolution: characteristics.availableScreenResolution || 'unknown',colorDepth: characteristics.colorDepth || 24,pixelRatio: characteristics.pixelRatio || 1,
         timezone: characteristics.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
         timezoneOffset: characteristics.timezoneOffset || new Date().getTimezoneOffset(),
-        language: characteristics.language || 'en-US',
-        languages: characteristics.languages || ['en-US'],
-        platform: characteristics.platform || 'unknown',
-        hardwareConcurrency: characteristics.hardwareConcurrency || navigator.hardwareConcurrency || 0,
-        maxTouchPoints: characteristics.maxTouchPoints || 0,
+        language: characteristics.language || 'en-US',languages: characteristics.languages || ['en-US'],platform: characteristics.platform || 'unknown',hardwareConcurrency: characteristics.hardwareConcurrency || navigator.hardwareConcurrency || 0,maxTouchPoints: characteristics.maxTouchPoints || 0,
         cookieEnabled: characteristics.cookieEnabled ?? true,
         doNotTrack: characteristics.doNotTrack ?? false,
-        webglVendor: characteristics.webglVendor || 'unknown',
-        webglRenderer: characteristics.webglRenderer || 'unknown',
+        webglVendor: characteristics.webglVendor || 'unknown',webglRenderer: characteristics.webglRenderer || 'unknown',
         canvasFingerprint: characteristics.canvasFingerprint || await this.generateCanvasFingerprint(),
         audioFingerprint: characteristics.audioFingerprint || await this.generateAudioFingerprint(),
         fontList: characteristics.fontList || [],
@@ -410,10 +350,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
       await this.updateDeviceReputation(deviceCharacteristics.deviceId, analysis, geoLocation);
 
       // Emit analysis event
-      this.eventEmitter.emit('device.analyzed', analysis);
-
-      // Audit analysis
-      await this.auditService.logSecurityEvent({
+      this.eventEmitter.emit('device.analyzed', analysis);// Audit analysisawait this.auditService.logSecurityEvent({
         eventType: AuditEventType.DEVICE_ANALYSIS,
         severity: this.getSeverityFromRiskScore(riskScore),
         userId: 'system',
@@ -429,15 +366,9 @@ export class DeviceFingerprintingService implements OnModuleInit {
       });
 
       this.logger.debug(
-        `Device fingerprint analysis completed: ${deviceCharacteristics.deviceId}, ` +
-        `Trust: ${trustLevel}, Risk: ${riskScore}, Recommendation: ${recommendation}`
-      );
-
-      return analysis;
+        `Device fingerprint analysis completed: ${deviceCharacteristics.deviceId}, ` +`Trust: ${trustLevel}, Risk: ${riskScore}, Recommendation: ${recommendation}`);return analysis;
     } catch (error) {
-      this.logger.error(`Failed to analyze device fingerprint: ${deviceCharacteristics.deviceId}`, error);
-      throw error;
-    }
+      this.logger.error(`Failed to analyze device fingerprint: ${deviceCharacteristics.deviceId}`, error);throw error;}
   }
 
   // ===== DEVICE REPUTATION MANAGEMENT =====
@@ -452,9 +383,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
 
       if (!reputation) {
         // Load from Redis
-        const reputationData = await this.redisClient.get(`device_reputation:${deviceId}`);
-        if (reputationData) {
-          reputation = JSON.parse(reputationData);
+        const reputationData = await this.redisClient.get(`device_reputation:${deviceId}`);if (reputationData) {reputation = JSON.parse(reputationData);
           if (reputation) {
             this.deviceCache.set(deviceId, reputation);
           }
@@ -463,9 +392,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
 
       return reputation || null;
     } catch (error) {
-      this.logger.error(`Failed to get device reputation: ${deviceId}`, error);
-      return null;
-    }
+      this.logger.error(`Failed to get device reputation: ${deviceId}`, error);return null;}
   }
 
   /**
@@ -522,14 +449,10 @@ export class DeviceFingerprintingService implements OnModuleInit {
       // Cache and persist updated reputation
       this.deviceCache.set(deviceId, reputation);
       await this.redisClient.setex(
-        `device_reputation:${deviceId}`,
-        2592000, // 30 days
-        JSON.stringify(reputation)
+        `device_reputation:${deviceId}`,2592000, // 30 daysJSON.stringify(reputation)
       );
 
-      this.logger.debug(`Device reputation updated: ${deviceId}, Score: ${reputation.reputationScore}`);
-    } catch (error) {
-      this.logger.error(`Failed to update device reputation: ${deviceId}`, error);
+      this.logger.debug(`Device reputation updated: ${deviceId}, Score: ${reputation.reputationScore}`);} catch (error) {this.logger.error(`Failed to update device reputation: ${deviceId}`, error);
     }
   }
 
@@ -547,10 +470,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Creating multi-device session for user: ${userId}`);
-
-      const multiDeviceSession: MultiDeviceSession = {
-        userId,
+      this.logger.debug(`Creating multi-device session for user: ${userId}`);const multiDeviceSession: MultiDeviceSession = {userId,
         primaryDeviceId,
         connectedDevices: [],
         createdAt: new Date(),
@@ -563,9 +483,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
 
       // Persist multi-device session
       await this.redisClient.setex(
-        `multi_device_session:${userId}`,
-        3600, // 1 hour
-        JSON.stringify(multiDeviceSession)
+        `multi_device_session:${userId}`,3600, // 1 hourJSON.stringify(multiDeviceSession)
       );
 
       // Audit multi-device session creation
@@ -582,9 +500,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
         metadata: { multiDeviceSession }
       });
 
-      this.logger.log(`Multi-device session created for user: ${userId}`);
-      return multiDeviceSession;
-    } catch (error) {
+      this.logger.log(`Multi-device session created for user: ${userId}`);return multiDeviceSession;} catch (error) {
       this.logger.error(`Failed to create multi-device session for user: ${userId}`, error);
       throw error;
     }
@@ -597,18 +513,12 @@ export class DeviceFingerprintingService implements OnModuleInit {
    */
   private async generateCanvasFingerprint(): Promise<string> {
     // Placeholder implementation - would generate canvas-based fingerprint
-    return crypto.randomBytes(16).toString('hex');
-  }
-
-  /**
+    return crypto.randomBytes(16).toString('hex');}/**
    * Generate audio fingerprint for enhanced device identification
    */
   private async generateAudioFingerprint(): Promise<string> {
     // Placeholder implementation - would generate audio-based fingerprint
-    return crypto.randomBytes(16).toString('hex');
-  }
-
-  /**
+    return crypto.randomBytes(16).toString('hex');}/**
    * Generate comprehensive fingerprint hash
    */
   private generateComprehensiveFingerprint(characteristics: DeviceCharacteristics): string {
@@ -623,12 +533,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
       characteristics.audioFingerprint,
       JSON.stringify(characteristics.plugins),
       JSON.stringify(characteristics.fontList)
-    ].join('|');
-
-    return crypto.createHash('sha256').update(data).digest('hex');
-  }
-
-  /**
+    ].join('|');return crypto.createHash('sha256').update(data).digest('hex');}/**
    * Detect fingerprint anomalies
    */
   private async detectFingerprintAnomalies(
@@ -640,43 +545,21 @@ export class DeviceFingerprintingService implements OnModuleInit {
     // Check for impossible combinations
     if (characteristics.hardwareConcurrency > 32) {
       anomalies.push({
-        type: 'impossible_hardware',
-        severity: 'high',
-        field: 'hardwareConcurrency',
-        expectedValue: '<=32',
-        actualValue: characteristics.hardwareConcurrency,
-        confidence: 0.9,
-        description: 'Hardware concurrency value exceeds realistic limits'
-      });
-    }
+        type: 'impossible_hardware',severity: 'high',field: 'hardwareConcurrency',expectedValue: '<=32',actualValue: characteristics.hardwareConcurrency,confidence: 0.9,
+        description: 'Hardware concurrency value exceeds realistic limits'});}
 
     // Check for suspicious screen resolutions
-    if (characteristics.screenResolution === '1x1' || characteristics.screenResolution === '0x0') {
-      anomalies.push({
-        type: 'suspicious_screen',
-        severity: 'medium',
-        field: 'screenResolution',
-        expectedValue: 'valid resolution',
-        actualValue: characteristics.screenResolution,
-        confidence: 0.8,
-        description: 'Screen resolution indicates potential automation or spoofing'
-      });
-    }
+    if (characteristics.screenResolution === '1x1' || characteristics.screenResolution === '0x0') {anomalies.push({type: 'suspicious_screen',severity: 'medium',field: 'screenResolution',expectedValue: 'valid resolution',actualValue: characteristics.screenResolution,confidence: 0.8,
+        description: 'Screen resolution indicates potential automation or spoofing'});}
 
     // Check for user agent inconsistencies
     if (characteristics.platform && characteristics.userAgent) {
       const platformInUserAgent = characteristics.userAgent.toLowerCase().includes(characteristics.platform.toLowerCase());
-      if (!platformInUserAgent && characteristics.platform !== 'unknown') {
-        anomalies.push({
-          type: 'platform_mismatch',
-          severity: 'medium',
-          field: 'platform',
+      if (!platformInUserAgent && characteristics.platform !== 'unknown') {anomalies.push({type: 'platform_mismatch',severity: 'medium',field: 'platform',
           expectedValue: `platform matching user agent`,
           actualValue: characteristics.platform,
           confidence: 0.7,
-          description: 'Platform does not match user agent information'
-        });
-      }
+          description: 'Platform does not match user agent information'});}
     }
 
     return anomalies;
@@ -696,15 +579,9 @@ export class DeviceFingerprintingService implements OnModuleInit {
     // Base risk from anomalies
     anomalies.forEach(anomaly => {
       switch (anomaly.severity) {
-        case 'high':
-          riskScore += 30 * anomaly.confidence;
-          break;
-        case 'medium':
-          riskScore += 20 * anomaly.confidence;
-          break;
-        case 'low':
-          riskScore += 10 * anomaly.confidence;
-          break;
+        case 'high':riskScore += 30 * anomaly.confidence;break;
+        case 'medium':riskScore += 20 * anomaly.confidence;break;
+        case 'low':riskScore += 10 * anomaly.confidence;break;
       }
     });
 
@@ -740,9 +617,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
     riskScore: number,
     anomalies: FingerprintAnomaly[]
   ): DeviceTrustLevel {
-    if (riskScore >= 80 || anomalies.some(a => a.severity === 'high')) {
-      return DeviceTrustLevel.UNTRUSTED;
-    }
+    if (riskScore >= 80 || anomalies.some(a => a.severity === 'high')) {return DeviceTrustLevel.UNTRUSTED;}
 
     if (riskScore >= 60) {
       return DeviceTrustLevel.LOW_TRUST;
@@ -771,17 +646,13 @@ export class DeviceFingerprintingService implements OnModuleInit {
     anomalies: FingerprintAnomaly[],
     riskScore: number
   ): FingerprintValidationStatus {
-    if (anomalies.some(a => a.type === 'impossible_hardware' || a.type === 'spoofed_values')) {
-      return FingerprintValidationStatus.SPOOFED;
-    }
+    if (anomalies.some(a => a.type === 'impossible_hardware' || a.type === 'spoofed_values')) {return FingerprintValidationStatus.SPOOFED;}
 
     if (riskScore >= 80) {
       return FingerprintValidationStatus.INVALID;
     }
 
-    if (riskScore >= 60 || anomalies.some(a => a.severity === 'high')) {
-      return FingerprintValidationStatus.SUSPICIOUS;
-    }
+    if (riskScore >= 60 || anomalies.some(a => a.severity === 'high')) {return FingerprintValidationStatus.SUSPICIOUS;}
 
     return FingerprintValidationStatus.VALID;
   }
@@ -793,23 +664,12 @@ export class DeviceFingerprintingService implements OnModuleInit {
     trustLevel: DeviceTrustLevel,
     riskScore: number,
     validationStatus: FingerprintValidationStatus
-  ): 'allow' | 'challenge' | 'block' {
-    if (validationStatus === FingerprintValidationStatus.SPOOFED ||
-        validationStatus === FingerprintValidationStatus.BLOCKED ||
+  ): 'allow' | 'challenge' | 'block' {if (validationStatus === FingerprintValidationStatus.SPOOFED ||validationStatus === FingerprintValidationStatus.BLOCKED ||
         trustLevel === DeviceTrustLevel.UNTRUSTED) {
-      return 'block';
-    }
-
-    if (riskScore >= 40 ||
+      return 'block';}if (riskScore >= 40 ||
         validationStatus === FingerprintValidationStatus.SUSPICIOUS ||
         trustLevel === DeviceTrustLevel.LOW_TRUST) {
-      return 'challenge';
-    }
-
-    return 'allow';
-  }
-
-  /**
+      return 'challenge';}return 'allow';}/**
    * Calculate confidence score for fingerprint analysis
    */
   private calculateConfidenceScore(
@@ -819,8 +679,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
     let confidence = 0.5; // Base confidence
 
     // Increase confidence based on available data points
-    if (characteristics.userAgent !== 'unknown') confidence += 0.1;
-    if (characteristics.screenResolution !== 'unknown') confidence += 0.1;
+    if (characteristics.userAgent !== 'unknown') confidence += 0.1;if (characteristics.screenResolution !== 'unknown') confidence += 0.1;
     if (characteristics.canvasFingerprint) confidence += 0.1;
     if (characteristics.audioFingerprint) confidence += 0.1;
     if (characteristics.plugins.length > 0) confidence += 0.1;
@@ -844,13 +703,7 @@ export class DeviceFingerprintingService implements OnModuleInit {
   ): string[] {
     const reasoning: string[] = [];
 
-    reasoning.push(`Trust level: ${trustLevel} (Risk score: ${riskScore})`);
-    reasoning.push(`Validation status: ${validationStatus}`);
-
-    if (anomalies.length > 0) {
-      reasoning.push(`${anomalies.length} anomalies detected:`);
-      anomalies.forEach(anomaly => {
-        reasoning.push(`  - ${anomaly.description} (${anomaly.severity} severity)`);
+    reasoning.push(`Trust level: ${trustLevel} (Risk score: ${riskScore})`);reasoning.push(`Validation status: ${validationStatus}`);if (anomalies.length > 0) {reasoning.push(`${anomalies.length} anomalies detected:`);anomalies.forEach(anomaly => {reasoning.push(`  - ${anomaly.description} (${anomaly.severity} severity)`);
       });
     }
 
@@ -885,15 +738,11 @@ export class DeviceFingerprintingService implements OnModuleInit {
             loadedCount++;
           }
         } catch (error) {
-          this.logger.warn(`Failed to load device reputation from key: ${key}`, error);
-        }
-      }
+          this.logger.warn(`Failed to load device reputation from key: ${key}`, error);}}
 
       this.logger.log(`Loaded ${loadedCount} device reputations from Redis`);
     } catch (error) {
-      this.logger.error('Failed to load device reputations', error);
-    }
-  }
+      this.logger.error('Failed to load device reputations', error);}}
 
   /**
    * Calculate updated reputation score
@@ -905,26 +754,14 @@ export class DeviceFingerprintingService implements OnModuleInit {
     let score = reputation.reputationScore;
 
     // Adjust based on analysis results
-    if (analysis.recommendation === 'allow') {
-      score += 2;
-    } else if (analysis.recommendation === 'challenge') {
-      score -= 1;
-    } else if (analysis.recommendation === 'block') {
-      score -= 10;
-    }
+    if (analysis.recommendation === 'allow') {score += 2;} else if (analysis.recommendation === 'challenge') {score -= 1;} else if (analysis.recommendation === 'block') {score -= 10;}
 
     // Adjust based on anomalies
     analysis.anomalies.forEach(anomaly => {
       switch (anomaly.severity) {
-        case 'high':
-          score -= 5;
-          break;
-        case 'medium':
-          score -= 3;
-          break;
-        case 'low':
-          score -= 1;
-          break;
+        case 'high':score -= 5;break;
+        case 'medium':score -= 3;break;
+        case 'low':score -= 1;break;
       }
     });
 

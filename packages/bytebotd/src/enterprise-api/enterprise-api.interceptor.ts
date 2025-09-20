@@ -27,16 +27,7 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
-import { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { ByteBotdUser } from '../auth/guards/jwt-auth.guard';
-
-// ===== INTERCEPTOR TYPES =====
-
-/**
+} from '@nestjs/common';import { Observable, throwError } from 'rxjs';import { map, catchError, tap } from 'rxjs/operators';import { Request, Response } from 'express';import { ConfigService } from '@nestjs/config';import { ByteBotdUser } from '../auth/guards/jwt-auth.guard';// ===== INTERCEPTOR TYPES =====/**
  * Extended Request interface with optional route and user properties
  */
 interface ExtendedRequest extends Request<Record<string, unknown>, unknown, unknown, Record<string, unknown>, Record<string, unknown>> {
@@ -95,9 +86,7 @@ interface PerformanceMetrics {
 interface SecurityValidationResult {
   isValid: boolean;
   issues: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  remediationSuggestions: string[];
-}
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';remediationSuggestions: string[];}
 
 // ===== ENTERPRISE API INTERCEPTOR =====
 
@@ -132,15 +121,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     rateLimitThreshold: 100, // requests per minute
     maxResponseTimeHistory: 1000,
     securityHeaders: {
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Content-Security-Policy': "default-src 'self'",
-      'Permissions-Policy': 'geolocation=(), camera=(), microphone=()',
-    },
-  };
+      'X-Content-Type-Options': 'nosniff','X-Frame-Options': 'DENY','X-XSS-Protection': '1; mode=block','Strict-Transport-Security': 'max-age=31536000; includeSubDomains','Referrer-Policy': 'strict-origin-when-cross-origin','Content-Security-Policy': "default-src 'self'','Permissions-Policy': 'geolocation=(), camera=(), microphone=()',},};
 
   constructor(private readonly configService: ConfigService) {
     this.logger.log('Enterprise API Interceptor initialized');
@@ -166,8 +147,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
       return throwError(() => new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Security validation failed',
-          error: 'Invalid Request',
+          message: 'Security validation failed',error: 'Invalid Request',
           details: securityValidation.issues,
           operationId: requestContext.operationId,
         },
@@ -185,10 +165,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
       return throwError(() => new HttpException(
         {
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
-          message: 'Rate limit exceeded',
-          error: 'Too Many Requests',
-          operationId: requestContext.operationId,
-        },
+          message: 'Rate limit exceeded',error: 'Too Many Requests',operationId: requestContext.operationId,},
         HttpStatus.TOO_MANY_REQUESTS,
       ));
     }
@@ -197,12 +174,9 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     this.setSecurityHeaders(response);
 
     // Set request context headers
-    response.setHeader('X-Operation-ID', requestContext.operationId);
-    response.setHeader('X-Request-Timestamp', new Date().toISOString());
+    response.setHeader('X-Operation-ID', requestContext.operationId);response.setHeader('X-Request-Timestamp', new Date().toISOString());
 
-    this.logger.debug(`[${requestContext.operationId}] Processing Enterprise API request`, {
-      operationId: requestContext.operationId,
-      method: requestContext.method,
+    this.logger.debug(`[${requestContext.operationId}] Processing Enterprise API request`, {operationId: requestContext.operationId,method: requestContext.method,
       endpoint: requestContext.endpoint,
       userId: requestContext.userId,
       ipAddress: requestContext.ipAddress,
@@ -212,9 +186,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         // Log successful request start
-        this.logger.debug(`[${requestContext.operationId}] Request processing started`);
-      }),
-      map((data) => {
+        this.logger.debug(`[${requestContext.operationId}] Request processing started`);}),map((data) => {
         // Post-processing: Add metadata and finalize response
         const processingTime = Date.now() - requestContext.startTime;
         const responseMetadata = this.buildResponseMetadata(requestContext, processingTime, response.statusCode);
@@ -231,8 +203,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
         });
 
         // Add response metadata
-        response.setHeader('X-Processing-Time', processingTime.toString());
-        response.setHeader('X-Response-Timestamp', new Date().toISOString());
+        response.setHeader('X-Processing-Time', processingTime.toString());response.setHeader('X-Response-Timestamp', new Date().toISOString());
         
         // Return enhanced response
         return this.enhanceResponse(data, responseMetadata);
@@ -253,8 +224,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
         });
 
         // Add error metadata to response
-        response.setHeader('X-Processing-Time', processingTime.toString());
-        response.setHeader('X-Error-Timestamp', new Date().toISOString());
+        response.setHeader('X-Processing-Time', processingTime.toString());response.setHeader('X-Error-Timestamp', new Date().toISOString());
         
         return throwError(() => error as Error);
       }),
@@ -267,9 +237,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    * Build comprehensive request context
    */
   private buildRequestContext(request: Request): EnterpriseRequestContext {
-    const operationId = `intercept${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const extendedRequest = request as ExtendedRequest;
-    const endpoint = `${request.method}:${extendedRequest.route?.path ?? request.url}`;
+    const operationId = `intercept${Date.now()}${Math.random().toString(36).substring(7)}`;const extendedRequest = request as ExtendedRequest;const endpoint = `${request.method}:${extendedRequest.route?.path ?? request.url}`;
     
     return {
       operationId,
@@ -279,10 +247,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
       userId: extendedRequest.user?.id,
       userRole: extendedRequest.user?.role,
       ipAddress: this.getClientIpAddress(request),
-      userAgent: request.headers['user-agent'] ?? 'unknown',
-      conversationId: request.headers['x-conversation-id'] as string,
-      requestSize: this.calculateRequestSize(request),
-    };
+      userAgent: request.headers['user-agent'] ?? 'unknown',conversationId: request.headers['x-conversation-id'] as string,requestSize: this.calculateRequestSize(request),};
   }
 
   /**
@@ -313,50 +278,19 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private validateRequestSecurity(request: Request, context: EnterpriseRequestContext): SecurityValidationResult {
     const issues: string[] = [];
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
-    const remediationSuggestions: string[] = [];
-
-    // Check for common security issues
+    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';const remediationSuggestions: string[] = [];// Check for common security issues
     
     // 1. Validate Content-Type for POST/PUT requests
-    if (['POST', 'PUT', 'PATCH'].includes(context.method)) {
-      const contentType = request.headers['content-type'];
-      if (!contentType || (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {
-        issues.push('Invalid or missing Content-Type header');
-        riskLevel = 'MEDIUM';
-        remediationSuggestions.push('Use application/json Content-Type for API requests');
-      }
-    }
+    if (['POST', 'PUT', 'PATCH'].includes(context.method)) {const contentType = request.headers['content-type'];if (!contentType || (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {issues.push('Invalid or missing Content-Type header');riskLevel = 'MEDIUM';remediationSuggestions.push('Use application/json Content-Type for API requests');}}
 
     // 2. Check for suspicious User-Agent
     if (!context.userAgent || context.userAgent.length < 10) {
-      issues.push('Suspicious or missing User-Agent header');
-      riskLevel = 'MEDIUM';
-      remediationSuggestions.push('Provide a valid User-Agent header');
-    }
-
-    // 3. Validate request size
+      issues.push('Suspicious or missing User-Agent header');riskLevel = 'MEDIUM';remediationSuggestions.push('Provide a valid User-Agent header');}// 3. Validate request size
     if (context.requestSize > 10 * 1024 * 1024) { // 10MB
-      issues.push('Request size exceeds maximum allowed limit');
-      riskLevel = 'HIGH';
-      remediationSuggestions.push('Reduce request payload size');
-    }
-
-    // 4. Check for SQL injection patterns
+      issues.push('Request size exceeds maximum allowed limit');riskLevel = 'HIGH';remediationSuggestions.push('Reduce request payload size');}// 4. Check for SQL injection patterns
     const url = request.url.toLowerCase();
-    const suspiciousPatterns = ['union select', 'drop table', '1=1', 'or 1=1', 'script>', '<script'];
-    if (suspiciousPatterns.some(pattern => url.includes(pattern))) {
-      issues.push('Potential injection attack detected in URL');
-      riskLevel = 'CRITICAL';
-      remediationSuggestions.push('Remove suspicious patterns from request');
-    }
-
-    // 5. Validate headers for XSS attempts
-    const headerValues = Object.values(request.headers).join(' ').toLowerCase();
-    if (headerValues.includes('<script') ?? headerValues.includes('javascript:')) {
-      issues.push('Potential XSS attack detected in headers');
-      riskLevel = 'CRITICAL';
-      remediationSuggestions.push('Remove script content from headers');
+    const suspiciousPatterns = ['union select', 'drop table', '1=1', 'or 1=1', 'script>', '<script'];if (suspiciousPatterns.some(pattern => url.includes(pattern))) {issues.push('Potential injection attack detected in URL');riskLevel = 'CRITICAL';remediationSuggestions.push('Remove suspicious patterns from request');}// 5. Validate headers for XSS attempts
+    const headerValues = Object.values(request.headers).join(' ').toLowerCase();if (headerValues.includes('<script') ?? headerValues.includes('javascript:')) {issues.push('Potential XSS attack detected in headers');riskLevel = 'CRITICAL';remediationSuggestions.push('Remove script content from headers');
     }
 
     return {
@@ -471,9 +405,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private enhanceResponse(data: unknown, metadata: EnterpriseResponseMetadata): unknown {
     // For non-object responses, return as-is
-    if (typeof data !== 'object' || data === null) {
-      return data;
-    }
+    if (typeof data !== 'object' || data === null) {return data;}
 
     // Add enterprise metadata to response
     return {
@@ -498,12 +430,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
-      (request.headers['x-real-ip'] as string) ??
-      request.socket?.remoteAddress ??
-      'unknown'
-    );
-  }
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??(request.headers['x-real-ip'] as string) ??request.socket?.remoteAddress ??'unknown');}
 
   /**
    * Calculate request size

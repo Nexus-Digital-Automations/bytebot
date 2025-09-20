@@ -1,23 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { spawn, ChildProcess as _ChildProcess } from 'child_process';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  CreateBrowserTaskDto,
+import { Injectable, Logger } from '@nestjs/common';import { spawn, ChildProcess as _ChildProcess } from 'child_process';import { promises as fs } from 'fs';import * as path from 'path';import { v4 as uuidv4 } from 'uuid';import {CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserActionType,
   BrowserActionDto,
-} from './dto/browser-task.dto';
-import { AsyncJobResultDto, CreateAsyncJobDto } from './dto/async-job.dto';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-import { BrowserAsyncJobService } from './browser-async-job.service';
-import { BrowserSessionDto } from './dto/browser-session.dto';
-
-/**
- * Browser element data interface for typed extraction results
+} from './dto/browser-task.dto';import { AsyncJobResultDto, CreateAsyncJobDto } from './dto/async-job.dto';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import { BrowserAsyncJobService } from './browser-async-job.service';import { BrowserSessionDto } from './dto/browser-session.dto';/*** Browser element data interface for typed extraction results
  * @public - Exported for use in controllers and other modules
  */
 export interface BrowserElementData {
@@ -94,10 +80,7 @@ interface _BrowserActionParams {
 interface ScreenshotOptions {
   fullPage?: boolean;
   quality?: number;
-  format?: 'png' | 'jpeg' | 'webp';
-}
-
-/**
+  format?: 'png' | 'jpeg' | 'webp';}/**
  * Browser-Use Service - Core Python Integration Layer
  *
  * Provides high-level interface for browser automation by integrating with
@@ -118,24 +101,15 @@ export class BrowserUseService {
   private readonly browserUsePath: string;
   private readonly workingDirectory: string;
   private readonly tempDirectory: string;
-  private readonly pythonExecutable: string = 'python3';
-
-  constructor(
-    private readonly sessionService: BrowserSessionService,
+  private readonly pythonExecutable: string = 'python3';constructor(private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
     private readonly asyncJobService: BrowserAsyncJobService,
   ) {
     // Local-only paths - no cloud dependencies
     this.browserUsePath =
       process.env.BROWSER_USE_PATH ??
-      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
-    this.workingDirectory =
-      process.env.BROWSER_USE_WORK_DIR ??
-      path.join(process.cwd(), 'browser-use-workspace');
-    this.tempDirectory = path.join(this.workingDirectory, 'temp');
-
-    this.initializeWorkspace().catch((err) => {
-      this.logger.error('Failed to initialize browser-use workspace', err);
+      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';this.workingDirectory =process.env.BROWSER_USE_WORK_DIR ??
+      path.join(process.cwd(), 'browser-use-workspace');this.tempDirectory = path.join(this.workingDirectory, 'temp');this.initializeWorkspace().catch((err) => {this.logger.error('Failed to initialize browser-use workspace', err);
     });
   }
 
@@ -218,9 +192,7 @@ export class BrowserUseService {
         }),
       });
 
-      this.logger.log(`Browser task completed: ${taskId}`, {
-        taskId,
-        status: result.status,
+      this.logger.log(`Browser task completed: ${taskId}`, {taskId,status: result.status,
         executionTimeMs: result.executionTimeMs,
         actionsCompleted: result.actionsCompleted,
       });
@@ -243,9 +215,7 @@ export class BrowserUseService {
         executionTimeMs,
         errorMessage,
         errorDetails: {
-          type: error instanceof Error ? error.constructor.name : 'UnknownError',
-          stack: error instanceof Error ? error.stack : undefined,
-          timestamp: new Date(),
+          type: error instanceof Error ? error.constructor.name : 'UnknownError',stack: error instanceof Error ? error.stack : undefined,timestamp: new Date(),
         },
       });
 
@@ -259,9 +229,7 @@ export class BrowserUseService {
         totalActions: taskDto.actions.length,
         errorMessage,
         errorDetails: {
-          type: error instanceof Error ? error.constructor.name : 'UnknownError',
-          message: errorMessage,
-          timestamp: new Date(),
+          type: error instanceof Error ? error.constructor.name : 'UnknownError',message: errorMessage,timestamp: new Date(),
         },
         logs: [
           {
@@ -296,20 +264,11 @@ export class BrowserUseService {
       dimensions: { width: number; height: number };
     };
   }> {
-    this.logger.log(`Capturing screenshot for session: ${sessionId}`);
-
-    try {
-      const session = this.sessionService.getSession(sessionId);
+    this.logger.log(`Capturing screenshot for session: ${sessionId}`);try {const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate unique filename
+        throw new Error(`Session not found: ${sessionId}`);}// Generate unique filename
       const timestamp = new Date();
-      const filename = `screenshot${sessionId}${Date.now()}.${config?.format ?? 'png'}`;
-      const filepath = path.join(this.tempDirectory, filename);
-
-      // Execute Python script for screenshot capture
+      const filename = `screenshot${sessionId}${Date.now()}.${config?.format ?? 'png'}`;const filepath = path.join(this.tempDirectory, filename);// Execute Python script for screenshot capture
       const screenshotScript = this.generateScreenshotScript(
         sessionId,
         filepath,
@@ -341,9 +300,7 @@ export class BrowserUseService {
       };
     } catch (error) {
       this.logger.error(
-        `Screenshot capture failed for session: ${sessionId}`,
-        error,
-      );
+        `Screenshot capture failed for session: ${sessionId}`,error,);
       throw error;
     }
   }
@@ -360,15 +317,9 @@ export class BrowserUseService {
       maxDepth?: number;
     },
   ): Promise<BrowserDataExtractionResult> {
-    this.logger.log(`Extracting DOM data for session: ${sessionId}`);
-
-    try {
-      const session = this.sessionService.getSession(sessionId);
+    this.logger.log(`Extracting DOM data for session: ${sessionId}`);try {const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      const startTime = Date.now();
+        throw new Error(`Session not found: ${sessionId}`);}const startTime = Date.now();
 
       // Generate DOM extraction script
       const extractionScript = this.generateDomExtractionScript(
@@ -378,10 +329,7 @@ export class BrowserUseService {
       const result = await this.executePythonScript(extractionScript);
 
       if (!result.success) {
-        throw new Error(`DOM extraction failed: ${result.error}`);
-      }
-
-      const extractionTime = Date.now() - startTime;
+        throw new Error(`DOM extraction failed: ${result.error}`);}const extractionTime = Date.now() - startTime;
       const extractedData = JSON.parse(result.output) as RawExtractionData;
 
       return {
@@ -395,9 +343,7 @@ export class BrowserUseService {
       };
     } catch (error) {
       this.logger.error(
-        `DOM extraction failed for session: ${sessionId}`,
-        error,
-      );
+        `DOM extraction failed for session: ${sessionId}`,error,);
       throw error;
     }
   }
@@ -406,9 +352,7 @@ export class BrowserUseService {
    * Create async job for long-running browser automation tasks
    */
   async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating job: ${_dto.name}`, {
-      jobName: _dto.name,
-      jobType: _dto.jobType,
+    this.logger.log(`Creating job: ${_dto.name}`, {jobName: _dto.name,jobType: _dto.jobType,
       priority: _dto.priority,
     });
 
@@ -419,19 +363,13 @@ export class BrowserUseService {
    * Get async job status and results
    */
   async getAsyncJob(_jobId: string): Promise<AsyncJobResultDto | null> {
-    this.logger.log(`Getting job: ${_jobId}`);
-
-    return await this.asyncJobService.getAsyncJob(_jobId);
-  }
+    this.logger.log(`Getting job: ${_jobId}`);return await this.asyncJobService.getAsyncJob(_jobId);}
 
   /**
    * Cancel async job
    */
   async cancelAsyncJob(_jobId: string): Promise<void> {
-    this.logger.log(`Cancelling job: ${_jobId}`);
-
-    return await this.asyncJobService.cancelAsyncJob(_jobId);
-  }
+    this.logger.log(`Cancelling job: ${_jobId}`);return await this.asyncJobService.cancelAsyncJob(_jobId);}
 
   /**
    * Take screenshot (wrapper for captureScreenshot with controller-expected interface)
@@ -475,9 +413,7 @@ export class BrowserUseService {
         metadata: result.metadata,
       };
     } catch (error) {
-      this.logger.error(`Screenshot failed for session: ${sessionId}`, error);
-      throw error;
-    }
+      this.logger.error(`Screenshot failed for session: ${sessionId}`, error);throw error;}
   }
 
   /**
@@ -491,9 +427,7 @@ export class BrowserUseService {
       timeout?: number;
     },
   ): Promise<Record<string, BrowserElementData>> {
-    this.logger.log(`Extracting page data for session: ${sessionId}`, {
-      sessionId,
-      selectorsCount: Object.keys(config.selectors).length,
+    this.logger.log(`Extracting page data for session: ${sessionId}`, {sessionId,selectorsCount: Object.keys(config.selectors).length,
       waitForSelector: config.waitForSelector,
       timeout: config.timeout,
     });
@@ -617,9 +551,7 @@ export class BrowserUseService {
         logs.push({
           timestamp: new Date(),
           level: 'info',
-          message: `Action completed: ${action.type}`,
-          actionIndex: i,
-          screenshot: actionResult.screenshot,
+          message: `Action completed: ${action.type}`,actionIndex: i,screenshot: actionResult.screenshot,
           metadata: {
             actionType: action.type,
             executionTime: actionResult.executionTime,
@@ -640,9 +572,7 @@ export class BrowserUseService {
         // Update task progress
         await this.taskService.updateTaskProgress(task.taskId, {
           actionsCompleted,
-          currentStep: `Completed: ${action.type}`,
-          progress: Math.round(
-            (actionsCompleted / taskDto.actions.length) * 100,
+          currentStep: `Completed: ${action.type}`,progress: Math.round((actionsCompleted / taskDto.actions.length) * 100,
           ),
         });
 
@@ -698,20 +628,12 @@ export class BrowserUseService {
 
     try {
       // Generate action script based on type
-      let script = '';
-
-      switch (action.type) {
-        case BrowserActionType.NAVIGATE:
-          script = this.generateNavigationScript(sessionId, action.url ?? '');
-          break;
-        case BrowserActionType.CLICK:
-          script = this.generateClickScript(sessionId, action.selector ?? '');
-          break;
-        case BrowserActionType.TYPE:
+      let script = '';switch (action.type) {case BrowserActionType.NAVIGATE:
+          script = this.generateNavigationScript(sessionId, action.url ?? '');break;case BrowserActionType.CLICK:
+          script = this.generateClickScript(sessionId, action.selector ?? '');break;case BrowserActionType.TYPE:
           script = this.generateTypeScript(
             sessionId,
-            action.selector ?? '',
-            action.text ?? '',
+            action.selector ?? '',action.text ?? '',
           );
           break;
         case BrowserActionType.SCREENSHOT:
@@ -746,9 +668,7 @@ export class BrowserUseService {
             BrowserElementData
           >;
         } catch (parseErr) {
-          this.logger.warn('Failed to parse extracted data', parseErr);
-        }
-      }
+          this.logger.warn('Failed to parse extracted data', parseErr);}}
 
       if (action.type === BrowserActionType.SCREENSHOT) {
         screenshot = result.output; // Base64 screenshot
@@ -786,9 +706,7 @@ export class BrowserUseService {
     // Create new session
     return await this.sessionService.createSession({
       name: `Auto-created session ${Date.now()}`,
-      ...(typeof config === 'object' && config !== null ? config : {}),
-    });
-  }
+      ...(typeof config === 'object' && config !== null ? config : {}),});}
 
   /**
    * Initialize workspace directories
@@ -805,9 +723,7 @@ export class BrowserUseService {
       });
     } catch (error) {
       throw new Error(
-        `Failed to initialize workspace: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+        `Failed to initialize workspace: ${error instanceof Error ? error.message : String(error)}`,);}
   }
 
   /**
@@ -836,20 +752,11 @@ export class BrowserUseService {
             },
           });
 
-          let stdout = '';
-          let stderr = '';
+          let stdout = '';let stderr = '';childProcess.stdout.on('data', (_data: Buffer) => {stdout += _data.toString();});
 
-          childProcess.stdout.on('data', (_data: Buffer) => {
-            stdout += _data.toString();
-          });
+          childProcess.stderr.on('data', (_data: Buffer) => {stderr += _data.toString();});
 
-          childProcess.stderr.on('data', (_data: Buffer) => {
-            stderr += _data.toString();
-          });
-
-          childProcess.on('close', async (code) => {
-            // Cleanup script file
-            try {
+          childProcess.on('close', async (code) => {// Cleanup script filetry {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {
               this.logger.warn('Failed to cleanup script file', cleanupErr);
@@ -869,27 +776,18 @@ export class BrowserUseService {
             }
           });
 
-          childProcess.on('error', async (_err: Error) => {
-            try {
-              await fs.unlink(scriptFile);
+          childProcess.on('error', async (_err: Error) => {try {await fs.unlink(scriptFile);
             } catch (cleanupErr) {
-              this.logger.warn('Failed to cleanup script file', cleanupErr);
-            }
-
-            resolve({
+              this.logger.warn('Failed to cleanup script file', cleanupErr);}resolve({
               success: false,
-              output: '',
-              error: _err.message,
-            });
+              output: '',error: _err.message,});
           });
         })
         .catch((_writeErr: Error) => {
           resolve({
             success: false,
             output: '',
-            error: `Failed to write script file: ${_writeErr.message}`,
-          });
-        });
+            error: `Failed to write script file: ${_writeErr.message}`,});});
     });
   }
 
@@ -911,17 +809,9 @@ async def main():
         # Navigate to URL
         await session.navigate(${JSON.stringify(url)})
         
-        print("Navigation completed successfully")
-        await session.close()
-        
-    except Exception as e:
-        print(_f"Navigation failed: {e}")
-        raise e
-
-if _name__ == "__main__":
-    asyncio.run(main())
-`;
-  }
+        print("Navigation completed successfully")await session.close()except Exception as e:
+        print(_f"Navigation failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+";}
 
   private generateClickScript(_sessionId: string, selector: string): string {
     return `
@@ -938,20 +828,9 @@ async def main():
         element = await session.page.query_selector(${JSON.stringify(selector)})
         if element:
             await element.click()
-            print("Click completed successfully")
-        else:
-            raise Exception(f"Element not found: {${JSON.stringify(selector)}}")
-            
-        await session.close()
-        
-    except Exception as e:
-        print(_f"Click failed: {e}")
-        raise e
-
-if _name__ == "__main__":
-    asyncio.run(main())
-`;
-  }
+            print("Click completed successfully")else:raise Exception(f"Element not found: {${JSON.stringify(selector)}}")await session.close()except Exception as e:
+        print(_f"Click failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+";}
 
   private generateTypeScript(
     sessionId: string,
@@ -972,20 +851,9 @@ async def main():
         element = await session.page.query_selector(${JSON.stringify(selector)})
         if element:
             await element.fill(${JSON.stringify(text)})
-            print("Type completed successfully")
-        else:
-            raise Exception(f"Element not found: {${JSON.stringify(selector)}}")
-            
-        await session.close()
-        
-    except Exception as e:
-        print(_f"Type failed: {e}")
-        raise e
-
-if _name__ == "__main__":
-    asyncio.run(main())
-`;
-  }
+            print("Type completed successfully")else:raise Exception(f"Element not found: {${JSON.stringify(selector)}}")await session.close()except Exception as e:
+        print(_f"Type failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+";}
 
   private generateScreenshotScript(
     sessionId: string,
@@ -1003,29 +871,15 @@ async def main():
         
         # Capture screenshot
         screenshot = await session.page.screenshot(
-            path=${filepath ? JSON.stringify(filepath) : 'None'},
-            full_page=${(config as ScreenshotOptions)?.fullPage ?? false},
-            quality=${(config as ScreenshotOptions)?.quality ?? 85},
-            type=${JSON.stringify((config as ScreenshotOptions)?.format ?? 'png')}
-        )
-        
-        if not ${filepath ? 'True' : 'False'}:
+            path=${filepath ? JSON.stringify(filepath) : 'None'},full_page=${(config as ScreenshotOptions)?.fullPage ?? false},quality=${(config as ScreenshotOptions)?.quality ?? 85},
+            type=${JSON.stringify((config as ScreenshotOptions)?.format ?? 'png')})if not ${filepath ? 'True' : 'False'}:
             # Return base64 if no file path
             import base64
             print(base64.b64encode(screenshot).decode())
         else:
-            print("Screenshot saved successfully")
-            
-        await session.close()
-        
-    except Exception as e:
-        print(_f"Screenshot failed: {e}")
-        raise e
-
-if _name__ == "__main__":
-    asyncio.run(main())
-`;
-  }
+            print("Screenshot saved successfully")await session.close()except Exception as e:
+        print(_f"Screenshot failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+";}
 
   private generateExtractionScript(
     sessionId: string,
@@ -1042,37 +896,21 @@ async def main():
         await session.start()
         
         # Extract data
-        if ${selector ? 'True' : 'False'}:
-            elements = await session.page.query_selector_all(${JSON.stringify(selector ?? '')})
-            data = []
-            for element in elements:
+        if ${selector ? 'True' : 'False'}:elements = await session.page.query_selector_all(${JSON.stringify(selector ?? '')})data = []for element in elements:
                 text_content = await element.text_content()
                 inner_html = await element.inner_html()
                 data.append({
-                    'text': text_content,
-                    'html': inner_html
-                })
-        else:
+                    'text': text_content,'html': inner_html})else:
             # Extract all text from page
-            text_content = await session.page.text_content('body')
-            data = {'pageText': text_content}
-        
-        result = {
-            'data': data,
-            'elementsCount': len(data) if isinstance(data, list) else 1,
-            'selectors': [${JSON.stringify(selector ?? 'body')}]
+            text_content = await session.page.text_content('body')data = {'pageText': text_content}result = {'data': data,'elementsCount': len(data) if isinstance(data, list) else 1,'selectors': [${JSON.stringify(selector ?? 'body')}]
         }
         
         print(json.dumps(result))
         await session.close()
         
     except Exception as e:
-        print(_f"Extraction failed: {e}")
-        raise e
-
-if _name__ == "__main__":
-    asyncio.run(main())
-`;
+        print(_f"Extraction failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+";
   }
 
   private generateDomExtractionScript(
@@ -1093,60 +931,15 @@ if _name__ == "__main__":
   private convertActionType(
     actionType: BrowserActionType,
   ):
-    | 'click'
-    | 'type'
-    | 'navigate'
-    | 'screenshot'
-    | 'wait'
-    | 'extract'
-    | 'scroll'
-    | 'fill_form'
-    | 'submit_form'
-    | 'custom' {
-    switch (actionType) {
-      case BrowserActionType.CLICK:
-        return 'click';
-      case BrowserActionType.TYPE:
-        return 'type';
-      case BrowserActionType.NAVIGATE:
-        return 'navigate';
-      case BrowserActionType.SCREENSHOT:
-        return 'screenshot';
-      case BrowserActionType.WAIT_FOR_ELEMENT:
-      case BrowserActionType.WAIT_FOR_URL:
-        return 'wait';
-      case BrowserActionType.EXTRACT_DATA:
-      case BrowserActionType.EXTRACT_TEXT:
-        return 'extract';
-      case BrowserActionType.SCROLL:
-        return 'scroll';
-      case BrowserActionType.FILL_FORM:
-        return 'fill_form';
-      case BrowserActionType.SUBMIT_FORM:
-        return 'submit_form';
-      case BrowserActionType.CUSTOM:
-        return 'custom';
-      default:
-        return 'click'; // fallback
-    }
-  }
+    | 'click'| 'type'| 'navigate'| 'screenshot'| 'wait'| 'extract'| 'scroll'| 'fill_form'| 'submit_form'| 'custom' {switch (actionType) {case BrowserActionType.CLICK:
+        return 'click';case BrowserActionType.TYPE:return 'type';case BrowserActionType.NAVIGATE:return 'navigate';case BrowserActionType.SCREENSHOT:return 'screenshot';case BrowserActionType.WAIT_FOR_ELEMENT:case BrowserActionType.WAIT_FOR_URL:
+        return 'wait';case BrowserActionType.EXTRACT_DATA:case BrowserActionType.EXTRACT_TEXT:
+        return 'extract';case BrowserActionType.SCROLL:return 'scroll';case BrowserActionType.FILL_FORM:return 'fill_form';case BrowserActionType.SUBMIT_FORM:return 'submit_form';case BrowserActionType.CUSTOM:return 'custom';default:return 'click'; // fallback}}
 
   /**
    * Convert log level string to TaskLogEntry level
    */
-  private convertLogLevel(_level: string): 'debug' | 'info' | 'warn' | 'error' {
-    switch (_level.toLowerCase()) {
-      case 'debug':
-        return 'debug';
-      case 'info':
-        return 'info';
-      case 'warn':
-      case 'warning':
-        return 'warn';
-      case 'error':
-        return 'error';
-      default:
-        return 'info'; // fallback
+  private convertLogLevel(_level: string): 'debug' | 'info' | 'warn' | 'error' {switch (_level.toLowerCase()) {case 'debug':return 'debug';case 'info':return 'info';case 'warn':case 'warning':return 'warn';case 'error':return 'error';default:return 'info'; // fallback
     }
   }
 

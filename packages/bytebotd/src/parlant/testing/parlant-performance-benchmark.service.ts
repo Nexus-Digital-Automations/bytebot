@@ -17,15 +17,7 @@
  * Testing: Automated CI/CD integration with performance gates
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { performance } from 'perf_hooks';
-import { ParlantValidationRequest, ParlantValidationResponse as _ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-import { ParlantPerformanceMonitorService } from '../performance/parlant-performance-monitor.service';
-
-// ===== BENCHMARKING INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { performance } from 'perf_hooks';import { ParlantValidationRequest, ParlantValidationResponse as _ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';import { ParlantPerformanceMonitorService } from '../performance/parlant-performance-monitor.service';// ===== BENCHMARKING INTERFACES =====/**
  * Performance benchmark configuration
  */
 export interface BenchmarkConfig {
@@ -129,9 +121,7 @@ export interface LoadTestScenario {
   readonly userJourneys: UserJourney[];
   readonly peakLoad: number;           // Peak concurrent users
   readonly duration: number;           // Test duration in seconds
-  readonly rampPattern: 'linear' | 'exponential' | 'step';
-  readonly expectedMetrics: {
-    readonly averageLatency: number;
+  readonly rampPattern: 'linear' | 'exponential' | 'step';readonly expectedMetrics: {readonly averageLatency: number;
     readonly throughput: number;
     readonly errorRate: number;
   };
@@ -154,10 +144,7 @@ export interface ValidationStep {
   readonly functionName: string;
   readonly riskLevel: RiskLevel;
   readonly parameters: Record<string, unknown>;
-  readonly expectedResult: 'APPROVED' | 'DENIED' | 'ANY';
-}
-
-// ===== PERFORMANCE BENCHMARK SERVICE =====
+  readonly expectedResult: 'APPROVED' | 'DENIED' | 'ANY';}// ===== PERFORMANCE BENCHMARK SERVICE =====
 
 @Injectable()
 export class ParlantPerformanceBenchmarkService {
@@ -165,11 +152,7 @@ export class ParlantPerformanceBenchmarkService {
   
   // Benchmark configurations
   private readonly benchmarkConfigs: Map<string, BenchmarkConfig> = new Map([
-    ['baseline_performance', {
-      name: 'Baseline Performance Test',
-      description: 'Standard performance validation for core Parlant operations',
-      duration: 60,
-      concurrency: 10,
+    ['baseline_performance', {name: 'Baseline Performance Test',description: 'Standard performance validation for core Parlant operations',duration: 60,concurrency: 10,
       rampUpTime: 10,
       warmupRequests: 50,
       targetLatency: 500,
@@ -177,11 +160,7 @@ export class ParlantPerformanceBenchmarkService {
       failureThreshold: 5,
       enabled: true,
     }],
-    ['load_test', {
-      name: 'Load Test',
-      description: 'High-load performance validation',
-      duration: 300,
-      concurrency: 50,
+    ['load_test', {name: 'Load Test',description: 'High-load performance validation',duration: 300,concurrency: 50,
       rampUpTime: 30,
       warmupRequests: 100,
       targetLatency: 750,
@@ -189,11 +168,7 @@ export class ParlantPerformanceBenchmarkService {
       failureThreshold: 10,
       enabled: true,
     }],
-    ['stress_test', {
-      name: 'Stress Test',
-      description: 'Maximum capacity and breaking point validation',
-      duration: 180,
-      concurrency: 100,
+    ['stress_test', {name: 'Stress Test',description: 'Maximum capacity and breaking point validation',duration: 180,concurrency: 100,
       rampUpTime: 60,
       warmupRequests: 200,
       targetLatency: 1000,
@@ -201,11 +176,7 @@ export class ParlantPerformanceBenchmarkService {
       failureThreshold: 25,
       enabled: false,
     }],
-    ['cache_performance', {
-      name: 'Cache Performance Test',
-      description: 'Cache hit rate and performance validation',
-      duration: 120,
-      concurrency: 20,
+    ['cache_performance', {name: 'Cache Performance Test',description: 'Cache hit rate and performance validation',duration: 120,concurrency: 20,
       rampUpTime: 15,
       warmupRequests: 100,
       targetLatency: 100,
@@ -218,56 +189,26 @@ export class ParlantPerformanceBenchmarkService {
   // Load test scenarios
   private readonly loadTestScenarios: LoadTestScenario[] = [
     {
-      name: 'typical_usage',
-      description: 'Typical user behavior simulation',
-      peakLoad: 25,
-      duration: 300,
-      rampPattern: 'linear',
-      userJourneys: [
-        {
-          name: 'low_risk_operations',
-          weight: 0.6,
-          thinkTime: 2000,
+      name: 'typical_usage',description: 'Typical user behavior simulation',peakLoad: 25,duration: 300,
+      rampPattern: 'linear',userJourneys: [{
+          name: 'low_risk_operations',weight: 0.6,thinkTime: 2000,
           steps: [
             {
-              functionName: 'computer_use_click',
-              riskLevel: RiskLevel.LOW,
-              parameters: { x: 100, y: 100 },
-              expectedResult: 'APPROVED',
-            },
-            {
-              functionName: 'computer_use_type',
-              riskLevel: RiskLevel.MINIMAL,
-              parameters: { text: 'hello world' },
-              expectedResult: 'APPROVED',
-            },
-          ],
+              functionName: 'computer_use_click',riskLevel: RiskLevel._LOW,parameters: { x: 100, y: 100 },
+              expectedResult: 'APPROVED',},{
+              functionName: 'computer_use_type',riskLevel: RiskLevel._MINIMAL,parameters: { text: 'hello world' },expectedResult: 'APPROVED',},],
         },
         {
-          name: 'medium_risk_operations',
-          weight: 0.3,
-          thinkTime: 5000,
+          name: 'medium_risk_operations',weight: 0.3,thinkTime: 5000,
           steps: [
             {
-              functionName: 'file_operation',
-              riskLevel: RiskLevel.MEDIUM,
-              parameters: { action: 'read', path: '/tmp/test.txt' },
-              expectedResult: 'ANY',
-            },
-          ],
+              functionName: 'file_operation',riskLevel: RiskLevel._MODERATE,parameters: { action: 'read', path: '/tmp/test.txt' },expectedResult: 'ANY',},],
         },
         {
-          name: 'high_risk_operations',
-          weight: 0.1,
-          thinkTime: 10000,
+          name: 'high_risk_operations',weight: 0.1,thinkTime: 10000,
           steps: [
             {
-              functionName: 'system_command',
-              riskLevel: RiskLevel.HIGH,
-              parameters: { command: 'ls -la' },
-              expectedResult: 'DENIED',
-            },
-          ],
+              functionName: 'system_command',riskLevel: RiskLevel._HIGH,parameters: { command: 'ls -la' },expectedResult: 'DENIED',},],
         },
       ],
       expectedMetrics: {
@@ -280,9 +221,7 @@ export class ParlantPerformanceBenchmarkService {
   
   // Regression configuration
   private readonly regressionConfig: RegressionConfig = {
-    baselineFile: 'baseline_performance.json',
-    tolerancePercent: 10,
-    criticalMetrics: ['averageLatency', 'p95Latency', 'throughput', 'errorRate'],
+    baselineFile: 'baseline_performance.json',tolerancePercent: 10,criticalMetrics: ['averageLatency', 'p95Latency', 'throughput', 'errorRate'],
     monitoringWindow: 7 * 24 * 60 * 60 * 1000, // 7 days
     autoRebaseline: false,
   };
@@ -295,11 +234,7 @@ export class ParlantPerformanceBenchmarkService {
     private readonly configService: ConfigService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService
   ) {
-    const operationId = `benchmark_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant Performance Benchmark Service`, {
-      benchmarkConfigs: Array.from(this.benchmarkConfigs.keys()),
-      loadTestScenarios: this.loadTestScenarios.map(s => s.name),
+    const operationId = `benchmark_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant Performance Benchmark Service`, {benchmarkConfigs: Array.from(this.benchmarkConfigs.keys()),loadTestScenarios: this.loadTestScenarios.map(s => s.name),
       regressionConfig: this.regressionConfig,
       enabledBenchmarks: Array.from(this.benchmarkConfigs.values()).filter(c => c.enabled).length,
     });
@@ -320,11 +255,7 @@ export class ParlantPerformanceBenchmarkService {
     customConfig?: Partial<BenchmarkConfig>
   ): Promise<BenchmarkResult> {
     const config = this.getBenchmarkConfig(benchmarkName, customConfig);
-    const testId = `bench${benchmarkName}${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`Starting benchmark: ${benchmarkName}`, {
-      testId,
-      config: {
+    const testId = `bench${benchmarkName}${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`Starting benchmark: ${benchmarkName}`, {testId,config: {
         duration: config.duration,
         concurrency: config.concurrency,
         targetLatency: config.targetLatency,
@@ -373,27 +304,15 @@ export class ParlantPerformanceBenchmarkService {
       // Store results
       this.storeBenchmarkResult(benchmarkName, benchmarkResult);
 
-      this.logger.log(`Benchmark completed: ${benchmarkName}`, {
-        testId,
-        passed: benchmarkResult.passed,
-        averageLatency: `${benchmarkResult.averageLatency.toFixed(2)}ms`,
-        throughput: `${benchmarkResult.throughput.toFixed(1)} req/s`,
-        errorRate: `${benchmarkResult.errorRate.toFixed(2)}%`,
-        duration: `${benchmarkResult.duration.toFixed(2)}s`,
-      });
-
-      return benchmarkResult;
+      this.logger.log(`Benchmark completed: ${benchmarkName}`, {testId,passed: benchmarkResult.passed,
+        averageLatency: `${benchmarkResult.averageLatency.toFixed(2)}ms`,throughput: `${benchmarkResult.throughput.toFixed(1)} req/s`,errorRate: `${benchmarkResult.errorRate.toFixed(2)}%`,duration: `${benchmarkResult.duration.toFixed(2)}s`,});return benchmarkResult;
 
     } catch (error) {
-      this.logger.error(`Benchmark failed: ${benchmarkName}`, {
-        testId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`Benchmark failed: ${benchmarkName}`, {testId,error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      throw new Error(`Benchmark execution failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Benchmark execution failed: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Execute load test scenario
@@ -404,14 +323,7 @@ export class ParlantPerformanceBenchmarkService {
   async executeLoadTest(scenarioName: string): Promise<BenchmarkResult> {
     const scenario = this.loadTestScenarios.find(s => s.name === scenarioName);
     if (!scenario) {
-      throw new Error(`Load test scenario not found: ${scenarioName}`);
-    }
-
-    const testId = `load${scenarioName}${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`Starting load test: ${scenarioName}`, {
-      testId,
-      peakLoad: scenario.peakLoad,
+      throw new Error(`Load test scenario not found: ${scenarioName}`);}const testId = `load${scenarioName}${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`Starting load test: ${scenarioName}`, {testId,peakLoad: scenario.peakLoad,
       duration: scenario.duration,
       userJourneys: scenario.userJourneys.length,
     });
@@ -442,9 +354,7 @@ export class ParlantPerformanceBenchmarkService {
       };
 
       const benchmarkResult = this.analyzeBenchmarkResults(
-        `load${scenarioName}`,
-        testId,
-        config,
+        `load${scenarioName}`,testId,config,
         startTime,
         endTime,
         results,
@@ -452,22 +362,13 @@ export class ParlantPerformanceBenchmarkService {
         cpuUsage
       );
 
-      this.storeBenchmarkResult(`load${scenarioName}`, benchmarkResult);
-
-      this.logger.log(`Load test completed: ${scenarioName}`, {
-        testId,
-        passed: benchmarkResult.passed,
-        averageLatency: `${benchmarkResult.averageLatency.toFixed(2)}ms`,
-        throughput: `${benchmarkResult.throughput.toFixed(1)} req/s`,
-        totalRequests: benchmarkResult.totalRequests,
-      });
+      this.storeBenchmarkResult(`load${scenarioName}`, benchmarkResult);this.logger.log(`Load test completed: ${scenarioName}`, {testId,passed: benchmarkResult.passed,
+        averageLatency: `${benchmarkResult.averageLatency.toFixed(2)}ms`,throughput: `${benchmarkResult.throughput.toFixed(1)} req/s`,totalRequests: benchmarkResult.totalRequests,});
 
       return benchmarkResult;
 
     } catch (error) {
-      this.logger.error(`Load test failed: ${scenarioName}`, {
-        testId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`Load test failed: ${scenarioName}`, {testId,error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -483,12 +384,7 @@ export class ParlantPerformanceBenchmarkService {
   async executeRegressionTest(benchmarkName: string): Promise<RegressionResult> {
     const baseline = this.baselines.get(benchmarkName);
     if (!baseline) {
-      throw new Error(`No baseline found for benchmark: ${benchmarkName}`);
-    }
-
-    this.logger.log(`Starting regression test: ${benchmarkName}`, {
-      baselineTestId: baseline.testId,
-      baselineDate: baseline.startTime.toISOString(),
+      throw new Error(`No baseline found for benchmark: ${benchmarkName}`);}this.logger.log(`Starting regression test: ${benchmarkName}`, {baselineTestId: baseline.testId,baselineDate: baseline.startTime.toISOString(),
     });
 
     // Execute current benchmark
@@ -497,9 +393,7 @@ export class ParlantPerformanceBenchmarkService {
     // Analyze regression
     const regressionResult = this.analyzeRegression(baseline, currentResult);
 
-    this.logger.log(`Regression test completed: ${benchmarkName}`, {
-      regression: regressionResult.regression,
-      improvements: regressionResult.improvements.length,
+    this.logger.log(`Regression test completed: ${benchmarkName}`, {regression: regressionResult.regression,improvements: regressionResult.improvements.length,
       degradations: regressionResult.degradations.length,
       criticalIssues: regressionResult.criticalIssues.length,
     });
@@ -509,10 +403,7 @@ export class ParlantPerformanceBenchmarkService {
         !regressionResult.regression && 
         regressionResult.improvements.length > 0) {
       this.updateBaseline(benchmarkName, currentResult);
-      this.logger.log(`Baseline updated for improved performance: ${benchmarkName}`);
-    }
-
-    return regressionResult;
+      this.logger.log(`Baseline updated for improved performance: ${benchmarkName}`);}return regressionResult;
   }
 
   /**
@@ -525,16 +416,11 @@ export class ParlantPerformanceBenchmarkService {
     const enabledBenchmarks = Array.from(this.benchmarkConfigs.entries())
       .filter(([, config]) => config.enabled);
 
-    this.logger.log(`Executing ${enabledBenchmarks.length} enabled benchmarks`);
-
-    for (const [benchmarkName] of enabledBenchmarks) {
-      try {
+    this.logger.log(`Executing ${enabledBenchmarks.length} enabled benchmarks`);for (const [benchmarkName] of enabledBenchmarks) {try {
         const result = await this.executeBenchmark(benchmarkName);
         results.set(benchmarkName, result);
       } catch (error) {
-        this.logger.error(`Benchmark failed: ${benchmarkName}`, error);
-      }
-    }
+        this.logger.error(`Benchmark failed: ${benchmarkName}`, error);}}
 
     return results;
   }
@@ -565,9 +451,7 @@ export class ParlantPerformanceBenchmarkService {
     // TODO: Persist baseline to file/database
     // await this.saveBaseline(benchmarkName, result);
     
-    this.logger.log(`Baseline updated: ${benchmarkName}`, {
-      testId: result.testId,
-      averageLatency: result.averageLatency,
+    this.logger.log(`Baseline updated: ${benchmarkName}`, {testId: result.testId,averageLatency: result.averageLatency,
       throughput: result.throughput,
     });
   }
@@ -666,13 +550,7 @@ export class ParlantPerformanceBenchmarkService {
   private calculateRampTarget(scenario: LoadTestScenario, elapsed: number, rampDuration: number): number {
     if (elapsed < rampDuration) {
       switch (scenario.rampPattern) {
-        case 'linear':
-          return Math.floor((elapsed / rampDuration) * scenario.peakLoad);
-        case 'exponential':
-          return Math.floor(scenario.peakLoad * Math.pow(elapsed / rampDuration, 2));
-        case 'step': {
-          const steps = 5;
-          const stepSize = scenario.peakLoad / steps;
+        case 'linear':return Math.floor((elapsed / rampDuration) * scenario.peakLoad);case 'exponential':return Math.floor(scenario.peakLoad * Math.pow(elapsed / rampDuration, 2));case 'step': {const steps = 5;const stepSize = scenario.peakLoad / steps;
           const stepDuration = rampDuration / steps;
           return Math.floor((Math.floor(elapsed / stepDuration) + 1) * stepSize);
         }
@@ -766,26 +644,19 @@ export class ParlantPerformanceBenchmarkService {
     
     // Simulate occasional failures
     if (Math.random() < 0.05) { // 5% failure rate
-      throw new Error('Simulated validation failure');
-    }
-  }
+      throw new Error('Simulated validation failure');}}
 
   private createTestRequest(
     functionName: string = 'test_function',
-    riskLevel: RiskLevel = RiskLevel.LOW,
+    riskLevel: RiskLevel = RiskLevel._LOW,
     parameters: Record<string, unknown> = {}
   ): ParlantValidationRequest {
     return {
       functionName,
       functionParams: parameters,
-      actionDescription: `Test ${functionName} execution`,
-      riskLevel,
-      operationId: `test${Date.now()}${Math.random().toString(36).substring(7)}`,
+      actionDescription: `Test ${functionName} execution`,riskLevel,operationId: `test${Date.now()}${Math.random().toString(36).substring(7)}`,
       context: {
-        userId: 'benchmark_user',
-        sessionId: 'benchmark_session',
-        agentRole: 'test_agent',
-        securityLevel: 'MEDIUM',
+        userId: 'benchmark_user',sessionId: 'benchmark_session',agentRole: 'test_agent',securityLevel: 'MEDIUM',
         conversationHistory: [],
         metadata: { benchmark: true },
       },
@@ -820,12 +691,8 @@ export class ParlantPerformanceBenchmarkService {
     // Check pass/fail criteria
     const failures: string[] = [];
     if (averageLatency > config.targetLatency) {
-      failures.push(`Average latency ${averageLatency.toFixed(2)}ms exceeds target ${config.targetLatency}ms`);
-    }
-    if (throughput < config.targetThroughput) {
-      failures.push(`Throughput ${throughput.toFixed(1)} req/s below target ${config.targetThroughput} req/s`);
-    }
-    if (errorRate > config.failureThreshold) {
+      failures.push(`Average latency ${averageLatency.toFixed(2)}ms exceeds target ${config.targetLatency}ms`);}if (throughput < config.targetThroughput) {
+      failures.push(`Throughput ${throughput.toFixed(1)} req/s below target ${config.targetThroughput} req/s`);}if (errorRate > config.failureThreshold) {
       failures.push(`Error rate ${errorRate.toFixed(2)}% exceeds threshold ${config.failureThreshold}%`);
     }
 
@@ -869,11 +736,11 @@ export class ParlantPerformanceBenchmarkService {
       validationPerformance: {
         averageTime: results.filter(r => r.success).reduce((sum, r) => sum + r.latency, 0) / Math.max(1, results.filter(r => r.success).length),
         riskLevelBreakdown: {
-          [RiskLevel.MINIMAL]: 50,
-          [RiskLevel.LOW]: 75,
-          [RiskLevel.MEDIUM]: 150,
-          [RiskLevel.HIGH]: 300,
-          [RiskLevel.CRITICAL]: 500,
+          [RiskLevel._MINIMAL]: 50,
+          [RiskLevel._LOW]: 75,
+          [RiskLevel._MODERATE]: 150,
+          [RiskLevel._HIGH]: 300,
+          [RiskLevel._CRITICAL]: 500,
         },
       },
       networkPerformance: {
@@ -894,14 +761,7 @@ export class ParlantPerformanceBenchmarkService {
    */
   private isValidNumericMetric(metric: string, result: BenchmarkResult): metric is keyof BenchmarkResult {
     const validMetrics = [
-      'averageLatency', 'medianLatency', 'p95Latency', 'p99Latency', 
-      'maxLatency', 'minLatency', 'throughput', 'errorRate', 'cacheHitRate',
-      'totalRequests', 'successfulRequests', 'failedRequests', 'duration'
-    ];
-    return validMetrics.includes(metric) && typeof result[metric as keyof BenchmarkResult] === 'number';
-  }
-
-  /**
+      'averageLatency', 'medianLatency', 'p95Latency', 'p99Latency', 'maxLatency', 'minLatency', 'throughput', 'errorRate', 'cacheHitRate','totalRequests', 'successfulRequests', 'failedRequests', 'duration'];return validMetrics.includes(metric) && typeof result[metric as keyof BenchmarkResult] === 'number';}/**
    * Safely get numeric value from BenchmarkResult for a given metric
    */
   private getMetricValue(result: BenchmarkResult, metric: string): number | null {
@@ -909,10 +769,7 @@ export class ParlantPerformanceBenchmarkService {
       return null;
     }
     const value = result[metric as keyof BenchmarkResult];
-    return typeof value === 'number' ? value : null;
-  }
-
-  private analyzeRegression(baseline: BenchmarkResult, current: BenchmarkResult): RegressionResult {
+    return typeof value === 'number' ? value : null;}private analyzeRegression(baseline: BenchmarkResult, current: BenchmarkResult): RegressionResult {
     const tolerance = this.regressionConfig.tolerancePercent / 100;
     const improvements: string[] = [];
     const degradations: string[] = [];
@@ -929,26 +786,18 @@ export class ParlantPerformanceBenchmarkService {
         if (metric === 'averageLatency' || metric === 'p95Latency' || metric === 'errorRate') {
           // Lower is better for these metrics
           if (change > tolerance) {
-            const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`;
-            degradations.push(issue);
-            if (change > tolerance * 2) {
+            const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`;degradations.push(issue);if (change > tolerance * 2) {
               criticalIssues.push(issue);
             }
           } else if (change < -tolerance) {
-            improvements.push(`${metric} improved: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${Math.abs(change * 100).toFixed(1)}% decrease)`);
-          }
-        } else {
+            improvements.push(`${metric} improved: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${Math.abs(change * 100).toFixed(1)}% decrease)`);}} else {
           // Higher is better for these metrics (throughput, etc.)
           if (change < -tolerance) {
-            const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${Math.abs(change * 100).toFixed(1)}% decrease)`;
-            degradations.push(issue);
-            if (change < -tolerance * 2) {
+            const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${Math.abs(change * 100).toFixed(1)}% decrease)`;degradations.push(issue);if (change < -tolerance * 2) {
               criticalIssues.push(issue);
             }
           } else if (change > tolerance) {
-            improvements.push(`${metric} improved: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`);
-          }
-        }
+            improvements.push(`${metric} improved: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`);}}
       }
     }
     
@@ -971,40 +820,17 @@ export class ParlantPerformanceBenchmarkService {
 
   private generateRegressionSummary(improvements: string[], degradations: string[], criticalIssues: string[]): string {
     if (criticalIssues.length > 0) {
-      return `CRITICAL: ${criticalIssues.length} critical performance issues detected. Immediate attention required.`;
-    }
-    
-    if (degradations.length > 0) {
-      return `REGRESSION: ${degradations.length} performance degradations detected. Review and optimization recommended.`;
-    }
-    
-    if (improvements.length > 0) {
+      return `CRITICAL: ${criticalIssues.length} critical performance issues detected. Immediate attention required.`;}if (degradations.length > 0) {
+      return `REGRESSION: ${degradations.length} performance degradations detected. Review and optimization recommended.`;}if (improvements.length > 0) {
       return `IMPROVEMENT: ${improvements.length} performance improvements detected. Performance is better than baseline.`;
     }
     
-    return 'STABLE: Performance is within acceptable tolerance of baseline.';
-  }
-
-  private generateRecommendedActions(degradations: string[], criticalIssues: string[]): string[] {
+    return 'STABLE: Performance is within acceptable tolerance of baseline.';}private generateRecommendedActions(degradations: string[], criticalIssues: string[]): string[] {
     const actions: string[] = [];
     
     if (criticalIssues.length > 0) {
-      actions.push('Immediately investigate critical performance degradations');
-      actions.push('Consider rolling back recent changes');
-      actions.push('Enable enhanced monitoring and alerting');
-    }
-    
-    if (degradations.length > 0) {
-      actions.push('Profile application to identify performance bottlenecks');
-      actions.push('Review recent code changes for performance impact');
-      actions.push('Consider performance optimization strategies');
-    }
-    
-    actions.push('Continue monitoring performance trends');
-    actions.push('Schedule regular performance reviews');
-    
-    return actions;
-  }
+      actions.push('Immediately investigate critical performance degradations');actions.push('Consider rolling back recent changes');actions.push('Enable enhanced monitoring and alerting');}if (degradations.length > 0) {
+      actions.push('Profile application to identify performance bottlenecks');actions.push('Review recent code changes for performance impact');actions.push('Consider performance optimization strategies');}actions.push('Continue monitoring performance trends');actions.push('Schedule regular performance reviews');return actions;}
 
   private storeBenchmarkResult(benchmarkName: string, result: BenchmarkResult): void {
     const history = this.testHistory.get(benchmarkName) ?? [];

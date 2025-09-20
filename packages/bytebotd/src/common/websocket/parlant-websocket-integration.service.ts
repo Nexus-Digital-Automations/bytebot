@@ -22,25 +22,14 @@
  * @version 2.0.0
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-
-import {
-  ConversationalWebSocketBridgeService,
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import {ConversationalWebSocketBridgeService,
   ConversationalMessageType,
   type ConversationalMessage,
   type ValidationRequestMessage,
   type ValidationContext,
   type ValidationAction,
   type ConversationalSession,
-} from './conversational-websocket-bridge.service';
-import { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';
-
-// ===== INTEGRATION TYPES =====
-
-/**
+} from './conversational-websocket-bridge.service';import { ParlantWebSocketBridgeService } from './parlant-websocket-bridge.service';// ===== INTEGRATION TYPES =====/**
  * Enhanced validation request with Parlant integration context
  */
 export interface ParlantValidationRequest {
@@ -70,9 +59,7 @@ export interface ParlantValidationContext extends ValidationContext {
  */
 export interface UserProfile {
   readonly userId: string;
-  readonly trustLevel: 'low' | 'medium' | 'high' | 'enterprise';
-  readonly preferences: ValidationPreferences;
-  readonly authorizedActions: string[];
+  readonly trustLevel: 'low' | 'medium' | 'high' | 'enterprise';readonly preferences: ValidationPreferences;readonly authorizedActions: string[];
   readonly restrictions: ValidationRestriction[];
 }
 
@@ -81,19 +68,14 @@ export interface UserProfile {
  */
 export interface ValidationPreferences {
   readonly autoApprovalEnabled: boolean;
-  readonly maxAutoApprovalRisk: 'low' | 'medium' | 'high';
-  readonly confirmationStyle: 'detailed' | 'summary' | 'minimal';
-  readonly progressUpdatesEnabled: boolean;
-  readonly notificationChannels: string[];
+  readonly maxAutoApprovalRisk: 'low' | 'medium' | 'high';readonly confirmationStyle: 'detailed' | 'summary' | 'minimal';readonly progressUpdatesEnabled: boolean;readonly notificationChannels: string[];
 }
 
 /**
  * Validation restrictions
  */
 export interface ValidationRestriction {
-  readonly type: 'action' | 'time' | 'resource' | 'scope';
-  readonly pattern: string;
-  readonly reason: string;
+  readonly type: 'action' | 'time' | 'resource' | 'scope';readonly pattern: string;readonly reason: string;
   readonly expiresAt?: number;
 }
 
@@ -102,18 +84,14 @@ export interface ValidationRestriction {
  */
 export interface ConversationEntry {
   readonly timestamp: number;
-  readonly speaker: 'user' | 'assistant' | 'system';
-  readonly message: string;
-  readonly metadata: Record<string, unknown>;
+  readonly speaker: 'user' | 'assistant' | 'system';readonly message: string;readonly metadata: Record<string, unknown>;
 }
 
 /**
  * Risk assessment details
  */
 export interface RiskAssessment {
-  readonly level: 'low' | 'medium' | 'high' | 'critical';
-  readonly factors: RiskFactor[];
-  readonly score: number;
+  readonly level: 'low' | 'medium' | 'high' | 'critical';readonly factors: RiskFactor[];readonly score: number;
   readonly confidence: number;
   readonly mitigations: RiskMitigation[];
 }
@@ -145,10 +123,7 @@ export interface ComplianceRequirement {
   readonly framework: string; // GDPR, SOX, HIPAA, etc.
   readonly requirement: string;
   readonly mandatory: boolean;
-  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';
-}
-
-/**
+  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';}/**
  * Parlant validation action with enhanced metadata
  */
 export interface ParlantValidationAction extends ValidationAction {
@@ -173,22 +148,12 @@ export interface FallbackAction {
  * Validation priority levels
  */
 export enum ValidationPriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
-}
-
-/**
+  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',EMERGENCY = 'emergency',}/**
  * Parlant streaming options
  */
 export interface ParlantStreamingOptions {
   readonly enableConversationalUpdates: boolean;
-  readonly conversationStyle: 'formal' | 'casual' | 'technical';
-  readonly updateFrequency: 'real_time' | 'periodic' | 'on_demand';
-  readonly includeReasoning: boolean;
-  readonly includeAlternatives: boolean;
+  readonly conversationStyle: 'formal' | 'casual' | 'technical';readonly updateFrequency: 'real_time' | 'periodic' | 'on_demand';readonly includeReasoning: boolean;readonly includeAlternatives: boolean;
 }
 
 /**
@@ -281,11 +246,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    * Initialize the integration service
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `parlant_integration_init_${Date.now()}`;
-
-    this.logger.log(`[${operationId}] Initializing ParlantWebSocketIntegrationService`, {
-      operationId,
-      maxConcurrentValidations: this.performanceTargets.maxConcurrentValidations,
+    const operationId = `parlant_integration_init_${Date.now()}`;this.logger.log(`[${operationId}] Initializing ParlantWebSocketIntegrationService`, {operationId,maxConcurrentValidations: this.performanceTargets.maxConcurrentValidations,
       targetResponseTime: this.performanceTargets.targetResponseTime,
     });
 
@@ -299,9 +260,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       // Initialize integration monitoring
       this.initializeIntegrationMonitoring();
 
-      this.logger.log(`[${operationId}] ParlantWebSocketIntegrationService initialized successfully`, {
-        operationId,
-        bridgesConnected: 2,
+      this.logger.log(`[${operationId}] ParlantWebSocketIntegrationService initialized successfully`, {operationId,bridgesConnected: 2,
         monitoringEnabled: true,
       });
 
@@ -320,18 +279,14 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    */
   private setupConversationalBridgeListeners(): void {
     // Listen for validation requests from conversational bridge
-    this.conversationalBridge.on('validation_request', (event: {
-      sessionId: string;
-      validationId: string;
+    this.conversationalBridge.on('validation_request', (event: {sessionId: string;validationId: string;
       message: ValidationRequestMessage;
     }) => {
       this.handleConversationalValidationRequest(event);
     });
 
     // Listen for user confirmations
-    this.conversationalBridge.on('user_confirmation', (event: {
-      sessionId: string;
-      confirmationId: string;
+    this.conversationalBridge.on('user_confirmation', (event: {sessionId: string;confirmationId: string;
       validationId: string;
       approved: boolean;
     }) => {
@@ -339,31 +294,20 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     });
 
     // Listen for session events
-    this.conversationalBridge.on('session_connected', (event: {
-      sessionId: string;
-      clientId: string;
+    this.conversationalBridge.on('session_connected', (event: {sessionId: string;clientId: string;
       session: ConversationalSession;
     }) => {
       this.handleSessionConnected(event);
     });
 
-    this.conversationalBridge.on('session_disconnected', (event: {
-      sessionId: string;
-      code: number;
+    this.conversationalBridge.on('session_disconnected', (event: {sessionId: string;code: number;
       reason: string;
     }) => {
       this.handleSessionDisconnected(event);
     });
 
     // Listen for performance metrics
-    this.conversationalBridge.on('performance_metrics', (metrics) => {
-      this.handlePerformanceMetrics('conversational', metrics);
-    });
-
-    this.logger.log('Conversational bridge event listeners configured');
-  }
-
-  /**
+    this.conversationalBridge.on('performance_metrics', (metrics) => {this.handlePerformanceMetrics('conversational', metrics);});this.logger.log('Conversational bridge event listeners configured');}/**
    * Set up event listeners for existing Parlant bridge
    */
   private setupParlantBridgeListeners(): void {
@@ -381,10 +325,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     validationId: string;
     message: ValidationRequestMessage;
   }): Promise<void> {
-    const operationId = `parlant_validation_${event.validationId}`;
-    const startTime = performance.now();
-
-    this.logger.log(`[${operationId}] Processing conversational validation request`, {
+    const operationId = `parlant_validation_${event.validationId}`;const startTime = performance.now();this.logger.log(`[${operationId}] Processing conversational validation request`, {
       operationId,
       sessionId: event.sessionId,
       validationId: event.validationId,
@@ -408,17 +349,13 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       const processingTime = performance.now() - startTime;
       this.updateIntegrationMetrics('validation_processing_time', processingTime);
 
-      this.logger.log(`[${operationId}] Conversational validation completed`, {
-        operationId,
-        validationId: event.validationId,
+      this.logger.log(`[${operationId}] Conversational validation completed`, {operationId,validationId: event.validationId,
         result: result.result,
         processingTime,
       });
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to process conversational validation`, {
-        operationId,
-        validationId: event.validationId,
+      this.logger.error(`[${operationId}] Failed to process conversational validation`, {operationId,validationId: event.validationId,
         error: error instanceof Error ? error.message : String(error),
       });
 
@@ -435,10 +372,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     message: ValidationRequestMessage
   ): Promise<ParlantValidationRequest> {
     const conversationId = this.conversationMappings.get(sessionId) ??
-                          `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    // Create enhanced validation context
-    const parlantContext: ParlantValidationContext = {
+                          `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;// Create enhanced validation contextconst parlantContext: ParlantValidationContext = {
       ...message.payload.context,
       parlantConversationId: conversationId,
       userProfile: await this.getUserProfile(message.payload.context.userId),
@@ -460,10 +394,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     // Create Parlant streaming options
     const parlantStreamingOptions: ParlantStreamingOptions = {
       enableConversationalUpdates: message.payload.streamingOptions.enableProgressUpdates,
-      conversationStyle: 'technical', // Default, could be user preference
-      updateFrequency: 'real_time',
-      includeReasoning: true,
-      includeAlternatives: true,
+      conversationStyle: 'technical', // Default, could be user preferenceupdateFrequency: 'real_time',includeReasoning: true,includeAlternatives: true,
     };
 
     return {
@@ -476,10 +407,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       streamingOptions: parlantStreamingOptions,
       auditTrail: [{
         timestamp: Date.now(),
-        event: 'validation_request_created',
-        actor: 'parlant_integration_service',
-        details: {
-          originalMessageId: message.messageId,
+        event: 'validation_request_created',actor: 'parlant_integration_service',details: {originalMessageId: message.messageId,
           sessionId,
           conversationId,
         },
@@ -514,25 +442,16 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
 
     const result: ParlantValidationResult = {
       requestId: request.requestId,
-      result: validationResult.approved ? 'approved' : 'rejected',
-      confidence: validationResult.confidence,
-      reasoning: validationResult.reasoning,
+      result: validationResult.approved ? 'approved' : 'rejected',confidence: validationResult.confidence,reasoning: validationResult.reasoning,
       conversationalResponse: await this.generateConversationalResponse(validationResult),
       conditions: validationResult.conditions,
       auditTrail: [
         ...request.auditTrail,
         {
           timestamp: Date.now(),
-          event: 'validation_completed',
-          actor: 'parlant_validation_service',
-          details: {
-            result: validationResult.approved ? 'approved' : 'rejected',
-            confidence: validationResult.confidence,
-            processingTime,
+          event: 'validation_completed',actor: 'parlant_validation_service',details: {result: validationResult.approved ? 'approved' : 'rejected',confidence: validationResult.confidence,processingTime,
           },
-          complianceFlags: ['audit_required', 'compliance_check'],
-        },
-      ],
+          complianceFlags: ['audit_required', 'compliance_check'],},],
       performanceMetrics: {
         processingTime,
         conversationTurns: 1, // Would be actual count
@@ -569,22 +488,11 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     // Simple approval logic based on risk and trust
     let approved = false;
     let confidence = 0.5;
-    let reasoning = '';
-
-    if (riskScore < 30 && userTrustLevel === 'enterprise') {
-      approved = true;
-      confidence = 0.95;
-      reasoning = 'Low risk action approved for enterprise user';
-    } else if (riskScore < 50 && userTrustLevel === 'high') {
-      approved = true;
-      confidence = 0.85;
-      reasoning = 'Medium risk action approved for high-trust user';
-    } else if (riskScore < 70) {
-      approved = true;
+    let reasoning = '';if (riskScore < 30 && userTrustLevel === 'enterprise') {approved = true;confidence = 0.95;
+      reasoning = 'Low risk action approved for enterprise user';} else if (riskScore < 50 && userTrustLevel === 'high') {approved = true;confidence = 0.85;
+      reasoning = 'Medium risk action approved for high-trust user';} else if (riskScore < 70) {approved = true;
       confidence = 0.7;
-      reasoning = 'Action approved with conditions';
-    } else {
-      approved = false;
+      reasoning = 'Action approved with conditions';} else {approved = false;
       confidence = 0.9;
       reasoning = 'High risk action rejected for security';
     }
@@ -617,12 +525,8 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
         performanceMetrics: result.performanceMetrics,
       },
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compression: true,
-        routingHints: ['validation_result'],
-      },
-    };
+        priority: 'high',requiresAck: true,compression: true,
+        routingHints: ['validation_result'],},};
 
     // Send through conversational bridge (would need to implement this method)
     // await this.conversationalBridge.sendMessage(sessionId, responseMessage);
@@ -656,12 +560,8 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
         recoverable: true,
       },
       metadata: {
-        priority: 'high',
-        requiresAck: false,
-        compression: false,
-        routingHints: ['validation_error'],
-      },
-    };
+        priority: 'high',requiresAck: false,compression: false,
+        routingHints: ['validation_error'],},};
 
     // Send through conversational bridge
     // await this.conversationalBridge.sendMessage(sessionId, errorMessage);
@@ -684,9 +584,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     validationId: string;
     approved: boolean;
   }): Promise<void> {
-    const operationId = `confirmation_${event.confirmationId}`;
-
-    this.logger.log(`[${operationId}] Processing user confirmation`, {
+    const operationId = `confirmation_${event.confirmationId}`;this.logger.log(`[${operationId}] Processing user confirmation`, {
       operationId,
       sessionId: event.sessionId,
       confirmationId: event.confirmationId,
@@ -701,10 +599,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       await this.processUserConfirmation(validation, event.approved);
     }
 
-    this.emit('user_confirmation_processed', event);
-  }
-
-  /**
+    this.emit('user_confirmation_processed', event);}/**
    * Process user confirmation through Parlant logic
    */
   private async processUserConfirmation(
@@ -714,17 +609,10 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     // Add audit entry for user confirmation
     const auditEntry: AuditEntry = {
       timestamp: Date.now(),
-      event: 'user_confirmation',
-      actor: validation.context.userId,
-      details: {
+      event: 'user_confirmation',actor: validation.context.userId,details: {
         validationId: validation.requestId,
         approved,
-        confirmationType: 'explicit',
-      },
-      complianceFlags: ['user_action', 'audit_required'],
-    };
-
-    // Update validation with user decision
+        confirmationType: 'explicit',},complianceFlags: ['user_action', 'audit_required'],};// Update validation with user decision
     const updatedValidation = {
       ...validation,
       auditTrail: [...validation.auditTrail, auditEntry],
@@ -733,9 +621,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     this.activeValidations.set(validation.requestId, updatedValidation);
 
     // Here we would integrate with existing Parlant services to process the confirmation
-    this.logger.log('User confirmation processed through Parlant logic', {
-      validationId: validation.requestId,
-      approved,
+    this.logger.log('User confirmation processed through Parlant logic', {validationId: validation.requestId,approved,
       userId: validation.context.userId,
     });
   }
@@ -754,16 +640,11 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     this.conversationMappings.set(event.sessionId, conversationId);
 
-    this.emit('session_integrated', { sessionId: event.sessionId, conversationId });
-  }
-
-  /**
+    this.emit('session_integrated', { sessionId: event.sessionId, conversationId });}/**
    * Handle session disconnected event
    */
   private handleSessionDisconnected(event: { sessionId: string; code: number; reason: string }): void {
-    this.logger.log('Conversational session disconnected', {
-      sessionId: event.sessionId,
-      code: event.code,
+    this.logger.log('Conversational session disconnected', {sessionId: event.sessionId,code: event.code,
       reason: event.reason,
     });
 
@@ -798,8 +679,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    * Handle performance metrics
    */
   private handlePerformanceMetrics(source: string, metrics: unknown): void {
-    this.logger.debug(`Performance metrics from ${source}`, metrics);
-    this.updateIntegrationMetrics(`${source}_metrics`, Date.now());
+    this.logger.debug(`Performance metrics from ${source}`, metrics);this.updateIntegrationMetrics(`${source}_metrics`, Date.now());
   }
 
   /**
@@ -810,10 +690,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       this.collectIntegrationMetrics();
     }, 30000); // Every 30 seconds
 
-    this.logger.log('Integration monitoring initialized');
-  }
-
-  /**
+    this.logger.log('Integration monitoring initialized');}/**
    * Collect integration metrics
    */
   private collectIntegrationMetrics(): void {
@@ -826,11 +703,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       timestamp: Date.now(),
     };
 
-    this.logger.debug('Integration metrics collected', metrics);
-    this.emit('integration_metrics', metrics);
-  }
-
-  /**
+    this.logger.debug('Integration metrics collected', metrics);this.emit('integration_metrics', metrics);}/**
    * Update integration metrics
    */
   private updateIntegrationMetrics(metric: string, value: number): void {
@@ -854,9 +727,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     const results = Array.from(this.validationResults.values());
     if (results.length === 0) return 0;
 
-    const successful = results.filter(result => result.result === 'approved').length;
-    return successful / results.length;
-  }
+    const successful = results.filter(result => result.result === 'approved').length;return successful / results.length;}
 
   // ===== UTILITY METHODS =====
 
@@ -867,17 +738,8 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     // Mock implementation - would integrate with actual user service
     return {
       userId,
-      trustLevel: 'medium',
-      preferences: {
-        autoApprovalEnabled: false,
-        maxAutoApprovalRisk: 'low',
-        confirmationStyle: 'detailed',
-        progressUpdatesEnabled: true,
-        notificationChannels: ['websocket'],
-      },
-      authorizedActions: ['basic_actions'],
-      restrictions: [],
-    };
+      trustLevel: 'medium',preferences: {autoApprovalEnabled: false,
+        maxAutoApprovalRisk: 'low',confirmationStyle: 'detailed',progressUpdatesEnabled: true,notificationChannels: ['websocket'],},authorizedActions: ['basic_actions'],restrictions: [],};
   }
 
   /**
@@ -894,18 +756,9 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
   private async assessRisk(action: ValidationAction): Promise<RiskAssessment> {
     // Mock implementation - would integrate with risk assessment service
     const baseScore = action.reversible ? 20 : 60;
-    const impactScore = action.impact.scope === 'external' ? 40 : 20;
-
-    return {
-      level: baseScore + impactScore > 50 ? 'high' : 'medium',
-      factors: [
-        {
-          type: 'reversibility',
-          impact: action.reversible ? 0.2 : 0.8,
-          probability: 1.0,
-          description: action.reversible ? 'Action is reversible' : 'Action is not reversible',
-        },
-      ],
+    const impactScore = action.impact.scope === 'external' ? 40 : 20;return {level: baseScore + impactScore > 50 ? 'high' : 'medium',factors: [{
+          type: 'reversibility',impact: action.reversible ? 0.2 : 0.8,probability: 1.0,
+          description: action.reversible ? 'Action is reversible' : 'Action is not reversible',},],
       score: baseScore + impactScore,
       confidence: 0.85,
       mitigations: [],
@@ -919,10 +772,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     // Mock implementation - would integrate with compliance service
     return [
       {
-        framework: 'GDPR',
-        requirement: 'User consent required for data processing',
-        mandatory: true,
-        auditLevel: 'detailed',
+        framework: 'GDPR',requirement: 'User consent required for data processing',mandatory: true,auditLevel: 'detailed',
       },
     ];
   }
@@ -931,17 +781,11 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    * Generate conversational context (mock implementation)
    */
   private async generateConversationalContext(action: ValidationAction): Promise<string> {
-    return `User is requesting to perform: ${action.actionType}`;
-  }
-
-  /**
+    return `User is requesting to perform: ${action.actionType}`;}/**
    * Generate natural language description (mock implementation)
    */
   private async generateNaturalLanguageDescription(action: ValidationAction): Promise<string> {
-    return `This action will ${action.actionType} with the following parameters: ${JSON.stringify(action.parameters)}`;
-  }
-
-  /**
+    return `This action will ${action.actionType} with the following parameters: ${JSON.stringify(action.parameters)}`;}/**
    * Generate expected user response (mock implementation)
    */
   private async generateExpectedUserResponse(action: ValidationAction): Promise<string> {
@@ -954,10 +798,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
   private async generateFallbackActions(_action: ValidationAction): Promise<FallbackAction[]> {
     return [
       {
-        actionType: 'cancel',
-        parameters: {},
-        condition: 'user_rejects',
-        description: 'Cancel the operation if user rejects',
+        actionType: 'cancel',parameters: {},condition: 'user_rejects',description: 'Cancel the operation if user rejects',
       },
     ];
   }
@@ -971,9 +812,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     reasoning: string;
   }): Promise<string> {
     if (validationResult.approved) {
-      return `✅ Action approved with ${Math.round(validationResult.confidence * 100)}% confidence. ${validationResult.reasoning}`;
-    } else {
-      return `❌ Action rejected. ${validationResult.reasoning}`;
+      return `✅ Action approved with ${Math.round(validationResult.confidence * 100)}% confidence. ${validationResult.reasoning}`;} else {return `❌ Action rejected. ${validationResult.reasoning}`;
     }
   }
 
@@ -982,10 +821,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    */
   private mapRiskToPriority(riskLevel: string): ValidationPriority {
     switch (riskLevel) {
-      case 'critical': return ValidationPriority.EMERGENCY;
-      case 'high': return ValidationPriority.CRITICAL;
-      case 'medium': return ValidationPriority.HIGH;
-      case 'low': return ValidationPriority.NORMAL;
+      case 'critical': return ValidationPriority.EMERGENCY;case 'high': return ValidationPriority.CRITICAL;case 'medium': return ValidationPriority.HIGH;case 'low': return ValidationPriority.NORMAL;
       default: return ValidationPriority.NORMAL;
     }
   }
@@ -1025,16 +861,12 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
       action,
       {
         enableProgressUpdates: options.enableConversationalUpdates,
-        updateInterval: options.updateFrequency === 'real_time' ? 1000 : 5000,
-        maxUpdateCount: 10,
-        compressionEnabled: true,
+        updateInterval: options.updateFrequency === 'real_time' ? 1000 : 5000,maxUpdateCount: 10,compressionEnabled: true,
         priorityBoost: false,
       }
     );
 
-    this.logger.log('Integrated validation request created', {
-      sessionId,
-      validationId,
+    this.logger.log('Integrated validation request created', {sessionId,validationId,
       actionType: action.actionType,
     });
 
@@ -1045,10 +877,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
    * Clean shutdown of integration service
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down ParlantWebSocketIntegrationService');
-
-    // Clean up all active validations
-    this.activeValidations.clear();
+    this.logger.log('Shutting down ParlantWebSocketIntegrationService');// Clean up all active validationsthis.activeValidations.clear();
     this.validationResults.clear();
     this.conversationMappings.clear();
     this.integrationMetrics.clear();

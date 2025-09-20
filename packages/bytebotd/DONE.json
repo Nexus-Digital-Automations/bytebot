@@ -4912,10 +4912,106 @@
       "updated_at": "2025-09-20T08:00:11.136Z",
       "archived_at": "2025-09-20T08:00:11.141Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T07:58:00.094Z",
+      "title": "Fix TypeScript explicit any type violations",
+      "description": "Replace all explicit any types with proper TypeScript interfaces and types in test files, specifically focusing on /src/common/websocket/__tests__/concurrent-session-management.spec.ts and other files with no-explicit-any violations",
+      "category": "error",
+      "id": "error_1758355080094_a1c4oe6cw1l",
+      "completed_at": "2025-09-20T08:01:20.000Z",
+      "updated_at": "2025-09-20T08:01:20.000Z",
+      "archived_at": "2025-09-20T08:01:20.008Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T15:07:01.934Z",
+      "title": "Coordinate TypeScript Error Resolution - Monitor 7 Concurrent Agents",
+      "description": "Monitor and coordinate all concurrent TypeScript error fixing agents. Validate incremental progress, resolve conflicts, and ensure successful build completion with zero errors.",
+      "category": "error",
+      "id": "error_1758380821934_j6yu3fbe9ye",
+      "assigned_agent": "dev_session_1758380806234_1_general_a7e1e766",
+      "started_at": "2025-09-20T15:07:21.080Z",
+      "claimed_by": "dev_session_1758380806234_1_general_a7e1e766",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758380806234_1_general_a7e1e766",
+          "role": "primary",
+          "assignedAt": "2025-09-20T15:07:21.080Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-20T15:12:22.236Z",
+      "updated_at": "2025-09-20T15:12:22.236Z",
+      "archived_at": "2025-09-20T15:12:22.240Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T15:07:00.802Z",
+      "title": "Fix TypeScript Generic Type and Type Parameter Errors",
+      "description": "Comprehensive fix for TS2344, TS2314, TS2564 generic type errors in bytebot/packages/shared/src/types/ and service files",
+      "category": "error",
+      "id": "error_1758380820801_kvvh75df3ie",
+      "completed_at": "2025-09-20T15:13:43.643Z",
+      "updated_at": "2025-09-20T15:13:43.643Z",
+      "archived_at": "2025-09-20T15:13:43.703Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T15:07:01.863Z",
+      "title": "Fix TypeScript property type mismatches and compatibility errors",
+      "description": "Resolve TS2741, TS2345, TS2322 errors in bytebot/packages/shared/src/ focusing on property mismatches, missing properties, and type assignments",
+      "category": "error",
+      "id": "error_1758380821863_hwqc4pvf3nm",
+      "assigned_agent": "dev_session_1758380806261_1_general_5b9bdd87",
+      "started_at": "2025-09-20T15:07:21.107Z",
+      "claimed_by": "dev_session_1758380806261_1_general_5b9bdd87",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758380806261_1_general_5b9bdd87",
+          "role": "primary",
+          "assignedAt": "2025-09-20T15:07:21.107Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-20T15:14:22.535Z",
+      "updated_at": "2025-09-20T15:14:22.535Z",
+      "archived_at": "2025-09-20T15:14:22.550Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T15:07:04.978Z",
+      "title": "Fix all TypeScript TS2304 missing type definition errors",
+      "description": "Scan codebase for TS2304 errors and fix all missing type definitions including ValidationSecurityConfig, ValidationComplianceConfig, SecurityValidationContext, ComplianceValidationContext, ResourceType exports, and other undefined type references",
+      "category": "error",
+      "id": "error_1758380824978_cdmthfnsasu",
+      "completed_at": "2025-09-20T15:16:05.995Z",
+      "updated_at": "2025-09-20T15:16:05.995Z",
+      "archived_at": "2025-09-20T15:16:06.016Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T15:07:01.189Z",
+      "title": "Fix TypeScript function signature and method override errors",
+      "description": "Identify and resolve all function signature mismatches, method override compatibility issues, callable type assignment errors, return type inconsistencies, and parameter type mismatches in bytebot/packages/shared/src/ service and guard files",
+      "category": "error",
+      "id": "error_1758380821189_bgyoa6twvb",
+      "completed_at": "2025-09-20T15:20:17.615Z",
+      "updated_at": "2025-09-20T15:20:17.615Z",
+      "archived_at": "2025-09-20T15:20:17.646Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 143,
+  "total_completed": 149,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-20T08:00:11.141Z"
+  "last_archived": "2025-09-20T15:20:17.646Z"
 }

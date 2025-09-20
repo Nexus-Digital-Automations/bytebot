@@ -1,7 +1,4 @@
-import { Module } from '@nestjs/common';
-import { FileManagementController } from './file-management.controller';
-import { FileManagementService } from './file-management.service';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { Module } from '@nestjs/common';import { FileManagementController } from './file-management.controller';import { FileManagementService } from './file-management.service';import { ComputerUseModule } from '../computer-use/computer-use.module';
 
 /**
  * File Management Module

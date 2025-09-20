@@ -10,35 +10,15 @@
  * @date 2025-09-20
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import * as request from 'supertest';
-import { BrowserOrchestrationController } from './browser-orchestration.controller';
-import { BrowserOrchestrationService } from './browser-orchestration.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-import { SecurityModule } from '../common/security/security.module';
-import { AuthModule } from '../auth/auth.module';
-import { PrismaService } from '../database/prisma.service';
-import {
-  CreateOrchestrationDto,
+import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, INestApplication } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import * as request from 'supertest';import { BrowserOrchestrationController } from './browser-orchestration.controller';import { BrowserOrchestrationService } from './browser-orchestration.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import { SecurityModule } from '../common/security/security.module';import { AuthModule } from '../auth/auth.module';import { PrismaService } from '../database/prisma.service';import {CreateOrchestrationDto,
   OrchestrationStrategy,
   TaskPriority,
   OrchestrationStatus
-} from './dto/browser-orchestration.dto';
-import {
-  CreateBrowserSessionDto,
+} from './dto/browser-orchestration.dto';import {CreateBrowserSessionDto,
   BrowserSessionStatus
-} from './dto/browser-session.dto';
-import {
-  CreateBrowserTaskDto,
+} from './dto/browser-session.dto';import {CreateBrowserTaskDto,
   BrowserTaskStatus
-} from './dto/browser-task.dto';
-
-describe('BrowserOrchestrationController', () => {
-  let app: INestApplication;
-  let controller: BrowserOrchestrationController;
+} from './dto/browser-task.dto';describe('BrowserOrchestrationController', () => {let app: INestApplication;let controller: BrowserOrchestrationController;
   let orchestrationService: BrowserOrchestrationService;
   let sessionService: BrowserSessionService;
   let taskService: BrowserTaskService;
@@ -107,9 +87,7 @@ describe('BrowserOrchestrationController', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test',
-        }),
-        SecurityModule,
+          envFilePath: '.env.test',}),SecurityModule,
         AuthModule,
       ],
       controllers: [BrowserOrchestrationController],
@@ -148,29 +126,14 @@ describe('BrowserOrchestrationController', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /browser-orchestration/orchestrations', () => {
-    it('should create new orchestration successfully', async () => {
-      const createOrchestrationDto: CreateOrchestrationDto = {
-        name: 'Multi-Agent Data Extraction',
-        strategy: OrchestrationStrategy.ADAPTIVE,
-        maxConcurrentAgents: 5,
+  describe('POST /browser-orchestration/orchestrations', () => {it('should create new orchestration successfully', async () => {const createOrchestrationDto: CreateOrchestrationDto = {name: 'Multi-Agent Data Extraction',strategy: OrchestrationStrategy.ADAPTIVE,maxConcurrentAgents: 5,
         maxConcurrentSessions: 10,
         timeoutSeconds: 300,
         tasks: [
           {
-            name: 'Extract Product Data',
-            type: 'data_extraction',
-            url: 'https://example.com/products',
-            instructions: 'Extract product names and prices',
-            priority: TaskPriority.HIGH,
-          },
+            name: 'Extract Product Data',type: 'data_extraction',url: 'https://example.com/products',instructions: 'Extract product names and prices',priority: TaskPriority.HIGH,},
           {
-            name: 'Capture Screenshots',
-            type: 'screenshot',
-            url: 'https://example.com/gallery',
-            instructions: 'Take full page screenshots',
-            priority: TaskPriority.NORMAL,
-          },
+            name: 'Capture Screenshots',type: 'screenshot',url: 'https://example.com/gallery',instructions: 'Take full page screenshots',priority: TaskPriority.NORMAL,},
         ],
         sessionConfig: {
           headless: true,
@@ -180,9 +143,7 @@ describe('BrowserOrchestrationController', () => {
       };
 
       const mockOrchestration = {
-        id: 'orch_12345',
-        name: createOrchestrationDto.name,
-        strategy: createOrchestrationDto.strategy,
+        id: 'orch_12345',name: createOrchestrationDto.name,strategy: createOrchestrationDto.strategy,
         status: OrchestrationStatus.PENDING,
         totalTasks: 2,
         completedTasks: 0,
@@ -194,9 +155,7 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.createOrchestration.mockResolvedValue(mockOrchestration);
 
       const response = await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations')
-        .send(createOrchestrationDto)
-        .expect(HttpStatus.CREATED);
+        .post('/browser-orchestration/orchestrations').send(createOrchestrationDto).expect(HttpStatus.CREATED);
 
       expect(response.body).toEqual(mockOrchestration);
       expect(mockOrchestrationService.createOrchestration).toHaveBeenCalledWith(
@@ -204,50 +163,27 @@ describe('BrowserOrchestrationController', () => {
       );
     });
 
-    it('should validate orchestration input data', async () => {
-      const invalidOrchestrationDto = {
-        name: '', // Invalid: empty name
-        strategy: 'invalid_strategy', // Invalid: unknown strategy
-        maxConcurrentAgents: -1, // Invalid: negative value
-        tasks: [], // Invalid: empty tasks array
+    it('should validate orchestration input data', async () => {const invalidOrchestrationDto = {name: '', // Invalid: empty namestrategy: 'invalid_strategy', // Invalid: unknown strategymaxConcurrentAgents: -1, // Invalid: negative valuetasks: [], // Invalid: empty tasks array
       };
 
       await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations')
-        .send(invalidOrchestrationDto)
-        .expect(HttpStatus.BAD_REQUEST);
+        .post('/browser-orchestration/orchestrations').send(invalidOrchestrationDto).expect(HttpStatus.BAD_REQUEST);
     });
 
-    it('should handle service errors gracefully', async () => {
-      const createOrchestrationDto: CreateOrchestrationDto = {
-        name: 'Test Orchestration',
-        strategy: OrchestrationStrategy.PARALLEL,
-        maxConcurrentAgents: 3,
+    it('should handle service errors gracefully', async () => {const createOrchestrationDto: CreateOrchestrationDto = {name: 'Test Orchestration',strategy: OrchestrationStrategy.PARALLEL,maxConcurrentAgents: 3,
         tasks: [
           {
-            name: 'Test Task',
-            type: 'navigation',
-            url: 'https://example.com',
-            instructions: 'Navigate to homepage',
-            priority: TaskPriority.NORMAL,
-          },
+            name: 'Test Task',type: 'navigation',url: 'https://example.com',instructions: 'Navigate to homepage',priority: TaskPriority.NORMAL,},
         ],
       };
 
       mockOrchestrationService.createOrchestration.mockRejectedValue(
-        new Error('Service unavailable')
-      );
-
-      await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations')
-        .send(createOrchestrationDto)
-        .expect(HttpStatus.INTERNAL_SERVER_ERROR);
+        new Error('Service unavailable'));await request(app.getHttpServer())
+        .post('/browser-orchestration/orchestrations').send(createOrchestrationDto).expect(HttpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 
-  describe('POST /browser-orchestration/orchestrations/:orchestrationId/execute', () => {
-    it('should execute orchestration successfully', async () => {
-      const orchestrationId = 'orch_12345';
+  describe('POST /browser-orchestration/orchestrations/:orchestrationId/execute', () => {it('should execute orchestration successfully', async () => {const orchestrationId = 'orch_12345';
       const mockExecutionResult = {
         orchestrationId,
         status: OrchestrationStatus.RUNNING,
@@ -270,11 +206,7 @@ describe('BrowserOrchestrationController', () => {
       );
     });
 
-    it('should handle non-existent orchestration', async () => {
-      const orchestrationId = 'non_existent';
-
-      mockOrchestrationService.executeOrchestration.mockRejectedValue(
-        new Error('Orchestration not found')
+    it('should handle non-existent orchestration', async () => {const orchestrationId = 'non_existent';mockOrchestrationService.executeOrchestration.mockRejectedValue(new Error('Orchestration not found')
       );
 
       await request(app.getHttpServer())
@@ -282,11 +214,7 @@ describe('BrowserOrchestrationController', () => {
         .expect(HttpStatus.NOT_FOUND);
     });
 
-    it('should prevent execution of already running orchestration', async () => {
-      const orchestrationId = 'orch_running';
-
-      mockOrchestrationService.executeOrchestration.mockRejectedValue(
-        new Error('Orchestration already running')
+    it('should prevent execution of already running orchestration', async () => {const orchestrationId = 'orch_running';mockOrchestrationService.executeOrchestration.mockRejectedValue(new Error('Orchestration already running')
       );
 
       await request(app.getHttpServer())
@@ -295,9 +223,7 @@ describe('BrowserOrchestrationController', () => {
     });
   });
 
-  describe('GET /browser-orchestration/orchestrations/:orchestrationId/status', () => {
-    it('should return orchestration status with detailed metrics', async () => {
-      const orchestrationId = 'orch_12345';
+  describe('GET /browser-orchestration/orchestrations/:orchestrationId/status', () => {it('should return orchestration status with detailed metrics', async () => {const orchestrationId = 'orch_12345';
       const mockStatus = {
         orchestrationId,
         status: OrchestrationStatus.RUNNING,
@@ -340,8 +266,7 @@ describe('BrowserOrchestrationController', () => {
       );
     });
 
-    it('should handle real-time status updates', async () => {
-      const orchestrationId = 'orch_realtime';
+    it('should handle real-time status updates', async () => {const orchestrationId = 'orch_realtime';
       const mockStatus = {
         orchestrationId,
         status: OrchestrationStatus.RUNNING,
@@ -354,16 +279,11 @@ describe('BrowserOrchestrationController', () => {
 
       const response = await request(app.getHttpServer())
         .get(`/browser-orchestration/orchestrations/${orchestrationId}/status`)
-        .query({ realTime: 'true' })
-        .expect(HttpStatus.OK);
-
-      expect(response.body.realTimeUpdates).toBe(true);
+        .query({ realTime: 'true' }).expect(HttpStatus.OK);expect(response.body.realTimeUpdates).toBe(true);
     });
   });
 
-  describe('POST /browser-orchestration/orchestrations/:orchestrationId/cancel', () => {
-    it('should cancel orchestration and cleanup resources', async () => {
-      const orchestrationId = 'orch_to_cancel';
+  describe('POST /browser-orchestration/orchestrations/:orchestrationId/cancel', () => {it('should cancel orchestration and cleanup resources', async () => {const orchestrationId = 'orch_to_cancel';
       const mockCancellationResult = {
         orchestrationId,
         status: OrchestrationStatus.CANCELLED,
@@ -388,10 +308,7 @@ describe('BrowserOrchestrationController', () => {
       );
     });
 
-    it('should handle graceful shutdown with timeout', async () => {
-      const orchestrationId = 'orch_graceful';
-      const shutdownOptions = {
-        graceful: true,
+    it('should handle graceful shutdown with timeout', async () => {const orchestrationId = 'orch_graceful';const shutdownOptions = {graceful: true,
         timeoutSeconds: 30,
       };
 
@@ -409,27 +326,16 @@ describe('BrowserOrchestrationController', () => {
         .send(shutdownOptions)
         .expect(HttpStatus.OK);
 
-      expect(response.body.shutdownType).toBe('graceful');
-    });
-  });
+      expect(response.body.shutdownType).toBe('graceful');});});
 
-  describe('GET /browser-orchestration/orchestrations', () => {
-    it('should return paginated orchestrations list', async () => {
-      const mockOrchestrations = {
-        data: [
+  describe('GET /browser-orchestration/orchestrations', () => {it('should return paginated orchestrations list', async () => {const mockOrchestrations = {data: [
           {
-            id: 'orch_1',
-            name: 'Orchestration 1',
-            status: OrchestrationStatus.COMPLETED,
-            totalTasks: 5,
+            id: 'orch_1',name: 'Orchestration 1',status: OrchestrationStatus.COMPLETED,totalTasks: 5,
             completedTasks: 5,
             createdAt: new Date(),
           },
           {
-            id: 'orch_2',
-            name: 'Orchestration 2',
-            status: OrchestrationStatus.RUNNING,
-            totalTasks: 3,
+            id: 'orch_2',name: 'Orchestration 2',status: OrchestrationStatus.RUNNING,totalTasks: 3,
             completedTasks: 1,
             createdAt: new Date(),
           },
@@ -445,21 +351,15 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.getAllOrchestrations.mockResolvedValue(mockOrchestrations);
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/orchestrations')
-        .query({ page: 1, limit: 10 })
-        .expect(HttpStatus.OK);
+        .get('/browser-orchestration/orchestrations').query({ page: 1, limit: 10 }).expect(HttpStatus.OK);
 
       expect(response.body).toEqual(mockOrchestrations);
     });
 
-    it('should filter orchestrations by status', async () => {
-      const statusFilter = OrchestrationStatus.RUNNING;
-      const mockFilteredOrchestrations = {
+    it('should filter orchestrations by status', async () => {const statusFilter = OrchestrationStatus.RUNNING;const mockFilteredOrchestrations = {
         data: [
           {
-            id: 'orch_running',
-            status: OrchestrationStatus.RUNNING,
-            totalTasks: 3,
+            id: 'orch_running',status: OrchestrationStatus.RUNNING,totalTasks: 3,
             completedTasks: 1,
           },
         ],
@@ -471,26 +371,16 @@ describe('BrowserOrchestrationController', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/orchestrations')
-        .query({ status: statusFilter })
-        .expect(HttpStatus.OK);
+        .get('/browser-orchestration/orchestrations').query({ status: statusFilter }).expect(HttpStatus.OK);
 
       expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].status).toBe(statusFilter);
     });
 
-    it('should sort orchestrations by creation date', async () => {
-      const mockSortedOrchestrations = {
-        data: [
+    it('should sort orchestrations by creation date', async () => {const mockSortedOrchestrations = {data: [
           {
-            id: 'orch_latest',
-            createdAt: new Date('2025-09-20T12:00:00Z'),
-          },
-          {
-            id: 'orch_older',
-            createdAt: new Date('2025-09-20T11:00:00Z'),
-          },
-        ],
+            id: 'orch_latest',createdAt: new Date('2025-09-20T12:00:00Z'),},{
+            id: 'orch_older',createdAt: new Date('2025-09-20T11:00:00Z'),},],
         pagination: { total: 2, page: 1, limit: 10, totalPages: 1 },
       };
 
@@ -499,44 +389,27 @@ describe('BrowserOrchestrationController', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/orchestrations')
-        .query({ sortBy: 'createdAt', sortOrder: 'desc' })
-        .expect(HttpStatus.OK);
-
-      expect(new Date(response.body.data[0].createdAt).getTime()).toBeGreaterThan(
+        .get('/browser-orchestration/orchestrations').query({ sortBy: 'createdAt', sortOrder: 'desc' }).expect(HttpStatus.OK);expect(new Date(response.body.data[0].createdAt).getTime()).toBeGreaterThan(
         new Date(response.body.data[1].createdAt).getTime()
       );
     });
   });
 
-  describe('GET /browser-orchestration/agents/status', () => {
-    it('should return agent pool status with detailed metrics', async () => {
-      const mockAgentStatus = {
-        totalAgents: 5,
+  describe('GET /browser-orchestration/agents/status', () => {it('should return agent pool status with detailed metrics', async () => {const mockAgentStatus = {totalAgents: 5,
         activeAgents: 3,
         idleAgents: 2,
         utilization: 60,
         agentDetails: [
           {
-            agentId: 'agent_1',
-            status: 'active',
-            currentTasks: 2,
-            maxTasks: 3,
-            capabilities: ['web_navigation', 'data_extraction'],
-            performance: {
-              tasksCompleted: 15,
+            agentId: 'agent_1',status: 'active',currentTasks: 2,maxTasks: 3,
+            capabilities: ['web_navigation', 'data_extraction'],performance: {tasksCompleted: 15,
               averageDuration: 45.2,
               successRate: 93.3,
             },
           },
           {
-            agentId: 'agent_2',
-            status: 'idle',
-            currentTasks: 0,
-            maxTasks: 3,
-            capabilities: ['screenshot', 'form_interaction'],
-            performance: {
-              tasksCompleted: 8,
+            agentId: 'agent_2',status: 'idle',currentTasks: 0,maxTasks: 3,
+            capabilities: ['screenshot', 'form_interaction'],performance: {tasksCompleted: 8,
               averageDuration: 32.1,
               successRate: 100,
             },
@@ -553,35 +426,21 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.getAgentPoolStatus.mockResolvedValue(mockAgentStatus);
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/agents/status')
-        .expect(HttpStatus.OK);
-
-      expect(response.body).toEqual(mockAgentStatus);
+        .get('/browser-orchestration/agents/status').expect(HttpStatus.OK);expect(response.body).toEqual(mockAgentStatus);
       expect(response.body.agentDetails).toHaveLength(2);
     });
 
-    it('should filter agent status by capability', async () => {
-      const capability = 'data_extraction';
-      const mockFilteredStatus = {
-        totalAgents: 2,
+    it('should filter agent status by capability', async () => {const capability = 'data_extraction';const mockFilteredStatus = {totalAgents: 2,
         agentDetails: [
           {
-            agentId: 'agent_1',
-            capabilities: ['web_navigation', 'data_extraction'],
-          },
-          {
-            agentId: 'agent_3',
-            capabilities: ['data_extraction', 'screenshot'],
-          },
-        ],
+            agentId: 'agent_1',capabilities: ['web_navigation', 'data_extraction'],},{
+            agentId: 'agent_3',capabilities: ['data_extraction', 'screenshot'],},],
       };
 
       mockOrchestrationService.getAgentPoolStatus.mockResolvedValue(mockFilteredStatus);
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/agents/status')
-        .query({ capability })
-        .expect(HttpStatus.OK);
+        .get('/browser-orchestration/agents/status').query({ capability }).expect(HttpStatus.OK);
 
       expect(response.body.agentDetails.every((agent: any) =>
         agent.capabilities.includes(capability)
@@ -589,13 +448,8 @@ describe('BrowserOrchestrationController', () => {
     });
   });
 
-  describe('POST /browser-orchestration/agents/scale', () => {
-    it('should scale agent pool up successfully', async () => {
-      const scaleRequest = {
-        targetAgents: 8,
-        strategy: 'gradual',
-        timeoutSeconds: 60,
-      };
+  describe('POST /browser-orchestration/agents/scale', () => {it('should scale agent pool up successfully', async () => {const scaleRequest = {targetAgents: 8,
+        strategy: 'gradual',timeoutSeconds: 60,};
 
       const mockScaleResult = {
         success: true,
@@ -604,29 +458,19 @@ describe('BrowserOrchestrationController', () => {
         actualAgentCount: 8,
         scalingDuration: 45,
         newAgents: [
-          { agentId: 'agent_6', status: 'initializing' },
-          { agentId: 'agent_7', status: 'initializing' },
-          { agentId: 'agent_8', status: 'ready' },
-        ],
-      };
+          { agentId: 'agent_6', status: 'initializing' },{ agentId: 'agent_7', status: 'initializing' },{ agentId: 'agent_8', status: 'ready' },],};
 
       mockOrchestrationService.scaleAgentPool.mockResolvedValue(mockScaleResult);
 
       const response = await request(app.getHttpServer())
-        .post('/browser-orchestration/agents/scale')
-        .send(scaleRequest)
-        .expect(HttpStatus.OK);
+        .post('/browser-orchestration/agents/scale').send(scaleRequest).expect(HttpStatus.OK);
 
       expect(response.body).toEqual(mockScaleResult);
       expect(response.body.newAgents).toHaveLength(3);
     });
 
-    it('should scale agent pool down with graceful shutdown', async () => {
-      const scaleRequest = {
-        targetAgents: 3,
-        strategy: 'graceful',
-        waitForTaskCompletion: true,
-      };
+    it('should scale agent pool down with graceful shutdown', async () => {const scaleRequest = {targetAgents: 3,
+        strategy: 'graceful',waitForTaskCompletion: true,};
 
       const mockScaleResult = {
         success: true,
@@ -634,44 +478,21 @@ describe('BrowserOrchestrationController', () => {
         targetAgentCount: 3,
         actualAgentCount: 3,
         removedAgents: [
-          { agentId: 'agent_4', shutdownDuration: 30 },
-          { agentId: 'agent_5', shutdownDuration: 25 },
-        ],
-      };
+          { agentId: 'agent_4', shutdownDuration: 30 },{ agentId: 'agent_5', shutdownDuration: 25 },],};
 
       mockOrchestrationService.scaleAgentPool.mockResolvedValue(mockScaleResult);
 
       const response = await request(app.getHttpServer())
-        .post('/browser-orchestration/agents/scale')
-        .send(scaleRequest)
-        .expect(HttpStatus.OK);
+        .post('/browser-orchestration/agents/scale').send(scaleRequest).expect(HttpStatus.OK);
 
       expect(response.body.removedAgents).toHaveLength(2);
     });
   });
 
-  describe('POST /browser-orchestration/tasks/distribute', () => {
-    it('should distribute task to optimal agent', async () => {
-      const taskDistributionRequest = {
-        taskId: 'task_12345',
-        taskType: 'data_extraction',
-        priority: TaskPriority.HIGH,
-        requirements: {
-          capabilities: ['web_navigation', 'data_extraction'],
-          minMemory: 512,
-          preferredRegion: 'us-east',
-        },
-        selectionStrategy: 'optimal',
-      };
-
-      const mockDistributionResult = {
+  describe('POST /browser-orchestration/tasks/distribute', () => {it('should distribute task to optimal agent', async () => {const taskDistributionRequest = {taskId: 'task_12345',taskType: 'data_extraction',priority: TaskPriority.HIGH,requirements: {
+          capabilities: ['web_navigation', 'data_extraction'],minMemory: 512,preferredRegion: 'us-east',},selectionStrategy: 'optimal',};const mockDistributionResult = {
         success: true,
-        taskId: 'task_12345',
-        assignedAgent: {
-          agentId: 'agent_3',
-          capabilities: ['web_navigation', 'data_extraction', 'form_interaction'],
-          currentLoad: 66.7,
-          estimatedDuration: 45,
+        taskId: 'task_12345',assignedAgent: {agentId: 'agent_3',capabilities: ['web_navigation', 'data_extraction', 'form_interaction'],currentLoad: 66.7,estimatedDuration: 45,
         },
         allocationTime: 1.2,
         selectionCriteria: {
@@ -684,101 +505,47 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.distributeTask.mockResolvedValue(mockDistributionResult);
 
       const response = await request(app.getHttpServer())
-        .post('/browser-orchestration/tasks/distribute')
-        .send(taskDistributionRequest)
-        .expect(HttpStatus.OK);
+        .post('/browser-orchestration/tasks/distribute').send(taskDistributionRequest).expect(HttpStatus.OK);
 
       expect(response.body).toEqual(mockDistributionResult);
-      expect(response.body.assignedAgent.capabilities).toContain('data_extraction');
-    });
-
-    it('should handle no available agents scenario', async () => {
-      const taskDistributionRequest = {
-        taskId: 'task_no_agents',
-        taskType: 'special_task',
-        requirements: {
-          capabilities: ['rare_capability'],
-        },
-      };
+      expect(response.body.assignedAgent.capabilities).toContain('data_extraction');});it('should handle no available agents scenario', async () => {const taskDistributionRequest = {taskId: 'task_no_agents',taskType: 'special_task',requirements: {capabilities: ['rare_capability'],},};
 
       mockOrchestrationService.distributeTask.mockRejectedValue(
-        new Error('No agents available with required capabilities')
-      );
-
-      await request(app.getHttpServer())
-        .post('/browser-orchestration/tasks/distribute')
-        .send(taskDistributionRequest)
-        .expect(HttpStatus.SERVICE_UNAVAILABLE);
+        new Error('No agents available with required capabilities'));await request(app.getHttpServer())
+        .post('/browser-orchestration/tasks/distribute').send(taskDistributionRequest).expect(HttpStatus.SERVICE_UNAVAILABLE);
     });
   });
 
-  describe('POST /browser-orchestration/sessions/coordinate', () => {
-    it('should coordinate multiple browser sessions', async () => {
-      const sessionCoordinationRequest = {
-        orchestrationId: 'orch_12345',
-        sessionRequests: [
+  describe('POST /browser-orchestration/sessions/coordinate', () => {it('should coordinate multiple browser sessions', async () => {const sessionCoordinationRequest = {orchestrationId: 'orch_12345',sessionRequests: [{
+            sessionType: 'data_extraction',url: 'https://example.com',viewportSize: { width: 1920, height: 1080 },},
           {
-            sessionType: 'data_extraction',
-            url: 'https://example.com',
-            viewportSize: { width: 1920, height: 1080 },
-          },
-          {
-            sessionType: 'screenshot',
-            url: 'https://example.com/gallery',
-            viewportSize: { width: 1280, height: 720 },
-          },
+            sessionType: 'screenshot',url: 'https://example.com/gallery',viewportSize: { width: 1280, height: 720 },},
         ],
-        coordinationStrategy: 'load_balanced',
-        reuseExistingSessions: true,
-      };
+        coordinationStrategy: 'load_balanced',reuseExistingSessions: true,};
 
       const mockCoordinationResult = {
         success: true,
-        orchestrationId: 'orch_12345',
-        coordinatedSessions: [
-          {
-            sessionId: 'session_1',
-            agentId: 'agent_1',
-            url: 'https://example.com',
-            status: 'active',
-            reuseType: 'new',
-          },
-          {
-            sessionId: 'session_2',
-            agentId: 'agent_2',
-            url: 'https://example.com/gallery',
-            status: 'active',
-            reuseType: 'reused',
-          },
-        ],
+        orchestrationId: 'orch_12345',coordinatedSessions: [{
+            sessionId: 'session_1',agentId: 'agent_1',url: 'https://example.com',status: 'active',reuseType: 'new',},{
+            sessionId: 'session_2',agentId: 'agent_2',url: 'https://example.com/gallery',status: 'active',reuseType: 'reused',},],
         coordinationTime: 2.3,
         resourceOptimization: {
           sessionsReused: 1,
           memoryOptimized: true,
-          loadDistribution: 'balanced',
-        },
-      };
+          loadDistribution: 'balanced',},};
 
       mockOrchestrationService.coordinateSessions.mockResolvedValue(mockCoordinationResult);
 
       const response = await request(app.getHttpServer())
-        .post('/browser-orchestration/sessions/coordinate')
-        .send(sessionCoordinationRequest)
-        .expect(HttpStatus.OK);
+        .post('/browser-orchestration/sessions/coordinate').send(sessionCoordinationRequest).expect(HttpStatus.OK);
 
       expect(response.body).toEqual(mockCoordinationResult);
       expect(response.body.coordinatedSessions).toHaveLength(2);
     });
   });
 
-  describe('GET /browser-orchestration/metrics/summary', () => {
-    it('should return comprehensive orchestration metrics', async () => {
-      const mockMetricsSummary = {
-        period: {
-          start: new Date('2025-09-20T00:00:00Z'),
-          end: new Date('2025-09-20T23:59:59Z'),
-        },
-        orchestrations: {
+  describe('GET /browser-orchestration/metrics/summary', () => {it('should return comprehensive orchestration metrics', async () => {const mockMetricsSummary = {period: {
+          start: new Date('2025-09-20T00:00:00Z'),end: new Date('2025-09-20T23:59:59Z'),},orchestrations: {
           total: 25,
           successful: 22,
           failed: 2,
@@ -816,20 +583,13 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.getOrchestrationMetrics.mockResolvedValue(mockMetricsSummary);
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/metrics/summary')
-        .query({
-          startDate: '2025-09-20T00:00:00Z',
-          endDate: '2025-09-20T23:59:59Z',
-        })
-        .expect(HttpStatus.OK);
+        .get('/browser-orchestration/metrics/summary').query({startDate: '2025-09-20T00:00:00Z',endDate: '2025-09-20T23:59:59Z',}).expect(HttpStatus.OK);
 
       expect(response.body).toEqual(mockMetricsSummary);
       expect(response.body.orchestrations.successRate).toBe(88);
     });
 
-    it('should filter metrics by orchestration strategy', async () => {
-      const strategy = OrchestrationStrategy.ADAPTIVE;
-      const mockStrategyMetrics = {
+    it('should filter metrics by orchestration strategy', async () => {const strategy = OrchestrationStrategy.ADAPTIVE;const mockStrategyMetrics = {
         strategy: OrchestrationStrategy.ADAPTIVE,
         orchestrations: {
           total: 15,
@@ -845,45 +605,27 @@ describe('BrowserOrchestrationController', () => {
       mockOrchestrationService.getOrchestrationMetrics.mockResolvedValue(mockStrategyMetrics);
 
       const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/metrics/summary')
-        .query({ strategy })
-        .expect(HttpStatus.OK);
+        .get('/browser-orchestration/metrics/summary').query({ strategy }).expect(HttpStatus.OK);
 
       expect(response.body.strategy).toBe(strategy);
       expect(response.body.orchestrations.successRate).toBe(93.3);
     });
   });
 
-  describe('GET /browser-orchestration/health', () => {
-    it('should return comprehensive health status', async () => {
-      const mockHealthStatus = {
-        status: 'healthy',
-        service: 'Browser Orchestration Controller',
-        version: '1.0.0',
-        timestamp: new Date().toISOString(),
-        components: {
+  describe('GET /browser-orchestration/health', () => {it('should return comprehensive health status', async () => {const mockHealthStatus = {status: 'healthy',service: 'Browser Orchestration Controller',version: '1.0.0',timestamp: new Date().toISOString(),components: {
           orchestrationService: {
-            status: 'healthy',
-            responseTime: 12,
-            activeOrchestrations: 3,
+            status: 'healthy',responseTime: 12,activeOrchestrations: 3,
           },
           agentPool: {
-            status: 'healthy',
-            totalAgents: 5,
-            healthyAgents: 5,
+            status: 'healthy',totalAgents: 5,healthyAgents: 5,
             utilization: 65.2,
           },
           sessionCoordinator: {
-            status: 'healthy',
-            activeSessions: 8,
-            maxSessions: 20,
+            status: 'healthy',activeSessions: 8,maxSessions: 20,
             memoryUsage: 45.3,
           },
           database: {
-            status: 'healthy',
-            connectionPool: 'optimal',
-            responseTime: 5,
-          },
+            status: 'healthy',connectionPool: 'optimal',responseTime: 5,},
         },
         capabilities: {
           multiAgentCoordination: true,
@@ -902,116 +644,50 @@ describe('BrowserOrchestrationController', () => {
       };
 
       // Mock the health check method
-      jest.spyOn(controller, 'getHealth').mockResolvedValue(mockHealthStatus);
+      jest.spyOn(controller, 'getHealth').mockResolvedValue(mockHealthStatus);const response = await request(app.getHttpServer()).get('/browser-orchestration/health').expect(HttpStatus.OK);expect(response.body).toEqual(mockHealthStatus);
+      expect(response.body.components.agentPool.status).toBe('healthy');});it('should detect unhealthy components', async () => {const mockUnhealthyStatus = {status: 'degraded',components: {orchestrationService: { status: 'healthy' },agentPool: { status: 'unhealthy', error: 'Agent connectivity issues' },sessionCoordinator: { status: 'healthy' },database: { status: 'healthy' },},};
 
-      const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/health')
-        .expect(HttpStatus.OK);
+      jest.spyOn(controller, 'getHealth').mockResolvedValue(mockUnhealthyStatus);const response = await request(app.getHttpServer()).get('/browser-orchestration/health').expect(HttpStatus.SERVICE_UNAVAILABLE);expect(response.body.status).toBe('degraded');expect(response.body.components.agentPool.status).toBe('unhealthy');});});
 
-      expect(response.body).toEqual(mockHealthStatus);
-      expect(response.body.components.agentPool.status).toBe('healthy');
-    });
-
-    it('should detect unhealthy components', async () => {
-      const mockUnhealthyStatus = {
-        status: 'degraded',
-        components: {
-          orchestrationService: { status: 'healthy' },
-          agentPool: { status: 'unhealthy', error: 'Agent connectivity issues' },
-          sessionCoordinator: { status: 'healthy' },
-          database: { status: 'healthy' },
-        },
-      };
-
-      jest.spyOn(controller, 'getHealth').mockResolvedValue(mockUnhealthyStatus);
-
-      const response = await request(app.getHttpServer())
-        .get('/browser-orchestration/health')
-        .expect(HttpStatus.SERVICE_UNAVAILABLE);
-
-      expect(response.body.status).toBe('degraded');
-      expect(response.body.components.agentPool.status).toBe('unhealthy');
-    });
-  });
-
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle database connection errors', async () => {
-      mockOrchestrationService.createOrchestration.mockRejectedValue(
-        new Error('Database connection failed')
-      );
-
-      const createOrchestrationDto: CreateOrchestrationDto = {
-        name: 'Test Orchestration',
-        strategy: OrchestrationStrategy.SEQUENTIAL,
-        tasks: [
+  describe('Error Handling and Edge Cases', () => {it('should handle database connection errors', async () => {mockOrchestrationService.createOrchestration.mockRejectedValue(new Error('Database connection failed'));const createOrchestrationDto: CreateOrchestrationDto = {
+        name: 'Test Orchestration',strategy: OrchestrationStrategy.SEQUENTIAL,tasks: [
           {
-            name: 'Test Task',
-            type: 'navigation',
-            url: 'https://example.com',
-            instructions: 'Test navigation',
-            priority: TaskPriority.NORMAL,
-          },
+            name: 'Test Task',type: 'navigation',url: 'https://example.com',instructions: 'Test navigation',priority: TaskPriority.NORMAL,},
         ],
       };
 
       await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations')
-        .send(createOrchestrationDto)
-        .expect(HttpStatus.INTERNAL_SERVER_ERROR);
+        .post('/browser-orchestration/orchestrations').send(createOrchestrationDto).expect(HttpStatus.INTERNAL_SERVER_ERROR);
     });
 
-    it('should handle concurrent access to same orchestration', async () => {
-      const orchestrationId = 'orch_concurrent';
-
-      mockOrchestrationService.executeOrchestration
-        .mockResolvedValueOnce({ status: OrchestrationStatus.RUNNING })
+    it('should handle concurrent access to same orchestration', async () => {const orchestrationId = 'orch_concurrent';mockOrchestrationService.executeOrchestration.mockResolvedValueOnce({ status: OrchestrationStatus.RUNNING })
         .mockRejectedValueOnce(new Error('Orchestration already running'));
 
       // First request should succeed
       await request(app.getHttpServer())
-        .post(`/browser-orchestration/orchestrations/${orchestrationId}/execute`)
-        .expect(HttpStatus.OK);
-
-      // Second concurrent request should fail
+        .post(`/browser-orchestration/orchestrations/${orchestrationId}/execute`).expect(HttpStatus.OK);// Second concurrent request should fail
       await request(app.getHttpServer())
         .post(`/browser-orchestration/orchestrations/${orchestrationId}/execute`)
         .expect(HttpStatus.CONFLICT);
     });
 
-    it('should validate orchestration limits', async () => {
-      const createOrchestrationDto: CreateOrchestrationDto = {
-        name: 'Large Orchestration',
+    it('should validate orchestration limits', async () => {const createOrchestrationDto: CreateOrchestrationDto = {name: 'Large Orchestration',
         strategy: OrchestrationStrategy.PARALLEL,
         maxConcurrentAgents: 1000, // Exceeds limit
         tasks: Array.from({ length: 1000 }, (_, i) => ({ // Exceeds task limit
           name: `Task ${i}`,
-          type: 'navigation',
-          url: 'https://example.com',
-          instructions: 'Navigate',
-          priority: TaskPriority.NORMAL,
-        })),
+          type: 'navigation',url: 'https://example.com',instructions: 'Navigate',priority: TaskPriority.NORMAL,})),
       };
 
       await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations')
-        .send(createOrchestrationDto)
-        .expect(HttpStatus.BAD_REQUEST);
+        .post('/browser-orchestration/orchestrations').send(createOrchestrationDto).expect(HttpStatus.BAD_REQUEST);
     });
 
-    it('should handle agent pool exhaustion gracefully', async () => {
-      mockOrchestrationService.executeOrchestration.mockRejectedValue(
-        new Error('Insufficient agent capacity')
-      );
-
-      await request(app.getHttpServer())
-        .post('/browser-orchestration/orchestrations/orch_12345/execute')
-        .expect(HttpStatus.SERVICE_UNAVAILABLE);
-    });
+    it('should handle agent pool exhaustion gracefully', async () => {mockOrchestrationService.executeOrchestration.mockRejectedValue(new Error('Insufficient agent capacity'));await request(app.getHttpServer())
+        .post('/browser-orchestration/orchestrations/orch_12345/execute').expect(HttpStatus.SERVICE_UNAVAILABLE);});
   });
 
-  describe('Performance and Load Testing', () => {
-    it('should handle high-frequency status requests', async () => {
-      const orchestrationId = 'orch_performance';
+  describe('Performance and Load Testing', () => {it('should handle high-frequency status requests', async () => {const orchestrationId = 'orch_performance';
       const mockStatus = {
         orchestrationId,
         status: OrchestrationStatus.RUNNING,
@@ -1028,21 +704,12 @@ describe('BrowserOrchestrationController', () => {
 
       const responses = await Promise.allSettled(requests);
       const successfulResponses = responses.filter(
-        (result) => result.status === 'fulfilled' && result.value.status === HttpStatus.OK
-      );
-
-      expect(successfulResponses.length).toBeGreaterThan(90); // 90% success rate
+        (result) => result.status === 'fulfilled' && result.value.status === HttpStatus.OK);expect(successfulResponses.length).toBeGreaterThan(90); // 90% success rate
     });
 
-    it('should maintain performance under load', async () => {
-      const startTime = Date.now();
-
-      // Execute multiple operations simultaneously
+    it('should maintain performance under load', async () => {const startTime = Date.now();// Execute multiple operations simultaneously
       const operations = [
-        request(app.getHttpServer()).get('/browser-orchestration/orchestrations'),
-        request(app.getHttpServer()).get('/browser-orchestration/agents/status'),
-        request(app.getHttpServer()).get('/browser-orchestration/metrics/summary'),
-        request(app.getHttpServer()).get('/browser-orchestration/health'),
+        request(app.getHttpServer()).get('/browser-orchestration/orchestrations'),request(app.getHttpServer()).get('/browser-orchestration/agents/status'),request(app.getHttpServer()).get('/browser-orchestration/metrics/summary'),request(app.getHttpServer()).get('/browser-orchestration/health'),
       ];
 
       await Promise.all(operations);

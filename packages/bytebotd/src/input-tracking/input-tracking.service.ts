@@ -1,26 +1,16 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import {
-  uIOhook,
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';import {uIOhook,
   UiohookKeyboardEvent,
   UiohookMouseEvent,
   UiohookWheelEvent,
   WheelDirection,
-} from 'uiohook-napi';
-import {
-  Button,
+} from 'uiohook-napi';import {Button,
   ClickMouseAction,
   ComputerAction,
   DragMouseAction,
   ScrollAction,
   TypeKeysAction,
   TypeTextAction,
-} from '@bytebot/shared';
-import { keyInfoMap } from './input-tracking.helpers';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import { InputTrackingGateway } from './input-tracking.gateway';
-
-@Injectable()
-export class InputTrackingService implements OnModuleDestroy {
+} from '@bytebot/shared';import { keyInfoMap } from './input-tracking.helpers';import { ComputerUseService } from '../computer-use/computer-use.service';import { InputTrackingGateway } from './input-tracking.gateway';@Injectable()export class InputTrackingService implements OnModuleDestroy {
   private readonly logger = new Logger(InputTrackingService.name);
 
   private isTracking = false;
@@ -65,9 +55,7 @@ export class InputTrackingService implements OnModuleDestroy {
     if (this.isTracking) {
       return;
     }
-    this.logger.log('Starting input tracking');
-    this.registerListeners();
-    uIOhook.start();
+    this.logger.log('Starting input tracking');this.registerListeners();uIOhook.start();
     this.isTracking = true;
   }
 
@@ -75,9 +63,7 @@ export class InputTrackingService implements OnModuleDestroy {
     if (!this.isTracking) {
       return;
     }
-    this.logger.log('Stopping input tracking');
-    uIOhook.stop();
-    uIOhook.removeAllListeners();
+    this.logger.log('Stopping input tracking');uIOhook.stop();uIOhook.removeAllListeners();
     this.isTracking = false;
   }
 
@@ -94,10 +80,7 @@ export class InputTrackingService implements OnModuleDestroy {
   private flushTypingBuffer() {
     if (!this.typingBuffer.length) return;
     const action: TypeTextAction = {
-      action: 'type_text',
-      text: this.typingBuffer.join(''),
-    };
-    this.typingBuffer.length = 0;
+      action: 'type_text',text: this.typingBuffer.join(''),};this.typingBuffer.length = 0;
     this.logAction(action);
   }
 
@@ -106,9 +89,7 @@ export class InputTrackingService implements OnModuleDestroy {
   }
 
   private registerListeners() {
-    uIOhook.on('mousemove', (e: UiohookMouseEvent) => {
-      if (this.isDragging && this.dragMouseAction) {
-        this.dragMouseAction.path.push({ x: e.x, y: e.y });
+    uIOhook.on('mousemove', (e: UiohookMouseEvent) => {if (this.isDragging && this.dragMouseAction) {this.dragMouseAction.path.push({ x: e.x, y: e.y });
       } else {
         if (this.screenshotTimeout) {
           clearTimeout(this.screenshotTimeout);
@@ -124,30 +105,17 @@ export class InputTrackingService implements OnModuleDestroy {
               this.screenshot = result;
             } catch (_error) {
               const errorMessage =
-                _error instanceof Error ? _error.message : 'Unknown _error';
-              this.logger.error(
-                'Failed to take screenshot for action',
-                errorMessage,
-              );
+                _error instanceof Error ? _error.message : 'Unknown _error';this.logger.error('Failed to take screenshot for action',errorMessage,);
             }
           })();
         }, this.SCREENSHOT_DEBOUNCE_MS);
       }
     });
 
-    uIOhook.on('click', (e: UiohookMouseEvent) => {
-      const action: ClickMouseAction = {
-        action: 'click_mouse',
-        button: this.mapButton(e.button),
-        coordinates: { x: e.x, y: e.y },
+    uIOhook.on('click', (e: UiohookMouseEvent) => {const action: ClickMouseAction = {action: 'click_mouse',button: this.mapButton(e.button),coordinates: { x: e.x, y: e.y },
         clickCount: e.clicks,
         holdKeys: [
-          e.altKey ? 'alt' : undefined,
-          e.ctrlKey ? 'ctrl' : undefined,
-          e.shiftKey ? 'shift' : undefined,
-          e.metaKey ? 'meta' : undefined,
-        ].filter((key) => key !== undefined),
-      };
+          e.altKey ? 'alt' : undefined,e.ctrlKey ? 'ctrl' : undefined,e.shiftKey ? 'shift' : undefined,e.metaKey ? 'meta' : undefined,].filter((key) => key !== undefined),};
       this.clickMouseActionBuffer.push(action);
       if (this.clickMouseActionTimeout) {
         clearTimeout(this.clickMouseActionTimeout);
@@ -165,24 +133,13 @@ export class InputTrackingService implements OnModuleDestroy {
       }, this.CLICK_DEBOUNCE_MS);
     });
 
-    uIOhook.on('mousedown', (e: UiohookMouseEvent) => {
-      this.isDragging = true;
-      this.dragMouseAction = {
-        action: 'drag_mouse',
-        button: this.mapButton(e.button),
-        path: [{ x: e.x, y: e.y }],
+    uIOhook.on('mousedown', (e: UiohookMouseEvent) => {this.isDragging = true;this.dragMouseAction = {
+        action: 'drag_mouse',button: this.mapButton(e.button),path: [{ x: e.x, y: e.y }],
         holdKeys: [
-          e.altKey ? 'alt' : undefined,
-          e.ctrlKey ? 'ctrl' : undefined,
-          e.shiftKey ? 'shift' : undefined,
-          e.metaKey ? 'meta' : undefined,
-        ].filter((key) => key !== undefined),
-      };
+          e.altKey ? 'alt' : undefined,e.ctrlKey ? 'ctrl' : undefined,e.shiftKey ? 'shift' : undefined,e.metaKey ? 'meta' : undefined,].filter((key) => key !== undefined),};
     });
 
-    uIOhook.on('mouseup', (e: UiohookMouseEvent) => {
-      if (this.isDragging && this.dragMouseAction) {
-        this.dragMouseAction.path.push({ x: e.x, y: e.y });
+    uIOhook.on('mouseup', (e: UiohookMouseEvent) => {if (this.isDragging && this.dragMouseAction) {this.dragMouseAction.path.push({ x: e.x, y: e.y });
         if (this.dragMouseAction.path.length > 3) {
           this.logAction(this.dragMouseAction);
         }
@@ -191,19 +148,9 @@ export class InputTrackingService implements OnModuleDestroy {
       this.isDragging = false;
     });
 
-    uIOhook.on('wheel', (e: UiohookWheelEvent) => {
-      const direction =
-        e.direction === WheelDirection.VERTICAL
+    uIOhook.on('wheel', (e: UiohookWheelEvent) => {const direction =e.direction === WheelDirection.VERTICAL
           ? e.rotation > 0
-            ? 'down'
-            : 'up'
-          : e.rotation > 0
-            ? 'right'
-            : 'left';
-      const action: ScrollAction = {
-        action: 'scroll',
-        direction: direction,
-        scrollCount: 1,
+            ? 'down': 'up': e.rotation > 0? 'right': 'left';const action: ScrollAction = {action: 'scroll',direction: direction,scrollCount: 1,
         coordinates: { x: e.x, y: e.y },
       };
 
@@ -225,9 +172,7 @@ export class InputTrackingService implements OnModuleDestroy {
 
     uIOhook.on('keydown', (e: UiohookKeyboardEvent) => {
       if (!keyInfoMap[e.keycode]) {
-        this.logger.warn(`Unknown key: ${e.keycode}`);
-        return;
-      }
+        this.logger.warn(`Unknown key: ${e.keycode}`);return;}
 
       /* Printable char with no active modifier → buffer for TypeTextAction. */
       if (!this.isModifierKey(e) && keyInfoMap[e.keycode]?.isPrintable) {
@@ -237,10 +182,7 @@ export class InputTrackingService implements OnModuleDestroy {
           return;
         }
         const char = e.shiftKey
-          ? (keyInfo.shiftString ?? keyInfo.string ?? '')
-          : (keyInfo.string ?? '');
-        this.bufferChar(char);
-        return;
+          ? (keyInfo.shiftString ?? keyInfo.string ?? ''): (keyInfo.string ?? '');this.bufferChar(char);return;
       }
 
       /* Anything with modifiers _or_ a non‑printable key: 
@@ -272,9 +214,7 @@ export class InputTrackingService implements OnModuleDestroy {
       }
 
       const action: TypeKeysAction = {
-        action: 'type_keys',
-        keys: [
-          // take the pressed keys and map them to their names
+        action: 'type_keys',keys: [// take the pressed keys and map them to their names
           ...Array.from(this.pressedKeys.values()).map(
             (key) => keyInfoMap[key]?.name,
           ),
@@ -289,13 +229,7 @@ export class InputTrackingService implements OnModuleDestroy {
   private mapButton(btn: unknown): Button {
     switch (btn) {
       case 1:
-        return 'left';
-      case 2:
-        return 'right';
-      case 3:
-        return 'middle';
-      default:
-        return 'left';
+        return 'left';case 2:return 'right';case 3:return 'middle';default:return 'left';
     }
   }
 

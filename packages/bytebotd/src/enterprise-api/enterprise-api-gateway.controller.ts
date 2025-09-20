@@ -37,41 +37,24 @@ import {
   UseInterceptors,
   Req,
   Res,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiHeader,
   ApiParam,
-} from '@nestjs/swagger';
-import type { Request, Response } from 'express';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
-import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-// Removed ForVersion import to resolve decorator conflicts
-// import {
+} from '@nestjs/swagger';import type { Request, Response } from 'express';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';// Removed ForVersion import to resolve decorator conflicts// import {
 //   ForVersion,
 //   SUPPORTED_API_VERSIONS,
-// } from '../common/versioning/api-version.decorator';
-import {
-  OperatorOrAdmin,
+// } from '../common/versioning/api-version.decorator';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import {
-  ParlantIntegrationService,
+} from '../auth/decorators/roles.decorator';import {ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-} from '../parlant/parlant-integration.service';
-
-// ===== ENTERPRISE API TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== ENTERPRISE API TYPES =====/**
  * Enterprise API request wrapper with Parlant context
  */
 export interface EnterpriseApiRequest {
@@ -84,9 +67,7 @@ export interface EnterpriseApiRequest {
   };
 
   /** HTTP method and parameters */
-  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  pathParams?: Record<string, string>;
-  queryParams?: Record<string, unknown>;
+  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';pathParams?: Record<string, string>;queryParams?: Record<string, unknown>;
   bodyParams?: unknown;
   headers?: Record<string, string>;
 
@@ -96,28 +77,20 @@ export interface EnterpriseApiRequest {
     userIntent?: string;
     conversationHistory?: Array<{
       timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
     apiUsageContext?: {
       applicationContext: string;
       businessPurpose: string;
       expectedOutcome: string;
-      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    };
-  };
+      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};};
 
   /** Enterprise request options */
   enterpriseOptions?: {
     bypassCache?: boolean;
     enableMonitoring?: boolean;
-    auditLevel?: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
-    timeoutMs?: number;
-    retryPolicy?: {
+    auditLevel?: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';timeoutMs?: number;retryPolicy?: {
       maxRetries: number;
-      backoffStrategy: 'LINEAR' | 'EXPONENTIAL';
-    };
-  };
+      backoffStrategy: 'LINEAR' | 'EXPONENTIAL';};};
 }
 
 /**
@@ -240,109 +213,26 @@ interface ApiEndpointConfig {
   endpoint: string;
   service: string;
   requiresValidation: boolean;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  cacheStrategy: 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG';
-  circuitBreaker: CircuitBreakerConfig;
-  complianceLevel: 'BASIC' | 'STANDARD' | 'HIGH' | 'MAXIMUM';
-}
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';cacheStrategy: 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG';circuitBreaker: CircuitBreakerConfig;complianceLevel: 'BASIC' | 'STANDARD' | 'HIGH' | 'MAXIMUM';}// ===== ENTERPRISE API GATEWAY CONTROLLER =====
 
-// ===== ENTERPRISE API GATEWAY CONTROLLER =====
-
-@ApiTags('Enterprise API Gateway - Parlant-Enhanced Universal API')
-@Controller('enterprise-api')
-@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UseInterceptors(LoggingInterceptor)
+@ApiTags('Enterprise API Gateway - Parlant-Enhanced Universal API')@Controller('enterprise-api')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth()
 export class EnterpriseApiGatewayController {
   private readonly logger = new Logger(EnterpriseApiGatewayController.name);
   
   /** Circuit breaker states for different services */
   private circuitBreakers = new Map<string, {
-    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
-    failureCount: number;
-    lastFailureTime?: Date;
+    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';failureCount: number;lastFailureTime?: Date;
     nextRetryTime?: Date;
   }>();
 
   /** API endpoint configurations */
   private readonly apiEndpoints: Map<string, ApiEndpointConfig> = new Map([
     // Computer Use API endpoints
-    ['POST:/computer-use/action', {
-      endpoint: '/computer-use/action',
-      service: 'computer-use',
-      requiresValidation: true,
-      riskLevel: 'HIGH',
-      cacheStrategy: 'NONE',
-      circuitBreaker: { failureThreshold: 5, timeoutMs: 30000, resetTimeoutMs: 60000, monitoringEnabled: true },
-      complianceLevel: 'MAXIMUM',
-    }],
-    ['POST:/computer-use/action/async', {
-      endpoint: '/computer-use/action/async',
-      service: 'computer-use',
-      requiresValidation: true,
-      riskLevel: 'HIGH',
-      cacheStrategy: 'SHORT',
-      circuitBreaker: { failureThreshold: 10, timeoutMs: 5000, resetTimeoutMs: 30000, monitoringEnabled: true },
-      complianceLevel: 'HIGH',
-    }],
-    ['GET:/computer-use/jobs/:jobId/status', {
-      endpoint: '/computer-use/jobs/:jobId/status',
-      service: 'computer-use',
-      requiresValidation: false,
-      riskLevel: 'LOW',
-      cacheStrategy: 'SHORT',
-      circuitBreaker: { failureThreshold: 20, timeoutMs: 10000, resetTimeoutMs: 15000, monitoringEnabled: true },
-      complianceLevel: 'STANDARD',
-    }],
-    // Authentication API endpoints
-    ['POST:/auth/login', {
-      endpoint: '/auth/login',
-      service: 'auth',
-      requiresValidation: true,
-      riskLevel: 'CRITICAL',
-      cacheStrategy: 'NONE',
-      circuitBreaker: { failureThreshold: 3, timeoutMs: 15000, resetTimeoutMs: 120000, monitoringEnabled: true },
-      complianceLevel: 'MAXIMUM',
-    }],
-    ['POST:/auth/register', {
-      endpoint: '/auth/register',
-      service: 'auth',
-      requiresValidation: true,
-      riskLevel: 'HIGH',
-      cacheStrategy: 'NONE',
-      circuitBreaker: { failureThreshold: 5, timeoutMs: 20000, resetTimeoutMs: 60000, monitoringEnabled: true },
-      complianceLevel: 'MAXIMUM',
-    }],
-    // Browser Use API endpoints
-    ['POST:/browser-use/action', {
-      endpoint: '/browser-use/action',
-      service: 'browser-use',
-      requiresValidation: true,
-      riskLevel: 'HIGH',
-      cacheStrategy: 'NONE',
-      circuitBreaker: { failureThreshold: 5, timeoutMs: 25000, resetTimeoutMs: 45000, monitoringEnabled: true },
-      complianceLevel: 'HIGH',
-    }],
-    // Health and Monitoring endpoints
-    ['GET:/health', {
-      endpoint: '/health',
-      service: 'health',
-      requiresValidation: false,
-      riskLevel: 'LOW',
-      cacheStrategy: 'SHORT',
-      circuitBreaker: { failureThreshold: 50, timeoutMs: 5000, resetTimeoutMs: 10000, monitoringEnabled: false },
-      complianceLevel: 'BASIC',
-    }],
-    ['GET:/metrics', {
-      endpoint: '/metrics',
-      service: 'metrics',
-      requiresValidation: false,
-      riskLevel: 'MEDIUM',
-      cacheStrategy: 'SHORT',
-      circuitBreaker: { failureThreshold: 20, timeoutMs: 10000, resetTimeoutMs: 20000, monitoringEnabled: true },
-      complianceLevel: 'STANDARD',
-    }],
-  ]);
+    ['POST:/computer-use/action', {endpoint: '/computer-use/action',service: 'computer-use',requiresValidation: true,riskLevel: 'HIGH',cacheStrategy: 'NONE',circuitBreaker: { failureThreshold: 5, timeoutMs: 30000, resetTimeoutMs: 60000, monitoringEnabled: true },complianceLevel: 'MAXIMUM',}],['POST:/computer-use/action/async', {endpoint: '/computer-use/action/async',service: 'computer-use',requiresValidation: true,riskLevel: 'HIGH',cacheStrategy: 'SHORT',circuitBreaker: { failureThreshold: 10, timeoutMs: 5000, resetTimeoutMs: 30000, monitoringEnabled: true },complianceLevel: 'HIGH',}],['GET:/computer-use/jobs/:jobId/status', {endpoint: '/computer-use/jobs/:jobId/status',service: 'computer-use',requiresValidation: false,riskLevel: 'LOW',cacheStrategy: 'SHORT',circuitBreaker: { failureThreshold: 20, timeoutMs: 10000, resetTimeoutMs: 15000, monitoringEnabled: true },complianceLevel: 'STANDARD',}],// Authentication API endpoints
+    ['POST:/auth/login', {endpoint: '/auth/login',service: 'auth',requiresValidation: true,riskLevel: 'CRITICAL',cacheStrategy: 'NONE',circuitBreaker: { failureThreshold: 3, timeoutMs: 15000, resetTimeoutMs: 120000, monitoringEnabled: true },complianceLevel: 'MAXIMUM',}],['POST:/auth/register', {endpoint: '/auth/register',service: 'auth',requiresValidation: true,riskLevel: 'HIGH',cacheStrategy: 'NONE',circuitBreaker: { failureThreshold: 5, timeoutMs: 20000, resetTimeoutMs: 60000, monitoringEnabled: true },complianceLevel: 'MAXIMUM',}],// Browser Use API endpoints
+    ['POST:/browser-use/action', {endpoint: '/browser-use/action',service: 'browser-use',requiresValidation: true,riskLevel: 'HIGH',cacheStrategy: 'NONE',circuitBreaker: { failureThreshold: 5, timeoutMs: 25000, resetTimeoutMs: 45000, monitoringEnabled: true },complianceLevel: 'HIGH',}],// Health and Monitoring endpoints
+    ['GET:/health', {endpoint: '/health',service: 'health',requiresValidation: false,riskLevel: 'LOW',cacheStrategy: 'SHORT',circuitBreaker: { failureThreshold: 50, timeoutMs: 5000, resetTimeoutMs: 10000, monitoringEnabled: false },complianceLevel: 'BASIC',}],['GET:/metrics', {endpoint: '/metrics',service: 'metrics',requiresValidation: false,riskLevel: 'MEDIUM',cacheStrategy: 'SHORT',circuitBreaker: { failureThreshold: 20, timeoutMs: 10000, resetTimeoutMs: 20000, monitoringEnabled: true },complianceLevel: 'STANDARD',}],]);
 
   /** Performance and analytics tracking */
   private analytics = {
@@ -362,40 +252,20 @@ export class EnterpriseApiGatewayController {
   constructor(
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
-    this.logger.log('Enterprise API Gateway initialized - Parlant validation active for all endpoints');
-    this.initializeCircuitBreakers();
-  }
+    this.logger.log('Enterprise API Gateway initialized - Parlant validation active for all endpoints');this.initializeCircuitBreakers();}
 
   // ===== UNIVERSAL API GATEWAY ENDPOINTS =====
 
   // /**
   //  * Universal POST endpoint with Parlant validation
   //  */
-  // @Post(':service/*path')
-  // @ApiOperation({
-  //   summary: 'Universal POST API with Parlant validation',
-  //   description: 'Execute any POST API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
-  // })
-  // @ApiParam({ name: 'service', description: 'Target service name' })
-  // @ApiParam({ name: 'path', description: 'Target endpoint path' })
-  // @ApiHeader({ name: 'x-conversation-id', description: 'Conversation ID for validation context', required: false })
-  // @ApiHeader({ name: 'x-user-intent', description: 'User intent description', required: false })
-  // @ApiResponse({ status: 200, description: 'API request executed successfully with validation' })
-  // @ApiResponse({ status: 403, description: 'Request denied by Parlant validation' })
-  // @ApiResponse({ status: 503, description: 'Service unavailable - circuit breaker open' })
-  // async executePostApi(
-  //   @Param('service') service: string,
-  //   @Param('path') endpoint: string,
-  //   @Body() body: unknown,
-  //   @Query() query: Record<string, unknown>,
+  // @Post(':service/*path')// @ApiOperation({//   summary: 'Universal POST API with Parlant validation',//   description: 'Execute any POST API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',// })// @ApiParam({ name: 'service', description: 'Target service name' })// @ApiParam({ name: 'path', description: 'Target endpoint path' })// @ApiHeader({ name: 'x-conversation-id', description: 'Conversation ID for validation context', required: false })// @ApiHeader({ name: 'x-user-intent', description: 'User intent description', required: false })// @ApiResponse({ status: 200, description: 'API request executed successfully with validation' })// @ApiResponse({ status: 403, description: 'Request denied by Parlant validation' })// @ApiResponse({ status: 503, description: 'Service unavailable - circuit breaker open' })// async executePostApi(//   @Param('service') service: string,//   @Param('path') endpoint: string,//   @Body() body: unknown,//   @Query() query: Record<string, unknown>,
   //   @Headers() headers: Record<string, string>,
   //   @CurrentUser() user: ByteBotdUser,
   //   @Req() request: Request,
   //   @Res() response: Response,
   // ): Promise<void> {
-  //   await this.executeUniversalApi('POST', service, endpoint, {
-  //     body,
-  //     query,
+  //   await this.executeUniversalApi('POST', service, endpoint, {//     body,//     query,
   //     headers,
   //     user,
   //     request,
@@ -406,35 +276,16 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal POST endpoint with Parlant validation - Simplified
    */
-  @Post('test')
-  async executeTestApi(): Promise<{ message: string }> {
-    return { message: 'Test endpoint working' };
-  }
-
-  /**
+  @Post('test')async executeTestApi(): Promise<{ message: string }> {return { message: 'Test endpoint working' };}/**
    * Universal GET endpoint with Parlant validation
    */
-  @Get(':service/*path')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Universal GET API with Parlant validation',
-    description: 'Execute any GET API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
-  })
-  @ApiParam({ name: 'service', description: 'Target service name' })
-  @ApiParam({ name: 'path', description: 'Target endpoint path' })
-  @ApiResponse({ status: 200, description: 'API request executed successfully with validation' })
-  async executeGetApi(
-    @Param('service') service: string,
-    @Param('path') endpoint: string,
-    @Query() query: Record<string, unknown>,
-    @Headers() headers: Record<string, string>,
+  @Get(':service/*path')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Universal GET API with Parlant validation',description: 'Execute any GET API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',})@ApiParam({ name: 'service', description: 'Target service name' })@ApiParam({ name: 'path', description: 'Target endpoint path' })@ApiResponse({ status: 200, description: 'API request executed successfully with validation' })async executeGetApi(@Param('service') service: string,@Param('path') endpoint: string,@Query() query: Record<string, unknown>,@Headers() headers: Record<string, string>,
     @CurrentUser() user: ByteBotdUser,
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<void> {
-    await this.executeUniversalApi('GET', service, endpoint, {
-      query,
-      headers,
+    await this.executeUniversalApi('GET', service, endpoint, {query,headers,
       user,
       request,
       response,
@@ -444,25 +295,15 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal PUT endpoint with Parlant validation
    */
-  @Put(':service/*path')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Universal PUT API with Parlant validation',
-    description: 'Execute any PUT API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
-  })
-  async executePutApi(
-    @Param('service') service: string,
-    @Param('path') endpoint: string,
-    @Body() body: unknown,
-    @Query() query: Record<string, unknown>,
+  @Put(':service/*path')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Universal PUT API with Parlant validation',description: 'Execute any PUT API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',})async executePutApi(
+    @Param('service') service: string,@Param('path') endpoint: string,@Body() body: unknown,@Query() query: Record<string, unknown>,
     @Headers() headers: Record<string, string>,
     @CurrentUser() user: ByteBotdUser,
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<void> {
-    await this.executeUniversalApi('PUT', service, endpoint, {
-      body,
-      query,
+    await this.executeUniversalApi('PUT', service, endpoint, {body,query,
       headers,
       user,
       request,
@@ -473,24 +314,14 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal DELETE endpoint with Parlant validation
    */
-  @Delete(':service/*path')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Universal DELETE API with Parlant validation',
-    description: 'Execute any DELETE API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
-  })
-  async executeDeleteApi(
-    @Param('service') service: string,
-    @Param('path') endpoint: string,
-    @Query() query: Record<string, unknown>,
-    @Headers() headers: Record<string, string>,
+  @Delete(':service/*path')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Universal DELETE API with Parlant validation',description: 'Execute any DELETE API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',})async executeDeleteApi(
+    @Param('service') service: string,@Param('path') endpoint: string,@Query() query: Record<string, unknown>,@Headers() headers: Record<string, string>,
     @CurrentUser() user: ByteBotdUser,
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<void> {
-    await this.executeUniversalApi('DELETE', service, endpoint, {
-      query,
-      headers,
+    await this.executeUniversalApi('DELETE', service, endpoint, {query,headers,
       user,
       request,
       response,
@@ -502,21 +333,13 @@ export class EnterpriseApiGatewayController {
   /**
    * Get comprehensive API analytics and performance metrics
    */
-  @Get('analytics')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Get Enterprise API analytics',
-    description: 'Retrieve comprehensive analytics and performance metrics for all API endpoints.',
-  })
-  @ApiResponse({
+  @Get('analytics')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Get Enterprise API analytics',description: 'Retrieve comprehensive analytics and performance metrics for all API endpoints.',})@ApiResponse({
     status: 200,
-    description: 'API analytics retrieved successfully',
-    type: 'object',
+    description: 'API analytics retrieved successfully',type: 'object',
   })
   async getApiAnalytics(@CurrentUser() user: ByteBotdUser): Promise<EnterpriseApiAnalytics> {
-    const operationId = `api_analytics${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] API analytics request`, {
+    const operationId = `api_analytics${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] API analytics request`, {
       operationId,
       userId: user.id,
     });
@@ -572,10 +395,7 @@ export class EnterpriseApiGatewayController {
             CRITICAL: 5,
           },
           topDenialReasons: [
-            { reason: 'High-risk operation without explicit approval', count: 15, percentage: 35.7 },
-            { reason: 'Insufficient conversation context', count: 12, percentage: 28.6 },
-            { reason: 'Security policy violation', count: 8, percentage: 19.0 },
-            { reason: 'Resource access outside permitted scope', count: 7, percentage: 16.7 },
+            { reason: 'High-risk operation without explicit approval', count: 15, percentage: 35.7 },{ reason: 'Insufficient conversation context', count: 12, percentage: 28.6 },{ reason: 'Security policy violation', count: 8, percentage: 19.0 },{ reason: 'Resource access outside permitted scope', count: 7, percentage: 16.7 },
           ],
         },
         compliance: {
@@ -594,20 +414,15 @@ export class EnterpriseApiGatewayController {
       });
 
       throw new HttpException(
-        'Failed to retrieve API analytics',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+        'Failed to retrieve API analytics',HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
   /**
    * Get circuit breaker status for all services
    */
-  @Get('circuit-breakers')
-  @OperatorOrAdmin()
-  @ApiOperation({
-    summary: 'Get circuit breaker status',
-    description: 'Retrieve current circuit breaker states and configuration for all services.',
+  @Get('circuit-breakers')@OperatorOrAdmin()@ApiOperation({
+    summary: 'Get circuit breaker status',description: 'Retrieve current circuit breaker states and configuration for all services.',
   })
   async getCircuitBreakerStatus(): Promise<Record<string, unknown>> {
     const status: Record<string, unknown> = {};
@@ -642,9 +457,7 @@ export class EnterpriseApiGatewayController {
       response: Response;
     },
   ): Promise<void> {
-    const operationId = `enterprise_api${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    const apiKey = `${method}:/${service}/${endpoint}`;
+    const operationId = `enterprise_api${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const apiKey = `${method}:/${service}/${endpoint}`;
     
     // Update analytics
     this.analytics.totalRequests++;
@@ -665,9 +478,7 @@ export class EnterpriseApiGatewayController {
     }
     serviceMetrics.requests++;
 
-    this.logger.log(`[${operationId}] Enterprise API execution`, {
-      operationId,
-      method,
+    this.logger.log(`[${operationId}] Enterprise API execution`, {operationId,method,
       service,
       endpoint,
       userId: context.user.id,
@@ -699,10 +510,7 @@ export class EnterpriseApiGatewayController {
         endpoint,
         service,
         requiresValidation: true,
-        riskLevel: 'MEDIUM',
-        cacheStrategy: 'NONE',
-        circuitBreaker: { failureThreshold: 10, timeoutMs: 30000, resetTimeoutMs: 60000, monitoringEnabled: true },
-        complianceLevel: 'STANDARD',
+        riskLevel: 'MEDIUM',cacheStrategy: 'NONE',circuitBreaker: { failureThreshold: 10, timeoutMs: 30000, resetTimeoutMs: 60000, monitoringEnabled: true },complianceLevel: 'STANDARD',
       } as ApiEndpointConfig;
 
       let validationResult: ParlantValidationResponse | null = null;
@@ -711,8 +519,7 @@ export class EnterpriseApiGatewayController {
       // Perform Parlant validation if required
       if (config.requiresValidation) {
         const validationRequest: ParlantValidationRequest = {
-          functionName: `API.${service}.${endpoint.replace(/[/:]/g, '')}`,
-          functionParams: {
+          functionName: `API.${service}.${endpoint.replace(/[/:]/g, '')}',functionParams: {
             method,
             service,
             endpoint,
@@ -723,16 +530,12 @@ export class EnterpriseApiGatewayController {
           actionDescription: `Execute ${method} API call to /${service}/${endpoint}`,
           context: {
             userId: context.user.id,
-            sessionId: context.headers?.['x-conversation-id'] ?? `api_session${Date.now()}`,
-            agentRole: context.user.role,
-            securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
+            sessionId: context.headers?.['x-conversation-id'] ?? `api_session${Date.now()}`,agentRole: context.user.role,securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
             conversationHistory: [],
             metadata: {
               operationId,
               apiEndpoint: `${method} /${service}/${endpoint}`,
-              userAgent: context.request.headers['user-agent'],
-              ipAddress: this.getClientIpAddress(context.request),
-              apiVersion: SUPPORTED_API_VERSIONS.V1,
+              userAgent: context.request.headers['user-agent'],ipAddress: this.getClientIpAddress(context.request),apiVersion: SUPPORTED_API_VERSIONS.V1,
             },
           },
           riskLevel: config.riskLevel as RiskLevel,
@@ -769,13 +572,10 @@ export class EnterpriseApiGatewayController {
 
       // Update circuit breaker success
       if (circuitBreaker) {
-        if (circuitBreaker.state === 'HALF_OPEN') {
-          circuitBreaker.state = 'CLOSED';
+        if (circuitBreaker.state === 'HALF_OPEN') {circuitBreaker.state = 'CLOSED';
           circuitBreaker.failureCount = 0;
           delete circuitBreaker.nextRetryTime;
-          this.logger.log(`[${operationId}] Circuit breaker closed for ${circuitBreakerKey}`);
-        }
-      }
+          this.logger.log(`[${operationId}] Circuit breaker closed for ${circuitBreakerKey}`);}}
 
       // Build enterprise response
       const enterpriseResponse: EnterpriseApiResponse = {
@@ -789,25 +589,14 @@ export class EnterpriseApiGatewayController {
           riskAssessment: {
             level: config.riskLevel,
             factors: [`API endpoint risk level: ${config.riskLevel}`],
-            mitigations: ['Parlant conversational validation'],
-          },
-        } : {
+            mitigations: ['Parlant conversational validation'],},} : {
           approved: true,
-          conversationId: 'validation-bypassed',
-          validationTimestamp: new Date(),
-          reasoning: 'Validation bypassed for low-risk endpoint',
-          confidence: 1.0,
-          riskAssessment: {
-            level: 'LOW',
-            factors: ['No validation required'],
-            mitigations: [],
-          },
+          conversationId: 'validation-bypassed',validationTimestamp: new Date(),reasoning: 'Validation bypassed for low-risk endpoint',confidence: 1.0,riskAssessment: {
+            level: 'LOW',factors: ['No validation required'],mitigations: [],},
         },
         metadata: {
           operationId,
-          apiVersion: 'v1',
-          processingTime: {
-            validationMs: validationTime,
+          apiVersion: 'v1',processingTime: {validationMs: validationTime,
             executionMs: executionTime,
             totalMs: totalTime,
           },
@@ -860,9 +649,7 @@ export class EnterpriseApiGatewayController {
         if (config && circuitBreaker.failureCount >= config.circuitBreaker.failureThreshold) {
           circuitBreaker.state = 'OPEN';
           circuitBreaker.nextRetryTime = new Date(Date.now() + config.circuitBreaker.resetTimeoutMs);
-          this.logger.warn(`[${operationId}] Circuit breaker opened for ${circuitBreakerKey}`, {
-            failureCount: circuitBreaker.failureCount,
-            threshold: config.circuitBreaker.failureThreshold,
+          this.logger.warn(`[${operationId}] Circuit breaker opened for ${circuitBreakerKey}`, {failureCount: circuitBreaker.failureCount,threshold: config.circuitBreaker.failureThreshold,
           });
         }
       }
@@ -876,8 +663,7 @@ export class EnterpriseApiGatewayController {
 
         context.response.status(HttpStatus.FORBIDDEN).json({
           statusCode: HttpStatus.FORBIDDEN,
-          message: 'API request denied by conversational validation',
-          error: 'Conversational Validation Failed',
+          message: 'API request denied by conversational validation',error: 'Conversational Validation Failed',
           details: {
             reasoning: error.reasoning,
             conversationId: error.conversationId,
@@ -900,8 +686,7 @@ export class EnterpriseApiGatewayController {
       const statusCode = error instanceof HttpException ? error.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
       context.response.status(statusCode).json({
         statusCode,
-        message: error instanceof Error ? error.message : 'Internal server error',
-        error: 'API Execution Failed',
+        message: error instanceof Error ? error.message : 'Internal server error',error: 'API Execution Failed',
         metadata: {
           operationId,
           timestamp: new Date(),
@@ -928,9 +713,7 @@ export class EnterpriseApiGatewayController {
     // For now, return a mock response
     return {
       success: true,
-      message: `Mock response for ${method} /${service}/${endpoint}`,
-      timestamp: new Date(),
-      data: {
+      message: `Mock response for ${method} /${service}/${endpoint}`,timestamp: new Date(),data: {
         service,
         endpoint,
         method,
@@ -957,14 +740,7 @@ export class EnterpriseApiGatewayController {
   /**
    * Map user role to security level
    */
-  private mapUserRoleToSecurityLevel(role: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (role?.toUpperCase()) {
-      case 'ADMIN': return 'CRITICAL';
-      case 'OPERATOR': return 'HIGH';
-      case 'USER': return 'MEDIUM';
-      default: return 'LOW';
-    }
-  }
+  private mapUserRoleToSecurityLevel(role: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (role?.toUpperCase()) {case 'ADMIN': return 'CRITICAL';case 'OPERATOR': return 'HIGH';case 'USER': return 'MEDIUM';default: return 'LOW';}}
 
   /**
    * Sanitize headers for validation
@@ -974,9 +750,7 @@ export class EnterpriseApiGatewayController {
     
     const sanitized: Record<string, string> = {};
     Object.entries(headers).forEach(([key, value]) => {
-      if (!key.toLowerCase().includes('authorization') && !key.toLowerCase().includes('cookie')) {
-        sanitized[key] = value;
-      }
+      if (!key.toLowerCase().includes('authorization') && !key.toLowerCase().includes('cookie')) {sanitized[key] = value;}
     });
     
     return sanitized;
@@ -987,10 +761,7 @@ export class EnterpriseApiGatewayController {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
-      (request.headers['x-real-ip'] as string) ??
-      request.socket?.remoteAddress ??
-      'unknown'
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??(request.headers['x-real-ip'] as string) ??request.socket?.remoteAddress ??'unknown'
     );
   }
 }

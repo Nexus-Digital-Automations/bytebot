@@ -17,17 +17,7 @@
  * @version 2.0.0
  */
 
-import { performance } from 'perf_hooks';
-import { EventEmitter } from 'events';
-import { promises as fs } from 'fs';
-import { performanceFramework } from './performance-framework';
-import { loadTestOrchestrator } from './load-testing-scenarios';
-import { testExecutionValidator } from './test-execution-validator';
-import { performanceBottleneckAnalyzer } from './performance-bottleneck-analyzer';
-import { createTestExecutionOptimizer } from './test-execution-optimizer';
-
-/**
- * Performance validation configuration for CI
+import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { promises as fs } from 'fs';import { performanceFramework } from './performance-framework';import { loadTestOrchestrator } from './load-testing-scenarios';import { testExecutionValidator } from './test-execution-validator';import { performanceBottleneckAnalyzer } from './performance-bottleneck-analyzer';import { createTestExecutionOptimizer } from './test-execution-optimizer';/*** Performance validation configuration for CI
  */
 export interface CIPerformanceConfig {
   readonly enabled: boolean;
@@ -124,9 +114,7 @@ export interface CIPerformanceResult {
   readonly branch: string;
   readonly commitHash: string;
   readonly timestamp: number;
-  readonly overallStatus: 'passed' | 'failed' | 'warning';
-  readonly testResults: {
-    totalTests: number;
+  readonly overallStatus: 'passed' | 'failed' | 'warning';readonly testResults: {totalTests: number;
     passedTests: number;
     failedTests: number;
     executionTime: number;
@@ -150,11 +138,7 @@ export interface CIPerformanceResult {
     previousValue: number;
     currentValue: number;
     change: number; // percentage
-    severity: 'critical' | 'high' | 'medium' | 'low';
-  }>;
-  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-  readonly recommendations: string[];
-  readonly artifacts: {
+    severity: 'critical' | 'high' | 'medium' | 'low';}>;readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';readonly recommendations: string[];readonly artifacts: {
     htmlReport?: string;
     jsonReport?: string;
     benchmarkData?: string;
@@ -182,14 +166,11 @@ export class CIPerformanceValidator extends EventEmitter {
     buildId: string;
     branch: string;
     commitHash: string;
-    triggerType: 'commit' | 'pull_request' | 'release';
-  }): Promise<CIPerformanceResult> {
-    if (!this.config.enabled) {
+    triggerType: 'commit' | 'pull_request' | 'release';}): Promise<CIPerformanceResult> {if (!this.config.enabled) {
       throw new Error('CI Performance validation is disabled');
     }
 
-    console.log(`🚀 [CI-PERF] Starting performance validation for build ${context.buildId}`);
-    console.log(`📋 [CI-PERF] Context: ${context.branch}@${context.commitHash} (${context.triggerType})`);
+    console.log(`🚀 [CI-PERF] Starting performance validation for build ${context.buildId}`);console.log(`📋 [CI-PERF] Context: ${context.branch}@${context.commitHash} (${context.triggerType})`);
 
     const validationStart = performance.now();
 
@@ -200,9 +181,7 @@ export class CIPerformanceValidator extends EventEmitter {
         branch: context.branch,
         commitHash: context.commitHash,
         timestamp: Date.now(),
-        overallStatus: 'passed',
-        testResults: {
-          totalTests: 0,
+        overallStatus: 'passed',testResults: {totalTests: 0,
           passedTests: 0,
           failedTests: 0,
           executionTime: 0,
@@ -222,28 +201,14 @@ export class CIPerformanceValidator extends EventEmitter {
           memoryOptimization: 0
         },
         regressions: [],
-        performanceGrade: 'A',
-        recommendations: [],
-        artifacts: {}
+        performanceGrade: 'A',recommendations: [],artifacts: {}
       };
 
       // Step 1: Test execution performance validation
-      console.log('🧪 [CI-PERF] Step _1: Validating test execution performance...');
-      const testResults = await this.validateTestExecutionPerformance();
-
-      // Step 2: Load testing validation
-      console.log('🔄 [CI-PERF] Step _2: Running load test scenarios...');
-      const loadResults = await this.validateLoadTestPerformance();
-
-      // Step 3: Performance optimization validation
-      console.log('⚡ [CI-PERF] Step _3: Validating performance optimizations...');
-      const optimizationResults = await this.validateOptimizationPerformance();
-
-      // Step 4: Regression detection
-      console.log('📊 [CI-PERF] Step _4: Detecting performance regressions...');
-      const regressions = await this.detectPerformanceRegressions(context);
-
-      // Step 5: Performance bottleneck analysis
+      console.log('🧪 [CI-PERF] Step _1: Validating test execution performance...');const testResults = await this.validateTestExecutionPerformance();// Step 2: Load testing validation
+      console.log('🔄 [CI-PERF] Step _2: Running load test scenarios...');const loadResults = await this.validateLoadTestPerformance();// Step 3: Performance optimization validation
+      console.log('⚡ [CI-PERF] Step _3: Validating performance optimizations...');const optimizationResults = await this.validateOptimizationPerformance();// Step 4: Regression detection
+      console.log('📊 [CI-PERF] Step _4: Detecting performance regressions...');const regressions = await this.detectPerformanceRegressions(context);// Step 5: Performance bottleneck analysis
       console.log('🔍 [CI-PERF] Step _5: Analyzing performance bottlenecks...');
       const bottleneckAnalysis = await this.analyzePerformanceBottlenecks();
 
@@ -275,28 +240,18 @@ export class CIPerformanceValidator extends EventEmitter {
       this.storeHistoricalResult(this.currentValidation);
 
       const validationTime = performance.now() - validationStart;
-      console.log(`✅ [CI-PERF] Performance validation completed in ${validationTime.toFixed(2)}ms`);
-      console.log(`📊 [CI-PERF] Overall status: ${this.currentValidation.overallStatus}`);
-      console.log(`🏆 [CI-PERF] Performance grade: ${this.currentValidation.performanceGrade}`);
+      console.log(`✅ [CI-PERF] Performance validation completed in ${validationTime.toFixed(2)}ms`);console.log(`📊 [CI-PERF] Overall status: ${this.currentValidation.overallStatus}`);console.log(`🏆 [CI-PERF] Performance grade: ${this.currentValidation.performanceGrade}`);
 
       // Send notifications if configured
       await this.sendNotifications(this.currentValidation);
 
-      this.emit('validationCompleted', this.currentValidation);
-      return this.currentValidation;
-
-    } catch (error) {
-      console.error('❌ [CI-PERF] Performance validation failed:', error);
-      
-      // Create failed result
-      const failedResult: CIPerformanceResult = {
+      this.emit('validationCompleted', this.currentValidation);return this.currentValidation;} catch (error) {
+      console.error('❌ [CI-PERF] Performance validation failed:', error);// Create failed resultconst failedResult: CIPerformanceResult = {
         buildId: this.currentValidation?.buildId ?? context.buildId,
         branch: this.currentValidation?.branch ?? context.branch,
         commitHash: this.currentValidation?.commitHash ?? context.commitHash,
         timestamp: this.currentValidation?.timestamp ?? Date.now(),
-        overallStatus: 'failed',
-        testResults: this.currentValidation?.testResults ?? {
-          totalTests: 0,
+        overallStatus: 'failed',testResults: this.currentValidation?.testResults ?? {totalTests: 0,
           passedTests: 0,
           failedTests: 0,
           executionTime: 0,
@@ -316,14 +271,9 @@ export class CIPerformanceValidator extends EventEmitter {
           memoryOptimization: 0
         },
         regressions: this.currentValidation?.regressions ?? [],
-        performanceGrade: 'F',
-        recommendations: ['Fix performance validation setup and retry'],
-        artifacts: this.currentValidation?.artifacts ?? {}
-      };
+        performanceGrade: 'F',recommendations: ['Fix performance validation setup and retry'],artifacts: this.currentValidation?.artifacts ?? {}};
 
-      this.emit('validationFailed', { error, context });
-      return failedResult;
-    }
+      this.emit('validationFailed', { error, context });return failedResult;}
   }
 
   /**
@@ -337,9 +287,7 @@ export class CIPerformanceValidator extends EventEmitter {
     memoryUsage: number;
   }> {
     const config = {
-      testPattern: '**/*.spec.ts',
-      maxWorkers: 4,
-      timeout: 30000,
+      testPattern: '**/*.spec.ts',maxWorkers: 4,timeout: 30000,
       retries: 0,
       coverage: false,
       watch: false,
@@ -353,18 +301,14 @@ export class CIPerformanceValidator extends EventEmitter {
 
     const testResults = {
       totalTests: validationResult.totalTests,
-      passedTests: validationResult.totalTests - (validationResult.bottlenecks.filter(b => b.type === 'execution_time').length),
-      failedTests: validationResult.bottlenecks.filter(b => b.type === 'execution_time').length,
+      passedTests: validationResult.totalTests - (validationResult.bottlenecks.filter(b => b.type === 'execution_time').length),failedTests: validationResult.bottlenecks.filter(b => b.type === 'execution_time').length,
       executionTime: validationResult.overallExecutionTime,
       memoryUsage: validationResult.memoryEfficiency
     };
 
     // Check against thresholds
     if (testResults.executionTime > this.config.performanceThresholds.testExecutionTime.max) {
-      console.warn(`⚠️ [CI-PERF] Test execution time ${testResults.executionTime}ms exceeds threshold ${this.config.performanceThresholds.testExecutionTime.max}ms`);
-    }
-
-    if (testResults.memoryUsage > this.config.performanceThresholds.memoryUsage.max) {
+      console.warn(`⚠️ [CI-PERF] Test execution time ${testResults.executionTime}ms exceeds threshold ${this.config.performanceThresholds.testExecutionTime.max}ms`);}if (testResults.memoryUsage > this.config.performanceThresholds.memoryUsage.max) {
       console.warn(`⚠️ [CI-PERF] Memory usage ${testResults.memoryUsage}MB exceeds threshold ${this.config.performanceThresholds.memoryUsage.max}MB`);
     }
 
@@ -393,9 +337,7 @@ export class CIPerformanceValidator extends EventEmitter {
           const result = await loadTestOrchestrator.executeLoadTestScenario(suiteName);
           results.set(suiteName, result);
         } catch (error) {
-          console.warn(`⚠️ [CI-PERF] Load test scenario ${suiteName} failed: ${error}`);
-        }
-      }
+          console.warn(`⚠️ [CI-PERF] Load test scenario ${suiteName} failed: ${error}`);}}
 
       // Aggregate results
       const allResults = Array.from(results.values());
@@ -413,14 +355,8 @@ export class CIPerformanceValidator extends EventEmitter {
       const thresholds = this.config.performanceThresholds.loadTestTargets;
       
       if (loadResults.averageResponseTime > thresholds.responseTime.p95) {
-        console.warn(`⚠️ [CI-PERF] Average response time ${loadResults.averageResponseTime}ms exceeds P95 threshold ${thresholds.responseTime.p95}ms`);
-      }
-
-      if (loadResults.throughput < thresholds.throughput.min) {
-        console.warn(`⚠️ [CI-PERF] Throughput ${loadResults.throughput} RPS below threshold ${thresholds.throughput.min} RPS`);
-      }
-
-      if (loadResults.errorRate > thresholds.errorRate.max) {
+        console.warn(`⚠️ [CI-PERF] Average response time ${loadResults.averageResponseTime}ms exceeds P95 threshold ${thresholds.responseTime.p95}ms`);}if (loadResults.throughput < thresholds.throughput.min) {
+        console.warn(`⚠️ [CI-PERF] Throughput ${loadResults.throughput} RPS below threshold ${thresholds.throughput.min} RPS`);}if (loadResults.errorRate > thresholds.errorRate.max) {
         console.warn(`⚠️ [CI-PERF] Error rate ${loadResults.errorRate}% exceeds threshold ${thresholds.errorRate.max}%`);
       }
 
@@ -445,14 +381,9 @@ export class CIPerformanceValidator extends EventEmitter {
       enableParallelization: true,
       maxWorkers: 4,
       memoryThreshold: 512,
-      cacheDirectory: './node_modules/.cache/jest-ci-optimizer'
-    });
-
-    // Get test files
+      cacheDirectory: './node_modules/.cache/jest-ci-optimizer'});// Get test files
     const testFiles = [
-      'src/auth/__tests__/auth.service.spec.ts',
-      'src/health/__tests__/health.service.spec.ts',
-      'src/computer-use/__tests__/computer-use.service.spec.ts'
+      'src/auth/__tests__/auth.service.spec.ts','src/health/__tests__/health.service.spec.ts','src/computer-use/__tests__/computer-use.service.spec.ts'
     ];
 
     // Create and execute optimization plan
@@ -468,10 +399,7 @@ export class CIPerformanceValidator extends EventEmitter {
 
     // Check against thresholds
     if (optimizationResults.cacheHitRate < this.config.performanceThresholds.cacheHitRate.min) {
-      console.warn(`⚠️ [CI-PERF] Cache hit rate ${optimizationResults.cacheHitRate}% below threshold ${this.config.performanceThresholds.cacheHitRate.min}%`);
-    }
-
-    if (optimizationResults.parallelizationEfficiency < this.config.performanceThresholds.parallelizationEfficiency.min) {
+      console.warn(`⚠️ [CI-PERF] Cache hit rate ${optimizationResults.cacheHitRate}% below threshold ${this.config.performanceThresholds.cacheHitRate.min}%`);}if (optimizationResults.parallelizationEfficiency < this.config.performanceThresholds.parallelizationEfficiency.min) {
       console.warn(`⚠️ [CI-PERF] Parallelization efficiency ${optimizationResults.parallelizationEfficiency}% below threshold ${this.config.performanceThresholds.parallelizationEfficiency.min}%`);
     }
 
@@ -486,9 +414,7 @@ export class CIPerformanceValidator extends EventEmitter {
     previousValue: number;
     currentValue: number;
     change: number;
-    severity: 'critical' | 'high' | 'medium' | 'low';
-  }>> {
-    if (!this.config.regressionDetection.enabled) {
+    severity: 'critical' | 'high' | 'medium' | 'low';}>> {if (!this.config.regressionDetection.enabled) {
       return [];
     }
 
@@ -497,68 +423,47 @@ export class CIPerformanceValidator extends EventEmitter {
       previousValue: number;
       currentValue: number;
       change: number;
-      severity: 'critical' | 'high' | 'medium' | 'low';
-    }> = [];
-
-    // Get historical results for baseline comparison
+      severity: 'critical' | 'high' | 'medium' | 'low';}> = [];// Get historical results for baseline comparison
     const baselineResults = this.getBaselineResults(context.branch);
     if (!baselineResults || baselineResults.length === 0) {
-      console.log('📊 [CI-PERF] No baseline results found for regression detection');
-      return regressions;
-    }
+      console.log('📊 [CI-PERF] No baseline results found for regression detection');return regressions;}
 
     const latestBaseline = baselineResults[baselineResults.length - 1];
     if (!latestBaseline) {
-      console.log('⚠️ [CI-PERF] No baseline data available for regression analysis');
-      return regressions;
-    }
+      console.log('⚠️ [CI-PERF] No baseline data available for regression analysis');return regressions;}
 
     const current = this.currentValidation;
     if (!current) {
-      console.log('⚠️ [CI-PERF] No current validation data available for regression analysis');
-      return regressions;
-    }
+      console.log('⚠️ [CI-PERF] No current validation data available for regression analysis');return regressions;}
 
     // Check for test execution time regression
     const testTimeChange = ((current.testResults.executionTime - latestBaseline.testResults.executionTime) / latestBaseline.testResults.executionTime) * 100;
     if (Math.abs(testTimeChange) > this.config.regressionDetection.significanceThreshold) {
       regressions.push({
-        metric: 'testExecutionTime',
-        previousValue: latestBaseline.testResults.executionTime,
-        currentValue: current.testResults.executionTime,
+        metric: 'testExecutionTime',previousValue: latestBaseline.testResults.executionTime,currentValue: current.testResults.executionTime,
         change: testTimeChange,
-        severity: Math.abs(testTimeChange) > 50 ? 'critical' : Math.abs(testTimeChange) > 25 ? 'high' : 'medium'
-      });
-    }
+        severity: Math.abs(testTimeChange) > 50 ? 'critical' : Math.abs(testTimeChange) > 25 ? 'high' : 'medium'});}
 
     // Check for memory usage regression
     const memoryChange = ((current.testResults.memoryUsage - latestBaseline.testResults.memoryUsage) / latestBaseline.testResults.memoryUsage) * 100;
     if (Math.abs(memoryChange) > this.config.regressionDetection.significanceThreshold) {
       regressions.push({
-        metric: 'memoryUsage',
-        previousValue: latestBaseline.testResults.memoryUsage,
-        currentValue: current.testResults.memoryUsage,
+        metric: 'memoryUsage',previousValue: latestBaseline.testResults.memoryUsage,currentValue: current.testResults.memoryUsage,
         change: memoryChange,
-        severity: Math.abs(memoryChange) > 40 ? 'critical' : Math.abs(memoryChange) > 20 ? 'high' : 'medium'
-      });
-    }
+        severity: Math.abs(memoryChange) > 40 ? 'critical' : Math.abs(memoryChange) > 20 ? 'high' : 'medium'});}
 
     // Check for load test regressions
     const responseTimeChange = ((current.loadTestResults.averageResponseTime - latestBaseline.loadTestResults.averageResponseTime) / latestBaseline.loadTestResults.averageResponseTime) * 100;
     if (Math.abs(responseTimeChange) > this.config.regressionDetection.significanceThreshold) {
       regressions.push({
-        metric: 'averageResponseTime',
-        previousValue: latestBaseline.loadTestResults.averageResponseTime,
-        currentValue: current.loadTestResults.averageResponseTime,
+        metric: 'averageResponseTime',previousValue: latestBaseline.loadTestResults.averageResponseTime,currentValue: current.loadTestResults.averageResponseTime,
         change: responseTimeChange,
         severity: Math.abs(responseTimeChange) > 30 ? 'critical' : Math.abs(responseTimeChange) > 15 ? 'high' : 'medium'
       });
     }
 
     if (regressions.length > 0) {
-      console.warn(`⚠️ [CI-PERF] Performance regressions detected: ${regressions.length}`);
-      regressions.forEach(reg => {
-        console.warn(`  ${reg.metric}: ${reg.change.toFixed(1)}% change (${reg.severity})`);
+      console.warn(`⚠️ [CI-PERF] Performance regressions detected: ${regressions.length}`);regressions.forEach(reg => {console.warn(`  ${reg.metric}: ${reg.change.toFixed(1)}% change (${reg.severity})`);
       });
     }
 
@@ -573,14 +478,9 @@ export class CIPerformanceValidator extends EventEmitter {
     
     // Simulate some test execution for bottleneck detection
     await performanceBottleneckAnalyzer.analyzeFunction(
-      'sampleTest',
-      async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      'sampleTest',async () => {await new Promise(resolve => setTimeout(resolve, 100));
       },
-      { file: 'test-suite', line: 1 }
-    );
-
-    const session = performanceBottleneckAnalyzer.stopProfiling();
+      { file: 'test-suite', line: 1 });const session = performanceBottleneckAnalyzer.stopProfiling();
     const report = performanceBottleneckAnalyzer.generateBottleneckReport();
 
     return {
@@ -592,44 +492,21 @@ export class CIPerformanceValidator extends EventEmitter {
   /**
    * Determine overall validation status
    */
-  private determineOverallStatus(): 'passed' | 'failed' | 'warning' {
-    const current = this.currentValidation;
-    if (!current) {
-      return 'failed';
-    }
-
-    // Check for critical failures
-    const hasCriticalRegressions = current.regressions.some(r => r.severity === 'critical');
-    const failedLoadTests = current.loadTestResults.scenarios - current.loadTestResults.passedScenarios;
-    const highFailureRate = (current.testResults.failedTests / current.testResults.totalTests) > 0.1;
+  private determineOverallStatus(): 'passed' | 'failed' | 'warning' {const current = this.currentValidation;if (!current) {
+      return 'failed';}// Check for critical failures
+    const hasCriticalRegressions = current.regressions.some(r => r.severity === 'critical');const failedLoadTests = current.loadTestResults.scenarios - current.loadTestResults.passedScenarios;const highFailureRate = (current.testResults.failedTests / current.testResults.totalTests) > 0.1;
 
     if (hasCriticalRegressions || failedLoadTests > 0 || highFailureRate) {
-      return 'failed';
-    }
-
-    // Check for warnings
-    const hasHighRegressions = current.regressions.some(r => r.severity === 'high');
-    const belowThresholds = 
-      current.optimizationResults.cacheHitRate < this.config.performanceThresholds.cacheHitRate.min ||
+      return 'failed';}// Check for warnings
+    const hasHighRegressions = current.regressions.some(r => r.severity === 'high');const belowThresholds = current.optimizationResults.cacheHitRate < this.config.performanceThresholds.cacheHitRate.min ||
       current.optimizationResults.parallelizationEfficiency < this.config.performanceThresholds.parallelizationEfficiency.min;
 
     if (hasHighRegressions || belowThresholds) {
-      return 'warning';
-    }
-
-    return 'passed';
-  }
-
-  /**
+      return 'warning';}return 'passed';}/**
    * Calculate performance grade
    */
-  private calculatePerformanceGrade(): 'A' | 'B' | 'C' | 'D' | 'F' {
-    const current = this.currentValidation;
-    if (!current) {
-      return 'F';
-    }
-
-    // Calculate score based on multiple factors
+  private calculatePerformanceGrade(): 'A' | 'B' | 'C' | 'D' | 'F' {const current = this.currentValidation;if (!current) {
+      return 'F';}// Calculate score based on multiple factors
     let score = 100;
 
     // Deduct for regressions
@@ -645,53 +522,25 @@ export class CIPerformanceValidator extends EventEmitter {
     // Deduct for load test failures
     score -= ((current.loadTestResults.scenarios - current.loadTestResults.passedScenarios) / current.loadTestResults.scenarios) * 30;
 
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
-  }
-
-  /**
+    if (score >= 90) return 'A';if (score >= 80) return 'B';if (score >= 70) return 'C';if (score >= 60) return 'D';return 'F';}/**
    * Generate recommendations
    */
   private generateRecommendations(bottleneckAnalysis: any): string[] {
     const recommendations: string[] = [];
     const current = this.currentValidation;
     if (!current) {
-      return ['Complete performance validation setup before generating recommendations'];
-    }
-
-    // Test execution recommendations
+      return ['Complete performance validation setup before generating recommendations'];}// Test execution recommendations
     if (current.testResults.executionTime > this.config.performanceThresholds.testExecutionTime.max) {
-      recommendations.push('Optimize test execution time by implementing better mocking and reducing test scope');
-    }
-
-    // Memory usage recommendations
+      recommendations.push('Optimize test execution time by implementing better mocking and reducing test scope');}// Memory usage recommendations
     if (current.testResults.memoryUsage > this.config.performanceThresholds.memoryUsage.max) {
-      recommendations.push('Implement better memory management and cleanup in tests');
-    }
-
-    // Load test recommendations
+      recommendations.push('Implement better memory management and cleanup in tests');}// Load test recommendations
     if (current.loadTestResults.errorRate > this.config.performanceThresholds.loadTestTargets.errorRate.max) {
-      recommendations.push('Investigate and fix errors causing load test failures');
-    }
-
-    // Optimization recommendations
+      recommendations.push('Investigate and fix errors causing load test failures');}// Optimization recommendations
     if (current.optimizationResults.cacheHitRate < this.config.performanceThresholds.cacheHitRate.min) {
-      recommendations.push('Improve test caching strategy to increase cache hit rate');
-    }
-
-    if (current.optimizationResults.parallelizationEfficiency < this.config.performanceThresholds.parallelizationEfficiency.min) {
-      recommendations.push('Reduce test dependencies to improve parallel execution');
-    }
-
-    // Regression recommendations
+      recommendations.push('Improve test caching strategy to increase cache hit rate');}if (current.optimizationResults.parallelizationEfficiency < this.config.performanceThresholds.parallelizationEfficiency.min) {
+      recommendations.push('Reduce test dependencies to improve parallel execution');}// Regression recommendations
     if (current.regressions.length > 0) {
-      recommendations.push('Address performance regressions before merging changes');
-    }
-
-    return recommendations;
+      recommendations.push('Address performance regressions before merging changes');}return recommendations;
   }
 
   /**
@@ -703,33 +552,21 @@ export class CIPerformanceValidator extends EventEmitter {
       console.warn('⚠️ [CI-PERF] No validation data available for artifact generation');
       return;
     }
-    const artifactsDir = `./artifacts/${current.buildId}`;
-
-    try {
-      await fs.mkdir(artifactsDir, { recursive: true });
+    const artifactsDir = `./artifacts/${current.buildId}`;try {await fs.mkdir(artifactsDir, { recursive: true });
 
       // Generate JSON report
       if (this.config.reporting.generateJsonReport) {
         const jsonReport = JSON.stringify(current, null, 2);
-        const jsonPath = `${artifactsDir}/performance-report.json`;
-        await fs.writeFile(jsonPath, jsonReport);
-        current.artifacts.jsonReport = jsonPath;
+        const jsonPath = `${artifactsDir}/performance-report.json`;await fs.writeFile(jsonPath, jsonReport);current.artifacts.jsonReport = jsonPath;
       }
 
       // Generate HTML report
       if (this.config.reporting.generateHtmlReport) {
         const htmlReport = this.generateHtmlReport(current);
-        const htmlPath = `${artifactsDir}/performance-report.html`;
-        await fs.writeFile(htmlPath, htmlReport);
-        current.artifacts.htmlReport = htmlPath;
+        const htmlPath = `${artifactsDir}/performance-report.html`;await fs.writeFile(htmlPath, htmlReport);current.artifacts.htmlReport = htmlPath;
       }
 
-      console.log(`📄 [CI-PERF] Generated artifacts in ${artifactsDir}`);
-
-    } catch (error) {
-      console.warn(`⚠️ [CI-PERF] Failed to generate artifacts: ${error}`);
-    }
-  }
+      console.log(`📄 [CI-PERF] Generated artifacts in ${artifactsDir}`);} catch (error) {console.warn(`⚠️ [CI-PERF] Failed to generate artifacts: ${error}`);}}
 
   /**
    * Generate HTML report
@@ -752,29 +589,21 @@ export class CIPerformanceValidator extends EventEmitter {
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Performance Validation Report</h1>
-        <p><strong>Build:</strong> ${result.buildId}</p>
+    <div class="header"><h1>Performance Validation Report</h1><p><strong>Build:</strong> ${result.buildId}</p>
         <p><strong>Branch:</strong> ${result.branch}</p>
         <p><strong>Commit:</strong> ${result.commitHash}</p>
-        <p><strong>Status:</strong> <span class="status-${result.overallStatus}">${result.overallStatus.toUpperCase()}</span></p>
-        <p><strong>Grade:</strong> ${result.performanceGrade}</p>
-        <p><strong>Timestamp:</strong> ${new Date(result.timestamp).toISOString()}</p>
+        <p><strong>Status:</strong> <span class="status-${result.overallStatus}">${result.overallStatus.toUpperCase()}</span></p><p><strong>Grade:</strong> ${result.performanceGrade}</p><p><strong>Timestamp:</strong> ${new Date(result.timestamp).toISOString()}</p>
     </div>
 
     <h2>Test Results</h2>
-    <div class="metric">
-        <strong>Total Tests:</strong> ${result.testResults.totalTests}<br>
-        <strong>Passed:</strong> ${result.testResults.passedTests}<br>
+    <div class="metric"><strong>Total Tests:</strong> ${result.testResults.totalTests}<br><strong>Passed:</strong> ${result.testResults.passedTests}<br>
         <strong>Failed:</strong> ${result.testResults.failedTests}<br>
         <strong>Execution Time:</strong> ${result.testResults.executionTime.toFixed(2)}ms<br>
         <strong>Memory Usage:</strong> ${result.testResults.memoryUsage.toFixed(2)}MB
     </div>
 
     <h2>Load Test Results</h2>
-    <div class="metric">
-        <strong>Scenarios:</strong> ${result.loadTestResults.scenarios}<br>
-        <strong>Passed:</strong> ${result.loadTestResults.passedScenarios}<br>
+    <div class="metric"><strong>Scenarios:</strong> ${result.loadTestResults.scenarios}<br><strong>Passed:</strong> ${result.loadTestResults.passedScenarios}<br>
         <strong>Avg Response Time:</strong> ${result.loadTestResults.averageResponseTime.toFixed(2)}ms<br>
         <strong>Throughput:</strong> ${result.loadTestResults.throughput.toFixed(2)} RPS<br>
         <strong>Error Rate:</strong> ${result.loadTestResults.errorRate.toFixed(2)}%
@@ -788,9 +617,7 @@ export class CIPerformanceValidator extends EventEmitter {
         <strong>Memory Optimization:</strong> ${result.optimizationResults.memoryOptimization.toFixed(2)}%
     </div>
 
-    ${result.regressions.length > 0 ? `
-    <h2>Performance Regressions</h2>
-    ${result.regressions.map(reg => `
+    ${result.regressions.length > 0 ? `<h2>Performance Regressions</h2>${result.regressions.map(reg => `
         <div class="regression">
             <strong>${reg.metric}:</strong> ${reg.change.toFixed(1)}% change (${reg.severity})<br>
             Previous: ${reg.previousValue} → Current: ${reg.currentValue}
@@ -798,19 +625,16 @@ export class CIPerformanceValidator extends EventEmitter {
     `).join('')}
     ` : ''}
 
-    ${result.recommendations.length > 0 ? `
-    <h2>Recommendations</h2>
-    ${result.recommendations.map(rec => `
+    ${result.recommendations.length > 0 ? `<h2>Recommendations</h2>${result.recommendations.map(rec => `
         <div class="recommendation">${rec}</div>
     `).join('')}
     ` : ''}
 
-    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
-        Generated by CI Performance Validation System
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">Generated by CI Performance Validation System
     </footer>
 </body>
 </html>
-    `;
+    ";
   }
 
   /**
@@ -828,9 +652,7 @@ export class CIPerformanceValidator extends EventEmitter {
     }
 
     // Email notifications for critical issues
-    if (this.config.reporting.emailNotifications && result.overallStatus === 'failed') {
-      await this.sendEmailNotification(result);
-    }
+    if (this.config.reporting.emailNotifications && result.overallStatus === 'failed') {await this.sendEmailNotification(result);}
   }
 
   /**
@@ -839,22 +661,13 @@ export class CIPerformanceValidator extends EventEmitter {
   private async sendSlackNotification(result: CIPerformanceResult): Promise<void> {
     try {
       const statusEmoji = {
-        passed: '✅',
-        warning: '⚠️',
-        failed: '❌'
+        passed: '✅',warning: '⚠️',failed: '❌'
       }[result.overallStatus];
 
       const message = {
         text: `${statusEmoji} Performance Validation ${result.overallStatus.toUpperCase()}`,
         attachments: [{
-          color: result.overallStatus === 'passed' ? 'good' : result.overallStatus === 'warning' ? 'warning' : 'danger',
-          fields: [
-            { title: 'Build', value: result.buildId, short: true },
-            { title: 'Branch', value: result.branch, short: true },
-            { title: 'Grade', value: result.performanceGrade, short: true },
-            { title: 'Regressions', value: result.regressions.length.toString(), short: true }
-          ]
-        }]
+          color: result.overallStatus === 'passed' ? 'good' : result.overallStatus === 'warning' ? 'warning' : 'danger',fields: [{ title: 'Build', value: result.buildId, short: true },{ title: 'Branch', value: result.branch, short: true },{ title: 'Grade', value: result.performanceGrade, short: true },{ title: 'Regressions', value: result.regressions.length.toString(), short: true }]}]
       };
 
       console.log('📱 [CI-PERF] Slack notification sent:', message.text);
@@ -871,15 +684,10 @@ export class CIPerformanceValidator extends EventEmitter {
   private async sendGitHubComment(result: CIPerformanceResult): Promise<void> {
     try {
       const statusEmoji = {
-        passed: '✅',
-        warning: '⚠️',
-        failed: '❌'
+        passed: '✅',warning: '⚠️',failed: '❌'
       }[result.overallStatus];
 
-      const comment = `
-## ${statusEmoji} Performance Validation ${result.overallStatus.toUpperCase()}
-
-**Grade:** ${result.performanceGrade}
+      const comment = `## ${statusEmoji} Performance Validation ${result.overallStatus.toUpperCase()}**Grade:** ${result.performanceGrade}
 
 ### Test Results
 - **Total Tests:** ${result.testResults.totalTests}
@@ -896,9 +704,7 @@ ${result.regressions.length > 0 ? `
 ${result.regressions.map(reg => `- **${reg.metric}:** ${reg.change.toFixed(1)}% change (${reg.severity})`).join('\n')}
 ` : ''}
 
-${result.recommendations.length > 0 ? `
-### 💡 Recommendations
-${result.recommendations.map(rec => `- ${rec}`).join('\n')}
+${result.recommendations.length > 0 ? `### 💡 Recommendations${result.recommendations.map(rec => `- ${rec}`).join('\n')}
 ` : ''}
 
 ---
@@ -909,19 +715,14 @@ ${result.recommendations.map(rec => `- ${rec}`).join('\n')}
       // In real implementation, would post to GitHub API
 
     } catch (error) {
-      console.warn(`⚠️ [CI-PERF] Failed to send GitHub comment: ${error}`);
-    }
-  }
+      console.warn(`⚠️ [CI-PERF] Failed to send GitHub comment: ${error}`);}}
 
   /**
    * Send email notification
    */
   private async sendEmailNotification(result: CIPerformanceResult): Promise<void> {
     try {
-      console.log(`📧 [CI-PERF] Email notification sent for critical performance issues in build ${result.buildId}`);
-      // In real implementation, would send email
-
-    } catch (error) {
+      console.log(`📧 [CI-PERF] Email notification sent for critical performance issues in build ${result.buildId}`);// In real implementation, would send email} catch (error) {
       console.warn(`⚠️ [CI-PERF] Failed to send email notification: ${error}`);
     }
   }
@@ -930,21 +731,14 @@ ${result.recommendations.map(rec => `- ${rec}`).join('\n')}
    * Initialize validator
    */
   private async initializeValidator(): Promise<void> {
-    console.log('🔧 [CI-PERF] Initializing CI performance validator...');
+    console.log('🔧 [CI-PERF] Initializing CI performance validator...');// Load historical resultsawait this.loadHistoricalResults();
 
-    // Load historical results
-    await this.loadHistoricalResults();
-
-    console.log('✅ [CI-PERF] CI performance validator initialized');
-  }
-
-  /**
+    console.log('✅ [CI-PERF] CI performance validator initialized');}/**
    * Load historical results
    */
   private async loadHistoricalResults(): Promise<void> {
     try {
-      const historyPath = './artifacts/performance-history.json';
-      const historyData = await fs.readFile(historyPath, 'utf-8');
+      const historyPath = './artifacts/performance-history.json';const historyData = await fs.readFile(historyPath, 'utf-8');
       const history = JSON.parse(historyData);
 
       for (const [branch, results] of Object.entries(history)) {
@@ -953,9 +747,7 @@ ${result.recommendations.map(rec => `- ${rec}`).join('\n')}
 
       console.log(`📊 [CI-PERF] Loaded historical results for ${this.historicalResults.size} branches`);
     } catch (error) {
-      console.log('📊 [CI-PERF] No historical results found, starting fresh');
-    }
-  }
+      console.log('📊 [CI-PERF] No historical results found, starting fresh');}}
 
   /**
    * Store historical result
@@ -1009,11 +801,7 @@ export function createCIPerformanceValidator(config: Partial<CIPerformanceConfig
     runOnPullRequest: true,
     runOnRelease: true,
     benchmarkSuites: [
-      'Baseline Load Test',
-      'Authentication Module Load Test',
-      'Health Monitoring Load Test'
-    ],
-    performanceThresholds: {
+      'Baseline Load Test','Authentication Module Load Test','Health Monitoring Load Test'],performanceThresholds: {
       testExecutionTime: {
         max: 30000, // 30 seconds
         regressionThreshold: 20 // 20% increase
@@ -1043,9 +831,7 @@ export function createCIPerformanceValidator(config: Partial<CIPerformanceConfig
     },
     regressionDetection: {
       enabled: true,
-      baselineBranch: 'main',
-      comparisonWindow: 5,
-      significanceThreshold: 15, // 15%
+      baselineBranch: 'main',comparisonWindow: 5,significanceThreshold: 15, // 15%
       consecutiveFailuresThreshold: 3
     },
     reporting: {

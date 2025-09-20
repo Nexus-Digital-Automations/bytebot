@@ -25,22 +25,10 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { performance, PerformanceObserver } from 'perf_hooks';
-
-import {
-  MessageOrderingDeliveryValidationService,
-} from '../message-ordering-delivery-validation.service';
-
-import {
-  ConversationalMessage,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import { performance, PerformanceObserver } from 'perf_hooks';import {MessageOrderingDeliveryValidationService,
+} from '../message-ordering-delivery-validation.service';import {ConversationalMessage,
   ConversationalMessageType,
-} from '../conversational-websocket-bridge.service';
-
-// ===== PERFORMANCE TESTING UTILITIES =====
-
-/**
+} from '../conversational-websocket-bridge.service';// ===== PERFORMANCE TESTING UTILITIES =====/**
  * Advanced performance measurement and analysis utilities
  */
 class AdvancedPerformanceAnalyzer {
@@ -57,9 +45,7 @@ class AdvancedPerformanceAnalyzer {
     this.observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       for (const entry of entries) {
-        if (entry.entryType === 'measure') {
-          const measurements = this.measurements.get(testName) ?? [];
-          measurements.push(entry.duration);
+        if (entry.entryType === 'measure') {const measurements = this.measurements.get(testName) ?? [];measurements.push(entry.duration);
           this.measurements.set(testName, measurements);
         }
       }
@@ -284,22 +270,16 @@ class LoadSimulator {
 
     return {
       type: randomType,
-      messageId: `load_msg_${sessionId}_${sequence}_${Date.now()}`,
-      sessionId,
-      conversationId: `conv_${sessionId}`,
+      messageId: `load_msg_${sessionId}_${sequence}_${Date.now()}`,sessionId,conversationId: `conv_${sessionId}`,
       timestamp: Date.now(),
       sequence,
       payload: {
         loadTest: true,
-        data: 'x'.repeat(Math.floor(Math.random() * 1000) + 100), // Variable payload size
-      },
-      metadata: {
+        data: 'x'.repeat(Math.floor(Math.random() * 1000) + 100), // Variable payload size},metadata: {
         priority: randomPriority,
         requiresAck: Math.random() > 0.5,
         compression: Math.random() > 0.7,
-        routingHints: ['load-test'],
-      },
-    };
+        routingHints: ['load-test'],},};
   }
 
   stop(): void {
@@ -341,22 +321,13 @@ interface SessionResult {
 const performanceConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'MESSAGE_QUEUE_MAX_SIZE': 10000,
-      'MESSAGE_QUEUE_FLUSH_INTERVAL': 25, // Faster processing for benchmarks
-      'MESSAGE_QUEUE_BATCH_SIZE': 50,
-      'MESSAGE_COMPRESSION_ENABLED': true,
-      'MESSAGE_BUFFER_MAX_SIZE': 5000,
-      'MESSAGE_VALIDATION_ENABLED': true,
-    };
-    return config[key] ?? defaultValue;
+      'MESSAGE_QUEUE_MAX_SIZE': 10000,'MESSAGE_QUEUE_FLUSH_INTERVAL': 25, // Faster processing for benchmarks'MESSAGE_QUEUE_BATCH_SIZE': 50,'MESSAGE_COMPRESSION_ENABLED': true,'MESSAGE_BUFFER_MAX_SIZE': 5000,'MESSAGE_VALIDATION_ENABLED': true,};return config[key] ?? defaultValue;
   }),
 };
 
 // ===== PERFORMANCE BENCHMARK SUITE =====
 
-describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
-  let service: MessageOrderingDeliveryValidationService;
-  let module: TestingModule;
+describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {let service: MessageOrderingDeliveryValidationService;let module: TestingModule;
   let analyzer: AdvancedPerformanceAnalyzer;
   let loadSimulator: LoadSimulator;
 
@@ -410,21 +381,14 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== THROUGHPUT BENCHMARKS =====
 
-  describe('Throughput Performance Benchmarks', () => {
-    it('should achieve target throughput under normal load', async () => {
-      const testName = 'throughput_normal_load';
-      const messageCount = 10000;
-
-      analyzer.startMeasurement(testName);
+  describe('Throughput Performance Benchmarks', () => {it('should achieve target throughput under normal load', async () => {const testName = 'throughput_normal_load';const messageCount = 10000;analyzer.startMeasurement(testName);
 
       const startTime = performance.now();
 
       for (let i = 1; i <= messageCount; i++) {
         const operationStart = performance.now();
 
-        const message = createBenchmarkMessage('throughput_session', i);
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('throughput_session', i);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
@@ -442,11 +406,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
       console.log('Throughput Benchmark Results:', {
         messageCount,
-        totalTime: `${totalTime.toFixed(2)}ms`,
-        throughput: `${throughput.toFixed(0)} msg/sec`,
-        averageLatency: `${result.averageLatency.toFixed(3)}ms`,
-        p95Latency: `${result.p95Latency.toFixed(3)}ms`,
-        memoryUsage: `${result.memoryUsage.toFixed(2)}MB`,
+        totalTime: `${totalTime.toFixed(2)}ms`,throughput: `${throughput.toFixed(0)} msg/sec`,averageLatency: `${result.averageLatency.toFixed(3)}ms`,p95Latency: `${result.p95Latency.toFixed(3)}ms`,memoryUsage: `${result.memoryUsage.toFixed(2)}MB`,
       });
 
       expect(throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput);
@@ -454,18 +414,12 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       expect(result.memoryUsage / messageCount).toBeLessThan(PERFORMANCE_TARGETS.maxMemoryPerMessage);
     });
 
-    it('should maintain throughput under high priority message load', async () => {
-      const testName = 'throughput_high_priority';
-      const messageCount = 5000;
-
-      analyzer.startMeasurement(testName);
+    it('should maintain throughput under high priority message load', async () => {const testName = 'throughput_high_priority';const messageCount = 5000;analyzer.startMeasurement(testName);
 
       for (let i = 1; i <= messageCount; i++) {
         const operationStart = performance.now();
 
-        const message = createBenchmarkMessage('priority_session', i, 'critical');
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('priority_session', i, 'critical');service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
@@ -474,8 +428,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       const result = analyzer.stopMeasurement(testName);
 
       console.log('High Priority Throughput:', {
-        throughput: `${result.throughput.toFixed(0)} msg/sec`,
-        p95Latency: `${result.p95Latency.toFixed(3)}ms`,
+        throughput: `${result.throughput.toFixed(0)} msg/sec`,p95Latency: `${result.p95Latency.toFixed(3)}ms`,
       });
 
       // High priority should have even better performance
@@ -483,8 +436,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       expect(result.p95Latency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency * 0.5);
     });
 
-    it('should handle burst traffic efficiently', async () => {
-      const testName = 'throughput_burst';
+    it('should handle burst traffic efficiently', async () => {const testName = 'throughput_burst';
       const burstSize = 2000;
       const burstCount = 5;
 
@@ -511,8 +463,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
       console.log('Burst Traffic Results:', {
         totalMessages: burstSize * burstCount,
-        averageBurstTime: `${result.averageLatency.toFixed(2)}ms`,
-        peakThroughput: `${(burstSize / (result.minLatency / 1000)).toFixed(0)} msg/sec`,
+        averageBurstTime: `${result.averageLatency.toFixed(2)}ms`,peakThroughput: `${(burstSize / (result.minLatency / 1000)).toFixed(0)} msg/sec`,
       });
 
       expect(result.throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput * 0.6);
@@ -521,11 +472,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== LATENCY BENCHMARKS =====
 
-  describe('Latency Performance Benchmarks', () => {
-    it('should maintain low latency under steady load', async () => {
-      const testName = 'latency_steady_load';
-      const duration = 30000; // 30 seconds
-      const messageInterval = 50; // 20 messages per second
+  describe('Latency Performance Benchmarks', () => {it('should maintain low latency under steady load', async () => {const testName = 'latency_steady_load';const duration = 30000; // 30 secondsconst messageInterval = 50; // 20 messages per second
 
       analyzer.startMeasurement(testName);
 
@@ -535,16 +482,11 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       while (Date.now() < endTime) {
         const operationStart = performance.now();
 
-        const message = createBenchmarkMessage('latency_session', sequence++);
-        const validationResult = service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('latency_session', sequence++);const validationResult = service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         if (validationResult.deliveryGuaranteed) {
           const deliveryLatency = Math.random() * 50 + 10;
-          service.processDeliveryAcknowledgment(message.messageId, 'latency_session', deliveryLatency);
-        }
-
-        const operationTime = performance.now() - operationStart;
+          service.processDeliveryAcknowledgment(message.messageId, 'latency_session', deliveryLatency);}const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
 
         await new Promise(resolve => setTimeout(resolve, messageInterval));
@@ -554,11 +496,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
       console.log('Steady Load Latency Results:', {
         totalOperations: result.totalOperations,
-        averageLatency: `${result.averageLatency.toFixed(3)}ms`,
-        medianLatency: `${result.medianLatency.toFixed(3)}ms`,
-        p95Latency: `${result.p95Latency.toFixed(3)}ms`,
-        p99Latency: `${result.p99Latency.toFixed(3)}ms`,
-        standardDeviation: `${result.standardDeviation.toFixed(3)}ms`,
+        averageLatency: `${result.averageLatency.toFixed(3)}ms`,medianLatency: `${result.medianLatency.toFixed(3)}ms`,p95Latency: `${result.p95Latency.toFixed(3)}ms`,p99Latency: `${result.p99Latency.toFixed(3)}ms`,standardDeviation: `${result.standardDeviation.toFixed(3)}ms`,
       });
 
       expect(result.p95Latency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency);
@@ -566,19 +504,14 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       expect(result.standardDeviation).toBeLessThan(result.averageLatency); // Low variance
     });
 
-    it('should handle latency spikes gracefully', async () => {
-      const testName = 'latency_spike_handling';
-      const normalMessages = 1000;
-      const spikeMessages = 500;
+    it('should handle latency spikes gracefully', async () => {const testName = 'latency_spike_handling';const normalMessages = 1000;const spikeMessages = 500;
 
       analyzer.startMeasurement(testName);
 
       // Normal load
       for (let i = 1; i <= normalMessages; i++) {
         const operationStart = performance.now();
-        const message = createBenchmarkMessage('spike_session', i);
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('spike_session', i);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
 
@@ -588,9 +521,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       // Spike - burst of high priority messages
       for (let i = 1; i <= spikeMessages; i++) {
         const operationStart = performance.now();
-        const message = createBenchmarkMessage('spike_session', normalMessages + i, 'critical');
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('spike_session', normalMessages + i, 'critical');service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
       }
@@ -598,12 +529,8 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       const result = analyzer.stopMeasurement(testName);
 
       console.log('Latency Spike Handling:', {
-        p95LatencyDuringSpike: `${result.p95Latency.toFixed(3)}ms`,
-        maxLatency: `${result.maxLatency.toFixed(3)}ms`,
-        recoveryTime: 'N/A', // Would measure recovery in real scenario
-      });
-
-      // Should handle spikes without excessive degradation
+        p95LatencyDuringSpike: `${result.p95Latency.toFixed(3)}ms`,maxLatency: `${result.maxLatency.toFixed(3)}ms`,
+        recoveryTime: 'N/A', // Would measure recovery in real scenario});// Should handle spikes without excessive degradation
       expect(result.p95Latency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency * 2);
       expect(result.maxLatency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency * 5);
     });
@@ -611,10 +538,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== CONCURRENT SESSION BENCHMARKS =====
 
-  describe('Concurrent Session Scalability Benchmarks', () => {
-    it('should handle target concurrent sessions efficiently', async () => {
-      const config = {
-        concurrentSessions: 500, // Start with 500 to ensure test completes
+  describe('Concurrent Session Scalability Benchmarks', () => {it('should handle target concurrent sessions efficiently', async () => {const config = {concurrentSessions: 500, // Start with 500 to ensure test completes
         messagesPerSession: 20,
         messageInterval: 100, // 10 messages per second per session
         duration: 10000, // 10 seconds
@@ -625,10 +549,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       console.log('Concurrent Sessions Results:', {
         totalSessions: result.totalSessions,
         totalMessages: result.totalMessages,
-        duration: `${result.duration.toFixed(0)}ms`,
-        throughput: `${result.throughput.toFixed(0)} msg/sec`,
-        averageLatency: `${result.averageLatency.toFixed(3)}ms`,
-        errorRate: `${(result.errorRate * 100).toFixed(3)}%`,
+        duration: `${result.duration.toFixed(0)}ms`,throughput: `${result.throughput.toFixed(0)} msg/sec`,averageLatency: `${result.averageLatency.toFixed(3)}ms`,errorRate: `${(result.errorRate * 100).toFixed(3)}%`,
       });
 
       expect(result.totalSessions).toBe(config.concurrentSessions);
@@ -637,9 +558,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       expect(result.averageLatency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency);
     });
 
-    it('should scale linearly with session count', async () => {
-      const sessionCounts = [100, 200, 400];
-      const scalabilityResults: Array<{ sessions: number; throughput: number; latency: number }> = [];
+    it('should scale linearly with session count', async () => {const sessionCounts = [100, 200, 400];const scalabilityResults: Array<{ sessions: number; throughput: number; latency: number }> = [];
 
       for (const sessionCount of sessionCounts) {
         const config = {
@@ -661,10 +580,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      console.log('Scalability Results:', scalabilityResults);
-
-      // Verify near-linear scaling (throughput should increase with sessions)
-      expect(scalabilityResults[1].throughput).toBeGreaterThan(scalabilityResults[0].throughput * 1.5);
+      console.log('Scalability Results:', scalabilityResults);// Verify near-linear scaling (throughput should increase with sessions)expect(scalabilityResults[1].throughput).toBeGreaterThan(scalabilityResults[0].throughput * 1.5);
       expect(scalabilityResults[2].throughput).toBeGreaterThan(scalabilityResults[1].throughput * 1.5);
 
       // Latency should not degrade significantly
@@ -675,19 +591,12 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== MEMORY AND RESOURCE BENCHMARKS =====
 
-  describe('Memory and Resource Usage Benchmarks', () => {
-    it('should maintain reasonable memory usage under load', async () => {
-      const testName = 'memory_usage';
-      const messageCount = 5000;
-
-      analyzer.startMeasurement(testName);
+  describe('Memory and Resource Usage Benchmarks', () => {it('should maintain reasonable memory usage under load', async () => {const testName = 'memory_usage';const messageCount = 5000;analyzer.startMeasurement(testName);
 
       const initialMemory = analyzer.getCurrentMemoryUsage();
 
       for (let i = 1; i <= messageCount; i++) {
-        const message = createBenchmarkMessage('memory_session', i);
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('memory_session', i);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         // Record memory usage periodically
         if (i % 500 === 0) {
@@ -708,29 +617,20 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
       console.log('Memory Usage Results:', {
         messageCount,
-        initialMemory: `${initialMemory.toFixed(2)}MB`,
-        finalMemory: `${finalMemory.toFixed(2)}MB`,
-        memoryIncrease: `${memoryIncrease.toFixed(2)}MB`,
-        memoryPerMessage: `${(memoryPerMessage * 1024).toFixed(3)}KB`,
+        initialMemory: `${initialMemory.toFixed(2)}MB`,finalMemory: `${finalMemory.toFixed(2)}MB`,memoryIncrease: `${memoryIncrease.toFixed(2)}MB`,memoryPerMessage: `${(memoryPerMessage * 1024).toFixed(3)}KB`,
       });
 
       expect(memoryPerMessage).toBeLessThan(PERFORMANCE_TARGETS.maxMemoryPerMessage);
     });
 
-    it('should clean up resources efficiently', async () => {
-      const messageCount = 2000;
-      const initialMemory = analyzer.getCurrentMemoryUsage();
+    it('should clean up resources efficiently', async () => {const messageCount = 2000;const initialMemory = analyzer.getCurrentMemoryUsage();
 
       // Create and process messages
       for (let i = 1; i <= messageCount; i++) {
-        const message = createBenchmarkMessage('cleanup_session', i);
-        const validationResult = service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('cleanup_session', i);const validationResult = service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         if (validationResult.deliveryGuaranteed) {
-          service.processDeliveryAcknowledgment(message.messageId, 'cleanup_session', 50);
-        }
-      }
+          service.processDeliveryAcknowledgment(message.messageId, 'cleanup_session', 50);}}
 
       const peakMemory = analyzer.getCurrentMemoryUsage();
 
@@ -748,10 +648,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       const cleanupEfficiency = (peakMemory - finalMemory) / (peakMemory - initialMemory);
 
       console.log('Resource Cleanup Results:', {
-        initialMemory: `${initialMemory.toFixed(2)}MB`,
-        peakMemory: `${peakMemory.toFixed(2)}MB`,
-        finalMemory: `${finalMemory.toFixed(2)}MB`,
-        cleanupEfficiency: `${(cleanupEfficiency * 100).toFixed(1)}%`,
+        initialMemory: `${initialMemory.toFixed(2)}MB`,peakMemory: `${peakMemory.toFixed(2)}MB`,finalMemory: `${finalMemory.toFixed(2)}MB`,cleanupEfficiency: `${(cleanupEfficiency * 100).toFixed(1)}%`,
       });
 
       expect(finalMemory).toBeLessThan(peakMemory * 1.2); // Should cleanup most memory
@@ -760,11 +657,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== DELIVERY GUARANTEE BENCHMARKS =====
 
-  describe('Delivery Guarantee Performance Benchmarks', () => {
-    it('should maintain high delivery success rate under load', async () => {
-      const testName = 'delivery_guarantees';
-      const messageCount = 3000;
-      let successfulDeliveries = 0;
+  describe('Delivery Guarantee Performance Benchmarks', () => {it('should maintain high delivery success rate under load', async () => {const testName = 'delivery_guarantees';const messageCount = 3000;let successfulDeliveries = 0;
       let failedDeliveries = 0;
 
       analyzer.startMeasurement(testName);
@@ -773,15 +666,11 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
         try {
           const operationStart = performance.now();
 
-          const message = createBenchmarkMessage('delivery_session', i);
-          const validationResult = service.validateMessageSequence(message);
-          service.addMessageToPriorityQueue(message);
+          const message = createBenchmarkMessage('delivery_session', i);const validationResult = service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
           if (validationResult.deliveryGuaranteed) {
             const deliveryLatency = Math.random() * 100 + 25;
-            service.processDeliveryAcknowledgment(message.messageId, 'delivery_session', deliveryLatency);
-            successfulDeliveries++;
-          } else {
+            service.processDeliveryAcknowledgment(message.messageId, 'delivery_session', deliveryLatency);successfulDeliveries++;} else {
             failedDeliveries++;
           }
 
@@ -800,26 +689,19 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
         totalMessages: messageCount,
         successfulDeliveries,
         failedDeliveries,
-        successRate: `${(deliverySuccessRate * 100).toFixed(2)}%`,
-        averageProcessingTime: `${result.averageLatency.toFixed(3)}ms`,
+        successRate: `${(deliverySuccessRate * 100).toFixed(2)}%`,averageProcessingTime: `${result.averageLatency.toFixed(3)}ms`,
       });
 
       expect(deliverySuccessRate).toBeGreaterThan(PERFORMANCE_TARGETS.minDeliverySuccessRate);
       expect(result.averageLatency).toBeLessThan(PERFORMANCE_TARGETS.maxP95Latency);
     });
 
-    it('should handle acknowledgment processing efficiently', async () => {
-      const testName = 'acknowledgment_performance';
-      const messageCount = 2000;
-
-      analyzer.startMeasurement(testName);
+    it('should handle acknowledgment processing efficiently', async () => {const testName = 'acknowledgment_performance';const messageCount = 2000;analyzer.startMeasurement(testName);
 
       // Pre-create messages and validate them
       const messages: ConversationalMessage[] = [];
       for (let i = 1; i <= messageCount; i++) {
-        const message = createBenchmarkMessage('ack_session', i);
-        service.validateMessageSequence(message);
-        messages.push(message);
+        const message = createBenchmarkMessage('ack_session', i);service.validateMessageSequence(message);messages.push(message);
       }
 
       // Benchmark acknowledgment processing
@@ -827,18 +709,14 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
         const operationStart = performance.now();
 
         const deliveryLatency = Math.random() * 50 + 10;
-        service.processDeliveryAcknowledgment(message.messageId, 'ack_session', deliveryLatency);
-
-        const operationTime = performance.now() - operationStart;
-        analyzer.recordMeasurement(testName, operationTime);
+        service.processDeliveryAcknowledgment(message.messageId, 'ack_session', deliveryLatency);const operationTime = performance.now() - operationStart;analyzer.recordMeasurement(testName, operationTime);
       }
 
       const result = analyzer.stopMeasurement(testName);
 
       console.log('Acknowledgment Performance:', {
         acknowledgementsProcessed: messageCount,
-        averageAckTime: `${result.averageLatency.toFixed(3)}ms`,
-        ackThroughput: `${result.throughput.toFixed(0)} ack/sec`,
+        averageAckTime: `${result.averageLatency.toFixed(3)}ms`,ackThroughput: `${result.throughput.toFixed(0)} ack/sec`,
       });
 
       expect(result.averageLatency).toBeLessThan(10); // Should be very fast
@@ -848,11 +726,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   // ===== STRESS AND ENDURANCE TESTS =====
 
-  describe('Stress and Endurance Testing', () => {
-    it('should handle extreme load without degradation', async () => {
-      const testName = 'extreme_load';
-      const config = {
-        concurrentSessions: 200, // Reduced for test environment
+  describe('Stress and Endurance Testing', () => {it('should handle extreme load without degradation', async () => {const testName = 'extreme_load';const config = {concurrentSessions: 200, // Reduced for test environment
         messagesPerSession: 50,
         messageInterval: 20, // Very high frequency
         duration: 15000, // 15 seconds
@@ -867,9 +741,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       console.log('Extreme Load Results:', {
         totalSessions: result.totalSessions,
         totalMessages: result.totalMessages,
-        throughput: `${result.throughput.toFixed(0)} msg/sec`,
-        errorRate: `${(result.errorRate * 100).toFixed(3)}%`,
-        memoryUsage: `${analysisResult.memoryUsage.toFixed(2)}MB`,
+        throughput: `${result.throughput.toFixed(0)} msg/sec`,errorRate: `${(result.errorRate * 100).toFixed(3)}%`,memoryUsage: `${analysisResult.memoryUsage.toFixed(2)}MB`,
       });
 
       // Should maintain reasonable performance even under extreme load
@@ -877,10 +749,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       expect(result.errorRate).toBeLessThan(PERFORMANCE_TARGETS.maxErrorRate * 10); // Allow higher error rate under extreme load
     });
 
-    it('should demonstrate system stability over time', async () => {
-      const testName = 'endurance_test';
-      const duration = 30000; // 30 seconds (reduced from longer endurance test)
-      const messageInterval = 100; // 10 messages per second
+    it('should demonstrate system stability over time', async () => {const testName = 'endurance_test';const duration = 30000; // 30 seconds (reduced from longer endurance test)const messageInterval = 100; // 10 messages per second
 
       analyzer.startMeasurement(testName);
 
@@ -890,9 +759,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       while (Date.now() < endTime) {
         const operationStart = performance.now();
 
-        const message = createBenchmarkMessage('endurance_session', sequence++);
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('endurance_session', sequence++);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
 
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
@@ -908,14 +775,8 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
       const finalResult = analyzer.stopMeasurement(testName);
 
       console.log('Endurance Test Results:', {
-        duration: `${duration / 1000}s`,
-        totalMessages: finalResult.totalOperations,
-        averageThroughput: `${finalResult.throughput.toFixed(0)} msg/sec`,
-        finalMemoryUsage: `${finalResult.memoryUsage.toFixed(2)}MB`,
-        performanceStability: 'Stable', // Would calculate variance in real implementation
-      });
-
-      expect(finalResult.throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput * 0.1);
+        duration: `${duration / 1000}s`,totalMessages: finalResult.totalOperations,averageThroughput: `${finalResult.throughput.toFixed(0)} msg/sec`,finalMemoryUsage: `${finalResult.memoryUsage.toFixed(2)}MB`,
+        performanceStability: 'Stable', // Would calculate variance in real implementation});expect(finalResult.throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput * 0.1);
       expect(finalResult.standardDeviation).toBeLessThan(finalResult.averageLatency * 2); // Reasonable variance
     });
   });
@@ -926,9 +787,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 async function warmUpService(service: MessageOrderingDeliveryValidationService): Promise<void> {
   // Warm up with a few operations
   for (let i = 1; i <= 10; i++) {
-    const message = createBenchmarkMessage('warmup_session', i);
-    service.validateMessageSequence(message);
-    service.addMessageToPriorityQueue(message);
+    const message = createBenchmarkMessage('warmup_session', i);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
   }
 
   await new Promise(resolve => setTimeout(resolve, 100));
@@ -941,16 +800,12 @@ function createBenchmarkMessage(
 ): ConversationalMessage {
   return {
     type: ConversationalMessageType.VALIDATION_REQUEST,
-    messageId: `bench_msg_${sessionId}_${sequence}_${Date.now()}`,
-    sessionId,
-    conversationId: `conv_${sessionId}`,
+    messageId: `bench_msg_${sessionId}_${sequence}_${Date.now()}`,sessionId,conversationId: `conv_${sessionId}`,
     timestamp: Date.now(),
     sequence,
     payload: {
       benchmark: true,
-      data: 'benchmark data payload',
-    },
-    metadata: {
+      data: 'benchmark data payload',},metadata: {
       priority,
       requiresAck: true,
       compression: false,

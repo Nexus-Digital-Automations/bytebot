@@ -23,7 +23,6 @@ import { ConfigService } from '@nestjs/config';
 import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== OPENAI INTEGRATION INTERFACES =====
-
 /**
  * OpenAI GPT model configuration
  */
@@ -187,7 +186,6 @@ export class OpenAIService {
     if (!this.apiKey) {
       this.logger.warn(`[${operationId}] OpenAI API key not configured - service will operate in validation-only mode`);
     }
-
     this.logger.log(`[${operationId}] OpenAI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
       validationRequired: true,
@@ -238,12 +236,11 @@ export class OpenAIService {
         },
         actionDescription: `Execute OpenAI ${request.config.model} chat completion with ${request.messages.length} messages`,
         context: request.context,
-        riskLevel: RiskLevel.HIGH, // AI model interactions are HIGH risk
+        riskLevel: RiskLevel._HIGH, // AI model interactions are HIGH risk
         operationId: request.operationId,
       };
 
       this.logger.log(`[${request.operationId}] Requesting Parlant validation for OpenAI interaction`);
-      
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
       this.validationCount++;
 
@@ -328,7 +325,6 @@ export class OpenAIService {
   ): Promise<void> {
     const operationId = `${request.operationId}_stream`;
     const startTime = Date.now();
-
     this.logger.log(
       `[${operationId}] Starting OpenAI streaming chat with Parlant validation`,
       {
@@ -349,7 +345,7 @@ export class OpenAIService {
         },
         actionDescription: `Execute streaming OpenAI ${request.config.model} chat with real-time responses`,
         context: request.context,
-        riskLevel: RiskLevel.HIGH, // Streaming AI interactions are HIGH risk
+        riskLevel: RiskLevel._HIGH, // Streaming AI interactions are HIGH risk
         operationId,
       };
 
@@ -358,7 +354,6 @@ export class OpenAIService {
       if (!validationResponse.approved) {
         throw new Error(`Streaming AI operation blocked: ${validationResponse.reasoning}`);
       }
-
       // Execute streaming with validation approval
       await this.performStreamingOpenAICall(request, onChunk);
 
@@ -391,7 +386,6 @@ export class OpenAIService {
   ): Promise<OpenAIChatResponse> {
     const operationId = `${request.operationId}_functions`;
     const startTime = Date.now();
-
     this.logger.log(
       `[${operationId}] Starting OpenAI function calling with Parlant validation`,
       {
@@ -414,17 +408,14 @@ export class OpenAIService {
         },
         actionDescription: `Execute OpenAI function calling with ${request.functions?.length ?? 0} available functions`,
         context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Function calling is CRITICAL risk
+        riskLevel: RiskLevel._CRITICAL, // Function calling is CRITICAL risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Function calling operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute OpenAI function calling with validation approval
+        throw new Error(`Function calling operation blocked: ${validationResponse.reasoning}`);}// Execute OpenAI function calling with validation approval
       const response = await this.performOpenAIFunctionCall(request);
 
       const duration = Date.now() - startTime;
@@ -494,7 +485,7 @@ export class OpenAIService {
         },
         actionDescription: `Create OpenAI Assistant '${assistantConfig.name}' with ${assistantConfig.model}`,
         context,
-        riskLevel: RiskLevel.CRITICAL, // Assistant creation is CRITICAL risk
+        riskLevel: RiskLevel._CRITICAL, // Assistant creation is CRITICAL risk
         operationId,
       };
 
@@ -719,7 +710,6 @@ export class OpenAIService {
     const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
     if (avgResponseTime > 1500 || validationRate < 95) {
       status = 'DEGRADED';
     }

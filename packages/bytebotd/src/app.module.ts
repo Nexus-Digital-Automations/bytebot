@@ -1,39 +1,9 @@
-import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ComputerUseModule } from './computer-use/computer-use.module';
-import { InputTrackingModule } from './input-tracking/input-tracking.module';
-import { ConfigModule } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { BytebotMcpModule } from './mcp';
-import { HealthModule } from './health/health.module';
-import { MetricsModule } from './metrics/metrics.module';
-import { SecurityModule } from './common/security/security.module';
-import { AuthModule } from './auth/auth.module';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { MetricsService } from './metrics/metrics.service';
-import { ErrorRecoveryInterceptor } from './common/error-handling/error-recovery.interceptor';
-import { ParlantModule } from './parlant/parlant.module';
-import { EnterpriseApiModule } from './enterprise-api/enterprise-api.module';
-import { FormAutomationModule } from './form-automation/form-automation.module';
-import { DataExtractionModule } from './data-extraction/data-extraction.module';
-import { WorkflowAutomationModule } from './workflow-automation/workflow-automation.module';
-import { FileManagementModule } from './file-management/file-management.module';
-import { ContentMonitoringModule } from './content-monitoring/content-monitoring.module';
-import { ErrorHandlingModule } from './common/error-handling/error-handling.module';
-import { AutomationTestingModule } from './automation-testing/automation-testing.module';
-import { BrowserUseModule } from './browser-use/browser-use.module';
-import { BrowserModule } from './browser/browser.module';
-
-@Module({
-  imports: [
+import { Module } from '@nestjs/common';import { APP_INTERCEPTOR } from '@nestjs/core';import { ComputerUseModule } from './computer-use/computer-use.module';import { InputTrackingModule } from './input-tracking/input-tracking.module';import { ConfigModule } from '@nestjs/config';import { ServeStaticModule } from '@nestjs/serve-static';import { AppController } from './app.controller';import { AppService } from './app.service';import { BytebotMcpModule } from './mcp';import { HealthModule } from './health/health.module';import { MetricsModule } from './metrics/metrics.module';import { SecurityModule } from './common/security/security.module';import { AuthModule } from './auth/auth.module';import { LoggingInterceptor } from './common/interceptors/logging.interceptor';import { MetricsService } from './metrics/metrics.service';import { ErrorRecoveryInterceptor } from './common/error-handling/error-recovery.interceptor';import { ParlantModule } from './parlant/parlant.module';import { EnterpriseApiModule } from './enterprise-api/enterprise-api.module';import { FormAutomationModule } from './form-automation/form-automation.module';import { DataExtractionModule } from './data-extraction/data-extraction.module';import { WorkflowAutomationModule } from './workflow-automation/workflow-automation.module';import { FileManagementModule } from './file-management/file-management.module';import { ContentMonitoringModule } from './content-monitoring/content-monitoring.module';import { ErrorHandlingModule } from './common/error-handling/error-handling.module';import { AutomationTestingModule } from './automation-testing/automation-testing.module';import { BrowserUseModule } from './browser-use/browser-use.module';import { BrowserModule } from './browser/browser.module';@Module({imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Explicitly makes it globally available
     }),
     ServeStaticModule.forRoot({
-      rootPath: '/opt/noVNC',
-      serveRoot: '/novnc',
+      rootPath: '/opt/noVNC',serveRoot: '/novnc',
     }),
     SecurityModule, // Enterprise security framework for BytebotD
     AuthModule, // JWT authentication and RBAC authorization

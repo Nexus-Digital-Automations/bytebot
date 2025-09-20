@@ -17,16 +17,7 @@
  * Recovery: Sub-30 second failover time with graceful degradation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-import { ParlantCircuitBreakerService, CircuitBreakerState } from './parlant-circuit-breaker.service';
-
-// ===== RETRY & FAILOVER INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';import { ParlantCircuitBreakerService, CircuitBreakerState } from './parlant-circuit-breaker.service';// ===== RETRY & FAILOVER INTERFACES =====/**
  * Retry configuration for different operation types
  */
 export interface RetryConfig {
@@ -135,9 +126,7 @@ interface MutableRetryAnalytics {
  * Graceful degradation strategy
  */
 export interface DegradationStrategy {
-  readonly level: 'NONE' | 'PARTIAL' | 'MINIMAL' | 'EMERGENCY';
-  readonly cacheOnly: boolean;
-  readonly reduceValidation: boolean;
+  readonly level: 'NONE' | 'PARTIAL' | 'MINIMAL' | 'EMERGENCY';readonly cacheOnly: boolean;readonly reduceValidation: boolean;
   readonly allowBypass: boolean;
   readonly notifyUsers: boolean;
   readonly fallbackResponse: ParlantValidationResponse;
@@ -151,47 +140,39 @@ export class ParlantRetryFailoverService extends EventEmitter {
   
   // Retry configurations by risk level
   private readonly retryConfigs: Map<RiskLevel, RetryConfig> = new Map([
-    [RiskLevel.MINIMAL, {
+    [RiskLevel._MINIMAL, {
       maxAttempts: 5,
       baseDelayMs: 100,
       maxDelayMs: 5000,
       exponentialBase: 2,
       jitterEnabled: true,
-      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR', 'RATE_LIMITED'],
-      timeoutMs: 10000,
-      circuitBreakerEnabled: true,
+      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR', 'RATE_LIMITED'],timeoutMs: 10000,circuitBreakerEnabled: true,
     }],
-    [RiskLevel.LOW, {
+    [RiskLevel._LOW, {
       maxAttempts: 4,
       baseDelayMs: 200,
       maxDelayMs: 8000,
       exponentialBase: 2,
       jitterEnabled: true,
-      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR', 'RATE_LIMITED'],
-      timeoutMs: 15000,
-      circuitBreakerEnabled: true,
+      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR', 'RATE_LIMITED'],timeoutMs: 15000,circuitBreakerEnabled: true,
     }],
-    [RiskLevel.MEDIUM, {
+    [RiskLevel._MODERATE, {
       maxAttempts: 3,
       baseDelayMs: 500,
       maxDelayMs: 10000,
       exponentialBase: 1.5,
       jitterEnabled: true,
-      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR'],
-      timeoutMs: 20000,
-      circuitBreakerEnabled: true,
+      retryOnErrors: ['TIMEOUT', 'CONNECTION_ERROR'],timeoutMs: 20000,circuitBreakerEnabled: true,
     }],
-    [RiskLevel.HIGH, {
+    [RiskLevel._HIGH, {
       maxAttempts: 2,
       baseDelayMs: 1000,
       maxDelayMs: 15000,
       exponentialBase: 1.5,
       jitterEnabled: false,
-      retryOnErrors: ['TIMEOUT'],
-      timeoutMs: 30000,
-      circuitBreakerEnabled: true,
+      retryOnErrors: ['TIMEOUT'],timeoutMs: 30000,circuitBreakerEnabled: true,
     }],
-    [RiskLevel.CRITICAL, {
+    [RiskLevel._CRITICAL, {
       maxAttempts: 1,
       baseDelayMs: 0,
       maxDelayMs: 0,
@@ -206,15 +187,10 @@ export class ParlantRetryFailoverService extends EventEmitter {
   // Failover endpoints configuration
   private readonly failoverEndpoints: FailoverEndpoint[] = [
     {
-      url: 'http://localhost:8000',
-      priority: 1,
-      healthWeight: 100,
+      url: 'http://localhost:8000',priority: 1,healthWeight: 100,
       maxConcurrentRequests: 50,
       enabled: true,
-      region: 'local',
-      capabilities: ['validation', 'conversation', 'audit'],
-    },
-    // Additional endpoints would be configured here
+      region: 'local',capabilities: ['validation', 'conversation', 'audit'],},// Additional endpoints would be configured here
   ];
   
   // Current endpoint health and load tracking
@@ -246,16 +222,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
   
   // Degradation strategies
   private readonly degradationStrategies: Map<string, DegradationStrategy> = new Map([
-    ['circuit_open', {
-      level: 'PARTIAL',
-      cacheOnly: true,
-      reduceValidation: true,
+    ['circuit_open', {level: 'PARTIAL',cacheOnly: true,reduceValidation: true,
       allowBypass: false,
       notifyUsers: true,
       fallbackResponse: this.createFallbackResponse(),
     }],
-    ['all_endpoints_down', {
-      level: 'EMERGENCY',
+    ['all_endpoints_down', {level: 'EMERGENCY',
       cacheOnly: true,
       reduceValidation: false,
       allowBypass: true,
@@ -279,9 +251,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   ) {
     super();
     
-    const operationId = `retry_failover_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant Retry & Failover Service`, {
+    const operationId = `retry_failover_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant Retry & Failover Service`, {
       retryConfigs: Object.fromEntries(this.retryConfigs),
       failoverEndpoints: this.failoverEndpoints.map(e => ({ url: e.url, priority: e.priority })),
       bulkRetryConfig: this.bulkRetryConfig,
@@ -363,11 +333,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
             const totalTime = performance.now() - startTime;
             this.updateSuccessAnalytics(currentAttempt, totalTime, endpoint.url);
             
-            this.logger.debug(`[${request.operationId}] Operation succeeded on attempt ${currentAttempt}`, {
-              endpoint: endpoint.url,
-              totalTime: `${totalTime.toFixed(2)}ms`,
-              attempts: currentAttempt,
-            });
+            this.logger.debug(`[${request.operationId}] Operation succeeded on attempt ${currentAttempt}`, {endpoint: endpoint.url,totalTime: `${totalTime.toFixed(2)}ms`,attempts: currentAttempt,});
             
             return {
               success: true,
@@ -432,24 +398,16 @@ export class ParlantRetryFailoverService extends EventEmitter {
         // Update endpoint health
         this.updateEndpointHealth(endpoint.url, false, attemptTime);
         
-        this.logger.warn(`[${request.operationId}] Attempt ${currentAttempt} failed`, {
-          endpoint: endpoint.url,
-          error: lastError.message,
-          attemptTime: `${attemptTime.toFixed(2)}ms`,
-          remainingAttempts: config.maxAttempts - currentAttempt,
-        });
+        this.logger.warn(`[${request.operationId}] Attempt ${currentAttempt} failed`, {endpoint: endpoint.url,error: lastError.message,
+          attemptTime: `${attemptTime.toFixed(2)}ms`,remainingAttempts: config.maxAttempts - currentAttempt,});
         
         // Check if we should retry this error type
         if (!this.shouldRetryError(lastError, config)) {
-          this.logger.debug(`[${request.operationId}] Error type not retryable: ${lastError.message}`);
-          break;
-        }
+          this.logger.debug(`[${request.operationId}] Error type not retryable: ${lastError.message}`);break;}
         
         // Apply delay before next attempt (if not last attempt)
         if (currentAttempt < config.maxAttempts && delayMs > 0) {
-          this.logger.debug(`[${request.operationId}] Delaying ${delayMs}ms before retry ${currentAttempt + 1}`);
-          await this.delay(delayMs);
-        }
+          this.logger.debug(`[${request.operationId}] Delaying ${delayMs}ms before retry ${currentAttempt + 1}`);await this.delay(delayMs);}
       }
     }
     
@@ -457,9 +415,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     const totalTime = performance.now() - startTime;
     this.updateFailureAnalytics(currentAttempt, totalTime);
     
-    this.logger.error(`[${request.operationId}] All retry attempts failed`, {
-      totalAttempts: currentAttempt,
-      totalTime: `${totalTime.toFixed(2)}ms`,
+    this.logger.error(`[${request.operationId}] All retry attempts failed`, {totalAttempts: currentAttempt,totalTime: `${totalTime.toFixed(2)}ms`,
       lastError: lastError?.message,
       failedEndpoints,
     });
@@ -581,10 +537,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
         // Check fail-fast threshold
         const failureRate = failedRequests / (successfulRequests + failedRequests);
         if (failureRate > this.bulkRetryConfig.failFastThreshold && processedBatches > 2) {
-          this.logger.warn(`Bulk operation exceeding failure threshold: ${(failureRate * 100).toFixed(1)}%`);
-          
-          if (!this.bulkRetryConfig.partialSuccessAllowed) {
-            throw new Error(`Bulk operation failed: failure rate ${(failureRate * 100).toFixed(1)}% exceeds threshold`);
+          this.logger.warn(`Bulk operation exceeding failure threshold: ${(failureRate * 100).toFixed(1)}%`);if (!this.bulkRetryConfig.partialSuccessAllowed) {throw new Error(`Bulk operation failed: failure rate ${(failureRate * 100).toFixed(1)}% exceeds threshold`);
           }
         }
       });
@@ -606,11 +559,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     
     this.logger.log('Bulk retry operation completed', {
       ...summary,
-      totalTime: `${totalTime.toFixed(2)}ms`,
-      successRate: `${((successfulRequests / totalRequests) * 100).toFixed(1)}%`,
-    });
-    
-    return { results, summary };
+      totalTime: `${totalTime.toFixed(2)}ms`,successRate: `${((successfulRequests / totalRequests) * 100).toFixed(1)}%`,});return { results, summary };
   }
 
   /**
@@ -654,7 +603,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   // ===== PRIVATE HELPER METHODS =====
 
   private getRetryConfig(riskLevel: RiskLevel): RetryConfig {
-    const config = this.retryConfigs.get(riskLevel) ?? this.retryConfigs.get(RiskLevel.MEDIUM);
+    const config = this.retryConfigs.get(riskLevel) ?? this.retryConfigs.get(RiskLevel._MODERATE);
     if (!config) {
       // Fallback configuration if none found
       return {
@@ -663,9 +612,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
         maxDelayMs: 10000,
         exponentialBase: 2,
         jitterEnabled: true,
-        retryOnErrors: ['TIMEOUT', 'NETWORK_ERROR', 'RATE_LIMIT'],
-        timeoutMs: 30000,
-        circuitBreakerEnabled: true
+        retryOnErrors: ['TIMEOUT', 'NETWORK_ERROR', 'RATE_LIMIT'],timeoutMs: 30000,circuitBreakerEnabled: true
       };
     }
     return config;
@@ -711,20 +658,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private categorizeError(error: Error): string {
     const message = error.message.toLowerCase();
     
-    if (message.includes('timeout') ?? message.includes('timed out')) {
-      return 'TIMEOUT';
-    }
-    if (message.includes('connection') ?? message.includes('network')) {
-      return 'CONNECTION_ERROR';
-    }
-    if (message.includes('rate limit') ?? message.includes('too many requests')) {
-      return 'RATE_LIMITED';
-    }
-    if (message.includes('server error') ?? message.includes('internal error')) {
-      return 'SERVER_ERROR';
-    }
-    
-    return 'UNKNOWN_ERROR';
+    if (message.includes('timeout') ?? message.includes('timed out')) {return 'TIMEOUT';}if (message.includes('connection') ?? message.includes('network')) {return 'CONNECTION_ERROR';}if (message.includes('rate limit') ?? message.includes('too many requests')) {return 'RATE_LIMITED';}if (message.includes('server error') ?? message.includes('internal error')) {return 'SERVER_ERROR';}return 'UNKNOWN_ERROR';
   }
 
   private calculateRetryDelay(attemptNumber: number, config: RetryConfig): number {
@@ -827,10 +761,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     const circuitStats = this.circuitBreakerService.getCircuitBreakerStats();
     
     if (circuitStats.state === CircuitBreakerState.OPEN) {
-      return this.degradationStrategies.get('circuit_open') ?? null;
-    }
-    
-    const healthyEndpoints = this.getHealthyEndpoints();
+      return this.degradationStrategies.get('circuit_open') ?? null;}const healthyEndpoints = this.getHealthyEndpoints();
     if (healthyEndpoints.length === 0) {
       return this.degradationStrategies.get('all_endpoints_down') ?? null;
     }
@@ -845,9 +776,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   ): Promise<FailoverResult<T>> {
     const totalTime = performance.now() - startTime;
     
-    this.logger.warn(`Executing in degraded mode: ${strategy.level}`, {
-      operationId: request.operationId,
-      strategy: strategy.level,
+    this.logger.warn(`Executing in degraded mode: ${strategy.level}`, {operationId: request.operationId,strategy: strategy.level,
       cacheOnly: strategy.cacheOnly,
       allowBypass: strategy.allowBypass,
     });
@@ -870,7 +799,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     data?: unknown;
   }> {
     // Try cache-only response for low-risk operations
-    if (request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW) {
+    if (request.riskLevel === RiskLevel._MINIMAL || request.riskLevel === RiskLevel._LOW) {
       return {
         degradedMode: true,
         fallbackUsed: true,
@@ -889,9 +818,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
       approved: false,
       conversationId: `fallback${Date.now()}`,
       validationTimestamp: new Date(),
-      reasoning: 'Fallback response due to service degradation - operation blocked for safety',
-      confidence: 0,
-      suggestedAlternatives: ['Retry operation later', 'Contact system administrator'],
+      reasoning: 'Fallback response due to service degradation - operation blocked for safety',confidence: 0,suggestedAlternatives: ['Retry operation later', 'Contact system administrator'],
     };
   }
 
@@ -900,14 +827,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
       approved: false,
       conversationId: `emergency${Date.now()}`,
       validationTimestamp: new Date(),
-      reasoning: 'Emergency fallback - validation service unavailable',
-      confidence: 0,
-      suggestedAlternatives: ['Service temporarily unavailable', 'Retry in a few minutes'],
+      reasoning: 'Emergency fallback - validation service unavailable',confidence: 0,suggestedAlternatives: ['Service temporarily unavailable', 'Retry in a few minutes'],
     };
   }
 
   private sortRequestsByPriority(requests: ParlantValidationRequest[]): ParlantValidationRequest[] {
-    const priorityOrder = [RiskLevel.CRITICAL, RiskLevel.HIGH, RiskLevel.MEDIUM, RiskLevel.LOW, RiskLevel.MINIMAL];
+    const priorityOrder = [RiskLevel._CRITICAL, RiskLevel._HIGH, RiskLevel._MODERATE, RiskLevel._LOW, RiskLevel._MINIMAL];
     
     return requests.sort((a, b) => {
       const aPriority = priorityOrder.indexOf(a.riskLevel);
@@ -944,10 +869,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
           const startTime = performance.now();
           
           // TODO: Implement actual health check
-          // const response = await fetch(`${endpoint.url}/health`, { timeout: 5000 });
-          const responseTime = performance.now() - startTime;
-          
-          this.updateEndpointHealth(endpoint.url, true, responseTime);
+          // const response = await fetch(`${endpoint.url}/health`, { timeout: 5000 });const responseTime = performance.now() - startTime;this.updateEndpointHealth(endpoint.url, true, responseTime);
           
         } catch (error) {
           this.updateEndpointHealth(endpoint.url, false, 0);
@@ -971,8 +893,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     
     // Trigger degradation assessment if circuit opens
     if (event.newState === CircuitBreakerState.OPEN) {
-      this.emit('degradationTriggered', {
-        reason: 'circuit_breaker_open',
+      this.emit('degradationTriggered', {reason: 'circuit_breaker_open',
         timestamp: new Date(),
       });
     }

@@ -17,20 +17,14 @@
  * Performance: Optimized wrapper generation with intelligent caching and batching
  */
 
-import { RiskLevel, ParlantValidationRequest, ParlantValidationResponse } from '../parlant-integration.service';
-
-// ===== CORE WRAPPER INTERFACES =====
-
-/**
+import { RiskLevel, ParlantValidationRequest, ParlantValidationResponse } from '../parlant-integration.service';// ===== CORE WRAPPER INTERFACES =====/**
  * Universal function metadata for comprehensive wrapper generation
  */
 export interface UniversalFunctionMetadata {
   readonly functionId: string;
   readonly functionName: string;
   readonly packageName: string;
-  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';
-  readonly category: FunctionCategory;
-  readonly riskClassification: RiskLevel;
+  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';readonly category: FunctionCategory;readonly riskClassification: RiskLevel;
   readonly description: string;
   readonly parameters: FunctionParameterMetadata[];
   readonly returnType: FunctionReturnMetadata;
@@ -47,65 +41,7 @@ export interface UniversalFunctionMetadata {
  */
 export enum FunctionCategory {
   // Database Operations
-  DATABASE_READ = 'database_read',
-  DATABASE_WRITE = 'database_write',
-  DATABASE_SCHEMA = 'database_schema',
-  DATABASE_ADMIN = 'database_admin',
-
-  // File System Operations
-  FILE_READ = 'file_read',
-  FILE_WRITE = 'file_write',
-  FILE_SYSTEM = 'file_system',
-
-  // Network Operations
-  HTTP_REQUEST = 'http_request',
-  WEBSOCKET = 'websocket',
-  API_CALL = 'api_call',
-
-  // System Operations
-  SYSTEM_COMMAND = 'system_command',
-  PROCESS_CONTROL = 'process_control',
-  HARDWARE_ACCESS = 'hardware_access',
-
-  // Authentication & Security
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  ENCRYPTION = 'encryption',
-  AUDIT = 'audit',
-
-  // Business Logic
-  CALCULATION = 'calculation',
-  TRANSFORMATION = 'transformation',
-  VALIDATION = 'validation',
-  WORKFLOW = 'workflow',
-
-  // Monitoring & Health
-  HEALTH_CHECK = 'health_check',
-  METRICS = 'metrics',
-  LOGGING = 'logging',
-
-  // Browser Automation
-  BROWSER_NAVIGATION = 'browser_navigation',
-  BROWSER_INTERACTION = 'browser_interaction',
-  BROWSER_EXTRACTION = 'browser_extraction',
-
-  // AI & ML Operations
-  LLM_EXECUTION = 'llm_execution',
-  CODE_GENERATION = 'code_generation',
-  DATA_ANALYSIS = 'data_analysis',
-
-  // Configuration & Settings
-  CONFIG_READ = 'config_read',
-  CONFIG_WRITE = 'config_write',
-  ENVIRONMENT = 'environment',
-
-  // Testing & Development
-  TEST_EXECUTION = 'test_execution',
-  DEBUG_UTILITY = 'debug_utility',
-  DEVELOPMENT_TOOL = 'development_tool'
-}
-
-/**
+  DATABASE_READ = 'database_read',DATABASE_WRITE = 'database_write',DATABASE_SCHEMA = 'database_schema',DATABASE_ADMIN = 'database_admin',// File System OperationsFILE_READ = 'file_read',FILE_WRITE = 'file_write',FILE_SYSTEM = 'file_system',// Network OperationsHTTP_REQUEST = 'http_request',WEBSOCKET = 'websocket',API_CALL = 'api_call',// System OperationsSYSTEM_COMMAND = 'system_command',PROCESS_CONTROL = 'process_control',HARDWARE_ACCESS = 'hardware_access',// Authentication & SecurityAUTHENTICATION = 'authentication',AUTHORIZATION = 'authorization',ENCRYPTION = 'encryption',AUDIT = 'audit',// Business LogicCALCULATION = 'calculation',TRANSFORMATION = 'transformation',VALIDATION = 'validation',WORKFLOW = 'workflow',// Monitoring & HealthHEALTH_CHECK = 'health_check',METRICS = 'metrics',LOGGING = 'logging',// Browser AutomationBROWSER_NAVIGATION = 'browser_navigation',BROWSER_INTERACTION = 'browser_interaction',BROWSER_EXTRACTION = 'browser_extraction',// AI & ML OperationsLLM_EXECUTION = 'llm_execution',CODE_GENERATION = 'code_generation',DATA_ANALYSIS = 'data_analysis',// Configuration & SettingsCONFIG_READ = 'config_read',CONFIG_WRITE = 'config_write',ENVIRONMENT = 'environment',// Testing & DevelopmentTEST_EXECUTION = 'test_execution',DEBUG_UTILITY = 'debug_utility',DEVELOPMENT_TOOL = 'development_tool'}/**
  * Function parameter metadata with type safety information
  */
 export interface FunctionParameterMetadata {
@@ -169,11 +105,7 @@ export interface PerformanceMetadata {
   readonly averageExecutionTimeMs: number;
   readonly maxExecutionTimeMs: number;
   readonly resourceIntensive: boolean;
-  readonly cpuUsage: 'low' | 'medium' | 'high';
-  readonly memoryUsage: 'low' | 'medium' | 'high';
-  readonly networkUsage: 'none' | 'low' | 'medium' | 'high';
-  readonly concurrencyLimit: number;
-  readonly rateLimitPerMinute: number;
+  readonly cpuUsage: 'low' | 'medium' | 'high';readonly memoryUsage: 'low' | 'medium' | 'high';readonly networkUsage: 'none' | 'low' | 'medium' | 'high';readonly concurrencyLimit: number;readonly rateLimitPerMinute: number;
   readonly batchable: boolean;
   readonly preferredBatchSize: number;
 }
@@ -184,11 +116,7 @@ export interface PerformanceMetadata {
 export interface SecurityContext {
   readonly requiresAuthentication: boolean;
   readonly requiredPermissions: string[];
-  readonly dataClassification: 'public' | 'internal' | 'confidential' | 'restricted' | 'classified';
-  readonly encryptionRequired: boolean;
-  readonly auditLevel: 'none' | 'basic' | 'detailed' | 'comprehensive';
-  readonly complianceFrameworks: string[];
-  readonly threatModel: ThreatModel;
+  readonly dataClassification: 'public' | 'internal' | 'confidential' | 'restricted' | 'classified';readonly encryptionRequired: boolean;readonly auditLevel: 'none' | 'basic' | 'detailed' | 'comprehensive';readonly complianceFrameworks: string[];readonly threatModel: ThreatModel;
 }
 
 /**
@@ -274,10 +202,7 @@ export interface FunctionAuditEntry {
   readonly timestamp: Date;
   readonly parameters: Record<string, unknown>;
   readonly result: unknown;
-  readonly validationDecision: 'approved' | 'denied' | 'error';
-  readonly executionStatus: 'success' | 'failure' | 'timeout' | 'cancelled';
-  readonly riskLevel: RiskLevel;
-  readonly conversationId: string;
+  readonly validationDecision: 'approved' | 'denied' | 'error';readonly executionStatus: 'success' | 'failure' | 'timeout' | 'cancelled';readonly riskLevel: RiskLevel;readonly conversationId: string;
   readonly approvalChain: ApprovalChainEntry[];
   readonly complianceFlags: string[];
 }
@@ -288,9 +213,7 @@ export interface FunctionAuditEntry {
 export interface ApprovalChainEntry {
   readonly approver: string;
   readonly timestamp: Date;
-  readonly decision: 'approved' | 'denied' | 'escalated';
-  readonly reasoning: string;
-  readonly approvalLevel: string;
+  readonly decision: 'approved' | 'denied' | 'escalated';readonly reasoning: string;readonly approvalLevel: string;
 }
 
 /**
@@ -301,9 +224,7 @@ export interface CacheInfo {
   readonly key: string;
   readonly ttl: number;
   readonly size: number;
-  readonly level: 'l1' | 'l2' | 'l3' | 'distributed';
-  readonly createdAt?: Date;
-  readonly lastAccessed?: Date;
+  readonly level: 'l1' | 'l2' | 'l3' | 'distributed';readonly createdAt?: Date;readonly lastAccessed?: Date;
 }
 
 // ===== SERVICE INTERFACES =====
@@ -371,9 +292,7 @@ export interface SystemState {
  */
 export interface SecurityAlert {
   readonly id: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly type: string;
-  readonly description: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly type: string;readonly description: string;
   readonly timestamp: Date;
   readonly resolved: boolean;
 }
@@ -424,10 +343,7 @@ export interface ParameterValidationWarning {
   readonly warningType: string;
   readonly message: string;
   readonly recommendation: string;
-  readonly severity: 'low' | 'medium' | 'high';
-}
-
-/**
+  readonly severity: 'low' | 'medium' | 'high';}/**
  * Function performance monitor for optimization
  */
 export interface FunctionPerformanceMonitor {
@@ -479,11 +395,7 @@ export interface AveragePerformanceMetrics {
  */
 export interface PerformanceTrend {
   readonly metric: string;
-  readonly direction: 'improving' | 'degrading' | 'stable';
-  readonly changePercent: number;
-  readonly significance: 'low' | 'medium' | 'high';
-  readonly timeframe: string;
-  readonly lastUpdated: Date;
+  readonly direction: 'improving' | 'degrading' | 'stable';readonly changePercent: number;readonly significance: 'low' | 'medium' | 'high';readonly timeframe: string;readonly lastUpdated: Date;
 }
 
 /**
@@ -492,10 +404,7 @@ export interface PerformanceTrend {
 export interface PerformanceAnomaly {
   readonly id: string;
   readonly functionId: string;
-  readonly anomalyType: 'latency_spike' | 'error_surge' | 'resource_exhaustion' | 'throughput_drop';
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly description: string;
-  readonly detectedAt: Date;
+  readonly anomalyType: 'latency_spike' | 'error_surge' | 'resource_exhaustion' | 'throughput_drop';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly detectedAt: Date;
   readonly affectedMetrics: string[];
   readonly suggestedActions: string[];
   readonly autoResolved: boolean;
@@ -509,9 +418,7 @@ export interface FunctionAuditLogger {
   logExecution(entry: FunctionAuditEntry): Promise<void>;
   logValidationDecision(
     executionId: string,
-    decision: 'approved' | 'denied' | 'error',
-    reasoning: string,
-    conversationId: string
+    decision: 'approved' | 'denied' | 'error',reasoning: string,conversationId: string
   ): Promise<void>;
   logApprovalChain(executionId: string, approvals: ApprovalChainEntry[]): Promise<void>;
   logComplianceFlags(executionId: string, flags: string[]): Promise<void>;
@@ -530,17 +437,11 @@ export interface AuditSearchCriteria {
   readonly userIds?: string[];
   readonly timeRange?: { start: Date; end: Date };
   readonly riskLevels?: RiskLevel[];
-  readonly validationDecisions?: ('approved' | 'denied' | 'error')[];
-  readonly executionStatuses?: ('success' | 'failure' | 'timeout' | 'cancelled')[];
-  readonly complianceFrameworks?: string[];
-  readonly dataClassifications?: string[];
+  readonly validationDecisions?: ('approved' | 'denied' | 'error')[];readonly executionStatuses?: ('success' | 'failure' | 'timeout' | 'cancelled')[];readonly complianceFrameworks?: string[];readonly dataClassifications?: string[];
   readonly limit?: number;
   readonly offset?: number;
   readonly sortBy?: string;
-  readonly sortOrder?: 'asc' | 'desc';
-}
-
-/**
+  readonly sortOrder?: 'asc' | 'desc';}/**
  * Compliance report for regulatory requirements
  */
 export interface ComplianceReport {
@@ -577,18 +478,13 @@ export interface ComplianceReportSummary {
  */
 export interface ComplianceFinding {
   readonly id: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly category: string;
-  readonly description: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly category: string;readonly description: string;
   readonly requirement: string;
   readonly evidence: string[];
   readonly remediation: string;
   readonly deadline?: Date;
   readonly assignedTo?: string;
-  readonly status: 'open' | 'in_progress' | 'resolved' | 'accepted_risk';
-}
-
-/**
+  readonly status: 'open' | 'in_progress' | 'resolved' | 'accepted_risk';}/**
  * Compliance attestation
  */
 export interface ComplianceAttestation {
@@ -665,9 +561,7 @@ export interface CacheOptimizationResult {
  * Cache recommendation for performance improvement
  */
 export interface CacheRecommendation {
-  readonly type: 'increase_ttl' | 'decrease_ttl' | 'remove_cache' | 'add_cache' | 'optimize_key';
-  readonly functionId: string;
-  readonly reasoning: string;
+  readonly type: 'increase_ttl' | 'decrease_ttl' | 'remove_cache' | 'add_cache' | 'optimize_key';readonly functionId: string;readonly reasoning: string;
   readonly expectedImprovement: number;
   readonly implementationPriority: 'low' | 'medium' | 'high';
   readonly estimatedEffort: string;
@@ -687,32 +581,13 @@ export class UniversalWrapperError extends Error {
     public readonly context?: Record<string, unknown>
   ) {
     super(`Universal wrapper error in ${functionId}: ${originalError?.message ?? 'Unknown error'}`);
-    this.name = 'UniversalWrapperError';
-  }
-}
+    this.name = 'UniversalWrapperError';}}
 
 /**
  * Wrapper error types for systematic error handling
  */
 export enum WrapperErrorType {
-  VALIDATION_FAILED = 'validation_failed',
-  PARAMETER_INVALID = 'parameter_invalid',
-  AUTHORIZATION_DENIED = 'authorization_denied',
-  EXECUTION_TIMEOUT = 'execution_timeout',
-  EXECUTION_FAILED = 'execution_failed',
-  CACHE_ERROR = 'cache_error',
-  AUDIT_ERROR = 'audit_error',
-  PERFORMANCE_DEGRADED = 'performance_degraded',
-  SYSTEM_OVERLOAD = 'system_overload',
-  COMPLIANCE_VIOLATION = 'compliance_violation',
-  SECURITY_THREAT = 'security_threat',
-  CONFIGURATION_ERROR = 'configuration_error',
-  NETWORK_ERROR = 'network_error',
-  RESOURCE_EXHAUSTED = 'resource_exhausted',
-  UNKNOWN_ERROR = 'unknown_error'
-}
-
-// ===== EXPORT DECLARATIONS =====
+  VALIDATION_FAILED = 'validation_failed',PARAMETER_INVALID = 'parameter_invalid',AUTHORIZATION_DENIED = 'authorization_denied',EXECUTION_TIMEOUT = 'execution_timeout',EXECUTION_FAILED = 'execution_failed',CACHE_ERROR = 'cache_error',AUDIT_ERROR = 'audit_error',PERFORMANCE_DEGRADED = 'performance_degraded',SYSTEM_OVERLOAD = 'system_overload',COMPLIANCE_VIOLATION = 'compliance_violation',SECURITY_THREAT = 'security_threat',CONFIGURATION_ERROR = 'configuration_error',NETWORK_ERROR = 'network_error',RESOURCE_EXHAUSTED = 'resource_exhausted',UNKNOWN_ERROR = 'unknown_error'}// ===== EXPORT DECLARATIONS =====
 
 /**
  * Type utility for extracting function signature information

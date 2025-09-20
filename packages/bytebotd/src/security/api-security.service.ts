@@ -17,60 +17,24 @@
  * Performance: Sub-500ms API security validation with intelligent caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
   ParlantValidationRequest, 
   ParlantConversationContext, 
   RiskLevel,
   ConversationalValidationError 
-} from '../parlant/parlant-integration.service';
-
-// ===== API SECURITY INTERFACES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== API SECURITY INTERFACES =====/**
  * API security scan types
  */
 export enum ApiSecurityScanType {
-  VULNERABILITY_SCAN = 'VULNERABILITY_SCAN',
-  AUTHENTICATION_TEST = 'AUTHENTICATION_TEST',
-  AUTHORIZATION_TEST = 'AUTHORIZATION_TEST',
-  RATE_LIMIT_TEST = 'RATE_LIMIT_TEST',
-  INJECTION_TEST = 'INJECTION_TEST',
-  OWASP_API_TOP10 = 'OWASP_API_TOP10',
-  PENETRATION_TEST = 'PENETRATION_TEST',
-  COMPLIANCE_SCAN = 'COMPLIANCE_SCAN'
-}
-
-/**
+  VULNERABILITY_SCAN = 'VULNERABILITY_SCAN',AUTHENTICATION_TEST = 'AUTHENTICATION_TEST',AUTHORIZATION_TEST = 'AUTHORIZATION_TEST',RATE_LIMIT_TEST = 'RATE_LIMIT_TEST',INJECTION_TEST = 'INJECTION_TEST',OWASP_API_TOP10 = 'OWASP_API_TOP10',PENETRATION_TEST = 'PENETRATION_TEST',COMPLIANCE_SCAN = 'COMPLIANCE_SCAN'}/**
  * API threat types for detection
  */
 export enum ApiThreatType {
-  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',
-  SQL_INJECTION = 'SQL_INJECTION',
-  XSS_ATTACK = 'XSS_ATTACK',
-  CSRF_ATTACK = 'CSRF_ATTACK',
-  BROKEN_AUTHENTICATION = 'BROKEN_AUTHENTICATION',
-  EXCESSIVE_DATA_EXPOSURE = 'EXCESSIVE_DATA_EXPOSURE',
-  LACK_OF_RESOURCES = 'LACK_OF_RESOURCES',
-  SECURITY_MISCONFIGURATION = 'SECURITY_MISCONFIGURATION',
-  INSUFFICIENT_LOGGING = 'INSUFFICIENT_LOGGING',
-  IMPROPER_ASSET_MANAGEMENT = 'IMPROPER_ASSET_MANAGEMENT'
-}
-
-/**
+  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',SQL_INJECTION = 'SQL_INJECTION',XSS_ATTACK = 'XSS_ATTACK',CSRF_ATTACK = 'CSRF_ATTACK',BROKEN_AUTHENTICATION = 'BROKEN_AUTHENTICATION',EXCESSIVE_DATA_EXPOSURE = 'EXCESSIVE_DATA_EXPOSURE',LACK_OF_RESOURCES = 'LACK_OF_RESOURCES',SECURITY_MISCONFIGURATION = 'SECURITY_MISCONFIGURATION',INSUFFICIENT_LOGGING = 'INSUFFICIENT_LOGGING',IMPROPER_ASSET_MANAGEMENT = 'IMPROPER_ASSET_MANAGEMENT'}/**
  * API security risk levels
  */
 export enum ApiSecurityRiskLevel {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  INFO = 'INFO'
-}
-
-/**
+  CRITICAL = 'CRITICAL',HIGH = 'HIGH',MEDIUM = 'MEDIUM',LOW = 'LOW',INFO = 'INFO'}/**
  * API security configuration
  */
 export interface ApiSecurityConfig {
@@ -97,10 +61,7 @@ export interface ApiEndpointSecurityProfile {
   readonly securityHeaders: Record<string, string>;
   readonly vulnerabilities: ApiSecurityVulnerability[];
   readonly lastScanned: Date;
-  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'UNKNOWN';
-}
-
-/**
+  readonly complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'UNKNOWN';}/**
  * API security vulnerability
  */
 export interface ApiSecurityVulnerability {
@@ -134,9 +95,7 @@ export interface ApiScanConfiguration {
   readonly deepScanEnabled: boolean;
   readonly authenticationBypass: boolean;
   readonly payloadFuzzing: boolean;
-  readonly complianceChecks: string[]; // e.g., ['OWASP', 'PCI-DSS', 'GDPR']
-  readonly customRules: ApiSecurityRule[];
-}
+  readonly complianceChecks: string[]; // e.g., ['OWASP', 'PCI-DSS', 'GDPR']readonly customRules: ApiSecurityRule[];}
 
 /**
  * Custom API security rule
@@ -232,11 +191,7 @@ export class ApiSecurityService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `api_security_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing API Security Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      scanningEnabled: this.getSecurityConfig().scanningEnabled,
+    const operationId = `api_security_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing API Security Service with Parlant integration`, {parlantIntegrationEnabled: true,scanningEnabled: this.getSecurityConfig().scanningEnabled,
       threatDetectionEnabled: this.getSecurityConfig().threatDetectionEnabled,
       conversationalValidationRequired: this.getSecurityConfig().conversationalValidationRequired,
     });
@@ -282,9 +237,7 @@ export class ApiSecurityService {
           authenticationBypass: request.scanConfiguration.authenticationBypass,
           payloadFuzzing: request.scanConfiguration.payloadFuzzing,
         },
-        actionDescription: `Perform ${request.scanType} security scan on ${request.targetEndpoints.length} API endpoints with ${request.scanConfiguration.deepScanEnabled ? 'deep' : 'standard'} scanning`,
-        context: request.context,
-        riskLevel: this.getScanRiskLevel(request.scanType, request.scanConfiguration),
+        actionDescription: `Perform ${request.scanType} security scan on ${request.targetEndpoints.length} API endpoints with ${request.scanConfiguration.deepScanEnabled ? 'deep' : 'standard'} scanning`,context: request.context,riskLevel: this.getScanRiskLevel(request.scanType, request.scanConfiguration),
         operationId: request.operationId,
       };
 
@@ -292,9 +245,7 @@ export class ApiSecurityService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] API security scan blocked by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] API security scan blocked by Parlant validation`,{operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -308,9 +259,7 @@ export class ApiSecurityService {
       }
 
       this.logger.log(
-        `[${request.operationId}] API security scan approved by Parlant`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] API security scan approved by Parlant`,{operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -327,9 +276,7 @@ export class ApiSecurityService {
       this.updateScanMetrics(duration);
 
       this.logger.log(
-        `[${request.operationId}] API security scan completed successfully`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] API security scan completed successfully`,{operationId: request.operationId,
           scanId: scanResult.scanId,
           vulnerabilitiesFound: scanResult.vulnerabilitiesFound.length,
           securityScore: scanResult.securityScore,
@@ -344,9 +291,7 @@ export class ApiSecurityService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] API security scan failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] API security scan failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           duration,
@@ -371,10 +316,7 @@ export class ApiSecurityService {
     requestDetails: ApiRequestDetails,
     context: ParlantConversationContext
   ): Promise<ApiThreatDetectionResult> {
-    const operationId = `detect_threat${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Analyzing API request for threats with Parlant validation`,
+    const operationId = `detect_threat${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing API request for threats with Parlant validation`,
       {
         operationId,
         method: requestDetails.method,
@@ -388,8 +330,8 @@ export class ApiSecurityService {
       // Perform initial threat analysis
       const threatAnalysis = await this.analyzeRequestForThreats(requestDetails);
 
-      if (threatAnalysis.severity === ApiSecurityRiskLevel.CRITICAL || 
-          threatAnalysis.severity === ApiSecurityRiskLevel.HIGH) {
+      if (threatAnalysis.severity === ApiSecurityRiskLevel._CRITICAL || 
+          threatAnalysis.severity === ApiSecurityRiskLevel._HIGH) {
         
         // HIGH RISK: Validate threat response through Parlant
         const validationRequest: ParlantValidationRequest = {
@@ -400,9 +342,7 @@ export class ApiSecurityService {
             targetEndpoint: requestDetails.path,
             sourceIp: threatAnalysis.sourceIp,
           },
-          actionDescription: `Detected ${threatAnalysis.severity} ${threatAnalysis.threatType} threat targeting ${requestDetails.path} from ${threatAnalysis.sourceIp}`,
-          context,
-          riskLevel: RiskLevel.HIGH,
+          actionDescription: `Detected ${threatAnalysis.severity} ${threatAnalysis.threatType} threat targeting ${requestDetails.path} from ${threatAnalysis.sourceIp}`,context,riskLevel: RiskLevel._HIGH,
           operationId,
         };
 
@@ -410,9 +350,7 @@ export class ApiSecurityService {
 
         if (!validation.approved) {
           this.logger.warn(
-            `[${operationId}] API threat response blocked by Parlant validation`,
-            {
-              operationId,
+            `[${operationId}] API threat response blocked by Parlant validation`,{operationId,
               reason: validation.reasoning,
             }
           );
@@ -434,9 +372,7 @@ export class ApiSecurityService {
         }
 
         this.logger.log(
-          `[${operationId}] API threat detected and processed`,
-          {
-            operationId,
+          `[${operationId}] API threat detected and processed`,{operationId,
             threatType: detectionResult.threatType,
             severity: detectionResult.severity,
             blocked: detectionResult.blocked,
@@ -453,9 +389,7 @@ export class ApiSecurityService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] API threat detection failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] API threat detection failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           path: requestDetails.path,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -479,10 +413,7 @@ export class ApiSecurityService {
     policy: RateLimitingPolicy,
     context: ParlantConversationContext
   ): Promise<{ configured: boolean; policyId: string; conversationId: string }> {
-    const operationId = `configure_rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Configuring API rate limiting with Parlant validation`,
+    const operationId = `configure_rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Configuring API rate limiting with Parlant validation`,
       {
         operationId,
         policyId: policy.policyId,
@@ -503,9 +434,8 @@ export class ApiSecurityService {
           requestsPerHour: policy.requestsPerHour,
           blockDurationMinutes: policy.blockDurationMinutes,
         },
-        actionDescription: `Configure rate limiting policy "${policy.name}" for ${policy.endpoint}: ${policy.requestsPerMinute} req/min, ${policy.requestsPerHour} req/hour`,
-        context,
-        riskLevel: RiskLevel.CRITICAL, // Rate limiting changes are CRITICAL
+        actionDescription: `Configure rate limiting policy "${policy.name}" for ${policy.endpoint}: ${policy.requestsPerMinute} req/min, ${policy.requestsPerHour} req/hour",context,
+        riskLevel: RiskLevel._CRITICAL, // Rate limiting changes are CRITICAL
         operationId,
       };
 
@@ -523,9 +453,7 @@ export class ApiSecurityService {
       await this.applyRateLimitingPolicy(policy, validation.conversationId);
 
       this.logger.log(
-        `[${operationId}] API rate limiting configured successfully`,
-        {
-          operationId,
+        `[${operationId}] API rate limiting configured successfully`,{operationId,
           policyId: policy.policyId,
           endpoint: policy.endpoint,
           conversationId: validation.conversationId,
@@ -540,9 +468,7 @@ export class ApiSecurityService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Rate limiting configuration failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Rate limiting configuration failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           policyId: policy.policyId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -628,7 +554,7 @@ export class ApiSecurityService {
 
     // Check compliance
     request.scanConfiguration.complianceChecks.forEach(standard => {
-      complianceResults[standard] = vulnerabilities.filter(v => v.severity === ApiSecurityRiskLevel.CRITICAL).length === 0;
+      complianceResults[standard] = vulnerabilities.filter(v => v.severity === ApiSecurityRiskLevel._CRITICAL).length === 0;
     });
 
     // Calculate security score
@@ -662,9 +588,7 @@ export class ApiSecurityService {
     // Simulate different types of vulnerabilities based on scan type
     if (Math.random() > 0.8) { // 20% chance of vulnerability
       vulnerabilities.push({
-        id: `vuln${Date.now()}${Math.random().toString(36).substring(7)}`,
-        type: ApiThreatType.SECURITY_MISCONFIGURATION,
-        severity: ApiSecurityRiskLevel.MEDIUM,
+        id: `vuln${Date.now()}${Math.random().toString(36).substring(7)}`,type: ApiThreatType.SECURITY_MISCONFIGURATION,severity: ApiSecurityRiskLevel._MODERATE,
         description: `Security misconfiguration detected in ${endpoint}`,
         affectedEndpoint: endpoint,
         discoveredAt: new Date(),
@@ -683,19 +607,14 @@ export class ApiSecurityService {
     
     // Mock threat analysis - would use ML models and pattern matching
     let threatType = ApiThreatType.SECURITY_MISCONFIGURATION;
-    let severity = ApiSecurityRiskLevel.LOW;
-    const sourceIp = '192.168.1.1'; // Mock IP
-    let blocked = false;
-
-    // Simulate threat detection based on suspicious indicators
+    let severity = ApiSecurityRiskLevel._LOW;
+    const sourceIp = '192.168.1.1'; // Mock IPlet blocked = false;// Simulate threat detection based on suspicious indicators
     if (requestDetails.suspicious) {
-      if (requestDetails.headers['user-agent']?.includes('sqlmap')) {
-        threatType = ApiThreatType.SQL_INJECTION;
-        severity = ApiSecurityRiskLevel.HIGH;
+      if (requestDetails.headers['user-agent']?.includes('sqlmap')) {threatType = ApiThreatType.SQL_INJECTION;severity = ApiSecurityRiskLevel._HIGH;
         blocked = true;
       } else if (requestDetails.queryParams.toString().includes('<script>')) {
         threatType = ApiThreatType.XSS_ATTACK;
-        severity = ApiSecurityRiskLevel.MEDIUM;
+        severity = ApiSecurityRiskLevel._MODERATE;
         blocked = true;
       }
     }
@@ -726,9 +645,7 @@ export class ApiSecurityService {
       conversationId,
     };
 
-    this.logger.warn(`API THREAT BLOCKED: ${threatAnalysis.threatType}`, {
-      detectionId: threatAnalysis.detectionId,
-      severity: threatAnalysis.severity,
+    this.logger.warn(`API THREAT BLOCKED: ${threatAnalysis.threatType}`, {detectionId: threatAnalysis.detectionId,severity: threatAnalysis.severity,
       sourceIp: threatAnalysis.sourceIp,
       targetEndpoint: threatAnalysis.targetEndpoint,
       conversationId,
@@ -760,16 +677,16 @@ export class ApiSecurityService {
     
     vulnerabilities.forEach(vuln => {
       switch (vuln.severity) {
-        case ApiSecurityRiskLevel.CRITICAL:
+        case ApiSecurityRiskLevel._CRITICAL:
           score -= 20;
           break;
-        case ApiSecurityRiskLevel.HIGH:
+        case ApiSecurityRiskLevel._HIGH:
           score -= 10;
           break;
-        case ApiSecurityRiskLevel.MEDIUM:
+        case ApiSecurityRiskLevel._MODERATE:
           score -= 5;
           break;
-        case ApiSecurityRiskLevel.LOW:
+        case ApiSecurityRiskLevel._LOW:
           score -= 2;
           break;
       }
@@ -782,33 +699,24 @@ export class ApiSecurityService {
     const actions: string[] = [];
     
     if (vulnerabilities.some(v => v.type === ApiThreatType.BROKEN_AUTHENTICATION)) {
-      actions.push('Strengthen authentication mechanisms');
-    }
-    
-    if (vulnerabilities.some(v => v.type === ApiThreatType.SECURITY_MISCONFIGURATION)) {
-      actions.push('Review and update security configuration');
-    }
-    
-    if (vulnerabilities.some(v => v.severity === ApiSecurityRiskLevel.CRITICAL)) {
-      actions.push('URGENT: Address critical vulnerabilities immediately');
-    }
-
-    return actions;
+      actions.push('Strengthen authentication mechanisms');}if (vulnerabilities.some(v => v.type === ApiThreatType.SECURITY_MISCONFIGURATION)) {
+      actions.push('Review and update security configuration');}if (vulnerabilities.some(v => v.severity === ApiSecurityRiskLevel._CRITICAL)) {
+      actions.push('URGENT: Address critical vulnerabilities immediately');}return actions;
   }
 
   private getScanRiskLevel(scanType: ApiSecurityScanType, config: ApiScanConfiguration): RiskLevel {
     if (config.authenticationBypass || config.payloadFuzzing) {
-      return RiskLevel.CRITICAL;
+      return RiskLevel._CRITICAL;
     }
     
     switch (scanType) {
       case ApiSecurityScanType.PENETRATION_TEST:
-        return RiskLevel.CRITICAL;
+        return RiskLevel._CRITICAL;
       case ApiSecurityScanType.VULNERABILITY_SCAN:
       case ApiSecurityScanType.OWASP_API_TOP10:
-        return RiskLevel.HIGH;
+        return RiskLevel._HIGH;
       default:
-        return RiskLevel.MEDIUM;
+        return RiskLevel._MODERATE;
     }
   }
 
@@ -840,14 +748,7 @@ export class ApiSecurityService {
 
   private getSecurityConfig(): ApiSecurityConfig {
     return {
-      scanningEnabled: this.configService.get<boolean>('API_SECURITY_SCANNING_ENABLED', true),
-      threatDetectionEnabled: this.configService.get<boolean>('API_THREAT_DETECTION_ENABLED', true),
-      rateLimitingEnabled: this.configService.get<boolean>('API_RATE_LIMITING_ENABLED', true),
-      authenticationRequired: this.configService.get<boolean>('API_AUTHENTICATION_REQUIRED', true),
-      auditLoggingEnabled: this.configService.get<boolean>('API_AUDIT_LOGGING_ENABLED', true),
-      conversationalValidationRequired: this.configService.get<boolean>('API_CONVERSATIONAL_VALIDATION', true),
-      maxRequestsPerMinute: this.configService.get<number>('API_MAX_REQUESTS_PER_MINUTE', 100),
-      scanIntervalMinutes: this.configService.get<number>('API_SCAN_INTERVAL_MINUTES', 60),
+      scanningEnabled: this.configService.get<boolean>('API_SECURITY_SCANNING_ENABLED', true),threatDetectionEnabled: this.configService.get<boolean>('API_THREAT_DETECTION_ENABLED', true),rateLimitingEnabled: this.configService.get<boolean>('API_RATE_LIMITING_ENABLED', true),authenticationRequired: this.configService.get<boolean>('API_AUTHENTICATION_REQUIRED', true),auditLoggingEnabled: this.configService.get<boolean>('API_AUDIT_LOGGING_ENABLED', true),conversationalValidationRequired: this.configService.get<boolean>('API_CONVERSATIONAL_VALIDATION', true),maxRequestsPerMinute: this.configService.get<number>('API_MAX_REQUESTS_PER_MINUTE', 100),scanIntervalMinutes: this.configService.get<number>('API_SCAN_INTERVAL_MINUTES', 60),
     };
   }
 }

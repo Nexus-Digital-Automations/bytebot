@@ -20,15 +20,7 @@
  * @created 2024-01-19
  */
 
-import { Logger } from '../../../logger';
-import { ImmutableAuditEvent } from './enterprise-audit-trail.service';
-import { ComplianceRegulation } from './compliance-monitoring.service';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-
-// ==================== TYPES AND INTERFACES ====================
-
-/**
+import { Logger } from '../../../logger';import { ImmutableAuditEvent } from './enterprise-audit-trail.service';import { ComplianceRegulation } from './compliance-monitoring.service';import { EventEmitter } from 'events';import * as crypto from 'crypto';// ==================== TYPES AND INTERFACES ====================/**
  * Real-time monitoring configuration
  */
 export interface MonitoringConfiguration {
@@ -80,28 +72,13 @@ export interface MonitoringConfiguration {
 }
 
 export enum RiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
+  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}
 
 export enum NotificationChannel {
-  EMAIL = 'email',
-  SMS = 'sms',
-  WEBHOOK = 'webhook',
-  SLACK = 'slack',
-  TEAMS = 'teams',
-  SIEM = 'siem',
-  DASHBOARD = 'dashboard',
-  MOBILE_PUSH = 'mobile-push'
-}
+  EMAIL = 'email',SMS = 'sms',WEBHOOK = 'webhook',SLACK = 'slack',TEAMS = 'teams',SIEM = 'siem',DASHBOARD = 'dashboard',MOBILE_PUSH = 'mobile-push'}
 
 export enum AutomationLevel {
-  MANUAL = 'manual',
-  SEMI_AUTOMATED = 'semi-automated',
-  FULLY_AUTOMATED = 'fully-automated'
-}
+  MANUAL = 'manual',SEMI_AUTOMATED = 'semi-automated',FULLY_AUTOMATED = 'fully-automated'}
 
 export interface EscalationTier {
   readonly tierId: string;
@@ -154,9 +131,7 @@ export interface AutomatedResponse {
 export interface ResponseThreshold {
   readonly thresholdId: string;
   readonly metricType: string;
-  readonly operator: 'gt' | 'lt' | 'eq' | 'ne' | 'gte' | 'lte';
-  readonly value: number;
-  readonly timeWindow: number; // seconds
+  readonly operator: 'gt' | 'lt' | 'eq' | 'ne' | 'gte' | 'lte';readonly value: number;readonly timeWindow: number; // seconds
   readonly responseActions: string[];
 }
 
@@ -174,25 +149,11 @@ export interface ResponseAction {
   readonly timeout: number; // seconds
   readonly retryPolicy: {
     readonly maxRetries: number;
-    readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';
-    readonly baseDelay: number; // seconds
-  };
+    readonly backoffStrategy: 'linear' | 'exponential' | 'fixed';readonly baseDelay: number; // seconds};
 }
 
 export enum ActionType {
-  BLOCK_USER = 'block-user',
-  LOCK_ACCOUNT = 'lock-account',
-  REVOKE_SESSION = 'revoke-session',
-  INCREASE_MONITORING = 'increase-monitoring',
-  TRIGGER_INVESTIGATION = 'trigger-investigation',
-  NOTIFY_SECURITY_TEAM = 'notify-security-team',
-  ISOLATE_RESOURCE = 'isolate-resource',
-  BACKUP_DATA = 'backup-data',
-  LOG_EVIDENCE = 'log-evidence',
-  ESCALATE_ALERT = 'escalate-alert'
-}
-
-/**
+  BLOCK_USER = 'block-user',LOCK_ACCOUNT = 'lock-account',REVOKE_SESSION = 'revoke-session',INCREASE_MONITORING = 'increase-monitoring',TRIGGER_INVESTIGATION = 'trigger-investigation',NOTIFY_SECURITY_TEAM = 'notify-security-team',ISOLATE_RESOURCE = 'isolate-resource',BACKUP_DATA = 'backup-data',LOG_EVIDENCE = 'log-evidence',ESCALATE_ALERT = 'escalate-alert'}/**
  * Real-time monitoring events and alerts
  */
 export interface RealTimeAlert {
@@ -226,46 +187,10 @@ export interface RealTimeAlert {
 }
 
 export enum AlertType {
-  ANOMALY_DETECTION = 'anomaly-detection',
-  VELOCITY_THRESHOLD = 'velocity-threshold',
-  PATTERN_MATCH = 'pattern-match',
-  COMPLIANCE_VIOLATION = 'compliance-violation',
-  SECURITY_INCIDENT = 'security-incident',
-  PERFORMANCE_DEGRADATION = 'performance-degradation',
-  INTEGRITY_VIOLATION = 'integrity-violation',
-  ACCESS_ANOMALY = 'access-anomaly',
-  BEHAVIORAL_CHANGE = 'behavioral-change',
-  THREAT_INTELLIGENCE = 'threat-intelligence'
-}
-
-export enum AlertSeverity {
-  INFO = 'info',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
-
-export enum DetectionMethod {
-  STATISTICAL_ANALYSIS = 'statistical-analysis',
-  MACHINE_LEARNING = 'machine-learning',
-  RULE_BASED = 'rule-based',
-  SIGNATURE_MATCH = 'signature-match',
-  BEHAVIORAL_MODELING = 'behavioral-modeling',
-  CORRELATION_ENGINE = 'correlation-engine',
-  THREAT_INTELLIGENCE = 'threat-intelligence'
-}
-
-export enum AlertStatus {
-  OPEN = 'open',
-  ACKNOWLEDGED = 'acknowledged',
-  INVESTIGATING = 'investigating',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed',
-  SUPPRESSED = 'suppressed'
-}
-
-export interface ThreatIndicator {
+  ANOMALY_DETECTION = 'anomaly-detection',VELOCITY_THRESHOLD = 'velocity-threshold',PATTERN_MATCH = 'pattern-match',COMPLIANCE_VIOLATION = 'compliance-violation',SECURITY_INCIDENT = 'security-incident',PERFORMANCE_DEGRADATION = 'performance-degradation',INTEGRITY_VIOLATION = 'integrity-violation',ACCESS_ANOMALY = 'access-anomaly',BEHAVIORAL_CHANGE = 'behavioral-change',THREAT_INTELLIGENCE = 'threat-intelligence'}export enum AlertSeverity {
+  INFO = 'info',LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}export enum DetectionMethod {
+  STATISTICAL_ANALYSIS = 'statistical-analysis',MACHINE_LEARNING = 'machine-learning',RULE_BASED = 'rule-based',SIGNATURE_MATCH = 'signature-match',BEHAVIORAL_MODELING = 'behavioral-modeling',CORRELATION_ENGINE = 'correlation-engine',THREAT_INTELLIGENCE = 'threat-intelligence'}export enum AlertStatus {
+  OPEN = 'open',ACKNOWLEDGED = 'acknowledged',INVESTIGATING = 'investigating',RESOLVED = 'resolved',CLOSED = 'closed',SUPPRESSED = 'suppressed'}export interface ThreatIndicator {
   readonly indicatorType: string;
   readonly value: string;
   readonly confidence: number;
@@ -294,9 +219,7 @@ export interface ComplianceImpact {
 }
 
 export interface AlertResolution {
-  readonly resolutionType: 'false-positive' | 'mitigated' | 'accepted-risk' | 'escalated';
-  readonly description: string;
-  readonly actionsTaken: string[];
+  readonly resolutionType: 'false-positive' | 'mitigated' | 'accepted-risk' | 'escalated';readonly description: string;readonly actionsTaken: string[];
   readonly lessonsLearned: string[];
   readonly preventiveMeasures: string[];
 }
@@ -305,9 +228,7 @@ export interface ExecutedAction {
   readonly actionId: string;
   readonly actionType: ActionType;
   readonly executedAt: Date;
-  readonly executionStatus: 'success' | 'failed' | 'partial';
-  readonly result: any;
-  readonly executionTime: number; // milliseconds
+  readonly executionStatus: 'success' | 'failed' | 'partial';readonly result: any;readonly executionTime: number; // milliseconds
   readonly errors?: string[];
 }
 
@@ -359,9 +280,7 @@ export interface MonitoringMetrics {
  */
 export interface BehavioralBaseline {
   readonly baselineId: string;
-  readonly entityType: 'user' | 'system' | 'application' | 'resource';
-  readonly entityId: string;
-  readonly timeRange: { start: Date; end: Date };
+  readonly entityType: 'user' | 'system' | 'application' | 'resource';readonly entityId: string;readonly timeRange: { start: Date; end: Date };
   readonly learningPeriod: number; // days
   readonly behaviorProfile: {
     readonly accessPatterns: AccessPattern[];
@@ -401,10 +320,7 @@ export interface VelocityMetric {
   readonly variance: number;
   readonly peaks: number[];
   readonly seasonality: string;
-  readonly trendDirection: 'increasing' | 'decreasing' | 'stable';
-}
-
-export interface TemporalPattern {
+  readonly trendDirection: 'increasing' | 'decreasing' | 'stable';}export interface TemporalPattern {
   readonly patternName: string;
   readonly hourlyDistribution: number[];
   readonly dailyDistribution: number[];
@@ -430,9 +346,7 @@ export interface InteractionPattern {
  * response, and machine learning-based threat detection for enterprise audit systems.
  */
 export class RealTimeMonitoringService extends EventEmitter {
-  private readonly logger = Logger.getInstance().child({ service: 'RealTimeMonitoringService' });
-  private readonly configurations: Map<string, MonitoringConfiguration> = new Map();
-  private readonly activeAlerts: Map<string, RealTimeAlert> = new Map();
+  private readonly logger = Logger.getInstance().child({ service: 'RealTimeMonitoringService' });private readonly configurations: Map<string, MonitoringConfiguration> = new Map();private readonly activeAlerts: Map<string, RealTimeAlert> = new Map();
   private readonly behavioralBaselines: Map<string, BehavioralBaseline> = new Map();
   private readonly eventBuffer: ImmutableAuditEvent[] = [];
   private readonly alertSuppressionCache: Map<string, Date> = new Map();
@@ -444,9 +358,7 @@ export class RealTimeMonitoringService extends EventEmitter {
 
   constructor() {
     super();
-    this.logger.info('Initializing PARLANT Real-Time Monitoring Service');
-    this.initializeDefaultConfigurations();
-    this.startRealTimeProcessing();
+    this.logger.info('Initializing PARLANT Real-Time Monitoring Service');this.initializeDefaultConfigurations();this.startRealTimeProcessing();
   }
 
   // ==================== CONFIGURATION MANAGEMENT ====================
@@ -455,15 +367,11 @@ export class RealTimeMonitoringService extends EventEmitter {
    * Create comprehensive monitoring configuration
    */
   async createMonitoringConfiguration(
-    configData: Omit<MonitoringConfiguration, 'configId' | 'isActive' | 'createdAt' | 'lastModified' | 'version'>
-  ): Promise<MonitoringConfiguration> {
-    const startTime = Date.now();
+    configData: Omit<MonitoringConfiguration, 'configId' | 'isActive' | 'createdAt' | 'lastModified' | 'version'>): Promise<MonitoringConfiguration> {const startTime = Date.now();
     const configId = this.generateConfigId();
 
     try {
-      this.logger.info('Creating monitoring configuration', {
-        configId,
-        configName: configData.configName,
+      this.logger.info('Creating monitoring configuration', {configId,configName: configData.configName,
         eventTypes: configData.monitoringScope.eventTypes.length
       });
 
@@ -477,19 +385,14 @@ export class RealTimeMonitoringService extends EventEmitter {
         isActive: true,
         createdAt: new Date(),
         lastModified: new Date(),
-        version: '1.0.0'
-      };
-
-      // Store configuration
+        version: '1.0.0'};// Store configuration
       this.configurations.set(configId, configuration);
 
       // Initialize behavioral baselines if needed
       await this.initializeBaselinesForConfiguration(configuration);
 
       const duration = Date.now() - startTime;
-      this.logger.info('Monitoring configuration created successfully', {
-        configId,
-        duration,
+      this.logger.info('Monitoring configuration created successfully', {configId,duration,
         monitoringScope: Object.keys(configuration.monitoringScope).length
       });
 
@@ -501,9 +404,7 @@ export class RealTimeMonitoringService extends EventEmitter {
         error: error.message,
         duration: Date.now() - startTime
       });
-      throw new Error(`Monitoring configuration creation failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Monitoring configuration creation failed: ${error.message}`);}}
 
   /**
    * Start real-time monitoring for specific configuration
@@ -515,9 +416,7 @@ export class RealTimeMonitoringService extends EventEmitter {
         throw new Error(`Configuration not found: ${configId}`);
       }
 
-      this.logger.info('Starting real-time monitoring', {
-        configId,
-        configName: configuration.configName
+      this.logger.info('Starting real-time monitoring', {configId,configName: configuration.configName
       });
 
       // Update configuration status
@@ -530,10 +429,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       this.startMetricsCollection();
       this.startBaselineLearning();
 
-      this.logger.info('Real-time monitoring started successfully', { configId });
-
-    } catch (error) {
-      this.logger.error('Failed to start monitoring', {
+      this.logger.info('Real-time monitoring started successfully', { configId });} catch (error) {this.logger.error('Failed to start monitoring', {
         configId,
         error: error.message
       });
@@ -562,10 +458,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       }
 
       // Emit event for real-time processing
-      this.emit('auditEvent', event);
-
-      // Process event against active configurations
-      await this.analyzeEventInRealTime(event);
+      this.emit('auditEvent', event);// Process event against active configurationsawait this.analyzeEventInRealTime(event);
 
       const processingTime = Date.now() - startTime;
 
@@ -577,9 +470,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       }
 
     } catch (error) {
-      this.logger.error('Failed to process audit event', {
-        eventId: event.eventId,
-        error: error.message,
+      this.logger.error('Failed to process audit event', {eventId: event.eventId,error: error.message,
         processingTime: Date.now() - startTime
       });
 
@@ -636,15 +527,11 @@ export class RealTimeMonitoringService extends EventEmitter {
           anomalyScore,
           confidence: baseline.confidenceMetrics.predictionAccuracy,
           detectionMethod: DetectionMethod.MACHINE_LEARNING,
-          threatIndicators: await this.extractThreatIndicators(event, 'anomaly'),
-          sourceConfig: config.configId
-        });
+          threatIndicators: await this.extractThreatIndicators(event, 'anomaly'),sourceConfig: config.configId});
       }
 
     } catch (error) {
-      this.logger.warn('Anomaly detection failed', {
-        eventId: event.eventId,
-        error: error.message
+      this.logger.warn('Anomaly detection failed', {eventId: event.eventId,error: error.message
       });
     }
   }
@@ -673,9 +560,7 @@ export class RealTimeMonitoringService extends EventEmitter {
           anomalyScore: Math.min(eventsPerMinute / config.detectionParameters.velocityThreshold, 1.0),
           confidence: 0.9,
           detectionMethod: DetectionMethod.STATISTICAL_ANALYSIS,
-          threatIndicators: await this.extractThreatIndicators(event, 'velocity'),
-          sourceConfig: config.configId
-        });
+          threatIndicators: await this.extractThreatIndicators(event, 'velocity'),sourceConfig: config.configId});
       }
 
     } catch (error) {
@@ -711,9 +596,7 @@ export class RealTimeMonitoringService extends EventEmitter {
             anomalyScore: 0.8,
             confidence: 0.95,
             detectionMethod: DetectionMethod.SIGNATURE_MATCH,
-            threatIndicators: await this.extractThreatIndicators(event, 'pattern'),
-            sourceConfig: config.configId
-          });
+            threatIndicators: await this.extractThreatIndicators(event, 'pattern'),sourceConfig: config.configId});
           break;
         }
       }
@@ -747,15 +630,11 @@ export class RealTimeMonitoringService extends EventEmitter {
           anomalyScore: deviationScore,
           confidence: baseline.confidenceMetrics.learningConfidence,
           detectionMethod: DetectionMethod.BEHAVIORAL_MODELING,
-          threatIndicators: await this.extractThreatIndicators(event, 'behavioral'),
-          sourceConfig: config.configId
-        });
+          threatIndicators: await this.extractThreatIndicators(event, 'behavioral'),sourceConfig: config.configId});
       }
 
     } catch (error) {
-      this.logger.warn('Behavioral analysis failed', {
-        eventId: event.eventId,
-        error: error.message
+      this.logger.warn('Behavioral analysis failed', {eventId: event.eventId,error: error.message
       });
     }
   }
@@ -784,9 +663,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       }
 
     } catch (error) {
-      this.logger.warn('Compliance check failed', {
-        eventId: event.eventId,
-        error: error.message
+      this.logger.warn('Compliance check failed', {eventId: event.eventId,error: error.message
       });
     }
   }
@@ -824,9 +701,7 @@ export class RealTimeMonitoringService extends EventEmitter {
         complianceImpact: alertData.complianceImpact || [],
         alertMetadata: {
           sourceConfig: alertData.sourceConfig,
-          detectionEngine: 'RealTimeMonitoringService',
-          correlationId: this.generateCorrelationId(),
-          relatedAlerts: await this.findRelatedAlerts(alertData.triggeredBy),
+          detectionEngine: 'RealTimeMonitoringService',correlationId: this.generateCorrelationId(),relatedAlerts: await this.findRelatedAlerts(alertData.triggeredBy),
           investigationPriority: this.calculateInvestigationPriority(alertData.severity, alertData.anomalyScore)
         },
         responseStatus: {
@@ -839,19 +714,14 @@ export class RealTimeMonitoringService extends EventEmitter {
       this.activeAlerts.set(alertId, alert);
 
       // Log alert creation
-      this.logger.warn('Security alert created', {
-        alertId,
-        alertType: alert.alertType,
+      this.logger.warn('Security alert created', {alertId,alertType: alert.alertType,
         severity: alert.severity,
         anomalyScore: alert.anomalyScore,
         affectedAssets: alert.affectedAssets.length
       });
 
       // Emit alert event
-      this.emit('alert', alert);
-
-      // Process notifications and automated responses
-      await this.processAlertNotifications(alert);
+      this.emit('alert', alert);// Process notifications and automated responsesawait this.processAlertNotifications(alert);
       await this.executeAutomatedResponses(alert);
 
       return alert;
@@ -882,9 +752,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       }
 
     } catch (error) {
-      this.logger.error('Failed to process alert notifications', {
-        alertId: alert.alertId,
-        error: error.message
+      this.logger.error('Failed to process alert notifications', {alertId: alert.alertId,error: error.message
       });
     }
   }
@@ -910,9 +778,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       this.activeAlerts.set(alert.alertId, alert);
 
     } catch (error) {
-      this.logger.error('Failed to execute automated responses', {
-        alertId: alert.alertId,
-        error: error.message
+      this.logger.error('Failed to execute automated responses', {alertId: alert.alertId,error: error.message
       });
     }
   }
@@ -930,10 +796,7 @@ export class RealTimeMonitoringService extends EventEmitter {
     };
 
     try {
-      this.logger.debug('Collecting monitoring metrics', { timeWindow: window });
-
-      // Filter events and alerts in time window
-      const windowEvents = this.eventBuffer.filter(e =>
+      this.logger.debug('Collecting monitoring metrics', { timeWindow: window });// Filter events and alerts in time windowconst windowEvents = this.eventBuffer.filter(e =>
         e.timestamp >= window.start && e.timestamp <= window.end
       );
 
@@ -998,9 +861,7 @@ export class RealTimeMonitoringService extends EventEmitter {
         }
       };
 
-      this.logger.info('Monitoring metrics collected', {
-        metricsId: metrics.metricsId,
-        totalEvents,
+      this.logger.info('Monitoring metrics collected', {metricsId: metrics.metricsId,totalEvents,
         totalAlerts: windowAlerts.length,
         eventsPerSecond: eventsPerSecond.toFixed(2)
       });
@@ -1012,41 +873,22 @@ export class RealTimeMonitoringService extends EventEmitter {
         error: error.message,
         timeWindow: window
       });
-      throw new Error(`Metrics collection failed: ${error.message}`);
-    }
-  }
+      throw new Error(`Metrics collection failed: ${error.message}`);}}
 
   // ==================== PRIVATE HELPER METHODS ====================
 
   private generateConfigId(): string {
-    return `mon_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateAlertId(): string {
-    return `alert_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateCorrelationId(): string {
-    return `corr_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
-  }
-
-  private generateMetricsId(): string {
+    return `mon_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateAlertId(): string {
+    return `alert_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateCorrelationId(): string {
+    return `corr_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;}private generateMetricsId(): string {
     return `met_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`;
   }
 
   private async initializeDefaultConfigurations(): Promise<void> {
     // Initialize default monitoring configurations
     const defaultConfig = {
-      configName: 'Default Security Monitoring',
-      description: 'Standard security monitoring configuration for PARLANT audit events',
-      monitoringScope: {
-        eventTypes: ['authentication', 'authorization', 'data-access', 'configuration-change'],
-        userCategories: ['all'],
-        riskLevels: [RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL],
-        complianceRegulations: [ComplianceRegulation.GDPR, ComplianceRegulation.SOX],
-        businessUnits: ['all']
-      },
-      detectionParameters: {
+      configName: 'Default Security Monitoring',description: 'Standard security monitoring configuration for PARLANT audit events',monitoringScope: {eventTypes: ['authentication', 'authorization', 'data-access', 'configuration-change'],userCategories: ['all'],riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH, RiskLevel._CRITICAL],complianceRegulations: [ComplianceRegulation.GDPR, ComplianceRegulation.SOX],
+        businessUnits: ['all']},detectionParameters: {
         anomalyThreshold: 0.7,
         velocityThreshold: 50, // events per minute
         patternSensitivity: 0.6,
@@ -1057,12 +899,7 @@ export class RealTimeMonitoringService extends EventEmitter {
         enabledChannels: [NotificationChannel.EMAIL, NotificationChannel.DASHBOARD],
         escalationTiers: [
           {
-            tierId: 'tier-1',
-            tierName: 'First Response',
-            severityThreshold: AlertSeverity.MEDIUM,
-            recipients: ['security-team@company.com'],
-            channels: [NotificationChannel.EMAIL],
-            escalationDelay: 300, // 5 minutes
+            tierId: 'tier-1',tierName: 'First Response',severityThreshold: AlertSeverity.MEDIUM,recipients: ['security-team@company.com'],channels: [NotificationChannel.EMAIL],escalationDelay: 300, // 5 minutes
             acknowledgmentRequired: true,
             autoEscalate: true
           }
@@ -1073,25 +910,16 @@ export class RealTimeMonitoringService extends EventEmitter {
       responseAutomation: {
         enabledResponses: [
           {
-            responseId: 'default-notify',
-            responseName: 'Default Notification',
-            triggerConditions: {
-              alertTypes: [AlertType.SECURITY_INCIDENT],
+            responseId: 'default-notify',responseName: 'Default Notification',triggerConditions: {alertTypes: [AlertType.SECURITY_INCIDENT],
               severityLevels: [AlertSeverity.HIGH, AlertSeverity.CRITICAL],
               eventPatterns: [],
               timeConstraints: []
             },
             actions: [
               {
-                actionId: 'notify-security',
-                actionType: ActionType.NOTIFY_SECURITY_TEAM,
-                parameters: { urgency: 'high' },
-                timeout: 30,
-                retryPolicy: {
+                actionId: 'notify-security',actionType: ActionType.NOTIFY_SECURITY_TEAM,parameters: { urgency: 'high' },timeout: 30,retryPolicy: {
                   maxRetries: 3,
-                  backoffStrategy: 'exponential',
-                  baseDelay: 5
-                }
+                  backoffStrategy: 'exponential',baseDelay: 5}
               }
             ],
             approvalRequired: false,
@@ -1122,51 +950,32 @@ export class RealTimeMonitoringService extends EventEmitter {
 
   private async validateConfiguration(config: any): Promise<void> {
     if (!config.configName || config.configName.trim().length === 0) {
-      throw new Error('Configuration name is required');
-    }
-
-    if (!config.monitoringScope || !config.monitoringScope.eventTypes || config.monitoringScope.eventTypes.length === 0) {
-      throw new Error('At least one event type must be specified in monitoring scope');
-    }
-
-    if (!config.detectionParameters || config.detectionParameters.anomalyThreshold < 0 || config.detectionParameters.anomalyThreshold > 1) {
-      throw new Error('Anomaly threshold must be between 0 and 1');
-    }
-  }
+      throw new Error('Configuration name is required');}if (!config.monitoringScope || !config.monitoringScope.eventTypes || config.monitoringScope.eventTypes.length === 0) {
+      throw new Error('At least one event type must be specified in monitoring scope');}if (!config.detectionParameters || config.detectionParameters.anomalyThreshold < 0 || config.detectionParameters.anomalyThreshold > 1) {
+      throw new Error('Anomaly threshold must be between 0 and 1');}}
 
   private async initializeBaselinesForConfiguration(config: MonitoringConfiguration): Promise<void> {
     // Initialize behavioral baselines for monitored entities
     // This would typically load historical data and create initial baselines
-    this.logger.info('Initializing behavioral baselines', {
-      configId: config.configId,
-      learningPeriod: config.detectionParameters.baselineLearnPeriod
+    this.logger.info('Initializing behavioral baselines', {configId: config.configId,learningPeriod: config.detectionParameters.baselineLearnPeriod
     });
   }
 
   private startRealTimeProcessing(): void {
     // Start background processing for real-time event analysis
-    this.logger.info('Starting real-time processing engine');
-  }
-
-  private startEventProcessing(): void {
+    this.logger.info('Starting real-time processing engine');}private startEventProcessing(): void {
     // Process queued events
     setInterval(() => {
       if (this.eventProcessingQueue.length > 0) {
         const eventsToProcess = this.eventProcessingQueue.splice(0, 100); // Process in batches
-        eventsToProcess.forEach(event => this.emit('processEvent', event));
-      }
-    }, 100); // Process every 100ms
+        eventsToProcess.forEach(event => this.emit('processEvent', event));}}, 100); // Process every 100ms
   }
 
   private startMetricsCollection(): void {
     this.metricsCollectionInterval = setInterval(async () => {
       try {
         const metrics = await this.collectMonitoringMetrics();
-        this.emit('metrics', metrics);
-      } catch (error) {
-        this.logger.error('Metrics collection failed', { error: error.message });
-      }
-    }, 60000); // Collect metrics every minute
+        this.emit('metrics', metrics);} catch (error) {this.logger.error('Metrics collection failed', { error: error.message });}}, 60000); // Collect metrics every minute
   }
 
   private startBaselineLearning(): void {
@@ -1174,18 +983,14 @@ export class RealTimeMonitoringService extends EventEmitter {
       try {
         await this.updateBehavioralBaselines();
       } catch (error) {
-        this.logger.error('Baseline learning failed', { error: error.message });
-      }
-    }, 6 * 60 * 60 * 1000); // Update baselines every 6 hours
+        this.logger.error('Baseline learning failed', { error: error.message });}}, 6 * 60 * 60 * 1000); // Update baselines every 6 hours
   }
 
   private isEventInScope(event: ImmutableAuditEvent, config: MonitoringConfiguration): boolean {
     const { monitoringScope } = config;
 
     // Check event type
-    if (!monitoringScope.eventTypes.includes('all') && !monitoringScope.eventTypes.includes(event.operationType)) {
-      return false;
-    }
+    if (!monitoringScope.eventTypes.includes('all') && !monitoringScope.eventTypes.includes(event.operationType)) {return false;}
 
     // Check risk level
     if (!monitoringScope.riskLevels.includes(event.securityContext.riskLevel as RiskLevel)) {
@@ -1203,10 +1008,7 @@ export class RealTimeMonitoringService extends EventEmitter {
     // Check temporal patterns
     const eventHour = event.timestamp.getHours();
     const expectedFrequency = baseline.behaviorProfile.temporalPatterns
-      .find(p => p.patternName === 'hourly')?.hourlyDistribution[eventHour] || 0;
-
-    if (expectedFrequency === 0) {
-      score += 0.3; // Unusual time
+      .find(p => p.patternName === 'hourly')?.hourlyDistribution[eventHour] || 0;if (expectedFrequency === 0) {score += 0.3; // Unusual time
     }
 
     // Check velocity patterns
@@ -1216,10 +1018,7 @@ export class RealTimeMonitoringService extends EventEmitter {
     ).length;
 
     const expectedVelocity = baseline.behaviorProfile.velocityMetrics
-      .find(v => v.metricName === 'events-per-minute')?.baselineValue || 1;
-
-    if (recentEventCount > expectedVelocity * 2) {
-      score += 0.4; // High velocity
+      .find(v => v.metricName === 'events-per-minute')?.baselineValue || 1;if (recentEventCount > expectedVelocity * 2) {score += 0.4; // High velocity
     }
 
     return Math.min(score, 1.0);
@@ -1243,25 +1042,17 @@ export class RealTimeMonitoringService extends EventEmitter {
     // Extract basic indicators from event
     if (event.clientIpAddress) {
       indicators.push({
-        indicatorType: 'ip-address',
-        value: event.clientIpAddress,
-        confidence: 0.8,
-        source: 'audit-event',
-        firstSeen: event.timestamp,
-        lastSeen: event.timestamp,
-        threatLevel: RiskLevel.MEDIUM
+        indicatorType: 'ip-address',value: event.clientIpAddress,confidence: 0.8,
+        source: 'audit-event',firstSeen: event.timestamp,lastSeen: event.timestamp,
+        threatLevel: RiskLevel._MODERATE
       });
     }
 
     if (event.userAgent) {
       indicators.push({
-        indicatorType: 'user-agent',
-        value: event.userAgent,
-        confidence: 0.6,
-        source: 'audit-event',
-        firstSeen: event.timestamp,
-        lastSeen: event.timestamp,
-        threatLevel: RiskLevel.LOW
+        indicatorType: 'user-agent',value: event.userAgent,confidence: 0.6,
+        source: 'audit-event',firstSeen: event.timestamp,lastSeen: event.timestamp,
+        threatLevel: RiskLevel._LOW
       });
     }
 
@@ -1283,10 +1074,7 @@ export class RealTimeMonitoringService extends EventEmitter {
     // Check temporal deviation
     const eventHour = event.timestamp.getHours();
     const hourlyPattern = baseline.behaviorProfile.temporalPatterns
-      .find(p => p.patternName === 'hourly');
-
-    if (hourlyPattern && hourlyPattern.hourlyDistribution[eventHour] < 0.1) {
-      deviation += 0.3; // Unusual time
+      .find(p => p.patternName === 'hourly');if (hourlyPattern && hourlyPattern.hourlyDistribution[eventHour] < 0.1) {deviation += 0.3; // Unusual time
     }
 
     return Math.min(deviation, 1.0);
@@ -1294,18 +1082,12 @@ export class RealTimeMonitoringService extends EventEmitter {
 
   private async checkComplianceViolation(event: ImmutableAuditEvent, regulation: ComplianceRegulation): Promise<ComplianceImpact | null> {
     // Check for compliance violations based on regulation
-    if (regulation === ComplianceRegulation.GDPR && event.operationType === 'data-access') {
-      // Check GDPR data access compliance
-      if (!event.operationDetails?.legalBasis) {
+    if (regulation === ComplianceRegulation.GDPR && event.operationType === 'data-access') {// Check GDPR data access complianceif (!event.operationDetails?.legalBasis) {
         return {
           regulation,
-          violationType: 'missing-legal-basis',
-          severity: AlertSeverity.HIGH,
-          reportingRequired: true,
+          violationType: 'missing-legal-basis',severity: AlertSeverity.HIGH,reportingRequired: true,
           timelineDays: 3,
-          mitigationSteps: ['Verify legal basis', 'Document justification', 'Report to DPO']
-        };
-      }
+          mitigationSteps: ['Verify legal basis', 'Document justification', 'Report to DPO']};}
     }
 
     return null;
@@ -1321,20 +1103,14 @@ export class RealTimeMonitoringService extends EventEmitter {
           assetType: 'user-account',
           assetId: event.userId,
           assetName: `User ${event.userId}`,
-          impactLevel: RiskLevel.MEDIUM,
-          exposureType: 'potential-compromise',
-          mitigationRequired: true
-        });
+          impactLevel: RiskLevel._MODERATE,
+          exposureType: 'potential-compromise',mitigationRequired: true});
       }
 
       // Identify affected resources
       if (event.operationTarget?.resourceId) {
         assets.push({
-          assetType: 'resource',
-          assetId: event.operationTarget.resourceId,
-          assetName: event.operationTarget.resourceType || 'Unknown Resource',
-          impactLevel: RiskLevel.MEDIUM,
-          exposureType: 'unauthorized-access',
+          assetType: 'resource',assetId: event.operationTarget.resourceId,assetName: event.operationTarget.resourceType || 'Unknown Resource',impactLevel: RiskLevel._MODERATE,exposureType: 'unauthorized-access',
           mitigationRequired: true
         });
       }
@@ -1396,9 +1172,7 @@ export class RealTimeMonitoringService extends EventEmitter {
   }
 
   private async sendNotificationToTier(alert: RealTimeAlert, tier: EscalationTier): Promise<void> {
-    this.logger.info('Sending alert notification', {
-      alertId: alert.alertId,
-      tier: tier.tierName,
+    this.logger.info('Sending alert notification', {alertId: alert.alertId,tier: tier.tierName,
       channels: tier.channels,
       recipients: tier.recipients.length
     });
@@ -1421,9 +1195,7 @@ export class RealTimeMonitoringService extends EventEmitter {
       // Execute first action as example
       const action = response.actions[0];
 
-      this.logger.info('Executing automated response action', {
-        alertId: alert.alertId,
-        actionType: action.actionType,
+      this.logger.info('Executing automated response action', {alertId: alert.alertId,actionType: action.actionType,
         responseId: response.responseId
       });
 
@@ -1436,19 +1208,14 @@ export class RealTimeMonitoringService extends EventEmitter {
         actionId: action.actionId,
         actionType: action.actionType,
         executedAt: new Date(),
-        executionStatus: 'success',
-        result: { message: 'Action executed successfully' },
-        executionTime
-      };
+        executionStatus: 'success',result: { message: 'Action executed successfully' },executionTime};
 
     } catch (error) {
       return {
         actionId: response.actions[0].actionId,
         actionType: response.actions[0].actionType,
         executedAt: new Date(),
-        executionStatus: 'failed',
-        result: null,
-        executionTime: Date.now() - startTime,
+        executionStatus: 'failed',result: null,executionTime: Date.now() - startTime,
         errors: [error.message]
       };
     }
@@ -1468,13 +1235,8 @@ export class RealTimeMonitoringService extends EventEmitter {
   }
 
   private async createSystemAlert(type: string, message: string, severity: AlertSeverity): Promise<void> {
-    this.logger.warn('System alert created', { type, message, severity });
-  }
-
-  private async updateBehavioralBaselines(): Promise<void> {
-    this.logger.debug('Updating behavioral baselines');
-    // Implementation would update machine learning models with recent data
-  }
+    this.logger.warn('System alert created', { type, message, severity });}private async updateBehavioralBaselines(): Promise<void> {
+    this.logger.debug('Updating behavioral baselines');// Implementation would update machine learning models with recent data}
 
   // Metrics calculation helper methods
   private calculateAverageLatency(): number {

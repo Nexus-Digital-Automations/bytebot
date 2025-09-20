@@ -19,14 +19,7 @@
  * - Latency Reduction: 60-80% improvement through batching
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-
-// ===== ASYNC BATCH PROCESSING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';// ===== ASYNC BATCH PROCESSING INTERFACES =====/**
  * Worker representation for mock implementation
  */
 interface WorkerInstance {
@@ -104,12 +97,7 @@ export interface ValidationTask {
  * Circuit breaker states
  */
 export enum CircuitState {
-  CLOSED = 'closed',     // Normal operation
-  OPEN = 'open',         // Failing, bypass validation
-  HALF_OPEN = 'half_open' // Testing recovery
-}
-
-/**
+  CLOSED = 'closed',     // Normal operationOPEN = 'open',         // Failing, bypass validationHALF_OPEN = 'half_open' // Testing recovery}/**
  * Async processing performance metrics
  */
 export interface AsyncPerformanceMetrics {
@@ -126,15 +114,10 @@ export interface AsyncPerformanceMetrics {
  * Batch optimization recommendation
  */
 export interface BatchOptimizationRecommendation {
-  readonly type: 'optimize_batching' | 'scale_workers' | 'adjust_timeouts' | 'tune_priorities';
-  readonly metric: string;
-  readonly currentValue: number;
+  readonly type: 'optimize_batching' | 'scale_workers' | 'adjust_timeouts' | 'tune_priorities';readonly metric: string;readonly currentValue: number;
   readonly targetValue: number;
   readonly action: string;
-  readonly priority: 'critical' | 'high' | 'medium' | 'low';
-}
-
-// ===== ASYNC BATCH PROCESSOR SERVICE =====
+  readonly priority: 'critical' | 'high' | 'medium' | 'low';}// ===== ASYNC BATCH PROCESSOR SERVICE =====
 
 @Injectable()
 export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModuleDestroy {
@@ -211,10 +194,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Parlant Async Batch Processor...');
-    
-    // Initialize worker pool
-    await this.initializeMinWorkers();
+    this.logger.log('Initializing Parlant Async Batch Processor...');// Initialize worker poolawait this.initializeMinWorkers();
     
     // Start idle worker cleanup
     this.startIdleWorkerCleanup();
@@ -222,10 +202,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     // Start performance monitoring
     this.startPerformanceMonitoring();
     
-    this.logger.log('Async Batch Processor initialized successfully');
-  }
-
-  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Async Batch Processor initialized successfully');}async onModuleDestroy(): Promise<void> {
     // Clean up timers and workers
     if (this.batchTimer) {
       clearTimeout(this.batchTimer);
@@ -242,9 +219,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
 
   private initializePriorityQueues(): void {
     for (const priority of Object.values(ValidationPriority)) {
-      if (typeof priority === 'number') {
-        this.priorityQueues.set(priority as ValidationPriority, []);
-      }
+      if (typeof priority === 'number') {this.priorityQueues.set(priority as ValidationPriority, []);}
     }
   }
 
@@ -291,9 +266,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       this.scheduleBatchProcessing();
       
       // Emit queue depth update
-      this.eventEmitter.emit('queueUpdate', this.getTotalQueueDepth());
-    });
-  }
+      this.eventEmitter.emit('queueUpdate', this.getTotalQueueDepth());});}
 
   /**
    * Process bulk validation requests with priority and batching
@@ -480,30 +453,13 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       conversationId: `fallback-${Date.now()}`,
       approved: false,
       confidence: 0,
-      reasoning: 'Validation service temporarily unavailable (circuit breaker open)',
-      validationTimestamp: new Date(),
-      riskAssessment: {
-        level: RiskLevel.MEDIUM,
-        factors: ['Service degradation'],
-        mitigation: 'Using fallback validation'
-      },
-      executionPlan: {
-        steps: ['Manual review required'],
-        estimatedDuration: 0,
-        requiredApprovals: ['human']
-      },
-      auditTrail: {
+      reasoning: 'Validation service temporarily unavailable (circuit breaker open)',validationTimestamp: new Date(),riskAssessment: {
+        level: RiskLevel._MODERATE,
+        factors: ['Service degradation'],mitigation: 'Using fallback validation'},executionPlan: {
+        steps: ['Manual review required'],estimatedDuration: 0,requiredApprovals: ['human']},auditTrail: {
         entries: [{
           timestamp: new Date(),
-          action: 'FALLBACK_VALIDATION',
-          details: 'Circuit breaker triggered fallback response',
-          actor: 'SYSTEM'
-        }],
-        complianceStatus: 'DEGRADED'
-      },
-      conversationSummary: 'Service temporarily unavailable'
-    }));
-  }
+          action: 'FALLBACK_VALIDATION',details: 'Circuit breaker triggered fallback response',actor: 'SYSTEM'}],complianceStatus: 'DEGRADED'},conversationSummary: 'Service temporarily unavailable'}));}
 
   private distributeBatchResults(
     batch: BatchItem[],
@@ -520,10 +476,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
 
   private handleBatchError(batch: BatchItem[], error: unknown): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const batchError = new Error(`Batch validation failed: ${errorMessage}`);
-    
-    batch.forEach(item => item.reject(batchError));
-  }
+    const batchError = new Error(`Batch validation failed: ${errorMessage}`);batch.forEach(item => item.reject(batchError));}
 
   // ===== WORKER POOL MANAGEMENT =====
 
@@ -541,9 +494,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     // TODO: Implement actual worker creation
     // For now, return a mock worker
     return {
-      id: `worker-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-      created: Date.now(),
-      lastUsed: Date.now()
+      id: `worker-${Date.now()}-${Math.random().toString(36).substring(7)}`,created: Date.now(),lastUsed: Date.now()
     };
   }
 
@@ -594,30 +545,20 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     await this.delay(Math.random() * 100 + 50); // 50-150ms processing time
     
     return task.requests.map((request, index) => ({
-      conversationId: `batch-${task.batchId}-${index}`,
-      approved: Math.random() > 0.1, // 90% approval rate
-      confidence: 0.8 + Math.random() * 0.2,
+      conversationId: `batch-${task.batchId}-${index}`,approved: Math.random() > 0.1, // 90% approval rateconfidence: 0.8 + Math.random() * 0.2,
       reasoning: `Validated request for ${request.functionName}`,
       riskAssessment: {
-        level: RiskLevel.LOW,
+        level: RiskLevel._LOW,
         factors: [],
-        mitigation: 'Standard validation passed'
-      },
-      executionPlan: {
-        steps: ['Execute function'],
-        estimatedDuration: 100,
-        requiredApprovals: []
+        mitigation: 'Standard validation passed'},executionPlan: {
+        steps: ['Execute function'],estimatedDuration: 100,requiredApprovals: []
       },
       auditTrail: {
         entries: [{
           timestamp: new Date(),
           action: 'BATCH_VALIDATION',
           details: `Processed in batch ${task.batchId}`,
-          actor: 'SYSTEM'
-        }],
-        complianceStatus: 'COMPLIANT'
-      },
-      conversationSummary: 'Batch validation completed successfully',
+          actor: 'SYSTEM'}],complianceStatus: 'COMPLIANT'},conversationSummary: 'Batch validation completed successfully',
       validationTimestamp: new Date()
     }));
   }
@@ -646,10 +587,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     this.workerPool.push(...newWorkers);
     this.availableWorkers.push(...newWorkers);
     
-    this.logger.debug(`Scaled up worker pool to ${this.workerPool.length} workers`);
-  }
-
-  private startIdleWorkerCleanup(): void {
+    this.logger.debug(`Scaled up worker pool to ${this.workerPool.length} workers`);}private startIdleWorkerCleanup(): void {
     setInterval(() => {
       this.cleanupIdleWorkers();
     }, this.workerPoolConfig.idleTimeoutMs);
@@ -692,9 +630,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     if (this.circuitState === CircuitState.OPEN) {
       if (this.shouldAttemptRecovery()) {
         this.circuitState = CircuitState.HALF_OPEN;
-        this.logger.debug('Circuit breaker attempting recovery');
-      } else {
-        return fallback();
+        this.logger.debug('Circuit breaker attempting recovery');} else {return fallback();
       }
     }
     
@@ -728,9 +664,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       if (this.successCount >= this.successThreshold) {
         this.circuitState = CircuitState.CLOSED;
         this.successCount = 0;
-        this.logger.log('Circuit breaker recovered to CLOSED state');
-      }
-    }
+        this.logger.log('Circuit breaker recovered to CLOSED state');}}
     
     this.performanceMetrics.circuitBreakerState = this.circuitState;
   }
@@ -741,10 +675,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     
     if (this.failureCount >= this.failureThreshold) {
       this.circuitState = CircuitState.OPEN;
-      this.logger.warn('Circuit breaker opened due to excessive failures');
-    }
-    
-    this.performanceMetrics.circuitBreakerState = this.circuitState;
+      this.logger.warn('Circuit breaker opened due to excessive failures');}this.performanceMetrics.circuitBreakerState = this.circuitState;
   }
 
   private shouldAttemptRecovery(): boolean {
@@ -836,10 +767,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       );
     }
     
-    this.logger.debug(`Optimized batch size to ${this.currentOptimalBatchSize}`);
-  }
-
-  private calculateRecentPerformance(): number {
+    this.logger.debug(`Optimized batch size to ${this.currentOptimalBatchSize}`);}private calculateRecentPerformance(): number {
     const recentSamples = this.performanceHistory.slice(-10);
     return recentSamples.reduce((sum, perf) => sum + perf, 0) / recentSamples.length;
   }
@@ -915,34 +843,18 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     
     if (metrics.batchEfficiency < 0.8) {
       recommendations.push({
-        type: 'optimize_batching',
-        metric: 'batch_efficiency',
-        currentValue: metrics.batchEfficiency,
-        targetValue: 0.9,
-        action: 'Adjust batch size or timeout parameters',
-        priority: 'high'
-      });
-    }
+        type: 'optimize_batching',metric: 'batch_efficiency',currentValue: metrics.batchEfficiency,targetValue: 0.9,
+        action: 'Adjust batch size or timeout parameters',priority: 'high'});}
     
     if (metrics.queueDepth > 100) {
       recommendations.push({
-        type: 'scale_workers',
-        metric: 'queue_depth',
-        currentValue: metrics.queueDepth,
-        targetValue: 50,
-        action: 'Increase worker pool size',
-        priority: 'critical'
-      });
-    }
+        type: 'scale_workers',metric: 'queue_depth',currentValue: metrics.queueDepth,targetValue: 50,
+        action: 'Increase worker pool size',priority: 'critical'});}
     
     if (metrics.workerUtilization > 0.9) {
       recommendations.push({
-        type: 'scale_workers',
-        metric: 'worker_utilization',
-        currentValue: metrics.workerUtilization,
-        targetValue: 0.8,
-        action: 'Scale up worker pool to handle increased load',
-        priority: 'high'
+        type: 'scale_workers',metric: 'worker_utilization',currentValue: metrics.workerUtilization,targetValue: 0.8,
+        action: 'Scale up worker pool to handle increased load',priority: 'high'
       });
     }
     
@@ -987,14 +899,8 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     const circuitHealthy = metrics.circuitBreakerState !== CircuitState.OPEN;
     
     if (!queueHealthy) {
-      issues.push(`High queue depth: ${metrics.queueDepth} requests`);
-    }
-    
-    if (!workerHealthy) {
-      issues.push(`High worker utilization: ${(metrics.workerUtilization * 100).toFixed(1)}%`);
-    }
-    
-    if (!circuitHealthy) {
+      issues.push(`High queue depth: ${metrics.queueDepth} requests`);}if (!workerHealthy) {
+      issues.push(`High worker utilization: ${(metrics.workerUtilization * 100).toFixed(1)}%`);}if (!circuitHealthy) {
       issues.push(`Circuit breaker is ${metrics.circuitBreakerState}`);
     }
     

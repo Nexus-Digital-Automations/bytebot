@@ -1,82 +1,42 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { WorkflowStepType, WorkflowExecutionMode } from './workflow.dto';
-
-/**
- * Step execution status
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import { WorkflowStepType, WorkflowExecutionMode } from './workflow.dto';/*** Step execution status
  */
 export enum StepExecutionStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  SKIPPED = 'skipped',
-  CANCELLED = 'cancelled'
-}
-
-/**
+  PENDING = 'pending',IN_PROGRESS = 'in_progress',COMPLETED = 'completed',FAILED = 'failed',SKIPPED = 'skipped',CANCELLED = 'cancelled'}/**
  * Workflow execution status
  */
 export enum WorkflowExecutionStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  PAUSED = 'paused'
-}
-
-/**
+  PENDING = 'pending',RUNNING = 'running',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',PAUSED = 'paused'}/**
  * Step execution result
  */
 export class StepExecutionResultDto {
   @ApiProperty({
-    description: 'Step identifier',
-    example: 'step_1_login'
-  })
-  stepId: string;
+    description: 'Step identifier',example: 'step_1_login'})stepId: string;
 
   @ApiProperty({
-    description: 'Step name',
-    example: 'Login to Application'
-  })
-  stepName: string;
+    description: 'Step name',example: 'Login to Application'})stepName: string;
 
   @ApiProperty({
-    description: 'Step type',
-    enum: WorkflowStepType,
-    example: WorkflowStepType.FORM_AUTOMATION
+    description: 'Step type',enum: WorkflowStepType,example: WorkflowStepType.FORM_AUTOMATION
   })
   stepType: WorkflowStepType;
 
   @ApiProperty({
-    description: 'Step execution status',
-    enum: StepExecutionStatus,
-    example: StepExecutionStatus.COMPLETED
+    description: 'Step execution status',enum: StepExecutionStatus,example: StepExecutionStatus.COMPLETED
   })
   status: StepExecutionStatus;
 
   @ApiProperty({
-    description: 'Step start time',
-    example: '2024-01-15T10:30:00.000Z'
-  })
-  startTime: string;
+    description: 'Step start time',example: '2024-01-15T10:30:00.000Z'})startTime: string;
 
   @ApiPropertyOptional({
-    description: 'Step completion time',
-    example: '2024-01-15T10:30:05.250Z'
-  })
-  endTime?: string;
+    description: 'Step completion time',example: '2024-01-15T10:30:05.250Z'})endTime?: string;
 
   @ApiProperty({
-    description: 'Step execution duration in milliseconds',
-    example: 5250
-  })
+    description: 'Step execution duration in milliseconds',example: 5250})
   durationMs: number;
 
   @ApiPropertyOptional({
-    description: 'Step execution result data',
-    example: {
-      success: true,
+    description: 'Step execution result data',example: {success: true,
       formFieldsFilled: 2,
       validationPassed: true
     }
@@ -84,61 +44,32 @@ export class StepExecutionResultDto {
   result?: any;
 
   @ApiPropertyOptional({
-    description: 'Output variables extracted from step',
-    example: {
-      loginSuccess: true,
-      userProfile: { name: 'John Doe', email: 'john@example.com' }
-    }
-  })
+    description: 'Output variables extracted from step',example: {loginSuccess: true,
+      userProfile: { name: 'John Doe', email: 'john@example.com' }}})
   outputVariables?: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'Error message if step failed',
-    example: 'Login form not found on page'
-  })
-  errorMessage?: string;
+    description: 'Error message if step failed',example: 'Login form not found on page'})errorMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed error information',
-    example: {
-      errorType: 'ElementNotFoundError',
-      errorCode: 'ELEMENT_NOT_FOUND',
-      stackTrace: 'Error: Element not found...'
-    }
-  })
+    description: 'Detailed error information',example: {errorType: 'ElementNotFoundError',errorCode: 'ELEMENT_NOT_FOUND',stackTrace: 'Error: Element not found...'}})
   errorDetails?: any;
 
   @ApiPropertyOptional({
-    description: 'Number of retry attempts made',
-    example: 1
-  })
+    description: 'Number of retry attempts made',example: 1})
   retryCount?: number;
 
   @ApiPropertyOptional({
-    description: 'Screenshot before step execution',
-    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
-  })
-  screenshotBefore?: string;
+    description: 'Screenshot before step execution',example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='})screenshotBefore?: string;
 
   @ApiPropertyOptional({
-    description: 'Screenshot after step execution',
-    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
-  })
-  screenshotAfter?: string;
+    description: 'Screenshot after step execution',example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='})screenshotAfter?: string;
 
   @ApiPropertyOptional({
-    description: 'Execution logs for this step',
-    example: ['Step started', 'Form found', 'Fields filled successfully', 'Step completed']
-  })
-  logs?: string[];
+    description: 'Execution logs for this step',example: ['Step started', 'Form found', 'Fields filled successfully', 'Step completed']})logs?: string[];
 
   @ApiPropertyOptional({
-    description: 'Performance metrics for this step',
-    example: {
-      memoryUsage: '45.2MB',
-      cpuUsage: '15%',
-      networkRequests: 3
-    }
+    description: 'Performance metrics for this step',example: {memoryUsage: '45.2MB',cpuUsage: '15%',networkRequests: 3}
   })
   metrics?: Record<string, any>;
 }
@@ -148,40 +79,26 @@ export class StepExecutionResultDto {
  */
 export class LoopExecutionInfoDto {
   @ApiProperty({
-    description: 'Current iteration number',
-    example: 3
-  })
+    description: 'Current iteration number',example: 3})
   currentIteration: number;
 
   @ApiProperty({
-    description: 'Total iterations completed',
-    example: 5
-  })
+    description: 'Total iterations completed',example: 5})
   totalIterations: number;
 
   @ApiPropertyOptional({
-    description: 'Maximum iterations allowed',
-    example: 10
-  })
+    description: 'Maximum iterations allowed',example: 10})
   maxIterations?: number;
 
   @ApiPropertyOptional({
-    description: 'Current iteration data',
-    example: { item: 'Product A', index: 2 }
-  })
-  currentIterationData?: any;
+    description: 'Current iteration data',example: { item: 'Product A', index: 2 }})currentIterationData?: any;
 
   @ApiProperty({
-    description: 'Whether loop is still active',
-    example: true
-  })
+    description: 'Whether loop is still active',example: true})
   isActive: boolean;
 
   @ApiPropertyOptional({
-    description: 'Loop completion reason',
-    example: 'condition_met'
-  })
-  completionReason?: string;
+    description: 'Loop completion reason',example: 'condition_met'})completionReason?: string;
 }
 
 /**
@@ -189,51 +106,34 @@ export class LoopExecutionInfoDto {
  */
 export class WorkflowExecutionProgressDto {
   @ApiProperty({
-    description: 'Total number of steps in workflow',
-    example: 8
-  })
+    description: 'Total number of steps in workflow',example: 8})
   totalSteps: number;
 
   @ApiProperty({
-    description: 'Number of completed steps',
-    example: 5
-  })
+    description: 'Number of completed steps',example: 5})
   completedSteps: number;
 
   @ApiProperty({
-    description: 'Number of failed steps',
-    example: 1
-  })
+    description: 'Number of failed steps',example: 1})
   failedSteps: number;
 
   @ApiProperty({
-    description: 'Number of skipped steps',
-    example: 0
-  })
+    description: 'Number of skipped steps',example: 0})
   skippedSteps: number;
 
   @ApiProperty({
-    description: 'Progress percentage',
-    example: 62.5
-  })
+    description: 'Progress percentage',example: 62.5})
   progressPercentage: number;
 
   @ApiPropertyOptional({
-    description: 'Currently executing step',
-    example: 'step_6_data_processing'
-  })
-  currentStep?: string;
+    description: 'Currently executing step',example: 'step_6_data_processing'})currentStep?: string;
 
   @ApiPropertyOptional({
-    description: 'Estimated time remaining in milliseconds',
-    example: 45000
-  })
+    description: 'Estimated time remaining in milliseconds',example: 45000})
   estimatedTimeRemainingMs?: number;
 
   @ApiPropertyOptional({
-    description: 'Active loops information',
-    type: [LoopExecutionInfoDto]
-  })
+    description: 'Active loops information',type: [LoopExecutionInfoDto]})
   activeLoops?: LoopExecutionInfoDto[];
 }
 
@@ -242,61 +142,39 @@ export class WorkflowExecutionProgressDto {
  */
 export class WorkflowExecutionStatsDto {
   @ApiProperty({
-    description: 'Total execution time in milliseconds',
-    example: 125000
-  })
+    description: 'Total execution time in milliseconds',example: 125000})
   totalExecutionTimeMs: number;
 
   @ApiProperty({
-    description: 'Average step execution time in milliseconds',
-    example: 15625
-  })
+    description: 'Average step execution time in milliseconds',example: 15625})
   averageStepTimeMs: number;
 
   @ApiProperty({
-    description: 'Fastest step execution time in milliseconds',
-    example: 1200
-  })
+    description: 'Fastest step execution time in milliseconds',example: 1200})
   fastestStepTimeMs: number;
 
   @ApiProperty({
-    description: 'Slowest step execution time in milliseconds',
-    example: 45000
-  })
+    description: 'Slowest step execution time in milliseconds',example: 45000})
   slowestStepTimeMs: number;
 
   @ApiProperty({
-    description: 'Total data processed (bytes)',
-    example: 2048576
-  })
+    description: 'Total data processed (bytes)',example: 2048576})
   totalDataProcessed: number;
 
   @ApiProperty({
-    description: 'Total screenshots captured',
-    example: 16
-  })
+    description: 'Total screenshots captured',example: 16})
   screenshotsCaptured: number;
 
   @ApiProperty({
-    description: 'Total errors encountered',
-    example: 2
-  })
+    description: 'Total errors encountered',example: 2})
   totalErrors: number;
 
   @ApiProperty({
-    description: 'Total retries attempted',
-    example: 3
-  })
+    description: 'Total retries attempted',example: 3})
   totalRetries: number;
 
   @ApiPropertyOptional({
-    description: 'Performance metrics',
-    example: {
-      averageMemoryUsage: '128MB',
-      peakMemoryUsage: '256MB',
-      averageCpuUsage: '25%',
-      totalNetworkRequests: 45
-    }
+    description: 'Performance metrics',example: {averageMemoryUsage: '128MB',peakMemoryUsage: '256MB',averageCpuUsage: '25%',totalNetworkRequests: 45}
   })
   performanceMetrics?: Record<string, any>;
 }
@@ -306,127 +184,70 @@ export class WorkflowExecutionStatsDto {
  */
 export class WorkflowExecutionResponseDto {
   @ApiProperty({
-    description: 'Workflow execution ID',
-    example: 'exec_1704454800_abc123'
-  })
-  executionId: string;
+    description: 'Workflow execution ID',example: 'exec_1704454800_abc123'})executionId: string;
 
   @ApiProperty({
-    description: 'Workflow ID',
-    example: 'workflow_data_collection'
-  })
-  workflowId: string;
+    description: 'Workflow ID',example: 'workflow_data_collection'})workflowId: string;
 
   @ApiProperty({
-    description: 'Workflow name',
-    example: 'E-commerce Data Collection Workflow'
-  })
-  workflowName: string;
+    description: 'Workflow name',example: 'E-commerce Data Collection Workflow'})workflowName: string;
 
   @ApiProperty({
-    description: 'Workflow execution status',
-    enum: WorkflowExecutionStatus,
-    example: WorkflowExecutionStatus.COMPLETED
+    description: 'Workflow execution status',enum: WorkflowExecutionStatus,example: WorkflowExecutionStatus.COMPLETED
   })
   status: WorkflowExecutionStatus;
 
   @ApiProperty({
-    description: 'Execution start time',
-    example: '2024-01-15T10:00:00.000Z'
-  })
-  startTime: string;
+    description: 'Execution start time',example: '2024-01-15T10:00:00.000Z'})startTime: string;
 
   @ApiPropertyOptional({
-    description: 'Execution completion time',
-    example: '2024-01-15T10:02:05.000Z'
-  })
-  endTime?: string;
+    description: 'Execution completion time',example: '2024-01-15T10:02:05.000Z'})endTime?: string;
 
   @ApiProperty({
-    description: 'Total execution duration in milliseconds',
-    example: 125000
-  })
+    description: 'Total execution duration in milliseconds',example: 125000})
   durationMs: number;
 
   @ApiProperty({
-    description: 'Execution progress information',
-    type: WorkflowExecutionProgressDto
-  })
+    description: 'Execution progress information',type: WorkflowExecutionProgressDto})
   progress: WorkflowExecutionProgressDto;
 
   @ApiProperty({
-    description: 'Individual step execution results',
-    type: [StepExecutionResultDto]
-  })
+    description: 'Individual step execution results',type: [StepExecutionResultDto]})
   stepResults: StepExecutionResultDto[];
 
   @ApiProperty({
-    description: 'Execution statistics',
-    type: WorkflowExecutionStatsDto
-  })
+    description: 'Execution statistics',type: WorkflowExecutionStatsDto})
   statistics: WorkflowExecutionStatsDto;
 
   @ApiPropertyOptional({
-    description: 'Final workflow output data',
-    example: {
-      extractedProducts: 156,
-      processedData: 'data/products_2024-01-15.json',
-      summaryReport: 'reports/summary_2024-01-15.html'
-    }
-  })
+    description: 'Final workflow output data',example: {extractedProducts: 156,
+      processedData: 'data/products_2024-01-15.json',summaryReport: 'reports/summary_2024-01-15.html'}})
   outputData?: any;
 
   @ApiPropertyOptional({
-    description: 'Final workflow variables state',
-    example: {
-      totalItemsProcessed: 156,
-      lastProcessedUrl: 'https://example.com/page/8',
-      processingErrors: 2
-    }
+    description: 'Final workflow variables state',example: {totalItemsProcessed: 156,
+      lastProcessedUrl: 'https://example.com/page/8',processingErrors: 2}
   })
   finalVariables?: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'Global error message if workflow failed',
-    example: 'Workflow failed due to network connectivity issues'
-  })
-  errorMessage?: string;
+    description: 'Global error message if workflow failed',example: 'Workflow failed due to network connectivity issues'})errorMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed error information',
-    example: {
-      errorType: 'NetworkError',
-      failedStep: 'step_3_navigate',
-      errorCode: 'NETWORK_TIMEOUT'
-    }
-  })
+    description: 'Detailed error information',example: {errorType: 'NetworkError',failedStep: 'step_3_navigate',errorCode: 'NETWORK_TIMEOUT'}})
   errorDetails?: any;
 
   @ApiPropertyOptional({
-    description: 'Workflow execution warnings',
-    example: ['Step timeout increased automatically', 'Rate limiting detected on target site']
-  })
-  warnings?: string[];
+    description: 'Workflow execution warnings',example: ['Step timeout increased automatically', 'Rate limiting detected on target site']})warnings?: string[];
 
   @ApiPropertyOptional({
-    description: 'Execution configuration used',
-    example: {
-      executionMode: 'sequential',
-      captureScreenshots: true,
-      debugMode: false
+    description: 'Execution configuration used',example: {executionMode: 'sequential',captureScreenshots: true,debugMode: false
     }
   })
   executionConfig?: any;
 
   @ApiPropertyOptional({
-    description: 'Runtime metadata',
-    example: {
-      executedBy: 'user@example.com',
-      executorAgent: 'agent_123',
-      environment: 'production',
-      triggerSource: 'manual'
-    }
-  })
+    description: 'Runtime metadata',example: {executedBy: 'user@example.com',executorAgent: 'agent_123',environment: 'production',triggerSource: 'manual'}})
   executionMetadata?: Record<string, any>;
 }
 
@@ -435,27 +256,17 @@ export class WorkflowExecutionResponseDto {
  */
 export class WorkflowValidationResultDto {
   @ApiProperty({
-    description: 'Whether workflow is valid',
-    example: true
-  })
+    description: 'Whether workflow is valid',example: true})
   isValid: boolean;
 
   @ApiPropertyOptional({
-    description: 'Validation errors',
-    example: ['Step step_2 references undefined variable: userData']
-  })
-  errors?: string[];
+    description: 'Validation errors',example: ['Step step_2 references undefined variable: userData']})errors?: string[];
 
   @ApiPropertyOptional({
-    description: 'Validation warnings',
-    example: ['Step step_5 has no error handling configured']
-  })
-  warnings?: string[];
+    description: 'Validation warnings',example: ['Step step_5 has no error handling configured']})warnings?: string[];
 
   @ApiProperty({
-    description: 'Validation statistics',
-    example: {
-      totalSteps: 8,
+    description: 'Validation statistics',example: {totalSteps: 8,
       stepsWithErrorHandling: 6,
       stepsWithTimeouts: 8,
       conditionalSteps: 2,
@@ -465,22 +276,13 @@ export class WorkflowValidationResultDto {
   validationStats: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'Dependency graph validation',
-    example: {
-      hasCircularDependencies: false,
+    description: 'Dependency graph validation',example: {hasCircularDependencies: false,
       unreachableSteps: [],
-      dependencyChains: ['step_1 -> step_2 -> step_3']
-    }
-  })
+      dependencyChains: ['step_1 -> step_2 -> step_3']}})
   dependencyValidation?: any;
 
   @ApiPropertyOptional({
-    description: 'Performance recommendations',
-    example: [
-      'Consider adding parallel execution for steps 4-6',
-      'Step 3 timeout may be too short for complex forms'
-    ]
-  })
+    description: 'Performance recommendations',example: ['Consider adding parallel execution for steps 4-6','Step 3 timeout may be too short for complex forms']})
   recommendations?: string[];
 }
 
@@ -489,33 +291,23 @@ export class WorkflowValidationResultDto {
  */
 export class WorkflowExecutionListDto {
   @ApiProperty({
-    description: 'List of workflow executions',
-    type: [WorkflowExecutionResponseDto]
-  })
+    description: 'List of workflow executions',type: [WorkflowExecutionResponseDto]})
   executions: WorkflowExecutionResponseDto[];
 
   @ApiProperty({
-    description: 'Total number of executions',
-    example: 125
-  })
+    description: 'Total number of executions',example: 125})
   totalCount: number;
 
   @ApiProperty({
-    description: 'Current page number',
-    example: 1
-  })
+    description: 'Current page number',example: 1})
   page: number;
 
   @ApiProperty({
-    description: 'Number of items per page',
-    example: 20
-  })
+    description: 'Number of items per page',example: 20})
   pageSize: number;
 
   @ApiProperty({
-    description: 'Total number of pages',
-    example: 7
-  })
+    description: 'Total number of pages',example: 7})
   totalPages: number;
 
   @ApiPropertyOptional({

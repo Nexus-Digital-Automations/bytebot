@@ -17,46 +17,20 @@
  * Performance: Sub-1000ms monitoring with intelligent alert aggregation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
   ParlantValidationRequest, 
   ParlantConversationContext, 
   RiskLevel,
   ConversationalValidationError 
-} from '../parlant/parlant-integration.service';
-
-// ===== SECURITY MONITORING INTERFACES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== SECURITY MONITORING INTERFACES =====/**
  * Security event severity levels
  */
 export enum SecurityEventSeverity {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH', 
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  INFO = 'INFO'
-}
-
-/**
+  CRITICAL = 'CRITICAL',HIGH = 'HIGH', MEDIUM = 'MEDIUM',LOW = 'LOW',INFO = 'INFO'}/**
  * Security event types for monitoring
  */
 export enum SecurityEventType {
-  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
-  UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
-  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',
-  DATA_BREACH_ATTEMPT = 'DATA_BREACH_ATTEMPT',
-  MALICIOUS_ACTIVITY = 'MALICIOUS_ACTIVITY',
-  SYSTEM_INTRUSION = 'SYSTEM_INTRUSION',
-  SECURITY_POLICY_VIOLATION = 'SECURITY_POLICY_VIOLATION',
-  CRYPTOGRAPHIC_FAILURE = 'CRYPTOGRAPHIC_FAILURE',
-  NETWORK_ANOMALY = 'NETWORK_ANOMALY',
-  APPLICATION_VULNERABILITY = 'APPLICATION_VULNERABILITY'
-}
-
-/**
+  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',DATA_BREACH_ATTEMPT = 'DATA_BREACH_ATTEMPT',MALICIOUS_ACTIVITY = 'MALICIOUS_ACTIVITY',SYSTEM_INTRUSION = 'SYSTEM_INTRUSION',SECURITY_POLICY_VIOLATION = 'SECURITY_POLICY_VIOLATION',CRYPTOGRAPHIC_FAILURE = 'CRYPTOGRAPHIC_FAILURE',NETWORK_ANOMALY = 'NETWORK_ANOMALY',APPLICATION_VULNERABILITY = 'APPLICATION_VULNERABILITY'}/**
  * Security monitoring configuration
  */
 export interface SecurityMonitoringConfig {
@@ -98,9 +72,7 @@ export interface SecurityMonitoringRequest {
   readonly operationId: string;
   readonly monitoringAction: string;
   readonly targetResources: string[];
-  readonly monitoringScope: 'SYSTEM' | 'APPLICATION' | 'NETWORK' | 'USER' | 'DATA';
-  readonly duration?: number;
-  readonly alertConfiguration: AlertConfiguration;
+  readonly monitoringScope: 'SYSTEM' | 'APPLICATION' | 'NETWORK' | 'USER' | 'DATA';readonly duration?: number;readonly alertConfiguration: AlertConfiguration;
   readonly context: ParlantConversationContext;
 }
 
@@ -109,9 +81,7 @@ export interface SecurityMonitoringRequest {
  */
 export interface AlertConfiguration {
   readonly enableRealTimeAlerts: boolean;
-  readonly alertChannels: ('EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK')[];
-  readonly alertThresholds: Record<SecurityEventSeverity, number>;
-  readonly escalationRules: EscalationRule[];
+  readonly alertChannels: ('EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK')[];readonly alertThresholds: Record<SecurityEventSeverity, number>;readonly escalationRules: EscalationRule[];
 }
 
 /**
@@ -167,11 +137,7 @@ export class SecurityMonitoringService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_monitor_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Security Monitoring Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      monitoringEnabled: this.getMonitoringConfig().monitoringEnabled,
+    const operationId = `security_monitor_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Monitoring Service with Parlant integration`, {parlantIntegrationEnabled: true,monitoringEnabled: this.getMonitoringConfig().monitoringEnabled,
       realTimeAlertsEnabled: this.getMonitoringConfig().realTimeAlertsEnabled,
       conversationalValidationRequired: this.getMonitoringConfig().conversationalValidationRequired,
     });
@@ -216,9 +182,7 @@ export class SecurityMonitoringService {
           targetResources: request.targetResources,
           duration: request.duration,
         },
-        actionDescription: `Start security monitoring: ${request.monitoringAction} for scope ${request.monitoringScope} targeting ${request.targetResources.length} resources`,
-        context: request.context,
-        riskLevel: RiskLevel.HIGH, // Security monitoring is HIGH risk
+        actionDescription: `Start security monitoring: ${request.monitoringAction} for scope ${request.monitoringScope} targeting ${request.targetResources.length} resources`,context: request.context,riskLevel: RiskLevel._HIGH, // Security monitoring is HIGH risk
         operationId: request.operationId,
       };
 
@@ -226,9 +190,7 @@ export class SecurityMonitoringService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Security monitoring blocked by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] Security monitoring blocked by Parlant validation`,{operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -242,9 +204,7 @@ export class SecurityMonitoringService {
       }
 
       this.logger.log(
-        `[${request.operationId}] Security monitoring approved by Parlant`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security monitoring approved by Parlant`,{operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -261,9 +221,7 @@ export class SecurityMonitoringService {
       this.updatePerformanceMetrics(duration);
 
       this.logger.log(
-        `[${request.operationId}] Security monitoring session started successfully`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security monitoring session started successfully`,{operationId: request.operationId,
           monitoringId: monitoringResult.monitoringId,
           conversationId: validation.conversationId,
           duration,
@@ -276,9 +234,7 @@ export class SecurityMonitoringService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] Security monitoring startup failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security monitoring startup failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           duration,
@@ -303,10 +259,7 @@ export class SecurityMonitoringService {
     event: SecurityEvent,
     context: ParlantConversationContext
   ): Promise<{ processed: boolean; actionTaken: string; conversationId: string }> {
-    const operationId = `process_event${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `process_event${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Processing security event with Parlant validation`,
       {
         operationId,
@@ -327,9 +280,7 @@ export class SecurityMonitoringService {
           severity: event.severity,
           riskScore: event.riskScore,
         },
-        actionDescription: `Process security event: ${event.eventType} with ${event.severity} severity (_risk score: ${event.riskScore})`,
-        context,
-        riskLevel: event.severity === SecurityEventSeverity.CRITICAL ? RiskLevel.CRITICAL : RiskLevel.HIGH,
+        actionDescription: `Process security event: ${event.eventType} with ${event.severity} severity (_risk score: ${event.riskScore})`,context,riskLevel: event.severity === SecurityEventSeverity.CRITICAL ? RiskLevel._CRITICAL : RiskLevel._HIGH,
         operationId,
       };
 
@@ -337,9 +288,7 @@ export class SecurityMonitoringService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${operationId}] Security event processing blocked by Parlant`,
-          {
-            operationId,
+          `[${operationId}] Security event processing blocked by Parlant`,{operationId,
             eventId: event.id,
             reason: validation.reasoning,
           }
@@ -347,9 +296,7 @@ export class SecurityMonitoringService {
 
         return {
           processed: false,
-          actionTaken: `Processing blocked: ${validation.reasoning}`,
-          conversationId: validation.conversationId,
-        };
+          actionTaken: `Processing blocked: ${validation.reasoning}`,conversationId: validation.conversationId,};
       }
 
       // Process the security event
@@ -373,9 +320,7 @@ export class SecurityMonitoringService {
       this.updatePerformanceMetrics(duration);
 
       this.logger.log(
-        `[${operationId}] Security event processed successfully`,
-        {
-          operationId,
+        `[${operationId}] Security event processed successfully`,{operationId,
           eventId: event.id,
           actionTaken,
           conversationId: validation.conversationId,
@@ -393,9 +338,7 @@ export class SecurityMonitoringService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${operationId}] Security event processing failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Security event processing failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           eventId: event.id,
           error: error instanceof Error ? error.message : String(error),
           duration,
@@ -420,10 +363,7 @@ export class SecurityMonitoringService {
     monitoringId: string,
     context: ParlantConversationContext
   ): Promise<SecurityMonitoringResult> {
-    const operationId = `stop_monitoring${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Stopping security monitoring with Parlant validation`,
+    const operationId = `stop_monitoring${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Stopping security monitoring with Parlant validation`,
       {
         operationId,
         monitoringId,
@@ -436,9 +376,7 @@ export class SecurityMonitoringService {
       const validationRequest: ParlantValidationRequest = {
         functionName: 'SecurityMonitoringService.stopSecurityMonitoring',
         functionParams: { monitoringId },
-        actionDescription: `Stop security monitoring session: ${monitoringId}`,
-        context,
-        riskLevel: RiskLevel.MEDIUM, // Stopping monitoring is MEDIUM risk
+        actionDescription: `Stop security monitoring session: ${monitoringId}`,context,riskLevel: RiskLevel._MODERATE, // Stopping monitoring is MEDIUM risk
         operationId,
       };
 
@@ -456,9 +394,7 @@ export class SecurityMonitoringService {
       const sessionResult = await this.finalizeMonitoringSession(monitoringId, validation.conversationId);
 
       this.logger.log(
-        `[${operationId}] Security monitoring stopped successfully`,
-        {
-          operationId,
+        `[${operationId}] Security monitoring stopped successfully`,{operationId,
           monitoringId,
           eventsProcessed: sessionResult.eventsDetected,
           conversationId: validation.conversationId,
@@ -469,9 +405,7 @@ export class SecurityMonitoringService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Stop monitoring failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Stop monitoring failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           monitoringId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -531,10 +465,7 @@ export class SecurityMonitoringService {
     request: SecurityMonitoringRequest,
     conversationId: string
   ): Promise<SecurityMonitoringResult> {
-    const monitoringId = `monitor${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    const result: SecurityMonitoringResult = {
-      monitoringId,
+    const monitoringId = `monitor${Date.now()}${Math.random().toString(36).substring(7)}`;const result: SecurityMonitoringResult = {monitoringId,
       startTime: new Date(),
       eventsDetected: 0,
       criticalEvents: [],
@@ -567,29 +498,15 @@ export class SecurityMonitoringService {
     conversationId: string
   ): Promise<string> {
     // Implement actual security event processing logic
-    let actionTaken = 'Event logged and analyzed';
-
-    switch (event.severity) {
-      case SecurityEventSeverity.CRITICAL:
-        actionTaken = 'CRITICAL: Immediate escalation triggered, incident response initiated';
-        break;
-      case SecurityEventSeverity.HIGH:
-        actionTaken = 'HIGH: Security team notified, enhanced monitoring activated';
-        break;
-      case SecurityEventSeverity.MEDIUM:
-        actionTaken = 'MEDIUM: Event logged, pattern analysis updated';
-        break;
-      case SecurityEventSeverity.LOW:
-        actionTaken = 'LOW: Standard logging and monitoring';
-        break;
-      default:
+    let actionTaken = 'Event logged and analyzed';switch (event.severity) {case SecurityEventSeverity.CRITICAL:
+        actionTaken = 'CRITICAL: Immediate escalation triggered, incident response initiated';break;case SecurityEventSeverity.HIGH:
+        actionTaken = 'HIGH: Security team notified, enhanced monitoring activated';break;case SecurityEventSeverity.MEDIUM:
+        actionTaken = 'MEDIUM: Event logged, pattern analysis updated';break;case SecurityEventSeverity.LOW:
+        actionTaken = 'LOW: Standard logging and monitoring';break;default:
         actionTaken = 'INFO: Event recorded for trend analysis';
     }
 
-    return `${actionTaken} (validated via conversation ${conversationId})`;
-  }
-
-  private shouldTriggerAlert(event: SecurityEvent): boolean {
+    return `${actionTaken} (validated via conversation ${conversationId})`;}private shouldTriggerAlert(event: SecurityEvent): boolean {
     const config = this.getMonitoringConfig();
     const threshold = config.alertThresholds[event.eventType] || 1;
     
@@ -606,9 +523,7 @@ export class SecurityMonitoringService {
     this.alertHistory.push(event);
     
     this.logger.warn(
-      `SECURITY ALERT: ${event.eventType}`,
-      {
-        eventId: event.id,
+      `SECURITY ALERT: ${event.eventType}`,{eventId: event.id,
         severity: event.severity,
         riskScore: event.riskScore,
         source: event.source,
@@ -625,10 +540,7 @@ export class SecurityMonitoringService {
   ): Promise<SecurityMonitoringResult> {
     const session = this.activeMonitoringSessions.get(monitoringId);
     if (!session) {
-      throw new Error(`Monitoring session ${monitoringId} not found`);
-    }
-
-    const mutableSession = session as SecurityMonitoringResult & { endTime: Date };
+      throw new Error(`Monitoring session ${monitoringId} not found`);}const mutableSession = session as SecurityMonitoringResult & { endTime: Date };
     mutableSession.endTime = new Date();
     session.conversationalAuditTrail.push(`Monitoring stopped via conversation ${conversationId}`);
     
@@ -678,11 +590,7 @@ export class SecurityMonitoringService {
 
   private getMonitoringConfig(): SecurityMonitoringConfig {
     return {
-      monitoringEnabled: this.configService.get<boolean>('SECURITY_MONITORING_ENABLED', true),
-      realTimeAlertsEnabled: this.configService.get<boolean>('REAL_TIME_ALERTS_ENABLED', true),
-      eventRetentionDays: this.configService.get<number>('SECURITY_EVENT_RETENTION_DAYS', 90),
-      alertThresholds: {
-        [SecurityEventType.AUTHENTICATION_FAILURE]: 5,
+      monitoringEnabled: this.configService.get<boolean>('SECURITY_MONITORING_ENABLED', true),realTimeAlertsEnabled: this.configService.get<boolean>('REAL_TIME_ALERTS_ENABLED', true),eventRetentionDays: this.configService.get<number>('SECURITY_EVENT_RETENTION_DAYS', 90),alertThresholds: {[SecurityEventType.AUTHENTICATION_FAILURE]: 5,
         [SecurityEventType.UNAUTHORIZED_ACCESS]: 3,
         [SecurityEventType.PRIVILEGE_ESCALATION]: 1,
         [SecurityEventType.DATA_BREACH_ATTEMPT]: 1,
@@ -693,8 +601,7 @@ export class SecurityMonitoringService {
         [SecurityEventType.NETWORK_ANOMALY]: 5,
         [SecurityEventType.APPLICATION_VULNERABILITY]: 2,
       },
-      siemIntegrationEnabled: this.configService.get<boolean>('SIEM_INTEGRATION_ENABLED', false),
-      conversationalValidationRequired: this.configService.get<boolean>('SECURITY_CONVERSATIONAL_VALIDATION', true),
+      siemIntegrationEnabled: this.configService.get<boolean>('SIEM_INTEGRATION_ENABLED', false),conversationalValidationRequired: this.configService.get<boolean>('SECURITY_CONVERSATIONAL_VALIDATION', true),
     };
   }
 }

@@ -24,22 +24,16 @@
  */
 
 // Mock dependencies before imports
-jest.mock('child_process', () => ({
-  exec: jest.fn(),
-  spawn: jest.fn(),
+jest.mock('child_process', () => ({exec: jest.fn(),spawn: jest.fn(),
 }));
 
-jest.mock('fs/promises', () => ({
-  writeFile: jest.fn(),
-  readFile: jest.fn(),
+jest.mock('fs/promises', () => ({writeFile: jest.fn(),readFile: jest.fn(),
   unlink: jest.fn(),
   access: jest.fn(),
   stat: jest.fn(),
 }));
 
-jest.mock('sharp', () => jest.fn(() => ({
-  metadata: jest.fn(),
-  resize: jest.fn().mockReturnThis(),
+jest.mock('sharp', () => jest.fn(() => ({metadata: jest.fn(),resize: jest.fn().mockReturnThis(),
   jpeg: jest.fn().mockReturnThis(),
   png: jest.fn().mockReturnThis(),
   webp: jest.fn().mockReturnThis(),
@@ -47,56 +41,24 @@ jest.mock('sharp', () => jest.fn(() => ({
   toFile: jest.fn(),
 })));
 
-jest.mock('../computer-use.service');
-jest.mock('../../nut/nut.service');
-
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { ComputerUseService, ScreenshotResult } from '../computer-use.service';
-import { NutService } from '../../nut/nut.service';
-import * as childProcess from 'child_process';
-import * as fs from 'fs/promises';
-import * as sharp from 'sharp';
-
-/**
- * Mock screenshot data and results
+jest.mock('../computer-use.service');jest.mock('../../nut/nut.service');import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { ComputerUseService, ScreenshotResult } from '../computer-use.service';import { NutService } from '../../nut/nut.service';import * as childProcess from 'child_process';import * as fs from 'fs/promises';import * as sharp from 'sharp';/*** Mock screenshot data and results
  */
-const mockScreenshotData = Buffer.from('fake-screenshot-data');
-const mockSmallScreenshotData = Buffer.from('small-fake-screenshot-data');
-const mockLargeScreenshotData = Buffer.alloc(10 * 1024 * 1024); // 10MB buffer
-
-const mockBasicScreenshotResult: ScreenshotResult = {
-  operationId: 'screenshot_123',
-  success: true,
-  timestamp: new Date().toISOString(),
-  screenshotPath: '/tmp/screenshot_123.png',
-  screenshotData: mockScreenshotData,
-  metadata: {
+const mockScreenshotData = Buffer.from('fake-screenshot-data');const mockSmallScreenshotData = Buffer.from('small-fake-screenshot-data');const mockLargeScreenshotData = Buffer.alloc(10 * 1024 * 1024); // 10MB bufferconst mockBasicScreenshotResult: ScreenshotResult = {
+  operationId: 'screenshot_123',success: true,timestamp: new Date().toISOString(),
+  screenshotPath: '/tmp/screenshot_123.png',screenshotData: mockScreenshotData,metadata: {
     width: 1920,
     height: 1080,
-    format: 'png',
-    fileSize: mockScreenshotData.length,
-    colorDepth: 24,
-    compression: 'none',
-    dpi: 96,
-  },
+    format: 'png',fileSize: mockScreenshotData.length,colorDepth: 24,
+    compression: 'none',dpi: 96,},
 };
 
 const mockHighResScreenshotResult: ScreenshotResult = {
-  operationId: 'screenshot_4k_456',
-  success: true,
-  timestamp: new Date().toISOString(),
-  screenshotPath: '/tmp/screenshot_4k_456.png',
-  screenshotData: mockLargeScreenshotData,
-  metadata: {
+  operationId: 'screenshot_4k_456',success: true,timestamp: new Date().toISOString(),
+  screenshotPath: '/tmp/screenshot_4k_456.png',screenshotData: mockLargeScreenshotData,metadata: {
     width: 3840,
     height: 2160,
-    format: 'png',
-    fileSize: mockLargeScreenshotData.length,
-    colorDepth: 32,
-    compression: 'lossless',
-    dpi: 144,
-  },
+    format: 'png',fileSize: mockLargeScreenshotData.length,colorDepth: 32,
+    compression: 'lossless',dpi: 144,},
 };
 
 /**
@@ -112,9 +74,7 @@ const mockSharpInstance = {
   toFile: jest.fn(),
 };
 
-describe('Computer Use Screen Capture and Analysis', () => {
-  let service: ComputerUseService;
-  let nutService: jest.Mocked<NutService>;
+describe('Computer Use Screen Capture and Analysis', () => {let service: ComputerUseService;let nutService: jest.Mocked<NutService>;
   let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
@@ -166,11 +126,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
     jest.clearAllMocks();
   });
 
-  describe('Basic Screenshot Capture', () => {
-    it('should capture full screen screenshot successfully', async () => {
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
-
-      const result = await service.screenshot();
+  describe('Basic Screenshot Capture', () => {it('should capture full screen screenshot successfully', async () => {nutService.screenshot.mockResolvedValue(mockScreenshotData);const result = await service.screenshot();
 
       expect(result).toEqual(mockBasicScreenshotResult);
       expect(result.success).toBe(true);
@@ -180,28 +136,15 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(nutService.screenshot).toHaveBeenCalled();
     });
 
-    it('should handle screenshot with custom format', async () => {
-      const jpegResult = {
-        ...mockBasicScreenshotResult,
-        screenshotPath: '/tmp/screenshot_123.jpg',
-        metadata: {
-          ...mockBasicScreenshotResult.metadata!,
-          format: 'jpeg',
-          compression: 'lossy',
-        },
-      };
+    it('should handle screenshot with custom format', async () => {const jpegResult = {...mockBasicScreenshotResult,
+        screenshotPath: '/tmp/screenshot_123.jpg',metadata: {...mockBasicScreenshotResult.metadata!,
+          format: 'jpeg',compression: 'lossy',},};
 
       nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
-      expect(result.metadata!.format).toBe('jpeg');
-      expect(result.screenshotPath).toContain('.jpg');
-    });
-
-    it('should capture screenshot with different quality settings', async () => {
-      const lowQualityResult = {
-        ...mockBasicScreenshotResult,
+      expect(result.metadata!.format).toBe('jpeg');expect(result.screenshotPath).toContain('.jpg');});it('should capture screenshot with different quality settings', async () => {const lowQualityResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           quality: 50,
@@ -217,39 +160,18 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result.metadata!.fileSize).toBeLessThan(mockBasicScreenshotResult.metadata!.fileSize);
     });
 
-    it('should handle screenshot capture failures', async () => {
-      nutService.screenshot.mockRejectedValue(new Error('Display not available'));
-
-      await expect(service.screenshot()).rejects.toThrow('Display not available');
-    });
-
-    it('should generate unique operation IDs for screenshots', async () => {
-      nutService.screenshot
-        .mockResolvedValueOnce({ ...mockBasicScreenshotResult, operationId: 'screenshot_001' })
-        .mockResolvedValueOnce({ ...mockBasicScreenshotResult, operationId: 'screenshot_002' });
-
-      const result1 = await service.screenshot();
-      const result2 = await service.screenshot();
+    it('should handle screenshot capture failures', async () => {nutService.screenshot.mockRejectedValue(new Error('Display not available'));await expect(service.screenshot()).rejects.toThrow('Display not available');});it('should generate unique operation IDs for screenshots', async () => {nutService.screenshot.mockResolvedValueOnce({ ...mockBasicScreenshotResult, operationId: 'screenshot_001' }).mockResolvedValueOnce({ ...mockBasicScreenshotResult, operationId: 'screenshot_002' });const result1 = await service.screenshot();const result2 = await service.screenshot();
 
       expect(result1.operationId).not.toBe(result2.operationId);
-      expect(result1.operationId).toContain('screenshot_');
-      expect(result2.operationId).toContain('screenshot_');
-    });
-  });
+      expect(result1.operationId).toContain('screenshot_');expect(result2.operationId).toContain('screenshot_');});});
 
-  describe('Multi-Monitor and Display Configuration', () => {
-    it('should handle multi-monitor screenshot capture', async () => {
-      const multiMonitorResult = {
-        ...mockBasicScreenshotResult,
+  describe('Multi-Monitor and Display Configuration', () => {it('should handle multi-monitor screenshot capture', async () => {const multiMonitorResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           width: 3840, // Two 1920x1080 monitors side by side
           height: 1080,
           displays: [
-            { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },
-            { id: 'display2', x: 1920, y: 0, width: 1920, height: 1080, primary: false },
-          ],
-        },
+            { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },{ id: 'display2', x: 1920, y: 0, width: 1920, height: 1080, primary: false },],},
       };
 
       nutService.getDisplayInfo.mockResolvedValue(multiMonitorResult.metadata.displays);
@@ -262,35 +184,21 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result.metadata!.displays[0]?.primary).toBe(true);
     });
 
-    it('should capture screenshot from specific monitor', async () => {
-      const singleMonitorResult = {
-        ...mockBasicScreenshotResult,
+    it('should capture screenshot from specific monitor', async () => {const singleMonitorResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
-          displayId: 'display2',
-          bounds: { x: 1920, y: 0, width: 1920, height: 1080 },
-        },
+          displayId: 'display2',bounds: { x: 1920, y: 0, width: 1920, height: 1080 },},
       };
 
       nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
-      expect(result.metadata!.displayId).toBe('display2');
-      expect(result.metadata!.bounds.x).toBe(1920);
-    });
+      expect(result.metadata!.displayId).toBe('display2');expect(result.metadata!.bounds.x).toBe(1920);});
 
-    it('should handle display configuration changes during capture', async () => {
-      nutService.getDisplayInfo
-        .mockResolvedValueOnce([
-          { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },
-        ])
-        .mockResolvedValueOnce([
-          { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },
-          { id: 'display2', x: 1920, y: 0, width: 1920, height: 1080, primary: false },
-        ]);
-
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
+    it('should handle display configuration changes during capture', async () => {nutService.getDisplayInfo.mockResolvedValueOnce([
+          { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },]).mockResolvedValueOnce([
+          { id: 'display1', x: 0, y: 0, width: 1920, height: 1080, primary: true },{ id: 'display2', x: 1920, y: 0, width: 1920, height: 1080, primary: false },]);nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result1 = await service.screenshot();
       const result2 = await service.screenshot();
@@ -300,9 +208,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(nutService.getDisplayInfo).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle high DPI displays correctly', async () => {
-      const highDpiResult = {
-        ...mockBasicScreenshotResult,
+    it('should handle high DPI displays correctly', async () => {const highDpiResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           width: 2880, // Retina display scaled
@@ -321,35 +227,23 @@ describe('Computer Use Screen Capture and Analysis', () => {
     });
   });
 
-  describe('Image Processing and Analysis', () => {
-    beforeEach(() => {
-      mockSharpInstance.metadata.mockResolvedValue({
+  describe('Image Processing and Analysis', () => {beforeEach(() => {mockSharpInstance.metadata.mockResolvedValue({
         width: 1920,
         height: 1080,
-        format: 'png',
-        channels: 3,
-        space: 'srgb',
-        size: mockScreenshotData.length,
-      });
+        format: 'png',channels: 3,space: 'srgb',size: mockScreenshotData.length,});
     });
 
-    it('should extract metadata from screenshot images', async () => {
-      mockSharpInstance.toBuffer.mockResolvedValue(mockScreenshotData);
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
+    it('should extract metadata from screenshot images', async () => {mockSharpInstance.toBuffer.mockResolvedValue(mockScreenshotData);nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
       expect(result.metadata!).toMatchObject({
         width: 1920,
         height: 1080,
-        format: 'png',
-        fileSize: expect.any(Number),
-      });
+        format: 'png',fileSize: expect.any(Number),});
     });
 
-    it('should compress large screenshots automatically', async () => {
-      const largeScreenshotResult = {
-        ...mockBasicScreenshotResult,
+    it('should compress large screenshots automatically', async () => {const largeScreenshotResult = {...mockBasicScreenshotResult,
         screenshotData: mockLargeScreenshotData,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
@@ -369,9 +263,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result.metadata!.compressionRatio).toBeLessThan(1);
     });
 
-    it('should resize screenshots when requested', async () => {
-      const resizedResult = {
-        ...mockBasicScreenshotResult,
+    it('should resize screenshots when requested', async () => {const resizedResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           width: 960,
@@ -393,15 +285,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result.metadata!.resized).toBe(true);
     });
 
-    it('should convert screenshot formats', async () => {
-      const webpResult = {
-        ...mockBasicScreenshotResult,
-        screenshotPath: '/tmp/screenshot_123.webp',
-        metadata: {
-          ...mockBasicScreenshotResult.metadata!,
-          format: 'webp',
-          fileSize: (mockBasicScreenshotResult.metadata?.fileSize ?? 1000) * 0.6, // WebP is smaller
-        },
+    it('should convert screenshot formats', async () => {const webpResult = {...mockBasicScreenshotResult,
+        screenshotPath: '/tmp/screenshot_123.webp',metadata: {...mockBasicScreenshotResult.metadata!,
+          format: 'webp',fileSize: (mockBasicScreenshotResult.metadata?.fileSize ?? 1000) * 0.6, // WebP is smaller},
       };
 
       mockSharpInstance.webp.mockReturnThis();
@@ -410,22 +296,12 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata!.format).toBe('webp');
-      expect(result.screenshotPath).toContain('.webp');
-    });
-
-    it('should analyze screenshot color information', async () => {
-      const colorAnalysisResult = {
-        ...mockBasicScreenshotResult,
+      expect(result.metadata!.format).toBe('webp');expect(result.screenshotPath).toContain('.webp');});it('should analyze screenshot color information', async () => {const colorAnalysisResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           colorAnalysis: {
-            dominantColors: ['#FF0000', '#00FF00', '#0000FF'],
-            averageBrightness: 128,
-            hasTransparency: false,
-            colorSpace: 'sRGB',
-          },
-        },
+            dominantColors: ['#FF0000', '#00FF00', '#0000FF'],averageBrightness: 128,hasTransparency: false,
+            colorSpace: 'sRGB',},},
       };
 
       mockSharpInstance.metadata.mockResolvedValue({
@@ -433,29 +309,19 @@ describe('Computer Use Screen Capture and Analysis', () => {
         height: 1080,
         channels: 3,
         hasAlpha: false,
-        space: 'srgb',
-      });
-
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
+        space: 'srgb',});nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
       expect(result.metadata!.colorAnalysis).toBeDefined();
       expect(result.metadata!.colorAnalysis.dominantColors).toHaveLength(3);
-      expect(result.metadata!.colorAnalysis.colorSpace).toBe('sRGB');
-    });
-  });
+      expect(result.metadata!.colorAnalysis.colorSpace).toBe('sRGB');});});
 
-  describe('Performance Optimization', () => {
-    it('should handle large screenshot processing efficiently', async () => {
-      const largeScreenshot = {
-        ...mockHighResScreenshotResult,
+  describe('Performance Optimization', () => {it('should handle large screenshot processing efficiently', async () => {const largeScreenshot = {...mockHighResScreenshotResult,
         metadata: {
           ...mockHighResScreenshotResult.metadata,
           processingTime: 150, // Should be reasonable for 4K
-          memoryUsage: '50MB',
-        },
-      };
+          memoryUsage: '50MB',},};
 
       nutService.screenshot.mockResolvedValue(mockLargeScreenshotData);
 
@@ -468,10 +334,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(processingTime).toBeLessThan(5000); // Should complete within 5 seconds
     });
 
-    it('should implement memory management for multiple screenshots', async () => {
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
-
-      // Take multiple screenshots rapidly
+    it('should implement memory management for multiple screenshots', async () => {nutService.screenshot.mockResolvedValue(mockScreenshotData);// Take multiple screenshots rapidly
       const screenshots = await Promise.all([
         service.screenshot(),
         service.screenshot(),
@@ -487,15 +350,11 @@ describe('Computer Use Screen Capture and Analysis', () => {
       });
     });
 
-    it('should cache screenshot data when appropriate', async () => {
-      const cachedResult = {
-        ...mockBasicScreenshotResult,
+    it('should cache screenshot data when appropriate', async () => {const cachedResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           cached: true,
-          cacheKey: 'screenshot_cache_123',
-        },
-      };
+          cacheKey: 'screenshot_cache_123',},};
 
       nutService.screenshot
         .mockResolvedValueOnce(mockBasicScreenshotResult)
@@ -508,16 +367,12 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result2.metadata!.cached).toBe(true);
     });
 
-    it('should optimize screenshot quality based on use case', async () => {
-      const optimizedResult = {
-        ...mockBasicScreenshotResult,
+    it('should optimize screenshot quality based on use case', async () => {const optimizedResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           quality: 85,
           optimized: true,
-          useCase: 'analysis',
-        },
-      };
+          useCase: 'analysis',},};
 
       nutService.screenshot.mockResolvedValue(mockSmallScreenshotData);
 
@@ -528,67 +383,31 @@ describe('Computer Use Screen Capture and Analysis', () => {
     });
   });
 
-  describe('Error Handling and Recovery', () => {
-    it('should handle display driver errors gracefully', async () => {
-      nutService.screenshot.mockRejectedValue(new Error('Graphics driver error'));
-
-      await expect(service.screenshot()).rejects.toThrow('Graphics driver error');
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Screenshot capture failed'),
-        expect.any(String)
-      );
+  describe('Error Handling and Recovery', () => {it('should handle display driver errors gracefully', async () => {nutService.screenshot.mockRejectedValue(new Error('Graphics driver error'));await expect(service.screenshot()).rejects.toThrow('Graphics driver error');expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Screenshot capture failed'),expect.any(String));
     });
 
-    it('should handle out of memory errors during processing', async () => {
-      nutService.screenshot.mockRejectedValue(new Error('Cannot allocate memory'));
-
-      await expect(service.screenshot()).rejects.toThrow('Cannot allocate memory');
-    });
-
-    it('should handle file system errors during save', async () => {
-      (fs.writeFile as jest.Mock).mockRejectedValue(new Error('Disk full'));
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
-
-      // Should still return screenshot data even if file save fails
+    it('should handle out of memory errors during processing', async () => {nutService.screenshot.mockRejectedValue(new Error('Cannot allocate memory'));await expect(service.screenshot()).rejects.toThrow('Cannot allocate memory');});it('should handle file system errors during save', async () => {(fs.writeFile as jest.Mock).mockRejectedValue(new Error('Disk full'));nutService.screenshot.mockResolvedValue(mockScreenshotData);// Should still return screenshot data even if file save fails
       const result = await service.screenshot();
 
       expect(result.screenshotData).toBeInstanceOf(Buffer);
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('should recover from temporary display issues', async () => {
-      nutService.screenshot
-        .mockRejectedValueOnce(new Error('Display busy'))
-        .mockResolvedValueOnce(mockBasicScreenshotResult);
-
-      const result = await service.screenshot();
+    it('should recover from temporary display issues', async () => {nutService.screenshot.mockRejectedValueOnce(new Error('Display busy')).mockResolvedValueOnce(mockBasicScreenshotResult);const result = await service.screenshot();
 
       expect(result.success).toBe(true);
       expect(nutService.screenshot).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle corrupted screenshot data', async () => {
-      const corruptedResult = {
-        ...mockBasicScreenshotResult,
-        screenshotData: Buffer.from('corrupted-data'),
-        success: false,
-        error: 'Corrupted screenshot data',
-      };
-
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
+    it('should handle corrupted screenshot data', async () => {const corruptedResult = {...mockBasicScreenshotResult,
+        screenshotData: Buffer.from('corrupted-data'),success: false,error: 'Corrupted screenshot data',};nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Corrupted');
-    });
-  });
+      expect(result.error).toContain('Corrupted');});});
 
-  describe('Real-time Monitoring and Analysis', () => {
-    it('should support continuous screenshot monitoring', async () => {
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
-
-      const screenshots = [];
+  describe('Real-time Monitoring and Analysis', () => {it('should support continuous screenshot monitoring', async () => {nutService.screenshot.mockResolvedValue(mockScreenshotData);const screenshots = [];
       for (let i = 0; i < 5; i++) {
         const result = await service.screenshot();
         screenshots.push(result);
@@ -599,18 +418,12 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(nutService.screenshot).toHaveBeenCalledTimes(5);
     });
 
-    it('should detect screen changes between captures', async () => {
-      const initialScreenshot = mockBasicScreenshotResult;
-      const changedScreenshot = {
+    it('should detect screen changes between captures', async () => {const initialScreenshot = mockBasicScreenshotResult;const changedScreenshot = {
         ...mockBasicScreenshotResult,
-        operationId: 'screenshot_456',
-        metadata: {
-          ...mockBasicScreenshotResult.metadata!,
+        operationId: 'screenshot_456',metadata: {...mockBasicScreenshotResult.metadata!,
           changedPixels: 15000,
           changePercentage: 12.5,
-          previousScreenshotId: 'screenshot_123',
-        },
-      };
+          previousScreenshotId: 'screenshot_123',},};
 
       nutService.screenshot
         .mockResolvedValueOnce(initialScreenshot)
@@ -619,22 +432,15 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const result1 = await service.screenshot();
       const result2 = await service.screenshot();
 
-      expect(result1.operationId).toBe('screenshot_123');
-      expect(result2.operationId).toBe('screenshot_456');
-      expect(result2.metadata!.changePercentage).toBe(12.5);
-    });
+      expect(result1.operationId).toBe('screenshot_123');expect(result2.operationId).toBe('screenshot_456');expect(result2.metadata!.changePercentage).toBe(12.5);});
 
-    it('should analyze screenshot content for specific elements', async () => {
-      const analysisResult = {
-        ...mockBasicScreenshotResult,
+    it('should analyze screenshot content for specific elements', async () => {const analysisResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           analysis: {
             textDetected: true,
             textRegions: [
-              { x: 100, y: 200, width: 300, height: 50, text: 'Hello World' },
-            ],
-            buttonsDetected: 3,
+              { x: 100, y: 200, width: 300, height: 50, text: 'Hello World' },],buttonsDetected: 3,
             windowsDetected: 2,
             confidence: 0.95,
           },
@@ -651,18 +457,14 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result.metadata!.analysis.confidence).toBe(0.95);
     });
 
-    it('should provide performance metrics for screenshot operations', async () => {
-      const performanceResult = {
-        ...mockBasicScreenshotResult,
+    it('should provide performance metrics for screenshot operations', async () => {const performanceResult = {...mockBasicScreenshotResult,
         metadata: {
           ...mockBasicScreenshotResult.metadata!,
           performance: {
             captureTime: 45,
             processingTime: 12,
             totalTime: 57,
-            memoryUsed: '15MB',
-            cpuUsage: 25,
-          },
+            memoryUsed: '15MB',cpuUsage: 25,},
         },
       };
 
@@ -676,10 +478,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
     });
   });
 
-  describe('Storage and Cleanup', () => {
-    it('should clean up temporary screenshot files', async () => {
-      (fs.unlink as jest.Mock).mockResolvedValue(undefined);
-      nutService.screenshot.mockResolvedValue(mockScreenshotData);
+  describe('Storage and Cleanup', () => {it('should clean up temporary screenshot files', async () => {(fs.unlink as jest.Mock).mockResolvedValue(undefined);nutService.screenshot.mockResolvedValue(mockScreenshotData);
 
       const result = await service.screenshot();
 
@@ -687,9 +486,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       // Cleanup should be handled automatically
     });
 
-    it('should handle screenshot file size limits', async () => {
-      const oversizedResult = {
-        ...mockBasicScreenshotResult,
+    it('should handle screenshot file size limits', async () => {const oversizedResult = {...mockBasicScreenshotResult,
         screenshotData: Buffer.alloc(100 * 1024 * 1024), // 100MB
         metadata: {
           ...mockBasicScreenshotResult.metadata!,

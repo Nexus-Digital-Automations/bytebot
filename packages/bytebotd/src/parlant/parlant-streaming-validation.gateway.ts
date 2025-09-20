@@ -31,20 +31,12 @@ import {
   ConnectedSocket,
   MessageBody,
   WsException,
-} from '@nestjs/websockets';
-import {
-  Logger,
+} from '@nestjs/websockets';import {Logger,
   UseGuards,
   UseFilters,
   UseInterceptors,
   Injectable,
-} from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { performance } from 'perf_hooks';
-import {
-  ParlantStreamingMessageType,
+} from '@nestjs/common';import { Server, Socket } from 'socket.io';import { ConfigService } from '@nestjs/config';import { JwtService } from '@nestjs/jwt';import { performance } from 'perf_hooks';import {ParlantStreamingMessageType,
   ParlantStreamingMessage,
   ParlantValidationStreamRequest,
   ParlantValidationStreamResponse,
@@ -52,9 +44,7 @@ import {
   StreamingSessionStatus,
   StreamInfo,
   StreamStatus,
-} from '../common/websocket/parlant-websocket-streaming-bridge.service';
-import {
-  ParlantStreamingProtocolType,
+} from '../common/websocket/parlant-websocket-streaming-bridge.service';import {ParlantStreamingProtocolType,
   ParlantProtocolMessage,
   EnhancedValidationContext,
   EnhancedValidationAction,
@@ -66,23 +56,12 @@ import {
   ValidationDecision,
   AuthenticationLevel,
   ProtocolPriority,
-} from '../../../shared/src/types/parlant-streaming-integration.types';
-
-// ===== GATEWAY CONFIGURATION =====
-
-/**
+} from '../../../shared/src/types/parlant-streaming-integration.types';// ===== GATEWAY CONFIGURATION =====/**
  * WebSocket Gateway configuration for Parlant streaming validation
  */
 const GATEWAY_CONFIG = {
-  namespace: '/parlant-streaming',
-  cors: {
-    origin: process.env.PARLANT_ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true,
-  pingTimeout: 60000, // 60 seconds
+  namespace: '/parlant-streaming',cors: {origin: process.env.PARLANT_ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],methods: ['GET', 'POST'],credentials: true,},
+  transports: ['websocket', 'polling'],allowEIO3: true,pingTimeout: 60000, // 60 seconds
   pingInterval: 25000, // 25 seconds
   upgradeTimeout: 10000, // 10 seconds
   maxHttpBufferSize: 1e8, // 100MB for large validation payloads
@@ -216,27 +195,19 @@ export class ParlantStreamingValidationGateway
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {
-    this.logger.log('🚀 Initializing Parlant Streaming Validation Gateway');
-  }
-
-  // ===== GATEWAY LIFECYCLE METHODS =====
+    this.logger.log('🚀 Initializing Parlant Streaming Validation Gateway');}// ===== GATEWAY LIFECYCLE METHODS =====
 
   /**
    * Initialize the gateway after creation
    */
   afterInit(server: Server): void {
-    this.logger.log('🌐 Parlant Streaming Validation Gateway initialized', {
-      namespace: GATEWAY_CONFIG.namespace,
-      cors: GATEWAY_CONFIG.cors,
+    this.logger.log('🌐 Parlant Streaming Validation Gateway initialized', {namespace: GATEWAY_CONFIG.namespace,cors: GATEWAY_CONFIG.cors,
       transports: GATEWAY_CONFIG.transports,
       maxPayload: GATEWAY_CONFIG.maxHttpBufferSize,
     });
 
     // Set up server-level event handlers
-    server.engine.on('connection_error', (err) => {
-      this.logger.error('❌ WebSocket connection error', {
-        error: err.message,
-        code: err.code,
+    server.engine.on('connection_error', (err) => {this.logger.error('❌ WebSocket connection error', {error: err.message,code: err.code,
         context: err.context,
       });
     });
@@ -251,10 +222,7 @@ export class ParlantStreamingValidationGateway
    * Handle new client connections
    */
   async handleConnection(client: AuthenticatedSocket): Promise<void> {
-    const connectionId = `connection_${Date.now()}_${this.generateId()}`;
-    const startTime = performance.now();
-
-    this.logger.log(`[${connectionId}] New client connecting`, {
+    const connectionId = `connection_${Date.now()}_${this.generateId()}`;const startTime = performance.now();this.logger.log(`[${connectionId}] New client connecting`, {
       connectionId,
       socketId: client.id,
       remoteAddress: client.handshake.address,
@@ -271,9 +239,7 @@ export class ParlantStreamingValidationGateway
           socketId: client.id,
           reason: authResult.reason,
         });
-        client.emit('auth_failure', { reason: authResult.reason });
-        client.disconnect(true);
-        return;
+        client.emit('auth_failure', { reason: authResult.reason });client.disconnect(true);return;
       }
 
       // Create session
@@ -341,9 +307,7 @@ export class ParlantStreamingValidationGateway
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      client.emit('connection_error', {
-        error: 'Connection setup failed',
-        code: 'SETUP_ERROR'
+      client.emit('connection_error', {error: 'Connection setup failed',code: 'SETUP_ERROR'
       });
       client.disconnect(true);
     }
@@ -354,24 +318,16 @@ export class ParlantStreamingValidationGateway
    */
   handleDisconnect(client: AuthenticatedSocket): void {
     const sessionId = this.socketToSession.get(client.id);
-    const disconnectionId = `disconnection_${sessionId || 'unknown'}_${Date.now()}`;
-
-    this.logger.log(`[${disconnectionId}] Client disconnecting`, {
+    const disconnectionId = `disconnection_${sessionId || 'unknown'}_${Date.now()}`;this.logger.log(`[${disconnectionId}] Client disconnecting`, {
       disconnectionId,
       sessionId,
       socketId: client.id,
       userId: client.userId,
-      reason: client.disconnected ? 'client_disconnect' : 'server_disconnect',
-    });
-
-    if (sessionId) {
+      reason: client.disconnected ? 'client_disconnect' : 'server_disconnect',});if (sessionId) {
       this.cleanupSession(sessionId);
     }
 
-    this.emit('client_disconnected', { sessionId, userId: client.userId });
-  }
-
-  // ===== AUTHENTICATION METHODS =====
+    this.emit('client_disconnected', { sessionId, userId: client.userId });}// ===== AUTHENTICATION METHODS =====
 
   /**
    * Authenticate WebSocket connection
@@ -387,16 +343,10 @@ export class ParlantStreamingValidationGateway
       // Extract authentication token
       const token = this.extractAuthToken(client);
       if (!token) {
-        return { success: false, reason: 'No authentication token provided' };
-      }
-
-      // Verify JWT token
+        return { success: false, reason: 'No authentication token provided' };}// Verify JWT token
       const payload = await this.jwtService.verifyAsync(token);
       if (!payload) {
-        return { success: false, reason: 'Invalid authentication token' };
-      }
-
-      // Set user context
+        return { success: false, reason: 'Invalid authentication token' };}// Set user context
       client.userId = payload.sub || payload.userId;
       client.permissions = payload.permissions || [];
       client.roles = payload.roles || [];
@@ -408,19 +358,13 @@ export class ParlantStreamingValidationGateway
 
       return {
         success: true,
-        method: 'jwt',
-        riskScore,
-        complianceFlags,
+        method: 'jwt',riskScore,complianceFlags,
       };
 
     } catch (error) {
-      this.logger.error('Authentication error', {
-        socketId: client.id,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Authentication error', {socketId: client.id,error: error instanceof Error ? error.message : String(error),
       });
-      return { success: false, reason: 'Authentication verification failed' };
-    }
-  }
+      return { success: false, reason: 'Authentication verification failed' };}}
 
   /**
    * Extract authentication token from connection
@@ -428,21 +372,15 @@ export class ParlantStreamingValidationGateway
   private extractAuthToken(client: AuthenticatedSocket): string | null {
     // Try authorization header first
     const authHeader = client.handshake.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      return authHeader.substring(7);
-    }
+    if (authHeader && authHeader.startsWith('Bearer ')) {return authHeader.substring(7);}
 
     // Try query parameter
     const queryToken = client.handshake.query.token;
-    if (typeof queryToken === 'string') {
-      return queryToken;
-    }
+    if (typeof queryToken === 'string') {return queryToken;}
 
     // Try handshake auth
     const handshakeToken = client.handshake.auth?.token;
-    if (typeof handshakeToken === 'string') {
-      return handshakeToken;
-    }
+    if (typeof handshakeToken === 'string') {return handshakeToken;}
 
     return null;
   }
@@ -510,21 +448,9 @@ export class ParlantStreamingValidationGateway
     const flags: string[] = [];
 
     // Check for PCI compliance requirements
-    if (payload.roles?.includes('payment_processor')) {
-      flags.push('PCI_DSS');
-    }
-
-    // Check for HIPAA compliance requirements
-    if (payload.roles?.includes('healthcare_worker')) {
-      flags.push('HIPAA');
-    }
-
-    // Check for SOX compliance requirements
-    if (payload.roles?.includes('financial_user')) {
-      flags.push('SOX');
-    }
-
-    // Check for GDPR compliance requirements
+    if (payload.roles?.includes('payment_processor')) {flags.push('PCI_DSS');}// Check for HIPAA compliance requirements
+    if (payload.roles?.includes('healthcare_worker')) {flags.push('HIPAA');}// Check for SOX compliance requirements
+    if (payload.roles?.includes('financial_user')) {flags.push('SOX');}// Check for GDPR compliance requirements
     if (this.isEUUser(client.handshake.address)) {
       flags.push('GDPR');
     }
@@ -542,10 +468,7 @@ export class ParlantStreamingValidationGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() message: ParlantStreamingMessage
   ): Promise<void> {
-    const operationId = `validation_request_${message.messageId}`;
-    const startTime = performance.now();
-
-    try {
+    const operationId = `validation_request_${message.messageId}`;const startTime = performance.now();try {
       this.logger.log(`[${operationId}] Processing validation request stream`, {
         operationId,
         sessionId: client.sessionId,
@@ -564,9 +487,10 @@ export class ParlantStreamingValidationGateway
       const enhancedRequest = await this.enhanceValidationRequest(client, request);
 
       // Create gateway validation request
+      const sessionId = this.getSessionId(client);
       const gatewayRequest: GatewayValidationRequest = {
         requestId: request.validationId,
-        sessionId: client.sessionId!,
+        sessionId,
         streamId: message.streamId,
         request: enhancedRequest,
         priority: message.metadata.priority as ProtocolPriority,
@@ -584,11 +508,11 @@ export class ParlantStreamingValidationGateway
       await this.sendValidationResponseStream(client, response);
 
       // Update session metrics
-      this.updateSessionActivity(client.sessionId!);
-      this.updateSessionValidationCount(client.sessionId!);
+      this.updateSessionActivity(sessionId);
+      this.updateSessionValidationCount(sessionId);
 
       const processingTime = performance.now() - startTime;
-      this.updateSessionPerformanceMetrics(client.sessionId!, processingTime);
+      this.updateSessionPerformanceMetrics(sessionId, processingTime);
 
       this.logger.log(`[${operationId}] Validation request processed successfully`, {
         operationId,
@@ -606,9 +530,7 @@ export class ParlantStreamingValidationGateway
       });
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Validation request processing failed`, {
-        operationId,
-        sessionId: client.sessionId,
+      this.logger.error(`[${operationId}] Validation request processing failed`, {operationId,sessionId: client.sessionId,
         messageId: message.messageId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -628,10 +550,7 @@ export class ParlantStreamingValidationGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() message: ParlantStreamingMessage
   ): Promise<void> {
-    const operationId = `confirmation_response_${message.messageId}`;
-
-    try {
-      this.logger.log(`[${operationId}] Processing user confirmation response`, {
+    const operationId = `confirmation_response_${message.messageId}`;try {this.logger.log(`[${operationId}] Processing user confirmation response`, {
         operationId,
         sessionId: client.sessionId,
         messageId: message.messageId,
@@ -657,7 +576,8 @@ export class ParlantStreamingValidationGateway
       // Send confirmation acknowledgment
       await this.sendConfirmationAcknowledgment(client, confirmation);
 
-      this.updateSessionActivity(client.sessionId!);
+      const sessionId = this.getSessionId(client);
+      this.updateSessionActivity(sessionId);
 
       this.emit('user_confirmation', {
         sessionId: client.sessionId,
@@ -686,10 +606,7 @@ export class ParlantStreamingValidationGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() message: ParlantStreamingMessage
   ): Promise<void> {
-    const operationId = `stream_create_${message.messageId}`;
-
-    try {
-      this.logger.log(`[${operationId}] Creating new stream`, {
+    const operationId = `stream_create_${message.messageId}`;try {this.logger.log(`[${operationId}] Creating new stream`, {
         operationId,
         sessionId: client.sessionId,
         messageId: message.messageId,
@@ -703,10 +620,11 @@ export class ParlantStreamingValidationGateway
       };
 
       const streamId = this.generateStreamId();
+      const sessionId = this.getSessionId(client);
       const streamInfo: StreamInfo = {
         streamId,
         streamType: streamRequest.streamType as StreamInfo['streamType'],
-        participants: [client.sessionId!],
+        participants: [sessionId],
         createdAt: new Date(),
         lastActivity: new Date(),
         messageCount: 0,
@@ -729,10 +647,10 @@ export class ParlantStreamingValidationGateway
 
       // Store stream information
       this.streams.set(streamId, streamInfo);
-      this.streamParticipants.set(streamId, new Set([client.sessionId!]));
+      this.streamParticipants.set(streamId, new Set([sessionId]));
 
       // Add to session streams
-      const session = this.sessions.get(client.sessionId!);
+      const session = this.sessions.get(sessionId);
       if (session) {
         session.streams.add(streamId);
       }
@@ -761,9 +679,7 @@ export class ParlantStreamingValidationGateway
         error: error instanceof Error ? error.message : String(error),
       });
 
-      throw new WsException('Failed to create stream');
-    }
-  }
+      throw new WsException('Failed to create stream');}}
 
   /**
    * Handle heartbeat ping messages
@@ -775,13 +691,14 @@ export class ParlantStreamingValidationGateway
   ): Promise<void> {
     try {
       // Update session activity
-      this.updateSessionActivity(client.sessionId!);
+      const sessionId = this.getSessionId(client);
+      this.updateSessionActivity(sessionId);
 
       // Send heartbeat pong response
       const pongMessage: ParlantStreamingMessage = {
         type: ParlantStreamingMessageType.HEARTBEAT_PONG,
         messageId: this.generateMessageId(),
-        sessionId: client.sessionId!,
+        sessionId,
         timestamp: Date.now(),
         sequence: ++this.sequence,
         payload: {
@@ -790,23 +707,28 @@ export class ParlantStreamingValidationGateway
           latency: Date.now() - (message.payload.clientTime as number || Date.now()),
         },
         metadata: {
-          priority: 'low',
-          requiresAck: false,
-          compressed: false,
+          priority: 'low',requiresAck: false,compressed: false,
           encrypted: false,
-          routingHints: ['heartbeat'],
-        },
-      };
+          routingHints: ['heartbeat'],},};
 
       client.emit(ParlantStreamingMessageType.HEARTBEAT_PONG, pongMessage);
 
     } catch (error) {
-      this.logger.error('Heartbeat ping processing failed', {
-        sessionId: client.sessionId,
-        messageId: message.messageId,
+      this.logger.error('Heartbeat ping processing failed', {sessionId: client.sessionId,messageId: message.messageId,
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  // ===== UTILITY METHODS =====
+
+  /**
+   * Safely get sessionId from client with proper error handling
+   */
+  private getSessionId(client: AuthenticatedSocket): string {
+    const sessionId = client.sessionId;
+    if (!sessionId) {
+      throw new WsException('Session ID is required but not found');}return sessionId;
   }
 
   // ===== VALIDATION PROCESSING METHODS =====
@@ -818,17 +740,13 @@ export class ParlantStreamingValidationGateway
     client: AuthenticatedSocket,
     request: ParlantValidationStreamRequest
   ): Promise<EnhancedParlantValidationRequest> {
-    const session = this.sessions.get(client.sessionId!);
+    const sessionId = this.getSessionId(client);
+    const session = this.sessions.get(sessionId);
     if (!session) {
-      throw new Error('Session not found');
-    }
-
-    // Build enhanced context
+      throw new Error('Session not found');}// Build enhanced context
     const enhancedContext: EnhancedValidationContext = {
       user: {
-        userId: client.userId || 'anonymous',
-        userRole: client.roles || [],
-        permissions: client.permissions || [],
+        userId: client.userId || 'anonymous',userRole: client.roles || [],permissions: client.permissions || [],
         authenticationLevel: client.authLevel || AuthenticationLevel.BASIC,
         sessionDuration: Date.now() - session.connectionTime.getTime(),
         previousActions: [], // TODO: Implement action history
@@ -840,22 +758,15 @@ export class ParlantStreamingValidationGateway
           lastAssessment: Date.now(),
         },
         preferences: {
-          confirmationMethod: 'prompt',
-          riskTolerance: 'medium',
-          notificationPreferences: {
-            email: true,
+          confirmationMethod: 'prompt',riskTolerance: 'medium',notificationPreferences: {email: true,
             sms: false,
             push: true,
             inApp: true,
           },
-          auditLevel: 'standard',
-        },
-      },
+          auditLevel: 'standard',},},
       session: {
-        sessionId: client.sessionId!,
-        sessionType: 'interactive',
-        startTime: session.connectionTime.getTime(),
-        duration: Date.now() - session.connectionTime.getTime(),
+        sessionId,
+        sessionType: 'interactive',startTime: session.connectionTime.getTime(),duration: Date.now() - session.connectionTime.getTime(),
         activityCount: session.messageCount,
         securityEvents: [],
         performanceMetrics: {
@@ -866,49 +777,23 @@ export class ParlantStreamingValidationGateway
         },
       },
       application: {
-        applicationId: 'aigent-bytebot',
-        applicationVersion: '1.0.0',
-        featureFlags: {},
-        configuration: {},
+        applicationId: 'aigent-bytebot',applicationVersion: '1.0.0',featureFlags: {},configuration: {},
         dependencies: [],
         healthStatus: {
-          status: 'healthy',
-          uptime: process.uptime() * 1000,
-          lastHealthCheck: Date.now(),
+          status: 'healthy',uptime: process.uptime() * 1000,lastHealthCheck: Date.now(),
           issues: [],
           metrics: {},
         },
       },
       environment: {
-        environment: this.configService.get('NODE_ENV', 'development') as any,
-        region: this.configService.get('AWS_REGION', 'us-east-1'),
-        infrastructure: {
-          platform: 'cloud',
-          provider: 'aws',
-        },
-        networkContext: {
-          networkType: 'public',
-          ipAddress: client.handshake.address,
-          firewallRules: [],
+        environment: this.configService.get('NODE_ENV', 'development') as any,region: this.configService.get('AWS_REGION', 'us-east-1'),infrastructure: {platform: 'cloud',provider: 'aws',},networkContext: {
+          networkType: 'public',ipAddress: client.handshake.address,firewallRules: [],
         },
         resourceContext: {
-          cpu: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },
-          memory: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },
-          storage: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },
-          network: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },
-        },
-      },
+          cpu: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },memory: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },storage: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },network: { current: 0, maximum: 100, unit: 'percent', trend: 'stable' },},},
       business: {
-        organizationId: 'aigent',
-        businessUnit: 'engineering',
-        budget: {
-          budgetId: 'default',
-          allocatedAmount: 0,
-          spentAmount: 0,
-          currency: 'USD',
-          period: 'monthly',
-        },
-        compliance: {
+        organizationId: 'aigent',businessUnit: 'engineering',budget: {budgetId: 'default',allocatedAmount: 0,spentAmount: 0,
+          currency: 'USD',period: 'monthly',},compliance: {
           frameworks: session.security.complianceFlags,
           policies: [],
           lastAudit: 0,
@@ -918,23 +803,10 @@ export class ParlantStreamingValidationGateway
       },
       technical: {
         architecture: {
-          pattern: 'microservices',
-          technologies: ['nodejs', 'typescript', 'nestjs', 'websocket'],
-          databases: ['postgresql'],
-          messageQueues: [],
-          caches: ['redis'],
-        },
-        deployment: {
-          strategy: 'rolling',
-          version: '1.0.0',
-          deploymentTime: Date.now(),
-          rollbackAvailable: true,
-          healthChecks: ['http', 'websocket'],
-        },
-        monitoring: {
-          tools: ['prometheus', 'grafana'],
-          metrics: [],
-          alerts: [],
+          pattern: 'microservices',technologies: ['nodejs', 'typescript', 'nestjs', 'websocket'],databases: ['postgresql'],messageQueues: [],caches: ['redis'],},deployment: {
+          strategy: 'rolling',version: '1.0.0',deploymentTime: Date.now(),rollbackAvailable: true,
+          healthChecks: ['http', 'websocket'],},monitoring: {
+          tools: ['prometheus', 'grafana'],metrics: [],alerts: [],
           dashboards: [],
         },
         integration: {
@@ -955,9 +827,7 @@ export class ParlantStreamingValidationGateway
           riskFactors: [],
           mitigationRequired: session.security.riskScore > 50,
           escalationRequired: session.security.riskScore > 75,
-          auditLevel: 'standard',
-        },
-      },
+          auditLevel: 'standard',},},
       compliance: {
         frameworks: session.security.complianceFlags,
         policies: [],
@@ -971,29 +841,21 @@ export class ParlantStreamingValidationGateway
     const enhancedAction: EnhancedValidationAction = {
       actionId: this.generateId(),
       actionType: request.action.actionType as any,
-      actionCategory: 'data_operation',
-      parameters: {
-        parameters: request.action.parameters,
+      actionCategory: 'data_operation',parameters: {parameters: request.action.parameters,
         validation: [],
         sanitization: [],
         encryption: [],
       },
       execution: {
-        mode: 'synchronous',
-        timeout: 30000,
-        retries: 0,
+        mode: 'synchronous',timeout: 30000,retries: 0,
         idempotent: request.action.reversible,
         transactional: true,
         atomic: true,
       },
       impact: {
         scope: request.action.impact.scope as any,
-        severity: 'medium',
-        reversibility: {
-          reversible: request.action.reversible,
-          rollbackComplexity: 'simple',
-          dataLoss: false,
-        },
+        severity: 'medium',reversibility: {reversible: request.action.reversible,
+          rollbackComplexity: 'simple',dataLoss: false,},
         dataImpact: {
           affectedRecords: 0,
           dataTypes: [],
@@ -1004,37 +866,21 @@ export class ParlantStreamingValidationGateway
         },
         systemImpact: {
           downtime: 0,
-          performance: 'neutral',
-          availability: 'neutral',
-          security: 'neutral',
-          scalability: 'neutral',
-        },
-        userImpact: {
+          performance: 'neutral',availability: 'neutral',security: 'neutral',scalability: 'neutral',},userImpact: {
           affectedUsers: 1,
-          userExperience: 'neutral',
-          functionality: 'maintained',
-          training: false,
-          communication: false,
+          userExperience: 'neutral',functionality: 'maintained',training: false,communication: false,
         },
         businessImpact: {
           revenue: 0,
           cost: 0,
-          compliance: 'maintained',
-          reputation: 'neutral',
-          competitive: 'neutral',
-        },
-      },
+          compliance: 'maintained',reputation: 'neutral',competitive: 'neutral',},},
       dependencies: request.action.prerequisites.map(p => ({
         dependencyId: this.generateId(),
-        dependencyType: 'prerequisite',
-        required: true,
-        description: p.description,
+        dependencyType: 'prerequisite',required: true,description: p.description,
         validationMethod: p.validationMethod,
       })),
       rollback: {
-        strategy: request.action.reversible ? 'immediate' : 'none',
-        automated: true,
-        timeout: 60000,
+        strategy: request.action.reversible ? 'immediate' : 'none',automated: true,timeout: 60000,
         triggers: [],
         validation: [],
       },
@@ -1050,9 +896,7 @@ export class ParlantStreamingValidationGateway
     return {
       requestId: request.validationId,
       operationId: request.operationId,
-      validationType: 'function_execution',
-      context: enhancedContext,
-      action: enhancedAction,
+      validationType: 'function_execution',context: enhancedContext,action: enhancedAction,
       constraints: {
         timeConstraints: {
           maxExecutionTime: 30000,
@@ -1091,30 +935,21 @@ export class ParlantStreamingValidationGateway
       streaming: {
         enabled: request.streamingOptions.enableProgressUpdates,
         protocol: {
-          version: '1.0',
-          features: ['compression', 'multiplexing'],
-          extensions: [],
-          negotiation: true,
+          version: '1.0',features: ['compression', 'multiplexing'],extensions: [],negotiation: true,
           fallback: [],
         },
         compression: {
           enabled: request.streamingOptions.compressionEnabled,
-          algorithm: 'gzip',
-          level: 6,
-          threshold: 1024,
+          algorithm: 'gzip',level: 6,threshold: 1024,
           adaptive: true,
         },
         batching: {
           enabled: false,
           maxSize: 100,
           maxDelay: 1000,
-          strategy: 'time',
-        },
-        ordering: {
+          strategy: 'time',},ordering: {
           guaranteed: true,
-          method: 'sequence',
-          bufferSize: 1000,
-          timeout: 5000,
+          method: 'sequence',bufferSize: 1000,timeout: 5000,
         },
         reliability: {
           acknowledgments: true,
@@ -1132,21 +967,12 @@ export class ParlantStreamingValidationGateway
         },
       },
       workflow: {
-        workflowId: 'default_validation',
-        workflowType: 'automatic',
-        stages: [{
-          stageId: 'validation',
-          name: 'Validation',
-          type: 'validation',
-          required: true,
-          timeout: 30000,
+        workflowId: 'default_validation',workflowType: 'automatic',stages: [{stageId: 'validation',name: 'Validation',type: 'validation',required: true,timeout: 30000,
           participants: [],
           conditions: [],
         }],
         routing: {
-          strategy: 'round_robin',
-          rules: [],
-          fallback: [],
+          strategy: 'round_robin',rules: [],fallback: [],
         },
         escalation: {
           enabled: request.requiresUserConfirmation,
@@ -1202,9 +1028,7 @@ export class ParlantStreamingValidationGateway
         trustScore: 75,
         qualityScore: 90,
         metadata: {
-          validationMethod: 'ai_assisted',
-          humanReviewed: false,
-          automaticDecision: true,
+          validationMethod: 'ai_assisted',humanReviewed: false,automaticDecision: true,
           reviewTime: performance.now() - startTime,
           version: '1.0.0',
         },
@@ -1213,11 +1037,7 @@ export class ParlantStreamingValidationGateway
         summary: `Validation completed with decision: ${decision}`,
         factors: [],
         analysis: {
-          methodology: 'risk_based_analysis',
-          assumptions: ['User has proper permissions'],
-          limitations: ['Limited historical context'],
-          confidence: 0.85,
-          bias: [],
+          methodology: 'risk_based_analysis',assumptions: ['User has proper permissions'],limitations: ['Limited historical context'],confidence: 0.85,bias: [],
         },
         alternatives: [],
       },
@@ -1227,11 +1047,7 @@ export class ParlantStreamingValidationGateway
         references: [],
         verification: {
           verified: true,
-          method: 'automated',
-          timestamp: Date.now(),
-          verifier: 'system',
-          confidence: 0.85,
-        },
+          method: 'automated',timestamp: Date.now(),verifier: 'system',confidence: 0.85,},
       },
       conditions: [],
       recommendations: [],
@@ -1239,23 +1055,10 @@ export class ParlantStreamingValidationGateway
         entryId: this.generateId(),
         timestamp: Date.now(),
         actor: {
-          actorId: 'system',
-          actorType: 'system',
-          identity: 'parlant-gateway',
-          roles: ['validator'],
-        },
-        action: {
+          actorId: 'system',actorType: 'system',identity: 'parlant-gateway',roles: ['validator'],},action: {
           actionId: gatewayRequest.requestId,
-          actionType: 'validation',
-          category: 'security',
-          description: 'Processed validation request',
-          parameters: {},
-          classification: 'normal',
-        },
-        outcome: {
-          result: 'success',
-          duration: performance.now() - startTime,
-          resources: {
+          actionType: 'validation',category: 'security',description: 'Processed validation request',parameters: {},classification: 'normal',},outcome: {
+          result: 'success',duration: performance.now() - startTime,resources: {
             cpu: 0,
             memory: 0,
             network: 0,
@@ -1267,20 +1070,14 @@ export class ParlantStreamingValidationGateway
           requestId: gatewayRequest.requestId,
           operationId: gatewayRequest.request.operationId,
           sessionId: gatewayRequest.sessionId,
-          environment: 'production',
-        },
-        evidence: {
+          environment: 'production',},evidence: {
           logs: [],
           artifacts: [],
           checksums: {},
           signatures: [],
         },
         integrity: {
-          hash: 'sha256:placeholder',
-          algorithm: 'sha256',
-          signature: 'placeholder',
-          timestamp: Date.now(),
-          verified: true,
+          hash: 'sha256:placeholder',algorithm: 'sha256',signature: 'placeholder',timestamp: Date.now(),verified: true,
         },
       }],
       performance: {
@@ -1375,10 +1172,7 @@ export class ParlantStreamingValidationGateway
           multiplexingSupported: true,
         },
         serverInfo: {
-          version: '1.0.0',
-          features: ['streaming', 'validation', 'multiplexing', 'compression'],
-          maxConcurrentSessions: 1000,
-          targetLatency: 50,
+          version: '1.0.0',features: ['streaming', 'validation', 'multiplexing', 'compression'],maxConcurrentSessions: 1000,targetLatency: 50,
         },
         security: {
           authenticated: session.security.authenticated,
@@ -1388,13 +1182,9 @@ export class ParlantStreamingValidationGateway
         },
       },
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compressed: false,
+        priority: 'high',requiresAck: true,compressed: false,
         encrypted: false,
-        routingHints: ['connection'],
-      },
-    };
+        routingHints: ['connection'],},};
 
     client.emit(ParlantStreamingMessageType.CONNECTION_READY, message);
   }
@@ -1415,13 +1205,9 @@ export class ParlantStreamingValidationGateway
       sequence: ++this.sequence,
       payload: gatewayResponse.response as unknown as Record<string, unknown>,
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compressed: gatewayResponse.compressionUsed,
+        priority: 'high',requiresAck: true,compressed: gatewayResponse.compressionUsed,
         encrypted: false,
-        routingHints: ['validation', 'response'],
-        auditRequired: true,
-      },
+        routingHints: ['validation', 'response'],auditRequired: true,},
     };
 
     client.emit(ParlantStreamingMessageType.VALIDATION_RESPONSE_STREAM, message);
@@ -1445,18 +1231,12 @@ export class ParlantStreamingValidationGateway
       payload: {
         originalMessageId: originalMessage.messageId,
         error: error instanceof Error ? error.message : String(error),
-        errorCode: 'VALIDATION_ERROR',
-        recoverable: true,
-        retryDelay: 5000,
+        errorCode: 'VALIDATION_ERROR',recoverable: true,retryDelay: 5000,
       },
       metadata: {
-        priority: 'high',
-        requiresAck: false,
-        compressed: false,
+        priority: 'high',requiresAck: false,compressed: false,
         encrypted: false,
-        routingHints: ['error'],
-      },
-    };
+        routingHints: ['error'],},};
 
     client.emit(ParlantStreamingMessageType.ERROR_NOTIFICATION, errorMessage);
   }
@@ -1520,10 +1300,7 @@ export class ParlantStreamingValidationGateway
       this.collectPerformanceMetrics();
     }, 60000); // Every minute
 
-    this.logger.log('📊 Performance monitoring initialized');
-  }
-
-  /**
+    this.logger.log('📊 Performance monitoring initialized');}/**
    * Collect and log performance metrics
    */
   private collectPerformanceMetrics(): void {
@@ -1537,8 +1314,7 @@ export class ParlantStreamingValidationGateway
       timestamp: Date.now(),
     };
 
-    this.logger.log('📊 Gateway performance metrics', metrics);
-    this.emit('performance_metrics', metrics);
+    this.logger.log('📊 Gateway performance metrics', metrics);this.emit('performance_metrics', metrics);
   }
 
   /**
@@ -1588,9 +1364,7 @@ export class ParlantStreamingValidationGateway
       this.validationCallbacks.delete(validationId);
     });
 
-    this.logger.log(`Session cleaned up: ${sessionId}`, {
-      sessionId,
-      userId: session.userId,
+    this.logger.log(`Session cleaned up: ${sessionId}`, {sessionId,userId: session.userId,
       connectionDuration: Date.now() - session.connectionTime.getTime(),
       messageCount: session.messageCount,
       validationCount: session.validationCount,
@@ -1601,18 +1375,9 @@ export class ParlantStreamingValidationGateway
    * Generate unique identifiers
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateStreamId(): string {
-    return `stream_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${this.generateId()}`;
-  }
-
-  private generateId(): string {
+    return `session_${Date.now()}_${this.generateId()}`;}private generateStreamId(): string {
+    return `stream_${Date.now()}_${this.generateId()}`;}private generateMessageId(): string {
+    return `msg_${Date.now()}_${this.generateId()}`;}private generateId(): string {
     return Math.random().toString(36).substring(2, 15);
   }
 

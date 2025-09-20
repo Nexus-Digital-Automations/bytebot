@@ -34,17 +34,9 @@
  * @version 1.0.0 - MAXIMUM ENTERPRISE MONITORING IMPLEMENTATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  JobStatus,
+import { Injectable, Logger } from '@nestjs/common';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import {JobStatus,
   JobPriority,
-} from '../dto/async-job.dto';
-import { MetricsService } from '../../metrics/metrics.service';
-
-/**
- * Job execution metrics with comprehensive tracking
+} from '../dto/async-job.dto';import { MetricsService } from '../../metrics/metrics.service';/*** Job execution metrics with comprehensive tracking
  */
 interface JobExecutionMetrics {
   jobId: string;
@@ -104,9 +96,7 @@ interface AlertConfiguration {
   name: string;
   description: string;
   condition: string; // JavaScript expression for evaluation
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  enabled: boolean;
-  cooldownPeriod: number; // Minimum time between alerts (ms)
+  severity: 'low' | 'medium' | 'high' | 'critical';enabled: boolean;cooldownPeriod: number; // Minimum time between alerts (ms)
   lastTriggered?: Date;
   notificationChannels: string[];
 }
@@ -129,9 +119,7 @@ interface BusinessMetrics {
   performanceRecommendations: Array<{
     category: string;
     recommendation: string;
-    priority: 'low' | 'medium' | 'high';
-    impact: string;
-  }>;
+    priority: 'low' | 'medium' | 'high';impact: string;}>;
 }
 
 /**
@@ -208,9 +196,7 @@ export class JobMonitoringService {
     private readonly metricsService: MetricsService,
     private readonly eventEmitter: EventEmitter2,
   ) {
-    this.logger.log('Enterprise Job Monitoring Service initializing');
-    this.initializeAlertConfigurations();
-    this.startRealTimeMonitoring();
+    this.logger.log('Enterprise Job Monitoring Service initializing');this.initializeAlertConfigurations();this.startRealTimeMonitoring();
     this.logger.log('Enterprise Job Monitoring Service initialized - Full observability active');
   }
 
@@ -232,8 +218,7 @@ export class JobMonitoringService {
     errorMessage?: string;
     metadata?: Record<string, unknown>;
   }): void {
-    const operationId = `job_metrics_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Recording job execution metrics for ${jobData.jobId}`);
+    const operationId = `job_metrics_${Date.now()}`;this.logger.debug(`[${operationId}] Recording job execution metrics for ${jobData.jobId}`);
 
     try {
       const now = new Date();
@@ -307,9 +292,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to record job metrics: ${errorMessage}`, {
-        jobId: jobData.jobId,
-        error: errorMessage,
+      this.logger.error(`[${operationId}] Failed to record job metrics: ${errorMessage}`, {jobId: jobData.jobId,error: errorMessage,
       });
     }
   }
@@ -348,11 +331,7 @@ export class JobMonitoringService {
       responseTimeHistory: number[];
     };
   }> {
-    const operationId = `dashboard_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Generating dashboard metrics`);
-
-    try {
-      // Get current system metrics
+    const operationId = `dashboard_${Date.now()}`;this.logger.debug(`[${operationId}] Generating dashboard metrics`);try {// Get current system metrics
       const realTimeMetrics = await this.getCurrentSystemMetrics();
 
       // Calculate job statistics
@@ -409,9 +388,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to generate dashboard metrics: ${errorMessage}`);
-      throw error;
-    }
+      this.logger.error(`[${operationId}] Failed to generate dashboard metrics: ${errorMessage}`);throw error;}
   }
 
   /**
@@ -420,11 +397,7 @@ export class JobMonitoringService {
    * @returns Capacity planning data
    */
   async getCapacityMetrics(): Promise<CapacityMetrics> {
-    const operationId = `capacity_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Generating capacity planning metrics`);
-
-    try {
-      const recentMetrics = this.systemMetricsHistory.slice(-720); // Last 12 hours
+    const operationId = `capacity_${Date.now()}`;this.logger.debug(`[${operationId}] Generating capacity planning metrics`);try {const recentMetrics = this.systemMetricsHistory.slice(-720); // Last 12 hours
       const recentJobs = Array.from(this.jobMetrics.values())
         .filter(job => job.submittedAt > new Date(Date.now() - 24 * 60 * 60 * 1000));
 
@@ -490,9 +463,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to generate capacity metrics: ${errorMessage}`);
-      throw error;
-    }
+      this.logger.error(`[${operationId}] Failed to generate capacity metrics: ${errorMessage}`);throw error;}
   }
 
   /**
@@ -501,8 +472,7 @@ export class JobMonitoringService {
    * @returns Business metrics and insights
    */
   async getBusinessMetrics(): Promise<BusinessMetrics> {
-    const operationId = `business_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Generating business intelligence metrics`);
+    const operationId = `business_${Date.now()}`;this.logger.debug(`[${operationId}] Generating business intelligence metrics`);
 
     try {
       const recentJobs = Array.from(this.jobMetrics.values())
@@ -577,10 +547,7 @@ export class JobMonitoringService {
       return;
     }
 
-    this.logger.log('Starting real-time monitoring system');
-    this.isMonitoringActive = true;
-
-    // Monitor system metrics every 30 seconds
+    this.logger.log('Starting real-time monitoring system');this.isMonitoringActive = true;// Monitor system metrics every 30 seconds
     setInterval(async () => {
       try {
         const systemMetrics = await this.getCurrentSystemMetrics();
@@ -592,9 +559,7 @@ export class JobMonitoringService {
         }
 
         // Emit real-time system metrics
-        this.eventEmitter.emit('system.metrics.updated', {
-          metrics: systemMetrics,
-          timestamp: systemMetrics.timestamp,
+        this.eventEmitter.emit('system.metrics.updated', {metrics: systemMetrics,timestamp: systemMetrics.timestamp,
         });
 
         // Check for alerts
@@ -606,64 +571,20 @@ export class JobMonitoringService {
       }
     }, 30000); // 30 seconds
 
-    this.logger.log('Real-time monitoring system started successfully');
-  }
-
-  /**
+    this.logger.log('Real-time monitoring system started successfully');}/**
    * Initialize alert configurations
    */
   private initializeAlertConfigurations(): void {
-    this.logger.debug('Initializing alert configurations');
-
-    const alerts: AlertConfiguration[] = [
-      {
-        id: 'high_queue_depth',
-        name: 'High Queue Depth',
-        description: 'Job queue depth exceeds acceptable threshold',
-        condition: 'metrics.queueDepth > 50',
-        severity: 'medium',
-        enabled: true,
-        cooldownPeriod: 300000, // 5 minutes
-        notificationChannels: ['websocket', 'email'],
-      },
-      {
-        id: 'high_error_rate',
-        name: 'High Error Rate',
-        description: 'Job error rate exceeds acceptable threshold',
-        condition: 'metrics.errorRate > 10',
-        severity: 'high',
-        enabled: true,
-        cooldownPeriod: 180000, // 3 minutes
-        notificationChannels: ['websocket', 'email', 'slack'],
-      },
-      {
-        id: 'sla_violation',
-        name: 'SLA Violation',
-        description: 'Job execution time exceeds SLA threshold',
-        condition: 'metrics.averageResponseTime > 5000',
-        severity: 'critical',
-        enabled: true,
-        cooldownPeriod: 60000, // 1 minute
-        notificationChannels: ['websocket', 'email', 'slack', 'pagerduty'],
-      },
-      {
-        id: 'memory_pressure',
-        name: 'Memory Pressure',
-        description: 'System memory usage exceeds safe threshold',
-        condition: 'metrics.memoryPressure > 80',
-        severity: 'high',
-        enabled: true,
-        cooldownPeriod: 300000, // 5 minutes
-        notificationChannels: ['websocket', 'email'],
-      },
-      {
-        id: 'worker_exhaustion',
-        name: 'Worker Pool Exhaustion',
-        description: 'Worker pool utilization critically high',
-        condition: 'metrics.activeWorkers >= 8 && metrics.queueDepth > 20',
-        severity: 'critical',
-        enabled: true,
-        cooldownPeriod: 120000, // 2 minutes
+    this.logger.debug('Initializing alert configurations');const alerts: AlertConfiguration[] = [{
+        id: 'high_queue_depth',name: 'High Queue Depth',description: 'Job queue depth exceeds acceptable threshold',condition: 'metrics.queueDepth > 50',severity: 'medium',enabled: true,cooldownPeriod: 300000, // 5 minutes
+        notificationChannels: ['websocket', 'email'],},{
+        id: 'high_error_rate',name: 'High Error Rate',description: 'Job error rate exceeds acceptable threshold',condition: 'metrics.errorRate > 10',severity: 'high',enabled: true,cooldownPeriod: 180000, // 3 minutes
+        notificationChannels: ['websocket', 'email', 'slack'],},{
+        id: 'sla_violation',name: 'SLA Violation',description: 'Job execution time exceeds SLA threshold',condition: 'metrics.averageResponseTime > 5000',severity: 'critical',enabled: true,cooldownPeriod: 60000, // 1 minute
+        notificationChannels: ['websocket', 'email', 'slack', 'pagerduty'],},{
+        id: 'memory_pressure',name: 'Memory Pressure',description: 'System memory usage exceeds safe threshold',condition: 'metrics.memoryPressure > 80',severity: 'high',enabled: true,cooldownPeriod: 300000, // 5 minutes
+        notificationChannels: ['websocket', 'email'],},{
+        id: 'worker_exhaustion',name: 'Worker Pool Exhaustion',description: 'Worker pool utilization critically high',condition: 'metrics.activeWorkers >= 8 && metrics.queueDepth > 20',severity: 'critical',enabled: true,cooldownPeriod: 120000, // 2 minutes
         notificationChannels: ['websocket', 'email', 'slack', 'pagerduty'],
       },
     ];
@@ -672,17 +593,11 @@ export class JobMonitoringService {
       this.alertConfigurations.set(alert.id, alert);
     });
 
-    this.logger.debug(`Initialized ${alerts.length} alert configurations`);
-  }
-
-  /**
+    this.logger.debug(`Initialized ${alerts.length} alert configurations`);}/**
    * Check alerts against current metrics
    */
   private async checkAlerts(systemMetrics: SystemPerformanceMetrics): Promise<void> {
-    const operationId = `alerts_${Date.now()}`;
-
-    try {
-      const recentJobs = Array.from(this.jobMetrics.values())
+    const operationId = `alerts_${Date.now()}`;try {const recentJobs = Array.from(this.jobMetrics.values())
         .filter(job => job.submittedAt > new Date(Date.now() - 60 * 60 * 1000)); // Last hour
 
       const errorRate = recentJobs.length > 0
@@ -720,9 +635,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Alert checking failed: ${errorMessage}`);
-    }
-  }
+      this.logger.error(`[${operationId}] Alert checking failed: ${errorMessage}`);}}
 
   /**
    * Trigger an alert and send notifications
@@ -732,8 +645,7 @@ export class JobMonitoringService {
     config: AlertConfiguration,
     metrics: Record<string, number>
   ): Promise<void> {
-    const operationId = `alert_${alertId}_${Date.now()}`;
-    this.logger.warn(`[${operationId}] Triggering alert: ${config.name}`, {
+    const operationId = `alert_${alertId}_${Date.now()}`;this.logger.warn(`[${operationId}] Triggering alert: ${config.name}`, {
       alertId,
       severity: config.severity,
       metrics,
@@ -817,10 +729,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to get system metrics: ${errorMessage}`);
-
-      // Return fallback metrics
-      return {
+      this.logger.error(`Failed to get system metrics: ${errorMessage}`);// Return fallback metricsreturn {
         timestamp: new Date(),
         cpuUsage: 0,
         memoryUsage: 0,
@@ -953,10 +862,7 @@ export class JobMonitoringService {
    */
   private recordBusinessMetrics(metrics: JobExecutionMetrics): void {
     // This would integrate with business analytics systems
-    // For now, we'll just log key business events
-
-    if (metrics.status === JobStatus.COMPLETED) {
-      const efficiency = metrics.executionTime / metrics.totalTime;
+    // For now, we'll just log key business eventsif (metrics.status === JobStatus.COMPLETED) {const efficiency = metrics.executionTime / metrics.totalTime;
       if (efficiency > 0.8) {
         this.logger.debug('High efficiency job completed', {
           jobId: metrics.jobId,
@@ -974,25 +880,18 @@ export class JobMonitoringService {
     const violations: string[] = [];
 
     if (metrics.queueWaitTime > this.slaThresholds.maxQueueWaitTime) {
-      violations.push(`Queue wait time exceeded: ${metrics.queueWaitTime}ms > ${this.slaThresholds.maxQueueWaitTime}ms`);
-    }
-
-    if (metrics.executionTime > this.slaThresholds.maxExecutionTime) {
+      violations.push(`Queue wait time exceeded: ${metrics.queueWaitTime}ms > ${this.slaThresholds.maxQueueWaitTime}ms`);}if (metrics.executionTime > this.slaThresholds.maxExecutionTime) {
       violations.push(`Execution time exceeded: ${metrics.executionTime}ms > ${this.slaThresholds.maxExecutionTime}ms`);
     }
 
     if (violations.length > 0) {
-      this.logger.warn('SLA violation detected', {
-        jobId: metrics.jobId,
-        violations,
+      this.logger.warn('SLA violation detected', {jobId: metrics.jobId,violations,
         jobType: metrics.jobType,
         priority: metrics.priority,
       });
 
       // Emit SLA violation event
-      this.eventEmitter.emit('sla.violation', {
-        jobId: metrics.jobId,
-        violations,
+      this.eventEmitter.emit('sla.violation', {jobId: metrics.jobId,violations,
         metrics,
         timestamp: new Date(),
       });
@@ -1049,9 +948,7 @@ export class JobMonitoringService {
     peakUtilization: number,
     growth: number,
     jobVolume: number
-  ): CapacityMetrics['recommendations'] {
-    const scaleUpThreshold = 80;
-    const scaleDownThreshold = 30;
+  ): CapacityMetrics['recommendations'] {const scaleUpThreshold = 80;const scaleDownThreshold = 30;
     const currentWorkers = 10;
 
     let optimalWorkerCount = currentWorkers;
@@ -1078,37 +975,23 @@ export class JobMonitoringService {
     };
   }
 
-  private generateCostOptimizations(jobs: JobExecutionMetrics[]): BusinessMetrics['costOptimizationOpportunities'] {
-    const opportunities: BusinessMetrics['costOptimizationOpportunities'] = [];
-
-    // Analyze retry patterns
-    const highRetryJobs = jobs.filter(job => job.retryCount > 2);
+  private generateCostOptimizations(jobs: JobExecutionMetrics[]): BusinessMetrics['costOptimizationOpportunities'] {const opportunities: BusinessMetrics['costOptimizationOpportunities'] = [];// Analyze retry patternsconst highRetryJobs = jobs.filter(job => job.retryCount > 2);
     if (highRetryJobs.length > jobs.length * 0.1) {
       opportunities.push({
-        type: 'retry_optimization',
-        description: 'High retry rate detected. Consider improving error handling and resilience.',
-        potentialSavings: highRetryJobs.length * 0.5, // Estimated cost per retry
-      });
+        type: 'retry_optimization',description: 'High retry rate detected. Consider improving error handling and resilience.',potentialSavings: highRetryJobs.length * 0.5, // Estimated cost per retry});
     }
 
     // Analyze queue efficiency
     const avgQueueTime = jobs.reduce((sum, job) => sum + job.queueWaitTime, 0) / jobs.length;
     if (avgQueueTime > 2000) {
       opportunities.push({
-        type: 'queue_optimization',
-        description: 'High average queue wait times. Consider optimizing job scheduling or adding workers.',
-        potentialSavings: Math.ceil(avgQueueTime / 1000) * jobs.length * 0.01,
-      });
+        type: 'queue_optimization',description: 'High average queue wait times. Consider optimizing job scheduling or adding workers.',potentialSavings: Math.ceil(avgQueueTime / 1000) * jobs.length * 0.01,});
     }
 
     return opportunities;
   }
 
-  private generatePerformanceRecommendations(jobs: JobExecutionMetrics[]): BusinessMetrics['performanceRecommendations'] {
-    const recommendations: BusinessMetrics['performanceRecommendations'] = [];
-
-    // Analyze execution times by job type
-    const jobTypeStats = new Map<string, { total: number; count: number; avg: number }>();
+  private generatePerformanceRecommendations(jobs: JobExecutionMetrics[]): BusinessMetrics['performanceRecommendations'] {const recommendations: BusinessMetrics['performanceRecommendations'] = [];// Analyze execution times by job typeconst jobTypeStats = new Map<string, { total: number; count: number; avg: number }>();
     jobs.forEach(job => {
       if (!jobTypeStats.has(job.jobType)) {
         jobTypeStats.set(job.jobType, { total: 0, count: 0, avg: 0 });
@@ -1135,10 +1018,7 @@ export class JobMonitoringService {
     const avgMemory = jobs.reduce((sum, job) => sum + job.resourceUsage.memoryPeak, 0) / jobs.length;
     if (avgMemory > 100) {
       recommendations.push({
-        category: 'resource',
-        recommendation: 'Consider memory optimization techniques to reduce average memory usage per job',
-        priority: 'medium',
-        impact: 'Reduced memory pressure and improved concurrent job capacity',
+        category: 'resource',recommendation: 'Consider memory optimization techniques to reduce average memory usage per job',priority: 'medium',impact: 'Reduced memory pressure and improved concurrent job capacity',
       });
     }
 
@@ -1154,15 +1034,9 @@ export class JobMonitoringService {
       // Replace metrics references and evaluate
       let expression = condition;
       Object.keys(metrics).forEach(key => {
-        expression = expression.replace(new RegExp(`metrics\\.${key}`, 'g'), metrics[key].toString());
-      });
-
-      // Basic safety check - only allow numbers, operators, and parentheses
+        expression = expression.replace(new RegExp(`metrics\\.${key}`, 'g'), metrics[key].toString());});// Basic safety check - only allow numbers, operators, and parentheses
       if (!/^[\d\s+\-*/><=&|()!.]+$/.test(expression)) {
-        throw new Error('Invalid expression');
-      }
-
-      // Evaluate the expression (using Function constructor as a simple evaluator)
+        throw new Error('Invalid expression');}// Evaluate the expression (using Function constructor as a simple evaluator)
       // Note: In production, use a proper safe expression evaluator
       return new Function('return ' + expression)();
     } catch (error) {
@@ -1175,32 +1049,7 @@ export class JobMonitoringService {
     const recommendations: string[] = [];
 
     switch (alertId) {
-      case 'high_queue_depth':
-        recommendations.push('Consider increasing worker pool size');
-        recommendations.push('Review job priorities and scheduling');
-        recommendations.push('Analyze job complexity and optimize slow operations');
-        break;
-      case 'high_error_rate':
-        recommendations.push('Review recent job failures for common patterns');
-        recommendations.push('Check system dependencies and external services');
-        recommendations.push('Consider implementing circuit breakers for failing operations');
-        break;
-      case 'sla_violation':
-        recommendations.push('Immediate capacity scaling recommended');
-        recommendations.push('Review and optimize critical path operations');
-        recommendations.push('Consider priority queue adjustments');
-        break;
-      case 'memory_pressure':
-        recommendations.push('Review memory usage patterns and optimize job resource allocation');
-        recommendations.push('Consider horizontal scaling or memory-optimized instances');
-        recommendations.push('Implement memory cleanup routines');
-        break;
-      case 'worker_exhaustion':
-        recommendations.push('CRITICAL: Scale worker pool immediately');
-        recommendations.push('Implement auto-scaling policies');
-        recommendations.push('Review job distribution and load balancing');
-        break;
-    }
+      case 'high_queue_depth':recommendations.push('Consider increasing worker pool size');recommendations.push('Review job priorities and scheduling');recommendations.push('Analyze job complexity and optimize slow operations');break;case 'high_error_rate':recommendations.push('Review recent job failures for common patterns');recommendations.push('Check system dependencies and external services');recommendations.push('Consider implementing circuit breakers for failing operations');break;case 'sla_violation':recommendations.push('Immediate capacity scaling recommended');recommendations.push('Review and optimize critical path operations');recommendations.push('Consider priority queue adjustments');break;case 'memory_pressure':recommendations.push('Review memory usage patterns and optimize job resource allocation');recommendations.push('Consider horizontal scaling or memory-optimized instances');recommendations.push('Implement memory cleanup routines');break;case 'worker_exhaustion':recommendations.push('CRITICAL: Scale worker pool immediately');recommendations.push('Implement auto-scaling policies');recommendations.push('Review job distribution and load balancing');break;}
 
     return recommendations;
   }
@@ -1208,10 +1057,7 @@ export class JobMonitoringService {
   private async sendNotification(channel: string, alert: AlertEvent): Promise<void> {
     try {
       switch (channel) {
-        case 'websocket':
-          this.eventEmitter.emit('notification.websocket', alert);
-          break;
-        case 'email':
+        case 'websocket':this.eventEmitter.emit('notification.websocket', alert);break;case 'email':
           // Integrate with email service
           this.logger.debug(`Email notification sent for alert: ${alert.alertName}`);
           break;
@@ -1221,16 +1067,12 @@ export class JobMonitoringService {
           break;
         case 'pagerduty':
           // Integrate with PagerDuty API
-          this.logger.debug(`PagerDuty incident created for alert: ${alert.alertName}`);
-          break;
-        default:
+          this.logger.debug(`PagerDuty incident created for alert: ${alert.alertName}`);break;default:
           this.logger.warn(`Unknown notification channel: ${channel}`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to send ${channel} notification: ${errorMessage}`);
-    }
-  }
+      this.logger.error(`Failed to send ${channel} notification: ${errorMessage}`);}}
 
   private async getActiveAlerts(): Promise<Array<{ id: string; severity: string; message: string; timestamp: Date }>> {
     // Return recent alerts from the last hour
@@ -1257,8 +1099,7 @@ export class JobMonitoringService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async generateHealthReport(): Promise<void> {
-    const operationId = `health_report_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Generating hourly health report`);
+    const operationId = `health_report_${Date.now()}`;this.logger.debug(`[${operationId}] Generating hourly health report`);
 
     try {
       const capacityMetrics = await this.getCapacityMetrics();
@@ -1266,21 +1107,15 @@ export class JobMonitoringService {
       const dashboardData = await this.getDashboardMetrics();
 
       // Emit comprehensive health report
-      this.eventEmitter.emit('health.report.generated', {
-        operationId,
-        timestamp: new Date(),
+      this.eventEmitter.emit('health.report.generated', {operationId,timestamp: new Date(),
         capacity: capacityMetrics,
         business: businessMetrics,
         dashboard: dashboardData,
         recommendations: [
           ...businessMetrics.performanceRecommendations,
           ...businessMetrics.costOptimizationOpportunities.map(opt => ({
-            category: 'cost',
-            recommendation: opt.description,
-            priority: 'medium' as const,
-            impact: `Potential savings: ${opt.potentialSavings}`,
-          })),
-        ],
+            category: 'cost',recommendation: opt.description,priority: 'medium' as const,
+            impact: `Potential savings: ${opt.potentialSavings}`,})),],
       });
 
       this.logger.debug(`[${operationId}] Health report generated successfully`, {
@@ -1291,9 +1126,7 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Health report generation failed: ${errorMessage}`);
-    }
-  }
+      this.logger.error(`[${operationId}] Health report generation failed: ${errorMessage}`);}}
 
   /**
    * Get comprehensive metrics export for Prometheus/Grafana
@@ -1303,11 +1136,7 @@ export class JobMonitoringService {
     grafana: Record<string, unknown>;
     businessIntelligence: BusinessMetrics;
   }> {
-    const operationId = `metrics_export_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Generating metrics export`);
-
-    try {
-      // Get Prometheus metrics from metrics service
+    const operationId = `metrics_export_${Date.now()}`;this.logger.debug(`[${operationId}] Generating metrics export`);try {// Get Prometheus metrics from metrics service
       const prometheusMetrics = await this.metricsService.getPrometheusMetrics();
 
       // Generate Grafana dashboard data

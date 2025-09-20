@@ -24,16 +24,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import * as WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { createServer, Server } from 'http';
-import { promisify } from 'util';
-
-import {
-  ConversationalWebSocketBridgeService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { createServer, Server } from 'http';import { promisify } from 'util';import {ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -43,21 +34,13 @@ import {
   ValidationAction,
   SecurityContext,
   ActionImpact,
-} from '../conversational-websocket-bridge.service';
-import { ParlantWebSocketStreamingBridgeService } from '../parlant-websocket-streaming-bridge.service';
-import { createSafeWebSocketServer } from '../websocket-types';
-
-// ===== MESSAGE FLOW TEST UTILITIES =====
-
-/**
+} from '../conversational-websocket-bridge.service';import { ParlantWebSocketStreamingBridgeService } from '../parlant-websocket-streaming-bridge.service';import { createSafeWebSocketServer } from '../websocket-types';// ===== MESSAGE FLOW TEST UTILITIES =====/**
  * Message flow validator for testing bidirectional communication
  */
 class MessageFlowValidator extends EventEmitter {
   private messageLog: Array<{
     timestamp: number;
-    direction: 'sent' | 'received';
-    message: ConversationalMessage;
-    latency?: number;
+    direction: 'sent' | 'received';message: ConversationalMessage;latency?: number;
   }> = [];
 
   private acknowledgments = new Map<string, {
@@ -82,14 +65,8 @@ class MessageFlowValidator extends EventEmitter {
   }
 
   private setupMessageHandling(): void {
-    this.ws.on('message', (data: WebSocket.RawData) => {
-      const receiveTime = performance.now();
-
-      try {
-        const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
-
-        // Calculate latency if this is a response to a sent message
-        const sentMessage = this.acknowledgments.get(message.messageId);
+    this.ws.on('message', (data: WebSocket.RawData) => {const receiveTime = performance.now();try {
+        const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;// Calculate latency if this is a response to a sent messageconst sentMessage = this.acknowledgments.get(message.messageId);
         if (sentMessage) {
           const latency = receiveTime - sentMessage.timestamp;
           sentMessage.acknowledged = true;
@@ -102,24 +79,14 @@ class MessageFlowValidator extends EventEmitter {
 
         this.messageLog.push({
           timestamp: receiveTime,
-          direction: 'received',
-          message,
-          latency: sentMessage?.ackLatency,
+          direction: 'received',message,latency: sentMessage?.ackLatency,
         });
 
         this.flowMetrics.totalReceived++;
-        this.emit('message-received', { message, timestamp: receiveTime });
+        this.emit('message-received', { message, timestamp: receiveTime });} catch (error) {this.flowMetrics.deliveryFailures++;
+        this.emit('parse-error', { error, timestamp: receiveTime });}});
 
-      } catch (error) {
-        this.flowMetrics.deliveryFailures++;
-        this.emit('parse-error', { error, timestamp: receiveTime });
-      }
-    });
-
-    this.ws.on('error', (error) => {
-      this.emit('connection-error', error);
-    });
-  }
+    this.ws.on('error', (error) => {this.emit('connection-error', error);});}
 
   async sendMessage(message: ConversationalMessage): Promise<void> {
     const sendTime = performance.now();
@@ -137,18 +104,11 @@ class MessageFlowValidator extends EventEmitter {
 
       this.messageLog.push({
         timestamp: sendTime,
-        direction: 'sent',
-        message,
-      });
+        direction: 'sent',message,});
 
       this.flowMetrics.totalSent++;
-      this.emit('message-sent', { message, timestamp: sendTime });
-
-    } catch (error) {
-      this.flowMetrics.deliveryFailures++;
-      this.emit('send-error', { error, message });
-    }
-  }
+      this.emit('message-sent', { message, timestamp: sendTime });} catch (error) {this.flowMetrics.deliveryFailures++;
+      this.emit('send-error', { error, message });}}
 
   async sendBulkMessages(messages: ConversationalMessage[], batchSize = 10): Promise<void> {
     for (let i = 0; i < messages.length; i += batchSize) {
@@ -251,28 +211,18 @@ class StreamingValidationTester {
     startTime: number;
     endTime?: number;
     progressCount: number;
-    status: 'pending' | 'completed' | 'failed';
-  }>();
-
-  constructor(private messageValidator: MessageFlowValidator) {
+    status: 'pending' | 'completed' | 'failed';}>();constructor(private messageValidator: MessageFlowValidator) {
     this.setupProgressTracking();
   }
 
   private setupProgressTracking(): void {
-    this.messageValidator.on('message-received', ({ message }) => {
-      if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
-        const progressMsg = message as ProgressUpdateMessage;
+    this.messageValidator.on('message-received', ({ message }) => {if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {const progressMsg = message as ProgressUpdateMessage;
         this.progressUpdates.push(progressMsg);
 
         const workflow = this.validationWorkflows.get(progressMsg.payload.operationId);
         if (workflow) {
           workflow.progressCount++;
-          if (progressMsg.payload.status === 'completed') {
-            workflow.endTime = Date.now();
-            workflow.status = 'completed';
-          } else if (progressMsg.payload.status === 'failed') {
-            workflow.endTime = Date.now();
-            workflow.status = 'failed';
+          if (progressMsg.payload.status === 'completed') {workflow.endTime = Date.now();workflow.status = 'completed';} else if (progressMsg.payload.status === 'failed') {workflow.endTime = Date.now();workflow.status = 'failed';
           }
         }
       }
@@ -280,8 +230,7 @@ class StreamingValidationTester {
   }
 
   async startValidationWorkflow(action: ValidationAction): Promise<string> {
-    const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const sessionId = `session_${Date.now()}`;
+    const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;const sessionId = `session_${Date.now()}`;
 
     // Track workflow
     this.validationWorkflows.set(validationId, {
@@ -300,21 +249,13 @@ class StreamingValidationTester {
       payload: {
         validationId,
         context: {
-          userId: 'stream-test-user',
-          applicationContext: 'streaming-test',
-          environmentInfo: { streaming: true },
-          previousActions: [],
+          userId: 'stream-test-user',applicationContext: 'streaming-test',environmentInfo: { streaming: true },previousActions: [],
           securityContext: {
-            authenticationLevel: 'basic',
-            permissions: ['read', 'write'],
-            auditRequired: false,
-            complianceFlags: [],
+            authenticationLevel: 'basic',permissions: ['read', 'write'],auditRequired: false,complianceFlags: [],
           } as SecurityContext,
         },
         action,
-        riskLevel: 'medium',
-        streamingOptions: {
-          enableProgressUpdates: true,
+        riskLevel: 'medium',streamingOptions: {enableProgressUpdates: true,
           updateInterval: 100, // 100ms updates
           maxUpdateCount: 10,
           compressionEnabled: false,
@@ -322,12 +263,8 @@ class StreamingValidationTester {
         },
       },
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compression: false,
-        routingHints: ['validation', 'streaming'],
-      },
-    };
+        priority: 'high',requiresAck: true,compression: false,
+        routingHints: ['validation', 'streaming'],},};
 
     await this.messageValidator.sendMessage(validationRequest);
     return validationId;
@@ -364,10 +301,7 @@ class StreamingValidationTester {
 
   getStreamingMetrics() {
     const completedWorkflows = Array.from(this.validationWorkflows.values())
-      .filter(workflow => workflow.status === 'completed');
-
-    const averageDuration = completedWorkflows.length > 0
-      ? completedWorkflows.reduce((sum, workflow) =>
+      .filter(workflow => workflow.status === 'completed');const averageDuration = completedWorkflows.length > 0? completedWorkflows.reduce((sum, workflow) =>
           sum + ((workflow.endTime || Date.now()) - workflow.startTime), 0) / completedWorkflows.length
       : 0;
 
@@ -378,10 +312,7 @@ class StreamingValidationTester {
     return {
       totalWorkflows: this.validationWorkflows.size,
       completedWorkflows: completedWorkflows.length,
-      failedWorkflows: Array.from(this.validationWorkflows.values()).filter(w => w.status === 'failed').length,
-      pendingWorkflows: Array.from(this.validationWorkflows.values()).filter(w => w.status === 'pending').length,
-      averageDuration,
-      averageProgressCount,
+      failedWorkflows: Array.from(this.validationWorkflows.values()).filter(w => w.status === 'failed').length,pendingWorkflows: Array.from(this.validationWorkflows.values()).filter(w => w.status === 'pending').length,averageDuration,averageProgressCount,
       totalProgressUpdates: this.progressUpdates.length,
     };
   }
@@ -392,14 +323,7 @@ class StreamingValidationTester {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8183,
-      'PARLANT_WEBSOCKET_PORT': 8184,
-      'WEBSOCKET_MESSAGE_QUEUE_SIZE': 10000,
-      'WEBSOCKET_MAX_MESSAGE_SIZE': 1048576, // 1MB
-      'WEBSOCKET_COMPRESSION_ENABLED': true,
-      'WEBSOCKET_HEARTBEAT_INTERVAL': 30000,
-    };
-    return config[key] ?? defaultValue;
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8183,'PARLANT_WEBSOCKET_PORT': 8184,'WEBSOCKET_MESSAGE_QUEUE_SIZE': 10000,'WEBSOCKET_MAX_MESSAGE_SIZE': 1048576, // 1MB'WEBSOCKET_COMPRESSION_ENABLED': true,'WEBSOCKET_HEARTBEAT_INTERVAL': 30000,};return config[key] ?? defaultValue;
   }),
 };
 
@@ -436,12 +360,7 @@ describe('Real-time Message Flow Tests', () => {
     testServer = createServer();
     wsServer = createSafeWebSocketServer({ server: testServer });
 
-    wsServer.on('connection', (ws: WebSocket.WebSocket) => {
-      console.log('New WebSocket connection for message flow testing');
-
-      ws.on('message', async (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
+    wsServer.on('connection', (ws: WebSocket.WebSocket) => {console.log('New WebSocket connection for message flow testing');ws.on('message', async (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
 
           // Handle different message types
           switch (message.type) {
@@ -467,9 +386,7 @@ describe('Real-time Message Flow Tests', () => {
                 type: ConversationalMessageType.ACKNOWLEDGMENT,
                 payload: { acknowledgedMessageId: message.messageId },
                 metadata: {
-                  priority: 'normal',
-                  requiresAck: false,
-                  compression: false,
+                  priority: 'normal',requiresAck: false,compression: false,
                   routingHints: [],
                 },
               };
@@ -478,15 +395,9 @@ describe('Real-time Message Flow Tests', () => {
               break;
           }
         } catch (error) {
-          console.error('Error processing message:', error);
-          ws.send(JSON.stringify({ error: 'Invalid message format' }));
-        }
-      });
+          console.error('Error processing message:', error);ws.send(JSON.stringify({ error: 'Invalid message format' }));}});
 
-      ws.on('error', (error) => {
-        console.error('WebSocket error in message flow test:', error);
-      });
-    });
+      ws.on('error', (error) => {console.error('WebSocket error in message flow test:', error);});});
 
     // Message handling functions
     async function handleValidationRequest(ws: WebSocket.WebSocket, request: ValidationRequestMessage): Promise<void> {
@@ -505,22 +416,16 @@ describe('Real-time Message Flow Tests', () => {
 
           const progressUpdate: ProgressUpdateMessage = {
             type: ConversationalMessageType.PROGRESS_UPDATE,
-            messageId: `progress_${validationId}_${updateCount}`,
-            sessionId: request.sessionId,
-            timestamp: Date.now(),
+            messageId: `progress_${validationId}_${updateCount}`,sessionId: request.sessionId,timestamp: Date.now(),
             sequence: updateCount,
             payload: {
               operationId: validationId,
               stage,
               progress,
               message: `Processing stage: ${stage} (${progress.toFixed(1)}%)`,
-              status: progress >= 100 ? 'completed' : 'active',
-              estimatedTimeRemaining: progress < 100 ? (updateInterval * (maxUpdates - updateCount)) : 0,
-            },
+              status: progress >= 100 ? 'completed' : 'active',estimatedTimeRemaining: progress < 100 ? (updateInterval * (maxUpdates - updateCount)) : 0,},
             metadata: {
-              priority: 'normal',
-              requiresAck: false,
-              compression: streamingOptions.compressionEnabled || false,
+              priority: 'normal',requiresAck: false,compression: streamingOptions.compressionEnabled || false,
               routingHints: ['progress'],
             },
           };
@@ -550,14 +455,9 @@ describe('Real-time Message Flow Tests', () => {
             requiresUserConfirmation: false,
             metadata: {
               processingTime: Math.random() * 100 + 50,
-              validationSteps: ['security', 'compliance', 'impact'],
-              riskAssessment: 'low',
-            },
-          },
+              validationSteps: ['security', 'compliance', 'impact'],riskAssessment: 'low',},},
           metadata: {
-            priority: 'high',
-            requiresAck: true,
-            compression: false,
+            priority: 'high',requiresAck: true,compression: false,
             routingHints: ['validation-response'],
           },
         };
@@ -575,17 +475,13 @@ describe('Real-time Message Flow Tests', () => {
         sequence: confirmation.sequence + 1,
         payload: {
           validationId: confirmation.payload.validationId,
-          result: confirmation.payload.approved ? 'approved' : 'rejected',
-          finalDecision: confirmation.payload.approved,
-          metadata: {
+          result: confirmation.payload.approved ? 'approved' : 'rejected',finalDecision: confirmation.payload.approved,metadata: {
             userReasoning: confirmation.payload.reasoning,
             confidence: confirmation.payload.confidence,
           },
         },
         metadata: {
-          priority: 'high',
-          requiresAck: false,
-          compression: false,
+          priority: 'high',requiresAck: false,compression: false,
           routingHints: ['confirmation-result'],
         },
       };
@@ -602,9 +498,7 @@ describe('Real-time Message Flow Tests', () => {
         sequence: heartbeat.sequence + 1,
         payload: { pong: true, serverTime: Date.now() },
         metadata: {
-          priority: 'low',
-          requiresAck: false,
-          compression: false,
+          priority: 'low',requiresAck: false,compression: false,
           routingHints: [],
         },
       };
@@ -631,29 +525,13 @@ describe('Real-time Message Flow Tests', () => {
 
   // ===== BIDIRECTIONAL MESSAGE EXCHANGE =====
 
-  describe('Bidirectional Message Exchange', () => {
-    it('should handle bidirectional message flow correctly', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
-      });
-
-      const messageValidator = new MessageFlowValidator(ws);
+  describe('Bidirectional Message Exchange', () => {it('should handle bidirectional message flow correctly', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);});const messageValidator = new MessageFlowValidator(ws);
       const testMessage: ConversationalMessage = {
-        messageId: 'bidirectional-test-001',
-        sessionId: 'test-session-bidirectional',
-        timestamp: Date.now(),
-        sequence: 1,
+        messageId: 'bidirectional-test-001',sessionId: 'test-session-bidirectional',timestamp: Date.now(),sequence: 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { status: 'test-message' },
-        metadata: {
-          priority: 'normal',
-          requiresAck: true,
-          compression: false,
-          routingHints: ['test'],
-        },
-      };
+        payload: { status: 'test-message' },metadata: {priority: 'normal',requiresAck: true,compression: false,
+          routingHints: ['test'],},};
 
       await messageValidator.sendMessage(testMessage);
 
@@ -674,11 +552,8 @@ describe('Real-time Message Flow Tests', () => {
       ws.close();
     });
 
-    it('should maintain message ordering in bidirectional flow', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
+    it('should maintain message ordering in bidirectional flow', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);
       });
 
       const messageValidator = new MessageFlowValidator(ws);
@@ -689,18 +564,12 @@ describe('Real-time Message Flow Tests', () => {
       for (let i = 0; i < messageCount; i++) {
         messages.push({
           messageId: `ordered-message-${i}`,
-          sessionId: 'test-session-ordering',
-          timestamp: Date.now() + i,
-          sequence: i + 1,
+          sessionId: 'test-session-ordering',timestamp: Date.now() + i,sequence: i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { messageIndex: i },
           metadata: {
-            priority: 'normal',
-            requiresAck: false,
-            compression: false,
-            routingHints: ['ordering-test'],
-          },
-        });
+            priority: 'normal',requiresAck: false,compression: false,
+            routingHints: ['ordering-test'],},});
       }
 
       // Send messages rapidly
@@ -713,11 +582,7 @@ describe('Real-time Message Flow Tests', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const messageLog = messageValidator.getMessageLog();
-      const sentMessages = messageLog.filter(entry => entry.direction === 'sent');
-      const receivedMessages = messageLog.filter(entry => entry.direction === 'received');
-
-      expect(sentMessages.length).toBe(messageCount);
-      expect(receivedMessages.length).toBe(messageCount);
+      const sentMessages = messageLog.filter(entry => entry.direction === 'sent');const receivedMessages = messageLog.filter(entry => entry.direction === 'received');expect(sentMessages.length).toBe(messageCount);expect(receivedMessages.length).toBe(messageCount);
 
       // Verify ordering
       for (let i = 0; i < messageCount; i++) {
@@ -731,29 +596,19 @@ describe('Real-time Message Flow Tests', () => {
 
   // ===== MESSAGE SERIALIZATION AND PERFORMANCE =====
 
-  describe('Message Serialization and Performance', () => {
-    it('should handle message serialization/deserialization efficiently', async () => {
-      const largePayload = {
-        data: 'x'.repeat(10000), // 10KB of data
+  describe('Message Serialization and Performance', () => {it('should handle message serialization/deserialization efficiently', async () => {const largePayload = {data: 'x'.repeat(10000), // 10KB of data
         metadata: {
           fields: Array.from({ length: 100 }, (_, i) => ({ field: `field_${i}`, value: Math.random() })),
         },
       };
 
       const testMessage: ConversationalMessage = {
-        messageId: 'serialization-test',
-        sessionId: 'test-session-serialization',
-        timestamp: Date.now(),
-        sequence: 1,
+        messageId: 'serialization-test',sessionId: 'test-session-serialization',timestamp: Date.now(),sequence: 1,
         type: ConversationalMessageType.STATUS_UPDATE,
         payload: largePayload,
         metadata: {
-          priority: 'normal',
-          requiresAck: false,
-          compression: true,
-          routingHints: ['serialization'],
-        },
-      };
+          priority: 'normal',requiresAck: false,compression: true,
+          routingHints: ['serialization'],},};
 
       // Test serialization performance
       const serializationStart = performance.now();
@@ -772,17 +627,12 @@ describe('Real-time Message Flow Tests', () => {
       expect(serialized.length).toBeGreaterThan(10000);
 
       console.log('Serialization Performance:', {
-        payloadSize: `${(serialized.length / 1024).toFixed(2)} KB`,
-        serializationTime: `${serializationTime.toFixed(3)}ms`,
-        deserializationTime: `${deserializationTime.toFixed(3)}ms`,
+        payloadSize: `${(serialized.length / 1024).toFixed(2)} KB`,serializationTime: `${serializationTime.toFixed(3)}ms`,deserializationTime: `${deserializationTime.toFixed(3)}ms`,
       });
     });
 
-    it('should achieve sub-50ms message delivery latency target', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
+    it('should achieve sub-50ms message delivery latency target', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);
       });
 
       const messageValidator = new MessageFlowValidator(ws);
@@ -792,18 +642,12 @@ describe('Real-time Message Flow Tests', () => {
       for (let i = 0; i < testCount; i++) {
         const testMessage: ConversationalMessage = {
           messageId: `latency-test-${i}`,
-          sessionId: 'test-session-latency',
-          timestamp: Date.now(),
-          sequence: i + 1,
+          sessionId: 'test-session-latency',timestamp: Date.now(),sequence: i + 1,
           type: ConversationalMessageType.HEARTBEAT,
           payload: { ping: true },
           metadata: {
-            priority: 'normal',
-            requiresAck: true,
-            compression: false,
-            routingHints: ['latency-test'],
-          },
-        };
+            priority: 'normal',requiresAck: true,compression: false,
+            routingHints: ['latency-test'],},};
 
         await messageValidator.sendMessage(testMessage);
         await new Promise(resolve => setTimeout(resolve, 20)); // 20ms between messages
@@ -816,14 +660,8 @@ describe('Real-time Message Flow Tests', () => {
 
       console.log('Message Delivery Performance:', {
         totalMessages: testCount,
-        deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,
-        averageLatency: `${metrics.averageLatency.toFixed(2)}ms`,
-        p50Latency: `${metrics.p50Latency.toFixed(2)}ms`,
-        p95Latency: `${metrics.p95Latency.toFixed(2)}ms`,
-        target: '50ms P95',
-      });
-
-      expect(metrics.deliverySuccessRate).toBeGreaterThan(0.99); // 99%+ success rate
+        deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,averageLatency: `${metrics.averageLatency.toFixed(2)}ms`,p50Latency: `${metrics.p50Latency.toFixed(2)}ms`,p95Latency: `${metrics.p95Latency.toFixed(2)}ms`,
+        target: '50ms P95',});expect(metrics.deliverySuccessRate).toBeGreaterThan(0.99); // 99%+ success rate
       expect(metrics.p95Latency).toBeLessThan(100); // P95 under 100ms (adjusted for test environment)
       expect(metrics.p50Latency).toBeLessThan(50); // P50 under 50ms
 
@@ -833,26 +671,13 @@ describe('Real-time Message Flow Tests', () => {
 
   // ===== STREAMING VALIDATION WORKFLOWS =====
 
-  describe('Streaming Validation Workflows', () => {
-    it('should handle real-time streaming validation workflow', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
-      });
-
-      const messageValidator = new MessageFlowValidator(ws);
+  describe('Streaming Validation Workflows', () => {it('should handle real-time streaming validation workflow', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);});const messageValidator = new MessageFlowValidator(ws);
       const streamingTester = new StreamingValidationTester(messageValidator);
 
       const testAction: ValidationAction = {
-        actionType: 'file_operation',
-        parameters: { operation: 'read', path: '/tmp/test.txt' },
-        expectedOutcome: 'File read successfully',
-        reversible: true,
-        impact: {
-          scope: 'local',
-          dataAccess: true,
-          stateChanges: false,
+        actionType: 'file_operation',parameters: { operation: 'read', path: '/tmp/test.txt' },expectedOutcome: 'File read successfully',reversible: true,impact: {
+          scope: 'local',dataAccess: true,stateChanges: false,
           userInteraction: false,
         } as ActionImpact,
       };
@@ -862,9 +687,7 @@ describe('Real-time Message Flow Tests', () => {
       // Wait for workflow completion
       const workflowResult = await streamingTester.waitForWorkflowCompletion(validationId);
 
-      expect(workflowResult.status).toBe('completed');
-      expect(workflowResult.progressCount).toBeGreaterThan(0);
-      expect(workflowResult.duration).toBeLessThan(5000); // Under 5 seconds
+      expect(workflowResult.status).toBe('completed');expect(workflowResult.progressCount).toBeGreaterThan(0);expect(workflowResult.duration).toBeLessThan(5000); // Under 5 seconds
       expect(workflowResult.progressUpdates.length).toBeGreaterThan(0);
 
       // Verify progress updates are ordered correctly
@@ -883,11 +706,8 @@ describe('Real-time Message Flow Tests', () => {
       ws.close();
     });
 
-    it('should handle multiple concurrent streaming workflows', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
+    it('should handle multiple concurrent streaming workflows', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);
       });
 
       const messageValidator = new MessageFlowValidator(ws);
@@ -899,14 +719,10 @@ describe('Real-time Message Flow Tests', () => {
       // Start multiple concurrent workflows
       for (let i = 0; i < workflowCount; i++) {
         const testAction: ValidationAction = {
-          actionType: `concurrent_action_${i}`,
-          parameters: { index: i, data: `test-data-${i}` },
-          expectedOutcome: `Action ${i} completed`,
+          actionType: `concurrent_action_${i}`,parameters: { index: i, data: `test-data-${i}` },expectedOutcome: `Action ${i} completed`,
           reversible: true,
           impact: {
-            scope: 'local',
-            dataAccess: false,
-            stateChanges: true,
+            scope: 'local',dataAccess: false,stateChanges: true,
             userInteraction: false,
           } as ActionImpact,
         };
@@ -921,10 +737,7 @@ describe('Real-time Message Flow Tests', () => {
       const results = await Promise.all(workflows);
 
       expect(results.length).toBe(workflowCount);
-      expect(results.every(result => result.status === 'completed')).toBe(true);
-
-      const streamingMetrics = streamingTester.getStreamingMetrics();
-      expect(streamingMetrics.completedWorkflows).toBe(workflowCount);
+      expect(results.every(result => result.status === 'completed')).toBe(true);const streamingMetrics = streamingTester.getStreamingMetrics();expect(streamingMetrics.completedWorkflows).toBe(workflowCount);
       expect(streamingMetrics.failedWorkflows).toBe(0);
 
       console.log('Concurrent Streaming Metrics:', {
@@ -940,12 +753,8 @@ describe('Real-time Message Flow Tests', () => {
 
   // ===== FLOW CONTROL AND BACKPRESSURE =====
 
-  describe('Flow Control and Backpressure', () => {
-    it('should handle high-throughput message flow without loss', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
+  describe('Flow Control and Backpressure', () => {it('should handle high-throughput message flow without loss', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);
       });
 
       const messageValidator = new MessageFlowValidator(ws);
@@ -961,12 +770,8 @@ describe('Real-time Message Flow Tests', () => {
         type: ConversationalMessageType.STATUS_UPDATE,
         payload: { index: i, data: `message-${i}` },
         metadata: {
-          priority: 'normal',
-          requiresAck: false,
-          compression: false,
-          routingHints: ['throughput'],
-        },
-      }));
+          priority: 'normal',requiresAck: false,compression: false,
+          routingHints: ['throughput'],},}));
 
       const startTime = performance.now();
       await messageValidator.sendBulkMessages(testMessages, batchSize);
@@ -980,24 +785,16 @@ describe('Real-time Message Flow Tests', () => {
 
       console.log('High-throughput Flow Results:', {
         messageCount,
-        sendDuration: `${sendDuration.toFixed(2)}ms`,
-        messagesPerSecond: Math.floor(messagesPerSecond),
-        deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,
-        target: '5000 messages/second',
-      });
-
-      expect(metrics.totalSent).toBe(messageCount);
+        sendDuration: `${sendDuration.toFixed(2)}ms`,messagesPerSecond: Math.floor(messagesPerSecond),deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,
+        target: '5000 messages/second',});expect(metrics.totalSent).toBe(messageCount);
       expect(metrics.deliverySuccessRate).toBeGreaterThan(0.95); // 95%+ success rate
       expect(messagesPerSecond).toBeGreaterThan(1000); // Target 1000+ messages/second
 
       ws.close();
     });
 
-    it('should implement proper backpressure handling', async () => {
-      const ws = new WebSocket.WebSocket(TEST_URL);
-      await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);
-        ws.on('error', reject);
+    it('should implement proper backpressure handling', async () => {const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);ws.on('error', reject);
       });
 
       const messageValidator = new MessageFlowValidator(ws);
@@ -1018,18 +815,10 @@ describe('Real-time Message Flow Tests', () => {
       const burstSize = 500;
       const largeMessages: ConversationalMessage[] = Array.from({ length: burstSize }, (_, i) => ({
         messageId: `backpressure-test-${i}`,
-        sessionId: 'test-session-backpressure',
-        timestamp: Date.now() + i,
-        sequence: i + 1,
+        sessionId: 'test-session-backpressure',timestamp: Date.now() + i,sequence: i + 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { index: i, largeData: 'x'.repeat(1000) }, // 1KB per message
-        metadata: {
-          priority: 'normal',
-          requiresAck: false,
-          compression: false,
-          routingHints: ['backpressure'],
-        },
-      }));
+        payload: { index: i, largeData: 'x'.repeat(1000) }, // 1KB per messagemetadata: {priority: 'normal',requiresAck: false,compression: false,
+          routingHints: ['backpressure'],},}));
 
       // Send burst without delays
       for (const message of largeMessages) {
@@ -1045,8 +834,7 @@ describe('Real-time Message Flow Tests', () => {
       console.log('Backpressure Test Results:', {
         burstSize,
         backpressureDetected,
-        maxQueueSize: `${(queueSize / 1024).toFixed(2)}KB`,
-        deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,
+        maxQueueSize: `${(queueSize / 1024).toFixed(2)}KB`,deliverySuccessRate: `${(metrics.deliverySuccessRate * 100).toFixed(2)}%`,
       });
 
       expect(metrics.totalSent).toBe(burstSize);

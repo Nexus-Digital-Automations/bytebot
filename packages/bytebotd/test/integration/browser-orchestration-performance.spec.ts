@@ -406,7 +406,7 @@ describe('Browser Orchestration Performance Tests', () => {
         if (agentStatus.body.utilization) {
           metrics.agentUtilization.efficiency = agentStatus.body.utilization;
         }
-      } catch (error) {
+      } catch (_error) {
         // Continue monitoring
       }
     }, config.monitoringInterval);
@@ -482,7 +482,7 @@ describe('Browser Orchestration Performance Tests', () => {
             previousAgentCount = currentAgentCount;
             break;
           }
-        } catch (error) {
+        } catch (_error) {
           // Continue monitoring
         }
 

@@ -27,20 +27,11 @@
  * @version 4.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { HealthIndicatorResult, HealthIndicator } from '@nestjs/terminus';
-import * as process from 'process';
-import {
-  BasicHealthResponse,
+import { Injectable, Logger } from '@nestjs/common';import { HealthIndicatorResult, HealthIndicator } from '@nestjs/terminus';import * as process from 'process';import {BasicHealthResponse,
   DetailedStatusResponse,
-} from './interfaces/health.interfaces';
-import {
-  ParlantHealthMetricsValidationService,
+} from './interfaces/health.interfaces';import {ParlantHealthMetricsValidationService,
   HealthOperationType,
-} from '../parlant/services/parlant-health-metrics-validation.service';
-
-// Re-export interfaces for test files
-export { BasicHealthResponse, DetailedStatusResponse };
+} from '../parlant/services/parlant-health-metrics-validation.service';// Re-export interfaces for test filesexport { BasicHealthResponse, DetailedStatusResponse };
 
 /**
  * Enterprise health monitoring service with Parlant conversational validation
@@ -55,8 +46,7 @@ export class HealthService extends HealthIndicator {
   ) {
     super();
     this.startTime = Date.now();
-    this.logger.log('Enterprise Health Service initialized with Parlant integration');
-    this.logger.log('PARLANT VALIDATION: All diagnostic operations now require conversational approval');
+    this.logger.log('Enterprise Health Service initialized with Parlant integration');this.logger.log('PARLANT VALIDATION: All diagnostic operations now require conversational approval');
   }
 
   /**
@@ -65,8 +55,7 @@ export class HealthService extends HealthIndicator {
    * @returns Basic health status with uptime and memory info
    */
   getBasicHealth(): BasicHealthResponse {
-    const operationId = `health${Date.now()}`;
-    this.logger.debug(`[${operationId}] Getting basic health status`);
+    const operationId = `health${Date.now()}`;this.logger.debug(`[${operationId}] Getting basic health status`);
 
     try {
       const memoryUsage = process.memoryUsage();
@@ -93,9 +82,7 @@ export class HealthService extends HealthIndicator {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown error';
       this.logger.error(
-        `[${operationId}] Failed to get basic health: ${errorMessage}`,
-      );
-      throw _error;
+        `[${operationId}] Failed to get basic health: ${errorMessage}`,);throw _error;
     }
   }
 
@@ -105,8 +92,7 @@ export class HealthService extends HealthIndicator {
    * @returns Comprehensive system status with service dependencies
    */
   getDetailedStatus(): DetailedStatusResponse {
-    const operationId = `status${Date.now()}`;
-    this.logger.debug(`[${operationId}] Getting detailed system status`);
+    const operationId = `status${Date.now()}`;this.logger.debug(`[${operationId}] Getting detailed system status`);
 
     try {
       const memoryUsage = process.memoryUsage();
@@ -119,18 +105,11 @@ export class HealthService extends HealthIndicator {
       const performance = this.getPerformanceMetrics();
 
       // Determine overall status based on services
-      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-      const serviceStatuses = Object.values(services);
-
-      if (
+      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';const serviceStatuses = Object.values(services);if (
         serviceStatuses.some(
           (s) =>
-            s === 'disconnected' || s === 'unavailable' || s === 'unreachable',
-        )
-      ) {
-        status = serviceStatuses.every((s) => s === 'unknown')
-          ? 'degraded'
-          : 'unhealthy';
+            s === 'disconnected' || s === 'unavailable' || s === 'unreachable',)) {
+        status = serviceStatuses.every((s) => s === 'unknown')? 'degraded': 'unhealthy';
       }
 
       const response: DetailedStatusResponse = {
@@ -151,11 +130,8 @@ export class HealthService extends HealthIndicator {
       };
 
       this.logger.debug(
-        `[${operationId}] Detailed status retrieved successfully`,
-        {
-          status,
-          memoryUsage: `${response.memory.used}MB`,
-          uptime: `${response.uptime}s`,
+        `[${operationId}] Detailed status retrieved successfully`,{status,
+          memoryUsage: `${response.memory.used}MB`,uptime: `${response.uptime}s`,
           servicesCount: Object.keys(services).length,
         },
       );
@@ -176,28 +152,16 @@ export class HealthService extends HealthIndicator {
    *
    * @returns Service health status map
    */
-  private checkServiceHealth(): DetailedStatusResponse['services'] {
-    this.logger.debug('Checking service health (legacy)');
-
-    // Legacy method - maintained for backward compatibility
-    // New Kubernetes health checks use the dedicated methods above
+  private checkServiceHealth(): DetailedStatusResponse['services'] {this.logger.debug('Checking service health (legacy)');// Legacy method - maintained for backward compatibility// New Kubernetes health checks use the dedicated methods above
     return {
-      database: 'unknown', // Use checkDatabaseHealth() for detailed checks
-      cache: 'unknown', // Would check Redis/cache availability
-      external: 'unknown', // Use checkExternalServices() for detailed checks
-    };
-  }
+      database: 'unknown', // Use checkDatabaseHealth() for detailed checkscache: 'unknown', // Would check Redis/cache availabilityexternal: 'unknown', // Use checkExternalServices() for detailed checks};}
 
   /**
    * Get basic performance metrics
    *
    * @returns Performance metrics object
    */
-  private getPerformanceMetrics(): DetailedStatusResponse['performance'] {
-    this.logger.debug('Getting performance metrics');
-
-    // In a real implementation, these would track actual request metrics
-    // For this simple feature demo, we'll return placeholder values
+  private getPerformanceMetrics(): DetailedStatusResponse['performance'] {this.logger.debug('Getting performance metrics');// In a real implementation, these would track actual request metrics// For this simple feature demo, we'll return placeholder values
     return {
       requestsPerSecond: 0, // Would track actual RPS
       averageResponseTime: 0, // Would track actual response times
@@ -224,12 +188,7 @@ export class HealthService extends HealthIndicator {
     const isStable = uptime >= minimumSeconds * 1000;
 
     this.logger.debug(
-      `Service stability check: ${isStable ? 'stable' : 'warming up'}`,
-      {
-        uptime: `${Math.round(uptime / 1000)}s`,
-        minimumRequired: `${minimumSeconds}s`,
-      },
-    );
+      `Service stability check: ${isStable ? 'stable' : 'warming up'}`,{uptime: `${Math.round(uptime / 1000)}s`,minimumRequired: `${minimumSeconds}s`,},);
 
     return isStable;
   }
@@ -240,11 +199,7 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for process health
    */
   checkProcessHealth(): HealthIndicatorResult {
-    const operationId = `process_health${Date.now()}`;
-    this.logger.debug(`[${operationId}] Checking process health`);
-
-    try {
-      const memoryUsage = process.memoryUsage();
+    const operationId = `process_health${Date.now()}`;this.logger.debug(`[${operationId}] Checking process health`);try {const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
       // Check if process is healthy (basic sanity checks)
@@ -255,15 +210,11 @@ export class HealthService extends HealthIndicator {
 
       if (isHealthy) {
         this.logger.debug(`[${operationId}] Process health check passed`);
-        return this.getStatus('process', true, {
-          uptime: Math.round(uptime),
-          memoryMB: Math.round(memoryUsage.rss / 1024 / 1024),
+        return this.getStatus('process', true, {uptime: Math.round(uptime),memoryMB: Math.round(memoryUsage.rss / 1024 / 1024),
         });
       } else {
         throw new Error(
-          'Process health check failed - invalid memory or uptime',
-        );
-      }
+          'Process health check failed - invalid memory or uptime',);}
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
@@ -281,26 +232,19 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for database connectivity with conversational approval
    */
   async checkDatabaseHealth(): Promise<HealthIndicatorResult> {
-    const operationId = `db_health${Date.now()}`;
-    this.logger.debug(`[${operationId}] Checking database health with Parlant validation`);
+    const operationId = `db_health${Date.now()}`;this.logger.debug(`[${operationId}] Checking database health with Parlant validation`);
 
     try {
       // PARLANT VALIDATION: Database health check (HIGH risk - critical system component)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.DATABASE_HEALTH,
         {
-          operation: 'database_connectivity_check',
-          component: 'database',
-          riskLevel: 'HIGH',
-          includesPing: true,
-          includesConnectionPool: true,
+          operation: 'database_connectivity_check',component: 'database',riskLevel: 'HIGH',includesPing: true,includesConnectionPool: true,
         },
         { userId: 'system', userRole: 'service' },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation for database health`, {
-        operationId,
-        approved: validation.approved,
+      this.logger.debug(`[${operationId}] Parlant validation for database health`, {operationId,approved: validation.approved,
         riskLevel: validation.riskLevel,
         conversationId: validation.conversationId,
       });
@@ -334,24 +278,18 @@ export class HealthService extends HealthIndicator {
 
         return this.getStatus('database', true, {
           responseTime: `${responseTime}ms`,
-          status: 'connected',
-          validationApproved: true,
-          conversationId: validation.conversationId,
+          status: 'connected',validationApproved: true,conversationId: validation.conversationId,
           parlantAudit: validation.auditTrail,
         });
       } else {
-        throw new Error('Database connection failed');
-      }
-    } catch (_error) {
+        throw new Error('Database connection failed');}} catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown error';
       this.logger.error(
         `[${operationId}] Database health check failed: ${errorMessage}`,
       );
 
-      return this.getStatus('database', false, {
-        error: errorMessage,
-        status: 'disconnected',
+      return this.getStatus('database', false, {error: errorMessage,status: 'disconnected',
       });
     }
   }
@@ -362,26 +300,19 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for external services with conversational approval
    */
   async checkExternalServices(): Promise<HealthIndicatorResult> {
-    const operationId = `external_services${Date.now()}`;
-    this.logger.debug(`[${operationId}] Checking external services with Parlant validation`);
+    const operationId = `external_services${Date.now()}`;this.logger.debug(`[${operationId}] Checking external services with Parlant validation`);
 
     try {
       // PARLANT VALIDATION: External services check (HIGH risk - network dependencies)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.EXTERNAL_SERVICES,
         {
-          operation: 'external_service_dependency_check',
-          component: 'external_services',
-          riskLevel: 'HIGH',
-          includesNetworkCalls: true,
-          includesThirdPartyServices: true,
+          operation: 'external_service_dependency_check',component: 'external_services',riskLevel: 'HIGH',includesNetworkCalls: true,includesThirdPartyServices: true,
         },
         { userId: 'system', userRole: 'service' },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation for external services`, {
-        operationId,
-        approved: validation.approved,
+      this.logger.debug(`[${operationId}] Parlant validation for external services`, {operationId,approved: validation.approved,
         riskLevel: validation.riskLevel,
         conversationId: validation.conversationId,
       });
@@ -395,9 +326,7 @@ export class HealthService extends HealthIndicator {
 
         return this.getStatus('external_services', false, {
           error: `Parlant validation failed: ${validation.reason}`,
-          status: 'validation_rejected',
-          conversationId: validation.conversationId,
-        });
+          status: 'validation_rejected',conversationId: validation.conversationId,});
       }
 
       // Execute external services check with Parlant audit trail
@@ -425,9 +354,7 @@ export class HealthService extends HealthIndicator {
         ) => {
           const serviceName = `service${index}`;
 
-          if (result.status === 'fulfilled') {
-            results[serviceName] = result.value;
-          } else {
+          if (result.status === 'fulfilled') {results[serviceName] = result.value;} else {
             results[serviceName] = {
               status: 'error',
               error:
@@ -447,9 +374,7 @@ export class HealthService extends HealthIndicator {
         conversationId: validation.conversationId,
       });
 
-      return this.getStatus('external_services', allHealthy, {
-        ...results,
-        validationApproved: true,
+      return this.getStatus('external_services', allHealthy, {...results,validationApproved: true,
         conversationId: validation.conversationId,
         parlantAudit: validation.auditTrail,
       });
@@ -472,11 +397,7 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for startup completion
    */
   checkStartupComplete(): HealthIndicatorResult {
-    const operationId = `startup${Date.now()}`;
-    this.logger.debug(`[${operationId}] Checking startup completion`);
-
-    try {
-      const uptime = Date.now() - this.startTime;
+    const operationId = `startup${Date.now()}`;this.logger.debug(`[${operationId}] Checking startup completion`);try {const uptime = Date.now() - this.startTime;
       const minimumStartupTime = 10000; // 10 seconds
       const isStartupComplete = uptime >= minimumStartupTime;
 
@@ -498,10 +419,7 @@ export class HealthService extends HealthIndicator {
 
         return this.getStatus('startup', false, {
           uptime: `${Math.round(uptime / 1000)}s`,
-          status: 'initializing',
-          message: 'Service is still starting up',
-        });
-      }
+          status: 'initializing',message: 'Service is still starting up',});}
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
@@ -519,16 +437,11 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for module initialization
    */
   checkModuleInitialization(): HealthIndicatorResult {
-    const operationId = `modules${Date.now()}`;
-    this.logger.debug(`[${operationId}] Checking module initialization`);
+    const operationId = `modules${Date.now()}`;this.logger.debug(`[${operationId}] Checking module initialization`);
 
     try {
       // Check if core modules are initialized
-      // This is a simplified check - in a real app you'd check actual module states
-      const modules = {
-        'computer-use': true, // Assume initialized
-        'input-tracking': true, // Assume initialized
-        health: true, // We know this is initialized since we're running
+      // This is a simplified check - in a real app you'd check actual module statesconst modules = {'computer-use': true, // Assume initialized'input-tracking': true, // Assume initializedhealth: true, // We know this is initialized since we're running
       };
 
       const allInitialized = Object.values(modules).every(Boolean);
@@ -541,9 +454,7 @@ export class HealthService extends HealthIndicator {
         },
       );
 
-      return this.getStatus('modules', allInitialized, { modules });
-    } catch (_error) {
-      const errorMessage =
+      return this.getStatus('modules', allInitialized, { modules });} catch (_error) {const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
       this.logger.error(
         `[${operationId}] Module initialization check failed: ${errorMessage}`,
@@ -592,9 +503,7 @@ export class HealthService extends HealthIndicator {
           // Simulate service availability (90% success rate)
           Math.random() > 0.1
             ? resolve(true)
-            : reject(new Error('Service unavailable'));
-        }, Math.random() * 200); // Simulate variable response time
-      });
+            : reject(new Error('Service unavailable'));}, Math.random() * 200); // Simulate variable response time});
 
       const responseTime = Date.now() - startTime;
       return {
@@ -605,9 +514,7 @@ export class HealthService extends HealthIndicator {
       const responseTime = Date.now() - startTime;
       return {
         status: 'unhealthy',
-        responseTime: `${responseTime}ms`,
-      };
-    }
+        responseTime: `${responseTime}ms`,};}
   }
 
   /**
@@ -617,8 +524,7 @@ export class HealthService extends HealthIndicator {
    * @returns Promise<{status: string, details: Record<string, string>}>
    */
   async checkHealth(): Promise<{status: string, details: Record<string, string>}> {
-    const operationId = `checkHealth${Date.now()}`;
-    this.logger.debug(`[${operationId}] Starting comprehensive health check`);
+    const operationId = `checkHealth${Date.now()}`;this.logger.debug(`[${operationId}] Starting comprehensive health check`);
 
     try {
       // Get basic health status
@@ -632,21 +538,9 @@ export class HealthService extends HealthIndicator {
 
       // Determine overall status
       const isHealthy =
-        basicHealth.status === 'healthy' &&
-        processHealth.process?.status === 'up' &&
-        databaseHealth.database?.status === 'up';
-
-      const status = isHealthy ? 'healthy' : 'unhealthy';
-
-      const details: Record<string, string> = {
-        overall: status,
-        process: processHealth.process?.status ?? 'unknown',
-        database: databaseHealth.database?.status ?? 'unknown',
-        uptime: `${basicHealth.uptime}s`,
-        memory: `${basicHealth.memory.used}MB`,
-      };
-
-      this.logger.debug(
+        basicHealth.status === 'healthy' &&processHealth.process?.status === 'up' &&databaseHealth.database?.status === 'up';const status = isHealthy ? 'healthy' : 'unhealthy';const details: Record<string, string> = {overall: status,
+        process: processHealth.process?.status ?? 'unknown',database: databaseHealth.database?.status ?? 'unknown',
+        uptime: `${basicHealth.uptime}s`,memory: `${basicHealth.memory.used}MB`,};this.logger.debug(
         `[${operationId}] Comprehensive health check completed`,
         { status, details }
       );
@@ -659,9 +553,7 @@ export class HealthService extends HealthIndicator {
       );
 
       return {
-        status: 'unhealthy',
-        details: {
-          overall: 'unhealthy',
+        status: 'unhealthy',details: {overall: 'unhealthy',
           error: errorMessage,
         },
       };

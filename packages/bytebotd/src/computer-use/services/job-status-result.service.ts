@@ -45,24 +45,9 @@ import {
   BadRequestException,
   NotFoundException,
   InternalServerErrorException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import Redis from 'ioredis';
-import * as zlib from 'zlib';
-import { promisify } from 'util';
-import { v4 as uuidv4 } from 'uuid';
-import { CacheService } from '../../cache/cache.service';
-import { MetricsService } from '../../metrics/metrics.service';
-import {
-  JobStatus,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import Redis from 'ioredis';import * as zlib from 'zlib';import { promisify } from 'util';import { v4 as uuidv4 } from 'uuid';import { CacheService } from '../../cache/cache.service';import { MetricsService } from '../../metrics/metrics.service';import {JobStatus,
   JobPriority,
-} from '../dto/async-job.dto';
-
-// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
-
-/**
+} from '../dto/async-job.dto';// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
  * Enhanced job status with detailed progress tracking
  */
 export interface EnhancedJobStatus {
@@ -109,9 +94,7 @@ export interface ResultStorageInfo {
   size: number;
   compressed: boolean;
   compressionRatio?: number;
-  format: 'json' | 'binary' | 'text' | 'stream';
-  contentType: string;
-  checksum: string;
+  format: 'json' | 'binary' | 'text' | 'stream';contentType: string;checksum: string;
   chunks?: number;
   storageLocation: string;
   encryption?: {
@@ -127,13 +110,9 @@ export interface ResultStorageInfo {
 export interface JobHistoryRecord {
   jobId: string;
   timestamp: Date;
-  event: 'created' | 'started' | 'progress' | 'completed' | 'failed' | 'cancelled' | 'retried';
-  userId?: string;
-  sessionId?: string;
+  event: 'created' | 'started' | 'progress' | 'completed' | 'failed' | 'cancelled' | 'retried';userId?: string;sessionId?: string;
   data: Record<string, unknown>;
-  source: 'system' | 'user' | 'webhook' | 'scheduler';
-  clientInfo?: {
-    userAgent?: string;
+  source: 'system' | 'user' | 'webhook' | 'scheduler';clientInfo?: {userAgent?: string;
     ipAddress?: string;
     requestId?: string;
   };
@@ -205,9 +184,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
   private redis: Redis;
   private redisSubscriber: Redis;
   private isInitialized = false;
-  private readonly keyPrefix = 'bytebot:job';
-  private readonly streamingConfig: StreamingConfig;
-  private readonly retentionPolicies: Map<string, RetentionPolicy> = new Map();
+  private readonly keyPrefix = 'bytebot:job';private readonly streamingConfig: StreamingConfig;private readonly retentionPolicies: Map<string, RetentionPolicy> = new Map();
 
   // Performance tracking
   private readonly performanceMetrics = {
@@ -226,15 +203,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
   ) {
     // Initialize streaming configuration
     this.streamingConfig = {
-      chunkSize: this.configService.get<number>('job.streaming.chunkSize', 1024 * 1024), // 1MB chunks
-      maxConcurrentChunks: this.configService.get<number>('job.streaming.maxConcurrentChunks', 5),
-      compressionEnabled: this.configService.get<boolean>('job.streaming.compression', true),
-      resumableDownloads: this.configService.get<boolean>('job.streaming.resumable', true),
-      cacheChunks: this.configService.get<boolean>('job.streaming.cacheChunks', true),
-      streamingThresholdMB: this.configService.get<number>('job.streaming.thresholdMB', 5),
-    };
-
-    this.initializeRetentionPolicies();
+      chunkSize: this.configService.get<number>('job.streaming.chunkSize', 1024 * 1024), // 1MB chunksmaxConcurrentChunks: this.configService.get<number>('job.streaming.maxConcurrentChunks', 5),compressionEnabled: this.configService.get<boolean>('job.streaming.compression', true),resumableDownloads: this.configService.get<boolean>('job.streaming.resumable', true),cacheChunks: this.configService.get<boolean>('job.streaming.cacheChunks', true),streamingThresholdMB: this.configService.get<number>('job.streaming.thresholdMB', 5),};this.initializeRetentionPolicies();
   }
 
   async onModuleInit(): Promise<void> {
@@ -243,18 +212,13 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
     await this.performStartupValidation();
     this.isInitialized = true;
 
-    this.logger.log('Job Status & Result Service initialized successfully', {
-      streamingConfig: this.streamingConfig,
-      retentionPolicies: this.retentionPolicies.size,
+    this.logger.log('Job Status & Result Service initialized successfully', {streamingConfig: this.streamingConfig,retentionPolicies: this.retentionPolicies.size,
     });
   }
 
   async onModuleDestroy(): Promise<void> {
     await this.cleanupConnections();
-    this.logger.log('Job Status & Result Service destroyed');
-  }
-
-  // ===== CORE STATUS TRACKING METHODS =====
+    this.logger.log('Job Status & Result Service destroyed');}// ===== CORE STATUS TRACKING METHODS =====
 
   /**
    * Updates job status with comprehensive progress tracking
@@ -305,10 +269,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       const historyKey = this.getHistoryKey(jobId);
 
       // Store enhanced status
-      pipeline.hset(statusKey, 'status', JSON.stringify(enhancedStatus));
-      pipeline.expire(statusKey, this.getRetentionTTL(jobId));
-
-      // Add history record
+      pipeline.hset(statusKey, 'status', JSON.stringify(enhancedStatus));pipeline.expire(statusKey, this.getRetentionTTL(jobId));// Add history record
       const historyRecord: JobHistoryRecord = {
         jobId,
         timestamp: new Date(),
@@ -330,9 +291,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       );
 
       // Emit real-time update event
-      this.eventEmitter.emit('job.status.updated', {
-        jobId,
-        status,
+      this.eventEmitter.emit('job.status.updated', {jobId,status,
         progress,
         timestamp: new Date(),
       });
@@ -341,24 +300,18 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       const responseTime = Date.now() - startTime;
       await this.updatePerformanceMetrics('status_update', responseTime);
 
-      this.logger.debug(`Job status updated: ${jobId} -> ${status} (${progress}%)`, {
-        jobId,
-        status,
+      this.logger.debug(`Job status updated: ${jobId} -> ${status} (${progress}%)`, {jobId,status,
         progress,
         responseTimeMs: responseTime,
       });
 
     } catch (error) {
-      this.logger.error(`Failed to update job status: ${jobId}`, {
-        error: error.message,
-        stack: error.stack,
+      this.logger.error(`Failed to update job status: ${jobId}`, {error: error.message,stack: error.stack,
         jobId,
         status,
         progress,
       });
-      throw new InternalServerErrorException(`Failed to update job status: ${error.message}`);
-    }
-  }
+      throw new InternalServerErrorException(`Failed to update job status: ${error.message}`);}}
 
   /**
    * Retrieves enhanced job status with caching
@@ -372,16 +325,11 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       // Try cache first
       const cached = await this.cacheService.get<EnhancedJobStatus>(`job:status:${jobId}`);
       if (cached) {
-        await this.updatePerformanceMetrics('status_get_cache_hit', Date.now() - startTime);
-        return cached;
-      }
+        await this.updatePerformanceMetrics('status_get_cache_hit', Date.now() - startTime);return cached;}
 
       // Fallback to Redis
       const statusKey = this.getStatusKey(jobId);
-      const statusData = await this.redis.hget(statusKey, 'status');
-
-      if (!statusData) {
-        await this.updatePerformanceMetrics('status_get_miss', Date.now() - startTime);
+      const statusData = await this.redis.hget(statusKey, 'status');if (!statusData) {await this.updatePerformanceMetrics('status_get_miss', Date.now() - startTime);
         return null;
       }
 
@@ -401,9 +349,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       return enhancedStatus;
 
     } catch (error) {
-      this.logger.error(`Failed to get job status: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job status: ${jobId}`, {error: error.message,jobId,
       });
       throw new InternalServerErrorException(`Failed to get job status: ${error.message}`);
     }
@@ -417,9 +363,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
   async storeJobResult(
     jobId: string,
     result: unknown,
-    contentType: string = 'application/json',
-    compress: boolean = true,
-  ): Promise<ResultStorageInfo> {
+    contentType: string = 'application/json',compress: boolean = true,): Promise<ResultStorageInfo> {
     const startTime = Date.now();
 
     try {
@@ -427,22 +371,14 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
       const resultId = uuidv4();
       const serializedResult = JSON.stringify(result);
-      const originalSize = Buffer.byteLength(serializedResult, 'utf8');
-
-      let finalData: Buffer;
-      let compressionRatio = 1;
+      const originalSize = Buffer.byteLength(serializedResult, 'utf8');let finalData: Buffer;let compressionRatio = 1;
       let compressed = false;
 
       // Apply compression if enabled and beneficial
       if (compress && originalSize > 1024) { // Only compress if >1KB
-        if (contentType.includes('json') || contentType.includes('text')) {
-          finalData = await this.compressData(serializedResult, 'gzip');
-          compressed = true;
-          compressionRatio = originalSize / finalData.length;
+        if (contentType.includes('json') || contentType.includes('text')) {finalData = await this.compressData(serializedResult, 'gzip');compressed = true;compressionRatio = originalSize / finalData.length;
         } else {
-          finalData = Buffer.from(serializedResult, 'utf8');
-        }
-      } else {
+          finalData = Buffer.from(serializedResult, 'utf8');}} else {
         finalData = Buffer.from(serializedResult, 'utf8');
       }
 
@@ -489,18 +425,11 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       });
 
       // Record in history
-      await this.recordJobHistory(jobId, 'completed', {
-        resultId,
-        resultSize: finalData.length,
+      await this.recordJobHistory(jobId, 'completed', {resultId,resultSize: finalData.length,
         compressionRatio,
-        storageStrategy: shouldStream ? 'streaming' : 'direct',
-      });
+        storageStrategy: shouldStream ? 'streaming' : 'direct',});await this.updatePerformanceMetrics('result_store', Date.now() - startTime);
 
-      await this.updatePerformanceMetrics('result_store', Date.now() - startTime);
-
-      this.logger.log(`Job result stored successfully: ${jobId}`, {
-        jobId,
-        resultId,
+      this.logger.log(`Job result stored successfully: ${jobId}`, {jobId,resultId,
         originalSize,
         finalSize: finalData.length,
         compressionRatio,
@@ -511,14 +440,10 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       return storageInfo;
 
     } catch (error) {
-      this.logger.error(`Failed to store job result: ${jobId}`, {
-        error: error.message,
-        stack: error.stack,
+      this.logger.error(`Failed to store job result: ${jobId}`, {error: error.message,stack: error.stack,
         jobId,
       });
-      throw new InternalServerErrorException(`Failed to store job result: ${error.message}`);
-    }
-  }
+      throw new InternalServerErrorException(`Failed to store job result: ${error.message}`);}}
 
   /**
    * Retrieves job result with decompression and streaming support
@@ -561,10 +486,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
         throw new NotFoundException(`Result data not found for job: ${jobId}`);
       }
 
-      let finalData = Buffer.from(resultData, 'base64');
-
-      // Decompress if needed
-      if (storageInfo.compressed) {
+      let finalData = Buffer.from(resultData, 'base64');// Decompress if neededif (storageInfo.compressed) {
         finalData = await this.decompressData(finalData, 'gzip');
       }
 
@@ -577,16 +499,12 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
         });
       }
 
-      const result = JSON.parse(finalData.toString('utf8'));
-
-      await this.updatePerformanceMetrics('result_get_redis', Date.now() - startTime);
+      const result = JSON.parse(finalData.toString('utf8'));await this.updatePerformanceMetrics('result_get_redis', Date.now() - startTime);
 
       return { result, metadata: storageInfo };
 
     } catch (error) {
-      this.logger.error(`Failed to get job result: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job result: ${jobId}`, {error: error.message,jobId,
       });
       throw new InternalServerErrorException(`Failed to get job result: ${error.message}`);
     }
@@ -599,9 +517,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
    */
   async recordJobHistory(
     jobId: string,
-    event: JobHistoryRecord['event'],
-    data: Record<string, unknown>,
-    userId?: string,
+    event: JobHistoryRecord['event'],data: Record<string, unknown>,userId?: string,
     sessionId?: string,
   ): Promise<void> {
     try {
@@ -620,9 +536,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       await this.redis.ltrim(historyKey, 0, 999); // Keep last 1000 records
       await this.redis.expire(historyKey, this.getRetentionTTL(jobId));
 
-      this.logger.debug(`Job history recorded: ${jobId} -> ${event}`, {
-        jobId,
-        event,
+      this.logger.debug(`Job history recorded: ${jobId} -> ${event}`, {jobId,event,
         userId,
         sessionId,
       });
@@ -658,9 +572,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       });
 
     } catch (error) {
-      this.logger.error(`Failed to get job history: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job history: ${jobId}`, {error: error.message,jobId,
       });
       throw new InternalServerErrorException(`Failed to get job history: ${error.message}`);
     }
@@ -701,17 +613,13 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
       const duration = Date.now() - startTime;
 
-      this.logger.log('Retention cleanup completed', {
-        totalCleaned,
-        totalArchived,
+      this.logger.log('Retention cleanup completed', {totalCleaned,totalArchived,
         durationMs: duration,
         keysScanned: jobKeys.length,
       });
 
       // Update metrics
-      await this.metricsService.recordMetric('job.retention.cleanup', {
-        cleaned: totalCleaned,
-        archived: totalArchived,
+      await this.metricsService.recordMetric('job.retention.cleanup', {cleaned: totalCleaned,archived: totalArchived,
         duration,
       });
 
@@ -736,19 +644,13 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
       await this.deleteJobData(jobId);
 
-      this.logger.log(`Job cleaned up: ${jobId}`, {
-        jobId,
-        archived: archive,
+      this.logger.log(`Job cleaned up: ${jobId}`, {jobId,archived: archive,
       });
 
     } catch (error) {
-      this.logger.error(`Failed to cleanup job: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to cleanup job: ${jobId}`, {error: error.message,jobId,
       });
-      throw new InternalServerErrorException(`Failed to cleanup job: ${error.message}`);
-    }
-  }
+      throw new InternalServerErrorException(`Failed to cleanup job: ${error.message}`);}}
 
   // ===== ANALYTICS AND MONITORING =====
 
@@ -786,8 +688,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
           evictionCount: 0,
         },
         errorMetrics: {
-          errorCount: history.filter(h => h.event === 'failed').length,
-          retryCount: history.filter(h => h.event === 'retried').length,
+          errorCount: history.filter(h => h.event === 'failed').length,retryCount: history.filter(h => h.event === 'retried').length,
           lastErrorCode: status.error?.code,
         },
         resourceMetrics: {
@@ -800,9 +701,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       return analytics;
 
     } catch (error) {
-      this.logger.error(`Failed to get job analytics: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job analytics: ${jobId}`, {error: error.message,jobId,
       });
       throw new InternalServerErrorException(`Failed to get job analytics: ${error.message}`);
     }
@@ -819,12 +718,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
   private async initializeRedisConnections(): Promise<void> {
     const redisConfig = {
-      host: this.configService.get<string>('redis.host', 'localhost'),
-      port: this.configService.get<number>('redis.port', 6379),
-      password: this.configService.get<string>('redis.password'),
-      db: this.configService.get<number>('redis.db', 0),
-      retryDelayOnFailover: 100,
-      enableOfflineQueue: false,
+      host: this.configService.get<string>('redis.host', 'localhost'),port: this.configService.get<number>('redis.port', 6379),password: this.configService.get<string>('redis.password'),db: this.configService.get<number>('redis.db', 0),retryDelayOnFailover: 100,enableOfflineQueue: false,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
     };
@@ -842,14 +736,8 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
     // Subscribe to job status change notifications
     await this.redisSubscriber.subscribe(`${this.keyPrefix}:notifications`);
 
-    this.redisSubscriber.on('message', (channel, message) => {
-      try {
-        const notification = JSON.parse(message);
-        this.eventEmitter.emit('job.status.notification', notification);
-      } catch (error) {
-        this.logger.error('Failed to process Redis notification', {
-          error: error.message,
-          channel,
+    this.redisSubscriber.on('message', (channel, message) => {try {const notification = JSON.parse(message);
+        this.eventEmitter.emit('job.status.notification', notification);} catch (error) {this.logger.error('Failed to process Redis notification', {error: error.message,channel,
           message,
         });
       }
@@ -862,15 +750,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       await this.redis.ping();
 
       // Test cache service
-      await this.cacheService.set('test:job-service', 'ok', 10);
-      await this.cacheService.get('test:job-service');
-      await this.cacheService.del('test:job-service');
-
-      this.logger.log('Startup validation completed successfully');
-    } catch (error) {
-      this.logger.error('Startup validation failed', {
-        error: error.message,
-      });
+      await this.cacheService.set('test:job-service', 'ok', 10);await this.cacheService.get('test:job-service');await this.cacheService.del('test:job-service');this.logger.log('Startup validation completed successfully');} catch (error) {this.logger.error('Startup validation failed', {error: error.message,});
       throw error;
     }
   }
@@ -880,9 +760,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       await this.redis?.quit();
       await this.redisSubscriber?.quit();
     } catch (error) {
-      this.logger.error('Failed to cleanup Redis connections', {
-        error: error.message,
-      });
+      this.logger.error('Failed to cleanup Redis connections', {error: error.message,});
     }
   }
 
@@ -890,23 +768,17 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
     // Default retention policies
     const defaultPolicies: RetentionPolicy[] = [
       {
-        jobType: 'screenshot',
-        priority: JobPriority.LOW,
-        retentionDays: 7,
+        jobType: 'screenshot',priority: JobPriority.LOW,retentionDays: 7,
         archiveBeforeDelete: false,
         compressionLevel: 6,
       },
       {
-        jobType: 'screenshot',
-        priority: JobPriority.HIGH,
-        retentionDays: 30,
+        jobType: 'screenshot',priority: JobPriority.HIGH,retentionDays: 30,
         archiveBeforeDelete: true,
         compressionLevel: 9,
       },
       {
-        jobType: 'click',
-        priority: JobPriority.LOW,
-        retentionDays: 3,
+        jobType: 'click',priority: JobPriority.LOW,retentionDays: 3,
         archiveBeforeDelete: false,
         compressionLevel: 6,
       },
@@ -926,26 +798,16 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
   }
 
   private validateJobId(jobId: string): void {
-    if (!jobId || typeof jobId !== 'string' || jobId.trim().length === 0) {
-      throw new BadRequestException('Job ID must be a non-empty string');
-    }
-  }
+    if (!jobId || typeof jobId !== 'string' || jobId.trim().length === 0) {throw new BadRequestException('Job ID must be a non-empty string');}}
 
   private validateProgress(progress: number): void {
-    if (typeof progress !== 'number' || progress < 0 || progress > 100) {
-      throw new BadRequestException('Progress must be a number between 0 and 100');
+    if (typeof progress !== 'number' || progress < 0 || progress > 100) {throw new BadRequestException('Progress must be a number between 0 and 100');
     }
   }
 
   private getStatusKey(jobId: string): string {
-    return `${this.keyPrefix}:status:${jobId}`;
-  }
-
-  private getResultKey(jobId: string): string {
-    return `${this.keyPrefix}:result:${jobId}`;
-  }
-
-  private getHistoryKey(jobId: string): string {
+    return `${this.keyPrefix}:status:${jobId}`;}private getResultKey(jobId: string): string {
+    return `${this.keyPrefix}:result:${jobId}`;}private getHistoryKey(jobId: string): string {
     return `${this.keyPrefix}:history:${jobId}`;
   }
 
@@ -956,25 +818,13 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
   private getRetentionPolicyForJob(jobId: string): RetentionPolicy {
     // Default policy if no specific policy found
-    return this.retentionPolicies.get('screenshot:normal') || {
-      jobType: 'default',
-      priority: JobPriority.NORMAL,
-      retentionDays: 7,
+    return this.retentionPolicies.get('screenshot:normal') || {jobType: 'default',priority: JobPriority.NORMAL,retentionDays: 7,
       archiveBeforeDelete: false,
       compressionLevel: 6,
     };
   }
 
-  private mapStatusToEvent(status: JobStatus): JobHistoryRecord['event'] {
-    switch (status) {
-      case JobStatus.PENDING: return 'created';
-      case JobStatus.IN_PROGRESS: return 'started';
-      case JobStatus.COMPLETED: return 'completed';
-      case JobStatus.FAILED: return 'failed';
-      case JobStatus.CANCELLED: return 'cancelled';
-      default: return 'progress';
-    }
-  }
+  private mapStatusToEvent(status: JobStatus): JobHistoryRecord['event'] {switch (status) {case JobStatus.PENDING: return 'created';case JobStatus.IN_PROGRESS: return 'started';case JobStatus.COMPLETED: return 'completed';case JobStatus.FAILED: return 'failed';case JobStatus.CANCELLED: return 'cancelled';default: return 'progress';}}
 
   private deserializeDates(status: EnhancedJobStatus): void {
     status.timestamps.submitted = new Date(status.timestamps.submitted);
@@ -987,26 +837,15 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
     status.timestamps.lastUpdated = new Date(status.timestamps.lastUpdated);
   }
 
-  private async compressData(data: string, algorithm: 'gzip' | 'brotli' = 'gzip'): Promise<Buffer> {
-    if (algorithm === 'brotli') {
-      return brotliCompressAsync(Buffer.from(data, 'utf8'));
-    }
-    return gzipAsync(data);
+  private async compressData(data: string, algorithm: 'gzip' | 'brotli' = 'gzip'): Promise<Buffer> {if (algorithm === 'brotli') {return brotliCompressAsync(Buffer.from(data, 'utf8'));}return gzipAsync(data);
   }
 
-  private async decompressData(data: Buffer, algorithm: 'gzip' | 'brotli' = 'gzip'): Promise<Buffer> {
-    if (algorithm === 'brotli') {
-      return brotliDecompressAsync(data);
-    }
+  private async decompressData(data: Buffer, algorithm: 'gzip' | 'brotli' = 'gzip'): Promise<Buffer> {if (algorithm === 'brotli') {return brotliDecompressAsync(data);}
     return gunzipAsync(data);
   }
 
   private generateChecksum(data: Buffer): string {
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(data).digest('hex');
-  }
-
-  private async storeResultDirect(
+    const crypto = require('crypto');return crypto.createHash('sha256').update(data).digest('hex');}private async storeResultDirect(
     jobId: string,
     resultId: string,
     data: Buffer,
@@ -1026,21 +865,15 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
       size: data.length,
       compressed: options.compressed,
       compressionRatio: options.compressionRatio,
-      format: 'json',
-      contentType: options.contentType,
-      checksum: options.checksum,
+      format: 'json',contentType: options.contentType,checksum: options.checksum,
       storageLocation: resultKey,
       metadata: {
         originalSize: options.originalSize,
-        storageType: 'direct',
-      },
-    };
+        storageType: 'direct',},};
 
     // Store both data and metadata
     await this.redis.hset(resultKey, {
-      data: data.toString('base64'),
-      metadata: JSON.stringify(storageInfo),
-    });
+      data: data.toString('base64'),metadata: JSON.stringify(storageInfo),});
     await this.redis.expire(resultKey, this.getRetentionTTL(jobId));
 
     return storageInfo;
@@ -1104,10 +937,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
     // Store metadata
     const metadataKey = `${this.keyPrefix}:stream:${jobId}:metadata`;
-    await this.redis.hset(metadataKey, 'info', JSON.stringify(storageInfo));
-    await this.redis.expire(metadataKey, this.getRetentionTTL(jobId));
-
-    return storageInfo;
+    await this.redis.hset(metadataKey, 'info', JSON.stringify(storageInfo));await this.redis.expire(metadataKey, this.getRetentionTTL(jobId));return storageInfo;
   }
 
   private async getResultStorageInfo(jobId: string): Promise<ResultStorageInfo | null> {
@@ -1121,10 +951,7 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
 
     // Try streaming storage
     const metadataKey = `${this.keyPrefix}:stream:${jobId}:metadata`;
-    const streamMetadata = await this.redis.hget(metadataKey, 'info');
-
-    if (streamMetadata) {
-      return JSON.parse(streamMetadata);
+    const streamMetadata = await this.redis.hget(metadataKey, 'info');if (streamMetadata) {return JSON.parse(streamMetadata);
     }
 
     return null;
@@ -1145,20 +972,13 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
           }
 
           const chunkKey = `${this.keyPrefix}:stream:${jobId}:${currentChunk}`;
-          const chunkData = await this.redis.hget(chunkKey, 'data');
-
-          if (chunkData) {
-            const chunk = Buffer.from(chunkData, 'base64');
-            this.push(chunk);
-          } else {
+          const chunkData = await this.redis.hget(chunkKey, 'data');if (chunkData) {const chunk = Buffer.from(chunkData, 'base64');this.push(chunk);} else {
             this.push(null); // End of stream on missing chunk
           }
 
           currentChunk++;
         } catch (error) {
-          this.emit('error', error);
-        }
-      },
+          this.emit('error', error);}},
     });
   }
 
@@ -1179,21 +999,12 @@ export class JobStatusResultService implements OnModuleInit, OnModuleDestroy {
   private async archiveJob(jobId: string): Promise<void> {
     // Implementation would depend on archive storage system
     // For now, just log the archival
-    this.logger.log(`Job archived: ${jobId}`, { jobId });
-  }
-
-  private async deleteJobData(jobId: string): Promise<void> {
-    const keys = await this.redis.keys(`${this.keyPrefix}:*:${jobId}*`);
-    if (keys.length > 0) {
-      await this.redis.del(...keys);
+    this.logger.log(`Job archived: ${jobId}`, { jobId });}private async deleteJobData(jobId: string): Promise<void> {
+    const keys = await this.redis.keys(`${this.keyPrefix}:*:${jobId}*`);if (keys.length > 0) {await this.redis.del(...keys);
     }
 
     // Clear from cache
-    await this.cacheService.del(`job:status:${jobId}`);
-    await this.cacheService.del(`job:result:${jobId}`);
-  }
-
-  private async updatePerformanceMetrics(operation: string, responseTimeMs: number): Promise<void> {
+    await this.cacheService.del(`job:status:${jobId}`);await this.cacheService.del(`job:result:${jobId}`);}private async updatePerformanceMetrics(operation: string, responseTimeMs: number): Promise<void> {
     // Update internal metrics
     this.performanceMetrics.averageResponseTimeMs =
       (this.performanceMetrics.averageResponseTimeMs + responseTimeMs) / 2;

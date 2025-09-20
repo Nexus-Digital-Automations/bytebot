@@ -11,19 +11,13 @@ import {
   Logger,
   DefaultValuePipe,
   ParseIntPipe
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
   ApiBody,
   ApiBearerAuth
-} from '@nestjs/swagger';
-import { AutomationErrorHandlerService } from './automation-error-handler.service';
-
-/**
- * Error Analytics Controller
+} from '@nestjs/swagger';import { AutomationErrorHandlerService } from './automation-error-handler.service';/*** Error Analytics Controller
  *
  * Provides comprehensive error analytics and monitoring capabilities for automation operations including:
  * - Real-time error statistics and trends
@@ -46,138 +40,45 @@ import { AutomationErrorHandlerService } from './automation-error-handler.servic
  * - Integration with external monitoring systems
  * - Customizable alerting and notifications
  */
-@ApiTags('Error Analytics')
-@Controller('error-analytics')
-@ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('Error Analytics')@Controller('error-analytics')@ApiBearerAuth()@UseInterceptors(ClassSerializerInterceptor)
 export class ErrorAnalyticsController {
   private readonly logger = new Logger(ErrorAnalyticsController.name);
 
   constructor(
     private readonly errorHandlerService: AutomationErrorHandlerService
   ) {
-    this.logger.log('ErrorAnalyticsController initialized');
-  }
-
-  /**
+    this.logger.log('ErrorAnalyticsController initialized');}/**
    * Get comprehensive error analytics and statistics
    */
-  @Get('analytics')
-  @ApiOperation({
-    summary: 'Get error analytics',
-    description: 'Retrieves comprehensive error analytics including statistics, trends, and recommendations for automation operations'
-  })
-  @ApiQuery({
-    name: 'startDate',
-    type: String,
-    required: false,
-    description: 'Start date for analytics range (ISO 8601 format)',
-    example: '2024-01-01T00:00:00.000Z'
-  })
-  @ApiQuery({
-    name: 'endDate',
-    type: String,
-    required: false,
-    description: 'End date for analytics range (ISO 8601 format)',
-    example: '2024-01-31T23:59:59.999Z'
-  })
-  @ApiResponse({
+  @Get('analytics')@ApiOperation({summary: 'Get error analytics',description: 'Retrieves comprehensive error analytics including statistics, trends, and recommendations for automation operations'})@ApiQuery({
+    name: 'startDate',type: String,required: false,
+    description: 'Start date for analytics range (ISO 8601 format)',example: '2024-01-01T00:00:00.000Z'})@ApiQuery({
+    name: 'endDate',type: String,required: false,
+    description: 'End date for analytics range (ISO 8601 format)',example: '2024-01-31T23:59:59.999Z'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Error analytics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            totalErrors: { type: 'number', example: 125 },
-            errorsByCategory: {
-              type: 'object',
-              example: {
-                'form_error': 45,
-                'network_error': 30,
-                'data_extraction_error': 25,
-                'workflow_error': 15,
-                'validation_error': 10
-              }
-            },
+    description: 'Error analytics retrieved successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {totalErrors: { type: 'number', example: 125 },errorsByCategory: {type: 'object',example: {'form_error': 45,'network_error': 30,'data_extraction_error': 25,'workflow_error': 15,'validation_error': 10}},
             errorsBySeverity: {
-              type: 'object',
-              example: {
-                'low': 75,
-                'medium': 35,
-                'high': 12,
-                'critical': 3
-              }
-            },
+              type: 'object',example: {'low': 75,'medium': 35,'high': 12,'critical': 3}},
             errorsByComponent: {
-              type: 'object',
-              example: {
-                'form-automation': 50,
-                'data-extraction': 35,
-                'workflow-automation': 25,
-                'file-management': 10,
-                'content-monitoring': 5
-              }
-            },
+              type: 'object',example: {'form-automation': 50,'data-extraction': 35,'workflow-automation': 25,'file-management': 10,'content-monitoring': 5}},
             topErrorMessages: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  message: { type: 'string', example: 'Element not found: .submit-button' },
-                  count: { type: 'number', example: 12 }
-                }
-              }
+              type: 'array',items: {type: 'object',properties: {message: { type: 'string', example: 'Element not found: .submit-button' },count: { type: 'number', example: 12 }}}
             },
-            recoverySuccessRate: { type: 'number', example: 85.5 },
-            averageRecoveryTime: { type: 'number', example: 1250 },
-            circuitBreakerStatus: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  component: { type: 'string', example: 'form-automation' },
-                  status: { type: 'string', example: 'closed' },
-                  failures: { type: 'number', example: 2 }
-                }
-              }
+            recoverySuccessRate: { type: 'number', example: 85.5 },averageRecoveryTime: { type: 'number', example: 1250 },circuitBreakerStatus: {type: 'array',items: {type: 'object',properties: {component: { type: 'string', example: 'form-automation' },status: { type: 'string', example: 'closed' },failures: { type: 'number', example: 2 }}}
             },
             errorTrends: {
-              type: 'object',
-              properties: {
-                last24Hours: { type: 'number', example: 15 },
-                previousPeriod: { type: 'number', example: 23 },
-                trend: { type: 'string', example: 'decreasing' }
-              }
-            },
+              type: 'object',properties: {last24Hours: { type: 'number', example: 15 },previousPeriod: { type: 'number', example: 23 },trend: { type: 'string', example: 'decreasing' }}},
             recommendations: {
-              type: 'array',
-              items: { type: 'string' },
-              example: [
-                'Consider implementing connection pooling for network errors',
-                'Review form selectors for better reliability'
-              ]
-            }
+              type: 'array',items: { type: 'string' },example: ['Consider implementing connection pooling for network errors','Review form selectors for better reliability']}
           }
         },
         metadata: {
-          type: 'object',
-          properties: {
-            generatedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' },
-            processingTime: { type: 'number', example: 156 },
-            timeRange: { type: 'string', example: '2024-01-01 to 2024-01-31' }
-          }
-        }
+          type: 'object',properties: {generatedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' },processingTime: { type: 'number', example: 156 },timeRange: { type: 'string', example: '2024-01-01 to 2024-01-31' }}}
       }
     }
   })
   async getErrorAnalytics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string
-  ): Promise<{
-    success: boolean;
+    @Query('startDate') startDate?: string,@Query('endDate') endDate?: string): Promise<{success: boolean;
     data: unknown;
     metadata: {
       generatedAt: string;
@@ -220,9 +121,7 @@ export class ErrorAnalyticsController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to get error analytics', {
-        error: (error as Error).message,
-        startDate,
+      this.logger.error('Failed to get error analytics', {error: (error as Error).message,startDate,
         endDate,
         duration: Date.now() - requestStartTime
       });
@@ -233,45 +132,15 @@ export class ErrorAnalyticsController {
   /**
    * Get error statistics by category
    */
-  @Get('statistics/by-category')
-  @ApiOperation({
-    summary: 'Get error statistics by category',
-    description: 'Retrieves error counts and percentages grouped by automation error categories'
-  })
-  @ApiQuery({
-    name: 'days',
-    type: Number,
-    required: false,
-    description: 'Number of days to include in statistics',
-    example: 7
-  })
+  @Get('statistics/by-category')@ApiOperation({summary: 'Get error statistics by category',description: 'Retrieves error counts and percentages grouped by automation error categories'})@ApiQuery({
+    name: 'days',type: Number,required: false,
+    description: 'Number of days to include in statistics',example: 7})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Category statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            categories: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  category: { type: 'string', example: 'form_error' },
-                  count: { type: 'number', example: 45 },
-                  percentage: { type: 'number', example: 36.0 },
-                  trend: { type: 'string', example: 'stable' },
-                  averageRecoveryTime: { type: 'number', example: 850 }
-                }
-              }
+    description: 'Category statistics retrieved successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {categories: {
+              type: 'array',items: {type: 'object',properties: {category: { type: 'string', example: 'form_error' },count: { type: 'number', example: 45 },percentage: { type: 'number', example: 36.0 },trend: { type: 'string', example: 'stable' },averageRecoveryTime: { type: 'number', example: 850 }}}
             },
-            totalErrors: { type: 'number', example: 125 },
-            periodDays: { type: 'number', example: 7 }
-          }
-        }
+            totalErrors: { type: 'number', example: 125 },periodDays: { type: 'number', example: 7 }}}
       }
     }
   })
@@ -342,9 +211,7 @@ export class ErrorAnalyticsController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to get category statistics', {
-        error: (error as Error).message,
-        days,
+      this.logger.error('Failed to get category statistics', {error: (error as Error).message,days,
         duration: Date.now() - startTime
       });
       throw error;
@@ -354,44 +221,13 @@ export class ErrorAnalyticsController {
   /**
    * Get circuit breaker status for all components
    */
-  @Get('circuit-breakers')
-  @ApiOperation({
-    summary: 'Get circuit breaker status',
-    description: 'Retrieves current status of all circuit breakers across automation components'
-  })
-  @ApiResponse({
+  @Get('circuit-breakers')@ApiOperation({summary: 'Get circuit breaker status',description: 'Retrieves current status of all circuit breakers across automation components'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Circuit breaker status retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            circuitBreakers: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  component: { type: 'string', example: 'form-automation' },
-                  status: { type: 'string', enum: ['open', 'closed', 'half-open'], example: 'closed' },
-                  failures: { type: 'number', example: 2 },
-                  threshold: { type: 'number', example: 5 },
-                  lastFailure: { type: 'string', example: '2024-01-15T10:15:00.000Z' },
-                  timeToNextRetry: { type: 'number', example: 45000 }
-                }
-              }
+    description: 'Circuit breaker status retrieved successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {circuitBreakers: {
+              type: 'array',items: {type: 'object',properties: {component: { type: 'string', example: 'form-automation' },status: { type: 'string', enum: ['open', 'closed', 'half-open'], example: 'closed' },failures: { type: 'number', example: 2 },threshold: { type: 'number', example: 5 },lastFailure: { type: 'string', example: '2024-01-15T10:15:00.000Z' },timeToNextRetry: { type: 'number', example: 45000 }}}
             },
             summary: {
-              type: 'object',
-              properties: {
-                totalBreakers: { type: 'number', example: 5 },
-                openBreakers: { type: 'number', example: 0 },
-                halfOpenBreakers: { type: 'number', example: 1 },
-                closedBreakers: { type: 'number', example: 4 }
-              }
-            }
+              type: 'object',properties: {totalBreakers: { type: 'number', example: 5 },openBreakers: { type: 'number', example: 0 },halfOpenBreakers: { type: 'number', example: 1 },closedBreakers: { type: 'number', example: 4 }}}
           }
         }
       }
@@ -421,10 +257,7 @@ export class ErrorAnalyticsController {
     };
   }> {
     const startTime = Date.now();
-    this.logger.log('Getting circuit breaker status');
-
-    try {
-      const analytics = this.errorHandlerService.getErrorAnalytics();
+    this.logger.log('Getting circuit breaker status');try {const analytics = this.errorHandlerService.getErrorAnalytics();
       const circuitBreakers = analytics.circuitBreakerStatus;
 
       // Enhance circuit breaker data with additional metadata
@@ -432,14 +265,9 @@ export class ErrorAnalyticsController {
         ...breaker,
         threshold: 5, // Would come from actual configuration
         lastFailure: new Date(Date.now() - Math.random() * 3600000).toISOString(), // Mock data
-        timeToNextRetry: breaker.status === 'open' ? 60000 : null
-      }));
-
-      const summary = {
+        timeToNextRetry: breaker.status === 'open' ? 60000 : null}));const summary = {
         totalBreakers: enhancedBreakers.length,
-        openBreakers: enhancedBreakers.filter(b => b.status === 'open').length,
-        halfOpenBreakers: enhancedBreakers.filter(b => b.status === 'half-open').length,
-        closedBreakers: enhancedBreakers.filter(b => b.status === 'closed').length
+        openBreakers: enhancedBreakers.filter(b => b.status === 'open').length,halfOpenBreakers: enhancedBreakers.filter(b => b.status === 'half-open').length,closedBreakers: enhancedBreakers.filter(b => b.status === 'closed').length
       };
 
       const response = {
@@ -462,9 +290,7 @@ export class ErrorAnalyticsController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to get circuit breaker status', {
-        error: (error as Error).message,
-        duration: Date.now() - startTime
+      this.logger.error('Failed to get circuit breaker status', {error: (error as Error).message,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -473,40 +299,18 @@ export class ErrorAnalyticsController {
   /**
    * Clear old error history for maintenance
    */
-  @Post('maintenance/clear-history')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Clear error history',
-    description: 'Clears old error history data for system maintenance and performance optimization'
-  })
-  @ApiBody({
+  @Post('maintenance/clear-history')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Clear error history',description: 'Clears old error history data for system maintenance and performance optimization'})@ApiBody({
     schema: {
-      type: 'object',
-      properties: {
-        olderThanDays: {
-          type: 'number',
-          description: 'Clear errors older than this many days',
-          example: 30,
-          minimum: 1,
+      type: 'object',properties: {olderThanDays: {
+          type: 'number',description: 'Clear errors older than this many days',example: 30,minimum: 1,
           maximum: 365
         }
       },
-      required: ['olderThanDays']
-    }
-  })
+      required: ['olderThanDays']}})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Error history cleared successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            clearedErrors: { type: 'number', example: 1250 },
-            remainingErrors: { type: 'number', example: 150 },
-            cutoffDate: { type: 'string', example: '2023-12-15T10:30:00.000Z' }
+    description: 'Error history cleared successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {clearedErrors: { type: 'number', example: 1250 },remainingErrors: { type: 'number', example: 150 },cutoffDate: { type: 'string', example: '2023-12-15T10:30:00.000Z' }
           }
         }
       }
@@ -528,10 +332,7 @@ export class ErrorAnalyticsController {
     };
   }> {
     const startTime = Date.now();
-    this.logger.log(`Clearing error history older than ${clearRequest.olderThanDays} days`);
-
-    try {
-      const cutoffDate = new Date(Date.now() - clearRequest.olderThanDays * 24 * 60 * 60 * 1000);
+    this.logger.log(`Clearing error history older than ${clearRequest.olderThanDays} days`);try {const cutoffDate = new Date(Date.now() - clearRequest.olderThanDays * 24 * 60 * 60 * 1000);
 
       // Get counts before clearing
       const beforeAnalytics = this.errorHandlerService.getErrorAnalytics();
@@ -569,9 +370,7 @@ export class ErrorAnalyticsController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to clear error history', {
-        error: (error as Error).message,
-        olderThanDays: clearRequest.olderThanDays,
+      this.logger.error('Failed to clear error history', {error: (error as Error).message,olderThanDays: clearRequest.olderThanDays,
         duration: Date.now() - startTime
       });
       throw error;
@@ -581,44 +380,13 @@ export class ErrorAnalyticsController {
   /**
    * Get error recovery recommendations
    */
-  @Get('recommendations')
-  @ApiOperation({
-    summary: 'Get error recovery recommendations',
-    description: 'Provides intelligent recommendations for improving error recovery and reducing failure rates'
-  })
-  @ApiResponse({
+  @Get('recommendations')@ApiOperation({summary: 'Get error recovery recommendations',description: 'Provides intelligent recommendations for improving error recovery and reducing failure rates'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Recommendations retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            recommendations: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  category: { type: 'string', example: 'Network Optimization' },
-                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], example: 'high' },
-                  description: { type: 'string', example: 'Implement connection pooling to reduce network timeouts' },
-                  impact: { type: 'string', example: 'Could reduce network errors by 60%' },
-                  implementation: { type: 'string', example: 'Configure HTTP client with connection pooling' },
-                  estimatedEffort: { type: 'string', example: '2-4 hours' }
-                }
-              }
+    description: 'Recommendations retrieved successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {recommendations: {
+              type: 'array',items: {type: 'object',properties: {category: { type: 'string', example: 'Network Optimization' },priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], example: 'high' },description: { type: 'string', example: 'Implement connection pooling to reduce network timeouts' },impact: { type: 'string', example: 'Could reduce network errors by 60%' },implementation: { type: 'string', example: 'Configure HTTP client with connection pooling' },estimatedEffort: { type: 'string', example: '2-4 hours' }}}
             },
             systemHealth: {
-              type: 'object',
-              properties: {
-                overallScore: { type: 'number', example: 85.5 },
-                trend: { type: 'string', example: 'improving' },
-                criticalIssues: { type: 'number', example: 2 },
-                nextReviewDate: { type: 'string', example: '2024-01-22T10:30:00.000Z' }
-              }
-            }
+              type: 'object',properties: {overallScore: { type: 'number', example: 85.5 },trend: { type: 'string', example: 'improving' },criticalIssues: { type: 'number', example: 2 },nextReviewDate: { type: 'string', example: '2024-01-22T10:30:00.000Z' }}}
           }
         }
       }
@@ -649,38 +417,14 @@ export class ErrorAnalyticsController {
     };
   }> {
     const startTime = Date.now();
-    this.logger.log('Getting error recovery recommendations');
-
-    try {
-      const analytics = this.errorHandlerService.getErrorAnalytics();
+    this.logger.log('Getting error recovery recommendations');try {const analytics = this.errorHandlerService.getErrorAnalytics();
 
       // Generate detailed recommendations based on error patterns
       const recommendations = [
         {
-          category: 'Network Optimization',
-          priority: 'high',
-          description: 'Implement connection pooling to reduce network timeouts',
-          impact: 'Could reduce network errors by 60%',
-          implementation: 'Configure HTTP client with connection pooling and retry policies',
-          estimatedEffort: '2-4 hours'
-        },
-        {
-          category: 'Form Automation',
-          priority: 'medium',
-          description: 'Add intelligent wait strategies for dynamic forms',
-          impact: 'Could reduce form interaction failures by 40%',
-          implementation: 'Implement smart waiting for element availability with multiple fallback selectors',
-          estimatedEffort: '4-6 hours'
-        },
-        {
-          category: 'Error Detection',
-          priority: 'low',
-          description: 'Enhance error pattern recognition',
-          impact: 'Could improve error classification accuracy by 25%',
-          implementation: 'Train machine learning models on historical error patterns',
-          estimatedEffort: '1-2 days'
-        }
-      ];
+          category: 'Network Optimization',priority: 'high',description: 'Implement connection pooling to reduce network timeouts',impact: 'Could reduce network errors by 60%',implementation: 'Configure HTTP client with connection pooling and retry policies',estimatedEffort: '2-4 hours'},{
+          category: 'Form Automation',priority: 'medium',description: 'Add intelligent wait strategies for dynamic forms',impact: 'Could reduce form interaction failures by 40%',implementation: 'Implement smart waiting for element availability with multiple fallback selectors',estimatedEffort: '4-6 hours'},{
+          category: 'Error Detection',priority: 'low',description: 'Enhance error pattern recognition',impact: 'Could improve error classification accuracy by 25%',implementation: 'Train machine learning models on historical error patterns',estimatedEffort: '1-2 days'}];
 
       const systemHealth = {
         overallScore: analytics.recoverySuccessRate,

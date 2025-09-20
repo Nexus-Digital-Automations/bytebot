@@ -18,15 +18,10 @@
  * @since Orchestrator PARLANT Integration Implementation
  */
 
-import { RiskLevel } from '../../parlant/parlant-integration.service';
-import {
-  OrchestrationStatus,
+import { RiskLevel } from '../../parlant/parlant-integration.service';import {OrchestrationStatus,
   ResourceLimits,
   ResourceUsage,
-} from '../../browser-use/types/orchestration.types';
-
-/**
- * Multi-service workflow definition with validation checkpoints
+} from '../../browser-use/types/orchestration.types';/*** Multi-service workflow definition with validation checkpoints
  */
 export interface MultiServiceWorkflow {
   workflowId: string;
@@ -63,11 +58,7 @@ export interface WorkflowStep {
  */
 export interface WorkflowValidationRequirement {
   requirementId: string;
-  type: 'CROSS_SERVICE_TRANSACTION' | 'RESOURCE_ALLOCATION' | 'SECURITY_CHECKPOINT' | 'BUSINESS_APPROVAL';
-  condition: string;
-  validationLevel: 'BASIC' | 'COMPREHENSIVE' | 'ENTERPRISE';
-  approvalRequired: boolean;
-  conversationalPrompt?: string;
+  type: 'CROSS_SERVICE_TRANSACTION' | 'RESOURCE_ALLOCATION' | 'SECURITY_CHECKPOINT' | 'BUSINESS_APPROVAL';condition: string;validationLevel: 'BASIC' | 'COMPREHENSIVE' | 'ENTERPRISE';approvalRequired: boolean;conversationalPrompt?: string;
   escalationPath?: string[];
 }
 
@@ -89,10 +80,7 @@ export interface WorkflowRiskAssessment {
  */
 export interface WorkflowRiskFactor {
   factor: string;
-  category: 'TECHNICAL' | 'BUSINESS' | 'OPERATIONAL' | 'SECURITY' | 'COMPLIANCE';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  likelihood: number;
-  impact: number;
+  category: 'TECHNICAL' | 'BUSINESS' | 'OPERATIONAL' | 'SECURITY' | 'COMPLIANCE';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';likelihood: number;impact: number;
   mitigation: string;
 }
 
@@ -102,11 +90,7 @@ export interface WorkflowRiskFactor {
 export interface ApprovalThreshold {
   thresholdId: string;
   metric: string;
-  operator: 'GT' | 'LT' | 'EQ' | 'GTE' | 'LTE';
-  value: number;
-  approvalLevel: 'AUTOMATIC' | 'SUPERVISOR' | 'MANAGER' | 'EXECUTIVE';
-  conversationalValidation: boolean;
-  timeoutMinutes: number;
+  operator: 'GT' | 'LT' | 'EQ' | 'GTE' | 'LTE';value: number;approvalLevel: 'AUTOMATIC' | 'SUPERVISOR' | 'MANAGER' | 'EXECUTIVE';conversationalValidation: boolean;timeoutMinutes: number;
 }
 
 /**
@@ -166,9 +150,7 @@ export interface RecoveryProcedure {
   procedureId: string;
   name: string;
   steps: string[];
-  automationLevel: 'MANUAL' | 'SEMI_AUTOMATIC' | 'AUTOMATIC';
-  estimatedDuration: number;
-  prerequisites: string[];
+  automationLevel: 'MANUAL' | 'SEMI_AUTOMATIC' | 'AUTOMATIC';estimatedDuration: number;prerequisites: string[];
 }
 
 /**
@@ -186,9 +168,7 @@ export interface NotificationPlan {
  */
 export interface NotificationChannel {
   channelId: string;
-  type: 'EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK' | 'DASHBOARD';
-  configuration: Record<string, unknown>;
-  enabled: boolean;
+  type: 'EMAIL' | 'SLACK' | 'SMS' | 'WEBHOOK' | 'DASHBOARD';configuration: Record<string, unknown>;enabled: boolean;
   priority: number;
 }
 
@@ -222,17 +202,13 @@ export interface MessageTemplate {
   eventType: string;
   subject: string;
   body: string;
-  format: 'TEXT' | 'HTML' | 'MARKDOWN';
-  variables: string[];
-}
+  format: 'TEXT' | 'HTML' | 'MARKDOWN';variables: string[];}
 
 /**
  * Urgency level
  */
 export interface UrgencyLevel {
-  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  responseTimeMinutes: number;
-  escalationEnabled: boolean;
+  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';responseTimeMinutes: number;escalationEnabled: boolean;
   conversationalApproval: boolean;
 }
 
@@ -266,9 +242,7 @@ export interface ManualApprovalCriteria {
   approverRoles: string[];
   minimumApprovers: number;
   timeoutMinutes: number;
-  fallbackBehavior: 'DENY' | 'APPROVE' | 'ESCALATE';
-  documentationRequired: boolean;
-}
+  fallbackBehavior: 'DENY' | 'APPROVE' | 'ESCALATE';documentationRequired: boolean;}
 
 /**
  * Conversational approval criteria
@@ -312,9 +286,7 @@ export interface BusinessRule {
   ruleId: string;
   name: string;
   condition: string;
-  action: 'APPROVE' | 'DENY' | 'ESCALATE' | 'REQUEST_INFO';
-  priority: number;
-  active: boolean;
+  action: 'APPROVE' | 'DENY' | 'ESCALATE' | 'REQUEST_INFO';priority: number;active: boolean;
   metadata: Record<string, unknown>;
 }
 
@@ -356,9 +328,7 @@ export interface OperationalImpact {
  */
 export interface ComplianceImpact {
   complianceFrameworks: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  auditRequirements: string[];
-  documentationNeeded: boolean;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';auditRequirements: string[];documentationNeeded: boolean;
   signoffRequired: boolean;
 }
 
@@ -367,9 +337,7 @@ export interface ComplianceImpact {
  */
 export interface CustomerImpact {
   affectedCustomers: number;
-  severityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  communicationRequired: boolean;
-  compensationNeeded: boolean;
+  severityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';communicationRequired: boolean;compensationNeeded: boolean;
   escalationPath: string[];
 }
 
@@ -377,11 +345,7 @@ export interface CustomerImpact {
  * Reputational impact assessment
  */
 export interface ReputationalImpact {
-  publicVisibility: 'LOW' | 'MEDIUM' | 'HIGH';
-  mediaAttention: boolean;
-  brandRisk: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH';
-  stakeholderConcern: boolean;
-  mitigationStrategy: string;
+  publicVisibility: 'LOW' | 'MEDIUM' | 'HIGH';mediaAttention: boolean;brandRisk: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH';stakeholderConcern: boolean;mitigationStrategy: string;
 }
 
 /**
@@ -391,9 +355,7 @@ export interface StepRetryPolicy {
   enabled: boolean;
   maxAttempts: number;
   retryDelay: number;
-  backoffStrategy: 'LINEAR' | 'EXPONENTIAL' | 'FIXED';
-  retryConditions: string[];
-  stopConditions: string[];
+  backoffStrategy: 'LINEAR' | 'EXPONENTIAL' | 'FIXED';retryConditions: string[];stopConditions: string[];
 }
 
 /**
@@ -431,9 +393,7 @@ export interface OrchestrationExecutionState {
 export interface ServiceState {
   serviceId: string;
   serviceName: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';
-  version: string;
-  resourceUsage: ResourceUsage;
+  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';version: string;resourceUsage: ResourceUsage;
   lastHealthCheck: Date;
   dependencyStatus: DependencyStatus[];
   operationalMetrics: OperationalMetrics;
@@ -445,9 +405,7 @@ export interface ServiceState {
 export interface ResourceAllocation {
   allocationId: string;
   serviceId: string;
-  resourceType: 'CPU' | 'MEMORY' | 'STORAGE' | 'NETWORK' | 'CUSTOM';
-  allocated: number;
-  used: number;
+  resourceType: 'CPU' | 'MEMORY' | 'STORAGE' | 'NETWORK' | 'CUSTOM';allocated: number;used: number;
   reserved: number;
   limits: ResourceLimits;
   allocationTime: Date;
@@ -461,10 +419,7 @@ export interface ValidationHistoryEntry {
   entryId: string;
   timestamp: Date;
   stepId: string;
-  validationType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';
-  result: 'APPROVED' | 'DENIED' | 'PENDING' | 'TIMEOUT';
-  approver?: string;
-  reasoning: string;
+  validationType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';result: 'APPROVED' | 'DENIED' | 'PENDING' | 'TIMEOUT';approver?: string;reasoning: string;
   confidence?: number;
   duration: number;
 }
@@ -478,9 +433,7 @@ export interface ConversationalContext {
   messageHistory: ConversationMessage[];
   currentIntent: string;
   confidence: number;
-  validationState: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
-  approvalQueue: ApprovalRequest[];
-}
+  validationState: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';approvalQueue: ApprovalRequest[];}
 
 /**
  * Conversation message
@@ -488,11 +441,7 @@ export interface ConversationalContext {
 export interface ConversationMessage {
   messageId: string;
   timestamp: Date;
-  sender: 'USER' | 'SYSTEM' | 'PARLANT' | 'ORCHESTRATOR';
-  content: string;
-  messageType: 'VALIDATION_REQUEST' | 'APPROVAL_REQUEST' | 'STATUS_UPDATE' | 'ERROR_NOTIFICATION';
-  metadata: Record<string, unknown>;
-}
+  sender: 'USER' | 'SYSTEM' | 'PARLANT' | 'ORCHESTRATOR';content: string;messageType: 'VALIDATION_REQUEST' | 'APPROVAL_REQUEST' | 'STATUS_UPDATE' | 'ERROR_NOTIFICATION';metadata: Record<string, unknown>;}
 
 /**
  * Approval request
@@ -504,15 +453,10 @@ export interface ApprovalRequest {
   description: string;
   requestedBy: string;
   requestTime: Date;
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  approvalType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';
-  businessJustification: string;
-  riskAssessment: WorkflowRiskAssessment;
+  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';approvalType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';businessJustification: string;riskAssessment: WorkflowRiskAssessment;
   estimatedImpact: BusinessImpactAssessment;
   timeoutMinutes: number;
-  status: 'PENDING' | 'APPROVED' | 'DENIED' | 'TIMEOUT' | 'CANCELLED';
-  approver?: string;
-  approvalTime?: Date;
+  status: 'PENDING' | 'APPROVED' | 'DENIED' | 'TIMEOUT' | 'CANCELLED';approver?: string;approvalTime?: Date;
   reasoning?: string;
   conditions?: ApprovalCondition[];
 }
@@ -523,9 +467,7 @@ export interface ApprovalRequest {
 export interface ApprovalCondition {
   conditionId: string;
   description: string;
-  type: 'MONITORING' | 'ROLLBACK_TRIGGER' | 'RESOURCE_LIMIT' | 'TIME_LIMIT';
-  parameters: Record<string, unknown>;
-  mandatory: boolean;
+  type: 'MONITORING' | 'ROLLBACK_TRIGGER' | 'RESOURCE_LIMIT' | 'TIME_LIMIT';parameters: Record<string, unknown>;mandatory: boolean;
 }
 
 /**
@@ -551,9 +493,7 @@ export interface PendingApproval {
 export interface OrchestrationError {
   errorId: string;
   timestamp: Date;
-  errorType: 'VALIDATION_FAILED' | 'APPROVAL_TIMEOUT' | 'SERVICE_FAILURE' | 'RESOURCE_EXHAUSTED' | 'BUSINESS_RULE_VIOLATION';
-  message: string;
-  details: Record<string, unknown>;
+  errorType: 'VALIDATION_FAILED' | 'APPROVAL_TIMEOUT' | 'SERVICE_FAILURE' | 'RESOURCE_EXHAUSTED' | 'BUSINESS_RULE_VIOLATION';message: string;details: Record<string, unknown>;
   affectedServices: string[];
   recoveryActions: string[];
   escalationRequired: boolean;
@@ -564,10 +504,7 @@ export interface OrchestrationError {
  */
 export interface DependencyStatus {
   dependencyId: string;
-  dependencyType: 'SERVICE' | 'DATABASE' | 'EXTERNAL_API' | 'RESOURCE';
-  status: 'AVAILABLE' | 'DEGRADED' | 'UNAVAILABLE';
-  responseTime: number;
-  lastChecked: Date;
+  dependencyType: 'SERVICE' | 'DATABASE' | 'EXTERNAL_API' | 'RESOURCE';status: 'AVAILABLE' | 'DEGRADED' | 'UNAVAILABLE';responseTime: number;lastChecked: Date;
   errorRate: number;
 }
 
@@ -614,9 +551,7 @@ export interface ValidationStep {
   approved: boolean;
   riskLevel: RiskLevel;
   requiresApproval: boolean;
-  approvalType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';
-  businessImpact: BusinessImpactAssessment;
-  technicalFeasibility: TechnicalFeasibility;
+  approvalType: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';businessImpact: BusinessImpactAssessment;technicalFeasibility: TechnicalFeasibility;
   complianceStatus: ComplianceStatus;
   estimatedDuration: number;
   resourceImpact: ResourceImpact;
@@ -633,9 +568,7 @@ export interface TechnicalFeasibility {
   confidence: number;
   technicalRisks: string[];
   resourceRequirements: ResourceRequirement[];
-  implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
-  estimatedEffort: number;
-  prerequisites: string[];
+  implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';estimatedEffort: number;prerequisites: string[];
 }
 
 /**
@@ -658,18 +591,14 @@ export interface ComplianceRequirement {
   framework: string;
   description: string;
   mandatory: boolean;
-  status: 'MET' | 'NOT_MET' | 'PARTIALLY_MET' | 'NOT_APPLICABLE';
-  evidence: string[];
-}
+  status: 'MET' | 'NOT_MET' | 'PARTIALLY_MET' | 'NOT_APPLICABLE';evidence: string[];}
 
 /**
  * Compliance violation
  */
 export interface ComplianceViolation {
   violationId: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  requirement: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;requirement: string;
   remediation: string;
   timeToFix: number;
 }
@@ -701,13 +630,9 @@ export interface CustomResourceImpact {
  * Resource requirement
  */
 export interface ResourceRequirement {
-  resourceType: 'CPU' | 'MEMORY' | 'STORAGE' | 'NETWORK' | 'CUSTOM';
-  amount: number;
-  unit: string;
+  resourceType: 'CPU' | 'MEMORY' | 'STORAGE' | 'NETWORK' | 'CUSTOM';amount: number;unit: string;
   duration: number;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  justification: string;
-}
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';justification: string;}
 
 /**
  * Multi-service coordination configuration
@@ -730,11 +655,7 @@ export interface MultiServiceCoordinationConfig {
 export interface ServiceCoordinationConfig {
   serviceId: string;
   serviceName: string;
-  role: 'PRIMARY' | 'SECONDARY' | 'SUPPORT' | 'MONITORING';
-  dependencies: string[];
-  communicationProtocol: 'HTTP' | 'GRPC' | 'MESSAGING' | 'WEBSOCKET';
-  endpoints: ServiceEndpoint[];
-  healthChecks: HealthCheckConfig[];
+  role: 'PRIMARY' | 'SECONDARY' | 'SUPPORT' | 'MONITORING';dependencies: string[];communicationProtocol: 'HTTP' | 'GRPC' | 'MESSAGING' | 'WEBSOCKET';endpoints: ServiceEndpoint[];healthChecks: HealthCheckConfig[];
   circuitBreaker: CircuitBreakerConfig;
   retryPolicy: RetryPolicyConfig;
 }
@@ -759,9 +680,7 @@ export interface ServiceEndpoint {
  */
 export interface HealthCheckConfig {
   checkId: string;
-  type: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
-  interval: number;
-  timeout: number;
+  type: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';interval: number;timeout: number;
   retries: number;
   successCriteria: string[];
   failureCriteria: string[];
@@ -776,9 +695,7 @@ export interface CircuitBreakerConfig {
   failureThreshold: number;
   successThreshold: number;
   timeout: number;
-  fallbackStrategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'ALTERNATIVE_SERVICE';
-  monitoringEnabled: boolean;
-}
+  fallbackStrategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'ALTERNATIVE_SERVICE';monitoringEnabled: boolean;}
 
 /**
  * Retry policy configuration
@@ -787,9 +704,7 @@ export interface RetryPolicyConfig {
   enabled: boolean;
   maxAttempts: number;
   initialDelay: number;
-  backoffStrategy: 'LINEAR' | 'EXPONENTIAL' | 'FIXED';
-  jitter: boolean;
-  retryableErrors: string[];
+  backoffStrategy: 'LINEAR' | 'EXPONENTIAL' | 'FIXED';jitter: boolean;retryableErrors: string[];
   nonRetryableErrors: string[];
 }
 
@@ -800,23 +715,13 @@ export interface RateLimitingConfig {
   enabled: boolean;
   requestsPerSecond: number;
   burstCapacity: number;
-  algorithm: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW';
-  keyStrategy: 'IP' | 'USER' | 'SERVICE' | 'GLOBAL';
-  enforcement: 'BLOCK' | 'THROTTLE' | 'QUEUE';
-}
-
-/**
+  algorithm: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW';keyStrategy: 'IP' | 'USER' | 'SERVICE' | 'GLOBAL';enforcement: 'BLOCK' | 'THROTTLE' | 'QUEUE';}/**
  * Authentication configuration
  */
 export interface AuthenticationConfig {
   required: boolean;
-  methods: ('API_KEY' | 'JWT' | 'OAUTH' | 'BASIC' | 'CERTIFICATE')[];
-  validationEndpoint?: string;
-  cacheTtl: number;
-  fallbackBehavior: 'DENY' | 'ALLOW' | 'ESCALATE';
-}
-
-/**
+  methods: ('API_KEY' | 'JWT' | 'OAUTH' | 'BASIC' | 'CERTIFICATE')[];validationEndpoint?: string;cacheTtl: number;
+  fallbackBehavior: 'DENY' | 'ALLOW' | 'ESCALATE';}/**
  * Coordination validation rule
  */
 export interface CoordinationValidationRule {
@@ -824,9 +729,7 @@ export interface CoordinationValidationRule {
   name: string;
   description: string;
   condition: string;
-  action: 'ALLOW' | 'DENY' | 'APPROVE' | 'ESCALATE';
-  priority: number;
-  active: boolean;
+  action: 'ALLOW' | 'DENY' | 'APPROVE' | 'ESCALATE';priority: number;active: boolean;
   conversationalValidation: boolean;
   metadata: Record<string, unknown>;
 }
@@ -851,12 +754,8 @@ export interface ApprovalWorkflowConfig {
 export interface ApprovalWorkflowStep {
   stepId: string;
   name: string;
-  type: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';
-  approverRole: string;
-  timeoutMinutes: number;
-  fallbackBehavior: 'DENY' | 'APPROVE' | 'ESCALATE';
-  conditions: string[];
-  parlantValidation: boolean;
+  type: 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL';approverRole: string;timeoutMinutes: number;
+  fallbackBehavior: 'DENY' | 'APPROVE' | 'ESCALATE';conditions: string[];parlantValidation: boolean;
 }
 
 /**
@@ -867,10 +766,7 @@ export interface EscalationPolicy {
   levels: EscalationLevel[];
   timeoutMinutes: number;
   maxEscalations: number;
-  finalAction: 'APPROVE' | 'DENY' | 'SUSPEND';
-}
-
-/**
+  finalAction: 'APPROVE' | 'DENY' | 'SUSPEND';}/**
  * Notification configuration
  */
 export interface NotificationConfig {
@@ -889,10 +785,7 @@ export interface ParlantIntegrationConfig {
   sessionManagement: ParlantSessionConfig;
   validationRules: ParlantValidationRule[];
   conversationFlow: ConversationFlowConfig;
-  fallbackBehavior: 'MANUAL_APPROVAL' | 'AUTO_DENY' | 'AUTO_APPROVE';
-}
-
-/**
+  fallbackBehavior: 'MANUAL_APPROVAL' | 'AUTO_DENY' | 'AUTO_APPROVE';}/**
  * PARLANT session configuration
  */
 export interface ParlantSessionConfig {
@@ -912,10 +805,7 @@ export interface ParlantValidationRule {
   validationPrompt: string;
   expectedResponses: string[];
   confidenceThreshold: number;
-  fallbackAction: 'APPROVE' | 'DENY' | 'ESCALATE';
-}
-
-/**
+  fallbackAction: 'APPROVE' | 'DENY' | 'ESCALATE';}/**
  * Conversation flow configuration
  */
 export interface ConversationFlowConfig {
@@ -954,9 +844,7 @@ export interface MetricsCollectionConfig {
  * Aggregation configuration
  */
 export interface AggregationConfig {
-  functions: ('SUM' | 'AVG' | 'MIN' | 'MAX' | 'COUNT' | 'PERCENTILE')[];
-  intervals: number[];
-  dimensions: string[];
+  functions: ('SUM' | 'AVG' | 'MIN' | 'MAX' | 'COUNT' | 'PERCENTILE')[];intervals: number[];dimensions: string[];
 }
 
 /**
@@ -964,9 +852,7 @@ export interface AggregationConfig {
  */
 export interface ExportConfig {
   enabled: boolean;
-  format: 'PROMETHEUS' | 'INFLUXDB' | 'ELASTICSEARCH' | 'CUSTOM';
-  endpoint: string;
-  authentication: Record<string, unknown>;
+  format: 'PROMETHEUS' | 'INFLUXDB' | 'ELASTICSEARCH' | 'CUSTOM';endpoint: string;authentication: Record<string, unknown>;
   batchSize: number;
 }
 
@@ -988,9 +874,7 @@ export interface AlertRule {
   ruleId: string;
   name: string;
   condition: string;
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  threshold: number;
-  duration: number;
+  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';threshold: number;duration: number;
   cooldown: number;
   enabled: boolean;
 }
@@ -1000,9 +884,7 @@ export interface AlertRule {
  */
 export interface AlertChannel {
   channelId: string;
-  type: 'EMAIL' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY';
-  configuration: Record<string, unknown>;
-  severityFilter: string[];
+  type: 'EMAIL' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY';configuration: Record<string, unknown>;severityFilter: string[];
   enabled: boolean;
 }
 
@@ -1106,9 +988,7 @@ export interface AuditTrailConfig {
  * Storage configuration
  */
 export interface StorageConfig {
-  type: 'DATABASE' | 'FILE' | 'CLOUD' | 'ELASTICSEARCH';
-  configuration: Record<string, unknown>;
-  backup: BackupConfig;
+  type: 'DATABASE' | 'FILE' | 'CLOUD' | 'ELASTICSEARCH';configuration: Record<string, unknown>;backup: BackupConfig;
   archival: ArchivalConfig;
 }
 
@@ -1151,9 +1031,7 @@ export interface PerformanceTrackingConfig {
 export interface PerformanceMetric {
   metricId: string;
   name: string;
-  type: 'COUNTER' | 'GAUGE' | 'HISTOGRAM' | 'TIMER';
-  unit: string;
-  description: string;
+  type: 'COUNTER' | 'GAUGE' | 'HISTOGRAM' | 'TIMER';unit: string;description: string;
   tags: string[];
 }
 
@@ -1208,9 +1086,7 @@ export interface PerformanceReportingConfig {
   enabled: boolean;
   frequency: number;
   recipients: string[];
-  format: 'PDF' | 'HTML' | 'CSV' | 'JSON';
-  sections: string[];
-}
+  format: 'PDF' | 'HTML' | 'CSV' | 'JSON';sections: string[];}
 
 /**
  * Failure handling configuration
@@ -1240,9 +1116,7 @@ export interface FailureStrategy {
  */
 export interface FailureAction {
   actionId: string;
-  type: 'RETRY' | 'FALLBACK' | 'CIRCUIT_BREAK' | 'ALERT' | 'ESCALATE';
-  configuration: Record<string, unknown>;
-  timeout: number;
+  type: 'RETRY' | 'FALLBACK' | 'CIRCUIT_BREAK' | 'ALERT' | 'ESCALATE';configuration: Record<string, unknown>;timeout: number;
   order: number;
 }
 
@@ -1252,13 +1126,8 @@ export interface FailureAction {
 export interface BulkheadConfig {
   bulkheadId: string;
   name: string;
-  type: 'THREAD_POOL' | 'SEMAPHORE' | 'CONNECTION_POOL';
-  capacity: number;
-  queueSize: number;
-  rejectionPolicy: 'ABORT' | 'CALLER_RUNS' | 'DISCARD' | 'DISCARD_OLDEST';
-}
-
-/**
+  type: 'THREAD_POOL' | 'SEMAPHORE' | 'CONNECTION_POOL';capacity: number;queueSize: number;
+  rejectionPolicy: 'ABORT' | 'CALLER_RUNS' | 'DISCARD' | 'DISCARD_OLDEST';}/**
  * Timeout configuration
  */
 export interface TimeoutConfig {

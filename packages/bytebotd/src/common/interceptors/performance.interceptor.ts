@@ -24,13 +24,7 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
-} from '@nestjs/common';
-import { Observable, tap, catchError } from 'rxjs';
-import { Request, Response } from 'express';
-import { MetricsService } from '../../metrics/metrics.service';
-
-/**
- * Performance monitoring data for each request
+} from '@nestjs/common';import { Observable, tap, catchError } from 'rxjs';import { Request, Response } from 'express';import { MetricsService } from '../../metrics/metrics.service';/*** Performance monitoring data for each request
  */
 interface PerformanceMetrics {
   operationId: string;
@@ -95,27 +89,15 @@ export class PerformanceInterceptor implements NestInterceptor {
   // Performance thresholds (configurable via environment variables)
   private readonly thresholds: PerformanceThresholds = {
     slowRequestWarning: parseInt(
-      process.env.SLOW_REQUEST_WARNING ?? '1000',
-      10,
-    ), // 1 second
+      process.env.SLOW_REQUEST_WARNING ?? '1000',10,), // 1 second
     slowRequestCritical: parseInt(
-      process.env.SLOW_REQUEST_CRITICAL ?? '5000',
-      10,
-    ), // 5 seconds
+      process.env.SLOW_REQUEST_CRITICAL ?? '5000',10,), // 5 seconds
     memoryLeakWarning: parseInt(
-      process.env.MEMORY_LEAK_WARNING ?? '50000000',
-      10,
-    ), // 50MB
-    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%
-  };
-
-  constructor(private readonly metricsService?: MetricsService) {
+      process.env.MEMORY_LEAK_WARNING ?? '50000000',10,), // 50MB
+    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%};constructor(private readonly metricsService?: MetricsService) {
     this.logger.log('Performance Interceptor initialized');
     this.logger.log(
-      `Thresholds: warning=${this.thresholds.slowRequestWarning}ms, critical=${this.thresholds.slowRequestCritical}ms`,
-    );
-
-    // Start periodic stats reporting
+      `Thresholds: warning=${this.thresholds.slowRequestWarning}ms, critical=${this.thresholds.slowRequestCritical}ms`,);// Start periodic stats reporting
     this.startPeriodicReporting();
   }
 
@@ -127,18 +109,13 @@ export class PerformanceInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
 
     // Generate unique operation ID for request tracking
-    const operationId = `perf${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    const memoryBefore = process.memoryUsage();
+    const operationId = `perf${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const memoryBefore = process.memoryUsage();
 
     // Add operation ID to request for downstream services
     (request as Request & { operationId?: string }).operationId = operationId;
 
     this.logger.debug(
-      `[${operationId}] Performance monitoring started: ${request.method} ${request.url}`,
-    );
-
-    return next.handle().pipe(
+      `[${operationId}] Performance monitoring started: ${request.method} ${request.url}`,);return next.handle().pipe(
       tap((_data) => {
         // Request completed successfully
         this.recordPerformanceMetrics({
@@ -208,9 +185,7 @@ export class PerformanceInterceptor implements NestInterceptor {
       this.storeResponseTime(metrics.duration);
     } catch (_error) {
       this.logger.error(
-        `[${metrics.operationId}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
-      );
-    }
+        `[${metrics.operationId}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,);}
   }
 
   /**
@@ -223,10 +198,7 @@ export class PerformanceInterceptor implements NestInterceptor {
       method: metrics.method,
       url: metrics.url,
       statusCode: metrics.statusCode,
-      duration: `${metrics.duration}ms`,
-      memoryDelta: {
-        rss: `${(metrics.memoryDelta.rss / 1024 / 1024).toFixed(2)}MB`,
-        heapUsed: `${(metrics.memoryDelta.heapUsed / 1024 / 1024).toFixed(2)}MB`,
+      duration: `${metrics.duration}ms`,memoryDelta: {rss: `${(metrics.memoryDelta.rss / 1024 / 1024).toFixed(2)}MB`,heapUsed: `${(metrics.memoryDelta.heapUsed / 1024 / 1024).toFixed(2)}MB`,
       },
     };
 
@@ -260,15 +232,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private determineLogLevel(
     duration: number,
-  ): 'debug' | 'log' | 'warn' | 'error' {
-    if (duration >= this.thresholds.slowRequestCritical) {
-      return 'error';
-    } else if (duration >= this.thresholds.slowRequestWarning) {
-      return 'warn';
-    } else if (duration >= 500) {
-      return 'log';
-    } else {
-      return 'debug';
+  ): 'debug' | 'log' | 'warn' | 'error' {if (duration >= this.thresholds.slowRequestCritical) {return 'error';} else if (duration >= this.thresholds.slowRequestWarning) {return 'warn';} else if (duration >= 500) {return 'log';} else {return 'debug';
     }
   }
 
@@ -280,9 +244,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     if (metrics.duration >= this.thresholds.slowRequestCritical) {
       this.stats.slowRequests++;
       this.logger.error(
-        `[${metrics.operationId}] CRITICAL: Request exceeded ${this.thresholds.slowRequestCritical}ms threshold`,
-        {
-          duration: metrics.duration,
+        `[${metrics.operationId}] CRITICAL: Request exceeded ${this.thresholds.slowRequestCritical}ms threshold`,{duration: metrics.duration,
           url: metrics.url,
           method: metrics.method,
         },
@@ -290,9 +252,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     } else if (metrics.duration >= this.thresholds.slowRequestWarning) {
       this.stats.slowRequests++;
       this.logger.warn(
-        `[${metrics.operationId}] WARNING: Request exceeded ${this.thresholds.slowRequestWarning}ms threshold`,
-        {
-          duration: metrics.duration,
+        `[${metrics.operationId}] WARNING: Request exceeded ${this.thresholds.slowRequestWarning}ms threshold`,{duration: metrics.duration,
           url: metrics.url,
           method: metrics.method,
         },
@@ -321,9 +281,7 @@ export class PerformanceInterceptor implements NestInterceptor {
   private calculateMemoryDelta(
     before: NodeJS.MemoryUsage,
     after: NodeJS.MemoryUsage,
-  ): PerformanceMetrics['memoryDelta'] {
-    return {
-      rss: after.rss - before.rss,
+  ): PerformanceMetrics['memoryDelta'] {return {rss: after.rss - before.rss,
       heapTotal: after.heapTotal - before.heapTotal,
       heapUsed: after.heapUsed - before.heapUsed,
       external: after.external - before.external,
@@ -335,14 +293,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private normalizeUrl(url: string): string {
     // Remove query parameters and normalize path parameters
-    const cleanUrl = (url ?? '').split('?')[0] ?? '';
-    return cleanUrl
-      .replace(/\/\d+/g, '/:id') // Replace numeric path params
-      .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params
-      .replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params
-  }
-
-  /**
+    const cleanUrl = (url ?? '').split('?')[0] ?? '';return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params.replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params}/**
    * Store response time for percentile calculations
    */
   private storeResponseTime(duration: number): void {
@@ -420,10 +371,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     });
 
     this.responseTimes.length = 0;
-    this.logger.log('Performance statistics cleared');
-  }
-
-  /**
+    this.logger.log('Performance statistics cleared');}/**
    * Start periodic performance statistics reporting
    */
   private startPeriodicReporting(): void {
@@ -434,14 +382,9 @@ export class PerformanceInterceptor implements NestInterceptor {
 
         this.logger.log('Performance Statistics Summary:', {
           requestCount: this.stats.requestCount,
-          averageResponseTime: `${this.stats.averageResponseTime.toFixed(2)}ms`,
-          slowRequests: this.stats.slowRequests,
-          memoryAlerts: this.stats.memoryAlerts,
+          averageResponseTime: `${this.stats.averageResponseTime.toFixed(2)}ms`,slowRequests: this.stats.slowRequests,memoryAlerts: this.stats.memoryAlerts,
           percentiles: {
-            p50: `${this.stats.p50ResponseTime}ms`,
-            p90: `${this.stats.p90ResponseTime}ms`,
-            p95: `${this.stats.p95ResponseTime}ms`,
-            p99: `${this.stats.p99ResponseTime}ms`,
+            p50: `${this.stats.p50ResponseTime}ms`,p90: `${this.stats.p90ResponseTime}ms`,p95: `${this.stats.p95ResponseTime}ms`,p99: `${this.stats.p99ResponseTime}ms`,
           },
         });
       }

@@ -18,25 +18,12 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { CacheKeyGenerator } from './cache-key.generator';
-import { MetricsService } from '../metrics/metrics.service';
-
-/**
- * Cache operation types for metrics tracking
+import { Injectable, Logger, Inject } from '@nestjs/common';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Cache } from 'cache-manager';import { CacheKeyGenerator } from './cache-key.generator';import { MetricsService } from '../metrics/metrics.service';/*** Cache operation types for metrics tracking
  */
-type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';
-
-/**
- * Type guard to check if a value is a valid JSON object
+type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';/*** Type guard to check if a value is a valid JSON object
  */
 function _isValidJsonObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-/**
+  return value !== null && typeof value === 'object' && !Array.isArray(value);}/**
  * Safe JSON parsing with type validation
  */
 function safeJsonParse<T>(jsonString: string): T | null {
@@ -53,9 +40,7 @@ function safeJsonParse<T>(jsonString: string): T | null {
  */
 interface _SerializedCacheValue {
   data: unknown;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
-  timestamp: number;
-}
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';timestamp: number;}
 
 /**
  * Cache options for fine-grained control
@@ -109,10 +94,7 @@ export class CacheService {
    * @returns Promise<T | null> Cached value or null if not found
    */
   async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
-    const operationId = `cache_get${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cache_get${Date.now()}`;const startTime = Date.now();try {
       const fullKey = this.keyGenerator.generate(key, options.namespace);
       this.logger.debug(`[${operationId}] Cache GET: ${fullKey}`);
 
@@ -179,10 +161,7 @@ export class CacheService {
     value: T,
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_set${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cache_set${Date.now()}`;const startTime = Date.now();try {
       const fullKey = this.keyGenerator.generate(key, options.namespace);
       const ttl = options.ttl ?? 300; // 5 minutes default
 
@@ -222,8 +201,7 @@ export class CacheService {
         `[${operationId}] Cache SET error: ${errorMessage} (${duration}ms)`,
       );
 
-      this.recordOperation('set', 'error', duration);
-      // Don't throw - cache errors should be non-fatal
+      this.recordOperation('set', 'error', duration);// Don't throw - cache errors should be non-fatal
     }
   }
 
@@ -234,10 +212,7 @@ export class CacheService {
    * @param options Cache options
    */
   async del(key: string, options: CacheOptions = {}): Promise<void> {
-    const operationId = `cache_del${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cache_del${Date.now()}`;const startTime = Date.now();try {
       const fullKey = this.keyGenerator.generate(key, options.namespace);
 
       this.logger.debug(`[${operationId}] Cache DEL: ${fullKey}`);
@@ -274,9 +249,7 @@ export class CacheService {
     keys: string[],
     options: CacheOptions = {},
   ): Promise<Map<string, T>> {
-    const operationId = `cache_mget${Date.now()}`;
-    const startTime = Date.now();
-    const results = new Map<string, T>();
+    const operationId = `cache_mget${Date.now()}`;const startTime = Date.now();const results = new Map<string, T>();
 
     try {
       this.logger.debug(`[${operationId}] Cache MGET: ${keys.length} keys`);
@@ -323,10 +296,7 @@ export class CacheService {
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_mset${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cache_mset${Date.now()}`;const startTime = Date.now();try {
       this.logger.debug(
         `[${operationId}] Cache MSET: ${entries.length} entries`,
       );
@@ -369,15 +339,9 @@ export class CacheService {
     keys: string[],
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_warm${Date.now()}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cache_warm${Date.now()}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] Cache warming started: ${keys.length} keys`,
-      );
-
-      const warmPromises = keys.map(async (key) => {
+        `[${operationId}] Cache warming started: ${keys.length} keys`,);const warmPromises = keys.map(async (key) => {
         try {
           const data = await dataProvider(key);
           if (data !== null) {
@@ -407,9 +371,7 @@ export class CacheService {
         `[${operationId}] Cache warming error: ${errorMessage} (${duration}ms)`,
       );
 
-      this.recordOperation('warm', 'error', duration);
-    }
-  }
+      this.recordOperation('warm', 'error', duration);}}
 
   /**
    * Get cache statistics
@@ -441,10 +403,7 @@ export class CacheService {
    * @param namespace Optional namespace
    */
   invalidatePattern(pattern: string, _namespace?: string): void {
-    const operationId = `cache_invalidate${Date.now()}`;
-
-    try {
-      // For Redis, we would use SCAN with pattern matching
+    const operationId = `cache_invalidate${Date.now()}`;try {// For Redis, we would use SCAN with pattern matching
       // This is a simplified implementation
       this.logger.warn(
         `[${operationId}] Pattern invalidation requested: ${pattern} (not fully implemented)`,

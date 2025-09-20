@@ -756,7 +756,7 @@ describe('Parlant Performance Comprehensive Testing', () => {
           try {
             await parlantService.validateFunctionExecution(request);
             requestCount++;
-          } catch (error) {
+          } catch (_error) {
             // Continue test even if individual requests fail
           }
         }

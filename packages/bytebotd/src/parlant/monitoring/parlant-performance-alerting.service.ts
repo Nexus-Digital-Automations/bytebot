@@ -24,16 +24,7 @@
  * @version 1.0.0 - Enterprise Alerting System
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-// Note: Using setInterval instead of Cron decorators for scheduling
-import { performance } from 'perf_hooks';
-import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';
-
-// ===== ALERTING INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';// Note: Using setInterval instead of Cron decorators for schedulingimport { performance } from 'perf_hooks';import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';// ===== ALERTING INTERFACES =====/**
  * Alert rule configuration
  */
 export interface AlertRule {
@@ -60,16 +51,7 @@ export interface AlertRule {
  * Alert condition types
  */
 export interface AlertCondition {
-  readonly type: 'THRESHOLD' | 'ANOMALY' | 'TREND' | 'COMPOSITE' | 'PREDICTIVE';
-  readonly operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';
-  readonly aggregation: 'AVG' | 'MAX' | 'MIN' | 'SUM' | 'COUNT' | 'P95' | 'P99';
-  readonly timeWindow: string; // e.g., '5m', '1h', '1d'
-  readonly evaluationFrequency: string; // e.g., '30s', '1m', '5m'
-  readonly dataPoints: number; // Number of data points to evaluate
-  readonly missingSDataBehavior: 'IGNORE' | 'TREAT_AS_ZERO' | 'ALERT';
-}
-
-/**
+  readonly type: 'THRESHOLD' | 'ANOMALY' | 'TREND' | 'COMPOSITE' | 'PREDICTIVE';readonly operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';readonly aggregation: 'AVG' | 'MAX' | 'MIN' | 'SUM' | 'COUNT' | 'P95' | 'P99';readonly timeWindow: string; // e.g., '5m', '1h', '1d'readonly evaluationFrequency: string; // e.g., '30s', '1m', '5m'readonly dataPoints: number; // Number of data points to evaluatereadonly missingSDataBehavior: 'IGNORE' | 'TREAT_AS_ZERO' | 'ALERT';}/**
  * Alert thresholds with dynamic adjustment
  */
 export interface AlertThresholds {
@@ -78,10 +60,7 @@ export interface AlertThresholds {
   readonly emergency?: number;
   readonly dynamicAdjustment: {
     readonly enabled: boolean;
-    readonly algorithm: 'STATISTICAL' | 'MACHINE_LEARNING' | 'SEASONAL';
-    readonly learningPeriod: string; // e.g., '7d', '30d'
-    readonly adjustmentFactor: number; // 0.1 = 10% adjustment
-    readonly minThreshold: number;
+    readonly algorithm: 'STATISTICAL' | 'MACHINE_LEARNING' | 'SEASONAL';readonly learningPeriod: string; // e.g., '7d', '30d'readonly adjustmentFactor: number; // 0.1 = 10% adjustmentreadonly minThreshold: number;
     readonly maxThreshold: number;
   };
   readonly percentileThresholds?: {
@@ -94,13 +73,7 @@ export interface AlertThresholds {
  * Alert severity levels
  */
 export enum AlertSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY',
-}
-
-/**
+  INFO = 'INFO',WARNING = 'WARNING',CRITICAL = 'CRITICAL',EMERGENCY = 'EMERGENCY',}/**
  * Escalation policy configuration
  */
 export interface EscalationPolicy {
@@ -129,9 +102,7 @@ export interface EscalationStep {
  * Escalation target
  */
 export interface EscalationTarget {
-  readonly type: 'USER' | 'TEAM' | 'EXTERNAL_SYSTEM';
-  readonly identifier: string; // User ID, team ID, or system identifier
-  readonly contactMethods: string[]; // email, sms, push, webhook
+  readonly type: 'USER' | 'TEAM' | 'EXTERNAL_SYSTEM';readonly identifier: string; // User ID, team ID, or system identifierreadonly contactMethods: string[]; // email, sms, push, webhook
   readonly priority: number; // Lower number = higher priority
 }
 
@@ -139,9 +110,7 @@ export interface EscalationTarget {
  * Escalation action
  */
 export interface EscalationAction {
-  readonly type: 'NOTIFY' | 'CREATE_INCIDENT' | 'RUN_AUTOMATION' | 'SCALE_RESOURCES';
-  readonly config: Record<string, unknown>;
-  readonly conditions?: string[]; // Conditions that must be met to execute action
+  readonly type: 'NOTIFY' | 'CREATE_INCIDENT' | 'RUN_AUTOMATION' | 'SCALE_RESOURCES';readonly config: Record<string, unknown>;readonly conditions?: string[]; // Conditions that must be met to execute action
 }
 
 /**
@@ -149,18 +118,14 @@ export interface EscalationAction {
  */
 export interface EscalationCondition {
   readonly metric: string;
-  readonly operator: 'GT' | 'LT' | 'EQ';
-  readonly value: number;
-  readonly timeWindow: string;
+  readonly operator: 'GT' | 'LT' | 'EQ';readonly value: number;readonly timeWindow: string;
 }
 
 /**
  * Notification channel configuration
  */
 export interface NotificationChannel {
-  readonly type: 'EMAIL' | 'SMS' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY' | 'TEAMS';
-  readonly config: Record<string, unknown>;
-  readonly enabled: boolean;
+  readonly type: 'EMAIL' | 'SMS' | 'SLACK' | 'WEBHOOK' | 'PAGERDUTY' | 'TEAMS';readonly config: Record<string, unknown>;readonly enabled: boolean;
   readonly priority: number;
   readonly rateLimiting: {
     readonly maxPerHour: number;
@@ -176,28 +141,18 @@ export interface NotificationChannel {
 export interface NotificationTemplate {
   readonly subject: string;
   readonly body: string;
-  readonly format: 'TEXT' | 'HTML' | 'MARKDOWN' | 'JSON';
-  readonly variables: string[]; // Available template variables
-}
+  readonly format: 'TEXT' | 'HTML' | 'MARKDOWN' | 'JSON';readonly variables: string[]; // Available template variables}
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpact {
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly category: 'PERFORMANCE' | 'AVAILABILITY' | 'SECURITY' | 'COMPLIANCE';
-  readonly affectedServices: string[];
-  readonly estimatedUserImpact: number; // Number of affected users
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'PERFORMANCE' | 'AVAILABILITY' | 'SECURITY' | 'COMPLIANCE';readonly affectedServices: string[];readonly estimatedUserImpact: number; // Number of affected users
   readonly revenueImpact: {
     readonly currency: string;
     readonly amountPerHour: number;
-    readonly calculationMethod: 'ESTIMATED' | 'HISTORICAL' | 'CALCULATED';
-  };
-  readonly complianceRisk: {
-    readonly level: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
-    readonly regulations: string[]; // e.g., ['GDPR', 'SOX', 'HIPAA']
-    readonly penalties: string[];
-  };
+    readonly calculationMethod: 'ESTIMATED' | 'HISTORICAL' | 'CALCULATED';};readonly complianceRisk: {
+    readonly level: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly regulations: string[]; // e.g., ['GDPR', 'SOX', 'HIPAA']readonly penalties: string[];};
 }
 
 /**
@@ -226,18 +181,14 @@ export interface AutoResolutionConfig {
  */
 export interface AutoResolutionCondition {
   readonly metric: string;
-  readonly operator: 'GT' | 'LT' | 'EQ';
-  readonly value: number;
-  readonly duration: number; // Minutes the condition must be met
+  readonly operator: 'GT' | 'LT' | 'EQ';readonly value: number;readonly duration: number; // Minutes the condition must be met
 }
 
 /**
  * Auto-resolution action
  */
 export interface AutoResolutionAction {
-  readonly type: 'RESOLVE_ALERT' | 'SEND_NOTIFICATION' | 'RUN_SCRIPT' | 'UPDATE_STATUS';
-  readonly config: Record<string, unknown>;
-}
+  readonly type: 'RESOLVE_ALERT' | 'SEND_NOTIFICATION' | 'RUN_SCRIPT' | 'UPDATE_STATUS';readonly config: Record<string, unknown>;}
 
 /**
  * Active alert instance
@@ -271,15 +222,7 @@ export interface ActiveAlert {
  * Alert status enumeration
  */
 export enum AlertStatus {
-  TRIGGERED = 'TRIGGERED',
-  ACKNOWLEDGED = 'ACKNOWLEDGED',
-  ESCALATED = 'ESCALATED',
-  RESOLVED = 'RESOLVED',
-  SUPPRESSED = 'SUPPRESSED',
-  AUTO_RESOLVED = 'AUTO_RESOLVED',
-}
-
-/**
+  TRIGGERED = 'TRIGGERED',ACKNOWLEDGED = 'ACKNOWLEDGED',ESCALATED = 'ESCALATED',RESOLVED = 'RESOLVED',SUPPRESSED = 'SUPPRESSED',AUTO_RESOLVED = 'AUTO_RESOLVED',}/**
  * Escalation event
  */
 export interface EscalationEvent {
@@ -287,9 +230,7 @@ export interface EscalationEvent {
   readonly fromLevel: number;
   readonly toLevel: number;
   readonly reason: string;
-  readonly triggeredBy: 'SYSTEM' | 'USER';
-  readonly targets: EscalationTarget[];
-  readonly actions: EscalationAction[];
+  readonly triggeredBy: 'SYSTEM' | 'USER';readonly targets: EscalationTarget[];readonly actions: EscalationAction[];
 }
 
 /**
@@ -299,9 +240,7 @@ export interface NotificationEvent {
   readonly timestamp: Date;
   readonly channel: string;
   readonly target: string;
-  status: 'SENT' | 'DELIVERED' | 'FAILED' | 'RATE_LIMITED';
-  responseTime: number;
-  errorMessage?: string;
+  status: 'SENT' | 'DELIVERED' | 'FAILED' | 'RATE_LIMITED';responseTime: number;errorMessage?: string;
   deliveryConfirmation?: Date;
 }
 
@@ -312,9 +251,7 @@ export interface AlertContext {
   readonly triggeringEvent: {
     readonly timestamp: Date;
     readonly value: number;
-    readonly trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';
-    readonly changeRate: number; // Rate of change
-    readonly historicalComparison: {
+    readonly trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';readonly changeRate: number; // Rate of changereadonly historicalComparison: {
       readonly samePeriodLastWeek: number;
       readonly samePeriodLastMonth: number;
       readonly percentChange: number;
@@ -346,11 +283,7 @@ export interface DeploymentEvent {
   readonly timestamp: Date;
   readonly service: string;
   readonly version: string;
-  readonly type: 'DEPLOYMENT' | 'ROLLBACK' | 'CONFIG_CHANGE';
-  readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-/**
+  readonly type: 'DEPLOYMENT' | 'ROLLBACK' | 'CONFIG_CHANGE';readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Configuration change event
  */
 export interface ConfigChangeEvent {
@@ -370,10 +303,7 @@ export interface TrafficSpikeEvent {
   readonly magnitude: number; // Multiplier of normal traffic
   readonly duration: number; // Minutes
   readonly source: string;
-  readonly type: 'ORGANIC' | 'DDOS' | 'LOAD_TEST' | 'MARKETING_CAMPAIGN';
-}
-
-/**
+  readonly type: 'ORGANIC' | 'DDOS' | 'LOAD_TEST' | 'MARKETING_CAMPAIGN';}/**
  * Alert correlation analysis
  */
 export interface AlertCorrelation {
@@ -381,9 +311,7 @@ export interface AlertCorrelation {
   readonly rootCauseCandidate: boolean;
   readonly correlationScore: number; // 0 to 1
   readonly timeCorrelation: {
-    readonly type: 'SIMULTANEOUS' | 'CASCADING' | 'PERIODIC';
-    readonly timeDelta: number; // Milliseconds between related alerts
-  };
+    readonly type: 'SIMULTANEOUS' | 'CASCADING' | 'PERIODIC';readonly timeDelta: number; // Milliseconds between related alerts};
   readonly metricCorrelation: {
     readonly strongCorrelations: string[]; // Metrics with strong correlation
     readonly weakCorrelations: string[]; // Metrics with weak correlation
@@ -397,24 +325,18 @@ export interface AlertCorrelation {
  */
 export interface AlertImpactChain {
   readonly metric: string;
-  readonly impact: 'CAUSE' | 'EFFECT' | 'AMPLIFIER' | 'DAMPENER';
-  readonly confidence: number; // 0 to 1
-  readonly evidence: string[];
+  readonly impact: 'CAUSE' | 'EFFECT' | 'AMPLIFIER' | 'DAMPENER';readonly confidence: number; // 0 to 1readonly evidence: string[];
 }
 
 /**
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
-  readonly overallImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly affectedUsers: number;
-  readonly affectedServices: string[];
+  readonly overallImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly affectedUsers: number;readonly affectedServices: string[];
   readonly affectedRevenue: number;
   readonly slaViolations: string[];
   readonly complianceRisks: string[];
-  readonly reputationImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly customerSatisfactionImpact: number; // -100 to 100
-  readonly recoveryTimeEstimate: number; // Minutes
+  readonly reputationImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly customerSatisfactionImpact: number; // -100 to 100readonly recoveryTimeEstimate: number; // Minutes
   readonly mitigationActions: string[];
 }
 
@@ -452,10 +374,7 @@ export interface AlertAnalytics {
  */
 export interface AlertingRecommendation {
   readonly id: string;
-  readonly type: 'THRESHOLD_ADJUSTMENT' | 'RULE_OPTIMIZATION' | 'NOISE_REDUCTION' | 'ESCALATION_TUNING';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly title: string;
-  readonly description: string;
+  readonly type: 'THRESHOLD_ADJUSTMENT' | 'RULE_OPTIMIZATION' | 'NOISE_REDUCTION' | 'ESCALATION_TUNING';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH';readonly title: string;readonly description: string;
   readonly impact: {
     readonly falsePositiveReduction: number; // Percentage
     readonly detectionImprovement: number; // Percentage
@@ -502,22 +421,11 @@ export class ParlantPerformanceAlertingService {
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly eventEmitter: EventEmitter2
   ) {
-    const operationId = `alerting_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.correlationEngine = new AlertCorrelationEngine();
-
-    this.logger.log(`[${operationId}] Initializing Parlant Performance Alerting Service`, {
+    const operationId = `alerting_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.correlationEngine = new AlertCorrelationEngine();this.logger.log(`[${operationId}] Initializing Parlant Performance Alerting Service`, {
       operationId,
       config: this.alertingConfig,
       features: [
-        'Multi-level escalation',
-        'Anomaly detection',
-        'Alert correlation',
-        'Auto-resolution',
-        'Business impact assessment',
-        'Predictive alerting',
-      ],
-    });
+        'Multi-level escalation','Anomaly detection','Alert correlation','Auto-resolution','Business impact assessment','Predictive alerting',],});
 
     // Initialize default alert rules
     this.initializeDefaultAlertRules();
@@ -542,40 +450,30 @@ export class ParlantPerformanceAlertingService {
       try {
         await this.performContinuousEvaluation();
       } catch (error) {
-        this.logger.error('Continuous evaluation failed', error);
-      }
-    }, 60 * 1000); // 1 minute
+        this.logger.error('Continuous evaluation failed', error);}}, 60 * 1000); // 1 minute
 
     // Performance analysis every 10 minutes
     setInterval(async () => {
       try {
         await this.performPerformanceAnalysis();
       } catch (error) {
-        this.logger.error('Performance analysis failed', error);
-      }
-    }, 10 * 60 * 1000); // 10 minutes
+        this.logger.error('Performance analysis failed', error);}}, 10 * 60 * 1000); // 10 minutes
 
     // Comprehensive analysis every hour
     setInterval(async () => {
       try {
         await this.performComprehensiveAnalysis();
       } catch (error) {
-        this.logger.error('Comprehensive analysis failed', error);
-      }
-    }, 60 * 60 * 1000); // 1 hour
+        this.logger.error('Comprehensive analysis failed', error);}}, 60 * 60 * 1000); // 1 hour
   }
 
   /**
    * Initialize event handlers
    */
   private initializeEventHandlers(): void {
-    this.eventEmitter.on('performance.metric.updated', async (data: { metric: string; value: number }) => {
-      try {
-        await this.handleMetricUpdate(data);
+    this.eventEmitter.on('performance.metric.updated', async (data: { metric: string; value: number }) => {try {await this.handleMetricUpdate(data);
       } catch (error) {
-        this.logger.error('Failed to handle metric update', error);
-      }
-    });
+        this.logger.error('Failed to handle metric update', error);}});
   }
 
   /**
@@ -585,10 +483,7 @@ export class ParlantPerformanceAlertingService {
    * @returns Created rule ID
    */
   async createAlertRule(rule: Omit<AlertRule, 'id' | 'createdAt' | 'lastModified'>): Promise<string> {
-    const ruleId = `rule_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    const alertRule: AlertRule = {
-      ...rule,
+    const ruleId = `rule_${Date.now()}_${Math.random().toString(36).substring(7)}`;const alertRule: AlertRule = {...rule,
       id: ruleId,
       createdAt: new Date(),
       lastModified: new Date(),
@@ -596,9 +491,7 @@ export class ParlantPerformanceAlertingService {
 
     this.alertRules.set(ruleId, alertRule);
 
-    this.logger.log(`Alert rule created: ${ruleId}`, {
-      ruleId,
-      name: rule.name,
+    this.logger.log(`Alert rule created: ${ruleId}`, {ruleId,name: rule.name,
       metric: rule.metric,
       severity: rule.severity,
       enabled: rule.enabled,
@@ -616,10 +509,7 @@ export class ParlantPerformanceAlertingService {
   async updateAlertRule(ruleId: string, updates: Partial<AlertRule>): Promise<void> {
     const existingRule = this.alertRules.get(ruleId);
     if (!existingRule) {
-      throw new Error(`Alert rule not found: ${ruleId}`);
-    }
-
-    const updatedRule: AlertRule = {
+      throw new Error(`Alert rule not found: ${ruleId}`);}const updatedRule: AlertRule = {
       ...existingRule,
       ...updates,
       id: ruleId, // Preserve original ID
@@ -629,9 +519,7 @@ export class ParlantPerformanceAlertingService {
 
     this.alertRules.set(ruleId, updatedRule);
 
-    this.logger.log(`Alert rule updated: ${ruleId}`, {
-      ruleId,
-      updatedFields: Object.keys(updates),
+    this.logger.log(`Alert rule updated: ${ruleId}`, {ruleId,updatedFields: Object.keys(updates),
     });
   }
 
@@ -656,9 +544,7 @@ export class ParlantPerformanceAlertingService {
       await this.resolveAlert(alert.id, 'SYSTEM', 'Alert rule deleted');
     }
 
-    this.logger.log(`Alert rule deleted: ${ruleId}`, {
-      ruleId,
-      resolvedAlerts: activeAlertsForRule.length,
+    this.logger.log(`Alert rule deleted: ${ruleId}`, {ruleId,resolvedAlerts: activeAlertsForRule.length,
     });
   }
 
@@ -672,14 +558,8 @@ export class ParlantPerformanceAlertingService {
   async acknowledgeAlert(alertId: string, acknowledgedBy: string, notes?: string): Promise<void> {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) {
-      throw new Error(`Alert not found: ${alertId}`);
-    }
-
-    if (alert.status === AlertStatus.ACKNOWLEDGED) {
-      throw new Error(`Alert already acknowledged: ${alertId}`);
-    }
-
-    const updatedAlert: ActiveAlert = {
+      throw new Error(`Alert not found: ${alertId}`);}if (alert.status === AlertStatus.ACKNOWLEDGED) {
+      throw new Error(`Alert already acknowledged: ${alertId}`);}const updatedAlert: ActiveAlert = {
       ...alert,
       status: AlertStatus.ACKNOWLEDGED,
       acknowledgedAt: new Date(),
@@ -715,14 +595,8 @@ export class ParlantPerformanceAlertingService {
   async resolveAlert(alertId: string, resolvedBy: string, resolution: string): Promise<void> {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) {
-      throw new Error(`Alert not found: ${alertId}`);
-    }
-
-    if (alert.status === AlertStatus.RESOLVED) {
-      throw new Error(`Alert already resolved: ${alertId}`);
-    }
-
-    const updatedAlert: ActiveAlert = {
+      throw new Error(`Alert not found: ${alertId}`);}if (alert.status === AlertStatus.RESOLVED) {
+      throw new Error(`Alert already resolved: ${alertId}`);}const updatedAlert: ActiveAlert = {
       ...alert,
       status: AlertStatus.RESOLVED,
       resolvedAt: new Date(),
@@ -748,10 +622,7 @@ export class ParlantPerformanceAlertingService {
       duration: updatedAlert.resolvedAt!.getTime() - updatedAlert.triggeredAt.getTime(),
     });
 
-    this.eventEmitter.emit('alert.resolved', updatedAlert);
-  }
-
-  /**
+    this.eventEmitter.emit('alert.resolved', updatedAlert);}/**
    * Get active alerts with optional filtering
    *
    * @param filters - Optional filters
@@ -788,9 +659,7 @@ export class ParlantPerformanceAlertingService {
   /**
    * Get alert analytics and insights
    *
-   * @param timeRange - Time range for analytics ('1h', '24h', '7d', '30d')
-   * @returns Alert analytics data
-   */
+   * @param timeRange - Time range for analytics ('1h', '24h', '7d', '30d')* @returns Alert analytics data*/
   async getAlertAnalytics(timeRange: string = '24h'): Promise<AlertAnalytics> {
     const cutoffTime = this.getTimeRangeCutoff(timeRange);
     const relevantAlerts = this.alertHistory.filter(alert => alert.triggeredAt >= cutoffTime);
@@ -838,52 +707,22 @@ export class ParlantPerformanceAlertingService {
   // ===== PRIVATE METHODS =====
 
   private initializeDefaultAlertRules(): void {
-    const defaultRules: Omit<AlertRule, 'id' | 'createdAt' | 'lastModified'>[] = [
-      {
-        name: 'High Response Time',
-        description: 'Alert when average response time exceeds thresholds',
-        enabled: true,
-        metric: 'averageLatency',
-        condition: {
-          type: 'THRESHOLD',
-          operator: 'GT',
-          aggregation: 'AVG',
-          timeWindow: '5m',
-          evaluationFrequency: '1m',
-          dataPoints: 5,
-          missingSDataBehavior: 'IGNORE',
-        },
-        thresholds: {
+    const defaultRules: Omit<AlertRule, 'id' | 'createdAt' | 'lastModified'>[] = [{name: 'High Response Time',description: 'Alert when average response time exceeds thresholds',enabled: true,metric: 'averageLatency',condition: {type: 'THRESHOLD',operator: 'GT',aggregation: 'AVG',timeWindow: '5m',evaluationFrequency: '1m',dataPoints: 5,missingSDataBehavior: 'IGNORE',},thresholds: {
           warning: 800,
           critical: 1500,
           emergency: 3000,
           dynamicAdjustment: {
             enabled: true,
-            algorithm: 'STATISTICAL',
-            learningPeriod: '7d',
-            adjustmentFactor: 0.1,
-            minThreshold: 500,
+            algorithm: 'STATISTICAL',learningPeriod: '7d',adjustmentFactor: 0.1,minThreshold: 500,
             maxThreshold: 5000,
           },
         },
         severity: AlertSeverity.CRITICAL,
         escalationPolicy: this.createDefaultEscalationPolicy(),
         notificationChannels: this.createDefaultNotificationChannels(),
-        tags: ['performance', 'latency', 'user-experience'],
-        businessImpact: {
-          severity: 'HIGH',
-          category: 'PERFORMANCE',
-          affectedServices: ['parlant-validation'],
-          estimatedUserImpact: 1000,
-          revenueImpact: {
-            currency: 'USD',
-            amountPerHour: 5000,
-            calculationMethod: 'ESTIMATED',
-          },
-          complianceRisk: {
-            level: 'LOW',
-            regulations: [],
-            penalties: [],
+        tags: ['performance', 'latency', 'user-experience'],businessImpact: {severity: 'HIGH',category: 'PERFORMANCE',affectedServices: ['parlant-validation'],estimatedUserImpact: 1000,revenueImpact: {
+            currency: 'USD',amountPerHour: 5000,calculationMethod: 'ESTIMATED',},complianceRisk: {
+            level: 'LOW',regulations: [],penalties: [],
           },
         },
         suppressionRules: [],
@@ -891,68 +730,31 @@ export class ParlantPerformanceAlertingService {
           enabled: true,
           conditions: [
             {
-              metric: 'averageLatency',
-              operator: 'LT',
-              value: 600,
-              duration: 5,
+              metric: 'averageLatency',operator: 'LT',value: 600,duration: 5,
             },
           ],
           timeout: 60,
           actions: [
             {
-              type: 'RESOLVE_ALERT',
-              config: {
-                reason: 'Response time returned to normal levels',
-              },
-            },
+              type: 'RESOLVE_ALERT',config: {reason: 'Response time returned to normal levels',},},
           ],
         },
-        createdBy: 'SYSTEM',
-      },
-      {
-        name: 'Low Cache Hit Rate',
-        description: 'Alert when cache hit rate drops below optimal levels',
-        enabled: true,
-        metric: 'cacheHitRate',
-        condition: {
-          type: 'THRESHOLD',
-          operator: 'LT',
-          aggregation: 'AVG',
-          timeWindow: '10m',
-          evaluationFrequency: '2m',
-          dataPoints: 5,
-          missingSDataBehavior: 'TREAT_AS_ZERO',
-        },
-        thresholds: {
+        createdBy: 'SYSTEM',},{
+        name: 'Low Cache Hit Rate',description: 'Alert when cache hit rate drops below optimal levels',enabled: true,metric: 'cacheHitRate',condition: {type: 'THRESHOLD',operator: 'LT',aggregation: 'AVG',timeWindow: '10m',evaluationFrequency: '2m',dataPoints: 5,missingSDataBehavior: 'TREAT_AS_ZERO',},thresholds: {
           warning: 85,
           critical: 70,
           dynamicAdjustment: {
             enabled: false,
-            algorithm: 'STATISTICAL',
-            learningPeriod: '7d',
-            adjustmentFactor: 0.05,
-            minThreshold: 60,
+            algorithm: 'STATISTICAL',learningPeriod: '7d',adjustmentFactor: 0.05,minThreshold: 60,
             maxThreshold: 95,
           },
         },
         severity: AlertSeverity.WARNING,
         escalationPolicy: this.createDefaultEscalationPolicy(),
         notificationChannels: this.createDefaultNotificationChannels(),
-        tags: ['performance', 'cache', 'optimization'],
-        businessImpact: {
-          severity: 'MEDIUM',
-          category: 'PERFORMANCE',
-          affectedServices: ['parlant-validation'],
-          estimatedUserImpact: 500,
-          revenueImpact: {
-            currency: 'USD',
-            amountPerHour: 1000,
-            calculationMethod: 'ESTIMATED',
-          },
-          complianceRisk: {
-            level: 'NONE',
-            regulations: [],
-            penalties: [],
+        tags: ['performance', 'cache', 'optimization'],businessImpact: {severity: 'MEDIUM',category: 'PERFORMANCE',affectedServices: ['parlant-validation'],estimatedUserImpact: 500,revenueImpact: {
+            currency: 'USD',amountPerHour: 1000,calculationMethod: 'ESTIMATED',},complianceRisk: {
+            level: 'NONE',regulations: [],penalties: [],
           },
         },
         suppressionRules: [],
@@ -960,20 +762,13 @@ export class ParlantPerformanceAlertingService {
           enabled: true,
           conditions: [
             {
-              metric: 'cacheHitRate',
-              operator: 'GT',
-              value: 90,
-              duration: 10,
+              metric: 'cacheHitRate',operator: 'GT',value: 90,duration: 10,
             },
           ],
           timeout: 120,
           actions: [
             {
-              type: 'RESOLVE_ALERT',
-              config: {
-                reason: 'Cache hit rate improved to acceptable levels',
-              },
-            },
+              type: 'RESOLVE_ALERT',config: {reason: 'Cache hit rate improved to acceptable levels',},},
           ],
         },
         createdBy: 'SYSTEM',
@@ -989,28 +784,16 @@ export class ParlantPerformanceAlertingService {
 
   private createDefaultEscalationPolicy(): EscalationPolicy {
     return {
-      id: 'default_escalation',
-      name: 'Default Escalation Policy',
-      steps: [
-        {
+      id: 'default_escalation',name: 'Default Escalation Policy',steps: [{
           level: 1,
           timeout: 15, // 15 minutes
           targets: [
             {
-              type: 'TEAM',
-              identifier: 'on-call-engineers',
-              contactMethods: ['email', 'slack'],
-              priority: 1,
-            },
+              type: 'TEAM',identifier: 'on-call-engineers',contactMethods: ['email', 'slack'],priority: 1,},
           ],
           actions: [
             {
-              type: 'NOTIFY',
-              config: {
-                channels: ['slack', 'email'],
-                urgency: 'normal',
-              },
-            },
+              type: 'NOTIFY',config: {channels: ['slack', 'email'],urgency: 'normal',},},
           ],
         },
         {
@@ -1018,27 +801,13 @@ export class ParlantPerformanceAlertingService {
           timeout: 30, // 30 minutes
           targets: [
             {
-              type: 'TEAM',
-              identifier: 'engineering-managers',
-              contactMethods: ['email', 'sms'],
-              priority: 1,
-            },
+              type: 'TEAM',identifier: 'engineering-managers',contactMethods: ['email', 'sms'],priority: 1,},
           ],
           actions: [
             {
-              type: 'NOTIFY',
-              config: {
-                channels: ['sms', 'email'],
-                urgency: 'high',
-              },
-            },
+              type: 'NOTIFY',config: {channels: ['sms', 'email'],urgency: 'high',},},
             {
-              type: 'CREATE_INCIDENT',
-              config: {
-                severity: 'major',
-                assignTo: 'on-call-engineers',
-              },
-            },
+              type: 'CREATE_INCIDENT',config: {severity: 'major',assignTo: 'on-call-engineers',},},
           ],
         },
         {
@@ -1046,20 +815,11 @@ export class ParlantPerformanceAlertingService {
           timeout: 60, // 60 minutes
           targets: [
             {
-              type: 'USER',
-              identifier: 'cto',
-              contactMethods: ['sms', 'push'],
-              priority: 1,
-            },
+              type: 'USER',identifier: 'cto',contactMethods: ['sms', 'push'],priority: 1,},
           ],
           actions: [
             {
-              type: 'NOTIFY',
-              config: {
-                channels: ['sms', 'push'],
-                urgency: 'emergency',
-              },
-            },
+              type: 'NOTIFY',config: {channels: ['sms', 'push'],urgency: 'emergency',},},
           ],
         },
       ],
@@ -1067,19 +827,12 @@ export class ParlantPerformanceAlertingService {
       repeatInterval: 30, // Repeat every 30 minutes
       maxRepetitions: 5,
       businessHoursOnly: false,
-      timezone: 'UTC',
-    };
-  }
+      timezone: 'UTC',};}
 
   private createDefaultNotificationChannels(): NotificationChannel[] {
     return [
       {
-        type: 'EMAIL',
-        config: {
-          recipients: ['alerts@company.com'],
-          smtpServer: 'smtp.company.com',
-        },
-        enabled: true,
+        type: 'EMAIL',config: {recipients: ['alerts@company.com'],smtpServer: 'smtp.company.com',},enabled: true,
         priority: 1,
         rateLimiting: {
           maxPerHour: 50,
@@ -1087,19 +840,13 @@ export class ParlantPerformanceAlertingService {
           cooldownMinutes: 5,
         },
         template: {
-          subject: 'Parlant Performance Alert: {{alertTitle}}',
-          body: 'Alert: {{alertTitle}}\nSeverity: {{severity}}\nMetric: {{metric}}\nValue: {{currentValue}}\nThreshold: {{threshold}}\nTime: {{timestamp}}',
-          format: 'TEXT',
-          variables: ['alertTitle', 'severity', 'metric', 'currentValue', 'threshold', 'timestamp'],
-        },
-      },
+          subject: 'Parlant Performance Alert: {{alertTitle}}',body: 'Alert: {{alertTitle}}Severity: {{severity}}
+Metric: {{metric}}
+Value: {{currentValue}}
+Threshold: {{threshold}}
+Time: {{timestamp}}',format: 'TEXT',variables: ['alertTitle', 'severity', 'metric', 'currentValue', 'threshold', 'timestamp'],},},
       {
-        type: 'SLACK',
-        config: {
-          webhookUrl: 'https://hooks.slack.com/services/...',
-          channel: '#alerts',
-        },
-        enabled: true,
+        type: 'SLACK',config: {webhookUrl: 'https://hooks.slack.com/services/...',channel: '#alerts',},enabled: true,
         priority: 2,
         rateLimiting: {
           maxPerHour: 100,
@@ -1107,12 +854,7 @@ export class ParlantPerformanceAlertingService {
           cooldownMinutes: 1,
         },
         template: {
-          subject: '',
-          body: '🚨 *{{alertTitle}}*\n*Severity:* {{severity}}\n*Metric:* {{metric}} ({{currentValue}})\n*Threshold:* {{threshold}}\n*Time:* {{timestamp}}',
-          format: 'MARKDOWN',
-          variables: ['alertTitle', 'severity', 'metric', 'currentValue', 'threshold', 'timestamp'],
-        },
-      },
+          subject: '',body: '🚨 *{{alertTitle}}*\n*Severity:* {{severity}}\n*Metric:* {{metric}} ({{currentValue}})\n*Threshold:* {{threshold}}\n*Time:* {{timestamp}}',format: 'MARKDOWN',variables: ['alertTitle', 'severity', 'metric', 'currentValue', 'threshold', 'timestamp'],},},
     ];
   }
 
@@ -1121,13 +863,9 @@ export class ParlantPerformanceAlertingService {
       try {
         await this.evaluateAlertRules();
       } catch (error) {
-        this.logger.error('Alert evaluation failed', error);
-      }
-    }, this.alertingConfig.evaluationIntervalMs);
+        this.logger.error('Alert evaluation failed', error);}}, this.alertingConfig.evaluationIntervalMs);
 
-    this.logger.log('Alert evaluation engine started', {
-      interval: this.alertingConfig.evaluationIntervalMs,
-      enabledRules: Array.from(this.alertRules.values()).filter(rule => rule.enabled).length,
+    this.logger.log('Alert evaluation engine started', {interval: this.alertingConfig.evaluationIntervalMs,enabledRules: Array.from(this.alertRules.values()).filter(rule => rule.enabled).length,
     });
   }
 
@@ -1136,14 +874,9 @@ export class ParlantPerformanceAlertingService {
       try {
         await this.processNotificationQueue();
       } catch (error) {
-        this.logger.error('Notification processing failed', error);
-      }
-    }, 5000); // Process every 5 seconds
+        this.logger.error('Notification processing failed', error);}}, 5000); // Process every 5 seconds
 
-    this.logger.log('Notification processor started');
-  }
-
-  private async evaluateAlertRules(): Promise<void> {
+    this.logger.log('Notification processor started');}private async evaluateAlertRules(): Promise<void> {
     const enabledRules = Array.from(this.alertRules.values()).filter(rule => rule.enabled);
     const stats = this.performanceMonitor.getPerformanceStats('minute');
 
@@ -1183,15 +916,7 @@ export class ParlantPerformanceAlertingService {
 
   private getMetricValue(metric: string, stats: ParlantPerformanceStats): number | null {
     switch (metric) {
-      case 'averageLatency': return stats.averageLatency;
-      case 'p95Latency': return stats.p95Latency;
-      case 'p99Latency': return stats.p99Latency;
-      case 'throughputRpm': return stats.throughputRpm;
-      case 'cacheHitRate': return stats.cacheHitRate;
-      case 'errorRate': return stats.errorRate;
-      case 'performanceScore': return stats.performanceScore;
-      default: return null;
-    }
+      case 'averageLatency': return stats.averageLatency;case 'p95Latency': return stats.p95Latency;case 'p99Latency': return stats.p99Latency;case 'throughputRpm': return stats.throughputRpm;case 'cacheHitRate': return stats.cacheHitRate;case 'errorRate': return stats.errorRate;case 'performanceScore': return stats.performanceScore;default: return null;}
   }
 
   private getApplicableThreshold(rule: AlertRule, metricValue: number): number {
@@ -1206,21 +931,13 @@ export class ParlantPerformanceAlertingService {
 
   private evaluateCondition(condition: AlertCondition, value: number, threshold: number): boolean {
     switch (condition.operator) {
-      case 'GT': return value > threshold;
-      case 'LT': return value < threshold;
-      case 'GTE': return value >= threshold;
-      case 'LTE': return value <= threshold;
-      case 'EQ': return value === threshold;
-      case 'NE': return value !== threshold;
+      case 'GT': return value > threshold;case 'LT': return value < threshold;case 'GTE': return value >= threshold;case 'LTE': return value <= threshold;case 'EQ': return value === threshold;case 'NE': return value !== threshold;
       default: return false;
     }
   }
 
   private async createAlert(rule: AlertRule, metricValue: number, metadata: Record<string, unknown> = {}): Promise<string> {
-    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const threshold = this.getApplicableThreshold(rule, metricValue);
-
-    const alert: ActiveAlert = {
+    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;const threshold = this.getApplicableThreshold(rule, metricValue);const alert: ActiveAlert = {
       id: alertId,
       ruleId: rule.id,
       ruleName: rule.name,
@@ -1258,10 +975,7 @@ export class ParlantPerformanceAlertingService {
       severity: alert.severity,
     });
 
-    this.eventEmitter.emit('alert.triggered', alert);
-
-    return alertId;
-  }
+    this.eventEmitter.emit('alert.triggered', alert);return alertId;}
 
   private determineSeverity(rule: AlertRule, metricValue: number): AlertSeverity {
     if (rule.thresholds.emergency && metricValue >= rule.thresholds.emergency) {
@@ -1274,15 +988,10 @@ export class ParlantPerformanceAlertingService {
   }
 
   private async buildAlertContext(rule: AlertRule, metricValue: number): Promise<AlertContext> {
-    const stats = this.performanceMonitor.getPerformanceStats('hour');
-
-    return {
-      triggeringEvent: {
+    const stats = this.performanceMonitor.getPerformanceStats('hour');return {triggeringEvent: {
         timestamp: new Date(),
         value: metricValue,
-        trend: 'STABLE', // TODO: Calculate actual trend
-        changeRate: 0, // TODO: Calculate change rate
-        historicalComparison: {
+        trend: 'STABLE', // TODO: Calculate actual trendchangeRate: 0, // TODO: Calculate change ratehistoricalComparison: {
           samePeriodLastWeek: metricValue * 0.9, // Mock data
           samePeriodLastMonth: metricValue * 0.8,
           percentChange: 10,
@@ -1294,20 +1003,13 @@ export class ParlantPerformanceAlertingService {
         memoryUsage: 70, // TODO: Get actual memory usage
         networkLatency: 20, // TODO: Get actual network latency
         dependencyHealth: {
-          database: 'HEALTHY',
-          cache: 'HEALTHY',
-        },
-      },
+          database: 'HEALTHY',cache: 'HEALTHY',},},
       relatedMetrics: [
         {
-          metric: 'throughputRpm',
-          value: stats.throughputRpm,
-          correlation: 0.8,
+          metric: 'throughputRpm',value: stats.throughputRpm,correlation: 0.8,
         },
         {
-          metric: 'errorRate',
-          value: stats.errorRate,
-          correlation: 0.6,
+          metric: 'errorRate',value: stats.errorRate,correlation: 0.6,
         },
       ],
       recentChanges: {
@@ -1329,51 +1031,19 @@ export class ParlantPerformanceAlertingService {
     return {
       overallImpact: this.calculateOverallImpact(impactMultiplier),
       affectedUsers,
-      affectedServices: impactMultiplier > 1.5 ? ['parlant-validation', 'parlant-integration'] : [],
-      affectedRevenue,
-      slaViolations: impactMultiplier > 2 ? ['Response Time SLA'] : [],
-      complianceRisks: baseImpact.complianceRisk.regulations,
-      reputationImpact: impactMultiplier > 3 ? 'HIGH' : 'MEDIUM',
-      customerSatisfactionImpact: Math.min(-100, -(impactMultiplier * 20)),
-      recoveryTimeEstimate: Math.floor(impactMultiplier * 30), // Minutes
+      affectedServices: impactMultiplier > 1.5 ? ['parlant-validation', 'parlant-integration'] : [],affectedRevenue,slaViolations: impactMultiplier > 2 ? ['Response Time SLA'] : [],complianceRisks: baseImpact.complianceRisk.regulations,reputationImpact: impactMultiplier > 3 ? 'HIGH' : 'MEDIUM',customerSatisfactionImpact: Math.min(-100, -(impactMultiplier * 20)),recoveryTimeEstimate: Math.floor(impactMultiplier * 30), // Minutes
       mitigationActions: this.generateMitigationActions(rule.metric, impactMultiplier),
     };
   }
 
-  private calculateOverallImpact(multiplier: number): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (multiplier > 5) return 'CRITICAL';
-    if (multiplier > 3) return 'HIGH';
-    if (multiplier > 2) return 'MEDIUM';
-    if (multiplier > 1.5) return 'LOW';
-    return 'NONE';
-  }
-
-  private generateMitigationActions(metric: string, multiplier: number): string[] {
+  private calculateOverallImpact(multiplier: number): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (multiplier > 5) return 'CRITICAL';if (multiplier > 3) return 'HIGH';if (multiplier > 2) return 'MEDIUM';if (multiplier > 1.5) return 'LOW';return 'NONE';}private generateMitigationActions(metric: string, multiplier: number): string[] {
     const actions: string[] = [];
 
     switch (metric) {
-      case 'averageLatency':
-        actions.push('Scale up application instances');
-        actions.push('Enable additional caching layers');
-        actions.push('Optimize database queries');
-        if (multiplier > 3) {
-          actions.push('Activate circuit breaker');
-          actions.push('Redirect traffic to backup systems');
-        }
-        break;
+      case 'averageLatency':actions.push('Scale up application instances');actions.push('Enable additional caching layers');actions.push('Optimize database queries');if (multiplier > 3) {actions.push('Activate circuit breaker');actions.push('Redirect traffic to backup systems');}break;
 
-      case 'cacheHitRate':
-        actions.push('Warm cache with frequently accessed data');
-        actions.push('Increase cache memory allocation');
-        actions.push('Optimize cache key strategies');
-        break;
-
-      default:
-        actions.push('Monitor system closely');
-        actions.push('Prepare for manual intervention');
-    }
-
-    return actions;
+      case 'cacheHitRate':actions.push('Warm cache with frequently accessed data');actions.push('Increase cache memory allocation');actions.push('Optimize cache key strategies');break;default:
+        actions.push('Monitor system closely');actions.push('Prepare for manual intervention');}return actions;
   }
 
   private async sendAlertNotifications(alert: ActiveAlert): Promise<void> {
@@ -1386,9 +1056,7 @@ export class ParlantPerformanceAlertingService {
           timestamp: new Date(),
           channel: channel.type,
           target: this.getChannelTarget(channel),
-          status: 'SENT',
-          responseTime: 0,
-        };
+          status: 'SENT',responseTime: 0,};
 
         this.notificationQueue.push(notification);
         alert.notificationHistory.push(notification);
@@ -1398,17 +1066,8 @@ export class ParlantPerformanceAlertingService {
 
   private getChannelTarget(channel: NotificationChannel): string {
     switch (channel.type) {
-      case 'EMAIL':
-        const recipients = channel.config.recipients as string[] | undefined;
-        return Array.isArray(recipients)
-          ? recipients[0] || 'unknown@example.com'
-          : 'unknown@example.com';
-      case 'SLACK':
-        return (channel.config.channel as string) || '#alerts';
-      default:
-        return 'unknown';
-    }
-  }
+      case 'EMAIL':const recipients = channel.config.recipients as string[] | undefined;return Array.isArray(recipients)
+          ? recipients[0] || 'unknown@example.com': 'unknown@example.com';case 'SLACK':return (channel.config.channel as string) || '#alerts';default:return 'unknown';}}
 
   private scheduleEscalation(alert: ActiveAlert): void {
     const rule = this.alertRules.get(alert.ruleId);
@@ -1438,8 +1097,7 @@ export class ParlantPerformanceAlertingService {
       timestamp: new Date(),
       fromLevel: alert.escalationLevel,
       toLevel: nextLevel,
-      reason: 'Escalation timeout reached',
-      triggeredBy: 'SYSTEM',
+      reason: 'Escalation timeout reached',triggeredBy: 'SYSTEM',
       targets: rule.escalationPolicy.steps[nextLevel]?.targets || [],
       actions: rule.escalationPolicy.steps[nextLevel]?.actions || [],
     };
@@ -1481,15 +1139,9 @@ export class ParlantPerformanceAlertingService {
 
   private async executeAction(action: EscalationAction, alert: ActiveAlert): Promise<void> {
     switch (action.type) {
-      case 'NOTIFY':
-        await this.sendEscalationNotification(alert, action.config);
-        break;
-      case 'CREATE_INCIDENT':
-        await this.createIncident(alert, action.config);
-        break;
-      case 'RUN_AUTOMATION':
-        await this.runAutomation(alert, action.config);
-        break;
+      case 'NOTIFY':await this.sendEscalationNotification(alert, action.config);break;
+      case 'CREATE_INCIDENT':await this.createIncident(alert, action.config);break;
+      case 'RUN_AUTOMATION':await this.runAutomation(alert, action.config);break;
       case 'SCALE_RESOURCES':
         await this.scaleResources(alert, action.config);
         break;
@@ -1497,19 +1149,13 @@ export class ParlantPerformanceAlertingService {
   }
 
   private async sendEscalationNotification(alert: ActiveAlert, config: Record<string, unknown>): Promise<void> {
-    this.logger.log(`Sending escalation notification for alert: ${alert.id}`, config);
-    // TODO: Implement actual notification sending
-  }
+    this.logger.log(`Sending escalation notification for alert: ${alert.id}`, config);// TODO: Implement actual notification sending}
 
   private async createIncident(alert: ActiveAlert, config: Record<string, unknown>): Promise<void> {
-    this.logger.log(`Creating incident for alert: ${alert.id}`, config);
-    // TODO: Implement incident creation
-  }
+    this.logger.log(`Creating incident for alert: ${alert.id}`, config);// TODO: Implement incident creation}
 
   private async runAutomation(alert: ActiveAlert, config: Record<string, unknown>): Promise<void> {
-    this.logger.log(`Running automation for alert: ${alert.id}`, config);
-    // TODO: Implement automation execution
-  }
+    this.logger.log(`Running automation for alert: ${alert.id}`, config);// TODO: Implement automation execution}
 
   private async scaleResources(alert: ActiveAlert, config: Record<string, unknown>): Promise<void> {
     this.logger.log(`Scaling resources for alert: ${alert.id}`, config);
@@ -1557,10 +1203,7 @@ export class ParlantPerformanceAlertingService {
       attempts: updatedAlert.autoResolutionAttempts,
     });
 
-    this.eventEmitter.emit('alert.auto_resolved', updatedAlert);
-  }
-
-  private async updateExistingAlert(alert: ActiveAlert, currentValue: number, threshold: number): Promise<void> {
+    this.eventEmitter.emit('alert.auto_resolved', updatedAlert);}private async updateExistingAlert(alert: ActiveAlert, currentValue: number, threshold: number): Promise<void> {
     const updatedAlert: ActiveAlert = {
       ...alert,
       currentValue,
@@ -1581,11 +1224,7 @@ export class ParlantPerformanceAlertingService {
         try {
           await this.deliverNotification(notification);
         } catch (error) {
-          this.logger.error('Failed to deliver notification', error);
-          notification.status = 'FAILED';
-          notification.errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        }
-      }
+          this.logger.error('Failed to deliver notification', error);notification.status = 'FAILED';notification.errorMessage = error instanceof Error ? error.message : 'Unknown error';}}
     }
   }
 
@@ -1601,9 +1240,7 @@ export class ParlantPerformanceAlertingService {
   }
 
   private async sendAcknowledgmentNotification(alert: ActiveAlert, acknowledgedBy: string, notes?: string): Promise<void> {
-    this.logger.log(`Sending acknowledgment notification for alert: ${alert.id}`, {
-      acknowledgedBy,
-      notes,
+    this.logger.log(`Sending acknowledgment notification for alert: ${alert.id}`, {acknowledgedBy,notes,
     });
     // TODO: Implement acknowledgment notification
   }
@@ -1616,10 +1253,7 @@ export class ParlantPerformanceAlertingService {
     // TODO: Implement resolution notification
   }
 
-  private calculateAlertTrends(alerts: ActiveAlert[]): AlertAnalytics['alertTrends'] {
-    const totalAlerts = alerts.length;
-
-    const alertsByType: Record<string, number> = {};
+  private calculateAlertTrends(alerts: ActiveAlert[]): AlertAnalytics['alertTrends'] {const totalAlerts = alerts.length;const alertsByType: Record<string, number> = {};
     const alertsBySeverity: Record<AlertSeverity, number> = {
       [AlertSeverity.INFO]: 0,
       [AlertSeverity.WARNING]: 0,
@@ -1673,9 +1307,7 @@ export class ParlantPerformanceAlertingService {
     };
   }
 
-  private calculateEscalationAnalytics(alerts: ActiveAlert[]): AlertAnalytics['escalationAnalytics'] {
-    const escalatedAlerts = alerts.filter(alert => alert.escalationLevel > 0);
-    const totalEscalationTime = escalatedAlerts.reduce(
+  private calculateEscalationAnalytics(alerts: ActiveAlert[]): AlertAnalytics['escalationAnalytics'] {const escalatedAlerts = alerts.filter(alert => alert.escalationLevel > 0);const totalEscalationTime = escalatedAlerts.reduce(
       (sum, alert) => {
         const firstEscalation = alert.escalationHistory[0];
         return firstEscalation
@@ -1727,9 +1359,7 @@ export class ParlantPerformanceAlertingService {
     if (falsePositiveRate > this.alertingConfig.falsePositiveThreshold * 100) {
       recommendations.push({
         id: `rec_false_positive_${Date.now()}`,
-        type: 'THRESHOLD_ADJUSTMENT',
-        priority: 'HIGH',
-        title: 'Reduce False Positive Rate',
+        type: 'THRESHOLD_ADJUSTMENT',priority: 'HIGH',title: 'Reduce False Positive Rate',
         description: `False positive rate (${falsePositiveRate.toFixed(1)}%) exceeds acceptable threshold. Consider adjusting alert thresholds or conditions.`,
         impact: {
           falsePositiveReduction: 50,
@@ -1737,12 +1367,7 @@ export class ParlantPerformanceAlertingService {
           resolutionTimeImprovement: 5,
         },
         implementation: {
-          difficulty: 'MEDIUM',
-          estimatedTime: 4,
-          dependencies: ['Historical data analysis', 'Threshold modeling'],
-          risks: ['Potential for missing actual issues', 'Requires careful validation'],
-        },
-        generatedAt: new Date(),
+          difficulty: 'MEDIUM',estimatedTime: 4,dependencies: ['Historical data analysis', 'Threshold modeling'],risks: ['Potential for missing actual issues', 'Requires careful validation'],},generatedAt: new Date(),
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
     }
@@ -1753,12 +1378,7 @@ export class ParlantPerformanceAlertingService {
   private getTimeRangeCutoff(timeRange: string): Date {
     const now = Date.now();
     switch (timeRange) {
-      case '1h': return new Date(now - 60 * 60 * 1000);
-      case '24h': return new Date(now - 24 * 60 * 60 * 1000);
-      case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);
-      case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);
-      default: return new Date(now - 24 * 60 * 60 * 1000);
-    }
+      case '1h': return new Date(now - 60 * 60 * 1000);case '24h': return new Date(now - 24 * 60 * 60 * 1000);case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);default: return new Date(now - 24 * 60 * 60 * 1000);}
   }
 
   private delay(ms: number): Promise<void> {
@@ -1785,27 +1405,17 @@ export class ParlantPerformanceAlertingService {
 
   private async performCorrelationAnalysis(): Promise<void> {
     // TODO: Implement correlation analysis
-    this.logger.debug('Performing correlation analysis');
-  }
-
-  private updateAnalytics(): void {
+    this.logger.debug('Performing correlation analysis');}private updateAnalytics(): void {
     // TODO: Update analytics data
-    this.logger.debug('Updating analytics');
-  }
-
-  // ===== EVENT HANDLERS =====
+    this.logger.debug('Updating analytics');}// ===== EVENT HANDLERS =====
 
   // Note: Event handling implemented in initializeEventHandlers()
   private async handleMetricUpdate(data: { metric: string; value: number }): Promise<void> {
     // Trigger immediate evaluation for critical metrics
-    const criticalMetrics = ['averageLatency', 'errorRate'];
-    if (criticalMetrics.includes(data.metric)) {
-      const relevantRules = Array.from(this.alertRules.values())
+    const criticalMetrics = ['averageLatency', 'errorRate'];if (criticalMetrics.includes(data.metric)) {const relevantRules = Array.from(this.alertRules.values())
         .filter(rule => rule.metric === data.metric && rule.enabled);
 
-      const stats = this.performanceMonitor.getPerformanceStats('minute');
-      for (const rule of relevantRules) {
-        await this.evaluateRule(rule, stats);
+      const stats = this.performanceMonitor.getPerformanceStats('minute');for (const rule of relevantRules) {await this.evaluateRule(rule, stats);
       }
     }
   }
@@ -1817,9 +1427,7 @@ export class ParlantPerformanceAlertingService {
     try {
       await this.evaluateAlertRules();
     } catch (error) {
-      this.logger.error('Minutely alerting tasks failed', error);
-    }
-  }
+      this.logger.error('Minutely alerting tasks failed', error);}}
 
   // Note: Scheduled via initializeScheduledTasks()
   private async performTenMinuteTasks(): Promise<void> {
@@ -1827,9 +1435,7 @@ export class ParlantPerformanceAlertingService {
       await this.cleanupResolvedAlerts();
       await this.updateAlertAnalytics();
     } catch (error) {
-      this.logger.error('Ten-minute alerting tasks failed', error);
-    }
-  }
+      this.logger.error('Ten-minute alerting tasks failed', error);}}
 
   // Note: Scheduled via initializeScheduledTasks()
   private async performHourlyTasks(): Promise<void> {
@@ -1853,15 +1459,8 @@ export class ParlantPerformanceAlertingService {
   }
 
   private async updateAlertAnalytics(): Promise<void> {
-    this.alertAnalytics = await this.getAlertAnalytics('24h');
-  }
-
-  private async generateAlertingReport(): Promise<void> {
-    const analytics = await this.getAlertAnalytics('1h');
-
-    this.logger.log('Alerting System Report', {
-      activeAlerts: this.activeAlerts.size,
-      totalRules: this.alertRules.size,
+    this.alertAnalytics = await this.getAlertAnalytics('24h');}private async generateAlertingReport(): Promise<void> {
+    const analytics = await this.getAlertAnalytics('1h');this.logger.log('Alerting System Report', {activeAlerts: this.activeAlerts.size,totalRules: this.alertRules.size,
       enabledRules: Array.from(this.alertRules.values()).filter(rule => rule.enabled).length,
       alertTrends: analytics.alertTrends,
       escalationAnalytics: analytics.escalationAnalytics,
@@ -1871,9 +1470,7 @@ export class ParlantPerformanceAlertingService {
 
   private async optimizeAlertThresholds(): Promise<void> {
     // TODO: Implement machine learning-based threshold optimization
-    this.logger.debug('Alert threshold optimization completed');
-  }
-}
+    this.logger.debug('Alert threshold optimization completed');}}
 
 // ===== ALERT CORRELATION ENGINE =====
 

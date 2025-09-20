@@ -24,8 +24,10 @@ import type {
   Query as ExpressQuery,
 } from 'express-serve-static-core';
 import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
+
 // Import shared package types to resolve compatibility issues
 import { Permission, UserRole as SharedUserRole } from '@bytebot/shared';
+
 // import type { BufferEncoding } from 'node:buffer'; // Causing import issues - use string instead
 
 // =============================================================================
@@ -201,7 +203,7 @@ export interface LoadTestResult {
 export {
   UserRole,
   Permission,
-} from '../../../shared/dist/types/security.types';
+} from '@bytebot/shared';
 
 /**
  * Type alias for backward compatibility with local Permission interface
@@ -865,6 +867,19 @@ export type MockImplementation<T> = {
     ? jest.MockedFunction<(...args: A) => R>
     : T[K];
 };
+
+// Re-export error types from error-types module
+export type {
+  ApplicationError,
+  AuthenticationError,
+  AuthorizationError,
+  ValidationError as ErrorValidationError,
+  SecurityError,
+  SystemError,
+  HttpError,
+  BaseError,
+  ErrorSeverity,
+} from './error-types';
 
 // Default export with grouped types for convenience
 export default {

@@ -21,9 +21,7 @@
  */
 
 // Mock @nut-tree-fork/nut-js FIRST before any imports to avoid import issues
-jest.mock('@nut-tree-fork/nut-js', () => ({
-  keyboard: {
-    pressKey: jest.fn().mockResolvedValue(
+jest.mock('@nut-tree-fork/nut-js', () => ({keyboard: {pressKey: jest.fn().mockResolvedValue(
       undefined,
     ),
     releaseKey: jest.fn().mockResolvedValue(
@@ -69,29 +67,13 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     (x: number, y: number) => ({ x, y }),
   ),
   Key: {
-    A: 'A',
-    B: 'B',
-    C: 'C',
-    Space: 'Space',
-    Enter: 'Enter',
-  },
-  Button: {
-    LEFT: 'LEFT',
-    RIGHT: 'RIGHT',
-    MIDDLE: 'MIDDLE',
-  },
-}));
+    A: 'A',B: 'B',C: 'C',Space: 'Space',Enter: 'Enter',},Button: {
+    LEFT: 'LEFT',RIGHT: 'RIGHT',MIDDLE: 'MIDDLE',},}));
 
 // Mock external dependencies
-jest.mock('child_process');
-jest.mock('util', () => {
-  const originalUtil = jest.requireActual('util') as typeof import('util');
-  return {
-    ...originalUtil,
+jest.mock('child_process');jest.mock('util', () => {const originalUtil = jest.requireActual('util') as typeof import('util');return {...originalUtil,
     promisify: Object.assign(jest.fn(), {
-      custom: Symbol.for('nodejs.util.promisify.custom'),
-    }),
-    inspect: Object.assign(
+      custom: Symbol.for('nodejs.util.promisify.custom'),}),inspect: Object.assign(
       jest.fn().mockImplementation(
         (obj: unknown) => JSON.stringify(obj),
       ),
@@ -103,14 +85,7 @@ jest.mock('util', () => {
         custom: originalUtil.inspect.custom,
       },
     ),
-  } as typeof import('util');
-});
-jest.mock('fs/promises');
-
-// Mock axios and HTTP services that cause util.inherits issues
-jest.mock('@nestjs/axios', () => ({
-  HttpService: jest.fn().mockImplementation(
-    () => ({
+  } as typeof import('util');});jest.mock('fs/promises');// Mock axios and HTTP services that cause util.inherits issuesjest.mock('@nestjs/axios', () => ({HttpService: jest.fn().mockImplementation(() => ({
       axiosRef: {
         get: jest.fn(),
         post: jest.fn(),
@@ -125,9 +100,7 @@ jest.mock('@nestjs/axios', () => ({
   ),
 }));
 
-jest.mock('axios', () => ({
-  default: {
-    get: jest.fn(),
+jest.mock('axios', () => ({default: {get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
@@ -141,11 +114,7 @@ jest.mock('axios', () => ({
 }));
 
 // Mock RxJS to avoid additional issues
-jest.mock('rxjs', () => ({
-  firstValueFrom: jest.fn().mockResolvedValue({
-    data: 'mocked',
-  }),
-  of: jest.fn(),
+jest.mock('rxjs', () => ({firstValueFrom: jest.fn().mockResolvedValue({data: 'mocked',}),of: jest.fn(),
   from: jest.fn(),
   Subject: jest.fn().mockImplementation(() => ({
     next: jest.fn(),
@@ -174,29 +143,13 @@ jest.mock('rxjs', () => ({
 }));
 
 // Mock @nestjs/config
-jest.mock('@nestjs/config', () => ({
-  ConfigService: jest.fn().mockImplementation(
-    () => ({
+jest.mock('@nestjs/config', () => ({ConfigService: jest.fn().mockImplementation(() => ({
       get: jest.fn().mockReturnValue(
-        'test-value',
-      ),
-    }),
+        'test-value',),}),
   ),
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use.service';
-import { NutService } from '../../nut/nut.service';
-import { ApplicationActionDto } from '../dto/computer-action.dto';
-import { ApplicationName } from '../dto/base.dto';
-import { spawn, SpawnOptions, ChildProcess } from 'child_process';
-import { promisify } from 'util';
-import { Readable } from 'stream';
-
-describe('ComputerUseService - Application Management', () => {
-  let service: ComputerUseService;
-  let testModule: TestingModule;
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { ComputerUseService } from '../computer-use.service';import { NutService } from '../../nut/nut.service';import { ApplicationActionDto } from '../dto/computer-action.dto';import { ApplicationName } from '../dto/base.dto';import { spawn, SpawnOptions, ChildProcess } from 'child_process';import { promisify } from 'util';import { Readable } from 'stream';describe('ComputerUseService - Application Management', () => {let service: ComputerUseService;let testModule: TestingModule;
 
   // Mock implementations with comprehensive typing
   const mockSpawn = jest.mocked(spawn);
@@ -238,9 +191,7 @@ describe('ComputerUseService - Application Management', () => {
     exitCode: null,
     signalCode: null,
     spawnargs: [],
-    spawnfile: '',
-    ref: jest.fn(),
-    disconnect: jest.fn(),
+    spawnfile: '',ref: jest.fn(),disconnect: jest.fn(),
     send: jest.fn(),
   };
 
@@ -286,30 +237,17 @@ describe('ComputerUseService - Application Management', () => {
     }
   });
 
-  describe('Desktop Activation', () => {
-    /**
-     * Test desktop activation - special case that doesn't follow the standard application pattern
+  describe('Desktop Activation', () => {/*** Test desktop activation - special case that doesn't follow the standard application pattern
      * Desktop activation uses wmctrl -k on to show desktop
      */
-    it('should activate desktop using wmctrl command', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.DESKTOP,
-      };
+    it('should activate desktop using wmctrl command', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.DESKTOP,};
 
       await service.action(action);
 
       // Verify desktop activation command
       expect(mockSpawn).toHaveBeenCalledWith(
-        'sudo',
-        ['-u', 'user', 'wmctrl', '-k', 'on'],
-        expect.objectContaining({
-          env: expect.objectContaining({
-            DISPLAY: ':0.0',
-          }) as NodeJS.ProcessEnv,
-          stdio: 'ignore',
-          detached: true,
-        }) as SpawnOptions,
+        'sudo',['-u', 'user', 'wmctrl', '-k', 'on'],expect.objectContaining({env: expect.objectContaining({
+            DISPLAY: ':0.0',}) as NodeJS.ProcessEnv,stdio: 'ignore',detached: true,}) as SpawnOptions,
       );
 
       // Verify process was unreferenced for proper cleanup
@@ -317,16 +255,10 @@ describe('ComputerUseService - Application Management', () => {
     });
   });
 
-  describe('Application Launch Operations', () => {
-    /**
-     * Test firefox application launch when not currently running
+  describe('Application Launch Operations', () => {/*** Test firefox application launch when not currently running
      * Should use wmctrl to check if running, fail, then launch new instance
      */
-    it('should launch firefox when not running', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.FIREFOX,
-      };
+    it('should launch firefox when not running', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.FIREFOX,};
 
       // Mock application not running (wmctrl check fails with exit code 1)
       (mockExecAsync).mockRejectedValue({
@@ -337,21 +269,12 @@ describe('ComputerUseService - Application Management', () => {
 
       // Verify application status check
       expect(mockExecAsync).toHaveBeenCalledWith(
-        'sudo -u user wmctrl -lx | grep Navigator.firefox-esr',
-        { timeout: 5000 },
-      );
+        'sudo -u user wmctrl -lx | grep Navigator.firefox-esr',{ timeout: 5000 },);
 
       // Verify application launch command
       expect(mockSpawn).toHaveBeenCalledWith(
-        'sudo',
-        ['-u', 'user', 'nohup', 'firefox-esr'],
-        expect.objectContaining({
-          env: expect.objectContaining({
-            DISPLAY: ':0.0',
-          }) as NodeJS.ProcessEnv,
-          stdio: 'ignore',
-          detached: true,
-        }) as SpawnOptions,
+        'sudo',['-u', 'user', 'nohup', 'firefox-esr'],expect.objectContaining({env: expect.objectContaining({
+            DISPLAY: ':0.0',}) as NodeJS.ProcessEnv,stdio: 'ignore',detached: true,}) as SpawnOptions,
       );
 
       expect(mockProcess.unref).toHaveBeenCalled();
@@ -360,21 +283,8 @@ describe('ComputerUseService - Application Management', () => {
     /**
      * Test all supported applications launch correctly
      */
-    it('should launch all supported applications when not running', async () => {
-      const appConfigs: Array<[ApplicationName, string, string]> = [
-        [ApplicationName.FIREFOX, 'firefox-esr', 'Navigator.firefox-esr'],
-        [ApplicationName.ONEPASSWORD, '1password', '1password.1Password'],
-        [ApplicationName.THUNDERBIRD, 'thunderbird', 'Mail.thunderbird'],
-        [ApplicationName.VSCODE, 'code', 'code.Code'],
-        [
-          ApplicationName.TERMINAL,
-          'xfce4-terminal',
-          'xfce4-terminal.Xfce4-Terminal',
-        ],
-        [ApplicationName.DIRECTORY, 'thunar', 'Thunar'],
-      ];
-
-      for (const [app, command, processName] of appConfigs) {
+    it('should launch all supported applications when not running', async () => {const appConfigs: Array<[ApplicationName, string, string]> = [[ApplicationName.FIREFOX, 'firefox-esr', 'Navigator.firefox-esr'],[ApplicationName.ONEPASSWORD, '1password', '1password.1Password'],[ApplicationName.THUNDERBIRD, 'thunderbird', 'Mail.thunderbird'],[ApplicationName.VSCODE, 'code', 'code.Code'],[ApplicationName.TERMINAL,
+          'xfce4-terminal','xfce4-terminal.Xfce4-Terminal',],[ApplicationName.DIRECTORY, 'thunar', 'Thunar'],];for (const [app, command, processName] of appConfigs) {
         jest.clearAllMocks();
         (mockExecAsync).mockRejectedValue({
           code: 1,
@@ -393,31 +303,16 @@ describe('ComputerUseService - Application Management', () => {
         );
 
         expect(mockSpawn).toHaveBeenCalledWith(
-          'sudo',
-          ['-u', 'user', 'nohup', command],
-          expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
-            stdio: 'ignore',
-            detached: true,
-          }),
+          'sudo',['-u', 'user', 'nohup', command],expect.objectContaining({env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],stdio: 'ignore',detached: true,}),
         );
       }
     });
   });
 
-  describe('Application Activation and Window Management', () => {
-    /**
-     * Test activation of already running applications
+  describe('Application Activation and Window Management', () => {/*** Test activation of already running applications
      * Should activate window and maximize it for better UX
      */
-    it('should activate and maximize running applications', async () => {
-      const appConfigs: Array<[ApplicationName, string]> = [
-        [ApplicationName.FIREFOX, 'Navigator.firefox-esr'],
-        [ApplicationName.VSCODE, 'code.Code'],
-        [ApplicationName.THUNDERBIRD, 'Mail.thunderbird'],
-      ];
-
-      for (const [app, processName] of appConfigs) {
+    it('should activate and maximize running applications', async () => {const appConfigs: Array<[ApplicationName, string]> = [[ApplicationName.FIREFOX, 'Navigator.firefox-esr'],[ApplicationName.VSCODE, 'code.Code'],[ApplicationName.THUNDERBIRD, 'Mail.thunderbird'],];for (const [app, processName] of appConfigs) {
         jest.clearAllMocks();
 
         const action: ApplicationActionDto = {
@@ -435,34 +330,14 @@ describe('ComputerUseService - Application Management', () => {
         // Verify window activation command
         expect(mockSpawn).toHaveBeenNthCalledWith(
           _1,
-          'sudo',
-          ['-u', 'user', 'wmctrl', '-x', '-a', processName],
-          expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
-            stdio: 'ignore',
-            detached: true,
-          }),
+          'sudo',['-u', 'user', 'wmctrl', '-x', '-a', processName],expect.objectContaining({env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],stdio: 'ignore',detached: true,}),
         );
 
         // Verify window maximization command
         expect(mockSpawn).toHaveBeenNthCalledWith(
           _2,
-          'sudo',
-          [
-            '-u',
-            'user',
-            'wmctrl',
-            '-x',
-            '-r',
-            processName,
-            '-b',
-            'add,maximized_vert,maximized_horz',
-          ],
-          expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
-            stdio: 'ignore',
-            detached: true,
-          }),
+          'sudo',['-u','user','wmctrl','-x','-r',processName,'-b','add,maximized_vert,maximized_horz',],expect.objectContaining({
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],stdio: 'ignore',detached: true,}),
         );
 
         expect(mockProcess.unref).toHaveBeenCalledTimes(2);
@@ -470,88 +345,46 @@ describe('ComputerUseService - Application Management', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    /**
-     * Test handling of unsupported applications
+  describe('Error Handling and Edge Cases', () => {/*** Test handling of unsupported applications
      */
-    it('should throw _error for unsupported application', async () => {
-      const action = {
-        action: 'application' as const,
-        application: 'unsupported-app' as ApplicationName,
-      };
-
-      await expect(service.action(action)).rejects.toThrow(
-        'Application management failed for unsupported-app: Unsupported application: unsupported-app',
-      );
-
-      expect(mockSpawn).not.toHaveBeenCalled();
+    it('should throw _error for unsupported application', async () => {const action = {action: 'application' as const,application: 'unsupported-app' as ApplicationName,};await expect(service.action(action)).rejects.toThrow(
+        'Application management failed for unsupported-app: Unsupported application: unsupported-app',);expect(mockSpawn).not.toHaveBeenCalled();
     });
 
     /**
      * Test graceful handling of wmctrl timeout errors
      */
-    it('should handle wmctrl timeout _error gracefully', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.FIREFOX,
-      };
+    it('should handle wmctrl timeout _error gracefully', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.FIREFOX,};
 
       // Mock timeout error
       (mockExecAsync).mockRejectedValue({
-        message: 'Command timeout after 5000ms',
-        code: 'TIMEOUT',
-      });
-
-      await service.action(action);
+        message: 'Command timeout after 5000ms',code: 'TIMEOUT',});await service.action(action);
 
       // Should proceed to launch application despite timeout
       expect(mockSpawn).toHaveBeenCalledWith(
-        'sudo',
-        ['-u', 'user', 'nohup', 'firefox-esr'],
-        expect.objectContaining({
-          env: expect.objectContaining({ DISPLAY: ':0.0' }) as NodeJS.ProcessEnv,
-        }) as SpawnOptions,
-      );
+        'sudo',['-u', 'user', 'nohup', 'firefox-esr'],expect.objectContaining({env: expect.objectContaining({ DISPLAY: ':0.0' }) as NodeJS.ProcessEnv,}) as SpawnOptions,);
     });
 
     /**
      * Test handling of spawn errors
      */
-    it('should handle spawn errors during application launch', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.TERMINAL,
-      };
+    it('should handle spawn errors during application launch', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.TERMINAL,};
 
       (mockExecAsync).mockRejectedValue({
         code: 1,
       });
       (mockSpawn).mockImplementation(() => {
-        throw new Error('Failed to spawn process');
-      });
-
-      await expect(service.action(action)).rejects.toThrow(
-        'Application management failed for terminal: Failed to spawn process',
-      );
-    });
+        throw new Error('Failed to spawn process');});await expect(service.action(action)).rejects.toThrow(
+        'Application management failed for terminal: Failed to spawn process',);});
   });
 
-  describe('Process Management and Security', () => {
-    /**
-     * Test proper process unreferencing for detached processes
+  describe('Process Management and Security', () => {/*** Test proper process unreferencing for detached processes
      */
-    it('should properly unref spawned processes', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.VSCODE,
-      };
+    it('should properly unref spawned processes', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.VSCODE,};
 
       // Mock application already running to trigger both activation and maximization
       (mockExecAsync).mockResolvedValue({
-        stdout: 'code.Code window data',
-      });
-
-      await service.action(action);
+        stdout: 'code.Code window data',});await service.action(action);
 
       // Two spawn calls should be made (activate + maximize)
       expect(mockSpawn).toHaveBeenCalledTimes(2);
@@ -561,34 +394,20 @@ describe('ComputerUseService - Application Management', () => {
     /**
      * Test sudo user context for all operations
      */
-    it('should run all operations with sudo user context', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.THUNDERBIRD,
-      };
+    it('should run all operations with sudo user context', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.THUNDERBIRD,};
 
       (mockExecAsync).mockResolvedValue({
-        stdout: 'Mail.thunderbird window data',
-      });
-
-      await service.action(action);
+        stdout: 'Mail.thunderbird window data',});await service.action(action);
 
       // All spawn calls should use sudo -u user
       const spawnCalls = mockSpawn.mock.calls;
       spawnCalls.forEach((call) => {
-        expect(call[0]).toBe('sudo');
-        expect(call[1]).toEqual(expect.arrayContaining(['-u', 'user']));
-      });
-    });
+        expect(call[0]).toBe('sudo');expect(call[1]).toEqual(expect.arrayContaining(['-u', 'user']));});});
 
     /**
      * Test DISPLAY environment variable security
      */
-    it('should set secure DISPLAY environment variable', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.ONEPASSWORD,
-      };
+    it('should set secure DISPLAY environment variable', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.ONEPASSWORD,};
 
       (mockExecAsync).mockRejectedValue({
         code: 1,
@@ -601,28 +420,17 @@ describe('ComputerUseService - Application Management', () => {
         expect.any(Array),
         expect.objectContaining({
           env: expect.objectContaining({
-            DISPLAY: ':0.0',
-          }) as NodeJS.ProcessEnv,
-        }) as SpawnOptions,
+            DISPLAY: ':0.0',}) as NodeJS.ProcessEnv,}) as SpawnOptions,
       );
     });
   });
 
-  describe('Timeout and Performance', () => {
-    /**
-     * Test timeout configuration for status checks
+  describe('Timeout and Performance', () => {/*** Test timeout configuration for status checks
      */
-    it('should apply timeout to application status checks', async () => {
-      const action: ApplicationActionDto = {
-        action: 'application',
-        application: ApplicationName.DIRECTORY,
-      };
+    it('should apply timeout to application status checks', async () => {const action: ApplicationActionDto = {action: 'application',application: ApplicationName.DIRECTORY,};
 
       (mockExecAsync).mockResolvedValue({
-        stdout: 'Thunar window',
-      });
-
-      await service.action(action);
+        stdout: 'Thunar window',});await service.action(action);
 
       expect(mockExecAsync).toHaveBeenCalledWith(
         'sudo -u user wmctrl -lx | grep Thunar',

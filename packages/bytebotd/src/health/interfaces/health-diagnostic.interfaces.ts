@@ -36,10 +36,7 @@ export interface SystemDiagnosticRequest {
   userContext: {
     userId: string;
     userRole: string;
-    securityClearance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  };
-
-  /** Diagnostic parameters */
+    securityClearance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};/** Diagnostic parameters */
   parameters: {
     includePerformanceAnalysis: boolean;
     includeResourceUsage: boolean;
@@ -62,28 +59,11 @@ export interface SystemDiagnosticRequest {
  * Diagnostic operation types
  */
 export enum DiagnosticType {
-  QUICK_HEALTH_CHECK = 'QUICK_HEALTH_CHECK',
-  COMPREHENSIVE_ANALYSIS = 'COMPREHENSIVE_ANALYSIS',
-  PERFORMANCE_BENCHMARK = 'PERFORMANCE_BENCHMARK',
-  SECURITY_ASSESSMENT = 'SECURITY_ASSESSMENT',
-  DEPENDENCY_VALIDATION = 'DEPENDENCY_VALIDATION',
-  RESOURCE_UTILIZATION = 'RESOURCE_UTILIZATION',
-  ERROR_INVESTIGATION = 'ERROR_INVESTIGATION',
-  COMPLIANCE_AUDIT = 'COMPLIANCE_AUDIT',
-}
-
-/**
+  QUICK_HEALTH_CHECK = 'QUICK_HEALTH_CHECK',COMPREHENSIVE_ANALYSIS = 'COMPREHENSIVE_ANALYSIS',PERFORMANCE_BENCHMARK = 'PERFORMANCE_BENCHMARK',SECURITY_ASSESSMENT = 'SECURITY_ASSESSMENT',DEPENDENCY_VALIDATION = 'DEPENDENCY_VALIDATION',RESOURCE_UTILIZATION = 'RESOURCE_UTILIZATION',ERROR_INVESTIGATION = 'ERROR_INVESTIGATION',COMPLIANCE_AUDIT = 'COMPLIANCE_AUDIT',}/**
  * Diagnostic scope levels
  */
 export enum DiagnosticScope {
-  COMPONENT_LEVEL = 'COMPONENT_LEVEL',
-  SERVICE_LEVEL = 'SERVICE_LEVEL',
-  SYSTEM_LEVEL = 'SYSTEM_LEVEL',
-  INFRASTRUCTURE_LEVEL = 'INFRASTRUCTURE_LEVEL',
-  BUSINESS_LEVEL = 'BUSINESS_LEVEL',
-}
-
-// ===== DIAGNOSTIC RESULTS =====
+  COMPONENT_LEVEL = 'COMPONENT_LEVEL',SERVICE_LEVEL = 'SERVICE_LEVEL',SYSTEM_LEVEL = 'SYSTEM_LEVEL',INFRASTRUCTURE_LEVEL = 'INFRASTRUCTURE_LEVEL',BUSINESS_LEVEL = 'BUSINESS_LEVEL',}// ===== DIAGNOSTIC RESULTS =====
 
 /**
  * Comprehensive diagnostic result with Parlant insights
@@ -152,16 +132,7 @@ export interface SystemDiagnosticResult {
  * Diagnostic status levels
  */
 export enum DiagnosticStatus {
-  OPTIMAL = 'OPTIMAL',
-  HEALTHY = 'HEALTHY',
-  DEGRADED = 'DEGRADED',
-  AT_RISK = 'AT_RISK',
-  CRITICAL = 'CRITICAL',
-  FAILED = 'FAILED',
-  UNKNOWN = 'UNKNOWN',
-}
-
-// ===== COMPONENT DIAGNOSTICS =====
+  OPTIMAL = 'OPTIMAL',HEALTHY = 'HEALTHY',DEGRADED = 'DEGRADED',AT_RISK = 'AT_RISK',CRITICAL = 'CRITICAL',FAILED = 'FAILED',UNKNOWN = 'UNKNOWN',}// ===== COMPONENT DIAGNOSTICS =====
 
 /**
  * Individual component diagnostic result
@@ -220,18 +191,7 @@ export interface ComponentDiagnosticResult {
  * Component types for classification
  */
 export enum ComponentType {
-  API_SERVICE = 'API_SERVICE',
-  DATABASE = 'DATABASE',
-  CACHE = 'CACHE',
-  MESSAGE_QUEUE = 'MESSAGE_QUEUE',
-  AUTH_SERVICE = 'AUTH_SERVICE',
-  MONITORING_SERVICE = 'MONITORING_SERVICE',
-  PARLANT_SERVICE = 'PARLANT_SERVICE',
-  EXTERNAL_SERVICE = 'EXTERNAL_SERVICE',
-  INFRASTRUCTURE = 'INFRASTRUCTURE',
-}
-
-/**
+  API_SERVICE = 'API_SERVICE',DATABASE = 'DATABASE',CACHE = 'CACHE',MESSAGE_QUEUE = 'MESSAGE_QUEUE',AUTH_SERVICE = 'AUTH_SERVICE',MONITORING_SERVICE = 'MONITORING_SERVICE',PARLANT_SERVICE = 'PARLANT_SERVICE',EXTERNAL_SERVICE = 'EXTERNAL_SERVICE',INFRASTRUCTURE = 'INFRASTRUCTURE',}/**
  * Component dependency information
  */
 export interface ComponentDependency {
@@ -260,10 +220,7 @@ export interface PerformanceDiagnosticResult {
     p95: number;
     p99: number;
     max: number;
-    trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-
-  /** Throughput analysis */
+    trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};/** Throughput analysis */
   throughput: {
     requestsPerSecond: number;
     peakThroughput: number;
@@ -277,10 +234,7 @@ export interface PerformanceDiagnosticResult {
     overall: number;
     byEndpoint: Map<string, number>;
     byErrorType: Map<string, number>;
-    trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-
-  /** Performance bottlenecks */
+    trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};/** Performance bottlenecks */
   bottlenecks: PerformanceBottleneck[];
 
   /** Optimization opportunities */
@@ -436,9 +390,7 @@ export interface SecurityDiagnosticResult {
   encryption: {
     dataAtRest: boolean;
     dataInTransit: boolean;
-    certificateStatus: 'VALID' | 'EXPIRING' | 'EXPIRED' | 'INVALID';
-    tlsVersion: string;
-  };
+    certificateStatus: 'VALID' | 'EXPIRING' | 'EXPIRED' | 'INVALID';tlsVersion: string;};
 
   /** Compliance status */
   compliance: {
@@ -467,22 +419,14 @@ export interface DiagnosticIssue {
 
   /** Impact assessment */
   impact: {
-    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    userImpact: 'NONE' | 'MINIMAL' | 'MODERATE' | 'SEVERE';
-    performanceImpact: number; // 0-100 scale
-    availabilityImpact: number; // 0-100 scale
+    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';userImpact: 'NONE' | 'MINIMAL' | 'MODERATE' | 'SEVERE';performanceImpact: number; // 0-100 scaleavailabilityImpact: number; // 0-100 scale
   };
 
   /** Timeline */
   detected: Date;
   estimatedResolution: Date;
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-
-  /** Resolution information */
-  resolution: {
-    status: 'IDENTIFIED' | 'INVESTIGATING' | 'FIXING' | 'RESOLVED';
-    steps: string[];
-    owner: string;
+  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';/** Resolution information */resolution: {
+    status: 'IDENTIFIED' | 'INVESTIGATING' | 'FIXING' | 'RESOLVED';steps: string[];owner: string;
     estimatedEffort: number; // hours
   };
 
@@ -499,31 +443,11 @@ export interface DiagnosticIssue {
  * Issue type classification
  */
 export enum IssueType {
-  PERFORMANCE_DEGRADATION = 'PERFORMANCE_DEGRADATION',
-  RESOURCE_EXHAUSTION = 'RESOURCE_EXHAUSTION',
-  SERVICE_UNAVAILABILITY = 'SERVICE_UNAVAILABILITY',
-  CONFIGURATION_ERROR = 'CONFIGURATION_ERROR',
-  SECURITY_VULNERABILITY = 'SECURITY_VULNERABILITY',
-  DEPENDENCY_FAILURE = 'DEPENDENCY_FAILURE',
-  DATA_INCONSISTENCY = 'DATA_INCONSISTENCY',
-  CAPACITY_SHORTAGE = 'CAPACITY_SHORTAGE',
-  NETWORK_CONNECTIVITY = 'NETWORK_CONNECTIVITY',
-  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
-}
-
-/**
+  PERFORMANCE_DEGRADATION = 'PERFORMANCE_DEGRADATION',RESOURCE_EXHAUSTION = 'RESOURCE_EXHAUSTION',SERVICE_UNAVAILABILITY = 'SERVICE_UNAVAILABILITY',CONFIGURATION_ERROR = 'CONFIGURATION_ERROR',SECURITY_VULNERABILITY = 'SECURITY_VULNERABILITY',DEPENDENCY_FAILURE = 'DEPENDENCY_FAILURE',DATA_INCONSISTENCY = 'DATA_INCONSISTENCY',CAPACITY_SHORTAGE = 'CAPACITY_SHORTAGE',NETWORK_CONNECTIVITY = 'NETWORK_CONNECTIVITY',AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',}/**
  * Issue severity levels
  */
 export enum IssueSeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY',
-}
-
-// ===== RECOMMENDATIONS =====
+  INFO = 'INFO',LOW = 'LOW',MEDIUM = 'MEDIUM',HIGH = 'HIGH',CRITICAL = 'CRITICAL',EMERGENCY = 'EMERGENCY',}// ===== RECOMMENDATIONS =====
 
 /**
  * Diagnostic recommendation with Parlant insights
@@ -541,13 +465,7 @@ export interface DiagnosticRecommendation {
 
   /** Implementation details */
   implementation: {
-    effort: 'LOW' | 'MEDIUM' | 'HIGH';
-    timeframe: 'IMMEDIATE' | 'SHORT_TERM' | 'MEDIUM_TERM' | 'LONG_TERM';
-    complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX';
-    cost: 'LOW' | 'MEDIUM' | 'HIGH';
-  };
-
-  /** Expected benefits */
+    effort: 'LOW' | 'MEDIUM' | 'HIGH';timeframe: 'IMMEDIATE' | 'SHORT_TERM' | 'MEDIUM_TERM' | 'LONG_TERM';complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX';cost: 'LOW' | 'MEDIUM' | 'HIGH';};/** Expected benefits */
   benefits: {
     performanceImprovement: number; // percentage
     reliabilityImprovement: number; // percentage
@@ -578,48 +496,22 @@ export interface DiagnosticRecommendation {
  * Recommendation types
  */
 export enum RecommendationType {
-  PERFORMANCE_OPTIMIZATION = 'PERFORMANCE_OPTIMIZATION',
-  RESOURCE_SCALING = 'RESOURCE_SCALING',
-  CONFIGURATION_CHANGE = 'CONFIGURATION_CHANGE',
-  INFRASTRUCTURE_UPGRADE = 'INFRASTRUCTURE_UPGRADE',
-  SECURITY_ENHANCEMENT = 'SECURITY_ENHANCEMENT',
-  MONITORING_IMPROVEMENT = 'MONITORING_IMPROVEMENT',
-  PROCESS_IMPROVEMENT = 'PROCESS_IMPROVEMENT',
-  COST_OPTIMIZATION = 'COST_OPTIMIZATION',
-}
-
-/**
+  PERFORMANCE_OPTIMIZATION = 'PERFORMANCE_OPTIMIZATION',RESOURCE_SCALING = 'RESOURCE_SCALING',CONFIGURATION_CHANGE = 'CONFIGURATION_CHANGE',INFRASTRUCTURE_UPGRADE = 'INFRASTRUCTURE_UPGRADE',SECURITY_ENHANCEMENT = 'SECURITY_ENHANCEMENT',MONITORING_IMPROVEMENT = 'MONITORING_IMPROVEMENT',PROCESS_IMPROVEMENT = 'PROCESS_IMPROVEMENT',COST_OPTIMIZATION = 'COST_OPTIMIZATION',}/**
  * Recommendation priority levels
  */
 export enum RecommendationPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  IMMEDIATE = 'IMMEDIATE',
-}
-
-// ===== PARLANT CONVERSATIONAL CONTEXT =====
+  LOW = 'LOW',MEDIUM = 'MEDIUM',HIGH = 'HIGH',CRITICAL = 'CRITICAL',IMMEDIATE = 'IMMEDIATE',}// ===== PARLANT CONVERSATIONAL CONTEXT =====
 
 /**
  * Conversational risk assessment with AI insights
  */
 export interface ConversationalRiskAssessment {
   /** Overall risk level */
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-
-  /** Risk factors identified by AI */
-  riskFactors: string[];
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';/** Risk factors identified by AI */riskFactors: string[];
 
   /** Business impact assessment */
   businessImpact: {
-    revenue: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    operations: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    reputation: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    compliance: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  };
-
-  /** Mitigation strategies */
+    revenue: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';operations: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';reputation: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';compliance: 'NO_IMPACT' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};/** Mitigation strategies */
   mitigationStrategies: string[];
 
   /** AI confidence level */
@@ -632,26 +524,19 @@ export interface ConversationalRiskAssessment {
 export interface ConversationalAction {
   /** Action identification */
   id: string;
-  type: 'IMMEDIATE' | 'SCHEDULED' | 'CONDITIONAL';
-
-  /** Action details */
-  description: string;
+  type: 'IMMEDIATE' | 'SCHEDULED' | 'CONDITIONAL';/** Action details */description: string;
   reasoning: string;
 
   /** Execution context */
   execution: {
-    when: 'NOW' | 'SCHEDULE' | 'ON_CONDITION';
-    condition?: string;
-    scheduledTime?: Date;
+    when: 'NOW' | 'SCHEDULE' | 'ON_CONDITION';condition?: string;scheduledTime?: Date;
     executor: string;
   };
 
   /** Validation requirements */
   validation: {
     requiresApproval: boolean;
-    approvalLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    validators: string[];
-  };
+    approvalLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';validators: string[];};
 
   /** Success criteria */
   successCriteria: string[];
@@ -667,9 +552,7 @@ export interface ConversationalAction {
  */
 export interface PerformanceBottleneck {
   location: string;
-  type: 'CPU' | 'MEMORY' | 'IO' | 'NETWORK' | 'DATABASE' | 'CACHE';
-  severity: number; // 0-100
-  impact: string;
+  type: 'CPU' | 'MEMORY' | 'IO' | 'NETWORK' | 'DATABASE' | 'CACHE';severity: number; // 0-100impact: string;
   recommendations: string[];
 }
 
@@ -678,10 +561,7 @@ export interface PerformanceBottleneck {
  */
 export interface PerformanceOptimization {
   area: string;
-  type: 'CACHING' | 'INDEXING' | 'COMPRESSION' | 'BATCHING' | 'ASYNC';
-  effort: 'LOW' | 'MEDIUM' | 'HIGH';
-  expectedGain: number; // percentage improvement
-  description: string;
+  type: 'CACHING' | 'INDEXING' | 'COMPRESSION' | 'BATCHING' | 'ASYNC';effort: 'LOW' | 'MEDIUM' | 'HIGH';expectedGain: number; // percentage improvementdescription: string;
 }
 
 /**
@@ -701,9 +581,7 @@ export interface ProcessResourceUsage {
 export interface MemoryLeakDetection {
   process: string;
   growthRate: number; // MB per hour
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  detectedAt: Date;
-}
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';detectedAt: Date;}
 
 /**
  * Storage hotspot identification
@@ -712,9 +590,7 @@ export interface StorageHotspot {
   path: string;
   usage: number;
   growth: number;
-  type: 'LOGS' | 'CACHE' | 'DATA' | 'TEMP';
-  cleanupRecommended: boolean;
-}
+  type: 'LOGS' | 'CACHE' | 'DATA' | 'TEMP';cleanupRecommended: boolean;}
 
 /**
  * Security vulnerability information
@@ -725,9 +601,7 @@ export interface SecurityVulnerability {
   description: string;
   cveId?: string;
   score: number; // CVSS score
-  exploitability: 'LOW' | 'MEDIUM' | 'HIGH';
-  remediation: string[];
-}
+  exploitability: 'LOW' | 'MEDIUM' | 'HIGH';remediation: string[];}
 
 /**
  * Trend analysis data

@@ -12,11 +12,7 @@
  * - Tool parameter validation and response formatting
  *
  * MCP Server Configuration:
- * - Server name: 'bytebotd'
- * - Version: '0.0.1'
- * - SSE endpoint: '/mcp'
- * - Tool namespace: computer use operations
- *
+ * - Server name: 'bytebotd'* - Version: '0.0.1'* - SSE endpoint: '/mcp'* - Tool namespace: computer use operations*
  * Dependencies:
  * - @rekog/mcp-nest: MCP server implementation for NestJS
  * - ComputerUseModule: Core computer automation functionality
@@ -31,16 +27,7 @@
  * @since 2024-01-01
  */
 
-import { Module, Logger } from '@nestjs/common';
-import { McpModule } from '@rekog/mcp-nest';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
-import { ComputerUseTools } from './computer-use.tools';
-
-// Initialize module logger
-const logger = new Logger('BytebotMcpModule');
-
-/**
- * Bytebot MCP Module Configuration
+import { Module, Logger } from '@nestjs/common';import { McpModule } from '@rekog/mcp-nest';import { ComputerUseModule } from '../computer-use/computer-use.module';import { ComputerUseTools } from './computer-use.tools';// Initialize module loggerconst logger = new Logger('BytebotMcpModule');/*** Bytebot MCP Module Configuration
  *
  * Configures and initializes the Model Context Protocol server integration
  * with comprehensive computer use tool support.
@@ -57,11 +44,7 @@ const logger = new Logger('BytebotMcpModule');
 
     // MCP server configuration with Bytebot-specific settings
     McpModule.forRoot({
-      name: 'bytebotd', // MCP server identifier
-      version: '0.0.1', // API version for compatibility
-      sseEndpoint: '/mcp', // Server-Sent Events endpoint path
-    }),
-  ],
+      name: 'bytebotd', // MCP server identifierversion: '0.0.1', // API version for compatibilitysseEndpoint: '/mcp', // Server-Sent Events endpoint path}),],
 
   // MCP tool implementations for computer use operations
   providers: [ComputerUseTools],
@@ -69,11 +52,7 @@ const logger = new Logger('BytebotMcpModule');
 export class BytebotMcpModule {
   constructor() {
     logger.log(
-      'BytebotMcpModule initialized - MCP server ready for connections',
-    );
-    logger.log('MCP endpoints available at: /mcp (SSE)');
-    logger.log(
-      'Available tool categories: mouse, keyboard, screen, file operations',
+      'BytebotMcpModule initialized - MCP server ready for connections',);logger.log('MCP endpoints available at: /mcp (SSE)');logger.log('Available tool categories: mouse, keyboard, screen, file operations',
     );
   }
 }

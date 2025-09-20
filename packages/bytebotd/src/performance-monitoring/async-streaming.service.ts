@@ -26,15 +26,7 @@
  * @version 1.0.0 - ENTERPRISE ASYNC STREAMING FRAMEWORK
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import WebSocket from 'ws';
-import { v4 as uuidv4 } from 'uuid';
-
-// ===== ASYNC PROCESSING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import WebSocket from 'ws';import { v4 as uuidv4 } from 'uuid';// ===== ASYNC PROCESSING INTERFACES =====/**
  * Async validation request structure
  */
 export interface AsyncValidationRequest {
@@ -43,9 +35,7 @@ export interface AsyncValidationRequest {
   readonly operationType: string;
   readonly functionName: string;
   readonly parameters: Record<string, unknown>;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly userId: string;
-  readonly sessionId: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly userId: string;readonly sessionId: string;
   readonly timeout: number;
   readonly requiresProgress: boolean;
   readonly deferrable: boolean;
@@ -73,38 +63,12 @@ export interface StreamingValidationContext {
  * Validation stages for progressive disclosure
  */
 export enum ValidationStage {
-  QUEUED = 'QUEUED',
-  RISK_ASSESSMENT = 'RISK_ASSESSMENT',
-  CACHE_CHECK = 'CACHE_CHECK',
-  PARLANT_VALIDATION = 'PARLANT_VALIDATION',
-  APPROVAL_PENDING = 'APPROVAL_PENDING',
-  EXECUTING = 'EXECUTING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  TIMEOUT = 'TIMEOUT'
-}
-
-/**
+  QUEUED = 'QUEUED',RISK_ASSESSMENT = 'RISK_ASSESSMENT',CACHE_CHECK = 'CACHE_CHECK',PARLANT_VALIDATION = 'PARLANT_VALIDATION',APPROVAL_PENDING = 'APPROVAL_PENDING',EXECUTING = 'EXECUTING',COMPLETED = 'COMPLETED',FAILED = 'FAILED',TIMEOUT = 'TIMEOUT'}/**
  * WebSocket message types for streaming
  */
 export enum StreamingMessageType {
   // Client -> Server
-  SUBSCRIBE = 'SUBSCRIBE',
-  UNSUBSCRIBE = 'UNSUBSCRIBE',
-  HEARTBEAT = 'HEARTBEAT',
-
-  // Server -> Client
-  VALIDATION_STARTED = 'VALIDATION_STARTED',
-  PROGRESS_UPDATE = 'PROGRESS_UPDATE',
-  STAGE_CHANGED = 'STAGE_CHANGED',
-  VALIDATION_COMPLETED = 'VALIDATION_COMPLETED',
-  VALIDATION_FAILED = 'VALIDATION_FAILED',
-  METRICS_UPDATE = 'METRICS_UPDATE',
-  SYSTEM_STATUS = 'SYSTEM_STATUS',
-  HEARTBEAT_RESPONSE = 'HEARTBEAT_RESPONSE'
-}
-
-/**
+  SUBSCRIBE = 'SUBSCRIBE',UNSUBSCRIBE = 'UNSUBSCRIBE',HEARTBEAT = 'HEARTBEAT',// Server -> ClientVALIDATION_STARTED = 'VALIDATION_STARTED',PROGRESS_UPDATE = 'PROGRESS_UPDATE',STAGE_CHANGED = 'STAGE_CHANGED',VALIDATION_COMPLETED = 'VALIDATION_COMPLETED',VALIDATION_FAILED = 'VALIDATION_FAILED',METRICS_UPDATE = 'METRICS_UPDATE',SYSTEM_STATUS = 'SYSTEM_STATUS',HEARTBEAT_RESPONSE = 'HEARTBEAT_RESPONSE'}/**
  * WebSocket streaming message structure
  */
 export interface StreamingMessage {
@@ -139,9 +103,7 @@ export interface WebSocketClient {
  */
 export interface BackgroundJob {
   readonly jobId: string;
-  readonly type: 'VALIDATION' | 'ANALYTICS' | 'AUDIT' | 'CLEANUP';
-  readonly priority: number; // 1-10 scale
-  readonly payload: Record<string, unknown>;
+  readonly type: 'VALIDATION' | 'ANALYTICS' | 'AUDIT' | 'CLEANUP';readonly priority: number; // 1-10 scalereadonly payload: Record<string, unknown>;
   readonly scheduledFor: Date;
   readonly createdAt: Date;
   readonly attempts: number;
@@ -176,9 +138,7 @@ export interface RealtimeAnalytics {
   readonly throughputPerSecond: number;
   readonly errorRate: number;
   readonly cacheHitRate: number;
-  readonly systemHealth: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-  readonly performanceMetrics: {
-    cpuUsage: number;
+  readonly systemHealth: 'HEALTHY' | 'WARNING' | 'CRITICAL';readonly performanceMetrics: {cpuUsage: number;
     memoryUsage: number;
     networkLatency: number;
     diskUsage: number;
@@ -194,10 +154,7 @@ class WebSocketManager {
   private readonly clients = new Map<string, WebSocketClient>();
   private readonly subscriptions = new Map<string, Set<string>>(); // streamId -> clientIds
   private readonly messageQueues = new Map<string, StreamingMessage[]>(); // clientId -> messages
-  private readonly logger = new Logger('WebSocketManager');
-
-  private heartbeatInterval: NodeJS.Timeout | null = null;
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private readonly logger = new Logger('WebSocketManager');private heartbeatInterval: NodeJS.Timeout | null = null;private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.startHeartbeatMonitoring();
@@ -223,14 +180,9 @@ class WebSocketManager {
     this.messageQueues.set(clientId, []);
 
     // Setup WebSocket event handlers
-    ws.on('message', (data) => this.handleMessage(clientId, data));
-    ws.on('close', () => this.removeClient(clientId));
-    ws.on('error', (error) => this.handleError(clientId, error));
+    ws.on('message', (data) => this.handleMessage(clientId, data));ws.on('close', () => this.removeClient(clientId));ws.on('error', (error) => this.handleError(clientId, error));
 
-    this.logger.log(`WebSocket client connected: ${clientId} (user: ${userId})`);
-  }
-
-  /**
+    this.logger.log(`WebSocket client connected: ${clientId} (user: ${userId})`);}/**
    * Remove WebSocket client
    */
   removeClient(clientId: string): void {
@@ -254,10 +206,7 @@ class WebSocketManager {
     // Remove client
     this.clients.delete(clientId);
 
-    this.logger.log(`WebSocket client disconnected: ${clientId}`);
-  }
-
-  /**
+    this.logger.log(`WebSocket client disconnected: ${clientId}`);}/**
    * Subscribe client to validation stream
    */
   subscribe(clientId: string, streamId: string): boolean {
@@ -271,9 +220,7 @@ class WebSocketManager {
     }
     this.subscriptions.get(streamId)!.add(clientId);
 
-    this.logger.debug(`Client ${clientId} subscribed to stream ${streamId}`);
-    return true;
-  }
+    this.logger.debug(`Client ${clientId} subscribed to stream ${streamId}`);return true;}
 
   /**
    * Unsubscribe client from validation stream
@@ -292,9 +239,7 @@ class WebSocketManager {
       }
     }
 
-    this.logger.debug(`Client ${clientId} unsubscribed from stream ${streamId}`);
-    return true;
-  }
+    this.logger.debug(`Client ${clientId} unsubscribed from stream ${streamId}`);return true;}
 
   /**
    * Send message to specific client
@@ -308,9 +253,7 @@ class WebSocketManager {
         client.ws.send(JSON.stringify(message));
         return true;
       } catch (error) {
-        this.logger.error(`Failed to send message to client ${clientId}`, {
-          error: error instanceof Error ? error.message : String(error)
-        });
+        this.logger.error(`Failed to send message to client ${clientId}`, {error: error instanceof Error ? error.message : String(error)});
         this.queueMessage(clientId, message);
         return false;
       }
@@ -335,9 +278,7 @@ class WebSocketManager {
       }
     });
 
-    this.logger.debug(`Broadcasted message to stream ${streamId}`, {
-      totalSubscribers: subscribers.size,
-      successfulSends: sentCount,
+    this.logger.debug(`Broadcasted message to stream ${streamId}`, {totalSubscribers: subscribers.size,successfulSends: sentCount,
     });
 
     return sentCount;
@@ -402,12 +343,8 @@ class WebSocketManager {
           this.handleHeartbeat(clientId);
           break;
         default:
-          this.logger.warn(`Unknown message type from client ${clientId}: ${message.type}`);
-      }
-    } catch (error) {
-      this.logger.error(`Failed to parse message from client ${clientId}`, {
-        error: error instanceof Error ? error.message : String(error)
-      });
+          this.logger.warn(`Unknown message type from client ${clientId}: ${message.type}`);}} catch (error) {
+      this.logger.error(`Failed to parse message from client ${clientId}`, {error: error instanceof Error ? error.message : String(error)});
     }
   }
 
@@ -531,10 +468,7 @@ class BackgroundJobQueue {
       this.priorityQueue.splice(insertIndex, 0, job);
     }
 
-    this.logger.debug(`Job added to queue: ${job.jobId} (type: ${job.type}, priority: ${job.priority})`);
-  }
-
-  /**
+    this.logger.debug(`Job added to queue: ${job.jobId} (type: ${job.type}, priority: ${job.priority})`);}/**
    * Remove job from queue
    */
   removeJob(jobId: string): boolean {
@@ -548,9 +482,7 @@ class BackgroundJobQueue {
     }
     this.processingJobs.delete(jobId);
 
-    this.logger.debug(`Job removed from queue: ${jobId}`);
-    return true;
-  }
+    this.logger.debug(`Job removed from queue: ${jobId}`);return true;}
 
   /**
    * Get queue statistics
@@ -603,9 +535,7 @@ class BackgroundJobQueue {
     try {
       await this.executeJob(job);
       this.removeJob(job.jobId);
-      this.logger.debug(`Job completed successfully: ${job.jobId}`);
-    } catch (error) {
-      this.logger.error(`Job failed: ${job.jobId}`, {
+      this.logger.debug(`Job completed successfully: ${job.jobId}`);} catch (error) {this.logger.error(`Job failed: ${job.jobId}`, {
         error: error instanceof Error ? error.message : String(error),
         attempts: job.attempts,
         maxAttempts: job.maxAttempts,
@@ -628,15 +558,9 @@ class BackgroundJobQueue {
   private async executeJob(job: BackgroundJob): Promise<void> {
     // Mock job execution - in production, this would route to appropriate handlers
     switch (job.type) {
-      case 'VALIDATION':
-        await this.executeValidationJob(job);
-        break;
-      case 'ANALYTICS':
-        await this.executeAnalyticsJob(job);
-        break;
-      case 'AUDIT':
-        await this.executeAuditJob(job);
-        break;
+      case 'VALIDATION':await this.executeValidationJob(job);break;
+      case 'ANALYTICS':await this.executeAnalyticsJob(job);break;
+      case 'AUDIT':await this.executeAuditJob(job);break;
       case 'CLEANUP':
         await this.executeCleanupJob(job);
         break;
@@ -714,10 +638,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
     this.startMetricsStreaming();
     this.startAnalyticsCollection();
 
-    this.logger.log('Async Streaming Service initialized with WebSocket and background processing');
-  }
-
-  // ===== PUBLIC API METHODS =====
+    this.logger.log('Async Streaming Service initialized with WebSocket and background processing');}// ===== PUBLIC API METHODS =====
 
   /**
    * Register WebSocket client for streaming
@@ -730,9 +651,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
       type: StreamingMessageType.SYSTEM_STATUS,
       timestamp: new Date(),
       data: {
-        status: 'connected',
-        serverTime: new Date(),
-        features: ['real-time-validation', 'progress-streaming', 'analytics'],
+        status: 'connected',serverTime: new Date(),features: ['real-time-validation', 'progress-streaming', 'analytics'],
         systemHealth: this.getSystemHealth(),
       },
     });
@@ -784,9 +703,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
       },
     });
 
-    this.logger.log(`Async validation started: ${streamId} (request: ${request.requestId})`);
-    return streamId;
-  }
+    this.logger.log(`Async validation started: ${streamId} (request: ${request.requestId})`);return streamId;}
 
   /**
    * Update validation progress and stream to clients
@@ -948,10 +865,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
     activeStreams: number;
     averageStreamingLatency: number;
     throughput: number;
-    connectionStats: ReturnType<WebSocketManager['getConnectionStats']>;
-    queueStats: ReturnType<BackgroundJobQueue['getQueueStats']>;
-    deferredCount: number;
-  } {
+    connectionStats: ReturnType<WebSocketManager['getConnectionStats']>;queueStats: ReturnType<BackgroundJobQueue['getQueueStats']>;deferredCount: number;} {
     return {
       validationsStarted: this.totalValidationsStarted,
       validationsCompleted: this.totalValidationsCompleted,
@@ -977,10 +891,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
       this.processDeferredValidations();
     }, 5000);
 
-    this.logger.log('Async processing intervals started');
-  }
-
-  private startMetricsStreaming(): void {
+    this.logger.log('Async processing intervals started');}private startMetricsStreaming(): void {
     this.metricsStreamingInterval = setInterval(() => {
       const analytics = this.getRealtimeAnalytics();
 
@@ -992,9 +903,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
       });
 
       // Emit event for other services
-      this.eventEmitter.emit('async.metrics.update', analytics);
-    }, 1000); // Every second
-  }
+      this.eventEmitter.emit('async.metrics.update', analytics);}, 1000); // Every second}
 
   private startAnalyticsCollection(): void {
     this.analyticsInterval = setInterval(() => {
@@ -1051,47 +960,24 @@ export class AsyncStreamingService implements OnApplicationShutdown {
 
   private async simulateValidationStages(streamId: string, request: AsyncValidationRequest): Promise<void> {
     // Stage 1: Risk Assessment
-    this.updateValidationProgress(streamId, ValidationStage.RISK_ASSESSMENT, 0.1, 'Analyzing operation risk');
-    await this.delay(50);
-
-    // Stage 2: Cache Check
-    this.updateValidationProgress(streamId, ValidationStage.CACHE_CHECK, 0.3, 'Checking validation cache');
-    await this.delay(30);
-
-    const cacheHit = Math.random() > 0.3; // 70% cache hit rate
+    this.updateValidationProgress(streamId, ValidationStage.RISK_ASSESSMENT, 0.1, 'Analyzing operation risk');await this.delay(50);// Stage 2: Cache Check
+    this.updateValidationProgress(streamId, ValidationStage.CACHE_CHECK, 0.3, 'Checking validation cache');await this.delay(30);const cacheHit = Math.random() > 0.3; // 70% cache hit rate
     if (cacheHit) {
       // Cache hit - complete quickly
-      this.updateValidationProgress(streamId, ValidationStage.COMPLETED, 1.0, 'Validation completed from cache');
-      this.completeValidation(streamId, {
-        success: true,
-        data: { validated: true, source: 'cache' },
-        processingTime: 80,
-        cacheHit: true,
+      this.updateValidationProgress(streamId, ValidationStage.COMPLETED, 1.0, 'Validation completed from cache');this.completeValidation(streamId, {success: true,
+        data: { validated: true, source: 'cache' },processingTime: 80,cacheHit: true,
       });
       return;
     }
 
     // Stage 3: PARLANT Validation
-    this.updateValidationProgress(streamId, ValidationStage.PARLANT_VALIDATION, 0.5, 'Performing conversational validation');
-    await this.delay(200);
-
-    // Stage 4: Approval Check (for high-risk operations)
-    if (request.priority === 'HIGH' || request.priority === 'CRITICAL') {
-      this.updateValidationProgress(streamId, ValidationStage.APPROVAL_PENDING, 0.8, 'Awaiting approval');
-      await this.delay(500);
-    }
+    this.updateValidationProgress(streamId, ValidationStage.PARLANT_VALIDATION, 0.5, 'Performing conversational validation');await this.delay(200);// Stage 4: Approval Check (for high-risk operations)
+    if (request.priority === 'HIGH' || request.priority === 'CRITICAL') {this.updateValidationProgress(streamId, ValidationStage.APPROVAL_PENDING, 0.8, 'Awaiting approval');await this.delay(500);}
 
     // Stage 5: Execution
-    this.updateValidationProgress(streamId, ValidationStage.EXECUTING, 0.9, 'Executing validated operation');
-    await this.delay(100);
-
-    // Complete validation
-    this.updateValidationProgress(streamId, ValidationStage.COMPLETED, 1.0, 'Validation completed successfully');
-    this.completeValidation(streamId, {
-      success: true,
-      data: { validated: true, source: 'full_validation' },
-      processingTime: 930,
-      cacheHit: false,
+    this.updateValidationProgress(streamId, ValidationStage.EXECUTING, 0.9, 'Executing validated operation');await this.delay(100);// Complete validation
+    this.updateValidationProgress(streamId, ValidationStage.COMPLETED, 1.0, 'Validation completed successfully');this.completeValidation(streamId, {success: true,
+      data: { validated: true, source: 'full_validation' },processingTime: 930,cacheHit: false,
     });
   }
 
@@ -1111,9 +997,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
 
     this.updateValidationProgress(streamId, ValidationStage.QUEUED, 0.05, 'Validation deferred - will process during low-traffic period');
 
-    this.logger.debug(`Validation deferred: ${request.requestId}`, {
-      deferredId: deferredValidation.id,
-      priority: deferredValidation.priority,
+    this.logger.debug(`Validation deferred: ${request.requestId}`, {deferredId: deferredValidation.id,priority: deferredValidation.priority,
     });
   }
 
@@ -1132,9 +1016,7 @@ export class AsyncStreamingService implements OnApplicationShutdown {
       this.deferredValidations.delete(deferred.id);
       this.validationQueue.push(deferred.request);
 
-      this.logger.debug(`Processing deferred validation: ${deferred.request.requestId}`);
-    }
-  }
+      this.logger.debug(`Processing deferred validation: ${deferred.request.requestId}`);}}
 
   private streamValidationUpdate(streamId: string, message: StreamingMessage): void {
     const sentCount = this.wsManager.broadcastToStream(streamId, message);
@@ -1157,36 +1039,24 @@ export class AsyncStreamingService implements OnApplicationShutdown {
   private estimateValidationTime(request: AsyncValidationRequest): number {
     const baseTime = 200; // Base 200ms
     const priorityMultiplier = {
-      'LOW': 0.8,
-      'MEDIUM': 1.0,
-      'HIGH': 1.5,
-      'CRITICAL': 2.0,
-    };
-
-    return baseTime * priorityMultiplier[request.priority];
+      'LOW': 0.8,'MEDIUM': 1.0,'HIGH': 1.5,'CRITICAL': 2.0,};return baseTime * priorityMultiplier[request.priority];
   }
 
   private calculateTotalSteps(request: AsyncValidationRequest): number {
     let steps = 4; // Base steps: queue, risk assessment, cache check, execution
 
-    if (request.priority === 'HIGH' || request.priority === 'CRITICAL') {
-      steps += 2; // Add approval and verification steps
-    }
+    if (request.priority === 'HIGH' || request.priority === 'CRITICAL') {steps += 2; // Add approval and verification steps}
 
     return steps;
   }
 
   private shouldDefer(request: AsyncValidationRequest): boolean {
     // Defer low-priority requests during high-traffic periods
-    return request.priority === 'LOW' &&
-           this.activeStreams.size > 50 &&
-           this.validationQueue.length > 20;
+    return request.priority === 'LOW' &&this.activeStreams.size > 50 &&this.validationQueue.length > 20;
   }
 
   private calculateDeferredPriority(request: AsyncValidationRequest): number {
-    const priorityMap = { 'LOW': 1, 'MEDIUM': 3, 'HIGH': 7, 'CRITICAL': 10 };
-    return priorityMap[request.priority];
-  }
+    const priorityMap = { 'LOW': 1, 'MEDIUM': 3, 'HIGH': 7, 'CRITICAL': 10 };return priorityMap[request.priority];}
 
   private isLowTrafficPeriod(): boolean {
     return this.activeStreams.size < 10 && this.validationQueue.length < 5;
@@ -1195,29 +1065,12 @@ export class AsyncStreamingService implements OnApplicationShutdown {
   private updateEstimatedCompletion(context: StreamingValidationContext): Date {
     const remainingProgress = 1 - context.progress;
     const estimatedRemainingTime = remainingProgress * this.estimateValidationTime({
-      priority: 'MEDIUM'
-    } as AsyncValidationRequest);
-
-    return new Date(Date.now() + estimatedRemainingTime);
+      priority: 'MEDIUM'} as AsyncValidationRequest);return new Date(Date.now() + estimatedRemainingTime);
   }
 
   private getStageDescription(stage: ValidationStage): string {
     const descriptions = {
-      [ValidationStage.QUEUED]: 'Request queued for processing',
-      [ValidationStage.RISK_ASSESSMENT]: 'Analyzing operation risk and security requirements',
-      [ValidationStage.CACHE_CHECK]: 'Checking for cached validation results',
-      [ValidationStage.PARLANT_VALIDATION]: 'Performing conversational AI validation',
-      [ValidationStage.APPROVAL_PENDING]: 'Awaiting human approval for high-risk operation',
-      [ValidationStage.EXECUTING]: 'Executing validated operation',
-      [ValidationStage.COMPLETED]: 'Validation completed successfully',
-      [ValidationStage.FAILED]: 'Validation failed due to errors',
-      [ValidationStage.TIMEOUT]: 'Validation timed out',
-    };
-
-    return descriptions[stage] || 'Unknown stage';
-  }
-
-  private updateStreamingMetrics(latency: number, processingTime: number): void {
+      [ValidationStage.QUEUED]: 'Request queued for processing',[ValidationStage.RISK_ASSESSMENT]: 'Analyzing operation risk and security requirements',[ValidationStage.CACHE_CHECK]: 'Checking for cached validation results',[ValidationStage.PARLANT_VALIDATION]: 'Performing conversational AI validation',[ValidationStage.APPROVAL_PENDING]: 'Awaiting human approval for high-risk operation',[ValidationStage.EXECUTING]: 'Executing validated operation',[ValidationStage.COMPLETED]: 'Validation completed successfully',[ValidationStage.FAILED]: 'Validation failed due to errors',[ValidationStage.TIMEOUT]: 'Validation timed out',};return descriptions[stage] || 'Unknown stage';}private updateStreamingMetrics(latency: number, processingTime: number): void {
     this.averageStreamingLatency = (this.averageStreamingLatency * (this.totalValidationsCompleted - 1) + latency) / this.totalValidationsCompleted;
 
     // Update throughput (simplified calculation)
@@ -1239,17 +1092,8 @@ export class AsyncStreamingService implements OnApplicationShutdown {
     return 0.73; // 73% cache hit rate
   }
 
-  private getSystemHealth(): 'HEALTHY' | 'WARNING' | 'CRITICAL' {
-    const stats = this.getServiceStats();
-
-    if (stats.activeStreams > 500 || stats.queueStats.pendingJobs > 1000) {
-      return 'CRITICAL';
-    } else if (stats.activeStreams > 200 || stats.queueStats.pendingJobs > 100) {
-      return 'WARNING';
-    } else {
-      return 'HEALTHY';
-    }
-  }
+  private getSystemHealth(): 'HEALTHY' | 'WARNING' | 'CRITICAL' {const stats = this.getServiceStats();if (stats.activeStreams > 500 || stats.queueStats.pendingJobs > 1000) {
+      return 'CRITICAL';} else if (stats.activeStreams > 200 || stats.queueStats.pendingJobs > 100) {return 'WARNING';} else {return 'HEALTHY';}}
 
   private getPerformanceMetrics(): { cpuUsage: number; memoryUsage: number; networkLatency: number; diskUsage: number } {
     return {

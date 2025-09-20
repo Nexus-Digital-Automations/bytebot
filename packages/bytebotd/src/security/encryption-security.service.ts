@@ -17,72 +17,28 @@
  * Performance: Sub-100ms encryption with secure key caching and HSM integration
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import * as crypto from 'crypto';import { ParlantIntegrationService, 
   ParlantValidationRequest, 
   ParlantConversationContext, 
   RiskLevel,
   ConversationalValidationError 
-} from '../parlant/parlant-integration.service';
-
-// ===== ENCRYPTION SECURITY INTERFACES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== ENCRYPTION SECURITY INTERFACES =====/**
  * Supported encryption algorithms
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes-256-gcm',
-  AES_256_CBC = 'aes-256-cbc',
-  AES_192_GCM = 'aes-192-gcm',
-  RSA_OAEP = 'rsa-oaep',
-  RSA_PKCS1 = 'rsa-pkcs1',
-  ECDH_P256 = 'ecdh-p256',
-  ECDH_P384 = 'ecdh-p384',
-  CHACHA20_POLY1305 = 'chacha20-poly1305'
-}
-
-/**
+  AES_256_GCM = 'aes-256-gcm',AES_256_CBC = 'aes-256-cbc',AES_192_GCM = 'aes-192-gcm',RSA_OAEP = 'rsa-oaep',RSA_PKCS1 = 'rsa-pkcs1',ECDH_P256 = 'ecdh-p256',ECDH_P384 = 'ecdh-p384',CHACHA20_POLY1305 = 'chacha20-poly1305'}/**
  * Key types for cryptographic operations
  */
 export enum KeyType {
-  SYMMETRIC = 'SYMMETRIC',
-  ASYMMETRIC_PUBLIC = 'ASYMMETRIC_PUBLIC',
-  ASYMMETRIC_PRIVATE = 'ASYMMETRIC_PRIVATE',
-  SIGNING = 'SIGNING',
-  VERIFICATION = 'VERIFICATION',
-  KEY_ENCRYPTION = 'KEY_ENCRYPTION',
-  DATA_ENCRYPTION = 'DATA_ENCRYPTION'
-}
-
-/**
+  SYMMETRIC = 'SYMMETRIC',ASYMMETRIC_PUBLIC = 'ASYMMETRIC_PUBLIC',ASYMMETRIC_PRIVATE = 'ASYMMETRIC_PRIVATE',SIGNING = 'SIGNING',VERIFICATION = 'VERIFICATION',KEY_ENCRYPTION = 'KEY_ENCRYPTION',DATA_ENCRYPTION = 'DATA_ENCRYPTION'}/**
  * Key security levels
  */
 export enum KeySecurityLevel {
-  HARDWARE_HSM = 'HARDWARE_HSM',         // Hardware Security Module
-  SOFTWARE_SECURE = 'SOFTWARE_SECURE',   // Secure software storage
-  ENCRYPTED_STORAGE = 'ENCRYPTED_STORAGE', // Encrypted at rest
-  STANDARD = 'STANDARD'                   // Standard security
-}
-
-/**
+  HARDWARE_HSM = 'HARDWARE_HSM',         // Hardware Security ModuleSOFTWARE_SECURE = 'SOFTWARE_SECURE',   // Secure software storageENCRYPTED_STORAGE = 'ENCRYPTED_STORAGE', // Encrypted at restSTANDARD = 'STANDARD'                   // Standard security}/**
  * Cryptographic operation types
  */
 export enum CryptographicOperation {
-  ENCRYPT = 'ENCRYPT',
-  DECRYPT = 'DECRYPT',
-  SIGN = 'SIGN',
-  VERIFY = 'VERIFY',
-  KEY_GENERATION = 'KEY_GENERATION',
-  KEY_ROTATION = 'KEY_ROTATION',
-  KEY_DERIVATION = 'KEY_DERIVATION',
-  HASH = 'HASH',
-  MAC = 'MAC'
-}
-
-/**
+  ENCRYPT = 'ENCRYPT',DECRYPT = 'DECRYPT',SIGN = 'SIGN',VERIFY = 'VERIFY',KEY_GENERATION = 'KEY_GENERATION',KEY_ROTATION = 'KEY_ROTATION',KEY_DERIVATION = 'KEY_DERIVATION',HASH = 'HASH',MAC = 'MAC'}/**
  * Encryption security configuration
  */
 export interface EncryptionSecurityConfig {
@@ -136,9 +92,7 @@ export interface CryptographicOptions {
   readonly iterations?: number;
   readonly salt?: Buffer;
   readonly iv?: Buffer;
-  readonly encoding?: 'hex' | 'base64' | 'utf8';
-  readonly padding?: string;
-}
+  readonly encoding?: 'hex' | 'base64' | 'utf8';readonly padding?: string;}
 
 /**
  * Encryption operation result
@@ -216,8 +170,7 @@ export interface CryptographicPolicy {
  */
 export interface CryptographicThreat {
   readonly threatId: string;
-  readonly type: 'WEAK_ALGORITHM' | 'KEY_COMPROMISE' | 'TIMING_ATTACK' | 'SIDE_CHANNEL' | 'QUANTUM_THREAT';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly type: 'WEAK_ALGORITHM' | 'KEY_COMPROMISE' | 'TIMING_ATTACK' | 'SIDE_CHANNEL' | 'QUANTUM_THREAT';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly description: string;
   readonly affectedKeys: string[];
   readonly detectedAt: Date;
@@ -245,11 +198,7 @@ export class EncryptionSecurityService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `encryption_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Encryption Security Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      encryptionEnabled: this.getEncryptionConfig().encryptionEnabled,
+    const operationId = `encryption_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Encryption Security Service with Parlant integration`, {parlantIntegrationEnabled: true,encryptionEnabled: this.getEncryptionConfig().encryptionEnabled,
       defaultAlgorithm: this.getEncryptionConfig().defaultAlgorithm,
       hsmEnabled: this.getEncryptionConfig().hsmEnabled,
       fipsComplianceRequired: this.getEncryptionConfig().fipsComplianceRequired,
@@ -298,9 +247,7 @@ export class EncryptionSecurityService {
           dataSize: request.data.length,
           options: request.options,
         },
-        actionDescription: `Perform ${request.operation} operation using ${request.algorithm} algorithm${request.keyId ? ` with key ${request.keyId}` : ''} on ${request.data.length} bytes`,
-        context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // All cryptographic operations are CRITICAL
+        actionDescription: `Perform ${request.operation} operation using ${request.algorithm} algorithm${request.keyId ? ` with key ${request.keyId}` : ''} on ${request.data.length} bytes`,context: request.context,riskLevel: RiskLevel._CRITICAL, // All cryptographic operations are CRITICAL
         operationId: request.operationId,
       };
 
@@ -308,9 +255,7 @@ export class EncryptionSecurityService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Cryptographic operation blocked by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] Cryptographic operation blocked by Parlant validation`,{operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -324,9 +269,7 @@ export class EncryptionSecurityService {
       }
 
       this.logger.log(
-        `[${request.operationId}] Cryptographic operation approved by Parlant`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Cryptographic operation approved by Parlant`,{operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -349,9 +292,7 @@ export class EncryptionSecurityService {
       await this.detectCryptographicThreats(request, result);
 
       this.logger.log(
-        `[${request.operationId}] Cryptographic operation completed successfully`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Cryptographic operation completed successfully`,{operationId: request.operationId,
           operation: request.operation,
           success: result.success,
           conversationId: validation.conversationId,
@@ -365,9 +306,7 @@ export class EncryptionSecurityService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] Cryptographic operation failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Cryptographic operation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           operation: request.operation,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
@@ -416,9 +355,7 @@ export class EncryptionSecurityService {
           securityLevel: request.securityLevel,
           usage: request.usage,
         },
-        actionDescription: `Generate ${request.keyType} cryptographic key using ${request.algorithm} algorithm with ${request.keySize}-bit strength at ${request.securityLevel} security level`,
-        context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Key generation is CRITICAL
+        actionDescription: `Generate ${request.keyType} cryptographic key using ${request.algorithm} algorithm with ${request.keySize}-bit strength at ${request.securityLevel} security level`,context: request.context,riskLevel: RiskLevel._CRITICAL, // Key generation is CRITICAL
         operationId,
       };
 
@@ -433,9 +370,7 @@ export class EncryptionSecurityService {
       }
 
       this.logger.log(
-        `[${operationId}] Key generation approved by Parlant`,
-        {
-          operationId,
+        `[${operationId}] Key generation approved by Parlant`,{operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -448,9 +383,7 @@ export class EncryptionSecurityService {
       this.totalKeyGenerations++;
 
       this.logger.log(
-        `[${operationId}] Cryptographic key generated successfully`,
-        {
-          operationId,
+        `[${operationId}] Cryptographic key generated successfully`,{operationId,
           keyId: key.keyId,
           keyType: key.keyType,
           algorithm: key.algorithm,
@@ -463,9 +396,7 @@ export class EncryptionSecurityService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Key generation failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Key generation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           keyType: request.keyType,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -490,9 +421,7 @@ export class EncryptionSecurityService {
     const operationId = request.operationId;
     
     this.logger.log(
-      `[${operationId}] Rotating cryptographic key with Parlant validation`,
-      {
-        operationId,
+      `[${operationId}] Rotating cryptographic key with Parlant validation`,{operationId,
         keyId: request.keyId,
         newSecurityLevel: request.newSecurityLevel,
         retainOldKey: request.retainOldKey,
@@ -518,9 +447,7 @@ export class EncryptionSecurityService {
           newSecurityLevel: request.newSecurityLevel,
           retainOldKey: request.retainOldKey,
         },
-        actionDescription: `Rotate cryptographic key ${request.keyId} (${existingKey.keyType}, ${existingKey.algorithm}) with ${request.retainOldKey ? 'retention' : 'replacement'} of old key`,
-        context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Key rotation is CRITICAL
+        actionDescription: `Rotate cryptographic key ${request.keyId} (${existingKey.keyType}, ${existingKey.algorithm}) with ${request.retainOldKey ? 'retention' : 'replacement'} of old key`,context: request.context,riskLevel: RiskLevel._CRITICAL, // Key rotation is CRITICAL
         operationId,
       };
 
@@ -535,9 +462,7 @@ export class EncryptionSecurityService {
       }
 
       this.logger.log(
-        `[${operationId}] Key rotation approved by Parlant`,
-        {
-          operationId,
+        `[${operationId}] Key rotation approved by Parlant`,{operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -549,9 +474,7 @@ export class EncryptionSecurityService {
       this.totalKeyRotations++;
 
       this.logger.log(
-        `[${operationId}] Cryptographic key rotated successfully`,
-        {
-          operationId,
+        `[${operationId}] Cryptographic key rotated successfully`,{operationId,
           oldKeyId: request.keyId,
           newKeyId,
           retainOldKey: request.retainOldKey,
@@ -567,9 +490,7 @@ export class EncryptionSecurityService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Key rotation failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Key rotation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           keyId: request.keyId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -640,16 +561,10 @@ export class EncryptionSecurityService {
     for (const policy of this.cryptographicPolicies.filter(p => p.enabled)) {
       // Check forbidden algorithms
       if (policy.forbiddenAlgorithms.includes(request.algorithm)) {
-        throw new Error(`Algorithm ${request.algorithm} is forbidden by policy ${policy.name}`);
-      }
-
-      // Check minimum key sizes
+        throw new Error(`Algorithm ${request.algorithm} is forbidden by policy ${policy.name}`);}// Check minimum key sizes
       const minKeySize = policy.minimumKeySizes[request.algorithm];
       if (minKeySize && request.options?.keySize && request.options.keySize < minKeySize) {
-        throw new Error(`Key size ${request.options.keySize} below minimum ${minKeySize} required by policy ${policy.name}`);
-      }
-
-      // Check key age if key exists
+        throw new Error(`Key size ${request.options.keySize} below minimum ${minKeySize} required by policy ${policy.name}`);}// Check key age if key exists
       if (request.keyId) {
         const key = this.cryptographicKeys.get(request.keyId);
         if (key) {
@@ -705,15 +620,10 @@ export class EncryptionSecurityService {
         }
 
         default:
-          throw new Error(`Unsupported cryptographic operation: ${request.operation}`);
-      }
-
-      this.totalOperations++;
+          throw new Error(`Unsupported cryptographic operation: ${request.operation}`);}this.totalOperations++;
 
     } catch (error) {
-      this.logger.error(`Cryptographic operation failed: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
-    }
+      this.logger.error(`Cryptographic operation failed: ${error instanceof Error ? error.message : String(error)}`);throw error;}
 
     const executionTime = Date.now() - startTime;
 
@@ -738,9 +648,7 @@ export class EncryptionSecurityService {
     if (request.keyId) {
       const keyRecord = this.cryptographicKeys.get(request.keyId);
       if (!keyRecord) {
-        throw new Error(`Key ${request.keyId} not found`);
-      }
-      // In production, retrieve actual key material securely
+        throw new Error(`Key ${request.keyId} not found`);}// In production, retrieve actual key material securely
       key = crypto.randomBytes(32); // Mock key
     } else {
       // Generate ephemeral key
@@ -790,9 +698,7 @@ export class EncryptionSecurityService {
     if (request.options?.iv) {
       try {
         // Only GCM deciphers have setAuthTag method
-        (decipher as crypto.DecipherGCM).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag
-      } catch {
-        // Not a GCM decipher, no auth tag needed
+        (decipher as crypto.DecipherGCM).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag} catch {// Not a GCM decipher, no auth tag needed
       }
     }
 
@@ -811,34 +717,16 @@ export class EncryptionSecurityService {
 
   private async performSigning(request: EncryptionRequest): Promise<Buffer> {
     if (!request.keyId) {
-      throw new Error('Key ID required for signing');
-    }
-
-    const keyRecord = this.cryptographicKeys.get(request.keyId);
+      throw new Error('Key ID required for signing');}const keyRecord = this.cryptographicKeys.get(request.keyId);
     if (!keyRecord || keyRecord.keyType !== KeyType.ASYMMETRIC_PRIVATE) {
-      throw new Error('Private key required for signing');
-    }
-
-    // Mock signing - in production would use actual private key
-    const sign = crypto.createSign('RSA-SHA256');
-    sign.update(request.data);
-    
-    // Generate mock private key for demonstration
-    const { privateKey } = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-    });
-
-    return sign.sign(privateKey);
+      throw new Error('Private key required for signing');}// Mock signing - in production would use actual private key
+    const sign = crypto.createSign('RSA-SHA256');sign.update(request.data);// Generate mock private key for demonstration
+    const { privateKey } = crypto.generateKeyPairSync('rsa', {modulusLength: 2048,publicKeyEncoding: { type: 'spki', format: 'pem' },privateKeyEncoding: { type: 'pkcs8', format: 'pem' }});return sign.sign(privateKey);
   }
 
   private async performSignatureVerification(request: EncryptionRequest): Promise<boolean> {
     if (!request.keyId) {
-      throw new Error('Key ID required for signature verification');
-    }
-
-    const keyRecord = this.cryptographicKeys.get(request.keyId);
+      throw new Error('Key ID required for signature verification');}const keyRecord = this.cryptographicKeys.get(request.keyId);
     if (!keyRecord || keyRecord.keyType !== KeyType.ASYMMETRIC_PUBLIC) {
       throw new Error('Public key required for signature verification');
     }
@@ -893,17 +781,12 @@ export class EncryptionSecurityService {
       case KeyType.ASYMMETRIC_PRIVATE:
       case KeyType.ASYMMETRIC_PUBLIC:
         // Generate asymmetric key pair
-        crypto.generateKeyPairSync('rsa', {
-          modulusLength: request.keySize,
-          publicKeyEncoding: { type: 'spki', format: 'pem' },
-          privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+        crypto.generateKeyPairSync('rsa', {modulusLength: request.keySize,publicKeyEncoding: { type: 'spki', format: 'pem' },privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
         });
         break;
 
       default:
-        throw new Error(`Unsupported key type: ${request.keyType}`);
-    }
-  }
+        throw new Error(`Unsupported key type: ${request.keyType}`);}}
 
   private async executeKeyRotation(
     request: KeyRotationRequest,
@@ -912,9 +795,7 @@ export class EncryptionSecurityService {
   ): Promise<string> {
     // Generate new key with same parameters as existing key
     const newKeyRequest: KeyGenerationRequest = {
-      operationId: `rotation${request.operationId}`,
-      keyType: existingKey.keyType,
-      algorithm: existingKey.algorithm,
+      operationId: `rotation${request.operationId}`,keyType: existingKey.keyType,algorithm: existingKey.algorithm,
       keySize: existingKey.keySize,
       securityLevel: request.newSecurityLevel ?? existingKey.securityLevel,
       usage: existingKey.usage,
@@ -950,24 +831,19 @@ export class EncryptionSecurityService {
     if (this.isWeakAlgorithm(request.algorithm)) {
       const threat: CryptographicThreat = {
         threatId: `threat${Date.now()}${Math.random().toString(36).substring(7)}`,
-        type: 'WEAK_ALGORITHM',
-        severity: 'HIGH',
+        type: 'WEAK_ALGORITHM',severity: 'HIGH',
         description: `Use of weak cryptographic algorithm: ${request.algorithm}`,
         affectedKeys: request.keyId ? [request.keyId] : [],
         detectedAt: new Date(),
         mitigated: false,
         remediationSteps: [
-          'Migrate to stronger algorithm',
-          'Update cryptographic policy',
-          'Rotate affected keys',
+          'Migrate to stronger algorithm','Update cryptographic policy','Rotate affected keys',
         ],
       };
 
       this.threatDetections.push(threat);
       
-      this.logger.warn(`CRYPTOGRAPHIC THREAT DETECTED: ${threat.description}`, {
-        threatId: threat.threatId,
-        type: threat.type,
+      this.logger.warn(`CRYPTOGRAPHIC THREAT DETECTED: ${threat.description}`, {threatId: threat.threatId,type: threat.type,
         severity: threat.severity,
       });
     }
@@ -976,18 +852,13 @@ export class EncryptionSecurityService {
     if (result.executionTime > 1000) { // Operations taking longer than 1 second
       const threat: CryptographicThreat = {
         threatId: `threat${Date.now()}${Math.random().toString(36).substring(7)}`,
-        type: 'TIMING_ATTACK',
-        severity: 'MEDIUM',
+        type: 'TIMING_ATTACK',severity: 'MEDIUM',
         description: `Potential timing attack vulnerability detected in ${request.operation} operation`,
         affectedKeys: request.keyId ? [request.keyId] : [],
         detectedAt: new Date(),
         mitigated: false,
         remediationSteps: [
-          'Implement constant-time operations',
-          'Add timing randomization',
-          'Review implementation for timing leaks',
-        ],
-      };
+          'Implement constant-time operations','Add timing randomization','Review implementation for timing leaks',],};
 
       this.threatDetections.push(threat);
     }
@@ -1005,28 +876,14 @@ export class EncryptionSecurityService {
   private mapAlgorithmToCrypto(algorithm: EncryptionAlgorithm): string {
     switch (algorithm) {
       case EncryptionAlgorithm.AES_256_GCM:
-        return 'aes-256-gcm';
-      case EncryptionAlgorithm.AES_256_CBC:
-        return 'aes-256-cbc';
-      case EncryptionAlgorithm.AES_192_GCM:
-        return 'aes-192-gcm';
-      case EncryptionAlgorithm.CHACHA20_POLY1305:
-        return 'chacha20-poly1305';
-      default:
-        return 'aes-256-gcm'; // Default fallback
-    }
-  }
+        return 'aes-256-gcm';case EncryptionAlgorithm.AES_256_CBC:return 'aes-256-cbc';case EncryptionAlgorithm.AES_192_GCM:return 'aes-192-gcm';case EncryptionAlgorithm.CHACHA20_POLY1305:return 'chacha20-poly1305';default:return 'aes-256-gcm'; // Default fallback}}
 
   private mapAlgorithmToHash(algorithm: EncryptionAlgorithm): string {
     // Map encryption algorithms to hash algorithms for digest operations
     switch (algorithm) {
       case EncryptionAlgorithm.AES_256_GCM:
       case EncryptionAlgorithm.AES_256_CBC:
-        return 'sha256';
-      default:
-        return 'sha256';
-    }
-  }
+        return 'sha256';default:return 'sha256';}}
 
   private initializeEncryptionSecurity(): void {
     // Initialize default cryptographic policies
@@ -1039,11 +896,7 @@ export class EncryptionSecurityService {
 
   private initializeDefaultPolicies(): void {
     const defaultPolicy: CryptographicPolicy = {
-      policyId: 'default_policy',
-      name: 'Default Cryptographic Policy',
-      description: 'Standard cryptographic requirements for enterprise security',
-      requiredAlgorithms: [
-        EncryptionAlgorithm.AES_256_GCM,
+      policyId: 'default_policy',name: 'Default Cryptographic Policy',description: 'Standard cryptographic requirements for enterprise security',requiredAlgorithms: [EncryptionAlgorithm.AES_256_GCM,
         EncryptionAlgorithm.AES_256_CBC,
         EncryptionAlgorithm.RSA_OAEP,
       ],
@@ -1070,9 +923,7 @@ export class EncryptionSecurityService {
       .filter(key => key.rotationDue <= now);
 
     if (keysDueForRotation.length > 0) {
-      this.logger.warn(`${keysDueForRotation.length} cryptographic keys are due for rotation`, {
-        keyIds: keysDueForRotation.map(k => k.keyId),
-      });
+      this.logger.warn(`${keysDueForRotation.length} cryptographic keys are due for rotation`, {keyIds: keysDueForRotation.map(k => k.keyId),});
     }
 
     // Check for expired keys
@@ -1081,9 +932,7 @@ export class EncryptionSecurityService {
 
     expiredKeys.forEach(key => {
       this.cryptographicKeys.delete(key.keyId);
-      this.logger.warn(`Expired key ${key.keyId} removed from key store`);
-    });
-  }
+      this.logger.warn(`Expired key ${key.keyId} removed from key store`);});}
 
   private checkThreatDetections(): void {
     const activeThreat = this.threatDetections.filter(t => !t.mitigated);
@@ -1100,14 +949,7 @@ export class EncryptionSecurityService {
 
   private getEncryptionConfig(): EncryptionSecurityConfig {
     return {
-      encryptionEnabled: this.configService.get<boolean>('ENCRYPTION_ENABLED', true),
-      defaultAlgorithm: this.configService.get<EncryptionAlgorithm>('DEFAULT_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),
-      minimumKeySize: this.configService.get<number>('MINIMUM_KEY_SIZE', 256),
-      keyRotationIntervalDays: this.configService.get<number>('KEY_ROTATION_INTERVAL_DAYS', 90),
-      hsmEnabled: this.configService.get<boolean>('HSM_ENABLED', false),
-      auditLoggingEnabled: this.configService.get<boolean>('ENCRYPTION_AUDIT_LOGGING', true),
-      conversationalValidationRequired: this.configService.get<boolean>('ENCRYPTION_CONVERSATIONAL_VALIDATION', true),
-      fipsComplianceRequired: this.configService.get<boolean>('FIPS_COMPLIANCE_REQUIRED', false),
+      encryptionEnabled: this.configService.get<boolean>('ENCRYPTION_ENABLED', true),defaultAlgorithm: this.configService.get<EncryptionAlgorithm>('DEFAULT_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),minimumKeySize: this.configService.get<number>('MINIMUM_KEY_SIZE', 256),keyRotationIntervalDays: this.configService.get<number>('KEY_ROTATION_INTERVAL_DAYS', 90),hsmEnabled: this.configService.get<boolean>('HSM_ENABLED', false),auditLoggingEnabled: this.configService.get<boolean>('ENCRYPTION_AUDIT_LOGGING', true),conversationalValidationRequired: this.configService.get<boolean>('ENCRYPTION_CONVERSATIONAL_VALIDATION', true),fipsComplianceRequired: this.configService.get<boolean>('FIPS_COMPLIANCE_REQUIRED', false),
     };
   }
 }

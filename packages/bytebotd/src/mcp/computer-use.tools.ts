@@ -20,14 +20,7 @@
  * @since 2024-01-01
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { Tool } from '@rekog/mcp-nest';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import { compressPngBase64Under1MB } from './compressor';
-import { McpSchemas, McpToolResponse, MouseMoveParams } from './types';
-
-/**
- * Computer Use Tools Service
+import { Injectable, Logger } from '@nestjs/common';import { Tool } from '@rekog/mcp-nest';import { ComputerUseService } from '../computer-use/computer-use.service';import { compressPngBase64Under1MB } from './compressor';import { McpSchemas, McpToolResponse, MouseMoveParams } from './types';/*** Computer Use Tools Service
  *
  * Provides MCP-compatible tool implementations for computer automation operations.
  * All methods include comprehensive logging, error handling, and parameter validation
@@ -58,8 +51,7 @@ export class ComputerUseTools {
    */
   private generateOperationId(): string {
     this.operationCounter = (this.operationCounter + 1) % 10000;
-    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}`;
-  }
+    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}';}
 
   /**
    * Logs operation start with comprehensive context
@@ -72,9 +64,7 @@ export class ComputerUseTools {
     toolName: string,
     parameters: Record<string, unknown>,
   ): void {
-    this.logger.log(`[${operationId}] Starting MCP tool execution`, {
-      operationId,
-      toolName,
+    this.logger.log(`[${operationId}] Starting MCP tool execution`, {operationId,toolName,
       parametersSize: JSON.stringify(parameters).length,
       timestamp: new Date().toISOString(),
     });
@@ -95,9 +85,7 @@ export class ComputerUseTools {
   ): void {
     const executionTime = Date.now() - startTime;
     this.logger.log(
-      `[${operationId}] MCP tool execution completed successfully`,
-      {
-        operationId,
+      `[${operationId}] MCP tool execution completed successfully`,{operationId,
         toolName,
         executionTimeMs: executionTime,
         result,
@@ -143,18 +131,12 @@ export class ComputerUseTools {
    * Error Handling: Validates coordinates and handles system-level failures
    */
   @Tool({
-    name: 'computer_move_mouse',
-    description: 'Moves the mouse cursor to the specified coordinates.',
-    parameters: McpSchemas.mouseMove,
-  })
+    name: 'computer_move_mouse',description: 'Moves the mouse cursor to the specified coordinates.',parameters: McpSchemas.mouseMove,})
   async moveMouse({ coordinates }: MouseMoveParams): Promise<McpToolResponse> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_move_mouse', { coordinates });
-
-    try {
-      // Execute mouse move operation through computer use service
+    this.logOperationStart(operationId, 'computer_move_mouse', { coordinates });try {// Execute mouse move operation through computer use service
       await this.computerUseService.action({
         action: 'move_mouse',
         coordinates,
@@ -163,18 +145,12 @@ export class ComputerUseTools {
       const result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
       this.logOperationSuccess(
         operationId,
-        'computer_move_mouse',
-        startTime,
-        result,
+        'computer_move_mouse',startTime,result,
       );
 
-      return { content: [{ type: 'text', text: 'mouse moved' }] };
-    } catch (_err) {
-      this.logOperationError(
+      return { content: [{ type: 'text', text: 'mouse moved' }] };} catch (_err) {this.logOperationError(
         operationId,
-        'computer_move_mouse',
-        startTime,
-        _err as Error,
+        'computer_move_mouse',startTime,_err as Error,
       );
 
       return {
@@ -203,11 +179,7 @@ export class ComputerUseTools {
    * Validation: Ensures path has valid coordinates and key names
    */
   @Tool({
-    name: 'computer_trace_mouse',
-    description:
-      'Moves the mouse cursor along a specified path of coordinates.',
-    parameters: McpSchemas.mouseTrace,
-  })
+    name: 'computer_trace_mouse',description:'Moves the mouse cursor along a specified path of coordinates.',parameters: McpSchemas.mouseTrace,})
   async traceMouse({
     path,
     holdKeys,
@@ -218,9 +190,7 @@ export class ComputerUseTools {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_trace_mouse', {
-      pathLength: path.length,
-      holdKeys,
+    this.logOperationStart(operationId, 'computer_trace_mouse', {pathLength: path.length,holdKeys,
       startPoint: path[0],
       endPoint: path[path.length - 1],
     });
@@ -233,23 +203,17 @@ export class ComputerUseTools {
         holdKeys,
       });
 
-      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
+      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(`, ')}` : ''}`;
       this.logOperationSuccess(
         operationId,
-        'computer_trace_mouse',
-        startTime,
-        result,
+        'computer_trace_mouse',startTime,result,
       );
 
       return {
-        content: [{ type: 'text', text: 'mouse traced' }],
-      };
-    } catch (_err) {
+        content: [{ type: 'text', text: 'mouse traced' }],};} catch (_err) {
       this.logOperationError(
         operationId,
-        'computer_trace_mouse',
-        startTime,
-        _err as Error,
+        'computer_trace_mouse',startTime,_err as Error,
       );
 
       return {
@@ -264,11 +228,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_click_mouse',
-    description:
-      'Performs a mouse click at the specified coordinates or current position.',
-    parameters: McpSchemas.mouseClickAdvanced,
-  })
+    name: 'computer_click_mouse',description:'Performs a mouse click at the specified coordinates or current position.',parameters: McpSchemas.mouseClickAdvanced,})
   async clickMouse({
     coordinates,
     button,
@@ -276,22 +236,16 @@ export class ComputerUseTools {
     clickCount,
   }: {
     coordinates?: { x: number; y: number };
-    button: 'left' | 'right' | 'middle';
-    holdKeys?: string[];
-    clickCount: number;
+    button: 'left' | 'right' | 'middle';holdKeys?: string[];clickCount: number;
   }) {
     try {
       await this.computerUseService.action({
-        action: 'click_mouse',
-        coordinates,
-        button,
+        action: 'click_mouse',coordinates,button,
         holdKeys,
         clickCount,
       });
       return {
-        content: [{ type: 'text', text: 'mouse clicked' }],
-      };
-    } catch (_err) {
+        content: [{ type: 'text', text: 'mouse clicked' }],};} catch (_err) {
       return {
         content: [
           {
@@ -304,31 +258,20 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_press_mouse',
-    description:
-      'Presses or releases a specified mouse button at the given coordinates or current position.',
-    parameters: McpSchemas.mousePress,
-  })
+    name: 'computer_press_mouse',description:'Presses or releases a specified mouse button at the given coordinates or current position.',parameters: McpSchemas.mousePress,})
   async pressMouse({
     coordinates,
     button,
     press,
   }: {
     coordinates?: { x: number; y: number };
-    button: 'left' | 'right' | 'middle';
-    press: 'down' | 'up';
-  }) {
-    try {
+    button: 'left' | 'right' | 'middle';press: 'down' | 'up';}) {try {
       await this.computerUseService.action({
-        action: 'press_mouse',
-        coordinates,
-        button,
+        action: 'press_mouse',coordinates,button,
         press,
       });
       return {
-        content: [{ type: 'text', text: 'mouse pressed' }],
-      };
-    } catch (_err) {
+        content: [{ type: 'text', text: 'mouse pressed' }],};} catch (_err) {
       return {
         content: [
           {
@@ -341,31 +284,21 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_drag_mouse',
-    description:
-      'Drags the mouse from a starting point along a path while holding a specified button.',
-    parameters: McpSchemas.mouseDragPath,
-  })
+    name: 'computer_drag_mouse',description:'Drags the mouse from a starting point along a path while holding a specified button.',parameters: McpSchemas.mouseDragPath,})
   async dragMouse({
     path,
     button,
     holdKeys,
   }: {
     path: { x: number; y: number }[];
-    button: 'left' | 'right' | 'middle';
-    holdKeys?: string[];
-  }) {
+    button: 'left' | 'right' | 'middle';holdKeys?: string[];}) {
     try {
       await this.computerUseService.action({
-        action: 'drag_mouse',
-        path,
-        button,
+        action: 'drag_mouse',path,button,
         holdKeys,
       });
       return {
-        content: [{ type: 'text', text: 'mouse dragged' }],
-      };
-    } catch (_err) {
+        content: [{ type: 'text', text: 'mouse dragged' }],};} catch (_err) {
       return {
         content: [
           {
@@ -378,10 +311,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_scroll',
-    description: 'Scrolls the mouse wheel up, down, left, or right.',
-    parameters: McpSchemas.scrollAdvanced,
-  })
+    name: 'computer_scroll',description: 'Scrolls the mouse wheel up, down, left, or right.',parameters: McpSchemas.scrollAdvanced,})
   async scroll({
     coordinates,
     direction,
@@ -389,21 +319,15 @@ export class ComputerUseTools {
     holdKeys,
   }: {
     coordinates?: { x: number; y: number };
-    direction: 'up' | 'down' | 'left' | 'right';
-    scrollCount: number;
-    holdKeys?: string[];
+    direction: 'up' | 'down' | 'left' | 'right';scrollCount: number;holdKeys?: string[];
   }) {
     try {
       await this.computerUseService.action({
-        action: 'scroll',
-        coordinates,
-        direction,
+        action: 'scroll',coordinates,direction,
         scrollCount,
         holdKeys,
       });
-      return { content: [{ type: 'text', text: 'scrolled' }] };
-    } catch (_err) {
-      return {
+      return { content: [{ type: 'text', text: 'scrolled' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -416,10 +340,7 @@ export class ComputerUseTools {
 
   @Tool({
     name: 'computer_type_keys',
-    description: `Simulates typing a sequence of keys, often used for shortcuts involving modifier keys (e.g., Ctrl+C). Presses and releases each key in order.
-    
-────────────────────────
-VALID KEYS
+    description: `Simulates typing a sequence of keys, often used for shortcuts involving modifier keys (e.g., Ctrl+C). Presses and releases each key in order.────────────────────────VALID KEYS
 ────────────────────────
 A, Add, AudioForward, AudioMute, AudioNext, AudioPause, AudioPlay, AudioPrev, AudioRandom, AudioRepeat, AudioRewind, AudioStop, AudioVolDown, AudioVolUp,  
 B, Backslash, Backspace,  
@@ -447,13 +368,9 @@ V, W, X, Y, Z`,
   async typeKeys({ keys, delay }: { keys: string[]; delay?: number }) {
     try {
       await this.computerUseService.action({
-        action: 'type_keys',
-        keys,
-        delay,
+        action: 'type_keys',keys,delay,
       });
-      return { content: [{ type: 'text', text: 'keys typed' }] };
-    } catch (_err) {
-      return {
+      return { content: [{ type: 'text', text: 'keys typed' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -466,9 +383,7 @@ V, W, X, Y, Z`,
 
   @Tool({
     name: 'computer_press_keys',
-    description: `Simulates pressing down or releasing specific keys. Useful for holding modifier keys.     
-────────────────────────
-VALID KEYS
+    description: `Simulates pressing down or releasing specific keys. Useful for holding modifier keys.     ────────────────────────VALID KEYS
 ────────────────────────
 A, Add, AudioForward, AudioMute, AudioNext, AudioPause, AudioPlay, AudioPrev, AudioRandom, AudioRepeat, AudioRewind, AudioStop, AudioVolDown, AudioVolUp,  
 B, Backslash, Backspace,  
@@ -494,16 +409,10 @@ V, W, X, Y, Z
       `,
     parameters: McpSchemas.pressKeysAdvanced,
   })
-  async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {
-    try {
-      await this.computerUseService.action({
-        action: 'press_keys',
-        keys,
-        press,
+  async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {try {await this.computerUseService.action({
+        action: 'press_keys',keys,press,
       });
-      return { content: [{ type: 'text', text: 'keys pressed' }] };
-    } catch (_err) {
-      return {
+      return { content: [{ type: 'text', text: 'keys pressed' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -515,21 +424,13 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_type_text',
-    description:
-      'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',
-    parameters: McpSchemas.typeTextAdvanced,
-  })
+    name: 'computer_type_text',description:'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',parameters: McpSchemas.typeTextAdvanced,})
   async typeText({ text, delay }: { text: string; delay?: number }) {
     try {
       await this.computerUseService.action({
-        action: 'type_text',
-        text,
-        delay,
+        action: 'type_text',text,delay,
       });
-      return { content: [{ type: 'text', text: 'text typed' }] };
-    } catch (_err) {
-      return {
+      return { content: [{ type: 'text', text: 'text typed' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -541,17 +442,10 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_paste_text',
-    description:
-      'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
-    parameters: McpSchemas.pasteText,
-  })
+    name: 'computer_paste_text',description:'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',parameters: McpSchemas.pasteText,})
   async pasteText({ text }: { text: string }) {
     try {
-      await this.computerUseService.action({ action: 'paste_text', text });
-      return { content: [{ type: 'text', text: 'text pasted' }] };
-    } catch (_err) {
-      return {
+      await this.computerUseService.action({ action: 'paste_text', text });return { content: [{ type: 'text', text: 'text pasted' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -563,16 +457,10 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_wait',
-    description: 'Pauses execution for a specified duration.',
-    parameters: McpSchemas.wait,
-  })
+    name: 'computer_wait',description: 'Pauses execution for a specified duration.',parameters: McpSchemas.wait,})
   async wait({ duration }: { duration: number }) {
     try {
-      await this.computerUseService.action({ action: 'wait', duration });
-      return { content: [{ type: 'text', text: 'waiting done' }] };
-    } catch (_err) {
-      return {
+      await this.computerUseService.action({ action: 'wait', duration });return { content: [{ type: 'text', text: 'waiting done' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -584,31 +472,15 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_application',
-    description:
-      'Opens or switches to the specified application and maximizes it.',
-    parameters: McpSchemas.application,
-  })
+    name: 'computer_application',description:'Opens or switches to the specified application and maximizes it.',parameters: McpSchemas.application,})
   async application({
     application,
   }: {
     application:
-      | 'firefox'
-      | '1password'
-      | 'thunderbird'
-      | 'vscode'
-      | 'terminal'
-      | 'desktop'
-      | 'directory';
-  }) {
-    try {
+      | 'firefox'| '1password'| 'thunderbird'| 'vscode'| 'terminal'| 'desktop'| 'directory';}) {try {
       await this.computerUseService.action({
-        action: 'application',
-        application,
-      });
-      return { content: [{ type: 'text', text: 'application opened' }] };
-    } catch (_err) {
-      return {
+        action: 'application',application,});
+      return { content: [{ type: 'text', text: 'application opened' }] };} catch (_err) {return {
         content: [
           {
             type: 'text',
@@ -638,26 +510,18 @@ V, W, X, Y, Z
    * Quality: Optimized compression balances file size and visual fidelity
    */
   @Tool({
-    name: 'computer_screenshot',
-    description: 'Captures a screenshot of the current screen.',
-  })
-  async screenshot() {
+    name: 'computer_screenshot',description: 'Captures a screenshot of the current screen.',})async screenshot() {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
     const screenshotStartTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_screenshot', {});
-
-    try {
-      // Capture raw screenshot through computer use service
+    this.logOperationStart(operationId, 'computer_screenshot', {});try {// Capture raw screenshot through computer use service
       const shot = (await this.computerUseService.action({
         action: 'screenshot',
       })) as { image: string };
 
       const captureTime = Date.now() - screenshotStartTime;
-      this.logger.debug(`[${operationId}] Screenshot captured`, {
-        operationId,
-        captureTimeMs: captureTime,
+      this.logger.debug(`[${operationId}] Screenshot captured`, {operationId,captureTimeMs: captureTime,
         rawImageSize: shot.image.length,
       });
 
@@ -668,39 +532,26 @@ V, W, X, Y, Z
 
       const compressionRatio = compressedImage.length / shot.image.length;
 
-      this.logger.debug(`[${operationId}] Screenshot compressed`, {
-        operationId,
-        compressionTimeMs: compressionTime,
+      this.logger.debug(`[${operationId}] Screenshot compressed`, {operationId,compressionTimeMs: compressionTime,
         originalSize: shot.image.length,
         compressedSize: compressedImage.length,
         compressionRatio: compressionRatio.toFixed(3),
-        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,
-      });
-
-      const result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
+        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,});const result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
       this.logOperationSuccess(
         operationId,
-        'computer_screenshot',
-        startTime,
-        result,
+        'computer_screenshot',startTime,result,
       );
 
       return {
         content: [
           {
-            type: 'image',
-            data: compressedImage,
-            mimeType: 'image/png',
-          },
-        ],
+            type: 'image',data: compressedImage,mimeType: 'image/png',},],
       };
     } catch (_err) {
       const error = _err as Error;
       this.logOperationError(
         operationId,
-        'computer_screenshot',
-        startTime,
-        error,
+        'computer_screenshot',startTime,error,
       );
 
       return {
@@ -715,20 +566,13 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_cursor_position',
-    description: 'Gets the current (x, y) coordinates of the mouse cursor.',
-  })
-  async cursorPosition() {
+    name: 'computer_cursor_position',description: 'Gets the current (x, y) coordinates of the mouse cursor.',})async cursorPosition() {
     try {
       const pos = (await this.computerUseService.action({
-        action: 'cursor_position',
-      })) as { x: number; y: number };
-      return {
+        action: 'cursor_position',})) as { x: number; y: number };return {
         content: [
           {
-            type: 'text',
-            text: JSON.stringify(pos),
-          },
+            type: 'text',text: JSON.stringify(pos),},
         ],
       };
     } catch (_err) {
@@ -744,33 +588,18 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_write_file',
-    description:
-      'Writes a file to the specified path with base64 encoded data.',
-    parameters: McpSchemas.writeFile,
-  })
+    name: 'computer_write_file',description:'Writes a file to the specified path with base64 encoded data.',parameters: McpSchemas.writeFile,})
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
       const result = await this.computerUseService.action({
-        action: 'write_file',
-        path,
-        data,
+        action: 'write_file',path,data,
       });
 
       const message = (() => {
-        if (result && typeof result === 'object' && 'message' in result) {
-          const msg = (result as { message: unknown }).message;
-          return typeof msg === 'string' ? msg : 'File operation completed';
-        }
-        return 'File written successfully';
-      })();
-
-      return {
+        if (result && typeof result === 'object' && 'message' in result) {const msg = (result as { message: unknown }).message;return typeof msg === 'string' ? msg : 'File operation completed';}return 'File written successfully';})();return {
         content: [
           {
-            type: 'text',
-            text: message,
-          },
+            type: 'text',text: message,},
         ],
       };
     } catch (_err) {
@@ -786,26 +615,16 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_read_file',
-    description:
-      'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
-    parameters: McpSchemas.readFile,
-  })
+    name: 'computer_read_file',description:'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',parameters: McpSchemas.readFile,})
   async readFile({ path }: { path: string }) {
     try {
       const result = await this.computerUseService.action({
-        action: 'read_file',
-        path,
-      });
+        action: 'read_file',path,});
 
       // Type guard to check if result has the expected structure
       const hasValidResult =
         result &&
-        typeof result === 'object' &&
-        'success' in result &&
-        'data' in result &&
-        (result as { success: unknown; data: unknown }).success &&
-        (result as { success: unknown; data: unknown }).data;
+        typeof result === 'object' &&'success' in result &&'data' in result &&(result as { success: unknown; data: unknown }).success &&(result as { success: unknown; data: unknown }).data;
 
       if (hasValidResult) {
         const fileResult = result as {
@@ -820,32 +639,16 @@ V, W, X, Y, Z
         return {
           content: [
             {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: fileResult.mediaType ?? 'application/octet-stream',
-                data: fileResult.data,
-              },
-              name: fileResult.name ?? 'file',
-              size: fileResult.size ?? 0,
-            },
+              type: 'document',source: {type: 'base64',media_type: fileResult.mediaType ?? 'application/octet-stream',data: fileResult.data,},
+              name: fileResult.name ?? 'file',size: fileResult.size ?? 0,},
           ],
         };
       } else {
         const errorMessage = (() => {
-          if (result && typeof result === 'object' && 'message' in result) {
-            const msg = (result as { message: unknown }).message;
-            return typeof msg === 'string' ? msg : 'Unknown error';
-          }
-          return 'Error reading file';
-        })();
-
-        return {
+          if (result && typeof result === 'object' && 'message' in result) {const msg = (result as { message: unknown }).message;return typeof msg === 'string' ? msg : 'Unknown error';}return 'Error reading file';})();return {
           content: [
             {
-              type: 'text',
-              text: errorMessage,
-            },
+              type: 'text',text: errorMessage,},
           ],
         };
       }

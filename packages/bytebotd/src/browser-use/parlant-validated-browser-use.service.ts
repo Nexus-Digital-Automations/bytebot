@@ -20,25 +20,15 @@
  * Performance: Optimized validation pipeline with intelligent caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { BrowserUseService, BrowserElementData, BrowserExtractionMetadata } from './browser-use.service';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { BrowserUseService, BrowserElementData, BrowserExtractionMetadata } from './browser-use.service';import { ParlantIntegrationService, 
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
   ConversationalValidationError
-} from '../parlant/parlant-integration.service';
-import {
-  CreateBrowserTaskDto,
+} from '../parlant/parlant-integration.service';import {CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserActionType,
-} from './dto/browser-task.dto';
-import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobType } from './dto/async-job.dto';
-
-// ===== PARLANT BROWSER VALIDATION INTERFACES =====
-
-/**
+} from './dto/browser-task.dto';import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobType } from './dto/async-job.dto';// ===== PARLANT BROWSER VALIDATION INTERFACES =====/**
  * Browser action validation context with conversation details
  */
 export interface BrowserActionValidationContext extends ParlantConversationContext {
@@ -46,10 +36,7 @@ export interface BrowserActionValidationContext extends ParlantConversationConte
   readonly sessionId?: string;
   readonly actionSequence: BrowserActionAuditEntry[];
   readonly browserState: BrowserStateInfo;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Browser action audit entry for tracking automation history
  */
 export interface BrowserActionAuditEntry {
@@ -57,10 +44,7 @@ export interface BrowserActionAuditEntry {
   readonly actionType: BrowserActionType;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';
-  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
-  readonly conversationId: string;
-  readonly targetUrl?: string;
+  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly targetUrl?: string;
   readonly extractedDataSize?: number;
 }
 
@@ -86,10 +70,7 @@ export interface BrowserActionRiskAssessment {
   readonly riskFactors: string[];
   readonly mitigationStrategies: string[];
   readonly requiresApproval: boolean;
-  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
-}
-
-/**
+  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';}/**
  * Browser data extraction validation result
  */
 export interface BrowserDataExtractionValidationResult {
@@ -122,11 +103,7 @@ export class ParlantValidatedBrowserUseService {
     private readonly originalBrowserUseService: BrowserUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_browser_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Use Service`, {
-      hasOriginalService: !!this.originalBrowserUseService,
-      hasParlantService: !!this.parlantIntegrationService,
+    const operationId = `parlant_browser_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Use Service`, {hasOriginalService: !!this.originalBrowserUseService,hasParlantService: !!this.parlantIntegrationService,
       validationEnabled: true,
     });
 
@@ -150,14 +127,10 @@ export class ParlantValidatedBrowserUseService {
     taskDto: CreateBrowserTaskDto,
     context: BrowserActionValidationContext
   ): Promise<BrowserTaskResultDto> {
-    const operationId = `parlant_browser_task${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_browser_task${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated browser task: ${taskDto.name}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated browser task: ${taskDto.name}`,{operationId,
         taskName: taskDto.name,
         actionsCount: taskDto.actions.length,
         userId: context.userId,
@@ -172,9 +145,7 @@ export class ParlantValidatedBrowserUseService {
       const riskAssessment = this.assessBrowserTaskRisk(taskDto, context);
       
       this.logger.log(
-        `[${operationId}] Browser task risk assessment completed: ${riskAssessment.riskLevel}`,
-        {
-          operationId,
+        `[${operationId}] Browser task risk assessment completed: ${riskAssessment.riskLevel}`,{operationId,
           riskLevel: riskAssessment.riskLevel,
           riskFactors: riskAssessment.riskFactors,
           requiresApproval: riskAssessment.requiresApproval,
@@ -201,11 +172,8 @@ export class ParlantValidatedBrowserUseService {
         // Create audit entry for denied operation
         await this.createBrowserActionAuditEntry({
           timestamp: new Date(),
-          actionType: 'TASK_EXECUTION' as BrowserActionType,
-          description: this.generateTaskDescription(taskDto),
-          riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'FAILURE',
+          actionType: 'TASK_EXECUTION' as BrowserActionType,description: this.generateTaskDescription(taskDto),riskLevel: riskAssessment.riskLevel,
+          validationResult: 'DENIED',executionResult: 'FAILURE',
           conversationId: validationResponse.conversationId,
           targetUrl: this.extractTargetUrlFromTask(taskDto),
         });
@@ -280,9 +248,7 @@ export class ParlantValidatedBrowserUseService {
       // Step 5: Create successful audit entry
       await this.createBrowserActionAuditEntry({
         timestamp: new Date(),
-        actionType: 'TASK_EXECUTION' as BrowserActionType,
-        description: this.generateTaskDescription(taskDto),
-        riskLevel: riskAssessment.riskLevel,
+        actionType: 'TASK_EXECUTION' as BrowserActionType,description: this.generateTaskDescription(taskDto),riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
         executionResult: executionStatus,
         conversationId: validationResponse.conversationId,
@@ -300,9 +266,7 @@ export class ParlantValidatedBrowserUseService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${operationId}] Parlant-validated browser task failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated browser task failed`,{operationId,
           taskName: taskDto.name,
           error: error instanceof Error ? error.message : String(error),
           duration,
@@ -315,9 +279,7 @@ export class ParlantValidatedBrowserUseService {
       }
 
       // Wrap other errors with context
-      throw new Error(`Browser task failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Browser task failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Create async job with Parlant conversational validation
@@ -330,13 +292,8 @@ export class ParlantValidatedBrowserUseService {
     jobDto: CreateAsyncJobDto,
     context: BrowserActionValidationContext
   ): Promise<AsyncJobResultDto> {
-    const operationId = `parlant_async_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job creation: ${jobDto.name}`,
-      {
-        operationId,
+    const operationId = `parlant_async_job${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated async job creation: ${jobDto.name}`,{operationId,
         jobName: jobDto.name,
         jobType: jobDto.jobType,
         priority: jobDto.priority,
@@ -350,9 +307,7 @@ export class ParlantValidatedBrowserUseService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserUseService.createAsyncJob`,
-        functionParams: this.sanitizeJobForValidation(jobDto),
-        actionDescription: this.generateJobDescription(jobDto),
+        functionName: `BrowserUseService.createAsyncJob`,functionParams: this.sanitizeJobForValidation(jobDto),actionDescription: this.generateJobDescription(jobDto),
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -362,9 +317,7 @@ export class ParlantValidatedBrowserUseService {
 
       if (!validationResponse.approved) {
         this.logger.warn(
-          `[${operationId}] Async job creation denied by Parlant validation`,
-          {
-            operationId,
+          `[${operationId}] Async job creation denied by Parlant validation`,{operationId,
             jobName: jobDto.name,
             reasoning: validationResponse.reasoning,
           }
@@ -381,9 +334,7 @@ export class ParlantValidatedBrowserUseService {
       const result = await this.originalBrowserUseService.createAsyncJob(jobDto);
 
       this.logger.log(
-        `[${operationId}] Async job created successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Async job created successfully after validation`,{operationId,
           jobId: result.jobId,
           jobName: jobDto.name,
           duration: Date.now() - startTime,
@@ -394,9 +345,7 @@ export class ParlantValidatedBrowserUseService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated async job creation failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated async job creation failed`,{operationId,
           jobName: jobDto.name,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -406,9 +355,7 @@ export class ParlantValidatedBrowserUseService {
         throw error;
       }
 
-      throw new Error(`Async job creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Async job creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Extract data with Parlant conversational validation
@@ -423,13 +370,8 @@ export class ParlantValidatedBrowserUseService {
     selectors: string[],
     context: BrowserActionValidationContext
   ): Promise<BrowserDataExtractionValidationResult> {
-    const operationId = `parlant_data_extract${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated data extraction`,
-      {
-        operationId,
+    const operationId = `parlant_data_extract${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated data extraction`,{operationId,
         url,
         selectorsCount: selectors.length,
         userId: context.userId,
@@ -442,11 +384,7 @@ export class ParlantValidatedBrowserUseService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserUseService.extractData`,
-        functionParams: { url, selectors: selectors.slice(0, 5) }, // Limit for validation
-        actionDescription: `Extract data from ${url} using ${selectors.length} selectors`,
-        context: context,
-        riskLevel: riskAssessment.riskLevel,
+        functionName: `BrowserUseService.extractData`,functionParams: { url, selectors: selectors.slice(0, 5) }, // Limit for validationactionDescription: `Extract data from ${url} using ${selectors.length} selectors`,context: context,riskLevel: riskAssessment.riskLevel,
         operationId,
       };
 
@@ -481,9 +419,7 @@ export class ParlantValidatedBrowserUseService {
       };
 
       this.logger.log(
-        `[${operationId}] Data extraction completed with validation`,
-        {
-          operationId,
+        `[${operationId}] Data extraction completed with validation`,{operationId,
           extractedElements: extractionResult.metadata.elementsExtracted,
           dataClassification,
           complianceFlags,
@@ -495,9 +431,7 @@ export class ParlantValidatedBrowserUseService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated data extraction failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated data extraction failed`,{operationId,
           url,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -521,54 +455,33 @@ export class ParlantValidatedBrowserUseService {
     context: BrowserActionValidationContext
   ): BrowserActionRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.MINIMAL;
+    let riskLevel: RiskLevel = RiskLevel._MINIMAL;
 
     // Assess based on action types and count
     const highRiskActions = taskDto.actions.filter(action => 
-      ['type', 'click', 'upload'].includes(action.type)
-    );
-
-    if (highRiskActions.length > 0) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('user_interaction_actions');
-    }
-
-    if (taskDto.actions.length > 10) {
+      ['type', 'click', 'upload'].includes(action.type));if (highRiskActions.length > 0) {
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('user_interaction_actions');}if (taskDto.actions.length > 10) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_action_count');
-    }
-
-    // Assess based on target URLs
+      riskFactors.push('high_action_count');}// Assess based on target URLs
     const urls = this.extractUrlsFromTask(taskDto);
     if (urls.some(url => this.isExternalDomain(url))) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('external_domain_access');
-    }
-
-    // Assess based on browser state
+      riskFactors.push('external_domain_access');}// Assess based on browser state
     if (context.browserState.suspiciousActivityDetected) {
-      riskLevel = RiskLevel.CRITICAL;
-      riskFactors.push('suspicious_activity_detected');
-    }
-
-    if (context.browserState.activeSessionsCount > 5) {
+      riskLevel = RiskLevel._CRITICAL;
+      riskFactors.push('suspicious_activity_detected');}if (context.browserState.activeSessionsCount > 5) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_session_count');
-    }
-
-    // Check for file operations and form submissions
+      riskFactors.push('high_session_count');}// Check for file operations and form submissions
     if (taskDto.actions.some(action => action.type === BrowserActionType.FILL_FORM || action.type === BrowserActionType.SUBMIT_FORM)) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('form_submission_operation');
-    }
-
-    const mitigationStrategies = this.generateMitigationStrategies(riskLevel, riskFactors);
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('form_submission_operation');}const mitigationStrategies = this.generateMitigationStrategies(riskLevel, riskFactors);
     
     return {
       riskLevel,
       riskFactors,
       mitigationStrategies,
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       recommendedMonitoring: this.getMonitoringLevel(riskLevel),
     };
   }
@@ -581,30 +494,21 @@ export class ParlantValidatedBrowserUseService {
     context: BrowserActionValidationContext
   ): BrowserActionRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Assess based on job type and duration
     if (jobDto.estimatedDurationMs && jobDto.estimatedDurationMs > 300000) { // 5 minutes
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('long_running_job');
-    }
-
-    if (jobDto.jobType === AsyncJobType.DATA_EXTRACTION) {
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('long_running_job');}if (jobDto.jobType === AsyncJobType.DATA_EXTRACTION) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('data_extraction_job');
-    }
-
-    // Check resource usage
+      riskFactors.push('data_extraction_job');}// Check resource usage
     if (context.browserState.resourceUsage.memoryMB > 1000) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_memory_usage');
-    }
-
-    return {
+      riskFactors.push('high_memory_usage');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskLevel, riskFactors),
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       recommendedMonitoring: this.getMonitoringLevel(riskLevel),
     };
   }
@@ -618,35 +522,23 @@ export class ParlantValidatedBrowserUseService {
     context: BrowserActionValidationContext
   ): BrowserActionRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Assess based on URL characteristics
     if (this.isExternalDomain(url)) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('external_domain_extraction');
-    }
-
-    if (this.containsSensitiveKeywords(url)) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('sensitive_url_keywords');
-    }
-
-    // Assess based on selectors
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('external_domain_extraction');}if (this.containsSensitiveKeywords(url)) {
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('sensitive_url_keywords');}// Assess based on selectors
     if (selectors.length > 20) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_selector_count');
-    }
-
-    if (selectors.some(sel => this.isSensitiveSelector(sel))) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('sensitive_data_selectors');
-    }
-
-    return {
+      riskFactors.push('high_selector_count');}if (selectors.some(sel => this.isSensitiveSelector(sel))) {
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('sensitive_data_selectors');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskLevel, riskFactors),
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       recommendedMonitoring: this.getMonitoringLevel(riskLevel),
     };
   }
@@ -658,12 +550,12 @@ export class ParlantValidatedBrowserUseService {
    */
   private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
-      case RiskLevel.MINIMAL: return RiskLevel.LOW;
-      case RiskLevel.LOW: return RiskLevel.MEDIUM;
-      case RiskLevel.MEDIUM: return RiskLevel.HIGH;
-      case RiskLevel.HIGH: return RiskLevel.CRITICAL;
-      case RiskLevel.CRITICAL: return RiskLevel.CRITICAL;
-      default: return RiskLevel.MEDIUM;
+      case RiskLevel._MINIMAL: return RiskLevel._LOW;
+      case RiskLevel._LOW: return RiskLevel._MODERATE;
+      case RiskLevel._MODERATE: return RiskLevel._HIGH;
+      case RiskLevel._HIGH: return RiskLevel._CRITICAL;
+      case RiskLevel._CRITICAL: return RiskLevel._CRITICAL;
+      default: return RiskLevel._MODERATE;
     }
   }
 
@@ -673,52 +565,28 @@ export class ParlantValidatedBrowserUseService {
   private generateMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.includes('external_domain_access')) {
-      strategies.push('verify_domain_safety', 'enable_request_monitoring');
-    }
-
-    if (riskFactors.includes('user_interaction_actions')) {
-      strategies.push('verify_user_intent', 'enable_action_recording');
-    }
-
-    if (riskFactors.includes('data_extraction_job')) {
-      strategies.push('data_classification_check', 'compliance_validation');
-    }
-
-    if (riskLevel === RiskLevel.CRITICAL) {
-      strategies.push('multi_factor_approval', 'comprehensive_audit_logging');
-    }
-
-    return strategies;
+    if (riskFactors.includes('external_domain_access')) {strategies.push('verify_domain_safety', 'enable_request_monitoring');}if (riskFactors.includes('user_interaction_actions')) {strategies.push('verify_user_intent', 'enable_action_recording');}if (riskFactors.includes('data_extraction_job')) {strategies.push('data_classification_check', 'compliance_validation');}if (riskLevel === RiskLevel._CRITICAL) {
+      strategies.push('multi_factor_approval', 'comprehensive_audit_logging');}return strategies;
   }
 
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW: return 'BASIC';
-      case RiskLevel.MEDIUM: return 'ENHANCED';
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 'COMPREHENSIVE';
-      default: return 'BASIC';
-    }
-  }
+  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {switch (riskLevel) {case RiskLevel._MINIMAL:
+      case RiskLevel._LOW: return 'BASIC';case RiskLevel._MODERATE: return 'ENHANCED';case RiskLevel._HIGH:case RiskLevel._CRITICAL: return 'COMPREHENSIVE';default: return 'BASIC';}}
 
   /**
    * Generate human-readable description of browser task
    */
   private generateTaskDescription(taskDto: CreateBrowserTaskDto): string {
     const actionSummary = taskDto.actions.map((action: any) => action.type).join(', ');
-    return `Execute browser task "${taskDto.name}" with ${taskDto.actions.length} actions: ${actionSummary}`;
-  }
+    return `Execute browser task "${taskDto.name}" with ${taskDto.actions.length} actions: ${actionSummary}";}
 
   /**
    * Generate human-readable description of async job
    */
   private generateJobDescription(jobDto: CreateAsyncJobDto): string {
-    return `Create async job "${jobDto.name}" of type ${jobDto.jobType} with estimated duration ${jobDto.estimatedDurationMs}ms`;
+    return `Create async job "${jobDto.name}" of type ${jobDto.jobType} with estimated duration ${jobDto.estimatedDurationMs}ms";
   }
 
   /**
@@ -750,9 +618,7 @@ export class ParlantValidatedBrowserUseService {
    * Extract target URL from task actions
    */
   private extractTargetUrlFromTask(taskDto: CreateBrowserTaskDto): string | undefined {
-    const navigateAction = taskDto.actions.find((action: any) => action.type === 'navigate');
-    return navigateAction?.url;
-  }
+    const navigateAction = taskDto.actions.find((action: any) => action.type === 'navigate');return navigateAction?.url;}
 
   /**
    * Extract all URLs from task actions
@@ -770,9 +636,7 @@ export class ParlantValidatedBrowserUseService {
   private isExternalDomain(url: string): boolean {
     try {
       const urlObj = new globalThis.URL(url);
-      const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];
-      return !allowedDomains.some(domain => urlObj.hostname.includes(domain));
-    } catch {
+      const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];return !allowedDomains.some(domain => urlObj.hostname.includes(domain));} catch {
       return true; // Assume external if URL parsing fails
     }
   }
@@ -781,17 +645,13 @@ export class ParlantValidatedBrowserUseService {
    * Check if URL contains sensitive keywords
    */
   private containsSensitiveKeywords(url: string): boolean {
-    const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];
-    return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));
-  }
+    const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));}
 
   /**
    * Check if selector targets sensitive data
    */
   private isSensitiveSelector(selector: string): boolean {
-    const sensitiveSelectors = ['input[type="password"]', '[data-sensitive]', '.password', '#password'];
-    return sensitiveSelectors.some(sensitive => selector.includes(sensitive));
-  }
+    const sensitiveSelectors = ['input[type="password"]", '[data-sensitive]', '.password', '#password'];return sensitiveSelectors.some(sensitive => selector.includes(sensitive));}
 
   /**
    * Calculate extracted data size
@@ -813,9 +673,7 @@ export class ParlantValidatedBrowserUseService {
   }> {
     // Mock implementation - in production would use actual browser automation
     return {
-      data: { 'mock_element': { text: 'Mock extracted data', url } },
-      timestamp: new Date(),
-      metadata: {
+      data: { 'mock_element': { text: 'Mock extracted data', url } },timestamp: new Date(),metadata: {
         elementsExtracted: selectors.length,
         selectors,
         extractionTime: Date.now(),
@@ -826,36 +684,16 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Classify extracted data for compliance
    */
-  private classifyExtractedData(data: Record<string, BrowserElementData>): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {
-    // Mock implementation - in production would use sophisticated data classification
-    const dataStr = JSON.stringify(data).toLowerCase();
+  private classifyExtractedData(data: Record<string, BrowserElementData>): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {// Mock implementation - in production would use sophisticated data classificationconst dataStr = JSON.stringify(data).toLowerCase();
     
-    if (dataStr.includes('password') || dataStr.includes('secret')) {
-      return 'RESTRICTED';
-    }
-    if (dataStr.includes('personal') || dataStr.includes('private')) {
-      return 'CONFIDENTIAL';
-    }
-    if (dataStr.includes('internal') || dataStr.includes('employee')) {
-      return 'INTERNAL';
-    }
-    return 'PUBLIC';
-  }
-
-  /**
+    if (dataStr.includes('password') || dataStr.includes('secret')) {return 'RESTRICTED';}if (dataStr.includes('personal') || dataStr.includes('private')) {return 'CONFIDENTIAL';}if (dataStr.includes('internal') || dataStr.includes('employee')) {return 'INTERNAL';}return 'PUBLIC';}/**
    * Generate compliance flags for extracted data
    */
   private generateComplianceFlags(data: Record<string, BrowserElementData>, url: string): string[] {
     const flags: string[] = [];
     const dataStr = JSON.stringify(data).toLowerCase();
 
-    if (dataStr.includes('email') || dataStr.includes('@')) {
-      flags.push('PII_EMAIL_DATA');
-    }
-    if (dataStr.includes('phone') || /\d{3}-\d{3}-\d{4}/.test(dataStr)) {
-      flags.push('PII_PHONE_DATA');
-    }
-    if (this.isExternalDomain(url)) {
+    if (dataStr.includes('email') || dataStr.includes('@')) {flags.push('PII_EMAIL_DATA');}if (dataStr.includes('phone') || /\d{3}-\d{3}-\d{4}/.test(dataStr)) {flags.push('PII_PHONE_DATA');}if (this.isExternalDomain(url)) {
       flags.push('EXTERNAL_DATA_SOURCE');
     }
 
@@ -906,9 +744,7 @@ export class ParlantValidatedBrowserUseService {
       totalOperations: this.totalOperations,
       approvedOperations: this.approvedOperations,
       deniedOperations: this.deniedOperations,
-      approvalRate: `${approvalRate.toFixed(2)}%`,
-      denialRate: `${denialRate.toFixed(2)}%`,
-      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
+      approvalRate: `${approvalRate.toFixed(2)}%`,denialRate: `${denialRate.toFixed(2)}%`,averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
       auditHistorySize: this.actionHistory.length,
     });
   }

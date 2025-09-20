@@ -23,30 +23,17 @@
  * Security: Enterprise-grade conversational validation for all API operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { AxiosResponse } from 'axios';
-import { Observable as _Observable, throwError } from 'rxjs';
-import { catchError, map, timeout, retry } from 'rxjs/operators';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger } from '@nestjs/common';import { HttpService } from '@nestjs/axios';import { ConfigService } from '@nestjs/config';import { AxiosResponse } from 'axios';import { Observable as _Observable, throwError } from 'rxjs';import { catchError, map, timeout, retry } from 'rxjs/operators';import {ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as _ParlantConversationContext,
-} from '../parlant/parlant-integration.service';
-
-// ===== ENTERPRISE API TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== ENTERPRISE API TYPES =====/**
  * Internal API request for proxying with Parlant validation context
  */
 export interface InternalApiRequest {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  url: string;
-  data?: unknown;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';url: string;data?: unknown;
   params?: Record<string, unknown>;
   headers?: Record<string, string>;
   timeout?: number;
@@ -58,13 +45,9 @@ export interface InternalApiRequest {
     sessionId: string;
     operationDescription: string;
     businessPurpose?: string;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    requiresValidation?: boolean;
-    conversationHistory?: Array<{
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';requiresValidation?: boolean;conversationHistory?: Array<{
       timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
   };
 }
 
@@ -87,9 +70,7 @@ export interface ApiPerformanceMetrics {
  * Circuit breaker state and configuration
  */
 export interface CircuitBreakerState {
-  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
-  failureCount: number;
-  failureThreshold: number;
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';failureCount: number;failureThreshold: number;
   timeout: number;
   nextRetryTime?: Date;
   lastFailureTime?: Date;
@@ -111,9 +92,7 @@ interface CacheEntry<T = unknown> {
   /** Parlant validation context for cache invalidation */
   parlantContext?: {
     conversationId: string;
-    validationResult: 'APPROVED' | 'DENIED';
-    riskLevel: string;
-    userId: string;
+    validationResult: 'APPROVED' | 'DENIED';riskLevel: string;userId: string;
   };
 }
 
@@ -122,9 +101,7 @@ interface CacheEntry<T = unknown> {
  */
 export interface EndpointHealth {
   endpoint: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-  responseTime: number;
-  successRate: number;
+  status: 'HEALTHY' | 'DEGRADED' | 'FAILED';responseTime: number;successRate: number;
   lastCheck: Date;
   circuitBreakerState: string;
   errorDetails?: string;
@@ -167,9 +144,7 @@ export class EnterpriseApiService {
     private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
-    this.logger.log('Enterprise API Service initialized with MAXIMUM Parlant integration');
-    this.initializePerformanceTracking();
-    this.startCacheCleanup();
+    this.logger.log('Enterprise API Service initialized with MAXIMUM Parlant integration');this.initializePerformanceTracking();this.startCacheCleanup();
     this.logger.log('Parlant validation enabled for all internal API operations');
   }
 
@@ -179,11 +154,7 @@ export class EnterpriseApiService {
    * Execute internal API request with full enterprise features and Parlant validation
    */
   async executeApiRequest(request: InternalApiRequest): Promise<unknown> {
-    const operationId = `api_request${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    const endpointKey = `${request.method}:${request.url}`;
-
-    this.logger.debug(`[${operationId}] Executing API request with Parlant validation`, {
+    const operationId = `api_request${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const endpointKey = `${request.method}:${request.url}`;this.logger.debug(`[${operationId}] Executing API request with Parlant validation`, {
       operationId,
       method: request.method,
       url: request.url,
@@ -199,9 +170,7 @@ export class EnterpriseApiService {
       
       if (request.parlantContext && (request.parlantContext.requiresValidation ?? true)) {
         const validationRequest: ParlantValidationRequest = {
-          functionName: `EnterpriseAPI.${request.method}.${this.sanitizeUrlForFunction(request.url)}`,
-          functionParams: {
-            method: request.method,
+          functionName: `EnterpriseAPI.${request.method}.${this.sanitizeUrlForFunction(request.url)}`,functionParams: {method: request.method,
             url: request.url,
             params: request.params,
             dataPresent: !!request.data,
@@ -211,15 +180,11 @@ export class EnterpriseApiService {
           context: {
             userId: request.parlantContext.userId,
             sessionId: request.parlantContext.sessionId,
-            agentRole: 'API_SERVICE',
-            securityLevel: this.mapRiskLevelToSecurityLevel(request.parlantContext.riskLevel),
-            conversationHistory: request.parlantContext.conversationHistory?.map(h => ({
+            agentRole: 'API_SERVICE',securityLevel: this.mapRiskLevelToSecurityLevel(request.parlantContext.riskLevel),conversationHistory: request.parlantContext.conversationHistory?.map(h => ({
               timestamp: new Date(h.timestamp),
               speaker: h.speaker,
               message: h.message,
-              intent: h.speaker === 'USER' ? 'api_request' : undefined,
-            })) ?? [],
-            metadata: {
+              intent: h.speaker === 'USER' ? 'api_request' : undefined,})) ?? [],metadata: {
               operationId,
               endpointKey,
               businessPurpose: request.parlantContext.businessPurpose,
@@ -238,14 +203,10 @@ export class EnterpriseApiService {
           
           throw new ConversationalValidationError(
             _validationResult.conversationId,
-            `Internal API request denied: ${validationResult.reasoning}`,
-            validationResult.suggestedAlternatives
-          );
+            `Internal API request denied: ${validationResult.reasoning}`,validationResult.suggestedAlternatives);
         }
 
-        this.logger.debug(`[${operationId}] Parlant validation approved`, {
-          operationId,
-          conversationId: validationResult.conversationId,
+        this.logger.debug(`[${operationId}] Parlant validation approved`, {operationId,conversationId: validationResult.conversationId,
           confidence: validationResult.confidence,
           validationTime: Date.now() - validationStartTime,
         });
@@ -271,12 +232,8 @@ export class EnterpriseApiService {
       const responseTime = Date.now() - startTime;
 
       // Cache successful GET responses with Parlant context
-      if (request.method === 'GET' && response) {
-        const parlantCacheContext = validationResult ? {
-          conversationId: validationResult.conversationId,
-          validationResult: 'APPROVED' as const,
-          riskLevel: request.parlantContext?.riskLevel ?? 'MEDIUM',
-          userId: request.parlantContext?.userId ?? 'unknown',
+      if (request.method === 'GET' && response) {const parlantCacheContext = validationResult ? {conversationId: validationResult.conversationId,
+          validationResult: 'APPROVED' as const,riskLevel: request.parlantContext?.riskLevel ?? 'MEDIUM',userId: request.parlantContext?.userId ?? 'unknown',
         } : undefined;
         
         this.setCachedResponse(
@@ -284,9 +241,7 @@ export class EnterpriseApiService {
           request.params, 
           response, 
           300000, // 5 minutes TTL
-          [`user${request.parlantContext?.userId}`, `risk${request.parlantContext?.riskLevel}`]
-        );
-      }
+          [`user${request.parlantContext?.userId}`, `risk${request.parlantContext?.riskLevel}`]);}
 
       // Update metrics and circuit breaker
       this.updateMetrics(endpointKey, responseTime, true, false);
@@ -311,9 +266,7 @@ export class EnterpriseApiService {
       this.updateCircuitBreaker(endpointKey, false);
 
       if (error instanceof ConversationalValidationError) {
-        this.logger.warn(`[${operationId}] API request denied by Parlant validation`, {
-          operationId,
-          reasoning: error.reasoning,
+        this.logger.warn(`[${operationId}] API request denied by Parlant validation`, {operationId,reasoning: error.reasoning,
           conversationId: error.conversationId,
           endpointKey,
         });
@@ -340,9 +293,7 @@ export class EnterpriseApiService {
       data: request.data,
       params: request.params,
       headers: {
-        'Content-Type': 'application/json',
-        ...request.headers,
-      },
+        'Content-Type': 'application/json',...request.headers,},
       timeout: request.timeout ?? this.config.defaultTimeout,
     };
 
@@ -435,10 +386,7 @@ export class EnterpriseApiService {
       .map(key => `${key}=${JSON.stringify(params[key])}`)
       .join('&');
       
-    return `${endpointKey}?${sortedParams}`;
-  }
-
-  /**
+    return `${endpointKey}?${sortedParams}`;}/**
    * Evict oldest cache entries to maintain size limit
    */
   private evictOldestCacheEntries(): void {
@@ -454,10 +402,7 @@ export class EnterpriseApiService {
       }
     }
     
-    this.logger.debug(`Evicted ${removeCount} old cache entries`);
-  }
-
-  /**
+    this.logger.debug(`Evicted ${removeCount} old cache entries`);}/**
    * Invalidate cache entries by tag
    */
   invalidateCacheByTag(tag: string): number {
@@ -485,9 +430,7 @@ export class EnterpriseApiService {
       return false;
     }
 
-    if (breaker.state === 'OPEN') {
-      // Check if we should try moving to half-open
-      if (breaker.nextRetryTime && new Date() >= breaker.nextRetryTime) {
+    if (breaker.state === 'OPEN') {// Check if we should try moving to half-openif (breaker.nextRetryTime && new Date() >= breaker.nextRetryTime) {
         breaker.state = 'HALF_OPEN';
         this.logger.log(`Circuit breaker moved to HALF_OPEN for ${endpointKey}`);
         return false;
@@ -506,9 +449,7 @@ export class EnterpriseApiService {
     
     if (!breaker) {
       breaker = {
-        state: 'CLOSED',
-        failureCount: 0,
-        failureThreshold: this.config.circuitBreakerThreshold,
+        state: 'CLOSED',failureCount: 0,failureThreshold: this.config.circuitBreakerThreshold,
         timeout: this.config.circuitBreakerTimeout,
         requestCount: 0,
         successCount: 0,
@@ -522,8 +463,7 @@ export class EnterpriseApiService {
       breaker.successCount++;
       breaker.failureCount = 0;
       
-      if (breaker.state === 'HALF_OPEN') {
-        breaker.state = 'CLOSED';
+      if (breaker.state === 'HALF_OPEN') {breaker.state = 'CLOSED';
         this.logger.log(`Circuit breaker closed for ${endpointKey}`);
       }
     } else {
@@ -627,9 +567,7 @@ export class EnterpriseApiService {
   getCircuitBreakerStatus(endpointKey?: string): CircuitBreakerState | Map<string, CircuitBreakerState> {
     if (endpointKey) {
       return this.circuitBreakers.get(endpointKey) ?? {
-        state: 'CLOSED',
-        failureCount: 0,
-        failureThreshold: this.config.circuitBreakerThreshold,
+        state: 'CLOSED',failureCount: 0,failureThreshold: this.config.circuitBreakerThreshold,
         timeout: this.config.circuitBreakerTimeout,
         requestCount: 0,
         successCount: 0,
@@ -650,25 +588,13 @@ export class EnterpriseApiService {
     for (const [endpointKey, metrics] of this.performanceMetrics) {
       const circuitBreaker = this.circuitBreakers.get(endpointKey);
       
-      let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-      
-      // Determine health status
-      if (circuitBreaker?.state === 'OPEN') {
-        status = 'FAILED';
-      } else if (metrics.uptime < 95 || metrics.averageResponseTime > 5000) {
-        status = 'DEGRADED';
-      }
-      
-      healthStatuses.push({
+      let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';// Determine health statusif (circuitBreaker?.state === 'OPEN') {status = 'FAILED';} else if (metrics.uptime < 95 || metrics.averageResponseTime > 5000) {status = 'DEGRADED';}healthStatuses.push({
         endpoint: endpointKey,
         status,
         responseTime: metrics.averageResponseTime,
         successRate: metrics.uptime,
         lastCheck: metrics.lastRequestTime ?? new Date(),
-        circuitBreakerState: circuitBreaker?.state ?? 'CLOSED',
-        errorDetails: status === 'FAILED' ? 'Circuit breaker is open' : undefined,
-      });
-    }
+        circuitBreakerState: circuitBreaker?.state ?? 'CLOSED',errorDetails: status === 'FAILED' ? 'Circuit breaker is open' : undefined,});}
     
     return healthStatuses;
   }
@@ -679,10 +605,7 @@ export class EnterpriseApiService {
    * Initialize performance tracking
    */
   private initializePerformanceTracking(): void {
-    this.logger.log('Performance tracking initialized');
-  }
-
-  /**
+    this.logger.log('Performance tracking initialized');}/**
    * Start cache cleanup interval
    */
   private startCacheCleanup(): void {
@@ -725,30 +648,16 @@ export class EnterpriseApiService {
     this.circuitBreakers.clear();
     this.responseTimesHistory.clear();
     
-    this.logger.log('Enterprise API Service destroyed');
-  }
-
-  // ===== PARLANT INTEGRATION HELPER METHODS =====
+    this.logger.log('Enterprise API Service destroyed');}// ===== PARLANT INTEGRATION HELPER METHODS =====
 
   /**
    * Sanitize URL for function name generation
    */
   private sanitizeUrlForFunction(url: string): string {
-    return url.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
-  }
-
-  /**
+    return url.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');}/**
    * Map risk level to security level for Parlant context
    */
-  private mapRiskLevelToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (riskLevel.toUpperCase()) {
-      case 'LOW': return 'LOW';
-      case 'MEDIUM': return 'MEDIUM';
-      case 'HIGH': return 'HIGH';
-      case 'CRITICAL': return 'CRITICAL';
-      default: return 'MEDIUM';
-    }
-  }
+  private mapRiskLevelToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (riskLevel.toUpperCase()) {case 'LOW': return 'LOW';case 'MEDIUM': return 'MEDIUM';case 'HIGH': return 'HIGH';case 'CRITICAL': return 'CRITICAL';default: return 'MEDIUM';}}
 
   /**
    * Sanitize headers for Parlant validation (remove sensitive information)
@@ -759,10 +668,7 @@ export class EnterpriseApiService {
     const sanitized: Record<string, string> = {};
     Object.entries(headers).forEach(([key, value]) => {
       const lowerKey = key.toLowerCase();
-      if (!lowerKey.includes('authorization') && 
-          !lowerKey.includes('cookie') && 
-          !lowerKey.includes('session') &&
-          !lowerKey.includes('token')) {
+      if (!lowerKey.includes('authorization') && !lowerKey.includes('cookie') && !lowerKey.includes('session') &&!lowerKey.includes('token')) {
         sanitized[key] = value;
       }
     });
@@ -783,9 +689,7 @@ export class EnterpriseApiService {
       }
     }
     
-    this.logger.debug(`Invalidated ${invalidatedCount} cache entries for user: ${userId}`);
-    return invalidatedCount;
-  }
+    this.logger.debug(`Invalidated ${invalidatedCount} cache entries for user: ${userId}`);return invalidatedCount;}
 
   /**
    * Get Parlant validation metrics for monitoring
@@ -819,23 +723,15 @@ export class EnterpriseApiService {
     operation: string,
     businessJustification?: string
   ): Promise<boolean> {
-    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    try {
-      const validationRequest: ParlantValidationRequest = {
-        functionName: `EnterpriseAPI.RateLimit.${this.sanitizeUrlForFunction(endpoint)}`,
-        functionParams: {
-          userId,
+    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;try {const validationRequest: ParlantValidationRequest = {
+        functionName: `EnterpriseAPI.RateLimit.${this.sanitizeUrlForFunction(endpoint)}`,functionParams: {userId,
           endpoint,
           operation,
           businessJustification,
         },
-        actionDescription: `Rate limit validation for ${operation} on ${endpoint}`,
-        context: {
-          userId,
+        actionDescription: `Rate limit validation for ${operation} on ${endpoint}`,context: {userId,
           sessionId: `rate_limit${Date.now()}`,
-          agentRole: 'RATE_LIMITER',
-          securityLevel: 'MEDIUM',
+          agentRole: 'RATE_LIMITER',securityLevel: 'MEDIUM',
           conversationHistory: [],
           metadata: {
             operationId,
@@ -844,24 +740,20 @@ export class EnterpriseApiService {
             operation,
           },
         },
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel._MODERATE,
         operationId,
       };
 
       const result = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
       
-      this.logger.debug(`[${operationId}] Rate limit validation completed`, {
-        operationId,
-        approved: result.approved,
+      this.logger.debug(`[${operationId}] Rate limit validation completed`, {operationId,approved: result.approved,
         userId,
         endpoint,
       });
 
       return result.approved;
     } catch (error) {
-      this.logger.error(`[${operationId}] Rate limit validation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Rate limit validation failed`, {operationId,error: error instanceof Error ? error.message : String(error),
       });
       return false; // Deny on validation failure
     }
@@ -876,23 +768,16 @@ export class EnterpriseApiService {
     context: Record<string, unknown>,
     userId: string
   ): Promise<{ allowed: boolean; reason: string; alternatives?: string[] }> {
-    const operationId = `policy${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    try {
-      const validationRequest: ParlantValidationRequest = {
-        functionName: `EnterpriseAPI.Policy.${policyName.replace(/[^a-zA-Z0-9]/g, '')}`,
-        functionParams: {
+    const operationId = `policy${Date.now()}${Math.random().toString(36).substring(7)}`;try {const validationRequest: ParlantValidationRequest = {
+        functionName: `EnterpriseAPI.Policy.${policyName.replace(/[^a-zA-Z0-9]/g, '')}',functionParams: {
           policyName,
           operation,
           context,
           userId,
         },
-        actionDescription: `Policy enforcement validation for ${policyName}: ${operation}`,
-        context: {
-          userId,
+        actionDescription: `Policy enforcement validation for ${policyName}: ${operation}`,context: {userId,
           sessionId: `policy${Date.now()}`,
-          agentRole: 'POLICY_ENFORCER',
-          securityLevel: 'HIGH',
+          agentRole: 'POLICY_ENFORCER',securityLevel: 'HIGH',
           conversationHistory: [],
           metadata: {
             operationId,
@@ -901,15 +786,13 @@ export class EnterpriseApiService {
             operation,
           },
         },
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel._HIGH,
         operationId,
       };
 
       const result = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
       
-      this.logger.debug(`[${operationId}] Policy enforcement validation completed`, {
-        operationId,
-        allowed: result.approved,
+      this.logger.debug(`[${operationId}] Policy enforcement validation completed`, {operationId,allowed: result.approved,
         policyName,
         userId,
       });
@@ -920,9 +803,7 @@ export class EnterpriseApiService {
         alternatives: result.suggestedAlternatives,
       };
     } catch (error) {
-      this.logger.error(`[${operationId}] Policy enforcement validation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Policy enforcement validation failed`, {operationId,error: error instanceof Error ? error.message : String(error),
       });
       return {
         allowed: false,

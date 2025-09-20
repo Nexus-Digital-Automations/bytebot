@@ -21,26 +21,14 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { InputTrackingModule } from '../input-tracking.module';
-import { InputTrackingController } from '../input-tracking.controller';
-import { InputTrackingService } from '../input-tracking.service';
-import { InputTrackingGateway } from '../input-tracking.gateway';
-import { ComputerUseModule as _ComputerUseModule } from '../../computer-use/computer-use.module';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-
-describe('InputTrackingModule', () => {
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { InputTrackingModule } from '../input-tracking.module';import { InputTrackingController } from '../input-tracking.controller';import { InputTrackingService } from '../input-tracking.service';import { InputTrackingGateway } from '../input-tracking.gateway';import { ComputerUseModule as _ComputerUseModule } from '../../computer-use/computer-use.module';import { ComputerUseService } from '../../computer-use/computer-use.service';describe('InputTrackingModule', () => {
   let module: TestingModule;
   let inputTrackingController: InputTrackingController;
   let inputTrackingService: InputTrackingService;
   let inputTrackingGateway: InputTrackingGateway;
   let computerUseService: ComputerUseService;
 
-  const operationId = `input_tracking_module_test${Date.now()}`;
-
-  beforeEach(async () => {
-    console.log(
+  const operationId = `input_tracking_module_test${Date.now()}`;beforeEach(async () => {console.log(
       `[${operationId}] Setting up InputTrackingModule test environment`,
     );
 
@@ -83,10 +71,7 @@ describe('InputTrackingModule', () => {
       module.get<InputTrackingGateway>(InputTrackingGateway);
     computerUseService = module.get<ComputerUseService>(ComputerUseService);
 
-    console.log(`[${operationId}] InputTrackingModule test setup completed`);
-  });
-
-  afterEach(async () => {
+    console.log(`[${operationId}] InputTrackingModule test setup completed`);});afterEach(async () => {
     if (module) {
       await module.close();
     }
@@ -94,10 +79,8 @@ describe('InputTrackingModule', () => {
     console.log(`[${operationId}] InputTrackingModule test cleanup completed`);
   });
 
-  describe('Module Definition', () => {
-    it('should be defined', () => {
-      const testId = `${operationId}_module_defined`;
-      console.log(`[${testId}] Testing module definition`);
+  describe('Module Definition', () => {it('should be defined', () => {
+      const testId = `${operationId}_module_defined`;console.log(`[${testId}] Testing module definition`);
 
       expect(InputTrackingModule).toBeDefined();
       expect(typeof InputTrackingModule).toBe('function');
@@ -106,31 +89,21 @@ describe('InputTrackingModule', () => {
     });
 
     it('should have correct metadata structure', () => {
-      const testId = `${operationId}_module_metadata`;
-      console.log(`[${testId}] Testing module metadata structure`);
+      const testId = `${operationId}_module_metadata`;console.log(`[${testId}] Testing module metadata structure`);
 
       const moduleMetadata: unknown =
-        Reflect.getMetadata('imports', InputTrackingModule) ??
-        Reflect.getMetadata('module', InputTrackingModule);
-
-      // Module should have the @Module decorator
-      expect(
-        Reflect.hasMetadata('module', InputTrackingModule) ||
-          Reflect.hasMetadata('imports', InputTrackingModule),
+        Reflect.getMetadata('imports', InputTrackingModule) ??Reflect.getMetadata('module', InputTrackingModule);// Module should have the @Module decoratorexpect(
+        Reflect.hasMetadata('module', InputTrackingModule) ||Reflect.hasMetadata('imports', InputTrackingModule),
       ).toBe(true);
 
       console.log(`[${testId}] Module metadata structure test completed`);
     });
 
     it('should be a valid NestJS module class', () => {
-      const testId = `${operationId}_valid_nestjs_module`;
-      console.log(`[${testId}] Testing valid NestJS module class`);
+      const testId = `${operationId}_valid_nestjs_module`;console.log(`[${testId}] Testing valid NestJS module class`);
 
       // Should be a constructor function
-      expect(typeof InputTrackingModule).toBe('function');
-      expect(InputTrackingModule.prototype).toBeDefined();
-
-      // Should be instantiable (though we don't typically instantiate modules directly)
+      expect(typeof InputTrackingModule).toBe('function');expect(InputTrackingModule.prototype).toBeDefined();// Should be instantiable (though we don't typically instantiate modules directly)
 
       expect(
         () => new (InputTrackingModule as unknown as new () => unknown)(),
@@ -140,14 +113,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Provider Registration', () => {
-    it('should register InputTrackingService as a provider', () => {
-      const testId = `${operationId}_service_provider_registration`;
-      console.log(
-        `[${testId}] Testing InputTrackingService provider registration`,
-      );
-
-      expect(inputTrackingService).toBeDefined();
+  describe('Provider Registration', () => {it('should register InputTrackingService as a provider', () => {
+      const testId = `${operationId}_service_provider_registration`;console.log(`[${testId}] Testing InputTrackingService provider registration`,);expect(inputTrackingService).toBeDefined();
       expect(inputTrackingService).toBeInstanceOf(InputTrackingService);
 
       console.log(
@@ -156,12 +123,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should register InputTrackingGateway as a provider', () => {
-      const testId = `${operationId}_gateway_provider_registration`;
-      console.log(
-        `[${testId}] Testing InputTrackingGateway provider registration`,
-      );
-
-      expect(inputTrackingGateway).toBeDefined();
+      const testId = `${operationId}_gateway_provider_registration`;console.log(`[${testId}] Testing InputTrackingGateway provider registration`,);expect(inputTrackingGateway).toBeDefined();
       expect(inputTrackingGateway).toBeInstanceOf(InputTrackingGateway);
 
       console.log(
@@ -170,41 +132,27 @@ describe('InputTrackingModule', () => {
     });
 
     it('should inject Logger into providers', () => {
-      const testId = `${operationId}_logger_injection`;
-      console.log(`[${testId}] Testing Logger injection into providers`);
+      const testId = `${operationId}_logger_injection`;console.log(`[${testId}] Testing Logger injection into providers`);
 
       // Verify that logger is injected (private property access through bracket notation)
-      expect(inputTrackingService['logger']).toBeDefined();
-      expect(inputTrackingGateway['logger']).toBeDefined();
+      expect(inputTrackingService['logger']).toBeDefined();expect(inputTrackingGateway['logger']).toBeDefined();
 
       console.log(`[${testId}] Logger injection test completed`);
     });
 
     it('should resolve all provider dependencies correctly', () => {
-      const testId = `${operationId}_provider_dependencies`;
-      console.log(`[${testId}] Testing provider dependency resolution`);
+      const testId = `${operationId}_provider_dependencies`;console.log(`[${testId}] Testing provider dependency resolution`);
 
       // InputTrackingService should have its dependencies
-      expect(inputTrackingService['computerUseService']).toBeDefined();
-      expect(inputTrackingService['gateway']).toBeDefined();
-
-      // Verify the dependency chain
-      expect(inputTrackingService['computerUseService']).toBe(
-        computerUseService,
-      );
+      expect(inputTrackingService['computerUseService']).toBeDefined();expect(inputTrackingService['gateway']).toBeDefined();// Verify the dependency chainexpect(inputTrackingService['computerUseService']).toBe(computerUseService,);
       expect(inputTrackingService['gateway']).toBe(inputTrackingGateway);
 
       console.log(`[${testId}] Provider dependency resolution test completed`);
     });
   });
 
-  describe('Controller Registration', () => {
-    it('should register InputTrackingController', () => {
-      const testId = `${operationId}_controller_registration`;
-      console.log(`[${testId}] Testing InputTrackingController registration`);
-
-      expect(inputTrackingController).toBeDefined();
-      expect(inputTrackingController).toBeInstanceOf(InputTrackingController);
+  describe('Controller Registration', () => {it('should register InputTrackingController', () => {
+      const testId = `${operationId}_controller_registration`;console.log(`[${testId}] Testing InputTrackingController registration`);expect(inputTrackingController).toBeDefined();expect(inputTrackingController).toBeInstanceOf(InputTrackingController);
 
       console.log(
         `[${testId}] InputTrackingController registration test completed`,
@@ -212,12 +160,10 @@ describe('InputTrackingModule', () => {
     });
 
     it('should inject InputTrackingService into controller', () => {
-      const testId = `${operationId}_controller_service_injection`;
-      console.log(`[${testId}] Testing service injection into controller`);
+      const testId = `${operationId}_controller_service_injection`;console.log(`[${testId}] Testing service injection into controller`);
 
       // Verify that the controller has the service injected
-      expect(inputTrackingController['inputTrackingService']).toBeDefined();
-      expect(inputTrackingController['inputTrackingService']).toBe(
+      expect(inputTrackingController['inputTrackingService']).toBeDefined();expect(inputTrackingController['inputTrackingService']).toBe(
         inputTrackingService,
       );
 
@@ -225,31 +171,23 @@ describe('InputTrackingModule', () => {
     });
 
     it('should have controller methods available', () => {
-      const testId = `${operationId}_controller_methods_availability`;
-      console.log(`[${testId}] Testing controller methods availability`);
+      const testId = `${operationId}_controller_methods_availability`;console.log(`[${testId}] Testing controller methods availability`);
 
       // Verify controller methods exist
-      expect(typeof inputTrackingController.start).toBe('function');
-      expect(typeof inputTrackingController.stop).toBe('function');
+      expect(typeof inputTrackingController.start).toBe('function');expect(typeof inputTrackingController.stop).toBe('function');
 
       console.log(`[${testId}] Controller methods availability test completed`);
     });
   });
 
-  describe('Module Imports', () => {
-    it('should import ComputerUseModule', () => {
-      const testId = `${operationId}_computer_use_module_import`;
-      console.log(`[${testId}] Testing ComputerUseModule import`);
-
-      // Verify ComputerUseService is available (indicates successful import)
-      expect(computerUseService).toBeDefined();
+  describe('Module Imports', () => {it('should import ComputerUseModule', () => {
+      const testId = `${operationId}_computer_use_module_import`;console.log(`[${testId}] Testing ComputerUseModule import`);// Verify ComputerUseService is available (indicates successful import)expect(computerUseService).toBeDefined();
 
       console.log(`[${testId}] ComputerUseModule import test completed`);
     });
 
     it('should have access to ComputerUseService from imported module', () => {
-      const testId = `${operationId}_computer_use_service_access`;
-      console.log(`[${testId}] Testing ComputerUseService access`);
+      const testId = `${operationId}_computer_use_service_access`;console.log(`[${testId}] Testing ComputerUseService access`);
 
       // Should be able to call methods on the imported service
       expect(typeof computerUseService.screenshot).toBe('function');
@@ -258,19 +196,15 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Module Exports', () => {
-    it('should export InputTrackingService', async () => {
-      const testId = `${operationId}_service_export`;
-      console.log(`[${testId}] Testing InputTrackingService export`);
+  describe('Module Exports', () => {it('should export InputTrackingService', async () => {
+      const testId = `${operationId}_service_export`;console.log(`[${testId}] Testing InputTrackingService export`);
 
       // Create a consuming module to test exports
       const consumerModule = await Test.createTestingModule({
         imports: [InputTrackingModule],
         providers: [
           {
-            provide: 'TestProvider',
-            useFactory: (service: InputTrackingService) => {
-              return { hasService: !!service };
+            provide: 'TestProvider',useFactory: (service: InputTrackingService) => {return { hasService: !!service };
             },
             inject: [InputTrackingService],
           },
@@ -286,16 +220,13 @@ describe('InputTrackingModule', () => {
     });
 
     it('should export InputTrackingGateway', async () => {
-      const testId = `${operationId}_gateway_export`;
-      console.log(`[${testId}] Testing InputTrackingGateway export`);
+      const testId = `${operationId}_gateway_export`;console.log(`[${testId}] Testing InputTrackingGateway export`);
 
       const consumerModule = await Test.createTestingModule({
         imports: [InputTrackingModule],
         providers: [
           {
-            provide: 'TestGatewayProvider',
-            useFactory: (gateway: InputTrackingGateway) => {
-              return { hasGateway: !!gateway };
+            provide: 'TestGatewayProvider',useFactory: (gateway: InputTrackingGateway) => {return { hasGateway: !!gateway };
             },
             inject: [InputTrackingGateway],
           },
@@ -311,16 +242,11 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Module Integration', () => {
-    it('should allow service and gateway to communicate', () => {
-      const testId = `${operationId}_service_gateway_integration`;
-      console.log(`[${testId}] Testing service and gateway integration`);
+  describe('Module Integration', () => {it('should allow service and gateway to communicate', () => {
+      const testId = `${operationId}_service_gateway_integration`;console.log(`[${testId}] Testing service and gateway integration`);
 
       // Mock gateway methods
-      const emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
-
-      // Start tracking to enable communication
-      inputTrackingService.startTracking();
+      const emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');// Start tracking to enable communicationinputTrackingService.startTracking();
 
       // Verify the service has reference to the gateway
       expect(inputTrackingService['gateway']).toBe(inputTrackingGateway);
@@ -332,13 +258,10 @@ describe('InputTrackingModule', () => {
     });
 
     it('should integrate with ComputerUseService for screenshots', async () => {
-      const testId = `${operationId}_computer_use_integration`;
-      console.log(`[${testId}] Testing ComputerUseService integration`);
+      const testId = `${operationId}_computer_use_integration`;console.log(`[${testId}] Testing ComputerUseService integration`);
 
       // Verify the service has access to ComputerUseService
-      expect(inputTrackingService['computerUseService']).toBe(
-        computerUseService,
-      );
+      expect(inputTrackingService['computerUseService']).toBe(computerUseService,);
 
       // Test screenshot functionality
       const result = await computerUseService.screenshot();
@@ -348,14 +271,10 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle service initialization properly', () => {
-      const testId = `${operationId}_service_initialization`;
-      console.log(`[${testId}] Testing service initialization`);
+      const testId = `${operationId}_service_initialization`;console.log(`[${testId}] Testing service initialization`);
 
       // Service should be initialized in stopped state
-      expect(inputTrackingService['isTracking']).toBe(false);
-
-      // Should be able to start tracking
-      expect(() => inputTrackingService.startTracking()).not.toThrow();
+      expect(inputTrackingService['isTracking']).toBe(false);// Should be able to start trackingexpect(() => inputTrackingService.startTracking()).not.toThrow();
       expect(inputTrackingService['isTracking']).toBe(true);
 
       // Cleanup
@@ -365,13 +284,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Module Lifecycle', () => {
-    it('should handle module initialization', () => {
-      const testId = `${operationId}_module_initialization`;
-      console.log(`[${testId}] Testing module initialization`);
-
-      // Module should initialize without errors
-      expect(module).toBeDefined();
+  describe('Module Lifecycle', () => {it('should handle module initialization', () => {
+      const testId = `${operationId}_module_initialization`;console.log(`[${testId}] Testing module initialization`);// Module should initialize without errorsexpect(module).toBeDefined();
       expect(module.get(InputTrackingService)).toBeDefined();
       expect(module.get(InputTrackingController)).toBeDefined();
       expect(module.get(InputTrackingGateway)).toBeDefined();
@@ -380,25 +294,18 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle module destruction gracefully', async () => {
-      const testId = `${operationId}_module_destruction`;
-      console.log(`[${testId}] Testing module destruction`);
-
-      // Should be able to close the module without errors
-      await expect(module.close()).resolves.not.toThrow();
+      const testId = `${operationId}_module_destruction`;console.log(`[${testId}] Testing module destruction`);// Should be able to close the module without errorsawait expect(module.close()).resolves.not.toThrow();
 
       console.log(`[${testId}] Module destruction test completed`);
     });
 
     it('should clean up resources on destroy', async () => {
-      const testId = `${operationId}_resource_cleanup`;
-      console.log(`[${testId}] Testing resource cleanup on destroy`);
+      const testId = `${operationId}_resource_cleanup`;console.log(`[${testId}] Testing resource cleanup on destroy`);
 
       // Start tracking to create resources
       inputTrackingService.startTracking();
 
-      // Spy on the service's onModuleDestroy method
-      const onModuleDestroySpy = jest.spyOn(
-        inputTrackingService,
+      // Spy on the service's onModuleDestroy methodconst onModuleDestroySpy = jest.spyOn(inputTrackingService,
         'onModuleDestroy',
       );
 
@@ -412,13 +319,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Dependency Resolution', () => {
-    it('should resolve circular dependencies correctly', () => {
-      const testId = `${operationId}_circular_dependency_resolution`;
-      console.log(`[${testId}] Testing circular dependency resolution`);
-
-      // No circular dependencies should exist in this module
-      // If there were, the module compilation would fail
+  describe('Dependency Resolution', () => {it('should resolve circular dependencies correctly', () => {
+      const testId = `${operationId}_circular_dependency_resolution`;console.log(`[${testId}] Testing circular dependency resolution`);// No circular dependencies should exist in this module// If there were, the module compilation would fail
       expect(inputTrackingService).toBeDefined();
       expect(inputTrackingGateway).toBeDefined();
       expect(inputTrackingController).toBeDefined();
@@ -427,8 +329,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle missing optional dependencies gracefully', () => {
-      const testId = `${operationId}_optional_dependencies`;
-      console.log(`[${testId}] Testing optional dependency handling`);
+      const testId = `${operationId}_optional_dependencies`;console.log(`[${testId}] Testing optional dependency handling`);
 
       // All dependencies in this module are required, but test robustness
       expect(() => {
@@ -440,11 +341,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should properly scope provider instances', () => {
-      const testId = `${operationId}_provider_scoping`;
-      console.log(`[${testId}] Testing provider instance scoping`);
-
-      // Get multiple references to the same providers
-      const service1 = module.get(InputTrackingService);
+      const testId = `${operationId}_provider_scoping`;console.log(`[${testId}] Testing provider instance scoping`);// Get multiple references to the same providersconst service1 = module.get(InputTrackingService);
       const service2 = module.get(InputTrackingService);
       const gateway1 = module.get(InputTrackingGateway);
       const gateway2 = module.get(InputTrackingGateway);
@@ -457,13 +354,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Error Scenarios', () => {
-    it('should handle provider initialization errors', () => {
-      const testId = `${operationId}_provider_init_errors`;
-      console.log(`[${testId}] Testing provider initialization error handling`);
-
-      // Test that the module can be created even if some providers have issues
-      // (NestJS will handle most initialization errors)
+  describe('Error Scenarios', () => {it('should handle provider initialization errors', () => {
+      const testId = `${operationId}_provider_init_errors`;console.log(`[${testId}] Testing provider initialization error handling`);// Test that the module can be created even if some providers have issues// (NestJS will handle most initialization errors)
       expect(module).toBeDefined();
 
       console.log(
@@ -472,11 +364,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle missing imported modules gracefully', async () => {
-      const testId = `${operationId}_missing_imports`;
-      console.log(`[${testId}] Testing missing import handling`);
-
-      // Try creating module without required imports
-      await expect(
+      const testId = `${operationId}_missing_imports`;console.log(`[${testId}] Testing missing import handling`);// Try creating module without required importsawait expect(
         Test.createTestingModule({
           // Missing ComputerUseModule import
           controllers: [InputTrackingController],
@@ -488,9 +376,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle malformed module configuration', async () => {
-      const testId = `${operationId}_malformed_config`;
-      console.log(
-        `[${testId}] Testing malformed module configuration handling`,
+      const testId = `${operationId}_malformed_config`;console.log(`[${testId}] Testing malformed module configuration handling`,
       );
 
       // Test with incomplete provider configuration
@@ -510,13 +396,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Module Metadata Validation', () => {
-    it('should have all required providers in metadata', () => {
-      const testId = `${operationId}_required_providers_metadata`;
-      console.log(`[${testId}] Testing required providers in metadata`);
-
-      // Verify that the module can provide all expected services
-      expect(() => module.get(InputTrackingService)).not.toThrow();
+  describe('Module Metadata Validation', () => {it('should have all required providers in metadata', () => {
+      const testId = `${operationId}_required_providers_metadata`;console.log(`[${testId}] Testing required providers in metadata`);// Verify that the module can provide all expected servicesexpect(() => module.get(InputTrackingService)).not.toThrow();
       expect(() => module.get(InputTrackingGateway)).not.toThrow();
       expect(() => module.get(InputTrackingController)).not.toThrow();
 
@@ -524,21 +405,13 @@ describe('InputTrackingModule', () => {
     });
 
     it('should have correct import configuration', () => {
-      const testId = `${operationId}_import_configuration`;
-      console.log(`[${testId}] Testing import configuration`);
-
-      // ComputerUseService should be available, indicating correct import
-      expect(() => module.get(ComputerUseService)).not.toThrow();
+      const testId = `${operationId}_import_configuration`;console.log(`[${testId}] Testing import configuration`);// ComputerUseService should be available, indicating correct importexpect(() => module.get(ComputerUseService)).not.toThrow();
 
       console.log(`[${testId}] Import configuration test completed`);
     });
 
     it('should have correct export configuration', () => {
-      const testId = `${operationId}_export_configuration`;
-      console.log(`[${testId}] Testing export configuration`);
-
-      // Both service and gateway should be exportable
-      const service = module.get(InputTrackingService);
+      const testId = `${operationId}_export_configuration`;console.log(`[${testId}] Testing export configuration`);// Both service and gateway should be exportableconst service = module.get(InputTrackingService);
       const gateway = module.get(InputTrackingGateway);
 
       expect(service).toBeInstanceOf(InputTrackingService);
@@ -548,14 +421,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Integration Testing', () => {
-    it('should work in a complete application context', async () => {
-      const testId = `${operationId}_complete_app_context`;
-      console.log(
-        `[${testId}] Testing complete application context integration`,
-      );
-
-      // Simulate a complete app module
+  describe('Integration Testing', () => {it('should work in a complete application context', async () => {
+      const testId = `${operationId}_complete_app_context`;console.log(`[${testId}] Testing complete application context integration`,);// Simulate a complete app module
       const appModule = await Test.createTestingModule({
         imports: [InputTrackingModule],
       }).compile();
@@ -580,11 +447,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle multiple module instances', async () => {
-      const testId = `${operationId}_multiple_module_instances`;
-      console.log(`[${testId}] Testing multiple module instance handling`);
-
-      // Create another module instance
-      const module2 = await Test.createTestingModule({
+      const testId = `${operationId}_multiple_module_instances`;console.log(`[${testId}] Testing multiple module instance handling`);// Create another module instanceconst module2 = await Test.createTestingModule({
         imports: [InputTrackingModule],
       }).compile();
 
@@ -605,11 +468,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle dynamic module imports', async () => {
-      const testId = `${operationId}_dynamic_module_imports`;
-      console.log(`[${testId}] Testing dynamic module import handling`);
-
-      // Test dynamic import pattern (if supported)
-      const dynamicModule = await Test.createTestingModule({
+      const testId = `${operationId}_dynamic_module_imports`;console.log(`[${testId}] Testing dynamic module import handling`);// Test dynamic import pattern (if supported)const dynamicModule = await Test.createTestingModule({
         imports: [
           // Simulate dynamic import
           {
@@ -626,14 +485,8 @@ describe('InputTrackingModule', () => {
     });
   });
 
-  describe('Performance and Scalability', () => {
-    it('should handle rapid module creation and destruction', async () => {
-      const testId = `${operationId}_rapid_module_lifecycle`;
-      console.log(`[${testId}] Testing rapid module creation and destruction`);
-
-      const modules = [];
-
-      // Create multiple modules rapidly
+  describe('Performance and Scalability', () => {it('should handle rapid module creation and destruction', async () => {
+      const testId = `${operationId}_rapid_module_lifecycle`;console.log(`[${testId}] Testing rapid module creation and destruction`);const modules = [];// Create multiple modules rapidly
       for (let i = 0; i < 5; i++) {
         const testModule = await Test.createTestingModule({
           imports: [InputTrackingModule],
@@ -652,11 +505,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should handle concurrent service access', async () => {
-      const testId = `${operationId}_concurrent_service_access`;
-      console.log(`[${testId}] Testing concurrent service access`);
-
-      // Simulate concurrent access to services
-      const promises = Array.from({ length: 10 }, () =>
+      const testId = `${operationId}_concurrent_service_access`;console.log(`[${testId}] Testing concurrent service access`);// Simulate concurrent access to servicesconst promises = Array.from({ length: 10 }, () =>
         Promise.resolve().then(() => {
           const service = module.get(InputTrackingService);
           const gateway = module.get(InputTrackingGateway);
@@ -677,11 +526,7 @@ describe('InputTrackingModule', () => {
     });
 
     it('should have reasonable memory footprint', () => {
-      const testId = `${operationId}_memory_footprint`;
-      console.log(`[${testId}] Testing memory footprint`);
-
-      // Module and its providers should not consume excessive memory
-      expect(module).toBeDefined();
+      const testId = `${operationId}_memory_footprint`;console.log(`[${testId}] Testing memory footprint`);// Module and its providers should not consume excessive memoryexpect(module).toBeDefined();
       expect(inputTrackingService).toBeDefined();
       expect(inputTrackingGateway).toBeDefined();
       expect(inputTrackingController).toBeDefined();

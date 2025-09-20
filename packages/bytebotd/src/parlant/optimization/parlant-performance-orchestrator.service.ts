@@ -20,29 +20,15 @@
  * - Comprehensive metrics collection and analysis
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-
-// Import our optimization services
-import { ParlantMultiLevelCacheService, MultiLevelCacheStats, ValidationMetadata } from '../caching/parlant-multi-level-cache.service';
-import { 
-  ParlantAsyncBatchProcessorService,
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';// Import our optimization servicesimport { ParlantMultiLevelCacheService, MultiLevelCacheStats, ValidationMetadata } from '../caching/parlant-multi-level-cache.service';import { ParlantAsyncBatchProcessorService,
   ValidationPriority,
   AsyncPerformanceMetrics 
-} from './parlant-async-batch-processor.service';
-
-// Import base Parlant types
-import { 
+} from './parlant-async-batch-processor.service';// Import base Parlant typesimport { 
   ParlantValidationRequest, 
   ParlantValidationResponse, 
   RiskLevel,
   ParlantConversationContext
-} from '../parlant-integration.service';
-
-// ===== PERFORMANCE ORCHESTRATION INTERFACES =====
-
-/**
+} from '../parlant-integration.service';// ===== PERFORMANCE ORCHESTRATION INTERFACES =====/**
  * Complete validation request with optimization metadata
  */
 export interface OptimizedValidationRequest extends ParlantValidationRequest {
@@ -51,9 +37,7 @@ export interface OptimizedValidationRequest extends ParlantValidationRequest {
     readonly enableCaching?: boolean;
     readonly enableBatching?: boolean;
     readonly timeoutMs?: number;
-    readonly retryPolicy?: 'none' | 'fast' | 'thorough';
-  };
-}
+    readonly retryPolicy?: 'none' | 'fast' | 'thorough';};}
 
 /**
  * Complete validation response with performance metadata
@@ -62,9 +46,7 @@ export interface OptimizedValidationResponse extends ParlantValidationResponse {
   readonly performanceMetadata: {
     readonly totalLatencyMs: number;
     readonly cacheHit: boolean;
-    readonly cacheLevel?: 'L1' | 'L2' | 'L3';
-    readonly batchProcessed: boolean;
-    readonly batchId?: string;
+    readonly cacheLevel?: 'L1' | 'L2' | 'L3';readonly batchProcessed: boolean;readonly batchId?: string;
     readonly retryAttempts: number;
     readonly circuitBreakerUsed: boolean;
     readonly degradedMode: boolean;
@@ -119,9 +101,7 @@ export interface OptimizationStrategy {
     readonly recoveryTimeoutMs: number;
   };
   readonly degradation: {
-    readonly strategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';
-    readonly fallbackTimeout: number;
-  };
+    readonly strategy: 'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY';readonly fallbackTimeout: number;};
 }
 
 /**
@@ -129,9 +109,7 @@ export interface OptimizationStrategy {
  */
 export interface PerformanceAlert {
   readonly id: string;
-  readonly level: 'warning' | 'error' | 'critical';
-  readonly metric: string;
-  readonly threshold: number;
+  readonly level: 'warning' | 'error' | 'critical';readonly metric: string;readonly threshold: number;
   readonly currentValue: number;
   readonly message: string;
   readonly timestamp: Date;
@@ -142,14 +120,9 @@ export interface PerformanceAlert {
  * Optimization recommendation
  */
 export interface OptimizationRecommendation {
-  readonly category: 'caching' | 'batching' | 'circuit-breaker' | 'infrastructure';
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
-  readonly title: string;
-  readonly description: string;
+  readonly category: 'caching' | 'batching' | 'circuit-breaker' | 'infrastructure';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly title: string;readonly description: string;
   readonly expectedImprovement: string;
-  readonly implementationComplexity: 'low' | 'medium' | 'high';
-  readonly estimatedTimeToValue: string;
-}
+  readonly implementationComplexity: 'low' | 'medium' | 'high';readonly estimatedTimeToValue: string;}
 
 // ===== PERFORMANCE ORCHESTRATOR SERVICE =====
 
@@ -176,9 +149,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       recoveryTimeoutMs: 30000
     },
     degradation: {
-      strategy: 'GRACEFUL_DEGRADATION',
-      fallbackTimeout: 1000
-    }
+      strategy: 'GRACEFUL_DEGRADATION',fallbackTimeout: 1000}
   };
 
   // Performance tracking
@@ -208,10 +179,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Parlant Performance Orchestrator...');
-    
-    // Load configuration
-    this.loadConfiguration();
+    this.logger.log('Initializing Parlant Performance Orchestrator...');// Load configurationthis.loadConfiguration();
     
     // Start monitoring
     this.startPerformanceMonitoring();
@@ -223,10 +191,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       await this.preloadCommonValidationPatterns();
     }
     
-    this.logger.log('Performance Orchestrator initialized successfully');
-  }
-
-  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Performance Orchestrator initialized successfully');}async onModuleDestroy(): Promise<void> {
     if (this.metricsTimer) {
       clearInterval(this.metricsTimer);
     }
@@ -243,19 +208,13 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   async validateWithOptimization(
     request: OptimizedValidationRequest,
     context: ParlantConversationContext = {
-      userId: 'system',
-      agentRole: 'optimization-service',
-      securityLevel: 'LOW',
-      conversationHistory: [],
-      metadata: {}
+      userId: 'system',agentRole: 'optimization-service',securityLevel: 'LOW',conversationHistory: [],metadata: {}
     }
   ): Promise<OptimizedValidationResponse> {
     const startTime = Date.now();
     const optimizationPath: string[] = [];
     let cacheHit = false;
-    let cacheLevel: 'L1' | 'L2' | 'L3' | undefined;
-    let batchProcessed = false;
-    let batchId: string | undefined;
+    let cacheLevel: 'L1' | 'L2' | 'L3' | undefined;let batchProcessed = false;let batchId: string | undefined;
     const circuitBreakerUsed = false;
     const degradedMode = false;
     const retryAttempts = 0;
@@ -265,10 +224,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
 
       // Step 1: Check multi-level cache first
       if (this.config.caching.enabled && (request.optimizationHints?.enableCaching ?? true)) {
-        optimizationPath.push('cache-lookup');
-        
-        const cachedResult = await this.cacheService.getCachedValidation(
-          request.functionName,
+        optimizationPath.push('cache-lookup');const cachedResult = await this.cacheService.getCachedValidation(request.functionName,
           Object.values(request.functionParams),
           context as unknown as Record<string, unknown>
         );
@@ -276,11 +232,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         if (cachedResult) {
           cacheHit = true;
           // TODO: Determine which cache level was hit
-          cacheLevel = 'L1'; // Placeholder
-          optimizationPath.push('cache-hit');
-          
-          return this.createOptimizedResponse(
-            cachedResult,
+          cacheLevel = 'L1'; // PlaceholderoptimizationPath.push('cache-hit');return this.createOptimizedResponse(cachedResult,
             startTime,
             optimizationPath,
             { 
@@ -307,10 +259,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           batchProcessed = true;
           // TODO: Get actual batch ID from batch processor
           batchId = `batch-${Date.now()}`;
-          optimizationPath.push('batch-processed');
-
-          // Cache the successful result
-          if (this.config.caching.enabled && response) {
+          optimizationPath.push('batch-processed');// Cache the successful resultif (this.config.caching.enabled && response) {
             await this.cacheService.setCachedValidation(
               request.functionName,
               Object.values(request.functionParams),
@@ -421,11 +370,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   async validateBulkWithOptimization(
     requests: OptimizedValidationRequest[],
     context: ParlantConversationContext = {
-      userId: 'system',
-      agentRole: 'optimization-service',
-      securityLevel: 'LOW',
-      conversationHistory: [],
-      metadata: {}
+      userId: 'system',agentRole: 'optimization-service',securityLevel: 'LOW',conversationHistory: [],metadata: {}
     },
     priority: ValidationPriority = ValidationPriority.MEDIUM
   ): Promise<OptimizedValidationResponse[]> {
@@ -450,9 +395,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         this.createOptimizedResponse(
           response,
           Date.now(), // Simplified timing for bulk operations
-          ['bulk-batch-processing'],
-          {
-            cacheHit: false,
+          ['bulk-batch-processing'],{cacheHit: false,
             batchProcessed: true,
             circuitBreakerUsed: false,
             degradedMode: false,
@@ -462,9 +405,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       );
 
     } catch (error) {
-      this.logger.error('Bulk validation failed:', error);
-      throw error;
-    }
+      this.logger.error('Bulk validation failed:', error);throw error;}
   }
 
   // ===== FALLBACK AND ERROR HANDLING =====
@@ -481,16 +422,11 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     // TODO: Implement direct Parlant validation processing
     // For now, create a mock response
     const mockResponse: ParlantValidationResponse = {
-      conversationId: `direct-${Date.now()}`,
-      approved: true,
-      confidence: 0.9,
+      conversationId: `direct-${Date.now()}`,approved: true,confidence: 0.9,
       reasoning: `Direct validation for ${request.functionName}`,
       validationTimestamp: new Date(),
       additionalContext: {
-        riskLevel: 'LOW',
-        processingType: 'direct-validation',
-        functionName: request.functionName
-      }
+        riskLevel: 'LOW',processingType: 'direct-validation',functionName: request.functionName}
     };
 
     // Cache successful result
@@ -522,17 +458,12 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     const errorMessage = error instanceof Error ? error.message : String(error);
     
     const errorResponse: ParlantValidationResponse = {
-      conversationId: `error-${Date.now()}`,
-      approved: false,
-      confidence: 0,
+      conversationId: `error-${Date.now()}`,approved: false,confidence: 0,
       reasoning: `Validation failed: ${errorMessage}`,
       validationTimestamp: new Date(),
       additionalContext: {
         errorDetails: errorMessage,
-        errorSource: 'optimization-service',
-        riskLevel: 'HIGH'
-      }
-    };
+        errorSource: 'optimization-service',riskLevel: 'HIGH'}};
 
     return this.createOptimizedResponse(
       errorResponse,
@@ -558,9 +489,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     optimizationPath: string[],
     metadata: {
       cacheHit: boolean;
-      cacheLevel?: 'L1' | 'L2' | 'L3';
-      batchProcessed: boolean;
-      batchId?: string;
+      cacheLevel?: 'L1' | 'L2' | 'L3';batchProcessed: boolean;batchId?: string;
       circuitBreakerUsed: boolean;
       degradedMode: boolean;
       retryAttempts: number;
@@ -577,20 +506,18 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         totalLatencyMs,
         ...metadata,
         optimizationPath,
-        endpointUsed: 'performance-orchestrator'
-      }
-    };
+        endpointUsed: 'performance-orchestrator'}};
   }
 
   private determinePriority(request: OptimizedValidationRequest): ValidationPriority {
     // Logic to determine priority based on request characteristics
-    if (request.riskLevel === RiskLevel.CRITICAL) {
+    if (request.riskLevel === RiskLevel._CRITICAL) {
       return ValidationPriority.CRITICAL;
     }
-    if (request.riskLevel === RiskLevel.HIGH) {
+    if (request.riskLevel === RiskLevel._HIGH) {
       return ValidationPriority.HIGH;
     }
-    if (request.riskLevel === RiskLevel.MEDIUM) {
+    if (request.riskLevel === RiskLevel._MODERATE) {
       return ValidationPriority.MEDIUM;
     }
     
@@ -626,9 +553,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     }
     
     // Emit performance event
-    this.eventEmitter.emit('responseTimeRecorded', {
-      latencyMs,
-      timestamp: Date.now()
+    this.eventEmitter.emit('responseTimeRecorded', {latencyMs,timestamp: Date.now()
     });
   }
 
@@ -644,23 +569,12 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     this.performanceMetrics.lastMetricsUpdate = Date.now();
     
     // Emit comprehensive metrics
-    this.eventEmitter.emit('performanceMetricsUpdated', this.getComprehensiveMetrics());
-  }
-
-  private startHealthMonitoring(): void {
+    this.eventEmitter.emit('performanceMetricsUpdated', this.getComprehensiveMetrics());}private startHealthMonitoring(): void {
     // Monitor cache service health
-    this.eventEmitter.on('cacheHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {
-      if (!health.healthy) {
-        this.createAlert('cache-health', 'warning', 'Cache service health degraded', health);
-      }
-    });
+    this.eventEmitter.on('cacheHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {if (!health.healthy) {this.createAlert('cache-health', 'warning', 'Cache service health degraded', health);}});
 
     // Monitor batch processor health
-    this.eventEmitter.on('batchHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {
-      if (!health.healthy) {
-        this.createAlert('batch-health', 'warning', 'Batch processor health degraded', health);
-      }
-    });
+    this.eventEmitter.on('batchHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {if (!health.healthy) {this.createAlert('batch-health', 'warning', 'Batch processor health degraded', health);}});
   }
 
   private startAlertMonitoring(): void {
@@ -675,39 +589,25 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     // Check P95 response time
     if (metrics.orchestratorMetrics.p95ResponseTime > 1000) {
       this.createAlert(
-        'p95-response-time',
-        'error',
-        'P95 response time exceeds 1000ms target',
-        { current: metrics.orchestratorMetrics.p95ResponseTime, target: 1000 }
-      );
+        'p95-response-time','error','P95 response time exceeds 1000ms target',{ current: metrics.orchestratorMetrics.p95ResponseTime, target: 1000 });
     }
 
     // Check cache hit rate
     if (metrics.cacheMetrics.overallStats.totalHitRate < 0.85) {
       this.createAlert(
-        'cache-hit-rate',
-        'warning',
-        'Cache hit rate below 85% target',
-        { current: metrics.cacheMetrics.overallStats.totalHitRate, target: 0.85 }
-      );
+        'cache-hit-rate','warning','Cache hit rate below 85% target',{ current: metrics.cacheMetrics.overallStats.totalHitRate, target: 0.85 });
     }
 
     // Check error rate
     if (metrics.orchestratorMetrics.errorRate > 0.05) {
       this.createAlert(
-        'error-rate',
-        'error',
-        'Error rate exceeds 5% threshold',
-        { current: metrics.orchestratorMetrics.errorRate, target: 0.05 }
-      );
+        'error-rate','error','Error rate exceeds 5% threshold',{ current: metrics.orchestratorMetrics.errorRate, target: 0.05 });
     }
   }
 
   private createAlert(
     id: string,
-    level: 'warning' | 'error' | 'critical',
-    message: string,
-    data: { current?: number; target?: number; [key: string]: unknown }
+    level: 'warning' | 'error' | 'critical',message: string,data: { current?: number; target?: number; [key: string]: unknown }
   ): void {
     const alert: PerformanceAlert = {
       id,
@@ -731,15 +631,9 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   private loadConfiguration(): void {
     // TODO: Load configuration from ConfigService
     // For now, use defaults
-    this.logger.debug('Performance orchestrator configuration loaded');
-  }
-
-  private async preloadCommonValidationPatterns(): Promise<void> {
+    this.logger.debug('Performance orchestrator configuration loaded');}private async preloadCommonValidationPatterns(): Promise<void> {
     // TODO: Implement pattern preloading based on historical data
-    this.logger.debug('Common validation patterns preloaded');
-  }
-
-  // ===== PUBLIC INTERFACE =====
+    this.logger.debug('Common validation patterns preloaded');}// ===== PUBLIC INTERFACE =====
 
   /**
    * Get comprehensive performance metrics
@@ -810,30 +704,16 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     const cacheRecommendations = this.cacheService.getCacheOptimizationRecommendations();
     recommendations.push(
       ...cacheRecommendations.map(rec => ({
-        category: 'caching' as const,
-        priority: 'medium' as const,
-        title: 'Cache Optimization',
-        description: rec,
-        expectedImprovement: '5-15% latency reduction',
-        implementationComplexity: 'medium' as const,
-        estimatedTimeToValue: '1-2 weeks'
-      }))
-    );
+        category: 'caching' as const,priority: 'medium' as const,title: 'Cache Optimization',description: rec,expectedImprovement: '5-15% latency reduction',implementationComplexity: 'medium' as const,estimatedTimeToValue: '1-2 weeks'})));
     
     // Batch optimization recommendations  
     const batchRecommendations = this.batchProcessor.getOptimizationRecommendations();
     recommendations.push(
       ...batchRecommendations.map(rec => ({
-        category: 'batching' as const,
-        priority: (rec.priority === 'high' ? 'high' : 
-                  rec.priority === 'medium' ? 'medium' : 'low') as 'low' | 'high' | 'medium' | 'critical',
+        category: 'batching' as const,priority: (rec.priority === 'high' ? 'high' : rec.priority === 'medium' ? 'medium' : 'low') as 'low' | 'high' | 'medium' | 'critical',
         title: `Batch ${rec.type}`,
         description: rec.action,
-        expectedImprovement: '10-30% throughput improvement',
-        implementationComplexity: 'low' as const,
-        estimatedTimeToValue: 'Immediate'
-      }))
-    );
+        expectedImprovement: '10-30% throughput improvement',implementationComplexity: 'low' as const,estimatedTimeToValue: 'Immediate'})));
 
     return recommendations;
   }
@@ -858,9 +738,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       };
       // Remove from active alerts and emit resolved event
       this.activeAlerts.delete(alertId);
-      this.eventEmitter.emit('alertResolved', resolvedAlert);
-      return true;
-    }
+      this.eventEmitter.emit('alertResolved', resolvedAlert);return true;}
     return false;
   }
 
@@ -876,7 +754,6 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
    */
   updateOptimizationStrategy(updates: Partial<OptimizationStrategy>): void {
     Object.assign(this.config, updates);
-    this.eventEmitter.emit('configurationUpdated', this.config);
-    this.logger.log('Optimization strategy updated', updates);
+    this.eventEmitter.emit('configurationUpdated', this.config);this.logger.log('Optimization strategy updated', updates);
   }
 }

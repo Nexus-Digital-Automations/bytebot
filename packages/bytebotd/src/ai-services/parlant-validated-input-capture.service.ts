@@ -24,7 +24,6 @@ import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, Parlant
 import { ComputerAction } from '@bytebot/shared';
 
 // ===== INPUT CAPTURE AI AGENT INTERFACES =====
-
 /**
  * AI agent input processing context
  */
@@ -78,8 +77,7 @@ export interface InputCaptureAuditEntry {
   readonly conversationId: string;
   readonly inputType: string;
   readonly actionDescription: string;
-  readonly validationResult: 'approved' | 'denied' | 'error';
-  readonly executionResult: 'success' | 'failure' | 'cancelled';
+  readonly validationResult: 'approved' | 'denied' | 'error';readonly executionResult: 'success' | 'failure' | 'cancelled';
   readonly timestamp: Date;
   readonly duration: number;
   readonly userId: string;
@@ -111,11 +109,7 @@ export class ParlantValidatedInputCaptureService {
     private readonly parlantIntegration: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `parlant-input-init-${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Parlant-Validated Input Capture Service with AI agent processing`, {
-      operationId,
-      parlantEnabled: this.isParlantInputEnabled(),
+    const operationId = `parlant-input-init-${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Input Capture Service with AI agent processing`, {operationId,parlantEnabled: this.isParlantInputEnabled(),
       aiProcessingEnabled: this.isAIProcessingEnabled(),
       auditEnabled: this.isInputAuditEnabled(),
       privacyMode: this.getPrivacyMode(),
@@ -171,27 +165,17 @@ export class ParlantValidatedInputCaptureService {
         operationId,
         inputContext: context,
         inputData: {
-          actionType: 'start_tracking',
-          coordinatesIncluded: context.inputType === 'mouse',
-          textContent: context.inputType === 'keyboard',
-          screenshotData: context.inputType === 'screenshot',
+          actionType: 'start_tracking',coordinatesIncluded: context.inputType === 'mouse',textContent: context.inputType === 'keyboard',screenshotData: context.inputType === 'screenshot',
         },
       };
 
-      this.logger.log(`[${operationId}] Requesting Parlant validation for AI input tracking`);
-      
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
-
-      if (!validationResponse.approved) {
+      this.logger.log(`[${operationId}] Requesting Parlant validation for AI input tracking`);const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);if (!validationResponse.approved) {
         const auditEntry = this.createInputAuditEntry({
           operationId,
           conversationId: validationResponse.conversationId,
           inputType: context.inputType,
           actionDescription: `Start ${context.inputType} tracking`,
-          validationResult: 'denied',
-          executionResult: 'cancelled',
-          userId: context.userId,
-          riskLevel: validationRequest.riskLevel,
+          validationResult: 'denied',executionResult: 'cancelled',userId: context.userId,riskLevel: validationRequest.riskLevel,
           aiProcessingUsed: context.aiProcessingRequired,
           privacyProtected: true,
           securityFlags: ['ai_input_validation_denied'],
@@ -201,9 +185,7 @@ export class ParlantValidatedInputCaptureService {
         this.addToInputAuditTrail(auditEntry);
 
         this.logger.warn(
-          `[${operationId}] AI input tracking denied by Parlant validation`,
-          {
-            operationId,
+          `[${operationId}] AI input tracking denied by Parlant validation`,{operationId,
             inputType: context.inputType,
             conversationId: validationResponse.conversationId,
             reasoning: validationResponse.reasoning,
@@ -211,13 +193,7 @@ export class ParlantValidatedInputCaptureService {
           }
         );
 
-        throw new Error(`AI input operation blocked by conversational validation: ${validationResponse.reasoning}`);
-      }
-
-      this.logger.log(`[${operationId}] Parlant validation approved - starting input tracking with AI processing`);
-
-      // Execute input tracking with validation approval
-      await this.inputTrackingService.startTracking();
+        throw new Error(`AI input operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${operationId}] Parlant validation approved - starting input tracking with AI processing`);// Execute input tracking with validation approvalawait this.inputTrackingService.startTracking();
 
       // Perform AI analysis of input intent if enabled
       let aiAnalysis;
@@ -243,17 +219,13 @@ export class ParlantValidatedInputCaptureService {
         conversationId: validationResponse.conversationId,
         inputType: context.inputType,
         actionDescription: `Start ${context.inputType} tracking`,
-        validationResult: 'approved',
-        executionResult: 'success',
+        validationResult: 'approved',executionResult: 'success',
         userId: context.userId,
         riskLevel: validationRequest.riskLevel,
         aiProcessingUsed: context.aiProcessingRequired,
         privacyProtected: true,
         securityFlags: response.securityFlags,
-        conversationSummary: `Input tracking started successfully: ${validationResponse.reasoning}`,
-      });
-
-      this.addToInputAuditTrail(successAuditEntry);
+        conversationSummary: `Input tracking started successfully: ${validationResponse.reasoning}`,});this.addToInputAuditTrail(successAuditEntry);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -283,22 +255,14 @@ export class ParlantValidatedInputCaptureService {
         conversationId: 'ERROR',
         inputType: context.inputType,
         actionDescription: `Start ${context.inputType} tracking`,
-        validationResult: 'error',
-        executionResult: 'failure',
-        userId: context.userId,
-        riskLevel: RiskLevel.HIGH,
+        validationResult: 'error',executionResult: 'failure',userId: context.userId,riskLevel: RiskLevel._HIGH,
         aiProcessingUsed: context.aiProcessingRequired,
         privacyProtected: false,
         securityFlags: ['ai_input_error', 'execution_failure'],
-        conversationSummary: `Input tracking failed: ${errorMessage}`,
-      });
-
-      this.addToInputAuditTrail(errorAuditEntry);
+        conversationSummary: `Input tracking failed: ${errorMessage}`,});this.addToInputAuditTrail(errorAuditEntry);
 
       this.logger.error(
-        `[${operationId}] Parlant-validated AI input tracking failed: ${errorMessage}`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated AI input tracking failed: ${errorMessage}`,{operationId,
           inputType: context.inputType,
           error: errorMessage,
           stack: error instanceof Error ? error.stack : undefined,
@@ -342,7 +306,7 @@ export class ParlantValidatedInputCaptureService {
         },
         actionDescription: `Stop ${context.inputType} input tracking`,
         context,
-        riskLevel: RiskLevel.MINIMAL, // Stopping is generally safe
+        riskLevel: RiskLevel._MINIMAL, // Stopping is generally safe
         operationId,
         inputContext: context,
         inputData: {
@@ -356,10 +320,7 @@ export class ParlantValidatedInputCaptureService {
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Stop tracking operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute stop tracking with validation approval
+        throw new Error(`Stop tracking operation blocked: ${validationResponse.reasoning}`);}// Execute stop tracking with validation approval
       await this.inputTrackingService.stopTracking();
 
       const response: ProcessedInputCaptureResponse = {
@@ -374,9 +335,7 @@ export class ParlantValidatedInputCaptureService {
       const duration = Date.now() - startTime;
       this.updateInputPerformanceMetrics(duration);
 
-      this.logger.log(`[${operationId}] Input tracking stopped successfully with Parlant validation`, {
-        operationId,
-        inputType: context.inputType,
+      this.logger.log(`[${operationId}] Input tracking stopped successfully with Parlant validation`, {operationId,inputType: context.inputType,
         conversationId: validationResponse.conversationId,
         duration,
       });
@@ -385,9 +344,7 @@ export class ParlantValidatedInputCaptureService {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Stop input tracking failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        inputType: context.inputType,
+      this.logger.error(`[${operationId}] Stop input tracking failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,inputType: context.inputType,
         error: error instanceof Error ? error.message : String(error),
         duration,
       });
@@ -424,12 +381,9 @@ export class ParlantValidatedInputCaptureService {
 
       // Parlant validation for computer action capture
       const validationRequest: InputCaptureValidationRequest = {
-        functionName: 'InputCaptureService.captureAction',
-        functionParams: {
-          actionType: action.action,
+        functionName: 'InputCaptureService.captureAction',functionParams: {actionType: action.action,
           inputType: context.inputType,
-          hasCoordinates: 'x' in action && 'y' in action,
-          hasTextContent: 'text' in action,
+          hasCoordinates: 'x' in action && 'y' in action,hasTextContent: 'text' in action,
         },
         actionDescription: `Capture ${action.action} computer action with AI processing`,
         context,
@@ -438,8 +392,7 @@ export class ParlantValidatedInputCaptureService {
         inputContext: context,
         inputData: {
           actionType: action.action,
-          coordinatesIncluded: 'x' in action && 'y' in action,
-          textContent: 'text' in action,
+          coordinatesIncluded: 'x' in action && 'y' in action,textContent: 'text' in action,
           screenshotData: false,
         },
       };
@@ -447,10 +400,7 @@ export class ParlantValidatedInputCaptureService {
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Computer action capture blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Process the action with AI analysis if required
+        throw new Error(`Computer action capture blocked: ${validationResponse.reasoning}`);}// Process the action with AI analysis if required
       let aiAnalysis;
       if (context.aiProcessingRequired) {
         aiAnalysis = await this.performAIActionAnalysis(action, context, validationResponse.conversationId);
@@ -470,9 +420,7 @@ export class ParlantValidatedInputCaptureService {
       const duration = Date.now() - startTime;
       this.updateInputPerformanceMetrics(duration);
 
-      this.logger.log(`[${operationId}] Computer action captured successfully with AI processing`, {
-        operationId,
-        actionType: action.action,
+      this.logger.log(`[${operationId}] Computer action captured successfully with AI processing`, {operationId,actionType: action.action,
         conversationId: validationResponse.conversationId,
         aiAnalysisPerformed: !!aiAnalysis,
         duration,
@@ -482,9 +430,7 @@ export class ParlantValidatedInputCaptureService {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Computer action capture failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        actionType: action.action,
+      this.logger.error(`[${operationId}] Computer action capture failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,actionType: action.action,
         error: error instanceof Error ? error.message : String(error),
         duration,
       });
@@ -518,10 +464,7 @@ export class ParlantValidatedInputCaptureService {
       anomalyDetected: Math.random() < 0.05, // 5% chance of anomaly detection
     };
 
-    this.logger.debug(`AI analysis completed for conversation ${conversationId}`, mockAnalysis);
-    
-    return mockAnalysis;
-  }
+    this.logger.debug(`AI analysis completed for conversation ${conversationId}`, mockAnalysis);return mockAnalysis;}
 
   /**
    * Perform AI analysis of computer action intent (mock implementation)
@@ -543,9 +486,7 @@ export class ParlantValidatedInputCaptureService {
     const mockAnalysis = {
       intentConfidence: 0.80 + Math.random() * 0.15, // 80-95% confidence
       riskAssessment: this.generateActionRiskAssessment(action),
-      userBehaviorPattern: `${action.action}_pattern_analysis`,
-      anomalyDetected: this.detectActionAnomaly(action),
-    };
+      userBehaviorPattern: `${action.action}_pattern_analysis`,anomalyDetected: this.detectActionAnomaly(action),};
 
     this.logger.debug(`AI action analysis completed for conversation ${conversationId}`, mockAnalysis);
     
@@ -556,18 +497,18 @@ export class ParlantValidatedInputCaptureService {
 
   private assessInputRiskLevel(context: InputAgentContext): RiskLevel {
     if (context.inputType === 'screenshot') {
-      return RiskLevel.HIGH; // Screenshots contain sensitive visual data
+      return RiskLevel._HIGH; // Screenshots contain sensitive visual data
     }
     if (context.inputType === 'keyboard' && context.privacyLevel === 'MAXIMUM') {
-      return RiskLevel.CRITICAL; // Keyboard input could contain passwords
+      return RiskLevel._CRITICAL; // Keyboard input could contain passwords
     }
     if (context.captureMode === 'ai_driven') {
-      return RiskLevel.HIGH; // AI-driven capture requires more scrutiny
+      return RiskLevel._HIGH; // AI-driven capture requires more scrutiny
     }
     if (context.privacyLevel === 'HIGH' || context.privacyLevel === 'MAXIMUM') {
-      return RiskLevel.MEDIUM;
+      return RiskLevel._MODERATE;
     }
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   private assessActionRiskLevel(action: ComputerAction): RiskLevel {
@@ -575,17 +516,17 @@ export class ParlantValidatedInputCaptureService {
       // Check if the text contains sensitive patterns
       const text = (action as { text: string }).text;
       if (this.containsSensitiveData(text)) {
-        return RiskLevel.CRITICAL;
+        return RiskLevel._CRITICAL;
       }
-      return RiskLevel.MEDIUM;
+      return RiskLevel._MODERATE;
     }
     if (action.action === 'click_mouse' || action.action === 'drag_mouse') {
-      return RiskLevel.MEDIUM; // Mouse actions can trigger important operations
+      return RiskLevel._MODERATE; // Mouse actions can trigger important operations
     }
     if (action.action === 'scroll' || action.action === 'move_mouse') {
-      return RiskLevel.LOW; // Navigation actions are generally safe
+      return RiskLevel._LOW; // Navigation actions are generally safe
     }
-    return RiskLevel.MINIMAL;
+    return RiskLevel._MINIMAL;
   }
 
   // ===== UTILITY METHODS =====
@@ -618,9 +559,7 @@ export class ParlantValidatedInputCaptureService {
 
   private detectActionAnomaly(action: ComputerAction): boolean {
     // Simple anomaly detection based on action type
-    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {
-      const text = (action as { text: string }).text;
-      return text.length > 1000; // Very long text input might be anomalous
+    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {const text = (action as { text: string }).text;return text.length > 1000; // Very long text input might be anomalous
     }
     return Math.random() < 0.03; // 3% chance of anomaly detection
   }
@@ -630,10 +569,7 @@ export class ParlantValidatedInputCaptureService {
     conversationId: string;
     inputType: string;
     actionDescription: string;
-    validationResult: 'approved' | 'denied' | 'error';
-    executionResult: 'success' | 'failure' | 'cancelled';
-    userId: string;
-    riskLevel: RiskLevel;
+    validationResult: 'approved' | 'denied' | 'error';executionResult: 'success' | 'failure' | 'cancelled';userId: string;riskLevel: RiskLevel;
     aiProcessingUsed: boolean;
     privacyProtected: boolean;
     securityFlags: string[];
@@ -661,9 +597,7 @@ export class ParlantValidatedInputCaptureService {
     this.inputAuditTrail.push(entry);
 
     // Trim audit trail if it gets too large
-    const maxAuditSize = this.configService.get<number>('INPUT_AUDIT_MAX_SIZE', 2000);
-    if (this.inputAuditTrail.length > maxAuditSize) {
-      this.inputAuditTrail.splice(0, this.inputAuditTrail.length - maxAuditSize);
+    const maxAuditSize = this.configService.get<number>('INPUT_AUDIT_MAX_SIZE', 2000);if (this.inputAuditTrail.length > maxAuditSize) {this.inputAuditTrail.splice(0, this.inputAuditTrail.length - maxAuditSize);
     }
   }
 
@@ -678,10 +612,7 @@ export class ParlantValidatedInputCaptureService {
 
     this.logger.log('Input Capture AI Processing Performance Metrics', {
       inputValidationCount: this.inputValidationCount,
-      inputCacheHitRate: `${inputCacheHitRate.toFixed(2)}%`,
-      averageInputValidationTime: `${this.averageInputValidationTime.toFixed(2)}ms`,
-      aiProcessingCount: this.aiProcessingCount,
-      aiProcessingRate: `${aiProcessingRate.toFixed(2)}%`,
+      inputCacheHitRate: `${inputCacheHitRate.toFixed(2)}%`,averageInputValidationTime: `${this.averageInputValidationTime.toFixed(2)}ms`,aiProcessingCount: this.aiProcessingCount,aiProcessingRate: `${aiProcessingRate.toFixed(2)}%`,
       inputAuditTrailSize: this.inputAuditTrail.length,
     });
   }
@@ -689,44 +620,22 @@ export class ParlantValidatedInputCaptureService {
   // ===== CONFIGURATION HELPERS =====
 
   private isParlantInputEnabled(): boolean {
-    return this.configService.get<boolean>('PARLANT_INPUT_ENABLED', true);
-  }
-
-  private isAIProcessingEnabled(): boolean {
-    return this.configService.get<boolean>('AI_INPUT_PROCESSING_ENABLED', true);
-  }
-
-  private isInputAuditEnabled(): boolean {
-    return this.configService.get<boolean>('INPUT_AUDIT_ENABLED', true);
-  }
-
-  private getPrivacyMode(): string {
-    return this.configService.get<string>('INPUT_PRIVACY_MODE', 'high');
-  }
-
-  // ===== PUBLIC UTILITY METHODS =====
+    return this.configService.get<boolean>('PARLANT_INPUT_ENABLED', true);}private isAIProcessingEnabled(): boolean {
+    return this.configService.get<boolean>('AI_INPUT_PROCESSING_ENABLED', true);}private isInputAuditEnabled(): boolean {
+    return this.configService.get<boolean>('INPUT_AUDIT_ENABLED', true);}private getPrivacyMode(): string {
+    return this.configService.get<string>('INPUT_PRIVACY_MODE', 'high');}// ===== PUBLIC UTILITY METHODS =====
 
   /**
    * Get input capture service health and statistics
    */
   getInputCaptureHealth(): {
-    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-    metrics: Record<string, unknown>;
-    auditSummary: Record<string, unknown>;
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';metrics: Record<string, unknown>;auditSummary: Record<string, unknown>;
   } {
     const avgValidationTime = this.averageInputValidationTime;
     const aiProcessingRate = this.inputValidationCount > 0 ? (this.aiProcessingCount / this.inputValidationCount) * 100 : 0;
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
-    if (avgValidationTime > 500 || aiProcessingRate < 50) {
-      status = 'DEGRADED';
-    }
-    if (avgValidationTime > 1000 || this.inputAuditTrail.length === 0) {
-      status = 'FAILED';
-    }
-
-    const auditSummary = {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgValidationTime > 500 || aiProcessingRate < 50) {status = 'DEGRADED';}if (avgValidationTime > 1000 || this.inputAuditTrail.length === 0) {
+      status = 'FAILED';}const auditSummary = {
       totalInputOperations: this.inputValidationCount,
       aiProcessingOperations: this.aiProcessingCount,
       auditTrailSize: this.inputAuditTrail.length,
@@ -739,8 +648,7 @@ export class ParlantValidatedInputCaptureService {
       status,
       metrics: {
         inputValidationCount: this.inputValidationCount,
-        averageInputValidationTime: `${avgValidationTime.toFixed(2)}ms`,
-        aiProcessingRate: `${aiProcessingRate.toFixed(2)}%`,
+        averageInputValidationTime: `${avgValidationTime.toFixed(2)}ms`,aiProcessingRate: `${aiProcessingRate.toFixed(2)}%`,
         parlantEnabled: this.isParlantInputEnabled(),
         aiProcessingEnabled: this.isAIProcessingEnabled(),
       },

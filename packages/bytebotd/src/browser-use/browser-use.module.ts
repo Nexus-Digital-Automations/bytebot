@@ -1,33 +1,4 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScheduleModule } from '@nestjs/schedule';
-import { BrowserUseController } from './browser-use.controller';
-import { ParlantValidatedBrowserUseController } from './parlant-validated-browser-use.controller';
-import { EnhancedBrowserAutomationController } from './enhanced-browser-automation.controller';
-import { BrowserTaskExecutionController } from './browser-task-execution.controller';
-import { BrowserInteractionController } from './browser-interaction.controller';
-import { BrowserOrchestrationSessionController } from './browser-orchestration-session.controller';
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserOrchestrationSessionService } from './browser-orchestration-session.service';
-import { BrowserTaskService } from './browser-task.service';
-import { BrowserAsyncJobService } from './browser-async-job.service';
-import { BrowserTaskExecutionService } from './browser-task-execution.service';
-import { BrowserInteractionService } from './browser-interaction.service';
-import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';
-import { MediaController } from './media.controller';
-import { MediaService } from './media.service';
-import { ExtractionController } from './extraction.controller';
-import { ExtractionService } from './extraction.service';
-import { ExtractionOrchestrationController } from './extraction-orchestration.controller';
-
-// Parlant-validated browser services imports
-import { ParlantModule } from '../parlant/parlant.module';
-import { ParlantValidatedBrowserUseService } from './parlant-validated-browser-use.service';
-import { ParlantValidatedBrowserSessionService } from './parlant-validated-browser-session.service';
-import { ParlantValidatedBrowserTaskService } from './parlant-validated-browser-task.service';
-import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-browser-async-job.service';
+import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { EventEmitterModule } from '@nestjs/event-emitter';import { ScheduleModule } from '@nestjs/schedule';import { BrowserUseController } from './browser-use.controller';import { ParlantValidatedBrowserUseController } from './parlant-validated-browser-use.controller';import { EnhancedBrowserAutomationController } from './enhanced-browser-automation.controller';import { BrowserTaskExecutionController } from './browser-task-execution.controller';import { BrowserInteractionController } from './browser-interaction.controller';import { BrowserOrchestrationSessionController } from './browser-orchestration-session.controller';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserOrchestrationSessionService } from './browser-orchestration-session.service';import { BrowserTaskService } from './browser-task.service';import { BrowserAsyncJobService } from './browser-async-job.service';import { BrowserTaskExecutionService } from './browser-task-execution.service';import { BrowserInteractionService } from './browser-interaction.service';import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';import { MediaController } from './media.controller';import { MediaService } from './media.service';import { ExtractionController } from './extraction.controller';import { ExtractionService } from './extraction.service';import { ExtractionOrchestrationController } from './extraction-orchestration.controller';// Parlant-validated browser services importsimport { ParlantModule } from '../parlant/parlant.module';import { ParlantValidatedBrowserUseService } from './parlant-validated-browser-use.service';import { ParlantValidatedBrowserSessionService } from './parlant-validated-browser-session.service';import { ParlantValidatedBrowserTaskService } from './parlant-validated-browser-task.service';import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-browser-async-job.service';
 
 /**
  * Browser-Use Module - MAXIMUM PARLANT INTEGRATION

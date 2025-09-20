@@ -1613,7 +1613,7 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
             };
             try {
               await client.sendMessageWithDeliveryGuarantee(largeMessage, { timeout: 1000 });
-            } catch (error) {
+            } catch (_error) {
               // Expected to fail for very large messages
             }
           },

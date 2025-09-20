@@ -17,13 +17,7 @@
  * Monitoring: Real-time metrics with historical trend analysis
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { performance } from 'perf_hooks';
-
-// ===== PERFORMANCE MONITORING INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { performance } from 'perf_hooks';// ===== PERFORMANCE MONITORING INTERFACES =====/**
  * Performance metrics for Parlant validation operations
  */
 export interface ParlantPerformanceMetrics {
@@ -32,9 +26,7 @@ export interface ParlantPerformanceMetrics {
   readonly startTime: number;
   readonly endTime: number;
   readonly duration: number;
-  readonly validationType: 'cache_hit' | 'cache_miss' | 'real_time' | 'circuit_breaker';
-  readonly cacheHit: boolean;
-  readonly errorOccurred: boolean;
+  readonly validationType: 'cache_hit' | 'cache_miss' | 'real_time' | 'circuit_breaker';readonly cacheHit: boolean;readonly errorOccurred: boolean;
   readonly throughputRpm: number; // Requests per minute
   readonly memoryUsage: NodeJS.MemoryUsage;
   readonly timestamp: Date;
@@ -44,9 +36,7 @@ export interface ParlantPerformanceMetrics {
  * Aggregated performance statistics
  */
 export interface ParlantPerformanceStats {
-  readonly period: 'minute' | 'hour' | 'day';
-  readonly totalOperations: number;
-  readonly averageLatency: number;
+  readonly period: 'minute' | 'hour' | 'day';readonly totalOperations: number;readonly averageLatency: number;
   readonly medianLatency: number;
   readonly p95Latency: number;
   readonly p99Latency: number;
@@ -76,17 +66,11 @@ export interface PerformanceAlertConfig {
     readonly minCacheHitRate: number; // 95%
     readonly maxErrorRate: number; // 5%
   };
-  readonly alertActions: ('log' | 'email' | 'webhook')[];
-}
-
-/**
+  readonly alertActions: ('log' | 'email' | 'webhook')[];}/**
  * Performance optimization recommendation
  */
 export interface PerformanceRecommendation {
-  readonly category: 'caching' | 'concurrency' | 'memory' | 'network' | 'algorithm';
-  readonly priority: 'critical' | 'high' | 'medium' | 'low';
-  readonly issue: string;
-  readonly recommendation: string;
+  readonly category: 'caching' | 'concurrency' | 'memory' | 'network' | 'algorithm';readonly priority: 'critical' | 'high' | 'medium' | 'low';readonly issue: string;readonly recommendation: string;
   readonly expectedImprovement: string;
   readonly implementationComplexity: 'low' | 'medium' | 'high';
 }
@@ -113,20 +97,10 @@ export class ParlantPerformanceMonitorService {
     const operationId = `perf_monitor_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.performanceAlerts = {
-      enabled: this.configService.get<boolean>('PARLANT_PERFORMANCE_ALERTS_ENABLED', true),
-      thresholds: {
-        maxAverageLatency: this.configService.get<number>('PARLANT_MAX_AVG_LATENCY_MS', 500),
-        maxP95Latency: this.configService.get<number>('PARLANT_MAX_P95_LATENCY_MS', 1000),
-        minThroughputRpm: this.configService.get<number>('PARLANT_MIN_THROUGHPUT_RPM', 25),
-        minCacheHitRate: this.configService.get<number>('PARLANT_MIN_CACHE_HIT_RATE', 95),
-        maxErrorRate: this.configService.get<number>('PARLANT_MAX_ERROR_RATE', 5),
-      },
-      alertActions: ['log', 'webhook'],
+      enabled: this.configService.get<boolean>('PARLANT_PERFORMANCE_ALERTS_ENABLED', true),thresholds: {maxAverageLatency: this.configService.get<number>('PARLANT_MAX_AVG_LATENCY_MS', 500),maxP95Latency: this.configService.get<number>('PARLANT_MAX_P95_LATENCY_MS', 1000),minThroughputRpm: this.configService.get<number>('PARLANT_MIN_THROUGHPUT_RPM', 25),minCacheHitRate: this.configService.get<number>('PARLANT_MIN_CACHE_HIT_RATE', 95),maxErrorRate: this.configService.get<number>('PARLANT_MAX_ERROR_RATE', 5),},alertActions: ['log', 'webhook'],
     };
 
-    this.logger.log(`[${operationId}] Initializing Parlant Performance Monitor`, {
-      alertsEnabled: this.performanceAlerts.enabled,
-      thresholds: this.performanceAlerts.thresholds,
+    this.logger.log(`[${operationId}] Initializing Parlant Performance Monitor`, {alertsEnabled: this.performanceAlerts.enabled,thresholds: this.performanceAlerts.thresholds,
       optimizationEnabled: this.performanceOptimizationEnabled,
       retentionDays: this.metricsRetentionDays,
     });
@@ -176,9 +150,7 @@ export class ParlantPerformanceMonitorService {
     const operation = this.activeOperations.get(operationId);
     
     if (!operation) {
-      this.logger.warn(`[${operationId}] No active operation found for performance tracking`);
-      return null;
-    }
+      this.logger.warn(`[${operationId}] No active operation found for performance tracking`);return null;}
 
     const duration = endTime - operation.startTime;
     const memoryUsage = process.memoryUsage();
@@ -209,9 +181,7 @@ export class ParlantPerformanceMonitorService {
     // Check performance thresholds and generate alerts if needed
     this.checkPerformanceThresholds(metrics);
 
-    this.logger.debug(`[${operationId}] Performance tracking completed`, {
-      operationId,
-      functionName: operation.functionName,
+    this.logger.debug(`[${operationId}] Performance tracking completed`, {operationId,functionName: operation.functionName,
       duration: `${duration.toFixed(2)}ms`,
       validationType,
       cacheHit,
@@ -228,9 +198,7 @@ export class ParlantPerformanceMonitorService {
    * @param period - Time period for statistics
    * @returns Aggregated performance statistics
    */
-  getPerformanceStats(period: ParlantPerformanceStats['period'] = 'hour'): ParlantPerformanceStats {
-    const periodMs = this.getPeriodInMs(period);
-    const cutoffTime = Date.now() - periodMs;
+  getPerformanceStats(period: ParlantPerformanceStats['period'] = 'hour'): ParlantPerformanceStats {const periodMs = this.getPeriodInMs(period);const cutoffTime = Date.now() - periodMs;
     
     const recentMetrics = this.metrics.filter(
       metric => metric.timestamp.getTime() > cutoffTime
@@ -296,68 +264,40 @@ export class ParlantPerformanceMonitorService {
    * @returns Array of optimization recommendations
    */
   generatePerformanceRecommendations(): PerformanceRecommendation[] {
-    const stats = this.getPerformanceStats('hour');
-    const recommendations: PerformanceRecommendation[] = [];
-
-    // Latency recommendations
+    const stats = this.getPerformanceStats('hour');const recommendations: PerformanceRecommendation[] = [];// Latency recommendations
     if (!stats.targetsMet.avgUnder500ms) {
       recommendations.push({
-        category: 'caching',
-        priority: 'critical',
+        category: 'caching',priority: 'critical',
         issue: `Average latency ${stats.averageLatency.toFixed(2)}ms exceeds 500ms target`,
-        recommendation: 'Implement intelligent caching with longer TTL for low-risk operations',
-        expectedImprovement: '40-60% latency reduction',
-        implementationComplexity: 'medium',
-      });
-    }
+        recommendation: 'Implement intelligent caching with longer TTL for low-risk operations',expectedImprovement: '40-60% latency reduction',implementationComplexity: 'medium',});}
 
     if (!stats.targetsMet.p95Under1000ms) {
       recommendations.push({
-        category: 'concurrency',
-        priority: 'high',
+        category: 'concurrency',priority: 'high',
         issue: `95th percentile latency ${stats.p95Latency.toFixed(2)}ms exceeds 1000ms target`,
-        recommendation: 'Implement circuit breaker pattern and async validation queuing',
-        expectedImprovement: '30-50% p95 latency reduction',
-        implementationComplexity: 'high',
-      });
-    }
+        recommendation: 'Implement circuit breaker pattern and async validation queuing',expectedImprovement: '30-50% p95 latency reduction',implementationComplexity: 'high',});}
 
     // Cache hit rate recommendations
     if (!stats.targetsMet.cacheHitOver95) {
       recommendations.push({
-        category: 'caching',
-        priority: 'high',
+        category: 'caching',priority: 'high',
         issue: `Cache hit rate ${stats.cacheHitRate.toFixed(1)}% below 95% target`,
-        recommendation: 'Implement Redis cluster with intelligent cache warming',
-        expectedImprovement: '15-25% cache hit rate improvement',
-        implementationComplexity: 'medium',
-      });
-    }
+        recommendation: 'Implement Redis cluster with intelligent cache warming',expectedImprovement: '15-25% cache hit rate improvement',implementationComplexity: 'medium',});}
 
     // Throughput recommendations
     if (!stats.targetsMet.throughputOver25) {
       recommendations.push({
-        category: 'concurrency',
-        priority: 'medium',
+        category: 'concurrency',priority: 'medium',
         issue: `Throughput ${stats.throughputRpm.toFixed(1)} RPM below 25 RPM target`,
-        recommendation: 'Implement connection pooling and batch validation processing',
-        expectedImprovement: '100-200% throughput increase',
-        implementationComplexity: 'medium',
-      });
-    }
+        recommendation: 'Implement connection pooling and batch validation processing',expectedImprovement: '100-200% throughput increase',implementationComplexity: 'medium',});}
 
     // Memory optimization
     const memoryUsage = process.memoryUsage();
     if (memoryUsage.heapUsed > 100 * 1024 * 1024) { // 100MB
       recommendations.push({
-        category: 'memory',
-        priority: 'medium',
+        category: 'memory',priority: 'medium',
         issue: `High memory usage: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-        recommendation: 'Implement metrics cleanup and cache size limits',
-        expectedImprovement: '30-50% memory usage reduction',
-        implementationComplexity: 'low',
-      });
-    }
+        recommendation: 'Implement metrics cleanup and cache size limits',expectedImprovement: '30-50% memory usage reduction',implementationComplexity: 'low',});}
 
     return recommendations;
   }
@@ -418,15 +358,9 @@ export class ParlantPerformanceMonitorService {
 
     // Check individual operation latency
     if (metrics.duration > this.performanceAlerts.thresholds.maxAverageLatency * 2) {
-      alerts.push(`High latency operation: ${metrics.duration.toFixed(2)}ms for ${metrics.functionName}`);
-    }
-
-    // Check error occurrence
+      alerts.push(`High latency operation: ${metrics.duration.toFixed(2)}ms for ${metrics.functionName}`);}// Check error occurrence
     if (metrics.errorOccurred) {
-      alerts.push(`Error in operation: ${metrics.operationId} (${metrics.functionName})`);
-    }
-
-    // Send alerts if any triggered
+      alerts.push(`Error in operation: ${metrics.operationId} (${metrics.functionName})`);}// Send alerts if any triggered
     if (alerts.length > 0) {
       this.sendPerformanceAlerts(alerts);
     }
@@ -437,12 +371,8 @@ export class ParlantPerformanceMonitorService {
       this.logger.warn(`Performance Alert: ${alert}`);
       
       // TODO: Implement additional alert actions (email, webhook)
-      // if (this.performanceAlerts.alertActions.includes('email')) {
-      //   await this.sendEmailAlert(alert);
-      // }
-      // if (this.performanceAlerts.alertActions.includes('webhook')) {
-      //   await this.sendWebhookAlert(alert);
-      // }
+      // if (this.performanceAlerts.alertActions.includes('email')) {//   await this.sendEmailAlert(alert);// }
+      // if (this.performanceAlerts.alertActions.includes('webhook')) {//   await this.sendWebhookAlert(alert);// }
     });
   }
 
@@ -451,18 +381,9 @@ export class ParlantPerformanceMonitorService {
     const alerts: string[] = [];
 
     if (!stats.targetsMet.avgUnder500ms) {
-      alerts.push(`Average latency ${stats.averageLatency.toFixed(2)}ms exceeds 500ms target`);
-    }
-
-    if (!stats.targetsMet.p95Under1000ms) {
-      alerts.push(`95th percentile latency ${stats.p95Latency.toFixed(2)}ms exceeds 1000ms target`);
-    }
-
-    if (!stats.targetsMet.cacheHitOver95) {
-      alerts.push(`Cache hit rate ${stats.cacheHitRate.toFixed(1)}% below 95% target`);
-    }
-
-    if (!stats.targetsMet.throughputOver25) {
+      alerts.push(`Average latency ${stats.averageLatency.toFixed(2)}ms exceeds 500ms target`);}if (!stats.targetsMet.p95Under1000ms) {
+      alerts.push(`95th percentile latency ${stats.p95Latency.toFixed(2)}ms exceeds 1000ms target`);}if (!stats.targetsMet.cacheHitOver95) {
+      alerts.push(`Cache hit rate ${stats.cacheHitRate.toFixed(1)}% below 95% target`);}if (!stats.targetsMet.throughputOver25) {
       alerts.push(`Throughput ${stats.throughputRpm.toFixed(1)} RPM below 25 RPM target`);
     }
 
@@ -496,18 +417,10 @@ export class ParlantPerformanceMonitorService {
     return Math.max(0, Math.min(100, score));
   }
 
-  private getPeriodInMs(period: ParlantPerformanceStats['period']): number {
-    switch (period) {
-      case 'minute': return 60 * 1000;
-      case 'hour': return 60 * 60 * 1000;
-      case 'day': return 24 * 60 * 60 * 1000;
-      default: return 60 * 60 * 1000;
-    }
+  private getPeriodInMs(period: ParlantPerformanceStats['period']): number {switch (period) {case 'minute': return 60 * 1000;case 'hour': return 60 * 60 * 1000;case 'day': return 24 * 60 * 60 * 1000;default: return 60 * 60 * 1000;}
   }
 
-  private getEmptyStats(period: ParlantPerformanceStats['period']): ParlantPerformanceStats {
-    return {
-      period,
+  private getEmptyStats(period: ParlantPerformanceStats['period']): ParlantPerformanceStats {return {period,
       totalOperations: 0,
       averageLatency: 0,
       medianLatency: 0,
@@ -531,16 +444,9 @@ export class ParlantPerformanceMonitorService {
   private startPeriodicMonitoring(): void {
     // Performance metrics logging every 5 minutes
     setInterval(() => {
-      const stats = this.getPerformanceStats('hour');
-      this.logger.log('Parlant Performance Metrics Summary', {
+      const stats = this.getPerformanceStats('hour');this.logger.log('Parlant Performance Metrics Summary', {
         totalOperations: stats.totalOperations,
-        averageLatency: `${stats.averageLatency.toFixed(2)}ms`,
-        p95Latency: `${stats.p95Latency.toFixed(2)}ms`,
-        throughputRpm: `${stats.throughputRpm.toFixed(1)} RPM`,
-        cacheHitRate: `${stats.cacheHitRate.toFixed(1)}%`,
-        performanceScore: `${stats.performanceScore.toFixed(1)}/100`,
-        targetsMet: stats.targetsMet,
-      });
+        averageLatency: `${stats.averageLatency.toFixed(2)}ms`,p95Latency: `${stats.p95Latency.toFixed(2)}ms`,throughputRpm: `${stats.throughputRpm.toFixed(1)} RPM`,cacheHitRate: `${stats.cacheHitRate.toFixed(1)}%`,performanceScore: `${stats.performanceScore.toFixed(1)}/100`,targetsMet: stats.targetsMet,});
     }, 5 * 60 * 1000);
 
     // Cleanup old metrics daily

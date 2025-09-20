@@ -17,73 +17,28 @@
  * Performance: Sub-200ms threat detection with intelligent analysis caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
   ParlantValidationRequest, 
   ParlantConversationContext, 
   RiskLevel,
   ConversationalValidationError 
-} from '../parlant/parlant-integration.service';
-
-// ===== THREAT DETECTION INTERFACES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== THREAT DETECTION INTERFACES =====/**
  * Threat types for detection and classification
  */
 export enum ThreatType {
-  MALWARE = 'MALWARE',
-  RANSOMWARE = 'RANSOMWARE',
-  APT_ATTACK = 'APT_ATTACK',
-  INSIDER_THREAT = 'INSIDER_THREAT',
-  DATA_EXFILTRATION = 'DATA_EXFILTRATION',
-  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',
-  SOCIAL_ENGINEERING = 'SOCIAL_ENGINEERING',
-  ZERO_DAY_EXPLOIT = 'ZERO_DAY_EXPLOIT',
-  SUPPLY_CHAIN_ATTACK = 'SUPPLY_CHAIN_ATTACK',
-  PHISHING_ATTACK = 'PHISHING_ATTACK',
-  DDOS_ATTACK = 'DDOS_ATTACK',
-  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION'
-}
-
-/**
+  MALWARE = 'MALWARE',RANSOMWARE = 'RANSOMWARE',APT_ATTACK = 'APT_ATTACK',INSIDER_THREAT = 'INSIDER_THREAT',DATA_EXFILTRATION = 'DATA_EXFILTRATION',BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',SOCIAL_ENGINEERING = 'SOCIAL_ENGINEERING',ZERO_DAY_EXPLOIT = 'ZERO_DAY_EXPLOIT',SUPPLY_CHAIN_ATTACK = 'SUPPLY_CHAIN_ATTACK',PHISHING_ATTACK = 'PHISHING_ATTACK',DDOS_ATTACK = 'DDOS_ATTACK',PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION'}/**
  * Threat severity levels
  */
 export enum ThreatSeverity {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  INFO = 'INFO'
-}
-
-/**
+  CRITICAL = 'CRITICAL',HIGH = 'HIGH',MEDIUM = 'MEDIUM',LOW = 'LOW',INFO = 'INFO'}/**
  * Threat detection confidence levels
  */
 export enum ThreatConfidence {
-  CONFIRMED = 'CONFIRMED',
-  HIGH_CONFIDENCE = 'HIGH_CONFIDENCE',
-  MEDIUM_CONFIDENCE = 'MEDIUM_CONFIDENCE',
-  LOW_CONFIDENCE = 'LOW_CONFIDENCE',
-  SUSPICIOUS = 'SUSPICIOUS'
-}
-
-/**
+  CONFIRMED = 'CONFIRMED',HIGH_CONFIDENCE = 'HIGH_CONFIDENCE',MEDIUM_CONFIDENCE = 'MEDIUM_CONFIDENCE',LOW_CONFIDENCE = 'LOW_CONFIDENCE',SUSPICIOUS = 'SUSPICIOUS'}/**
  * Threat source categories
  */
 export enum ThreatSource {
-  EXTERNAL_NETWORK = 'EXTERNAL_NETWORK',
-  INTERNAL_NETWORK = 'INTERNAL_NETWORK',
-  EMAIL_SYSTEM = 'EMAIL_SYSTEM',
-  WEB_APPLICATION = 'WEB_APPLICATION',
-  ENDPOINT_DEVICE = 'ENDPOINT_DEVICE',
-  CLOUD_SERVICE = 'CLOUD_SERVICE',
-  MOBILE_DEVICE = 'MOBILE_DEVICE',
-  IOT_DEVICE = 'IOT_DEVICE'
-}
-
-/**
+  EXTERNAL_NETWORK = 'EXTERNAL_NETWORK',INTERNAL_NETWORK = 'INTERNAL_NETWORK',EMAIL_SYSTEM = 'EMAIL_SYSTEM',WEB_APPLICATION = 'WEB_APPLICATION',ENDPOINT_DEVICE = 'ENDPOINT_DEVICE',CLOUD_SERVICE = 'CLOUD_SERVICE',MOBILE_DEVICE = 'MOBILE_DEVICE',IOT_DEVICE = 'IOT_DEVICE'}/**
  * Threat detector configuration
  */
 export interface ThreatDetectorConfig {
@@ -143,11 +98,7 @@ export interface ThreatSourceDetails {
  * Threat indicator of compromise (IoC)
  */
 export interface ThreatIndicator {
-  readonly type: 'IP' | 'DOMAIN' | 'URL' | 'FILE_HASH' | 'EMAIL' | 'REGISTRY_KEY' | 'PROCESS';
-  readonly value: string;
-  readonly category: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
-  readonly firstSeen: Date;
-  readonly lastSeen: Date;
+  readonly type: 'IP' | 'DOMAIN' | 'URL' | 'FILE_HASH' | 'EMAIL' | 'REGISTRY_KEY' | 'PROCESS';readonly value: string;readonly category: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';readonly firstSeen: Date;readonly lastSeen: Date;
   readonly confidence: ThreatConfidence;
   readonly reputation: number;
   readonly context: string;
@@ -158,9 +109,7 @@ export interface ThreatIndicator {
  */
 export interface ThreatDetectionRequest {
   readonly operationId: string;
-  readonly detectionScope: 'SYSTEM_WIDE' | 'NETWORK' | 'ENDPOINT' | 'APPLICATION' | 'USER_BEHAVIOR';
-  readonly timeRange?: { start: Date; end: Date };
-  readonly targetAssets?: string[];
+  readonly detectionScope: 'SYSTEM_WIDE' | 'NETWORK' | 'ENDPOINT' | 'APPLICATION' | 'USER_BEHAVIOR';readonly timeRange?: { start: Date; end: Date };readonly targetAssets?: string[];
   readonly threatTypes?: ThreatType[];
   readonly minConfidence?: ThreatConfidence;
   readonly context: ParlantConversationContext;
@@ -180,18 +129,13 @@ export interface ThreatDetectionResult {
   readonly highestRiskScore: number;
   readonly recommendedActions: string[];
   readonly conversationId: string;
-  readonly validationStatus: 'APPROVED' | 'ANALYZING' | 'BLOCKED';
-}
-
-/**
+  readonly validationStatus: 'APPROVED' | 'ANALYZING' | 'BLOCKED';}/**
  * Threat response request
  */
 export interface ThreatResponseRequest {
   readonly operationId: string;
   readonly threatId: string;
-  readonly responseType: 'CONTAIN' | 'QUARANTINE' | 'BLOCK' | 'INVESTIGATE' | 'ALERT_ONLY';
-  readonly automatedResponse: boolean;
-  readonly customActions?: string[];
+  readonly responseType: 'CONTAIN' | 'QUARANTINE' | 'BLOCK' | 'INVESTIGATE' | 'ALERT_ONLY';readonly automatedResponse: boolean;readonly customActions?: string[];
   readonly context: ParlantConversationContext;
 }
 
@@ -204,22 +148,16 @@ export interface ThreatResponseResult {
   readonly responseType: string;
   readonly actionsExecuted: ThreatResponseAction[];
   readonly responseEffective: boolean;
-  readonly containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';
-  readonly conversationId: string;
-}
+  readonly containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';readonly conversationId: string;}
 
 /**
  * Threat response action
  */
 export interface ThreatResponseAction {
   readonly actionId: string;
-  readonly actionType: 'NETWORK_BLOCK' | 'PROCESS_KILL' | 'USER_DISABLE' | 'QUARANTINE' | 'ALERT';
-  readonly target: string;
-  readonly executed: boolean;
+  readonly actionType: 'NETWORK_BLOCK' | 'PROCESS_KILL' | 'USER_DISABLE' | 'QUARANTINE' | 'ALERT';readonly target: string;readonly executed: boolean;
   readonly executedAt?: Date;
-  readonly result: 'SUCCESS' | 'FAILED' | 'PARTIAL';
-  readonly details: string;
-}
+  readonly result: 'SUCCESS' | 'FAILED' | 'PARTIAL';readonly details: string;}
 
 /**
  * Behavioral analysis profile
@@ -227,9 +165,7 @@ export interface ThreatResponseAction {
 export interface BehavioralAnalysisProfile {
   readonly profileId: string;
   readonly entityId: string;
-  readonly entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK';
-  readonly baselineProfile: BehavioralBaseline;
-  readonly currentBehavior: BehavioralMetrics;
+  readonly entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK';readonly baselineProfile: BehavioralBaseline;readonly currentBehavior: BehavioralMetrics;
   readonly anomalies: BehavioralAnomaly[];
   readonly riskScore: number;
   readonly lastUpdated: Date;
@@ -294,11 +230,7 @@ export class SecurityThreatDetectorService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `threat_detector_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Security Threat Detector Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      detectionEnabled: this.getThreatConfig().detectionEnabled,
+    const operationId = `threat_detector_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Threat Detector Service with Parlant integration`, {parlantIntegrationEnabled: true,detectionEnabled: this.getThreatConfig().detectionEnabled,
       realTimeAnalysisEnabled: this.getThreatConfig().realTimeAnalysisEnabled,
       behavioralAnalysisEnabled: this.getThreatConfig().behavioralAnalysisEnabled,
       conversationalValidationRequired: this.getThreatConfig().conversationalValidationRequired,
@@ -345,9 +277,7 @@ export class SecurityThreatDetectorService {
           threatTypes: request.threatTypes,
           minConfidence: request.minConfidence,
         },
-        actionDescription: `Perform ${request.detectionScope} threat detection${request.targetAssets ? ` on ${request.targetAssets.length} assets` : ''}${request.threatTypes ? ` for ${request.threatTypes.length} threat types` : ''}`,
-        context: request.context,
-        riskLevel: RiskLevel.HIGH, // Threat detection is HIGH risk
+        actionDescription: `Perform ${request.detectionScope} threat detection${request.targetAssets ? ` on ${request.targetAssets.length} assets` : ''}${request.threatTypes ? ` for ${request.threatTypes.length} threat types` : ''}`,context: request.context,riskLevel: RiskLevel._HIGH, // Threat detection is HIGH risk
         operationId: request.operationId,
       };
 
@@ -355,9 +285,7 @@ export class SecurityThreatDetectorService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Threat detection blocked by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] Threat detection blocked by Parlant validation`,{operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -371,9 +299,7 @@ export class SecurityThreatDetectorService {
       }
 
       this.logger.log(
-        `[${request.operationId}] Threat detection approved by Parlant`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Threat detection approved by Parlant`,{operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -387,9 +313,7 @@ export class SecurityThreatDetectorService {
       this.updateDetectionMetrics(duration);
 
       this.logger.log(
-        `[${request.operationId}] Threat detection completed successfully`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Threat detection completed successfully`,{operationId: request.operationId,
           detectionId: detectionResult.detectionId,
           threatsDetected: detectionResult.totalThreats,
           highestRiskScore: detectionResult.highestRiskScore,
@@ -404,9 +328,7 @@ export class SecurityThreatDetectorService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] Threat detection failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Threat detection failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           duration,
@@ -432,9 +354,7 @@ export class SecurityThreatDetectorService {
     const operationId = request.operationId;
     
     this.logger.log(
-      `[${operationId}] Executing threat response with Parlant validation`,
-      {
-        operationId,
+      `[${operationId}] Executing threat response with Parlant validation`,{operationId,
         threatId: request.threatId,
         responseType: request.responseType,
         automatedResponse: request.automatedResponse,
@@ -460,9 +380,7 @@ export class SecurityThreatDetectorService {
           automatedResponse: request.automatedResponse,
           customActions: request.customActions,
         },
-        actionDescription: `Execute ${request.responseType} response for ${threat.severity} ${threat.threatType} threat affecting ${threat.affectedAssets.length} assets`,
-        context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Threat response is CRITICAL risk
+        actionDescription: `Execute ${request.responseType} response for ${threat.severity} ${threat.threatType} threat affecting ${threat.affectedAssets.length} assets`,context: request.context,riskLevel: RiskLevel._CRITICAL, // Threat response is CRITICAL risk
         operationId,
       };
 
@@ -496,9 +414,7 @@ export class SecurityThreatDetectorService {
       }
 
       this.logger.log(
-        `[${operationId}] Threat response executed successfully`,
-        {
-          operationId,
+        `[${operationId}] Threat response executed successfully`,{operationId,
           responseId: responseResult.responseId,
           actionsExecuted: responseResult.actionsExecuted.length,
           containmentStatus: responseResult.containmentStatus,
@@ -538,10 +454,7 @@ export class SecurityThreatDetectorService {
     entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK',
     context: ParlantConversationContext
   ): Promise<BehavioralAnalysisProfile> {
-    const operationId = `behavioral_analysis${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Analyzing behavioral anomalies with Parlant validation`,
+    const operationId = `behavioral_analysis${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing behavioral anomalies with Parlant validation`,
       {
         operationId,
         entityId,
@@ -558,9 +471,7 @@ export class SecurityThreatDetectorService {
           entityId,
           entityType,
         },
-        actionDescription: `Analyze behavioral anomalies for ${entityType} entity: ${entityId}`,
-        context,
-        riskLevel: RiskLevel.MEDIUM, // Behavioral analysis is MEDIUM risk
+        actionDescription: `Analyze behavioral anomalies for ${entityType} entity: ${entityId}`,context,riskLevel: RiskLevel._MODERATE, // Behavioral analysis is MEDIUM risk
         operationId,
       };
 
@@ -580,9 +491,7 @@ export class SecurityThreatDetectorService {
       this.behavioralProfiles.set(entityId, analysisResult);
 
       this.logger.log(
-        `[${operationId}] Behavioral analysis completed successfully`,
-        {
-          operationId,
+        `[${operationId}] Behavioral analysis completed successfully`,{operationId,
           entityId,
           riskScore: analysisResult.riskScore,
           anomaliesFound: analysisResult.anomalies.length,
@@ -594,9 +503,7 @@ export class SecurityThreatDetectorService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Behavioral analysis failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Behavioral analysis failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           entityId,
           entityType,
           error: error instanceof Error ? error.message : String(error),
@@ -666,21 +573,11 @@ export class SecurityThreatDetectorService {
 
     // Simulate different types of threats based on scope
     switch (request.detectionScope) {
-      case 'SYSTEM_WIDE':
-        detectedThreats.push(...this.simulateSystemWideThreats());
-        break;
-      case 'NETWORK':
-        detectedThreats.push(...this.simulateNetworkThreats());
-        break;
-      case 'ENDPOINT':
-        detectedThreats.push(...this.simulateEndpointThreats());
-        break;
-      case 'APPLICATION':
-        detectedThreats.push(...this.simulateApplicationThreats());
-        break;
-      case 'USER_BEHAVIOR':
-        detectedThreats.push(...this.simulateUserBehaviorThreats());
-        break;
+      case 'SYSTEM_WIDE':detectedThreats.push(...this.simulateSystemWideThreats());break;
+      case 'NETWORK':detectedThreats.push(...this.simulateNetworkThreats());break;
+      case 'ENDPOINT':detectedThreats.push(...this.simulateEndpointThreats());break;
+      case 'APPLICATION':detectedThreats.push(...this.simulateApplicationThreats());break;
+      case 'USER_BEHAVIOR':detectedThreats.push(...this.simulateUserBehaviorThreats());break;
     }
 
     // Add conversation context to threats
@@ -742,39 +639,21 @@ export class SecurityThreatDetectorService {
           ...action,
           executed: true,
           executedAt: new Date(),
-          result: result ? 'SUCCESS' : 'FAILED',
-          details: result ? 'Action executed successfully' : 'Action failed to execute',
-        });
-      } catch (error) {
+          result: result ? 'SUCCESS' : 'FAILED',details: result ? 'Action executed successfully' : 'Action failed to execute',});} catch (error) {
         actionsExecuted.push({
           ...action,
           executed: false,
-          result: 'FAILED',
-          details: error instanceof Error ? error.message : String(error),
-        });
+          result: 'FAILED',details: error instanceof Error ? error.message : String(error),});
       }
     }
 
     // Determine containment status
-    const successfulActions = actionsExecuted.filter(a => a.result === 'SUCCESS').length;
-    let containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';
-
-    if (successfulActions === actionsExecuted.length) {
-      containmentStatus = 'CONTAINED';
-    } else if (successfulActions > 0) {
-      containmentStatus = 'PARTIALLY_CONTAINED';
-    } else {
-      containmentStatus = 'NOT_CONTAINED';
-    }
-
-    return {
+    const successfulActions = actionsExecuted.filter(a => a.result === 'SUCCESS').length;let containmentStatus: 'CONTAINED' | 'PARTIALLY_CONTAINED' | 'NOT_CONTAINED';if (successfulActions === actionsExecuted.length) {containmentStatus = 'CONTAINED';} else if (successfulActions > 0) {containmentStatus = 'PARTIALLY_CONTAINED';} else {containmentStatus = 'NOT_CONTAINED';}return {
       responseId,
       threatId: request.threatId,
       responseType: request.responseType,
       actionsExecuted,
-      responseEffective: containmentStatus === 'CONTAINED',
-      containmentStatus,
-      conversationId,
+      responseEffective: containmentStatus === 'CONTAINED',containmentStatus,conversationId,
     };
   }
 
@@ -787,20 +666,9 @@ export class SecurityThreatDetectorService {
 
     const baselineProfile: BehavioralBaseline = {
       typicalLoginTimes: [8, 9, 10, 17, 18], // 8-10 AM, 5-6 PM
-      typicalLocations: ['Office', 'Home'],
-      typicalApplications: ['Email', 'Browser', 'IDE'],
-      averageDataTransfer: 100 * 1024 * 1024, // 100MB
-      networkPatterns: ['HTTP', 'HTTPS', 'SSH'],
-      accessPatterns: ['Read', 'Write', 'Execute'],
-    };
-
-    const currentBehavior: BehavioralMetrics = {
+      typicalLocations: ['Office', 'Home'],typicalApplications: ['Email', 'Browser', 'IDE'],averageDataTransfer: 100 * 1024 * 1024, // 100MBnetworkPatterns: ['HTTP', 'HTTPS', 'SSH'],accessPatterns: ['Read', 'Write', 'Execute'],};const currentBehavior: BehavioralMetrics = {
       loginTime: new Date(),
-      location: 'Unknown Location',
-      applications: ['Suspicious App', 'Terminal'],
-      dataTransferred: 500 * 1024 * 1024, // 500MB
-      networkActivity: ['HTTP', 'FTP', 'P2P'],
-      accessAttempts: ['Admin Panel', 'System Files'],
+      location: 'Unknown Location',applications: ['Suspicious App', 'Terminal'],dataTransferred: 500 * 1024 * 1024, // 500MBnetworkActivity: ['HTTP', 'FTP', 'P2P'],accessAttempts: ['Admin Panel', 'System Files'],
       deviationScore: 0.75, // High deviation
     };
 
@@ -810,11 +678,7 @@ export class SecurityThreatDetectorService {
     if (currentBehavior.deviationScore > 0.7) {
       anomalies.push({
         anomalyId: `anomaly${Date.now()}_1`,
-        type: 'BEHAVIOR_BASED',
-        severity: ThreatSeverity.HIGH,
-        description: 'Unusual data transfer volume detected',
-        deviationScore: currentBehavior.deviationScore,
-        confidence: ThreatConfidence.HIGH_CONFIDENCE,
+        type: 'BEHAVIOR_BASED',severity: ThreatSeverity.HIGH,description: 'Unusual data transfer volume detected',deviationScore: currentBehavior.deviationScore,confidence: ThreatConfidence.HIGH_CONFIDENCE,
         detectedAt: new Date(),
         context: {
           expectedTransfer: baselineProfile.averageDataTransfer,
@@ -826,9 +690,7 @@ export class SecurityThreatDetectorService {
     if (currentBehavior.location === 'Unknown Location') {
       anomalies.push({
         anomalyId: `anomaly${Date.now()}_2`,
-        type: 'LOCATION_BASED',
-        severity: ThreatSeverity.MEDIUM,
-        description: 'Access from unknown location',
+        type: 'LOCATION_BASED',severity: ThreatSeverity.MEDIUM,description: 'Access from unknown location',
         deviationScore: 0.8,
         confidence: ThreatConfidence.MEDIUM_CONFIDENCE,
         detectedAt: new Date(),
@@ -905,32 +767,16 @@ export class SecurityThreatDetectorService {
       confidence: ThreatConfidence.HIGH_CONFIDENCE,
       source,
       sourceDetails: {
-        sourceIp: '192.168.1.100',
-        sourcePort: 443,
-        destinationIp: '10.0.0.1',
-        destinationPort: 80,
-        protocol: 'TCP',
+        sourceIp: '192.168.1.100',sourcePort: 443,destinationIp: '10.0.0.1',destinationPort: 80,protocol: 'TCP',
       },
       description: `${threatType} detected from ${source}`,
       indicators: [
         {
-          type: 'IP',
-          value: '192.168.1.100',
-          category: 'SUSPICIOUS',
-          firstSeen: new Date(),
-          lastSeen: new Date(),
+          type: 'IP',value: '192.168.1.100',category: 'SUSPICIOUS',firstSeen: new Date(),lastSeen: new Date(),
           confidence: ThreatConfidence.HIGH_CONFIDENCE,
           reputation: 25,
-          context: 'Suspicious network activity',
-        },
-      ],
-      affectedAssets: ['Server-01', 'Workstation-05'],
-      killChainStage: 'Initial Access',
-      mitreTechniques: ['T1566.001', 'T1059.001'],
-      riskScore: this.calculateRiskScore(severity, ThreatConfidence.HIGH_CONFIDENCE),
-      containmentActions: ['Block IP', 'Quarantine endpoint', 'Alert security team'],
-      validated: false,
-    };
+          context: 'Suspicious network activity',},],
+      affectedAssets: ['Server-01', 'Workstation-05'],killChainStage: 'Initial Access',mitreTechniques: ['T1566.001', 'T1059.001'],riskScore: this.calculateRiskScore(severity, ThreatConfidence.HIGH_CONFIDENCE),containmentActions: ['Block IP', 'Quarantine endpoint', 'Alert security team'],validated: false,};
   }
 
   private calculateRiskScore(severity: ThreatSeverity, confidence: ThreatConfidence): number {
@@ -959,38 +805,24 @@ export class SecurityThreatDetectorService {
   private generateResponseActions(
     threat: SecurityThreat,
     responseType: string
-  ): Omit<ThreatResponseAction, 'executed' | 'executedAt' | 'result' | 'details'>[] {
-    const actions: Omit<ThreatResponseAction, 'executed' | 'executedAt' | 'result' | 'details'>[] = [];
-    
-    switch (responseType) {
-      case 'CONTAIN':
+  ): Omit<ThreatResponseAction, 'executed' | 'executedAt' | 'result' | 'details'>[] {const actions: Omit<ThreatResponseAction, 'executed' | 'executedAt' | 'result' | 'details'>[] = [];switch (responseType) {case 'CONTAIN':
         actions.push({
           actionId: `action${Date.now()}_1`,
-          actionType: 'NETWORK_BLOCK',
-          target: threat.sourceDetails.sourceIp ?? 'unknown',
+          actionType: 'NETWORK_BLOCK',target: threat.sourceDetails.sourceIp ?? 'unknown',
         });
         actions.push({
           actionId: `action${Date.now()}_2`,
-          actionType: 'QUARANTINE',
-          target: threat.affectedAssets[0] ?? 'unknown',
-        });
-        break;
+          actionType: 'QUARANTINE',target: threat.affectedAssets[0] ?? 'unknown',});break;
 
       case 'BLOCK':
         actions.push({
           actionId: `action${Date.now()}_1`,
-          actionType: 'NETWORK_BLOCK',
-          target: threat.sourceDetails.sourceIp ?? 'unknown',
-        });
-        break;
+          actionType: 'NETWORK_BLOCK',target: threat.sourceDetails.sourceIp ?? 'unknown',});break;
 
       case 'ALERT_ONLY':
         actions.push({
           actionId: `action${Date.now()}_1`,
-          actionType: 'ALERT',
-          target: 'security_team',
-        });
-        break;
+          actionType: 'ALERT',target: 'security_team',});break;
     }
 
     return actions;
@@ -1004,13 +836,7 @@ export class SecurityThreatDetectorService {
     
     // Simulate success/failure based on action type
     switch (action.actionType) {
-      case 'NETWORK_BLOCK':
-        return Math.random() > 0.1; // 90% success rate
-      case 'QUARANTINE':
-        return Math.random() > 0.05; // 95% success rate
-      case 'ALERT':
-        return true; // Alerts always succeed
-      default:
+      case 'NETWORK_BLOCK':return Math.random() > 0.1; // 90% success ratecase 'QUARANTINE':return Math.random() > 0.05; // 95% success ratecase 'ALERT':return true; // Alerts always succeeddefault:
         return Math.random() > 0.2; // 80% success rate
     }
   }
@@ -1021,28 +847,10 @@ export class SecurityThreatDetectorService {
     const highThreats = threats.filter(t => t.severity === ThreatSeverity.HIGH);
 
     if (criticalThreats.length > 0) {
-      actions.push('URGENT: Isolate affected systems immediately');
-      actions.push('Activate incident response team');
-      actions.push('Notify executive leadership');
-    }
-
-    if (highThreats.length > 0) {
-      actions.push('Implement containment measures');
-      actions.push('Begin forensic analysis');
-      actions.push('Update security monitoring rules');
-    }
-
-    if (threats.length > 5) {
-      actions.push('Consider increasing security alert levels');
-      actions.push('Review and strengthen security controls');
-    }
-
-    if (actions.length === 0) {
-      actions.push('Continue monitoring for threat activity');
-      actions.push('Review and update threat detection rules');
-    }
-
-    return actions;
+      actions.push('URGENT: Isolate affected systems immediately');actions.push('Activate incident response team');actions.push('Notify executive leadership');}if (highThreats.length > 0) {
+      actions.push('Implement containment measures');actions.push('Begin forensic analysis');actions.push('Update security monitoring rules');}if (threats.length > 5) {
+      actions.push('Consider increasing security alert levels');actions.push('Review and strengthen security controls');}if (actions.length === 0) {
+      actions.push('Continue monitoring for threat activity');actions.push('Review and update threat detection rules');}return actions;
   }
 
   private initializeThreatDetection(): void {
@@ -1060,9 +868,7 @@ export class SecurityThreatDetectorService {
   }
 
   private performBackgroundThreatCheck(): void {
-    this.logger.debug('Performing background threat detection check');
-    // Would implement continuous threat monitoring
-  }
+    this.logger.debug('Performing background threat detection check');// Would implement continuous threat monitoring}
 
   private performBehavioralAnalysisCheck(): void {
     this.logger.debug('Performing behavioral analysis check');
@@ -1088,14 +894,7 @@ export class SecurityThreatDetectorService {
 
   private getThreatConfig(): ThreatDetectorConfig {
     return {
-      detectionEnabled: this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true),
-      realTimeAnalysisEnabled: this.configService.get<boolean>('REAL_TIME_ANALYSIS_ENABLED', true),
-      behavioralAnalysisEnabled: this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true),
-      threatIntelEnabled: this.configService.get<boolean>('THREAT_INTEL_ENABLED', true),
-      automatedResponseEnabled: this.configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),
-      conversationalValidationRequired: this.configService.get<boolean>('THREAT_CONVERSATIONAL_VALIDATION', true),
-      mlModelEnabled: this.configService.get<boolean>('ML_MODEL_ENABLED', false),
-      siemIntegrationEnabled: this.configService.get<boolean>('SIEM_INTEGRATION_ENABLED', false),
+      detectionEnabled: this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true),realTimeAnalysisEnabled: this.configService.get<boolean>('REAL_TIME_ANALYSIS_ENABLED', true),behavioralAnalysisEnabled: this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true),threatIntelEnabled: this.configService.get<boolean>('THREAT_INTEL_ENABLED', true),automatedResponseEnabled: this.configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),conversationalValidationRequired: this.configService.get<boolean>('THREAT_CONVERSATIONAL_VALIDATION', true),mlModelEnabled: this.configService.get<boolean>('ML_MODEL_ENABLED', false),siemIntegrationEnabled: this.configService.get<boolean>('SIEM_INTEGRATION_ENABLED', false),
     };
   }
 }

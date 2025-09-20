@@ -22,12 +22,7 @@ import {
   Injectable,
   Logger,
   TooManyRequestsException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, ParlantConversationContext } from '../parlant/parlant-integration.service';
-
-/**
- * Rate limiting configuration
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, ParlantConversationContext } from '../parlant/parlant-integration.service';/*** Rate limiting configuration
  */
 interface RateLimitConfig {
   windowMs: number;
@@ -101,13 +96,7 @@ interface RateLimitStatistics {
  * Rate limiting tier configuration
  */
 enum RateLimitTier {
-  USER = 'user',
-  IP = 'ip',
-  ENDPOINT = 'endpoint',
-  GLOBAL = 'global',
-}
-
-/**
+  USER = 'user',IP = 'ip',ENDPOINT = 'endpoint',GLOBAL = 'global',}/**
  * Advanced browser automation rate limiting service
  */
 @Injectable()
@@ -131,10 +120,7 @@ export class BrowserRateLimitingService {
     setInterval(() => this.cleanupExpiredTrackers(), 300000); // Every 5 minutes
     setInterval(() => this.updateStatistics(), 60000); // Every minute
 
-    this.logger.log('Browser Rate Limiting Service initialized', {
-      configurations: this.config.size,
-      cleanupInterval: '5 minutes',
-      statisticsInterval: '1 minute',
+    this.logger.log('Browser Rate Limiting Service initialized', {configurations: this.config.size,cleanupInterval: '5 minutes',statisticsInterval: '1 minute',
     });
   }
 
@@ -142,10 +128,7 @@ export class BrowserRateLimitingService {
    * Check rate limit for browser automation request
    */
   async checkRateLimit(context: RateLimitContext, configKey?: string): Promise<RateLimitResult> {
-    const operationId = `rate_limit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Checking rate limit`, {
+    const operationId = `rate_limit_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Checking rate limit`, {
       operationId,
       userId: context.userId,
       ipAddress: context.ipAddress,
@@ -171,9 +154,7 @@ export class BrowserRateLimitingService {
 
       // Log rate limit check
       const duration = Date.now() - startTime;
-      this.logger.debug(`[${operationId}] Rate limit check completed`, {
-        operationId,
-        allowed: result.allowed,
+      this.logger.debug(`[${operationId}] Rate limit check completed`, {operationId,allowed: result.allowed,
         remaining: result.remaining,
         blocked: result.blocked,
         reason: result.reason,
@@ -232,10 +213,7 @@ export class BrowserRateLimitingService {
       });
 
       throw new TooManyRequestsException({
-        message: 'Rate limit exceeded',
-        type: 'rate_limit_exceeded',
-        limit: result.limit,
-        remaining: result.remaining,
+        message: 'Rate limit exceeded',type: 'rate_limit_exceeded',limit: result.limit,remaining: result.remaining,
         resetTime: result.resetTime,
         retryAfter: result.retryAfter,
         reason: result.reason,
@@ -254,13 +232,7 @@ export class BrowserRateLimitingService {
     // Analyze trackers for statistics
     for (const [key, tracker] of this.rateLimitTrackers.entries()) {
       // Extract user ID and IP from key if possible
-      const keyParts = key.split(':');
-      if (keyParts.length >= 2) {
-        if (keyParts[0] !== 'unknown') uniqueUsers.add(keyParts[0]);
-        if (keyParts[1] !== 'unknown') uniqueIPs.add(keyParts[1]);
-      }
-
-      // Track violators
+      const keyParts = key.split(':');if (keyParts.length >= 2) {if (keyParts[0] !== 'unknown') uniqueUsers.add(keyParts[0]);if (keyParts[1] !== 'unknown') uniqueIPs.add(keyParts[1]);}// Track violators
       if (tracker.violations > 0) {
         violators.push({
           identifier: key,
@@ -307,9 +279,7 @@ export class BrowserRateLimitingService {
       }
     }
 
-    this.logger.log(`Rate limit reset completed`, {
-      userId,
-      ipAddress,
+    this.logger.log(`Rate limit reset completed`, {userId,ipAddress,
       resetCount,
     });
 
@@ -322,9 +292,7 @@ export class BrowserRateLimitingService {
   addRateLimitConfiguration(key: string, config: RateLimitConfig): void {
     this.config.set(key, config);
 
-    this.logger.log(`Rate limit configuration added`, {
-      key,
-      windowMs: config.windowMs,
+    this.logger.log(`Rate limit configuration added`, {key,windowMs: config.windowMs,
       maxRequests: config.maxRequests,
       burstLimit: config.burstLimit,
     });
@@ -354,50 +322,32 @@ export class BrowserRateLimitingService {
 
   private initializeRateLimitConfigurations(): void {
     // Default configuration
-    this.config.set('default', {
-      windowMs: this.configService.get<number>('BROWSER_RATE_LIMIT_WINDOW_MS', 60000), // 1 minute
-      maxRequests: this.configService.get<number>('BROWSER_RATE_LIMIT_MAX_REQUESTS', 100),
-      burstLimit: this.configService.get<number>('BROWSER_RATE_LIMIT_BURST', 10),
-    });
-
-    // Task execution limits
-    this.config.set('tasks', {
-      windowMs: 60000, // 1 minute
-      maxRequests: 10,
+    this.config.set('default', {windowMs: this.configService.get<number>('BROWSER_RATE_LIMIT_WINDOW_MS', 60000), // 1 minutemaxRequests: this.configService.get<number>('BROWSER_RATE_LIMIT_MAX_REQUESTS', 100),burstLimit: this.configService.get<number>('BROWSER_RATE_LIMIT_BURST', 10),});// Task execution limits
+    this.config.set('tasks', {windowMs: 60000, // 1 minutemaxRequests: 10,
       burstLimit: 3,
     });
 
     // Session creation limits
-    this.config.set('sessions', {
-      windowMs: 300000, // 5 minutes
-      maxRequests: 5,
+    this.config.set('sessions', {windowMs: 300000, // 5 minutesmaxRequests: 5,
       burstLimit: 2,
     });
 
     // Screenshot limits
-    this.config.set('screenshots', {
-      windowMs: 60000, // 1 minute
-      maxRequests: 30,
+    this.config.set('screenshots', {windowMs: 60000, // 1 minutemaxRequests: 30,
       burstLimit: 10,
     });
 
     // Data extraction limits
-    this.config.set('extraction', {
-      windowMs: 600000, // 10 minutes
-      maxRequests: 20,
+    this.config.set('extraction', {windowMs: 600000, // 10 minutesmaxRequests: 20,
       burstLimit: 5,
     });
 
     // Admin operation limits
-    this.config.set('admin', {
-      windowMs: 300000, // 5 minutes
-      maxRequests: 3,
+    this.config.set('admin', {windowMs: 300000, // 5 minutesmaxRequests: 3,
       burstLimit: 1,
     });
 
-    this.logger.log('Rate limit configurations initialized', {
-      configurationsCount: this.config.size,
-    });
+    this.logger.log('Rate limit configurations initialized', {configurationsCount: this.config.size,});
   }
 
   private getRateLimitConfiguration(key: string, context: RateLimitContext): RateLimitConfig {
@@ -406,28 +356,12 @@ export class BrowserRateLimitingService {
 
     if (!config) {
       // Try endpoint-based configuration
-      if (context.endpoint.includes('/tasks')) {
-        config = this.config.get('tasks');
-      } else if (context.endpoint.includes('/sessions')) {
-        config = this.config.get('sessions');
-      } else if (context.endpoint.includes('/screenshot')) {
-        config = this.config.get('screenshots');
-      } else if (context.endpoint.includes('/extract')) {
-        config = this.config.get('extraction');
-      } else if (context.endpoint.includes('/admin')) {
-        config = this.config.get('admin');
-      }
-    }
+      if (context.endpoint.includes('/tasks')) {config = this.config.get('tasks');} else if (context.endpoint.includes('/sessions')) {config = this.config.get('sessions');} else if (context.endpoint.includes('/screenshot')) {config = this.config.get('screenshots');} else if (context.endpoint.includes('/extract')) {config = this.config.get('extraction');} else if (context.endpoint.includes('/admin')) {config = this.config.get('admin');}}
 
     // Fallback to default
     if (!config) {
-      config = this.config.get('default')!;
-    }
-
-    // Apply user role adjustments
-    if (context.userRole === 'admin') {
-      return {
-        ...config,
+      config = this.config.get('default')!;}// Apply user role adjustments
+    if (context.userRole === 'admin') {return {...config,
         maxRequests: Math.floor(config.maxRequests * 2), // Admins get double limits
         burstLimit: config.burstLimit ? Math.floor(config.burstLimit * 1.5) : undefined,
       };
@@ -442,8 +376,7 @@ export class BrowserRateLimitingService {
     }
 
     // Default key generation: userId:ipAddress:endpoint
-    const userId = context.userId || 'anonymous';
-    const ipAddress = context.ipAddress || 'unknown';
+    const userId = context.userId || 'anonymous';const ipAddress = context.ipAddress || 'unknown';
     const endpoint = context.endpoint;
 
     return `${userId}:${ipAddress}:${endpoint}`;
@@ -481,9 +414,7 @@ export class BrowserRateLimitingService {
         resetTime: tracker.backoffUntil,
         retryAfter: Math.ceil((tracker.backoffUntil - now) / 1000),
         blocked: true,
-        reason: 'backoff_period',
-      };
-    }
+        reason: 'backoff_period',};}
 
     // Check burst limit
     if (config.burstLimit && tracker.burstCount >= config.burstLimit) {
@@ -499,9 +430,7 @@ export class BrowserRateLimitingService {
           resetTime: now + 60000, // 1 minute cooldown
           retryAfter: 60,
           blocked: true,
-          reason: 'burst_limit_exceeded',
-        };
-      } else {
+          reason: 'burst_limit_exceeded',};} else {
         // Reset burst count if enough time has passed
         tracker.burstCount = 0;
       }
@@ -607,9 +536,7 @@ export class BrowserRateLimitingService {
     // Update various statistics
     const stats = this.getRateLimitStatistics();
 
-    this.logger.debug('Rate limiting statistics updated', {
-      totalRequests: stats.totalRequests,
-      blockedRequests: stats.blockedRequests,
+    this.logger.debug('Rate limiting statistics updated', {totalRequests: stats.totalRequests,blockedRequests: stats.blockedRequests,
       blockRate: (stats.blockedRequests / stats.totalRequests * 100).toFixed(2) + '%',
       uniqueUsers: stats.uniqueUsers,
       uniqueIPs: stats.uniqueIPs,

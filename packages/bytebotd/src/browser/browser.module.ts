@@ -1,8 +1,4 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { SessionController } from './session.controller';
-import { SessionService } from './session.service';
-import { BrowserUseModule } from '../browser-use/browser-use.module';
+import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { SessionController } from './session.controller';import { SessionService } from './session.service';import { BrowserUseModule } from '../browser-use/browser-use.module';
 
 /**
  * Browser Module - Dedicated Session Management

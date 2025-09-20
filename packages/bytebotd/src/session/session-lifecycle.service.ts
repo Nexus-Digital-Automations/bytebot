@@ -14,81 +14,27 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
-import { SessionMetadata, SessionState, SessionPriority } from './session-management.service';
-
-// ===== SESSION LIFECYCLE ENUMS =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import Redis from 'ioredis';import { v4 as uuidv4 } from 'uuid';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';import { SessionMetadata, SessionState, SessionPriority } from './session-management.service';// ===== SESSION LIFECYCLE ENUMS =====/**
  * Session expiration policies
  */
 export enum SessionExpirationPolicy {
-  FIXED_TIMEOUT = 'FIXED_TIMEOUT',
-  SLIDING_TIMEOUT = 'SLIDING_TIMEOUT',
-  ACTIVITY_BASED = 'ACTIVITY_BASED',
-  PRIORITY_WEIGHTED = 'PRIORITY_WEIGHTED',
-  ADAPTIVE_INTELLIGENCE = 'ADAPTIVE_INTELLIGENCE',
-  BUSINESS_HOURS_AWARE = 'BUSINESS_HOURS_AWARE'
-}
-
-/**
+  FIXED_TIMEOUT = 'FIXED_TIMEOUT',SLIDING_TIMEOUT = 'SLIDING_TIMEOUT',ACTIVITY_BASED = 'ACTIVITY_BASED',PRIORITY_WEIGHTED = 'PRIORITY_WEIGHTED',ADAPTIVE_INTELLIGENCE = 'ADAPTIVE_INTELLIGENCE',BUSINESS_HOURS_AWARE = 'BUSINESS_HOURS_AWARE'}/**
  * Session cleanup strategies
  */
 export enum SessionCleanupStrategy {
-  IMMEDIATE = 'IMMEDIATE',
-  GRACEFUL = 'GRACEFUL',
-  HIBERNATION = 'HIBERNATION',
-  DELAYED = 'DELAYED',
-  CONDITIONAL = 'CONDITIONAL',
-  RESOURCE_OPTIMIZED = 'RESOURCE_OPTIMIZED'
-}
-
-/**
+  IMMEDIATE = 'IMMEDIATE',GRACEFUL = 'GRACEFUL',HIBERNATION = 'HIBERNATION',DELAYED = 'DELAYED',CONDITIONAL = 'CONDITIONAL',RESOURCE_OPTIMIZED = 'RESOURCE_OPTIMIZED'}/**
  * Session transition reasons
  */
 export enum SessionTransitionReason {
-  NATURAL_EXPIRATION = 'NATURAL_EXPIRATION',
-  INACTIVITY_TIMEOUT = 'INACTIVITY_TIMEOUT',
-  MANUAL_TERMINATION = 'MANUAL_TERMINATION',
-  SYSTEM_SHUTDOWN = 'SYSTEM_SHUTDOWN',
-  SECURITY_VIOLATION = 'SECURITY_VIOLATION',
-  RESOURCE_PRESSURE = 'RESOURCE_PRESSURE',
-  POLICY_ENFORCEMENT = 'POLICY_ENFORCEMENT',
-  UPGRADE_MAINTENANCE = 'UPGRADE_MAINTENANCE',
-  USER_INITIATED = 'USER_INITIATED',
-  BUSINESS_RULE = 'BUSINESS_RULE'
-}
-
-/**
+  NATURAL_EXPIRATION = 'NATURAL_EXPIRATION',INACTIVITY_TIMEOUT = 'INACTIVITY_TIMEOUT',MANUAL_TERMINATION = 'MANUAL_TERMINATION',SYSTEM_SHUTDOWN = 'SYSTEM_SHUTDOWN',SECURITY_VIOLATION = 'SECURITY_VIOLATION',RESOURCE_PRESSURE = 'RESOURCE_PRESSURE',POLICY_ENFORCEMENT = 'POLICY_ENFORCEMENT',UPGRADE_MAINTENANCE = 'UPGRADE_MAINTENANCE',USER_INITIATED = 'USER_INITIATED',BUSINESS_RULE = 'BUSINESS_RULE'}/**
  * Hibernation strategies for session preservation
  */
 export enum HibernationStrategy {
-  MEMORY_ONLY = 'MEMORY_ONLY',
-  DISK_PERSISTENCE = 'DISK_PERSISTENCE',
-  COMPRESSED_STORAGE = 'COMPRESSED_STORAGE',
-  CLOUD_BACKUP = 'CLOUD_BACKUP',
-  DISTRIBUTED_STORAGE = 'DISTRIBUTED_STORAGE',
-  NO_HIBERNATION = 'NO_HIBERNATION'
-}
-
-/**
+  MEMORY_ONLY = 'MEMORY_ONLY',DISK_PERSISTENCE = 'DISK_PERSISTENCE',COMPRESSED_STORAGE = 'COMPRESSED_STORAGE',CLOUD_BACKUP = 'CLOUD_BACKUP',DISTRIBUTED_STORAGE = 'DISTRIBUTED_STORAGE',NO_HIBERNATION = 'NO_HIBERNATION'}/**
  * Session activity levels for lifecycle decisions
  */
 export enum SessionActivityLevel {
-  DORMANT = 'DORMANT',           // No activity for extended period
-  IDLE = 'IDLE',                 // No recent activity
-  ACTIVE = 'ACTIVE',             // Regular activity
-  HIGHLY_ACTIVE = 'HIGHLY_ACTIVE', // Frequent activity
-  CRITICAL = 'CRITICAL'          // Business-critical activity
-}
-
-// ===== SESSION LIFECYCLE INTERFACES =====
+  DORMANT = 'DORMANT',           // No activity for extended periodIDLE = 'IDLE',                 // No recent activityACTIVE = 'ACTIVE',             // Regular activityHIGHLY_ACTIVE = 'HIGHLY_ACTIVE', // Frequent activityCRITICAL = 'CRITICAL'          // Business-critical activity}// ===== SESSION LIFECYCLE INTERFACES =====
 
 /**
  * Session lifecycle configuration
@@ -144,19 +90,14 @@ export interface LifecyclePolicyRule {
  * Policy condition for rule evaluation
  */
 export interface PolicyCondition {
-  readonly type: 'session_age' | 'activity_level' | 'resource_usage' | 'user_role' | 'time_of_day' | 'custom';
-  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'contains';
-  readonly value: any;
-  readonly metadata?: Record<string, any>;
+  readonly type: 'session_age' | 'activity_level' | 'resource_usage' | 'user_role' | 'time_of_day' | 'custom';readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'contains';readonly value: any;readonly metadata?: Record<string, any>;
 }
 
 /**
  * Policy action for rule execution
  */
 export interface PolicyAction {
-  readonly type: 'extend_timeout' | 'force_cleanup' | 'hibernate' | 'alert' | 'log' | 'custom';
-  readonly parameters: Record<string, any>;
-  readonly delay?: number;
+  readonly type: 'extend_timeout' | 'force_cleanup' | 'hibernate' | 'alert' | 'log' | 'custom';readonly parameters: Record<string, any>;readonly delay?: number;
   readonly conditions?: PolicyCondition[];
 }
 
@@ -183,9 +124,7 @@ export interface AgeRange {
  * Resource usage range specification
  */
 export interface ResourceUsageRange {
-  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';
-  readonly minUsage: number;
-  readonly maxUsage?: number;
+  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';readonly minUsage: number;readonly maxUsage?: number;
 }
 
 /**
@@ -260,9 +199,7 @@ export interface ResourceConstraintsConfig {
  * Pressure response rule
  */
 export interface PressureResponseRule {
-  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';
-  readonly threshold: number;
-  readonly actions: string[];
+  readonly resourceType: 'memory' | 'cpu' | 'bandwidth' | 'storage';readonly threshold: number;readonly actions: string[];
   readonly priority: number;
   readonly cooldownPeriod: number;
 }
@@ -327,13 +264,9 @@ export interface ConditionEvaluationResult {
  * Lifecycle action recommendation
  */
 export interface LifecycleAction {
-  readonly action: 'maintain' | 'extend' | 'warn' | 'hibernate' | 'cleanup' | 'terminate';
-  readonly parameters: Record<string, any>;
-  readonly confidence: number;
+  readonly action: 'maintain' | 'extend' | 'warn' | 'hibernate' | 'cleanup' | 'terminate';readonly parameters: Record<string, any>;readonly confidence: number;
   readonly reasoning: string[];
-  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
-  readonly estimatedImpact: string;
-  readonly alternatives: LifecycleAction[];
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';readonly estimatedImpact: string;readonly alternatives: LifecycleAction[];
 }
 
 /**
@@ -354,11 +287,7 @@ export interface PredictionFactor {
   readonly factor: string;
   readonly weight: number;
   readonly value: any;
-  readonly trend: 'increasing' | 'decreasing' | 'stable';
-  readonly influence: 'positive' | 'negative' | 'neutral';
-}
-
-/**
+  readonly trend: 'increasing' | 'decreasing' | 'stable';readonly influence: 'positive' | 'negative' | 'neutral';}/**
  * Expiration scenario
  */
 export interface ExpirationScenario {
@@ -374,9 +303,7 @@ export interface ExpirationScenario {
  */
 export interface LifecycleRiskFactor {
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly description: string;
-  readonly likelihood: number;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly likelihood: number;
   readonly impact: number;
   readonly mitigation: string[];
   readonly monitoring: boolean;
@@ -480,10 +407,7 @@ export interface CleanupError {
   readonly stackTrace?: string;
   readonly timestamp: Date;
   readonly recovered: boolean;
-  readonly impact: 'none' | 'low' | 'medium' | 'high';
-}
-
-/**
+  readonly impact: 'none' | 'low' | 'medium' | 'high';}/**
  * Cleanup performance metrics
  */
 export interface CleanupPerformanceMetrics {
@@ -524,28 +448,14 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
   ) {
     // Initialize lifecycle configuration
     this.lifecycleConfig = {
-      expirationPolicy: this.configService.get<SessionExpirationPolicy>('SESSION_EXPIRATION_POLICY', SessionExpirationPolicy.ADAPTIVE_INTELLIGENCE),
-      cleanupStrategy: this.configService.get<SessionCleanupStrategy>('SESSION_CLEANUP_STRATEGY', SessionCleanupStrategy.GRACEFUL),
-      hibernationStrategy: this.configService.get<HibernationStrategy>('SESSION_HIBERNATION_STRATEGY', HibernationStrategy.COMPRESSED_STORAGE),
-      defaultTimeoutMs: this.configService.get<number>('SESSION_DEFAULT_TIMEOUT_MS', 3600000), // 1 hour
-      maxTimeoutMs: this.configService.get<number>('SESSION_MAX_TIMEOUT_MS', 86400000), // 24 hours
-      minTimeoutMs: this.configService.get<number>('SESSION_MIN_TIMEOUT_MS', 300000), // 5 minutes
-      idleTimeoutMs: this.configService.get<number>('SESSION_IDLE_TIMEOUT_MS', 1800000), // 30 minutes
-      gracePeriodMs: this.configService.get<number>('SESSION_GRACE_PERIOD_MS', 300000), // 5 minutes
-      cleanupIntervalMs: this.configService.get<number>('SESSION_CLEANUP_INTERVAL_MS', 300000), // 5 minutes
-      hibernationThresholdMs: this.configService.get<number>('SESSION_HIBERNATION_THRESHOLD_MS', 7200000), // 2 hours
-      activityCheckIntervalMs: this.configService.get<number>('SESSION_ACTIVITY_CHECK_INTERVAL_MS', 60000), // 1 minute
-      extensionThresholds: this.getDefaultExtensionThresholds(),
-      policyRules: this.getDefaultPolicyRules(),
+      expirationPolicy: this.configService.get<SessionExpirationPolicy>('SESSION_EXPIRATION_POLICY', SessionExpirationPolicy.ADAPTIVE_INTELLIGENCE),cleanupStrategy: this.configService.get<SessionCleanupStrategy>('SESSION_CLEANUP_STRATEGY', SessionCleanupStrategy.GRACEFUL),hibernationStrategy: this.configService.get<HibernationStrategy>('SESSION_HIBERNATION_STRATEGY', HibernationStrategy.COMPRESSED_STORAGE),defaultTimeoutMs: this.configService.get<number>('SESSION_DEFAULT_TIMEOUT_MS', 3600000), // 1 hourmaxTimeoutMs: this.configService.get<number>('SESSION_MAX_TIMEOUT_MS', 86400000), // 24 hoursminTimeoutMs: this.configService.get<number>('SESSION_MIN_TIMEOUT_MS', 300000), // 5 minutesidleTimeoutMs: this.configService.get<number>('SESSION_IDLE_TIMEOUT_MS', 1800000), // 30 minutesgracePeriodMs: this.configService.get<number>('SESSION_GRACE_PERIOD_MS', 300000), // 5 minutescleanupIntervalMs: this.configService.get<number>('SESSION_CLEANUP_INTERVAL_MS', 300000), // 5 minuteshibernationThresholdMs: this.configService.get<number>('SESSION_HIBERNATION_THRESHOLD_MS', 7200000), // 2 hoursactivityCheckIntervalMs: this.configService.get<number>('SESSION_ACTIVITY_CHECK_INTERVAL_MS', 60000), // 1 minuteextensionThresholds: this.getDefaultExtensionThresholds(),policyRules: this.getDefaultPolicyRules(),
       businessHours: this.getDefaultBusinessHours(),
       resourceConstraints: this.getDefaultResourceConstraints()
     };
 
     // Initialize Redis client
     this.redisClient = new Redis(
-      this.configService.get<string>('SESSION_LIFECYCLE_REDIS_URL', 'redis://localhost:6379'),
-      {
-        retryDelayOnFailover: 100,
+      this.configService.get<string>('SESSION_LIFECYCLE_REDIS_URL', 'redis://localhost:6379'),{retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         enableOfflineQueue: false,
         lazyConnect: true,
@@ -555,9 +465,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     );
 
     this.logger.log('Session Lifecycle Service initialized');
-    this.logger.log(`Expiration policy: ${this.lifecycleConfig.expirationPolicy}`);
-    this.logger.log(`Cleanup strategy: ${this.lifecycleConfig.cleanupStrategy}`);
-    this.logger.log(`Hibernation strategy: ${this.lifecycleConfig.hibernationStrategy}`);
+    this.logger.log(`Expiration policy: ${this.lifecycleConfig.expirationPolicy}`);this.logger.log(`Cleanup strategy: ${this.lifecycleConfig.cleanupStrategy}`);this.logger.log(`Hibernation strategy: ${this.lifecycleConfig.hibernationStrategy}`);
   }
 
   /**
@@ -566,10 +474,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
   async onModuleInit(): Promise<void> {
     try {
       await this.redisClient.connect();
-      this.logger.log('Connected to Redis for session lifecycle data');
-
-      // Load existing sessions and hibernated data
-      await this.loadExistingSessions();
+      this.logger.log('Connected to Redis for session lifecycle data');// Load existing sessions and hibernated dataawait this.loadExistingSessions();
       await this.loadHibernatedSessions();
 
       // Start monitoring intervals
@@ -580,11 +485,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
       // Initialize event handlers
       this.initializeEventHandlers();
 
-      this.logger.log('Session Lifecycle Service fully initialized');
-    } catch (error) {
-      this.logger.error('Failed to initialize Session Lifecycle Service', error);
-      throw error;
-    }
+      this.logger.log('Session Lifecycle Service fully initialized');} catch (error) {this.logger.error('Failed to initialize Session Lifecycle Service', error);throw error;}
   }
 
   /**
@@ -614,9 +515,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
       // Disconnect from Redis
       await this.redisClient.disconnect();
 
-      this.logger.log('Session Lifecycle Service shutdown completed');
-    } catch (error) {
-      this.logger.error('Error during Session Lifecycle Service shutdown', error);
+      this.logger.log('Session Lifecycle Service shutdown completed');} catch (error) {this.logger.error('Error during Session Lifecycle Service shutdown', error);
     }
   }
 
@@ -629,14 +528,8 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Analyzing session expiration: ${sessionId}`);
-
-      const session = await this.getSession(sessionId);
-      if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Calculate session metrics
+      this.logger.debug(`Analyzing session expiration: ${sessionId}`);const session = await this.getSession(sessionId);if (!session) {
+        throw new Error(`Session not found: ${sessionId}`);}// Calculate session metrics
       const ageMs = Date.now() - session.createdAt.getTime();
       const inactiveMs = Date.now() - session.lastActivity.getTime();
       const activityLevel = await this.determineActivityLevel(session);
@@ -687,12 +580,8 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
         metadata: { analysis }
       });
 
-      this.logger.debug(`Session expiration analysis completed: ${sessionId}, Recommendation: ${recommendedAction.action}`);
-      return analysis;
-    } catch (error) {
-      this.logger.error(`Failed to analyze session expiration: ${sessionId}`, error);
-      throw error;
-    }
+      this.logger.debug(`Session expiration analysis completed: ${sessionId}, Recommendation: ${recommendedAction.action}`);return analysis;} catch (error) {
+      this.logger.error(`Failed to analyze session expiration: ${sessionId}`, error);throw error;}
   }
 
   // ===== SESSION HIBERNATION =====
@@ -704,10 +593,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Hibernating session: ${sessionId}`);
-
-      const session = await this.getSession(sessionId);
-      if (!session) {
+      this.logger.debug(`Hibernating session: ${sessionId}`);const session = await this.getSession(sessionId);if (!session) {
         throw new Error(`Session not found: ${sessionId}`);
       }
 
@@ -757,9 +643,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
           originalDataSize: JSON.stringify(sessionData).length,
           processedDataSize: JSON.stringify(processedData).length,
           compressionRatio: compressionApplied ? this.calculateCompressionRatio(sessionData, processedData) : 1,
-          hibernationReason: 'resource_optimization'
-        }
-      };
+          hibernationReason: 'resource_optimization'}};
 
       // Store hibernation data
       await this.storeHibernationData(hibernationData);
@@ -793,12 +677,8 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
         metadata: { hibernationData }
       });
 
-      this.logger.log(`Session hibernated successfully: ${sessionId} -> ${hibernationId}`);
-      return hibernationData;
-    } catch (error) {
-      this.logger.error(`Failed to hibernate session: ${sessionId}`, error);
-      throw error;
-    }
+      this.logger.log(`Session hibernated successfully: ${sessionId} -> ${hibernationId}`);return hibernationData;} catch (error) {
+      this.logger.error(`Failed to hibernate session: ${sessionId}`, error);throw error;}
   }
 
   /**
@@ -808,20 +688,14 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Restoring hibernated session: ${hibernationId}`);
-
-      const hibernationData = await this.getHibernationData(hibernationId);
-      if (!hibernationData) {
+      this.logger.debug(`Restoring hibernated session: ${hibernationId}`);const hibernationData = await this.getHibernationData(hibernationId);if (!hibernationData) {
         throw new Error(`Hibernation data not found: ${hibernationId}`);
       }
 
       // Verify integrity
       const currentIntegrityHash = await this.calculateIntegrityHash(hibernationData.sessionData);
       if (currentIntegrityHash !== hibernationData.integrityHash) {
-        throw new Error('Hibernated session data integrity verification failed');
-      }
-
-      // Decrypt and decompress data if needed
+        throw new Error('Hibernated session data integrity verification failed');}// Decrypt and decompress data if needed
       let restoredData = hibernationData.sessionData;
 
       if (hibernationData.encryptionApplied) {
@@ -869,9 +743,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
         metadata: { restoredSession }
       });
 
-      this.logger.log(`Session restored successfully: ${hibernationId} -> ${restoredSession.sessionId}`);
-      return restoredSession;
-    } catch (error) {
+      this.logger.log(`Session restored successfully: ${hibernationId} -> ${restoredSession.sessionId}`);return restoredSession;} catch (error) {
       this.logger.error(`Failed to restore hibernated session: ${hibernationId}`, error);
       throw error;
     }
@@ -890,10 +762,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Starting scheduled session cleanup operation');
-
-      const result: CleanupOperationResult = {
-        operationId,
+      this.logger.debug('Starting scheduled session cleanup operation');const result: CleanupOperationResult = {operationId,
         strategy: this.lifecycleConfig.cleanupStrategy,
         startTime: new Date(startTime),
         endTime: new Date(),
@@ -918,10 +787,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
           peakResourceUsage: 0,
           efficiencyScore: 0
         },
-        summary: ''
-      };
-
-      // Get sessions for cleanup analysis
+        summary: ''};// Get sessions for cleanup analysis
       const sessions = Array.from(this.sessionRegistry.values());
       result.sessionsProcessed = sessions.length;
 
@@ -931,19 +797,13 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
           const analysis = await this.analyzeSessionExpiration(session.sessionId);
 
           switch (analysis.recommendedAction.action) {
-            case 'terminate':
-              await this.terminateSession(session.sessionId, SessionTransitionReason.NATURAL_EXPIRATION);
-              result.sessionsTerminated++;
+            case 'terminate':await this.terminateSession(session.sessionId, SessionTransitionReason.NATURAL_EXPIRATION);result.sessionsTerminated++;
               break;
 
-            case 'hibernate':
-              await this.hibernateSession(session.sessionId);
-              result.sessionsHibernated++;
+            case 'hibernate':await this.hibernateSession(session.sessionId);result.sessionsHibernated++;
               break;
 
-            case 'cleanup':
-              await this.cleanupSession(session.sessionId);
-              result.sessionsTerminated++;
+            case 'cleanup':await this.cleanupSession(session.sessionId);result.sessionsTerminated++;
               break;
 
             default:
@@ -1009,9 +869,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
       this.logger.log(`Scheduled cleanup completed: ${result.summary}`);
       return result;
     } catch (error) {
-      this.logger.error('Failed to perform scheduled cleanup', error);
-      throw error;
-    }
+      this.logger.error('Failed to perform scheduled cleanup', error);throw error;}
   }
 
   // ===== PRIVATE HELPER METHODS =====
@@ -1071,21 +929,13 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
    * Initialize event handlers
    */
   private initializeEventHandlers(): void {
-    this.eventEmitter.on('session.created', (session: SessionMetadata) => {
-      this.sessionRegistry.set(session.sessionId, session);
-    });
+    this.eventEmitter.on('session.created', (session: SessionMetadata) => {this.sessionRegistry.set(session.sessionId, session);});
 
-    this.eventEmitter.on('session.terminated', (sessionId: string) => {
-      this.sessionRegistry.delete(sessionId);
-    });
+    this.eventEmitter.on('session.terminated', (sessionId: string) => {this.sessionRegistry.delete(sessionId);});
 
-    this.eventEmitter.on('session.hibernated', (sessionId: string, hibernationId: string) => {
-      this.sessionRegistry.delete(sessionId);
-    });
+    this.eventEmitter.on('session.hibernated', (sessionId: string, hibernationId: string) => {this.sessionRegistry.delete(sessionId);});
 
-    this.eventEmitter.on('session.restored', (sessionId: string, hibernationId: string) => {
-      // Session already added to registry in restore method
-    });
+    this.eventEmitter.on('session.restored', (sessionId: string, hibernationId: string) => {// Session already added to registry in restore method});
   }
 
   // Additional placeholder methods for comprehensive implementation...
@@ -1124,14 +974,8 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     policyEvaluations: PolicyEvaluationResult[]
   ): Promise<LifecycleAction> {
     return {
-      action: 'maintain',
-      parameters: {},
-      confidence: 0.8,
-      reasoning: ['Session is active and within normal parameters'],
-      urgency: 'low',
-      estimatedImpact: 'minimal',
-      alternatives: []
-    };
+      action: 'maintain',parameters: {},confidence: 0.8,
+      reasoning: ['Session is active and within normal parameters'],urgency: 'low',estimatedImpact: 'minimal',alternatives: []};
   }
 
   private async predictExpiration(
@@ -1167,19 +1011,12 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
       compliance: 0.3,
       reputation: 0.1,
       customer: 0.2,
-      reasoning: 'Low impact session termination',
-      mitigationCost: 100
-    };
+      reasoning: 'Low impact session termination',mitigationCost: 100};
   }
 
   private getAnalysisSeverity(action: LifecycleAction): AuditSeverity {
     switch (action.urgency) {
-      case 'critical': return AuditSeverity.CRITICAL;
-      case 'high': return AuditSeverity.HIGH;
-      case 'medium': return AuditSeverity.MEDIUM;
-      case 'low': return AuditSeverity.LOW;
-      default: return AuditSeverity.INFO;
-    }
+      case 'critical': return AuditSeverity.CRITICAL;case 'high': return AuditSeverity.HIGH;case 'medium': return AuditSeverity.MEDIUM;case 'low': return AuditSeverity.LOW;default: return AuditSeverity.INFO;}
   }
 
   // Additional placeholder methods...
@@ -1188,9 +1025,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
   private getDefaultBusinessHours(): BusinessHoursConfig {
     return {
       enabled: false,
-      timezone: 'UTC',
-      weekdays: [],
-      holidays: [],
+      timezone: 'UTC',weekdays: [],holidays: [],
       afterHoursPolicy: {
         timeoutMultiplier: 1,
         maxSessionDuration: 3600000,
@@ -1233,9 +1068,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
   private async decompressSessionData(data: any): Promise<any> { return data; }
   private async decryptSessionData(data: any): Promise<any> { return data; }
   private shouldEncryptHibernatedData(session: SessionMetadata): boolean { return false; }
-  private async calculateIntegrityHash(data: any): Promise<string> { return 'hash'; }
-  private calculateCompressionRatio(original: any, compressed: any): number { return 0.8; }
-  private async storeHibernationData(hibernationData: SessionHibernationData): Promise<void> { }
+  private async calculateIntegrityHash(data: any): Promise<string> { return 'hash'; }private calculateCompressionRatio(original: any, compressed: any): number { return 0.8; }private async storeHibernationData(hibernationData: SessionHibernationData): Promise<void> { }
   private async getHibernationData(hibernationId: string): Promise<SessionHibernationData | null> { return null; }
   private async removeHibernationData(hibernationId: string): Promise<void> { }
   private async updateSessionState(sessionId: string, state: SessionState): Promise<void> { }
@@ -1251,9 +1084,7 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
   private calculateCleanupEfficiency(result: CleanupOperationResult): number { return 0.85; }
   private createEmptyCleanupResult(): CleanupOperationResult {
     return {
-      operationId: '',
-      strategy: SessionCleanupStrategy.GRACEFUL,
-      startTime: new Date(),
+      operationId: '',strategy: SessionCleanupStrategy.GRACEFUL,startTime: new Date(),
       endTime: new Date(),
       sessionsProcessed: 0,
       sessionsTerminated: 0,

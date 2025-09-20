@@ -1,19 +1,11 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import {
-  FileOperationDto,
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';import { ComputerUseService } from '../computer-use/computer-use.service';import * as fs from 'fs/promises';import * as path from 'path';import * as crypto from 'crypto';import {FileOperationDto,
   BulkFileOperationDto,
   FileSyncDto,
   FileOperationType,
   FileUploadMethod,
   FileDownloadMethod,
   CompressionType
-} from './dto/file-operation.dto';
-import {
-  FileOperationResponseDto,
+} from './dto/file-operation.dto';import {FileOperationResponseDto,
   BulkFileOperationResponseDto,
   FileListingResponseDto,
   FileSyncResponseDto,
@@ -23,10 +15,7 @@ import {
   FileOperationStatus,
   FileOperationProgressDto,
   FileValidationResultDto
-} from './dto/file-response.dto';
-
-/**
- * File Management Service
+} from './dto/file-response.dto';/*** File Management Service
  *
  * Provides comprehensive file management capabilities including:
  * - Automated file uploads with form detection and interaction
@@ -42,8 +31,7 @@ import {
 export class FileManagementService {
   private readonly logger = new Logger(FileManagementService.name);
   private readonly activeOperations = new Map<string, any>();
-  private readonly defaultDownloadDir = '/tmp/bytebot-downloads';
-  private readonly defaultUploadDir = '/tmp/bytebot-uploads';
+  private readonly defaultDownloadDir = '/tmp/bytebot-downloads';private readonly defaultUploadDir = '/tmp/bytebot-uploads';
 
   constructor(
     private readonly computerUseService: ComputerUseService,
@@ -55,12 +43,7 @@ export class FileManagementService {
    * Execute file operation
    */
   async executeFileOperation(operation: FileOperationDto): Promise<FileOperationResponseDto> {
-    const operationId = `file_${operation.operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Starting file operation: ${operation.operation}`, {
-      operationId,
-      operation: operation.operation,
+    const operationId = `file_${operation.operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting file operation: ${operation.operation}`, {operationId,operation: operation.operation,
       source: operation.source,
       target: operation.target,
       filename: operation.filename
@@ -107,10 +90,7 @@ export class FileManagementService {
           result = await this.handleCreateDirectory(operation, operationId);
           break;
         default:
-          throw new Error(`Unsupported file operation: ${operation.operation}`);
-      }
-
-      const processingTime = Date.now() - startTime;
+          throw new Error(`Unsupported file operation: ${operation.operation}`);}const processingTime = Date.now() - startTime;
 
       const response: FileOperationResponseDto = {
         success: true,
@@ -120,9 +100,7 @@ export class FileManagementService {
         ...result
       };
 
-      this.logger.log(`[${operationId}] File operation completed successfully (${processingTime}ms)`, {
-        operationId,
-        operation: operation.operation,
+      this.logger.log(`[${operationId}] File operation completed successfully (${processingTime}ms)`, {operationId,operation: operation.operation,
         processingTime,
         success: true
       });
@@ -130,10 +108,7 @@ export class FileManagementService {
       return response;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] File operation failed (${processingTime}ms)`, error);
-
-      return {
-        success: false,
+      this.logger.error(`[${operationId}] File operation failed (${processingTime}ms)`, error);return {success: false,
         operation: operation.operation,
         operationId,
         processingTimeMs: processingTime,
@@ -152,12 +127,7 @@ export class FileManagementService {
    * Execute bulk file operations
    */
   async executeBulkFileOperations(bulkOperation: BulkFileOperationDto): Promise<BulkFileOperationResponseDto> {
-    const operationId = `bulk_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Starting bulk file operation`, {
-      operationId,
-      operationCount: bulkOperation.operations.length,
+    const operationId = `bulk_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting bulk file operation`, {operationId,operationCount: bulkOperation.operations.length,
       parallel: bulkOperation.parallel,
       maxConcurrent: bulkOperation.maxConcurrent
     });
@@ -212,9 +182,7 @@ export class FileManagementService {
             results.push({
               success: false,
               operation: operation.operation,
-              operationId: `failed_${Date.now()}`,
-              processingTimeMs: 0,
-              errorMessage: error.message
+              operationId: `failed_${Date.now()}`,processingTimeMs: 0,errorMessage: error.message
             });
 
             if (!bulkOperation.continueOnError) {
@@ -240,9 +208,7 @@ export class FileManagementService {
         statistics: this.calculateBulkStatistics(results, totalProcessingTime)
       };
 
-      this.logger.log(`[${operationId}] Bulk file operation completed (${totalProcessingTime}ms)`, {
-        operationId,
-        totalOperations: bulkOperation.operations.length,
+      this.logger.log(`[${operationId}] Bulk file operation completed (${totalProcessingTime}ms)`, {operationId,totalOperations: bulkOperation.operations.length,
         successfulOperations,
         failedOperations,
         totalProcessingTime
@@ -251,10 +217,7 @@ export class FileManagementService {
       return response;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Bulk file operation failed (${processingTime}ms)`, error);
-
-      return {
-        success: false,
+      this.logger.error(`[${operationId}] Bulk file operation failed (${processingTime}ms)`, error);return {success: false,
         operationId,
         totalOperations: bulkOperation.operations.length,
         successfulOperations,
@@ -271,10 +234,7 @@ export class FileManagementService {
    * Synchronize files between locations
    */
   async synchronizeFiles(syncOperation: FileSyncDto): Promise<FileSyncResponseDto> {
-    const operationId = `sync_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(`[${operationId}] Starting file synchronization`, {
+    const operationId = `sync_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Starting file synchronization`, {
       operationId,
       source: syncOperation.source,
       target: syncOperation.target,
@@ -333,9 +293,7 @@ export class FileManagementService {
         timestamp: new Date(endTime).toISOString()
       };
 
-      this.logger.log(`[${operationId}] File synchronization completed (${durationMs}ms)`, {
-        operationId,
-        filesSync,
+      this.logger.log(`[${operationId}] File synchronization completed (${durationMs}ms)`, {operationId,filesSync,
         filesSkipped,
         filesError,
         totalBytesSync,
@@ -369,11 +327,7 @@ export class FileManagementService {
    * List files in directory
    */
   async listFiles(directoryPath: string, filters?: any): Promise<FileListingResponseDto> {
-    const operationId = `list_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Listing files in directory: ${directoryPath}`, {
-      operationId,
-      directoryPath,
+    const operationId = `list_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Listing files in directory: ${directoryPath}`, {operationId,directoryPath,
       filters
     });
 
@@ -422,9 +376,7 @@ export class FileManagementService {
         timestamp: new Date().toISOString()
       };
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to list files in directory: ${directoryPath}`, error);
-      throw new HttpException(
-        `Failed to list files: ${error.message}`,
+      this.logger.error(`[${operationId}] Failed to list files in directory: ${directoryPath}`, error);throw new HttpException(`Failed to list files: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
@@ -445,7 +397,7 @@ export class FileManagementService {
     if (uploadConfig.validation) {
       validation = await this.validateFile(operation, uploadConfig.validation);
       if (!validation.isValid) {
-        throw new Error(`File validation failed: ${validation.errors?.join(', ')}`);
+        throw new Error(`File validation failed: ${validation.errors?.join(`, ')}`);
       }
     }
 
@@ -486,10 +438,7 @@ export class FileManagementService {
         status: FileOperationStatus.COMPLETED,
         method: uploadConfig.method,
         fileInfo: {
-          name: operation.filename || 'uploaded_file',
-          path: operation.target || '',
-          size: operation.fileSize || 0,
-          mimeType: operation.mimeType
+          name: operation.filename || 'uploaded_file',path: operation.target || '',size: operation.fileSize || 0,mimeType: operation.mimeType
         },
         progress: {
           ...progress,
@@ -513,10 +462,7 @@ export class FileManagementService {
         status: FileOperationStatus.FAILED,
         method: uploadConfig.method,
         fileInfo: {
-          name: operation.filename || 'failed_upload',
-          path: '',
-          size: 0
-        },
+          name: operation.filename || 'failed_upload',path: '',size: 0},
         progress,
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),
@@ -530,10 +476,7 @@ export class FileManagementService {
 
   private async handleFileDownload(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.downloadConfig) {
-      throw new Error('Download configuration is required for download operations');
-    }
-
-    const downloadConfig = operation.downloadConfig;
+      throw new Error('Download configuration is required for download operations');}const downloadConfig = operation.downloadConfig;
     const startTime = Date.now();
 
     // Create progress tracker
@@ -595,10 +538,7 @@ export class FileManagementService {
         status: FileOperationStatus.FAILED,
         method: downloadConfig.method,
         fileInfo: {
-          name: 'failed_download',
-          path: '',
-          size: 0
-        },
+          name: 'failed_download',path: '',size: 0},
         progress,
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),
@@ -612,10 +552,7 @@ export class FileManagementService {
 
   private async handleFileDelete(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.source) {
-      throw new Error('Source path is required for delete operations');
-    }
-
-    await fs.unlink(operation.source);
+      throw new Error('Source path is required for delete operations');}await fs.unlink(operation.source);
 
     return {
       fileInfo: {
@@ -628,10 +565,7 @@ export class FileManagementService {
 
   private async handleFileMove(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.source || !operation.target) {
-      throw new Error('Source and target paths are required for move operations');
-    }
-
-    await fs.rename(operation.source, operation.target);
+      throw new Error('Source and target paths are required for move operations');}await fs.rename(operation.source, operation.target);
 
     const stats = await fs.stat(operation.target);
 
@@ -647,10 +581,7 @@ export class FileManagementService {
 
   private async handleFileCopy(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.source || !operation.target) {
-      throw new Error('Source and target paths are required for copy operations');
-    }
-
-    await fs.copyFile(operation.source, operation.target);
+      throw new Error('Source and target paths are required for copy operations');}await fs.copyFile(operation.source, operation.target);
 
     const stats = await fs.stat(operation.target);
 
@@ -666,10 +597,7 @@ export class FileManagementService {
 
   private async handleFileRename(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.source || !operation.filename) {
-      throw new Error('Source path and new filename are required for rename operations');
-    }
-
-    const targetPath = path.join(path.dirname(operation.source), operation.filename);
+      throw new Error('Source path and new filename are required for rename operations');}const targetPath = path.join(path.dirname(operation.source), operation.filename);
     await fs.rename(operation.source, targetPath);
 
     const stats = await fs.stat(targetPath);
@@ -685,21 +613,12 @@ export class FileManagementService {
   }
 
   private async handleFileList(operation: FileOperationDto, operationId: string): Promise<any> {
-    const directoryPath = operation.source || '.';
-    const listing = await this.listFiles(directoryPath);
-
-    return { listing };
+    const directoryPath = operation.source || '.';const listing = await this.listFiles(directoryPath);return { listing };
   }
 
   private async handleFileRead(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.source) {
-      throw new Error('Source path is required for read operations');
-    }
-
-    const content = await fs.readFile(operation.source, 'utf8');
-    const stats = await fs.stat(operation.source);
-
-    return {
+      throw new Error('Source path is required for read operations');}const content = await fs.readFile(operation.source, 'utf8');const stats = await fs.stat(operation.source);return {
       fileInfo: {
         name: path.basename(operation.source),
         path: operation.source,
@@ -712,13 +631,8 @@ export class FileManagementService {
 
   private async handleFileWrite(operation: FileOperationDto, operationId: string): Promise<any> {
     if (!operation.target || !operation.fileData) {
-      throw new Error('Target path and file data are required for write operations');
-    }
-
-    // Decode base64 data if needed
-    const data = operation.fileData.startsWith('data:')
-      ? Buffer.from(operation.fileData.split(',')[1], 'base64')
-      : Buffer.from(operation.fileData, 'base64');
+      throw new Error('Target path and file data are required for write operations');}// Decode base64 data if needed
+    const data = operation.fileData.startsWith('data:')? Buffer.from(operation.fileData.split(',')[1], 'base64'): Buffer.from(operation.fileData, 'base64');
 
     await fs.writeFile(operation.target, data);
 
@@ -740,8 +654,7 @@ export class FileManagementService {
 
     return {
       fileInfo: {
-        name: 'compressed.zip',
-        path: operation.target || 'compressed.zip',
+        name: 'compressed.zip',path: operation.target || 'compressed.zip',
         size: 1024000
       }
     };
@@ -753,10 +666,7 @@ export class FileManagementService {
 
     return {
       fileInfo: {
-        name: 'extracted',
-        path: operation.target || 'extracted',
-        size: 0
-      }
+        name: 'extracted',path: operation.target || 'extracted',size: 0}
     };
   }
 
@@ -787,10 +697,7 @@ export class FileManagementService {
     }
 
     // Simulate file upload interaction
-    progress.currentPhase = 'uploading';
-    progress.progressPercentage = 50;
-
-    // Submit form if configured
+    progress.currentPhase = 'uploading';progress.progressPercentage = 50;// Submit form if configured
     if (config.autoSubmit && config.submitSelector) {
       await this.clickElement(config.submitSelector, operationId);
       progress.progressPercentage = 100;
@@ -808,10 +715,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing drag-drop upload`);
 
     // Implementation would simulate drag-drop interaction
-    progress.currentPhase = 'drag-drop';
-    progress.progressPercentage = 100;
-
-    return {
+    progress.currentPhase = 'drag-drop';progress.progressPercentage = 100;return {
       success: true,
       uploadedFile: operation.filename,
       method: 'drag-drop'
@@ -822,10 +726,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing direct input upload`);
 
     // Implementation would directly set file input value
-    progress.currentPhase = 'direct-input';
-    progress.progressPercentage = 100;
-
-    return {
+    progress.currentPhase = 'direct-input';progress.progressPercentage = 100;return {
       success: true,
       uploadedFile: operation.filename,
       method: 'direct-input'
@@ -836,10 +737,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing bulk upload`);
 
     // Implementation would handle multiple file uploads
-    progress.currentPhase = 'bulk-upload';
-    progress.progressPercentage = 100;
-
-    return {
+    progress.currentPhase = 'bulk-upload';progress.progressPercentage = 100;return {
       success: true,
       uploadedFiles: [operation.filename],
       method: 'bulk-upload'
@@ -852,13 +750,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing direct download`);
 
     // Implementation would download from direct URL
-    progress.currentPhase = 'downloading';
-    progress.progressPercentage = 100;
-
-    const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');
-
-    return {
-      fileInfo: {
+    progress.currentPhase = 'downloading';progress.progressPercentage = 100;const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');return {fileInfo: {
         name: config.customFilename || 'downloaded_file',
         path: downloadPath,
         size: config.expectedFileSize || 1024000
@@ -875,13 +767,7 @@ export class FileManagementService {
       await this.clickElement(config.downloadSelector, operationId);
     }
 
-    progress.currentPhase = 'downloading';
-    progress.progressPercentage = 100;
-
-    const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');
-
-    return {
-      fileInfo: {
+    progress.currentPhase = 'downloading';progress.progressPercentage = 100;const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');return {fileInfo: {
         name: config.customFilename || 'downloaded_file',
         path: downloadPath,
         size: config.expectedFileSize || 1024000
@@ -895,13 +781,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing form submission download`);
 
     // Implementation would submit form to trigger download
-    progress.currentPhase = 'form-submission';
-    progress.progressPercentage = 100;
-
-    const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');
-
-    return {
-      fileInfo: {
+    progress.currentPhase = 'form-submission';progress.progressPercentage = 100;const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');return {fileInfo: {
         name: config.customFilename || 'downloaded_file',
         path: downloadPath,
         size: config.expectedFileSize || 1024000
@@ -915,13 +795,7 @@ export class FileManagementService {
     this.logger.log(`[${operationId}] Performing AJAX download`);
 
     // Implementation would trigger AJAX download
-    progress.currentPhase = 'ajax-download';
-    progress.progressPercentage = 100;
-
-    const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');
-
-    return {
-      fileInfo: {
+    progress.currentPhase = 'ajax-download';progress.progressPercentage = 100;const downloadPath = path.join(config.downloadDirectory || this.defaultDownloadDir, config.customFilename || 'downloaded_file');return {fileInfo: {
         name: config.customFilename || 'downloaded_file',
         path: downloadPath,
         size: config.expectedFileSize || 1024000
@@ -939,20 +813,12 @@ export class FileManagementService {
 
     // Check file size
     if (validation.maxFileSize && operation.fileSize && operation.fileSize > validation.maxFileSize) {
-      errors.push(`File size (${operation.fileSize}) exceeds maximum limit (${validation.maxFileSize})`);
-    }
-
-    if (validation.minFileSize && operation.fileSize && operation.fileSize < validation.minFileSize) {
-      errors.push(`File size (${operation.fileSize}) below minimum limit (${validation.minFileSize})`);
-    }
-
-    // Check file extension
+      errors.push(`File size (${operation.fileSize}) exceeds maximum limit (${validation.maxFileSize})`);}if (validation.minFileSize && operation.fileSize && operation.fileSize < validation.minFileSize) {
+      errors.push(`File size (${operation.fileSize}) below minimum limit (${validation.minFileSize})`);}// Check file extension
     if (validation.allowedExtensions && operation.filename) {
       const ext = path.extname(operation.filename).toLowerCase();
       if (!validation.allowedExtensions.includes(ext)) {
-        errors.push(`File extension ${ext} is not allowed`);
-      }
-    }
+        errors.push(`File extension ${ext} is not allowed`);}}
 
     // Check MIME type
     if (validation.allowedMimeTypes && operation.mimeType) {
@@ -978,9 +844,7 @@ export class FileManagementService {
   }
 
   private async waitForElement(selector: string, timeout: number, operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Waiting for element: ${selector}`);
-    // Implementation would wait for element using browser automation
-  }
+    this.logger.log(`[${operationId}] Waiting for element: ${selector}`);// Implementation would wait for element using browser automation}
 
   private async clickElement(selector: string, operationId: string): Promise<void> {
     this.logger.log(`[${operationId}] Clicking element: ${selector}`);
@@ -1029,9 +893,7 @@ export class FileManagementService {
 
       return sourceTime > targetTime || sourceFile.size !== targetStats.size;
     } catch (error) {
-      // Target file doesn't exist, needs sync
-      return true;
-    }
+      // Target file doesn't exist, needs syncreturn true;}
   }
 
   private async synchronizeFile(sourceFile: FileInfoDto, targetPath: string, direction: string): Promise<void> {

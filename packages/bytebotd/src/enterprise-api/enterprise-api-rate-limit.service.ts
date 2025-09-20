@@ -23,20 +23,13 @@
  * Business Intelligence: Conversation-driven rate limit policy optimization
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {ParlantIntegrationService,
   ConversationalValidationError as _ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as _ParlantConversationContext,
-} from '../parlant/parlant-integration.service';
-
-// ===== RATE LIMITING TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== RATE LIMITING TYPES =====/**
  * Rate limit configuration with Parlant validation context
  */
 export interface RateLimitConfig {
@@ -54,15 +47,7 @@ export interface RateLimitConfig {
   };
   
   /** Business context */
-  businessPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  serviceLevel: 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
-  
-  /** Risk assessment */
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  enforcementPolicy: 'STRICT' | 'FLEXIBLE' | 'CONVERSATION_BASED';
-}
-
-/**
+  businessPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';serviceLevel: 'BASIC' | 'PREMIUM' | 'ENTERPRISE';/** Risk assessment */riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';enforcementPolicy: 'STRICT' | 'FLEXIBLE' | 'CONVERSATION_BASED';}/**
  * Rate limit request with conversational context
  */
 export interface RateLimitRequest {
@@ -77,12 +62,8 @@ export interface RateLimitRequest {
     sessionId: string;
     userIntent?: string;
     businessJustification?: string;
-    urgencyLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    conversationHistory?: Array<{
-      timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
-      message: string;
-    }>;
+    urgencyLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';conversationHistory?: Array<{timestamp: string;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
     requestedOverride?: {
       reason: string;
       expectedDuration: number;
@@ -108,9 +89,7 @@ export interface RateLimitDecision {
     confidence: number;
     riskAssessment: string;
     overrideApplied?: {
-      type: 'BUSINESS_JUSTIFICATION' | 'EMERGENCY_OVERRIDE' | 'USER_INTENT';
-      reason: string;
-      duration: number;
+      type: 'BUSINESS_JUSTIFICATION' | 'EMERGENCY_OVERRIDE' | 'USER_INTENT';reason: string;duration: number;
       approvalLevel: string;
     };
   };
@@ -139,15 +118,11 @@ export interface RateLimitViolation {
     conversationId: string;
     userIntent: string;
     legitimacyScore: number;
-    recommendedAction: 'BLOCK' | 'WARN' | 'ALLOW_WITH_MONITORING';
-    businessImpactAssessment: string;
-  };
+    recommendedAction: 'BLOCK' | 'WARN' | 'ALLOW_WITH_MONITORING';businessImpactAssessment: string;};
   
   /** Violation handling */
   resolution: {
-    action: 'BLOCKED' | 'RATE_LIMITED' | 'ALLOWED_WITH_OVERRIDE';
-    reasoning: string;
-    additionalMeasures: string[];
+    action: 'BLOCKED' | 'RATE_LIMITED' | 'ALLOWED_WITH_OVERRIDE';reasoning: string;additionalMeasures: string[];
   };
 }
 
@@ -236,14 +211,9 @@ export class EnterpriseApiRateLimitService {
    * Evaluate rate limit with comprehensive Parlant validation
    */
   async evaluateRateLimit(request: RateLimitRequest): Promise<RateLimitDecision> {
-    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
+    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.analytics.totalRequests++;
     
-    this.analytics.totalRequests++;
-    
-    this.logger.debug(`[${operationId}] Evaluating rate limit with Parlant validation`, {
-      operationId,
-      userId: request.userId,
+    this.logger.debug(`[${operationId}] Evaluating rate limit with Parlant validation`, {operationId,userId: request.userId,
       endpoint: request.endpoint,
       method: request.method,
       hasConversationalContext: !!request.conversationalContext,
@@ -252,10 +222,7 @@ export class EnterpriseApiRateLimitService {
     try {
       // Get rate limit configuration
       const config = this.getRateLimitConfig(request.endpoint);
-      const trackingKey = `${request.userId}:${request.endpoint}`;
-      
-      // Get current rate limit status
-      const currentStatus = this.getCurrentRateLimitStatus(trackingKey, config);
+      const trackingKey = `${request.userId}:${request.endpoint}`;// Get current rate limit statusconst currentStatus = this.getCurrentRateLimitStatus(trackingKey, config);
       
       // Perform Parlant validation for rate limiting decision
       const validationResult = await this.validateRateLimitDecision(
@@ -284,9 +251,7 @@ export class EnterpriseApiRateLimitService {
       this.updateRateLimitTracking(trackingKey, config, decision);
       this.updateAnalytics(decision);
 
-      this.logger.debug(`[${operationId}] Rate limit evaluation completed`, {
-        operationId,
-        allowed: decision.allowed,
+      this.logger.debug(`[${operationId}] Rate limit evaluation completed`, {operationId,allowed: decision.allowed,
         remainingRequests: decision.remainingRequests,
         parlantApproved: decision.parlantValidation.validationApproved,
         processingTime: Date.now() - startTime,
@@ -320,11 +285,7 @@ export class EnterpriseApiRateLimitService {
       };
     }
   ): Promise<{ approved: boolean; reason: string; duration?: number }> {
-    const operationId = `rate_override${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Processing rate limit override request`, {
-      operationId,
-      userId: request.userId,
+    const operationId = `rate_override${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Processing rate limit override request`, {operationId,userId: request.userId,
       endpoint: request.endpoint,
       urgencyLevel: request.overrideRequest.urgencyLevel,
       reason: request.overrideRequest.reason,
@@ -332,20 +293,14 @@ export class EnterpriseApiRateLimitService {
 
     try {
       const validationRequest: ParlantValidationRequest = {
-        functionName: `RateLimit.Override.${this.sanitizeEndpointForFunction(request.endpoint)}`,
-        functionParams: {
-          userId: request.userId,
+        functionName: `RateLimit.Override.${this.sanitizeEndpointForFunction(request.endpoint)}`,functionParams: {userId: request.userId,
           endpoint: request.endpoint,
           overrideRequest: request.overrideRequest,
           currentContext: request.conversationalContext,
         },
-        actionDescription: `Rate limit override request: ${request.overrideRequest.reason}`,
-        context: {
-          userId: request.userId,
+        actionDescription: `Rate limit override request: ${request.overrideRequest.reason}`,context: {userId: request.userId,
           sessionId: request.conversationalContext?.sessionId ?? `override${Date.now()}`,
-          agentRole: 'RATE_LIMIT_MANAGER',
-          securityLevel: this.mapUrgencyToSecurityLevel(request.overrideRequest.urgencyLevel),
-          conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
+          agentRole: 'RATE_LIMIT_MANAGER',securityLevel: this.mapUrgencyToSecurityLevel(request.overrideRequest.urgencyLevel),conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
             timestamp: new Date(h.timestamp),
             speaker: h.speaker,
             message: h.message,
@@ -371,9 +326,7 @@ export class EnterpriseApiRateLimitService {
         }
       }
 
-      this.logger.log(`[${operationId}] Rate limit override validation completed`, {
-        operationId,
-        approved: result.approved,
+      this.logger.log(`[${operationId}] Rate limit override validation completed`, {operationId,approved: result.approved,
         confidence: result.confidence,
         reasoning: result.reasoning,
       });
@@ -385,16 +338,12 @@ export class EnterpriseApiRateLimitService {
       };
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Rate limit override validation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Rate limit override validation failed`, {operationId,error: error instanceof Error ? error.message : String(error),
       });
 
       return {
         approved: false,
-        reason: `Override validation failed: ${error instanceof Error ? error.message : String(error)}`,
-      };
-    }
+        reason: `Override validation failed: ${error instanceof Error ? error.message : String(error)}`,};}
   }
 
   /**
@@ -437,9 +386,7 @@ export class EnterpriseApiRateLimitService {
                                     request.conversationalContext?.requestedOverride;
 
     const validationRequest: ParlantValidationRequest = {
-      functionName: `RateLimit.Decision.${this.sanitizeEndpointForFunction(request.endpoint)}`,
-      functionParams: {
-        userId: request.userId,
+      functionName: `RateLimit.Decision.${this.sanitizeEndpointForFunction(request.endpoint)}`,functionParams: {userId: request.userId,
         endpoint: request.endpoint,
         method: request.method,
         currentCount: currentStatus.count,
@@ -451,14 +398,9 @@ export class EnterpriseApiRateLimitService {
         conversationalContext: request.conversationalContext,
       },
       actionDescription: wouldExceedLimit 
-        ? `Rate limit exceeded for ${request.endpoint} - evaluate override based on business context`
-        : `Rate limit check for ${request.endpoint} - validate normal request`,
-      context: {
-        userId: request.userId,
+        ? `Rate limit exceeded for ${request.endpoint} - evaluate override based on business context`: `Rate limit check for ${request.endpoint} - validate normal request`,context: {userId: request.userId,
         sessionId: request.conversationalContext?.sessionId ?? `rate${Date.now()}`,
-        agentRole: 'RATE_LIMITER',
-        securityLevel: this.mapRiskLevelToSecurityLevel(config.riskLevel),
-        conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
+        agentRole: 'RATE_LIMITER',securityLevel: this.mapRiskLevelToSecurityLevel(config.riskLevel),conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
           timestamp: new Date(h.timestamp),
           speaker: h.speaker,
           message: h.message,
@@ -491,16 +433,11 @@ export class EnterpriseApiRateLimitService {
   ): RateLimitDecision {
     const wouldExceedLimit = currentStatus.count >= config.maxRequests;
     let allowed = !wouldExceedLimit;
-    let overrideApplied: RateLimitDecision['parlantValidation']['overrideApplied'];
-
-    // Apply Parlant validation result
-    if (wouldExceedLimit && validationResult.approved) {
+    let overrideApplied: RateLimitDecision['parlantValidation']['overrideApplied'];// Apply Parlant validation resultif (wouldExceedLimit && validationResult.approved) {
       // Parlant approved override
       allowed = true;
       overrideApplied = {
-        type: request.conversationalContext?.requestedOverride ? 'BUSINESS_JUSTIFICATION' : 'USER_INTENT',
-        reason: validationResult.reasoning,
-        duration: request.conversationalContext?.requestedOverride?.expectedDuration ?? 3600000, // 1 hour default
+        type: request.conversationalContext?.requestedOverride ? 'BUSINESS_JUSTIFICATION' : 'USER_INTENT',reason: validationResult.reasoning,duration: request.conversationalContext?.requestedOverride?.expectedDuration ?? 3600000, // 1 hour default
         approvalLevel: 'PARLANT_AI_VALIDATION',
       };
     } else if (wouldExceedLimit && !validationResult.approved) {
@@ -554,12 +491,7 @@ export class EnterpriseApiRateLimitService {
         overrideWindowMs: 3600000,
         requiresJustification: true,
       },
-      businessPriority: 'MEDIUM',
-      serviceLevel: 'BASIC',
-      riskLevel: 'MEDIUM',
-      enforcementPolicy: 'CONVERSATION_BASED',
-    };
-  }
+      businessPriority: 'MEDIUM',serviceLevel: 'BASIC',riskLevel: 'MEDIUM',enforcementPolicy: 'CONVERSATION_BASED',};}
 
   /**
    * Get current rate limit status
@@ -631,18 +563,10 @@ export class EnterpriseApiRateLimitService {
       resetTime: new Date(Date.now() + 3600000),
       currentCount: 0,
       parlantValidation: {
-        conversationId: 'failsafe',
-        validationApproved: true,
-        reasoning: 'Failsafe mode - validation service unavailable',
-        confidence: 0.5,
-        riskAssessment: 'Unable to assess - service degraded',
-      },
-      metadata: {
+        conversationId: 'failsafe',validationApproved: true,reasoning: 'Failsafe mode - validation service unavailable',confidence: 0.5,riskAssessment: 'Unable to assess - service degraded',},metadata: {
         operationId,
         timestamp: new Date(),
-        enforcementPolicy: 'FAILSAFE',
-        businessContext: { failsafeMode: true },
-      },
+        enforcementPolicy: 'FAILSAFE',businessContext: { failsafeMode: true },},
     };
   }
 
@@ -652,37 +576,7 @@ export class EnterpriseApiRateLimitService {
   private initializeRateLimitConfigs(): void {
     // Initialize default configurations for common endpoints
     const defaultConfigs: Array<[string, Partial<RateLimitConfig>]> = [
-      ['/computer-use/action', { 
-        maxRequests: 50, 
-        businessPriority: 'HIGH', 
-        riskLevel: 'HIGH', 
-        enforcementPolicy: 'CONVERSATION_BASED' 
-      }],
-      ['/auth/login', { 
-        maxRequests: 20, 
-        businessPriority: 'CRITICAL', 
-        riskLevel: 'CRITICAL', 
-        enforcementPolicy: 'STRICT' 
-      }],
-      ['/browser-use/action', { 
-        maxRequests: 30, 
-        businessPriority: 'HIGH', 
-        riskLevel: 'HIGH', 
-        enforcementPolicy: 'FLEXIBLE' 
-      }],
-      ['/health', { 
-        maxRequests: 1000, 
-        businessPriority: 'LOW', 
-        riskLevel: 'LOW', 
-        enforcementPolicy: 'FLEXIBLE' 
-      }],
-      ['/metrics', { 
-        maxRequests: 500, 
-        businessPriority: 'MEDIUM', 
-        riskLevel: 'MEDIUM', 
-        enforcementPolicy: 'CONVERSATION_BASED' 
-      }],
-    ];
+      ['/computer-use/action', { maxRequests: 50, businessPriority: 'HIGH', riskLevel: 'HIGH', enforcementPolicy: 'CONVERSATION_BASED' }],['/auth/login', { maxRequests: 20, businessPriority: 'CRITICAL', riskLevel: 'CRITICAL', enforcementPolicy: 'STRICT' }],['/browser-use/action', { maxRequests: 30, businessPriority: 'HIGH', riskLevel: 'HIGH', enforcementPolicy: 'FLEXIBLE' }],['/health', { maxRequests: 1000, businessPriority: 'LOW', riskLevel: 'LOW', enforcementPolicy: 'FLEXIBLE' }],['/metrics', { maxRequests: 500, businessPriority: 'MEDIUM', riskLevel: 'MEDIUM', enforcementPolicy: 'CONVERSATION_BASED' }],];
 
     defaultConfigs.forEach(([endpoint, overrides]) => {
       const baseConfig: RateLimitConfig = {
@@ -695,20 +589,14 @@ export class EnterpriseApiRateLimitService {
           overrideWindowMs: 3600000,
           requiresJustification: true,
         },
-        businessPriority: 'MEDIUM',
-        serviceLevel: 'BASIC',
-        riskLevel: 'MEDIUM',
-        enforcementPolicy: 'CONVERSATION_BASED',
+        businessPriority: 'MEDIUM',serviceLevel: 'BASIC',riskLevel: 'MEDIUM',enforcementPolicy: 'CONVERSATION_BASED',
         ...overrides,
       };
       
       this.rateLimitConfigs.set(endpoint, baseConfig);
     });
 
-    this.logger.log(`Initialized ${this.rateLimitConfigs.size} rate limit configurations`);
-  }
-
-  /**
+    this.logger.log(`Initialized ${this.rateLimitConfigs.size} rate limit configurations`);}/**
    * Start cleanup interval for expired tracking entries
    */
   private startCleanupInterval(): void {
@@ -733,33 +621,17 @@ export class EnterpriseApiRateLimitService {
    * Sanitize endpoint for function name generation
    */
   private sanitizeEndpointForFunction(endpoint: string): string {
-    return endpoint.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
-  }
-
-  /**
+    return endpoint.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');}/**
    * Map urgency level to security level
    */
-  private mapUrgencyToSecurityLevel(urgency: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (urgency.toUpperCase()) {
-      case 'LOW': return 'LOW';
-      case 'MEDIUM': return 'MEDIUM';
-      case 'HIGH': return 'HIGH';
-      case 'CRITICAL': return 'CRITICAL';
-      default: return 'MEDIUM';
-    }
-  }
+  private mapUrgencyToSecurityLevel(urgency: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (urgency.toUpperCase()) {case 'LOW': return 'LOW';case 'MEDIUM': return 'MEDIUM';case 'HIGH': return 'HIGH';case 'CRITICAL': return 'CRITICAL';default: return 'MEDIUM';}}
 
   /**
    * Map urgency level to risk level
    */
   private mapUrgencyToRiskLevel(urgency: string): RiskLevel {
     switch (urgency) {
-      case 'LOW': return RiskLevel.LOW;
-      case 'MEDIUM': return RiskLevel.MEDIUM;
-      case 'HIGH': return RiskLevel.HIGH;
-      case 'CRITICAL': return RiskLevel.CRITICAL;
-      default: return RiskLevel.LOW; // Default fallback
-    }
+      case 'LOW': return RiskLevel._LOW;case 'MEDIUM': return RiskLevel._MODERATE;case 'HIGH': return RiskLevel._HIGH;case 'CRITICAL': return RiskLevel._CRITICAL;default: return RiskLevel._LOW; // Default fallback}
   }
 
   /**

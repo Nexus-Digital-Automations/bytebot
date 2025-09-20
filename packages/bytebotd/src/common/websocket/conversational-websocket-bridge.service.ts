@@ -23,51 +23,17 @@
  * @version 2.0.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { promisify } from 'util';
-import {
-  createSafeWebSocketServer,
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { promisify } from 'util';import {createSafeWebSocketServer,
   createSecureVerifyCallback,
   SafeWebSocketServerOptions,
   EnhancedRequestInfo,
   convertIncomingMessageToRecord,
-} from './websocket-types';
-
-// ===== CONVERSATIONAL STREAMING TYPES =====
-
-/**
+} from './websocket-types';// ===== CONVERSATIONAL STREAMING TYPES =====/**
  * Streaming validation message types for real-time conversational flows
  */
 export enum ConversationalMessageType {
   // Session management
-  SESSION_START = 'session_start',
-  SESSION_READY = 'session_ready',
-  SESSION_END = 'session_end',
-
-  // Validation streaming protocols
-  VALIDATION_REQUEST = 'validation_request',
-  VALIDATION_RESPONSE = 'validation_response',
-  USER_CONFIRMATION = 'user_confirmation',
-  CONFIRMATION_RESULT = 'confirmation_result',
-  PROGRESS_UPDATE = 'progress_update',
-  STREAMING_COMPLETE = 'streaming_complete',
-
-  // Real-time communication
-  HEARTBEAT = 'heartbeat',
-  HEARTBEAT_ACK = 'heartbeat_ack',
-  RECONNECT_REQUEST = 'reconnect_request',
-  ERROR_STREAM = 'error_stream',
-
-  // Performance and monitoring
-  PERFORMANCE_METRICS = 'performance_metrics',
-  CONNECTION_STATUS = 'connection_status',
-}
-
-/**
+  SESSION_START = 'session_start',SESSION_READY = 'session_ready',SESSION_END = 'session_end',// Validation streaming protocolsVALIDATION_REQUEST = 'validation_request',VALIDATION_RESPONSE = 'validation_response',USER_CONFIRMATION = 'user_confirmation',CONFIRMATION_RESULT = 'confirmation_result',PROGRESS_UPDATE = 'progress_update',STREAMING_COMPLETE = 'streaming_complete',// Real-time communicationHEARTBEAT = 'heartbeat',HEARTBEAT_ACK = 'heartbeat_ack',RECONNECT_REQUEST = 'reconnect_request',ERROR_STREAM = 'error_stream',// Performance and monitoringPERFORMANCE_METRICS = 'performance_metrics',CONNECTION_STATUS = 'connection_status',}/**
  * Base conversational message structure for all streaming protocols
  */
 export interface ConversationalMessage {
@@ -85,9 +51,7 @@ export interface ConversationalMessage {
  * Message metadata for performance tracking and routing
  */
 export interface ConversationalMessageMetadata {
-  readonly priority: 'low' | 'normal' | 'high' | 'critical';
-  readonly requiresAck: boolean;
-  readonly timeout?: number;
+  readonly priority: 'low' | 'normal' | 'high' | 'critical';readonly requiresAck: boolean;readonly timeout?: number;
   readonly retryCount?: number;
   readonly compression?: boolean;
   readonly routingHints?: string[];
@@ -102,9 +66,7 @@ export interface ValidationRequestMessage extends ConversationalMessage {
     readonly validationId: string;
     readonly context: ValidationContext;
     readonly action: ValidationAction;
-    readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';
-    readonly streamingOptions: ValidationStreamingOptions;
-  };
+    readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';readonly streamingOptions: ValidationStreamingOptions;};
 }
 
 /**
@@ -122,9 +84,7 @@ export interface ValidationContext {
  * Security context for validation
  */
 export interface SecurityContext {
-  readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';
-  readonly permissions: string[];
-  readonly auditRequired: boolean;
+  readonly authenticationLevel: 'basic' | 'multi_factor' | 'enterprise';readonly permissions: string[];readonly auditRequired: boolean;
   readonly complianceFlags: string[];
 }
 
@@ -143,9 +103,7 @@ export interface ValidationAction {
  * Action impact assessment
  */
 export interface ActionImpact {
-  readonly scope: 'local' | 'system' | 'network' | 'external';
-  readonly dataAccess: boolean;
-  readonly stateChanges: boolean;
+  readonly scope: 'local' | 'system' | 'network' | 'external';readonly dataAccess: boolean;readonly stateChanges: boolean;
   readonly userInteraction: boolean;
 }
 
@@ -193,9 +151,7 @@ export interface ProgressUpdateMessage extends ConversationalMessage {
     operationId: string;
     stage: string;
     progress: number; // 0-100
-    status: 'pending' | 'active' | 'completed' | 'failed';
-    details: ProgressDetails;
-    estimatedCompletion?: number;
+    status: 'pending' | 'active' | 'completed' | 'failed';details: ProgressDetails;estimatedCompletion?: number;
   };
 }
 
@@ -265,13 +221,7 @@ export interface SessionConnectionInfo {
  * Session status enumeration
  */
 export enum SessionStatus {
-  CONNECTING = 'connecting',
-  ACTIVE = 'active',
-  IDLE = 'idle',
-  VALIDATING = 'validating',
-  DISCONNECTING = 'disconnecting',
-  DISCONNECTED = 'disconnected',
-  ERROR = 'error',
+  CONNECTING = 'connecting',ACTIVE = 'active',IDLE = 'idle',VALIDATING = 'validating',DISCONNECTING = 'disconnecting',DISCONNECTED = 'disconnected',ERROR = 'error',
 }
 
 /**
@@ -348,11 +298,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Initialize the conversational WebSocket bridge with optimized settings
    */
   private initializeConversationalBridge(): void {
-    const operationId = `conv_ws_init_${Date.now()}_${this.generateId()}`;
-
-    this.logger.log(`[${operationId}] Initializing ConversationalWebSocketBridge`, {
-      operationId,
-      targetConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
+    const operationId = `conv_ws_init_${Date.now()}_${this.generateId()}`;this.logger.log(`[${operationId}] Initializing ConversationalWebSocketBridge`, {operationId,targetConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
       targetLatency: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
       compressionThreshold: this.PERFORMANCE_TARGETS.MESSAGE_COMPRESSION_THRESHOLD,
     });
@@ -390,9 +336,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       // Set up performance monitoring
       this.initializePerformanceMonitoring();
 
-      this.logger.log(`[${operationId}] ConversationalWebSocketBridge initialized successfully`, {
-        operationId,
-        port: this.getConversationalPort(),
+      this.logger.log(`[${operationId}] ConversationalWebSocketBridge initialized successfully`, {operationId,port: this.getConversationalPort(),
         maxConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
         heartbeatInterval: this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL,
       });
@@ -425,23 +369,12 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   private setupConversationalEventHandlers(): void {
     if (!this.webSocketServer) return;
 
-    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {
-      this.handleNewConversationalConnection(ws, convertIncomingMessageToRecord(req));
-    });
+    this.webSocketServer.on('connection', (ws: WebSocket.WebSocket, req) => {this.handleNewConversationalConnection(ws, convertIncomingMessageToRecord(req));});
 
-    this.webSocketServer.on('error', (error: Error) => {
-      this.logger.error('ConversationalWebSocket server error', {
-        error: error.message,
-        stack: error.stack,
+    this.webSocketServer.on('error', (error: Error) => {this.logger.error('ConversationalWebSocket server error', {error: error.message,stack: error.stack,
         timestamp: Date.now(),
       });
-      this.emit('server_error', error);
-    });
-
-    this.webSocketServer.on('close', () => {
-      this.logger.log('ConversationalWebSocket server closed', {
-        totalSessions: this.sessions.size,
-        activeConnections: this.clients.size,
+      this.emit('server_error', error);});this.webSocketServer.on('close', () => {this.logger.log('ConversationalWebSocket server closed', {totalSessions: this.sessions.size,activeConnections: this.clients.size,
         timestamp: Date.now(),
       });
       this.emit('server_closed');
@@ -463,10 +396,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       sessionId,
       clientId,
       connectionInfo: {
-        origin: req.headers?.origin ?? 'unknown',
-        userAgent: req.headers?.['user-agent'] ?? 'unknown',
-        remoteAddress: req.remoteAddress ?? 'unknown',
-        protocol: 'ws',
+        origin: req.headers?.origin ?? 'unknown',userAgent: req.headers?.['user-agent'] ?? 'unknown',remoteAddress: req.remoteAddress ?? 'unknown',protocol: 'ws',
         compression: true,
         heartbeatInterval: this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL,
       },
@@ -516,28 +446,19 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       origin: session.connectionInfo.origin,
     });
 
-    this.emit('session_connected', { sessionId, clientId, session });
-  }
-
-  /**
+    this.emit('session_connected', { sessionId, clientId, session });}/**
    * Set up optimized client event handlers
    */
   private setupClientEventHandlers(clientId: string, sessionId: string, ws: WebSocket.WebSocket): void {
     // Message handler with performance tracking
-    ws.on('message', (data: WebSocket.RawData) => {
-      const startTime = performance.now();
-      this.handleConversationalMessage(sessionId, data, startTime);
+    ws.on('message', (data: WebSocket.RawData) => {const startTime = performance.now();this.handleConversationalMessage(sessionId, data, startTime);
     });
 
     // Close handler with cleanup
-    ws.on('close', (code: number, reason: Buffer) => {
-      this.handleSessionDisconnection(sessionId, code, reason);
-    });
+    ws.on('close', (code: number, reason: Buffer) => {this.handleSessionDisconnection(sessionId, code, reason);});
 
     // Error handler with recovery
-    ws.on('error', (error: Error) => {
-      this.handleClientError(sessionId, error);
-    });
+    ws.on('error', (error: Error) => {this.handleClientError(sessionId, error);});
 
     // Pong handler for heartbeat
     ws.on('pong', () => {
@@ -552,10 +473,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     const operationId = `conv_message_${sessionId}_${Date.now()}`;
 
     try {
-      const rawMessage = Buffer.from(data as ArrayBuffer).toString('utf8');
-      const message = JSON.parse(rawMessage) as ConversationalMessage;
-
-      // Validate message structure
+      const rawMessage = Buffer.from(data as ArrayBuffer).toString('utf8');const message = JSON.parse(rawMessage) as ConversationalMessage;// Validate message structure
       if (!this.validateMessageStructure(message)) {
         this.sendErrorMessage(sessionId, 'Invalid message structure', operationId);
         return;
@@ -572,9 +490,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       const processingTime = performance.now() - routingStartTime;
       this.updateSessionPerformanceMetrics(sessionId, processingTime);
 
-      this.logger.debug(`[${operationId}] Processed conversational message`, {
-        operationId,
-        sessionId,
+      this.logger.debug(`[${operationId}] Processed conversational message`, {operationId,sessionId,
         messageType: message.type,
         processingTime,
         sequence: message.sequence,
@@ -619,9 +535,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         break;
 
       default:
-        this.logger.warn(`[${operationId}] Unknown message type: ${message.type}`, {
-          operationId,
-          sessionId,
+        this.logger.warn(`[${operationId}] Unknown message type: ${message.type}`, {operationId,sessionId,
           messageType: message.type,
         });
     }
@@ -651,10 +565,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     // Send validation response acknowledging receipt
     await this.sendValidationResponse(sessionId, {
       validationId,
-      status: 'received',
-      message: 'Validation request received and queued for processing',
-      timestamp: Date.now(),
-    });
+      status: 'received',message: 'Validation request received and queued for processing',timestamp: Date.now(),});
 
     // Start progress streaming if enabled
     if (message.payload.streamingOptions.enableProgressUpdates) {
@@ -691,21 +602,11 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       confirmationId,
       validationId,
       processed: true,
-      result: approved ? 'approved' : 'rejected',
-      timestamp: Date.now(),
-    });
+      result: approved ? 'approved' : 'rejected',timestamp: Date.now(),});
 
     // Complete validation if approved
     if (approved) {
-      await this.completeValidation(sessionId, validationId, 'approved', message.payload.reasoning);
-    } else {
-      await this.completeValidation(sessionId, validationId, 'rejected', message.payload.reasoning);
-    }
-
-    this.emit('user_confirmation', { sessionId, confirmationId, validationId, approved });
-  }
-
-  /**
+      await this.completeValidation(sessionId, validationId, 'approved', message.payload.reasoning);} else {await this.completeValidation(sessionId, validationId, 'rejected', message.payload.reasoning);}this.emit('user_confirmation', { sessionId, confirmationId, validationId, approved });}/**
    * Start validation progress streaming
    */
   private startValidationProgressStreaming(
@@ -730,9 +631,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
 
       await this.sendProgressUpdate(sessionId, {
         operationId: validationId,
-        stage: `validation_step_${updateCount}`,
-        progress,
-        status: progressStatus,
+        stage: `validation_step_${updateCount}`,progress,status: progressStatus,
         details: {
           currentStep: `Processing validation step ${updateCount}`,
           totalSteps: options.maxUpdateCount,
@@ -768,12 +667,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       sequence: ++this.sequence,
       payload: response,
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compression: true,
-        routingHints: ['validation'],
-      },
-    };
+        priority: 'high',requiresAck: true,compression: true,
+        routingHints: ['validation'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -796,12 +691,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       sequence: ++this.sequence,
       payload: result,
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compression: false,
-        routingHints: ['confirmation'],
-      },
-    };
+        priority: 'high',requiresAck: true,compression: false,
+        routingHints: ['confirmation'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -813,9 +704,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     operationId: string;
     stage: string;
     progress: number;
-    status: 'pending' | 'active' | 'completed' | 'failed';
-    details: ProgressDetails;
-  }): Promise<void> {
+    status: 'pending' | 'active' | 'completed' | 'failed';details: ProgressDetails;}): Promise<void> {
     const message: ProgressUpdateMessage = {
       type: ConversationalMessageType.PROGRESS_UPDATE,
       messageId: this.generateMessageId(),
@@ -824,12 +713,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       sequence: ++this.sequence,
       payload: update,
       metadata: {
-        priority: 'normal',
-        requiresAck: false,
-        compression: true,
-        routingHints: ['progress'],
-      },
-    };
+        priority: 'normal',requiresAck: false,compression: true,
+        routingHints: ['progress'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -850,12 +735,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         totalUpdates: this.sequence,
       },
       metadata: {
-        priority: 'normal',
-        requiresAck: true,
-        compression: false,
-        routingHints: ['completion'],
-      },
-    };
+        priority: 'normal',requiresAck: true,compression: false,
+        routingHints: ['completion'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -879,9 +760,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       this.validationCallbacks.delete(validationId);
     }
 
-    this.logger.log(`Validation completed: ${validationId}`, {
-      sessionId,
-      validationId,
+    this.logger.log(`Validation completed: ${validationId}`, {sessionId,validationId,
       result,
       reasoning,
     });
@@ -895,15 +774,11 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       .find(([, sid]) => sid === sessionId)?.[0];
 
     if (!clientId) {
-      this.logger.warn(`Client not found for session: ${sessionId}`);
-      return;
-    }
+      this.logger.warn(`Client not found for session: ${sessionId}`);return;}
 
     const client = this.clients.get(clientId);
     if (!client || client.readyState !== WebSocket.WebSocket.OPEN) {
-      this.logger.warn(`Client connection not available: ${clientId}`);
-      return;
-    }
+      this.logger.warn(`Client connection not available: ${clientId}`);return;}
 
     try {
       const startTime = performance.now();
@@ -951,12 +826,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         recoverable: true,
       },
       metadata: {
-        priority: 'high',
-        requiresAck: false,
-        compression: false,
-        routingHints: ['error'],
-      },
-    };
+        priority: 'high',requiresAck: false,compression: false,
+        routingHints: ['error'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -979,19 +850,12 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         connectionTime,
         capabilities: session.capabilities,
         serverInfo: {
-          version: '2.0.0',
-          features: ['streaming', 'validation', 'progress', 'compression'],
-          maxConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
-          targetLatency: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
+          version: '2.0.0',features: ['streaming', 'validation', 'progress', 'compression'],maxConcurrentSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,targetLatency: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
         },
       },
       metadata: {
-        priority: 'high',
-        requiresAck: true,
-        compression: false,
-        routingHints: ['session'],
-      },
-    };
+        priority: 'high',requiresAck: true,compression: false,
+        routingHints: ['session'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -1004,9 +868,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       this.performHeartbeatCheck();
     }, this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL);
 
-    this.logger.log('Heartbeat system initialized', {
-      interval: this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL,
-      targetSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
+    this.logger.log('Heartbeat system initialized', {interval: this.PERFORMANCE_TARGETS.HEARTBEAT_INTERVAL,targetSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
     });
   }
 
@@ -1022,9 +884,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       }
     });
 
-    this.logger.debug('Heartbeat check completed', {
-      activeSessions: activeSessionCount,
-      timestamp: Date.now(),
+    this.logger.debug('Heartbeat check completed', {activeSessions: activeSessionCount,timestamp: Date.now(),
     });
   }
 
@@ -1043,13 +903,9 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         sessionStatus: this.sessions.get(sessionId)?.status,
       },
       metadata: {
-        priority: 'low',
-        requiresAck: true,
-        timeout: 5000,
+        priority: 'low',requiresAck: true,timeout: 5000,
         compression: false,
-        routingHints: ['heartbeat'],
-      },
-    };
+        routingHints: ['heartbeat'],},};
 
     await this.sendMessage(sessionId, message);
   }
@@ -1089,9 +945,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
         latency: Date.now() - (message.payload.clientTime as number || Date.now()),
       },
       metadata: {
-        priority: 'low',
-        requiresAck: false,
-        compression: false,
+        priority: 'low',requiresAck: false,compression: false,
         routingHints: ['heartbeat'],
       },
     };
@@ -1116,10 +970,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   private handleHeartbeatTimeout(sessionId: string): void {
     this.logger.warn(`Heartbeat timeout for session: ${sessionId}`);
     this.updateSessionStatus(sessionId, SessionStatus.ERROR);
-    this.handleSessionDisconnection(sessionId, 1006, Buffer.from('Heartbeat timeout'));
-  }
-
-  /**
+    this.handleSessionDisconnection(sessionId, 1006, Buffer.from('Heartbeat timeout'));}/**
    * Initialize performance monitoring
    */
   private initializePerformanceMonitoring(): void {
@@ -1127,10 +978,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       this.collectPerformanceMetrics();
     }, 60000); // Every minute
 
-    this.logger.log('Performance monitoring initialized');
-  }
-
-  /**
+    this.logger.log('Performance monitoring initialized');}/**
    * Collect and log performance metrics
    */
   private collectPerformanceMetrics(): void {
@@ -1167,23 +1015,15 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       metrics.averageErrorRate = sessionMetrics.reduce((sum, m) => sum + m.errorRate, 0) / sessionMetrics.length;
     }
 
-    this.logger.log('Performance metrics collected', metrics);
-    this.emit('performance_metrics', metrics);
-  }
-
-  /**
+    this.logger.log('Performance metrics collected', metrics);this.emit('performance_metrics', metrics);}/**
    * Validate message structure
    */
   private validateMessageStructure(message: unknown): message is ConversationalMessage {
-    if (typeof message !== 'object' || message === null) return false;
-
-    const msg = message as Record<string, unknown>;
-    return !!(
+    if (typeof message !== 'object' || message === null) return false;const msg = message as Record<string, unknown>;return !!(
       msg.type &&
       msg.messageId &&
       msg.sessionId &&
-      typeof msg.timestamp === 'number' &&
-      typeof msg.sequence === 'number' &&
+      typeof msg.timestamp === 'number' &&typeof msg.sequence === 'number' &&
       msg.payload
     );
   }
@@ -1239,13 +1079,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Update delivery metrics
    */
   private updateDeliveryMetrics(sessionId: string, deliveryTime: number): void {
-    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);
-
-    // Log performance warning if delivery exceeds target
-    if (deliveryTime > this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY) {
-      this.logger.warn(`Message delivery exceeded target latency`, {
-        sessionId,
-        deliveryTime,
+    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);// Log performance warning if delivery exceeds targetif (deliveryTime > this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY) {
+      this.logger.warn(`Message delivery exceeded target latency`, {sessionId,deliveryTime,
         target: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
       });
     }
@@ -1344,17 +1179,11 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Generate unique client ID
    */
   private generateClientId(): string {
-    return `client_${Date.now()}_${this.generateId()}`;
-  }
-
-  /**
+    return `client_${Date.now()}_${this.generateId()}`;}/**
    * Generate unique session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${this.generateId()}`;
-  }
-
-  /**
+    return `session_${Date.now()}_${this.generateId()}`;}/**
    * Generate unique message ID
    */
   private generateMessageId(): string {
@@ -1371,19 +1200,9 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   // ===== CONFIGURATION METHODS =====
 
   private getConversationalPort(): number {
-    return this.configService.get<number>('CONVERSATIONAL_WEBSOCKET_PORT', 8081);
-  }
-
-  private getAllowedOrigins(): string[] {
-    const origins = this.configService.get<string>('CONVERSATIONAL_ALLOWED_ORIGINS', '');
-    return origins ? origins.split(',').map(o => o.trim()) : [];
-  }
-
-  private isHttpsRequired(): boolean {
-    return this.configService.get<boolean>('CONVERSATIONAL_REQUIRE_HTTPS', false);
-  }
-
-  // ===== PUBLIC API METHODS =====
+    return this.configService.get<number>('CONVERSATIONAL_WEBSOCKET_PORT', 8081);}private getAllowedOrigins(): string[] {
+    const origins = this.configService.get<string>('CONVERSATIONAL_ALLOWED_ORIGINS', '');return origins ? origins.split(',').map(o => o.trim()) : [];}private isHttpsRequired(): boolean {
+    return this.configService.get<boolean>('CONVERSATIONAL_REQUIRE_HTTPS', false);}// ===== PUBLIC API METHODS =====
 
   /**
    * Get comprehensive server statistics
@@ -1422,9 +1241,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   /**
    * Broadcast message to all active sessions
    */
-  async broadcastToAllSessions(message: Omit<ConversationalMessage, 'sessionId' | 'messageId' | 'sequence'>): Promise<void> {
-    const activeSessions = Array.from(this.sessions.keys())
-      .filter(sessionId => this.sessions.get(sessionId)?.status === SessionStatus.ACTIVE);
+  async broadcastToAllSessions(message: Omit<ConversationalMessage, 'sessionId' | 'messageId' | 'sequence'>): Promise<void> {const activeSessions = Array.from(this.sessions.keys()).filter(sessionId => this.sessions.get(sessionId)?.status === SessionStatus.ACTIVE);
 
     await Promise.all(activeSessions.map(sessionId => {
       const fullMessage: ConversationalMessage = {
@@ -1467,9 +1284,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       setTimeout(() => {
         if (this.validationCallbacks.has(validationId)) {
           this.validationCallbacks.delete(validationId);
-          reject(new Error('Validation request timeout'));
-        }
-      }, 30000); // 30 second timeout
+          reject(new Error('Validation request timeout'));}}, 30000); // 30 second timeout
 
       // Create and send validation request
       const message: ValidationRequestMessage = {
@@ -1486,12 +1301,8 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
           streamingOptions,
         },
         metadata: {
-          priority: 'high',
-          requiresAck: true,
-          compression: true,
-          routingHints: ['validation'],
-        },
-      };
+          priority: 'high',requiresAck: true,compression: true,
+          routingHints: ['validation'],},};
 
       this.sendMessage(sessionId, message);
     });
@@ -1500,28 +1311,13 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
   /**
    * Assess risk level for validation action
    */
-  private assessRiskLevel(action: ValidationAction): 'low' | 'medium' | 'high' | 'critical' {
-    // Simple risk assessment logic
-    if (action.impact.scope === 'external' || !action.reversible) {
-      return 'critical';
-    }
-    if (action.impact.dataAccess || action.impact.stateChanges) {
-      return 'high';
-    }
-    if (action.impact.userInteraction) {
-      return 'medium';
-    }
-    return 'low';
-  }
-
-  /**
+  private assessRiskLevel(action: ValidationAction): 'low' | 'medium' | 'high' | 'critical' {// Simple risk assessment logicif (action.impact.scope === 'external' || !action.reversible) {return 'critical';}if (action.impact.dataAccess || action.impact.stateChanges) {
+      return 'high';}if (action.impact.userInteraction) {
+      return 'medium';}return 'low';}/**
    * Clean shutdown of the conversational WebSocket bridge
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down ConversationalWebSocketBridge');
-
-    // Clear heartbeat interval
-    if (this.heartbeatInterval) {
+    this.logger.log('Shutting down ConversationalWebSocketBridge');// Clear heartbeat intervalif (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
 
@@ -1534,23 +1330,14 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       type: ConversationalMessageType.SESSION_END,
       timestamp: Date.now(),
       payload: {
-        reason: 'server_shutdown',
-        message: 'Server is shutting down',
-      },
-      metadata: {
-        priority: 'critical',
-        requiresAck: false,
-        compression: false,
-        routingHints: ['shutdown'],
-      },
-    });
+        reason: 'server_shutdown',message: 'Server is shutting down',},metadata: {
+        priority: 'critical',requiresAck: false,compression: false,
+        routingHints: ['shutdown'],},});
 
     // Close all client connections gracefully
     this.clients.forEach((client, _clientId) => {
       if (client.readyState === WebSocket.WebSocket.OPEN) {
-        client.close(1000, 'Server shutting down');
-      }
-    });
+        client.close(1000, 'Server shutting down');}});
 
     // Close the WebSocket server
     if (this.webSocketServer) {

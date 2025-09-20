@@ -27,33 +27,20 @@
  * @author PARLANT Performance Testing Agent
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { performance } from 'perf_hooks';
-import { randomUUID } from 'crypto';
-
-// ===== STRESS TESTING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import { performance } from 'perf_hooks';import { randomUUID } from 'crypto';// ===== STRESS TESTING INTERFACES =====/**
  * Conversational session state for stress testing
  */
 interface ConversationalSession {
   readonly sessionId: string;
   readonly userId: string;
   readonly startTime: number;
-  readonly agentRole: 'assistant' | 'user';
-  conversationTurns: number;
-  lastActivityTime: number;
+  readonly agentRole: 'assistant' | 'user';conversationTurns: number;lastActivityTime: number;
   totalValidations: number;
   responseTimeHistory: number[];
   cacheHitCount: number;
   cacheMissCount: number;
   errorCount: number;
-  status: 'active' | 'degraded' | 'failed' | 'completed';
-  memoryUsage: number;
-  connectionId?: string;
+  status: 'active' | 'degraded' | 'failed' | 'completed';memoryUsage: number;connectionId?: string;
 }
 
 /**
@@ -95,10 +82,7 @@ interface StressTestMetrics {
   readonly errorRate: number;
   readonly connectionPoolUtilization: number;
   readonly systemHealthScore: number; // 0-100
-  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-}
-
-/**
+  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';}/**
  * Stress test results and analysis
  */
 interface StressTestResults {
@@ -176,16 +160,12 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2
   ) {
-    this.logger.log('PARLANT Stress Testing Framework initialized', {
-      maxConcurrentSessions: this.defaultStressConfig.maxConcurrentSessions,
-      performanceTargets: this.defaultStressConfig.performanceTargets,
+    this.logger.log('PARLANT Stress Testing Framework initialized', {maxConcurrentSessions: this.defaultStressConfig.maxConcurrentSessions,performanceTargets: this.defaultStressConfig.performanceTargets,
     });
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Starting PARLANT stress testing monitoring systems...');
-    this.startPerformanceMonitoring();
-  }
+    this.logger.log('Starting PARLANT stress testing monitoring systems...');this.startPerformanceMonitoring();}
 
   async onModuleDestroy(): Promise<void> {
     if (this.stressTestActive) {
@@ -208,9 +188,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       ...config,
     };
 
-    const testId = `stress_test_${Date.now()}_${randomUUID().substr(0, 8)}`;
-
-    this.logger.log(`🚀 Starting PARLANT stress test: ${testId}`, {
+    const testId = `stress_test_${Date.now()}_${randomUUID().substr(0, 8)}`;this.logger.log(`🚀 Starting PARLANT stress test: ${testId}`, {
       maxConcurrentSessions: testConfig.maxConcurrentSessions,
       stressDuration: testConfig.stressDuration,
       targets: testConfig.performanceTargets,
@@ -239,9 +217,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       await this.executeRecoveryPhase(testConfig);
 
       const results = await this.generateStressTestResults();
-      this.logger.log('✅ PARLANT stress test completed successfully', {
-        testId,
-        duration: results.duration,
+      this.logger.log('✅ PARLANT stress test completed successfully', {testId,duration: results.duration,
         score: results.score,
         passed: results.passed,
       });
@@ -249,9 +225,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       return results;
 
     } catch (error) {
-      this.logger.error('❌ PARLANT stress test failed', error);
-      throw error;
-    } finally {
+      this.logger.error('❌ PARLANT stress test failed', error);throw error;} finally {
       await this.cleanupStressTest();
     }
   }
@@ -260,9 +234,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
    * Phase 1: Gradual ramp-up to target concurrent sessions
    */
   private async executeRampUpPhase(config: StressTestConfiguration): Promise<void> {
-    this.logger.log('📈 Phase 1: Ramping up to target concurrent sessions', {
-      target: config.maxConcurrentSessions,
-      rampUpRate: config.sessionRampUpRate,
+    this.logger.log('📈 Phase 1: Ramping up to target concurrent sessions', {target: config.maxConcurrentSessions,rampUpRate: config.sessionRampUpRate,
     });
 
     const rampUpDuration = (config.maxConcurrentSessions / config.sessionRampUpRate) * 1000;
@@ -286,18 +258,14 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
       // Check for early failure conditions
       if (currentMetrics.p95ResponseTime > config.performanceTargets.maxP95ResponseTime * 1.5) {
-        this.logger.warn('⚠️ Performance degradation detected during ramp-up', {
-          currentP95: currentMetrics.p95ResponseTime,
-          target: config.performanceTargets.maxP95ResponseTime,
+        this.logger.warn('⚠️ Performance degradation detected during ramp-up', {currentP95: currentMetrics.p95ResponseTime,target: config.performanceTargets.maxP95ResponseTime,
         });
       }
 
       await this.sleep(config.monitoringInterval);
     }
 
-    this.logger.log('✅ Ramp-up phase completed', {
-      activeSessions: this.activeSessions.size,
-      targetSessions: config.maxConcurrentSessions,
+    this.logger.log('✅ Ramp-up phase completed', {activeSessions: this.activeSessions.size,targetSessions: config.maxConcurrentSessions,
     });
   }
 
@@ -305,9 +273,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
    * Phase 2: Sustained stress testing at target load
    */
   private async executeSustainedStressPhase(config: StressTestConfiguration): Promise<void> {
-    this.logger.log('🎯 Phase 2: Sustained stress testing at target load', {
-      sessions: this.activeSessions.size,
-      duration: config.stressDuration,
+    this.logger.log('🎯 Phase 2: Sustained stress testing at target load', {sessions: this.activeSessions.size,duration: config.stressDuration,
     });
 
     const sustainedStartTime = Date.now();
@@ -329,18 +295,13 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       await this.sleep(config.monitoringInterval);
     }
 
-    this.logger.log('✅ Sustained stress phase completed');
-  }
-
-  /**
+    this.logger.log('✅ Sustained stress phase completed');}/**
    * Phase 3: Overload testing beyond target capacity
    */
   private async executeOverloadPhase(config: StressTestConfiguration): Promise<void> {
     const overloadTarget = Math.floor(config.maxConcurrentSessions * 1.5); // 150% of target
 
-    this.logger.log('💥 Phase 3: Overload testing beyond capacity', {
-      currentSessions: this.activeSessions.size,
-      overloadTarget,
+    this.logger.log('💥 Phase 3: Overload testing beyond capacity', {currentSessions: this.activeSessions.size,overloadTarget,
     });
 
     // Rapidly create additional sessions for overload testing
@@ -358,9 +319,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       this.currentStressTest!.metricsHistory.push(currentMetrics);
 
       // Document overload behavior
-      this.logger.log('📊 Overload metrics', {
-        activeSessions: currentMetrics.activeSessions,
-        p95ResponseTime: currentMetrics.p95ResponseTime,
+      this.logger.log('📊 Overload metrics', {activeSessions: currentMetrics.activeSessions,p95ResponseTime: currentMetrics.p95ResponseTime,
         errorRate: currentMetrics.errorRate,
         memoryUsage: currentMetrics.memoryUsageMB,
       });
@@ -368,17 +327,11 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       await this.sleep(config.monitoringInterval);
     }
 
-    this.logger.log('✅ Overload phase completed');
-  }
-
-  /**
+    this.logger.log('✅ Overload phase completed');}/**
    * Phase 4: Recovery testing and validation
    */
   private async executeRecoveryPhase(config: StressTestConfiguration): Promise<void> {
-    this.logger.log('🔄 Phase 4: Recovery testing and validation');
-
-    // Rapidly reduce session count to normal levels
-    const targetRecoverySessionCount = Math.floor(config.maxConcurrentSessions * 0.2); // 20% of max
+    this.logger.log('🔄 Phase 4: Recovery testing and validation');// Rapidly reduce session count to normal levelsconst targetRecoverySessionCount = Math.floor(config.maxConcurrentSessions * 0.2); // 20% of max
 
     while (this.activeSessions.size > targetRecoverySessionCount) {
       // Remove excess sessions
@@ -401,9 +354,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
       // Validate recovery performance
       if (currentMetrics.p95ResponseTime <= config.performanceTargets.maxP95ResponseTime) {
-        this.logger.log('✅ Performance recovered to target levels', {
-          p95ResponseTime: currentMetrics.p95ResponseTime,
-          target: config.performanceTargets.maxP95ResponseTime,
+        this.logger.log('✅ Performance recovered to target levels', {p95ResponseTime: currentMetrics.p95ResponseTime,target: config.performanceTargets.maxP95ResponseTime,
         });
       }
 
@@ -419,32 +370,25 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
    * Create new conversational session for stress testing
    */
   private async createConversationalSession(config: StressTestConfiguration): Promise<ConversationalSession> {
-    const sessionId = `stress_session_${Date.now()}_${randomUUID().substr(0, 8)}`;
-    const userId = `stress_user_${this.activeSessions.size}_${Math.floor(Math.random() * 10000)}`;
+    const sessionId = `stress_session_${Date.now()}_${randomUUID().substr(0, 8)}`;const userId = `stress_user_${this.activeSessions.size}_${Math.floor(Math.random() * 10000)}`;
 
     const session: ConversationalSession = {
       sessionId,
       userId,
       startTime: Date.now(),
-      agentRole: Math.random() > 0.5 ? 'assistant' : 'user',
-      conversationTurns: 0,
-      lastActivityTime: Date.now(),
+      agentRole: Math.random() > 0.5 ? 'assistant' : 'user',conversationTurns: 0,lastActivityTime: Date.now(),
       totalValidations: 0,
       responseTimeHistory: [],
       cacheHitCount: 0,
       cacheMissCount: 0,
       errorCount: 0,
-      status: 'active',
-      memoryUsage: 0,
-    };
+      status: 'active',memoryUsage: 0,};
 
     this.activeSessions.set(sessionId, session);
     this.sessionCreationRate++;
 
     // Emit session created event
-    this.eventEmitter.emit('stress-test.session.created', {
-      sessionId,
-      userId,
+    this.eventEmitter.emit('stress-test.session.created', {sessionId,userId,
       totalActiveSessions: this.activeSessions.size,
     });
 
@@ -458,10 +402,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
     const sessionPromises: Promise<void>[] = [];
 
     for (const [sessionId, session] of this.activeSessions) {
-      if (session.status === 'active' &&
-          session.conversationTurns < config.conversationTurnsPerSession) {
-
-        const turnPromise = this.executeSessionConversationTurn(session, config);
+      if (session.status === 'active' &&session.conversationTurns < config.conversationTurnsPerSession) {const turnPromise = this.executeSessionConversationTurn(session, config);
         sessionPromises.push(turnPromise);
       }
     }
@@ -508,9 +449,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
         if (!response.success) {
           session.errorCount++;
           if (session.errorCount > 5) {
-            session.status = 'degraded';
-          }
-        }
+            session.status = 'degraded';}}
 
         // Brief pause between validations
         await this.sleep(50);
@@ -527,9 +466,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
     } catch (error) {
       this.logger.error(`Error in conversation turn for session ${session.sessionId}:`, error);
-      session.status = 'failed';
-      session.errorCount++;
-    }
+      session.status = 'failed';session.errorCount++;}
   }
 
   /**
@@ -573,9 +510,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
       this.activeSessions.delete(sessionId);
 
-      this.eventEmitter.emit('stress-test.session.terminated', {
-        sessionId,
-        duration: sessionDuration,
+      this.eventEmitter.emit('stress-test.session.terminated', {sessionId,duration: sessionDuration,
         conversationTurns: session.conversationTurns,
         totalValidations: session.totalValidations,
         status: session.status,
@@ -637,14 +572,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
     const systemHealthScore = Object.values(healthFactors).reduce((sum, score) => sum + score, 0) / 4;
 
     // Performance grade
-    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'F';
-    if (systemHealthScore >= 90) performanceGrade = 'A';
-    else if (systemHealthScore >= 80) performanceGrade = 'B';
-    else if (systemHealthScore >= 70) performanceGrade = 'C';
-    else if (systemHealthScore >= 60) performanceGrade = 'D';
-
-    const metrics: StressTestMetrics = {
-      timestamp: currentTime,
+    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'F';if (systemHealthScore >= 90) performanceGrade = 'A';else if (systemHealthScore >= 80) performanceGrade = 'B';else if (systemHealthScore >= 70) performanceGrade = 'C';else if (systemHealthScore >= 60) performanceGrade = 'D';const metrics: StressTestMetrics = {timestamp: currentTime,
       activeSessions: this.activeSessions.size,
       totalSessionsCreated: this.sessionCreationRate,
       completedSessions: 0, // Would need to track this separately
@@ -676,28 +604,17 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
     // Validate P95 response time target
     if (metrics.p95ResponseTime > config.performanceTargets.maxP95ResponseTime) {
-      issues.push(`P95 response time ${metrics.p95ResponseTime}ms exceeds target ${config.performanceTargets.maxP95ResponseTime}ms`);
-    }
-
-    // Validate memory usage
+      issues.push(`P95 response time ${metrics.p95ResponseTime}ms exceeds target ${config.performanceTargets.maxP95ResponseTime}ms`);}// Validate memory usage
     if (metrics.memoryUsageMB > config.performanceTargets.maxMemoryUsageMB) {
-      issues.push(`Memory usage ${metrics.memoryUsageMB}MB exceeds target ${config.performanceTargets.maxMemoryUsageMB}MB`);
-    }
-
-    // Validate cache hit rate
+      issues.push(`Memory usage ${metrics.memoryUsageMB}MB exceeds target ${config.performanceTargets.maxMemoryUsageMB}MB`);}// Validate cache hit rate
     if (metrics.cacheHitRate < config.performanceTargets.minCacheHitRate) {
-      issues.push(`Cache hit rate ${(metrics.cacheHitRate * 100).toFixed(1)}% below target ${(config.performanceTargets.minCacheHitRate * 100).toFixed(1)}%`);
-    }
-
-    // Validate error rate
+      issues.push(`Cache hit rate ${(metrics.cacheHitRate * 100).toFixed(1)}% below target ${(config.performanceTargets.minCacheHitRate * 100).toFixed(1)}%`);}// Validate error rate
     if (metrics.errorRate > config.performanceTargets.maxErrorRate) {
       issues.push(`Error rate ${(metrics.errorRate * 100).toFixed(2)}% exceeds target ${(config.performanceTargets.maxErrorRate * 100).toFixed(2)}%`);
     }
 
     if (issues.length > 0) {
-      this.logger.warn('⚠️ Performance targets not met during stress testing', {
-        issues,
-        currentMetrics: {
+      this.logger.warn('⚠️ Performance targets not met during stress testing', {issues,currentMetrics: {
           p95ResponseTime: metrics.p95ResponseTime,
           memoryUsage: metrics.memoryUsageMB,
           cacheHitRate: metrics.cacheHitRate,
@@ -714,11 +631,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
    */
   private generateStressValidationRequest(session: ConversationalSession, validationIndex: number) {
     const functionNames = [
-      'get_user_profile',
-      'update_user_settings',
-      'send_notification',
-      'validate_permissions',
-      'get_conversation_history',
+      'get_user_profile','update_user_settings','send_notification','validate_permissions','get_conversation_history',
     ];
 
     return {
@@ -737,9 +650,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
         userId: session.userId,
         sessionId: session.sessionId,
         agentRole: session.agentRole,
-        securityLevel: 'MEDIUM',
-        conversationHistory: [],
-        metadata: {
+        securityLevel: 'MEDIUM',conversationHistory: [],metadata: {
           stressTest: true,
           sessionStartTime: session.startTime,
           conversationTurn: session.conversationTurns,
@@ -782,10 +693,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
    * Start performance monitoring
    */
   private startPerformanceMonitoring(): void {
-    this.logger.log('🔍 Performance monitoring started for stress testing');
-  }
-
-  /**
+    this.logger.log('🔍 Performance monitoring started for stress testing');}/**
    * Stop current stress test
    */
   async stopStressTest(): Promise<void> {
@@ -793,27 +701,18 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
       return;
     }
 
-    this.logger.log('🛑 Stopping stress test...');
-    this.stressTestActive = false;
-
-    // Terminate all active sessions
+    this.logger.log('🛑 Stopping stress test...');this.stressTestActive = false;// Terminate all active sessions
     const sessionIds = Array.from(this.activeSessions.keys());
     for (const sessionId of sessionIds) {
       await this.terminateConversationalSession(sessionId);
     }
 
-    this.logger.log('✅ Stress test stopped successfully');
-  }
-
-  /**
+    this.logger.log('✅ Stress test stopped successfully');}/**
    * Generate comprehensive stress test results
    */
   private async generateStressTestResults(): Promise<StressTestResults> {
     if (!this.currentStressTest) {
-      throw new Error('No active stress test to generate results from');
-    }
-
-    const endTime = Date.now();
+      throw new Error('No active stress test to generate results from');}const endTime = Date.now();
     const duration = endTime - this.currentStressTest.startTime;
 
     // Calculate peak and final metrics
@@ -828,9 +727,7 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
     const sessionAnalysis = {
       totalSessions: this.sessionCreationRate,
       successfulSessions: 0, // Would need to track completed sessions
-      failedSessions: Array.from(this.activeSessions.values()).filter(s => s.status === 'failed').length,
-      averageSessionDuration: 0, // Would calculate from completed sessions
-      averageConversationTurns: 0, // Would calculate from all sessions
+      failedSessions: Array.from(this.activeSessions.values()).filter(s => s.status === 'failed').length,averageSessionDuration: 0, // Would calculate from completed sessionsaverageConversationTurns: 0, // Would calculate from all sessions
       totalValidations: Array.from(this.activeSessions.values()).reduce((sum, s) => sum + s.totalValidations, 0),
     };
 
@@ -857,14 +754,8 @@ export class ParlantStressTestingFrameworkService implements OnModuleInit, OnMod
 
     if (performanceAnalysis.p95ResponseTime > config.performanceTargets.maxP95ResponseTime) {
       criticalIssues.push(`P95 response time ${performanceAnalysis.p95ResponseTime}ms exceeds target ${config.performanceTargets.maxP95ResponseTime}ms`);
-      recommendations.push('Optimize response time through caching, connection pooling, or scaling');
-    }
-
-    if (performanceAnalysis.finalCacheHitRate < config.performanceTargets.minCacheHitRate) {
-      recommendations.push('Improve cache hit rate through better cache key strategies and increased cache sizes');
-    }
-
-    // Calculate overall score
+      recommendations.push('Optimize response time through caching, connection pooling, or scaling');}if (performanceAnalysis.finalCacheHitRate < config.performanceTargets.minCacheHitRate) {
+      recommendations.push('Improve cache hit rate through better cache key strategies and increased cache sizes');}// Calculate overall score
     let score = 100;
     if (!performanceAnalysis.targetsMet) score -= 40;
     if (performanceAnalysis.degradationEvents > 5) score -= 20;

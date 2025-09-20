@@ -1,22 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { BrowserUseService } from './browser-use.service';
-import { BrowserTaskService } from './browser-task.service';
-import {
-  CreateAsyncJobDto,
+import { Injectable, Logger } from '@nestjs/common';import { v4 as uuidv4 } from 'uuid';import { BrowserUseService } from './browser-use.service';import { BrowserTaskService } from './browser-task.service';import {CreateAsyncJobDto,
   AsyncJobResultDto,
   AsyncJobStatus,
   AsyncJobType,
   AsyncJobPriority,
-} from './dto/async-job.dto';
-import {
-  CreateBrowserTaskDto,
+} from './dto/async-job.dto';import {CreateBrowserTaskDto,
   BrowserTaskPriority,
   BrowserActionType,
-} from './dto/browser-task.dto';
-
-/**
- * Task configuration interface with proper typing
+} from './dto/browser-task.dto';/*** Task configuration interface with proper typing
  */
 interface TaskConfig {
   name: string;
@@ -78,9 +68,7 @@ export class BrowserAsyncJobService {
     // Start job processor
     this.jobProcessingInterval = setInterval(() => {
       this.processJobQueue().catch((err) => {
-        this.logger.error('Job queue processing failed', err);
-      });
-    }, 5000); // Check every 5 seconds
+        this.logger.error('Job queue processing failed', err);});}, 5000); // Check every 5 seconds
 
     this.logger.log('Browser Async Job Service initialized');
   }
@@ -109,9 +97,7 @@ export class BrowserAsyncJobService {
         status: AsyncJobStatus.QUEUED,
         priority: dto.priority ?? AsyncJobPriority.NORMAL,
         progress: {
-          currentStep: 'Job queued for processing',
-          completedSteps: 0,
-          totalSteps: this.estimateTotalSteps(dto),
+          currentStep: 'Job queued for processing',completedSteps: 0,totalSteps: this.estimateTotalSteps(dto),
           percentage: 0,
           estimatedRemainingMs: dto.estimatedDurationMs ?? 300000,
         },
@@ -141,17 +127,13 @@ export class BrowserAsyncJobService {
       // Add to priority queue
       this.addToQueue(jobId);
 
-      this.logger.log(`Async job created and queued: ${jobId}`, {
-        jobId,
-        status: job.status,
+      this.logger.log(`Async job created and queued: ${jobId}`, {jobId,status: job.status,
         queuePosition: this.getQueuePosition(jobId),
       });
 
       return job;
     } catch (error) {
-      this.logger.error(`Failed to create job: ${dto.name}`, error);
-      throw error;
-    }
+      this.logger.error(`Failed to create job: ${dto.name}`, error);throw error;}
   }
 
   /**
@@ -195,18 +177,12 @@ export class BrowserAsyncJobService {
   async cancelAsyncJob(_jobId: string): Promise<void> {
     const job = this.jobs.get(_jobId);
     if (!job) {
-      throw new Error(`Async job not found: ${_jobId}`);
-    }
-
-    if (
+      throw new Error(`Async job not found: ${_jobId}`);}if (
       job.status === AsyncJobStatus.COMPLETED ||
       job.status === AsyncJobStatus.FAILED ||
       job.status === AsyncJobStatus.CANCELLED
     ) {
-      throw new Error(`Cannot cancel job in status: ${job.status}`);
-    }
-
-    this.logger.log(`Cancelling job: ${_jobId}`, {
+      throw new Error(`Cannot cancel job in status: ${job.status}`);}this.logger.log(`Cancelling job: ${_jobId}`, {
       jobId: _jobId,
       currentStatus: job.status,
     });
@@ -217,15 +193,9 @@ export class BrowserAsyncJobService {
     // Update job status
     job.status = AsyncJobStatus.CANCELLED;
     job.completedAt = new Date();
-    job.progress.currentStep = 'Job cancelled by user';
-
-    // Add cancellation log
-    job.results.logs.push({
+    job.progress.currentStep = 'Job cancelled by user';// Add cancellation logjob.results.logs.push({
       timestamp: new Date(),
-      level: 'warn',
-      message: 'Async job cancelled by user',
-      metadata: {
-        reason: 'user_cancellation',
+      level: 'warn',message: 'Async job cancelled by user',metadata: {reason: 'user_cancellation',
         completedSteps: job.progress.completedSteps,
         totalSteps: job.progress.totalSteps,
       },
@@ -243,9 +213,7 @@ export class BrowserAsyncJobService {
         try {
           await this.taskService.cancelTask(taskId);
         } catch (error) {
-          this.logger.warn(`Failed to cancel associated task: ${taskId}`, error);
-        }
-      }
+          this.logger.warn(`Failed to cancel associated task: ${taskId}`, error);}}
     }
 
     // Remove from processing set
@@ -253,9 +221,7 @@ export class BrowserAsyncJobService {
 
     this.jobs.set(_jobId, job);
 
-    this.logger.log(`Async job cancelled: ${_jobId}`, {
-      jobId: _jobId,
-      completedSteps: job.progress.completedSteps,
+    this.logger.log(`Async job cancelled: ${_jobId}`, {jobId: _jobId,completedSteps: job.progress.completedSteps,
       totalSteps: job.progress.totalSteps,
     });
   }
@@ -274,10 +240,7 @@ export class BrowserAsyncJobService {
       job.status === AsyncJobStatus.RUNNING ||
       job.status === AsyncJobStatus.QUEUED
     ) {
-      throw new Error(`Cannot delete job in status: ${job.status}`);
-    }
-
-    // Remove from queue if present
+      throw new Error(`Cannot delete job in status: ${job.status}`);}// Remove from queue if present
     const queueIndex = this.jobQueue.indexOf(_jobId);
     if (queueIndex >= 0) {
       this.jobQueue.splice(queueIndex, 1);
@@ -289,17 +252,13 @@ export class BrowserAsyncJobService {
         try {
           await this.taskService.deleteTask(taskId);
         } catch (error) {
-          this.logger.warn(`Failed to delete associated task: ${taskId}`, error);
-        }
-      }
+          this.logger.warn(`Failed to delete associated task: ${taskId}`, error);}}
     }
 
     // Delete job
     this.jobs.delete(_jobId);
 
-    this.logger.log(`Async job deleted: ${_jobId}`, {
-      jobId: _jobId,
-      status: job.status,
+    this.logger.log(`Async job deleted: ${_jobId}`, {jobId: _jobId,status: job.status,
     });
   }
 
@@ -370,9 +329,7 @@ export class BrowserAsyncJobService {
     }
 
     if (cleanedCount > 0) {
-      this.logger.log(`Cleaned up ${cleanedCount} old jobs`, {
-        cleanedCount,
-        maxAgeHours: _maxAge / (1000 * 60 * 60),
+      this.logger.log(`Cleaned up ${cleanedCount} old jobs`, {cleanedCount,maxAgeHours: _maxAge / (1000 * 60 * 60),
         remainingJobs: this.jobs.size,
       });
     }
@@ -407,9 +364,7 @@ export class BrowserAsyncJobService {
     // Start processing job
     this.processingJobs.add(jobId);
 
-    this.logger.log(`Starting job processing: ${jobId}`, {
-      jobId,
-      jobType: job.jobType,
+    this.logger.log(`Starting job processing: ${jobId}`, {jobId,jobType: job.jobType,
       priority: job.priority,
     });
 
@@ -457,10 +412,7 @@ export class BrowserAsyncJobService {
 
       default:
         // TypeScript exhaustiveness check - this should never be reached
-        throw new Error(`Unsupported job type: ${_job.jobType as string}`);
-    }
-
-    // Mark job as completed
+        throw new Error(`Unsupported job type: ${_job.jobType as string}`);}// Mark job as completed
     await this.completeJob(_job);
   }
 
@@ -480,13 +432,9 @@ export class BrowserAsyncJobService {
       const taskConfig = tasks[i];
 
       if (!taskConfig) {
-        this.logger.warn(`Task config at index ${i} is undefined, skipping`);
-        continue;
-      }
+        this.logger.warn(`Task config at index ${i} is undefined, skipping`);continue;}
 
-      _job.progress.currentStep = `Processing task ${i + 1}/${tasks.length}: ${taskConfig.name}`;
-      _job.progress.completedSteps = i;
-      _job.progress.percentage = Math.round((i / tasks.length) * 100);
+      _job.progress.currentStep = `Processing task ${i + 1}/${tasks.length}: ${taskConfig.name}`;_job.progress.completedSteps = i;_job.progress.percentage = Math.round((i / tasks.length) * 100);
 
       this.jobs.set(_job.jobId, _job);
 
@@ -494,9 +442,7 @@ export class BrowserAsyncJobService {
         // Convert TaskConfig to CreateBrowserTaskDto format
         const taskDto: CreateBrowserTaskDto = {
           name: taskConfig.name,
-          description: taskConfig.description ?? `Task: ${taskConfig.name}`,
-          actions: (taskConfig.actions ?? []).map((action) => ({
-            type: action as BrowserActionType,
+          description: taskConfig.description ?? `Task: ${taskConfig.name}`,actions: (taskConfig.actions ?? []).map((action) => ({type: action as BrowserActionType,
             selector: taskConfig.selectors?.[0],
             url: taskConfig.url,
             waitTimeoutMs: taskConfig.timeout ?? 5000,
@@ -541,9 +487,7 @@ export class BrowserAsyncJobService {
         _job.results.logs.push({
           timestamp: new Date(),
           level: 'error',
-          message: `Task failed: ${taskConfig?.name ?? 'Unknown task'}`,
-          metadata: {
-            taskIndex: i,
+          message: `Task failed: ${taskConfig?.name ?? 'Unknown task'}`,metadata: {taskIndex: i,
             error: error instanceof Error ? error.message : String(error),
           },
         });
@@ -569,9 +513,7 @@ export class BrowserAsyncJobService {
       const url = urls[i];
 
       if (!url) {
-        this.logger.warn(`URL at index ${i} is undefined, skipping`);
-        continue;
-      }
+        this.logger.warn(`URL at index ${i} is undefined, skipping`);continue;}
 
       _job.progress.currentStep = `Extracting data from ${url}`;
       _job.progress.completedSteps = i;
@@ -587,19 +529,13 @@ export class BrowserAsyncJobService {
           sessionId,
           {
             selectors:
-              typeof config.selectors === 'object' &&
-              config.selectors !== null &&
-              !Array.isArray(config.selectors)
+              typeof config.selectors === 'object' &&config.selectors !== null &&!Array.isArray(config.selectors)
                 ? (config.selectors as Record<string, string>)
                 : ({} as Record<string, string>),
             waitForSelector:
-              typeof config.waitForSelector === 'string'
-                ? config.waitForSelector
-                : undefined,
+              typeof config.waitForSelector === 'string'? config.waitForSelector: undefined,
             timeout:
-              typeof config.timeout === 'number' ? config.timeout : 30000,
-          },
-        );
+              typeof config.timeout === 'number' ? config.timeout : 30000,},);
 
         _job.results.extractedData[url] = extractedData;
 
@@ -635,25 +571,19 @@ export class BrowserAsyncJobService {
    */
   private processFormFilling(_job: AsyncJobResultDto): void {
     // Implementation for form filling jobs
-    _job.progress.currentStep = 'Processing form filling job';
-    _job.progress.completedSteps = 1;
-    _job.progress.totalSteps = 1;
+    _job.progress.currentStep = 'Processing form filling job';_job.progress.completedSteps = 1;_job.progress.totalSteps = 1;
     _job.progress.percentage = 100;
   }
 
   private processScreenshotCapture(_job: AsyncJobResultDto): void {
     // Implementation for screenshot capture jobs
-    _job.progress.currentStep = 'Processing screenshot capture job';
-    _job.progress.completedSteps = 1;
-    _job.progress.totalSteps = 1;
+    _job.progress.currentStep = 'Processing screenshot capture job';_job.progress.completedSteps = 1;_job.progress.totalSteps = 1;
     _job.progress.percentage = 100;
   }
 
   private processCustomWorkflow(_job: AsyncJobResultDto): void {
     // Implementation for custom workflow jobs
-    _job.progress.currentStep = 'Processing custom workflow job';
-    _job.progress.completedSteps = 1;
-    _job.progress.totalSteps = 1;
+    _job.progress.currentStep = 'Processing custom workflow job';_job.progress.completedSteps = 1;_job.progress.totalSteps = 1;
     _job.progress.percentage = 100;
   }
 
@@ -663,18 +593,14 @@ export class BrowserAsyncJobService {
   private completeJob(_job: AsyncJobResultDto): void {
     _job.status = AsyncJobStatus.COMPLETED;
     _job.completedAt = new Date();
-    _job.progress.currentStep = 'Job completed successfully';
-    _job.progress.percentage = 100;
-
-    if (_job.startedAt) {
+    _job.progress.currentStep = 'Job completed successfully';_job.progress.percentage = 100;if (_job.startedAt) {
       _job.actualDurationMs =
         _job.completedAt.getTime() - _job.startedAt.getTime();
     }
 
     _job.results.logs.push({
       timestamp: new Date(),
-      level: 'info',
-      message: 'Async job completed successfully',
+      level: 'info',message: 'Async job completed successfully',
       metadata: {
         tasksCompleted: _job.results.tasksCompleted,
         totalTasks: _job.results.totalTasks,
@@ -684,9 +610,7 @@ export class BrowserAsyncJobService {
 
     this.jobs.set(_job.jobId, _job);
 
-    this.logger.log(`Async job completed: ${_job.jobId}`, {
-      jobId: _job.jobId,
-      actualDurationMs: _job.actualDurationMs,
+    this.logger.log(`Async job completed: ${_job.jobId}`, {jobId: _job.jobId,actualDurationMs: _job.actualDurationMs,
       tasksCompleted: _job.results.tasksCompleted,
     });
   }
@@ -715,8 +639,7 @@ export class BrowserAsyncJobService {
 
     job.results.logs.push({
       timestamp: new Date(),
-      level: 'error',
-      message: 'Async job failed',
+      level: 'error',message: 'Async job failed',
       metadata: {
         error: job.errorMessage,
         retryCount: job.metadata.retryCount,
@@ -728,20 +651,13 @@ export class BrowserAsyncJobService {
     if (job.metadata.retryCount < job.metadata.maxRetries) {
       job.metadata.retryCount++;
       job.status = AsyncJobStatus.QUEUED;
-      job.progress.currentStep = `Retrying job (attempt ${job.metadata.retryCount + 1}/${job.metadata.maxRetries + 1})`;
+      job.progress.currentStep = `Retrying job (attempt ${job.metadata.retryCount + 1}/${job.metadata.maxRetries + 1})`;// Add back to queue for retrythis.addToQueue(jobId);
 
-      // Add back to queue for retry
-      this.addToQueue(jobId);
-
-      this.logger.warn(`Job failed, retrying: ${jobId}`, {
-        jobId,
-        retryCount: job.metadata.retryCount,
+      this.logger.warn(`Job failed, retrying: ${jobId}`, {jobId,retryCount: job.metadata.retryCount,
         maxRetries: job.metadata.maxRetries,
       });
     } else {
-      this.logger.error(`Job failed permanently: ${jobId}`, {
-        jobId,
-        error: job.errorMessage,
+      this.logger.error(`Job failed permanently: ${jobId}`, {jobId,error: job.errorMessage,
         retryCount: job.metadata.retryCount,
       });
     }
@@ -808,9 +724,7 @@ export class BrowserAsyncJobService {
 
     this.jobQueue.splice(insertIndex, 0, _jobId);
 
-    this.logger.log(`Job added to queue: ${_jobId}`, {
-      jobId: _jobId,
-      priority: job.priority,
+    this.logger.log(`Job added to queue: ${_jobId}`, {jobId: _jobId,priority: job.priority,
       queuePosition: insertIndex,
       queueLength: this.jobQueue.length,
     });
@@ -854,10 +768,7 @@ export class BrowserAsyncJobService {
   private createExtractionSession(): string {
     // This would create a browser session for data extraction
     // For now, return a mock session ID
-    return `extraction_session${Date.now()}`;
-  }
-
-  /**
+    return `extraction_session${Date.now()}`;}/**
    * Cleanup on service destruction
    */
   onModuleDestroy() {

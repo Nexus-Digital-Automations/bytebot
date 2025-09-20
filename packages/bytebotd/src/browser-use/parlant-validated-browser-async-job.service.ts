@@ -21,26 +21,17 @@
  * Performance: Optimized validation pipeline with intelligent caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { BrowserAsyncJobService } from './browser-async-job.service';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { BrowserAsyncJobService } from './browser-async-job.service';import { ParlantIntegrationService, 
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
   ConversationalValidationError
-} from '../parlant/parlant-integration.service';
-import {
-  CreateAsyncJobDto,
+} from '../parlant/parlant-integration.service';import {CreateAsyncJobDto,
   AsyncJobResultDto,
   AsyncJobStatus,
   AsyncJobType,
   AsyncJobPriority,
-} from './dto/async-job.dto';
-
-// ===== PARLANT ASYNC JOB VALIDATION INTERFACES =====
-
-/**
+} from './dto/async-job.dto';// ===== PARLANT ASYNC JOB VALIDATION INTERFACES =====/**
  * Async job validation context with conversation details
  */
 export interface AsyncJobValidationContext extends ParlantConversationContext {
@@ -48,9 +39,7 @@ export interface AsyncJobValidationContext extends ParlantConversationContext {
   readonly estimatedDurationMs?: number;
   readonly maxRetries?: number;
   readonly resourceRequirements: AsyncJobResourceRequirements;
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly queueState: AsyncJobQueueInfo;
-}
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly queueState: AsyncJobQueueInfo;}
 
 /**
  * Resource requirements for async job validation
@@ -81,13 +70,8 @@ export interface AsyncJobAuditEntry {
   readonly timestamp: Date;
   readonly jobId: string;
   readonly jobType: AsyncJobType;
-  readonly operation: 'CREATE' | 'CANCEL' | 'DELETE' | 'RETRIEVE' | 'CLEANUP';
-  readonly description: string;
-  readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';
-  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
-  readonly conversationId: string;
-  readonly estimatedDurationMs?: number;
+  readonly operation: 'CREATE' | 'CANCEL' | 'DELETE' | 'RETRIEVE' | 'CLEANUP';readonly description: string;readonly riskLevel: RiskLevel;
+  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly estimatedDurationMs?: number;
   readonly actualDurationMs?: number;
 }
 
@@ -99,9 +83,7 @@ export interface AsyncJobRiskAssessment {
   readonly riskFactors: string[];
   readonly mitigationStrategies: string[];
   readonly requiresApproval: boolean;
-  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';
-  readonly resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT';
+  readonly recommendedMonitoring: 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE';readonly resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT';
 }
 
 /**
@@ -144,11 +126,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     private readonly originalAsyncJobService: BrowserAsyncJobService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_async_job_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Async Job Service`, {
-      hasOriginalService: !!this.originalAsyncJobService,
-      hasParlantService: !!this.parlantIntegrationService,
+    const operationId = `parlant_async_job_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Async Job Service`, {hasOriginalService: !!this.originalAsyncJobService,hasParlantService: !!this.parlantIntegrationService,
       validationEnabled: true,
     });
 
@@ -172,14 +150,10 @@ export class ParlantValidatedBrowserAsyncJobService {
     dto: CreateAsyncJobDto,
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto> {
-    const operationId = `parlant_async_job_create${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_create${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job creation: ${dto.name}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async job creation: ${dto.name}`,{operationId,
         jobName: dto.name,
         jobType: dto.jobType,
         priority: dto.priority,
@@ -195,9 +169,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       const riskAssessment = this.assessAsyncJobCreationRisk(dto, context);
       
       this.logger.log(
-        `[${operationId}] Async job creation risk assessment completed: ${riskAssessment.riskLevel}`,
-        {
-          operationId,
+        `[${operationId}] Async job creation risk assessment completed: ${riskAssessment.riskLevel}`,{operationId,
           riskLevel: riskAssessment.riskLevel,
           riskFactors: riskAssessment.riskFactors,
           requiresApproval: riskAssessment.requiresApproval,
@@ -225,13 +197,8 @@ export class ParlantValidatedBrowserAsyncJobService {
         // Create audit entry for denied operation
         await this.createAsyncJobAuditEntry({
           timestamp: new Date(),
-          jobId: 'CREATION_DENIED',
-          jobType: dto.jobType,
-          operation: 'CREATE',
-          description: this.generateJobCreationDescription(dto),
-          riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'FAILURE',
+          jobId: 'CREATION_DENIED',jobType: dto.jobType,operation: 'CREATE',description: this.generateJobCreationDescription(dto),riskLevel: riskAssessment.riskLevel,
+          validationResult: 'DENIED',executionResult: 'FAILURE',
           conversationId: validationResponse.conversationId,
           estimatedDurationMs: dto.estimatedDurationMs,
         });
@@ -308,9 +275,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         timestamp: new Date(),
         jobId: executionResult.jobId,
         jobType: executionResult.jobType,
-        operation: 'CREATE',
-        description: this.generateJobCreationDescription(dto),
-        riskLevel: riskAssessment.riskLevel,
+        operation: 'CREATE',description: this.generateJobCreationDescription(dto),riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
         executionResult: executionStatus,
         conversationId: validationResponse.conversationId,
@@ -321,9 +286,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       this.updatePerformanceMetrics(Date.now() - startTime);
 
       this.logger.log(
-        `[${operationId}] Parlant-validated async job creation completed successfully`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated async job creation completed successfully`,{operationId,
           jobId: executionResult.jobId,
           totalValidationTimeMs: Date.now() - startTime,
           executionTimeMs: Date.now() - executionStartTime,
@@ -335,9 +298,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     } catch (error) {
       // Log validation failure
       this.logger.error(
-        `[${operationId}] Parlant-validated async job creation failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated async job creation failed`,{operationId,
           error: error instanceof Error ? error.message : String(error),
           totalTimeMs: Date.now() - startTime,
         }
@@ -354,14 +315,10 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto | null> {
-    const operationId = `parlant_async_job_get${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_get${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job retrieval: ${jobId}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async job retrieval: ${jobId}`,{operationId,
         jobId,
         userId: context.userId,
         sessionId: context.sessionId,
@@ -373,22 +330,18 @@ export class ParlantValidatedBrowserAsyncJobService {
       const riskAssessment = this.assessJobRetrievalRisk(jobId, context);
 
       // For low-risk operations, use simplified validation
-      if (riskAssessment.riskLevel === RiskLevel.MINIMAL || riskAssessment.riskLevel === RiskLevel.LOW) {
+      if (riskAssessment.riskLevel === RiskLevel._MINIMAL || riskAssessment.riskLevel === RiskLevel._LOW) {
         const result = await this.originalAsyncJobService.getAsyncJob(jobId);
         
         this.logger.log(
-          `[${operationId}] Low-risk async job retrieval completed`,
-          { operationId, jobId, found: !!result }
-        );
+          `[${operationId}] Low-risk async job retrieval completed`,{ operationId, jobId, found: !!result });
 
         return result;
       }
 
       // For higher-risk operations, perform full validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserAsyncJobService.getAsyncJob`,
-        functionParams: { jobId },
-        actionDescription: `Retrieve async job details for job: ${jobId}`,
+        functionName: `BrowserAsyncJobService.getAsyncJob`,functionParams: { jobId },actionDescription: `Retrieve async job details for job: ${jobId}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -416,8 +369,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         operation: 'RETRIEVE',
         description: `Retrieved async job: ${jobId}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
@@ -426,9 +378,7 @@ export class ParlantValidatedBrowserAsyncJobService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated async job retrieval failed`,
-        { operationId, jobId, error: error instanceof Error ? error.message : String(error) }
-      );
+        `[${operationId}] Parlant-validated async job retrieval failed`,{ operationId, jobId, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -439,14 +389,10 @@ export class ParlantValidatedBrowserAsyncJobService {
   async getAllAsyncJobs(
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto[]> {
-    const operationId = `parlant_async_job_get_all${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_get_all${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async jobs list retrieval`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async jobs list retrieval`,{operationId,
         userId: context.userId,
         sessionId: context.sessionId,
       }
@@ -480,18 +426,14 @@ export class ParlantValidatedBrowserAsyncJobService {
       const result = await this.originalAsyncJobService.getAllAsyncJobs();
 
       this.logger.log(
-        `[${operationId}] Retrieved ${result.length} async jobs`,
-        { operationId, jobsCount: result.length }
-      );
+        `[${operationId}] Retrieved ${result.length} async jobs`,{ operationId, jobsCount: result.length });
 
       this.updatePerformanceMetrics(Date.now() - startTime);
       return result;
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated async jobs list retrieval failed`,
-        { operationId, error: error instanceof Error ? error.message : String(error) }
-      );
+        `[${operationId}] Parlant-validated async jobs list retrieval failed`,{ operationId, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -503,14 +445,10 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<void> {
-    const operationId = `parlant_async_job_cancel${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_cancel${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job cancellation: ${jobId}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async job cancellation: ${jobId}`,{operationId,
         jobId,
         userId: context.userId,
         sessionId: context.sessionId,
@@ -521,16 +459,11 @@ export class ParlantValidatedBrowserAsyncJobService {
       // Get job details for risk assessment
       const jobDetails = await this.originalAsyncJobService.getAsyncJob(jobId);
       if (!jobDetails) {
-        throw new Error(`Async job not found: ${jobId}`);
-      }
-
-      // Assess cancellation risk
+        throw new Error(`Async job not found: ${jobId}`);}// Assess cancellation risk
       const riskAssessment = this.assessJobCancellationRisk(jobDetails, context);
 
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserAsyncJobService.cancelAsyncJob`,
-        functionParams: { jobId },
-        actionDescription: `Cancel async job: ${jobDetails.name} (${jobDetails.jobType})`,
+        functionName: `BrowserAsyncJobService.cancelAsyncJob`,functionParams: { jobId },actionDescription: `Cancel async job: ${jobDetails.name} (${jobDetails.jobType})`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -548,10 +481,7 @@ export class ParlantValidatedBrowserAsyncJobService {
           operation: 'CANCEL',
           description: `Cancellation denied for job: ${jobDetails.name}`,
           riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'FAILURE',
-          conversationId: validationResponse.conversationId,
-        });
+          validationResult: 'DENIED',executionResult: 'FAILURE',conversationId: validationResponse.conversationId,});
 
         throw new ConversationalValidationError(
           validationResponse.conversationId,
@@ -576,23 +506,18 @@ export class ParlantValidatedBrowserAsyncJobService {
         operation: 'CANCEL',
         description: `Cancelled async job: ${jobDetails.name}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
       this.updatePerformanceMetrics(Date.now() - startTime);
 
       this.logger.log(
-        `[${operationId}] Async job cancelled successfully`,
-        { operationId, jobId }
-      );
+        `[${operationId}] Async job cancelled successfully`,{ operationId, jobId });
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated async job cancellation failed`,
-        { operationId, jobId, error: error instanceof Error ? error.message : String(error) }
-      );
+        `[${operationId}] Parlant-validated async job cancellation failed`,{ operationId, jobId, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -604,14 +529,10 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<void> {
-    const operationId = `parlant_async_job_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_delete${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job deletion: ${jobId}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async job deletion: ${jobId}`,{operationId,
         jobId,
         userId: context.userId,
         sessionId: context.sessionId,
@@ -630,9 +551,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       const riskAssessment = this.assessJobDeletionRisk(jobDetails, context);
 
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserAsyncJobService.deleteAsyncJob`,
-        functionParams: { jobId },
-        actionDescription: `Delete async job and all associated data: ${jobDetails.name} (${jobDetails.jobType})`,
+        functionName: `BrowserAsyncJobService.deleteAsyncJob`,functionParams: { jobId },actionDescription: `Delete async job and all associated data: ${jobDetails.name} (${jobDetails.jobType})`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -650,10 +569,7 @@ export class ParlantValidatedBrowserAsyncJobService {
           operation: 'DELETE',
           description: `Deletion denied for job: ${jobDetails.name}`,
           riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'FAILURE',
-          conversationId: validationResponse.conversationId,
-        });
+          validationResult: 'DENIED',executionResult: 'FAILURE',conversationId: validationResponse.conversationId,});
 
         throw new ConversationalValidationError(
           validationResponse.conversationId,
@@ -675,17 +591,14 @@ export class ParlantValidatedBrowserAsyncJobService {
         operation: 'DELETE',
         description: `Deleted async job: ${jobDetails.name}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
       this.updatePerformanceMetrics(Date.now() - startTime);
 
       this.logger.log(
-        `[${operationId}] Async job deleted successfully`,
-        { operationId, jobId }
-      );
+        `[${operationId}] Async job deleted successfully`,{ operationId, jobId });
 
     } catch (error) {
       this.logger.error(
@@ -711,14 +624,10 @@ export class ParlantValidatedBrowserAsyncJobService {
     maxAge: number,
     context: AsyncJobValidationContext
   ): Promise<JobCleanupValidationResult> {
-    const operationId = `parlant_async_job_cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalOperations++;
+    const operationId = `parlant_async_job_cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated async job cleanup`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated async job cleanup`,{operationId,
         maxAgeMs: maxAge,
         userId: context.userId,
         sessionId: context.sessionId,
@@ -730,9 +639,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       const riskAssessment = this.assessJobCleanupRisk(maxAge, context);
 
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserAsyncJobService.cleanupOldJobs`,
-        functionParams: { maxAge },
-        actionDescription: `Clean up async jobs older than ${Math.round(maxAge / (1000 * 60 * 60))} hours`,
+        functionName: `BrowserAsyncJobService.cleanupOldJobs`,functionParams: { maxAge },actionDescription: `Clean up async jobs older than ${Math.round(maxAge / (1000 * 60 * 60))} hours`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -750,9 +657,7 @@ export class ParlantValidatedBrowserAsyncJobService {
           validationDetails: {
             conversationId: validationResponse.conversationId,
             riskAssessment,
-            complianceFlags: ['CLEANUP_DENIED'],
-          },
-        };
+            complianceFlags: ['CLEANUP_DENIED'],},};
       }
 
       this.approvedOperations++;
@@ -763,15 +668,10 @@ export class ParlantValidatedBrowserAsyncJobService {
       // Create audit entry
       await this.createAsyncJobAuditEntry({
         timestamp: new Date(),
-        jobId: 'CLEANUP_OPERATION',
-        jobType: AsyncJobType.CUSTOM_WORKFLOW,
-        operation: 'CLEANUP' as const,
+        jobId: 'CLEANUP_OPERATION',jobType: AsyncJobType.CUSTOM_WORKFLOW,operation: 'CLEANUP' as const,
         description: `Cleaned up ${cleanedCount} old async jobs`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
-        conversationId: validationResponse.conversationId,
-      });
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',conversationId: validationResponse.conversationId,});
 
       this.updatePerformanceMetrics(Date.now() - startTime);
 
@@ -782,9 +682,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         validationDetails: {
           conversationId: validationResponse.conversationId,
           riskAssessment,
-          complianceFlags: [`CLEANED${cleanedCount}_JOBS`],
-        },
-      };
+          complianceFlags: [`CLEANED${cleanedCount}_JOBS`],},};
 
     } catch (error) {
       this.logger.error(
@@ -807,85 +705,41 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel = RiskLevel.LOW;
-    let resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
-    let queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' = 'MINIMAL';
-
-    // Assess by job type
-    switch (dto.jobType) {
+    let riskLevel = RiskLevel._LOW;
+    let resourceImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';let queueImpact: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' = 'MINIMAL';// Assess by job typeswitch (dto.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
-        riskFactors.push('Batch automation with multiple tasks');
-        riskLevel = RiskLevel.MEDIUM;
-        resourceImpact = 'MEDIUM';
-        break;
-      case AsyncJobType.DATA_EXTRACTION:
-        riskFactors.push('Data extraction from external sources');
-        riskLevel = RiskLevel.MEDIUM;
-        break;
+        riskFactors.push('Batch automation with multiple tasks');riskLevel = RiskLevel._MODERATE;resourceImpact = 'MEDIUM';break;case AsyncJobType.DATA_EXTRACTION:
+        riskFactors.push('Data extraction from external sources');riskLevel = RiskLevel._MODERATE;break;
       case AsyncJobType.CUSTOM_WORKFLOW:
-        riskFactors.push('Custom workflow with unknown operations');
-        riskLevel = RiskLevel.HIGH;
-        resourceImpact = 'HIGH';
-        break;
-    }
+        riskFactors.push('Custom workflow with unknown operations');riskLevel = RiskLevel._HIGH;resourceImpact = 'HIGH';break;}
 
     // Assess by duration
     if (dto.estimatedDurationMs && dto.estimatedDurationMs > 3600000) { // > 1 hour
-      riskFactors.push('Long-running job (>1 hour)');
-      if (riskLevel < RiskLevel.MEDIUM) {
-        riskLevel = RiskLevel.MEDIUM;
+      riskFactors.push('Long-running job (>1 hour)');if (riskLevel < RiskLevel._MODERATE) {riskLevel = RiskLevel._MODERATE;
       }
-      resourceImpact = 'HIGH';
-    }
-
-    // Assess by priority
+      resourceImpact = 'HIGH';}// Assess by priority
     if (dto.priority === AsyncJobPriority.CRITICAL || dto.priority === AsyncJobPriority.URGENT) {
-      riskFactors.push('High priority job affecting queue order');
-      queueImpact = 'SIGNIFICANT';
-    }
-
-    // Assess by resource requirements
+      riskFactors.push('High priority job affecting queue order');queueImpact = 'SIGNIFICANT';}// Assess by resource requirements
     if (context.resourceRequirements.memoryEstimateMB > 1000) {
-      riskFactors.push('High memory usage (>1GB)');
-      resourceImpact = 'HIGH';
-    }
-
-    if (context.resourceRequirements.cpuIntensive) {
-      riskFactors.push('CPU-intensive operations');
-      if (resourceImpact === 'LOW') {
-        resourceImpact = 'MEDIUM';
-      }
-    }
+      riskFactors.push('High memory usage (>1GB)');resourceImpact = 'HIGH';}if (context.resourceRequirements.cpuIntensive) {
+      riskFactors.push('CPU-intensive operations');if (resourceImpact === 'LOW') {resourceImpact = 'MEDIUM';}}
 
     if (context.resourceRequirements.networkIntensive) {
-      riskFactors.push('Network-intensive operations');
-      if (riskLevel < RiskLevel.MEDIUM) {
-        riskLevel = RiskLevel.MEDIUM;
+      riskFactors.push('Network-intensive operations');if (riskLevel < RiskLevel._MODERATE) {riskLevel = RiskLevel._MODERATE;
       }
     }
 
     // Assess queue impact
     if (context.queueState.queueLength > 10) {
-      riskFactors.push('Queue is congested (>10 jobs)');
-      queueImpact = 'MODERATE';
-    }
-
-    if (context.queueState.systemLoadPercent > 80) {
-      riskFactors.push('System under high load (>80%)');
-      if (riskLevel < RiskLevel.HIGH) {
-        riskLevel = RiskLevel.HIGH;
+      riskFactors.push('Queue is congested (>10 jobs)');queueImpact = 'MODERATE';}if (context.queueState.systemLoadPercent > 80) {
+      riskFactors.push('System under high load (>80%)');if (riskLevel < RiskLevel._HIGH) {riskLevel = RiskLevel._HIGH;
       }
-      resourceImpact = 'CRITICAL';
-    }
-
-    return {
+      resourceImpact = 'CRITICAL';}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskFactors),
-      requiresApproval: riskLevel >= RiskLevel.MEDIUM,
-      recommendedMonitoring: riskLevel >= RiskLevel.HIGH ? 'COMPREHENSIVE' : 'BASIC',
-      resourceImpact,
-      queueImpact,
+      requiresApproval: riskLevel >= RiskLevel._MODERATE,
+      recommendedMonitoring: riskLevel >= RiskLevel._HIGH ? 'COMPREHENSIVE' : 'BASIC',resourceImpact,queueImpact,
     };
   }
 
@@ -897,15 +751,9 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     return {
-      riskLevel: RiskLevel.MINIMAL,
-      riskFactors: ['Read-only operation'],
-      mitigationStrategies: [],
-      requiresApproval: false,
-      recommendedMonitoring: 'BASIC',
-      resourceImpact: 'LOW',
-      queueImpact: 'MINIMAL',
-    };
-  }
+      riskLevel: RiskLevel._MINIMAL,
+      riskFactors: ['Read-only operation'],mitigationStrategies: [],requiresApproval: false,
+      recommendedMonitoring: 'BASIC',resourceImpact: 'LOW',queueImpact: 'MINIMAL',};}
 
   /**
    * Assess risk for job list retrieval
@@ -914,24 +762,17 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel = RiskLevel.LOW;
+    let riskLevel = RiskLevel._LOW;
 
     // Check if user has appropriate access level
-    if (context.securityLevel === 'HIGH' || context.securityLevel === 'CRITICAL') {
-      riskFactors.push('Access to sensitive job information');
-      riskLevel = RiskLevel.MEDIUM;
-    }
+    if (context.securityLevel === 'HIGH' || context.securityLevel === 'CRITICAL') {riskFactors.push('Access to sensitive job information');riskLevel = RiskLevel._MODERATE;}
 
     return {
       riskLevel,
       riskFactors,
       mitigationStrategies: [],
-      requiresApproval: riskLevel >= RiskLevel.MEDIUM,
-      recommendedMonitoring: 'BASIC',
-      resourceImpact: 'LOW',
-      queueImpact: 'MINIMAL',
-    };
-  }
+      requiresApproval: riskLevel >= RiskLevel._MODERATE,
+      recommendedMonitoring: 'BASIC',resourceImpact: 'LOW',queueImpact: 'MINIMAL',};}
 
   /**
    * Assess risk for job cancellation
@@ -941,27 +782,21 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel = RiskLevel.MEDIUM; // Default medium for operational changes
+    let riskLevel = RiskLevel._MODERATE; // Default medium for operational changes
 
     // Running jobs have higher risk to cancel
     if (jobDetails.status === AsyncJobStatus.RUNNING) {
-      riskFactors.push('Cancelling active running job');
-      riskLevel = RiskLevel.HIGH;
-    }
+      riskFactors.push('Cancelling active running job');riskLevel = RiskLevel._HIGH;}
 
     // High priority jobs
     if (jobDetails.priority === AsyncJobPriority.CRITICAL || jobDetails.priority === AsyncJobPriority.URGENT) {
-      riskFactors.push('Cancelling high priority job');
-      if (riskLevel < RiskLevel.HIGH) {
-        riskLevel = RiskLevel.HIGH;
+      riskFactors.push('Cancelling high priority job');if (riskLevel < RiskLevel._HIGH) {riskLevel = RiskLevel._HIGH;
       }
     }
 
     // Long-running jobs with significant progress
     if (jobDetails.progress.percentage > 50) {
-      riskFactors.push('Cancelling job with significant progress (>50%)');
-      if (riskLevel < RiskLevel.MEDIUM) {
-        riskLevel = RiskLevel.MEDIUM;
+      riskFactors.push('Cancelling job with significant progress (>50%)');if (riskLevel < RiskLevel._MODERATE) {riskLevel = RiskLevel._MODERATE;
       }
     }
 
@@ -970,11 +805,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskFactors),
       requiresApproval: true,
-      recommendedMonitoring: 'ENHANCED',
-      resourceImpact: 'MEDIUM',
-      queueImpact: 'MODERATE',
-    };
-  }
+      recommendedMonitoring: 'ENHANCED',resourceImpact: 'MEDIUM',queueImpact: 'MODERATE',};}
 
   /**
    * Assess risk for job deletion
@@ -984,40 +815,26 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel = RiskLevel.HIGH; // Default high for data deletion
+    let riskLevel = RiskLevel._HIGH; // Default high for data deletion
 
-    riskFactors.push('Permanent deletion of job data');
-
-    // Active jobs cannot be deleted
-    if (jobDetails.status === AsyncJobStatus.RUNNING || jobDetails.status === AsyncJobStatus.QUEUED) {
-      riskFactors.push('Attempting to delete active job');
-      riskLevel = RiskLevel.CRITICAL;
-    }
+    riskFactors.push('Permanent deletion of job data');// Active jobs cannot be deletedif (jobDetails.status === AsyncJobStatus.RUNNING || jobDetails.status === AsyncJobStatus.QUEUED) {
+      riskFactors.push('Attempting to delete active job');riskLevel = RiskLevel._CRITICAL;}
 
     // Jobs with extracted data
     if (jobDetails.results.extractedData && Object.keys(jobDetails.results.extractedData).length > 0) {
-      riskFactors.push('Job contains extracted data that will be lost');
-      if (riskLevel < RiskLevel.HIGH) {
-        riskLevel = RiskLevel.HIGH;
+      riskFactors.push('Job contains extracted data that will be lost');if (riskLevel < RiskLevel._HIGH) {riskLevel = RiskLevel._HIGH;
       }
     }
 
     // Jobs with audit requirements
-    if (context.securityLevel === 'CRITICAL') {
-      riskFactors.push('Deleting job with audit trail requirements');
-      riskLevel = RiskLevel.CRITICAL;
-    }
+    if (context.securityLevel === 'CRITICAL') {riskFactors.push('Deleting job with audit trail requirements');riskLevel = RiskLevel._CRITICAL;}
 
     return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskFactors),
       requiresApproval: true,
-      recommendedMonitoring: 'COMPREHENSIVE',
-      resourceImpact: 'LOW',
-      queueImpact: 'MINIMAL',
-    };
-  }
+      recommendedMonitoring: 'COMPREHENSIVE',resourceImpact: 'LOW',queueImpact: 'MINIMAL',};}
 
   /**
    * Assess risk for job cleanup operations
@@ -1027,25 +844,15 @@ export class ParlantValidatedBrowserAsyncJobService {
     context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel = RiskLevel.MEDIUM; // Default medium for bulk operations
+    let riskLevel = RiskLevel._MODERATE; // Default medium for bulk operations
 
-    riskFactors.push('Bulk deletion of old job data');
-
-    // Short retention periods are riskier
-    const ageHours = maxAge / (1000 * 60 * 60);
+    riskFactors.push('Bulk deletion of old job data');// Short retention periods are riskierconst ageHours = maxAge / (1000 * 60 * 60);
     if (ageHours < 24) {
-      riskFactors.push('Very short retention period (<24 hours)');
-      riskLevel = RiskLevel.HIGH;
-    } else if (ageHours < 168) { // 1 week
-      riskFactors.push('Short retention period (<1 week)');
-      riskLevel = RiskLevel.MEDIUM;
-    }
+      riskFactors.push('Very short retention period (<24 hours)');riskLevel = RiskLevel._HIGH;} else if (ageHours < 168) { // 1 week
+      riskFactors.push('Short retention period (<1 week)');riskLevel = RiskLevel._MODERATE;}
 
     // Security level affects risk
-    if (context.securityLevel === 'CRITICAL') {
-      riskFactors.push('Cleanup in critical security environment');
-      if (riskLevel < RiskLevel.HIGH) {
-        riskLevel = RiskLevel.HIGH;
+    if (context.securityLevel === 'CRITICAL') {riskFactors.push('Cleanup in critical security environment');if (riskLevel < RiskLevel._HIGH) {riskLevel = RiskLevel._HIGH;
       }
     }
 
@@ -1054,11 +861,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskFactors),
       requiresApproval: true,
-      recommendedMonitoring: 'ENHANCED',
-      resourceImpact: 'MEDIUM',
-      queueImpact: 'MINIMAL',
-    };
-  }
+      recommendedMonitoring: 'ENHANCED',resourceImpact: 'MEDIUM',queueImpact: 'MINIMAL',};}
 
   // ===========================
   // UTILITY METHODS
@@ -1070,23 +873,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   private generateMitigationStrategies(riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.some((f: string) => f.includes('memory'))) {
-      strategies.push('Monitor memory usage during execution');
-    }
-    if (riskFactors.some((f: string) => f.includes('CPU'))) {
-      strategies.push('Implement CPU throttling if needed');
-    }
-    if (riskFactors.some((f: string) => f.includes('network'))) {
-      strategies.push('Monitor network activity and implement rate limiting');
-    }
-    if (riskFactors.some((f: string) => f.includes('queue'))) {
-      strategies.push('Consider scheduling during off-peak hours');
-    }
-    if (riskFactors.some((f: string) => f.includes('data'))) {
-      strategies.push('Ensure compliance with data retention policies');
-    }
-    if (riskFactors.some((f: string) => f.includes('deletion'))) {
-      strategies.push('Create backup before deletion if required');
+    if (riskFactors.some((f: string) => f.includes('memory'))) {strategies.push('Monitor memory usage during execution');}if (riskFactors.some((f: string) => f.includes('CPU'))) {strategies.push('Implement CPU throttling if needed');}if (riskFactors.some((f: string) => f.includes('network'))) {strategies.push('Monitor network activity and implement rate limiting');}if (riskFactors.some((f: string) => f.includes('queue'))) {strategies.push('Consider scheduling during off-peak hours');}if (riskFactors.some((f: string) => f.includes('data'))) {strategies.push('Ensure compliance with data retention policies');}if (riskFactors.some((f: string) => f.includes('deletion'))) {strategies.push('Create backup before deletion if required');
     }
 
     return strategies;
@@ -1099,7 +886,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     const duration = dto.estimatedDurationMs ?
       `(estimated ${Math.round(dto.estimatedDurationMs / 60000)} minutes)` : '';
 
-    return `Create ${dto.jobType.toLowerCase().replace('_', ' ')} async job "${dto.name}" ${duration}`;
+    return `Create ${dto.jobType.toLowerCase().replace('_', ' ')} async job "${dto.name}" ${duration}";
   }
 
   /**
@@ -1170,8 +957,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       totalOperations: this.totalOperations,
       approvedOperations: this.approvedOperations,
       deniedOperations: this.deniedOperations,
-      approvalRate: `${approvalRate.toFixed(2)}%`,
-      averageValidationTime: `${Math.round(this.averageValidationTime)}ms`,
+      approvalRate: `${approvalRate.toFixed(2)}%`,averageValidationTime: `${Math.round(this.averageValidationTime)}ms`,
       jobMetrics: this.jobMetrics,
       auditHistorySize: this.jobAuditHistory.length,
     });

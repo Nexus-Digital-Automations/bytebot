@@ -17,11 +17,7 @@
  * @version 2.0.0
  */
 
-import { performance } from 'perf_hooks';
-import { EventEmitter } from 'events';
-
-/**
- * Performance metrics interface
+import { performance } from 'perf_hooks';import { EventEmitter } from 'events';/*** Performance metrics interface
  */
 export interface PerformanceMetrics {
   readonly executionTime: number;
@@ -101,10 +97,7 @@ export class PerformanceTestingFramework extends EventEmitter {
    * Start performance measurement for a test
    */
   public startMeasurement(testName: string, testSuite: string): void {
-    console.log(`📊 [PERF] Starting measurement for ${testSuite}::${testName}`);
-    
-    const startTime = performance.now();
-    const startMemory = process.memoryUsage();
+    console.log(`📊 [PERF] Starting measurement for ${testSuite}::${testName}`);const startTime = performance.now();const startMemory = process.memoryUsage();
     const startCpu = process.cpuUsage();
 
     this.activeMeasurements.set(`${testSuite}::${testName}`, {
@@ -120,14 +113,8 @@ export class PerformanceTestingFramework extends EventEmitter {
    * End performance measurement for a test
    */
   public endMeasurement(testName: string, testSuite: string, passed: boolean, errors: Error[] = []): PerformanceMetrics {
-    const measurementKey = `${testSuite}::${testName}`;
-    const measurement = this.activeMeasurements.get(measurementKey);
-
-    if (!measurement) {
-      throw new Error(`No active measurement found for ${measurementKey}`);
-    }
-
-    const endTime = performance.now();
+    const measurementKey = `${testSuite}::${testName}`;const measurement = this.activeMeasurements.get(measurementKey);if (!measurement) {
+      throw new Error(`No active measurement found for ${measurementKey}`);}const endTime = performance.now();
     const endMemory = process.memoryUsage();
     const endCpu = process.cpuUsage(measurement.startCpu);
 
@@ -149,9 +136,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     };
 
     // Store metrics
-    const testKey = `${testSuite}::${testName}`;
-    if (!this.metrics.has(testKey)) {
-      this.metrics.set(testKey, []);
+    const testKey = `${testSuite}::${testName}`;if (!this.metrics.has(testKey)) {this.metrics.set(testKey, []);
     }
     this.metrics.get(testKey)!.push(metrics);
 
@@ -171,20 +156,11 @@ export class PerformanceTestingFramework extends EventEmitter {
     testFunction: () => Promise<void> | void,
     config: PerformanceTestConfig
   ): Promise<PerformanceBenchmark> {
-    console.log(`🚀 [PERF] Starting benchmark: ${config.name}`);
-    console.log(`📋 [PERF] Config: ${config.measurementIterations} iterations, ${config.concurrencyLevel} concurrency`);
-
-    const allMetrics: PerformanceMetrics[] = [];
-
-    // Warmup phase
-    console.log(`🔥 [PERF] Warmup phase: ${config.warmupIterations} iterations`);
-    for (let i = 0; i < config.warmupIterations; i++) {
-      try {
+    console.log(`🚀 [PERF] Starting benchmark: ${config.name}`);console.log(`📋 [PERF] Config: ${config.measurementIterations} iterations, ${config.concurrencyLevel} concurrency`);const allMetrics: PerformanceMetrics[] = [];// Warmup phase
+    console.log(`🔥 [PERF] Warmup phase: ${config.warmupIterations} iterations`);for (let i = 0; i < config.warmupIterations; i++) {try {
         await testFunction();
       } catch (error) {
-        console.warn(`⚠️ [PERF] Warmup iteration ${i + 1} failed:`, error);
-      }
-    }
+        console.warn(`⚠️ [PERF] Warmup iteration ${i + 1} failed:`, error);}}
 
     // Force garbage collection if available
     if (global.gc) {
@@ -192,14 +168,8 @@ export class PerformanceTestingFramework extends EventEmitter {
     }
 
     // Measurement phase
-    console.log(`📊 [PERF] Measurement phase: ${config.measurementIterations} iterations`);
-    
-    for (let i = 0; i < config.measurementIterations; i++) {
-      const iterationName = `${config.name}_iteration${i + 1}`;
-      this.startMeasurement(iterationName, 'benchmark');
-
-      const errors: Error[] = [];
-      let passed = true;
+    console.log(`📊 [PERF] Measurement phase: ${config.measurementIterations} iterations`);for (let i = 0; i < config.measurementIterations; i++) {const iterationName = `${config.name}_iteration${i + 1}`;
+      this.startMeasurement(iterationName, 'benchmark');const errors: Error[] = [];let passed = true;
 
       try {
         await testFunction();
@@ -214,9 +184,7 @@ export class PerformanceTestingFramework extends EventEmitter {
       // Check for early termination on consistent failures
       if (!passed && i > config.measurementIterations * 0.1 && 
           allMetrics.slice(-Math.floor(config.measurementIterations * 0.1)).every(m => !m.passed)) {
-        console.warn(`⚠️ [PERF] Early termination due to consistent failures`);
-        break;
-      }
+        console.warn(`⚠️ [PERF] Early termination due to consistent failures`);break;}
     }
 
     // Analyze results
@@ -267,12 +235,7 @@ export class PerformanceTestingFramework extends EventEmitter {
       recommendations
     };
 
-    console.log(`📊 [PERF] Benchmark results for ${config.name}:`);
-    console.log(`  Average: ${averageExecutionTime.toFixed(2)}ms`);
-    console.log(`  P95: ${p95ExecutionTime.toFixed(2)}ms`);
-    console.log(`  Memory: ${(averageMemoryUsage / 1024 / 1024).toFixed(2)}MB`);
-    console.log(`  Grade: ${performanceGrade}`);
-    console.log(`  Status: ${passed ? '✅ PASSED' : '❌ FAILED'}`);
+    console.log(`📊 [PERF] Benchmark results for ${config.name}:`);console.log(`  Average: ${averageExecutionTime.toFixed(2)}ms`);console.log(`  P95: ${p95ExecutionTime.toFixed(2)}ms`);console.log(`  Memory: ${(averageMemoryUsage / 1024 / 1024).toFixed(2)}MB`);console.log(`  Grade: ${performanceGrade}`);console.log(`  Status: ${passed ? '✅ PASSED' : '❌ FAILED'}`);
 
     this.emit('benchmarkCompleted', benchmark);
     return benchmark;
@@ -285,8 +248,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     console.log(`🔍 [PERF] Validating test execution performance across all suites`);
 
     const testSuites = Array.from(this.metrics.keys()).reduce((suites, testKey) => {
-      const splitParts = testKey.split('::');
-      const suiteName: string = splitParts.length > 0 && splitParts[0] ? splitParts[0] : 'unknown';
+      const splitParts = testKey.split('::');const suiteName: string = splitParts.length > 0 && splitParts[0] ? splitParts[0] : 'unknown';
       if (!suites.has(suiteName)) {
         suites.set(suiteName, []);
       }
@@ -337,14 +299,7 @@ export class PerformanceTestingFramework extends EventEmitter {
 
       this.testExecutionMetrics.set(suiteName, testExecutionMetrics);
 
-      console.log(`📊 [PERF] Suite ${suiteName} metrics:`);
-      console.log(`  Tests: ${totalTests} (${passedTests} passed, ${failedTests} failed)`);
-      console.log(`  Avg time: ${averageTestTime.toFixed(2)}ms`);
-      console.log(`  Slowest: ${slowestMetric.testName} (${slowestMetric.executionTime.toFixed(2)}ms)`);
-      console.log(`  Parallelization benefit: ${parallelizationBenefit.toFixed(1)}%`);
-    }
-
-    return this.testExecutionMetrics;
+      console.log(`📊 [PERF] Suite ${suiteName} metrics:`);console.log(`  Tests: ${totalTests} (${passedTests} passed, ${failedTests} failed)`);console.log(`  Avg time: ${averageTestTime.toFixed(2)}ms`);console.log(`  Slowest: ${slowestMetric.testName} (${slowestMetric.executionTime.toFixed(2)}ms)`);console.log(`  Parallelization benefit: ${parallelizationBenefit.toFixed(1)}%`);}return this.testExecutionMetrics;
   }
 
   /**
@@ -445,19 +400,11 @@ export class PerformanceTestingFramework extends EventEmitter {
     avgTime: number,
     avgMemory: number,
     memoryLeak: boolean
-  ): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (memoryLeak) return 'F';
-
-    const timeRatio = avgTime / config.maxExecutionTime;
-    const memoryRatio = avgMemory / config.maxMemoryUsage;
+  ): 'A' | 'B' | 'C' | 'D' | 'F' {if (memoryLeak) return 'F';const timeRatio = avgTime / config.maxExecutionTime;const memoryRatio = avgMemory / config.maxMemoryUsage;
 
     const overallRatio = Math.max(timeRatio, memoryRatio);
 
-    if (overallRatio <= 0.6) return 'A';
-    if (overallRatio <= 0.8) return 'B';
-    if (overallRatio <= 1.0) return 'C';
-    if (overallRatio <= 1.2) return 'D';
-    return 'F';
+    if (overallRatio <= 0.6) return 'A';if (overallRatio <= 0.8) return 'B';if (overallRatio <= 1.0) return 'C';if (overallRatio <= 1.2) return 'D';return 'F';
   }
 
   /**
@@ -475,10 +422,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     const recommendations: string[] = [];
 
     if (results.averageExecutionTime > config.maxExecutionTime) {
-      recommendations.push(`Optimize execution time: current ${results.averageExecutionTime.toFixed(2)}ms exceeds target ${config.maxExecutionTime}ms`);
-    }
-
-    if (results.averageMemoryUsage > config.maxMemoryUsage) {
+      recommendations.push(`Optimize execution time: current ${results.averageExecutionTime.toFixed(2)}ms exceeds target ${config.maxExecutionTime}ms`);}if (results.averageMemoryUsage > config.maxMemoryUsage) {
       recommendations.push(`Reduce memory usage: current ${(results.averageMemoryUsage / 1024 / 1024).toFixed(2)}MB exceeds target ${(config.maxMemoryUsage / 1024 / 1024).toFixed(2)}MB`);
     }
 
@@ -521,10 +465,8 @@ export class PerformanceTestingFramework extends EventEmitter {
 
     slowTests.forEach(test => {
       bottlenecks.push({
-        testName: `${test.testSuite}::${test.testName}`,
-        issue: `Slow execution time: ${test.executionTime.toFixed(2)}ms`,
-        impact: 'Increases overall test suite execution time',
-        recommendation: 'Optimize test logic, reduce I/O operations, or consider mocking'
+        testName: `${test.testSuite}::${test.testName}`,issue: `Slow execution time: ${test.executionTime.toFixed(2)}ms`,
+        impact: 'Increases overall test suite execution time',recommendation: 'Optimize test logic, reduce I/O operations, or consider mocking'
       });
     });
 
@@ -536,12 +478,8 @@ export class PerformanceTestingFramework extends EventEmitter {
 
     memoryIntensiveTests.forEach(test => {
       bottlenecks.push({
-        testName: `${test.testSuite}::${test.testName}`,
-        issue: `High memory usage: ${(test.memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`,
-        impact: 'May cause memory pressure and affect other tests',
-        recommendation: 'Optimize data structures, implement proper cleanup, or reduce test scope'
-      });
-    });
+        testName: `${test.testSuite}::${test.testName}`,issue: `High memory usage: ${(test.memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`,
+        impact: 'May cause memory pressure and affect other tests',recommendation: 'Optimize data structures, implement proper cleanup, or reduce test scope'});});
 
     return bottlenecks;
   }
@@ -557,27 +495,11 @@ export class PerformanceTestingFramework extends EventEmitter {
     const failureRate = metrics.filter(m => !m.passed).length / metrics.length;
 
     if (totalExecutionTime > 60000) { // More than 1 minute total
-      opportunities.push('Implement test parallelization to reduce total execution time');
-    }
-
-    if (totalMemoryUsage > 500 * 1024 * 1024) { // More than 500MB total
-      opportunities.push('Optimize memory usage through better resource management and cleanup');
-    }
-
-    if (failureRate > 0.02) { // More than 2% failure rate
-      opportunities.push('Improve test stability and reduce flaky tests');
-    }
-
-    const avgTestTime = totalExecutionTime / metrics.length;
+      opportunities.push('Implement test parallelization to reduce total execution time');}if (totalMemoryUsage > 500 * 1024 * 1024) { // More than 500MB total
+      opportunities.push('Optimize memory usage through better resource management and cleanup');}if (failureRate > 0.02) { // More than 2% failure rate
+      opportunities.push('Improve test stability and reduce flaky tests');}const avgTestTime = totalExecutionTime / metrics.length;
     if (avgTestTime > 1000) {
-      opportunities.push('Optimize individual test execution time through mocking and test optimization');
-    }
-
-    opportunities.push('Consider implementing test caching for expensive setup operations');
-    opportunities.push('Evaluate test isolation to reduce inter-test dependencies');
-
-    return opportunities;
-  }
+      opportunities.push('Optimize individual test execution time through mocking and test optimization');}opportunities.push('Consider implementing test caching for expensive setup operations');opportunities.push('Evaluate test isolation to reduce inter-test dependencies');return opportunities;}
 
   /**
    * Calculate overall performance grade
@@ -601,11 +523,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     if (passRate < 0.95) score -= 30;
     else if (passRate < 0.98) score -= 15;
 
-    if (score >= 90) return 'A+ (Excellent)';
-    if (score >= 80) return 'A (Very Good)';
-    if (score >= 70) return 'B (Good)';
-    if (score >= 60) return 'C (Fair)';
-    return 'D (Needs Improvement)';
+    if (score >= 90) return 'A+ (Excellent)';if (score >= 80) return 'A (Very Good)';if (score >= 70) return 'B (Good)';if (score >= 60) return 'C (Fair)';return 'D (Needs Improvement)';
   }
 }
 
@@ -624,9 +542,7 @@ export function performanceTest(config: Partial<PerformanceTestConfig> = {}) {
     descriptor.value = async function(...args: unknown[]) {
       const testConfig: PerformanceTestConfig = {
         name: propertyName,
-        description: `Performance test for ${propertyName}`,
-        maxExecutionTime: 5000,
-        maxMemoryUsage: 100 * 1024 * 1024, // 100MB
+        description: `Performance test for ${propertyName}`,maxExecutionTime: 5000,maxMemoryUsage: 100 * 1024 * 1024, // 100MB
         maxCpuUsage: 80,
         warmupIterations: 3,
         measurementIterations: 10,
@@ -641,10 +557,7 @@ export function performanceTest(config: Partial<PerformanceTestConfig> = {}) {
         testConfig
       );
 
-      console.log(`📊 [PERF] ${propertyName} benchmark completed: ${benchmark.performanceGrade} grade`);
-      
-      if (!benchmark.passed) {
-        throw new Error(`Performance test failed for ${propertyName}: ${benchmark.recommendations.join(', ')}`);
+      console.log(`📊 [PERF] ${propertyName} benchmark completed: ${benchmark.performanceGrade} grade`);if (!benchmark.passed) {throw new Error(`Performance test failed for ${propertyName}: ${benchmark.recommendations.join(`, ')}`);
       }
 
       return benchmark;

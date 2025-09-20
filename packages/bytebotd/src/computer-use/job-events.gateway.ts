@@ -24,16 +24,7 @@ import {
   OnGatewayDisconnect,
   ConnectedSocket,
   MessageBody,
-} from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
-import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { JobProgressUpdateDto } from './dto/batch-job.dto';
-import { JobStatus } from './dto/async-job.dto';
-
-/**
- * WebSocket client interface with authentication
+} from '@nestjs/websockets';import { Logger, UseGuards } from '@nestjs/common';import { OnEvent } from '@nestjs/event-emitter';import { Server, Socket } from 'socket.io';import { JwtService } from '@nestjs/jwt';import { JobProgressUpdateDto } from './dto/batch-job.dto';import { JobStatus } from './dto/async-job.dto';/*** WebSocket client interface with authentication
  */
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -63,9 +54,7 @@ interface BatchEventPayload {
   completedJobs: number;
   failedJobs: number;
   cancelledJobs: number;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
-  progress: number;
-  timestamp: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled';progress: number;timestamp: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -80,14 +69,8 @@ interface JobSubscriptionRequest {
 
 @WebSocketGateway(8081, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  namespace: '/job-events',
-  transports: ['websocket', 'polling'],
-})
-export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+    origin: '*',methods: ['GET', 'POST'],credentials: true,},
+  namespace: '/job-events',transports: ['websocket', 'polling'],})export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server = new Server();
 
@@ -148,8 +131,7 @@ export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnec
       );
 
       // Send connection confirmation
-      client.emit('connection_confirmed', {
-        message: 'Connected to job events',
+      client.emit('connection_confirmed', {message: 'Connected to job events',
         userId: client.userId,
         username: client.username,
         timestamp: new Date().toISOString(),
@@ -159,10 +141,173 @@ export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnec
         `Authentication failed for client ${client.id}: ${error}`,
         error instanceof Error ? error.stack : undefined,
       );
-      client.emit('auth_error', {
-        message: 'Authentication failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
+      client.emit('auth_error', {message: 'Authentication failed',error: error instanceof Error ? error.message : 'Unknown error',
       });
       client.disconnect();
     }
-  }\n\n  /**\n   * Handle client disconnections\n   */\n  handleDisconnect(client: AuthenticatedSocket): void {\n    this.logger.log(\n      `Client disconnected: ${client.id} (user: ${client.username})`,\n      {\n        socketId: client.id,\n        userId: client.userId,\n        username: client.username,\n      },\n    );\n\n    // Clean up subscriptions\n    if (client.subscribedJobs) {\n      client.subscribedJobs.forEach((jobId) => {\n        const subscribers = this.jobSubscriptions.get(jobId);\n        if (subscribers) {\n          subscribers.delete(client.id);\n          if (subscribers.size === 0) {\n            this.jobSubscriptions.delete(jobId);\n          }\n        }\n      });\n    }\n\n    if (client.subscribedBatches) {\n      client.subscribedBatches.forEach((batchId) => {\n        const subscribers = this.batchSubscriptions.get(batchId);\n        if (subscribers) {\n          subscribers.delete(client.id);\n          if (subscribers.size === 0) {\n            this.batchSubscriptions.delete(batchId);\n          }\n        }\n      });\n    }\n\n    if (client.userId) {\n      const userSubs = this.userSubscriptions.get(client.userId);\n      if (userSubs) {\n        userSubs.delete(client.id);\n        if (userSubs.size === 0) {\n          this.userSubscriptions.delete(client.userId);\n        }\n      }\n    }\n\n    // Remove client connection\n    this.connectedClients.delete(client.id);\n  }\n\n  /**\n   * Subscribe to specific job progress updates\n   */\n  @SubscribeMessage('subscribe_jobs')\n  handleJobSubscription(\n    @ConnectedSocket() client: AuthenticatedSocket,\n    @MessageBody() request: JobSubscriptionRequest,\n  ): void {\n    if (!client.userId) {\n      client.emit('subscription_error', {\n        message: 'Authentication required for job subscriptions',\n      });\n      return;\n    }\n\n    try {\n      let subscribedCount = 0;\n\n      // Subscribe to specific jobs\n      if (request.jobIds) {\n        request.jobIds.forEach((jobId) => {\n          if (!this.jobSubscriptions.has(jobId)) {\n            this.jobSubscriptions.set(jobId, new Set());\n          }\n          this.jobSubscriptions.get(jobId)!.add(client.id);\n          client.subscribedJobs!.add(jobId);\n          subscribedCount++;\n        });\n      }\n\n      // Subscribe to specific batches\n      if (request.batchIds) {\n        request.batchIds.forEach((batchId) => {\n          if (!this.batchSubscriptions.has(batchId)) {\n            this.batchSubscriptions.set(batchId, new Set());\n          }\n          this.batchSubscriptions.get(batchId)!.add(client.id);\n          client.subscribedBatches!.add(batchId);\n          subscribedCount++;\n        });\n      }\n\n      this.logger.log(\n        `Client ${client.id} subscribed to ${subscribedCount} job/batch updates`,\n        {\n          socketId: client.id,\n          userId: client.userId,\n          username: client.username,\n          jobIds: request.jobIds,\n          batchIds: request.batchIds,\n          allUserJobs: request.allUserJobs,\n        },\n      );\n\n      client.emit('subscription_confirmed', {\n        message: `Subscribed to ${subscribedCount} job/batch updates`,\n        jobIds: request.jobIds || [],\n        batchIds: request.batchIds || [],\n        allUserJobs: request.allUserJobs || false,\n        timestamp: new Date().toISOString(),\n      });\n    } catch (error) {\n      this.logger.error(\n        `Subscription error for client ${client.id}: ${error}`,\n        error instanceof Error ? error.stack : undefined,\n      );\n      client.emit('subscription_error', {\n        message: 'Failed to process job subscription',\n        error: error instanceof Error ? error.message : 'Unknown error',\n      });\n    }\n  }\n\n  /**\n   * Unsubscribe from job progress updates\n   */\n  @SubscribeMessage('unsubscribe_jobs')\n  handleJobUnsubscription(\n    @ConnectedSocket() client: AuthenticatedSocket,\n    @MessageBody() request: { jobIds?: string[]; batchIds?: string[] },\n  ): void {\n    if (!client.userId) {\n      return;\n    }\n\n    let unsubscribedCount = 0;\n\n    // Unsubscribe from specific jobs\n    if (request.jobIds) {\n      request.jobIds.forEach((jobId) => {\n        const subscribers = this.jobSubscriptions.get(jobId);\n        if (subscribers) {\n          subscribers.delete(client.id);\n          if (subscribers.size === 0) {\n            this.jobSubscriptions.delete(jobId);\n          }\n        }\n        client.subscribedJobs!.delete(jobId);\n        unsubscribedCount++;\n      });\n    }\n\n    // Unsubscribe from specific batches\n    if (request.batchIds) {\n      request.batchIds.forEach((batchId) => {\n        const subscribers = this.batchSubscriptions.get(batchId);\n        if (subscribers) {\n          subscribers.delete(client.id);\n          if (subscribers.size === 0) {\n            this.batchSubscriptions.delete(batchId);\n          }\n        }\n        client.subscribedBatches!.delete(batchId);\n        unsubscribedCount++;\n      });\n    }\n\n    this.logger.log(\n      `Client ${client.id} unsubscribed from ${unsubscribedCount} job/batch updates`,\n      {\n        socketId: client.id,\n        userId: client.userId,\n        jobIds: request.jobIds,\n        batchIds: request.batchIds,\n      },\n    );\n\n    client.emit('unsubscription_confirmed', {\n      message: `Unsubscribed from ${unsubscribedCount} job/batch updates`,\n      timestamp: new Date().toISOString(),\n    });\n  }\n\n  /**\n   * Get current connection and subscription status\n   */\n  @SubscribeMessage('get_status')\n  handleGetStatus(@ConnectedSocket() client: AuthenticatedSocket): void {\n    const status = {\n      connected: true,\n      userId: client.userId,\n      username: client.username,\n      role: client.role,\n      subscribedJobs: Array.from(client.subscribedJobs || []),\n      subscribedBatches: Array.from(client.subscribedBatches || []),\n      totalConnections: this.connectedClients.size,\n      timestamp: new Date().toISOString(),\n    };\n\n    client.emit('status_response', status);\n  }\n\n  // ===== EVENT LISTENERS =====\n\n  /**\n   * Handle job progress events from the enhanced async service\n   */\n  @OnEvent('job.progress')\n  handleJobProgress(payload: JobEventPayload): void {\n    this.logger.debug(`Broadcasting job progress: ${payload.jobId} - ${payload.progress}%`);\n\n    // Broadcast to job subscribers\n    const jobSubscribers = this.jobSubscriptions.get(payload.jobId);\n    if (jobSubscribers) {\n      jobSubscribers.forEach((socketId) => {\n        const client = this.connectedClients.get(socketId);\n        if (client) {\n          client.emit('job_progress', payload);\n        }\n      });\n    }\n\n    // Broadcast to batch subscribers if job is part of a batch\n    if (payload.batchId) {\n      const batchSubscribers = this.batchSubscriptions.get(payload.batchId);\n      if (batchSubscribers) {\n        batchSubscribers.forEach((socketId) => {\n          const client = this.connectedClients.get(socketId);\n          if (client) {\n            client.emit('job_progress', payload);\n          }\n        });\n      }\n    }\n  }\n\n  /**\n   * Handle job completion events\n   */\n  @OnEvent('job.completed')\n  handleJobCompleted(payload: JobEventPayload): void {\n    this.logger.debug(`Broadcasting job completion: ${payload.jobId}`);\n    this.broadcastJobEvent('job_completed', payload);\n  }\n\n  /**\n   * Handle job failure events\n   */\n  @OnEvent('job.failed')\n  handleJobFailed(payload: JobEventPayload): void {\n    this.logger.debug(`Broadcasting job failure: ${payload.jobId}`);\n    this.broadcastJobEvent('job_failed', payload);\n  }\n\n  /**\n   * Handle job cancellation events\n   */\n  @OnEvent('job.cancelled')\n  handleJobCancelled(payload: JobEventPayload): void {\n    this.logger.debug(`Broadcasting job cancellation: ${payload.jobId}`);\n    this.broadcastJobEvent('job_cancelled', payload);\n  }\n\n  /**\n   * Handle batch submission events\n   */\n  @OnEvent('batch.submitted')\n  handleBatchSubmitted(payload: BatchEventPayload): void {\n    this.logger.debug(`Broadcasting batch submission: ${payload.batchId}`);\n    this.broadcastBatchEvent('batch_submitted', payload);\n  }\n\n  /**\n   * Handle batch completion events\n   */\n  @OnEvent('batch.completed')\n  handleBatchCompleted(payload: BatchEventPayload): void {\n    this.logger.debug(`Broadcasting batch completion: ${payload.batchId}`);\n    this.broadcastBatchEvent('batch_completed', payload);\n  }\n\n  /**\n   * Handle batch failure events\n   */\n  @OnEvent('batch.failed')\n  handleBatchFailed(payload: BatchEventPayload): void {\n    this.logger.debug(`Broadcasting batch failure: ${payload.batchId}`);\n    this.broadcastBatchEvent('batch_failed', payload);\n  }\n\n  // ===== PRIVATE HELPER METHODS =====\n\n  /**\n   * Broadcast job event to relevant subscribers\n   */\n  private broadcastJobEvent(eventName: string, payload: JobEventPayload): void {\n    // Broadcast to job subscribers\n    const jobSubscribers = this.jobSubscriptions.get(payload.jobId);\n    if (jobSubscribers) {\n      jobSubscribers.forEach((socketId) => {\n        const client = this.connectedClients.get(socketId);\n        if (client) {\n          client.emit(eventName, payload);\n        }\n      });\n    }\n\n    // Broadcast to batch subscribers if job is part of a batch\n    if (payload.batchId) {\n      const batchSubscribers = this.batchSubscriptions.get(payload.batchId);\n      if (batchSubscribers) {\n        batchSubscribers.forEach((socketId) => {\n          const client = this.connectedClients.get(socketId);\n          if (client) {\n            client.emit(eventName, payload);\n          }\n        });\n      }\n    }\n  }\n\n  /**\n   * Broadcast batch event to relevant subscribers\n   */\n  private broadcastBatchEvent(eventName: string, payload: BatchEventPayload): void {\n    const batchSubscribers = this.batchSubscriptions.get(payload.batchId);\n    if (batchSubscribers) {\n      batchSubscribers.forEach((socketId) => {\n        const client = this.connectedClients.get(socketId);\n        if (client) {\n          client.emit(eventName, payload);\n        }\n      });\n    }\n  }\n\n  /**\n   * Get current gateway statistics\n   */\n  getStatistics(): {\n    totalConnections: number;\n    jobSubscriptions: number;\n    batchSubscriptions: number;\n    userSubscriptions: number;\n  } {\n    return {\n      totalConnections: this.connectedClients.size,\n      jobSubscriptions: this.jobSubscriptions.size,\n      batchSubscriptions: this.batchSubscriptions.size,\n      userSubscriptions: this.userSubscriptions.size,\n    };\n  }\n}
+  }\n\n  /**
+ * Handle client disconnections\n   */
+  handleDisconnect(client: AuthenticatedSocket): void {
+    this.logger.log(\n      `Client disconnected: ${client.id} (user: ${client.username})`,\n      {
+        socketId: client.id,
+        userId: client.userId,
+        username: client.username,\n      },\n    );\n\n    // Clean up subscriptions
+    if (client.subscribedJobs) {
+      client.subscribedJobs.forEach((jobId) => {
+        const subscribers = this.jobSubscriptions.get(jobId);
+        if (subscribers) {
+          subscribers.delete(client.id);
+          if (subscribers.size === 0) {
+            this.jobSubscriptions.delete(jobId);\n          }\n        }\n      });\n    }
+  if (client.subscribedBatches) {
+      client.subscribedBatches.forEach((batchId) => {
+        const subscribers = this.batchSubscriptions.get(batchId);
+        if (subscribers) {
+          subscribers.delete(client.id);
+          if (subscribers.size === 0) {
+            this.batchSubscriptions.delete(batchId);\n          }\n        }\n      });\n    }
+  if (client.userId) {
+      const userSubs = this.userSubscriptions.get(client.userId);
+      if (userSubs) {
+        userSubs.delete(client.id);
+        if (userSubs.size === 0) {
+          this.userSubscriptions.delete(client.userId);\n        }\n      }\n    }\n\n    // Remove client connection
+    this.connectedClients.delete(client.id);\n  }\n\n  /**
+ * Subscribe to specific job progress updates\n   */\n  @SubscribeMessage('subscribe_jobs')handleJobSubscription(\n    @ConnectedSocket() client: AuthenticatedSocket,\n    @MessageBody() request: JobSubscriptionRequest,\n  ): void {if (!client.userId) {
+      client.emit('subscription_error', {message: 'Authentication required for job subscriptions',\n      });
+      return;\n    }
+  try {
+      let subscribedCount = 0;\n\n      // Subscribe to specific jobs
+      if (request.jobIds) {
+        request.jobIds.forEach((jobId) => {
+          if (!this.jobSubscriptions.has(jobId)) {
+            this.jobSubscriptions.set(jobId, new Set());\n          }
+          this.jobSubscriptions.get(jobId)!.add(client.id);
+          client.subscribedJobs!.add(jobId);
+          subscribedCount++;\n        });\n      }\n\n      // Subscribe to specific batches
+      if (request.batchIds) {
+        request.batchIds.forEach((batchId) => {
+          if (!this.batchSubscriptions.has(batchId)) {
+            this.batchSubscriptions.set(batchId, new Set());\n          }
+          this.batchSubscriptions.get(batchId)!.add(client.id);
+          client.subscribedBatches!.add(batchId);
+          subscribedCount++;\n        });\n      }
+  this.logger.log(\n        `Client ${client.id} subscribed to ${subscribedCount} job/batch updates`,\n        {
+          socketId: client.id,
+          userId: client.userId,
+          username: client.username,
+          jobIds: request.jobIds,
+          batchIds: request.batchIds,
+          allUserJobs: request.allUserJobs,\n        },\n      );
+  client.emit('subscription_confirmed', {
+        message: `Subscribed to ${subscribedCount} job/batch updates`,jobIds: request.jobIds || [],batchIds: request.batchIds || [],
+        allUserJobs: request.allUserJobs || false,
+        timestamp: new Date().toISOString(),\n      });\n    } catch (error) {
+      this.logger.error(\n        `Subscription error for client ${client.id}: ${error}`,
+        error instanceof Error ? error.stack : undefined,\n      );
+      client.emit('subscription_error', {message: 'Failed to process job subscription',error: error instanceof Error ? error.message : 'Unknown error',\n      });\n    }\n  }\n\n  /*** Unsubscribe from job progress updates\n   */\n  @SubscribeMessage('unsubscribe_jobs')
+  handleJobUnsubscription(\n    @ConnectedSocket() client: AuthenticatedSocket,\n    @MessageBody() request: { jobIds?: string[]; batchIds?: string[] },\n  ): void {
+    if (!client.userId) {
+      return;\n    }
+  let unsubscribedCount = 0;\n\n    // Unsubscribe from specific jobs
+    if (request.jobIds) {
+      request.jobIds.forEach((jobId) => {
+        const subscribers = this.jobSubscriptions.get(jobId);
+        if (subscribers) {
+          subscribers.delete(client.id);
+          if (subscribers.size === 0) {
+            this.jobSubscriptions.delete(jobId);\n          }\n        }
+        client.subscribedJobs!.delete(jobId);
+        unsubscribedCount++;\n      });\n    }\n\n    // Unsubscribe from specific batches
+    if (request.batchIds) {
+      request.batchIds.forEach((batchId) => {
+        const subscribers = this.batchSubscriptions.get(batchId);
+        if (subscribers) {
+          subscribers.delete(client.id);
+          if (subscribers.size === 0) {
+            this.batchSubscriptions.delete(batchId);\n          }\n        }
+        client.subscribedBatches!.delete(batchId);
+        unsubscribedCount++;\n      });\n    }
+  this.logger.log(\n      `Client ${client.id} unsubscribed from ${unsubscribedCount} job/batch updates`,\n      {
+        socketId: client.id,
+        userId: client.userId,
+        jobIds: request.jobIds,
+        batchIds: request.batchIds,\n      },\n    );
+  client.emit('unsubscription_confirmed', {
+      message: `Unsubscribed from ${unsubscribedCount} job/batch updates`,
+      timestamp: new Date().toISOString(),\n    });\n  }\n\n  /**
+ * Get current connection and subscription status\n   */\n  @SubscribeMessage('get_status')handleGetStatus(@ConnectedSocket() client: AuthenticatedSocket): void {const status = {
+      connected: true,
+      userId: client.userId,
+      username: client.username,
+      role: client.role,
+      subscribedJobs: Array.from(client.subscribedJobs || []),
+      subscribedBatches: Array.from(client.subscribedBatches || []),
+      totalConnections: this.connectedClients.size,
+      timestamp: new Date().toISOString(),\n    };
+  client.emit('status_response', status);\n  }\n\n  // ===== EVENT LISTENERS =====\n\n  /*** Handle job progress events from the enhanced async service\n   */\n  @OnEvent('job.progress')
+  handleJobProgress(payload: JobEventPayload): void {
+    this.logger.debug(`Broadcasting job progress: ${payload.jobId} - ${payload.progress}%`);\n\n    // Broadcast to job subscribers
+    const jobSubscribers = this.jobSubscriptions.get(payload.jobId);
+    if (jobSubscribers) {
+      jobSubscribers.forEach((socketId) => {
+        const client = this.connectedClients.get(socketId);
+        if (client) {
+          client.emit('job_progress', payload);\n        }\n      });\n    }\n\n    // Broadcast to batch subscribers if job is part of a batchif (payload.batchId) {const batchSubscribers = this.batchSubscriptions.get(payload.batchId);
+      if (batchSubscribers) {
+        batchSubscribers.forEach((socketId) => {
+          const client = this.connectedClients.get(socketId);
+          if (client) {
+            client.emit('job_progress', payload);\n          }\n        });\n      }\n    }\n  }\n\n  /*** Handle job completion events\n   */\n  @OnEvent('job.completed')
+  handleJobCompleted(payload: JobEventPayload): void {
+    this.logger.debug(`Broadcasting job completion: ${payload.jobId}`);
+    this.broadcastJobEvent('job_completed', payload);\n  }\n\n  /*** Handle job failure events\n   */\n  @OnEvent('job.failed')
+  handleJobFailed(payload: JobEventPayload): void {
+    this.logger.debug(`Broadcasting job failure: ${payload.jobId}`);
+    this.broadcastJobEvent('job_failed', payload);\n  }\n\n  /*** Handle job cancellation events\n   */\n  @OnEvent('job.cancelled')
+  handleJobCancelled(payload: JobEventPayload): void {
+    this.logger.debug(`Broadcasting job cancellation: ${payload.jobId}`);
+    this.broadcastJobEvent('job_cancelled', payload);\n  }\n\n  /*** Handle batch submission events\n   */\n  @OnEvent('batch.submitted')
+  handleBatchSubmitted(payload: BatchEventPayload): void {
+    this.logger.debug(`Broadcasting batch submission: ${payload.batchId}`);
+    this.broadcastBatchEvent('batch_submitted', payload);\n  }\n\n  /*** Handle batch completion events\n   */\n  @OnEvent('batch.completed')
+  handleBatchCompleted(payload: BatchEventPayload): void {
+    this.logger.debug(`Broadcasting batch completion: ${payload.batchId}`);
+    this.broadcastBatchEvent('batch_completed', payload);\n  }\n\n  /*** Handle batch failure events\n   */\n  @OnEvent('batch.failed')
+  handleBatchFailed(payload: BatchEventPayload): void {
+    this.logger.debug(`Broadcasting batch failure: ${payload.batchId}`);
+    this.broadcastBatchEvent('batch_failed', payload);\n  }\n\n  // ===== PRIVATE HELPER METHODS =====\n\n  /**
+ * Broadcast job event to relevant subscribers\n   */
+  private broadcastJobEvent(eventName: string, payload: JobEventPayload): void {\n    // Broadcast to job subscribers
+    const jobSubscribers = this.jobSubscriptions.get(payload.jobId);
+    if (jobSubscribers) {
+      jobSubscribers.forEach((socketId) => {
+        const client = this.connectedClients.get(socketId);
+        if (client) {
+          client.emit(eventName, payload);\n        }\n      });\n    }\n\n    // Broadcast to batch subscribers if job is part of a batch
+    if (payload.batchId) {
+      const batchSubscribers = this.batchSubscriptions.get(payload.batchId);
+      if (batchSubscribers) {
+        batchSubscribers.forEach((socketId) => {
+          const client = this.connectedClients.get(socketId);
+          if (client) {
+            client.emit(eventName, payload);\n          }\n        });\n      }\n    }\n  }\n\n  /**
+ * Broadcast batch event to relevant subscribers\n   */
+  private broadcastBatchEvent(eventName: string, payload: BatchEventPayload): void {
+    const batchSubscribers = this.batchSubscriptions.get(payload.batchId);
+    if (batchSubscribers) {
+      batchSubscribers.forEach((socketId) => {
+        const client = this.connectedClients.get(socketId);
+        if (client) {
+          client.emit(eventName, payload);\n        }\n      });\n    }\n  }\n\n  /**
+ * Get current gateway statistics\n   */
+  getStatistics(): {
+    totalConnections: number;
+    jobSubscriptions: number;
+    batchSubscriptions: number;
+    userSubscriptions: number;\n  } {
+    return {
+      totalConnections: this.connectedClients.size,
+      jobSubscriptions: this.jobSubscriptions.size,
+      batchSubscriptions: this.batchSubscriptions.size,
+      userSubscriptions: this.userSubscriptions.size,\n    };\n  }\n}

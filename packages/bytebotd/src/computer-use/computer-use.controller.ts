@@ -11,23 +11,14 @@ import {
   Get,
   Param,
   Delete,
-} from '@nestjs/common';
-import {
-  ApiOperation,
+} from '@nestjs/common';import {ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiParam,
-} from '@nestjs/swagger';
-import { EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
-import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
-import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import {
-  ForVersion,
+} from '@nestjs/swagger';import { EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';
-import {
-  ParlantCritical,
+} from '../common/versioning/api-version.decorator';import {ParlantCritical,
   ParlantSecure,
   ParlantValidated,
   ParlantAdmin,
@@ -36,37 +27,20 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import {
-  OperatorOrAdmin,
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { ComputerUseService } from './computer-use.service';
-import { AsyncJobService } from './async-job.service';
-import { EnhancedAsyncJobService } from './enhanced-async-job.service';
-import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
-import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';
-import { ComputerActionDto } from './dto/computer-action.dto';
-import {
-  JobSubmissionResponseDto,
+} from '../auth/decorators/roles.decorator';import { ComputerUseService } from './computer-use.service';import { AsyncJobService } from './async-job.service';import { EnhancedAsyncJobService } from './enhanced-async-job.service';import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';import { ComputerActionDto } from './dto/computer-action.dto';import {JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
   AsyncActionSubmissionDto,
-} from './dto/async-job.dto';
-import {
-  BatchJobSubmissionDto,
+} from './dto/async-job.dto';import {BatchJobSubmissionDto,
   BatchJobSubmissionResponseDto,
   JobSearchCriteriaDto,
   JobSearchResultsDto,
   JobAnalyticsDto,
   JobProgressUpdateDto,
-} from './dto/batch-job.dto';
-
-// Define interfaces for proper error handling
-interface ErrorWithMessage {
+} from './dto/batch-job.dto';// Define interfaces for proper error handlinginterface ErrorWithMessage {
   message: string;
 }
 
@@ -127,30 +101,19 @@ interface ErrorWithStack extends ErrorWithMessage {
 // Type guard to check if an unknown error has a message property
 function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as Record<string, unknown>).message === 'string'
-  );
-}
+    typeof error === 'object' &&error !== null &&'message' in error &&typeof (error as Record<string, unknown>).message === 'string');}
 
 // Type guard to check if an error has a stack property
 function isErrorWithStack(error: unknown): error is ErrorWithStack {
   return (
     isErrorWithMessage(error) &&
-    'stack' in error &&
-    (typeof (error as Record<string, unknown>).stack === 'string' ||
-      (error as Record<string, unknown>).stack === undefined)
-  );
+    'stack' in error &&(typeof (error as Record<string, unknown>).stack === 'string' ||(error as Record<string, unknown>).stack === undefined));
 }
 
 // Extract error message safely from unknown error
 function getErrorMessage(error: unknown): string {
   if (isErrorWithMessage(error)) return error.message;
-  return typeof error === 'string' ? error : JSON.stringify(error);
-}
-
-// Extract error stack safely from unknown error
+  return typeof error === 'string' ? error : JSON.stringify(error);}// Extract error stack safely from unknown error
 function getErrorStack(error: unknown): string | undefined {
   if (isErrorWithStack(error)) return error.stack;
   return undefined;
@@ -219,14 +182,9 @@ type ComputerActionResponse =
  *
  * Dependencies: ComputerUseService for action execution
  */
-@ApiTags('Computer Use API')
-@Controller('computer-use')
-@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
+@ApiTags('Computer Use API')@Controller('computer-use')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
 @UseInterceptors(LoggingInterceptor, ParlantValidationInterceptor)
-@ApiBearerAuth('bearer')
-export class ComputerUseController {
-  private readonly logger = new Logger(ComputerUseController.name);
+@ApiBearerAuth('bearer')export class ComputerUseController {private readonly logger = new Logger(ComputerUseController.name);
 
   constructor(
     private readonly computerUseService: ComputerUseService,
@@ -247,55 +205,26 @@ export class ComputerUseController {
    * @param user Authenticated user context
    * @returns Promise<BatchJobSubmissionResponseDto> Batch submission details with job IDs
    */
-  @Post('jobs/batch')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('jobs/batch')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Submit batch computer actions',
-    description:
-      'Submit multiple computer actions as a batch with dependency management and execution control. Supports sequential, parallel, and mixed execution modes.',
-    operationId: 'submitBatchComputerActions',
-  })
-  @ApiResponse({
+    summary: 'Submit batch computer actions',description:'Submit multiple computer actions as a batch with dependency management and execution control. Supports sequential, parallel, and mixed execution modes.',operationId: 'submitBatchComputerActions',})@ApiResponse({
     status: 202,
-    description: 'Batch submitted successfully for async execution',
-    type: BatchJobSubmissionResponseDto,
-  })
+    description: 'Batch submitted successfully for async execution',type: BatchJobSubmissionResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid batch parameters or dependency configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid batch parameters or dependency configuration',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
     status: 429,
-    description: 'Rate limit exceeded',
-  })
-  @ParlantBatch(
-    'Submit batch computer automation actions with dependency management and execution control',
-    {
-      securityLevel: SecurityLevel.CRITICAL,
+    description: 'Rate limit exceeded',})@ParlantBatch(
+    'Submit batch computer automation actions with dependency management and execution control',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'BATCH_COMPUTER_AUTOMATION',
-      complianceFlags: ['BATCH_PROCESSING', 'SYSTEM_CONTROL', 'HIGH_RISK'],
-      requiredRoles: ['OPERATOR', 'ADMIN'],
-      customRules: [
+      businessCategory: 'BATCH_COMPUTER_AUTOMATION',complianceFlags: ['BATCH_PROCESSING', 'SYSTEM_CONTROL', 'HIGH_RISK'],requiredRoles: ['OPERATOR', 'ADMIN'],customRules: [{
+          name: 'batch_size_validation',condition: 'batch_size <= 50',action: 'APPROVE',priority: 5},
         {
-          name: 'batch_size_validation',
-          condition: 'batch_size <= 50',
-          action: 'APPROVE',
-          priority: 5
-        },
-        {
-          name: 'critical_action_detection',
-          condition: 'contains_critical_actions',
-          action: 'REQUIRE_CONFIRMATION',
+          name: 'critical_action_detection',condition: 'contains_critical_actions',action: 'REQUIRE_CONFIRMATION',
           priority: 10
         }
       ]
@@ -305,10 +234,7 @@ export class ComputerUseController {
     @Body(new BatchJobValidationPipe()) batchRequest: BatchJobSubmissionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<BatchJobSubmissionResponseDto> {
-    const operationId = `batch_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `batch_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Batch computer action submission: ${batchRequest.jobs.length} jobs`,
         {
@@ -335,9 +261,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Batch submitted successfully: ${batchResponse.batchId} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Batch submitted successfully: ${batchResponse.batchId} (${processingTime}ms)`,{operationId,
           batchId: batchResponse.batchId,
           totalJobs: batchResponse.totalJobs,
           processingTime,
@@ -382,38 +306,20 @@ export class ComputerUseController {
    * @param user Authenticated user context
    * @returns Promise<JobSearchResultsDto> Paginated search results
    */
-  @Post('jobs/search')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('jobs/search')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Search jobs with advanced filtering',
-    description:
-      'Search and filter jobs with comprehensive criteria including status, priority, date ranges, execution times, and metadata search.',
-    operationId: 'searchJobs',
-  })
-  @ApiResponse({
+    summary: 'Search jobs with advanced filtering',description:'Search and filter jobs with comprehensive criteria including status, priority, date ranges, execution times, and metadata search.',operationId: 'searchJobs',})@ApiResponse({
     status: 200,
-    description: 'Job search results retrieved successfully',
-    type: JobSearchResultsDto,
-  })
+    description: 'Job search results retrieved successfully',type: JobSearchResultsDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid search criteria',
-  })
-  @ApiResponse({
+    description: 'Invalid search criteria',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ParlantValidated({
-    intent: 'Search and filter computer automation job history with advanced filtering criteria',
-    securityLevel: SecurityLevel.MEDIUM,
-    validationMode: ValidationMode.CONVERSATIONAL,
-    businessCategory: 'JOB_SEARCH_MONITORING',
-    complianceFlags: ['JOB_MONITORING', 'DATA_ACCESS'],
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
+    intent: 'Search and filter computer automation job history with advanced filtering criteria',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_SEARCH_MONITORING',complianceFlags: ['JOB_MONITORING', 'DATA_ACCESS'],
     cacheable: true,
     timeout: 8000
   })
@@ -421,14 +327,9 @@ export class ComputerUseController {
     @Body() criteria: JobSearchCriteriaDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobSearchResultsDto> {
-    const operationId = `job_search_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `job_search_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] Job search request`,
-        {
-          operationId,
+        `[${operationId}] Job search request`,{operationId,
           userId: user.id,
           username: user.username,
           searchCriteria: {
@@ -445,9 +346,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job search completed: ${searchResults.totalCount} total, ${searchResults.jobs.length} returned (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job search completed: ${searchResults.totalCount} total, ${searchResults.jobs.length} returned (${processingTime}ms)`,{operationId,
           totalCount: searchResults.totalCount,
           returnedCount: searchResults.jobs.length,
           processingTime,
@@ -490,57 +389,28 @@ export class ComputerUseController {
    * @param user Authenticated user context
    * @returns Promise<JobProgressUpdateDto> Real-time progress information
    */
-  @Get('jobs/:jobId/progress')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('jobs/:jobId/progress')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get real-time job progress',
-    description:
-      'Retrieve real-time progress information including current step, completion estimates, and detailed progress metadata.',
-    operationId: 'getJobProgress',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiResponse({
+    summary: 'Get real-time job progress',description:'Retrieve real-time progress information including current step, completion estimates, and detailed progress metadata.',operationId: 'getJobProgress',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job progress retrieved successfully',
-    type: JobProgressUpdateDto,
-  })
+    description: 'Job progress retrieved successfully',type: JobProgressUpdateDto,})
   @ApiResponse({
     status: 404,
-    description: 'Job not found',
-  })
-  @ApiResponse({
+    description: 'Job not found',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ParlantValidated({
-    intent: 'Retrieve real-time progress information for computer automation job execution',
-    securityLevel: SecurityLevel.MEDIUM,
-    validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'JOB_PROGRESS_MONITORING',
-    complianceFlags: ['REAL_TIME_MONITORING', 'JOB_TRACKING'],
-    cacheable: true,
-    timeout: 5000
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
+    intent: 'Retrieve real-time progress information for computer automation job execution',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_PROGRESS_MONITORING',complianceFlags: ['REAL_TIME_MONITORING', 'JOB_TRACKING'],cacheable: true,timeout: 5000
   })
   async getJobProgress(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobProgressUpdateDto> {
-    const operationId = `progress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
-      this.logger.log(`[${operationId}] Job progress request for: ${jobId}`, {
-        operationId,
-        jobId,
+    const operationId = `progress_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+      this.logger.log(`[${operationId}] Job progress request for: ${jobId}`, {operationId,jobId,
         userId: user.id,
         username: user.username,
       });
@@ -549,9 +419,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job progress retrieved: ${progressUpdate.progress}% (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job progress retrieved: ${progressUpdate.progress}% (${processingTime}ms)`,{operationId,
           jobId,
           progress: progressUpdate.progress,
           status: progressUpdate.status,
@@ -573,17 +441,13 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
       if (errorMessage.includes('not found')) {
         throw new HttpException(
-          `Job not found: ${jobId}`,
-          HttpStatus.NOT_FOUND,
-        );
+          `Job not found: ${jobId}`,HttpStatus.NOT_FOUND,);
       }
 
       throw new HttpException(
@@ -603,48 +467,27 @@ export class ComputerUseController {
    * @param user Authenticated user context
    * @returns Promise<JobAnalyticsDto> Comprehensive analytics summary
    */
-  @Get('jobs/analytics')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('jobs/analytics')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get job analytics and performance metrics',
-    description:
-      'Retrieve comprehensive job analytics including success rates, execution times, and performance trends.',
-    operationId: 'getJobAnalytics',
-  })
-  @ApiResponse({
+    summary: 'Get job analytics and performance metrics',description:'Retrieve comprehensive job analytics including success rates, execution times, and performance trends.',operationId: 'getJobAnalytics',})@ApiResponse({
     status: 200,
-    description: 'Job analytics retrieved successfully',
-    type: JobAnalyticsDto,
-  })
+    description: 'Job analytics retrieved successfully',type: JobAnalyticsDto,})
   @ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ParlantValidated({
-    intent: 'Retrieve comprehensive analytics and performance metrics for computer automation system',
-    securityLevel: SecurityLevel.MEDIUM,
-    validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'ANALYTICS_MONITORING',
-    complianceFlags: ['PERFORMANCE_ANALYTICS', 'SYSTEM_METRICS'],
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
+    intent: 'Retrieve comprehensive analytics and performance metrics for computer automation system',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'ANALYTICS_MONITORING',complianceFlags: ['PERFORMANCE_ANALYTICS', 'SYSTEM_METRICS'],
     cacheable: true,
     timeout: 10000
   })
   async getJobAnalytics(
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobAnalyticsDto> {
-    const operationId = `analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] Job analytics request`,
-        {
-          operationId,
+        `[${operationId}] Job analytics request`,{operationId,
           userId: user.id,
           username: user.username,
         },
@@ -654,9 +497,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job analytics retrieved: ${analytics.totalJobs} total jobs (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job analytics retrieved: ${analytics.totalJobs} total jobs (${processingTime}ms)`,{operationId,
           totalJobs: analytics.totalJobs,
           successRate: analytics.successRate,
           processingTime,
@@ -699,64 +540,28 @@ export class ComputerUseController {
    * @param user Authenticated user context
    * @returns Promise<{ cancelled: string[]; failed: string[] }> Cancellation results
    */
-  @Delete('jobs/batch/:batchId')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Delete('jobs/batch/:batchId')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Cancel jobs by batch ID',
-    description:
-      'Cancel all jobs within a specific batch. Useful for stopping entire workflows or cleaning up failed batches.',
-    operationId: 'cancelJobsBatch',
-  })
-  @ApiParam({
-    name: 'batchId',
-    description: 'Batch identifier to cancel all jobs within',
-    example: 'batch_1702983456789_xyz789',
-  })
-  @ApiResponse({
+    summary: 'Cancel jobs by batch ID',description:'Cancel all jobs within a specific batch. Useful for stopping entire workflows or cleaning up failed batches.',operationId: 'cancelJobsBatch',})@ApiParam({
+    name: 'batchId',description: 'Batch identifier to cancel all jobs within',example: 'batch_1702983456789_xyz789',})@ApiResponse({
     status: 200,
-    description: 'Batch cancellation processed',
-    schema: {
-      type: 'object',
-      properties: {
-        cancelled: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Array of successfully cancelled job IDs',
-        },
-        failed: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Array of job IDs that could not be cancelled',
-        },
-        batchId: { type: 'string' },
-      },
-    },
+    description: 'Batch cancellation processed',schema: {type: 'object',properties: {cancelled: {
+          type: 'array',items: { type: 'string' },description: 'Array of successfully cancelled job IDs',},failed: {
+          type: 'array',items: { type: 'string' },description: 'Array of job IDs that could not be cancelled',},batchId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 404,
-    description: 'Batch not found',
-  })
-  @ApiResponse({
+    description: 'Batch not found',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  async cancelJobsBatch(
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})async cancelJobsBatch(
     @Param('batchId') batchId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<{ cancelled: string[]; failed: string[]; batchId: string }> {
-    const operationId = `cancel_batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cancel_batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] Batch cancellation request for: ${batchId}`,
-        {
-          operationId,
+        `[${operationId}] Batch cancellation request for: ${batchId}`,{operationId,
           batchId,
           userId: user.id,
           username: user.username,
@@ -769,9 +574,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Batch cancellation completed: ${results.cancelled.length} cancelled, ${results.failed.length} failed (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Batch cancellation completed: ${results.cancelled.length} cancelled, ${results.failed.length} failed (${processingTime}ms)`,{operationId,
           batchId,
           cancelledCount: results.cancelled.length,
           failedCount: results.failed.length,
@@ -821,61 +624,30 @@ export class ComputerUseController {
    * @param user - Authenticated user context
    * @returns Promise<JobSubmissionResponseDto> - Job submission details with tracking ID
    */
-  @Post('action/async')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('action/async')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Submit async computer action',
-    description:
-      'Submit a computer action for asynchronous execution. Returns immediately with job ID for tracking. Supports priority queuing and result caching.',
-    operationId: 'submitAsyncComputerAction',
-  })
-  @ApiResponse({
+    summary: 'Submit async computer action',description:'Submit a computer action for asynchronous execution. Returns immediately with job ID for tracking. Supports priority queuing and result caching.',operationId: 'submitAsyncComputerAction',})@ApiResponse({
     status: 202,
-    description: 'Action submitted successfully for async execution',
-    type: JobSubmissionResponseDto,
-  })
+    description: 'Action submitted successfully for async execution',type: JobSubmissionResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid action parameters or async options',
-  })
-  @ApiResponse({
+    description: 'Invalid action parameters or async options',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
     status: 429,
-    description: 'Rate limit exceeded',
-  })
-  @ApiResponse({
+    description: 'Rate limit exceeded',})@ApiResponse({
     status: 503,
-    description: 'Job queue full or service temporarily unavailable',
-  })
-  @ParlantCritical(
-    'Submit computer automation action for asynchronous execution with comprehensive security validation',
-    {
-      securityLevel: SecurityLevel.CRITICAL,
+    description: 'Job queue full or service temporarily unavailable',})@ParlantCritical(
+    'Submit computer automation action for asynchronous execution with comprehensive security validation',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'ASYNC_COMPUTER_AUTOMATION',
-      complianceFlags: ['ASYNC_EXECUTION', 'SYSTEM_CONTROL', 'SECURITY_CRITICAL'],
-      requiredRoles: ['OPERATOR', 'ADMIN'],
-      timeout: 30000,
-      cacheable: false,
+      businessCategory: 'ASYNC_COMPUTER_AUTOMATION',complianceFlags: ['ASYNC_EXECUTION', 'SYSTEM_CONTROL', 'SECURITY_CRITICAL'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 30000,cacheable: false,
       customRules: [
         {
-          name: 'destructive_action_validation',
-          condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]',
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 10
-        },
+          name: 'destructive_action_validation',condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]",action: 'REQUIRE_CONFIRMATION',priority: 10},
         {
-          name: 'network_action_validation',
-          condition: 'action_type in ["network_request", "download_file"]',
-          action: 'REQUIRE_CONFIRMATION',
+          name: 'network_action_validation',condition: 'action_type in ["network_request", "download_file"]",action: 'REQUIRE_CONFIRMATION',
           priority: 8
         }
       ]
@@ -895,14 +667,11 @@ export class ComputerUseController {
 
       // Create safe copy for logging
       const paramsCopy = { ...actionParams };
-      if (paramsCopy.action === 'write_file') {
-        (paramsCopy as Record<string, unknown>).data = '[base64 data redacted]';
+      if (paramsCopy.action === 'write_file') {(paramsCopy as Record<string, unknown>).data = '[base64 data redacted]';
       }
 
       this.logger.log(
-        `[${operationId}] Async computer action submission: ${JSON.stringify(paramsCopy)}`,
-        {
-          operationId,
+        `[${operationId}] Async computer action submission: ${JSON.stringify(paramsCopy)}`,{operationId,
           action: actionParams.action,
           userId: user.id,
           username: user.username,
@@ -931,9 +700,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Async job submitted successfully: ${jobResponse.jobId} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Async job submitted successfully: ${jobResponse.jobId} (${processingTime}ms)`,{operationId,
           jobId: jobResponse.jobId,
           action: actionParams.action,
           processingTime,
@@ -954,18 +721,13 @@ export class ComputerUseController {
           operationId,
           action: params.action,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
       // Map specific errors to appropriate HTTP status codes
       if (
-        errorMessage.includes('queue full') ||
-        errorMessage.includes('capacity')
-      ) {
-        throw new HttpException(
+        errorMessage.includes('queue full') ||errorMessage.includes('capacity')) {throw new HttpException(
           'Job queue is currently full. Please try again later.',
           HttpStatus.SERVICE_UNAVAILABLE,
         );
@@ -988,57 +750,28 @@ export class ComputerUseController {
    * @param user - Authenticated user context
    * @returns Promise<JobStatusResponseDto> - Current job status and progress
    */
-  @Get('jobs/:jobId/status')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('jobs/:jobId/status')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get async job status',
-    description:
-      'Retrieve current status and progress information for an async computer action job.',
-    operationId: 'getAsyncJobStatus',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier from async submission',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiResponse({
+    summary: 'Get async job status',description:'Retrieve current status and progress information for an async computer action job.',operationId: 'getAsyncJobStatus',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job status retrieved successfully',
-    type: JobStatusResponseDto,
-  })
+    description: 'Job status retrieved successfully',type: JobStatusResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Job not found',
-  })
-  @ApiResponse({
+    description: 'Job not found',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ParlantValidated({
-    intent: 'Retrieve current status and progress information for asynchronous computer automation job',
-    securityLevel: SecurityLevel.LOW,
-    validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'JOB_STATUS_MONITORING',
-    complianceFlags: ['STATUS_MONITORING', 'JOB_TRACKING'],
-    cacheable: true,
-    timeout: 3000
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
+    intent: 'Retrieve current status and progress information for asynchronous computer automation job',securityLevel: SecurityLevel.LOW,validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_STATUS_MONITORING',complianceFlags: ['STATUS_MONITORING', 'JOB_TRACKING'],cacheable: true,timeout: 3000
   })
   async getJobStatus(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobStatusResponseDto> {
-    const operationId = `status${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
-      this.logger.log(`[${operationId}] Job status request for: ${jobId}`, {
-        operationId,
-        jobId,
+    const operationId = `status${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+      this.logger.log(`[${operationId}] Job status request for: ${jobId}`, {operationId,jobId,
         userId: user.id,
         username: user.username,
       });
@@ -1047,9 +780,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job status retrieved successfully: ${jobStatus.status} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job status retrieved successfully: ${jobStatus.status} (${processingTime}ms)`,{operationId,
           jobId,
           status: jobStatus.status,
           progress: jobStatus.progress,
@@ -1071,17 +802,13 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
       if (errorMessage.includes('not found')) {
         throw new HttpException(
-          `Job not found: ${jobId}`,
-          HttpStatus.NOT_FOUND,
-        );
+          `Job not found: ${jobId}`,HttpStatus.NOT_FOUND,);
       }
 
       throw new HttpException(
@@ -1101,58 +828,29 @@ export class ComputerUseController {
    * @param user - Authenticated user context
    * @returns Promise<JobResultResponseDto> - Job execution result and metadata
    */
-  @Get('jobs/:jobId/result')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('jobs/:jobId/result')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get async job result',
-    description:
-      'Retrieve the execution result of a completed async computer action job.',
-    operationId: 'getAsyncJobResult',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier from async submission',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiResponse({
+    summary: 'Get async job result',description:'Retrieve the execution result of a completed async computer action job.',operationId: 'getAsyncJobResult',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job result retrieved successfully',
-    type: JobResultResponseDto,
-  })
+    description: 'Job result retrieved successfully',type: JobResultResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Job not found',
-  })
-  @ApiResponse({
+    description: 'Job not found',})@ApiResponse({
     status: 409,
-    description: 'Job has not completed yet',
-  })
-  @ApiResponse({
+    description: 'Job has not completed yet',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ParlantValidated({
-    intent: 'Retrieve execution results and output data from completed computer automation job',
-    securityLevel: SecurityLevel.MEDIUM,
-    validationMode: ValidationMode.CONVERSATIONAL,
-    businessCategory: 'JOB_RESULT_RETRIEVAL',
-    complianceFlags: ['RESULT_ACCESS', 'DATA_RETRIEVAL'],
-    cacheable: true,
-    timeout: 8000
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
+    intent: 'Retrieve execution results and output data from completed computer automation job',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_RESULT_RETRIEVAL',complianceFlags: ['RESULT_ACCESS', 'DATA_RETRIEVAL'],cacheable: true,timeout: 8000
   })
   async getJobResult(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobResultResponseDto> {
-    const operationId = `result${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `result${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(`[${operationId}] Job result request for: ${jobId}`, {
         operationId,
         jobId,
@@ -1166,9 +864,7 @@ export class ComputerUseController {
 
       // Create safe copy for logging (avoid logging large base64 data)
       const resultCopy = { ...jobResult };
-      if (resultCopy.result && typeof resultCopy.result === 'object') {
-        const result = resultCopy.result as Record<string, unknown>;
-        if (
+      if (resultCopy.result && typeof resultCopy.result === 'object') {const result = resultCopy.result as Record<string, unknown>;if (
           result.image &&
           typeof result.image === 'string' &&
           result.image.length > 100
@@ -1180,14 +876,10 @@ export class ComputerUseController {
           typeof result.data === 'string' &&
           result.data.length > 100
         ) {
-          result.data = `[base64 file data - ${result.data.length} chars]`;
-        }
-      }
+          result.data = `[base64 file data - ${result.data.length} chars]`;}}
 
       this.logger.log(
-        `[${operationId}] Job result retrieved successfully: ${jobResult.status} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job result retrieved successfully: ${jobResult.status} (${processingTime}ms)`,{operationId,
           jobId,
           status: jobResult.status,
           executionTimeMs: jobResult.executionTimeMs,
@@ -1210,9 +902,7 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
@@ -1225,9 +915,7 @@ export class ComputerUseController {
 
       if (errorMessage.includes('not completed')) {
         throw new HttpException(
-          `Job has not completed yet: ${jobId}`,
-          HttpStatus.CONFLICT,
-        );
+          `Job has not completed yet: ${jobId}`,HttpStatus.CONFLICT,);
       }
 
       throw new HttpException(
@@ -1247,52 +935,24 @@ export class ComputerUseController {
    * @param user - Authenticated user context
    * @returns Promise<{ cancelled: boolean; message: string }> - Cancellation result
    */
-  @Delete('jobs/:jobId')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Delete('jobs/:jobId')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Cancel async job',
-    description:
-      'Cancel a pending or in-progress async computer action job. Completed jobs cannot be cancelled.',
-    operationId: 'cancelAsyncJob',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier from async submission',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiResponse({
+    summary: 'Cancel async job',description:'Cancel a pending or in-progress async computer action job. Completed jobs cannot be cancelled.',operationId: 'cancelAsyncJob',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job cancellation processed',
-    schema: {
-      type: 'object',
-      properties: {
-        cancelled: { type: 'boolean' },
-        message: { type: 'string' },
-        jobId: { type: 'string' },
-      },
-    },
+    description: 'Job cancellation processed',schema: {type: 'object',properties: {cancelled: { type: 'boolean' },message: { type: 'string' },jobId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 404,
-    description: 'Job not found',
-  })
-  @ApiResponse({
+    description: 'Job not found',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  async cancelJob(
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})async cancelJob(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<{ cancelled: boolean; message: string; jobId: string }> {
-    const operationId = `cancel${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `cancel${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Job cancellation request for: ${jobId}`,
         {
@@ -1307,13 +967,10 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       const message = cancelled
-        ? 'Job cancelled successfully'
-        : 'Job could not be cancelled (may be completed or not found)';
+        ? 'Job cancelled successfully': 'Job could not be cancelled (may be completed or not found)';
 
       this.logger.log(
-        `[${operationId}] Job cancellation result: ${cancelled} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Job cancellation result: ${cancelled} (${processingTime}ms)`,{operationId,
           jobId,
           cancelled,
           processingTime,
@@ -1371,78 +1028,33 @@ export class ComputerUseController {
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Execute computer action',
-    description:
-      'Execute various computer control actions including mouse, keyboard, and application operations. Requires OPERATOR or ADMIN role.',
-    operationId: 'executeComputerAction',
-  })
-  @ApiResponse({
+    summary: 'Execute computer action',description:'Execute various computer control actions including mouse, keyboard, and application operations. Requires OPERATOR or ADMIN role.',operationId: 'executeComputerAction',})@ApiResponse({
     status: 200,
-    description: 'Action executed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        result: { type: 'object' },
-        operationId: { type: 'string' },
-      },
-    },
+    description: 'Action executed successfully',schema: {type: 'object',properties: {success: { type: 'boolean' },result: { type: 'object' },operationId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid action parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid action parameters',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
     status: 429,
-    description: 'Rate limit exceeded',
-  })
-  @ParlantCritical(
-    'Execute immediate computer automation action with real-time system control and comprehensive validation',
-    {
-      securityLevel: SecurityLevel.CRITICAL,
+    description: 'Rate limit exceeded',})@ParlantCritical(
+    'Execute immediate computer automation action with real-time system control and comprehensive validation',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'DIRECT_COMPUTER_AUTOMATION',
-      complianceFlags: ['IMMEDIATE_EXECUTION', 'SYSTEM_CONTROL', 'HIGH_RISK', 'REAL_TIME'],
-      requiredRoles: ['OPERATOR', 'ADMIN'],
-      timeout: 45000,
-      cacheable: false,
+      businessCategory: 'DIRECT_COMPUTER_AUTOMATION',complianceFlags: ['IMMEDIATE_EXECUTION', 'SYSTEM_CONTROL', 'HIGH_RISK', 'REAL_TIME'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 45000,cacheable: false,
       customRules: [
         {
-          name: 'screenshot_action_validation',
-          condition: 'action === "screenshot"',
-          action: 'APPROVE',
-          priority: 2
-        },
+          name: 'screenshot_action_validation',condition: 'action === "screenshot"",action: 'APPROVE',priority: 2},
         {
-          name: 'file_write_validation',
-          condition: 'action === "write_file"',
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 9
-        },
+          name: 'file_write_validation',condition: 'action === "write_file"",action: 'REQUIRE_CONFIRMATION',priority: 9},
         {
-          name: 'mouse_click_validation',
-          condition: 'action === "click"',
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 7
-        },
+          name: 'mouse_click_validation',condition: 'action === "click"",action: 'REQUIRE_CONFIRMATION',priority: 7},
         {
-          name: 'keyboard_input_validation',
-          condition: 'action === "type"',
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 8
-        },
+          name: 'keyboard_input_validation',condition: 'action === "type"",action: 'REQUIRE_CONFIRMATION',priority: 8},
         {
-          name: 'application_launch_validation',
-          condition: 'action === "launch_app"',
-          action: 'REQUIRE_CONFIRMATION',
+          name: 'application_launch_validation',condition: 'action === "launch_app"",action: 'REQUIRE_CONFIRMATION',
           priority: 9
         }
       ]
@@ -1460,14 +1072,11 @@ export class ComputerUseController {
     try {
       // Create a safe copy for logging (avoid logging sensitive base64 data)
       const paramsCopy = { ...params };
-      if (paramsCopy.action === 'write_file') {
-        paramsCopy.data = 'base64 data';
+      if (paramsCopy.action === 'write_file') {paramsCopy.data = 'base64 data';
       }
 
       this.logger.log(
-        `[${operationId}] Computer action request: ${JSON.stringify(paramsCopy)}`,
-        {
-          operationId,
+        `[${operationId}] Computer action request: ${JSON.stringify(paramsCopy)}`,{operationId,
           action: params.action,
           userId: user.id,
           username: user.username,
@@ -1486,9 +1095,7 @@ export class ComputerUseController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Computer action completed successfully (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] Computer action completed successfully (${processingTime}ms)`,{operationId,
           action: params.action,
           processingTime,
           userId: user.id,
@@ -1530,12 +1137,7 @@ export class ComputerUseController {
    * Execute computer action (legacy method for backward compatibility)
    * @deprecated Use action() method instead
    */
-  @Post('execute')
-  @ApiOperation({
-    summary: 'Execute computer action (legacy)',
-    description: 'Legacy endpoint for executing computer actions. Use /action instead.',
-  })
-  @ApiBearerAuth()
+  @Post('execute')@ApiOperation({summary: 'Execute computer action (legacy)',description: 'Legacy endpoint for executing computer actions. Use /action instead.',})@ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
   @UsePipes(new ComputerActionValidationPipe(), SecuritySanitizationPipes.HIGH_SECURITY)
@@ -1551,12 +1153,7 @@ export class ComputerUseController {
   /**
    * Capture screenshot (convenience method)
    */
-  @Post('screenshot')
-  @ApiOperation({
-    summary: 'Capture screenshot',
-    description: 'Convenience endpoint for capturing screenshots',
-  })
-  @ApiBearerAuth()
+  @Post('screenshot')@ApiOperation({summary: 'Capture screenshot',description: 'Convenience endpoint for capturing screenshots',})@ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
   @UseInterceptors(LoggingInterceptor)

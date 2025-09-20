@@ -31,40 +31,23 @@
  * - Comprehensive reporting and analytics
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { createHash, randomBytes } from 'crypto';
-
-// Import Parlant services for testing
-import {
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { createHash, randomBytes } from 'crypto';// Import Parlant services for testingimport {
   ParlantUltraPerformanceOptimizerService,
   UltraOptimizedValidationRequest,
   UltraOptimizedValidationResponse,
   PerformanceTestConfig
-} from '../optimization/parlant-ultra-performance-optimizer.service';
-import { ParlantPerformanceOrchestratorService } from '../optimization/parlant-performance-orchestrator.service';
-import { ParlantEnterpriseAuditService } from '../audit/parlant-enterprise-audit.service';
-import {
-  ParlantValidationRequest,
+} from '../optimization/parlant-ultra-performance-optimizer.service';import { ParlantPerformanceOrchestratorService } from '../optimization/parlant-performance-orchestrator.service';import { ParlantEnterpriseAuditService } from '../audit/parlant-enterprise-audit.service';import {ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext
-} from '../parlant-integration.service';
-
-// ===== TESTING FRAMEWORK INTERFACES =====
-
-/**
+} from '../parlant-integration.service';// ===== TESTING FRAMEWORK INTERFACES =====/**
  * Test case definition
  */
 export interface TestCase {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly category: 'unit' | 'integration' | 'performance' | 'compliance' | 'security' | 'e2e';
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
-  readonly tags: string[];
-  readonly expectedDuration: number; // milliseconds
+  readonly category: 'unit' | 'integration' | 'performance' | 'compliance' | 'security' | 'e2e';readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly tags: string[];readonly expectedDuration: number; // milliseconds
   readonly timeout: number; // milliseconds
   readonly retryAttempts: number;
   readonly setupMethod?: string;
@@ -77,10 +60,7 @@ export interface TestCase {
  * Test assertion configuration
  */
 export interface TestAssertion {
-  readonly type: 'response_time' | 'success_rate' | 'compliance' | 'cache_hit' | 'custom';
-  readonly condition: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'neq' | 'contains' | 'matches';
-  readonly expectedValue: unknown;
-  readonly tolerancePercent?: number;
+  readonly type: 'response_time' | 'success_rate' | 'compliance' | 'cache_hit' | 'custom';readonly condition: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'neq' | 'contains' | 'matches';readonly expectedValue: unknown;readonly tolerancePercent?: number;
   readonly description: string;
 }
 
@@ -95,18 +75,13 @@ export interface TestSuite {
   readonly parallelExecution: boolean;
   readonly maxConcurrency: number;
   readonly failFast: boolean;
-  readonly reportFormat: 'json' | 'xml' | 'html' | 'console';
-}
-
-/**
+  readonly reportFormat: 'json' | 'xml' | 'html' | 'console';}/**
  * Test execution result
  */
 export interface TestResult {
   readonly testCaseId: string;
   readonly testSuiteId: string;
-  readonly status: 'passed' | 'failed' | 'skipped' | 'timeout' | 'error';
-  readonly startTime: Date;
-  readonly endTime: Date;
+  readonly status: 'passed' | 'failed' | 'skipped' | 'timeout' | 'error';readonly startTime: Date;readonly endTime: Date;
   readonly duration: number;
   readonly assertionResults: AssertionResult[];
   readonly errorMessage?: string;
@@ -171,9 +146,7 @@ export interface PerformanceBenchmark {
   readonly concurrentRequests: number;
   readonly testDurationMs: number;
   readonly requestPatterns: string[];
-  readonly loadProfile: 'constant' | 'ramp-up' | 'spike' | 'stress';
-  readonly thresholds: {
-    readonly p95ResponseTime: number;
+  readonly loadProfile: 'constant' | 'ramp-up' | 'spike' | 'stress';readonly thresholds: {readonly p95ResponseTime: number;
     readonly p99ResponseTime: number;
     readonly throughputPerSecond: number;
     readonly errorRate: number;
@@ -185,9 +158,7 @@ export interface PerformanceBenchmark {
  * Compliance test configuration
  */
 export interface ComplianceTest {
-  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS';
-  readonly testScenarios: ComplianceScenario[];
-  readonly validationCriteria: string[];
+  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS';readonly testScenarios: ComplianceScenario[];readonly validationCriteria: string[];
   readonly auditRequirements: string[];
 }
 
@@ -240,10 +211,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Parlant QA Testing Framework...');
-
-    // Load test suites and benchmarks
-    await this.loadTestSuites();
+    this.logger.log('Initializing Parlant QA Testing Framework...');// Load test suites and benchmarksawait this.loadTestSuites();
     await this.loadPerformanceBenchmarks();
     await this.loadComplianceTests();
     await this.initializeTestDataGenerators();
@@ -260,10 +228,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   async executeTestSuite(suiteId: string): Promise<TestExecutionSummary> {
     const testSuite = this.testSuites.get(suiteId);
     if (!testSuite) {
-      throw new Error(`Test suite ${suiteId} not found`);
-    }
-
-    this.logger.log(`Executing test suite: ${testSuite.name}`);
+      throw new Error(`Test suite ${suiteId} not found`);}this.logger.log(`Executing test suite: ${testSuite.name}`);
     const startTime = new Date();
     const results: TestResult[] = [];
 
@@ -289,9 +254,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
           }));
 
           // Fail fast if enabled
-          if (testSuite.failFast && results.some(r => r.status === 'failed')) {
-            break;
-          }
+          if (testSuite.failFast && results.some(r => r.status === 'failed')) {break;}
         }
       } else {
         // Execute tests sequentially
@@ -300,9 +263,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
           results.push(result);
 
           // Fail fast if enabled
-          if (testSuite.failFast && result.status === 'failed') {
-            break;
-          }
+          if (testSuite.failFast && result.status === 'failed') {break;}
         }
       }
 
@@ -319,13 +280,8 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
         results
       });
 
-      this.logger.log(`Test suite completed: ${summary.successRate.toFixed(2)}% success rate`);
-      return summary;
-
-    } catch (error) {
-      this.logger.error(`Test suite execution failed: ${error}`);
-      throw error;
-    }
+      this.logger.log(`Test suite completed: ${summary.successRate.toFixed(2)}% success rate`);return summary;} catch (error) {
+      this.logger.error(`Test suite execution failed: ${error}`);throw error;}
   }
 
   /**
@@ -341,31 +297,18 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       // Setup
       if (testCase.setupMethod) {
         await this.executeSetupMethod(testCase.setupMethod);
-        logs.push('Setup completed');
-      }
-
-      // Execute test based on category
+        logs.push('Setup completed');}// Execute test based on category
       let performanceMetrics: Record<string, number> = {};
       let assertionResults: AssertionResult[] = [];
 
       switch (testCase.category) {
-        case 'unit':
-          assertionResults = await this.executeUnitTest(testCase);
-          break;
-        case 'integration':
-          assertionResults = await this.executeIntegrationTest(testCase);
-          break;
-        case 'performance':
-          const perfResult = await this.executePerformanceTest(testCase);
-          assertionResults = perfResult.assertions;
+        case 'unit':assertionResults = await this.executeUnitTest(testCase);break;
+        case 'integration':assertionResults = await this.executeIntegrationTest(testCase);break;
+        case 'performance':const perfResult = await this.executePerformanceTest(testCase);assertionResults = perfResult.assertions;
           performanceMetrics = perfResult.metrics;
           break;
-        case 'compliance':
-          assertionResults = await this.executeComplianceTest(testCase);
-          break;
-        case 'security':
-          assertionResults = await this.executeSecurityTest(testCase);
-          break;
+        case 'compliance':assertionResults = await this.executeComplianceTest(testCase);break;
+        case 'security':assertionResults = await this.executeSecurityTest(testCase);break;
         case 'e2e':
           assertionResults = await this.executeE2ETest(testCase);
           break;
@@ -376,10 +319,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       // Teardown
       if (testCase.teardownMethod) {
         await this.executeTeardownMethod(testCase.teardownMethod);
-        logs.push('Teardown completed');
-      }
-
-      const endTime = new Date();
+        logs.push('Teardown completed');}const endTime = new Date();
       const duration = endTime.getTime() - startTime.getTime();
 
       // Determine overall test status
@@ -452,10 +392,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   }> {
     const benchmark = this.performanceBenchmarks.get(benchmarkId);
     if (!benchmark) {
-      throw new Error(`Performance benchmark ${benchmarkId} not found`);
-    }
-
-    this.logger.log(`Executing performance benchmark: ${benchmark.name}`);
+      throw new Error(`Performance benchmark ${benchmarkId} not found`);}this.logger.log(`Executing performance benchmark: ${benchmark.name}`);
 
     const testConfig: PerformanceTestConfig = {
       testDurationMs: benchmark.testDurationMs,
@@ -519,9 +456,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       }
     };
 
-    this.logger.log('Performance benchmark completed:', {
-      benchmarkId,
-      results: benchmarkResults,
+    this.logger.log('Performance benchmark completed:', {benchmarkId,results: benchmarkResults,
       thresholdsPassed: Object.values(thresholdResults).every(t => t.passed)
     });
 
@@ -547,10 +482,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   }> {
     const complianceTest = this.complianceTests.get(regulation);
     if (!complianceTest) {
-      throw new Error(`Compliance test for ${regulation} not found`);
-    }
-
-    this.logger.log(`Executing compliance test suite for: ${regulation}`);
+      throw new Error(`Compliance test for ${regulation} not found`);}this.logger.log(`Executing compliance test suite for: ${regulation}`);
 
     const scenarioResults = [];
     let totalScenarios = 0;
@@ -563,13 +495,10 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       const testRequest: UltraOptimizedValidationRequest = {
         functionName: 'compliance_test',
         functionParams: scenario.testData,
-        actionDescription: `Compliance test for ${regulation} regulation - scenario ${scenario.id}`,
-        operationId: `compliance_test_${regulation}_${scenario.id}_${Date.now()}`,
-        riskLevel: RiskLevel.HIGH,
+        actionDescription: `Compliance test for ${regulation} regulation - scenario ${scenario.id}`,operationId: `compliance_test_${regulation}_${scenario.id}_${Date.now()}`,
+        riskLevel: RiskLevel._HIGH,
         context: {
-          userId: 'test-user',
-          agentRole: 'system',
-          securityLevel: 'HIGH',
+          userId: 'test-user',agentRole: 'system',securityLevel: 'HIGH',
           conversationHistory: [],
           metadata: { complianceTest: regulation, scenario: scenario.id }
         },
@@ -591,10 +520,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
 
       const issues: string[] = [];
       if (!scenarioCompliant) {
-        issues.push(`Expected compliance: ${scenario.expectedCompliance}, Actual: ${complianceResult.compliant}`);
-      }
-
-      scenarioResults.push({
+        issues.push(`Expected compliance: ${scenario.expectedCompliance}, Actual: ${complianceResult.compliant}`);}scenarioResults.push({
         scenarioId: scenario.id,
         scenarioName: scenario.name,
         compliant: scenarioCompliant,
@@ -606,10 +532,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const overallCompliance = compliantScenarios === totalScenarios;
     const complianceScore = (compliantScenarios / totalScenarios) * 100;
 
-    this.logger.log(`Compliance test completed for ${regulation}:`, {
-      overallCompliance,
-      complianceScore: `${complianceScore.toFixed(2)}%`,
-      scenariosPassed: `${compliantScenarios}/${totalScenarios}`
+    this.logger.log(`Compliance test completed for ${regulation}:`, {overallCompliance,complianceScore: `${complianceScore.toFixed(2)}%`,scenariosPassed: `${compliantScenarios}/${totalScenarios}`
     });
 
     return {
@@ -632,15 +555,9 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
 
         // Execute the specific unit test based on test data
         switch (assertion.type) {
-          case 'response_time':
-            actualValue = await this.measureResponseTime(testCase.testData);
-            break;
-          case 'success_rate':
-            actualValue = await this.measureSuccessRate(testCase.testData);
-            break;
-          case 'cache_hit':
-            actualValue = await this.measureCacheHitRate(testCase.testData);
-            break;
+          case 'response_time':actualValue = await this.measureResponseTime(testCase.testData);break;
+          case 'success_rate':actualValue = await this.measureSuccessRate(testCase.testData);break;
+          case 'cache_hit':actualValue = await this.measureCacheHitRate(testCase.testData);break;
           default:
             actualValue = await this.executeCustomAssertion(assertion, testCase.testData);
         }
@@ -652,9 +569,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
           passed,
           actualValue,
           expectedValue: assertion.expectedValue,
-          message: passed ? 'Assertion passed' : `Assertion failed: ${assertion.description}`,
-          toleranceUsed: assertion.tolerancePercent
-        });
+          message: passed ? 'Assertion passed' : `Assertion failed: ${assertion.description}`,toleranceUsed: assertion.tolerancePercent});
 
       } catch (error) {
         results.push({
@@ -678,15 +593,10 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const testRequest: UltraOptimizedValidationRequest = {
       functionName: testCase.testData.functionName as string || 'integration_test',
       functionParams: testCase.testData.functionParams as Record<string, unknown> || {},
-      actionDescription: `Integration test for ${testCase.name}`,
-      operationId: `integration_test_${testCase.id}_${Date.now()}`,
-      riskLevel: testCase.testData.riskLevel as RiskLevel || RiskLevel.MEDIUM,
+      actionDescription: `Integration test for ${testCase.name}`,operationId: `integration_test_${testCase.id}_${Date.now()}`,
+      riskLevel: testCase.testData.riskLevel as RiskLevel || RiskLevel._MODERATE,
       context: {
-        userId: 'test-user',
-        agentRole: 'system',
-        securityLevel: 'MEDIUM',
-        conversationHistory: [],
-        metadata: testCase.testData.context as Record<string, unknown> || {}
+        userId: 'test-user',agentRole: 'system',securityLevel: 'MEDIUM',conversationHistory: [],metadata: testCase.testData.context as Record<string, unknown> || {}
       }
     };
 
@@ -720,10 +630,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       concurrentRequests: testCase.testData.concurrentRequests as number || 100,
       targetLatencyMs: testCase.testData.targetLatencyMs as number || 500,
       complianceTestsEnabled: false,
-      loadTestPatterns: testCase.testData.patterns as string[] || ['test*']
-    };
-
-    const testResults = await this.ultraPerformanceOptimizer.runPerformanceTest(performanceConfig);
+      loadTestPatterns: testCase.testData.patterns as string[] || ['test*']};const testResults = await this.ultraPerformanceOptimizer.runPerformanceTest(performanceConfig);
 
     const metrics = {
       averageLatency: testResults.testResults.averageLatency,
@@ -756,28 +663,18 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const testRequest: UltraOptimizedValidationRequest = {
       functionName: 'compliance_test',
       functionParams: testCase.testData,
-      actionDescription: `Compliance test for ${testCase.name}`,
-      operationId: `compliance_test_${testCase.id}_${Date.now()}`,
-      riskLevel: RiskLevel.HIGH,
+      actionDescription: `Compliance test for ${testCase.name}`,operationId: `compliance_test_${testCase.id}_${Date.now()}`,
+      riskLevel: RiskLevel._HIGH,
       context: {
-        userId: 'test-user',
-        agentRole: 'system',
-        securityLevel: 'HIGH',
-        conversationHistory: [],
-        metadata: { complianceTest: true }
+        userId: 'test-user',agentRole: 'system',securityLevel: 'HIGH',conversationHistory: [],metadata: { complianceTest: true }
       }
     };
 
-    const regulations = testCase.testData.regulations as ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[] || ['GDPR'];
-    const complianceResult = await this.ultraPerformanceOptimizer.validateCompliance(testRequest, regulations);
-
-    const assertions: AssertionResult[] = [];
+    const regulations = testCase.testData.regulations as ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[] || ['GDPR'];const complianceResult = await this.ultraPerformanceOptimizer.validateCompliance(testRequest, regulations);const assertions: AssertionResult[] = [];
     for (const assertion of testCase.assertions) {
       let actualValue: unknown;
 
-      if (assertion.type === 'compliance') {
-        actualValue = complianceResult.compliant;
-      } else {
+      if (assertion.type === 'compliance') {actualValue = complianceResult.compliant;} else {
         actualValue = complianceResult.details[assertion.type];
       }
 
@@ -844,29 +741,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     const tolerance = assertion.tolerancePercent || 0;
 
     switch (assertion.condition) {
-      case 'lt':
-        return typeof actualValue === 'number' && typeof expected === 'number' &&
-               actualValue < expected;
-      case 'lte':
-        return typeof actualValue === 'number' && typeof expected === 'number' &&
-               actualValue <= expected * (1 + tolerance / 100);
-      case 'gt':
-        return typeof actualValue === 'number' && typeof expected === 'number' &&
-               actualValue > expected;
-      case 'gte':
-        return typeof actualValue === 'number' && typeof expected === 'number' &&
-               actualValue >= expected * (1 - tolerance / 100);
-      case 'eq':
-        return actualValue === expected;
-      case 'neq':
-        return actualValue !== expected;
-      case 'contains':
-        return typeof actualValue === 'string' && typeof expected === 'string' &&
-               actualValue.includes(expected);
-      case 'matches':
-        return typeof actualValue === 'string' && typeof expected === 'string' &&
-               new RegExp(expected).test(actualValue);
-      default:
+      case 'lt':return typeof actualValue === 'number' && typeof expected === 'number' &&actualValue < expected;case 'lte':return typeof actualValue === 'number' && typeof expected === 'number' &&actualValue <= expected * (1 + tolerance / 100);case 'gt':return typeof actualValue === 'number' && typeof expected === 'number' &&actualValue > expected;case 'gte':return typeof actualValue === 'number' && typeof expected === 'number' &&actualValue >= expected * (1 - tolerance / 100);case 'eq':return actualValue === expected;case 'neq':return actualValue !== expected;case 'contains':return typeof actualValue === 'string' && typeof expected === 'string' &&actualValue.includes(expected);case 'matches':return typeof actualValue === 'string' && typeof expected === 'string' &&new RegExp(expected).test(actualValue);default:
         return false;
     }
   }
@@ -876,15 +751,11 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
 
     // Create test request
     const testRequest: UltraOptimizedValidationRequest = {
-      functionName: testData.functionName as string || 'test_function',
-      functionParams: testData.functionParams as Record<string, unknown> || {},
-      actionDescription: 'Response time measurement test',
+      functionName: testData.functionName as string || 'test_function',functionParams: testData.functionParams as Record<string, unknown> || {},actionDescription: 'Response time measurement test',
       operationId: `response_time_test_${Date.now()}`,
-      riskLevel: RiskLevel.LOW,
+      riskLevel: RiskLevel._LOW,
       context: {
-        userId: 'test-user',
-        agentRole: 'system',
-        securityLevel: 'LOW',
+        userId: 'test-user',agentRole: 'system',securityLevel: 'LOW',
         conversationHistory: [],
         metadata: {}
       }
@@ -902,17 +773,10 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     for (let i = 0; i < attempts; i++) {
       try {
         const testRequest: UltraOptimizedValidationRequest = {
-          functionName: `test_function_${i}`,
-          functionParams: { attempt: i },
-          actionDescription: `Success rate test attempt ${i}`,
-          operationId: `success_rate_test_${i}_${Date.now()}`,
-          riskLevel: RiskLevel.LOW,
+          functionName: `test_function_${i}`,functionParams: { attempt: i },actionDescription: `Success rate test attempt ${i}`,operationId: `success_rate_test_${i}_${Date.now()}`,
+          riskLevel: RiskLevel._LOW,
           context: {
-            userId: 'test-user',
-            agentRole: 'system',
-            securityLevel: 'LOW',
-            conversationHistory: [],
-            metadata: {}
+            userId: 'test-user',agentRole: 'system',securityLevel: 'LOW',conversationHistory: [],metadata: {}
           }
         };
 
@@ -938,13 +802,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
 
   private extractValueFromResponse(response: UltraOptimizedValidationResponse, type: string): unknown {
     switch (type) {
-      case 'response_time':
-        return response.ultraPerformanceMetadata.totalUltraLatencyMs;
-      case 'cache_hit':
-        return response.ultraPerformanceMetadata.l0CacheHit;
-      case 'success_rate':
-        return response.approved ? 1 : 0;
-      default:
+      case 'response_time':return response.ultraPerformanceMetadata.totalUltraLatencyMs;case 'cache_hit':return response.ultraPerformanceMetadata.l0CacheHit;case 'success_rate':return response.approved ? 1 : 0;default:
         return null;
     }
   }
@@ -981,14 +839,7 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   ): TestExecutionSummary {
     const totalDuration = endTime.getTime() - startTime.getTime();
     const totalTests = results.length;
-    const passedTests = results.filter(r => r.status === 'passed').length;
-    const failedTests = results.filter(r => r.status === 'failed').length;
-    const skippedTests = results.filter(r => r.status === 'skipped').length;
-    const timeoutTests = results.filter(r => r.status === 'timeout').length;
-    const errorTests = results.filter(r => r.status === 'error').length;
-
-    const successRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
-    const durations = results.map(r => r.duration);
+    const passedTests = results.filter(r => r.status === 'passed').length;const failedTests = results.filter(r => r.status === 'failed').length;const skippedTests = results.filter(r => r.status === 'skipped').length;const timeoutTests = results.filter(r => r.status === 'timeout').length;const errorTests = results.filter(r => r.status === 'error').length;const successRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;const durations = results.map(r => r.duration);
     const averageDuration = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     const sortedDurations = durations.sort((a, b) => a - b);
@@ -1008,19 +859,11 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
         categoryBreakdown[testCase.category] = { total: 0, passed: 0, failed: 0, successRate: 0 };
       }
       categoryBreakdown[testCase.category].total++;
-      if (result.status === 'passed') categoryBreakdown[testCase.category].passed++;
-      if (result.status === 'failed') categoryBreakdown[testCase.category].failed++;
-
-      // Priority breakdown
-      if (!priorityBreakdown[testCase.priority]) {
+      if (result.status === 'passed') categoryBreakdown[testCase.category].passed++;if (result.status === 'failed') categoryBreakdown[testCase.category].failed++;// Priority breakdownif (!priorityBreakdown[testCase.priority]) {
         priorityBreakdown[testCase.priority] = { total: 0, passed: 0, failed: 0, successRate: 0 };
       }
       priorityBreakdown[testCase.priority].total++;
-      if (result.status === 'passed') priorityBreakdown[testCase.priority].passed++;
-      if (result.status === 'failed') priorityBreakdown[testCase.priority].failed++;
-    }
-
-    // Calculate success rates
+      if (result.status === 'passed') priorityBreakdown[testCase.priority].passed++;if (result.status === 'failed') priorityBreakdown[testCase.priority].failed++;}// Calculate success rates
     Object.keys(categoryBreakdown).forEach(category => {
       const breakdown = categoryBreakdown[category];
       breakdown.successRate = breakdown.total > 0 ? (breakdown.passed / breakdown.total) * 100 : 0;
@@ -1056,22 +899,12 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
   private async loadTestSuites(): Promise<void> {
     // Load test suites from configuration or files
     // This is a placeholder - in a real implementation, this would load from files or database
-    this.logger.debug('Test suites loaded');
-  }
-
-  private async loadPerformanceBenchmarks(): Promise<void> {
+    this.logger.debug('Test suites loaded');}private async loadPerformanceBenchmarks(): Promise<void> {
     // Load performance benchmarks
     const defaultBenchmark: PerformanceBenchmark = {
-      id: 'ultra_performance_benchmark',
-      name: 'Ultra Performance Validation Benchmark',
-      description: 'Validates <500ms response time targets',
-      targetLatencyMs: 500,
-      concurrentRequests: 100,
+      id: 'ultra_performance_benchmark',name: 'Ultra Performance Validation Benchmark',description: 'Validates <500ms response time targets',targetLatencyMs: 500,concurrentRequests: 100,
       testDurationMs: 60000,
-      requestPatterns: ['validate*', 'check*', 'process*'],
-      loadProfile: 'constant',
-      thresholds: {
-        p95ResponseTime: 500,
+      requestPatterns: ['validate*', 'check*', 'process*'],loadProfile: 'constant',thresholds: {p95ResponseTime: 500,
         p99ResponseTime: 750,
         throughputPerSecond: 1000,
         errorRate: 0.01,
@@ -1080,43 +913,16 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
     };
 
     this.performanceBenchmarks.set(defaultBenchmark.id, defaultBenchmark);
-    this.logger.debug('Performance benchmarks loaded');
-  }
-
-  private async loadComplianceTests(): Promise<void> {
+    this.logger.debug('Performance benchmarks loaded');}private async loadComplianceTests(): Promise<void> {
     // Load compliance tests for all regulations
     const gdprTest: ComplianceTest = {
-      regulation: 'GDPR',
-      testScenarios: [
-        {
-          id: 'gdpr_personal_data',
-          name: 'Personal Data Processing',
-          description: 'Test GDPR compliance for personal data processing',
-          testData: { email: 'test@example.com', name: 'Test User' },
-          expectedCompliance: true,
-          validationChecks: ['consent', 'data_minimization', 'purpose_limitation']
-        }
-      ],
-      validationCriteria: ['consent_validation', 'data_minimization', 'right_to_be_forgotten'],
-      auditRequirements: ['data_processing_log', 'consent_records', 'deletion_logs']
-    };
-
-    this.complianceTests.set('GDPR', gdprTest);
-    this.logger.debug('Compliance tests loaded');
-  }
-
-  private async initializeTestDataGenerators(): Promise<void> {
+      regulation: 'GDPR',testScenarios: [{
+          id: 'gdpr_personal_data',name: 'Personal Data Processing',description: 'Test GDPR compliance for personal data processing',testData: { email: 'test@example.com', name: 'Test User' },expectedCompliance: true,validationChecks: ['consent', 'data_minimization', 'purpose_limitation']}],
+      validationCriteria: ['consent_validation', 'data_minimization', 'right_to_be_forgotten'],auditRequirements: ['data_processing_log', 'consent_records', 'deletion_logs']};this.complianceTests.set('GDPR', gdprTest);this.logger.debug('Compliance tests loaded');}private async initializeTestDataGenerators(): Promise<void> {
     // Initialize test data generators
-    this.testDataGenerators.set('basic_validation', () => ({
-      functionName: 'test_function',
-      functionParams: { data: randomBytes(16).toString('hex') },
-      riskLevel: RiskLevel.LOW
-    }));
+    this.testDataGenerators.set('basic_validation', () => ({functionName: 'test_function',functionParams: { data: randomBytes(16).toString('hex') },riskLevel: RiskLevel._LOW}));
 
-    this.logger.debug('Test data generators initialized');
-  }
-
-  private async initializeMockServices(): Promise<void> {
+    this.logger.debug('Test data generators initialized');}private async initializeMockServices(): Promise<void> {
     // Initialize mock services for testing
     this.logger.debug('Mock services initialized');
   }

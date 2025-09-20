@@ -4,11 +4,7 @@ import {
   BadRequestException,
   ArgumentMetadata,
   Logger,
-} from '@nestjs/common';
-import { validate, ValidationError } from 'class-validator';
-import { plainToClass, ClassConstructor } from 'class-transformer';
-import {
-  detectSQLInjection,
+} from '@nestjs/common';import { validate, ValidationError } from 'class-validator';import { plainToClass, ClassConstructor } from 'class-transformer';import {detectSQLInjection,
   detectAdvancedXSS,
   detectCommandInjection,
   detectMaliciousFileContent,
@@ -21,9 +17,7 @@ import {
   type CommandInjectionDetectionResult,
   type FilePathValidationResult,
   type CoordinatesValidationResult,
-} from '@bytebot/shared';
-import {
-  MoveMouseActionDto,
+} from '@bytebot/shared';import {MoveMouseActionDto,
   TraceMouseActionDto,
   ClickMouseActionDto,
   PressMouseActionDto,
@@ -40,10 +34,7 @@ import {
   WriteFileActionDto,
   ReadFileActionDto,
   ComputerActionDto,
-} from './computer-action.dto';
-
-/**
- * Interface defining the structure of raw action input data
+} from './computer-action.dto';/*** Interface defining the structure of raw action input data
  * Ensures type safety for incoming requests before validation
  */
 interface RawActionInput {
@@ -56,25 +47,7 @@ interface RawActionInput {
  * Used for type-safe action validation and DTO mapping
  */
 type ActionType =
-  | 'move_mouse'
-  | 'trace_mouse'
-  | 'click_mouse'
-  | 'press_mouse'
-  | 'drag_mouse'
-  | 'scroll'
-  | 'type_keys'
-  | 'press_keys'
-  | 'type_text'
-  | 'paste_text'
-  | 'wait'
-  | 'screenshot'
-  | 'cursor_position'
-  | 'application'
-  | 'write_file'
-  | 'read_file';
-
-/**
- * Enterprise-Grade Multi-Stage Security Validation Pipeline for Computer Action DTOs
+  | 'move_mouse'| 'trace_mouse'| 'click_mouse'| 'press_mouse'| 'drag_mouse'| 'scroll'| 'type_keys'| 'press_keys'| 'type_text'| 'paste_text'| 'wait'| 'screenshot'| 'cursor_position'| 'application'| 'write_file'| 'read_file';/*** Enterprise-Grade Multi-Stage Security Validation Pipeline for Computer Action DTOs
  * Validates incoming action requests and transforms them to strongly-typed DTOs with
  * comprehensive threat detection and advanced security analysis
  *
@@ -206,10 +179,7 @@ export class ComputerActionValidationPipe
     value: unknown,
     metadata: ArgumentMetadata,
   ): Promise<ComputerActionDto> {
-    const operationId = `computer-action-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `computer-action-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();try {
       this.logger.debug(
         `[${operationId}] Starting computer action validation`,
         {
@@ -246,9 +216,7 @@ export class ComputerActionValidationPipe
         this.logSecurityEvent(
           operationId,
           SecurityEventType._VALIDATION_FAILED,
-          'Computer action validation failed',
-          rawInput,
-          formattedErrors,
+          'Computer action validation failed',rawInput,formattedErrors,
         );
 
         throw new BadRequestException({
@@ -261,9 +229,7 @@ export class ComputerActionValidationPipe
 
       const processingTime = Date.now() - startTime;
       this.logger.debug(
-        `[${operationId}] Computer action validation completed successfully`,
-        {
-          operationId,
+        `[${operationId}] Computer action validation completed successfully`,{operationId,
           action: rawInput.action,
           processingTimeMs: processingTime,
         },
@@ -296,18 +262,10 @@ export class ComputerActionValidationPipe
     operationId: string,
   ): RawActionInput {
     // Check for null, undefined, or non-object values
-    if (!value || typeof value !== 'object') {
-      this.logSecurityEvent(
-        operationId,
+    if (!value || typeof value !== 'object') {this.logSecurityEvent(operationId,
         SecurityEventType._VALIDATION_FAILED,
-        'Invalid request body structure',
-        value,
-        ['Request body must be a valid object'],
-      );
-      throw new BadRequestException({
-        message: 'Request body must be a valid object',
-        operationId,
-        timestamp: new Date().toISOString(),
+        'Invalid request body structure',value,['Request body must be a valid object'],);throw new BadRequestException({
+        message: 'Request body must be a valid object',operationId,timestamp: new Date().toISOString(),
       });
     }
 
@@ -324,9 +282,7 @@ export class ComputerActionValidationPipe
         'Payload size limit exceeded',
         { payloadSize, maxAllowed: MAX_PAYLOAD_SIZE },
         [
-          `Payload size ${payloadSize} exceeds maximum allowed ${MAX_PAYLOAD_SIZE} bytes`,
-        ],
-      );
+          `Payload size ${payloadSize} exceeds maximum allowed ${MAX_PAYLOAD_SIZE} bytes`,],);
       throw new BadRequestException({
         message: `Payload too large. Maximum allowed: ${MAX_PAYLOAD_SIZE} bytes`,
         operationId,
@@ -335,15 +291,9 @@ export class ComputerActionValidationPipe
     }
 
     // Validate presence and type of action field
-    if (!input.action || typeof input.action !== 'string') {
-      this.logSecurityEvent(
-        operationId,
+    if (!input.action || typeof input.action !== 'string') {this.logSecurityEvent(operationId,
         SecurityEventType._VALIDATION_FAILED,
-        'Missing or invalid action field',
-        input,
-        ['Missing or invalid action field - must be a string'],
-      );
-      throw new BadRequestException({
+        'Missing or invalid action field',input,['Missing or invalid action field - must be a string'],);throw new BadRequestException({
         message: 'Missing or invalid action field - must be a string',
         operationId,
         timestamp: new Date().toISOString(),
@@ -363,14 +313,11 @@ export class ComputerActionValidationPipe
   private getDtoClass(action: string): ClassConstructor<ComputerActionDto> {
     // Type guard to ensure action is a valid ActionType
     if (!this.isValidActionType(action)) {
-      this.logger.warn(`Unsupported action type attempted: ${action}`, {
-        action,
-        validActions: Object.keys(this.actionToDtoMap),
+      this.logger.warn(`Unsupported action type attempted: ${action}`, {action,validActions: Object.keys(this.actionToDtoMap),
       });
 
       throw new BadRequestException({
-        message: `Unsupported action type: '${action}'`,
-        validActions: Object.keys(this.actionToDtoMap),
+        message: `Unsupported action type: '${action}'',validActions: Object.keys(this.actionToDtoMap),
         timestamp: new Date().toISOString(),
       });
     }
@@ -402,10 +349,7 @@ export class ComputerActionValidationPipe
   ): void {
     const startTime = Date.now();
     this.logger.debug(
-      `[${operationId}] Starting comprehensive security validation pipeline`,
-    );
-
-    // Initialize security event aggregation
+      `[${operationId}] Starting comprehensive security validation pipeline`,);// Initialize security event aggregation
     const securityContext = {
       threats: [] as string[],
       totalRiskScore: 0,
@@ -425,10 +369,7 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _1: Input preprocessing and normalization`,
       );
-      securityContext.validationStages.push('input-preprocessing');
-
-      const inputString = JSON.stringify(rawInput);
-      const normalizedInput = inputString.normalize('NFKC');
+      securityContext.validationStages.push('input-preprocessing');const inputString = JSON.stringify(rawInput);const normalizedInput = inputString.normalize('NFKC');
 
       // Unicode normalization attack detection
       if (normalizedInput !== inputString) {
@@ -443,14 +384,9 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _2: Advanced XSS pattern analysis`,
       );
-      securityContext.validationStages.push('xss-detection');
-
-      const xssAnalysis: XSSDetectionResult =
-        this.safeDetectAdvancedXSS(inputString);
+      securityContext.validationStages.push('xss-detection');const xssAnalysis: XSSDetectionResult =this.safeDetectAdvancedXSS(inputString);
       if (xssAnalysis.hasXSS) {
-        securityContext.threats.push('ADVANCED_XSS');
-        securityContext.totalRiskScore += xssAnalysis.riskScore;
-        securityContext.detectionEvents.push({
+        securityContext.threats.push('ADVANCED_XSS');securityContext.totalRiskScore += xssAnalysis.riskScore;securityContext.detectionEvents.push({
           type: 'XSS_DETECTED',
           severity: xssAnalysis.severity,
           riskScore: xssAnalysis.riskScore,
@@ -460,8 +396,7 @@ export class ComputerActionValidationPipe
         });
 
         this.logger.warn(
-          `[${operationId}] Advanced XSS threats detected: ${xssAnalysis.threats.join(', ')}`,
-          {
+          `[${operationId}] Advanced XSS threats detected: ${xssAnalysis.threats.join(`, ')}',{
             operationId,
             action: rawInput.action,
             severity: xssAnalysis.severity,
@@ -477,14 +412,9 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _3: Advanced SQL injection analysis`,
       );
-      securityContext.validationStages.push('sql-injection-detection');
-
-      const sqlAnalysis: SQLInjectionDetectionResult =
-        this.safeDetectSQLInjection(inputString);
+      securityContext.validationStages.push('sql-injection-detection');const sqlAnalysis: SQLInjectionDetectionResult =this.safeDetectSQLInjection(inputString);
       if (sqlAnalysis.hasInjection) {
-        securityContext.threats.push('ADVANCED_SQL_INJECTION');
-        securityContext.totalRiskScore += sqlAnalysis.riskScore;
-        securityContext.detectionEvents.push({
+        securityContext.threats.push('ADVANCED_SQL_INJECTION');securityContext.totalRiskScore += sqlAnalysis.riskScore;securityContext.detectionEvents.push({
           type: 'SQL_INJECTION_DETECTED',
           severity: sqlAnalysis.severity,
           riskScore: sqlAnalysis.riskScore,
@@ -494,8 +424,7 @@ export class ComputerActionValidationPipe
         });
 
         this.logger.warn(
-          `[${operationId}] Advanced SQL injection threats detected: ${sqlAnalysis.threats.join(', ')}`,
-          {
+          `[${operationId}] Advanced SQL injection threats detected: ${sqlAnalysis.threats.join(`, ')}',{
             operationId,
             action: rawInput.action,
             severity: sqlAnalysis.severity,
@@ -512,18 +441,13 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _4: Command injection pattern analysis`,
       );
-      securityContext.validationStages.push('command-injection-detection');
-
-      const cmdAnalysis: CommandInjectionDetectionResult =
-        this.safeDetectCommandInjection(_inputString, {
+      securityContext.validationStages.push('command-injection-detection');const cmdAnalysis: CommandInjectionDetectionResult =this.safeDetectCommandInjection(_inputString, {
           strictMode: true,
           contextType: this.getSecurityContext(rawInput.action),
         });
 
       if (cmdAnalysis.hasInjection) {
-        securityContext.threats.push('COMMAND_INJECTION');
-        securityContext.totalRiskScore += cmdAnalysis.riskScore;
-        securityContext.detectionEvents.push({
+        securityContext.threats.push('COMMAND_INJECTION');securityContext.totalRiskScore += cmdAnalysis.riskScore;securityContext.detectionEvents.push({
           type: 'COMMAND_INJECTION_DETECTED',
           severity: cmdAnalysis.severity,
           riskScore: cmdAnalysis.riskScore,
@@ -533,8 +457,7 @@ export class ComputerActionValidationPipe
         });
 
         this.logger.warn(
-          `[${operationId}] Command injection threats detected: ${cmdAnalysis.threats.join(', ')}`,
-          {
+          `[${operationId}] Command injection threats detected: ${cmdAnalysis.threats.join(`, ')}',{
             operationId,
             action: rawInput.action,
             severity: cmdAnalysis.severity,
@@ -553,12 +476,7 @@ export class ComputerActionValidationPipe
         this.logger.debug(
           `[${operationId}] Stage _5: File operation security validation`,
         );
-        securityContext.validationStages.push('file-security-validation');
-
-        const filePath = (rawInput as { path?: string }).path;
-        if (typeof filePath === 'string') {
-          // Enhanced file path validation with comprehensive security checks
-          const pathValidation: FilePathValidationResult =
+        securityContext.validationStages.push('file-security-validation');const filePath = (rawInput as { path?: string }).path;if (typeof filePath === 'string') {// Enhanced file path validation with comprehensive security checksconst pathValidation: FilePathValidationResult =
             this.safeValidateFilePath(_filePath, {
               allowAbsolutePaths: false,
               maxPathLength: 1000,
@@ -569,11 +487,8 @@ export class ComputerActionValidationPipe
             });
 
           if (!pathValidation.isValid) {
-            securityContext.threats.push('MALICIOUS_FILE_PATH');
-            securityContext.totalRiskScore += pathValidation.riskScore ?? 60;
-            securityContext.detectionEvents.push({
-              type: 'FILE_PATH_VIOLATION',
-              severity: pathValidation.severity ?? 'high',
+            securityContext.threats.push('MALICIOUS_FILE_PATH');securityContext.totalRiskScore += pathValidation.riskScore ?? 60;securityContext.detectionEvents.push({
+              type: 'FILE_PATH_VIOLATION',severity: pathValidation.severity ?? 'high',
               riskScore: pathValidation.riskScore ?? 60,
               confidence: 95,
               context: pathValidation.errors ?? [],
@@ -593,17 +508,8 @@ export class ComputerActionValidationPipe
         }
 
         // Enhanced malicious file content detection for write operations
-        if (rawInput.action === 'write_file') {
-          const fileData = (rawInput as { data?: string }).data;
-          if (typeof fileData === 'string') {
-            if (detectMaliciousFileContent(fileData, filePath ?? '')) {
-              securityContext.threats.push('MALICIOUS_FILE_CONTENT');
-              securityContext.totalRiskScore += 80;
-              securityContext.detectionEvents.push({
-                type: 'MALICIOUS_CONTENT_DETECTED',
-                severity: 'critical',
-                riskScore: 80,
-                confidence: 90,
+        if (rawInput.action === 'write_file') {const fileData = (rawInput as { data?: string }).data;if (typeof fileData === 'string') {if (detectMaliciousFileContent(fileData, filePath ?? '')) {securityContext.threats.push('MALICIOUS_FILE_CONTENT');securityContext.totalRiskScore += 80;securityContext.detectionEvents.push({
+                type: 'MALICIOUS_CONTENT_DETECTED',severity: 'critical',riskScore: 80,confidence: 90,
                 context: ['malicious-file-content'],
                 timestamp: new Date(),
               });
@@ -628,16 +534,9 @@ export class ComputerActionValidationPipe
         this.logger.debug(
           `[${operationId}] Stage _6: Enhanced coordinate validation`,
         );
-        securityContext.validationStages.push('coordinate-validation');
-
-        const coordinates = (
-          rawInput as { coordinates?: { x?: number; y?: number } }
+        securityContext.validationStages.push('coordinate-validation');const coordinates = (rawInput as { coordinates?: { x?: number; y?: number } }
         ).coordinates;
-        if (coordinates && typeof coordinates === 'object') {
-          const { x, y } = coordinates;
-          if (typeof x === 'number' && typeof y === 'number') {
-            // Enhanced coordinate validation with overflow protection and multi-monitor support
-            const coordValidation: CoordinatesValidationResult =
+        if (coordinates && typeof coordinates === 'object') {const { x, y } = coordinates;if (typeof x === 'number' && typeof y === 'number') {// Enhanced coordinate validation with overflow protection and multi-monitor supportconst coordValidation: CoordinatesValidationResult =
               this.safeValidateCoordinates(
                 _x,
                 y,
@@ -663,11 +562,8 @@ export class ComputerActionValidationPipe
               );
 
             if (!coordValidation.isValid) {
-              securityContext.threats.push('INVALID_COORDINATES');
-              securityContext.totalRiskScore += coordValidation.riskScore ?? 40;
-              securityContext.detectionEvents.push({
-                type: 'COORDINATE_VALIDATION_FAILED',
-                severity: coordValidation.severity ?? 'medium',
+              securityContext.threats.push('INVALID_COORDINATES');securityContext.totalRiskScore += coordValidation.riskScore ?? 40;securityContext.detectionEvents.push({
+                type: 'COORDINATE_VALIDATION_FAILED',severity: coordValidation.severity ?? 'medium',
                 riskScore: coordValidation.riskScore ?? 40,
                 confidence: 95,
                 context: coordValidation.errors ?? [],
@@ -675,9 +571,7 @@ export class ComputerActionValidationPipe
               });
 
               this.logger.warn(
-                `[${operationId}] Invalid coordinates detected`,
-                {
-                  operationId,
+                `[${operationId}] Invalid coordinates detected`,{operationId,
                   action: rawInput.action,
                   coordinates: { x, y },
                   severity: coordValidation.severity,
@@ -720,9 +614,7 @@ export class ComputerActionValidationPipe
         this.logSecurityEvent(
           operationId,
           SecurityEventType._SUSPICIOUS_ACTIVITY,
-          `Multi-stage security threats detected: ${threatTypes}`,
-          {
-            ...rawInput,
+          `Multi-stage security threats detected: ${threatTypes}`,{...rawInput,
             securityAnalysis: {
               threats: securityContext.threats,
               totalRiskScore: securityContext.totalRiskScore,
@@ -736,9 +628,7 @@ export class ComputerActionValidationPipe
         );
 
         throw new BadRequestException({
-          message: `Advanced security threats detected: ${threatTypes}. Request blocked by multi-stage validation pipeline.`,
-          operationId,
-          threatTypes: securityContext.threats,
+          message: `Advanced security threats detected: ${threatTypes}. Request blocked by multi-stage validation pipeline.`,operationId,threatTypes: securityContext.threats,
           totalRiskScore: securityContext.totalRiskScore,
           threatLevel: finalThreatAssessment.level,
           validationStages: securityContext.validationStages,
@@ -766,21 +656,8 @@ export class ComputerActionValidationPipe
    */
   private getSecurityContext(
     action: string,
-  ): 'url' | 'form' | 'api' | 'file' | 'general' {
-    // Map actions to appropriate security contexts for enhanced threat detection
-    switch (action) {
-      case 'write_file':
-      case 'read_file':
-        return 'file';
-      case 'type_text':
-      case 'paste_text':
-        return 'form';
-      case 'application':
-        return 'url';
-      default:
-        return 'api';
-    }
-  }
+  ): 'url' | 'form' | 'api' | 'file' | 'general' {// Map actions to appropriate security contexts for enhanced threat detectionswitch (action) {
+      case 'write_file':case 'read_file':return 'file';case 'type_text':case 'paste_text':return 'form';case 'application':return 'url';default:return 'api';}}
 
   /**
    * Calculate final threat score based on aggregated security context
@@ -801,9 +678,7 @@ export class ComputerActionValidationPipe
     }>;
     validationStages: string[];
   }): {
-    level: 'none' | 'low' | 'medium' | 'high' | 'critical';
-    adjustedScore: number;
-    reasoning: string[];
+    level: 'none' | 'low' | 'medium' | 'high' | 'critical';adjustedScore: number;reasoning: string[];
   } {
     const { totalRiskScore, threats, detectionEvents } = securityContext;
     let adjustedScore = totalRiskScore;
@@ -811,20 +686,12 @@ export class ComputerActionValidationPipe
 
     // Apply threat multipliers based on combination patterns
     if (
-      threats.includes('ADVANCED_XSS') &&
-      threats.includes('COMMAND_INJECTION')
-    ) {
-      adjustedScore *= 1.5;
+      threats.includes('ADVANCED_XSS') &&threats.includes('COMMAND_INJECTION')) {adjustedScore *= 1.5;
       reasoning.push(
-        'XSS + Command Injection combination detected (50% multiplier)',
-      );
-    }
+        'XSS + Command Injection combination detected (50% multiplier)',);}
 
     if (
-      threats.includes('ADVANCED_SQL_INJECTION') &&
-      threats.includes('MALICIOUS_FILE_PATH')
-    ) {
-      adjustedScore *= 1.3;
+      threats.includes('ADVANCED_SQL_INJECTION') &&threats.includes('MALICIOUS_FILE_PATH')) {adjustedScore *= 1.3;
       reasoning.push(
         'SQL Injection + File Path manipulation combination (30% multiplier)',
       );
@@ -842,17 +709,7 @@ export class ComputerActionValidationPipe
     }
 
     // Determine threat level based on adjusted score
-    let level: 'none' | 'low' | 'medium' | 'high' | 'critical';
-    if (adjustedScore === 0) {
-      level = 'none';
-    } else if (adjustedScore <= 30) {
-      level = 'low';
-    } else if (adjustedScore <= 60) {
-      level = 'medium';
-    } else if (adjustedScore <= 100) {
-      level = 'high';
-    } else {
-      level = 'critical';
+    let level: 'none' | 'low' | 'medium' | 'high' | 'critical';if (adjustedScore === 0) {level = 'none';} else if (adjustedScore <= 30) {level = 'low';} else if (adjustedScore <= 60) {level = 'medium';} else if (adjustedScore <= 100) {level = 'high';} else {level = 'critical';
     }
 
     reasoning.push(
@@ -870,14 +727,7 @@ export class ComputerActionValidationPipe
    */
   private isCoordinateAction(action: string): boolean {
     const coordinateActions = [
-      'move_mouse',
-      'trace_mouse',
-      'click_mouse',
-      'press_mouse',
-      'drag_mouse',
-      'scroll',
-    ];
-    return coordinateActions.includes(action);
+      'move_mouse','trace_mouse','click_mouse','press_mouse','drag_mouse','scroll',];return coordinateActions.includes(action);
   }
 
   /**
@@ -927,23 +777,17 @@ export class ComputerActionValidationPipe
     try {
       const securityEvent = createSecurityEvent(
         _eventType,
-        'computer-action-validation',
-        'POST',
-        false,
-        message,
+        'computer-action-validation','POST',false,message,
         {
           operationId,
           inputData: data,
           errors,
-          service: 'BytebotD',
-          component: 'ComputerActionValidationPipe',
+          service: 'BytebotD',component: 'ComputerActionValidationPipe',
         },
       );
 
       this.logger.warn(
-        `Computer action security event: ${securityEvent.eventId}`,
-        {
-          eventId: securityEvent.eventId,
+        `Computer action security event: ${securityEvent.eventId}`,{eventId: securityEvent.eventId,
           eventType: securityEvent.type,
           riskScore: securityEvent.riskScore,
           operationId,

@@ -23,7 +23,6 @@ import { ConfigService } from '@nestjs/config';
 import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== GOOGLE AI INTEGRATION INTERFACES =====
-
 /**
  * Google Gemini model configuration
  */
@@ -59,9 +58,7 @@ export interface GeminiContentPart {
  * Google AI content interface
  */
 export interface GeminiContent {
-  readonly role: 'user' | 'model';
-  readonly parts: GeminiContentPart[];
-}
+  readonly role: 'user' | 'model';readonly parts: GeminiContentPart[];}
 
 /**
  * Google AI chat completion request
@@ -73,9 +70,7 @@ export interface GeminiChatRequest {
   readonly tools?: GeminiFunctionDeclaration[];
   readonly toolConfig?: {
     readonly functionCallingConfig: {
-      readonly mode: 'AUTO' | 'ANY' | 'NONE';
-      readonly allowedFunctionNames?: string[];
-    };
+      readonly mode: 'AUTO' | 'ANY' | 'NONE';readonly allowedFunctionNames?: string[];};
   };
   readonly context: ParlantConversationContext;
   readonly operationId: string;
@@ -97,9 +92,7 @@ export interface GeminiFunctionDeclaration {
   readonly name: string;
   readonly description: string;
   readonly parameters: {
-    readonly type: 'object';
-    readonly properties: Record<string, {
-      readonly type: string;
+    readonly type: 'object';readonly properties: Record<string, {readonly type: string;
       readonly description: string;
       readonly enum?: string[];
     }>;
@@ -112,9 +105,7 @@ export interface GeminiFunctionDeclaration {
  */
 export interface GeminiCandidate {
   readonly content: GeminiContent;
-  readonly finishReason: 'FINISH_REASON_UNSPECIFIED' | 'STOP' | 'MAX_TOKENS' | 'SAFETY' | 'RECITATION' | 'OTHER';
-  readonly safetyRatings: GeminiSafetyRating[];
-  readonly citationMetadata?: {
+  readonly finishReason: 'FINISH_REASON_UNSPECIFIED' | 'STOP' | 'MAX_TOKENS' | 'SAFETY' | 'RECITATION' | 'OTHER';readonly safetyRatings: GeminiSafetyRating[];readonly citationMetadata?: {
     readonly citationSources: Array<{
       readonly startIndex?: number;
       readonly endIndex?: number;
@@ -128,11 +119,7 @@ export interface GeminiCandidate {
  * Google AI safety rating interface
  */
 export interface GeminiSafetyRating {
-  readonly category: 'HARM_CATEGORY_HARASSMENT' | 'HARM_CATEGORY_HATE_SPEECH' | 'HARM_CATEGORY_SEXUALLY_EXPLICIT' | 'HARM_CATEGORY_DANGEROUS_CONTENT';
-  readonly probability: 'HARM_PROBABILITY_UNSPECIFIED' | 'NEGLIGIBLE' | 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-/**
+  readonly category: 'HARM_CATEGORY_HARASSMENT' | 'HARM_CATEGORY_HATE_SPEECH' | 'HARM_CATEGORY_SEXUALLY_EXPLICIT' | 'HARM_CATEGORY_DANGEROUS_CONTENT';readonly probability: 'HARM_PROBABILITY_UNSPECIFIED' | 'NEGLIGIBLE' | 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Google AI chat completion response
  */
 export interface GeminiChatResponse {
@@ -192,12 +179,7 @@ export class GoogleService {
     
     this.apiKey = this.configService.get<string>('GOOGLE_AI_API_KEY', '');
     if (!this.apiKey) {
-      this.logger.warn(`[${operationId}] Google AI API key not configured - service will operate in validation-only mode`);
-    }
-
-    this.logger.log(`[${operationId}] Google AI Service initialized with MAXIMUM Parlant integration`, {
-      parlantEnabled: true,
-      validationRequired: true,
+      this.logger.warn(`[${operationId}] Google AI API key not configured - service will operate in validation-only mode`);}this.logger.log(`[${operationId}] Google AI Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,
       auditTrailEnabled: true,
       baseUrl: this.baseUrl,
     });
@@ -235,42 +217,27 @@ export class GoogleService {
     try {
       // CRITICAL: Parlant conversational validation for AI model interaction
       const validationRequest: ParlantValidationRequest = {
-        functionName: 'GoogleService.executeChatCompletion',
-        functionParams: {
-          model: request.config.model,
+        functionName: 'GoogleService.executeChatCompletion',functionParams: {model: request.config.model,
           contentCount: request.contents.length,
           hasSystemInstruction: !!request.systemInstruction,
           toolsCount: request.tools?.length ?? 0,
           toolMode: request.toolConfig?.functionCallingConfig?.mode ?? 'NONE',
         },
-        actionDescription: `Execute Gemini ${request.config.model} chat completion with ${request.contents.length} content parts`,
-        context: request.context,
-        riskLevel: RiskLevel.HIGH, // AI model interactions are HIGH risk
+        actionDescription: `Execute Gemini ${request.config.model} chat completion with ${request.contents.length} content parts`,context: request.context,riskLevel: RiskLevel._HIGH, // AI model interactions are HIGH risk
         operationId: request.operationId,
       };
 
-      this.logger.log(`[${request.operationId}] Requesting Parlant validation for Gemini AI interaction`);
-      
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
-      this.validationCount++;
+      this.logger.log(`[${request.operationId}] Requesting Parlant validation for Gemini AI interaction`);const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);this.validationCount++;
 
       if (!validationResponse.approved) {
         this.logger.warn(
-          `[${request.operationId}] Gemini AI interaction denied by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] Gemini AI interaction denied by Parlant validation`,{operationId: request.operationId,
             reasoning: validationResponse.reasoning,
             alternatives: validationResponse.suggestedAlternatives,
           }
         );
 
-        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
-      }
-
-      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Gemini API call`);
-
-      // Execute Gemini API call with validated parameters
-      const response = await this.performGeminiAPICall(request);
+        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Gemini API call`);// Execute Gemini API call with validated parametersconst response = await this.performGeminiAPICall(request);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -308,9 +275,7 @@ export class GoogleService {
       );
 
       const serviceError: GoogleServiceError = {
-        code: 'GEMINI_CHAT_COMPLETION_ERROR',
-        message: error instanceof Error ? error.message : String(error),
-        operationId: request.operationId,
+        code: 'GEMINI_CHAT_COMPLETION_ERROR',message: error instanceof Error ? error.message : String(error),operationId: request.operationId,
         timestamp: new Date(),
         context: {
           model: request.config.model,
@@ -334,10 +299,7 @@ export class GoogleService {
     request: GeminiChatRequest,
     onChunk: (chunk: GeminiStreamChunk) => void
   ): Promise<void> {
-    const operationId = `${request.operationId}_stream`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_stream`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting Gemini streaming chat with Parlant validation`,
       {
         operationId,
@@ -355,33 +317,24 @@ export class GoogleService {
           contentCount: request.contents.length,
           streamingMode: true,
         },
-        actionDescription: `Execute streaming Gemini ${request.config.model} chat with real-time responses`,
-        context: request.context,
-        riskLevel: RiskLevel.HIGH, // Streaming AI interactions are HIGH risk
+        actionDescription: `Execute streaming Gemini ${request.config.model} chat with real-time responses`,context: request.context,riskLevel: RiskLevel._HIGH, // Streaming AI interactions are HIGH risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Streaming AI operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute streaming with validation approval
+        throw new Error(`Streaming AI operation blocked: ${validationResponse.reasoning}`);}// Execute streaming with validation approval
       await this.performStreamingGeminiCall(request, onChunk);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`[${operationId}] Gemini streaming completed successfully`, {
-        operationId,
-        duration,
+      this.logger.log(`[${operationId}] Gemini streaming completed successfully`, {operationId,duration,
         validationId: validationResponse.conversationId,
       });
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Gemini streaming failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Gemini streaming failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,error: error instanceof Error ? error.message : String(error),
         duration,
       });
       throw error;
@@ -397,10 +350,7 @@ export class GoogleService {
   async executeFunctionCalling(
     request: GeminiChatRequest & { requiresFunctionCall?: boolean }
   ): Promise<GeminiChatResponse> {
-    const operationId = `${request.operationId}_functions`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_functions`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting Gemini function calling with Parlant validation`,
       {
         operationId,
@@ -414,27 +364,20 @@ export class GoogleService {
     try {
       // Parlant validation for AI function calling (CRITICAL risk level)
       const validationRequest: ParlantValidationRequest = {
-        functionName: 'GoogleService.executeFunctionCalling',
-        functionParams: {
-          model: request.config.model,
+        functionName: 'GoogleService.executeFunctionCalling',functionParams: {model: request.config.model,
           toolsCount: request.tools?.length ?? 0,
           toolMode: request.toolConfig?.functionCallingConfig?.mode ?? 'AUTO',
           toolNames: request.tools?.map(t => t.name) ?? [],
           allowedFunctions: request.toolConfig?.functionCallingConfig?.allowedFunctionNames ?? [],
         },
-        actionDescription: `Execute Gemini function calling with ${request.tools?.length ?? 0} available functions`,
-        context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Function calling is CRITICAL risk
+        actionDescription: `Execute Gemini function calling with ${request.tools?.length ?? 0} available functions`,context: request.context,riskLevel: RiskLevel._CRITICAL, // Function calling is CRITICAL risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Function calling operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute Gemini function calling with validation approval
+        throw new Error(`Function calling operation blocked: ${validationResponse.reasoning}`);}// Execute Gemini function calling with validation approval
       const response = await this.performGeminiFunctionCall(request);
 
       const duration = Date.now() - startTime;
@@ -443,9 +386,7 @@ export class GoogleService {
       const firstCandidate = response.candidates.length > 0 ? response.candidates[0] : null;
       const functionCalls = firstCandidate?.content.parts.filter(part => part.functionCall) ?? [];
 
-      this.logger.log(`[${operationId}] Gemini function calling completed successfully`, {
-        operationId,
-        modelVersion: response.modelVersion,
+      this.logger.log(`[${operationId}] Gemini function calling completed successfully`, {operationId,modelVersion: response.modelVersion,
         functionCallsCount: functionCalls.length,
         functionNames: functionCalls.map(call => call.functionCall?.name).filter((name): name is string => Boolean(name)),
         duration,
@@ -456,9 +397,7 @@ export class GoogleService {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Gemini function calling failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Gemini function calling failed: ${error instanceof Error ? error.message : String(error)}`, {operationId,error: error instanceof Error ? error.message : String(error),
         duration,
       });
       throw error;
@@ -474,10 +413,7 @@ export class GoogleService {
   async executeMultimodalProcessing(
     request: GeminiMultimodalRequest
   ): Promise<GeminiChatResponse> {
-    const operationId = `${request.operationId}_multimodal`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `${request.operationId}_multimodal`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting Gemini multimodal processing with Parlant validation`,
       {
         operationId,
@@ -500,27 +436,20 @@ export class GoogleService {
           imageCount: request.imageCount ?? 0,
           totalImageSize: request.totalImageSize ?? 0,
         },
-        actionDescription: `Execute Gemini multimodal processing with ${request.contents.length} content parts including ${request.imageCount ?? 0} images`,
-        context: request.context,
-        riskLevel: RiskLevel.HIGH, // Multimodal processing is HIGH risk
+        actionDescription: `Execute Gemini multimodal processing with ${request.contents.length} content parts including ${request.imageCount ?? 0} images`,context: request.context,riskLevel: RiskLevel._HIGH, // Multimodal processing is HIGH risk
         operationId,
       };
 
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Multimodal processing operation blocked: ${validationResponse.reasoning}`);
-      }
-
-      // Execute Gemini multimodal processing with validation approval
+        throw new Error(`Multimodal processing operation blocked: ${validationResponse.reasoning}`);}// Execute Gemini multimodal processing with validation approval
       const response = await this.performGeminiMultimodalCall(request);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.usageMetadata);
 
-      this.logger.log(`[${operationId}] Gemini multimodal processing completed successfully`, {
-        operationId,
-        modelVersion: response.modelVersion,
+      this.logger.log(`[${operationId}] Gemini multimodal processing completed successfully`, {operationId,modelVersion: response.modelVersion,
         promptTokens: response.usageMetadata.promptTokenCount,
         candidatesTokens: response.usageMetadata.candidatesTokenCount,
         safetyRatings: response.candidates.length > 0 ? response.candidates[0]?.safetyRatings ?? [] : [],
@@ -558,25 +487,11 @@ export class GoogleService {
             text: `Mock Gemini ${request.config.model} response for ${request.contents.length} content parts`
           }]
         },
-        finishReason: 'STOP',
-        safetyRatings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            probability: 'NEGLIGIBLE'
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            probability: 'NEGLIGIBLE'
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            probability: 'NEGLIGIBLE'
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            probability: 'NEGLIGIBLE'
-          }
-        ]
+        finishReason: 'STOP',safetyRatings: [{
+            category: 'HARM_CATEGORY_HARASSMENT',probability: 'NEGLIGIBLE'},{
+            category: 'HARM_CATEGORY_HATE_SPEECH',probability: 'NEGLIGIBLE'},{
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',probability: 'NEGLIGIBLE'},{
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',probability: 'NEGLIGIBLE'}]
       }],
       usageMetadata: {
         promptTokenCount: this.estimatePromptTokens(request),
@@ -606,34 +521,17 @@ export class GoogleService {
       {
         candidates: [{
           content: {
-            role: 'model',
-            parts: [{ text: 'Mock streaming ' }]
-          },
-          finishReason: 'FINISH_REASON_UNSPECIFIED',
-          safetyRatings: []
-        }]
+            role: 'model',parts: [{ text: 'Mock streaming ' }]},finishReason: 'FINISH_REASON_UNSPECIFIED',safetyRatings: []}]
       },
       {
         candidates: [{
           content: {
-            role: 'model',
-            parts: [{ text: 'response from Gemini ' }]
-          },
-          finishReason: 'FINISH_REASON_UNSPECIFIED',
-          safetyRatings: []
-        }]
+            role: 'model',parts: [{ text: 'response from Gemini ' }]},finishReason: 'FINISH_REASON_UNSPECIFIED',safetyRatings: []}]
       },
       {
         candidates: [{
           content: {
-            role: 'model',
-            parts: [{ text: 'with Parlant validation.' }]
-          },
-          finishReason: 'STOP',
-          safetyRatings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', probability: 'NEGLIGIBLE' }
-          ]
-        }],
+            role: 'model',parts: [{ text: 'with Parlant validation.' }]},finishReason: 'STOP',safetyRatings: [{ category: 'HARM_CATEGORY_HARASSMENT', probability: 'NEGLIGIBLE' }]}],
         usageMetadata: {
           promptTokenCount: this.estimatePromptTokens(request),
           candidatesTokenCount: 75,
@@ -656,25 +554,14 @@ export class GoogleService {
     // TODO: Implement actual Google AI function calling SDK integration
     
     const mockFunctionCall = {
-      name: request.tools?.[0]?.name ?? 'mock_function',
-      args: { param: 'mock_value', timestamp: Date.now() }
-    };
-
-    const mockResponse: GeminiChatResponse = {
+      name: request.tools?.[0]?.name ?? 'mock_function',args: { param: 'mock_value', timestamp: Date.now() }};const mockResponse: GeminiChatResponse = {
       candidates: [{
         content: {
-          role: 'model',
-          parts: [{
-            functionCall: mockFunctionCall
+          role: 'model',parts: [{functionCall: mockFunctionCall
           }]
         },
-        finishReason: 'STOP',
-        safetyRatings: [
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            probability: 'NEGLIGIBLE'
-          }
-        ]
+        finishReason: 'STOP',safetyRatings: [{
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',probability: 'NEGLIGIBLE'}]
       }],
       usageMetadata: {
         promptTokenCount: this.estimatePromptTokens(request),
@@ -702,17 +589,9 @@ export class GoogleService {
             text: `Mock Gemini multimodal analysis with ${request.imageCount ?? 0} images processed`
           }]
         },
-        finishReason: 'STOP',
-        safetyRatings: [
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            probability: 'NEGLIGIBLE'
-          },
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            probability: 'LOW'
-          }
-        ]
+        finishReason: 'STOP',safetyRatings: [{
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',probability: 'NEGLIGIBLE'},{
+            category: 'HARM_CATEGORY_HARASSMENT',probability: 'LOW'}]
       }],
       usageMetadata: {
         promptTokenCount: this.estimatePromptTokens(request) + (request.imageCount ?? 0) * 200, // Images add tokens
@@ -733,13 +612,7 @@ export class GoogleService {
     const textContent = request.contents
       .flatMap(content => content.parts)
       .filter(part => part.text)
-      .map(part => part.text ?? '')
-      .join(' ');
-    
-    const systemContent = request.systemInstruction ?? '';
-    const toolsContent = JSON.stringify(request.tools ?? []);
-    
-    return Math.ceil((textContent.length + systemContent.length + toolsContent.length) / 4);
+      .map(part => part.text ?? '').join(' ');const systemContent = request.systemInstruction ?? '';const toolsContent = JSON.stringify(request.tools ?? []);return Math.ceil((textContent.length + systemContent.length + toolsContent.length) / 4);
   }
 
   private updatePerformanceMetrics(duration: number, usage: { promptTokenCount: number; candidatesTokenCount: number }): void {
@@ -755,13 +628,10 @@ export class GoogleService {
     
     this.logger.log('Google AI Service Performance Metrics', {
       requestCount: this.requestCount,
-      validationRate: `${validationRate.toFixed(2)}%`,
-      averageResponseTime: `${this.averageResponseTime.toFixed(2)}ms`,
+      validationRate: `${validationRate.toFixed(2)}%`,averageResponseTime: `${this.averageResponseTime.toFixed(2)}ms`,
       totalPromptTokens: this.tokenUsage.prompt,
       totalCandidatesTokens: this.tokenUsage.candidates,
-      tokenRatio: this.tokenUsage.prompt > 0 ? (this.tokenUsage.candidates / this.tokenUsage.prompt).toFixed(2) : '0',
-    });
-  }
+      tokenRatio: this.tokenUsage.prompt > 0 ? (this.tokenUsage.candidates / this.tokenUsage.prompt).toFixed(2) : '0',});}
 
   // ===== PUBLIC UTILITY METHODS =====
 
@@ -769,18 +639,11 @@ export class GoogleService {
    * Get current service health with performance metrics
    */
   getServiceHealth(): {
-    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-    metrics: Record<string, unknown>;
-  } {
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';metrics: Record<string, unknown>;} {
     const avgResponseTime = this.averageResponseTime;
     const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
-    if (avgResponseTime > 2500 || validationRate < 95) {
-      status = 'DEGRADED';
-    }
-    if (avgResponseTime > 6000 || validationRate < 80 || !this.apiKey) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgResponseTime > 2500 || validationRate < 95) {status = 'DEGRADED';}if (avgResponseTime > 6000 || validationRate < 80 || !this.apiKey) {
       status = 'FAILED';
     }
 
@@ -788,8 +651,7 @@ export class GoogleService {
       status,
       metrics: {
         requestCount: this.requestCount,
-        averageResponseTime: `${avgResponseTime.toFixed(2)}ms`,
-        validationRate: `${validationRate.toFixed(2)}%`,
+        averageResponseTime: `${avgResponseTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,
         tokenUsage: this.tokenUsage,
         apiKeyConfigured: !!this.apiKey,
       },

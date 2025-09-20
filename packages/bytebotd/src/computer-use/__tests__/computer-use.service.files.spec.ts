@@ -17,13 +17,7 @@
  * @version 1.0.0
  */
 
-import { WriteFileAction } from '@bytebot/shared';
-import { ReadFileActionDto } from '../dto/computer-action.dto';
-
-// Mock the nut-js library first to prevent module loading issues
-jest.mock('@nut-tree-fork/nut-js', () => ({
-  keyboard: {
-    pressKey: (
+import { WriteFileAction } from '@bytebot/shared';import { ReadFileActionDto } from '../dto/computer-action.dto';// Mock the nut-js library first to prevent module loading issuesjest.mock('@nut-tree-fork/nut-js', () => ({keyboard: {pressKey: (
       jest.fn() as jest.MockedFunction<() => Promise<void>>
     ).mockResolvedValue(undefined),
     releaseKey: (
@@ -75,54 +69,30 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     >
   ).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
-    A: 'A',
-    B: 'B',
-    C: 'C',
-    Enter: 'Enter',
-    Escape: 'Escape',
-    Space: 'Space',
-  },
-  Button: {
-    LEFT: 'LEFT',
-    RIGHT: 'RIGHT',
-    MIDDLE: 'MIDDLE',
-  },
-}));
+    A: 'A',B: 'B',C: 'C',Enter: 'Enter',Escape: 'Escape',Space: 'Space',},Button: {
+    LEFT: 'LEFT',RIGHT: 'RIGHT',MIDDLE: 'MIDDLE',},}));
 
 // Mock all external modules at the top level
-jest.mock('fs/promises', () => ({
-  writeFile: (
-    jest.fn() as jest.MockedFunction<
+jest.mock('fs/promises', () => ({writeFile: (jest.fn() as jest.MockedFunction<
       (file: string, data: Buffer) => Promise<void>
     >
   ).mockResolvedValue(undefined),
   readFile: (
     jest.fn() as jest.MockedFunction<(path: string) => Promise<Buffer>>
-  ).mockResolvedValue(Buffer.from('test content')),
-  unlink: (
-    jest.fn() as jest.MockedFunction<(path: string) => Promise<void>>
+  ).mockResolvedValue(Buffer.from('test content')),unlink: (jest.fn() as jest.MockedFunction<(path: string) => Promise<void>>
   ).mockResolvedValue(undefined),
 }));
 
-jest.mock('child_process');
-
-jest.mock('util', () => ({
-  promisify: jest.fn(() =>
-    (
+jest.mock('child_process');jest.mock('util', () => ({promisify: jest.fn(() =>(
       jest.fn() as jest.MockedFunction<
         (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
       >
     ).mockResolvedValue({
-      stdout: 'success',
-      stderr: '',
-    }),
-  ),
+      stdout: 'success',stderr: '',}),),
 }));
 
 // Mock the axios and http modules that are causing issues
-jest.mock('@nestjs/axios', () => ({
-  HttpService: (
-    jest.fn() as jest.MockedFunction<() => unknown>
+jest.mock('@nestjs/axios', () => ({HttpService: (jest.fn() as jest.MockedFunction<() => unknown>
   ).mockImplementation(() => ({
     axiosRef: {
       get: jest.fn(),
@@ -137,9 +107,7 @@ jest.mock('@nestjs/axios', () => ({
   })),
 }));
 
-jest.mock('axios', () => ({
-  default: {
-    get: jest.fn(),
+jest.mock('axios', () => ({default: {get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
@@ -152,30 +120,18 @@ jest.mock('axios', () => ({
   },
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import * as fs from 'fs/promises';
-import { promisify } from 'util';
-
-// Import services after mocking
-import {
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import * as fs from 'fs/promises';import { promisify } from 'util';// Import services after mockingimport {
   ComputerUseService,
   FileWriteResult,
   FileReadResult,
-} from '../computer-use.service';
-import { NutService } from '../../nut/nut.service';
-
-// Create mock implementations with proper typing
-const mockFs = fs as jest.Mocked<typeof fs>;
+} from '../computer-use.service';import { NutService } from '../../nut/nut.service';// Create mock implementations with proper typingconst mockFs = fs as jest.Mocked<typeof fs>;
 const mockPromisify = promisify as jest.MockedFunction<typeof promisify>;
 const mockExecAsync = jest.fn<
   Promise<{ stdout: string; stderr: string }>,
   [string]
 >();
 
-describe('ComputerUseService - File Operations', () => {
-  let service: ComputerUseService;
-  let testModule: TestingModule;
+describe('ComputerUseService - File Operations', () => {let service: ComputerUseService;let testModule: TestingModule;
   let mockLogger: jest.Mocked<Logger>;
 
   // Mock service implementations with comprehensive typing
@@ -214,17 +170,12 @@ describe('ComputerUseService - File Operations', () => {
         (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
       >
     ).mockResolvedValue({
-      stdout: 'success',
-      stderr: '',
-    });
-    (
+      stdout: 'success',stderr: '',});(
       mockFs.writeFile as jest.MockedFunction<typeof mockFs.writeFile>
     ).mockResolvedValue(undefined);
     (
       mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-    ).mockResolvedValue(Buffer.from('test content'));
-    (
-      mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
+    ).mockResolvedValue(Buffer.from('test content'));(mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
     ).mockResolvedValue(undefined);
 
     // Focus on file operations with standard mocking
@@ -250,62 +201,32 @@ describe('ComputerUseService - File Operations', () => {
     }
   });
 
-  describe('writeFile Method - Comprehensive File Writing Tests', () => {
-    const validBase64Data = Buffer.from(
-      'test file content for writing operations',
-    ).toString('base64');
-    const largeBase64Data = Buffer.from('a'.repeat(1024 * 1024)).toString(
-      'base64',
-    ); // 1MB test data
-
-    describe('Successful File Writing Operations', () => {
-      it('should write file successfully with absolute path', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/documents/test.txt',
-          data: validBase64Data,
-        };
+  describe('writeFile Method - Comprehensive File Writing Tests', () => {const validBase64Data = Buffer.from('test file content for writing operations',).toString('base64');const largeBase64Data = Buffer.from('a'.repeat(1024 * 1024)).toString('base64',); // 1MB test datadescribe('Successful File Writing Operations', () => {it('should write file successfully with absolute path', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/documents/test.txt',data: validBase64Data,};
 
         // Mock successful file operations
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir command
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp command
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown command
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmod command
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        // Verify successful result structure
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir command.mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp command.mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown command.mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmod commandconst result = (await service.action(action)) as FileWriteResult;// Verify successful result structure
         expect(result).toMatchObject({
           success: true,
-          path: '/home/user/documents/test.txt',
-          size: Buffer.from(validBase64Data, 'base64').length,
-        } as Partial<FileWriteResult>);
-        expect(result.message).toEqual(expect.any(String) as string);
+          path: '/home/user/documents/test.txt',size: Buffer.from(validBase64Data, 'base64').length,} as Partial<FileWriteResult>);expect(result.message).toEqual(expect.any(String) as string);
         expect(result.operationId).toEqual(expect.any(String) as string);
         expect(result.timestamp).toEqual(expect.any(Date) as Date);
 
         // Verify file system operations were called correctly
         expect(mockFs.writeFile).toHaveBeenCalledWith(
           expect.stringMatching(/^\/tmp\/bytebot_temp_\d+[a-z0-9]+$/),
-          Buffer.from(validBase64Data, 'base64'),
-        );
-
-        // Verify directory creation, file copy, and permissions
+          Buffer.from(validBase64Data, 'base64'),);// Verify directory creation, file copy, and permissions
         expect(mockExecAsync).toHaveBeenCalledWith(
-          'sudo mkdir -p "/home/user/documents"',
-        );
+          'sudo mkdir -p "/home/user/documents"",);
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
             /sudo cp "\/tmp\/bytebot_temp_\d+[a-z0-9]+" "\/home\/user\/documents\/test\.txt"/,
           ),
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
-          'sudo chown user:user "/home/user/documents/test.txt"',
-        );
+          'sudo chown user:user "/home/user/documents/test.txt"",);
         expect(mockExecAsync).toHaveBeenCalledWith(
-          'sudo chmod 644 "/home/user/documents/test.txt"',
-        );
+          'sudo chmod 644 "/home/user/documents/test.txt"",);
 
         // Verify temporary file cleanup
         expect(mockFs.unlink).toHaveBeenCalledWith(
@@ -317,9 +238,7 @@ describe('ComputerUseService - File Operations', () => {
           expect.stringMatching(/^\[write_file_\d+[a-z0-9]+\] Writing file$/),
           expect.objectContaining({
             operationId: expect.any(String) as string,
-            originalPath: '/home/user/documents/test.txt',
-            dataLength: validBase64Data.length,
-            timestamp: expect.any(String) as string,
+            originalPath: '/home/user/documents/test.txt',dataLength: validBase64Data.length,timestamp: expect.any(String) as string,
           }),
         );
 
@@ -329,36 +248,22 @@ describe('ComputerUseService - File Operations', () => {
           ),
           expect.objectContaining({
             operationId: expect.any(String) as string,
-            finalPath: '/home/user/documents/test.txt',
-            fileSize: expect.any(Number) as number,
-          }),
+            finalPath: '/home/user/documents/test.txt',fileSize: expect.any(Number) as number,}),
         );
       });
 
-      it('should handle relative paths correctly', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: 'documents/relative-test.txt',
-          data: validBase64Data,
-        };
+      it('should handle relative paths correctly', async () => {const action: WriteFileAction = {action: 'write_file',path: 'documents/relative-test.txt',data: validBase64Data,};
 
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
         expect(result.path).toBe(
-          '/home/user/Desktop/documents/relative-test.txt',
-        );
-
-        // Verify path resolution logging
+          '/home/user/Desktop/documents/relative-test.txt',);// Verify path resolution logging
         expect(mockLogger.log).toHaveBeenCalledWith(
           expect.stringMatching(
             /Resolved relative path to: \/home\/user\/Desktop\/documents\/relative-test\.txt/,
@@ -366,23 +271,14 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should handle large file data successfully', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/large-file.bin',
-          data: largeBase64Data,
-        };
+      it('should handle large file data successfully', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/large-file.bin',data: largeBase64Data,};
 
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
         expect(result.size).toBe(1024 * 1024); // 1MB
@@ -392,50 +288,27 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should handle empty file data correctly', async () => {
-        const emptyBase64Data = Buffer.from('').toString('base64');
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/empty-file.txt',
-          data: emptyBase64Data,
-        };
+      it('should handle empty file data correctly', async () => {const emptyBase64Data = Buffer.from('').toString('base64');const action: WriteFileAction = {action: 'write_file',path: '/home/user/empty-file.txt',data: emptyBase64Data,};
 
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         // Empty base64 data (empty string) is actually rejected by the service
         // because it checks for !action.data which includes empty string
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File data must be a non-empty base64 encoded string',
-        );
-      });
+          'File data must be a non-empty base64 encoded string',);});
     });
 
-    describe('Input Validation and Error Handling', () => {
-      it('should reject empty or null file data', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: '',
-        };
-
-        const result = (await service.action(action)) as FileWriteResult;
+    describe('Input Validation and Error Handling', () => {it('should reject empty or null file data', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: '',};const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File data must be a non-empty base64 encoded string',
-        );
-
-        // Verify error logging
+          'File data must be a non-empty base64 encoded string',);// Verify error logging
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(/File write operation failed/),
           expect.objectContaining({
@@ -445,152 +318,77 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should reject empty or null file path', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '',
-          data: validBase64Data,
-        };
+      it('should reject empty or null file path', async () => {const action: WriteFileAction = {action: 'write_file',path: '',data: validBase64Data,};
 
         const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path must be a non-empty string',
-        );
-      });
+          'File path must be a non-empty string',);});
 
-      it('should accept pseudo-invalid base64 data (Buffer.from is permissive)', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: 'invalid-base64-characters-!@#$%',
-        };
-
-        (
+      it('should accept pseudo-invalid base64 data (Buffer.from is permissive)', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: 'invalid-base64-characters-!@#$%',};(
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         // Buffer.from() is very permissive and will decode what it can,
         // so this doesn't fail validation in the actual service
         expect(result.success).toBe(true);
       });
 
-      it('should accept malformed base64 with special characters (Buffer.from is permissive)', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: 'not-valid-base64-!@#$%^&*()+={}[]|\\:";\'<>?,./`~',
-        };
+      it('should accept malformed base64 with special characters (Buffer.from is permissive)', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: 'not-valid-base64-!@#$%^&*()+={}[]|\\:';\'<>?,./`~`,};
 
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         // Buffer.from() is permissive and doesn't throw for most "invalid" base64
         expect(result.success).toBe(true);
       });
     });
 
-    describe('Security and Path Validation', () => {
-      it('should reject paths outside allowed directories', async () => {
-        const dangerousPaths = [
-          '/etc/passwd',
-          '/root/sensitive.txt',
-          '/var/log/system.log',
-          '/usr/bin/malicious',
-          '/../../../etc/passwd',
-          '/home/user/../../../etc/shadow',
-        ];
-
-        for (const dangerousPath of dangerousPaths) {
+    describe('Security and Path Validation', () => {it('should reject paths outside allowed directories', async () => {const dangerousPaths = ['/etc/passwd','/root/sensitive.txt','/var/log/system.log','/usr/bin/malicious','/../../../etc/passwd','/home/user/../../../etc/shadow',];for (const dangerousPath of dangerousPaths) {
           const action: WriteFileAction = {
-            action: 'write_file',
-            path: dangerousPath,
-            data: validBase64Data,
+            action: 'write_file',path: dangerousPath,data: validBase64Data,
           };
 
           const result = (await service.action(action)) as FileWriteResult;
 
           expect(result.success).toBe(false);
           expect(result.message).toContain(
-            'File path outside allowed directories',
-          );
-        }
+            'File path outside allowed directories',);}
       });
 
-      it('should allow files in /tmp directory', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/tmp/test-file.txt',
-          data: validBase64Data,
-        };
+      it('should allow files in /tmp directory', async () => {const action: WriteFileAction = {action: 'write_file',path: '/tmp/test-file.txt',data: validBase64Data,};
 
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-
-        const result = (await service.action(action)) as FileWriteResult;
+          stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
-        expect(result.path).toBe('/tmp/test-file.txt');
-      });
-
-      it('should normalize paths with .. traversal attempts', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/documents/../../../etc/passwd',
-          data: validBase64Data,
-        };
+        expect(result.path).toBe('/tmp/test-file.txt');});it('should normalize paths with .. traversal attempts', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/documents/../../../etc/passwd',data: validBase64Data,};
 
         const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path outside allowed directories',
-        );
-      });
+          'File path outside allowed directories',);});
     });
 
-    describe('File System Error Handling', () => {
-      it('should handle directory creation errors gracefully', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/deep/nested/directory/test.txt',
-          data: validBase64Data,
-        };
+    describe('File System Error Handling', () => {it('should handle directory creation errors gracefully', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/deep/nested/directory/test.txt',data: validBase64Data,};
 
         // Mock directory creation failure but continue operation
         mockExecAsync
           .mockRejectedValueOnce(
-            new Error('Permission denied for directory creation'),
-          )
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmod
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(true);
+            new Error('Permission denied for directory creation'),).mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp.mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown.mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmodconst result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(true);
 
         // Verify directory error was logged but didn't stop operation
         expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -600,53 +398,23 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should handle file copy/move errors', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: validBase64Data,
-        };
+      it('should handle file copy/move errors', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: validBase64Data,};
 
         // Mock file copy failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir
-          .mockRejectedValueOnce(new Error('Permission denied for file copy')); // cp fails
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(false);
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir.mockRejectedValueOnce(new Error('Permission denied for file copy')); // cp failsconst result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to move file to target location',
-        );
-
-        // Verify temporary file cleanup was attempted
+          'Failed to move file to target location',);// Verify temporary file cleanup was attempted
         expect(mockFs.unlink).toHaveBeenCalled();
       });
 
-      it('should handle temporary file write errors', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: validBase64Data,
-        };
+      it('should handle temporary file write errors', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: validBase64Data,};
 
         // Mock temporary file write failure
         (
           mockFs.writeFile as jest.MockedFunction<typeof mockFs.writeFile>
-        ).mockRejectedValue(new Error('Disk full'));
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(false);
-        expect(result.message).toContain('Disk full');
-      });
-
-      it('should handle cleanup errors without affecting main result', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: validBase64Data,
-        };
+        ).mockRejectedValue(new Error('Disk full'));const result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(false);
+        expect(result.message).toContain('Disk full');});it('should handle cleanup errors without affecting main result', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: validBase64Data,};
 
         // Mock successful operation but cleanup failure
         (
@@ -654,16 +422,9 @@ describe('ComputerUseService - File Operations', () => {
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
         ).mockResolvedValue({
-          stdout: '',
-          stderr: '',
-        });
-        (
+          stdout: '',stderr: '',});(
           mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
-        ).mockRejectedValue(new Error('Cannot delete temporary file'));
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(true);
+        ).mockRejectedValue(new Error('Cannot delete temporary file'));const result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(true);
 
         // Verify cleanup warning was logged
         expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -672,75 +433,31 @@ describe('ComputerUseService - File Operations', () => {
       });
     });
 
-    describe('Permission and Ownership Operations', () => {
-      it('should handle permission setting errors', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: validBase64Data,
-        };
+    describe('Permission and Ownership Operations', () => {it('should handle permission setting errors', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: validBase64Data,};
 
         // Mock permission setting failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown
-          .mockRejectedValueOnce(new Error('Cannot set file permissions')); // chmod fails
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(false);
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir.mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp.mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown.mockRejectedValueOnce(new Error('Cannot set file permissions')); // chmod failsconst result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to move file to target location',
-        );
-      });
+          'Failed to move file to target location',);});
 
-      it('should handle ownership setting errors', async () => {
-        const action: WriteFileAction = {
-          action: 'write_file',
-          path: '/home/user/test.txt',
-          data: validBase64Data,
-        };
+      it('should handle ownership setting errors', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: validBase64Data,};
 
         // Mock ownership setting failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp
-          .mockRejectedValueOnce(new Error('Cannot change file ownership')); // chown fails
-
-        const result = (await service.action(action)) as FileWriteResult;
-
-        expect(result.success).toBe(false);
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir.mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp.mockRejectedValueOnce(new Error('Cannot change file ownership')); // chown failsconst result = (await service.action(action)) as FileWriteResult;expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to move file to target location',
-        );
-      });
+          'Failed to move file to target location',);});
     });
   });
 
-  describe('readFile Method - Comprehensive File Reading Tests', () => {
-    const testFileContent = Buffer.from(
-      'test file content for reading operations',
-    );
-    const binaryFileContent = Buffer.from([
+  describe('readFile Method - Comprehensive File Reading Tests', () => {const testFileContent = Buffer.from('test file content for reading operations',);const binaryFileContent = Buffer.from([
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
     ]); // PNG header
 
-    describe('Successful File Reading Operations', () => {
-      it('should read text file successfully with full metadata', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/documents/test.txt',
-        };
-
-        // Mock successful file operations with comprehensive stat output
+    describe('Successful File Reading Operations', () => {it('should read text file successfully with full metadata', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/documents/test.txt',};// Mock successful file operations with comprehensive stat output
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp command
-          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chmod command
-          .mockResolvedValueOnce({ stdout: '25 1609459200', stderr: '' }); // stat command
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp command.mockResolvedValueOnce({ stdout: '', stderr: '' }) // chmod command.mockResolvedValueOnce({ stdout: '25 1609459200', stderr: '' }); // stat command(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
@@ -748,10 +465,7 @@ describe('ComputerUseService - File Operations', () => {
         // Verify successful result with complete metadata
         expect(result).toMatchObject({
           success: true,
-          data: testFileContent.toString('base64'),
-          name: 'test.txt',
-          size: 25,
-          mediaType: 'text/plain',
+          data: testFileContent.toString('base64'),name: 'test.txt',size: 25,mediaType: 'text/plain',
           lastModified: new Date(1609459200 * 1000), // Unix timestamp conversion
         } as Partial<FileReadResult>);
         expect(result.operationId).toEqual((expect.stringMatching(/^read_file_\d+[a-z0-9]+$/) as unknown) as string);
@@ -760,17 +474,14 @@ describe('ComputerUseService - File Operations', () => {
         // Verify file system operations
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
-            /sudo cp "\/home\/user\/documents\/test\.txt" "\/tmp\/bytebot_read_\d+[a-z0-9]+"/,
-          ),
-        );
+            /sudo cp "\/home\/user\/documents\/test\.txt" "\/tmp\/bytebot_read_\d+[a-z0-9]+"/,),);
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
             /sudo chmod 644 "\/tmp\/bytebot_read_\d+[a-z0-9]+"/,
           ),
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
-          'sudo stat -c "%s %Y" "/home/user/documents/test.txt"',
-        );
+          'sudo stat -c "%s %Y" "/home/user/documents/test.txt"",);
 
         // Verify temporary file cleanup
         expect(mockFs.unlink).toHaveBeenCalledWith(
@@ -778,24 +489,9 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should handle relative paths correctly', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: 'documents/relative-test.txt',
-        };
-
-        mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '15 1609459200', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-        ).mockResolvedValue(Buffer.from('relative content'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(true);
+      it('should handle relative paths correctly', async () => {const action: ReadFileActionDto = {action: 'read_file',path: 'documents/relative-test.txt',};mockExecAsync
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '15 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+        ).mockResolvedValue(Buffer.from('relative content'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
 
         // Verify path resolution logging
         expect(mockLogger.log).toHaveBeenCalledWith(
@@ -805,114 +501,41 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should detect media types correctly for various file extensions', async () => {
-        const mediaTypeTests = [
-          { path: '/home/user/image.png', expectedType: 'image/png' },
-          { path: '/home/user/photo.jpg', expectedType: 'image/jpeg' },
-          { path: '/home/user/photo.jpeg', expectedType: 'image/jpeg' },
-          { path: '/home/user/doc.pdf', expectedType: 'application/pdf' },
-          { path: '/home/user/data.json', expectedType: 'application/json' },
-          { path: '/home/user/config.xml', expectedType: 'text/xml' },
-          { path: '/home/user/style.css', expectedType: 'text/css' },
-          { path: '/home/user/script.js', expectedType: 'text/javascript' },
-          { path: '/home/user/code.ts', expectedType: 'text/typescript' },
-          { path: '/home/user/data.csv', expectedType: 'text/csv' },
-          { path: '/home/user/archive.zip', expectedType: 'application/zip' },
-          { path: '/home/user/audio.mp3', expectedType: 'audio/mpeg' },
-          { path: '/home/user/video.mp4', expectedType: 'video/mp4' },
-          {
-            path: '/home/user/unknown.xyz',
-            expectedType: 'application/octet-stream',
-          },
-        ];
+      it('should detect media types correctly for various file extensions', async () => {const mediaTypeTests = [{ path: '/home/user/image.png', expectedType: 'image/png' },{ path: '/home/user/photo.jpg', expectedType: 'image/jpeg' },{ path: '/home/user/photo.jpeg', expectedType: 'image/jpeg' },{ path: '/home/user/doc.pdf', expectedType: 'application/pdf' },{ path: '/home/user/data.json', expectedType: 'application/json' },{ path: '/home/user/config.xml', expectedType: 'text/xml' },{ path: '/home/user/style.css', expectedType: 'text/css' },{ path: '/home/user/script.js', expectedType: 'text/javascript' },{ path: '/home/user/code.ts', expectedType: 'text/typescript' },{ path: '/home/user/data.csv', expectedType: 'text/csv' },{ path: '/home/user/archive.zip', expectedType: 'application/zip' },{ path: '/home/user/audio.mp3', expectedType: 'audio/mpeg' },{ path: '/home/user/video.mp4', expectedType: 'video/mp4' },{path: '/home/user/unknown.xyz',expectedType: 'application/octet-stream',},];
 
         for (const test of mediaTypeTests) {
           // Reset mocks for each test
           jest.clearAllMocks();
 
           const action: ReadFileActionDto = {
-            action: 'read_file',
-            path: test.path,
-          };
+            action: 'read_file',path: test.path,};
 
           mockExecAsync
-            .mockResolvedValueOnce({ stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ stdout: '100 1609459200', stderr: '' });
-
-          (
-            mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-          ).mockResolvedValue(Buffer.from('test content'));
-
-          const result = (await service.action(action)) as FileReadResult;
-
-          expect(result.success).toBe(true);
+            .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '100 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+          ).mockResolvedValue(Buffer.from('test content'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
           expect(result.mediaType).toBe(test.expectedType);
         }
       });
 
-      it('should handle binary files correctly', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/image.png',
-        };
-
-        mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '8 1609459200', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+      it('should handle binary files correctly', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/image.png',};mockExecAsync
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '8 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(binaryFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
-        expect(result.data).toBe(binaryFileContent.toString('base64'));
-        expect(result.mediaType).toBe('image/png');
-        expect(result.size).toBe(8);
-      });
+        expect(result.data).toBe(binaryFileContent.toString('base64'));expect(result.mediaType).toBe('image/png');expect(result.size).toBe(8);});
 
-      it('should handle empty files correctly', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/empty.txt',
-        };
+      it('should handle empty files correctly', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/empty.txt',};mockExecAsync
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '0 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+        ).mockResolvedValue(Buffer.from(''));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
+        expect(result.data).toBe('');expect(result.size).toBe(0);});
 
-        mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '0 1609459200', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-        ).mockResolvedValue(Buffer.from(''));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(true);
-        expect(result.data).toBe('');
-        expect(result.size).toBe(0);
-      });
-
-      it('should handle large files correctly', async () => {
-        const largeContent = Buffer.alloc(1024 * 1024, 'a'); // 1MB file
-
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/large-file.bin',
-        };
-
-        mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
+      it('should handle large files correctly', async () => {const largeContent = Buffer.alloc(1024 * 1024, 'a'); // 1MB fileconst action: ReadFileActionDto = {action: 'read_file',path: '/home/user/large-file.bin',};mockExecAsync
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({
             stdout: `${1024 * 1024} 1609459200`,
-            stderr: '',
-          });
-
-        (
+            stderr: '',});(
           mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(largeContent);
 
@@ -920,25 +543,13 @@ describe('ComputerUseService - File Operations', () => {
 
         expect(result.success).toBe(true);
         expect(result.size).toBe(1024 * 1024);
-        expect(result.data).toBe(largeContent.toString('base64'));
-      });
-    });
+        expect(result.data).toBe(largeContent.toString('base64'));});});
 
-    describe('Input Validation and Error Handling', () => {
-      it('should reject empty or null file path', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '',
-        };
-
-        const result = (await service.action(action)) as FileReadResult;
+    describe('Input Validation and Error Handling', () => {it('should reject empty or null file path', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '',};const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path must be a non-empty string',
-        );
-
-        // Verify error logging
+          'File path must be a non-empty string',);// Verify error logging
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(/File read operation failed/),
           expect.objectContaining({
@@ -948,214 +559,88 @@ describe('ComputerUseService - File Operations', () => {
         );
       });
 
-      it('should handle non-string path parameter', async () => {
-        const action = {
-          action: 'read_file',
-          path: null,
-        } as unknown as ReadFileActionDto;
+      it('should handle non-string path parameter', async () => {const action = {action: 'read_file',path: null,} as unknown as ReadFileActionDto;
 
         const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path must be a non-empty string',
-        );
-      });
+          'File path must be a non-empty string',);});
     });
 
-    describe('Security and Path Validation', () => {
-      it('should reject paths outside allowed directories', async () => {
-        const dangerousPaths = [
-          '/etc/shadow',
-          '/root/.ssh/id_rsa',
-          '/var/log/auth.log',
-          '/usr/bin/sudo',
-          '/../../../etc/passwd',
-          '/home/user/../../../etc/hosts',
-        ];
-
-        for (const dangerousPath of dangerousPaths) {
+    describe('Security and Path Validation', () => {it('should reject paths outside allowed directories', async () => {const dangerousPaths = ['/etc/shadow','/root/.ssh/id_rsa','/var/log/auth.log','/usr/bin/sudo','/../../../etc/passwd','/home/user/../../../etc/hosts',];for (const dangerousPath of dangerousPaths) {
           const action: ReadFileActionDto = {
-            action: 'read_file',
-            path: dangerousPath,
-          };
+            action: 'read_file',path: dangerousPath,};
 
           const result = (await service.action(action)) as FileReadResult;
 
           expect(result.success).toBe(false);
           expect(result.message).toContain(
-            'File path outside allowed directories',
-          );
-        }
+            'File path outside allowed directories',);}
       });
 
-      it('should allow files in /tmp directory', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/tmp/test-file.txt',
-        };
-
-        mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-        ).mockResolvedValue(Buffer.from('tmp content'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(true);
+      it('should allow files in /tmp directory', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/tmp/test-file.txt',};mockExecAsync
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+        ).mockResolvedValue(Buffer.from('tmp content'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
       });
     });
 
-    describe('File System Error Handling', () => {
-      it('should handle file copy errors', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock file copy failure
+    describe('File System Error Handling', () => {it('should handle file copy errors', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock file copy failure
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
-        ).mockRejectedValue(new Error('Permission denied for file access'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(false);
+        ).mockRejectedValue(new Error('Permission denied for file access'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to read file: Permission denied for file access',
-        );
-
-        // Verify temporary file cleanup was attempted
+          'Failed to read file: Permission denied for file access',);// Verify temporary file cleanup was attempted
         expect(mockFs.unlink).toHaveBeenCalled();
       });
 
-      it('should handle file read errors', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock successful copy but read failure
+      it('should handle file read errors', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock successful copy but read failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-        ).mockRejectedValue(new Error('File corrupted'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(false);
-        expect(result.message).toContain('Failed to read file: File corrupted');
-      });
-
-      it('should handle stat command errors', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock successful copy and read but stat failure
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+        ).mockRejectedValue(new Error('File corrupted'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(false);
+        expect(result.message).toContain('Failed to read file: File corrupted');});it('should handle stat command errors', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock successful copy and read but stat failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({
-            stdout: '',
-            stderr: '',
-          })
-          .mockRejectedValue(new Error('Cannot get file stats'));
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({stdout: '',stderr: '',}).mockRejectedValue(new Error('Cannot get file stats'));(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to read file: Cannot get file stats',
-        );
-      });
+          'Failed to read file: Cannot get file stats',);});
 
-      it('should handle malformed stat output', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock malformed stat output
+      it('should handle malformed stat output', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock malformed stat output
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: 'invalid stat output', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: 'invalid stat output', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'Failed to read file size from stat output',
-        );
-      });
+          'Failed to read file size from stat output',);});
 
-      it('should handle cleanup _errors without affecting main error result', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock file operation failure and cleanup failure
+      it('should handle cleanup _errors without affecting main error result', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock file operation failure and cleanup failure
         (
           mockExecAsync as jest.MockedFunction<
             (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
           >
-        ).mockRejectedValue(new Error('File not found'));
-        (
-          mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
-        ).mockRejectedValue(new Error('Cannot delete temporary file'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(false);
-        expect(result.message).toContain('File not found');
-
-        // Verify cleanup warning was logged
-        expect(mockLogger.warn).toHaveBeenCalledWith(
+        ).mockRejectedValue(new Error('File not found'));(mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
+        ).mockRejectedValue(new Error('Cannot delete temporary file'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(false);
+        expect(result.message).toContain('File not found');// Verify cleanup warning was loggedexpect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringMatching(/Failed to cleanup temp file on error/),
         );
       });
 
-      it('should handle successful operation with cleanup failure', async () => {
-        const action: ReadFileActionDto = {
-          action: 'read_file',
-          path: '/home/user/test.txt',
-        };
-
-        // Mock successful operation but cleanup failure
+      it('should handle successful operation with cleanup failure', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};// Mock successful operation but cleanup failure
         mockExecAsync
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
-
-        (
-          mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+          .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
         ).mockResolvedValue(testFileContent);
         (
           mockFs.unlink as jest.MockedFunction<typeof mockFs.unlink>
-        ).mockRejectedValue(new Error('Cannot delete temporary file'));
-
-        const result = (await service.action(action)) as FileReadResult;
-
-        expect(result.success).toBe(true);
+        ).mockRejectedValue(new Error('Cannot delete temporary file'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
 
         // Verify cleanup warning was logged but didn't affect result
         expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1164,125 +649,65 @@ describe('ComputerUseService - File Operations', () => {
       });
     });
 
-    describe('Base64 Encoding and Content Handling', () => {
-      it('should properly encode various content types to base64', async () => {
-        const testCases = [
-          { content: 'simple text', description: 'plain text' },
-          {
-            content: '{"key": "value", "number": 123}',
-            description: 'JSON content',
-          },
-          {
-            content: '<html><body>Test</body></html>',
-            description: 'HTML content',
-          },
-          { content: 'line1\nline2\nline3', description: 'multiline text' },
-          {
-            content: 'special chars: àáâãäåæçèéêë',
-            description: 'Unicode characters',
-          },
-          { content: '\x00\x01\x02\x03', description: 'binary data' },
-        ];
-
-        for (const testCase of testCases) {
+    describe('Base64 Encoding and Content Handling', () => {it('should properly encode various content types to base64', async () => {const testCases = [{ content: 'simple text', description: 'plain text' },{content: '{"key": "value", "number": 123}",description: 'JSON content',},{
+            content: '<html><body>Test</body></html>',description: 'HTML content',},{ content: 'line1
+line2
+line3', description: 'multiline text' },{content: 'special chars: àáâãäåæçèéêë',description: 'Unicode characters',},{ content: '\x00\x01\x02\x03', description: 'binary data' },];for (const testCase of testCases) {
           jest.clearAllMocks();
 
           const action: ReadFileActionDto = {
             action: 'read_file',
-            path: `/home/user/${testCase.description.replace(/\s+/g, '')}.txt`,
-          };
+            path: `/home/user/${testCase.description.replace(/\s+/g, '')}.txt',};
 
           const contentBuffer = Buffer.from(testCase.content);
 
           mockExecAsync
-            .mockResolvedValueOnce({ stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ stdout: '', stderr: '' })
+            .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' })
             .mockResolvedValueOnce({
               stdout: `${contentBuffer.length} 1609459200`,
-              stderr: '',
-            });
-
-          (
+              stderr: '',});(
             mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
           ).mockResolvedValue(contentBuffer);
 
           const result = (await service.action(action)) as FileReadResult;
 
           expect(result.success).toBe(true);
-          expect(result.data).toBe(contentBuffer.toString('base64'));
-
-          // Verify content can be decoded back correctly
-          if (!result.data) {
+          expect(result.data).toBe(contentBuffer.toString('base64'));// Verify content can be decoded back correctlyif (!result.data) {
             throw new Error(
-              'Expected result.data to be defined for successful read operation',
-            );
-          }
-          const decodedContent = Buffer.from(result.data, 'base64').toString();
-          expect(decodedContent).toBe(testCase.content);
-        }
+              'Expected result.data to be defined for successful read operation',);}
+          const decodedContent = Buffer.from(result.data, 'base64').toString();expect(decodedContent).toBe(testCase.content);}
       });
     });
   });
 
-  describe('Logging and Operation Tracking', () => {
-    it('should generate unique operation IDs for each file operation', async () => {
-      const action1: WriteFileAction = {
-        action: 'write_file',
-        path: '/home/user/test1.txt',
-        data: Buffer.from('test1').toString('base64'),
-      };
-
-      const action2: ReadFileActionDto = {
-        action: 'read_file',
-        path: '/home/user/test2.txt',
-      };
-
-      (
+  describe('Logging and Operation Tracking', () => {it('should generate unique operation IDs for each file operation', async () => {const action1: WriteFileAction = {action: 'write_file',path: '/home/user/test1.txt',data: Buffer.from('test1').toString('base64'),};const action2: ReadFileActionDto = {
+        action: 'read_file',path: '/home/user/test2.txt',};(
         mockExecAsync as jest.MockedFunction<
           (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
         >
       ).mockResolvedValue({
-        stdout: '10 1609459200',
-        stderr: '',
-      });
-      (
+        stdout: '10 1609459200',stderr: '',});(
         mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-      ).mockResolvedValue(Buffer.from('test2'));
-
-      const result1 = (await service.action(action1)) as FileWriteResult;
-      const result2 = (await service.action(action2)) as FileReadResult;
+      ).mockResolvedValue(Buffer.from('test2'));const result1 = (await service.action(action1)) as FileWriteResult;const result2 = (await service.action(action2)) as FileReadResult;
 
       expect(_result1.operationId).toMatch(/^write_file_\d+[a-z0-9]+$/);
       expect(_result2.operationId).toMatch(/^read_file_\d+[a-z0-9]+$/);
       expect(_result1.operationId).not.toBe(_result2.operationId);
     });
 
-    it('should log comprehensive operation metadata for successful writes', async () => {
-      const action: WriteFileAction = {
-        action: 'write_file',
-        path: '/home/user/test.txt',
-        data: Buffer.from('test content').toString('base64'),
-      };
-
-      (
+    it('should log comprehensive operation metadata for successful writes', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: Buffer.from('test content').toString('base64'),};(
         mockExecAsync as jest.MockedFunction<
           (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
         >
       ).mockResolvedValue({
-        stdout: '',
-        stderr: '',
-      });
-
-      await service.action(action);
+        stdout: '',stderr: '',});await service.action(action);
 
       // Verify start logging
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/Writing file$/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
-          originalPath: '/home/user/test.txt',
-          dataLength: expect.any(Number) as number,
-          timestamp: expect.any(String) as string,
+          originalPath: '/home/user/test.txt',dataLength: expect.any(Number) as number,timestamp: expect.any(String) as string,
         }),
       );
 
@@ -1291,37 +716,18 @@ describe('ComputerUseService - File Operations', () => {
         expect.stringMatching(/File write operation completed successfully$/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
-          finalPath: '/home/user/test.txt',
-          fileSize: expect.any(Number) as number,
-        }),
+          finalPath: '/home/user/test.txt',fileSize: expect.any(Number) as number,}),
       );
     });
 
-    it('should log comprehensive operation metadata for successful reads', async () => {
-      const action: ReadFileActionDto = {
-        action: 'read_file',
-        path: '/home/user/test.txt',
-      };
-
-      mockExecAsync
-        .mockResolvedValueOnce({ stdout: '', stderr: '' })
-        .mockResolvedValueOnce({ stdout: '', stderr: '' })
-        .mockResolvedValueOnce({ stdout: '12 1609459200', stderr: '' });
-
-      (
-        mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-      ).mockResolvedValue(Buffer.from('test content'));
-
-      await service.action(action);
-
-      // Verify start logging
+    it('should log comprehensive operation metadata for successful reads', async () => {const action: ReadFileActionDto = {action: 'read_file',path: '/home/user/test.txt',};mockExecAsync
+        .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '12 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+      ).mockResolvedValue(Buffer.from('test content'));await service.action(action);// Verify start logging
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/Reading file$/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
-          originalPath: '/home/user/test.txt',
-          timestamp: expect.any(String) as string,
-        }),
+          originalPath: '/home/user/test.txt',timestamp: expect.any(String) as string,}),
       );
 
       // Verify completion logging
@@ -1329,27 +735,12 @@ describe('ComputerUseService - File Operations', () => {
         expect.stringMatching(/File read operation completed successfully$/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
-          fileName: 'test.txt',
-          fileSize: 12,
-          mediaType: 'text/plain',
-          base64Length: expect.any(Number) as number,
-        }),
+          fileName: 'test.txt',fileSize: 12,mediaType: 'text/plain',base64Length: expect.any(Number) as number,}),
       );
     });
 
-    it('should maintain consistent logging format for errors', async () => {
-      const writeAction: WriteFileAction = {
-        action: 'write_file',
-        path: '/etc/passwd', // Unsafe path
-        data: Buffer.from('test').toString('base64'),
-      };
-
-      const readAction: ReadFileActionDto = {
-        action: 'read_file',
-        path: '/etc/shadow', // Unsafe path
-      };
-
-      await service.action(writeAction);
+    it('should maintain consistent logging format for errors', async () => {const writeAction: WriteFileAction = {action: 'write_file',path: '/etc/passwd', // Unsafe pathdata: Buffer.from('test').toString('base64'),};const readAction: ReadFileActionDto = {
+        action: 'read_file',path: '/etc/shadow', // Unsafe path};await service.action(writeAction);
       await service.action(readAction);
 
       // Verify error logging format consistency
@@ -1373,83 +764,36 @@ describe('ComputerUseService - File Operations', () => {
     });
   });
 
-  describe('Edge Cases and Boundary Conditions', () => {
-    it('should handle extremely long file paths', async () => {
-      const longPath = '/home/user/' + 'a'.repeat(255) + '.txt';
-
-      const action: WriteFileAction = {
-        action: 'write_file',
-        path: longPath,
-        data: Buffer.from('test').toString('base64'),
-      };
-
-      (
+  describe('Edge Cases and Boundary Conditions', () => {it('should handle extremely long file paths', async () => {const longPath = '/home/user/' + 'a'.repeat(255) + '.txt';const action: WriteFileAction = {action: 'write_file',path: longPath,data: Buffer.from('test').toString('base64'),};(
         mockExecAsync as jest.MockedFunction<
           (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
         >
       ).mockResolvedValue({
-        stdout: '',
-        stderr: '',
-      });
-
-      const result = (await service.action(action)) as FileWriteResult;
+        stdout: '',stderr: '',});const result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(true);
       expect(result.path).toBe(longPath);
     });
 
-    it('should handle paths with special characters', async () => {
-      const specialPath =
-        '/home/user/test file with spaces and "quotes" & symbols.txt';
-
-      const action: ReadFileActionDto = {
-        action: 'read_file',
-        path: specialPath,
-      };
+    it('should handle paths with special characters', async () => {const specialPath ='/home/user/test file with spaces and "quotes" & symbols.txt";const action: ReadFileActionDto = {
+        action: 'read_file',path: specialPath,};
 
       mockExecAsync
-        .mockResolvedValueOnce({ stdout: '', stderr: '' })
-        .mockResolvedValueOnce({ stdout: '', stderr: '' })
-        .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
-
-      (
-        mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-      ).mockResolvedValue(Buffer.from('test content'));
-
-      const result = (await service.action(action)) as FileReadResult;
-
-      expect(result.success).toBe(true);
+        .mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '', stderr: '' }).mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });(mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
+      ).mockResolvedValue(Buffer.from('test content'));const result = (await service.action(action)) as FileReadResult;expect(result.success).toBe(true);
       expect(result.name).toBe(
-        'test file with spaces and "quotes" & symbols.txt',
-      );
+        'test file with spaces and "quotes" & symbols.txt",);
     });
 
-    it('should handle concurrent file operations safely', async () => {
-      const writeAction: WriteFileAction = {
-        action: 'write_file',
-        path: '/home/user/concurrent1.txt',
-        data: Buffer.from('concurrent write').toString('base64'),
-      };
-
-      const readAction: ReadFileActionDto = {
-        action: 'read_file',
-        path: '/home/user/concurrent2.txt',
-      };
-
-      (
+    it('should handle concurrent file operations safely', async () => {const writeAction: WriteFileAction = {action: 'write_file',path: '/home/user/concurrent1.txt',data: Buffer.from('concurrent write').toString('base64'),};const readAction: ReadFileActionDto = {
+        action: 'read_file',path: '/home/user/concurrent2.txt',};(
         mockExecAsync as jest.MockedFunction<
           (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
         >
       ).mockResolvedValue({
-        stdout: '15 1609459200',
-        stderr: '',
-      });
-      (
+        stdout: '15 1609459200',stderr: '',});(
         mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
-      ).mockResolvedValue(Buffer.from('concurrent read'));
-
-      // Execute operations concurrently
-      const [writeResult, readResult] = await Promise.all([
+      ).mockResolvedValue(Buffer.from('concurrent read'));// Execute operations concurrentlyconst [writeResult, readResult] = await Promise.all([
         service.action(writeAction),
         service.action(readAction),
       ]);
@@ -1466,15 +810,7 @@ describe('ComputerUseService - File Operations', () => {
     });
   });
 
-  describe('Performance and Resource Management', () => {
-    it('should cleanup all temporary resources in finally blocks', async () => {
-      const action: WriteFileAction = {
-        action: 'write_file',
-        path: '/home/user/test.txt',
-        data: Buffer.from('test').toString('base64'),
-      };
-
-      // Simulate various failure scenarios to test cleanup
+  describe('Performance and Resource Management', () => {it('should cleanup all temporary resources in finally blocks', async () => {const action: WriteFileAction = {action: 'write_file',path: '/home/user/test.txt',data: Buffer.from('test').toString('base64'),};// Simulate various failure scenarios to test cleanup
       const failureScenarios = [
         () => {
           (
@@ -1483,14 +819,10 @@ describe('ComputerUseService - File Operations', () => {
                 ...args: unknown[]
               ) => Promise<{ stdout: string; stderr: string }>
             >
-          ).mockRejectedValue(new Error('mkdir failed'));
-        },
-        () => {
+          ).mockRejectedValue(new Error('mkdir failed'));},() => {
           (
             mockFs.writeFile as jest.MockedFunction<typeof mockFs.writeFile>
-          ).mockRejectedValue(new Error('write failed'));
-        },
-        () => {
+          ).mockRejectedValue(new Error('write failed'));},() => {
           // First setup a successful response, then a failure to test cp failure scenario
           (
             mockExecAsync as jest.MockedFunction<
@@ -1500,12 +832,7 @@ describe('ComputerUseService - File Operations', () => {
             >
           )
             .mockResolvedValueOnce({
-              stdout: '',
-              stderr: '',
-            })
-            .mockRejectedValue(new Error('cp failed')); // cp failure on second call
-        },
-      ];
+              stdout: '',stderr: '',}).mockRejectedValue(new Error('cp failed')); // cp failure on second call},];
 
       for (const scenario of failureScenarios) {
         jest.clearAllMocks();
@@ -1518,24 +845,14 @@ describe('ComputerUseService - File Operations', () => {
       }
     });
 
-    it('should handle memory-efficient operations for large files', async () => {
-      // Test with a very large base64 string (simulating 10MB file)
-      const largeData = 'a'.repeat(10 * 1024 * 1024);
-      const largeBase64 = Buffer.from(largeData).toString('base64');
-
-      const action: WriteFileAction = {
-        action: 'write_file',
-        path: '/home/user/large-file.txt',
-        data: largeBase64,
-      };
+    it('should handle memory-efficient operations for large files', async () => {// Test with a very large base64 string (simulating 10MB file)const largeData = 'a'.repeat(10 * 1024 * 1024);const largeBase64 = Buffer.from(largeData).toString('base64');const action: WriteFileAction = {action: 'write_file',path: '/home/user/large-file.txt',data: largeBase64,};
 
       (
         mockExecAsync as jest.MockedFunction<
           (...args: unknown[]) => Promise<{ stdout: string; stderr: string }>
         >
       ).mockResolvedValue({
-        stdout: '',
-        stderr: '',
+        stdout: '',stderr: '',
       });
 
       const result = (await service.action(action)) as FileWriteResult;

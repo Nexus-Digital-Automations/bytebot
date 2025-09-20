@@ -25,8 +25,10 @@ import { Reflector } from '@nestjs/core';
 // Type definitions for JWT operations
 interface JwtPayload {
   sub: string;
-  email: string;
-  role: string;
+  emai,
+        l: string;
+  rol,
+      e: string;
   permissions?: string[];
   exp?: number;
   iat?: number;
@@ -44,9 +46,12 @@ function isJwtPayload(payload: unknown): payload is JwtPayload {
     'sub' in payload &&
     'email' in payload &&
     'role' in payload &&
-    typeof (payload as { sub: unknown }).sub === 'string' &&
-    typeof (payload as { email: unknown }).email === 'string' &&
-    typeof (payload as { role: unknown }).role === 'string'
+    typeof (payload as { su,
+      b: unknown }).sub === 'string' &&
+    typeof (payload as { emai,
+      l: unknown }).email === 'string' &&
+    typeof (payload as { rol,
+      e: unknown }).role === 'string'
   );
 }
 
@@ -54,36 +59,46 @@ function isStringOrUndefined(value: unknown): value is string | undefined {
   return typeof value === 'string' || value === undefined;
 }
 
-function isHttpContext(context: unknown): context is { getRequest: () => unknown } {
+function isHttpContext(context: unknown): context is { getReques,
+      t: () => unknown } {
   return (
     typeof context === 'object' &&
     context !== null &&
     'getRequest' in context &&
-    typeof (context as { getRequest: unknown }).getRequest === 'function'
+    typeof (context as { getReques,
+      t: unknown }).getRequest === 'function'
   );
 }
 
-function safeGetRequest(httpContext: { getRequest: () => unknown }): unknown {
+function safeGetRequest(httpContext: { getReques,
+      t: () => unknown }): unknown {
   // This wrapper function helps TypeScript understand that we're safely handling the any return
   return httpContext.getRequest();
 }
 
-function safeJwtVerify(jwtService: { verifyAsync: (token: string, options: { secret: string }) => Promise<unknown> }, token: string, options: { secret: string }): Promise<unknown> {
-  // This wrapper function helps TypeScript understand that we're safely handling the any return
-  return jwtService.verifyAsync(token, options);
-}
+function safeJwtVerify(jwtService: { verifyAsync: (token: string, option,
+        s: { secre,
+      t: string }) => Promise<unknown> }, token: string, options: { secre,
+      t: string }): Promise<unknown> {
+  // This wrapper function helps TypeScript understand that we're safely handling the any returnreturn jwtService.verifyAsync(token, options);}
 
 // Proper typing for Jest mocks
 type _MockJwtService = {
-  verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
+  verifyAsync: jest.MockedFunction<(token: string, option,
+        s: { secre,
+      t: string }) => Promise<unknown>>;
 };
 
 type _MockConfigService = {
-  get: jest.MockedFunction<(key: string) => string | undefined>;
+  ge,
+        t: jest.MockedFunction<(ke,
+      y: string) => string | undefined>;
 };
 
 type _MockReflector = {
-  getAllAndOverride: jest.MockedFunction<(key: string, targets: unknown[]) => boolean>;
+  getAllAndOverride: jest.MockedFunction<(ke,
+        y: string, target,
+      s: unknown[]) => boolean>;
 };
 
 interface AuthenticatedRequest {
@@ -91,28 +106,31 @@ interface AuthenticatedRequest {
   user?: {
     id: string;
     email: string;
-    role: string;
-    permissions: string[];
+    rol,
+        e: string;
+    permission,
+      s: string[];
   };
 }
 
 interface RequestHeaders {
   authorization?: string;
-  [key: string]: string | string[] | undefined;
+  [ke,
+      y: string]: string | string[] | undefined;
 }
 
 // Mock JWT Authentication Guard implementation for Phase 1 requirements
 class MockJwtAuthGuard {
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService,
-    private reflector: Reflector,
+    private configServic,
+        e: ConfigService,
+    private reflecto,
+      r: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
-      context.getHandler(),
-      context.getClass(),
+    const isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [context.getHandler(),context.getClass(),
     ]);
 
     if (isPublic) {
@@ -121,50 +139,34 @@ class MockJwtAuthGuard {
 
     const httpContext = context.switchToHttp();
     if (!isHttpContext(httpContext)) {
-      throw new UnauthorizedException('Invalid execution context');
-    }
-    const rawRequest = safeGetRequest(httpContext);
+      throw new UnauthorizedException('Invalid execution context');}const rawRequest = safeGetRequest(httpContext);
     if (!isAuthenticatedRequest(rawRequest)) {
-      throw new UnauthorizedException('Invalid request format');
-    }
-    const request = rawRequest;
+      throw new UnauthorizedException('Invalid request format');}const request = rawRequest;
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException('No authentication token provided');
-    }
-
-    try {
-      const jwtSecret = this.configService.get<string>('JWT_SECRET');
-      if (!jwtSecret) {
-        throw new UnauthorizedException('JWT secret not configured');
-      }
-      const rawPayload = await safeJwtVerify(this.jwtService, token, {
-        secret: jwtSecret,
+      throw new UnauthorizedException('No authentication token provided');}try {
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');if (!jwtSecret) {throw new UnauthorizedException('JWT secret not configured');}const rawPayload = await safeJwtVerify(this.jwtService, token, {
+        secre,
+      t: jwtSecret,
       });
       
       if (!isJwtPayload(rawPayload)) {
-        throw new UnauthorizedException('Invalid token payload structure');
-      }
-      const payload = rawPayload;
+        throw new UnauthorizedException('Invalid token payload structure');}const payload = rawPayload;
 
       // Validate token payload structure
       if (!payload.sub || !payload.email || !payload.role) {
-        throw new UnauthorizedException('Invalid token payload structure');
-      }
-
-      // Check token expiration
+        throw new UnauthorizedException('Invalid token payload structure');}// Check token expiration
       const currentTime = Math.floor(Date.now() / 1000);
       if (payload.exp && payload.exp < currentTime) {
-        throw new UnauthorizedException('Token has expired');
-      }
-
-      // Attach user information to request
+        throw new UnauthorizedException('Token has expired');}// Attach user information to request
       request.user = {
         id: payload.sub,
         email: payload.email,
-        role: payload.role,
-        permissions: payload.permissions ?? [],
+        rol,
+        e: payload.role,
+        permission,
+      s: payload.permissions ?? [],
       };
 
       return true;
@@ -172,9 +174,7 @@ class MockJwtAuthGuard {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException('Invalid authentication token');
-    }
-  }
+      throw new UnauthorizedException('Invalid authentication token');}}
 
   private extractTokenFromHeader(request: AuthenticatedRequest): string | undefined {
     const authHeader = request.headers?.authorization;
@@ -182,16 +182,15 @@ class MockJwtAuthGuard {
       return undefined;
     }
 
-    const [type, token] = authHeader.split(' ');
-    return type === 'Bearer' ? token : undefined;
-  }
-}
+    const [type, token] = authHeader.split(' ');return type === 'Bearer' ? token : undefined;}}
 
 describe('JwtAuthGuard', () => {
   let guard: MockJwtAuthGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
-  let reflector: Reflector;
+  let configServic,
+        e: ConfigService;
+  let reflecto,
+      r: Reflector;
 
   const operationId = `jwt_guard_test${Date.now()}`;
 
@@ -200,15 +199,19 @@ describe('JwtAuthGuard', () => {
     headers: RequestHeaders = {},
     _isPublic = false,
   ): ExecutionContext => {
-    const mockRequest: AuthenticatedRequest = {
+    const mockReques,
+        t: AuthenticatedRequest = {
       headers,
-      user: undefined,
+      use,
+      r: undefined,
     };
 
     return {
       switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
-        getResponse: jest.fn().mockReturnValue({}),
+        getReques,
+        t: jest.fn().mockReturnValue(mockRequest),
+        getRespons,
+      e: jest.fn().mockReturnValue({}),
         getNext: jest.fn().mockReturnValue(jest.fn()),
       }),
       getHandler: jest.fn(),
@@ -219,35 +222,46 @@ describe('JwtAuthGuard', () => {
         return args[index] as T;
       }),
       switchToRpc: jest.fn().mockReturnValue({
-        getContext: jest.fn(),
-        getData: jest.fn(),
+        getContex,
+        t: jest.fn(),
+        getDat,
+      a: jest.fn(),
       }),
       switchToWs: jest.fn().mockReturnValue({
-        getClient: jest.fn(),
-        getData: jest.fn(),
+        getClien,
+        t: jest.fn(),
+        getDat,
+      a: jest.fn(),
       }),
       getType: jest.fn().mockReturnValue('http'),
     } satisfies ExecutionContext;
   };
 
   beforeEach(async () => {
-    console.log(`[${operationId}] Setting up JwtAuthGuard test module`);
+    console.log(
 
-    const module: TestingModule = await Test.createTestingModule({
+    );
+      const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
           provide: JwtService,
-          useValue: {
-            verifyAsync: jest.fn(),
+          useValu,
+        e: {
+            verifyAsyn,
+      c: jest.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              const config: { [key: string]: string } = {
-                JWT_SECRET: 'test-jwt-secret',
-                JWT_REFRESH_SECRET: 'test-refresh-secret',
+              const confi,
+        g: { [ke,
+      y: string]: string } = {
+                JWT_SECRE,
+        T: 'test-jwt-secret',
+      JWT_REFRESH_SECRE,
+      T: 'test-refresh-secret',
               };
               return config[key];
             }),
@@ -255,8 +269,10 @@ describe('JwtAuthGuard', () => {
         },
         {
           provide: Reflector,
-          useValue: {
-            getAllAndOverride: jest.fn(),
+          useValu,
+        e: {
+            getAllAndOverrid,
+      e: jest.fn(),
           },
         },
       ],
@@ -268,23 +284,20 @@ describe('JwtAuthGuard', () => {
 
     guard = new MockJwtAuthGuard(jwtService, configService, reflector);
 
-    console.log(`[${operationId}] JwtAuthGuard test setup completed`);
-  });
+    console.log(`[${operationId}] JwtAuthGuard test setup completed`);});
 
-  afterEach(() => {
+    afterEach(() => {
     console.log(`[${operationId}] JwtAuthGuard test cleanup completed`);
   });
 
-  describe('Public Route Access', () => {
-    it('should allow access to public routes without authentication', async () => {
-      const testId = `${operationId}_public_access`;
-      console.log(`[${testId}] Testing public route access`);
+    describe('Public Route Access', () => {it('should allow access to public routes without authentication', async () => {
+      const testId = `${operationId}_public_access`;console.log(
 
+      );
       const context = createMockExecutionContext({});
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
       expect(jwtService.verifyAsync).not.toHaveBeenCalled();
 
@@ -294,11 +307,9 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should enforce authentication on protected routes', async () => {
-      const testId = `${operationId}_protected_enforcement`;
-      console.log(
-        `[${testId}] Testing protected route authentication enforcement`,
-      );
+      const testId = `${operationId}_protected_enforcement`;console.log(
 
+      );
       const context = createMockExecutionContext({});
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 
@@ -312,46 +323,41 @@ describe('JwtAuthGuard', () => {
     });
   });
 
-  describe('Token Extraction', () => {
-    it('should extract valid Bearer token from Authorization header', async () => {
-      const testId = `${operationId}_token_extraction_valid`;
-      console.log(`[${testId}] Testing valid Bearer token extraction`);
+    describe('Token Extraction', () => {it('should extract valid Bearer token from Authorization header', async () => {
+      const testId = `${operationId}_token_extraction_valid`;console.log(
 
+      );
       const validToken = 'valid-jwt-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-        sub: 'user_123',
-        email: 'test@bytebot.ai',
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({sub: 'user_123',
+      email: 'test@bytebot.ai',
         role: 'admin',
-        permissions: ['task:read', 'task:write'],
-        exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-      });
+      permissions: ['task:read', 'tas,
+        k: write'],
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now});
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
       expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
-        secret: 'test-jwt-secret',
+        secre,
+      t: 'test-jwt-secret',
       });
 
       console.log(`[${testId}] Valid Bearer token extraction test completed`);
     });
 
     it('should reject malformed Authorization header', async () => {
-      const testId = `${operationId}_token_extraction_malformed`;
-      console.log(
-        `[${testId}] Testing malformed Authorization header rejection`,
+      const testId = `${operationId}_token_extraction_malformed`;console.log(
+
       );
-
       const context = createMockExecutionContext({
-        authorization: 'NotBearer invalid-format',
-      });
-
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        authorizatio,
+      n: 'NotBearer invalid-format',});jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -363,14 +369,11 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should reject missing Authorization header', async () => {
-      const testId = `${operationId}_token_extraction_missing`;
-      console.log(`[${testId}] Testing missing Authorization header rejection`);
+      const testId = `${operationId}_token_extraction_missing`;console.log(
 
+      );
       const context = createMockExecutionContext({});
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        new UnauthorizedException('No authentication token provided'),
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);await expect(guard.canActivate(context)).rejects.toThrow(new UnauthorizedException('No authentication token provided'),
       );
 
       console.log(
@@ -379,14 +382,12 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should reject empty Bearer token', async () => {
-      const testId = `${operationId}_token_extraction_empty`;
-      console.log(`[${testId}] Testing empty Bearer token rejection`);
+      const testId = `${operationId}_token_extraction_empty`;console.log(
 
+      );
       const context = createMockExecutionContext({
-        authorization: 'Bearer ',
-      });
-
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        authorizatio,
+      n: 'Bearer ',});jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -396,40 +397,29 @@ describe('JwtAuthGuard', () => {
     });
   });
 
-  describe('Token Validation', () => {
-    it('should validate JWT token structure and payload', async () => {
-      const testId = `${operationId}_token_validation_structure`;
-      console.log(`[${testId}] Testing JWT token structure validation`);
+    describe('Token Validation', () => {it('should validate JWT token structure and payload', async () => {
+      const testId = `${operationId}_token_validation_structure`;console.log(
 
+      );
       const validToken = 'valid-structured-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
       const validPayload = {
         sub: 'user_123',
-        email: 'admin@bytebot.ai',
+      email: 'admin@bytebot.ai',
         role: 'admin',
-        permissions: [
-          'task:read',
-          'task:write',
-          'computer:control',
-          'system:admin',
-        ],
-        iat: Math.floor(Date.now() / 1000) - 300, // 5 minutes ago
-        exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+      permissions: ['task:read','task:write','computer:control','system:admin',],ia,
+        t: Math.floor(Date.now() / 1000) - 300, // 5 minutes ago
+        ex,
+      p: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
       };
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(validPayload);
-
-      const result = await guard.canActivate(context);
-
-      const httpContext = context.switchToHttp();
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(validPayload);const result = await guard.canActivate(context);const httpContext = context.switchToHttp();
       if (!isHttpContext(httpContext)) {
-        throw new Error('Invalid execution context in test');
-      }
-      const rawRequest = safeGetRequest(httpContext);
+        throw new Error('Invalid execution context in test');}const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -439,32 +429,30 @@ describe('JwtAuthGuard', () => {
       expect(request.user).toEqual({
         id: validPayload.sub,
         email: validPayload.email,
-        role: validPayload.role,
-        permissions: validPayload.permissions,
+        rol,
+        e: validPayload.role,
+        permission,
+      s: validPayload.permissions,
       });
 
       console.log(`[${testId}] JWT token structure validation test completed`);
     });
 
     it('should reject token with missing required fields', async () => {
-      const testId = `${operationId}_token_validation_missing_fields`;
-      console.log(`[${testId}] Testing token with missing required fields`);
+      const testId = `${operationId}_token_validation_missing_fields`;console.log(
 
+      );
       const invalidToken = 'token-missing-fields';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${invalidToken}`,
+        authorizatio,
+      n: `Bearer ${invalidToken}`,
       });
 
       const incompletePayload = {
-        sub: 'user_123',
-        // Missing email and role
-      };
+        su,
+      b: 'user_123',// Missing email and role};
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      const mockVerifyAsync = jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<typeof jwtService.verifyAsync>;
-      mockVerifyAsync.mockResolvedValue(incompletePayload);
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);const mockVerifyAsync = jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<typeof jwtService.verifyAsync>;mockVerifyAsync.mockResolvedValue(incompletePayload);await expect(guard.canActivate(context)).rejects.toThrow(
         new UnauthorizedException('Invalid token payload structure'),
       );
 
@@ -474,80 +462,68 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should reject expired tokens', async () => {
-      const testId = `${operationId}_token_validation_expired`;
-      console.log(`[${testId}] Testing expired token rejection`);
+      const testId = `${operationId}_token_validation_expired`;console.log(
 
+      );
       const expiredToken = 'expired-jwt-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${expiredToken}`,
+        authorizatio,
+      n: `Bearer ${expiredToken}`,
       });
 
       const expiredPayload = {
         sub: 'user_123',
-        email: 'test@bytebot.ai',
-        role: 'admin',
-        exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago (expired)
-      };
+      email: 'test@bytebot.ai',
+        rol,
+        e: 'admin',
+      ex,
+      p: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago (expired)};
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(expiredPayload);
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        new UnauthorizedException('Token has expired'),
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(expiredPayload);await expect(guard.canActivate(context)).rejects.toThrow(new UnauthorizedException('Token has expired'),
       );
 
       console.log(`[${testId}] Expired token rejection test completed`);
     });
 
     it('should handle JWT verification errors', async () => {
-      const testId = `${operationId}_token_validation_jwt_error`;
-      console.log(`[${testId}] Testing JWT verification error handling`);
+      const testId = `${operationId}_token_validation_jwt_error`;console.log(
 
+      );
       const invalidToken = 'invalid-jwt-signature';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${invalidToken}`,
+        authorizatio,
+      n: `Bearer ${invalidToken}`,
       });
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-        .mockRejectedValue(new Error('JWT signature invalid'));
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        new UnauthorizedException('Invalid authentication token'),
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('JWT signature invalid'));await expect(guard.canActivate(context)).rejects.toThrow(new UnauthorizedException('Invalid authentication token'),
       );
 
       console.log(`[${testId}] JWT verification error handling test completed`);
     });
   });
 
-  describe('Role and Permission Validation', () => {
-    it('should attach correct user information to request', async () => {
-      const testId = `${operationId}_user_attachment`;
-      console.log(`[${testId}] Testing user information attachment to request`);
+    describe('Role and Permission Validation', () => {it('should attach correct user information to request', async () => {
+      const testId = `${operationId}_user_attachment`;console.log(
 
+      );
       const validToken = 'user-info-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
       const userPayload = {
         sub: 'operator_456',
-        email: 'operator@bytebot.ai',
+      email: 'operator@bytebot.ai',
         role: 'operator',
-        permissions: ['task:read', 'task:write', 'computer:control'],
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      };
+      permissions: ['task:read', 'task:write', 'compute,
+        r: control'],
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,};
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(userPayload);
-
-      await guard.canActivate(context);
-      const httpContext = context.switchToHttp();
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(userPayload);await guard.canActivate(context);const httpContext = context.switchToHttp();
       if (!isHttpContext(httpContext)) {
-        throw new Error('Invalid execution context in test');
-      }
-      const rawRequest = safeGetRequest(httpContext);
+        throw new Error('Invalid execution context in test');}const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -556,41 +532,38 @@ describe('JwtAuthGuard', () => {
       expect(request.user).toEqual({
         id: userPayload.sub,
         email: userPayload.email,
-        role: userPayload.role,
-        permissions: userPayload.permissions,
+        rol,
+        e: userPayload.role,
+        permission,
+      s: userPayload.permissions,
       });
 
       console.log(`[${testId}] User information attachment test completed`);
     });
 
     it('should handle tokens without permissions gracefully', async () => {
-      const testId = `${operationId}_no_permissions`;
-      console.log(`[${testId}] Testing token without permissions handling`);
+      const testId = `${operationId}_no_permissions`;console.log(
 
+      );
       const validToken = 'no-permissions-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
       const payloadWithoutPermissions = {
         sub: 'viewer_789',
-        email: 'viewer@bytebot.ai',
-        role: 'viewer',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        // No permissions field
+      email: 'viewer@bytebot.ai',
+        rol,
+        e: 'viewer',
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,// No permissions field
       };
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-        .mockResolvedValue(payloadWithoutPermissions);
-
-      await guard.canActivate(context);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payloadWithoutPermissions);await guard.canActivate(context);
       const httpContext = context.switchToHttp();
       if (!isHttpContext(httpContext)) {
-        throw new Error('Invalid execution context in test');
-      }
-      const rawRequest = safeGetRequest(httpContext);
+        throw new Error('Invalid execution context in test');}const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -604,28 +577,26 @@ describe('JwtAuthGuard', () => {
     });
   });
 
-  describe('Security Edge Cases', () => {
-    it('should handle concurrent authentication requests', async () => {
-      const testId = `${operationId}_concurrent_auth`;
-      console.log(`[${testId}] Testing concurrent authentication requests`);
+    describe('Security Edge Cases', () => {it('should handle concurrent authentication requests', async () => {
+      const testId = `${operationId}_concurrent_auth`;console.log(
 
-      const validToken = 'concurrent-test-token';
-      const payload = {
-        sub: 'concurrent_user',
-        email: 'concurrent@bytebot.ai',
-        role: 'admin',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      };
+      );
+      const validToken = 'concurrent-test-token';const payload = {sub: 'concurrent_user',
+      email: 'concurrent@bytebot.ai',
+        rol,
+        e: 'admin',
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,};
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
 
       // Create multiple concurrent authentication requests
       const contexts = Array(10)
         .fill(null)
         .map(() =>
           createMockExecutionContext({
-            authorization: `Bearer ${validToken}`,
+            authorizatio,
+      n: `Bearer ${validToken}`,
           }),
         );
 
@@ -641,42 +612,28 @@ describe('JwtAuthGuard', () => {
       contexts.forEach((context) => {
         const httpContext = context.switchToHttp();
         if (!isHttpContext(httpContext)) {
-          throw new Error('Invalid execution context in test');
-        }
-        const rawRequest = safeGetRequest(httpContext);
+          throw new Error('Invalid execution context in test');}const rawRequest = safeGetRequest(httpContext);
         if (!isAuthenticatedRequest(rawRequest)) {
-          throw new Error('Invalid request format in test');
-        }
-        const request = rawRequest;
+          throw new Error('Invalid request format in test');}const request = rawRequest;
         if (!request.user) {
           throw new Error('User not attached to request in test');
         }
         expect(request.user.id).toBe(payload.sub);
-        expect(request.user.email).toBe(payload.email);
+      expect(request.user.email).toBe(payload.email);
       });
 
       console.log(`[${testId}] Concurrent authentication test completed`);
     });
 
     it('should handle token injection attempts', async () => {
-      const testId = `${operationId}_token_injection`;
-      console.log(`[${testId}] Testing token injection protection`);
+      const testId = `${operationId}_token_injection`;console.log(
 
+      );
       const maliciousHeaders = {
-        authorization: 'Bearer malicious-token',
-        'x-forwarded-authorization': 'Bearer admin-token',
-        'x-real-authorization': 'Bearer super-admin-token',
-      };
+        authorizatio,
+      n: 'Bearer malicious-token','x-forwarded-authorization': 'Bearer admin-token','x-real-authorization': 'Bearer super-admin-token',};const context = createMockExecutionContext(maliciousHeaders);
 
-      const context = createMockExecutionContext(maliciousHeaders);
-
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-        .mockRejectedValue(new Error('Invalid token'));
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Invalid token'));await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException,
       );
 
       // Verify only the primary authorization header was used
@@ -689,29 +646,25 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should handle case-sensitive header parsing', async () => {
-      const testId = `${operationId}_case_sensitive_headers`;
-      console.log(`[${testId}] Testing case-sensitive header parsing`);
+      const testId = `${operationId}_case_sensitive_headers`;console.log(
 
+      );
       const contexts = [
-        createMockExecutionContext({ authorization: 'Bearer valid-token' }),
-        createMockExecutionContext({ Authorization: 'Bearer valid-token' }),
-        createMockExecutionContext({ AUTHORIZATION: 'Bearer valid-token' }),
-      ];
-
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-        sub: 'user_123',
-        email: 'test@bytebot.ai',
-        role: 'admin',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      });
+        createMockExecutionContext({ authorizatio,
+      n: 'Bearer valid-token' }),createMockExecutionContext({ Authorizatio,
+      n: 'Bearer valid-token' }),createMockExecutionContext({ AUTHORIZATIO,
+      N: 'Bearer valid-token' }),];jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({sub: 'user_123',
+      email: 'test@bytebot.ai',
+        rol,
+        e: 'admin',
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,});
 
       const results = await Promise.allSettled(
         contexts.map((context) => guard.canActivate(context)),
       );
 
-      // Only lowercase 'authorization' header should work
-      expect(results[0]?.status).toBe('fulfilled');
+      // Only lowercase 'authorization' header should workexpect(results[0]?.status).toBe('fulfilled');
       expect(results[1]?.status).toBe('rejected');
       expect(results[2]?.status).toBe('rejected');
 
@@ -719,22 +672,22 @@ describe('JwtAuthGuard', () => {
     });
   });
 
-  describe('Performance & Reliability', () => {
-    it('should complete authentication within performance threshold', async () => {
-      const testId = `${operationId}_performance_threshold`;
-      console.log(`[${testId}] Testing authentication performance threshold`);
+    describe('Performance & Reliability', () => {it('should complete authentication within performance threshold', async () => {
+      const testId = `${operationId}_performance_threshold`;console.log(
 
+      );
       const validToken = 'performance-test-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-        sub: 'perf_user',
-        email: 'perf@bytebot.ai',
-        role: 'operator',
-        exp: Math.floor(Date.now() / 1000) + 3600,
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({sub: 'perf_user',
+      email: 'perf@bytebot.ai',
+        rol,
+        e: 'operator',
+        ex,
+      p: Math.floor(Date.now() / 1000) + 3600,
       });
 
       const startTime = Date.now();
@@ -750,19 +703,17 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should handle high-frequency authentication requests', async () => {
-      const testId = `${operationId}_high_frequency`;
-      console.log(`[${testId}] Testing high-frequency authentication handling`);
+      const testId = `${operationId}_high_frequency`;console.log(
 
-      const validToken = 'high-freq-token';
-      const payload = {
-        sub: 'freq_user',
-        email: 'freq@bytebot.ai',
-        role: 'admin',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      };
+      );
+      const validToken = 'high-freq-token';const payload = {sub: 'freq_user',
+      email: 'freq@bytebot.ai',
+        rol,
+        e: 'admin',
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,};
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
 
       // Simulate high-frequency requests (100 requests)
       const startTime = Date.now();
@@ -770,9 +721,8 @@ describe('JwtAuthGuard', () => {
         .fill(null)
         .map(() => {
           const context = createMockExecutionContext({
-            authorization: `Bearer ${validToken}`,
-          });
-          return guard.canActivate(context);
+            authorizatio,
+      n: `Bearer ${validToken}`,});return guard.canActivate(context);
         });
 
       const results = await Promise.all(promises);
@@ -787,44 +737,35 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should handle JWT service failures gracefully', async () => {
-      const testId = `${operationId}_jwt_service_failure`;
-      console.log(`[${testId}] Testing JWT service failure handling`);
+      const testId = `${operationId}_jwt_service_failure`;console.log(
 
+      );
       const validToken = 'service-failure-token';
       const context = createMockExecutionContext({
-        authorization: `Bearer ${validToken}`,
+        authorizatio,
+      n: `Bearer ${validToken}`,
       });
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-        .mockRejectedValue(new Error('JWT service unavailable'));
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        new UnauthorizedException('Invalid authentication token'),
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('JWT service unavailable'));await expect(guard.canActivate(context)).rejects.toThrow(new UnauthorizedException('Invalid authentication token'),
       );
 
       console.log(`[${testId}] JWT service failure handling test completed`);
     });
   });
 
-  describe('Memory and Resource Management', () => {
-    it('should not leak memory during authentication', async () => {
-      const testId = `${operationId}_memory_leak`;
-      console.log(`[${testId}] Testing memory leak prevention`);
-
-      const initialMemory = process.memoryUsage();
-
-      // Perform multiple authentication operations
+    describe('Memory and Resource Management', () => {it('should not leak memory during authentication', async () => {
+      const testId = `${operationId}_memory_leak`;console.log();
+      const initialMemory = process.memoryUsage();// Perform multiple authentication operations
       for (let i = 0; i < 50; i++) {
         const context = createMockExecutionContext({
-          authorization: `Bearer token-${i}`,
+          authorizatio,
+      n: `Bearer token-${i}`,
         });
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-          sub: `user${i}`,
-          email: `user${i}@bytebot.ai`,
+        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+          su,
+      b: `user${i}`,
+      email: `user${i}@bytebot.ai`,
           role: 'viewer',
           exp: Math.floor(Date.now() / 1000) + 3600,
         });
@@ -844,20 +785,17 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should clean up resources properly', async () => {
-      const testId = `${operationId}_resource_cleanup`;
-      console.log(`[${testId}] Testing resource cleanup`);
+      const testId = `${operationId}_resource_cleanup`;console.log(
 
+      );
       const context = createMockExecutionContext({
-        authorization: 'Bearer cleanup-test-token',
-      });
-
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-        sub: 'cleanup_user',
-        email: 'cleanup@bytebot.ai',
-        role: 'admin',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      });
+        authorizatio,
+      n: 'Bearer cleanup-test-token',});jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({sub: 'cleanup_user',
+      email: 'cleanup@bytebot.ai',
+        rol,
+        e: 'admin',
+      ex,
+      p: Math.floor(Date.now() / 1000) + 3600,});
 
       const result = await guard.canActivate(context);
       expect(result).toBe(true);
@@ -865,9 +803,7 @@ describe('JwtAuthGuard', () => {
       // Verify no persistent references or leaks
       const httpContext = context.switchToHttp();
       if (!isHttpContext(httpContext)) {
-        throw new Error('Invalid execution context in test');
-      }
-      const rawRequest = safeGetRequest(httpContext);
+        throw new Error('Invalid execution context in test');}const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }

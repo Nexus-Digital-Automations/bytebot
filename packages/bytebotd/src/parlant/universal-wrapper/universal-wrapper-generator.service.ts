@@ -19,9 +19,7 @@
  * Performance: Optimized wrapper generation with intelligent caching and lazy loading
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import {
-  UniversalFunctionWrapper,
+import { Injectable, Logger } from '@nestjs/common';import {UniversalFunctionWrapper,
   UniversalFunctionMetadata,
   WrappedFunction,
   WrapperExecutionResult,
@@ -35,13 +33,7 @@ import {
   ExecutionPerformanceMetrics,
   FunctionAuditEntry,
   CacheInfo,
-} from './universal-function-wrapper.interface';
-import { ParlantIntegrationService, RiskLevel } from '../parlant-integration.service';
-import { UniversalFunctionRegistryService } from './universal-function-registry.service';
-
-// ===== WRAPPER GENERATOR INTERFACES =====
-
-/**
+} from './universal-function-wrapper.interface';import { ParlantIntegrationService, RiskLevel } from '../parlant-integration.service';import { UniversalFunctionRegistryService } from './universal-function-registry.service';// ===== WRAPPER GENERATOR INTERFACES =====/**
  * Wrapper generation options for customizing wrapper behavior
  */
 export interface WrapperGenerationOptions {
@@ -158,11 +150,7 @@ export class UniversalWrapperGeneratorService {
     private readonly parlantIntegrationService: ParlantIntegrationService,
     private readonly registryService: UniversalFunctionRegistryService
   ) {
-    const operationId = `wrapper_generator_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Universal Wrapper Generator Service`, {
-      cacheEnabled: true,
-      performanceMonitoringEnabled: true,
+    const operationId = `wrapper_generator_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Universal Wrapper Generator Service`, {cacheEnabled: true,performanceMonitoringEnabled: true,
       auditLoggingEnabled: true,
       errorRecoveryEnabled: true,
     });
@@ -193,14 +181,10 @@ export class UniversalWrapperGeneratorService {
     metadata: UniversalFunctionMetadata,
     options: WrapperGenerationOptions = this.getDefaultOptions()
   ): Promise<WrapperGenerationResult<TFunction>> {
-    const operationId = `generate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.generationCount++;
+    const operationId = `generate_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.generationCount++;
 
     this.logger.log(
-      `[${operationId}] Generating universal wrapper for function: ${metadata.functionName}`,
-      {
-        operationId,
+      `[${operationId}] Generating universal wrapper for function: ${metadata.functionName}`,{operationId,
         functionId: metadata.functionId,
         functionName: metadata.functionName,
         riskLevel: metadata.riskClassification,
@@ -220,9 +204,7 @@ export class UniversalWrapperGeneratorService {
         const generationTime = Date.now() - startTime;
 
         this.logger.log(
-          `[${operationId}] Using cached wrapper`,
-          {
-            operationId,
+          `[${operationId}] Using cached wrapper`,{operationId,
             functionId: metadata.functionId,
             generationTime,
             cacheHit: true,
@@ -277,9 +259,7 @@ export class UniversalWrapperGeneratorService {
       this.updateGenerationMetrics(generationTime);
 
       this.logger.log(
-        `[${operationId}] Universal wrapper generated successfully`,
-        {
-          operationId,
+        `[${operationId}] Universal wrapper generated successfully`,{operationId,
           functionId: metadata.functionId,
           generationTime,
           complexityScore: analysisResult.complexityScore,
@@ -324,11 +304,8 @@ export class UniversalWrapperGeneratorService {
           estimatedPerformanceImpact: 0,
           recommendedOptimizations: [],
           detectedPatterns: [],
-          potentialRisks: ['wrapper_generation_failed'],
-        },
-        optimizations: [],
-        warnings: ['Wrapper generation failed'],
-        recommendations: ['Check function signature and metadata'],
+          potentialRisks: ['wrapper_generation_failed'],},optimizations: [],
+        warnings: ['Wrapper generation failed'],recommendations: ['Check function signature and metadata'],
       };
     }
   }
@@ -342,10 +319,7 @@ export class UniversalWrapperGeneratorService {
   async generateBatchWrappers<TFunction extends (...args: any[]) => any>(
     request: BatchWrapperRequest<TFunction>
   ): Promise<BatchWrapperResult> {
-    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${batchId}] Starting batch wrapper generation`,
       {
         batchId,
@@ -474,12 +448,8 @@ export class UniversalWrapperGeneratorService {
       if (request.functions.length > 50) {
         const processedCount = result.successful + result.failed;
         this.logger.log(
-          `[${batchId}] Batch progress: ${processedCount}/${request.functions.length}`,
-          {
-            batchId,
-            progress: `${((processedCount / request.functions.length) * 100).toFixed(1)}%`,
-            successful: result.successful,
-            failed: result.failed,
+          `[${batchId}] Batch progress: ${processedCount}/${request.functions.length}`,{batchId,
+            progress: `${((processedCount / request.functions.length) * 100).toFixed(1)}%`,successful: result.successful,failed: result.failed,
           }
         );
       }
@@ -490,9 +460,7 @@ export class UniversalWrapperGeneratorService {
     result.averageGenerationTime = result.totalRequested > 0 ? result.totalGenerationTime / result.totalRequested : 0;
 
     this.logger.log(
-      `[${batchId}] Batch wrapper generation completed`,
-      {
-        batchId,
+      `[${batchId}] Batch wrapper generation completed`,{batchId,
         totalRequested: result.totalRequested,
         successful: result.successful,
         failed: result.failed,
@@ -519,10 +487,7 @@ export class UniversalWrapperGeneratorService {
 
     // Return a function that preserves the original type signature
     return (async (...args: Parameters<TFunction>): Promise<WrapperExecutionResult<Awaited<ReturnType<TFunction>>>> => {
-      const executionId = `exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      const startTime = Date.now();
-
-      this.logger.debug(
+      const executionId = `exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(
         `[${executionId}] Starting wrapped function execution: ${metadata.functionName}`,
         {
           executionId,
@@ -541,11 +506,7 @@ export class UniversalWrapperGeneratorService {
         duration: 0,
         validationResult: {
           approved: false,
-          conversationId: '',
-          validationTimestamp: new Date(),
-          reasoning: 'Not validated',
-          confidence: 0,
-        },
+          conversationId: '',validationTimestamp: new Date(),reasoning: 'Not validated',confidence: 0,},
         performanceMetrics: {
           validationTime: 0,
           executionTime: 0,
@@ -560,25 +521,14 @@ export class UniversalWrapperGeneratorService {
           executionId,
           functionId: metadata.functionId,
           functionName: metadata.functionName,
-          userId: 'system', // Will be updated from context
-          timestamp: new Date(startTime),
-          parameters: {},
+          userId: 'system', // Will be updated from contexttimestamp: new Date(startTime),parameters: {},
           result: undefined,
-          validationDecision: 'denied',
-          executionStatus: 'failure',
-          riskLevel: metadata.riskClassification,
-          conversationId: '',
-          approvalChain: [],
-          complianceFlags: [],
+          validationDecision: 'denied',executionStatus: 'failure',riskLevel: metadata.riskClassification,conversationId: '',approvalChain: [],complianceFlags: [],
         },
         cacheInfo: {
           hit: false,
-          key: '',
-          ttl: 0,
-          size: 0,
-          level: 'l1',
-        },
-      };
+          key: '',ttl: 0,size: 0,
+          level: 'l1',},};
 
       try {
         // Start performance monitoring
@@ -590,15 +540,7 @@ export class UniversalWrapperGeneratorService {
 
           // Build validation context (simplified for this implementation)
           const validationContext: ValidationContext = {
-            userId: 'system', // TODO: Extract from actual context
-            sessionId: executionId,
-            userRoles: ['function_executor'],
-            userPermissions: ['execute_function'],
-            securityLevel: 'medium',
-            ipAddress: '127.0.0.1',
-            userAgent: 'Universal Wrapper',
-            requestId: executionId,
-            correlationId: executionId,
+            userId: 'system', // TODO: Extract from actual contextsessionId: executionId,userRoles: ['function_executor'],userPermissions: ['execute_function'],securityLevel: 'medium',ipAddress: '127.0.0.1',userAgent: 'Universal Wrapper',requestId: executionId,correlationId: executionId,
             systemState: {
               cpuUsage: 50,
               memoryUsage: 60,
@@ -610,16 +552,7 @@ export class UniversalWrapperGeneratorService {
               securityAlerts: [],
             },
             businessContext: {
-              tenantId: 'default',
-              organizationId: 'aigent',
-              departmentId: 'engineering',
-              projectId: 'parlant-integration',
-              businessProcess: 'function_execution',
-              complianceRequirements: [],
-              dataClassification: 'internal',
-              approvalWorkflow: 'automatic',
-            },
-          };
+              tenantId: 'default',organizationId: 'aigent',departmentId: 'engineering',projectId: 'parlant-integration',businessProcess: 'function_execution',complianceRequirements: [],dataClassification: 'internal',approvalWorkflow: 'automatic',},};
 
           // Perform PARLANT validation
           const validationResult = await this.validationService.validateExecution(
@@ -631,10 +564,7 @@ export class UniversalWrapperGeneratorService {
           result.validationResult = validationResult;
           result.auditTrail.userId = validationContext.userId;
           result.auditTrail.conversationId = validationResult.conversationId;
-          result.auditTrail.validationDecision = validationResult.approved ? 'approved' : 'denied';
-
-          const validationTime = Date.now() - paramValidationStartTime;
-          this.performanceMonitor.recordValidationTime(performanceTrackingId, validationTime);
+          result.auditTrail.validationDecision = validationResult.approved ? 'approved' : 'denied';const validationTime = Date.now() - paramValidationStartTime;this.performanceMonitor.recordValidationTime(performanceTrackingId, validationTime);
 
           // Check if validation was approved
           if (!validationResult.approved) {
@@ -657,13 +587,8 @@ export class UniversalWrapperGeneratorService {
             approved: true,
             conversationId: `skipped_${executionId}`,
             validationTimestamp: new Date(),
-            reasoning: 'Validation disabled for this function',
-            confidence: 1.0,
-          };
-          result.auditTrail.validationDecision = 'approved';
-        }
-
-        // Step 2: Check cache if enabled
+            reasoning: 'Validation disabled for this function',confidence: 1.0,};
+          result.auditTrail.validationDecision = 'approved';}// Step 2: Check cache if enabled
         if (options.enableCaching && metadata.validationRequirements.cacheable) {
           const cacheKey = this.cacheManager.generateCacheKey(metadata, args);
           const cachedResult = await this.cacheManager.get(cacheKey);
@@ -676,9 +601,7 @@ export class UniversalWrapperGeneratorService {
               key: cacheKey,
               ttl: cachedResult.ttl,
               size: cachedResult.size,
-              level: 'l1',
-              createdAt: cachedResult.createdAt,
-              lastAccessed: new Date(),
+              level: 'l1',createdAt: cachedResult.createdAt,lastAccessed: new Date(),
             };
 
             result.auditTrail.executionStatus = 'success';
@@ -717,10 +640,7 @@ export class UniversalWrapperGeneratorService {
 
           result.success = true;
           result.result = executionResult;
-          result.auditTrail.executionStatus = 'success';
-          result.auditTrail.result = executionResult;
-
-        } catch (executionError) {
+          result.auditTrail.executionStatus = 'success';result.auditTrail.result = executionResult;} catch (executionError) {
           result.success = false;
           result.error = executionError instanceof Error ? executionError : new Error(String(executionError));
           result.auditTrail.executionStatus = 'failure';
@@ -750,9 +670,7 @@ export class UniversalWrapperGeneratorService {
             key: cacheKey,
             ttl,
             size: this.estimateObjectSize(result.result),
-            level: 'l1',
-            createdAt: new Date(),
-          };
+            level: 'l1',createdAt: new Date(),};
         }
 
         // Step 5: Complete performance monitoring
@@ -772,9 +690,7 @@ export class UniversalWrapperGeneratorService {
         result.auditTrail.executionStatus = 'failure';
 
         this.logger.error(
-          `[${executionId}] Wrapper execution failed`,
-          {
-            executionId,
+          `[${executionId}] Wrapper execution failed`,{executionId,
             functionId: metadata.functionId,
             error: result.error.message,
           }
@@ -829,27 +745,9 @@ export class UniversalWrapperGeneratorService {
 
     // Detect patterns
     const detectedPatterns: string[] = [];
-    if (functionString.includes('await')) detectedPatterns.push('async_operations');
-    if (functionString.includes('Promise')) detectedPatterns.push('promise_usage');
-    if (functionString.includes('try') && functionString.includes('catch')) detectedPatterns.push('error_handling');
-    if (functionString.includes('console.log')) detectedPatterns.push('debug_logging');
-
-    // Identify potential risks
-    const potentialRisks: string[] = [];
-    if (functionString.includes('eval(')) potentialRisks.push('code_evaluation');
-    if (functionString.includes('fs.')) potentialRisks.push('file_system_access');
-    if (functionString.includes('process.')) potentialRisks.push('process_access');
-    if (functionString.includes('require(')) potentialRisks.push('dynamic_imports');
-
-    // Generate optimization recommendations
-    const recommendedOptimizations: string[] = [];
-    if (metadata.validationRequirements.cacheable) recommendedOptimizations.push('enable_caching');
-    if (parameterCount > 3) recommendedOptimizations.push('parameter_validation_optimization');
-    if (hasAsyncReturn) recommendedOptimizations.push('async_execution_optimization');
-    if (complexityScore > 50) recommendedOptimizations.push('complexity_reduction');
-
-    return {
-      functionName: metadata.functionName,
+    if (functionString.includes('await')) detectedPatterns.push('async_operations');if (functionString.includes('Promise')) detectedPatterns.push('promise_usage');if (functionString.includes('try') && functionString.includes('catch')) detectedPatterns.push('error_handling');if (functionString.includes('console.log')) detectedPatterns.push('debug_logging');// Identify potential risksconst potentialRisks: string[] = [];
+    if (functionString.includes('eval(')) potentialRisks.push('code_evaluation');if (functionString.includes('fs.')) potentialRisks.push('file_system_access');if (functionString.includes('process.')) potentialRisks.push('process_access');if (functionString.includes('require(')) potentialRisks.push('dynamic_imports');// Generate optimization recommendationsconst recommendedOptimizations: string[] = [];
+    if (metadata.validationRequirements.cacheable) recommendedOptimizations.push('enable_caching');if (parameterCount > 3) recommendedOptimizations.push('parameter_validation_optimization');if (hasAsyncReturn) recommendedOptimizations.push('async_execution_optimization');if (complexityScore > 50) recommendedOptimizations.push('complexity_reduction');return {functionName: metadata.functionName,
       parameterCount,
       hasAsyncReturn,
       hasOptionalParameters,
@@ -874,54 +772,27 @@ export class UniversalWrapperGeneratorService {
     // Caching optimization
     if (metadata.validationRequirements.cacheable && options.enableCaching) {
       optimizations.push({
-        type: 'caching',
-        description: 'Enable intelligent result caching for performance',
-        expectedPerformanceGain: 70,
-        tradeoffs: ['Memory usage increase', 'Cache invalidation complexity'],
-        enabled: true,
-      });
+        type: 'caching',description: 'Enable intelligent result caching for performance',expectedPerformanceGain: 70,tradeoffs: ['Memory usage increase', 'Cache invalidation complexity'],enabled: true,});
     }
 
     // Validation skipping for low-risk functions
-    if (metadata.riskClassification === RiskLevel.MINIMAL && options.enableValidation) {
+    if (metadata.riskClassification === RiskLevel._MINIMAL && options.enableValidation) {
       optimizations.push({
-        type: 'validation_skip',
-        description: 'Skip conversational validation for minimal risk functions',
-        expectedPerformanceGain: 90,
-        tradeoffs: ['Reduced audit trail', 'Lower security assurance'],
-        enabled: false, // Conservative default
-      });
+        type: 'validation_skip',description: 'Skip conversational validation for minimal risk functions',expectedPerformanceGain: 90,tradeoffs: ['Reduced audit trail', 'Lower security assurance'],enabled: false, // Conservative default});
     }
 
     // Parameter validation optimization
     if (analysis.parameterCount > 2) {
       optimizations.push({
-        type: 'parameter_validation',
-        description: 'Optimize parameter validation for functions with many parameters',
-        expectedPerformanceGain: 30,
-        tradeoffs: ['Slightly reduced validation coverage'],
-        enabled: true,
-      });
+        type: 'parameter_validation',description: 'Optimize parameter validation for functions with many parameters',expectedPerformanceGain: 30,tradeoffs: ['Slightly reduced validation coverage'],enabled: true,});
     }
 
     // Batch processing for suitable functions
-    if (analysis.detectedPatterns.includes('async_operations') && metadata.performanceMetadata.batchable) {
-      optimizations.push({
-        type: 'batch_processing',
-        description: 'Enable batch processing for improved throughput',
-        expectedPerformanceGain: 50,
-        tradeoffs: ['Increased latency for individual requests', 'More complex error handling'],
-        enabled: false, // Requires specific implementation
-      });
+    if (analysis.detectedPatterns.includes('async_operations') && metadata.performanceMetadata.batchable) {optimizations.push({type: 'batch_processing',description: 'Enable batch processing for improved throughput',expectedPerformanceGain: 50,tradeoffs: ['Increased latency for individual requests', 'More complex error handling'],enabled: false, // Requires specific implementation});
     }
 
     // Return filtering optimization
-    if (metadata.securityContext.dataClassification !== 'public') {
-      optimizations.push({
-        type: 'return_filtering',
-        description: 'Optimize return value filtering for sensitive data',
-        expectedPerformanceGain: 10,
-        tradeoffs: ['Potential data loss if filtering is too aggressive'],
+    if (metadata.securityContext.dataClassification !== 'public') {optimizations.push({type: 'return_filtering',description: 'Optimize return value filtering for sensitive data',expectedPerformanceGain: 10,tradeoffs: ['Potential data loss if filtering is too aggressive'],
         enabled: true,
       });
     }
@@ -943,10 +814,7 @@ export class UniversalWrapperGeneratorService {
 
   private generateWrapperCacheKey(metadata: UniversalFunctionMetadata, options: WrapperGenerationOptions): string {
     const optionsHash = this.hashObject(options);
-    return `wrapper_${metadata.functionId}_${metadata.version}_${optionsHash}`;
-  }
-
-  private getWrapperFromCache<TFunction extends (...args: any[]) => any>(
+    return `wrapper_${metadata.functionId}_${metadata.version}_${optionsHash}`;}private getWrapperFromCache<TFunction extends (...args: any[]) => any>(
     cacheKey: string
   ): UniversalFunctionWrapper<TFunction> | null {
     return this.wrapperCache.get(cacheKey) ?? null;
@@ -971,22 +839,13 @@ export class UniversalWrapperGeneratorService {
     const warnings: string[] = [];
 
     if (analysis.complexityScore > 75) {
-      warnings.push(`High function complexity (${analysis.complexityScore}) may impact performance`);
-    }
-
-    if (analysis.potentialRisks.length > 0) {
-      warnings.push(`Potential security risks detected: ${analysis.potentialRisks.join(', ')}`);
+      warnings.push(`High function complexity (${analysis.complexityScore}) may impact performance`);}if (analysis.potentialRisks.length > 0) {
+      warnings.push(`Potential security risks detected: ${analysis.potentialRisks.join(`, ')}`);
     }
 
     if (metadata.performanceMetadata.resourceIntensive) {
-      warnings.push('Function is marked as resource intensive - consider rate limiting');
-    }
-
-    if (!metadata.validationRequirements.cacheable && analysis.estimatedPerformanceImpact > 5) {
-      warnings.push('Function has high performance impact but caching is disabled');
-    }
-
-    return warnings;
+      warnings.push('Function is marked as resource intensive - consider rate limiting');}if (!metadata.validationRequirements.cacheable && analysis.estimatedPerformanceImpact > 5) {
+      warnings.push('Function has high performance impact but caching is disabled');}return warnings;
   }
 
   private generateRecommendations(
@@ -997,22 +856,9 @@ export class UniversalWrapperGeneratorService {
     const recommendations: string[] = [];
 
     if (optimizations.some(o => o.enabled && o.expectedPerformanceGain > 50)) {
-      recommendations.push('High-impact optimizations are enabled - monitor performance improvements');
-    }
-
-    if (analysis.recommendedOptimizations.includes('enable_caching')) {
-      recommendations.push('Consider enabling caching for this function to improve performance');
-    }
-
-    if (metadata.riskClassification === RiskLevel.HIGH || metadata.riskClassification === RiskLevel.CRITICAL) {
-      recommendations.push('High-risk function - ensure comprehensive monitoring and alerting');
-    }
-
-    if (analysis.parameterCount > 5) {
-      recommendations.push('Consider refactoring to reduce parameter count for better maintainability');
-    }
-
-    return recommendations;
+      recommendations.push('High-impact optimizations are enabled - monitor performance improvements');}if (analysis.recommendedOptimizations.includes('enable_caching')) {recommendations.push('Consider enabling caching for this function to improve performance');}if (metadata.riskClassification === RiskLevel._HIGH || metadata.riskClassification === RiskLevel._CRITICAL) {
+      recommendations.push('High-risk function - ensure comprehensive monitoring and alerting');}if (analysis.parameterCount > 5) {
+      recommendations.push('Consider refactoring to reduce parameter count for better maintainability');}return recommendations;
   }
 
   private createTimeoutPromise<T>(timeoutMs: number): Promise<T> {
@@ -1020,9 +866,7 @@ export class UniversalWrapperGeneratorService {
       setTimeout(() => {
         reject(new UniversalWrapperError(
           'timeout_function',
-          `timeout_${Date.now()}`,
-          WrapperErrorType.EXECUTION_TIMEOUT,
-          new Error(`Function execution timed out after ${timeoutMs}ms`)
+          `timeout_${Date.now()}`,WrapperErrorType.EXECUTION_TIMEOUT,new Error(`Function execution timed out after ${timeoutMs}ms`)
         ));
       }, timeoutMs);
     });
@@ -1042,9 +886,7 @@ export class UniversalWrapperGeneratorService {
 
   private cleanupCaches(): void {
     // Implement cache cleanup logic
-    this.logger.debug('Performing cache cleanup', {
-      wrapperCacheSize: this.wrapperCache.size,
-      analysisCacheSize: this.analysisCache.size,
+    this.logger.debug('Performing cache cleanup', {wrapperCacheSize: this.wrapperCache.size,analysisCacheSize: this.analysisCache.size,
     });
   }
 
@@ -1107,8 +949,7 @@ class DefaultFunctionValidationService implements FunctionValidationService {
         errors.push({
           parameterName: paramMeta.name,
           errorType: 'required_parameter_missing',
-          message: `Required parameter '${paramMeta.name}' is missing`,
-          expectedType: paramMeta.type,
+          message: `Required parameter '${paramMeta.name}' is missing',expectedType: paramMeta.type,
           actualType: typeof paramValue,
           suggestions: [`Provide a value for ${paramMeta.name}`],
         });
@@ -1127,19 +968,13 @@ class DefaultFunctionValidationService implements FunctionValidationService {
     // Basic parameter sanitization
     return parameters.map((param, index) => {
       const paramMeta = metadata.parameters[index];
-      if (paramMeta?.sensitiveData && typeof param === 'string') {
-        // Mask sensitive data
-        return '[SENSITIVE_DATA_MASKED]';
-      }
-      return param;
+      if (paramMeta?.sensitiveData && typeof param === 'string') {// Mask sensitive datareturn '[SENSITIVE_DATA_MASKED]';}return param;
     });
   }
 
   async filterResponse(metadata: UniversalFunctionMetadata, response: unknown, context: ValidationContext): Promise<unknown> {
     // Basic response filtering
-    if (metadata.securityContext.dataClassification === 'confidential' && typeof response === 'object') {
-      // Filter out sensitive fields
-      return '[RESPONSE_FILTERED_FOR_SECURITY]';
+    if (metadata.securityContext.dataClassification === 'confidential' && typeof response === 'object') {// Filter out sensitive fieldsreturn '[RESPONSE_FILTERED_FOR_SECURITY]';
     }
     return response;
   }
@@ -1160,9 +995,7 @@ class DefaultFunctionPerformanceMonitor implements FunctionPerformanceMonitor {
   private executions = new Map<string, any>();
 
   startExecution(functionId: string, parameters: unknown[]): string {
-    const executionId = `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    this.executions.set(executionId, {
-      functionId,
+    const executionId = `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.executions.set(executionId, {functionId,
       startTime: Date.now(),
       parameters,
     });
@@ -1292,9 +1125,7 @@ class DefaultFunctionAuditLogger implements FunctionAuditLogger {
       framework,
       timeRange,
       generatedAt: new Date(),
-      generatedBy: 'DefaultFunctionAuditLogger',
-      summary: {
-        totalExecutions: this.auditEntries.length,
+      generatedBy: 'DefaultFunctionAuditLogger',summary: {totalExecutions: this.auditEntries.length,
         approvedExecutions: 0,
         deniedExecutions: 0,
         errorExecutions: 0,
@@ -1309,11 +1140,7 @@ class DefaultFunctionAuditLogger implements FunctionAuditLogger {
       findings: [],
       recommendations: [],
       attestation: {
-        attestedBy: 'system',
-        attestedAt: new Date(),
-        statement: 'Mock compliance report',
-        digitalSignature: 'mock_signature',
-        certificationLevel: 'basic',
+        attestedBy: 'system',attestedAt: new Date(),statement: 'Mock compliance report',digitalSignature: 'mock_signature',certificationLevel: 'basic',
         validityPeriod: { start: new Date(), end: new Date() },
       },
     };
@@ -1362,10 +1189,7 @@ class DefaultFunctionCacheManager implements FunctionCacheManager {
 
   generateCacheKey(metadata: UniversalFunctionMetadata, parameters: unknown[]): string {
     const paramHash = JSON.stringify(parameters);
-    return `func_${metadata.functionId}_${this.hashString(paramHash)}`;
-  }
-
-  isCacheable(metadata: UniversalFunctionMetadata, parameters: unknown[]): boolean {
+    return `func_${metadata.functionId}_${this.hashString(paramHash)}`;}isCacheable(metadata: UniversalFunctionMetadata, parameters: unknown[]): boolean {
     return metadata.validationRequirements.cacheable;
   }
 

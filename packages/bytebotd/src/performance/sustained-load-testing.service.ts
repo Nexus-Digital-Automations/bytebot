@@ -26,42 +26,15 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import * as os from 'os';
-
-// ===== SUSTAINED LOAD TESTING TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import * as os from 'os';// ===== SUSTAINED LOAD TESTING TYPES =====/**
  * Sustained load test types
  */
 export enum SustainedLoadTestType {
-  ENDURANCE_TEST = 'endurance_test',           // Long-duration stability testing
-  STABILITY_TEST = 'stability_test',           // Performance stability validation
-  MEMORY_LEAK_TEST = 'memory_leak_test',       // Memory leak detection
-  CONNECTION_ENDURANCE = 'connection_endurance', // Connection stability testing
-  STRESS_ENDURANCE = 'stress_endurance',       // High-load endurance testing
-  FATIGUE_TEST = 'fatigue_test',              // Extended operation fatigue
-  RECOVERY_TEST = 'recovery_test',             // Recovery after exhaustion
-  CAPACITY_TEST = 'capacity_test',             // Maximum capacity testing
-  DEGRADATION_TEST = 'degradation_test',       // Performance degradation analysis
-}
-
-/**
+  ENDURANCE_TEST = 'endurance_test',           // Long-duration stability testingSTABILITY_TEST = 'stability_test',           // Performance stability validationMEMORY_LEAK_TEST = 'memory_leak_test',       // Memory leak detectionCONNECTION_ENDURANCE = 'connection_endurance', // Connection stability testingSTRESS_ENDURANCE = 'stress_endurance',       // High-load endurance testingFATIGUE_TEST = 'fatigue_test',              // Extended operation fatigueRECOVERY_TEST = 'recovery_test',             // Recovery after exhaustionCAPACITY_TEST = 'capacity_test',             // Maximum capacity testingDEGRADATION_TEST = 'degradation_test',       // Performance degradation analysis}/**
  * Load pattern for sustained testing
  */
 export enum LoadPattern {
-  CONSTANT = 'constant',                       // Constant load throughout test
-  GRADUAL_INCREASE = 'gradual_increase',       // Gradually increasing load
-  STEP_INCREASE = 'step_increase',             // Step-wise load increases
-  SINE_WAVE = 'sine_wave',                     // Sine wave load pattern
-  RANDOM_SPIKES = 'random_spikes',             // Random load spikes
-  BUSINESS_HOURS = 'business_hours',           // Business hours simulation
-}
-
-/**
+  CONSTANT = 'constant',                       // Constant load throughout testGRADUAL_INCREASE = 'gradual_increase',       // Gradually increasing loadSTEP_INCREASE = 'step_increase',             // Step-wise load increasesSINE_WAVE = 'sine_wave',                     // Sine wave load patternRANDOM_SPIKES = 'random_spikes',             // Random load spikesBUSINESS_HOURS = 'business_hours',           // Business hours simulation}/**
  * Sustained load test configuration
  */
 export interface SustainedLoadTestConfig {
@@ -185,22 +158,15 @@ export interface SustainedLoadMetrics {
  */
 export interface PerformanceDegradationAnalysis {
   detected: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-
-  degradationMetrics: {
-    latencyDegradation: {
+  severity: 'low' | 'medium' | 'high' | 'critical';degradationMetrics: {latencyDegradation: {
       initial: number;                         // Initial latency (ms)
       current: number;                         // Current latency (ms)
       increase: number;                        // Increase percentage
-      trend: 'stable' | 'gradual' | 'rapid';
-    };
-    throughputDegradation: {
+      trend: 'stable' | 'gradual' | 'rapid';};throughputDegradation: {
       initial: number;                         // Initial throughput
       current: number;                         // Current throughput
       decrease: number;                        // Decrease percentage
-      trend: 'stable' | 'gradual' | 'rapid';
-    };
-    memoryGrowth: {
+      trend: 'stable' | 'gradual' | 'rapid';};memoryGrowth: {
       initial: number;                         // Initial memory usage (MB)
       current: number;                         // Current memory usage (MB)
       growthRate: number;                      // Growth rate (MB/hour)
@@ -211,9 +177,7 @@ export interface PerformanceDegradationAnalysis {
   rootCauseAnalysis: {
     likelyCauses: string[];                    // Likely causes of degradation
     recommendations: string[];                  // Immediate recommendations
-    urgency: 'low' | 'medium' | 'high' | 'immediate';
-  };
-}
+    urgency: 'low' | 'medium' | 'high' | 'immediate';};}
 
 /**
  * Memory leak detection analysis
@@ -224,9 +188,7 @@ export interface MemoryLeakAnalysis {
 
   leakCharacteristics: {
     growthRate: number;                        // Memory growth rate (MB/hour)
-    pattern: 'linear' | 'exponential' | 'stepped';
-    leakSize: number;                          // Estimated leak size (MB)
-    timeToExhaustion: number;                  // Time to memory exhaustion (hours)
+    pattern: 'linear' | 'exponential' | 'stepped';leakSize: number;                          // Estimated leak size (MB)timeToExhaustion: number;                  // Time to memory exhaustion (hours)
   };
 
   leakLocation: {
@@ -281,12 +243,7 @@ export interface SustainedLoadTestResults {
 
   // Performance summary
   performanceSummary: {
-    overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    stabilityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    enduranceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-
-    // Key metrics
-    averagePerformance: {
+    overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';stabilityGrade: 'A' | 'B' | 'C' | 'D' | 'F';enduranceGrade: 'A' | 'B' | 'C' | 'D' | 'F';// Key metricsaveragePerformance: {
       throughput: number;
       latency: number;
       errorRate: number;
@@ -311,10 +268,7 @@ export interface SustainedLoadTestResults {
   // Critical events
   criticalEvents: {
     timestamp: number;
-    type: 'memory_spike' | 'connection_failure' | 'performance_drop' | 'error_spike';
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    description: string;
-    impact: string;
+    type: 'memory_spike' | 'connection_failure' | 'performance_drop' | 'error_spike';severity: 'low' | 'medium' | 'high' | 'critical';description: string;impact: string;
   }[];
 
   // Recommendations
@@ -365,9 +319,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
   private readonly DEFAULT_CONFIGS = {
     ENDURANCE_4H: {
       testType: SustainedLoadTestType.ENDURANCE_TEST,
-      testName: '4-Hour Endurance Test',
-      duration: 4 * 60 * 60 * 1000,           // 4 hours
-      warmupDuration: 10 * 60 * 1000,         // 10 minutes
+      testName: '4-Hour Endurance Test',duration: 4 * 60 * 60 * 1000,           // 4 hourswarmupDuration: 10 * 60 * 1000,         // 10 minutes
       cooldownDuration: 5 * 60 * 1000,        // 5 minutes
       loadPattern: LoadPattern.CONSTANT,
       baseLoad: {
@@ -396,9 +348,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
 
     STRESS_ENDURANCE: {
       testType: SustainedLoadTestType.STRESS_ENDURANCE,
-      testName: 'Stress Endurance Test',
-      duration: 2 * 60 * 60 * 1000,           // 2 hours
-      warmupDuration: 15 * 60 * 1000,         // 15 minutes
+      testName: 'Stress Endurance Test',duration: 2 * 60 * 60 * 1000,           // 2 hourswarmupDuration: 15 * 60 * 1000,         // 15 minutes
       cooldownDuration: 10 * 60 * 1000,       // 10 minutes
       loadPattern: LoadPattern.GRADUAL_INCREASE,
       baseLoad: {
@@ -435,49 +385,25 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 Sustained Load Testing Service initializing...');
-  }
+    this.logger.log('🚀 Sustained Load Testing Service initializing...');}async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing Sustained Load Testing Framework');// Initialize baseline performance dataawait this.initializeBaselines();
 
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Sustained Load Testing Framework');
-
-    // Initialize baseline performance data
-    await this.initializeBaselines();
-
-    this.logger.log('✅ Sustained Load Testing Framework ready');
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Sustained Load Testing Framework');
-
-    // Stop all active tests
-    for (const testId of this.activeTests.keys()) {
+    this.logger.log('✅ Sustained Load Testing Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down Sustained Load Testing Framework');// Stop all active testsfor (const testId of this.activeTests.keys()) {
       await this.stopSustainedLoadTest(testId);
     }
 
-    this.logger.log('✅ Sustained Load Testing Framework shutdown complete');
-  }
-
-  // ===== MAIN TESTING METHODS =====
+    this.logger.log('✅ Sustained Load Testing Framework shutdown complete');}// ===== MAIN TESTING METHODS =====
 
   /**
    * Execute 4-hour endurance test
    */
   async executeEnduranceTest(): Promise<SustainedLoadTestResults> {
-    this.logger.log('🏃‍♂️ Starting 4-hour endurance test');
-
-    const config = { ...this.DEFAULT_CONFIGS.ENDURANCE_4H };
-    return await this.executeSustainedLoadTest('endurance_4h', config);
-  }
-
-  /**
+    this.logger.log('🏃‍♂️ Starting 4-hour endurance test');const config = { ...this.DEFAULT_CONFIGS.ENDURANCE_4H };return await this.executeSustainedLoadTest('endurance_4h', config);}/**
    * Execute stress endurance test with gradual load increase
    */
   async executeStressEnduranceTest(): Promise<SustainedLoadTestResults> {
-    this.logger.log('💪 Starting stress endurance test');
-
-    const config = { ...this.DEFAULT_CONFIGS.STRESS_ENDURANCE };
-    return await this.executeSustainedLoadTest('stress_endurance', config);
+    this.logger.log('💪 Starting stress endurance test');const config = { ...this.DEFAULT_CONFIGS.STRESS_ENDURANCE };return await this.executeSustainedLoadTest('stress_endurance', config);
   }
 
   /**
@@ -488,11 +414,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
     config: SustainedLoadTestConfig
   ): Promise<SustainedLoadTestResults> {
     const testId = this.generateTestId(testName);
-    this.logger.log(`🧪 Starting sustained load test: ${testId}`);
-
-    this.activeTests.set(testId, config);
-
-    const startTime = new Date();
+    this.logger.log(`🧪 Starting sustained load test: ${testId}`);this.activeTests.set(testId, config);const startTime = new Date();
     let testResults: SustainedLoadTestResults;
 
     try {
@@ -517,9 +439,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
       return testResults;
 
     } catch (error) {
-      this.logger.error(`Sustained load test failed: ${testId}`, error.stack);
-      throw error;
-    } finally {
+      this.logger.error(`Sustained load test failed: ${testId}`, error.stack);throw error;} finally {
       // Cleanup
       this.activeTests.delete(testId);
       this.stopTestMonitoring(testId);
@@ -531,10 +451,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
    * Execute memory leak detection test
    */
   async executeMemoryLeakTest(durationHours: number = 8): Promise<SustainedLoadTestResults> {
-    this.logger.log(`🧠 Starting memory leak detection test (${durationHours} hours)`);
-
-    const config: SustainedLoadTestConfig = {
-      testType: SustainedLoadTestType.MEMORY_LEAK_TEST,
+    this.logger.log(`🧠 Starting memory leak detection test (${durationHours} hours)`);const config: SustainedLoadTestConfig = {testType: SustainedLoadTestType.MEMORY_LEAK_TEST,
       testName: `Memory Leak Test (${durationHours}h)`,
       duration: durationHours * 60 * 60 * 1000,
       warmupDuration: 30 * 60 * 1000,         // 30 minutes
@@ -564,20 +481,12 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
       },
     };
 
-    return await this.executeSustainedLoadTest('memory_leak', config);
-  }
-
-  /**
+    return await this.executeSustainedLoadTest('memory_leak', config);}/**
    * Execute connection stability test
    */
   async executeConnectionStabilityTest(): Promise<SustainedLoadTestResults> {
-    this.logger.log('🔗 Starting connection stability test');
-
-    const config: SustainedLoadTestConfig = {
-      testType: SustainedLoadTestType.CONNECTION_ENDURANCE,
-      testName: 'Connection Stability Test',
-      duration: 6 * 60 * 60 * 1000,           // 6 hours
-      warmupDuration: 20 * 60 * 1000,         // 20 minutes
+    this.logger.log('🔗 Starting connection stability test');const config: SustainedLoadTestConfig = {testType: SustainedLoadTestType.CONNECTION_ENDURANCE,
+      testName: 'Connection Stability Test',duration: 6 * 60 * 60 * 1000,           // 6 hourswarmupDuration: 20 * 60 * 1000,         // 20 minutes
       cooldownDuration: 10 * 60 * 1000,       // 10 minutes
       loadPattern: LoadPattern.RANDOM_SPIKES,
       baseLoad: {
@@ -622,10 +531,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
     testId: string,
     config: SustainedLoadTestConfig
   ): Promise<void> {
-    this.logger.log(`Initializing test environment for: ${testId}`);
-
-    // Collect baseline metrics
-    const baseline = await this.collectBaselineMetrics();
+    this.logger.log(`Initializing test environment for: ${testId}`);// Collect baseline metricsconst baseline = await this.collectBaselineMetrics();
     this.performanceBaselines.set(testId, baseline);
 
     // Initialize metrics collection
@@ -644,19 +550,12 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
   ): Promise<void> {
     // Warmup phase
     if (config.warmupDuration > 0) {
-      this.logger.log(`🔥 Warmup phase: ${config.warmupDuration / 1000}s`);
-      await this.executeWarmupPhase(testId, config);
-    }
+      this.logger.log(`🔥 Warmup phase: ${config.warmupDuration / 1000}s`);await this.executeWarmupPhase(testId, config);}
 
     // Main test phase
-    this.logger.log(`🚀 Main test phase: ${config.duration / 1000}s`);
-    await this.executeMainTestPhase(testId, config);
-
-    // Cooldown phase
+    this.logger.log(`🚀 Main test phase: ${config.duration / 1000}s`);await this.executeMainTestPhase(testId, config);// Cooldown phase
     if (config.cooldownDuration > 0) {
-      this.logger.log(`❄️ Cooldown phase: ${config.cooldownDuration / 1000}s`);
-      await this.executeCooldownPhase(testId, config);
-    }
+      this.logger.log(`❄️ Cooldown phase: ${config.cooldownDuration / 1000}s`);await this.executeCooldownPhase(testId, config);}
   }
 
   /**
@@ -672,9 +571,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
     while (Date.now() < endTime) {
       // Check for early termination conditions
       if (await this.shouldTerminateEarly(testId, config)) {
-        this.logger.warn(`Early termination triggered for test: ${testId}`);
-        break;
-      }
+        this.logger.warn(`Early termination triggered for test: ${testId}`);break;}
 
       // Apply current load based on pattern
       const currentLoad = this.calculateCurrentLoad(
@@ -770,9 +667,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
         await this.checkAlertConditions(testId, config, metrics);
 
       } catch (error) {
-        this.logger.error(`Error collecting metrics for test ${testId}`, error.stack);
-      }
-    }, config.monitoring.metricsInterval);
+        this.logger.error(`Error collecting metrics for test ${testId}`, error.stack);}}, config.monitoring.metricsInterval);
 
     this.monitoringIntervals.set(testId, interval);
   }
@@ -921,18 +816,11 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
     if (metrics.length < 2) {
       return {
         detected: false,
-        severity: 'low',
-        degradationMetrics: {
-          latencyDegradation: { initial: 0, current: 0, increase: 0, trend: 'stable' },
-          throughputDegradation: { initial: 0, current: 0, decrease: 0, trend: 'stable' },
-          memoryGrowth: { initial: 0, current: 0, growthRate: 0, leakSuspected: false },
-        },
+        severity: 'low',degradationMetrics: {latencyDegradation: { initial: 0, current: 0, increase: 0, trend: 'stable' },throughputDegradation: { initial: 0, current: 0, decrease: 0, trend: 'stable' },memoryGrowth: { initial: 0, current: 0, growthRate: 0, leakSuspected: false },},
         rootCauseAnalysis: {
           likelyCauses: [],
           recommendations: [],
-          urgency: 'low',
-        },
-      };
+          urgency: 'low',},};
     }
 
     const initialMetrics = metrics[0];
@@ -976,9 +864,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
       rootCauseAnalysis: {
         likelyCauses: this.identifyLikelyCauses(latencyIncrease, throughputDecrease, memoryGrowthRate),
         recommendations: this.generateDegradationRecommendations(severity),
-        urgency: severity === 'critical' ? 'immediate' : severity === 'high' ? 'high' : 'medium',
-      },
-    };
+        urgency: severity === 'critical' ? 'immediate' : severity === 'high' ? 'high' : 'medium',},};
   }
 
   /**
@@ -1103,15 +989,11 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
 
     // Check memory exhaustion
     if (latest.resources.memory.rss > 3000) { // 3GB threshold
-      this.logger.warn(`Memory exhaustion detected for test ${testId}: ${latest.resources.memory.rss}MB`);
-      return true;
-    }
+      this.logger.warn(`Memory exhaustion detected for test ${testId}: ${latest.resources.memory.rss}MB`);return true;}
 
     // Check critical error rate
     if (latest.errors.rate > 50) {
-      this.logger.warn(`Critical error rate detected for test ${testId}: ${latest.errors.rate}%`);
-      return true;
-    }
+      this.logger.warn(`Critical error rate detected for test ${testId}: ${latest.errors.rate}%`);return true;}
 
     return false;
   }
@@ -1143,16 +1025,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
    */
   private logTestResults(results: SustainedLoadTestResults): void {
     this.logger.log('📊 Sustained Load Test Results:');
-    this.logger.log(`   Test ID: ${results.testId}`);
-    this.logger.log(`   Duration: ${(results.execution.actualDuration / 1000 / 60).toFixed(1)} minutes`);
-    this.logger.log(`   Overall Grade: ${results.performanceSummary.overallGrade}`);
-    this.logger.log(`   Stability Score: ${results.connectionStabilityAnalysis.stabilityScore.toFixed(1)}`);
-
-    if (results.degradationAnalysis.detected) {
-      this.logger.warn(`   Performance Degradation: ${results.degradationAnalysis.severity}`);
-    }
-
-    if (results.memoryLeakAnalysis.leakDetected) {
+    this.logger.log(`   Test ID: ${results.testId}`);this.logger.log(`   Duration: ${(results.execution.actualDuration / 1000 / 60).toFixed(1)} minutes`);this.logger.log(`   Overall Grade: ${results.performanceSummary.overallGrade}`);this.logger.log(`   Stability Score: ${results.connectionStabilityAnalysis.stabilityScore.toFixed(1)}`);if (results.degradationAnalysis.detected) {this.logger.warn(`   Performance Degradation: ${results.degradationAnalysis.severity}`);}if (results.memoryLeakAnalysis.leakDetected) {
       this.logger.warn(`   Memory Leak Detected: ${results.memoryLeakAnalysis.leakCharacteristics.growthRate.toFixed(1)} MB/hour`);
     }
   }
@@ -1178,32 +1051,16 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
       networkBandwidth: 100,
       totalErrors: 10,
       errorRate: 1,
-      errorTypes: new Map([['timeout', 5], ['connection', 3], ['validation', 2]]),
-    };
-  }
+      errorTypes: new Map([['timeout', 5], ['connection', 3], ['validation', 2]]),};}
   private calculateReliabilityScore(performance: any): number { return 95; }
   private calculatePerformanceScore(performance: any, baseline: any): number { return 90; }
   private async checkAlertConditions(testId: string, config: SustainedLoadTestConfig, metrics: SustainedLoadMetrics): Promise<void> { /* Implementation */ }
   private analyzePerformanceSummary(metrics: SustainedLoadMetrics[], baseline: any): any {
     return {
-      overallGrade: 'B' as const,
-      stabilityGrade: 'A' as const,
-      enduranceGrade: 'B' as const,
-      averagePerformance: { throughput: 1000, latency: 50, errorRate: 2, resourceUsage: 60 },
-      performanceStability: { throughputStability: 5, latencyStability: 8, memoryStability: 3 },
+      overallGrade: 'B' as const,stabilityGrade: 'A' as const,enduranceGrade: 'B' as const,averagePerformance: { throughput: 1000, latency: 50, errorRate: 2, resourceUsage: 60 },performanceStability: { throughputStability: 5, latencyStability: 8, memoryStability: 3 },
     };
   }
-  private analyzeTrend(values: number[]): 'stable' | 'gradual' | 'rapid' { return 'stable'; }
-  private determineDegradationSeverity(latency: number, throughput: number, memory: number): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }
-  private identifyLikelyCauses(latency: number, throughput: number, memory: number): string[] { return ['Normal test execution']; }
-  private generateDegradationRecommendations(severity: string): string[] { return ['Monitor performance']; }
-  private calculateLinearGrowthRate(time: number[], memory: number[]): number { return 5; }
-  private determineGrowthPattern(values: number[]): 'linear' | 'exponential' | 'stepped' { return 'linear'; }
-  private identifySuspectedLeakSources(metrics: SustainedLoadMetrics[]): string[] { return ['WebSocket connections']; }
-  private generateLeakInvestigationRecommendations(growthRate: number): string[] { return ['Use heap profiler']; }
-  private generateLeakPreventionRecommendations(): string[] { return ['Implement connection pooling']; }
-  private analyzeConnectionStability(metrics: SustainedLoadMetrics[]): ConnectionStabilityAnalysis {
-    return {
+  private analyzeTrend(values: number[]): 'stable' | 'gradual' | 'rapid' { return 'stable'; }private determineDegradationSeverity(latency: number, throughput: number, memory: number): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }private identifyLikelyCauses(latency: number, throughput: number, memory: number): string[] { return ['Normal test execution']; }private generateDegradationRecommendations(severity: string): string[] { return ['Monitor performance']; }private calculateLinearGrowthRate(time: number[], memory: number[]): number { return 5; }private determineGrowthPattern(values: number[]): 'linear' | 'exponential' | 'stepped' { return 'linear'; }private identifySuspectedLeakSources(metrics: SustainedLoadMetrics[]): string[] { return ['WebSocket connections']; }private generateLeakInvestigationRecommendations(growthRate: number): string[] { return ['Use heap profiler']; }private generateLeakPreventionRecommendations(): string[] { return ['Implement connection pooling']; }private analyzeConnectionStability(metrics: SustainedLoadMetrics[]): ConnectionStabilityAnalysis {return {
       stabilityScore: 92,
       connectionMetrics: {
         averageConnectionDuration: 300000,
@@ -1217,18 +1074,11 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
         reconnectionFailures: false,
         resourceExhaustion: false,
       },
-      stabilityRecommendations: ['Maintain current connection management'],
-    };
-  }
+      stabilityRecommendations: ['Maintain current connection management'],};}
   private extractCriticalEvents(metrics: SustainedLoadMetrics[]): any[] { return []; }
   private generateRecommendations(degradation: any, memoryLeak: any, connection: any): any {
     return {
-      immediate: ['Continue monitoring'],
-      shortTerm: ['Optimize performance'],
-      longTerm: ['Plan capacity upgrades'],
-      infrastructure: ['Consider horizontal scaling'],
-    };
-  }
+      immediate: ['Continue monitoring'],shortTerm: ['Optimize performance'],longTerm: ['Plan capacity upgrades'],infrastructure: ['Consider horizontal scaling'],};}
   private generateCapacityPlanningInsights(metrics: SustainedLoadMetrics[], config: SustainedLoadTestConfig): any {
     return {
       maxSustainableLoad: {
@@ -1236,12 +1086,7 @@ export class SustainedLoadTestingService implements OnModuleInit, OnModuleDestro
         throughput: 5000,
         duration: 24,
       },
-      scalingRecommendations: ['Add more instances for higher load'],
-      resourceRequirements: {
-        cpu: '4 cores minimum',
-        memory: '8GB recommended',
-        network: '1Gbps sufficient',
-        storage: '100GB for logs',
+      scalingRecommendations: ['Add more instances for higher load'],resourceRequirements: {cpu: '4 cores minimum',memory: '8GB recommended',network: '1Gbps sufficient',storage: '100GB for logs',
       },
     };
   }

@@ -24,15 +24,7 @@
  * @version 1.0.0 - ENTERPRISE PERFORMANCE MONITORING FRAMEWORK
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import WebSocket from 'ws';
-
-// ===== PERFORMANCE MONITORING INTERFACES =====
-
-/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import WebSocket from 'ws';// ===== PERFORMANCE MONITORING INTERFACES =====/**
  * Performance metrics data structure
  */
 export interface PerformanceMetrics {
@@ -42,9 +34,7 @@ export interface PerformanceMetrics {
   readonly functionName: string;
   readonly riskLevel: string;
   readonly duration: number;
-  readonly cacheLevel?: 'L1' | 'L2' | 'L3' | 'MISS';
-  readonly approved: boolean;
-  readonly validationDuration: number;
+  readonly cacheLevel?: 'L1' | 'L2' | 'L3' | 'MISS';readonly approved: boolean;readonly validationDuration: number;
   readonly executionDuration?: number;
   readonly resourceUsage: {
     cpuUsage: number;
@@ -96,20 +86,14 @@ export interface PerformanceStats {
 export interface AlertThreshold {
   readonly metricName: string;
   readonly threshold: number;
-  readonly operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly enabled: boolean;
-  readonly cooldownMs: number;
+  readonly operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly enabled: boolean;readonly cooldownMs: number;
 }
 
 /**
  * Performance optimization recommendation
  */
 export interface OptimizationRecommendation {
-  readonly type: 'CACHE_TUNING' | 'BATCH_SIZE' | 'THRESHOLD_ADJUSTMENT' | 'RESOURCE_SCALING';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly expectedImpact: string;
+  readonly type: 'CACHE_TUNING' | 'BATCH_SIZE' | 'THRESHOLD_ADJUSTMENT' | 'RESOURCE_SCALING';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly expectedImpact: string;
   readonly implementation: string;
   readonly estimatedEffort: string;
   readonly metadata: Record<string, unknown>;
@@ -119,9 +103,7 @@ export interface OptimizationRecommendation {
  * Cache performance metrics
  */
 export interface CacheMetrics {
-  readonly level: 'L1' | 'L2' | 'L3';
-  readonly hitCount: number;
-  readonly missCount: number;
+  readonly level: 'L1' | 'L2' | 'L3';readonly hitCount: number;readonly missCount: number;
   readonly hitRate: number;
   readonly averageAccessTime: number;
   readonly size: number;
@@ -181,10 +163,7 @@ class L1MemoryCache {
   private hitCount = 0;
   private missCount = 0;
   private evictionCount = 0;
-  private readonly logger = new Logger('L1MemoryCache');
-
-  constructor(config: { maxSize: number; ttlMs: number }) {
-    this.maxSize = config.maxSize;
+  private readonly logger = new Logger('L1MemoryCache');constructor(config: { maxSize: number; ttlMs: number }) {this.maxSize = config.maxSize;
     this.defaultTtl = config.ttlMs;
   }
 
@@ -240,9 +219,7 @@ class L1MemoryCache {
   getMetrics(): CacheMetrics {
     const totalRequests = this.hitCount + this.missCount;
     return {
-      level: 'L1',
-      hitCount: this.hitCount,
-      missCount: this.missCount,
+      level: 'L1',hitCount: this.hitCount,missCount: this.missCount,
       hitRate: totalRequests > 0 ? this.hitCount / totalRequests : 0,
       averageAccessTime: 2, // L1 cache is typically ~2ms
       size: this.cache.size,
@@ -286,10 +263,7 @@ class L2RedisCache {
   private readonly defaultTtl: number;
   private hitCount = 0;
   private missCount = 0;
-  private readonly logger = new Logger('L2RedisCache');
-
-  constructor(config: { redis: Redis; ttlMs: number }) {
-    this.redis = config.redis;
+  private readonly logger = new Logger('L2RedisCache');constructor(config: { redis: Redis; ttlMs: number }) {this.redis = config.redis;
     this.defaultTtl = config.ttlMs;
   }
 
@@ -305,9 +279,7 @@ class L2RedisCache {
       this.hitCount++;
       return JSON.parse(data);
     } catch (error) {
-      this.logger.error('L2 cache get error', { key, error: error instanceof Error ? error.message : String(error) });
-      this.missCount++;
-      return null;
+      this.logger.error('L2 cache get error', { key, error: error instanceof Error ? error.message : String(error) });this.missCount++;return null;
     }
   }
 
@@ -318,34 +290,26 @@ class L2RedisCache {
 
       await this.redis.setex(key, Math.floor(ttl / 1000), serializedData);
     } catch (error) {
-      this.logger.error('L2 cache set error', { key, error: error instanceof Error ? error.message : String(error) });
-    }
-  }
+      this.logger.error('L2 cache set error', { key, error: error instanceof Error ? error.message : String(error) });}}
 
   async delete(key: string): Promise<boolean> {
     try {
       const result = await this.redis.del(key);
       return result > 0;
     } catch (error) {
-      this.logger.error('L2 cache delete error', { key, error: error instanceof Error ? error.message : String(error) });
-      return false;
-    }
+      this.logger.error('L2 cache delete error', { key, error: error instanceof Error ? error.message : String(error) });return false;}
   }
 
   async clear(): Promise<void> {
     try {
       await this.redis.flushdb();
     } catch (error) {
-      this.logger.error('L2 cache clear error', { error: error instanceof Error ? error.message : String(error) });
-    }
-  }
+      this.logger.error('L2 cache clear error', { error: error instanceof Error ? error.message : String(error) });}}
 
   getMetrics(): CacheMetrics {
     const totalRequests = this.hitCount + this.missCount;
     return {
-      level: 'L2',
-      hitCount: this.hitCount,
-      missCount: this.missCount,
+      level: 'L2',hitCount: this.hitCount,missCount: this.missCount,
       hitRate: totalRequests > 0 ? this.hitCount / totalRequests : 0,
       averageAccessTime: 15, // Redis typically ~15ms
       size: 0, // Would need to query Redis for actual size
@@ -362,10 +326,7 @@ class L3DatabaseCache {
   private readonly defaultTtl: number;
   private hitCount = 0;
   private missCount = 0;
-  private readonly logger = new Logger('L3DatabaseCache');
-
-  constructor(config: { ttlMs: number }) {
-    this.defaultTtl = config.ttlMs;
+  private readonly logger = new Logger('L3DatabaseCache');constructor(config: { ttlMs: number }) {this.defaultTtl = config.ttlMs;
   }
 
   async get(key: string): Promise<unknown | null> {
@@ -376,10 +337,7 @@ class L3DatabaseCache {
 
   async set(key: string, data: unknown, ttlMs?: number): Promise<void> {
     // Mock implementation - would insert into database
-    this.logger.debug('L3 cache set (mock)', { key });
-  }
-
-  async delete(key: string): Promise<boolean> {
+    this.logger.debug('L3 cache set (mock)', { key });}async delete(key: string): Promise<boolean> {
     // Mock implementation - would delete from database
     return false;
   }
@@ -391,9 +349,7 @@ class L3DatabaseCache {
   getMetrics(): CacheMetrics {
     const totalRequests = this.hitCount + this.missCount;
     return {
-      level: 'L3',
-      hitCount: this.hitCount,
-      missCount: this.missCount,
+      level: 'L3',hitCount: this.hitCount,missCount: this.missCount,
       hitRate: totalRequests > 0 ? this.hitCount / totalRequests : 0,
       averageAccessTime: 50, // Database typically ~50ms
       size: 0,
@@ -440,35 +396,21 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
     this.initializeAlertThresholds();
     this.startPerformanceMonitoring();
 
-    this.logger.log('Performance Monitoring Service initialized with comprehensive caching and real-time monitoring');
-  }
-
-  // ===== MULTI-LEVEL CACHE OPERATIONS =====
+    this.logger.log('Performance Monitoring Service initialized with comprehensive caching and real-time monitoring');}// ===== MULTI-LEVEL CACHE OPERATIONS =====
 
   /**
    * Get data from multi-level cache hierarchy
    */
-  async getCachedData(key: string): Promise<{ data: unknown; level: 'L1' | 'L2' | 'L3' | 'MISS' }> {
-    const startTime = Date.now();
-
-    try {
+  async getCachedData(key: string): Promise<{ data: unknown; level: 'L1' | 'L2' | 'L3' | 'MISS' }> {const startTime = Date.now();try {
       // L1: In-memory cache (fastest)
       let data = await this.l1Cache.get(key);
       if (data !== null) {
-        this.recordCacheHit('L1', Date.now() - startTime);
-        return { data, level: 'L1' };
-      }
-
-      // L2: Redis distributed cache
+        this.recordCacheHit('L1', Date.now() - startTime);return { data, level: 'L1' };}// L2: Redis distributed cache
       data = await this.l2Cache.get(key);
       if (data !== null) {
         // Promote to L1 cache
         await this.l1Cache.set(key, data);
-        this.recordCacheHit('L2', Date.now() - startTime);
-        return { data, level: 'L2' };
-      }
-
-      // L3: Database cache
+        this.recordCacheHit('L2', Date.now() - startTime);return { data, level: 'L2' };}// L3: Database cache
       data = await this.l3Cache.get(key);
       if (data !== null) {
         // Promote to L2 and L1 caches
@@ -476,21 +418,10 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
           this.l2Cache.set(key, data),
           this.l1Cache.set(key, data),
         ]);
-        this.recordCacheHit('L3', Date.now() - startTime);
-        return { data, level: 'L3' };
-      }
-
-      this.recordCacheMiss(Date.now() - startTime);
-      return { data: null, level: 'MISS' };
-
-    } catch (error) {
-      this.logger.error('Cache hierarchy error', {
-        key,
-        error: error instanceof Error ? error.message : String(error)
+        this.recordCacheHit('L3', Date.now() - startTime);return { data, level: 'L3' };}this.recordCacheMiss(Date.now() - startTime);
+      return { data: null, level: 'MISS' };} catch (error) {this.logger.error('Cache hierarchy error', {key,error: error instanceof Error ? error.message : String(error)
       });
-      return { data: null, level: 'MISS' };
-    }
-  }
+      return { data: null, level: 'MISS' };}}
 
   /**
    * Set data in multi-level cache hierarchy
@@ -504,9 +435,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
         this.l3Cache.set(key, data, ttlMs),
       ]);
     } catch (error) {
-      this.logger.error('Cache set error', {
-        key,
-        error: error instanceof Error ? error.message : String(error)
+      this.logger.error('Cache set error', {key,error: error instanceof Error ? error.message : String(error)
       });
     }
   }
@@ -522,9 +451,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
         this.l3Cache.delete(key),
       ]);
     } catch (error) {
-      this.logger.error('Cache invalidation error', {
-        key,
-        error: error instanceof Error ? error.message : String(error)
+      this.logger.error('Cache invalidation error', {key,error: error instanceof Error ? error.message : String(error)
       });
     }
   }
@@ -556,13 +483,8 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
     }
 
     // Emit real-time event
-    this.eventEmitter.emit('performance.metrics.recorded', metrics);
-
-    // Stream to WebSocket clients
-    this.broadcastMetricsUpdate({
-      type: 'operation_recorded',
-      metrics,
-      timestamp: new Date(),
+    this.eventEmitter.emit('performance.metrics.recorded', metrics);// Stream to WebSocket clientsthis.broadcastMetricsUpdate({
+      type: 'operation_recorded',metrics,timestamp: new Date(),
     });
 
     this.logger.debug('Performance metrics recorded', {
@@ -655,53 +577,33 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
     // Cache hit rate optimization
     if (stats.cacheStats.overallHitRate < 0.85) {
       recommendations.push({
-        type: 'CACHE_TUNING',
-        priority: 'HIGH',
+        type: 'CACHE_TUNING',priority: 'HIGH',
         description: `Cache hit rate is ${(stats.cacheStats.overallHitRate * 100).toFixed(1)}%, below 85% target`,
-        expectedImpact: 'Improve response times by 30-50%',
-        implementation: 'Increase cache TTL values and implement smarter cache key strategies',
-        estimatedEffort: '2-4 hours',
-        metadata: { currentHitRate: stats.cacheStats.overallHitRate, targetHitRate: 0.85 },
-      });
+        expectedImpact: 'Improve response times by 30-50%',implementation: 'Increase cache TTL values and implement smarter cache key strategies',estimatedEffort: '2-4 hours',metadata: { currentHitRate: stats.cacheStats.overallHitRate, targetHitRate: 0.85 },});
     }
 
     // Response time optimization
     if (stats.p95ResponseTime > 1000) {
       recommendations.push({
-        type: 'THRESHOLD_ADJUSTMENT',
-        priority: 'CRITICAL',
+        type: 'THRESHOLD_ADJUSTMENT',priority: 'CRITICAL',
         description: `P95 response time is ${stats.p95ResponseTime}ms, exceeding 1000ms target`,
-        expectedImpact: 'Reduce P95 response time to <1000ms',
-        implementation: 'Optimize validation logic, implement async processing, tune cache settings',
-        estimatedEffort: '4-8 hours',
-        metadata: { currentP95: stats.p95ResponseTime, targetP95: 1000 },
-      });
+        expectedImpact: 'Reduce P95 response time to <1000ms',implementation: 'Optimize validation logic, implement async processing, tune cache settings',estimatedEffort: '4-8 hours',metadata: { currentP95: stats.p95ResponseTime, targetP95: 1000 },});
     }
 
     // Throughput optimization
     if (stats.throughputStats.operationsPerSecond < 5000) {
       recommendations.push({
-        type: 'BATCH_SIZE',
-        priority: 'MEDIUM',
+        type: 'BATCH_SIZE',priority: 'MEDIUM',
         description: `Throughput is ${stats.throughputStats.operationsPerSecond.toFixed(0)} ops/sec, below 5000 target`,
-        expectedImpact: 'Increase throughput to 5000+ operations per second',
-        implementation: 'Implement batch processing, optimize database queries, scale horizontally',
-        estimatedEffort: '6-12 hours',
-        metadata: { currentThroughput: stats.throughputStats.operationsPerSecond, targetThroughput: 5000 },
-      });
+        expectedImpact: 'Increase throughput to 5000+ operations per second',implementation: 'Implement batch processing, optimize database queries, scale horizontally',estimatedEffort: '6-12 hours',metadata: { currentThroughput: stats.throughputStats.operationsPerSecond, targetThroughput: 5000 },});
     }
 
     // Resource usage optimization
     if (stats.resourceStats.averageCpuUsage > 70) {
       recommendations.push({
-        type: 'RESOURCE_SCALING',
-        priority: 'HIGH',
+        type: 'RESOURCE_SCALING',priority: 'HIGH',
         description: `CPU usage is ${stats.resourceStats.averageCpuUsage.toFixed(1)}%, indicating resource pressure`,
-        expectedImpact: 'Reduce CPU usage by 40% and improve system stability',
-        implementation: 'Optimize algorithms, implement caching, scale resources',
-        estimatedEffort: '4-8 hours',
-        metadata: { currentCpuUsage: stats.resourceStats.averageCpuUsage, targetCpuUsage: 50 },
-      });
+        expectedImpact: 'Reduce CPU usage by 40% and improve system stability',implementation: 'Optimize algorithms, implement caching, scale resources',estimatedEffort: '4-8 hours',metadata: { currentCpuUsage: stats.resourceStats.averageCpuUsage, targetCpuUsage: 50 },});
     }
 
     return recommendations;
@@ -715,21 +617,14 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
   addWebSocketClient(ws: WebSocket): void {
     this.wsClients.add(ws);
 
-    ws.on('close', () => {
-      this.wsClients.delete(ws);
-    });
+    ws.on('close', () => {this.wsClients.delete(ws);});
 
     // Send current stats immediately
     this.sendToClient(ws, {
-      type: 'performance_stats',
-      data: this.getPerformanceStats(),
-      timestamp: new Date(),
+      type: 'performance_stats',data: this.getPerformanceStats(),timestamp: new Date(),
     });
 
-    this.logger.debug('WebSocket client added for real-time performance monitoring');
-  }
-
-  /**
+    this.logger.debug('WebSocket client added for real-time performance monitoring');}/**
    * Broadcast metrics update to all WebSocket clients
    */
   private broadcastMetricsUpdate(update: Record<string, unknown>): void {
@@ -777,11 +672,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
         ttlMs: cacheConfig.l2.ttlMs,
       });
 
-      this.logger.log('Redis L2 cache initialized successfully');
-    } catch (error) {
-      this.logger.warn('Redis not available, L2 cache disabled', {
-        error: error instanceof Error ? error.message : String(error)
-      });
+      this.logger.log('Redis L2 cache initialized successfully');} catch (error) {this.logger.warn('Redis not available, L2 cache disabled', {error: error instanceof Error ? error.message : String(error)});
 
       // Create mock L2 cache
       this.l2Cache = new L2RedisCache({
@@ -795,9 +686,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
       ttlMs: cacheConfig.l3.ttlMs,
     });
 
-    this.logger.log('Multi-level cache system initialized', {
-      l1MaxSize: cacheConfig.l1.maxSize,
-      l2Enabled: !!this.redis,
+    this.logger.log('Multi-level cache system initialized', {l1MaxSize: cacheConfig.l1.maxSize,l2Enabled: !!this.redis,
       l3Enabled: true,
     });
   }
@@ -805,62 +694,26 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
   private getCacheConfig(): CacheConfig {
     return {
       l1: {
-        maxSize: this.configService.get<number>('CACHE_L1_MAX_SIZE', 50000),
-        ttlMs: this.configService.get<number>('CACHE_L1_TTL_MS', 60000),
-        compressionEnabled: this.configService.get<boolean>('CACHE_L1_COMPRESSION', true),
-      },
-      l2: {
+        maxSize: this.configService.get<number>('CACHE_L1_MAX_SIZE', 50000),ttlMs: this.configService.get<number>('CACHE_L1_TTL_MS', 60000),compressionEnabled: this.configService.get<boolean>('CACHE_L1_COMPRESSION', true),},l2: {
         redisConfig: {
-          host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-          port: this.configService.get<number>('REDIS_PORT', 6379),
-        },
-        ttlMs: this.configService.get<number>('CACHE_L2_TTL_MS', 300000),
-        compressionLevel: this.configService.get<number>('CACHE_L2_COMPRESSION_LEVEL', 6),
-      },
-      l3: {
+          host: this.configService.get<string>('REDIS_HOST', 'localhost'),port: this.configService.get<number>('REDIS_PORT', 6379),},ttlMs: this.configService.get<number>('CACHE_L2_TTL_MS', 300000),compressionLevel: this.configService.get<number>('CACHE_L2_COMPRESSION_LEVEL', 6),},l3: {
         databaseConfig: {
-          connectionString: this.configService.get<string>('DATABASE_URL', ''),
-          tableName: 'performance_cache',
-        },
-        ttlMs: this.configService.get<number>('CACHE_L3_TTL_MS', 3600000),
-        indexOptimization: this.configService.get<boolean>('CACHE_L3_INDEX_OPTIMIZATION', true),
-      },
-    };
+          connectionString: this.configService.get<string>('DATABASE_URL', ''),tableName: 'performance_cache',},ttlMs: this.configService.get<number>('CACHE_L3_TTL_MS', 3600000),indexOptimization: this.configService.get<boolean>('CACHE_L3_INDEX_OPTIMIZATION', true),},};
   }
 
   private initializeAlertThresholds(): void {
     this.alertThresholds.push(
       {
-        metricName: 'p95_response_time',
-        threshold: 1000,
-        operator: 'gt',
-        severity: 'CRITICAL',
-        enabled: true,
-        cooldownMs: 60000,
+        metricName: 'p95_response_time',threshold: 1000,operator: 'gt',severity: 'CRITICAL',enabled: true,cooldownMs: 60000,
       },
       {
-        metricName: 'cache_hit_rate',
-        threshold: 0.85,
-        operator: 'lt',
-        severity: 'HIGH',
-        enabled: true,
-        cooldownMs: 300000,
+        metricName: 'cache_hit_rate',threshold: 0.85,operator: 'lt',severity: 'HIGH',enabled: true,cooldownMs: 300000,
       },
       {
-        metricName: 'throughput',
-        threshold: 5000,
-        operator: 'lt',
-        severity: 'MEDIUM',
-        enabled: true,
-        cooldownMs: 300000,
+        metricName: 'throughput',threshold: 5000,operator: 'lt',severity: 'MEDIUM',enabled: true,cooldownMs: 300000,
       },
       {
-        metricName: 'error_rate',
-        threshold: 0.01,
-        operator: 'gt',
-        severity: 'HIGH',
-        enabled: true,
-        cooldownMs: 60000,
+        metricName: 'error_rate',threshold: 0.01,operator: 'gt',severity: 'HIGH',enabled: true,cooldownMs: 60000,
       }
     );
   }
@@ -876,24 +729,16 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
       this.checkAlertThresholds();
     }, 30000);
 
-    this.logger.log('Performance monitoring intervals started');
-  }
-
-  private collectSystemMetrics(): void {
+    this.logger.log('Performance monitoring intervals started');}private collectSystemMetrics(): void {
     const stats = this.getPerformanceStats();
 
     // Broadcast to WebSocket clients
     this.broadcastMetricsUpdate({
-      type: 'performance_stats_update',
-      data: stats,
-      timestamp: new Date(),
+      type: 'performance_stats_update',data: stats,timestamp: new Date(),
     });
 
     // Emit event for other services
-    this.eventEmitter.emit('performance.stats.collected', stats);
-  }
-
-  private checkAlertThresholds(): void {
+    this.eventEmitter.emit('performance.stats.collected', stats);}private checkAlertThresholds(): void {
     const stats = this.getPerformanceStats();
 
     this.alertThresholds.forEach(threshold => {
@@ -901,18 +746,10 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
 
       let metricValue: number;
       switch (threshold.metricName) {
-        case 'p95_response_time':
-          metricValue = stats.p95ResponseTime;
-          break;
-        case 'cache_hit_rate':
-          metricValue = stats.cacheStats.overallHitRate;
-          break;
-        case 'throughput':
-          metricValue = stats.throughputStats.operationsPerSecond;
-          break;
-        case 'error_rate':
-          metricValue = stats.errorStats.errorRate;
-          break;
+        case 'p95_response_time':metricValue = stats.p95ResponseTime;break;
+        case 'cache_hit_rate':metricValue = stats.cacheStats.overallHitRate;break;
+        case 'throughput':metricValue = stats.throughputStats.operationsPerSecond;break;
+        case 'error_rate':metricValue = stats.errorStats.errorRate;break;
         default:
           return;
       }
@@ -927,13 +764,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
 
   private evaluateThreshold(value: number, threshold: AlertThreshold): boolean {
     switch (threshold.operator) {
-      case 'gt': return value > threshold.threshold;
-      case 'lt': return value < threshold.threshold;
-      case 'gte': return value >= threshold.threshold;
-      case 'lte': return value <= threshold.threshold;
-      case 'eq': return value === threshold.threshold;
-      default: return false;
-    }
+      case 'gt': return value > threshold.threshold;case 'lt': return value < threshold.threshold;case 'gte': return value >= threshold.threshold;case 'lte': return value <= threshold.threshold;case 'eq': return value === threshold.threshold;default: return false;}
   }
 
   private triggerAlert(threshold: AlertThreshold, currentValue: number, stats: PerformanceStats): void {
@@ -950,21 +781,11 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
     this.logger.warn(`Performance alert triggered: ${threshold.metricName}`, alert);
 
     // Emit alert event
-    this.eventEmitter.emit('performance.alert.triggered', alert);
-
-    // Broadcast to WebSocket clients
-    this.broadcastMetricsUpdate(alert);
+    this.eventEmitter.emit('performance.alert.triggered', alert);// Broadcast to WebSocket clientsthis.broadcastMetricsUpdate(alert);
   }
 
-  private recordCacheHit(level: 'L1' | 'L2' | 'L3', accessTime: number): void {
-    this.eventEmitter.emit('performance.cache.hit', { level, accessTime });
-  }
-
-  private recordCacheMiss(accessTime: number): void {
-    this.eventEmitter.emit('performance.cache.miss', { accessTime });
-  }
-
-  private calculatePercentile(sortedArray: number[], percentile: number): number {
+  private recordCacheHit(level: 'L1' | 'L2' | 'L3', accessTime: number): void {this.eventEmitter.emit('performance.cache.hit', { level, accessTime });}private recordCacheMiss(accessTime: number): void {
+    this.eventEmitter.emit('performance.cache.miss', { accessTime });}private calculatePercentile(sortedArray: number[], percentile: number): number {
     if (sortedArray.length === 0) return 0;
 
     const index = Math.floor(sortedArray.length * percentile);
@@ -994,15 +815,10 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
       this.l3Cache.clear(),
     ]);
 
-    this.logger.log('All cache levels cleared');
-  }
-
-  /**
+    this.logger.log('All cache levels cleared');}/**
    * Get performance health status
    */
-  getHealthStatus(): { status: 'HEALTHY' | 'WARNING' | 'CRITICAL'; issues: string[] } {
-    const stats = this.getPerformanceStats();
-    const issues: string[] = [];
+  getHealthStatus(): { status: 'HEALTHY' | 'WARNING' | 'CRITICAL'; issues: string[] } {const stats = this.getPerformanceStats();const issues: string[] = [];
     let status: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
 
     if (stats.p95ResponseTime > 1000) {
@@ -1017,10 +833,7 @@ export class PerformanceMonitoringService implements OnApplicationShutdown {
 
     if (stats.throughputStats.operationsPerSecond < 5000) {
       issues.push(`Throughput (${stats.throughputStats.operationsPerSecond.toFixed(0)} ops/sec) below 5000 target`);
-      if (status !== 'CRITICAL') status = 'WARNING';
-    }
-
-    return { status, issues };
+      if (status !== 'CRITICAL') status = 'WARNING';}return { status, issues };
   }
 
   /**

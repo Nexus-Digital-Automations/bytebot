@@ -13,28 +13,12 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { CacheModule } from '@nestjs/cache-manager';
-import * as request from 'supertest';
-import { JobStatusResultController } from '../job-status-result.controller';
-import { JobStatusResultService } from '../../services/job-status-result.service';
-import { JobStatus, JobPriority } from '../../dto/async-job.dto';
-import {
-  EnhancedJobStatusResponseDto,
+import { Test, TestingModule } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { ThrottlerModule } from '@nestjs/throttler';import { CacheModule } from '@nestjs/cache-manager';import * as request from 'supertest';import { JobStatusResultController } from '../job-status-result.controller';import { JobStatusResultService } from '../../services/job-status-result.service';import { JobStatus, JobPriority } from '../../dto/async-job.dto';import {EnhancedJobStatusResponseDto,
   BulkJobStatusRequestDto,
   JobAnalyticsDto,
-} from '../../dto/enhanced-job-status.dto';
-import {
-  EnhancedJobResultResponseDto,
+} from '../../dto/enhanced-job-status.dto';import {EnhancedJobResultResponseDto,
   ResultDownloadRequestDto,
-} from '../../dto/enhanced-job-result.dto';
-
-// Mock service implementation
-const mockJobStatusResultService = {
+} from '../../dto/enhanced-job-result.dto';// Mock service implementationconst mockJobStatusResultService = {
   getJobStatus: jest.fn(),
   updateJobStatus: jest.fn(),
   getJobResult: jest.fn(),
@@ -47,58 +31,33 @@ const mockJobStatusResultService = {
 };
 
 // Sample test data
-const sampleJobId = 'job_1702983456789_abc123';
-const sampleEnhancedStatus: Partial<EnhancedJobStatusResponseDto> = {
-  jobId: sampleJobId,
+const sampleJobId = 'job_1702983456789_abc123';const sampleEnhancedStatus: Partial<EnhancedJobStatusResponseDto> = {jobId: sampleJobId,
   status: JobStatus.IN_PROGRESS,
   progress: 75,
   progressDetails: {
-    currentStep: 'Processing screenshot',
-    totalSteps: 4,
-    currentStepIndex: 3,
+    currentStep: 'Processing screenshot',totalSteps: 4,currentStepIndex: 3,
     estimatedTimeRemaining: 5000,
   },
   timestamps: {
-    submitted: '2023-12-19T10:30:45.789Z',
-    started: '2023-12-19T10:30:46.123Z',
-    lastUpdated: '2023-12-19T10:31:10.456Z',
-  },
-  performance: {
+    submitted: '2023-12-19T10:30:45.789Z',started: '2023-12-19T10:30:46.123Z',lastUpdated: '2023-12-19T10:31:10.456Z',},performance: {
     executionTimeMs: 25000,
     memoryUsageMB: 45.7,
     cpuUsagePercent: 12.5,
   },
   priority: JobPriority.NORMAL,
   metadata: {
-    userId: 'user123',
-    sessionId: 'session456',
-  },
-};
+    userId: 'user123',sessionId: 'session456',},};
 
 const sampleJobResult: Partial<EnhancedJobResultResponseDto> = {
   jobId: sampleJobId,
   status: JobStatus.COMPLETED,
   result: {
-    screenshot: 'base64-encoded-data',
-    success: true,
-    coordinates: { x: 150, y: 200 },
+    screenshot: 'base64-encoded-data',success: true,coordinates: { x: 150, y: 200 },
   },
   storageInfo: {
-    resultId: 'result_123',
-    size: 2048576,
-    compressed: true,
+    resultId: 'result_123',size: 2048576,compressed: true,
     compressionRatio: 3.2,
-    format: 'json',
-    contentType: 'application/json',
-    checksum: 'a1b2c3d4e5f6789012345678901234567890abcdef',
-    storageLocation: 'redis://job-results/abc123',
-    createdAt: '2023-12-19T10:31:15.789Z',
-    expiresAt: '2023-12-26T10:31:15.789Z',
-  },
-  submittedAt: '2023-12-19T10:30:45.789Z',
-  completedAt: '2023-12-19T10:31:15.789Z',
-  executionTimeMs: 30123,
-  duration: 1250,
+    format: 'json',contentType: 'application/json',checksum: 'a1b2c3d4e5f6789012345678901234567890abcdef',storageLocation: 'redis://job-results/abc123',createdAt: '2023-12-19T10:31:15.789Z',expiresAt: '2023-12-26T10:31:15.789Z',},submittedAt: '2023-12-19T10:30:45.789Z',completedAt: '2023-12-19T10:31:15.789Z',executionTimeMs: 30123,duration: 1250,
 };
 
 const sampleAnalytics: JobAnalyticsDto = {
@@ -126,9 +85,7 @@ const sampleAnalytics: JobAnalyticsDto = {
   },
 };
 
-describe('JobStatusResultController (Integration)', () => {
-  let app: INestApplication;
-  let module: TestingModule;
+describe('JobStatusResultController (Integration)', () => {let app: INestApplication;let module: TestingModule;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -175,8 +132,7 @@ describe('JobStatusResultController (Integration)', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /jobs/:jobId/status', () => {
-    it('should return job status successfully', async () => {
+  describe('GET /jobs/:jobId/status', () => {it('should return job status successfully', async () => {
       mockJobStatusResultService.getJobStatus.mockResolvedValue(sampleEnhancedStatus);
 
       const response = await request(app.getHttpServer())
@@ -192,13 +148,8 @@ describe('JobStatusResultController (Integration)', () => {
       expect(mockJobStatusResultService.getJobStatus).toHaveBeenCalledWith(sampleJobId);
     });
 
-    it('should return 404 for non-existent job', async () => {
-      mockJobStatusResultService.getJobStatus.mockResolvedValue(null);
-
-      await request(app.getHttpServer())
-        .get('/jobs/non-existent-job/status')
-        .expect(404);
-    });
+    it('should return 404 for non-existent job', async () => {mockJobStatusResultService.getJobStatus.mockResolvedValue(null);await request(app.getHttpServer())
+        .get('/jobs/non-existent-job/status').expect(404);});
 
     it('should include progress details when requested', async () => {
       mockJobStatusResultService.getJobStatus.mockResolvedValue(sampleEnhancedStatus);
@@ -209,10 +160,7 @@ describe('JobStatusResultController (Integration)', () => {
         .expect(200);
 
       expect(response.body.progressDetails).toBeDefined();
-      expect(response.body.progressDetails.currentStep).toBe('Processing screenshot');
-    });
-
-    it('should include performance metrics when requested', async () => {
+      expect(response.body.progressDetails.currentStep).toBe('Processing screenshot');});it('should include performance metrics when requested', async () => {
       mockJobStatusResultService.getJobStatus.mockResolvedValue(sampleEnhancedStatus);
 
       const response = await request(app.getHttpServer())
@@ -224,9 +172,7 @@ describe('JobStatusResultController (Integration)', () => {
       expect(response.body.performance.memoryUsageMB).toBe(45.7);
     });
 
-    it('should handle service errors gracefully', async () => {
-      mockJobStatusResultService.getJobStatus.mockRejectedValue(
-        new Error('Database connection failed')
+    it('should handle service errors gracefully', async () => {mockJobStatusResultService.getJobStatus.mockRejectedValue(new Error('Database connection failed')
       );
 
       await request(app.getHttpServer())
@@ -234,26 +180,14 @@ describe('JobStatusResultController (Integration)', () => {
         .expect(500);
     });
 
-    it('should validate job ID format', async () => {
-      await request(app.getHttpServer())
-        .get('/jobs/invalid-job-id/status')
-        .expect(404); // Service will return null for invalid IDs
-    });
+    it('should validate job ID format', async () => {await request(app.getHttpServer()).get('/jobs/invalid-job-id/status').expect(404); // Service will return null for invalid IDs});
   });
 
-  describe('PUT /jobs/:jobId/status', () => {
-    const statusUpdate = {
-      status: 'completed',
-      progress: 100,
-      progressDetails: {
-        currentStep: 'Completed successfully',
-        totalSteps: 4,
-        currentStepIndex: 4,
+  describe('PUT /jobs/:jobId/status', () => {const statusUpdate = {status: 'completed',progress: 100,progressDetails: {
+        currentStep: 'Completed successfully',totalSteps: 4,currentStepIndex: 4,
       },
       metadata: {
-        completedBy: 'system',
-      },
-    };
+        completedBy: 'system',},};
 
     it('should update job status successfully', async () => {
       mockJobStatusResultService.updateJobStatus.mockResolvedValue(undefined);
@@ -265,14 +199,9 @@ describe('JobStatusResultController (Integration)', () => {
 
       expect(response.body).toEqual({
         success: true,
-        message: 'Job status updated successfully: completed',
-      });
-
-      expect(mockJobStatusResultService.updateJobStatus).toHaveBeenCalledWith(
+        message: 'Job status updated successfully: completed',});expect(mockJobStatusResultService.updateJobStatus).toHaveBeenCalledWith(
         sampleJobId,
-        'completed',
-        100,
-        statusUpdate.progressDetails,
+        'completed',100,statusUpdate.progressDetails,
         statusUpdate.metadata
       );
     });
@@ -281,9 +210,7 @@ describe('JobStatusResultController (Integration)', () => {
       await request(app.getHttpServer())
         .put(`/jobs/${sampleJobId}/status`)
         .send({
-          status: 'in_progress',
-          // Missing progress field
-        })
+          status: 'in_progress',// Missing progress field})
         .expect(400);
     });
 
@@ -299,9 +226,7 @@ describe('JobStatusResultController (Integration)', () => {
       await request(app.getHttpServer())
         .put(`/jobs/${sampleJobId}/status`)
         .send({
-          status: 'in_progress',
-          progress: -10, // Invalid progress < 0
-        })
+          status: 'in_progress',progress: -10, // Invalid progress < 0})
         .expect(400);
     });
 
@@ -309,9 +234,7 @@ describe('JobStatusResultController (Integration)', () => {
       await request(app.getHttpServer())
         .put(`/jobs/${sampleJobId}/status`)
         .send({
-          status: 'invalid_status',
-          progress: 50,
-        })
+          status: 'invalid_status',progress: 50,})
         .expect(400);
     });
 
@@ -322,9 +245,7 @@ describe('JobStatusResultController (Integration)', () => {
         request(app.getHttpServer())
           .put(`/jobs/${sampleJobId}/status`)
           .send({
-            status: 'in_progress',
-            progress: i * 10,
-          })
+            status: 'in_progress',progress: i * 10,})
       );
 
       const responses = await Promise.all(updates);
@@ -337,48 +258,25 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('POST /jobs/bulk/status', () => {
-    const bulkRequest: BulkJobStatusRequestDto = {
-      jobIds: [sampleJobId, 'job_2', 'job_3'],
-      includeProgressDetails: true,
-      includePerformanceMetrics: false,
+  describe('POST /jobs/bulk/status', () => {const bulkRequest: BulkJobStatusRequestDto = {jobIds: [sampleJobId, 'job_2', 'job_3'],includeProgressDetails: true,includePerformanceMetrics: false,
     };
 
-    it('should retrieve bulk job status successfully', async () => {
-      mockJobStatusResultService.getJobStatus
-        .mockResolvedValueOnce(sampleEnhancedStatus)
-        .mockResolvedValueOnce({ ...sampleEnhancedStatus, jobId: 'job_2' })
-        .mockResolvedValueOnce(null); // job_3 not found
-
-      const response = await request(app.getHttpServer())
-        .post('/jobs/bulk/status')
-        .send(bulkRequest)
-        .expect(200);
+    it('should retrieve bulk job status successfully', async () => {mockJobStatusResultService.getJobStatus.mockResolvedValueOnce(sampleEnhancedStatus)
+        .mockResolvedValueOnce({ ...sampleEnhancedStatus, jobId: 'job_2' }).mockResolvedValueOnce(null); // job_3 not foundconst response = await request(app.getHttpServer())
+        .post('/jobs/bulk/status').send(bulkRequest).expect(200);
 
       expect(response.body.jobs).toHaveLength(2);
       expect(response.body.totalRequested).toBe(3);
       expect(response.body.totalFound).toBe(2);
-      expect(response.body.notFound).toEqual(['job_3']);
-      expect(response.body.executionTimeMs).toBeDefined();
-    });
+      expect(response.body.notFound).toEqual(['job_3']);expect(response.body.executionTimeMs).toBeDefined();});
 
-    it('should handle empty job ID list', async () => {
-      await request(app.getHttpServer())
-        .post('/jobs/bulk/status')
-        .send({
-          jobIds: [],
+    it('should handle empty job ID list', async () => {await request(app.getHttpServer()).post('/jobs/bulk/status').send({jobIds: [],
           includeProgressDetails: false,
         })
         .expect(200);
     });
 
-    it('should validate job ID format in bulk request', async () => {
-      await request(app.getHttpServer())
-        .post('/jobs/bulk/status')
-        .send({
-          jobIds: ['invalid-format', 'also-invalid'],
-        })
-        .expect(400);
+    it('should validate job ID format in bulk request', async () => {await request(app.getHttpServer()).post('/jobs/bulk/status').send({jobIds: ['invalid-format', 'also-invalid'],}).expect(400);
     });
 
     it('should respect concurrency limits for bulk operations', async () => {
@@ -389,9 +287,7 @@ describe('JobStatusResultController (Integration)', () => {
 
       const startTime = Date.now();
       await request(app.getHttpServer())
-        .post('/jobs/bulk/status')
-        .send({ jobIds: manyJobIds })
-        .expect(200);
+        .post('/jobs/bulk/status').send({ jobIds: manyJobIds }).expect(200);
       const duration = Date.now() - startTime;
 
       // Should complete reasonably quickly with concurrency
@@ -399,8 +295,7 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('GET /jobs/:jobId/result', () => {
-    it('should return job result successfully', async () => {
+  describe('GET /jobs/:jobId/result', () => {it('should return job result successfully', async () => {
       mockJobStatusResultService.getJobResult.mockResolvedValue({
         result: sampleJobResult.result,
         metadata: sampleJobResult.storageInfo,
@@ -416,8 +311,7 @@ describe('JobStatusResultController (Integration)', () => {
       }));
     });
 
-    it('should handle streaming results', async () => {
-      const mockStream = require('stream').Readable.from(['chunk1', 'chunk2']);
+    it('should handle streaming results', async () => {const mockStream = require('stream').Readable.from(['chunk1', 'chunk2']);
       mockJobStatusResultService.getJobResult.mockResolvedValue(mockStream);
 
       const response = await request(app.getHttpServer())
@@ -425,18 +319,8 @@ describe('JobStatusResultController (Integration)', () => {
         .query({ stream: true })
         .expect(200);
 
-      expect(response.headers['content-type']).toContain('application/octet-stream');
-    });
-
-    it('should return 404 for non-existent result', async () => {
-      mockJobStatusResultService.getJobResult.mockRejectedValue(
-        new Error('Result not found')
-      );
-
-      await request(app.getHttpServer())
-        .get('/jobs/non-existent-job/result')
-        .expect(500);
-    });
+      expect(response.headers['content-type']).toContain('application/octet-stream');});it('should return 404 for non-existent result', async () => {mockJobStatusResultService.getJobResult.mockRejectedValue(new Error('Result not found'));await request(app.getHttpServer())
+        .get('/jobs/non-existent-job/result').expect(500);});
 
     it('should support format conversion', async () => {
       mockJobStatusResultService.getJobResult.mockResolvedValue({
@@ -446,17 +330,11 @@ describe('JobStatusResultController (Integration)', () => {
 
       await request(app.getHttpServer())
         .get(`/jobs/${sampleJobId}/result`)
-        .query({ format: 'json' })
-        .expect(200);
-    });
+        .query({ format: 'json' }).expect(200);});
   });
 
-  describe('POST /jobs/:jobId/result/download', () => {
-    const downloadRequest: ResultDownloadRequestDto = {
-      jobId: sampleJobId,
-      format: 'json',
-      compress: true,
-      expirationSeconds: 3600,
+  describe('POST /jobs/:jobId/result/download', () => {const downloadRequest: ResultDownloadRequestDto = {jobId: sampleJobId,
+      format: 'json',compress: true,expirationSeconds: 3600,
     };
 
     it('should generate download URL successfully', async () => {
@@ -472,9 +350,7 @@ describe('JobStatusResultController (Integration)', () => {
 
       expect(response.body).toEqual(expect.objectContaining({
         jobId: sampleJobId,
-        downloadUrl: expect.stringContaining('download?token='),
-        expiresAt: expect.any(String),
-      }));
+        downloadUrl: expect.stringContaining('download?token='),expiresAt: expect.any(String),}));
     });
 
     it('should validate download request parameters', async () => {
@@ -488,9 +364,7 @@ describe('JobStatusResultController (Integration)', () => {
 
     it('should handle invalid expiration values', async () => {
       await request(app.getHttpServer())
-        .post(`/jobs/${sampleJobId}/result/download`)
-        .send({
-          ...downloadRequest,
+        .post(`/jobs/${sampleJobId}/result/download`).send({...downloadRequest,
           expirationSeconds: 100000, // Too large
         })
         .expect(400);
@@ -505,8 +379,7 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('GET /jobs/:jobId/analytics', () => {
-    it('should return job analytics successfully', async () => {
+  describe('GET /jobs/:jobId/analytics', () => {it('should return job analytics successfully', async () => {
       mockJobStatusResultService.getJobAnalytics.mockResolvedValue(sampleAnalytics);
 
       const response = await request(app.getHttpServer())
@@ -522,10 +395,7 @@ describe('JobStatusResultController (Integration)', () => {
 
       // First request
       await request(app.getHttpServer())
-        .get(`/jobs/${sampleJobId}/analytics`)
-        .expect(200);
-
-      // Second request (should use cache)
+        .get(`/jobs/${sampleJobId}/analytics`).expect(200);// Second request (should use cache)
       await request(app.getHttpServer())
         .get(`/jobs/${sampleJobId}/analytics`)
         .expect(200);
@@ -535,21 +405,9 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('GET /jobs/:jobId/history', () => {
-    const sampleHistory = [
-      {
-        timestamp: '2023-12-19T10:30:45.789Z',
-        event: 'created',
-        data: { status: 'pending' },
-        source: 'system',
-      },
-      {
-        timestamp: '2023-12-19T10:30:46.123Z',
-        event: 'started',
-        data: { status: 'in_progress' },
-        source: 'system',
-      },
-    ];
+  describe('GET /jobs/:jobId/history', () => {const sampleHistory = [{
+        timestamp: '2023-12-19T10:30:45.789Z',event: 'created',data: { status: 'pending' },source: 'system',},{
+        timestamp: '2023-12-19T10:30:46.123Z',event: 'started',data: { status: 'in_progress' },source: 'system',},];
 
     it('should return job history successfully', async () => {
       mockJobStatusResultService.getJobHistory.mockResolvedValue(sampleHistory);
@@ -583,9 +441,7 @@ describe('JobStatusResultController (Integration)', () => {
 
     it('should validate pagination parameters', async () => {
       await request(app.getHttpServer())
-        .get(`/jobs/${sampleJobId}/history`)
-        .query({ limit: -1 })
-        .expect(400);
+        .get(`/jobs/${sampleJobId}/history`).query({ limit: -1 }).expect(400);
 
       await request(app.getHttpServer())
         .get(`/jobs/${sampleJobId}/history`)
@@ -594,42 +450,25 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('GET /jobs/system/metrics', () => {
-    const sampleSystemMetrics = {
-      operationsPerSecond: 150.5,
+  describe('GET /jobs/system/metrics', () => {const sampleSystemMetrics = {operationsPerSecond: 150.5,
       averageResponseTimeMs: 125.3,
       memoryUsageMB: 256.7,
       activeJobs: 42,
       cacheHitRate: 0.89,
     };
 
-    it('should return system metrics successfully', async () => {
-      mockJobStatusResultService.getSystemMetrics.mockResolvedValue(sampleSystemMetrics);
-
-      const response = await request(app.getHttpServer())
-        .get('/jobs/system/metrics')
-        .expect(200);
-
-      expect(response.body).toEqual(sampleSystemMetrics);
+    it('should return system metrics successfully', async () => {mockJobStatusResultService.getSystemMetrics.mockResolvedValue(sampleSystemMetrics);const response = await request(app.getHttpServer())
+        .get('/jobs/system/metrics').expect(200);expect(response.body).toEqual(sampleSystemMetrics);
     });
 
-    it('should cache system metrics', async () => {
-      mockJobStatusResultService.getSystemMetrics.mockResolvedValue(sampleSystemMetrics);
-
-      // Multiple rapid requests should use cache
+    it('should cache system metrics', async () => {mockJobStatusResultService.getSystemMetrics.mockResolvedValue(sampleSystemMetrics);// Multiple rapid requests should use cache
       await Promise.all([
-        request(app.getHttpServer()).get('/jobs/system/metrics'),
-        request(app.getHttpServer()).get('/jobs/system/metrics'),
-        request(app.getHttpServer()).get('/jobs/system/metrics'),
-      ]);
-
-      // Should only call service once due to caching
+        request(app.getHttpServer()).get('/jobs/system/metrics'),request(app.getHttpServer()).get('/jobs/system/metrics'),request(app.getHttpServer()).get('/jobs/system/metrics'),]);// Should only call service once due to caching
       expect(mockJobStatusResultService.getSystemMetrics).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('DELETE /jobs/:jobId', () => {
-    it('should cleanup job successfully', async () => {
+  describe('DELETE /jobs/:jobId', () => {it('should cleanup job successfully', async () => {
       mockJobStatusResultService.cleanupJob.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())
@@ -638,10 +477,7 @@ describe('JobStatusResultController (Integration)', () => {
 
       expect(response.body).toEqual({
         success: true,
-        message: 'Job cleaned up successfully',
-      });
-
-      expect(mockJobStatusResultService.cleanupJob).toHaveBeenCalledWith(sampleJobId, false);
+        message: 'Job cleaned up successfully',});expect(mockJobStatusResultService.cleanupJob).toHaveBeenCalledWith(sampleJobId, false);
     });
 
     it('should support archival before cleanup', async () => {
@@ -652,13 +488,9 @@ describe('JobStatusResultController (Integration)', () => {
         .query({ archive: true })
         .expect(200);
 
-      expect(response.body.message).toContain('(archived)');
-      expect(mockJobStatusResultService.cleanupJob).toHaveBeenCalledWith(sampleJobId, true);
-    });
+      expect(response.body.message).toContain('(archived)');expect(mockJobStatusResultService.cleanupJob).toHaveBeenCalledWith(sampleJobId, true);});
 
-    it('should handle cleanup errors', async () => {
-      mockJobStatusResultService.cleanupJob.mockRejectedValue(
-        new Error('Cleanup failed')
+    it('should handle cleanup errors', async () => {mockJobStatusResultService.cleanupJob.mockRejectedValue(new Error('Cleanup failed')
       );
 
       await request(app.getHttpServer())
@@ -667,8 +499,7 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('Rate Limiting and Security', () => {
-    it('should enforce rate limits on high-frequency requests', async () => {
+  describe('Rate Limiting and Security', () => {it('should enforce rate limits on high-frequency requests', async () => {
       mockJobStatusResultService.getJobStatus.mockResolvedValue(sampleEnhancedStatus);
 
       // Rapid fire requests to trigger rate limiting
@@ -678,19 +509,11 @@ describe('JobStatusResultController (Integration)', () => {
 
       const responses = await Promise.allSettled(requests);
       const rateLimitedResponses = responses.filter(
-        result => result.status === 'fulfilled' && (result.value as any).status === 429
-      );
-
-      expect(rateLimitedResponses.length).toBeGreaterThan(0);
+        result => result.status === 'fulfilled' && (result.value as any).status === 429);expect(rateLimitedResponses.length).toBeGreaterThan(0);
     });
 
-    it('should validate input sanitization', async () => {
-      const maliciousInput = {
-        status: 'completed',
-        progress: 100,
-        metadata: {
-          '__proto__': { polluted: true },
-          'constructor': { prototype: { polluted: true } },
+    it('should validate input sanitization', async () => {const maliciousInput = {status: 'completed',progress: 100,metadata: {
+          '__proto__': { polluted: true },'constructor': { prototype: { polluted: true } },
         },
       };
 
@@ -703,30 +526,21 @@ describe('JobStatusResultController (Integration)', () => {
 
       // Verify metadata was sanitized
       const updateCall = mockJobStatusResultService.updateJobStatus.mock.calls[0];
-      expect(updateCall[4]).not.toHaveProperty('__proto__');
-      expect(updateCall[4]).not.toHaveProperty('constructor');
-    });
-  });
+      expect(updateCall[4]).not.toHaveProperty('__proto__');expect(updateCall[4]).not.toHaveProperty('constructor');});});
 
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle malformed JSON requests', async () => {
+  describe('Error Handling and Edge Cases', () => {it('should handle malformed JSON requests', async () => {
       await request(app.getHttpServer())
         .put(`/jobs/${sampleJobId}/status`)
-        .set('Content-Type', 'application/json')
-        .send('{ invalid json }')
-        .expect(400);
-    });
+        .set('Content-Type', 'application/json').send('{ invalid json }').expect(400);});
 
-    it('should handle very large job IDs', async () => {
-      const veryLongJobId = 'x'.repeat(1000);
+    it('should handle very large job IDs', async () => {const veryLongJobId = 'x'.repeat(1000);
 
       await request(app.getHttpServer())
         .get(`/jobs/${veryLongJobId}/status`)
         .expect(404);
     });
 
-    it('should handle special characters in job IDs', async () => {
-      const specialCharJobId = 'job_%$#@!&*()_test';
+    it('should handle special characters in job IDs', async () => {const specialCharJobId = 'job_%$#@!&*()_test';
 
       mockJobStatusResultService.getJobStatus.mockResolvedValue(null);
 
@@ -750,8 +564,7 @@ describe('JobStatusResultController (Integration)', () => {
     });
   });
 
-  describe('Performance and Load Testing', () => {
-    it('should handle concurrent requests efficiently', async () => {
+  describe('Performance and Load Testing', () => {it('should handle concurrent requests efficiently', async () => {
       mockJobStatusResultService.getJobStatus.mockResolvedValue(sampleEnhancedStatus);
 
       const concurrentRequests = 50;
@@ -773,14 +586,10 @@ describe('JobStatusResultController (Integration)', () => {
       expect(endTime - startTime).toBeLessThan(2000);
     });
 
-    it('should handle large response payloads', async () => {
-      const largeResult = {
-        ...sampleJobResult,
+    it('should handle large response payloads', async () => {const largeResult = {...sampleJobResult,
         result: {
           largeData: 'x'.repeat(100000), // 100KB of data
-          moreData: Array.from({ length: 1000 }, (_, i) => ({ id: i, data: `item_${i}` })),
-        },
-      };
+          moreData: Array.from({ length: 1000 }, (_, i) => ({ id: i, data: `item_${i}` })),},};
 
       mockJobStatusResultService.getJobResult.mockResolvedValue({
         result: largeResult.result,

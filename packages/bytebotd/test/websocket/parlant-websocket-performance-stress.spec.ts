@@ -612,7 +612,7 @@ class ConcurrentStressTestManager extends EventEmitter {
           const latency = performance.now() - messageStart;
           clientLatencies.push(latency);
 
-        } catch (error) {
+        } catch (_error) {
           // Skip failed samples
         }
 

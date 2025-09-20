@@ -1800,7 +1800,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
 
           await testClient.sendValidationRequest(action);
           messagesSent++;
-        } catch (error) {
+        } catch (_error) {
           // Continue sending messages even if some fail
         }
       }, messageInterval);
@@ -2017,7 +2017,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         await testClient['sendMessageWithTracking'](duplicateMessage);
         await testClient['sendMessageWithTracking'](duplicateMessage);
         await testClient['sendMessageWithTracking'](duplicateMessage);
-      } catch (error) {
+      } catch (_error) {
         // Expected to fail or be rejected for duplicates
       }
 

@@ -18,33 +18,17 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
-import { jest } from '@jest/globals';
-
-import {
-  ParlantMultiLevelCacheService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import { Logger } from '@nestjs/common';import { jest } from '@jest/globals';import {ParlantMultiLevelCacheService,
   L1CacheConfig,
   L2CacheConfig,
   L3CacheConfig,
   ValidationPattern,
   ValidationMetadata,
-} from '../caching/parlant-multi-level-cache.service';
-
-import {
-  ParlantValidationResponse,
+} from '../caching/parlant-multi-level-cache.service';import {ParlantValidationResponse,
   RiskLevel,
-} from '../parlant-integration.service';
-
-import {
-  generateMockValidationRequest,
+} from '../parlant-integration.service';import {generateMockValidationRequest,
   generateMockConversationContext,
-} from '../../test-utils/parlant-mocks';
-
-// ===== MOCK REDIS CLIENT =====
-
-const createMockRedisClient = () => ({
+} from '../../test-utils/parlant-mocks';// ===== MOCK REDIS CLIENT =====const createMockRedisClient = () => ({
   get: jest.fn(),
   set: jest.fn(),
   del: jest.fn(),
@@ -75,9 +59,7 @@ const createMockDatabase = () => ({
 
 // ===== TEST SETUP =====
 
-describe('ParlantMultiLevelCacheService', () => {
-  let service: ParlantMultiLevelCacheService;
-  let module: TestingModule;
+describe('ParlantMultiLevelCacheService', () => {let service: ParlantMultiLevelCacheService;let module: TestingModule;
   let configService: jest.Mocked<ConfigService>;
   let mockLogger: jest.Mocked<Logger>;
   let mockRedisClient: ReturnType<typeof createMockRedisClient>;
@@ -87,26 +69,18 @@ describe('ParlantMultiLevelCacheService', () => {
     l1: {
       maxSize: 10000,
       ttlMs: 100,
-      evictionPolicy: 'LRU' as const,
-    },
-    l2: {
+      evictionPolicy: 'LRU' as const,},l2: {
       redis: {
-        cluster: ['redis://localhost:6379'],
-        ttl: {
-          pattern: 300000, // 5 minutes
+        cluster: ['redis://localhost:6379'],ttl: {pattern: 300000, // 5 minutes
           result: 60000,   // 1 minute
         },
       },
       compression: {
         enabled: true,
-        algorithm: 'gzip' as const,
-        level: 6,
-      },
+        algorithm: 'gzip' as const,level: 6,},
     },
     l3: {
-      database: 'sqlite' as const,
-      retention: {
-        successful: 3600000, // 1 hour
+      database: 'sqlite' as const,retention: {successful: 3600000, // 1 hour
         failed: 300000,      // 5 minutes
       },
       compression: {
@@ -124,12 +98,7 @@ describe('ParlantMultiLevelCacheService', () => {
     configService = {
       get: jest.fn((key: string) => {
         const configMap: Record<string, any> = {
-          'parlant.cache.l1': mockConfig.l1,
-          'parlant.cache.l2': mockConfig.l2,
-          'parlant.cache.l3': mockConfig.l3,
-          'parlant.cache.enabled': true,
-        };
-        return configMap[key];
+          'parlant.cache.l1': mockConfig.l1,'parlant.cache.l2': mockConfig.l2,'parlant.cache.l3': mockConfig.l3,'parlant.cache.enabled': true,};return configMap[key];
       }),
     } as any;
 
@@ -170,20 +139,12 @@ describe('ParlantMultiLevelCacheService', () => {
 
   // ===== L1 CACHE TESTS =====
 
-  describe('L1 Cache (In-Memory)', () => {
-    it('should store and retrieve values from L1 cache', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+  describe('L1 Cache (In-Memory)', () => {it('should store and retrieve values from L1 cache', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.9,
-        reasoning: 'Test validation',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Test validation',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 25,
           cacheHit: false,
         },
@@ -201,19 +162,12 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(cached!.cached).toBe(true);
     });
 
-    it('should respect L1 cache TTL', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+    it('should respect L1 cache TTL', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.8,
-        reasoning: 'TTL test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'TTL test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 20,
           cacheHit: false,
         },
@@ -221,10 +175,7 @@ describe('ParlantMultiLevelCacheService', () => {
       };
 
       // Mock short TTL
-      jest.spyOn(configService, 'get').mockImplementation((key: string) => {
-        if (key === 'parlant.cache.l1') {
-          return { ...mockConfig.l1, ttlMs: 50 }; // 50ms TTL
-        }
+      jest.spyOn(configService, 'get').mockImplementation((key: string) => {if (key === 'parlant.cache.l1') {return { ...mockConfig.l1, ttlMs: 50 }; // 50ms TTL}
         return configService.get(key);
       });
 
@@ -240,11 +191,8 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(cached).toBeNull(); // Should be expired
     });
 
-    it('should implement LRU eviction policy', async () => {
-      // Arrange
-      const maxSize = 3;
-      jest.spyOn(configService, 'get').mockImplementation((key: string) => {
-        if (key === 'parlant.cache.l1') {
+    it('should implement LRU eviction policy', async () => {// Arrangeconst maxSize = 3;
+      jest.spyOn(configService, 'get').mockImplementation((key: string) => {if (key === 'parlant.cache.l1') {
           return { ...mockConfig.l1, maxSize };
         }
         return configService.get(key);
@@ -257,13 +205,8 @@ describe('ParlantMultiLevelCacheService', () => {
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.8,
-        reasoning: 'LRU test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'LRU test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 15,
           cacheHit: false,
         },
@@ -283,19 +226,12 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(await service.getL1Cache(requests[4])).toBeDefined(); // Cached
     });
 
-    it('should track access counts for L1 cache entries', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+    it('should track access counts for L1 cache entries', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.85,
-        reasoning: 'Access count test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Access count test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 18,
           cacheHit: false,
         },
@@ -322,13 +258,8 @@ describe('ParlantMultiLevelCacheService', () => {
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.8,
-        reasoning: 'Clear test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Clear test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 20,
           cacheHit: false,
         },
@@ -355,20 +286,12 @@ describe('ParlantMultiLevelCacheService', () => {
 
   // ===== L2 CACHE TESTS =====
 
-  describe('L2 Cache (Redis)', () => {
-    it('should store and retrieve values from L2 cache', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+  describe('L2 Cache (Redis)', () => {it('should store and retrieve values from L2 cache', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.92,
-        reasoning: 'Redis test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.MEDIUM,
+        reasoning: 'Redis test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._MODERATE,
           validationTimeMs: 30,
           cacheHit: false,
         },
@@ -377,10 +300,7 @@ describe('ParlantMultiLevelCacheService', () => {
 
       const compressedData = JSON.stringify(response);
       mockRedisClient.get.mockResolvedValue(compressedData);
-      mockRedisClient.set.mockResolvedValue('OK');
-
-      // Act
-      await service.setL2Cache(request, response);
+      mockRedisClient.set.mockResolvedValue('OK');// Actawait service.setL2Cache(request, response);
       const cached = await service.getL2Cache(request);
 
       // Assert
@@ -391,66 +311,43 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(cached!.cached).toBe(true);
     });
 
-    it('should handle Redis connection failures gracefully', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+    it('should handle Redis connection failures gracefully', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.8,
-        reasoning: 'Redis failure test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Redis failure test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 25,
           cacheHit: false,
         },
         cached: false,
       };
 
-      mockRedisClient.set.mockRejectedValue(new Error('Redis connection failed'));
-      mockRedisClient.get.mockRejectedValue(new Error('Redis connection failed'));
-
-      // Act & Assert
-      await expect(service.setL2Cache(request, response)).resolves.not.toThrow();
+      mockRedisClient.set.mockRejectedValue(new Error('Redis connection failed'));mockRedisClient.get.mockRejectedValue(new Error('Redis connection failed'));// Act & Assertawait expect(service.setL2Cache(request, response)).resolves.not.toThrow();
       const cached = await service.getL2Cache(request);
       expect(cached).toBeNull();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Redis error'),
-        expect.any(String)
-      );
+        expect.stringContaining('Redis error'),expect.any(String));
     });
 
-    it('should compress large payloads for L2 cache', async () => {
-      // Arrange
-      const request = generateMockValidationRequest({
+    it('should compress large payloads for L2 cache', async () => {// Arrangeconst request = generateMockValidationRequest({
         functionParams: {
-          largeData: 'x'.repeat(2000), // Large payload
-        },
-      });
+          largeData: 'x'.repeat(2000), // Large payload},});
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.88,
-        reasoning: 'Compression test with very long reasoning that exceeds the compression threshold',
-        intent: 'TEST_ACTION',
+        reasoning: 'Compression test with very long reasoning that exceeds the compression threshold',intent: 'TEST_ACTION',
         suggestedAlternatives: Array.from({ length: 10 }, (_, i) => `Alternative ${i}`),
         validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.HIGH,
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._HIGH,
           validationTimeMs: 45,
           cacheHit: false,
         },
         cached: false,
       };
 
-      mockRedisClient.set.mockResolvedValue('OK');
-
-      // Act
-      await service.setL2Cache(request, response);
+      mockRedisClient.set.mockResolvedValue('OK');// Actawait service.setL2Cache(request, response);
 
       // Assert
       const setCall = mockRedisClient.set.mock.calls[0];
@@ -461,60 +358,28 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(compressedSize).toBeLessThan(originalSize);
     });
 
-    it('should handle pattern-based caching for L2', async () => {
-      // Arrange
-      const pattern: ValidationPattern = {
-        functionSignature: 'getUserInfo',
-        parameterPatterns: ['userId:string'],
-        contextPatterns: ['securityLevel:MEDIUM'],
-        riskLevel: RiskLevel.LOW,
-        validationRules: ['requireAuth', 'validateUserId'],
-      };
-
-      mockRedisClient.set.mockResolvedValue('OK');
-      mockRedisClient.get.mockResolvedValue(JSON.stringify(pattern));
-
-      // Act
+    it('should handle pattern-based caching for L2', async () => {// Arrangeconst pattern: ValidationPattern = {
+        functionSignature: 'getUserInfo',parameterPatterns: ['userId:string'],contextPatterns: ['securityLevel:MEDIUM'],riskLevel: RiskLevel._LOW,validationRules: ['requireAuth', 'validateUserId'],};mockRedisClient.set.mockResolvedValue('OK');mockRedisClient.get.mockResolvedValue(JSON.stringify(pattern));// Act
       await service.setL2Pattern(pattern);
-      const cachedPattern = await service.getL2Pattern('getUserInfo');
+      const cachedPattern = await service.getL2Pattern('getUserInfo');// Assertexpect(cachedPattern).toBeDefined();
+      expect(cachedPattern!.functionSignature).toBe('getUserInfo');expect(cachedPattern!.riskLevel).toBe(RiskLevel._LOW);});
 
-      // Assert
-      expect(cachedPattern).toBeDefined();
-      expect(cachedPattern!.functionSignature).toBe('getUserInfo');
-      expect(cachedPattern!.riskLevel).toBe(RiskLevel.LOW);
-    });
-
-    it('should implement L2 cache cleanup and maintenance', async () => {
-      // Arrange
-      mockRedisClient.keys.mockResolvedValue(['parlant:cache:1', 'parlant:cache:2', 'parlant:cache:3']);
-      mockRedisClient.del.mockResolvedValue(3);
-
-      // Act
+    it('should implement L2 cache cleanup and maintenance', async () => {// ArrangemockRedisClient.keys.mockResolvedValue(['parlant:cache:1', 'parlant:cache:2', 'parlant:cache:3']);mockRedisClient.del.mockResolvedValue(3);// Act
       const deletedCount = await service.cleanupL2Cache();
 
       // Assert
       expect(deletedCount).toBe(3);
-      expect(mockRedisClient.keys).toHaveBeenCalledWith('parlant:cache:*');
-      expect(mockRedisClient.del).toHaveBeenCalled();
-    });
+      expect(mockRedisClient.keys).toHaveBeenCalledWith('parlant:cache:*');expect(mockRedisClient.del).toHaveBeenCalled();});
   });
 
   // ===== L3 CACHE TESTS =====
 
-  describe('L3 Cache (Persistent)', () => {
-    it('should store and retrieve values from L3 cache', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+  describe('L3 Cache (Persistent)', () => {it('should store and retrieve values from L3 cache', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.95,
-        reasoning: 'Persistent cache test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.CRITICAL,
+        reasoning: 'Persistent cache test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._CRITICAL,
           validationTimeMs: 60,
           cacheHit: false,
         },
@@ -555,21 +420,10 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(cached!.cached).toBe(true);
     });
 
-    it('should handle different retention policies for L3 cache', async () => {
-      // Arrange
-      const successfulRequest = generateMockValidationRequest({ functionName: 'successfulFunc' });
-      const failedRequest = generateMockValidationRequest({ functionName: 'failedFunc' });
-
-      const successfulResponse: ParlantValidationResponse = {
-        approved: true,
+    it('should handle different retention policies for L3 cache', async () => {// Arrangeconst successfulRequest = generateMockValidationRequest({ functionName: 'successfulFunc' });const failedRequest = generateMockValidationRequest({ functionName: 'failedFunc' });const successfulResponse: ParlantValidationResponse = {approved: true,
         confidence: 0.9,
-        reasoning: 'Successful validation',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Successful validation',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 25,
           cacheHit: false,
         },
@@ -579,13 +433,7 @@ describe('ParlantMultiLevelCacheService', () => {
       const failedResponse: ParlantValidationResponse = {
         approved: false,
         confidence: 0.2,
-        reasoning: 'Failed validation',
-        intent: 'DENIED_ACTION',
-        suggestedAlternatives: ['Try alternative approach'],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.HIGH,
+        reasoning: 'Failed validation',intent: 'DENIED_ACTION',suggestedAlternatives: ['Try alternative approach'],validationTimestamp: new Date(),conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._HIGH,
           validationTimeMs: 35,
           cacheHit: false,
         },
@@ -596,9 +444,7 @@ describe('ParlantMultiLevelCacheService', () => {
 
       // Act
       await service.setL3Cache(successfulRequest, successfulResponse, {
-        functionName: 'successfulFunc',
-        riskLevel: RiskLevel.LOW,
-        timestamp: new Date(),
+        functionName: 'successfulFunc',riskLevel: RiskLevel._LOW,timestamp: new Date(),
         context: {},
         cacheHit: false,
         batchProcessed: false,
@@ -608,9 +454,7 @@ describe('ParlantMultiLevelCacheService', () => {
       });
 
       await service.setL3Cache(failedRequest, failedResponse, {
-        functionName: 'failedFunc',
-        riskLevel: RiskLevel.HIGH,
-        timestamp: new Date(),
+        functionName: 'failedFunc',riskLevel: RiskLevel._HIGH,timestamp: new Date(),
         context: {},
         cacheHit: false,
         batchProcessed: false,
@@ -630,24 +474,15 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(successfulTtl).toBeGreaterThan(failedTtl); // Successful validations cached longer
     });
 
-    it('should compress large payloads in L3 cache', async () => {
-      // Arrange
-      const request = generateMockValidationRequest({
+    it('should compress large payloads in L3 cache', async () => {// Arrangeconst request = generateMockValidationRequest({
         functionParams: {
-          veryLargeData: 'x'.repeat(5000), // Exceeds compression threshold
-        },
-      });
+          veryLargeData: 'x'.repeat(5000), // Exceeds compression threshold},});
 
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.87,
-        reasoning: 'Large payload compression test with extensive reasoning that definitely exceeds the compression threshold',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.MEDIUM,
+        reasoning: 'Large payload compression test with extensive reasoning that definitely exceeds the compression threshold',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._MODERATE,
           validationTimeMs: 40,
           cacheHit: false,
         },
@@ -679,9 +514,7 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(storedData.length).toBeLessThan(originalSize);
     });
 
-    it('should handle L3 cache cleanup and maintenance', async () => {
-      // Arrange
-      const expiredDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
+    it('should handle L3 cache cleanup and maintenance', async () => {// Arrangeconst expiredDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
       mockDatabase.delete.mockResolvedValue({ deletedCount: 5 });
 
       // Act
@@ -701,20 +534,9 @@ describe('ParlantMultiLevelCacheService', () => {
 
   // ===== CACHE KEY GENERATION TESTS =====
 
-  describe('Cache Key Generation', () => {
-    it('should generate consistent cache keys for identical requests', async () => {
-      // Arrange
-      const request1 = generateMockValidationRequest({
-        functionName: 'testFunction',
-        functionParams: { param1: 'value1', param2: 42 },
-      });
-
-      const request2 = generateMockValidationRequest({
-        functionName: 'testFunction',
-        functionParams: { param1: 'value1', param2: 42 },
-      });
-
-      // Act
+  describe('Cache Key Generation', () => {it('should generate consistent cache keys for identical requests', async () => {// Arrangeconst request1 = generateMockValidationRequest({
+        functionName: 'testFunction',functionParams: { param1: 'value1', param2: 42 },});const request2 = generateMockValidationRequest({
+        functionName: 'testFunction',functionParams: { param1: 'value1', param2: 42 },});// Act
       const key1 = service.generateCacheKey(request1);
       const key2 = service.generateCacheKey(request2);
 
@@ -722,19 +544,9 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(key1).toBe(key2);
     });
 
-    it('should generate different cache keys for different requests', async () => {
-      // Arrange
-      const request1 = generateMockValidationRequest({
-        functionName: 'function1',
-        functionParams: { param: 'value1' },
-      });
-
-      const request2 = generateMockValidationRequest({
-        functionName: 'function2',
-        functionParams: { param: 'value2' },
-      });
-
-      // Act
+    it('should generate different cache keys for different requests', async () => {// Arrangeconst request1 = generateMockValidationRequest({
+        functionName: 'function1',functionParams: { param: 'value1' },});const request2 = generateMockValidationRequest({
+        functionName: 'function2',functionParams: { param: 'value2' },});// Act
       const key1 = service.generateCacheKey(request1);
       const key2 = service.generateCacheKey(request2);
 
@@ -742,17 +554,9 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(key1).not.toBe(key2);
     });
 
-    it('should normalize cache keys regardless of parameter order', async () => {
-      // Arrange
-      const request1 = generateMockValidationRequest({
-        functionParams: { param1: 'value1', param2: 'value2' },
-      });
-
-      const request2 = generateMockValidationRequest({
-        functionParams: { param2: 'value2', param1: 'value1' },
-      });
-
-      // Act
+    it('should normalize cache keys regardless of parameter order', async () => {// Arrangeconst request1 = generateMockValidationRequest({
+        functionParams: { param1: 'value1', param2: 'value2' },});const request2 = generateMockValidationRequest({
+        functionParams: { param2: 'value2', param1: 'value1' },});// Act
       const key1 = service.generateCacheKey(request1);
       const key2 = service.generateCacheKey(request2);
 
@@ -760,10 +564,8 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(key1).toBe(key2);
     });
 
-    it('should include risk level in cache key generation', async () => {
-      // Arrange
-      const lowRiskRequest = generateMockValidationRequest({ riskLevel: RiskLevel.LOW });
-      const highRiskRequest = generateMockValidationRequest({ riskLevel: RiskLevel.HIGH });
+    it('should include risk level in cache key generation', async () => {// Arrangeconst lowRiskRequest = generateMockValidationRequest({ riskLevel: RiskLevel._LOW });
+      const highRiskRequest = generateMockValidationRequest({ riskLevel: RiskLevel._HIGH });
 
       // Act
       const lowKey = service.generateCacheKey(lowRiskRequest);
@@ -771,15 +573,11 @@ describe('ParlantMultiLevelCacheService', () => {
 
       // Assert
       expect(lowKey).not.toBe(highKey);
-      expect(lowKey).toContain('LOW');
-      expect(highKey).toContain('HIGH');
-    });
-  });
+      expect(lowKey).toContain('LOW');expect(highKey).toContain('HIGH');});});
 
   // ===== PERFORMANCE TESTS =====
 
-  describe('Performance Optimization', () => {
-    it('should achieve target cache hit rates', async () => {
+  describe('Performance Optimization', () => {it('should achieve target cache hit rates', async () => {
       // Arrange
       const requests = Array.from({ length: 100 }, (_, i) => {
         // Create 10 unique requests, repeated 10 times each
@@ -792,13 +590,8 @@ describe('ParlantMultiLevelCacheService', () => {
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.85,
-        reasoning: 'Performance test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Performance test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 20,
           cacheHit: false,
         },
@@ -819,19 +612,12 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(stats.hitRate).toBeGreaterThan(0.8); // 80%+ hit rate
     });
 
-    it('should meet performance targets for cache operations', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+    it('should meet performance targets for cache operations', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.9,
-        reasoning: 'Performance timing test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Performance timing test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 15,
           cacheHit: false,
         },
@@ -851,26 +637,18 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(l1GetTime).toBeLessThan(3);
     });
 
-    it('should optimize memory usage with efficient eviction', async () => {
-      // Arrange
-      const maxSize = 10;
-      jest.spyOn(configService, 'get').mockImplementation((key: string) => {
-        if (key === 'parlant.cache.l1') {
-          return { ...mockConfig.l1, maxSize };
-        }
+    it('should optimize memory usage with efficient eviction', async () => {// Arrangeconst maxSize = 10;
+      jest.spyOn(configService, 'get').mockImplementation((key: string) => {if (key === 'parlant.cache.l1') {return { ...mockConfig.l1, maxSize };}
         return configService.get(key);
       });
 
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.8,
-        reasoning: 'Memory optimization test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
+        reasoning: 'Memory optimization test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
         conversationId: 'test-conversation',
         executionContext: {
-          riskLevel: RiskLevel.LOW,
+          riskLevel: RiskLevel._LOW,
           validationTimeMs: 18,
           cacheHit: false,
         },
@@ -893,33 +671,20 @@ describe('ParlantMultiLevelCacheService', () => {
 
   // ===== INTEGRATED CACHE HIERARCHY TESTS =====
 
-  describe('Multi-Level Cache Integration', () => {
-    it('should fall back through cache hierarchy (L1 -> L2 -> L3)', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+  describe('Multi-Level Cache Integration', () => {it('should fall back through cache hierarchy (L1 -> L2 -> L3)', async () => {// Arrangeconst request = generateMockValidationRequest();
 
       // Mock L1 miss
-      jest.spyOn(service, 'getL1Cache').mockResolvedValue(null);
-
-      // Mock L2 miss
-      mockRedisClient.get.mockResolvedValue(null);
+      jest.spyOn(service, 'getL1Cache').mockResolvedValue(null);// Mock L2 missmockRedisClient.get.mockResolvedValue(null);
 
       // Mock L3 hit
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.85,
-        reasoning: 'Cache hierarchy test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.MEDIUM,
+        reasoning: 'Cache hierarchy test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._MODERATE,
           validationTimeMs: 50,
           cacheHit: true,
-          cacheLevel: 'L3',
-        },
-        cached: true,
+          cacheLevel: 'L3',},cached: true,
       };
 
       mockDatabase.select.mockResolvedValue([{
@@ -935,72 +700,44 @@ describe('ParlantMultiLevelCacheService', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result!.cached).toBe(true);
-      expect(result!.executionContext.cacheLevel).toBe('L3');
-    });
-
-    it('should populate upper cache levels on lower level hits', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+      expect(result!.executionContext.cacheLevel).toBe('L3');});it('should populate upper cache levels on lower level hits', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.88,
-        reasoning: 'Cache population test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Cache population test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 30,
           cacheHit: true,
-          cacheLevel: 'L3',
-        },
-        cached: true,
+          cacheLevel: 'L3',},cached: true,
       };
 
       // Mock L1 and L2 miss, L3 hit
-      jest.spyOn(service, 'getL1Cache').mockResolvedValue(null);
-      mockRedisClient.get.mockResolvedValue(null);
-      mockDatabase.select.mockResolvedValue([{
+      jest.spyOn(service, 'getL1Cache').mockResolvedValue(null);mockRedisClient.get.mockResolvedValue(null);mockDatabase.select.mockResolvedValue([{
         response_data: JSON.stringify(response),
         metadata: JSON.stringify({}),
       }]);
 
       // Mock successful cache population
-      jest.spyOn(service, 'setL1Cache').mockResolvedValue(undefined);
-      mockRedisClient.set.mockResolvedValue('OK');
-
-      // Act
-      await service.getCachedValidation(request);
+      jest.spyOn(service, 'setL1Cache').mockResolvedValue(undefined);mockRedisClient.set.mockResolvedValue('OK');// Actawait service.getCachedValidation(request);
 
       // Assert - Should populate L1 and L2 caches
       expect(service.setL1Cache).toHaveBeenCalledWith(request, expect.any(Object));
       expect(mockRedisClient.set).toHaveBeenCalled();
     });
 
-    it('should maintain cache consistency across levels', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
+    it('should maintain cache consistency across levels', async () => {// Arrangeconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.92,
-        reasoning: 'Cache consistency test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.MEDIUM,
+        reasoning: 'Cache consistency test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._MODERATE,
           validationTimeMs: 25,
           cacheHit: false,
         },
         cached: false,
       };
 
-      mockRedisClient.set.mockResolvedValue('OK');
-      mockDatabase.insert.mockResolvedValue({ id: 1 });
-
-      // Act - Store in all cache levels
+      mockRedisClient.set.mockResolvedValue('OK');mockDatabase.insert.mockResolvedValue({ id: 1 });// Act - Store in all cache levels
       await service.setCachedValidation(request, response);
 
       // Assert - All cache levels should be updated
@@ -1011,72 +748,40 @@ describe('ParlantMultiLevelCacheService', () => {
 
   // ===== ERROR HANDLING AND RESILIENCE TESTS =====
 
-  describe('Error Handling and Resilience', () => {
-    it('should continue functioning when Redis is unavailable', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
-      mockRedisClient.get.mockRejectedValue(new Error('Redis unavailable'));
-      mockRedisClient.set.mockRejectedValue(new Error('Redis unavailable'));
-
-      // Act & Assert - Should not throw
-      await expect(service.getL2Cache(request)).resolves.toBeNull();
+  describe('Error Handling and Resilience', () => {it('should continue functioning when Redis is unavailable', async () => {// Arrangeconst request = generateMockValidationRequest();
+      mockRedisClient.get.mockRejectedValue(new Error('Redis unavailable'));mockRedisClient.set.mockRejectedValue(new Error('Redis unavailable'));// Act & Assert - Should not throwawait expect(service.getL2Cache(request)).resolves.toBeNull();
       await expect(service.setL2Cache(request, {} as any)).resolves.not.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Redis error'),
-        expect.any(String)
-      );
+        expect.stringContaining('Redis error'),expect.any(String));
     });
 
-    it('should handle database connection failures gracefully', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
-      mockDatabase.select.mockRejectedValue(new Error('Database connection failed'));
-      mockDatabase.insert.mockRejectedValue(new Error('Database connection failed'));
-
-      // Act & Assert - Should not throw
-      await expect(service.getL3Cache(request)).resolves.toBeNull();
+    it('should handle database connection failures gracefully', async () => {// Arrangeconst request = generateMockValidationRequest();
+      mockDatabase.select.mockRejectedValue(new Error('Database connection failed'));mockDatabase.insert.mockRejectedValue(new Error('Database connection failed'));// Act & Assert - Should not throwawait expect(service.getL3Cache(request)).resolves.toBeNull();
       await expect(service.setL3Cache(request, {} as any, {} as any)).resolves.not.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Database error'),
-        expect.any(String)
-      );
+        expect.stringContaining('Database error'),expect.any(String));
     });
 
-    it('should handle cache corruption gracefully', async () => {
-      // Arrange
-      const request = generateMockValidationRequest();
-      mockRedisClient.get.mockResolvedValue('invalid json data');
-
-      // Act
-      const result = await service.getL2Cache(request);
+    it('should handle cache corruption gracefully', async () => {// Arrangeconst request = generateMockValidationRequest();
+      mockRedisClient.get.mockResolvedValue('invalid json data');// Actconst result = await service.getL2Cache(request);
 
       // Assert
       expect(result).toBeNull();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Cache corruption detected'),
-        expect.any(String)
-      );
+        expect.stringContaining('Cache corruption detected'),expect.any(String));
     });
   });
 
   // ===== CACHE STATISTICS AND MONITORING TESTS =====
 
-  describe('Cache Statistics and Monitoring', () => {
-    it('should provide comprehensive cache statistics', async () => {
-      // Arrange & Act
-      const request = generateMockValidationRequest();
+  describe('Cache Statistics and Monitoring', () => {it('should provide comprehensive cache statistics', async () => {// Arrange & Actconst request = generateMockValidationRequest();
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.87,
-        reasoning: 'Stats test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
-        conversationId: 'test-conversation',
-        executionContext: {
-          riskLevel: RiskLevel.LOW,
+        reasoning: 'Stats test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
+        conversationId: 'test-conversation',executionContext: {riskLevel: RiskLevel._LOW,
           validationTimeMs: 22,
           cacheHit: false,
         },
@@ -1098,19 +803,14 @@ describe('ParlantMultiLevelCacheService', () => {
       expect(stats.l1.currentSize).toBeGreaterThan(0);
     });
 
-    it('should track performance metrics across cache levels', async () => {
-      // Arrange
-      const requests = Array.from({ length: 20 }, () => generateMockValidationRequest());
+    it('should track performance metrics across cache levels', async () => {// Arrangeconst requests = Array.from({ length: 20 }, () => generateMockValidationRequest());
       const response: ParlantValidationResponse = {
         approved: true,
         confidence: 0.85,
-        reasoning: 'Performance metrics test',
-        intent: 'TEST_ACTION',
-        suggestedAlternatives: [],
-        validationTimestamp: new Date(),
+        reasoning: 'Performance metrics test',intent: 'TEST_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
         conversationId: 'test-conversation',
         executionContext: {
-          riskLevel: RiskLevel.LOW,
+          riskLevel: RiskLevel._LOW,
           validationTimeMs: 20,
           cacheHit: false,
         },

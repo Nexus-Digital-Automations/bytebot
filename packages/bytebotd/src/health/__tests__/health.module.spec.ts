@@ -28,17 +28,7 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { TerminusModule } from '@nestjs/terminus';
-import { HealthModule } from '../health.module';
-import { HealthController } from '../health.controller';
-import { HealthService } from '../health.service';
-import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
-import { UserRole, Permission } from '@bytebot/shared';
-
-// Type definitions for health service method returns
-interface HealthCheckResponse {
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { TerminusModule } from '@nestjs/terminus';import { HealthModule } from '../health.module';import { HealthController } from '../health.controller';import { HealthService } from '../health.service';import { ByteBotdUser } from '../../auth/decorators/roles.decorator';import { UserRole, Permission } from '@bytebot/shared';// Type definitions for health service method returnsinterface HealthCheckResponse {
   status: string;
   timestamp?: string;
   [key: string]: unknown;
@@ -61,15 +51,8 @@ describe('HealthModule', () => {
 
   // Mock user for authenticated calls
   const mockUser: ByteBotdUser = {
-    sub: 'test-user-id',
-    id: 'test-user-id',
-    email: 'test@example.com',
-    username: 'test-user',
-    role: UserRole._ADMIN,
-    isActive: true,
-    firstName: 'Test',
-    lastName: 'User',
-    sessionId: 'test-session-id',
+    sub: 'test-user-id',id: 'test-user-id',email: 'test@example.com',username: 'test-user',role: UserRole._ADMIN,isActive: true,
+    firstName: 'Test',lastName: 'User',sessionId: 'test-session-id',
     permissions: [Permission._COMPUTER_CONTROL],
   };
 
@@ -99,12 +82,7 @@ describe('HealthModule', () => {
     } as unknown as jest.Mocked<Logger>;
 
     // Mock Logger constructor to return our mock
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
-    jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
-    jest
-      .spyOn(Logger.prototype, 'verbose')
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);jest.spyOn(Logger.prototype, 'verbose')
       .mockImplementation(mockLogger.verbose);
 
     module = await Test.createTestingModule({
@@ -115,24 +93,16 @@ describe('HealthModule', () => {
     healthController = module.get<HealthController>(HealthController);
     healthService = module.get<HealthService>(HealthService);
 
-    console.log(`[${operationId}] HealthModule test setup completed`);
-  });
-
-  afterEach(async () => {
-    console.log(`[${operationId}] HealthModule test cleanup initiated`);
-
-    if (module) {
-      await module.close();
+    console.log(`[${operationId}] HealthModule test setup completed`);});afterEach(async () => {
+    console.log(`[${operationId}] HealthModule test cleanup initiated`);if (module) {await module.close();
     }
 
     jest.clearAllMocks();
     console.log(`[${operationId}] HealthModule test cleanup completed`);
   });
 
-  describe('Module Initialization and Configuration', () => {
-    it('should initialize health module successfully', () => {
-      const testId = `${operationId}_module_initialization`;
-      console.log(`[${testId}] Testing health module initialization`);
+  describe('Module Initialization and Configuration', () => {it('should initialize health module successfully', () => {
+      const testId = `${operationId}_module_initialization`;console.log(`[${testId}] Testing health module initialization`);
 
       expect(healthModule).toBeDefined();
       expect(healthController).toBeDefined();
@@ -140,12 +110,8 @@ describe('HealthModule', () => {
 
       // Verify module initialization logging
       expect(mockLogger.log).toHaveBeenCalledWith(
-        'Enterprise Health Module initialized - Kubernetes monitoring enabled',
-      );
-      expect(mockLogger.log).toHaveBeenCalledWith(
-        'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status',
-      );
-      expect(mockLogger.log).toHaveBeenCalledWith(
+        'Enterprise Health Module initialized - Kubernetes monitoring enabled',);expect(mockLogger.log).toHaveBeenCalledWith(
+        'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status',);expect(mockLogger.log).toHaveBeenCalledWith(
         'Kubernetes probes: liveness (/health/live), readiness (/health/ready), startup (/health/startup)',
       );
 
@@ -155,28 +121,21 @@ describe('HealthModule', () => {
     });
 
     it('should register required dependencies correctly', () => {
-      const testId = `${operationId}_dependency_registration`;
-      console.log(`[${testId}] Testing dependency registration`);
-
-      // Check that TerminusModule is properly imported
-      const terminusModule = module.get(TerminusModule, { strict: false });
+      const testId = `${operationId}_dependency_registration`;console.log(`[${testId}] Testing dependency registration`);// Check that TerminusModule is properly importedconst terminusModule = module.get(TerminusModule, { strict: false });
       expect(terminusModule).toBeDefined();
 
       console.log(`[${testId}] Dependency registration test completed`);
     });
 
     it('should export HealthService for use by other modules', async () => {
-      const testId = `${operationId}_service_export`;
-      console.log(`[${testId}] Testing HealthService export availability`);
+      const testId = `${operationId}_service_export`;console.log(`[${testId}] Testing HealthService export availability`);
 
       // Create a test module that imports HealthModule and uses HealthService
       const testModule = await Test.createTestingModule({
         imports: [HealthModule],
         providers: [
           {
-            provide: 'TestServiceUsingHealth',
-            useFactory: (healthService: HealthService) => {
-              return {
+            provide: 'TestServiceUsingHealth',useFactory: (healthService: HealthService) => {return {
                 getHealthService: () => healthService,
               };
             },
@@ -203,14 +162,10 @@ describe('HealthModule', () => {
     });
 
     it('should handle module initialization errors gracefully', async () => {
-      const testId = `${operationId}_initialization_errors`;
-      console.log(`[${testId}] Testing module initialization error handling`);
+      const testId = `${operationId}_initialization_errors`;console.log(`[${testId}] Testing module initialization error handling`);
 
       // Mock Logger constructor to throw an error during module initialization
-      const errorMessage = 'Logger initialization failed';
-
-      try {
-        // This is a conceptual test - in practice, NestJS handles most initialization errors
+      const errorMessage = 'Logger initialization failed';try {// This is a conceptual test - in practice, NestJS handles most initialization errors
         // We're testing that the module can be created even if logging has issues
         jest.spyOn(Logger.prototype, 'log').mockImplementationOnce(() => {
           throw new Error(errorMessage);
@@ -235,11 +190,7 @@ describe('HealthModule', () => {
     });
 
     it('should configure providers with correct scope and lifecycle', () => {
-      const testId = `${operationId}_provider_configuration`;
-      console.log(`[${testId}] Testing provider configuration and lifecycle`);
-
-      // Test that services are singletons (same instance returned)
-      const healthService1 = module.get<HealthService>(HealthService);
+      const testId = `${operationId}_provider_configuration`;console.log(`[${testId}] Testing provider configuration and lifecycle`);// Test that services are singletons (same instance returned)const healthService1 = module.get<HealthService>(HealthService);
       const healthService2 = module.get<HealthService>(HealthService);
 
       expect(healthService1).toBe(healthService2);
@@ -254,13 +205,8 @@ describe('HealthModule', () => {
     });
   });
 
-  describe('Dependency Injection and Integration', () => {
-    it('should inject dependencies correctly into controller', async () => {
-      const testId = `${operationId}_controller_dependency_injection`;
-      console.log(`[${testId}] Testing controller dependency injection`);
-
-      // Verify that HealthController has access to HealthService
-      expect(healthController).toBeDefined();
+  describe('Dependency Injection and Integration', () => {it('should inject dependencies correctly into controller', async () => {
+      const testId = `${operationId}_controller_dependency_injection`;console.log(`[${testId}] Testing controller dependency injection`);// Verify that HealthController has access to HealthServiceexpect(healthController).toBeDefined();
       expect(healthService).toBeDefined();
 
       // Test basic functionality to ensure dependencies are working
@@ -272,11 +218,7 @@ describe('HealthModule', () => {
     });
 
     it('should integrate with Terminus module correctly', async () => {
-      const testId = `${operationId}_terminus_integration`;
-      console.log(`[${testId}] Testing Terminus module integration`);
-
-      // Verify Terminus module is available and integrated
-      const terminusModule = module.get(TerminusModule, { strict: false });
+      const testId = `${operationId}_terminus_integration`;console.log(`[${testId}] Testing Terminus module integration`);// Verify Terminus module is available and integratedconst terminusModule = module.get(TerminusModule, { strict: false });
       expect(terminusModule).toBeDefined();
 
       // Test that Terminus health checks are working
@@ -292,16 +234,9 @@ describe('HealthModule', () => {
     });
 
     it('should integrate with HttpModule for external service checks', async () => {
-      const testId = `${operationId}_http_module_integration`;
-      console.log(`[${testId}] Testing HttpModule integration`);
-
-      // HttpModule integration is handled internally by NestJS
-      // Test external service health check functionality instead
+      const testId = `${operationId}_http_module_integration`;console.log(`[${testId}] Testing HttpModule integration`);// HttpModule integration is handled internally by NestJS// Test external service health check functionality instead
       console.log(
-        `HttpModule integration tested via functionality`,
-      );
-
-      // Test external service health check functionality
+        `HttpModule integration tested via functionality`,);// Test external service health check functionality
       try {
         const readinessResult = await healthController.checkReadiness(mockUser);
         expect(readinessResult).toBeDefined();
@@ -314,8 +249,7 @@ describe('HealthModule', () => {
     });
 
     it('should handle circular dependency scenarios', () => {
-      const testId = `${operationId}_circular_dependency_prevention`;
-      console.log(`[${testId}] Testing circular dependency prevention`);
+      const testId = `${operationId}_circular_dependency_prevention`;console.log(`[${testId}] Testing circular dependency prevention`);
 
       // Verify that module doesn't have circular dependencies
       expect(healthModule).toBeDefined();
@@ -330,8 +264,7 @@ describe('HealthModule', () => {
     });
 
     it('should support dynamic module configuration', async () => {
-      const testId = `${operationId}_dynamic_configuration`;
-      console.log(`[${testId}] Testing dynamic module configuration support`);
+      const testId = `${operationId}_dynamic_configuration`;console.log(`[${testId}] Testing dynamic module configuration support`);
 
       // Test that module can be configured dynamically
       const dynamicModule = await Test.createTestingModule({
@@ -356,10 +289,8 @@ describe('HealthModule', () => {
     });
   });
 
-  describe('Module Lifecycle and Resource Management', () => {
-    it('should initialize services in correct order', async () => {
-      const testId = `${operationId}_service_initialization_order`;
-      console.log(`[${testId}] Testing service initialization order`);
+  describe('Module Lifecycle and Resource Management', () => {it('should initialize services in correct order', async () => {
+      const testId = `${operationId}_service_initialization_order`;console.log(`[${testId}] Testing service initialization order`);
 
       // Services should be initialized and ready to use
       expect(healthService).toBeDefined();
@@ -378,11 +309,7 @@ describe('HealthModule', () => {
     });
 
     it('should handle module destruction gracefully', async () => {
-      const testId = `${operationId}_module_destruction`;
-      console.log(`[${testId}] Testing module destruction and cleanup`);
-
-      // Create a separate module for testing destruction
-      const testModule = await Test.createTestingModule({
+      const testId = `${operationId}_module_destruction`;console.log(`[${testId}] Testing module destruction and cleanup`);// Create a separate module for testing destructionconst testModule = await Test.createTestingModule({
         imports: [HealthModule],
       }).compile();
 
@@ -396,17 +323,14 @@ describe('HealthModule', () => {
     });
 
     it('should handle concurrent module access', async () => {
-      const testId = `${operationId}_concurrent_access`;
-      console.log(`[${testId}] Testing concurrent module access`);
+      const testId = `${operationId}_concurrent_access`;console.log(`[${testId}] Testing concurrent module access`);
 
       // Test concurrent access to health service
       const promises = Array(10)
         .fill(null)
         .map(async (_, _i) => {
           const health = await healthController.getHealth(mockUser);
-          expect(health.status).toBe('healthy');
-          return health;
-        });
+          expect(health.status).toBe('healthy');return health;});
 
       const results = await Promise.all(promises);
       expect(results).toHaveLength(10);
@@ -421,12 +345,7 @@ describe('HealthModule', () => {
     });
 
     it('should manage memory efficiently during module lifecycle', async () => {
-      const testId = `${operationId}_memory_management`;
-      console.log(
-        `[${testId}] Testing memory management during module lifecycle`,
-      );
-
-      const initialMemory = process.memoryUsage();
+      const testId = `${operationId}_memory_management`;console.log(`[${testId}] Testing memory management during module lifecycle`,);const initialMemory = process.memoryUsage();
 
       // Create and destroy multiple modules to test for memory leaks
       for (let i = 0; i < 5; i++) {
@@ -452,11 +371,7 @@ describe('HealthModule', () => {
     });
 
     it('should support hot module replacement scenarios', () => {
-      const testId = `${operationId}_hot_module_replacement`;
-      console.log(`[${testId}] Testing hot module replacement compatibility`);
-
-      // Test that module state persists correctly during updates
-      const originalInitTime = healthService.getInitializationTime();
+      const testId = `${operationId}_hot_module_replacement`;console.log(`[${testId}] Testing hot module replacement compatibility`);// Test that module state persists correctly during updatesconst originalInitTime = healthService.getInitializationTime();
 
       // Simulate module state check (what HMR would do)
       expect(healthService.isServiceStable(0.1)).toBe(true);
@@ -469,10 +384,8 @@ describe('HealthModule', () => {
     });
   });
 
-  describe('Integration Testing and API Surface', () => {
-    it('should expose correct module metadata', () => {
-      const testId = `${operationId}_module_metadata`;
-      console.log(`[${testId}] Testing module metadata exposure`);
+  describe('Integration Testing and API Surface', () => {it('should expose correct module metadata', () => {
+      const testId = `${operationId}_module_metadata`;console.log(`[${testId}] Testing module metadata exposure`);
 
       // Verify module structure and metadata
       expect(HealthModule).toBeDefined();
@@ -486,18 +399,14 @@ describe('HealthModule', () => {
     });
 
     it('should integrate with NestJS application context', async () => {
-      const testId = `${operationId}_application_context_integration`;
-      console.log(`[${testId}] Testing NestJS application context integration`);
+      const testId = `${operationId}_application_context_integration`;console.log(`[${testId}] Testing NestJS application context integration`);
 
       // Test that module works within full application context
       const appModule = await Test.createTestingModule({
         imports: [HealthModule],
         providers: [
           {
-            provide: 'APP_CONFIG',
-            useValue: { environment: 'test' },
-          },
-        ],
+            provide: 'APP_CONFIG',useValue: { environment: 'test' },},],
       }).compile();
 
       const appHealthService = appModule.get<HealthService>(HealthService);
@@ -516,17 +425,14 @@ describe('HealthModule', () => {
     });
 
     it('should support custom configuration and extensibility', async () => {
-      const testId = `${operationId}_custom_configuration`;
-      console.log(`[${testId}] Testing custom configuration and extensibility`);
+      const testId = `${operationId}_custom_configuration`;console.log(`[${testId}] Testing custom configuration and extensibility`);
 
       // Test that module can be extended with custom providers
       const extendedModule = await Test.createTestingModule({
         imports: [HealthModule],
         providers: [
           {
-            provide: 'CustomHealthIndicator',
-            useFactory: (healthService: HealthService) => ({
-              checkCustomHealth: () => healthService.getBasicHealth(),
+            provide: 'CustomHealthIndicator',useFactory: (healthService: HealthService) => ({checkCustomHealth: () => healthService.getBasicHealth(),
             }),
             inject: [HealthService],
           },
@@ -534,9 +440,7 @@ describe('HealthModule', () => {
       }).compile();
 
       const customHealthIndicator = extendedModule.get(
-        'CustomHealthIndicator',
-      ) as { checkCustomHealth: () => Promise<{ status: string }> };
-      expect(customHealthIndicator).toBeDefined();
+        'CustomHealthIndicator',) as { checkCustomHealth: () => Promise<{ status: string }> };expect(customHealthIndicator).toBeDefined();
 
       const customHealth = await customHealthIndicator.checkCustomHealth();
       expect(customHealth.status).toBe('healthy');
@@ -546,11 +450,7 @@ describe('HealthModule', () => {
     });
 
     it('should maintain API compatibility across module versions', () => {
-      const testId = `${operationId}_api_compatibility`;
-      console.log(`[${testId}] Testing API compatibility maintenance`);
-
-      // Test that public API remains stable
-      expect(healthService.getBasicHealth).toBeDefined();
+      const testId = `${operationId}_api_compatibility`;console.log(`[${testId}] Testing API compatibility maintenance`);// Test that public API remains stableexpect(healthService.getBasicHealth).toBeDefined();
       expect(healthService.getDetailedStatus).toBeDefined();
       expect(healthService.isServiceStable).toBeDefined();
       expect(healthService.getInitializationTime).toBeDefined();
@@ -566,8 +466,7 @@ describe('HealthModule', () => {
     });
 
     it('should handle edge cases in module loading', async () => {
-      const testId = `${operationId}_module_loading_edge_cases`;
-      console.log(`[${testId}] Testing module loading edge cases`);
+      const testId = `${operationId}_module_loading_edge_cases`;console.log(`[${testId}] Testing module loading edge cases`);
 
       // Test module loading with minimal dependencies
       const minimalModule = await Test.createTestingModule({
@@ -589,25 +488,18 @@ describe('HealthModule', () => {
     });
   });
 
-  describe('Error Handling and Resilience', () => {
-    it('should handle service initialization failures', async () => {
-      const testId = `${operationId}_service_initialization_failures`;
-      console.log(
-        `[${testId}] Testing service initialization failure handling`,
+  describe('Error Handling and Resilience', () => {it('should handle service initialization failures', async () => {
+      const testId = `${operationId}_service_initialization_failures`;console.log(`[${testId}] Testing service initialization failure handling`,
       );
 
       // Mock HealthService constructor to simulate initialization failure
       const mockHealthService = {
         getBasicHealth: (
           jest.fn() as jest.MockedFunction<() => Promise<HealthCheckResponse>>
-        ).mockRejectedValue(new Error('Service initialization failed')),
-        getDetailedStatus: (
-          jest.fn() as jest.MockedFunction<
+        ).mockRejectedValue(new Error('Service initialization failed')),getDetailedStatus: (jest.fn() as jest.MockedFunction<
             () => Promise<DetailedStatusResponse>
           >
-        ).mockRejectedValue(new Error('Service initialization failed')),
-        isServiceStable: jest.fn().mockReturnValue(false),
-        getInitializationTime: jest.fn().mockReturnValue(Date.now()),
+        ).mockRejectedValue(new Error('Service initialization failed')),isServiceStable: jest.fn().mockReturnValue(false),getInitializationTime: jest.fn().mockReturnValue(Date.now()),
       };
 
       const failureModule = await Test.createTestingModule({
@@ -633,8 +525,7 @@ describe('HealthModule', () => {
     });
 
     it('should maintain module stability during dependency failures', async () => {
-      const testId = `${operationId}_dependency_failure_resilience`;
-      console.log(`[${testId}] Testing resilience to dependency failures`);
+      const testId = `${operationId}_dependency_failure_resilience`;console.log(`[${testId}] Testing resilience to dependency failures`);
 
       // Test that module remains functional even if some dependencies fail
       const resilientModule = await Test.createTestingModule({
@@ -659,18 +550,14 @@ describe('HealthModule', () => {
     });
 
     it('should recover from transient errors', async () => {
-      const testId = `${operationId}_transient_error_recovery`;
-      console.log(`[${testId}] Testing transient error recovery`);
+      const testId = `${operationId}_transient_error_recovery`;console.log(`[${testId}] Testing transient error recovery`);
 
       // Test module behavior during transient errors
       const originalLog = mockLogger.log;
 
       // Simulate transient logging error
       mockLogger.log.mockImplementationOnce(() => {
-        throw new Error('Transient logging error');
-      });
-
-      // Module should continue functioning despite transient errors
+        throw new Error('Transient logging error');});// Module should continue functioning despite transient errors
       const health1 = await healthController.getHealth(mockUser);
       expect(health1).toBeDefined();
 
@@ -684,8 +571,7 @@ describe('HealthModule', () => {
     });
 
     it('should maintain thread safety under stress', async () => {
-      const testId = `${operationId}_thread_safety_stress`;
-      console.log(`[${testId}] Testing thread safety under stress conditions`);
+      const testId = `${operationId}_thread_safety_stress`;console.log(`[${testId}] Testing thread safety under stress conditions`);
 
       // Create concurrent requests to test thread safety
       const stressPromises = Array(50)
@@ -711,8 +597,7 @@ describe('HealthModule', () => {
     });
 
     it('should handle resource exhaustion gracefully', async () => {
-      const testId = `${operationId}_resource_exhaustion_handling`;
-      console.log(`[${testId}] Testing resource exhaustion handling`);
+      const testId = `${operationId}_resource_exhaustion_handling`;console.log(`[${testId}] Testing resource exhaustion handling`);
 
       // Simulate resource exhaustion by creating many concurrent operations
       const exhaustionPromises = Array(100)
@@ -722,9 +607,7 @@ describe('HealthModule', () => {
             const health = await healthController.getHealth(mockUser);
             return health;
           } catch (error) {
-            return { status: 'error', error: (error as Error).message };
-          }
-        });
+            return { status: 'error', error: (error as Error).message };}});
 
       const exhaustionResults = await Promise.all(exhaustionPromises);
 
@@ -745,14 +628,8 @@ describe('HealthModule', () => {
     });
   });
 
-  describe('Performance and Scalability', () => {
-    it('should initialize quickly under normal conditions', async () => {
-      const testId = `${operationId}_initialization_performance`;
-      console.log(`[${testId}] Testing module initialization performance`);
-
-      const startTime = Date.now();
-
-      const perfModule = await Test.createTestingModule({
+  describe('Performance and Scalability', () => {it('should initialize quickly under normal conditions', async () => {
+      const testId = `${operationId}_initialization_performance`;console.log(`[${testId}] Testing module initialization performance`);const startTime = Date.now();const perfModule = await Test.createTestingModule({
         imports: [HealthModule],
       }).compile();
 
@@ -768,8 +645,7 @@ describe('HealthModule', () => {
     });
 
     it('should scale to multiple concurrent requests efficiently', async () => {
-      const testId = `${operationId}_concurrent_request_scaling`;
-      console.log(`[${testId}] Testing concurrent request scaling`);
+      const testId = `${operationId}_concurrent_request_scaling`;console.log(`[${testId}] Testing concurrent request scaling`);
 
       const startTime = Date.now();
 
@@ -791,12 +667,7 @@ describe('HealthModule', () => {
     });
 
     it('should maintain consistent performance over time', async () => {
-      const testId = `${operationId}_performance_consistency`;
-      console.log(`[${testId}] Testing performance consistency over time`);
-
-      const performanceMetrics: number[] = [];
-
-      // Execute health checks over time and measure performance
+      const testId = `${operationId}_performance_consistency`;console.log(`[${testId}] Testing performance consistency over time`);const performanceMetrics: number[] = [];// Execute health checks over time and measure performance
       for (let i = 0; i < 20; i++) {
         const startTime = Date.now();
         await healthController.getHealth(mockUser);
@@ -825,8 +696,7 @@ describe('HealthModule', () => {
     });
 
     it('should handle high-frequency health check requests', async () => {
-      const testId = `${operationId}_high_frequency_requests`;
-      console.log(`[${testId}] Testing high-frequency health check handling`);
+      const testId = `${operationId}_high_frequency_requests`;console.log(`[${testId}] Testing high-frequency health check handling`);
 
       const requestCount = 500;
       const startTime = Date.now();
@@ -852,12 +722,7 @@ describe('HealthModule', () => {
     });
 
     it('should optimize memory usage during sustained operations', async () => {
-      const testId = `${operationId}_sustained_operation_memory`;
-      console.log(
-        `[${testId}] Testing memory optimization during sustained operations`,
-      );
-
-      const initialMemory = process.memoryUsage();
+      const testId = `${operationId}_sustained_operation_memory`;console.log(`[${testId}] Testing memory optimization during sustained operations`,);const initialMemory = process.memoryUsage();
 
       // Perform sustained operations
       for (let batch = 0; batch < 10; batch++) {

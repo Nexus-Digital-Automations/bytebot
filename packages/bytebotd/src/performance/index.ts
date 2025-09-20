@@ -10,88 +10,55 @@
  */
 
 // Core performance testing services
-export { WebSocketPerformanceBenchmarkingService } from './websocket-performance-benchmarking.service';
-export { ThroughputTestingService } from './throughput-testing.service';
-export { LatencyMeasurementService } from './latency-measurement.service';
-export { ResourceMonitoringService } from './resource-monitoring.service';
-export { ParlantValidationImpactAnalysisService } from './parlant-validation-impact-analysis.service';
-export { SustainedLoadTestingService } from './sustained-load-testing.service';
-export { PerformanceRegressionTestingService } from './performance-regression-testing.service';
-
-// Type exports for external usage
-export type {
+export { WebSocketPerformanceBenchmarkingService } from './websocket-performance-benchmarking.service';export { ThroughputTestingService } from './throughput-testing.service';export { LatencyMeasurementService } from './latency-measurement.service';export { ResourceMonitoringService } from './resource-monitoring.service';export { ParlantValidationImpactAnalysisService } from './parlant-validation-impact-analysis.service';export { SustainedLoadTestingService } from './sustained-load-testing.service';export { PerformanceRegressionTestingService } from './performance-regression-testing.service';// Type exports for external usageexport type {
   // Core benchmarking types
   PerformanceTestType,
   PerformanceMetrics,
   BenchmarkResults,
   RealTimeMetrics,
-} from './websocket-performance-benchmarking.service';
-
-export type {
-  // Throughput testing types
+} from './websocket-performance-benchmarking.service';export type {// Throughput testing types
   ThroughputTestScenario,
   ThroughputTestConfig,
   ThroughputTestResults,
   ThroughputMetrics,
-} from './throughput-testing.service';
-
-export type {
-  // Latency testing types
+} from './throughput-testing.service';export type {// Latency testing types
   LatencyTestType,
   LatencyMeasurementConfig,
   LatencyTestResults,
   LatencyStatistics,
   LatencyMeasurement,
-} from './latency-measurement.service';
-
-export type {
-  // Resource monitoring types
+} from './latency-measurement.service';export type {// Resource monitoring types
   ResourceMetrics,
   CPUMetrics,
   MemoryMetrics,
   NetworkMetrics,
   DiskMetrics,
   ResourceBottleneck,
-} from './resource-monitoring.service';
-
-export type {
-  // PARLANT validation impact types
+} from './resource-monitoring.service';export type {// PARLANT validation impact types
   ValidationComplexity,
   ValidationCategory,
   ValidationPerformanceMeasurement,
   ValidationImpactComparison,
   ValidationImpactAnalysisResults,
-} from './parlant-validation-impact-analysis.service';
-
-export type {
-  // Sustained load testing types
+} from './parlant-validation-impact-analysis.service';export type {// Sustained load testing types
   SustainedLoadTestType,
   LoadPattern,
   SustainedLoadTestConfig,
   SustainedLoadTestResults,
   PerformanceDegradationAnalysis,
   MemoryLeakAnalysis,
-} from './sustained-load-testing.service';
-
-export type {
-  // Regression testing types
+} from './sustained-load-testing.service';export type {// Regression testing types
   RegressionTestType,
   PerformanceBaseline,
   RegressionAnalysisResult,
   PerformanceTrendAnalysis,
   RegressionAlertConfig,
-} from './performance-regression-testing.service';
-
-/**
- * Performance testing framework configuration
+} from './performance-regression-testing.service';/*** Performance testing framework configuration
  */
 export interface PerformanceFrameworkConfig {
   // Global settings
   enabled: boolean;
-  environment: 'development' | 'staging' | 'production';
-
-  // Target performance metrics
-  targets: {
+  environment: 'development' | 'staging' | 'production';// Target performance metricstargets: {
     throughput: number;              // Target: 5000+ messages/second
     latencyP95: number;             // Target: <50ms P95 latency
     latencyP99: number;             // Target: <100ms P99 latency
@@ -148,15 +115,11 @@ export interface PerformanceFrameworkSummary {
       current: number;
       target: number;
       targetMet: boolean;
-      trend: 'improving' | 'stable' | 'degrading';
-    };
-    latency: {
+      trend: 'improving' | 'stable' | 'degrading';};latency: {
       currentP95: number;
       targetP95: number;
       targetMet: boolean;
-      trend: 'improving' | 'stable' | 'degrading';
-    };
-    reliability: {
+      trend: 'improving' | 'stable' | 'degrading';};reliability: {
       current: number;
       target: number;
       targetMet: boolean;
@@ -199,10 +162,7 @@ export interface PerformanceFrameworkSummary {
  */
 export const DEFAULT_PERFORMANCE_CONFIG: PerformanceFrameworkConfig = {
   enabled: true,
-  environment: 'development',
-
-  targets: {
-    throughput: 5000,              // 5000+ messages/second
+  environment: 'development',targets: {throughput: 5000,              // 5000+ messages/second
     latencyP95: 50,               // <50ms P95 latency
     latencyP99: 100,              // <100ms P99 latency
     reliabilityTarget: 99,        // 99% success rate
@@ -211,10 +171,7 @@ export const DEFAULT_PERFORMANCE_CONFIG: PerformanceFrameworkConfig = {
 
   testing: {
     enableAutomatedTesting: true,
-    testSchedule: '0 2 * * *',     // Daily at 2 AM
-    baselineUpdateFrequency: '0 0 * * 0', // Weekly on Sunday
-    retentionPeriod: 90,           // 90 days
-  },
+    testSchedule: '0 2 * * *',     // Daily at 2 AMbaselineUpdateFrequency: '0 0 * * 0', // Weekly on SundayretentionPeriod: 90,           // 90 days},
 
   monitoring: {
     enableRealTimeMonitoring: true,
@@ -285,22 +242,11 @@ export const PERFORMANCE_CONSTANTS = {
  * Performance test result status
  */
 export enum TestResultStatus {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  SKIPPED = 'skipped',
-  ERROR = 'error',
-}
-
-/**
+  PASSED = 'passed',FAILED = 'failed',WARNING = 'warning',SKIPPED = 'skipped',ERROR = 'error',}/**
  * Performance grade classification
  */
 export enum PerformanceGrade {
-  EXCELLENT = 'A',               // Exceeds all targets
-  GOOD = 'B',                    // Meets all targets
-  ACCEPTABLE = 'C',              // Meets most targets
-  POOR = 'D',                    // Below targets
-  UNACCEPTABLE = 'F',            // Significantly below targets
+  EXCELLENT = 'A',               // Exceeds all targetsGOOD = 'B',                    // Meets all targetsACCEPTABLE = 'C',              // Meets most targetsPOOR = 'D',                    // Below targetsUNACCEPTABLE = 'F',            // Significantly below targets
 }
 
 /**
@@ -391,13 +337,7 @@ export class PerformanceUtils {
   static formatMetrics(metrics: DisplayMetrics): string {
     return `
 Performance Metrics Summary:
-📊 Throughput: ${metrics.throughput?.toFixed(0) ?? 'N/A'} msg/sec
-⏱️  P95 Latency: ${metrics.latencyP95?.toFixed(2) ?? 'N/A'}ms
-⏱️  P99 Latency: ${metrics.latencyP99?.toFixed(2) ?? 'N/A'}ms
-✅ Success Rate: ${metrics.reliability?.toFixed(1) ?? 'N/A'}%
-💾 CPU Usage: ${metrics.cpuUsage?.toFixed(1) ?? 'N/A'}%
-🧠 Memory Usage: ${metrics.memoryUsage?.toFixed(1) ?? 'N/A'}MB
-📈 Performance Grade: ${metrics.grade ?? 'N/A'}
+📊 Throughput: ${metrics.throughput?.toFixed(0) ?? 'N/A'} msg/sec⏱️  P95 Latency: ${metrics.latencyP95?.toFixed(2) ?? 'N/A'}ms⏱️  P99 Latency: ${metrics.latencyP99?.toFixed(2) ?? 'N/A'}ms✅ Success Rate: ${metrics.reliability?.toFixed(1) ?? 'N/A'}%💾 CPU Usage: ${metrics.cpuUsage?.toFixed(1) ?? 'N/A'}%🧠 Memory Usage: ${metrics.memoryUsage?.toFixed(1) ?? 'N/A'}MB📈 Performance Grade: ${metrics.grade ?? 'N/A'}
     `.trim();
   }
 
@@ -431,26 +371,11 @@ Performance Metrics Summary:
     const targets = PERFORMANCE_CONSTANTS.ENTERPRISE_TARGETS;
 
     if ((metrics.throughput ?? 0) < targets.THROUGHPUT_MINIMUM) {
-      recommendations.push('🚀 Optimize throughput: Consider connection pooling and message batching');
-    }
-
-    if ((metrics.latencyP95 ?? Infinity) > targets.LATENCY_P95_TARGET) {
-      recommendations.push('⚡ Reduce latency: Implement caching and optimize processing pipeline');
-    }
-
-    if ((metrics.reliability ?? 0) < targets.RELIABILITY_TARGET) {
-      recommendations.push('🔧 Improve reliability: Enhance error handling and connection stability');
-    }
-
-    if ((metrics.cpuUsage ?? 100) > targets.CPU_EFFICIENCY_TARGET) {
-      recommendations.push('💪 Optimize CPU usage: Profile and optimize CPU-intensive operations');
-    }
-
-    if (recommendations.length === 0) {
-      recommendations.push('✅ Performance targets met - continue monitoring for regressions');
-    }
-
-    return recommendations;
+      recommendations.push('🚀 Optimize throughput: Consider connection pooling and message batching');}if ((metrics.latencyP95 ?? Infinity) > targets.LATENCY_P95_TARGET) {
+      recommendations.push('⚡ Reduce latency: Implement caching and optimize processing pipeline');}if ((metrics.reliability ?? 0) < targets.RELIABILITY_TARGET) {
+      recommendations.push('🔧 Improve reliability: Enhance error handling and connection stability');}if ((metrics.cpuUsage ?? 100) > targets.CPU_EFFICIENCY_TARGET) {
+      recommendations.push('💪 Optimize CPU usage: Profile and optimize CPU-intensive operations');}if (recommendations.length === 0) {
+      recommendations.push('✅ Performance targets met - continue monitoring for regressions');}return recommendations;
   }
 }
 

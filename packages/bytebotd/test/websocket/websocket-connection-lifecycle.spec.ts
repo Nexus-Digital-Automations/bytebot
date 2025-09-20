@@ -1388,7 +1388,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       // Try to connect to invalid host
       try {
         await client.connect();
-      } catch (error) {
+      } catch (_error) {
         // Expected to fail
       }
 

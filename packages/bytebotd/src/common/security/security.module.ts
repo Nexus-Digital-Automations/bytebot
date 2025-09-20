@@ -10,36 +10,16 @@
  * @author Security Framework Specialist
  */
 
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BytebotDValidationPipes } from '../pipes/global-validation.pipe';
-import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
-import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
-import { DeprecationGuard } from '../versioning/deprecation.guard';
-import { VersionInterceptor } from '../versioning/version.interceptor';
-import Redis from 'ioredis';
-
-@Module({
-  imports: [ConfigModule],
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';import { ConfigModule, ConfigService } from '@nestjs/config';import { BytebotDValidationPipes } from '../pipes/global-validation.pipe';import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';import { DeprecationGuard } from '../versioning/deprecation.guard';import { VersionInterceptor } from '../versioning/version.interceptor';import Redis from 'ioredis';@Module({imports: [ConfigModule],
   providers: [
     // Reflector for versioning decorators
     Reflector,
 
     // Redis client for rate limiting
     {
-      provide: 'REDIS_CLIENT',
-      useFactory: (configService: ConfigService) => {
-        return new Redis({
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-          password: configService.get<string>('REDIS_PASSWORD'),
-          db: configService.get<number>('REDIS_DB', 2), // Separate DB for BytebotD
-          maxRetriesPerRequest: 3,
-          lazyConnect: true,
-          keyPrefix: 'bytebotd:',
-        });
-      },
+      provide: 'REDIS_CLIENT',useFactory: (configService: ConfigService) => {return new Redis({
+          host: configService.get<string>('REDIS_HOST', 'localhost'),port: configService.get<number>('REDIS_PORT', 6379),password: configService.get<string>('REDIS_PASSWORD'),db: configService.get<number>('REDIS_DB', 2), // Separate DB for BytebotDmaxRetriesPerRequest: 3,lazyConnect: true,
+          keyPrefix: 'bytebotd:',});},
       inject: [ConfigService],
     },
 
@@ -48,19 +28,9 @@ import Redis from 'ioredis';
       provide: APP_PIPE,
       useFactory: (configService: ConfigService) => {
         const environment = configService.get<string>(
-          'NODE_ENV',
-          'development',
-        );
-
-        // Use different validation levels based on environment
+          'NODE_ENV','development',);// Use different validation levels based on environment
         switch (environment) {
-          case 'production':
-            return BytebotDValidationPipes.MAXIMUM_SECURITY;
-          case 'staging':
-            return BytebotDValidationPipes.DESKTOP_OPERATIONS;
-          case 'development':
-            return BytebotDValidationPipes.DEVELOPMENT;
-          default:
+          case 'production':return BytebotDValidationPipes.MAXIMUM_SECURITY;case 'staging':return BytebotDValidationPipes.DESKTOP_OPERATIONS;case 'development':return BytebotDValidationPipes.DEVELOPMENT;default:
             return BytebotDValidationPipes.STANDARD;
         }
       },
@@ -69,13 +39,9 @@ import Redis from 'ioredis';
 
     // Throttler module options for EnterpriseRateLimitGuard
     {
-      provide: 'THROTTLER:MODULE_OPTIONS',
-      useValue: {
-        throttlers: [
+      provide: 'THROTTLER:MODULE_OPTIONS',useValue: {throttlers: [
           {
-            name: 'default',
-            ttl: 60000, // 60 seconds
-            limit: 100, // 100 requests per minute for desktop operations
+            name: 'default',ttl: 60000, // 60 secondslimit: 100, // 100 requests per minute for desktop operations
           },
         ],
       },
@@ -83,9 +49,7 @@ import Redis from 'ioredis';
 
     // Throttler storage for EnterpriseRateLimitGuard
     {
-      provide: 'THROTTLER_STORAGE',
-      useValue: {
-        getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
+      provide: 'THROTTLER_STORAGE',useValue: {getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
         addRecord: async () => ({ totalHits: 1, timeToExpire: 60000 }),
       },
     },
@@ -115,11 +79,7 @@ import Redis from 'ioredis';
     VersionInterceptor,
   ],
   exports: [
-    'REDIS_CLIENT',
-    'THROTTLER:MODULE_OPTIONS',
-    'THROTTLER_STORAGE',
-    SecurityHeadersMiddleware,
-    EnterpriseRateLimitGuard,
+    'REDIS_CLIENT','THROTTLER:MODULE_OPTIONS','THROTTLER_STORAGE',SecurityHeadersMiddleware,EnterpriseRateLimitGuard,
     DeprecationGuard,
     VersionInterceptor,
   ],

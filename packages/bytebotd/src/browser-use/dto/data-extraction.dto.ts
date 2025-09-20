@@ -1,6 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -12,50 +10,30 @@ import {
   ArrayMaxSize,
   Min,
   Max,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-
-/**
- * Data extraction output formats
+} from 'class-validator';import { Type } from 'class-transformer';/*** Data extraction output formats
  */
 export enum ExtractionFormat {
-  JSON = 'json',
-  CSV = 'csv',
-  XML = 'xml',
-  TEXT = 'text',
-}
-
-/**
+  JSON = 'json',CSV = 'csv',XML = 'xml',TEXT = 'text',}/**
  * Table extraction configuration
  */
 export class TableExtractionConfig {
   @ApiProperty({
-    description: 'CSS selector for the table element',
-    example: 'table.data-table',
-  })
-  @IsString()
+    description: 'CSS selector for the table element',example: 'table.data-table',})@IsString()
   selector: string;
 
   @ApiPropertyOptional({
-    description: 'Include table headers',
-    default: true,
-  })
+    description: 'Include table headers',default: true,})
   @IsOptional()
   @IsBoolean()
   includeHeaders?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Column mapping for renamed headers',
-    example: { 'Full Name': 'name', 'Email Address': 'email' },
-  })
-  @IsOptional()
+    description: 'Column mapping for renamed headers',example: { 'Full Name': 'name', 'Email Address': 'email' },})@IsOptional()
   @IsObject()
   columnMapping?: Record<string, string>;
 
   @ApiPropertyOptional({
-    description: 'Maximum number of rows to extract',
-    example: 100,
-  })
+    description: 'Maximum number of rows to extract',example: 100,})
   @IsOptional()
   @IsNumber()
   @Min(1)
@@ -63,9 +41,7 @@ export class TableExtractionConfig {
   maxRows?: number;
 
   @ApiPropertyOptional({
-    description: 'Skip empty rows',
-    default: true,
-  })
+    description: 'Skip empty rows',default: true,})
   @IsOptional()
   @IsBoolean()
   skipEmptyRows?: boolean = true;
@@ -76,43 +52,32 @@ export class TableExtractionConfig {
  */
 export class TextExtractionConfig {
   @ApiProperty({
-    description: 'CSS selectors for text extraction',
-    example: ['h1', '.content', 'p'],
-  })
-  @IsArray()
+    description: 'CSS selectors for text extraction',example: ['h1', '.content', 'p'],})@IsArray()
   @IsString({ each: true })
   @ArrayMinSize(1)
   @ArrayMaxSize(50)
   selectors: string[];
 
   @ApiPropertyOptional({
-    description: 'Include element attributes',
-    default: false,
-  })
+    description: 'Include element attributes',default: false,})
   @IsOptional()
   @IsBoolean()
   includeAttributes?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Include element metadata (tag, class, id)',
-    default: true,
-  })
+    description: 'Include element metadata (tag, class, id)',default: true,})
   @IsOptional()
   @IsBoolean()
   includeMetadata?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Clean text (remove extra whitespace)',
-    default: true,
-  })
+    description: 'Clean text (remove extra whitespace)',default: true,})
   @IsOptional()
   @IsBoolean()
   cleanText?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Maximum text length per element',
-    example: 1000,
-  })
+    description: 'Maximum text length per element',example: 1000,})
   @IsOptional()
   @IsNumber()
   @Min(1)
@@ -125,50 +90,35 @@ export class TextExtractionConfig {
  */
 export class LinkExtractionConfig {
   @ApiPropertyOptional({
-    description: 'CSS selector for link container',
-    example: 'nav, .menu, .links',
-  })
-  @IsOptional()
+    description: 'CSS selector for link container',example: 'nav, .menu, .links',})@IsOptional()
   @IsString()
   containerSelector?: string;
 
   @ApiPropertyOptional({
-    description: 'Include external links',
-    default: true,
-  })
+    description: 'Include external links',default: true,})
   @IsOptional()
   @IsBoolean()
   includeExternal?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Include internal links',
-    default: true,
-  })
+    description: 'Include internal links',default: true,})
   @IsOptional()
   @IsBoolean()
   includeInternal?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Include link metadata (title, rel, target)',
-    default: true,
-  })
+    description: 'Include link metadata (title, rel, target)',default: true,})
   @IsOptional()
   @IsBoolean()
   includeMetadata?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Filter links by pattern (regex)',
-    example: '^https://example\\.com.*',
-  })
-  @IsOptional()
+    description: 'Filter links by pattern (regex)',example: '^https://example\\.com.*',})@IsOptional()
   @IsString()
   filterPattern?: string;
 
   @ApiPropertyOptional({
-    description: 'Exclude links by pattern (regex)',
-    example: '\\.(pdf|doc|zip)$',
-  })
-  @IsOptional()
+    description: 'Exclude links by pattern (regex)',example: '\\.(pdf|doc|zip)$',})@IsOptional()
   @IsString()
   excludePattern?: string;
 }
@@ -178,42 +128,30 @@ export class LinkExtractionConfig {
  */
 export class ImageExtractionConfig {
   @ApiPropertyOptional({
-    description: 'CSS selector for image container',
-    example: '.gallery, .images, main',
-  })
-  @IsOptional()
+    description: 'CSS selector for image container',example: '.gallery, .images, main',})@IsOptional()
   @IsString()
   containerSelector?: string;
 
   @ApiPropertyOptional({
-    description: 'Include image metadata (alt, title, dimensions)',
-    default: true,
-  })
+    description: 'Include image metadata (alt, title, dimensions)',default: true,})
   @IsOptional()
   @IsBoolean()
   includeMetadata?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Include data URLs (base64 images)',
-    default: false,
-  })
+    description: 'Include data URLs (base64 images)',default: false,})
   @IsOptional()
   @IsBoolean()
   includeDataUrls?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Minimum image dimensions (width x height)',
-    example: { width: 100, height: 100 },
-  })
+    description: 'Minimum image dimensions (width x height)',example: { width: 100, height: 100 },})
   @IsOptional()
   @IsObject()
   minDimensions?: { width: number; height: number };
 
   @ApiPropertyOptional({
-    description: 'Filter images by file extension',
-    example: ['jpg', 'png', 'webp'],
-  })
-  @IsOptional()
+    description: 'Filter images by file extension',example: ['jpg', 'png', 'webp'],})@IsOptional()
   @IsArray()
   @IsString({ each: true })
   fileExtensions?: string[];
@@ -224,33 +162,23 @@ export class ImageExtractionConfig {
  */
 export class ExtractionRequestDto {
   @ApiProperty({
-    description: 'Browser session ID',
-    example: 'session_123456789',
-  })
-  @IsString()
+    description: 'Browser session ID',example: 'session_123456789',})@IsString()
   sessionId: string;
 
   @ApiPropertyOptional({
-    description: 'Output format for extracted data',
-    enum: ExtractionFormat,
-    default: ExtractionFormat.JSON,
+    description: 'Output format for extracted data',enum: ExtractionFormat,default: ExtractionFormat.JSON,
   })
   @IsOptional()
   @IsEnum(ExtractionFormat)
   format?: ExtractionFormat = ExtractionFormat.JSON;
 
   @ApiPropertyOptional({
-    description: 'Wait for this selector before extraction',
-    example: '.data-loaded',
-  })
-  @IsOptional()
+    description: 'Wait for this selector before extraction',example: '.data-loaded',})@IsOptional()
   @IsString()
   waitForSelector?: string;
 
   @ApiPropertyOptional({
-    description: 'Timeout in milliseconds',
-    example: 30000,
-    default: 30000,
+    description: 'Timeout in milliseconds',example: 30000,default: 30000,
   })
   @IsOptional()
   @IsNumber()
@@ -264,9 +192,7 @@ export class ExtractionRequestDto {
  */
 export class TextExtractionRequestDto extends ExtractionRequestDto {
   @ApiProperty({
-    description: 'Text extraction configuration',
-    type: TextExtractionConfig,
-  })
+    description: 'Text extraction configuration',type: TextExtractionConfig,})
   @ValidateNested()
   @Type(() => TextExtractionConfig)
   config: TextExtractionConfig;
@@ -277,9 +203,7 @@ export class TextExtractionRequestDto extends ExtractionRequestDto {
  */
 export class TableExtractionRequestDto extends ExtractionRequestDto {
   @ApiProperty({
-    description: 'Table extraction configuration',
-    type: TableExtractionConfig,
-  })
+    description: 'Table extraction configuration',type: TableExtractionConfig,})
   @ValidateNested()
   @Type(() => TableExtractionConfig)
   config: TableExtractionConfig;
@@ -290,9 +214,7 @@ export class TableExtractionRequestDto extends ExtractionRequestDto {
  */
 export class LinkExtractionRequestDto extends ExtractionRequestDto {
   @ApiPropertyOptional({
-    description: 'Link extraction configuration',
-    type: LinkExtractionConfig,
-  })
+    description: 'Link extraction configuration',type: LinkExtractionConfig,})
   @IsOptional()
   @ValidateNested()
   @Type(() => LinkExtractionConfig)
@@ -304,9 +226,7 @@ export class LinkExtractionRequestDto extends ExtractionRequestDto {
  */
 export class ImageExtractionRequestDto extends ExtractionRequestDto {
   @ApiPropertyOptional({
-    description: 'Image extraction configuration',
-    type: ImageExtractionConfig,
-  })
+    description: 'Image extraction configuration',type: ImageExtractionConfig,})
   @IsOptional()
   @ValidateNested()
   @Type(() => ImageExtractionConfig)
@@ -318,28 +238,19 @@ export class ImageExtractionRequestDto extends ExtractionRequestDto {
  */
 export class StructuredDataExtractionRequestDto extends ExtractionRequestDto {
   @ApiPropertyOptional({
-    description: 'JSON-LD script selectors',
-    example: ['script[type="application/ld+json"]'],
-  })
-  @IsOptional()
+    description: 'JSON-LD script selectors',example: ['script[type="application/ld+json"]'],})@IsOptional()
   @IsArray()
   @IsString({ each: true })
   jsonLdSelectors?: string[];
 
   @ApiPropertyOptional({
-    description: 'Microdata selectors',
-    example: ['[itemscope]'],
-  })
-  @IsOptional()
+    description: 'Microdata selectors',example: ['[itemscope]'],})@IsOptional()
   @IsArray()
   @IsString({ each: true })
   microdataSelectors?: string[];
 
   @ApiPropertyOptional({
-    description: 'OpenGraph meta selectors',
-    example: ['meta[property^="og:"]'],
-  })
-  @IsOptional()
+    description: 'OpenGraph meta selectors',example: ['meta[property^="og:"]'],})@IsOptional()
   @IsArray()
   @IsString({ each: true })
   openGraphSelectors?: string[];
@@ -350,19 +261,14 @@ export class StructuredDataExtractionRequestDto extends ExtractionRequestDto {
  */
 export class XPathExtractionRequestDto extends ExtractionRequestDto {
   @ApiProperty({
-    description: 'XPath expressions for extraction',
-    example: ['//h1/text()', '//a/@href', '//img/@src'],
-  })
-  @IsArray()
+    description: 'XPath expressions for extraction',example: ['//h1/text()', '//a/@href', '//img/@src'],})@IsArray()
   @IsString({ each: true })
   @ArrayMinSize(1)
   @ArrayMaxSize(20)
   xpaths: string[];
 
   @ApiPropertyOptional({
-    description: 'Extract as attributes vs text content',
-    default: false,
-  })
+    description: 'Extract as attributes vs text content',default: false,})
   @IsOptional()
   @IsBoolean()
   extractAttributes?: boolean = false;
@@ -373,27 +279,16 @@ export class XPathExtractionRequestDto extends ExtractionRequestDto {
  */
 export class BatchExtractionRequestDto extends ExtractionRequestDto {
   @ApiProperty({
-    description: 'Array of extraction operations',
-  })
-  @IsArray()
+    description: 'Array of extraction operations',})@IsArray()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @ArrayMaxSize(10)
   @Type(() => Object, {
     discriminator: {
-      property: 'type',
-      subTypes: [
-        { value: TextExtractionConfig, name: 'text' },
-        { value: TableExtractionConfig, name: 'table' },
-        { value: LinkExtractionConfig, name: 'links' },
-        { value: ImageExtractionConfig, name: 'images' },
-      ],
-    },
+      property: 'type',subTypes: [{ value: TextExtractionConfig, name: 'text' },{ value: TableExtractionConfig, name: 'table' },{ value: LinkExtractionConfig, name: 'links' },{ value: ImageExtractionConfig, name: 'images' },],},
   })
   operations: Array<{
-    type: 'text' | 'table' | 'links' | 'images';
-    name: string;
-    config: TextExtractionConfig | TableExtractionConfig | LinkExtractionConfig | ImageExtractionConfig;
+    type: 'text' | 'table' | 'links' | 'images';name: string;config: TextExtractionConfig | TableExtractionConfig | LinkExtractionConfig | ImageExtractionConfig;
   }>;
 }
 
@@ -431,9 +326,7 @@ export interface ExtractedTableData {
 export interface ExtractedLinkData {
   url: string;
   text: string;
-  type: 'internal' | 'external';
-  metadata?: {
-    title?: string;
+  type: 'internal' | 'external';metadata?: {title?: string;
     rel?: string;
     target?: string;
     position: number;
@@ -484,34 +377,21 @@ export interface ExtractedXPathData {
  */
 export class ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extraction success status',
-    example: true,
-  })
+    description: 'Extraction success status',example: true,})
   success: boolean;
 
   @ApiProperty({
-    description: 'Extraction timestamp',
-    example: '2024-01-15T10:30:00.000Z',
-  })
-  timestamp: Date;
+    description: 'Extraction timestamp',example: '2024-01-15T10:30:00.000Z',})timestamp: Date;
 
   @ApiProperty({
-    description: 'Extraction execution time in milliseconds',
-    example: 1250,
-  })
+    description: 'Extraction execution time in milliseconds',example: 1250,})
   executionTime: number;
 
   @ApiProperty({
-    description: 'Session ID used for extraction',
-    example: 'session_123456789',
-  })
-  sessionId: string;
+    description: 'Session ID used for extraction',example: 'session_123456789',})sessionId: string;
 
   @ApiPropertyOptional({
-    description: 'Extraction error message if failed',
-    example: 'Selector not found',
-  })
-  error?: string;
+    description: 'Extraction error message if failed',example: 'Selector not found',})error?: string;
 }
 
 /**
@@ -519,15 +399,11 @@ export class ExtractionResponseDto {
  */
 export class TextExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extracted text data',
-    type: [Object],
-  })
+    description: 'Extracted text data',type: [Object],})
   data: ExtractedTextData[];
 
   @ApiProperty({
-    description: 'Extraction metadata',
-  })
-  metadata: {
+    description: 'Extraction metadata',})metadata: {
     totalElements: number;
     selectors: string[];
     totalTextLength: number;
@@ -539,14 +415,10 @@ export class TextExtractionResponseDto extends ExtractionResponseDto {
  */
 export class TableExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extracted table data',
-  })
-  data: ExtractedTableData;
+    description: 'Extracted table data',})data: ExtractedTableData;
 
   @ApiPropertyOptional({
-    description: 'CSV formatted data if format=csv',
-  })
-  csv?: string;
+    description: 'CSV formatted data if format=csv',})csv?: string;
 }
 
 /**
@@ -554,15 +426,11 @@ export class TableExtractionResponseDto extends ExtractionResponseDto {
  */
 export class LinkExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extracted link data',
-    type: [Object],
-  })
+    description: 'Extracted link data',type: [Object],})
   data: ExtractedLinkData[];
 
   @ApiProperty({
-    description: 'Extraction metadata',
-  })
-  metadata: {
+    description: 'Extraction metadata',})metadata: {
     totalLinks: number;
     internalLinks: number;
     externalLinks: number;
@@ -575,15 +443,11 @@ export class LinkExtractionResponseDto extends ExtractionResponseDto {
  */
 export class ImageExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extracted image data',
-    type: [Object],
-  })
+    description: 'Extracted image data',type: [Object],})
   data: ExtractedImageData[];
 
   @ApiProperty({
-    description: 'Extraction metadata',
-  })
-  metadata: {
+    description: 'Extraction metadata',})metadata: {
     totalImages: number;
     formats: string[];
     averageDimensions?: { width: number; height: number };
@@ -595,9 +459,7 @@ export class ImageExtractionResponseDto extends ExtractionResponseDto {
  */
 export class StructuredDataExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Extracted structured data',
-  })
-  data: ExtractedStructuredData;
+    description: 'Extracted structured data',})data: ExtractedStructuredData;
 }
 
 /**
@@ -605,15 +467,11 @@ export class StructuredDataExtractionResponseDto extends ExtractionResponseDto {
  */
 export class XPathExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'XPath extraction results',
-    type: [Object],
-  })
+    description: 'XPath extraction results',type: [Object],})
   data: ExtractedXPathData[];
 
   @ApiProperty({
-    description: 'Extraction metadata',
-  })
-  metadata: {
+    description: 'Extraction metadata',})metadata: {
     totalExpressions: number;
     totalResults: number;
     successfulExpressions: number;
@@ -625,9 +483,7 @@ export class XPathExtractionResponseDto extends ExtractionResponseDto {
  */
 export class BatchExtractionResponseDto extends ExtractionResponseDto {
   @ApiProperty({
-    description: 'Batch extraction results',
-  })
-  data: Record<string, {
+    description: 'Batch extraction results',})data: Record<string, {
     type: string;
     success: boolean;
     data: unknown;

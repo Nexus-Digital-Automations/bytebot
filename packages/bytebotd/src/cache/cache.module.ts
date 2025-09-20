@@ -17,15 +17,7 @@
  * @version 1.0.0
  */
 
-import { Module, Global, Logger } from '@nestjs/common';
-import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { CacheService } from './cache.service';
-import { CacheKeyGenerator } from './cache-key.generator';
-import { MetricsModule } from '../metrics/metrics.module';
-import * as redisStore from 'cache-manager-redis-store';
-
-/**
- * Cache configuration for enterprise-grade Redis caching
+import { Module, Global, Logger } from '@nestjs/common';import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';import { CacheService } from './cache.service';import { CacheKeyGenerator } from './cache-key.generator';import { MetricsModule } from '../metrics/metrics.module';import * as redisStore from 'cache-manager-redis-store';/*** Cache configuration for enterprise-grade Redis caching
  */
 interface CacheConfig {
   store: unknown; // Redis store for cache manager
@@ -46,21 +38,8 @@ interface CacheConfig {
     MetricsModule, // Import MetricsModule to provide MetricsService dependency
     NestCacheModule.registerAsync({
       useFactory: (): CacheConfig => {
-        const logger = new Logger('CacheModule');
-
-        const config: CacheConfig = {
-          store: redisStore,
-          host: process.env.REDIS_HOST ?? 'localhost',
-          port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
-          ttl: parseInt(process.env.CACHE_TTL ?? '300', 10), // 5 minutes default
-          max: parseInt(process.env.CACHE_MAX_ITEMS ?? '1000', 10),
-          password: process.env.REDIS_PASSWORD,
-          db: parseInt(process.env.REDIS_DB ?? '0', 10),
-        };
-
-        logger.log('Cache module configuration:', {
-          host: config.host,
-          port: config.port,
+        const logger = new Logger('CacheModule');const config: CacheConfig = {store: redisStore,
+          host: process.env.REDIS_HOST ?? 'localhost',port: parseInt(process.env.REDIS_PORT ?? '6379', 10),ttl: parseInt(process.env.CACHE_TTL ?? '300', 10), // 5 minutes defaultmax: parseInt(process.env.CACHE_MAX_ITEMS ?? '1000', 10),password: process.env.REDIS_PASSWORD,db: parseInt(process.env.REDIS_DB ?? '0', 10),};logger.log('Cache module configuration:', {host: config.host,port: config.port,
           ttl: config.ttl,
           maxItems: config.max,
           database: config.db,
@@ -77,8 +56,6 @@ export class CacheModule {
   private readonly logger = new Logger(CacheModule.name);
 
   constructor() {
-    this.logger.log('Redis Cache Module initialized');
-    this.logger.log('Cache patterns: cache-aside, write-through');
-    this.logger.log('Features: TTL management, key generation, metrics');
+    this.logger.log('Redis Cache Module initialized');this.logger.log('Cache patterns: cache-aside, write-through');this.logger.log('Features: TTL management, key generation, metrics');
   }
 }

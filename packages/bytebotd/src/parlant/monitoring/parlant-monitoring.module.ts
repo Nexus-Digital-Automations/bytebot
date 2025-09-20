@@ -22,26 +22,7 @@
  * @version 1.0.0 - Enterprise Monitoring Module
  */
 
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScheduleModule } from '@nestjs/schedule';
-
-// Core performance services
-import { ParlantPerformanceMonitorService } from '../performance/parlant-performance-monitor.service';
-import { ParlantPerformanceBenchmarkService } from '../testing/parlant-performance-benchmark.service';
-
-// Monitoring services
-import { ParlantPerformanceDashboardService } from './parlant-performance-dashboard.service';
-import { ParlantPerformanceAlertingService } from './parlant-performance-alerting.service';
-import { ParlantPerformanceValidatorService } from './parlant-performance-validator.service';
-
-// Existing infrastructure services
-import { MetricsService } from '../../metrics/metrics.service';
-import { ParlantHealthMetricsValidationService } from '../services/parlant-health-metrics-validation.service';
-
-/**
- * Parlant Monitoring Module
+import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { EventEmitterModule } from '@nestjs/event-emitter';import { ScheduleModule } from '@nestjs/schedule';// Core performance servicesimport { ParlantPerformanceMonitorService } from '../performance/parlant-performance-monitor.service';import { ParlantPerformanceBenchmarkService } from '../testing/parlant-performance-benchmark.service';// Monitoring servicesimport { ParlantPerformanceDashboardService } from './parlant-performance-dashboard.service';import { ParlantPerformanceAlertingService } from './parlant-performance-alerting.service';import { ParlantPerformanceValidatorService } from './parlant-performance-validator.service';// Existing infrastructure servicesimport { MetricsService } from '../../metrics/metrics.service';import { ParlantHealthMetricsValidationService } from '../services/parlant-health-metrics-validation.service';/*** Parlant Monitoring Module
  *
  * Provides comprehensive performance monitoring capabilities including:
  * - Real-time performance dashboards
@@ -57,9 +38,7 @@ import { ParlantHealthMetricsValidationService } from '../services/parlant-healt
     EventEmitterModule.forRoot({
       // Event emitter configuration for real-time monitoring
       wildcard: false,
-      delimiter: '.',
-      newListener: false,
-      removeListener: false,
+      delimiter: '.',newListener: false,removeListener: false,
       maxListeners: 100,
       verboseMemoryLeak: false,
       ignoreErrors: false,
@@ -95,28 +74,6 @@ import { ParlantHealthMetricsValidationService } from '../services/parlant-healt
 })
 export class ParlantMonitoringModule {
   constructor() {
-    console.log('🚀 Parlant Enterprise Monitoring Module initialized');
-    console.log('   ✅ Real-time performance dashboard');
-    console.log('   ✅ Automated alerting with escalation');
-    console.log('   ✅ Continuous performance validation');
-    console.log('   ✅ Benchmark validation and regression detection');
-    console.log('   ✅ Business impact assessment');
-    console.log('   ✅ Enterprise audit trail and compliance');
-    console.log('   ✅ Integration with existing monitoring infrastructure');
-    console.log('');
-    console.log('📊 Performance Targets:');
-    console.log('   • Response Time: <1000ms P95, <500ms average');
-    console.log('   • Cache Hit Rate: >85% minimum, >95% target');
-    console.log('   • Throughput: >50 req/sec sustained, >100 req/sec peak');
-    console.log('   • Error Rate: <1% target, <5% maximum');
-    console.log('   • Availability: >99.9% uptime');
-    console.log('');
-    console.log('🎯 Enterprise Features:');
-    console.log('   • Real-time anomaly detection with ML algorithms');
-    console.log('   • Multi-level alert escalation with business impact');
-    console.log('   • Automated performance regression detection');
-    console.log('   • SLA compliance monitoring and reporting');
-    console.log('   • Comprehensive audit trail for enterprise compliance');
-    console.log('   • ROI analysis for performance optimization investments');
+    console.log('🚀 Parlant Enterprise Monitoring Module initialized');console.log('   ✅ Real-time performance dashboard');console.log('   ✅ Automated alerting with escalation');console.log('   ✅ Continuous performance validation');console.log('   ✅ Benchmark validation and regression detection');console.log('   ✅ Business impact assessment');console.log('   ✅ Enterprise audit trail and compliance');console.log('   ✅ Integration with existing monitoring infrastructure');console.log('');console.log('📊 Performance Targets:');console.log('   • Response Time: <1000ms P95, <500ms average');console.log('   • Cache Hit Rate: >85% minimum, >95% target');console.log('   • Throughput: >50 req/sec sustained, >100 req/sec peak');console.log('   • Error Rate: <1% target, <5% maximum');console.log('   • Availability: >99.9% uptime');console.log('');console.log('🎯 Enterprise Features:');console.log('   • Real-time anomaly detection with ML algorithms');console.log('   • Multi-level alert escalation with business impact');console.log('   • Automated performance regression detection');console.log('   • SLA compliance monitoring and reporting');console.log('   • Comprehensive audit trail for enterprise compliance');console.log('   • ROI analysis for performance optimization investments');
   }
 }

@@ -27,29 +27,16 @@
  * - Testing and QA infrastructure
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { createHash } from 'crypto';
-
-// Import existing services
-import {
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { createHash } from 'crypto';// Import existing servicesimport {
   ParlantPerformanceOrchestratorService,
   OptimizedValidationRequest,
   OptimizedValidationResponse,
   ComprehensivePerformanceMetrics
-} from './parlant-performance-orchestrator.service';
-import { ParlantEnterpriseAuditService } from '../audit/parlant-enterprise-audit.service';
-import {
-  ParlantValidationRequest,
+} from './parlant-performance-orchestrator.service';import { ParlantEnterpriseAuditService } from '../audit/parlant-enterprise-audit.service';import {ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext
-} from '../parlant-integration.service';
-
-// ===== ULTRA PERFORMANCE INTERFACES =====
-
-/**
+} from '../parlant-integration.service';// ===== ULTRA PERFORMANCE INTERFACES =====/**
  * Ultra-performance validation request with enhanced optimization hints
  */
 export interface UltraOptimizedValidationRequest extends OptimizedValidationRequest {
@@ -57,11 +44,7 @@ export interface UltraOptimizedValidationRequest extends OptimizedValidationRequ
     readonly enableL0Cache?: boolean;
     readonly enablePredictiveLoading?: boolean;
     readonly enableMicroBatching?: boolean;
-    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];
-    readonly maxLatencyMs?: number; // Default 500ms
-    readonly priorityLevel?: 'ULTRA' | 'HIGH' | 'NORMAL';
-  };
-}
+    readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];readonly maxLatencyMs?: number; // Default 500msreadonly priorityLevel?: 'ULTRA' | 'HIGH' | 'NORMAL';};}
 
 /**
  * Ultra-performance validation response with detailed timing
@@ -174,9 +157,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
     ttlMs: 60000,
     enablePredictive: true,
     preloadPatterns: [
-      'get*', 'list*', 'read*', 'check*', 'validate*'
-    ]
-  };
+      'get*', 'list*', 'read*', 'check*', 'validate*']};
 
   private readonly microBatchConfig: MicroBatchConfig = {
     maxBatchSize: 8,
@@ -218,20 +199,14 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Ultra Performance Optimizer for <500ms targets...');
-
-    // Start ultra-fast processing timers
-    this.startL0CacheManagement();
+    this.logger.log('Initializing Ultra Performance Optimizer for <500ms targets...');// Start ultra-fast processing timersthis.startL0CacheManagement();
     this.startMicroBatchProcessor();
     this.startMetricsReporting();
 
     // Load predictive patterns
     await this.loadPredictivePatterns();
 
-    this.logger.log('Ultra Performance Optimizer initialized successfully');
-  }
-
-  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Ultra Performance Optimizer initialized successfully');}async onModuleDestroy(): Promise<void> {
     if (this.l0CacheCleanupTimer) clearInterval(this.l0CacheCleanupTimer);
     if (this.microBatchProcessorTimer) clearInterval(this.microBatchProcessorTimer);
     if (this.metricsReportingTimer) clearInterval(this.metricsReportingTimer);
@@ -245,11 +220,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
   async validateWithUltraOptimization(
     request: UltraOptimizedValidationRequest,
     context: ParlantConversationContext = {
-      userId: 'system',
-      agentRole: 'ultra-optimization-service',
-      securityLevel: 'LOW',
-      conversationHistory: [],
-      metadata: {}
+      userId: 'system',agentRole: 'ultra-optimization-service',securityLevel: 'LOW',conversationHistory: [],metadata: {}
     }
   ): Promise<UltraOptimizedValidationResponse> {
     const startTime = Date.now();
@@ -397,9 +368,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       );
 
     } catch (error) {
-      this.logger.error('Ultra validation error:', error);
-      throw error;
-    }
+      this.logger.error('Ultra validation error:', error);throw error;}
   }
 
   /**
@@ -407,27 +376,17 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
    */
   async validateCompliance(
     request: UltraOptimizedValidationRequest,
-    requiredCompliance: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[]
-  ): Promise<{ compliant: boolean; validationTimeMs: number; details: Record<string, boolean> }> {
-    const startTime = Date.now();
+    requiredCompliance: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[]): Promise<{ compliant: boolean; validationTimeMs: number; details: Record<string, boolean> }> {const startTime = Date.now();
     const details: Record<string, boolean> = {};
 
     try {
       // Parallel compliance validation for speed
       const validationPromises = requiredCompliance.map(async (regulation) => {
         switch (regulation) {
-          case 'GDPR':
-            details.GDPR = await this.validateGDPRCompliance(request);
-            return details.GDPR;
-          case 'SOX':
-            details.SOX = await this.validateSOXCompliance(request);
-            return details.SOX;
-          case 'HIPAA':
-            details.HIPAA = await this.validateHIPAACompliance(request);
-            return details.HIPAA;
-          case 'PCI_DSS':
-            details.PCI_DSS = await this.validatePCIDSSCompliance(request);
-            return details.PCI_DSS;
+          case 'GDPR':details.GDPR = await this.validateGDPRCompliance(request);return details.GDPR;
+          case 'SOX':details.SOX = await this.validateSOXCompliance(request);return details.SOX;
+          case 'HIPAA':details.HIPAA = await this.validateHIPAACompliance(request);return details.HIPAA;
+          case 'PCI_DSS':details.PCI_DSS = await this.validatePCIDSSCompliance(request);return details.PCI_DSS;
           default:
             return true;
         }
@@ -443,9 +402,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       return { compliant, validationTimeMs, details };
 
     } catch (error) {
-      this.logger.error('Compliance validation error:', error);
-      return {
-        compliant: false,
+      this.logger.error('Compliance validation error:', error);return {compliant: false,
         validationTimeMs: Date.now() - startTime,
         details: { error: false }
       };
@@ -489,9 +446,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
 
   private shouldFlushMicroBatch(request: UltraOptimizedValidationRequest): boolean {
     const queueLength = this.microBatchQueue.length;
-    const isHighPriority = request.ultraOptimizationHints?.priorityLevel === 'ULTRA';
-    const queueAge = this.microBatchQueue.length > 0 ?
-      Date.now() - (this.microBatchQueue[0]?.timestamp ?? Date.now()) : 0;
+    const isHighPriority = request.ultraOptimizationHints?.priorityLevel === 'ULTRA';const queueAge = this.microBatchQueue.length > 0 ?Date.now() - (this.microBatchQueue[0]?.timestamp ?? Date.now()) : 0;
 
     return queueLength >= this.microBatchConfig.maxBatchSize ||
            queueAge >= this.microBatchConfig.maxWaitTimeMs ||
@@ -542,9 +497,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
 
           item.resolve(ultraResponse);
         } else {
-          item.reject(new Error('Batch processing failed'));
-        }
-      });
+          item.reject(new Error('Batch processing failed'));}});
 
     } catch (error) {
       // Reject all promises in case of batch failure
@@ -577,19 +530,11 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       performanceMetadata: {
         totalLatencyMs,
         cacheHit: ultraMetadata.l0CacheHit || ultraMetadata.predictiveLoadUsed,
-        cacheLevel: ultraMetadata.l0CacheHit ? 'L1' : undefined,
-        batchProcessed: ultraMetadata.microBatchProcessed,
-        retryAttempts: 0,
+        cacheLevel: ultraMetadata.l0CacheHit ? 'L1' : undefined,batchProcessed: ultraMetadata.microBatchProcessed,retryAttempts: 0,
         circuitBreakerUsed: false,
         degradedMode: false,
         optimizationPath: [
-          ultraMetadata.l0CacheHit ? 'l0-cache-hit' : 'l0-cache-miss',
-          ultraMetadata.predictiveLoadUsed ? 'predictive-hit' : 'predictive-miss',
-          ultraMetadata.microBatchProcessed ? 'micro-batch' : 'standard-processing'
-        ],
-        endpointUsed: 'ultra-performance-optimizer'
-      },
-      ultraPerformanceMetadata: ultraMetadata
+          ultraMetadata.l0CacheHit ? 'l0-cache-hit' : 'l0-cache-miss',ultraMetadata.predictiveLoadUsed ? 'predictive-hit' : 'predictive-miss',ultraMetadata.microBatchProcessed ? 'micro-batch' : 'standard-processing'],endpointUsed: 'ultra-performance-optimizer'},ultraPerformanceMetadata: ultraMetadata
     };
   }
 
@@ -656,21 +601,15 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
   // Helper methods for compliance detection
   private detectPersonalData(request: UltraOptimizedValidationRequest): boolean {
     const dataString = JSON.stringify(request.functionParams).toLowerCase();
-    const personalDataIndicators = ['email', 'name', 'address', 'phone', 'ssn', 'id'];
-    return personalDataIndicators.some(indicator => dataString.includes(indicator));
-  }
+    const personalDataIndicators = ['email', 'name', 'address', 'phone', 'ssn', 'id'];return personalDataIndicators.some(indicator => dataString.includes(indicator));}
 
   private detectFinancialData(request: UltraOptimizedValidationRequest): boolean {
     const dataString = JSON.stringify(request.functionParams).toLowerCase();
-    const financialIndicators = ['account', 'balance', 'transaction', 'payment', 'invoice'];
-    return financialIndicators.some(indicator => dataString.includes(indicator));
-  }
+    const financialIndicators = ['account', 'balance', 'transaction', 'payment', 'invoice'];return financialIndicators.some(indicator => dataString.includes(indicator));}
 
   private detectHealthData(request: UltraOptimizedValidationRequest): boolean {
     const dataString = JSON.stringify(request.functionParams).toLowerCase();
-    const healthIndicators = ['patient', 'medical', 'diagnosis', 'prescription', 'health'];
-    return healthIndicators.some(indicator => dataString.includes(indicator));
-  }
+    const healthIndicators = ['patient', 'medical', 'diagnosis', 'prescription', 'health'];return healthIndicators.some(indicator => dataString.includes(indicator));}
 
   private detectPaymentData(request: UltraOptimizedValidationRequest): boolean {
     const dataString = JSON.stringify(request.functionParams).toLowerCase();
@@ -772,11 +711,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       this.ultraMetrics.complianceValidationTime / this.ultraMetrics.complianceValidationTotal : 0;
 
     this.logger.log('Ultra Performance Metrics:', {
-      sub500msPercentage: `${sub500msPercentage.toFixed(2)}%`,
-      l0CacheHitRate: `${l0CacheHitRate.toFixed(2)}%`,
-      avgComplianceLatency: `${avgComplianceLatency.toFixed(2)}ms`,
-      totalRequests: this.ultraMetrics.totalRequests,
-      microBatchProcessed: this.ultraMetrics.microBatchProcessed
+      sub500msPercentage: `${sub500msPercentage.toFixed(2)}%`,l0CacheHitRate: `${l0CacheHitRate.toFixed(2)}%`,avgComplianceLatency: `${avgComplianceLatency.toFixed(2)}ms`,totalRequests: this.ultraMetrics.totalRequests,microBatchProcessed: this.ultraMetrics.microBatchProcessed
     });
   }
 
@@ -849,10 +784,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
       pciDssCompliant: number;
     };
   }> {
-    this.logger.log('Starting performance test...', config);
-
-    const testResults = {
-      totalRequests: 0,
+    this.logger.log('Starting performance test...', config);const testResults = {totalRequests: 0,
       sub500msCount: 0,
       sub500msPercentage: 0,
       averageLatency: 0,
@@ -889,10 +821,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
     testResults.p95Latency = sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] ?? 0;
     testResults.p99Latency = sortedLatencies[Math.floor(sortedLatencies.length * 0.99)] ?? 0;
 
-    this.logger.log('Performance test completed:', testResults);
-
-    return { testResults };
-  }
+    this.logger.log('Performance test completed:', testResults);return { testResults };}
 
   private async runSinglePerformanceTest(
     config: PerformanceTestConfig,
@@ -900,12 +829,7 @@ export class ParlantUltraPerformanceOptimizerService implements OnModuleInit, On
     testResults: { sub500msCount: number }
   ): Promise<void> {
     const testRequest: UltraOptimizedValidationRequest = {
-      functionName: 'test_function',
-      functionParams: { testData: 'performance_test' },
-      riskLevel: RiskLevel.LOW,
-      context: { source: 'performance_test' },
-      ultraOptimizationHints: {
-        enableL0Cache: true,
+      functionName: 'test_function',functionParams: { testData: 'performance_test' },riskLevel: RiskLevel._LOW,context: { source: 'performance_test' },ultraOptimizationHints: {enableL0Cache: true,
         enablePredictiveLoading: true,
         enableMicroBatching: true,
         maxLatencyMs: config.targetLatencyMs

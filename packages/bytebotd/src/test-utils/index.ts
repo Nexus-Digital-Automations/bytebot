@@ -18,16 +18,7 @@
  */
 
 // Import utilities from setup files
-import { TestUtils as SetupTestUtils } from './setup';
-import { TestDataFactory } from './setupAfterEnv';
-import { testUtils } from './nestjs-mocks';
-
-// Re-export setup utilities (use SetupTestUtils as the primary TestUtils export)
-export { TestUtils } from './setup';
-export { TestDataFactory } from './setupAfterEnv';
-
-// Re-export NestJS mocking utilities
-export {
+import { TestUtils as SetupTestUtils } from './setup';import { TestDataFactory } from './setupAfterEnv';import { testUtils } from './nestjs-mocks';// Re-export setup utilities (use SetupTestUtils as the primary TestUtils export)export { TestUtils } from './setup';export { TestDataFactory } from './setupAfterEnv';// Re-export NestJS mocking utilitiesexport {
   MockTestingModuleBuilder,
   createMockService,
   createMockRepository,
@@ -43,11 +34,7 @@ export {
   createMockApplication,
   testUtils,
   mockDecorators,
-} from './nestjs-mocks';
-
-// TestDataFactory is exported from setupAfterEnv.ts to avoid duplication
-
-/**
+} from './nestjs-mocks';// TestDataFactory is exported from setupAfterEnv.ts to avoid duplication/**
  * Type definitions for test utilities
  */
 interface OperationResult {
@@ -88,10 +75,7 @@ export const AssertionHelpers = {
     expectedFields: string[] = [],
   ) => {
     expect(result).toBeDefined();
-    expect(typeof result).toBe('object');
-
-    // Check common fields
-    if (result.operationId) {
+    expect(typeof result).toBe('object');// Check common fieldsif (result.operationId) {
       // Use custom matcher if available, otherwise use regex
       const operationIdPattern = /^[a-z_]+_\d{13}[a-z0-9]{7}$/;
       expect(result.operationId).toMatch(operationIdPattern);
@@ -142,11 +126,7 @@ export const AssertionHelpers = {
    */
   expectValidCoordinates: (coords: TestCoordinates) => {
     expect(coords).toBeDefined();
-    expect(typeof coords).toBe('object');
-    expect(coords).toHaveProperty('x');
-    expect(coords).toHaveProperty('y');
-    expect(coords.x).toBeGreaterThanOrEqual(0);
-    expect(coords.y).toBeGreaterThanOrEqual(0);
+    expect(typeof coords).toBe('object');expect(coords).toHaveProperty('x');expect(coords).toHaveProperty('y');expect(coords.x).toBeGreaterThanOrEqual(0);expect(coords.y).toBeGreaterThanOrEqual(0);
   },
 
   /**
@@ -154,13 +134,7 @@ export const AssertionHelpers = {
    */
   expectValidScreenshot: (screenshot: ScreenshotResult) => {
     expect(screenshot).toBeDefined();
-    expect(typeof screenshot).toBe('object');
-    expect(screenshot).toHaveProperty('image');
-    expect(screenshot).toHaveProperty('metadata');
-    expect(screenshot.image).toBeDefined();
-    expect(typeof screenshot.image).toBe('string');
-    // Validate base64 format
-    expect(screenshot.image).toMatch(/^[A-Za-z0-9+/=]+$/);
+    expect(typeof screenshot).toBe('object');expect(screenshot).toHaveProperty('image');expect(screenshot).toHaveProperty('metadata');expect(screenshot.image).toBeDefined();expect(typeof screenshot.image).toBe('string');// Validate base64 formatexpect(screenshot.image).toMatch(/^[A-Za-z0-9+/=]+$/);
   },
 
   /**
@@ -186,57 +160,26 @@ export const MockDataProviders = {
    * Provide mock data for mouse operations
    */
   mouseOperations: {
-    move: () => ({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }),
-    click: () => ({ action: 'click_mouse', button: 'left', clickCount: 1 }),
-    drag: () => ({
-      action: 'drag_mouse',
-      path: [
-        { x: 0, y: 0 },
+    move: () => ({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }),click: () => ({ action: 'click_mouse', button: 'left', clickCount: 1 }),drag: () => ({action: 'drag_mouse',path: [{ x: 0, y: 0 },
         { x: 100, y: 100 },
       ],
-      button: 'left',
-    }),
-    scroll: () => ({ action: 'scroll', direction: 'up', scrollCount: 3 }),
-  },
-
-  /**
+      button: 'left',}),scroll: () => ({ action: 'scroll', direction: 'up', scrollCount: 3 }),},/**
    * Provide mock data for keyboard operations
    */
   keyboardOperations: {
-    typeText: () => ({ action: 'type_text', text: 'Hello World' }),
-    pressKeys: () => ({
-      action: 'press_keys',
-      keys: ['ctrl', 'c'],
-      press: 'down',
-    }),
-    typeKeys: () => ({ action: 'type_keys', keys: ['a', 'b', 'c'] }),
-  },
-
-  /**
+    typeText: () => ({ action: 'type_text', text: 'Hello World' }),pressKeys: () => ({action: 'press_keys',keys: ['ctrl', 'c'],press: 'down',}),typeKeys: () => ({ action: 'type_keys', keys: ['a', 'b', 'c'] }),},/**
    * Provide mock data for file operations
    */
   fileOperations: {
     read: () => ({
-      action: 'read_file',
-      path: '/home/user/test.txt',
-    }),
-    write: () => ({
-      action: 'write_file',
-      path: '/home/user/output.txt',
-      data: Buffer.from('test content').toString('base64'),
-    }),
-  },
+      action: 'read_file',path: '/home/user/test.txt',}),write: () => ({
+      action: 'write_file',path: '/home/user/output.txt',data: Buffer.from('test content').toString('base64'),}),},
 
   /**
    * Provide mock data for CUA operations
    */
   cuaOperations: {
-    ocr: () => ({ action: 'ocr', language: 'en' }),
-    findText: () => ({ action: 'find_text', text: 'search term' }),
-    enhancedScreenshot: () => ({
-      action: 'enhanced_screenshot',
-      includeOcr: true,
-      includeTextDetection: false,
+    ocr: () => ({ action: 'ocr', language: 'en' }),findText: () => ({ action: 'find_text', text: 'search term' }),enhancedScreenshot: () => ({action: 'enhanced_screenshot',includeOcr: true,includeTextDetection: false,
     }),
   },
 };
@@ -256,26 +199,15 @@ export const TestEnvironment = {
   /**
    * Check if running in debug mode
    */
-  isDebug: () => Boolean(process.env.DEBUG ?? process.env.NODE_ENV === 'debug'),
-
-  /**
-   * Get test worker ID
+  isDebug: () => Boolean(process.env.DEBUG ?? process.env.NODE_ENV === 'debug'),/*** Get test worker ID
    */
-  getWorkerId: () => process.env.JEST_WORKER_ID ?? '1',
-
-  /**
-   * Check if running in parallel mode
+  getWorkerId: () => process.env.JEST_WORKER_ID ?? '1',/*** Check if running in parallel mode
    */
-  isParallel: () => parseInt(process.env.JEST_WORKER_ID ?? '1', 10) > 1,
-
-  /**
-   * Get memory constraints for current test environment
+  isParallel: () => parseInt(process.env.JEST_WORKER_ID ?? '1', 10) > 1,/*** Get memory constraints for current test environment
    */
   getMemoryLimits: () => ({
     maxHeapUsed:
-      process.env.NODE_ENV === 'ci' ? 512 * 1024 * 1024 : 1024 * 1024 * 1024, // 512MB in CI, 1GB local
-    maxRSS:
-      process.env.NODE_ENV === 'ci' ? 1024 * 1024 * 1024 : 2048 * 1024 * 1024, // 1GB in CI, 2GB local
+      process.env.NODE_ENV === 'ci' ? 512 * 1024 * 1024 : 1024 * 1024 * 1024, // 512MB in CI, 1GB localmaxRSS:process.env.NODE_ENV === 'ci' ? 1024 * 1024 * 1024 : 2048 * 1024 * 1024, // 1GB in CI, 2GB local
   }),
 };
 

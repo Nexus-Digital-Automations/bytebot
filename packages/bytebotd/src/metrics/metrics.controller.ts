@@ -24,39 +24,20 @@
  * @version 2.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import {
-  Authenticated,
+import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';import { ApiBearerAuth } from '@nestjs/swagger';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {Authenticated,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { BytebotMetricsService } from './metrics.service';
-import {
-  ParlantHealthMetricsValidationService,
+} from '../auth/decorators/roles.decorator';import { BytebotMetricsService } from './metrics.service';import {ParlantHealthMetricsValidationService,
   MetricsOperationType,
-} from '../parlant/services/parlant-health-metrics-validation.service';
-
-/**
- * Metrics collection controller providing Prometheus endpoints with Parlant validation
+} from '../parlant/services/parlant-health-metrics-validation.service';/*** Metrics collection controller providing Prometheus endpoints with Parlant validation
  */
-@Controller('metrics')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('bearer')
-export class MetricsController {
-  private readonly logger = new Logger(MetricsController.name);
+@Controller('metrics')@UseGuards(JwtAuthGuard, RolesGuard)@ApiBearerAuth('bearer')export class MetricsController {private readonly logger = new Logger(MetricsController.name);
 
   constructor(
     private readonly metricsService: BytebotMetricsService,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
-    this.logger.log('Metrics Controller initialized with Parlant validation');
-    this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active for all metrics operations');
-  }
-
-  /**
+    this.logger.log('Metrics Controller initialized with Parlant validation');this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active for all metrics operations');}/**
    * Prometheus metrics endpoint with Parlant validation
    * GET /metrics
    *
@@ -67,24 +48,17 @@ export class MetricsController {
   @Authenticated()
   @Header('Content-Type', 'text/plain; charset=utf-8')
   async getMetrics(@CurrentUser() user: ByteBotdUser): Promise<string> {
-    const operationId = `metrics${Date.now()}`;
-    this.logger.debug(`[${operationId}] Metrics collection requested with Parlant validation`, {
+    const operationId = `metrics${Date.now()}`;this.logger.debug(`[${operationId}] Metrics collection requested with Parlant validation`, {
       operationId,
       userId: user.id,
       username: user.username,
       role: user.role,
-      securityEvent: 'metrics_access_requested',
-    });
-
-    try {
+      securityEvent: 'metrics_access_requested',});try {
       // PARLANT VALIDATION: Prometheus metrics collection (LOW risk - optimized with caching)
       const validation = await this.parlantValidationService.validateMetricsOperation(
         MetricsOperationType.PROMETHEUS_COLLECTION,
         {
-          endpoint: '/metrics',
-          method: 'GET',
-          frequency: 'high-frequency',
-          metricsType: 'prometheus_format',
+          endpoint: '/metrics',method: 'GET',frequency: 'high-frequency',metricsType: 'prometheus_format',
           includesSystemMetrics: true,
           includesApplicationMetrics: true,
           includesPerformanceMetrics: true,
@@ -92,9 +66,7 @@ export class MetricsController {
         { userId: user.id, userRole: user.role },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation completed for metrics collection`, {
-        operationId,
-        approved: validation.approved,
+      this.logger.debug(`[${operationId}] Parlant validation completed for metrics collection`, {operationId,approved: validation.approved,
         riskLevel: validation.riskLevel,
         validationDuration: validation.performanceImpact.validationDuration,
         cacheHit: validation.performanceImpact.cacheHit,
@@ -115,14 +87,9 @@ export class MetricsController {
         // Return validation rejection in Prometheus format
         return `# HELP bytebot_metrics_validation_rejected Metrics validation rejections
 # TYPE bytebot_metrics_validation_rejected counter
-bytebot_metrics_validation_rejected{reason="${validation.reason ?? 'unknown'}"} 1
-# HELP bytebot_metrics_conversation_id Conversation ID for validation
-# TYPE bytebot_metrics_conversation_id info
+bytebot_metrics_validation_rejected{reason="${validation.reason ?? 'unknown'}"} 1# HELP bytebot_metrics_conversation_id Conversation ID for validation# TYPE bytebot_metrics_conversation_id info
 bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 1
-`;
-      }
-
-      const startTime = Date.now();
+`;}const startTime = Date.now();
 
       // Execute metrics collection with Parlant audit trail
       const metricsData = await this.metricsService.getPrometheusMetrics();
@@ -151,8 +118,7 @@ bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 
 
       // Track metrics endpoint performance with validation overhead
       this.metricsService.recordApiRequestDuration(
-        'GET',
-        '/metrics',
+        'GET','/metrics',
         200,
         processingTime + validation.performanceImpact.validationDuration,
       );
@@ -161,14 +127,8 @@ bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 
       const parlantMetrics = `
 # HELP bytebot_parlant_validation_total Total Parlant validations performed
 # TYPE bytebot_parlant_validation_total counter
-bytebot_parlant_validation_total{operation="metrics_collection",result="approved"} 1
-
-# HELP bytebot_parlant_validation_duration_seconds Parlant validation duration
-# TYPE bytebot_parlant_validation_duration_seconds histogram
-bytebot_parlant_validation_duration_seconds{operation="metrics_collection"} ${validation.performanceImpact.validationDuration / 1000}
-
-# HELP bytebot_parlant_cache_hits_total Parlant validation cache hits
-# TYPE bytebot_parlant_cache_hits_total counter
+bytebot_parlant_validation_total{operation="metrics_collection",result="approved"} 1# HELP bytebot_parlant_validation_duration_seconds Parlant validation duration# TYPE bytebot_parlant_validation_duration_seconds histogram
+bytebot_parlant_validation_duration_seconds{operation="metrics_collection"} ${validation.performanceImpact.validationDuration / 1000}# HELP bytebot_parlant_cache_hits_total Parlant validation cache hits# TYPE bytebot_parlant_cache_hits_total counter
 bytebot_parlant_cache_hits_total{operation="metrics_collection"} ${validation.performanceImpact.cacheHit ? 1 : 0}
 `;
 
@@ -192,9 +152,7 @@ bytebot_parlant_cache_hits_total{operation="metrics_collection"} ${validation.pe
       // Return comprehensive error info in Prometheus format
       return `# HELP bytebot_metrics_error Metrics collection errors
 # TYPE bytebot_metrics_error counter
-bytebot_metrics_error{error="${errorMessage.replace(/"/g, '\\"')}"} 1
-
-# HELP bytebot_metrics_error_timestamp Error timestamp
+bytebot_metrics_error{error="${errorMessage.replace(/"/g, '\\"')}'} 1# HELP bytebot_metrics_error_timestamp Error timestamp
 # TYPE bytebot_metrics_error_timestamp gauge
 bytebot_metrics_error_timestamp ${Date.now()}
 

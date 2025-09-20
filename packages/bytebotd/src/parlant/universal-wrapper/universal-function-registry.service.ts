@@ -18,10 +18,7 @@
  * Performance: Sub-millisecond lookup with intelligent caching and indexing
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  UniversalFunctionMetadata,
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {UniversalFunctionMetadata,
   FunctionCategory,
   ValidationRequirements,
   PerformanceMetadata,
@@ -31,20 +28,13 @@ import {
   FunctionReturnMetadata,
   UniversalWrapperError,
   WrapperErrorType
-} from './universal-function-wrapper.interface';
-import { RiskLevel } from '../parlant-integration.service';
-
-// ===== REGISTRY INTERFACES =====
-
-/**
+} from './universal-function-wrapper.interface';import { RiskLevel } from '../parlant-integration.service';// ===== REGISTRY INTERFACES =====/**
  * Function registration request for adding new functions to registry
  */
 export interface FunctionRegistrationRequest {
   readonly functionName: string;
   readonly packageName: string;
-  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';
-  readonly category: FunctionCategory;
-  readonly description: string;
+  readonly language: 'typescript' | 'python' | 'ruby' | 'javascript';readonly category: FunctionCategory;readonly description: string;
   readonly parameters: FunctionParameterMetadata[];
   readonly returnType: FunctionReturnMetadata;
   readonly tags?: string[];
@@ -62,22 +52,14 @@ export interface FunctionRegistrationRequest {
 export interface FunctionSearchCriteria {
   readonly functionName?: string | RegExp;
   readonly packageName?: string | string[];
-  readonly language?: ('typescript' | 'python' | 'ruby' | 'javascript')[];
-  readonly categories?: FunctionCategory[];
-  readonly riskLevels?: RiskLevel[];
+  readonly language?: ('typescript' | 'python' | 'ruby' | 'javascript')[];readonly categories?: FunctionCategory[];readonly riskLevels?: RiskLevel[];
   readonly tags?: string[];
   readonly hasValidationRequirements?: boolean;
-  readonly performanceRating?: 'excellent' | 'good' | 'average' | 'poor';
-  readonly securityRating?: 'high' | 'medium' | 'low';
-  readonly lastUpdatedAfter?: Date;
-  readonly lastUpdatedBefore?: Date;
+  readonly performanceRating?: 'excellent' | 'good' | 'average' | 'poor';readonly securityRating?: 'high' | 'medium' | 'low';readonly lastUpdatedAfter?: Date;readonly lastUpdatedBefore?: Date;
   readonly limit?: number;
   readonly offset?: number;
   readonly sortBy?: keyof UniversalFunctionMetadata;
-  readonly sortOrder?: 'asc' | 'desc';
-}
-
-/**
+  readonly sortOrder?: 'asc' | 'desc';}/**
  * Registry statistics for monitoring and reporting
  */
 export interface RegistryStatistics {
@@ -90,33 +72,19 @@ export interface RegistryStatistics {
   readonly averagePerformanceRating: number;
   readonly securityComplianceRate: number;
   readonly lastUpdated: Date;
-  readonly registryHealth: 'healthy' | 'degraded' | 'critical';
-  readonly indexingStatus: 'complete' | 'in_progress' | 'failed';
-}
-
-/**
+  readonly registryHealth: 'healthy' | 'degraded' | 'critical';readonly indexingStatus: 'complete' | 'in_progress' | 'failed';}/**
  * Function health status for monitoring
  */
 export interface FunctionHealthStatus {
   readonly functionId: string;
   readonly healthScore: number;
-  readonly status: 'healthy' | 'warning' | 'critical' | 'unknown';
-  readonly issues: HealthIssue[];
-  readonly lastHealthCheck: Date;
+  readonly status: 'healthy' | 'warning' | 'critical' | 'unknown';readonly issues: HealthIssue[];readonly lastHealthCheck: Date;
   readonly nextHealthCheck: Date;
-  readonly performanceTrend: 'improving' | 'stable' | 'degrading';
-  readonly securityStatus: 'secure' | 'vulnerable' | 'unknown';
-  readonly complianceStatus: 'compliant' | 'non_compliant' | 'unknown';
-}
-
-/**
+  readonly performanceTrend: 'improving' | 'stable' | 'degrading';readonly securityStatus: 'secure' | 'vulnerable' | 'unknown';readonly complianceStatus: 'compliant' | 'non_compliant' | 'unknown';}/**
  * Health issue for function monitoring
  */
 export interface HealthIssue {
-  readonly type: 'performance' | 'security' | 'compliance' | 'availability' | 'configuration';
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
-  readonly description: string;
-  readonly impact: string;
+  readonly type: 'performance' | 'security' | 'compliance' | 'availability' | 'configuration';readonly severity: 'low' | 'medium' | 'high' | 'critical';readonly description: string;readonly impact: string;
   readonly recommendation: string;
   readonly detectedAt: Date;
   readonly resolvedAt?: Date;
@@ -193,11 +161,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
   private averageSearchTime = 0;
 
   constructor(private readonly configService: ConfigService) {
-    const operationId = `registry_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Universal Function Registry Service`, {
-      maxFunctions: this.getMaxFunctions(),
-      cachingEnabled: this.isCachingEnabled(),
+    const operationId = `registry_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Universal Function Registry Service`, {maxFunctions: this.getMaxFunctions(),cachingEnabled: this.isCachingEnabled(),
       healthMonitoringEnabled: this.isHealthMonitoringEnabled(),
       autoDiscoveryEnabled: this.isAutoDiscoveryEnabled(),
     });
@@ -226,14 +190,10 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
    * @throws UniversalWrapperError if registration fails
    */
   async registerFunction(request: FunctionRegistrationRequest): Promise<UniversalFunctionMetadata> {
-    const operationId = `register_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.registryOperations++;
+    const operationId = `register_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.registryOperations++;
 
     this.logger.log(
-      `[${operationId}] Registering function: ${request.packageName}.${request.functionName}`,
-      {
-        operationId,
+      `[${operationId}] Registering function: ${request.packageName}.${request.functionName}`,{operationId,
         functionName: request.functionName,
         packageName: request.packageName,
         language: request.language,
@@ -248,9 +208,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       // Check for existing registration
       if (this.functionRegistry.has(functionId)) {
         const existing = this.functionRegistry.get(functionId)!;
-        this.logger.warn(`[${operationId}] Function already registered, updating`, {
-          functionId,
-          existingVersion: existing.version,
+        this.logger.warn(`[${operationId}] Function already registered, updating`, {functionId,existingVersion: existing.version,
           lastUpdated: existing.lastUpdated,
         });
       }
@@ -292,9 +250,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       const registrationTime = Date.now() - startTime;
 
       this.logger.log(
-        `[${operationId}] Function registered successfully`,
-        {
-          operationId,
+        `[${operationId}] Function registered successfully`,{operationId,
           functionId,
           riskLevel,
           validationRequired: validationRequirements.conversationalApproval,
@@ -309,9 +265,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       const registrationTime = Date.now() - startTime;
 
       this.logger.error(
-        `[${operationId}] Function registration failed`,
-        {
-          operationId,
+        `[${operationId}] Function registration failed`,{operationId,
           functionName: request.functionName,
           packageName: request.packageName,
           error: error instanceof Error ? error.message : String(error),
@@ -320,9 +274,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       );
 
       throw new UniversalWrapperError(
-        `${request.packageName}.${request.functionName}`,
-        operationId,
-        WrapperErrorType.CONFIGURATION_ERROR,
+        `${request.packageName}.${request.functionName}`,operationId,WrapperErrorType.CONFIGURATION_ERROR,
         error instanceof Error ? error : new Error(String(error))
       );
     }
@@ -335,10 +287,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
    * @returns Promise with bulk operation result
    */
   async bulkRegisterFunctions(requests: FunctionRegistrationRequest[]): Promise<BulkOperationResult> {
-    const operationId = `bulk_register_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `bulk_register_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting bulk function registration`,
       {
         operationId,
@@ -356,10 +305,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       failed: 0,
       skipped: 0,
       errors: [],
-      summary: '',
-    };
-
-    // Process in batches for performance
+      summary: '',};// Process in batches for performance
     const batchSize = this.getBulkBatchSize();
     for (let i = 0; i < requests.length; i += batchSize) {
       const batch = requests.slice(i, i + batchSize);
@@ -390,24 +336,15 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       if (requests.length > 100) {
         const progress = Math.min(i + batchSize, requests.length);
         this.logger.log(
-          `[${operationId}] Bulk registration progress: ${progress}/${requests.length}`,
-          {
-            operationId,
-            progress: `${((progress / requests.length) * 100).toFixed(1)}%`,
-            successful: result.successful,
-            failed: result.failed,
+          `[${operationId}] Bulk registration progress: ${progress}/${requests.length}`,{operationId,
+            progress: `${((progress / requests.length) * 100).toFixed(1)}%`,successful: result.successful,failed: result.failed,
           }
         );
       }
     }
 
     result.endTime = new Date();
-    result.summary = `Bulk registration completed: ${result.successful} successful, ${result.failed} failed, ${result.skipped} skipped`;
-
-    this.logger.log(
-      `[${operationId}] Bulk function registration completed`,
-      {
-        operationId,
+    result.summary = `Bulk registration completed: ${result.successful} successful, ${result.failed} failed, ${result.skipped} skipped`;this.logger.log(`[${operationId}] Bulk function registration completed`,{operationId,
         ...result,
         duration: Date.now() - startTime,
       }
@@ -432,9 +369,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     this.updateSearchPerformanceMetrics(searchTime);
 
     if (metadata) {
-      this.logger.debug(`Function metadata retrieved: ${functionId}`, {
-        functionId,
-        functionName: metadata.functionName,
+      this.logger.debug(`Function metadata retrieved: ${functionId}`, {functionId,functionName: metadata.functionName,
         packageName: metadata.packageName,
         searchTime,
       });
@@ -450,9 +385,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
    * @returns Promise with array of matching function metadata
    */
   async searchFunctions(criteria: FunctionSearchCriteria): Promise<UniversalFunctionMetadata[]> {
-    const operationId = `search_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.searchOperations++;
+    const operationId = `search_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.searchOperations++;
 
     this.logger.debug(
       `[${operationId}] Searching functions with criteria`,
@@ -486,9 +419,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       this.updateSearchPerformanceMetrics(searchTime);
 
       this.logger.debug(
-        `[${operationId}] Function search completed`,
-        {
-          operationId,
+        `[${operationId}] Function search completed`,{operationId,
           totalMatches: results.length,
           returnedResults: paginatedResults.length,
           searchTime,
@@ -511,9 +442,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       );
 
       throw new UniversalWrapperError(
-        'search_operation',
-        operationId,
-        WrapperErrorType.UNKNOWN_ERROR,
+        'search_operation',operationId,WrapperErrorType.UNKNOWN_ERROR,
         error instanceof Error ? error : new Error(String(error))
       );
     }
@@ -579,10 +508,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       securityComplianceRate: totalFunctions > 0 ? (securityCompliantFunctions / totalFunctions) * 100 : 0,
       lastUpdated: new Date(),
       registryHealth: this.assessRegistryHealth(),
-      indexingStatus: this.indexingInProgress ? 'in_progress' : 'complete',
-    };
-
-    const calculationTime = Date.now() - startTime;
+      indexingStatus: this.indexingInProgress ? 'in_progress' : 'complete',};const calculationTime = Date.now() - startTime;
 
     this.logger.log('Registry statistics calculated', {
       totalFunctions,
@@ -600,10 +526,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
    * @returns Promise with health check results
    */
   async performHealthChecks(): Promise<Map<string, FunctionHealthStatus>> {
-    const operationId = `health_check_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `health_check_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting comprehensive health checks`,
       {
         operationId,
@@ -632,20 +555,14 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
             this.functionHealthStatus.set(functionId, healthStatus);
 
             switch (healthStatus.status) {
-              case 'healthy':
-                healthyCount++;
-                break;
-              case 'warning':
-                warningCount++;
-                break;
+              case 'healthy':healthyCount++;break;
+              case 'warning':warningCount++;break;
               case 'critical':
                 criticalCount++;
                 break;
             }
           } catch (error) {
-            this.logger.error(`Health check failed for function ${functionId}`, {
-              functionId,
-              error: error instanceof Error ? error.message : String(error),
+            this.logger.error(`Health check failed for function ${functionId}`, {functionId,error: error instanceof Error ? error.message : String(error),
             });
           }
         })
@@ -655,17 +572,13 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     const healthCheckTime = Date.now() - startTime;
 
     this.logger.log(
-      `[${operationId}] Health checks completed`,
-      {
-        operationId,
+      `[${operationId}] Health checks completed`,{operationId,
         totalChecked: results.size,
         healthyCount,
         warningCount,
         criticalCount,
         healthCheckTime,
-        healthRate: `${((healthyCount / results.size) * 100).toFixed(2)}%`,
-      }
-    );
+        healthRate: `${((healthyCount / results.size) * 100).toFixed(2)}%`,});
 
     return results;
   }
@@ -677,10 +590,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
    * @returns Promise with registry backup data
    */
   async exportRegistry(includeHealthData: boolean = false): Promise<RegistryBackup> {
-    const operationId = `export_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `export_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Starting registry export`,
       {
         operationId,
@@ -692,9 +602,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     const exportData = {
       metadata: {
         exportedAt: new Date(),
-        exportedBy: 'UniversalFunctionRegistryService',
-        version: this.getRegistryVersion(),
-        totalFunctions: this.functionRegistry.size,
+        exportedBy: 'UniversalFunctionRegistryService',version: this.getRegistryVersion(),totalFunctions: this.functionRegistry.size,
       },
       functions: Array.from(this.functionRegistry.entries()),
       healthData: includeHealthData ? Array.from(this.functionHealthStatus.entries()) : [],
@@ -726,9 +634,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     };
 
     this.logger.log(
-      `[${operationId}] Registry export completed`,
-      {
-        operationId,
+      `[${operationId}] Registry export completed`,{operationId,
         backupId: backup.backupId,
         functionCount: backup.functionCount,
         exportSize: exportJson.length,
@@ -748,10 +654,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
   private initializeBuiltInFunctions(): void {
     const builtInFunctions = this.getBuiltInFunctionDefinitions();
 
-    this.logger.log(`Initializing ${builtInFunctions.length} built-in functions`);
-
-    builtInFunctions.forEach(async (functionDef) => {
-      try {
+    this.logger.log(`Initializing ${builtInFunctions.length} built-in functions`);builtInFunctions.forEach(async (functionDef) => {try {
         await this.registerFunction(functionDef);
       } catch (error) {
         this.logger.warn(`Failed to register built-in function: ${functionDef.functionName}`, {
@@ -768,31 +671,13 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     return [
       // Database Operations
       {
-        functionName: 'findOne',
-        packageName: 'database',
-        language: 'typescript',
-        category: FunctionCategory.DATABASE_READ,
-        description: 'Find a single record by criteria',
-        parameters: [
-          {
-            name: 'criteria',
-            type: 'Record<string, unknown>',
-            required: true,
-            description: 'Search criteria object',
-            validation: {},
-            sensitiveData: false,
-            examples: [{ id: 1 }, { email: 'user@example.com' }],
-          },
-        ],
+        functionName: 'findOne',packageName: 'database',language: 'typescript',category: FunctionCategory.DATABASE_READ,description: 'Find a single record by criteria',parameters: [{
+            name: 'criteria',type: 'Record<string, unknown>',required: true,description: 'Search criteria object',validation: {},sensitiveData: false,
+            examples: [{ id: 1 }, { email: 'user@example.com' }],},],
         returnType: {
-          type: 'Promise<Record<string, unknown> | null>',
-          description: 'Found record or null',
-          nullable: true,
-          asyncReturn: true,
+          type: 'Promise<Record<string, unknown> | null>',description: 'Found record or null',nullable: true,asyncReturn: true,
           streamingResponse: false,
-          errorTypes: ['DatabaseError', 'ValidationError'],
-        },
-        tags: ['database', 'read', 'query'],
+          errorTypes: ['DatabaseError', 'ValidationError'],},tags: ['database', 'read', 'query'],
       },
       // Add more built-in functions as needed
     ];
@@ -818,24 +703,16 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       case FunctionCategory.DATABASE_SCHEMA:
       case FunctionCategory.DATABASE_ADMIN:
         riskScore += 30;
-        riskFactors.push('database_modification');
-        break;
-      case FunctionCategory.FILE_WRITE:
+        riskFactors.push('database_modification');break;case FunctionCategory.FILE_WRITE:
       case FunctionCategory.FILE_SYSTEM:
         riskScore += 25;
-        riskFactors.push('file_system_modification');
-        break;
-      case FunctionCategory.SYSTEM_COMMAND:
+        riskFactors.push('file_system_modification');break;case FunctionCategory.SYSTEM_COMMAND:
       case FunctionCategory.PROCESS_CONTROL:
         riskScore += 40;
-        riskFactors.push('system_control');
-        break;
-      case FunctionCategory.AUTHENTICATION:
+        riskFactors.push('system_control');break;case FunctionCategory.AUTHENTICATION:
       case FunctionCategory.AUTHORIZATION:
         riskScore += 35;
-        riskFactors.push('security_operation');
-        break;
-      default:
+        riskFactors.push('security_operation');break;default:
         riskScore += 10;
     }
 
@@ -843,26 +720,15 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     for (const param of request.parameters) {
       if (param.sensitiveData) {
         riskScore += 15;
-        riskFactors.push('sensitive_data_handling');
-      }
-      if (param.type.includes('any') || param.type.includes('unknown')) {
-        riskScore += 5;
-        riskFactors.push('weak_typing');
-      }
-    }
+        riskFactors.push('sensitive_data_handling');}if (param.type.includes('any') || param.type.includes('unknown')) {riskScore += 5;riskFactors.push('weak_typing');}}
 
     // Return type-based assessment
-    if (request.returnType.type.includes('void') || request.returnType.type.includes('undefined')) {
-      riskScore += 10;
-      riskFactors.push('no_return_validation');
-    }
-
-    // Convert score to risk level
-    if (riskScore >= 60) return RiskLevel.CRITICAL;
-    if (riskScore >= 40) return RiskLevel.HIGH;
-    if (riskScore >= 20) return RiskLevel.MEDIUM;
-    if (riskScore >= 10) return RiskLevel.LOW;
-    return RiskLevel.MINIMAL;
+    if (request.returnType.type.includes('void') || request.returnType.type.includes('undefined')) {riskScore += 10;riskFactors.push('no_return_validation');}// Convert score to risk level
+    if (riskScore >= 60) return RiskLevel._CRITICAL;
+    if (riskScore >= 40) return RiskLevel._HIGH;
+    if (riskScore >= 20) return RiskLevel._MODERATE;
+    if (riskScore >= 10) return RiskLevel._LOW;
+    return RiskLevel._MINIMAL;
   }
 
   /**
@@ -873,14 +739,14 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     riskLevel: RiskLevel
   ): ValidationRequirements {
     const base: ValidationRequirements = {
-      conversationalApproval: riskLevel !== RiskLevel.MINIMAL,
-      userConfirmation: riskLevel === RiskLevel.HIGH || riskLevel === RiskLevel.CRITICAL,
-      administratorApproval: riskLevel === RiskLevel.CRITICAL,
-      auditTrail: riskLevel !== RiskLevel.MINIMAL,
+      conversationalApproval: riskLevel !== RiskLevel._MINIMAL,
+      userConfirmation: riskLevel === RiskLevel._HIGH || riskLevel === RiskLevel._CRITICAL,
+      administratorApproval: riskLevel === RiskLevel._CRITICAL,
+      auditTrail: riskLevel !== RiskLevel._MINIMAL,
       preExecutionValidation: true,
-      postExecutionValidation: riskLevel === RiskLevel.HIGH || riskLevel === RiskLevel.CRITICAL,
+      postExecutionValidation: riskLevel === RiskLevel._HIGH || riskLevel === RiskLevel._CRITICAL,
       parameterSanitization: true,
-      responseFiltering: riskLevel !== RiskLevel.MINIMAL,
+      responseFiltering: riskLevel !== RiskLevel._MINIMAL,
       timeoutMs: this.getTimeoutForRiskLevel(riskLevel),
       retryAttempts: this.getRetryAttemptsForRiskLevel(riskLevel),
       cacheable: this.isCacheableByCategory(request.category),
@@ -932,11 +798,8 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
       mitigations: await this.identifyMitigations(request, riskLevel),
       riskScore: this.calculateRiskScore(riskLevel),
       lastAssessment: new Date(),
-      assessedBy: 'UniversalFunctionRegistryService',
-    };
-
-    const base: SecurityContext = {
-      requiresAuthentication: riskLevel !== RiskLevel.MINIMAL,
+      assessedBy: 'UniversalFunctionRegistryService',};const base: SecurityContext = {
+      requiresAuthentication: riskLevel !== RiskLevel._MINIMAL,
       requiredPermissions: this.determineRequiredPermissions(request, riskLevel),
       dataClassification: this.determineDataClassification(request),
       encryptionRequired: this.determineEncryptionRequirement(request, riskLevel),
@@ -1086,32 +949,23 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     a: UniversalFunctionMetadata,
     b: UniversalFunctionMetadata,
     sortBy: keyof UniversalFunctionMetadata,
-    sortOrder: 'asc' | 'desc'
-  ): number {
-    const aValue = a[sortBy];
+    sortOrder: 'asc' | 'desc'): number {const aValue = a[sortBy];
     const bValue = b[sortBy];
 
     let comparison = 0;
     if (aValue < bValue) comparison = -1;
     if (aValue > bValue) comparison = 1;
 
-    return sortOrder === 'desc' ? -comparison : comparison;
-  }
-
-  /**
+    return sortOrder === 'desc' ? -comparison : comparison;}/**
    * Initialize health monitoring for a function
    */
   private async initializeFunctionHealth(functionId: string): Promise<void> {
     const healthStatus: FunctionHealthStatus = {
       functionId,
       healthScore: 100,
-      status: 'healthy',
-      issues: [],
-      lastHealthCheck: new Date(),
+      status: 'healthy',issues: [],lastHealthCheck: new Date(),
       nextHealthCheck: new Date(Date.now() + this.getHealthCheckInterval()),
-      performanceTrend: 'stable',
-      securityStatus: 'secure',
-      complianceStatus: 'compliant',
+      performanceTrend: 'stable',securityStatus: 'secure',complianceStatus: 'compliant',
     };
 
     this.functionHealthStatus.set(functionId, healthStatus);
@@ -1137,62 +991,30 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     // Security health checks
     const securityIssues = await this.checkSecurityHealth(functionId, metadata);
     issues.push(...securityIssues);
-    healthScore -= securityIssues.filter(i => i.severity === 'high' || i.severity === 'critical').length * 15;
-
-    // Compliance health checks
-    const complianceIssues = await this.checkComplianceHealth(functionId, metadata);
+    healthScore -= securityIssues.filter(i => i.severity === 'high' || i.severity === 'critical').length * 15;// Compliance health checksconst complianceIssues = await this.checkComplianceHealth(functionId, metadata);
     issues.push(...complianceIssues);
     healthScore -= complianceIssues.length * 5;
 
     // Determine overall status
-    let status: 'healthy' | 'warning' | 'critical' | 'unknown' = 'healthy';
-    if (healthScore < 50) status = 'critical';
-    else if (healthScore < 80) status = 'warning';
-
-    return {
-      functionId,
+    let status: 'healthy' | 'warning' | 'critical' | 'unknown' = 'healthy';if (healthScore < 50) status = 'critical';else if (healthScore < 80) status = 'warning';return {functionId,
       healthScore: Math.max(0, healthScore),
       status,
       issues,
       lastHealthCheck: new Date(),
       nextHealthCheck: new Date(Date.now() + this.getHealthCheckInterval()),
       performanceTrend: this.calculatePerformanceTrend(functionId),
-      securityStatus: securityIssues.length === 0 ? 'secure' : 'vulnerable',
-      complianceStatus: complianceIssues.length === 0 ? 'compliant' : 'non_compliant',
-    };
-  }
+      securityStatus: securityIssues.length === 0 ? 'secure' : 'vulnerable',complianceStatus: complianceIssues.length === 0 ? 'compliant' : 'non_compliant',};}
 
   // ===== CONFIGURATION HELPERS =====
 
   private getMaxFunctions(): number {
-    return this.configService.get<number>('REGISTRY_MAX_FUNCTIONS', 10000);
-  }
-
-  private isCachingEnabled(): boolean {
-    return this.configService.get<boolean>('REGISTRY_CACHING_ENABLED', true);
-  }
-
-  private isHealthMonitoringEnabled(): boolean {
-    return this.configService.get<boolean>('REGISTRY_HEALTH_MONITORING_ENABLED', true);
-  }
-
-  private isAutoDiscoveryEnabled(): boolean {
-    return this.configService.get<boolean>('REGISTRY_AUTO_DISCOVERY_ENABLED', false);
-  }
-
-  private getHealthCheckInterval(): number {
-    return this.configService.get<number>('REGISTRY_HEALTH_CHECK_INTERVAL_MS', 300000); // 5 minutes
-  }
-
-  private getAutoDiscoveryInterval(): number {
-    return this.configService.get<number>('REGISTRY_AUTO_DISCOVERY_INTERVAL_MS', 3600000); // 1 hour
-  }
-
-  private getBulkBatchSize(): number {
-    return this.configService.get<number>('REGISTRY_BULK_BATCH_SIZE', 50);
-  }
-
-  private getRegistryVersion(): string {
+    return this.configService.get<number>('REGISTRY_MAX_FUNCTIONS', 10000);}private isCachingEnabled(): boolean {
+    return this.configService.get<boolean>('REGISTRY_CACHING_ENABLED', true);}private isHealthMonitoringEnabled(): boolean {
+    return this.configService.get<boolean>('REGISTRY_HEALTH_MONITORING_ENABLED', true);}private isAutoDiscoveryEnabled(): boolean {
+    return this.configService.get<boolean>('REGISTRY_AUTO_DISCOVERY_ENABLED', false);}private getHealthCheckInterval(): number {
+    return this.configService.get<number>('REGISTRY_HEALTH_CHECK_INTERVAL_MS', 300000); // 5 minutes}private getAutoDiscoveryInterval(): number {
+    return this.configService.get<number>('REGISTRY_AUTO_DISCOVERY_INTERVAL_MS', 3600000); // 1 hour}private getBulkBatchSize(): number {
+    return this.configService.get<number>('REGISTRY_BULK_BATCH_SIZE', 50);}private getRegistryVersion(): string {
     return this.configService.get<string>('REGISTRY_VERSION', '1.0.0');
   }
 
@@ -1249,22 +1071,22 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
 
   private getTimeoutForRiskLevel(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 5000;
-      case RiskLevel.LOW: return 10000;
-      case RiskLevel.MEDIUM: return 30000;
-      case RiskLevel.HIGH: return 60000;
-      case RiskLevel.CRITICAL: return 120000;
+      case RiskLevel._MINIMAL: return 5000;
+      case RiskLevel._LOW: return 10000;
+      case RiskLevel._MODERATE: return 30000;
+      case RiskLevel._HIGH: return 60000;
+      case RiskLevel._CRITICAL: return 120000;
       default: return 10000;
     }
   }
 
   private getRetryAttemptsForRiskLevel(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW: return 3;
-      case RiskLevel.MEDIUM: return 2;
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 1;
+      case RiskLevel._MINIMAL:
+      case RiskLevel._LOW: return 3;
+      case RiskLevel._MODERATE: return 2;
+      case RiskLevel._HIGH:
+      case RiskLevel._CRITICAL: return 1;
       default: return 1;
     }
   }
@@ -1309,24 +1131,11 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     return intensiveCategories.includes(category);
   }
 
-  private estimateCpuUsage(category: FunctionCategory): 'low' | 'medium' | 'high' {
-    return this.isResourceIntensive(category) ? 'high' : 'low';
-  }
-
-  private estimateMemoryUsage(category: FunctionCategory): 'low' | 'medium' | 'high' {
-    return this.isResourceIntensive(category) ? 'high' : 'low';
-  }
-
-  private estimateNetworkUsage(category: FunctionCategory): 'none' | 'low' | 'medium' | 'high' {
-    const networkCategories = [
-      FunctionCategory.HTTP_REQUEST,
+  private estimateCpuUsage(category: FunctionCategory): 'low' | 'medium' | 'high' {return this.isResourceIntensive(category) ? 'high' : 'low';}private estimateMemoryUsage(category: FunctionCategory): 'low' | 'medium' | 'high' {return this.isResourceIntensive(category) ? 'high' : 'low';}private estimateNetworkUsage(category: FunctionCategory): 'none' | 'low' | 'medium' | 'high' {const networkCategories = [FunctionCategory.HTTP_REQUEST,
       FunctionCategory.WEBSOCKET,
       FunctionCategory.API_CALL,
     ];
-    return networkCategories.includes(category) ? 'high' : 'low';
-  }
-
-  private getConcurrencyLimit(category: FunctionCategory): number {
+    return networkCategories.includes(category) ? 'high' : 'low';}private getConcurrencyLimit(category: FunctionCategory): number {
     return this.isResourceIntensive(category) ? 5 : 20;
   }
 
@@ -1350,21 +1159,15 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
 
   private async identifyThreats(request: FunctionRegistrationRequest): Promise<string[]> {
     // Mock implementation
-    return ['sql_injection', 'privilege_escalation', 'data_leakage'];
-  }
-
-  private async identifyMitigations(request: FunctionRegistrationRequest, riskLevel: RiskLevel): Promise<string[]> {
+    return ['sql_injection', 'privilege_escalation', 'data_leakage'];}private async identifyMitigations(request: FunctionRegistrationRequest, riskLevel: RiskLevel): Promise<string[]> {
     // Mock implementation
-    return ['input_validation', 'access_control', 'audit_logging'];
-  }
-
-  private calculateRiskScore(riskLevel: RiskLevel): number {
+    return ['input_validation', 'access_control', 'audit_logging'];}private calculateRiskScore(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 10;
-      case RiskLevel.LOW: return 30;
-      case RiskLevel.MEDIUM: return 50;
-      case RiskLevel.HIGH: return 70;
-      case RiskLevel.CRITICAL: return 90;
+      case RiskLevel._MINIMAL: return 10;
+      case RiskLevel._LOW: return 30;
+      case RiskLevel._MODERATE: return 50;
+      case RiskLevel._HIGH: return 70;
+      case RiskLevel._CRITICAL: return 90;
       default: return 50;
     }
   }
@@ -1374,32 +1177,15 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     return ['function_execute', `risk_level_${riskLevel.toLowerCase()}`];
   }
 
-  private determineDataClassification(request: FunctionRegistrationRequest): 'public' | 'internal' | 'confidential' | 'restricted' | 'classified' {
-    // Mock implementation
-    return 'internal';
+  private determineDataClassification(request: FunctionRegistrationRequest): 'public' | 'internal' | 'confidential' | 'restricted' | 'classified' {// Mock implementationreturn 'internal';}private determineEncryptionRequirement(request: FunctionRegistrationRequest, riskLevel: RiskLevel): boolean {
+    return riskLevel === RiskLevel._HIGH || riskLevel === RiskLevel._CRITICAL;
   }
 
-  private determineEncryptionRequirement(request: FunctionRegistrationRequest, riskLevel: RiskLevel): boolean {
-    return riskLevel === RiskLevel.HIGH || riskLevel === RiskLevel.CRITICAL;
-  }
-
-  private determineAuditLevel(riskLevel: RiskLevel): 'none' | 'basic' | 'detailed' | 'comprehensive' {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 'none';
-      case RiskLevel.LOW: return 'basic';
-      case RiskLevel.MEDIUM: return 'detailed';
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 'comprehensive';
-      default: return 'basic';
-    }
-  }
+  private determineAuditLevel(riskLevel: RiskLevel): 'none' | 'basic' | 'detailed' | 'comprehensive' {switch (riskLevel) {case RiskLevel._MINIMAL: return 'none';case RiskLevel._LOW: return 'basic';case RiskLevel._MODERATE: return 'detailed';case RiskLevel._HIGH:case RiskLevel._CRITICAL: return 'comprehensive';default: return 'basic';}}
 
   private determineComplianceFrameworks(request: FunctionRegistrationRequest): string[] {
     // Mock implementation
-    return ['GDPR', 'SOX', 'HIPAA'];
-  }
-
-  private calculatePerformanceRating(metadata: PerformanceMetadata): number {
+    return ['GDPR', 'SOX', 'HIPAA'];}private calculatePerformanceRating(metadata: PerformanceMetadata): number {
     // Mock calculation returning 0-100 rating
     return 85;
   }
@@ -1409,12 +1195,7 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     return context.threatModel.riskScore < 70;
   }
 
-  private assessRegistryHealth(): 'healthy' | 'degraded' | 'critical' {
-    // Mock implementation
-    return 'healthy';
-  }
-
-  private async checkPerformanceHealth(functionId: string, metadata: UniversalFunctionMetadata): Promise<HealthIssue[]> {
+  private assessRegistryHealth(): 'healthy' | 'degraded' | 'critical' {// Mock implementationreturn 'healthy';}private async checkPerformanceHealth(functionId: string, metadata: UniversalFunctionMetadata): Promise<HealthIssue[]> {
     // Mock implementation
     return [];
   }
@@ -1429,24 +1210,13 @@ export class UniversalFunctionRegistryService implements OnApplicationShutdown {
     return [];
   }
 
-  private calculatePerformanceTrend(functionId: string): 'improving' | 'stable' | 'degrading' {
-    // Mock implementation
-    return 'stable';
-  }
-
-  private async performAutoDiscovery(): Promise<void> {
+  private calculatePerformanceTrend(functionId: string): 'improving' | 'stable' | 'degrading' {// Mock implementationreturn 'stable';}private async performAutoDiscovery(): Promise<void> {
     // Mock implementation for auto-discovering functions
-    this.logger.debug('Performing auto-discovery of functions');
-  }
-
-  /**
+    this.logger.debug('Performing auto-discovery of functions');}/**
    * Clean up resources on service shutdown
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Universal Function Registry Service shutdown initiated');
-
-    // Save registry state if needed
-    // Close any open connections
+    this.logger.log('Universal Function Registry Service shutdown initiated');// Save registry state if needed// Close any open connections
     // Clean up resources
 
     this.logger.log('Universal Function Registry Service shutdown complete');

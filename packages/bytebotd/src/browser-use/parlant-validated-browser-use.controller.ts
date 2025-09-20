@@ -34,9 +34,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
   UnauthorizedException,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
@@ -44,57 +42,31 @@ import {
   ApiBody,
   ApiHeader,
   ApiBearerAuth,
-} from '@nestjs/swagger';
-
-// Parlant-validated services and interfaces
-import {
+} from '@nestjs/swagger';// Parlant-validated services and interfacesimport {
   ParlantValidatedBrowserUseService,
   BrowserActionValidationContext,
   BrowserActionAuditEntry,
   BrowserStateInfo,
-} from './parlant-validated-browser-use.service';
-import {
-  ParlantValidatedBrowserSessionService,
+} from './parlant-validated-browser-use.service';import {ParlantValidatedBrowserSessionService,
   BrowserSessionValidationContext,
   SessionValidationResult,
-} from './parlant-validated-browser-session.service';
-import {
-  ParlantValidatedBrowserTaskService,
+} from './parlant-validated-browser-session.service';import {ParlantValidatedBrowserTaskService,
   BrowserTaskValidationContext,
-} from './parlant-validated-browser-task.service';
-import {
-  ParlantValidatedBrowserAsyncJobService,
+} from './parlant-validated-browser-task.service';import {ParlantValidatedBrowserAsyncJobService,
   AsyncJobValidationContext,
   AsyncJobResourceRequirements,
   AsyncJobQueueInfo,
-} from './parlant-validated-browser-async-job.service';
-
-// DTOs and types
-import {
+} from './parlant-validated-browser-async-job.service';// DTOs and typesimport {
   CreateBrowserTaskDto,
   BrowserTaskResultDto,
-} from './dto/browser-task.dto';
-import {
-  CreateBrowserSessionDto,
-} from './dto/browser-session.dto';
-import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobPriority, AsyncJobType } from './dto/async-job.dto';
-
-// Parlant integration
-import { ConversationalValidationError } from '../parlant/parlant-integration.service';
-
-// ===== PARLANT VALIDATION CONTEXT DTOS =====
-
-/**
+} from './dto/browser-task.dto';import {CreateBrowserSessionDto,
+} from './dto/browser-session.dto';import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobPriority, AsyncJobType } from './dto/async-job.dto';// Parlant integrationimport { ConversationalValidationError } from '../parlant/parlant-integration.service';// ===== PARLANT VALIDATION CONTEXT DTOS =====/**
  * Request context for Parlant validation
  */
 export class ParlantRequestContextDto {
-  userId: string = '';
-  sessionId?: string;
-  conversationId?: string;
+  userId: string = '';sessionId?: string;conversationId?: string;
   intent?: string;
-  securityLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  emergencyOverride?: boolean;
-  auditRequired?: boolean;
+  securityLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';emergencyOverride?: boolean;auditRequired?: boolean;
 }
 
 /**
@@ -142,10 +114,7 @@ export class ParlantValidationResponseDto<T> {
 
 // ===== PARLANT-VALIDATED BROWSER CONTROLLER =====
 
-@ApiTags('Parlant Browser Automation')
-@Controller('parlant/browser-use')
-@ApiBearerAuth()
-export class ParlantValidatedBrowserUseController {
+@ApiTags('Parlant Browser Automation')@Controller('parlant/browser-use')@ApiBearerAuth()export class ParlantValidatedBrowserUseController {
   private readonly logger = new Logger(ParlantValidatedBrowserUseController.name);
 
   constructor(
@@ -154,59 +123,32 @@ export class ParlantValidatedBrowserUseController {
     private readonly parlantTaskService: ParlantValidatedBrowserTaskService,
     private readonly parlantAsyncJobService: ParlantValidatedBrowserAsyncJobService,
   ) {
-    this.logger.log('Parlant-Validated Browser Use Controller initialized');
-    this.logger.log('PARLANT MAXIMUM INTEGRATION: All browser operations require conversational validation');
-  }
-
-  // ===========================
+    this.logger.log('Parlant-Validated Browser Use Controller initialized');this.logger.log('PARLANT MAXIMUM INTEGRATION: All browser operations require conversational validation');}// ===========================
   // PARLANT-VALIDATED TASK MANAGEMENT
   // ===========================
 
   /**
    * Execute browser automation task with Parlant conversational validation
    */
-  @Post('tasks')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Execute browser task with Parlant validation',
-    description: 'Create and execute a browser automation task with comprehensive Parlant conversational AI validation. Every action is validated through natural language conversation.',
-  })
+  @Post('tasks')@HttpCode(HttpStatus.CREATED)@ApiOperation({
+    summary: 'Execute browser task with Parlant validation',description: 'Create and execute a browser automation task with comprehensive Parlant conversational AI validation. Every action is validated through natural language conversation.',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for Parlant validation',required: true,})
   @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for Parlant validation',
-    required: true,
-  })
-  @ApiHeader({
-    name: 'X-Session-ID',
-    description: 'Session identifier for conversation context',
-    required: false,
-  })
+    name: 'X-Session-ID',description: 'Session identifier for conversation context',required: false,})
   @ApiBody({
     type: ParlantBrowserTaskDto,
-    description: 'Browser task configuration with Parlant validation context',
-  })
-  @ApiResponse({
+    description: 'Browser task configuration with Parlant validation context',})@ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Task created and execution started after Parlant approval',
-    type: ParlantValidationResponseDto,
-  })
+    description: 'Task created and execution started after Parlant approval',type: ParlantValidationResponseDto,})
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
-    description: 'Task execution denied by Parlant validation',
-  })
-  @ApiResponse({
+    description: 'Task execution denied by Parlant validation',})@ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid task configuration or missing validation context',
-  })
-  async executeBrowserTaskWithValidation(
+    description: 'Invalid task configuration or missing validation context',})async executeBrowserTaskWithValidation(
     @Body() taskDto: ParlantBrowserTaskDto,
-    @Headers('X-User-ID') userId?: string,
-    @Headers('X-Session-ID') sessionId?: string,
+    @Headers('X-User-ID') userId?: string,@Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<BrowserTaskResultDto>> {
-    const operationId = `parlant_task${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
+    const operationId = `parlant_task${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
       `[${operationId}] Parlant-validated browser task execution requested`,
       {
         taskName: taskDto.name,
@@ -219,10 +161,7 @@ export class ParlantValidatedBrowserUseController {
     try {
       // Validate required context
       if (!userId && !taskDto.parlantContext.userId) {
-        throw new BadRequestException('User ID required for Parlant validation');
-      }
-
-      const finalUserId = userId ?? taskDto.parlantContext.userId;
+        throw new BadRequestException('User ID required for Parlant validation');}const finalUserId = userId ?? taskDto.parlantContext.userId;
       const finalSessionId = sessionId ?? taskDto.parlantContext.sessionId;
 
       // Build browser state info
@@ -244,8 +183,7 @@ export class ParlantValidatedBrowserUseController {
         targetUrl: this.extractTargetUrlFromTask(taskDto),
         actionSequence: [],
         browserState,
-        securityLevel: taskDto.parlantContext.securityLevel ?? 'MEDIUM',
-        agentRole: 'USER',
+        securityLevel: taskDto.parlantContext.securityLevel ?? 'MEDIUM',agentRole: 'USER',
         conversationHistory: [],
         metadata: {},
       };
@@ -257,9 +195,7 @@ export class ParlantValidatedBrowserUseController {
       );
 
       this.logger.log(
-        `[${operationId}] Parlant-validated browser task completed successfully`,
-        {
-          taskId: result.taskId,
+        `[${operationId}] Parlant-validated browser task completed successfully`,{taskId: result.taskId,
           status: result.status,
           validationTime: Date.now() - startTime,
         }
@@ -318,59 +254,32 @@ export class ParlantValidatedBrowserUseController {
         }
       );
 
-      throw new InternalServerErrorException('Browser task execution failed');
-    }
-  }
+      throw new InternalServerErrorException('Browser task execution failed');}}
 
   /**
    * Get task status with Parlant audit context
    */
-  @Get('tasks/:taskId')
-  @ApiOperation({
-    summary: 'Get browser task status with Parlant audit',
-    description: 'Retrieve browser task status and results with complete Parlant audit trail.',
-  })
-  @ApiParam({
-    name: 'taskId',
-    description: 'Browser task identifier',
-    type: 'string',
-  })
-  @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for Parlant validation',
-    required: true,
-  })
+  @Get('tasks/:taskId')@ApiOperation({summary: 'Get browser task status with Parlant audit',description: 'Retrieve browser task status and results with complete Parlant audit trail.',})@ApiParam({
+    name: 'taskId',description: 'Browser task identifier',type: 'string',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for Parlant validation',required: true,})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Task status retrieved successfully',
-    type: ParlantValidationResponseDto,
-  })
+    description: 'Task status retrieved successfully',type: ParlantValidationResponseDto,})
   async getBrowserTaskWithValidation(
-    @Param('taskId') taskId: string,
-    @Headers('X-User-ID') userId?: string,
-    @Headers('X-Session-ID') sessionId?: string,
+    @Param('taskId') taskId: string,@Headers('X-User-ID') userId?: string,@Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<BrowserTaskResultDto | null>> {
     const operationId = `parlant_get_task${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId) {
-      throw new UnauthorizedException('User ID required for Parlant validation');
-    }
-
-    try {
+      throw new UnauthorizedException('User ID required for Parlant validation');}try {
       // Create validation context for task retrieval with all required properties
       const validationContext: BrowserTaskValidationContext = {
         userId,
         sessionId,
-        agentRole: 'USER',
-        conversationHistory: [],
-        metadata: {},
-        securityLevel: 'MEDIUM',
-        taskExecutionContext: {
-          actionsCount: 0,
-          actionsComplexity: 'SIMPLE',
-          targetsExternalDomains: false,
-          requiresUserInput: false,
+        agentRole: 'USER',conversationHistory: [],metadata: {},
+        securityLevel: 'MEDIUM',taskExecutionContext: {actionsCount: 0,
+          actionsComplexity: 'SIMPLE',targetsExternalDomains: false,requiresUserInput: false,
           modifiesData: false,
         },
         browserEnvironment: {
@@ -400,14 +309,9 @@ export class ParlantValidatedBrowserUseController {
           },
         },
         securityProfile: {
-          userTrustLevel: 'MEDIUM',
-          recentViolations: 0,
-          suspiciousActivityScore: 0,
+          userTrustLevel: 'MEDIUM',recentViolations: 0,suspiciousActivityScore: 0,
           lastSecurityCheck: new Date(),
-          allowedOperations: ['CREATE_TASK', 'START_TASK', 'STOP_TASK'],
-          restrictedOperations: ['DELETE_TASK'],
-        },
-      };
+          allowedOperations: ['CREATE_TASK', 'START_TASK', 'STOP_TASK'],restrictedOperations: ['DELETE_TASK'],},};
 
       const result = await this.parlantTaskService.getTask(taskId, validationContext);
 
@@ -429,9 +333,7 @@ export class ParlantValidatedBrowserUseController {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated task retrieval failed`,
-        {
-          error: error instanceof Error ? error.message : String(error),
+        `[${operationId}] Parlant-validated task retrieval failed`,{error: error instanceof Error ? error.message : String(error),
           taskId,
         }
       );
@@ -447,51 +349,31 @@ export class ParlantValidatedBrowserUseController {
   /**
    * Create browser session with Parlant validation
    */
-  @Post('sessions')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create browser session with Parlant validation',
-    description: 'Create a new browser session with comprehensive Parlant conversational validation for session parameters and security constraints.',
-  })
-  @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for Parlant validation',
-    required: true,
-  })
+  @Post('sessions')@HttpCode(HttpStatus.CREATED)@ApiOperation({
+    summary: 'Create browser session with Parlant validation',description: 'Create a new browser session with comprehensive Parlant conversational validation for session parameters and security constraints.',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for Parlant validation',required: true,})
   @ApiBody({
     type: ParlantBrowserSessionDto,
-    description: 'Browser session configuration with Parlant validation context',
-  })
-  @ApiResponse({
+    description: 'Browser session configuration with Parlant validation context',})@ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Session created successfully after Parlant approval',
-    type: ParlantValidationResponseDto,
-  })
+    description: 'Session created successfully after Parlant approval',type: ParlantValidationResponseDto,})
   async createBrowserSessionWithValidation(
     @Body() sessionDto: ParlantBrowserSessionDto,
-    @Headers('X-User-ID') userId?: string,
-    @Headers('X-Session-ID') sessionId?: string,
+    @Headers('X-User-ID') userId?: string,@Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<SessionValidationResult>> {
     const operationId = `parlant_session${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId && !sessionDto.parlantContext.userId) {
-      throw new BadRequestException('User ID required for Parlant validation');
-    }
-
-    const finalUserId = userId ?? sessionDto.parlantContext.userId;
+      throw new BadRequestException('User ID required for Parlant validation');}const finalUserId = userId ?? sessionDto.parlantContext.userId;
 
     try {
       // Create session validation context with all required properties
       const validationContext: BrowserSessionValidationContext = {
         userId: finalUserId,
         sessionId: sessionId ?? sessionDto.parlantContext.sessionId,
-        agentRole: 'USER',
-        conversationHistory: [],
-        metadata: {},
-        securityLevel: 'MEDIUM',
-        requestedSessionCount: 1,
-        currentActiveSessionsCount: 1,
+        agentRole: 'USER',conversationHistory: [],metadata: {},
+        securityLevel: 'MEDIUM',requestedSessionCount: 1,currentActiveSessionsCount: 1,
         sessionHistory: [],
         systemResourceState: {
           totalMemoryUsageMB: 512,
@@ -502,13 +384,9 @@ export class ParlantValidatedBrowserUseController {
           lastResourceCheck: new Date(),
         },
         securityProfile: {
-          userTrustLevel: 'MEDIUM',
-          recentSecurityIncidents: 0,
-          suspiciousActivityScore: 0,
+          userTrustLevel: 'MEDIUM',recentSecurityIncidents: 0,suspiciousActivityScore: 0,
           lastSecurityScan: new Date(),
-          enabledSecurityFeatures: ['AUDIT_TRAIL', 'CONTENT_VALIDATION'],
-          securityViolations: [],
-        },
+          enabledSecurityFeatures: ['AUDIT_TRAIL', 'CONTENT_VALIDATION'],securityViolations: [],},
       };
 
       const result = await this.parlantSessionService.createSession(
@@ -542,9 +420,7 @@ export class ParlantValidatedBrowserUseController {
         }
       );
 
-      throw new InternalServerErrorException('Browser session creation failed');
-    }
-  }
+      throw new InternalServerErrorException('Browser session creation failed');}}
 
   // ===========================
   // PARLANT-VALIDATED ASYNC JOB MANAGEMENT
@@ -553,39 +429,23 @@ export class ParlantValidatedBrowserUseController {
   /**
    * Create async job with Parlant validation
    */
-  @Post('async-jobs')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create async job with Parlant validation',
-    description: 'Create a long-running browser automation job with comprehensive Parlant conversational validation for resource usage and business impact.',
-  })
-  @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for Parlant validation',
-    required: true,
-  })
+  @Post('async-jobs')@HttpCode(HttpStatus.CREATED)@ApiOperation({
+    summary: 'Create async job with Parlant validation',description: 'Create a long-running browser automation job with comprehensive Parlant conversational validation for resource usage and business impact.',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for Parlant validation',required: true,})
   @ApiBody({
     type: ParlantAsyncJobDto,
-    description: 'Async job configuration with Parlant validation context',
-  })
-  @ApiResponse({
+    description: 'Async job configuration with Parlant validation context',})@ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Async job created successfully after Parlant approval',
-    type: ParlantValidationResponseDto,
-  })
+    description: 'Async job created successfully after Parlant approval',type: ParlantValidationResponseDto,})
   async createAsyncJobWithValidation(
     @Body() jobDto: ParlantAsyncJobDto,
-    @Headers('X-User-ID') userId?: string,
-    @Headers('X-Session-ID') sessionId?: string,
+    @Headers('X-User-ID') userId?: string,@Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<AsyncJobResultDto>> {
     const operationId = `parlant_async_job${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId && !jobDto.parlantContext.userId) {
-      throw new BadRequestException('User ID required for Parlant validation');
-    }
-
-    const finalUserId = userId ?? jobDto.parlantContext.userId;
+      throw new BadRequestException('User ID required for Parlant validation');}const finalUserId = userId ?? jobDto.parlantContext.userId;
 
     try {
       // Get current queue status for context
@@ -609,9 +469,7 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: AsyncJobValidationContext = {
         userId: finalUserId,
         sessionId: sessionId ?? jobDto.parlantContext.sessionId,
-        agentRole: 'USER',
-        conversationHistory: [],
-        metadata: {},
+        agentRole: 'USER',conversationHistory: [],metadata: {},
         jobType: jobDto.jobType,
         estimatedDurationMs: jobDto.estimatedDurationMs,
         maxRetries: jobDto.maxRetries,
@@ -656,54 +514,31 @@ export class ParlantValidatedBrowserUseController {
         }
       );
 
-      throw new InternalServerErrorException('Async job creation failed');
-    }
-  }
+      throw new InternalServerErrorException('Async job creation failed');}}
 
   /**
    * Get async job status with Parlant audit
    */
-  @Get('async-jobs/:jobId')
-  @ApiOperation({
-    summary: 'Get async job status with Parlant audit',
-    description: 'Retrieve async job status and progress with complete Parlant audit trail.',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Async job identifier',
-    type: 'string',
-  })
-  @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for Parlant validation',
-    required: true,
-  })
+  @Get('async-jobs/:jobId')@ApiOperation({summary: 'Get async job status with Parlant audit',description: 'Retrieve async job status and progress with complete Parlant audit trail.',})@ApiParam({
+    name: 'jobId',description: 'Async job identifier',type: 'string',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for Parlant validation',required: true,})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Async job status retrieved successfully',
-    type: ParlantValidationResponseDto,
-  })
+    description: 'Async job status retrieved successfully',type: ParlantValidationResponseDto,})
   async getAsyncJobWithValidation(
-    @Param('jobId') jobId: string,
-    @Headers('X-User-ID') userId?: string,
-    @Headers('X-Session-ID') sessionId?: string,
+    @Param('jobId') jobId: string,@Headers('X-User-ID') userId?: string,@Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<AsyncJobResultDto | null>> {
     const operationId = `parlant_get_job${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId) {
-      throw new UnauthorizedException('User ID required for Parlant validation');
-    }
-
-    try {
+      throw new UnauthorizedException('User ID required for Parlant validation');}try {
       // Create minimal validation context for read operation
       const validationContext: AsyncJobValidationContext = {
         userId,
         sessionId,
         jobType: AsyncJobType.CUSTOM_WORKFLOW, // Will be updated based on actual job
-        securityLevel: 'LOW',
-        resourceRequirements: {
-          memoryEstimateMB: 0,
+        securityLevel: 'LOW',resourceRequirements: {memoryEstimateMB: 0,
           cpuIntensive: false,
           networkIntensive: false,
           diskSpaceRequiredMB: 0,
@@ -716,9 +551,7 @@ export class ParlantValidatedBrowserUseController {
           currentPriorityDistribution: {} as Record<string, number>,
           systemLoadPercent: 0,
         },
-        agentRole: 'USER',
-        conversationHistory: [],
-        metadata: {},
+        agentRole: 'USER',conversationHistory: [],metadata: {},
       };
 
       const result = await this.parlantAsyncJobService.getAsyncJob(jobId, validationContext);
@@ -741,9 +574,7 @@ export class ParlantValidatedBrowserUseController {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated job retrieval failed`,
-        {
-          error: error instanceof Error ? error.message : String(error),
+        `[${operationId}] Parlant-validated job retrieval failed`,{error: error instanceof Error ? error.message : String(error),
           jobId,
         }
       );
@@ -759,16 +590,9 @@ export class ParlantValidatedBrowserUseController {
   /**
    * Get Parlant performance metrics for browser operations
    */
-  @Get('parlant/metrics')
-  @ApiOperation({
-    summary: 'Get Parlant browser validation metrics',
-    description: 'Retrieve performance metrics and statistics for Parlant browser validation operations.',
-  })
-  @ApiResponse({
+  @Get('parlant/metrics')@ApiOperation({summary: 'Get Parlant browser validation metrics',description: 'Retrieve performance metrics and statistics for Parlant browser validation operations.',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Parlant metrics retrieved successfully',
-  })
-  getParlantBrowserMetrics(): {
+    description: 'Parlant metrics retrieved successfully',})getParlantBrowserMetrics(): {
     browserUseMetrics: Record<string, unknown>;
     sessionMetrics: Record<string, unknown>;
     taskMetrics: Record<string, unknown>;
@@ -785,31 +609,13 @@ export class ParlantValidatedBrowserUseController {
   /**
    * Get Parlant audit history for browser operations
    */
-  @Get('parlant/audit')
-  @ApiOperation({
-    summary: 'Get Parlant browser audit history',
-    description: 'Retrieve complete audit trail for all Parlant-validated browser operations.',
-  })
-  @ApiQuery({
-    name: 'limit',
-    description: 'Maximum number of audit entries to return',
-    required: false,
-    type: 'number',
-  })
-  @ApiHeader({
-    name: 'X-User-ID',
-    description: 'User identifier for audit access validation',
-    required: true,
-  })
+  @Get('parlant/audit')@ApiOperation({summary: 'Get Parlant browser audit history',description: 'Retrieve complete audit trail for all Parlant-validated browser operations.',})@ApiQuery({
+    name: 'limit',description: 'Maximum number of audit entries to return',required: false,type: 'number',})@ApiHeader({
+    name: 'X-User-ID',description: 'User identifier for audit access validation',required: true,})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Parlant audit history retrieved successfully',
-  })
-  getParlantBrowserAuditHistory(
-    @Query('limit') limit: number = 100,
-    @Headers('X-User-ID') userId?: string,
-  ): {
-    browserActionHistory: readonly BrowserActionAuditEntry[];
+    description: 'Parlant audit history retrieved successfully',})getParlantBrowserAuditHistory(
+    @Query('limit') limit: number = 100,@Headers('X-User-ID') userId?: string,): {browserActionHistory: readonly BrowserActionAuditEntry[];
     totalEntries: number;
     auditContext: {
       requestedBy: string;
@@ -818,10 +624,7 @@ export class ParlantValidatedBrowserUseController {
     };
   } {
     if (!userId) {
-      throw new UnauthorizedException('User ID required for audit access');
-    }
-
-    // TODO: Implement getAuditHistory method in ParlantValidatedBrowserUseService
+      throw new UnauthorizedException('User ID required for audit access');}// TODO: Implement getAuditHistory method in ParlantValidatedBrowserUseService
     const auditHistory: BrowserActionAuditEntry[] = []; // Placeholder until method is implemented
     const limitedHistory = auditHistory.slice(0, limit);
 

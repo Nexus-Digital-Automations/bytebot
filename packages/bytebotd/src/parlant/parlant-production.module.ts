@@ -19,34 +19,12 @@
  * Performance: Optimized for high-throughput production environments
  */
 
-import { Module, DynamicModule, Logger } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-
-// Configuration and Environment
-import { ParlantEnvironmentConfigService } from './config/parlant-environment.config';
-
-// Core Production Services
-import { ParlantProductionClientService } from './client/parlant-production-client.service';
-import { ParlantProductionIntegrationService } from './parlant-production-integration.service';
-
-// Monitoring and Health
-import { ParlantHealthMonitorService } from './monitoring/parlant-health-monitor.service';
-
-// Failover and Reliability
-import { ParlantFailoverManagerService } from './failover/parlant-failover-manager.service';
-
-// Legacy compatibility (for gradual migration)
-import { ParlantIntegrationService } from './parlant-integration.service';
-
-/**
- * Production module configuration options
+import { Module, DynamicModule, Logger } from '@nestjs/common';import { ConfigModule, ConfigService } from '@nestjs/config';// Configuration and Environmentimport { ParlantEnvironmentConfigService } from './config/parlant-environment.config';// Core Production Servicesimport { ParlantProductionClientService } from './client/parlant-production-client.service';import { ParlantProductionIntegrationService } from './parlant-production-integration.service';// Monitoring and Healthimport { ParlantHealthMonitorService } from './monitoring/parlant-health-monitor.service';// Failover and Reliabilityimport { ParlantFailoverManagerService } from './failover/parlant-failover-manager.service';// Legacy compatibility (for gradual migration)import { ParlantIntegrationService } from './parlant-integration.service';/*** Production module configuration options
  */
 export interface ParlantProductionModuleOptions {
   // Core configuration
   readonly enabled?: boolean;
-  readonly environment?: 'development' | 'staging' | 'production';
-  readonly serverUrl?: string;
-  readonly apiKey?: string;
+  readonly environment?: 'development' | 'staging' | 'production';readonly serverUrl?: string;readonly apiKey?: string;
   readonly wsUrl?: string;
 
   // Feature toggles
@@ -99,9 +77,7 @@ export class ParlantProductionModule {
       providers: [
         // Configuration services
         {
-          provide: 'PARLANT_PRODUCTION_OPTIONS',
-          useValue: options,
-        },
+          provide: 'PARLANT_PRODUCTION_OPTIONS',useValue: options,},
         ParlantEnvironmentConfigService,
 
         // Core production services
@@ -122,9 +98,7 @@ export class ParlantProductionModule {
 
         // Module initialization service
         {
-          provide: 'PARLANT_PRODUCTION_INITIALIZER',
-          useFactory: (
-            configService: ParlantEnvironmentConfigService,
+          provide: 'PARLANT_PRODUCTION_INITIALIZER',useFactory: (configService: ParlantEnvironmentConfigService,
             integrationService: ParlantProductionIntegrationService,
             healthMonitor: ParlantHealthMonitorService,
             failoverManager: ParlantFailoverManagerService
@@ -167,9 +141,7 @@ export class ParlantProductionModule {
       providers: [
         // Async configuration provider
         {
-          provide: 'PARLANT_PRODUCTION_OPTIONS',
-          useFactory: options.useFactory,
-          inject: options.inject || [],
+          provide: 'PARLANT_PRODUCTION_OPTIONS',useFactory: options.useFactory,inject: options.inject || [],
         },
         ParlantEnvironmentConfigService,
 
@@ -191,9 +163,7 @@ export class ParlantProductionModule {
 
         // Module initialization service
         {
-          provide: 'PARLANT_PRODUCTION_INITIALIZER',
-          useFactory: async (
-            moduleOptions: ParlantProductionModuleOptions,
+          provide: 'PARLANT_PRODUCTION_INITIALIZER',useFactory: async (moduleOptions: ParlantProductionModuleOptions,
             configService: ParlantEnvironmentConfigService,
             integrationService: ParlantProductionIntegrationService,
             healthMonitor: ParlantHealthMonitorService,
@@ -208,9 +178,7 @@ export class ParlantProductionModule {
             );
           },
           inject: [
-            'PARLANT_PRODUCTION_OPTIONS',
-            ParlantEnvironmentConfigService,
-            ParlantProductionIntegrationService,
+            'PARLANT_PRODUCTION_OPTIONS',ParlantEnvironmentConfigService,ParlantProductionIntegrationService,
             ParlantHealthMonitorService,
             ParlantFailoverManagerService,
           ],
@@ -231,12 +199,7 @@ export class ParlantProductionModule {
   /**
    * Create feature module for specific production features
    */
-  static forFeature(features: Array<'health' | 'failover' | 'metrics' | 'audit'>): DynamicModule {
-    const providers: any[] = [];
-
-    if (features.includes('health')) {
-      providers.push(ParlantHealthMonitorService);
-    }
+  static forFeature(features: Array<'health' | 'failover' | 'metrics' | 'audit'>): DynamicModule {const providers: any[] = [];if (features.includes('health')) {providers.push(ParlantHealthMonitorService);}
 
     if (features.includes('failover')) {
       providers.push(ParlantFailoverManagerService);
@@ -261,10 +224,7 @@ export class ParlantProductionModule {
     healthMonitor: ParlantHealthMonitorService,
     failoverManager: ParlantFailoverManagerService
   ): Promise<void> {
-    const operationId = `prod_module_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Parlant Production Module`, {
+    const operationId = `prod_module_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Initializing Parlant Production Module`, {
         enabled: options.enabled ?? true,
         environment: options.environment ?? 'production',
         serverUrl: options.serverUrl,
@@ -279,20 +239,13 @@ export class ParlantProductionModule {
 
       // Validate configuration
       if (!configService.isEnabled()) {
-        this.logger.warn(`[${operationId}] Parlant integration is disabled, skipping initialization`);
-        return;
-      }
+        this.logger.warn(`[${operationId}] Parlant integration is disabled, skipping initialization`);return;}
 
       const validationResult = configService.getValidationResult();
       if (!validationResult.valid) {
-        this.logger.error(`[${operationId}] Configuration validation failed`, {
-          errors: validationResult.errors,
-          missingRequired: validationResult.missingRequired,
+        this.logger.error(`[${operationId}] Configuration validation failed`, {errors: validationResult.errors,missingRequired: validationResult.missingRequired,
         });
-        throw new Error(`Invalid Parlant configuration: ${validationResult.errors.join(', ')}`);
-      }
-
-      if (validationResult.warnings.length > 0) {
+        throw new Error(`Invalid Parlant configuration: ${validationResult.errors.join(`, ')}`);}if (validationResult.warnings.length > 0) {
         this.logger.warn(`[${operationId}] Configuration warnings detected`, {
           warnings: validationResult.warnings,
           recommendations: validationResult.recommendations,
@@ -301,56 +254,38 @@ export class ParlantProductionModule {
 
       // Set up health monitoring integration
       if (options.enableHealthMonitoring ?? true) {
-        healthMonitor.on('health-status-update', (status) => {
-          this.logger.debug('Health status updated', {
-            overall: status.overall,
-            connectivity: status.connectivity.success,
+        healthMonitor.on('health-status-update', (status) => {this.logger.debug('Health status updated', {overall: status.overall,connectivity: status.connectivity.success,
             api: status.api.success,
             websocket: status.websocket.success,
             performance: status.performance.success,
           });
         });
 
-        healthMonitor.on('health-alert', (alert) => {
-          this.logger.warn('Health alert triggered', {
-            id: alert.id,
-            severity: alert.severity,
+        healthMonitor.on('health-alert', (alert) => {this.logger.warn('Health alert triggered', {id: alert.id,severity: alert.severity,
             type: alert.type,
             message: alert.message,
           });
         });
 
-        healthMonitor.on('health-alert-resolved', (alert) => {
-          this.logger.log('Health alert resolved', {
-            id: alert.id,
-            resolvedAt: alert.resolvedAt,
+        healthMonitor.on('health-alert-resolved', (alert) => {this.logger.log('Health alert resolved', {id: alert.id,resolvedAt: alert.resolvedAt,
           });
         });
       }
 
       // Set up failover integration
       if (options.enableFailover ?? true) {
-        failoverManager.on('server-degraded', (event) => {
-          this.logger.warn('Server degraded', {
-            serverId: event.serverId,
-            consecutiveFailures: event.consecutiveFailures,
+        failoverManager.on('server-degraded', (event) => {this.logger.warn('Server degraded', {serverId: event.serverId,consecutiveFailures: event.consecutiveFailures,
             error: event.error,
           });
         });
 
-        failoverManager.on('circuit-breaker-state-change', (newState) => {
-          this.logger.warn('Circuit breaker state changed', {
-            newState,
-            timestamp: new Date(),
+        failoverManager.on('circuit-breaker-state-change', (newState) => {this.logger.warn('Circuit breaker state changed', {newState,timestamp: new Date(),
           });
         });
       }
 
       // Set up integration service monitoring
-      integrationService.on?.('validation-completed', (result) => {
-        this.logger.debug('Validation completed', {
-          operationId: result.operationId,
-          approved: result.approved,
+      integrationService.on?.('validation-completed', (result) => {this.logger.debug('Validation completed', {operationId: result.operationId,approved: result.approved,
           confidence: result.confidence,
           source: result.source,
         });
@@ -358,9 +293,7 @@ export class ParlantProductionModule {
 
       // Set up configuration change monitoring
       configService.onConfigurationUpdate((newConfig) => {
-        this.logger.log('Configuration updated', {
-          serverUrl: newConfig.serverUrl,
-          environment: newConfig.environment,
+        this.logger.log('Configuration updated', {serverUrl: newConfig.serverUrl,environment: newConfig.environment,
           enabled: newConfig.enabled,
         });
       });
@@ -369,9 +302,7 @@ export class ParlantProductionModule {
       const initialHealthCheck = await healthMonitor.performComprehensiveHealthCheck();
 
       if (!initialHealthCheck.overall || initialHealthCheck.overall === 'unhealthy') {
-        this.logger.warn(`[${operationId}] Initial health check failed`, {
-          overall: initialHealthCheck.overall,
-          connectivity: initialHealthCheck.connectivity.success,
+        this.logger.warn(`[${operationId}] Initial health check failed`, {overall: initialHealthCheck.overall,connectivity: initialHealthCheck.connectivity.success,
           errors: [
             ...initialHealthCheck.connectivity.errors || [],
             ...initialHealthCheck.api.errors || [],
@@ -380,17 +311,13 @@ export class ParlantProductionModule {
           ],
         });
       } else {
-        this.logger.log(`[${operationId}] Initial health check passed`, {
-          overall: initialHealthCheck.overall,
-          serverVersion: initialHealthCheck.serverInfo.version,
+        this.logger.log(`[${operationId}] Initial health check passed`, {overall: initialHealthCheck.overall,serverVersion: initialHealthCheck.serverInfo.version,
           averageResponseTime: initialHealthCheck.metrics.averageResponseTime,
         });
       }
 
       // Log successful initialization
-      this.logger.log(`[${operationId}] Parlant Production Module initialized successfully`, {
-        serverUrl: configService.getConfiguration().serverUrl,
-        environment: configService.getConfiguration().environment,
+      this.logger.log(`[${operationId}] Parlant Production Module initialized successfully`, {serverUrl: configService.getConfiguration().serverUrl,environment: configService.getConfiguration().environment,
         healthStatus: initialHealthCheck.overall,
         failoverServers: configService.getConfiguration().failover.servers.length,
         cacheEnabled: configService.getConfiguration().performance.cacheEnabled,
@@ -417,32 +344,10 @@ export class ParlantProductionModule {
  */
 export function createProductionConfigFromEnv(): ParlantProductionModuleOptions {
   return {
-    enabled: process.env.PARLANT_ENABLED !== 'false',
-    environment: (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'production',
-    serverUrl: process.env.PARLANT_API_BASE_URL,
-    apiKey: process.env.PARLANT_API_KEY,
+    enabled: process.env.PARLANT_ENABLED !== 'false',environment: (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'production',serverUrl: process.env.PARLANT_API_BASE_URL,apiKey: process.env.PARLANT_API_KEY,
     wsUrl: process.env.PARLANT_WS_URL,
 
-    enableHealthMonitoring: process.env.PARLANT_ENABLE_HEALTH_CHECK !== 'false',
-    enableFailover: process.env.PARLANT_RETRY_FAILOVER_ENABLED !== 'false',
-    enableCircuitBreaker: process.env.PARLANT_CIRCUIT_BREAKER_ENABLED !== 'false',
-    enableMetrics: process.env.PARLANT_ENABLE_PROMETHEUS_METRICS !== 'false',
-    enableAudit: process.env.PARLANT_AUDIT_ENABLED !== 'false',
-
-    connectionTimeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS || '8000', 10),
-    maxRetries: parseInt(process.env.PARLANT_API_RETRIES || '5', 10),
-    cacheEnabled: process.env.PARLANT_CACHE_ENABLED !== 'false',
-    batchingEnabled: process.env.PARLANT_BATCHING_ENABLED !== 'false',
-
-    tlsEnabled: process.env.PARLANT_TLS_ENABLED !== 'false',
-    authenticationRequired: !!process.env.PARLANT_API_KEY,
-    encryptionEnabled: process.env.PARLANT_AUDIT_ENCRYPTION_ENABLED === 'true',
-
-    healthCheckInterval: parseInt(process.env.PARLANT_HEALTH_CHECK_INTERVAL_MS || '15000', 10),
-    metricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS || '60000', 10),
-    alertsEnabled: process.env.PARLANT_ENABLE_FAILURE_ALERTS !== 'false',
-  };
-}
+    enableHealthMonitoring: process.env.PARLANT_ENABLE_HEALTH_CHECK !== 'false',enableFailover: process.env.PARLANT_RETRY_FAILOVER_ENABLED !== 'false',enableCircuitBreaker: process.env.PARLANT_CIRCUIT_BREAKER_ENABLED !== 'false',enableMetrics: process.env.PARLANT_ENABLE_PROMETHEUS_METRICS !== 'false',enableAudit: process.env.PARLANT_AUDIT_ENABLED !== 'false',connectionTimeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS || '8000', 10),maxRetries: parseInt(process.env.PARLANT_API_RETRIES || '5', 10),cacheEnabled: process.env.PARLANT_CACHE_ENABLED !== 'false',batchingEnabled: process.env.PARLANT_BATCHING_ENABLED !== 'false',tlsEnabled: process.env.PARLANT_TLS_ENABLED !== 'false',authenticationRequired: !!process.env.PARLANT_API_KEY,encryptionEnabled: process.env.PARLANT_AUDIT_ENCRYPTION_ENABLED === 'true',healthCheckInterval: parseInt(process.env.PARLANT_HEALTH_CHECK_INTERVAL_MS || '15000', 10),metricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS || '60000', 10),alertsEnabled: process.env.PARLANT_ENABLE_FAILURE_ALERTS !== 'false',};}
 
 /**
  * Example usage configurations for different environments
@@ -453,10 +358,7 @@ export const PRODUCTION_CONFIGURATIONS = {
    */
   development: (): ParlantProductionModuleOptions => ({
     enabled: true,
-    environment: 'development',
-    serverUrl: 'http://localhost:8000',
-    enableHealthMonitoring: true,
-    enableFailover: false,
+    environment: 'development',serverUrl: 'http://localhost:8000',enableHealthMonitoring: true,enableFailover: false,
     enableCircuitBreaker: false,
     enableMetrics: false,
     enableAudit: false,
@@ -473,10 +375,7 @@ export const PRODUCTION_CONFIGURATIONS = {
    */
   staging: (): ParlantProductionModuleOptions => ({
     enabled: true,
-    environment: 'staging',
-    serverUrl: 'https://staging-api.parlant.io',
-    enableHealthMonitoring: true,
-    enableFailover: true,
+    environment: 'staging',serverUrl: 'https://staging-api.parlant.io',enableHealthMonitoring: true,enableFailover: true,
     enableCircuitBreaker: true,
     enableMetrics: true,
     enableAudit: true,
@@ -496,8 +395,7 @@ export const PRODUCTION_CONFIGURATIONS = {
    */
   production: (): ParlantProductionModuleOptions => ({
     enabled: true,
-    environment: 'production',
-    serverUrl: 'https://api.parlant.io',
+    environment: 'production',serverUrl: 'https://api.parlant.io',
     enableHealthMonitoring: true,
     enableFailover: true,
     enableCircuitBreaker: true,

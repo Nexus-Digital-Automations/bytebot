@@ -25,23 +25,12 @@ import {
   Logger,
   TooManyRequestsException,
   ServiceUnavailableException,
-} from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
-
-// Authentication context types
-import {
+} from '@nestjs/common';import { performance } from 'perf_hooks';import * as crypto from 'crypto';// Authentication context typesimport {
   BrowserUseUserContext,
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserPermission,
-} from '../middleware/browser-use-auth.middleware';
-
-// Security levels
-import { SecurityLevel } from '../../shared/src/types/parlant-integration.types';
-
-/**
- * Rate limit configuration for different limit types
+} from '../middleware/browser-use-auth.middleware';// Security levelsimport { SecurityLevel } from '../../shared/src/types/parlant-integration.types';/*** Rate limit configuration for different limit types
  */
 export interface RateLimitConfig {
   windowSizeMs: number;
@@ -69,16 +58,9 @@ export interface RateLimitContext {
  * Operation details for rate limiting
  */
 export interface RateLimitOperation {
-  type: 'TASK_CREATE' | 'TASK_GET' | 'SESSION_CREATE' | 'SESSION_MANAGE' | 'ASYNC_JOB' | 'DATA_EXTRACT' | 'ADMIN';
-  endpoint: string;
-  method: string;
-  complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  resourceIntensive: boolean;
-  estimatedDurationMs: number;
-  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  type: 'TASK_CREATE' | 'TASK_GET' | 'SESSION_CREATE' | 'SESSION_MANAGE' | 'ASYNC_JOB' | 'DATA_EXTRACT' | 'ADMIN';endpoint: string;method: string;
+  complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';resourceIntensive: boolean;estimatedDurationMs: number;
+  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Environment factors affecting rate limits
  */
 export interface RateLimitEnvironment {
@@ -112,26 +94,19 @@ export interface RateLimitDecision {
  * Applied rate limit information
  */
 export interface AppliedRateLimit {
-  type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE';
-  name: string;
-  current: number;
+  type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE';name: string;current: number;
   limit: number;
   windowMs: number;
   resetTime: Date;
   blocked: boolean;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Rate limit metadata
  */
 export interface RateLimitMetadata {
   limitId: string;
   timestamp: Date;
   processingTime: number;
-  algorithmUsed: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW' | 'ADAPTIVE';
-  adaptiveFactors: string[];
-  systemMetrics: {
+  algorithmUsed: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW' | 'ADAPTIVE';adaptiveFactors: string[];systemMetrics: {
     load: number;
     memory: number;
     cpu: number;
@@ -153,9 +128,7 @@ interface TokenBucket {
  * Circuit breaker state
  */
 interface CircuitBreakerState {
-  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
-  failureCount: number;
-  lastFailureTime: Date;
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';failureCount: number;lastFailureTime: Date;
   openTime?: Date;
   recoveryTimeoutMs: number;
 }
@@ -200,9 +173,7 @@ export class BrowserRateLimiterService {
   // Rate limit configurations for different contexts
   private readonly rateLimitConfigs: Map<string, RateLimitConfig> = new Map([
     // Global limits
-    ['global', {
-      windowSizeMs: 60000, // 1 minute
-      maxRequests: 1000,
+    ['global', {windowSizeMs: 60000, // 1 minutemaxRequests: 1000,
       burstAllowance: 50,
       retryAfterMs: 60000,
       enabled: true,
@@ -212,9 +183,7 @@ export class BrowserRateLimiterService {
     }],
 
     // Per-user limits
-    ['user:default', {
-      windowSizeMs: 60000, // 1 minute
-      maxRequests: 100,
+    ['user:default', {windowSizeMs: 60000, // 1 minutemaxRequests: 100,
       burstAllowance: 10,
       retryAfterMs: 60000,
       enabled: true,
@@ -223,9 +192,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 180000, // 3 minutes
     }],
 
-    ['user:power_user', {
-      windowSizeMs: 60000,
-      maxRequests: 200,
+    ['user:power_user', {windowSizeMs: 60000,maxRequests: 200,
       burstAllowance: 20,
       retryAfterMs: 45000,
       enabled: true,
@@ -234,9 +201,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 120000, // 2 minutes
     }],
 
-    ['user:admin', {
-      windowSizeMs: 60000,
-      maxRequests: 500,
+    ['user:admin', {windowSizeMs: 60000,maxRequests: 500,
       burstAllowance: 50,
       retryAfterMs: 30000,
       enabled: true,
@@ -246,9 +211,7 @@ export class BrowserRateLimiterService {
     }],
 
     // Endpoint-specific limits
-    ['endpoint:task_create', {
-      windowSizeMs: 60000,
-      maxRequests: 20,
+    ['endpoint:task_create', {windowSizeMs: 60000,maxRequests: 20,
       burstAllowance: 5,
       retryAfterMs: 120000, // 2 minutes
       enabled: true,
@@ -257,9 +220,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 600000, // 10 minutes
     }],
 
-    ['endpoint:session_create', {
-      windowSizeMs: 300000, // 5 minutes
-      maxRequests: 5,
+    ['endpoint:session_create', {windowSizeMs: 300000, // 5 minutesmaxRequests: 5,
       burstAllowance: 2,
       retryAfterMs: 300000,
       enabled: true,
@@ -268,9 +229,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 900000, // 15 minutes
     }],
 
-    ['endpoint:async_job', {
-      windowSizeMs: 600000, // 10 minutes
-      maxRequests: 3,
+    ['endpoint:async_job', {windowSizeMs: 600000, // 10 minutesmaxRequests: 3,
       burstAllowance: 1,
       retryAfterMs: 600000,
       enabled: true,
@@ -279,9 +238,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 1800000, // 30 minutes
     }],
 
-    ['endpoint:data_extract', {
-      windowSizeMs: 60000,
-      maxRequests: 10,
+    ['endpoint:data_extract', {windowSizeMs: 60000,maxRequests: 10,
       burstAllowance: 3,
       retryAfterMs: 180000, // 3 minutes
       enabled: true,
@@ -291,9 +248,7 @@ export class BrowserRateLimiterService {
     }],
 
     // Resource-based limits
-    ['resource:memory_intensive', {
-      windowSizeMs: 300000, // 5 minutes
-      maxRequests: 5,
+    ['resource:memory_intensive', {windowSizeMs: 300000, // 5 minutesmaxRequests: 5,
       burstAllowance: 1,
       retryAfterMs: 300000,
       enabled: true,
@@ -302,9 +257,7 @@ export class BrowserRateLimiterService {
       maxBackoffMs: 600000, // 10 minutes
     }],
 
-    ['resource:cpu_intensive', {
-      windowSizeMs: 300000,
-      maxRequests: 3,
+    ['resource:cpu_intensive', {windowSizeMs: 300000,maxRequests: 3,
       burstAllowance: 1,
       retryAfterMs: 450000, // 7.5 minutes
       enabled: true,
@@ -340,10 +293,7 @@ export class BrowserRateLimiterService {
 
   constructor() {
     this.logger.log('⚡ Browser Rate Limiter Service initialized');
-    this.logger.log(`🎚️ Configured ${this.rateLimitConfigs.size} rate limit profiles`);
-
-    // Start periodic maintenance tasks
-    setInterval(() => this.performMaintenanceTasks(), 60000); // Every minute
+    this.logger.log(`🎚️ Configured ${this.rateLimitConfigs.size} rate limit profiles`);// Start periodic maintenance taskssetInterval(() => this.performMaintenanceTasks(), 60000); // Every minute
     setInterval(() => this.updateAdaptiveFactors(), 30000); // Every 30 seconds
     setInterval(() => this.logRateLimitStatistics(), 300000); // Every 5 minutes
 
@@ -376,9 +326,7 @@ export class BrowserRateLimiterService {
       if (!circuitBreakerCheck.allowed) {
         const decision = this.createBlockedDecision(
           limitId,
-          'Circuit breaker active',
-          circuitBreakerCheck.retryAfterMs || 60000,
-          startTime,
+          'Circuit breaker active',circuitBreakerCheck.retryAfterMs || 60000,startTime,
           'CIRCUIT_BREAKER'
         );
         this.updateStatistics(decision);
@@ -441,13 +389,9 @@ export class BrowserRateLimiterService {
       this.statistics.allowedRequests++;
 
       this.logger.debug(
-        `[${limitId}] Rate limits passed`,
-        {
-          userId: context.user.userId,
+        `[${limitId}] Rate limits passed`,{userId: context.user.userId,
           appliedLimits: rateLimitChecks.length,
-          processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
-        }
-      );
+          processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,});
 
       return decision;
 
@@ -455,9 +399,7 @@ export class BrowserRateLimiterService {
       const processingTime = performance.now() - startTime;
 
       this.logger.error(
-        `[${limitId}] Rate limit evaluation failed`,
-        {
-          error: error instanceof Error ? error.message : String(error),
+        `[${limitId}] Rate limit evaluation failed`,{error: error instanceof Error ? error.message : String(error),
           userId: context.user.userId,
           operation: context.operation.type,
           processingTime: `${processingTime.toFixed(2)}ms`,
@@ -467,9 +409,7 @@ export class BrowserRateLimiterService {
       // Fail-safe: allow request but log the failure
       return this.createAllowedDecision(
         limitId,
-        'Rate limit evaluation failed - allowing request',
-        startTime,
-        []
+        'Rate limit evaluation failed - allowing request',startTime,[]
       );
     }
   }
@@ -488,21 +428,14 @@ export class BrowserRateLimiterService {
     // Check user-specific limits
     const userEntry = this.rateLimitStore.get(userKey);
     if (userEntry) {
-      const config = this.rateLimitConfigs.get('user:default') || this.rateLimitConfigs.get('user:default')!;
-      const remaining = Math.max(0, config.maxRequests - userEntry.count);
-      const resetTime = new Date(userEntry.windowStart.getTime() + config.windowSizeMs);
+      const config = this.rateLimitConfigs.get('user:default') || this.rateLimitConfigs.get('user:default')!;const remaining = Math.max(0, config.maxRequests - userEntry.count);const resetTime = new Date(userEntry.windowStart.getTime() + config.windowSizeMs);
 
       limits.push({
-        type: 'USER',
-        name: 'User Rate Limit',
-        current: userEntry.count,
-        limit: config.maxRequests,
+        type: 'USER',name: 'User Rate Limit',current: userEntry.count,limit: config.maxRequests,
         windowMs: config.windowSizeMs,
         resetTime,
         blocked: userEntry.count >= config.maxRequests,
-        severity: userEntry.count >= config.maxRequests * 0.9 ? 'CRITICAL' :
-                 userEntry.count >= config.maxRequests * 0.7 ? 'HIGH' :
-                 userEntry.count >= config.maxRequests * 0.5 ? 'MEDIUM' : 'LOW',
+        severity: userEntry.count >= config.maxRequests * 0.9 ? 'CRITICAL' :userEntry.count >= config.maxRequests * 0.7 ? 'HIGH' :userEntry.count >= config.maxRequests * 0.5 ? 'MEDIUM' : 'LOW',
       });
     }
 
@@ -525,27 +458,13 @@ export class BrowserRateLimiterService {
             windowMs: config.windowSizeMs,
             resetTime: new Date(entry.windowStart.getTime() + config.windowSizeMs),
             blocked: entry.count >= config.maxRequests,
-            severity: entry.count >= config.maxRequests * 0.9 ? 'CRITICAL' : 'LOW',
-          });
-        }
+            severity: entry.count >= config.maxRequests * 0.9 ? 'CRITICAL' : 'LOW',});}
       }
     }
 
     // Determine overall status
-    const overallStatus = limits.some(l => l.blocked) ? 'CRITICAL' :
-                         limits.some(l => l.severity === 'HIGH') ? 'WARNING' : 'NORMAL';
-
-    // Generate recommendations
-    const recommendations: string[] = [];
-    if (overallStatus === 'CRITICAL') {
-      recommendations.push('Reduce request frequency immediately');
-      recommendations.push('Consider batching operations');
-    } else if (overallStatus === 'WARNING') {
-      recommendations.push('Slow down request rate to avoid limits');
-      recommendations.push('Optimize operation complexity');
-    }
-
-    return { limits, overallStatus, recommendations };
+    const overallStatus = limits.some(l => l.blocked) ? 'CRITICAL' :limits.some(l => l.severity === 'HIGH') ? 'WARNING' : 'NORMAL';// Generate recommendationsconst recommendations: string[] = [];
+    if (overallStatus === 'CRITICAL') {recommendations.push('Reduce request frequency immediately');recommendations.push('Consider batching operations');} else if (overallStatus === 'WARNING') {recommendations.push('Slow down request rate to avoid limits');recommendations.push('Optimize operation complexity');}return { limits, overallStatus, recommendations };
   }
 
   // ===== RATE LIMIT EVALUATION METHODS =====
@@ -580,10 +499,7 @@ export class BrowserRateLimiterService {
    * Evaluate global rate limit
    */
   private async evaluateGlobalRateLimit(context: RateLimitContext): Promise<AppliedRateLimit> {
-    const config = this.rateLimitConfigs.get('global')!;
-    const key = 'global';
-
-    return this.evaluateRateLimitWithConfig(key, config, 'GLOBAL', 'Global Rate Limit');
+    const config = this.rateLimitConfigs.get('global')!;const key = 'global';return this.evaluateRateLimitWithConfig(key, config, 'GLOBAL', 'Global Rate Limit');
   }
 
   /**
@@ -595,10 +511,7 @@ export class BrowserRateLimiterService {
     const config = this.rateLimitConfigs.get(configKey) || this.rateLimitConfigs.get('user:default')!;
     const key = `user:${context.user.userId}`;
 
-    return this.evaluateRateLimitWithConfig(key, config, 'USER', `User Rate Limit (${userRole})`);
-  }
-
-  /**
+    return this.evaluateRateLimitWithConfig(key, config, 'USER', `User Rate Limit (${userRole})`);}/**
    * Evaluate endpoint-specific rate limit
    */
   private async evaluateEndpointRateLimit(context: RateLimitContext): Promise<AppliedRateLimit> {
@@ -607,10 +520,7 @@ export class BrowserRateLimiterService {
     const config = this.rateLimitConfigs.get(configKey);
 
     if (!config) {
-      return this.createPassedLimit('ENDPOINT', `Endpoint: ${endpointType}`, 0, 999999);
-    }
-
-    const key = `${configKey}:${context.user.userId}`;
+      return this.createPassedLimit('ENDPOINT', `Endpoint: ${endpointType}`, 0, 999999);}const key = `${configKey}:${context.user.userId}`;
 
     return this.evaluateRateLimitWithConfig(key, config, 'ENDPOINT', `Endpoint: ${endpointType}`);
   }
@@ -639,9 +549,7 @@ export class BrowserRateLimiterService {
    */
   private async evaluateResourceRateLimit(context: RateLimitContext): Promise<AppliedRateLimit> {
     const resourceType = context.operation.complexity === 'CRITICAL' ? 'cpu_intensive' : 'memory_intensive';
-    const configKey = `resource:${resourceType}`;
-    const config = this.rateLimitConfigs.get(configKey)!;
-    const key = `${configKey}:${context.user.userId}`;
+    const configKey = `resource:${resourceType}`;const config = this.rateLimitConfigs.get(configKey)!;const key = `${configKey}:${context.user.userId}`;
 
     return this.evaluateRateLimitWithConfig(key, config, 'RESOURCE', `Resource: ${resourceType}`);
   }
@@ -652,9 +560,7 @@ export class BrowserRateLimiterService {
   private evaluateRateLimitWithConfig(
     key: string,
     config: RateLimitConfig,
-    type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE',
-    name: string
-  ): AppliedRateLimit {
+    type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE',name: string): AppliedRateLimit {
     if (!config.enabled) {
       return this.createPassedLimit(type, name, 0, config.maxRequests);
     }
@@ -759,20 +665,9 @@ export class BrowserRateLimiterService {
    */
   private initializeCircuitBreakers(): void {
     const circuitBreakerKeys = [
-      'global',
-      'user:default',
-      'endpoint:task_create',
-      'endpoint:session_create',
-      'endpoint:async_job',
-      'resource:memory_intensive',
-      'resource:cpu_intensive',
-    ];
-
-    circuitBreakerKeys.forEach(key => {
+      'global','user:default','endpoint:task_create','endpoint:session_create','endpoint:async_job','resource:memory_intensive','resource:cpu_intensive',];circuitBreakerKeys.forEach(key => {
       this.circuitBreakers.set(key, {
-        state: 'CLOSED',
-        failureCount: 0,
-        lastFailureTime: new Date(),
+        state: 'CLOSED',failureCount: 0,lastFailureTime: new Date(),
         recoveryTimeoutMs: 60000, // 1 minute
       });
     });
@@ -791,9 +686,7 @@ export class BrowserRateLimiterService {
       const now = new Date();
 
       // Handle OPEN state
-      if (breaker.state === 'OPEN') {
-        if (breaker.openTime && now.getTime() - breaker.openTime.getTime() > breaker.recoveryTimeoutMs) {
-          breaker.state = 'HALF_OPEN';
+      if (breaker.state === 'OPEN') {if (breaker.openTime && now.getTime() - breaker.openTime.getTime() > breaker.recoveryTimeoutMs) {breaker.state = 'HALF_OPEN';
           this.logger.log(`Circuit breaker ${key} moved to HALF_OPEN state`);
         } else {
           return { allowed: false, retryAfterMs: breaker.recoveryTimeoutMs };
@@ -801,9 +694,7 @@ export class BrowserRateLimiterService {
       }
 
       // Handle HALF_OPEN state
-      if (breaker.state === 'HALF_OPEN') {
-        // Allow request but monitor for failure
-        return { allowed: true };
+      if (breaker.state === 'HALF_OPEN') {// Allow request but monitor for failurereturn { allowed: true };
       }
     }
 
@@ -847,8 +738,7 @@ export class BrowserRateLimiterService {
       const breaker = this.circuitBreakers.get(key);
       if (!breaker) return;
 
-      if (breaker.state === 'HALF_OPEN') {
-        breaker.state = 'CLOSED';
+      if (breaker.state === 'HALF_OPEN') {breaker.state = 'CLOSED';
         breaker.failureCount = 0;
         this.logger.log(`Circuit breaker ${key} CLOSED after successful request`);
       } else if (breaker.state === 'CLOSED') {
@@ -900,12 +790,7 @@ export class BrowserRateLimiterService {
   private calculateUserAdaptiveFactor(user: BrowserUseUserContext): number {
     // Increase limits for trusted users
     switch (user.trustLevel) {
-      case 'CRITICAL': return 1.5;
-      case 'HIGH': return 1.2;
-      case 'MEDIUM': return 1.0;
-      case 'LOW': return 0.8;
-      default: return 0.6;
-    }
+      case 'CRITICAL': return 1.5;case 'HIGH': return 1.2;case 'MEDIUM': return 1.0;case 'LOW': return 0.8;default: return 0.6;}
   }
 
   /**
@@ -924,60 +809,32 @@ export class BrowserRateLimiterService {
    * Get user role for rate limiting
    */
   private getUserRoleForRateLimit(user: BrowserUseUserContext): string {
-    if (user.roles.includes('admin')) return 'admin';
-    if (user.permissions.includes(BrowserPermission.ADMIN_OPERATIONS)) return 'admin';
-    if (user.permissions.includes(BrowserPermission.ASYNC_JOBS)) return 'power_user';
-    return 'default';
-  }
-
-  /**
+    if (user.roles.includes('admin')) return 'admin';if (user.permissions.includes(BrowserPermission.ADMIN_OPERATIONS)) return 'admin';if (user.permissions.includes(BrowserPermission.ASYNC_JOBS)) return 'power_user';return 'default';}/**
    * Get endpoint type for rate limiting
    */
   private getEndpointTypeForRateLimit(operation: RateLimitOperation): string {
     switch (operation.type) {
-      case 'TASK_CREATE': return 'task_create';
-      case 'SESSION_CREATE': return 'session_create';
-      case 'ASYNC_JOB': return 'async_job';
-      case 'DATA_EXTRACT': return 'data_extract';
-      default: return 'default';
-    }
-  }
+      case 'TASK_CREATE': return 'task_create';case 'SESSION_CREATE': return 'session_create';case 'ASYNC_JOB': return 'async_job';case 'DATA_EXTRACT': return 'data_extract';default: return 'default';}}
 
   /**
    * Get complexity multiplier for rate limiting
    */
   private getComplexityMultiplier(complexity: string): number {
     switch (complexity) {
-      case 'CRITICAL': return 4;
-      case 'HIGH': return 3;
-      case 'MEDIUM': return 2;
-      case 'LOW': return 1;
-      default: return 2;
-    }
+      case 'CRITICAL': return 4;case 'HIGH': return 3;case 'MEDIUM': return 2;case 'LOW': return 1;default: return 2;}
   }
 
   /**
    * Calculate limit severity
    */
-  private calculateLimitSeverity(current: number, limit: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const usage = current / limit;
-    if (usage >= 1.0) return 'CRITICAL';
-    if (usage >= 0.9) return 'HIGH';
-    if (usage >= 0.7) return 'MEDIUM';
-    return 'LOW';
-  }
-
-  /**
+  private calculateLimitSeverity(current: number, limit: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {const usage = current / limit;if (usage >= 1.0) return 'CRITICAL';if (usage >= 0.9) return 'HIGH';if (usage >= 0.7) return 'MEDIUM';return 'LOW';}/**
    * Get applicable circuit breaker keys
    */
   private getApplicableCircuitBreakerKeys(context: RateLimitContext): string[] {
     const keys = ['global'];
 
     const userRole = this.getUserRoleForRateLimit(context.user);
-    keys.push(`user:${userRole}`);
-
-    const endpointType = this.getEndpointTypeForRateLimit(context.operation);
-    keys.push(`endpoint:${endpointType}`);
+    keys.push(`user:${userRole}`);const endpointType = this.getEndpointTypeForRateLimit(context.operation);keys.push(`endpoint:${endpointType}`);
 
     if (context.operation.resourceIntensive) {
       const resourceType = context.operation.complexity === 'CRITICAL' ? 'cpu_intensive' : 'memory_intensive';
@@ -1012,18 +869,11 @@ export class BrowserRateLimiterService {
       rateLimitType,
       appliedLimits,
       recommendations: [
-        'Reduce request frequency',
-        'Implement exponential backoff',
-        'Consider batching operations',
-      ],
-      metadata: {
+        'Reduce request frequency','Implement exponential backoff','Consider batching operations',],metadata: {
         limitId,
         timestamp: new Date(),
         processingTime,
-        algorithmUsed: 'TOKEN_BUCKET',
-        adaptiveFactors: ['system_load', 'user_behavior', 'time_of_day'],
-        systemMetrics: {
-          load: this.adaptiveFactors.systemLoadMultiplier,
+        algorithmUsed: 'TOKEN_BUCKET',adaptiveFactors: ['system_load', 'user_behavior', 'time_of_day'],systemMetrics: {load: this.adaptiveFactors.systemLoadMultiplier,
           memory: 0, // Placeholder
           cpu: 0, // Placeholder
           connections: 0, // Placeholder
@@ -1042,26 +892,15 @@ export class BrowserRateLimiterService {
     appliedLimits: AppliedRateLimit[]
   ): RateLimitDecision {
     const processingTime = performance.now() - startTime;
-    const primaryLimit = appliedLimits.find(l => l.type === 'USER') || appliedLimits[0];
-
-    return {
-      allowed: true,
+    const primaryLimit = appliedLimits.find(l => l.type === 'USER') || appliedLimits[0];return {allowed: true,
       reason,
       remainingRequests: primaryLimit ? Math.max(0, primaryLimit.limit - primaryLimit.current) : 999,
       totalRequests: primaryLimit ? primaryLimit.current : 0,
       windowResetTime: primaryLimit ? primaryLimit.resetTime : new Date(Date.now() + 60000),
-      rateLimitType: 'ALLOWED',
-      appliedLimits,
-      recommendations: appliedLimits.some(l => l.severity === 'HIGH') ?
-        ['Consider reducing request frequency to avoid future limits'] : [],
-      metadata: {
-        limitId,
+      rateLimitType: 'ALLOWED',appliedLimits,recommendations: appliedLimits.some(l => l.severity === 'HIGH') ?['Consider reducing request frequency to avoid future limits'] : [],metadata: {limitId,
         timestamp: new Date(),
         processingTime,
-        algorithmUsed: 'TOKEN_BUCKET',
-        adaptiveFactors: ['system_load', 'user_behavior', 'time_of_day'],
-        systemMetrics: {
-          load: this.adaptiveFactors.systemLoadMultiplier,
+        algorithmUsed: 'TOKEN_BUCKET',adaptiveFactors: ['system_load', 'user_behavior', 'time_of_day'],systemMetrics: {load: this.adaptiveFactors.systemLoadMultiplier,
           memory: 0, // Placeholder
           cpu: 0, // Placeholder
           connections: 0, // Placeholder
@@ -1074,9 +913,7 @@ export class BrowserRateLimiterService {
    * Create passed limit
    */
   private createPassedLimit(
-    type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE',
-    name: string,
-    current: number,
+    type: 'GLOBAL' | 'USER' | 'ENDPOINT' | 'OPERATION' | 'RESOURCE' | 'ADAPTIVE',name: string,current: number,
     limit: number
   ): AppliedRateLimit {
     return {
@@ -1162,13 +999,9 @@ export class BrowserRateLimiterService {
     const now = new Date();
 
     this.circuitBreakers.forEach((breaker, key) => {
-      if (breaker.state === 'OPEN' && breaker.openTime &&
-          now.getTime() - breaker.openTime.getTime() > breaker.recoveryTimeoutMs * 2) {
-        breaker.state = 'CLOSED';
+      if (breaker.state === 'OPEN' && breaker.openTime &&now.getTime() - breaker.openTime.getTime() > breaker.recoveryTimeoutMs * 2) {breaker.state = 'CLOSED';
         breaker.failureCount = 0;
-        this.logger.log(`Circuit breaker ${key} automatically reset to CLOSED`);
-      }
-    });
+        this.logger.log(`Circuit breaker ${key} automatically reset to CLOSED`);}});
   }
 
   /**
@@ -1189,8 +1022,7 @@ export class BrowserRateLimiterService {
       totalRequests: this.statistics.totalRequests,
       allowedRequests: this.statistics.allowedRequests,
       blockedRequests: this.statistics.blockedRequests,
-      allowanceRate: `${allowanceRate.toFixed(2)}%`,
-      averageProcessingTime: `${this.statistics.averageProcessingTime.toFixed(2)}ms`,
+      allowanceRate: `${allowanceRate.toFixed(2)}%`,averageProcessingTime: `${this.statistics.averageProcessingTime.toFixed(2)}ms`,
       adaptiveAdjustments: this.statistics.adaptiveAdjustments,
       circuitBreakerTrips: this.statistics.circuitBreakerTrips,
       activeLimitEntries: this.rateLimitStore.size,

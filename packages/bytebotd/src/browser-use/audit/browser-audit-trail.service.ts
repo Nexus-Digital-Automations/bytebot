@@ -26,94 +26,20 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
-import { Readable } from 'stream';
-
-// Authentication and security context types
-import {
+} from '@nestjs/common';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import * as crypto from 'crypto';import { Readable } from 'stream';// Authentication and security context typesimport {
   BrowserUseUserContext,
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserUseAuditContext,
-} from '../middleware/browser-use-auth.middleware';
-
-// Rate limiting and authorization context
-import { RateLimitDecision } from '../rate-limiters/browser-rate-limiter.service';
-import { AuthorizationDecision } from '../guards/browser-use-rbac.guard';
-
-// Request validation context
-import { RequestValidationResult } from '../validators/browser-request-validator.service';
-
-/**
- * Audit event types for browser operations
+} from '../middleware/browser-use-auth.middleware';// Rate limiting and authorization contextimport { RateLimitDecision } from '../rate-limiters/browser-rate-limiter.service';import { AuthorizationDecision } from '../guards/browser-use-rbac.guard';// Request validation contextimport { RequestValidationResult } from '../validators/browser-request-validator.service';/*** Audit event types for browser operations
  */
 export enum BrowserAuditEventType {
   // Authentication events
-  AUTHENTICATION_SUCCESS = 'auth.success',
-  AUTHENTICATION_FAILURE = 'auth.failure',
-  SESSION_CREATED = 'session.created',
-  SESSION_EXPIRED = 'session.expired',
-  SESSION_TERMINATED = 'session.terminated',
-
-  // Authorization events
-  AUTHORIZATION_GRANTED = 'authz.granted',
-  AUTHORIZATION_DENIED = 'authz.denied',
-  PERMISSION_ESCALATION = 'authz.escalation',
-  ROLE_ASSIGNMENT = 'authz.role_assignment',
-
-  // Browser operation events
-  TASK_CREATED = 'task.created',
-  TASK_STARTED = 'task.started',
-  TASK_COMPLETED = 'task.completed',
-  TASK_FAILED = 'task.failed',
-  TASK_CANCELLED = 'task.cancelled',
-
-  // Session management events
-  BROWSER_SESSION_CREATED = 'browser_session.created',
-  BROWSER_SESSION_CLOSED = 'browser_session.closed',
-  PAGE_NAVIGATED = 'page.navigated',
-  ACTION_EXECUTED = 'action.executed',
-
-  // Data events
-  DATA_EXTRACTED = 'data.extracted',
-  FILE_UPLOADED = 'file.uploaded',
-  FORM_SUBMITTED = 'form.submitted',
-  SCREENSHOT_TAKEN = 'screenshot.taken',
-
-  // Security events
-  RATE_LIMIT_EXCEEDED = 'security.rate_limit_exceeded',
-  VALIDATION_FAILED = 'security.validation_failed',
-  SUSPICIOUS_ACTIVITY = 'security.suspicious_activity',
-  SECURITY_VIOLATION = 'security.violation',
-
-  // Compliance events
-  PII_ACCESS = 'compliance.pii_access',
-  DATA_RETENTION_APPLIED = 'compliance.data_retention',
-  CONSENT_RECORDED = 'compliance.consent',
-  GDPR_REQUEST = 'compliance.gdpr_request',
-
-  // System events
-  SERVICE_STARTED = 'system.service_started',
-  SERVICE_STOPPED = 'system.service_stopped',
-  CONFIGURATION_CHANGED = 'system.config_changed',
-  ERROR_OCCURRED = 'system.error',
-}
-
-/**
+  AUTHENTICATION_SUCCESS = 'auth.success',AUTHENTICATION_FAILURE = 'auth.failure',SESSION_CREATED = 'session.created',SESSION_EXPIRED = 'session.expired',SESSION_TERMINATED = 'session.terminated',// Authorization eventsAUTHORIZATION_GRANTED = 'authz.granted',AUTHORIZATION_DENIED = 'authz.denied',PERMISSION_ESCALATION = 'authz.escalation',ROLE_ASSIGNMENT = 'authz.role_assignment',// Browser operation eventsTASK_CREATED = 'task.created',TASK_STARTED = 'task.started',TASK_COMPLETED = 'task.completed',TASK_FAILED = 'task.failed',TASK_CANCELLED = 'task.cancelled',// Session management eventsBROWSER_SESSION_CREATED = 'browser_session.created',BROWSER_SESSION_CLOSED = 'browser_session.closed',PAGE_NAVIGATED = 'page.navigated',ACTION_EXECUTED = 'action.executed',// Data eventsDATA_EXTRACTED = 'data.extracted',FILE_UPLOADED = 'file.uploaded',FORM_SUBMITTED = 'form.submitted',SCREENSHOT_TAKEN = 'screenshot.taken',// Security eventsRATE_LIMIT_EXCEEDED = 'security.rate_limit_exceeded',VALIDATION_FAILED = 'security.validation_failed',SUSPICIOUS_ACTIVITY = 'security.suspicious_activity',SECURITY_VIOLATION = 'security.violation',// Compliance eventsPII_ACCESS = 'compliance.pii_access',DATA_RETENTION_APPLIED = 'compliance.data_retention',CONSENT_RECORDED = 'compliance.consent',GDPR_REQUEST = 'compliance.gdpr_request',// System eventsSERVICE_STARTED = 'system.service_started',SERVICE_STOPPED = 'system.service_stopped',CONFIGURATION_CHANGED = 'system.config_changed',ERROR_OCCURRED = 'system.error',}/**
  * Audit event severity levels
  */
 export enum AuditEventSeverity {
-  INFO = 'info',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-
-/**
+  INFO = 'info',LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',}/**
  * Base audit event structure
  */
 export interface BrowserAuditEvent {
@@ -133,10 +59,7 @@ export interface BrowserAuditEvent {
   description: string;
   resource: string;
   action: string;
-  outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'CANCELLED';
-
-  // Security context
-  ipAddress: string;
+  outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'CANCELLED';// Security contextipAddress: string;
   userAgent: string;
   deviceFingerprint?: string;
   riskScore?: number;
@@ -148,10 +71,7 @@ export interface BrowserAuditEvent {
   // Integrity and compliance
   signature?: string;
   hash: string;
-  retentionCategory: 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE';
-  complianceFlags: string[];
-
-  // Relationships
+  retentionCategory: 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE';complianceFlags: string[];// Relationships
   parentEventId?: string;
   correlationId?: string;
   traceId?: string;
@@ -171,9 +91,7 @@ export interface AuditEventMetadata {
     memoryUsage: number;
     cpuUsage: number;
   };
-  securityClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
-  dataCategories: string[];
-  additionalContext: Record<string, unknown>;
+  securityClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';dataCategories: string[];additionalContext: Record<string, unknown>;
 }
 
 /**
@@ -197,10 +115,7 @@ interface AuditTrailConfig {
     minimumSeverity: AuditEventSeverity;
   };
   storage: {
-    primaryStore: 'DATABASE' | 'FILE_SYSTEM' | 'CLOUD_STORAGE';
-    backupStore: 'DATABASE' | 'FILE_SYSTEM' | 'CLOUD_STORAGE';
-    compressionEnabled: boolean;
-    encryptionEnabled: boolean;
+    primaryStore: 'DATABASE' | 'FILE_SYSTEM' | 'CLOUD_STORAGE';backupStore: 'DATABASE' | 'FILE_SYSTEM' | 'CLOUD_STORAGE';compressionEnabled: boolean;encryptionEnabled: boolean;
   };
 }
 
@@ -218,10 +133,7 @@ export interface AuditQueryParams {
   searchText?: string;
   limit?: number;
   offset?: number;
-  sortBy?: 'timestamp' | 'severity' | 'eventType';
-  sortOrder?: 'ASC' | 'DESC';
-  includeMetadata?: boolean;
-  complianceFilter?: string[];
+  sortBy?: 'timestamp' | 'severity' | 'eventType';sortOrder?: 'ASC' | 'DESC';includeMetadata?: boolean;complianceFilter?: string[];
 }
 
 /**
@@ -295,10 +207,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       minimumSeverity: AuditEventSeverity.INFO,
     },
     storage: {
-      primaryStore: 'DATABASE',
-      backupStore: 'FILE_SYSTEM',
-      compressionEnabled: true,
-      encryptionEnabled: true,
+      primaryStore: 'DATABASE',backupStore: 'FILE_SYSTEM',compressionEnabled: true,encryptionEnabled: true,
     },
   };
 
@@ -328,14 +237,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   constructor() {
     super();
 
-    this.logger.log('📊 Browser Audit Trail Service initializing...');
-
-    // Generate cryptographic keys (in production, use proper key management)
-    this.signingKey = crypto.randomBytes(32).toString('hex');
-    this.encryptionKey = crypto.randomBytes(32).toString('hex');
-
-    // Initialize event counters
-    Object.values(BrowserAuditEventType).forEach(type => {
+    this.logger.log('📊 Browser Audit Trail Service initializing...');// Generate cryptographic keys (in production, use proper key management)this.signingKey = crypto.randomBytes(32).toString('hex');this.encryptionKey = crypto.randomBytes(32).toString('hex');// Initialize event countersObject.values(BrowserAuditEventType).forEach(type => {
       this.statistics.eventsByType.set(type, 0);
     });
 
@@ -348,10 +250,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
    * Initialize audit trail service
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log('🚀 Starting Browser Audit Trail Service...');
-
-    try {
-      await this.initializeStorage();
+    this.logger.log('🚀 Starting Browser Audit Trail Service...');try {await this.initializeStorage();
       await this.startRealTimeStreaming();
       await this.scheduleMaintenanceTasks();
       await this.performIntegrityCheck();
@@ -360,45 +259,23 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       await this.recordEvent({
         eventType: BrowserAuditEventType.SERVICE_STARTED,
         severity: AuditEventSeverity.INFO,
-        description: 'Browser Audit Trail Service started successfully',
-        resource: 'audit_service',
-        action: 'service_startup',
-        outcome: 'SUCCESS',
-        ipAddress: 'localhost',
-        userAgent: 'system',
-        data: {
-          config: this.sanitizeConfigForLogging(),
+        description: 'Browser Audit Trail Service started successfully',resource: 'audit_service',action: 'service_startup',outcome: 'SUCCESS',ipAddress: 'localhost',userAgent: 'system',data: {config: this.sanitizeConfigForLogging(),
           statistics: this.getStatisticsSummary(),
         },
       });
 
-      this.logger.log('✅ Browser Audit Trail Service initialized successfully');
-
-    } catch (error) {
-      this.logger.error('❌ Failed to initialize Browser Audit Trail Service', error);
-      throw error;
-    }
+      this.logger.log('✅ Browser Audit Trail Service initialized successfully');} catch (error) {this.logger.error('❌ Failed to initialize Browser Audit Trail Service', error);throw error;}
   }
 
   /**
    * Cleanup on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down Browser Audit Trail Service...');
-
-    try {
-      // Log service shutdown
+    this.logger.log('🔄 Shutting down Browser Audit Trail Service...');try {// Log service shutdown
       await this.recordEvent({
         eventType: BrowserAuditEventType.SERVICE_STOPPED,
         severity: AuditEventSeverity.INFO,
-        description: 'Browser Audit Trail Service shutting down',
-        resource: 'audit_service',
-        action: 'service_shutdown',
-        outcome: 'SUCCESS',
-        ipAddress: 'localhost',
-        userAgent: 'system',
-        data: {
-          totalEventsProcessed: this.statistics.totalEvents,
+        description: 'Browser Audit Trail Service shutting down',resource: 'audit_service',action: 'service_shutdown',outcome: 'SUCCESS',ipAddress: 'localhost',userAgent: 'system',data: {totalEventsProcessed: this.statistics.totalEvents,
           uptime: process.uptime(),
         },
       });
@@ -406,12 +283,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       await this.flushPendingEvents();
       await this.closeEventStreams();
 
-      this.logger.log('✅ Browser Audit Trail Service shutdown complete');
-
-    } catch (error) {
-      this.logger.error('❌ Error during audit service shutdown', error);
-    }
-  }
+      this.logger.log('✅ Browser Audit Trail Service shutdown complete');} catch (error) {this.logger.error('❌ Error during audit service shutdown', error);}}
 
   // ===== MAIN AUDIT METHODS =====
 
@@ -422,7 +294,6 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     if (!this.config.enabled) {
       return '';
     }
-
     const startTime = performance.now();
 
     try {
@@ -478,10 +349,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       this.logger.error('Failed to record audit event', {
         error: error instanceof Error ? error.message : String(error),
         eventType: eventData.eventType,
-        processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
-      });
-
-      throw error;
+        processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,});throw error;
     }
   }
 
@@ -503,11 +371,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       requestId: auditContext.requestId,
       operationId: auditContext.operationId,
       description: `User authentication ${eventType === BrowserAuditEventType.AUTHENTICATION_SUCCESS ? 'succeeded' : 'failed'}`,
-      resource: 'authentication_service',
-      action: 'authenticate',
-      outcome: eventType === BrowserAuditEventType.AUTHENTICATION_SUCCESS ? 'SUCCESS' : 'FAILURE',
-      ipAddress: auditContext.ipAddress,
-      userAgent: auditContext.userAgent,
+      resource: 'authentication_service',action: 'authenticate',outcome: eventType === BrowserAuditEventType.AUTHENTICATION_SUCCESS ? 'SUCCESS' : 'FAILURE',ipAddress: auditContext.ipAddress,userAgent: auditContext.userAgent,
       data: {
         authenticationMethod: auditContext.authenticationMethod,
         securityValidation: auditContext.securityValidation,
@@ -538,9 +402,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       description: `Authorization ${eventType === BrowserAuditEventType.AUTHORIZATION_GRANTED ? 'granted' : 'denied'} for ${auditContext.endpoint}`,
       resource: auditContext.endpoint,
       action: auditContext.method,
-      outcome: authorizationDecision.granted ? 'SUCCESS' : 'FAILURE',
-      ipAddress: auditContext.ipAddress,
-      userAgent: auditContext.userAgent,
+      outcome: authorizationDecision.granted ? 'SUCCESS' : 'FAILURE',ipAddress: auditContext.ipAddress,userAgent: auditContext.userAgent,
       data: {
         reasoning: authorizationDecision.reasoning,
         conditions: authorizationDecision.conditions,
@@ -549,9 +411,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
         auditTrail: authorizationDecision.auditTrail,
       },
       correlationId: auditContext.operationId,
-      complianceFlags: ['AUTHORIZATION_LOG'],
-    });
-  }
+      complianceFlags: ['AUTHORIZATION_LOG'],});}
 
   /**
    * Record browser task event
@@ -572,9 +432,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       requestId: auditContext.requestId,
       operationId: auditContext.operationId,
       description: this.generateTaskEventDescription(eventType, taskData),
-      resource: 'browser_task',
-      action: this.getActionFromEventType(eventType),
-      outcome: this.getOutcomeFromEventType(eventType),
+      resource: 'browser_task',action: this.getActionFromEventType(eventType),outcome: this.getOutcomeFromEventType(eventType),
       ipAddress: auditContext.ipAddress,
       userAgent: auditContext.userAgent,
       riskScore: userContext.trustLevel ? this.mapTrustLevelToRiskScore(userContext.trustLevel) : undefined,
@@ -601,11 +459,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       requestId: auditContext.requestId,
       operationId: auditContext.operationId,
       description: this.generateSecurityEventDescription(eventType, securityData),
-      resource: 'security_service',
-      action: 'security_check',
-      outcome: 'FAILURE',
-      ipAddress: auditContext.ipAddress,
-      userAgent: auditContext.userAgent,
+      resource: 'security_service',action: 'security_check',outcome: 'FAILURE',ipAddress: auditContext.ipAddress,userAgent: auditContext.userAgent,
       data: securityData,
       correlationId: auditContext.operationId,
       complianceFlags: ['SECURITY_INCIDENT'],
@@ -630,9 +484,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       description: `Rate limit exceeded: ${rateLimitDecision.reason}`,
       resource: auditContext.endpoint,
       action: auditContext.method,
-      outcome: 'FAILURE',
-      ipAddress: auditContext.ipAddress,
-      userAgent: auditContext.userAgent,
+      outcome: 'FAILURE',ipAddress: auditContext.ipAddress,userAgent: auditContext.userAgent,
       data: {
         rateLimitType: rateLimitDecision.rateLimitType,
         remainingRequests: rateLimitDecision.remainingRequests,
@@ -663,9 +515,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       description: `Request validation failed with ${validationResult.violations.length} violations`,
       resource: auditContext.endpoint,
       action: auditContext.method,
-      outcome: 'FAILURE',
-      ipAddress: auditContext.ipAddress,
-      userAgent: auditContext.userAgent,
+      outcome: 'FAILURE',ipAddress: auditContext.ipAddress,userAgent: auditContext.userAgent,
       riskScore: validationResult.riskScore,
       data: {
         violations: validationResult.violations,
@@ -724,13 +574,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
         severity: AuditEventSeverity.INFO,
         userId: requesterContext.userId,
         description: `Audit query executed returning ${result.totalCount} events`,
-        resource: 'audit_trail',
-        action: 'query',
-        outcome: 'SUCCESS',
-        ipAddress: 'internal',
-        userAgent: 'audit_service',
-        data: {
-          queryId,
+        resource: 'audit_trail',action: 'query',outcome: 'SUCCESS',ipAddress: 'internal',userAgent: 'audit_service',data: {queryId,
           queryParams,
           resultCount: result.totalCount,
           executionTime: result.executionTime,
@@ -788,19 +632,9 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     // Set up event listener with filter
     const eventHandler = (event: BrowserAuditEvent) => {
       if (this.matchesStreamFilter(event, filter)) {
-        stream.push(JSON.stringify(event) + '\n');
-      }
-    };
+        stream.push(JSON.stringify(event) + '\n');}};
 
-    this.on('audit:event', eventHandler);
-
-    // Clean up on stream close
-    stream.on('close', () => {
-      this.eventStreams.delete(streamId);
-      this.off('audit:event', eventHandler);
-    });
-
-    return stream;
+    this.on('audit:event', eventHandler);// Clean up on stream closestream.on('close', () => {this.eventStreams.delete(streamId);this.off('audit:event', eventHandler);});return stream;
   }
 
   // ===== PRIVATE HELPER METHODS =====
@@ -814,28 +648,15 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
     return {
       eventId,
-      eventType: eventData.eventType || 'UNKNOWN',
-      timestamp: now,
-      severity: eventData.severity || AuditEventSeverity.INFO,
+      eventType: eventData.eventType || 'UNKNOWN',timestamp: now,severity: eventData.severity || AuditEventSeverity.INFO,
       userId: eventData.userId,
       sessionId: eventData.sessionId,
       requestId: eventData.requestId,
       operationId: eventData.operationId,
-      description: eventData.description || '',
-      resource: eventData.resource || 'unknown',
-      action: eventData.action || 'unknown',
-      outcome: eventData.outcome || 'SUCCESS',
-      ipAddress: eventData.ipAddress || 'unknown',
-      userAgent: eventData.userAgent || 'unknown',
-      deviceFingerprint: eventData.deviceFingerprint,
-      riskScore: eventData.riskScore,
+      description: eventData.description || '',resource: eventData.resource || 'unknown',action: eventData.action || 'unknown',outcome: eventData.outcome || 'SUCCESS',ipAddress: eventData.ipAddress || 'unknown',userAgent: eventData.userAgent || 'unknown',deviceFingerprint: eventData.deviceFingerprint,riskScore: eventData.riskScore,
       data: eventData.data || {},
       metadata: this.createEventMetadata(eventData),
-      hash: '', // Will be set later
-      signature: eventData.signature,
-      retentionCategory: this.determineRetentionCategory(eventData.eventType || 'UNKNOWN', eventData.severity || AuditEventSeverity.INFO),
-      complianceFlags: eventData.complianceFlags || [],
-      parentEventId: eventData.parentEventId,
+      hash: '', // Will be set latersignature: eventData.signature,retentionCategory: this.determineRetentionCategory(eventData.eventType || 'UNKNOWN', eventData.severity || AuditEventSeverity.INFO),complianceFlags: eventData.complianceFlags || [],parentEventId: eventData.parentEventId,
       correlationId: eventData.correlationId,
       traceId: eventData.traceId || this.generateTraceId(),
     };
@@ -846,19 +667,11 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
    */
   private createEventMetadata(eventData: Partial<BrowserAuditEvent>): AuditEventMetadata {
     return {
-      sourceComponent: 'browser-audit-trail-service',
-      sourceVersion: '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
-      processId: process.pid.toString(),
-      threadId: '0', // Node.js is single-threaded
-      performanceMetrics: {
-        processingTime: 0, // Will be updated
+      sourceComponent: 'browser-audit-trail-service',sourceVersion: '1.0.0',environment: process.env.NODE_ENV || 'development',processId: process.pid.toString(),threadId: '0', // Node.js is single-threadedperformanceMetrics: {processingTime: 0, // Will be updated
         memoryUsage: process.memoryUsage().heapUsed,
         cpuUsage: process.cpuUsage().user,
       },
-      securityClassification: this.determineSecurityClassification(eventData.eventType || 'UNKNOWN', eventData.data || {}),
-      dataCategories: this.identifyDataCategories(eventData.data || {}),
-      additionalContext: {
+      securityClassification: this.determineSecurityClassification(eventData.eventType || 'UNKNOWN', eventData.data || {}),dataCategories: this.identifyDataCategories(eventData.data || {}),additionalContext: {
         nodeVersion: process.version,
         platform: process.platform,
         uptime: process.uptime(),
@@ -915,9 +728,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     ];
 
     const redactObject = (obj: any): any => {
-      if (typeof obj !== 'object' || obj === null) {
-        return obj;
-      }
+      if (typeof obj !== 'object' || obj === null) {return obj;}
 
       if (Array.isArray(obj)) {
         return obj.map(redactObject);
@@ -926,11 +737,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       const redacted: any = {};
       for (const [key, value] of Object.entries(obj)) {
         if (sensitivePatterns.some(pattern => pattern.test(key))) {
-          redacted[key] = '[REDACTED]';
-        } else if (typeof value === 'string' && sensitivePatterns.some(pattern => pattern.test(value))) {
-          redacted[key] = '[REDACTED]';
-        } else {
-          redacted[key] = redactObject(value);
+          redacted[key] = '[REDACTED]';} else if (typeof value === 'string' && sensitivePatterns.some(pattern => pattern.test(value))) {redacted[key] = '[REDACTED]';} else {redacted[key] = redactObject(value);
         }
       }
       return redacted;
@@ -952,18 +759,12 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       data: event.data,
     });
 
-    return crypto.createHmac('sha256', this.signingKey).update(eventString).digest('hex');
-  }
-
-  /**
+    return crypto.createHmac('sha256', this.signingKey).update(eventString).digest('hex');}/**
    * Hash event for integrity verification
    */
   private hashEvent(event: BrowserAuditEvent): string {
     const eventString = JSON.stringify(event);
-    return crypto.createHash('sha256').update(eventString).digest('hex');
-  }
-
-  /**
+    return crypto.createHash('sha256').update(eventString).digest('hex');}/**
    * Store event in appropriate storage tier
    */
   private async storeEvent(event: BrowserAuditEvent): Promise<void> {
@@ -975,7 +776,10 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       if (!this.correlationMap.has(event.correlationId)) {
         this.correlationMap.set(event.correlationId, []);
       }
-      this.correlationMap.get(event.correlationId)!.push(event.eventId);
+      const correlationEvents = this.correlationMap.get(event.correlationId);
+      if (correlationEvents) {
+        correlationEvents.push(event.eventId);
+      }
     }
 
     // Add to trace map
@@ -983,7 +787,10 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
       if (!this.traceMap.has(event.traceId)) {
         this.traceMap.set(event.traceId, []);
       }
-      this.traceMap.get(event.traceId)!.push(event);
+      const traceEvents = this.traceMap.get(event.traceId);
+      if (traceEvents) {
+        traceEvents.push(event);
+      }
     }
   }
 
@@ -994,9 +801,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     // Emit to all active streams
     this.eventStreams.forEach(stream => {
       if (!stream.destroyed) {
-        stream.push(JSON.stringify(event) + '\n');
-      }
-    });
+        stream.push(JSON.stringify(event) + '\n');}});
   }
 
   /**
@@ -1059,25 +864,15 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     }
 
     // Apply sorting
-    const sortBy = params.sortBy || 'timestamp';
-    const sortOrder = params.sortOrder || 'DESC';
-
-    events.sort((a, b) => {
-      let aValue: any, bValue: any;
+    const sortBy = params.sortBy || 'timestamp';const sortOrder = params.sortOrder || 'DESC';events.sort((a, b) => {let aValue: any, bValue: any;
 
       switch (sortBy) {
-        case 'timestamp':
-          aValue = a.timestamp.getTime();
-          bValue = b.timestamp.getTime();
+        case 'timestamp':aValue = a.timestamp.getTime();bValue = b.timestamp.getTime();
           break;
-        case 'severity':
-          const severityOrder = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };
-          aValue = severityOrder[a.severity as keyof typeof severityOrder];
+        case 'severity':const severityOrder = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };aValue = severityOrder[a.severity as keyof typeof severityOrder];
           bValue = severityOrder[b.severity as keyof typeof severityOrder];
           break;
-        case 'eventType':
-          aValue = a.eventType;
-          bValue = b.eventType;
+        case 'eventType':aValue = a.eventType;bValue = b.eventType;
           break;
         default:
           aValue = a.timestamp.getTime();
@@ -1098,27 +893,18 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   // ===== UTILITY METHODS =====
 
   private generateEventId(): string {
-    return `audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-  }
+    return `audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
 
   private generateQueryId(): string {
-    return `query_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-  }
+    return `query_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
 
   private generateStreamId(): string {
-    return `stream_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-  }
+    return `stream_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
 
   private generateTraceId(): string {
-    return `trace_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
-  }
+    return `trace_${Date.now()}_${crypto.randomBytes(8).toString('hex')}';}
 
-  private determineRetentionCategory(eventType: BrowserAuditEventType, severity: AuditEventSeverity): 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE' {
-    if (severity === AuditEventSeverity.CRITICAL || severity === AuditEventSeverity.HIGH) {
-      return 'HOT';
-    }
-
-    const criticalEventTypes = [
+  private determineRetentionCategory(eventType: BrowserAuditEventType, severity: AuditEventSeverity): 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE' {if (severity === AuditEventSeverity.CRITICAL || severity === AuditEventSeverity.HIGH) {return 'HOT';}const criticalEventTypes = [
       BrowserAuditEventType.AUTHENTICATION_FAILURE,
       BrowserAuditEventType.AUTHORIZATION_DENIED,
       BrowserAuditEventType.SECURITY_VIOLATION,
@@ -1126,45 +912,24 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
     ];
 
     if (criticalEventTypes.includes(eventType)) {
-      return 'WARM';
-    }
-
-    return 'COLD';
-  }
-
-  private determineSecurityClassification(eventType: BrowserAuditEventType, data: Record<string, unknown>): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {
-    const restrictedEventTypes = [
-      BrowserAuditEventType.PII_ACCESS,
+      return 'WARM';}return 'COLD';}private determineSecurityClassification(eventType: BrowserAuditEventType, data: Record<string, unknown>): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {const restrictedEventTypes = [BrowserAuditEventType.PII_ACCESS,
       BrowserAuditEventType.GDPR_REQUEST,
     ];
 
     if (restrictedEventTypes.includes(eventType)) {
-      return 'RESTRICTED';
-    }
-
-    const confidentialEventTypes = [
+      return 'RESTRICTED';}const confidentialEventTypes = [
       BrowserAuditEventType.AUTHENTICATION_SUCCESS,
       BrowserAuditEventType.AUTHENTICATION_FAILURE,
       BrowserAuditEventType.AUTHORIZATION_DENIED,
     ];
 
     if (confidentialEventTypes.includes(eventType)) {
-      return 'CONFIDENTIAL';
-    }
-
-    return 'INTERNAL';
-  }
-
-  private identifyDataCategories(data: Record<string, unknown>): string[] {
+      return 'CONFIDENTIAL';}return 'INTERNAL';}private identifyDataCategories(data: Record<string, unknown>): string[] {
     const categories: string[] = [];
 
     // Check for PII
     const dataString = JSON.stringify(data).toLowerCase();
-    if (dataString.includes('email') || dataString.includes('@')) {
-      categories.push('PII_EMAIL');
-    }
-    if (dataString.includes('phone') || /\d{3}-\d{3}-\d{4}/.test(dataString)) {
-      categories.push('PII_PHONE');
+    if (dataString.includes('email') || dataString.includes('@')) {categories.push('PII_EMAIL');}if (dataString.includes('phone') || /\d{3}-\d{3}-\d{4}/.test(dataString)) {categories.push('PII_PHONE');
     }
 
     return categories;
@@ -1235,23 +1000,9 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   }
 
   private getActionFromEventType(eventType: BrowserAuditEventType): string {
-    return eventType.split('.')[1] || 'unknown';
-  }
-
-  private getOutcomeFromEventType(eventType: BrowserAuditEventType): 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'CANCELLED' {
-    if (eventType.includes('failed')) return 'FAILURE';
-    if (eventType.includes('cancelled')) return 'CANCELLED';
-    return 'SUCCESS';
-  }
-
-  private mapTrustLevelToRiskScore(trustLevel: string): number {
+    return eventType.split('.')[1] || 'unknown';}private getOutcomeFromEventType(eventType: BrowserAuditEventType): 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'CANCELLED' {if (eventType.includes('failed')) return 'FAILURE';if (eventType.includes('cancelled')) return 'CANCELLED';return 'SUCCESS';}private mapTrustLevelToRiskScore(trustLevel: string): number {
     switch (trustLevel) {
-      case 'CRITICAL': return 10;
-      case 'HIGH': return 25;
-      case 'MEDIUM': return 50;
-      case 'LOW': return 75;
-      default: return 90;
-    }
+      case 'CRITICAL': return 10;case 'HIGH': return 25;case 'MEDIUM': return 50;case 'LOW': return 75;default: return 90;}
   }
 
   private sanitizeTaskData(taskData: Record<string, unknown>): Record<string, unknown> {
@@ -1264,13 +1015,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   }
 
   private generateComplianceFlags(taskData: Record<string, unknown>): string[] {
-    const flags: string[] = ['BROWSER_AUTOMATION'];
-
-    if (taskData.externalUrls) {
-      flags.push('EXTERNAL_ACCESS');
-    }
-
-    if (taskData.dataExtraction) {
+    const flags: string[] = ['BROWSER_AUTOMATION'];if (taskData.externalUrls) {flags.push('EXTERNAL_ACCESS');}if (taskData.dataExtraction) {
       flags.push('DATA_EXTRACTION');
     }
 
@@ -1283,9 +1028,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
   private async validateQueryPermissions(params: AuditQueryParams, requesterContext: { userId: string; hasAdminAccess: boolean }): Promise<void> {
     if (!requesterContext.hasAdminAccess && params.userId && params.userId !== requesterContext.userId) {
-      throw new Error('Insufficient permissions to query other users\' audit events');
-    }
-  }
+      throw new Error('Insufficient permissions to query other users\' audit events');}}
 
   private filterResultsByPermissions(events: BrowserAuditEvent[], requesterContext: { userId: string; hasAdminAccess: boolean }): BrowserAuditEvent[] {
     if (requesterContext.hasAdminAccess) {
@@ -1315,10 +1058,7 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
   private async performMaintenance(): Promise<void> {
     // Perform periodic maintenance tasks
-    this.logger.debug('Performing audit trail maintenance');
-
-    // Clean up old events based on retention policies
-    const now = new Date();
+    this.logger.debug('Performing audit trail maintenance');// Clean up old events based on retention policiesconst now = new Date();
     let cleanedCount = 0;
 
     for (const [eventId, event] of this.auditEventStore.entries()) {
@@ -1326,15 +1066,9 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
 
       let shouldDelete = false;
       switch (event.retentionCategory) {
-        case 'HOT':
-          shouldDelete = ageInDays > this.config.retentionPolicies.hot;
-          break;
-        case 'WARM':
-          shouldDelete = ageInDays > this.config.retentionPolicies.warm;
-          break;
-        case 'COLD':
-          shouldDelete = ageInDays > this.config.retentionPolicies.cold;
-          break;
+        case 'HOT':shouldDelete = ageInDays > this.config.retentionPolicies.hot;break;
+        case 'WARM':shouldDelete = ageInDays > this.config.retentionPolicies.warm;break;
+        case 'COLD':shouldDelete = ageInDays > this.config.retentionPolicies.cold;break;
         case 'ARCHIVE':
           shouldDelete = ageInDays > this.config.retentionPolicies.archive;
           break;

@@ -24,77 +24,27 @@
  * Task priority levels for orchestration
  */
 export enum TaskPriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
-}
-
-/**
+  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',EMERGENCY = 'emergency',}/**
  * Coordination modes for multi-agent operations
  */
 export enum CoordinationMode {
-  SIMPLE = 'simple',              // Single coordinator, simple distribution
-  PEER_TO_PEER = 'peer_to_peer',  // Agents coordinate directly with each other
-  HIERARCHICAL = 'hierarchical',  // Tree-based coordination hierarchy
-  CUSTOM = 'custom',              // Custom coordination logic
-}
-
-/**
+  SIMPLE = 'simple',              // Single coordinator, simple distributionPEER_TO_PEER = 'peer_to_peer',  // Agents coordinate directly with each otherHIERARCHICAL = 'hierarchical',  // Tree-based coordination hierarchyCUSTOM = 'custom',              // Custom coordination logic}/**
  * Task distribution strategies
  */
 export enum TaskDistributionStrategy {
-  ROUND_ROBIN = 'round_robin',    // Distribute tasks in round-robin fashion
-  WEIGHTED = 'weighted',          // Distribute based on agent capabilities
-  PRIORITY = 'priority',          // Distribute based on task priority
-  LOAD_BALANCED = 'load_balanced', // Distribute based on current load
-  CUSTOM = 'custom',              // Custom distribution logic
-}
-
-/**
+  ROUND_ROBIN = 'round_robin',    // Distribute tasks in round-robin fashionWEIGHTED = 'weighted',          // Distribute based on agent capabilitiesPRIORITY = 'priority',          // Distribute based on task priorityLOAD_BALANCED = 'load_balanced', // Distribute based on current loadCUSTOM = 'custom',              // Custom distribution logic}/**
  * Agent capability types
  */
 export enum AgentCapability {
-  BROWSER_AUTOMATION = 'browser_automation',
-  DATA_EXTRACTION = 'data_extraction',
-  FORM_FILLING = 'form_filling',
-  SCREENSHOT_CAPTURE = 'screenshot_capture',
-  PERFORMANCE_MONITORING = 'performance_monitoring',
-  SECURITY_SCANNING = 'security_scanning',
-  API_TESTING = 'api_testing',
-  LOAD_TESTING = 'load_testing',
-  CUSTOM = 'custom',
-}
-
-/**
+  BROWSER_AUTOMATION = 'browser_automation',DATA_EXTRACTION = 'data_extraction',FORM_FILLING = 'form_filling',SCREENSHOT_CAPTURE = 'screenshot_capture',PERFORMANCE_MONITORING = 'performance_monitoring',SECURITY_SCANNING = 'security_scanning',API_TESTING = 'api_testing',LOAD_TESTING = 'load_testing',CUSTOM = 'custom',}/**
  * Orchestration execution status
  */
 export enum OrchestrationStatus {
-  PENDING = 'pending',
-  INITIALIZING = 'initializing',
-  RUNNING = 'running',
-  PAUSED = 'paused',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TERMINATING = 'terminating',
-}
-
-/**
+  PENDING = 'pending',INITIALIZING = 'initializing',RUNNING = 'running',PAUSED = 'paused',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TERMINATING = 'terminating',}/**
  * Agent status in orchestration
  */
 export enum AgentStatus {
-  IDLE = 'idle',
-  ASSIGNED = 'assigned',
-  EXECUTING = 'executing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  UNAVAILABLE = 'unavailable',
-  TERMINATED = 'terminated',
-}
-
-/**
+  IDLE = 'idle',ASSIGNED = 'assigned',EXECUTING = 'executing',COMPLETED = 'completed',FAILED = 'failed',UNAVAILABLE = 'unavailable',TERMINATED = 'terminated',}/**
  * Resource allocation and limits
  */
 export interface ResourceLimits {
@@ -122,9 +72,7 @@ export interface ResourceUsage {
  */
 export interface FailoverConfig {
   enabled: boolean;
-  strategy: 'IMMEDIATE' | 'GRACEFUL' | 'MANUAL';
-  timeoutMs: number;
-  maxRetries: number;
+  strategy: 'IMMEDIATE' | 'GRACEFUL' | 'MANUAL';timeoutMs: number;maxRetries: number;
   fallbackAgents?: string[];
   notificationChannels?: string[];
 }
@@ -198,9 +146,7 @@ export interface AgentError {
   errorType: string;
   errorMessage: string;
   taskId?: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  resolved: boolean;
-  context?: Record<string, unknown>;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';resolved: boolean;context?: Record<string, unknown>;
 }
 
 /**
@@ -226,9 +172,7 @@ export interface DistributedTask {
  */
 export interface TaskAction {
   actionId: string;
-  type: 'navigate' | 'click' | 'type' | 'extract' | 'screenshot' | 'wait' | 'custom';
-  selector?: string;
-  url?: string;
+  type: 'navigate' | 'click' | 'type' | 'extract' | 'screenshot' | 'wait' | 'custom';selector?: string;url?: string;
   text?: string;
   parameters?: Record<string, unknown>;
   waitTimeoutMs?: number;
@@ -240,9 +184,7 @@ export interface TaskAction {
  * Action condition
  */
 export interface ActionCondition {
-  type: 'ELEMENT_VISIBLE' | 'ELEMENT_CLICKABLE' | 'PAGE_LOADED' | 'CUSTOM';
-  selector?: string;
-  timeout?: number;
+  type: 'ELEMENT_VISIBLE' | 'ELEMENT_CLICKABLE' | 'PAGE_LOADED' | 'CUSTOM';selector?: string;timeout?: number;
   customLogic?: string;
 }
 
@@ -250,9 +192,7 @@ export interface ActionCondition {
  * Action result
  */
 export interface ActionResult {
-  type: 'SCREENSHOT' | 'TEXT' | 'HTML' | 'DATA' | 'METRIC';
-  name: string;
-  selector?: string;
+  type: 'SCREENSHOT' | 'TEXT' | 'HTML' | 'DATA' | 'METRIC';name: string;selector?: string;
   format?: string;
   validation?: string;
 }
@@ -272,9 +212,7 @@ export interface TaskRetryConfig {
  * Task validation rule
  */
 export interface TaskValidationRule {
-  type: 'RESULT_VALIDATION' | 'PERFORMANCE_VALIDATION' | 'SECURITY_VALIDATION';
-  condition: string;
-  expectedValue?: unknown;
+  type: 'RESULT_VALIDATION' | 'PERFORMANCE_VALIDATION' | 'SECURITY_VALIDATION';condition: string;expectedValue?: unknown;
   threshold?: number;
   message: string;
 }
@@ -284,9 +222,7 @@ export interface TaskValidationRule {
  */
 export interface TaskOutput {
   name: string;
-  type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'OBJECT' | 'ARRAY' | 'FILE';
-  format?: string;
-  validation?: string;
+  type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'OBJECT' | 'ARRAY' | 'FILE';format?: string;validation?: string;
   required: boolean;
   description?: string;
 }
@@ -297,9 +233,7 @@ export interface TaskOutput {
 export interface TaskExecutionResult {
   taskId: string;
   agentId: string;
-  status: 'SUCCESS' | 'FAILED' | 'TIMEOUT' | 'CANCELLED';
-  startTime: Date;
-  endTime: Date;
+  status: 'SUCCESS' | 'FAILED' | 'TIMEOUT' | 'CANCELLED';startTime: Date;endTime: Date;
   duration: number;
   outputs: Record<string, unknown>;
   errors: TaskExecutionError[];
@@ -318,10 +252,7 @@ export interface TaskExecutionError {
   errorMessage: string;
   stackTrace?: string;
   recovery?: string;
-  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Task performance metrics
  */
 export interface TaskPerformanceMetrics {
@@ -387,11 +318,7 @@ export interface OrchestrationMonitoringConfig {
  */
 export interface AlertThreshold {
   metric: string;
-  operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';
-  value: number;
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  description: string;
-  actions: string[];
+  operator: 'GT' | 'LT' | 'EQ' | 'NE' | 'GTE' | 'LTE';value: number;severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';description: string;actions: string[];
 }
 
 /**
@@ -401,17 +328,13 @@ export interface MetricsExportConfig {
   enabled: boolean;
   exportInterval: number;
   destinations: MetricsDestination[];
-  format: 'JSON' | 'PROMETHEUS' | 'INFLUX' | 'CUSTOM';
-  filters?: string[];
-}
+  format: 'JSON' | 'PROMETHEUS' | 'INFLUX' | 'CUSTOM';filters?: string[];}
 
 /**
  * Metrics destination
  */
 export interface MetricsDestination {
-  type: 'HTTP' | 'FILE' | 'DATABASE' | 'QUEUE';
-  url?: string;
-  authentication?: Record<string, unknown>;
+  type: 'HTTP' | 'FILE' | 'DATABASE' | 'QUEUE';url?: string;authentication?: Record<string, unknown>;
   configuration: Record<string, unknown>;
 }
 
@@ -433,9 +356,7 @@ export interface OrchestrationSecurityConfig {
  */
 export interface AccessControlEntry {
   principal: string;
-  principalType: 'USER' | 'GROUP' | 'SERVICE' | 'ROLE';
-  permissions: string[];
-  resources: string[];
+  principalType: 'USER' | 'GROUP' | 'SERVICE' | 'ROLE';permissions: string[];resources: string[];
   conditions?: AccessCondition[];
   expiresAt?: Date;
 }
@@ -444,9 +365,7 @@ export interface AccessControlEntry {
  * Access condition
  */
 export interface AccessCondition {
-  type: 'IP_RANGE' | 'TIME_WINDOW' | 'GEOLOCATION' | 'CUSTOM';
-  configuration: Record<string, unknown>;
-}
+  type: 'IP_RANGE' | 'TIME_WINDOW' | 'GEOLOCATION' | 'CUSTOM';configuration: Record<string, unknown>;}
 
 /**
  * Notification configuration
@@ -463,9 +382,7 @@ export interface NotificationConfig {
  */
 export interface NotificationChannel {
   channelId: string;
-  type: 'EMAIL' | 'SLACK' | 'WEBHOOK' | 'SMS' | 'PUSH';
-  configuration: Record<string, unknown>;
-  enabled: boolean;
+  type: 'EMAIL' | 'SLACK' | 'WEBHOOK' | 'SMS' | 'PUSH';configuration: Record<string, unknown>;enabled: boolean;
   priority: number;
 }
 
@@ -478,9 +395,7 @@ export interface NotificationTemplate {
   eventTypes: string[];
   subject: string;
   body: string;
-  format: 'TEXT' | 'HTML' | 'MARKDOWN';
-  variables: string[];
-}
+  format: 'TEXT' | 'HTML' | 'MARKDOWN';variables: string[];}
 
 /**
  * Notification rule
@@ -500,9 +415,7 @@ export interface NotificationRule {
  */
 export interface NotificationCondition {
   field: string;
-  operator: 'EQ' | 'NE' | 'GT' | 'LT' | 'CONTAINS' | 'REGEX';
-  value: unknown;
-}
+  operator: 'EQ' | 'NE' | 'GT' | 'LT' | 'CONTAINS' | 'REGEX';value: unknown;}
 
 /**
  * Orchestration metrics
@@ -551,11 +464,7 @@ export interface PerformanceMetrics {
 export interface OrchestrationEvent {
   eventId: string;
   timestamp: Date;
-  eventType: 'ORCHESTRATION_STARTED' | 'ORCHESTRATION_COMPLETED' | 'TASK_ASSIGNED' | 'TASK_COMPLETED' | 'AGENT_ADDED' | 'AGENT_REMOVED' | 'ERROR_OCCURRED' | 'RESOURCE_THRESHOLD_EXCEEDED';
-  source: string;
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  message: string;
-  details: Record<string, unknown>;
+  eventType: 'ORCHESTRATION_STARTED' | 'ORCHESTRATION_COMPLETED' | 'TASK_ASSIGNED' | 'TASK_COMPLETED' | 'AGENT_ADDED' | 'AGENT_REMOVED' | 'ERROR_OCCURRED' | 'RESOURCE_THRESHOLD_EXCEEDED';source: string;severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';message: string;details: Record<string, unknown>;
   correlationId?: string;
   tags?: string[];
 }
@@ -583,11 +492,7 @@ export interface ScalingPolicy {
   name: string;
   metric: string;
   threshold: number;
-  action: 'SCALE_UP' | 'SCALE_DOWN';
-  adjustment: number;
-  adjustmentType: 'ABSOLUTE' | 'PERCENTAGE';
-  cooldown: number;
-  enabled: boolean;
+  action: 'SCALE_UP' | 'SCALE_DOWN';adjustment: number;adjustmentType: 'ABSOLUTE' | 'PERCENTAGE';cooldown: number;enabled: boolean;
 }
 
 /**
@@ -597,16 +502,12 @@ export interface OrchestrationDeployment {
   deploymentId: string;
   name: string;
   version: string;
-  environment: 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION';
-  region: string;
-  configuration: OrchestrationConfig;
+  environment: 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION';region: string;configuration: OrchestrationConfig;
   scaling: OrchestrationScalingConfig;
   networking: NetworkingConfig;
   security: SecurityDeploymentConfig;
   monitoring: MonitoringDeploymentConfig;
-  status: 'DEPLOYING' | 'ACTIVE' | 'UPDATING' | 'TERMINATING' | 'FAILED';
-  createdAt: Date;
-  updatedAt: Date;
+  status: 'DEPLOYING' | 'ACTIVE' | 'UPDATING' | 'TERMINATING' | 'FAILED';createdAt: Date;updatedAt: Date;
   metadata: Record<string, unknown>;
 }
 
@@ -627,10 +528,7 @@ export interface NetworkingConfig {
  */
 export interface LoadBalancerConfig {
   enabled: boolean;
-  type: 'APPLICATION' | 'NETWORK' | 'CLASSIC';
-  algorithm: 'ROUND_ROBIN' | 'LEAST_CONNECTIONS' | 'WEIGHTED' | 'IP_HASH';
-  healthCheck: HealthCheckConfig;
-  stickySession: boolean;
+  type: 'APPLICATION' | 'NETWORK' | 'CLASSIC';algorithm: 'ROUND_ROBIN' | 'LEAST_CONNECTIONS' | 'WEIGHTED' | 'IP_HASH';healthCheck: HealthCheckConfig;stickySession: boolean;
 }
 
 /**
@@ -652,9 +550,7 @@ export interface HealthCheckConfig {
 export interface DnsConfig {
   domain: string;
   hostedZoneId?: string;
-  recordType: 'A' | 'CNAME' | 'ALIAS';
-  ttl: number;
-  healthCheck?: boolean;
+  recordType: 'A' | 'CNAME' | 'ALIAS';ttl: number;healthCheck?: boolean;
 }
 
 /**
@@ -687,9 +583,7 @@ export interface SecurityDeploymentConfig {
  * Secrets management configuration
  */
 export interface SecretsManagementConfig {
-  provider: 'AWS_SECRETS_MANAGER' | 'HASHICORP_VAULT' | 'KUBERNETES_SECRETS' | 'AZURE_KEY_VAULT';
-  region?: string;
-  keyId?: string;
+  provider: 'AWS_SECRETS_MANAGER' | 'HASHICORP_VAULT' | 'KUBERNETES_SECRETS' | 'AZURE_KEY_VAULT';region?: string;keyId?: string;
   rotationEnabled: boolean;
   rotationSchedule?: string;
 }
@@ -722,21 +616,14 @@ export interface MonitoringDeploymentConfig {
  */
 export interface LoggingConfig {
   enabled: boolean;
-  level: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  destination: 'STDOUT' | 'FILE' | 'CLOUDWATCH' | 'ELASTICSEARCH' | 'CUSTOM';
-  retention: number;
-  format: 'JSON' | 'TEXT' | 'STRUCTURED';
-  includeMetadata: boolean;
-}
+  level: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';destination: 'STDOUT' | 'FILE' | 'CLOUDWATCH' | 'ELASTICSEARCH' | 'CUSTOM';retention: number;format: 'JSON' | 'TEXT' | 'STRUCTURED';includeMetadata: boolean;}
 
 /**
  * Metrics configuration
  */
 export interface MetricsConfig {
   enabled: boolean;
-  provider: 'PROMETHEUS' | 'CLOUDWATCH' | 'DATADOG' | 'NEW_RELIC' | 'CUSTOM';
-  scrapeInterval: number;
-  retention: number;
+  provider: 'PROMETHEUS' | 'CLOUDWATCH' | 'DATADOG' | 'NEW_RELIC' | 'CUSTOM';scrapeInterval: number;retention: number;
   customMetrics: CustomMetric[];
 }
 
@@ -745,9 +632,7 @@ export interface MetricsConfig {
  */
 export interface CustomMetric {
   name: string;
-  type: 'COUNTER' | 'GAUGE' | 'HISTOGRAM' | 'SUMMARY';
-  description: string;
-  labels: string[];
+  type: 'COUNTER' | 'GAUGE' | 'HISTOGRAM' | 'SUMMARY';description: string;labels: string[];
   buckets?: number[];
 }
 
@@ -756,9 +641,7 @@ export interface CustomMetric {
  */
 export interface TracingConfig {
   enabled: boolean;
-  provider: 'JAEGER' | 'ZIPKIN' | 'AWS_XRAY' | 'DATADOG' | 'CUSTOM';
-  samplingRate: number;
-  endpoint?: string;
+  provider: 'JAEGER' | 'ZIPKIN' | 'AWS_XRAY' | 'DATADOG' | 'CUSTOM';samplingRate: number;endpoint?: string;
   serviceName: string;
 }
 
@@ -767,9 +650,7 @@ export interface TracingConfig {
  */
 export interface AlertingConfig {
   enabled: boolean;
-  provider: 'PROMETHEUS_ALERTMANAGER' | 'CLOUDWATCH_ALARMS' | 'PAGERDUTY' | 'CUSTOM';
-  rules: AlertRule[];
-  silencing: SilencingConfig;
+  provider: 'PROMETHEUS_ALERTMANAGER' | 'CLOUDWATCH_ALARMS' | 'PAGERDUTY' | 'CUSTOM';rules: AlertRule[];silencing: SilencingConfig;
   escalation: EscalationConfig;
 }
 
@@ -781,11 +662,7 @@ export interface AlertRule {
   name: string;
   query: string;
   threshold: number;
-  operator: 'GT' | 'LT' | 'EQ' | 'NE';
-  duration: number;
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  labels: Record<string, string>;
-  annotations: Record<string, string>;
+  operator: 'GT' | 'LT' | 'EQ' | 'NE';duration: number;severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';labels: Record<string, string>;annotations: Record<string, string>;
 }
 
 /**
@@ -843,9 +720,7 @@ export interface EscalationLevel {
  * Escalation target
  */
 export interface EscalationTarget {
-  type: 'USER' | 'GROUP' | 'SERVICE' | 'WEBHOOK';
-  identifier: string;
-  configuration?: Record<string, unknown>;
+  type: 'USER' | 'GROUP' | 'SERVICE' | 'WEBHOOK';identifier: string;configuration?: Record<string, unknown>;
 }
 
 /**
@@ -868,9 +743,7 @@ export interface DashboardConfig {
 export interface DashboardPanel {
   panelId: string;
   title: string;
-  type: 'GRAPH' | 'TABLE' | 'STAT' | 'GAUGE' | 'HEATMAP' | 'TEXT';
-  query: string;
-  position: PanelPosition;
+  type: 'GRAPH' | 'TABLE' | 'STAT' | 'GAUGE' | 'HEATMAP' | 'TEXT';query: string;position: PanelPosition;
   size: PanelSize;
   configuration: Record<string, unknown>;
 }
@@ -879,9 +752,7 @@ export interface DashboardPanel {
  * Dashboard layout
  */
 export interface DashboardLayout {
-  type: 'GRID' | 'FLOW' | 'CUSTOM';
-  columns: number;
-  rowHeight: number;
+  type: 'GRID' | 'FLOW' | 'CUSTOM';columns: number;rowHeight: number;
   margins: Margins;
 }
 
@@ -899,9 +770,7 @@ export interface TimeRange {
  */
 export interface DashboardVariable {
   name: string;
-  type: 'QUERY' | 'CONSTANT' | 'INTERVAL' | 'DATASOURCE';
-  query?: string;
-  value?: string;
+  type: 'QUERY' | 'CONSTANT' | 'INTERVAL' | 'DATASOURCE';query?: string;value?: string;
   options?: VariableOption[];
 }
 
@@ -966,9 +835,7 @@ export interface OrchestrationTemplate {
  */
 export interface TemplateVariable {
   name: string;
-  type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';
-  description: string;
-  defaultValue?: unknown;
+  type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';description: string;defaultValue?: unknown;
   required: boolean;
   validation?: string;
   options?: unknown[];
@@ -978,13 +845,8 @@ export interface TemplateVariable {
  * Template constraint
  */
 export interface TemplateConstraint {
-  type: 'RESOURCE' | 'AGENT' | 'TASK' | 'SECURITY' | 'CUSTOM';
-  condition: string;
-  message: string;
-  severity: 'WARNING' | 'ERROR';
-}
-
-/**
+  type: 'RESOURCE' | 'AGENT' | 'TASK' | 'SECURITY' | 'CUSTOM';condition: string;message: string;
+  severity: 'WARNING' | 'ERROR';}/**
  * Template example
  */
 export interface TemplateExample {
@@ -1029,9 +891,7 @@ export interface ExecutionPhase {
  * Phase condition
  */
 export interface PhaseCondition {
-  type: 'PREREQUISITE' | 'RESOURCE_AVAILABILITY' | 'CUSTOM';
-  condition: string;
-  required: boolean;
+  type: 'PREREQUISITE' | 'RESOURCE_AVAILABILITY' | 'CUSTOM';condition: string;required: boolean;
 }
 
 /**
@@ -1063,9 +923,7 @@ export interface PlanDependency {
   dependencyId: string;
   source: string;
   target: string;
-  type: 'SEQUENCE' | 'RESOURCE' | 'DATA' | 'SYNCHRONIZATION';
-  condition?: string;
-  optional: boolean;
+  type: 'SEQUENCE' | 'RESOURCE' | 'DATA' | 'SYNCHRONIZATION';condition?: string;optional: boolean;
 }
 
 /**
@@ -1110,16 +968,11 @@ export interface TimelineDependency {
   source: string;
   target: string;
   delay: number;
-  type: 'FINISH_TO_START' | 'START_TO_START' | 'FINISH_TO_FINISH' | 'START_TO_FINISH';
-}
-
-/**
+  type: 'FINISH_TO_START' | 'START_TO_START' | 'FINISH_TO_FINISH' | 'START_TO_FINISH';}/**
  * Plan risk assessment
  */
 export interface PlanRiskAssessment {
-  overallRisk: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  riskFactors: PlanRiskFactor[];
-  mitigationStrategies: MitigationStrategy[];
+  overallRisk: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';riskFactors: PlanRiskFactor[];mitigationStrategies: MitigationStrategy[];
   contingencyPlans: ContingencyPlan[];
   successProbability: number;
 }
@@ -1129,9 +982,7 @@ export interface PlanRiskAssessment {
  */
 export interface PlanRiskFactor {
   factor: string;
-  category: 'RESOURCE' | 'TECHNICAL' | 'OPERATIONAL' | 'EXTERNAL';
-  probability: number;
-  impact: number;
+  category: 'RESOURCE' | 'TECHNICAL' | 'OPERATIONAL' | 'EXTERNAL';probability: number;impact: number;
   riskScore: number;
   description: string;
 }
@@ -1145,10 +996,7 @@ export interface MitigationStrategy {
   approach: string;
   implementation: string;
   effectiveness: number;
-  cost: 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-/**
+  cost: 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Contingency plan
  */
 export interface ContingencyPlan {
@@ -1177,9 +1025,7 @@ export interface AlternativePlan {
  * Plan tradeoff
  */
 export interface PlanTradeoff {
-  aspect: 'PERFORMANCE' | 'COST' | 'RELIABILITY' | 'COMPLEXITY' | 'SECURITY';
-  description: string;
-  impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  aspect: 'PERFORMANCE' | 'COST' | 'RELIABILITY' | 'COMPLEXITY' | 'SECURITY';description: string;impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
   magnitude: number;
 }
 

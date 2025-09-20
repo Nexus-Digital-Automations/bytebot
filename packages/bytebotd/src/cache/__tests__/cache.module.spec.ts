@@ -20,19 +20,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Logger } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { CacheModule } from '../cache.module';
-import { CacheService } from '../cache.service';
-import { CacheKeyGenerator } from '../cache-key.generator';
-import { MetricsService } from '../../metrics/metrics.service';
-
-// Mock the redis store import
-jest.mock('cache-manager-redis-store', () => ({
-  _esModule: true,
-  default: jest.fn(),
+import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Logger } from '@nestjs/common';import { Cache } from 'cache-manager';import { CacheModule } from '../cache.module';import { CacheService } from '../cache.service';import { CacheKeyGenerator } from '../cache-key.generator';import { MetricsService } from '../../metrics/metrics.service';// Mock the redis store importjest.mock('cache-manager-redis-store', () => ({_esModule: true,default: jest.fn(),
 }));
 
 // Mock environment variables helper
@@ -44,9 +32,7 @@ const mockEnvVars = (envVars: Record<string, string> = {}) => {
   };
 };
 
-describe('CacheModule', () => {
-  let module: TestingModule;
-  let cacheService: CacheService;
+describe('CacheModule', () => {let module: TestingModule;let cacheService: CacheService;
   let keyGenerator: CacheKeyGenerator;
   let cacheManager: Cache;
   let restoreEnv: () => void;
@@ -64,10 +50,7 @@ describe('CacheModule', () => {
     jest.clearAllMocks();
   });
 
-  describe('Module Initialization', () => {
-    it('should compile and initialize successfully', async () => {
-      module = await Test.createTestingModule({
-        imports: [CacheModule],
+  describe('Module Initialization', () => {it('should compile and initialize successfully', async () => {module = await Test.createTestingModule({imports: [CacheModule],
         providers: [
           {
             provide: MetricsService,
@@ -82,9 +65,7 @@ describe('CacheModule', () => {
       expect(module).toBeDefined();
     });
 
-    it('should provide all required services', async () => {
-      module = await Test.createTestingModule({
-        imports: [CacheModule],
+    it('should provide all required services', async () => {module = await Test.createTestingModule({imports: [CacheModule],
         providers: [
           {
             provide: MetricsService,
@@ -107,17 +88,10 @@ describe('CacheModule', () => {
       expect(cacheManager).toBeDefined();
     });
 
-    it('should be a global module', () => {
-      const moduleMetadata = Reflect.getMetadata('_module:global__', CacheModule);
-      expect(moduleMetadata).toBe(true);
-    });
+    it('should be a global module', () => {const moduleMetadata = Reflect.getMetadata('_module:global__', CacheModule);expect(moduleMetadata).toBe(true);});
   });
 
-  describe('Configuration with Default Environment Variables', () => {
-    it('should use default configuration when no env vars are set', async () => {
-      restoreEnv = mockEnvVars({}); // No environment variables
-
-      module = await Test.createTestingModule({
+  describe('Configuration with Default Environment Variables', () => {it('should use default configuration when no env vars are set', async () => {restoreEnv = mockEnvVars({}); // No environment variablesmodule = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -138,9 +112,7 @@ describe('CacheModule', () => {
       expect(cacheManager).toBeDefined();
     });
 
-    it('should apply default values correctly', async () => {
-      // Capture the configuration that would be used
-      const CacheModuleClass = CacheModule as unknown;
+    it('should apply default values correctly', async () => {// Capture the configuration that would be usedconst CacheModuleClass = CacheModule as unknown;
       const factory = CacheModuleClass.prototype.constructor;
       
       // We can't directly test the factory function, but we can test
@@ -173,18 +145,7 @@ describe('CacheModule', () => {
     });
   });
 
-  describe('Configuration with Custom Environment Variables', () => {
-    it('should use custom Redis host and port', async () => {
-      restoreEnv = mockEnvVars({
-        REDIS_HOST: 'custom-redis-host',
-        REDIS_PORT: '6380',
-        REDIS_PASSWORD: 'secret-password',
-        REDIS_DB: '2',
-        CACHE_TTL: '600',
-        CACHE_MAX_ITEMS: '2000',
-      });
-
-      module = await Test.createTestingModule({
+  describe('Configuration with Custom Environment Variables', () => {it('should use custom Redis host and port', async () => {restoreEnv = mockEnvVars({REDIS_HOST: 'custom-redis-host',REDIS_PORT: '6380',REDIS_PASSWORD: 'secret-password',REDIS_DB: '2',CACHE_TTL: '600',CACHE_MAX_ITEMS: '2000',});module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -204,15 +165,7 @@ describe('CacheModule', () => {
       expect(cacheManager).toBeDefined();
     });
 
-    it('should handle invalid port numbers gracefully', async () => {
-      restoreEnv = mockEnvVars({
-        REDIS_PORT: 'invalid-port',
-        CACHE_TTL: 'invalid-ttl',
-        CACHE_MAX_ITEMS: 'invalid-max',
-        REDIS_DB: 'invalid-db',
-      });
-
-      // Should not throw during module compilation
+    it('should handle invalid port numbers gracefully', async () => {restoreEnv = mockEnvVars({REDIS_PORT: 'invalid-port',CACHE_TTL: 'invalid-ttl',CACHE_MAX_ITEMS: 'invalid-max',REDIS_DB: 'invalid-db',});// Should not throw during module compilation
       module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
@@ -229,10 +182,7 @@ describe('CacheModule', () => {
       expect(module).toBeDefined();
     });
 
-    it('should handle missing environment variables', async () => {
-      restoreEnv = mockEnvVars({});
-
-      module = await Test.createTestingModule({
+    it('should handle missing environment variables', async () => {restoreEnv = mockEnvVars({});module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -249,9 +199,7 @@ describe('CacheModule', () => {
     });
   });
 
-  describe('Service Dependencies and Injection', () => {
-    beforeEach(async () => {
-      module = await Test.createTestingModule({
+  describe('Service Dependencies and Injection', () => {beforeEach(async () => {module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -265,9 +213,7 @@ describe('CacheModule', () => {
       }).compile();
     });
 
-    it('should inject CacheManager into CacheService', () => {
-      cacheService = module.get<CacheService>(CacheService);
-      cacheManager = module.get<Cache>(CACHE_MANAGER);
+    it('should inject CacheManager into CacheService', () => {cacheService = module.get<CacheService>(CacheService);cacheManager = module.get<Cache>(CACHE_MANAGER);
 
       expect(cacheService).toBeDefined();
       expect(cacheManager).toBeDefined();
@@ -276,9 +222,7 @@ describe('CacheModule', () => {
       expect(cacheService).toBeInstanceOf(CacheService);
     });
 
-    it('should inject CacheKeyGenerator into CacheService', () => {
-      cacheService = module.get<CacheService>(CacheService);
-      keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
+    it('should inject CacheKeyGenerator into CacheService', () => {cacheService = module.get<CacheService>(CacheService);keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
 
       expect(cacheService).toBeDefined();
       expect(keyGenerator).toBeDefined();
@@ -288,9 +232,7 @@ describe('CacheModule', () => {
       expect(keyGenerator).toBeInstanceOf(CacheKeyGenerator);
     });
 
-    it('should inject MetricsService into CacheService', () => {
-      cacheService = module.get<CacheService>(CacheService);
-      const metricsService = module.get<MetricsService>(MetricsService);
+    it('should inject MetricsService into CacheService', () => {cacheService = module.get<CacheService>(CacheService);const metricsService = module.get<MetricsService>(MetricsService);
 
       expect(cacheService).toBeDefined();
       expect(metricsService).toBeDefined();
@@ -299,21 +241,13 @@ describe('CacheModule', () => {
       expect(metricsService.recordCacheOperation).toBeDefined();
     });
 
-    it('should make CacheKeyGenerator independently available', () => {
-      keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
-
-      expect(keyGenerator).toBeDefined();
+    it('should make CacheKeyGenerator independently available', () => {keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);expect(keyGenerator).toBeDefined();
       expect(keyGenerator).toBeInstanceOf(CacheKeyGenerator);
       
       // Should be able to use the key generator independently
-      const testKey = keyGenerator.generate('test-key');
-      expect(testKey).toBe('bytebot:test-key');
-    });
-  });
+      const testKey = keyGenerator.generate('test-key');expect(testKey).toBe('bytebot:test-key');});});
 
-  describe('Module Exports', () => {
-    beforeEach(async () => {
-      module = await Test.createTestingModule({
+  describe('Module Exports', () => {beforeEach(async () => {module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -327,27 +261,19 @@ describe('CacheModule', () => {
       }).compile();
     });
 
-    it('should export CacheService', () => {
-      const exportedService = module.get<CacheService>(CacheService);
-      expect(exportedService).toBeDefined();
+    it('should export CacheService', () => {const exportedService = module.get<CacheService>(CacheService);expect(exportedService).toBeDefined();
       expect(exportedService).toBeInstanceOf(CacheService);
     });
 
-    it('should export CacheKeyGenerator', () => {
-      const exportedGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
-      expect(exportedGenerator).toBeDefined();
+    it('should export CacheKeyGenerator', () => {const exportedGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);expect(exportedGenerator).toBeDefined();
       expect(exportedGenerator).toBeInstanceOf(CacheKeyGenerator);
     });
 
-    it('should export NestCacheModule', () => {
-      const cacheManager = module.get<Cache>(CACHE_MANAGER);
-      expect(cacheManager).toBeDefined();
+    it('should export NestCacheModule', () => {const cacheManager = module.get<Cache>(CACHE_MANAGER);expect(cacheManager).toBeDefined();
     });
   });
 
-  describe('Integration Testing', () => {
-    beforeEach(async () => {
-      module = await Test.createTestingModule({
+  describe('Integration Testing', () => {beforeEach(async () => {module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -364,64 +290,30 @@ describe('CacheModule', () => {
       keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
     });
 
-    it('should enable cache operations through CacheService', async () => {
-      // Mock the underlying cache manager for this test
-      const mockCacheManager = {
-        get: jest.fn().mockResolvedValue('"test-value"'),
-        set: jest.fn().mockResolvedValue(undefined),
-        del: jest.fn().mockResolvedValue(undefined),
+    it('should enable cache operations through CacheService', async () => {// Mock the underlying cache manager for this testconst mockCacheManager = {
+        get: jest.fn().mockResolvedValue('"test-value"'),set: jest.fn().mockResolvedValue(undefined),del: jest.fn().mockResolvedValue(undefined),
       };
 
       // Replace the cache manager in the service
       (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Test cache operations
-      await cacheService.set('test-key', 'test-value');
-      expect(mockCacheManager.set).toHaveBeenCalled();
+      await cacheService.set('test-key', 'test-value');expect(mockCacheManager.set).toHaveBeenCalled();const value = await cacheService.get('test-key');expect(mockCacheManager.get).toHaveBeenCalled();expect(value).toBe('test-value');await cacheService.del('test-key');expect(mockCacheManager.del).toHaveBeenCalled();});
 
-      const value = await cacheService.get('test-key');
-      expect(mockCacheManager.get).toHaveBeenCalled();
-      expect(value).toBe('test-value');
-
-      await cacheService.del('test-key');
-      expect(mockCacheManager.del).toHaveBeenCalled();
-    });
-
-    it('should enable key generation through CacheKeyGenerator', () => {
-      const simpleKey = keyGenerator.generate('simple');
-      expect(simpleKey).toBe('bytebot:simple');
-
-      const apiKey = keyGenerator.generateApiKey('GET', '/api/test');
-      expect(apiKey).toMatch(/^api:api:get:api_test$/);
-
-      const dbKey = keyGenerator.generateDbKey('users', 'SELECT');
-      expect(dbKey).toBe('database:db:users:select');
-    });
-
-    it('should coordinate between CacheService and CacheKeyGenerator', async () => {
-      // Mock the cache manager
-      const mockCacheManager = {
+    it('should enable key generation through CacheKeyGenerator', () => {const simpleKey = keyGenerator.generate('simple');expect(simpleKey).toBe('bytebot:simple');const apiKey = keyGenerator.generateApiKey('GET', '/api/test');expect(apiKey).toMatch(/^api:api:get:api_test$/);const dbKey = keyGenerator.generateDbKey('users', 'SELECT');expect(dbKey).toBe('database:db:users:select');});it('should coordinate between CacheService and CacheKeyGenerator', async () => {// Mock the cache managerconst mockCacheManager = {
         get: jest.fn().mockResolvedValue(null),
         set: jest.fn().mockResolvedValue(undefined),
       };
       (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Use CacheService which should use CacheKeyGenerator internally
-      await cacheService.set('coordination-test', 'test-value');
-
-      // Verify that key generation was used (check the call to cache manager)
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        'bytebot:coordination-test',
-        expect.any(String),
-        expect.any(Number)
+      await cacheService.set('coordination-test', 'test-value');// Verify that key generation was used (check the call to cache manager)expect(mockCacheManager.set).toHaveBeenCalledWith(
+        'bytebot:coordination-test',expect.any(String),expect.any(Number)
       );
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle MetricsService dependency injection errors', async () => {
-      // Test with missing MetricsService
-      await expect(
+  describe('Error Handling', () => {it('should handle MetricsService dependency injection errors', async () => {// Test with missing MetricsServiceawait expect(
         Test.createTestingModule({
           imports: [CacheModule],
           // No MetricsService provided
@@ -429,14 +321,8 @@ describe('CacheModule', () => {
       ).rejects.toThrow();
     });
 
-    it('should handle module initialization with invalid configuration', async () => {
-      // This tests the resilience of the configuration factory
-      restoreEnv = mockEnvVars({
-        REDIS_HOST: '', // Empty host
-        REDIS_PORT: '-1', // Invalid port
-      });
-
-      // Should still compile but may have issues at runtime
+    it('should handle module initialization with invalid configuration', async () => {// This tests the resilience of the configuration factoryrestoreEnv = mockEnvVars({
+        REDIS_HOST: '', // Empty hostREDIS_PORT: '-1', // Invalid port});// Should still compile but may have issues at runtime
       module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
@@ -453,10 +339,7 @@ describe('CacheModule', () => {
     });
   });
 
-  describe('Module Lifecycle', () => {
-    it('should initialize and close cleanly', async () => {
-      module = await Test.createTestingModule({
-        imports: [CacheModule],
+  describe('Module Lifecycle', () => {it('should initialize and close cleanly', async () => {module = await Test.createTestingModule({imports: [CacheModule],
         providers: [
           {
             provide: MetricsService,
@@ -473,9 +356,7 @@ describe('CacheModule', () => {
       await expect(module.close()).resolves.toBeUndefined();
     });
 
-    it('should handle multiple module instances', async () => {
-      const module1 = await Test.createTestingModule({
-        imports: [CacheModule],
+    it('should handle multiple module instances', async () => {const module1 = await Test.createTestingModule({imports: [CacheModule],
         providers: [
           {
             provide: MetricsService,
@@ -502,10 +383,7 @@ describe('CacheModule', () => {
     });
   });
 
-  describe('Performance and Resource Management', () => {
-    it('should not leak memory during module operations', async () => {
-      // Create and destroy modules to test for leaks
-      for (let i = 0; i < 10; i++) {
+  describe('Performance and Resource Management', () => {it('should not leak memory during module operations', async () => {// Create and destroy modules to test for leaksfor (let i = 0; i < 10; i++) {
         const testModule = await Test.createTestingModule({
           imports: [CacheModule],
           providers: [

@@ -17,18 +17,12 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConversationalDatabaseService } from '../conversational-database.service';
-import {
-  BaseEntity,
+import { Injectable, Logger } from '@nestjs/common';import { ConversationalDatabaseService } from '../conversational-database.service';import {BaseEntity,
   Repository,
   QueryOptions,
   Optional,
   StrictRecord,
-} from '../../types/index';
-
-/**
- * Context for repository operations
+} from '../../types/index';/*** Context for repository operations
  */
 export interface RepositoryOperationContext {
   userId?: string;
@@ -104,14 +98,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
       if (entity) {
         const transformedEntity = await this.transformEntity(entity, context);
-        this.logOperation('findById', { id }, true, operationContext);
-        return transformedEntity;
-      }
+        this.logOperation('findById', { id }, true, operationContext);return transformedEntity;}
 
-      this.logOperation('findById', { id }, false, operationContext, 'Entity not found');
-      return null;
-
-    } catch (error) {
+      this.logOperation('findById', { id }, false, operationContext, 'Entity not found');return null;} catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`[${operationContext.correlationId}] Failed to find ${this.getEntityType()} by ID: ${errorMessage}`, {
         id,
@@ -177,20 +166,10 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
     try {
       // Validate business rules first
-      const businessValidation = await this.validateBusinessRules('create', data, context);
-
-      if (!businessValidation.valid) {
-        const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} creation: ${errors}`);
-        throw new Error(`Business validation failed: ${errors}`);
-      }
-
-      // Log warnings if any
+      const businessValidation = await this.validateBusinessRules('create', data, context);if (!businessValidation.valid) {const errors = businessValidation.errors.join(', ');
+        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} creation: ${errors}`);throw new Error(`Business validation failed: ${errors}`);}// Log warnings if any
       if (businessValidation.warnings.length > 0) {
-        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`);
-      }
-
-      // Execute conversational database operation
+        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(`, ')}`);}// Execute conversational database operation
       const entity = await this.conversationalDbService.create(
         this.baseRepository,
         data,
@@ -202,10 +181,7 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
       const transformedEntity = await this.transformEntity(entity, context);
 
-      this.logOperation('create', { entityId: entity.id }, true, operationContext);
-      return transformedEntity;
-
-    } catch (error) {
+      this.logOperation('create', { entityId: entity.id }, true, operationContext);return transformedEntity;} catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`[${operationContext.correlationId}] Failed to create ${this.getEntityType()} entity: ${errorMessage}`, {
         data: this.sanitizeLogData(data),
@@ -233,20 +209,10 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
     try {
       // Validate business rules first
-      const businessValidation = await this.validateBusinessRules('update', data, context);
-
-      if (!businessValidation.valid) {
-        const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} update: ${errors}`);
-        throw new Error(`Business validation failed: ${errors}`);
-      }
-
-      // Log warnings if any
+      const businessValidation = await this.validateBusinessRules('update', data, context);if (!businessValidation.valid) {const errors = businessValidation.errors.join(', ');
+        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} update: ${errors}`);throw new Error(`Business validation failed: ${errors}`);}// Log warnings if any
       if (businessValidation.warnings.length > 0) {
-        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`);
-      }
-
-      // Execute conversational database operation
+        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(`, ')}`);}// Execute conversational database operation
       const entity = await this.conversationalDbService.update(
         this.baseRepository,
         id,
@@ -259,14 +225,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
       if (entity) {
         const transformedEntity = await this.transformEntity(entity, context);
-        this.logOperation('update', { id, changes: Object.keys(data) }, true, operationContext);
-        return transformedEntity;
-      }
+        this.logOperation('update', { id, changes: Object.keys(data) }, true, operationContext);return transformedEntity;}
 
-      this.logOperation('update', { id }, false, operationContext, 'Entity not found for update');
-      return null;
-
-    } catch (error) {
+      this.logOperation('update', { id }, false, operationContext, 'Entity not found for update');return null;} catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`[${operationContext.correlationId}] Failed to update ${this.getEntityType()} entity: ${errorMessage}`, {
         id,
@@ -294,15 +255,8 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
     try {
       // Additional validation for delete operations
-      const businessValidation = await this.validateBusinessRules('delete', { id } as Partial<T>, context);
-
-      if (!businessValidation.valid) {
-        const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} deletion: ${errors}`);
-        throw new Error(`Business validation failed: ${errors}`);
-      }
-
-      // Execute conversational database operation
+      const businessValidation = await this.validateBusinessRules('delete', { id } as Partial<T>, context);if (!businessValidation.valid) {const errors = businessValidation.errors.join(', ');
+        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} deletion: ${errors}`);throw new Error(`Business validation failed: ${errors}`);}// Execute conversational database operation
       const success = await this.conversationalDbService.delete(
         this.baseRepository,
         id,
@@ -313,10 +267,7 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         },
       );
 
-      this.logOperation('delete', { id }, success, operationContext);
-      return success;
-
-    } catch (error) {
+      this.logOperation('delete', { id }, success, operationContext);return success;} catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`[${operationContext.correlationId}] Failed to delete ${this.getEntityType()} entity: ${errorMessage}`, {
         id,
@@ -381,13 +332,8 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
     try {
       // Validate business rules for each entity
       for (let i = 0; i < dataArray.length; i++) {
-        const businessValidation = await this.validateBusinessRules('create', dataArray[i], context);
-
-        if (!businessValidation.valid) {
-          const errors = businessValidation.errors.join(', ');
-          throw new Error(`Business validation failed for entity ${i + 1}: ${errors}`);
-        }
-      }
+        const businessValidation = await this.validateBusinessRules('create', dataArray[i], context);if (!businessValidation.valid) {const errors = businessValidation.errors.join(', ');
+          throw new Error(`Business validation failed for entity ${i + 1}: ${errors}`);}}
 
       // Execute conversational bulk operation
       const entities = await this.conversationalDbService.bulkCreate(
@@ -434,15 +380,8 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
 
     try {
       // Additional validation for bulk delete operations
-      const businessValidation = await this.validateBusinessRules('bulkDelete', filter, context);
-
-      if (!businessValidation.valid) {
-        const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} bulk deletion: ${errors}`);
-        throw new Error(`Business validation failed: ${errors}`);
-      }
-
-      // Execute conversational bulk delete operation
+      const businessValidation = await this.validateBusinessRules('bulkDelete', filter, context);if (!businessValidation.valid) {const errors = businessValidation.errors.join(', ');
+        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} bulk deletion: ${errors}`);throw new Error(`Business validation failed: ${errors}`);}// Execute conversational bulk delete operation
       const deletedCount = await this.conversationalDbService.bulkDelete(
         this.baseRepository,
         filter,
@@ -477,13 +416,10 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
     context?: RepositoryOperationContext,
   ): RepositoryOperationContext & { correlationId: string } {
     return {
-      userId: context?.userId ?? 'system',
-      userRole: context?.userRole ?? 'service',
+      userId: context?.userId ?? 'system',userRole: context?.userRole ?? 'service',
       businessPurpose: context?.businessPurpose,
       sessionId: context?.sessionId,
-      correlationId: context?.correlationId ?? `${operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      metadata: context?.metadata ?? {},
-    };
+      correlationId: context?.correlationId ?? `${operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`,metadata: context?.metadata ?? {},};
   }
 
   /**
@@ -508,9 +444,7 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
     };
 
     if (success) {
-      this.logger.debug(`[${context.correlationId}] ${this.getEntityType()} ${operation} completed`, logData);
-    } else {
-      this.logger.warn(`[${context.correlationId}] ${this.getEntityType()} ${operation} failed`, logData);
+      this.logger.debug(`[${context.correlationId}] ${this.getEntityType()} ${operation} completed`, logData);} else {this.logger.warn(`[${context.correlationId}] ${this.getEntityType()} ${operation} failed`, logData);
     }
   }
 
@@ -518,14 +452,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
    * Sanitize data for logging (remove sensitive fields)
    */
   private sanitizeLogData(data: unknown): unknown {
-    if (!data || typeof data !== 'object') {
-      return data;
-    }
+    if (!data || typeof data !== 'object') {return data;}
 
-    const sensitiveFields = ['password', 'token', 'secret', 'key', 'hash'];
-    const sanitized = { ...data as StrictRecord<unknown> };
-
-    Object.keys(sanitized).forEach(key => {
+    const sensitiveFields = ['password', 'token', 'secret', 'key', 'hash'];const sanitized = { ...data as StrictRecord<unknown> };Object.keys(sanitized).forEach(key => {
       if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
         sanitized[key] = '[REDACTED]';
       }

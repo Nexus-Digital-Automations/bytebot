@@ -30,9 +30,7 @@ import {
   Logger,
   UseGuards,
   UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
@@ -40,10 +38,7 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiSecurity,
-} from '@nestjs/swagger';
-import { HealthDiagnosticService } from '../services/health-diagnostic.service';
-import {
-  SystemDiagnosticRequest,
+} from '@nestjs/swagger';import { HealthDiagnosticService } from '../services/health-diagnostic.service';import {SystemDiagnosticRequest,
   SystemDiagnosticResult,
   DiagnosticType,
   DiagnosticScope,
@@ -51,15 +46,7 @@ import {
   DiagnosticIssue,
   IssueSeverity,
   RecommendationType,
-} from '../interfaces/health-diagnostic.interfaces';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { LoggingInterceptor } from '../../common/interceptors/logging.interceptor';
-
-// ===== REQUEST/RESPONSE DTOs =====
-
-/**
+} from '../interfaces/health-diagnostic.interfaces';import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';import { RolesGuard } from '../../auth/guards/roles.guard';import { Roles } from '../../auth/decorators/roles.decorator';import { LoggingInterceptor } from '../../common/interceptors/logging.interceptor';// ===== REQUEST/RESPONSE DTOs =====/**
  * Diagnostic request DTO
  */
 export class DiagnosticRequestDto {
@@ -94,28 +81,28 @@ export class QuickHealthResponseDto {
  * Component health summary DTO
  */
 export class ComponentHealthSummaryDto {
-  componentName!: string;
-  status: DiagnosticStatus = DiagnosticStatus.HEALTHY;
+  componentName: string = '';status: DiagnosticStatus = DiagnosticStatus.HEALTHY;
   healthScore: number = 0;
   responseTime: number = 0;
   uptime: number = 0;
-  errorRate!: number;
-  lastCheck!: Date;
+  errorRate: number = 0;
+  lastCheck: Date = new Date();
 }
 
 /**
  * System metrics overview DTO
  */
 export class SystemMetricsDto {
-  cpu!: { usage: number; status: string };
-  memory!: { usage: number; status: string };
-  disk!: { usage: number; status: string };
-  network!: { usage: number; status: string };
-  performance!: {
+  cpu: { usage: number; status: string } = { usage: 0, status: 'unknown' };memory: { usage: number; status: string } = { usage: 0, status: 'unknown' };disk: { usage: number; status: string } = { usage: 0, status: 'unknown' };network: { usage: number; status: string } = { usage: 0, status: 'unknown' };performance: {
     averageResponseTime: number;
     throughput: number;
     errorRate: number;
     availability: number;
+  } = {
+    averageResponseTime: 0,
+    throughput: 0,
+    errorRate: 0,
+    availability: 0
   };
 }
 
@@ -123,39 +110,24 @@ export class SystemMetricsDto {
  * Issue summary DTO
  */
 export class IssueSummaryDto {
-  id!: string;
-  type!: string;
-  severity!: IssueSeverity;
-  title!: string;
-  affectedComponents!: string[];
-  businessImpact!: string;
-  urgency!: string;
-  estimatedResolution!: Date;
+  id: string = '';type: string = '';severity: IssueSeverity = IssueSeverity.INFO;
+  title: string = '';affectedComponents: string[] = [];
+  businessImpact: string = '';urgency: string = '';estimatedResolution: Date = new Date();
 }
 
 /**
  * Recommendation summary DTO
  */
 export class RecommendationSummaryDto {
-  id!: string;
-  type!: RecommendationType;
-  title!: string;
-  priority!: string;
-  effort!: string;
-  timeframe!: string;
-  expectedBenefit!: number;
+  id: string = '';type: RecommendationType = RecommendationType.CONFIGURATION;
+  title: string = '';priority: string = '';effort: string = '';timeframe: string = '';expectedBenefit: number = 0;
 }
 
 // ===== MAIN CONTROLLER =====
 
-@ApiTags('Health Diagnostics')
-@Controller('health/diagnostics')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(LoggingInterceptor)
+@ApiTags('Health Diagnostics')@Controller('health/diagnostics')@UseGuards(JwtAuthGuard, RolesGuard)@UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth()
-@ApiSecurity('api-key')
-export class HealthDiagnosticController {
-  private readonly logger = new Logger(HealthDiagnosticController.name);
+@ApiSecurity('api-key')export class HealthDiagnosticController {private readonly logger = new Logger(HealthDiagnosticController.name);
 
   constructor(private readonly diagnosticService: HealthDiagnosticService) {}
 
@@ -164,24 +136,14 @@ export class HealthDiagnosticController {
   /**
    * Get quick system health overview
    */
-  @Get('quick')
-  @ApiOperation({
-    summary: 'Quick Health Check',
-    description: 'Get a rapid overview of system health status without full diagnostic analysis',
-  })
-  @ApiResponse({
+  @Get('quick')@ApiOperation({summary: 'Quick Health Check',description: 'Get a rapid overview of system health status without full diagnostic analysis',})@ApiResponse({
     status: 200,
-    description: 'Quick health check completed successfully',
-    type: QuickHealthResponseDto,
-  })
+    description: 'Quick health check completed successfully',type: QuickHealthResponseDto,})
   @ApiResponse({
     status: 503,
-    description: 'System is experiencing issues',
-  })
-  @Roles('admin', 'sre', 'developer', 'monitor')
+    description: 'System is experiencing issues',})@Roles('admin', 'sre', 'developer', 'monitor')
   async getQuickHealth(): Promise<QuickHealthResponseDto> {
-    const operationId = `quick${Date.now()}${Math.random().toString(36).substring(7)}`;
-    this.logger.log(`[${operationId}] Quick health check requested`);
+    const operationId = `quick${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Quick health check requested`);
 
     try {
       // Perform lightweight diagnostic
@@ -190,9 +152,7 @@ export class HealthDiagnosticController {
         diagnosticType: DiagnosticType.QUICK_HEALTH_CHECK,
         scope: DiagnosticScope.SYSTEM_LEVEL,
         userContext: {
-          userId: 'system',
-          userRole: 'monitor',
-          securityClearance: 'LOW',
+          userId: 'system',userRole: 'monitor',securityClearance: 'LOW',
         },
         parameters: {
           includePerformanceAnalysis: false,
@@ -268,20 +228,12 @@ export class HealthDiagnosticController {
   /**
    * Get component health summaries
    */
-  @Get('components')
-  @ApiOperation({
-    summary: 'Component Health Summary',
-    description: 'Get health status overview for all system components',
-  })
-  @ApiResponse({
+  @Get('components')@ApiOperation({summary: 'Component Health Summary',description: 'Get health status overview for all system components',})@ApiResponse({
     status: 200,
-    description: 'Component health summaries retrieved successfully',
-    type: [ComponentHealthSummaryDto],
-  })
+    description: 'Component health summaries retrieved successfully',type: [ComponentHealthSummaryDto],})
   @Roles('admin', 'sre', 'developer', 'monitor')
   async getComponentHealthSummary(): Promise<ComponentHealthSummaryDto[]> {
-    const operationId = `comp${Date.now()}${Math.random().toString(36).substring(7)}`;
-    this.logger.log(`[${operationId}] Component health summary requested`);
+    const operationId = `comp${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Component health summary requested`);
 
     try {
       const request: SystemDiagnosticRequest = {
@@ -289,9 +241,7 @@ export class HealthDiagnosticController {
         diagnosticType: DiagnosticType.QUICK_HEALTH_CHECK,
         scope: DiagnosticScope.COMPONENT_LEVEL,
         userContext: {
-          userId: 'system',
-          userRole: 'monitor',
-          securityClearance: 'LOW',
+          userId: 'system',userRole: 'monitor',securityClearance: 'LOW',
         },
         parameters: {
           includePerformanceAnalysis: false,
@@ -336,29 +286,19 @@ export class HealthDiagnosticController {
       });
 
       throw new HttpException(
-        { message: 'Failed to retrieve component health summary', error: errorMessage },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+        { message: 'Failed to retrieve component health summary', error: errorMessage },HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
   /**
    * Get system metrics overview
    */
-  @Get('metrics')
-  @ApiOperation({
-    summary: 'System Metrics Overview',
-    description: 'Get current system resource utilization and performance metrics',
-  })
-  @ApiResponse({
+  @Get('metrics')@ApiOperation({summary: 'System Metrics Overview',description: 'Get current system resource utilization and performance metrics',})@ApiResponse({
     status: 200,
-    description: 'System metrics retrieved successfully',
-    type: SystemMetricsDto,
-  })
+    description: 'System metrics retrieved successfully',type: SystemMetricsDto,})
   @Roles('admin', 'sre', 'developer', 'monitor')
   async getSystemMetrics(): Promise<SystemMetricsDto> {
-    const operationId = `metrics${Date.now()}${Math.random().toString(36).substring(7)}`;
-    this.logger.log(`[${operationId}] System metrics overview requested`);
+    const operationId = `metrics${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] System metrics overview requested`);
 
     try {
       const request: SystemDiagnosticRequest = {
@@ -366,11 +306,7 @@ export class HealthDiagnosticController {
         diagnosticType: DiagnosticType.RESOURCE_UTILIZATION,
         scope: DiagnosticScope.SYSTEM_LEVEL,
         userContext: {
-          userId: 'system',
-          userRole: 'monitor',
-          securityClearance: 'LOW',
-        },
-        parameters: {
+          userId: 'system',userRole: 'monitor',securityClearance: 'LOW',},parameters: {
           includePerformanceAnalysis: true,
           includeResourceUsage: true,
           includeNetworkDiagnostics: false,
@@ -391,17 +327,11 @@ export class HealthDiagnosticController {
       const metrics: SystemMetricsDto = {
         cpu: {
           usage: result.resourceAnalysis.cpu.currentUsage,
-          status: result.resourceAnalysis.cpu.currentUsage > 80 ? 'WARNING' : 'NORMAL',
-        },
-        memory: {
+          status: result.resourceAnalysis.cpu.currentUsage > 80 ? 'WARNING' : 'NORMAL',},memory: {
           usage: (result.resourceAnalysis.memory.usedMemory / result.resourceAnalysis.memory.totalMemory) * 100,
-          status: (result.resourceAnalysis.memory.usedMemory / result.resourceAnalysis.memory.totalMemory) > 0.85 ? 'WARNING' : 'NORMAL',
-        },
-        disk: {
+          status: (result.resourceAnalysis.memory.usedMemory / result.resourceAnalysis.memory.totalMemory) > 0.85 ? 'WARNING' : 'NORMAL',},disk: {
           usage: (result.resourceAnalysis.storage.usedSpace / result.resourceAnalysis.storage.totalSpace) * 100,
-          status: (result.resourceAnalysis.storage.usedSpace / result.resourceAnalysis.storage.totalSpace) > 0.85 ? 'WARNING' : 'NORMAL',
-        },
-        network: {
+          status: (result.resourceAnalysis.storage.usedSpace / result.resourceAnalysis.storage.totalSpace) > 0.85 ? 'WARNING' : 'NORMAL',},network: {
           usage: result.resourceAnalysis.network.throughput,
           status: result.resourceAnalysis.network.throughput > 800 ? 'WARNING' : 'NORMAL',
         },
@@ -430,9 +360,7 @@ export class HealthDiagnosticController {
       });
 
       throw new HttpException(
-        { message: 'Failed to retrieve system metrics', error: errorMessage },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+        { message: 'Failed to retrieve system metrics', error: errorMessage },HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
@@ -441,31 +369,19 @@ export class HealthDiagnosticController {
   /**
    * Perform comprehensive system diagnostic
    */
-  @Post('comprehensive')
-  @ApiOperation({
-    summary: 'Comprehensive System Diagnostic',
-    description: 'Perform in-depth system analysis with AI insights and recommendations',
-  })
-  @ApiBody({ type: DiagnosticRequestDto })
+  @Post('comprehensive')@ApiOperation({summary: 'Comprehensive System Diagnostic',description: 'Perform in-depth system analysis with AI insights and recommendations',})@ApiBody({ type: DiagnosticRequestDto })
   @ApiResponse({
     status: 200,
-    description: 'Comprehensive diagnostic completed successfully',
-    type: Object, // SystemDiagnosticResult is too complex for Swagger
-  })
+    description: 'Comprehensive diagnostic completed successfully',type: Object, // SystemDiagnosticResult is too complex for Swagger})
   @ApiResponse({
     status: 400,
-    description: 'Invalid diagnostic request parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid diagnostic request parameters',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions for diagnostic operation',
-  })
-  @Roles('admin', 'sre')
+    description: 'Insufficient permissions for diagnostic operation',})@Roles('admin', 'sre')
   async performComprehensiveDiagnostic(
     @Body() diagnosticDto: DiagnosticRequestDto,
   ): Promise<SystemDiagnosticResult> {
-    const operationId = `comp${Date.now()}${Math.random().toString(36).substring(7)}`;
-    this.logger.log(`[${operationId}] Comprehensive diagnostic requested`, {
+    const operationId = `comp${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Comprehensive diagnostic requested`, {
       operationId,
       type: diagnosticDto.diagnosticType,
       scope: diagnosticDto.scope,
@@ -477,9 +393,7 @@ export class HealthDiagnosticController {
         diagnosticType: diagnosticDto.diagnosticType,
         scope: diagnosticDto.scope,
         userContext: {
-          userId: 'api_user', // TODO: Extract from JWT token
-          userRole: 'sre',
-          securityClearance: 'HIGH',
+          userId: 'api_user', // TODO: Extract from JWT tokenuserRole: 'sre',securityClearance: 'HIGH',
         },
         parameters: {
           includePerformanceAnalysis: diagnosticDto.includePerformanceAnalysis ?? true,
@@ -517,17 +431,11 @@ export class HealthDiagnosticController {
         error: errorMessage,
       });
 
-      if (errorMessage.includes('denied by Parlant validation')) {
-        throw new HttpException(
-          { message: 'Diagnostic operation not approved', error: errorMessage },
-          HttpStatus.FORBIDDEN,
-        );
+      if (errorMessage.includes('denied by Parlant validation')) {throw new HttpException({ message: 'Diagnostic operation not approved', error: errorMessage },HttpStatus.FORBIDDEN,);
       }
 
       throw new HttpException(
-        { message: 'Comprehensive diagnostic failed', error: errorMessage },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+        { message: 'Comprehensive diagnostic failed', error: errorMessage },HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
@@ -536,27 +444,11 @@ export class HealthDiagnosticController {
   /**
    * Get current system issues
    */
-  @Get('issues')
-  @ApiOperation({
-    summary: 'Get System Issues',
-    description: 'Retrieve current system issues and their severity levels',
-  })
-  @ApiQuery({ name: 'severity', required: false, enum: IssueSeverity, description: 'Filter by issue severity' })
-  @ApiQuery({ name: 'component', required: false, description: 'Filter by affected component' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Maximum number of issues to return' })
-  @ApiResponse({
-    status: 200,
-    description: 'System issues retrieved successfully',
-    type: [IssueSummaryDto],
-  })
-  @Roles('admin', 'sre', 'developer', 'monitor')
-  async getSystemIssues(
-    @Query('severity') severity?: IssueSeverity,
-    @Query('component') component?: string,
-    @Query('limit') limit: number = 50,
+  @Get('issues')@ApiOperation({summary: 'Get System Issues',description: 'Retrieve current system issues and their severity levels',})@ApiQuery({ name: 'severity', required: false, enum: IssueSeverity, description: 'Filter by issue severity' })@ApiQuery({ name: 'component', required: false, description: 'Filter by affected component' })@ApiQuery({ name: 'limit', required: false, type: Number, description: 'Maximum number of issues to return' })@ApiResponse({status: 200,
+    description: 'System issues retrieved successfully',type: [IssueSummaryDto],})
+  @Roles('admin', 'sre', 'developer', 'monitor')async getSystemIssues(@Query('severity') severity?: IssueSeverity,@Query('component') component?: string,@Query('limit') limit: number = 50,
   ): Promise<IssueSummaryDto[]> {
-    const operationId = `issues${Date.now()}${Math.random().toString(36).substring(7)}`;
-    this.logger.log(`[${operationId}] System issues requested`, {
+    const operationId = `issues${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] System issues requested`, {
       operationId,
       severity,
       component,
@@ -570,9 +462,7 @@ export class HealthDiagnosticController {
         diagnosticType: DiagnosticType.ERROR_INVESTIGATION,
         scope: DiagnosticScope.SYSTEM_LEVEL,
         userContext: {
-          userId: 'system',
-          userRole: 'monitor',
-          securityClearance: 'MEDIUM',
+          userId: 'system',userRole: 'monitor',securityClearance: 'MEDIUM',
         },
         parameters: {
           includePerformanceAnalysis: false,
@@ -633,39 +523,23 @@ export class HealthDiagnosticController {
       });
 
       throw new HttpException(
-        { message: 'Failed to retrieve system issues', error: errorMessage },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+        { message: 'Failed to retrieve system issues', error: errorMessage },HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
   /**
    * Get issue details
    */
-  @Get('issues/:issueId')
-  @ApiOperation({
-    summary: 'Get Issue Details',
-    description: 'Retrieve detailed information about a specific issue',
-  })
-  @ApiParam({ name: 'issueId', description: 'Issue identifier' })
-  @ApiResponse({
-    status: 200,
-    description: 'Issue details retrieved successfully',
-  })
-  @ApiResponse({
+  @Get('issues/:issueId')@ApiOperation({summary: 'Get Issue Details',description: 'Retrieve detailed information about a specific issue',})@ApiParam({ name: 'issueId', description: 'Issue identifier' })@ApiResponse({status: 200,
+    description: 'Issue details retrieved successfully',})@ApiResponse({
     status: 404,
-    description: 'Issue not found',
-  })
-  @Roles('admin', 'sre', 'developer')
-  async getIssueDetails(@Param('issueId') issueId: string): Promise<DiagnosticIssue> {
+    description: 'Issue not found',})@Roles('admin', 'sre', 'developer')async getIssueDetails(@Param('issueId') issueId: string): Promise<DiagnosticIssue> {
     this.logger.log(`Issue details requested for: ${issueId}`);
 
     try {
       // TODO: Implement issue details retrieval from storage
       throw new HttpException(
-        { message: 'Issue details storage not implemented' },
-        HttpStatus.NOT_IMPLEMENTED,
-      );
+        { message: 'Issue details storage not implemented' },HttpStatus.NOT_IMPLEMENTED,);
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

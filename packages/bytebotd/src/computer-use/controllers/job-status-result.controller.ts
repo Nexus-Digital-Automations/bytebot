@@ -44,9 +44,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Logger,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
@@ -56,21 +54,13 @@ import {
   ApiBearerAuth,
   ApiProduces,
   ApiConsumes,
-} from '@nestjs/swagger';
-import { Response } from 'express';
-import { Throttle } from '@nestjs/throttler';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { JobStatusResultService } from '../services/job-status-result.service';
-import {
-  EnhancedJobStatusResponseDto,
+} from '@nestjs/swagger';import { Response } from 'express';import { Throttle } from '@nestjs/throttler';import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';import { JobStatusResultService } from '../services/job-status-result.service';import {EnhancedJobStatusResponseDto,
   JobAnalyticsDto,
   JobHistoryEntryDto,
   BulkJobStatusRequestDto,
   BulkJobStatusResponseDto,
   JobStatusUpdateNotificationDto,
-} from '../dto/enhanced-job-status.dto';
-import {
-  EnhancedJobResultResponseDto,
+} from '../dto/enhanced-job-status.dto';import {EnhancedJobResultResponseDto,
   ResultDownloadRequestDto,
   ResultDownloadResponseDto,
   ResultExportRequestDto,
@@ -78,12 +68,7 @@ import {
   BulkResultRequestDto,
   BulkResultResponseDto,
   ResultStorageInfoDto,
-} from '../dto/enhanced-job-result.dto';
-
-@ApiTags('Job Status & Result Management')
-@Controller('jobs')
-@ApiBearerAuth()
-export class JobStatusResultController {
+} from '../dto/enhanced-job-result.dto';@ApiTags('Job Status & Result Management')@Controller('jobs')@ApiBearerAuth()export class JobStatusResultController {
   private readonly logger = new Logger(JobStatusResultController.name);
 
   constructor(
@@ -92,44 +77,21 @@ export class JobStatusResultController {
 
   // ===== JOB STATUS ENDPOINTS =====
 
-  @Get(':jobId/status')
-  @ApiOperation({
-    summary: 'Get enhanced job status',
-    description: 'Retrieves comprehensive job status including progress details, performance metrics, and execution timeline',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
+  @Get(':jobId/status')@ApiOperation({summary: 'Get enhanced job status',description: 'Retrieves comprehensive job status including progress details, performance metrics, and execution timeline',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'includeProgressDetails',required: false,description: 'Include detailed progress information with subtasks',example: true,})
   @ApiQuery({
-    name: 'includeProgressDetails',
-    required: false,
-    description: 'Include detailed progress information with subtasks',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'includePerformanceMetrics',
-    required: false,
-    description: 'Include real-time performance metrics',
-    example: false,
-  })
+    name: 'includePerformanceMetrics',required: false,description: 'Include real-time performance metrics',example: false,})
   @ApiResponse({
     status: 200,
-    description: 'Enhanced job status retrieved successfully',
-    type: EnhancedJobStatusResponseDto,
-  })
+    description: 'Enhanced job status retrieved successfully',type: EnhancedJobStatusResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Job not found',
-  })
-  @UseInterceptors(CacheInterceptor)
+    description: 'Job not found',})@UseInterceptors(CacheInterceptor)
   @CacheTTL(30) // Cache for 30 seconds
   @Throttle({ default: { limit: 100, ttl: 60000 } }) // 100 requests per minute
   async getJobStatus(
-    @Param('jobId') jobId: string,
-    @Query('includeProgressDetails') includeProgressDetails?: boolean,
-    @Query('includePerformanceMetrics') includePerformanceMetrics?: boolean,
+    @Param('jobId') jobId: string,@Query('includeProgressDetails') includeProgressDetails?: boolean,@Query('includePerformanceMetrics') includePerformanceMetrics?: boolean,
   ): Promise<EnhancedJobStatusResponseDto> {
     try {
       const enhancedStatus = await this.jobStatusResultService.getJobStatus(jobId);
@@ -156,18 +118,14 @@ export class JobStatusResultController {
         metadata: enhancedStatus.metadata,
       };
 
-      this.logger.debug(`Job status retrieved: ${jobId}`, {
-        jobId,
-        status: enhancedStatus.status,
+      this.logger.debug(`Job status retrieved: ${jobId}`, {jobId,status: enhancedStatus.status,
         progress: enhancedStatus.progress,
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get job status: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job status: ${jobId}`, {error: error.message,jobId,
       });
 
       if (error instanceof NotFoundException) {
@@ -178,42 +136,13 @@ export class JobStatusResultController {
     }
   }
 
-  @Put(':jobId/status')
-  @ApiOperation({
-    summary: 'Update job status',
-    description: 'Updates job status with progress information and optional metadata',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiBody({
-    description: 'Status update information',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { enum: ['pending', 'in_progress', 'completed', 'failed', 'cancelled'] },
-        progress: { type: 'number', minimum: 0, maximum: 100 },
-        progressDetails: {
-          type: 'object',
-          properties: {
-            currentStep: { type: 'string' },
-            totalSteps: { type: 'number' },
-            currentStepIndex: { type: 'number' },
-            estimatedTimeRemaining: { type: 'number' },
-          },
-        },
-        metadata: { type: 'object' },
-      },
-      required: ['status', 'progress'],
-    },
-  })
+  @Put(':jobId/status')@ApiOperation({summary: 'Update job status',description: 'Updates job status with progress information and optional metadata',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiBody({
+    description: 'Status update information',schema: {type: 'object',properties: {status: { enum: ['pending', 'in_progress', 'completed', 'failed', 'cancelled'] },progress: { type: 'number', minimum: 0, maximum: 100 },progressDetails: {type: 'object',properties: {currentStep: { type: 'string' },totalSteps: { type: 'number' },currentStepIndex: { type: 'number' },estimatedTimeRemaining: { type: 'number' },},},
+        metadata: { type: 'object' },},required: ['status', 'progress'],},})
   @ApiResponse({
     status: 200,
-    description: 'Job status updated successfully',
-  })
-  @HttpCode(HttpStatus.OK)
+    description: 'Job status updated successfully',})@HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 200, ttl: 60000 } }) // 200 requests per minute
   async updateJobStatus(
     @Param('jobId') jobId: string,
@@ -233,21 +162,14 @@ export class JobStatusResultController {
         updateData.metadata,
       );
 
-      this.logger.log(`Job status updated: ${jobId} -> ${updateData.status} (${updateData.progress}%)`, {
-        jobId,
-        status: updateData.status,
+      this.logger.log(`Job status updated: ${jobId} -> ${updateData.status} (${updateData.progress}%)`, {jobId,status: updateData.status,
         progress: updateData.progress,
       });
 
       return {
         success: true,
-        message: `Job status updated successfully: ${updateData.status}`,
-      };
-
-    } catch (error) {
-      this.logger.error(`Failed to update job status: ${jobId}`, {
-        error: error.message,
-        jobId,
+        message: `Job status updated successfully: ${updateData.status}`,};} catch (error) {
+      this.logger.error(`Failed to update job status: ${jobId}`, {error: error.message,jobId,
         updateData,
       });
 
@@ -255,20 +177,11 @@ export class JobStatusResultController {
     }
   }
 
-  @Post('bulk/status')
-  @ApiOperation({
-    summary: 'Get status for multiple jobs',
-    description: 'Retrieves status information for multiple jobs in a single request',
-  })
-  @ApiBody({
-    description: 'Bulk status request',
-    type: BulkJobStatusRequestDto,
-  })
+  @Post('bulk/status')@ApiOperation({summary: 'Get status for multiple jobs',description: 'Retrieves status information for multiple jobs in a single request',})@ApiBody({
+    description: 'Bulk status request',type: BulkJobStatusRequestDto,})
   @ApiResponse({
     status: 200,
-    description: 'Bulk job status retrieved successfully',
-    type: BulkJobStatusResponseDto,
-  })
+    description: 'Bulk job status retrieved successfully',type: BulkJobStatusResponseDto,})
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 50, ttl: 60000 } }) // 50 requests per minute for bulk operations
   async getBulkJobStatus(
@@ -305,9 +218,7 @@ export class JobStatusResultController {
               },
               performance: bulkRequest.includePerformanceMetrics ? status.performance : undefined,
               error: status.error,
-              priority: status.metadata?.priority as any || 'normal',
-              metadata: status.metadata,
-            } as EnhancedJobStatusResponseDto;
+              priority: status.metadata?.priority as any || 'normal',metadata: status.metadata,} as EnhancedJobStatusResponseDto;
           })
         );
 
@@ -347,53 +258,21 @@ export class JobStatusResultController {
 
   // ===== JOB RESULT ENDPOINTS =====
 
-  @Get(':jobId/result')
-  @ApiOperation({
-    summary: 'Get job result',
-    description: 'Retrieves job execution result with optional streaming support for large results',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
+  @Get(':jobId/result')@ApiOperation({summary: 'Get job result',description: 'Retrieves job execution result with optional streaming support for large results',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'stream',required: false,description: 'Enable streaming for large results',example: false,})
   @ApiQuery({
-    name: 'stream',
-    required: false,
-    description: 'Enable streaming for large results',
-    example: false,
-  })
-  @ApiQuery({
-    name: 'format',
-    required: false,
-    description: 'Preferred result format',
-    enum: ['json', 'binary', 'text', 'original'],
-    example: 'json',
-  })
-  @ApiResponse({
+    name: 'format',required: false,description: 'Preferred result format',enum: ['json', 'binary', 'text', 'original'],example: 'json',})@ApiResponse({
     status: 200,
-    description: 'Job result retrieved successfully',
-    type: EnhancedJobResultResponseDto,
-  })
-  @ApiProduces('application/json', 'application/octet-stream')
-  @Throttle({ default: { limit: 100, ttl: 60000 } })
-  async getJobResult(
-    @Param('jobId') jobId: string,
-    @Query('stream') stream?: boolean,
-    @Query('format') format: string = 'json',
-    @Res({ passthrough: true }) res?: Response,
-  ): Promise<EnhancedJobResultResponseDto | StreamableFile> {
+    description: 'Job result retrieved successfully',type: EnhancedJobResultResponseDto,})
+  @ApiProduces('application/json', 'application/octet-stream')@Throttle({ default: { limit: 100, ttl: 60000 } })async getJobResult(
+    @Param('jobId') jobId: string,@Query('stream') stream?: boolean,@Query('format') format: string = 'json',@Res({ passthrough: true }) res?: Response,): Promise<EnhancedJobResultResponseDto | StreamableFile> {
     try {
       const result = await this.jobStatusResultService.getJobResult(jobId, stream);
 
-      if (result instanceof require('stream').Readable) {
-        // Handle streaming response
-        res?.set({
-          'Content-Type': 'application/octet-stream',
-          'Content-Disposition': `attachment; filename="job_${jobId}_result"`,
-          'Transfer-Encoding': 'chunked',
-        });
-        return new StreamableFile(result);
+      if (result instanceof require('stream').Readable) {// Handle streaming responseres?.set({
+          'Content-Type': 'application/octet-stream','Content-Disposition': `attachment; filename="job_${jobId}_result"",
+          'Transfer-Encoding': 'chunked',});return new StreamableFile(result);
       }
 
       // Handle direct result response
@@ -425,9 +304,7 @@ export class JobStatusResultController {
         metadata: metadata.metadata,
       };
 
-      this.logger.debug(`Job result retrieved: ${jobId}`, {
-        jobId,
-        resultSize: metadata.size,
+      this.logger.debug(`Job result retrieved: ${jobId}`, {jobId,resultSize: metadata.size,
         compressed: metadata.compressed,
         format: metadata.format,
       });
@@ -435,9 +312,7 @@ export class JobStatusResultController {
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get job result: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job result: ${jobId}`, {error: error.message,jobId,
       });
 
       if (error instanceof NotFoundException) {
@@ -448,25 +323,12 @@ export class JobStatusResultController {
     }
   }
 
-  @Post(':jobId/result/download')
-  @ApiOperation({
-    summary: 'Generate result download URL',
-    description: 'Creates a secure download URL for job result with optional format conversion',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiBody({
-    description: 'Download configuration',
-    type: ResultDownloadRequestDto,
-  })
+  @Post(':jobId/result/download')@ApiOperation({summary: 'Generate result download URL',description: 'Creates a secure download URL for job result with optional format conversion',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiBody({
+    description: 'Download configuration',type: ResultDownloadRequestDto,})
   @ApiResponse({
     status: 200,
-    description: 'Download URL generated successfully',
-    type: ResultDownloadResponseDto,
-  })
+    description: 'Download URL generated successfully',type: ResultDownloadResponseDto,})
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 50, ttl: 60000 } })
   async generateDownloadUrl(
@@ -478,10 +340,7 @@ export class JobStatusResultController {
       const storageInfo = await this.jobStatusResultService.getJobResult(jobId, false);
 
       if (!storageInfo) {
-        throw new NotFoundException(`Result not found for job: ${jobId}`);
-      }
-
-      // Generate secure download URL (implementation would depend on storage system)
+        throw new NotFoundException(`Result not found for job: ${jobId}`);}// Generate secure download URL (implementation would depend on storage system)
       const downloadUrl = `https://api.bytebot.com/jobs/${jobId}/result/download?token=${this.generateSecureToken(jobId)}`;
       const expirationTime = new Date(Date.now() + (downloadRequest.expirationSeconds || 3600) * 1000);
 
@@ -489,13 +348,8 @@ export class JobStatusResultController {
         jobId,
         downloadUrl,
         storageInfo: {
-          resultId: 'temp-result-id',
-          size: 0,
-          compressed: false,
-          format: 'json',
-          contentType: 'application/json',
-          checksum: '',
-          storageLocation: '',
+          resultId: 'temp-result-id',size: 0,compressed: false,
+          format: 'json',contentType: 'application/json',checksum: '',storageLocation: '',
           createdAt: new Date().toISOString(),
           expiresAt: expirationTime.toISOString(),
         },
@@ -510,18 +364,14 @@ export class JobStatusResultController {
         },
       };
 
-      this.logger.log(`Download URL generated for job: ${jobId}`, {
-        jobId,
-        expiresAt: expirationTime.toISOString(),
+      this.logger.log(`Download URL generated for job: ${jobId}`, {jobId,expiresAt: expirationTime.toISOString(),
         format: downloadRequest.format,
       });
 
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to generate download URL: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to generate download URL: ${jobId}`, {error: error.message,jobId,
       });
 
       throw new InternalServerErrorException(`Failed to generate download URL: ${error.message}`);
@@ -530,21 +380,10 @@ export class JobStatusResultController {
 
   // ===== JOB ANALYTICS ENDPOINTS =====
 
-  @Get(':jobId/analytics')
-  @ApiOperation({
-    summary: 'Get job analytics',
-    description: 'Retrieves comprehensive analytics and performance metrics for a job',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiResponse({
+  @Get(':jobId/analytics')@ApiOperation({summary: 'Get job analytics',description: 'Retrieves comprehensive analytics and performance metrics for a job',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job analytics retrieved successfully',
-    type: JobAnalyticsDto,
-  })
+    description: 'Job analytics retrieved successfully',type: JobAnalyticsDto,})
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(300) // Cache for 5 minutes
   @Throttle({ default: { limit: 50, ttl: 60000 } })
@@ -554,18 +393,14 @@ export class JobStatusResultController {
     try {
       const analytics = await this.jobStatusResultService.getJobAnalytics(jobId);
 
-      this.logger.debug(`Job analytics retrieved: ${jobId}`, {
-        jobId,
-        totalTimeMs: analytics.executionMetrics.totalTimeMs,
+      this.logger.debug(`Job analytics retrieved: ${jobId}`, {jobId,totalTimeMs: analytics.executionMetrics.totalTimeMs,
         errorCount: analytics.errorMetrics.errorCount,
       });
 
       return analytics;
 
     } catch (error) {
-      this.logger.error(`Failed to get job analytics: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job analytics: ${jobId}`, {error: error.message,jobId,
       });
 
       if (error instanceof NotFoundException) {
@@ -576,38 +411,17 @@ export class JobStatusResultController {
     }
   }
 
-  @Get(':jobId/history')
-  @ApiOperation({
-    summary: 'Get job execution history',
-    description: 'Retrieves detailed execution history and audit trail for a job',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
+  @Get(':jobId/history')@ApiOperation({summary: 'Get job execution history',description: 'Retrieves detailed execution history and audit trail for a job',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'limit',required: false,description: 'Maximum number of history entries to return',example: 100,})
   @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Maximum number of history entries to return',
-    example: 100,
-  })
-  @ApiQuery({
-    name: 'offset',
-    required: false,
-    description: 'Number of entries to skip for pagination',
-    example: 0,
-  })
+    name: 'offset',required: false,description: 'Number of entries to skip for pagination',example: 0,})
   @ApiResponse({
     status: 200,
-    description: 'Job history retrieved successfully',
-    type: [JobHistoryEntryDto],
-  })
+    description: 'Job history retrieved successfully',type: [JobHistoryEntryDto],})
   @Throttle({ default: { limit: 100, ttl: 60000 } })
   async getJobHistory(
-    @Param('jobId') jobId: string,
-    @Query('limit') limit: number = 100,
-    @Query('offset') offset: number = 0,
+    @Param('jobId') jobId: string,@Query('limit') limit: number = 100,@Query('offset') offset: number = 0,
   ): Promise<JobHistoryEntryDto[]> {
     try {
       const history = await this.jobStatusResultService.getJobHistory(jobId, limit, offset);
@@ -622,9 +436,7 @@ export class JobStatusResultController {
         clientInfo: entry.clientInfo,
       }));
 
-      this.logger.debug(`Job history retrieved: ${jobId}`, {
-        jobId,
-        entryCount: historyDtos.length,
+      this.logger.debug(`Job history retrieved: ${jobId}`, {jobId,entryCount: historyDtos.length,
         limit,
         offset,
       });
@@ -632,9 +444,7 @@ export class JobStatusResultController {
       return historyDtos;
 
     } catch (error) {
-      this.logger.error(`Failed to get job history: ${jobId}`, {
-        error: error.message,
-        jobId,
+      this.logger.error(`Failed to get job history: ${jobId}`, {error: error.message,jobId,
       });
 
       throw new InternalServerErrorException(`Failed to retrieve job history: ${error.message}`);
@@ -643,24 +453,9 @@ export class JobStatusResultController {
 
   // ===== SYSTEM MONITORING ENDPOINTS =====
 
-  @Get('system/metrics')
-  @ApiOperation({
-    summary: 'Get system performance metrics',
-    description: 'Retrieves overall system performance metrics for job management',
-  })
-  @ApiResponse({
+  @Get('system/metrics')@ApiOperation({summary: 'Get system performance metrics',description: 'Retrieves overall system performance metrics for job management',})@ApiResponse({
     status: 200,
-    description: 'System metrics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        operationsPerSecond: { type: 'number' },
-        averageResponseTimeMs: { type: 'number' },
-        memoryUsageMB: { type: 'number' },
-        activeJobs: { type: 'number' },
-        cacheHitRate: { type: 'number' },
-      },
-    },
+    description: 'System metrics retrieved successfully',schema: {type: 'object',properties: {operationsPerSecond: { type: 'number' },averageResponseTimeMs: { type: 'number' },memoryUsageMB: { type: 'number' },activeJobs: { type: 'number' },cacheHitRate: { type: 'number' },},},
   })
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(60) // Cache for 1 minute
@@ -669,9 +464,7 @@ export class JobStatusResultController {
     try {
       const metrics = await this.jobStatusResultService.getSystemMetrics();
 
-      this.logger.debug('System metrics retrieved', {
-        operationsPerSecond: metrics.operationsPerSecond,
-        averageResponseTimeMs: metrics.averageResponseTimeMs,
+      this.logger.debug('System metrics retrieved', {operationsPerSecond: metrics.operationsPerSecond,averageResponseTimeMs: metrics.averageResponseTimeMs,
         activeJobs: metrics.activeJobs,
       });
 
@@ -688,49 +481,26 @@ export class JobStatusResultController {
 
   // ===== CLEANUP AND MAINTENANCE ENDPOINTS =====
 
-  @Delete(':jobId')
-  @ApiOperation({
-    summary: 'Cleanup job data',
-    description: 'Manually cleanup job data and results with optional archival',
-  })
-  @ApiParam({
-    name: 'jobId',
-    description: 'Unique job identifier',
-    example: 'job_1702983456789_abc123',
-  })
-  @ApiQuery({
-    name: 'archive',
-    required: false,
-    description: 'Archive data before deletion',
-    example: false,
-  })
+  @Delete(':jobId')@ApiOperation({summary: 'Cleanup job data',description: 'Manually cleanup job data and results with optional archival',})@ApiParam({
+    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'archive',required: false,description: 'Archive data before deletion',example: false,})
   @ApiResponse({
     status: 200,
-    description: 'Job cleaned up successfully',
-  })
-  @HttpCode(HttpStatus.OK)
+    description: 'Job cleaned up successfully',})@HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   async cleanupJob(
-    @Param('jobId') jobId: string,
-    @Query('archive') archive: boolean = false,
+    @Param('jobId') jobId: string,@Query('archive') archive: boolean = false,
   ): Promise<{ success: boolean; message: string }> {
     try {
       await this.jobStatusResultService.cleanupJob(jobId, archive);
 
-      this.logger.log(`Job cleaned up: ${jobId}`, {
-        jobId,
-        archived: archive,
+      this.logger.log(`Job cleaned up: ${jobId}`, {jobId,archived: archive,
       });
 
       return {
         success: true,
-        message: `Job cleaned up successfully${archive ? ' (archived)' : ''}`,
-      };
-
-    } catch (error) {
-      this.logger.error(`Failed to cleanup job: ${jobId}`, {
-        error: error.message,
-        jobId,
+        message: `Job cleaned up successfully${archive ? ' (archived)' : ''}`,};} catch (error) {
+      this.logger.error(`Failed to cleanup job: ${jobId}`, {error: error.message,jobId,
       });
 
       throw new InternalServerErrorException(`Failed to cleanup job: ${error.message}`);
@@ -741,7 +511,6 @@ export class JobStatusResultController {
 
   private generateSecureToken(jobId: string): string {
     // Implementation would use proper cryptographic token generation
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(`${jobId}-${Date.now()}`).digest('hex').substring(0, 32);
+    const crypto = require('crypto');return crypto.createHash('sha256').update(`${jobId}-${Date.now()}`).digest('hex').substring(0, 32);
   }
 }

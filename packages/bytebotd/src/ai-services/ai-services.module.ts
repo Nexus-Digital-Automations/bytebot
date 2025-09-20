@@ -17,25 +17,7 @@
  * Performance: Optimized for enterprise-scale AI processing with monitoring
  */
 
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ParlantModule } from '../parlant/parlant.module';
-
-// Import all AI services
-import { AnthropicService } from './anthropic.service';
-import { OpenAIService } from './openai.service';
-import { GoogleService } from './google.service';
-import { MessagesService } from './messages.service';
-import { ParlantValidatedInputCaptureService } from './parlant-validated-input-capture.service';
-
-// Additional AI services for complete coverage
-import { TasksService } from './tasks.service';
-import { SummariesService } from './summaries.service';
-import { ProxyService } from './proxy.service';
-import { AIAuditService } from './ai-audit.service';
-
-// Import supporting modules
-import { InputTrackingModule } from '../input-tracking/input-tracking.module';
+import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { ParlantModule } from '../parlant/parlant.module';// Import all AI servicesimport { AnthropicService } from './anthropic.service';import { OpenAIService } from './openai.service';import { GoogleService } from './google.service';import { MessagesService } from './messages.service';import { ParlantValidatedInputCaptureService } from './parlant-validated-input-capture.service';// Additional AI services for complete coverageimport { TasksService } from './tasks.service';import { SummariesService } from './summaries.service';import { ProxyService } from './proxy.service';import { AIAuditService } from './ai-audit.service';// Import supporting modulesimport { InputTrackingModule } from '../input-tracking/input-tracking.module';
 
 @Module({
   imports: [

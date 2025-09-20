@@ -20,10 +20,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Logger,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { UserRole, Permission } from '@bytebot/shared';
-import { AuthenticatedRequest, ByteBotdUser } from './jwt-auth.guard';
+} from '@nestjs/common';import { Reflector } from '@nestjs/core';import { UserRole, Permission } from '@bytebot/shared';import { AuthenticatedRequest, ByteBotdUser } from './jwt-auth.guard';
 
 /**
  * Role hierarchy definition for permission inheritance
@@ -99,9 +96,7 @@ export class RolesGuard implements CanActivate {
 
     // Get required roles from metadata
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      'roles',
-      [context.getHandler(), context.getClass()],
-    );
+      'roles',[context.getHandler(), context.getClass()],);
 
     // Get required permissions from metadata
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
@@ -112,9 +107,7 @@ export class RolesGuard implements CanActivate {
     // If no roles or permissions required, allow access
     if (!requiredRoles?.length && !requiredPermissions?.length) {
       this.logger.debug(
-        `[${operationId}] No RBAC requirements, allowing access`,
-      );
-      return true;
+        `[${operationId}] No RBAC requirements, allowing access`,);return true;
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -153,9 +146,7 @@ export class RolesGuard implements CanActivate {
             userRole: user.role,
             requiredRoles: requiredRoles.map((r) => r.toString()),
             authTimeMs: authTime,
-            securityEvent: 'role_authorization_failed',
-          });
-          throw new ForbiddenException('Insufficient role for this operation');
+            securityEvent: 'role_authorization_failed',});throw new ForbiddenException('Insufficient role for this operation');
         }
       }
 
@@ -173,9 +164,7 @@ export class RolesGuard implements CanActivate {
             userRole: user.role,
             requiredPermissions: requiredPermissions.map((p) => p.toString()),
             authTimeMs: authTime,
-            securityEvent: 'permission_authorization_failed',
-          });
-          throw new ForbiddenException(
+            securityEvent: 'permission_authorization_failed',});throw new ForbiddenException(
             'Insufficient permissions for this operation',
           );
         }
@@ -206,13 +195,8 @@ export class RolesGuard implements CanActivate {
         userId: user.id,
         error: errorMessage,
         authTimeMs: authTime,
-        securityEvent: 'rbac_authorization_error',
-      });
-
-      throw new ForbiddenException(
-        'Authorization failed for computer control operation',
-      );
-    }
+        securityEvent: 'rbac_authorization_error',});throw new ForbiddenException(
+        'Authorization failed for computer control operation',);}
   }
 
   /**

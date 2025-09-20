@@ -14,30 +14,18 @@
  * @created 2025-09-20
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
-import {
-  EnhancedAsyncJobService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import { Logger } from '@nestjs/common';import {EnhancedAsyncJobService,
   EnhancedJobStats,
-} from './enhanced-async-job.service';
-import {
-  RedisJobPersistenceService,
+} from './enhanced-async-job.service';import {RedisJobPersistenceService,
   RedisJobData,
   BulkJobOperationResult,
   CacheOperationResult,
-} from './redis-job-persistence.service';
-import {
-  JobStatus,
+} from './redis-job-persistence.service';import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from '../dto/async-job.dto';
-import { ComputerActionDto } from '../dto/computer-action.dto';
-import { ComputerUseService } from '../computer-use.service';
-import { CacheService } from '../../cache/cache.service';
-import { MetricsService } from '../../metrics/metrics.service';
+} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';import { ComputerUseService } from '../computer-use.service';import { CacheService } from '../../cache/cache.service';import { MetricsService } from '../../metrics/metrics.service';
 
 // ===== TEST HELPERS AND MOCKS =====
 
@@ -52,10 +40,7 @@ class MockComputerUseService {
     await this.simulateExecution();
 
     if (Math.random() < this.failureRate) {
-      throw new Error(`Mock execution failure for action: ${action.action}`);
-    }
-
-    return {
+      throw new Error(`Mock execution failure for action: ${action.action}`);}return {
       success: true,
       action: action.action,
       timestamp: new Date().toISOString(),
@@ -142,9 +127,7 @@ class MockRedisJobPersistenceService {
     if (!this.healthy) {
       return {
         success: false,
-        error: 'Redis persistence is unhealthy',
-        metadata: {
-          latency: this.operationLatency,
+        error: 'Redis persistence is unhealthy',metadata: {latency: this.operationLatency,
           fromCache: false,
           compressed: false,
           retryCount: 0,
@@ -172,9 +155,7 @@ class MockRedisJobPersistenceService {
     if (!this.healthy) {
       return {
         success: false,
-        error: 'Redis persistence is unhealthy',
-        metadata: {
-          latency: this.operationLatency,
+        error: 'Redis persistence is unhealthy',metadata: {latency: this.operationLatency,
           fromCache: false,
           compressed: false,
           retryCount: 0,
@@ -204,9 +185,7 @@ class MockRedisJobPersistenceService {
 
     return {
       success: this.healthy,
-      error: this.healthy ? undefined : 'Redis persistence is unhealthy',
-      metadata: {
-        latency: this.operationLatency,
+      error: this.healthy ? undefined : 'Redis persistence is unhealthy',metadata: {latency: this.operationLatency,
         fromCache: false,
         compressed: false,
         retryCount: 0,
@@ -221,9 +200,7 @@ class MockRedisJobPersistenceService {
     if (!this.healthy) {
       return {
         success: false,
-        error: 'Redis persistence is unhealthy',
-        data: [],
-        metadata: {
+        error: 'Redis persistence is unhealthy',data: [],metadata: {
           latency: this.operationLatency,
           fromCache: false,
           compressed: false,
@@ -255,12 +232,8 @@ class MockRedisJobPersistenceService {
         processedCount: jobs.length,
         successCount: 0,
         failureCount: jobs.length,
-        errors: jobs.map(job => ({ jobId: job.jobId, error: 'Redis persistence is unhealthy' })),
-        latency: this.operationLatency,
-        metadata: {
-          operationType: 'BULK_SAVE',
-          batchSize: jobs.length,
-          compressionUsed: false,
+        errors: jobs.map(job => ({ jobId: job.jobId, error: 'Redis persistence is unhealthy' })),latency: this.operationLatency,metadata: {
+          operationType: 'BULK_SAVE',batchSize: jobs.length,compressionUsed: false,
           nodeDistribution: {},
         },
       };
@@ -278,9 +251,7 @@ class MockRedisJobPersistenceService {
       errors: [],
       latency: this.operationLatency,
       metadata: {
-        operationType: 'BULK_SAVE',
-        batchSize: jobs.length,
-        compressionUsed: jobs.some(job => (job.originalSize || 0) > 1024),
+        operationType: 'BULK_SAVE',batchSize: jobs.length,compressionUsed: jobs.some(job => (job.originalSize || 0) > 1024),
         nodeDistribution: { 'node_0': jobs.length },
       },
     };
@@ -401,18 +372,12 @@ function createTestConfig(): any {
 /**
  * Create test computer action
  */
-function createTestAction(action: string = 'screenshot'): ComputerActionDto {
-  return {
-    action,
-    parameters: { format: 'png', quality: 'high' },
-  } as ComputerActionDto;
-}
+function createTestAction(action: string = 'screenshot'): ComputerActionDto {return {action,
+    parameters: { format: 'png', quality: 'high' },} as ComputerActionDto;}
 
 // ===== TEST SUITE =====
 
-describe('EnhancedAsyncJobService', () => {
-  let service: EnhancedAsyncJobService;
-  let mockComputerUse: MockComputerUseService;
+describe('EnhancedAsyncJobService', () => {let service: EnhancedAsyncJobService;let mockComputerUse: MockComputerUseService;
   let mockCache: MockCacheService;
   let mockMetrics: MockMetricsService;
   let mockRedisPersistence: MockRedisJobPersistenceService;
@@ -454,13 +419,7 @@ describe('EnhancedAsyncJobService', () => {
     service = module.get<EnhancedAsyncJobService>(EnhancedAsyncJobService);
 
     // Suppress logs during testing
-    jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    jest.spyOn(Logger.prototype, 'error').mockImplementation();
-  });
-
-  afterEach(() => {
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();jest.spyOn(Logger.prototype, 'debug').mockImplementation();jest.spyOn(Logger.prototype, 'warn').mockImplementation();jest.spyOn(Logger.prototype, 'error').mockImplementation();});afterEach(() => {
     mockCache.clearCache();
     mockMetrics.clearMetrics();
     mockRedisPersistence.clearStorage();
@@ -469,17 +428,9 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== ENHANCED JOB SUBMISSION =====
 
-  describe('Enhanced Job Submission', () => {
-    it('should submit job with Redis persistence enabled', async () => {
-      const action = createTestAction();
-      const options = {
+  describe('Enhanced Job Submission', () => {it('should submit job with Redis persistence enabled', async () => {const action = createTestAction();const options = {
         priority: JobPriority.HIGH,
-        metadata: { userId: 'test_user' },
-        userId: 'test_user',
-        sessionId: 'test_session',
-      };
-
-      const response = await service.submitJob(action, options);
+        metadata: { userId: 'test_user' },userId: 'test_user',sessionId: 'test_session',};const response = await service.submitJob(action, options);
 
       expect(response.jobId).toBeDefined();
       expect(response.status).toBe(JobStatus.PENDING);
@@ -489,10 +440,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(mockRedisPersistence.getStorageSize()).toBe(1);
     });
 
-    it('should submit job with fallback to memory when Redis fails', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      const action = createTestAction();
+    it('should submit job with fallback to memory when Redis fails', async () => {mockRedisPersistence.setHealthy(false);const action = createTestAction();
       const response = await service.submitJob(action);
 
       expect(response.jobId).toBeDefined();
@@ -503,13 +451,10 @@ describe('EnhancedAsyncJobService', () => {
       expect(jobStatus.jobId).toBe(response.jobId);
     });
 
-    it('should handle cached results with enhanced metadata', async () => {
-      const action = createTestAction();
-      const cachedResult = { cached: true, data: 'test' };
+    it('should handle cached results with enhanced metadata', async () => {const action = createTestAction();const cachedResult = { cached: true, data: 'test' };
 
       // Pre-populate cache
-      const cacheKey = `action${Buffer.from(JSON.stringify(action)).toString('base64').substring(0, 32)}`;
-      await mockCache.set(cacheKey, cachedResult);
+      const cacheKey = `action${Buffer.from(JSON.stringify(action)).toString('base64').substring(0, 32)}';await mockCache.set(cacheKey, cachedResult);
 
       const response = await service.submitJob(action, { useCache: true });
 
@@ -520,9 +465,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(jobStatus.metadata?.persistenceEnabled).toBe(true);
     });
 
-    it('should maintain backwards compatibility with submitAction', async () => {
-      const action = createTestAction();
-      const response = await service.submitAction(action);
+    it('should maintain backwards compatibility with submitAction', async () => {const action = createTestAction();const response = await service.submitAction(action);
 
       expect(response.jobId).toBeDefined();
       expect(response.status).toBe(JobStatus.PENDING);
@@ -531,10 +474,7 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== JOB EXECUTION WITH PERSISTENCE =====
 
-  describe('Job Execution with Persistence', () => {
-    it('should execute job and persist status updates', async () => {
-      const action = createTestAction();
-      const response = await service.submitJob(action);
+  describe('Job Execution with Persistence', () => {it('should execute job and persist status updates', async () => {const action = createTestAction();const response = await service.submitJob(action);
 
       // Wait for job execution
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -545,10 +485,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(jobResult.metadata?.persistenceHealthy).toBe(true);
     });
 
-    it('should handle job retries with persistence', async () => {
-      mockComputerUse.setFailureRate(0.8); // 80% failure rate
-
-      const action = createTestAction();
+    it('should handle job retries with persistence', async () => {mockComputerUse.setFailureRate(0.8); // 80% failure rateconst action = createTestAction();
       const response = await service.submitJob(action, { timeout: 50 });
 
       // Wait for retries and eventual completion/failure
@@ -562,9 +499,7 @@ describe('EnhancedAsyncJobService', () => {
       }
     });
 
-    it('should persist job cancellation', async () => {
-      const action = createTestAction();
-      const response = await service.submitJob(action);
+    it('should persist job cancellation', async () => {const action = createTestAction();const response = await service.submitJob(action);
 
       const cancelled = service.cancelJob(response.jobId);
       expect(cancelled).toBe(true);
@@ -576,12 +511,9 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== BULK OPERATIONS =====
 
-  describe('Bulk Operations', () => {
-    it('should submit bulk jobs successfully', async () => {
+  describe('Bulk Operations', () => {it('should submit bulk jobs successfully', async () => {
       const actions = Array.from({ length: 10 }, (_, i) => ({
-        action: createTestAction(`action_${i}`),
-        options: {
-          priority: i % 2 === 0 ? JobPriority.HIGH : JobPriority.NORMAL,
+        action: createTestAction(`action_${i}`),options: {priority: i % 2 === 0 ? JobPriority.HIGH : JobPriority.NORMAL,
           metadata: { index: i },
           userId: `user_${i % 3}`,
         },
@@ -625,16 +557,11 @@ describe('EnhancedAsyncJobService', () => {
       const result = await service.submitBulkJobs(actions);
 
       expect(result.success).toBe(false);
-      expect(result.errors[0].error).toContain('exceeds maximum');
-    });
-  });
+      expect(result.errors[0].error).toContain('exceeds maximum');});});
 
   // ===== JOB RECOVERY =====
 
-  describe('Job Recovery', () => {
-    it('should recover jobs from Redis on service restart', async () => {
-      // Simulate persisted jobs from previous session
-      mockRedisPersistence.simulateRecoveryJobs(5);
+  describe('Job Recovery', () => {it('should recover jobs from Redis on service restart', async () => {// Simulate persisted jobs from previous sessionmockRedisPersistence.simulateRecoveryJobs(5);
 
       // Initialize service (this would trigger recovery)
       await service.onModuleInit();
@@ -644,10 +571,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(health.memoryJobs).toBeGreaterThanOrEqual(5);
     });
 
-    it('should handle recovery when Redis is unhealthy', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      // Should not throw error during recovery
+    it('should handle recovery when Redis is unhealthy', async () => {mockRedisPersistence.setHealthy(false);// Should not throw error during recovery
       await expect(service.onModuleInit()).resolves.not.toThrow();
 
       const health = service.getServiceHealth();
@@ -655,9 +579,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(health.healthy).toBe(true); // Should still be healthy due to fallback
     });
 
-    it('should continue processing recovered jobs', async () => {
-      // Simulate pending jobs from previous session
-      mockRedisPersistence.simulateRecoveryJobs(3);
+    it('should continue processing recovered jobs', async () => {// Simulate pending jobs from previous sessionmockRedisPersistence.simulateRecoveryJobs(3);
       await service.onModuleInit();
 
       // Wait for jobs to process
@@ -670,46 +592,21 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== ENHANCED QUERYING =====
 
-  describe('Enhanced Querying', () => {
-    beforeEach(async () => {
-      // Submit test jobs with different users and statuses
-      await service.submitJob(createTestAction(), { userId: 'user1' });
-      await service.submitJob(createTestAction(), { userId: 'user1' });
-      await service.submitJob(createTestAction(), { userId: 'user2' });
+  describe('Enhanced Querying', () => {beforeEach(async () => {// Submit test jobs with different users and statuses
+      await service.submitJob(createTestAction(), { userId: 'user1' });await service.submitJob(createTestAction(), { userId: 'user1' });await service.submitJob(createTestAction(), { userId: 'user2' });});it('should query jobs by user ID', async () => {const jobs = await service.getJobsByUser('user1');expect(jobs).toBeDefined();expect(Array.isArray(jobs)).toBe(true);
     });
 
-    it('should query jobs by user ID', async () => {
-      const jobs = await service.getJobsByUser('user1');
-
-      expect(jobs).toBeDefined();
-      expect(Array.isArray(jobs)).toBe(true);
+    it('should query jobs with status filter', async () => {const jobs = await service.getJobsByUser('user1', { status: JobStatus.PENDING });expect(jobs).toBeDefined();expect(Array.isArray(jobs)).toBe(true);
     });
 
-    it('should query jobs with status filter', async () => {
-      const jobs = await service.getJobsByUser('user1', { status: JobStatus.PENDING });
-
-      expect(jobs).toBeDefined();
-      expect(Array.isArray(jobs)).toBe(true);
+    it('should query jobs with limit', async () => {const jobs = await service.getJobsByUser('user1', { limit: 1 });expect(jobs).toBeDefined();expect(Array.isArray(jobs)).toBe(true);
     });
 
-    it('should query jobs with limit', async () => {
-      const jobs = await service.getJobsByUser('user1', { limit: 1 });
-
-      expect(jobs).toBeDefined();
-      expect(Array.isArray(jobs)).toBe(true);
-    });
-
-    it('should throw error when querying with Redis disabled', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      await expect(service.queryJobs()).rejects.toThrow('Redis persistence');
-    });
-  });
+    it('should throw error when querying with Redis disabled', async () => {mockRedisPersistence.setHealthy(false);await expect(service.queryJobs()).rejects.toThrow('Redis persistence');});});
 
   // ===== ENHANCED STATISTICS =====
 
-  describe('Enhanced Statistics', () => {
-    it('should provide enhanced job statistics', async () => {
+  describe('Enhanced Statistics', () => {it('should provide enhanced job statistics', async () => {
       // Submit and execute some jobs
       const actions = Array.from({ length: 5 }, (_, i) => createTestAction(`action_${i}`));
 
@@ -730,21 +627,14 @@ describe('EnhancedAsyncJobService', () => {
       expect(stats.compressionRate).toBeGreaterThanOrEqual(0);
     });
 
-    it('should track Redis health in statistics', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      const stats = service.getJobStats();
+    it('should track Redis health in statistics', async () => {mockRedisPersistence.setHealthy(false);const stats = service.getJobStats();
       expect(stats.redisHealthy).toBe(false);
     });
   });
 
   // ===== SERVICE HEALTH MONITORING =====
 
-  describe('Service Health Monitoring', () => {
-    it('should provide comprehensive service health status', async () => {
-      const health = service.getServiceHealth();
-
-      expect(health.healthy).toBe(true);
+  describe('Service Health Monitoring', () => {it('should provide comprehensive service health status', async () => {const health = service.getServiceHealth();expect(health.healthy).toBe(true);
       expect(health.memoryJobs).toBeGreaterThanOrEqual(0);
       expect(health.queueLength).toBeGreaterThanOrEqual(0);
       expect(health.activeJobs).toBeGreaterThanOrEqual(0);
@@ -754,29 +644,19 @@ describe('EnhancedAsyncJobService', () => {
       expect(health.stats).toBeDefined();
     });
 
-    it('should reflect Redis health in service health', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      const health = service.getServiceHealth();
+    it('should reflect Redis health in service health', async () => {mockRedisPersistence.setHealthy(false);const health = service.getServiceHealth();
       expect(health.persistenceHealthy).toBe(false);
       expect(health.healthy).toBe(true); // Should still be healthy due to fallback
     });
 
-    it('should track service uptime', async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const health = service.getServiceHealth();
+    it('should track service uptime', async () => {await new Promise(resolve => setTimeout(resolve, 100));const health = service.getServiceHealth();
       expect(health.uptime).toBeGreaterThan(50);
     });
   });
 
   // ===== ERROR HANDLING AND FALLBACK =====
 
-  describe('Error Handling and Fallback', () => {
-    it('should gracefully handle Redis connection failures', async () => {
-      mockRedisPersistence.setHealthy(false);
-
-      const action = createTestAction();
+  describe('Error Handling and Fallback', () => {it('should gracefully handle Redis connection failures', async () => {mockRedisPersistence.setHealthy(false);const action = createTestAction();
 
       // Should not throw error
       await expect(service.submitJob(action)).resolves.toBeDefined();
@@ -804,10 +684,7 @@ describe('EnhancedAsyncJobService', () => {
       expect(stats.completedJobs).toBeGreaterThan(0);
     });
 
-    it('should handle persistence latency spikes gracefully', async () => {
-      mockRedisPersistence.setOperationLatency(100); // High latency
-
-      const action = createTestAction();
+    it('should handle persistence latency spikes gracefully', async () => {mockRedisPersistence.setOperationLatency(100); // High latencyconst action = createTestAction();
       const startTime = Date.now();
 
       const response = await service.submitJob(action);
@@ -821,8 +698,7 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== PERFORMANCE CHARACTERISTICS =====
 
-  describe('Performance Characteristics', () => {
-    it('should handle high-throughput job submission', async () => {
+  describe('Performance Characteristics', () => {it('should handle high-throughput job submission', async () => {
       const jobCount = 50;
       const startTime = Date.now();
 
@@ -859,9 +735,7 @@ describe('EnhancedAsyncJobService', () => {
       // Submit many jobs
       for (let i = 0; i < 100; i++) {
         await service.submitJob(createTestAction(`memory_test_${i}`), {
-          metadata: { data: 'x'.repeat(1000) }, // 1KB metadata per job
-        });
-      }
+          metadata: { data: 'x'.repeat(1000) }, // 1KB metadata per job});}
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
@@ -874,17 +748,9 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== INTEGRATION SCENARIOS =====
 
-  describe('Integration Scenarios', () => {
-    it('should handle complete job lifecycle with persistence', async () => {
-      const action = createTestAction();
-      const options = {
+  describe('Integration Scenarios', () => {it('should handle complete job lifecycle with persistence', async () => {const action = createTestAction();const options = {
         priority: JobPriority.HIGH,
-        metadata: { testCase: 'lifecycle' },
-        userId: 'lifecycle_user',
-        sessionId: 'lifecycle_session',
-      };
-
-      // Submit job
+        metadata: { testCase: 'lifecycle' },userId: 'lifecycle_user',sessionId: 'lifecycle_session',};// Submit job
       const response = await service.submitJob(action, options);
       expect(response.status).toBe(JobStatus.PENDING);
 
@@ -953,14 +819,10 @@ describe('EnhancedAsyncJobService', () => {
 
   // ===== EDGE CASES =====
 
-  describe('Edge Cases', () => {
-    it('should handle very large job metadata', async () => {
+  describe('Edge Cases', () => {it('should handle very large job metadata', async () => {
       const largeMetadata = {
         data: Array.from({ length: 1000 }, (_, i) => `item_${i}`),
-        description: 'x'.repeat(10000),
-      };
-
-      const action = createTestAction();
+        description: 'x'.repeat(10000),};const action = createTestAction();
       const response = await service.submitJob(action, { metadata: largeMetadata });
 
       expect(response.jobId).toBeDefined();
@@ -969,24 +831,13 @@ describe('EnhancedAsyncJobService', () => {
       expect(jobStatus.metadata).toMatchObject(largeMetadata);
     });
 
-    it('should handle special characters in job data', async () => {
-      const action = createTestAction();
-      const options = {
+    it('should handle special characters in job data', async () => {const action = createTestAction();const options = {
         metadata: {
-          description: 'Special chars: 你好 🚀 émoji',
-          unicode: '\u2603\u2764\uFE0F',
-        },
-        userId: 'user_unicode_🚀',
-      };
-
-      const response = await service.submitJob(action, options);
+          description: 'Special chars: 你好 🚀 émoji',unicode: '\u2603\u2764\uFE0F',},userId: 'user_unicode_🚀',};const response = await service.submitJob(action, options);
       expect(response.jobId).toBeDefined();
 
       const jobStatus = service.getJobStatus(response.jobId);
-      expect(jobStatus.metadata?.description).toBe('Special chars: 你好 🚀 émoji');
-    });
-
-    it('should handle concurrent job operations', async () => {
+      expect(jobStatus.metadata?.description).toBe('Special chars: 你好 🚀 émoji');});it('should handle concurrent job operations', async () => {
       const concurrentJobs = 20;
       const promises: Promise<any>[] = [];
 

@@ -10,14 +10,7 @@
  * @author Security Headers & CORS Specialist
  */
 
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Request, Response, NextFunction } from 'express';
-import helmet, { HelmetOptions } from 'helmet';
-import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';
-
-/**
- * Type-safe Express request with correlation ID
+import { Injectable, NestMiddleware, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { Request, Response, NextFunction } from 'express';import helmet, { HelmetOptions } from 'helmet';import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';/*** Type-safe Express request with correlation ID
  */
 interface SafeRequest extends Request {
   correlationId?: string;
@@ -42,9 +35,7 @@ interface _SafeHelmetOptions {
     | false;
   frameguard?:
     | {
-        action: 'deny' | 'sameorigin';
-      }
-    | false;
+        action: 'deny' | 'sameorigin';}| false;
   noSniff?: boolean;
   xssFilter?: boolean;
   referrerPolicy?:
@@ -92,10 +83,7 @@ interface SecurityMiddlewareConfig {
   hstsPreload: boolean;
 
   /** Frame options value */
-  frameOptions: 'DENY' | 'SAMEORIGIN' | false;
-
-  /** Enable X-Content-Type-Options: nosniff */
-  noSniff: boolean;
+  frameOptions: 'DENY' | 'SAMEORIGIN' | false;/** Enable X-Content-Type-Options: nosniff */noSniff: boolean;
 
   /** Enable X-XSS-Protection */
   xssFilter: boolean;
@@ -126,13 +114,7 @@ const SECURITY_CONFIGS: Record<string, Partial<SecurityMiddlewareConfig>> = {
   development: {
     csp: false, // Relaxed CSP for development
     hsts: false, // No HSTS in development
-    frameOptions: 'SAMEORIGIN',
-    corsOrigins: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:8080',
-    ],
-    corsCredentials: true,
+    frameOptions: 'SAMEORIGIN',corsOrigins: ['http://localhost:3000','http://localhost:3001','http://localhost:8080',],corsCredentials: true,
     enableSecurityLogging: false,
   },
 
@@ -142,9 +124,7 @@ const SECURITY_CONFIGS: Record<string, Partial<SecurityMiddlewareConfig>> = {
     hstsMaxAge: 86400, // 1 day
     hstsIncludeSubDomains: true,
     hstsPreload: false,
-    frameOptions: 'DENY',
-    corsCredentials: true,
-    enableSecurityLogging: true,
+    frameOptions: 'DENY',corsCredentials: true,enableSecurityLogging: true,
   },
 
   production: {
@@ -153,16 +133,9 @@ const SECURITY_CONFIGS: Record<string, Partial<SecurityMiddlewareConfig>> = {
     hstsMaxAge: 31536000, // 1 year
     hstsIncludeSubDomains: true,
     hstsPreload: true,
-    frameOptions: 'DENY',
-    corsCredentials: true,
-    enableSecurityLogging: true,
+    frameOptions: 'DENY',corsCredentials: true,enableSecurityLogging: true,
     customHeaders: {
-      'X-Powered-By': '', // Remove X-Powered-By header
-      Server: '', // Remove Server header
-      'X-Service': 'BytebotD',
-      'X-API-Version': '1.0',
-    },
-  },
+      'X-Powered-By': '', // Remove X-Powered-By headerServer: '', // Remove Server header'X-Service': 'BytebotD','X-API-Version': '1.0',},},
 };
 
 /**
@@ -171,28 +144,11 @@ const SECURITY_CONFIGS: Record<string, Partial<SecurityMiddlewareConfig>> = {
 const DEFAULT_CSP_DIRECTIVES = {
   'default-src': ["'self'"],
   'script-src': [
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    'https://cdn.jsdelivr.net',
-  ],
-  'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
-  'img-src': ["'self'", 'data:', 'https:', 'blob:', 'http://localhost:*'],
-  'media-src': ["'self'", 'blob:'],
-  'object-src': ["'none'"],
+    "'self'',"'unsafe-inline'',"'unsafe-eval'','https://cdn.jsdelivr.net',],'style-src': ["'self'', "'unsafe-inline'', 'https://fonts.googleapis.com'],'font-src': ["'self'', 'https://fonts.gstatic.com', 'data:'],'img-src': ["'self'', 'data:', 'https:', 'blob:', 'http://localhost:*'],'media-src': ["'self'', 'blob:'],'object-src': ["'none'"],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
-  'frame-ancestors': ["'self'", 'http://localhost:*'],
-  'upgrade-insecure-requests': [],
-  'connect-src': [
-    "'self'",
-    'ws:',
-    'wss:',
-    'http://localhost:*',
-    'https://localhost:*',
-  ],
-};
+  'frame-ancestors': ["'self'', 'http://localhost:*'],'upgrade-insecure-requests': [],'connect-src': [
+    "'self'','ws:','wss:','http://localhost:*','https://localhost:*',],};
 
 @Injectable()
 export class SecurityHeadersMiddleware implements NestMiddleware {
@@ -206,42 +162,22 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
   constructor(private configService: ConfigService) {
     const environment =
-      this.configService.get<string>('NODE_ENV') ?? 'development';
-    const corsOrigins = this.configService.get<string[]>('CORS_ORIGINS') ?? [
-      'http://localhost:3000',
-      'http://localhost:8080',
-    ];
-    const securityHeaders =
+      this.configService.get<string>('NODE_ENV') ?? 'development';const corsOrigins = this.configService.get<string[]>('CORS_ORIGINS') ?? ['http://localhost:3000','http://localhost:8080',];const securityHeaders =
       this.configService.get<Partial<SecurityMiddlewareConfig>>(
-        'security.headers',
-      ) ?? {};
-
-    // Build configuration with type safety
+        'security.headers',) ?? {};// Build configuration with type safety
     this.config = {
       environment,
       csp: true,
-      hsts: environment === 'production',
-      hstsMaxAge: environment === 'production' ? 31536000 : 86400,
-      hstsIncludeSubDomains: true,
-      hstsPreload: environment === 'production',
-      frameOptions: 'SAMEORIGIN', // Allow framing for VNC viewer
-      noSniff: true,
-      xssFilter: true,
-      referrerPolicy: 'same-origin',
-      corsOrigins,
-      corsCredentials: true,
-      enableSecurityLogging: environment !== 'development',
-      ...SECURITY_CONFIGS[environment],
-      // Override with specific config values
+      hsts: environment === 'production',hstsMaxAge: environment === 'production' ? 31536000 : 86400,hstsIncludeSubDomains: true,hstsPreload: environment === 'production',frameOptions: 'SAMEORIGIN', // Allow framing for VNC viewernoSniff: true,xssFilter: true,
+      referrerPolicy: 'same-origin',corsOrigins,corsCredentials: true,
+      enableSecurityLogging: environment !== 'development',...SECURITY_CONFIGS[environment],// Override with specific config values
       ...securityHeaders,
     };
 
     // Initialize helmet middleware
     this.helmetMiddleware = this.createHelmetMiddleware();
 
-    this.logger.log('BytebotD security headers middleware initialized', {
-      environment,
-      csp: this.config.csp,
+    this.logger.log('BytebotD security headers middleware initialized', {environment,csp: this.config.csp,
       hsts: this.config.hsts,
       frameOptions: this.config.frameOptions,
       corsOrigins: Array.isArray(this.config.corsOrigins)
@@ -255,10 +191,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Apply security headers to request
    */
   use(req: Request, res: Response, next: NextFunction): void {
-    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    // Set correlation ID for request tracking with type safety
+    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();// Set correlation ID for request tracking with type safety
     const safeReq = req as SafeRequest;
     safeReq.correlationId = operationId;
 
@@ -267,8 +200,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       method: req.method,
       url: req.url,
       ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      origin: req.get('Origin'),
+      userAgent: req.get('User-Agent'),origin: req.get('Origin'),
     });
 
     try {
@@ -306,9 +238,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         const processingTime = Date.now() - startTime;
 
         this.logger.debug(
-          `[${operationId}] BytebotD security headers applied successfully`,
-          {
-            operationId,
+          `[${operationId}] BytebotD security headers applied successfully`,{operationId,
             processingTimeMs: processingTime,
             headersCount: Object.keys(res.getHeaders()).length,
           },
@@ -330,9 +260,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       // Log security event
       this.logSecurityEvent(
         req,
-        'MIDDLEWARE_FAILURE',
-        safeError.message,
-        operationId,
+        'MIDDLEWARE_FAILURE',safeError.message,operationId,
       );
 
       next(caughtError);
@@ -355,9 +283,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
               ...DEFAULT_CSP_DIRECTIVES,
               ...this.config.cspDirectives,
             },
-            reportOnly: this.config.environment === 'development',
-          }
-        : false,
+            reportOnly: this.config.environment === 'development',}: false,
 
       // HTTP Strict Transport Security
       hsts: this.config.hsts
@@ -372,10 +298,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       frameguard: this.config.frameOptions
         ? {
             action: this.config.frameOptions.toLowerCase() as
-              | 'deny'
-              | 'sameorigin',
-          }
-        : false,
+              | 'deny'| 'sameorigin',}: false,
 
       // X-Content-Type-Options
       noSniff: this.config.noSniff,
@@ -387,16 +310,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       referrerPolicy: this.config.referrerPolicy
         ? {
             policy: this.config.referrerPolicy as
-              | 'same-origin'
-              | 'strict-origin'
-              | 'strict-origin-when-cross-origin'
-              | 'no-referrer'
-              | 'no-referrer-when-downgrade'
-              | 'origin'
-              | 'origin-when-cross-origin'
-              | 'unsafe-url',
-          }
-        : false,
+              | 'same-origin'| 'strict-origin'| 'strict-origin-when-cross-origin'| 'no-referrer'| 'no-referrer-when-downgrade'| 'origin'| 'origin-when-cross-origin'| 'unsafe-url',}: false,
 
       // Hide X-Powered-By
       hidePoweredBy: true,
@@ -455,33 +369,16 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     res: Response,
     operationId: string,
   ): void {
-    const origin = req.get('Origin');
-
-    if (!origin) {
-      return; // No CORS needed for same-origin requests
+    const origin = req.get('Origin');if (!origin) {return; // No CORS needed for same-origin requests
     }
 
     // Check if origin is allowed
     const isAllowedOrigin = this.isOriginAllowed(origin);
 
     if (isAllowedOrigin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-
-      if (this.config.corsCredentials) {
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-      }
-
-      // Set other CORS headers for preflight
-      if (req.method === 'OPTIONS') {
-        res.setHeader(
-          'Access-Control-Allow-Methods',
-          'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-        );
-        res.setHeader(
-          'Access-Control-Allow-Headers',
-          'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key, X-Service-ID',
-        );
-        res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+      res.setHeader('Access-Control-Allow-Origin', origin);if (this.config.corsCredentials) {res.setHeader('Access-Control-Allow-Credentials', 'true');}// Set other CORS headers for preflight
+      if (req.method === 'OPTIONS') {res.setHeader('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, PATCH, OPTIONS',);res.setHeader(
+          'Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key, X-Service-ID',);res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
       }
 
       this.logger.debug(`[${operationId}] BytebotD CORS headers applied`, {
@@ -517,27 +414,16 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Check if origin is allowed by CORS policy
    */
   private isOriginAllowed(origin: string): boolean {
-    if (typeof this.config.corsOrigins === 'string') {
-      return (
-        this.config.corsOrigins === '*' || this.config.corsOrigins === origin
-      );
-    }
+    if (typeof this.config.corsOrigins === 'string') {return (this.config.corsOrigins === '*' || this.config.corsOrigins === origin);}
 
     if (Array.isArray(this.config.corsOrigins)) {
       return (
         this.config.corsOrigins.includes(origin) ||
-        this.config.corsOrigins.includes('*') ||
-        this.config.corsOrigins.some((allowed) => {
-          // Support wildcard subdomains
-          if (allowed.startsWith('*.')) {
-            const domain = allowed.substring(2);
-            return origin.endsWith(domain);
+        this.config.corsOrigins.includes('*') ||this.config.corsOrigins.some((allowed) => {// Support wildcard subdomains
+          if (allowed.startsWith('*.')) {const domain = allowed.substring(2);return origin.endsWith(domain);
           }
           // Support localhost with any port
-          if (allowed.includes('localhost:*')) {
-            const baseOrigin = allowed.replace(':*', '');
-            return origin.startsWith(baseOrigin);
-          }
+          if (allowed.includes('localhost:*')) {const baseOrigin = allowed.replace(':*', '');return origin.startsWith(baseOrigin);}
           return allowed === origin;
         })
       );
@@ -570,14 +456,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         message,
         {
           operationId,
-          middleware: 'security-headers',
-          service: 'BytebotD',
-          eventType,
-          userAgent: req.get('User-Agent'),
-          origin: req.get('Origin'),
-          referer: req.get('Referer'),
-        },
-        undefined, // No user ID at middleware level
+          middleware: 'security-headers',service: 'BytebotD',eventType,userAgent: req.get('User-Agent'),origin: req.get('Origin'),referer: req.get('Referer'),},undefined, // No user ID at middleware level
         req.ip,
         req.get('User-Agent'),
       );
@@ -593,9 +472,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       );
     } catch (caughtError) {
       const safeError = caughtError as SafeError;
-      this.logger.error('Failed to log BytebotD security headers event', {
-        operationId,
-        error: safeError.message,
+      this.logger.error('Failed to log BytebotD security headers event', {operationId,error: safeError.message,
         originalEventType: eventType,
       });
     }
@@ -606,12 +483,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    */
   private mapEventType(eventType: string): SecurityEventType {
     switch (eventType) {
-      case 'CORS_VIOLATION':
-        return SecurityEventType._ACCESS_DENIED;
-      case 'MIDDLEWARE_ERROR':
-      case 'MIDDLEWARE_FAILURE':
-        return SecurityEventType._SECURITY_CONFIG_CHANGED;
-      default:
+      case 'CORS_VIOLATION':return SecurityEventType._ACCESS_DENIED;case 'MIDDLEWARE_ERROR':case 'MIDDLEWARE_FAILURE':return SecurityEventType._SECURITY_CONFIG_CHANGED;default:
         return SecurityEventType._SUSPICIOUS_ACTIVITY;
     }
   }
@@ -636,13 +508,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     // Check for essential security headers
     const essentialHeaders = [
-      'x-content-type-options',
-      'x-frame-options',
-      'x-xss-protection',
-      'referrer-policy',
-    ];
-
-    essentialHeaders.forEach((header) => {
+      'x-content-type-options','x-frame-options','x-xss-protection','referrer-policy',];essentialHeaders.forEach((header) => {
       if (!headers[header]) {
         missing.push(header);
       }
@@ -650,17 +516,8 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     // Check for HSTS in production
     if (
-      this.config.environment === 'production' &&
-      !headers['strict-transport-security']
-    ) {
-      missing.push('strict-transport-security');
-      recommendations.push('Enable HSTS for production environment');
-    }
-
-    // Check for CSP
-    if (this.config.csp && !headers['content-security-policy']) {
-      missing.push('content-security-policy');
-      recommendations.push('Content Security Policy should be configured');
+      this.config.environment === 'production' &&!headers['strict-transport-security']) {missing.push('strict-transport-security');recommendations.push('Enable HSTS for production environment');}// Check for CSP
+    if (this.config.csp && !headers['content-security-policy']) {missing.push('content-security-policy');recommendations.push('Content Security Policy should be configured');
     }
 
     return {

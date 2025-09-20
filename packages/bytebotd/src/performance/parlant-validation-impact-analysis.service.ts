@@ -26,35 +26,15 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-
-// ===== PARLANT VALIDATION IMPACT TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';// ===== PARLANT VALIDATION IMPACT TYPES =====/**
  * Validation complexity levels for impact analysis
  */
 export enum ValidationComplexity {
-  SIMPLE = 'simple',               // Basic parameter validation
-  MEDIUM = 'medium',               // Standard conversational validation
-  COMPLEX = 'complex',             // Deep contextual analysis
-  CRITICAL = 'critical',           // Security-critical operations
-}
-
-/**
+  SIMPLE = 'simple',               // Basic parameter validationMEDIUM = 'medium',               // Standard conversational validationCOMPLEX = 'complex',             // Deep contextual analysisCRITICAL = 'critical',           // Security-critical operations}/**
  * Validation operation categories
  */
 export enum ValidationCategory {
-  PARAMETER_VALIDATION = 'parameter_validation',
-  SECURITY_VALIDATION = 'security_validation',
-  BUSINESS_LOGIC_VALIDATION = 'business_logic_validation',
-  CONTEXTUAL_VALIDATION = 'contextual_validation',
-  COMPLIANCE_VALIDATION = 'compliance_validation',
-}
-
-/**
+  PARAMETER_VALIDATION = 'parameter_validation',SECURITY_VALIDATION = 'security_validation',BUSINESS_LOGIC_VALIDATION = 'business_logic_validation',CONTEXTUAL_VALIDATION = 'contextual_validation',COMPLIANCE_VALIDATION = 'compliance_validation',}/**
  * Individual validation performance measurement
  */
 export interface ValidationPerformanceMeasurement {
@@ -98,10 +78,7 @@ export interface ValidationPerformanceMeasurement {
     approved: boolean;          // Validation result
     confidence: number;         // Confidence score (0-1)
     requiresHuman: boolean;     // Requires human intervention
-    riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  };
-
-  // Performance metadata
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';};// Performance metadata
   metadata: {
     userId: string;
     sessionId: string;
@@ -117,10 +94,7 @@ export interface ValidationPerformanceMeasurement {
  */
 export interface ValidationImpactComparison {
   testId: string;
-  comparisonType: 'with_vs_without' | 'complexity_comparison' | 'cache_impact' | 'temporal_comparison';
-
-  // Baseline performance (without validation)
-  baseline: {
+  comparisonType: 'with_vs_without' | 'complexity_comparison' | 'cache_impact' | 'temporal_comparison';// Baseline performance (without validation)baseline: {
     averageLatency: number;
     throughput: number;
     resourceUsage: {
@@ -243,27 +217,16 @@ export interface ValidationPerformanceTrends {
 
   // Trend analysis
   trends: {
-    latencyTrend: 'improving' | 'stable' | 'degrading';
-    throughputTrend: 'improving' | 'stable' | 'degrading';
-    cacheTrend: 'improving' | 'stable' | 'degrading';
-    errorTrend: 'improving' | 'stable' | 'degrading';
-  };
-
-  // Performance forecasting
+    latencyTrend: 'improving' | 'stable' | 'degrading';throughputTrend: 'improving' | 'stable' | 'degrading';cacheTrend: 'improving' | 'stable' | 'degrading';errorTrend: 'improving' | 'stable' | 'degrading';};// Performance forecasting
   forecast: {
     predictedLatencyIncrease: number; // Predicted latency increase
     predictedThroughputDecrease: number; // Predicted throughput decrease
     scalingRequirements: string[];   // Scaling requirements forecast
-    optimizationUrgency: 'low' | 'medium' | 'high' | 'critical';
-  };
-
-  // Anomaly detection
+    optimizationUrgency: 'low' | 'medium' | 'high' | 'critical';};// Anomaly detection
   anomalies: {
     detected: boolean;
     anomalyType: string[];       // Types of anomalies detected
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    recommendations: string[];
-  };
+    severity: 'low' | 'medium' | 'high' | 'critical';recommendations: string[];};
 }
 
 /**
@@ -281,14 +244,7 @@ export interface ValidationImpactAnalysisResults {
 
   // Performance grades
   grades: {
-    overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    latencyGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    throughputGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    resourceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    cacheGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-  };
-
-  // Strategic recommendations
+    overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';latencyGrade: 'A' | 'B' | 'C' | 'D' | 'F';throughputGrade: 'A' | 'B' | 'C' | 'D' | 'F';resourceGrade: 'A' | 'B' | 'C' | 'D' | 'F';cacheGrade: 'A' | 'B' | 'C' | 'D' | 'F';};// Strategic recommendations
   strategicRecommendations: {
     immediate: string[];         // Immediate action items
     shortTerm: string[];        // Short-term improvements (1-4 weeks)
@@ -367,26 +323,14 @@ export class ParlantValidationImpactAnalysisService
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 PARLANT Validation Impact Analysis Service initializing...');
-  }
-
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing PARLANT Validation Impact Analysis Framework');
-
-    // Start real-time monitoring
-    this.startRealTimeMonitoring();
+    this.logger.log('🚀 PARLANT Validation Impact Analysis Service initializing...');}async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing PARLANT Validation Impact Analysis Framework');// Start real-time monitoringthis.startRealTimeMonitoring();
 
     // Load baseline performance data
     await this.loadBaselinePerformance();
 
-    this.logger.log('✅ PARLANT Validation Impact Analysis Framework ready');
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down PARLANT Validation Impact Analysis Framework');
-
-    // Stop monitoring
-    this.stopRealTimeMonitoring();
+    this.logger.log('✅ PARLANT Validation Impact Analysis Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down PARLANT Validation Impact Analysis Framework');// Stop monitoringthis.stopRealTimeMonitoring();
 
     this.logger.log('✅ PARLANT Validation Impact Analysis Framework shutdown complete');
   }
@@ -540,10 +484,7 @@ export class ParlantValidationImpactAnalysisService
    * Perform impact comparison analysis
    */
   private async performImpactComparison(): Promise<ValidationImpactComparison> {
-    this.logger.log('📊 Performing validation impact comparison');
-
-    // Get baseline performance (without validation)
-    const baseline = await this.getBaselinePerformance();
+    this.logger.log('📊 Performing validation impact comparison');// Get baseline performance (without validation)const baseline = await this.getBaselinePerformance();
 
     // Get current performance (with validation)
     const withValidation = await this.getCurrentValidationPerformance();
@@ -581,9 +522,7 @@ export class ParlantValidationImpactAnalysisService
 
     return {
       testId: this.generateTestId(),
-      comparisonType: 'with_vs_without',
-      baseline,
-      withValidation,
+      comparisonType: 'with_vs_without',baseline,withValidation,
       impact,
       recommendations,
     };
@@ -593,10 +532,7 @@ export class ParlantValidationImpactAnalysisService
    * Analyze cache performance
    */
   private async analyzeCachePerformance(): Promise<CachePerformanceAnalysis> {
-    this.logger.log('💾 Analyzing cache performance');
-
-    const measurements = this.completedMeasurements;
-    const cacheHits = measurements.filter(m => m.cache.hit);
+    this.logger.log('💾 Analyzing cache performance');const measurements = this.completedMeasurements;const cacheHits = measurements.filter(m => m.cache.hit);
     const cacheMisses = measurements.filter(m => !m.cache.hit);
 
     // Calculate hit rates
@@ -661,18 +597,13 @@ export class ParlantValidationImpactAnalysisService
    * Analyze bypass performance
    */
   private async analyzeBypassPerformance(): Promise<BypassPerformanceAnalysis> {
-    this.logger.log('🚪 Analyzing bypass mechanism performance');
-
-    // This would integrate with bypass mechanism data
-    const bypassMeasurements = this.getBypassedMeasurements();
+    this.logger.log('🚪 Analyzing bypass mechanism performance');// This would integrate with bypass mechanism dataconst bypassMeasurements = this.getBypassedMeasurements();
 
     const bypassRate = (bypassMeasurements.length / this.completedMeasurements.length) * 100;
 
     const bypassReasons = new Map<string, number>();
     bypassMeasurements.forEach(measurement => {
-      const reason = measurement.metadata.bypassReason || 'unknown';
-      bypassReasons.set(reason, (bypassReasons.get(reason) || 0) + 1);
-    });
+      const reason = measurement.metadata.bypassReason || 'unknown';bypassReasons.set(reason, (bypassReasons.get(reason) || 0) + 1);});
 
     const latencyImpact = {
       averageBypassLatency: this.calculateMean(bypassMeasurements.map(m => m.totalLatency)),
@@ -705,12 +636,7 @@ export class ParlantValidationImpactAnalysisService
    * Analyze performance trends
    */
   private async analyzePerformanceTrends(): Promise<ValidationPerformanceTrends> {
-    this.logger.log('📈 Analyzing validation performance trends');
-
-    const timeframe = '24h';
-    const recentMeasurements = this.getRecentMeasurements(86400000); // 24 hours
-
-    // Analyze trends
+    this.logger.log('📈 Analyzing validation performance trends');const timeframe = '24h';const recentMeasurements = this.getRecentMeasurements(86400000); // 24 hours// Analyze trends
     const trends = {
       latencyTrend: this.analyzeTrend(recentMeasurements.map(m => m.totalLatency)),
       throughputTrend: this.analyzeThroughputTrend(),
@@ -790,33 +716,13 @@ export class ParlantValidationImpactAnalysisService
 
     // Immediate recommendations
     if (impactComparison.impact.latencyIncrease > this.ANALYSIS_CONFIG.thresholds.acceptableLatencyIncrease) {
-      immediate.push('Implement emergency latency reduction measures');
-      immediate.push('Activate bypass mechanisms for non-critical operations');
-    }
-
-    if (cacheAnalysis.hitRate < this.ANALYSIS_CONFIG.thresholds.minimumCacheHitRate) {
-      immediate.push('Optimize cache configuration and TTL settings');
-    }
-
-    // Short-term recommendations
+      immediate.push('Implement emergency latency reduction measures');immediate.push('Activate bypass mechanisms for non-critical operations');}if (cacheAnalysis.hitRate < this.ANALYSIS_CONFIG.thresholds.minimumCacheHitRate) {
+      immediate.push('Optimize cache configuration and TTL settings');}// Short-term recommendations
     if (impactComparison.impact.throughputDecrease > this.ANALYSIS_CONFIG.thresholds.acceptableThroughputDecrease) {
-      shortTerm.push('Implement validation request batching');
-      shortTerm.push('Optimize validation processing pipeline');
-    }
-
-    // Long-term recommendations
-    if (trendsAnalysis.forecast.optimizationUrgency === 'high') {
-      longTerm.push('Consider validation service scaling strategy');
-      longTerm.push('Implement predictive validation caching');
-    }
-
-    // Architectural recommendations
+      shortTerm.push('Implement validation request batching');shortTerm.push('Optimize validation processing pipeline');}// Long-term recommendations
+    if (trendsAnalysis.forecast.optimizationUrgency === 'high') {longTerm.push('Consider validation service scaling strategy');longTerm.push('Implement predictive validation caching');}// Architectural recommendations
     if (impactComparison.impact.resourceOverhead.cpu > this.ANALYSIS_CONFIG.thresholds.maxResourceOverhead) {
-      architectural.push('Consider microservices architecture for validation');
-      architectural.push('Implement async validation patterns');
-    }
-
-    return {
+      architectural.push('Consider microservices architecture for validation');architectural.push('Implement async validation patterns');}return {
       immediate,
       shortTerm,
       longTerm,
@@ -886,58 +792,19 @@ export class ParlantValidationImpactAnalysisService
   /**
    * Grade latency impact
    */
-  private gradeLatencyImpact(latencyIncrease: number): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (latencyIncrease <= 10) return 'A';
-    if (latencyIncrease <= 25) return 'B';
-    if (latencyIncrease <= 50) return 'C';
-    if (latencyIncrease <= 100) return 'D';
-    return 'F';
-  }
-
-  /**
+  private gradeLatencyImpact(latencyIncrease: number): 'A' | 'B' | 'C' | 'D' | 'F' {if (latencyIncrease <= 10) return 'A';if (latencyIncrease <= 25) return 'B';if (latencyIncrease <= 50) return 'C';if (latencyIncrease <= 100) return 'D';return 'F';}/**
    * Grade throughput impact
    */
-  private gradeThroughputImpact(throughputDecrease: number): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (throughputDecrease <= 5) return 'A';
-    if (throughputDecrease <= 10) return 'B';
-    if (throughputDecrease <= 20) return 'C';
-    if (throughputDecrease <= 35) return 'D';
-    return 'F';
-  }
-
-  /**
+  private gradeThroughputImpact(throughputDecrease: number): 'A' | 'B' | 'C' | 'D' | 'F' {if (throughputDecrease <= 5) return 'A';if (throughputDecrease <= 10) return 'B';if (throughputDecrease <= 20) return 'C';if (throughputDecrease <= 35) return 'D';return 'F';}/**
    * Grade resource impact
    */
-  private gradeResourceImpact(resourceOverhead: any): 'A' | 'B' | 'C' | 'D' | 'F' {
-    const averageOverhead = (resourceOverhead.cpu + resourceOverhead.memory + resourceOverhead.network) / 3;
-
-    if (averageOverhead <= 10) return 'A';
-    if (averageOverhead <= 20) return 'B';
-    if (averageOverhead <= 30) return 'C';
-    if (averageOverhead <= 50) return 'D';
-    return 'F';
-  }
-
-  /**
+  private gradeResourceImpact(resourceOverhead: any): 'A' | 'B' | 'C' | 'D' | 'F' {const averageOverhead = (resourceOverhead.cpu + resourceOverhead.memory + resourceOverhead.network) / 3;if (averageOverhead <= 10) return 'A';if (averageOverhead <= 20) return 'B';if (averageOverhead <= 30) return 'C';if (averageOverhead <= 50) return 'D';return 'F';}/**
    * Grade cache performance
    */
-  private gradeCachePerformance(hitRate: number): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (hitRate >= 90) return 'A';
-    if (hitRate >= 80) return 'B';
-    if (hitRate >= 70) return 'C';
-    if (hitRate >= 60) return 'D';
-    return 'F';
-  }
-
-  /**
+  private gradeCachePerformance(hitRate: number): 'A' | 'B' | 'C' | 'D' | 'F' {if (hitRate >= 90) return 'A';if (hitRate >= 80) return 'B';if (hitRate >= 70) return 'C';if (hitRate >= 60) return 'D';return 'F';}/**
    * Calculate overall grade
    */
-  private calculateOverallGrade(grades: Array<'A' | 'B' | 'C' | 'D' | 'F'>): 'A' | 'B' | 'C' | 'D' | 'F' {
-    const gradeValues = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0 };
-    const valueToGrade = { 4: 'A', 3: 'B', 2: 'C', 1: 'D', 0: 'F' } as const;
-
-    const averageValue = grades.reduce((sum, grade) => sum + gradeValues[grade], 0) / grades.length;
-    const roundedValue = Math.round(averageValue) as 0 | 1 | 2 | 3 | 4;
+  private calculateOverallGrade(grades: Array<'A' | 'B' | 'C' | 'D' | 'F'>): 'A' | 'B' | 'C' | 'D' | 'F' {const gradeValues = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0 };const valueToGrade = { 4: 'A', 3: 'B', 2: 'C', 1: 'D', 0: 'F' } as const;const averageValue = grades.reduce((sum, grade) => sum + gradeValues[grade], 0) / grades.length;const roundedValue = Math.round(averageValue) as 0 | 1 | 2 | 3 | 4;
 
     return valueToGrade[roundedValue];
   }
@@ -953,23 +820,14 @@ export class ParlantValidationImpactAnalysisService
   /**
    * Analyze trend direction
    */
-  private analyzeTrend(values: number[]): 'improving' | 'stable' | 'degrading' {
-    if (values.length < 2) return 'stable';
-
-    const firstHalf = values.slice(0, Math.floor(values.length / 2));
-    const secondHalf = values.slice(Math.floor(values.length / 2));
+  private analyzeTrend(values: number[]): 'improving' | 'stable' | 'degrading' {if (values.length < 2) return 'stable';const firstHalf = values.slice(0, Math.floor(values.length / 2));const secondHalf = values.slice(Math.floor(values.length / 2));
 
     const firstMean = this.calculateMean(firstHalf);
     const secondMean = this.calculateMean(secondHalf);
 
     const changePercent = ((secondMean - firstMean) / firstMean) * 100;
 
-    if (changePercent > 5) return 'degrading';
-    if (changePercent < -5) return 'improving';
-    return 'stable';
-  }
-
-  // ===== INFRASTRUCTURE METHODS =====
+    if (changePercent > 5) return 'degrading';if (changePercent < -5) return 'improving';return 'stable';}// ===== INFRASTRUCTURE METHODS =====
 
   /**
    * Start real-time monitoring
@@ -1069,10 +927,7 @@ export class ParlantValidationImpactAnalysisService
    * Generate analysis ID
    */
   private generateAnalysisId(): string {
-    return `parlant_analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
+    return `parlant_analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;}/**
    * Generate test ID
    */
   private generateTestId(): string {
@@ -1084,15 +939,7 @@ export class ParlantValidationImpactAnalysisService
    */
   private logAnalysisResults(results: ValidationImpactAnalysisResults): void {
     this.logger.log('📊 PARLANT Validation Impact Analysis Results:');
-    this.logger.log(`   Analysis ID: ${results.analysisId}`);
-    this.logger.log(`   Overall Grade: ${results.grades.overallGrade}`);
-    this.logger.log(`   Latency Impact: +${results.impactComparison.impact.latencyIncrease.toFixed(2)}ms (${results.impactComparison.impact.latencyIncreasePercentage.toFixed(1)}%)`);
-    this.logger.log(`   Throughput Impact: -${results.impactComparison.impact.throughputDecrease.toFixed(1)}%`);
-    this.logger.log(`   Cache Hit Rate: ${results.cacheAnalysis.hitRate.toFixed(1)}%`);
-    this.logger.log(`   ROI: ${results.costBenefit.roi.toFixed(1)}%`);
-
-    if (results.strategicRecommendations.immediate.length > 0) {
-      this.logger.log(`   Immediate Actions Required: ${results.strategicRecommendations.immediate.length}`);
+    this.logger.log(`   Analysis ID: ${results.analysisId}`);this.logger.log(`   Overall Grade: ${results.grades.overallGrade}`);this.logger.log(`   Latency Impact: +${results.impactComparison.impact.latencyIncrease.toFixed(2)}ms (${results.impactComparison.impact.latencyIncreasePercentage.toFixed(1)}%)`);this.logger.log(`   Throughput Impact: -${results.impactComparison.impact.throughputDecrease.toFixed(1)}%`);this.logger.log(`   Cache Hit Rate: ${results.cacheAnalysis.hitRate.toFixed(1)}%`);this.logger.log(`   ROI: ${results.costBenefit.roi.toFixed(1)}%`);if (results.strategicRecommendations.immediate.length > 0) {this.logger.log(`   Immediate Actions Required: ${results.strategicRecommendations.immediate.length}`);
     }
   }
 
@@ -1105,28 +952,13 @@ export class ParlantValidationImpactAnalysisService
   private calculatePotentialHitRateImprovement(hitRate: number): number { return Math.max(0, 90 - hitRate); }
   private calculateOptimalTTL(): number { return 300; } // 5 minutes
   private calculateOptimalCacheSize(): number { return 10000; }
-  private recommendCachingStrategy(hitRate: number, efficiency: any): string { return 'LRU with TTL'; }
-  private calculateBypassOverhead(): number { return 5; }
-  private calculateEmergencyBypassLatency(): number { return 10; }
+  private recommendCachingStrategy(hitRate: number, efficiency: any): string { return 'LRU with TTL'; }private calculateBypassOverhead(): number { return 5; }private calculateEmergencyBypassLatency(): number { return 10; }
   private calculateFalsePositiveRate(): number { return 2; }
   private calculateMissedValidationRate(): number { return 1; }
   private calculateRiskExposure(): number { return 3; }
-  private generateBypassThresholdRecommendations(): string[] { return ['Adjust CPU threshold to 85%']; }
-  private generateBypassConditionRecommendations(): string[] { return ['Add memory pressure check']; }
-  private generateEmergencyProtocolRecommendations(): string[] { return ['Implement circuit breaker']; }
-  private getRecentMeasurements(timeframe: number): ValidationPerformanceMeasurement[] { return this.completedMeasurements.slice(-100); }
-  private analyzeThroughputTrend(): 'improving' | 'stable' | 'degrading' { return 'stable'; }
-  private analyzeCacheTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }
-  private analyzeErrorTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }
-  private forecastLatencyIncrease(measurements: ValidationPerformanceMeasurement[]): number { return 5; }
-  private forecastThroughputDecrease(): number { return 3; }
-  private forecastScalingRequirements(): string[] { return ['Add 2 more validation instances']; }
-  private assessOptimizationUrgency(trends: any): 'low' | 'medium' | 'high' | 'critical' { return 'medium'; }
-  private detectAnomalies(measurements: ValidationPerformanceMeasurement[]): boolean { return false; }
-  private identifyAnomalyTypes(measurements: ValidationPerformanceMeasurement[]): string[] { return []; }
-  private assessAnomalySeverity(measurements: ValidationPerformanceMeasurement[]): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }
-  private generateAnomalyRecommendations(): string[] { return []; }
-  private generateImpactRecommendations(impact: any): any { return { optimization: [], configuration: [], architecture: [], caching: [] }; }
+  private generateBypassThresholdRecommendations(): string[] { return ['Adjust CPU threshold to 85%']; }private generateBypassConditionRecommendations(): string[] { return ['Add memory pressure check']; }private generateEmergencyProtocolRecommendations(): string[] { return ['Implement circuit breaker']; }private getRecentMeasurements(timeframe: number): ValidationPerformanceMeasurement[] { return this.completedMeasurements.slice(-100); }private analyzeThroughputTrend(): 'improving' | 'stable' | 'degrading' { return 'stable'; }private analyzeCacheTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }private analyzeErrorTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }private forecastLatencyIncrease(measurements: ValidationPerformanceMeasurement[]): number { return 5; }private forecastThroughputDecrease(): number { return 3; }
+  private forecastScalingRequirements(): string[] { return ['Add 2 more validation instances']; }private assessOptimizationUrgency(trends: any): 'low' | 'medium' | 'high' | 'critical' { return 'medium'; }private detectAnomalies(measurements: ValidationPerformanceMeasurement[]): boolean { return false; }private identifyAnomalyTypes(measurements: ValidationPerformanceMeasurement[]): string[] { return []; }
+  private assessAnomalySeverity(measurements: ValidationPerformanceMeasurement[]): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }private generateAnomalyRecommendations(): string[] { return []; }private generateImpactRecommendations(impact: any): any { return { optimization: [], configuration: [], architecture: [], caching: [] }; }
 
   // ===== PUBLIC API METHODS =====
 

@@ -13,49 +13,29 @@ import {
   Query,
   UploadedFile,
   UseInterceptors as UseFileInterceptor,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiOperation,
+} from '@nestjs/common';import { FileInterceptor } from '@nestjs/platform-express';import {ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiParam,
   ApiQuery,
   ApiConsumes,
-} from '@nestjs/swagger';
-import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
-import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
-import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import {
-  ForVersion,
+} from '@nestjs/swagger';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import {
-  OperatorOrAdmin,
+} from '../common/versioning/api-version.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { FileManagementService } from './file-management.service';
-import {
-  FileOperationDto,
+} from '../auth/decorators/roles.decorator';import { FileManagementService } from './file-management.service';import {FileOperationDto,
   BulkFileOperationDto,
   FileSyncDto,
   FileOperationType,
   FileUploadMethod,
   FileDownloadMethod
-} from './dto/file-operation.dto';
-import {
-  FileOperationResponseDto,
+} from './dto/file-operation.dto';import {FileOperationResponseDto,
   BulkFileOperationResponseDto,
   FileListingResponseDto,
   FileSyncResponseDto
-} from './dto/file-response.dto';
-
-/**
- * File Management Controller
+} from './dto/file-response.dto';/*** File Management Controller
  *
  * Provides enterprise-grade APIs for automated file operations including:
  * - Automated file uploads with form detection and interaction
@@ -75,14 +55,9 @@ import {
  * - Comprehensive audit logging
  * - Secure file handling and storage
  */
-@ApiTags('File Management API')
-@Controller('file-management')
-@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
+@ApiTags('File Management API')@Controller('file-management')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
 @UseInterceptors(LoggingInterceptor)
-@ApiBearerAuth('bearer')
-export class FileManagementController {
-  private readonly logger = new Logger(FileManagementController.name);
+@ApiBearerAuth('bearer')export class FileManagementController {private readonly logger = new Logger(FileManagementController.name);
 
   constructor(private readonly fileManagementService: FileManagementService) {}
 
@@ -97,44 +72,24 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileOperationResponseDto> - Operation execution results
    */
-  @Post('operation')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('operation')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Execute file operation',
-    description: 'Execute various file operations including upload, download, copy, move, delete, compress, and extract with comprehensive configuration options.',
-    operationId: 'executeFileOperation',
-  })
-  @ApiResponse({
+    summary: 'Execute file operation',description: 'Execute various file operations including upload, download, copy, move, delete, compress, and extract with comprehensive configuration options.',operationId: 'executeFileOperation',})@ApiResponse({
     status: 200,
-    description: 'File operation executed successfully',
-    type: FileOperationResponseDto,
-  })
+    description: 'File operation executed successfully',type: FileOperationResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid operation parameters or configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid operation parameters or configuration',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
     status: 404,
-    description: 'Source file or target location not found',
-  })
-  @ApiResponse({
+    description: 'Source file or target location not found',})@ApiResponse({
     status: 413,
-    description: 'File too large',
-  })
-  @ApiResponse({
+    description: 'File too large',})@ApiResponse({
     status: 415,
-    description: 'Unsupported file type',
-  })
-  @ApiResponse({
+    description: 'Unsupported file type',})@ApiResponse({
     status: 429,
     description: 'Rate limit exceeded',
   })
@@ -142,14 +97,9 @@ export class FileManagementController {
     @Body() params: FileOperationDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileOperationResponseDto> {
-    const operationId = `file_op_${params.operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `file_op_${params.operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] File operation request: ${params.operation}`,
-        {
-          operationId,
+        `[${operationId}] File operation request: ${params.operation}`,{operationId,
           operation: params.operation,
           source: params.source,
           target: params.target,
@@ -165,9 +115,7 @@ export class FileManagementController {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] File operation completed: ${result.success ? 'SUCCESS' : 'FAILED'} (${processingTime}ms)`,
-        {
-          operationId,
+        `[${operationId}] File operation completed: ${result.success ? 'SUCCESS' : 'FAILED'} (${processingTime}ms)`,{operationId,
           operation: params.operation,
           success: result.success,
           processingTime,
@@ -188,9 +136,7 @@ export class FileManagementController {
           operationId,
           operation: params.operation,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
@@ -218,9 +164,7 @@ export class FileManagementController {
 
       if (errorMessage.includes('file type not allowed') || errorMessage.includes('MIME type')) {
         throw new HttpException(
-          `Unsupported file type: ${errorMessage}`,
-          HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-        );
+          `Unsupported file type: ${errorMessage}`,HttpStatus.UNSUPPORTED_MEDIA_TYPE,);
       }
 
       throw new HttpException(
@@ -241,19 +185,11 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<BulkFileOperationResponseDto> - Bulk operation results
    */
-  @Post('bulk-operation')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('bulk-operation')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Execute bulk file operations',
-    description: 'Perform multiple file operations in parallel or sequential mode with comprehensive progress tracking and error handling.',
-    operationId: 'executeBulkFileOperations',
-  })
-  @ApiResponse({
+    summary: 'Execute bulk file operations',description: 'Perform multiple file operations in parallel or sequential mode with comprehensive progress tracking and error handling.',operationId: 'executeBulkFileOperations',})@ApiResponse({
     status: 200,
-    description: 'Bulk file operations completed',
-    type: BulkFileOperationResponseDto,
-  })
+    description: 'Bulk file operations completed',type: BulkFileOperationResponseDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid bulk operation parameters',
@@ -262,10 +198,7 @@ export class FileManagementController {
     @Body() params: BulkFileOperationDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<BulkFileOperationResponseDto> {
-    const operationId = `bulk_file_op_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Bulk file operation request`,
+    const operationId = `bulk_file_op_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Bulk file operation request`,
       {
         operationId,
         operationCount: params.operations.length,
@@ -294,40 +227,20 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileOperationResponseDto> - Upload operation results
    */
-  @Post('upload')
-  @UseFileInterceptor(FileInterceptor('file'))
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('upload')@UseFileInterceptor(FileInterceptor('file'))@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Upload file',
-    description: 'Upload file using multipart form data or automated web form interaction with validation and progress tracking.',
-    operationId: 'uploadFile',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiResponse({
-    status: 200,
-    description: 'File uploaded successfully',
-    type: FileOperationResponseDto,
-  })
+    summary: 'Upload file',description: 'Upload file using multipart form data or automated web form interaction with validation and progress tracking.',operationId: 'uploadFile',})@ApiConsumes('multipart/form-data')@ApiResponse({status: 200,
+    description: 'File uploaded successfully',type: FileOperationResponseDto,})
   @ApiResponse({
     status: 413,
-    description: 'File too large',
-  })
-  @ApiResponse({
+    description: 'File too large',})@ApiResponse({
     status: 415,
-    description: 'Unsupported file type',
-  })
-  async uploadFile(
+    description: 'Unsupported file type',})async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('uploadMethod') uploadMethod: FileUploadMethod = FileUploadMethod.FORM_UPLOAD,
-    @Body('targetSelector') targetSelector?: string,
-    @Body('autoSubmit') autoSubmit: boolean = false,
+    @Body('uploadMethod') uploadMethod: FileUploadMethod = FileUploadMethod.FORM_UPLOAD,@Body('targetSelector') targetSelector?: string,@Body('autoSubmit') autoSubmit: boolean = false,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileOperationResponseDto> {
-    const operationId = `upload_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File upload request`,
+    const operationId = `upload_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File upload request`,
       {
         operationId,
         filename: file?.originalname,
@@ -345,9 +258,7 @@ export class FileManagementController {
       filename: file?.originalname,
       fileSize: file?.size,
       mimeType: file?.mimetype,
-      fileData: file?.buffer ? file.buffer.toString('base64') : undefined,
-      uploadConfig: {
-        method: uploadMethod,
+      fileData: file?.buffer ? file.buffer.toString('base64') : undefined,uploadConfig: {method: uploadMethod,
         targetSelector,
         autoSubmit,
         uploadTimeout: 60000,
@@ -376,35 +287,18 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileOperationResponseDto> - Download operation results
    */
-  @Post('download')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('download')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Download file',
-    description: 'Download files from web pages using various methods including direct links, button clicks, and form submissions.',
-    operationId: 'downloadFile',
-  })
-  @ApiResponse({
+    summary: 'Download file',description: 'Download files from web pages using various methods including direct links, button clicks, and form submissions.',operationId: 'downloadFile',})@ApiResponse({
     status: 200,
-    description: 'File downloaded successfully',
-    type: FileOperationResponseDto,
-  })
+    description: 'File downloaded successfully',type: FileOperationResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Download source not found',
-  })
-  async downloadFile(
-    @Body('downloadUrl') downloadUrl?: string,
-    @Body('downloadMethod') downloadMethod: FileDownloadMethod = FileDownloadMethod.DIRECT_LINK,
-    @Body('downloadSelector') downloadSelector?: string,
-    @Body('customFilename') customFilename?: string,
-    @Body('downloadDirectory') downloadDirectory?: string,
+    description: 'Download source not found',})async downloadFile(
+    @Body('downloadUrl') downloadUrl?: string,@Body('downloadMethod') downloadMethod: FileDownloadMethod = FileDownloadMethod.DIRECT_LINK,@Body('downloadSelector') downloadSelector?: string,@Body('customFilename') customFilename?: string,@Body('downloadDirectory') downloadDirectory?: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileOperationResponseDto> {
-    const operationId = `download_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File download request`,
+    const operationId = `download_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File download request`,
       {
         operationId,
         downloadUrl,
@@ -444,19 +338,11 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileSyncResponseDto> - Synchronization results
    */
-  @Post('sync')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('sync')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Synchronize files',
-    description: 'Synchronize files between local and remote locations with bidirectional support, conflict resolution, and pattern filtering.',
-    operationId: 'synchronizeFiles',
-  })
-  @ApiResponse({
+    summary: 'Synchronize files',description: 'Synchronize files between local and remote locations with bidirectional support, conflict resolution, and pattern filtering.',operationId: 'synchronizeFiles',})@ApiResponse({
     status: 200,
-    description: 'File synchronization completed',
-    type: FileSyncResponseDto,
-  })
+    description: 'File synchronization completed',type: FileSyncResponseDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid synchronization parameters',
@@ -465,10 +351,7 @@ export class FileManagementController {
     @Body() params: FileSyncDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileSyncResponseDto> {
-    const operationId = `sync_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File synchronization request`,
+    const operationId = `sync_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File synchronization request`,
       {
         operationId,
         source: params.source,
@@ -497,65 +380,30 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileListingResponseDto> - File listing results
    */
-  @Get('list')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('list')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'List files',
-    description: 'List files and directories with optional filtering by extension, size, date, and other criteria.',
-    operationId: 'listFiles',
+    summary: 'List files',description: 'List files and directories with optional filtering by extension, size, date, and other criteria.',operationId: 'listFiles',})@ApiQuery({
+    name: 'path',description: 'Directory path to list',example: '/uploads/documents',required: false})
+  @ApiQuery({
+    name: 'extensions',description: 'File extensions filter (comma-separated)',example: '.pdf,.doc,.docx',required: false})
+  @ApiQuery({
+    name: 'minSize',description: 'Minimum file size in bytes',example: 1024,required: false
   })
   @ApiQuery({
-    name: 'path',
-    description: 'Directory path to list',
-    example: '/uploads/documents',
-    required: false
+    name: 'maxSize',description: 'Maximum file size in bytes',example: 10485760,required: false
   })
   @ApiQuery({
-    name: 'extensions',
-    description: 'File extensions filter (comma-separated)',
-    example: '.pdf,.doc,.docx',
-    required: false
-  })
-  @ApiQuery({
-    name: 'minSize',
-    description: 'Minimum file size in bytes',
-    example: 1024,
-    required: false
-  })
-  @ApiQuery({
-    name: 'maxSize',
-    description: 'Maximum file size in bytes',
-    example: 10485760,
-    required: false
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    description: 'Sort criteria',
-    example: 'name',
-    required: false
-  })
+    name: 'sortBy',description: 'Sort criteria',example: 'name',required: false})
   @ApiResponse({
     status: 200,
-    description: 'File listing retrieved successfully',
-    type: FileListingResponseDto,
-  })
+    description: 'File listing retrieved successfully',type: FileListingResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Directory not found',
-  })
-  async listFiles(
-    @Query('path') path: string = '.',
-    @Query('extensions') extensions?: string,
-    @Query('minSize') minSize?: number,
-    @Query('maxSize') maxSize?: number,
-    @Query('sortBy') sortBy?: string,
+    description: 'Directory not found',})async listFiles(
+    @Query('path') path: string = '.',@Query('extensions') extensions?: string,@Query('minSize') minSize?: number,@Query('maxSize') maxSize?: number,@Query('sortBy') sortBy?: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileListingResponseDto> {
-    const operationId = `list_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File listing request`,
+    const operationId = `list_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File listing request`,
       {
         operationId,
         path,
@@ -569,9 +417,7 @@ export class FileManagementController {
     );
 
     const filters = {
-      extensions: extensions ? extensions.split(',').map(ext => ext.trim()) : undefined,
-      minSize,
-      maxSize,
+      extensions: extensions ? extensions.split(',').map(ext => ext.trim()) : undefined,minSize,maxSize,
       sortBy
     };
 
@@ -592,32 +438,16 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileOperationResponseDto> - Compression operation results
    */
-  @Post('compress')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('compress')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Compress files',
-    description: 'Create compressed archives from files and directories with various compression formats and encryption support.',
-    operationId: 'compressFiles',
-  })
-  @ApiResponse({
+    summary: 'Compress files',description: 'Create compressed archives from files and directories with various compression formats and encryption support.',operationId: 'compressFiles',})@ApiResponse({
     status: 200,
-    description: 'Files compressed successfully',
-    type: FileOperationResponseDto,
-  })
+    description: 'Files compressed successfully',type: FileOperationResponseDto,})
   async compressFiles(
-    @Body('sourcePath') sourcePath: string,
-    @Body('targetPath') targetPath: string,
-    @Body('compressionType') compressionType: string = 'zip',
-    @Body('compressionLevel') compressionLevel: number = 6,
-    @Body('password') password?: string,
-    @Body('excludePatterns') excludePatterns?: string[],
+    @Body('sourcePath') sourcePath: string,@Body('targetPath') targetPath: string,@Body('compressionType') compressionType: string = 'zip',@Body('compressionLevel') compressionLevel: number = 6,@Body('password') password?: string,@Body('excludePatterns') excludePatterns?: string[],
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileOperationResponseDto> {
-    const operationId = `compress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File compression request`,
+    const operationId = `compress_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File compression request`,
       {
         operationId,
         sourcePath,
@@ -659,30 +489,16 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Promise<FileOperationResponseDto> - Extraction operation results
    */
-  @Post('extract')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract files',
-    description: 'Extract files from compressed archives with support for various formats and password-protected archives.',
-    operationId: 'extractFiles',
-  })
-  @ApiResponse({
+    summary: 'Extract files',description: 'Extract files from compressed archives with support for various formats and password-protected archives.',operationId: 'extractFiles',})@ApiResponse({
     status: 200,
-    description: 'Files extracted successfully',
-    type: FileOperationResponseDto,
-  })
+    description: 'Files extracted successfully',type: FileOperationResponseDto,})
   async extractFiles(
-    @Body('archivePath') archivePath: string,
-    @Body('targetDirectory') targetDirectory: string,
-    @Body('password') password?: string,
-    @Body('overwriteExisting') overwriteExisting: boolean = false,
+    @Body('archivePath') archivePath: string,@Body('targetDirectory') targetDirectory: string,@Body('password') password?: string,@Body('overwriteExisting') overwriteExisting: boolean = false,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FileOperationResponseDto> {
-    const operationId = `extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] File extraction request`,
+    const operationId = `extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] File extraction request`,
       {
         operationId,
         archivePath,
@@ -699,9 +515,7 @@ export class FileManagementController {
       source: archivePath,
       target: targetDirectory,
       compressionConfig: {
-        type: 'zip' as any, // Will be auto-detected
-        password
-      },
+        type: 'zip' as any, // Will be auto-detectedpassword},
       metadata: {
         overwriteExisting
       }
@@ -720,37 +534,16 @@ export class FileManagementController {
    * @param user - Authenticated user context
    * @returns Operation status and progress information
    */
-  @Get('operations/:operationId/status')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('operations/:operationId/status')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get operation status',
-    description: 'Retrieve current status and progress of a running file operation.',
-    operationId: 'getOperationStatus',
-  })
-  @ApiParam({
-    name: 'operationId',
-    description: 'File operation identifier',
-    example: 'file_upload_1704454800_abc123'
-  })
-  @ApiResponse({
+    summary: 'Get operation status',description: 'Retrieve current status and progress of a running file operation.',operationId: 'getOperationStatus',})@ApiParam({
+    name: 'operationId',description: 'File operation identifier',example: 'file_upload_1704454800_abc123'})@ApiResponse({
     status: 200,
-    description: 'Operation status retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        operationId: { type: 'string' },
-        status: { type: 'string' },
-        progress: { type: 'object' },
-        currentPhase: { type: 'string' }
-      }
-    }
+    description: 'Operation status retrieved successfully',schema: {type: 'object',properties: {operationId: { type: 'string' },status: { type: 'string' },progress: { type: 'object' },currentPhase: { type: 'string' }}}
   })
   @ApiResponse({
     status: 404,
-    description: 'Operation not found',
-  })
-  async getOperationStatus(
+    description: 'Operation not found',})async getOperationStatus(
     @Param('operationId') operationId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<any> {
@@ -766,24 +559,15 @@ export class FileManagementController {
     // Implementation would return status from active operations tracking
     return {
       operationId,
-      status: 'completed',
-      progress: {
-        progressPercentage: 100,
-        currentPhase: 'completed'
-      }
-    };
+      status: 'completed',progress: {progressPercentage: 100,
+        currentPhase: 'completed'}};
   }
 
   // Helper methods for error handling
 
   private getErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'message' in error) {
-      return (error as { message: string }).message;
-    }
-    return typeof error === 'string' ? error : 'Unknown error';
-  }
-
-  private getErrorStack(error: unknown): string | undefined {
+    if (error && typeof error === 'object' && 'message' in error) {return (error as { message: string }).message;}
+    return typeof error === 'string' ? error : 'Unknown error';}private getErrorStack(error: unknown): string | undefined {
     if (error && typeof error === 'object' && 'stack' in error) {
       return (error as { stack?: string }).stack;
     }

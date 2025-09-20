@@ -1,6 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -11,57 +9,23 @@ import {
   ValidateNested,
   Min,
   Max,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-
-/**
- * Browser task execution priorities
+} from 'class-validator';import { Type } from 'class-transformer';/*** Browser task execution priorities
  */
 export enum BrowserTaskPriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-
-/**
+  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',}/**
  * Browser task execution status
  */
 export enum BrowserTaskStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout',
-}
-
-/**
+  PENDING = 'pending',RUNNING = 'running',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',}/**
  * Browser automation action types
  */
 export enum BrowserActionType {
-  NAVIGATE = 'navigate',
-  CLICK = 'click',
-  TYPE = 'type',
-  SCROLL = 'scroll',
-  SCREENSHOT = 'screenshot',
-  EXTRACT_TEXT = 'extract_text',
-  EXTRACT_DATA = 'extract_data',
-  FILL_FORM = 'fill_form',
-  SUBMIT_FORM = 'submit_form',
-  WAIT_FOR_ELEMENT = 'wait_for_element',
-  WAIT_FOR_URL = 'wait_for_url',
-  CUSTOM = 'custom',
-}
-
-/**
+  NAVIGATE = 'navigate',CLICK = 'click',TYPE = 'type',SCROLL = 'scroll',SCREENSHOT = 'screenshot',EXTRACT_TEXT = 'extract_text',EXTRACT_DATA = 'extract_data',FILL_FORM = 'fill_form',SUBMIT_FORM = 'submit_form',WAIT_FOR_ELEMENT = 'wait_for_element',WAIT_FOR_URL = 'wait_for_url',CUSTOM = 'custom',}/**
  * Browser session configuration
  */
 export class BrowserSessionConfigDto {
   @ApiPropertyOptional({
-    description: 'Browser viewport width',
-    minimum: 320,
-    maximum: 3840,
+    description: 'Browser viewport width',minimum: 320,maximum: 3840,
     default: 1920,
   })
   @IsOptional()
@@ -71,9 +35,7 @@ export class BrowserSessionConfigDto {
   viewportWidth?: number = 1920;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport height',
-    minimum: 240,
-    maximum: 2160,
+    description: 'Browser viewport height',minimum: 240,maximum: 2160,
     default: 1080,
   })
   @IsOptional()
@@ -83,13 +45,7 @@ export class BrowserSessionConfigDto {
   viewportHeight?: number = 1080;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport configuration',
-    type: 'object',
-    properties: {
-      width: { type: 'number', minimum: 320, maximum: 3840 },
-      height: { type: 'number', minimum: 240, maximum: 2160 },
-    },
-  })
+    description: 'Browser viewport configuration',type: 'object',properties: {width: { type: 'number', minimum: 320, maximum: 3840 },height: { type: 'number', minimum: 240, maximum: 2160 },},})
   @IsOptional()
   @IsObject()
   viewport?: {
@@ -98,42 +54,31 @@ export class BrowserSessionConfigDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Run browser in headless mode',
-    default: false,
-  })
+    description: 'Run browser in headless mode',default: false,})
   @IsOptional()
   @IsBoolean()
   headless?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Enable browser developer tools',
-    default: false,
-  })
+    description: 'Enable browser developer tools',default: false,})
   @IsOptional()
   @IsBoolean()
   devtools?: boolean = false;
 
   @ApiPropertyOptional({
-    description: 'Custom user agent string',
-  })
-  @IsOptional()
+    description: 'Custom user agent string',})@IsOptional()
   @IsString()
   userAgent?: string;
 
   @ApiPropertyOptional({
-    description: 'Additional Chrome launch arguments',
-    type: [String],
-  })
+    description: 'Additional Chrome launch arguments',type: [String],})
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   additionalArgs?: string[];
 
   @ApiPropertyOptional({
-    description: 'Proxy configuration',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Proxy configuration',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   proxy?: {
@@ -143,16 +88,12 @@ export class BrowserSessionConfigDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Browser profile directory path (local filesystem)',
-  })
-  @IsOptional()
+    description: 'Browser profile directory path (local filesystem)',})@IsOptional()
   @IsString()
   profilePath?: string;
 
   @ApiPropertyOptional({
-    description: 'Session timeout in milliseconds',
-    minimum: 1000,
-    maximum: 3600000,
+    description: 'Session timeout in milliseconds',minimum: 1000,maximum: 3600000,
     default: 300000,
   })
   @IsOptional()
@@ -167,37 +108,27 @@ export class BrowserSessionConfigDto {
  */
 export class BrowserActionDto {
   @ApiProperty({
-    description: 'Type of browser action to perform',
-    enum: BrowserActionType,
-  })
+    description: 'Type of browser action to perform',enum: BrowserActionType,})
   @IsEnum(BrowserActionType)
   type: BrowserActionType = BrowserActionType.CLICK;
 
   @ApiPropertyOptional({
-    description: 'CSS selector or XPath for element targeting',
-  })
-  @IsOptional()
+    description: 'CSS selector or XPath for element targeting',})@IsOptional()
   @IsString()
   selector?: string;
 
   @ApiPropertyOptional({
-    description: 'Text content for typing actions',
-  })
-  @IsOptional()
+    description: 'Text content for typing actions',})@IsOptional()
   @IsString()
   text?: string;
 
   @ApiPropertyOptional({
-    description: 'URL for navigation actions',
-  })
-  @IsOptional()
+    description: 'URL for navigation actions',})@IsOptional()
   @IsUrl({ require_protocol: true })
   url?: string;
 
   @ApiPropertyOptional({
-    description: 'Wait timeout in milliseconds',
-    minimum: 100,
-    maximum: 60000,
+    description: 'Wait timeout in milliseconds',minimum: 100,maximum: 60000,
     default: 5000,
   })
   @IsOptional()
@@ -207,19 +138,13 @@ export class BrowserActionDto {
   waitTimeoutMs?: number = 5000;
 
   @ApiPropertyOptional({
-    description: 'Additional action parameters',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Additional action parameters',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   parameters?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Expected outcome validation',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Expected outcome validation',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   validation?: {
@@ -234,50 +159,30 @@ export class BrowserActionDto {
  */
 export class CreateBrowserTaskDto {
   @ApiProperty({
-    description: 'Descriptive _name for the browser task',
-    example: 'Extract product information from e-commerce site',
-  })
-  @IsString()
-  name: string = '';
-
-  @ApiProperty({
-    description: 'Detailed task description or instructions',
-    example: 'Navigate to product page, extract _name, price, and description',
-  })
-  @IsString()
-  description: string = '';
-
-  @ApiProperty({
-    description: 'Array of browser actions to execute sequentially',
-    type: [BrowserActionDto],
-  })
+    description: 'Descriptive _name for the browser task',example: 'Extract product information from e-commerce site',})@IsString()
+  name: string = '';@ApiProperty({description: 'Detailed task description or instructions',example: 'Navigate to product page, extract _name, price, and description',})@IsString()
+  description: string = '';@ApiProperty({description: 'Array of browser actions to execute sequentially',type: [BrowserActionDto],})
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BrowserActionDto)
   actions: BrowserActionDto[] = [];
 
   @ApiPropertyOptional({
-    description: 'Task execution priority',
-    enum: BrowserTaskPriority,
-    default: BrowserTaskPriority.NORMAL,
+    description: 'Task execution priority',enum: BrowserTaskPriority,default: BrowserTaskPriority.NORMAL,
   })
   @IsOptional()
   @IsEnum(BrowserTaskPriority)
   priority?: BrowserTaskPriority = BrowserTaskPriority.NORMAL;
 
   @ApiPropertyOptional({
-    description: 'Browser session configuration',
-    type: BrowserSessionConfigDto,
-  })
+    description: 'Browser session configuration',type: BrowserSessionConfigDto,})
   @IsOptional()
   @ValidateNested()
   @Type(() => BrowserSessionConfigDto)
   sessionConfig?: BrowserSessionConfigDto;
 
   @ApiPropertyOptional({
-    description: 'Maximum execution time in milliseconds',
-    minimum: 5000,
-    maximum: 1800000, // 30 minutes
+    description: 'Maximum execution time in milliseconds',minimum: 5000,maximum: 1800000, // 30 minutes
     default: 300000, // 5 minutes
   })
   @IsOptional()
@@ -287,26 +192,19 @@ export class CreateBrowserTaskDto {
   maxExecutionTimeMs?: number = 300000;
 
   @ApiPropertyOptional({
-    description: 'Custom metadata for task tracking',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Custom metadata for task tracking',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Enable detailed logging and screenshots',
-    default: true,
-  })
+    description: 'Enable detailed logging and screenshots',default: true,})
   @IsOptional()
   @IsBoolean()
   enableLogging?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Continue on errors (vs fail fast)',
-    default: false,
-  })
+    description: 'Continue on errors (vs fail fast)',default: false,})
   @IsOptional()
   @IsBoolean()
   continueOnError?: boolean = false;
@@ -317,70 +215,41 @@ export class CreateBrowserTaskDto {
  */
 export class BrowserTaskResultDto {
   @ApiProperty({
-    description: 'Unique task identifier',
-  })
-  taskId: string = '';
-
-  @ApiProperty({
-    description: 'Current task status',
-    enum: BrowserTaskStatus,
-  })
+    description: 'Unique task identifier',})taskId: string = '';@ApiProperty({description: 'Current task status',enum: BrowserTaskStatus,})
   status: BrowserTaskStatus = BrowserTaskStatus.PENDING;
 
   @ApiProperty({
-    description: 'Task execution start timestamp',
-  })
-  startedAt: Date = new Date();
+    description: 'Task execution start timestamp',})startedAt: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Task execution completion timestamp',
-  })
-  completedAt?: Date;
+    description: 'Task execution completion timestamp',})completedAt?: Date;
 
   @ApiProperty({
-    description: 'Total execution time in milliseconds',
-  })
-  executionTimeMs: number = 0;
+    description: 'Total execution time in milliseconds',})executionTimeMs: number = 0;
 
   @ApiProperty({
-    description: 'Number of actions completed successfully',
-  })
-  actionsCompleted: number = 0;
+    description: 'Number of actions completed successfully',})actionsCompleted: number = 0;
 
   @ApiProperty({
-    description: 'Total number of actions in task',
-  })
-  totalActions: number = 0;
+    description: 'Total number of actions in task',})totalActions: number = 0;
 
   @ApiPropertyOptional({
-    description: 'Extracted data from browser actions',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Extracted data from browser actions',type: 'object',additionalProperties: true,})
   extractedData?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Screenshots captured during execution',
-    type: [String],
-  })
+    description: 'Screenshots captured during execution',type: [String],})
   screenshots?: string[]; // Base64 or file paths
 
   @ApiPropertyOptional({
-    description: 'Error message if task failed',
-  })
-  errorMessage?: string;
+    description: 'Error message if task failed',})errorMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed error information',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Detailed error information',type: 'object',additionalProperties: true,})
   errorDetails?: Record<string, unknown>;
 
   @ApiProperty({
-    description: 'Execution logs and action details',
-    type: [Object],
-  })
+    description: 'Execution logs and action details',type: [Object],})
   logs: Array<{
     timestamp: Date;
     level: string;
@@ -391,8 +260,7 @@ export class BrowserTaskResultDto {
   }> = [];
 
   @ApiPropertyOptional({
-    description: 'Task metadata and configuration used',
-    type: 'object',
+    description: 'Task metadata and configuration used',type: 'object',
     additionalProperties: true,
   })
   metadata?: Record<string, unknown>;

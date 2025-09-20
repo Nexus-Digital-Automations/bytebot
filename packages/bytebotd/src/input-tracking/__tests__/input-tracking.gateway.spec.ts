@@ -23,14 +23,7 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { Server as _Server, Socket as _Socket } from 'socket.io';
-import { ComputerAction } from '@bytebot/shared';
-import { InputTrackingGateway } from '../input-tracking.gateway';
-// Types imported for potential use but may not be needed in all test cases
-
-// Mock Socket.IO types
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { Server as _Server, Socket as _Socket } from 'socket.io';import { ComputerAction } from '@bytebot/shared';import { InputTrackingGateway } from '../input-tracking.gateway';// Types imported for potential use but may not be needed in all test cases// Mock Socket.IO types
 interface MockSocket {
   id: string;
   emit: jest.Mock;
@@ -57,32 +50,18 @@ describe('InputTrackingGateway', () => {
 
   // Mock computer actions for testing
   const mockClickAction: ComputerAction = {
-    action: 'click_mouse',
-    coordinates: { x: 100, y: 200 },
-    button: 'left',
-    clickCount: 1,
-  };
+    action: 'click_mouse',coordinates: { x: 100, y: 200 },button: 'left',clickCount: 1,};
 
   const mockDragAction: ComputerAction = {
-    action: 'drag_mouse',
-    button: 'left',
-    path: [
-      { x: 100, y: 100 },
+    action: 'drag_mouse',button: 'left',path: [{ x: 100, y: 100 },
       { x: 150, y: 150 },
       { x: 200, y: 200 },
     ],
   };
 
   const mockTypeAction: ComputerAction = {
-    action: 'type_text',
-    text: 'Hello World',
-  };
-
-  const mockScrollAction: ComputerAction = {
-    action: 'scroll',
-    direction: 'down',
-    scrollCount: 3,
-    coordinates: { x: 300, y: 400 },
+    action: 'type_text',text: 'Hello World',};const mockScrollAction: ComputerAction = {
+    action: 'scroll',direction: 'down',scrollCount: 3,coordinates: { x: 300, y: 400 },
   };
 
   const mockScreenshot = {
@@ -108,11 +87,7 @@ describe('InputTrackingGateway', () => {
   });
 
   beforeEach(async () => {
-    console.log(`[${operationId}] Setting up InputTrackingGateway test module`);
-
-    mockServer = createMockServer();
-
-    const module: TestingModule = await Test.createTestingModule({
+    console.log(`[${operationId}] Setting up InputTrackingGateway test module`);mockServer = createMockServer();const module: TestingModule = await Test.createTestingModule({
       providers: [
         InputTrackingGateway,
         {
@@ -134,28 +109,19 @@ describe('InputTrackingGateway', () => {
     // Set the mock server
     gateway.server = mockServer as unknown as _Server;
 
-    console.log(`[${operationId}] InputTrackingGateway test setup completed`);
-  });
-
-  afterEach(() => {
+    console.log(`[${operationId}] InputTrackingGateway test setup completed`);});afterEach(() => {
     jest.clearAllMocks();
     console.log(`[${operationId}] InputTrackingGateway test cleanup completed`);
   });
 
-  describe('Gateway Initialization', () => {
-    it('should be defined', () => {
-      const testId = `${operationId}_gateway_defined`;
-      console.log(`[${testId}] Testing gateway initialization`);
-
-      expect(gateway).toBeDefined();
-      expect(logger).toBeDefined();
+  describe('Gateway Initialization', () => {it('should be defined', () => {
+      const testId = `${operationId}_gateway_defined`;console.log(`[${testId}] Testing gateway initialization`);expect(gateway).toBeDefined();expect(logger).toBeDefined();
 
       console.log(`[${testId}] Gateway initialization test completed`);
     });
 
     it('should have WebSocket server property', () => {
-      const testId = `${operationId}_websocket_server_property`;
-      console.log(`[${testId}] Testing WebSocket server property`);
+      const testId = `${operationId}_websocket_server_property`;console.log(`[${testId}] Testing WebSocket server property`);
 
       expect(gateway.server).toBeDefined();
       expect(typeof gateway.server.emit).toBe('function');
@@ -164,8 +130,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should be decorated as injectable and WebSocket gateway', () => {
-      const testId = `${operationId}_decorators_validation`;
-      console.log(`[${testId}] Testing gateway decorators`);
+      const testId = `${operationId}_decorators_validation`;console.log(`[${testId}] Testing gateway decorators`);
 
       const injectable = Reflect.getMetadata(
         '__injectable__',
@@ -177,29 +142,18 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Client Connection Handling', () => {
-    it('should handle client connection', () => {
-      const testId = `${operationId}_client_connection`;
-      console.log(`[${testId}] Testing client connection handling`);
+  describe('Client Connection Handling', () => {it('should handle client connection', () => {
+      const testId = `${operationId}_client_connection`;console.log(`[${testId}] Testing client connection handling`);
 
-      const mockClient = createMockSocket('client_123');
-
-      gateway.handleConnection(mockClient as unknown as _Socket);
-
-      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: client_123');
+      const mockClient = createMockSocket('client_123');gateway.handleConnection(mockClient as unknown as _Socket);expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: client_123');
 
       console.log(`[${testId}] Client connection handling test completed`);
     });
 
     it('should handle client disconnection', () => {
-      const testId = `${operationId}_client_disconnection`;
-      console.log(`[${testId}] Testing client disconnection handling`);
+      const testId = `${operationId}_client_disconnection`;console.log(`[${testId}] Testing client disconnection handling`);
 
-      const mockClient = createMockSocket('client_456');
-
-      gateway.handleDisconnect(mockClient as unknown as _Socket);
-
-      expect(logger.log as jest.Mock).toHaveBeenCalledWith(
+      const mockClient = createMockSocket('client_456');gateway.handleDisconnect(mockClient as unknown as _Socket);expect(logger.log as jest.Mock).toHaveBeenCalledWith(
         'Client disconnected: client_456',
       );
 
@@ -207,23 +161,14 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle multiple simultaneous connections', () => {
-      const testId = `${operationId}_multiple_connections`;
-      console.log(`[${testId}] Testing multiple simultaneous connections`);
-
-      const clients = Array.from({ length: 10 }, (_, i) =>
-        createMockSocket(`client${i}`),
-      );
-
-      clients.forEach((client) => {
+      const testId = `${operationId}_multiple_connections`;console.log(`[${testId}] Testing multiple simultaneous connections`);const clients = Array.from({ length: 10 }, (_, i) =>createMockSocket(`client${i}`),);clients.forEach((client) => {
         gateway.handleConnection(client as unknown as _Socket);
       });
 
       expect(logger.log as jest.Mock).toHaveBeenCalledTimes(10);
       clients.forEach((client, i) => {
         expect(logger.log as jest.Mock).toHaveBeenCalledWith(
-          `Client connected: client${i}`,
-        );
-      });
+          `Client connected: client${i}`,);});
 
       console.log(
         `[${testId}] Multiple simultaneous connections test completed`,
@@ -231,8 +176,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle rapid connection/disconnection cycles', () => {
-      const testId = `${operationId}_rapid_connection_cycles`;
-      console.log(`[${testId}] Testing rapid connection/disconnection cycles`);
+      const testId = `${operationId}_rapid_connection_cycles`;console.log(`[${testId}] Testing rapid connection/disconnection cycles`);
 
       const clientId = 'rapid_client';
       const mockClient = createMockSocket(clientId);
@@ -251,10 +195,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Action Emission', () => {
-    it('should emit click mouse action', () => {
-      const testId = `${operationId}_emit_click_action`;
-      console.log(`[${testId}] Testing click mouse action emission`);
+  describe('Action Emission', () => {it('should emit click mouse action', () => {
+      const testId = `${operationId}_emit_click_action`;console.log(`[${testId}] Testing click mouse action emission`);
 
       gateway.emitAction(mockClickAction);
 
@@ -264,8 +206,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should emit drag mouse action', () => {
-      const testId = `${operationId}_emit_drag_action`;
-      console.log(`[${testId}] Testing drag mouse action emission`);
+      const testId = `${operationId}_emit_drag_action`;console.log(`[${testId}] Testing drag mouse action emission`);
 
       gateway.emitAction(mockDragAction);
 
@@ -275,8 +216,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should emit type text action', () => {
-      const testId = `${operationId}_emit_type_action`;
-      console.log(`[${testId}] Testing type text action emission`);
+      const testId = `${operationId}_emit_type_action`;console.log(`[${testId}] Testing type text action emission`);
 
       gateway.emitAction(mockTypeAction);
 
@@ -286,8 +226,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should emit scroll action', () => {
-      const testId = `${operationId}_emit_scroll_action`;
-      console.log(`[${testId}] Testing scroll action emission`);
+      const testId = `${operationId}_emit_scroll_action`;console.log(`[${testId}] Testing scroll action emission`);
 
       gateway.emitAction(mockScrollAction);
 
@@ -297,15 +236,10 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle complex action objects', () => {
-      const testId = `${operationId}_complex_action_emission`;
-      console.log(`[${testId}] Testing complex action object emission`);
+      const testId = `${operationId}_complex_action_emission`;console.log(`[${testId}] Testing complex action object emission`);
 
       const complexAction: ComputerAction = {
-        action: 'type_keys',
-        keys: ['ctrl', 'c'],
-      };
-
-      gateway.emitAction(complexAction);
+        action: 'type_keys',keys: ['ctrl', 'c'],};gateway.emitAction(complexAction);
 
       expect(mockServer.emit).toHaveBeenCalledWith('action', complexAction);
 
@@ -313,10 +247,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Screenshot and Action Emission', () => {
-    it('should emit screenshot with click action', () => {
-      const testId = `${operationId}_emit_screenshot_click`;
-      console.log(`[${testId}] Testing screenshot with click action emission`);
+  describe('Screenshot and Action Emission', () => {it('should emit screenshot with click action', () => {
+      const testId = `${operationId}_emit_screenshot_click`;console.log(`[${testId}] Testing screenshot with click action emission`);
 
       gateway.emitScreenshotAndAction(mockScreenshot, mockClickAction);
 
@@ -332,8 +264,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should emit screenshot with drag action', () => {
-      const testId = `${operationId}_emit_screenshot_drag`;
-      console.log(`[${testId}] Testing screenshot with drag action emission`);
+      const testId = `${operationId}_emit_screenshot_drag`;console.log(`[${testId}] Testing screenshot with drag action emission`);
 
       gateway.emitScreenshotAndAction(mockScreenshot, mockDragAction);
 
@@ -349,14 +280,10 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle large screenshot data', () => {
-      const testId = `${operationId}_large_screenshot_emission`;
-      console.log(`[${testId}] Testing large screenshot data emission`);
+      const testId = `${operationId}_large_screenshot_emission`;console.log(`[${testId}] Testing large screenshot data emission`);
 
       const largeScreenshot = {
-        image: 'data:image/png;base64,' + 'x'.repeat(100000), // Large base64 string
-      };
-
-      gateway.emitScreenshotAndAction(largeScreenshot, mockClickAction);
+        image: 'data:image/png;base64,' + 'x'.repeat(100000), // Large base64 string};gateway.emitScreenshotAndAction(largeScreenshot, mockClickAction);
 
       expect(mockServer.emit).toHaveBeenCalledWith(
         'screenshotAndAction',
@@ -368,17 +295,13 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should emit screenshot and action with all parameter types', () => {
-      const testId = `${operationId}_screenshot_action_parameter_types`;
-      console.log(`[${testId}] Testing screenshot and action parameter types`);
+      const testId = `${operationId}_screenshot_action_parameter_types`;console.log(`[${testId}] Testing screenshot and action parameter types`);
 
       const screenshotWithMetadata = {
         image: mockScreenshot.image,
         timestamp: new Date().toISOString(),
         quality: 95,
-        format: 'png',
-      };
-
-      gateway.emitScreenshotAndAction(screenshotWithMetadata, mockScrollAction);
+        format: 'png',};gateway.emitScreenshotAndAction(screenshotWithMetadata, mockScrollAction);
 
       expect(mockServer.emit).toHaveBeenCalledWith(
         'screenshotAndAction',
@@ -392,10 +315,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('High-Frequency Event Processing', () => {
-    it('should handle rapid action emissions', () => {
-      const testId = `${operationId}_rapid_action_emissions`;
-      console.log(`[${testId}] Testing rapid action emissions`);
+  describe('High-Frequency Event Processing', () => {it('should handle rapid action emissions', () => {
+      const testId = `${operationId}_rapid_action_emissions`;console.log(`[${testId}] Testing rapid action emissions`);
 
       const actionCount = 100;
       const startTime = Date.now();
@@ -418,18 +339,13 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle burst screenshot emissions', () => {
-      const testId = `${operationId}_burst_screenshot_emissions`;
-      console.log(`[${testId}] Testing burst screenshot emissions`);
-
-      const burstCount = 50;
-      const startTime = Date.now();
+      const testId = `${operationId}_burst_screenshot_emissions`;console.log(`[${testId}] Testing burst screenshot emissions`);const burstCount = 50;const startTime = Date.now();
 
       for (let i = 0; i < burstCount; i++) {
         gateway.emitScreenshotAndAction(
           { image: `screenshot${i}` },
           {
-            action: 'click_mouse',
-            button: 'left',
+            action: 'click_mouse',button: 'left',
             clickCount: 1,
             coordinates: { x: i, y: i },
           },
@@ -447,21 +363,12 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should maintain event order under high frequency', () => {
-      const testId = `${operationId}_event_order_high_frequency`;
-      console.log(`[${testId}] Testing event order under high frequency`);
+      const testId = `${operationId}_event_order_high_frequency`;console.log(`[${testId}] Testing event order under high frequency`);
 
       const events = [
-        { action: 'move_mouse' as const, coordinates: { x: 1, y: 1 } },
-        {
-          action: 'click_mouse' as const,
-          button: 'left' as const,
-          clickCount: 1,
-          coordinates: { x: 2, y: 2 },
+        { action: 'move_mouse' as const, coordinates: { x: 1, y: 1 } },{action: 'click_mouse' as const,button: 'left' as const,clickCount: 1,coordinates: { x: 2, y: 2 },
         },
-        { action: 'type_text' as const, text: 'test' },
-      ];
-
-      events.forEach((event) => {
+        { action: 'type_text' as const, text: 'test' },];events.forEach((event) => {
         gateway.emitAction(event);
       });
 
@@ -480,10 +387,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle null action gracefully', () => {
-      const testId = `${operationId}_null_action_handling`;
-      console.log(`[${testId}] Testing null action handling`);
+  describe('Error Handling and Edge Cases', () => {it('should handle null action gracefully', () => {
+      const testId = `${operationId}_null_action_handling`;console.log(`[${testId}] Testing null action handling`);
 
       // This should not throw an error
       expect(() => {
@@ -496,8 +401,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle undefined screenshot', () => {
-      const testId = `${operationId}_undefined_screenshot_handling`;
-      console.log(`[${testId}] Testing undefined screenshot handling`);
+      const testId = `${operationId}_undefined_screenshot_handling`;console.log(`[${testId}] Testing undefined screenshot handling`);
 
       expect(() => {
         gateway.emitScreenshotAndAction(
@@ -516,13 +420,10 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle malformed action objects', () => {
-      const testId = `${operationId}_malformed_action_handling`;
-      console.log(`[${testId}] Testing malformed action objects`);
+      const testId = `${operationId}_malformed_action_handling`;console.log(`[${testId}] Testing malformed action objects`);
 
       const malformedAction = {
-        // Missing required 'action' property
-        coordinates: { x: 100, y: 200 },
-      };
+        // Missing required 'action' propertycoordinates: { x: 100, y: 200 },};
 
       expect(() => {
         gateway.emitAction(malformedAction as unknown as ComputerAction);
@@ -534,17 +435,13 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle server emission errors', () => {
-      const testId = `${operationId}_server_emission_errors`;
-      console.log(`[${testId}] Testing server emission error handling`);
+      const testId = `${operationId}_server_emission_errors`;console.log(`[${testId}] Testing server emission error handling`);
 
       // Mock server emit to throw error
       mockServer.emit = (
         jest.fn()
       ).mockImplementation(() => {
-        throw new Error('Network error');
-      });
-
-      expect(() => {
+        throw new Error('Network error');});expect(() => {
         gateway.emitAction(mockClickAction);
       }).toThrow('Network error');
 
@@ -552,33 +449,21 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle connection with invalid client ID', () => {
-      const testId = `${operationId}_invalid_client_id`;
-      console.log(`[${testId}] Testing connection with invalid client ID`);
+      const testId = `${operationId}_invalid_client_id`;console.log(`[${testId}] Testing connection with invalid client ID`);
 
-      const invalidClient = createMockSocket('');
-
-      gateway.handleConnection(invalidClient as unknown as _Socket);
-
-      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: ');
+      const invalidClient = createMockSocket('');gateway.handleConnection(invalidClient as unknown as _Socket);expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: ');
 
       console.log(`[${testId}] Invalid client ID handling test completed`);
     });
   });
 
-  describe('Memory Management and Cleanup', () => {
-    it('should not retain references after disconnection', () => {
-      const testId = `${operationId}_memory_cleanup_disconnection`;
-      console.log(`[${testId}] Testing memory cleanup after disconnection`);
+  describe('Memory Management and Cleanup', () => {it('should not retain references after disconnection', () => {
+      const testId = `${operationId}_memory_cleanup_disconnection`;console.log(`[${testId}] Testing memory cleanup after disconnection`);
 
-      const client = createMockSocket('temp_client');
-
-      gateway.handleConnection(client as unknown as _Socket);
-      gateway.handleDisconnect(client as unknown as _Socket);
+      const client = createMockSocket('temp_client');gateway.handleConnection(client as unknown as _Socket);gateway.handleDisconnect(client as unknown as _Socket);
 
       // Verify logging was called correctly
-      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: temp_client');
-      expect(logger.log as jest.Mock).toHaveBeenCalledWith(
-        'Client disconnected: temp_client',
+      expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client connected: temp_client');expect(logger.log as jest.Mock).toHaveBeenCalledWith('Client disconnected: temp_client',
       );
 
       console.log(
@@ -587,15 +472,8 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle massive connection cycles without memory leaks', () => {
-      const testId = `${operationId}_memory_leak_prevention`;
-      console.log(`[${testId}] Testing memory leak prevention`);
-
-      const connectionCount = 1000;
-
-      for (let i = 0; i < connectionCount; i++) {
-        const client = createMockSocket(`stress_client${i}`);
-        gateway.handleConnection(client as unknown as _Socket);
-        gateway.handleDisconnect(client as unknown as _Socket);
+      const testId = `${operationId}_memory_leak_prevention`;console.log(`[${testId}] Testing memory leak prevention`);const connectionCount = 1000;for (let i = 0; i < connectionCount; i++) {
+        const client = createMockSocket(`stress_client${i}`);gateway.handleConnection(client as unknown as _Socket);gateway.handleDisconnect(client as unknown as _Socket);
       }
 
       expect(logger.log as jest.Mock).toHaveBeenCalledTimes(connectionCount * 2);
@@ -604,20 +482,14 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('CORS and Security Configuration', () => {
-    it('should have proper WebSocket gateway configuration', () => {
-      const testId = `${operationId}_websocket_configuration`;
-      console.log(`[${testId}] Testing WebSocket gateway configuration`);
-
-      // Gateway should be properly configured (this is more of an integration test)
-      expect(gateway).toBeDefined();
+  describe('CORS and Security Configuration', () => {it('should have proper WebSocket gateway configuration', () => {
+      const testId = `${operationId}_websocket_configuration`;console.log(`[${testId}] Testing WebSocket gateway configuration`);// Gateway should be properly configured (this is more of an integration test)expect(gateway).toBeDefined();
 
       console.log(`[${testId}] WebSocket gateway configuration test completed`);
     });
 
     it('should allow cross-origin connections', () => {
-      const testId = `${operationId}_cors_configuration`;
-      console.log(`[${testId}] Testing CORS configuration`);
+      const testId = `${operationId}_cors_configuration`;console.log(`[${testId}] Testing CORS configuration`);
 
       // This would be tested in integration tests with actual connections
       // Here we just verify the gateway handles connections normally
@@ -631,10 +503,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Performance Benchmarks', () => {
-    it('should emit actions within performance threshold', () => {
-      const testId = `${operationId}_action_emission_performance`;
-      console.log(`[${testId}] Testing action emission performance`);
+  describe('Performance Benchmarks', () => {it('should emit actions within performance threshold', () => {
+      const testId = `${operationId}_action_emission_performance`;console.log(`[${testId}] Testing action emission performance`);
 
       const iterations = 1000;
       const startTime = Date.now();
@@ -658,16 +528,10 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle connection events efficiently', () => {
-      const testId = `${operationId}_connection_event_performance`;
-      console.log(`[${testId}] Testing connection event performance`);
-
-      const connectionCount = 100;
-      const startTime = Date.now();
+      const testId = `${operationId}_connection_event_performance`;console.log(`[${testId}] Testing connection event performance`);const connectionCount = 100;const startTime = Date.now();
 
       for (let i = 0; i < connectionCount; i++) {
-        const client = createMockSocket(`perf_client${i}`);
-        gateway.handleConnection(client as unknown as _Socket);
-      }
+        const client = createMockSocket(`perf_client${i}`);gateway.handleConnection(client as unknown as _Socket);}
 
       const totalTime = Date.now() - startTime;
       const avgTimePerConnection = totalTime / connectionCount;
@@ -681,13 +545,8 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Event Broadcasting Scenarios', () => {
-    it('should broadcast to all connected clients', () => {
-      const testId = `${operationId}_broadcast_all_clients`;
-      console.log(`[${testId}] Testing broadcast to all clients`);
-
-      // Simulate multiple connected clients
-      const clientCount = 5;
+  describe('Event Broadcasting Scenarios', () => {it('should broadcast to all connected clients', () => {
+      const testId = `${operationId}_broadcast_all_clients`;console.log(`[${testId}] Testing broadcast to all clients`);// Simulate multiple connected clientsconst clientCount = 5;
       for (let i = 0; i < clientCount; i++) {
         const client = createMockSocket(`broadcast_client${i}`);
         gateway.handleConnection(client as unknown as _Socket);
@@ -701,8 +560,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle mixed event types in sequence', () => {
-      const testId = `${operationId}_mixed_event_sequence`;
-      console.log(`[${testId}] Testing mixed event types in sequence`);
+      const testId = `${operationId}_mixed_event_sequence`;console.log(`[${testId}] Testing mixed event types in sequence`);
 
       gateway.emitAction(mockClickAction);
       gateway.emitScreenshotAndAction(mockScreenshot, mockDragAction);
@@ -712,20 +570,14 @@ describe('InputTrackingGateway', () => {
       expect(mockServer.emit).toHaveBeenCalledTimes(4);
       expect(mockServer.emit).toHaveBeenNthCalledWith(
         1,
-        'action',
-        mockClickAction,
-      );
+        'action',mockClickAction,);
       expect(mockServer.emit).toHaveBeenNthCalledWith(
         2,
-        'screenshotAndAction',
-        mockScreenshot,
-        mockDragAction,
+        'screenshotAndAction',mockScreenshot,mockDragAction,
       );
       expect(mockServer.emit).toHaveBeenNthCalledWith(
         3,
-        'action',
-        mockTypeAction,
-      );
+        'action',mockTypeAction,);
       expect(mockServer.emit).toHaveBeenNthCalledWith(
         4,
         'screenshotAndAction',
@@ -737,17 +589,13 @@ describe('InputTrackingGateway', () => {
     });
   });
 
-  describe('Reliability and Resilience', () => {
-    it('should maintain functionality after server errors', () => {
-      const testId = `${operationId}_server_error_recovery`;
-      console.log(`[${testId}] Testing server error recovery`);
+  describe('Reliability and Resilience', () => {it('should maintain functionality after server errors', () => {
+      const testId = `${operationId}_server_error_recovery`;console.log(`[${testId}] Testing server error recovery`);
 
       // First call fails
       mockServer.emit = (
         jest.fn().mockImplementationOnce(() => {
-          throw new Error('Temporary server error');
-        })
-      ).mockImplementation(() => {
+          throw new Error('Temporary server error');})).mockImplementation(() => {
         return true;
       });
 
@@ -765,12 +613,7 @@ describe('InputTrackingGateway', () => {
     });
 
     it('should handle concurrent connections and emissions', () => {
-      const testId = `${operationId}_concurrent_operations`;
-      console.log(`[${testId}] Testing concurrent connections and emissions`);
-
-      const startTime = Date.now();
-
-      // Simulate concurrent connections
+      const testId = `${operationId}_concurrent_operations`;console.log(`[${testId}] Testing concurrent connections and emissions`);const startTime = Date.now();// Simulate concurrent connections
       const connectionPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => {
           const client = createMockSocket(`concurrent_client${i}`);

@@ -14,29 +14,16 @@
  * @created 2025-09-20
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
-import {
-  RedisJobPersistenceService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import { Logger } from '@nestjs/common';import {RedisJobPersistenceService,
   RedisJobData,
   JobQueryOptions,
   BulkJobOperationResult,
-} from './redis-job-persistence.service';
-import {
-  RedisClusterCacheService,
+} from './redis-job-persistence.service';import {RedisClusterCacheService,
   CacheOperationResult,
   RedisCacheEntry,
-} from '../../parlant/caching/redis-cluster-cache.service';
-import {
-  JobStatus,
+} from '../../parlant/caching/redis-cluster-cache.service';import {JobStatus,
   JobPriority,
-} from '../dto/async-job.dto';
-import { ComputerActionDto } from '../dto/computer-action.dto';
-
-// ===== TEST HELPERS AND MOCKS =====
-
-/**
+} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';// ===== TEST HELPERS AND MOCKS =====/**
  * Mock Redis Cluster Cache Service for testing
  */
 class MockRedisClusterCacheService {
@@ -103,9 +90,7 @@ class MockRedisClusterCacheService {
   }
 
   simulateFailure(): void {
-    this.get = jest.fn().mockRejectedValue(new Error('Redis connection failed'));
-    this.set = jest.fn().mockRejectedValue(new Error('Redis connection failed'));
-    this.del = jest.fn().mockRejectedValue(new Error('Redis connection failed'));
+    this.get = jest.fn().mockRejectedValue(new Error('Redis connection failed'));this.set = jest.fn().mockRejectedValue(new Error('Redis connection failed'));this.del = jest.fn().mockRejectedValue(new Error('Redis connection failed'));
   }
 
   private async simulateLatency(): Promise<void> {
@@ -125,19 +110,13 @@ function createTestJobData(overrides: Partial<RedisJobData> = {}): RedisJobData 
     status: JobStatus.PENDING,
     priority: JobPriority.NORMAL,
     action: {
-      action: 'screenshot',
-      parameters: { format: 'png' },
-    } as ComputerActionDto,
-    progress: 0,
+      action: 'screenshot',parameters: { format: 'png' },} as ComputerActionDto,progress: 0,
     submittedAt: now,
     timeout: 30000,
     useCache: false,
     retryCount: 0,
     maxRetries: 3,
-    userId: 'test_user_123',
-    sessionId: 'test_session_456',
-    indexKeys: [],
-    ttlSeconds: 86400,
+    userId: 'test_user_123',sessionId: 'test_session_456',indexKeys: [],ttlSeconds: 86400,
     createdAt: now,
     updatedAt: now,
     version: 1,
@@ -154,9 +133,7 @@ function createTestConfig(): any {
     get: jest.fn((key: string, defaultValue?: any) => {
       const config = {
         REDIS_JOB_PERSISTENCE_ENABLED: true,
-        REDIS_JOB_KEY_PREFIX: 'test_job',
-        REDIS_JOB_DEFAULT_TTL: 86400,
-        REDIS_JOB_INDEXING_ENABLED: true,
+        REDIS_JOB_KEY_PREFIX: 'test_job',REDIS_JOB_DEFAULT_TTL: 86400,REDIS_JOB_INDEXING_ENABLED: true,
         REDIS_JOB_COMPRESSION_THRESHOLD: 1024,
         REDIS_JOB_CLEANUP_INTERVAL: 3600000,
         REDIS_JOB_RETENTION_DAYS: 7,
@@ -175,9 +152,7 @@ function createTestConfig(): any {
 
 // ===== TEST SUITE =====
 
-describe('RedisJobPersistenceService', () => {
-  let service: RedisJobPersistenceService;
-  let mockRedisCache: MockRedisClusterCacheService;
+describe('RedisJobPersistenceService', () => {let service: RedisJobPersistenceService;let mockRedisCache: MockRedisClusterCacheService;
   let mockConfigService: any;
 
   beforeEach(async () => {
@@ -201,33 +176,21 @@ describe('RedisJobPersistenceService', () => {
     service = module.get<RedisJobPersistenceService>(RedisJobPersistenceService);
 
     // Suppress logs during testing
-    jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    jest.spyOn(Logger.prototype, 'error').mockImplementation();
-  });
-
-  afterEach(() => {
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();jest.spyOn(Logger.prototype, 'debug').mockImplementation();jest.spyOn(Logger.prototype, 'warn').mockImplementation();jest.spyOn(Logger.prototype, 'error').mockImplementation();});afterEach(() => {
     mockRedisCache.clearStorage();
     jest.clearAllMocks();
   });
 
   // ===== BASIC PERSISTENCE OPERATIONS =====
 
-  describe('Basic Persistence Operations', () => {
-    it('should save job data successfully', async () => {
-      const jobData = createTestJobData();
-
-      const result = await service.saveJob(jobData);
+  describe('Basic Persistence Operations', () => {it('should save job data successfully', async () => {const jobData = createTestJobData();const result = await service.saveJob(jobData);
 
       expect(result.success).toBe(true);
       expect(result.metadata.latency).toBeGreaterThan(0);
       expect(mockRedisCache.getStorageSize()).toBe(1);
     });
 
-    it('should load job data successfully', async () => {
-      const jobData = createTestJobData();
-      await service.saveJob(jobData);
+    it('should load job data successfully', async () => {const jobData = createTestJobData();await service.saveJob(jobData);
 
       const result = await service.loadJob(jobData.jobId);
 
@@ -238,16 +201,10 @@ describe('RedisJobPersistenceService', () => {
       expect(result.data?.userId).toBe(jobData.userId);
     });
 
-    it('should return undefined for non-existent job', async () => {
-      const result = await service.loadJob('non_existent_job');
-
-      expect(result.success).toBe(true);
-      expect(result.data).toBeUndefined();
+    it('should return undefined for non-existent job', async () => {const result = await service.loadJob('non_existent_job');expect(result.success).toBe(true);expect(result.data).toBeUndefined();
     });
 
-    it('should delete job data successfully', async () => {
-      const jobData = createTestJobData();
-      await service.saveJob(jobData);
+    it('should delete job data successfully', async () => {const jobData = createTestJobData();await service.saveJob(jobData);
 
       const deleteResult = await service.deleteJob(jobData.jobId);
       expect(deleteResult.success).toBe(true);
@@ -256,26 +213,14 @@ describe('RedisJobPersistenceService', () => {
       expect(loadResult.data).toBeUndefined();
     });
 
-    it('should handle job data validation errors', async () => {
-      const invalidJobData = createTestJobData({
-        jobId: '', // Invalid empty job ID
-      });
-
-      const result = await service.saveJob(invalidJobData);
+    it('should handle job data validation errors', async () => {const invalidJobData = createTestJobData({jobId: '', // Invalid empty job ID});const result = await service.saveJob(invalidJobData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Job ID is required');
-    });
-  });
+      expect(result.error).toContain('Job ID is required');});});
 
   // ===== JOB DATA COMPRESSION =====
 
-  describe('Job Data Compression', () => {
-    it('should compress large job data', async () => {
-      // Create job with large result data
-      const largeResult = 'x'.repeat(2048); // Exceeds compression threshold
-      const jobData = createTestJobData({
-        result: largeResult,
+  describe('Job Data Compression', () => {it('should compress large job data', async () => {// Create job with large result dataconst largeResult = 'x'.repeat(2048); // Exceeds compression thresholdconst jobData = createTestJobData({result: largeResult,
         originalSize: 2048,
       });
 
@@ -285,11 +230,7 @@ describe('RedisJobPersistenceService', () => {
       expect(result.metadata.compressed).toBe(true);
     });
 
-    it('should not compress small job data', async () => {
-      // Create job with small result data
-      const smallResult = 'small data';
-      const jobData = createTestJobData({
-        result: smallResult,
+    it('should not compress small job data', async () => {// Create job with small result dataconst smallResult = 'small data';const jobData = createTestJobData({result: smallResult,
         originalSize: 50,
       });
 
@@ -299,10 +240,7 @@ describe('RedisJobPersistenceService', () => {
       expect(result.metadata.compressed).toBe(false);
     });
 
-    it('should decompress job data when loading', async () => {
-      const largeResult = { data: 'x'.repeat(2048) };
-      const jobData = createTestJobData({
-        result: largeResult,
+    it('should decompress job data when loading', async () => {const largeResult = { data: 'x'.repeat(2048) };const jobData = createTestJobData({result: largeResult,
         originalSize: 2048,
       });
 
@@ -316,38 +254,22 @@ describe('RedisJobPersistenceService', () => {
 
   // ===== JOB INDEXING AND QUERYING =====
 
-  describe('Job Indexing and Querying', () => {
-    beforeEach(async () => {
-      // Create test jobs with different properties
+  describe('Job Indexing and Querying', () => {beforeEach(async () => {// Create test jobs with different properties
       const jobs = [
         createTestJobData({
-          jobId: 'job1',
-          status: JobStatus.PENDING,
-          priority: JobPriority.HIGH,
-          userId: 'user1',
-        }),
-        createTestJobData({
-          jobId: 'job2',
-          status: JobStatus.IN_PROGRESS,
-          priority: JobPriority.NORMAL,
-          userId: 'user1',
-        }),
-        createTestJobData({
-          jobId: 'job3',
-          status: JobStatus.COMPLETED,
-          priority: JobPriority.LOW,
-          userId: 'user2',
-        }),
-      ];
+          jobId: 'job1',status: JobStatus.PENDING,priority: JobPriority.HIGH,
+          userId: 'user1',}),createTestJobData({
+          jobId: 'job2',status: JobStatus.IN_PROGRESS,priority: JobPriority.NORMAL,
+          userId: 'user1',}),createTestJobData({
+          jobId: 'job3',status: JobStatus.COMPLETED,priority: JobPriority.LOW,
+          userId: 'user2',}),];
 
       for (const job of jobs) {
         await service.saveJob(job);
       }
     });
 
-    it('should query jobs by status', async () => {
-      const options: JobQueryOptions = { status: JobStatus.PENDING };
-      const result = await service.queryJobs(options);
+    it('should query jobs by status', async () => {const options: JobQueryOptions = { status: JobStatus.PENDING };const result = await service.queryJobs(options);
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -355,25 +277,17 @@ describe('RedisJobPersistenceService', () => {
       // Mock implementation returns simulated results
     });
 
-    it('should query jobs by user ID', async () => {
-      const options: JobQueryOptions = { userId: 'user1' };
-      const result = await service.queryJobs(options);
+    it('should query jobs by user ID', async () => {const options: JobQueryOptions = { userId: 'user1' };const result = await service.queryJobs(options);expect(result.success).toBe(true);
+      expect(result.data).toBeDefined();
+    });
+
+    it('should query jobs with pagination', async () => {const options: JobQueryOptions = { limit: 2, offset: 1 };const result = await service.queryJobs(options);
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
     });
 
-    it('should query jobs with pagination', async () => {
-      const options: JobQueryOptions = { limit: 2, offset: 1 };
-      const result = await service.queryJobs(options);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toBeDefined();
-    });
-
-    it('should query jobs with date range', async () => {
-      const startDate = new Date(Date.now() - 3600000); // 1 hour ago
-      const endDate = new Date();
+    it('should query jobs with date range', async () => {const startDate = new Date(Date.now() - 3600000); // 1 hour agoconst endDate = new Date();
       const options: JobQueryOptions = { startDate, endDate };
       const result = await service.queryJobs(options);
 
@@ -384,8 +298,7 @@ describe('RedisJobPersistenceService', () => {
 
   // ===== BULK OPERATIONS =====
 
-  describe('Bulk Operations', () => {
-    it('should perform bulk job save successfully', async () => {
+  describe('Bulk Operations', () => {it('should perform bulk job save successfully', async () => {
       const jobs = Array.from({ length: 5 }, (_, i) =>
         createTestJobData({ jobId: `bulk_job_${i}` })
       );
@@ -399,14 +312,7 @@ describe('RedisJobPersistenceService', () => {
       expect(result.latency).toBeGreaterThan(0);
     });
 
-    it('should handle partial failures in bulk operations', async () => {
-      const jobs = [
-        createTestJobData({ jobId: 'valid_job' }),
-        createTestJobData({ jobId: '' }), // Invalid job
-        createTestJobData({ jobId: 'another_valid_job' }),
-      ];
-
-      const result = await service.bulkSaveJobs(jobs);
+    it('should handle partial failures in bulk operations', async () => {const jobs = [createTestJobData({ jobId: 'valid_job' }),createTestJobData({ jobId: '' }), // Invalid jobcreateTestJobData({ jobId: 'another_valid_job' }),];const result = await service.bulkSaveJobs(jobs);
 
       expect(result.success).toBe(false);
       expect(result.processedCount).toBe(3);
@@ -423,25 +329,16 @@ describe('RedisJobPersistenceService', () => {
       const result = await service.bulkSaveJobs(jobs);
 
       expect(result.success).toBe(false);
-      expect(result.errors[0].error).toContain('exceeds maximum');
-    });
-  });
+      expect(result.errors[0].error).toContain('exceeds maximum');});});
 
   // ===== CLEANUP OPERATIONS =====
 
-  describe('Cleanup Operations', () => {
-    it('should cleanup expired jobs', async () => {
-      // Create jobs with different timestamps
-      const oldJob = createTestJobData({
-        jobId: 'old_job',
-        submittedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-        status: JobStatus.COMPLETED,
+  describe('Cleanup Operations', () => {it('should cleanup expired jobs', async () => {// Create jobs with different timestampsconst oldJob = createTestJobData({
+        jobId: 'old_job',submittedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days agostatus: JobStatus.COMPLETED,
       });
 
       const recentJob = createTestJobData({
-        jobId: 'recent_job',
-        submittedAt: new Date(),
-        status: JobStatus.COMPLETED,
+        jobId: 'recent_job',submittedAt: new Date(),status: JobStatus.COMPLETED,
       });
 
       await service.saveJob(oldJob);
@@ -453,12 +350,8 @@ describe('RedisJobPersistenceService', () => {
       expect(result.data).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle cleanup when indexing is disabled', async () => {
-      // Mock indexing disabled
-      mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'REDIS_JOB_INDEXING_ENABLED') return false;
-        return createTestConfig().get(key, defaultValue);
-      });
+    it('should handle cleanup when indexing is disabled', async () => {// Mock indexing disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
+        if (key === 'REDIS_JOB_INDEXING_ENABLED') return false;return createTestConfig().get(key, defaultValue);});
 
       const result = await service.cleanupExpiredJobs();
 
@@ -469,26 +362,15 @@ describe('RedisJobPersistenceService', () => {
 
   // ===== ERROR HANDLING AND RECOVERY =====
 
-  describe('Error Handling and Recovery', () => {
-    it('should handle Redis connection failures gracefully', async () => {
-      mockRedisCache.simulateFailure();
-
-      const jobData = createTestJobData();
+  describe('Error Handling and Recovery', () => {it('should handle Redis connection failures gracefully', async () => {mockRedisCache.simulateFailure();const jobData = createTestJobData();
       const result = await service.saveJob(jobData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Redis connection failed');
-    });
-
-    it('should handle serialization errors', async () => {
-      const jobData = createTestJobData({
-        result: undefined, // This could cause serialization issues
+      expect(result.error).toContain('Redis connection failed');});it('should handle serialization errors', async () => {const jobData = createTestJobData({result: undefined, // This could cause serialization issues
       });
 
       // Create a circular reference to cause JSON serialization error
-      const circularObject: any = { data: 'test' };
-      circularObject.self = circularObject;
-      jobData.result = circularObject;
+      const circularObject: any = { data: 'test' };circularObject.self = circularObject;jobData.result = circularObject;
 
       const result = await service.saveJob(jobData);
 
@@ -496,58 +378,26 @@ describe('RedisJobPersistenceService', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should handle compression errors', async () => {
-      const jobData = createTestJobData({
-        originalSize: 5000, // Force compression
+    it('should handle compression errors', async () => {const jobData = createTestJobData({originalSize: 5000, // Force compression
       });
 
       // Mock compression failure
-      const originalGzip = require('zlib').gzip;
-      jest.spyOn(require('zlib'), 'gzip').mockImplementation((data, callback) => {
-        callback(new Error('Compression failed'));
-      });
-
-      const result = await service.saveJob(jobData);
+      const originalGzip = require('zlib').gzip;jest.spyOn(require('zlib'), 'gzip').mockImplementation((data, callback) => {callback(new Error('Compression failed'));});const result = await service.saveJob(jobData);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Compression failed');
-
-      // Restore original function
-      require('zlib').gzip = originalGzip;
-    });
-
-    it('should handle decompression errors', async () => {
-      // Save a job that should be compressed
-      const jobData = createTestJobData({
+      expect(result.error).toContain('Compression failed');// Restore original functionrequire('zlib').gzip = originalGzip;});it('should handle decompression errors', async () => {// Save a job that should be compressedconst jobData = createTestJobData({
         originalSize: 5000,
-        result: 'x'.repeat(5000),
-      });
-
-      await service.saveJob(jobData);
+        result: 'x'.repeat(5000),});await service.saveJob(jobData);
 
       // Mock decompression failure for loading
-      const originalGunzip = require('zlib').gunzip;
-      jest.spyOn(require('zlib'), 'gunzip').mockImplementation((data, callback) => {
-        callback(new Error('Decompression failed'));
-      });
-
-      const result = await service.loadJob(jobData.jobId);
+      const originalGunzip = require('zlib').gunzip;jest.spyOn(require('zlib'), 'gunzip').mockImplementation((data, callback) => {callback(new Error('Decompression failed'));});const result = await service.loadJob(jobData.jobId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('parse job data');
-
-      // Restore original function
-      require('zlib').gunzip = originalGunzip;
-    });
-  });
+      expect(result.error).toContain('parse job data');// Restore original functionrequire('zlib').gunzip = originalGunzip;});});
 
   // ===== PERFORMANCE METRICS =====
 
-  describe('Performance Metrics', () => {
-    it('should track operation metrics', async () => {
-      const jobData = createTestJobData();
-
-      await service.saveJob(jobData);
+  describe('Performance Metrics', () => {it('should track operation metrics', async () => {const jobData = createTestJobData();await service.saveJob(jobData);
       await service.loadJob(jobData.jobId);
       await service.deleteJob(jobData.jobId);
 
@@ -559,10 +409,7 @@ describe('RedisJobPersistenceService', () => {
       expect(metrics.metrics.operations.deletes).toBe(1);
     });
 
-    it('should track performance metrics', async () => {
-      mockRedisCache.setOperationLatency(10);
-
-      const jobData = createTestJobData();
+    it('should track performance metrics', async () => {mockRedisCache.setOperationLatency(10);const jobData = createTestJobData();
       await service.saveJob(jobData);
 
       const metrics = service.getMetrics();
@@ -571,9 +418,7 @@ describe('RedisJobPersistenceService', () => {
       expect(metrics.metrics.performance.throughput).toBeGreaterThanOrEqual(0);
     });
 
-    it('should generate health recommendations', async () => {
-      // Simulate high latency
-      mockRedisCache.setOperationLatency(25);
+    it('should generate health recommendations', async () => {// Simulate high latencymockRedisCache.setOperationLatency(25);
 
       const jobData = createTestJobData();
       await service.saveJob(jobData);
@@ -581,13 +426,9 @@ describe('RedisJobPersistenceService', () => {
       const metrics = service.getMetrics();
 
       expect(metrics.recommendations).toContain(
-        expect.stringContaining('latency')
-      );
-    });
+        expect.stringContaining('latency'));});
 
-    it('should generate alerts for threshold violations', async () => {
-      // Simulate very high latency
-      mockRedisCache.setOperationLatency(50);
+    it('should generate alerts for threshold violations', async () => {// Simulate very high latencymockRedisCache.setOperationLatency(50);
 
       const jobData = createTestJobData();
       await service.saveJob(jobData);
@@ -595,40 +436,21 @@ describe('RedisJobPersistenceService', () => {
       const metrics = service.getMetrics();
 
       expect(metrics.alerts).toContain(
-        expect.stringContaining('CRITICAL')
-      );
-    });
+        expect.stringContaining('CRITICAL'));});
   });
 
   // ===== CONFIGURATION VALIDATION =====
 
-  describe('Configuration Validation', () => {
-    it('should use default configuration values', () => {
-      const defaultConfig = createTestConfig();
-      expect(defaultConfig.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(true);
-      expect(defaultConfig.get('REDIS_JOB_INDEXING_ENABLED')).toBe(true);
-      expect(defaultConfig.get('REDIS_JOB_COMPRESSION_THRESHOLD')).toBe(1024);
-    });
-
-    it('should handle disabled persistence', async () => {
-      // Mock persistence disabled
-      mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'REDIS_JOB_PERSISTENCE_ENABLED') return false;
-        return createTestConfig().get(key, defaultValue);
-      });
+  describe('Configuration Validation', () => {it('should use default configuration values', () => {const defaultConfig = createTestConfig();expect(defaultConfig.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_INDEXING_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_COMPRESSION_THRESHOLD')).toBe(1024);});it('should handle disabled persistence', async () => {// Mock persistence disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
+        if (key === 'REDIS_JOB_PERSISTENCE_ENABLED') return false;return createTestConfig().get(key, defaultValue);});
 
       // Since service is already initialized, we would need to reinitialize
       // For this test, we verify the config value directly
-      expect(mockConfigService.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(false);
-    });
-  });
+      expect(mockConfigService.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(false);});});
 
   // ===== INTEGRATION SCENARIOS =====
 
-  describe('Integration Scenarios', () => {
-    it('should handle job lifecycle from creation to completion', async () => {
-      // Create and save pending job
-      const jobData = createTestJobData({
+  describe('Integration Scenarios', () => {it('should handle job lifecycle from creation to completion', async () => {// Create and save pending jobconst jobData = createTestJobData({
         status: JobStatus.PENDING,
       });
 
@@ -684,10 +506,7 @@ describe('RedisJobPersistenceService', () => {
       expect(loadResults.every(result => result.success && result.data)).toBe(true);
     });
 
-    it('should maintain data consistency across operations', async () => {
-      const jobData = createTestJobData();
-
-      // Save initial job
+    it('should maintain data consistency across operations', async () => {const jobData = createTestJobData();// Save initial job
       await service.saveJob(jobData);
 
       // Load and verify
@@ -712,10 +531,7 @@ describe('RedisJobPersistenceService', () => {
 
   // ===== EDGE CASES =====
 
-  describe('Edge Cases', () => {
-    it('should handle empty job result', async () => {
-      const jobData = createTestJobData({
-        result: null,
+  describe('Edge Cases', () => {it('should handle empty job result', async () => {const jobData = createTestJobData({result: null,
       });
 
       const result = await service.saveJob(jobData);
@@ -729,10 +545,7 @@ describe('RedisJobPersistenceService', () => {
     it('should handle very large job metadata', async () => {
       const largeMetadata = {
         data: Array.from({ length: 1000 }, (_, i) => `item_${i}`),
-        description: 'x'.repeat(10000),
-      };
-
-      const jobData = createTestJobData({
+        description: 'x'.repeat(10000),};const jobData = createTestJobData({
         metadata: largeMetadata,
         originalSize: 50000,
       });
@@ -742,32 +555,20 @@ describe('RedisJobPersistenceService', () => {
       expect(result.metadata.compressed).toBe(true);
     });
 
-    it('should handle special characters in job data', async () => {
-      const jobData = createTestJobData({
-        metadata: {
-          description: 'Special chars: 你好 🚀 émoji',
-          unicode: '\u2603\u2764\uFE0F',
-        },
-      });
+    it('should handle special characters in job data', async () => {const jobData = createTestJobData({metadata: {
+          description: 'Special chars: 你好 🚀 émoji',unicode: '\u2603\u2764\uFE0F',},});
 
       const result = await service.saveJob(jobData);
       expect(result.success).toBe(true);
 
       const loadResult = await service.loadJob(jobData.jobId);
       expect(loadResult.success).toBe(true);
-      expect(loadResult.data?.metadata?.description).toBe('Special chars: 你好 🚀 émoji');
-    });
-
-    it('should handle job data with deeply nested objects', async () => {
-      const deepObject = {
-        level1: {
+      expect(loadResult.data?.metadata?.description).toBe('Special chars: 你好 🚀 émoji');});it('should handle job data with deeply nested objects', async () => {const deepObject = {level1: {
           level2: {
             level3: {
               level4: {
                 level5: {
-                  data: 'deep value',
-                  array: [1, 2, 3, { nested: true }],
-                },
+                  data: 'deep value',array: [1, 2, 3, { nested: true }],},
               },
             },
           },
@@ -790,9 +591,7 @@ describe('RedisJobPersistenceService', () => {
 
 // ===== PERFORMANCE TESTS =====
 
-describe('RedisJobPersistenceService Performance Tests', () => {
-  let service: RedisJobPersistenceService;
-  let mockRedisCache: MockRedisClusterCacheService;
+describe('RedisJobPersistenceService Performance Tests', () => {let service: RedisJobPersistenceService;let mockRedisCache: MockRedisClusterCacheService;
 
   beforeEach(async () => {
     mockRedisCache = new MockRedisClusterCacheService();
@@ -815,19 +614,12 @@ describe('RedisJobPersistenceService Performance Tests', () => {
     service = module.get<RedisJobPersistenceService>(RedisJobPersistenceService);
 
     // Suppress logs during performance testing
-    jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
-  });
-
-  afterEach(() => {
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();jest.spyOn(Logger.prototype, 'debug').mockImplementation();});afterEach(() => {
     mockRedisCache.clearStorage();
     jest.clearAllMocks();
   });
 
-  it('should meet latency requirements for job operations', async () => {
-    const jobData = createTestJobData();
-
-    // Test save operation latency
+  it('should meet latency requirements for job operations', async () => {const jobData = createTestJobData();// Test save operation latency
     const saveStart = Date.now();
     const saveResult = await service.saveJob(jobData);
     const saveLatency = Date.now() - saveStart;
@@ -868,8 +660,7 @@ describe('RedisJobPersistenceService Performance Tests', () => {
     const jobCount = 1000;
     const jobs = Array.from({ length: jobCount }, (_, i) =>
       createTestJobData({
-        jobId: `memory_job_${i}`,
-        result: `Large result data: ${'x'.repeat(1000)}`, // 1KB per job
+        jobId: `memory_job_${i}`,result: `Large result data: ${'x'.repeat(1000)}', // 1KB per job
       })
     );
 

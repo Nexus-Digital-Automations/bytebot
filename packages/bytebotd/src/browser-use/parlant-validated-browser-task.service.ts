@@ -20,24 +20,15 @@
  * Performance: Optimized validation with intelligent task state management
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { BrowserTaskService, TaskCreationData, TaskUpdateData, BrowserSessionConfig } from './browser-task.service';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { BrowserTaskService, TaskCreationData, TaskUpdateData, BrowserSessionConfig } from './browser-task.service';import { ParlantIntegrationService, 
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
   ConversationalValidationError
-} from '../parlant/parlant-integration.service';
-import {
-  BrowserTaskResultDto,
+} from '../parlant/parlant-integration.service';import {BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
-} from './dto/browser-task.dto';
-
-// ===== PARLANT TASK VALIDATION INTERFACES =====
-
-/**
+} from './dto/browser-task.dto';// ===== PARLANT TASK VALIDATION INTERFACES =====/**
  * Browser task validation context with conversation details
  */
 export interface BrowserTaskValidationContext extends ParlantConversationContext {
@@ -55,9 +46,7 @@ export interface TaskExecutionContextInfo {
   readonly estimatedExecutionTime?: number;
   readonly maxExecutionTime?: number;
   readonly actionsCount: number;
-  readonly actionsComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'HIGHLY_COMPLEX';
-  readonly targetsExternalDomains: boolean;
-  readonly requiresUserInput: boolean;
+  readonly actionsComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'HIGHLY_COMPLEX';readonly targetsExternalDomains: boolean;readonly requiresUserInput: boolean;
   readonly modifiesData: boolean;
 }
 
@@ -88,10 +77,7 @@ export interface BrowserTaskAuditEntry {
   readonly taskId: string;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';
-  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';
-  readonly conversationId: string;
-  readonly taskMetadata?: TaskExecutionMetadata;
+  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED';readonly conversationId: string;readonly taskMetadata?: TaskExecutionMetadata;
   readonly performanceMetrics?: TaskPerformanceMetrics;
 }
 
@@ -99,18 +85,7 @@ export interface BrowserTaskAuditEntry {
  * Task operation types
  */
 export type TaskOperation = 
-  | 'CREATE_TASK'
-  | 'UPDATE_TASK' 
-  | 'DELETE_TASK'
-  | 'START_TASK'
-  | 'STOP_TASK'
-  | 'MONITOR_TASK'
-  | 'GET_TASK_STATUS'
-  | 'GET_TASK_LOGS'
-  | 'CLEANUP_TASK';
-
-/**
- * Task resource constraints for validation
+  | 'CREATE_TASK'| 'UPDATE_TASK' | 'DELETE_TASK'| 'START_TASK'| 'STOP_TASK'| 'MONITOR_TASK'| 'GET_TASK_STATUS'| 'GET_TASK_LOGS'| 'CLEANUP_TASK';/*** Task resource constraints for validation
  */
 export interface TaskResourceConstraints {
   readonly maxMemoryMB: number;
@@ -128,9 +103,7 @@ export interface TaskResourceConstraints {
  * Task security profile for risk assessment
  */
 export interface TaskSecurityProfile {
-  readonly userTrustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'MAXIMUM';
-  readonly recentViolations: number;
-  readonly suspiciousActivityScore: number;
+  readonly userTrustLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'MAXIMUM';readonly recentViolations: number;readonly suspiciousActivityScore: number;
   readonly lastSecurityCheck: Date;
   readonly allowedOperations: TaskOperation[];
   readonly restrictedOperations: TaskOperation[];
@@ -220,11 +193,7 @@ export class ParlantValidatedBrowserTaskService {
     private readonly originalBrowserTaskService: BrowserTaskService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Task Service`, {
-      hasOriginalService: !!this.originalBrowserTaskService,
-      hasParlantService: !!this.parlantIntegrationService,
+    const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Task Service`, {hasOriginalService: !!this.originalBrowserTaskService,hasParlantService: !!this.parlantIntegrationService,
       validationEnabled: true,
     });
 
@@ -248,14 +217,10 @@ export class ParlantValidatedBrowserTaskService {
     taskData: TaskCreationData,
     context: BrowserTaskValidationContext
   ): Promise<TaskValidationResult> {
-    const operationId = `parlant_task_create${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalTaskOperations++;
+    const operationId = `parlant_task_create${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalTaskOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated task creation: ${taskData.name}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated task creation: ${taskData.name}`,{operationId,
         taskName: taskData.name,
         taskId: taskData.taskId,
         userId: context.userId,
@@ -270,9 +235,7 @@ export class ParlantValidatedBrowserTaskService {
       const riskAssessment = this.assessTaskCreationRisk(taskData, context);
       
       this.logger.log(
-        `[${operationId}] Task creation risk assessment completed: ${riskAssessment.riskLevel}`,
-        {
-          operationId,
+        `[${operationId}] Task creation risk assessment completed: ${riskAssessment.riskLevel}`,{operationId,
           riskLevel: riskAssessment.riskLevel,
           riskFactors: riskAssessment.riskFactors,
           requiresApproval: riskAssessment.requiresApproval,
@@ -299,12 +262,9 @@ export class ParlantValidatedBrowserTaskService {
         // Create audit entry for denied operation
         await this.createTaskAuditEntry({
           timestamp: new Date(),
-          operation: 'CREATE_TASK',
-          taskId: taskData.taskId,
-          description: this.generateTaskCreationDescription(taskData),
+          operation: 'CREATE_TASK',taskId: taskData.taskId,description: this.generateTaskCreationDescription(taskData),
           riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'CANCELLED',
+          validationResult: 'DENIED',executionResult: 'CANCELLED',
           conversationId: validationResponse.conversationId,
           taskMetadata: this.extractTaskMetadata(taskData),
         });
@@ -387,9 +347,7 @@ export class ParlantValidatedBrowserTaskService {
       // Step 7: Create successful audit entry
       await this.createTaskAuditEntry({
         timestamp: new Date(),
-        operation: 'CREATE_TASK',
-        taskId: task.taskId,
-        description: this.generateTaskCreationDescription(taskData),
+        operation: 'CREATE_TASK',taskId: task.taskId,description: this.generateTaskCreationDescription(taskData),
         riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
         executionResult: executionStatus,
@@ -420,9 +378,7 @@ export class ParlantValidatedBrowserTaskService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${operationId}] Parlant-validated task creation failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated task creation failed`,{operationId,
           taskName: taskData.name,
           taskId: taskData.taskId,
           error: error instanceof Error ? error.message : String(error),
@@ -436,9 +392,7 @@ export class ParlantValidatedBrowserTaskService {
       }
 
       // Wrap other errors with context
-      throw new Error(`Task creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Task creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Update task with Parlant conversational validation
@@ -453,13 +407,8 @@ export class ParlantValidatedBrowserTaskService {
     updateData: TaskUpdateData,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto> {
-    const operationId = `parlant_task_update${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated task update: ${taskId}`,
-      {
-        operationId,
+    const operationId = `parlant_task_update${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated task update: ${taskId}`,{operationId,
         taskId,
         userId: context.userId,
         hasStatusUpdate: !!updateData.status,
@@ -473,11 +422,7 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.updateTask`,
-        functionParams: this.sanitizeUpdateDataForValidation(updateData),
-        actionDescription: `Update browser task ${taskId} with new status and data`,
-        context: context,
-        riskLevel: riskAssessment.riskLevel,
+        functionName: `BrowserTaskService.updateTask`,functionParams: this.sanitizeUpdateDataForValidation(updateData),actionDescription: `Update browser task ${taskId} with new status and data`,context: context,riskLevel: riskAssessment.riskLevel,
         operationId,
       };
 
@@ -485,9 +430,7 @@ export class ParlantValidatedBrowserTaskService {
 
       if (!validationResponse.approved) {
         this.logger.warn(
-          `[${operationId}] Task update denied by Parlant validation`,
-          {
-            operationId,
+          `[${operationId}] Task update denied by Parlant validation`,{operationId,
             taskId,
             reasoning: validationResponse.reasoning,
           }
@@ -515,16 +458,13 @@ export class ParlantValidatedBrowserTaskService {
         taskId,
         description: `Update task with status: ${updateData.status ?? 'unchanged'}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
         performanceMetrics: this.extractPerformanceMetrics(updatedTask),
       });
 
       this.logger.log(
-        `[${operationId}] Task updated successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Task updated successfully after validation`,{operationId,
           taskId,
           newStatus: updateData.status,
           duration: Date.now() - startTime,
@@ -535,9 +475,7 @@ export class ParlantValidatedBrowserTaskService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated task update failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated task update failed`,{operationId,
           taskId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -547,9 +485,7 @@ export class ParlantValidatedBrowserTaskService {
         throw error;
       }
 
-      throw new Error(`Task update failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Task update failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Get task with Parlant conversational validation
@@ -562,13 +498,8 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto | null> {
-    const operationId = `parlant_task_get${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated task retrieval: ${taskId}`,
-      {
-        operationId,
+    const operationId = `parlant_task_get${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated task retrieval: ${taskId}`,{operationId,
         taskId,
         userId: context.userId,
       }
@@ -580,9 +511,7 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.getTask`,
-        functionParams: { taskId },
-        actionDescription: `Retrieve browser task information for ${taskId}`,
+        functionName: `BrowserTaskService.getTask`,functionParams: { taskId },actionDescription: `Retrieve browser task information for ${taskId}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -608,15 +537,12 @@ export class ParlantValidatedBrowserTaskService {
         taskId,
         description: `Retrieve task information for ${taskId}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: task ? 'SUCCESS' : 'FAILURE',
+        validationResult: 'APPROVED',executionResult: task ? 'SUCCESS' : 'FAILURE',
         conversationId: validationResponse.conversationId,
       });
 
       this.logger.log(
-        `[${operationId}] Task retrieved successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Task retrieved successfully after validation`,{operationId,
           taskId,
           found: !!task,
           status: task?.status,
@@ -628,9 +554,7 @@ export class ParlantValidatedBrowserTaskService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated task retrieval failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated task retrieval failed`,{operationId,
           taskId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -640,9 +564,7 @@ export class ParlantValidatedBrowserTaskService {
         throw error;
       }
 
-      throw new Error(`Task retrieval failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Task retrieval failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Delete task with Parlant conversational validation
@@ -655,13 +577,8 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<void> {
-    const operationId = `parlant_task_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated task deletion: ${taskId}`,
-      {
-        operationId,
+    const operationId = `parlant_task_delete${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated task deletion: ${taskId}`,{operationId,
         taskId,
         userId: context.userId,
       }
@@ -673,9 +590,7 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.deleteTask`,
-        functionParams: { taskId },
-        actionDescription: `Delete browser task ${taskId}`,
+        functionName: `BrowserTaskService.deleteTask`,functionParams: { taskId },actionDescription: `Delete browser task ${taskId}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -701,15 +616,12 @@ export class ParlantValidatedBrowserTaskService {
         taskId,
         description: `Delete browser task ${taskId}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
       this.logger.log(
-        `[${operationId}] Task deleted successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Task deleted successfully after validation`,{operationId,
           taskId,
           duration: Date.now() - startTime,
         }
@@ -717,9 +629,7 @@ export class ParlantValidatedBrowserTaskService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated task deletion failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated task deletion failed`,{operationId,
           taskId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -743,70 +653,37 @@ export class ParlantValidatedBrowserTaskService {
     context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Assess based on task complexity
     if (taskData.totalActions > 20) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('high_action_count');
-    }
-
-    if (taskData.totalActions > 50) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('very_high_action_count');
-    }
-
-    // Assess based on task priority
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('high_action_count');}if (taskData.totalActions > 50) {
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('very_high_action_count');}// Assess based on task priority
     if (taskData.priority === BrowserTaskPriority.HIGH || taskData.priority === BrowserTaskPriority.CRITICAL) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_priority_task');
-    }
-
-    // Assess based on execution time
+      riskFactors.push('high_priority_task');}// Assess based on execution time
     if (taskData.maxExecutionTimeMs && taskData.maxExecutionTimeMs > 300000) { // 5 minutes
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('long_running_task');
-    }
-
-    // Assess based on browser environment
+      riskFactors.push('long_running_task');}// Assess based on browser environment
     if (context.browserEnvironment.suspiciousActivity.detected) {
-      riskLevel = RiskLevel.CRITICAL;
-      riskFactors.push('suspicious_activity_detected');
-    }
-
-    if (context.browserEnvironment.activeSessions > 5) {
+      riskLevel = RiskLevel._CRITICAL;
+      riskFactors.push('suspicious_activity_detected');}if (context.browserEnvironment.activeSessions > 5) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_session_count');
-    }
-
-    // Assess based on task execution context
+      riskFactors.push('high_session_count');}// Assess based on task execution context
     if (context.taskExecutionContext.targetsExternalDomains) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('external_domain_access');
-    }
-
-    if (context.taskExecutionContext.modifiesData) {
+      riskFactors.push('external_domain_access');}if (context.taskExecutionContext.modifiesData) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('data_modification');
-    }
-
-    if (context.taskExecutionContext.requiresUserInput) {
+      riskFactors.push('data_modification');}if (context.taskExecutionContext.requiresUserInput) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('user_input_required');
-    }
-
-    // Assess based on resource usage
+      riskFactors.push('user_input_required');}// Assess based on resource usage
     if (context.browserEnvironment.resourceUsage.memoryMB > 1000) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_memory_usage');
-    }
-
-    if (context.browserEnvironment.resourceUsage.cpuPercent > 80) {
+      riskFactors.push('high_memory_usage');}if (context.browserEnvironment.resourceUsage.cpuPercent > 80) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_cpu_usage');
-    }
-
-    const mitigationStrategies = this.generateTaskMitigationStrategies(riskLevel, riskFactors);
+      riskFactors.push('high_cpu_usage');}const mitigationStrategies = this.generateTaskMitigationStrategies(riskLevel, riskFactors);
     const resourceLimitations = this.generateResourceLimitations(context);
     const monitoringRequirements = this.generateMonitoringRequirements(riskLevel);
     
@@ -814,7 +691,7 @@ export class ParlantValidatedBrowserTaskService {
       riskLevel,
       riskFactors,
       mitigationStrategies,
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL && riskLevel !== RiskLevel.LOW,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL && riskLevel !== RiskLevel._LOW,
       resourceLimitations,
       monitoringRequirements,
     };
@@ -829,31 +706,22 @@ export class ParlantValidatedBrowserTaskService {
     context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Check if updating status to a critical state
     if (updateData.status === BrowserTaskStatus.FAILED || updateData.status === BrowserTaskStatus.COMPLETED) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('status_finalization');
-    }
-
-    // Check if adding extracted data
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('status_finalization');}// Check if adding extracted data
     if (updateData.extractedData) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('data_extraction_update');
-    }
-
-    // Check for error conditions
+      riskFactors.push('data_extraction_update');}// Check for error conditions
     if (updateData.errorMessage) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('error_status_update');
-    }
-
-    return {
+      riskFactors.push('error_status_update');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateTaskMitigationStrategies(riskLevel, riskFactors),
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       resourceLimitations: [],
       monitoringRequirements: [],
     };
@@ -867,15 +735,10 @@ export class ParlantValidatedBrowserTaskService {
     context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.MINIMAL;
+    let riskLevel: RiskLevel = RiskLevel._MINIMAL;
 
     // Check security profile
-    if (context.securityProfile.userTrustLevel === 'LOW') {
-      riskLevel = RiskLevel.LOW;
-      riskFactors.push('low_trust_user');
-    }
-
-    return {
+    if (context.securityProfile.userTrustLevel === 'LOW') {riskLevel = RiskLevel._LOW;riskFactors.push('low_trust_user');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: [],
@@ -893,26 +756,16 @@ export class ParlantValidatedBrowserTaskService {
     context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.MEDIUM;
+    let riskLevel: RiskLevel = RiskLevel._MODERATE;
 
     // Task deletion is inherently medium risk due to data loss potential
-    riskFactors.push('permanent_data_deletion');
-
-    // Check if task is currently running
-    if (this.isTaskCurrentlyRunning(taskId)) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('active_task_termination');
-    }
-
-    return {
+    riskFactors.push('permanent_data_deletion');// Check if task is currently runningif (this.isTaskCurrentlyRunning(taskId)) {
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('active_task_termination');}return {
       riskLevel,
       riskFactors,
-      mitigationStrategies: ['create_backup_before_deletion', 'confirm_user_intent'],
-      requiresApproval: true,
-      resourceLimitations: [],
-      monitoringRequirements: ['audit_deletion_operation'],
-    };
-  }
+      mitigationStrategies: ['create_backup_before_deletion', 'confirm_user_intent'],requiresApproval: true,resourceLimitations: [],
+      monitoringRequirements: ['audit_deletion_operation'],};}
 
   // ===== HELPER METHODS =====
 
@@ -921,12 +774,12 @@ export class ParlantValidatedBrowserTaskService {
    */
   private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
-      case RiskLevel.MINIMAL: return RiskLevel.LOW;
-      case RiskLevel.LOW: return RiskLevel.MEDIUM;
-      case RiskLevel.MEDIUM: return RiskLevel.HIGH;
-      case RiskLevel.HIGH: return RiskLevel.CRITICAL;
-      case RiskLevel.CRITICAL: return RiskLevel.CRITICAL;
-      default: return RiskLevel.MEDIUM;
+      case RiskLevel._MINIMAL: return RiskLevel._LOW;
+      case RiskLevel._LOW: return RiskLevel._MODERATE;
+      case RiskLevel._MODERATE: return RiskLevel._HIGH;
+      case RiskLevel._HIGH: return RiskLevel._CRITICAL;
+      case RiskLevel._CRITICAL: return RiskLevel._CRITICAL;
+      default: return RiskLevel._MODERATE;
     }
   }
 
@@ -936,27 +789,8 @@ export class ParlantValidatedBrowserTaskService {
   private generateTaskMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.includes('high_action_count')) {
-      strategies.push('enable_detailed_logging', 'implement_progress_checkpoints');
-    }
-
-    if (riskFactors.includes('external_domain_access')) {
-      strategies.push('verify_domain_safety', 'enable_network_monitoring');
-    }
-
-    if (riskFactors.includes('data_modification')) {
-      strategies.push('create_data_backup', 'verify_modification_intent');
-    }
-
-    if (riskFactors.includes('suspicious_activity_detected')) {
-      strategies.push('enhance_monitoring', 'require_additional_authorization');
-    }
-
-    if (riskLevel === RiskLevel.CRITICAL) {
-      strategies.push('multi_factor_approval', 'comprehensive_audit_logging');
-    }
-
-    return strategies;
+    if (riskFactors.includes('high_action_count')) {strategies.push('enable_detailed_logging', 'implement_progress_checkpoints');}if (riskFactors.includes('external_domain_access')) {strategies.push('verify_domain_safety', 'enable_network_monitoring');}if (riskFactors.includes('data_modification')) {strategies.push('create_data_backup', 'verify_modification_intent');}if (riskFactors.includes('suspicious_activity_detected')) {strategies.push('enhance_monitoring', 'require_additional_authorization');}if (riskLevel === RiskLevel._CRITICAL) {
+      strategies.push('multi_factor_approval', 'comprehensive_audit_logging');}return strategies;
   }
 
   /**
@@ -966,18 +800,9 @@ export class ParlantValidatedBrowserTaskService {
     const limitations: string[] = [];
 
     if (context.browserEnvironment.resourceUsage.memoryMB > 500) {
-      limitations.push('memory_limit_1GB');
-    }
-
-    if (context.browserEnvironment.resourceUsage.cpuPercent > 60) {
-      limitations.push('cpu_limit_50_percent');
-    }
-
-    if (context.browserEnvironment.activeSessions > 3) {
-      limitations.push('session_limit_enforcement');
-    }
-
-    return limitations;
+      limitations.push('memory_limit_1GB');}if (context.browserEnvironment.resourceUsage.cpuPercent > 60) {
+      limitations.push('cpu_limit_50_percent');}if (context.browserEnvironment.activeSessions > 3) {
+      limitations.push('session_limit_enforcement');}return limitations;
   }
 
   /**
@@ -987,25 +812,11 @@ export class ParlantValidatedBrowserTaskService {
     const requirements: string[] = [];
 
     switch (riskLevel) {
-      case RiskLevel.CRITICAL:
-        requirements.push('real_time_monitoring', 'security_team_notification');
-        requirements.push('detailed_action_logging', 'resource_monitoring');
-        requirements.push('progress_tracking', 'error_monitoring');
-        requirements.push('basic_logging');
-        break;
-      case RiskLevel.HIGH:
-        requirements.push('detailed_action_logging', 'resource_monitoring');
-        requirements.push('progress_tracking', 'error_monitoring');
-        requirements.push('basic_logging');
-        break;
-      case RiskLevel.MEDIUM:
-        requirements.push('progress_tracking', 'error_monitoring');
-        requirements.push('basic_logging');
-        break;
-      case RiskLevel.LOW:
-        requirements.push('basic_logging');
-        break;
-      default:
+      case RiskLevel._CRITICAL:
+        requirements.push('real_time_monitoring', 'security_team_notification');requirements.push('detailed_action_logging', 'resource_monitoring');requirements.push('progress_tracking', 'error_monitoring');requirements.push('basic_logging');break;case RiskLevel._HIGH:
+        requirements.push('detailed_action_logging', 'resource_monitoring');requirements.push('progress_tracking', 'error_monitoring');requirements.push('basic_logging');break;case RiskLevel._MODERATE:
+        requirements.push('progress_tracking', 'error_monitoring');requirements.push('basic_logging');break;case RiskLevel._LOW:
+        requirements.push('basic_logging');break;default:
         requirements.push('minimal_logging');
     }
 
@@ -1017,20 +828,14 @@ export class ParlantValidatedBrowserTaskService {
    */
   private generateTaskCreationDescription(taskData: TaskCreationData): string {
     const complexity = this.determineTaskComplexity(taskData.totalActions);
-    return `Create browser task "${taskData.name}" with ${taskData.totalActions} actions (${complexity} complexity), priority: ${taskData.priority}`;
+    return `Create browser task "${taskData.name}" with ${taskData.totalActions} actions (${complexity} complexity), priority: ${taskData.priority}";
   }
 
   /**
    * Determine task complexity based on action count
    */
   private determineTaskComplexity(actionCount: number): string {
-    if (actionCount <= 5) return 'simple';
-    if (actionCount <= 15) return 'moderate';
-    if (actionCount <= 30) return 'complex';
-    return 'highly complex';
-  }
-
-  /**
+    if (actionCount <= 5) return 'simple';if (actionCount <= 15) return 'moderate';if (actionCount <= 30) return 'complex';return 'highly complex';}/**
    * Sanitize task data for validation
    */
   private sanitizeTaskForValidation(taskData: TaskCreationData): Record<string, unknown> {
@@ -1099,27 +904,11 @@ export class ParlantValidatedBrowserTaskService {
 
     // Check task status
     if (task.status === BrowserTaskStatus.FAILED) {
-      flags.push('TASK_FAILED');
-      recommendations.push('Investigate failure cause');
-    }
-
-    // Check for extracted data
+      flags.push('TASK_FAILED');recommendations.push('Investigate failure cause');}// Check for extracted data
     if (task.extractedData) {
-      flags.push('DATA_EXTRACTED');
-      recommendations.push('Review extracted data for sensitivity');
-    }
-
-    // Check against security profile
-    if (context.securityProfile.userTrustLevel === 'LOW') {
-      flags.push('LOW_TRUST_USER');
-      recommendations.push('Enable enhanced monitoring');
-    }
-
-    const passed = flags.length === 0 || 
-                  (flags.length <= 2 && context.securityProfile.userTrustLevel !== 'LOW');
-
-    return { passed, flags, recommendations };
-  }
+      flags.push('DATA_EXTRACTED');recommendations.push('Review extracted data for sensitivity');}// Check against security profile
+    if (context.securityProfile.userTrustLevel === 'LOW') {flags.push('LOW_TRUST_USER');recommendations.push('Enable enhanced monitoring');}const passed = flags.length === 0 || 
+                  (flags.length <= 2 && context.securityProfile.userTrustLevel !== 'LOW');return { passed, flags, recommendations };}
 
   /**
    * Generate compliance flags for task
@@ -1131,18 +920,9 @@ export class ParlantValidatedBrowserTaskService {
     const flags: string[] = [];
 
     if (task.extractedData) {
-      flags.push('DATA_EXTRACTION_PERFORMED');
-    }
-
-    if (taskData.totalActions > 20) {
-      flags.push('HIGH_COMPLEXITY_TASK');
-    }
-
-    if (taskData.priority === BrowserTaskPriority.CRITICAL) {
-      flags.push('URGENT_PRIORITY_TASK');
-    }
-
-    return flags;
+      flags.push('DATA_EXTRACTION_PERFORMED');}if (taskData.totalActions > 20) {
+      flags.push('HIGH_COMPLEXITY_TASK');}if (taskData.priority === BrowserTaskPriority.CRITICAL) {
+      flags.push('URGENT_PRIORITY_TASK');}return flags;
   }
 
   /**
@@ -1164,14 +944,8 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW: return 'BASIC';
-      case RiskLevel.MEDIUM: return 'DETAILED';
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL: return 'COMPREHENSIVE';
-      default: return 'BASIC';
+  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {switch (riskLevel) {case RiskLevel._MINIMAL:
+      case RiskLevel._LOW: return 'BASIC';case RiskLevel._MODERATE: return 'DETAILED';case RiskLevel._HIGH:case RiskLevel._CRITICAL: return 'COMPREHENSIVE';default: return 'BASIC';
     }
   }
 
@@ -1227,9 +1001,7 @@ export class ParlantValidatedBrowserTaskService {
       totalTaskOperations: this.totalTaskOperations,
       approvedTaskOperations: this.approvedTaskOperations,
       deniedTaskOperations: this.deniedTaskOperations,
-      approvalRate: `${approvalRate.toFixed(2)}%`,
-      denialRate: `${denialRate.toFixed(2)}%`,
-      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
+      approvalRate: `${approvalRate.toFixed(2)}%`,denialRate: `${denialRate.toFixed(2)}%`,averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
       taskHistorySize: this.taskHistory.length,
     });
   }
@@ -1281,9 +1053,7 @@ export class ParlantValidatedBrowserTaskService {
   async getTaskSecurityProfile(_userId: string): Promise<TaskSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
-      userTrustLevel: 'MEDIUM',
-      recentViolations: 0,
-      suspiciousActivityScore: 0.1,
+      userTrustLevel: 'MEDIUM',recentViolations: 0,suspiciousActivityScore: 0.1,
       lastSecurityCheck: new Date(),
       allowedOperations: ['CREATE_TASK', 'UPDATE_TASK', 'GET_TASK_STATUS', 'DELETE_TASK'],
       restrictedOperations: [],

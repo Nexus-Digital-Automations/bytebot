@@ -17,56 +17,24 @@
  * Performance: Sub-500ms alert processing with intelligent batching
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
   ParlantValidationRequest, 
   ParlantConversationContext, 
   RiskLevel,
   ConversationalValidationError 
-} from '../parlant/parlant-integration.service';
-import { SecurityEvent, SecurityEventType } from './security-monitoring.service';
-
-// ===== SECURITY ALERTS INTERFACES =====
-
-/**
+} from '../parlant/parlant-integration.service';import { SecurityEvent, SecurityEventType } from './security-monitoring.service';// ===== SECURITY ALERTS INTERFACES =====/**
  * Alert channel types for multi-channel distribution
  */
 export enum AlertChannel {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  SLACK = 'SLACK',
-  TEAMS = 'TEAMS',
-  WEBHOOK = 'WEBHOOK',
-  PAGER_DUTY = 'PAGER_DUTY',
-  SOAR_PLATFORM = 'SOAR_PLATFORM',
-  SIEM_SYSTEM = 'SIEM_SYSTEM'
-}
-
-/**
+  EMAIL = 'EMAIL',SMS = 'SMS',SLACK = 'SLACK',TEAMS = 'TEAMS',WEBHOOK = 'WEBHOOK',PAGER_DUTY = 'PAGER_DUTY',SOAR_PLATFORM = 'SOAR_PLATFORM',SIEM_SYSTEM = 'SIEM_SYSTEM'}/**
  * Alert priority levels for escalation
  */
 export enum AlertPriority {
-  P0_CRITICAL = 'P0_CRITICAL',     // Immediate response required
-  P1_HIGH = 'P1_HIGH',             // Response within 15 minutes
-  P2_MEDIUM = 'P2_MEDIUM',         // Response within 1 hour
-  P3_LOW = 'P3_LOW',               // Response within 24 hours
-  P4_INFO = 'P4_INFO'              // Informational only
-}
-
-/**
+  P0_CRITICAL = 'P0_CRITICAL',     // Immediate response requiredP1_HIGH = 'P1_HIGH',             // Response within 15 minutesP2_MEDIUM = 'P2_MEDIUM',         // Response within 1 hourP3_LOW = 'P3_LOW',               // Response within 24 hoursP4_INFO = 'P4_INFO'              // Informational only}/**
  * Alert status for tracking
  */
 export enum AlertStatus {
-  PENDING = 'PENDING',
-  SENT = 'SENT',
-  ACKNOWLEDGED = 'ACKNOWLEDGED',
-  INVESTIGATING = 'INVESTIGATING',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-  ESCALATED = 'ESCALATED',
-  BLOCKED = 'BLOCKED'
+  PENDING = 'PENDING',SENT = 'SENT',ACKNOWLEDGED = 'ACKNOWLEDGED',INVESTIGATING = 'INVESTIGATING',RESOLVED = 'RESOLVED',CLOSED = 'CLOSED',ESCALATED = 'ESCALATED',BLOCKED = 'BLOCKED'
 }
 
 /**
@@ -184,11 +152,7 @@ export class SecurityAlertsService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_alerts_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Security Alerts Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      alertingEnabled: this.getAlertConfig().alertingEnabled,
+    const operationId = `security_alerts_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Alerts Service with Parlant integration`, {parlantIntegrationEnabled: true,alertingEnabled: this.getAlertConfig().alertingEnabled,
       escalationEnabled: this.getAlertConfig().escalationEnabled,
       conversationalValidationRequired: this.getAlertConfig().conversationalValidationRequired,
       supportedChannels: this.getAlertConfig().channels,
@@ -236,9 +200,7 @@ export class SecurityAlertsService {
           channels: request.targetChannels,
           customMessage: request.customMessage,
         },
-        actionDescription: `Generate ${request.alertPriority} security alert for ${request.sourceEvent.eventType} event to ${request.targetChannels.length} channels`,
-        context: request.context,
-        riskLevel: this.getAlertRiskLevel(request.alertPriority),
+        actionDescription: `Generate ${request.alertPriority} security alert for ${request.sourceEvent.eventType} event to ${request.targetChannels.length} channels`,context: request.context,riskLevel: this.getAlertRiskLevel(request.alertPriority),
         operationId: request.operationId,
       };
 
@@ -246,9 +208,7 @@ export class SecurityAlertsService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Security alert generation blocked by Parlant validation`,
-          {
-            operationId: request.operationId,
+          `[${request.operationId}] Security alert generation blocked by Parlant validation`,{operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -262,9 +222,7 @@ export class SecurityAlertsService {
       }
 
       this.logger.log(
-        `[${request.operationId}] Security alert generation approved by Parlant`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security alert generation approved by Parlant`,{operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -292,9 +250,7 @@ export class SecurityAlertsService {
       this.updateAlertMetrics(duration);
 
       this.logger.log(
-        `[${request.operationId}] Security alert generated and distributed successfully`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security alert generated and distributed successfully`,{operationId: request.operationId,
           alertId: alert.id,
           sentToChannels: distributionResult.sentToChannels.length,
           totalRecipients: distributionResult.totalRecipients,
@@ -309,9 +265,7 @@ export class SecurityAlertsService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] Security alert generation failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Security alert generation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           duration,
@@ -334,10 +288,7 @@ export class SecurityAlertsService {
   async acknowledgeAlert(
     request: AlertAcknowledgmentRequest
   ): Promise<{ acknowledged: boolean; alert: SecurityAlert; conversationId: string }> {
-    const operationId = `ack_alert${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Acknowledging security alert with Parlant validation`,
+    const operationId = `ack_alert${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Acknowledging security alert with Parlant validation`,
       {
         operationId,
         alertId: request.alertId,
@@ -355,9 +306,8 @@ export class SecurityAlertsService {
           acknowledgedBy: request.acknowledgedBy,
           responseNotes: request.responseNotes,
         },
-        actionDescription: `Acknowledge security alert ${request.alertId} with response: "${request.responseNotes}"`,
-        context: request.context,
-        riskLevel: RiskLevel.MEDIUM,
+        actionDescription: `Acknowledge security alert ${request.alertId} with response: "${request.responseNotes}"",context: request.context,
+        riskLevel: RiskLevel._MODERATE,
         operationId,
       };
 
@@ -374,10 +324,7 @@ export class SecurityAlertsService {
       // Process alert acknowledgment
       const alert = this.activeAlerts.get(request.alertId);
       if (!alert) {
-        throw new Error(`Alert ${request.alertId} not found`);
-      }
-
-      const updatedAlert: SecurityAlert = {
+        throw new Error(`Alert ${request.alertId} not found`);}const updatedAlert: SecurityAlert = {
         ...alert,
         status: AlertStatus.ACKNOWLEDGED,
       };
@@ -388,9 +335,7 @@ export class SecurityAlertsService {
       this.cancelEscalation(request.alertId);
 
       this.logger.log(
-        `[${operationId}] Security alert acknowledged successfully`,
-        {
-          operationId,
+        `[${operationId}] Security alert acknowledged successfully`,{operationId,
           alertId: request.alertId,
           acknowledgedBy: request.acknowledgedBy,
           conversationId: validation.conversationId,
@@ -405,9 +350,7 @@ export class SecurityAlertsService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Alert acknowledgment failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Alert acknowledgment failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           alertId: request.alertId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -431,10 +374,7 @@ export class SecurityAlertsService {
     alertId: string,
     context: ParlantConversationContext
   ): Promise<{ escalated: boolean; alert: SecurityAlert; conversationId: string }> {
-    const operationId = `escalate_alert${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(
-      `[${operationId}] Escalating security alert with Parlant validation`,
+    const operationId = `escalate_alert${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Escalating security alert with Parlant validation`,
       {
         operationId,
         alertId,
@@ -447,9 +387,7 @@ export class SecurityAlertsService {
       const validationRequest: ParlantValidationRequest = {
         functionName: 'SecurityAlertsService.escalateAlert',
         functionParams: { alertId },
-        actionDescription: `Escalate security alert ${alertId} to next level in escalation chain`,
-        context,
-        riskLevel: RiskLevel.CRITICAL, // Escalation is CRITICAL risk
+        actionDescription: `Escalate security alert ${alertId} to next level in escalation chain`,context,riskLevel: RiskLevel._CRITICAL, // Escalation is CRITICAL risk
         operationId,
       };
 
@@ -466,16 +404,11 @@ export class SecurityAlertsService {
       // Process alert escalation
       const alert = this.activeAlerts.get(alertId);
       if (!alert) {
-        throw new Error(`Alert ${alertId} not found`);
-      }
-
-      const updatedAlert = await this.performAlertEscalation(alert, validation.conversationId);
+        throw new Error(`Alert ${alertId} not found`);}const updatedAlert = await this.performAlertEscalation(alert, validation.conversationId);
       this.escalationsTriggered++;
 
       this.logger.log(
-        `[${operationId}] Security alert escalated successfully`,
-        {
-          operationId,
+        `[${operationId}] Security alert escalated successfully`,{operationId,
           alertId,
           newStatus: updatedAlert.status,
           conversationId: validation.conversationId,
@@ -490,9 +423,7 @@ export class SecurityAlertsService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Alert escalation failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId,
+        `[${operationId}] Alert escalation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
           alertId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -543,10 +474,7 @@ export class SecurityAlertsService {
     request: AlertGenerationRequest,
     conversationId: string
   ): Promise<SecurityAlert> {
-    const alertId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    const alert: SecurityAlert = {
-      id: alertId,
+    const alertId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;const alert: SecurityAlert = {id: alertId,
       timestamp: new Date(),
       title: this.generateAlertTitle(request.sourceEvent),
       description: this.generateAlertDescription(request.sourceEvent, request.customMessage),
@@ -579,9 +507,7 @@ export class SecurityAlertsService {
         deliveryConfirmations[channel] = true;
         totalRecipients += recipients;
       } catch (error) {
-        this.logger.error(`Failed to send alert to ${channel}: ${error instanceof Error ? error.message : String(error)}`);
-        failedChannels.push(channel);
-        deliveryConfirmations[channel] = false;
+        this.logger.error(`Failed to send alert to ${channel}: ${error instanceof Error ? error.message : String(error)}`);failedChannels.push(channel);deliveryConfirmations[channel] = false;
       }
     }
 
@@ -598,16 +524,12 @@ export class SecurityAlertsService {
       failedChannels,
       totalRecipients,
       deliveryConfirmations,
-      conversationalAuditTrail: [`Alert distributed via conversation ${alert.conversationId}`],
-      escalationScheduled: this.getAlertConfig().escalationEnabled,
-    };
+      conversationalAuditTrail: [`Alert distributed via conversation ${alert.conversationId}`],escalationScheduled: this.getAlertConfig().escalationEnabled,};
   }
 
   private async sendAlertToChannel(alert: SecurityAlert, channel: AlertChannel): Promise<number> {
     // Mock implementation - would integrate with actual notification systems
-    this.logger.log(`Sending alert ${alert.id} to ${channel}`, {
-      alertId: alert.id,
-      channel,
+    this.logger.log(`Sending alert ${alert.id} to ${channel}`, {alertId: alert.id,channel,
       priority: alert.priority,
     });
 
@@ -640,9 +562,7 @@ export class SecurityAlertsService {
   }
 
   private async performAutomaticEscalation(alertId: string, step: EscalationStep): Promise<void> {
-    const operationId = `auto_escalate${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Performing automatic escalation for alert ${alertId}`);
+    const operationId = `auto_escalate${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Performing automatic escalation for alert ${alertId}`);
 
     try {
       const alert = this.activeAlerts.get(alertId);
@@ -654,9 +574,7 @@ export class SecurityAlertsService {
       this.escalationsTriggered++;
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Automatic escalation failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      this.logger.error(`[${operationId}] Automatic escalation failed: ${error instanceof Error ? error.message : String(error)}`);}}
 
   private async performAlertEscalation(
     alert: SecurityAlert,
@@ -678,9 +596,7 @@ export class SecurityAlertsService {
   }
 
   private async sendEscalationNotification(alert: SecurityAlert, channel: AlertChannel): Promise<void> {
-    this.logger.warn(`ESCALATED ALERT: ${alert.title}`, {
-      alertId: alert.id,
-      channel,
+    this.logger.warn(`ESCALATED ALERT: ${alert.title}`, {alertId: alert.id,channel,
       priority: alert.priority,
       originalTimestamp: alert.timestamp,
     });
@@ -704,10 +620,7 @@ export class SecurityAlertsService {
     request: AlertGenerationRequest,
     conversationId: string
   ): Promise<AlertDistributionResult> {
-    this.logger.log(`Updating existing alert ${existingAlert.id} instead of creating duplicate`);
-
-    return {
-      alertId: existingAlert.id,
+    this.logger.log(`Updating existing alert ${existingAlert.id} instead of creating duplicate`);return {alertId: existingAlert.id,
       sentToChannels: existingAlert.channels,
       failedChannels: [],
       totalRecipients: 1,
@@ -715,14 +628,11 @@ export class SecurityAlertsService {
         acc[channel] = true;
         return acc;
       }, {} as Record<AlertChannel, boolean>),
-      conversationalAuditTrail: [`Duplicate alert prevented via conversation ${conversationId}`],
-      escalationScheduled: false,
-    };
+      conversationalAuditTrail: [`Duplicate alert prevented via conversation ${conversationId}`],escalationScheduled: false,};
   }
 
   private generateAlertTitle(event: SecurityEvent): string {
-    return `${event.severity.toUpperCase()}: ${event.eventType.replace(/_/g, ' ')}`;
-  }
+    return `${event.severity.toUpperCase()}: ${event.eventType.replace(/_/g, ' ')}';}
 
   private generateAlertDescription(event: SecurityEvent, customMessage?: string): string {
     let description = event.description;
@@ -737,19 +647,10 @@ export class SecurityAlertsService {
 
     switch (event.eventType) {
       case SecurityEventType.AUTHENTICATION_FAILURE:
-        actions.push('Review authentication logs', 'Check for brute force attacks', 'Verify user account status');
-        break;
-      case SecurityEventType.UNAUTHORIZED_ACCESS:
-        actions.push('Immediately revoke access permissions', 'Investigate access patterns', 'Review audit logs');
-        break;
-      case SecurityEventType.PRIVILEGE_ESCALATION:
-        actions.push('CRITICAL: Isolate affected system', 'Review privilege changes', 'Investigate root cause');
-        break;
-      default:
-        actions.push('Investigate security event', 'Review system logs', 'Follow incident response procedures');
-    }
-
-    return actions;
+        actions.push('Review authentication logs', 'Check for brute force attacks', 'Verify user account status');break;case SecurityEventType.UNAUTHORIZED_ACCESS:
+        actions.push('Immediately revoke access permissions', 'Investigate access patterns', 'Review audit logs');break;case SecurityEventType.PRIVILEGE_ESCALATION:
+        actions.push('CRITICAL: Isolate affected system', 'Review privilege changes', 'Investigate root cause');break;default:
+        actions.push('Investigate security event', 'Review system logs', 'Follow incident response procedures');}return actions;
   }
 
   private generateEscalationChain(priority: AlertPriority): EscalationStep[] {
@@ -758,16 +659,10 @@ export class SecurityAlertsService {
     switch (priority) {
       case AlertPriority.P0_CRITICAL:
         chain.push(
-          { stepNumber: 1, triggerAfterMinutes: 5, targetPersonnel: ['security_team'], channels: [AlertChannel.SMS, AlertChannel.PAGER_DUTY], requiresConversationalApproval: false, executed: false },
-          { stepNumber: 2, triggerAfterMinutes: 15, targetPersonnel: ['security_manager'], channels: [AlertChannel.SMS], requiresConversationalApproval: true, executed: false }
-        );
-        break;
+          { stepNumber: 1, triggerAfterMinutes: 5, targetPersonnel: ['security_team'], channels: [AlertChannel.SMS, AlertChannel.PAGER_DUTY], requiresConversationalApproval: false, executed: false },{ stepNumber: 2, triggerAfterMinutes: 15, targetPersonnel: ['security_manager'], channels: [AlertChannel.SMS], requiresConversationalApproval: true, executed: false });break;
       case AlertPriority.P1_HIGH:
         chain.push(
-          { stepNumber: 1, triggerAfterMinutes: 15, targetPersonnel: ['security_team'], channels: [AlertChannel.EMAIL, AlertChannel.SLACK], requiresConversationalApproval: false, executed: false },
-          { stepNumber: 2, triggerAfterMinutes: 60, targetPersonnel: ['security_manager'], channels: [AlertChannel.EMAIL], requiresConversationalApproval: true, executed: false }
-        );
-        break;
+          { stepNumber: 1, triggerAfterMinutes: 15, targetPersonnel: ['security_team'], channels: [AlertChannel.EMAIL, AlertChannel.SLACK], requiresConversationalApproval: false, executed: false },{ stepNumber: 2, triggerAfterMinutes: 60, targetPersonnel: ['security_manager'], channels: [AlertChannel.EMAIL], requiresConversationalApproval: true, executed: false });break;
       default:
         chain.push(
           { stepNumber: 1, triggerAfterMinutes: 60, targetPersonnel: ['security_team'], channels: [AlertChannel.EMAIL], requiresConversationalApproval: false, executed: false }
@@ -779,20 +674,19 @@ export class SecurityAlertsService {
 
   private generateAlertHash(event: SecurityEvent): string {
     // Create hash for deduplication based on event type, source, and affected resources
-    const hashInput = `${event.eventType}${event.source}${event.affectedResources.join(',')}${Math.floor(event.timestamp.getTime() / (60 * 60 * 1000))}`; // Hour-based grouping
-    return Buffer.from(hashInput).toString('base64');
+    const hashInput = `${event.eventType}${event.source}${event.affectedResources.join(`,')}${Math.floor(event.timestamp.getTime() / (60 * 60 * 1000))}'; // Hour-based groupingreturn Buffer.from(hashInput).toString('base64');
   }
 
   private getAlertRiskLevel(priority: AlertPriority): RiskLevel {
     switch (priority) {
       case AlertPriority.P0_CRITICAL:
-        return RiskLevel.CRITICAL;
+        return RiskLevel._CRITICAL;
       case AlertPriority.P1_HIGH:
-        return RiskLevel.HIGH;
+        return RiskLevel._HIGH;
       case AlertPriority.P2_MEDIUM:
-        return RiskLevel.MEDIUM;
+        return RiskLevel._MODERATE;
       default:
-        return RiskLevel.LOW;
+        return RiskLevel._LOW;
     }
   }
 
@@ -811,9 +705,7 @@ export class SecurityAlertsService {
     const afterCount = this.alertHistory.length;
 
     if (beforeCount > afterCount) {
-      this.logger.log(`Cleaned up ${beforeCount - afterCount} old alerts`);
-    }
-  }
+      this.logger.log(`Cleaned up ${beforeCount - afterCount} old alerts`);}}
 
   private checkEscalationTimers(): void {
     this.logger.debug(`Checking ${this.escalationTimers.size} escalation timers`);
@@ -826,13 +718,7 @@ export class SecurityAlertsService {
 
   private getAlertConfig(): SecurityAlertConfig {
     return {
-      alertingEnabled: this.configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),
-      channels: this.configService.get<AlertChannel[]>('ALERT_CHANNELS', [AlertChannel.EMAIL, AlertChannel.SLACK]),
-      escalationEnabled: this.configService.get<boolean>('ALERT_ESCALATION_ENABLED', true),
-      deduplicationEnabled: this.configService.get<boolean>('ALERT_DEDUPLICATION_ENABLED', true),
-      conversationalValidationRequired: this.configService.get<boolean>('ALERT_CONVERSATIONAL_VALIDATION', true),
-      alertRetentionDays: this.configService.get<number>('ALERT_RETENTION_DAYS', 365),
-      maxAlertsPerHour: this.configService.get<number>('MAX_ALERTS_PER_HOUR', 100),
+      alertingEnabled: this.configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),channels: this.configService.get<AlertChannel[]>('ALERT_CHANNELS', [AlertChannel.EMAIL, AlertChannel.SLACK]),escalationEnabled: this.configService.get<boolean>('ALERT_ESCALATION_ENABLED', true),deduplicationEnabled: this.configService.get<boolean>('ALERT_DEDUPLICATION_ENABLED', true),conversationalValidationRequired: this.configService.get<boolean>('ALERT_CONVERSATIONAL_VALIDATION', true),alertRetentionDays: this.configService.get<number>('ALERT_RETENTION_DAYS', 365),maxAlertsPerHour: this.configService.get<number>('MAX_ALERTS_PER_HOUR', 100),
     };
   }
 }

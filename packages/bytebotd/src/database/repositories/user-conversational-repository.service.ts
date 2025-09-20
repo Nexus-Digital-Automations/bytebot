@@ -17,14 +17,7 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { BaseConversationalRepositoryService, RepositoryOperationContext, BusinessValidationResult } from './base-conversational-repository.service';
-import { ConversationalDatabaseService } from '../conversational-database.service';
-import { UserEntity } from '../../test-utils/database-types';
-import { Repository, QueryOptions } from '../../types/index';
-
-/**
- * User-specific operation context
+import { Injectable, Logger } from '@nestjs/common';import { BaseConversationalRepositoryService, RepositoryOperationContext, BusinessValidationResult } from './base-conversational-repository.service';import { ConversationalDatabaseService } from '../conversational-database.service';import { UserEntity } from '../../test-utils/database-types';import { Repository, QueryOptions } from '../../types/index';/*** User-specific operation context
  */
 export interface UserOperationContext extends RepositoryOperationContext {
   requireEmailValidation?: boolean;
@@ -51,23 +44,14 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   private readonly logger = new Logger(UserConversationalRepositoryService.name);
 
   /** Valid user roles */
-  private readonly validRoles = ['admin', 'user', 'moderator', 'guest', 'system'];
-
-  /** Email validation regex */
-  private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  private readonly validRoles = ['admin', 'user', 'moderator', 'guest', 'system'];/** Email validation regex */private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   /** Sensitive fields to redact in logs */
-  private readonly sensitiveFields = ['passwordHash', 'password', 'token', 'secret'];
-
-  constructor(
-    conversationalDbService: ConversationalDatabaseService,
+  private readonly sensitiveFields = ['passwordHash', 'password', 'token', 'secret'];constructor(conversationalDbService: ConversationalDatabaseService,
     baseRepository: Repository<UserEntity>,
   ) {
     super(conversationalDbService, baseRepository);
-    this.logger.log('User Conversational Repository Service initialized');
-  }
-
-  // ===== IMPLEMENTATION OF ABSTRACT METHODS =====
+    this.logger.log('User Conversational Repository Service initialized');}// ===== IMPLEMENTATION OF ABSTRACT METHODS =====
 
   /**
    * Get entity type name
@@ -92,9 +76,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     };
 
     try {
-      this.logger.debug(`Validating business rules for user ${operation}`, {
-        operation,
-        hasEmail: !!data.email,
+      this.logger.debug(`Validating business rules for user ${operation}`, {operation,hasEmail: !!data.email,
         hasRole: !!data.role,
         context: this.sanitizeContext(context),
       });
@@ -123,24 +105,18 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       if (data.role && context?.requireRoleValidation !== false) {
         const roleValidation = await this.validateUserRole(data.role, context);
         if (!roleValidation.valid) {
-          result.errors.push(`Invalid role: ${data.role}. Allowed roles: ${roleValidation.allowedRoles.join(', ')}`);
+          result.errors.push(`Invalid role: ${data.role}. Allowed roles: ${roleValidation.allowedRoles.join(`, ')}`);
           result.valid = false;
         }
       }
 
       // Operation-specific validations
       switch (operation) {
-        case 'create':
-          await this.validateUserCreation(data, result);
-          break;
+        case 'create':await this.validateUserCreation(data, result);break;
 
-        case 'update':
-          await this.validateUserUpdate(data, result, context);
-          break;
+        case 'update':await this.validateUserUpdate(data, result, context);break;
 
-        case 'delete':
-          await this.validateUserDeletion(data, result, context);
-          break;
+        case 'delete':await this.validateUserDeletion(data, result, context);break;
 
         case 'bulkDelete':
           await this.validateBulkUserDeletion(data, result, context);
@@ -163,9 +139,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Business rule validation failed for user ${operation}: ${errorMessage}`, {
-        operation,
-        error: errorMessage,
+      this.logger.error(`Business rule validation failed for user ${operation}: ${errorMessage}`, {operation,error: errorMessage,
         data: this.sanitizeUserData(data),
       });
 
@@ -186,8 +160,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     const transformed = { ...entity };
 
     // Always redact password hash unless explicitly requested by system
-    if (context?.userRole !== 'system' && context?.bypassSecurityChecks !== true) {
-      (transformed as Partial<UserEntity>).passwordHash = '[REDACTED]';
+    if (context?.userRole !== 'system' && context?.bypassSecurityChecks !== true) {(transformed as Partial<UserEntity>).passwordHash = '[REDACTED]';
     }
 
     // Log access for audit purposes
@@ -195,10 +168,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       userId: entity.id,
       accessedBy: context?.userId,
       accessorRole: context?.userRole,
-      redacted: context?.userRole !== 'system',
-    });
-
-    return transformed;
+      redacted: context?.userRole !== 'system',});return transformed;
   }
 
   // ===== USER-SPECIFIC VALIDATION METHODS =====
@@ -215,42 +185,25 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     // Format validation
     if (!this.emailRegex.test(email)) {
       result.valid = false;
-      result.errors.push('Invalid email format');
-      return result;
-    }
+      result.errors.push('Invalid email format');return result;}
 
     // Domain validation
-    const domain = email.split('@')[1];
-    if (!domain || domain.length < 3) {
-      result.valid = false;
-      result.errors.push('Invalid email domain');
-      return result;
-    }
+    const domain = email.split('@')[1];if (!domain || domain.length < 3) {result.valid = false;
+      result.errors.push('Invalid email domain');return result;}
 
     // Uniqueness check (for create operations)
-    if (operation === 'create') {
-      try {
-        const existingUsers = await this.baseRepository.findAll({
+    if (operation === 'create') {try {const existingUsers = await this.baseRepository.findAll({
           filter: { email } as Partial<UserEntity>,
           limit: 1,
         } as QueryOptions);
 
         if (existingUsers.length > 0) {
           result.valid = false;
-          result.errors.push('Email address already exists');
-        }
-      } catch (error) {
-        this.logger.warn('Could not check email uniqueness', { email, error });
-        result.warnings.push('Email uniqueness check failed - proceeding with caution');
-      }
-    }
+          result.errors.push('Email address already exists');}} catch (error) {
+        this.logger.warn('Could not check email uniqueness', { email, error });result.warnings.push('Email uniqueness check failed - proceeding with caution');}}
 
     // Security warnings for common email patterns
-    if (email.includes('+') || email.includes('..')) {
-      result.warnings.push('Email contains potentially problematic characters');
-    }
-
-    return result;
+    if (email.includes('+') || email.includes('..')) {result.warnings.push('Email contains potentially problematic characters');}return result;
   }
 
   /**
@@ -263,37 +216,21 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     if (!password) {
       result.valid = false;
-      result.errors.push('Password is required');
-      return result;
-    }
+      result.errors.push('Password is required');return result;}
 
     // Length check
     if (password.length < 8) {
       result.valid = false;
-      result.errors.push('Password must be at least 8 characters long');
-    }
-
-    // Complexity checks
+      result.errors.push('Password must be at least 8 characters long');}// Complexity checks
     if (!/[A-Z]/.test(password)) {
-      result.warnings.push('Password should contain at least one uppercase letter');
-    }
-
-    if (!/[a-z]/.test(password)) {
-      result.warnings.push('Password should contain at least one lowercase letter');
-    }
-
-    if (!/\d/.test(password)) {
+      result.warnings.push('Password should contain at least one uppercase letter');}if (!/[a-z]/.test(password)) {
+      result.warnings.push('Password should contain at least one lowercase letter');}if (!/\d/.test(password)) {
       result.warnings.push('Password should contain at least one number');
     }
 
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      result.warnings.push('Password should contain at least one special character');
-    }
-
-    // Common password check
-    const commonPasswords = ['password', '123456', 'qwerty', 'admin'];
-    if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
-      result.valid = false;
+      result.warnings.push('Password should contain at least one special character');}// Common password check
+    const commonPasswords = ['password', '123456', 'qwerty', 'admin'];if (commonPasswords.some(common => password.toLowerCase().includes(common))) {result.valid = false;
       result.errors.push('Password contains common patterns and is not secure');
     }
 
@@ -367,18 +304,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     // Required fields check
     if (!data.email) {
       result.valid = false;
-      result.errors.push('Email is required for user creation');
-    }
-
-    if (!data.role) {
-      result.warnings.push('No role specified, will default to "user"');
-    }
-
-    // Default values recommendation
+      result.errors.push('Email is required for user creation');}if (!data.role) {
+      result.warnings.push('No role specified, will default to "user"');}// Default values recommendation
     if (data.isActive === undefined) {
-      result.recommendations.push('Consider setting isActive explicitly (defaults to true)');
-    }
-  }
+      result.recommendations.push('Consider setting isActive explicitly (defaults to true)');}}
 
   /**
    * Validate user update
@@ -389,9 +318,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     context?: UserOperationContext,
   ): Promise<void> {
     // Check if trying to update sensitive fields
-    if (data.passwordHash && context?.userRole !== 'system') {
-      result.valid = false;
-      result.errors.push('Direct password hash updates are not allowed');
+    if (data.passwordHash && context?.userRole !== 'system') {result.valid = false;result.errors.push('Direct password hash updates are not allowed');
     }
 
     // Role change validation
@@ -405,9 +332,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     // Warn about account deactivation
     if (data.isActive === false) {
-      result.warnings.push('This operation will deactivate the user account');
-    }
-  }
+      result.warnings.push('This operation will deactivate the user account');}}
 
   /**
    * Validate user deletion
@@ -420,20 +345,8 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     // Check if trying to delete self
     if (data.id === context?.userId) {
       result.valid = false;
-      result.errors.push('Users cannot delete their own accounts');
-    }
-
-    // Check permissions for deletion
-    if (context?.userRole && !['admin', 'system'].includes(context.userRole)) {
-      result.valid = false;
-      result.errors.push('Insufficient permissions for user deletion');
-    }
-
-    result.warnings.push('User deletion is irreversible and will remove all associated data');
-    result.recommendations.push('Consider deactivating the user instead of deletion');
-  }
-
-  /**
+      result.errors.push('Users cannot delete their own accounts');}// Check permissions for deletion
+    if (context?.userRole && !['admin', 'system'].includes(context.userRole)) {result.valid = false;result.errors.push('Insufficient permissions for user deletion');}result.warnings.push('User deletion is irreversible and will remove all associated data');result.recommendations.push('Consider deactivating the user instead of deletion');}/**
    * Validate bulk user deletion
    */
   private async validateBulkUserDeletion(
@@ -442,17 +355,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     context?: UserOperationContext,
   ): Promise<void> {
     // Only system and admin can perform bulk deletions
-    if (context?.userRole && !['admin', 'system'].includes(context.userRole)) {
-      result.valid = false;
-      result.errors.push('Insufficient permissions for bulk user deletion');
-    }
-
-    result.warnings.push('Bulk user deletion is a critical operation that cannot be undone');
-    result.recommendations.push('Ensure all affected users have been properly notified');
-    result.recommendations.push('Consider bulk deactivation instead of deletion');
-  }
-
-  /**
+    if (context?.userRole && !['admin', 'system'].includes(context.userRole)) {result.valid = false;result.errors.push('Insufficient permissions for bulk user deletion');}result.warnings.push('Bulk user deletion is a critical operation that cannot be undone');result.recommendations.push('Ensure all affected users have been properly notified');result.recommendations.push('Consider bulk deactivation instead of deletion');}/**
    * Perform security checks
    */
   private async performSecurityChecks(
@@ -463,16 +366,8 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   ): Promise<void> {
     // Check for suspicious patterns
     if (data.email && this.isSuspiciousEmail(data.email)) {
-      result.warnings.push('Email pattern appears suspicious - may require additional verification');
-    }
-
-    // Rate limiting check (simplified)
-    if (operation === 'create' && await this.isRateLimited(context?.userId)) {
-      result.valid = false;
-      result.errors.push('Rate limit exceeded for user creation operations');
-    }
-
-    // Audit logging for security-sensitive operations
+      result.warnings.push('Email pattern appears suspicious - may require additional verification');}// Rate limiting check (simplified)
+    if (operation === 'create' && await this.isRateLimited(context?.userId)) {result.valid = false;result.errors.push('Rate limit exceeded for user creation operations');}// Audit logging for security-sensitive operations
     if (['delete', 'bulkDelete'].includes(operation)) {
       this.logger.warn(`Security-sensitive user operation: ${operation}`, {
         operation,
@@ -504,9 +399,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
    */
   private async isRateLimited(_userId?: string): Promise<boolean> {
     // In a real implementation, this would check against a rate limiting service
-    // For now, we'll just return false
-    return false;
-  }
+    // For now, we'll just return falsereturn false;}
 
   /**
    * Sanitize user data for logging
@@ -517,9 +410,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     const sanitized = { ...data };
     this.sensitiveFields.forEach(field => {
       if (field in sanitized) {
-        (sanitized as Record<string, unknown>)[field] = '[REDACTED]';
-      }
-    });
+        (sanitized as Record<string, unknown>)[field] = '[REDACTED]';}});
 
     return sanitized;
   }
@@ -549,10 +440,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     email: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Finding user by email', { email, context: this.sanitizeContext(context) });
-
-    try {
-      const users = await this.findAll(
+    this.logger.debug('Finding user by email', { email, context: this.sanitizeContext(context) });try {const users = await this.findAll(
         {
           filter: { email } as Partial<UserEntity>,
           limit: 1,
@@ -576,10 +464,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     role: string,
     context?: UserOperationContext,
   ): Promise<readonly UserEntity[]> {
-    this.logger.debug('Finding users by role', { role, context: this.sanitizeContext(context) });
-
-    try {
-      return this.findAll(
+    this.logger.debug('Finding users by role', { role, context: this.sanitizeContext(context) });try {return this.findAll(
         {
           filter: { role } as Partial<UserEntity>,
         } as QueryOptions,
@@ -597,10 +482,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
    * Find active users with conversational validation
    */
   async findActiveUsers(context?: UserOperationContext): Promise<readonly UserEntity[]> {
-    this.logger.debug('Finding active users', { context: this.sanitizeContext(context) });
-
-    try {
-      return this.findAll(
+    this.logger.debug('Finding active users', { context: this.sanitizeContext(context) });try {return this.findAll(
         {
           filter: { isActive: true } as Partial<UserEntity>,
         } as QueryOptions,
@@ -621,16 +503,11 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     id: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Deactivating user', { id, context: this.sanitizeContext(context) });
-
-    return this.update(
-      id,
+    this.logger.debug('Deactivating user', { id, context: this.sanitizeContext(context) });return this.update(id,
       { isActive: false } as Partial<UserEntity>,
       {
         ...context,
-        businessPurpose: context?.businessPurpose ?? 'Deactivate user account',
-      },
-    );
+        businessPurpose: context?.businessPurpose ?? 'Deactivate user account',},);
   }
 
   /**
@@ -640,10 +517,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     id: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Reactivating user', { id, context: this.sanitizeContext(context) });
-
-    return this.update(
-      id,
+    this.logger.debug('Reactivating user', { id, context: this.sanitizeContext(context) });return this.update(id,
       { isActive: true } as Partial<UserEntity>,
       {
         ...context,

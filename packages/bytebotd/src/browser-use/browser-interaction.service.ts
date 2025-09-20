@@ -1,9 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import {
-  ClickInteractionDto,
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';import { v4 as uuidv4 } from 'uuid';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import {ClickInteractionDto,
   TypeInteractionDto,
   ScrollInteractionDto,
   HoverInteractionDto,
@@ -62,10 +57,7 @@ export class BrowserInteractionService {
 
       // Validate that either selector or coordinates are provided
       if (!clickDto.selector && (clickDto.x === undefined || clickDto.y === undefined)) {
-        throw new BadRequestException('Either selector or coordinates (x, y) must be provided');
-      }
-
-      // Create DOM interaction DTO for enhanced service
+        throw new BadRequestException('Either selector or coordinates (x, y) must be provided');}// Create DOM interaction DTO for enhanced service
       const domInteractionDto = {
         sessionId: clickDto.sessionId,
         action: this.mapClickTypeToDOMAction(clickDto.clickType),
@@ -99,13 +91,10 @@ export class BrowserInteractionService {
         completedAt: endTime,
         durationMs: duration,
         errorMessage: result.errorMessage ?? undefined,
-        pageUrl: result.pageUrl ?? '',
-        pageTitle: result.pageTitle ?? '',
+        pageUrl: result.pageUrl ?? '',pageTitle: result.pageTitle ?? '',
       };
 
-      this.logger.log(`Click interaction completed: ${interactionId}`, {
-        success: result.success,
-        durationMs: duration,
+      this.logger.log(`Click interaction completed: ${interactionId}`, {success: result.success,durationMs: duration,
       });
 
       return interactionResult;
@@ -123,8 +112,7 @@ export class BrowserInteractionService {
         completedAt: endTime,
         durationMs: duration,
         errorMessage: error instanceof Error ? error.message : String(error),
-        pageUrl: '',
-        pageTitle: '',
+        pageUrl: '',pageTitle: '',
       };
 
       return interactionResult;
@@ -189,9 +177,7 @@ export class BrowserInteractionService {
         pageTitle: result.pageTitle,
       };
 
-      this.logger.log(`Type interaction completed: ${interactionId}`, {
-        success: result.success,
-        durationMs: duration,
+      this.logger.log(`Type interaction completed: ${interactionId}`, {success: result.success,durationMs: duration,
       });
 
       return interactionResult;
@@ -209,8 +195,7 @@ export class BrowserInteractionService {
         completedAt: endTime,
         durationMs: duration,
         errorMessage: error instanceof Error ? error.message : String(error),
-        pageUrl: '',
-        pageTitle: '',
+        pageUrl: '',pageTitle: '',
       };
 
       return interactionResult;
@@ -271,9 +256,7 @@ export class BrowserInteractionService {
         pageTitle: result.pageTitle,
       };
 
-      this.logger.log(`Scroll interaction completed: ${interactionId}`, {
-        success: result.success,
-        durationMs: duration,
+      this.logger.log(`Scroll interaction completed: ${interactionId}`, {success: result.success,durationMs: duration,
       });
 
       return interactionResult;
@@ -291,8 +274,7 @@ export class BrowserInteractionService {
         completedAt: endTime,
         durationMs: duration,
         errorMessage: error instanceof Error ? error.message : String(error),
-        pageUrl: '',
-        pageTitle: '',
+        pageUrl: '',pageTitle: '',
       };
 
       return interactionResult;
@@ -354,9 +336,7 @@ export class BrowserInteractionService {
         pageTitle: result.pageTitle,
       };
 
-      this.logger.log(`Hover interaction completed: ${interactionId}`, {
-        success: result.success,
-        durationMs: duration,
+      this.logger.log(`Hover interaction completed: ${interactionId}`, {success: result.success,durationMs: duration,
       });
 
       return interactionResult;
@@ -374,8 +354,7 @@ export class BrowserInteractionService {
         completedAt: endTime,
         durationMs: duration,
         errorMessage: error instanceof Error ? error.message : String(error),
-        pageUrl: '',
-        pageTitle: '',
+        pageUrl: '',pageTitle: '',
       };
 
       return interactionResult;
@@ -403,9 +382,7 @@ export class BrowserInteractionService {
       const detectionDto = {
         sessionId: findDto.sessionId,
         criteria: {
-          strategy: 'selector' as any,
-          selector: {
-            type: this.mapSelectorStrategy(findDto.selectorType),
+          strategy: 'selector' as any,selector: {type: this.mapSelectorStrategy(findDto.selectorType),
             value: findDto.selector,
             options: {
               timeout: findDto.timeout,
@@ -413,9 +390,7 @@ export class BrowserInteractionService {
           },
         },
         waitConfig: findDto.waitForElement ? {
-          condition: 'visible' as any,
-          timeoutMs: findDto.timeout,
-        } : undefined,
+          condition: 'visible' as any,timeoutMs: findDto.timeout,} : undefined,
         includeScreenshot: findDto.includeScreenshot,
         findMultiple: findDto.findAll,
       };
@@ -427,17 +402,8 @@ export class BrowserInteractionService {
       const elements: ElementInfoResultDto[] = (result.elements as unknown[]).map((element: Record<string, unknown>) => ({
         found: true,
         sessionId: findDto.sessionId,
-        tagName: String(element.tagName ?? ''),
-        id: String(element.id ?? ''),
-        className: String(element.className ?? ''),
-        textContent: String(element.textContent ?? ''),
-        innerHTML: String(element.innerHTML ?? ''),
-        outerHTML: String(element.outerHTML ?? ''),
-        attributes: element.attributes as Record<string, string> ?? {},
-        styles: element.styles as Record<string, string> ?? {},
-        boundingBox: element.boundingBox as ElementInfoResultDto['boundingBox'],
-        visible: Boolean(element.visible),
-        interactable: Boolean(element.interactable),
+        tagName: String(element.tagName ?? ''),id: String(element.id ?? ''),className: String(element.className ?? ''),textContent: String(element.textContent ?? ''),innerHTML: String(element.innerHTML ?? ''),outerHTML: String(element.outerHTML ?? ''),attributes: element.attributes as Record<string, string> ?? {},styles: element.styles as Record<string, string> ?? {},
+        boundingBox: element.boundingBox as ElementInfoResultDto['boundingBox'],visible: Boolean(element.visible),interactable: Boolean(element.interactable),
         screenshot: String(element.screenshot ?? ''),
         timestamp,
       }));
@@ -451,17 +417,12 @@ export class BrowserInteractionService {
         timestamp,
       };
 
-      this.logger.log(`Found ${elements.length} elements`, {
-        sessionId: findDto.sessionId,
-        count: elements.length,
+      this.logger.log(`Found ${elements.length} elements`, {sessionId: findDto.sessionId,count: elements.length,
       });
 
       return findResult;
     } catch (error) {
-      this.logger.error(`Element finding failed`, error);
-
-      // Return empty result on error
-      const findResult: ElementFindResultDto = {
+      this.logger.error(`Element finding failed`, error);// Return empty result on errorconst findResult: ElementFindResultDto = {
         elements: [],
         sessionId: findDto.sessionId,
         count: 0,
@@ -480,9 +441,7 @@ export class BrowserInteractionService {
   async getElementInfo(infoDto: ElementInfoDto): Promise<ElementInfoResultDto> {
     const timestamp = new Date();
 
-    this.logger.log(`Getting element info`, {
-      sessionId: infoDto.sessionId,
-      selector: infoDto.selector,
+    this.logger.log(`Getting element info`, {sessionId: infoDto.sessionId,selector: infoDto.selector,
       infoType: infoDto.infoType,
     });
 
@@ -520,18 +479,13 @@ export class BrowserInteractionService {
         // This would require additional browser automation calls
       }
 
-      this.logger.log(`Element info retrieved successfully`, {
-        sessionId: infoDto.sessionId,
-        tagName: element.tagName,
+      this.logger.log(`Element info retrieved successfully`, {sessionId: infoDto.sessionId,tagName: element.tagName,
         visible: element.visible,
       });
 
       return element;
     } catch (error) {
-      this.logger.error(`Element info retrieval failed`, error);
-
-      return {
-        found: false,
+      this.logger.error(`Element info retrieval failed`, error);return {found: false,
         sessionId: infoDto.sessionId,
         timestamp,
       };
@@ -556,20 +510,11 @@ export class BrowserInteractionService {
 
       // TODO: Implement page source extraction using browser service
       // This might require adding a new method to the enhanced browser service
-      // For now, we'll simulate the response structure
-
-      // Get current page info using existing browser service capabilities
-      const session = await this.browserSessionService.getSessionById(sourceDto.sessionId);
+      // For now, we'll simulate the response structure// Get current page info using existing browser service capabilitiesconst session = await this.browserSessionService.getSessionById(sourceDto.sessionId);
 
       // Placeholder implementation - in a real scenario, you'd extract the actual HTML
       const sourceResult: PageSourceResultDto = {
-        source: '<!DOCTYPE html><html><!-- Page source would be extracted here --></html>',
-        sessionId: sourceDto.sessionId,
-        url: session?.url || '',
-        title: session?.title || '',
-        metadata: sourceDto.includeMetadata ? {
-          charset: 'utf-8',
-          lang: 'en',
+        source: '<!DOCTYPE html><html><!-- Page source would be extracted here --></html>',sessionId: sourceDto.sessionId,url: session?.url || '',title: session?.title || '',metadata: sourceDto.includeMetadata ? {charset: 'utf-8',lang: 'en',
           // Add more metadata extraction logic
         } : undefined,
         length: 0, // Would be calculated from actual source
@@ -579,16 +524,12 @@ export class BrowserInteractionService {
       // Calculate actual length
       sourceResult.length = sourceResult.source.length;
 
-      this.logger.log(`Page source retrieved successfully`, {
-        sessionId: sourceDto.sessionId,
-        sourceLength: sourceResult.length,
+      this.logger.log(`Page source retrieved successfully`, {sessionId: sourceDto.sessionId,sourceLength: sourceResult.length,
       });
 
       return sourceResult;
     } catch (error) {
-      this.logger.error(`Page source retrieval failed`, error);
-      throw error;
-    }
+      this.logger.error(`Page source retrieval failed`, error);throw error;}
   }
 
   /**
@@ -598,9 +539,7 @@ export class BrowserInteractionService {
     try {
       const session = await this.browserSessionService.getSessionById(sessionId);
       if (!session) {
-        throw new NotFoundException(`Browser session not found: ${sessionId}`);
-      }
-    } catch (error) {
+        throw new NotFoundException(`Browser session not found: ${sessionId}`);}} catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
@@ -614,16 +553,8 @@ export class BrowserInteractionService {
   private mapClickTypeToDOMAction(clickType?: ClickType): string {
     switch (clickType) {
       case ClickType.RIGHT:
-        return 'right_click';
-      case ClickType.DOUBLE:
-        return 'double_click';
-      case ClickType.MIDDLE:
-        return 'click'; // Middle click is still a click action
-      case ClickType.LEFT:
-      default:
-        return 'click';
-    }
-  }
+        return 'right_click';case ClickType.DOUBLE:return 'double_click';case ClickType.MIDDLE:return 'click'; // Middle click is still a click actioncase ClickType.LEFT:default:
+        return 'click';}}
 
   /**
    * Map selector strategy to enhanced service format
@@ -631,21 +562,7 @@ export class BrowserInteractionService {
   private mapSelectorStrategy(strategy?: SelectorStrategy): string {
     switch (strategy) {
       case SelectorStrategy.XPATH:
-        return 'xpath';
-      case SelectorStrategy.TEXT:
-        return 'text';
-      case SelectorStrategy.ID:
-        return 'id';
-      case SelectorStrategy.CLASS:
-        return 'class';
-      case SelectorStrategy.TAG:
-        return 'tag';
-      case SelectorStrategy.NAME:
-        return 'name';
-      case SelectorStrategy.ATTRIBUTE:
-        return 'attribute';
-      case SelectorStrategy.CSS:
-      default:
+        return 'xpath';case SelectorStrategy.TEXT:return 'text';case SelectorStrategy.ID:return 'id';case SelectorStrategy.CLASS:return 'class';case SelectorStrategy.TAG:return 'tag';case SelectorStrategy.NAME:return 'name';case SelectorStrategy.ATTRIBUTE:return 'attribute';case SelectorStrategy.CSS:default:
         return 'css';
     }
   }

@@ -30,23 +30,10 @@ import {
   MockComputerUseServiceInterface,
   MockNutServiceInterface,
   createMockFunction,
-} from '../../__tests__/test-utils/mock-types';
-
-// Create type-safe NUT mock
-const mockNut = createNutMock();
+} from '../../__tests__/test-utils/mock-types';// Create type-safe NUT mockconst mockNut = createNutMock();
 
 // Mock NUT library before imports with proper typing
-jest.mock('@nut-tree-fork/nut-js', () => mockNut);
-
-jest.mock('../computer-use.service');
-jest.mock('../../nut/nut.service');
-
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use.service';
-import { NutService } from '../../nut/nut.service';
-// Extract typed mock components from the mock
-const screen = mockNut.screen;
+jest.mock('@nut-tree-fork/nut-js', () => mockNut);jest.mock('../computer-use.service');jest.mock('../../nut/nut.service');import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { ComputerUseService } from '../computer-use.service';import { NutService } from '../../nut/nut.service';// Extract typed mock components from the mockconst screen = mockNut.screen;
 const mouse = mockNut.mouse;
 const keyboard = mockNut.keyboard;
 const Key = mockNut.Key;
@@ -64,10 +51,7 @@ import {
   ScrollAction,
   TypeTextAction,
   PressKeysAction,
-} from '@bytebot/shared';
-
-/**
- * Mock coordinates and regions
+} from '@bytebot/shared';/*** Mock coordinates and regions
  */
 const mockCoordinates = { x: 100, y: 200 };
 const mockTargetCoordinates = { x: 300, y: 400 };
@@ -77,17 +61,13 @@ const mockRegion = { x: 50, y: 100, width: 200, height: 150 };
  * Mock NUT results
  */
 const mockScreenCapture = {
-  data: Buffer.from('mock-screenshot-data'),
-  width: 1920,
-  height: 1080,
+  data: Buffer.from('mock-screenshot-data'),width: 1920,height: 1080,
   channels: 3,
 };
 
 const mockMousePosition = { x: 150, y: 250 };
 
-describe('Computer Use NUT Integration', () => {
-  let service: ComputerUseService;
-  let nutService: jest.Mocked<NutService>;
+describe('Computer Use NUT Integration', () => {let service: ComputerUseService;let nutService: jest.Mocked<NutService>;
   let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
@@ -155,19 +135,13 @@ describe('Computer Use NUT Integration', () => {
     jest.clearAllMocks();
   });
 
-  describe('NUT Service Initialization', () => {
-    it('should initialize NUT service with proper configuration', async () => {
-      await nutService.initialize();
-
-      expect(nutService.initialize).toHaveBeenCalled();
+  describe('NUT Service Initialization', () => {it('should initialize NUT service with proper configuration', async () => {await nutService.initialize();expect(nutService.initialize).toHaveBeenCalled();
       expect(screen.config.confidence).toBe(0.99);
       expect(mouse.config.mouseSpeed).toBe(1000);
       expect(keyboard.config.autoDelayMs).toBe(100);
     });
 
-    it('should configure NUT performance settings', async () => {
-      const config = {
-        mouseSpeed: 2000,
+    it('should configure NUT performance settings', async () => {const config = {mouseSpeed: 2000,
         confidence: 0.95,
         autoDelayMs: 50,
       };
@@ -177,30 +151,15 @@ describe('Computer Use NUT Integration', () => {
       expect(nutService.configure).toHaveBeenCalledWith(config);
     });
 
-    it('should handle NUT initialization failures', async () => {
-      nutService.initialize.mockRejectedValue(new Error('NUT initialization failed'));
+    it('should handle NUT initialization failures', async () => {nutService.initialize.mockRejectedValue(new Error('NUT initialization failed'));await expect(nutService.initialize()).rejects.toThrow('NUT initialization failed');expect(logger.error).toHaveBeenCalled();});
 
-      await expect(nutService.initialize()).rejects.toThrow('NUT initialization failed');
-      expect(logger.error).toHaveBeenCalled();
-    });
-
-    it('should cleanup NUT resources properly', async () => {
-      await nutService.cleanup();
-
-      expect(nutService.cleanup).toHaveBeenCalled();
+    it('should cleanup NUT resources properly', async () => {await nutService.cleanup();expect(nutService.cleanup).toHaveBeenCalled();
     });
   });
 
-  describe('Mouse Automation Integration', () => {
-    describe('Mouse Movement', () => {
-      const moveAction: MoveMouseAction = {
-        action: 'move_mouse',
-        coordinates: mockCoordinates,
-      };
+  describe('Mouse Automation Integration', () => {describe('Mouse Movement', () => {const moveAction: MoveMouseAction = {action: 'move_mouse',coordinates: mockCoordinates,};
 
-      it('should integrate with NUT mouse movement', async () => {
-        mouse.move.mockResolvedValue(undefined);
-        nutService.moveMouse.mockResolvedValue(undefined);
+      it('should integrate with NUT mouse movement', async () => {mouse.move.mockResolvedValue(undefined);nutService.moveMouse.mockResolvedValue(undefined);
 
         await nutService.moveMouse(moveAction.coordinates);
 
@@ -208,11 +167,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.moveMouse).toHaveBeenCalledTimes(1);
       });
 
-      it('should handle smooth mouse movement paths', async () => {
-        const smoothMoveAction: MoveMouseAction = {
-          action: 'move_mouse',
-          coordinates: mockTargetCoordinates,
-          duration: 1000,
+      it('should handle smooth mouse movement paths', async () => {const smoothMoveAction: MoveMouseAction = {action: 'move_mouse',coordinates: mockTargetCoordinates,duration: 1000,
           smooth: true,
         };
 
@@ -225,47 +180,24 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.moveMouse).toHaveBeenCalledWith(smoothMoveAction.coordinates);
       });
 
-      it('should get current mouse position via NUT', async () => {
-        mouse.getPosition.mockResolvedValue(mockMousePosition);
-
-        const position = await mouse.getPosition();
+      it('should get current mouse position via NUT', async () => {mouse.getPosition.mockResolvedValue(mockMousePosition);const position = await mouse.getPosition();
 
         expect(position).toEqual(mockMousePosition);
         expect(mouse.getPosition).toHaveBeenCalled();
       });
 
-      it('should handle mouse movement errors', async () => {
-        mouse.move.mockRejectedValue(new Error('Mouse movement failed'));
-        nutService.moveMouse.mockRejectedValue(new Error('Mouse movement failed'));
+      it('should handle mouse movement errors', async () => {mouse.move.mockRejectedValue(new Error('Mouse movement failed'));nutService.moveMouse.mockRejectedValue(new Error('Mouse movement failed'));await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Mouse movement failed');});});
 
-        await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Mouse movement failed');
-      });
-    });
-
-    describe('Mouse Clicking', () => {
-      const clickAction: ClickMouseAction = {
-        action: 'click_mouse',
-        coordinates: mockCoordinates,
-        clickCount: 1,
-        button: 'left',
-      };
-
-      it('should integrate with NUT left click', async () => {
-        mouse.leftClick.mockResolvedValue(undefined);
-        nutService.clickMouse.mockResolvedValue(undefined);
+    describe('Mouse Clicking', () => {const clickAction: ClickMouseAction = {action: 'click_mouse',coordinates: mockCoordinates,clickCount: 1,
+        button: 'left',};it('should integrate with NUT left click', async () => {mouse.leftClick.mockResolvedValue(undefined);nutService.clickMouse.mockResolvedValue(undefined);
 
         await nutService.clickMouse(clickAction.button);
 
         expect(nutService.clickMouse).toHaveBeenCalledWith(clickAction.button);
       });
 
-      it('should handle right click operations', async () => {
-        const rightClickAction: ClickMouseAction = {
-          ...clickAction,
-          button: 'right',
-        };
-
-        mouse.rightClick.mockResolvedValue(undefined);
+      it('should handle right click operations', async () => {const rightClickAction: ClickMouseAction = {...clickAction,
+          button: 'right',};mouse.rightClick.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
         await nutService.clickMouse(rightClickAction.button);
@@ -273,9 +205,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.clickMouse).toHaveBeenCalledWith(rightClickAction.button);
       });
 
-      it('should handle double click operations', async () => {
-        const doubleClickAction: ClickMouseAction = {
-          ...clickAction,
+      it('should handle double click operations', async () => {const doubleClickAction: ClickMouseAction = {...clickAction,
           clickCount: 2,
         };
 
@@ -287,13 +217,8 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.clickMouse).toHaveBeenCalledWith(doubleClickAction.button);
       });
 
-      it('should handle click with specific button types', async () => {
-        const middleClickAction: ClickMouseAction = {
-          ...clickAction,
-          button: 'middle',
-        };
-
-        mouse.pressButton.mockResolvedValue(undefined);
+      it('should handle click with specific button types', async () => {const middleClickAction: ClickMouseAction = {...clickAction,
+          button: 'middle',};mouse.pressButton.mockResolvedValue(undefined);
         mouse.releaseButton.mockResolvedValue(undefined);
         nutService.clickMouse.mockResolvedValue(undefined);
 
@@ -303,25 +228,17 @@ describe('Computer Use NUT Integration', () => {
       });
     });
 
-    describe('Mouse Dragging', () => {
-      const dragAction: DragMouseAction = {
-        action: 'drag_mouse',
-        startCoordinates: mockCoordinates,
-        endCoordinates: mockTargetCoordinates,
+    describe('Mouse Dragging', () => {const dragAction: DragMouseAction = {action: 'drag_mouse',startCoordinates: mockCoordinates,endCoordinates: mockTargetCoordinates,
       };
 
-      it('should integrate with NUT drag operations', async () => {
-        mouse.drag.mockResolvedValue(undefined);
-        nutService.dragMouse.mockResolvedValue(undefined);
+      it('should integrate with NUT drag operations', async () => {mouse.drag.mockResolvedValue(undefined);nutService.dragMouse.mockResolvedValue(undefined);
 
         await nutService.dragMouse(dragAction);
 
         expect(nutService.dragMouse).toHaveBeenCalledWith(dragAction);
       });
 
-      it('should handle drag with custom duration', async () => {
-        const timedDragAction: DragMouseAction = {
-          ...dragAction,
+      it('should handle drag with custom duration', async () => {const timedDragAction: DragMouseAction = {...dragAction,
           duration: 2000,
         };
 
@@ -333,13 +250,8 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.dragMouse).toHaveBeenCalledWith(timedDragAction);
       });
 
-      it('should handle drag operations with different buttons', async () => {
-        const rightDragAction: DragMouseAction = {
-          ...dragAction,
-          button: 'right',
-        };
-
-        mouse.pressButton.mockResolvedValue(undefined);
+      it('should handle drag operations with different buttons', async () => {const rightDragAction: DragMouseAction = {...dragAction,
+          button: 'right',};mouse.pressButton.mockResolvedValue(undefined);
         mouse.move.mockResolvedValue(undefined);
         mouse.releaseButton.mockResolvedValue(undefined);
         nutService.dragMouse.mockResolvedValue(undefined);
@@ -350,30 +262,17 @@ describe('Computer Use NUT Integration', () => {
       });
     });
 
-    describe('Mouse Scrolling', () => {
-      const scrollAction: ScrollAction = {
-        action: 'scroll',
-        coordinates: mockCoordinates,
-        direction: 'down',
-        distance: 3,
-      };
+    describe('Mouse Scrolling', () => {const scrollAction: ScrollAction = {action: 'scroll',coordinates: mockCoordinates,direction: 'down',distance: 3,};
 
-      it('should integrate with NUT scroll down', async () => {
-        mouse.scrollDown.mockResolvedValue(undefined);
-        nutService.scroll.mockResolvedValue(undefined);
+      it('should integrate with NUT scroll down', async () => {mouse.scrollDown.mockResolvedValue(undefined);nutService.scroll.mockResolvedValue(undefined);
 
         await nutService.scroll(scrollAction.direction, scrollAction.amount);
 
         expect(nutService.scroll).toHaveBeenCalledWith(scrollAction.direction, scrollAction.amount);
       });
 
-      it('should integrate with NUT scroll up', async () => {
-        const scrollUpAction: ScrollAction = {
-          ...scrollAction,
-          direction: 'up',
-        };
-
-        mouse.scrollUp.mockResolvedValue(undefined);
+      it('should integrate with NUT scroll up', async () => {const scrollUpAction: ScrollAction = {...scrollAction,
+          direction: 'up',};mouse.scrollUp.mockResolvedValue(undefined);
         nutService.scroll.mockResolvedValue(undefined);
 
         await nutService.scroll(scrollUpAction.direction, scrollUpAction.amount);
@@ -381,13 +280,8 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.scroll).toHaveBeenCalledWith(scrollUpAction.direction, scrollUpAction.amount);
       });
 
-      it('should handle horizontal scrolling', async () => {
-        const horizontalScrollAction: ScrollAction = {
-          ...scrollAction,
-          direction: 'right',
-        };
-
-        nutService.scroll.mockResolvedValue(undefined);
+      it('should handle horizontal scrolling', async () => {const horizontalScrollAction: ScrollAction = {...scrollAction,
+          direction: 'right',};nutService.scroll.mockResolvedValue(undefined);
 
         await nutService.scroll(horizontalScrollAction.direction, horizontalScrollAction.amount);
 
@@ -396,29 +290,16 @@ describe('Computer Use NUT Integration', () => {
     });
   });
 
-  describe('Keyboard Automation Integration', () => {
-    describe('Text Typing', () => {
-      const typeAction: TypeTextAction = {
-        action: 'type_text',
-        text: 'Hello, (World ?? "default")',
-      };
+  describe('Keyboard Automation Integration', () => {describe('Text Typing', () => {const typeAction: TypeTextAction = {action: 'type_text',text: 'Hello, (World ?? "default")",};
 
-      it('should integrate with NUT text typing', async () => {
-        keyboard.type.mockResolvedValue(undefined);
-        nutService.typeText.mockResolvedValue(undefined);
+      it('should integrate with NUT text typing', async () => {keyboard.type.mockResolvedValue(undefined);nutService.typeText.mockResolvedValue(undefined);
 
         await nutService.typeText(typeAction.text);
 
         expect(nutService.typeText).toHaveBeenCalledWith(typeAction.text);
       });
 
-      it('should handle special characters in text', async () => {
-        const specialTextAction: TypeTextAction = {
-          action: 'type_text',
-          text: 'Special chars: @#$%^&*()_+{}[]|\\:";\'<>?,./',
-        };
-
-        keyboard.type.mockResolvedValue(undefined);
+      it('should handle special characters in text', async () => {const specialTextAction: TypeTextAction = {action: 'type_text',text: 'Special chars: @#$%^&*()_+{}[]|\\:';\'<>?,./',};keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
         await nutService.typeText(specialTextAction.text);
@@ -426,13 +307,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.typeText).toHaveBeenCalledWith(specialTextAction.text);
       });
 
-      it('should handle Unicode text input', async () => {
-        const unicodeTextAction: TypeTextAction = {
-          action: 'type_text',
-          text: 'Unicode: 你好 🌍 café naïve résumé',
-        };
-
-        keyboard.type.mockResolvedValue(undefined);
+      it('should handle Unicode text input', async () => {const unicodeTextAction: TypeTextAction = {action: 'type_text',text: 'Unicode: 你好 🌍 café naïve résumé',};keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
 
         await nutService.typeText(unicodeTextAction.text);
@@ -440,12 +315,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.typeText).toHaveBeenCalledWith(unicodeTextAction.text);
       });
 
-      it('should handle typing with custom delay', async () => {
-        const delayedTypeAction: TypeTextAction = {
-          action: 'type_text',
-          text: 'Slow typing',
-          delay: 200,
-        };
+      it('should handle typing with custom delay', async () => {const delayedTypeAction: TypeTextAction = {action: 'type_text',text: 'Slow typing',delay: 200,};
 
         keyboard.type.mockResolvedValue(undefined);
         nutService.typeText.mockResolvedValue(undefined);
@@ -456,15 +326,7 @@ describe('Computer Use NUT Integration', () => {
       });
     });
 
-    describe('Key Pressing', () => {
-      const keyAction: PressKeysAction = {
-        action: 'press_keys',
-        keys: ['Control', 'c'],
-      };
-
-      it('should integrate with NUT key pressing', async () => {
-        keyboard.pressKey.mockResolvedValue(undefined);
-        keyboard.releaseKey.mockResolvedValue(undefined);
+    describe('Key Pressing', () => {const keyAction: PressKeysAction = {action: 'press_keys',keys: ['Control', 'c'],};it('should integrate with NUT key pressing', async () => {keyboard.pressKey.mockResolvedValue(undefined);keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
         await nutService.pressKeys(keyAction.keys);
@@ -472,13 +334,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.pressKeys).toHaveBeenCalledWith(keyAction.keys);
       });
 
-      it('should handle function keys', async () => {
-        const functionKeyAction: PressKeysAction = {
-          action: 'press_keys',
-          keys: ['F1'],
-        };
-
-        keyboard.pressKey.mockResolvedValue(undefined);
+      it('should handle function keys', async () => {const functionKeyAction: PressKeysAction = {action: 'press_keys',keys: ['F1'],};keyboard.pressKey.mockResolvedValue(undefined);
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
@@ -487,13 +343,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.pressKeys).toHaveBeenCalledWith(functionKeyAction.keys);
       });
 
-      it('should handle arrow keys', async () => {
-        const arrowKeyAction: PressKeysAction = {
-          action: 'press_keys',
-          keys: ['Up', 'Down', 'Left', 'Right'],
-        };
-
-        keyboard.pressKey.mockResolvedValue(undefined);
+      it('should handle arrow keys', async () => {const arrowKeyAction: PressKeysAction = {action: 'press_keys',keys: ['Up', 'Down', 'Left', 'Right'],};keyboard.pressKey.mockResolvedValue(undefined);
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
@@ -502,13 +352,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.pressKeys).toHaveBeenCalledWith(arrowKeyAction.keys);
       });
 
-      it('should handle complex key combinations', async () => {
-        const complexKeyAction: PressKeysAction = {
-          action: 'press_keys',
-          keys: ['Control', 'Shift', 'Alt', 'F12'],
-        };
-
-        keyboard.pressKey.mockResolvedValue(undefined);
+      it('should handle complex key combinations', async () => {const complexKeyAction: PressKeysAction = {action: 'press_keys',keys: ['Control', 'Shift', 'Alt', 'F12'],};keyboard.pressKey.mockResolvedValue(undefined);
         keyboard.releaseKey.mockResolvedValue(undefined);
         nutService.pressKeys.mockResolvedValue(undefined);
 
@@ -517,12 +361,7 @@ describe('Computer Use NUT Integration', () => {
         expect(nutService.pressKeys).toHaveBeenCalledWith(complexKeyAction.keys);
       });
 
-      it('should handle key sequences with timing', async () => {
-        const sequenceAction: PressKeysAction = {
-          action: 'press_keys',
-          keys: ['Tab', 'Tab', 'Enter'],
-          sequence: true,
-          delay: 100,
+      it('should handle key sequences with timing', async () => {const sequenceAction: PressKeysAction = {action: 'press_keys',keys: ['Tab', 'Tab', 'Enter'],sequence: true,delay: 100,
         };
 
         keyboard.pressKey.mockResolvedValue(undefined);
@@ -536,21 +375,12 @@ describe('Computer Use NUT Integration', () => {
     });
   });
 
-  describe('Screen Capture Integration', () => {
-    it('should integrate with NUT screen capture', async () => {
-      screen.capture.mockResolvedValue(mockScreenCapture);
-      nutService.screenshot.mockResolvedValue({
-        operationId: 'screenshot_123',
-        success: true,
-        timestamp: new Date().toISOString(),
-        screenshotPath: '/tmp/screenshot.png',
-        screenshotData: mockScreenCapture.data,
-        metadata: {
+  describe('Screen Capture Integration', () => {it('should integrate with NUT screen capture', async () => {screen.capture.mockResolvedValue(mockScreenCapture);nutService.screenshot.mockResolvedValue({
+        operationId: 'screenshot_123',success: true,timestamp: new Date().toISOString(),
+        screenshotPath: '/tmp/screenshot.png',screenshotData: mockScreenCapture.data,metadata: {
           width: mockScreenCapture.width,
           height: mockScreenCapture.height,
-          format: 'png',
-          fileSize: mockScreenCapture.data.length,
-        },
+          format: 'png',fileSize: mockScreenCapture.data.length,},
       });
 
       const result = await nutService.screenshot();
@@ -560,20 +390,12 @@ describe('Computer Use NUT Integration', () => {
       expect(nutService.screenshot).toHaveBeenCalled();
     });
 
-    it('should handle region-based screen capture', async () => {
-      screen.capture.mockResolvedValue(mockScreenCapture);
-      nutService.screenshot.mockResolvedValue({
-        operationId: 'screenshot_region_456',
-        success: true,
-        timestamp: new Date().toISOString(),
-        screenshotPath: '/tmp/screenshot_region.png',
-        screenshotData: mockScreenCapture.data,
-        metadata: {
+    it('should handle region-based screen capture', async () => {screen.capture.mockResolvedValue(mockScreenCapture);nutService.screenshot.mockResolvedValue({
+        operationId: 'screenshot_region_456',success: true,timestamp: new Date().toISOString(),
+        screenshotPath: '/tmp/screenshot_region.png',screenshotData: mockScreenCapture.data,metadata: {
           width: mockRegion.width,
           height: mockRegion.height,
-          format: 'png',
-          fileSize: mockScreenCapture.data.length,
-          region: mockRegion,
+          format: 'png',fileSize: mockScreenCapture.data.length,region: mockRegion,
         },
       });
 
@@ -583,18 +405,9 @@ describe('Computer Use NUT Integration', () => {
       expect(nutService.screenshot).toHaveBeenCalled();
     });
 
-    it('should handle screen capture errors', async () => {
-      screen.capture.mockRejectedValue(new Error('Screen capture failed'));
-      nutService.screenshot.mockRejectedValue(new Error('Screen capture failed'));
+    it('should handle screen capture errors', async () => {screen.capture.mockRejectedValue(new Error('Screen capture failed'));nutService.screenshot.mockRejectedValue(new Error('Screen capture failed'));await expect(nutService.screenshot()).rejects.toThrow('Screen capture failed');});});
 
-      await expect(nutService.screenshot()).rejects.toThrow('Screen capture failed');
-    });
-  });
-
-  describe('Visual Recognition and Template Matching', () => {
-    it('should integrate with NUT image finding', async () => {
-      const mockImage = new Image();
-      screen.find.mockResolvedValue({ x: 100, y: 200 });
+  describe('Visual Recognition and Template Matching', () => {it('should integrate with NUT image finding', async () => {const mockImage = new Image();screen.find.mockResolvedValue({ x: 100, y: 200 });
 
       const position = await screen.find(mockImage);
 
@@ -602,9 +415,7 @@ describe('Computer Use NUT Integration', () => {
       expect(screen.find).toHaveBeenCalledWith(mockImage);
     });
 
-    it('should handle template matching with confidence', async () => {
-      const mockImage = new Image();
-      screen.find.mockResolvedValue({ x: 150, y: 250 });
+    it('should handle template matching with confidence', async () => {const mockImage = new Image();screen.find.mockResolvedValue({ x: 150, y: 250 });
       screen.config.confidence = 0.95;
 
       const position = await screen.find(mockImage);
@@ -613,9 +424,7 @@ describe('Computer Use NUT Integration', () => {
       expect(screen.config.confidence).toBe(0.95);
     });
 
-    it('should handle visual element waiting', async () => {
-      const mockImage = new Image();
-      screen.waitFor.mockResolvedValue({ x: 200, y: 300 });
+    it('should handle visual element waiting', async () => {const mockImage = new Image();screen.waitFor.mockResolvedValue({ x: 200, y: 300 });
 
       const position = await screen.waitFor(mockImage, 5000);
 
@@ -623,9 +432,7 @@ describe('Computer Use NUT Integration', () => {
       expect(screen.waitFor).toHaveBeenCalledWith(mockImage, 5000);
     });
 
-    it('should handle visual element highlighting', async () => {
-      const mockRegion = new Region(100, 200, 300, 400);
-      screen.highlight.mockResolvedValue(undefined);
+    it('should handle visual element highlighting', async () => {const mockRegion = new Region(100, 200, 300, 400);screen.highlight.mockResolvedValue(undefined);
 
       await screen.highlight(mockRegion);
 
@@ -633,18 +440,12 @@ describe('Computer Use NUT Integration', () => {
     });
   });
 
-  describe('Performance and Timing Control', () => {
-    it('should integrate with NUT sleep functionality', async () => {
-      sleep.mockResolvedValue(undefined);
-
-      await sleep(1000);
+  describe('Performance and Timing Control', () => {it('should integrate with NUT sleep functionality', async () => {sleep.mockResolvedValue(undefined);await sleep(1000);
 
       expect(sleep).toHaveBeenCalledWith(1000);
     });
 
-    it('should handle custom mouse movement trajectories', async () => {
-      (linear as jest.Mock).mockResolvedValue(undefined);
-      (straightTo as jest.Mock).mockResolvedValue(undefined);
+    it('should handle custom mouse movement trajectories', async () => {(linear as jest.Mock).mockResolvedValue(undefined);(straightTo as jest.Mock).mockResolvedValue(undefined);
 
       await straightTo(new Point(300, 400));
       await linear();
@@ -653,9 +454,7 @@ describe('Computer Use NUT Integration', () => {
       expect(linear).toHaveBeenCalled();
     });
 
-    it('should configure NUT timing parameters', async () => {
-      mouse.config.mouseSpeed = 2000;
-      mouse.config.autoDelayMs = 50;
+    it('should configure NUT timing parameters', async () => {mouse.config.mouseSpeed = 2000;mouse.config.autoDelayMs = 50;
       keyboard.config.autoDelayMs = 75;
 
       expect(mouse.config.mouseSpeed).toBe(2000);
@@ -663,88 +462,19 @@ describe('Computer Use NUT Integration', () => {
       expect(keyboard.config.autoDelayMs).toBe(75);
     });
 
-    it('should handle performance optimization settings', async () => {
-      screen.config.confidence = 0.8; // Lower confidence for faster matching
-      screen.config.resourceDirectory = '/tmp/fast-resources';
+    it('should handle performance optimization settings', async () => {screen.config.confidence = 0.8; // Lower confidence for faster matchingscreen.config.resourceDirectory = '/tmp/fast-resources';expect(screen.config.confidence).toBe(0.8);expect(screen.config.resourceDirectory).toBe('/tmp/fast-resources');});});
 
-      expect(screen.config.confidence).toBe(0.8);
-      expect(screen.config.resourceDirectory).toBe('/tmp/fast-resources');
-    });
-  });
+  describe('Error Handling and Fallbacks', () => {it('should handle NUT library not available', async () => {nutService.initialize.mockRejectedValue(new Error('NUT library not found'));await expect(nutService.initialize()).rejects.toThrow('NUT library not found');expect(logger.error).toHaveBeenCalled();});
 
-  describe('Error Handling and Fallbacks', () => {
-    it('should handle NUT library not available', async () => {
-      nutService.initialize.mockRejectedValue(new Error('NUT library not found'));
+    it('should handle native automation failures', async () => {mouse.move.mockRejectedValue(new Error('Native automation failed'));nutService.moveMouse.mockRejectedValue(new Error('Native automation failed'));const moveAction: MoveMouseAction = {action: 'move_mouse',coordinates: mockCoordinates,};
 
-      await expect(nutService.initialize()).rejects.toThrow('NUT library not found');
-      expect(logger.error).toHaveBeenCalled();
-    });
+      await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Native automation failed');});it('should handle permissions errors', async () => {screen.capture.mockRejectedValue(new Error('Permission denied'));nutService.screenshot.mockRejectedValue(new Error('Permission denied'));await expect(nutService.screenshot()).rejects.toThrow('Permission denied');});it('should handle display server issues', async () => {mouse.getPosition.mockRejectedValue(new Error('Display server not responding'));await expect(mouse.getPosition()).rejects.toThrow('Display server not responding');});});
 
-    it('should handle native automation failures', async () => {
-      mouse.move.mockRejectedValue(new Error('Native automation failed'));
-      nutService.moveMouse.mockRejectedValue(new Error('Native automation failed'));
-
-      const moveAction: MoveMouseAction = {
-        action: 'move_mouse',
-        coordinates: mockCoordinates,
-      };
-
-      await expect(nutService.moveMouse(moveAction.coordinates)).rejects.toThrow('Native automation failed');
-    });
-
-    it('should handle permissions errors', async () => {
-      screen.capture.mockRejectedValue(new Error('Permission denied'));
-      nutService.screenshot.mockRejectedValue(new Error('Permission denied'));
-
-      await expect(nutService.screenshot()).rejects.toThrow('Permission denied');
-    });
-
-    it('should handle display server issues', async () => {
-      mouse.getPosition.mockRejectedValue(new Error('Display server not responding'));
-
-      await expect(mouse.getPosition()).rejects.toThrow('Display server not responding');
-    });
-  });
-
-  describe('Cross-Platform Compatibility', () => {
-    it('should handle Linux X11 automation', async () => {
-      nutService.initialize.mockResolvedValue({ platform: 'linux', display: 'X11' });
-
-      const result = await nutService.initialize();
-
-      expect(result).toEqual({ platform: 'linux', display: 'X11' });
-    });
-
-    it('should handle Windows automation differences', async () => {
-      nutService.initialize.mockResolvedValue({ platform: 'win32', display: 'Windows' });
-
-      const result = await nutService.initialize();
-
-      expect(result).toEqual({ platform: 'win32', display: 'Windows' });
-    });
-
-    it('should handle macOS automation specifics', async () => {
-      nutService.initialize.mockResolvedValue({ platform: 'darwin', display: 'Quartz' });
-
-      const result = await nutService.initialize();
-
-      expect(result).toEqual({ platform: 'darwin', display: 'Quartz' });
-    });
-
-    it('should adapt key mappings for different platforms', async () => {
-      const platformSpecificKeys = {
-        linux: ['Control', 'c'],
-        win32: ['Control', 'c'],
-        darwin: ['Meta', 'c'], // Cmd+C on macOS
-      };
-
-      nutService.pressKeys.mockResolvedValue(undefined);
+  describe('Cross-Platform Compatibility', () => {it('should handle Linux X11 automation', async () => {nutService.initialize.mockResolvedValue({ platform: 'linux', display: 'X11' });const result = await nutService.initialize();expect(result).toEqual({ platform: 'linux', display: 'X11' });});it('should handle Windows automation differences', async () => {nutService.initialize.mockResolvedValue({ platform: 'win32', display: 'Windows' });const result = await nutService.initialize();expect(result).toEqual({ platform: 'win32', display: 'Windows' });});it('should handle macOS automation specifics', async () => {nutService.initialize.mockResolvedValue({ platform: 'darwin', display: 'Quartz' });const result = await nutService.initialize();expect(result).toEqual({ platform: 'darwin', display: 'Quartz' });});it('should adapt key mappings for different platforms', async () => {const platformSpecificKeys = {linux: ['Control', 'c'],win32: ['Control', 'c'],darwin: ['Meta', 'c'], // Cmd+C on macOS};nutService.pressKeys.mockResolvedValue(undefined);
 
       for (const [platform, keys] of Object.entries(platformSpecificKeys)) {
         const keyAction: PressKeysAction = {
-          action: 'press_keys',
-          keys,
-          platform: platform as unknown,
+          action: 'press_keys',keys,platform: platform as unknown,
         };
 
         await nutService.pressKeys(keyAction.keys);
@@ -753,42 +483,19 @@ describe('Computer Use NUT Integration', () => {
     });
   });
 
-  describe('Resource Management and Cleanup', () => {
-    it('should clean up NUT resources on service destruction', async () => {
-      nutService.cleanup.mockResolvedValue(undefined);
-
-      await nutService.cleanup();
+  describe('Resource Management and Cleanup', () => {it('should clean up NUT resources on service destruction', async () => {nutService.cleanup.mockResolvedValue(undefined);await nutService.cleanup();
 
       expect(nutService.cleanup).toHaveBeenCalled();
     });
 
-    it('should handle resource cleanup errors gracefully', async () => {
-      nutService.cleanup.mockRejectedValue(new Error('Cleanup failed'));
+    it('should handle resource cleanup errors gracefully', async () => {nutService.cleanup.mockRejectedValue(new Error('Cleanup failed'));await expect(nutService.cleanup()).rejects.toThrow('Cleanup failed');expect(logger.error).toHaveBeenCalled();});
 
-      await expect(nutService.cleanup()).rejects.toThrow('Cleanup failed');
-      expect(logger.error).toHaveBeenCalled();
-    });
-
-    it('should manage memory usage during automation', async () => {
-      // Simulate multiple operations
-      const operations = [
-        () => nutService.moveMouse({ action: 'move_mouse', coordinates: mockCoordinates }),
-        () => nutService.clickMouse({ action: 'click_mouse', coordinates: mockCoordinates, clickCount: 1, button: 'left' }),
-        () => nutService.screenshot(),
-        () => nutService.typeText({ action: 'type_text', text: 'test' }),
-      ];
-
-      nutService.moveMouse.mockResolvedValue(undefined);
+    it('should manage memory usage during automation', async () => {// Simulate multiple operationsconst operations = [
+        () => nutService.moveMouse({ action: 'move_mouse', coordinates: mockCoordinates }),() => nutService.clickMouse({ action: 'click_mouse', coordinates: mockCoordinates, clickCount: 1, button: 'left' }),() => nutService.screenshot(),() => nutService.typeText({ action: 'type_text', text: 'test' }),];nutService.moveMouse.mockResolvedValue(undefined);
       nutService.clickMouse.mockResolvedValue(undefined);
       nutService.screenshot.mockResolvedValue({
-        operationId: 'screenshot_mem_test',
-        success: true,
-        timestamp: new Date().toISOString(),
-        screenshotPath: '/tmp/test.png',
-        screenshotData: Buffer.from('test'),
-        metadata: { width: 100, height: 100, format: 'png', fileSize: 4 },
-      });
-      nutService.typeText.mockResolvedValue(undefined);
+        operationId: 'screenshot_mem_test',success: true,timestamp: new Date().toISOString(),
+        screenshotPath: '/tmp/test.png',screenshotData: Buffer.from('test'),metadata: { width: 100, height: 100, format: 'png', fileSize: 4 },});nutService.typeText.mockResolvedValue(undefined);
 
       // Execute all operations
       await Promise.all(operations.map(op => op()));
@@ -799,14 +506,10 @@ describe('Computer Use NUT Integration', () => {
       expect(nutService.typeText).toHaveBeenCalled();
     });
 
-    it('should handle concurrent automation operations', async () => {
-      nutService.moveMouse.mockResolvedValue(undefined);
-      nutService.clickMouse.mockResolvedValue(undefined);
+    it('should handle concurrent automation operations', async () => {nutService.moveMouse.mockResolvedValue(undefined);nutService.clickMouse.mockResolvedValue(undefined);
 
       const concurrentOperations = [
-        nutService.moveMouse({ action: 'move_mouse', coordinates: { x: 100, y: 100 } }),
-        nutService.moveMouse({ action: 'move_mouse', coordinates: { x: 200, y: 200 } }),
-        nutService.clickMouse({ action: 'click_mouse', coordinates: { x: 150, y: 150 }, clickCount: 1, button: 'left' }),
+        nutService.moveMouse({ action: 'move_mouse', coordinates: { x: 100, y: 100 } }),nutService.moveMouse({ action: 'move_mouse', coordinates: { x: 200, y: 200 } }),nutService.clickMouse({ action: 'click_mouse', coordinates: { x: 150, y: 150 }, clickCount: 1, button: 'left' }),
       ];
 
       await Promise.all(concurrentOperations);

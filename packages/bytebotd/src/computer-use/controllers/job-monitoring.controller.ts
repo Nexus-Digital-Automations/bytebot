@@ -35,18 +35,12 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
   ApiBearerAuth,
-} from '@nestjs/swagger';
-import { JobMonitoringService } from '../services/job-monitoring.service';
-
-/**
- * Dashboard metrics response DTO
+} from '@nestjs/swagger';import { JobMonitoringService } from '../services/job-monitoring.service';/*** Dashboard metrics response DTO
  */
 export class DashboardMetricsResponseDto {
   realTime: {
@@ -149,9 +143,7 @@ export class BusinessMetricsResponseDto {
   performanceRecommendations: Array<{
     category: string;
     recommendation: string;
-    priority: 'low' | 'medium' | 'high';
-    impact: string;
-  }>;
+    priority: 'low' | 'medium' | 'high';impact: string;}>;
 }
 
 /**
@@ -159,10 +151,7 @@ export class BusinessMetricsResponseDto {
  */
 export class HealthReportResponseDto {
   timestamp: Date;
-  overallHealth: 'excellent' | 'good' | 'warning' | 'critical';
-  healthScore: number;
-
-  systemHealth: {
+  overallHealth: 'excellent' | 'good' | 'warning' | 'critical';healthScore: number;systemHealth: {
     cpuHealth: number;
     memoryHealth: number;
     diskHealth: number;
@@ -178,9 +167,7 @@ export class HealthReportResponseDto {
 
   recommendations: Array<{
     category: string;
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    title: string;
-    description: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';title: string;description: string;
     action: string;
   }>;
 
@@ -202,43 +189,26 @@ export class MetricsExportResponseDto {
   version: string;
 }
 
-@ApiTags('Job Monitoring & Operations Dashboard')
-@Controller('monitoring')
-@ApiBearerAuth()
-export class JobMonitoringController {
+@ApiTags('Job Monitoring & Operations Dashboard')@Controller('monitoring')@ApiBearerAuth()export class JobMonitoringController {
   private readonly logger = new Logger(JobMonitoringController.name);
 
   constructor(
     private readonly jobMonitoringService: JobMonitoringService,
   ) {
-    this.logger.log('Job Monitoring Controller initialized - Enterprise dashboard endpoints active');
-  }
-
-  /**
+    this.logger.log('Job Monitoring Controller initialized - Enterprise dashboard endpoints active');}/**
    * Get real-time dashboard metrics for operations team
    *
    * @returns Comprehensive dashboard data with real-time metrics
    */
-  @Get('dashboard')
-  @ApiOperation({
-    summary: 'Get Real-time Dashboard Metrics',
-    description: 'Retrieve comprehensive real-time metrics for operations dashboard including job statistics, SLA compliance, system health, and trend analysis.',
-  })
-  @ApiResponse({
+  @Get('dashboard')@ApiOperation({summary: 'Get Real-time Dashboard Metrics',description: 'Retrieve comprehensive real-time metrics for operations dashboard including job statistics, SLA compliance, system health, and trend analysis.',})@ApiResponse({
     status: 200,
-    description: 'Dashboard metrics retrieved successfully',
-    type: DashboardMetricsResponseDto,
-  })
+    description: 'Dashboard metrics retrieved successfully',type: DashboardMetricsResponseDto,})
   @ApiResponse({
     status: 500,
     description: 'Internal server error while retrieving dashboard metrics',
   })
   async getDashboardMetrics(): Promise<DashboardMetricsResponseDto> {
-    const operationId = `dashboard_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Dashboard metrics requested`);
-
-    try {
-      const dashboardData = await this.jobMonitoringService.getDashboardMetrics();
+    const operationId = `dashboard_${Date.now()}`;this.logger.debug(`[${operationId}] Dashboard metrics requested`);try {const dashboardData = await this.jobMonitoringService.getDashboardMetrics();
 
       this.logger.debug(`[${operationId}] Dashboard metrics retrieved successfully`, {
         totalJobs: dashboardData.jobStats.totalJobs,
@@ -253,9 +223,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Dashboard metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve dashboard metrics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to retrieve dashboard metrics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -267,22 +235,13 @@ export class JobMonitoringController {
    *
    * @returns Capacity metrics with scaling recommendations
    */
-  @Get('metrics/capacity')
-  @ApiOperation({
-    summary: 'Get Capacity Planning Metrics',
-    description: 'Retrieve capacity planning metrics including current utilization, growth trends, and auto-scaling recommendations for optimal resource allocation.',
-  })
-  @ApiResponse({
+  @Get('metrics/capacity')@ApiOperation({summary: 'Get Capacity Planning Metrics',description: 'Retrieve capacity planning metrics including current utilization, growth trends, and auto-scaling recommendations for optimal resource allocation.',})@ApiResponse({
     status: 200,
     description: 'Capacity metrics retrieved successfully',
     type: CapacityMetricsResponseDto,
   })
   async getCapacityMetrics(): Promise<CapacityMetricsResponseDto> {
-    const operationId = `capacity_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Capacity metrics requested`);
-
-    try {
-      const capacityData = await this.jobMonitoringService.getCapacityMetrics();
+    const operationId = `capacity_${Date.now()}`;this.logger.debug(`[${operationId}] Capacity metrics requested`);try {const capacityData = await this.jobMonitoringService.getCapacityMetrics();
 
       this.logger.debug(`[${operationId}] Capacity metrics retrieved successfully`, {
         workerUtilization: capacityData.utilization.averageWorkerUtilization,
@@ -297,9 +256,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Capacity metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve capacity metrics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to retrieve capacity metrics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -311,22 +268,13 @@ export class JobMonitoringController {
    *
    * @returns Business metrics with analytics and recommendations
    */
-  @Get('metrics/business')
-  @ApiOperation({
-    summary: 'Get Business Intelligence Metrics',
-    description: 'Retrieve business intelligence metrics including user activity patterns, cost optimization opportunities, and performance recommendations.',
-  })
-  @ApiResponse({
+  @Get('metrics/business')@ApiOperation({summary: 'Get Business Intelligence Metrics',description: 'Retrieve business intelligence metrics including user activity patterns, cost optimization opportunities, and performance recommendations.',})@ApiResponse({
     status: 200,
     description: 'Business metrics retrieved successfully',
     type: BusinessMetricsResponseDto,
   })
   async getBusinessMetrics(): Promise<BusinessMetricsResponseDto> {
-    const operationId = `business_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Business metrics requested`);
-
-    try {
-      const businessData = await this.jobMonitoringService.getBusinessMetrics();
+    const operationId = `business_${Date.now()}`;this.logger.debug(`[${operationId}] Business metrics requested`);try {const businessData = await this.jobMonitoringService.getBusinessMetrics();
 
       // Convert Maps to Records for JSON serialization
       const response: BusinessMetricsResponseDto = {
@@ -349,9 +297,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Business metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve business metrics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to retrieve business metrics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -363,19 +309,13 @@ export class JobMonitoringController {
    *
    * @returns Detailed health report with recommendations
    */
-  @Get('health')
-  @ApiOperation({
-    summary: 'Get System Health Report',
-    description: 'Retrieve comprehensive system health report including component health scores, recommendations, and predictive insights for proactive maintenance.',
-  })
-  @ApiResponse({
+  @Get('health')@ApiOperation({summary: 'Get System Health Report',description: 'Retrieve comprehensive system health report including component health scores, recommendations, and predictive insights for proactive maintenance.',})@ApiResponse({
     status: 200,
     description: 'Health report generated successfully',
     type: HealthReportResponseDto,
   })
   async getHealthReport(): Promise<HealthReportResponseDto> {
-    const operationId = `health_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Health report requested`);
+    const operationId = `health_${Date.now()}`;this.logger.debug(`[${operationId}] Health report requested`);
 
     try {
       // Get comprehensive metrics for health assessment
@@ -394,11 +334,7 @@ export class JobMonitoringController {
 
       const overallHealthScore = (slaScore + cpuHealth + memoryHealth + queueHealth + errorRateHealth) / 5;
 
-      let overallHealth: 'excellent' | 'good' | 'warning' | 'critical';
-      if (overallHealthScore >= 90) overallHealth = 'excellent';
-      else if (overallHealthScore >= 75) overallHealth = 'good';
-      else if (overallHealthScore >= 60) overallHealth = 'warning';
-      else overallHealth = 'critical';
+      let overallHealth: 'excellent' | 'good' | 'warning' | 'critical';if (overallHealthScore >= 90) overallHealth = 'excellent';else if (overallHealthScore >= 75) overallHealth = 'good';else if (overallHealthScore >= 60) overallHealth = 'warning';else overallHealth = 'critical';
 
       // Generate recommendations
       const recommendations = this.generateHealthRecommendations(
@@ -444,9 +380,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Health report generation failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to generate health report',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to generate health report',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -458,26 +392,15 @@ export class JobMonitoringController {
    *
    * @returns Metrics in multiple formats for external monitoring systems
    */
-  @Get('export/prometheus')
-  @ApiOperation({
-    summary: 'Export Prometheus Metrics',
-    description: 'Export comprehensive metrics in Prometheus format for integration with external monitoring and alerting systems.',
-  })
-  @ApiResponse({
+  @Get('export/prometheus')@ApiOperation({summary: 'Export Prometheus Metrics',description: 'Export comprehensive metrics in Prometheus format for integration with external monitoring and alerting systems.',})@ApiResponse({
     status: 200,
-    description: 'Prometheus metrics exported successfully',
-    type: String,
-    schema: {
-      type: 'string',
-      example: '# HELP bytebot_job_execution_total Total number of job executions\\n# TYPE bytebot_job_execution_total counter\\nbytebot_job_execution_total{status="completed"} 150\\n',
+    description: 'Prometheus metrics exported successfully',type: String,schema: {
+      type: 'string',example: '# HELP bytebot_job_execution_total Total number of job executions\n# TYPE bytebot_job_execution_total counter\
+bytebot_job_execution_total{status="completed"} 150\n',
     },
   })
   async exportPrometheusMetrics(): Promise<string> {
-    const operationId = `prometheus_export_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Prometheus metrics export requested`);
-
-    try {
-      const exportData = await this.jobMonitoringService.getMetricsExport();
+    const operationId = `prometheus_export_${Date.now()}`;this.logger.debug(`[${operationId}] Prometheus metrics export requested`);try {const exportData = await this.jobMonitoringService.getMetricsExport();
 
       this.logger.debug(`[${operationId}] Prometheus metrics exported successfully`);
       return exportData.prometheus;
@@ -487,9 +410,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Prometheus metrics export failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to export Prometheus metrics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to export Prometheus metrics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -501,19 +422,13 @@ export class JobMonitoringController {
    *
    * @returns Complete metrics export including Prometheus, Grafana, and business intelligence data
    */
-  @Get('export/complete')
-  @ApiOperation({
-    summary: 'Export Complete Metrics Package',
-    description: 'Export comprehensive metrics package including Prometheus metrics, Grafana dashboard data, and business intelligence insights for complete monitoring integration.',
-  })
-  @ApiResponse({
+  @Get('export/complete')@ApiOperation({summary: 'Export Complete Metrics Package',description: 'Export comprehensive metrics package including Prometheus metrics, Grafana dashboard data, and business intelligence insights for complete monitoring integration.',})@ApiResponse({
     status: 200,
     description: 'Complete metrics export generated successfully',
     type: MetricsExportResponseDto,
   })
   async exportCompleteMetrics(): Promise<MetricsExportResponseDto> {
-    const operationId = `complete_export_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Complete metrics export requested`);
+    const operationId = `complete_export_${Date.now()}`;this.logger.debug(`[${operationId}] Complete metrics export requested`);
 
     try {
       const exportData = await this.jobMonitoringService.getMetricsExport();
@@ -538,9 +453,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Complete metrics export failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to export complete metrics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to export complete metrics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -553,23 +466,10 @@ export class JobMonitoringController {
    * @param timeRange Time range for statistics (1h, 24h, 7d, 30d)
    * @returns Real-time job execution statistics
    */
-  @Get('stats/jobs')
-  @ApiOperation({
-    summary: 'Get Real-time Job Statistics',
-    description: 'Retrieve real-time job execution statistics with configurable time range for detailed performance analysis.',
-  })
-  @ApiQuery({
-    name: 'timeRange',
-    required: false,
-    description: 'Time range for statistics',
-    enum: ['1h', '24h', '7d', '30d'],
-    example: '24h',
-  })
-  @ApiResponse({
+  @Get('stats/jobs')@ApiOperation({summary: 'Get Real-time Job Statistics',description: 'Retrieve real-time job execution statistics with configurable time range for detailed performance analysis.',})@ApiQuery({
+    name: 'timeRange',required: false,description: 'Time range for statistics',enum: ['1h', '24h', '7d', '30d'],example: '24h',})@ApiResponse({
     status: 200,
-    description: 'Job statistics retrieved successfully',
-  })
-  async getJobStatistics(
+    description: 'Job statistics retrieved successfully',})async getJobStatistics(
     @Query('timeRange') timeRange: '1h' | '24h' | '7d' | '30d' = '24h'
   ): Promise<{
     timeRange: string;
@@ -587,8 +487,7 @@ export class JobMonitoringController {
       byHour: number[];
     };
   }> {
-    const operationId = `job_stats_${Date.now()}`;
-    this.logger.debug(`[${operationId}] Job statistics requested for ${timeRange}`);
+    const operationId = `job_stats_${Date.now()}`;this.logger.debug(`[${operationId}] Job statistics requested for ${timeRange}`);
 
     try {
       const dashboardData = await this.jobMonitoringService.getDashboardMetrics();
@@ -633,9 +532,7 @@ export class JobMonitoringController {
       this.logger.error(`[${operationId}] Job statistics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve job statistics',
-          error: errorMessage,
-          operationId,
+          message: 'Failed to retrieve job statistics',error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -650,63 +547,29 @@ export class JobMonitoringController {
     capacityData: CapacityMetricsResponseDto,
     businessData: BusinessMetricsResponseDto,
     healthScore: number
-  ): HealthReportResponseDto['recommendations'] {
-    const recommendations: HealthReportResponseDto['recommendations'] = [];
-
-    // Critical health recommendations
-    if (healthScore < 60) {
+  ): HealthReportResponseDto['recommendations'] {const recommendations: HealthReportResponseDto['recommendations'] = [];// Critical health recommendationsif (healthScore < 60) {
       recommendations.push({
-        category: 'critical',
-        priority: 'critical',
-        title: 'Critical System Health',
-        description: 'System health is critically low requiring immediate attention',
-        action: 'Review all system components and implement immediate remediation measures',
-      });
-    }
+        category: 'critical',priority: 'critical',title: 'Critical System Health',description: 'System health is critically low requiring immediate attention',action: 'Review all system components and implement immediate remediation measures',});}
 
     // Memory pressure recommendations
     if (dashboardData.realTime.memoryPressure > 80) {
       recommendations.push({
-        category: 'performance',
-        priority: 'high',
-        title: 'High Memory Pressure',
-        description: 'System memory usage is critically high',
-        action: 'Scale memory resources or optimize memory-intensive operations',
-      });
-    }
+        category: 'performance',priority: 'high',title: 'High Memory Pressure',description: 'System memory usage is critically high',action: 'Scale memory resources or optimize memory-intensive operations',});}
 
     // Queue depth recommendations
     if (dashboardData.realTime.queueDepth > 50) {
       recommendations.push({
-        category: 'capacity',
-        priority: 'high',
-        title: 'High Queue Depth',
-        description: 'Job queue is backing up with high depth',
-        action: 'Increase worker pool size or optimize job processing efficiency',
-      });
-    }
+        category: 'capacity',priority: 'high',title: 'High Queue Depth',description: 'Job queue is backing up with high depth',action: 'Increase worker pool size or optimize job processing efficiency',});}
 
     // SLA compliance recommendations
     if (dashboardData.slaCompliance.overallSLAScore < 90) {
       recommendations.push({
-        category: 'sla',
-        priority: 'medium',
-        title: 'SLA Compliance Below Target',
-        description: 'Overall SLA compliance is below the 90% target',
-        action: 'Review job execution times and optimize critical path operations',
-      });
-    }
+        category: 'sla',priority: 'medium',title: 'SLA Compliance Below Target',description: 'Overall SLA compliance is below the 90% target',action: 'Review job execution times and optimize critical path operations',});}
 
     // Worker utilization recommendations
     if (capacityData.utilization.averageWorkerUtilization > 85) {
       recommendations.push({
-        category: 'capacity',
-        priority: 'medium',
-        title: 'High Worker Utilization',
-        description: 'Worker pool utilization is approaching capacity limits',
-        action: 'Consider scaling worker pool to handle increased load',
-      });
-    }
+        category: 'capacity',priority: 'medium',title: 'High Worker Utilization',description: 'Worker pool utilization is approaching capacity limits',action: 'Consider scaling worker pool to handle increased load',});}
 
     // Business optimization recommendations
     businessData.performanceRecommendations.forEach((rec) => {
@@ -728,35 +591,21 @@ export class JobMonitoringController {
   private generatePredictiveInsights(
     capacityData: CapacityMetricsResponseDto,
     businessData: BusinessMetricsResponseDto
-  ): HealthReportResponseDto['predictiveInsights'] {
-    const expectedBottlenecks: string[] = [];
-    const capacityRecommendations: string[] = [];
+  ): HealthReportResponseDto['predictiveInsights'] {const expectedBottlenecks: string[] = [];const capacityRecommendations: string[] = [];
     const optimizationOpportunities: string[] = [];
 
     // Predict bottlenecks based on trends
     if (capacityData.trends.jobVolumeGrowth > 20) {
-      expectedBottlenecks.push('Queue capacity may become insufficient within 24-48 hours due to high job volume growth');
-    }
-
-    if (capacityData.trends.complexityGrowth > 15) {
+      expectedBottlenecks.push('Queue capacity may become insufficient within 24-48 hours due to high job volume growth');}if (capacityData.trends.complexityGrowth > 15) {
       expectedBottlenecks.push('Job execution times increasing, potential worker pool saturation expected');
     }
 
     // Capacity scaling recommendations
     if (capacityData.utilization.peakWorkerUtilization > 90) {
-      capacityRecommendations.push(`Scale worker pool to ${capacityData.recommendations.optimalWorkerCount} workers`);
-    }
-
-    capacityRecommendations.push(
-      `Predicted capacity needs: ${capacityData.recommendations.predictedCapacityNeeds.nextDay} jobs/day`
-    );
-
-    // Optimization opportunities
+      capacityRecommendations.push(`Scale worker pool to ${capacityData.recommendations.optimalWorkerCount} workers`);}capacityRecommendations.push(
+      `Predicted capacity needs: ${capacityData.recommendations.predictedCapacityNeeds.nextDay} jobs/day`);// Optimization opportunities
     businessData.costOptimizationOpportunities.forEach((opp) => {
-      optimizationOpportunities.push(`${opp.description} (Potential savings: ${opp.potentialSavings})`);
-    });
-
-    if (businessData.averageJobsPerHour > 0) {
+      optimizationOpportunities.push(`${opp.description} (Potential savings: ${opp.potentialSavings})`);});if (businessData.averageJobsPerHour > 0) {
       const peakHours = businessData.peakHourRange;
       optimizationOpportunities.push(
         `Optimize resource allocation for peak hours (${peakHours.start}:00-${peakHours.end}:00)`

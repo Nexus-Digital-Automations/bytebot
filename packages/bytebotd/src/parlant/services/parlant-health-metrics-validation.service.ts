@@ -24,67 +24,23 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-
-// ===== VALIDATION INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';// ===== VALIDATION INTERFACES =====/**
  * Risk level for health/metrics operations
  */
 export enum HealthMetricsRiskLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM', 
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-}
-
-/**
+  LOW = 'LOW',MEDIUM = 'MEDIUM', HIGH = 'HIGH',CRITICAL = 'CRITICAL',}/**
  * Health operation types for validation
  */
 export enum HealthOperationType {
-  BASIC_HEALTH_CHECK = 'BASIC_HEALTH_CHECK',
-  DETAILED_STATUS = 'DETAILED_STATUS',
-  LIVENESS_PROBE = 'LIVENESS_PROBE',
-  READINESS_PROBE = 'READINESS_PROBE',
-  STARTUP_PROBE = 'STARTUP_PROBE',
-  PROCESS_HEALTH = 'PROCESS_HEALTH',
-  DATABASE_HEALTH = 'DATABASE_HEALTH',
-  EXTERNAL_SERVICES = 'EXTERNAL_SERVICES',
-  MODULE_INITIALIZATION = 'MODULE_INITIALIZATION',
-  SYSTEM_RESOURCES = 'SYSTEM_RESOURCES',
-  DEPENDENCY_CHECK = 'DEPENDENCY_CHECK',
-}
-
-/**
+  BASIC_HEALTH_CHECK = 'BASIC_HEALTH_CHECK',DETAILED_STATUS = 'DETAILED_STATUS',LIVENESS_PROBE = 'LIVENESS_PROBE',READINESS_PROBE = 'READINESS_PROBE',STARTUP_PROBE = 'STARTUP_PROBE',PROCESS_HEALTH = 'PROCESS_HEALTH',DATABASE_HEALTH = 'DATABASE_HEALTH',EXTERNAL_SERVICES = 'EXTERNAL_SERVICES',MODULE_INITIALIZATION = 'MODULE_INITIALIZATION',SYSTEM_RESOURCES = 'SYSTEM_RESOURCES',DEPENDENCY_CHECK = 'DEPENDENCY_CHECK',}/**
  * Metrics operation types for validation
  */
 export enum MetricsOperationType {
-  PROMETHEUS_COLLECTION = 'PROMETHEUS_COLLECTION',
-  API_REQUEST_TRACKING = 'API_REQUEST_TRACKING',
-  TASK_PROCESSING = 'TASK_PROCESSING',
-  COMPUTER_USE_METRICS = 'COMPUTER_USE_METRICS',
-  WEBSOCKET_METRICS = 'WEBSOCKET_METRICS',
-  DATABASE_METRICS = 'DATABASE_METRICS',
-  CACHE_METRICS = 'CACHE_METRICS',
-  COMPRESSION_METRICS = 'COMPRESSION_METRICS',
-  SYSTEM_METRICS = 'SYSTEM_METRICS',
-  PERFORMANCE_BASELINE = 'PERFORMANCE_BASELINE',
-}
-
-/**
+  PROMETHEUS_COLLECTION = 'PROMETHEUS_COLLECTION',API_REQUEST_TRACKING = 'API_REQUEST_TRACKING',TASK_PROCESSING = 'TASK_PROCESSING',COMPUTER_USE_METRICS = 'COMPUTER_USE_METRICS',WEBSOCKET_METRICS = 'WEBSOCKET_METRICS',DATABASE_METRICS = 'DATABASE_METRICS',CACHE_METRICS = 'CACHE_METRICS',COMPRESSION_METRICS = 'COMPRESSION_METRICS',SYSTEM_METRICS = 'SYSTEM_METRICS',PERFORMANCE_BASELINE = 'PERFORMANCE_BASELINE',}/**
  * Alert operation types for validation
  */
 export enum AlertOperationType {
-  CREATE_ALERT = 'CREATE_ALERT',
-  ACKNOWLEDGE_ALERT = 'ACKNOWLEDGE_ALERT',
-  ESCALATE_ALERT = 'ESCALATE_ALERT',
-  RESOLVE_ALERT = 'RESOLVE_ALERT',
-  EMERGENCY_NOTIFICATION = 'EMERGENCY_NOTIFICATION',
-  SLA_VIOLATION = 'SLA_VIOLATION',
-}
-
-/**
+  CREATE_ALERT = 'CREATE_ALERT',ACKNOWLEDGE_ALERT = 'ACKNOWLEDGE_ALERT',ESCALATE_ALERT = 'ESCALATE_ALERT',RESOLVE_ALERT = 'RESOLVE_ALERT',EMERGENCY_NOTIFICATION = 'EMERGENCY_NOTIFICATION',SLA_VIOLATION = 'SLA_VIOLATION',}/**
  * Validation request context
  */
 export interface HealthMetricsValidationContext {
@@ -104,9 +60,7 @@ export interface HealthMetricsValidationContext {
     endpoint?: string;
     method?: string;
     duration?: number;
-    frequency?: 'once' | 'periodic' | 'high-frequency';
-  };
-}
+    frequency?: 'once' | 'periodic' | 'high-frequency';};}
 
 /**
  * Validation result
@@ -179,14 +133,11 @@ export class ParlantHealthMetricsValidationService {
       id: `validation${Date.now()}${Math.random().toString(36).substring(7)}`,
       validate: async () => ({ approved: true, reason: 'Validated through conversational AI' }),
       explainAction: async () => `Health/metrics operation: ${context.operationType}`,
-      logAudit: async (audit: { action: string; timestamp: Date; details?: Record<string, unknown> }) => this.logger.debug('Parlant audit logged', audit),
-    }),
-  };
+      logAudit: async (audit: { action: string; timestamp: Date; details?: Record<string, unknown> }) => this.logger.debug('Parlant audit logged', audit),}),};
 
   constructor(private readonly configService: ConfigService) {
     this.initializeRiskMappings();
-    this.logger.log('Parlant Health & Metrics Validation Service initialized');
-    this.logger.log('Risk-based validation system active with performance optimization');
+    this.logger.log('Parlant Health & Metrics Validation Service initialized');this.logger.log('Risk-based validation system active with performance optimization');
   }
 
   // ===== PRIMARY VALIDATION METHODS =====
@@ -199,12 +150,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `health${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating health operation: ${operationType}`, {
-      operationId,
-      operationType,
+    const operationId = `health${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating health operation: ${operationType}`, {operationId,operationType,
       parametersCount: Object.keys(parameters).length,
       userId: userContext?.userId,
     });
@@ -277,9 +223,7 @@ export class ParlantHealthMetricsValidationService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Health validation failed: ${errorMessage}`, {
-        operationId,
-        operationType,
+      this.logger.error(`[${operationId}] Health validation failed: ${errorMessage}`, {operationId,operationType,
         error: errorMessage,
       });
 
@@ -296,12 +240,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `metrics${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating metrics operation: ${operationType}`, {
-      operationId,
-      operationType,
+    const operationId = `metrics${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating metrics operation: ${operationType}`, {operationId,operationType,
       parametersCount: Object.keys(parameters).length,
       userId: userContext?.userId,
     });
@@ -311,7 +250,7 @@ export class ParlantHealthMetricsValidationService {
       const riskLevel = this.getMetricsOperationRiskLevel(operationType, parameters);
       
       // For low-risk, high-frequency metrics operations, use optimized validation
-      if (riskLevel === HealthMetricsRiskLevel.LOW && this.isHighFrequencyOperation(operationType)) {
+      if (riskLevel === HealthMetricsRiskLevel._LOW && this.isHighFrequencyOperation(operationType)) {
         return this.performOptimizedValidation(operationId, operationType, parameters);
       }
 
@@ -350,9 +289,7 @@ export class ParlantHealthMetricsValidationService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Metrics validation failed: ${errorMessage}`, {
-        operationId,
-        operationType,
+      this.logger.error(`[${operationId}] Metrics validation failed: ${errorMessage}`, {operationId,operationType,
         error: errorMessage,
       });
 
@@ -368,10 +305,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating alert operation: ${operationType}`, {
+    const operationId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating alert operation: ${operationType}`, {
       operationId,
       operationType,
       severity: parameters.severity,
@@ -436,14 +370,11 @@ export class ParlantHealthMetricsValidationService {
     operationType: HealthOperationType | MetricsOperationType | AlertOperationType,
     parameters: Record<string, unknown>,
   ): RiskAssessment {
-    const baseRisk = this.operationRiskMap.get(operationType.toString()) ?? HealthMetricsRiskLevel.MEDIUM;
+    const baseRisk = this.operationRiskMap.get(operationType.toString()) ?? HealthMetricsRiskLevel._MODERATE;
     const factors: string[] = [];
     
     // Analyze parameters for risk factors
-    if (parameters.severity === 'EMERGENCY' || parameters.severity === 'CRITICAL') {
-      factors.push('Critical severity level');
-      return {
-        level: HealthMetricsRiskLevel.CRITICAL,
+    if (parameters.severity === 'EMERGENCY' || parameters.severity === 'CRITICAL') {factors.push('Critical severity level');return {level: HealthMetricsRiskLevel._CRITICAL,
         factors,
         requiresApproval: true,
         escalationRequired: true,
@@ -451,19 +382,11 @@ export class ParlantHealthMetricsValidationService {
       };
     }
 
-    if (parameters.component === 'database' || parameters.component === 'authentication') {
-      factors.push('Critical system component');
-    }
-
-    if (parameters.frequency === 'high-frequency') {
-      factors.push('High frequency operation - optimized validation');
-    }
-
-    return {
+    if (parameters.component === 'database' || parameters.component === 'authentication') {factors.push('Critical system component');}if (parameters.frequency === 'high-frequency') {factors.push('High frequency operation - optimized validation');}return {
       level: baseRisk,
       factors,
-      requiresApproval: baseRisk !== HealthMetricsRiskLevel.LOW,
-      escalationRequired: baseRisk === HealthMetricsRiskLevel.CRITICAL,
+      requiresApproval: baseRisk !== HealthMetricsRiskLevel._LOW,
+      escalationRequired: baseRisk === HealthMetricsRiskLevel._CRITICAL,
       auditRequired: true,
     };
   }
@@ -483,7 +406,7 @@ export class ParlantHealthMetricsValidationService {
     ];
 
     if (lowRiskOperations.includes(operationType)) {
-      return HealthMetricsRiskLevel.LOW;
+      return HealthMetricsRiskLevel._LOW;
     }
 
     // Performance-impacting operations are medium risk
@@ -493,10 +416,10 @@ export class ParlantHealthMetricsValidationService {
     ];
 
     if (mediumRiskOperations.includes(operationType)) {
-      return HealthMetricsRiskLevel.MEDIUM;
+      return HealthMetricsRiskLevel._MODERATE;
     }
 
-    return HealthMetricsRiskLevel.LOW;
+    return HealthMetricsRiskLevel._LOW;
   }
 
   /**
@@ -508,25 +431,19 @@ export class ParlantHealthMetricsValidationService {
   ): HealthMetricsRiskLevel {
     // Emergency operations are critical
     if (operationType === AlertOperationType.EMERGENCY_NOTIFICATION) {
-      return HealthMetricsRiskLevel.CRITICAL;
+      return HealthMetricsRiskLevel._CRITICAL;
     }
 
     // Alert creation based on severity
     if (operationType === AlertOperationType.CREATE_ALERT) {
       const severity = parameters.severity as string;
       switch (severity) {
-        case 'EMERGENCY':
-          return HealthMetricsRiskLevel.CRITICAL;
-        case 'CRITICAL':
-          return HealthMetricsRiskLevel.HIGH;
-        case 'WARNING':
-          return HealthMetricsRiskLevel.MEDIUM;
-        default:
-          return HealthMetricsRiskLevel.LOW;
+        case 'EMERGENCY':return HealthMetricsRiskLevel._CRITICAL;case 'CRITICAL':return HealthMetricsRiskLevel._HIGH;case 'WARNING':return HealthMetricsRiskLevel._MODERATE;default:
+          return HealthMetricsRiskLevel._LOW;
       }
     }
 
-    return HealthMetricsRiskLevel.MEDIUM;
+    return HealthMetricsRiskLevel._MODERATE;
   }
 
   // ===== CONVERSATIONAL VALIDATION =====
@@ -543,11 +460,8 @@ export class ParlantHealthMetricsValidationService {
     });
 
     // For low-risk operations, auto-approve with minimal validation
-    if (riskAssessment.level === HealthMetricsRiskLevel.LOW) {
-      return this.createApprovedValidation(context, session.id, 'Low risk operation auto-approved');
-    }
-
-    // For higher-risk operations, perform conversational validation
+    if (riskAssessment.level === HealthMetricsRiskLevel._LOW) {
+      return this.createApprovedValidation(context, session.id, 'Low risk operation auto-approved');}// For higher-risk operations, perform conversational validation
     const validation = await session.validate();
     const explanation = await session.explainAction();
 
@@ -561,10 +475,7 @@ export class ParlantHealthMetricsValidationService {
       auditTrail: {
         operationId: context.operationId,
         timestamp: new Date(),
-        validator: 'ParlantHealthMetricsValidationService',
-        decision: validation.approved ? 'APPROVED' : 'REJECTED',
-        reasoning: explanation,
-        evidence: {
+        validator: 'ParlantHealthMetricsValidationService',decision: validation.approved ? 'APPROVED' : 'REJECTED',reasoning: explanation,evidence: {
           riskLevel: riskAssessment.level,
           factors: riskAssessment.factors,
           systemContext: context.systemContext,
@@ -602,29 +513,18 @@ export class ParlantHealthMetricsValidationService {
   ): HealthMetricsValidationResult {
     return {
       approved: true,
-      riskLevel: HealthMetricsRiskLevel.LOW,
+      riskLevel: HealthMetricsRiskLevel._LOW,
       conversationId: `optimized${operationId}`,
       operationId,
-      reason: 'High-frequency, low-risk operation - optimized approval',
-      recommendations: ['Continue monitoring for patterns'],
-      auditTrail: {
-        operationId,
+      reason: 'High-frequency, low-risk operation - optimized approval',recommendations: ['Continue monitoring for patterns'],auditTrail: {operationId,
         timestamp: new Date(),
-        validator: 'ParlantHealthMetricsValidationService',
-        decision: 'APPROVED',
-        reasoning: 'Optimized validation for high-frequency metrics operation',
-        evidence: {
-          operationType,
+        validator: 'ParlantHealthMetricsValidationService',decision: 'APPROVED',reasoning: 'Optimized validation for high-frequency metrics operation',evidence: {operationType,
           parameters,
-          optimization: 'high_frequency_fast_path',
-        },
-      },
+          optimization: 'high_frequency_fast_path',},},
       performanceImpact: {
         validationDuration: 1, // Sub-millisecond for optimized path
         cacheHit: false,
-        optimization: 'fast_path_approval',
-      },
-    };
+        optimization: 'fast_path_approval',},};
   }
 
   // ===== HELPER METHODS =====
@@ -634,41 +534,35 @@ export class ParlantHealthMetricsValidationService {
    */
   private initializeRiskMappings(): void {
     // Health operation risk levels
-    this.operationRiskMap.set(HealthOperationType.BASIC_HEALTH_CHECK, HealthMetricsRiskLevel.LOW);
-    this.operationRiskMap.set(HealthOperationType.LIVENESS_PROBE, HealthMetricsRiskLevel.LOW);
-    this.operationRiskMap.set(HealthOperationType.READINESS_PROBE, HealthMetricsRiskLevel.MEDIUM);
-    this.operationRiskMap.set(HealthOperationType.STARTUP_PROBE, HealthMetricsRiskLevel.MEDIUM);
-    this.operationRiskMap.set(HealthOperationType.DETAILED_STATUS, HealthMetricsRiskLevel.MEDIUM);
-    this.operationRiskMap.set(HealthOperationType.DATABASE_HEALTH, HealthMetricsRiskLevel.HIGH);
-    this.operationRiskMap.set(HealthOperationType.EXTERNAL_SERVICES, HealthMetricsRiskLevel.HIGH);
-    this.operationRiskMap.set(HealthOperationType.SYSTEM_RESOURCES, HealthMetricsRiskLevel.MEDIUM);
+    this.operationRiskMap.set(HealthOperationType.BASIC_HEALTH_CHECK, HealthMetricsRiskLevel._LOW);
+    this.operationRiskMap.set(HealthOperationType.LIVENESS_PROBE, HealthMetricsRiskLevel._LOW);
+    this.operationRiskMap.set(HealthOperationType.READINESS_PROBE, HealthMetricsRiskLevel._MODERATE);
+    this.operationRiskMap.set(HealthOperationType.STARTUP_PROBE, HealthMetricsRiskLevel._MODERATE);
+    this.operationRiskMap.set(HealthOperationType.DETAILED_STATUS, HealthMetricsRiskLevel._MODERATE);
+    this.operationRiskMap.set(HealthOperationType.DATABASE_HEALTH, HealthMetricsRiskLevel._HIGH);
+    this.operationRiskMap.set(HealthOperationType.EXTERNAL_SERVICES, HealthMetricsRiskLevel._HIGH);
+    this.operationRiskMap.set(HealthOperationType.SYSTEM_RESOURCES, HealthMetricsRiskLevel._MODERATE);
 
     // Metrics operation risk levels
-    this.operationRiskMap.set(MetricsOperationType.PROMETHEUS_COLLECTION, HealthMetricsRiskLevel.LOW);
-    this.operationRiskMap.set(MetricsOperationType.API_REQUEST_TRACKING, HealthMetricsRiskLevel.LOW);
-    this.operationRiskMap.set(MetricsOperationType.SYSTEM_METRICS, HealthMetricsRiskLevel.LOW);
-    this.operationRiskMap.set(MetricsOperationType.DATABASE_METRICS, HealthMetricsRiskLevel.MEDIUM);
-    this.operationRiskMap.set(MetricsOperationType.PERFORMANCE_BASELINE, HealthMetricsRiskLevel.MEDIUM);
+    this.operationRiskMap.set(MetricsOperationType.PROMETHEUS_COLLECTION, HealthMetricsRiskLevel._LOW);
+    this.operationRiskMap.set(MetricsOperationType.API_REQUEST_TRACKING, HealthMetricsRiskLevel._LOW);
+    this.operationRiskMap.set(MetricsOperationType.SYSTEM_METRICS, HealthMetricsRiskLevel._LOW);
+    this.operationRiskMap.set(MetricsOperationType.DATABASE_METRICS, HealthMetricsRiskLevel._MODERATE);
+    this.operationRiskMap.set(MetricsOperationType.PERFORMANCE_BASELINE, HealthMetricsRiskLevel._MODERATE);
 
     // Alert operation risk levels
-    this.operationRiskMap.set(AlertOperationType.CREATE_ALERT, HealthMetricsRiskLevel.MEDIUM);
-    this.operationRiskMap.set(AlertOperationType.EMERGENCY_NOTIFICATION, HealthMetricsRiskLevel.CRITICAL);
-    this.operationRiskMap.set(AlertOperationType.ESCALATE_ALERT, HealthMetricsRiskLevel.HIGH);
+    this.operationRiskMap.set(AlertOperationType.CREATE_ALERT, HealthMetricsRiskLevel._MODERATE);
+    this.operationRiskMap.set(AlertOperationType.EMERGENCY_NOTIFICATION, HealthMetricsRiskLevel._CRITICAL);
+    this.operationRiskMap.set(AlertOperationType.ESCALATE_ALERT, HealthMetricsRiskLevel._HIGH);
 
-    this.logger.debug('Operation risk mappings initialized', {
-      totalMappings: this.operationRiskMap.size,
-    });
+    this.logger.debug('Operation risk mappings initialized', {totalMappings: this.operationRiskMap.size,});
   }
 
   /**
    * Get current system context
    */
-  private async getSystemContext(): Promise<HealthMetricsValidationContext['systemContext']> {
-    // In production, this would query actual system status
-    return {
-      currentHealth: 'HEALTHY',
-      activeAlerts: 0,
-      systemLoad: 25,
+  private async getSystemContext(): Promise<HealthMetricsValidationContext['systemContext']> {// In production, this would query actual system statusreturn {
+      currentHealth: 'HEALTHY',activeAlerts: 0,systemLoad: 25,
       criticalOperationsActive: false,
     };
   }
@@ -678,29 +572,21 @@ export class ParlantHealthMetricsValidationService {
    */
   private determineOperationFrequency(
     operationType: HealthOperationType | MetricsOperationType | AlertOperationType,
-  ): 'once' | 'periodic' | 'high-frequency' {
-    const highFrequencyOps: (HealthOperationType | MetricsOperationType)[] = [
-      HealthOperationType.BASIC_HEALTH_CHECK,
+  ): 'once' | 'periodic' | 'high-frequency' {const highFrequencyOps: (HealthOperationType | MetricsOperationType)[] = [HealthOperationType.BASIC_HEALTH_CHECK,
       HealthOperationType.LIVENESS_PROBE,
       MetricsOperationType.API_REQUEST_TRACKING,
       MetricsOperationType.SYSTEM_METRICS,
     ];
 
     if (highFrequencyOps.includes(operationType as HealthOperationType | MetricsOperationType)) {
-      return 'high-frequency';
-    }
-
-    const periodicOps: (HealthOperationType | MetricsOperationType)[] = [
+      return 'high-frequency';}const periodicOps: (HealthOperationType | MetricsOperationType)[] = [
       HealthOperationType.READINESS_PROBE,
       HealthOperationType.DETAILED_STATUS,
       MetricsOperationType.PROMETHEUS_COLLECTION,
     ];
 
     if (periodicOps.includes(operationType as HealthOperationType | MetricsOperationType)) {
-      return 'periodic';
-    }
-
-    return 'once';
+      return 'periodic';}return 'once';
   }
 
   /**
@@ -725,8 +611,7 @@ export class ParlantHealthMetricsValidationService {
     riskLevel: HealthMetricsRiskLevel,
   ): string {
     const paramHash = JSON.stringify(parameters);
-    return `${operationType}${riskLevel}${Buffer.from(paramHash).toString('base64').substring(0, 16)}`;
-  }
+    return `${operationType}${riskLevel}${Buffer.from(paramHash).toString('base64').substring(0, 16)}';}
 
   /**
    * Get cached validation result
@@ -750,7 +635,7 @@ export class ParlantHealthMetricsValidationService {
    * Cache validation result
    */
   private cacheValidation(cacheKey: string, result: HealthMetricsValidationResult): void {
-    const expiryMinutes = result.riskLevel === HealthMetricsRiskLevel.LOW ? 15 : 5;
+    const expiryMinutes = result.riskLevel === HealthMetricsRiskLevel._LOW ? 15 : 5;
     const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
     this.validationCache.set(cacheKey, {
@@ -768,11 +653,8 @@ export class ParlantHealthMetricsValidationService {
     riskLevel: HealthMetricsRiskLevel,
   ): boolean {
     // Cache low-risk, high-frequency operations
-    return riskLevel === HealthMetricsRiskLevel.LOW ||
-           this.determineOperationFrequency(operationType) === 'high-frequency';
-  }
-
-  /**
+    return riskLevel === HealthMetricsRiskLevel._LOW ||
+           this.determineOperationFrequency(operationType) === 'high-frequency';}/**
    * Create approved validation result
    */
   private createApprovedValidation(
@@ -786,14 +668,9 @@ export class ParlantHealthMetricsValidationService {
       conversationId,
       operationId: context.operationId,
       reason,
-      recommendations: ['Operation approved - continue monitoring'],
-      auditTrail: {
-        operationId: context.operationId,
+      recommendations: ['Operation approved - continue monitoring'],auditTrail: {operationId: context.operationId,
         timestamp: new Date(),
-        validator: 'ParlantHealthMetricsValidationService',
-        decision: 'APPROVED',
-        reasoning: reason,
-        evidence: {
+        validator: 'ParlantHealthMetricsValidationService',decision: 'APPROVED',reasoning: reason,evidence: {
           riskLevel: context.riskLevel,
           systemContext: context.systemContext,
         },
@@ -820,22 +697,14 @@ export class ParlantHealthMetricsValidationService {
 
     return {
       approved,
-      riskLevel: HealthMetricsRiskLevel.HIGH,
-      conversationId: `failsafe${operationId}`,
-      operationId,
-      reason: approved 
-        ? `Failsafe approval for health operation: ${errorMessage}`
-        : `Validation failed, operation rejected: ${errorMessage}`,
+      riskLevel: HealthMetricsRiskLevel._HIGH,
+      conversationId: `failsafe${operationId}`,operationId,reason: approved 
+        ? `Failsafe approval for health operation: ${errorMessage}`: `Validation failed, operation rejected: ${errorMessage}`,
       recommendations: [
-        'Review validation system health',
-        'Check Parlant service connectivity',
-        'Monitor system for patterns',
-      ],
-      auditTrail: {
+        'Review validation system health','Check Parlant service connectivity','Monitor system for patterns',],auditTrail: {
         operationId,
         timestamp: new Date(),
-        validator: 'ParlantHealthMetricsValidationService',
-        decision: approved ? 'APPROVED' : 'REJECTED',
+        validator: 'ParlantHealthMetricsValidationService',decision: approved ? 'APPROVED' : 'REJECTED',
         reasoning: `Failsafe validation triggered due to error: ${errorMessage}`,
         evidence: {
           error: errorMessage,
@@ -846,9 +715,7 @@ export class ParlantHealthMetricsValidationService {
       performanceImpact: {
         validationDuration: 0,
         cacheHit: false,
-        optimization: 'failsafe_mode',
-      },
-    };
+        optimization: 'failsafe_mode',},};
   }
 
   /**
@@ -860,21 +727,10 @@ export class ParlantHealthMetricsValidationService {
   ): string[] {
     const recommendations: string[] = [];
 
-    if (riskAssessment.level === HealthMetricsRiskLevel.HIGH || riskAssessment.level === HealthMetricsRiskLevel.CRITICAL) {
-      recommendations.push('Monitor operation closely for unexpected behavior');
-      recommendations.push('Review system impact after operation completion');
-    }
-
-    if (context.systemContext.activeAlerts > 0) {
-      recommendations.push('Consider current system alerts when evaluating operation impact');
-    }
-
-    if (context.systemContext.systemLoad > 80) {
-      recommendations.push('System load is high - consider deferring non-critical operations');
-    }
-
-    if (context.metadata.frequency === 'high-frequency') {
-      recommendations.push('Optimize validation for high-frequency operations');
+    if (riskAssessment.level === HealthMetricsRiskLevel._HIGH || riskAssessment.level === HealthMetricsRiskLevel._CRITICAL) {
+      recommendations.push('Monitor operation closely for unexpected behavior');recommendations.push('Review system impact after operation completion');}if (context.systemContext.activeAlerts > 0) {
+      recommendations.push('Consider current system alerts when evaluating operation impact');}if (context.systemContext.systemLoad > 80) {
+      recommendations.push('System load is high - consider deferring non-critical operations');}if (context.metadata.frequency === 'high-frequency') {recommendations.push('Optimize validation for high-frequency operations');
     }
 
     return recommendations;

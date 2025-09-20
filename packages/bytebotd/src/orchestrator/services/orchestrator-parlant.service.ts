@@ -25,19 +25,13 @@
  * @since Orchestrator PARLANT Integration Implementation
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import {ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
   RiskLevel,
   ConversationalValidationError,
-} from '../../parlant/parlant-integration.service';
-import {
-  MultiServiceWorkflow,
+} from '../../parlant/parlant-integration.service';import {MultiServiceWorkflow,
   WorkflowStep,
   OrchestrationContext,
   WorkflowValidationResult,
@@ -55,19 +49,14 @@ import {
   MultiServiceCoordinationConfig,
   ApprovalWorkflowConfig,
   ParlantIntegrationConfig,
-} from '../types/orchestrator-parlant.types';
-import {
-  OrchestrationStatus,
+} from '../types/orchestrator-parlant.types';import {OrchestrationStatus,
   AgentStatus,
   TaskPriority,
   ResourceLimits,
   ResourceUsage,
   OrchestrationMetrics,
   OrchestrationEvent,
-} from '../../browser-use/types/orchestration.types';
-
-/**
- * Workflow approval decision result
+} from '../../browser-use/types/orchestration.types';/*** Workflow approval decision result
  */
 interface WorkflowApprovalResult {
   approved: boolean;
@@ -86,9 +75,7 @@ interface WorkflowApprovalResult {
 interface ApprovalCondition {
   conditionId: string;
   description: string;
-  type: 'MONITORING' | 'ROLLBACK_TRIGGER' | 'RESOURCE_LIMIT' | 'TIME_LIMIT' | 'BUSINESS_APPROVAL';
-  parameters: Record<string, unknown>;
-  mandatory: boolean;
+  type: 'MONITORING' | 'ROLLBACK_TRIGGER' | 'RESOURCE_LIMIT' | 'TIME_LIMIT' | 'BUSINESS_APPROVAL';parameters: Record<string, unknown>;mandatory: boolean;
   validationRequired: boolean;
 }
 
@@ -99,23 +86,17 @@ interface ServiceCoordinationValidationRequest {
   coordinationId: string;
   services: string[];
   operation: string;
-  operationType: 'DEPLOY' | 'SCALE' | 'CONFIGURE' | 'RESTART' | 'ROLLBACK' | 'FAILOVER';
-  businessJustification: string;
-  riskAssessment: WorkflowRiskAssessment;
+  operationType: 'DEPLOY' | 'SCALE' | 'CONFIGURE' | 'RESTART' | 'ROLLBACK' | 'FAILOVER';businessJustification: string;riskAssessment: WorkflowRiskAssessment;
   impactAssessment: BusinessImpactAssessment;
   requestedBy: string;
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  context: OrchestrationContext;
-}
+  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';context: OrchestrationContext;}
 
 /**
  * Load balancing validation request
  */
 interface LoadBalancingValidationRequest {
   balancingId: string;
-  operation: 'ROUTE_CHANGE' | 'WEIGHT_ADJUSTMENT' | 'TRAFFIC_SPLIT' | 'FAILOVER' | 'CIRCUIT_BREAK';
-  services: string[];
-  trafficPercentage: number;
+  operation: 'ROUTE_CHANGE' | 'WEIGHT_ADJUSTMENT' | 'TRAFFIC_SPLIT' | 'FAILOVER' | 'CIRCUIT_BREAK';services: string[];trafficPercentage: number;
   expectedImpact: BusinessImpactAssessment;
   rollbackPlan: string;
   businessJustification: string;
@@ -128,14 +109,10 @@ interface LoadBalancingValidationRequest {
  */
 interface HealthManagementValidationRequest {
   healthCheckId: string;
-  operation: 'FAILOVER' | 'RECOVERY' | 'DEGRADATION' | 'MAINTENANCE' | 'SCALING';
-  affectedServices: string[];
-  currentStatus: ServiceState[];
+  operation: 'FAILOVER' | 'RECOVERY' | 'DEGRADATION' | 'MAINTENANCE' | 'SCALING';affectedServices: string[];currentStatus: ServiceState[];
   proposedActions: string[];
   riskAssessment: WorkflowRiskAssessment;
-  automationLevel: 'MANUAL' | 'SEMI_AUTOMATIC' | 'AUTOMATIC';
-  businessJustification: string;
-  requestedBy: string;
+  automationLevel: 'MANUAL' | 'SEMI_AUTOMATIC' | 'AUTOMATIC';businessJustification: string;requestedBy: string;
   context: OrchestrationContext;
 }
 
@@ -144,10 +121,7 @@ interface HealthManagementValidationRequest {
  */
 interface ConfigurationValidationRequest {
   configurationId: string;
-  operation: 'UPDATE' | 'DEPLOY' | 'ROLLBACK' | 'ENVIRONMENT_SYNC' | 'SECURITY_UPDATE';
-  scope: 'SERVICE' | 'CLUSTER' | 'ENVIRONMENT' | 'GLOBAL';
-  configurationChanges: ConfigurationChange[];
-  impactAssessment: BusinessImpactAssessment;
+  operation: 'UPDATE' | 'DEPLOY' | 'ROLLBACK' | 'ENVIRONMENT_SYNC' | 'SECURITY_UPDATE';scope: 'SERVICE' | 'CLUSTER' | 'ENVIRONMENT' | 'GLOBAL';configurationChanges: ConfigurationChange[];impactAssessment: BusinessImpactAssessment;
   complianceRequirements: string[];
   rollbackPlan: string;
   businessJustification: string;
@@ -174,9 +148,7 @@ interface ConfigurationChange {
  */
 interface ApiGatewayValidationRequest {
   gatewayId: string;
-  operation: 'ROUTE_UPDATE' | 'RATE_LIMIT_CHANGE' | 'AUTH_POLICY_UPDATE' | 'CIRCUIT_BREAKER' | 'LOAD_BALANCER_UPDATE';
-  routes: ApiRoute[];
-  securityChanges: SecurityChange[];
+  operation: 'ROUTE_UPDATE' | 'RATE_LIMIT_CHANGE' | 'AUTH_POLICY_UPDATE' | 'CIRCUIT_BREAKER' | 'LOAD_BALANCER_UPDATE';routes: ApiRoute[];securityChanges: SecurityChange[];
   performanceImpact: PerformanceImpact;
   businessJustification: string;
   complianceRequirements: string[];
@@ -204,11 +176,7 @@ interface ApiRoute {
 interface RateLimitConfig {
   requestsPerSecond: number;
   burstCapacity: number;
-  algorithm: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW';
-  enforcement: 'BLOCK' | 'THROTTLE' | 'QUEUE';
-}
-
-/**
+  algorithm: 'TOKEN_BUCKET' | 'SLIDING_WINDOW' | 'FIXED_WINDOW';enforcement: 'BLOCK' | 'THROTTLE' | 'QUEUE';}/**
  * Security change definition
  */
 interface SecurityChange {
@@ -271,14 +239,9 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const operationId = `orchestrator_parlant_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // Load configuration
-    this.maxConcurrentWorkflows = this.configService.get<number>('ORCHESTRATOR_MAX_CONCURRENT_WORKFLOWS', 50);
-    this.defaultApprovalTimeout = this.configService.get<number>('ORCHESTRATOR_DEFAULT_APPROVAL_TIMEOUT_MINUTES', 30);
-    this.enableDistributedTracing = this.configService.get<boolean>('ORCHESTRATOR_DISTRIBUTED_TRACING_ENABLED', true);
-    this.auditingEnabled = this.configService.get<boolean>('ORCHESTRATOR_AUDITING_ENABLED', true);
+    this.maxConcurrentWorkflows = this.configService.get<number>('ORCHESTRATOR_MAX_CONCURRENT_WORKFLOWS', 50);this.defaultApprovalTimeout = this.configService.get<number>('ORCHESTRATOR_DEFAULT_APPROVAL_TIMEOUT_MINUTES', 30);this.enableDistributedTracing = this.configService.get<boolean>('ORCHESTRATOR_DISTRIBUTED_TRACING_ENABLED', true);this.auditingEnabled = this.configService.get<boolean>('ORCHESTRATOR_AUDITING_ENABLED', true);
 
-    this.logger.log(`[${operationId}] Initializing Orchestrator PARLANT Service`, {
-      maxConcurrentWorkflows: this.maxConcurrentWorkflows,
-      defaultApprovalTimeout: this.defaultApprovalTimeout,
+    this.logger.log(`[${operationId}] Initializing Orchestrator PARLANT Service`, {maxConcurrentWorkflows: this.maxConcurrentWorkflows,defaultApprovalTimeout: this.defaultApprovalTimeout,
       enableDistributedTracing: this.enableDistributedTracing,
       auditingEnabled: this.auditingEnabled,
     });
@@ -289,10 +252,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     // Set up event listeners for orchestration events
     this.setupEventListeners();
 
-    this.logger.log(`[${operationId}] Orchestrator PARLANT Service initialization completed`);
-  }
-
-  /**
+    this.logger.log(`[${operationId}] Orchestrator PARLANT Service initialization completed`);}/**
    * Validate multi-service operation through PARLANT conversational AI
    *
    * This is the core method for multi-service workflow validation that ensures
@@ -309,11 +269,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     context: OrchestrationContext
   ): Promise<WorkflowValidationResult> {
     const startTime = Date.now();
-    const operationId = `multi_service_validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Starting multi-service operation validation`, {
-      workflowId: workflow.workflowId,
-      stepsCount: workflow.steps.length,
+    const operationId = `multi_service_validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Starting multi-service operation validation`, {workflowId: workflow.workflowId,stepsCount: workflow.steps.length,
       overallRisk: workflow.riskAssessment.overallRisk,
       userId: context.userId,
       services: workflow.steps.map(step => step.targetService).filter((v, i, a) => a.indexOf(v) === i),
@@ -334,9 +290,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
       let haltedAt: string | undefined;
 
       for (const step of workflow.steps) {
-        this.logger.log(`[${operationId}] Validating workflow step: ${step.name}`, {
-          stepId: step.stepId,
-          targetService: step.targetService,
+        this.logger.log(`[${operationId}] Validating workflow step: ${step.name}`, {stepId: step.stepId,targetService: step.targetService,
           operation: step.operation,
           riskLevel: step.riskLevel,
         });
@@ -346,9 +300,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
 
         // Check if step requires approval and halt workflow if needed
         if (stepValidation.requiresApproval && !stepValidation.approved) {
-          this.logger.warn(`[${operationId}] Workflow halted at step requiring approval: ${step.name}`, {
-            stepId: step.stepId,
-            approvalType: stepValidation.approvalType,
+          this.logger.warn(`[${operationId}] Workflow halted at step requiring approval: ${step.name}`, {stepId: step.stepId,approvalType: stepValidation.approvalType,
             reasoning: stepValidation.reasoning,
           });
 
@@ -368,9 +320,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
           const approvalResult = await this.waitForApproval(approvalRequest, operationId);
 
           if (!approvalResult.approved) {
-            this.logger.warn(`[${operationId}] Workflow step approval denied or timed out`, {
-              stepId: step.stepId,
-              approvalId: approvalRequest.requestId,
+            this.logger.warn(`[${operationId}] Workflow step approval denied or timed out`, {stepId: step.stepId,approvalId: approvalRequest.requestId,
               result: approvalResult.status,
             });
             break;
@@ -441,9 +391,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         duration,
       });
 
-      this.logger.log(`[${operationId}] Multi-service operation validation completed`, {
-        workflowId: workflow.workflowId,
-        approved: allStepsApproved,
+      this.logger.log(`[${operationId}] Multi-service operation validation completed`, {workflowId: workflow.workflowId,approved: allStepsApproved,
         overallRisk,
         duration,
         stepsValidated: validationSteps.length,
@@ -496,9 +444,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   async validateServiceCoordination(
     request: ServiceCoordinationValidationRequest
   ): Promise<ParlantValidationResponse> {
-    const operationId = `service_coordination_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Validating service coordination operation`, {
+    const operationId = `service_coordination_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating service coordination operation`, {
       coordinationId: request.coordinationId,
       operation: request.operation,
       operationType: request.operationType,
@@ -517,8 +463,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         businessJustification: request.businessJustification,
         urgency: request.urgency,
       },
-      actionDescription: `Execute service coordination: ${request.operation} on services [${request.services.join(', ')}] with ${request.operationType} operation type`,
-      context: this.buildParlantContext(request.context, request.requestedBy),
+      actionDescription: `Execute service coordination: ${request.operation} on services [${request.services.join(`, ')}] with ${request.operationType} operation type',context: this.buildParlantContext(request.context, request.requestedBy),
       riskLevel: this.assessServiceCoordinationRisk(request),
       operationId,
     };
@@ -532,9 +477,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   async validateLoadBalancing(
     request: LoadBalancingValidationRequest
   ): Promise<ParlantValidationResponse> {
-    const operationId = `load_balancing_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Validating load balancing operation`, {
+    const operationId = `load_balancing_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating load balancing operation`, {
       balancingId: request.balancingId,
       operation: request.operation,
       services: request.services,
@@ -551,8 +494,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         expectedImpact: request.expectedImpact,
         rollbackPlan: request.rollbackPlan,
       },
-      actionDescription: `Execute load balancing: ${request.operation} affecting ${request.trafficPercentage}% traffic across services [${request.services.join(', ')}]`,
-      context: this.buildParlantContext(request.context, request.requestedBy),
+      actionDescription: `Execute load balancing: ${request.operation} affecting ${request.trafficPercentage}% traffic across services [${request.services.join(`, ')}]',context: this.buildParlantContext(request.context, request.requestedBy),
       riskLevel: this.assessLoadBalancingRisk(request),
       operationId,
     };
@@ -566,9 +508,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   async validateHealthManagement(
     request: HealthManagementValidationRequest
   ): Promise<ParlantValidationResponse> {
-    const operationId = `health_management_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Validating health management operation`, {
+    const operationId = `health_management_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating health management operation`, {
       healthCheckId: request.healthCheckId,
       operation: request.operation,
       affectedServices: request.affectedServices,
@@ -585,8 +525,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         proposedActions: request.proposedActions,
         automationLevel: request.automationLevel,
       },
-      actionDescription: `Execute health management: ${request.operation} on services [${request.affectedServices.join(', ')}] with ${request.automationLevel} automation`,
-      context: this.buildParlantContext(request.context, request.requestedBy),
+      actionDescription: `Execute health management: ${request.operation} on services [${request.affectedServices.join(`, ')}] with ${request.automationLevel} automation',context: this.buildParlantContext(request.context, request.requestedBy),
       riskLevel: this.assessHealthManagementRisk(request),
       operationId,
     };
@@ -600,9 +539,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   async validateConfigurationManagement(
     request: ConfigurationValidationRequest
   ): Promise<ParlantValidationResponse> {
-    const operationId = `configuration_management_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Validating configuration management operation`, {
+    const operationId = `configuration_management_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating configuration management operation`, {
       configurationId: request.configurationId,
       operation: request.operation,
       scope: request.scope,
@@ -620,9 +557,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         complianceRequirements: request.complianceRequirements,
         rollbackPlan: request.rollbackPlan,
       },
-      actionDescription: `Execute configuration management: ${request.operation} with ${request.scope} scope affecting ${request.configurationChanges.length} configuration parameters`,
-      context: this.buildParlantContext(request.context, request.requestedBy),
-      riskLevel: this.assessConfigurationRisk(request),
+      actionDescription: `Execute configuration management: ${request.operation} with ${request.scope} scope affecting ${request.configurationChanges.length} configuration parameters`,context: this.buildParlantContext(request.context, request.requestedBy),riskLevel: this.assessConfigurationRisk(request),
       operationId,
     };
 
@@ -635,9 +570,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   async validateApiGateway(
     request: ApiGatewayValidationRequest
   ): Promise<ParlantValidationResponse> {
-    const operationId = `api_gateway_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Validating API Gateway operation`, {
+    const operationId = `api_gateway_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating API Gateway operation`, {
       gatewayId: request.gatewayId,
       operation: request.operation,
       routesCount: request.routes.length,
@@ -654,9 +587,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
         performanceImpact: request.performanceImpact,
         complianceRequirements: request.complianceRequirements,
       },
-      actionDescription: `Execute API Gateway: ${request.operation} affecting ${request.routes.length} routes with ${request.securityChanges.length} security changes`,
-      context: this.buildParlantContext(request.context, request.requestedBy),
-      riskLevel: this.assessApiGatewayRisk(request),
+      actionDescription: `Execute API Gateway: ${request.operation} affecting ${request.routes.length} routes with ${request.securityChanges.length} security changes`,context: this.buildParlantContext(request.context, request.requestedBy),riskLevel: this.assessApiGatewayRisk(request),
       operationId,
     };
 
@@ -674,15 +605,9 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   ): Promise<void> {
     // Check if workflow is already active
     if (this.activeWorkflows.has(workflow.workflowId)) {
-      throw new Error(`Workflow ${workflow.workflowId} is already in progress`);
-    }
-
-    // Check concurrent workflow limits
+      throw new Error(`Workflow ${workflow.workflowId} is already in progress`);}// Check concurrent workflow limits
     if (this.activeWorkflows.size >= this.maxConcurrentWorkflows) {
-      throw new Error(`Maximum concurrent workflows limit reached: ${this.maxConcurrentWorkflows}`);
-    }
-
-    // Validate service dependencies
+      throw new Error(`Maximum concurrent workflows limit reached: ${this.maxConcurrentWorkflows}`);}// Validate service dependencies
     await this.validateServiceDependencies(workflow);
 
     // Check resource availability
@@ -702,9 +627,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   ): Promise<ConversationalContext> {
     const conversationalContext: ConversationalContext = {
       parlantSessionId: context.sessionId,
-      conversationId: `conv_${operationId}`,
-      messageHistory: [],
-      currentIntent: `validate_multi_service_workflow_${workflow.workflowId}`,
+      conversationId: `conv_${operationId}`,messageHistory: [],currentIntent: `validate_multi_service_workflow_${workflow.workflowId}`,
       confidence: 0.0,
       validationState: 'PENDING',
       approvalQueue: [],
@@ -728,21 +651,14 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
 
     // Build PARLANT validation request for the step
     const parlantRequest: ParlantValidationRequest = {
-      functionName: `orchestrator.workflow.step.${step.targetService}`,
-      functionParams: {
-        stepId: step.stepId,
+      functionName: `orchestrator.workflow.step.${step.targetService}`,functionParams: {stepId: step.stepId,
         operation: step.operation,
         parameters: step.parameters,
         targetService: step.targetService,
         dependencies: step.dependencies,
       },
-      actionDescription: `Execute workflow step: ${step.name} on service ${step.targetService} with operation ${step.operation}`,
-      context: this.buildParlantContext(context, context.userId),
-      riskLevel: step.riskLevel,
-      operationId: `${operationId}_step_${step.stepId}`,
-    };
-
-    try {
+      actionDescription: `Execute workflow step: ${step.name} on service ${step.targetService} with operation ${step.operation}`,context: this.buildParlantContext(context, context.userId),riskLevel: step.riskLevel,
+      operationId: `${operationId}_step_${step.stepId}`,};try {
       // Validate step through PARLANT
       const parlantResponse = await this.parlantIntegrationService.validateFunctionExecution(parlantRequest);
 
@@ -802,9 +718,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
           confidence: 0.0,
           technicalRisks: [`Validation failed: ${error instanceof Error ? error.message : String(error)}`],
           resourceRequirements: [],
-          implementationComplexity: 'VERY_HIGH',
-          estimatedEffort: 0,
-          prerequisites: [],
+          implementationComplexity: 'VERY_HIGH',estimatedEffort: 0,prerequisites: [],
         },
         complianceStatus: {
           compliant: false,
@@ -814,10 +728,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
             violationId: `violation_${step.stepId}`,
             severity: 'HIGH',
             description: `Step validation failed: ${error instanceof Error ? error.message : String(error)}`,
-            requirement: 'validation_requirement',
-            remediation: 'Resolve validation errors and retry',
-            timeToFix: 60,
-          }],
+            requirement: 'validation_requirement',remediation: 'Resolve validation errors and retry',timeToFix: 60,}],
           remediation: ['Resolve validation errors', 'Check service status', 'Verify permissions'],
           signoffRequired: true,
         },
@@ -846,9 +757,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
           },
         },
         dependencies: step.dependencies,
-        reasoning: `Step validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        validationTimestamp: new Date(),
-      };
+        reasoning: `Step validation failed: ${error instanceof Error ? error.message : String(error)}`,validationTimestamp: new Date(),};
     }
   }
 
@@ -864,9 +773,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     operationId: string
   ): Promise<ApprovalRequest> {
     const approvalRequest: ApprovalRequest = {
-      requestId: `approval_${operationId}_${step.stepId}`,
-      workflowId: workflow.workflowId,
-      stepId: step.stepId,
+      requestId: `approval_${operationId}_${step.stepId}`,workflowId: workflow.workflowId,stepId: step.stepId,
       description: `Approval required for workflow step: ${step.name}`,
       requestedBy: context.userId,
       requestTime: new Date(),
@@ -922,26 +829,16 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
       await new Promise(resolve => setTimeout(resolve, checkInterval));
 
       // Check if approval has been updated
-      if (approvalRequest.status !== 'PENDING') {
-        return {
-          approved: approvalRequest.status === 'APPROVED',
-          status: approvalRequest.status,
-          approver: approvalRequest.approver,
+      if (approvalRequest.status !== 'PENDING') {return {approved: approvalRequest.status === 'APPROVED',status: approvalRequest.status,approver: approvalRequest.approver,
           reasoning: approvalRequest.reasoning,
         };
       }
     }
 
     // Timeout reached
-    approvalRequest.status = 'TIMEOUT';
-    this.pendingApprovals.delete(approvalRequest.requestId);
-
-    return {
+    approvalRequest.status = 'TIMEOUT';this.pendingApprovals.delete(approvalRequest.requestId);return {
       approved: false,
-      status: 'TIMEOUT',
-      reasoning: 'Approval request timed out',
-    };
-  }
+      status: 'TIMEOUT',reasoning: 'Approval request timed out',};}
 
   /**
    * Build PARLANT context from orchestration context
@@ -950,9 +847,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     return {
       userId,
       sessionId: context.sessionId,
-      agentRole: 'orchestrator',
-      securityLevel: this.determineSecurityLevel(context),
-      conversationHistory: this.buildConversationHistory(context),
+      agentRole: 'orchestrator',securityLevel: this.determineSecurityLevel(context),conversationHistory: this.buildConversationHistory(context),
       metadata: {
         contextId: context.contextId,
         workflowId: context.workflowId,
@@ -971,19 +866,13 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const operationType = request.operationType;
     const urgency = request.urgency;
 
-    if (operationType === 'FAILOVER' || urgency === 'CRITICAL') {
-      return RiskLevel.CRITICAL;
-    }
+    if (operationType === 'FAILOVER' || urgency === 'CRITICAL') {return RiskLevel._CRITICAL;}
 
-    if (operationType === 'RESTART' || serviceCount > 5) {
-      return RiskLevel.HIGH;
-    }
+    if (operationType === 'RESTART' || serviceCount > 5) {return RiskLevel._HIGH;}
 
-    if (operationType === 'CONFIGURE' || operationType === 'SCALE') {
-      return RiskLevel.MEDIUM;
-    }
+    if (operationType === 'CONFIGURE' || operationType === 'SCALE') {return RiskLevel._MODERATE;}
 
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   /**
@@ -993,15 +882,11 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const trafficImpact = request.trafficPercentage;
     const operation = request.operation;
 
-    if (operation === 'FAILOVER' || trafficImpact > 50) {
-      return RiskLevel.HIGH;
-    }
+    if (operation === 'FAILOVER' || trafficImpact > 50) {return RiskLevel._HIGH;}
 
-    if (operation === 'CIRCUIT_BREAK' || trafficImpact > 25) {
-      return RiskLevel.MEDIUM;
-    }
+    if (operation === 'CIRCUIT_BREAK' || trafficImpact > 25) {return RiskLevel._MODERATE;}
 
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   /**
@@ -1012,15 +897,11 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const automationLevel = request.automationLevel;
     const serviceCount = request.affectedServices.length;
 
-    if (operation === 'FAILOVER' || automationLevel === 'AUTOMATIC') {
-      return RiskLevel.HIGH;
-    }
+    if (operation === 'FAILOVER' || automationLevel === 'AUTOMATIC') {return RiskLevel._HIGH;}
 
-    if (operation === 'RECOVERY' || serviceCount > 3) {
-      return RiskLevel.MEDIUM;
-    }
+    if (operation === 'RECOVERY' || serviceCount > 3) {return RiskLevel._MODERATE;}
 
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   /**
@@ -1030,22 +911,16 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const scope = request.scope;
     const changesCount = request.configurationChanges.length;
     const hasHighRiskChanges = request.configurationChanges.some(change =>
-      change.riskLevel === RiskLevel.HIGH || change.riskLevel === RiskLevel.CRITICAL
+      change.riskLevel === RiskLevel._HIGH || change.riskLevel === RiskLevel._CRITICAL
     );
 
-    if (scope === 'GLOBAL' || hasHighRiskChanges) {
-      return RiskLevel.CRITICAL;
-    }
+    if (scope === 'GLOBAL' || hasHighRiskChanges) {return RiskLevel._CRITICAL;}
 
-    if (scope === 'ENVIRONMENT' || changesCount > 10) {
-      return RiskLevel.HIGH;
-    }
+    if (scope === 'ENVIRONMENT' || changesCount > 10) {return RiskLevel._HIGH;}
 
-    if (scope === 'CLUSTER' || changesCount > 5) {
-      return RiskLevel.MEDIUM;
-    }
+    if (scope === 'CLUSTER' || changesCount > 5) {return RiskLevel._MODERATE;}
 
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   /**
@@ -1055,18 +930,14 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const operation = request.operation;
     const hasSecurityChanges = request.securityChanges.length > 0;
     const hasHighRiskRoutes = request.routes.some(route =>
-      route.riskLevel === RiskLevel.HIGH || route.riskLevel === RiskLevel.CRITICAL
+      route.riskLevel === RiskLevel._HIGH || route.riskLevel === RiskLevel._CRITICAL
     );
 
-    if (operation === 'AUTH_POLICY_UPDATE' || hasHighRiskRoutes) {
-      return RiskLevel.HIGH;
-    }
+    if (operation === 'AUTH_POLICY_UPDATE' || hasHighRiskRoutes) {return RiskLevel._HIGH;}
 
-    if (hasSecurityChanges || operation === 'RATE_LIMIT_CHANGE') {
-      return RiskLevel.MEDIUM;
-    }
+    if (hasSecurityChanges || operation === 'RATE_LIMIT_CHANGE') {return RiskLevel._MODERATE;}
 
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   // ===== VALIDATION HELPER METHODS =====
@@ -1093,9 +964,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
       confidence: 0.9,
       technicalRisks: [],
       resourceRequirements: [],
-      implementationComplexity: 'MEDIUM',
-      estimatedEffort: step.executionTimeout,
-      prerequisites: step.dependencies,
+      implementationComplexity: 'MEDIUM',estimatedEffort: step.executionTimeout,prerequisites: step.dependencies,
     };
   }
 
@@ -1103,11 +972,9 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     // Implementation for compliance checking
     return {
       compliant: true,
-      framework: 'enterprise',
-      requirements: [],
-      violations: [],
+      framework: 'enterprise',requirements: [],violations: [],
       remediation: [],
-      signoffRequired: step.riskLevel === RiskLevel.CRITICAL,
+      signoffRequired: step.riskLevel === RiskLevel._CRITICAL,
     };
   }
 
@@ -1140,23 +1007,17 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
 
   private determineApprovalRequirement(step: WorkflowStep, parlantResponse: ParlantValidationResponse): boolean {
     return step.requiresApproval ||
-           step.riskLevel === RiskLevel.HIGH ||
-           step.riskLevel === RiskLevel.CRITICAL ||
+           step.riskLevel === RiskLevel._HIGH ||
+           step.riskLevel === RiskLevel._CRITICAL ||
            !parlantResponse.approved;
   }
 
-  private determineApprovalType(step: WorkflowStep, requiresApproval: boolean): 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL' {
-    if (!requiresApproval) return 'AUTOMATIC';
-    if (step.riskLevel === RiskLevel.CRITICAL) return 'MANUAL';
-    return 'CONVERSATIONAL';
-  }
-
-  private calculateOverallRisk(validationSteps: ValidationStep[]): RiskLevel {
+  private determineApprovalType(step: WorkflowStep, requiresApproval: boolean): 'AUTOMATIC' | 'MANUAL' | 'CONVERSATIONAL' {if (!requiresApproval) return 'AUTOMATIC';if (step.riskLevel === RiskLevel._CRITICAL) return 'MANUAL';return 'CONVERSATIONAL';}private calculateOverallRisk(validationSteps: ValidationStep[]): RiskLevel {
     const risks = validationSteps.map(step => step.riskLevel);
-    if (risks.includes(RiskLevel.CRITICAL)) return RiskLevel.CRITICAL;
-    if (risks.includes(RiskLevel.HIGH)) return RiskLevel.HIGH;
-    if (risks.includes(RiskLevel.MEDIUM)) return RiskLevel.MEDIUM;
-    return RiskLevel.LOW;
+    if (risks.includes(RiskLevel._CRITICAL)) return RiskLevel._CRITICAL;
+    if (risks.includes(RiskLevel._HIGH)) return RiskLevel._HIGH;
+    if (risks.includes(RiskLevel._MODERATE)) return RiskLevel._MODERATE;
+    return RiskLevel._LOW;
   }
 
   private async calculateResourceRequirements(validationSteps: ValidationStep[], workflow: MultiServiceWorkflow): Promise<any[]> {
@@ -1165,15 +1026,13 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
   }
 
   private requiresBusinessApproval(workflow: MultiServiceWorkflow, validationSteps: ValidationStep[]): boolean {
-    return workflow.riskAssessment.overallRisk === RiskLevel.CRITICAL ||
+    return workflow.riskAssessment.overallRisk === RiskLevel._CRITICAL ||
            validationSteps.some(step => step.businessImpact.financialImpact.estimatedCost > 10000);
   }
 
   private requiresTechnicalApproval(workflow: MultiServiceWorkflow, validationSteps: ValidationStep[]): boolean {
     return validationSteps.some(step =>
-      step.technicalFeasibility.implementationComplexity === 'VERY_HIGH' ||
-      step.riskLevel === RiskLevel.HIGH ||
-      step.riskLevel === RiskLevel.CRITICAL
+      step.technicalFeasibility.implementationComplexity === 'VERY_HIGH' ||step.riskLevel === RiskLevel._HIGH ||step.riskLevel === RiskLevel._CRITICAL
     );
   }
 
@@ -1186,32 +1045,14 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
 
     // Add recommendations based on validation results
     if (validationSteps.some(step => !step.approved)) {
-      recommendations.push('Review and resolve validation failures before proceeding');
-    }
-
-    if (workflow.riskAssessment.overallRisk === RiskLevel.HIGH || workflow.riskAssessment.overallRisk === RiskLevel.CRITICAL) {
-      recommendations.push('Consider implementing additional safeguards for high-risk operations');
-    }
-
-    recommendations.push('Monitor resource utilization during execution');
-    recommendations.push('Ensure rollback procedures are ready');
-
-    return recommendations;
-  }
+      recommendations.push('Review and resolve validation failures before proceeding');}if (workflow.riskAssessment.overallRisk === RiskLevel._HIGH || workflow.riskAssessment.overallRisk === RiskLevel._CRITICAL) {
+      recommendations.push('Consider implementing additional safeguards for high-risk operations');}recommendations.push('Monitor resource utilization during execution');recommendations.push('Ensure rollback procedures are ready');return recommendations;}
 
   private generateNextActions(allStepsApproved: boolean, validationSteps: ValidationStep[], context: OrchestrationContext): string[] {
     const nextActions: string[] = [];
 
     if (allStepsApproved) {
-      nextActions.push('Proceed with workflow execution');
-      nextActions.push('Monitor execution progress');
-    } else {
-      nextActions.push('Address validation failures');
-      nextActions.push('Request necessary approvals');
-    }
-
-    nextActions.push('Review execution logs');
-    nextActions.push('Update stakeholders on progress');
+      nextActions.push('Proceed with workflow execution');nextActions.push('Monitor execution progress');} else {nextActions.push('Address validation failures');nextActions.push('Request necessary approvals');}nextActions.push('Review execution logs');nextActions.push('Update stakeholders on progress');
 
     return nextActions;
   }
@@ -1221,9 +1062,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     const totalCount = validationSteps.length;
 
     if (allStepsApproved) {
-      return `All ${totalCount} workflow steps validated successfully and approved for execution`;
-    } else {
-      return `${approvedCount} of ${totalCount} workflow steps approved. ${totalCount - approvedCount} steps require additional approval or remediation`;
+      return `All ${totalCount} workflow steps validated successfully and approved for execution`;} else {return `${approvedCount} of ${totalCount} workflow steps approved. ${totalCount - approvedCount} steps require additional approval or remediation`;
     }
   }
 
@@ -1247,10 +1086,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
       entryId: result.validationId,
       timestamp: result.timestamp,
       stepId: result.workflowId,
-      validationType: 'CONVERSATIONAL',
-      result: result.approved ? 'APPROVED' : 'DENIED',
-      reasoning: result.reasoning,
-      duration: 0, // Will be calculated based on timestamps
+      validationType: 'CONVERSATIONAL',result: result.approved ? 'APPROVED' : 'DENIED',reasoning: result.reasoning,duration: 0, // Will be calculated based on timestamps
     };
 
     const history = this.validationHistory.get(result.workflowId) || [];
@@ -1258,47 +1094,30 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     this.validationHistory.set(result.workflowId, history);
   }
 
-  private determineSecurityLevel(context: OrchestrationContext): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    // Implementation for determining security level based on context
-    return 'MEDIUM';
-  }
-
-  private buildConversationHistory(context: OrchestrationContext): any[] {
+  private determineSecurityLevel(context: OrchestrationContext): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {// Implementation for determining security level based on contextreturn 'MEDIUM';}private buildConversationHistory(context: OrchestrationContext): any[] {
     // Implementation for building conversation history
     return [];
   }
 
-  private determineApprovalUrgency(step: WorkflowStep, validation: ValidationStep): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (step.riskLevel === RiskLevel.CRITICAL) return 'CRITICAL';
-    if (step.riskLevel === RiskLevel.HIGH) return 'HIGH';
-    return 'MEDIUM';
+  private determineApprovalUrgency(step: WorkflowStep, validation: ValidationStep): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (step.riskLevel === RiskLevel._CRITICAL) return 'CRITICAL';if (step.riskLevel === RiskLevel._HIGH) return 'HIGH';return 'MEDIUM';
   }
 
   private generateBusinessJustification(step: WorkflowStep, validation: ValidationStep): string {
-    return `Business justification for ${step.name}: ${step.businessImpact.financialImpact.justification}`;
-  }
-
-  private generateApprovalConditions(step: WorkflowStep, validation: ValidationStep): ApprovalCondition[] {
+    return `Business justification for ${step.name}: ${step.businessImpact.financialImpact.justification}`;}private generateApprovalConditions(step: WorkflowStep, validation: ValidationStep): ApprovalCondition[] {
     return [
       {
         conditionId: `condition_${step.stepId}_monitoring`,
-        description: 'Continuous monitoring during execution',
-        type: 'MONITORING',
-        parameters: { level: 'COMPREHENSIVE' },
-        mandatory: true,
-        validationRequired: false,
+        description: 'Continuous monitoring during execution',type: 'MONITORING',parameters: { level: 'COMPREHENSIVE' },mandatory: true,validationRequired: false,
       },
     ];
   }
 
   private determineApproverRole(step: WorkflowStep, validation: ValidationStep): string {
-    if (step.riskLevel === RiskLevel.CRITICAL) return 'SENIOR_MANAGER';
-    if (step.riskLevel === RiskLevel.HIGH) return 'TECHNICAL_LEAD';
-    return 'TEAM_LEAD';
+    if (step.riskLevel === RiskLevel._CRITICAL) return 'SENIOR_MANAGER';if (step.riskLevel === RiskLevel._HIGH) return 'TECHNICAL_LEAD';return 'TEAM_LEAD';
   }
 
   private generateConversationalPrompt(step: WorkflowStep, validation: ValidationStep): string {
-    return `Please review and approve the execution of workflow step "${step.name}" with ${step.riskLevel} risk level. ${validation.reasoning}`;
+    return `Please review and approve the execution of workflow step "${step.name}" with ${step.riskLevel} risk level. ${validation.reasoning}";
   }
 
   /**
@@ -1316,26 +1135,16 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
    */
   private setupEventListeners(): void {
     // Listen for orchestration events and update state accordingly
-    this.eventEmitter.on('orchestrator.service.health.changed', (event) => {
-      this.handleServiceHealthChange(event);
-    });
+    this.eventEmitter.on('orchestrator.service.health.changed', (event) => {this.handleServiceHealthChange(event);});
 
-    this.eventEmitter.on('orchestrator.resource.allocation.changed', (event) => {
-      this.handleResourceAllocationChange(event);
-    });
+    this.eventEmitter.on('orchestrator.resource.allocation.changed', (event) => {this.handleResourceAllocationChange(event);});
   }
 
   private handleServiceHealthChange(event: any): void {
     // Implementation for handling service health changes
-    this.logger.log('Service health changed', event);
-  }
-
-  private handleResourceAllocationChange(event: any): void {
+    this.logger.log('Service health changed', event);}private handleResourceAllocationChange(event: any): void {
     // Implementation for handling resource allocation changes
-    this.logger.log('Resource allocation changed', event);
-  }
-
-  private logPerformanceMetrics(): void {
+    this.logger.log('Resource allocation changed', event);}private logPerformanceMetrics(): void {
     this.logger.log('Orchestrator PARLANT Service Performance Metrics', {
       totalValidations: this.validationMetrics.totalValidations,
       approvedValidations: this.validationMetrics.approvedValidations,
@@ -1351,10 +1160,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
    * Clean up resources on service shutdown
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down Orchestrator PARLANT Service');
-
-    // Clean up active workflows
-    this.activeWorkflows.clear();
+    this.logger.log('Shutting down Orchestrator PARLANT Service');// Clean up active workflowsthis.activeWorkflows.clear();
     this.pendingApprovals.clear();
     this.conversationalSessions.clear();
 

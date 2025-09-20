@@ -16,23 +16,13 @@
  * - System Throughput: 5-8x improvement with effective caching
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
-import { ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-
-// ===== MULTI-LEVEL CACHE INTERFACES =====
-
-/**
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { createHash } from 'crypto';import { ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';// ===== MULTI-LEVEL CACHE INTERFACES =====/**
  * L1 Cache: In-Memory Function Result Cache
  */
 export interface L1CacheConfig {
   readonly maxSize: number;           // 10000 maximum cached items
   readonly ttlMs: number;             // 100ms TTL for immediate reuse
-  readonly evictionPolicy: 'LRU';     // Least Recently Used
-}
-
-export interface L1CacheEntry {
+  readonly evictionPolicy: 'LRU';     // Least Recently Used}export interface L1CacheEntry {
   readonly result: ParlantValidationResponse;
   readonly timestamp: number;
   readonly accessCount: number;
@@ -52,9 +42,7 @@ export interface L2CacheConfig {
   };
   readonly compression: {
     readonly enabled: boolean;
-    readonly algorithm: 'gzip';
-    readonly level: number;
-  };
+    readonly algorithm: 'gzip';readonly level: number;};
 }
 
 export interface ValidationPattern {
@@ -69,9 +57,7 @@ export interface ValidationPattern {
  * L3 Cache: Long-Term Persistent Cache
  */
 export interface L3CacheConfig {
-  readonly database: 'sqlite' | 'postgresql';
-  readonly retention: {
-    readonly successful: number;   // 1 hour for successful validations
+  readonly database: 'sqlite' | 'postgresql';readonly retention: {readonly successful: number;   // 1 hour for successful validations
     readonly failed: number;       // 5 minutes for failed validations
   };
   readonly compression: {
@@ -88,9 +74,7 @@ export interface ValidationMetadata {
   readonly timestamp: Date;
   readonly context: Record<string, unknown>;
   readonly cacheHit: boolean;
-  readonly cacheLevel?: 'L1' | 'L2' | 'L3';
-  readonly batchProcessed: boolean;
-  readonly batchId?: string;
+  readonly cacheLevel?: 'L1' | 'L2' | 'L3';readonly batchProcessed: boolean;readonly batchId?: string;
   readonly circuitBreakerUsed: boolean;
   readonly degradedMode: boolean;
   readonly retryAttempts: number;
@@ -148,10 +132,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   private readonly l1Config: L1CacheConfig = {
     maxSize: 10000,
     ttlMs: 100,
-    evictionPolicy: 'LRU'
-  };
-
-  // L2 Cache: Distributed Redis (placeholder for now)
+    evictionPolicy: 'LRU'};// L2 Cache: Distributed Redis (placeholder for now)
   private redisClient: unknown = null;
   private readonly l2Config: L2CacheConfig = {
     redis: {
@@ -163,17 +144,13 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     },
     compression: {
       enabled: true,
-      algorithm: 'gzip',
-      level: 6
-    }
+      algorithm: 'gzip',level: 6}
   };
 
   // L3 Cache: Persistent Storage (placeholder for now)
   private dbClient: unknown = null;
   private readonly l3Config: L3CacheConfig = {
-    database: 'sqlite',
-    retention: {
-      successful: 3600000, // 1 hour
+    database: 'sqlite',retention: {successful: 3600000, // 1 hour
       failed: 300000,      // 5 minutes
     },
     compression: {
@@ -223,10 +200,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Parlant Multi-Level Cache Service...');
-    
-    // Initialize cache configurations from environment
-    this.initializeCacheConfigurations();
+    this.logger.log('Initializing Parlant Multi-Level Cache Service...');// Initialize cache configurations from environmentthis.initializeCacheConfigurations();
     
     // TODO: Initialize Redis client for L2 cache
     // TODO: Initialize database client for L3 cache
@@ -250,17 +224,9 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   private normalizeParameters(params: unknown[]): string {
     return params
       .map(param => this.normalizeParameter(param))
-      .join('|');
-  }
-
-  private normalizeParameter(param: unknown): string {
+      .join('|');}private normalizeParameter(param: unknown): string {
     if (param === null || param === undefined) {
-      return 'null';
-    }
-    
-    if (typeof param === 'object' && param !== null) {
-      // Sort object keys for consistent hashing
-      const sorted = Object.keys(param as Record<string, unknown>)
+      return 'null';}if (typeof param === 'object' && param !== null) {// Sort object keys for consistent hashingconst sorted = Object.keys(param as Record<string, unknown>)
         .sort()
         .reduce((acc, key) => {
           acc[key] = (param as Record<string, unknown>)[key];
@@ -357,25 +323,17 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   ): Promise<void> {
     // TODO: Implement Redis cluster caching
     // For now, placeholder implementation
-    this.logger.debug(`L2 Cache SET: ${key} (placeholder)`);
-  }
-
-  private async getL2Cache(key: string): Promise<ParlantValidationResponse | null> {
+    this.logger.debug(`L2 Cache SET: ${key} (placeholder)`);}private async getL2Cache(key: string): Promise<ParlantValidationResponse | null> {
     // TODO: Implement Redis cluster lookup
     // For now, placeholder implementation
-    this.logger.debug(`L2 Cache GET: ${key} (placeholder)`);
-    return null;
-  }
+    this.logger.debug(`L2 Cache GET: ${key} (placeholder)`);return null;}
 
   private async cacheValidationPattern(
     functionSignature: string,
     _pattern: ValidationPattern
   ): Promise<void> {
     // TODO: Implement pattern caching in Redis
-    this.logger.debug(`L2 Pattern Cache: ${functionSignature} (placeholder)`);
-  }
-
-  // ===== L3 CACHE: PERSISTENT LONG-TERM CACHE =====
+    this.logger.debug(`L2 Pattern Cache: ${functionSignature} (placeholder)`);}// ===== L3 CACHE: PERSISTENT LONG-TERM CACHE =====
 
   private async setL3Cache(
     key: string,
@@ -383,10 +341,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     _metadata: ValidationMetadata
   ): Promise<void> {
     // TODO: Implement persistent database caching
-    this.logger.debug(`L3 Cache SET: ${key} (placeholder)`);
-  }
-
-  private async getL3Cache(key: string): Promise<ParlantValidationResponse | null> {
+    this.logger.debug(`L3 Cache SET: ${key} (placeholder)`);}private async getL3Cache(key: string): Promise<ParlantValidationResponse | null> {
     // TODO: Implement persistent database lookup
     this.logger.debug(`L3 Cache GET: ${key} (placeholder)`);
     return null;
@@ -412,9 +367,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
       const l1Result = this.getL1Cache(key);
       if (l1Result) {
         this.performanceMetrics.l1Hits++;
-        this.recordCacheHit('L1', Date.now() - startTime);
-        return l1Result;
-      }
+        this.recordCacheHit('L1', Date.now() - startTime);return l1Result;}
       
       // L2 Cache: Distributed Redis lookup (5-15ms)
       const l2Result = await this.getL2Cache(key);
@@ -422,9 +375,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
         // Store in L1 for future fast access
         this.setL1Cache(key, l2Result);
         this.performanceMetrics.l2Hits++;
-        this.recordCacheHit('L2', Date.now() - startTime);
-        return l2Result;
-      }
+        this.recordCacheHit('L2', Date.now() - startTime);return l2Result;}
       
       // L3 Cache: Persistent database lookup (20-50ms)
       const l3Result = await this.getL3Cache(key);
@@ -443,9 +394,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
       return null;
       
     } catch (error) {
-      this.logger.error(`Cache lookup error for key ${key}:`, error);
-      return null;
-    }
+      this.logger.error(`Cache lookup error for key ${key}:`, error);return null;}
   }
 
   /**
@@ -467,9 +416,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
       await this.setL3Cache(key, result, metadata);
       
     } catch (error) {
-      this.logger.error(`Cache storage error for key ${key}:`, error);
-    }
-  }
+      this.logger.error(`Cache storage error for key ${key}:`, error);}}
 
   /**
    * Invalidate cache entries by pattern
@@ -489,9 +436,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   // ===== PERFORMANCE TRACKING =====
 
-  private recordCacheHit(level: 'L1' | 'L2' | 'L3', latency: number): void {
-    this.performanceMetrics.latencySum += latency;
-    this.updateCacheStats();
+  private recordCacheHit(level: 'L1' | 'L2' | 'L3', latency: number): void {this.performanceMetrics.latencySum += latency;this.updateCacheStats();
   }
 
   private recordCacheMiss(latency: number): void {
@@ -506,27 +451,19 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     this.stats = { ...this.stats, ...updates };
   }
 
-  private updateL1Stats(updates: Partial<MultiLevelCacheStats['l1Stats']>): void {
-    this.updateMultiLevelStats({
-      l1Stats: { ...this.stats.l1Stats, ...updates }
+  private updateL1Stats(updates: Partial<MultiLevelCacheStats['l1Stats']>): void {this.updateMultiLevelStats({l1Stats: { ...this.stats.l1Stats, ...updates }
     });
   }
 
-  private updateL2Stats(updates: Partial<MultiLevelCacheStats['l2Stats']>): void {
-    this.updateMultiLevelStats({
-      l2Stats: { ...this.stats.l2Stats, ...updates }
+  private updateL2Stats(updates: Partial<MultiLevelCacheStats['l2Stats']>): void {this.updateMultiLevelStats({l2Stats: { ...this.stats.l2Stats, ...updates }
     });
   }
 
-  private updateL3Stats(updates: Partial<MultiLevelCacheStats['l3Stats']>): void {
-    this.updateMultiLevelStats({
-      l3Stats: { ...this.stats.l3Stats, ...updates }
+  private updateL3Stats(updates: Partial<MultiLevelCacheStats['l3Stats']>): void {this.updateMultiLevelStats({l3Stats: { ...this.stats.l3Stats, ...updates }
     });
   }
 
-  private updateOverallStats(updates: Partial<MultiLevelCacheStats['overallStats']>): void {
-    this.updateMultiLevelStats({
-      overallStats: { ...this.stats.overallStats, ...updates }
+  private updateOverallStats(updates: Partial<MultiLevelCacheStats['overallStats']>): void {this.updateMultiLevelStats({overallStats: { ...this.stats.overallStats, ...updates }
     });
   }
 
@@ -584,10 +521,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     const latencyTarget = stats.overallStats.averageLatency <= 30;
     
     if (!hitRateTarget) {
-      issues.push(`Cache hit rate ${(stats.overallStats.totalHitRate * 100).toFixed(1)}% below 85% target`);
-    }
-    
-    if (!latencyTarget) {
+      issues.push(`Cache hit rate ${(stats.overallStats.totalHitRate * 100).toFixed(1)}% below 85% target`);}if (!latencyTarget) {
       issues.push(`Average latency ${stats.overallStats.averageLatency.toFixed(1)}ms above 30ms target`);
     }
     
@@ -607,14 +541,8 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     const recommendations: string[] = [];
     
     if (stats.l1Stats.hitRate < 0.7) {
-      recommendations.push('Increase L1 cache size by 50% to improve hit rate');
-    }
-    
-    if (stats.l2Stats.hitRate < 0.8) {
-      recommendations.push('Review pattern matching algorithm for L2 cache optimization');
-    }
-    
-    if (stats.overallStats.averageLatency > 30) {
+      recommendations.push('Increase L1 cache size by 50% to improve hit rate');}if (stats.l2Stats.hitRate < 0.8) {
+      recommendations.push('Review pattern matching algorithm for L2 cache optimization');}if (stats.overallStats.averageLatency > 30) {
       recommendations.push('Consider cache warming strategies for frequently accessed patterns');
     }
     

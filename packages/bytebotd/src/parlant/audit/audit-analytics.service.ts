@@ -25,19 +25,10 @@
  * @version 1.0.0 - Advanced Analytics Framework
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-import {
-  ImmutableAuditEvent,
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as crypto from 'crypto';import {ImmutableAuditEvent,
   AuditOperationType,
   ComplianceRegulation
-} from './enterprise-audit-trail.service';
-
-// ===== ANALYTICS INTERFACES =====
-
-/**
+} from './enterprise-audit-trail.service';// ===== ANALYTICS INTERFACES =====/**
  * Analytics configuration
  */
 export interface AnalyticsConfiguration {
@@ -45,16 +36,10 @@ export interface AnalyticsConfiguration {
   readonly realTimeAnalysis: boolean;
   readonly batchAnalysis: boolean;
   readonly machineLearningEnabled: boolean;
-  readonly anomalyDetectionSensitivity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly patternDetectionDepth: 'SHALLOW' | 'MODERATE' | 'DEEP' | 'COMPREHENSIVE';
-  readonly threatIntelligenceEnabled: boolean;
-  readonly behavioralProfilingEnabled: boolean;
+  readonly anomalyDetectionSensitivity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly patternDetectionDepth: 'SHALLOW' | 'MODERATE' | 'DEEP' | 'COMPREHENSIVE';readonly threatIntelligenceEnabled: boolean;readonly behavioralProfilingEnabled: boolean;
   readonly predictiveAnalyticsEnabled: boolean;
   readonly retentionPeriodDays: number;
-  readonly analysisFrequency: 'REAL_TIME' | 'MINUTELY' | 'HOURLY' | 'DAILY';
-}
-
-/**
+  readonly analysisFrequency: 'REAL_TIME' | 'MINUTELY' | 'HOURLY' | 'DAILY';}/**
  * Analytics result
  */
 export interface AnalyticsResult {
@@ -77,17 +62,7 @@ export interface AnalyticsResult {
  * Analysis types
  */
 export enum AnalysisType {
-  PATTERN_RECOGNITION = 'pattern_recognition',
-  ANOMALY_DETECTION = 'anomaly_detection',
-  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
-  THREAT_ANALYSIS = 'threat_analysis',
-  TREND_ANALYSIS = 'trend_analysis',
-  CORRELATION_ANALYSIS = 'correlation_analysis',
-  PREDICTIVE_ANALYSIS = 'predictive_analysis',
-  RISK_ASSESSMENT = 'risk_assessment',
-}
-
-/**
+  PATTERN_RECOGNITION = 'pattern_recognition',ANOMALY_DETECTION = 'anomaly_detection',BEHAVIORAL_ANALYSIS = 'behavioral_analysis',THREAT_ANALYSIS = 'threat_analysis',TREND_ANALYSIS = 'trend_analysis',CORRELATION_ANALYSIS = 'correlation_analysis',PREDICTIVE_ANALYSIS = 'predictive_analysis',RISK_ASSESSMENT = 'risk_assessment',}/**
  * Analysis scope
  */
 export interface AnalysisScope {
@@ -108,9 +83,7 @@ export interface AnalysisScope {
 export interface AnalyticsFinding {
   readonly findingId: string;
   readonly type: FindingType;
-  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly confidence: number;
-  readonly title: string;
+  readonly severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly confidence: number;readonly title: string;
   readonly description: string;
   readonly evidence: EvidenceItem[];
   readonly affectedEntities: AffectedEntity[];
@@ -125,19 +98,7 @@ export interface AnalyticsFinding {
  * Finding types
  */
 export enum FindingType {
-  SECURITY_ANOMALY = 'security_anomaly',
-  BEHAVIORAL_DEVIATION = 'behavioral_deviation',
-  ACCESS_PATTERN_ANOMALY = 'access_pattern_anomaly',
-  TEMPORAL_ANOMALY = 'temporal_anomaly',
-  VOLUME_ANOMALY = 'volume_anomaly',
-  PRIVILEGE_ESCALATION_PATTERN = 'privilege_escalation_pattern',
-  DATA_EXFILTRATION_INDICATOR = 'data_exfiltration_indicator',
-  INSIDER_THREAT_INDICATOR = 'insider_threat_indicator',
-  EXTERNAL_ATTACK_PATTERN = 'external_attack_pattern',
-  COMPLIANCE_VIOLATION_PATTERN = 'compliance_violation_pattern',
-}
-
-/**
+  SECURITY_ANOMALY = 'security_anomaly',BEHAVIORAL_DEVIATION = 'behavioral_deviation',ACCESS_PATTERN_ANOMALY = 'access_pattern_anomaly',TEMPORAL_ANOMALY = 'temporal_anomaly',VOLUME_ANOMALY = 'volume_anomaly',PRIVILEGE_ESCALATION_PATTERN = 'privilege_escalation_pattern',DATA_EXFILTRATION_INDICATOR = 'data_exfiltration_indicator',INSIDER_THREAT_INDICATOR = 'insider_threat_indicator',EXTERNAL_ATTACK_PATTERN = 'external_attack_pattern',COMPLIANCE_VIOLATION_PATTERN = 'compliance_violation_pattern',}/**
  * Evidence item for analytics
  */
 export interface EvidenceItem {
@@ -153,11 +114,7 @@ export interface EvidenceItem {
  * Affected entity
  */
 export interface AffectedEntity {
-  readonly entityType: 'USER' | 'SYSTEM' | 'RESOURCE' | 'NETWORK' | 'APPLICATION';
-  readonly entityId: string;
-  readonly impactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-}
+  readonly entityType: 'USER' | 'SYSTEM' | 'RESOURCE' | 'NETWORK' | 'APPLICATION';readonly entityId: string;readonly impactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;}
 
 /**
  * Analytics pattern
@@ -181,17 +138,7 @@ export interface AnalyticsPattern {
  * Pattern types
  */
 export enum PatternType {
-  TEMPORAL = 'temporal',
-  BEHAVIORAL = 'behavioral',
-  ACCESS = 'access',
-  COMMUNICATION = 'communication',
-  OPERATIONAL = 'operational',
-  SECURITY = 'security',
-  COMPLIANCE = 'compliance',
-  BUSINESS = 'business',
-}
-
-/**
+  TEMPORAL = 'temporal',BEHAVIORAL = 'behavioral',ACCESS = 'access',COMMUNICATION = 'communication',OPERATIONAL = 'operational',SECURITY = 'security',COMPLIANCE = 'compliance',BUSINESS = 'business',}/**
  * Pattern example
  */
 export interface PatternExample {
@@ -229,9 +176,7 @@ export interface PatternCharacteristic {
 export interface Anomaly {
   readonly anomalyId: string;
   readonly type: AnomalyType;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly detectionMethod: DetectionMethod;
-  readonly detectedAt: Date;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly detectionMethod: DetectionMethod;readonly detectedAt: Date;
   readonly affectedEvents: string[];
   readonly baselineDeviation: number;
   readonly statisticalSignificance: number;
@@ -239,38 +184,15 @@ export interface Anomaly {
   readonly potentialCauses: string[];
   readonly recommendations: string[];
   readonly falsePositiveProbability: number;
-  readonly investigationPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-}
-
-/**
+  readonly investigationPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';}/**
  * Anomaly types
  */
 export enum AnomalyType {
-  STATISTICAL_OUTLIER = 'statistical_outlier',
-  TEMPORAL_ANOMALY = 'temporal_anomaly',
-  FREQUENCY_ANOMALY = 'frequency_anomaly',
-  BEHAVIORAL_ANOMALY = 'behavioral_anomaly',
-  VOLUMETRIC_ANOMALY = 'volumetric_anomaly',
-  SEQUENTIAL_ANOMALY = 'sequential_anomaly',
-  CORRELATION_ANOMALY = 'correlation_anomaly',
-  CONTEXTUAL_ANOMALY = 'contextual_anomaly',
-}
-
-/**
+  STATISTICAL_OUTLIER = 'statistical_outlier',TEMPORAL_ANOMALY = 'temporal_anomaly',FREQUENCY_ANOMALY = 'frequency_anomaly',BEHAVIORAL_ANOMALY = 'behavioral_anomaly',VOLUMETRIC_ANOMALY = 'volumetric_anomaly',SEQUENTIAL_ANOMALY = 'sequential_anomaly',CORRELATION_ANOMALY = 'correlation_anomaly',CONTEXTUAL_ANOMALY = 'contextual_anomaly',}/**
  * Detection methods
  */
 export enum DetectionMethod {
-  STATISTICAL_ANALYSIS = 'statistical_analysis',
-  MACHINE_LEARNING = 'machine_learning',
-  RULE_BASED = 'rule_based',
-  THRESHOLD_BASED = 'threshold_based',
-  CLUSTERING = 'clustering',
-  NEURAL_NETWORK = 'neural_network',
-  TIME_SERIES = 'time_series',
-  HYBRID = 'hybrid',
-}
-
-/**
+  STATISTICAL_ANALYSIS = 'statistical_analysis',MACHINE_LEARNING = 'machine_learning',RULE_BASED = 'rule_based',THRESHOLD_BASED = 'threshold_based',CLUSTERING = 'clustering',NEURAL_NETWORK = 'neural_network',TIME_SERIES = 'time_series',HYBRID = 'hybrid',}/**
  * Prediction result
  */
 export interface Prediction {
@@ -292,25 +214,13 @@ export interface Prediction {
  * Prediction types
  */
 export enum PredictionType {
-  SECURITY_INCIDENT = 'security_incident',
-  COMPLIANCE_VIOLATION = 'compliance_violation',
-  SYSTEM_FAILURE = 'system_failure',
-  PERFORMANCE_DEGRADATION = 'performance_degradation',
-  USER_BEHAVIOR_CHANGE = 'user_behavior_change',
-  THREAT_ESCALATION = 'threat_escalation',
-  RESOURCE_EXHAUSTION = 'resource_exhaustion',
-  BUSINESS_IMPACT = 'business_impact',
-}
-
-/**
+  SECURITY_INCIDENT = 'security_incident',COMPLIANCE_VIOLATION = 'compliance_violation',SYSTEM_FAILURE = 'system_failure',PERFORMANCE_DEGRADATION = 'performance_degradation',USER_BEHAVIOR_CHANGE = 'user_behavior_change',THREAT_ESCALATION = 'threat_escalation',RESOURCE_EXHAUSTION = 'resource_exhaustion',BUSINESS_IMPACT = 'business_impact',}/**
  * Prediction condition
  */
 export interface PredictionCondition {
   readonly condition: string;
   readonly probability: number;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly mitigation: string[];
-}
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly mitigation: string[];}
 
 /**
  * Analytics recommendation
@@ -318,14 +228,10 @@ export interface PredictionCondition {
 export interface AnalyticsRecommendation {
   readonly recommendationId: string;
   readonly category: RecommendationCategory;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  readonly title: string;
-  readonly description: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';readonly title: string;readonly description: string;
   readonly actionItems: ActionItem[];
   readonly expectedBenefit: string;
-  readonly implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly estimatedCost: string;
-  readonly timeline: string;
+  readonly implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH';readonly estimatedCost: string;readonly timeline: string;
   readonly dependencies: string[];
   readonly riskReduction: number;
 }
@@ -334,17 +240,7 @@ export interface AnalyticsRecommendation {
  * Recommendation categories
  */
 export enum RecommendationCategory {
-  SECURITY_ENHANCEMENT = 'security_enhancement',
-  COMPLIANCE_IMPROVEMENT = 'compliance_improvement',
-  OPERATIONAL_EFFICIENCY = 'operational_efficiency',
-  MONITORING_ENHANCEMENT = 'monitoring_enhancement',
-  POLICY_UPDATE = 'policy_update',
-  TRAINING_REQUIREMENT = 'training_requirement',
-  TECHNOLOGY_UPGRADE = 'technology_upgrade',
-  PROCESS_IMPROVEMENT = 'process_improvement',
-}
-
-/**
+  SECURITY_ENHANCEMENT = 'security_enhancement',COMPLIANCE_IMPROVEMENT = 'compliance_improvement',OPERATIONAL_EFFICIENCY = 'operational_efficiency',MONITORING_ENHANCEMENT = 'monitoring_enhancement',POLICY_UPDATE = 'policy_update',TRAINING_REQUIREMENT = 'training_requirement',TECHNOLOGY_UPGRADE = 'technology_upgrade',PROCESS_IMPROVEMENT = 'process_improvement',}/**
  * Action item
  */
 export interface ActionItem {
@@ -352,9 +248,7 @@ export interface ActionItem {
   readonly description: string;
   readonly responsible: string[];
   readonly deadline: Date;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  readonly dependencies: string[];
-  readonly successCriteria: string[];
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';readonly dependencies: string[];readonly successCriteria: string[];
 }
 
 /**
@@ -450,9 +344,7 @@ export interface CommunicationPattern {
  * Seasonality pattern
  */
 export interface SeasonalityPattern {
-  readonly period: 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY';
-  readonly multiplier: number;
-  readonly confidence: number;
+  readonly period: 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY';readonly multiplier: number;readonly confidence: number;
 }
 
 /**
@@ -528,16 +420,10 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
     realTimeAnalysis: true,
     batchAnalysis: true,
     machineLearningEnabled: true,
-    anomalyDetectionSensitivity: 'MEDIUM',
-    patternDetectionDepth: 'MODERATE',
-    threatIntelligenceEnabled: true,
-    behavioralProfilingEnabled: true,
+    anomalyDetectionSensitivity: 'MEDIUM',patternDetectionDepth: 'MODERATE',threatIntelligenceEnabled: true,behavioralProfilingEnabled: true,
     predictiveAnalyticsEnabled: true,
     retentionPeriodDays: 365,
-    analysisFrequency: 'REAL_TIME',
-  };
-
-  // Performance metrics
+    analysisFrequency: 'REAL_TIME',};// Performance metrics
   private readonly metrics = {
     totalAnalyses: 0,
     anomaliesDetected: 0,
@@ -555,9 +441,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
   constructor(private readonly configService: ConfigService) {
     super();
 
-    this.logger.log('Audit Analytics Service initialized', {
-      realTimeAnalysis: this.config.realTimeAnalysis,
-      machineLearningEnabled: this.config.machineLearningEnabled,
+    this.logger.log('Audit Analytics Service initialized', {realTimeAnalysis: this.config.realTimeAnalysis,machineLearningEnabled: this.config.machineLearningEnabled,
       anomalyDetectionSensitivity: this.config.anomalyDetectionSensitivity,
     });
   }
@@ -567,10 +451,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
    */
   async onModuleInit(): Promise<void> {
     try {
-      this.logger.log('Starting Audit Analytics Service...');
-
-      // Initialize machine learning models
-      await this.initializeModels();
+      this.logger.log('Starting Audit Analytics Service...');// Initialize machine learning modelsawait this.initializeModels();
 
       // Start background analytics processes
       this.startRealTimeAnalysis();
@@ -578,10 +459,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       this.startModelMaintenance();
       this.startCacheManagement();
 
-      this.logger.log('Audit Analytics Service started successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to start Audit Analytics Service', {
+      this.logger.log('Audit Analytics Service started successfully');} catch (error) {this.logger.error('Failed to start Audit Analytics Service', {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -631,14 +509,9 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       const processingTime = Date.now() - startTime;
       this.updateAnalyticsMetrics(processingTime, anomalies.length, patterns.length);
 
-      this.logger.debug(`Event analyzed: ${event.eventId}`, {
-        anomalies: anomalies.length,
-        patterns: patterns.length,
+      this.logger.debug(`Event analyzed: ${event.eventId}`, {anomalies: anomalies.length,patterns: patterns.length,
         riskScore,
-        processingTime: `${processingTime}ms`,
-      });
-
-      return {
+        processingTime: `${processingTime}ms`,});return {
         anomalies,
         patterns,
         riskScore,
@@ -646,9 +519,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       };
 
     } catch (error) {
-      this.logger.error(`Failed to analyze event: ${event.eventId}`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`Failed to analyze event: ${event.eventId}`, {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -661,13 +532,10 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
     events: ImmutableAuditEvent[],
     scope?: Partial<AnalysisScope>
   ): Promise<AnalyticsResult> {
-    const resultId = `analysis_${analysisType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-    const startTime = Date.now();
+    const resultId = `analysis_${analysisType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';const startTime = Date.now();
 
     try {
-      this.logger.log(`Starting comprehensive analysis: ${resultId}`, {
-        analysisType,
-        eventCount: events.length,
+      this.logger.log(`Starting comprehensive analysis: ${resultId}`, {analysisType,eventCount: events.length,
         scope,
       });
 
@@ -729,16 +597,11 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
 
       const duration = Date.now() - startTime;
 
-      this.logger.log(`Analysis completed: ${resultId}`, {
-        analysisType,
-        findings: result.findings.length,
+      this.logger.log(`Analysis completed: ${resultId}`, {analysisType,findings: result.findings.length,
         anomalies: result.anomalies.length,
         patterns: result.patterns.length,
         riskScore: result.riskScore,
-        duration: `${duration}ms`,
-      });
-
-      return result;
+        duration: `${duration}ms`,});return result;
 
     } catch (error) {
       this.logger.error(`Analysis failed: ${resultId}`, {
@@ -782,9 +645,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
   updateConfiguration(newConfig: Partial<AnalyticsConfiguration>): void {
     Object.assign(this.config, newConfig);
 
-    this.logger.log('Analytics configuration updated', {
-      updatedFields: Object.keys(newConfig),
-      newConfig,
+    this.logger.log('Analytics configuration updated', {updatedFields: Object.keys(newConfig),newConfig,
     });
 
     // Trigger model reconfiguration if needed
@@ -815,12 +676,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       // Initialize predictive model
       await this.models.predictor.initialize();
 
-      this.logger.log('Analytics models initialized successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to initialize analytics models', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.log('Analytics models initialized successfully');} catch (error) {this.logger.error('Failed to initialize analytics models', {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -865,9 +721,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       return anomalies;
 
     } catch (error) {
-      this.logger.error('Failed to detect event anomalies', {
-        eventId: event.eventId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Failed to detect event anomalies', {eventId: event.eventId,error: error instanceof Error ? error.message : String(error),
       });
       return anomalies;
     }
@@ -894,9 +748,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       return patterns;
 
     } catch (error) {
-      this.logger.error('Failed to recognize event patterns', {
-        eventId: event.eventId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Failed to recognize event patterns', {eventId: event.eventId,error: error instanceof Error ? error.message : String(error),
       });
       return patterns;
     }
@@ -914,24 +766,12 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
 
     // Base risk from event risk level
     const baseRiskScores = {
-      'LOW': 10,
-      'MEDIUM': 30,
-      'HIGH': 60,
-      'CRITICAL': 90,
-    };
-
-    riskScore += baseRiskScores[event.eventData.riskLevel] || 0;
+      'LOW': 10,'MEDIUM': 30,'HIGH': 60,'CRITICAL': 90,};riskScore += baseRiskScores[event.eventData.riskLevel] || 0;
 
     // Add risk from anomalies
     for (const anomaly of anomalies) {
       const anomalyRiskScores = {
-        'LOW': 5,
-        'MEDIUM': 15,
-        'HIGH': 30,
-        'CRITICAL': 50,
-      };
-
-      riskScore += anomalyRiskScores[anomaly.severity] || 0;
+        'LOW': 5,'MEDIUM': 15,'HIGH': 30,'CRITICAL': 50,};riskScore += anomalyRiskScores[anomaly.severity] || 0;
     }
 
     // Add risk from threat patterns
@@ -963,9 +803,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       }
 
     } catch (error) {
-      this.logger.error('Failed to update user profile', {
-        userId: event.userId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Failed to update user profile', {userId: event.userId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -988,9 +826,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       dataClassifications: scope?.dataClassifications,
       totalEvents: events.length,
       uniqueUsers: new Set(events.map(e => e.userId)).size,
-      uniqueSystems: new Set(events.map(e => e.eventData.parameters?.system || 'unknown')).size,
-    };
-  }
+      uniqueSystems: new Set(events.map(e => e.eventData.parameters?.system || 'unknown')).size,};}
 
   // Simplified analysis method implementations
   private async performPatternRecognitionAnalysis(
@@ -1086,9 +922,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
         processingTime: Date.now() - startTime,
         algorithmsUsed: [analysisType],
         dataQuality: 0.9,
-        modelVersion: '1.0.0',
-        parametersUsed: {},
-        limitations: ['Simplified implementation'],
+        modelVersion: '1.0.0',parametersUsed: {},limitations: ['Simplified implementation'],
         nextAnalysisScheduled: new Date(Date.now() + 3600000), // 1 hour
       },
     };
@@ -1102,17 +936,11 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       return {
         anomalyId: `temporal_${Date.now()}`,
         type: AnomalyType.TEMPORAL_ANOMALY,
-        severity: 'MEDIUM',
-        detectionMethod: DetectionMethod.STATISTICAL_ANALYSIS,
-        detectedAt: new Date(),
+        severity: 'MEDIUM',detectionMethod: DetectionMethod.STATISTICAL_ANALYSIS,detectedAt: new Date(),
         affectedEvents: [event.eventId],
         baselineDeviation: 2.5,
         statisticalSignificance: 0.95,
-        description: 'Activity outside typical hours',
-        potentialCauses: ['Overtime work', 'Unauthorized access'],
-        recommendations: ['Verify with user', 'Review access logs'],
-        falsePositiveProbability: 0.1,
-        investigationPriority: 'MEDIUM',
+        description: 'Activity outside typical hours',potentialCauses: ['Overtime work', 'Unauthorized access'],recommendations: ['Verify with user', 'Review access logs'],falsePositiveProbability: 0.1,investigationPriority: 'MEDIUM',
       };
     }
     return null;
@@ -1134,9 +962,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
       profileId: `profile_${event.userId}_${Date.now()}`,
       createdAt: new Date(),
       lastUpdated: new Date(),
-      profileVersion: '1.0.0',
-      behaviorBaseline: {
-        establishedAt: new Date(),
+      profileVersion: '1.0.0',behaviorBaseline: {establishedAt: new Date(),
         basedOnDays: 1,
         eventCount: 1,
         typicalHours: [event.timestamp.getHours()],
@@ -1209,10 +1035,7 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
 
   private reconfigureModels(): void {
     // Would reconfigure models based on new settings
-    this.logger.log('Reconfiguring analytics models with new settings');
-  }
-
-  // Model creation methods (simplified)
+    this.logger.log('Reconfiguring analytics models with new settings');}// Model creation methods (simplified)
   private createAnomalyDetectionModel() {
     return {
       initialize: async () => { /* Initialize model */ },
@@ -1251,17 +1074,13 @@ export class AuditAnalyticsService extends EventEmitter implements OnModuleInit 
   // Background processes
   private startRealTimeAnalysis(): void {
     if (this.config.realTimeAnalysis) {
-      this.logger.log('Real-time analysis started');
-    }
-  }
+      this.logger.log('Real-time analysis started');}}
 
   private startBatchAnalysis(): void {
     if (this.config.batchAnalysis) {
       setInterval(() => {
         // Periodic batch analysis
-        this.logger.debug('Performing batch analysis');
-      }, 3600000); // Every hour
-    }
+        this.logger.debug('Performing batch analysis');}, 3600000); // Every hour}
   }
 
   private startModelMaintenance(): void {

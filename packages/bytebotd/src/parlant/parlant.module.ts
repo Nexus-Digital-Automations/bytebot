@@ -15,60 +15,18 @@
  * Performance: Optimized validation pipeline with sub-1000ms targets
  */
 
-import { Module, forwardRef } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ParlantIntegrationService } from './parlant-integration.service';
-import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
-import { ParlantHealthMetricsValidationService } from './services/parlant-health-metrics-validation.service';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
-import { ParlantMonitoringModule } from './monitoring/parlant-monitoring.module';
-
-/**
- * Parlant configuration factory for enterprise deployment
+import { Module, forwardRef } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { ParlantIntegrationService } from './parlant-integration.service';import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';import { ParlantHealthMetricsValidationService } from './services/parlant-health-metrics-validation.service';import { ComputerUseModule } from '../computer-use/computer-use.module';import { ParlantMonitoringModule } from './monitoring/parlant-monitoring.module';/*** Parlant configuration factory for enterprise deployment
  */
 export const parlantConfigFactory = () => ({
   parlant: {
-    enabled: process.env.PARLANT_ENABLED !== 'false',
-    cacheEnabled: process.env.PARLANT_CACHE_ENABLED !== 'false',
-    auditEnabled: process.env.PARLANT_AUDIT_ENABLED !== 'false',
-    cacheMaxAgeMs: parseInt(process.env.PARLANT_CACHE_MAX_AGE_MS ?? '300000', 10), // 5 minutes
-    validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '5000', 10), // 5 seconds
-    maxConversationHistory: parseInt(process.env.PARLANT_MAX_CONVERSATION_HISTORY ?? '100', 10),
-    performanceMetricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS ?? '60000', 10), // 1 minute
-    auditRetentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS ?? '90', 10),
-    
-    // Security configuration
-    security: {
-      requireApprovalForHighRisk: process.env.PARLANT_REQUIRE_HIGH_RISK_APPROVAL !== 'false',
-      enableThreatDetection: process.env.PARLANT_ENABLE_THREAT_DETECTION !== 'false',
-      maxFailedValidations: parseInt(process.env.PARLANT_MAX_FAILED_VALIDATIONS ?? '5', 10),
-      suspiciousActivityThreshold: parseInt(process.env.PARLANT_SUSPICIOUS_THRESHOLD ?? '3', 10),
-    },
-    
-    // Performance configuration
+    enabled: process.env.PARLANT_ENABLED !== 'false',cacheEnabled: process.env.PARLANT_CACHE_ENABLED !== 'false',auditEnabled: process.env.PARLANT_AUDIT_ENABLED !== 'false',cacheMaxAgeMs: parseInt(process.env.PARLANT_CACHE_MAX_AGE_MS ?? '300000', 10), // 5 minutesvalidationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '5000', 10), // 5 secondsmaxConversationHistory: parseInt(process.env.PARLANT_MAX_CONVERSATION_HISTORY ?? '100', 10),performanceMetricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS ?? '60000', 10), // 1 minuteauditRetentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS ?? '90', 10),// Security configurationsecurity: {
+      requireApprovalForHighRisk: process.env.PARLANT_REQUIRE_HIGH_RISK_APPROVAL !== 'false',enableThreatDetection: process.env.PARLANT_ENABLE_THREAT_DETECTION !== 'false',maxFailedValidations: parseInt(process.env.PARLANT_MAX_FAILED_VALIDATIONS ?? '5', 10),suspiciousActivityThreshold: parseInt(process.env.PARLANT_SUSPICIOUS_THRESHOLD ?? '3', 10),},// Performance configuration
     performance: {
-      cacheSize: parseInt(process.env.PARLANT_CACHE_SIZE ?? '1000', 10),
-      batchValidationSize: parseInt(process.env.PARLANT_BATCH_SIZE ?? '10', 10),
-      concurrentValidations: parseInt(process.env.PARLANT_CONCURRENT_VALIDATIONS ?? '5', 10),
-      validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '1000', 10),
-    },
-    
-    // API configuration (for future Parlant API integration)
+      cacheSize: parseInt(process.env.PARLANT_CACHE_SIZE ?? '1000', 10),batchValidationSize: parseInt(process.env.PARLANT_BATCH_SIZE ?? '10', 10),concurrentValidations: parseInt(process.env.PARLANT_CONCURRENT_VALIDATIONS ?? '5', 10),validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '1000', 10),},// API configuration (for future Parlant API integration)
     api: {
-      baseUrl: process.env.PARLANT_API_BASE_URL ?? 'http://localhost:8000',
-      apiKey: process.env.PARLANT_API_KEY ?? '',
-      timeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS ?? '10000', 10),
-      retries: parseInt(process.env.PARLANT_API_RETRIES ?? '3', 10),
-    },
-    
-    // Logging configuration
+      baseUrl: process.env.PARLANT_API_BASE_URL ?? 'http://localhost:8000',apiKey: process.env.PARLANT_API_KEY ?? '',timeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS ?? '10000', 10),retries: parseInt(process.env.PARLANT_API_RETRIES ?? '3', 10),},// Logging configuration
     logging: {
-      level: process.env.PARLANT_LOG_LEVEL ?? 'info',
-      enableAuditLogging: process.env.PARLANT_ENABLE_AUDIT_LOGGING !== 'false',
-      enablePerformanceLogging: process.env.PARLANT_ENABLE_PERFORMANCE_LOGGING !== 'false',
-      logValidationDetails: process.env.PARLANT_LOG_VALIDATION_DETAILS === 'true',
-    }
-  }
+      level: process.env.PARLANT_LOG_LEVEL ?? 'info',enableAuditLogging: process.env.PARLANT_ENABLE_AUDIT_LOGGING !== 'false',enablePerformanceLogging: process.env.PARLANT_ENABLE_PERFORMANCE_LOGGING !== 'false',logValidationDetails: process.env.PARLANT_LOG_VALIDATION_DETAILS === 'true',}}
 });
 
 @Module({
@@ -123,16 +81,7 @@ export const parlantConfigFactory = () => ({
 export class ParlantModule {
   constructor() {
     // Log module initialization for monitoring
-    console.log('🚀 Parlant Module initialized - MAXIMUM IMPLEMENTATION with ENTERPRISE MONITORING');
-    console.log('   ✅ Function-level conversational validation enabled for all services');
-    console.log('   ✅ Comprehensive performance monitoring and alerting');
-    console.log('   ✅ Real-time dashboard with enterprise metrics');
-    console.log('   ✅ Automated benchmark validation and regression detection');
-    console.log('   ✅ Business impact assessment and ROI analysis');
-    console.log('   ✅ Enterprise audit trail and compliance reporting');
-    console.log('   🎯 Performance Targets: <1000ms P95, >85% cache hit rate, >99.9% availability');
-  }
-}
+    console.log('🚀 Parlant Module initialized - MAXIMUM IMPLEMENTATION with ENTERPRISE MONITORING');console.log('   ✅ Function-level conversational validation enabled for all services');console.log('   ✅ Comprehensive performance monitoring and alerting');console.log('   ✅ Real-time dashboard with enterprise metrics');console.log('   ✅ Automated benchmark validation and regression detection');console.log('   ✅ Business impact assessment and ROI analysis');console.log('   ✅ Enterprise audit trail and compliance reporting');console.log('   🎯 Performance Targets: <1000ms P95, >85% cache hit rate, >99.9% availability');}}
 
 /**
  * Parlant configuration interface for type safety
@@ -207,16 +156,11 @@ export const defaultParlantConfig: ParlantModuleConfig = {
     },
     
     api: {
-      baseUrl: 'http://localhost:8000',
-      apiKey: '',
-      timeout: 10000,
-      retries: 3,
+      baseUrl: 'http://localhost:8000',apiKey: '',timeout: 10000,retries: 3,
     },
     
     logging: {
-      level: 'info',
-      enableAuditLogging: true,
-      enablePerformanceLogging: true,
+      level: 'info',enableAuditLogging: true,enablePerformanceLogging: true,
       logValidationDetails: false, // Set to true for detailed debugging
     }
   }
@@ -227,44 +171,12 @@ export const defaultParlantConfig: ParlantModuleConfig = {
  */
 export const PARLANT_ENVIRONMENT_VARIABLES = {
   // Core functionality
-  PARLANT_ENABLED: 'Enable/disable Parlant integration (default: true)',
-  PARLANT_CACHE_ENABLED: 'Enable validation result caching (default: true)',
-  PARLANT_AUDIT_ENABLED: 'Enable audit trail logging (default: true)',
-  
-  // Performance tuning
-  PARLANT_CACHE_MAX_AGE_MS: 'Cache entry maximum age in milliseconds (default: 300000)',
-  PARLANT_VALIDATION_TIMEOUT_MS: 'Validation timeout in milliseconds (default: 5000)',
-  PARLANT_CACHE_SIZE: 'Maximum cache entries (default: 1000)',
-  PARLANT_CONCURRENT_VALIDATIONS: 'Max concurrent validations (default: 5)',
-  
-  // Security settings
-  PARLANT_REQUIRE_HIGH_RISK_APPROVAL: 'Require approval for high-risk operations (default: true)',
-  PARLANT_ENABLE_THREAT_DETECTION: 'Enable threat detection (default: true)',
-  PARLANT_MAX_FAILED_VALIDATIONS: 'Max failed validations before blocking (default: 5)',
-  
-  // API configuration
-  PARLANT_API_BASE_URL: 'Parlant API base URL (default: http://localhost:8000)',
-  PARLANT_API_KEY: 'Parlant API authentication key',
-  PARLANT_API_TIMEOUT_MS: 'API request timeout (default: 10000)',
-  
-  // Logging configuration
-  PARLANT_LOG_LEVEL: 'Logging level: debug, info, warn, error (default: info)',
-  PARLANT_ENABLE_AUDIT_LOGGING: 'Enable detailed audit logging (default: true)',
-  PARLANT_LOG_VALIDATION_DETAILS: 'Log detailed validation information (default: false)',
-  
-  // Data retention
-  PARLANT_AUDIT_RETENTION_DAYS: 'Audit trail retention period in days (default: 90)',
-  PARLANT_MAX_CONVERSATION_HISTORY: 'Max conversation entries to keep (default: 100)',
-};
-
-/**
+  PARLANT_ENABLED: 'Enable/disable Parlant integration (default: true)',PARLANT_CACHE_ENABLED: 'Enable validation result caching (default: true)',PARLANT_AUDIT_ENABLED: 'Enable audit trail logging (default: true)',// Performance tuningPARLANT_CACHE_MAX_AGE_MS: 'Cache entry maximum age in milliseconds (default: 300000)',PARLANT_VALIDATION_TIMEOUT_MS: 'Validation timeout in milliseconds (default: 5000)',PARLANT_CACHE_SIZE: 'Maximum cache entries (default: 1000)',PARLANT_CONCURRENT_VALIDATIONS: 'Max concurrent validations (default: 5)',// Security settingsPARLANT_REQUIRE_HIGH_RISK_APPROVAL: 'Require approval for high-risk operations (default: true)',PARLANT_ENABLE_THREAT_DETECTION: 'Enable threat detection (default: true)',PARLANT_MAX_FAILED_VALIDATIONS: 'Max failed validations before blocking (default: 5)',// API configurationPARLANT_API_BASE_URL: 'Parlant API base URL (default: http://localhost:8000)',PARLANT_API_KEY: 'Parlant API authentication key',PARLANT_API_TIMEOUT_MS: 'API request timeout (default: 10000)',// Logging configurationPARLANT_LOG_LEVEL: 'Logging level: debug, info, warn, error (default: info)',PARLANT_ENABLE_AUDIT_LOGGING: 'Enable detailed audit logging (default: true)',PARLANT_LOG_VALIDATION_DETAILS: 'Log detailed validation information (default: false)',// Data retentionPARLANT_AUDIT_RETENTION_DAYS: 'Audit trail retention period in days (default: 90)',PARLANT_MAX_CONVERSATION_HISTORY: 'Max conversation entries to keep (default: 100)',};/**
  * Parlant health check status for monitoring
  */
 export interface ParlantHealthStatus {
   enabled: boolean;
-  validationService: 'healthy' | 'degraded' | 'failed';
-  cacheService: 'healthy' | 'degraded' | 'failed';
-  auditService: 'healthy' | 'degraded' | 'failed';
+  validationService: 'healthy' | 'degraded' | 'failed';cacheService: 'healthy' | 'degraded' | 'failed';auditService: 'healthy' | 'degraded' | 'failed';
   performanceMetrics: {
     averageValidationTime: number;
     cacheHitRate: number;

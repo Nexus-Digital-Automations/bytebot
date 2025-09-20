@@ -9,11 +9,7 @@
  * @version 1.0.0
  */
 
-import type { IncomingMessage } from 'http';
-import * as WebSocket from 'ws';
-
-/**
- * WebSocket verification info structure that bridges IncomingMessage and Record types
+import type { IncomingMessage } from 'http';import * as WebSocket from 'ws';/*** WebSocket verification info structure that bridges IncomingMessage and Record types
  */
 export interface WebSocketVerificationInfo {
   readonly req: IncomingMessage;
@@ -65,9 +61,7 @@ export interface SafeWebSocketServerOptions {
   port?: number;
   host?: string;
   backlog?: number;
-  server?: import('http').Server | import('https').Server;
-  path?: string;
-  noServer?: boolean;
+  server?: import('http').Server | import('https').Server;path?: string;noServer?: boolean;
   clientTracking?: boolean;
   perMessageDeflate?: WebSocket.PerMessageDeflateOptions | false | true;
   maxPayload?: number;
@@ -80,10 +74,7 @@ export interface SafeWebSocketServerOptions {
 export function isAsyncVerifyCallback(
   callback: SafeVerifyClientCallbackUnion
 ): callback is SafeVerifyClientCallbackAsync {
-  return callback.constructor.name === 'AsyncFunction';
-}
-
-/**
+  return callback.constructor.name === 'AsyncFunction';}/**
  * Converts IncomingMessage to EnhancedRequestInfo for type compatibility
  */
 export function convertIncomingMessageToRecord(
@@ -93,12 +84,8 @@ export function convertIncomingMessageToRecord(
   
   // Safely convert headers to Record<string, string>
   Object.entries(req.headers).forEach(([key, value]) => {
-    if (typeof value === 'string') {
-      headers[key] = value;
-    } else if (Array.isArray(value)) {
-      headers[key] = value.join(', ');
-    } else if (value !== undefined) {
-      headers[key] = String(value);
+    if (typeof value === 'string') {headers[key] = value;} else if (Array.isArray(value)) {
+      headers[key] = value.join(', ');} else if (value !== undefined) {headers[key] = String(value);
     }
   });
 
@@ -109,13 +96,9 @@ export function convertIncomingMessageToRecord(
     origin: headers.origin,
     secure: (req.connection as { encrypted?: boolean })?.encrypted === true,
     remoteAddress: req.connection?.remoteAddress,
-    userAgent: headers['user-agent'],
-    // Add any additional properties from the request
-    ...Object.getOwnPropertyNames(req).reduce((acc, key) => {
+    userAgent: headers['user-agent'],// Add any additional properties from the request...Object.getOwnPropertyNames(req).reduce((acc, key) => {
       const value = (req as unknown as Record<string, unknown>)[key];
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        acc[key] = value;
-      }
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {acc[key] = value;}
       return acc;
     }, {} as Record<string, unknown>),
   };
@@ -190,23 +173,7 @@ export function validateWebSocketHeaders(
   headers: Record<string, string>
 ): { valid: boolean; reason?: string } {
   // Check required WebSocket headers
-  if (!headers.upgrade || headers.upgrade.toLowerCase() !== 'websocket') {
-    return { valid: false, reason: 'Missing or invalid Upgrade header' };
-  }
-  
-  if (!headers.connection?.toLowerCase().includes('upgrade')) {
-    return { valid: false, reason: 'Missing or invalid Connection header' };
-  }
-  
-  if (!headers['sec-websocket-key']) {
-    return { valid: false, reason: 'Missing Sec-WebSocket-Key header' };
-  }
-  
-  if (!headers['sec-websocket-version']) {
-    return { valid: false, reason: 'Missing Sec-WebSocket-Version header' };
-  }
-  
-  return { valid: true };
+  if (!headers.upgrade || headers.upgrade.toLowerCase() !== 'websocket') {return { valid: false, reason: 'Missing or invalid Upgrade header' };}if (!headers.connection?.toLowerCase().includes('upgrade')) {return { valid: false, reason: 'Missing or invalid Connection header' };}if (!headers['sec-websocket-key']) {return { valid: false, reason: 'Missing Sec-WebSocket-Key header' };}if (!headers['sec-websocket-version']) {return { valid: false, reason: 'Missing Sec-WebSocket-Version header' };}return { valid: true };
 }
 
 /**
@@ -236,9 +203,7 @@ export function createSecureVerifyCallback(
     // Origin validation
     if (options.allowedOrigins && origin) {
       if (!options.allowedOrigins.includes(origin)) {
-        console.warn(`WebSocket connection rejected: Origin ${origin} not allowed`);
-        return false;
-      }
+        console.warn(`WebSocket connection rejected: Origin ${origin} not allowed`);return false;}
     }
     
     // Rate limiting by IP
@@ -247,9 +212,7 @@ export function createSecureVerifyCallback(
       const lastTime = lastConnectionTime.get(remoteAddress);
       
       if (lastTime && now - lastTime < 1000) { // 1 second rate limit
-        console.warn(`WebSocket connection rejected: Rate limit exceeded for ${remoteAddress}`);
-        return false;
-      }
+        console.warn(`WebSocket connection rejected: Rate limit exceeded for ${remoteAddress}`);return false;}
       
       lastConnectionTime.set(remoteAddress, now);
     }
@@ -258,9 +221,7 @@ export function createSecureVerifyCallback(
     if (options.maxConnections && remoteAddress) {
       const currentCount = connectionCount.get(remoteAddress) ?? 0;
       if (currentCount >= options.maxConnections) {
-        console.warn(`WebSocket connection rejected: Max connections exceeded for ${remoteAddress}`);
-        return false;
-      }
+        console.warn(`WebSocket connection rejected: Max connections exceeded for ${remoteAddress}`);return false;}
     }
     
     // Header validation

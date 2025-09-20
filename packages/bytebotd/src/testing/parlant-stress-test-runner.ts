@@ -18,21 +18,7 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-
-// Import our stress testing components
-import { StressTestingFramework, StressTestConfig, StressTestResult } from './stress-testing-framework';
-import ChaosEngineeringService, { ChaosExperiment, ChaosExperimentResult } from './chaos-engineering.service';
-import ResourceMonitoringService, { SystemResourceMetrics, ResourceMonitoringConfig } from './resource-monitoring.service';
-
-// ===== PARLANT STRESS TEST INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import * as fs from 'fs/promises';import * as path from 'path';// Import our stress testing componentsimport { StressTestingFramework, StressTestConfig, StressTestResult } from './stress-testing-framework';import ChaosEngineeringService, { ChaosExperiment, ChaosExperimentResult } from './chaos-engineering.service';import ResourceMonitoringService, { SystemResourceMetrics, ResourceMonitoringConfig } from './resource-monitoring.service';// ===== PARLANT STRESS TEST INTERFACES =====/**
  * Complete PARLANT stress test suite configuration
  */
 export interface ParlantStressTestSuite {
@@ -51,10 +37,7 @@ export interface ParlantStressScenario {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly category: 'LOAD' | 'RESILIENCE' | 'CHAOS' | 'RECOVERY' | 'PERFORMANCE';
-  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  readonly dependencies: string[];
-  readonly stressConfig: StressTestConfig;
+  readonly category: 'LOAD' | 'RESILIENCE' | 'CHAOS' | 'RECOVERY' | 'PERFORMANCE';readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';readonly dependencies: string[];readonly stressConfig: StressTestConfig;
   readonly chaosExperiments: ChaosExperiment[];
   readonly successCriteria: SuccessCriteria;
   readonly rollbackConfig: RollbackConfig;
@@ -101,9 +84,7 @@ export interface ResourceSuccessThresholds {
  */
 export interface CustomMetricThreshold {
   readonly metricName: string;
-  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';
-  readonly threshold: number;
-  readonly duration: number; // milliseconds
+  readonly operator: '>' | '<' | '>=' | '<=' | '==' | '!=';readonly threshold: number;readonly duration: number; // milliseconds
   readonly critical: boolean;
 }
 
@@ -125,10 +106,7 @@ export interface RollbackTrigger {
   readonly condition: string;
   readonly threshold: number;
   readonly duration: number; // milliseconds
-  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
-}
-
-/**
+  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';}/**
  * Rollback procedure definition
  */
 export interface RollbackProcedure {
@@ -164,9 +142,7 @@ export interface RollbackVerification {
  */
 export interface VerificationCheck {
   readonly name: string;
-  readonly type: 'health' | 'metric' | 'custom';
-  readonly target: string;
-  readonly expectedValue: unknown;
+  readonly type: 'health' | 'metric' | 'custom';readonly target: string;readonly expectedValue: unknown;
   readonly tolerance: number;
 }
 
@@ -190,10 +166,7 @@ export interface EmergencyThreshold {
   readonly metric: string;
   readonly value: number;
   readonly duration: number; // milliseconds
-  readonly action: 'ROLLBACK' | 'SHUTDOWN' | 'ALERT';
-}
-
-/**
+  readonly action: 'ROLLBACK' | 'SHUTDOWN' | 'ALERT';}/**
  * Emergency shutdown configuration
  */
 export interface EmergencyShutdownConfig {
@@ -211,10 +184,7 @@ export interface EmergencyShutdownTrigger {
   readonly condition: string;
   readonly threshold: number;
   readonly duration: number; // milliseconds
-  readonly severity: 'CRITICAL' | 'SEVERE';
-}
-
-/**
+  readonly severity: 'CRITICAL' | 'SEVERE';}/**
  * Emergency shutdown procedure
  */
 export interface EmergencyShutdownProcedure {
@@ -241,9 +211,7 @@ export interface ReportingConfig {
  * Report format definition
  */
 export interface ReportFormat {
-  readonly type: 'HTML' | 'PDF' | 'JSON' | 'CSV' | 'MARKDOWN';
-  readonly template?: string;
-  readonly options: Record<string, unknown>;
+  readonly type: 'HTML' | 'PDF' | 'JSON' | 'CSV' | 'MARKDOWN';readonly template?: string;readonly options: Record<string, unknown>;
 }
 
 /**
@@ -319,11 +287,7 @@ export interface ParlantStressTestSummary {
   readonly peakConcurrency: number;
   readonly averageResponseTime: number;
   readonly maxResponseTime: number;
-  readonly systemStability: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'CRITICAL';
-  readonly resilienceScore: number; // 0-100
-  readonly performanceGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
-  readonly resourceEfficiency: number; // percentage
-  readonly chaosResistance: number; // percentage
+  readonly systemStability: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'CRITICAL';readonly resilienceScore: number; // 0-100readonly performanceGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';readonly resourceEfficiency: number; // percentagereadonly chaosResistance: number; // percentage
   readonly recoveryPerformance: RecoveryPerformanceMetrics;
   readonly bottlenecks: SystemBottleneck[];
   readonly criticalIssues: CriticalIssue[];
@@ -346,9 +310,7 @@ export interface RecoveryPerformanceMetrics {
 export interface SystemBottleneck {
   readonly component: string;
   readonly metric: string;
-  readonly severity: 'HIGH' | 'MEDIUM' | 'LOW';
-  readonly impact: string;
-  readonly recommendedAction: string;
+  readonly severity: 'HIGH' | 'MEDIUM' | 'LOW';readonly impact: string;readonly recommendedAction: string;
   readonly timeDetected: Date;
   readonly duration: number; // milliseconds
 }
@@ -360,9 +322,7 @@ export interface CriticalIssue {
   readonly id: string;
   readonly title: string;
   readonly description: string;
-  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-  readonly component: string;
-  readonly impact: string;
+  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';readonly component: string;readonly impact: string;
   readonly immediateAction: string;
   readonly longTermSolution: string;
   readonly timeDetected: Date;
@@ -372,10 +332,7 @@ export interface CriticalIssue {
  * Stress test recommendation
  */
 export interface StressTestRecommendation {
-  readonly category: 'PERFORMANCE' | 'SCALABILITY' | 'RESILIENCE' | 'ARCHITECTURE' | 'CONFIGURATION';
-  readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  readonly title: string;
-  readonly description: string;
+  readonly category: 'PERFORMANCE' | 'SCALABILITY' | 'RESILIENCE' | 'ARCHITECTURE' | 'CONFIGURATION';readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';readonly title: string;readonly description: string;
   readonly recommendation: string;
   readonly implementation: string;
   readonly expectedImpact: string;
@@ -399,22 +356,9 @@ export interface GeneratedReport {
  * Complete PARLANT Phase 1 stress test suite
  */
 export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
-  name: 'PARLANT Phase 1 Comprehensive Stress Test Suite',
-  description: 'Enterprise-grade stress testing suite for PARLANT conversational AI validation system',
-  version: '1.0.0',
-  scenarios: [
-    {
-      id: 'parlant-massive-conversation-load',
-      name: 'Massive Conversation Load Test',
-      description: 'Test system behavior under 10,000+ concurrent conversational sessions',
-      category: 'LOAD',
-      priority: 'HIGH',
-      dependencies: [],
-      stressConfig: {
-        name: 'PARLANT_MASSIVE_CONVERSATIONS',
-        description: 'Test 10,000+ concurrent conversational validation sessions',
-        duration: 600000, // 10 minutes
-        targetConcurrency: 10000,
+  name: 'PARLANT Phase 1 Comprehensive Stress Test Suite',description: 'Enterprise-grade stress testing suite for PARLANT conversational AI validation system',version: '1.0.0',scenarios: [{
+      id: 'parlant-massive-conversation-load',name: 'Massive Conversation Load Test',description: 'Test system behavior under 10,000+ concurrent conversational sessions',category: 'LOAD',priority: 'HIGH',dependencies: [],stressConfig: {
+        name: 'PARLANT_MASSIVE_CONVERSATIONS',description: 'Test 10,000+ concurrent conversational validation sessions',duration: 600000, // 10 minutestargetConcurrency: 10000,
         rampUpDuration: 120000, // 2 minutes
         rampDownDuration: 60000, // 1 minute
         resourceLimits: {
@@ -438,9 +382,7 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
           enabled: true,
           scenarios: [],
           frequency: 60000, // 1 minute
-          intensity: 'HIGH',
-          recoveryValidation: true,
-        },
+          intensity: 'HIGH',recoveryValidation: true,},
       },
       chaosExperiments: [],
       successCriteria: {
@@ -458,10 +400,7 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
         },
         customMetrics: [
           {
-            metricName: 'conversation_validation_time',
-            operator: '<',
-            threshold: 1500,
-            duration: 30000,
+            metricName: 'conversation_validation_time',operator: '<',threshold: 1500,duration: 30000,
             critical: true,
           },
         ],
@@ -470,12 +409,8 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
         enabled: true,
         triggers: [
           {
-            condition: 'error_rate > 10',
-            threshold: 10,
-            duration: 60000,
-            priority: 'HIGH',
-          },
-        ],
+            condition: 'error_rate > 10',threshold: 10,duration: 60000,
+            priority: 'HIGH',},],
         procedures: [],
         timeout: 120000,
         verification: {
@@ -505,36 +440,24 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
       },
       alerting: {
         enabled: true,
-        channels: ['console', 'file'],
-        cooldown: 60000,
-        escalation: {
+        channels: ['console', 'file'],cooldown: 60000,escalation: {
           enabled: true,
           levels: [
             {
               level: 1,
               threshold: 85,
               duration: 60000,
-              actions: ['log', 'alert'],
-            },
-            {
+              actions: ['log', 'alert'],},{
               level: 2,
               threshold: 95,
               duration: 30000,
-              actions: ['log', 'alert', 'rollback'],
-            },
-          ],
+              actions: ['log', 'alert', 'rollback'],},],
         },
       },
       storage: {
         enabled: true,
-        format: 'json',
-        retention: 30,
-        compression: true,
-        path: './stress-test-metrics',
-      },
-      testId: 'parlant-stress-test',
-    },
-    safetyLimits: {
+        format: 'json',retention: 30,compression: true,
+        path: './stress-test-metrics',},testId: 'parlant-stress-test',},safetyLimits: {
       maxConcurrentUsers: 15000,
       maxRequestRate: 10000,
       maxMemoryUsageMB: 12288, // 12GB
@@ -543,35 +466,20 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
       maxNetworkUtilizationPercent: 95,
       emergencyShutdownThresholds: [
         {
-          metric: 'memory_usage_percent',
-          value: 98,
-          duration: 10000,
-          action: 'SHUTDOWN',
-        },
-        {
-          metric: 'cpu_usage_percent',
-          value: 98,
-          duration: 30000,
-          action: 'ROLLBACK',
-        },
-      ],
+          metric: 'memory_usage_percent',value: 98,duration: 10000,
+          action: 'SHUTDOWN',},{
+          metric: 'cpu_usage_percent',value: 98,duration: 30000,
+          action: 'ROLLBACK',},],
     },
     emergencyShutdown: {
       enabled: true,
       triggers: [
         {
-          condition: 'system_unresponsive',
-          threshold: 1,
-          duration: 30000,
-          severity: 'CRITICAL',
-        },
-      ],
+          condition: 'system_unresponsive',threshold: 1,duration: 30000,
+          severity: 'CRITICAL',},],
       procedures: [
         {
-          name: 'graceful_shutdown',
-          steps: ['stop_load_generation', 'save_metrics', 'cleanup_resources'],
-          timeout: 60000,
-          priority: 1,
+          name: 'graceful_shutdown',steps: ['stop_load_generation', 'save_metrics', 'cleanup_resources'],timeout: 60000,priority: 1,
         },
       ],
       timeout: 120000,
@@ -582,17 +490,11 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
     enabled: true,
     formats: [
       {
-        type: 'HTML',
-        options: { includeCharts: true, includeMetrics: true },
-      },
+        type: 'HTML',options: { includeCharts: true, includeMetrics: true },},
       {
-        type: 'JSON',
-        options: { pretty: true, includeRawData: true },
-      },
+        type: 'JSON',options: { pretty: true, includeRawData: true },},
       {
-        type: 'MARKDOWN',
-        options: { includeExecutiveSummary: true },
-      },
+        type: 'MARKDOWN',options: { includeExecutiveSummary: true },},
     ],
     outputPath: './stress-test-reports',
     realTimeUpdates: true,
@@ -617,21 +519,13 @@ export class ParlantStressTestRunner extends EventEmitter {
   ) {
     super();
 
-    this.logger.log(`🚀 [PARLANT-STRESS] PARLANT Stress Test Runner initialized`);
-  }
-
-  /**
+    this.logger.log(`🚀 [PARLANT-STRESS] PARLANT Stress Test Runner initialized`);}/**
    * Execute complete PARLANT stress test suite
    */
   async executeParlantStressTestSuite(
     suite = PARLANT_STRESS_TEST_SUITE
   ): Promise<ParlantStressTestResult> {
-    const executionId = `parlant_stress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = new Date();
-
-    this.logger.log(`🚀 [PARLANT-STRESS] Starting PARLANT Phase 1 stress test suite`, {
-      executionId,
-      totalScenarios: suite.scenarios.length,
+    const executionId = `parlant_stress_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = new Date();this.logger.log(`🚀 [PARLANT-STRESS] Starting PARLANT Phase 1 stress test suite`, {executionId,totalScenarios: suite.scenarios.length,
       estimatedDuration: suite.globalConfig.globalTimeoutMs,
     });
 
@@ -640,25 +534,11 @@ export class ParlantStressTestRunner extends EventEmitter {
 
     try {
       // Phase 1: Initialize monitoring and safety systems
-      this.logger.log(`📊 [PARLANT-STRESS] Phase 1: Initialize monitoring and safety systems`, { executionId });
-      await this.initializeStressTestEnvironment(suite, execution);
-
-      // Phase 2: Execute stress test scenarios
-      this.logger.log(`💪 [PARLANT-STRESS] Phase 2: Execute stress test scenarios`, { executionId });
-      const scenarioResults = await this.executeStressTestScenarios(suite, execution);
-
-      // Phase 3: Execute chaos engineering experiments
-      this.logger.log(`🔥 [PARLANT-STRESS] Phase 3: Execute chaos engineering experiments`, { executionId });
-      const chaosResults = await this.executeChaosExperiments(suite, execution);
-
-      // Phase 4: Validate system recovery and resilience
-      this.logger.log(`🔄 [PARLANT-STRESS] Phase 4: Validate system recovery and resilience`, { executionId });
-      await this.validateSystemRecovery(suite, execution);
-
-      // Phase 5: Analyze results and generate recommendations
-      this.logger.log(`📊 [PARLANT-STRESS] Phase 5: Analyze results and generate recommendations`, { executionId });
-      const endTime = new Date();
-      const result = await this.generateStressTestResult({
+      this.logger.log(`📊 [PARLANT-STRESS] Phase 1: Initialize monitoring and safety systems`, { executionId });await this.initializeStressTestEnvironment(suite, execution);// Phase 2: Execute stress test scenarios
+      this.logger.log(`💪 [PARLANT-STRESS] Phase 2: Execute stress test scenarios`, { executionId });const scenarioResults = await this.executeStressTestScenarios(suite, execution);// Phase 3: Execute chaos engineering experiments
+      this.logger.log(`🔥 [PARLANT-STRESS] Phase 3: Execute chaos engineering experiments`, { executionId });const chaosResults = await this.executeChaosExperiments(suite, execution);// Phase 4: Validate system recovery and resilience
+      this.logger.log(`🔄 [PARLANT-STRESS] Phase 4: Validate system recovery and resilience`, { executionId });await this.validateSystemRecovery(suite, execution);// Phase 5: Analyze results and generate recommendations
+      this.logger.log(`📊 [PARLANT-STRESS] Phase 5: Analyze results and generate recommendations`, { executionId });const endTime = new Date();const result = await this.generateStressTestResult({
         suite,
         executionId,
         startTime,
@@ -669,9 +549,7 @@ export class ParlantStressTestRunner extends EventEmitter {
       });
 
       // Phase 6: Generate comprehensive reports
-      this.logger.log(`📋 [PARLANT-STRESS] Phase 6: Generate comprehensive reports`, { executionId });
-      const reports = await this.generateStressTestReports(result);
-      result.reports = reports;
+      this.logger.log(`📋 [PARLANT-STRESS] Phase 6: Generate comprehensive reports`, { executionId });const reports = await this.generateStressTestReports(result);result.reports = reports;
 
       this.logger.log(`✅ [PARLANT-STRESS] PARLANT stress test suite completed: ${result.passed ? 'PASSED' : 'FAILED'}`, {
         executionId,
@@ -687,9 +565,7 @@ export class ParlantStressTestRunner extends EventEmitter {
       return result;
 
     } catch (error) {
-      this.logger.error(`❌ [PARLANT-STRESS] Stress test suite failed: ${error instanceof Error ? error.message : String(error)}`, {
-        executionId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`❌ [PARLANT-STRESS] Stress test suite failed: ${error instanceof Error ? error.message : String(error)}`, {executionId,error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
 

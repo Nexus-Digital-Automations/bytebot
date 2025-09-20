@@ -12,10 +12,7 @@
  * @version 1.0.0
  */
 
-import { expect } from '@jest/globals';
-
-// Type interfaces for test result validation
-export interface ScreenshotResult {
+import { expect } from '@jest/globals';// Type interfaces for test result validationexport interface ScreenshotResult {
   image: string;
   metadata: {
     captureTime: Date;
@@ -94,41 +91,15 @@ export interface EnhancedScreenshotResult {
 // Type guard functions for safe property access
 const isScreenshotResult = (obj: unknown): obj is ScreenshotResult => {
   return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'image' in obj &&
-    'metadata' in obj &&
-    typeof (obj as { image: unknown }).image === 'string' &&
-    typeof (obj as { metadata: unknown }).metadata === 'object'
-  );
-};
+    typeof obj === 'object' &&obj !== null &&'image' in obj &&'metadata' in obj &&typeof (obj as { image: unknown }).image === 'string' &&typeof (obj as { metadata: unknown }).metadata === 'object');};
 
 const isFileOperationResult = (obj: unknown): obj is FileOperationResult => {
   return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'success' in obj &&
-    'operationId' in obj &&
-    'timestamp' in obj &&
-    typeof (obj as { success: unknown }).success === 'boolean' &&
-    typeof (obj as { operationId: unknown }).operationId === 'string'
-  );
-};
+    typeof obj === 'object' &&obj !== null &&'success' in obj &&'operationId' in obj &&'timestamp' in obj &&typeof (obj as { success: unknown }).success === 'boolean' &&typeof (obj as { operationId: unknown }).operationId === 'string');};
 
 const isOcrResult = (obj: unknown): obj is OcrResult => {
   return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'text' in obj &&
-    'confidence' in obj &&
-    'processingTimeMs' in obj &&
-    'method' in obj &&
-    'operationId' in obj &&
-    typeof (obj as { text: unknown }).text === 'string' &&
-    typeof (obj as { confidence: unknown }).confidence === 'number' &&
-    typeof (obj as { processingTimeMs: unknown }).processingTimeMs === 'number'
-  );
-};
+    typeof obj === 'object' &&obj !== null &&'text' in obj &&'confidence' in obj &&'processingTimeMs' in obj &&'method' in obj &&'operationId' in obj &&typeof (obj as { text: unknown }).text === 'string' &&typeof (obj as { confidence: unknown }).confidence === 'number' &&typeof (obj as { processingTimeMs: unknown }).processingTimeMs === 'number');};
 
 // Custom Jest matchers for BytebotD testing
 expect.extend({
@@ -142,9 +113,7 @@ expect.extend({
 
     if (pass) {
       return {
-        message: () => `Expected ${String(received)} not to be a valid operation ID`,
-        pass: true,
-      };
+        message: () => `Expected ${String(received)} not to be a valid operation ID`,pass: true,};
     } else {
       return {
         message: () =>
@@ -172,14 +141,10 @@ expect.extend({
 
       if (pass) {
         return {
-          message: () => `Expected ${received} not to be valid base64`,
-          pass: true,
-        };
+          message: () => `Expected ${received} not to be valid base64`,pass: true,};
       } else {
         return {
-          message: () => `Expected ${received} to be valid base64`,
-          pass: false,
-        };
+          message: () => `Expected ${received} to be valid base64`,pass: false,};
       }
     } catch (_error) {
       return {
@@ -199,16 +164,12 @@ expect.extend({
   ): jest.CustomMatcherResult {
     let executionTime: number;
 
-    if (typeof received === 'number') {
-      executionTime = received;
-    } else if (received && typeof received === 'object') {
+    if (typeof received === 'number') {executionTime = received;} else if (received && typeof received === 'object') {
       executionTime = received.processingTimeMs ?? received.duration ?? 0;
     } else {
       return {
         message: () =>
-          `Expected ${JSON.stringify(received)} to have processingTimeMs, duration property, or be a number`,
-        pass: false,
-      };
+          `Expected ${JSON.stringify(received)} to have processingTimeMs, duration property, or be a number`,pass: false,};
     }
 
     const pass = executionTime > 0 && executionTime <= maxMs;
@@ -216,9 +177,7 @@ expect.extend({
     if (pass) {
       return {
         message: () =>
-          `Expected execution time ${executionTime}ms not to be within reasonable bounds (0-${maxMs}ms)`,
-        pass: true,
-      };
+          `Expected execution time ${executionTime}ms not to be within reasonable bounds (0-${maxMs}ms)`,pass: true,};
     } else {
       return {
         message: () =>
@@ -234,9 +193,7 @@ expect.extend({
   toBeValidScreenshotResult(received: unknown): jest.CustomMatcherResult {
     if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${JSON.stringify(received)} to be an object`,
-        pass: false,
-      };
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,pass: false,};
     }
 
     if (!isScreenshotResult(received)) {
@@ -246,10 +203,7 @@ expect.extend({
       };
     }
 
-    const hasImage = typeof received.image === 'string';
-    const hasMetadata = received.metadata && typeof received.metadata === 'object';
-    const hasValidTimestamp =
-      hasMetadata && received.metadata.captureTime instanceof Date;
+    const hasImage = typeof received.image === 'string';const hasMetadata = received.metadata && typeof received.metadata === 'object';const hasValidTimestamp =hasMetadata && received.metadata.captureTime instanceof Date;
     const hasOperationId =
       hasMetadata && typeof received.metadata.operationId === 'string';
 
@@ -264,22 +218,15 @@ expect.extend({
     } else {
       const issues: string[] = [];
       if (!hasImage) {
-        issues.push('missing or invalid image');
-      }
-      if (!hasMetadata) {
-        issues.push('missing metadata');
-      }
-      if (!hasValidTimestamp) {
-        issues.push('missing or invalid captureTime');
-      }
-      if (!hasOperationId) {
+        issues.push('missing or invalid image');}if (!hasMetadata) {
+        issues.push('missing metadata');}if (!hasValidTimestamp) {
+        issues.push('missing or invalid captureTime');}if (!hasOperationId) {
         issues.push('missing or invalid operationId');
       }
 
       return {
         message: () =>
-          `Expected ${JSON.stringify(received)} to be a valid screenshot result. Issues: ${issues.join(', ')}`,
-        pass: false,
+          `Expected ${JSON.stringify(received)} to be a valid screenshot result. Issues: ${issues.join(`, ')}',pass: false,
       };
     }
   },
@@ -289,13 +236,9 @@ expect.extend({
    */
   toBeValidFileResult(
     received: unknown,
-    operation: 'read' | 'write',
-  ): jest.CustomMatcherResult {
-    if (!received || typeof received !== 'object') {
+    operation: 'read' | 'write',): jest.CustomMatcherResult {if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${JSON.stringify(received)} to be an object`,
-        pass: false,
-      };
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,pass: false,};
     }
 
     if (!isFileOperationResult(received)) {
@@ -305,27 +248,11 @@ expect.extend({
       };
     }
 
-    const hasSuccess = typeof received.success === 'boolean';
-    const hasOperationId = typeof received.operationId === 'string';
-    const hasTimestamp = received.timestamp instanceof Date;
-    const hasMessage = typeof received.message === 'string';
+    const hasSuccess = typeof received.success === 'boolean';const hasOperationId = typeof received.operationId === 'string';const hasTimestamp = received.timestamp instanceof Date;const hasMessage = typeof received.message === 'string';let operationSpecificChecks = true;const issues: string[] = [];
 
-    let operationSpecificChecks = true;
-    const issues: string[] = [];
-
-    if (operation === 'read') {
-      const hasValidReadData = received.success
-        ? typeof received.data === 'string' && typeof received.name === 'string'
-        : true;
-      operationSpecificChecks = hasValidReadData;
+    if (operation === 'read') {const hasValidReadData = received.success? typeof received.data === 'string' && typeof received.name === 'string': true;operationSpecificChecks = hasValidReadData;
       if (!hasValidReadData) {
-        issues.push('missing read-specific data');
-      }
-    } else if (operation === 'write') {
-      const hasValidWriteData = received.success
-        ? typeof received.path === 'string' && typeof received.size === 'number'
-        : true;
-      operationSpecificChecks = hasValidWriteData;
+        issues.push('missing read-specific data');}} else if (operation === 'write') {const hasValidWriteData = received.success? typeof received.path === 'string' && typeof received.size === 'number': true;operationSpecificChecks = hasValidWriteData;
       if (!hasValidWriteData) {
         issues.push('missing write-specific data');
       }
@@ -346,22 +273,15 @@ expect.extend({
       };
     } else {
       if (!hasSuccess) {
-        issues.push('missing or invalid success');
-      }
-      if (!hasOperationId) {
-        issues.push('missing or invalid operationId');
-      }
-      if (!hasTimestamp) {
-        issues.push('missing or invalid timestamp');
-      }
-      if (!received.success && !hasMessage) {
+        issues.push('missing or invalid success');}if (!hasOperationId) {
+        issues.push('missing or invalid operationId');}if (!hasTimestamp) {
+        issues.push('missing or invalid timestamp');}if (!received.success && !hasMessage) {
         issues.push('missing error message');
       }
 
       return {
         message: () =>
-          `Expected ${JSON.stringify(received)} to be a valid ${operation} file result. Issues: ${issues.join(', ')}`,
-        pass: false,
+          `Expected ${JSON.stringify(received)} to be a valid ${operation} file result. Issues: ${issues.join(`, ')}',pass: false,
       };
     }
   },
@@ -372,9 +292,7 @@ expect.extend({
   toBeValidOcrResult(received: unknown): jest.CustomMatcherResult {
     if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${JSON.stringify(received)} to be an object`,
-        pass: false,
-      };
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,pass: false,};
     }
 
     if (!isOcrResult(received)) {
@@ -384,16 +302,9 @@ expect.extend({
       };
     }
 
-    const hasText = typeof received.text === 'string';
-    const hasConfidence =
-      typeof received.confidence === 'number' &&
-      received.confidence >= 0 &&
-      received.confidence <= 1;
+    const hasText = typeof received.text === 'string';const hasConfidence =typeof received.confidence === 'number' &&received.confidence >= 0 &&received.confidence <= 1;
     const hasProcessingTime =
-      typeof received.processingTimeMs === 'number' &&
-      received.processingTimeMs > 0;
-    const hasMethod = typeof received.method === 'string';
-    const hasOperationId = typeof received.operationId === 'string';
+      typeof received.processingTimeMs === 'number' &&received.processingTimeMs > 0;const hasMethod = typeof received.method === 'string';const hasOperationId = typeof received.operationId === 'string';
     const hasBoundingBoxes =
       !received.boundingBoxes || Array.isArray(received.boundingBoxes);
 
@@ -413,28 +324,17 @@ expect.extend({
     } else {
       const issues: string[] = [];
       if (!hasText) {
-        issues.push('missing or invalid text');
-      }
-      if (!hasConfidence) {
-        issues.push('missing or invalid confidence');
-      }
-      if (!hasProcessingTime) {
-        issues.push('missing or invalid processingTimeMs');
-      }
-      if (!hasMethod) {
-        issues.push('missing or invalid method');
-      }
-      if (!hasOperationId) {
-        issues.push('missing or invalid operationId');
-      }
-      if (!hasBoundingBoxes) {
+        issues.push('missing or invalid text');}if (!hasConfidence) {
+        issues.push('missing or invalid confidence');}if (!hasProcessingTime) {
+        issues.push('missing or invalid processingTimeMs');}if (!hasMethod) {
+        issues.push('missing or invalid method');}if (!hasOperationId) {
+        issues.push('missing or invalid operationId');}if (!hasBoundingBoxes) {
         issues.push('invalid boundingBoxes format');
       }
 
       return {
         message: () =>
-          `Expected ${JSON.stringify(received)} to be a valid OCR result. Issues: ${issues.join(', ')}`,
-        pass: false,
+          `Expected ${JSON.stringify(received)} to be a valid OCR result. Issues: ${issues.join(`, ')}',pass: false,
       };
     }
   },
@@ -447,9 +347,7 @@ const performanceMonitor = {
 
   logSlowTest(testName: string, duration: number): void {
     if (duration > this.slowTestThreshold) {
-      console.warn(`⚠️ Slow test detected: "${testName}" took ${duration}ms`);
-    }
-  },
+      console.warn(`⚠️ Slow test detected: "${testName}" took ${duration}ms`);}},
 
   logMemoryUsage(
     testName: string,
@@ -459,7 +357,7 @@ const performanceMonitor = {
     const heapDelta = after.heapUsed - before.heapUsed;
     if (heapDelta > this.memoryLeakThreshold) {
       console.warn(
-        `⚠️ Memory leak detected in "${testName}": +${Math.round(heapDelta / 1024 / 1024)}MB heap`,
+        `⚠️ Memory leak detected in "${testName}": +${Math.round(heapDelta / 1024 / 1024)}MB heap",
       );
     }
   },
@@ -475,9 +373,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName ?? 'unknown';
-  const duration = Date.now() - testStartTime;
-  const endMemory = process.memoryUsage();
+  const testName = expect.getState().currentTestName ?? 'unknown';const duration = Date.now() - testStartTime;const endMemory = process.memoryUsage();
 
   performanceMonitor.logSlowTest(testName, duration);
   performanceMonitor.logMemoryUsage(testName, testStartMemory, endMemory);
@@ -515,10 +411,7 @@ export const TestDataFactory = {
     if (success) {
       return {
         ...base,
-        message: 'File written successfully',
-        path: '/tmp/test-file.txt',
-        size: 1024,
-        ...overrides,
+        message: 'File written successfully',path: '/tmp/test-file.txt',size: 1024,...overrides,
       };
     } else {
       return {
@@ -542,17 +435,12 @@ export const TestDataFactory = {
     if (success) {
       return {
         ...base,
-        data: Buffer.from('test file content').toString('base64'),
-        name: 'test-file.txt',
-        size: 17,
-        ...overrides,
+        data: Buffer.from('test file content').toString('base64'),name: 'test-file.txt',size: 17,...overrides,
       };
     } else {
       return {
         ...base,
-        message: 'File read failed: Test error',
-        ...overrides,
-      };
+        message: 'File read failed: Test error',...overrides,};
     }
   },
 
@@ -561,17 +449,11 @@ export const TestDataFactory = {
    */
   createOcrResult(overrides: Partial<OcrResult> = {}): OcrResult {
     return {
-      text: 'Sample OCR extracted text',
-      confidence: 0.95,
-      processingTimeMs: 250,
+      text: 'Sample OCR extracted text',confidence: 0.95,processingTimeMs: 250,
       method: 'ANE',
       operationId: `ocr${Date.now()}_jkl3456`,
-      language: 'en',
-      boundingBoxes: [
-        {
-          text: 'Sample',
-          x: 100,
-          y: 200,
+      language: 'en',boundingBoxes: [{
+          text: 'Sample',x: 100,y: 200,
           width: 80,
           height: 25,
           confidence: 0.98,
@@ -598,9 +480,7 @@ export const TestDataFactory = {
       processingTimeMs: 150,
       operationId: `find_text${Date.now()}_mno7890`,
       searchCriteria: {
-        text: 'search term',
-        caseSensitive: false,
-        wholeWord: false,
+        text: 'search term',caseSensitive: false,wholeWord: false,
       },
     };
 
@@ -609,9 +489,7 @@ export const TestDataFactory = {
         ...base,
         matches: [
           {
-            text: 'search term',
-            x: 300,
-            y: 400,
+            text: 'search term',x: 300,y: 400,
             width: 120,
             height: 20,
             confidence: 0.92,
@@ -633,9 +511,7 @@ export const TestDataFactory = {
    */
   createEnhancedScreenshotResult(overrides: Partial<EnhancedScreenshotResult> = {}): EnhancedScreenshotResult {
     return {
-      image: Buffer.from('fake-enhanced-screenshot-data').toString('base64'),
-      processingTimeMs: 450,
-      enhancementsApplied: ['screenshot', 'ocr', 'text_detection'],
+      image: Buffer.from('fake-enhanced-screenshot-data').toString('base64'),processingTimeMs: 450,enhancementsApplied: ['screenshot', 'ocr', 'text_detection'],
       operationId: `enhanced_screenshot${Date.now()}_pqr4567`,
       ocr: this.createOcrResult(),
       textDetection: {
@@ -683,10 +559,7 @@ export const TestUtils = {
   /**
    * Creates a temporary test directory
    */
-  async createTempDir(prefix = 'bytebot-test'): Promise<string> {
-    const fs = await import('fs/promises');
-    const path = await import('path');
-    const os = await import('os');
+  async createTempDir(prefix = 'bytebot-test'): Promise<string> {const fs = await import('fs/promises');const path = await import('path');const os = await import('os');
 
     const tempDir = path.join(
       os.tmpdir(),

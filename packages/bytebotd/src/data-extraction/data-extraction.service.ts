@@ -1,13 +1,8 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import {
-  DataExtractionDto,
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';import { ComputerUseService } from '../computer-use/computer-use.service';import {DataExtractionDto,
   MultiSelectorExtractionDto,
   DataExtractionType,
   ExtractionOutputFormat
-} from './dto/data-extraction.dto';
-import {
-  DataExtractionResponseDto,
+} from './dto/data-extraction.dto';import {DataExtractionResponseDto,
   MultiExtractionResponseDto,
   ExtractedTableDto,
   ExtractedListDto,
@@ -44,11 +39,7 @@ export class DataExtractionService {
    */
   async extractData(extraction: DataExtractionDto): Promise<DataExtractionResponseDto> {
     const startTime = Date.now();
-    const operationId = `extract_${extraction.extractionType}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Starting data extraction: ${extraction.extractionType}`, {
-      operationId,
-      extractionType: extraction.extractionType,
+    const operationId = `extract_${extraction.extractionType}_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Starting data extraction: ${extraction.extractionType}`, {operationId,extractionType: extraction.extractionType,
       selector: extraction.selector,
       url: extraction.url,
       outputFormat: extraction.config?.outputFormat || ExtractionOutputFormat.JSON
@@ -110,10 +101,7 @@ export class DataExtractionService {
           result = await this.extractMetadata(extraction, operationId);
           break;
         default:
-          throw new Error(`Unsupported extraction type: ${extraction.extractionType}`);
-      }
-
-      // Add screenshot to result if captured
+          throw new Error(`Unsupported extraction type: ${extraction.extractionType}`);}// Add screenshot to result if captured
       if (screenshot) {
         result.screenshot = screenshot;
       }
@@ -126,9 +114,7 @@ export class DataExtractionService {
       const processingTime = Date.now() - startTime;
       result.metadata.processingTimeMs = processingTime;
 
-      this.logger.log(`[${operationId}] Data extraction completed successfully (${processingTime}ms)`, {
-        operationId,
-        extractionType: extraction.extractionType,
+      this.logger.log(`[${operationId}] Data extraction completed successfully (${processingTime}ms)`, {operationId,extractionType: extraction.extractionType,
         itemCount: result.itemCount,
         processingTime,
         success: result.success
@@ -137,9 +123,7 @@ export class DataExtractionService {
       return result;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Data extraction failed (${processingTime}ms)`, error, {
-        operationId,
-        extractionType: extraction.extractionType,
+      this.logger.error(`[${operationId}] Data extraction failed (${processingTime}ms)`, error, {operationId,extractionType: extraction.extractionType,
         processingTime,
         errorType: error?.constructor?.name
       });
@@ -152,11 +136,7 @@ export class DataExtractionService {
    */
   async extractMultiple(extraction: MultiSelectorExtractionDto): Promise<MultiExtractionResponseDto> {
     const startTime = Date.now();
-    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Starting multi-extraction operation`, {
-      operationId,
-      extractionCount: extraction.extractions.length,
+    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Starting multi-extraction operation`, {operationId,extractionCount: extraction.extractions.length,
       parallel: extraction.parallel,
       url: extraction.url
     });
@@ -181,9 +161,7 @@ export class DataExtractionService {
             return result;
           } catch (error) {
             failedExtractions++;
-            this.logger.error(`[${operationId}] Extraction ${index} failed`, error);
-            return this.createErrorResponse(ext, error.message);
-          }
+            this.logger.error(`[${operationId}] Extraction ${index} failed`, error);return this.createErrorResponse(ext, error.message);}
         });
 
         const parallelResults = await Promise.all(promises);
@@ -199,9 +177,7 @@ export class DataExtractionService {
             successfulExtractions++;
           } catch (error) {
             failedExtractions++;
-            this.logger.error(`[${operationId}] Extraction ${i} failed`, error);
-            results.push(this.createErrorResponse(ext, error.message));
-          }
+            this.logger.error(`[${operationId}] Extraction ${i} failed`, error);results.push(this.createErrorResponse(ext, error.message));}
         }
       }
 
@@ -224,9 +200,7 @@ export class DataExtractionService {
         summary
       };
 
-      this.logger.log(`[${operationId}] Multi-extraction completed (${totalProcessingTime}ms)`, {
-        operationId,
-        extractionCount: extraction.extractions.length,
+      this.logger.log(`[${operationId}] Multi-extraction completed (${totalProcessingTime}ms)`, {operationId,extractionCount: extraction.extractions.length,
         successfulExtractions,
         failedExtractions,
         totalProcessingTime
@@ -235,9 +209,7 @@ export class DataExtractionService {
       return response;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Multi-extraction failed (${processingTime}ms)`, error);
-      throw error;
-    }
+      this.logger.error(`[${operationId}] Multi-extraction failed (${processingTime}ms)`, error);throw error;}
   }
 
   // Specific extraction methods
@@ -252,12 +224,7 @@ export class DataExtractionService {
     // Implementation would use browser automation to extract table data
     // For now, return mock data structure
     const tables: ExtractedTableDto[] = [{
-      headers: ['Column 1', 'Column 2', 'Column 3'],
-      rows: [
-        ['Row 1 Col 1', 'Row 1 Col 2', 'Row 1 Col 3'],
-        ['Row 2 Col 1', 'Row 2 Col 2', 'Row 2 Col 3']
-      ],
-      rowCount: 2,
+      headers: ['Column 1', 'Column 2', 'Column 3'],rows: [['Row 1 Col 1', 'Row 1 Col 2', 'Row 1 Col 3'],['Row 2 Col 1', 'Row 2 Col 2', 'Row 2 Col 3']],rowCount: 2,
       columnCount: 3,
       selector: extraction.selector || 'table'
     }];
@@ -279,10 +246,7 @@ export class DataExtractionService {
     });
 
     const lists: ExtractedListDto[] = [{
-      items: ['List Item 1', 'List Item 2', 'List Item 3'],
-      listType: 'unordered',
-      itemCount: 3,
-      selector: extraction.selector || 'ul, ol',
+      items: ['List Item 1', 'List Item 2', 'List Item 3'],listType: 'unordered',itemCount: 3,selector: extraction.selector || 'ul, ol',
       depth: 1
     }];
 
@@ -303,9 +267,7 @@ export class DataExtractionService {
     });
 
     const texts: ExtractedTextDto[] = [{
-      content: 'This is extracted text content from the page.',
-      length: 45,
-      wordCount: 8,
+      content: 'This is extracted text content from the page.',length: 45,wordCount: 8,
       patterns: [],
       formattingPreserved: extraction.textConfig?.preserveFormatting || false,
       selector: extraction.selector || 'body'
@@ -328,10 +290,7 @@ export class DataExtractionService {
     });
 
     const links: ExtractedLinkDto[] = [{
-      url: 'https://example.com/page',
-      text: 'Example Link',
-      title: 'Visit Example Page',
-      target: '_blank',
+      url: 'https://example.com/page',text: 'Example Link',title: 'Visit Example Page',target: '_blank',
       isInternal: false,
       attributes: {}
     }];
@@ -353,9 +312,7 @@ export class DataExtractionService {
     });
 
     const images: ExtractedImageDto[] = [{
-      src: 'https://example.com/image.jpg',
-      alt: 'Example Image',
-      title: 'Sample Image',
+      src: 'https://example.com/image.jpg',alt: 'Example Image',title: 'Sample Image',
       width: 800,
       height: 600,
       attributes: {}
@@ -375,12 +332,7 @@ export class DataExtractionService {
 
     // This would integrate with the form automation module
     const customData: ExtractedCustomDataDto[] = [{
-      selector: 'form',
-      text: 'Contact Form',
-      attributes: { action: '/submit', method: 'POST' },
-      children: [
-        { selector: 'input[type="email"]', attributes: { name: 'email', required: 'true' } },
-        { selector: 'textarea', attributes: { name: 'message' } }
+      selector: 'form',text: 'Contact Form',attributes: { action: '/submit', method: 'POST' },children: [{ selector: 'input[type="email"]", attributes: { name: 'email', required: 'true' } },{ selector: 'textarea', attributes: { name: 'message' } }
       ]
     }];
 
@@ -397,9 +349,7 @@ export class DataExtractionService {
     this.logger.log(`[${operationId}] Extracting structured data (JSON-LD, microdata)`);
 
     const customData: ExtractedCustomDataDto[] = [{
-      selector: 'script[type="application/ld+json"]',
-      text: '{"@context": "https://schema.org", "@type": "Organization", "name": "Example Company"}',
-      attributes: { type: 'application/ld+json' }
+      selector: 'script[type="application/ld+json"]",text: '{"@context": "https://schema.org", "@type": "Organization", "name": "Example Company"}',attributes: { type: 'application/ld+json' }
     }];
 
     return this.createSuccessResponse(
@@ -420,8 +370,7 @@ export class DataExtractionService {
 
     const customData: ExtractedCustomDataDto[] = [{
       selector: extraction.customConfig?.selector || extraction.selector,
-      text: 'Custom extracted content',
-      attributes: { 'data-custom': 'value' },
+      text: 'Custom extracted content',attributes: { 'data-custom': 'value' },
       children: []
     }];
 
@@ -438,9 +387,7 @@ export class DataExtractionService {
     this.logger.log(`[${operationId}] Extracting complete page content`);
 
     const texts: ExtractedTextDto[] = [{
-      content: 'Complete page content extracted here...',
-      length: 1000,
-      wordCount: 150,
+      content: 'Complete page content extracted here...',length: 1000,wordCount: 150,
       selector: 'body'
     }];
 
@@ -457,9 +404,7 @@ export class DataExtractionService {
     this.logger.log(`[${operationId}] Extracting page metadata`);
 
     const customData: ExtractedCustomDataDto[] = [
-      { selector: 'title', text: 'Page Title' },
-      { selector: 'meta[name="description"]', attributes: { content: 'Page description' } },
-      { selector: 'meta[name="keywords"]', attributes: { content: 'keyword1, keyword2' } }
+      { selector: 'title', text: 'Page Title' },{ selector: 'meta[name="description"]", attributes: { content: 'Page description' } },{ selector: 'meta[name="keywords"]", attributes: { content: 'keyword1, keyword2' } }
     ];
 
     return this.createSuccessResponse(
@@ -474,14 +419,10 @@ export class DataExtractionService {
   // Helper methods
 
   private async navigateToUrl(url: string, operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Navigating to URL: ${url}`);
-    // Implementation would navigate to the URL
-  }
+    this.logger.log(`[${operationId}] Navigating to URL: ${url}`);// Implementation would navigate to the URL}
 
   private async waitForDynamicContent(operationId: string): Promise<void> {
-    this.logger.log(`[${operationId}] Waiting for dynamic content to load`);
-    await this.delay(2000); // Wait for dynamic content
-  }
+    this.logger.log(`[${operationId}] Waiting for dynamic content to load`);await this.delay(2000); // Wait for dynamic content}
 
   private async handleInfiniteScroll(operationId: string): Promise<void> {
     this.logger.log(`[${operationId}] Handling infinite scroll to load more content`);
@@ -490,8 +431,7 @@ export class DataExtractionService {
 
   private async captureScreenshot(operationId: string): Promise<string> {
     try {
-      const result = await this.computerUseService.action({ action: 'screenshot' });
-      return (result as any)?.image || '';
+      const result = await this.computerUseService.action({ action: 'screenshot' });return (result as any)?.image || '';
     } catch (error) {
       this.logger.warn(`[${operationId}] Failed to capture screenshot: ${error.message}`);
       return '';
@@ -519,30 +459,19 @@ export class DataExtractionService {
 
   private convertToCSV(data: any): string {
     // Implementation would convert data to CSV format
-    return 'Column1,Column2,Column3\nValue1,Value2,Value3';
-  }
+    return 'Column1,Column2,Column3Value1,Value2,Value3';}
 
   private convertToXML(data: any): string {
     // Implementation would convert data to XML format
-    return '<?xml version="1.0"?><root><data>value</data></root>';
-  }
+    return '<?xml version="1.0"?><root><data>value</data></root>";}
 
   private convertToYAML(data: any): string {
     // Implementation would convert data to YAML format
-    return 'data:\n  - value1\n  - value2';
-  }
-
-  private convertToPlainText(data: any): string {
+    return 'data:\n  - value1\n  - value2';}private convertToPlainText(data: any): string {
     // Implementation would convert data to plain text format
-    return 'Extracted data in plain text format';
-  }
-
-  private convertToHTML(data: any): string {
+    return 'Extracted data in plain text format';}private convertToHTML(data: any): string {
     // Implementation would convert data to HTML format
-    return '<html><body><h1>Extracted Data</h1><p>Data content here</p></body></html>';
-  }
-
-  private createSuccessResponse(
+    return '<html><body><h1>Extracted Data</h1><p>Data content here</p></body></html>';}private createSuccessResponse(
     extractionType: DataExtractionType,
     outputFormat: ExtractionOutputFormat,
     data: any,
@@ -566,23 +495,12 @@ export class DataExtractionService {
       outputFormat: extraction.config?.outputFormat || ExtractionOutputFormat.JSON,
       itemCount: 0,
       errorMessage,
-      metadata: this.createMetadata('error')
-    };
-  }
+      metadata: this.createMetadata('error')};}
 
   private createMetadata(operationId: string): ExtractionMetadataDto {
     return {
-      sourceUrl: 'https://example.com',
-      pageTitle: 'Example Page',
-      timestamp: new Date().toISOString(),
-      processingTimeMs: 0, // Will be set later
-      userAgent: 'ByteBot Data Extractor',
-      viewport: { width: 1920, height: 1080 },
-      language: 'en-US',
-      encoding: 'UTF-8',
-      contentType: 'text/html'
-    };
-  }
+      sourceUrl: 'https://example.com',pageTitle: 'Example Page',timestamp: new Date().toISOString(),processingTimeMs: 0, // Will be set later
+      userAgent: 'ByteBot Data Extractor',viewport: { width: 1920, height: 1080 },language: 'en-US',encoding: 'UTF-8',contentType: 'text/html'};}
 
   private createCombinedMetadata(results: DataExtractionResponseDto[], processingTime: number): ExtractionMetadataDto {
     const firstResult = results.find(r => r.success);

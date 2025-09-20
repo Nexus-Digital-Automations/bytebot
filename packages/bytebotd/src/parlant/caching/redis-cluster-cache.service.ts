@@ -24,15 +24,7 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { performance } from 'perf_hooks';
-import { createHash } from 'crypto';
-import { gzip, gunzip } from 'zlib';
-import { promisify } from 'util';
-
-const gzipAsync = promisify(gzip);
-const gunzipAsync = promisify(gunzip);
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { performance } from 'perf_hooks';import { createHash } from 'crypto';import { gzip, gunzip } from 'zlib';import { promisify } from 'util';const gzipAsync = promisify(gzip);const gunzipAsync = promisify(gunzip);
 
 // ===== REDIS CLUSTER INTERFACES =====
 
@@ -65,15 +57,11 @@ export interface RedisClusterConfig {
 export interface RedisNodeConfig {
   readonly host: string;
   readonly port: number;
-  readonly role: 'master' | 'slave';
-  readonly weight: number;  // Load balancing weight
-}
+  readonly role: 'master' | 'slave';readonly weight: number;  // Load balancing weight}
 
 export interface CompressionConfig {
   readonly enabled: boolean;
-  readonly algorithm: 'gzip' | 'lz4';
-  readonly level: number;
-  readonly threshold: number;  // Compress payloads > threshold bytes
+  readonly algorithm: 'gzip' | 'lz4';readonly level: number;readonly threshold: number;  // Compress payloads > threshold bytes
   readonly ratio: number;      // Expected compression ratio
 }
 
@@ -155,9 +143,7 @@ export interface RedisClusterMetrics {
   readonly health: {
     readonly uptime: number;
     readonly lastFailure?: Date;
-    readonly circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
-    readonly errorRate: number;
-  };
+    readonly circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';readonly errorRate: number;};
 }
 
 /**
@@ -196,13 +182,8 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     performance: { avgLatency: 0, p95Latency: 0, p99Latency: 0, throughput: 0 },
     cache: { hitRate: 0, missRate: 0, evictionRate: 0, compressionRate: 0 },
     connections: { active: 0, idle: 0, failed: 0, retries: 0 },
-    health: { uptime: 0, circuitBreakerState: 'CLOSED', errorRate: 0 },
-  };
-
-  // Circuit Breaker State
-  private circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-  private circuitBreakerFailures = 0;
-  private circuitBreakerLastFailure: Date | null = null;
+    health: { uptime: 0, circuitBreakerState: 'CLOSED', errorRate: 0 },};// Circuit Breaker State
+  private circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';private circuitBreakerFailures = 0;private circuitBreakerLastFailure: Date | null = null;
 
   // Performance Monitoring
   private latencyHistory: number[] = [];
@@ -212,9 +193,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly configService: ConfigService) {
     this.config = this.loadRedisClusterConfig();
 
-    this.logger.log('Redis Cluster Cache Service initializing...', {
-      clusterEnabled: this.config.enabled,
-      nodes: this.config.nodes.length,
+    this.logger.log('Redis Cluster Cache Service initializing...', {clusterEnabled: this.config.enabled,nodes: this.config.nodes.length,
       compression: this.config.compression.enabled,
       pipelining: this.config.performance.pipelining.enabled,
       circuitBreaker: this.config.performance.circuitBreaker.enabled,
@@ -227,13 +206,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const operationId = `redis_cluster_init${Date.now()}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Redis Cluster connection...`);
-
-      // Initialize Redis Cluster connection
-      await this.initializeCluster();
+    const operationId = `redis_cluster_init${Date.now()}`;try {this.logger.log(`[${operationId}] Initializing Redis Cluster connection...`);// Initialize Redis Cluster connectionawait this.initializeCluster();
 
       // Start health monitoring
       this.startHealthMonitoring();
@@ -255,19 +228,12 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
     } catch (error) {
       this.logger.error(`[${operationId}] Redis Cluster initialization failed:`, error);
-      // Don't throw - allow service to start in degraded mode
-      this.circuitBreakerState = 'OPEN';
+      // Don't throw - allow service to start in degraded modethis.circuitBreakerState = 'OPEN';
     }
   }
 
   async onModuleDestroy(): Promise<void> {
-    const operationId = `redis_cluster_shutdown${Date.now()}`;
-
-    try {
-      this.logger.log(`[${operationId}] Shutting down Redis Cluster Cache Service...`);
-
-      // Stop timers
-      if (this.pipelineTimer) {
+    const operationId = `redis_cluster_shutdown${Date.now()}`;try {this.logger.log(`[${operationId}] Shutting down Redis Cluster Cache Service...`);// Stop timersif (this.pipelineTimer) {
         clearInterval(this.pipelineTimer);
       }
 
@@ -284,12 +250,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       // Log final metrics
       this.logFinalMetrics();
 
-      this.logger.log(`[${operationId}] Redis Cluster Cache Service shutdown completed`);
-
-    } catch (error) {
-      this.logger.error(`[${operationId}] Redis Cluster shutdown error:`, error);
-    }
-  }
+      this.logger.log(`[${operationId}] Redis Cluster Cache Service shutdown completed`);} catch (error) {this.logger.error(`[${operationId}] Redis Cluster shutdown error:`, error);}}
 
   // ===== PUBLIC CACHE INTERFACE =====
 
@@ -306,8 +267,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
     try {
       // Circuit breaker check
-      if (this.circuitBreakerState === 'OPEN') {
-        return this.createFailureResult<T>('Circuit breaker is OPEN', startTime);
+      if (this.circuitBreakerState === 'OPEN') {return this.createFailureResult<T>('Circuit breaker is OPEN', startTime);
       }
 
       this.metrics.operations.total++;
@@ -337,10 +297,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       // Parse cache entry
       const entry = this.parseRedisCacheEntry<T>(rawData);
       if (!entry) {
-        return this.createFailureResult<T>('Failed to parse cache entry', startTime);
-      }
-
-      // Decompress if needed
+        return this.createFailureResult<T>('Failed to parse cache entry', startTime);}// Decompress if needed
       let data = entry.data;
       if (entry.metadata.compressed && this.config.compression.enabled) {
         data = await this.decompress(data as Buffer) as T;
@@ -367,9 +324,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       const latency = performance.now() - startTime;
       this.recordOperationError('GET', latency, error);
 
-      this.logger.error(`[${operationId}] Redis GET error:`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Redis GET error:`, {key,error: error instanceof Error ? error.message : String(error),
         latency: `${latency.toFixed(2)}ms`,
       });
 
@@ -400,8 +355,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
     try {
       // Circuit breaker check
-      if (this.circuitBreakerState === 'OPEN') {
-        return this.createFailureResult<void>('Circuit breaker is OPEN', startTime);
+      if (this.circuitBreakerState === 'OPEN') {return this.createFailureResult<void>('Circuit breaker is OPEN', startTime);
       }
 
       this.metrics.operations.total++;
@@ -440,18 +394,11 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
           size: valueSize,
           compressed,
           compressionRatio: compressed ? compressionRatio : undefined,
-          version: '1.0',
-        },
-      };
+          version: '1.0',},};
 
       // Pipeline operation if enabled
       if (options.pipeline && this.config.performance.pipelining.enabled) {
-        this.queuePipelineOperation(key, 'SET', entry, ttl);
-        const latency = performance.now() - startTime;
-        this.recordOperationHistory('SET_PIPELINE', latency, true);
-
-        return {
-          success: true,
+        this.queuePipelineOperation(key, 'SET', entry, ttl);const latency = performance.now() - startTime;this.recordOperationHistory('SET_PIPELINE', latency, true);return {success: true,
           metadata: {
             latency,
             fromCache: false,
@@ -467,9 +414,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
       this.recordOperationHistory('SET', latency, true);
 
-      this.logger.debug(`[${operationId}] Redis SET successful: ${key} (${latency.toFixed(2)}ms)`, {
-        compressed,
-        compressionRatio: compressed ? compressionRatio.toFixed(2) : undefined,
+      this.logger.debug(`[${operationId}] Redis SET successful: ${key} (${latency.toFixed(2)}ms)`, {compressed,compressionRatio: compressed ? compressionRatio.toFixed(2) : undefined,
         size: `${valueSize} bytes`,
       });
 
@@ -487,13 +432,8 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       const latency = performance.now() - startTime;
       this.recordOperationError('SET', latency, error);
 
-      this.logger.error(`[${operationId}] Redis SET error:`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,
-      });
-
-      return this.createFailureResult<void>(error instanceof Error ? error.message : String(error), startTime);
+      this.logger.error(`[${operationId}] Redis SET error:`, {key,error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,});return this.createFailureResult<void>(error instanceof Error ? error.message : String(error), startTime);
     }
   }
 
@@ -505,8 +445,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     const startTime = performance.now();
 
     try {
-      if (this.circuitBreakerState === 'OPEN') {
-        return this.createFailureResult<void>('Circuit breaker is OPEN', startTime);
+      if (this.circuitBreakerState === 'OPEN') {return this.createFailureResult<void>('Circuit breaker is OPEN', startTime);
       }
 
       this.metrics.operations.total++;
@@ -535,13 +474,8 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       const latency = performance.now() - startTime;
       this.recordOperationError('DEL', latency, error);
 
-      this.logger.error(`[${operationId}] Redis DEL error:`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,
-      });
-
-      return this.createFailureResult<void>(error instanceof Error ? error.message : String(error), startTime);
+      this.logger.error(`[${operationId}] Redis DEL error:`, {key,error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,});return this.createFailureResult<void>(error instanceof Error ? error.message : String(error), startTime);
     }
   }
 
@@ -553,8 +487,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     const startTime = performance.now();
 
     try {
-      if (this.circuitBreakerState === 'OPEN') {
-        return this.createFailureResult<number>('Circuit breaker is OPEN', startTime);
+      if (this.circuitBreakerState === 'OPEN') {return this.createFailureResult<number>('Circuit breaker is OPEN', startTime);
       }
 
       this.logger.log(`[${operationId}] Redis pattern invalidation: ${pattern}`);
@@ -582,9 +515,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       const latency = performance.now() - startTime;
       this.recordOperationError('INVALIDATE', latency, error);
 
-      this.logger.error(`[${operationId}] Pattern invalidation error:`, {
-        pattern,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Pattern invalidation error:`, {pattern,error: error instanceof Error ? error.message : String(error),
         latency: `${latency.toFixed(2)}ms`,
       });
 
@@ -605,8 +536,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     const startTime = performance.now();
 
     try {
-      if (this.circuitBreakerState === 'OPEN') {
-        return this.createFailureResult<Array<{ key: string; success: boolean; data?: unknown; error?: string }>>('Circuit breaker is OPEN', startTime);
+      if (this.circuitBreakerState === 'OPEN') {return this.createFailureResult<Array<{ key: string; success: boolean; data?: unknown; error?: string }>>('Circuit breaker is OPEN', startTime);
       }
 
       this.metrics.operations.total += operations.length;
@@ -636,9 +566,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       const latency = performance.now() - startTime;
       this.recordOperationError('BATCH', latency, error);
 
-      this.logger.error(`[${operationId}] Batch operation error:`, {
-        operationCount: operations.length,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Batch operation error:`, {operationCount: operations.length,error: error instanceof Error ? error.message : String(error),
         latency: `${latency.toFixed(2)}ms`,
       });
 
@@ -658,9 +586,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
   } {
     this.updateMetrics();
 
-    const healthy = this.circuitBreakerState === 'CLOSED' &&
-      this.metrics.performance.avgLatency < this.config.monitoring.alertThresholds.latencyMs &&
-      this.metrics.health.errorRate < this.config.monitoring.alertThresholds.errorRatePercent &&
+    const healthy = this.circuitBreakerState === 'CLOSED' &&this.metrics.performance.avgLatency < this.config.monitoring.alertThresholds.latencyMs &&this.metrics.health.errorRate < this.config.monitoring.alertThresholds.errorRatePercent &&
       this.metrics.cache.hitRate > this.config.monitoring.alertThresholds.hitRatePercent;
 
     const recommendations = this.generateHealthRecommendations();
@@ -678,69 +604,29 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
   private loadRedisClusterConfig(): RedisClusterConfig {
     return {
-      enabled: this.configService.get<boolean>('REDIS_CLUSTER_ENABLED', true),
-      nodes: this.parseRedisNodes(this.configService.get<string>('REDIS_CLUSTER_NODES', 'localhost:6379')),
-      options: {
-        enableReadyCheck: true,
+      enabled: this.configService.get<boolean>('REDIS_CLUSTER_ENABLED', true),nodes: this.parseRedisNodes(this.configService.get<string>('REDIS_CLUSTER_NODES', 'localhost:6379')),options: {enableReadyCheck: true,
         redisOptions: {
           family: 4,
           keepAlive: true,
-          connectTimeout: this.configService.get<number>('REDIS_CONNECT_TIMEOUT', 5000),
-          commandTimeout: this.configService.get<number>('REDIS_COMMAND_TIMEOUT', 5000),
-          retryDelayOnFailover: 100,
-          maxRetriesPerRequest: 3,
+          connectTimeout: this.configService.get<number>('REDIS_CONNECT_TIMEOUT', 5000),commandTimeout: this.configService.get<number>('REDIS_COMMAND_TIMEOUT', 5000),retryDelayOnFailover: 100,maxRetriesPerRequest: 3,
         },
         clusterRetryDelayOnFailover: 100,
         clusterRetryDelayOnClusterDown: 300,
         clusterMaxRedirections: 16,
-        scaleReads: 'slave',
-      },
-      compression: {
-        enabled: this.configService.get<boolean>('REDIS_COMPRESSION_ENABLED', true),
-        algorithm: 'gzip',
-        level: this.configService.get<number>('REDIS_COMPRESSION_LEVEL', 6),
-        threshold: this.configService.get<number>('REDIS_COMPRESSION_THRESHOLD', 1024),
-        ratio: 0.7, // Expected 70% compression
-      },
+        scaleReads: 'slave',},compression: {
+        enabled: this.configService.get<boolean>('REDIS_COMPRESSION_ENABLED', true),algorithm: 'gzip',level: this.configService.get<number>('REDIS_COMPRESSION_LEVEL', 6),threshold: this.configService.get<number>('REDIS_COMPRESSION_THRESHOLD', 1024),ratio: 0.7, // Expected 70% compression},
       performance: {
         pipelining: {
-          enabled: this.configService.get<boolean>('REDIS_PIPELINE_ENABLED', true),
-          batchSize: this.configService.get<number>('REDIS_PIPELINE_BATCH_SIZE', 100),
-          timeoutMs: this.configService.get<number>('REDIS_PIPELINE_TIMEOUT', 50),
-        },
-        pooling: {
-          maxConnections: this.configService.get<number>('REDIS_MAX_CONNECTIONS', 10),
-          idleTimeoutMs: this.configService.get<number>('REDIS_IDLE_TIMEOUT', 30000),
-          acquireTimeoutMs: this.configService.get<number>('REDIS_ACQUIRE_TIMEOUT', 5000),
-        },
-        circuitBreaker: {
-          enabled: this.configService.get<boolean>('REDIS_CIRCUIT_BREAKER_ENABLED', true),
-          failureThreshold: this.configService.get<number>('REDIS_CIRCUIT_BREAKER_THRESHOLD', 5),
-          resetTimeoutMs: this.configService.get<number>('REDIS_CIRCUIT_BREAKER_RESET_TIMEOUT', 60000),
-        },
-      },
+          enabled: this.configService.get<boolean>('REDIS_PIPELINE_ENABLED', true),batchSize: this.configService.get<number>('REDIS_PIPELINE_BATCH_SIZE', 100),timeoutMs: this.configService.get<number>('REDIS_PIPELINE_TIMEOUT', 50),},pooling: {
+          maxConnections: this.configService.get<number>('REDIS_MAX_CONNECTIONS', 10),idleTimeoutMs: this.configService.get<number>('REDIS_IDLE_TIMEOUT', 30000),acquireTimeoutMs: this.configService.get<number>('REDIS_ACQUIRE_TIMEOUT', 5000),},circuitBreaker: {
+          enabled: this.configService.get<boolean>('REDIS_CIRCUIT_BREAKER_ENABLED', true),failureThreshold: this.configService.get<number>('REDIS_CIRCUIT_BREAKER_THRESHOLD', 5),resetTimeoutMs: this.configService.get<number>('REDIS_CIRCUIT_BREAKER_RESET_TIMEOUT', 60000),},},
       monitoring: {
-        metricsEnabled: this.configService.get<boolean>('REDIS_METRICS_ENABLED', true),
-        healthCheckIntervalMs: this.configService.get<number>('REDIS_HEALTH_CHECK_INTERVAL', 30000),
-        slowLogThresholdMs: this.configService.get<number>('REDIS_SLOW_LOG_THRESHOLD', 100),
-        alertThresholds: {
-          errorRatePercent: this.configService.get<number>('REDIS_ALERT_ERROR_RATE', 5),
-          latencyMs: this.configService.get<number>('REDIS_ALERT_LATENCY', 50),
-          hitRatePercent: this.configService.get<number>('REDIS_ALERT_HIT_RATE', 70),
-        },
-      },
+        metricsEnabled: this.configService.get<boolean>('REDIS_METRICS_ENABLED', true),healthCheckIntervalMs: this.configService.get<number>('REDIS_HEALTH_CHECK_INTERVAL', 30000),slowLogThresholdMs: this.configService.get<number>('REDIS_SLOW_LOG_THRESHOLD', 100),alertThresholds: {errorRatePercent: this.configService.get<number>('REDIS_ALERT_ERROR_RATE', 5),latencyMs: this.configService.get<number>('REDIS_ALERT_LATENCY', 50),hitRatePercent: this.configService.get<number>('REDIS_ALERT_HIT_RATE', 70),},},
     };
   }
 
   private parseRedisNodes(nodesString: string): RedisNodeConfig[] {
-    return nodesString.split(',').map((node, index) => {
-      const [host, port] = node.trim().split(':');
-      return {
-        host: host || 'localhost',
-        port: parseInt(port) || 6379,
-        role: index === 0 ? 'master' : 'slave', // Simple assumption
-        weight: 1,
-      };
+    return nodesString.split(',').map((node, index) => {const [host, port] = node.trim().split(':');return {host: host || 'localhost',port: parseInt(port) || 6379,role: index === 0 ? 'master' : 'slave', // Simple assumptionweight: 1,};
     });
   }
 
@@ -748,10 +634,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     // TODO: Initialize Redis Cluster with ioredis
     // this.redisCluster = new Redis.Cluster(this.config.nodes, this.config.options);
 
-    this.logger.debug('Redis Cluster connection placeholder initialized');
-  }
-
-  // Placeholder Redis Operations (would be replaced with actual ioredis calls)
+    this.logger.debug('Redis Cluster connection placeholder initialized');}// Placeholder Redis Operations (would be replaced with actual ioredis calls)
   private async performRedisGet(key: string): Promise<string | null> {
     // Simulate Redis GET operation
     await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 2)); // 2-12ms latency
@@ -775,9 +658,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async performBatchOperations(operations: Array<{
-    type: 'GET' | 'SET' | 'DEL';
-    key: string;
-    value?: unknown;
+    type: 'GET' | 'SET' | 'DEL';key: string;value?: unknown;
     ttl?: number;
   }>): Promise<Array<{ key: string; success: boolean; data?: unknown; error?: string }>> {
     // Simulate batch pipeline operations
@@ -786,24 +667,18 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     return operations.map(op => ({
       key: op.key,
       success: Math.random() > 0.05, // 95% success rate
-      data: op.type === 'GET' ? { mocked: true } : undefined,
-    }));
-  }
+      data: op.type === 'GET' ? { mocked: true } : undefined,}));}
 
   // Compression Methods
   private async compress<T>(data: T): Promise<Buffer> {
-    if (this.config.compression.algorithm === 'gzip') {
-      const jsonData = JSON.stringify(data);
-      return await gzipAsync(Buffer.from(jsonData));
+    if (this.config.compression.algorithm === 'gzip') {const jsonData = JSON.stringify(data);return await gzipAsync(Buffer.from(jsonData));
     }
     // For other algorithms, would implement accordingly
     return Buffer.from(JSON.stringify(data));
   }
 
   private async decompress<T>(compressedData: Buffer): Promise<T> {
-    if (this.config.compression.algorithm === 'gzip') {
-      const decompressed = await gunzipAsync(compressedData);
-      return JSON.parse(decompressed.toString());
+    if (this.config.compression.algorithm === 'gzip') {const decompressed = await gunzipAsync(compressedData);return JSON.parse(decompressed.toString());
     }
     // For other algorithms, would implement accordingly
     return JSON.parse(compressedData.toString());
@@ -863,9 +738,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 2));
       this.logger.debug(`Processed pipeline batch: ${operations.length} operations`);
     } catch (error) {
-      this.logger.error('Pipeline processing error:', error);
-    }
-  }
+      this.logger.error('Pipeline processing error:', error);}}
 
   // Circuit Breaker Implementation
   private async retryOperation<T>(operation: () => Promise<CacheOperationResult<T>>): Promise<CacheOperationResult<T>> {
@@ -908,14 +781,9 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
     if (this.config.performance.circuitBreaker.enabled &&
         this.circuitBreakerFailures >= this.config.performance.circuitBreaker.failureThreshold) {
-      this.circuitBreakerState = 'OPEN';
-      this.circuitBreakerLastFailure = new Date();
-
-      // Auto-reset circuit breaker after timeout
+      this.circuitBreakerState = 'OPEN';this.circuitBreakerLastFailure = new Date();// Auto-reset circuit breaker after timeout
       setTimeout(() => {
-        this.circuitBreakerState = 'HALF_OPEN';
-        this.circuitBreakerFailures = 0;
-      }, this.config.performance.circuitBreaker.resetTimeoutMs);
+        this.circuitBreakerState = 'HALF_OPEN';this.circuitBreakerFailures = 0;}, this.config.performance.circuitBreaker.resetTimeoutMs);
     }
 
     this.metrics.connections.failed++;
@@ -970,11 +838,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log('Redis Cluster Performance Report', {
         healthy: health.healthy,
-        hitRate: `${health.metrics.cache.hitRate.toFixed(2)}%`,
-        avgLatency: `${health.metrics.performance.avgLatency.toFixed(2)}ms`,
-        p95Latency: `${health.metrics.performance.p95Latency.toFixed(2)}ms`,
-        throughput: `${health.metrics.performance.throughput} ops/sec`,
-        errorRate: `${health.metrics.health.errorRate.toFixed(2)}%`,
+        hitRate: `${health.metrics.cache.hitRate.toFixed(2)}%`,avgLatency: `${health.metrics.performance.avgLatency.toFixed(2)}ms`,p95Latency: `${health.metrics.performance.p95Latency.toFixed(2)}ms`,throughput: `${health.metrics.performance.throughput} ops/sec`,errorRate: `${health.metrics.health.errorRate.toFixed(2)}%`,
         circuitBreaker: health.metrics.health.circuitBreakerState,
         totalOperations: health.metrics.operations.total,
       });
@@ -987,8 +851,7 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
       // await this.redisCluster.ping();
       this.metrics.connections.active++;
     } catch (error) {
-      this.logger.warn('Redis cluster health check failed:', error);
-      this.recordOperationError('HEALTH_CHECK', 0, error);
+      this.logger.warn('Redis cluster health check failed:', error);this.recordOperationError('HEALTH_CHECK', 0, error);
     }
   }
 
@@ -996,49 +859,31 @@ export class RedisClusterCacheService implements OnModuleInit, OnModuleDestroy {
     const recommendations: string[] = [];
 
     if (this.metrics.performance.avgLatency > 15) {
-      recommendations.push(`Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds 15ms target - consider cluster optimization`);
-    }
-
-    if (this.metrics.cache.hitRate < 30) {
-      recommendations.push(`Cache hit rate ${this.metrics.cache.hitRate.toFixed(2)}% is below 30% target - review caching strategy`);
-    }
-
-    if (this.metrics.health.errorRate > 5) {
+      recommendations.push(`Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds 15ms target - consider cluster optimization`);}if (this.metrics.cache.hitRate < 30) {
+      recommendations.push(`Cache hit rate ${this.metrics.cache.hitRate.toFixed(2)}% is below 30% target - review caching strategy`);}if (this.metrics.health.errorRate > 5) {
       recommendations.push(`Error rate ${this.metrics.health.errorRate.toFixed(2)}% exceeds 5% threshold - investigate connection issues`);
     }
 
     if (this.circuitBreakerState !== 'CLOSED') {
-      recommendations.push(`Circuit breaker is ${this.circuitBreakerState} - check Redis cluster connectivity`);
-    }
-
-    return recommendations;
+      recommendations.push(`Circuit breaker is ${this.circuitBreakerState} - check Redis cluster connectivity`);}return recommendations;
   }
 
   private generateHealthAlerts(): string[] {
     const alerts: string[] = [];
 
     if (this.metrics.performance.avgLatency > this.config.monitoring.alertThresholds.latencyMs) {
-      alerts.push(`CRITICAL: Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds threshold`);
-    }
-
-    if (this.metrics.health.errorRate > this.config.monitoring.alertThresholds.errorRatePercent) {
+      alerts.push(`CRITICAL: Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds threshold`);}if (this.metrics.health.errorRate > this.config.monitoring.alertThresholds.errorRatePercent) {
       alerts.push(`CRITICAL: Error rate ${this.metrics.health.errorRate.toFixed(2)}% exceeds threshold`);
     }
 
-    if (this.circuitBreakerState === 'OPEN') {
-      alerts.push('CRITICAL: Circuit breaker is OPEN - Redis cluster is unavailable');
-    }
-
-    return alerts;
+    if (this.circuitBreakerState === 'OPEN') {alerts.push('CRITICAL: Circuit breaker is OPEN - Redis cluster is unavailable');}return alerts;
   }
 
   private logFinalMetrics(): void {
     this.updateMetrics();
     this.logger.log('Redis Cluster Cache Final Performance Report', {
       totalOperations: this.metrics.operations.total,
-      avgLatency: `${this.metrics.performance.avgLatency.toFixed(2)}ms`,
-      hitRate: `${this.metrics.cache.hitRate.toFixed(2)}%`,
-      uptime: `${Math.floor(this.metrics.health.uptime / 1000)}s`,
+      avgLatency: `${this.metrics.performance.avgLatency.toFixed(2)}ms`,hitRate: `${this.metrics.cache.hitRate.toFixed(2)}%`,uptime: `${Math.floor(this.metrics.health.uptime / 1000)}s`,
       totalErrors: this.metrics.connections.failed,
       circuitBreakerState: this.metrics.health.circuitBreakerState,
     });

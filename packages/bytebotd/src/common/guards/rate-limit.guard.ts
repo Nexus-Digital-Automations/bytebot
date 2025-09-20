@@ -21,18 +21,11 @@ import {
   Logger,
   SetMetadata,
   Inject,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import {
-  ThrottlerGuard,
+} from '@nestjs/common';import { Reflector } from '@nestjs/core';import {ThrottlerGuard,
   ThrottlerException,
   ThrottlerModuleOptions,
   ThrottlerStorage,
-} from '@nestjs/throttler';
-import { Request } from 'express';
-
-/**
- * Rate limiting configuration per endpoint type
+} from '@nestjs/throttler';import { Request } from 'express';/*** Rate limiting configuration per endpoint type
  */
 interface RateLimitConfig {
   /** Maximum requests per time window */
@@ -42,10 +35,7 @@ interface RateLimitConfig {
   windowSeconds: number;
 
   /** Rate limit tier (for logging/monitoring) */
-  tier: 'strict' | 'moderate' | 'lenient';
-
-  /** Custom error message */
-  message?: string;
+  tier: 'strict' | 'moderate' | 'lenient';/** Custom error message */message?: string;
 }
 
 /**
@@ -56,50 +46,28 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig | undefined> = {
   computer_use: {
     limit: 120,
     windowSeconds: 60,
-    tier: 'moderate',
-    message: 'Computer control rate limit exceeded. Please slow down.',
-  },
-
-  // Authentication endpoints - strict limits
+    tier: 'moderate',message: 'Computer control rate limit exceeded. Please slow down.',},// Authentication endpoints - strict limits
   auth: {
     limit: 10,
     windowSeconds: 60,
-    tier: 'strict',
-    message: 'Authentication rate limit exceeded. Try again later.',
-  },
-
-  // Screenshot/vision operations - moderate limits (resource intensive)
+    tier: 'strict',message: 'Authentication rate limit exceeded. Try again later.',},// Screenshot/vision operations - moderate limits (resource intensive)
   vision: {
     limit: 30,
     windowSeconds: 60,
-    tier: 'moderate',
-    message: 'Vision processing rate limit exceeded.',
-  },
-
-  // File operations - strict limits (potential for abuse)
+    tier: 'moderate',message: 'Vision processing rate limit exceeded.',},// File operations - strict limits (potential for abuse)
   file_operations: {
     limit: 20,
     windowSeconds: 60,
-    tier: 'strict',
-    message: 'File operation rate limit exceeded.',
-  },
-
-  // General API operations - lenient limits
+    tier: 'strict',message: 'File operation rate limit exceeded.',},// General API operations - lenient limits
   general: {
     limit: 200,
     windowSeconds: 60,
-    tier: 'lenient',
-    message: 'API rate limit exceeded. Please reduce request frequency.',
-  },
-};
+    tier: 'lenient',message: 'API rate limit exceeded. Please reduce request frequency.',},};
 
 /**
  * Metadata key for rate limit configuration
  */
-export const RATE_LIMIT_KEY = 'rate-limit';
-
-/**
- * Decorator to set custom rate limits for specific endpoints
+export const RATE_LIMIT_KEY = 'rate-limit';/*** Decorator to set custom rate limits for specific endpoints
  */
 export const RateLimit = (
   config: Partial<RateLimitConfig> & { type: string },
@@ -127,9 +95,7 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
-    @Inject('THROTTLER:MODULE_OPTIONS')
-    options: ThrottlerModuleOptions,
-    @Inject('THROTTLER_STORAGE')
+    @Inject('THROTTLER:MODULE_OPTIONS')options: ThrottlerModuleOptions,@Inject('THROTTLER_STORAGE')
     storageService: ThrottlerStorage,
     protected reflector: Reflector,
   ) {
@@ -138,16 +104,11 @@ export class EnterpriseRateLimitGuard
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    try {
-      // Get rate limit configuration for this endpoint
+    const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;try {// Get rate limit configuration for this endpoint
       const rateLimitConfig = this.getRateLimitConfig(context);
       const clientIdentifier = this.getClientIdentifier(request);
 
-      this.logger.debug(`[${operationId}] Rate limit check initiated`, {
-        operationId,
-        endpoint: request.path,
+      this.logger.debug(`[${operationId}] Rate limit check initiated`, {operationId,endpoint: request.path,
         method: request.method,
         clientIdentifier,
         rateLimitTier: rateLimitConfig.tier,
@@ -190,14 +151,10 @@ export class EnterpriseRateLimitGuard
         return true;
       }
 
-      // This shouldn't be reached if super.canActivate throws on failure
-      return false;
-    } catch (_error) {
+      // This shouldn't be reached if super.canActivate throws on failurereturn false;} catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        (typeof _error === 'object' &&
-          _error !== null &&
-          'status' in _error &&
+        (typeof _error === 'object' &&_error !== null &&'status' in _error &&
           _error.status === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
@@ -213,18 +170,13 @@ export class EnterpriseRateLimitGuard
           method: request.method,
           rateLimitTier: rateLimitConfig.tier,
           limit: rateLimitConfig.limit,
-          userAgent: request.headers['user-agent'] as string | undefined,
-          rateLimited: true,
-        });
+          userAgent: request.headers['user-agent'] as string | undefined,rateLimited: true,});
 
         // Return custom error message
         throw new HttpException(
           {
             statusCode: HttpStatus.TOO_MANY_REQUESTS,
-            error: 'Too Many Requests',
-            message: rateLimitConfig.message ?? 'Rate limit exceeded',
-            retryAfter: rateLimitConfig.windowSeconds,
-            rateLimitTier: rateLimitConfig.tier,
+            error: 'Too Many Requests',message: rateLimitConfig.message ?? 'Rate limit exceeded',retryAfter: rateLimitConfig.windowSeconds,rateLimitTier: rateLimitConfig.tier,
             operationId,
           },
           HttpStatus.TOO_MANY_REQUESTS,
@@ -253,34 +205,22 @@ export class EnterpriseRateLimitGuard
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.path.toLowerCase();
 
-    if (path.includes('computer-use')) {
-      return (
-        RATE_LIMIT_CONFIGS.computer_use ??
+    if (path.includes('computer-use')) {return (RATE_LIMIT_CONFIGS.computer_use ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    } else if (path.includes('auth') || path.includes('login')) {
-      return (
-        RATE_LIMIT_CONFIGS.auth ??
+    } else if (path.includes('auth') || path.includes('login')) {return (RATE_LIMIT_CONFIGS.auth ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
     } else if (
-      path.includes('screenshot') ||
-      path.includes('vision') ||
-      path.includes('ocr')
-    ) {
-      return (
+      path.includes('screenshot') ||path.includes('vision') ||path.includes('ocr')) {return (
         RATE_LIMIT_CONFIGS.vision ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
     } else if (
-      path.includes('file') ||
-      path.includes('read') ||
-      path.includes('write')
-    ) {
-      return (
+      path.includes('file') ||path.includes('read') ||path.includes('write')) {return (
         RATE_LIMIT_CONFIGS.file_operations ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
@@ -298,10 +238,7 @@ export class EnterpriseRateLimitGuard
     return {
       limit: 200,
       windowSeconds: 60,
-      tier: 'lenient' as const,
-      message: 'API rate limit exceeded. Please reduce request frequency.',
-    };
-  }
+      tier: 'lenient' as const,message: 'API rate limit exceeded. Please reduce request frequency.',};}
 
   /**
    * Generate client identifier for rate limiting
@@ -312,17 +249,12 @@ export class EnterpriseRateLimitGuard
       request.ip ??
       request.connection.remoteAddress ??
       request.socket.remoteAddress ??
-      (request.headers['x-forwarded-for'] as string | undefined)?.split(',')[0] ??
-      'unknown';
-
-    const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unknown';
+      (request.headers['x-forwarded-for'] as string | undefined)?.split(',')[0] ??'unknown';const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unknown';
 
     // Create hash-like identifier without actually hashing (for performance)
     return `${ip}:${userAgent.substring(0, 50)}`.replace(
       /[^a-zA-Z0-9:.-]/g,
-      '',
-    );
-  }
+      '',);}
 
   /**
    * Track suspicious activity for potential threats
@@ -341,9 +273,7 @@ export class EnterpriseRateLimitGuard
         existingEntry.blocked = true;
 
         this.logger.error(
-          'Client blocked for suspicious rate limit violations',
-          {
-            clientIdentifier,
+          'Client blocked for suspicious rate limit violations',{clientIdentifier,
             violations: existingEntry.violations,
             timePeriodMs: timeDiff,
             blocked: true,

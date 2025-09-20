@@ -31,17 +31,7 @@
  * @version 1.0.0 - Enterprise Performance Validation
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-// Note: Using setInterval instead of Cron decorators for scheduling
-import { performance } from 'perf_hooks';
-import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';
-import { ParlantPerformanceBenchmarkService, BenchmarkResult } from '../testing/parlant-performance-benchmark.service';
-
-// ===== VALIDATION INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';// Note: Using setInterval instead of Cron decorators for schedulingimport { performance } from 'perf_hooks';import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';import { ParlantPerformanceBenchmarkService, BenchmarkResult } from '../testing/parlant-performance-benchmark.service';// ===== VALIDATION INTERFACES =====/**
  * Performance target configuration
  */
 export interface PerformanceTargets {
@@ -100,14 +90,7 @@ export interface ValidationResult {
  * Validation status
  */
 export enum ValidationStatus {
-  PASSED = 'PASSED',
-  WARNING = 'WARNING',
-  FAILED = 'FAILED',
-  CRITICAL = 'CRITICAL',
-  BLOCKED = 'BLOCKED',
-}
-
-/**
+  PASSED = 'PASSED',WARNING = 'WARNING',FAILED = 'FAILED',CRITICAL = 'CRITICAL',BLOCKED = 'BLOCKED',}/**
  * Actual performance metrics
  */
 export interface ActualMetrics {
@@ -122,21 +105,15 @@ export interface ActualMetrics {
     readonly current: number;
     readonly peak: number;
     readonly sustained: number;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-  readonly cacheHitRate: {
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly cacheHitRate: {
     readonly overall: number;
     readonly byType: Record<string, number>;
     readonly efficiency: number;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-  readonly errorRate: {
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly errorRate: {
     readonly overall: number;
     readonly byType: Record<string, number>;
     readonly severity: Record<string, number>;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-  readonly availability: {
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly availability: {
     readonly uptime: number; // percentage
     readonly downtime: number; // minutes in period
     readonly mttr: number; // mean time to recovery
@@ -176,10 +153,7 @@ export interface OutlierAnalysis {
   readonly count: number;
   readonly percentage: number;
   readonly causes: string[];
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-/**
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH';}/**
  * Memory utilization details
  */
 export interface MemoryUtilization {
@@ -187,19 +161,13 @@ export interface MemoryUtilization {
   readonly heapTotal: number; // bytes
   readonly external: number; // bytes
   readonly percentage: number;
-  readonly trend: 'STABLE' | 'GROWING' | 'SHRINKING';
-  readonly leaks: MemoryLeakAnalysis[];
-}
+  readonly trend: 'STABLE' | 'GROWING' | 'SHRINKING';readonly leaks: MemoryLeakAnalysis[];}
 
 /**
  * Memory leak analysis
  */
 export interface MemoryLeakAnalysis {
-  readonly type: 'SUSPECTED' | 'CONFIRMED';
-  readonly growthRate: number; // bytes/hour
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly evidence: string[];
-}
+  readonly type: 'SUSPECTED' | 'CONFIRMED';readonly growthRate: number; // bytes/hourreadonly impact: 'LOW' | 'MEDIUM' | 'HIGH';readonly evidence: string[];}
 
 /**
  * CPU utilization details
@@ -209,18 +177,13 @@ export interface CpuUtilization {
   readonly system: number; // percentage
   readonly idle: number; // percentage
   readonly loadAverage: number[];
-  readonly trend: 'STABLE' | 'INCREASING' | 'DECREASING';
-  readonly bottlenecks: CpuBottleneck[];
-}
+  readonly trend: 'STABLE' | 'INCREASING' | 'DECREASING';readonly bottlenecks: CpuBottleneck[];}
 
 /**
  * CPU bottleneck analysis
  */
 export interface CpuBottleneck {
-  readonly type: 'COMPUTE_INTENSIVE' | 'IO_WAIT' | 'CONTEXT_SWITCHING';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly impact: string;
-  readonly recommendation: string;
+  readonly type: 'COMPUTE_INTENSIVE' | 'IO_WAIT' | 'CONTEXT_SWITCHING';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH';readonly impact: string;readonly recommendation: string;
 }
 
 /**
@@ -266,13 +229,9 @@ export interface ComplianceResults {
 export interface SlaComplianceResult {
   readonly slaId: string;
   readonly name: string;
-  readonly type: 'RESPONSE_TIME' | 'AVAILABILITY' | 'THROUGHPUT' | 'ERROR_RATE';
-  readonly target: number;
-  readonly actual: number;
+  readonly type: 'RESPONSE_TIME' | 'AVAILABILITY' | 'THROUGHPUT' | 'ERROR_RATE';readonly target: number;readonly actual: number;
   readonly compliance: number; // percentage
-  readonly status: 'MET' | 'WARNING' | 'VIOLATED';
-  readonly impact: BusinessImpact;
-  readonly history: SlaComplianceHistory[];
+  readonly status: 'MET' | 'WARNING' | 'VIOLATED';readonly impact: BusinessImpact;readonly history: SlaComplianceHistory[];
 }
 
 /**
@@ -299,13 +258,9 @@ export interface BusinessImpact {
     readonly satisfaction: number; // 0-100
   };
   readonly reputation: {
-    readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    readonly description: string;
-  };
+    readonly impact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;};
   readonly compliance: {
-    readonly risk: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    readonly regulations: string[];
-  };
+    readonly risk: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly regulations: string[];};
 }
 
 /**
@@ -315,9 +270,7 @@ export interface RegulatoryComplianceResult {
   readonly regulation: string;
   readonly requirements: RegulatorylRequirement[];
   readonly overallCompliance: number;
-  readonly status: 'COMPLIANT' | 'WARNING' | 'NON_COMPLIANT';
-  readonly evidence: ComplianceEvidence[];
-}
+  readonly status: 'COMPLIANT' | 'WARNING' | 'NON_COMPLIANT';readonly evidence: ComplianceEvidence[];}
 
 /**
  * Regulatory requirement
@@ -327,17 +280,13 @@ export interface RegulatorylRequirement {
   readonly description: string;
   readonly target: string;
   readonly actual: string;
-  readonly compliance: 'MET' | 'PARTIAL' | 'NOT_MET';
-  readonly evidence: string[];
-}
+  readonly compliance: 'MET' | 'PARTIAL' | 'NOT_MET';readonly evidence: string[];}
 
 /**
  * Compliance evidence
  */
 export interface ComplianceEvidence {
-  readonly type: 'METRIC' | 'AUDIT_LOG' | 'SCREENSHOT' | 'REPORT';
-  readonly source: string;
-  readonly timestamp: Date;
+  readonly type: 'METRIC' | 'AUDIT_LOG' | 'SCREENSHOT' | 'REPORT';readonly source: string;readonly timestamp: Date;
   readonly data: Record<string, unknown>;
 }
 
@@ -349,10 +298,7 @@ export interface InternalStandardsResult {
   readonly version: string;
   readonly requirements: InternalRequirement[];
   readonly overallCompliance: number;
-  readonly status: 'COMPLIANT' | 'WARNING' | 'NON_COMPLIANT';
-}
-
-/**
+  readonly status: 'COMPLIANT' | 'WARNING' | 'NON_COMPLIANT';}/**
  * Internal requirement
  */
 export interface InternalRequirement {
@@ -360,19 +306,12 @@ export interface InternalRequirement {
   readonly requirement: string;
   readonly target: string;
   readonly actual: string;
-  readonly compliance: 'MET' | 'PARTIAL' | 'NOT_MET';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  readonly compliance: 'MET' | 'PARTIAL' | 'NOT_MET';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Compliance violation
  */
 export interface ComplianceViolation {
   readonly id: string;
-  readonly type: 'SLA' | 'REGULATORY' | 'INTERNAL';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly requirement: string;
+  readonly type: 'SLA' | 'REGULATORY' | 'INTERNAL';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly requirement: string;
   readonly actual: string;
   readonly expected: string;
   readonly impact: BusinessImpact;
@@ -388,9 +327,7 @@ export interface ComplianceViolation {
 export interface RemediationPlan {
   readonly steps: RemediationStep[];
   readonly estimatedTime: number; // hours
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly assignee?: string;
-  readonly deadline?: Date;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly assignee?: string;readonly deadline?: Date;
   readonly dependencies: string[];
 }
 
@@ -412,19 +349,12 @@ export interface RemediationStep {
  */
 export interface ComplianceRecommendation {
   readonly id: string;
-  readonly type: 'PREVENTIVE' | 'CORRECTIVE' | 'OPTIMIZATION';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly title: string;
-  readonly description: string;
+  readonly type: 'PREVENTIVE' | 'CORRECTIVE' | 'OPTIMIZATION';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly title: string;readonly description: string;
   readonly impact: {
     readonly complianceImprovement: number; // percentage
     readonly riskReduction: number; // percentage
-    readonly costImplication: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
-  };
-  readonly implementation: {
-    readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';
-    readonly timeline: string;
-    readonly resources: string[];
+    readonly costImplication: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';};readonly implementation: {
+    readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';readonly timeline: string;readonly resources: string[];
   };
 }
 
@@ -433,9 +363,7 @@ export interface ComplianceRecommendation {
  */
 export interface RegressionAnalysis {
   readonly detected: boolean;
-  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly affectedMetrics: MetricRegression[];
-  readonly rootCause: RootCauseAnalysis;
+  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly affectedMetrics: MetricRegression[];readonly rootCause: RootCauseAnalysis;
   readonly impact: RegressionImpact;
   readonly recommendations: RegressionRecommendation[];
   readonly rollbackPlan: RollbackPlan;
@@ -449,10 +377,7 @@ export interface MetricRegression {
   readonly baseline: number;
   readonly current: number;
   readonly change: number; // percentage
-  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly trend: 'DEGRADING' | 'IMPROVING' | 'VOLATILE';
-  readonly confidence: number; // 0-1
-}
+  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly trend: 'DEGRADING' | 'IMPROVING' | 'VOLATILE';readonly confidence: number; // 0-1}
 
 /**
  * Root cause analysis
@@ -471,17 +396,13 @@ export interface RootCauseAnalysis {
 export interface CauseEvent {
   readonly timestamp: Date;
   readonly event: string;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly correlation: number; // 0-1
-}
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH';readonly correlation: number; // 0-1}
 
 /**
  * Cause evidence
  */
 export interface CauseEvidence {
-  readonly type: 'METRIC' | 'LOG' | 'EVENT' | 'DEPLOYMENT' | 'CONFIG_CHANGE';
-  readonly source: string;
-  readonly description: string;
+  readonly type: 'METRIC' | 'LOG' | 'EVENT' | 'DEPLOYMENT' | 'CONFIG_CHANGE';readonly source: string;readonly description: string;
   readonly timestamp: Date;
   readonly relevance: number; // 0-1
 }
@@ -498,9 +419,7 @@ export interface RegressionImpact {
   readonly business: {
     readonly revenueImpact: number; // monetary value
     readonly customerSatisfaction: number; // -100 to 100
-    readonly competitivePosition: 'IMPROVED' | 'MAINTAINED' | 'DEGRADED';
-  };
-  readonly technical: {
+    readonly competitivePosition: 'IMPROVED' | 'MAINTAINED' | 'DEGRADED';};readonly technical: {
     readonly systemStability: number; // 0-100
     readonly maintainability: number; // 0-100
     readonly scalability: number; // 0-100
@@ -511,13 +430,8 @@ export interface RegressionImpact {
  * Regression recommendation
  */
 export interface RegressionRecommendation {
-  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM';
-  readonly action: string;
-  readonly description: string;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly impact: {
-    readonly performanceImprovement: number; // percentage
+  readonly type: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM';readonly action: string;readonly description: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';readonly impact: {readonly performanceImprovement: number; // percentage
     readonly riskReduction: number; // percentage
     readonly costImplication: number; // monetary value
   };
@@ -530,9 +444,7 @@ export interface RegressionRecommendation {
  */
 export interface RollbackPlan {
   readonly available: boolean;
-  readonly type: 'AUTOMATED' | 'MANUAL' | 'HYBRID';
-  readonly estimatedTime: number; // minutes
-  readonly steps: RollbackStep[];
+  readonly type: 'AUTOMATED' | 'MANUAL' | 'HYBRID';readonly estimatedTime: number; // minutesreadonly steps: RollbackStep[];
   readonly risks: RollbackRisk[];
   readonly validation: RollbackValidation;
 }
@@ -553,10 +465,7 @@ export interface RollbackStep {
  * Rollback risk
  */
 export interface RollbackRisk {
-  readonly type: 'DATA_LOSS' | 'DOWNTIME' | 'CONFIGURATION' | 'DEPENDENCY';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly mitigation: string;
+  readonly type: 'DATA_LOSS' | 'DOWNTIME' | 'CONFIGURATION' | 'DEPENDENCY';readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly mitigation: string;
 }
 
 /**
@@ -574,9 +483,7 @@ export interface RollbackValidation {
 export interface ValidationCheck {
   readonly name: string;
   readonly description: string;
-  readonly type: 'AUTOMATED' | 'MANUAL';
-  readonly timeout: number; // minutes
-  readonly passCriteria: string;
+  readonly type: 'AUTOMATED' | 'MANUAL';readonly timeout: number; // minutesreadonly passCriteria: string;
 }
 
 /**
@@ -604,10 +511,7 @@ export interface MonitoringRequirement {
  */
 export interface PerformanceRecommendation {
   readonly id: string;
-  readonly category: 'OPTIMIZATION' | 'SCALING' | 'ARCHITECTURE' | 'CONFIGURATION';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly title: string;
-  readonly description: string;
+  readonly category: 'OPTIMIZATION' | 'SCALING' | 'ARCHITECTURE' | 'CONFIGURATION';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly title: string;readonly description: string;
   readonly rationale: string;
   readonly impact: RecommendationImpact;
   readonly implementation: RecommendationImplementation;
@@ -643,11 +547,7 @@ export interface RecommendationImpact {
  */
 export interface RecommendationImplementation {
   readonly steps: ImplementationStep[];
-  readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly complexity: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly risk: 'LOW' | 'MEDIUM' | 'HIGH';
-  readonly dependencies: string[];
-  readonly prerequisites: string[];
+  readonly effort: 'LOW' | 'MEDIUM' | 'HIGH';readonly complexity: 'LOW' | 'MEDIUM' | 'HIGH';readonly risk: 'LOW' | 'MEDIUM' | 'HIGH';readonly dependencies: string[];readonly prerequisites: string[];
   readonly rollback: RollbackPlan;
 }
 
@@ -680,9 +580,7 @@ export interface RecommendationValidation {
  */
 export interface ValidationTest {
   readonly name: string;
-  readonly type: 'UNIT' | 'INTEGRATION' | 'LOAD' | 'PERFORMANCE' | 'SECURITY';
-  readonly description: string;
-  readonly passCriteria: string;
+  readonly type: 'UNIT' | 'INTEGRATION' | 'LOAD' | 'PERFORMANCE' | 'SECURITY';readonly description: string;readonly passCriteria: string;
   readonly automatable: boolean;
 }
 
@@ -715,9 +613,7 @@ export interface TimelinePhase {
  * Business impact assessment
  */
 export interface BusinessImpactAssessment {
-  readonly overall: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'CRITICAL';
-  readonly score: number; // -100 to 100
-  readonly categories: BusinessImpactCategory[];
+  readonly overall: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'CRITICAL';readonly score: number; // -100 to 100readonly categories: BusinessImpactCategory[];
   readonly trends: BusinessTrend[];
   readonly projections: BusinessProjection[];
   readonly recommendations: BusinessRecommendation[];
@@ -727,9 +623,7 @@ export interface BusinessImpactAssessment {
  * Business impact category
  */
 export interface BusinessImpactCategory {
-  readonly category: 'REVENUE' | 'USERS' | 'COSTS' | 'REPUTATION' | 'COMPLIANCE';
-  readonly impact: number; // -100 to 100
-  readonly description: string;
+  readonly category: 'REVENUE' | 'USERS' | 'COSTS' | 'REPUTATION' | 'COMPLIANCE';readonly impact: number; // -100 to 100readonly description: string;
   readonly evidence: string[];
   readonly mitigation: string[];
 }
@@ -739,9 +633,7 @@ export interface BusinessImpactCategory {
  */
 export interface BusinessTrend {
   readonly metric: string;
-  readonly direction: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  readonly rate: number; // percentage change per period
-  readonly confidence: number; // 0-1
+  readonly direction: 'IMPROVING' | 'STABLE' | 'DEGRADING';readonly rate: number; // percentage change per periodreadonly confidence: number; // 0-1
   readonly forecast: TrendForecast[];
 }
 
@@ -752,10 +644,7 @@ export interface TrendForecast {
   readonly period: string;
   readonly value: number;
   readonly confidence: number; // 0-1
-  readonly scenario: 'BEST' | 'EXPECTED' | 'WORST';
-}
-
-/**
+  readonly scenario: 'BEST' | 'EXPECTED' | 'WORST';}/**
  * Business projection
  */
 export interface BusinessProjection {
@@ -772,10 +661,7 @@ export interface BusinessProjection {
  * Business recommendation
  */
 export interface BusinessRecommendation {
-  readonly type: 'INVESTMENT' | 'OPTIMIZATION' | 'RISK_MITIGATION' | 'STRATEGIC';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly description: string;
-  readonly rationale: string;
+  readonly type: 'INVESTMENT' | 'OPTIMIZATION' | 'RISK_MITIGATION' | 'STRATEGIC';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly description: string;readonly rationale: string;
   readonly investment: number; // monetary value
   readonly expectedReturn: number; // monetary value
   readonly paybackPeriod: number; // months
@@ -810,9 +696,7 @@ export interface MetricEvidence {
  */
 export interface LogEvidence {
   readonly source: string;
-  readonly level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
-  readonly timestamp: Date;
-  readonly message: string;
+  readonly level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';readonly timestamp: Date;readonly message: string;
   readonly context: Record<string, unknown>;
 }
 
@@ -822,9 +706,7 @@ export interface LogEvidence {
 export interface TestEvidence {
   readonly testSuite: string;
   readonly testCase: string;
-  readonly result: 'PASSED' | 'FAILED' | 'SKIPPED';
-  readonly duration: number; // ms
-  readonly metrics: Record<string, number>;
+  readonly result: 'PASSED' | 'FAILED' | 'SKIPPED';readonly duration: number; // msreadonly metrics: Record<string, number>;
   readonly errors: string[];
 }
 
@@ -857,10 +739,7 @@ export interface AuditEvidence {
   readonly timestamp: Date;
   readonly findings: AuditFinding[];
   readonly recommendations: string[];
-  readonly status: 'PASSED' | 'WARNING' | 'FAILED';
-}
-
-/**
+  readonly status: 'PASSED' | 'WARNING' | 'FAILED';}/**
  * Audit finding
  */
 export interface AuditFinding {
@@ -933,21 +812,12 @@ export class ParlantPerformanceValidatorService {
     private readonly benchmarkService: ParlantPerformanceBenchmarkService,
     private readonly eventEmitter: EventEmitter2
   ) {
-    const operationId = `validator_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Parlant Performance Validator`, {
+    const operationId = `validator_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant Performance Validator`, {
       operationId,
       targets: this.performanceTargets,
       config: this.validationConfig,
       features: [
-        'Continuous validation',
-        'SLA compliance monitoring',
-        'Regression detection',
-        'Business impact assessment',
-        'Automated remediation',
-        'Enterprise audit trail',
-      ],
-    });
+        'Continuous validation','SLA compliance monitoring','Regression detection','Business impact assessment','Automated remediation','Enterprise audit trail',],});
 
     // Start continuous validation
     this.startContinuousValidation();
@@ -967,18 +837,14 @@ export class ParlantPerformanceValidatorService {
       try {
         await this.performContinuousValidation();
       } catch (error) {
-        this.logger.error('Continuous validation failed', error);
-      }
-    }, 5 * 60 * 1000); // 5 minutes
+        this.logger.error('Continuous validation failed', error);}}, 5 * 60 * 1000); // 5 minutes
 
     // Hourly validation
     setInterval(async () => {
       try {
         await this.performHourlyValidation();
       } catch (error) {
-        this.logger.error('Hourly validation failed', error);
-      }
-    }, 60 * 60 * 1000); // 1 hour
+        this.logger.error('Hourly validation failed', error);}}, 60 * 60 * 1000); // 1 hour
 
     // Daily compliance check at midnight equivalent (every 24 hours)
     setInterval(async () => {
@@ -1002,10 +868,7 @@ export class ParlantPerformanceValidatorService {
     includeBenchmark?: boolean;
     includeBusinessImpact?: boolean;
   } = {}): Promise<ValidationResult> {
-    const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();
-
-    this.logger.log(`Starting performance validation: ${validationId}`, {
+    const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();this.logger.log(`Starting performance validation: ${validationId}`, {
       validationId,
       options,
       timestamp: new Date(),
@@ -1070,9 +933,7 @@ export class ParlantPerformanceValidatorService {
         await this.handleCriticalValidationFailure(validationResult);
       }
 
-      this.logger.log(`Performance validation completed: ${validationId}`, {
-        validationId,
-        status,
+      this.logger.log(`Performance validation completed: ${validationId}`, {validationId,status,
         score: overallScore,
         duration: `${duration.toFixed(2)}ms`,
         violations: compliance.violations.length,
@@ -1083,9 +944,7 @@ export class ParlantPerformanceValidatorService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Performance validation failed: ${validationId}`, {
-        validationId,
-        error: errorMessage,
+      this.logger.error(`Performance validation failed: ${validationId}`, {validationId,error: errorMessage,
         duration: performance.now() - startTime,
       });
 
@@ -1105,9 +964,7 @@ export class ParlantPerformanceValidatorService {
   /**
    * Get validation history
    *
-   * @param timeRange - Time range for history ('1h', '24h', '7d', '30d')
-   * @returns Array of validation results
-   */
+   * @param timeRange - Time range for history ('1h', '24h', '7d', '30d')* @returns Array of validation results*/
   getValidationHistory(timeRange: string = '24h'): ValidationResult[] {
     const cutoffTime = this.getTimeRangeCutoff(timeRange);
     return this.validationHistory.filter(result => result.timestamp >= cutoffTime);
@@ -1133,19 +990,14 @@ export class ParlantPerformanceValidatorService {
   async acknowledgeViolation(violationId: string, acknowledgedBy: string, notes?: string): Promise<void> {
     const violation = this.complianceViolations.get(violationId);
     if (!violation) {
-      throw new Error(`Compliance violation not found: ${violationId}`);
-    }
-
-    const updatedViolation: ComplianceViolation = {
+      throw new Error(`Compliance violation not found: ${violationId}`);}const updatedViolation: ComplianceViolation = {
       ...violation,
       acknowledgedAt: new Date(),
     };
 
     this.complianceViolations.set(violationId, updatedViolation);
 
-    this.logger.log(`Compliance violation acknowledged: ${violationId}`, {
-      violationId,
-      acknowledgedBy,
+    this.logger.log(`Compliance violation acknowledged: ${violationId}`, {violationId,acknowledgedBy,
       notes,
       acknowledgedAt: updatedViolation.acknowledgedAt,
     });
@@ -1161,10 +1013,7 @@ export class ParlantPerformanceValidatorService {
   async resolveViolation(violationId: string, resolvedBy: string, resolution: string): Promise<void> {
     const violation = this.complianceViolations.get(violationId);
     if (!violation) {
-      throw new Error(`Compliance violation not found: ${violationId}`);
-    }
-
-    const updatedViolation: ComplianceViolation = {
+      throw new Error(`Compliance violation not found: ${violationId}`);}const updatedViolation: ComplianceViolation = {
       ...violation,
       resolvedAt: new Date(),
     };
@@ -1189,10 +1038,7 @@ export class ParlantPerformanceValidatorService {
     validationResult: ValidationResult;
     recommendations: PerformanceRecommendation[];
   }> {
-    this.logger.log('Executing performance benchmark validation');
-
-    // Execute all enabled benchmarks
-    const benchmarkResults = await this.benchmarkService.executeAllBenchmarks();
+    this.logger.log('Executing performance benchmark validation');// Execute all enabled benchmarksconst benchmarkResults = await this.benchmarkService.executeAllBenchmarks();
 
     // Perform validation with benchmark evidence
     const validationResult = await this.performValidation({
@@ -1207,9 +1053,7 @@ export class ParlantPerformanceValidatorService {
       Array.from(benchmarkResults.values())
     );
 
-    this.logger.log('Benchmark validation completed', {
-      benchmarksExecuted: benchmarkResults.size,
-      overallScore: validationResult.overallScore,
+    this.logger.log('Benchmark validation completed', {benchmarksExecuted: benchmarkResults.size,overallScore: validationResult.overallScore,
       status: validationResult.status,
       recommendations: recommendations.length,
     });
@@ -1224,9 +1068,7 @@ export class ParlantPerformanceValidatorService {
   /**
    * Generate compliance report
    *
-   * @param format - Report format ('json', 'pdf', 'html')
-   * @returns Compliance report
-   */
+   * @param format - Report format ('json', 'pdf', 'html')* @returns Compliance report*/
   async generateComplianceReport(format: 'json' | 'pdf' | 'html' = 'json'): Promise<string> {
     const validationResult = await this.performValidation({
       includeCompliance: true,
@@ -1236,9 +1078,7 @@ export class ParlantPerformanceValidatorService {
     const report = {
       generatedAt: new Date(),
       reportId: `compliance_report_${Date.now()}`,
-      period: '30d',
-      overallCompliance: validationResult.compliance.overallCompliance,
-      slaCompliance: validationResult.compliance.slaCompliance,
+      period: '30d',overallCompliance: validationResult.compliance.overallCompliance,slaCompliance: validationResult.compliance.slaCompliance,
       violations: validationResult.compliance.violations,
       businessImpact: validationResult.businessImpact,
       recommendations: validationResult.compliance.recommendations,
@@ -1246,11 +1086,7 @@ export class ParlantPerformanceValidatorService {
     };
 
     switch (format) {
-      case 'json':
-        return JSON.stringify(report, null, 2);
-      case 'pdf':
-        return this.generatePdfReport(report);
-      case 'html':
+      case 'json':return JSON.stringify(report, null, 2);case 'pdf':return this.generatePdfReport(report);case 'html':
         return this.generateHtmlReport(report);
       default:
         throw new Error(`Unsupported report format: ${format}`);
@@ -1268,15 +1104,11 @@ export class ParlantPerformanceValidatorService {
         includeBusinessImpact: true,
       });
 
-      this.logger.log('Initial validation completed', {
-        status: result.status,
-        score: result.overallScore,
+      this.logger.log('Initial validation completed', {status: result.status,score: result.overallScore,
         violations: result.compliance.violations.length,
       });
     } catch (error) {
-      this.logger.error('Initial validation failed', error);
-    }
-  }
+      this.logger.error('Initial validation failed', error);}}
 
   private startContinuousValidation(): void {
     // Continuous lightweight validation
@@ -1289,9 +1121,7 @@ export class ParlantPerformanceValidatorService {
           includeBusinessImpact: false,
         });
       } catch (error) {
-        this.logger.error('Continuous validation failed', error);
-      }
-    }, this.validationConfig.intervalMinutes * 60 * 1000);
+        this.logger.error('Continuous validation failed', error);}}, this.validationConfig.intervalMinutes * 60 * 1000);
 
     this.logger.log('Continuous validation started', {
       interval: `${this.validationConfig.intervalMinutes} minutes`,
@@ -1299,11 +1129,7 @@ export class ParlantPerformanceValidatorService {
   }
 
   private async collectActualMetrics(): Promise<ActualMetrics> {
-    const stats = this.performanceMonitor.getPerformanceStats('hour');
-    const recentStats = this.performanceMonitor.getPerformanceStats('minute');
-    const dashboardData = this.performanceMonitor.getPerformanceDashboardData();
-
-    return {
+    const stats = this.performanceMonitor.getPerformanceStats('hour');const recentStats = this.performanceMonitor.getPerformanceStats('minute');const dashboardData = this.performanceMonitor.getPerformanceDashboardData();return {
       responseTime: {
         average: stats.averageLatency,
         p95: stats.p95Latency,
@@ -1315,21 +1141,15 @@ export class ParlantPerformanceValidatorService {
         current: recentStats.throughputRpm / 60, // Convert to req/sec
         peak: Math.max(stats.throughputRpm / 60, recentStats.throughputRpm / 60),
         sustained: stats.throughputRpm / 60,
-        trend: this.determineTrend('throughput', stats.throughputRpm),
-      },
-      cacheHitRate: {
+        trend: this.determineTrend('throughput', stats.throughputRpm),},cacheHitRate: {
         overall: stats.cacheHitRate,
         byType: {}, // TODO: Implement cache type tracking
         efficiency: this.calculateCacheEfficiency(stats),
-        trend: this.determineTrend('cacheHitRate', stats.cacheHitRate),
-      },
-      errorRate: {
+        trend: this.determineTrend('cacheHitRate', stats.cacheHitRate),},errorRate: {
         overall: stats.errorRate,
         byType: {}, // TODO: Implement error type tracking
         severity: {}, // TODO: Implement error severity tracking
-        trend: this.determineTrend('errorRate', stats.errorRate),
-      },
-      availability: {
+        trend: this.determineTrend('errorRate', stats.errorRate),},availability: {
         uptime: 99.9, // TODO: Calculate actual uptime
         downtime: 0, // TODO: Calculate actual downtime
         mttr: 0, // TODO: Calculate MTTR
@@ -1376,27 +1196,13 @@ export class ParlantPerformanceValidatorService {
     return {
       buckets,
       percentiles: {
-        'p50': stats.medianLatency,
-        'p95': stats.p95Latency,
-        'p99': stats.p99Latency,
-        'p99.9': stats.p99Latency * 1.2,
-      },
-      outliers: {
+        'p50': stats.medianLatency,'p95': stats.p95Latency,'p99': stats.p99Latency,'p99.9': stats.p99Latency * 1.2,},outliers: {
         count: Math.floor(stats.totalOperations * 0.01), // 1% outliers
         percentage: 1,
-        causes: ['Network latency', 'Database locks', 'Cache misses'],
-        impact: 'MEDIUM',
-      },
-    };
+        causes: ['Network latency', 'Database locks', 'Cache misses'],impact: 'MEDIUM',},};
   }
 
-  private determineTrend(metric: string, currentValue: number): 'IMPROVING' | 'STABLE' | 'DEGRADING' {
-    // TODO: Implement actual trend calculation based on historical data
-    return 'STABLE';
-  }
-
-
-  private calculateCacheEfficiency(stats: ParlantPerformanceStats): number {
+  private determineTrend(metric: string, currentValue: number): 'IMPROVING' | 'STABLE' | 'DEGRADING' {// TODO: Implement actual trend calculation based on historical datareturn 'STABLE';}private calculateCacheEfficiency(stats: ParlantPerformanceStats): number {
     // Simple efficiency calculation
     const hitRateScore = (stats.cacheHitRate / 100) * 70;
     const performanceScore = Math.max(0, (1000 - stats.averageLatency) / 1000) * 30;
@@ -1411,9 +1217,7 @@ export class ParlantPerformanceValidatorService {
       heapTotal: memory.heapTotal,
       external: memory.external,
       percentage: (memory.heapUsed / memory.heapTotal) * 100,
-      trend: 'STABLE',
-      leaks: [], // TODO: Implement memory leak detection
-    };
+      trend: 'STABLE',leaks: [], // TODO: Implement memory leak detection};
   }
 
   private async collectCpuUtilization(): Promise<CpuUtilization> {
@@ -1423,9 +1227,7 @@ export class ParlantPerformanceValidatorService {
       system: 5,
       idle: 75,
       loadAverage: [0.5, 0.6, 0.7],
-      trend: 'STABLE',
-      bottlenecks: [],
-    };
+      trend: 'STABLE',bottlenecks: [],};
   }
 
   private async collectNetworkUtilization(): Promise<NetworkUtilization> {
@@ -1478,46 +1280,25 @@ export class ParlantPerformanceValidatorService {
 
     // Response Time SLA
     const responseTimeSla: SlaComplianceResult = {
-      slaId: 'response_time_sla',
-      name: 'Response Time SLA',
-      type: 'RESPONSE_TIME',
-      target: this.performanceTargets.responseTime.p95,
-      actual: metrics.responseTime.p95,
+      slaId: 'response_time_sla',name: 'Response Time SLA',type: 'RESPONSE_TIME',target: this.performanceTargets.responseTime.p95,actual: metrics.responseTime.p95,
       compliance: Math.min(100, (this.performanceTargets.responseTime.p95 / metrics.responseTime.p95) * 100),
-      status: metrics.responseTime.p95 <= this.performanceTargets.responseTime.p95 ? 'MET' :
-              metrics.responseTime.p95 <= this.performanceTargets.responseTime.p95 * 1.1 ? 'WARNING' : 'VIOLATED',
-      impact: await this.calculateBusinessImpact(metrics),
-      history: [], // TODO: Implement SLA history tracking
+      status: metrics.responseTime.p95 <= this.performanceTargets.responseTime.p95 ? 'MET' :metrics.responseTime.p95 <= this.performanceTargets.responseTime.p95 * 1.1 ? 'WARNING' : 'VIOLATED',impact: await this.calculateBusinessImpact(metrics),history: [], // TODO: Implement SLA history tracking
     };
     results.push(responseTimeSla);
 
     // Availability SLA
     const availabilitySla: SlaComplianceResult = {
-      slaId: 'availability_sla',
-      name: 'Availability SLA',
-      type: 'AVAILABILITY',
-      target: this.performanceTargets.availability.target,
-      actual: metrics.availability.uptime,
+      slaId: 'availability_sla',name: 'Availability SLA',type: 'AVAILABILITY',target: this.performanceTargets.availability.target,actual: metrics.availability.uptime,
       compliance: (metrics.availability.uptime / this.performanceTargets.availability.target) * 100,
-      status: metrics.availability.uptime >= this.performanceTargets.availability.target ? 'MET' :
-              metrics.availability.uptime >= this.performanceTargets.availability.minimum ? 'WARNING' : 'VIOLATED',
-      impact: await this.calculateBusinessImpact(metrics),
-      history: [],
+      status: metrics.availability.uptime >= this.performanceTargets.availability.target ? 'MET' :metrics.availability.uptime >= this.performanceTargets.availability.minimum ? 'WARNING' : 'VIOLATED',impact: await this.calculateBusinessImpact(metrics),history: [],
     };
     results.push(availabilitySla);
 
     // Throughput SLA
     const throughputSla: SlaComplianceResult = {
-      slaId: 'throughput_sla',
-      name: 'Throughput SLA',
-      type: 'THROUGHPUT',
-      target: this.performanceTargets.throughput.target,
-      actual: metrics.throughput.sustained,
+      slaId: 'throughput_sla',name: 'Throughput SLA',type: 'THROUGHPUT',target: this.performanceTargets.throughput.target,actual: metrics.throughput.sustained,
       compliance: (metrics.throughput.sustained / this.performanceTargets.throughput.target) * 100,
-      status: metrics.throughput.sustained >= this.performanceTargets.throughput.target ? 'MET' :
-              metrics.throughput.sustained >= this.performanceTargets.throughput.minimum ? 'WARNING' : 'VIOLATED',
-      impact: await this.calculateBusinessImpact(metrics),
-      history: [],
+      status: metrics.throughput.sustained >= this.performanceTargets.throughput.target ? 'MET' :metrics.throughput.sustained >= this.performanceTargets.throughput.minimum ? 'WARNING' : 'VIOLATED',impact: await this.calculateBusinessImpact(metrics),history: [],
     };
     results.push(throughputSla);
 
@@ -1528,21 +1309,13 @@ export class ParlantPerformanceValidatorService {
     return {
       revenue: {
         impact: 1000, // $1000 per hour
-        currency: 'USD',
-        timeframe: 'hour',
-      },
-      users: {
+        currency: 'USD',timeframe: 'hour',},users: {
         affected: 100,
         satisfaction: 80,
       },
       reputation: {
-        impact: 'MEDIUM',
-        description: 'Performance impacts user experience',
-      },
-      compliance: {
-        risk: 'LOW',
-        regulations: [],
-      },
+        impact: 'MEDIUM',description: 'Performance impacts user experience',},compliance: {
+        risk: 'LOW',regulations: [],},
     };
   }
 
@@ -1569,8 +1342,7 @@ export class ParlantPerformanceValidatorService {
         const violationId = `sla_violation_${sla.slaId}_${Date.now()}`;
         const violation: ComplianceViolation = {
           id: violationId,
-          type: 'SLA',
-          severity: sla.type === 'AVAILABILITY' ? 'CRITICAL' : 'HIGH',
+          type: 'SLA',severity: sla.type === 'AVAILABILITY' ? 'CRITICAL' : 'HIGH',
           description: `${sla.name} violated: actual ${sla.actual} vs target ${sla.target}`,
           requirement: sla.name,
           actual: sla.actual.toString(),
@@ -1591,50 +1363,15 @@ export class ParlantPerformanceValidatorService {
     const steps: RemediationStep[] = [];
 
     switch (sla.type) {
-      case 'RESPONSE_TIME':
-        steps.push({
-          id: 'optimize_caching',
-          description: 'Optimize caching configuration',
-          action: 'Increase cache size and implement cache warming',
-          estimatedTime: 2,
-          dependencies: [],
-          validation: 'Measure response time improvement',
-          rollback: 'Revert cache configuration',
-        });
-        steps.push({
-          id: 'database_optimization',
-          description: 'Optimize database queries',
-          action: 'Add indexes and optimize slow queries',
-          estimatedTime: 4,
-          dependencies: ['optimize_caching'],
-          validation: 'Database query performance metrics',
-          rollback: 'Revert database changes',
-        });
-        break;
+      case 'RESPONSE_TIME':steps.push({id: 'optimize_caching',description: 'Optimize caching configuration',action: 'Increase cache size and implement cache warming',estimatedTime: 2,dependencies: [],
+          validation: 'Measure response time improvement',rollback: 'Revert cache configuration',});steps.push({
+          id: 'database_optimization',description: 'Optimize database queries',action: 'Add indexes and optimize slow queries',estimatedTime: 4,dependencies: ['optimize_caching'],validation: 'Database query performance metrics',rollback: 'Revert database changes',});break;
 
-      case 'THROUGHPUT':
-        steps.push({
-          id: 'scale_instances',
-          description: 'Scale application instances',
-          action: 'Increase number of application instances',
-          estimatedTime: 1,
-          dependencies: [],
-          validation: 'Monitor throughput increase',
-          rollback: 'Scale down instances',
-        });
-        break;
+      case 'THROUGHPUT':steps.push({id: 'scale_instances',description: 'Scale application instances',action: 'Increase number of application instances',estimatedTime: 1,dependencies: [],
+          validation: 'Monitor throughput increase',rollback: 'Scale down instances',});break;
 
-      case 'AVAILABILITY':
-        steps.push({
-          id: 'failover_setup',
-          description: 'Implement failover mechanisms',
-          action: 'Configure automatic failover to backup systems',
-          estimatedTime: 8,
-          dependencies: [],
-          validation: 'Test failover functionality',
-          rollback: 'Disable failover mechanisms',
-        });
-        break;
+      case 'AVAILABILITY':steps.push({id: 'failover_setup',description: 'Implement failover mechanisms',action: 'Configure automatic failover to backup systems',estimatedTime: 8,dependencies: [],
+          validation: 'Test failover functionality',rollback: 'Disable failover mechanisms',});break;
     }
 
     return {
@@ -1651,21 +1388,13 @@ export class ParlantPerformanceValidatorService {
     if (violations.length > 0) {
       recommendations.push({
         id: `compliance_rec_${Date.now()}`,
-        type: 'CORRECTIVE',
-        priority: 'HIGH',
-        title: 'Address Performance SLA Violations',
+        type: 'CORRECTIVE',priority: 'HIGH',title: 'Address Performance SLA Violations',
         description: `${violations.length} compliance violations detected requiring immediate attention`,
         impact: {
           complianceImprovement: 80,
           riskReduction: 70,
-          costImplication: 'MEDIUM',
-        },
-        implementation: {
-          effort: 'HIGH',
-          timeline: '1-2 weeks',
-          resources: ['DevOps team', 'Performance engineers'],
-        },
-      });
+          costImplication: 'MEDIUM',},implementation: {
+          effort: 'HIGH',timeline: '1-2 weeks',resources: ['DevOps team', 'Performance engineers'],},});
     }
 
     return recommendations;
@@ -1688,10 +1417,7 @@ export class ParlantPerformanceValidatorService {
 
     const baseline = this.lastValidation.actualMetrics;
     const affectedMetrics = this.compareMetrics(baseline, metrics);
-    const detected = affectedMetrics.some(metric => metric.significance !== 'LOW');
-
-    if (!detected) {
-      return this.getEmptyRegressionAnalysis();
+    const detected = affectedMetrics.some(metric => metric.significance !== 'LOW');if (!detected) {return this.getEmptyRegressionAnalysis();
     }
 
     const severity = this.calculateRegressionSeverity(affectedMetrics);
@@ -1718,62 +1444,36 @@ export class ParlantPerformanceValidatorService {
     const responseTimeChange = ((current.responseTime.average - baseline.responseTime.average) / baseline.responseTime.average) * 100;
     if (Math.abs(responseTimeChange) > 5) { // 5% threshold
       regressions.push({
-        metric: 'responseTime',
-        baseline: baseline.responseTime.average,
-        current: current.responseTime.average,
+        metric: 'responseTime',baseline: baseline.responseTime.average,current: current.responseTime.average,
         change: responseTimeChange,
-        significance: Math.abs(responseTimeChange) > 20 ? 'CRITICAL' : Math.abs(responseTimeChange) > 10 ? 'HIGH' : 'MEDIUM',
-        trend: responseTimeChange > 0 ? 'DEGRADING' : 'IMPROVING',
-        confidence: 0.85,
-      });
+        significance: Math.abs(responseTimeChange) > 20 ? 'CRITICAL' : Math.abs(responseTimeChange) > 10 ? 'HIGH' : 'MEDIUM',trend: responseTimeChange > 0 ? 'DEGRADING' : 'IMPROVING',confidence: 0.85,});
     }
 
     // Throughput regression
     const throughputChange = ((current.throughput.current - baseline.throughput.current) / baseline.throughput.current) * 100;
     if (Math.abs(throughputChange) > 5) {
       regressions.push({
-        metric: 'throughput',
-        baseline: baseline.throughput.current,
-        current: current.throughput.current,
+        metric: 'throughput',baseline: baseline.throughput.current,current: current.throughput.current,
         change: throughputChange,
-        significance: Math.abs(throughputChange) > 20 ? 'CRITICAL' : Math.abs(throughputChange) > 10 ? 'HIGH' : 'MEDIUM',
-        trend: throughputChange < 0 ? 'DEGRADING' : 'IMPROVING',
-        confidence: 0.80,
-      });
+        significance: Math.abs(throughputChange) > 20 ? 'CRITICAL' : Math.abs(throughputChange) > 10 ? 'HIGH' : 'MEDIUM',trend: throughputChange < 0 ? 'DEGRADING' : 'IMPROVING',confidence: 0.80,});
     }
 
     // Cache hit rate regression
     const cacheChange = ((current.cacheHitRate.overall - baseline.cacheHitRate.overall) / baseline.cacheHitRate.overall) * 100;
     if (Math.abs(cacheChange) > 2) { // 2% threshold for cache hit rate
       regressions.push({
-        metric: 'cacheHitRate',
-        baseline: baseline.cacheHitRate.overall,
-        current: current.cacheHitRate.overall,
+        metric: 'cacheHitRate',baseline: baseline.cacheHitRate.overall,current: current.cacheHitRate.overall,
         change: cacheChange,
-        significance: Math.abs(cacheChange) > 10 ? 'HIGH' : Math.abs(cacheChange) > 5 ? 'MEDIUM' : 'LOW',
-        trend: cacheChange < 0 ? 'DEGRADING' : 'IMPROVING',
-        confidence: 0.90,
-      });
+        significance: Math.abs(cacheChange) > 10 ? 'HIGH' : Math.abs(cacheChange) > 5 ? 'MEDIUM' : 'LOW',trend: cacheChange < 0 ? 'DEGRADING' : 'IMPROVING',confidence: 0.90,});
     }
 
     return regressions;
   }
 
-  private calculateRegressionSeverity(metrics: MetricRegression[]): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (metrics.some(m => m.significance === 'CRITICAL')) return 'CRITICAL';
-    if (metrics.some(m => m.significance === 'HIGH')) return 'HIGH';
-    if (metrics.some(m => m.significance === 'MEDIUM')) return 'MEDIUM';
-    if (metrics.some(m => m.significance === 'LOW')) return 'LOW';
-    return 'NONE';
-  }
-
-  private async analyzeRootCause(metrics: MetricRegression[]): Promise<RootCauseAnalysis> {
+  private calculateRegressionSeverity(metrics: MetricRegression[]): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (metrics.some(m => m.significance === 'CRITICAL')) return 'CRITICAL';if (metrics.some(m => m.significance === 'HIGH')) return 'HIGH';if (metrics.some(m => m.significance === 'MEDIUM')) return 'MEDIUM';if (metrics.some(m => m.significance === 'LOW')) return 'LOW';return 'NONE';}private async analyzeRootCause(metrics: MetricRegression[]): Promise<RootCauseAnalysis> {
     // TODO: Implement sophisticated root cause analysis
     return {
-      primaryCause: 'Performance degradation detected',
-      contributingFactors: ['Increased load', 'Configuration changes'],
-      timeline: [],
-      evidence: [],
+      primaryCause: 'Performance degradation detected',contributingFactors: ['Increased load', 'Configuration changes'],timeline: [],evidence: [],
       confidence: 0.7,
     };
   }
@@ -1784,14 +1484,10 @@ export class ParlantPerformanceValidatorService {
       userExperience: {
         degradation: 15,
         affectedUsers: 100,
-        scenarios: ['API response delays'],
-      },
-      business: {
+        scenarios: ['API response delays'],},business: {
         revenueImpact: 1000,
         customerSatisfaction: -10,
-        competitivePosition: 'DEGRADED',
-      },
-      technical: {
+        competitivePosition: 'DEGRADED',},technical: {
         systemStability: 85,
         maintainability: 90,
         scalability: 80,
@@ -1803,21 +1499,13 @@ export class ParlantPerformanceValidatorService {
     const recommendations: RegressionRecommendation[] = [];
 
     for (const metric of metrics) {
-      if (metric.trend === 'DEGRADING' && metric.significance !== 'LOW') {
-        recommendations.push({
-          type: 'IMMEDIATE',
-          action: `Address ${metric.metric} regression`,
-          description: `${metric.metric} has degraded by ${Math.abs(metric.change).toFixed(1)}%`,
-          priority: metric.significance === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
-          effort: 'MEDIUM',
-          impact: {
-            performanceImprovement: 15,
+      if (metric.trend === 'DEGRADING' && metric.significance !== 'LOW') {recommendations.push({type: 'IMMEDIATE',
+          action: `Address ${metric.metric} regression`,description: `${metric.metric} has degraded by ${Math.abs(metric.change).toFixed(1)}%`,
+          priority: metric.significance === 'CRITICAL' ? 'CRITICAL' : 'HIGH',effort: 'MEDIUM',impact: {performanceImprovement: 15,
             riskReduction: 20,
             costImplication: 5000,
           },
-          timeline: metric.significance === 'CRITICAL' ? 'Immediate' : '24 hours',
-          dependencies: [],
-        });
+          timeline: metric.significance === 'CRITICAL' ? 'Immediate' : '24 hours',dependencies: [],});
       }
     }
 
@@ -1851,13 +1539,9 @@ export class ParlantPerformanceValidatorService {
     if (metrics.responseTime.p95 > this.performanceTargets.responseTime.p95) {
       recommendations.push({
         id: `rec_response_time_${Date.now()}`,
-        category: 'OPTIMIZATION',
-        priority: 'HIGH',
-        title: 'Optimize Response Time Performance',
+        category: 'OPTIMIZATION',priority: 'HIGH',title: 'Optimize Response Time Performance',
         description: `P95 response time (${metrics.responseTime.p95.toFixed(0)}ms) exceeds target (${this.performanceTargets.responseTime.p95}ms)`,
-        rationale: 'High response times impact user experience and SLA compliance',
-        impact: {
-          performance: {
+        rationale: 'High response times impact user experience and SLA compliance',impact: {performance: {
             responseTime: -30,
             throughput: 15,
             cacheHitRate: 10,
@@ -1878,36 +1562,10 @@ export class ParlantPerformanceValidatorService {
         implementation: {
           steps: [
             {
-              phase: 'Analysis',
-              description: 'Analyze performance bottlenecks',
-              actions: ['Profile slow endpoints', 'Analyze database queries', 'Review caching patterns'],
-              deliverables: ['Performance analysis report', 'Bottleneck identification'],
-              duration: 8,
-              resources: ['Performance engineer', 'Database administrator'],
-              risks: ['Service disruption during profiling'],
-              validation: ['Performance metrics collected', 'Bottlenecks identified'],
-            },
-            {
-              phase: 'Optimization',
-              description: 'Implement performance optimizations',
-              actions: ['Optimize database queries', 'Implement caching', 'Configure CDN'],
-              deliverables: ['Optimized code', 'Enhanced caching layer'],
-              duration: 24,
-              resources: ['Development team', 'DevOps team'],
-              risks: ['Performance regression', 'System instability'],
-              validation: ['Performance tests pass', 'Response time targets met'],
-            },
-          ],
-          effort: 'HIGH',
-          complexity: 'MEDIUM',
-          risk: 'MEDIUM',
-          dependencies: ['Database access', 'CDN configuration'],
-          prerequisites: ['Performance baseline established', 'Testing environment ready'],
-          rollback: {
-            available: true,
-            type: 'MANUAL',
-            estimatedTime: 30,
-            steps: [],
+              phase: 'Analysis',description: 'Analyze performance bottlenecks',actions: ['Profile slow endpoints', 'Analyze database queries', 'Review caching patterns'],deliverables: ['Performance analysis report', 'Bottleneck identification'],duration: 8,resources: ['Performance engineer', 'Database administrator'],risks: ['Service disruption during profiling'],validation: ['Performance metrics collected', 'Bottlenecks identified'],},{
+              phase: 'Optimization',description: 'Implement performance optimizations',actions: ['Optimize database queries', 'Implement caching', 'Configure CDN'],deliverables: ['Optimized code', 'Enhanced caching layer'],duration: 24,resources: ['Development team', 'DevOps team'],risks: ['Performance regression', 'System instability'],validation: ['Performance tests pass', 'Response time targets met'],},],
+          effort: 'HIGH',complexity: 'MEDIUM',risk: 'MEDIUM',dependencies: ['Database access', 'CDN configuration'],prerequisites: ['Performance baseline established', 'Testing environment ready'],rollback: {available: true,
+            type: 'MANUAL',estimatedTime: 30,steps: [],
             risks: [],
             validation: {
               checks: [],
@@ -1917,29 +1575,18 @@ export class ParlantPerformanceValidatorService {
           },
         },
         validation: {
-          metrics: ['responseTime', 'throughput', 'errorRate'],
-          tests: [
-            {
-              name: 'Load Test',
-              type: 'LOAD',
-              description: 'Validate performance under expected load',
-              passCriteria: 'P95 response time < 1000ms',
-              automatable: true,
-            },
+          metrics: ['responseTime', 'throughput', 'errorRate'],tests: [{
+              name: 'Load Test',type: 'LOAD',description: 'Validate performance under expected load',passCriteria: 'P95 response time < 1000ms',automatable: true,},
           ],
           criteria: [
             {
-              metric: 'responseTime',
-              target: this.performanceTargets.responseTime.p95,
-              tolerance: 10,
+              metric: 'responseTime',target: this.performanceTargets.responseTime.p95,tolerance: 10,
               timeframe: 60,
             },
           ],
           monitoring: [
             {
-              metric: 'responseTime',
-              frequency: 30,
-              duration: 1440,
+              metric: 'responseTime',frequency: 30,duration: 1440,
               alertThreshold: this.performanceTargets.responseTime.p95 * 1.1,
             },
           ],
@@ -1953,20 +1600,13 @@ export class ParlantPerformanceValidatorService {
           total: 60,
           phases: [
             {
-              name: 'Planning and Analysis',
-              start: new Date(),
-              end: new Date(Date.now() + 8 * 60 * 60 * 1000),
+              name: 'Planning and Analysis',start: new Date(),end: new Date(Date.now() + 8 * 60 * 60 * 1000),
               duration: 8,
               dependencies: [],
-              milestones: ['Performance analysis complete'],
-            },
-            {
-              name: 'Implementation',
-              start: new Date(Date.now() + 8 * 60 * 60 * 1000),
-              end: new Date(Date.now() + 32 * 60 * 60 * 1000),
+              milestones: ['Performance analysis complete'],},{
+              name: 'Implementation',start: new Date(Date.now() + 8 * 60 * 60 * 1000),end: new Date(Date.now() + 32 * 60 * 60 * 1000),
               duration: 24,
-              dependencies: ['Planning and Analysis'],
-              milestones: ['Optimizations implemented', 'Code review complete'],
+              dependencies: ['Planning and Analysis'],milestones: ['Optimizations implemented', 'Code review complete'],
             },
           ],
         },
@@ -1977,13 +1617,9 @@ export class ParlantPerformanceValidatorService {
     if (metrics.cacheHitRate.overall < this.performanceTargets.cacheHitRate.target) {
       recommendations.push({
         id: `rec_cache_optimization_${Date.now()}`,
-        category: 'OPTIMIZATION',
-        priority: 'MEDIUM',
-        title: 'Improve Cache Hit Rate',
+        category: 'OPTIMIZATION',priority: 'MEDIUM',title: 'Improve Cache Hit Rate',
         description: `Cache hit rate (${metrics.cacheHitRate.overall.toFixed(1)}%) below target (${this.performanceTargets.cacheHitRate.target}%)`,
-        rationale: 'Low cache hit rates increase response times and system load',
-        impact: {
-          performance: {
+        rationale: 'Low cache hit rates increase response times and system load',impact: {performance: {
             responseTime: -20,
             throughput: 10,
             cacheHitRate: 15,
@@ -2004,26 +1640,9 @@ export class ParlantPerformanceValidatorService {
         implementation: {
           steps: [
             {
-              phase: 'Cache Analysis',
-              description: 'Analyze current caching patterns',
-              actions: ['Review cache usage patterns', 'Identify cache miss reasons', 'Analyze cache sizing'],
-              deliverables: ['Cache analysis report', 'Optimization recommendations'],
-              duration: 4,
-              resources: ['Performance engineer'],
-              risks: ['Cache service disruption during analysis'],
-              validation: ['Cache patterns documented', 'Miss reasons identified'],
-            },
-          ],
-          effort: 'MEDIUM',
-          complexity: 'LOW',
-          risk: 'LOW',
-          dependencies: ['Cache monitoring access'],
-          prerequisites: ['Cache metrics available'],
-          rollback: {
-            available: true,
-            type: 'AUTOMATED',
-            estimatedTime: 10,
-            steps: [],
+              phase: 'Cache Analysis',description: 'Analyze current caching patterns',actions: ['Review cache usage patterns', 'Identify cache miss reasons', 'Analyze cache sizing'],deliverables: ['Cache analysis report', 'Optimization recommendations'],duration: 4,resources: ['Performance engineer'],risks: ['Cache service disruption during analysis'],validation: ['Cache patterns documented', 'Miss reasons identified'],},],
+          effort: 'MEDIUM',complexity: 'LOW',risk: 'LOW',dependencies: ['Cache monitoring access'],prerequisites: ['Cache metrics available'],rollback: {available: true,
+            type: 'AUTOMATED',estimatedTime: 10,steps: [],
             risks: [],
             validation: {
               checks: [],
@@ -2033,29 +1652,18 @@ export class ParlantPerformanceValidatorService {
           },
         },
         validation: {
-          metrics: ['cacheHitRate', 'responseTime'],
-          tests: [
-            {
-              name: 'Cache Performance Test',
-              type: 'PERFORMANCE',
-              description: 'Validate cache hit rate improvements',
-              passCriteria: 'Cache hit rate > 95%',
-              automatable: true,
-            },
+          metrics: ['cacheHitRate', 'responseTime'],tests: [{
+              name: 'Cache Performance Test',type: 'PERFORMANCE',description: 'Validate cache hit rate improvements',passCriteria: 'Cache hit rate > 95%',automatable: true,},
           ],
           criteria: [
             {
-              metric: 'cacheHitRate',
-              target: this.performanceTargets.cacheHitRate.target,
-              tolerance: 2,
+              metric: 'cacheHitRate',target: this.performanceTargets.cacheHitRate.target,tolerance: 2,
               timeframe: 60,
             },
           ],
           monitoring: [
             {
-              metric: 'cacheHitRate',
-              frequency: 60,
-              duration: 1440,
+              metric: 'cacheHitRate',frequency: 60,duration: 1440,
               alertThreshold: this.performanceTargets.cacheHitRate.minimum,
             },
           ],
@@ -2069,14 +1677,10 @@ export class ParlantPerformanceValidatorService {
           total: 20,
           phases: [
             {
-              name: 'Cache Analysis and Planning',
-              start: new Date(),
-              end: new Date(Date.now() + 6 * 60 * 60 * 1000),
+              name: 'Cache Analysis and Planning',start: new Date(),end: new Date(Date.now() + 6 * 60 * 60 * 1000),
               duration: 6,
               dependencies: [],
-              milestones: ['Cache analysis complete', 'Optimization plan ready'],
-            },
-          ],
+              milestones: ['Cache analysis complete', 'Optimization plan ready'],},],
         },
       });
     }
@@ -2091,27 +1695,9 @@ export class ParlantPerformanceValidatorService {
   ): Promise<BusinessImpactAssessment> {
     const categories: BusinessImpactCategory[] = [
       {
-        category: 'REVENUE',
-        impact: this.calculateRevenueImpact(metrics, compliance),
-        description: 'Performance impacts on revenue generation',
-        evidence: ['SLA violations', 'User experience degradation'],
-        mitigation: ['Performance optimization', 'SLA compliance improvements'],
-      },
-      {
-        category: 'USERS',
-        impact: this.calculateUserImpact(metrics),
-        description: 'User experience and satisfaction impact',
-        evidence: ['Response time metrics', 'Error rates'],
-        mitigation: ['Response time optimization', 'Error reduction'],
-      },
-      {
-        category: 'REPUTATION',
-        impact: this.calculateReputationImpact(compliance),
-        description: 'Brand and reputation impact',
-        evidence: ['SLA violations', 'System availability'],
-        mitigation: ['Reliability improvements', 'Communication strategy'],
-      },
-    ];
+        category: 'REVENUE',impact: this.calculateRevenueImpact(metrics, compliance),description: 'Performance impacts on revenue generation',evidence: ['SLA violations', 'User experience degradation'],mitigation: ['Performance optimization', 'SLA compliance improvements'],},{
+        category: 'USERS',impact: this.calculateUserImpact(metrics),description: 'User experience and satisfaction impact',evidence: ['Response time metrics', 'Error rates'],mitigation: ['Response time optimization', 'Error reduction'],},{
+        category: 'REPUTATION',impact: this.calculateReputationImpact(compliance),description: 'Brand and reputation impact',evidence: ['SLA violations', 'System availability'],mitigation: ['Reliability improvements', 'Communication strategy'],},];
 
     const overallScore = categories.reduce((sum, cat) => sum + cat.impact, 0) / categories.length;
 
@@ -2129,10 +1715,7 @@ export class ParlantPerformanceValidatorService {
     let impact = 0;
 
     // SLA violation penalties
-    const violations = compliance.violations.filter(v => v.type === 'SLA');
-    impact -= violations.length * 10;
-
-    // Performance degradation impact
+    const violations = compliance.violations.filter(v => v.type === 'SLA');impact -= violations.length * 10;// Performance degradation impact
     if (metrics.responseTime.p95 > this.performanceTargets.responseTime.p95) {
       const degradation = (metrics.responseTime.p95 - this.performanceTargets.responseTime.p95) / this.performanceTargets.responseTime.p95;
       impact -= degradation * 20;
@@ -2163,23 +1746,12 @@ export class ParlantPerformanceValidatorService {
     let impact = 0;
 
     // Compliance violations impact reputation
-    const criticalViolations = compliance.violations.filter(v => v.severity === 'CRITICAL').length;
-    const highViolations = compliance.violations.filter(v => v.severity === 'HIGH').length;
-
-    impact -= criticalViolations * 25;
-    impact -= highViolations * 15;
+    const criticalViolations = compliance.violations.filter(v => v.severity === 'CRITICAL').length;const highViolations = compliance.violations.filter(v => v.severity === 'HIGH').length;impact -= criticalViolations * 25;impact -= highViolations * 15;
 
     return Math.max(-100, Math.min(100, impact));
   }
 
-  private categorizeImpact(score: number): 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'CRITICAL' {
-    if (score > 10) return 'POSITIVE';
-    if (score > -10) return 'NEUTRAL';
-    if (score > -50) return 'NEGATIVE';
-    return 'CRITICAL';
-  }
-
-  private calculateOverallScore(metrics: ActualMetrics, compliance: ComplianceResults): number {
+  private categorizeImpact(score: number): 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'CRITICAL' {if (score > 10) return 'POSITIVE';if (score > -10) return 'NEUTRAL';if (score > -50) return 'NEGATIVE';return 'CRITICAL';}private calculateOverallScore(metrics: ActualMetrics, compliance: ComplianceResults): number {
     let score = 100;
 
     // Response time scoring (25% weight)
@@ -2210,14 +1782,10 @@ export class ParlantPerformanceValidatorService {
     regression: RegressionAnalysis
   ): ValidationStatus {
     // Critical conditions
-    if (compliance.violations.some(v => v.severity === 'CRITICAL') || regression.severity === 'CRITICAL') {
-      return ValidationStatus.CRITICAL;
-    }
+    if (compliance.violations.some(v => v.severity === 'CRITICAL') || regression.severity === 'CRITICAL') {return ValidationStatus.CRITICAL;}
 
     // Failed conditions
-    if (score < 60 || compliance.violations.some(v => v.severity === 'HIGH')) {
-      return ValidationStatus.FAILED;
-    }
+    if (score < 60 || compliance.violations.some(v => v.severity === 'HIGH')) {return ValidationStatus.FAILED;}
 
     // Warning conditions
     if (score < 80 || compliance.violations.length > 0 || regression.detected) {
@@ -2232,24 +1800,11 @@ export class ParlantPerformanceValidatorService {
     const evidence: ValidationEvidence = {
       metrics: [
         {
-          metric: 'responseTime',
-          source: 'performance_monitor',
-          timestamp: new Date(),
-          value: metrics.responseTime.p95,
-          context: { type: 'p95' },
-        },
-        {
-          metric: 'throughput',
-          source: 'performance_monitor',
-          timestamp: new Date(),
-          value: metrics.throughput.sustained,
-          context: { type: 'sustained' },
-        },
-        {
-          metric: 'cacheHitRate',
-          source: 'performance_monitor',
-          timestamp: new Date(),
-          value: metrics.cacheHitRate.overall,
+          metric: 'responseTime',source: 'performance_monitor',timestamp: new Date(),value: metrics.responseTime.p95,
+          context: { type: 'p95' },},{
+          metric: 'throughput',source: 'performance_monitor',timestamp: new Date(),value: metrics.throughput.sustained,
+          context: { type: 'sustained' },},{
+          metric: 'cacheHitRate',source: 'performance_monitor',timestamp: new Date(),value: metrics.cacheHitRate.overall,
           context: { type: 'overall' },
         },
       ],
@@ -2269,12 +1824,8 @@ export class ParlantPerformanceValidatorService {
       if (!benchmark.passed) {
         recommendations.push({
           id: `benchmark_rec_${benchmark.testId}`,
-          category: 'OPTIMIZATION',
-          priority: 'HIGH',
-          title: `Address ${benchmark.benchmarkName} Performance Issues`,
-          description: `Benchmark ${benchmark.benchmarkName} failed with ${benchmark.failures.length} issues`,
-          rationale: `Performance targets not met: ${benchmark.failures.join(', ')}`,
-          impact: {
+          category: 'OPTIMIZATION',priority: 'HIGH',
+          title: `Address ${benchmark.benchmarkName} Performance Issues`,description: `Benchmark ${benchmark.benchmarkName} failed with ${benchmark.failures.length} issues`,rationale: `Performance targets not met: ${benchmark.failures.join(`, ')}',impact: {
             performance: {
               responseTime: -25,
               throughput: 20,
@@ -2296,26 +1847,9 @@ export class ParlantPerformanceValidatorService {
           implementation: {
             steps: [
               {
-                phase: 'Analysis',
-                description: 'Analyze benchmark failures',
-                actions: ['Review benchmark results', 'Identify root causes', 'Plan optimizations'],
-                deliverables: ['Failure analysis report', 'Optimization plan'],
-                duration: 4,
-                resources: ['Performance engineer'],
-                risks: ['Analysis may reveal complex issues'],
-                validation: ['Root causes identified', 'Plan approved'],
-              },
-            ],
-            effort: 'HIGH',
-            complexity: 'MEDIUM',
-            risk: 'MEDIUM',
-            dependencies: ['Benchmark results'],
-            prerequisites: ['Development environment access'],
-            rollback: {
-              available: true,
-              type: 'MANUAL',
-              estimatedTime: 20,
-              steps: [],
+                phase: 'Analysis',description: 'Analyze benchmark failures',actions: ['Review benchmark results', 'Identify root causes', 'Plan optimizations'],deliverables: ['Failure analysis report', 'Optimization plan'],duration: 4,resources: ['Performance engineer'],risks: ['Analysis may reveal complex issues'],validation: ['Root causes identified', 'Plan approved'],},],
+            effort: 'HIGH',complexity: 'MEDIUM',risk: 'MEDIUM',dependencies: ['Benchmark results'],prerequisites: ['Development environment access'],rollback: {available: true,
+              type: 'MANUAL',estimatedTime: 20,steps: [],
               risks: [],
               validation: {
                 checks: [],
@@ -2325,29 +1859,21 @@ export class ParlantPerformanceValidatorService {
             },
           },
           validation: {
-            metrics: ['responseTime', 'throughput'],
-            tests: [
-              {
+            metrics: ['responseTime', 'throughput'],tests: [{
                 name: benchmark.benchmarkName,
                 type: 'PERFORMANCE',
                 description: `Re-run ${benchmark.benchmarkName} benchmark`,
-                passCriteria: 'All benchmark targets met',
-                automatable: true,
-              },
+                passCriteria: 'All benchmark targets met',automatable: true,},
             ],
             criteria: [
               {
-                metric: 'benchmarkScore',
-                target: 100,
-                tolerance: 5,
+                metric: 'benchmarkScore',target: 100,tolerance: 5,
                 timeframe: 60,
               },
             ],
             monitoring: [
               {
-                metric: 'benchmarkScore',
-                frequency: 3600,
-                duration: 86400,
+                metric: 'benchmarkScore',frequency: 3600,duration: 86400,
                 alertThreshold: 90,
               },
             ],
@@ -2361,9 +1887,7 @@ export class ParlantPerformanceValidatorService {
             total: 34,
             phases: [
               {
-                name: 'Benchmark Analysis',
-                start: new Date(),
-                end: new Date(Date.now() + 4 * 60 * 60 * 1000),
+                name: 'Benchmark Analysis',start: new Date(),end: new Date(Date.now() + 4 * 60 * 60 * 1000),
                 duration: 4,
                 dependencies: [],
                 milestones: ['Analysis complete'],
@@ -2393,27 +1917,20 @@ export class ParlantPerformanceValidatorService {
   }
 
   private async handleCriticalValidationFailure(result: ValidationResult): Promise<void> {
-    this.logger.error('Critical validation failure detected', {
-      validationId: result.validationId,
-      status: result.status,
+    this.logger.error('Critical validation failure detected', {validationId: result.validationId,status: result.status,
       score: result.overallScore,
       violations: result.compliance.violations.length,
       regressionSeverity: result.regressionAnalysis.severity,
     });
 
     // Emit critical failure event
-    this.eventEmitter.emit('performance.validation.critical_failure', result);
-
-    // Auto-remediation if enabled
-    if (this.validationConfig.autoRemediationEnabled) {
+    this.eventEmitter.emit('performance.validation.critical_failure', result);// Auto-remediation if enabledif (this.validationConfig.autoRemediationEnabled) {
       await this.triggerAutoRemediation(result);
     }
   }
 
   private async triggerAutoRemediation(result: ValidationResult): Promise<void> {
-    this.logger.log('Triggering auto-remediation for critical validation failure', {
-      validationId: result.validationId,
-    });
+    this.logger.log('Triggering auto-remediation for critical validation failure', {validationId: result.validationId,});
 
     // TODO: Implement auto-remediation logic
     // This could include:
@@ -2430,12 +1947,7 @@ export class ParlantPerformanceValidatorService {
   private getTimeRangeCutoff(timeRange: string): Date {
     const now = Date.now();
     switch (timeRange) {
-      case '1h': return new Date(now - 60 * 60 * 1000);
-      case '24h': return new Date(now - 24 * 60 * 60 * 1000);
-      case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);
-      case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);
-      default: return new Date(now - 24 * 60 * 60 * 1000);
-    }
+      case '1h': return new Date(now - 60 * 60 * 1000);case '24h': return new Date(now - 24 * 60 * 60 * 1000);case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);default: return new Date(now - 24 * 60 * 60 * 1000);}
   }
 
   private getEmptyComplianceResults(): ComplianceResults {
@@ -2452,12 +1964,8 @@ export class ParlantPerformanceValidatorService {
   private getEmptyRegressionAnalysis(): RegressionAnalysis {
     return {
       detected: false,
-      severity: 'NONE',
-      affectedMetrics: [],
-      rootCause: {
-        primaryCause: '',
-        contributingFactors: [],
-        timeline: [],
+      severity: 'NONE',affectedMetrics: [],rootCause: {
+        primaryCause: '',contributingFactors: [],timeline: [],
         evidence: [],
         confidence: 0,
       },
@@ -2470,9 +1978,7 @@ export class ParlantPerformanceValidatorService {
         business: {
           revenueImpact: 0,
           customerSatisfaction: 0,
-          competitivePosition: 'MAINTAINED',
-        },
-        technical: {
+          competitivePosition: 'MAINTAINED',},technical: {
           systemStability: 100,
           maintainability: 100,
           scalability: 100,
@@ -2481,9 +1987,7 @@ export class ParlantPerformanceValidatorService {
       recommendations: [],
       rollbackPlan: {
         available: false,
-        type: 'MANUAL',
-        estimatedTime: 0,
-        steps: [],
+        type: 'MANUAL',estimatedTime: 0,steps: [],
         risks: [],
         validation: {
           checks: [],
@@ -2496,9 +2000,7 @@ export class ParlantPerformanceValidatorService {
 
   private getEmptyBusinessImpact(): BusinessImpactAssessment {
     return {
-      overall: 'NEUTRAL',
-      score: 0,
-      categories: [],
+      overall: 'NEUTRAL',score: 0,categories: [],
       trends: [],
       projections: [],
       recommendations: [],
@@ -2507,15 +2009,9 @@ export class ParlantPerformanceValidatorService {
 
   private generatePdfReport(report: any): string {
     // TODO: Implement PDF generation
-    return 'PDF report generation not implemented';
-  }
-
-  private generateHtmlReport(report: any): string {
+    return 'PDF report generation not implemented';}private generateHtmlReport(report: any): string {
     // TODO: Implement HTML generation
-    return 'HTML report generation not implemented';
-  }
-
-  // ===== SCHEDULED TASKS =====
+    return 'HTML report generation not implemented';}// ===== SCHEDULED TASKS =====
 
   // Note: Scheduled via initializeScheduledTasks()
   private async performContinuousValidation(): Promise<void> {
@@ -2527,9 +2023,7 @@ export class ParlantPerformanceValidatorService {
         includeBusinessImpact: false,
       });
     } catch (error) {
-      this.logger.error('Continuous validation failed', error);
-    }
-  }
+      this.logger.error('Continuous validation failed', error);}}
 
   // Note: Scheduled via initializeScheduledTasks()
   private async performHourlyValidation(): Promise<void> {
@@ -2541,9 +2035,7 @@ export class ParlantPerformanceValidatorService {
         includeBusinessImpact: true,
       });
     } catch (error) {
-      this.logger.error('Hourly validation failed', error);
-    }
-  }
+      this.logger.error('Hourly validation failed', error);}}
 
   // Note: Scheduled via initializeScheduledTasks()
   private async performDailyCompliance(): Promise<void> {
@@ -2554,11 +2046,7 @@ export class ParlantPerformanceValidatorService {
       });
 
       // Generate daily compliance report
-      const report = await this.generateComplianceReport('json');
-
-      this.logger.log('Daily compliance validation completed', {
-        overallCompliance: result.compliance.overallCompliance,
-        violations: result.compliance.violations.length,
+      const report = await this.generateComplianceReport('json');this.logger.log('Daily compliance validation completed', {overallCompliance: result.compliance.overallCompliance,violations: result.compliance.violations.length,
         businessImpact: result.businessImpact.overall,
       });
     } catch (error) {

@@ -26,17 +26,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import * as WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { createServer, Server } from 'http';
-import { randomUUID } from 'crypto';
-import axios from 'axios';
-
-import {
-  ConversationalWebSocketBridgeService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { createServer, Server } from 'http';import { randomUUID } from 'crypto';import axios from 'axios';import {ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -46,14 +36,7 @@ import {
   ValidationAction,
   SecurityContext,
   ActionImpact,
-} from '../conversational-websocket-bridge.service';
-import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
-import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';
-import { createSafeWebSocketServer } from '../websocket-types';
-
-// ===== PARLANT INTEGRATION TEST UTILITIES =====
-
-/**
+} from '../conversational-websocket-bridge.service';import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';import { createSafeWebSocketServer } from '../websocket-types';// ===== PARLANT INTEGRATION TEST UTILITIES =====/**
  * Mock PARLANT service for integration testing
  */
 class MockParlantService {
@@ -64,9 +47,7 @@ class MockParlantService {
     startTime: number;
     action: ValidationAction;
     context: any;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    progress: number;
-  }>();
+    status: 'pending' | 'processing' | 'completed' | 'failed';progress: number;}>();
 
   private responses = new Map<string, any>();
   private connectionMetrics = {
@@ -83,61 +64,31 @@ class MockParlantService {
   }
 
   private setupRoutes(): void {
-    this.httpServer.on('request', (req, res) => {
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-      if (req.method === 'OPTIONS') {
-        res.writeHead(200);
-        res.end();
+    this.httpServer.on('request', (req, res) => {res.setHeader('Content-Type', 'application/json');res.setHeader('Access-Control-Allow-Origin', '*');res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');if (req.method === 'OPTIONS') {res.writeHead(200);res.end();
         return;
       }
 
-      if (req.url === '/health') {
-        res.writeHead(200);
-        res.end(JSON.stringify({
-          status: 'healthy',
-          service: 'parlant-mock',
-          timestamp: Date.now(),
-          version: '1.0.0',
-          capabilities: ['validation', 'conversation', 'streaming'],
-        }));
-        return;
+      if (req.url === '/health') {res.writeHead(200);res.end(JSON.stringify({
+          status: 'healthy',service: 'parlant-mock',timestamp: Date.now(),version: '1.0.0',capabilities: ['validation', 'conversation', 'streaming'],}));return;
       }
 
-      if (req.url === '/api/validate' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-          try {
-            const validationRequest = JSON.parse(body);
+      if (req.url === '/api/validate' && req.method === 'POST') {let body = '';req.on('data', chunk => body += chunk);req.on('end', () => {try {const validationRequest = JSON.parse(body);
             const response = this.processValidationRequest(validationRequest);
             res.writeHead(200);
             res.end(JSON.stringify(response));
           } catch (error) {
             res.writeHead(400);
-            res.end(JSON.stringify({ error: 'Invalid request' }));
-          }
-        });
+            res.end(JSON.stringify({ error: 'Invalid request' }));}});
         return;
       }
 
-      if (req.url === '/api/conversation' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-          try {
-            const conversationRequest = JSON.parse(body);
+      if (req.url === '/api/conversation' && req.method === 'POST') {let body = '';req.on('data', chunk => body += chunk);req.on('end', () => {try {const conversationRequest = JSON.parse(body);
             const response = this.processConversationRequest(conversationRequest);
             res.writeHead(200);
             res.end(JSON.stringify(response));
           } catch (error) {
             res.writeHead(400);
-            res.end(JSON.stringify({ error: 'Invalid conversation request' }));
-          }
-        });
+            res.end(JSON.stringify({ error: 'Invalid conversation request' }));}});
         return;
       }
 
@@ -159,23 +110,10 @@ class MockParlantService {
   private setupWebSocketServer(): void {
     this.wsServer = createSafeWebSocketServer({
       server: this.httpServer,
-      path: '/ws',
-    });
+      path: '/ws',});this.wsServer.on('connection', (ws: WebSocket.WebSocket) => {this.connectionMetrics.totalConnections++;this.connectionMetrics.activeConnections++;
 
-    this.wsServer.on('connection', (ws: WebSocket.WebSocket) => {
-      this.connectionMetrics.totalConnections++;
-      this.connectionMetrics.activeConnections++;
-
-      console.log('PARLANT WebSocket client connected');
-
-      ws.on('message', async (data: WebSocket.RawData) => {
-        const startTime = performance.now();
-
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));
-          this.connectionMetrics.messagesProcessed++;
-
-          const response = await this.handleWebSocketMessage(message);
+      console.log('PARLANT WebSocket client connected');ws.on('message', async (data: WebSocket.RawData) => {const startTime = performance.now();try {
+          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));this.connectionMetrics.messagesProcessed++;const response = await this.handleWebSocketMessage(message);
           if (response) {
             ws.send(JSON.stringify(response));
           }
@@ -187,46 +125,19 @@ class MockParlantService {
             this.connectionMetrics.processingTimes.length;
 
         } catch (error) {
-          console.error('PARLANT WebSocket message error:', error);
-          ws.send(JSON.stringify({
-            error: 'Message processing failed',
-            details: error.message,
-          }));
+          console.error('PARLANT WebSocket message error:', error);ws.send(JSON.stringify({error: 'Message processing failed',details: error.message,}));
         }
       });
 
-      ws.on('close', () => {
-        this.connectionMetrics.activeConnections--;
-        console.log('PARLANT WebSocket client disconnected');
-      });
-
-      ws.on('error', (error) => {
-        console.error('PARLANT WebSocket error:', error);
-        this.connectionMetrics.activeConnections--;
-      });
+      ws.on('close', () => {this.connectionMetrics.activeConnections--;console.log('PARLANT WebSocket client disconnected');});ws.on('error', (error) => {console.error('PARLANT WebSocket error:', error);this.connectionMetrics.activeConnections--;});
     });
   }
 
   private async handleWebSocketMessage(message: any): Promise<any> {
     switch (message.type) {
-      case 'validation_request':
-        return this.handleValidationRequest(message);
-
-      case 'user_confirmation':
-        return this.handleUserConfirmation(message);
-
-      case 'conversation_message':
-        return this.handleConversationMessage(message);
-
-      case 'progress_request':
-        return this.handleProgressRequest(message);
-
-      default:
+      case 'validation_request':return this.handleValidationRequest(message);case 'user_confirmation':return this.handleUserConfirmation(message);case 'conversation_message':return this.handleConversationMessage(message);case 'progress_request':return this.handleProgressRequest(message);default:
         return {
-          type: 'error',
-          error: 'Unknown message type',
-          originalType: message.type,
-        };
+          type: 'error',error: 'Unknown message type',originalType: message.type,};
     }
   }
 
@@ -240,18 +151,13 @@ class MockParlantService {
       startTime,
       action: message.action,
       context: message.context,
-      status: 'processing',
-      progress: 0,
-    });
+      status: 'processing',progress: 0,});
 
     // Simulate processing time
     setTimeout(() => {
       const validation = this.activeValidations.get(validationId);
       if (validation) {
-        validation.status = 'completed';
-        validation.progress = 100;
-
-        const response = {
+        validation.status = 'completed';validation.progress = 100;const response = {
           type: 'validation_response',
           validationId,
           approved: this.shouldApproveAction(message.action),
@@ -261,10 +167,7 @@ class MockParlantService {
           requiresUserConfirmation: this.requiresUserConfirmation(message.action),
           processingTime: performance.now() - startTime,
           metadata: {
-            parlantVersion: '1.0.0',
-            modelUsed: 'mock-conversational-ai',
-            riskAssessment: this.assessRisk(message.action),
-          },
+            parlantVersion: '1.0.0',modelUsed: 'mock-conversational-ai',riskAssessment: this.assessRisk(message.action),},
         };
 
         this.responses.set(validationId, response);
@@ -272,9 +175,7 @@ class MockParlantService {
     }, Math.random() * 500 + 200); // 200-700ms processing time
 
     return {
-      type: 'validation_accepted',
-      validationId,
-      estimatedProcessingTime: 500,
+      type: 'validation_accepted',validationId,estimatedProcessingTime: 500,
       streamingEnabled: true,
     };
   }
@@ -285,23 +186,13 @@ class MockParlantService {
     const validation = this.activeValidations.get(validationId);
     if (!validation) {
       return {
-        type: 'error',
-        error: 'Validation not found',
-        validationId,
-      };
+        type: 'error',error: 'Validation not found',validationId,};
     }
 
     const result = {
-      type: 'confirmation_result',
-      validationId,
-      result: approved ? 'approved' : 'rejected',
-      finalDecision: approved,
-      userReasoning: reasoning,
+      type: 'confirmation_result',validationId,result: approved ? 'approved' : 'rejected',finalDecision: approved,userReasoning: reasoning,
       timestamp: Date.now(),
-      parlantDecision: validation.status === 'completed' ? 'processed' : 'pending',
-    };
-
-    this.activeValidations.delete(validationId);
+      parlantDecision: validation.status === 'completed' ? 'processed' : 'pending',};this.activeValidations.delete(validationId);
     return result;
   }
 
@@ -309,13 +200,9 @@ class MockParlantService {
     const conversationId = message.conversationId || randomUUID();
 
     return {
-      type: 'conversation_response',
-      conversationId,
-      response: this.generateConversationalResponse(message.content),
+      type: 'conversation_response',conversationId,response: this.generateConversationalResponse(message.content),
       context: {
-        conversationState: 'active',
-        previousMessages: 1,
-        confidence: 0.9,
+        conversationState: 'active',previousMessages: 1,confidence: 0.9,
       },
       timestamp: Date.now(),
     };
@@ -325,18 +212,13 @@ class MockParlantService {
     const validation = this.activeValidations.get(message.validationId);
     if (!validation) {
       return {
-        type: 'error',
-        error: 'Validation not found',
-      };
-    }
+        type: 'error',error: 'Validation not found',};}
 
     // Simulate progress
     validation.progress = Math.min(validation.progress + 25, 100);
 
     return {
-      type: 'progress_update',
-      validationId: message.validationId,
-      progress: validation.progress,
+      type: 'progress_update',validationId: message.validationId,progress: validation.progress,
       stage: validation.progress === 100 ? 'completed' : 'processing',
       message: `Processing validation: ${validation.progress}%`,
       estimatedTimeRemaining: validation.progress === 100 ? 0 : 1000,
@@ -364,45 +246,21 @@ class MockParlantService {
 
   private shouldApproveAction(action: any): boolean {
     // Simple approval logic based on action type
-    const highRiskActions = ['delete', 'remove', 'destroy', 'format'];
-    const actionType = action?.actionType?.toLowerCase() || '';
-
-    return !highRiskActions.some(risk => actionType.includes(risk));
-  }
+    const highRiskActions = ['delete', 'remove', 'destroy', 'format'];const actionType = action?.actionType?.toLowerCase() || '';return !highRiskActions.some(risk => actionType.includes(risk));}
 
   private requiresUserConfirmation(action: any): boolean {
     const impact = action?.impact;
-    return impact?.scope === 'system' || impact?.stateChanges === true;
-  }
-
-  private generateReasoning(action: any): string {
-    const actionType = action?.actionType || 'unknown';
-    const scope = action?.impact?.scope || 'local';
+    return impact?.scope === 'system' || impact?.stateChanges === true;}private generateReasoning(action: any): string {
+    const actionType = action?.actionType || 'unknown';const scope = action?.impact?.scope || 'local';
 
     if (this.shouldApproveAction(action)) {
-      return `Action '${actionType}' appears safe for ${scope} scope. No security concerns detected.`;
-    } else {
-      return `Action '${actionType}' requires careful review due to potential ${scope} impact.`;
-    }
+      return `Action '${actionType}' appears safe for ${scope} scope. No security concerns detected.';} else {
+      return `Action '${actionType}' requires careful review due to potential ${scope} impact.';}
   }
 
-  private assessRisk(action: any): 'low' | 'medium' | 'high' {
-    const impact = action?.impact;
-    if (impact?.scope === 'system' && impact?.stateChanges) return 'high';
-    if (impact?.dataAccess || impact?.stateChanges) return 'medium';
-    return 'low';
-  }
-
-  private generateConversationalResponse(content: string): string {
+  private assessRisk(action: any): 'low' | 'medium' | 'high' {const impact = action?.impact;if (impact?.scope === 'system' && impact?.stateChanges) return 'high';if (impact?.dataAccess || impact?.stateChanges) return 'medium';return 'low';}private generateConversationalResponse(content: string): string {
     const responses = [
-      'I understand your request. Let me help you with that.',
-      'That seems like a reasonable action. I can assist with that.',
-      'I need to validate this action before proceeding.',
-      'This action requires careful consideration due to its impact.',
-      'I can help you accomplish this task safely.',
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
+      'I understand your request. Let me help you with that.','That seems like a reasonable action. I can assist with that.','I need to validate this action before proceeding.','This action requires careful consideration due to its impact.','I can help you accomplish this task safely.',];return responses[Math.floor(Math.random() * responses.length)];
   }
 
   getMetrics() {
@@ -420,9 +278,7 @@ class MockParlantService {
 
     return new Promise((resolve) => {
       this.httpServer.close(() => {
-        console.log('Mock PARLANT service stopped');
-        resolve();
-      });
+        console.log('Mock PARLANT service stopped');resolve();});
     });
   }
 }
@@ -448,39 +304,19 @@ class ParlantIntegrationTestClient extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket.WebSocket(this.url);
 
-      this.ws.on('open', () => {
-        this.connected = true;
-        this.emit('connected');
-        resolve();
-      });
+      this.ws.on('open', () => {this.connected = true;this.emit('connected');resolve();});
 
-      this.ws.on('message', (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));
-          this.handleResponse(message);
-          this.emit('message', message);
-        } catch (error) {
-          this.emit('error', new Error(`Failed to parse message: ${error}`));
+      this.ws.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));this.handleResponse(message);this.emit('message', message);} catch (error) {this.emit('error', new Error(`Failed to parse message: ${error}`));
         }
       });
 
-      this.ws.on('error', (error) => {
-        this.connected = false;
-        this.emit('error', error);
-        reject(error);
-      });
+      this.ws.on('error', (error) => {this.connected = false;this.emit('error', error);reject(error);});
 
-      this.ws.on('close', () => {
-        this.connected = false;
-        this.emit('disconnected');
-      });
-    });
+      this.ws.on('close', () => {this.connected = false;this.emit('disconnected');});});
   }
 
   private handleResponse(message: any): void {
-    if (message.type === 'validation_response') {
-      const tracking = this.validationTracking.get(message.validationId);
-      if (tracking) {
+    if (message.type === 'validation_response') {const tracking = this.validationTracking.get(message.validationId);if (tracking) {
         tracking.completed = true;
         tracking.response = message;
       }
@@ -505,21 +341,13 @@ class ParlantIntegrationTestClient extends EventEmitter {
       payload: {
         validationId,
         context: context || {
-          userId: 'integration-test-user',
-          applicationContext: 'parlant-integration-test',
-          environmentInfo: { testMode: true },
-          previousActions: [],
+          userId: 'integration-test-user',applicationContext: 'parlant-integration-test',environmentInfo: { testMode: true },previousActions: [],
           securityContext: {
-            authenticationLevel: 'basic',
-            permissions: ['read', 'write'],
-            auditRequired: false,
-            complianceFlags: [],
+            authenticationLevel: 'basic',permissions: ['read', 'write'],auditRequired: false,complianceFlags: [],
           } as SecurityContext,
         },
         action,
-        riskLevel: 'medium',
-        streamingOptions: {
-          enableProgressUpdates: true,
+        riskLevel: 'medium',streamingOptions: {enableProgressUpdates: true,
           updateInterval: 200,
           maxUpdateCount: 5,
           compressionEnabled: false,
@@ -527,9 +355,7 @@ class ParlantIntegrationTestClient extends EventEmitter {
         },
       },
       metadata: {
-        priority: 'normal',
-        requiresAck: true,
-        compression: false,
+        priority: 'normal',requiresAck: true,compression: false,
         routingHints: ['parlant-integration'],
       },
     };
@@ -557,10 +383,7 @@ class ParlantIntegrationTestClient extends EventEmitter {
   }> {
     const tracking = this.validationTracking.get(validationId);
     if (!tracking) {
-      throw new Error(`Validation ${validationId} not found`);
-    }
-
-    const startTime = Date.now();
+      throw new Error(`Validation ${validationId} not found`);}const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {
       if (tracking.completed && tracking.response) {
@@ -581,23 +404,15 @@ class ParlantIntegrationTestClient extends EventEmitter {
     const confirmationMessage: UserConfirmationMessage = {
       type: ConversationalMessageType.USER_CONFIRMATION,
       messageId: randomUUID(),
-      sessionId: 'integration-test-session',
-      timestamp: Date.now(),
-      sequence: 2,
+      sessionId: 'integration-test-session',timestamp: Date.now(),sequence: 2,
       payload: {
         confirmationId: randomUUID(),
         validationId,
         approved,
-        reasoning: reasoning || (approved ? 'User approved action' : 'User rejected action'),
-        confidence: 0.95,
-      },
+        reasoning: reasoning || (approved ? 'User approved action' : 'User rejected action'),confidence: 0.95,},
       metadata: {
-        priority: 'high',
-        requiresAck: false,
-        compression: false,
-        routingHints: ['user-confirmation'],
-      },
-    };
+        priority: 'high',requiresAck: false,compression: false,
+        routingHints: ['user-confirmation'],},};
 
     if (this.ws && this.connected) {
       this.ws.send(JSON.stringify(confirmationMessage));
@@ -634,15 +449,7 @@ class ParlantIntegrationTestClient extends EventEmitter {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8195,
-      'PARLANT_WEBSOCKET_PORT': 8196,
-      'PARLANT_SERVICE_URL': 'http://localhost:8196',
-      'PARLANT_WEBSOCKET_URL': 'ws://localhost:8196/ws',
-      'PARLANT_API_TIMEOUT': 10000,
-      'PARLANT_RETRY_ATTEMPTS': 3,
-      'PARLANT_HEALTH_CHECK_INTERVAL': 30000,
-    };
-    return config[key] ?? defaultValue;
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8195,'PARLANT_WEBSOCKET_PORT': 8196,'PARLANT_SERVICE_URL': 'http://localhost:8196','PARLANT_WEBSOCKET_URL': 'ws://localhost:8196/ws','PARLANT_API_TIMEOUT': 10000,'PARLANT_RETRY_ATTEMPTS': 3,'PARLANT_HEALTH_CHECK_INTERVAL': 30000,};return config[key] ?? defaultValue;
   }),
 };
 
@@ -688,15 +495,7 @@ describe('PARLANT Integration Tests', () => {
     testServer = createServer();
     wsServer = createSafeWebSocketServer({ server: testServer });
 
-    wsServer.on('connection', (ws: WebSocket.WebSocket) => {
-      console.log('Integration test client connected');
-
-      ws.on('message', async (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
-
-          // Forward to PARLANT integration service
-          switch (message.type) {
+    wsServer.on('connection', (ws: WebSocket.WebSocket) => {console.log('Integration test client connected');ws.on('message', async (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;// Forward to PARLANT integration serviceswitch (message.type) {
             case ConversationalMessageType.VALIDATION_REQUEST:
               await handleValidationRequest(ws, message as ValidationRequestMessage);
               break;
@@ -719,27 +518,16 @@ describe('PARLANT Integration Tests', () => {
                   parlantIntegration: true,
                 },
                 metadata: {
-                  priority: 'normal',
-                  requiresAck: false,
-                  compression: false,
-                  routingHints: ['integration-test'],
-                },
-              };
+                  priority: 'normal',requiresAck: false,compression: false,
+                  routingHints: ['integration-test'],},};
 
               ws.send(JSON.stringify(echoResponse));
               break;
           }
         } catch (error) {
-          console.error('Integration test message error:', error);
-        }
-      });
+          console.error('Integration test message error:', error);}});
 
-      ws.on('close', () => {
-        console.log('Integration test client disconnected');
-      });
-
-      ws.on('error', (error) => {
-        console.error('Integration test client error:', error);
+      ws.on('close', () => {console.log('Integration test client disconnected');});ws.on('error', (error) => {console.error('Integration test client error:', error);
       });
     });
 
@@ -773,13 +561,9 @@ describe('PARLANT Integration Tests', () => {
                   stage: i === updateCount ? 'completed' : 'processing',
                   progress,
                   message: `PARLANT processing: ${progress.toFixed(1)}%`,
-                  status: i === updateCount ? 'completed' : 'active',
-                  estimatedTimeRemaining: i === updateCount ? 0 : (updateCount - i) * interval,
-                },
+                  status: i === updateCount ? 'completed' : 'active',estimatedTimeRemaining: i === updateCount ? 0 : (updateCount - i) * interval,},
                 metadata: {
-                  priority: 'normal',
-                  requiresAck: false,
-                  compression: false,
+                  priority: 'normal',requiresAck: false,compression: false,
                   routingHints: ['parlant-progress'],
                 },
               };
@@ -806,42 +590,27 @@ describe('PARLANT Integration Tests', () => {
               requiresUserConfirmation: false,
               metadata: {
                 parlantProcessingTime: parlantResponse.data.processingTime,
-                parlantService: 'mock-parlant-v1.0.0',
-                integrationLatency: Date.now() - request.timestamp,
-              },
+                parlantService: 'mock-parlant-v1.0.0',integrationLatency: Date.now() - request.timestamp,},
             },
             metadata: {
-              priority: 'high',
-              requiresAck: false,
-              compression: false,
-              routingHints: ['parlant-validation-response'],
-            },
-          };
+              priority: 'high',requiresAck: false,compression: false,
+              routingHints: ['parlant-validation-response'],},};
 
           ws.send(JSON.stringify(validationResponse));
         }, (streamingOptions?.maxUpdateCount || 3) * (streamingOptions?.updateInterval || 200) + 100);
 
       } catch (error) {
-        console.error('PARLANT integration error:', error);
-
-        const errorResponse: ConversationalMessage = {
-          type: ConversationalMessageType.ERROR,
+        console.error('PARLANT integration error:', error);const errorResponse: ConversationalMessage = {type: ConversationalMessageType.ERROR,
           messageId: randomUUID(),
           sessionId: request.sessionId,
           timestamp: Date.now(),
           sequence: request.sequence + 1,
           payload: {
-            error: 'PARLANT service unavailable',
-            details: error.message,
-            validationId,
+            error: 'PARLANT service unavailable',details: error.message,validationId,
           },
           metadata: {
-            priority: 'high',
-            requiresAck: false,
-            compression: false,
-            routingHints: ['error'],
-          },
-        };
+            priority: 'high',requiresAck: false,compression: false,
+            routingHints: ['error'],},};
 
         ws.send(JSON.stringify(errorResponse));
       }
@@ -856,18 +625,12 @@ describe('PARLANT Integration Tests', () => {
         sequence: confirmation.sequence + 1,
         payload: {
           validationId: confirmation.payload.validationId,
-          result: confirmation.payload.approved ? 'approved' : 'rejected',
-          finalDecision: confirmation.payload.approved,
-          userReasoning: confirmation.payload.reasoning,
+          result: confirmation.payload.approved ? 'approved' : 'rejected',finalDecision: confirmation.payload.approved,userReasoning: confirmation.payload.reasoning,
           parlantIntegration: true,
         },
         metadata: {
-          priority: 'high',
-          requiresAck: false,
-          compression: false,
-          routingHints: ['confirmation-result'],
-        },
-      };
+          priority: 'high',requiresAck: false,compression: false,
+          routingHints: ['confirmation-result'],},};
 
       ws.send(JSON.stringify(result));
     }
@@ -897,19 +660,14 @@ describe('PARLANT Integration Tests', () => {
 
   // ===== PARLANT SERVICE INTEGRATION =====
 
-  describe('PARLANT Service Integration', () => {
-    it('should detect PARLANT service availability', async () => {
+  describe('PARLANT Service Integration', () => {it('should detect PARLANT service availability', async () => {
       try {
         const healthResponse = await axios.get(`http://localhost:${PARLANT_PORT}/health`, {
           timeout: 5000,
         });
 
         expect(healthResponse.status).toBe(200);
-        expect(healthResponse.data.status).toBe('healthy');
-        expect(healthResponse.data.service).toBe('parlant-mock');
-        expect(healthResponse.data.capabilities).toContain('validation');
-
-        console.log('PARLANT Service Health Check:', {
+        expect(healthResponse.data.status).toBe('healthy');expect(healthResponse.data.service).toBe('parlant-mock');expect(healthResponse.data.capabilities).toContain('validation');console.log('PARLANT Service Health Check:', {
           status: healthResponse.data.status,
           service: healthResponse.data.service,
           version: healthResponse.data.version,
@@ -925,17 +683,10 @@ describe('PARLANT Integration Tests', () => {
 
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('PARLANT WebSocket connection timeout'));
-        }, 5000);
-
-        parlantWs.on('open', () => {
-          clearTimeout(timeout);
-          resolve();
+          reject(new Error('PARLANT WebSocket connection timeout'));}, 5000);parlantWs.on('open', () => {clearTimeout(timeout);resolve();
         });
 
-        parlantWs.on('error', (error) => {
-          clearTimeout(timeout);
-          reject(error);
+        parlantWs.on('error', (error) => {clearTimeout(timeout);reject(error);
         });
       });
 
@@ -944,37 +695,19 @@ describe('PARLANT Integration Tests', () => {
       parlantWs.close();
     });
 
-    it('should handle PARLANT service communication errors gracefully', async () => {
-      // Test with invalid PARLANT endpoint
-      try {
-        await axios.post('http://localhost:99999/api/validate', {
-          validationId: 'test',
-          action: { actionType: 'test' },
-        }, { timeout: 1000 });
-
-        fail('Should have thrown connection error');
-      } catch (error) {
-        expect(error.code).toMatch(/ECONNREFUSED|TIMEOUT/);
+    it('should handle PARLANT service communication errors gracefully', async () => {// Test with invalid PARLANT endpointtry {
+        await axios.post('http://localhost:99999/api/validate', {validationId: 'test',action: { actionType: 'test' },}, { timeout: 1000 });fail('Should have thrown connection error');} catch (error) {expect(error.code).toMatch(/ECONNREFUSED|TIMEOUT/);
       }
     });
   });
 
   // ===== REAL-TIME VALIDATION WORKFLOWS =====
 
-  describe('Real-time Validation Workflows', () => {
-    it('should complete end-to-end validation workflow with PARLANT', async () => {
-      const client = new ParlantIntegrationTestClient(TEST_URL);
-      await client.connect();
+  describe('Real-time Validation Workflows', () => {it('should complete end-to-end validation workflow with PARLANT', async () => {const client = new ParlantIntegrationTestClient(TEST_URL);await client.connect();
 
       const testAction: ValidationAction = {
-        actionType: 'file_read',
-        parameters: { path: '/tmp/test.txt', encoding: 'utf8' },
-        expectedOutcome: 'File content read successfully',
-        reversible: true,
-        impact: {
-          scope: 'local',
-          dataAccess: true,
-          stateChanges: false,
+        actionType: 'file_read',parameters: { path: '/tmp/test.txt', encoding: 'utf8' },expectedOutcome: 'File content read successfully',reversible: true,impact: {
+          scope: 'local',dataAccess: true,stateChanges: false,
           userInteraction: false,
         } as ActionImpact,
       };
@@ -1001,22 +734,11 @@ describe('PARLANT Integration Tests', () => {
       await client.disconnect();
     });
 
-    it('should handle progressive validation streaming with PARLANT', async () => {
-      const client = new ParlantIntegrationTestClient(TEST_URL);
-      await client.connect();
+    it('should handle progressive validation streaming with PARLANT', async () => {const client = new ParlantIntegrationTestClient(TEST_URL);await client.connect();
 
       const complexAction: ValidationAction = {
-        actionType: 'system_configuration_change',
-        parameters: {
-          configFile: '/etc/app/config.yaml',
-          changes: { logging: { level: 'debug' } },
-        },
-        expectedOutcome: 'Configuration updated successfully',
-        reversible: true,
-        impact: {
-          scope: 'system',
-          dataAccess: false,
-          stateChanges: true,
+        actionType: 'system_configuration_change',parameters: {configFile: '/etc/app/config.yaml',changes: { logging: { level: 'debug' } },},expectedOutcome: 'Configuration updated successfully',reversible: true,impact: {
+          scope: 'system',dataAccess: false,stateChanges: true,
           userInteraction: false,
         } as ActionImpact,
       };
@@ -1044,44 +766,24 @@ describe('PARLANT Integration Tests', () => {
       await client.disconnect();
     });
 
-    it('should correlate validation responses with original requests', async () => {
-      const client = new ParlantIntegrationTestClient(TEST_URL);
-      await client.connect();
+    it('should correlate validation responses with original requests', async () => {const client = new ParlantIntegrationTestClient(TEST_URL);await client.connect();
 
       const actions: ValidationAction[] = [
         {
-          actionType: 'data_export',
-          parameters: { format: 'csv', destination: '/tmp/export.csv' },
-          expectedOutcome: 'Data exported successfully',
-          reversible: false,
-          impact: {
-            scope: 'local',
-            dataAccess: true,
-            stateChanges: false,
+          actionType: 'data_export',parameters: { format: 'csv', destination: '/tmp/export.csv' },expectedOutcome: 'Data exported successfully',reversible: false,impact: {
+            scope: 'local',dataAccess: true,stateChanges: false,
             userInteraction: false,
           } as ActionImpact,
         },
         {
-          actionType: 'database_query',
-          parameters: { query: 'SELECT * FROM users LIMIT 10' },
-          expectedOutcome: 'Query executed successfully',
-          reversible: true,
-          impact: {
-            scope: 'local',
-            dataAccess: true,
-            stateChanges: false,
+          actionType: 'database_query',parameters: { query: 'SELECT * FROM users LIMIT 10' },expectedOutcome: 'Query executed successfully',reversible: true,impact: {
+            scope: 'local',dataAccess: true,stateChanges: false,
             userInteraction: false,
           } as ActionImpact,
         },
         {
-          actionType: 'api_call',
-          parameters: { url: 'https://api.example.com/data', method: 'GET' },
-          expectedOutcome: 'API data retrieved',
-          reversible: true,
-          impact: {
-            scope: 'external',
-            dataAccess: true,
-            stateChanges: false,
+          actionType: 'api_call',parameters: { url: 'https://api.example.com/data', method: 'GET' },expectedOutcome: 'API data retrieved',reversible: true,impact: {
+            scope: 'external',dataAccess: true,stateChanges: false,
             userInteraction: false,
           } as ActionImpact,
         },
@@ -1118,20 +820,11 @@ describe('PARLANT Integration Tests', () => {
 
   // ===== USER INTERACTION EVENT HANDLING =====
 
-  describe('User Interaction Event Handling', () => {
-    it('should handle user confirmation events with PARLANT', async () => {
-      const client = new ParlantIntegrationTestClient(TEST_URL);
-      await client.connect();
+  describe('User Interaction Event Handling', () => {it('should handle user confirmation events with PARLANT', async () => {const client = new ParlantIntegrationTestClient(TEST_URL);await client.connect();
 
       const confirmationAction: ValidationAction = {
-        actionType: 'critical_system_operation',
-        parameters: { operation: 'restart_service', service: 'database' },
-        expectedOutcome: 'Service restarted successfully',
-        reversible: false,
-        impact: {
-          scope: 'system',
-          dataAccess: false,
-          stateChanges: true,
+        actionType: 'critical_system_operation',parameters: { operation: 'restart_service', service: 'database' },expectedOutcome: 'Service restarted successfully',reversible: false,impact: {
+          scope: 'system',dataAccess: false,stateChanges: true,
           userInteraction: true,
         } as ActionImpact,
       };
@@ -1140,14 +833,9 @@ describe('PARLANT Integration Tests', () => {
       const validationResult = await client.waitForValidationCompletion(validationId);
 
       // Send user confirmation
-      await client.sendUserConfirmation(validationId, true, 'User confirmed critical operation');
+      await client.sendUserConfirmation(validationId, true, 'User confirmed critical operation');// Wait for confirmation resultawait new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Wait for confirmation result
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      console.log('User Confirmation Results:', {
-        validationId,
-        initialApproval: validationResult.response.payload.approved,
+      console.log('User Confirmation Results:', {validationId,initialApproval: validationResult.response.payload.approved,
         userConfirmationSent: true,
         parlantProcessingTime: validationResult.response.payload.metadata?.parlantProcessingTime,
         integrationLatency: validationResult.response.payload.metadata?.integrationLatency,
@@ -1159,19 +847,11 @@ describe('PARLANT Integration Tests', () => {
       await client.disconnect();
     });
 
-    it('should handle rejection scenarios appropriately', async () => {
-      const client = new ParlantIntegrationTestClient(TEST_URL);
-      await client.connect();
+    it('should handle rejection scenarios appropriately', async () => {const client = new ParlantIntegrationTestClient(TEST_URL);await client.connect();
 
       const dangerousAction: ValidationAction = {
-        actionType: 'delete_all_data',
-        parameters: { confirm: true, backup: false },
-        expectedOutcome: 'All data deleted',
-        reversible: false,
-        impact: {
-          scope: 'system',
-          dataAccess: true,
-          stateChanges: true,
+        actionType: 'delete_all_data',parameters: { confirm: true, backup: false },expectedOutcome: 'All data deleted',reversible: false,impact: {
+          scope: 'system',dataAccess: true,stateChanges: true,
           userInteraction: true,
         } as ActionImpact,
       };
@@ -1183,12 +863,7 @@ describe('PARLANT Integration Tests', () => {
       await client.sendUserConfirmation(
         validationId,
         false,
-        'Action too dangerous - user rejected'
-      );
-
-      console.log('Rejection Handling Results:', {
-        validationId,
-        actionType: dangerousAction.actionType,
+        'Action too dangerous - user rejected');console.log('Rejection Handling Results:', {validationId,actionType: dangerousAction.actionType,
         initialApproval: validationResult.response.payload.approved,
         userRejectionSent: true,
         parlantReasoning: validationResult.response.payload.reasoning,
@@ -1203,20 +878,15 @@ describe('PARLANT Integration Tests', () => {
 
   // ===== PERFORMANCE AND RELIABILITY =====
 
-  describe('Performance and Reliability', () => {
-    it('should maintain sub-1000ms validation response times', async () => {
+  describe('Performance and Reliability', () => {it('should maintain sub-1000ms validation response times', async () => {
       const client = new ParlantIntegrationTestClient(TEST_URL);
       await client.connect();
 
       const performanceActions: ValidationAction[] = Array.from({ length: 10 }, (_, i) => ({
-        actionType: `performance_test_${i}`,
-        parameters: { index: i, timestamp: Date.now() },
-        expectedOutcome: `Test action ${i} completed`,
+        actionType: `performance_test_${i}`,parameters: { index: i, timestamp: Date.now() },expectedOutcome: `Test action ${i} completed`,
         reversible: true,
         impact: {
-          scope: 'local',
-          dataAccess: false,
-          stateChanges: false,
+          scope: 'local',dataAccess: false,stateChanges: false,
           userInteraction: false,
         } as ActionImpact,
       }));
@@ -1239,12 +909,8 @@ describe('PARLANT Integration Tests', () => {
 
       console.log('Performance Test Results:', {
         totalValidations: performanceResults.length,
-        averageDuration: `${averageDuration.toFixed(0)}ms`,
-        maxDuration: `${maxDuration.toFixed(0)}ms`,
-        successRate: `${(successRate * 100).toFixed(1)}%`,
-        target: '1000ms average',
-        parlantMetrics: mockParlantService.getMetrics(),
-      });
+        averageDuration: `${averageDuration.toFixed(0)}ms`,maxDuration: `${maxDuration.toFixed(0)}ms`,successRate: `${(successRate * 100).toFixed(1)}%`,
+        target: '1000ms average',parlantMetrics: mockParlantService.getMetrics(),});
 
       expect(averageDuration).toBeLessThan(2000); // Adjusted for test environment
       expect(maxDuration).toBeLessThan(5000); // Max under 5 seconds
@@ -1253,9 +919,7 @@ describe('PARLANT Integration Tests', () => {
       await client.disconnect();
     });
 
-    it('should handle concurrent validation requests efficiently', async () => {
-      const clients: ParlantIntegrationTestClient[] = [];
-      const concurrentValidations = 5;
+    it('should handle concurrent validation requests efficiently', async () => {const clients: ParlantIntegrationTestClient[] = [];const concurrentValidations = 5;
 
       // Create multiple clients
       for (let i = 0; i < concurrentValidations; i++) {
@@ -1265,14 +929,8 @@ describe('PARLANT Integration Tests', () => {
       }
 
       const concurrentAction: ValidationAction = {
-        actionType: 'concurrent_test',
-        parameters: { concurrency: true },
-        expectedOutcome: 'Concurrent validation completed',
-        reversible: true,
-        impact: {
-          scope: 'local',
-          dataAccess: false,
-          stateChanges: false,
+        actionType: 'concurrent_test',parameters: { concurrency: true },expectedOutcome: 'Concurrent validation completed',reversible: true,impact: {
+          scope: 'local',dataAccess: false,stateChanges: false,
           userInteraction: false,
         } as ActionImpact,
       };
@@ -1289,8 +947,7 @@ describe('PARLANT Integration Tests', () => {
 
       console.log('Concurrent Validation Results:', {
         concurrentValidations,
-        totalCompletionTime: `${totalTime.toFixed(0)}ms`,
-        averagePerValidation: `${(totalTime / concurrentValidations).toFixed(0)}ms`,
+        totalCompletionTime: `${totalTime.toFixed(0)}ms`,averagePerValidation: `${(totalTime / concurrentValidations).toFixed(0)}ms`,
         allCompleted: results.length === concurrentValidations,
         parlantMetrics: mockParlantService.getMetrics(),
       });

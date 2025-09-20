@@ -26,16 +26,7 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { performance } from 'perf_hooks';
-import { createHash } from 'crypto';
-import { RiskLevel } from '../parlant-integration.service';
-
-// ===== INVALIDATION INTERFACES =====
-
-/**
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';import { performance } from 'perf_hooks';import { createHash } from 'crypto';import { RiskLevel } from '../parlant-integration.service';// ===== INVALIDATION INTERFACES =====/**
  * Cache Invalidation Configuration
  */
 export interface CacheInvalidationConfig {
@@ -81,15 +72,10 @@ export interface ScheduledInterval {
   readonly name: string;
   readonly cronExpression: string;
   readonly patterns: string[];
-  readonly priority: 'low' | 'medium' | 'high';
-}
-
-export interface PatternMatchingConfig {
+  readonly priority: 'low' | 'medium' | 'high';}export interface PatternMatchingConfig {
   readonly wildcard: {
     readonly enabled: boolean;
-    readonly operators: string[]; // ['*', '?', '[]', '{}']
-  };
-  readonly regex: {
+    readonly operators: string[]; // ['*', '?', '[]', '{}']};readonly regex: {
     readonly enabled: boolean;
     readonly timeout: number; // prevent ReDoS
     readonly maxLength: number;
@@ -97,26 +83,18 @@ export interface PatternMatchingConfig {
   readonly semantic: {
     readonly enabled: boolean;
     readonly similarity: number; // threshold
-    readonly algorithm: 'cosine' | 'jaccard' | 'levenshtein';
-  };
-}
+    readonly algorithm: 'cosine' | 'jaccard' | 'levenshtein';};}
 
 export interface DependencyConfig {
   readonly tracking: {
     readonly enabled: boolean;
     readonly maxDependencies: number;
-    readonly storage: 'memory' | 'redis' | 'database';
-  };
-  readonly resolution: {
-    readonly strategy: 'breadth-first' | 'depth-first';
-    readonly maxDepth: number;
-    readonly timeout: number;
+    readonly storage: 'memory' | 'redis' | 'database';};readonly resolution: {
+    readonly strategy: 'breadth-first' | 'depth-first';readonly maxDepth: number;readonly timeout: number;
   };
   readonly circular: {
     readonly detection: boolean;
-    readonly handling: 'error' | 'break' | 'warn';
-  };
-}
+    readonly handling: 'error' | 'break' | 'warn';};}
 
 export interface EventConfig {
   readonly sources: EventSourceConfig[];
@@ -134,18 +112,11 @@ export interface EventConfig {
 
 export interface EventSourceConfig {
   readonly name: string;
-  readonly type: 'user_permission' | 'system_config' | 'data_change' | 'security_update';
-  readonly priority: number;
-  readonly patterns: string[];
-  readonly invalidationStrategy: 'immediate' | 'lazy' | 'scheduled';
-}
-
-export interface EventFilterRule {
+  readonly type: 'user_permission' | 'system_config' | 'data_change' | 'security_update';readonly priority: number;readonly patterns: string[];
+  readonly invalidationStrategy: 'immediate' | 'lazy' | 'scheduled';}export interface EventFilterRule {
   readonly name: string;
   readonly condition: string; // JSONPath or similar
-  readonly action: 'include' | 'exclude' | 'modify';
-  readonly parameters?: Record<string, unknown>;
-}
+  readonly action: 'include' | 'exclude' | 'modify';readonly parameters?: Record<string, unknown>;}
 
 export interface InvalidationPerformanceConfig {
   readonly batching: {
@@ -188,24 +159,13 @@ export interface InvalidationRequest {
   readonly strategy: InvalidationStrategy;
   readonly target: InvalidationTarget;
   readonly context: InvalidationContext;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
-  readonly metadata: Record<string, unknown>;
-}
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly metadata: Record<string, unknown>;}
 
-export type InvalidationStrategy = 'immediate' | 'lazy' | 'scheduled' | 'predictive' | 'dependency';
-
-export interface InvalidationTarget {
-  readonly type: 'key' | 'pattern' | 'function' | 'user' | 'session' | 'risk_level';
-  readonly value: string | string[];
-  readonly scope: 'L1' | 'L2' | 'L3' | 'all';
-  readonly conditions?: InvalidationCondition[];
-}
+export type InvalidationStrategy = 'immediate' | 'lazy' | 'scheduled' | 'predictive' | 'dependency';export interface InvalidationTarget {readonly type: 'key' | 'pattern' | 'function' | 'user' | 'session' | 'risk_level';readonly value: string | string[];readonly scope: 'L1' | 'L2' | 'L3' | 'all';readonly conditions?: InvalidationCondition[];}
 
 export interface InvalidationCondition {
   readonly field: string;
-  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'in' | 'contains' | 'matches';
-  readonly value: unknown;
-}
+  readonly operator: 'eq' | 'ne' | 'gt' | 'lt' | 'in' | 'contains' | 'matches';readonly value: unknown;}
 
 export interface InvalidationContext {
   readonly requestId: string;
@@ -214,9 +174,7 @@ export interface InvalidationContext {
   readonly functionName?: string;
   readonly riskLevel?: RiskLevel;
   readonly timestamp: Date;
-  readonly source: 'manual' | 'automatic' | 'event' | 'predicted';
-  readonly reason: string;
-}
+  readonly source: 'manual' | 'automatic' | 'event' | 'predicted';readonly reason: string;}
 
 /**
  * Invalidation Result
@@ -229,9 +187,7 @@ export interface InvalidationResult {
   readonly errors: InvalidationError[];
   readonly performance: {
     readonly duration: number;
-    readonly cacheLevel: ('L1' | 'L2' | 'L3')[];
-    readonly batchSize?: number;
-    readonly parallelWorkers?: number;
+    readonly cacheLevel: ('L1' | 'L2' | 'L3')[];readonly batchSize?: number;readonly parallelWorkers?: number;
   };
   readonly dependencies?: {
     readonly triggered: string[];
@@ -241,9 +197,7 @@ export interface InvalidationResult {
 }
 
 export interface InvalidationError {
-  readonly level: 'L1' | 'L2' | 'L3';
-  readonly type: string;
-  readonly message: string;
+  readonly level: 'L1' | 'L2' | 'L3';readonly type: string;readonly message: string;
   readonly key?: string;
   readonly retryable: boolean;
 }
@@ -259,9 +213,7 @@ export interface CacheDependency {
     readonly createdAt: Date;
     readonly lastUsed: Date;
     readonly strength: number; // 0-1, strength of dependency
-    readonly type: 'functional' | 'data' | 'user' | 'session';
-  };
-}
+    readonly type: 'functional' | 'data' | 'user' | 'session';};}
 
 /**
  * Invalidation Analytics
@@ -274,9 +226,7 @@ export interface InvalidationAnalytics {
     readonly strategiesUsed: Record<InvalidationStrategy, number>;
   };
   readonly performance: {
-    readonly cacheLevel: Record<'L1' | 'L2' | 'L3', {
-      readonly requests: number;
-      readonly success: number;
+    readonly cacheLevel: Record<'L1' | 'L2' | 'L3', {readonly requests: number;readonly success: number;
       readonly avgDuration: number;
     }>;
     readonly patterns: Array<{
@@ -351,13 +301,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<void> {
-    const operationId = `invalidation_init${Date.now()}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing cache invalidation service...`);
-
-      // Start background processing
-      this.startBackgroundProcessing();
+    const operationId = `invalidation_init${Date.now()}`;try {this.logger.log(`[${operationId}] Initializing cache invalidation service...`);// Start background processingthis.startBackgroundProcessing();
 
       // Initialize dependency tracking
       if (this.config.dependencies.tracking.enabled) {
@@ -379,12 +323,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
         this.startAnalyticsCollection();
       }
 
-      this.logger.log(`[${operationId}] Cache invalidation service initialized successfully`);
-
-    } catch (error) {
-      this.logger.error(`[${operationId}] Invalidation service initialization failed:`, error);
-      throw error;
-    }
+      this.logger.log(`[${operationId}] Cache invalidation service initialized successfully`);} catch (error) {this.logger.error(`[${operationId}] Invalidation service initialization failed:`, error);throw error;}
   }
 
   // ===== PUBLIC INVALIDATION INTERFACE =====
@@ -393,10 +332,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
    * Invalidate cache entries using specified strategy
    */
   async invalidate(request: InvalidationRequest): Promise<InvalidationResult> {
-    const operationId = `invalidate${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();
-
-    try {
+    const operationId = `invalidate${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();try {
       this.logger.debug(`[${operationId}] Processing invalidation request:`, {
         strategy: request.strategy,
         target: request.target,
@@ -409,26 +345,15 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       // Route to appropriate strategy handler
       let result: InvalidationResult;
       switch (request.strategy) {
-        case 'immediate':
-          result = await this.handleImmediateInvalidation(request);
-          break;
-        case 'lazy':
-          result = await this.handleLazyInvalidation(request);
-          break;
-        case 'scheduled':
-          result = await this.handleScheduledInvalidation(request);
-          break;
-        case 'predictive':
-          result = await this.handlePredictiveInvalidation(request);
-          break;
+        case 'immediate':result = await this.handleImmediateInvalidation(request);break;
+        case 'lazy':result = await this.handleLazyInvalidation(request);break;
+        case 'scheduled':result = await this.handleScheduledInvalidation(request);break;
+        case 'predictive':result = await this.handlePredictiveInvalidation(request);break;
         case 'dependency':
           result = await this.handleDependencyInvalidation(request);
           break;
         default:
-          throw new Error(`Unsupported invalidation strategy: ${request.strategy}`);
-      }
-
-      // Update analytics
+          throw new Error(`Unsupported invalidation strategy: ${request.strategy}`);}// Update analytics
       this.recordInvalidationResult(request, result);
 
       // Update prediction model
@@ -437,20 +362,14 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       }
 
       const totalDuration = performance.now() - startTime;
-      this.logger.debug(`[${operationId}] Invalidation completed:`, {
-        strategy: request.strategy,
-        invalidatedCount: result.invalidatedCount,
-        duration: `${totalDuration.toFixed(2)}ms`,
-        success: result.success,
-      });
+      this.logger.debug(`[${operationId}] Invalidation completed:`, {strategy: request.strategy,invalidatedCount: result.invalidatedCount,
+        duration: `${totalDuration.toFixed(2)}ms`,success: result.success,});
 
       return result;
 
     } catch (error) {
       const totalDuration = performance.now() - startTime;
-      this.logger.error(`[${operationId}] Invalidation error:`, {
-        error: error instanceof Error ? error.message : String(error),
-        request,
+      this.logger.error(`[${operationId}] Invalidation error:`, {error: error instanceof Error ? error.message : String(error),request,
         duration: `${totalDuration.toFixed(2)}ms`,
       });
 
@@ -460,10 +379,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
         strategy: request.strategy,
         invalidatedCount: 0,
         errors: [{
-          level: 'L1',
-          type: 'InvalidationError',
-          message: error instanceof Error ? error.message : String(error),
-          retryable: true,
+          level: 'L1',type: 'InvalidationError',message: error instanceof Error ? error.message : String(error),retryable: true,
         }],
         performance: {
           duration: totalDuration,
@@ -480,18 +396,13 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     pattern: string,
     options: {
       strategy?: InvalidationStrategy;
-      scope?: 'L1' | 'L2' | 'L3' | 'all';
-      priority?: 'low' | 'medium' | 'high' | 'critical';
+      scope?: 'L1' | 'L2' | 'L3' | 'all';priority?: 'low' | 'medium' | 'high' | 'critical';
       context?: Partial<InvalidationContext>;
     } = {}
   ): Promise<InvalidationResult> {
     const request: InvalidationRequest = {
       id: `pattern_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      strategy: options.strategy || 'immediate',
-      target: {
-        type: 'pattern',
-        value: pattern,
-        scope: options.scope || 'all',
+      strategy: options.strategy || 'immediate',target: {type: 'pattern',value: pattern,scope: options.scope || 'all',
       },
       context: {
         requestId: `pattern_request_${Date.now()}`,
@@ -521,14 +432,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
   ): Promise<InvalidationResult> {
     const request: InvalidationRequest = {
       id: `function_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      strategy: options.strategy || (options.includeDependencies ? 'dependency' : 'immediate'),
-      target: {
-        type: 'function',
-        value: functionName,
-        scope: 'all',
-        conditions: options.riskLevel ? [{
-          field: 'riskLevel',
-          operator: 'eq',
+      strategy: options.strategy || (options.includeDependencies ? 'dependency' : 'immediate'),target: {type: 'function',value: functionName,scope: 'all',conditions: options.riskLevel ? [{field: 'riskLevel',operator: 'eq',
           value: options.riskLevel,
         }] : undefined,
       },
@@ -536,9 +440,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
         requestId: `function_request_${Date.now()}`,
         timestamp: new Date(),
         source: 'manual',
-        reason: `Function invalidation: ${functionName}`,
-        functionName,
-        riskLevel: options.riskLevel,
+        reason: `Function invalidation: ${functionName}`,functionName,riskLevel: options.riskLevel,
         userId: options.userId,
       },
       priority: this.determinePriorityByRisk(options.riskLevel),
@@ -561,11 +463,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
   ): Promise<InvalidationResult> {
     const request: InvalidationRequest = {
       id: `user_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      strategy: options.strategy || 'immediate',
-      target: {
-        type: 'user',
-        value: userId,
-        scope: 'all',
+      strategy: options.strategy || 'immediate',target: {type: 'user',value: userId,scope: 'all',
       },
       context: {
         requestId: `user_request_${Date.now()}`,
@@ -585,14 +483,8 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
    * Batch invalidation for performance optimization
    */
   async batchInvalidate(requests: InvalidationRequest[]): Promise<InvalidationResult[]> {
-    const operationId = `batch_invalidate${Date.now()}`;
-    const startTime = performance.now();
-
-    try {
-      this.logger.log(`[${operationId}] Processing batch invalidation: ${requests.length} requests`);
-
-      // Group requests by strategy and priority
-      const groupedRequests = this.groupInvalidationRequests(requests);
+    const operationId = `batch_invalidate${Date.now()}`;const startTime = performance.now();try {
+      this.logger.log(`[${operationId}] Processing batch invalidation: ${requests.length} requests`);// Group requests by strategy and priorityconst groupedRequests = this.groupInvalidationRequests(requests);
 
       // Process groups in parallel with priority ordering
       const results: InvalidationResult[] = [];
@@ -604,14 +496,8 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       }
 
       const totalDuration = performance.now() - startTime;
-      this.logger.log(`[${operationId}] Batch invalidation completed:`, {
-        totalRequests: requests.length,
-        totalInvalidated: results.reduce((sum, r) => sum + r.invalidatedCount, 0),
-        duration: `${totalDuration.toFixed(2)}ms`,
-        successRate: `${(results.filter(r => r.success).length / results.length * 100).toFixed(1)}%`,
-      });
-
-      return results;
+      this.logger.log(`[${operationId}] Batch invalidation completed:`, {totalRequests: requests.length,totalInvalidated: results.reduce((sum, r) => sum + r.invalidatedCount, 0),
+        duration: `${totalDuration.toFixed(2)}ms`,successRate: `${(results.filter(r => r.success).length / results.length * 100).toFixed(1)}%`,});return results;
 
     } catch (error) {
       this.logger.error(`[${operationId}] Batch invalidation error:`, error);
@@ -626,9 +512,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     key: string,
     dependsOn: string | string[],
     metadata: {
-      type?: 'functional' | 'data' | 'user' | 'session';
-      strength?: number;
-    } = {}
+      type?: 'functional' | 'data' | 'user' | 'session';strength?: number;} = {}
   ): Promise<void> {
     if (!this.config.dependencies.tracking.enabled) return;
 
@@ -645,9 +529,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
           createdAt: new Date(),
           lastUsed: new Date(),
           strength: metadata.strength || 1.0,
-          type: metadata.type || 'functional',
-        },
-      };
+          type: metadata.type || 'functional',},};
       this.dependencyGraph.set(key, dependency);
     }
 
@@ -679,7 +561,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       }
     }
 
-    this.logger.debug(`Registered dependency: ${key} depends on [${dependencies.join(', ')}]`);
+    this.logger.debug(`Registered dependency: ${key} depends on [${dependencies.join(`, ')}]`);
   }
 
   /**
@@ -707,45 +589,26 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
   // ===== EVENT-DRIVEN INVALIDATION =====
 
-  @OnEvent('user.permission.changed')
-  async handleUserPermissionChange(event: { userId: string; permissions: string[] }): Promise<void> {
-    this.logger.debug('Handling user permission change event', event);
+  @OnEvent('user.permission.changed')async handleUserPermissionChange(event: { userId: string; permissions: string[] }): Promise<void> {this.logger.debug('Handling user permission change event', event);await this.invalidateByUser(event.userId, {strategy: 'immediate',reason: 'User permissions changed',});}
 
-    await this.invalidateByUser(event.userId, {
-      strategy: 'immediate',
-      reason: 'User permissions changed',
-    });
-  }
-
-  @OnEvent('system.config.updated')
-  async handleSystemConfigUpdate(event: { configKey: string; value: unknown }): Promise<void> {
-    this.logger.debug('Handling system config update event', event);
+  @OnEvent('system.config.updated')async handleSystemConfigUpdate(event: { configKey: string; value: unknown }): Promise<void> {this.logger.debug('Handling system config update event', event);
 
     // Invalidate cache entries that might be affected by config changes
     const pattern = `*:${event.configKey}:*`;
     await this.invalidateByPattern(pattern, {
-      strategy: 'immediate',
-      priority: 'high',
+      strategy: 'immediate',priority: 'high',
       context: {
         reason: `System config updated: ${event.configKey}`,
-        source: 'event',
-      },
-    });
+        source: 'event',},});
   }
 
-  @OnEvent('security.threat.detected')
-  async handleSecurityThreat(event: { threatType: string; affectedUsers?: string[] }): Promise<void> {
-    this.logger.warn('Handling security threat event', event);
+  @OnEvent('security.threat.detected')async handleSecurityThreat(event: { threatType: string; affectedUsers?: string[] }): Promise<void> {this.logger.warn('Handling security threat event', event);
 
     if (event.affectedUsers) {
       // Invalidate specific users
       const requests = event.affectedUsers.map(userId => ({
         id: `security_${Date.now()}_${userId}`,
-        strategy: 'immediate' as InvalidationStrategy,
-        target: {
-          type: 'user' as const,
-          value: userId,
-          scope: 'all' as const,
+        strategy: 'immediate' as InvalidationStrategy,target: {type: 'user' as const,value: userId,scope: 'all' as const,
         },
         context: {
           requestId: `security_request_${Date.now()}`,
@@ -754,21 +617,15 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
           reason: `Security threat detected: ${event.threatType}`,
           userId,
         },
-        priority: 'critical' as const,
-        metadata: { threatType: event.threatType },
-      }));
+        priority: 'critical' as const,metadata: { threatType: event.threatType },}));
 
       await this.batchInvalidate(requests);
     } else {
       // Global security invalidation
-      await this.invalidateByPattern('*', {
-        strategy: 'immediate',
-        priority: 'critical',
+      await this.invalidateByPattern('*', {strategy: 'immediate',priority: 'critical',
         context: {
           reason: `Global security threat: ${event.threatType}`,
-          source: 'event',
-        },
-      });
+          source: 'event',},});
     }
   }
 
@@ -778,144 +635,47 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     return {
       strategies: {
         immediate: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_IMMEDIATE_ENABLED', true),
-          maxConcurrent: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_MAX_CONCURRENT', 10),
-          timeoutMs: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_TIMEOUT', 5000),
-          retryAttempts: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_RETRIES', 3),
-        },
-        lazy: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_LAZY_ENABLED', true),
-          maxAge: this.configService.get<number>('CACHE_INVALIDATION_LAZY_MAX_AGE', 300), // 5 minutes
-          batchSize: this.configService.get<number>('CACHE_INVALIDATION_LAZY_BATCH_SIZE', 100),
-        },
-        scheduled: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_SCHEDULED_ENABLED', true),
-          intervals: [
-            {
-              name: 'hourly_cleanup',
-              cronExpression: '0 * * * *', // Every hour
-              patterns: ['*:expired:*', '*:temp:*'],
-              priority: 'low',
-            },
-            {
-              name: 'daily_maintenance',
-              cronExpression: '0 2 * * *', // 2 AM daily
-              patterns: ['*:old:*', '*:stale:*'],
-              priority: 'medium',
-            },
-          ],
-          maxBatchSize: this.configService.get<number>('CACHE_INVALIDATION_SCHEDULED_MAX_BATCH', 1000),
-        },
-        predictive: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_PREDICTIVE_ENABLED', false),
-          modelThreshold: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_THRESHOLD', 0.8),
-          lookAheadMinutes: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_LOOKAHEAD', 30),
-          maxPredictions: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_MAX', 100),
-        },
-        dependency: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_ENABLED', true),
-          maxDepth: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX_DEPTH', 5),
-          circularDetection: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_CIRCULAR_DETECTION', true),
-        },
-      },
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_IMMEDIATE_ENABLED', true),maxConcurrent: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_MAX_CONCURRENT', 10),timeoutMs: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_TIMEOUT', 5000),retryAttempts: this.configService.get<number>('CACHE_INVALIDATION_IMMEDIATE_RETRIES', 3),},lazy: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_LAZY_ENABLED', true),maxAge: this.configService.get<number>('CACHE_INVALIDATION_LAZY_MAX_AGE', 300), // 5 minutesbatchSize: this.configService.get<number>('CACHE_INVALIDATION_LAZY_BATCH_SIZE', 100),},scheduled: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_SCHEDULED_ENABLED', true),intervals: [{
+              name: 'hourly_cleanup',cronExpression: '0 * * * *', // Every hourpatterns: ['*:expired:*', '*:temp:*'],priority: 'low',},{
+              name: 'daily_maintenance',cronExpression: '0 2 * * *', // 2 AM dailypatterns: ['*:old:*', '*:stale:*'],priority: 'medium',},],
+          maxBatchSize: this.configService.get<number>('CACHE_INVALIDATION_SCHEDULED_MAX_BATCH', 1000),},predictive: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_PREDICTIVE_ENABLED', false),modelThreshold: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_THRESHOLD', 0.8),lookAheadMinutes: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_LOOKAHEAD', 30),maxPredictions: this.configService.get<number>('CACHE_INVALIDATION_PREDICTIVE_MAX', 100),},dependency: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_ENABLED', true),maxDepth: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX_DEPTH', 5),circularDetection: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_CIRCULAR_DETECTION', true),},},
       patterns: {
         wildcard: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_WILDCARD_ENABLED', true),
-          operators: ['*', '?', '[]', '{}'],
-        },
-        regex: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_REGEX_ENABLED', true),
-          timeout: this.configService.get<number>('CACHE_INVALIDATION_REGEX_TIMEOUT', 1000),
-          maxLength: this.configService.get<number>('CACHE_INVALIDATION_REGEX_MAX_LENGTH', 1000),
-        },
-        semantic: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_SEMANTIC_ENABLED', false),
-          similarity: this.configService.get<number>('CACHE_INVALIDATION_SEMANTIC_SIMILARITY', 0.8),
-          algorithm: 'cosine',
-        },
-      },
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_WILDCARD_ENABLED', true),operators: ['*', '?', '[]', '{}'],},regex: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_REGEX_ENABLED', true),timeout: this.configService.get<number>('CACHE_INVALIDATION_REGEX_TIMEOUT', 1000),maxLength: this.configService.get<number>('CACHE_INVALIDATION_REGEX_MAX_LENGTH', 1000),},semantic: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_SEMANTIC_ENABLED', false),similarity: this.configService.get<number>('CACHE_INVALIDATION_SEMANTIC_SIMILARITY', 0.8),algorithm: 'cosine',},},
       dependencies: {
         tracking: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_TRACKING_ENABLED', true),
-          maxDependencies: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX', 1000),
-          storage: 'memory',
-        },
-        resolution: {
-          strategy: 'breadth-first',
-          maxDepth: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX_DEPTH', 5),
-          timeout: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_TIMEOUT', 10000),
-        },
-        circular: {
-          detection: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_CIRCULAR_DETECTION', true),
-          handling: 'warn',
-        },
-      },
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_TRACKING_ENABLED', true),maxDependencies: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX', 1000),storage: 'memory',},resolution: {
+          strategy: 'breadth-first',maxDepth: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_MAX_DEPTH', 5),timeout: this.configService.get<number>('CACHE_INVALIDATION_DEPENDENCY_TIMEOUT', 10000),},circular: {
+          detection: this.configService.get<boolean>('CACHE_INVALIDATION_DEPENDENCY_CIRCULAR_DETECTION', true),handling: 'warn',},},
       events: {
         sources: [
           {
-            name: 'user_permission',
-            type: 'user_permission',
-            priority: 1,
-            patterns: ['*:user:*', '*:permission:*'],
-            invalidationStrategy: 'immediate',
-          },
-          {
-            name: 'system_config',
-            type: 'system_config',
-            priority: 2,
-            patterns: ['*:config:*', '*:setting:*'],
-            invalidationStrategy: 'immediate',
-          },
-          {
-            name: 'security_update',
-            type: 'security_update',
-            priority: 0, // Highest priority
-            patterns: ['*'],
-            invalidationStrategy: 'immediate',
-          },
-        ],
+            name: 'user_permission',type: 'user_permission',priority: 1,patterns: ['*:user:*', '*:permission:*'],invalidationStrategy: 'immediate',},{
+            name: 'system_config',type: 'system_config',priority: 2,patterns: ['*:config:*', '*:setting:*'],invalidationStrategy: 'immediate',},{
+            name: 'security_update',type: 'security_update',priority: 0, // Highest prioritypatterns: ['*'],invalidationStrategy: 'immediate',},],
         processing: {
-          async: this.configService.get<boolean>('CACHE_INVALIDATION_EVENT_ASYNC', true),
-          queueSize: this.configService.get<number>('CACHE_INVALIDATION_EVENT_QUEUE_SIZE', 1000),
-          batchSize: this.configService.get<number>('CACHE_INVALIDATION_EVENT_BATCH_SIZE', 50),
-          flushInterval: this.configService.get<number>('CACHE_INVALIDATION_EVENT_FLUSH_INTERVAL', 1000),
-        },
-        filtering: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_EVENT_FILTERING_ENABLED', true),
-          rules: [],
-        },
+          async: this.configService.get<boolean>('CACHE_INVALIDATION_EVENT_ASYNC', true),queueSize: this.configService.get<number>('CACHE_INVALIDATION_EVENT_QUEUE_SIZE', 1000),batchSize: this.configService.get<number>('CACHE_INVALIDATION_EVENT_BATCH_SIZE', 50),flushInterval: this.configService.get<number>('CACHE_INVALIDATION_EVENT_FLUSH_INTERVAL', 1000),},filtering: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_EVENT_FILTERING_ENABLED', true),rules: [],},
       },
       performance: {
         batching: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_BATCHING_ENABLED', true),
-          maxSize: this.configService.get<number>('CACHE_INVALIDATION_BATCHING_MAX_SIZE', 100),
-          timeoutMs: this.configService.get<number>('CACHE_INVALIDATION_BATCHING_TIMEOUT', 1000),
-          adaptive: this.configService.get<boolean>('CACHE_INVALIDATION_BATCHING_ADAPTIVE', true),
-        },
-        parallelization: {
-          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_PARALLEL_ENABLED', true),
-          maxWorkers: this.configService.get<number>('CACHE_INVALIDATION_PARALLEL_MAX_WORKERS', 5),
-          queueSize: this.configService.get<number>('CACHE_INVALIDATION_PARALLEL_QUEUE_SIZE', 500),
-        },
-        optimization: {
-          deduplicate: this.configService.get<boolean>('CACHE_INVALIDATION_DEDUPLICATE', true),
-          compress: this.configService.get<boolean>('CACHE_INVALIDATION_COMPRESS', false),
-          prefetch: this.configService.get<boolean>('CACHE_INVALIDATION_PREFETCH', false),
-        },
-      },
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_BATCHING_ENABLED', true),maxSize: this.configService.get<number>('CACHE_INVALIDATION_BATCHING_MAX_SIZE', 100),timeoutMs: this.configService.get<number>('CACHE_INVALIDATION_BATCHING_TIMEOUT', 1000),adaptive: this.configService.get<boolean>('CACHE_INVALIDATION_BATCHING_ADAPTIVE', true),},parallelization: {
+          enabled: this.configService.get<boolean>('CACHE_INVALIDATION_PARALLEL_ENABLED', true),maxWorkers: this.configService.get<number>('CACHE_INVALIDATION_PARALLEL_MAX_WORKERS', 5),queueSize: this.configService.get<number>('CACHE_INVALIDATION_PARALLEL_QUEUE_SIZE', 500),},optimization: {
+          deduplicate: this.configService.get<boolean>('CACHE_INVALIDATION_DEDUPLICATE', true),compress: this.configService.get<boolean>('CACHE_INVALIDATION_COMPRESS', false),prefetch: this.configService.get<boolean>('CACHE_INVALIDATION_PREFETCH', false),},},
       analytics: {
-        enabled: this.configService.get<boolean>('CACHE_INVALIDATION_ANALYTICS_ENABLED', true),
-        metrics: {
-          success: true,
+        enabled: this.configService.get<boolean>('CACHE_INVALIDATION_ANALYTICS_ENABLED', true),metrics: {success: true,
           latency: true,
           patterns: true,
           dependencies: true,
         },
         retention: {
-          days: this.configService.get<number>('CACHE_INVALIDATION_ANALYTICS_RETENTION_DAYS', 7),
-          aggregation: this.configService.get<boolean>('CACHE_INVALIDATION_ANALYTICS_AGGREGATION', true),
-        },
-      },
+          days: this.configService.get<number>('CACHE_INVALIDATION_ANALYTICS_RETENTION_DAYS', 7),aggregation: this.configService.get<boolean>('CACHE_INVALIDATION_ANALYTICS_AGGREGATION', true),},},
     };
   }
 
@@ -935,37 +695,18 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       const errors: InvalidationError[] = [];
 
       // Invalidate across cache levels
-      const cacheLevel: ('L1' | 'L2' | 'L3')[] = [];
-
-      if (request.target.scope === 'all' || request.target.scope === 'L1') {
-        const l1Result = await this.invalidateL1Cache(uniqueKeys);
-        invalidatedCount += l1Result.count;
+      const cacheLevel: ('L1' | 'L2' | 'L3')[] = [];if (request.target.scope === 'all' || request.target.scope === 'L1') {const l1Result = await this.invalidateL1Cache(uniqueKeys);invalidatedCount += l1Result.count;
         errors.push(...l1Result.errors);
-        if (l1Result.count > 0) cacheLevel.push('L1');
-      }
-
-      if (request.target.scope === 'all' || request.target.scope === 'L2') {
-        const l2Result = await this.invalidateL2Cache(uniqueKeys);
-        invalidatedCount += l2Result.count;
+        if (l1Result.count > 0) cacheLevel.push('L1');}if (request.target.scope === 'all' || request.target.scope === 'L2') {const l2Result = await this.invalidateL2Cache(uniqueKeys);invalidatedCount += l2Result.count;
         errors.push(...l2Result.errors);
-        if (l2Result.count > 0) cacheLevel.push('L2');
-      }
-
-      if (request.target.scope === 'all' || request.target.scope === 'L3') {
-        const l3Result = await this.invalidateL3Cache(uniqueKeys);
-        invalidatedCount += l3Result.count;
+        if (l2Result.count > 0) cacheLevel.push('L2');}if (request.target.scope === 'all' || request.target.scope === 'L3') {const l3Result = await this.invalidateL3Cache(uniqueKeys);invalidatedCount += l3Result.count;
         errors.push(...l3Result.errors);
-        if (l3Result.count > 0) cacheLevel.push('L3');
-      }
-
-      const duration = performance.now() - startTime;
+        if (l3Result.count > 0) cacheLevel.push('L3');}const duration = performance.now() - startTime;
 
       return {
         requestId: request.id,
         success: errors.length === 0,
-        strategy: 'immediate',
-        invalidatedCount,
-        errors,
+        strategy: 'immediate',invalidatedCount,errors,
         performance: {
           duration,
           cacheLevel,
@@ -977,13 +718,8 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       return {
         requestId: request.id,
         success: false,
-        strategy: 'immediate',
-        invalidatedCount: 0,
-        errors: [{
-          level: 'L1',
-          type: 'ImmediateInvalidationError',
-          message: error instanceof Error ? error.message : String(error),
-          retryable: true,
+        strategy: 'immediate',invalidatedCount: 0,errors: [{
+          level: 'L1',type: 'ImmediateInvalidationError',message: error instanceof Error ? error.message : String(error),retryable: true,
         }],
         performance: {
           duration,
@@ -1000,9 +736,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     return {
       requestId: request.id,
       success: true,
-      strategy: 'lazy',
-      invalidatedCount: 0, // Will be processed later
-      errors: [],
+      strategy: 'lazy',invalidatedCount: 0, // Will be processed latererrors: [],
       performance: {
         duration: 0,
         cacheLevel: [],
@@ -1017,9 +751,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     return {
       requestId: request.id,
       success: true,
-      strategy: 'scheduled',
-      invalidatedCount: 0, // Will be processed on schedule
-      errors: [],
+      strategy: 'scheduled',invalidatedCount: 0, // Will be processed on scheduleerrors: [],
       performance: {
         duration: 0,
         cacheLevel: [],
@@ -1048,14 +780,10 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     return {
       requestId: request.id,
       success: allErrors.length === 0,
-      strategy: 'predictive',
-      invalidatedCount: totalInvalidated,
-      errors: allErrors,
+      strategy: 'predictive',invalidatedCount: totalInvalidated,errors: allErrors,
       performance: {
         duration: maxDuration,
-        cacheLevel: ['L1', 'L2', 'L3'],
-      },
-    };
+        cacheLevel: ['L1', 'L2', 'L3'],},};
   }
 
   private async handleDependencyInvalidation(request: InvalidationRequest): Promise<InvalidationResult> {
@@ -1074,11 +802,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       const circular = this.config.dependencies.circular.detection ?
         this.detectCircularDependencies(dependencyCascade) : false;
 
-      if (circular && this.config.dependencies.circular.handling === 'error') {
-        throw new Error('Circular dependency detected in invalidation cascade');
-      }
-
-      // Execute cascade invalidation
+      if (circular && this.config.dependencies.circular.handling === 'error') {throw new Error('Circular dependency detected in invalidation cascade');}// Execute cascade invalidation
       let invalidatedCount = 0;
       const errors: InvalidationError[] = [];
 
@@ -1093,14 +817,10 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       return {
         requestId: request.id,
         success: errors.length === 0,
-        strategy: 'dependency',
-        invalidatedCount,
-        errors,
+        strategy: 'dependency',invalidatedCount,errors,
         performance: {
           duration,
-          cacheLevel: ['L1', 'L2', 'L3'],
-        },
-        dependencies: {
+          cacheLevel: ['L1', 'L2', 'L3'],},dependencies: {
           triggered: dependencyCascade.keys,
           depth: dependencyCascade.depth,
           circular,
@@ -1112,13 +832,8 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       return {
         requestId: request.id,
         success: false,
-        strategy: 'dependency',
-        invalidatedCount: 0,
-        errors: [{
-          level: 'L1',
-          type: 'DependencyInvalidationError',
-          message: error instanceof Error ? error.message : String(error),
-          retryable: false,
+        strategy: 'dependency',invalidatedCount: 0,errors: [{
+          level: 'L1',type: 'DependencyInvalidationError',message: error instanceof Error ? error.message : String(error),retryable: false,
         }],
         performance: {
           duration,
@@ -1135,8 +850,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
     const successCount = Math.floor(keys.length * 0.95); // 95% success rate
     const errors: InvalidationError[] = keys.slice(successCount).map(key => ({
-      level: 'L1',
-      type: 'L1InvalidationError',
+      level: 'L1',type: 'L1InvalidationError',
       message: `Failed to invalidate key: ${key}`,
       key,
       retryable: true,
@@ -1151,8 +865,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
     const successCount = Math.floor(keys.length * 0.90); // 90% success rate
     const errors: InvalidationError[] = keys.slice(successCount).map(key => ({
-      level: 'L2',
-      type: 'L2InvalidationError',
+      level: 'L2',type: 'L2InvalidationError',
       message: `Failed to invalidate key: ${key}`,
       key,
       retryable: true,
@@ -1167,8 +880,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
     const successCount = Math.floor(keys.length * 0.85); // 85% success rate
     const errors: InvalidationError[] = keys.slice(successCount).map(key => ({
-      level: 'L3',
-      type: 'L3InvalidationError',
+      level: 'L3',type: 'L3InvalidationError',
       message: `Failed to invalidate key: ${key}`,
       key,
       retryable: true,
@@ -1180,22 +892,10 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
   // Target Resolution
   private async resolveInvalidationTargets(target: InvalidationTarget): Promise<string[]> {
     switch (target.type) {
-      case 'key':
-        return Array.isArray(target.value) ? target.value : [target.value];
-      case 'pattern':
-        return this.resolvePatternTargets(target.value as string);
-      case 'function':
-        return this.resolveFunctionTargets(target.value as string, target.conditions);
-      case 'user':
-        return this.resolveUserTargets(target.value as string);
-      case 'session':
-        return this.resolveSessionTargets(target.value as string);
-      case 'risk_level':
+      case 'key':return Array.isArray(target.value) ? target.value : [target.value];case 'pattern':return this.resolvePatternTargets(target.value as string);case 'function':return this.resolveFunctionTargets(target.value as string, target.conditions);case 'user':return this.resolveUserTargets(target.value as string);case 'session':return this.resolveSessionTargets(target.value as string);case 'risk_level':
         return this.resolveRiskLevelTargets(target.value as string);
       default:
-        throw new Error(`Unsupported target type: ${target.type}`);
-    }
-  }
+        throw new Error(`Unsupported target type: ${target.type}`);}}
 
   private async resolvePatternTargets(pattern: string): Promise<string[]> {
     // Check pattern cache first
@@ -1207,10 +907,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     // TODO: Implement actual pattern matching against cache keys
     // For now, return mock keys
     const mockKeys = [
-      `${pattern.replace('*', 'user1')}`,
-      `${pattern.replace('*', 'user2')}`,
-      `${pattern.replace('*', 'session1')}`,
-    ];
+      `${pattern.replace('*', 'user1')}',`${pattern.replace('*', 'user2')}',`${pattern.replace('*', 'session1')}',];
 
     // Cache the result
     this.patternCache.set(pattern, mockKeys);
@@ -1220,25 +917,13 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
   private async resolveFunctionTargets(functionName: string, conditions?: InvalidationCondition[]): Promise<string[]> {
     // TODO: Query cache for keys matching function name and conditions
-    return [`parlant:enhanced:${functionName}:*`];
-  }
-
-  private async resolveUserTargets(userId: string): Promise<string[]> {
+    return [`parlant:enhanced:${functionName}:*`];}private async resolveUserTargets(userId: string): Promise<string[]> {
     // TODO: Query cache for keys related to user
-    return [`*:user:${userId}:*`, `*:${userId}:*`];
-  }
-
-  private async resolveSessionTargets(sessionId: string): Promise<string[]> {
+    return [`*:user:${userId}:*`, `*:${userId}:*`];}private async resolveSessionTargets(sessionId: string): Promise<string[]> {
     // TODO: Query cache for keys related to session
-    return [`*:session:${sessionId}:*`];
-  }
-
-  private async resolveRiskLevelTargets(riskLevel: string): Promise<string[]> {
+    return [`*:session:${sessionId}:*`];}private async resolveRiskLevelTargets(riskLevel: string): Promise<string[]> {
     // TODO: Query cache for keys with specific risk level
-    return [`*:${riskLevel}:*`];
-  }
-
-  // Dependency Resolution
+    return [`*:${riskLevel}:*`];}// Dependency Resolution
   private async resolveDependencyCascade(rootKeys: string[]): Promise<{ keys: string[]; depth: number }> {
     const visited = new Set<string>();
     const result = new Set<string>();
@@ -1318,13 +1003,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
   private findRelatedPatterns(pattern: string): string[] {
     // Simple pattern similarity matching
     const related: string[] = [];
-    const baseWords = pattern.split(':');
-
-    for (const [knownPattern] of this.predictionModel.patterns) {
-      const knownWords = knownPattern.split(':');
-      const similarity = this.calculatePatternSimilarity(baseWords, knownWords);
-
-      if (similarity > this.config.strategies.predictive.modelThreshold) {
+    const baseWords = pattern.split(':');for (const [knownPattern] of this.predictionModel.patterns) {const knownWords = knownPattern.split(':');const similarity = this.calculatePatternSimilarity(baseWords, knownWords);if (similarity > this.config.strategies.predictive.modelThreshold) {
         related.push(knownPattern);
       }
     }
@@ -1344,22 +1023,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
   // Utility Methods
   private validateInvalidationRequest(request: InvalidationRequest): void {
-    if (!request.id) throw new Error('Invalidation request must have an ID');
-    if (!request.strategy) throw new Error('Invalidation request must specify a strategy');
-    if (!request.target) throw new Error('Invalidation request must specify a target');
-    if (!request.context) throw new Error('Invalidation request must include context');
-  }
-
-  private determinePriorityByRisk(riskLevel?: RiskLevel): 'low' | 'medium' | 'high' | 'critical' {
-    if (!riskLevel) return 'medium';
-
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL: return 'low';
-      case RiskLevel.LOW: return 'low';
-      case RiskLevel.MEDIUM: return 'medium';
-      case RiskLevel.HIGH: return 'high';
-      case RiskLevel.CRITICAL: return 'critical';
-      default: return 'medium';
+    if (!request.id) throw new Error('Invalidation request must have an ID');if (!request.strategy) throw new Error('Invalidation request must specify a strategy');if (!request.target) throw new Error('Invalidation request must specify a target');if (!request.context) throw new Error('Invalidation request must include context');}private determinePriorityByRisk(riskLevel?: RiskLevel): 'low' | 'medium' | 'high' | 'critical' {if (!riskLevel) return 'medium';switch (riskLevel) {case RiskLevel._MINIMAL: return 'low';case RiskLevel._LOW: return 'low';case RiskLevel._MODERATE: return 'medium';case RiskLevel._HIGH: return 'high';case RiskLevel._CRITICAL: return 'critical';default: return 'medium';
     }
   }
 
@@ -1443,10 +1107,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
   private async processScheduledInvalidations(): Promise<void> {
     // TODO: Implement cron-based scheduled invalidation processing
-    this.logger.debug('Processing scheduled invalidations (placeholder)');
-  }
-
-  // Analytics and Monitoring
+    this.logger.debug('Processing scheduled invalidations (placeholder)');}// Analytics and Monitoring
   private recordInvalidationResult(request: InvalidationRequest, result: InvalidationResult): void {
     this.invalidationHistory.push({
       request,
@@ -1478,19 +1139,13 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
 
   // Initialization Methods
   private async initializeDependencyTracking(): Promise<void> {
-    this.logger.debug('Initializing dependency tracking');
-    // TODO: Load existing dependencies from storage
-  }
+    this.logger.debug('Initializing dependency tracking');// TODO: Load existing dependencies from storage}
 
   private async initializePredictionModel(): Promise<void> {
-    this.logger.debug('Initializing prediction model');
-    // TODO: Load trained prediction model
-  }
+    this.logger.debug('Initializing prediction model');// TODO: Load trained prediction model}
 
   private initializeScheduledInvalidation(): void {
-    this.logger.debug('Initializing scheduled invalidation');
-    // TODO: Setup cron jobs for scheduled intervals
-  }
+    this.logger.debug('Initializing scheduled invalidation');// TODO: Setup cron jobs for scheduled intervals}
 
   private startAnalyticsCollection(): void {
     // Log analytics every 10 minutes
@@ -1498,10 +1153,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
       const analytics = this.getInvalidationAnalytics();
       this.logger.log('Cache Invalidation Analytics Report', {
         totalRequests: analytics.summary.totalRequests,
-        successRate: `${(analytics.summary.successRate * 100).toFixed(2)}%`,
-        avgDuration: `${analytics.summary.avgDuration.toFixed(2)}ms`,
-        strategiesUsed: analytics.summary.strategiesUsed,
-        dependencyNodes: analytics.dependencies.totalNodes,
+        successRate: `${(analytics.summary.successRate * 100).toFixed(2)}%`,avgDuration: `${analytics.summary.avgDuration.toFixed(2)}ms`,strategiesUsed: analytics.summary.strategiesUsed,dependencyNodes: analytics.dependencies.totalNodes,
         predictionAccuracy: `${(analytics.predictions.accuracy * 100).toFixed(2)}%`,
       });
     }, 10 * 60 * 1000);
@@ -1539,9 +1191,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     };
   }
 
-  private calculateSummaryAnalytics(history: Array<{ request: InvalidationRequest; result: InvalidationResult; timestamp: Date }>): InvalidationAnalytics['summary'] {
-    const totalRequests = history.length;
-    const successfulRequests = history.filter(h => h.result.success).length;
+  private calculateSummaryAnalytics(history: Array<{ request: InvalidationRequest; result: InvalidationResult; timestamp: Date }>): InvalidationAnalytics['summary'] {const totalRequests = history.length;const successfulRequests = history.filter(h => h.result.success).length;
     const totalDuration = history.reduce((sum, h) => sum + h.result.performance.duration, 0);
 
     const strategiesUsed: Record<InvalidationStrategy, number> = {
@@ -1564,10 +1214,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     };
   }
 
-  private calculatePerformanceAnalytics(history: Array<{ request: InvalidationRequest; result: InvalidationResult; timestamp: Date }>): InvalidationAnalytics['performance'] {
-    const cacheLevel: Record<'L1' | 'L2' | 'L3', { requests: number; success: number; avgDuration: number }> = {
-      L1: { requests: 0, success: 0, avgDuration: 0 },
-      L2: { requests: 0, success: 0, avgDuration: 0 },
+  private calculatePerformanceAnalytics(history: Array<{ request: InvalidationRequest; result: InvalidationResult; timestamp: Date }>): InvalidationAnalytics['performance'] {const cacheLevel: Record<'L1' | 'L2' | 'L3', { requests: number; success: number; avgDuration: number }> = {L1: { requests: 0, success: 0, avgDuration: 0 },L2: { requests: 0, success: 0, avgDuration: 0 },
       L3: { requests: 0, success: 0, avgDuration: 0 },
     };
 
@@ -1580,9 +1227,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
         cacheLevel[level].avgDuration = (cacheLevel[level].avgDuration + h.result.performance.duration) / 2;
       });
 
-      if (h.request.target.type === 'pattern') {
-        const pattern = Array.isArray(h.request.target.value) ? h.request.target.value[0] : h.request.target.value;
-        const existing = patternMap.get(pattern) || { frequency: 0, totalInvalidated: 0, totalDuration: 0 };
+      if (h.request.target.type === 'pattern') {const pattern = Array.isArray(h.request.target.value) ? h.request.target.value[0] : h.request.target.value;const existing = patternMap.get(pattern) || { frequency: 0, totalInvalidated: 0, totalDuration: 0 };
         patternMap.set(pattern, {
           frequency: existing.frequency + 1,
           totalInvalidated: existing.totalInvalidated + h.result.invalidatedCount,
@@ -1604,9 +1249,7 @@ export class IntelligentCacheInvalidationService implements OnModuleInit {
     };
   }
 
-  private calculateDependencyAnalytics(): InvalidationAnalytics['dependencies'] {
-    const totalNodes = this.dependencyGraph.size;
-    let totalDepth = 0;
+  private calculateDependencyAnalytics(): InvalidationAnalytics['dependencies'] {const totalNodes = this.dependencyGraph.size;let totalDepth = 0;
     let maxCascade = 0;
     let circularDetected = 0;
 

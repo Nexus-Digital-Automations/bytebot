@@ -19,19 +19,8 @@
  * Performance: Sub-800ms validation with multi-level caching for compliance operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
-
-// ===== COMPLIANCE FRAMEWORK INTEGRATION INTERFACES =====
-
-export interface ComplianceContext extends ParlantConversationContext {
-  readonly frameworkType: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST' | 'SOC2' | 'FedRAMP';
-  readonly operationType: 'assessment' | 'audit' | 'reporting' | 'mapping' | 'remediation' | 'certification';
-  readonly scope: 'organization' | 'department' | 'application' | 'process' | 'control';
-  readonly regulatoryImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly assessmentPeriod?: string;
-  readonly auditRequired: boolean;
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';// ===== COMPLIANCE FRAMEWORK INTEGRATION INTERFACES =====export interface ComplianceContext extends ParlantConversationContext {
+  readonly frameworkType: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST' | 'SOC2' | 'FedRAMP';readonly operationType: 'assessment' | 'audit' | 'reporting' | 'mapping' | 'remediation' | 'certification';readonly scope: 'organization' | 'department' | 'application' | 'process' | 'control';readonly regulatoryImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly assessmentPeriod?: string;readonly auditRequired: boolean;
   readonly externalAuditor?: string;
 }
 
@@ -39,9 +28,7 @@ export interface ComplianceFramework {
   readonly id: string;
   readonly name: string;
   readonly version: string;
-  readonly type: ComplianceContext['frameworkType'];
-  readonly description: string;
-  readonly requirements: ComplianceRequirement[];
+  readonly type: ComplianceContext['frameworkType'];readonly description: string;readonly requirements: ComplianceRequirement[];
   readonly controls: ComplianceControl[];
   readonly assessmentCriteria: AssessmentCriteria[];
   readonly metadata: {
@@ -59,10 +46,7 @@ export interface ComplianceRequirement {
   readonly section: string;
   readonly title: string;
   readonly description: string;
-  readonly category: 'governance' | 'risk_management' | 'data_protection' | 'access_control' | 'monitoring' | 'incident_response';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly mandatory: boolean;
-  readonly applicableControls: string[];
+  readonly category: 'governance' | 'risk_management' | 'data_protection' | 'access_control' | 'monitoring' | 'incident_response';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly mandatory: boolean;readonly applicableControls: string[];
   readonly evidenceRequirements: string[];
 }
 
@@ -70,21 +54,14 @@ export interface ComplianceControl {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly controlType: 'preventive' | 'detective' | 'corrective' | 'compensating';
-  readonly implementationStatus: 'not_implemented' | 'partially_implemented' | 'implemented' | 'not_applicable';
-  readonly effectivenessRating: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';
-  readonly testingFrequency: 'continuous' | 'monthly' | 'quarterly' | 'annually';
-  readonly owner: string;
-  readonly lastTested: Date;
+  readonly controlType: 'preventive' | 'detective' | 'corrective' | 'compensating';readonly implementationStatus: 'not_implemented' | 'partially_implemented' | 'implemented' | 'not_applicable';readonly effectivenessRating: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';readonly testingFrequency: 'continuous' | 'monthly' | 'quarterly' | 'annually';readonly owner: string;readonly lastTested: Date;
   readonly nextTest: Date;
   readonly evidence: ComplianceEvidence[];
 }
 
 export interface ComplianceEvidence {
   readonly id: string;
-  readonly type: 'document' | 'screenshot' | 'log' | 'certificate' | 'attestation' | 'test_result';
-  readonly description: string;
-  readonly location: string;
+  readonly type: 'document' | 'screenshot' | 'log' | 'certificate' | 'attestation' | 'test_result';readonly description: string;readonly location: string;
   readonly collectedBy: string;
   readonly collectedAt: Date;
   readonly validUntil?: Date;
@@ -97,15 +74,10 @@ export interface AssessmentCriteria {
   readonly description: string;
   readonly passingScore: number;
   readonly weightage: number;
-  readonly evaluationMethod: 'automated' | 'manual' | 'hybrid';
-  readonly testProcedures: string[];
-}
+  readonly evaluationMethod: 'automated' | 'manual' | 'hybrid';readonly testProcedures: string[];}
 
 export interface ComplianceAssessmentRequest {
-  readonly framework: ComplianceContext['frameworkType'];
-  readonly scope: ComplianceContext['scope'];
-  readonly requirements: string[]; // Requirement IDs to assess
-  readonly context: ComplianceContext;
+  readonly framework: ComplianceContext['frameworkType'];readonly scope: ComplianceContext['scope'];readonly requirements: string[]; // Requirement IDs to assessreadonly context: ComplianceContext;
   readonly operationId: string;
 }
 
@@ -114,14 +86,10 @@ export interface ComplianceAssessmentResponse {
   readonly processedAt: Date;
   readonly operationId: string;
   readonly conversationId: string;
-  readonly framework: ComplianceContext['frameworkType'];
-  readonly assessmentResults: {
-    readonly overallScore: number;
+  readonly framework: ComplianceContext['frameworkType'];readonly assessmentResults: {readonly overallScore: number;
     readonly maxScore: number;
     readonly percentage: number;
-    readonly status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'under_review';
-    readonly requirementResults: RequirementAssessmentResult[];
-    readonly controlResults: ControlAssessmentResult[];
+    readonly status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'under_review';readonly requirementResults: RequirementAssessmentResult[];readonly controlResults: ControlAssessmentResult[];
   };
   readonly findings: ComplianceFinding[];
   readonly recommendations: ComplianceRecommendation[];
@@ -148,9 +116,7 @@ export interface ComplianceAssessmentResponse {
 
 export interface RequirementAssessmentResult {
   readonly requirementId: string;
-  readonly status: 'met' | 'not_met' | 'partially_met' | 'not_applicable';
-  readonly score: number;
-  readonly maxScore: number;
+  readonly status: 'met' | 'not_met' | 'partially_met' | 'not_applicable';readonly score: number;readonly maxScore: number;
   readonly evidence: string[];
   readonly gaps: string[];
   readonly recommendations: string[];
@@ -158,18 +124,13 @@ export interface RequirementAssessmentResult {
 
 export interface ControlAssessmentResult {
   readonly controlId: string;
-  readonly effectiveness: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';
-  readonly testResults: string[];
-  readonly deficiencies: string[];
+  readonly effectiveness: 'ineffective' | 'partially_effective' | 'effective' | 'highly_effective';readonly testResults: string[];readonly deficiencies: string[];
   readonly recommendations: string[];
 }
 
 export interface ComplianceFinding {
   readonly id: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly category: 'gap' | 'deficiency' | 'weakness' | 'non_compliance';
-  readonly description: string;
-  readonly requirement: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'gap' | 'deficiency' | 'weakness' | 'non_compliance';readonly description: string;readonly requirement: string;
   readonly control?: string;
   readonly riskRating: number;
   readonly remediation: string;
@@ -178,8 +139,7 @@ export interface ComplianceFinding {
 
 export interface ComplianceRecommendation {
   readonly id: string;
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly category: 'process_improvement' | 'control_enhancement' | 'policy_update' | 'training' | 'technology';
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly category: 'process_improvement' | 'control_enhancement' | 'policy_update' | 'training' | 'technology';
   readonly description: string;
   readonly justification: string;
   readonly estimatedEffort: string;
@@ -201,11 +161,7 @@ export class ComplianceFrameworkService {
     private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `compliance_framework_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Compliance Framework Service initialized with MAXIMUM Parlant integration`, {
-      parlantEnabled: true,
-      validationRequired: true,
+    const operationId = `compliance_framework_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Compliance Framework Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,
       auditTrailEnabled: true,
       supportedFrameworks: this.getSupportedFrameworks(),
     });
@@ -233,9 +189,7 @@ export class ComplianceFrameworkService {
 
     try {
       const validationRequest: ParlantValidationRequest = {
-        functionName: 'ComplianceFrameworkService.performComplianceAssessment',
-        functionParams: {
-          framework: request.framework,
+        functionName: 'ComplianceFrameworkService.performComplianceAssessment',functionParams: {framework: request.framework,
           scope: request.scope,
           requirementsCount: request.requirements.length,
           operationType: request.context.operationType,
@@ -244,9 +198,7 @@ export class ComplianceFrameworkService {
           hasExternalAuditor: !!request.context.externalAuditor,
           isRegulatoryMandated: request.context.regulatoryImpact === 'CRITICAL',
         },
-        actionDescription: `Perform ${request.framework} compliance ${request.context.operationType} for ${request.scope} scope with ${request.context.regulatoryImpact} regulatory impact`,
-        context: request.context,
-        riskLevel: this.assessComplianceRiskLevel(request),
+        actionDescription: `Perform ${request.framework} compliance ${request.context.operationType} for ${request.scope} scope with ${request.context.regulatoryImpact} regulatory impact`,context: request.context,riskLevel: this.assessComplianceRiskLevel(request),
         operationId: request.operationId,
       };
 
@@ -254,18 +206,13 @@ export class ComplianceFrameworkService {
       this.validationCount++;
 
       if (!validationResponse.approved) {
-        throw new Error(`Compliance assessment blocked by conversational validation: ${validationResponse.reasoning}`);
-      }
-
-      const response = await this.executeComplianceAssessment(request, validationResponse.conversationId);
+        throw new Error(`Compliance assessment blocked by conversational validation: ${validationResponse.reasoning}`);}const response = await this.executeComplianceAssessment(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.findings.length);
 
       this.logger.log(
-        `[${request.operationId}] Compliance assessment completed successfully with Parlant validation`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Compliance assessment completed successfully with Parlant validation`,{operationId: request.operationId,
           responseId: response.id,
           framework: response.framework,
           overallScore: response.assessmentResults.percentage,
@@ -281,9 +228,7 @@ export class ComplianceFrameworkService {
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(
-        `[${request.operationId}] Compliance assessment failed: ${error instanceof Error ? error.message : String(error)}`,
-        {
-          operationId: request.operationId,
+        `[${request.operationId}] Compliance assessment failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           duration,
         }
@@ -309,11 +254,8 @@ export class ComplianceFrameworkService {
       if (!isCompliant) {
         findings.push({
           id: `finding${index}${Date.now()}`,
-          severity: 'MEDIUM',
-          category: 'gap',
-          description: `Requirement ${reqId} not fully met`,
-          requirement: reqId,
-          riskRating: 6,
+          severity: 'MEDIUM',category: 'gap',
+          description: `Requirement ${reqId} not fully met`,requirement: reqId,riskRating: 6,
           remediation: `Implement controls to address requirement ${reqId}`,
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         });
@@ -324,38 +266,22 @@ export class ComplianceFrameworkService {
         status: isCompliant ? 'met' : 'partially_met',
         score: isCompliant ? 10 : 6,
         maxScore: 10,
-        evidence: isCompliant ? [`Evidence for ${reqId}`] : [],
-        gaps: isCompliant ? [] : [`Gap in ${reqId} implementation`],
-        recommendations: isCompliant ? [] : [`Improve ${reqId} controls`],
+        evidence: isCompliant ? [`Evidence for ${reqId}`] : [],gaps: isCompliant ? [] : [`Gap in ${reqId} implementation`],recommendations: isCompliant ? [] : [`Improve ${reqId} controls`],
       };
     });
 
     const controlResults: ControlAssessmentResult[] = [
       {
-        controlId: 'AC-001',
-        effectiveness: 'effective',
-        testResults: ['Access control test passed'],
-        deficiencies: [],
-        recommendations: [],
+        controlId: 'AC-001',effectiveness: 'effective',testResults: ['Access control test passed'],deficiencies: [],recommendations: [],
       },
       {
-        controlId: 'AU-002',
-        effectiveness: 'partially_effective',
-        testResults: ['Audit logging partially configured'],
-        deficiencies: ['Missing some audit events'],
-        recommendations: ['Enhance audit log coverage'],
+        controlId: 'AU-002',effectiveness: 'partially_effective',testResults: ['Audit logging partially configured'],deficiencies: ['Missing some audit events'],recommendations: ['Enhance audit log coverage'],
       },
     ];
 
     recommendations.push({
       id: `rec${Date.now()}`,
-      priority: 'HIGH',
-      category: 'control_enhancement',
-      description: 'Implement comprehensive audit logging',
-      justification: 'Required for regulatory compliance',
-      estimatedEffort: '2-3 weeks',
-      implementationDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-      benefits: ['Improved compliance posture', 'Better security monitoring'],
+      priority: 'HIGH',category: 'control_enhancement',description: 'Implement comprehensive audit logging',justification: 'Required for regulatory compliance',estimatedEffort: '2-3 weeks',implementationDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),benefits: ['Improved compliance posture', 'Better security monitoring'],
     });
 
     const overallScore = requirementResults.reduce((sum, r) => sum + r.score, 0);
@@ -374,9 +300,7 @@ export class ComplianceFrameworkService {
         overallScore,
         maxScore,
         percentage,
-        status: percentage >= 90 ? 'compliant' : percentage >= 70 ? 'partially_compliant' : 'non_compliant',
-        requirementResults,
-        controlResults,
+        status: percentage >= 90 ? 'compliant' : percentage >= 70 ? 'partially_compliant' : 'non_compliant',requirementResults,controlResults,
       },
       findings,
       recommendations,
@@ -384,59 +308,31 @@ export class ComplianceFrameworkService {
         overallRisk: this.assessComplianceRiskLevel(request),
         riskFactors: this.identifyComplianceRiskFactors(request, findings),
         mitigationRequired: findings.length > 0,
-        timelineForRemediation: findings.length > 0 ? '30-60 days' : 'N/A',
-      },
-      auditTrail: {
-        assessedBy: 'ComplianceFrameworkService',
-        reviewedBy: request.context.auditRequired ? ['compliance_officer', 'security_team'] : undefined,
-        approvedBy: request.context.externalAuditor,
-        evidenceCollected: requirementResults.filter(r => r.evidence.length > 0).length,
+        timelineForRemediation: findings.length > 0 ? '30-60 days' : 'N/A',},auditTrail: {
+        assessedBy: 'ComplianceFrameworkService',reviewedBy: request.context.auditRequired ? ['compliance_officer', 'security_team'] : undefined,approvedBy: request.context.externalAuditor,evidenceCollected: requirementResults.filter(r => r.evidence.length > 0).length,
         testsPerforme: controlResults.length,
       },
       nextActions: {
         remediationRequired: findings.length > 0,
         followUpDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        responsibleParties: ['compliance_team', 'security_team'],
-        escalationRequired: findings.some(f => f.severity === 'CRITICAL'),
-      },
-    };
+        responsibleParties: ['compliance_team', 'security_team'],escalationRequired: findings.some(f => f.severity === 'CRITICAL'),},};
 
     return mockResponse;
   }
 
   private assessComplianceRiskLevel(request: ComplianceAssessmentRequest): RiskLevel {
-    if (request.context.regulatoryImpact === 'CRITICAL' || 
-        request.framework === 'SOX' || 
-        request.context.auditRequired) {
-      return RiskLevel.CRITICAL;
+    if (request.context.regulatoryImpact === 'CRITICAL' || request.framework === 'SOX' || request.context.auditRequired) {return RiskLevel._CRITICAL;
     }
-    if (request.context.regulatoryImpact === 'HIGH' || 
-        ['GDPR', 'HIPAA', 'PCI_DSS'].includes(request.framework)) {
-      return RiskLevel.HIGH;
-    }
-    if (request.context.scope === 'organization') {
-      return RiskLevel.MEDIUM;
-    }
-    return RiskLevel.LOW;
+    if (request.context.regulatoryImpact === 'HIGH' || ['GDPR', 'HIPAA', 'PCI_DSS'].includes(request.framework)) {return RiskLevel._HIGH;}
+    if (request.context.scope === 'organization') {return RiskLevel._MODERATE;}
+    return RiskLevel._LOW;
   }
 
   private identifyComplianceRiskFactors(request: ComplianceAssessmentRequest, findings: ComplianceFinding[]): string[] {
     const factors: string[] = [];
     
-    if (request.context.regulatoryImpact === 'CRITICAL') {
-      factors.push('Critical regulatory impact');
-    }
-    if (findings.some(f => f.severity === 'CRITICAL')) {
-      factors.push('Critical compliance findings identified');
-    }
-    if (request.context.auditRequired) {
-      factors.push('External audit requirement');
-    }
-    if (request.context.scope === 'organization') {
-      factors.push('Organization-wide scope');
-    }
-    
-    return factors;
+    if (request.context.regulatoryImpact === 'CRITICAL') {factors.push('Critical regulatory impact');}if (findings.some(f => f.severity === 'CRITICAL')) {factors.push('Critical compliance findings identified');}if (request.context.auditRequired) {
+      factors.push('External audit requirement');}if (request.context.scope === 'organization') {factors.push('Organization-wide scope');}return factors;
   }
 
   private updatePerformanceMetrics(duration: number, findingsCount: number): void {
@@ -451,8 +347,7 @@ export class ComplianceFrameworkService {
     
     this.logger.log('Compliance Framework Service Performance Metrics', {
       assessmentCount: this.assessmentCount,
-      validationRate: `${validationRate.toFixed(2)}%`,
-      averageAssessmentTime: `${this.averageAssessmentTime.toFixed(2)}ms`,
+      validationRate: `${validationRate.toFixed(2)}%`,averageAssessmentTime: `${this.averageAssessmentTime.toFixed(2)}ms`,
       complianceFindings: this.complianceFindings,
       averageFindingsPerAssessment: averageFindingsPerAssessment.toFixed(2),
       frameworksCovered: Array.from(this.frameworksCovered),
@@ -460,19 +355,9 @@ export class ComplianceFrameworkService {
   }
 
   private getSupportedFrameworks(): string[] {
-    return ['SOX', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO27001', 'NIST', 'SOC2', 'FedRAMP'];
-  }
+    return ['SOX', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO27001', 'NIST', 'SOC2', 'FedRAMP'];}getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {const avgAssessmentTime = this.averageAssessmentTime;const validationRate = this.assessmentCount > 0 ? (this.validationCount / this.assessmentCount) * 100 : 100;
 
-  getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {
-    const avgAssessmentTime = this.averageAssessmentTime;
-    const validationRate = this.assessmentCount > 0 ? (this.validationCount / this.assessmentCount) * 100 : 100;
-
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
-    
-    if (avgAssessmentTime > 5000 || validationRate < 95) {
-      status = 'DEGRADED';
-    }
-    if (avgAssessmentTime > 15000 || validationRate < 80) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgAssessmentTime > 5000 || validationRate < 95) {status = 'DEGRADED';}if (avgAssessmentTime > 15000 || validationRate < 80) {
       status = 'FAILED';
     }
 
@@ -480,8 +365,7 @@ export class ComplianceFrameworkService {
       status,
       metrics: {
         assessmentCount: this.assessmentCount,
-        averageAssessmentTime: `${avgAssessmentTime.toFixed(2)}ms`,
-        validationRate: `${validationRate.toFixed(2)}%`,
+        averageAssessmentTime: `${avgAssessmentTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,
         complianceFindings: this.complianceFindings,
         frameworksCovered: Array.from(this.frameworksCovered),
         parlantIntegrationEnabled: true,

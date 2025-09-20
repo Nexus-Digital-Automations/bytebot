@@ -25,40 +25,15 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
-import * as _crypto from 'crypto';
-import { v4 as _uuidv4 } from 'uuid';
-import { ComputerUseService } from './computer-use.service';
-import { ComputerAction } from '@bytebot/shared';
-
-// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import Redis from 'ioredis';import * as _crypto from 'crypto';import { v4 as _uuidv4 } from 'uuid';import { ComputerUseService } from './computer-use.service';import { ComputerAction } from '@bytebot/shared';// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
  * Job status enumeration with comprehensive lifecycle states
  */
 export enum JobStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout',
-  RETRY = 'retry',
-}
-
-/**
+  PENDING = 'pending',RUNNING = 'running',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',RETRY = 'retry',}/**
  * Job priority levels for execution ordering
  */
 export enum JobPriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  URGENT = 'urgent',
-}
-
-/**
+  LOW = 'low',NORMAL = 'normal',HIGH = 'high',URGENT = 'urgent',}/**
  * Computer action response types (union of all possible responses)
  */
 export type ComputerActionResponse =
@@ -251,17 +226,9 @@ export class JobStorage implements JobStorageInterface {
   private readonly logger = new Logger(JobStorage.name);
   private readonly redis: Redis;
   private readonly encryptionKey: string;
-  private readonly keyPrefix = 'bytebot:jobs:';
-
-  constructor(private readonly configService: ConfigService) {
-    // Initialize Redis connection with optimized configuration
+  private readonly keyPrefix = 'bytebot:jobs:';constructor(private readonly configService: ConfigService) {// Initialize Redis connection with optimized configuration
     this.redis = new Redis({
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-      db: this.configService.get<number>('REDIS_DB', 0),
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
+      host: this.configService.get<string>('REDIS_HOST', 'localhost'),port: this.configService.get<number>('REDIS_PORT', 6379),password: this.configService.get<string>('REDIS_PASSWORD'),db: this.configService.get<number>('REDIS_DB', 0),maxRetriesPerRequest: 3,lazyConnect: true,
       keepAlive: 30000,
       connectTimeout: 10000,
       commandTimeout: 5000,
@@ -270,25 +237,14 @@ export class JobStorage implements JobStorageInterface {
 
     // Initialize encryption key for job data
     this.encryptionKey =
-      this.configService.get<string>('JOB_ENCRYPTION_KEY') ??
-      _crypto
-        .createHash('sha256')
-        .update('bytebot-job-encryption')
-        .digest('hex');
-
-    this.logger.log('JobStorage initialized with Redis configuration');
+      this.configService.get<string>('JOB_ENCRYPTION_KEY') ??_crypto.createHash('sha256').update('bytebot-job-encryption').digest('hex');this.logger.log('JobStorage initialized with Redis configuration');
   }
 
   /**
    * Save job to Redis with encryption and proper serialization
    */
   async saveJob(job: JobResult): Promise<void> {
-    const operationId = `save_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Saving job to Redis`, {
-        jobId: job.jobId,
-        status: job.status,
+    const operationId = `save_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Saving job to Redis`, {jobId: job.jobId,status: job.status,
         priority: job.priority,
       });
 
@@ -297,53 +253,29 @@ export class JobStorage implements JobStorageInterface {
       const encryptedJob = this.encryptData(serializedJob);
 
       // Save to Redis with expiration
-      const key = `${this.keyPrefix}${job.jobId}`;
-      const ttl = this.calculateJobTTL(job);
-
-      await this.redis.setex(key, ttl, encryptedJob);
+      const key = `${this.keyPrefix}${job.jobId}`;const ttl = this.calculateJobTTL(job);await this.redis.setex(key, ttl, encryptedJob);
 
       // Add to status index for efficient queries
-      await this.redis.sadd(`${this.keyPrefix}status:${job.status}`, job.jobId);
+      await this.redis.sadd(`${this.keyPrefix}status:${job.status}`, job.jobId);// Add to priority indexawait this.redis.sadd(
+        `${this.keyPrefix}priority:${job.priority}`,job.jobId,);
 
-      // Add to priority index
-      await this.redis.sadd(
-        `${this.keyPrefix}priority:${job.priority}`,
-        job.jobId,
-      );
-
-      this.logger.log(`[${operationId}] Job saved successfully`, {
-        jobId: job.jobId,
-        ttl,
+      this.logger.log(`[${operationId}] Job saved successfully`, {jobId: job.jobId,ttl,
       });
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to save job`, {
-        jobId: job.jobId,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to save job`, {jobId: job.jobId,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to save job ${job.jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to save job ${job.jobId}: ${error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Retrieve job from Redis with decryption
    */
   async getJob(jobId: string): Promise<JobResult | null> {
-    const operationId = `get_job${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Retrieving job from Redis`, {jobId,});
 
-    try {
-      this.logger.debug(`[${operationId}] Retrieving job from Redis`, {
-        jobId,
-      });
-
-      const key = `${this.keyPrefix}${jobId}`;
-      const encryptedJob = await this.redis.get(key);
-
-      if (!encryptedJob) {
-        this.logger.debug(`[${operationId}] Job not found`, { jobId });
-        return null;
-      }
+      const key = `${this.keyPrefix}${jobId}`;const encryptedJob = await this.redis.get(key);if (!encryptedJob) {
+        this.logger.debug(`[${operationId}] Job not found`, { jobId });return null;}
 
       // Decrypt and deserialize job data
       const serializedJob = this.decryptData(encryptedJob);
@@ -364,19 +296,13 @@ export class JobStorage implements JobStorageInterface {
           : undefined,
       };
 
-      this.logger.debug(`[${operationId}] Job retrieved successfully`, {
-        jobId,
-      });
+      this.logger.debug(`[${operationId}] Job retrieved successfully`, {jobId,});
       return restoredJob;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to retrieve job`, {
-        jobId,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to retrieve job`, {jobId,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to retrieve job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to retrieve job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
@@ -388,12 +314,7 @@ export class JobStorage implements JobStorageInterface {
     result?: ComputerActionResponse,
     error?: JobError,
   ): Promise<void> {
-    const operationId = `update_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Updating job status`, {
-        jobId,
-        status,
+    const operationId = `update_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Updating job status`, {jobId,status,
         hasResult: !!result,
         hasError: !!error,
       });
@@ -401,10 +322,7 @@ export class JobStorage implements JobStorageInterface {
       // Get current job
       const job = await this.getJob(jobId);
       if (!job) {
-        throw new Error(`Job ${jobId} not found`);
-      }
-
-      // Calculate execution metrics
+        throw new Error(`Job ${jobId} not found`);}// Calculate execution metrics
       const now = new Date();
       const executionTimeMs = job.startedAt
         ? now.getTime() - job.startedAt.getTime()
@@ -430,94 +348,47 @@ export class JobStorage implements JobStorageInterface {
       const multi = this.redis.multi();
 
       // Remove from old status index
-      multi.srem(`${this.keyPrefix}status:${job.status}`, jobId);
-
-      // Add to new status index
-      multi.sadd(`${this.keyPrefix}status:${status}`, jobId);
-
-      // Save updated job
-      const serializedJob = JSON.stringify(updatedJob);
+      multi.srem(`${this.keyPrefix}status:${job.status}`, jobId);// Add to new status indexmulti.sadd(`${this.keyPrefix}status:${status}`, jobId);// Save updated jobconst serializedJob = JSON.stringify(updatedJob);
       const encryptedJob = this.encryptData(serializedJob);
-      const key = `${this.keyPrefix}${jobId}`;
-      const ttl = this.calculateJobTTL(updatedJob);
-
-      multi.setex(key, ttl, encryptedJob);
+      const key = `${this.keyPrefix}${jobId}`;const ttl = this.calculateJobTTL(updatedJob);multi.setex(key, ttl, encryptedJob);
 
       await multi.exec();
 
-      this.logger.log(`[${operationId}] Job status updated successfully`, {
-        jobId,
-        oldStatus: job.status,
+      this.logger.log(`[${operationId}] Job status updated successfully`, {jobId,oldStatus: job.status,
         newStatus: status,
         executionTimeMs,
         queuedTimeMs,
       });
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to update job status`, {
-        jobId,
-        status,
+      this.logger.error(`[${operationId}] Failed to update job status`, {jobId,status,
         error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to update job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to update job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Delete job from Redis with cleanup
    */
   async deleteJob(jobId: string): Promise<void> {
-    const operationId = `delete_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Deleting job from Redis`, { jobId });
-
-      // Get job to clean up indexes
-      const job = await this.getJob(jobId);
+    const operationId = `delete_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Deleting job from Redis`, { jobId });// Get job to clean up indexesconst job = await this.getJob(jobId);
       if (job) {
         const multi = this.redis.multi();
 
         // Remove from status _index
-        multi.srem(`${this.keyPrefix}status:${job.status}`, jobId);
-
-        // Remove from priority index
-        multi.srem(`${this.keyPrefix}priority:${job.priority}`, jobId);
-
-        // Delete job data
-        multi.del(`${this.keyPrefix}${jobId}`);
-
-        await multi.exec();
-      } else {
+        multi.srem(`${this.keyPrefix}status:${job.status}`, jobId);// Remove from priority indexmulti.srem(`${this.keyPrefix}priority:${job.priority}`, jobId);// Delete job datamulti.del(`${this.keyPrefix}${jobId}`);await multi.exec();} else {
         // Just try to delete the key
-        await this.redis.del(`${this.keyPrefix}${jobId}`);
-      }
-
-      this.logger.log(`[${operationId}] Job deleted successfully`, { jobId });
-    } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to delete job`, {
-        jobId,
-        error: _error instanceof Error ? _error.message : String(_error),
+        await this.redis.del(`${this.keyPrefix}${jobId}`);}this.logger.log(`[${operationId}] Job deleted successfully`, { jobId });} catch (_error) {this.logger.error(`[${operationId}] Failed to delete job`, {jobId,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to delete job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to delete job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Get jobs by status with efficient Redis queries
    */
   async getJobsByStatus(status: JobStatus): Promise<JobResult[]> {
-    const operationId = `get_jobs_by_status${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.debug(`[${operationId}] Getting jobs by status`, { status });
-
-      const jobIds = await this.redis.smembers(
-        `${this.keyPrefix}status:${status}`,
-      );
-      const jobs: JobResult[] = [];
+    const operationId = `get_jobs_by_status${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Getting jobs by status`, { status });const jobIds = await this.redis.smembers(`${this.keyPrefix}status:${status}`,);const jobs: JobResult[] = [];
 
       // Batch retrieve jobs for efficiency
       const batchSize = 100;
@@ -529,70 +400,49 @@ export class JobStorage implements JobStorageInterface {
               return await this.getJob(jobId);
             } catch (_error) {
               this.logger.warn(
-                `Failed to retrieve job ${jobId}, removing from _index`,
-                {
-                  error:
+                `Failed to retrieve job ${jobId}, removing from _index`,{error:
                     _error instanceof Error ? _error.message : String(_error),
                 },
               );
               // Clean up stale index entry
-              await this.redis.srem(`${this.keyPrefix}status:${status}`, jobId);
-              return null;
-            }
+              await this.redis.srem(`${this.keyPrefix}status:${status}`, jobId);return null;}
           }),
         );
 
         jobs.push(...batchJobs.filter((job): job is JobResult => job !== null));
       }
 
-      this.logger.debug(`[${operationId}] Retrieved jobs by status`, {
-        status,
-        count: jobs.length,
+      this.logger.debug(`[${operationId}] Retrieved jobs by status`, {status,count: jobs.length,
       });
 
       return jobs;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to get jobs by status`, {
-        status,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to get jobs by status`, {status,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get jobs by status ${status}: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to get jobs by status ${status}: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Get jobs by priority
    */
   async getJobsByPriority(priority: JobPriority): Promise<JobResult[]> {
-    const operationId = `get_jobs_by_priority${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.debug(`[${operationId}] Getting jobs by priority`, {
-        priority,
-      });
+    const operationId = `get_jobs_by_priority${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Getting jobs by priority`, {priority,});
 
       const jobIds = await this.redis.smembers(
-        `${this.keyPrefix}priority:${priority}`,
-      );
-      const jobs = await Promise.all(
+        `${this.keyPrefix}priority:${priority}`,);const jobs = await Promise.all(
         jobIds.map(async (jobId) => {
           try {
             return await this.getJob(jobId);
           } catch (_error) {
             this.logger.warn(
-              `Failed to retrieve job ${jobId}, removing from priority _index`,
-              {
-                error:
+              `Failed to retrieve job ${jobId}, removing from priority _index`,{error:
                   _error instanceof Error ? _error.message : String(_error),
               },
             );
             // Clean up stale index entry
             await this.redis.srem(
-              `${this.keyPrefix}priority:${priority}`,
-              jobId,
-            );
+              `${this.keyPrefix}priority:${priority}`,jobId,);
             return null;
           }
         }),
@@ -600,40 +450,25 @@ export class JobStorage implements JobStorageInterface {
 
       const validJobs = jobs.filter((job): job is JobResult => job !== null);
 
-      this.logger.debug(`[${operationId}] Retrieved jobs by priority`, {
-        priority,
-        count: validJobs.length,
+      this.logger.debug(`[${operationId}] Retrieved jobs by priority`, {priority,count: validJobs.length,
       });
 
       return validJobs;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to get jobs by priority`, {
-        priority,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to get jobs by priority`, {priority,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get jobs by priority ${priority}: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to get jobs by priority ${priority}: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Cleanup expired jobs from Redis
    */
   async cleanupExpiredJobs(olderThanMs: number): Promise<number> {
-    const operationId = `cleanup_jobs${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Starting job cleanup`, { olderThanMs });
-
-      const cutoffDate = new Date(Date.now() - olderThanMs);
-      let deletedCount = 0;
+    const operationId = `cleanup_jobs${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Starting job cleanup`, { olderThanMs });const cutoffDate = new Date(Date.now() - olderThanMs);let deletedCount = 0;
 
       // Get all status keys
-      const statusKeys = await this.redis.keys(`${this.keyPrefix}status:*`);
-
-      for (const statusKey of statusKeys) {
-        const jobIds = await this.redis.smembers(statusKey);
+      const statusKeys = await this.redis.keys(`${this.keyPrefix}status:*`);for (const statusKey of statusKeys) {const jobIds = await this.redis.smembers(statusKey);
 
         for (const jobId of jobIds) {
           try {
@@ -649,16 +484,12 @@ export class JobStorage implements JobStorageInterface {
         }
       }
 
-      this.logger.log(`[${operationId}] Job cleanup completed`, {
-        deletedCount,
-        olderThanMs,
+      this.logger.log(`[${operationId}] Job cleanup completed`, {deletedCount,olderThanMs,
       });
 
       return deletedCount;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to cleanup expired jobs`, {
-        olderThanMs,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to cleanup expired jobs`, {olderThanMs,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
         `Failed to cleanup expired jobs: ${_error instanceof Error ? _error.message : String(_error)}`,
@@ -673,54 +504,26 @@ export class JobStorage implements JobStorageInterface {
     try {
       const iv = _crypto.randomBytes(16); // 16 bytes IV for AES-256-GCM
       const cipher = _crypto.createCipheriv(
-        'aes-256-gcm',
-        Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),
-        iv,
-      );
+        'aes-256-gcm',Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),iv,);
 
-      let encrypted = cipher.update(data, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
+      let encrypted = cipher.update(data, 'utf8', 'hex');encrypted += cipher.final('hex');
 
       const authTag = cipher.getAuthTag();
 
-      return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
-    } catch (_error) {
-      this.logger.error('Failed to encrypt job data', {
-        error: _error instanceof Error ? _error.message : String(_error),
-      });
-      throw new Error('Data encryption failed');
-    }
-  }
+      return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}';} catch (_error) {
+      this.logger.error('Failed to encrypt job data', {error: _error instanceof Error ? _error.message : String(_error),});
+      throw new Error('Data encryption failed');}}
 
   /**
    * Decrypt data using AES-256-GCM with proper IV handling
    */
   private decryptData(encryptedData: string): string {
     try {
-      const [ivHex, authTagHex, encrypted] = encryptedData.split(':');
-
-      if (!ivHex || !authTagHex || !encrypted) {
-        throw new Error('Invalid encrypted data format');
-      }
-
-      const iv = Buffer.from(ivHex, 'hex');
-      const authTag = Buffer.from(authTagHex, 'hex');
-
-      const decipher = _crypto.createDecipheriv(
-        'aes-256-gcm',
-        Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),
-        iv,
-      );
+      const [ivHex, authTagHex, encrypted] = encryptedData.split(':');if (!ivHex || !authTagHex || !encrypted) {throw new Error('Invalid encrypted data format');}const iv = Buffer.from(ivHex, 'hex');const authTag = Buffer.from(authTagHex, 'hex');const decipher = _crypto.createDecipheriv('aes-256-gcm',Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),iv,);
       decipher.setAuthTag(authTag);
 
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-
-      return decrypted;
-    } catch (_error) {
-      this.logger.error('Failed to decrypt job data', {
-        error: _error instanceof Error ? _error.message : String(_error),
-      });
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');decrypted += decipher.final('utf8');return decrypted;} catch (_error) {
+      this.logger.error('Failed to decrypt job data', {error: _error instanceof Error ? _error.message : String(_error),});
       throw new Error('Data decryption failed');
     }
   }
@@ -781,8 +584,7 @@ export class BackgroundWorker
     private readonly computerUseService: ComputerUseService,
     private readonly configService: ConfigService,
   ) {
-    this.workerId = `worker${process.pid}${_uuidv4().split('-')[0]}`;
-    this.stats = {
+    this.workerId = `worker${process.pid}${_uuidv4().split('-')[0]}';this.stats = {
       workerId: this.workerId,
       isRunning: false,
       jobsProcessed: 0,
@@ -811,34 +613,23 @@ export class BackgroundWorker
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('Worker already running', { workerId: this.workerId });
-      return;
-    }
+      this.logger.warn('Worker already running', { workerId: this.workerId });return;}
 
-    this.logger.log('Starting background worker', { workerId: this.workerId });
-
-    this.isRunning = true;
-    this.stats.isRunning = true;
+    this.logger.log('Starting background worker', { workerId: this.workerId });this.isRunning = true;this.stats.isRunning = true;
 
     const intervalMs = this.configService.get<number>(
-      'JOB_WORKER_INTERVAL',
-      1000,
-    );
+      'JOB_WORKER_INTERVAL',1000,);
 
     this.workerInterval = setInterval(async () => {
       try {
         await this.processNextJob();
       } catch (_error) {
-        this.logger.error('Error in worker loop', {
-          workerId: this.workerId,
-          error: _error instanceof Error ? _error.message : String(_error),
+        this.logger.error('Error in worker loop', {workerId: this.workerId,error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, intervalMs);
 
-    this.logger.log('Background worker started', {
-      workerId: this.workerId,
-      intervalMs,
+    this.logger.log('Background worker started', {workerId: this.workerId,intervalMs,
     });
   }
 
@@ -847,14 +638,9 @@ export class BackgroundWorker
    */
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Worker not running', { workerId: this.workerId });
-      return;
-    }
+      this.logger.warn('Worker not running', { workerId: this.workerId });return;}
 
-    this.logger.log('Stopping background worker', { workerId: this.workerId });
-
-    this.isRunning = false;
-    this.stats.isRunning = false;
+    this.logger.log('Stopping background worker', { workerId: this.workerId });this.isRunning = false;this.stats.isRunning = false;
 
     if (this.workerInterval) {
       clearInterval(this.workerInterval);
@@ -881,18 +667,13 @@ export class BackgroundWorker
    * Process the next available job
    */
   private async processNextJob(): Promise<void> {
-    const operationId = `process_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      // Get highest priority pending job
+    const operationId = `process_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {// Get highest priority pending job
       const job = await this.getNextJob();
       if (!job) {
         return; // No jobs to process
       }
 
-      this.logger.log(`[${operationId}] Processing job`, {
-        workerId: this.workerId,
-        jobId: job.jobId,
+      this.logger.log(`[${operationId}] Processing job`, {workerId: this.workerId,jobId: job.jobId,
         action: job.action.action,
         priority: job.priority,
       });
@@ -966,9 +747,7 @@ export class BackgroundWorker
             await this.jobStorage.updateJobStatus(job.jobId, JobStatus.PENDING);
           }, this.calculateRetryDelay(job.retryCount));
 
-          this.logger.warn(`[${operationId}] Job scheduled for retry`, {
-            workerId: this.workerId,
-            jobId: job.jobId,
+          this.logger.warn(`[${operationId}] Job scheduled for retry`, {workerId: this.workerId,jobId: job.jobId,
             retryCount: job.retryCount + 1,
             maxRetries: job.maxRetries,
           });
@@ -981,9 +760,7 @@ export class BackgroundWorker
             jobError,
           );
 
-          this.logger.error(`[${operationId}] Job failed permanently`, {
-            workerId: this.workerId,
-            jobId: job.jobId,
+          this.logger.error(`[${operationId}] Job failed permanently`, {workerId: this.workerId,jobId: job.jobId,
             retryCount: job.retryCount,
             maxRetries: job.maxRetries,
             error: jobError.message,
@@ -1041,10 +818,7 @@ export class BackgroundWorker
    */
   private async handleJobTimeout(job: JobResult): Promise<void> {
     const jobError: JobError = {
-      code: 'JOB_TIMEOUT',
-      message: 'Job execution exceeded timeout limit',
-      timestamp: new Date(),
-      retryable: false,
+      code: 'JOB_TIMEOUT',message: 'Job execution exceeded timeout limit',timestamp: new Date(),retryable: false,
       context: {
         workerId: this.workerId,
         timeoutAt: job.timeoutAt,
@@ -1059,9 +833,7 @@ export class BackgroundWorker
       jobError,
     );
 
-    this.logger.warn('Job timed out', {
-      workerId: this.workerId,
-      jobId: job.jobId,
+    this.logger.warn('Job timed out', {workerId: this.workerId,jobId: job.jobId,
       timeoutAt: job.timeoutAt,
     });
   }
@@ -1073,15 +845,7 @@ export class BackgroundWorker
     if (error instanceof Error) {
       // Network errors, temporary service unavailability, etc.
       const retryableMessages = [
-        'ECONNRESET',
-        'ECONNREFUSED',
-        'ENOTFOUND',
-        'timeout',
-        'temporary',
-        'unavailable',
-      ];
-
-      return retryableMessages.some((msg) =>
+        'ECONNRESET','ECONNREFUSED','ENOTFOUND','timeout','temporary','unavailable',];return retryableMessages.some((msg) =>
         error.message.toLowerCase().includes(msg.toLowerCase()),
       );
     }
@@ -1142,34 +906,19 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
   ) {
     this.config = {
       maxJobAge: this.configService.get<number>(
-        'JOB_MAX_AGE',
-        7 * 24 * 60 * 60 * 1000,
-      ), // 7 days
+        'JOB_MAX_AGE',7 * 24 * 60 * 60 * 1000,), // 7 days
       cleanupInterval: this.configService.get<number>(
-        'JOB_CLEANUP_INTERVAL',
-        60 * 60 * 1000,
-      ), // 1 hour
-      batchSize: this.configService.get<number>('JOB_CLEANUP_BATCH_SIZE', 100),
-      retentionPolicy: {
-        completedJobs: this.configService.get<number>(
-          'JOB_RETENTION_COMPLETED',
-          24 * 60 * 60 * 1000,
-        ), // 24 hours
+        'JOB_CLEANUP_INTERVAL',60 * 60 * 1000,), // 1 hour
+      batchSize: this.configService.get<number>('JOB_CLEANUP_BATCH_SIZE', 100),retentionPolicy: {completedJobs: this.configService.get<number>(
+          'JOB_RETENTION_COMPLETED',24 * 60 * 60 * 1000,), // 24 hours
         failedJobs: this.configService.get<number>(
-          'JOB_RETENTION_FAILED',
-          7 * 24 * 60 * 60 * 1000,
-        ), // 7 days
+          'JOB_RETENTION_FAILED',7 * 24 * 60 * 60 * 1000,), // 7 days
         cancelledJobs: this.configService.get<number>(
-          'JOB_RETENTION_CANCELLED',
-          12 * 60 * 60 * 1000,
-        ), // 12 hours
+          'JOB_RETENTION_CANCELLED',12 * 60 * 60 * 1000,), // 12 hours
       },
     };
 
-    this.logger.log('JobCleanupManager initialized', this.config);
-  }
-
-  onModuleInit(): void {
+    this.logger.log('JobCleanupManager initialized', this.config);}onModuleInit(): void {
     this.startCleanupSchedule();
   }
 
@@ -1181,17 +930,13 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
    * Start the cleanup schedule
    */
   private startCleanupSchedule(): void {
-    this.logger.log('Starting job cleanup schedule', {
-      intervalMs: this.config.cleanupInterval,
-    });
+    this.logger.log('Starting job cleanup schedule', {intervalMs: this.config.cleanupInterval,});
 
     this.cleanupInterval = setInterval(async () => {
       try {
         await this.performCleanup();
       } catch (_error) {
-        this.logger.error('Error in cleanup schedule', {
-          error: _error instanceof Error ? _error.message : String(_error),
-        });
+        this.logger.error('Error in cleanup schedule', {error: _error instanceof Error ? _error.message : String(_error),});
       }
     }, this.config.cleanupInterval);
   }
@@ -1211,18 +956,10 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
    * Perform cleanup of expired jobs
    */
   async performCleanup(): Promise<void> {
-    const operationId = `cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Starting job cleanup`);
-
-      const deletedCount = await this.jobStorage.cleanupExpiredJobs(
-        this.config.maxJobAge,
+    const operationId = `cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Starting job cleanup`);const deletedCount = await this.jobStorage.cleanupExpiredJobs(this.config.maxJobAge,
       );
 
-      this.logger.log(`[${operationId}] Job cleanup completed`, {
-        deletedJobs: deletedCount,
-        maxAgeMs: this.config.maxJobAge,
+      this.logger.log(`[${operationId}] Job cleanup completed`, {deletedJobs: deletedCount,maxAgeMs: this.config.maxJobAge,
       });
     } catch (_error) {
       this.logger.error(`[${operationId}] Job cleanup failed`, {
@@ -1247,13 +984,8 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     private readonly cleanupManager: JobCleanupManager,
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('JobManagementService initialized');
-  }
-
-  onModuleInit(): void {
-    this.logger.log('JobManagementService starting...');
-    // Components start themselves via their OnModuleInit
-  }
+    this.logger.log('JobManagementService initialized');}onModuleInit(): void {
+    this.logger.log('JobManagementService starting...');// Components start themselves via their OnModuleInit}
 
   onModuleDestroy(): void {
     this.logger.log('JobManagementService shutting down...');
@@ -1308,93 +1040,52 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       await this.jobStorage.saveJob(job);
 
-      this.logger.log(`[${operationId}] Job created successfully`, {
-        jobId,
-        action: action.action,
+      this.logger.log(`[${operationId}] Job created successfully`, {jobId,action: action.action,
         priority: job.priority,
         timeout,
       });
 
       return jobId;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to create job`, {
-        action: action.action,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to create job`, {action: action.action,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to create job: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to create job: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Get job status and result
    */
   async getJobStatus(jobId: string): Promise<JobResult | null> {
-    const operationId = `get_job_status${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.debug(`[${operationId}] Getting job status`, { jobId });
-
-      const job = await this.jobStorage.getJob(jobId);
-
-      if (!job) {
-        this.logger.debug(`[${operationId}] Job not found`, { jobId });
-        return null;
-      }
+    const operationId = `get_job_status${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Getting job status`, { jobId });const job = await this.jobStorage.getJob(jobId);if (!job) {
+        this.logger.debug(`[${operationId}] Job not found`, { jobId });return null;}
 
       return job;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to get job status`, {
-        jobId,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to get job status`, {jobId,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get job status: ${_error instanceof Error ? _error.message : String(_error)}`,
-      );
-    }
+        `Failed to get job status: ${_error instanceof Error ? _error.message : String(_error)}`,);}
   }
 
   /**
    * Get job result (throws if not completed)
    */
   async getJobResult(jobId: string): Promise<ComputerActionResponse> {
-    const operationId = `get_job_result${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.debug(`[${operationId}] Getting job result`, { jobId });
-
-      const job = await this.jobStorage.getJob(jobId);
-
-      if (!job) {
-        throw new Error(`Job ${jobId} not found`);
-      }
-
-      if (
+    const operationId = `get_job_result${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Getting job result`, { jobId });const job = await this.jobStorage.getJob(jobId);if (!job) {
+        throw new Error(`Job ${jobId} not found`);}if (
         job.status === JobStatus.PENDING ||
         job.status === JobStatus.RUNNING
       ) {
-        throw new Error(`Job ${jobId} is still ${job.status.toLowerCase()}`);
-      }
-
-      if (job.status === JobStatus.FAILED || job.status === JobStatus.TIMEOUT) {
+        throw new Error(`Job ${jobId} is still ${job.status.toLowerCase()}`);}if (job.status === JobStatus.FAILED || job.status === JobStatus.TIMEOUT) {
         throw new Error(
-          `Job ${jobId} failed: ${job.error?.message ?? 'Unknown error'}`,
-        );
-      }
+          `Job ${jobId} failed: ${job.error?.message ?? 'Unknown error'}`,);}
 
       if (job.status === JobStatus.CANCELLED) {
-        throw new Error(`Job ${jobId} was cancelled`);
-      }
-
-      if (job.result === undefined) {
-        throw new Error(`Job ${jobId} has no result`);
-      }
-      return job.result;
+        throw new Error(`Job ${jobId} was cancelled`);}if (job.result === undefined) {
+        throw new Error(`Job ${jobId} has no result`);}return job.result;
     } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to get job result`, {
-        jobId,
-        error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to get job result`, {jobId,error: _error instanceof Error ? _error.message : String(_error),
       });
       throw _error; // Re-throw to preserve original error
     }
@@ -1404,18 +1095,8 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
    * Cancel a pending or running job
    */
   async cancelJob(jobId: string): Promise<void> {
-    const operationId = `cancel_job${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Cancelling job`, { jobId });
-
-      const job = await this.jobStorage.getJob(jobId);
-
-      if (!job) {
-        throw new Error(`Job ${jobId} not found`);
-      }
-
-      if (
+    const operationId = `cancel_job${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Cancelling job`, { jobId });const job = await this.jobStorage.getJob(jobId);if (!job) {
+        throw new Error(`Job ${jobId} not found`);}if (
         job.status === JobStatus.COMPLETED ||
         job.status === JobStatus.FAILED ||
         job.status === JobStatus.CANCELLED ||
@@ -1427,10 +1108,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
       }
 
       const cancelError: JobError = {
-        code: 'JOB_CANCELLED',
-        message: 'Job was cancelled by user request',
-        timestamp: new Date(),
-        retryable: false,
+        code: 'JOB_CANCELLED',message: 'Job was cancelled by user request',timestamp: new Date(),retryable: false,
         context: {
           operationId,
           cancelledBy: 'user',
@@ -1444,9 +1122,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         cancelError,
       );
 
-      this.logger.log(`[${operationId}] Job cancelled successfully`, { jobId });
-    } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to cancel job`, {
+      this.logger.log(`[${operationId}] Job cancelled successfully`, { jobId });} catch (_error) {this.logger.error(`[${operationId}] Failed to cancel job`, {
         jobId,
         error: _error instanceof Error ? _error.message : String(_error),
       });
@@ -1460,9 +1136,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   executeActionAsync(jobId: string, action: ComputerAction): Promise<void> {
     // This method is deprecated - use createJob instead
     this.logger.warn(
-      'executeActionAsync is deprecated, use createJob instead',
-      {
-        jobId,
+      'executeActionAsync is deprecated, use createJob instead',{jobId,
         action: action.action,
       },
     );
@@ -1490,10 +1164,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     cancelled: number;
     timeout: number;
   }> {
-    const operationId = `get_queue_stats${Date.now()}${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.debug(`[${operationId}] Getting queue statistics`);
+    const operationId = `get_queue_stats${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.debug(`[${operationId}] Getting queue statistics`);
 
       const [pending, running, completed, failed, cancelled] =
         await Promise.all([
@@ -1504,9 +1175,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
           this.jobStorage.getJobsByStatus(JobStatus.CANCELLED),
         ]);
 
-      // Get timeout jobs (they're stored as failed with timeout error)
-      const timeoutJobs = failed.filter(
-        (job) => job.error?.code === 'JOB_TIMEOUT',
+      // Get timeout jobs (they're stored as failed with timeout error)const timeoutJobs = failed.filter((job) => job.error?.code === 'JOB_TIMEOUT',
       );
 
       const stats = {
@@ -1518,13 +1187,8 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         timeout: timeoutJobs.length,
       };
 
-      this.logger.debug(`[${operationId}] Queue statistics retrieved`, stats);
-
-      return stats;
-    } catch (_error) {
-      this.logger.error(`[${operationId}] Failed to get queue statistics`, {
-        error: _error instanceof Error ? _error.message : String(_error),
-      });
+      this.logger.debug(`[${operationId}] Queue statistics retrieved`, stats);return stats;} catch (_error) {
+      this.logger.error(`[${operationId}] Failed to get queue statistics`, {error: _error instanceof Error ? _error.message : String(_error),});
       throw new Error(
         `Failed to get queue statistics: ${_error instanceof Error ? _error.message : String(_error)}`,
       );

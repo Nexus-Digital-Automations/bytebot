@@ -12,35 +12,15 @@
 
 // TypeScript safety note: This file contains NestJS decorators that work with metadata reflection
 
-import 'reflect-metadata';
-import { SetMetadata, applyDecorators } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
-
-/**
- * API versioning strategy enumeration
+import 'reflect-metadata';import { SetMetadata, applyDecorators } from '@nestjs/common';import { ApiHeader, ApiTags } from '@nestjs/swagger';/*** API versioning strategy enumeration
  */
 export enum VersioningStrategy {
   /** Version specified in request header (_e.g., Accept-Version: v1) */
-  HEADER = 'header',
-
-  /** Version specified in URL path (e.g., /api/v1/computer-use) */
-  URL = 'url',
-
-  /** Version specified as query parameter (e.g., ?version=v1) */
-  QUERY = 'query',
-
-  /** Version specified in Accept header (_e.g., Accept: application/vnd.bytebotd.v1+json) */
-  MEDIA_TYPE = 'media_type',
-}
-
-/**
+  HEADER = 'header',/** Version specified in URL path (e.g., /api/v1/computer-use) */URL = 'url',/** Version specified as query parameter (e.g., ?version=v1) */QUERY = 'query',/** Version specified in Accept header (_e.g., Accept: application/vnd.bytebotd.v1+json) */MEDIA_TYPE = 'media_type',}/**
  * API version configuration for BytebotD
  */
 export interface ApiVersionConfig {
-  /** Version identifier (e.g., 'v1', 'v2', '1.0') */
-  version: string;
-
-  /** Deprecation information */
+  /** Version identifier (e.g., 'v1', 'v2', '1.0') */version: string;/** Deprecation information */
   deprecation?: {
     /** Is this version deprecated */
     deprecated: boolean;
@@ -74,10 +54,7 @@ export interface ApiVersionConfig {
   };
 
   /** Version stability level */
-  stability?: 'experimental' | 'beta' | 'stable' | 'deprecated' | 'sunset';
-
-  /** Desktop service compatibility */
-  desktopCompatibility?: {
+  stability?: 'experimental' | 'beta' | 'stable' | 'deprecated' | 'sunset';/** Desktop service compatibility */desktopCompatibility?: {
     /** Minimum desktop environment version */
     minDesktopVersion?: string;
 
@@ -93,22 +70,13 @@ export interface ApiVersionConfig {
  * Supported API versions for BytebotD desktop services
  */
 export const SUPPORTED_API_VERSIONS = {
-  V1: 'v1',
-  V2: 'v2',
-} as const;
-
-export type SupportedVersion =
+  V1: 'v1',V2: 'v2',} as const;export type SupportedVersion =
   (typeof SUPPORTED_API_VERSIONS)[keyof typeof SUPPORTED_API_VERSIONS];
 
 /**
  * API version metadata keys
  */
-export const VERSION_METADATA_KEY = 'api_version';
-export const VERSION_CONFIG_KEY = 'api_version_config';
-export const DESKTOP_VERSION_KEY = 'desktop_api_version';
-
-/**
- * BytebotD API Version decorator - applies version constraints to desktop service methods
+export const VERSION_METADATA_KEY = 'api_version';export const VERSION_CONFIG_KEY = 'api_version_config';export const DESKTOP_VERSION_KEY = 'desktop_api_version';/*** BytebotD API Version decorator - applies version constraints to desktop service methods
  * @param config - Version configuration with desktop-specific options
  */
 export const ApiVersion = (config: string | ApiVersionConfig) => {
@@ -125,20 +93,12 @@ export const ApiVersion = (config: string | ApiVersionConfig) => {
       description: `BytebotD desktop API version header (${versionConfig.version})`,
       required: false,
       schema: {
-        type: 'string',
-        enum: Object.values(SUPPORTED_API_VERSIONS),
-        default: SUPPORTED_API_VERSIONS.V1,
+        type: 'string',enum: Object.values(SUPPORTED_API_VERSIONS),default: SUPPORTED_API_VERSIONS.V1,
       },
     }),
     ApiHeader({
-      name: 'X-Desktop-Client',
-      description: 'Desktop client identifier for compatibility tracking',
-      required: false,
-      schema: {
-        type: 'string',
-        example: 'BytebotD-Desktop-1.0.0',
-      },
-    }),
+      name: 'X-Desktop-Client',description: 'Desktop client identifier for compatibility tracking',required: false,schema: {
+        type: 'string',example: 'BytebotD-Desktop-1.0.0',},}),
   );
 };
 
@@ -154,37 +114,21 @@ export const DeprecatedApi = (config: {
   desktopMigrationNotes?: string;
 }) => {
   return applyDecorators(
-    SetMetadata('deprecated', true),
-    SetMetadata('deprecation_config', config),
-    ApiHeader({
-      name: 'Deprecation',
-      description: 'BytebotD API deprecation warning header',
-      required: false,
-      schema: {
+    SetMetadata('deprecated', true),SetMetadata('deprecation_config', config),ApiHeader({name: 'Deprecation',description: 'BytebotD API deprecation warning header',required: false,schema: {
         type: 'string',
-        example: `date="${config.since.toISOString()}"`,
+        example: `date="${config.since.toISOString()}"",
       },
     }),
     config.sunset
       ? ApiHeader({
-          name: 'Sunset',
-          description: 'BytebotD API sunset date header',
-          required: false,
-          schema: {
-            type: 'string',
-            example: config.sunset.toISOString(),
-          },
+          name: 'Sunset',description: 'BytebotD API sunset date header',required: false,schema: {
+            type: 'string',example: config.sunset.toISOString(),},
         })
       : () => {},
     config.desktopMigrationNotes
       ? ApiHeader({
-          name: 'X-Desktop-Migration-Notes',
-          description: 'Desktop-specific migration guidance',
-          required: false,
-          schema: {
-            type: 'string',
-            example: config.desktopMigrationNotes,
-          },
+          name: 'X-Desktop-Migration-Notes',description: 'Desktop-specific migration guidance',required: false,schema: {
+            type: 'string',example: config.desktopMigrationNotes,},
         })
       : () => {},
   );
@@ -201,13 +145,7 @@ export const ForVersion = (
 ) => {
   const versionConfig: ApiVersionConfig = {
     version,
-    stability: 'stable',
-    desktopCompatibility: {
-      minDesktopVersion: '1.0.0',
-      vncRequirements: ['noVNC 1.3.0+'],
-      computerUseFeatures: ['screenshot', 'click', 'type', 'scroll'],
-    },
-    ...config,
+    stability: 'stable',desktopCompatibility: {minDesktopVersion: '1.0.0',vncRequirements: ['noVNC 1.3.0+'],computerUseFeatures: ['screenshot', 'click', 'type', 'scroll'],},...config,
   };
 
   return ApiVersion(versionConfig);
@@ -222,15 +160,12 @@ export const MultiVersion = (versions: SupportedVersion[]) => {
     SetMetadata('multi_version', versions),
     SetMetadata(VERSION_METADATA_KEY, versions[0]), // Default to first version
     SetMetadata(DESKTOP_VERSION_KEY, true),
-    ApiTags(`BytebotD API ${versions.join(', ')}`),
+    ApiTags(`BytebotD API ${versions.join(`, ')}`),
     ApiHeader({
       name: 'Accept-Version',
-      description: `BytebotD desktop API version header (supports: ${versions.join(', ')})`,
-      required: false,
+      description: `BytebotD desktop API version header (supports: ${versions.join(`, ')})',required: false,
       schema: {
-        type: 'string',
-        enum: versions,
-        default: versions[0],
+        type: 'string',enum: versions,default: versions[0],
       },
     }),
   );
@@ -243,33 +178,12 @@ export const MultiVersion = (versions: SupportedVersion[]) => {
 export const ExperimentalApi = (version: SupportedVersion) => {
   return applyDecorators(
     ForVersion(version, {
-      stability: 'experimental',
-      desktopCompatibility: {
-        minDesktopVersion: '1.0.0-beta',
-        vncRequirements: ['noVNC 1.4.0+'],
-        computerUseFeatures: ['experimental-features'],
-      },
-    }),
-    SetMetadata('experimental', true),
-    SetMetadata('desktop_experimental', true),
+      stability: 'experimental',desktopCompatibility: {minDesktopVersion: '1.0.0-beta',vncRequirements: ['noVNC 1.4.0+'],computerUseFeatures: ['experimental-features'],},}),
+    SetMetadata('experimental', true),SetMetadata('desktop_experimental', true),ApiHeader({name: 'X-API-Experimental',description: 'Accept experimental BytebotD desktop API features',required: true,schema: {
+        type: 'string',enum: ['true'],example: 'true',},}),
     ApiHeader({
-      name: 'X-API-Experimental',
-      description: 'Accept experimental BytebotD desktop API features',
-      required: true,
-      schema: {
-        type: 'string',
-        enum: ['true'],
-        example: 'true',
-      },
-    }),
-    ApiHeader({
-      name: 'X-Desktop-Experimental',
-      description: 'Enable experimental desktop features',
-      required: false,
-      schema: {
-        type: 'boolean',
-        default: false,
-      },
+      name: 'X-Desktop-Experimental',description: 'Enable experimental desktop features',required: false,schema: {
+        type: 'boolean',default: false,},
     }),
   );
 };
@@ -281,23 +195,9 @@ export const ExperimentalApi = (version: SupportedVersion) => {
 export const BetaApi = (version: SupportedVersion) => {
   return applyDecorators(
     ForVersion(version, {
-      stability: 'beta',
-      desktopCompatibility: {
-        minDesktopVersion: '1.0.0-rc',
-        vncRequirements: ['noVNC 1.3.0+'],
-        computerUseFeatures: ['beta-computer-use'],
-      },
-    }),
-    SetMetadata('beta', true),
-    SetMetadata('desktop_beta', true),
-    ApiHeader({
-      name: 'X-API-Beta',
-      description: 'Accept beta BytebotD desktop API features',
-      required: false,
-      schema: {
-        type: 'boolean',
-        default: false,
-      },
+      stability: 'beta',desktopCompatibility: {minDesktopVersion: '1.0.0-rc',vncRequirements: ['noVNC 1.3.0+'],computerUseFeatures: ['beta-computer-use'],},}),
+    SetMetadata('beta', true),SetMetadata('desktop_beta', true),ApiHeader({name: 'X-API-Beta',description: 'Accept beta BytebotD desktop API features',required: false,schema: {
+        type: 'boolean',default: false,},
     }),
   );
 };
@@ -314,28 +214,10 @@ export const ComputerUseApi = (
   return applyDecorators(
     ForVersion(version, {
       desktopCompatibility: {
-        minDesktopVersion: '1.0.0',
-        vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],
-        computerUseFeatures: features ?? [
-          'screenshot',
-          'click',
-          'type',
-          'scroll',
-          'key',
-        ],
-      },
+        minDesktopVersion: '1.0.0',vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],computerUseFeatures: features ?? ['screenshot','click','type','scroll','key',],},
     }),
-    SetMetadata('computer_use', true),
-    ApiTags('Computer Use'),
-    ApiHeader({
-      name: 'X-Computer-Use-Client',
-      description: 'Computer use client identifier',
-      required: false,
-      schema: {
-        type: 'string',
-        example: 'BytebotD-ComputerUse-1.0.0',
-      },
-    }),
+    SetMetadata('computer_use', true),ApiTags('Computer Use'),ApiHeader({name: 'X-Computer-Use-Client',description: 'Computer use client identifier',required: false,schema: {
+        type: 'string',example: 'BytebotD-ComputerUse-1.0.0',},}),
   );
 };
 
@@ -346,9 +228,7 @@ export const ComputerUseApi = (
  */
 export function getVersionConfig(target: object): ApiVersionConfig | null {
   const metadata: unknown = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
-  return metadata && typeof metadata === 'object' && 'version' in metadata
-    ? (metadata as ApiVersionConfig)
-    : null;
+  return metadata && typeof metadata === 'object' && 'version' in metadata? (metadata as ApiVersionConfig): null;
 }
 
 /**
@@ -358,19 +238,13 @@ export function getVersionConfig(target: object): ApiVersionConfig | null {
  */
 export function getApiVersion(target: object): string | null {
   const metadata: unknown = Reflect.getMetadata(VERSION_METADATA_KEY, target);
-  return typeof metadata === 'string' ? metadata : null;
-}
-
-/**
+  return typeof metadata === 'string' ? metadata : null;}/**
  * Check if endpoint supports multiple versions
  * @param target - Target class or method
  * @returns Array of supported versions or null
  */
 export function getMultiVersions(target: object): SupportedVersion[] | null {
-  const metadata: unknown = Reflect.getMetadata('multi_version', target);
-  return Array.isArray(metadata) && metadata.every((v) => typeof v === 'string')
-    ? (metadata as SupportedVersion[])
-    : null;
+  const metadata: unknown = Reflect.getMetadata('multi_version', target);return Array.isArray(metadata) && metadata.every((v) => typeof v === 'string')? (metadata as SupportedVersion[]): null;
 }
 
 /**

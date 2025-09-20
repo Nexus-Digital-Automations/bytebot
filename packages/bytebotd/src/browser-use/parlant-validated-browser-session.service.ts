@@ -20,25 +20,15 @@
  * Performance: Optimized validation with intelligent session state management
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { URL } from 'url';
-import { BrowserSessionService } from './browser-session.service';
-import { 
-  ParlantIntegrationService, 
+import { Injectable, Logger } from '@nestjs/common';import { URL } from 'url';import { BrowserSessionService } from './browser-session.service';import { ParlantIntegrationService, 
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
   ConversationalValidationError
-} from '../parlant/parlant-integration.service';
-import {
-  CreateBrowserSessionDto,
+} from '../parlant/parlant-integration.service';import {CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserTabInfoDto,
-} from './dto/browser-session.dto';
-
-// ===== PARLANT SESSION VALIDATION INTERFACES =====
-
-/**
+} from './dto/browser-session.dto';// ===== PARLANT SESSION VALIDATION INTERFACES =====/**
  * Browser session validation context with conversation details
  */
 export interface BrowserSessionValidationContext extends ParlantConversationContext {
@@ -58,10 +48,7 @@ export interface BrowserSessionAuditEntry {
   readonly sessionId: string;
   readonly description: string;
   readonly riskLevel: RiskLevel;
-  readonly validationResult: 'APPROVED' | 'DENIED';
-  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';
-  readonly conversationId: string;
-  readonly sessionConfig?: Partial<CreateBrowserSessionDto>;
+  readonly validationResult: 'APPROVED' | 'DENIED';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT';readonly conversationId: string;readonly sessionConfig?: Partial<CreateBrowserSessionDto>;
   readonly resourceImpact?: ResourceImpactInfo;
 }
 
@@ -69,17 +56,7 @@ export interface BrowserSessionAuditEntry {
  * Session operation types
  */
 export type SessionOperation = 
-  | 'CREATE_SESSION'
-  | 'DELETE_SESSION' 
-  | 'UPDATE_SESSION'
-  | 'CREATE_TAB'
-  | 'CLOSE_TAB'
-  | 'SWITCH_TAB'
-  | 'CLEANUP_SESSIONS'
-  | 'MONITOR_SESSION';
-
-/**
- * Session resource state for validation context
+  | 'CREATE_SESSION'| 'DELETE_SESSION' | 'UPDATE_SESSION'| 'CREATE_TAB'| 'CLOSE_TAB'| 'SWITCH_TAB'| 'CLEANUP_SESSIONS'| 'MONITOR_SESSION';/*** Session resource state for validation context
  */
 export interface SessionResourceState {
   readonly totalMemoryUsageMB: number;
@@ -160,11 +137,7 @@ export class ParlantValidatedBrowserSessionService {
     private readonly originalBrowserSessionService: BrowserSessionService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_session_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Session Service`, {
-      hasOriginalService: !!this.originalBrowserSessionService,
-      hasParlantService: !!this.parlantIntegrationService,
+    const operationId = `parlant_session_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Session Service`, {hasOriginalService: !!this.originalBrowserSessionService,hasParlantService: !!this.parlantIntegrationService,
       validationEnabled: true,
     });
 
@@ -188,20 +161,14 @@ export class ParlantValidatedBrowserSessionService {
     sessionDto: CreateBrowserSessionDto,
     context: BrowserSessionValidationContext
   ): Promise<SessionValidationResult> {
-    const operationId = `parlant_session_create${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.totalSessionOperations++;
+    const operationId = `parlant_session_create${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalSessionOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated session creation: ${sessionDto.name}`,
-      {
-        operationId,
+      `[${operationId}] Starting Parlant-validated session creation: ${sessionDto.name}`,{operationId,
         sessionName: sessionDto.name,
         userId: context.userId,
         headless: sessionDto.headless,
-        viewport: `${sessionDto.viewportWidth}x${sessionDto.viewportHeight}`,
-        currentSessions: context.currentActiveSessionsCount,
-        timestamp: new Date().toISOString(),
+        viewport: `${sessionDto.viewportWidth}x${sessionDto.viewportHeight}`,currentSessions: context.currentActiveSessionsCount,timestamp: new Date().toISOString(),
       }
     );
 
@@ -210,9 +177,7 @@ export class ParlantValidatedBrowserSessionService {
       const riskAssessment = this.assessSessionCreationRisk(sessionDto, context);
       
       this.logger.log(
-        `[${operationId}] Session creation risk assessment completed: ${riskAssessment.riskLevel}`,
-        {
-          operationId,
+        `[${operationId}] Session creation risk assessment completed: ${riskAssessment.riskLevel}`,{operationId,
           riskLevel: riskAssessment.riskLevel,
           riskFactors: riskAssessment.riskFactors,
           requiresApproval: riskAssessment.requiresApproval,
@@ -239,12 +204,8 @@ export class ParlantValidatedBrowserSessionService {
         // Create audit entry for denied operation
         await this.createSessionAuditEntry({
           timestamp: new Date(),
-          operation: 'CREATE_SESSION',
-          sessionId: 'DENIED',
-          description: this.generateSessionCreationDescription(sessionDto),
-          riskLevel: riskAssessment.riskLevel,
-          validationResult: 'DENIED',
-          executionResult: 'FAILURE',
+          operation: 'CREATE_SESSION',sessionId: 'DENIED',description: this.generateSessionCreationDescription(sessionDto),riskLevel: riskAssessment.riskLevel,
+          validationResult: 'DENIED',executionResult: 'FAILURE',
           conversationId: validationResponse.conversationId,
           sessionConfig: sessionDto,
           resourceImpact: this.estimateResourceImpact(sessionDto),
@@ -326,9 +287,7 @@ export class ParlantValidatedBrowserSessionService {
       // Step 7: Create successful audit entry
       await this.createSessionAuditEntry({
         timestamp: new Date(),
-        operation: 'CREATE_SESSION',
-        sessionId: session.sessionId,
-        description: this.generateSessionCreationDescription(sessionDto),
+        operation: 'CREATE_SESSION',sessionId: session.sessionId,description: this.generateSessionCreationDescription(sessionDto),
         riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
         executionResult: executionStatus,
@@ -359,9 +318,7 @@ export class ParlantValidatedBrowserSessionService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${operationId}] Parlant-validated session creation failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated session creation failed`,{operationId,
           sessionName: sessionDto.name,
           error: error instanceof Error ? error.message : String(error),
           duration,
@@ -374,9 +331,7 @@ export class ParlantValidatedBrowserSessionService {
       }
 
       // Wrap other errors with context
-      throw new Error(`Session creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Session creation failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Delete session with Parlant conversational validation
@@ -389,13 +344,8 @@ export class ParlantValidatedBrowserSessionService {
     sessionId: string,
     context: BrowserSessionValidationContext
   ): Promise<void> {
-    const operationId = `parlant_session_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated session deletion: ${sessionId}`,
-      {
-        operationId,
+    const operationId = `parlant_session_delete${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated session deletion: ${sessionId}`,{operationId,
         sessionId,
         userId: context.userId,
       }
@@ -407,11 +357,7 @@ export class ParlantValidatedBrowserSessionService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserSessionService.deleteSession`,
-        functionParams: { sessionId },
-        actionDescription: `Delete browser session ${sessionId}`,
-        context: context,
-        riskLevel: riskAssessment.riskLevel,
+        functionName: `BrowserSessionService.deleteSession`,functionParams: { sessionId },actionDescription: `Delete browser session ${sessionId}`,context: context,riskLevel: riskAssessment.riskLevel,
         operationId,
       };
 
@@ -444,15 +390,12 @@ export class ParlantValidatedBrowserSessionService {
         sessionId,
         description: `Delete browser session ${sessionId}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
       this.logger.log(
-        `[${operationId}] Session deleted successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Session deleted successfully after validation`,{operationId,
           sessionId,
           duration: Date.now() - startTime,
         }
@@ -460,9 +403,7 @@ export class ParlantValidatedBrowserSessionService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated session deletion failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated session deletion failed`,{operationId,
           sessionId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -472,9 +413,7 @@ export class ParlantValidatedBrowserSessionService {
         throw error;
       }
 
-      throw new Error(`Session deletion failed after validation: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+      throw new Error(`Session deletion failed after validation: ${error instanceof Error ? error.message : String(error)}`);}}
 
   /**
    * Create tab with Parlant conversational validation
@@ -489,13 +428,8 @@ export class ParlantValidatedBrowserSessionService {
     url: string,
     context: BrowserSessionValidationContext
   ): Promise<BrowserTabInfoDto> {
-    const operationId = `parlant_tab_create${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${operationId}] Starting Parlant-validated tab creation`,
-      {
-        operationId,
+    const operationId = `parlant_tab_create${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${operationId}] Starting Parlant-validated tab creation`,{operationId,
         sessionId,
         url,
         userId: context.userId,
@@ -508,9 +442,7 @@ export class ParlantValidatedBrowserSessionService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserSessionService.createTab`,
-        functionParams: { sessionId, url: this.sanitizeUrlForValidation(url) },
-        actionDescription: `Create new tab in session ${sessionId} with URL: ${this.sanitizeUrlForValidation(url)}`,
+        functionName: `BrowserSessionService.createTab`,functionParams: { sessionId, url: this.sanitizeUrlForValidation(url) },actionDescription: `Create new tab in session ${sessionId} with URL: ${this.sanitizeUrlForValidation(url)}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -536,15 +468,12 @@ export class ParlantValidatedBrowserSessionService {
         sessionId,
         description: `Create tab with URL: ${this.sanitizeUrlForValidation(url)}`,
         riskLevel: riskAssessment.riskLevel,
-        validationResult: 'APPROVED',
-        executionResult: 'SUCCESS',
+        validationResult: 'APPROVED',executionResult: 'SUCCESS',
         conversationId: validationResponse.conversationId,
       });
 
       this.logger.log(
-        `[${operationId}] Tab created successfully after validation`,
-        {
-          operationId,
+        `[${operationId}] Tab created successfully after validation`,{operationId,
           sessionId,
           tabId: tabInfo.tabId,
           duration: Date.now() - startTime,
@@ -555,9 +484,7 @@ export class ParlantValidatedBrowserSessionService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Parlant-validated tab creation failed`,
-        {
-          operationId,
+        `[${operationId}] Parlant-validated tab creation failed`,{operationId,
           sessionId,
           url: this.sanitizeUrlForValidation(url),
           error: error instanceof Error ? error.message : String(error),
@@ -582,54 +509,28 @@ export class ParlantValidatedBrowserSessionService {
     context: BrowserSessionValidationContext
   ): SessionOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Assess based on session configuration
     if (!sessionDto.headless) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('non_headless_mode');
-    }
-
-    if (sessionDto.devtools) {
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('non_headless_mode');}if (sessionDto.devtools) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('devtools_enabled');
-    }
-
-    // Assess based on current system state
+      riskFactors.push('devtools_enabled');}// Assess based on current system state
     if (context.currentActiveSessionsCount >= 5) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_session_count');
-    }
-
-    // Assess based on resource usage
+      riskFactors.push('high_session_count');}// Assess based on resource usage
     if (context.systemResourceState.totalMemoryUsageMB > 2000) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_memory_usage');
-    }
-
-    if (context.systemResourceState.cpuUsagePercent > 80) {
+      riskFactors.push('high_memory_usage');}if (context.systemResourceState.cpuUsagePercent > 80) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_cpu_usage');
-    }
-
-    // Assess based on security profile
+      riskFactors.push('high_cpu_usage');}// Assess based on security profile
     if (context.securityProfile.suspiciousActivityScore > 0.7) {
-      riskLevel = RiskLevel.CRITICAL;
-      riskFactors.push('suspicious_activity_detected');
-    }
-
-    if (context.securityProfile.userTrustLevel === 'LOW') {
-      riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('low_user_trust_level');
-    }
-
-    // Check for proxy configuration
+      riskLevel = RiskLevel._CRITICAL;
+      riskFactors.push('suspicious_activity_detected');}if (context.securityProfile.userTrustLevel === 'LOW') {riskLevel = this.escalateRiskLevel(riskLevel);riskFactors.push('low_user_trust_level');}// Check for proxy configuration
     if (sessionDto.proxy) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('proxy_configuration');
-    }
-
-    const mitigationStrategies = this.generateSessionMitigationStrategies(riskLevel, riskFactors);
+      riskFactors.push('proxy_configuration');}const mitigationStrategies = this.generateSessionMitigationStrategies(riskLevel, riskFactors);
     const resourceConstraints = this.generateResourceConstraints(context);
     const securityRecommendations = this.generateSecurityRecommendations(context);
     
@@ -637,7 +538,7 @@ export class ParlantValidatedBrowserSessionService {
       riskLevel,
       riskFactors,
       mitigationStrategies,
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       resourceConstraints,
       securityRecommendations,
     };
@@ -651,26 +552,20 @@ export class ParlantValidatedBrowserSessionService {
     context: BrowserSessionValidationContext
   ): SessionOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Check if session has active tasks
     const hasActiveTasks = this.hasActiveTasksInSession(sessionId);
     if (hasActiveTasks) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('active_tasks_in_session');
-    }
-
-    // Check for data loss potential
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('active_tasks_in_session');}// Check for data loss potential
     if (this.hasUnsavedDataInSession(sessionId)) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('potential_data_loss');
-    }
-
-    return {
+      riskFactors.push('potential_data_loss');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateSessionMitigationStrategies(riskLevel, riskFactors),
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       resourceConstraints: [],
       securityRecommendations: [],
     };
@@ -685,35 +580,23 @@ export class ParlantValidatedBrowserSessionService {
     context: BrowserSessionValidationContext
   ): SessionOperationRiskAssessment {
     const riskFactors: string[] = [];
-    let riskLevel: RiskLevel = RiskLevel.LOW;
+    let riskLevel: RiskLevel = RiskLevel._LOW;
 
     // Assess URL safety
     if (this.isExternalDomain(url)) {
-      riskLevel = RiskLevel.MEDIUM;
-      riskFactors.push('external_domain_access');
-    }
-
-    if (this.containsSensitiveKeywords(url)) {
-      riskLevel = RiskLevel.HIGH;
-      riskFactors.push('sensitive_url_keywords');
-    }
-
-    if (this.isSuspiciousUrl(url)) {
-      riskLevel = RiskLevel.CRITICAL;
-      riskFactors.push('suspicious_url_pattern');
-    }
-
-    // Check tab count in session
+      riskLevel = RiskLevel._MODERATE;
+      riskFactors.push('external_domain_access');}if (this.containsSensitiveKeywords(url)) {
+      riskLevel = RiskLevel._HIGH;
+      riskFactors.push('sensitive_url_keywords');}if (this.isSuspiciousUrl(url)) {
+      riskLevel = RiskLevel._CRITICAL;
+      riskFactors.push('suspicious_url_pattern');}// Check tab count in session
     if (context.systemResourceState.openTabsCount > 20) {
       riskLevel = this.escalateRiskLevel(riskLevel);
-      riskFactors.push('high_tab_count');
-    }
-
-    return {
+      riskFactors.push('high_tab_count');}return {
       riskLevel,
       riskFactors,
       mitigationStrategies: this.generateSessionMitigationStrategies(riskLevel, riskFactors),
-      requiresApproval: riskLevel !== RiskLevel.MINIMAL,
+      requiresApproval: riskLevel !== RiskLevel._MINIMAL,
       resourceConstraints: [],
       securityRecommendations: [],
     };
@@ -726,12 +609,12 @@ export class ParlantValidatedBrowserSessionService {
    */
   private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
-      case RiskLevel.MINIMAL: return RiskLevel.LOW;
-      case RiskLevel.LOW: return RiskLevel.MEDIUM;
-      case RiskLevel.MEDIUM: return RiskLevel.HIGH;
-      case RiskLevel.HIGH: return RiskLevel.CRITICAL;
-      case RiskLevel.CRITICAL: return RiskLevel.CRITICAL;
-      default: return RiskLevel.MEDIUM;
+      case RiskLevel._MINIMAL: return RiskLevel._LOW;
+      case RiskLevel._LOW: return RiskLevel._MODERATE;
+      case RiskLevel._MODERATE: return RiskLevel._HIGH;
+      case RiskLevel._HIGH: return RiskLevel._CRITICAL;
+      case RiskLevel._CRITICAL: return RiskLevel._CRITICAL;
+      default: return RiskLevel._MODERATE;
     }
   }
 
@@ -741,23 +624,8 @@ export class ParlantValidatedBrowserSessionService {
   private generateSessionMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[] = []): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.includes('non_headless_mode')) {
-      strategies.push('enable_session_monitoring', 'verify_user_presence');
-    }
-
-    if (riskFactors.includes('high_session_count')) {
-      strategies.push('cleanup_idle_sessions', 'implement_session_limits');
-    }
-
-    if (riskFactors.includes('external_domain_access')) {
-      strategies.push('verify_domain_safety', 'enable_network_monitoring');
-    }
-
-    if (riskLevel === RiskLevel.CRITICAL) {
-      strategies.push('multi_factor_approval', 'comprehensive_session_logging');
-    }
-
-    return strategies;
+    if (riskFactors.includes('non_headless_mode')) {strategies.push('enable_session_monitoring', 'verify_user_presence');}if (riskFactors.includes('high_session_count')) {strategies.push('cleanup_idle_sessions', 'implement_session_limits');}if (riskFactors.includes('external_domain_access')) {strategies.push('verify_domain_safety', 'enable_network_monitoring');}if (riskLevel === RiskLevel._CRITICAL) {
+      strategies.push('multi_factor_approval', 'comprehensive_session_logging');}return strategies;
   }
 
   /**
@@ -767,18 +635,9 @@ export class ParlantValidatedBrowserSessionService {
     const constraints: string[] = [];
 
     if (context.systemResourceState.totalMemoryUsageMB > 1500) {
-      constraints.push('memory_limit_1GB');
-    }
-
-    if (context.systemResourceState.cpuUsagePercent > 70) {
-      constraints.push('cpu_limit_50_percent');
-    }
-
-    if (context.systemResourceState.openTabsCount > 15) {
-      constraints.push('max_5_tabs_per_session');
-    }
-
-    return constraints;
+      constraints.push('memory_limit_1GB');}if (context.systemResourceState.cpuUsagePercent > 70) {
+      constraints.push('cpu_limit_50_percent');}if (context.systemResourceState.openTabsCount > 15) {
+      constraints.push('max_5_tabs_per_session');}return constraints;
   }
 
   /**
@@ -787,19 +646,9 @@ export class ParlantValidatedBrowserSessionService {
   private generateSecurityRecommendations(context: BrowserSessionValidationContext): string[] {
     const recommendations: string[] = [];
 
-    if (context.securityProfile.userTrustLevel === 'LOW') {
-      recommendations.push('enable_enhanced_monitoring', 'require_explicit_approvals');
-    }
-
-    if (context.securityProfile.recentSecurityIncidents > 0) {
-      recommendations.push('security_review_required', 'additional_validation');
-    }
-
-    if (context.securityProfile.suspiciousActivityScore > 0.5) {
-      recommendations.push('heightened_security_monitoring');
-    }
-
-    return recommendations;
+    if (context.securityProfile.userTrustLevel === 'LOW') {recommendations.push('enable_enhanced_monitoring', 'require_explicit_approvals');}if (context.securityProfile.recentSecurityIncidents > 0) {
+      recommendations.push('security_review_required', 'additional_validation');}if (context.securityProfile.suspiciousActivityScore > 0.5) {
+      recommendations.push('heightened_security_monitoring');}return recommendations;
   }
 
   /**
@@ -807,13 +656,10 @@ export class ParlantValidatedBrowserSessionService {
    */
   private generateSessionCreationDescription(sessionDto: CreateBrowserSessionDto): string {
     const features = [];
-    if (!sessionDto.headless) features.push('visible mode');
-    if (sessionDto.devtools) features.push('devtools enabled');
-    if (sessionDto.proxy) features.push('proxy configured');
+    if (!sessionDto.headless) features.push('visible mode');if (sessionDto.devtools) features.push('devtools enabled');if (sessionDto.proxy) features.push('proxy configured');
 
-    const featureStr = features.length > 0 ? ` with ${features.join(', ')}` : '';
-    return `Create browser session "${sessionDto.name}" (${sessionDto.viewportWidth}x${sessionDto.viewportHeight})${featureStr}`;
-  }
+    const featureStr = features.length > 0 ? ` with ${features.join(`, ')}` : '';
+    return `Create browser session "${sessionDto.name}" (${sessionDto.viewportWidth}x${sessionDto.viewportHeight})${featureStr}";}
 
   /**
    * Sanitize session parameters for validation
@@ -822,9 +668,7 @@ export class ParlantValidatedBrowserSessionService {
     return {
       name: sessionDto.name,
       headless: sessionDto.headless,
-      viewport: `${sessionDto.viewportWidth}x${sessionDto.viewportHeight}`,
-      devtools: sessionDto.devtools,
-      hasProxy: !!sessionDto.proxy,
+      viewport: `${sessionDto.viewportWidth}x${sessionDto.viewportHeight}`,devtools: sessionDto.devtools,hasProxy: !!sessionDto.proxy,
       initialUrlsCount: sessionDto.initialUrls?.length ?? 0,
     };
   }
@@ -837,9 +681,7 @@ export class ParlantValidatedBrowserSessionService {
       const urlObj = new URL(url);
       return `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname.substring(0, 50)}...`;
     } catch {
-      return url.substring(0, 50) + '...';
-    }
-  }
+      return url.substring(0, 50) + '...';}}
 
   /**
    * Check if URL is external domain
@@ -847,9 +689,7 @@ export class ParlantValidatedBrowserSessionService {
   private isExternalDomain(url: string): boolean {
     try {
       const urlObj = new URL(url);
-      const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];
-      return !allowedDomains.some(domain => urlObj.hostname.includes(domain));
-    } catch {
+      const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];return !allowedDomains.some(domain => urlObj.hostname.includes(domain));} catch {
       return true; // Assume external if URL parsing fails
     }
   }
@@ -858,9 +698,7 @@ export class ParlantValidatedBrowserSessionService {
    * Check if URL contains sensitive keywords
    */
   private containsSensitiveKeywords(url: string): boolean {
-    const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];
-    return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));
-  }
+    const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));}
 
   /**
    * Check if URL has suspicious patterns
@@ -919,31 +757,11 @@ export class ParlantValidatedBrowserSessionService {
 
     // Check session configuration security
     if (!session.config.headless) {
-      flags.push('NON_HEADLESS_SESSION');
-      recommendations.push('Monitor session for unauthorized access');
-    }
-
-    if (session.config.devtools) {
-      flags.push('DEVTOOLS_ENABLED');
-      recommendations.push('Restrict devtools access to authorized users');
-    }
-
-    if (session.config.proxy) {
-      flags.push('PROXY_CONFIGURED');
-      recommendations.push('Validate proxy server security');
-    }
-
-    // Check against security profile
-    if (context.securityProfile.userTrustLevel === 'LOW') {
-      flags.push('LOW_TRUST_USER');
-      recommendations.push('Enable enhanced monitoring');
-    }
-
-    const passed = flags.length === 0 || 
-                  (flags.length <= 2 && context.securityProfile.userTrustLevel !== 'LOW');
-
-    return { passed, flags, recommendations };
-  }
+      flags.push('NON_HEADLESS_SESSION');recommendations.push('Monitor session for unauthorized access');}if (session.config.devtools) {
+      flags.push('DEVTOOLS_ENABLED');recommendations.push('Restrict devtools access to authorized users');}if (session.config.proxy) {
+      flags.push('PROXY_CONFIGURED');recommendations.push('Validate proxy server security');}// Check against security profile
+    if (context.securityProfile.userTrustLevel === 'LOW') {flags.push('LOW_TRUST_USER');recommendations.push('Enable enhanced monitoring');}const passed = flags.length === 0 || 
+                  (flags.length <= 2 && context.securityProfile.userTrustLevel !== 'LOW');return { passed, flags, recommendations };}
 
   /**
    * Generate compliance flags for session
@@ -955,14 +773,8 @@ export class ParlantValidatedBrowserSessionService {
     const flags: string[] = [];
 
     if (!session.config.headless) {
-      flags.push('VISIBLE_SESSION_CREATED');
-    }
-
-    if (sessionDto.proxy) {
-      flags.push('PROXY_SESSION_CONFIGURATION');
-    }
-
-    if (sessionDto.initialUrls?.some(url => this.isExternalDomain(url))) {
+      flags.push('VISIBLE_SESSION_CREATED');}if (sessionDto.proxy) {
+      flags.push('PROXY_SESSION_CONFIGURATION');}if (sessionDto.initialUrls?.some(url => this.isExternalDomain(url))) {
       flags.push('EXTERNAL_DOMAIN_SESSION');
     }
 
@@ -1013,9 +825,7 @@ export class ParlantValidatedBrowserSessionService {
       totalSessionOperations: this.totalSessionOperations,
       approvedSessionOperations: this.approvedSessionOperations,
       deniedSessionOperations: this.deniedSessionOperations,
-      approvalRate: `${approvalRate.toFixed(2)}%`,
-      denialRate: `${denialRate.toFixed(2)}%`,
-      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
+      approvalRate: `${approvalRate.toFixed(2)}%`,denialRate: `${denialRate.toFixed(2)}%`,averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
       sessionHistorySize: this.sessionHistory.length,
     });
   }
@@ -1061,9 +871,7 @@ export class ParlantValidatedBrowserSessionService {
   async getSecurityProfile(userId: string): Promise<SessionSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
-      userTrustLevel: 'MEDIUM',
-      recentSecurityIncidents: 0,
-      suspiciousActivityScore: 0.1,
+      userTrustLevel: 'MEDIUM',recentSecurityIncidents: 0,suspiciousActivityScore: 0.1,
       lastSecurityScan: new Date(),
       enabledSecurityFeatures: ['session_monitoring', 'url_validation'],
       securityViolations: [],

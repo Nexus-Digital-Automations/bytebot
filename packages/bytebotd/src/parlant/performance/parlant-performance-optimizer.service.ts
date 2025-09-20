@@ -18,15 +18,7 @@
  * 5. Real-time performance monitoring and auto-tuning
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { performance } from 'perf_hooks';
-
-// ===== OPTIMIZED PERFORMANCE INTERFACES =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import { performance } from 'perf_hooks';// ===== OPTIMIZED PERFORMANCE INTERFACES =====/**
  * Optimized cache configuration for sub-1000ms response times
  */
 interface OptimizedCacheConfig {
@@ -114,9 +106,7 @@ interface OptimizedPerformanceMetrics {
     p95: number;               // Target: <1000ms
     p99: number;
     current: number;
-    trend: 'improving' | 'stable' | 'degrading';
-  };
-  caching: {
+    trend: 'improving' | 'stable' | 'degrading';};caching: {
     l1HitRate: number;
     l2HitRate: number;
     l3HitRate: number;
@@ -147,10 +137,7 @@ interface OptimizedPerformanceMetrics {
  * Performance optimization recommendation with priority
  */
 interface PerformanceOptimizationAction {
-  category: 'caching' | 'batching' | 'workers' | 'circuit_breaker' | 'memory';
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  action: string;
-  currentValue: number;
+  category: 'caching' | 'batching' | 'workers' | 'circuit_breaker' | 'memory';priority: 'critical' | 'high' | 'medium' | 'low';action: string;currentValue: number;
   targetValue: number;
   expectedImprovement: string;
   autoApplyable: boolean;
@@ -191,21 +178,13 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     // Initialize optimized configurations based on performance analysis
     this.cacheConfig = {
       l1Cache: {
-        maxSize: this.configService.get('PARLANT_L1_MAX_SIZE', 25000),
-        ttlMs: this.configService.get('PARLANT_L1_TTL_MS', 500),
-        compressionThreshold: 512,
-        preWarmingEnabled: true
+        maxSize: this.configService.get('PARLANT_L1_MAX_SIZE', 25000),ttlMs: this.configService.get('PARLANT_L1_TTL_MS', 500),compressionThreshold: 512,preWarmingEnabled: true
       },
       l2Cache: {
-        redisCluster: ['redis-1:6379', 'redis-2:6379', 'redis-3:6379'],
-        ttlMs: this.configService.get('PARLANT_L2_TTL_MS', 120000),
-        compressionLevel: 6,
-        connectionPoolSize: 20
+        redisCluster: ['redis-1:6379', 'redis-2:6379', 'redis-3:6379'],ttlMs: this.configService.get('PARLANT_L2_TTL_MS', 120000),compressionLevel: 6,connectionPoolSize: 20
       },
       l3Cache: {
-        persistentTtlMs: this.configService.get('PARLANT_L3_TTL_MS', 600000),
-        batchWriteSize: 100,
-        compressionEnabled: true
+        persistentTtlMs: this.configService.get('PARLANT_L3_TTL_MS', 600000),batchWriteSize: 100,compressionEnabled: true
       }
     };
 
@@ -259,9 +238,7 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     // Initialize metrics
     this.currentMetrics = this.initializeMetrics();
 
-    this.logger.log('Parlant Performance Optimizer initialized with aggressive optimization settings', {
-      l1CacheSize: this.cacheConfig.l1Cache.maxSize,
-      l1TTL: this.cacheConfig.l1Cache.ttlMs,
+    this.logger.log('Parlant Performance Optimizer initialized with aggressive optimization settings', {l1CacheSize: this.cacheConfig.l1Cache.maxSize,l1TTL: this.cacheConfig.l1Cache.ttlMs,
       maxBatchSize: this.batchConfig.adaptive.maxBatchSize,
       minWorkers: this.workerConfig.scaling.minWorkers,
       maxWorkers: this.workerConfig.scaling.maxWorkers,
@@ -272,10 +249,7 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Starting performance optimization systems...');
-
-    // Initialize performance monitoring
-    this.startPerformanceMonitoring();
+    this.logger.log('Starting performance optimization systems...');// Initialize performance monitoringthis.startPerformanceMonitoring();
 
     // Initialize auto-optimization
     this.startAutoOptimization();
@@ -285,10 +259,7 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
       await this.preWarmCaches();
     }
 
-    this.logger.log('Performance optimization systems started successfully');
-  }
-
-  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Performance optimization systems started successfully');}async onModuleDestroy(): Promise<void> {
     // Final performance report
     this.logFinalPerformanceReport();
   }
@@ -303,22 +274,16 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     const entry = this.l1Cache.get(key);
 
     if (!entry) {
-      this.recordCacheAccess('L1', false, performance.now() - startTime);
-      return null;
-    }
+      this.recordCacheAccess('L1', false, performance.now() - startTime);return null;}
 
     // Check extended TTL (500ms vs original 100ms)
     if (Date.now() - entry.timestamp > this.cacheConfig.l1Cache.ttlMs) {
       this.l1Cache.delete(key);
-      this.recordCacheAccess('L1', false, performance.now() - startTime);
-      return null;
-    }
+      this.recordCacheAccess('L1', false, performance.now() - startTime);return null;}
 
     // Update access tracking for LRU optimization
     entry.accessCount++;
-    this.recordCacheAccess('L1', true, performance.now() - startTime);
-    return entry.value;
-  }
+    this.recordCacheAccess('L1', true, performance.now() - startTime);return entry.value;}
 
   /**
    * Set in optimized L1 cache with intelligent eviction
@@ -429,17 +394,9 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     this.currentMetrics.batching.processingTime = processingTimeMs;
   }
 
-  private recordCacheAccess(level: 'L1' | 'L2' | 'L3', hit: boolean, accessTimeMs: number): void {
-    switch (level) {
-      case 'L1':
-        // Update L1 cache metrics
-        break;
-      case 'L2':
-        // Update L2 cache metrics
-        break;
-      case 'L3':
-        // Update L3 cache metrics
-        break;
+  private recordCacheAccess(level: 'L1' | 'L2' | 'L3', hit: boolean, accessTimeMs: number): void {switch (level) {case 'L1':// Update L1 cache metricsbreak;
+      case 'L2':// Update L2 cache metricsbreak;
+      case 'L3':// Update L3 cache metricsbreak;
     }
   }
 
@@ -481,23 +438,10 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     return 0.75; // Placeholder
   }
 
-  private calculatePerformanceTrend(): 'improving' | 'stable' | 'degrading' {
-    if (this.performanceHistory.length < 3) return 'stable';
-
-    const recent = this.performanceHistory.slice(-3);
-    const avgRecent = recent.reduce((sum, m) => sum + m.responseTime.p95, 0) / recent.length;
+  private calculatePerformanceTrend(): 'improving' | 'stable' | 'degrading' {if (this.performanceHistory.length < 3) return 'stable';const recent = this.performanceHistory.slice(-3);const avgRecent = recent.reduce((sum, m) => sum + m.responseTime.p95, 0) / recent.length;
     const older = this.performanceHistory.slice(-6, -3);
 
-    if (older.length === 0) return 'stable';
-
-    const avgOlder = older.reduce((sum, m) => sum + m.responseTime.p95, 0) / older.length;
-
-    if (avgRecent < avgOlder * 0.95) return 'improving';
-    if (avgRecent > avgOlder * 1.05) return 'degrading';
-    return 'stable';
-  }
-
-  private arePerformanceTargetsMet(): boolean {
+    if (older.length === 0) return 'stable';const avgOlder = older.reduce((sum, m) => sum + m.responseTime.p95, 0) / older.length;if (avgRecent < avgOlder * 0.95) return 'improving';if (avgRecent > avgOlder * 1.05) return 'degrading';return 'stable';}private arePerformanceTargetsMet(): boolean {
     return (
       this.currentMetrics.responseTime.p95 < 1000 &&
       this.currentMetrics.caching.overallHitRate >= 0.85 &&
@@ -527,9 +471,7 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
 
     // Auto-apply critical and high priority optimizations
     for (const rec of recommendations) {
-      if (rec.autoApplyable && (rec.priority === 'critical' || rec.priority === 'high')) {
-        await this.applyOptimizationAction(rec);
-      }
+      if (rec.autoApplyable && (rec.priority === 'critical' || rec.priority === 'high')) {await this.applyOptimizationAction(rec);}
     }
 
     // Store recommendations for manual review
@@ -543,50 +485,28 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     // P95 latency optimization
     if (metrics.responseTime.p95 > 1000) {
       recommendations.push({
-        category: 'caching',
-        priority: 'critical',
-        action: 'Increase L1 cache TTL to 1000ms',
-        currentValue: metrics.responseTime.p95,
-        targetValue: 1000,
-        expectedImprovement: '25-40% latency reduction',
-        autoApplyable: true
-      });
+        category: 'caching',priority: 'critical',action: 'Increase L1 cache TTL to 1000ms',currentValue: metrics.responseTime.p95,targetValue: 1000,
+        expectedImprovement: '25-40% latency reduction',autoApplyable: true});
     }
 
     // Cache hit rate optimization
     if (metrics.caching.overallHitRate < 0.85) {
       recommendations.push({
-        category: 'caching',
-        priority: 'high',
-        action: 'Increase cache sizes by 50%',
-        currentValue: metrics.caching.overallHitRate,
-        targetValue: 0.85,
-        expectedImprovement: '15-25% performance improvement',
-        autoApplyable: true
-      });
+        category: 'caching',priority: 'high',action: 'Increase cache sizes by 50%',currentValue: metrics.caching.overallHitRate,targetValue: 0.85,
+        expectedImprovement: '15-25% performance improvement',autoApplyable: true});
     }
 
     // Batch efficiency optimization
     if (metrics.batching.efficiency < 0.90) {
       recommendations.push({
-        category: 'batching',
-        priority: 'high',
-        action: 'Optimize batch sizing algorithm',
-        currentValue: metrics.batching.efficiency,
-        targetValue: 0.90,
-        expectedImprovement: '10-20% throughput increase',
-        autoApplyable: false
-      });
+        category: 'batching',priority: 'high',action: 'Optimize batch sizing algorithm',currentValue: metrics.batching.efficiency,targetValue: 0.90,
+        expectedImprovement: '10-20% throughput increase',autoApplyable: false});
     }
 
     // Throughput optimization
     if (metrics.throughput.requestsPerSecond < 25) {
       recommendations.push({
-        category: 'workers',
-        priority: 'medium',
-        action: 'Scale up worker pool',
-        currentValue: metrics.throughput.requestsPerSecond,
-        targetValue: 25,
+        category: 'workers',priority: 'medium',action: 'Scale up worker pool',currentValue: metrics.throughput.requestsPerSecond,targetValue: 25,
         expectedImprovement: '50-100% throughput increase',
         autoApplyable: true
       });
@@ -603,18 +523,10 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     });
 
     switch (action.category) {
-      case 'caching':
-        if (action.action.includes('TTL')) {
-          // Dynamically increase cache TTL
-          this.cacheConfig.l1Cache.ttlMs = Math.min(1000, this.cacheConfig.l1Cache.ttlMs * 1.5);
+      case 'caching':if (action.action.includes('TTL')) {// Dynamically increase cache TTLthis.cacheConfig.l1Cache.ttlMs = Math.min(1000, this.cacheConfig.l1Cache.ttlMs * 1.5);
         }
         break;
-      case 'workers':
-        if (action.action.includes('Scale up')) {
-          // Trigger worker pool scaling
-          this.eventEmitter.emit('worker.scale_up', { factor: 1.5 });
-        }
-        break;
+      case 'workers':if (action.action.includes('Scale up')) {// Trigger worker pool scalingthis.eventEmitter.emit('worker.scale_up', { factor: 1.5 });}break;
     }
   }
 
@@ -633,19 +545,12 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     }
 
     // Emit performance update event
-    this.eventEmitter.emit('performance.metrics.updated', this.currentMetrics);
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
+    this.eventEmitter.emit('performance.metrics.updated', this.currentMetrics);}@Cron(CronExpression.EVERY_MINUTE)
   private logPerformanceStatus(): void {
     const metrics = this.currentMetrics;
     const targetsStatus = this.performanceTargetsMet ? '✅ MET' : '❌ NOT MET';
 
-    this.logger.log(`Parlant Performance Status - Targets ${targetsStatus}`, {
-      p95ResponseTime: `${metrics.responseTime.p95.toFixed(1)}ms (target: <1000ms)`,
-      cacheHitRate: `${(metrics.caching.overallHitRate * 100).toFixed(1)}% (target: >85%)`,
-      batchEfficiency: `${(metrics.batching.efficiency * 100).toFixed(1)}% (target: >90%)`,
-      throughput: `${metrics.throughput.requestsPerSecond.toFixed(1)} req/s (target: >25)`,
+    this.logger.log(`Parlant Performance Status - Targets ${targetsStatus}`, {p95ResponseTime: `${metrics.responseTime.p95.toFixed(1)}ms (target: <1000ms)`,cacheHitRate: `${(metrics.caching.overallHitRate * 100).toFixed(1)}% (target: >85%)`,batchEfficiency: `${(metrics.batching.efficiency * 100).toFixed(1)}% (target: >90%)`,throughput: `${metrics.throughput.requestsPerSecond.toFixed(1)} req/s (target: >25)`,
       trend: metrics.responseTime.trend,
       pendingOptimizations: this.optimizationActions.length
     });
@@ -695,27 +600,18 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
   }
 
   private async preWarmCaches(): Promise<void> {
-    this.logger.log('Pre-warming caches for optimal performance...');
-    // Implementation would pre-populate frequently accessed cache entries
-    // For now, this is a placeholder
+    this.logger.log('Pre-warming caches for optimal performance...');// Implementation would pre-populate frequently accessed cache entries// For now, this is a placeholder
   }
 
   private startPerformanceMonitoring(): void {
-    this.logger.log('Performance monitoring started with sub-1000ms P95 targets');
-  }
-
-  private logFinalPerformanceReport(): void {
+    this.logger.log('Performance monitoring started with sub-1000ms P95 targets');}private logFinalPerformanceReport(): void {
     const metrics = this.currentMetrics;
     const totalValidations = this.responseTimes.length;
     const avgResponseTime = this.responseTimes.reduce((sum, time) => sum + time, 0) / Math.max(totalValidations, 1);
 
     this.logger.log('Final Parlant Performance Report', {
       totalValidations,
-      avgResponseTime: `${avgResponseTime.toFixed(1)}ms`,
-      p95ResponseTime: `${metrics.responseTime.p95.toFixed(1)}ms`,
-      targetsAchieved: this.performanceTargetsMet,
-      cacheHitRate: `${(metrics.caching.overallHitRate * 100).toFixed(1)}%`,
-      peakThroughput: `${metrics.throughput.requestsPerSecond.toFixed(1)} req/s`,
+      avgResponseTime: `${avgResponseTime.toFixed(1)}ms`,p95ResponseTime: `${metrics.responseTime.p95.toFixed(1)}ms`,targetsAchieved: this.performanceTargetsMet,cacheHitRate: `${(metrics.caching.overallHitRate * 100).toFixed(1)}%`,peakThroughput: `${metrics.throughput.requestsPerSecond.toFixed(1)} req/s`,
       optimizationsApplied: this.optimizationActions.filter(a => a.autoApplyable).length
     });
   }

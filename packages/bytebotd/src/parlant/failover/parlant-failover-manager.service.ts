@@ -20,13 +20,7 @@
  * Performance: Optimized routing with minimal latency impact
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';
-import { ParlantHealthMonitorService, ParlantHealthStatus } from '../monitoring/parlant-health-monitor.service';
-import { EventEmitter } from 'events';
-
-/**
- * Server configuration for failover
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ParlantEnvironmentConfigService, ParlantEnvironmentConfig } from '../config/parlant-environment.config';import { ParlantHealthMonitorService, ParlantHealthStatus } from '../monitoring/parlant-health-monitor.service';import { EventEmitter } from 'events';/*** Server configuration for failover
  */
 export interface ParlantServerConfig {
   readonly id: string;
@@ -63,16 +57,7 @@ export interface ServerStatus {
  * Load balancing strategy
  */
 export type LoadBalancingStrategy =
-  | 'round_robin'
-  | 'weighted_round_robin'
-  | 'least_connections'
-  | 'response_time'
-  | 'random'
-  | 'hash_based'
-  | 'priority_based';
-
-/**
- * Failover configuration
+  | 'round_robin'| 'weighted_round_robin'| 'least_connections'| 'response_time'| 'random'| 'hash_based'| 'priority_based';/*** Failover configuration
  */
 export interface FailoverConfig {
   readonly enabled: boolean;
@@ -102,9 +87,7 @@ export interface RequestContext {
   readonly id: string;
   readonly method: string;
   readonly endpoint: string;
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
-  readonly timeout?: number;
-  readonly retries?: number;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';readonly timeout?: number;readonly retries?: number;
   readonly sessionAffinity?: string;
   readonly metadata: Record<string, unknown>;
 }
@@ -220,31 +203,11 @@ class LoadBalancer {
     }
 
     switch (this.strategy) {
-      case 'round_robin':
-        return this.roundRobinSelection(availableServers);
-
-      case 'weighted_round_robin':
-        return this.weightedRoundRobinSelection(availableServers);
-
-      case 'least_connections':
-        return this.leastConnectionsSelection(availableServers);
-
-      case 'response_time':
-        return this.responseTimeSelection(availableServers);
-
-      case 'random':
-        return this.randomSelection(availableServers);
-
-      case 'hash_based':
-        return this.hashBasedSelection(availableServers, context);
-
-      case 'priority_based':
+      case 'round_robin':return this.roundRobinSelection(availableServers);case 'weighted_round_robin':return this.weightedRoundRobinSelection(availableServers);case 'least_connections':return this.leastConnectionsSelection(availableServers);case 'response_time':return this.responseTimeSelection(availableServers);case 'random':return this.randomSelection(availableServers);case 'hash_based':return this.hashBasedSelection(availableServers, context);case 'priority_based':
         return this.priorityBasedSelection(availableServers);
 
       default:
-        this.logger.warn(`Unknown load balancing strategy: ${this.strategy}, using round_robin`);
-        return this.roundRobinSelection(availableServers);
-    }
+        this.logger.warn(`Unknown load balancing strategy: ${this.strategy}, using round_robin`);return this.roundRobinSelection(availableServers);}
   }
 
   /**
@@ -351,18 +314,10 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
    * Initialize failover manager
    */
   async onModuleInit(): Promise<void> {
-    const operationId = `failover_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    try {
-      this.logger.log(`[${operationId}] Initializing Parlant Failover Manager`);
-
-      // Load configuration
-      this.config = this.configService.getConfiguration();
+    const operationId = `failover_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Initializing Parlant Failover Manager`);// Load configurationthis.config = this.configService.getConfiguration();
 
       if (!this.config.enabled || !this.config.failover.enabled) {
-        this.logger.warn(`[${operationId}] Failover is disabled`);
-        return;
-      }
+        this.logger.warn(`[${operationId}] Failover is disabled`);return;}
 
       // Initialize failover configuration
       this.initializeFailoverConfig();
@@ -387,9 +342,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
       // Set up metrics reporting
       this.setupMetricsReporting();
 
-      this.logger.log(`[${operationId}] Parlant Failover Manager initialized successfully`, {
-        serverCount: this.servers.size,
-        strategy: this.config.failover.loadBalancingStrategy,
+      this.logger.log(`[${operationId}] Parlant Failover Manager initialized successfully`, {serverCount: this.servers.size,strategy: this.config.failover.loadBalancingStrategy,
         healthCheckInterval: this.failoverConfig!.healthCheckInterval,
         maxRetries: this.failoverConfig!.maxRetries,
       });
@@ -457,10 +410,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
         const selectedServer = preferredServer || this.selectBestServer(context);
 
         if (!selectedServer) {
-          throw new Error('No healthy servers available for failover');
-        }
-
-        // Track connection
+          throw new Error('No healthy servers available for failover');}// Track connection
         this.loadBalancer?.updateConnectionCount(selectedServer.server.id, 1);
 
         const attemptStartTime = new Date();
@@ -506,9 +456,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
           const totalTime = Date.now() - startTime;
           this.updateResponseTimeMetrics(totalTime);
 
-          this.logger.log(`Failover execution successful`, {
-            requestId: context.id,
-            server: selectedServer.server.id,
+          this.logger.log(`Failover execution successful`, {requestId: context.id,server: selectedServer.server.id,
             attempts: attemptCount + 1,
             totalTime,
             responseTime,
@@ -547,9 +495,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
           // Mark server as potentially unhealthy
           this.markServerFailure(selectedServer.server.id, lastError.message);
 
-          this.logger.warn(`Failover attempt failed`, {
-            requestId: context.id,
-            server: selectedServer.server.id,
+          this.logger.warn(`Failover attempt failed`, {requestId: context.id,server: selectedServer.server.id,
             attempt: attemptCount + 1,
             error: lastError.message,
             responseTime,
@@ -570,9 +516,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
         // Apply retry delay if not the last attempt
         if (attemptCount < maxAttempts && this.retryStrategy) {
           const delay = this.retryStrategy.calculateDelay(attemptCount - 1);
-          this.logger.log(`Waiting ${delay}ms before retry attempt ${attemptCount + 1}`, {
-            requestId: context.id,
-          });
+          this.logger.log(`Waiting ${delay}ms before retry attempt ${attemptCount + 1}`, {requestId: context.id,});
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
@@ -681,17 +625,10 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
 
     // Primary server
     const primaryServer: ParlantServerConfig = {
-      id: 'primary',
-      url: this.config.serverUrl,
-      wsUrl: this.config.wsUrl,
+      id: 'primary',url: this.config.serverUrl,wsUrl: this.config.wsUrl,
       priority: 100,
       weight: 10,
-      region: 'primary',
-      capabilities: ['validation', 'nlp', 'conversation'],
-      maxConnections: this.config.connection.poolSize,
-      healthCheckUrl: '/health',
-      metadata: {
-        type: 'primary',
+      region: 'primary',capabilities: ['validation', 'nlp', 'conversation'],maxConnections: this.config.connection.poolSize,healthCheckUrl: '/health',metadata: {type: 'primary',
         environment: this.config.environment,
       },
     };
@@ -703,15 +640,8 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
       const failoverServer: ParlantServerConfig = {
         id: `failover-${index + 1}`,
         url: serverUrl,
-        wsUrl: serverUrl.replace(/^http/, 'ws') + '/ws',
-        priority: 90 - (index * 10),
-        weight: 5,
-        region: 'failover',
-        capabilities: ['validation', 'nlp', 'conversation'],
-        maxConnections: Math.floor(this.config.connection.poolSize / 2),
-        healthCheckUrl: '/health',
-        metadata: {
-          type: 'failover',
+        wsUrl: serverUrl.replace(/^http/, 'ws') + '/ws',priority: 90 - (index * 10),weight: 5,
+        region: 'failover',capabilities: ['validation', 'nlp', 'conversation'],maxConnections: Math.floor(this.config.connection.poolSize / 2),healthCheckUrl: '/health',metadata: {type: 'failover',
           index,
           environment: this.config.environment,
         },
@@ -789,10 +719,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
 
     try {
       // Perform health check (simplified - would use actual HTTP client)
-      const healthCheckUrl = `${status.server.url}${status.server.healthCheckUrl}`;
-
-      // This would be replaced with actual HTTP health check
-      const mockHealthCheck = await new Promise<boolean>((resolve) => {
+      const healthCheckUrl = `${status.server.url}${status.server.healthCheckUrl}`;// This would be replaced with actual HTTP health checkconst mockHealthCheck = await new Promise<boolean>((resolve) => {
         setTimeout(() => resolve(Math.random() > 0.1), 100 + Math.random() * 200);
       });
 
@@ -846,9 +773,7 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
 
     // Temporarily reduce weight for failed servers
     if (status.consecutiveFailures >= 2) {
-      this.emit('server-degraded', {
-        serverId,
-        consecutiveFailures: status.consecutiveFailures,
+      this.emit('server-degraded', {serverId,consecutiveFailures: status.consecutiveFailures,
         error,
       });
     }
@@ -906,11 +831,8 @@ export class ParlantFailoverManagerService extends EventEmitter implements OnMod
       const healthyServers = Array.from(this.servers.values()).filter(s => s.healthy).length;
       const availableServers = Array.from(this.servers.values()).filter(s => s.available).length;
 
-      this.logger.log('Parlant Failover Metrics', {
-        totalRequests: this.metrics.totalRequests,
-        successRate: this.metrics.totalRequests > 0
-          ? (this.metrics.successfulRequests / this.metrics.totalRequests * 100).toFixed(2) + '%'
-          : '0%',
+      this.logger.log('Parlant Failover Metrics', {totalRequests: this.metrics.totalRequests,successRate: this.metrics.totalRequests > 0
+          ? (this.metrics.successfulRequests / this.metrics.totalRequests * 100).toFixed(2) + '%': '0%',
         failoverCount: this.metrics.failoverCount,
         averageResponseTime: `${this.metrics.averageResponseTime.toFixed(2)}ms`,
         healthyServers,

@@ -19,13 +19,7 @@
  * @version 1.0.0
  */
 
-import { Module, Logger } from '@nestjs/common';
-import { MetricsController } from './metrics.controller';
-import { BytebotMetricsService } from './metrics.service';
-import { ParlantModule } from '../parlant/parlant.module';
-
-/**
- * Metrics collection module providing application observability
+import { Module, Logger } from '@nestjs/common';import { MetricsController } from './metrics.controller';import { BytebotMetricsService } from './metrics.service';import { ParlantModule } from '../parlant/parlant.module';/*** Metrics collection module providing application observability
  */
 @Module({
   imports: [ParlantModule],
@@ -37,7 +31,6 @@ export class MetricsModule {
   private readonly logger = new Logger(MetricsModule.name);
 
   constructor() {
-    this.logger.log('Metrics Module initialized - Prometheus metrics enabled');
-    this.logger.log('Available endpoints: GET /metrics');
+    this.logger.log('Metrics Module initialized - Prometheus metrics enabled');this.logger.log('Available endpoints: GET /metrics');
   }
 }

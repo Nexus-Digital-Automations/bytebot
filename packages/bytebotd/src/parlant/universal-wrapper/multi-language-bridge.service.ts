@@ -19,28 +19,16 @@
  * Performance: Sub-50ms cross-language validation with intelligent caching
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import axios, { AxiosInstance } from 'axios';
-import WebSocket from 'ws';
-import {
-  UniversalFunctionMetadata,
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import axios, { AxiosInstance } from 'axios';import WebSocket from 'ws';import {UniversalFunctionMetadata,
   ValidationContext,
   WrapperExecutionResult,
   UniversalWrapperError,
   WrapperErrorType,
-} from './universal-function-wrapper.interface';
-import { ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-
-// ===== MULTI-LANGUAGE BRIDGE INTERFACES =====
-
-/**
+} from './universal-function-wrapper.interface';import { ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';// ===== MULTI-LANGUAGE BRIDGE INTERFACES =====/**
  * Language-specific bridge configuration
  */
 export interface LanguageBridgeConfig {
-  readonly language: 'python' | 'ruby' | 'javascript' | 'go' | 'rust';
-  readonly bridgeUrl: string;
-  readonly bridgePort: number;
+  readonly language: 'python' | 'ruby' | 'javascript' | 'go' | 'rust';readonly bridgeUrl: string;readonly bridgePort: number;
   readonly authenticationKey: string;
   readonly timeout: number;
   readonly retryAttempts: number;
@@ -130,9 +118,7 @@ export interface CrossLanguageCacheInfo {
   readonly hit: boolean;
   readonly key: string;
   readonly ttl: number;
-  readonly level: 'local' | 'distributed' | 'bridge';
-  readonly serializationTime: number;
-  readonly deserializationTime: number;
+  readonly level: 'local' | 'distributed' | 'bridge';readonly serializationTime: number;readonly deserializationTime: number;
 }
 
 /**
@@ -164,9 +150,7 @@ export interface CrossLanguageError {
  */
 export interface BridgeHealthStatus {
   readonly language: string;
-  readonly status: 'healthy' | 'degraded' | 'unavailable' | 'unknown';
-  readonly responseTime: number;
-  readonly successRate: number;
+  readonly status: 'healthy' | 'degraded' | 'unavailable' | 'unknown';readonly responseTime: number;readonly successRate: number;
   readonly errorRate: number;
   readonly lastHealthCheck: Date;
   readonly activeConnections: number;
@@ -304,12 +288,8 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
   private batchTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(private readonly configService: ConfigService) {
-    const operationId = `bridge_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Initializing Multi-Language Bridge Service`, {
-      supportedLanguages: ['python', 'ruby', 'javascript', 'go', 'rust'],
-      bridgingEnabled: this.isBridgingEnabled(),
-      webSocketEnabled: this.isWebSocketEnabled(),
+    const operationId = `bridge_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Multi-Language Bridge Service`, {
+      supportedLanguages: ['python', 'ruby', 'javascript', 'go', 'rust'],bridgingEnabled: this.isBridgingEnabled(),webSocketEnabled: this.isWebSocketEnabled(),
       batchingEnabled: this.isBatchingEnabled(),
     });
 
@@ -325,8 +305,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     }
 
     // Initialize language-specific adapters
-    this.pythonAdapter = new DefaultPythonBridgeAdapter(this.getBridgeConfig('python'), this.logger);
-    this.rubyAdapter = new DefaultRubyBridgeAdapter(this.getBridgeConfig('ruby'), this.logger);
+    this.pythonAdapter = new DefaultPythonBridgeAdapter(this.getBridgeConfig('python'), this.logger);this.rubyAdapter = new DefaultRubyBridgeAdapter(this.getBridgeConfig('ruby'), this.logger);
     this.webSocketBridge = new DefaultWebSocketBridge(this.webSocketConnections, this.logger);
 
     // Start periodic health checks
@@ -348,9 +327,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * @returns Promise with execution response including validation results
    */
   async executeFunction(request: CrossLanguageExecutionRequest): Promise<CrossLanguageExecutionResponse> {
-    const operationId = `cross_lang_exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-    this.executionCount++;
+    const operationId = `cross_lang_exec_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.executionCount++;
 
     this.logger.log(
       `[${operationId}] Executing cross-language function: ${request.language}.${request.functionName}`,
@@ -378,19 +355,10 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       let response: CrossLanguageExecutionResponse;
 
       switch (request.language.toLowerCase()) {
-        case 'python':
-          response = await this.executePythonFunction(request);
-          break;
-        case 'ruby':
-          response = await this.executeRubyFunction(request);
-          break;
-        case 'javascript':
-        case 'typescript':
-          response = await this.executeJavaScriptFunction(request);
-          break;
-        case 'go':
-          response = await this.executeGoFunction(request);
-          break;
+        case 'python':response = await this.executePythonFunction(request);break;
+        case 'ruby':response = await this.executeRubyFunction(request);break;
+        case 'javascript':case 'typescript':response = await this.executeJavaScriptFunction(request);break;
+        case 'go':response = await this.executeGoFunction(request);break;
         case 'rust':
           response = await this.executeRustFunction(request);
           break;
@@ -399,18 +367,14 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
             request.functionId,
             operationId,
             WrapperErrorType.CONFIGURATION_ERROR,
-            new Error(`Unsupported language: ${request.language}`)
-          );
-      }
+            new Error(`Unsupported language: ${request.language}`));}
 
       // Update performance metrics
       const totalTime = Date.now() - startTime;
       this.updateBridgePerformanceMetrics(request.language, totalTime, response.success);
 
       this.logger.log(
-        `[${operationId}] Cross-language function execution completed`,
-        {
-          operationId,
+        `[${operationId}] Cross-language function execution completed`,{operationId,
           requestId: request.requestId,
           language: request.language,
           success: response.success,
@@ -451,11 +415,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
         },
         validationResult: {
           approved: false,
-          conversationId: `error_${operationId}`,
-          validationTimestamp: new Date(),
-          reasoning: `Bridge execution failed: ${error instanceof Error ? error.message : String(error)}`,
-          confidence: 0,
-        },
+          conversationId: `error_${operationId}`,validationTimestamp: new Date(),reasoning: `Bridge execution failed: ${error instanceof Error ? error.message : String(error)}`,confidence: 0,},
         executionTime: 0,
         bridgeLatency: totalTime,
         language: request.language,
@@ -471,13 +431,8 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * @returns Promise with batch execution results
    */
   async executeBatch(requests: CrossLanguageExecutionRequest[]): Promise<BridgeBatchResponse> {
-    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.log(
-      `[${batchId}] Executing cross-language batch`,
-      {
-        batchId,
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+      `[${batchId}] Executing cross-language batch`,{batchId,
         totalRequests: requests.length,
         languages: [...new Set(requests.map(r => r.language))],
       }
@@ -514,9 +469,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
             success: false,
             error: {
               type: 'batch_execution_error',
-              message: `Batch execution failed for ${language}: ${error instanceof Error ? error.message : String(error)}`,
-              languageSpecificError: error,
-              bridgeError: true,
+              message: `Batch execution failed for ${language}: ${error instanceof Error ? error.message : String(error)}`,languageSpecificError: error,bridgeError: true,
               recoverable: true,
               suggestedRetryDelay: 5000,
             },
@@ -550,9 +503,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     };
 
     this.logger.log(
-      `[${batchId}] Cross-language batch execution completed`,
-      {
-        batchId,
+      `[${batchId}] Cross-language batch execution completed`,{batchId,
         totalRequests: requests.length,
         successCount,
         failureCount,
@@ -571,10 +522,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * @returns Promise with validation response
    */
   async validateFunction(request: CrossLanguageExecutionRequest): Promise<ParlantValidationResponse> {
-    const operationId = `cross_lang_validate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Validating cross-language function: ${request.language}.${request.functionName}`,
+    const operationId = `cross_lang_validate_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Validating cross-language function: ${request.language}.${request.functionName}`,
       {
         operationId,
         requestId: request.requestId,
@@ -586,26 +534,12 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     try {
       // Route validation to appropriate language bridge
       switch (request.language.toLowerCase()) {
-        case 'python':
-          return await this.pythonAdapter.validateFunction(request);
-        case 'ruby':
-          return await this.rubyAdapter.validateFunction(request);
-        case 'javascript':
-        case 'typescript':
-          return await this.validateJavaScriptFunction(request);
-        case 'go':
-          return await this.validateGoFunction(request);
-        case 'rust':
+        case 'python':return await this.pythonAdapter.validateFunction(request);case 'ruby':return await this.rubyAdapter.validateFunction(request);case 'javascript':case 'typescript':return await this.validateJavaScriptFunction(request);case 'go':return await this.validateGoFunction(request);case 'rust':
           return await this.validateRustFunction(request);
         default:
-          throw new Error(`Validation not supported for language: ${request.language}`);
-      }
-
-    } catch (error) {
+          throw new Error(`Validation not supported for language: ${request.language}`);}} catch (error) {
       this.logger.error(
-        `[${operationId}] Cross-language function validation failed`,
-        {
-          operationId,
+        `[${operationId}] Cross-language function validation failed`,{operationId,
           requestId: request.requestId,
           error: error instanceof Error ? error.message : String(error),
         }
@@ -613,13 +547,9 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
 
       return {
         approved: false,
-        conversationId: `validation_error_${operationId}`,
-        validationTimestamp: new Date(),
-        reasoning: `Cross-language validation failed: ${error instanceof Error ? error.message : String(error)}`,
+        conversationId: `validation_error_${operationId}`,validationTimestamp: new Date(),reasoning: `Cross-language validation failed: ${error instanceof Error ? error.message : String(error)}`,
         confidence: 0,
-        suggestedAlternatives: ['Retry validation', 'Check bridge connectivity', 'Verify function metadata'],
-      };
-    }
+        suggestedAlternatives: ['Retry validation', 'Check bridge connectivity', 'Verify function metadata'],};}
   }
 
   /**
@@ -638,16 +568,12 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       } catch (error) {
         healthStatuses.set(language, {
           language,
-          status: 'unavailable',
-          responseTime: -1,
-          successRate: 0,
+          status: 'unavailable',responseTime: -1,successRate: 0,
           errorRate: 100,
           lastHealthCheck: new Date(),
           activeConnections: 0,
           queuedRequests: 0,
-          version: 'unknown',
-          uptime: 0,
-        });
+          version: 'unknown',uptime: 0,});
       }
     }
 
@@ -674,17 +600,10 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * Execute JavaScript/TypeScript function through JavaScript bridge
    */
   private async executeJavaScriptFunction(request: CrossLanguageExecutionRequest): Promise<CrossLanguageExecutionResponse> {
-    const client = this.httpClients.get('javascript');
-    if (!client) {
-      throw new Error('JavaScript bridge not configured');
-    }
-
-    const startTime = Date.now();
+    const client = this.httpClients.get('javascript');if (!client) {throw new Error('JavaScript bridge not configured');}const startTime = Date.now();
 
     try {
-      const response = await client.post('/execute', {
-        requestId: request.requestId,
-        functionName: request.functionName,
+      const response = await client.post('/execute', {requestId: request.requestId,functionName: request.functionName,
         packageName: request.packageName,
         parameters: request.parameters,
         metadata: request.metadata,
@@ -697,10 +616,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       return {
         ...response.data,
         bridgeLatency,
-        language: 'javascript',
-      };
-
-    } catch (error) {
+        language: 'javascript',};} catch (error) {
       throw new UniversalWrapperError(
         request.functionId,
         request.requestId,
@@ -714,17 +630,10 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * Execute Go function through Go bridge
    */
   private async executeGoFunction(request: CrossLanguageExecutionRequest): Promise<CrossLanguageExecutionResponse> {
-    const client = this.httpClients.get('go');
-    if (!client) {
-      throw new Error('Go bridge not configured');
-    }
-
-    const startTime = Date.now();
+    const client = this.httpClients.get('go');if (!client) {throw new Error('Go bridge not configured');}const startTime = Date.now();
 
     try {
-      const response = await client.post('/execute', {
-        requestId: request.requestId,
-        functionName: request.functionName,
+      const response = await client.post('/execute', {requestId: request.requestId,functionName: request.functionName,
         packageName: request.packageName,
         parameters: request.parameters,
         metadata: request.metadata,
@@ -737,10 +646,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       return {
         ...response.data,
         bridgeLatency,
-        language: 'go',
-      };
-
-    } catch (error) {
+        language: 'go',};} catch (error) {
       throw new UniversalWrapperError(
         request.functionId,
         request.requestId,
@@ -754,17 +660,10 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
    * Execute Rust function through Rust bridge
    */
   private async executeRustFunction(request: CrossLanguageExecutionRequest): Promise<CrossLanguageExecutionResponse> {
-    const client = this.httpClients.get('rust');
-    if (!client) {
-      throw new Error('Rust bridge not configured');
-    }
-
-    const startTime = Date.now();
+    const client = this.httpClients.get('rust');if (!client) {throw new Error('Rust bridge not configured');}const startTime = Date.now();
 
     try {
-      const response = await client.post('/execute', {
-        requestId: request.requestId,
-        functionName: request.functionName,
+      const response = await client.post('/execute', {requestId: request.requestId,functionName: request.functionName,
         packageName: request.packageName,
         parameters: request.parameters,
         metadata: request.metadata,
@@ -820,9 +719,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       approved: true,
       conversationId: `rust_validation_${request.requestId}`,
       validationTimestamp: new Date(),
-      reasoning: 'Rust function validation passed',
-      confidence: 0.9,
-    };
+      reasoning: 'Rust function validation passed',confidence: 0.9,};
   }
 
   // ===== HELPER METHODS =====
@@ -833,19 +730,8 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     for (const language of languages) {
       const config: LanguageBridgeConfig = {
         language: language as any,
-        bridgeUrl: this.configService.get(`BRIDGE_${language.toUpperCase()}_URL`, `http://localhost:${this.getDefaultPort(language)}`),
-        bridgePort: this.configService.get(`BRIDGE_${language.toUpperCase()}_PORT`, this.getDefaultPort(language)),
-        authenticationKey: this.configService.get(`BRIDGE_${language.toUpperCase()}_AUTH_KEY`, ''),
-        timeout: this.configService.get(`BRIDGE_${language.toUpperCase()}_TIMEOUT`, 30000),
-        retryAttempts: this.configService.get(`BRIDGE_${language.toUpperCase()}_RETRY_ATTEMPTS`, 3),
-        connectionPoolSize: this.configService.get(`BRIDGE_${language.toUpperCase()}_POOL_SIZE`, 10),
-        enableBatching: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENABLE_BATCHING`, true),
-        batchSize: this.configService.get(`BRIDGE_${language.toUpperCase()}_BATCH_SIZE`, 10),
-        batchTimeout: this.configService.get(`BRIDGE_${language.toUpperCase()}_BATCH_TIMEOUT`, 5000),
-        enableWebSocket: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENABLE_WEBSOCKET`, false),
-        webSocketUrl: this.configService.get(`BRIDGE_${language.toUpperCase()}_WEBSOCKET_URL`),
-        compressionEnabled: this.configService.get(`BRIDGE_${language.toUpperCase()}_COMPRESSION`, true),
-        encryptionEnabled: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENCRYPTION`, false),
+        bridgeUrl: this.configService.get(`BRIDGE_${language.toUpperCase()}_URL`, `http://localhost:${this.getDefaultPort(language)}`),bridgePort: this.configService.get(`BRIDGE_${language.toUpperCase()}_PORT`, this.getDefaultPort(language)),authenticationKey: this.configService.get(`BRIDGE_${language.toUpperCase()}_AUTH_KEY`, ''),
+        timeout: this.configService.get(`BRIDGE_${language.toUpperCase()}_TIMEOUT`, 30000),retryAttempts: this.configService.get(`BRIDGE_${language.toUpperCase()}_RETRY_ATTEMPTS`, 3),connectionPoolSize: this.configService.get(`BRIDGE_${language.toUpperCase()}_POOL_SIZE`, 10),enableBatching: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENABLE_BATCHING`, true),batchSize: this.configService.get(`BRIDGE_${language.toUpperCase()}_BATCH_SIZE`, 10),batchTimeout: this.configService.get(`BRIDGE_${language.toUpperCase()}_BATCH_TIMEOUT`, 5000),enableWebSocket: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENABLE_WEBSOCKET`, false),webSocketUrl: this.configService.get(`BRIDGE_${language.toUpperCase()}_WEBSOCKET_URL`),compressionEnabled: this.configService.get(`BRIDGE_${language.toUpperCase()}_COMPRESSION`, true),encryptionEnabled: this.configService.get(`BRIDGE_${language.toUpperCase()}_ENCRYPTION`, false),
       };
 
       this.bridgeConfigs.set(language, config);
@@ -858,11 +744,8 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
         baseURL: config.bridgeUrl,
         timeout: config.timeout,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': config.authenticationKey ? `Bearer ${config.authenticationKey}` : undefined,
-          'User-Agent': 'AIgent-MultiLanguageBridge/1.0',
-        },
-      });
+          'Content-Type': 'application/json','Authorization': config.authenticationKey ? `Bearer ${config.authenticationKey}` : undefined,
+          'User-Agent': 'AIgent-MultiLanguageBridge/1.0',},});
 
       this.httpClients.set(language, client);
     }
@@ -884,10 +767,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
           });
 
           ws.on('close', () => {
-            this.logger.log(`WebSocket connection closed for ${language} bridge`);
-          });
-
-        } catch (error) {
+            this.logger.log(`WebSocket connection closed for ${language} bridge`);});} catch (error) {
           this.logger.error(`Failed to initialize WebSocket for ${language}`, {
             error: error instanceof Error ? error.message : String(error),
           });
@@ -900,12 +780,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     const health = await this.checkBridgeHealth(language);
     if (health.status === 'unavailable') {
       throw new UniversalWrapperError(
-        `bridge_${language}`,
-        `health_check_${Date.now()}`,
-        WrapperErrorType.NETWORK_ERROR,
-        new Error(`Bridge for ${language} is unavailable`)
-      );
-    }
+        `bridge_${language}`,`health_check_${Date.now()}`,WrapperErrorType.NETWORK_ERROR,new Error(`Bridge for ${language} is unavailable`));}
   }
 
   private async checkBridgeHealth(language: string): Promise<BridgeHealthStatus> {
@@ -924,21 +799,14 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       }
 
       const startTime = Date.now();
-      const response = await client.get('/health');
-      const responseTime = Date.now() - startTime;
-
-      const health: BridgeHealthStatus = {
+      const response = await client.get('/health');const responseTime = Date.now() - startTime;const health: BridgeHealthStatus = {
         language,
-        status: response.data.status || 'healthy',
-        responseTime,
-        successRate: response.data.successRate || 100,
+        status: response.data.status || 'healthy',responseTime,successRate: response.data.successRate || 100,
         errorRate: response.data.errorRate || 0,
         lastHealthCheck: new Date(),
         activeConnections: response.data.activeConnections || 0,
         queuedRequests: response.data.queuedRequests || 0,
-        version: response.data.version || 'unknown',
-        uptime: response.data.uptime || 0,
-      };
+        version: response.data.version || 'unknown',uptime: response.data.uptime || 0,};
 
       this.bridgeHealthCache.set(language, health);
       this.lastHealthCheck.set(language, new Date());
@@ -948,9 +816,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     } catch (error) {
       const health: BridgeHealthStatus = {
         language,
-        status: 'unavailable',
-        responseTime: -1,
-        successRate: 0,
+        status: 'unavailable',responseTime: -1,successRate: 0,
         errorRate: 100,
         lastHealthCheck: new Date(),
         activeConnections: 0,
@@ -1036,9 +902,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
             approved: false,
             conversationId: `error_${request.requestId}`,
             validationTimestamp: new Date(),
-            reasoning: 'Execution failed',
-            confidence: 0,
-          },
+            reasoning: 'Execution failed',confidence: 0,},
           executionTime: 0,
           bridgeLatency: 0,
           language,
@@ -1093,11 +957,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
 
   private createErrorMetadata(language: string, error: unknown): CrossLanguageExecutionMetadata {
     return {
-      bridgeVersion: 'unknown',
-      languageVersion: 'unknown',
-      executionEnvironment: 'error',
-      resourceUsage: {
-        cpuUsage: 0,
+      bridgeVersion: 'unknown',languageVersion: 'unknown',executionEnvironment: 'error',resourceUsage: {cpuUsage: 0,
         memoryUsage: 0,
         networkLatency: 0,
         diskUsage: 0,
@@ -1106,20 +966,13 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
       },
       cacheInfo: {
         hit: false,
-        key: '',
-        ttl: 0,
-        level: 'local',
-        serializationTime: 0,
-        deserializationTime: 0,
+        key: '',ttl: 0,level: 'local',serializationTime: 0,deserializationTime: 0,
       },
       securityContext: {
-        authenticatedUser: 'unknown',
-        authorizationLevel: 'unknown',
+        authenticatedUser: 'unknown',authorizationLevel: 'unknown',
         encryptionUsed: false,
         signatureValid: false,
-        auditTrailId: `error_${Date.now()}`,
-      },
-    };
+        auditTrailId: `error_${Date.now()}`,},};
   }
 
   private async performBridgeHealthChecks(): Promise<void> {
@@ -1141,26 +994,11 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
   // ===== CONFIGURATION HELPERS =====
 
   private isBridgingEnabled(): boolean {
-    return this.configService.get<boolean>('MULTI_LANGUAGE_BRIDGING_ENABLED', true);
-  }
-
-  private isWebSocketEnabled(): boolean {
-    return this.configService.get<boolean>('MULTI_LANGUAGE_WEBSOCKET_ENABLED', false);
-  }
-
-  private isBatchingEnabled(): boolean {
-    return this.configService.get<boolean>('MULTI_LANGUAGE_BATCHING_ENABLED', true);
-  }
-
-  private getHealthCheckInterval(): number {
-    return this.configService.get<number>('BRIDGE_HEALTH_CHECK_INTERVAL_MS', 60000); // 1 minute
-  }
-
-  private getBatchProcessingInterval(): number {
-    return this.configService.get<number>('BRIDGE_BATCH_PROCESSING_INTERVAL_MS', 5000); // 5 seconds
-  }
-
-  /**
+    return this.configService.get<boolean>('MULTI_LANGUAGE_BRIDGING_ENABLED', true);}private isWebSocketEnabled(): boolean {
+    return this.configService.get<boolean>('MULTI_LANGUAGE_WEBSOCKET_ENABLED', false);}private isBatchingEnabled(): boolean {
+    return this.configService.get<boolean>('MULTI_LANGUAGE_BATCHING_ENABLED', true);}private getHealthCheckInterval(): number {
+    return this.configService.get<number>('BRIDGE_HEALTH_CHECK_INTERVAL_MS', 60000); // 1 minute}private getBatchProcessingInterval(): number {
+    return this.configService.get<number>('BRIDGE_BATCH_PROCESSING_INTERVAL_MS', 5000); // 5 seconds}/**
    * Clean up resources on service shutdown
    */
   async onApplicationShutdown(): Promise<void> {
@@ -1170,9 +1008,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
     for (const [language, ws] of this.webSocketConnections) {
       try {
         ws.close();
-        this.logger.log(`Closed WebSocket connection for ${language}`);
-      } catch (error) {
-        this.logger.error(`Error closing WebSocket for ${language}`, {
+        this.logger.log(`Closed WebSocket connection for ${language}`);} catch (error) {this.logger.error(`Error closing WebSocket for ${language}`, {
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -1211,21 +1047,13 @@ class DefaultPythonBridgeAdapter implements PythonBridgeAdapter {
       return {
         requestId: request.requestId,
         success: true,
-        result: { message: `Python function ${request.functionName} executed successfully` },
-        validationResult: {
-          approved: true,
+        result: { message: `Python function ${request.functionName} executed successfully` },validationResult: {approved: true,
           conversationId: `python_${request.requestId}`,
           validationTimestamp: new Date(),
-          reasoning: 'Python function validation passed',
-          confidence: 0.95,
-        },
+          reasoning: 'Python function validation passed',confidence: 0.95,},
         executionTime,
         bridgeLatency: 10,
-        language: 'python',
-        metadata: {
-          bridgeVersion: '1.0.0',
-          languageVersion: '3.9.0',
-          executionEnvironment: 'python_bridge',
+        language: 'python',metadata: {bridgeVersion: '1.0.0',languageVersion: '3.9.0',executionEnvironment: 'python_bridge',
           resourceUsage: {
             cpuUsage: 20,
             memoryUsage: 50,
@@ -1238,15 +1066,10 @@ class DefaultPythonBridgeAdapter implements PythonBridgeAdapter {
             hit: false,
             key: `python_${request.functionId}`,
             ttl: 300000,
-            level: 'local',
-            serializationTime: 2,
-            deserializationTime: 1,
+            level: 'local',serializationTime: 2,deserializationTime: 1,
           },
           securityContext: {
-            authenticatedUser: 'python_bridge',
-            authorizationLevel: 'standard',
-            encryptionUsed: this.config.encryptionEnabled,
-            signatureValid: true,
+            authenticatedUser: 'python_bridge',authorizationLevel: 'standard',encryptionUsed: this.config.encryptionEnabled,signatureValid: true,
             auditTrailId: request.requestId,
           },
         },
@@ -1267,18 +1090,10 @@ class DefaultPythonBridgeAdapter implements PythonBridgeAdapter {
           approved: false,
           conversationId: `python_error_${request.requestId}`,
           validationTimestamp: new Date(),
-          reasoning: 'Python function execution failed',
-          confidence: 0,
-        },
+          reasoning: 'Python function execution failed',confidence: 0,},
         executionTime: Date.now() - startTime,
         bridgeLatency: 5,
-        language: 'python',
-        metadata: {
-          bridgeVersion: '1.0.0',
-          languageVersion: '3.9.0',
-          executionEnvironment: 'python_bridge_error',
-          resourceUsage: {
-            cpuUsage: 0,
+        language: 'python',metadata: {bridgeVersion: '1.0.0',languageVersion: '3.9.0',executionEnvironment: 'python_bridge_error',resourceUsage: {cpuUsage: 0,
             memoryUsage: 0,
             networkLatency: 0,
             diskUsage: 0,
@@ -1287,15 +1102,10 @@ class DefaultPythonBridgeAdapter implements PythonBridgeAdapter {
           },
           cacheInfo: {
             hit: false,
-            key: '',
-            ttl: 0,
-            level: 'local',
-            serializationTime: 0,
-            deserializationTime: 0,
+            key: '',ttl: 0,level: 'local',serializationTime: 0,deserializationTime: 0,
           },
           securityContext: {
-            authenticatedUser: 'python_bridge',
-            authorizationLevel: 'standard',
+            authenticatedUser: 'python_bridge',authorizationLevel: 'standard',
             encryptionUsed: false,
             signatureValid: false,
             auditTrailId: request.requestId,
@@ -1308,37 +1118,26 @@ class DefaultPythonBridgeAdapter implements PythonBridgeAdapter {
   async validateFunction(request: CrossLanguageExecutionRequest): Promise<ParlantValidationResponse> {
     // Mock Python validation
     return {
-      approved: request.metadata.riskClassification !== RiskLevel.CRITICAL,
-      conversationId: `python_validation_${request.requestId}`,
-      validationTimestamp: new Date(),
-      reasoning: `Python function validation: ${request.metadata.riskClassification} risk level`,
+      approved: request.metadata.riskClassification !== RiskLevel._CRITICAL,
+      conversationId: `python_validation_${request.requestId}`,validationTimestamp: new Date(),reasoning: `Python function validation: ${request.metadata.riskClassification} risk level`,
       confidence: 0.9,
     };
   }
 
   async healthCheck(): Promise<BridgeHealthStatus> {
     return {
-      language: 'python',
-      status: 'healthy',
-      responseTime: 50,
-      successRate: 95,
+      language: 'python',status: 'healthy',responseTime: 50,successRate: 95,
       errorRate: 5,
       lastHealthCheck: new Date(),
       activeConnections: 3,
       queuedRequests: 0,
-      version: '1.0.0',
-      uptime: 86400000, // 24 hours
-    };
+      version: '1.0.0',uptime: 86400000, // 24 hours};
   }
 
   async getCapabilities(): Promise<PythonBridgeCapabilities> {
     return {
-      supportedVersions: ['3.8', '3.9', '3.10', '3.11'],
-      availablePackages: ['numpy', 'pandas', 'requests', 'sqlalchemy'],
-      maxMemoryLimit: 1024 * 1024 * 1024, // 1GB
-      maxExecutionTime: 300000, // 5 minutes
-      supportedFeatures: ['async_execution', 'batch_processing', 'caching'],
-      securityLevel: 'standard',
+      supportedVersions: ['3.8', '3.9', '3.10', '3.11'],availablePackages: ['numpy', 'pandas', 'requests', 'sqlalchemy'],maxMemoryLimit: 1024 * 1024 * 1024, // 1GBmaxExecutionTime: 300000, // 5 minutes
+      supportedFeatures: ['async_execution', 'batch_processing', 'caching'],securityLevel: 'standard',
     };
   }
 }
@@ -1365,21 +1164,13 @@ class DefaultRubyBridgeAdapter implements RubyBridgeAdapter {
       return {
         requestId: request.requestId,
         success: true,
-        result: { message: `Ruby function ${request.functionName} executed successfully` },
-        validationResult: {
-          approved: true,
+        result: { message: `Ruby function ${request.functionName} executed successfully` },validationResult: {approved: true,
           conversationId: `ruby_${request.requestId}`,
           validationTimestamp: new Date(),
-          reasoning: 'Ruby function validation passed',
-          confidence: 0.92,
-        },
+          reasoning: 'Ruby function validation passed',confidence: 0.92,},
         executionTime,
         bridgeLatency: 8,
-        language: 'ruby',
-        metadata: {
-          bridgeVersion: '1.0.0',
-          languageVersion: '3.0.0',
-          executionEnvironment: 'ruby_bridge',
+        language: 'ruby',metadata: {bridgeVersion: '1.0.0',languageVersion: '3.0.0',executionEnvironment: 'ruby_bridge',
           resourceUsage: {
             cpuUsage: 15,
             memoryUsage: 40,
@@ -1392,15 +1183,10 @@ class DefaultRubyBridgeAdapter implements RubyBridgeAdapter {
             hit: false,
             key: `ruby_${request.functionId}`,
             ttl: 300000,
-            level: 'local',
-            serializationTime: 1,
-            deserializationTime: 1,
+            level: 'local',serializationTime: 1,deserializationTime: 1,
           },
           securityContext: {
-            authenticatedUser: 'ruby_bridge',
-            authorizationLevel: 'standard',
-            encryptionUsed: this.config.encryptionEnabled,
-            signatureValid: true,
+            authenticatedUser: 'ruby_bridge',authorizationLevel: 'standard',encryptionUsed: this.config.encryptionEnabled,signatureValid: true,
             auditTrailId: request.requestId,
           },
         },
@@ -1421,18 +1207,10 @@ class DefaultRubyBridgeAdapter implements RubyBridgeAdapter {
           approved: false,
           conversationId: `ruby_error_${request.requestId}`,
           validationTimestamp: new Date(),
-          reasoning: 'Ruby function execution failed',
-          confidence: 0,
-        },
+          reasoning: 'Ruby function execution failed',confidence: 0,},
         executionTime: Date.now() - startTime,
         bridgeLatency: 3,
-        language: 'ruby',
-        metadata: {
-          bridgeVersion: '1.0.0',
-          languageVersion: '3.0.0',
-          executionEnvironment: 'ruby_bridge_error',
-          resourceUsage: {
-            cpuUsage: 0,
+        language: 'ruby',metadata: {bridgeVersion: '1.0.0',languageVersion: '3.0.0',executionEnvironment: 'ruby_bridge_error',resourceUsage: {cpuUsage: 0,
             memoryUsage: 0,
             networkLatency: 0,
             diskUsage: 0,
@@ -1441,15 +1219,10 @@ class DefaultRubyBridgeAdapter implements RubyBridgeAdapter {
           },
           cacheInfo: {
             hit: false,
-            key: '',
-            ttl: 0,
-            level: 'local',
-            serializationTime: 0,
-            deserializationTime: 0,
+            key: '',ttl: 0,level: 'local',serializationTime: 0,deserializationTime: 0,
           },
           securityContext: {
-            authenticatedUser: 'ruby_bridge',
-            authorizationLevel: 'standard',
+            authenticatedUser: 'ruby_bridge',authorizationLevel: 'standard',
             encryptionUsed: false,
             signatureValid: false,
             auditTrailId: request.requestId,
@@ -1462,37 +1235,26 @@ class DefaultRubyBridgeAdapter implements RubyBridgeAdapter {
   async validateFunction(request: CrossLanguageExecutionRequest): Promise<ParlantValidationResponse> {
     // Mock Ruby validation
     return {
-      approved: request.metadata.riskClassification !== RiskLevel.CRITICAL,
-      conversationId: `ruby_validation_${request.requestId}`,
-      validationTimestamp: new Date(),
-      reasoning: `Ruby function validation: ${request.metadata.riskClassification} risk level`,
+      approved: request.metadata.riskClassification !== RiskLevel._CRITICAL,
+      conversationId: `ruby_validation_${request.requestId}`,validationTimestamp: new Date(),reasoning: `Ruby function validation: ${request.metadata.riskClassification} risk level`,
       confidence: 0.88,
     };
   }
 
   async healthCheck(): Promise<BridgeHealthStatus> {
     return {
-      language: 'ruby',
-      status: 'healthy',
-      responseTime: 40,
-      successRate: 97,
+      language: 'ruby',status: 'healthy',responseTime: 40,successRate: 97,
       errorRate: 3,
       lastHealthCheck: new Date(),
       activeConnections: 2,
       queuedRequests: 0,
-      version: '1.0.0',
-      uptime: 172800000, // 48 hours
-    };
+      version: '1.0.0',uptime: 172800000, // 48 hours};
   }
 
   async getCapabilities(): Promise<RubyBridgeCapabilities> {
     return {
-      supportedVersions: ['2.7', '3.0', '3.1'],
-      availableGems: ['rails', 'sinatra', 'httparty', 'sequel'],
-      maxMemoryLimit: 512 * 1024 * 1024, // 512MB
-      maxExecutionTime: 180000, // 3 minutes
-      supportedFeatures: ['sync_execution', 'caching', 'monitoring'],
-      securityLevel: 'standard',
+      supportedVersions: ['2.7', '3.0', '3.1'],availableGems: ['rails', 'sinatra', 'httparty', 'sequel'],maxMemoryLimit: 512 * 1024 * 1024, // 512MBmaxExecutionTime: 180000, // 3 minutes
+      supportedFeatures: ['sync_execution', 'caching', 'monitoring'],securityLevel: 'standard',
     };
   }
 }
@@ -1513,10 +1275,7 @@ class DefaultWebSocketBridge implements WebSocketBridge {
     }
 
     // This would establish a new WebSocket connection
-    throw new Error(`WebSocket connection not available for ${language}`);
-  }
-
-  async disconnect(language: string): Promise<void> {
+    throw new Error(`WebSocket connection not available for ${language}`);}async disconnect(language: string): Promise<void> {
     const connection = this.connections.get(language);
     if (connection) {
       connection.close();
@@ -1527,15 +1286,10 @@ class DefaultWebSocketBridge implements WebSocketBridge {
   async sendValidationRequest(language: string, request: CrossLanguageExecutionRequest): Promise<string> {
     const connection = this.connections.get(language);
     if (!connection || connection.readyState !== WebSocket.OPEN) {
-      throw new Error(`WebSocket not connected for ${language}`);
-    }
-
-    const requestId = `ws_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      throw new Error(`WebSocket not connected for ${language}`);}const requestId = `ws_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     connection.send(JSON.stringify({
-      type: 'validation_request',
-      requestId,
-      data: request,
+      type: 'validation_request',requestId,data: request,
     }));
 
     return requestId;
@@ -1544,9 +1298,7 @@ class DefaultWebSocketBridge implements WebSocketBridge {
   subscribeToValidationResults(callback: (response: CrossLanguageExecutionResponse) => void): void {
     // Implementation would set up event listeners for WebSocket messages
     for (const [language, connection] of this.connections) {
-      connection.on('message', (data) => {
-        try {
-          const message = JSON.parse(data.toString());
+      connection.on('message', (data) => {try {const message = JSON.parse(data.toString());
           if (message.type === 'validation_response') {
             callback(message.data);
           }
@@ -1559,16 +1311,7 @@ class DefaultWebSocketBridge implements WebSocketBridge {
     }
   }
 
-  getConnectionStatus(language: string): 'connected' | 'disconnected' | 'connecting' | 'error' {
-    const connection = this.connections.get(language);
-    if (!connection) return 'disconnected';
-
-    switch (connection.readyState) {
-      case WebSocket.OPEN: return 'connected';
-      case WebSocket.CONNECTING: return 'connecting';
-      case WebSocket.CLOSED: return 'disconnected';
-      case WebSocket.CLOSING: return 'disconnected';
-      default: return 'error';
+  getConnectionStatus(language: string): 'connected' | 'disconnected' | 'connecting' | 'error' {const connection = this.connections.get(language);if (!connection) return 'disconnected';switch (connection.readyState) {case WebSocket.OPEN: return 'connected';case WebSocket.CONNECTING: return 'connecting';case WebSocket.CLOSED: return 'disconnected';case WebSocket.CLOSING: return 'disconnected';default: return 'error';
     }
   }
 }

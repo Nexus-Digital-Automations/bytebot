@@ -22,15 +22,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import { BytebotMcpModule } from '../bytebot-mcp.module';
-import { ComputerUseTools } from '../computer-use.tools';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-import { Base64ImageCompressor, compressPngBase64Under1MB } from '../compressor';
-import {
-  McpSchemas,
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { performance } from 'perf_hooks';import { BytebotMcpModule } from '../bytebot-mcp.module';import { ComputerUseTools } from '../computer-use.tools';import { ComputerUseService } from '../../computer-use/computer-use.service';import { Base64ImageCompressor, compressPngBase64Under1MB } from '../compressor';import {McpSchemas,
   McpToolResponse,
   McpContentItem,
   McpResponse,
@@ -48,23 +40,14 @@ import {
   DirectoryListParams,
   ZodSchemaInput,
   ZodSchemaOutput,
-} from '../types';
-import {
-  createMockService,
+} from '../types';import {createMockService,
   createMockLogger,
   TestUtils,
   AssertionHelpers,
-} from '../../test-utils';
-
-// Mock sharp module for compression testing
-jest.mock('sharp', () => {
-  const mockSharp = jest.fn().mockImplementation((input: string | Buffer) => ({
-    metadata: jest.fn().mockResolvedValue({
+} from '../../test-utils';// Mock sharp module for compression testingjest.mock('sharp', () => {const mockSharp = jest.fn().mockImplementation((input: string | Buffer) => ({metadata: jest.fn().mockResolvedValue({
       width: 1920,
       height: 1080,
-      format: 'png',
-    }),
-    resize: jest.fn().mockReturnThis(),
+      format: 'png',}),resize: jest.fn().mockReturnThis(),
     png: jest.fn().mockReturnThis(),
     jpeg: jest.fn().mockReturnThis(),
     webp: jest.fn().mockReturnThis(),
@@ -75,9 +58,7 @@ jest.mock('sharp', () => {
   return mockSharp;
 });
 
-describe('MCP Comprehensive Coverage', () => {
-  let module: TestingModule;
-  let computerUseTools: ComputerUseTools;
+describe('MCP Comprehensive Coverage', () => {let module: TestingModule;let computerUseTools: ComputerUseTools;
   let mockComputerUseService: jest.Mocked<ComputerUseService>;
   let testId: string;
 
@@ -88,25 +69,7 @@ describe('MCP Comprehensive Coverage', () => {
     // Create comprehensive mock service
     mockComputerUseService = {
       ...createMockService([
-        'action',
-        'screenshot',
-        'moveMouse',
-        'clickMouse',
-        'traceMouse',
-        'dragMouse',
-        'pressMouse',
-        'scroll',
-        'typeKeys',
-        'pressKeys',
-        'typeText',
-        'pasteText',
-        'wait',
-        'application',
-        'cursorPosition',
-        'writeFile',
-        'readFile',
-        'initializeNutJS',
-        'validateCoordinates',
+        'action','screenshot','moveMouse','clickMouse','traceMouse','dragMouse','pressMouse','scroll','typeKeys','pressKeys','typeText','pasteText','wait','application','cursorPosition','writeFile','readFile','initializeNutJS','validateCoordinates',
       ]),
       logger: createMockLogger(),
       cuaEnabled: true,
@@ -126,23 +89,15 @@ describe('MCP Comprehensive Coverage', () => {
 
     computerUseTools = module.get<ComputerUseTools>(ComputerUseTools);
 
-    console.log(`[${testId}] Comprehensive coverage test setup completed`);
-  });
-
-  afterEach(() => {
+    console.log(`[${testId}] Comprehensive coverage test setup completed`);});afterEach(() => {
     console.log(`[${testId}] Comprehensive coverage test cleanup completed`);
   });
 
   /**
    * Test Suite: BytebotMcpModule Coverage
    */
-  describe('BytebotMcpModule Coverage', () => {
-    it('should test module constructor and logging', () => {
-      const operationId = `${testId}_module_constructor`;
-      console.log(`[${operationId}] Testing BytebotMcpModule constructor`);
-
-      // Test module constructor by creating a new instance
-      const module = new BytebotMcpModule();
+  describe('BytebotMcpModule Coverage', () => {it('should test module constructor and logging', () => {
+      const operationId = `${testId}_module_constructor`;console.log(`[${operationId}] Testing BytebotMcpModule constructor`);// Test module constructor by creating a new instanceconst module = new BytebotMcpModule();
       expect(module).toBeDefined();
       expect(module).toBeInstanceOf(BytebotMcpModule);
 
@@ -150,11 +105,7 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test module initialization lifecycle', async () => {
-      const operationId = `${testId}_module_lifecycle`;
-      console.log(`[${operationId}] Testing module initialization lifecycle`);
-
-      // Test full module with dependencies
-      const testModule = await Test.createTestingModule({
+      const operationId = `${testId}_module_lifecycle`;console.log(`[${operationId}] Testing module initialization lifecycle`);// Test full module with dependenciesconst testModule = await Test.createTestingModule({
         imports: [BytebotMcpModule],
         providers: [
           {
@@ -179,13 +130,8 @@ describe('MCP Comprehensive Coverage', () => {
   /**
    * Test Suite: ComputerUseTools Complete Coverage
    */
-  describe('ComputerUseTools Complete Coverage', () => {
-    it('should test private method generateOperationId', () => {
-      const operationId = `${testId}_private_operation_id`;
-      console.log(`[${operationId}] Testing private generateOperationId method`);
-
-      // Access private method through any casting
-      const tools = computerUseTools as unknown;
+  describe('ComputerUseTools Complete Coverage', () => {it('should test private method generateOperationId', () => {
+      const operationId = `${testId}_private_operation_id`;console.log(`[${operationId}] Testing private generateOperationId method`);// Access private method through any castingconst tools = computerUseTools as unknown;
       
       // Test multiple ID generations to ensure uniqueness
       const id1 = tools.generateOperationId();
@@ -203,24 +149,13 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test private logging methods with all parameters', () => {
-      const operationId = `${testId}_private_logging`;
-      console.log(`[${operationId}] Testing private logging methods`);
+      const operationId = `${testId}_private_logging`;console.log(`[${operationId}] Testing private logging methods`);
 
       const tools = computerUseTools as unknown;
-      const testOpId = 'test_operation_123';
-      const testParams = { test: 'data', nested: { value: 42 } };
-
-      // Test logOperationStart
+      const testOpId = 'test_operation_123';const testParams = { test: 'data', nested: { value: 42 } };// Test logOperationStartexpect(() => {
+        tools.logOperationStart(testOpId, 'test_tool', testParams);}).not.toThrow();// Test logOperationSuccess
       expect(() => {
-        tools.logOperationStart(testOpId, 'test_tool', testParams);
-      }).not.toThrow();
-
-      // Test logOperationSuccess
-      expect(() => {
-        tools.logOperationSuccess(testOpId, 'test_tool', Date.now(), 'test result');
-      }).not.toThrow();
-
-      // Test logOperationError
+        tools.logOperationSuccess(testOpId, 'test_tool', Date.now(), 'test result');}).not.toThrow();// Test logOperationError
       expect(() => {
         tools.logOperationError(testOpId, 'test_tool', Date.now(), new Error('test error'));
       }).not.toThrow();
@@ -229,26 +164,17 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test error scenarios for all tool methods', async () => {
-      const operationId = `${testId}_tool_error_scenarios`;
-      console.log(`[${operationId}] Testing error scenarios for all tool methods`);
+      const operationId = `${testId}_tool_error_scenarios`;console.log(`[${operationId}] Testing error scenarios for all tool methods`);
 
       // Configure service methods to throw specific errors
-      const testError = new Error('Service method failed');
-      
-      mockComputerUseService.screenshot.mockRejectedValue(testError);
-      mockComputerUseService.moveMouse.mockRejectedValue(testError);
+      const testError = new Error('Service method failed');mockComputerUseService.screenshot.mockRejectedValue(testError);mockComputerUseService.moveMouse.mockRejectedValue(testError);
       mockComputerUseService.clickMouse.mockRejectedValue(testError);
       mockComputerUseService.typeText.mockRejectedValue(testError);
       mockComputerUseService.readFile.mockRejectedValue(testError);
       mockComputerUseService.writeFile.mockRejectedValue(testError);
 
       const errorTests = [
-        { method: 'screenshot', params: { display: 0 } },
-        { method: 'moveMouse', params: { coordinates: { x: 100, y: 200 } } },
-        { method: 'clickMouse', params: { coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 } },
-        { method: 'typeText', params: { text: 'test' } },
-        { method: 'readFile', params: { path: '/test/file.txt' } },
-        { method: 'writeFile', params: { path: '/test/file.txt', content: 'test' } },
+        { method: 'screenshot', params: { display: 0 } },{ method: 'moveMouse', params: { coordinates: { x: 100, y: 200 } } },{ method: 'clickMouse', params: { coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 } },{ method: 'typeText', params: { text: 'test' } },{ method: 'readFile', params: { path: '/test/file.txt' } },{ method: 'writeFile', params: { path: '/test/file.txt', content: 'test' } },
       ];
 
       for (const test of errorTests) {
@@ -260,9 +186,7 @@ describe('MCP Comprehensive Coverage', () => {
           expect(result.content).toBeDefined();
           expect(result.isError).toBe(true);
           
-          console.log(`[${operationId}] Error scenario for ${test.method} handled correctly`);
-        } catch (error) {
-          // Some methods might throw, which is also acceptable
+          console.log(`[${operationId}] Error scenario for ${test.method} handled correctly`);} catch (error) {// Some methods might throw, which is also acceptable
           expect(error).toBeInstanceOf(Error);
           console.log(`[${operationId}] Error scenario for ${test.method} threw error as expected`);
         }
@@ -270,30 +194,23 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test cursor position tracking', async () => {
-      const operationId = `${testId}_cursor_position`;
-      console.log(`[${operationId}] Testing cursor position tracking`);
+      const operationId = `${testId}_cursor_position`;console.log(`[${operationId}] Testing cursor position tracking`);
 
       mockComputerUseService.cursorPosition.mockResolvedValue({
         x: 150,
         y: 250,
         timestamp: new Date(),
-        operationId: 'cursor_test',
-      });
-
-      const result = await computerUseTools.cursorPosition();
+        operationId: 'cursor_test',});const result = await computerUseTools.cursorPosition();
       
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.content[0]?.type).toBe('text');
-      expect(result.content[0]?.text).toContain('150');
-      expect(result.content[0]?.text).toContain('250');
+      expect(result.content[0]?.type).toBe('text');expect(result.content[0]?.text).toContain('150');expect(result.content[0]?.text).toContain('250');
 
       console.log(`[${operationId}] Cursor position tracking tested`);
     });
 
     it('should test all advanced tool methods', async () => {
-      const operationId = `${testId}_advanced_tools`;
-      console.log(`[${operationId}] Testing all advanced tool methods`);
+      const operationId = `${testId}_advanced_tools`;console.log(`[${operationId}] Testing all advanced tool methods`);
 
       // Mock responses for advanced methods
       mockComputerUseService.traceMouse.mockResolvedValue({ success: true });
@@ -307,76 +224,35 @@ describe('MCP Comprehensive Coverage', () => {
 
       const advancedTests = [
         {
-          method: 'traceMouse',
-          params: {
-            path: [{ x: 0, y: 0 }, { x: 100, y: 100 }],
-            holdKeys: ['shift'],
-          },
-        },
+          method: 'traceMouse',params: {path: [{ x: 0, y: 0 }, { x: 100, y: 100 }],
+            holdKeys: ['shift'],},},
         {
-          method: 'dragMouse',
-          params: {
-            startCoordinates: { x: 0, y: 0 },
+          method: 'dragMouse',params: {startCoordinates: { x: 0, y: 0 },
             endCoordinates: { x: 100, y: 100 },
           },
         },
         {
-          method: 'dragMousePath',
-          params: {
-            path: [{ x: 0, y: 0 }, { x: 50, y: 50 }, { x: 100, y: 100 }],
-            button: 'left' as const,
-            holdKeys: ['ctrl'],
-          },
+          method: 'dragMousePath',params: {path: [{ x: 0, y: 0 }, { x: 50, y: 50 }, { x: 100, y: 100 }],
+            button: 'left' as const,holdKeys: ['ctrl'],},},
+        {
+          method: 'pressMouse',params: {coordinates: { x: 100, y: 200 },
+            button: 'left' as const,press: 'down' as const,},},
+        {
+          method: 'scrollAdvanced',params: {coordinates: { x: 100, y: 200 },
+            direction: 'up' as const,scrollCount: 5,holdKeys: ['ctrl'],},},
+        {
+          method: 'typeKeysAdvanced',params: {keys: ['ctrl', 'c'],delay: 100,},
         },
         {
-          method: 'pressMouse',
-          params: {
-            coordinates: { x: 100, y: 200 },
-            button: 'left' as const,
-            press: 'down' as const,
-          },
+          method: 'pressKeysAdvanced',params: {keys: ['shift'],press: 'down' as const,},},
+        {
+          method: 'typeTextAdvanced',params: {text: 'advanced typing',delay: 50,},
         },
         {
-          method: 'scrollAdvanced',
-          params: {
-            coordinates: { x: 100, y: 200 },
-            direction: 'up' as const,
-            scrollCount: 5,
-            holdKeys: ['ctrl'],
-          },
-        },
+          method: 'pasteText',params: { text: 'pasted content' },},{
+          method: 'wait',params: { duration: 1000 },},
         {
-          method: 'typeKeysAdvanced',
-          params: {
-            keys: ['ctrl', 'c'],
-            delay: 100,
-          },
-        },
-        {
-          method: 'pressKeysAdvanced',
-          params: {
-            keys: ['shift'],
-            press: 'down' as const,
-          },
-        },
-        {
-          method: 'typeTextAdvanced',
-          params: {
-            text: 'advanced typing',
-            delay: 50,
-          },
-        },
-        {
-          method: 'pasteText',
-          params: { text: 'pasted content' },
-        },
-        {
-          method: 'wait',
-          params: { duration: 1000 },
-        },
-        {
-          method: 'application',
-          params: { application: 'firefox' as const },
+          method: 'application',params: { application: 'firefox' as const },
         },
       ];
 
@@ -394,27 +270,18 @@ describe('MCP Comprehensive Coverage', () => {
   /**
    * Test Suite: Base64ImageCompressor Complete Coverage
    */
-  describe('Base64ImageCompressor Complete Coverage', () => {
-    it('should test compressToSize with all options', async () => {
-      const operationId = `${testId}_compress_to_size_options`;
-      console.log(`[${operationId}] Testing compressToSize with all options`);
+  describe('Base64ImageCompressor Complete Coverage', () => {it('should test compressToSize with all options', async () => {
+      const operationId = `${testId}_compress_to_size_options`;console.log(`[${operationId}] Testing compressToSize with all options`);
 
-      const testBase64 = 'data:image/png;base64,' + Buffer.alloc(2048, 'A').toString('base64');
-
-      const compressionOptions: CompressionOptions[] = [
-        {}, // Default options
+      const testBase64 = 'data:image/png;base64,' + Buffer.alloc(2048, 'A').toString('base64');const compressionOptions: CompressionOptions[] = [{}, // Default options
         {
           targetSizeKB: 512,
           initialQuality: 90,
           minQuality: 30,
-          format: 'jpeg',
-          maxIterations: 5,
-        },
+          format: 'jpeg',maxIterations: 5,},
         {
           targetSizeKB: 256,
-          format: 'webp',
-          maxIterations: 10,
-        },
+          format: 'webp',maxIterations: 10,},
         {
           targetSizeKB: 128,
           format: 'png',
@@ -437,13 +304,9 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test compressWithResize method', async () => {
-      const operationId = `${testId}_compress_with_resize`;
-      console.log(`[${operationId}] Testing compressWithResize method`);
+      const operationId = `${testId}_compress_with_resize`;console.log(`[${operationId}] Testing compressWithResize method`);
 
-      const testBase64 = 'data:image/png;base64,' + Buffer.alloc(4096, 'B').toString('base64');
-
-      const result = await Base64ImageCompressor.compressWithResize(
-        _testBase64,
+      const testBase64 = 'data:image/png;base64,' + Buffer.alloc(4096, 'B').toString('base64');const result = await Base64ImageCompressor.compressWithResize(_testBase64,
         { targetSizeKB: 100, format: 'jpeg' },
         { maxWidth: 800, maxHeight: 600 }
       );
@@ -458,16 +321,10 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test getBestCompressionFormat method', () => {
-      const operationId = `${testId}_best_compression_format`;
-      console.log(`[${operationId}] Testing getBestCompressionFormat method`);
+      const operationId = `${testId}_best_compression_format`;console.log(`[${operationId}] Testing getBestCompressionFormat method`);
 
       const testCases = [
-        { base64: 'data:image/png;base64,test', expected: 'png' },
-        { base64: 'data:image/jpeg;base64,test', expected: 'jpeg' },
-        { base64: 'data:image/webp;base64,test', expected: 'webp' },
-        { base64: 'iVBORw0KGgoAAAANSUhEUgAA', expected: 'png' }, // PNG signature
-        { base64: '/9j/4AAQSkZJRgABAQEAYABgAAD/', expected: 'jpeg' }, // JPEG signature
-        { base64: 'invaliddata', expected: 'png' }, // Fallback
+        { base64: 'data:image/png;base64,test', expected: 'png' },{ base64: 'data:image/jpeg;base64,test', expected: 'jpeg' },{ base64: 'data:image/webp;base64,test', expected: 'webp' },{ base64: 'iVBORw0KGgoAAAANSUhEUgAA', expected: 'png' }, // PNG signature{ base64: '/9j/4AAQSkZJRgABAQEAYABgAAD/', expected: 'jpeg' }, // JPEG signature{ base64: 'invaliddata', expected: 'png' }, // Fallback
       ];
 
       testCases.forEach((testCase, index) => {
@@ -478,32 +335,15 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test parseBase64Image method', () => {
-      const operationId = `${testId}_parse_base64_image`;
-      console.log(`[${operationId}] Testing parseBase64Image method`);
+      const operationId = `${testId}_parse_base64_image`;console.log(`[${operationId}] Testing parseBase64Image method`);
 
       const testCases = [
         {
-          input: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',
-          expected: {
-            mimeType: 'image/png',
-            format: 'png',
-            data: 'iVBORw0KGgoAAAANSUhEUgAA',
-          },
-        },
+          input: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',expected: {mimeType: 'image/png',format: 'png',data: 'iVBORw0KGgoAAAANSUhEUgAA',},},
         {
-          input: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/',
-          expected: {
-            mimeType: 'image/jpeg',
-            format: 'jpeg',
-            data: '/9j/4AAQSkZJRgABAQEAYABgAAD/',
-          },
-        },
+          input: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/',expected: {mimeType: 'image/jpeg',format: 'jpeg',data: '/9j/4AAQSkZJRgABAQEAYABgAAD/',},},
         {
-          input: 'iVBORw0KGgoAAAANSUhEUgAA', // Without data URL prefix
-          expected: {
-            mimeType: 'image/png',
-            format: 'png',
-            data: 'iVBORw0KGgoAAAANSUhEUgAA',
+          input: 'iVBORw0KGgoAAAANSUhEUgAA', // Without data URL prefixexpected: {mimeType: 'image/png',format: 'png',data: 'iVBORw0KGgoAAAANSUhEUgAA',
           },
         },
       ];
@@ -520,23 +360,15 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test error handling in compression methods', async () => {
-      const operationId = `${testId}_compression_errors`;
-      console.log(`[${operationId}] Testing compression error handling`);
+      const operationId = `${testId}_compression_errors`;console.log(`[${operationId}] Testing compression error handling`);
 
       const errorTests = [
         {
-          name: 'invalid base64',
-          input: 'invalid-base64-data',
-          options: {},
-        },
+          name: 'invalid base64',input: 'invalid-base64-data',options: {},},
         {
-          name: 'empty string',
-          input: '',
-          options: {},
-        },
+          name: 'empty string',input: '',options: {},},
         {
-          name: 'malformed data URL',
-          input: 'data:invalid;base64,test',
+          name: 'malformed data URL',input: 'data:invalid;base64,test',
           options: {},
         },
       ];
@@ -544,23 +376,16 @@ describe('MCP Comprehensive Coverage', () => {
       for (const test of errorTests) {
         try {
           await Base64ImageCompressor.compressToSize(test.input, test.options);
-          console.warn(`[${operationId}] ${test.name} did not throw error as expected`);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
+          console.warn(`[${operationId}] ${test.name} did not throw error as expected`);} catch (error) {expect(error).toBeInstanceOf(Error);
           console.log(`[${operationId}] ${test.name} error handled correctly: ${error.message}`);
         }
       }
     });
 
     it('should test compressPngBase64Under1MB convenience function', async () => {
-      const operationId = `${testId}_compress_png_1mb`;
-      console.log(`[${operationId}] Testing compressPngBase64Under1MB convenience function`);
+      const operationId = `${testId}_compress_png_1mb`;console.log(`[${operationId}] Testing compressPngBase64Under1MB convenience function`);
 
-      const testBase64 = Buffer.alloc(2048, 'C').toString('base64');
-      
-      const result = await compressPngBase64Under1MB(testBase64);
-      
-      expect(result).toBeDefined();
+      const testBase64 = Buffer.alloc(2048, 'C').toString('base64');const result = await compressPngBase64Under1MB(testBase64);expect(result).toBeDefined();
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
       
@@ -571,18 +396,13 @@ describe('MCP Comprehensive Coverage', () => {
   /**
    * Test Suite: Types and Utilities Complete Coverage
    */
-  describe('Types and Utilities Complete Coverage', () => {
-    it('should test all type guards comprehensively', () => {
-      const operationId = `${testId}_type_guards_comprehensive`;
-      console.log(`[${operationId}] Testing all type guards comprehensively`);
+  describe('Types and Utilities Complete Coverage', () => {it('should test all type guards comprehensively', () => {
+      const operationId = `${testId}_type_guards_comprehensive`;console.log(`[${operationId}] Testing all type guards comprehensively`);
 
       // Test isMcpResponse with various inputs
       const mcpResponseTests = [
         { input: { success: true }, expected: true },
-        { input: { success: false, error: { code: 'TEST', message: 'test' } }, expected: true },
-        { input: { success: 'true' }, expected: false }, // wrong type
-        { input: { notSuccess: true }, expected: false }, // missing field
-        { input: null, expected: false },
+        { input: { success: false, error: { code: 'TEST', message: 'test' } }, expected: true },{ input: { success: 'true' }, expected: false }, // wrong type{ input: { notSuccess: true }, expected: false }, // missing field{ input: null, expected: false },
         { input: undefined, expected: false },
         { input: 'string', expected: false },
         { input: 42, expected: false },
@@ -599,16 +419,12 @@ describe('MCP Comprehensive Coverage', () => {
       const compressionResultTests = [
         {
           input: {
-            base64: 'test',
-            originalSizeKB: 100,
-            compressedSizeKB: 50,
+            base64: 'test',originalSizeKB: 100,compressedSizeKB: 50,
             sizeKB: 50,
             sizeBytes: 51200,
             sizeMB: 0.05,
             quality: 80,
-            format: 'jpeg',
-            iterations: 3,
-          },
+            format: 'jpeg',iterations: 3,},
           expected: true,
         },
         {
@@ -631,11 +447,7 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test all Zod schemas with edge cases', () => {
-      const operationId = `${testId}_zod_schemas_edge_cases`;
-      console.log(`[${operationId}] Testing Zod schemas with edge cases`);
-
-      // Test mouseMove schema with edge cases
-      const mouseMoveEdgeCases = [
+      const operationId = `${testId}_zod_schemas_edge_cases`;console.log(`[${operationId}] Testing Zod schemas with edge cases`);// Test mouseMove schema with edge casesconst mouseMoveEdgeCases = [
         { coordinates: { x: 0, y: 0 } }, // Minimum coordinates
         { coordinates: { x: 99999, y: 99999 } }, // Very large coordinates
         { coordinates: { x: -1000, y: -1000 } }, // Negative coordinates
@@ -651,18 +463,13 @@ describe('MCP Comprehensive Coverage', () => {
       // Test mouseClick schema with optional parameters
       const mouseClickCases = [
         { coordinates: { x: 100, y: 200 } }, // Minimal valid
-        { coordinates: { x: 100, y: 200 }, button: 'left' },
-        { coordinates: { x: 100, y: 200 }, button: 'right', clickCount: 2 },
-        { coordinates: { x: 100, y: 200 }, button: 'middle', clickCount: 1 },
+        { coordinates: { x: 100, y: 200 }, button: 'left' },{ coordinates: { x: 100, y: 200 }, button: 'right', clickCount: 2 },{ coordinates: { x: 100, y: 200 }, button: 'middle', clickCount: 1 },
       ];
 
       mouseClickCases.forEach((testCase, index) => {
         const result = McpSchemas.mouseClick.safeParse(testCase);
         expect(result.success).toBe(true);
-        console.log(`[${operationId}] mouseClick case ${index + 1} passed validation`);
-      });
-
-      // Test screenshot schema edge cases
+        console.log(`[${operationId}] mouseClick case ${index + 1} passed validation`);});// Test screenshot schema edge cases
       const screenshotCases = [
         {}, // No display specified
         { display: 0 }, // Primary display
@@ -678,8 +485,7 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test type inference helpers', () => {
-      const operationId = `${testId}_type_inference`;
-      console.log(`[${operationId}] Testing type inference helpers`);
+      const operationId = `${testId}_type_inference`;console.log(`[${operationId}] Testing type inference helpers`);
 
       // Test ZodSchemaInput type inference
       type MouseMoveInput = ZodSchemaInput<typeof McpSchemas.mouseMove>;
@@ -703,49 +509,32 @@ describe('MCP Comprehensive Coverage', () => {
       type MouseClickAdvancedInput = ZodSchemaInput<typeof McpSchemas.mouseClickAdvanced>;
       const complexInput: MouseClickAdvancedInput = {
         coordinates: { x: 100, y: 200 },
-        button: 'left',
-        holdKeys: ['ctrl', 'shift'],
-        clickCount: 2,
-      };
+        button: 'left',holdKeys: ['ctrl', 'shift'],clickCount: 2,};
 
-      expect(complexInput.button).toBe('left');
-      expect(complexInput.holdKeys).toEqual(['ctrl', 'shift']);
+      expect(complexInput.button).toBe('left');expect(complexInput.holdKeys).toEqual(['ctrl', 'shift']);
       expect(complexInput.clickCount).toBe(2);
 
       console.log(`[${operationId}] Type inference helpers tested successfully`);
     });
 
     it('should test all schema validation error paths', () => {
-      const operationId = `${testId}_schema_validation_errors`;
-      console.log(`[${operationId}] Testing schema validation error paths`);
+      const operationId = `${testId}_schema_validation_errors`;console.log(`[${operationId}] Testing schema validation error paths`);
 
       const invalidTestCases = [
         {
           schema: McpSchemas.mouseMove,
-          input: { coordinates: { x: 'invalid', y: 200 } },
-          expectedError: 'coordinates.x',
-        },
-        {
+          input: { coordinates: { x: 'invalid', y: 200 } },expectedError: 'coordinates.x',},{
           schema: McpSchemas.mouseClick,
-          input: { coordinates: { x: 100, y: 200 }, button: 'invalid' },
-          expectedError: 'button',
-        },
-        {
+          input: { coordinates: { x: 100, y: 200 }, button: 'invalid' },expectedError: 'button',},{
           schema: McpSchemas.keyboardType,
           input: { text: 123 },
-          expectedError: 'text',
-        },
-        {
+          expectedError: 'text',},{
           schema: McpSchemas.fileRead,
           input: { path: null },
-          expectedError: 'path',
-        },
-        {
+          expectedError: 'path',},{
           schema: McpSchemas.directoryCreate,
           input: {},
-          expectedError: 'path',
-        },
-      ];
+          expectedError: 'path',},];
 
       invalidTestCases.forEach((testCase, index) => {
         const result = testCase.schema.safeParse(testCase.input);
@@ -764,17 +553,12 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test interface compliance for all exported types', () => {
-      const operationId = `${testId}_interface_compliance`;
-      console.log(`[${operationId}] Testing interface compliance for all exported types`);
+      const operationId = `${testId}_interface_compliance`;console.log(`[${operationId}] Testing interface compliance for all exported types`);
 
       // Test McpToolResponse compliance
       const validToolResponse: McpToolResponse = {
         content: [
-          { type: 'text', text: 'Test response' },
-          { type: 'image', mimeType: 'image/png', data: 'base64data' },
-          { type: 'resource', uri: 'file:///test' },
-        ],
-        isError: false,
+          { type: 'text', text: 'Test response' },{ type: 'image', mimeType: 'image/png', data: 'base64data' },{ type: 'resource', uri: 'file:///test' },],isError: false,
       };
 
       expect(validToolResponse.content).toHaveLength(3);
@@ -782,20 +566,9 @@ describe('MCP Comprehensive Coverage', () => {
 
       // Test McpError compliance
       const validError: McpError = {
-        code: 'TEST_ERROR',
-        message: 'Test error message',
-        details: { context: 'testing', timestamp: Date.now() },
-      };
-
-      expect(validError.code).toBe('TEST_ERROR');
-      expect(validError.message).toBe('Test error message');
-      expect(validError.details).toBeDefined();
-
-      // Test CompressionResult compliance
+        code: 'TEST_ERROR',message: 'Test error message',details: { context: 'testing', timestamp: Date.now() },};expect(validError.code).toBe('TEST_ERROR');expect(validError.message).toBe('Test error message');expect(validError.details).toBeDefined();// Test CompressionResult compliance
       const validCompressionResult: CompressionResult = {
-        base64: 'compressed-data',
-        sizeBytes: 51200,
-        sizeKB: 50,
+        base64: 'compressed-data',sizeBytes: 51200,sizeKB: 50,
         sizeMB: 0.05,
         quality: 80,
         format: 'jpeg',
@@ -818,28 +591,18 @@ describe('MCP Comprehensive Coverage', () => {
   /**
    * Test Suite: Index Module Coverage
    */
-  describe('Index Module Coverage', () => {
-    it('should test all exports from index module', () => {
-      const operationId = `${testId}_index_exports`;
-      console.log(`[${operationId}] Testing all exports from index module`);
+  describe('Index Module Coverage', () => {it('should test all exports from index module', () => {
+      const operationId = `${testId}_index_exports`;console.log(`[${operationId}] Testing all exports from index module`);
 
       // Import everything from index
-      const McpIndex = require('../index');
-
-      // Test class exports
-      expect(McpIndex.BytebotMcpModule).toBeDefined();
+      const McpIndex = require('../index');// Test class exportsexpect(McpIndex.BytebotMcpModule).toBeDefined();
       expect(McpIndex.ComputerUseTools).toBeDefined();
       expect(McpIndex.Base64ImageCompressor).toBeDefined();
 
       // Test function exports
       expect(McpIndex.compressPngBase64Under1MB).toBeDefined();
-      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');
-
-      // Test type exports (should not throw when used)
-      const testResponse: McpIndex.McpToolResponse = {
-        content: [{ type: 'text', text: 'test' }],
-      };
-      expect(testResponse.content).toBeDefined();
+      expect(typeof McpIndex.compressPngBase64Under1MB).toBe('function');// Test type exports (should not throw when used)const testResponse: McpIndex.McpToolResponse = {
+        content: [{ type: 'text', text: 'test' }],};expect(testResponse.content).toBeDefined();
 
       // Test enum/schema exports
       expect(McpIndex.McpSchemas).toBeDefined();
@@ -848,21 +611,16 @@ describe('MCP Comprehensive Coverage', () => {
       // Test utility function exports
       expect(McpIndex.isMcpResponse).toBeDefined();
       expect(McpIndex.isCompressionResult).toBeDefined();
-      expect(typeof McpIndex.isMcpResponse).toBe('function');
-      expect(typeof McpIndex.isCompressionResult).toBe('function');
+      expect(typeof McpIndex.isMcpResponse).toBe('function');expect(typeof McpIndex.isCompressionResult).toBe('function');
 
       console.log(`[${operationId}] All index module exports validated`);
     });
 
     it('should test re-export functionality', () => {
-      const operationId = `${testId}_reexport_functionality`;
-      console.log(`[${operationId}] Testing re-export functionality`);
+      const operationId = `${testId}_reexport_functionality`;console.log(`[${operationId}] Testing re-export functionality`);
 
       // Test that re-exported items work correctly
-      const McpIndex = require('../index');
-
-      // Test BytebotMcpModule can be instantiated
-      const moduleInstance = new McpIndex.BytebotMcpModule();
+      const McpIndex = require('../index');// Test BytebotMcpModule can be instantiatedconst moduleInstance = new McpIndex.BytebotMcpModule();
       expect(moduleInstance).toBeInstanceOf(McpIndex.BytebotMcpModule);
 
       // Test ComputerUseTools requires injection
@@ -886,31 +644,10 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test module metadata and documentation', () => {
-      const operationId = `${testId}_module_metadata`;
-      console.log(`[${operationId}] Testing module metadata and documentation`);
+      const operationId = `${testId}_module_metadata`;console.log(`[${operationId}] Testing module metadata and documentation`);
 
       // Read the index file to verify documentation exists
-      const fs = require('fs');
-      const path = require('path');
-      
-      const indexPath = path.join(__dirname, '..', 'index.ts');
-      const indexContent = fs.readFileSync(indexPath, 'utf8');
-
-      // Verify documentation blocks exist
-      expect(indexContent).toContain('/**');
-      expect(indexContent).toContain('MCP Integration Public API');
-      expect(indexContent).toContain('@author');
-      expect(indexContent).toContain('@version');
-
-      // Verify all expected exports are present
-      expect(indexContent).toContain('export * from \'./bytebot-mcp.module\'');
-      expect(indexContent).toContain('export * from \'./computer-use.tools\'');
-      expect(indexContent).toContain('export * from \'./compressor\'');
-
-      // Verify type exports
-      expect(indexContent).toContain('export type {');
-      expect(indexContent).toContain('CompressionOptions');
-      expect(indexContent).toContain('McpToolResponse');
+      const fs = require('fs');const path = require('path');const indexPath = path.join(__dirname, '..', 'index.ts');const indexContent = fs.readFileSync(indexPath, 'utf8');// Verify documentation blocks existexpect(indexContent).toContain('/**');expect(indexContent).toContain('MCP Integration Public API');expect(indexContent).toContain('@author');expect(indexContent).toContain('@version');// Verify all expected exports are presentexpect(indexContent).toContain('export * from \'./bytebot-mcp.module\'');expect(indexContent).toContain('export * from \'./computer-use.tools\'');expect(indexContent).toContain('export * from \'./compressor\'');// Verify type exportsexpect(indexContent).toContain('export type {');expect(indexContent).toContain('CompressionOptions');expect(indexContent).toContain('McpToolResponse');
 
       console.log(`[${operationId}] Module metadata and documentation validated`);
     });
@@ -919,22 +656,16 @@ describe('MCP Comprehensive Coverage', () => {
   /**
    * Test Suite: Performance and Memory Coverage
    */
-  describe('Performance and Memory Coverage', () => {
-    it('should test memory usage under load', async () => {
-      const operationId = `${testId}_memory_load_test`;
-      console.log(`[${operationId}] Testing memory usage under load`);
+  describe('Performance and Memory Coverage', () => {it('should test memory usage under load', async () => {
+      const operationId = `${testId}_memory_load_test`;console.log(`[${operationId}] Testing memory usage under load`);
 
       const initialMemory = process.memoryUsage();
       
       // Setup mock for consistent responses
       mockComputerUseService.screenshot.mockResolvedValue({
-        image: Buffer.alloc(1024, 'D').toString('base64'),
-        metadata: {
-          width: 800,
+        image: Buffer.alloc(1024, 'D').toString('base64'),metadata: {width: 800,
           height: 600,
-          format: 'png' as const,
-          captureTime: new Date(),
-          operationId: 'memory_test',
+          format: 'png' as const,captureTime: new Date(),operationId: 'memory_test',
         },
       });
 
@@ -957,8 +688,7 @@ describe('MCP Comprehensive Coverage', () => {
     });
 
     it('should test operation counter overflow handling', () => {
-      const operationId = `${testId}_counter_overflow`;
-      console.log(`[${operationId}] Testing operation counter overflow handling`);
+      const operationId = `${testId}_counter_overflow`;console.log(`[${operationId}] Testing operation counter overflow handling`);
 
       const tools = computerUseTools as unknown;
       
@@ -970,19 +700,13 @@ describe('MCP Comprehensive Coverage', () => {
       const id2 = tools.generateOperationId();
       const id3 = tools.generateOperationId();
 
-      expect(id1).toContain('9999');
-      expect(id2).toContain('0000'); // Should wrap to 0
-      expect(id3).toContain('0001');
+      expect(id1).toContain('9999');expect(id2).toContain('0000'); // Should wrap to 0expect(id3).toContain('0001');
 
       console.log(`[${operationId}] Operation counter overflow handling tested: ${id1}, ${id2}, ${id3}`);
     });
 
     it('should test performance timing accuracy', async () => {
-      const operationId = `${testId}_timing_accuracy`;
-      console.log(`[${operationId}] Testing performance timing accuracy`);
-
-      // Mock with known delay
-      mockComputerUseService.wait.mockImplementation(async (params) => {
+      const operationId = `${testId}_timing_accuracy`;console.log(`[${operationId}] Testing performance timing accuracy`);// Mock with known delaymockComputerUseService.wait.mockImplementation(async (params) => {
         await new Promise(resolve => setTimeout(resolve, params.duration || 100));
         return { success: true, duration: params.duration };
       });

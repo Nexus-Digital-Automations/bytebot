@@ -24,22 +24,14 @@ import {
   BadRequestException,
   Logger,
   UnprocessableEntityException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  validate,
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {validate,
   ValidationError,
   ValidatorOptions,
   registerDecorator,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-} from 'class-validator';
-import { plainToClass, Transform } from 'class-transformer';
-import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';
-
-/**
- * Validation configuration
+} from 'class-validator';import { plainToClass, Transform } from 'class-transformer';import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';/*** Validation configuration
  */
 interface ValidationConfig {
   enableStrictValidation: boolean;
@@ -86,9 +78,7 @@ interface ValidationIssue {
   field: string;
   message: string;
   code: string;
-  severity: 'error' | 'warning' | 'info';
-  value?: any;
-  constraint?: string;
+  severity: 'error' | 'warning' | 'info';value?: any;constraint?: string;
   context?: Record<string, unknown>;
 }
 
@@ -106,9 +96,7 @@ interface BusinessRuleResult {
 interface BusinessRuleViolation {
   rule: string;
   message: string;
-  severity: 'error' | 'warning';
-  field?: string;
-  context?: Record<string, unknown>;
+  severity: 'error' | 'warning';field?: string;context?: Record<string, unknown>;
 }
 
 /**
@@ -123,12 +111,8 @@ interface ValidationCacheEntry {
 /**
  * Custom validator for browser automation specific constraints
  */
-@ValidatorConstraint({ name: 'isSafeBrowserSelector', async: false })
-export class IsSafeBrowserSelectorConstraint implements ValidatorConstraintInterface {
-  validate(selector: string): boolean {
-    if (!selector || typeof selector !== 'string') {
-      return false;
-    }
+@ValidatorConstraint({ name: 'isSafeBrowserSelector', async: false })export class IsSafeBrowserSelectorConstraint implements ValidatorConstraintInterface {validate(selector: string): boolean {
+    if (!selector || typeof selector !== 'string') {return false;}
 
     // Check for dangerous patterns
     const dangerousPatterns = [
@@ -145,38 +129,24 @@ export class IsSafeBrowserSelectorConstraint implements ValidatorConstraintInter
   }
 
   defaultMessage(): string {
-    return 'Selector contains potentially dangerous patterns';
-  }
-}
+    return 'Selector contains potentially dangerous patterns';}}
 
 /**
  * Custom validator for safe URLs
  */
-@ValidatorConstraint({ name: 'isSafeUrl', async: false })
-export class IsSafeUrlConstraint implements ValidatorConstraintInterface {
-  validate(url: string): boolean {
-    if (!url || typeof url !== 'string') {
-      return false;
-    }
+@ValidatorConstraint({ name: 'isSafeUrl', async: false })export class IsSafeUrlConstraint implements ValidatorConstraintInterface {validate(url: string): boolean {
+    if (!url || typeof url !== 'string') {return false;}
 
     try {
       const parsedUrl = new URL(url);
 
       // Only allow http and https
-      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-        return false;
-      }
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {return false;}
 
       // Block internal URLs
       const hostname = parsedUrl.hostname.toLowerCase();
       const blockedHosts = [
-        'localhost',
-        '127.0.0.1',
-        '0.0.0.0',
-        '::1',
-      ];
-
-      if (blockedHosts.includes(hostname)) {
+        'localhost','127.0.0.1','0.0.0.0','::1',];if (blockedHosts.includes(hostname)) {
         return false;
       }
 
@@ -200,9 +170,7 @@ export class IsSafeUrlConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return 'URL is not safe for browser automation';
-  }
-}
+    return 'URL is not safe for browser automation';}}
 
 /**
  * Decorator for safe browser selector validation
@@ -239,19 +207,9 @@ export function IsSafeUrl(validationOptions?: ValidationOptions) {
  */
 export function SanitizeHtml() {
   return Transform(({ value }) => {
-    if (typeof value !== 'string') return value;
-
-    // Basic HTML sanitization
-    return value
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/<style[^>]*>.*?<\/style>/gi, '')
-      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/vbscript:/gi, '')
-      .replace(/data:/gi, '');
-  });
-}
+    if (typeof value !== 'string') return value;// Basic HTML sanitizationreturn value
+      .replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/<style[^>]*>.*?<\/style>/gi, '').replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '').replace(/javascript:/gi, '').replace(/vbscript:/gi, '').replace(/data:/gi, '');});}
 
 /**
  * Browser Automation Validation Service
@@ -267,10 +225,7 @@ export class BrowserValidationService {
     maxConcurrentSessions: 10,
     maxTaskDuration: 1800000, // 30 minutes
     maxActionsPerTask: 100,
-    allowedBrowsers: ['chrome', 'chromium'],
-    allowedProtocols: ['http:', 'https:'],
-    maxViewportWidth: 3840,
-    maxViewportHeight: 2160,
+    allowedBrowsers: ['chrome', 'chromium'],allowedProtocols: ['http:', 'https:'],maxViewportWidth: 3840,maxViewportHeight: 2160,
     minViewportWidth: 320,
     minViewportHeight: 240,
     maxScreenshotsPerTask: 50,
@@ -298,10 +253,7 @@ export class BrowserValidationService {
    * Validate and sanitize browser task creation request
    */
   async validateBrowserTask(data: any, context: ValidationContext): Promise<ValidationResult> {
-    const operationId = `validate_task_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating browser task`, {
+    const operationId = `validate_task_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating browser task`, {
       operationId,
       taskName: data.name,
       actionsCount: data.actions?.length,
@@ -315,9 +267,7 @@ export class BrowserValidationService {
       const cachedResult = this.getFromCache(cacheKey);
 
       if (cachedResult) {
-        this.logger.debug(`[${operationId}] Validation cache hit`, { operationId, cacheKey });
-        return { ...cachedResult, cacheHit: true };
-      }
+        this.logger.debug(`[${operationId}] Validation cache hit`, { operationId, cacheKey });return { ...cachedResult, cacheHit: true };}
 
       const errors: ValidationIssue[] = [];
       const warnings: ValidationIssue[] = [];
@@ -362,9 +312,7 @@ export class BrowserValidationService {
         this.setCache(cacheKey, result);
       }
 
-      this.logger.log(`[${operationId}] Browser task validation completed`, {
-        operationId,
-        isValid: result.isValid,
+      this.logger.log(`[${operationId}] Browser task validation completed`, {operationId,isValid: result.isValid,
         errorsCount: errors.length,
         warningsCount: warnings.length,
         validationTime,
@@ -393,16 +341,9 @@ export class BrowserValidationService {
    * Validate browser session creation request
    */
   async validateBrowserSession(data: any, context: ValidationContext): Promise<ValidationResult> {
-    const operationId = `validate_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating browser session`, {
-      operationId,
-      sessionName: data.name,
+    const operationId = `validate_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating browser session`, {operationId,sessionName: data.name,
       headless: data.headless,
-      viewport: `${data.viewportWidth}x${data.viewportHeight}`,
-      userId: context.userId,
-    });
+      viewport: `${data.viewportWidth}x${data.viewportHeight}`,userId: context.userId,});
 
     try {
       const errors: ValidationIssue[] = [];
@@ -433,9 +374,7 @@ export class BrowserValidationService {
         validationTime,
       };
 
-      this.logger.log(`[${operationId}] Browser session validation completed`, {
-        operationId,
-        isValid: result.isValid,
+      this.logger.log(`[${operationId}] Browser session validation completed`, {operationId,isValid: result.isValid,
         errorsCount: errors.length,
         warningsCount: warnings.length,
         validationTime,
@@ -463,12 +402,7 @@ export class BrowserValidationService {
    * Validate data extraction request
    */
   async validateDataExtraction(data: any, context: ValidationContext): Promise<ValidationResult> {
-    const operationId = `validate_extraction_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    this.logger.debug(`[${operationId}] Validating data extraction`, {
-      operationId,
-      selectorsCount: data.selectors ? Object.keys(data.selectors).length : 0,
+    const operationId = `validate_extraction_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.debug(`[${operationId}] Validating data extraction`, {operationId,selectorsCount: data.selectors ? Object.keys(data.selectors).length : 0,
       waitForSelector: data.waitForSelector,
       userId: context.userId,
     });
@@ -502,9 +436,7 @@ export class BrowserValidationService {
         validationTime,
       };
 
-      this.logger.log(`[${operationId}] Data extraction validation completed`, {
-        operationId,
-        isValid: result.isValid,
+      this.logger.log(`[${operationId}] Data extraction validation completed`, {operationId,isValid: result.isValid,
         errorsCount: errors.length,
         warningsCount: warnings.length,
         validationTime,
@@ -522,9 +454,7 @@ export class BrowserValidationService {
       });
 
       throw new UnprocessableEntityException({
-        message: 'Data extraction validation failed',
-        error: error instanceof Error ? error.message : String(error),
-      });
+        message: 'Data extraction validation failed',error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -549,34 +479,15 @@ export class BrowserValidationService {
 
   private async validateBasicTaskData(data: any, errors: ValidationIssue[], warnings: ValidationIssue[]): Promise<void> {
     // Validate required fields
-    if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
-      errors.push({
-        field: 'name',
-        message: 'Task name is required and must be a non-empty string',
-        code: 'REQUIRED_FIELD',
-        severity: 'error',
-        value: data.name,
-      });
+    if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {errors.push({field: 'name',message: 'Task name is required and must be a non-empty string',code: 'REQUIRED_FIELD',severity: 'error',value: data.name,});
     }
 
-    if (!data.description || typeof data.description !== 'string' || data.description.trim().length === 0) {
-      errors.push({
-        field: 'description',
-        message: 'Task description is required and must be a non-empty string',
-        code: 'REQUIRED_FIELD',
-        severity: 'error',
-        value: data.description,
-      });
+    if (!data.description || typeof data.description !== 'string' || data.description.trim().length === 0) {errors.push({field: 'description',message: 'Task description is required and must be a non-empty string',code: 'REQUIRED_FIELD',severity: 'error',value: data.description,});
     }
 
     if (!data.actions || !Array.isArray(data.actions) || data.actions.length === 0) {
       errors.push({
-        field: 'actions',
-        message: 'At least one browser action is required',
-        code: 'REQUIRED_FIELD',
-        severity: 'error',
-        value: data.actions,
-      });
+        field: 'actions',message: 'At least one browser action is required',code: 'REQUIRED_FIELD',severity: 'error',value: data.actions,});
     }
 
     // Validate field lengths
@@ -584,43 +495,23 @@ export class BrowserValidationService {
       errors.push({
         field: 'name',
         message: `Task name exceeds maximum length of ${this.config.maxStringLength} characters`,
-        code: 'STRING_TOO_LONG',
-        severity: 'error',
-        value: data.name.length,
-      });
+        code: 'STRING_TOO_LONG',severity: 'error',value: data.name.length,});
     }
 
     if (data.description && data.description.length > this.config.maxStringLength * 2) {
       errors.push({
         field: 'description',
         message: `Task description exceeds maximum length of ${this.config.maxStringLength * 2} characters`,
-        code: 'STRING_TOO_LONG',
-        severity: 'error',
-        value: data.description.length,
-      });
+        code: 'STRING_TOO_LONG',severity: 'error',value: data.description.length,});
     }
 
     // Validate priority
-    if (data.priority && !['low', 'normal', 'high', 'critical'].includes(data.priority)) {
-      errors.push({
-        field: 'priority',
-        message: 'Invalid task priority',
-        code: 'INVALID_ENUM',
-        severity: 'error',
-        value: data.priority,
-      });
+    if (data.priority && !['low', 'normal', 'high', 'critical'].includes(data.priority)) {errors.push({field: 'priority',message: 'Invalid task priority',code: 'INVALID_ENUM',severity: 'error',value: data.priority,});
     }
 
     // Validate execution timeout
     if (data.maxExecutionTimeMs) {
-      if (typeof data.maxExecutionTimeMs !== 'number' || data.maxExecutionTimeMs < 5000 || data.maxExecutionTimeMs > 1800000) {
-        errors.push({
-          field: 'maxExecutionTimeMs',
-          message: 'Execution timeout must be between 5 seconds and 30 minutes',
-          code: 'INVALID_RANGE',
-          severity: 'error',
-          value: data.maxExecutionTimeMs,
-        });
+      if (typeof data.maxExecutionTimeMs !== 'number' || data.maxExecutionTimeMs < 5000 || data.maxExecutionTimeMs > 1800000) {errors.push({field: 'maxExecutionTimeMs',message: 'Execution timeout must be between 5 seconds and 30 minutes',code: 'INVALID_RANGE',severity: 'error',value: data.maxExecutionTimeMs,});
       }
     }
   }
@@ -637,26 +528,14 @@ export class BrowserValidationService {
     suspiciousPatterns.forEach(pattern => {
       if (pattern.test(data.name) || pattern.test(data.description)) {
         warnings.push({
-          field: 'content',
-          message: 'Task content contains potentially suspicious patterns',
-          code: 'SUSPICIOUS_CONTENT',
-          severity: 'warning',
-          context: { pattern: pattern.source },
-        });
+          field: 'content',message: 'Task content contains potentially suspicious patterns',code: 'SUSPICIOUS_CONTENT',severity: 'warning',context: { pattern: pattern.source },});
       }
     });
 
     // Validate metadata for security issues
-    if (data.metadata && typeof data.metadata === 'object') {
-      const metadataString = JSON.stringify(data.metadata);
-      if (metadataString.length > 10000) {
+    if (data.metadata && typeof data.metadata === 'object') {const metadataString = JSON.stringify(data.metadata);if (metadataString.length > 10000) {
         errors.push({
-          field: 'metadata',
-          message: 'Metadata object too large',
-          code: 'PAYLOAD_TOO_LARGE',
-          severity: 'error',
-          value: metadataString.length,
-        });
+          field: 'metadata',message: 'Metadata object too large',code: 'PAYLOAD_TOO_LARGE',severity: 'error',value: metadataString.length,});
       }
 
       // Check for sensitive data in metadata
@@ -670,12 +549,7 @@ export class BrowserValidationService {
       sensitivePatterns.forEach(pattern => {
         if (pattern.test(metadataString)) {
           warnings.push({
-            field: 'metadata',
-            message: 'Metadata may contain sensitive information',
-            code: 'SENSITIVE_DATA',
-            severity: 'warning',
-            context: { pattern: pattern.source },
-          });
+            field: 'metadata',message: 'Metadata may contain sensitive information',code: 'SENSITIVE_DATA',severity: 'warning',context: { pattern: pattern.source },});
         }
       });
     }
@@ -687,74 +561,45 @@ export class BrowserValidationService {
       errors.push({
         field: 'actions',
         message: `Too many actions in task. Maximum allowed: ${this.businessRules.maxActionsPerTask}`,
-        code: 'BUSINESS_RULE_VIOLATION',
-        severity: 'error',
-        value: data.actions.length,
-        constraint: 'maxActionsPerTask',
-      });
-    }
+        code: 'BUSINESS_RULE_VIOLATION',severity: 'error',value: data.actions.length,constraint: 'maxActionsPerTask',});}
 
     // Validate task duration limits
     if (data.maxExecutionTimeMs && data.maxExecutionTimeMs > this.businessRules.maxTaskDuration) {
       errors.push({
         field: 'maxExecutionTimeMs',
         message: `Task duration exceeds maximum allowed: ${this.businessRules.maxTaskDuration}ms`,
-        code: 'BUSINESS_RULE_VIOLATION',
-        severity: 'error',
-        value: data.maxExecutionTimeMs,
-        constraint: 'maxTaskDuration',
-      });
-    }
+        code: 'BUSINESS_RULE_VIOLATION',severity: 'error',value: data.maxExecutionTimeMs,constraint: 'maxTaskDuration',});}
 
     // Count screenshot actions
     if (data.actions) {
-      const screenshotCount = data.actions.filter(action => action.type === 'screenshot').length;
-      if (screenshotCount > this.businessRules.maxScreenshotsPerTask) {
-        errors.push({
+      const screenshotCount = data.actions.filter(action => action.type === 'screenshot').length;if (screenshotCount > this.businessRules.maxScreenshotsPerTask) {errors.push({
           field: 'actions',
           message: `Too many screenshot actions. Maximum allowed: ${this.businessRules.maxScreenshotsPerTask}`,
-          code: 'BUSINESS_RULE_VIOLATION',
-          severity: 'error',
-          value: screenshotCount,
-          constraint: 'maxScreenshotsPerTask',
-        });
-      }
+          code: 'BUSINESS_RULE_VIOLATION',severity: 'error',value: screenshotCount,constraint: 'maxScreenshotsPerTask',});}
     }
 
     // Count extraction actions
     if (data.actions) {
       const extractionCount = data.actions.filter(action =>
-        action.type === 'extract_text' || action.type === 'extract_data'
-      ).length;
-
-      if (extractionCount > this.businessRules.maxExtractionsPerTask) {
+        action.type === 'extract_text' || action.type === 'extract_data').length;if (extractionCount > this.businessRules.maxExtractionsPerTask) {
         errors.push({
           field: 'actions',
           message: `Too many extraction actions. Maximum allowed: ${this.businessRules.maxExtractionsPerTask}`,
-          code: 'BUSINESS_RULE_VIOLATION',
-          severity: 'error',
-          value: extractionCount,
-          constraint: 'maxExtractionsPerTask',
-        });
-      }
+          code: 'BUSINESS_RULE_VIOLATION',severity: 'error',value: extractionCount,constraint: 'maxExtractionsPerTask',});}
     }
   }
 
   private async validateBrowserActions(actions: any[], context: ValidationContext, errors: ValidationIssue[], warnings: ValidationIssue[]): Promise<void> {
     const allowedActionTypes = [
-      'navigate', 'click', 'type', 'scroll', 'screenshot',
-      'extract_text', 'extract_data', 'fill_form', 'submit_form',
-      'wait_for_element', 'wait_for_url', 'custom'
+      'navigate', 'click', 'type', 'scroll', 'screenshot','extract_text', 'extract_data', 'fill_form', 'submit_form','wait_for_element', 'wait_for_url', 'custom'
     ];
 
     actions.forEach((action, index) => {
       // Validate action type
       if (!action.type || !allowedActionTypes.includes(action.type)) {
         errors.push({
-          field: `actions[${index}].type`,
-          message: `Invalid action type: ${action.type}`,
-          code: 'INVALID_ACTION_TYPE',
-          severity: 'error',
+          field: `actions[${index}].type`,message: `Invalid action type: ${action.type}`,
+          code: 'INVALID_ACTION_TYPE',severity: 'error',
           value: action.type,
         });
       }
@@ -766,8 +611,7 @@ export class BrowserValidationService {
           errors.push({
             field: `actions[${index}].selector`,
             message: selectorConstraint.defaultMessage(),
-            code: 'UNSAFE_SELECTOR',
-            severity: 'error',
+            code: 'UNSAFE_SELECTOR',severity: 'error',
             value: action.selector,
           });
         }
@@ -780,10 +624,7 @@ export class BrowserValidationService {
           errors.push({
             field: `actions[${index}].url`,
             message: urlConstraint.defaultMessage(),
-            code: 'UNSAFE_URL',
-            severity: 'error',
-            value: action.url,
-          });
+            code: 'UNSAFE_URL',severity: 'error',value: action.url,});
         }
       }
 
@@ -792,9 +633,7 @@ export class BrowserValidationService {
         if (typeof action.waitTimeoutMs !== 'number' || action.waitTimeoutMs < 100 || action.waitTimeoutMs > 60000) {
           errors.push({
             field: `actions[${index}].waitTimeoutMs`,
-            message: 'Wait timeout must be between 100ms and 60 seconds',
-            code: 'INVALID_RANGE',
-            severity: 'error',
+            message: 'Wait timeout must be between 100ms and 60 seconds',code: 'INVALID_RANGE',severity: 'error',
             value: action.waitTimeoutMs,
           });
         }
@@ -803,12 +642,8 @@ export class BrowserValidationService {
       // Validate text inputs
       if (action.text && action.text.length > this.config.maxStringLength) {
         errors.push({
-          field: `actions[${index}].text`,
-          message: `Text input too long. Maximum: ${this.config.maxStringLength} characters`,
-          code: 'STRING_TOO_LONG',
-          severity: 'error',
-          value: action.text.length,
-        });
+          field: `actions[${index}].text`,message: `Text input too long. Maximum: ${this.config.maxStringLength} characters`,
+          code: 'STRING_TOO_LONG',severity: 'error',value: action.text.length,});
       }
 
       // Validate action parameters
@@ -817,11 +652,7 @@ export class BrowserValidationService {
         if (paramString.length > 5000) {
           warnings.push({
             field: `actions[${index}].parameters`,
-            message: 'Action parameters object is large',
-            code: 'LARGE_PARAMETERS',
-            severity: 'warning',
-            value: paramString.length,
-          });
+            message: 'Action parameters object is large',code: 'LARGE_PARAMETERS',severity: 'warning',value: paramString.length,});
         }
       }
     });
@@ -830,51 +661,31 @@ export class BrowserValidationService {
   private async validateSessionConfiguration(sessionConfig: any, context: ValidationContext, errors: ValidationIssue[], warnings: ValidationIssue[]): Promise<void> {
     // Validate viewport dimensions
     if (sessionConfig.viewportWidth) {
-      if (typeof sessionConfig.viewportWidth !== 'number' ||
-          sessionConfig.viewportWidth < this.businessRules.minViewportWidth ||
-          sessionConfig.viewportWidth > this.businessRules.maxViewportWidth) {
+      if (typeof sessionConfig.viewportWidth !== 'number' ||sessionConfig.viewportWidth < this.businessRules.minViewportWidth ||sessionConfig.viewportWidth > this.businessRules.maxViewportWidth) {
         errors.push({
           field: 'sessionConfig.viewportWidth',
           message: `Viewport width must be between ${this.businessRules.minViewportWidth} and ${this.businessRules.maxViewportWidth}`,
-          code: 'INVALID_RANGE',
-          severity: 'error',
-          value: sessionConfig.viewportWidth,
-        });
+          code: 'INVALID_RANGE',severity: 'error',value: sessionConfig.viewportWidth,});
       }
     }
 
     if (sessionConfig.viewportHeight) {
-      if (typeof sessionConfig.viewportHeight !== 'number' ||
-          sessionConfig.viewportHeight < this.businessRules.minViewportHeight ||
-          sessionConfig.viewportHeight > this.businessRules.maxViewportHeight) {
+      if (typeof sessionConfig.viewportHeight !== 'number' ||sessionConfig.viewportHeight < this.businessRules.minViewportHeight ||sessionConfig.viewportHeight > this.businessRules.maxViewportHeight) {
         errors.push({
           field: 'sessionConfig.viewportHeight',
           message: `Viewport height must be between ${this.businessRules.minViewportHeight} and ${this.businessRules.maxViewportHeight}`,
-          code: 'INVALID_RANGE',
-          severity: 'error',
-          value: sessionConfig.viewportHeight,
-        });
+          code: 'INVALID_RANGE',severity: 'error',value: sessionConfig.viewportHeight,});
       }
     }
 
     // Validate additional arguments for security
     if (sessionConfig.additionalArgs && Array.isArray(sessionConfig.additionalArgs)) {
       const dangerousArgs = [
-        '--disable-web-security',
-        '--user-data-dir',
-        '--allow-running-insecure-content',
-        '--disable-features',
-        '--enable-features',
-        '--proxy-server',
-      ];
-
-      sessionConfig.additionalArgs.forEach((arg, index) => {
+        '--disable-web-security','--user-data-dir','--allow-running-insecure-content','--disable-features','--enable-features','--proxy-server',];sessionConfig.additionalArgs.forEach((arg, index) => {
         if (typeof arg !== 'string') {
           errors.push({
             field: `sessionConfig.additionalArgs[${index}]`,
-            message: 'Browser argument must be a string',
-            code: 'INVALID_TYPE',
-            severity: 'error',
+            message: 'Browser argument must be a string',code: 'INVALID_TYPE',severity: 'error',
             value: arg,
           });
           return;
@@ -884,71 +695,34 @@ export class BrowserValidationService {
         if (isDangerous) {
           errors.push({
             field: `sessionConfig.additionalArgs[${index}]`,
-            message: 'Dangerous browser argument detected',
-            code: 'DANGEROUS_ARGUMENT',
-            severity: 'error',
-            value: arg,
-          });
+            message: 'Dangerous browser argument detected',code: 'DANGEROUS_ARGUMENT',severity: 'error',value: arg,});
         }
       });
     }
 
     // Validate user agent
     if (sessionConfig.userAgent) {
-      if (typeof sessionConfig.userAgent !== 'string' || sessionConfig.userAgent.length > 500) {
-        errors.push({
-          field: 'sessionConfig.userAgent',
-          message: 'User agent must be a string with maximum 500 characters',
-          code: 'INVALID_USER_AGENT',
-          severity: 'error',
-          value: sessionConfig.userAgent?.length,
-        });
+      if (typeof sessionConfig.userAgent !== 'string' || sessionConfig.userAgent.length > 500) {errors.push({field: 'sessionConfig.userAgent',message: 'User agent must be a string with maximum 500 characters',code: 'INVALID_USER_AGENT',severity: 'error',value: sessionConfig.userAgent?.length,});
       }
     }
 
     // Validate timeout
     if (sessionConfig.timeoutMs) {
-      if (typeof sessionConfig.timeoutMs !== 'number' || sessionConfig.timeoutMs < 1000 || sessionConfig.timeoutMs > 3600000) {
-        errors.push({
-          field: 'sessionConfig.timeoutMs',
-          message: 'Session timeout must be between 1 second and 1 hour',
-          code: 'INVALID_RANGE',
-          severity: 'error',
-          value: sessionConfig.timeoutMs,
-        });
+      if (typeof sessionConfig.timeoutMs !== 'number' || sessionConfig.timeoutMs < 1000 || sessionConfig.timeoutMs > 3600000) {errors.push({field: 'sessionConfig.timeoutMs',message: 'Session timeout must be between 1 second and 1 hour',code: 'INVALID_RANGE',severity: 'error',value: sessionConfig.timeoutMs,});
       }
     }
   }
 
   private async validateBasicSessionData(data: any, errors: ValidationIssue[], warnings: ValidationIssue[]): Promise<void> {
     // Validate required fields
-    if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
-      errors.push({
-        field: 'name',
-        message: 'Session name is required and must be a non-empty string',
-        code: 'REQUIRED_FIELD',
-        severity: 'error',
-        value: data.name,
-      });
+    if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {errors.push({field: 'name',message: 'Session name is required and must be a non-empty string',code: 'REQUIRED_FIELD',severity: 'error',value: data.name,});
     }
 
     // Validate boolean fields
-    if (data.headless !== undefined && typeof data.headless !== 'boolean') {
-      errors.push({
-        field: 'headless',
-        message: 'Headless must be a boolean value',
-        code: 'INVALID_TYPE',
-        severity: 'error',
-        value: data.headless,
-      });
+    if (data.headless !== undefined && typeof data.headless !== 'boolean') {errors.push({field: 'headless',message: 'Headless must be a boolean value',code: 'INVALID_TYPE',severity: 'error',value: data.headless,});
     }
 
-    if (data.devtools !== undefined && typeof data.devtools !== 'boolean') {
-      errors.push({
-        field: 'devtools',
-        message: 'Devtools must be a boolean value',
-        code: 'INVALID_TYPE',
-        severity: 'error',
+    if (data.devtools !== undefined && typeof data.devtools !== 'boolean') {errors.push({field: 'devtools',message: 'Devtools must be a boolean value',code: 'INVALID_TYPE',severity: 'error',
         value: data.devtools,
       });
     }
@@ -961,10 +735,7 @@ export class BrowserValidationService {
           errors.push({
             field: `initialUrls[${index}]`,
             message: urlConstraint.defaultMessage(),
-            code: 'UNSAFE_URL',
-            severity: 'error',
-            value: url,
-          });
+            code: 'UNSAFE_URL',severity: 'error',value: url,});
         }
       });
     }
@@ -980,12 +751,7 @@ export class BrowserValidationService {
     suspiciousPatterns.forEach(pattern => {
       if (pattern.test(data.name)) {
         warnings.push({
-          field: 'name',
-          message: 'Session name contains potentially suspicious patterns',
-          code: 'SUSPICIOUS_NAME',
-          severity: 'warning',
-          context: { pattern: pattern.source },
-        });
+          field: 'name',message: 'Session name contains potentially suspicious patterns',code: 'SUSPICIOUS_NAME',severity: 'warning',context: { pattern: pattern.source },});
       }
     });
   }
@@ -1000,36 +766,17 @@ export class BrowserValidationService {
       errors.push({
         field: 'session',
         message: `Maximum concurrent sessions (${this.businessRules.maxConcurrentSessions}) exceeded`,
-        code: 'BUSINESS_RULE_VIOLATION',
-        severity: 'error',
-        value: currentSessionCount,
-        constraint: 'maxConcurrentSessions',
-      });
-    }
+        code: 'BUSINESS_RULE_VIOLATION',severity: 'error',value: currentSessionCount,constraint: 'maxConcurrentSessions',});}
   }
 
   private async validateExtractionConfig(data: any, errors: ValidationIssue[], warnings: ValidationIssue[]): Promise<void> {
     // Validate selectors object
-    if (!data.selectors || typeof data.selectors !== 'object' || Object.keys(data.selectors).length === 0) {
-      errors.push({
-        field: 'selectors',
-        message: 'Selectors object is required and must contain at least one selector',
-        code: 'REQUIRED_FIELD',
-        severity: 'error',
-        value: data.selectors,
-      });
+    if (!data.selectors || typeof data.selectors !== 'object' || Object.keys(data.selectors).length === 0) {errors.push({field: 'selectors',message: 'Selectors object is required and must contain at least one selector',code: 'REQUIRED_FIELD',severity: 'error',value: data.selectors,});
     }
 
     // Validate timeout
     if (data.timeout) {
-      if (typeof data.timeout !== 'number' || data.timeout < 100 || data.timeout > 60000) {
-        errors.push({
-          field: 'timeout',
-          message: 'Timeout must be between 100ms and 60 seconds',
-          code: 'INVALID_RANGE',
-          severity: 'error',
-          value: data.timeout,
-        });
+      if (typeof data.timeout !== 'number' || data.timeout < 100 || data.timeout > 60000) {errors.push({field: 'timeout',message: 'Timeout must be between 100ms and 60 seconds',code: 'INVALID_RANGE',severity: 'error',value: data.timeout,});
       }
     }
 
@@ -1038,12 +785,7 @@ export class BrowserValidationService {
       const selectorConstraint = new IsSafeBrowserSelectorConstraint();
       if (!selectorConstraint.validate(data.waitForSelector)) {
         errors.push({
-          field: 'waitForSelector',
-          message: selectorConstraint.defaultMessage(),
-          code: 'UNSAFE_SELECTOR',
-          severity: 'error',
-          value: data.waitForSelector,
-        });
+          field: 'waitForSelector',message: selectorConstraint.defaultMessage(),code: 'UNSAFE_SELECTOR',severity: 'error',value: data.waitForSelector,});
       }
     }
   }
@@ -1055,9 +797,7 @@ export class BrowserValidationService {
       if (typeof selector !== 'string') {
         errors.push({
           field: `selectors.${key}`,
-          message: 'Selector must be a string',
-          code: 'INVALID_TYPE',
-          severity: 'error',
+          message: 'Selector must be a string',code: 'INVALID_TYPE',severity: 'error',
           value: selector,
         });
         return;
@@ -1067,8 +807,7 @@ export class BrowserValidationService {
         errors.push({
           field: `selectors.${key}`,
           message: selectorConstraint.defaultMessage(),
-          code: 'UNSAFE_SELECTOR',
-          severity: 'error',
+          code: 'UNSAFE_SELECTOR',severity: 'error',
           value: selector,
         });
       }
@@ -1076,11 +815,7 @@ export class BrowserValidationService {
       if (selector.length > 1000) {
         errors.push({
           field: `selectors.${key}`,
-          message: 'Selector too long (maximum 1000 characters)',
-          code: 'STRING_TOO_LONG',
-          severity: 'error',
-          value: selector.length,
-        });
+          message: 'Selector too long (maximum 1000 characters)',code: 'STRING_TOO_LONG',severity: 'error',value: selector.length,});
       }
     });
   }
@@ -1098,12 +833,7 @@ export class BrowserValidationService {
     sensitivePatterns.forEach(pattern => {
       if (pattern.test(selectorsString)) {
         warnings.push({
-          field: 'selectors',
-          message: 'Extraction selectors may target sensitive data',
-          code: 'SENSITIVE_DATA_EXTRACTION',
-          severity: 'warning',
-          context: { pattern: pattern.source },
-        });
+          field: 'selectors',message: 'Extraction selectors may target sensitive data',code: 'SENSITIVE_DATA_EXTRACTION',severity: 'warning',context: { pattern: pattern.source },});
       }
     });
   }
@@ -1149,12 +879,8 @@ export class BrowserValidationService {
   private async sanitizeExtractionData(data: any): Promise<any> {
     const sanitized = { ...data };
 
-    if (sanitized.selectors && typeof sanitized.selectors === 'object') {
-      const sanitizedSelectors = {};
-      Object.entries(sanitized.selectors).forEach(([key, selector]) => {
-        sanitizedSelectors[key] = typeof selector === 'string' ? this.sanitizeSelector(selector) : selector;
-      });
-      sanitized.selectors = sanitizedSelectors;
+    if (sanitized.selectors && typeof sanitized.selectors === 'object') {const sanitizedSelectors = {};Object.entries(sanitized.selectors).forEach(([key, selector]) => {
+        sanitizedSelectors[key] = typeof selector === 'string' ? this.sanitizeSelector(selector) : selector;});sanitized.selectors = sanitizedSelectors;
     }
 
     if (sanitized.waitForSelector) {
@@ -1166,21 +892,12 @@ export class BrowserValidationService {
 
   private sanitizeString(input: string): string {
     return input
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/<style[^>]*>.*?<\/style>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/vbscript:/gi, '')
-      .replace(/data:/gi, '')
-      .trim();
-  }
+      .replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/<style[^>]*>.*?<\/style>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '').replace(/javascript:/gi, '').replace(/vbscript:/gi, '').replace(/data:/gi, '').trim();}
 
   private sanitizeSelector(selector: string): string {
     return selector
-      .replace(/javascript:/gi, '')
-      .replace(/vbscript:/gi, '')
-      .replace(/data:/gi, '')
-      .replace(/on\w+=/gi, '')
+      .replace(/javascript:/gi, '').replace(/vbscript:/gi, '').replace(/data:/gi, '').replace(/on\w+=/gi, '')
       .trim();
   }
 
@@ -1241,15 +958,7 @@ export class BrowserValidationService {
 
   private loadValidationConfig(): ValidationConfig {
     return {
-      enableStrictValidation: this.configService.get<boolean>('BROWSER_VALIDATION_STRICT', true),
-      enableBusinessRuleValidation: this.configService.get<boolean>('BROWSER_VALIDATION_BUSINESS_RULES', true),
-      enableSecurityValidation: this.configService.get<boolean>('BROWSER_VALIDATION_SECURITY', true),
-      maxValidationCacheSize: this.configService.get<number>('BROWSER_VALIDATION_CACHE_SIZE', 1000),
-      validationCacheTtl: this.configService.get<number>('BROWSER_VALIDATION_CACHE_TTL', 300000), // 5 minutes
-      enableCustomValidators: this.configService.get<boolean>('BROWSER_VALIDATION_CUSTOM', true),
-      maxStringLength: this.configService.get<number>('BROWSER_VALIDATION_MAX_STRING', 10000),
-      maxArrayLength: this.configService.get<number>('BROWSER_VALIDATION_MAX_ARRAY', 1000),
-      maxObjectDepth: this.configService.get<number>('BROWSER_VALIDATION_MAX_DEPTH', 10),
+      enableStrictValidation: this.configService.get<boolean>('BROWSER_VALIDATION_STRICT', true),enableBusinessRuleValidation: this.configService.get<boolean>('BROWSER_VALIDATION_BUSINESS_RULES', true),enableSecurityValidation: this.configService.get<boolean>('BROWSER_VALIDATION_SECURITY', true),maxValidationCacheSize: this.configService.get<number>('BROWSER_VALIDATION_CACHE_SIZE', 1000),validationCacheTtl: this.configService.get<number>('BROWSER_VALIDATION_CACHE_TTL', 300000), // 5 minutesenableCustomValidators: this.configService.get<boolean>('BROWSER_VALIDATION_CUSTOM', true),maxStringLength: this.configService.get<number>('BROWSER_VALIDATION_MAX_STRING', 10000),maxArrayLength: this.configService.get<number>('BROWSER_VALIDATION_MAX_ARRAY', 1000),maxObjectDepth: this.configService.get<number>('BROWSER_VALIDATION_MAX_DEPTH', 10),
     };
   }
 }

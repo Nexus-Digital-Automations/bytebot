@@ -11,32 +11,18 @@ import {
   Get,
   Param,
   Query,
-} from '@nestjs/common';
-import {
-  ApiOperation,
+} from '@nestjs/common';import {ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiParam,
   ApiQuery,
-} from '@nestjs/swagger';
-import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
-import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
-import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import {
-  ForVersion,
+} from '@nestjs/swagger';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import {
-  OperatorOrAdmin,
+} from '../common/versioning/api-version.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { FormAutomationService } from './form-automation.service';
-import {
-  FormActionDto,
+} from '../auth/decorators/roles.decorator';import { FormAutomationService } from './form-automation.service';import {FormActionDto,
   FormDetectionDto,
   FormFillingDto,
   FormSubmissionDto,
@@ -44,16 +30,11 @@ import {
   FormAutoCompleteDto,
   FormActionType,
   FormFieldType
-} from './dto/form-action.dto';
-import {
-  FormDetectionResponseDto,
+} from './dto/form-action.dto';import {FormDetectionResponseDto,
   FormAutomationResponseDto,
   FormSubmissionResponseDto,
   FormAutoCompleteResponseDto
-} from './dto/form-response.dto';
-
-/**
- * Form Automation Controller
+} from './dto/form-response.dto';/*** Form Automation Controller
  *
  * Provides enterprise-grade APIs for automated form interaction including:
  * - Intelligent form detection and analysis
@@ -70,14 +51,9 @@ import {
  * - Comprehensive audit logging
  * - Secure file handling for form uploads
  */
-@ApiTags('Form Automation API')
-@Controller('form-automation')
-@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
+@ApiTags('Form Automation API')@Controller('form-automation')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
 @UseInterceptors(LoggingInterceptor)
-@ApiBearerAuth('bearer')
-export class FormAutomationController {
-  private readonly logger = new Logger(FormAutomationController.name);
+@ApiBearerAuth('bearer')export class FormAutomationController {private readonly logger = new Logger(FormAutomationController.name);
 
   constructor(private readonly formAutomationService: FormAutomationService) {}
 
@@ -92,36 +68,20 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutomationResponseDto> - Action execution results
    */
-  @Post('action')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('action')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Execute form automation action',
-    description: 'Execute various form automation actions including detection, filling, submission, and validation. Supports all form types with intelligent field recognition.',
-    operationId: 'executeFormAutomation',
-  })
-  @ApiResponse({
+    summary: 'Execute form automation action',description: 'Execute various form automation actions including detection, filling, submission, and validation. Supports all form types with intelligent field recognition.',operationId: 'executeFormAutomation',})@ApiResponse({
     status: 200,
-    description: 'Form automation action executed successfully',
-    type: FormAutomationResponseDto,
-  })
+    description: 'Form automation action executed successfully',type: FormAutomationResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid action parameters or unsupported form operation',
-  })
-  @ApiResponse({
+    description: 'Invalid action parameters or unsupported form operation',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
-  })
-  @ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
     status: 404,
-    description: 'Form not found on page',
-  })
-  @ApiResponse({
+    description: 'Form not found on page',})@ApiResponse({
     status: 429,
     description: 'Rate limit exceeded',
   })
@@ -129,14 +89,9 @@ export class FormAutomationController {
     @Body() params: FormActionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormDetectionResponseDto | FormAutomationResponseDto | FormSubmissionResponseDto | FormAutoCompleteResponseDto> {
-    const operationId = `form_action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `form_action_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
       this.logger.log(
-        `[${operationId}] Form automation request: ${params.action}`,
-        {
-          operationId,
+        `[${operationId}] Form automation request: ${params.action}`,{operationId,
           action: params.action,
           formSelector: params.formSelector,
           fieldsCount: params.fields?.length ?? 0,
@@ -173,9 +128,7 @@ export class FormAutomationController {
           operationId,
           action: params.action,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',
-          userId: user.id,
-          username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
         },
       );
 
@@ -189,9 +142,7 @@ export class FormAutomationController {
 
       if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
         throw new HttpException(
-          `Form automation timeout: ${errorMessage}`,
-          HttpStatus.REQUEST_TIMEOUT,
-        );
+          `Form automation timeout: ${errorMessage}`,HttpStatus.REQUEST_TIMEOUT,);
       }
 
       throw new HttpException(
@@ -212,28 +163,16 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormDetectionResponseDto> - Detected forms and their structure
    */
-  @Post('detect')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('detect')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Detect forms on page',
-    description: 'Analyze the current page to identify all forms and their field structure. Supports deep analysis of form validation rules and field types.',
-    operationId: 'detectForms',
-  })
-  @ApiResponse({
+    summary: 'Detect forms on page',description: 'Analyze the current page to identify all forms and their field structure. Supports deep analysis of form validation rules and field types.',operationId: 'detectForms',})@ApiResponse({
     status: 200,
-    description: 'Form detection completed successfully',
-    type: FormDetectionResponseDto,
-  })
+    description: 'Form detection completed successfully',type: FormDetectionResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid detection parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid detection parameters',})@ApiResponse({
     status: 401,
-    description: 'Authentication required',
-  })
-  @ApiResponse({
+    description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
@@ -241,10 +180,7 @@ export class FormAutomationController {
     @Body() params: FormDetectionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormDetectionResponseDto> {
-    const operationId = `form_detect_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form detection request`,
+    const operationId = `form_detect_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form detection request`,
       {
         operationId,
         url: params.url,
@@ -269,24 +205,14 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutomationResponseDto> - Filling results and validation status
    */
-  @Post('fill')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('fill')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Fill form fields',
-    description: 'Automatically fill form fields with provided data. Supports validation, retry mechanisms, and all HTML5 input types.',
-    operationId: 'fillForm',
-  })
-  @ApiResponse({
+    summary: 'Fill form fields',description: 'Automatically fill form fields with provided data. Supports validation, retry mechanisms, and all HTML5 input types.',operationId: 'fillForm',})@ApiResponse({
     status: 200,
-    description: 'Form filling completed successfully',
-    type: FormAutomationResponseDto,
-  })
+    description: 'Form filling completed successfully',type: FormAutomationResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid filling parameters or field data',
-  })
-  @ApiResponse({
+    description: 'Invalid filling parameters or field data',})@ApiResponse({
     status: 404,
     description: 'Form or required fields not found',
   })
@@ -294,10 +220,7 @@ export class FormAutomationController {
     @Body() params: FormFillingDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormAutomationResponseDto> {
-    const operationId = `form_fill_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form filling request`,
+    const operationId = `form_fill_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form filling request`,
       {
         operationId,
         formSelector: params.formSelector,
@@ -323,24 +246,14 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormSubmissionResponseDto> - Submission results and response analysis
    */
-  @Post('submit')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('submit')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Submit form',
-    description: 'Submit a form with comprehensive error handling and response analysis. Supports traditional and AJAX submissions with redirect detection.',
-    operationId: 'submitForm',
-  })
-  @ApiResponse({
+    summary: 'Submit form',description: 'Submit a form with comprehensive error handling and response analysis. Supports traditional and AJAX submissions with redirect detection.',operationId: 'submitForm',})@ApiResponse({
     status: 200,
-    description: 'Form submission completed',
-    type: FormSubmissionResponseDto,
-  })
+    description: 'Form submission completed',type: FormSubmissionResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid submission parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid submission parameters',})@ApiResponse({
     status: 404,
     description: 'Form or submit button not found',
   })
@@ -348,10 +261,7 @@ export class FormAutomationController {
     @Body() params: FormSubmissionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormSubmissionResponseDto> {
-    const operationId = `form_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form submission request`,
+    const operationId = `form_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form submission request`,
       {
         operationId,
         formSelector: params.formSelector,
@@ -377,24 +287,14 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutomationResponseDto> - Validation results for all fields
    */
-  @Post('validate')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('validate')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Validate form fields',
-    description: 'Validate form fields against HTML5 rules and custom validation patterns. Provides detailed error messages and validation status.',
-    operationId: 'validateForm',
-  })
-  @ApiResponse({
+    summary: 'Validate form fields',description: 'Validate form fields against HTML5 rules and custom validation patterns. Provides detailed error messages and validation status.',operationId: 'validateForm',})@ApiResponse({
     status: 200,
-    description: 'Form validation completed',
-    type: FormAutomationResponseDto,
-  })
+    description: 'Form validation completed',type: FormAutomationResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid validation parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid validation parameters',})@ApiResponse({
     status: 404,
     description: 'Form not found',
   })
@@ -402,10 +302,7 @@ export class FormAutomationController {
     @Body() params: FormValidationDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormAutomationResponseDto> {
-    const operationId = `form_validate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form validation request`,
+    const operationId = `form_validate_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form validation request`,
       {
         operationId,
         formSelector: params.formSelector,
@@ -431,24 +328,14 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutoCompleteResponseDto> - Auto-completion results
    */
-  @Post('auto-complete')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('auto-complete')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Auto-complete form with profile',
-    description: 'Automatically fill form fields using user profile data with intelligent field mapping. Supports custom mappings and multiple profile templates.',
-    operationId: 'autoCompleteForm',
-  })
-  @ApiResponse({
+    summary: 'Auto-complete form with profile',description: 'Automatically fill form fields using user profile data with intelligent field mapping. Supports custom mappings and multiple profile templates.',operationId: 'autoCompleteForm',})@ApiResponse({
     status: 200,
-    description: 'Form auto-completion completed',
-    type: FormAutoCompleteResponseDto,
-  })
+    description: 'Form auto-completion completed',type: FormAutoCompleteResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid auto-complete parameters or profile data',
-  })
-  @ApiResponse({
+    description: 'Invalid auto-complete parameters or profile data',})@ApiResponse({
     status: 404,
     description: 'Form not found',
   })
@@ -456,10 +343,7 @@ export class FormAutomationController {
     @Body() params: FormAutoCompleteDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormAutoCompleteResponseDto> {
-    const operationId = `form_autocomplete_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form auto-complete request`,
+    const operationId = `form_autocomplete_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form auto-complete request`,
       {
         operationId,
         formSelector: params.formSelector,
@@ -485,36 +369,20 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutomationResponseDto> - Clear operation results
    */
-  @Post('clear')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('clear')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Clear form fields',
-    description: 'Clear all or specific form fields. Useful for form reset operations and testing validation behavior.',
-    operationId: 'clearForm',
-  })
-  @ApiResponse({
+    summary: 'Clear form fields',description: 'Clear all or specific form fields. Useful for form reset operations and testing validation behavior.',operationId: 'clearForm',})@ApiResponse({
     status: 200,
-    description: 'Form fields cleared successfully',
-    type: FormAutomationResponseDto,
-  })
+    description: 'Form fields cleared successfully',type: FormAutomationResponseDto,})
   @ApiResponse({
     status: 400,
-    description: 'Invalid clear parameters',
-  })
-  @ApiResponse({
+    description: 'Invalid clear parameters',})@ApiResponse({
     status: 404,
-    description: 'Form not found',
-  })
-  async clearForm(
-    @Body('formSelector') formSelector: string,
-    @Body('fieldSelectors') fieldSelectors?: string[],
+    description: 'Form not found',})async clearForm(
+    @Body('formSelector') formSelector: string,@Body('fieldSelectors') fieldSelectors?: string[],
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormAutomationResponseDto> {
-    const operationId = `form_clear_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form clear request`,
+    const operationId = `form_clear_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form clear request`,
       {
         operationId,
         formSelector,
@@ -529,9 +397,7 @@ export class FormAutomationController {
       formSelector,
       fields: fieldSelectors?.map(selector => ({
         selector,
-        type: 'text' as FormFieldType // Will be determined dynamically
-      }))
-    };
+        type: 'text' as FormFieldType // Will be determined dynamically}))};
 
     const result = await this.formAutomationService.executeFormAction(params);
     return result as FormAutomationResponseDto;
@@ -548,47 +414,24 @@ export class FormAutomationController {
    * @param user - Authenticated user context
    * @returns Promise<FormAutomationResponseDto> - Wait operation results
    */
-  @Get('wait/:formSelector')
-  @OperatorOrAdmin()
-  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('wait/:formSelector')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Wait for form to appear',
-    description: 'Wait for a specific form to appear on the page. Useful for dynamic forms loaded via JavaScript.',
-    operationId: 'waitForForm',
-  })
-  @ApiParam({
-    name: 'formSelector',
-    description: 'CSS selector for the form to wait for',
-    example: '#dynamicForm'
-  })
-  @ApiQuery({
-    name: 'timeout',
-    description: 'Timeout in milliseconds',
-    example: 10000,
-    required: false
+    summary: 'Wait for form to appear',description: 'Wait for a specific form to appear on the page. Useful for dynamic forms loaded via JavaScript.',operationId: 'waitForForm',})@ApiParam({
+    name: 'formSelector',description: 'CSS selector for the form to wait for',example: '#dynamicForm'})@ApiQuery({
+    name: 'timeout',description: 'Timeout in milliseconds',example: 10000,required: false
   })
   @ApiResponse({
     status: 200,
-    description: 'Form appeared successfully',
-    type: FormAutomationResponseDto,
-  })
+    description: 'Form appeared successfully',type: FormAutomationResponseDto,})
   @ApiResponse({
     status: 404,
-    description: 'Form did not appear within timeout',
-  })
-  @ApiResponse({
+    description: 'Form did not appear within timeout',})@ApiResponse({
     status: 408,
-    description: 'Request timeout waiting for form',
-  })
-  async waitForForm(
-    @Param('formSelector') formSelector: string,
-    @Query('timeout') timeout?: number,
+    description: 'Request timeout waiting for form',})async waitForForm(
+    @Param('formSelector') formSelector: string,@Query('timeout') timeout?: number,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<FormAutomationResponseDto> {
-    const operationId = `form_wait_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Form wait request`,
+    const operationId = `form_wait_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Form wait request`,
       {
         operationId,
         formSelector,
@@ -613,13 +456,8 @@ export class FormAutomationController {
   // Helper methods for error handling
 
   private getErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'message' in error) {
-      return (error as { message: string }).message;
-    }
-    return typeof error === 'string' ? error : 'Unknown error';
-  }
-
-  private getErrorStack(error: unknown): string | undefined {
+    if (error && typeof error === 'object' && 'message' in error) {return (error as { message: string }).message;}
+    return typeof error === 'string' ? error : 'Unknown error';}private getErrorStack(error: unknown): string | undefined {
     if (error && typeof error === 'object' && 'stack' in error) {
       return (error as { stack?: string }).stack;
     }

@@ -17,14 +17,7 @@
  * Security: End-to-end encryption with digital signatures
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes } from 'crypto';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
-
-// ===== AUDIT INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { createHash, randomBytes } from 'crypto';import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';// ===== AUDIT INTERFACES =====/**
  * Comprehensive audit entry for all Parlant operations
  */
 export interface ParlantAuditEntry {
@@ -39,10 +32,7 @@ export interface ParlantAuditEntry {
   readonly riskLevel: RiskLevel;
   readonly validationRequest: ParlantValidationRequest;
   readonly validationResponse: ParlantValidationResponse | null;
-  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';
-  readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED' | 'PENDING';
-  readonly duration: number;
-  readonly ipAddress?: string;
+  readonly validationResult: 'APPROVED' | 'DENIED' | 'ERROR' | 'TIMEOUT';readonly executionResult: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' | 'CANCELLED' | 'PENDING';readonly duration: number;readonly ipAddress?: string;
   readonly userAgent?: string;
   readonly geoLocation?: string;
   readonly complianceFlags: ComplianceFlag[];
@@ -55,11 +45,7 @@ export interface ParlantAuditEntry {
  * Compliance flag for regulatory requirements
  */
 export interface ComplianceFlag {
-  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'ISO27001' | 'PCI_DSS';
-  readonly requirement: string;
-  readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW';
-  readonly evidence: string[];
-  readonly assessedAt: Date;
+  readonly regulation: 'GDPR' | 'SOX' | 'HIPAA' | 'ISO27001' | 'PCI_DSS';readonly requirement: string;readonly status: 'COMPLIANT' | 'NON_COMPLIANT' | 'REQUIRES_REVIEW';readonly evidence: string[];readonly assessedAt: Date;
   readonly expiresAt?: Date;
 }
 
@@ -70,12 +56,7 @@ export interface SecurityContext {
   readonly authenticationMethod: string;
   readonly authorizationLevel: string;
   readonly encryptionUsed: boolean;
-  readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
-  readonly accessControls: string[];
-  readonly threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  readonly dataClassification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';readonly accessControls: string[];readonly threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Audit query parameters for compliance reporting
  */
 export interface AuditQuery {
@@ -114,9 +95,7 @@ export interface ComplianceReport {
  */
 export interface ComplianceFinding {
   readonly findingId: string;
-  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  readonly regulation: string;
-  readonly requirement: string;
+  readonly severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';readonly regulation: string;readonly requirement: string;
   readonly description: string;
   readonly affectedOperations: string[];
   readonly remediationRequired: boolean;
@@ -128,10 +107,7 @@ export interface ComplianceFinding {
  * Compliance recommendation
  */
 export interface ComplianceRecommendation {
-  readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING';
-  readonly priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  readonly recommendation: string;
-  readonly expectedBenefit: string;
+  readonly category: 'PROCESS' | 'TECHNICAL' | 'POLICY' | 'TRAINING';readonly priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';readonly recommendation: string;readonly expectedBenefit: string;
   readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';
   readonly estimatedCost?: string;
 }
@@ -187,12 +163,9 @@ export class ParlantEnterpriseAuditService {
     const operationId = `audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize encryption keys (in production, use proper key management)
-    this.encryptionKey = this.configService.get('PARLANT_AUDIT_ENCRYPTION_KEY', randomBytes(32).toString('hex'));
-    this.signingKey = this.configService.get('PARLANT_AUDIT_SIGNING_KEY', randomBytes(32).toString('hex'));
+    this.encryptionKey = this.configService.get('PARLANT_AUDIT_ENCRYPTION_KEY', randomBytes(32).toString('hex'));this.signingKey = this.configService.get('PARLANT_AUDIT_SIGNING_KEY', randomBytes(32).toString('hex'));
     
-    this.logger.log(`[${operationId}] Initializing Parlant Enterprise Audit Service`, {
-      complianceConfig: this.complianceConfig,
-      encryptionEnabled: this.complianceConfig.encryptionEnabled,
+    this.logger.log(`[${operationId}] Initializing Parlant Enterprise Audit Service`, {complianceConfig: this.complianceConfig,encryptionEnabled: this.complianceConfig.encryptionEnabled,
       digitalSigningEnabled: this.complianceConfig.digitalSigningEnabled,
       retentionPeriod: `${this.complianceConfig.retentionPeriodDays} days`,
     });
@@ -224,9 +197,7 @@ export class ParlantEnterpriseAuditService {
     } = {}
   ): Promise<ParlantAuditEntry> {
     const startTime = Date.now();
-    const auditId = `audit${Date.now()}${randomBytes(8).toString('hex')}`;
-    
-    try {
+    const auditId = `audit${Date.now()}${randomBytes(8).toString('hex')}';try {
       // Determine validation result
       const validationResult = this.determineValidationResult(response, executionResult);
       
@@ -237,12 +208,8 @@ export class ParlantEnterpriseAuditService {
       const securityContext = this.createSecurityContext(request);
       
       // Create base audit entry
-      const auditEntry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'> = {
-        auditId,
-        operationId: request.operationId,
-        conversationId: response?.conversationId ?? 'N/A',
-        timestamp: new Date(),
-        userId: request.context.userId,
+      const auditEntry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'> = {auditId,operationId: request.operationId,
+        conversationId: response?.conversationId ?? 'N/A',timestamp: new Date(),userId: request.context.userId,
         sessionId: request.context.sessionId ?? 'no-session',
         functionName: request.functionName,
         actionDescription: request.actionDescription,
@@ -274,18 +241,13 @@ export class ParlantEnterpriseAuditService {
       const auditTime = Date.now() - startTime;
       this.updateAuditPerformanceMetrics(auditTime);
       
-      this.logger.debug(`[${request.operationId}] Audit entry created: ${auditId}`, {
-        auditId,
-        operationId: request.operationId,
+      this.logger.debug(`[${request.operationId}] Audit entry created: ${auditId}`, {auditId,operationId: request.operationId,
         userId: request.context.userId,
         functionName: request.functionName,
         validationResult,
         executionResult,
         complianceFlags: complianceFlags.length,
-        auditTime: `${auditTime.toFixed(2)}ms`,
-      });
-      
-      // Trigger real-time compliance monitoring if enabled
+        auditTime: `${auditTime.toFixed(2)}ms`,});// Trigger real-time compliance monitoring if enabled
       if (this.complianceConfig.realTimeMonitoring) {
         await this.performRealTimeComplianceCheck(completeAuditEntry);
       }
@@ -293,9 +255,7 @@ export class ParlantEnterpriseAuditService {
       return completeAuditEntry;
       
     } catch (error) {
-      this.logger.error(`[${request.operationId}] Failed to create audit entry:`, {
-        error: error instanceof Error ? error.message : String(error),
-        operationId: request.operationId,
+      this.logger.error(`[${request.operationId}] Failed to create audit entry:`, {error: error instanceof Error ? error.message : String(error),operationId: request.operationId,
         stack: error instanceof Error ? error.stack : undefined,
       });
       
@@ -381,12 +341,9 @@ export class ParlantEnterpriseAuditService {
     startDate: Date,
     endDate: Date
   ): Promise<ComplianceReport> {
-    const reportId = `compliance${regulation}${Date.now()}${randomBytes(4).toString('hex')}`;
-    const startTime = Date.now();
+    const reportId = `compliance${regulation}${Date.now()}${randomBytes(4).toString('hex')}';const startTime = Date.now();
     
-    this.logger.log(`Generating compliance report: ${reportId}`, {
-      regulation,
-      period: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+    this.logger.log(`Generating compliance report: ${reportId}`, {regulation,period: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
     });
     
     // Query relevant audit entries
@@ -426,17 +383,10 @@ export class ParlantEnterpriseAuditService {
     
     const reportTime = Date.now() - startTime;
     
-    this.logger.log(`Compliance report generated: ${reportId}`, {
-      reportId,
-      regulation,
+    this.logger.log(`Compliance report generated: ${reportId}`, {reportId,regulation,
       totalOperations: report.totalOperations,
-      complianceRate: `${report.complianceRate.toFixed(2)}%`,
-      criticalFindings: report.criticalFindings.length,
-      recommendations: report.recommendations.length,
-      reportTime: `${reportTime.toFixed(2)}ms`,
-    });
-    
-    return report;
+      complianceRate: `${report.complianceRate.toFixed(2)}%`,criticalFindings: report.criticalFindings.length,recommendations: report.recommendations.length,
+      reportTime: `${reportTime.toFixed(2)}ms`,});return report;
   }
 
   /**
@@ -458,9 +408,7 @@ export class ParlantEnterpriseAuditService {
         const recalculatedHash = this.generateAuditHash(entry);
         if (recalculatedHash !== entry.auditHash) {
           tamperedCount++;
-          this.logger.warn(`Audit entry tamper detected: ${entry.auditId}`, {
-            auditId: entry.auditId,
-            expectedHash: entry.auditHash,
+          this.logger.warn(`Audit entry tamper detected: ${entry.auditId}`, {auditId: entry.auditId,expectedHash: entry.auditHash,
             actualHash: recalculatedHash,
           });
           continue;
@@ -470,9 +418,7 @@ export class ParlantEnterpriseAuditService {
         const validSignature = this.verifyDigitalSignature(entry, entry.auditHash, entry.digitalSignature);
         if (!validSignature) {
           tamperedCount++;
-          this.logger.warn(`Invalid digital signature: ${entry.auditId}`);
-          continue;
-        }
+          this.logger.warn(`Invalid digital signature: ${entry.auditId}`);continue;}
         
         verifiedCount++;
         
@@ -546,62 +492,33 @@ export class ParlantEnterpriseAuditService {
 
   private determineValidationResult(
     response: ParlantValidationResponse | null,
-    executionResult: ParlantAuditEntry['executionResult']
-  ): ParlantAuditEntry['validationResult'] {
-    if (!response) return 'ERROR';
-    if (executionResult === 'TIMEOUT') return 'TIMEOUT';
-    return response.approved ? 'APPROVED' : 'DENIED';
-  }
-
-  private async generateComplianceFlags(
+    executionResult: ParlantAuditEntry['executionResult']): ParlantAuditEntry['validationResult'] {if (!response) return 'ERROR';if (executionResult === 'TIMEOUT') return 'TIMEOUT';return response.approved ? 'APPROVED' : 'DENIED';}private async generateComplianceFlags(
     request: ParlantValidationRequest,
     response: ParlantValidationResponse | null,
-    _executionResult: ParlantAuditEntry['executionResult']
-  ): Promise<ComplianceFlag[]> {
-    const flags: ComplianceFlag[] = [];
+    _executionResult: ParlantAuditEntry['executionResult']): Promise<ComplianceFlag[]> {const flags: ComplianceFlag[] = [];
     
     // GDPR compliance checks
     if (this.complianceConfig.gdprEnabled) {
       flags.push({
-        regulation: 'GDPR',
-        requirement: 'Article 30 - Records of processing activities',
-        status: 'COMPLIANT',
-        evidence: ['Audit entry created', 'Processing purpose documented'],
-        assessedAt: new Date(),
-        expiresAt: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)), // 1 year
+        regulation: 'GDPR',requirement: 'Article 30 - Records of processing activities',status: 'COMPLIANT',evidence: ['Audit entry created', 'Processing purpose documented'],assessedAt: new Date(),expiresAt: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)), // 1 year
       });
       
-      if (request.riskLevel === RiskLevel.CRITICAL && !response?.approved) {
+      if (request.riskLevel === RiskLevel._CRITICAL && !response?.approved) {
         flags.push({
-          regulation: 'GDPR',
-          requirement: 'Article 25 - Data protection by design and by default',
-          status: 'COMPLIANT',
-          evidence: ['High-risk operation blocked', 'Privacy-preserving validation'],
-          assessedAt: new Date(),
-        });
+          regulation: 'GDPR',requirement: 'Article 25 - Data protection by design and by default',status: 'COMPLIANT',evidence: ['High-risk operation blocked', 'Privacy-preserving validation'],assessedAt: new Date(),});
       }
     }
     
     // SOX compliance checks
     if (this.complianceConfig.soxEnabled) {
       flags.push({
-        regulation: 'SOX',
-        requirement: 'Section 404 - Internal controls assessment',
-        status: 'COMPLIANT',
-        evidence: ['Operation validated', 'Audit trail maintained'],
-        assessedAt: new Date(),
-      });
+        regulation: 'SOX',requirement: 'Section 404 - Internal controls assessment',status: 'COMPLIANT',evidence: ['Operation validated', 'Audit trail maintained'],assessedAt: new Date(),});
     }
     
     // ISO 27001 compliance checks
     if (this.complianceConfig.iso27001Enabled) {
       flags.push({
-        regulation: 'ISO27001',
-        requirement: 'A.12.4.1 - Event logging',
-        status: 'COMPLIANT',
-        evidence: ['Comprehensive logging implemented', 'Security events recorded'],
-        assessedAt: new Date(),
-      });
+        regulation: 'ISO27001',requirement: 'A.12.4.1 - Event logging',status: 'COMPLIANT',evidence: ['Comprehensive logging implemented', 'Security events recorded'],assessedAt: new Date(),});
     }
     
     return flags;
@@ -609,50 +526,20 @@ export class ParlantEnterpriseAuditService {
 
   private createSecurityContext(request: ParlantValidationRequest): SecurityContext {
     return {
-      authenticationMethod: 'JWT', // TODO: Get from actual context
-      authorizationLevel: request.context.securityLevel,
-      encryptionUsed: this.complianceConfig.encryptionEnabled,
+      authenticationMethod: 'JWT', // TODO: Get from actual contextauthorizationLevel: request.context.securityLevel,encryptionUsed: this.complianceConfig.encryptionEnabled,
       dataClassification: this.determineDataClassification(request.riskLevel),
-      accessControls: ['role_based_access', 'function_validation'],
-      threatLevel: this.mapRiskLevelToThreatLevel(request.riskLevel),
-    };
+      accessControls: ['role_based_access', 'function_validation'],threatLevel: this.mapRiskLevelToThreatLevel(request.riskLevel),};
   }
 
-  private determineDataClassification(riskLevel: RiskLevel): SecurityContext['dataClassification'] {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW:
-        return 'INTERNAL';
-      case RiskLevel.MEDIUM:
-        return 'CONFIDENTIAL';
-      case RiskLevel.HIGH:
-      case RiskLevel.CRITICAL:
-        return 'RESTRICTED';
-      default:
-        return 'INTERNAL';
-    }
-  }
+  private determineDataClassification(riskLevel: RiskLevel): SecurityContext['dataClassification'] {switch (riskLevel) {case RiskLevel._MINIMAL:
+      case RiskLevel._LOW:
+        return 'INTERNAL';case RiskLevel._MODERATE:return 'CONFIDENTIAL';case RiskLevel._HIGH:case RiskLevel._CRITICAL:
+        return 'RESTRICTED';default:return 'INTERNAL';}}
 
-  private mapRiskLevelToThreatLevel(riskLevel: RiskLevel): SecurityContext['threatLevel'] {
-    switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-        return 'LOW';
-      case RiskLevel.LOW:
-        return 'LOW';
-      case RiskLevel.MEDIUM:
-        return 'MEDIUM';
-      case RiskLevel.HIGH:
-        return 'HIGH';
-      case RiskLevel.CRITICAL:
-        return 'CRITICAL';
-      default:
-        return 'MEDIUM';
-    }
-  }
+  private mapRiskLevelToThreatLevel(riskLevel: RiskLevel): SecurityContext['threatLevel'] {switch (riskLevel) {case RiskLevel._MINIMAL:
+        return 'LOW';case RiskLevel._LOW:return 'LOW';case RiskLevel._MODERATE:return 'MEDIUM';case RiskLevel._HIGH:return 'HIGH';case RiskLevel._CRITICAL:return 'CRITICAL';default:return 'MEDIUM';}}
 
-  private generateAuditHash(entry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'>): string {
-    const hashData = {
-      auditId: entry.auditId,
+  private generateAuditHash(entry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'>): string {const hashData = {auditId: entry.auditId,
       operationId: entry.operationId,
       timestamp: entry.timestamp.toISOString(),
       userId: entry.userId,
@@ -661,22 +548,12 @@ export class ParlantEnterpriseAuditService {
       executionResult: entry.executionResult,
     };
     
-    return createHash('sha256')
-      .update(JSON.stringify(hashData))
-      .digest('hex');
-  }
-
-  private generateDigitalSignature(
+    return createHash('sha256').update(JSON.stringify(hashData)).digest('hex');}private generateDigitalSignature(
     entry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'>,
     auditHash: string
   ): string {
     const signatureData = `${auditHash}:${entry.auditId}:${this.signingKey}`;
-    return createHash('sha256')
-      .update(signatureData)
-      .digest('hex');
-  }
-
-  private verifyDigitalSignature(entry: ParlantAuditEntry, auditHash: string, signature: string): boolean {
+    return createHash('sha256').update(signatureData).digest('hex');}private verifyDigitalSignature(entry: ParlantAuditEntry, auditHash: string, signature: string): boolean {
     const expectedSignature = this.generateDigitalSignature(entry, auditHash);
     return expectedSignature === signature;
   }
@@ -706,11 +583,7 @@ export class ParlantEnterpriseAuditService {
     const violations: string[] = [];
     
     // Check for high-risk operations without approval
-    if (entry.riskLevel === RiskLevel.CRITICAL && entry.validationResult !== 'APPROVED') {
-      violations.push('Critical operation blocked - compliance validated');
-    }
-    
-    // Check for unusual activity patterns
+    if (entry.riskLevel === RiskLevel._CRITICAL && entry.validationResult !== 'APPROVED') {violations.push('Critical operation blocked - compliance validated');}// Check for unusual activity patterns
     const recentUserEntries = await this.queryAuditEntries({
       userId: entry.userId,
       startDate: new Date(Date.now() - (60 * 60 * 1000)), // Last hour
@@ -742,10 +615,7 @@ export class ParlantEnterpriseAuditService {
     
     for (const entry of entries) {
       const regulationFlags = entry.complianceFlags.filter(flag => flag.regulation === regulation);
-      const isCompliant = regulationFlags.every(flag => flag.status === 'COMPLIANT');
-      
-      if (isCompliant) {
-        compliantCount++;
+      const isCompliant = regulationFlags.every(flag => flag.status === 'COMPLIANT');if (isCompliant) {compliantCount++;
       } else {
         nonCompliantCount++;
       }
@@ -772,10 +642,7 @@ export class ParlantEnterpriseAuditService {
     
     if (nonCompliantEntries.length > 0) {
       findings.push({
-        findingId: `finding${Date.now()}${randomBytes(4).toString('hex')}`,
-        severity: 'HIGH',
-        regulation,
-        requirement: 'General compliance requirements',
+        findingId: `finding${Date.now()}${randomBytes(4).toString('hex')}',severity: 'HIGH',regulation,requirement: 'General compliance requirements',
         description: `${nonCompliantEntries.length} operations failed compliance validation`,
         affectedOperations: nonCompliantEntries.map(e => e.operationId),
         remediationRequired: true,
@@ -794,22 +661,12 @@ export class ParlantEnterpriseAuditService {
     
     if (analysis.complianceRate < 95) {
       recommendations.push({
-        category: 'PROCESS',
-        priority: 'HIGH',
-        recommendation: 'Implement automated compliance validation for all operations',
+        category: 'PROCESS',priority: 'HIGH',recommendation: 'Implement automated compliance validation for all operations',
         expectedBenefit: `Improve compliance rate from ${analysis.complianceRate.toFixed(1)}% to >98%`,
-        implementationEffort: 'MEDIUM',
-        estimatedCost: '$50,000 - $100,000',
-      });
-    }
+        implementationEffort: 'MEDIUM',estimatedCost: '$50,000 - $100,000',});}
     
     recommendations.push({
-      category: 'TECHNICAL',
-      priority: 'MEDIUM',
-      recommendation: 'Enhance audit trail encryption and digital signing',
-      expectedBenefit: 'Improved audit trail integrity and tamper detection',
-      implementationEffort: 'LOW',
-      estimatedCost: '$10,000 - $25,000',
+      category: 'TECHNICAL',priority: 'MEDIUM',recommendation: 'Enhance audit trail encryption and digital signing',expectedBenefit: 'Improved audit trail integrity and tamper detection',implementationEffort: 'LOW',estimatedCost: '$10,000 - $25,000',
     });
     
     return recommendations;
@@ -822,17 +679,11 @@ export class ParlantEnterpriseAuditService {
     return `Executive Summary for ${regulation} Compliance:
 
 The audit analysis shows a ${analysis.complianceRate.toFixed(1)}% compliance rate for ${regulation} requirements. 
-${analysis.complianceRate >= 95 ? 'The organization demonstrates strong compliance posture.' : 'There are opportunities for improvement in compliance processes.'}
-
-Key achievements:
-- Comprehensive audit trail implementation
+${analysis.complianceRate >= 95 ? 'The organization demonstrates strong compliance posture.' : 'There are opportunities for improvement in compliance processes.'}Key achievements:- Comprehensive audit trail implementation
 - Real-time compliance monitoring
 - Automated validation processes
 
-${analysis.complianceRate < 95 ? 'Recommended actions:\n- Implement enhanced validation processes\n- Provide additional compliance training\n- Review and update compliance procedures' : 'Continue current compliance practices and monitor for any emerging requirements.'}`;
-  }
-
-  private calculateComplianceDistribution(entries: ParlantAuditEntry[]): Record<string, number> {
+${analysis.complianceRate < 95 ? 'Recommended actions:\n- Implement enhanced validation processes\n- Provide additional compliance training\n- Review and update compliance procedures' : 'Continue current compliance practices and monitor for any emerging requirements.'}`;}private calculateComplianceDistribution(entries: ParlantAuditEntry[]): Record<string, number> {
     const distribution: Record<string, number> = {};
     
     for (const entry of entries) {

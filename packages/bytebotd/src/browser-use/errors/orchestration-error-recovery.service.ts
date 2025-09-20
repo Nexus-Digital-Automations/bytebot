@@ -10,11 +10,7 @@
  * @security-focus Critical
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { Observable, from, of, throwError, timer, concat, defer } from 'rxjs';
-import { retryWhen, delay, take, mergeMap, catchError, tap, concatMap, switchMap } from 'rxjs/operators';
-import {
-  OrchestrationError,
+import { Injectable, Logger } from '@nestjs/common';import { Observable, from, of, throwError, timer, concat, defer } from 'rxjs';import { retryWhen, delay, take, mergeMap, catchError, tap, concatMap, switchMap } from 'rxjs/operators';import {OrchestrationError,
   OrchestrationErrorType,
   OrchestrationErrorCategory,
   OrchestrationErrorSeverity,
@@ -28,10 +24,7 @@ import {
   ResourceAllocationError,
   AggregationError,
   OrchestrationErrorAnalyzer,
-} from './orchestration-errors';
-
-/**
- * Recovery operation result interface
+} from './orchestration-errors';/*** Recovery operation result interface
  */
 export interface RecoveryOperationResult {
   readonly success: boolean;
@@ -68,38 +61,23 @@ export interface OrchestrationRecoveryContext {
  * Distributed recovery strategy configuration
  */
 export interface DistributedRecoveryConfig {
-  readonly isolationLevel: 'operation' | 'node' | 'cluster';
-  readonly redistributionStrategy: 'even' | 'load_based' | 'capability_based' | 'priority_based';
-  readonly nodeSelectionCriteria: {
-    readonly preferredNodes?: string[];
+  readonly isolationLevel: 'operation' | 'node' | 'cluster';readonly redistributionStrategy: 'even' | 'load_based' | 'capability_based' | 'priority_based';readonly nodeSelectionCriteria: {readonly preferredNodes?: string[];
     readonly excludedNodes?: string[];
     readonly minResourceThreshold: number;
     readonly maxLoadThreshold: number;
   };
-  readonly coordinationProtocol: 'leader_follower' | 'consensus' | 'master_slave' | 'peer_to_peer';
-  readonly checkpointingEnabled: boolean;
-  readonly rollbackToLastCheckpoint: boolean;
+  readonly coordinationProtocol: 'leader_follower' | 'consensus' | 'master_slave' | 'peer_to_peer';readonly checkpointingEnabled: boolean;readonly rollbackToLastCheckpoint: boolean;
 }
 
 /**
  * Workflow recovery strategy configuration
  */
 export interface WorkflowRecoveryConfig {
-  readonly recoveryScope: 'step' | 'stage' | 'workflow' | 'cascade';
-  readonly compensationOrder: 'reverse' | 'dependency' | 'priority';
-  readonly statePreservation: 'full' | 'partial' | 'minimal';
-  readonly rollbackDepth: number;
-  readonly reexecutionStrategy: 'from_failure' | 'from_checkpoint' | 'full_restart';
-  readonly dependencyHandling: 'block' | 'skip' | 'substitute';
-}
-
-/**
+  readonly recoveryScope: 'step' | 'stage' | 'workflow' | 'cascade';readonly compensationOrder: 'reverse' | 'dependency' | 'priority';readonly statePreservation: 'full' | 'partial' | 'minimal';readonly rollbackDepth: number;readonly reexecutionStrategy: 'from_failure' | 'from_checkpoint' | 'full_restart';readonly dependencyHandling: 'block' | 'skip' | 'substitute';}/**
  * Resource recovery strategy configuration
  */
 export interface ResourceRecoveryConfig {
-  readonly reallocationStrategy: 'immediate' | 'gradual' | 'queued';
-  readonly resourcePoolExpansion: boolean;
-  readonly degradationAcceptable: boolean;
+  readonly reallocationStrategy: 'immediate' | 'gradual' | 'queued';readonly resourcePoolExpansion: boolean;readonly degradationAcceptable: boolean;
   readonly priorityReallocation: boolean;
   readonly temporaryResourceBorrowing: boolean;
   readonly resourceCleanupRequired: boolean;
@@ -109,12 +87,7 @@ export interface ResourceRecoveryConfig {
  * Aggregation recovery strategy configuration
  */
 export interface AggregationRecoveryConfig {
-  readonly partialResultHandling: 'salvage' | 'recompute' | 'interpolate';
-  readonly conflictResolution: 'manual' | 'automatic' | 'weighted_merge';
-  readonly dataValidationLevel: 'strict' | 'relaxed' | 'disabled';
-  readonly outputFormat: 'original' | 'degraded' | 'summary';
-  readonly qualityThreshold: number;
-}
+  readonly partialResultHandling: 'salvage' | 'recompute' | 'interpolate';readonly conflictResolution: 'manual' | 'automatic' | 'weighted_merge';readonly dataValidationLevel: 'strict' | 'relaxed' | 'disabled';readonly outputFormat: 'original' | 'degraded' | 'summary';readonly qualityThreshold: number;}
 
 /**
  * Recovery operation statistics
@@ -173,10 +146,7 @@ export class OrchestrationErrorRecoveryService {
   };
 
   constructor() {
-    this.logger.log('OrchestrationErrorRecoveryService initialized');
-  }
-
-  /**
+    this.logger.log('OrchestrationErrorRecoveryService initialized');}/**
    * Main entry point for orchestration error recovery
    */
   async recoverFromError(
@@ -186,9 +156,7 @@ export class OrchestrationErrorRecoveryService {
     const startTime = Date.now();
     const recoveryId = this.generateRecoveryId();
 
-    this.logger.log('Starting orchestration error recovery', {
-      recoveryId,
-      orchestrationId: context.orchestrationId,
+    this.logger.log('Starting orchestration error recovery', {recoveryId,orchestrationId: context.orchestrationId,
       errorCategory: error.category,
       errorSeverity: error.severity,
       operationType: context.operationType,
@@ -200,9 +168,7 @@ export class OrchestrationErrorRecoveryService {
 
       // Analyze error impact and determine recovery strategy
       const errorAnalysis = OrchestrationErrorAnalyzer.analyzeErrorImpact(error);
-      this.logger.log('Error impact analysis completed', {
-        recoveryId,
-        impactLevel: errorAnalysis.impactLevel,
+      this.logger.log('Error impact analysis completed', {recoveryId,impactLevel: errorAnalysis.impactLevel,
         recoveryComplexity: errorAnalysis.recoveryComplexity,
         estimatedRecoveryTime: errorAnalysis.estimatedRecoveryTime,
       });
@@ -228,9 +194,7 @@ export class OrchestrationErrorRecoveryService {
       // Store recovery history
       this.storeRecoveryHistory(recoveryId, recoveryResult);
 
-      this.logger.log('Orchestration error recovery completed', {
-        recoveryId,
-        success: recoveryResult.success,
+      this.logger.log('Orchestration error recovery completed', {recoveryId,success: recoveryResult.success,
         duration: recoveryResult.duration,
         attempts: recoveryResult.attempts,
         strategy: recoveryResult.recoveryStrategy,
@@ -239,11 +203,7 @@ export class OrchestrationErrorRecoveryService {
       return recoveryResult;
 
     } catch (recoveryError) {
-      const errorMessage = recoveryError instanceof Error ? recoveryError.message : 'Unknown recovery error';
-
-      this.logger.error('Orchestration error recovery failed', {
-        recoveryId,
-        recoveryError: errorMessage,
+      const errorMessage = recoveryError instanceof Error ? recoveryError.message : 'Unknown recovery error';this.logger.error('Orchestration error recovery failed', {recoveryId,recoveryError: errorMessage,
         originalError: error.message,
         duration: Date.now() - startTime,
       });
@@ -251,9 +211,7 @@ export class OrchestrationErrorRecoveryService {
       const failedResult: RecoveryOperationResult = {
         success: false,
         operationId: recoveryId,
-        recoveryStrategy: 'recovery_failed',
-        attempts: 1,
-        duration: Date.now() - startTime,
+        recoveryStrategy: 'recovery_failed',attempts: 1,duration: Date.now() - startTime,
         error: errorMessage,
         metadata: {
           originalError: error,
@@ -279,20 +237,13 @@ export class OrchestrationErrorRecoveryService {
     recoveryId: string
   ): Promise<RecoveryOperationResult> {
     const config: DistributedRecoveryConfig = {
-      isolationLevel: 'operation',
-      redistributionStrategy: 'load_based',
-      nodeSelectionCriteria: {
-        minResourceThreshold: 0.3,
+      isolationLevel: 'operation',redistributionStrategy: 'load_based',nodeSelectionCriteria: {minResourceThreshold: 0.3,
         maxLoadThreshold: 0.8,
       },
-      coordinationProtocol: 'leader_follower',
-      checkpointingEnabled: true,
-      rollbackToLastCheckpoint: true,
+      coordinationProtocol: 'leader_follower',checkpointingEnabled: true,rollbackToLastCheckpoint: true,
     };
 
-    this.logger.log('Executing distributed operation recovery', {
-      recoveryId,
-      isolationLevel: config.isolationLevel,
+    this.logger.log('Executing distributed operation recovery', {recoveryId,isolationLevel: config.isolationLevel,
       redistributionStrategy: config.redistributionStrategy,
       coordinationFailure: error.distributedError.coordinationFailure,
       partialResults: error.distributedError.partialResults,
@@ -343,17 +294,7 @@ export class OrchestrationErrorRecoveryService {
     recoveryId: string
   ): Promise<RecoveryOperationResult> {
     const config: WorkflowRecoveryConfig = {
-      recoveryScope: error.workflowError.rollbackRequired ? 'workflow' : 'step',
-      compensationOrder: 'reverse',
-      statePreservation: 'partial',
-      rollbackDepth: error.workflowError.completedSteps,
-      reexecutionStrategy: 'from_failure',
-      dependencyHandling: 'block',
-    };
-
-    this.logger.log('Executing workflow coordination recovery', {
-      recoveryId,
-      currentStep: error.workflowError.currentStep,
+      recoveryScope: error.workflowError.rollbackRequired ? 'workflow' : 'step',compensationOrder: 'reverse',statePreservation: 'partial',rollbackDepth: error.workflowError.completedSteps,reexecutionStrategy: 'from_failure',dependencyHandling: 'block',};this.logger.log('Executing workflow coordination recovery', {recoveryId,currentStep: error.workflowError.currentStep,
       failedStep: error.workflowError.failedStep,
       rollbackRequired: error.workflowError.rollbackRequired,
       compensationActions: error.workflowError.compensationActions.length,
@@ -402,17 +343,13 @@ export class OrchestrationErrorRecoveryService {
     recoveryId: string
   ): Promise<RecoveryOperationResult> {
     const config: ResourceRecoveryConfig = {
-      reallocationStrategy: 'gradual',
-      resourcePoolExpansion: true,
-      degradationAcceptable: !context.criticalPathOnly,
+      reallocationStrategy: 'gradual',resourcePoolExpansion: true,degradationAcceptable: !context.criticalPathOnly,
       priorityReallocation: true,
       temporaryResourceBorrowing: true,
       resourceCleanupRequired: true,
     };
 
-    this.logger.log('Executing resource allocation recovery', {
-      recoveryId,
-      requestedBrowsers: error.resourceError.requestedResources.browsers,
+    this.logger.log('Executing resource allocation recovery', {recoveryId,requestedBrowsers: error.resourceError.requestedResources.browsers,
       availableBrowsers: error.resourceError.availableResources.browsers,
       allocationStrategy: error.resourceError.allocationStrategy,
       queuePosition: error.resourceError.queuePosition,
@@ -466,16 +403,9 @@ export class OrchestrationErrorRecoveryService {
     recoveryId: string
   ): Promise<RecoveryOperationResult> {
     const config: AggregationRecoveryConfig = {
-      partialResultHandling: 'salvage',
-      conflictResolution: 'weighted_merge',
-      dataValidationLevel: 'relaxed',
-      outputFormat: context.allowPartialRecovery ? 'degraded' : 'original',
-      qualityThreshold: 0.7,
-    };
+      partialResultHandling: 'salvage',conflictResolution: 'weighted_merge',dataValidationLevel: 'relaxed',outputFormat: context.allowPartialRecovery ? 'degraded' : 'original',qualityThreshold: 0.7,};
 
-    this.logger.log('Executing aggregation recovery', {
-      recoveryId,
-      aggregationType: error.aggregationError.aggregationType,
+    this.logger.log('Executing aggregation recovery', {recoveryId,aggregationType: error.aggregationError.aggregationType,
       partialResultsCount: error.aggregationError.partialResults.length,
       mergeConflictsCount: error.aggregationError.mergeConflicts.length,
       dataIntegrityValid: error.aggregationError.dataIntegrity.checksumValid,
@@ -526,9 +456,7 @@ export class OrchestrationErrorRecoveryService {
     context: OrchestrationRecoveryContext,
     recoveryId: string
   ): Promise<RecoveryOperationResult> {
-    this.logger.log('Executing generic orchestration error recovery', {
-      recoveryId,
-      errorCategory: error.category,
+    this.logger.log('Executing generic orchestration error recovery', {recoveryId,errorCategory: error.category,
       errorSeverity: error.severity,
       affectedOperations: error.affectedOperations.length,
     });
@@ -545,9 +473,7 @@ export class OrchestrationErrorRecoveryService {
       return {
         success: true,
         operationId: recoveryId,
-        recoveryStrategy: 'generic_retry_recovery',
-        attempts: retryResult.attempts,
-        duration: Date.now() - context.recoveryStartTime.getTime(),
+        recoveryStrategy: 'generic_retry_recovery',attempts: retryResult.attempts,duration: Date.now() - context.recoveryStartTime.getTime(),
         result: retryResult.result,
         metadata: {
           retryAttempts: retryResult.attempts,
@@ -685,15 +611,10 @@ export class OrchestrationErrorRecoveryService {
         const result = await Promise.race([
           operation(),
           new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Operation timeout')), timeoutMs)
-          ),
-        ]);
+            setTimeout(() => reject(new Error('Operation timeout')), timeoutMs)),]);
         return { result, attempts };
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-
-        if (attempts < maxRetries) {
-          const delay = baseDelayMs * Math.pow(2, attempts - 1);
+        lastError = error instanceof Error ? error : new Error('Unknown error');if (attempts < maxRetries) {const delay = baseDelayMs * Math.pow(2, attempts - 1);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }

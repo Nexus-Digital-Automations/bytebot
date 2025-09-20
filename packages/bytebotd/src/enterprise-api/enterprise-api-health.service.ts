@@ -23,29 +23,17 @@
  * Security: Enterprise-grade conversational validation for all health operations
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { HttpService } from '@nestjs/axios';
-import { EnterpriseApiService, EndpointHealth as EndpointHealth, ApiPerformanceMetrics } from './enterprise-api.service';
-import {
-  ParlantIntegrationService,
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { Cron, CronExpression } from '@nestjs/schedule';import { HttpService } from '@nestjs/axios';import { EnterpriseApiService, EndpointHealth as EndpointHealth, ApiPerformanceMetrics } from './enterprise-api.service';import {ParlantIntegrationService,
   ConversationalValidationError as ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as ParlantConversationContext,
-} from '../parlant/parlant-integration.service';
-
-// ===== HEALTH SERVICE TYPES =====
-
-/**
+} from '../parlant/parlant-integration.service';// ===== HEALTH SERVICE TYPES =====/**
  * Overall system health status
  */
 export interface SystemHealthStatus {
-  status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED';
-  timestamp: Date;
-  overallScore: number; // 0-100
+  status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED';timestamp: Date;overallScore: number; // 0-100
   components: {
     api: ComponentHealth;
     database: ComponentHealth;
@@ -75,9 +63,7 @@ export interface SystemHealthStatus {
  * Individual component health
  */
 export interface ComponentHealth {
-  status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED';
-  score: number; // 0-100
-  lastCheck: Date;
+  status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED';score: number; // 0-100lastCheck: Date;
   responseTime: number;
   uptime: number;
   errorCount: number;
@@ -92,10 +78,7 @@ export interface ResourceHealth {
   usage: number; // 0-100 percentage
   available: number;
   total: number;
-  status: 'NORMAL' | 'WARNING' | 'CRITICAL';
-  trend: 'STABLE' | 'INCREASING' | 'DECREASING';
-  threshold: {
-    warning: number;
+  status: 'NORMAL' | 'WARNING' | 'CRITICAL';trend: 'STABLE' | 'INCREASING' | 'DECREASING';threshold: {warning: number;
     critical: number;
   };
 }
@@ -105,10 +88,7 @@ export interface ResourceHealth {
  */
 export interface DependencyHealth {
   name: string;
-  type: 'DATABASE' | 'API' | 'CACHE' | 'MESSAGE_QUEUE' | 'FILE_SYSTEM';
-  status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
-  endpoint: string;
-  responseTime: number;
+  type: 'DATABASE' | 'API' | 'CACHE' | 'MESSAGE_QUEUE' | 'FILE_SYSTEM';status: 'HEALTHY' | 'DEGRADED' | 'FAILED';endpoint: string;responseTime: number;
   lastCheck: Date;
   errorDetails?: string;
 }
@@ -127,9 +107,7 @@ export interface HealthTrend {
  */
 export interface HealthAlert {
   id: string;
-  severity: 'INFO' | 'WARNING' | 'CRITICAL' | 'EMERGENCY';
-  component: string;
-  message: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL' | 'EMERGENCY';component: string;message: string;
   timestamp: Date;
   acknowledged: boolean;
   resolvedAt?: Date;
@@ -142,9 +120,7 @@ export interface HealthAlert {
     validationApproved: boolean;
     riskAssessment: string;
     recommendedActions: string[];
-    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    autoRemediation?: {
-      enabled: boolean;
+    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';autoRemediation?: {enabled: boolean;
       approvedActions: string[];
       requiresUserApproval: boolean;
     };
@@ -198,30 +174,16 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   
   /** Current system health status */
   private currentHealthStatus: SystemHealthStatus = {
-    status: 'HEALTHY',
-    timestamp: new Date(),
-    overallScore: 100,
+    status: 'HEALTHY',timestamp: new Date(),overallScore: 100,
     components: {
-      api: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-      database: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-      parlant: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-      cache: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-      authentication: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-      monitoring: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },
-    },
-    performance: {
+      api: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },database: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },parlant: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },cache: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },authentication: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },monitoring: { status: 'HEALTHY', score: 100, lastCheck: new Date(), responseTime: 0, uptime: 100, errorCount: 0, details: {}, trends: [] },},performance: {
       averageResponseTime: 0,
       successRate: 100,
       throughput: 1000,
       errorRate: 0,
     },
     resources: {
-      cpu: { usage: 25, available: 75, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 70, critical: 90 } },
-      memory: { usage: 50, available: 50, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },
-      disk: { usage: 30, available: 70, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 85, critical: 95 } },
-      network: { usage: 10, available: 90, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 75, critical: 90 } },
-    },
-    dependencies: [],
+      cpu: { usage: 25, available: 75, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 70, critical: 90 } },memory: { usage: 50, available: 50, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },disk: { usage: 30, available: 70, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 85, critical: 95 } },network: { usage: 10, available: 90, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 75, critical: 90 } },},dependencies: [],
     alerts: [],
     recommendations: [],
   };
@@ -257,13 +219,8 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   ) {
     this.initializeHealthStatus();
     this.loadHealthConfigurations();
-    this.logger.log('Enterprise API Health Service initialized with MAXIMUM Parlant integration');
-  }
-
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Enterprise API Health Service initialized with Parlant validation');
-    await this.performInitialHealthCheck();
-    this.logger.log('Parlant validation enabled for all health monitoring operations');
+    this.logger.log('Enterprise API Health Service initialized with MAXIMUM Parlant integration');}async onModuleInit(): Promise<void> {
+    this.logger.log('Enterprise API Health Service initialized with Parlant validation');await this.performInitialHealthCheck();this.logger.log('Parlant validation enabled for all health monitoring operations');
   }
 
   // ===== HEALTH MONITORING =====
@@ -304,9 +261,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     const alert = this.activeAlerts.get(alertId);
     if (alert) {
       alert.acknowledged = true;
-      this.logger.log(`Alert ${alertId} acknowledged by ${acknowledgedBy}`);
-      return true;
-    }
+      this.logger.log(`Alert ${alertId} acknowledged by ${acknowledgedBy}`);return true;}
     return false;
   }
 
@@ -322,9 +277,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     try {
       // Validate health check operation through Parlant
       const validationResult = await this.validateHealthOperation(
-        'scheduled_health_check',
-        'Perform comprehensive system health monitoring',
-        'MEDIUM',
+        'scheduled_health_check','Perform comprehensive system health monitoring','MEDIUM',
         operationId
       );
       
@@ -355,19 +308,13 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     try {
       // Validate metrics collection through Parlant (lightweight validation)
       const validationResult = await this.validateHealthOperation(
-        'performance_metrics_collection',
-        'Collect performance metrics for monitoring dashboard',
-        'LOW',
-        operationId
-      );
+        'performance_metrics_collection','Collect performance metrics for monitoring dashboard','LOW',operationId);
       
       if (validationResult.approved) {
         await this.updatePerformanceMetrics();
       }
     } catch (error) {
-      this.logger.error('Performance metrics collection failed', {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Performance metrics collection failed', {operationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -375,14 +322,10 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * SLA compliance check - runs every 5 minutes
    */
-  @Cron('*/5 * * * *')
-  async checkSlaCompliance(): Promise<void> {
-    try {
+  @Cron('*/5 * * * *')async checkSlaCompliance(): Promise<void> {try {
       await this.updateSlaMetrics();
     } catch (error) {
-      this.logger.error('SLA compliance check failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('SLA compliance check failed', {error: error instanceof Error ? error.message : String(error),});
     }
   }
 
@@ -398,18 +341,13 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       this.healthHistory.set(component, filteredTrends);
     });
     
-    this.logger.debug('Health history cleanup completed');
-  }
-
-  // ===== COMPREHENSIVE HEALTH CHECKS =====
+    this.logger.debug('Health history cleanup completed');}// ===== COMPREHENSIVE HEALTH CHECKS =====
 
   /**
    * Perform initial health check on service startup
    */
   private async performInitialHealthCheck(): Promise<void> {
-    this.logger.log('Performing initial health check...');
-    await this.performComprehensiveHealthCheck();
-    this.logger.log('Initial health check completed');
+    this.logger.log('Performing initial health check...');await this.performComprehensiveHealthCheck();this.logger.log('Initial health check completed');
   }
 
   /**
@@ -476,15 +414,10 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       });
       
     } catch (error) {
-      this.logger.error('Comprehensive health check failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Comprehensive health check failed', {error: error instanceof Error ? error.message : String(error),});
       
       // Set system to critical state
-      this.currentHealthStatus.status = 'CRITICAL';
-      await this.createAlert('CRITICAL', 'system', 'Health check system failure', ['Restart health monitoring', 'Check system resources', 'Contact support']);
-    }
-  }
+      this.currentHealthStatus.status = 'CRITICAL';await this.createAlert('CRITICAL', 'system', 'Health check system failure', ['Restart health monitoring', 'Check system resources', 'Contact support']);}}
 
   // ===== COMPONENT HEALTH CHECKS =====
 
@@ -530,14 +463,8 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           averageResponseTime: avgResponseTime,
           endpointMetrics: Object.fromEntries(metrics),
         },
-        trends: this.updateTrend('api', score),
-      };
-      
-    } catch (error) {
-      this.logger.error('API health check failed', { error: error instanceof Error ? error.message : String(error) });
-      return this.createFailedHealth('API health check failed');
-    }
-  }
+        trends: this.updateTrend('api', score),};} catch (error) {
+      this.logger.error('API health check failed', { error: error instanceof Error ? error.message : String(error) });return this.createFailedHealth('API health check failed');}}
 
   /**
    * Check database health
@@ -561,18 +488,9 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         uptime: 99.9,
         errorCount: 0,
         details: {
-          connectionPool: 'healthy',
-          queryPerformance: 'optimal',
-          replicationLag: 0,
-        },
-        trends: this.updateTrend('database', score),
-      };
-      
-    } catch (error) {
-      this.logger.error('Database health check failed', { error: error instanceof Error ? error.message : String(error) });
-      return this.createFailedHealth('Database health check failed');
-    }
-  }
+          connectionPool: 'healthy',queryPerformance: 'optimal',replicationLag: 0,},
+        trends: this.updateTrend('database', score),};} catch (error) {
+      this.logger.error('Database health check failed', { error: error instanceof Error ? error.message : String(error) });return this.createFailedHealth('Database health check failed');}}
 
   /**
    * Check Parlant integration health
@@ -596,18 +514,9 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         uptime: 99.8,
         errorCount: 0,
         details: {
-          validationService: 'healthy',
-          conversationEngine: 'optimal',
-          cacheHitRate: 85,
-        },
-        trends: this.updateTrend('parlant', score),
-      };
-      
-    } catch (error) {
-      this.logger.error('Parlant health check failed', { error: error instanceof Error ? error.message : String(error) });
-      return this.createFailedHealth('Parlant health check failed');
-    }
-  }
+          validationService: 'healthy',conversationEngine: 'optimal',cacheHitRate: 85,},
+        trends: this.updateTrend('parlant', score),};} catch (error) {
+      this.logger.error('Parlant health check failed', { error: error instanceof Error ? error.message : String(error) });return this.createFailedHealth('Parlant health check failed');}}
 
   /**
    * Check cache health
@@ -633,13 +542,8 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           memoryUsage: 65,
           evictionRate: 2,
         },
-        trends: this.updateTrend('cache', score),
-      };
-      
-    } catch (_error) {
-      return this.createFailedHealth('Cache health check failed');
-    }
-  }
+        trends: this.updateTrend('cache', score),};} catch (_error) {
+      return this.createFailedHealth('Cache health check failed');}}
 
   /**
    * Check authentication health
@@ -661,17 +565,8 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         uptime: 99.7,
         errorCount: 0,
         details: {
-          jwtValidation: 'healthy',
-          sessionManagement: 'optimal',
-          rateLimiting: 'active',
-        },
-        trends: this.updateTrend('authentication', score),
-      };
-      
-    } catch (_error) {
-      return this.createFailedHealth('Authentication health check failed');
-    }
-  }
+          jwtValidation: 'healthy',sessionManagement: 'optimal',rateLimiting: 'active',},trends: this.updateTrend('authentication', score),};} catch (_error) {
+      return this.createFailedHealth('Authentication health check failed');}}
 
   /**
    * Check monitoring health
@@ -692,58 +587,35 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         uptime: 99.6,
         errorCount: 0,
         details: {
-          metricsCollection: 'active',
-          alerting: 'functional',
-          logging: 'operational',
-        },
-        trends: this.updateTrend('monitoring', score),
-      };
-      
-    } catch (_error) {
-      return this.createFailedHealth('Monitoring health check failed');
-    }
-  }
+          metricsCollection: 'active',alerting: 'functional',logging: 'operational',},trends: this.updateTrend('monitoring', score),};} catch (_error) {
+      return this.createFailedHealth('Monitoring health check failed');}}
 
   // ===== SYSTEM RESOURCE MONITORING =====
 
   /**
    * Check system resources
    */
-  private async checkSystemResources(): Promise<SystemHealthStatus['resources']> {
-    // TODO: Implement actual system resource monitoring
-    return {
+  private async checkSystemResources(): Promise<SystemHealthStatus['resources']> {// TODO: Implement actual system resource monitoringreturn {
       cpu: {
         usage: 25,
         available: 75,
         total: 100,
-        status: 'NORMAL',
-        trend: 'STABLE',
-        threshold: { warning: 70, critical: 90 },
-      },
+        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 70, critical: 90 },},
       memory: {
         usage: 60,
         available: 40,
         total: 100,
-        status: 'NORMAL',
-        trend: 'STABLE',
-        threshold: { warning: 80, critical: 95 },
-      },
+        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 80, critical: 95 },},
       disk: {
         usage: 45,
         available: 55,
         total: 100,
-        status: 'NORMAL',
-        trend: 'STABLE',
-        threshold: { warning: 85, critical: 95 },
-      },
+        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 85, critical: 95 },},
       network: {
         usage: 15,
         available: 85,
         total: 100,
-        status: 'NORMAL',
-        trend: 'STABLE',
-        threshold: { warning: 80, critical: 95 },
-      },
+        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 80, critical: 95 },},
     };
   }
 
@@ -754,20 +626,10 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     // TODO: Implement actual dependency health checks
     return [
       {
-        name: 'Primary Database',
-        type: 'DATABASE',
-        status: 'HEALTHY',
-        endpoint: 'postgresql://localhost:5432',
-        responseTime: 25,
-        lastCheck: new Date(),
+        name: 'Primary Database',type: 'DATABASE',status: 'HEALTHY',endpoint: 'postgresql://localhost:5432',responseTime: 25,lastCheck: new Date(),
       },
       {
-        name: 'Redis Cache',
-        type: 'CACHE',
-        status: 'HEALTHY',
-        endpoint: 'redis://localhost:6379',
-        responseTime: 5,
-        lastCheck: new Date(),
+        name: 'Redis Cache',type: 'CACHE',status: 'HEALTHY',endpoint: 'redis://localhost:6379',responseTime: 5,lastCheck: new Date(),
       },
     ];
   }
@@ -779,9 +641,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   private initializeHealthStatus(): void {
     this.currentHealthStatus = {
-      status: 'HEALTHY',
-      timestamp: new Date(),
-      overallScore: 100,
+      status: 'HEALTHY',timestamp: new Date(),overallScore: 100,
       components: {
         api: this.createDefaultHealth(),
         database: this.createDefaultHealth(),
@@ -797,12 +657,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         errorRate: 0,
       },
       resources: {
-        cpu: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 70, critical: 90 } },
-        memory: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },
-        disk: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 85, critical: 95 } },
-        network: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },
-      },
-      dependencies: [],
+        cpu: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 70, critical: 90 } },memory: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },disk: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 85, critical: 95 } },network: { usage: 0, available: 100, total: 100, status: 'NORMAL', trend: 'STABLE', threshold: { warning: 80, critical: 95 } },},dependencies: [],
       alerts: [],
       recommendations: [],
     };
@@ -813,9 +668,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   private createDefaultHealth(): ComponentHealth {
     return {
-      status: 'HEALTHY',
-      score: 100,
-      lastCheck: new Date(),
+      status: 'HEALTHY',score: 100,lastCheck: new Date(),
       responseTime: 0,
       uptime: 100,
       errorCount: 0,
@@ -829,9 +682,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   private createFailedHealth(reason: string): ComponentHealth {
     return {
-      status: 'FAILED',
-      score: 0,
-      lastCheck: new Date(),
+      status: 'FAILED',score: 0,lastCheck: new Date(),
       responseTime: 0,
       uptime: 0,
       errorCount: 1,
@@ -863,14 +714,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * Determine component status from score
    */
-  private determineComponentStatus(score: number): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED' {
-    if (score >= 95) return 'HEALTHY';
-    if (score >= 80) return 'DEGRADED';
-    if (score >= 50) return 'CRITICAL';
-    return 'FAILED';
-  }
-
-  /**
+  private determineComponentStatus(score: number): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED' {if (score >= 95) return 'HEALTHY';if (score >= 80) return 'DEGRADED';if (score >= 50) return 'CRITICAL';return 'FAILED';}/**
    * Calculate overall system score
    */
   private calculateOverallScore(components: Record<string, ComponentHealth>): number {
@@ -881,14 +725,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * Determine overall system status
    */
-  private determineOverallStatus(score: number): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED' {
-    if (score >= 95) return 'HEALTHY';
-    if (score >= 80) return 'DEGRADED';
-    if (score >= 50) return 'CRITICAL';
-    return 'FAILED';
-  }
-
-  /**
+  private determineOverallStatus(score: number): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILED' {if (score >= 95) return 'HEALTHY';if (score >= 80) return 'DEGRADED';if (score >= 50) return 'CRITICAL';return 'FAILED';}/**
    * Update health trend for component
    */
   private updateTrend(component: string, value: number): HealthTrend[] {
@@ -897,10 +734,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     trends.push({
       timestamp: new Date(),
       value,
-      metric: 'score',
-    });
-    
-    // Keep only last 100 data points
+      metric: 'score',});// Keep only last 100 data points
     if (trends.length > 100) {
       trends = trends.slice(-100);
     }
@@ -921,19 +755,13 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     // Check component health
     Object.entries(components).forEach(([name, health]) => {
       if (health.score < 80) {
-        recommendations.push(`Investigate ${name} component performance issues`);
-      }
-      if (health.responseTime > 2000) {
-        recommendations.push(`Optimize ${name} component response time`);
-      }
-    });
+        recommendations.push(`Investigate ${name} component performance issues`);}if (health.responseTime > 2000) {
+        recommendations.push(`Optimize ${name} component response time`);}});
     
     // Check resource usage
     Object.entries(resources).forEach(([name, resource]) => {
       if (resource.usage > resource.threshold.warning) {
-        recommendations.push(`Monitor ${name} usage - approaching warning threshold`);
-      }
-      if (resource.usage > resource.threshold.critical) {
+        recommendations.push(`Monitor ${name} usage - approaching warning threshold`);}if (resource.usage > resource.threshold.critical) {
         recommendations.push(`Immediate action required: ${name} usage critical`);
       }
     });
@@ -946,25 +774,14 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   private async checkForAlerts(
     components: Record<string, ComponentHealth>,
-    resources: SystemHealthStatus['resources'],
-  ): Promise<void> {
-    // Check component alerts
+    resources: SystemHealthStatus['resources'],): Promise<void> {// Check component alerts
     for (const [name, health] of Object.entries(components)) {
-      if (health.status === 'FAILED') {
-        await this.createAlert('CRITICAL', name, `${name} component has failed`, ['Restart service', 'Check logs', 'Contact support']);
-      } else if (health.status === 'CRITICAL') {
-        await this.createAlert('WARNING', name, `${name} component is in critical state`, ['Monitor closely', 'Review performance metrics']);
-      }
-    }
+      if (health.status === 'FAILED') {await this.createAlert('CRITICAL', name, `${name} component has failed`, ['Restart service', 'Check logs', 'Contact support']);} else if (health.status === 'CRITICAL') {await this.createAlert('WARNING', name, `${name} component is in critical state`, ['Monitor closely', 'Review performance metrics']);}}
     
     // Check resource alerts
     for (const [name, resource] of Object.entries(resources)) {
       if (resource.usage > resource.threshold.critical) {
-        await this.createAlert('EMERGENCY', name, `${name} usage critical: ${resource.usage}%`, ['Scale resources', 'Clear cache', 'Restart services']);
-      } else if (resource.usage > resource.threshold.warning) {
-        await this.createAlert('WARNING', name, `${name} usage high: ${resource.usage}%`, ['Monitor usage', 'Plan capacity increase']);
-      }
-    }
+        await this.createAlert('EMERGENCY', name, `${name} usage critical: ${resource.usage}%`, ['Scale resources', 'Clear cache', 'Restart services']);} else if (resource.usage > resource.threshold.warning) {await this.createAlert('WARNING', name, `${name} usage high: ${resource.usage}%`, ['Monitor usage', 'Plan capacity increase']);}}
   }
 
   /**
@@ -1004,18 +821,14 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           recommendedActions: validationResult.suggestedAlternatives ?? actions,
           businessImpact: this.mapSeverityToBusinessImpact(severity),
           autoRemediation: {
-            enabled: validationResult.approved && severity !== 'EMERGENCY',
-            approvedActions: validationResult.approved ? actions : [],
-            requiresUserApproval: severity === 'CRITICAL' || severity === 'EMERGENCY',
+            enabled: validationResult.approved && severity !== 'EMERGENCY',approvedActions: validationResult.approved ? actions : [],requiresUserApproval: severity === 'CRITICAL' || severity === 'EMERGENCY',
           },
         },
       };
       
       this.activeAlerts.set(alertId, alert);
       
-      this.logger.warn(`Health alert created with Parlant validation: ${severity} - ${message}`, {
-        alertId,
-        component,
+      this.logger.warn(`Health alert created with Parlant validation: ${severity} - ${message}`, {alertId,component,
         severity,
         actions,
         parlantApproved: validationResult.approved,
@@ -1080,19 +893,13 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     
     try {
       const validationResult = await this.validateHealthOperation(
-        'sla_metrics_update',
-        'Update SLA compliance metrics and performance tracking',
-        'MEDIUM',
+        'sla_metrics_update','Update SLA compliance metrics and performance tracking','MEDIUM',
         operationId
       );
       
       if (validationResult.approved) {
         // TODO: Calculate and update SLA compliance metrics
-        this.logger.debug(`[${operationId}] SLA metrics update approved by Parlant validation`);
-      } else {
-        this.logger.warn(`[${operationId}] SLA metrics update denied by Parlant validation`, {
-          reasoning: validationResult.reasoning,
-        });
+        this.logger.debug(`[${operationId}] SLA metrics update approved by Parlant validation`);} else {this.logger.warn(`[${operationId}] SLA metrics update denied by Parlant validation`, {reasoning: validationResult.reasoning,});
       }
     } catch (error) {
       this.logger.error(`[${operationId}] SLA metrics update validation failed`, {
@@ -1114,8 +921,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     operationId: string
   ): Promise<ParlantValidationResponse> {
     const validationRequest: ParlantValidationRequest = {
-      functionName: `HealthService.${operationType.replace(/[^a-zA-Z0-9]/g, '')}`,
-      functionParams: {
+      functionName: `HealthService.${operationType.replace(/[^a-zA-Z0-9]/g, '')}',functionParams: {
         operationType,
         description,
         riskLevel,
@@ -1125,16 +931,12 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       context: {
         userId: 'health_service',
         sessionId: `health_session${Date.now()}`,
-        agentRole: 'HEALTH_MONITOR',
-        securityLevel: this.mapRiskToSecurityLevel(riskLevel),
-        conversationHistory: [],
+        agentRole: 'HEALTH_MONITOR',securityLevel: this.mapRiskToSecurityLevel(riskLevel),conversationHistory: [],
         metadata: {
           operationId,
           healthMonitoring: true,
           operationType,
-          systemContext: 'enterprise_api_health',
-        },
-      },
+          systemContext: 'enterprise_api_health',},},
       riskLevel: riskLevel as RiskLevel,
       operationId,
     };
@@ -1155,9 +957,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     const riskLevel = this.mapSeverityToRiskLevel(severity);
     
     const validationRequest: ParlantValidationRequest = {
-      functionName: `HealthService.AlertCreation.${severity}`,
-      functionParams: {
-        severity,
+      functionName: `HealthService.AlertCreation.${severity}`,functionParams: {severity,
         component,
         message,
         actions,
@@ -1167,17 +967,13 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       context: {
         userId: 'health_service',
         sessionId: `alert_session${Date.now()}`,
-        agentRole: 'ALERT_MANAGER',
-        securityLevel: this.mapRiskToSecurityLevel(riskLevel),
-        conversationHistory: [],
+        agentRole: 'ALERT_MANAGER',securityLevel: this.mapRiskToSecurityLevel(riskLevel),conversationHistory: [],
         metadata: {
           operationId: alertId,
           alertCreation: true,
           severity,
           component,
-          businessContinuity: severity === 'CRITICAL' || severity === 'EMERGENCY',
-        },
-      },
+          businessContinuity: severity === 'CRITICAL' || severity === 'EMERGENCY',},},
       riskLevel: riskLevel as RiskLevel,
       operationId: alertId,
     };
@@ -1188,52 +984,24 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * Map severity to risk level
    */
-  private mapSeverityToRiskLevel(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (severity) {
-      case 'INFO': return 'LOW';
-      case 'WARNING': return 'MEDIUM';
-      case 'CRITICAL': return 'HIGH';
-      case 'EMERGENCY': return 'CRITICAL';
-      default: return 'MEDIUM';
-    }
-  }
+  private mapSeverityToRiskLevel(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (severity) {case 'INFO': return 'LOW';case 'WARNING': return 'MEDIUM';case 'CRITICAL': return 'HIGH';case 'EMERGENCY': return 'CRITICAL';default: return 'MEDIUM';}}
 
   /**
    * Map risk level to security level
    */
-  private mapRiskToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (riskLevel.toUpperCase()) {
-      case 'LOW': return 'LOW';
-      case 'MEDIUM': return 'MEDIUM';
-      case 'HIGH': return 'HIGH';
-      case 'CRITICAL': return 'CRITICAL';
-      default: return 'MEDIUM';
-    }
-  }
+  private mapRiskToSecurityLevel(riskLevel: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (riskLevel.toUpperCase()) {case 'LOW': return 'LOW';case 'MEDIUM': return 'MEDIUM';case 'HIGH': return 'HIGH';case 'CRITICAL': return 'CRITICAL';default: return 'MEDIUM';}}
 
   /**
    * Map severity to risk assessment
    */
   private mapSeverityToRisk(severity: string): string {
     switch (severity) {
-      case 'INFO': return 'Informational - Low business impact';
-      case 'WARNING': return 'Warning - Potential service degradation';
-      case 'CRITICAL': return 'Critical - Service availability at risk';
-      case 'EMERGENCY': return 'Emergency - Immediate business continuity threat';
-      default: return 'Unknown risk level';
-    }
-  }
+      case 'INFO': return 'Informational - Low business impact';case 'WARNING': return 'Warning - Potential service degradation';case 'CRITICAL': return 'Critical - Service availability at risk';case 'EMERGENCY': return 'Emergency - Immediate business continuity threat';default: return 'Unknown risk level';}}
 
   /**
    * Map severity to business impact
    */
-  private mapSeverityToBusinessImpact(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    switch (severity) {
-      case 'INFO': return 'LOW';
-      case 'WARNING': return 'MEDIUM';
-      case 'CRITICAL': return 'HIGH';
-      case 'EMERGENCY': return 'CRITICAL';
-      default: return 'MEDIUM';
+  private mapSeverityToBusinessImpact(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {switch (severity) {case 'INFO': return 'LOW';case 'WARNING': return 'MEDIUM';case 'CRITICAL': return 'HIGH';case 'EMERGENCY': return 'CRITICAL';default: return 'MEDIUM';
     }
   }
 
@@ -1268,23 +1036,15 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     userId: string,
     justification: string
   ): Promise<{ approved: boolean; reason: string; approvedConfig?: Partial<HealthCheckConfig> }> {
-    const operationId = `health_config${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
-    try {
-      const validationRequest: ParlantValidationRequest = {
-        functionName: `HealthService.ConfigChange.${component}`,
-        functionParams: {
-          component,
+    const operationId = `health_config${Date.now()}${Math.random().toString(36).substring(7)}`;try {const validationRequest: ParlantValidationRequest = {
+        functionName: `HealthService.ConfigChange.${component}`,functionParams: {component,
           newConfig,
           userId,
           justification,
         },
-        actionDescription: `Modify health check configuration for ${component}: ${justification}`,
-        context: {
-          userId,
+        actionDescription: `Modify health check configuration for ${component}: ${justification}`,context: {userId,
           sessionId: `config_session${Date.now()}`,
-          agentRole: 'CONFIG_MANAGER',
-          securityLevel: 'HIGH',
+          agentRole: 'CONFIG_MANAGER',securityLevel: 'HIGH',
           conversationHistory: [],
           metadata: {
             operationId,
@@ -1293,7 +1053,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
             criticalInfrastructure: true,
           },
         },
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel._HIGH,
         operationId,
       };
 

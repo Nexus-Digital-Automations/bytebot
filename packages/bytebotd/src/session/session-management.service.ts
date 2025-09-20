@@ -16,42 +16,15 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
-import * as crypto from 'crypto';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
-
-// ===== SESSION MANAGEMENT ENUMS =====
-
-/**
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import { v4 as uuidv4 } from 'uuid';import * as crypto from 'crypto';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';// ===== SESSION MANAGEMENT ENUMS =====/**
  * Session state enumeration for comprehensive lifecycle tracking
  */
 export enum SessionState {
-  INITIALIZING = 'INITIALIZING',
-  ACTIVE = 'ACTIVE',
-  IDLE = 'IDLE',
-  SUSPENDED = 'SUSPENDED',
-  EXPIRED = 'EXPIRED',
-  TERMINATED = 'TERMINATED',
-  EMERGENCY_TERMINATED = 'EMERGENCY_TERMINATED'
-}
-
-/**
+  INITIALIZING = 'INITIALIZING',ACTIVE = 'ACTIVE',IDLE = 'IDLE',SUSPENDED = 'SUSPENDED',EXPIRED = 'EXPIRED',TERMINATED = 'TERMINATED',EMERGENCY_TERMINATED = 'EMERGENCY_TERMINATED'}/**
  * Device type classification for multi-device support
  */
 export enum DeviceType {
-  DESKTOP = 'DESKTOP',
-  MOBILE = 'MOBILE',
-  TABLET = 'TABLET',
-  API_CLIENT = 'API_CLIENT',
-  BROWSER_EXTENSION = 'BROWSER_EXTENSION',
-  UNKNOWN = 'UNKNOWN'
-}
-
-/**
+  DESKTOP = 'DESKTOP',MOBILE = 'MOBILE',TABLET = 'TABLET',API_CLIENT = 'API_CLIENT',BROWSER_EXTENSION = 'BROWSER_EXTENSION',UNKNOWN = 'UNKNOWN'}/**
  * Session priority levels for conflict resolution
  */
 export enum SessionPriority {
@@ -66,14 +39,7 @@ export enum SessionPriority {
  * Conflict resolution strategies for concurrent sessions
  */
 export enum ConflictResolutionStrategy {
-  TERMINATE_OLDEST = 'TERMINATE_OLDEST',
-  TERMINATE_NEWEST = 'TERMINATE_NEWEST',
-  MAINTAIN_ALL = 'MAINTAIN_ALL',
-  USER_CHOICE = 'USER_CHOICE',
-  PRIORITY_BASED = 'PRIORITY_BASED'
-}
-
-// ===== SESSION INTERFACES =====
+  TERMINATE_OLDEST = 'TERMINATE_OLDEST',TERMINATE_NEWEST = 'TERMINATE_NEWEST',MAINTAIN_ALL = 'MAINTAIN_ALL',USER_CHOICE = 'USER_CHOICE',PRIORITY_BASED = 'PRIORITY_BASED'}// ===== SESSION INTERFACES =====
 
 /**
  * Device fingerprint for unique device identification
@@ -148,10 +114,7 @@ export interface SessionManagementConfig {
   readonly sessionCleanupIntervalMs: number;
   readonly sessionPersistenceEnabled: boolean;
   readonly crossDeviceSyncEnabled: boolean;
-  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';
-}
-
-/**
+  readonly auditLevel: 'basic' | 'detailed' | 'comprehensive';}/**
  * Session conflict information
  */
 export interface SessionConflict {
@@ -159,9 +122,7 @@ export interface SessionConflict {
   readonly userId: string;
   readonly existingSessions: SessionMetadata[];
   readonly newSessionRequest: Partial<SessionMetadata>;
-  readonly conflictType: 'max_sessions_exceeded' | 'duplicate_device' | 'security_violation';
-  readonly recommendedAction: ConflictResolutionStrategy;
-  readonly detectedAt: Date;
+  readonly conflictType: 'max_sessions_exceeded' | 'duplicate_device' | 'security_violation';readonly recommendedAction: ConflictResolutionStrategy;readonly detectedAt: Date;
 }
 
 /**
@@ -214,23 +175,8 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
   ) {
     // Initialize session management configuration
     this.config = {
-      redisClusterUrl: this.configService.get<string>('SESSION_REDIS_URL', 'redis://localhost:6379'),
-      sessionTimeoutMs: this.configService.get<number>('SESSION_TIMEOUT_MS', 3600000), // 1 hour
-      maxConcurrentSessions: this.configService.get<number>('MAX_CONCURRENT_SESSIONS', 10),
-      conflictResolutionStrategy: this.configService.get<ConflictResolutionStrategy>(
-        'CONFLICT_RESOLUTION_STRATEGY',
-        ConflictResolutionStrategy.PRIORITY_BASED
-      ),
-      enableDeviceFingerprinting: this.configService.get<boolean>('ENABLE_DEVICE_FINGERPRINTING', true),
-      enableSessionEncryption: this.configService.get<boolean>('ENABLE_SESSION_ENCRYPTION', true),
-      enableThreatDetection: this.configService.get<boolean>('ENABLE_THREAT_DETECTION', true),
-      sessionCleanupIntervalMs: this.configService.get<number>('SESSION_CLEANUP_INTERVAL_MS', 300000), // 5 minutes
-      sessionPersistenceEnabled: this.configService.get<boolean>('SESSION_PERSISTENCE_ENABLED', true),
-      crossDeviceSyncEnabled: this.configService.get<boolean>('CROSS_DEVICE_SYNC_ENABLED', true),
-      auditLevel: this.configService.get<'basic' | 'detailed' | 'comprehensive'>('SESSION_AUDIT_LEVEL', 'comprehensive')
-    };
-
-    // Initialize Redis client with cluster support
+      redisClusterUrl: this.configService.get<string>('SESSION_REDIS_URL', 'redis://localhost:6379'),sessionTimeoutMs: this.configService.get<number>('SESSION_TIMEOUT_MS', 3600000), // 1 hourmaxConcurrentSessions: this.configService.get<number>('MAX_CONCURRENT_SESSIONS', 10),conflictResolutionStrategy: this.configService.get<ConflictResolutionStrategy>('CONFLICT_RESOLUTION_STRATEGY',ConflictResolutionStrategy.PRIORITY_BASED),
+      enableDeviceFingerprinting: this.configService.get<boolean>('ENABLE_DEVICE_FINGERPRINTING', true),enableSessionEncryption: this.configService.get<boolean>('ENABLE_SESSION_ENCRYPTION', true),enableThreatDetection: this.configService.get<boolean>('ENABLE_THREAT_DETECTION', true),sessionCleanupIntervalMs: this.configService.get<number>('SESSION_CLEANUP_INTERVAL_MS', 300000), // 5 minutessessionPersistenceEnabled: this.configService.get<boolean>('SESSION_PERSISTENCE_ENABLED', true),crossDeviceSyncEnabled: this.configService.get<boolean>('CROSS_DEVICE_SYNC_ENABLED', true),auditLevel: this.configService.get<'basic' | 'detailed' | 'comprehensive'>('SESSION_AUDIT_LEVEL', 'comprehensive')};// Initialize Redis client with cluster support
     this.redisClient = new Redis(this.config.redisClusterUrl, {
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
@@ -251,10 +197,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
     try {
       // Connect to Redis cluster
       await this.redisClient.connect();
-      this.logger.log('Connected to Redis cluster for session management');
-
-      // Start session cleanup interval
-      this.startSessionCleanup();
+      this.logger.log('Connected to Redis cluster for session management');// Start session cleanup intervalthis.startSessionCleanup();
 
       // Initialize session monitoring
       this.initializeSessionMonitoring();
@@ -264,11 +207,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
         await this.loadPersistedSessions();
       }
 
-      this.logger.log('Session Management Service fully initialized and ready');
-    } catch (error) {
-      this.logger.error('Failed to initialize Session Management Service', error);
-      throw error;
-    }
+      this.logger.log('Session Management Service fully initialized and ready');} catch (error) {this.logger.error('Failed to initialize Session Management Service', error);throw error;}
   }
 
   /**
@@ -291,11 +230,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
       // Disconnect from Redis
       await this.redisClient.disconnect();
 
-      this.logger.log('Session Management Service shutdown completed');
-    } catch (error) {
-      this.logger.error('Error during Session Management Service shutdown', error);
-    }
-  }
+      this.logger.log('Session Management Service shutdown completed');} catch (error) {this.logger.error('Error during Session Management Service shutdown', error);}}
 
   // ===== DEVICE FINGERPRINTING =====
 
@@ -308,16 +243,9 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
     try {
       const fingerprint: DeviceFingerprint = {
         deviceId: deviceInfo.deviceId || uuidv4(),
-        userAgent: deviceInfo.userAgent || 'unknown',
-        screenResolution: deviceInfo.screenResolution || 'unknown',
-        timezone: deviceInfo.timezone || 'UTC',
-        language: deviceInfo.language || 'en-US',
-        platform: deviceInfo.platform || 'unknown',
-        hardwareConcurrency: deviceInfo.hardwareConcurrency || 0,
-        cookieEnabled: deviceInfo.cookieEnabled ?? true,
+        userAgent: deviceInfo.userAgent || 'unknown',screenResolution: deviceInfo.screenResolution || 'unknown',timezone: deviceInfo.timezone || 'UTC',language: deviceInfo.language || 'en-US',platform: deviceInfo.platform || 'unknown',hardwareConcurrency: deviceInfo.hardwareConcurrency || 0,cookieEnabled: deviceInfo.cookieEnabled ?? true,
         doNotTrack: deviceInfo.doNotTrack ?? false,
-        ipAddress: deviceInfo.ipAddress || '127.0.0.1',
-        hash: '',
+        ipAddress: deviceInfo.ipAddress || '127.0.0.1',hash: '',
         createdAt: new Date(),
         lastSeen: new Date()
       };
@@ -353,17 +281,13 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
       this.logger.debug(`Device fingerprint generated: ${fingerprint.deviceId}`);
       return fingerprint;
     } catch (error) {
-      this.logger.error('Failed to generate device fingerprint', error);
-      throw error;
-    }
+      this.logger.error('Failed to generate device fingerprint', error);throw error;}
   }
 
   /**
    * Generate secure hash for device fingerprint
    */
-  private generateFingerprintHash(fingerprint: Omit<DeviceFingerprint, 'hash'>): string {
-    const data = [
-      fingerprint.userAgent,
+  private generateFingerprintHash(fingerprint: Omit<DeviceFingerprint, 'hash'>): string {const data = [fingerprint.userAgent,
       fingerprint.screenResolution,
       fingerprint.timezone,
       fingerprint.language,
@@ -371,26 +295,13 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
       fingerprint.hardwareConcurrency.toString(),
       fingerprint.cookieEnabled.toString(),
       fingerprint.doNotTrack.toString()
-    ].join('|');
-
-    return crypto.createHash('sha256').update(data).digest('hex');
-  }
-
-  /**
+    ].join('|');return crypto.createHash('sha256').update(data).digest('hex');}/**
    * Classify device type based on user agent and fingerprint
    */
   private classifyDeviceType(deviceFingerprint: DeviceFingerprint): DeviceType {
     const userAgent = deviceFingerprint.userAgent.toLowerCase();
 
-    if (userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone')) {
-      return DeviceType.MOBILE;
-    } else if (userAgent.includes('tablet') || userAgent.includes('ipad')) {
-      return DeviceType.TABLET;
-    } else if (userAgent.includes('postman') || userAgent.includes('curl') || userAgent.includes('api')) {
-      return DeviceType.API_CLIENT;
-    } else if (userAgent.includes('extension')) {
-      return DeviceType.BROWSER_EXTENSION;
-    } else if (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari')) {
+    if (userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone')) {return DeviceType.MOBILE;} else if (userAgent.includes('tablet') || userAgent.includes('ipad')) {return DeviceType.TABLET;} else if (userAgent.includes('postman') || userAgent.includes('curl') || userAgent.includes('api')) {return DeviceType.API_CLIENT;} else if (userAgent.includes('extension')) {return DeviceType.BROWSER_EXTENSION;} else if (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari')) {
       return DeviceType.DESKTOP;
     }
 
@@ -411,10 +322,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Creating session for user: ${userId}`);
-
-      // Generate device fingerprint
-      const deviceFingerprint = await this.generateDeviceFingerprint(deviceInfo);
+      this.logger.debug(`Creating session for user: ${userId}`);// Generate device fingerprintconst deviceFingerprint = await this.generateDeviceFingerprint(deviceInfo);
 
       // Check for session conflicts
       const conflict = await this.checkSessionConflicts(userId, deviceFingerprint);
@@ -449,9 +357,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
 
       if (this.config.sessionPersistenceEnabled) {
         await this.redisClient.setex(
-          `session:${sessionMetadata.sessionId}`,
-          Math.ceil(this.config.sessionTimeoutMs / 1000),
-          JSON.stringify(sessionMetadata)
+          `session:${sessionMetadata.sessionId}`,Math.ceil(this.config.sessionTimeoutMs / 1000),JSON.stringify(sessionMetadata)
         );
 
         // Add to user session index
@@ -482,12 +388,8 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
         metadata: { sessionMetadata }
       });
 
-      this.logger.log(`Session created successfully: ${sessionMetadata.sessionId} for user: ${userId}`);
-      return sessionMetadata;
-    } catch (error) {
-      this.logger.error(`Failed to create session for user: ${userId}`, error);
-      throw error;
-    }
+      this.logger.log(`Session created successfully: ${sessionMetadata.sessionId} for user: ${userId}`);return sessionMetadata;} catch (error) {
+      this.logger.error(`Failed to create session for user: ${userId}`, error);throw error;}
   }
 
   /**
@@ -497,14 +399,8 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
     try {
       const session = await this.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      if (session.sessionState !== SessionState.ACTIVE) {
-        throw new Error(`Cannot update activity for session in state: ${session.sessionState}`);
-      }
-
-      // Update session timestamps
+        throw new Error(`Session not found: ${sessionId}`);}if (session.sessionState !== SessionState.ACTIVE) {
+        throw new Error(`Cannot update activity for session in state: ${session.sessionState}`);}// Update session timestamps
       const updatedSession: SessionMetadata = {
         ...session,
         lastActivity: new Date(),
@@ -525,9 +421,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
       // Update analytics
       this.updateSessionAnalytics(sessionId, 'activity_update');
 
-      this.logger.debug(`Session activity updated: ${sessionId}`);
-    } catch (error) {
-      this.logger.error(`Failed to update session activity: ${sessionId}`, error);
+      this.logger.debug(`Session activity updated: ${sessionId}`);} catch (error) {this.logger.error(`Failed to update session activity: ${sessionId}`, error);
       throw error;
     }
   }
@@ -577,9 +471,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
         this.logger.log(`Session cleanup completed: ${cleanedCount} sessions cleaned in ${Date.now() - startTime}ms`);
       }
     } catch (error) {
-      this.logger.error('Failed to cleanup expired sessions', error);
-    }
-  }
+      this.logger.error('Failed to cleanup expired sessions', error);}}
 
   /**
    * Initialize session monitoring and event handling
@@ -598,10 +490,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
       this.logger.warn(`Session conflict detected: ${conflict.conflictId}`);
     });
 
-    this.logger.log('Session monitoring initialized');
-  }
-
-  /**
+    this.logger.log('Session monitoring initialized');}/**
    * Load persisted sessions on startup
    */
   private async loadPersistedSessions(): Promise<void> {
@@ -625,9 +514,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
             }
           }
         } catch (error) {
-          this.logger.warn(`Failed to load session from key: ${key}`, error);
-        }
-      }
+          this.logger.warn(`Failed to load session from key: ${key}`, error);}}
 
       this.logger.log(`Loaded ${loadedCount} persisted sessions from Redis`);
     } catch (error) {
@@ -646,22 +533,16 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
         if (session.sessionState === SessionState.ACTIVE && new Date(session.expiresAt) > new Date()) {
           try {
             await this.redisClient.setex(
-              `session:${sessionId}`,
-              Math.ceil((new Date(session.expiresAt).getTime() - Date.now()) / 1000),
-              JSON.stringify(session)
+              `session:${sessionId}`,Math.ceil((new Date(session.expiresAt).getTime() - Date.now()) / 1000),JSON.stringify(session)
             );
             persistedCount++;
           } catch (error) {
-            this.logger.warn(`Failed to persist session: ${sessionId}`, error);
-          }
-        }
+            this.logger.warn(`Failed to persist session: ${sessionId}`, error);}}
       }
 
       this.logger.log(`Persisted ${persistedCount} active sessions to Redis`);
     } catch (error) {
-      this.logger.error('Failed to persist active sessions', error);
-    }
-  }
+      this.logger.error('Failed to persist active sessions', error);}}
 
   // ===== PLACEHOLDER METHODS FOR FULL IMPLEMENTATION =====
 
@@ -694,9 +575,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
     if (session) {
       const updatedSession = { ...session, sessionState: SessionState.TERMINATED };
       this.sessionCache.set(sessionId, updatedSession);
-      this.eventEmitter.emit('session.terminated', sessionId, reason);
-    }
-  }
+      this.eventEmitter.emit('session.terminated', sessionId, reason);}}
 
   /**
    * Check for session conflicts
@@ -711,10 +590,7 @@ export class SessionManagementService implements OnModuleInit, OnApplicationShut
    */
   private async resolveSessionConflict(conflict: SessionConflict): Promise<void> {
     // Implementation placeholder
-    this.eventEmitter.emit('session.conflict', conflict);
-  }
-
-  /**
+    this.eventEmitter.emit('session.conflict', conflict);}/**
    * Create session security context
    */
   private async createSessionSecurityContext(deviceFingerprint: DeviceFingerprint): Promise<SessionSecurityContext> {

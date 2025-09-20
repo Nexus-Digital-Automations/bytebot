@@ -115,9 +115,7 @@ const mockUIOhook = {
   listeners: jest.fn(),
 };
 
-jest.mock('uiohook-napi', () => ({
-  uIOhook: mockUIOhook,
-  UiohookKey: {
+jest.mock('uiohook-napi', () => ({uIOhook: mockUIOhook,UiohookKey: {
     A: 65,
     B: 66,
     C: 67,
@@ -175,13 +173,7 @@ jest.mock('uiohook-napi', () => ({
   Button: MouseButton,
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { InputTrackingService } from '../input-tracking.service';
-import { InputTrackingGateway } from '../input-tracking.gateway';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-import {
-  ComputerAction as _ComputerAction,
+import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { InputTrackingService } from '../input-tracking.service';import { InputTrackingGateway } from '../input-tracking.gateway';import { ComputerUseService } from '../../computer-use/computer-use.service';import {ComputerAction as _ComputerAction,
   ClickMouseAction as _ClickMouseAction,
   DragMouseAction as _DragMouseAction,
   ScrollAction as _ScrollAction,
@@ -189,10 +181,7 @@ import {
   TypeTextAction as _TypeTextAction,
   MoveMouseAction as _MoveMouseAction,
   PressMouseAction as _PressMouseAction,
-} from '@bytebot/shared';
-
-// Mock implementations
-const createMockLogger = () => ({
+} from '@bytebot/shared';// Mock implementationsconst createMockLogger = () => ({
   log: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
@@ -203,24 +192,15 @@ const createMockLogger = () => ({
 const mockComputerUseService = {
   action: jest.fn().mockResolvedValue({
     success: true,
-    message: 'Screenshot captured',
-    image: 'base64-mock-screenshot-data',
-    metadata: {
-      width: 1920,
+    message: 'Screenshot captured',image: 'base64-mock-screenshot-data',metadata: {width: 1920,
       height: 1080,
       captureTime: new Date(),
-      operationId: 'screenshot-123',
-    },
-  }),
+      operationId: 'screenshot-123',},}),
   screenshot: jest.fn().mockResolvedValue({
-    image: 'base64-mock-screenshot-data',
-    metadata: {
-      width: 1920,
+    image: 'base64-mock-screenshot-data',metadata: {width: 1920,
       height: 1080,
       captureTime: new Date(),
-      operationId: 'screenshot-123',
-    },
-  }),
+      operationId: 'screenshot-123',},}),
 };
 
 const mockInputTrackingGateway = {
@@ -234,16 +214,12 @@ const mockInputTrackingGateway = {
   leaveRoom: jest.fn(),
   getClientRooms: (
     jest.fn() as jest.MockedFunction<() => string[]>
-  ).mockReturnValue(['desktop-session-1']),
-  emitAction: jest.fn(),
-  emitScreenshotAndAction: jest.fn(),
+  ).mockReturnValue(['desktop-session-1']),emitAction: jest.fn(),emitScreenshotAndAction: jest.fn(),
   handleConnection: jest.fn(),
   handleDisconnect: jest.fn(),
 };
 
-describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
-  let service: InputTrackingService;
-  let gateway: InputTrackingGateway;
+describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {let service: InputTrackingService;let gateway: InputTrackingGateway;
   let computerUseService: ComputerUseService;
   let testModule: TestingModule;
 
@@ -269,14 +245,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
   ): UiohookKeyboardEvent => ({
     type: EventType.EVENT_KEY_PRESSED,
     time: Date.now(),
-    keycode: 65, // 'A'
-    altKey: false,
-    ctrlKey: false,
+    keycode: 65, // 'A'altKey: false,ctrlKey: false,
     metaKey: false,
     shiftKey: false,
-    char: 'a',
-    rawcode: 65,
-    ...overrides,
+    char: 'a',rawcode: 65,...overrides,
   });
 
   const createWheelEvent = (
@@ -299,13 +271,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
   const simulateHighFrequencyInput = (
     eventCount: number,
-    eventType: 'mouse' | 'keyboard' = 'mouse',
-  ) => {
-    const events = [];
+    eventType: 'mouse' | 'keyboard' = 'mouse',) => {const events = [];
     for (let i = 0; i < eventCount; i++) {
-      if (eventType === 'mouse') {
-        events.push(
-          createMouseEvent({
+      if (eventType === 'mouse') {events.push(createMouseEvent({
             x: i % 1920,
             y: (i * 2) % 1080,
             time: Date.now() + i,
@@ -365,95 +333,44 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     }
   });
 
-  describe('Service Lifecycle Management', () => {
-    it('should initialize and start tracking properly', () => {
-      expect(service['isTracking']).toBe(false);
-
-      service.startTracking();
-
-      expect(service['isTracking']).toBe(true);
-      expect(mockUIOhook.start).toHaveBeenCalled();
+  describe('Service Lifecycle Management', () => {it('should initialize and start tracking properly', () => {expect(service['isTracking']).toBe(false);service.startTracking();expect(service['isTracking']).toBe(true);expect(mockUIOhook.start).toHaveBeenCalled();expect(mockUIOhook.on).toHaveBeenCalledWith(
+        'mouseclick',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'mouseclick',
-        expect.any(Function),
-      );
+        'mousemove',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'mousemove',
-        expect.any(Function),
-      );
+        'mousedown',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'mousedown',
-        expect.any(Function),
-      );
+        'mouseup',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'mouseup',
-        expect.any(Function),
-      );
+        'wheel',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'wheel',
-        expect.any(Function),
-      );
+        'keydown',expect.any(Function),);
       expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'keydown',
-        expect.any(Function),
-      );
-      expect(mockUIOhook.on).toHaveBeenCalledWith(
-        'keyup',
-        expect.any(Function),
-      );
+        'keyup',expect.any(Function),);
     });
 
-    it('should stop tracking and clean up resources properly', () => {
-      service.startTracking();
-      expect(service['isTracking']).toBe(true);
-
-      service.stopTracking();
-
-      expect(service['isTracking']).toBe(false);
-      expect(mockUIOhook.stop).toHaveBeenCalled();
-      expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
+    it('should stop tracking and clean up resources properly', () => {service.startTracking();expect(service['isTracking']).toBe(true);service.stopTracking();expect(service['isTracking']).toBe(false);expect(mockUIOhook.stop).toHaveBeenCalled();expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
     });
 
-    it('should handle multiple start/stop cycles gracefully', () => {
-      // Multiple starts should not cause issues
-      service.startTracking();
+    it('should handle multiple start/stop cycles gracefully', () => {// Multiple starts should not cause issuesservice.startTracking();
       service.startTracking();
       service.startTracking();
 
-      expect(service['isTracking']).toBe(true);
-      expect(mockUIOhook.start).toHaveBeenCalledTimes(1); // Should not start multiple times
-
-      // Multiple stops should not cause issues
+      expect(service['isTracking']).toBe(true);expect(mockUIOhook.start).toHaveBeenCalledTimes(1); // Should not start multiple times// Multiple stops should not cause issues
       service.stopTracking();
       service.stopTracking();
       service.stopTracking();
 
-      expect(service['isTracking']).toBe(false);
-      expect(mockUIOhook.stop).toHaveBeenCalledTimes(1);
-    });
+      expect(service['isTracking']).toBe(false);expect(mockUIOhook.stop).toHaveBeenCalledTimes(1);});
 
-    it('should handle module destruction gracefully', () => {
-      service.startTracking();
-      expect(service['isTracking']).toBe(true);
-
-      service.onModuleDestroy();
-
-      expect(service['isTracking']).toBe(false);
-      expect(mockUIOhook.stop).toHaveBeenCalled();
-      expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
+    it('should handle module destruction gracefully', () => {service.startTracking();expect(service['isTracking']).toBe(true);service.onModuleDestroy();expect(service['isTracking']).toBe(false);expect(mockUIOhook.stop).toHaveBeenCalled();expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
     });
   });
 
-  describe('Real-time Mouse Event Processing', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Real-time Mouse Event Processing', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should process mouse click events with debouncing', async () => {
-      const clickHandler = mockEventListeners[
-        'mouseclick'
-      ] as MouseEventHandler;
-      expect(clickHandler).toBeDefined();
+    it('should process mouse click events with debouncing', async () => {const clickHandler = mockEventListeners['mouseclick'] as MouseEventHandler;expect(clickHandler).toBeDefined();
 
       // Generate rapid click events
       const clickEvents = [
@@ -490,11 +407,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.broadcastActionEvent).toHaveBeenCalled();
     });
 
-    it('should track mouse movement with coordinate accuracy', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-      expect(moveHandler).toBeDefined();
-
-      const moveEvents = [
+    it('should track mouse movement with coordinate accuracy', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;expect(moveHandler).toBeDefined();const moveEvents = [
         createMouseEvent({ type: EventType.EVENT_MOUSE_MOVED, x: 0, y: 0 }),
         createMouseEvent({ type: EventType.EVENT_MOUSE_MOVED, x: 100, y: 100 }),
         createMouseEvent({
@@ -514,22 +427,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify movement events were processed
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'mouse_move',
-          coordinates: expect.objectContaining({
-            x: expect.any(Number) as unknown as number,
+          type: 'mouse_move',coordinates: expect.objectContaining({x: expect.any(Number) as unknown as number,
             y: expect.any(Number) as unknown as number,
           }) as unknown,
         }),
       );
     });
 
-    it('should handle mouse drag operations with state management', () => {
-      const downHandler = mockEventListeners['mousedown'] as MouseEventHandler;
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-      const upHandler = mockEventListeners['mouseup'] as MouseEventHandler;
-
-      // Start drag
-      const startEvent = createMouseEvent({
+    it('should handle mouse drag operations with state management', () => {const downHandler = mockEventListeners['mousedown'] as MouseEventHandler;const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;const upHandler = mockEventListeners['mouseup'] as MouseEventHandler;// Start dragconst startEvent = createMouseEvent({
         type: EventType.EVENT_MOUSE_PRESSED,
         x: 100,
         y: 100,
@@ -578,18 +483,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify drag action was created and broadcasted
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'drag_mouse',
-          startCoordinates: { x: 100, y: 100 },
-          endCoordinates: { x: 250, y: 250 },
+          action: 'drag_mouse',startCoordinates: { x: 100, y: 100 },endCoordinates: { x: 250, y: 250 },
         }),
       );
     });
 
-    it('should process mouse wheel events with direction and scroll amount', async () => {
-      const wheelHandler = mockEventListeners['wheel'] as WheelEventHandler;
-      expect(wheelHandler).toBeDefined();
-
-      const wheelEvents = [
+    it('should process mouse wheel events with direction and scroll amount', async () => {const wheelHandler = mockEventListeners['wheel'] as WheelEventHandler;expect(wheelHandler).toBeDefined();const wheelEvents = [
         // Vertical scroll down
         createWheelEvent({
           direction: WheelDirection.VERTICAL,
@@ -625,16 +524,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify scroll actions were processed
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'scroll',
-        }),
-      );
+          action: 'scroll',}),);
     });
 
-    it('should handle multi-monitor coordinate mapping', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Test coordinates across multiple monitors
-      const multiMonitorEvents = [
+    it('should handle multi-monitor coordinate mapping', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Test coordinates across multiple monitorsconst multiMonitorEvents = [
         // Primary monitor
         createMouseEvent({ x: 960, y: 540 }),
         // Secondary monitor (right)
@@ -656,30 +549,17 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
   });
 
-  describe('Advanced Keyboard Event Processing', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Advanced Keyboard Event Processing', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should process text input with buffering and debouncing', async () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
+    it('should process text input with buffering and debouncing', async () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
 
       // Simulate typing "Hello World"
-      const text = 'Hello World';
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const keycode = char === ' ' ? 32 : (char?.charCodeAt(0) ?? 0);
-
-        if (keydownHandler) {
-          keydownHandler(
+      const text = 'Hello World';for (let i = 0; i < text.length; i++) {const char = text[i];
+        const keycode = char === ' ' ? 32 : (char?.charCodeAt(0) ?? 0);if (keydownHandler) {keydownHandler(
             createKeyboardEvent({
               keycode,
-              char: char === ' ' ? ' ' : char?.toLowerCase(),
-              type: EventType.EVENT_KEY_PRESSED,
-            }),
+              char: char === ' ' ? ' ' : char?.toLowerCase(),type: EventType.EVENT_KEY_PRESSED,}),
           );
         }
 
@@ -687,9 +567,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           keyupHandler(
             createKeyboardEvent({
               keycode,
-              char: char === ' ' ? ' ' : char?.toLowerCase(),
-              type: EventType.EVENT_KEY_RELEASED,
-            }),
+              char: char === ' ' ? ' ' : char?.toLowerCase(),type: EventType.EVENT_KEY_RELEASED,}),
           );
         }
       }
@@ -700,27 +578,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify text was buffered and flushed as type_text action
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'type_text',
-          text: expect.stringContaining('hello world') as unknown,
-        }),
-      );
+          action: 'type_text',text: expect.stringContaining('hello world') as unknown,}),);
     });
 
-    it('should handle modifier key combinations accurately', async () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
-
-      // Test various modifier combinations
-      const shortcuts = [
+    it('should handle modifier key combinations accurately', async () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;// Test various modifier combinationsconst shortcuts = [
         // Ctrl+C (Copy)
         [
           { keycode: 17, ctrlKey: true, char: undefined }, // Ctrl down
-          { keycode: 67, ctrlKey: true, char: 'c' }, // C down
-          { keycode: 67, ctrlKey: true, char: 'c' }, // C up
-          { keycode: 17, ctrlKey: false, char: undefined }, // Ctrl up
-        ],
+          { keycode: 67, ctrlKey: true, char: 'c' }, // C down{ keycode: 67, ctrlKey: true, char: 'c' }, // C up{ keycode: 17, ctrlKey: false, char: undefined }, // Ctrl up],
         // Alt+Tab (Switch apps)
         [
           { keycode: 18, altKey: true, char: undefined }, // Alt down
@@ -758,22 +623,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify shortcuts were processed as press_keys actions
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'press_keys',
-          keys: expect.any(Array) as unknown,
-        }),
+          action: 'press_keys',keys: expect.any(Array) as unknown,}),
       );
     });
 
-    it('should prevent key repeat spam and handle held keys', async () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Simulate holding a key (rapid repeated events)
-      const heldKey = createKeyboardEvent({ keycode: 65, char: 'a' }); // 'A' key
-
-      // Send multiple rapid keydown events (simulating key repeat)
-      for (let i = 0; i < 20; i++) {
+    it('should prevent key repeat spam and handle held keys', async () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;// Simulate holding a key (rapid repeated events)
+      const heldKey = createKeyboardEvent({ keycode: 65, char: 'a' }); // 'A' key// Send multiple rapid keydown events (simulating key repeat)for (let i = 0; i < 20; i++) {
         if (keydownHandler) {
           keydownHandler({ ...heldKey, time: Date.now() + i });
         }
@@ -781,26 +636,8 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       }
 
       // Verify key repeat was suppressed (should only trigger once)
-      expect(service['pressedKeys'].has(65)).toBe(true);
-    });
-
-    it('should handle international keyboard layouts and special characters', async () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
-
-      // International characters and symbols
-      const internationalChars = [
-        { keycode: 192, char: 'à' }, // French
-        { keycode: 209, char: 'ñ' }, // Spanish
-        { keycode: 196, char: 'ä' }, // German
-        { keycode: 231, char: 'ç' }, // Portuguese
-        { keycode: 8364, char: '€' }, // Euro symbol
-        { keycode: 165, char: '¥' }, // Yen symbol
-      ];
-
-      for (const charData of internationalChars) {
+      expect(service['pressedKeys'].has(65)).toBe(true);});it('should handle international keyboard layouts and special characters', async () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;// International characters and symbolsconst internationalChars = [
+        { keycode: 192, char: 'à' }, // French{ keycode: 209, char: 'ñ' }, // Spanish{ keycode: 196, char: 'ä' }, // German{ keycode: 231, char: 'ç' }, // Portuguese{ keycode: 8364, char: '€' }, // Euro symbol{ keycode: 165, char: '¥' }, // Yen symbol];for (const charData of internationalChars) {
         if (keydownHandler) {
           keydownHandler(createKeyboardEvent(charData));
         }
@@ -815,27 +652,17 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Verify international characters were processed
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'type_text',
-          text: expect.stringMatching(/[àñäç€¥]/) as unknown,
-        }),
+          action: 'type_text',text: expect.stringMatching(/[àñäç€¥]/) as unknown,}),
       );
     });
   });
 
-  describe('Performance Testing and Optimization', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Performance Testing and Optimization', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should handle high-frequency mouse events without performance degradation', async () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-      const startTime = Date.now();
-      const highFrequencyEvents = await simulateHighFrequencyInput(
+    it('should handle high-frequency mouse events without performance degradation', async () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;const startTime = Date.now();const highFrequencyEvents = await simulateHighFrequencyInput(
         1000,
-        'mouse',
-      );
-
-      // Process all events
+        'mouse',);// Process all events
       for (const event of highFrequencyEvents) {
         if (moveHandler) {
           moveHandler(event as never);
@@ -852,13 +679,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(memoryUsage).toBeLessThan(100); // Should stay under 100MB
     });
 
-    it('should handle concurrent input streams efficiently', async () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Create concurrent input streams
+    it('should handle concurrent input streams efficiently', async () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;// Create concurrent input streams
       const mousePromises = [];
       const keyboardPromises = [];
 
@@ -894,18 +715,11 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(totalTime).toBeLessThan(2000);
     });
 
-    it('should optimize memory usage with proper buffer management', async () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-      const initialMemory = process.memoryUsage().heapUsed;
+    it('should optimize memory usage with proper buffer management', async () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;const initialMemory = process.memoryUsage().heapUsed;
 
       // Fill typing buffer multiple times
       for (let cycle = 0; cycle < 10; cycle++) {
-        const longText = 'A'.repeat(1000);
-
-        for (const char of longText) {
-          if (keydownHandler) {
+        const longText = 'A'.repeat(1000);for (const char of longText) {if (keydownHandler) {
             keydownHandler(
               createKeyboardEvent({
                 keycode: char.charCodeAt(0),
@@ -926,19 +740,11 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(memoryIncrease).toBeLessThan(10);
 
       // Verify buffers are properly cleared
-      expect(service['typingBuffer'].length).toBe(0);
-    });
-
-    it('should maintain responsiveness under sustained load', async () => {
-      const startTime = Date.now();
-      let eventsProcessed = 0;
+      expect(service['typingBuffer'].length).toBe(0);});it('should maintain responsiveness under sustained load', async () => {const startTime = Date.now();let eventsProcessed = 0;
 
       // Create sustained load for 2 seconds
       const endTime = startTime + 2000;
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      while (Date.now() < endTime) {
-        if (moveHandler) {
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;while (Date.now() < endTime) {if (moveHandler) {
           moveHandler(
             createMouseEvent({
               x: Math.random() * 1920,
@@ -956,38 +762,23 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(eventsProcessed).toBeGreaterThan(100);
 
       // Service should still be responsive
-      expect(service['isTracking']).toBe(true);
-    });
-  });
+      expect(service['isTracking']).toBe(true);});});
 
-  describe('WebSocket Integration and Broadcasting', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('WebSocket Integration and Broadcasting', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should broadcast input events to connected clients', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      const mouseEvent = createMouseEvent({ x: 300, y: 400 });
-      if (moveHandler) {
+    it('should broadcast input events to connected clients', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;const mouseEvent = createMouseEvent({ x: 300, y: 400 });if (moveHandler) {
         moveHandler(mouseEvent);
       }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'mouse_move',
-          coordinates: { x: 300, y: 400 },
-          timestamp: expect.any(Number) as number,
+          type: 'mouse_move',coordinates: { x: 300, y: 400 },timestamp: expect.any(Number) as number,
         }),
       );
     });
 
-    it('should broadcast action events with proper formatting', async () => {
-      const clickHandler = mockEventListeners[
-        'mouseclick'
-      ] as MouseEventHandler;
-
-      const clickEvent = createMouseEvent({
+    it('should broadcast action events with proper formatting', async () => {const clickHandler = mockEventListeners['mouseclick'] as MouseEventHandler;const clickEvent = createMouseEvent({
         type: EventType.EVENT_MOUSE_CLICKED,
         x: 150,
         y: 250,
@@ -1002,18 +793,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'click_mouse',
-          coordinates: { x: 150, y: 250 },
-          button: 'left',
-        }),
-      );
+          action: 'click_mouse',coordinates: { x: 150, y: 250 },button: 'left',}),);
     });
 
-    it('should handle WebSocket connection management during high activity', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Simulate high activity
-      for (let i = 0; i < 50; i++) {
+    it('should handle WebSocket connection management during high activity', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Simulate high activityfor (let i = 0; i < 50; i++) {
         if (moveHandler) {
           moveHandler(createMouseEvent({ x: i * 10, y: i * 5 }));
         }
@@ -1026,16 +809,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.getConnectedClients()).toBe(5);
     });
 
-    it('should support room-based broadcasting for multi-session scenarios', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Join specific rooms
-      mockInputTrackingGateway.getClientRooms = (
+    it('should support room-based broadcasting for multi-session scenarios', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Join specific roomsmockInputTrackingGateway.getClientRooms = (
         jest.fn() as jest.MockedFunction<() => string[]>
-      ).mockReturnValue(['desktop-session-1', 'automation-session-2']);
-
-      const mouseEvent = createMouseEvent({ x: 500, y: 600 });
-      moveHandler?.(mouseEvent);
+      ).mockReturnValue(['desktop-session-1', 'automation-session-2']);const mouseEvent = createMouseEvent({ x: 500, y: 600 });moveHandler?.(mouseEvent);
 
       // Verify room-based broadcasting capability exists
       expect(gateway.getClientRooms).toBeDefined();
@@ -1043,23 +819,13 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
   });
 
-  describe('Cross-Platform Compatibility', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Cross-Platform Compatibility', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should handle Windows-specific input behaviors', () => {
-      // Mock Windows platform
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-        configurable: true,
-      });
+    it('should handle Windows-specific input behaviors', () => {// Mock Windows platformObject.defineProperty(process, 'platform', {value: 'win32',configurable: true,});
 
       const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Windows-specific key combinations
+        'keydown'] as KeyboardEventHandler;// Windows-specific key combinations
       const winKey = createKeyboardEvent({ keycode: 91, metaKey: true }); // Windows key
       if (keydownHandler) {
         keydownHandler(winKey);
@@ -1067,26 +833,16 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'keyboard_input',
-          modifiers: expect.objectContaining({
-            metaKey: true,
+          type: 'keyboard_input',modifiers: expect.objectContaining({metaKey: true,
           }) as unknown,
         }),
       );
     });
 
-    it('should handle macOS-specific input behaviors', () => {
-      // Mock macOS platform
-      Object.defineProperty(process, 'platform', {
-        value: 'darwin',
-        configurable: true,
-      });
+    it('should handle macOS-specific input behaviors', () => {// Mock macOS platformObject.defineProperty(process, 'platform', {value: 'darwin',configurable: true,});
 
       const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // macOS-specific Command key
+        'keydown'] as KeyboardEventHandler;// macOS-specific Command key
       const cmdKey = createKeyboardEvent({ keycode: 91, metaKey: true });
       if (keydownHandler) {
         keydownHandler(cmdKey);
@@ -1094,26 +850,16 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'keyboard_input',
-          modifiers: expect.objectContaining({
-            metaKey: true,
+          type: 'keyboard_input',modifiers: expect.objectContaining({metaKey: true,
           }) as unknown,
         }),
       );
     });
 
-    it('should handle Linux-specific input behaviors', () => {
-      // Mock Linux platform
-      Object.defineProperty(process, 'platform', {
-        value: 'linux',
-        configurable: true,
-      });
+    it('should handle Linux-specific input behaviors', () => {// Mock Linux platformObject.defineProperty(process, 'platform', {value: 'linux',configurable: true,});
 
       const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Linux-specific Super key
+        'keydown'] as KeyboardEventHandler;// Linux-specific Super key
       const superKey = createKeyboardEvent({ keycode: 133, metaKey: true });
       if (keydownHandler) {
         keydownHandler(superKey);
@@ -1121,54 +867,28 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'keyboard_input',
-          modifiers: expect.objectContaining({
-            metaKey: true,
+          type: 'keyboard_input',modifiers: expect.objectContaining({metaKey: true,
           }) as unknown,
         }),
       );
     });
   });
 
-  describe('Error Handling and Recovery', () => {
-    it('should handle UIohook initialization failures gracefully', () => {
-      mockUIOhook.start = jest.fn().mockImplementation(() => {
-        throw new Error('UIohook initialization failed');
-      }) as never;
-
-      expect(() => service.startTracking()).not.toThrow();
+  describe('Error Handling and Recovery', () => {it('should handle UIohook initialization failures gracefully', () => {mockUIOhook.start = jest.fn().mockImplementation(() => {throw new Error('UIohook initialization failed');}) as never;expect(() => service.startTracking()).not.toThrow();
 
       // Service should handle the error gracefully
-      expect(service['isTracking']).toBe(false);
-    });
-
-    it('should recover from WebSocket broadcasting failures', () => {
-      service.startTracking();
-
-      // Mock gateway failure
+      expect(service['isTracking']).toBe(false);});it('should recover from WebSocket broadcasting failures', () => {service.startTracking();// Mock gateway failure
       mockInputTrackingGateway.broadcastInputEvent = jest
         .fn()
         .mockImplementation(() => {
-          throw new Error('WebSocket connection lost');
-        });
-
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Should not crash on broadcast failure
-      expect(() => {
+          throw new Error('WebSocket connection lost');});const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Should not crash on broadcast failureexpect(() => {
         moveHandler?.(createMouseEvent({ x: 100, y: 100 }));
       }).not.toThrow();
     });
 
-    it('should handle memory pressure and cleanup automatically', async () => {
-      service.startTracking();
-
-      // Simulate memory pressure scenario
+    it('should handle memory pressure and cleanup automatically', async () => {service.startTracking();// Simulate memory pressure scenario
       const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Fill up buffers with large amounts of data
+        'keydown'] as KeyboardEventHandler;// Fill up buffers with large amounts of data
       for (let i = 0; i < 10000; i++) {
         if (keydownHandler) {
           keydownHandler(
@@ -1184,13 +904,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Service should handle memory pressure by flushing buffers
-      const bufferSize = service['typingBuffer'].length;
-      expect(bufferSize).toBeLessThan(1000); // Should have been flushed
-    });
+      const bufferSize = service['typingBuffer'].length;expect(bufferSize).toBeLessThan(1000); // Should have been flushed});
 
-    it('should maintain service stability during rapid start/stop cycles', async () => {
-      // Rapid start/stop cycles
-      for (let i = 0; i < 10; i++) {
+    it('should maintain service stability during rapid start/stop cycles', async () => {// Rapid start/stop cyclesfor (let i = 0; i < 10; i++) {
         service.startTracking();
         await new Promise((resolve) => setTimeout(resolve, 10));
         service.stopTracking();
@@ -1198,21 +914,13 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       }
 
       // Final state should be stable
-      expect(service['isTracking']).toBe(false);
-      expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
-    });
+      expect(service['isTracking']).toBe(false);expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();});
   });
 
-  describe('Security and Input Validation', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Security and Input Validation', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should validate and sanitize input coordinates', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Test edge cases and potentially malicious coordinates
-      const edgeCaseEvents = [
+    it('should validate and sanitize input coordinates', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Test edge cases and potentially malicious coordinatesconst edgeCaseEvents = [
         createMouseEvent({ x: -99999, y: -99999 }),
         createMouseEvent({ x: 999999, y: 999999 }),
         createMouseEvent({ x: NaN, y: NaN }),
@@ -1226,11 +934,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       }
     });
 
-    it('should limit input event processing rate to prevent DoS', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-      const startTime = Date.now();
-
-      // Attempt to overwhelm with rapid events
+    it('should limit input event processing rate to prevent DoS', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;const startTime = Date.now();// Attempt to overwhelm with rapid events
       for (let i = 0; i < 10000; i++) {
         moveHandler(createMouseEvent({ x: i, y: i }));
       }
@@ -1241,22 +945,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(processingTime).toBeLessThan(5000); // Should not take more than 5 seconds
     });
 
-    it('should validate keyboard input and prevent injection attacks', () => {
-      const keydownHandler = mockEventListeners[
-        'keydown'
-      ] as KeyboardEventHandler;
-
-      // Attempt malicious input patterns
+    it('should validate keyboard input and prevent injection attacks', () => {const keydownHandler = mockEventListeners['keydown'] as KeyboardEventHandler;// Attempt malicious input patterns
       const maliciousInputs: Array<Partial<UiohookKeyboardEvent>> = [
         {
           keycode: null as unknown as number,
-          char: '<script>alert("xss")</script>',
-        },
-        { keycode: undefined as unknown as number, char: '$(rm -rf /)' },
-        { keycode: 'invalid' as unknown as number, char: '../../etc/passwd' },
-      ];
-
-      for (const maliciousInput of maliciousInputs) {
+          char: '<script>alert("xss")</script>",},
+        { keycode: undefined as unknown as number, char: '$(rm -rf /)' },{ keycode: 'invalid' as unknown as number, char: '../../etc/passwd' },];for (const maliciousInput of maliciousInputs) {
         // Should handle invalid input gracefully
         expect(() => {
           keydownHandler(createKeyboardEvent(maliciousInput));
@@ -1265,25 +959,17 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
   });
 
-  describe('Integration with Computer Use Service', () => {
-    beforeEach(() => {
-      service.startTracking();
+  describe('Integration with Computer Use Service', () => {beforeEach(() => {service.startTracking();
     });
 
-    it('should coordinate with screenshot capture during input tracking', () => {
-      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
-
-      // Trigger mouse movement
-      moveHandler(createMouseEvent({ x: 400, y: 300 }));
+    it('should coordinate with screenshot capture during input tracking', () => {const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;// Trigger mouse movementmoveHandler(createMouseEvent({ x: 400, y: 300 }));
 
       // Should potentially trigger screenshot capture
       // (depending on implementation details)
       expect(computerUseService.action).toBeDefined();
     });
 
-    it('should integrate with computer use actions for complete workflow', async () => {
-      const clickHandler = mockEventListeners[
-        'mouseclick'
+    it('should integrate with computer use actions for complete workflow', async () => {const clickHandler = mockEventListeners['mouseclick'
       ] as MouseEventHandler;
 
       // Simulate a click that might trigger downstream actions

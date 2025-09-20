@@ -16,18 +16,11 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import {
-  OrchestrationError,
+} from '@nestjs/common';import { Observable } from 'rxjs';import { map, tap, catchError } from 'rxjs/operators';import {OrchestrationError,
   OrchestrationErrorType,
   OrchestrationOperationType,
   isOrchestrationError,
-} from '../errors/orchestration-errors';
-
-/**
- * Standard orchestration response format
+} from '../errors/orchestration-errors';/*** Standard orchestration response format
  */
 export interface OrchestrationResponse<T = unknown> {
   readonly success: boolean;
@@ -35,9 +28,7 @@ export interface OrchestrationResponse<T = unknown> {
   readonly orchestration: {
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed' | 'cancelled';
-    readonly progress: {
-      readonly totalOperations: number;
+    readonly status: 'initializing' | 'executing' | 'aggregating' | 'completed' | 'failed' | 'cancelled';readonly progress: {readonly totalOperations: number;
       readonly completedOperations: number;
       readonly failedOperations: number;
       readonly remainingOperations: number;
@@ -69,9 +60,7 @@ export interface OrchestrationResponse<T = unknown> {
   };
   readonly operations?: Array<{
     readonly operationId: string;
-    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-    readonly startTime?: Date;
-    readonly endTime?: Date;
+    readonly status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';readonly startTime?: Date;readonly endTime?: Date;
     readonly duration?: number;
     readonly result?: unknown;
     readonly error?: string;
@@ -122,11 +111,7 @@ export interface OrchestrationResult<T = unknown> {
   readonly orchestrationContext: {
     readonly orchestrationId: string;
     readonly operationType: OrchestrationOperationType;
-    readonly distributedContext: OrchestrationError['distributedContext'];
-    readonly resourceContext: OrchestrationError['resourceContext'];
-    readonly performanceMetrics: OrchestrationError['performanceMetrics'];
-  };
-  readonly operationResults?: Array<{
+    readonly distributedContext: OrchestrationError['distributedContext'];readonly resourceContext: OrchestrationError['resourceContext'];readonly performanceMetrics: OrchestrationError['performanceMetrics'];};readonly operationResults?: Array<{
     readonly operationId: string;
     readonly result: unknown;
     readonly metadata: Record<string, unknown>;
@@ -164,20 +149,11 @@ interface OrchestrationRequestContext {
 @Injectable()
 export class OrchestrationResponseInterceptor implements NestInterceptor {
   private readonly logger = new Logger(OrchestrationResponseInterceptor.name);
-  private readonly version = '1.0.0';
-  private readonly environment = process.env.NODE_ENV || 'development';
-
-  constructor() {
-    this.logger.log('OrchestrationResponseInterceptor initialized');
-  }
-
-  intercept(context: ExecutionContext, next: CallHandler): Observable<OrchestrationResponse> {
+  private readonly version = '1.0.0';private readonly environment = process.env.NODE_ENV || 'development';constructor() {this.logger.log('OrchestrationResponseInterceptor initialized');}intercept(context: ExecutionContext, next: CallHandler): Observable<OrchestrationResponse> {
     const requestContext = this.extractRequestContext(context);
     const startTime = Date.now();
 
-    this.logger.log('Processing orchestration request', {
-      orchestrationId: requestContext.orchestrationId,
-      operationType: requestContext.operationType,
+    this.logger.log('Processing orchestration request', {orchestrationId: requestContext.orchestrationId,operationType: requestContext.operationType,
       url: requestContext.url,
       method: requestContext.method,
     });
@@ -205,9 +181,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
     const orchestrationResult = this.extractOrchestrationResult(data);
 
     // Determine orchestration status based on result data
-    let status: OrchestrationResponse['orchestration']['status'] = 'completed';
-    let progress = {
-      totalOperations: 1,
+    let status: OrchestrationResponse['orchestration']['status'] = 'completed';let progress = {totalOperations: 1,
       completedOperations: 1,
       failedOperations: 0,
       remainingOperations: 0,
@@ -216,12 +190,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
 
     if (orchestrationResult?.orchestrationContext) {
       const context = orchestrationResult.orchestrationContext.distributedContext;
-      status = context.coordinationState === 'executing' ? 'executing' :
-               context.coordinationState === 'aggregating' ? 'aggregating' :
-               context.coordinationState === 'failed' ? 'failed' : 'completed';
-
-      progress = {
-        totalOperations: context.totalOperations,
+      status = context.coordinationState === 'executing' ? 'executing' :context.coordinationState === 'aggregating' ? 'aggregating' :context.coordinationState === 'failed' ? 'failed' : 'completed';progress = {totalOperations: context.totalOperations,
         completedOperations: context.completedOperations,
         failedOperations: context.failedOperations,
         remainingOperations: context.remainingOperations,
@@ -245,9 +214,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
           endTime: new Date(),
           duration: processingTime,
           parallelExecutions: orchestrationResult?.orchestrationContext?.distributedContext?.parallelExecutions || 1,
-          coordinationState: orchestrationResult?.orchestrationContext?.distributedContext?.coordinationState || 'completed',
-        },
-        resources: {
+          coordinationState: orchestrationResult?.orchestrationContext?.distributedContext?.coordinationState || 'completed',},resources: {
           browserSessions: orchestrationResult?.orchestrationContext?.resourceContext?.browserSessions || 0,
           activeTasks: orchestrationResult?.orchestrationContext?.resourceContext?.activeTasks || 0,
           memoryUsage: orchestrationResult?.orchestrationContext?.resourceContext?.memoryUsage,
@@ -292,13 +259,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
     const orchestrationError = isOrchestrationError(error) ? error : null;
 
     let errorInfo = {
-      type: 'unknown_error',
-      message: 'An unexpected error occurred',
-      severity: 'medium',
-      category: 'system_error',
-      orchestrationId: requestContext.orchestrationId || 'unknown',
-      affectedOperations: [] as string[],
-    };
+      type: 'unknown_error',message: 'An unexpected error occurred',severity: 'medium',category: 'system_error',orchestrationId: requestContext.orchestrationId || 'unknown',affectedOperations: [] as string[],};
 
     if (orchestrationError) {
       errorInfo = {
@@ -311,10 +272,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
       };
     } else if (error instanceof Error) {
       errorInfo.message = error.message;
-      errorInfo.type = error.name || 'error';
-    }
-
-    const progress = orchestrationError ? {
+      errorInfo.type = error.name || 'error';}const progress = orchestrationError ? {
       totalOperations: orchestrationError.distributedContext.totalOperations,
       completedOperations: orchestrationError.distributedContext.completedOperations,
       failedOperations: orchestrationError.distributedContext.failedOperations,
@@ -335,16 +293,12 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
       orchestration: {
         orchestrationId: errorInfo.orchestrationId,
         operationType: requestContext.operationType || OrchestrationOperationType.WORKFLOW_EXECUTION,
-        status: 'failed',
-        progress,
-        execution: {
+        status: 'failed',progress,execution: {
           startTime: requestContext.startTime,
           endTime: new Date(),
           duration: processingTime,
           parallelExecutions: orchestrationError?.distributedContext?.parallelExecutions || 0,
-          coordinationState: orchestrationError?.distributedContext?.coordinationState || 'failed',
-        },
-        resources: {
+          coordinationState: orchestrationError?.distributedContext?.coordinationState || 'failed',},resources: {
           browserSessions: orchestrationError?.resourceContext?.browserSessions || 0,
           activeTasks: orchestrationError?.resourceContext?.activeTasks || 0,
           memoryUsage: orchestrationError?.resourceContext?.memoryUsage,
@@ -401,20 +355,14 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
       headers: request.headers,
       user: request.user,
       sessionID: request.sessionID,
-      orchestrationId: request.body?.orchestrationId || request.query?.orchestrationId || request.headers?.['x-orchestration-id'],
-      operationType: (request.body?.operationType || request.query?.operationType) as OrchestrationOperationType,
-      requestId: request.headers?.['x-request-id'],
-      startTime: new Date(),
-    };
+      orchestrationId: request.body?.orchestrationId || request.query?.orchestrationId || request.headers?.['x-orchestration-id'],operationType: (request.body?.operationType || request.query?.operationType) as OrchestrationOperationType,requestId: request.headers?.['x-request-id'],startTime: new Date(),};
   }
 
   /**
    * Extract orchestration result from response data
    */
   private extractOrchestrationResult(data: unknown): OrchestrationResult | null {
-    if (data && typeof data === 'object' && 'orchestrationContext' in data) {
-      return data as OrchestrationResult;
-    }
+    if (data && typeof data === 'object' && 'orchestrationContext' in data) {return data as OrchestrationResult;}
     return null;
   }
 
@@ -422,17 +370,12 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Format operation results for response
    */
   private formatOperationResults(
-    operationResults?: OrchestrationResult['operationResults']
-  ): OrchestrationResponse['operations'] {
-    if (!operationResults) {
-      return undefined;
+    operationResults?: OrchestrationResult['operationResults']): OrchestrationResponse['operations'] {if (!operationResults) {return undefined;
     }
 
     return operationResults.map(op => ({
       operationId: op.operationId,
-      status: 'completed' as const,
-      result: op.result,
-      startTime: new Date(),
+      status: 'completed' as const,result: op.result,startTime: new Date(),
       endTime: new Date(),
       duration: 0,
       dependencies: [],
@@ -443,10 +386,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Format failed operations for error response
    */
   private formatFailedOperations(
-    affectedOperations: OrchestrationError['affectedOperations']
-  ): OrchestrationResponse['operations'] {
-    return affectedOperations.map(op => ({
-      operationId: op.operationId,
+    affectedOperations: OrchestrationError['affectedOperations']): OrchestrationResponse['operations'] {return affectedOperations.map(op => ({operationId: op.operationId,
       status: op.status,
       error: op.errorMessage,
       retryCount: op.retryCount,
@@ -458,9 +398,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Calculate estimated time remaining for operations
    */
   private calculateEstimatedTimeRemaining(
-    context: OrchestrationError['distributedContext'],
-    currentProcessingTime: number
-  ): number | undefined {
+    context: OrchestrationError['distributedContext'],currentProcessingTime: number): number | undefined {
     if (context.completedOperations === 0 || context.remainingOperations === 0) {
       return undefined;
     }
@@ -473,9 +411,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Calculate resource utilization percentage
    */
   private calculateResourceUtilization(
-    resourceContext?: OrchestrationError['resourceContext']
-  ): number | undefined {
-    if (!resourceContext?.memoryUsage || !resourceContext.cpuUsage) {
+    resourceContext?: OrchestrationError['resourceContext']): number | undefined {if (!resourceContext?.memoryUsage || !resourceContext.cpuUsage) {
       return undefined;
     }
 
@@ -496,13 +432,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
   /**
    * Extract pagination information from data
    */
-  private extractPaginationInfo(data: unknown): OrchestrationResponse['pagination'] {
-    if (data && typeof data === 'object' && 'pagination' in data) {
-      const pagination = (data as { pagination: unknown }).pagination;
-      if (pagination && typeof pagination === 'object') {
-        return pagination as OrchestrationResponse['pagination'];
-      }
-    }
+  private extractPaginationInfo(data: unknown): OrchestrationResponse['pagination'] {if (data && typeof data === 'object' && 'pagination' in data) {const pagination = (data as { pagination: unknown }).pagination;if (pagination && typeof pagination === 'object') {return pagination as OrchestrationResponse['pagination'];}}
     return undefined;
   }
 
@@ -510,22 +440,10 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Extract trace ID from request context
    */
   private extractTraceId(requestContext: OrchestrationRequestContext): string | undefined {
-    return requestContext.headers?.['x-trace-id'] ||
-           requestContext.headers?.['traceparent'] ||
-           requestContext.headers?.['x-correlation-id'];
-  }
-
-  /**
+    return requestContext.headers?.['x-trace-id'] ||requestContext.headers?.['traceparent'] ||requestContext.headers?.['x-correlation-id'];}/**
    * Extract recovery information from error
    */
-  private extractRecoveryInfo(error: unknown): OrchestrationResponse['error']['recovery'] {
-    // Check if error has recovery metadata (from error handler)
-    if (error && typeof error === 'object' && 'recovery' in error) {
-      const recovery = (error as { recovery: unknown }).recovery;
-      if (recovery && typeof recovery === 'object') {
-        return recovery as OrchestrationResponse['error']['recovery'];
-      }
-    }
+  private extractRecoveryInfo(error: unknown): OrchestrationResponse['error']['recovery'] {// Check if error has recovery metadata (from error handler)if (error && typeof error === 'object' && 'recovery' in error) {const recovery = (error as { recovery: unknown }).recovery;if (recovery && typeof recovery === 'object') {return recovery as OrchestrationResponse['error']['recovery'];}}
 
     return {
       attempted: false,
@@ -537,17 +455,10 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    */
   private getErrorRecommendations(orchestrationError: OrchestrationErrorType | null): string[] {
     if (!orchestrationError) {
-      return ['Contact system administrator for assistance'];
-    }
-
-    // Import recommendations from error analyzer
+      return ['Contact system administrator for assistance'];}// Import recommendations from error analyzer
     // This would typically import from the orchestration-errors module
     return [
-      'Review orchestration configuration',
-      'Check resource availability',
-      'Consider reducing parallel operations',
-    ];
-  }
+      'Review orchestration configuration','Check resource availability','Consider reducing parallel operations',];}
 
   /**
    * Log response metrics
@@ -556,9 +467,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
     response: OrchestrationResponse,
     requestContext: OrchestrationRequestContext
   ): void {
-    this.logger.log('Orchestration response processed successfully', {
-      orchestrationId: response.orchestration.orchestrationId,
-      operationType: response.orchestration.operationType,
+    this.logger.log('Orchestration response processed successfully', {orchestrationId: response.orchestration.orchestrationId,operationType: response.orchestration.operationType,
       status: response.orchestration.status,
       processingTime: response.metadata.processingTime,
       totalOperations: response.orchestration.progress.totalOperations,
@@ -576,9 +485,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
     requestContext: OrchestrationRequestContext,
     originalError: unknown
   ): void {
-    this.logger.error('Orchestration response error processed', {
-      orchestrationId: response.orchestration.orchestrationId,
-      errorType: response.error?.type,
+    this.logger.error('Orchestration response error processed', {orchestrationId: response.orchestration.orchestrationId,errorType: response.error?.type,
       errorCategory: response.error?.category,
       severity: response.error?.severity,
       processingTime: response.metadata.processingTime,
@@ -592,10 +499,7 @@ export class OrchestrationResponseInterceptor implements NestInterceptor {
    * Generate orchestration ID
    */
   private generateOrchestrationId(): string {
-    return `orch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
+    return `orch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;}/**
    * Generate request ID
    */
   private generateRequestId(): string {

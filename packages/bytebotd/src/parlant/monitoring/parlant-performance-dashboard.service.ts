@@ -23,16 +23,7 @@
  * @version 1.0.0 - Enterprise Performance Dashboard
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { performance } from 'perf_hooks';
-import { ParlantPerformanceMonitorService, ParlantPerformanceMetrics, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';
-
-// ===== DASHBOARD INTERFACES =====
-
-/**
+import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import { performance } from 'perf_hooks';import { ParlantPerformanceMonitorService, ParlantPerformanceMetrics, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';// ===== DASHBOARD INTERFACES =====/**
  * Real-time dashboard data structure
  */
 export interface ParlantDashboardData {
@@ -51,19 +42,13 @@ export interface ParlantDashboardData {
  * Performance overview summary
  */
 export interface PerformanceOverview {
-  readonly status: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN';
-  readonly overallScore: number; // 0-100
-  readonly responseTime: {
+  readonly status: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN';readonly overallScore: number; // 0-100readonly responseTime: {
     readonly current: number;
     readonly target: number;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-  readonly throughput: {
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly throughput: {
     readonly current: number;
     readonly target: number;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-  readonly availability: {
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};readonly availability: {
     readonly current: number;
     readonly target: number;
     readonly uptime: number; // seconds
@@ -71,9 +56,7 @@ export interface PerformanceOverview {
   readonly errorRate: {
     readonly current: number;
     readonly target: number;
-    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
-  };
-}
+    readonly trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';};}
 
 /**
  * Real-time metrics data
@@ -113,21 +96,14 @@ export interface TrendData {
   readonly value: number;
   readonly target?: number;
   readonly anomaly?: boolean;
-  readonly severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  readonly severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * Regression analysis results
  */
 export interface RegressionAnalysis {
   readonly detected: boolean;
-  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly affectedMetrics: string[];
-  readonly impactAssessment: {
+  readonly severity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly affectedMetrics: string[];readonly impactAssessment: {
     readonly performanceImpact: number; // percentage
-    readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    readonly estimatedRecoveryTime: number; // minutes
-  };
+    readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly estimatedRecoveryTime: number; // minutes};
   readonly rootCauseAnalysis: string[];
   readonly recommendedActions: string[];
 }
@@ -147,17 +123,12 @@ export interface AlertsAndAnomalies {
  */
 export interface PerformanceAlert {
   readonly id: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly type: 'RESPONSE_TIME' | 'THROUGHPUT' | 'ERROR_RATE' | 'AVAILABILITY' | 'CACHE_PERFORMANCE' | 'ANOMALY';
-  readonly title: string;
-  readonly description: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly type: 'RESPONSE_TIME' | 'THROUGHPUT' | 'ERROR_RATE' | 'AVAILABILITY' | 'CACHE_PERFORMANCE' | 'ANOMALY';readonly title: string;readonly description: string;
   readonly triggeredAt: Date;
   readonly metric: string;
   readonly currentValue: number;
   readonly threshold: number;
-  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly acknowledgedBy?: string;
-  readonly acknowledgedAt?: Date;
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly acknowledgedBy?: string;readonly acknowledgedAt?: Date;
   readonly resolvedAt?: Date;
   readonly escalated: boolean;
   readonly escalationLevel: number;
@@ -180,18 +151,13 @@ export interface PerformanceAnomaly {
     readonly seasonalPattern: boolean;
     readonly correlatedMetrics: string[];
   };
-  readonly classification: 'OUTLIER' | 'TREND_BREAK' | 'SEASONAL_DEVIATION' | 'PATTERN_CHANGE';
-}
-
-/**
+  readonly classification: 'OUTLIER' | 'TREND_BREAK' | 'SEASONAL_DEVIATION' | 'PATTERN_CHANGE';}/**
  * Alert history entry
  */
 export interface AlertHistoryEntry {
   readonly id: string;
   readonly alertId: string;
-  readonly action: 'TRIGGERED' | 'ACKNOWLEDGED' | 'ESCALATED' | 'RESOLVED' | 'AUTO_RESOLVED';
-  readonly timestamp: Date;
-  readonly userId?: string;
+  readonly action: 'TRIGGERED' | 'ACKNOWLEDGED' | 'ESCALATED' | 'RESOLVED' | 'AUTO_RESOLVED';readonly timestamp: Date;readonly userId?: string;
   readonly details: string;
   readonly systemAction: boolean;
 }
@@ -201,9 +167,7 @@ export interface AlertHistoryEntry {
  */
 export interface EscalationStatus {
   readonly activeEscalations: number;
-  readonly highestSeverity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly escalationPolicy: {
-    readonly level1TimeoutMinutes: number;
+  readonly highestSeverity: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly escalationPolicy: {readonly level1TimeoutMinutes: number;
     readonly level2TimeoutMinutes: number;
     readonly level3TimeoutMinutes: number;
     readonly autoEscalationEnabled: boolean;
@@ -274,11 +238,7 @@ export interface SystemHealthMetrics {
     };
   };
   readonly dependencyHealth: {
-    readonly database: 'HEALTHY' | 'DEGRADED' | 'DOWN';
-    readonly cache: 'HEALTHY' | 'DEGRADED' | 'DOWN';
-    readonly externalServices: Record<string, 'HEALTHY' | 'DEGRADED' | 'DOWN'>;
-  };
-  readonly healthScore: number; // 0-100
+    readonly database: 'HEALTHY' | 'DEGRADED' | 'DOWN';readonly cache: 'HEALTHY' | 'DEGRADED' | 'DOWN';readonly externalServices: Record<string, 'HEALTHY' | 'DEGRADED' | 'DOWN'>;};readonly healthScore: number; // 0-100
   readonly lastHealthCheck: Date;
 }
 
@@ -321,15 +281,10 @@ export interface BusinessMetrics {
  */
 export interface PerformanceRecommendation {
   readonly id: string;
-  readonly category: 'OPTIMIZATION' | 'SCALING' | 'CONFIGURATION' | 'ARCHITECTURE' | 'MAINTENANCE';
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly title: string;
-  readonly description: string;
+  readonly category: 'OPTIMIZATION' | 'SCALING' | 'CONFIGURATION' | 'ARCHITECTURE' | 'MAINTENANCE';readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly title: string;readonly description: string;
   readonly impact: {
     readonly performanceImprovement: number; // percentage
-    readonly costImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
-    readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';
-    readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    readonly costImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';readonly implementationEffort: 'LOW' | 'MEDIUM' | 'HIGH';readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   };
   readonly implementation: {
     readonly steps: string[];
@@ -402,13 +357,7 @@ export class ParlantPerformanceDashboardService {
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly eventEmitter: EventEmitter2
   ) {
-    const operationId = `dashboard_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.anomalyDetector = new AnomalyDetector();
-
-    this.logger.log(`[${operationId}] Initializing Parlant Performance Dashboard`, {
-      operationId,
-      config: this.config,
+    const operationId = `dashboard_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.anomalyDetector = new AnomalyDetector();this.logger.log(`[${operationId}] Initializing Parlant Performance Dashboard`, {operationId,config: this.config,
       baselines: this.performanceBaselines,
       realTimeUpdates: true,
       anomalyDetection: this.config.anomalyDetectionEnabled,
@@ -427,10 +376,7 @@ export class ParlantPerformanceDashboardService {
    * @returns Complete dashboard data structure
    */
   async getDashboardData(): Promise<ParlantDashboardData> {
-    const operationId = `get_dashboard_${Date.now()}`;
-
-    try {
-      // Update dashboard data if needed
+    const operationId = `get_dashboard_${Date.now()}`;try {// Update dashboard data if needed
       if (!this.currentDashboardData || this.shouldRefreshDashboard()) {
         this.currentDashboardData = await this.buildDashboardData();
       }
@@ -447,9 +393,7 @@ export class ParlantPerformanceDashboardService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get dashboard data: ${errorMessage}`, {
-        operationId,
-        error: errorMessage,
+      this.logger.error(`[${operationId}] Failed to get dashboard data: ${errorMessage}`, {operationId,error: errorMessage,
       });
 
       throw new Error(`Dashboard data retrieval failed: ${errorMessage}`);
@@ -462,10 +406,7 @@ export class ParlantPerformanceDashboardService {
    * @returns Real-time metrics data
    */
   getRealTimeMetrics(): RealTimeMetrics {
-    const stats = this.performanceMonitor.getPerformanceStats('minute');
-    const dashboardData = this.performanceMonitor.getPerformanceDashboardData();
-
-    return {
+    const stats = this.performanceMonitor.getPerformanceStats('minute');const dashboardData = this.performanceMonitor.getPerformanceDashboardData();return {
       activeOperations: dashboardData.activeOperations,
       operationsPerSecond: stats.throughputRpm / 60,
       averageResponseTime: stats.averageLatency,
@@ -484,12 +425,8 @@ export class ParlantPerformanceDashboardService {
    * Get historical trends for specific metric
    *
    * @param metric - Metric name
-   * @param timeRange - Time range ('1h', '6h', '24h', '7d', '30d')
-   * @returns Historical trend data
-   */
-  getHistoricalTrend(metric: string, timeRange: string = '24h'): TrendData[] {
-    const history = this.metricsHistory.get(metric) ?? [];
-    const cutoffTime = this.getTimeRangeCutoff(timeRange);
+   * @param timeRange - Time range ('1h', '6h', '24h', '7d', '30d')* @returns Historical trend data*/
+  getHistoricalTrend(metric: string, timeRange: string = '24h'): TrendData[] {const history = this.metricsHistory.get(metric) ?? [];const cutoffTime = this.getTimeRangeCutoff(timeRange);
 
     return history.filter(point => point.timestamp >= cutoffTime);
   }
@@ -503,8 +440,7 @@ export class ParlantPerformanceDashboardService {
   async createCustomAlert(alertConfig: {
     metric: string;
     threshold: number;
-    condition: 'GREATER_THAN' | 'LESS_THAN' | 'EQUALS';
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    condition: 'GREATER_THAN' | 'LESS_THAN' | 'EQUALS';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     description: string;
   }): Promise<string> {
     const alertId = `custom_alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -513,9 +449,7 @@ export class ParlantPerformanceDashboardService {
       id: alertId,
       severity: alertConfig.severity,
       type: 'ANOMALY',
-      title: `Custom Alert: ${alertConfig.metric}`,
-      description: alertConfig.description,
-      triggeredAt: new Date(),
+      title: `Custom Alert: ${alertConfig.metric}`,description: alertConfig.description,triggeredAt: new Date(),
       metric: alertConfig.metric,
       currentValue: 0, // Will be updated when triggered
       threshold: alertConfig.threshold,
@@ -526,9 +460,7 @@ export class ParlantPerformanceDashboardService {
 
     this.activeAlerts.set(alertId, alert);
 
-    this.logger.log(`Custom alert created: ${alertId}`, {
-      alertId,
-      metric: alertConfig.metric,
+    this.logger.log(`Custom alert created: ${alertId}`, {alertId,metric: alertConfig.metric,
       threshold: alertConfig.threshold,
       severity: alertConfig.severity,
     });
@@ -545,10 +477,7 @@ export class ParlantPerformanceDashboardService {
   async acknowledgeAlert(alertId: string, userId: string): Promise<void> {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) {
-      throw new Error(`Alert not found: ${alertId}`);
-    }
-
-    alert.acknowledgedBy = userId;
+      throw new Error(`Alert not found: ${alertId}`);}alert.acknowledgedBy = userId;
     alert.acknowledgedAt = new Date();
 
     this.addAlertHistoryEntry({
@@ -557,13 +486,9 @@ export class ParlantPerformanceDashboardService {
       action: 'ACKNOWLEDGED',
       timestamp: new Date(),
       userId,
-      details: `Alert acknowledged by ${userId}`,
-      systemAction: false,
-    });
+      details: `Alert acknowledged by ${userId}`,systemAction: false,});
 
-    this.logger.log(`Alert acknowledged: ${alertId}`, {
-      alertId,
-      userId,
+    this.logger.log(`Alert acknowledged: ${alertId}`, {alertId,userId,
       acknowledgedAt: alert.acknowledgedAt,
     });
   }
@@ -578,10 +503,7 @@ export class ParlantPerformanceDashboardService {
   async resolveAlert(alertId: string, userId: string, resolution: string): Promise<void> {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) {
-      throw new Error(`Alert not found: ${alertId}`);
-    }
-
-    alert.resolvedAt = new Date();
+      throw new Error(`Alert not found: ${alertId}`);}alert.resolvedAt = new Date();
 
     this.addAlertHistoryEntry({
       id: `resolve_${Date.now()}`,
@@ -607,20 +529,9 @@ export class ParlantPerformanceDashboardService {
   /**
    * Export dashboard data for external systems
    *
-   * @param format - Export format ('json', 'csv', 'prometheus')
-   * @returns Exported data string
-   */
-  async exportDashboardData(format: 'json' | 'csv' | 'prometheus' = 'json'): Promise<string> {
-    const dashboardData = await this.getDashboardData();
-
-    switch (format) {
-      case 'json':
-        return JSON.stringify(dashboardData, null, 2);
-
-      case 'csv':
-        return this.convertToCSV(dashboardData);
-
-      case 'prometheus':
+   * @param format - Export format ('json', 'csv', 'prometheus')* @returns Exported data string*/
+  async exportDashboardData(format: 'json' | 'csv' | 'prometheus' = 'json'): Promise<string> {const dashboardData = await this.getDashboardData();switch (format) {
+      case 'json':return JSON.stringify(dashboardData, null, 2);case 'csv':return this.convertToCSV(dashboardData);case 'prometheus':
         return this.convertToPrometheusFormat(dashboardData);
 
       default:
@@ -633,14 +544,10 @@ export class ParlantPerformanceDashboardService {
   private async initializeDashboard(): Promise<void> {
     try {
       this.currentDashboardData = await this.buildDashboardData();
-      this.logger.log('Dashboard initialized successfully', {
-        status: this.currentDashboardData.overview.status,
-        score: this.currentDashboardData.overview.overallScore,
+      this.logger.log('Dashboard initialized successfully', {status: this.currentDashboardData.overview.status,score: this.currentDashboardData.overview.overallScore,
       });
     } catch (error) {
-      this.logger.error('Failed to initialize dashboard', error);
-    }
-  }
+      this.logger.error('Failed to initialize dashboard', error);}}
 
   private startRealTimeMonitoring(): void {
     // Real-time metrics collection
@@ -650,34 +557,23 @@ export class ParlantPerformanceDashboardService {
         await this.detectAnomalies();
         await this.checkAlertConditions();
       } catch (error) {
-        this.logger.error('Real-time monitoring error', error);
-      }
-    }, this.config.updateIntervalMs);
+        this.logger.error('Real-time monitoring error', error);}}, this.config.updateIntervalMs);
 
     // Dashboard refresh
     setInterval(async () => {
       try {
         if (this.shouldRefreshDashboard()) {
           this.currentDashboardData = await this.buildDashboardData();
-          this.eventEmitter.emit('dashboard.updated', this.currentDashboardData);
-        }
-      } catch (error) {
-        this.logger.error('Dashboard refresh error', error);
-      }
-    }, this.config.dashboardRefreshRate);
+          this.eventEmitter.emit('dashboard.updated', this.currentDashboardData);}} catch (error) {
+        this.logger.error('Dashboard refresh error', error);}}, this.config.dashboardRefreshRate);
 
-    this.logger.log('Real-time monitoring started', {
-      updateInterval: this.config.updateIntervalMs,
-      refreshRate: this.config.dashboardRefreshRate,
+    this.logger.log('Real-time monitoring started', {updateInterval: this.config.updateIntervalMs,refreshRate: this.config.dashboardRefreshRate,
     });
   }
 
   private async buildDashboardData(): Promise<ParlantDashboardData> {
     const timestamp = new Date();
-    const stats = this.performanceMonitor.getPerformanceStats('hour');
-    const realTimeMetrics = this.getRealTimeMetrics();
-
-    return {
+    const stats = this.performanceMonitor.getPerformanceStats('hour');const realTimeMetrics = this.getRealTimeMetrics();return {
       timestamp,
       overview: this.buildPerformanceOverview(stats, realTimeMetrics),
       realTimeMetrics,
@@ -731,14 +627,7 @@ export class ParlantPerformanceDashboardService {
 
   private buildHistoricalTrends(): HistoricalTrends {
     return {
-      responseTimeTrend: this.getHistoricalTrend('responseTime', '24h'),
-      throughputTrend: this.getHistoricalTrend('throughput', '24h'),
-      errorRateTrend: this.getHistoricalTrend('errorRate', '24h'),
-      cacheHitRateTrend: this.getHistoricalTrend('cacheHitRate', '24h'),
-      availabilityTrend: this.getHistoricalTrend('availability', '24h'),
-      performanceScoreTrend: this.getHistoricalTrend('performanceScore', '24h'),
-      regressionDetection: this.detectRegressions(),
-    };
+      responseTimeTrend: this.getHistoricalTrend('responseTime', '24h'),throughputTrend: this.getHistoricalTrend('throughput', '24h'),errorRateTrend: this.getHistoricalTrend('errorRate', '24h'),cacheHitRateTrend: this.getHistoricalTrend('cacheHitRate', '24h'),availabilityTrend: this.getHistoricalTrend('availability', '24h'),performanceScoreTrend: this.getHistoricalTrend('performanceScore', '24h'),regressionDetection: this.detectRegressions(),};
   }
 
   private buildAlertsAndAnomalies(): AlertsAndAnomalies {
@@ -774,11 +663,7 @@ export class ParlantPerformanceDashboardService {
         cacheEfficiency: this.calculateCacheEfficiency(stats),
       },
       trends: {
-        hitRateTrend: this.getHistoricalTrend('cacheHitRate', '24h'),
-        lookupTimeTrend: this.getHistoricalTrend('cacheLookupTime', '24h'),
-        memoryUsageTrend: this.getHistoricalTrend('cacheMemoryUsage', '24h'),
-      },
-    };
+        hitRateTrend: this.getHistoricalTrend('cacheHitRate', '24h'),lookupTimeTrend: this.getHistoricalTrend('cacheLookupTime', '24h'),memoryUsageTrend: this.getHistoricalTrend('cacheMemoryUsage', '24h'),},};
   }
 
   private buildSystemHealthMetrics(): SystemHealthMetrics {
@@ -808,8 +693,7 @@ export class ParlantPerformanceDashboardService {
         },
       },
       dependencyHealth: {
-        database: 'HEALTHY', // TODO: Implement database health checking
-        cache: 'HEALTHY', // TODO: Implement cache health checking
+        database: 'HEALTHY', // TODO: Implement database health checkingcache: 'HEALTHY', // TODO: Implement cache health checking
         externalServices: {}, // TODO: Implement external service health checking
       },
       healthScore: 95, // TODO: Calculate actual health score
@@ -857,34 +741,16 @@ export class ParlantPerformanceDashboardService {
     if (stats.averageLatency > this.performanceBaselines.responseTime.warning) {
       recommendations.push({
         id: `rec_response_time_${Date.now()}`,
-        category: 'OPTIMIZATION',
-        priority: stats.averageLatency > this.performanceBaselines.responseTime.critical ? 'CRITICAL' : 'HIGH',
-        title: 'Optimize Response Time Performance',
+        category: 'OPTIMIZATION',priority: stats.averageLatency > this.performanceBaselines.responseTime.critical ? 'CRITICAL' : 'HIGH',title: 'Optimize Response Time Performance',
         description: `Average response time (${stats.averageLatency.toFixed(2)}ms) exceeds optimal targets. Consider implementing caching optimizations and query performance improvements.`,
         impact: {
           performanceImprovement: 30,
-          costImpact: 'LOW',
-          implementationEffort: 'MEDIUM',
-          riskLevel: 'LOW',
-        },
-        implementation: {
+          costImpact: 'LOW',implementationEffort: 'MEDIUM',riskLevel: 'LOW',},implementation: {
           steps: [
-            'Analyze slow queries and optimize database indexes',
-            'Implement intelligent caching for frequently accessed data',
-            'Optimize API response serialization',
-            'Enable compression for large responses',
-          ],
-          estimatedTime: 8,
-          prerequisites: ['Performance profiling tools', 'Database access'],
-          rollbackPlan: ['Disable new caching layer', 'Revert query optimizations'],
-        },
-        metrics: {
+            'Analyze slow queries and optimize database indexes','Implement intelligent caching for frequently accessed data','Optimize API response serialization','Enable compression for large responses',],estimatedTime: 8,
+          prerequisites: ['Performance profiling tools', 'Database access'],rollbackPlan: ['Disable new caching layer', 'Revert query optimizations'],},metrics: {
           expectedImprovement: {
-            'averageLatency': -30,
-            'p95Latency': -25,
-            'throughput': 15,
-          },
-          measurementCriteria: ['Response time reduction', 'Cache hit rate increase', 'Throughput improvement'],
+            'averageLatency': -30,'p95Latency': -25,'throughput': 15,},measurementCriteria: ['Response time reduction', 'Cache hit rate increase', 'Throughput improvement'],
         },
         generatedAt: new Date(),
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
@@ -895,36 +761,16 @@ export class ParlantPerformanceDashboardService {
     if (stats.cacheHitRate < this.performanceBaselines.cacheHitRate.warning) {
       recommendations.push({
         id: `rec_cache_optimization_${Date.now()}`,
-        category: 'OPTIMIZATION',
-        priority: 'HIGH',
-        title: 'Improve Cache Hit Rate',
+        category: 'OPTIMIZATION',priority: 'HIGH',title: 'Improve Cache Hit Rate',
         description: `Cache hit rate (${stats.cacheHitRate.toFixed(1)}%) is below optimal levels. Implement cache warming and optimization strategies.`,
         impact: {
           performanceImprovement: 25,
-          costImpact: 'LOW',
-          implementationEffort: 'MEDIUM',
-          riskLevel: 'LOW',
-        },
-        implementation: {
+          costImpact: 'LOW',implementationEffort: 'MEDIUM',riskLevel: 'LOW',},implementation: {
           steps: [
-            'Analyze cache miss patterns',
-            'Implement cache warming for critical data',
-            'Optimize cache key strategies',
-            'Implement intelligent cache eviction policies',
-          ],
-          estimatedTime: 6,
-          prerequisites: ['Cache monitoring tools', 'Access to cache configuration'],
-          rollbackPlan: ['Revert cache configuration changes', 'Disable cache warming'],
-        },
-        metrics: {
+            'Analyze cache miss patterns','Implement cache warming for critical data','Optimize cache key strategies','Implement intelligent cache eviction policies',],estimatedTime: 6,
+          prerequisites: ['Cache monitoring tools', 'Access to cache configuration'],rollbackPlan: ['Revert cache configuration changes', 'Disable cache warming'],},metrics: {
           expectedImprovement: {
-            'cacheHitRate': 15,
-            'averageLatency': -20,
-            'throughput': 10,
-          },
-          measurementCriteria: ['Cache hit rate increase', 'Response time improvement'],
-        },
-        generatedAt: new Date(),
+            'cacheHitRate': 15,'averageLatency': -20,'throughput': 10,},measurementCriteria: ['Cache hit rate increase', 'Response time improvement'],},generatedAt: new Date(),
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
     }
@@ -936,18 +782,8 @@ export class ParlantPerformanceDashboardService {
 
   private async collectRealTimeMetrics(): Promise<void> {
     const timestamp = new Date();
-    const stats = this.performanceMonitor.getPerformanceStats('minute');
-    const realTime = this.getRealTimeMetrics();
-
-    // Store metrics for trend analysis
-    this.storeMetricPoint('responseTime', timestamp, stats.averageLatency);
-    this.storeMetricPoint('throughput', timestamp, stats.throughputRpm);
-    this.storeMetricPoint('errorRate', timestamp, stats.errorRate);
-    this.storeMetricPoint('cacheHitRate', timestamp, stats.cacheHitRate);
-    this.storeMetricPoint('performanceScore', timestamp, stats.performanceScore);
-
-    // Cleanup old data
-    this.cleanupOldMetrics();
+    const stats = this.performanceMonitor.getPerformanceStats('minute');const realTime = this.getRealTimeMetrics();// Store metrics for trend analysis
+    this.storeMetricPoint('responseTime', timestamp, stats.averageLatency);this.storeMetricPoint('throughput', timestamp, stats.throughputRpm);this.storeMetricPoint('errorRate', timestamp, stats.errorRate);this.storeMetricPoint('cacheHitRate', timestamp, stats.cacheHitRate);this.storeMetricPoint('performanceScore', timestamp, stats.performanceScore);// Cleanup old datathis.cleanupOldMetrics();
   }
 
   private storeMetricPoint(metric: string, timestamp: Date, value: number): void {
@@ -974,19 +810,10 @@ export class ParlantPerformanceDashboardService {
 
   private getMetricTarget(metric: string): number {
     switch (metric) {
-      case 'responseTime': return this.performanceBaselines.responseTime.target;
-      case 'throughput': return this.performanceBaselines.throughput.target;
-      case 'errorRate': return this.performanceBaselines.errorRate.target;
-      case 'cacheHitRate': return this.performanceBaselines.cacheHitRate.target;
-      case 'availability': return this.performanceBaselines.availability.target;
-      default: return 0;
-    }
+      case 'responseTime': return this.performanceBaselines.responseTime.target;case 'throughput': return this.performanceBaselines.throughput.target;case 'errorRate': return this.performanceBaselines.errorRate.target;case 'cacheHitRate': return this.performanceBaselines.cacheHitRate.target;case 'availability': return this.performanceBaselines.availability.target;default: return 0;}
   }
 
-  private getMetricStatus(value: number, baseline: any, lowerIsBetter: boolean = false): { score: number; trend: 'IMPROVING' | 'STABLE' | 'DEGRADING' } {
-    let score: number;
-
-    if (lowerIsBetter) {
+  private getMetricStatus(value: number, baseline: any, lowerIsBetter: boolean = false): { score: number; trend: 'IMPROVING' | 'STABLE' | 'DEGRADING' } {let score: number;if (lowerIsBetter) {
       if (value <= baseline.target) score = 100;
       else if (value <= baseline.warning) score = 75;
       else if (value <= baseline.critical) score = 50;
@@ -999,21 +826,13 @@ export class ParlantPerformanceDashboardService {
     }
 
     // TODO: Implement trend calculation based on historical data
-    const trend: 'IMPROVING' | 'STABLE' | 'DEGRADING' = 'STABLE';
-
-    return { score, trend };
-  }
+    const trend: 'IMPROVING' | 'STABLE' | 'DEGRADING' = 'STABLE';return { score, trend };}
 
   private calculateOverallScore(scores: number[]): number {
     return scores.reduce((sum, score) => sum + score, 0) / scores.length;
   }
 
-  private getOverallStatus(score: number): 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN' {
-    if (score >= 90) return 'EXCELLENT';
-    if (score >= 75) return 'GOOD';
-    if (score >= 50) return 'WARNING';
-    if (score >= 25) return 'CRITICAL';
-    return 'DOWN';
+  private getOverallStatus(score: number): 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL' | 'DOWN' {if (score >= 90) return 'EXCELLENT';if (score >= 75) return 'GOOD';if (score >= 50) return 'WARNING';if (score >= 25) return 'CRITICAL';return 'DOWN';
   }
 
   private shouldRefreshDashboard(): boolean {
@@ -1059,10 +878,8 @@ export class ParlantPerformanceDashboardService {
 
     const alert: PerformanceAlert = {
       id: alertId,
-      severity: dataPoint.severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
-      type: 'ANOMALY',
-      title: `Anomaly Detected: ${metric}`,
-      description: `Anomalous behavior detected in ${metric}. Current value: ${dataPoint.value}, Expected: ${dataPoint.target}`,
+      severity: dataPoint.severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',type: 'ANOMALY',
+      title: `Anomaly Detected: ${metric}`,description: `Anomalous behavior detected in ${metric}. Current value: ${dataPoint.value}, Expected: ${dataPoint.target}`,
       triggeredAt: dataPoint.timestamp,
       metric,
       currentValue: dataPoint.value,
@@ -1086,36 +903,19 @@ export class ParlantPerformanceDashboardService {
   private async checkAlertConditions(): Promise<void> {
     if (!this.config.autoAlertingEnabled) return;
 
-    const stats = this.performanceMonitor.getPerformanceStats('minute');
-
-    // Check response time alerts
-    if (stats.averageLatency > this.performanceBaselines.responseTime.critical) {
-      await this.triggerAlert('RESPONSE_TIME', 'CRITICAL', stats.averageLatency, this.performanceBaselines.responseTime.critical);
-    } else if (stats.averageLatency > this.performanceBaselines.responseTime.warning) {
-      await this.triggerAlert('RESPONSE_TIME', 'HIGH', stats.averageLatency, this.performanceBaselines.responseTime.warning);
-    }
-
-    // Check throughput alerts
+    const stats = this.performanceMonitor.getPerformanceStats('minute');// Check response time alertsif (stats.averageLatency > this.performanceBaselines.responseTime.critical) {
+      await this.triggerAlert('RESPONSE_TIME', 'CRITICAL', stats.averageLatency, this.performanceBaselines.responseTime.critical);} else if (stats.averageLatency > this.performanceBaselines.responseTime.warning) {await this.triggerAlert('RESPONSE_TIME', 'HIGH', stats.averageLatency, this.performanceBaselines.responseTime.warning);}// Check throughput alerts
     if (stats.throughputRpm < this.performanceBaselines.throughput.critical) {
-      await this.triggerAlert('THROUGHPUT', 'CRITICAL', stats.throughputRpm, this.performanceBaselines.throughput.critical);
-    }
-
-    // Check error rate alerts
+      await this.triggerAlert('THROUGHPUT', 'CRITICAL', stats.throughputRpm, this.performanceBaselines.throughput.critical);}// Check error rate alerts
     if (stats.errorRate > this.performanceBaselines.errorRate.critical) {
-      await this.triggerAlert('ERROR_RATE', 'CRITICAL', stats.errorRate, this.performanceBaselines.errorRate.critical);
-    }
-
-    // Check cache hit rate alerts
+      await this.triggerAlert('ERROR_RATE', 'CRITICAL', stats.errorRate, this.performanceBaselines.errorRate.critical);}// Check cache hit rate alerts
     if (stats.cacheHitRate < this.performanceBaselines.cacheHitRate.critical) {
       await this.triggerAlert('CACHE_PERFORMANCE', 'HIGH', stats.cacheHitRate, this.performanceBaselines.cacheHitRate.critical);
     }
   }
 
   private async triggerAlert(type: string, severity: string, currentValue: number, threshold: number): Promise<void> {
-    const alertKey = `${type}_${severity}`;
-
-    // Prevent duplicate alerts
-    if (this.activeAlerts.has(alertKey)) return;
+    const alertKey = `${type}_${severity}`;// Prevent duplicate alertsif (this.activeAlerts.has(alertKey)) return;
 
     const alertId = `alert_${type.toLowerCase()}_${Date.now()}`;
 
@@ -1123,9 +923,7 @@ export class ParlantPerformanceDashboardService {
       id: alertId,
       severity: severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
       type: type as any,
-      title: `${type.replace('_', ' ')} Alert`,
-      description: `${type.replace('_', ' ')} threshold exceeded. Current: ${currentValue}, Threshold: ${threshold}`,
-      triggeredAt: new Date(),
+      title: `${type.replace('_', ' ')} Alert',description: `${type.replace('_', ' ')} threshold exceeded. Current: ${currentValue}, Threshold: ${threshold}',triggeredAt: new Date(),
       metric: type.toLowerCase(),
       currentValue,
       threshold,
@@ -1140,9 +938,7 @@ export class ParlantPerformanceDashboardService {
       alertId,
       action: 'TRIGGERED',
       timestamp: new Date(),
-      details: `${type} alert triggered`,
-      systemAction: true,
-    });
+      details: `${type} alert triggered`,systemAction: true,});
 
     this.logger.warn(`Performance alert triggered: ${type}`, {
       alertId,
@@ -1152,9 +948,7 @@ export class ParlantPerformanceDashboardService {
     });
   }
 
-  private calculateAlertImpact(severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    return severity; // For now, impact matches severity
-  }
+  private calculateAlertImpact(severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {return severity; // For now, impact matches severity}
 
   private addAlertHistoryEntry(entry: AlertHistoryEntry): void {
     this.alertHistory.push(entry);
@@ -1169,13 +963,9 @@ export class ParlantPerformanceDashboardService {
     // TODO: Implement sophisticated regression detection
     return {
       detected: false,
-      severity: 'NONE',
-      affectedMetrics: [],
-      impactAssessment: {
+      severity: 'NONE',affectedMetrics: [],impactAssessment: {
         performanceImpact: 0,
-        businessImpact: 'LOW',
-        estimatedRecoveryTime: 0,
-      },
+        businessImpact: 'LOW',estimatedRecoveryTime: 0,},
       rootCauseAnalysis: [],
       recommendedActions: [],
     };
@@ -1187,40 +977,22 @@ export class ParlantPerformanceDashboardService {
   }
 
   private getEscalationStatus(): EscalationStatus {
-    const criticalAlerts = Array.from(this.activeAlerts.values()).filter(alert => alert.severity === 'CRITICAL');
-
-    return {
-      activeEscalations: criticalAlerts.filter(alert => alert.escalated).length,
-      highestSeverity: criticalAlerts.length > 0 ? 'CRITICAL' : 'NONE',
-      escalationPolicy: {
-        level1TimeoutMinutes: 15,
+    const criticalAlerts = Array.from(this.activeAlerts.values()).filter(alert => alert.severity === 'CRITICAL');return {activeEscalations: criticalAlerts.filter(alert => alert.escalated).length,
+      highestSeverity: criticalAlerts.length > 0 ? 'CRITICAL' : 'NONE',escalationPolicy: {level1TimeoutMinutes: 15,
         level2TimeoutMinutes: 30,
         level3TimeoutMinutes: 60,
         autoEscalationEnabled: true,
       },
       onCallRotation: {
-        primaryContact: 'oncall-primary@example.com',
-        secondaryContact: 'oncall-secondary@example.com',
-        emergencyContact: 'oncall-emergency@example.com',
-      },
-    };
+        primaryContact: 'oncall-primary@example.com',secondaryContact: 'oncall-secondary@example.com',emergencyContact: 'oncall-emergency@example.com',},};
   }
 
   private generateCacheOptimizationRecommendations(stats: ParlantPerformanceStats): string[] {
     const recommendations: string[] = [];
 
     if (stats.cacheHitRate < 90) {
-      recommendations.push('Implement cache warming for frequently accessed data');
-      recommendations.push('Optimize cache key strategies to reduce collisions');
-      recommendations.push('Increase cache memory allocation for better retention');
-    }
-
-    if (stats.averageLatency > 300) {
-      recommendations.push('Enable cache compression to improve lookup speed');
-      recommendations.push('Implement distributed caching for better performance');
-    }
-
-    return recommendations;
+      recommendations.push('Implement cache warming for frequently accessed data');recommendations.push('Optimize cache key strategies to reduce collisions');recommendations.push('Increase cache memory allocation for better retention');}if (stats.averageLatency > 300) {
+      recommendations.push('Enable cache compression to improve lookup speed');recommendations.push('Implement distributed caching for better performance');}return recommendations;
   }
 
   private calculatePotentialCacheHitRateIncrease(stats: ParlantPerformanceStats): number {
@@ -1296,13 +1068,7 @@ export class ParlantPerformanceDashboardService {
   private getTimeRangeCutoff(timeRange: string): Date {
     const now = Date.now();
     switch (timeRange) {
-      case '1h': return new Date(now - 60 * 60 * 1000);
-      case '6h': return new Date(now - 6 * 60 * 60 * 1000);
-      case '24h': return new Date(now - 24 * 60 * 60 * 1000);
-      case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);
-      case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);
-      default: return new Date(now - 24 * 60 * 60 * 1000);
-    }
+      case '1h': return new Date(now - 60 * 60 * 1000);case '6h': return new Date(now - 6 * 60 * 60 * 1000);case '24h': return new Date(now - 24 * 60 * 60 * 1000);case '7d': return new Date(now - 7 * 24 * 60 * 60 * 1000);case '30d': return new Date(now - 30 * 24 * 60 * 60 * 1000);default: return new Date(now - 24 * 60 * 60 * 1000);}
   }
 
   private cleanupOldMetrics(): void {
@@ -1324,20 +1090,9 @@ export class ParlantPerformanceDashboardService {
     const timestamp = dashboardData.timestamp.getTime();
 
     // Real-time metrics
-    metrics.push(`parlant_active_operations ${dashboardData.realTimeMetrics.activeOperations} ${timestamp}`);
-    metrics.push(`parlant_operations_per_second ${dashboardData.realTimeMetrics.operationsPerSecond} ${timestamp}`);
-    metrics.push(`parlant_average_response_time_ms ${dashboardData.realTimeMetrics.averageResponseTime} ${timestamp}`);
-    metrics.push(`parlant_p95_response_time_ms ${dashboardData.realTimeMetrics.p95ResponseTime} ${timestamp}`);
-    metrics.push(`parlant_cache_hit_rate ${dashboardData.realTimeMetrics.cacheHitRate} ${timestamp}`);
-    metrics.push(`parlant_error_rate ${dashboardData.realTimeMetrics.errorRate} ${timestamp}`);
+    metrics.push(`parlant_active_operations ${dashboardData.realTimeMetrics.activeOperations} ${timestamp}`);metrics.push(`parlant_operations_per_second ${dashboardData.realTimeMetrics.operationsPerSecond} ${timestamp}`);metrics.push(`parlant_average_response_time_ms ${dashboardData.realTimeMetrics.averageResponseTime} ${timestamp}`);metrics.push(`parlant_p95_response_time_ms ${dashboardData.realTimeMetrics.p95ResponseTime} ${timestamp}`);metrics.push(`parlant_cache_hit_rate ${dashboardData.realTimeMetrics.cacheHitRate} ${timestamp}`);metrics.push(`parlant_error_rate ${dashboardData.realTimeMetrics.errorRate} ${timestamp}`);// Overview metricsmetrics.push(`parlant_overall_score ${dashboardData.overview.overallScore} ${timestamp}`);
 
-    // Overview metrics
-    metrics.push(`parlant_overall_score ${dashboardData.overview.overallScore} ${timestamp}`);
-
-    return metrics.join('\n');
-  }
-
-  // ===== SCHEDULED TASKS =====
+    return metrics.join('\n');}// ===== SCHEDULED TASKS =====
 
   // Scheduled tasks are implemented in the service initialization
   private performMinutelyTasks(): void {
@@ -1345,9 +1100,7 @@ export class ParlantPerformanceDashboardService {
       try {
         await this.collectRealTimeMetrics();
       } catch (error) {
-        this.logger.error('Minutely tasks failed', error);
-      }
-    }, 60000);
+        this.logger.error('Minutely tasks failed', error);}}, 60000);
   }
 
   private performFiveMinuteTasks(): void {
@@ -1356,9 +1109,7 @@ export class ParlantPerformanceDashboardService {
         await this.detectAnomalies();
         await this.checkAlertConditions();
       } catch (error) {
-        this.logger.error('Five-minute tasks failed', error);
-      }
-    }, 300000);
+        this.logger.error('Five-minute tasks failed', error);}}, 300000);
   }
 
   private performHourlyTasks(): void {
@@ -1367,9 +1118,7 @@ export class ParlantPerformanceDashboardService {
         this.cleanupOldMetrics();
         await this.generatePerformanceReport();
       } catch (error) {
-        this.logger.error('Hourly tasks failed', error);
-      }
-    }, 3600000);
+        this.logger.error('Hourly tasks failed', error);}}, 3600000);
   }
 
   private async generatePerformanceReport(): Promise<void> {
@@ -1411,9 +1160,7 @@ class AnomalyDetector {
 
     if (normalizedDeviation > this.sensitivityThreshold) {
       return {
-        id: `anomaly_${metric}_${Date.now()}`,
-        detectedAt: new Date(),
-        metric,
+        id: `anomaly_${metric}_${Date.now()}`,detectedAt: new Date(),metric,
         expectedValue: mean,
         actualValue: value,
         deviation: (deviation / mean) * 100,
@@ -1431,10 +1178,6 @@ class AnomalyDetector {
     return null;
   }
 
-  private classifyAnomaly(normalizedDeviation: number): 'OUTLIER' | 'TREND_BREAK' | 'SEASONAL_DEVIATION' | 'PATTERN_CHANGE' {
-    if (normalizedDeviation > 4.0) return 'PATTERN_CHANGE';
-    if (normalizedDeviation > 3.0) return 'TREND_BREAK';
-    if (normalizedDeviation > 2.5) return 'SEASONAL_DEVIATION';
-    return 'OUTLIER';
+  private classifyAnomaly(normalizedDeviation: number): 'OUTLIER' | 'TREND_BREAK' | 'SEASONAL_DEVIATION' | 'PATTERN_CHANGE' {if (normalizedDeviation > 4.0) return 'PATTERN_CHANGE';if (normalizedDeviation > 3.0) return 'TREND_BREAK';if (normalizedDeviation > 2.5) return 'SEASONAL_DEVIATION';return 'OUTLIER';
   }
 }

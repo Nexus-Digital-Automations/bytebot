@@ -26,27 +26,11 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-
-// ===== PERFORMANCE REGRESSION TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';// ===== PERFORMANCE REGRESSION TYPES =====/**
  * Types of performance regression analysis
  */
 export enum RegressionTestType {
-  BASELINE_COMPARISON = 'baseline_comparison',     // Compare against established baseline
-  HISTORICAL_COMPARISON = 'historical_comparison', // Compare against historical data
-  SLIDING_WINDOW = 'sliding_window',               // Compare against recent performance window
-  STATISTICAL_ANALYSIS = 'statistical_analysis',   // Statistical significance testing
-  ANOMALY_DETECTION = 'anomaly_detection',         // Detect performance anomalies
-  TREND_ANALYSIS = 'trend_analysis',               // Analyze performance trends
-  CI_CD_INTEGRATION = 'ci_cd_integration',         // CI/CD pipeline integration
-}
-
-/**
+  BASELINE_COMPARISON = 'baseline_comparison',     // Compare against established baselineHISTORICAL_COMPARISON = 'historical_comparison', // Compare against historical dataSLIDING_WINDOW = 'sliding_window',               // Compare against recent performance windowSTATISTICAL_ANALYSIS = 'statistical_analysis',   // Statistical significance testingANOMALY_DETECTION = 'anomaly_detection',         // Detect performance anomaliesTREND_ANALYSIS = 'trend_analysis',               // Analyze performance trendsCI_CD_INTEGRATION = 'ci_cd_integration',         // CI/CD pipeline integration}/**
  * Performance metrics for regression analysis
  */
 export interface PerformanceMetrics {
@@ -102,13 +86,9 @@ export interface PerformanceMetrics {
 
   // Test context
   testConditions: {
-    loadLevel: string;           // 'light', 'medium', 'heavy', 'stress'
-    duration: number;            // Test duration in milliseconds
-    concurrentUsers: number;
+    loadLevel: string;           // 'light', 'medium', 'heavy', 'stress'duration: number;            // Test duration in millisecondsconcurrentUsers: number;
     messageSize: number;
-    testEnvironment: string;     // 'development', 'staging', 'production'
-  };
-}
+    testEnvironment: string;     // 'development', 'staging', 'production'};}
 
 /**
  * Performance baseline definition
@@ -170,9 +150,7 @@ export interface RegressionAnalysisResult {
   // Regression detection
   regression: {
     detected: boolean;
-    severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';
-    confidence: number;           // Statistical confidence (0-1)
-    significance: number;         // Statistical significance level
+    severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';confidence: number;           // Statistical confidence (0-1)significance: number;         // Statistical significance level
   };
 
   // Detailed analysis
@@ -180,29 +158,21 @@ export interface RegressionAnalysisResult {
     throughputRegression: {
       detected: boolean;
       change: number;              // Percentage change
-      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';
-      significance: number;
-    };
+      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';significance: number;};
     latencyRegression: {
       detected: boolean;
       p95Change: number;           // Change in P95 latency
       p99Change: number;           // Change in P99 latency
-      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';
-      significance: number;
-    };
+      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';significance: number;};
     resourceRegression: {
       detected: boolean;
       cpuChange: number;
       memoryChange: number;
-      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';
-    };
-    reliabilityRegression: {
+      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';};reliabilityRegression: {
       detected: boolean;
       errorRateChange: number;
       successRateChange: number;
-      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';
-    };
-  };
+      severity: 'none' | 'minor' | 'moderate' | 'major' | 'critical';};};
 
   // Root cause analysis
   rootCause: {
@@ -226,9 +196,7 @@ export interface RegressionAnalysisResult {
   // Alert details
   alert: {
     shouldAlert: boolean;
-    alertLevel: 'info' | 'warning' | 'error' | 'critical';
-    recipients: string[];
-    message: string;
+    alertLevel: 'info' | 'warning' | 'error' | 'critical';recipients: string[];message: string;
     escalation?: {
       escalate: boolean;
       escalationDelay: number;
@@ -241,25 +209,16 @@ export interface RegressionAnalysisResult {
  * Performance trend analysis
  */
 export interface PerformanceTrendAnalysis {
-  timeframe: string;            // e.g., '7d', '30d', '90d'
-
-  trends: {
-    throughput: {
-      direction: 'improving' | 'stable' | 'degrading';
-      changeRate: number;        // Rate of change per day
-      volatility: number;        // Trend volatility
+  timeframe: string;            // e.g., '7d', '30d', '90d'trends: {throughput: {
+      direction: 'improving' | 'stable' | 'degrading';changeRate: number;        // Rate of change per dayvolatility: number;        // Trend volatility
       seasonality: boolean;      // Seasonal patterns detected
     };
     latency: {
-      direction: 'improving' | 'stable' | 'degrading';
-      changeRate: number;
-      volatility: number;
+      direction: 'improving' | 'stable' | 'degrading';changeRate: number;volatility: number;
       seasonality: boolean;
     };
     resourceUsage: {
-      direction: 'improving' | 'stable' | 'degrading';
-      changeRate: number;
-      volatility: number;
+      direction: 'improving' | 'stable' | 'degrading';changeRate: number;volatility: number;
       growthProjection: number;  // Projected growth
     };
   };
@@ -287,9 +246,7 @@ export interface PerformanceTrendAnalysis {
       value: number;
       expected: number;
       deviation: number;
-      severity: 'low' | 'medium' | 'high';
-    }[];
-  };
+      severity: 'low' | 'medium' | 'high';}[];};
 }
 
 /**
@@ -418,30 +375,18 @@ export class PerformanceRegressionTestingService
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 Performance Regression Testing Service initializing...');
-
-    // Initialize alert configuration
-    this.alertConfig = this.initializeAlertConfig();
+    this.logger.log('🚀 Performance Regression Testing Service initializing...');// Initialize alert configurationthis.alertConfig = this.initializeAlertConfig();
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Performance Regression Testing Framework');
-
-    // Load existing baselines and historical data
-    await this.loadBaselines();
+    this.logger.log('Initializing Performance Regression Testing Framework');// Load existing baselines and historical dataawait this.loadBaselines();
     await this.loadPerformanceHistory();
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
 
-    this.logger.log('✅ Performance Regression Testing Framework ready');
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Performance Regression Testing Framework');
-
-    // Stop monitoring
-    this.stopRealTimeMonitoring();
+    this.logger.log('✅ Performance Regression Testing Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down Performance Regression Testing Framework');// Stop monitoringthis.stopRealTimeMonitoring();
 
     // Save state
     await this.saveBaselines();
@@ -484,9 +429,7 @@ export class PerformanceRegressionTestingService
         standardDeviations: 2,
       },
       metadata: {
-        testType: metadata.testType || 'unknown',
-        environment: metadata.environment || 'unknown',
-        buildVersion: metadata.buildVersion || 'unknown',
+        testType: metadata.testType || 'unknown',environment: metadata.environment || 'unknown',buildVersion: metadata.buildVersion || 'unknown',
         tags: metadata.tags || [],
       },
     };
@@ -494,9 +437,7 @@ export class PerformanceRegressionTestingService
     this.baselines.set(baselineId, baseline);
     this.currentBaseline = baseline;
 
-    this.logger.log(`✅ Baseline created: ${baselineId}`);
-    return baseline;
-  }
+    this.logger.log(`✅ Baseline created: ${baselineId}`);return baseline;}
 
   /**
    * Update existing baseline with new data
@@ -507,13 +448,7 @@ export class PerformanceRegressionTestingService
   ): Promise<PerformanceBaseline> {
     const baseline = this.baselines.get(baselineId);
     if (!baseline) {
-      throw new Error(`Baseline not found: ${baselineId}`);
-    }
-
-    this.logger.log(`📈 Updating baseline: ${baselineId}`);
-
-    // Calculate updated statistical bounds
-    const statisticalBounds = await this.calculateStatisticalBounds(newMetrics, baseline.metrics);
+      throw new Error(`Baseline not found: ${baselineId}`);}this.logger.log(`📈 Updating baseline: ${baselineId}`);// Calculate updated statistical boundsconst statisticalBounds = await this.calculateStatisticalBounds(newMetrics, baseline.metrics);
 
     const updatedBaseline: PerformanceBaseline = {
       ...baseline,
@@ -541,10 +476,7 @@ export class PerformanceRegressionTestingService
   setActiveBaseline(baselineId: string): void {
     const baseline = this.baselines.get(baselineId);
     if (!baseline) {
-      throw new Error(`Baseline not found: ${baselineId}`);
-    }
-
-    this.currentBaseline = baseline;
+      throw new Error(`Baseline not found: ${baselineId}`);}this.currentBaseline = baseline;
     this.logger.log(`🎯 Active baseline set to: ${baselineId}`);
   }
 
@@ -557,20 +489,14 @@ export class PerformanceRegressionTestingService
     currentMetrics: PerformanceMetrics,
     testType: RegressionTestType = RegressionTestType.BASELINE_COMPARISON
   ): Promise<RegressionAnalysisResult> {
-    this.logger.log('🔍 Executing performance regression analysis');
-
-    const analysisId = this.generateAnalysisId();
-
-    try {
+    this.logger.log('🔍 Executing performance regression analysis');const analysisId = this.generateAnalysisId();try {
       let baseline: PerformanceMetrics;
 
       // Select comparison baseline based on test type
       switch (testType) {
         case RegressionTestType.BASELINE_COMPARISON:
           if (!this.currentBaseline) {
-            throw new Error('No active baseline available for comparison');
-          }
-          baseline = this.currentBaseline.metrics;
+            throw new Error('No active baseline available for comparison');}baseline = this.currentBaseline.metrics;
           break;
 
         case RegressionTestType.HISTORICAL_COMPARISON:
@@ -642,9 +568,7 @@ export class PerformanceRegressionTestingService
   private async performDetailedAnalysis(
     baseline: PerformanceMetrics,
     current: PerformanceMetrics
-  ): Promise<RegressionAnalysisResult['analysis']> {
-    // Throughput analysis
-    const throughputChange = ((baseline.throughput.averageThroughput - current.throughput.averageThroughput) / baseline.throughput.averageThroughput) * 100;
+  ): Promise<RegressionAnalysisResult['analysis']> {// Throughput analysisconst throughputChange = ((baseline.throughput.averageThroughput - current.throughput.averageThroughput) / baseline.throughput.averageThroughput) * 100;
     const throughputRegression = {
       detected: throughputChange > this.REGRESSION_THRESHOLDS.throughput.minor,
       change: throughputChange,
@@ -700,9 +624,7 @@ export class PerformanceRegressionTestingService
   /**
    * Assess overall regression severity
    */
-  private assessOverallRegression(analysis: any): RegressionAnalysisResult['regression'] {
-    const regressions = [
-      analysis.throughputRegression,
+  private assessOverallRegression(analysis: any): RegressionAnalysisResult['regression'] {const regressions = [analysis.throughputRegression,
       analysis.latencyRegression,
       analysis.resourceRegression,
       analysis.reliabilityRegression,
@@ -713,17 +635,12 @@ export class PerformanceRegressionTestingService
     if (!detected) {
       return {
         detected: false,
-        severity: 'none',
-        confidence: 1.0,
-        significance: 0,
+        severity: 'none',confidence: 1.0,significance: 0,
       };
     }
 
     // Determine overall severity
-    const severities = regressions.map(r => r.severity).filter(s => s !== 'none');
-    const overallSeverity = this.determineOverallSeverity(severities);
-
-    // Calculate confidence
+    const severities = regressions.map(r => r.severity).filter(s => s !== 'none');const overallSeverity = this.determineOverallSeverity(severities);// Calculate confidence
     const significances = regressions.map(r => r.significance || 0);
     const averageSignificance = significances.reduce((sum, sig) => sum + sig, 0) / significances.length;
 
@@ -741,10 +658,7 @@ export class PerformanceRegressionTestingService
    * Analyze performance trends over time
    */
   async analyzePerformanceTrends(timeframe: string = '30d'): Promise<PerformanceTrendAnalysis> {
-    this.logger.log(`📈 Analyzing performance trends (${timeframe})`);
-
-    const timeframeMs = this.parseTimeframe(timeframe);
-    const cutoffTime = Date.now() - timeframeMs;
+    this.logger.log(`📈 Analyzing performance trends (${timeframe})`);const timeframeMs = this.parseTimeframe(timeframe);const cutoffTime = Date.now() - timeframeMs;
 
     const relevantData = this.performanceHistory.filter(
       metrics => metrics.timestamp >= cutoffTime
@@ -784,9 +698,7 @@ export class PerformanceRegressionTestingService
   private analyzeTrend(values: number[]): any {
     if (values.length < 2) {
       return {
-        direction: 'stable' as const,
-        changeRate: 0,
-        volatility: 0,
+        direction: 'stable' as const,changeRate: 0,volatility: 0,
         seasonality: false,
       };
     }
@@ -796,14 +708,7 @@ export class PerformanceRegressionTestingService
 
     // Determine direction
     const changeThreshold = 0.01; // 1% change threshold
-    let direction: 'improving' | 'stable' | 'degrading';
-
-    if (Math.abs(slope) < changeThreshold) {
-      direction = 'stable';
-    } else if (slope > 0) {
-      direction = 'improving'; // Assuming higher values are better for throughput
-    } else {
-      direction = 'degrading';
+    let direction: 'improving' | 'stable' | 'degrading';if (Math.abs(slope) < changeThreshold) {direction = 'stable';} else if (slope > 0) {direction = 'improving'; // Assuming higher values are better for throughput} else {direction = 'degrading';
     }
 
     // Check for seasonality (simplified)
@@ -844,56 +749,28 @@ export class PerformanceRegressionTestingService
       }
 
       // Emit event for other services
-      this.eventEmitter.emit('regression_alert', {
-        analysisId: result.analysisId,
-        severity: result.regression.severity,
+      this.eventEmitter.emit('regression_alert', {analysisId: result.analysisId,severity: result.regression.severity,
         alertLevel: alert.alertLevel,
         message: alert.message,
       });
 
     } catch (error) {
-      this.logger.error('Failed to send regression alert', error.stack);
-    }
-  }
+      this.logger.error('Failed to send regression alert', error.stack);}}
 
   /**
    * Determine alert requirements
    */
   private determineAlertRequirements(
-    regression: RegressionAnalysisResult['regression'],
-    analysis: RegressionAnalysisResult['analysis']
-  ): RegressionAnalysisResult['alert'] {
-    const shouldAlert = regression.detected && regression.severity !== 'none';
-
-    let alertLevel: 'info' | 'warning' | 'error' | 'critical';
-
-    switch (regression.severity) {
-      case 'critical':
-        alertLevel = 'critical';
-        break;
-      case 'major':
-        alertLevel = 'error';
-        break;
-      case 'moderate':
-        alertLevel = 'warning';
-        break;
-      default:
-        alertLevel = 'info';
-    }
-
-    const message = this.generateAlertMessage(regression, analysis);
+    regression: RegressionAnalysisResult['regression'],analysis: RegressionAnalysisResult['analysis']): RegressionAnalysisResult['alert'] {const shouldAlert = regression.detected && regression.severity !== 'none';let alertLevel: 'info' | 'warning' | 'error' | 'critical';switch (regression.severity) {case 'critical':alertLevel = 'critical';break;case 'major':alertLevel = 'error';break;case 'moderate':alertLevel = 'warning';break;default:
+        alertLevel = 'info';}const message = this.generateAlertMessage(regression, analysis);
 
     return {
       shouldAlert,
       alertLevel,
       recipients: this.alertConfig.delivery.email.recipients,
       message,
-      escalation: regression.severity === 'critical' ? {
-        escalate: true,
-        escalationDelay: 15 * 60 * 1000, // 15 minutes
-        escalationLevel: 'manager',
-      } : undefined,
-    };
+      escalation: regression.severity === 'critical' ? {escalate: true,escalationDelay: 15 * 60 * 1000, // 15 minutes
+        escalationLevel: 'manager',} : undefined,};
   }
 
   // ===== UTILITY METHODS =====
@@ -904,9 +781,7 @@ export class PerformanceRegressionTestingService
   private async calculateStatisticalBounds(
     metrics: PerformanceMetrics,
     previousMetrics?: PerformanceMetrics
-  ): Promise<PerformanceBaseline['statisticalBounds']> {
-    const confidence = this.STATISTICAL_CONFIG.confidenceLevel;
-    const stdDevMultiplier = 2; // 2 standard deviations
+  ): Promise<PerformanceBaseline['statisticalBounds']> {const confidence = this.STATISTICAL_CONFIG.confidenceLevel;const stdDevMultiplier = 2; // 2 standard deviations
 
     // For initial baseline, use simple bounds
     if (!previousMetrics) {
@@ -959,15 +834,7 @@ export class PerformanceRegressionTestingService
   private classifySeverity(
     change: number,
     thresholds: any
-  ): 'none' | 'minor' | 'moderate' | 'major' | 'critical' {
-    if (change < thresholds.minor) return 'none';
-    if (change < thresholds.moderate) return 'minor';
-    if (change < thresholds.major) return 'moderate';
-    if (change < thresholds.critical) return 'major';
-    return 'critical';
-  }
-
-  /**
+  ): 'none' | 'minor' | 'moderate' | 'major' | 'critical' {if (change < thresholds.minor) return 'none';if (change < thresholds.moderate) return 'minor';if (change < thresholds.major) return 'moderate';if (change < thresholds.critical) return 'major';return 'critical';}/**
    * Calculate statistical significance
    */
   private async calculateStatisticalSignificance(
@@ -997,36 +864,15 @@ export class PerformanceRegressionTestingService
    * Generate alert message
    */
   private generateAlertMessage(
-    regression: RegressionAnalysisResult['regression'],
-    analysis: RegressionAnalysisResult['analysis']
-  ): string {
-    const severityIcon = {
-      'none': '✅',
-      'minor': '⚠️',
-      'moderate': '🔶',
-      'major': '🔴',
-      'critical': '🚨',
+    regression: RegressionAnalysisResult['regression'],analysis: RegressionAnalysisResult['analysis']): string {const severityIcon = {
+      'none': '✅','minor': '⚠️','moderate': '🔶','major': '🔴','critical': '🚨',
     };
 
-    let message = `${severityIcon[regression.severity]} Performance Regression Detected (${regression.severity.toUpperCase()})\n\n`;
-
-    if (analysis.throughputRegression.detected) {
-      message += `📉 Throughput: ${analysis.throughputRegression.change.toFixed(1)}% decrease\n`;
-    }
-
-    if (analysis.latencyRegression.detected) {
-      message += `⏱️ P95 Latency: ${analysis.latencyRegression.p95Change.toFixed(1)}% increase\n`;
-    }
-
-    if (analysis.resourceRegression.detected) {
-      message += `💾 Resource Usage: CPU ${analysis.resourceRegression.cpuChange.toFixed(1)}%, Memory ${analysis.resourceRegression.memoryChange.toFixed(1)}%\n`;
-    }
-
-    if (analysis.reliabilityRegression.detected) {
-      message += `❌ Error Rate: ${analysis.reliabilityRegression.errorRateChange.toFixed(1)}% increase\n`;
-    }
-
-    message += `\nConfidence: ${(regression.confidence * 100).toFixed(1)}%`;
+    let message = `${severityIcon[regression.severity]} Performance Regression Detected (${regression.severity.toUpperCase()})\n\n`;if (analysis.throughputRegression.detected) {message += `📉 Throughput: ${analysis.throughputRegression.change.toFixed(1)}% decrease\n`;}if (analysis.latencyRegression.detected) {
+      message += `⏱️ P95 Latency: ${analysis.latencyRegression.p95Change.toFixed(1)}% increase\n`;}if (analysis.resourceRegression.detected) {
+      message += `💾 Resource Usage: CPU ${analysis.resourceRegression.cpuChange.toFixed(1)}%, Memory ${analysis.resourceRegression.memoryChange.toFixed(1)}%\n`;}if (analysis.reliabilityRegression.detected) {
+      message += `❌ Error Rate: ${analysis.reliabilityRegression.errorRateChange.toFixed(1)}% increase\n`;}message += `
+Confidence: ${(regression.confidence * 100).toFixed(1)}%`;
 
     return message;
   }
@@ -1056,15 +902,7 @@ export class PerformanceRegressionTestingService
     return Math.sqrt((baselineVariance + currentVariance) / 2);
   }
 
-  private determineOverallSeverity(severities: string[]): 'none' | 'minor' | 'moderate' | 'major' | 'critical' {
-    if (severities.includes('critical')) return 'critical';
-    if (severities.includes('major')) return 'major';
-    if (severities.includes('moderate')) return 'moderate';
-    if (severities.includes('minor')) return 'minor';
-    return 'none';
-  }
-
-  private calculateLinearRegression(values: number[]): { slope: number; volatility: number } {
+  private determineOverallSeverity(severities: string[]): 'none' | 'minor' | 'moderate' | 'major' | 'critical' {if (severities.includes('critical')) return 'critical';if (severities.includes('major')) return 'major';if (severities.includes('moderate')) return 'moderate';if (severities.includes('minor')) return 'minor';return 'none';}private calculateLinearRegression(values: number[]): { slope: number; volatility: number } {
     if (values.length < 2) return { slope: 0, volatility: 0 };
 
     const n = values.length;
@@ -1106,11 +944,7 @@ export class PerformanceRegressionTestingService
     const unit = timeframe.slice(-1);
 
     switch (unit) {
-      case 'h': return value * 60 * 60 * 1000;
-      case 'd': return value * 24 * 60 * 60 * 1000;
-      case 'w': return value * 7 * 24 * 60 * 60 * 1000;
-      default: return 30 * 24 * 60 * 60 * 1000; // Default 30 days
-    }
+      case 'h': return value * 60 * 60 * 1000;case 'd': return value * 24 * 60 * 60 * 1000;case 'w': return value * 7 * 24 * 60 * 60 * 1000;default: return 30 * 24 * 60 * 60 * 1000; // Default 30 days}
   }
 
   // ===== INFRASTRUCTURE METHODS =====
@@ -1157,8 +991,7 @@ export class PerformanceRegressionTestingService
   }
 
   private generateBaselineId(name: string): string {
-    return `baseline_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
-  }
+    return `baseline_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}';}
 
   private generateAnalysisId(): string {
     return `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1166,18 +999,7 @@ export class PerformanceRegressionTestingService
 
   private logRegressionResults(result: RegressionAnalysisResult): void {
     this.logger.log('📊 Regression Analysis Results:');
-    this.logger.log(`   Analysis ID: ${result.analysisId}`);
-    this.logger.log(`   Regression Detected: ${result.regression.detected ? '❌' : '✅'}`);
-
-    if (result.regression.detected) {
-      this.logger.log(`   Severity: ${result.regression.severity.toUpperCase()}`);
-      this.logger.log(`   Confidence: ${(result.regression.confidence * 100).toFixed(1)}%`);
-
-      if (result.analysis.throughputRegression.detected) {
-        this.logger.log(`   Throughput Regression: ${result.analysis.throughputRegression.change.toFixed(1)}%`);
-      }
-
-      if (result.analysis.latencyRegression.detected) {
+    this.logger.log(`   Analysis ID: ${result.analysisId}`);this.logger.log(`   Regression Detected: ${result.regression.detected ? '❌' : '✅'}`);if (result.regression.detected) {this.logger.log(`   Severity: ${result.regression.severity.toUpperCase()}`);this.logger.log(`   Confidence: ${(result.regression.confidence * 100).toFixed(1)}%`);if (result.analysis.throughputRegression.detected) {this.logger.log(`   Throughput Regression: ${result.analysis.throughputRegression.change.toFixed(1)}%`);}if (result.analysis.latencyRegression.detected) {
         this.logger.log(`   Latency Regression: P95 +${result.analysis.latencyRegression.p95Change.toFixed(1)}%`);
       }
     }
@@ -1193,19 +1015,12 @@ export class PerformanceRegressionTestingService
   private async getSlidingWindowBaseline(): Promise<PerformanceMetrics> { return {} as PerformanceMetrics; }
   private async performRootCauseAnalysis(baseline: PerformanceMetrics, current: PerformanceMetrics, analysis: any): Promise<any> {
     return {
-      likelyCauses: ['Performance test variance'],
-      evidenceStrength: 0.5,
-      correlations: [],
+      likelyCauses: ['Performance test variance'],evidenceStrength: 0.5,correlations: [],
     };
   }
   private generateRegressionRecommendations(analysis: any, regression: any): any {
     return {
-      immediate: ['Monitor performance closely'],
-      investigation: ['Review recent code changes'],
-      remediation: ['Consider performance optimization'],
-      prevention: ['Implement performance monitoring'],
-    };
-  }
+      immediate: ['Monitor performance closely'],investigation: ['Review recent code changes'],remediation: ['Consider performance optimization'],prevention: ['Implement performance monitoring'],};}
   private async sendEmailAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }
   private async sendSlackAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }
   private async sendWebhookAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }

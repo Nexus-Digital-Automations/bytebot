@@ -24,22 +24,12 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import * as WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { createServer, Server } from 'http';
-import { randomUUID } from 'crypto';
-
-import {
-  ConversationalWebSocketBridgeService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { createServer, Server } from 'http';import { randomUUID } from 'crypto';import {ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
   ProgressUpdateMessage,
-} from '../conversational-websocket-bridge.service';
-import { createSafeWebSocketServer } from '../websocket-types';
+} from '../conversational-websocket-bridge.service';import { createSafeWebSocketServer } from '../websocket-types';
 
 // ===== MESSAGE ORDERING AND RELIABILITY TEST UTILITIES =====
 
@@ -158,17 +148,12 @@ class MessageSequenceTracker {
       expectedSequence: number;
       actualSequence: number;
       messageId: string;
-      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';
-    }>;
-  } {
+      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';}>;} {
     const violations: Array<{
       expectedSequence: number;
       actualSequence: number;
       messageId: string;
-      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';
-    }> = [];
-
-    // Group messages by session
+      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';}> = [];// Group messages by session
     const sessionMessages = new Map<string, typeof this.receivedMessages>();
 
     for (const received of this.receivedMessages) {
@@ -192,15 +177,7 @@ class MessageSequenceTracker {
         const actualSequence = current.message.sequence;
 
         if (actualSequence !== expectedSequence) {
-          let violationType: 'out_of_order' | 'gap' | 'duplicate_sequence' = 'out_of_order';
-
-          if (actualSequence > expectedSequence) {
-            violationType = 'gap';
-          } else if (actualSequence < expectedSequence) {
-            violationType = 'duplicate_sequence';
-          }
-
-          violations.push({
+          let violationType: 'out_of_order' | 'gap' | 'duplicate_sequence' = 'out_of_order';if (actualSequence > expectedSequence) {violationType = 'gap';} else if (actualSequence < expectedSequence) {violationType = 'duplicate_sequence';}violations.push({
             expectedSequence,
             actualSequence,
             messageId: current.message.messageId,
@@ -317,10 +294,7 @@ class MessagePriorityTester {
 
   enqueueMessage(message: ConversationalMessage): void {
     const timestamp = performance.now();
-    const priority = message.metadata.priority || 'normal';
-
-    if (priority in this.priorityQueues) {
-      this.priorityQueues[priority as keyof typeof this.priorityQueues].push({
+    const priority = message.metadata.priority || 'normal';if (priority in this.priorityQueues) {this.priorityQueues[priority as keyof typeof this.priorityQueues].push({
         message,
         timestamp,
       });
@@ -334,10 +308,7 @@ class MessagePriorityTester {
     const processTime = performance.now();
 
     // Process in priority order: critical -> high -> normal -> low
-    const priorities: Array<keyof typeof this.priorityQueues> = ['critical', 'high', 'normal', 'low'];
-
-    for (const priority of priorities) {
-      const queue = this.priorityQueues[priority];
+    const priorities: Array<keyof typeof this.priorityQueues> = ['critical', 'high', 'normal', 'low'];for (const priority of priorities) {const queue = this.priorityQueues[priority];
 
       while (queue.length > 0) {
         const item = queue.shift()!;
@@ -363,51 +334,31 @@ class MessagePriorityTester {
       messageId: string;
       expectedPriority: string;
       actualPosition: number;
-      violationType: 'priority_inversion' | 'starvation';
-    }>;
-  } {
+      violationType: 'priority_inversion' | 'starvation';}>;} {
     const violations: Array<{
       messageId: string;
       expectedPriority: string;
       actualPosition: number;
-      violationType: 'priority_inversion' | 'starvation';
-    }> = [];
-
-    const priorityOrder = ['critical', 'high', 'normal', 'low'];
-    let lastPriorityIndex = -1;
-
-    for (let i = 0; i < this.processedMessages.length; i++) {
+      violationType: 'priority_inversion' | 'starvation';}> = [];const priorityOrder = ['critical', 'high', 'normal', 'low'];let lastPriorityIndex = -1;for (let i = 0; i < this.processedMessages.length; i++) {
       const processed = this.processedMessages[i];
-      const priority = processed.message.metadata.priority || 'normal';
-      const currentPriorityIndex = priorityOrder.indexOf(priority);
-
-      // Check for priority inversion (lower priority processed before higher priority)
+      const priority = processed.message.metadata.priority || 'normal';const currentPriorityIndex = priorityOrder.indexOf(priority);// Check for priority inversion (lower priority processed before higher priority)
       if (currentPriorityIndex > lastPriorityIndex && lastPriorityIndex !== -1) {
         violations.push({
           messageId: processed.message.messageId,
           expectedPriority: priority,
           actualPosition: i,
-          violationType: 'priority_inversion',
-        });
-      }
+          violationType: 'priority_inversion',});}
 
       lastPriorityIndex = Math.max(lastPriorityIndex, currentPriorityIndex);
     }
 
     // Check for starvation (low priority messages waiting too long)
     const lowPriorityMessages = this.processedMessages.filter(
-      p => p.message.metadata.priority === 'low'
-    );
-
-    for (const lowPriority of lowPriorityMessages) {
+      p => p.message.metadata.priority === 'low');for (const lowPriority of lowPriorityMessages) {
       if (lowPriority.queueTime > 5000) { // 5 second threshold
         violations.push({
           messageId: lowPriority.message.messageId,
-          expectedPriority: 'low',
-          actualPosition: this.processedMessages.indexOf(lowPriority),
-          violationType: 'starvation',
-        });
-      }
+          expectedPriority: 'low',actualPosition: this.processedMessages.indexOf(lowPriority),violationType: 'starvation',});}
     }
 
     return {
@@ -427,13 +378,7 @@ class MessagePriorityTester {
       : 0;
 
     const queueTimesByPriority = {
-      critical: this.processedMessages.filter(p => p.message.metadata.priority === 'critical').map(p => p.queueTime),
-      high: this.processedMessages.filter(p => p.message.metadata.priority === 'high').map(p => p.queueTime),
-      normal: this.processedMessages.filter(p => (p.message.metadata.priority || 'normal') === 'normal').map(p => p.queueTime),
-      low: this.processedMessages.filter(p => p.message.metadata.priority === 'low').map(p => p.queueTime),
-    };
-
-    return {
+      critical: this.processedMessages.filter(p => p.message.metadata.priority === 'critical').map(p => p.queueTime),high: this.processedMessages.filter(p => p.message.metadata.priority === 'high').map(p => p.queueTime),normal: this.processedMessages.filter(p => (p.message.metadata.priority || 'normal') === 'normal').map(p => p.queueTime),low: this.processedMessages.filter(p => p.message.metadata.priority === 'low').map(p => p.queueTime),};return {
       queueSizes,
       totalProcessed: this.processedMessages.length,
       averageQueueTime,
@@ -466,41 +411,20 @@ class ReliabilityTestClient extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket.WebSocket(this.url);
 
-      this.ws.on('open', () => {
-        this.connected = true;
-        this.emit('connected');
-        resolve();
-      });
+      this.ws.on('open', () => {this.connected = true;this.emit('connected');resolve();});
 
-      this.ws.on('message', (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
-          this.sequenceTracker.trackReceivedMessage(message);
-          this.emit('message', message);
-        } catch (error) {
-          this.emit('error', new Error(`Failed to parse message: ${error}`));
+      this.ws.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;this.sequenceTracker.trackReceivedMessage(message);this.emit('message', message);} catch (error) {this.emit('error', new Error(`Failed to parse message: ${error}`));
         }
       });
 
-      this.ws.on('error', (error) => {
-        this.connected = false;
-        this.emit('error', error);
-        reject(error);
-      });
+      this.ws.on('error', (error) => {this.connected = false;this.emit('error', error);reject(error);});
 
-      this.ws.on('close', () => {
-        this.connected = false;
-        this.emit('disconnected');
-      });
-    });
+      this.ws.on('close', () => {this.connected = false;this.emit('disconnected');});});
   }
 
   async sendMessage(message: ConversationalMessage): Promise<void> {
     if (!this.ws || !this.connected) {
-      throw new Error('WebSocket not connected');
-    }
-
-    this.sequenceTracker.trackSentMessage(message);
+      throw new Error('WebSocket not connected');}this.sequenceTracker.trackSentMessage(message);
     this.priorityTester.enqueueMessage(message);
     this.ws.send(JSON.stringify(message));
   }
@@ -510,9 +434,7 @@ class ReliabilityTestClient extends EventEmitter {
     sessionId: string,
     options: {
       delay?: number;
-      priority?: 'critical' | 'high' | 'normal' | 'low';
-      requiresAck?: boolean;
-      messageType?: ConversationalMessageType;
+      priority?: 'critical' | 'high' | 'normal' | 'low';requiresAck?: boolean;messageType?: ConversationalMessageType;
     } = {}
   ): Promise<void> {
     const delay = options.delay || 0;
@@ -522,9 +444,7 @@ class ReliabilityTestClient extends EventEmitter {
 
     for (let i = 1; i <= count; i++) {
       const message: ConversationalMessage = {
-        messageId: `seq_msg_${sessionId}_${i}_${Date.now()}`,
-        sessionId,
-        timestamp: Date.now(),
+        messageId: `seq_msg_${sessionId}_${i}_${Date.now()}`,sessionId,timestamp: Date.now(),
         sequence: i,
         type: messageType,
         payload: {
@@ -536,9 +456,7 @@ class ReliabilityTestClient extends EventEmitter {
           priority,
           requiresAck,
           compression: false,
-          routingHints: ['sequence-test'],
-        },
-      };
+          routingHints: ['sequence-test'],},};
 
       await this.sendMessage(message);
 
@@ -566,15 +484,11 @@ class ReliabilityTestClient extends EventEmitter {
           payload: {
             priority,
             index: i,
-            testType: 'priority',
-          },
-          metadata: {
+            testType: 'priority',},metadata: {
             priority,
             requiresAck: false,
             compression: false,
-            routingHints: ['priority-test'],
-          },
-        });
+            routingHints: ['priority-test'],},});
       }
     }
 
@@ -619,14 +533,7 @@ class ReliabilityTestClient extends EventEmitter {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8187,
-      'PARLANT_WEBSOCKET_PORT': 8188,
-      'WEBSOCKET_MESSAGE_ACK_TIMEOUT': 5000,
-      'WEBSOCKET_MAX_RETRY_ATTEMPTS': 3,
-      'WEBSOCKET_SEQUENCE_VALIDATION': true,
-      'WEBSOCKET_PRIORITY_QUEUE_ENABLED': true,
-    };
-    return config[key] ?? defaultValue;
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8187,'PARLANT_WEBSOCKET_PORT': 8188,'WEBSOCKET_MESSAGE_ACK_TIMEOUT': 5000,'WEBSOCKET_MAX_RETRY_ATTEMPTS': 3,'WEBSOCKET_SEQUENCE_VALIDATION': true,'WEBSOCKET_PRIORITY_QUEUE_ENABLED': true,};return config[key] ?? defaultValue;
   }),
 };
 
@@ -669,8 +576,7 @@ describe('Message Ordering and Reliability Tests', () => {
       sentAcks: Set<string>;
     }>();
 
-    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {
-      const sessionId = req.headers['x-session-id'] as string || randomUUID();
+    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {const sessionId = req.headers['x-session-id'] as string || randomUUID();
 
       const sessionInfo = {
         ws,
@@ -683,12 +589,7 @@ describe('Message Ordering and Reliability Tests', () => {
       sessions.set(sessionId, sessionInfo);
       console.log(`Session ${sessionId} connected for reliability testing`);
 
-      ws.on('message', async (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
-          sessionInfo.receivedMessages.push(message);
-
-          // Send acknowledgment if required
+      ws.on('message', async (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;sessionInfo.receivedMessages.push(message);// Send acknowledgment if required
           if (message.metadata.requiresAck && !sessionInfo.sentAcks.has(message.messageId)) {
             const ackMessage: ConversationalMessage = {
               messageId: randomUUID(),
@@ -698,12 +599,8 @@ describe('Message Ordering and Reliability Tests', () => {
               type: ConversationalMessageType.ACKNOWLEDGMENT,
               payload: { acknowledgedMessageId: message.messageId },
               metadata: {
-                priority: 'high',
-                requiresAck: false,
-                compression: false,
-                routingHints: ['ack'],
-              },
-            };
+                priority: 'high',requiresAck: false,compression: false,
+                routingHints: ['ack'],},};
 
             ws.send(JSON.stringify(ackMessage));
             sessionInfo.sentAcks.add(message.messageId);
@@ -724,12 +621,8 @@ describe('Message Ordering and Reliability Tests', () => {
                 serverSequence: sessionInfo.messageSequence,
               },
               metadata: {
-                priority: message.metadata.priority || 'normal',
-                requiresAck: false,
-                compression: false,
-                routingHints: ['echo'],
-              },
-            };
+                priority: message.metadata.priority || 'normal',requiresAck: false,compression: false,
+                routingHints: ['echo'],},};
 
             // Simulate processing delay based on priority
             const delay = getPriorityDelay(message.metadata.priority || 'normal');
@@ -762,12 +655,7 @@ describe('Message Ordering and Reliability Tests', () => {
 
     function getPriorityDelay(priority: string): number {
       switch (priority) {
-        case 'critical': return 1;
-        case 'high': return 5;
-        case 'normal': return 10;
-        case 'low': return 20;
-        default: return 10;
-      }
+        case 'critical': return 1;case 'high': return 5;case 'normal': return 10;case 'low': return 20;default: return 10;}
     }
 
     async function handleValidationWithProgress(
@@ -795,16 +683,10 @@ describe('Message Ordering and Reliability Tests', () => {
                 stage: i === updateCount ? 'completed' : 'processing',
                 progress,
                 message: `Progress: ${progress.toFixed(1)}%`,
-                status: i === updateCount ? 'completed' : 'active',
-                estimatedTimeRemaining: i === updateCount ? 0 : (updateCount - i) * interval,
-              },
+                status: i === updateCount ? 'completed' : 'active',estimatedTimeRemaining: i === updateCount ? 0 : (updateCount - i) * interval,},
               metadata: {
-                priority: 'normal',
-                requiresAck: false,
-                compression: false,
-                routingHints: ['progress'],
-              },
-            };
+                priority: 'normal',requiresAck: false,compression: false,
+                routingHints: ['progress'],},};
 
             sessionInfo.ws.send(JSON.stringify(progressMessage));
           }, i * interval);
@@ -829,12 +711,8 @@ describe('Message Ordering and Reliability Tests', () => {
             metadata: { processingTime: 150 },
           },
           metadata: {
-            priority: 'high',
-            requiresAck: true,
-            compression: false,
-            routingHints: ['validation-response'],
-          },
-        };
+            priority: 'high',requiresAck: true,compression: false,
+            routingHints: ['validation-response'],},};
 
         sessionInfo.ws.send(JSON.stringify(response));
       }, (streamingOptions?.maxUpdateCount || 3) * (streamingOptions?.updateInterval || 100) + 50);
@@ -858,15 +736,9 @@ describe('Message Ordering and Reliability Tests', () => {
 
   // ===== MESSAGE SEQUENCE ORDERING TESTS =====
 
-  describe('Message Sequence Ordering', () => {
-    it('should maintain perfect message ordering in sequential delivery', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+  describe('Message Sequence Ordering', () => {it('should maintain perfect message ordering in sequential delivery', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'sequence-test-session';
-      const messageCount = 100;
-
-      // Send sequenced messages
+      const sessionId = 'sequence-test-session';const messageCount = 100;// Send sequenced messages
       await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 10,
         requiresAck: true,
@@ -879,9 +751,7 @@ describe('Message Ordering and Reliability Tests', () => {
       const orderingValidation = sequenceTracker.validateSequenceOrdering();
       const metrics = sequenceTracker.getMetrics();
 
-      console.log('Sequential Ordering Results:', {
-        messagesSent: messageCount,
-        messagesReceived: metrics.totalReceived,
+      console.log('Sequential Ordering Results:', {messagesSent: messageCount,messagesReceived: metrics.totalReceived,
         sequenceViolations: metrics.sequenceViolations,
         isValidOrdering: orderingValidation.isValid,
         violationDetails: orderingValidation.violations.slice(0, 5),
@@ -894,21 +764,13 @@ describe('Message Ordering and Reliability Tests', () => {
       await client.disconnect();
     });
 
-    it('should handle rapid message bursts while maintaining order', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should handle rapid message bursts while maintaining order', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'burst-test-session';
-      const messageCount = 200;
-
-      // Send rapid burst of messages (no delay)
+      const sessionId = 'burst-test-session';const messageCount = 200;// Send rapid burst of messages (no delay)
       await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 0,
         requiresAck: false,
-        priority: 'high',
-      });
-
-      // Wait for all responses
+        priority: 'high',});// Wait for all responses
       await new Promise(resolve => setTimeout(resolve, 5000));
 
       const sequenceTracker = client.getSequenceTracker();
@@ -929,43 +791,23 @@ describe('Message Ordering and Reliability Tests', () => {
       await client.disconnect();
     });
 
-    it('should handle out-of-order delivery and recovery', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should handle out-of-order delivery and recovery', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'out-of-order-test';
-      const sequenceTracker = client.getSequenceTracker();
-
-      // Send messages with intentionally mixed sequences
+      const sessionId = 'out-of-order-test';const sequenceTracker = client.getSequenceTracker();// Send messages with intentionally mixed sequences
       const messages: ConversationalMessage[] = [
         {
-          messageId: 'msg-3',
-          sessionId,
-          timestamp: Date.now(),
+          messageId: 'msg-3',sessionId,timestamp: Date.now(),
           sequence: 3,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'third' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },
-        },
-        {
-          messageId: 'msg-1',
-          sessionId,
-          timestamp: Date.now(),
+          payload: { order: 'third' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},{
+          messageId: 'msg-1',sessionId,timestamp: Date.now(),
           sequence: 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'first' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },
-        },
-        {
-          messageId: 'msg-2',
-          sessionId,
-          timestamp: Date.now(),
+          payload: { order: 'first' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},{
+          messageId: 'msg-2',sessionId,timestamp: Date.now(),
           sequence: 2,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'second' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },
-        },
-      ];
+          payload: { order: 'second' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},];
 
       // Send messages in out-of-order sequence
       for (const message of messages) {
@@ -977,27 +819,19 @@ describe('Message Ordering and Reliability Tests', () => {
 
       const orderingValidation = sequenceTracker.validateSequenceOrdering();
 
-      console.log('Out-of-order Handling Results:', {
-        sentMessages: messages.length,
-        sequenceViolations: sequenceTracker.getMetrics().sequenceViolations,
+      console.log('Out-of-order Handling Results:', {sentMessages: messages.length,sequenceViolations: sequenceTracker.getMetrics().sequenceViolations,
         violations: orderingValidation.violations,
         recoveryCapable: orderingValidation.violations.length <= messages.length,
       });
 
       // Should detect out-of-order messages
       expect(orderingValidation.violations.length).toBeGreaterThan(0);
-      expect(orderingValidation.violations.some(v => v.violationType === 'gap')).toBe(true);
-
-      await client.disconnect();
-    });
+      expect(orderingValidation.violations.some(v => v.violationType === 'gap')).toBe(true);await client.disconnect();});
   });
 
   // ===== DELIVERY ACKNOWLEDGMENT SYSTEMS =====
 
-  describe('Delivery Acknowledgment Systems', () => {
-    it('should provide sub-5ms acknowledgment latency for critical messages', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+  describe('Delivery Acknowledgment Systems', () => {it('should provide sub-5ms acknowledgment latency for critical messages', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
       const sessionId = 'ack-latency-test';
       const messageCount = 50;
@@ -1005,19 +839,13 @@ describe('Message Ordering and Reliability Tests', () => {
       // Send critical priority messages requiring acknowledgment
       for (let i = 1; i <= messageCount; i++) {
         const message: ConversationalMessage = {
-          messageId: `critical-msg-${i}`,
-          sessionId,
-          timestamp: Date.now(),
+          messageId: `critical-msg-${i}`,sessionId,timestamp: Date.now(),
           sequence: i,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { criticalData: `Important data ${i}` },
           metadata: {
-            priority: 'critical',
-            requiresAck: true,
-            compression: false,
-            routingHints: ['critical'],
-          },
-        };
+            priority: 'critical',requiresAck: true,compression: false,
+            routingHints: ['critical'],},};
 
         await client.sendMessage(message);
         await new Promise(resolve => setTimeout(resolve, 20));
@@ -1033,34 +861,21 @@ describe('Message Ordering and Reliability Tests', () => {
       console.log('Acknowledgment Latency Results:', {
         messagesSent: messageCount,
         acknowledged: metrics.totalAcknowledged,
-        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(2)}%`,
-        averageAckLatency: `${metrics.averageAckLatency.toFixed(2)}ms`,
-        maxAckLatency: `${metrics.maxAckLatency.toFixed(2)}ms`,
-        target: '5ms average',
-      });
-
-      expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
+        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(2)}%`,averageAckLatency: `${metrics.averageAckLatency.toFixed(2)}ms`,maxAckLatency: `${metrics.maxAckLatency.toFixed(2)}ms`,
+        target: '5ms average',});expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
       expect(metrics.averageAckLatency).toBeLessThan(20); // Sub-20ms average (adjusted for test environment)
       expect(metrics.maxAckLatency).toBeLessThan(100); // Max under 100ms
 
       await client.disconnect();
     });
 
-    it('should achieve 99.95% message delivery success rate', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should achieve 99.95% message delivery success rate', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'delivery-rate-test';
-      const messageCount = 1000;
-
-      // Send large volume of messages
+      const sessionId = 'delivery-rate-test';const messageCount = 1000;// Send large volume of messages
       await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 2,
         requiresAck: true,
-        priority: 'normal',
-      });
-
-      // Wait for all deliveries and acknowledgments
+        priority: 'normal',});// Wait for all deliveries and acknowledgments
       await new Promise(resolve => setTimeout(resolve, 10000));
 
       const sequenceTracker = client.getSequenceTracker();
@@ -1071,23 +886,15 @@ describe('Message Ordering and Reliability Tests', () => {
         messagesSent: messageCount,
         messagesReceived: metrics.totalReceived,
         acknowledged: metrics.totalAcknowledged,
-        deliveryRate: `${(reliability.deliveryRate * 100).toFixed(3)}%`,
-        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(3)}%`,
-        lostMessages: reliability.lostMessages.length,
-        reliabilityScore: `${(reliability.reliabilityScore * 100).toFixed(2)}%`,
-        target: '99.95%',
-      });
-
-      expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
+        deliveryRate: `${(reliability.deliveryRate * 100).toFixed(3)}%`,acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(3)}%`,lostMessages: reliability.lostMessages.length,reliabilityScore: `${(reliability.reliabilityScore * 100).toFixed(2)}%`,
+        target: '99.95%',});expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
       expect(reliability.acknowledgmentRate).toBeGreaterThan(0.99); // 99%+ ack rate
       expect(reliability.reliabilityScore).toBeGreaterThan(0.95); // 95%+ overall reliability
 
       await client.disconnect();
     });
 
-    it('should handle acknowledgment timeouts and retries', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should handle acknowledgment timeouts and retries', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
       const sessionId = 'timeout-test';
       const timeoutMessages: ConversationalMessage[] = [];
@@ -1102,12 +909,8 @@ describe('Message Ordering and Reliability Tests', () => {
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { timeoutTest: true, index: i },
           metadata: {
-            priority: 'normal',
-            requiresAck: true,
-            compression: false,
-            routingHints: ['timeout-test'],
-          },
-        };
+            priority: 'normal',requiresAck: true,compression: false,
+            routingHints: ['timeout-test'],},};
 
         timeoutMessages.push(message);
         await client.sendMessage(message);
@@ -1136,15 +939,9 @@ describe('Message Ordering and Reliability Tests', () => {
 
   // ===== MESSAGE PRIORITY QUEUE MANAGEMENT =====
 
-  describe('Message Priority Queue Management', () => {
-    it('should process messages in correct priority order', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+  describe('Message Priority Queue Management', () => {it('should process messages in correct priority order', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'priority-test-session';
-      const messageCount = 40;
-
-      // Send mixed priority messages
+      const sessionId = 'priority-test-session';const messageCount = 40;// Send mixed priority messages
       await client.sendPriorityTestMessages(messageCount, sessionId);
 
       // Wait for processing
@@ -1169,9 +966,7 @@ describe('Message Ordering and Reliability Tests', () => {
       await client.disconnect();
     });
 
-    it('should prevent starvation of low priority messages', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should prevent starvation of low priority messages', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
       const sessionId = 'starvation-test';
       const priorityTester = client.getPriorityTester();
@@ -1184,11 +979,7 @@ describe('Message Ordering and Reliability Tests', () => {
           timestamp: Date.now(),
           sequence: i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { priority: 'high', index: i },
-          metadata: {
-            priority: 'high',
-            requiresAck: false,
-            compression: false,
+          payload: { priority: 'high', index: i },metadata: {priority: 'high',requiresAck: false,compression: false,
             routingHints: ['starvation-test'],
           },
         };
@@ -1204,14 +995,8 @@ describe('Message Ordering and Reliability Tests', () => {
           timestamp: Date.now(),
           sequence: 20 + i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { priority: 'low', index: i },
-          metadata: {
-            priority: 'low',
-            requiresAck: false,
-            compression: false,
-            routingHints: ['starvation-test'],
-          },
-        };
+          payload: { priority: 'low', index: i },metadata: {priority: 'low',requiresAck: false,compression: false,
+            routingHints: ['starvation-test'],},};
 
         await client.sendMessage(lowPriorityMessage);
       }
@@ -1222,42 +1007,22 @@ describe('Message Ordering and Reliability Tests', () => {
       const orderingValidation = priorityTester.validatePriorityOrdering();
       const queueStats = priorityTester.getQueueStatistics();
 
-      console.log('Starvation Prevention Results:', {
-        totalProcessed: queueStats.totalProcessed,
-        starvationViolations: orderingValidation.violations.filter(v => v.violationType === 'starvation').length,
-        lowPriorityQueueTimes: queueStats.queueTimesByPriority.low,
-        maxLowPriorityQueueTime: Math.max(...queueStats.queueTimesByPriority.low, 0),
+      console.log('Starvation Prevention Results:', {totalProcessed: queueStats.totalProcessed,starvationViolations: orderingValidation.violations.filter(v => v.violationType === 'starvation').length,lowPriorityQueueTimes: queueStats.queueTimesByPriority.low,maxLowPriorityQueueTime: Math.max(...queueStats.queueTimesByPriority.low, 0),
       });
 
-      const starvationViolations = orderingValidation.violations.filter(v => v.violationType === 'starvation');
-      expect(starvationViolations.length).toBe(0); // No starvation should occur
-
-      await client.disconnect();
+      const starvationViolations = orderingValidation.violations.filter(v => v.violationType === 'starvation');expect(starvationViolations.length).toBe(0); // No starvation should occurawait client.disconnect();
     });
   });
 
   // ===== MESSAGE DEDUPLICATION AND IDEMPOTENCY =====
 
-  describe('Message Deduplication and Idempotency', () => {
-    it('should detect and handle duplicate messages', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+  describe('Message Deduplication and Idempotency', () => {it('should detect and handle duplicate messages', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'deduplication-test';
-      const originalMessage: ConversationalMessage = {
-        messageId: 'duplicate-test-message',
-        sessionId,
-        timestamp: Date.now(),
+      const sessionId = 'deduplication-test';const originalMessage: ConversationalMessage = {messageId: 'duplicate-test-message',sessionId,timestamp: Date.now(),
         sequence: 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { testData: 'original message' },
-        metadata: {
-          priority: 'normal',
-          requiresAck: false,
-          compression: false,
-          routingHints: ['dedup-test'],
-        },
-      };
+        payload: { testData: 'original message' },metadata: {priority: 'normal',requiresAck: false,compression: false,
+          routingHints: ['dedup-test'],},};
 
       // Send the same message multiple times
       for (let i = 0; i < 5; i++) {
@@ -1270,9 +1035,7 @@ describe('Message Ordering and Reliability Tests', () => {
       const sequenceTracker = client.getSequenceTracker();
       const metrics = sequenceTracker.getMetrics();
 
-      console.log('Deduplication Test Results:', {
-        messagesSent: 5,
-        duplicatesDetected: metrics.duplicatesDetected,
+      console.log('Deduplication Test Results:', {messagesSent: 5,duplicatesDetected: metrics.duplicatesDetected,
         uniqueMessagesReceived: metrics.totalReceived,
         deduplicationEffective: metrics.duplicatesDetected > 0,
       });
@@ -1283,48 +1046,27 @@ describe('Message Ordering and Reliability Tests', () => {
       await client.disconnect();
     });
 
-    it('should maintain idempotency for validation requests', async () => {
-      const client = new ReliabilityTestClient(TEST_URL);
-      await client.connect();
+    it('should maintain idempotency for validation requests', async () => {const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
-      const sessionId = 'idempotency-test';
-      const validationId = randomUUID();
-
-      const validationRequest: ValidationRequestMessage = {
+      const sessionId = 'idempotency-test';const validationId = randomUUID();const validationRequest: ValidationRequestMessage = {
         type: ConversationalMessageType.VALIDATION_REQUEST,
-        messageId: 'idempotent-validation',
-        sessionId,
-        timestamp: Date.now(),
+        messageId: 'idempotent-validation',sessionId,timestamp: Date.now(),
         sequence: 1,
         payload: {
           validationId,
           context: {
-            userId: 'test-user',
-            applicationContext: 'idempotency-test',
-            environmentInfo: {},
-            previousActions: [],
+            userId: 'test-user',applicationContext: 'idempotency-test',environmentInfo: {},previousActions: [],
             securityContext: {
-              authenticationLevel: 'basic',
-              permissions: ['read'],
-              auditRequired: false,
-              complianceFlags: [],
+              authenticationLevel: 'basic',permissions: ['read'],auditRequired: false,complianceFlags: [],
             },
           },
           action: {
-            actionType: 'idempotent_action',
-            parameters: { test: true },
-            expectedOutcome: 'Should be processed once',
-            reversible: true,
-            impact: {
-              scope: 'local',
-              dataAccess: false,
-              stateChanges: false,
+            actionType: 'idempotent_action',parameters: { test: true },expectedOutcome: 'Should be processed once',reversible: true,impact: {
+              scope: 'local',dataAccess: false,stateChanges: false,
               userInteraction: false,
             },
           },
-          riskLevel: 'low',
-          streamingOptions: {
-            enableProgressUpdates: false,
+          riskLevel: 'low',streamingOptions: {enableProgressUpdates: false,
             updateInterval: 1000,
             maxUpdateCount: 1,
             compressionEnabled: false,
@@ -1332,12 +1074,8 @@ describe('Message Ordering and Reliability Tests', () => {
           },
         },
         metadata: {
-          priority: 'normal',
-          requiresAck: true,
-          compression: false,
-          routingHints: ['validation'],
-        },
-      };
+          priority: 'normal',requiresAck: true,compression: false,
+          routingHints: ['validation'],},};
 
       // Send the same validation request multiple times
       for (let i = 0; i < 3; i++) {

@@ -17,18 +17,12 @@
  * @version 2.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  JobStatus,
+import { Injectable, Logger } from '@nestjs/common';import { EventEmitter2 } from '@nestjs/event-emitter';import { v4 as uuidv4 } from 'uuid';import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from './dto/async-job.dto';
-import {
-  BatchJobSubmissionDto,
+} from './dto/async-job.dto';import {BatchJobSubmissionDto,
   BatchJobSubmissionResponseDto,
   BatchJobSpecDto,
   BatchExecutionMode,
@@ -37,12 +31,7 @@ import {
   JobSearchResultsDto,
   JobAnalyticsDto,
   JobProgressUpdateDto,
-} from './dto/batch-job.dto';
-import { ComputerActionDto } from './dto/computer-action.dto';
-import { AsyncJobService } from './async-job.service';
-
-/**
- * Enhanced job data structure with batch and dependency support
+} from './dto/batch-job.dto';import { ComputerActionDto } from './dto/computer-action.dto';import { AsyncJobService } from './async-job.service';/*** Enhanced job data structure with batch and dependency support
  */
 interface EnhancedJobData {
   jobId: string;
@@ -208,8 +197,7 @@ export class EnhancedAsyncJobService {
           const depJobId = batchContext.jobKeys[dep.dependsOnJobId];
           if (!depJobId) {
             throw new Error(
-              `Dependency job key '${dep.dependsOnJobId}' not found in batch`,
-            );
+              `Dependency job key '${dep.dependsOnJobId}' not found in batch',);
           }
 
           job.dependencies.push(depJobId);
@@ -243,9 +231,7 @@ export class EnhancedAsyncJobService {
     );
 
     // Emit batch submission event
-    this.eventEmitter.emit('batch.submitted', {
-      batchId,
-      jobIds,
+    this.eventEmitter.emit('batch.submitted', {batchId,jobIds,
       executionMode: batchRequest.executionMode,
       totalJobs: batchRequest.jobs.length,
     });
@@ -328,34 +314,20 @@ export class EnhancedAsyncJobService {
     }
 
     // Sort results
-    const sortBy = criteria.sortBy ?? 'submittedAt';
-    const sortOrder = criteria.sortOrder ?? 'desc';
-
-    filteredJobs.sort((a, b) => {
-      let aValue: unknown;
+    const sortBy = criteria.sortBy ?? 'submittedAt';const sortOrder = criteria.sortOrder ?? 'desc';filteredJobs.sort((a, b) => {let aValue: unknown;
       let bValue: unknown;
 
       switch (sortBy) {
-        case 'submittedAt':
-          aValue = a.submittedAt.getTime();
-          bValue = b.submittedAt.getTime();
+        case 'submittedAt':aValue = a.submittedAt.getTime();bValue = b.submittedAt.getTime();
           break;
-        case 'completedAt':
-          aValue = a.completedAt?.getTime() ?? 0;
-          bValue = b.completedAt?.getTime() ?? 0;
+        case 'completedAt':aValue = a.completedAt?.getTime() ?? 0;bValue = b.completedAt?.getTime() ?? 0;
           break;
-        case 'executionTime':
-          aValue = a.executionTime ?? 0;
-          bValue = b.executionTime ?? 0;
+        case 'executionTime':aValue = a.executionTime ?? 0;bValue = b.executionTime ?? 0;
           break;
-        case 'priority':
-          const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
-          aValue = priorityOrder[a.priority as keyof typeof priorityOrder];
+        case 'priority':const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };aValue = priorityOrder[a.priority as keyof typeof priorityOrder];
           bValue = priorityOrder[b.priority as keyof typeof priorityOrder];
           break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
+        case 'status':aValue = a.status;bValue = b.status;
           break;
         default:
           aValue = a.submittedAt.getTime();
@@ -545,18 +517,14 @@ export class EnhancedAsyncJobService {
           cancelled.push(job.jobId);
 
           // Emit cancellation event
-          this.eventEmitter.emit('job.cancelled', {
-            jobId: job.jobId,
-            batchId: job.batchId,
+          this.eventEmitter.emit('job.cancelled', {jobId: job.jobId,batchId: job.batchId,
             reason: 'bulk_cancellation',
           });
         } else {
           failed.push(job.jobId);
         }
       } catch (error) {
-        this.logger.error(`Failed to cancel job ${job.jobId}: ${error}`);
-        failed.push(job.jobId);
-      }
+        this.logger.error(`Failed to cancel job ${job.jobId}: ${error}`);failed.push(job.jobId);}
     }
 
     return { cancelled, failed };
@@ -566,17 +534,11 @@ export class EnhancedAsyncJobService {
    * Generate unique batch identifier
    */
   private generateBatchId(): string {
-    return `batch_${Date.now()}_${uuidv4().substring(0, 8)}`;
-  }
-
-  /**
+    return `batch_${Date.now()}_${uuidv4().substring(0, 8)}`;}/**
    * Generate unique job identifier
    */
   private generateJobId(): string {
-    return `job_${Date.now()}_${uuidv4().substring(0, 8)}`;
-  }
-
-  /**
+    return `job_${Date.now()}_${uuidv4().substring(0, 8)}`;}/**
    * Validate dependency graph for cycles
    */
   private validateDependencyGraph(batchId: string): void {
@@ -608,9 +570,7 @@ export class EnhancedAsyncJobService {
 
     for (const jobId of Object.values(batch.jobKeys)) {
       if (hasCycle(jobId)) {
-        throw new Error(`Circular dependency detected in batch ${batchId}`);
-      }
-    }
+        throw new Error(`Circular dependency detected in batch ${batchId}`);}}
   }
 
   /**
@@ -767,9 +727,7 @@ export class EnhancedAsyncJobService {
       }
     } catch (error) {
       // Job might not exist in base service yet
-      this.logger.debug(`Could not get status for job ${job.jobId}: ${error}`);
-    }
-  }
+      this.logger.debug(`Could not get status for job ${job.jobId}: ${error}`);}}
 
   /**
    * Resolve dependencies and trigger dependent jobs

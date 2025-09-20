@@ -18,34 +18,21 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
-import { Request, Response } from 'express';
-import {
-  getVersionConfig,
+} from '@nestjs/common';import { Reflector } from '@nestjs/core';import { ConfigService } from '@nestjs/config';import { Observable } from 'rxjs';import { map, tap } from 'rxjs/operators';import { Request, Response } from 'express';import {getVersionConfig,
   getApiVersion,
   getMultiVersions,
   isDesktopApiVersion,
   getDesktopCompatibility,
   SUPPORTED_API_VERSIONS,
   SupportedVersion,
-} from './api-version.decorator';
-
-/**
- * Version resolution result
+} from './api-version.decorator';/*** Version resolution result
  */
 interface VersionResolution {
   /** Resolved API version */
   resolvedVersion: string;
 
   /** Version source (header, query, url, default) */
-  source: 'header' | 'query' | 'url' | 'default';
-
-  /** Whether version is supported */
-  isSupported: boolean;
+  source: 'header' | 'query' | 'url' | 'default';/** Whether version is supported */isSupported: boolean;
 
   /** Desktop client compatibility */
   desktopCompatibility: {
@@ -94,13 +81,9 @@ export class VersionInterceptor implements NestInterceptor {
     private readonly configService: ConfigService,
   ) {
     this.defaultVersion = this.configService.get<SupportedVersion>(
-      'api.version.default',
-      SUPPORTED_API_VERSIONS.V1,
-    );
+      'api.version.default',SUPPORTED_API_VERSIONS.V1,);
     this.strictVersioning = this.configService.get<boolean>(
-      'api.version.strict',
-      false,
-    );
+      'api.version.strict',false,);
 
     this.logger.log('BytebotD version interceptor initialized', {
       defaultVersion: this.defaultVersion,
@@ -110,10 +93,7 @@ export class VersionInterceptor implements NestInterceptor {
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const operationId = `bytebotd-version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    try {
+    const operationId = `bytebotd-version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();try {
       const request = context.switchToHttp().getRequest<Request>();
       const response = context.switchToHttp().getResponse<Response>();
 
@@ -125,9 +105,7 @@ export class VersionInterceptor implements NestInterceptor {
       const desktopCompatibility: DesktopCompatibility | null =
         getDesktopCompatibility(context.getHandler()) ?? null;
 
-      this.logger.debug(`[${operationId}] Processing BytebotD API version`, {
-        operationId,
-        endpoint: request.path,
+      this.logger.debug(`[${operationId}] Processing BytebotD API version`, {operationId,endpoint: request.path,
         method: request.method,
         endpointVersion,
         multiVersions,
@@ -166,9 +144,7 @@ export class VersionInterceptor implements NestInterceptor {
 
       // Log version resolution
       if (versionResolution.warnings.length > 0) {
-        this.logger.warn(`[${operationId}] Version resolution warnings`, {
-          operationId,
-          warnings: versionResolution.warnings,
+        this.logger.warn(`[${operationId}] Version resolution warnings`, {operationId,warnings: versionResolution.warnings,
           resolvedVersion: versionResolution.resolvedVersion,
           desktopClient: versionResolution.desktopCompatibility,
         });
@@ -191,9 +167,7 @@ export class VersionInterceptor implements NestInterceptor {
         }),
         map((data: unknown) => {
           // Add version metadata to response
-          if (typeof data === 'object' && data !== null) {
-            return {
-              ...(data as Record<string, unknown>),
+          if (typeof data === 'object' && data !== null) {return {...(data as Record<string, unknown>),
               metadata: {
                 apiVersion: versionResolution.resolvedVersion,
                 service: 'BytebotD',
@@ -224,9 +198,7 @@ export class VersionInterceptor implements NestInterceptor {
   /**
    * Resolve API version from request with desktop client awareness
    * @param request - Express request
-   * @param endpointVersion - Endpoint's declared version
-   * @param multiVersions - Array of supported versions
-   * @param isDesktopEndpoint - Whether endpoint is desktop-specific
+   * @param endpointVersion - Endpoint's declared version* @param multiVersions - Array of supported versions* @param isDesktopEndpoint - Whether endpoint is desktop-specific
    * @param desktopCompatibility - Desktop compatibility requirements
    * @param operationId - Operation ID for logging
    * @returns Version resolution result
@@ -240,18 +212,13 @@ export class VersionInterceptor implements NestInterceptor {
     operationId: string,
   ): VersionResolution {
     let resolvedVersion = this.defaultVersion;
-    let source: VersionResolution['source'] = 'default';
-    const warnings: string[] = [];
-
-    // Extract desktop client information
+    let source: VersionResolution['source'] = 'default';const warnings: string[] = [];// Extract desktop client information
     const desktopClientInfo = this.extractDesktopClientInfo(request);
 
     // Try to resolve version from different sources (in order of precedence)
 
     // 1. Accept-Version header (most specific)
-    const acceptVersion = request.get('Accept-Version');
-    if (acceptVersion) {
-      if (this.isValidVersion(acceptVersion)) {
+    const acceptVersion = request.get('Accept-Version');if (acceptVersion) {if (this.isValidVersion(acceptVersion)) {
         resolvedVersion = acceptVersion;
         source = 'header';
       } else {
@@ -261,9 +228,7 @@ export class VersionInterceptor implements NestInterceptor {
 
     // 2. Query parameter version
     const queryVersion = request.query.version as string;
-    if (queryVersion && source === 'default') {
-      if (this.isValidVersion(queryVersion)) {
-        resolvedVersion = queryVersion;
+    if (queryVersion && source === 'default') {if (this.isValidVersion(queryVersion)) {resolvedVersion = queryVersion;
         source = 'query';
       } else {
         warnings.push(`Invalid query version parameter: ${queryVersion}`);
@@ -282,8 +247,7 @@ export class VersionInterceptor implements NestInterceptor {
       }
     }
 
-    // 4. Use endpoint's declared version if no version specified
-    if (source === 'default' && endpointVersion) {
+    // 4. Use endpoint's declared version if no version specifiedif (source === 'default' && endpointVersion) {
       resolvedVersion = endpointVersion;
     }
 
@@ -305,9 +269,7 @@ export class VersionInterceptor implements NestInterceptor {
     if (compatibilityIssues.length > 0) {
       warnings.push(
         ...compatibilityIssues.map(
-          (issue) => `Desktop compatibility: ${issue}`,
-        ),
-      );
+          (issue) => `Desktop compatibility: ${issue}`,),);
     }
 
     this.logger.debug(`[${operationId}] BytebotD version resolved`, {
@@ -326,9 +288,7 @@ export class VersionInterceptor implements NestInterceptor {
       isSupported,
       desktopCompatibility: {
         isDesktopClient: desktopClientInfo.isDesktopClient,
-        clientVersion: desktopClientInfo.clientVersion ?? 'unknown',
-        vncClient: desktopClientInfo.vncClient,
-        isComputerUse: desktopClientInfo.isComputerUse,
+        clientVersion: desktopClientInfo.clientVersion ?? 'unknown',vncClient: desktopClientInfo.vncClient,isComputerUse: desktopClientInfo.isComputerUse,
         compatibilityIssues,
       },
       warnings,
@@ -341,35 +301,16 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Desktop client information
    */
   private extractDesktopClientInfo(request: Request) {
-    const desktopClient = request.get('X-Desktop-Client') ?? '';
-    const computerUseClient = request.get('X-Computer-Use-Client');
-    const vncClient = request.get('X-VNC-Client') ?? 'unknown';
-    const userAgent = request.get('User-Agent') ?? '';
-
-    // Detect if this is a desktop client
-    const isDesktopClient = Boolean(
+    const desktopClient = request.get('X-Desktop-Client') ?? '';const computerUseClient = request.get('X-Computer-Use-Client');const vncClient = request.get('X-VNC-Client') ?? 'unknown';const userAgent = request.get('User-Agent') ?? '';// Detect if this is a desktop clientconst isDesktopClient = Boolean(
       desktopClient ||
-        (computerUseClient ?? '') ||
-        userAgent.toLowerCase().includes('bytebotd') ||
-        userAgent.toLowerCase().includes('desktop'),
+        (computerUseClient ?? '') ||userAgent.toLowerCase().includes('bytebotd') ||userAgent.toLowerCase().includes('desktop'),
     );
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
     const versionMatch = desktopClient.match(
       /-([0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9]+)?)/,
     );
-    const clientVersion = versionMatch ? versionMatch[1] : 'unknown';
-
-    const isComputerUse = Boolean(
-      (computerUseClient ?? '') ||
-        request.path.includes('computer-use') ||
-        request.path.includes('screenshot') ||
-        request.path.includes('click') ||
-        request.path.includes('type') ||
-        request.path.includes('key'),
-    );
-
-    return {
+    const clientVersion = versionMatch ? versionMatch[1] : 'unknown';const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes('computer-use') ||request.path.includes('screenshot') ||request.path.includes('click') ||request.path.includes('type') ||request.path.includes('key'),);return {
       isDesktopClient,
       clientVersion,
       vncClient,
@@ -409,8 +350,7 @@ export class VersionInterceptor implements NestInterceptor {
     if (multiVersions && multiVersions.length > 0) {
       if (!multiVersions.includes(resolvedVersion as SupportedVersion)) {
         warnings.push(
-          `Version ${resolvedVersion} not supported by this endpoint. Supported: ${multiVersions.join(', ')}`,
-        );
+          `Version ${resolvedVersion} not supported by this endpoint. Supported: ${multiVersions.join(`, ')}',);
         return false;
       }
       return true;
@@ -419,9 +359,7 @@ export class VersionInterceptor implements NestInterceptor {
     // If endpoint has a specific version, check compatibility
     if (endpointVersion && endpointVersion !== resolvedVersion) {
       warnings.push(
-        `Version mismatch: endpoint requires ${endpointVersion}, requested ${resolvedVersion}`,
-      );
-      return false;
+        `Version mismatch: endpoint requires ${endpointVersion}, requested ${resolvedVersion}`,);return false;
     }
 
     return true;
@@ -466,10 +404,7 @@ export class VersionInterceptor implements NestInterceptor {
       desktopCompatibility.vncRequirements.length > 0
     ) {
       const vncVersion = desktopClientInfo.vncClient as string;
-      if (vncVersion === 'unknown') {
-        issues.push('VNC client information not provided');
-      } else {
-        // Could implement more sophisticated VNC compatibility checking here
+      if (vncVersion === 'unknown') {issues.push('VNC client information not provided');} else {// Could implement more sophisticated VNC compatibility checking here
         // For now, just log the requirement
       }
     }
@@ -494,12 +429,9 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Boolean indicating if version1 >= version2
    */
   private compareVersions(version1: string, version2: string): boolean {
-    if (version1 === 'unknown' || version2 === 'unknown') {
-      return false;
-    }
+    if (version1 === 'unknown' || version2 === 'unknown') {return false;}
 
-    const v1Parts = version1.split('.').map(Number);
-    const v2Parts = version2.split('.').map(Number);
+    const v1Parts = version1.split('.').map(Number);const v2Parts = version2.split('.').map(Number);
 
     for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
       const v1Part = v1Parts[i] ?? 0;
@@ -534,10 +466,7 @@ export class VersionInterceptor implements NestInterceptor {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          error: 'Bad Request',
-          message: 'API version not supported',
-          details: {
-            requestedVersion: versionResolution.resolvedVersion,
+          error: 'Bad Request',message: 'API version not supported',details: {requestedVersion: versionResolution.resolvedVersion,
             source: versionResolution.source,
             warnings: versionResolution.warnings,
             supportedVersions: Object.values(SUPPORTED_API_VERSIONS),
@@ -568,10 +497,7 @@ export class VersionInterceptor implements NestInterceptor {
       throw new HttpException(
         {
           statusCode: 426, // 426 Upgrade Required
-          error: 'Upgrade Required',
-          message: 'Desktop client version incompatible',
-          details: {
-            compatibilityIssues: criticalIssues,
+          error: 'Upgrade Required',message: 'Desktop client version incompatible',details: {compatibilityIssues: criticalIssues,
             clientVersion: versionResolution.desktopCompatibility.clientVersion,
             isDesktopClient:
               versionResolution.desktopCompatibility.isDesktopClient,
@@ -592,37 +518,20 @@ export class VersionInterceptor implements NestInterceptor {
     response: Response,
     versionResolution: VersionResolution,
   ): void {
-    response.setHeader('X-API-Version', versionResolution.resolvedVersion);
-    response.setHeader('X-Version-Source', versionResolution.source);
-    response.setHeader('X-Service', 'BytebotD');
-
-    if (versionResolution.desktopCompatibility.isDesktopClient) {
-      response.setHeader('X-Desktop-Client-Detected', 'true');
+    response.setHeader('X-API-Version', versionResolution.resolvedVersion);response.setHeader('X-Version-Source', versionResolution.source);response.setHeader('X-Service', 'BytebotD');if (versionResolution.desktopCompatibility.isDesktopClient) {response.setHeader('X-Desktop-Client-Detected', 'true');response.setHeader('X-Desktop-Client-Version',versionResolution.desktopCompatibility.clientVersion,);
       response.setHeader(
-        'X-Desktop-Client-Version',
-        versionResolution.desktopCompatibility.clientVersion,
-      );
-      response.setHeader(
-        'X-VNC-Client',
-        versionResolution.desktopCompatibility.vncClient,
-      );
+        'X-VNC-Client',versionResolution.desktopCompatibility.vncClient,);
 
       if (versionResolution.desktopCompatibility.isComputerUse) {
-        response.setHeader('X-Computer-Use-Enabled', 'true');
-      }
-    }
+        response.setHeader('X-Computer-Use-Enabled', 'true');}}
 
     if (versionResolution.warnings.length > 0) {
       response.setHeader(
-        'X-Version-Warnings',
-        versionResolution.warnings.join('; '),
-      );
-    }
+        'X-Version-Warnings',versionResolution.warnings.join('; '),);}
 
     // Add supported versions for client discovery
     response.setHeader(
-      'X-Supported-Versions',
-      Object.values(SUPPORTED_API_VERSIONS).join(', '),
+      'X-Supported-Versions',Object.values(SUPPORTED_API_VERSIONS).join(', '),
     );
   }
 }

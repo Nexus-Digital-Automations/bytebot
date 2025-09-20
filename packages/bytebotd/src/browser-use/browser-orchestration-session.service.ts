@@ -1,17 +1,7 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Interval } from '@nestjs/schedule';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  CreateBrowserSessionDto,
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Interval } from '@nestjs/schedule';import { v4 as uuidv4 } from 'uuid';import {CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserSessionStatus,
-} from './dto/browser-session.dto';
-import { BrowserSessionService } from './browser-session.service';
-
-/**
- * Session Pool Configuration for orchestration
+} from './dto/browser-session.dto';import { BrowserSessionService } from './browser-session.service';/*** Session Pool Configuration for orchestration
  */
 export interface SessionPoolConfig {
   readonly poolId: string;
@@ -26,29 +16,11 @@ export interface SessionPoolConfig {
  * Session types for different automation scenarios
  */
 export enum SessionType {
-  STANDARD = 'standard',
-  HEADLESS = 'headless',
-  MOBILE = 'mobile',
-  INCOGNITO = 'incognito',
-  PERSISTENT = 'persistent',
-  TEMPORARY = 'temporary',
-}
-
-/**
+  STANDARD = 'standard',HEADLESS = 'headless',MOBILE = 'mobile',INCOGNITO = 'incognito',PERSISTENT = 'persistent',TEMPORARY = 'temporary',}/**
  * Session lifecycle events for orchestration coordination
  */
 export enum SessionLifecycleEvent {
-  SESSION_CREATED = 'session.created',
-  SESSION_ASSIGNED = 'session.assigned',
-  SESSION_RELEASED = 'session.released',
-  SESSION_IDLE = 'session.idle',
-  SESSION_ERROR = 'session.error',
-  SESSION_CLOSED = 'session.closed',
-  POOL_EXHAUSTED = 'pool.exhausted',
-  POOL_OPTIMIZED = 'pool.optimized',
-}
-
-/**
+  SESSION_CREATED = 'session.created',SESSION_ASSIGNED = 'session.assigned',SESSION_RELEASED = 'session.released',SESSION_IDLE = 'session.idle',SESSION_ERROR = 'session.error',SESSION_CLOSED = 'session.closed',POOL_EXHAUSTED = 'pool.exhausted',POOL_OPTIMIZED = 'pool.optimized',}/**
  * Agent session assignment tracking
  */
 export interface AgentSessionAssignment {
@@ -173,12 +145,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
   ) {
     // Load orchestration configuration
     this.config = this.loadOrchestrationConfig();
-    this.coordinatorUrl = this.configService.get<string>('BROWSER_COORDINATOR_URL', '');
-    this.coordinatorApiKey = this.configService.get<string>('BROWSER_COORDINATOR_API_KEY', '');
-    this.enableOrchestrationBridge = this.configService.get<boolean>('ENABLE_ORCHESTRATION_BRIDGE', false);
-
-    // Initialize session pools
-    this.initializeSessionPools();
+    this.coordinatorUrl = this.configService.get<string>('BROWSER_COORDINATOR_URL', '');this.coordinatorApiKey = this.configService.get<string>('BROWSER_COORDINATOR_API_KEY', '');this.enableOrchestrationBridge = this.configService.get<boolean>('ENABLE_ORCHESTRATION_BRIDGE', false);// Initialize session poolsthis.initializeSessionPools();
 
     // Setup event listeners
     this.setupEventListeners();
@@ -203,9 +170,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
   ): Promise<BrowserSessionDto> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Creating orchestration session`, {
-      agentId,
-      sessionType,
+    this.logger.log(`[${operationId}] Creating orchestration session`, {agentId,sessionType,
       priority,
       name: dto.name,
       poolUtilization: await this.getPoolUtilization(sessionType) ?? 0,
@@ -244,9 +209,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
       // Update statistics
       this.totalSessionsCreated++;
 
-      this.logger.log(`[${operationId}] Orchestration session created successfully`, {
-        sessionId: session.sessionId,
-        sessionType,
+      this.logger.log(`[${operationId}] Orchestration session created successfully`, {sessionId: session.sessionId,sessionType,
         agentId,
         totalSessions: await this.getTotalActiveSessions(),
       });
@@ -256,9 +219,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`[${operationId}] Failed to create orchestration session`, {
-        error: errorMessage,
-        agentId,
+      this.logger.error(`[${operationId}] Failed to create orchestration session`, {error: errorMessage,agentId,
         sessionType,
         stack: errorStack,
       });
@@ -277,9 +238,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
   ): Promise<BrowserSessionDto | null> {
     const operationId = this.generateOperationId();
 
-    this.logger.debug(`[${operationId}] Finding available session for agent`, {
-      agentId,
-      sessionType,
+    this.logger.debug(`[${operationId}] Finding available session for agent`, {agentId,sessionType,
       priority,
       taskRequirements: !!taskRequirements,
     });
@@ -339,9 +298,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
         timestamp: new Date(),
       });
 
-      this.logger.warn(`[${operationId}] No available sessions for agent`, {
-        agentId,
-        sessionType,
+      this.logger.warn(`[${operationId}] No available sessions for agent`, {agentId,sessionType,
         poolSize: poolSessions.size,
         maxSessions: poolConfig?.maxSessions,
       });
@@ -351,9 +308,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`[${operationId}] Failed to get available session for agent`, {
-        error: errorMessage,
-        agentId,
+      this.logger.error(`[${operationId}] Failed to get available session for agent`, {error: errorMessage,agentId,
         sessionType,
         stack: errorStack,
       });
@@ -444,9 +399,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
 
       this.totalAgentAssignments++;
 
-      this.logger.log(`[${operationId}] Session assigned to agent successfully`, {
-        sessionId,
-        agentId,
+      this.logger.log(`[${operationId}] Session assigned to agent successfully`, {sessionId,agentId,
         tabId: tab.tabId,
         taskId,
         priority,
@@ -485,10 +438,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
         if (assignment) {
           agentAssignments.delete(assignment);
 
-          // Close the agent's tab
-          this.baseSessionService.closeTab(sessionId, assignment.tabId);
-
-          // Remove agent from session tracking
+          // Close the agent's tabthis.baseSessionService.closeTab(sessionId, assignment.tabId);// Remove agent from session tracking
           const sessionAgents = this.sessionAssignments.get(sessionId);
           if (sessionAgents) {
             sessionAgents.delete(agentId);
@@ -525,9 +475,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
             timestamp: new Date(),
           });
 
-          this.logger.log(`[${operationId}] Session released from agent successfully`, {
-            sessionId,
-            agentId,
+          this.logger.log(`[${operationId}] Session released from agent successfully`, {sessionId,agentId,
             tabId: assignment.tabId,
             remainingAgents,
             sessionKept: keepSessionAlive,
@@ -536,9 +484,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
       }
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to release session from agent`, {
-        error: error.message,
-        sessionId,
+      this.logger.error(`[${operationId}] Failed to release session from agent`, {error: error.message,sessionId,
         agentId,
         stack: error.stack,
       });
@@ -596,10 +542,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
   async optimizeSessionPools(): Promise<void> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Starting session pool optimization`);
-
-    try {
-      for (const [sessionType, poolConfig] of this.sessionPoolConfigs.entries()) {
+    this.logger.log(`[${operationId}] Starting session pool optimization`);try {for (const [sessionType, poolConfig] of this.sessionPoolConfigs.entries()) {
         const poolState = await this.getPoolState(sessionType);
         const pool = this.sessionPools.get(sessionType) || new Set();
 
@@ -623,12 +566,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
         pools: Array.from(this.sessionPoolConfigs.keys()),
       });
 
-      this.logger.log(`[${operationId}] Session pool optimization completed`);
-
-    } catch (error) {
-      this.logger.error(`[${operationId}] Session pool optimization failed`, {
-        error: error.message,
-        stack: error.stack,
+      this.logger.log(`[${operationId}] Session pool optimization completed`);} catch (error) {this.logger.error(`[${operationId}] Session pool optimization failed`, {error: error.message,stack: error.stack,
       });
     }
   }
@@ -672,9 +610,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
 
       this.totalSessionsDestroyed++;
 
-      this.logger.log(`[${operationId}] Orchestration session closed successfully`, {
-        sessionId,
-        totalSessions: await this.getTotalActiveSessions(),
+      this.logger.log(`[${operationId}] Orchestration session closed successfully`, {sessionId,totalSessions: await this.getTotalActiveSessions(),
       });
 
     } catch (error) {
@@ -708,9 +644,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
       }
 
     } catch (error) {
-      this.logger.error('Health check failed', {
-        error: error.message,
-        stack: error.stack,
+      this.logger.error('Health check failed', {error: error.message,stack: error.stack,
       });
     }
   }
@@ -719,10 +653,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
    * Module cleanup
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Browser Orchestration Session Service');
-
-    try {
-      // Close all sessions
+    this.logger.log('Shutting down Browser Orchestration Session Service');try {// Close all sessions
       const allSessions = new Set<string>();
       for (const pool of this.sessionPools.values()) {
         for (const sessionId of pool) {
@@ -741,12 +672,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
       this.sessionMetrics.clear();
       this.poolStates.clear();
 
-      this.logger.log('Browser Orchestration Session Service shutdown complete');
-
-    } catch (error) {
-      this.logger.error('Shutdown failed', {
-        error: error.message,
-        stack: error.stack,
+      this.logger.log('Browser Orchestration Session Service shutdown complete');} catch (error) {this.logger.error('Shutdown failed', {error: error.message,stack: error.stack,
       });
     }
   }
@@ -756,18 +682,9 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
   // ========================================================================
 
   private loadOrchestrationConfig(): OrchestrationSessionConfig {
-    const maxTotalSessions = this.configService.get<number>('BROWSER_MAX_TOTAL_SESSIONS', 50);
-
-    return {
-      maxTotalSessions,
+    const maxTotalSessions = this.configService.get<number>('BROWSER_MAX_TOTAL_SESSIONS', 50);return {maxTotalSessions,
       sessionPools: this.createDefaultPoolConfigs(maxTotalSessions),
-      enableSessionSharing: this.configService.get<boolean>('BROWSER_ENABLE_SESSION_SHARING', true),
-      enableSessionReuse: this.configService.get<boolean>('BROWSER_ENABLE_SESSION_REUSE', true),
-      globalTimeoutMs: this.configService.get<number>('BROWSER_GLOBAL_TIMEOUT_MS', 600000),
-      resourceOptimization: this.configService.get<boolean>('BROWSER_ENABLE_OPTIMIZATION', true),
-      performanceMonitoring: this.configService.get<boolean>('BROWSER_ENABLE_MONITORING', true),
-      coordinatorEndpoint: this.configService.get<string>('BROWSER_COORDINATOR_ENDPOINT'),
-      coordinatorApiKey: this.configService.get<string>('BROWSER_COORDINATOR_API_KEY'),
+      enableSessionSharing: this.configService.get<boolean>('BROWSER_ENABLE_SESSION_SHARING', true),enableSessionReuse: this.configService.get<boolean>('BROWSER_ENABLE_SESSION_REUSE', true),globalTimeoutMs: this.configService.get<number>('BROWSER_GLOBAL_TIMEOUT_MS', 600000),resourceOptimization: this.configService.get<boolean>('BROWSER_ENABLE_OPTIMIZATION', true),performanceMonitoring: this.configService.get<boolean>('BROWSER_ENABLE_MONITORING', true),coordinatorEndpoint: this.configService.get<string>('BROWSER_COORDINATOR_ENDPOINT'),coordinatorApiKey: this.configService.get<string>('BROWSER_COORDINATOR_API_KEY'),
     };
   }
 
@@ -844,18 +761,10 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     const poolConfig = this.sessionPoolConfigs.get(sessionType);
 
     if (!pool || !poolConfig) {
-      throw new Error(`Session pool not configured for type: ${sessionType}`);
-    }
-
-    if (pool.size >= poolConfig.maxSessions) {
-      throw new Error(`Session pool at capacity for type: ${sessionType} (${pool.size}/${poolConfig.maxSessions})`);
-    }
-
-    const totalSessions = await this.getTotalActiveSessions();
+      throw new Error(`Session pool not configured for type: ${sessionType}`);}if (pool.size >= poolConfig.maxSessions) {
+      throw new Error(`Session pool at capacity for type: ${sessionType} (${pool.size}/${poolConfig.maxSessions})`);}const totalSessions = await this.getTotalActiveSessions();
     if (totalSessions >= this.config.maxTotalSessions) {
-      throw new Error(`Global session limit reached: ${totalSessions}/${this.config.maxTotalSessions}`);
-    }
-  }
+      throw new Error(`Global session limit reached: ${totalSessions}/${this.config.maxTotalSessions}`);}}
 
   private async addSessionToPool(sessionId: string, sessionType: SessionType): Promise<void> {
     const pool = this.sessionPools.get(sessionType);
@@ -1000,9 +909,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     const poolHealth = errorSessions === 0 ? 1.0 : Math.max(0, 1 - (errorSessions / pool.size));
 
     return {
-      poolId: poolConfig?.poolId || `pool_${sessionType}`,
-      sessionType,
-      activeSessions,
+      poolId: poolConfig?.poolId || `pool_${sessionType}`,sessionType,activeSessions,
       idleSessions,
       busySessions,
       errorSessions,
@@ -1029,15 +936,11 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     for (let i = 0; i < count; i++) {
       try {
         const createDto: CreateBrowserSessionDto = {
-          name: `Pool Warmup Session - ${sessionType}`,
-          headless: sessionType === SessionType.HEADLESS,
-          metadata: { poolWarmup: true },
+          name: `Pool Warmup Session - ${sessionType}`,headless: sessionType === SessionType.HEADLESS,metadata: { poolWarmup: true },
         };
         await this.createOrchestrationSession(createDto, undefined, sessionType);
       } catch (error) {
-        this.logger.warn(`Failed to create warmup session for ${sessionType}`, { error: error.message });
-        break;
-      }
+        this.logger.warn(`Failed to create warmup session for ${sessionType}`, { error: error.message });break;}
     }
   }
 
@@ -1094,62 +997,42 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     try {
       // TODO: Implement HTTP call to Python coordinator
       // const response = await fetch(`${this.coordinatorUrl}/sessions`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${this.coordinatorApiKey}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     action: 'session_created',
-      //     sessionId: session.sessionId,
-      //     agentId,
+      //   method: 'POST',//   headers: {//     'Authorization': `Bearer ${this.coordinatorApiKey}`,
+      //     'Content-Type': 'application/json',//   },//   body: JSON.stringify({
+      //     action: 'session_created',//     sessionId: session.sessionId,//     agentId,
       //     sessionType,
       //     timestamp: new Date().toISOString(),
       //   }),
       // });
 
-      this.logger.debug('Notified coordinator of session creation', { sessionId: session.sessionId });
-    } catch (error) {
-      this.logger.warn('Failed to notify coordinator of session creation', { error: error.message });
-    }
-  }
+      this.logger.debug('Notified coordinator of session creation', { sessionId: session.sessionId });} catch (error) {this.logger.warn('Failed to notify coordinator of session creation', { error: error.message });}}
 
   private async notifyCoordinatorSessionAssigned(assignment: AgentSessionAssignment): Promise<void> {
     if (!this.coordinatorUrl) return;
 
     try {
       // TODO: Implement HTTP call to Python coordinator
-      this.logger.debug('Notified coordinator of session assignment', {
-        sessionId: assignment.sessionId,
-        agentId: assignment.agentId,
+      this.logger.debug('Notified coordinator of session assignment', {sessionId: assignment.sessionId,agentId: assignment.agentId,
       });
     } catch (error) {
-      this.logger.warn('Failed to notify coordinator of session assignment', { error: error.message });
-    }
-  }
+      this.logger.warn('Failed to notify coordinator of session assignment', { error: error.message });}}
 
   private async notifyCoordinatorSessionReleased(assignment: AgentSessionAssignment): Promise<void> {
     if (!this.coordinatorUrl) return;
 
     try {
       // TODO: Implement HTTP call to Python coordinator
-      this.logger.debug('Notified coordinator of session release', {
-        sessionId: assignment.sessionId,
-        agentId: assignment.agentId,
+      this.logger.debug('Notified coordinator of session release', {sessionId: assignment.sessionId,agentId: assignment.agentId,
       });
     } catch (error) {
-      this.logger.warn('Failed to notify coordinator of session release', { error: error.message });
-    }
-  }
+      this.logger.warn('Failed to notify coordinator of session release', { error: error.message });}}
 
   private async notifyCoordinatorSessionClosed(sessionId: string): Promise<void> {
     if (!this.coordinatorUrl) return;
 
     try {
       // TODO: Implement HTTP call to Python coordinator
-      this.logger.debug('Notified coordinator of session closure', { sessionId });
-    } catch (error) {
-      this.logger.warn('Failed to notify coordinator of session closure', { error: error.message });
+      this.logger.debug('Notified coordinator of session closure', { sessionId });} catch (error) {this.logger.warn('Failed to notify coordinator of session closure', { error: error.message });
     }
   }
 

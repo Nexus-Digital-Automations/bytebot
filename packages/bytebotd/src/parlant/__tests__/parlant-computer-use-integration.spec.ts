@@ -1,9 +1,7 @@
 /**
  * Parlant Computer Use Conversational Validation Integration Tests
  * 
- * This test suite provides comprehensive integration testing for Parlant's
- * conversational AI validation system with Computer Use functionality,
- * ensuring secure and intelligent computer action validation.
+ * This test suite provides comprehensive integration testing for Parlant's* conversational AI validation system with Computer Use functionality,* ensuring secure and intelligent computer action validation.
  * 
  * Integration Coverage:
  * - Conversational validation workflows for computer actions
@@ -25,24 +23,9 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ParlantValidatedComputerUseService, ComputerActionValidationContext } from '../parlant-validated-computer-use.service';
-import { ParlantIntegrationService, ConversationalValidationError, RiskLevel } from '../parlant-integration.service';
-import { ParlantComputerUseController } from '../parlant-computer-use.controller';
-import { ParlantModule } from '../parlant.module';
-import { ComputerUseService } from '../../computer-use/computer-use.service';
-import { ComputerUseModule } from '../../computer-use/computer-use.module';
-import { NutService } from '../../nut/nut.service';
-import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
-import {
-  ComputerAction,
+import { Test, TestingModule } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import { ParlantValidatedComputerUseService, ComputerActionValidationContext } from '../parlant-validated-computer-use.service';import { ParlantIntegrationService, ConversationalValidationError, RiskLevel } from '../parlant-integration.service';import { ParlantComputerUseController } from '../parlant-computer-use.controller';import { ParlantModule } from '../parlant.module';import { ComputerUseService } from '../../computer-use/computer-use.service';import { ComputerUseModule } from '../../computer-use/computer-use.module';import { NutService } from '../../nut/nut.service';import { ByteBotdUser } from '../../auth/decorators/roles.decorator';import {ComputerAction,
   MoveMouseAction,
-} from '@bytebot/shared';
-import * as fs from 'fs/promises';
-
-// Parlant integration test interfaces
-interface ParlantIntegrationContext {
+} from '@bytebot/shared';import * as fs from 'fs/promises';// Parlant integration test interfacesinterface ParlantIntegrationContext {
   app: INestApplication;
   parlantValidatedService: ParlantValidatedComputerUseService;
   parlantIntegrationService: ParlantIntegrationService;
@@ -75,13 +58,8 @@ interface ConversationalValidationMetrics {
   memoryUsage: NodeJS.MemoryUsage;
 }
 
-describe('Parlant Computer Use Integration Tests', () => {
-  let context: ParlantIntegrationContext;
-  let testModule: TestingModule;
-  const testDataDir = '/tmp/bytebot-parlant-integration-tests';
-  const validationMetrics: ConversationalValidationMetrics[] = [];
-
-  /**
+describe('Parlant Computer Use Integration Tests', () => {let context: ParlantIntegrationContext;let testModule: TestingModule;
+  const testDataDir = '/tmp/bytebot-parlant-integration-tests';const validationMetrics: ConversationalValidationMetrics[] = [];/**
    * Setup Parlant integration test environment
    */
   beforeAll(async () => {
@@ -122,25 +100,11 @@ describe('Parlant Computer Use Integration Tests', () => {
     validationMetrics.length = 0; // Clear metrics
   });
 
-  describe('Conversational Validation Workflows', () => {
-    it('should approve safe actions with clear user intent', async () => {
-      const scenario = createValidationScenario({
-        scenarioId: 'safe_screenshot',
-        userRole: 'OPERATOR',
-        securityLevel: 'HIGH',
-        action: { action: 'screenshot' },
-        conversationHistory: [
-          {
+  describe('Conversational Validation Workflows', () => {it('should approve safe actions with clear user intent', async () => {const scenario = createValidationScenario({scenarioId: 'safe_screenshot',userRole: 'OPERATOR',securityLevel: 'HIGH',action: { action: 'screenshot' },conversationHistory: [{
             timestamp: new Date(),
-            speaker: 'USER',
-            message: 'Please take a screenshot for documentation purposes'
-          },
-          {
+            speaker: 'USER',message: 'Please take a screenshot for documentation purposes'},{
             timestamp: new Date(),
-            speaker: 'ASSISTANT',
-            message: 'I understand you need a screenshot for documentation. This is a safe operation.'
-          }
-        ],
+            speaker: 'ASSISTANT',message: 'I understand you need a screenshot for documentation. This is a safe operation.'}],
         systemState: {
           cpuUsage: 20,
           memoryUsage: 40,
@@ -149,27 +113,20 @@ describe('Parlant Computer Use Integration Tests', () => {
           maintenanceMode: false,
         },
         expectedApproval: true,
-        expectedRiskLevel: RiskLevel.LOW,
+        expectedRiskLevel: RiskLevel._LOW,
       });
 
       // Mock Parlant service to approve the action
       mockParlantValidationResponse({
         approved: true,
         confidence: 0.95,
-        reasoning: 'Screenshot operation approved for documentation purposes with clear user intent',
-        riskLevel: RiskLevel.LOW,
-        executionContext: {
+        reasoning: 'Screenshot operation approved for documentation purposes with clear user intent',riskLevel: RiskLevel._LOW,executionContext: {
           timeoutMs: 5000,
           retryAttempts: 1,
-          monitoringLevel: 'BASIC',
-          safeguards: ['screenshot-validation'],
-        },
-      });
+          monitoringLevel: 'BASIC',safeguards: ['screenshot-validation'],},});
 
       const metrics = await executeValidationWithMetrics(
-        'safe_screenshot_validation',
-        scenario.action,
-        scenario.validationContext
+        'safe_screenshot_validation',scenario.action,scenario.validationContext
       );
 
       expect(metrics.approved).toBe(true);
@@ -178,51 +135,28 @@ describe('Parlant Computer Use Integration Tests', () => {
       expect(context.nutService.screendump).toHaveBeenCalled();
     });
 
-    it('should reject high-risk actions with insufficient justification', async () => {
-      const scenario = createValidationScenario({
-        scenarioId: 'risky_file_write',
-        userRole: 'USER',
-        securityLevel: 'LOW',
-        action: {
-          action: 'write_file',
-          path: '/etc/passwd',
-          data: Buffer.from('malicious content').toString('base64'),
-        },
-        conversationHistory: [
+    it('should reject high-risk actions with insufficient justification', async () => {const scenario = createValidationScenario({scenarioId: 'risky_file_write',userRole: 'USER',securityLevel: 'LOW',action: {action: 'write_file',path: '/etc/passwd',data: Buffer.from('malicious content').toString('base64'),},conversationHistory: [
           {
             timestamp: new Date(),
-            speaker: 'USER',
-            message: 'Write this file'
-          }
-        ],
+            speaker: 'USER',message: 'Write this file'}],
         systemState: {
           cpuUsage: 85,
           memoryUsage: 90,
           networkActivity: true,
-          securityAlerts: ['high-resource-usage', 'suspicious-file-access'],
-          maintenanceMode: false,
-        },
+          securityAlerts: ['high-resource-usage', 'suspicious-file-access'],maintenanceMode: false,},
         expectedApproval: false,
-        expectedRiskLevel: RiskLevel.CRITICAL,
+        expectedRiskLevel: RiskLevel._CRITICAL,
       });
 
       // Mock Parlant service to reject the action
       mockParlantValidationRejection({
-        reasoning: 'Critical security risk: Attempt to modify system files without clear justification',
-        confidence: 0.98,
-        riskLevel: RiskLevel.CRITICAL,
+        reasoning: 'Critical security risk: Attempt to modify system files without clear justification',confidence: 0.98,riskLevel: RiskLevel._CRITICAL,
         suggestedAlternatives: [
-          'Use a safe directory within user space for file operations',
-          'Provide clear justification for system file modifications',
-          'Contact system administrator for elevated permissions',
-        ],
-      });
+          'Use a safe directory within user space for file operations','Provide clear justification for system file modifications','Contact system administrator for elevated permissions',],});
 
       await expect(
         executeValidationWithMetrics(
-          'risky_file_write_validation',
-          scenario.action,
-          scenario.validationContext
+          'risky_file_write_validation',scenario.action,scenario.validationContext
         )
       ).rejects.toThrow(ConversationalValidationError);
 
@@ -230,105 +164,56 @@ describe('Parlant Computer Use Integration Tests', () => {
       expect(context.nutService.screendump).not.toHaveBeenCalled();
     });
 
-    it('should handle complex conversation context for validation decisions', async () => {
-      const scenario = createValidationScenario({
-        scenarioId: 'complex_context_validation',
-        userRole: 'ADMIN',
-        securityLevel: 'CRITICAL',
-        action: {
-          action: 'click_mouse',
-          coordinates: { x: 500, y: 300 },
-          button: 'left',
-          clickCount: 1,
-        },
+    it('should handle complex conversation context for validation decisions', async () => {const scenario = createValidationScenario({scenarioId: 'complex_context_validation',userRole: 'ADMIN',securityLevel: 'CRITICAL',action: {action: 'click_mouse',coordinates: { x: 500, y: 300 },button: 'left',clickCount: 1,},
         conversationHistory: [
           {
             timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-            speaker: 'USER',
-            message: 'I need to troubleshoot a critical system issue'
-          },
-          {
+            speaker: 'USER',message: 'I need to troubleshoot a critical system issue'},{
             timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-            speaker: 'ASSISTANT',
-            message: 'I understand this is urgent. What specific steps do you need to take?'
-          },
-          {
+            speaker: 'ASSISTANT',message: 'I understand this is urgent. What specific steps do you need to take?'},{
             timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-            speaker: 'USER',
-            message: 'The system monitor shows errors. I need to click on the error details'
-          },
-          {
+            speaker: 'USER',message: 'The system monitor shows errors. I need to click on the error details'},{
             timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-            speaker: 'ASSISTANT',
-            message: 'Clicking on error details for system troubleshooting is appropriate for your admin role'
-          },
-          {
+            speaker: 'ASSISTANT',message: 'Clicking on error details for system troubleshooting is appropriate for your admin role'},{
             timestamp: new Date(Date.now() - 60000), // 1 minute ago
-            speaker: 'USER',
-            message: 'Please click on coordinates 500, 300 to access the error log'
-          }
-        ],
+            speaker: 'USER',message: 'Please click on coordinates 500, 300 to access the error log'}],
         systemState: {
           cpuUsage: 95,
           memoryUsage: 85,
           networkActivity: true,
-          securityAlerts: ['system-performance-critical'],
-          maintenanceMode: true,
-        },
+          securityAlerts: ['system-performance-critical'],maintenanceMode: true,},
         expectedApproval: true,
-        expectedRiskLevel: RiskLevel.MEDIUM,
+        expectedRiskLevel: RiskLevel._MODERATE,
       });
 
       // Mock Parlant service with complex context analysis
       mockParlantValidationResponse({
         approved: true,
         confidence: 0.88,
-        reasoning: 'Click operation approved based on conversation context: Admin user troubleshooting critical system issue with clear justification and proper escalation',
-        riskLevel: RiskLevel.MEDIUM,
-        executionContext: {
+        reasoning: 'Click operation approved based on conversation context: Admin user troubleshooting critical system issue with clear justification and proper escalation',riskLevel: RiskLevel._MODERATE,executionContext: {
           timeoutMs: 3000,
           retryAttempts: 2,
-          monitoringLevel: 'COMPREHENSIVE',
-          safeguards: ['admin-validation', 'system-troubleshooting', 'audit-trail'],
-        },
-      });
+          monitoringLevel: 'COMPREHENSIVE',safeguards: ['admin-validation', 'system-troubleshooting', 'audit-trail'],},});
 
       const metrics = await executeValidationWithMetrics(
-        'complex_context_validation',
-        scenario.action,
-        scenario.validationContext
+        'complex_context_validation',scenario.action,scenario.validationContext
       );
 
       expect(metrics.approved).toBe(true);
       expect(metrics.confidence).toBeGreaterThan(0.8);
       expect(metrics.conversationLength).toBe(5);
       expect(metrics.contextComplexity).toBeGreaterThan(3); // Complex context with multiple factors
-      expect(context.nutService.mouseClickEvent).toHaveBeenCalledWith(500, 300, 'left', 1);
-    });
-
-    it('should validate actions based on user security level and role', async () => {
-      const testCases = [
-        {
-          userRole: 'ADMIN',
-          securityLevel: 'CRITICAL',
-          expectedApproval: true,
-          confidence: 0.95,
+      expect(context.nutService.mouseClickEvent).toHaveBeenCalledWith(500, 300, 'left', 1);});it('should validate actions based on user security level and role', async () => {const testCases = [{
+          userRole: 'ADMIN',securityLevel: 'CRITICAL',expectedApproval: true,confidence: 0.95,
         },
         {
-          userRole: 'OPERATOR',
-          securityLevel: 'HIGH',
-          expectedApproval: true,
-          confidence: 0.85,
+          userRole: 'OPERATOR',securityLevel: 'HIGH',expectedApproval: true,confidence: 0.85,
         },
         {
-          userRole: 'USER',
-          securityLevel: 'MEDIUM',
-          expectedApproval: false,
-          confidence: 0.9,
+          userRole: 'USER',securityLevel: 'MEDIUM',expectedApproval: false,confidence: 0.9,
         },
         {
-          userRole: 'GUEST',
-          securityLevel: 'LOW',
+          userRole: 'GUEST',securityLevel: 'LOW',
           expectedApproval: false,
           confidence: 0.95,
         },
@@ -337,31 +222,21 @@ describe('Parlant Computer Use Integration Tests', () => {
       for (const testCase of testCases) {
         const scenario = createValidationScenario({
           scenarioId: `role_based_validation${testCase.userRole}`,
-          userRole: testCase.userRole as 'ADMIN' | 'OPERATOR' | 'USER',
-          securityLevel: testCase.securityLevel as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
-          action: {
-            action: 'write_file',
-            path: '/tmp/test-file.txt',
-            data: Buffer.from('test content').toString('base64'),
-          },
-          conversationHistory: [
+          userRole: testCase.userRole as 'ADMIN' | 'OPERATOR' | 'USER',securityLevel: testCase.securityLevel as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',action: {action: 'write_file',path: '/tmp/test-file.txt',data: Buffer.from('test content').toString('base64'),},conversationHistory: [
             {
               timestamp: new Date(),
-              speaker: 'USER',
-              message: 'Create a test file for validation testing'
+              speaker: 'USER',message: 'Create a test file for validation testing'
             }
           ],
           expectedApproval: testCase.expectedApproval,
-          expectedRiskLevel: RiskLevel.MEDIUM,
+          expectedRiskLevel: RiskLevel._MODERATE,
         });
 
         if (testCase.expectedApproval) {
           mockParlantValidationResponse({
             approved: true,
             confidence: testCase.confidence,
-            reasoning: `File creation approved for ${testCase.userRole} user with ${testCase.securityLevel} security level`,
-            riskLevel: RiskLevel.MEDIUM,
-          });
+            reasoning: `File creation approved for ${testCase.userRole} user with ${testCase.securityLevel} security level`,riskLevel: RiskLevel._MODERATE,});
 
           const metrics = await executeValidationWithMetrics(
             scenario.scenarioId,
@@ -375,11 +250,8 @@ describe('Parlant Computer Use Integration Tests', () => {
           mockParlantValidationRejection({
             reasoning: `File creation denied for ${testCase.userRole} user with ${testCase.securityLevel} security level`,
             confidence: testCase.confidence,
-            riskLevel: RiskLevel.MEDIUM,
-            suggestedAlternatives: ['Contact administrator for elevated permissions'],
-          });
-
-          await expect(
+            riskLevel: RiskLevel._MODERATE,
+            suggestedAlternatives: ['Contact administrator for elevated permissions'],});await expect(
             executeValidationWithMetrics(
               scenario.scenarioId,
               scenario.action,
@@ -391,10 +263,7 @@ describe('Parlant Computer Use Integration Tests', () => {
     });
   });
 
-  describe('Performance and Optimization', () => {
-    it('should meet sub-1000ms validation performance targets', async () => {
-      const performanceTests = Array.from({ length: 10 }, (_, i) => ({
-        action: { action: 'move_mouse', coordinates: { x: 100 + i * 10, y: 200 + i * 10 } } as MoveMouseAction,
+  describe('Performance and Optimization', () => {it('should meet sub-1000ms validation performance targets', async () => {const performanceTests = Array.from({ length: 10 }, (_, i) => ({action: { action: 'move_mouse', coordinates: { x: 100 + i * 10, y: 200 + i * 10 } } as MoveMouseAction,
         scenarioId: `performance_test${i}`,
       }));
 
@@ -403,26 +272,18 @@ describe('Parlant Computer Use Integration Tests', () => {
       for (const test of performanceTests) {
         const scenario = createValidationScenario({
           scenarioId: test.scenarioId,
-          userRole: 'OPERATOR',
-          securityLevel: 'HIGH',
-          action: test.action,
-          conversationHistory: [
+          userRole: 'OPERATOR',securityLevel: 'HIGH',action: test.action,conversationHistory: [
             {
               timestamp: new Date(),
-              speaker: 'USER',
-              message: 'Move mouse for performance testing'
-            }
-          ],
+              speaker: 'USER',message: 'Move mouse for performance testing'}],
           expectedApproval: true,
-          expectedRiskLevel: RiskLevel.LOW,
+          expectedRiskLevel: RiskLevel._LOW,
         });
 
         mockParlantValidationResponse({
           approved: true,
           confidence: 0.9,
-          reasoning: 'Mouse movement approved for performance testing',
-          riskLevel: RiskLevel.LOW,
-        });
+          reasoning: 'Mouse movement approved for performance testing',riskLevel: RiskLevel._LOW,});
 
         const metrics = await executeValidationWithMetrics(
           test.scenarioId,
@@ -446,25 +307,19 @@ describe('Parlant Computer Use Integration Tests', () => {
       const validationPromises = Array.from({ length: concurrentValidations }, (_, i) => {
         const scenario = createValidationScenario({
           scenarioId: `concurrent_validation${i}`,
-          userRole: 'OPERATOR',
-          securityLevel: 'HIGH',
-          action: { action: 'screenshot' },
-          conversationHistory: [
-            {
+          userRole: 'OPERATOR',securityLevel: 'HIGH',action: { action: 'screenshot' },conversationHistory: [{
               timestamp: new Date(),
               speaker: 'USER',
-              message: `Concurrent validation test ${i}`
-            }
-          ],
+              message: `Concurrent validation test ${i}`}],
           expectedApproval: true,
-          expectedRiskLevel: RiskLevel.LOW,
+          expectedRiskLevel: RiskLevel._LOW,
         });
 
         mockParlantValidationResponse({
           approved: true,
           confidence: 0.9,
           reasoning: `Concurrent validation ${i} approved`,
-          riskLevel: RiskLevel.LOW,
+          riskLevel: RiskLevel._LOW,
         });
 
         return executeValidationWithMetrics(
@@ -487,54 +342,35 @@ describe('Parlant Computer Use Integration Tests', () => {
       expect(results.every(result => result.validationTime < 1000)).toBe(true);
     });
 
-    it('should optimize validation for repeated similar actions', async () => {
-      const repeatedAction: MoveMouseAction = {
-        action: 'move_mouse',
-        coordinates: { x: 300, y: 400 },
-      };
+    it('should optimize validation for repeated similar actions', async () => {const repeatedAction: MoveMouseAction = {action: 'move_mouse',coordinates: { x: 300, y: 400 },};
 
       const baseScenario = createValidationScenario({
-        scenarioId: 'repeated_action_optimization',
-        userRole: 'OPERATOR',
-        securityLevel: 'HIGH',
-        action: repeatedAction,
-        conversationHistory: [
+        scenarioId: 'repeated_action_optimization',userRole: 'OPERATOR',securityLevel: 'HIGH',action: repeatedAction,conversationHistory: [
           {
             timestamp: new Date(),
-            speaker: 'USER',
-            message: 'Move mouse to specific coordinates'
-          }
-        ],
+            speaker: 'USER',message: 'Move mouse to specific coordinates'}],
         expectedApproval: true,
-        expectedRiskLevel: RiskLevel.LOW,
+        expectedRiskLevel: RiskLevel._LOW,
       });
 
       // First validation (no cache)
       mockParlantValidationResponse({
         approved: true,
         confidence: 0.9,
-        reasoning: 'First mouse movement validation',
-        riskLevel: RiskLevel.LOW,
-      });
+        reasoning: 'First mouse movement validation',riskLevel: RiskLevel._LOW,});
 
       const firstValidation = await executeValidationWithMetrics(
-        'first_repeated_validation',
-        repeatedAction,
-        baseScenario.validationContext
+        'first_repeated_validation',repeatedAction,baseScenario.validationContext
       );
 
       // Second validation (potentially cached/optimized)
       mockParlantValidationResponse({
         approved: true,
         confidence: 0.9,
-        reasoning: 'Cached/optimized mouse movement validation',
-        riskLevel: RiskLevel.LOW,
-      });
+        reasoning: 'Cached/optimized mouse movement validation',riskLevel: RiskLevel._LOW,});
 
       const secondValidation = await executeValidationWithMetrics(
-        'second_repeated_validation',
-        repeatedAction,
-        baseScenario.validationContext
+        'second_repeated_validation',repeatedAction,baseScenario.validationContext
       );
 
       expect(firstValidation.approved).toBe(true);
@@ -547,59 +383,28 @@ describe('Parlant Computer Use Integration Tests', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle Parlant service unavailability gracefully', async () => {
-      const scenario = createValidationScenario({
-        scenarioId: 'parlant_service_failure',
-        userRole: 'OPERATOR',
-        securityLevel: 'HIGH',
-        action: { action: 'screenshot' },
-        conversationHistory: [
-          {
+  describe('Error Handling and Edge Cases', () => {it('should handle Parlant service unavailability gracefully', async () => {const scenario = createValidationScenario({scenarioId: 'parlant_service_failure',userRole: 'OPERATOR',securityLevel: 'HIGH',action: { action: 'screenshot' },conversationHistory: [{
             timestamp: new Date(),
-            speaker: 'USER',
-            message: 'Take screenshot during service failure test'
-          }
-        ],
+            speaker: 'USER',message: 'Take screenshot during service failure test'}],
         expectedApproval: false,
-        expectedRiskLevel: RiskLevel.MEDIUM,
+        expectedRiskLevel: RiskLevel._MODERATE,
       });
 
       // Mock Parlant service failure
-      jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution')
-        .mockRejectedValue(new Error('Parlant service temporarily unavailable'));
-
-      await expect(
-        executeValidationWithMetrics(
-          'parlant_service_failure',
-          scenario.action,
-          scenario.validationContext
+      jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockRejectedValue(new Error('Parlant service temporarily unavailable'));await expect(executeValidationWithMetrics(
+          'parlant_service_failure',scenario.action,scenario.validationContext
         )
-      ).rejects.toThrow('Parlant service temporarily unavailable');
-    });
-
-    it('should validate actions with empty conversation history', async () => {
-      const scenario = createValidationScenario({
-        scenarioId: 'empty_conversation_history',
-        userRole: 'ADMIN',
-        securityLevel: 'CRITICAL',
-        action: { action: 'cursor_position' },
-        conversationHistory: [], // Empty conversation history
-        expectedApproval: true,
-        expectedRiskLevel: RiskLevel.LOW,
+      ).rejects.toThrow('Parlant service temporarily unavailable');});it('should validate actions with empty conversation history', async () => {const scenario = createValidationScenario({scenarioId: 'empty_conversation_history',userRole: 'ADMIN',securityLevel: 'CRITICAL',action: { action: 'cursor_position' },conversationHistory: [], // Empty conversation historyexpectedApproval: true,
+        expectedRiskLevel: RiskLevel._LOW,
       });
 
       mockParlantValidationResponse({
         approved: true,
         confidence: 0.75, // Lower confidence due to lack of context
-        reasoning: 'Cursor position query approved despite empty conversation history - low risk operation',
-        riskLevel: RiskLevel.LOW,
-      });
+        reasoning: 'Cursor position query approved despite empty conversation history - low risk operation',riskLevel: RiskLevel._LOW,});
 
       const metrics = await executeValidationWithMetrics(
-        'empty_conversation_validation',
-        scenario.action,
-        scenario.validationContext
+        'empty_conversation_validation',scenario.action,scenario.validationContext
       );
 
       expect(metrics.approved).toBe(true);
@@ -607,40 +412,20 @@ describe('Parlant Computer Use Integration Tests', () => {
       expect(metrics.conversationLength).toBe(0);
     });
 
-    it('should handle malformed validation requests', async () => {
-      const invalidAction = {
-        action: 'invalid_action_type',
-        invalidParameter: 'malformed data',
-      } as unknown as ComputerAction;
-
-      const scenario = createValidationScenario({
-        scenarioId: 'malformed_request',
-        userRole: 'USER',
-        securityLevel: 'MEDIUM',
-        action: invalidAction,
-        conversationHistory: [
+    it('should handle malformed validation requests', async () => {const invalidAction = {action: 'invalid_action_type',invalidParameter: 'malformed data',} as unknown as ComputerAction;const scenario = createValidationScenario({
+        scenarioId: 'malformed_request',userRole: 'USER',securityLevel: 'MEDIUM',action: invalidAction,conversationHistory: [
           {
             timestamp: new Date(),
-            speaker: 'USER',
-            message: 'Execute invalid action'
-          }
-        ],
+            speaker: 'USER',message: 'Execute invalid action'}],
         expectedApproval: false,
-        expectedRiskLevel: RiskLevel.HIGH,
+        expectedRiskLevel: RiskLevel._HIGH,
       });
 
       mockParlantValidationRejection({
-        reasoning: 'Invalid action type - malformed validation request',
-        confidence: 0.99,
-        riskLevel: RiskLevel.HIGH,
-        suggestedAlternatives: ['Use supported action types', 'Check action parameter format'],
-      });
-
-      await expect(
+        reasoning: 'Invalid action type - malformed validation request',confidence: 0.99,riskLevel: RiskLevel._HIGH,
+        suggestedAlternatives: ['Use supported action types', 'Check action parameter format'],});await expect(
         executeValidationWithMetrics(
-          'malformed_request_validation',
-          invalidAction,
-          scenario.validationContext
+          'malformed_request_validation',invalidAction,scenario.validationContext
         )
       ).rejects.toThrow(ConversationalValidationError);
     });
@@ -653,10 +438,7 @@ describe('Parlant Computer Use Integration Tests', () => {
    */
   function createValidationScenario(params: {
     scenarioId: string;
-    userRole: 'ADMIN' | 'OPERATOR' | 'USER';
-    securityLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-    action: ComputerAction;
-    conversationHistory: Array<{
+    userRole: 'ADMIN' | 'OPERATOR' | 'USER';securityLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';action: ComputerAction;conversationHistory: Array<{
       timestamp: Date;
       speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
       message: string;
@@ -672,15 +454,10 @@ describe('Parlant Computer Use Integration Tests', () => {
     expectedRiskLevel: RiskLevel;
   }): ValidationScenario {
     const validationContext: ComputerActionValidationContext = {
-      userId: `test-user-${params.scenarioId}`,
-      sessionId: `session-${params.scenarioId}`,
-      agentRole: params.userRole,
-      securityLevel: params.securityLevel,
+      userId: `test-user-${params.scenarioId}`,sessionId: `session-${params.scenarioId}`,agentRole: params.userRole,securityLevel: params.securityLevel,
       conversationHistory: params.conversationHistory,
       metadata: {
-        operationId: `op-${params.scenarioId}`,
-        testScenario: true,
-      },
+        operationId: `op-${params.scenarioId}`,testScenario: true,},
       recentActions: [],
       systemState: params.systemState ?? {
         cpuUsage: 25,
@@ -716,9 +493,7 @@ describe('Parlant Computer Use Integration Tests', () => {
     executionContext?: {
       timeoutMs?: number;
       retryAttempts?: number;
-      monitoringLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
-      safeguards: string[];
-    };
+      monitoringLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';safeguards: string[];};
   }): void {
     jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution')
       .mockResolvedValue({
@@ -772,13 +547,13 @@ describe('Parlant Computer Use Integration Tests', () => {
       await context.parlantValidatedService.action(action, validationContext);
       approved = true;
       confidence = 0.9; // Default for successful validation
-      riskLevel = RiskLevel.LOW; // Default for approved actions
+      riskLevel = RiskLevel._LOW; // Default for approved actions
     } catch (error: unknown) {
       if (error instanceof ConversationalValidationError) {
         const validationError = error as ConversationalValidationError;
         approved = false;
         confidence = validationError.confidence ?? 0.8;
-        riskLevel = validationError.riskLevel ?? RiskLevel.MEDIUM;
+        riskLevel = validationError.riskLevel ?? RiskLevel._MODERATE;
       }
       throw error;
     } finally {
@@ -826,13 +601,7 @@ describe('Parlant Computer Use Integration Tests', () => {
     
     // Security level complexity
     switch (context.securityLevel) {
-      case 'CRITICAL': complexity += 3; break;
-      case 'HIGH': complexity += 2; break;
-      case 'MEDIUM': complexity += 1; break;
-      case 'LOW': complexity += 0; break;
-    }
-    
-    return Math.round(complexity);
+      case 'CRITICAL': complexity += 3; break;case 'HIGH': complexity += 2; break;case 'MEDIUM': complexity += 1; break;case 'LOW': complexity += 0; break;}return Math.round(complexity);
   }
 
   /**
@@ -848,9 +617,7 @@ describe('Parlant Computer Use Integration Tests', () => {
       sendKeys: jest.fn().mockResolvedValue({ success: true }),
       typeText: jest.fn().mockResolvedValue({ success: true }),
       pasteText: jest.fn().mockResolvedValue({ success: true }),
-      screendump: jest.fn().mockResolvedValue(Buffer.from('mocked-parlant-screenshot')),
-      getCursorPosition: jest.fn().mockResolvedValue({ x: 500, y: 600 }),
-    };
+      screendump: jest.fn().mockResolvedValue(Buffer.from('mocked-parlant-screenshot')),getCursorPosition: jest.fn().mockResolvedValue({ x: 500, y: 600 }),};
   }
 
   /**

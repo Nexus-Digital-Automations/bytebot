@@ -19,24 +19,10 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
-import { ThrottlerException } from '@nestjs/throttler';
-
-/**
- * Security-focused error classification
+} from '@nestjs/common';import { Request, Response } from 'express';import { ThrottlerException } from '@nestjs/throttler';/*** Security-focused error classification
  */
 enum SecurityErrorType {
-  VALIDATION_ERROR = 'validation_error',
-  AUTHENTICATION_ERROR = 'authentication_error',
-  AUTHORIZATION_ERROR = 'authorization_error',
-  RATE_LIMIT_ERROR = 'rate_limit_error',
-  SECURITY_VIOLATION = 'security_violation',
-  SYSTEM_ERROR = 'system_error',
-  INPUT_ERROR = 'input_error',
-}
-
-/**
+  VALIDATION_ERROR = 'validation_error',AUTHENTICATION_ERROR = 'authentication_error',AUTHORIZATION_ERROR = 'authorization_error',RATE_LIMIT_ERROR = 'rate_limit_error',SECURITY_VIOLATION = 'security_violation',SYSTEM_ERROR = 'system_error',INPUT_ERROR = 'input_error',}/**
  * Error details structure for development responses
  */
 interface ErrorDetails {
@@ -96,8 +82,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
     // Generate request ID for tracking (use existing or create new)
     const requestId =
-      (request.headers['x-correlation-id'] as string) ||
-      (request.headers['x-request-id'] as string) ||
+      (request.headers['x-correlation-id'] as string) ||(request.headers['x-request-id'] as string) ||
       `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Classify and analyze the exception
@@ -123,12 +108,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     }
 
     // Set security headers
-    response.setHeader('X-Request-ID', requestId);
-    response.setHeader('X-Content-Type-Options', 'nosniff');
-    response.setHeader('X-Frame-Options', 'DENY');
-
-    // Send secure response
-    response.status(secureResponse.statusCode).json(secureResponse);
+    response.setHeader('X-Request-ID', requestId);response.setHeader('X-Content-Type-Options', 'nosniff');response.setHeader('X-Frame-Options', 'DENY');// Send secure responseresponse.status(secureResponse.statusCode).json(secureResponse);
   }
 
   /**
@@ -162,19 +142,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
         case HttpStatus.UNAUTHORIZED:
           errorType = SecurityErrorType.AUTHENTICATION_ERROR;
           riskScore = 4;
-          threatIndicators.push('auth_failure');
-          break;
-        case HttpStatus.FORBIDDEN:
+          threatIndicators.push('auth_failure');break;case HttpStatus.FORBIDDEN:
           errorType = SecurityErrorType.AUTHORIZATION_ERROR;
           riskScore = 5;
-          threatIndicators.push('access_denied');
-          break;
-        case HttpStatus.TOO_MANY_REQUESTS:
+          threatIndicators.push('access_denied');break;case HttpStatus.TOO_MANY_REQUESTS:
           errorType = SecurityErrorType.RATE_LIMIT_ERROR;
           riskScore = 3;
-          threatIndicators.push('rate_limit_exceeded');
-          break;
-        default:
+          threatIndicators.push('rate_limit_exceeded');break;default:
           if (statusCode >= HttpStatus.BAD_REQUEST && statusCode < HttpStatus.INTERNAL_SERVER_ERROR) {
             riskScore = 3;
           }
@@ -184,37 +158,21 @@ export class SecurityExceptionFilter implements ExceptionFilter {
       if (exception instanceof ThrottlerException) {
         errorType = SecurityErrorType.RATE_LIMIT_ERROR;
         riskScore = 4;
-        threatIndicators.push('throttle_violation');
-      }
-
-      // Analyze error message for security patterns
-      const message = exception.message?.toLowerCase() ?? '';
-
-      if (message.includes('validation') ?? message.includes('sanitization')) {
-        errorType = SecurityErrorType.VALIDATION_ERROR;
-        riskScore += 1;
+        threatIndicators.push('throttle_violation');}// Analyze error message for security patterns
+      const message = exception.message?.toLowerCase() ?? '';if (message.includes('validation') ?? message.includes('sanitization')) {errorType = SecurityErrorType.VALIDATION_ERROR;riskScore += 1;
       }
 
       if (
-        message.includes('xss') ||
-        message.includes('injection') ||
-        message.includes('malicious')
-      ) {
-        errorType = SecurityErrorType.SECURITY_VIOLATION;
+        message.includes('xss') ||message.includes('injection') ||message.includes('malicious')) {errorType = SecurityErrorType.SECURITY_VIOLATION;
         riskScore += 4;
-        threatIndicators.push('attack_detected');
-      }
-    }
+        threatIndicators.push('attack_detected');}}
 
     // Increase risk score for repeated errors from same client
     const clientIdentifier = this.getClientIdentifier(request);
     const existingPattern = this.errorPatterns.get(clientIdentifier);
     if (existingPattern && existingPattern.count > 5) {
       riskScore += 2;
-      threatIndicators.push('repeated_errors');
-    }
-
-    return {
+      threatIndicators.push('repeated_errors');}return {
       errorType,
       statusCode,
       riskScore: Math.min(10, riskScore), // Cap at 10
@@ -238,10 +196,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
       isSecurityRelated: boolean;
     },
   ): SecureErrorResponse {
-    const isDevelopment = process.env.NODE_ENV === 'development';
-
-    // Base secure response
-    const response: SecureErrorResponse = {
+    const isDevelopment = process.env.NODE_ENV === 'development';// Base secure responseconst response: SecureErrorResponse = {
       statusCode: errorAnalysis.statusCode,
       error: this.getSecureErrorName(errorAnalysis.statusCode),
       message: this.getSecureErrorMessage(exception, errorAnalysis),
@@ -267,24 +222,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    */
   private getSecureErrorName(statusCode: number): string {
     const errorNames: Record<number, string> = {
-      400: 'Bad Request',
-      401: 'Unauthorized',
-      403: 'Forbidden',
-      404: 'Not Found',
-      405: 'Method Not Allowed',
-      409: 'Conflict',
-      422: 'Unprocessable Entity',
-      429: 'Too Many Requests',
-      500: 'Internal Server Error',
-      502: 'Bad Gateway',
-      503: 'Service Unavailable',
-      504: 'Gateway Timeout',
-    };
-
-    return errorNames[statusCode] ?? 'Unknown Error';
-  }
-
-  /**
+      400: 'Bad Request',401: 'Unauthorized',403: 'Forbidden',404: 'Not Found',405: 'Method Not Allowed',409: 'Conflict',422: 'Unprocessable Entity',429: 'Too Many Requests',500: 'Internal Server Error',502: 'Bad Gateway',503: 'Service Unavailable',504: 'Gateway Timeout',};return errorNames[statusCode] ?? 'Unknown Error';}/**
    * Get secure error message that doesn't leak sensitive information
    */
   private getSecureErrorMessage(
@@ -299,50 +237,27 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   ): string {
     // For security violations, use generic message
     if (errorAnalysis.errorType === SecurityErrorType.SECURITY_VIOLATION) {
-      return 'Request blocked due to security policy violation';
-    }
-
-    // For rate limiting
+      return 'Request blocked due to security policy violation';}// For rate limiting
     if (errorAnalysis.errorType === SecurityErrorType.RATE_LIMIT_ERROR) {
-      return 'Too many requests. Please try again later';
-    }
-
-    // For validation errors, provide safe message
+      return 'Too many requests. Please try again later';}// For validation errors, provide safe message
     if (errorAnalysis.errorType === SecurityErrorType.VALIDATION_ERROR) {
-      return 'Invalid input provided. Please check your request';
-    }
-
-    // For HTTP exceptions, use the message but sanitize it
+      return 'Invalid input provided. Please check your request';}// For HTTP exceptions, use the message but sanitize it
     if (exception instanceof HttpException) {
       const message = exception.message;
       return this.sanitizeErrorMessage(message);
     }
 
     // Generic message for other errors
-    return 'An error occurred while processing your request';
-  }
-
-  /**
+    return 'An error occurred while processing your request';}/**
    * Sanitize error message to prevent information disclosure
    */
   private sanitizeErrorMessage(message: string): string {
     // Remove sensitive patterns
     const sanitizedMessage = message
       // Remove file paths
-      .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')
-      // Remove database information
-      .replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]')
-      // Remove system information
-      .replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]')
-      // Remove stack traces
-      .replace(/at [a-zA-Z0-9._]+\([^)]+\)/g, '[STACK_REMOVED]')
-      // Remove sensitive environment variables
-      .replace(
+      .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')// Remove database information.replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]')// Remove system information.replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]')// Remove stack traces.replace(/at [a-zA-Z0-9._]+\([^)]+\)/g, '[STACK_REMOVED]')// Remove sensitive environment variables.replace(
         /NODE_ENV|API_KEY|SECRET|PASSWORD|TOKEN/gi,
-        '[SENSITIVE_REMOVED]',
-      );
-
-    return sanitizedMessage.substring(0, 200); // Limit message length
+        '[SENSITIVE_REMOVED]',);return sanitizedMessage.substring(0, 200); // Limit message length
   }
 
   /**
@@ -367,27 +282,15 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    * Safely extract cause from error with proper type checking
    */
   private getErrorCause(error: Error): string | null {
-    // Check if error has cause property and it's a valid type
-    if ('cause' in error) {
-      const cause = (error as { cause?: unknown }).cause;
-      if (typeof cause === 'string') {
-        return cause;
-      }
+    // Check if error has cause property and it's a valid typeif ('cause' in error) {const cause = (error as { cause?: unknown }).cause;if (typeof cause === 'string') {return cause;}
       if (cause instanceof Error) {
         return cause.message;
       }
       if (cause !== null && cause !== undefined) {
         // Safely stringify non-null, non-undefined values
-        if (typeof cause === 'object') {
-          return '[object Object]';
-        }
-        if (typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {
-          return String(cause);
-        }
+        if (typeof cause === 'object') {return '[object Object]';}if (typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {return String(cause);}
         // For other types, ensure it's a string or convertible
-        return typeof cause === 'string' ? cause : '[Unknown Type]';
-      }
-    }
+        return typeof cause === 'string' ? cause : '[Unknown Type]';}}
     return null;
   }
 
@@ -407,9 +310,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     requestId: string,
   ): void {
     const logData = {
-      event: 'security_exception',
-      requestId,
-      errorType: errorAnalysis.errorType,
+      event: 'security_exception',requestId,errorType: errorAnalysis.errorType,
       statusCode: errorAnalysis.statusCode,
       riskScore: errorAnalysis.riskScore,
       threatIndicators: errorAnalysis.threatIndicators,
@@ -421,9 +322,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
         query: request.query,
         headers: this.sanitizeHeaders(request.headers),
         clientIP: this.getClientIP(request),
-        userAgent: request.headers['user-agent'],
-      },
-      exception: {
+        userAgent: request.headers['user-agent'],},exception: {
         name: exception instanceof Error ? exception.name : 'Unknown',
         message:
           exception instanceof Error ? exception.message : String(exception),
@@ -434,11 +333,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
     // Log at appropriate level based on risk score
     if (errorAnalysis.riskScore >= 7) {
-      this.logger.error(`[${requestId}] HIGH RISK SECURITY EXCEPTION`, logData);
-    } else if (errorAnalysis.isSecurityRelated) {
-      this.logger.warn(`[${requestId}] Security-related exception`, logData);
-    } else {
-      this.logger.debug(`[${requestId}] Application exception`, logData);
+      this.logger.error(`[${requestId}] HIGH RISK SECURITY EXCEPTION`, logData);} else if (errorAnalysis.isSecurityRelated) {this.logger.warn(`[${requestId}] Security-related exception`, logData);} else {this.logger.debug(`[${requestId}] Application exception`, logData);
     }
   }
 
@@ -496,17 +391,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const userAgent = request.headers['user-agent'];
 
     this.logger.error(`[${requestId}] HIGH RISK SECURITY EVENT DETECTED`, {
-      event: 'high_risk_error',
-      requestId,
-      clientIP,
+      event: 'high_risk_error',requestId,clientIP,
       userAgent,
       endpoint: request.path,
       riskScore: errorAnalysis.riskScore,
       threatIndicators: errorAnalysis.threatIndicators,
       recommendation:
-        'Consider implementing additional security measures for this client',
-      timestamp: new Date().toISOString(),
-    });
+        'Consider implementing additional security measures for this client',timestamp: new Date().toISOString(),});
 
     // In a production environment, you might:
     // - Send alert to security team
@@ -521,21 +412,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   private getClientIdentifier(request: Request): string {
     const ip = this.getClientIP(request);
     const userAgent = (request.headers['user-agent'] ?? '').substring(0, 50);
-    return `${ip}:${userAgent}`.replace(/[^a-zA-Z0-9:.-]/g, '');
-  }
-
-  /**
+    return `${ip}:${userAgent}`.replace(/[^a-zA-Z0-9:.-]/g, '');}/**
    * Get client IP address
    */
   private getClientIP(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??
-      (request.headers['x-real-ip'] as string) ??
-      request.connection.remoteAddress ??
-      request.socket.remoteAddress ??
-      'unknown'
-    );
-  }
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??(request.headers['x-real-ip'] as string) ??request.connection.remoteAddress ??request.socket.remoteAddress ??
+      'unknown');}
 
   /**
    * Sanitize headers to remove sensitive information
@@ -544,18 +427,9 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const sanitized = { ...headers };
 
     const sensitiveHeaders = [
-      'authorization',
-      'cookie',
-      'x-api-key',
-      'x-auth-token',
-      'proxy-authorization',
-    ];
-
-    sensitiveHeaders.forEach((header) => {
+      'authorization','cookie','x-api-key','x-auth-token','proxy-authorization',];sensitiveHeaders.forEach((header) => {
       if (sanitized[header]) {
-        sanitized[header] = '[REDACTED]';
-      }
-    });
+        sanitized[header] = '[REDACTED]';}});
 
     return sanitized;
   }

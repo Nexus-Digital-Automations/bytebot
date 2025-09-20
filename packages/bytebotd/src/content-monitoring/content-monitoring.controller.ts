@@ -15,34 +15,24 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
   Logger
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBearerAuth,
   ApiBody
-} from '@nestjs/swagger';
-import { ContentMonitoringService } from './content-monitoring.service';
-import {
-  ContentMonitoringDto,
+} from '@nestjs/swagger';import { ContentMonitoringService } from './content-monitoring.service';import {ContentMonitoringDto,
   MonitorOperationDto,
   BulkMonitorOperationDto,
   MonitoringType
-} from './dto/monitoring.dto';
-import {
-  MonitorStatus,
+} from './dto/monitoring.dto';import {MonitorStatus,
   MonitorStatusResponseDto,
   MonitorOperationResponseDto,
   BulkMonitorOperationResponseDto,
   MonitorListResponseDto,
   ChangeHistoryResponseDto
-} from './dto/monitoring-response.dto';
-
-/**
- * Content Monitoring Controller
+} from './dto/monitoring-response.dto';/*** Content Monitoring Controller
  *
  * Provides comprehensive REST API endpoints for content monitoring including:
  * - Monitor lifecycle management (create, start, stop, pause, resume, delete)
@@ -67,42 +57,25 @@ import {
  * - Real-time status monitoring
  * - Comprehensive API documentation
  */
-@ApiTags('Content Monitoring')
-@Controller('content-monitoring')
-@ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('Content Monitoring')@Controller('content-monitoring')@ApiBearerAuth()@UseInterceptors(ClassSerializerInterceptor)
 export class ContentMonitoringController {
   private readonly logger = new Logger(ContentMonitoringController.name);
 
   constructor(
     private readonly contentMonitoringService: ContentMonitoringService
   ) {
-    this.logger.log('ContentMonitoringController initialized');
-  }
-
-  /**
+    this.logger.log('ContentMonitoringController initialized');}/**
    * Create and start a new content monitor
    */
-  @Post('monitors')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create content monitor',
-    description: 'Creates a new content monitor with specified configuration and starts monitoring if enabled'
-  })
-  @ApiBody({
+  @Post('monitors')@HttpCode(HttpStatus.CREATED)@ApiOperation({
+    summary: 'Create content monitor',description: 'Creates a new content monitor with specified configuration and starts monitoring if enabled'})@ApiBody({
     type: ContentMonitoringDto,
-    description: 'Monitor configuration including URL, detection method, notifications, and frequency'
-  })
-  @ApiResponse({
+    description: 'Monitor configuration including URL, detection method, notifications, and frequency'})@ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Monitor created successfully',
-    type: MonitorStatusResponseDto
-  })
+    description: 'Monitor created successfully',type: MonitorStatusResponseDto})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid configuration or monitor ID already exists'
-  })
-  @ApiResponse({
+    description: 'Invalid configuration or monitor ID already exists'})@ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'Authentication required'
   })
@@ -110,18 +83,14 @@ export class ContentMonitoringController {
     @Body() config: ContentMonitoringDto
   ): Promise<MonitorStatusResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Creating monitor: ${config.id}`, {
-      url: config.url,
-      type: config.type,
+    this.logger.log(`Creating monitor: ${config.id}`, {url: config.url,type: config.type,
       enabled: config.enabled
     });
 
     try {
       const result = await this.contentMonitoringService.createMonitor(config);
 
-      this.logger.log(`Monitor created successfully in ${Date.now() - startTime}ms`, {
-        monitorId: config.id,
-        status: result.status
+      this.logger.log(`Monitor created successfully in ${Date.now() - startTime}ms`, {monitorId: config.id,status: result.status
       });
 
       return result;
@@ -138,37 +107,19 @@ export class ContentMonitoringController {
   /**
    * Get monitor status and statistics
    */
-  @Get('monitors/:monitorId')
-  @ApiOperation({
-    summary: 'Get monitor status',
-    description: 'Retrieves detailed status, configuration, and statistics for a specific monitor'
-  })
-  @ApiParam({
-    name: 'monitorId',
-    description: 'Unique monitor identifier',
-    example: 'monitor_price_tracker_123'
-  })
-  @ApiResponse({
+  @Get('monitors/:monitorId')@ApiOperation({summary: 'Get monitor status',description: 'Retrieves detailed status, configuration, and statistics for a specific monitor'})@ApiParam({
+    name: 'monitorId',description: 'Unique monitor identifier',example: 'monitor_price_tracker_123'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Monitor status retrieved successfully',
-    type: MonitorStatusResponseDto
-  })
+    description: 'Monitor status retrieved successfully',type: MonitorStatusResponseDto})
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Monitor not found'
-  })
-  async getMonitorStatus(
+    description: 'Monitor not found'})async getMonitorStatus(
     @Param('monitorId') monitorId: string
   ): Promise<MonitorStatusResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Getting monitor status: ${monitorId}`);
+    this.logger.log(`Getting monitor status: ${monitorId}`);try {const result = await this.contentMonitoringService.getMonitorStatus(monitorId);
 
-    try {
-      const result = await this.contentMonitoringService.getMonitorStatus(monitorId);
-
-      this.logger.log(`Monitor status retrieved in ${Date.now() - startTime}ms`, {
-        monitorId,
-        status: result.status
+      this.logger.log(`Monitor status retrieved in ${Date.now() - startTime}ms`, {monitorId,status: result.status
       });
 
       return result;
@@ -185,57 +136,26 @@ export class ContentMonitoringController {
   /**
    * List all monitors with filtering and pagination
    */
-  @Get('monitors')
-  @ApiOperation({
-    summary: 'List monitors',
-    description: 'Retrieves list of monitors with optional filtering by status and type, includes pagination support'
-  })
+  @Get('monitors')@ApiOperation({summary: 'List monitors',description: 'Retrieves list of monitors with optional filtering by status and type, includes pagination support'})@ApiQuery({
+    name: 'status',enum: MonitorStatus,required: false,
+    description: 'Filter by monitor status'})@ApiQuery({
+    name: 'type',enum: MonitoringType,required: false,
+    description: 'Filter by monitoring type'})@ApiQuery({
+    name: 'page',type: Number,required: false,
+    description: 'Page number for pagination',example: 1})
   @ApiQuery({
-    name: 'status',
-    enum: MonitorStatus,
-    required: false,
-    description: 'Filter by monitor status'
-  })
-  @ApiQuery({
-    name: 'type',
-    enum: MonitoringType,
-    required: false,
-    description: 'Filter by monitoring type'
-  })
-  @ApiQuery({
-    name: 'page',
-    type: Number,
-    required: false,
-    description: 'Page number for pagination',
-    example: 1
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    type: Number,
-    required: false,
-    description: 'Number of items per page',
-    example: 20
-  })
+    name: 'pageSize',type: Number,required: false,
+    description: 'Number of items per page',example: 20})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Monitors list retrieved successfully',
-    type: MonitorListResponseDto
-  })
+    description: 'Monitors list retrieved successfully',type: MonitorListResponseDto})
   async listMonitors(
-    @Query('status') status?: MonitorStatus,
-    @Query('type') type?: MonitoringType,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number = 20
+    @Query('status') status?: MonitorStatus,@Query('type') type?: MonitoringType,@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,@Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number = 20
   ): Promise<MonitorListResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Listing monitors`, { status, type, page, pageSize });
+    this.logger.log(`Listing monitors`, { status, type, page, pageSize });try {const result = await this.contentMonitoringService.listMonitors(status, type, page, pageSize);
 
-    try {
-      const result = await this.contentMonitoringService.listMonitors(status, type, page, pageSize);
-
-      this.logger.log(`Listed ${result.monitors.length} monitors in ${Date.now() - startTime}ms`, {
-        totalCount: result.totalCount,
-        filteredCount: result.monitors.length
+      this.logger.log(`Listed ${result.monitors.length} monitors in ${Date.now() - startTime}ms`, {totalCount: result.totalCount,filteredCount: result.monitors.length
       });
 
       return result;
@@ -252,46 +172,24 @@ export class ContentMonitoringController {
   /**
    * Perform operation on a monitor (start, stop, pause, resume, reset, update)
    */
-  @Put('monitors/:monitorId/operations')
-  @ApiOperation({
-    summary: 'Perform monitor operation',
-    description: 'Executes lifecycle operations on a monitor (start, stop, pause, resume, reset, update)'
-  })
-  @ApiParam({
-    name: 'monitorId',
-    description: 'Unique monitor identifier',
-    example: 'monitor_price_tracker_123'
-  })
-  @ApiBody({
+  @Put('monitors/:monitorId/operations')@ApiOperation({summary: 'Perform monitor operation',description: 'Executes lifecycle operations on a monitor (start, stop, pause, resume, reset, update)'})@ApiParam({
+    name: 'monitorId',description: 'Unique monitor identifier',example: 'monitor_price_tracker_123'})@ApiBody({
     type: MonitorOperationDto,
-    description: 'Operation details including operation type and optional configuration for updates'
-  })
-  @ApiResponse({
+    description: 'Operation details including operation type and optional configuration for updates'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Operation completed successfully',
-    type: MonitorOperationResponseDto
-  })
+    description: 'Operation completed successfully',type: MonitorOperationResponseDto})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid operation or monitor state'
-  })
-  @ApiResponse({
+    description: 'Invalid operation or monitor state'})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Monitor not found'
-  })
-  async performMonitorOperation(
+    description: 'Monitor not found'})async performMonitorOperation(
     @Param('monitorId') monitorId: string,
     @Body() operation: MonitorOperationDto
   ): Promise<MonitorOperationResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Performing operation: ${operation.operation} on monitor: ${monitorId}`);
+    this.logger.log(`Performing operation: ${operation.operation} on monitor: ${monitorId}`);try {const result = await this.contentMonitoringService.performMonitorOperation(monitorId, operation);
 
-    try {
-      const result = await this.contentMonitoringService.performMonitorOperation(monitorId, operation);
-
-      this.logger.log(`Operation ${operation.operation} completed in ${Date.now() - startTime}ms`, {
-        monitorId,
-        success: result.success,
+      this.logger.log(`Operation ${operation.operation} completed in ${Date.now() - startTime}ms`, {monitorId,success: result.success,
         newStatus: result.newStatus
       });
 
@@ -309,20 +207,11 @@ export class ContentMonitoringController {
   /**
    * Perform bulk operations on multiple monitors
    */
-  @Put('monitors/bulk-operations')
-  @ApiOperation({
-    summary: 'Perform bulk monitor operations',
-    description: 'Executes operations on multiple monitors simultaneously with optional error handling'
-  })
-  @ApiBody({
+  @Put('monitors/bulk-operations')@ApiOperation({summary: 'Perform bulk monitor operations',description: 'Executes operations on multiple monitors simultaneously with optional error handling'})@ApiBody({
     type: BulkMonitorOperationDto,
-    description: 'Bulk operation details including monitor IDs, operation type, and error handling preferences'
-  })
-  @ApiResponse({
+    description: 'Bulk operation details including monitor IDs, operation type, and error handling preferences'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Bulk operation completed',
-    type: BulkMonitorOperationResponseDto
-  })
+    description: 'Bulk operation completed',type: BulkMonitorOperationResponseDto})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid operation or monitor IDs'
@@ -331,17 +220,13 @@ export class ContentMonitoringController {
     @Body() operation: BulkMonitorOperationDto
   ): Promise<BulkMonitorOperationResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Performing bulk operation: ${operation.operation}`, {
-      monitorCount: operation.monitorIds.length,
-      continueOnError: operation.continueOnError
+    this.logger.log(`Performing bulk operation: ${operation.operation}`, {monitorCount: operation.monitorIds.length,continueOnError: operation.continueOnError
     });
 
     try {
       const result = await this.contentMonitoringService.performBulkOperation(operation);
 
-      this.logger.log(`Bulk operation ${operation.operation} completed in ${Date.now() - startTime}ms`, {
-        totalMonitors: result.totalMonitors,
-        successfulOperations: result.successfulOperations,
+      this.logger.log(`Bulk operation ${operation.operation} completed in ${Date.now() - startTime}ms`, {totalMonitors: result.totalMonitors,successfulOperations: result.successfulOperations,
         failedOperations: result.failedOperations
       });
 
@@ -359,64 +244,27 @@ export class ContentMonitoringController {
   /**
    * Get change history for a monitor
    */
-  @Get('monitors/:monitorId/changes')
-  @ApiOperation({
-    summary: 'Get change history',
-    description: 'Retrieves historical change detection results for a monitor with optional date filtering and pagination'
-  })
-  @ApiParam({
-    name: 'monitorId',
-    description: 'Unique monitor identifier',
-    example: 'monitor_price_tracker_123'
-  })
+  @Get('monitors/:monitorId/changes')@ApiOperation({summary: 'Get change history',description: 'Retrieves historical change detection results for a monitor with optional date filtering and pagination'})@ApiParam({
+    name: 'monitorId',description: 'Unique monitor identifier',example: 'monitor_price_tracker_123'})@ApiQuery({
+    name: 'dateFrom',type: String,required: false,
+    description: 'Start date for change history (ISO 8601 format)',example: '2024-01-01T00:00:00.000Z'})@ApiQuery({
+    name: 'dateTo',type: String,required: false,
+    description: 'End date for change history (ISO 8601 format)',example: '2024-01-31T23:59:59.999Z'})@ApiQuery({
+    name: 'page',type: Number,required: false,
+    description: 'Page number for pagination',example: 1})
   @ApiQuery({
-    name: 'dateFrom',
-    type: String,
-    required: false,
-    description: 'Start date for change history (ISO 8601 format)',
-    example: '2024-01-01T00:00:00.000Z'
-  })
-  @ApiQuery({
-    name: 'dateTo',
-    type: String,
-    required: false,
-    description: 'End date for change history (ISO 8601 format)',
-    example: '2024-01-31T23:59:59.999Z'
-  })
-  @ApiQuery({
-    name: 'page',
-    type: Number,
-    required: false,
-    description: 'Page number for pagination',
-    example: 1
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    type: Number,
-    required: false,
-    description: 'Number of changes per page',
-    example: 50
-  })
+    name: 'pageSize',type: Number,required: false,
+    description: 'Number of changes per page',example: 50})
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Change history retrieved successfully',
-    type: ChangeHistoryResponseDto
-  })
+    description: 'Change history retrieved successfully',type: ChangeHistoryResponseDto})
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Monitor not found'
-  })
-  async getChangeHistory(
-    @Param('monitorId') monitorId: string,
-    @Query('dateFrom') dateFrom?: string,
-    @Query('dateTo') dateTo?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('pageSize', new DefaultValuePipe(50), ParseIntPipe) pageSize: number = 50
+    description: 'Monitor not found'})async getChangeHistory(
+    @Param('monitorId') monitorId: string,@Query('dateFrom') dateFrom?: string,@Query('dateTo') dateTo?: string,@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,@Query('pageSize', new DefaultValuePipe(50), ParseIntPipe) pageSize: number = 50
   ): Promise<ChangeHistoryResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Getting change history for monitor: ${monitorId}`, {
-      dateFrom,
-      dateTo,
+    this.logger.log(`Getting change history for monitor: ${monitorId}`, {dateFrom,dateTo,
       page,
       pageSize
     });
@@ -433,9 +281,7 @@ export class ContentMonitoringController {
         pageSize
       );
 
-      this.logger.log(`Retrieved ${result.changes.length} changes in ${Date.now() - startTime}ms`, {
-        monitorId,
-        totalChanges: result.totalChanges
+      this.logger.log(`Retrieved ${result.changes.length} changes in ${Date.now() - startTime}ms`, {monitorId,totalChanges: result.totalChanges
       });
 
       return result;
@@ -452,37 +298,19 @@ export class ContentMonitoringController {
   /**
    * Delete a monitor and its data
    */
-  @Delete('monitors/:monitorId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Delete monitor',
-    description: 'Permanently deletes a monitor and all associated data including change history and statistics'
-  })
-  @ApiParam({
-    name: 'monitorId',
-    description: 'Unique monitor identifier',
-    example: 'monitor_price_tracker_123'
-  })
-  @ApiResponse({
+  @Delete('monitors/:monitorId')@HttpCode(HttpStatus.NO_CONTENT)@ApiOperation({
+    summary: 'Delete monitor',description: 'Permanently deletes a monitor and all associated data including change history and statistics'})@ApiParam({
+    name: 'monitorId',description: 'Unique monitor identifier',example: 'monitor_price_tracker_123'})@ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Monitor deleted successfully'
-  })
-  @ApiResponse({
+    description: 'Monitor deleted successfully'})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Monitor not found'
-  })
-  async deleteMonitor(
+    description: 'Monitor not found'})async deleteMonitor(
     @Param('monitorId') monitorId: string
   ): Promise<void> {
     const startTime = Date.now();
-    this.logger.log(`Deleting monitor: ${monitorId}`);
+    this.logger.log(`Deleting monitor: ${monitorId}`);try {await this.contentMonitoringService.deleteMonitor(monitorId);
 
-    try {
-      await this.contentMonitoringService.deleteMonitor(monitorId);
-
-      this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {
-        monitorId
-      });
+      this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {monitorId});
 
     } catch (error) {
       this.logger.error(`Failed to delete monitor: ${monitorId}`, {
@@ -496,37 +324,18 @@ export class ContentMonitoringController {
   /**
    * Trigger immediate check for a monitor
    */
-  @Post('monitors/:monitorId/check')
-  @ApiOperation({
-    summary: 'Trigger immediate check',
-    description: 'Manually triggers an immediate content check for a monitor, bypassing the scheduled interval'
-  })
-  @ApiParam({
-    name: 'monitorId',
-    description: 'Unique monitor identifier',
-    example: 'monitor_price_tracker_123'
-  })
-  @ApiResponse({
+  @Post('monitors/:monitorId/check')@ApiOperation({summary: 'Trigger immediate check',description: 'Manually triggers an immediate content check for a monitor, bypassing the scheduled interval'})@ApiParam({
+    name: 'monitorId',description: 'Unique monitor identifier',example: 'monitor_price_tracker_123'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Check completed successfully',
-    type: 'MonitorCheckResultDto'
-  })
-  @ApiResponse({
+    description: 'Check completed successfully',type: 'MonitorCheckResultDto'})@ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Monitor not found'
-  })
-  async triggerCheck(
+    description: 'Monitor not found'})async triggerCheck(
     @Param('monitorId') monitorId: string
   ): Promise<any> {
     const startTime = Date.now();
-    this.logger.log(`Triggering immediate check for monitor: ${monitorId}`);
+    this.logger.log(`Triggering immediate check for monitor: ${monitorId}`);try {const result = await this.contentMonitoringService.triggerCheck(monitorId);
 
-    try {
-      const result = await this.contentMonitoringService.triggerCheck(monitorId);
-
-      this.logger.log(`Check completed in ${Date.now() - startTime}ms`, {
-        monitorId,
-        success: result.success,
+      this.logger.log(`Check completed in ${Date.now() - startTime}ms`, {monitorId,success: result.success,
         changeDetected: result.changeDetection.detected
       });
 
@@ -544,49 +353,17 @@ export class ContentMonitoringController {
   /**
    * Get system health and monitoring statistics
    */
-  @Get('health')
-  @ApiOperation({
-    summary: 'Get system health',
-    description: 'Retrieves overall system health metrics including active monitors, performance stats, and system status'
-  })
-  @ApiResponse({
+  @Get('health')@ApiOperation({summary: 'Get system health',description: 'Retrieves overall system health metrics including active monitors, performance stats, and system status'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'System health retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'string', example: 'healthy' },
-        timestamp: { type: 'string', example: '2024-01-15T10:30:00.000Z' },
-        statistics: {
-          type: 'object',
-          properties: {
-            totalMonitors: { type: 'number', example: 25 },
-            activeMonitors: { type: 'number', example: 20 },
-            pausedMonitors: { type: 'number', example: 3 },
-            errorMonitors: { type: 'number', example: 2 },
-            totalChecksToday: { type: 'number', example: 1440 },
-            changesDetectedToday: { type: 'number', example: 15 },
-            averageResponseTime: { type: 'number', example: 2350 },
-            systemUptime: { type: 'number', example: 99.8 }
-          }
-        },
+    description: 'System health retrieved successfully',schema: {type: 'object',properties: {status: { type: 'string', example: 'healthy' },timestamp: { type: 'string', example: '2024-01-15T10:30:00.000Z' },statistics: {type: 'object',properties: {totalMonitors: { type: 'number', example: 25 },activeMonitors: { type: 'number', example: 20 },pausedMonitors: { type: 'number', example: 3 },errorMonitors: { type: 'number', example: 2 },totalChecksToday: { type: 'number', example: 1440 },changesDetectedToday: { type: 'number', example: 15 },averageResponseTime: { type: 'number', example: 2350 },systemUptime: { type: 'number', example: 99.8 }}},
         performance: {
-          type: 'object',
-          properties: {
-            memoryUsage: { type: 'object' },
-            cpuUsage: { type: 'number' },
-            queueSize: { type: 'number' }
-          }
-        }
+          type: 'object',properties: {memoryUsage: { type: 'object' },cpuUsage: { type: 'number' },queueSize: { type: 'number' }}}
       }
     }
   })
   async getSystemHealth(): Promise<any> {
     const startTime = Date.now();
-    this.logger.log('Getting system health metrics');
-
-    try {
-      // Get system statistics
+    this.logger.log('Getting system health metrics');try {// Get system statistics
       const monitors = await this.contentMonitoringService.listMonitors();
 
       const health = {
@@ -618,15 +395,11 @@ export class ContentMonitoringController {
       return health;
 
     } catch (error) {
-      this.logger.error('Failed to get system health', {
-        error: error.message,
-        duration: Date.now() - startTime
+      this.logger.error('Failed to get system health', {error: error.message,duration: Date.now() - startTime
       });
 
       return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error.message,
+        status: 'unhealthy',timestamp: new Date().toISOString(),error: error.message,
         requestDuration: Date.now() - startTime
       };
     }
@@ -635,123 +408,33 @@ export class ContentMonitoringController {
   /**
    * Get API documentation and usage guidelines
    */
-  @Get('docs/api-guide')
-  @ApiOperation({
-    summary: 'Get API documentation',
-    description: 'Retrieves comprehensive API documentation including usage examples, best practices, and integration guidelines'
-  })
-  @ApiResponse({
+  @Get('docs/api-guide')@ApiOperation({summary: 'Get API documentation',description: 'Retrieves comprehensive API documentation including usage examples, best practices, and integration guidelines'})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'API documentation retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        version: { type: 'string', example: '1.0.0' },
-        title: { type: 'string', example: 'Content Monitoring API' },
-        description: { type: 'string' },
-        endpoints: { type: 'array' },
-        examples: { type: 'object' },
-        bestPractices: { type: 'array' },
-        troubleshooting: { type: 'object' }
-      }
-    }
+    description: 'API documentation retrieved successfully',schema: {type: 'object',properties: {version: { type: 'string', example: '1.0.0' },title: { type: 'string', example: 'Content Monitoring API' },description: { type: 'string' },endpoints: { type: 'array' },examples: { type: 'object' },bestPractices: { type: 'array' },troubleshooting: { type: 'object' }}}
   })
   async getApiGuide(): Promise<any> {
     const startTime = Date.now();
-    this.logger.log('Getting API documentation');
-
-    const documentation = {
-      version: '1.0.0',
-      title: 'Content Monitoring API',
-      description: 'Comprehensive API for web content monitoring, change detection, and automated notifications',
-
-      endpoints: [
-        {
-          method: 'POST',
-          path: '/content-monitoring/monitors',
-          description: 'Create a new content monitor',
-          example: {
-            id: 'monitor_price_tracker_123',
-            name: 'Product Price Monitor',
-            type: 'text_change',
-            url: 'https://example.com/product/123',
-            selector: '.price-value',
-            frequency: { interval: 60000 },
-            detection: { method: 'text_diff', sensitivity: 90 },
-            notifications: [
-              { method: 'email', target: 'admin@example.com' }
-            ]
-          }
+    this.logger.log('Getting API documentation');const documentation = {version: '1.0.0',title: 'Content Monitoring API',description: 'Comprehensive API for web content monitoring, change detection, and automated notifications',endpoints: [{
+          method: 'POST',path: '/content-monitoring/monitors',description: 'Create a new content monitor',example: {id: 'monitor_price_tracker_123',name: 'Product Price Monitor',type: 'text_change',url: 'https://example.com/product/123',selector: '.price-value',frequency: { interval: 60000 },detection: { method: 'text_diff', sensitivity: 90 },notifications: [{ method: 'email', target: 'admin@example.com' }]}
         },
         {
-          method: 'GET',
-          path: '/content-monitoring/monitors',
-          description: 'List all monitors with filtering and pagination',
-          parameters: ['status', 'type', 'page', 'pageSize']
-        },
-        {
-          method: 'GET',
-          path: '/content-monitoring/monitors/{monitorId}',
-          description: 'Get detailed monitor status and statistics'
-        },
-        {
-          method: 'PUT',
-          path: '/content-monitoring/monitors/{monitorId}/operations',
-          description: 'Perform lifecycle operations (start, stop, pause, resume, reset, update)'
-        },
-        {
-          method: 'DELETE',
-          path: '/content-monitoring/monitors/{monitorId}',
-          description: 'Delete monitor and all associated data'
-        },
-        {
-          method: 'POST',
-          path: '/content-monitoring/monitors/{monitorId}/check',
-          description: 'Trigger immediate content check'
-        },
-        {
-          method: 'GET',
-          path: '/content-monitoring/monitors/{monitorId}/changes',
-          description: 'Get change history with date filtering and pagination'
-        }
-      ],
+          method: 'GET',path: '/content-monitoring/monitors',description: 'List all monitors with filtering and pagination',parameters: ['status', 'type', 'page', 'pageSize']},{
+          method: 'GET',path: '/content-monitoring/monitors/{monitorId}',description: 'Get detailed monitor status and statistics'},{
+          method: 'PUT',path: '/content-monitoring/monitors/{monitorId}/operations',description: 'Perform lifecycle operations (start, stop, pause, resume, reset, update)'},{
+          method: 'DELETE',path: '/content-monitoring/monitors/{monitorId}',description: 'Delete monitor and all associated data'},{
+          method: 'POST',path: '/content-monitoring/monitors/{monitorId}/check',description: 'Trigger immediate content check'},{
+          method: 'GET',path: '/content-monitoring/monitors/{monitorId}/changes',description: 'Get change history with date filtering and pagination'}],
 
       bestPractices: [
-        'Use descriptive monitor IDs and names for easy identification',
-        'Set appropriate monitoring intervals to balance freshness and resource usage',
-        'Configure sensitive change detection thresholds to reduce false positives',
-        'Implement rate limiting for notifications to avoid spam',
-        'Use bulk operations for managing multiple monitors efficiently',
-        'Monitor system health regularly and adjust configurations as needed',
-        'Implement proper error handling and retry logic in client applications',
-        'Use pagination for large datasets to maintain performance',
-        'Store sensitive configuration data securely (authentication, API keys)',
-        'Regularly review and clean up inactive or unnecessary monitors'
-      ],
-
-      troubleshooting: {
+        'Use descriptive monitor IDs and names for easy identification','Set appropriate monitoring intervals to balance freshness and resource usage','Configure sensitive change detection thresholds to reduce false positives','Implement rate limiting for notifications to avoid spam','Use bulk operations for managing multiple monitors efficiently','Monitor system health regularly and adjust configurations as needed','Implement proper error handling and retry logic in client applications','Use pagination for large datasets to maintain performance','Store sensitive configuration data securely (authentication, API keys)','Regularly review and clean up inactive or unnecessary monitors'],troubleshooting: {
         commonIssues: [
           {
-            issue: 'Monitor stuck in starting state',
-            solution: 'Check URL accessibility and network connectivity'
-          },
-          {
-            issue: 'False positive change detections',
-            solution: 'Adjust sensitivity threshold or exclude dynamic elements'
-          },
-          {
-            issue: 'Notifications not being delivered',
-            solution: 'Verify notification configuration and service availability'
-          },
-          {
-            issue: 'High resource usage',
-            solution: 'Optimize monitoring intervals and reduce concurrent monitors'
-          }
-        ],
+            issue: 'Monitor stuck in starting state',solution: 'Check URL accessibility and network connectivity'},{
+            issue: 'False positive change detections',solution: 'Adjust sensitivity threshold or exclude dynamic elements'},{
+            issue: 'Notifications not being delivered',solution: 'Verify notification configuration and service availability'},{
+            issue: 'High resource usage',solution: 'Optimize monitoring intervals and reduce concurrent monitors'}],
         supportContacts: {
-          documentation: '/api/docs',
-          issues: 'https://github.com/your-org/bytebot/issues',
-          email: 'support@example.com'
+          documentation: '/api/docs',issues: 'https://github.com/your-org/bytebot/issues',email: 'support@example.com'
         }
       },
 

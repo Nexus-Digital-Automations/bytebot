@@ -42,7 +42,9 @@ export class DatabaseModule {
   constructor(private readonly databaseService: ConversationalDatabaseService) {
     // Initialize cleanup interval
     setInterval(() => {
-      this.databaseService.cleanup().catch(console.error);
+      this.databaseService.cleanup().catch((error: unknown) => {
+        console.error('Database cleanup failed:', error);
+      });
     }, 600000); // 10 minutes
   }
 }

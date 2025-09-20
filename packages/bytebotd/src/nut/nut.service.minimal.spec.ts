@@ -8,12 +8,7 @@
  * Simple test to verify Jest and NUT service basic functionality
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-
-// Mock external dependencies first
-jest.mock('@nut-tree-fork/nut-js', () => ({
-  keyboard: {
-    pressKey: jest.fn().mockResolvedValue(undefined),
+import { Test, TestingModule } from '@nestjs/testing';// Mock external dependencies firstjest.mock('@nut-tree-fork/nut-js', () => ({keyboard: {pressKey: jest.fn().mockResolvedValue(undefined),
     releaseKey: jest.fn().mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
@@ -28,32 +23,12 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
   },
   Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
-    A: 'A',
-    B: 'B',
-    Space: 'Space',
-    Enter: 'Enter',
-    LeftShift: 'LeftShift',
-    LeftControl: 'LeftControl',
-  },
-  Button: { LEFT: 'LEFT', RIGHT: 'RIGHT', MIDDLE: 'MIDDLE' },
-  FileType: { PNG: 'PNG' },
+    A: 'A',B: 'B',Space: 'Space',Enter: 'Enter',LeftShift: 'LeftShift',LeftControl: 'LeftControl',},Button: { LEFT: 'LEFT', RIGHT: 'RIGHT', MIDDLE: 'MIDDLE' },FileType: { PNG: 'PNG' },}));// Mock dynamic fs import
+jest.mock('fs', () => ({promises: {mkdir: jest.fn().mockResolvedValue(undefined),
+    readFile: jest.fn().mockResolvedValue(Buffer.from('test')),unlink: jest.fn().mockResolvedValue(undefined),},
 }));
 
-// Mock dynamic fs import
-jest.mock('fs', () => ({
-  promises: {
-    mkdir: jest.fn().mockResolvedValue(undefined),
-    readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
-    unlink: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-
-import { NutService } from './nut.service';
-
-describe('NutService - Minimal Test', () => {
-  let service: NutService;
-
-  beforeEach(async () => {
+import { NutService } from './nut.service';describe('NutService - Minimal Test', () => {let service: NutService;beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [NutService],
     }).compile();
@@ -61,13 +36,9 @@ describe('NutService - Minimal Test', () => {
     service = module.get<NutService>(NutService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should be defined', () => {expect(service).toBeDefined();});
 
-  it('should return service status', () => {
-    const status = service.getServiceStatus();
-    expect(status).toBeDefined();
+  it('should return service status', () => {const status = service.getServiceStatus();expect(status).toBeDefined();
     expect(typeof status.healthy).toBe('boolean');
   });
 });

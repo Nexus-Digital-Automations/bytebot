@@ -8,25 +8,13 @@
  * @version 1.0.0
  */
 
-import { UserRole, Permission } from '@bytebot/shared';
-
-// Base coordinate interface for mouse positions
-export interface Coordinates {
+import { UserRole, Permission } from '@bytebot/shared';// Base coordinate interface for mouse positionsexport interface Coordinates {
   x: number;
   y: number;
 }
 
 // Hold keys interface for modifier keys
-export type HoldKey = 'alt' | 'ctrl' | 'shift' | 'meta';
-
-// Button types for mouse interactions
-export type Button = 'left' | 'right' | 'middle';
-
-// Scroll direction types
-export type ScrollDirection = 'up' | 'down' | 'left' | 'right';
-
-// Key information interface
-export interface KeyInfo {
+export type HoldKey = 'alt' | 'ctrl' | 'shift' | 'meta';// Button types for mouse interactionsexport type Button = 'left' | 'right' | 'middle';// Scroll direction typesexport type ScrollDirection = 'up' | 'down' | 'left' | 'right';// Key information interfaceexport interface KeyInfo {
   name: string;
   isPrintable: boolean;
   string?: string;
@@ -181,9 +169,7 @@ export interface InputValidationOptions {
 // Event tracking interfaces
 export interface TrackedEvent {
   id: string;
-  type: 'mouse' | 'keyboard' | 'scroll';
-  timestamp: string;
-  data: MouseEventData | KeyboardEventData | WheelEventData;
+  type: 'mouse' | 'keyboard' | 'scroll';timestamp: string;data: MouseEventData | KeyboardEventData | WheelEventData;
   userId?: string;
   sessionId?: string;
 }
@@ -215,38 +201,19 @@ export interface ErrorContext {
 // Type guards for runtime type checking
 export function isMouseEventData(data: unknown): data is MouseEventData {
   return (
-    typeof data === 'object' &&
-    data !== null &&
-    typeof (data as MouseEventData).button === 'number' &&
-    typeof (data as MouseEventData).x === 'number' &&
-    typeof (data as MouseEventData).y === 'number'
-  );
-}
+    typeof data === 'object' &&data !== null &&typeof (data as MouseEventData).button === 'number' &&typeof (data as MouseEventData).x === 'number' &&typeof (data as MouseEventData).y === 'number');}
 
 export function isKeyboardEventData(data: unknown): data is KeyboardEventData {
   return (
-    typeof data === 'object' &&
-    data !== null &&
-    typeof (data as KeyboardEventData).keycode === 'number'
-  );
-}
+    typeof data === 'object' &&data !== null &&typeof (data as KeyboardEventData).keycode === 'number');}
 
 export function isMockByteBotdUser(user: unknown): user is MockByteBotdUser {
   return (
-    typeof user === 'object' &&
-    user !== null &&
-    typeof (user as MockByteBotdUser).id === 'string' &&
-    typeof (user as MockByteBotdUser).username === 'string' &&
-    typeof (user as MockByteBotdUser).role === 'string'
-  );
-}
+    typeof user === 'object' &&user !== null &&typeof (user as MockByteBotdUser).id === 'string' &&typeof (user as MockByteBotdUser).username === 'string' &&typeof (user as MockByteBotdUser).role === 'string');}
 
 export function isValidCoordinates(coords: unknown): coords is Coordinates {
   return (
-    typeof coords === 'object' &&
-    coords !== null &&
-    typeof (coords as Coordinates).x === 'number' &&
-    typeof (coords as Coordinates).y === 'number'
+    typeof coords === 'object' &&coords !== null &&typeof (coords as Coordinates).x === 'number' &&typeof (coords as Coordinates).y === 'number'
   );
 }
 

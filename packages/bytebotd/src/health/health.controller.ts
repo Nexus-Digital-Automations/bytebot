@@ -24,45 +24,24 @@
  * @version 3.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Controller, Get, Logger, UseGuards, Res, Header, HttpCode, HttpStatus } from '@nestjs/common';
-import {
-  HealthCheckService,
+import { Controller, Get, Logger, UseGuards, Res, Header, HttpCode, HttpStatus } from '@nestjs/common';import {HealthCheckService,
   HttpHealthIndicator,
   MemoryHealthIndicator,
   DiskHealthIndicator,
   HealthCheck,
   HealthCheckResult,
-} from '@nestjs/terminus';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import type { Response } from 'express';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import {
-  Authenticated,
+} from '@nestjs/terminus';import { ApiBearerAuth } from '@nestjs/swagger';import type { Response } from 'express';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {Authenticated,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';
-import { HealthService } from './health.service';
-import {
-  BasicHealthResponse,
+} from '../auth/decorators/roles.decorator';import { HealthService } from './health.service';import {BasicHealthResponse,
   DetailedStatusResponse,
-} from './interfaces/health.interfaces';
-import {
-  ParlantHealthMetricsValidationService,
+} from './interfaces/health.interfaces';import {ParlantHealthMetricsValidationService,
   HealthOperationType,
   MetricsOperationType,
   HealthMetricsValidationResult,
-} from '../parlant/services/parlant-health-metrics-validation.service';
-import { MetricsService } from '../metrics/metrics.service';
-
-/**
- * Health monitoring controller providing system status endpoints with Parlant validation
+} from '../parlant/services/parlant-health-metrics-validation.service';import { MetricsService } from '../metrics/metrics.service';/*** Health monitoring controller providing system status endpoints with Parlant validation
  */
-@Controller('health')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('bearer')
-export class HealthController {
-  private readonly logger = new Logger(HealthController.name);
+@Controller('health')@UseGuards(JwtAuthGuard, RolesGuard)@ApiBearerAuth('bearer')export class HealthController {private readonly logger = new Logger(HealthController.name);
 
   constructor(
     private readonly healthService: HealthService,
@@ -73,12 +52,7 @@ export class HealthController {
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
     private readonly metricsService: MetricsService,
   ) {
-    this.logger.log('Enterprise Health Controller initialized with Parlant validation');
-    this.logger.log(
-      'Available endpoints: /health, /health/live, /health/ready, /health/startup, /health/status',
-    );
-    this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active');
-    this.logger.log('METRICS INTEGRATION: Prometheus metrics collection enabled');
+    this.logger.log('Enterprise Health Controller initialized with Parlant validation');this.logger.log('Available endpoints: /health, /health/live, /health/ready, /health/startup, /health/status',);this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active');this.logger.log('METRICS INTEGRATION: Prometheus metrics collection enabled');
   }
 
   /**
@@ -92,30 +66,21 @@ export class HealthController {
   @Authenticated()
   async getHealth(@CurrentUser() user: ByteBotdUser):
     Promise<BasicHealthResponse | { status: string; timestamp: string; error: string; validation?: HealthMetricsValidationResult }> {
-    const operationId = `health_basic${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] Basic health check requested with Parlant validation`, {
+    const operationId = `health_basic${Date.now()}`;this.logger.debug(`[${operationId}] Basic health check requested with Parlant validation`, {
       operationId,
       userId: user.id,
       username: user.username,
-      securityEvent: 'health_check_requested',
-    });
-
-    try {
+      securityEvent: 'health_check_requested',});try {
       // PARLANT VALIDATION: Basic health check (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.BASIC_HEALTH_CHECK,
         {
-          endpoint: '/health',
-          method: 'GET',
-          frequency: 'high-frequency',
+          endpoint: '/health',method: 'GET',frequency: 'high-frequency',
         },
         { userId: user.id, userRole: user.role },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation completed`, {
-        operationId,
-        approved: validation.approved,
+      this.logger.debug(`[${operationId}] Parlant validation completed`, {operationId,approved: validation.approved,
         riskLevel: validation.riskLevel,
         validationDuration: validation.performanceImpact.validationDuration,
         cacheHit: validation.performanceImpact.cacheHit,
@@ -129,11 +94,7 @@ export class HealthController {
         });
 
         return {
-          status: 'validation_rejected',
-          timestamp: new Date().toISOString(),
-          error: validation.reason ?? 'Health check operation not approved',
-          validation,
-        };
+          status: 'validation_rejected',timestamp: new Date().toISOString(),error: validation.reason ?? 'Health check operation not approved',validation,};
       }
 
       // Execute health check with audit trail
@@ -144,13 +105,7 @@ export class HealthController {
       // Record metrics for health check
       /* TEMPORARILY DISABLED - API differences between shared and local MetricsService
       try {
-        this.metricsService.recordHealthCheck('basic', { isHealthy: true, details: {}, responseTime });
-        this.metricsService.incrementCounter('health_requests_total', 1, {
-          endpoint: '/health',
-          method: 'GET',
-          status: 'success',
-          user_id: user.id,
-        });
+        this.metricsService.recordHealthCheck('basic', { isHealthy: true, details: {}, responseTime });this.metricsService.incrementCounter('health_requests_total', 1, {endpoint: '/health',method: 'GET',status: 'success',user_id: user.id,});
       } catch (metricsError) {
         this.logger.warn('Failed to record health check metrics', {
           error: metricsError instanceof Error ? metricsError.message : String(metricsError),
@@ -164,10 +119,7 @@ export class HealthController {
         healthStatus: healthData.status,
         conversationId: validation.conversationId,
         responseTime,
-        securityEvent: 'health_check_completed',
-      });
-
-      return healthData;
+        securityEvent: 'health_check_completed',});return healthData;
       
     } catch (_error) {
       const errorMessage =
@@ -179,9 +131,7 @@ export class HealthController {
       });
 
       return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
+        status: 'unhealthy',timestamp: new Date().toISOString(),error: errorMessage,
       };
     }
   }
@@ -200,39 +150,26 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkLiveness(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `liveness${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] Liveness probe requested with Parlant validation`, {
+    const operationId = `liveness${Date.now()}`;this.logger.debug(`[${operationId}] Liveness probe requested with Parlant validation`, {
       operationId,
       userId: user.id,
-      securityEvent: 'liveness_probe_requested',
-    });
-
-    try {
+      securityEvent: 'liveness_probe_requested',});try {
       // PARLANT VALIDATION: Liveness probe (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.LIVENESS_PROBE,
         {
-          endpoint: '/health/live',
-          method: 'GET',
-          frequency: 'high-frequency',
-          component: 'kubernetes_probe',
+          endpoint: '/health/live',method: 'GET',frequency: 'high-frequency',component: 'kubernetes_probe',
         },
         { userId: user.id, userRole: user.role },
       );
 
       if (!validation.approved) {
-        this.logger.error(`[${operationId}] Liveness probe rejected by Parlant validation`, {
-          operationId,
-          reason: validation.reason,
+        this.logger.error(`[${operationId}] Liveness probe rejected by Parlant validation`, {operationId,reason: validation.reason,
           conversationId: validation.conversationId,
         });
         
         // For liveness probes, rejection could cause pod restart - use failsafe
-        throw new Error(`Liveness probe validation failed: ${validation.reason}`);
-      }
-
-      this.logger.debug(`[${operationId}] Parlant validation approved for liveness probe`, {
+        throw new Error(`Liveness probe validation failed: ${validation.reason}`);}this.logger.debug(`[${operationId}] Parlant validation approved for liveness probe`, {
         operationId,
         conversationId: validation.conversationId,
         validationDuration: validation.performanceImpact.validationDuration,
@@ -250,11 +187,7 @@ export class HealthController {
         operationId,
         userId: user.id,
         conversationId: validation.conversationId,
-        probeStatus: 'healthy',
-        securityEvent: 'liveness_probe_completed',
-      });
-
-      return result;
+        probeStatus: 'healthy',securityEvent: 'liveness_probe_completed',});return result;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -283,23 +216,15 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkReadiness(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `readiness${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] Readiness probe requested with Parlant validation`, {
+    const operationId = `readiness${Date.now()}`;this.logger.debug(`[${operationId}] Readiness probe requested with Parlant validation`, {
       operationId,
       userId: user.id,
-      securityEvent: 'readiness_probe_requested',
-    });
-
-    try {
+      securityEvent: 'readiness_probe_requested',});try {
       // PARLANT VALIDATION: Readiness probe (MEDIUM risk - includes database and external services)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.READINESS_PROBE,
         {
-          endpoint: '/health/ready',
-          method: 'GET',
-          frequency: 'periodic',
-          component: 'kubernetes_probe',
+          endpoint: '/health/ready',method: 'GET',frequency: 'periodic',component: 'kubernetes_probe',
           includesDatabase: true,
           includesExternalServices: true,
         },
@@ -307,16 +232,11 @@ export class HealthController {
       );
 
       if (!validation.approved) {
-        this.logger.error(`[${operationId}] Readiness probe rejected by Parlant validation`, {
-          operationId,
-          reason: validation.reason,
+        this.logger.error(`[${operationId}] Readiness probe rejected by Parlant validation`, {operationId,reason: validation.reason,
           conversationId: validation.conversationId,
         });
         
-        throw new Error(`Readiness probe validation failed: ${validation.reason}`);
-      }
-
-      this.logger.debug(`[${operationId}] Parlant validation approved for readiness probe`, {
+        throw new Error(`Readiness probe validation failed: ${validation.reason}`);}this.logger.debug(`[${operationId}] Parlant validation approved for readiness probe`, {
         operationId,
         conversationId: validation.conversationId,
         riskLevel: validation.riskLevel,
@@ -331,20 +251,14 @@ export class HealthController {
         () => this.healthService.checkExternalServices(),
         // Check disk space (warn if over 80%)
         () =>
-          this.disk.checkStorage('storage', { thresholdPercent: 0.8, path: '/' }),
-        // Check memory usage (warn if over 80%)
-        () => this.memory.checkHeap('memory_heap', 120 * 1024 * 1024), // 120MB limit
+          this.disk.checkStorage('storage', { thresholdPercent: 0.8, path: '/' }),// Check memory usage (warn if over 80%)() => this.memory.checkHeap('memory_heap', 120 * 1024 * 1024), // 120MB limit
       ]);
 
       this.logger.debug(`[${operationId}] Readiness probe completed successfully`, {
         operationId,
         userId: user.id,
         conversationId: validation.conversationId,
-        probeStatus: 'ready',
-        securityEvent: 'readiness_probe_completed',
-      });
-
-      return result;
+        probeStatus: 'ready',securityEvent: 'readiness_probe_completed',});return result;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -372,23 +286,15 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkStartup(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `startup${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] Startup probe requested with Parlant validation`, {
+    const operationId = `startup${Date.now()}`;this.logger.debug(`[${operationId}] Startup probe requested with Parlant validation`, {
       operationId,
       userId: user.id,
-      securityEvent: 'startup_probe_requested',
-    });
-
-    try {
+      securityEvent: 'startup_probe_requested',});try {
       // PARLANT VALIDATION: Startup probe (MEDIUM risk - includes module initialization and database)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.STARTUP_PROBE,
         {
-          endpoint: '/health/startup',
-          method: 'GET',
-          frequency: 'once',
-          component: 'kubernetes_probe',
+          endpoint: '/health/startup',method: 'GET',frequency: 'once',component: 'kubernetes_probe',
           includesModules: true,
           includesDatabase: true,
         },
@@ -396,18 +302,11 @@ export class HealthController {
       );
 
       if (!validation.approved) {
-        this.logger.error(`[${operationId}] Startup probe rejected by Parlant validation`, {
-          operationId,
-          reason: validation.reason,
+        this.logger.error(`[${operationId}] Startup probe rejected by Parlant validation`, {operationId,reason: validation.reason,
           conversationId: validation.conversationId,
         });
         
-        throw new Error(`Startup probe validation failed: ${validation.reason}`);
-      }
-
-      this.logger.debug(`[${operationId}] Parlant validation approved for startup probe`, {
-        operationId,
-        conversationId: validation.conversationId,
+        throw new Error(`Startup probe validation failed: ${validation.reason}`);}this.logger.debug(`[${operationId}] Parlant validation approved for startup probe`, {operationId,conversationId: validation.conversationId,
         riskLevel: validation.riskLevel,
         validationDuration: validation.performanceImpact.validationDuration,
       });
@@ -426,11 +325,7 @@ export class HealthController {
         operationId,
         userId: user.id,
         conversationId: validation.conversationId,
-        probeStatus: 'started',
-        securityEvent: 'startup_probe_completed',
-      });
-
-      return result;
+        probeStatus: 'started',securityEvent: 'startup_probe_completed',});return result;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -455,23 +350,16 @@ export class HealthController {
   @Authenticated()
   async getDetailedStatus(@CurrentUser() user: ByteBotdUser):
     Promise<DetailedStatusResponse | { status: string; timestamp: string; error: string; services: {}; validation?: HealthMetricsValidationResult }> {
-    const operationId = `status_detailed${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] Detailed status requested with Parlant validation`, {
+    const operationId = `status_detailed${Date.now()}`;this.logger.debug(`[${operationId}] Detailed status requested with Parlant validation`, {
       operationId,
       userId: user.id,
       username: user.username,
-      securityEvent: 'detailed_status_requested',
-    });
-
-    try {
+      securityEvent: 'detailed_status_requested',});try {
       // PARLANT VALIDATION: Detailed status (MEDIUM risk - comprehensive system information)
       const validation = await this.parlantValidationService.validateHealthOperation(
         HealthOperationType.DETAILED_STATUS,
         {
-          endpoint: '/health/status',
-          method: 'GET',
-          frequency: 'periodic',
+          endpoint: '/health/status',method: 'GET',frequency: 'periodic',
           includesSystemInfo: true,
           includesPerformanceMetrics: true,
           includesServiceStatus: true,
@@ -479,9 +367,7 @@ export class HealthController {
         { userId: user.id, userRole: user.role },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation completed for detailed status`, {
-        operationId,
-        approved: validation.approved,
+      this.logger.debug(`[${operationId}] Parlant validation completed for detailed status`, {operationId,approved: validation.approved,
         riskLevel: validation.riskLevel,
         validationDuration: validation.performanceImpact.validationDuration,
         cacheHit: validation.performanceImpact.cacheHit,
@@ -495,9 +381,7 @@ export class HealthController {
         });
 
         return {
-          status: 'validation_rejected',
-          timestamp: new Date().toISOString(),
-          error: validation.reason ?? 'Detailed status operation not approved',
+          status: 'validation_rejected',timestamp: new Date().toISOString(),error: validation.reason ?? 'Detailed status operation not approved',
           services: {},
           validation,
         };
@@ -512,10 +396,7 @@ export class HealthController {
         systemStatus: statusData.status,
         serviceCount: Object.keys(statusData.services).length,
         conversationId: validation.conversationId,
-        securityEvent: 'detailed_status_completed',
-      });
-
-      return statusData;
+        securityEvent: 'detailed_status_completed',});return statusData;
       
     } catch (_error) {
       const errorMessage =
@@ -527,9 +408,7 @@ export class HealthController {
       });
 
       return {
-        status: 'error',
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
+        status: 'error',timestamp: new Date().toISOString(),error: errorMessage,
         services: {},
       };
     }
@@ -539,30 +418,21 @@ export class HealthController {
    * Prometheus metrics endpoint with Parlant validation
    * GET /health/metrics
    */
-  @Get('metrics')
-  @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+  @Get('metrics')@Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
   @HttpCode(HttpStatus.OK)
   async getPrometheusMetrics(
     @CurrentUser() user: ByteBotdUser, 
     @Res() response: Response
   ): Promise<void> {
-    const operationId = `metrics${Date.now()}`;
-    this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed with Parlant validation`, {
+    const operationId = `metrics${Date.now()}`;this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed with Parlant validation`, {
       operationId,
       userId: user.id,
-      securityEvent: 'metrics_endpoint_accessed',
-    });
-
-    try {
+      securityEvent: 'metrics_endpoint_accessed',});try {
       // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
       const validation = await this.parlantValidationService.validateMetricsOperation(
         MetricsOperationType.PROMETHEUS_COLLECTION,
         {
-          endpoint: '/health/metrics',
-          method: 'GET',
-          frequency: 'periodic',
-          exposesSystemMetrics: true,
-          sensitivityLevel: 'medium',
+          endpoint: '/health/metrics',method: 'GET',frequency: 'periodic',exposesSystemMetrics: true,sensitivityLevel: 'medium',
         },
         { userId: user.id, userRole: user.role },
       );
@@ -591,10 +461,7 @@ export class HealthController {
 
       // Record metrics endpoint access - TEMPORARILY DISABLED due to API differences
       /* 
-      this.metricsService.incrementCounter('prometheus_metrics_requests_total', 1, {
-        service: 'bytebotd',
-        user_id: user.id,
-      });
+      this.metricsService.incrementCounter('prometheus_metrics_requests_total', 1, {service: 'bytebotd',user_id: user.id,});
       this.metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
       */
 
@@ -605,10 +472,7 @@ export class HealthController {
         responseTimeMs: responseTime,
         outputSize: metricsOutput.length,
         // metricsCount: this.metricsService.getMetricsSummary(), // TEMPORARILY DISABLED
-        securityEvent: 'metrics_endpoint_completed',
-      });
-
-      response.send(metricsOutput);
+        securityEvent: 'metrics_endpoint_completed',});response.send(metricsOutput);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`, {
@@ -618,10 +482,7 @@ export class HealthController {
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      // this.metricsService.incrementCounter('prometheus_metrics_errors_total', 1, {
-      //   service: 'bytebotd',
-      //   user_id: user.id,
-      // }); // TEMPORARILY DISABLED
+      // this.metricsService.incrementCounter('prometheus_metrics_errors_total', 1, {//   service: 'bytebotd',//   user_id: user.id,// }); // TEMPORARILY DISABLED
       response.status(500).send('# Error generating metrics\n');
     }
   }

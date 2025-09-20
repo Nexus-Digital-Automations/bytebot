@@ -23,22 +23,10 @@
  * @version 1.0.0 - Enterprise Forensic Framework
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as zlib from 'zlib';
-import { promisify } from 'util';
-import {
-  ImmutableAuditEvent,
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as crypto from 'crypto';import * as fs from 'fs/promises';import * as path from 'path';import * as zlib from 'zlib';import { promisify } from 'util';import {ImmutableAuditEvent,
   ComplianceRegulation,
   AuditOperationType
-} from './enterprise-audit-trail.service';
-
-const gzip = promisify(zlib.gzip);
-const gunzip = promisify(zlib.gunzip);
+} from './enterprise-audit-trail.service';const gzip = promisify(zlib.gzip);const gunzip = promisify(zlib.gunzip);
 
 // ===== FORENSIC INTERFACES =====
 
@@ -62,10 +50,7 @@ export interface ForensicInvestigation {
     readonly reportedBy: string;
     readonly assignedInvestigator: string;
     readonly legalHold: boolean;
-    readonly confidentialityLevel: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
-  };
-
-  // Investigation Scope
+    readonly confidentialityLevel: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';};// Investigation Scope
   readonly investigationScope: {
     readonly timeRange: { start: Date; end: Date };
     readonly affectedSystems: string[];
@@ -104,54 +89,19 @@ export interface ForensicInvestigation {
  * Investigation types
  */
 export enum InvestigationType {
-  SECURITY_INCIDENT = 'security_incident',
-  COMPLIANCE_AUDIT = 'compliance_audit',
-  INTERNAL_INVESTIGATION = 'internal_investigation',
-  LEGAL_DISCOVERY = 'legal_discovery',
-  FRAUD_INVESTIGATION = 'fraud_investigation',
-  DATA_BREACH = 'data_breach',
-  INSIDER_THREAT = 'insider_threat',
-  CYBER_ATTACK = 'cyber_attack',
-}
-
-/**
+  SECURITY_INCIDENT = 'security_incident',COMPLIANCE_AUDIT = 'compliance_audit',INTERNAL_INVESTIGATION = 'internal_investigation',LEGAL_DISCOVERY = 'legal_discovery',FRAUD_INVESTIGATION = 'fraud_investigation',DATA_BREACH = 'data_breach',INSIDER_THREAT = 'insider_threat',CYBER_ATTACK = 'cyber_attack',}/**
  * Investigation priorities
  */
 export enum InvestigationPriority {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-}
-
-/**
+  CRITICAL = 'critical',HIGH = 'high',MEDIUM = 'medium',LOW = 'low',}/**
  * Investigation status
  */
 export enum InvestigationStatus {
-  INITIATED = 'initiated',
-  EVIDENCE_COLLECTION = 'evidence_collection',
-  ANALYSIS = 'analysis',
-  REPORTING = 'reporting',
-  COMPLETED = 'completed',
-  SUSPENDED = 'suspended',
-  CLOSED = 'closed',
-}
-
-/**
+  INITIATED = 'initiated',EVIDENCE_COLLECTION = 'evidence_collection',ANALYSIS = 'analysis',REPORTING = 'reporting',COMPLETED = 'completed',SUSPENDED = 'suspended',CLOSED = 'closed',}/**
  * Incident types
  */
 export enum IncidentType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  MALWARE_INFECTION = 'malware_infection',
-  POLICY_VIOLATION = 'policy_violation',
-  SYSTEM_COMPROMISE = 'system_compromise',
-  INSIDER_ABUSE = 'insider_abuse',
-  EXTERNAL_ATTACK = 'external_attack',
-}
-
-/**
+  UNAUTHORIZED_ACCESS = 'unauthorized_access',DATA_EXFILTRATION = 'data_exfiltration',PRIVILEGE_ESCALATION = 'privilege_escalation',MALWARE_INFECTION = 'malware_infection',POLICY_VIOLATION = 'policy_violation',SYSTEM_COMPROMISE = 'system_compromise',INSIDER_ABUSE = 'insider_abuse',EXTERNAL_ATTACK = 'external_attack',}/**
  * Chain of custody entry
  */
 export interface ChainOfCustodyEntry {
@@ -173,18 +123,7 @@ export interface ChainOfCustodyEntry {
  * Custody actions
  */
 export enum CustodyAction {
-  COLLECTED = 'collected',
-  TRANSFERRED = 'transferred',
-  ANALYZED = 'analyzed',
-  COPIED = 'copied',
-  SEALED = 'sealed',
-  UNSEALED = 'unsealed',
-  RETURNED = 'returned',
-  DESTROYED = 'destroyed',
-  ARCHIVED = 'archived',
-}
-
-/**
+  COLLECTED = 'collected',TRANSFERRED = 'transferred',ANALYZED = 'analyzed',COPIED = 'copied',SEALED = 'sealed',UNSEALED = 'unsealed',RETURNED = 'returned',DESTROYED = 'destroyed',ARCHIVED = 'archived',}/**
  * Evidence reference
  */
 export interface EvidenceReference {
@@ -203,20 +142,7 @@ export interface EvidenceReference {
  * Evidence types
  */
 export enum EvidenceType {
-  AUDIT_LOG = 'audit_log',
-  SYSTEM_LOG = 'system_log',
-  NETWORK_TRAFFIC = 'network_traffic',
-  FILE_SYSTEM = 'file_system',
-  MEMORY_DUMP = 'memory_dump',
-  DATABASE_RECORD = 'database_record',
-  EMAIL = 'email',
-  DOCUMENT = 'document',
-  SCREENSHOT = 'screenshot',
-  VIDEO = 'video',
-  TESTIMONY = 'testimony',
-}
-
-/**
+  AUDIT_LOG = 'audit_log',SYSTEM_LOG = 'system_log',NETWORK_TRAFFIC = 'network_traffic',FILE_SYSTEM = 'file_system',MEMORY_DUMP = 'memory_dump',DATABASE_RECORD = 'database_record',EMAIL = 'email',DOCUMENT = 'document',SCREENSHOT = 'screenshot',VIDEO = 'video',TESTIMONY = 'testimony',}/**
  * Forensic analysis result
  */
 export interface ForensicAnalysisResult {
@@ -237,9 +163,7 @@ export interface ForensicAnalysisResult {
   readonly conclusions: {
     readonly summary: string;
     readonly keyFindings: string[];
-    readonly evidenceQuality: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
-    readonly confidence: number;
-    readonly limitations: string[];
+    readonly evidenceQuality: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';readonly confidence: number;readonly limitations: string[];
     readonly recommendations: string[];
   };
 
@@ -257,24 +181,13 @@ export interface ForensicAnalysisResult {
  * Forensic analysis types
  */
 export enum ForensicAnalysisType {
-  TIMELINE_ANALYSIS = 'timeline_analysis',
-  PATTERN_ANALYSIS = 'pattern_analysis',
-  ANOMALY_DETECTION = 'anomaly_detection',
-  CORRELATION_ANALYSIS = 'correlation_analysis',
-  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
-  TECHNICAL_ANALYSIS = 'technical_analysis',
-  STATISTICAL_ANALYSIS = 'statistical_analysis',
-}
-
-/**
+  TIMELINE_ANALYSIS = 'timeline_analysis',PATTERN_ANALYSIS = 'pattern_analysis',ANOMALY_DETECTION = 'anomaly_detection',CORRELATION_ANALYSIS = 'correlation_analysis',BEHAVIORAL_ANALYSIS = 'behavioral_analysis',TECHNICAL_ANALYSIS = 'technical_analysis',STATISTICAL_ANALYSIS = 'statistical_analysis',}/**
  * Forensic finding
  */
 export interface ForensicFinding {
   readonly findingId: string;
   readonly type: FindingType;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly confidence: number;
-  readonly description: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly confidence: number;readonly description: string;
   readonly evidence: string[];
   readonly supportingAnalysis: string;
   readonly implications: string[];
@@ -285,17 +198,7 @@ export interface ForensicFinding {
  * Finding types
  */
 export enum FindingType {
-  ATTACK_VECTOR = 'attack_vector',
-  COMPROMISE_INDICATOR = 'compromise_indicator',
-  UNAUTHORIZED_ACTIVITY = 'unauthorized_activity',
-  DATA_ACCESS = 'data_access',
-  PRIVILEGE_ABUSE = 'privilege_abuse',
-  POLICY_VIOLATION = 'policy_violation',
-  SYSTEM_WEAKNESS = 'system_weakness',
-  TEMPORAL_ANOMALY = 'temporal_anomaly',
-}
-
-/**
+  ATTACK_VECTOR = 'attack_vector',COMPROMISE_INDICATOR = 'compromise_indicator',UNAUTHORIZED_ACTIVITY = 'unauthorized_activity',DATA_ACCESS = 'data_access',PRIVILEGE_ABUSE = 'privilege_abuse',POLICY_VIOLATION = 'policy_violation',SYSTEM_WEAKNESS = 'system_weakness',TEMPORAL_ANOMALY = 'temporal_anomaly',}/**
  * Timeline event
  */
 export interface TimelineEvent {
@@ -307,9 +210,7 @@ export interface TimelineEvent {
   readonly action: string;
   readonly outcome: string;
   readonly evidence: string[];
-  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly verified: boolean;
-}
+  readonly significance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly verified: boolean;}
 
 /**
  * Evidence relationship
@@ -328,15 +229,7 @@ export interface EvidenceRelationship {
  * Relationship types
  */
 export enum RelationshipType {
-  TEMPORAL = 'temporal',
-  CAUSAL = 'causal',
-  CORRELATIONAL = 'correlational',
-  HIERARCHICAL = 'hierarchical',
-  SEQUENTIAL = 'sequential',
-  ASSOCIATIVE = 'associative',
-}
-
-/**
+  TEMPORAL = 'temporal',CAUSAL = 'causal',CORRELATIONAL = 'correlational',HIERARCHICAL = 'hierarchical',SEQUENTIAL = 'sequential',ASSOCIATIVE = 'associative',}/**
  * Forensic pattern
  */
 export interface ForensicPattern {
@@ -354,24 +247,14 @@ export interface ForensicPattern {
  * Pattern types
  */
 export enum PatternType {
-  BEHAVIORAL = 'behavioral',
-  TEMPORAL = 'temporal',
-  ACCESS = 'access',
-  COMMUNICATION = 'communication',
-  DATA_FLOW = 'data_flow',
-  ATTACK_SIGNATURE = 'attack_signature',
-}
-
-/**
+  BEHAVIORAL = 'behavioral',TEMPORAL = 'temporal',ACCESS = 'access',COMMUNICATION = 'communication',DATA_FLOW = 'data_flow',ATTACK_SIGNATURE = 'attack_signature',}/**
  * Forensic report
  */
 export interface ForensicReport {
   readonly reportId: string;
   readonly investigationId: string;
   readonly reportType: ReportType;
-  readonly classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
-  readonly createdAt: Date;
-  readonly createdBy: string;
+  readonly classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';readonly createdAt: Date;readonly createdBy: string;
   readonly approvedBy?: string;
   readonly approvedAt?: Date;
 
@@ -395,23 +278,13 @@ export interface ForensicReport {
  * Report types
  */
 export enum ReportType {
-  PRELIMINARY = 'preliminary',
-  INTERIM = 'interim',
-  FINAL = 'final',
-  EXPERT_WITNESS = 'expert_witness',
-  TECHNICAL = 'technical',
-  EXECUTIVE = 'executive',
-}
-
-/**
+  PRELIMINARY = 'preliminary',INTERIM = 'interim',FINAL = 'final',EXPERT_WITNESS = 'expert_witness',TECHNICAL = 'technical',EXECUTIVE = 'executive',}/**
  * Report appendix
  */
 export interface ReportAppendix {
   readonly appendixId: string;
   readonly title: string;
-  readonly type: 'EVIDENCE' | 'ANALYSIS' | 'METHODOLOGY' | 'REFERENCE';
-  readonly content: string;
-  readonly attachments: string[];
+  readonly type: 'EVIDENCE' | 'ANALYSIS' | 'METHODOLOGY' | 'REFERENCE';readonly content: string;readonly attachments: string[];
 }
 
 // ===== FORENSIC INVESTIGATION SERVICE =====
@@ -436,9 +309,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
 
   // Configuration
   private readonly config = {
-    evidenceStoragePath: '/secure/evidence',
-    compressionEnabled: true,
-    encryptionEnabled: true,
+    evidenceStoragePath: '/secure/evidence',compressionEnabled: true,encryptionEnabled: true,
     automaticAnalysis: true,
     chainOfCustodyValidation: true,
     legalComplianceMode: true,
@@ -461,9 +332,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   constructor(private readonly configService: ConfigService) {
     super();
 
-    this.logger.log('Forensic Investigation Service initialized', {
-      evidenceStoragePath: this.config.evidenceStoragePath,
-      legalComplianceMode: this.config.legalComplianceMode,
+    this.logger.log('Forensic Investigation Service initialized', {evidenceStoragePath: this.config.evidenceStoragePath,legalComplianceMode: this.config.legalComplianceMode,
       automaticAnalysis: this.config.automaticAnalysis,
     });
   }
@@ -473,22 +342,14 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
    */
   async onModuleInit(): Promise<void> {
     try {
-      this.logger.log('Starting Forensic Investigation Service...');
-
-      // Initialize evidence storage
-      await this.initializeEvidenceStorage();
+      this.logger.log('Starting Forensic Investigation Service...');// Initialize evidence storageawait this.initializeEvidenceStorage();
 
       // Start background processes
       this.startIntegrityMonitoring();
       this.startAutomaticAnalysis();
       this.startChainOfCustodyValidation();
 
-      this.logger.log('Forensic Investigation Service started successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to start Forensic Investigation Service', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.log('Forensic Investigation Service started successfully');} catch (error) {this.logger.error('Failed to start Forensic Investigation Service', {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -509,8 +370,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       scope: ForensicInvestigation['investigationScope'];
     }
   ): Promise<ForensicInvestigation> {
-    const investigationId = `investigation_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
-    const caseNumber = this.generateCaseNumber(investigationDetails.investigationType);
+    const investigationId = `investigation_${Date.now()}_${crypto.randomBytes(8).toString('hex')}';const caseNumber = this.generateCaseNumber(investigationDetails.investigationType);
 
     try {
       this.logger.log(`Creating forensic investigation: ${investigationId}`, {
@@ -522,14 +382,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
 
       // Create initial chain of custody entry
       const initialCustodyEntry = await this.createChainOfCustodyEntry(
-        'system',
-        CustodyAction.COLLECTED,
-        'Digital Investigation System',
-        [],
-        'Investigation initiated'
-      );
-
-      // Create investigation object
+        'system',CustodyAction.COLLECTED,'Digital Investigation System',[],'Investigation initiated');// Create investigation object
       const investigation: ForensicInvestigation = {
         investigationId,
         caseNumber,
@@ -561,9 +414,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
         },
         analysisResults: [],
         legalContext: {
-          jurisdiction: 'United States',
-          applicableLaws: this.getApplicableLaws(investigationDetails.investigationType),
-          retentionRequirements: this.config.retentionPeriodDays,
+          jurisdiction: 'United States',applicableLaws: this.getApplicableLaws(investigationDetails.investigationType),retentionRequirements: this.config.retentionPeriodDays,
           discoveryRequirements: [],
           expertWitnessRequired: this.isExpertWitnessRequired(investigationDetails.investigationType),
         },
@@ -579,18 +430,14 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       // Emit investigation created event
       this.emit('investigationCreated', investigation);
 
-      this.logger.log(`Forensic investigation created: ${investigationId}`, {
-        caseNumber,
-        status: investigation.status,
+      this.logger.log(`Forensic investigation created: ${investigationId}`, {caseNumber,status: investigation.status,
         legalHold: investigation.caseDetails.legalHold,
       });
 
       return investigation;
 
     } catch (error) {
-      this.logger.error(`Failed to create investigation: ${investigationId}`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`Failed to create investigation: ${investigationId}`, {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -618,10 +465,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     try {
       const investigation = this.activeInvestigations.get(investigationId);
       if (!investigation) {
-        throw new Error(`Investigation not found: ${investigationId}`);
-      }
-
-      this.logger.log(`Collecting evidence for investigation: ${investigationId}`, {
+        throw new Error(`Investigation not found: ${investigationId}`);}this.logger.log(`Collecting evidence for investigation: ${investigationId}`, {
         caseNumber: investigation.caseNumber,
         eventCount: evidence.events.length,
         collector: evidence.collector,
@@ -714,9 +558,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
         await this.triggerAutomaticAnalysis(investigationId, evidenceIds);
       }
 
-      this.logger.log(`Evidence collected for investigation: ${investigationId}`, {
-        evidenceCount: evidenceIds.length,
-        integrityVerified: integrityVerification.verified,
+      this.logger.log(`Evidence collected for investigation: ${investigationId}`, {evidenceCount: evidenceIds.length,integrityVerified: integrityVerification.verified,
         investigationStatus: updatedInvestigation.status,
       });
 
@@ -727,9 +569,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       };
 
     } catch (error) {
-      this.logger.error(`Failed to collect evidence for investigation: ${investigationId}`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(`Failed to collect evidence for investigation: ${investigationId}`, {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -748,22 +588,14 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       parameters?: Record<string, any>;
     } = {}
   ): Promise<ForensicAnalysisResult> {
-    const analysisId = `analysis_${analysisType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-
-    try {
+    const analysisId = `analysis_${analysisType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';try {
       const investigation = this.activeInvestigations.get(investigationId);
       if (!investigation) {
-        throw new Error(`Investigation not found: ${investigationId}`);
-      }
-
-      this.logger.log(`Starting forensic analysis: ${analysisId}`, {
+        throw new Error(`Investigation not found: ${investigationId}`);}this.logger.log(`Starting forensic analysis: ${analysisId}`, {
         investigationId,
         analysisType,
         analyst,
-        evidenceCount: options.evidenceIds?.length || 'all',
-      });
-
-      // Get evidence for analysis
+        evidenceCount: options.evidenceIds?.length || 'all',});// Get evidence for analysis
       const evidenceRefs = options.evidenceIds
         ? options.evidenceIds.map(id => this.evidenceStore.get(id)!).filter(Boolean)
         : Array.from(this.evidenceStore.values()).filter(ref =>
@@ -849,9 +681,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
         findingsCount: analysisResult.findings.length,
       });
 
-      this.logger.log(`Forensic analysis completed: ${analysisId}`, {
-        investigationId,
-        analysisType,
+      this.logger.log(`Forensic analysis completed: ${analysisId}`, {investigationId,analysisType,
         findingsCount: analysisResult.findings.length,
         confidence: analysisResult.conclusions.confidence,
       });
@@ -882,15 +712,10 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       classification?: ForensicReport['classification'];
     } = {}
   ): Promise<ForensicReport> {
-    const reportId = `report_${reportType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-
-    try {
+    const reportId = `report_${reportType}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';try {
       const investigation = this.activeInvestigations.get(investigationId);
       if (!investigation) {
-        throw new Error(`Investigation not found: ${investigationId}`);
-      }
-
-      this.logger.log(`Generating forensic report: ${reportId}`, {
+        throw new Error(`Investigation not found: ${investigationId}`);}this.logger.log(`Generating forensic report: ${reportId}`, {
         investigationId,
         reportType,
         author,
@@ -932,9 +757,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
         executiveSummary,
         methodology,
         findings: options.includeAllFindings ? allFindings :
-          allFindings.filter(f => f.severity === 'HIGH' || f.severity === 'CRITICAL'),
-        timeline: options.includeTimeline ? allTimelineEvents : [],
-        conclusions,
+          allFindings.filter(f => f.severity === 'HIGH' || f.severity === 'CRITICAL'),timeline: options.includeTimeline ? allTimelineEvents : [],conclusions,
         recommendations,
         appendices,
         legalDisclaimer: this.generateLegalDisclaimer(),
@@ -963,9 +786,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
         author,
       });
 
-      this.logger.log(`Forensic report generated: ${reportId}`, {
-        investigationId,
-        reportType,
+      this.logger.log(`Forensic report generated: ${reportId}`, {investigationId,reportType,
         findingsCount: report.findings.length,
         timelineEventsCount: report.timeline.length,
       });
@@ -1032,13 +853,9 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   private async initializeEvidenceStorage(): Promise<void> {
     try {
       await fs.mkdir(this.config.evidenceStoragePath, { recursive: true });
-      this.logger.log('Evidence storage initialized', {
-        path: this.config.evidenceStoragePath,
-      });
+      this.logger.log('Evidence storage initialized', {path: this.config.evidenceStoragePath,});
     } catch (error) {
-      this.logger.error('Failed to initialize evidence storage', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to initialize evidence storage', {error: error instanceof Error ? error.message : String(error),});
       throw error;
     }
   }
@@ -1059,32 +876,16 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   private determineConfidentialityLevel(
     investigationType: InvestigationType,
     incidentType: IncidentType
-  ): ForensicInvestigation['caseDetails']['confidentialityLevel'] {
-    if (investigationType === InvestigationType.LEGAL_DISCOVERY ||
-        incidentType === IncidentType.DATA_EXFILTRATION) {
-      return 'SECRET';
-    }
-    if (investigationType === InvestigationType.SECURITY_INCIDENT ||
+  ): ForensicInvestigation['caseDetails']['confidentialityLevel'] {if (investigationType === InvestigationType.LEGAL_DISCOVERY ||incidentType === IncidentType.DATA_EXFILTRATION) {
+      return 'SECRET';}if (investigationType === InvestigationType.SECURITY_INCIDENT ||
         incidentType === IncidentType.SYSTEM_COMPROMISE) {
-      return 'CONFIDENTIAL';
-    }
-    return 'INTERNAL';
-  }
-
-  /**
+      return 'CONFIDENTIAL';}return 'INTERNAL';}/**
    * Get applicable laws for investigation type
    */
   private getApplicableLaws(investigationType: InvestigationType): string[] {
-    const laws = ['Federal Rules of Evidence'];
-
-    switch (investigationType) {
-      case InvestigationType.DATA_BREACH:
-        laws.push('State Breach Notification Laws', 'GDPR', 'CCPA');
-        break;
-      case InvestigationType.FRAUD_INVESTIGATION:
-        laws.push('Sarbanes-Oxley Act', 'Wire Fraud Act');
-        break;
-      case InvestigationType.CYBER_ATTACK:
+    const laws = ['Federal Rules of Evidence'];switch (investigationType) {case InvestigationType.DATA_BREACH:
+        laws.push('State Breach Notification Laws', 'GDPR', 'CCPA');break;case InvestigationType.FRAUD_INVESTIGATION:
+        laws.push('Sarbanes-Oxley Act', 'Wire Fraud Act');break;case InvestigationType.CYBER_ATTACK:
         laws.push('Computer Fraud and Abuse Act', 'Cybersecurity Information Sharing Act');
         break;
     }
@@ -1114,8 +915,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     notes?: string,
     previousCustodian?: string
   ): Promise<ChainOfCustodyEntry> {
-    const entryId = `custody_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-    const timestamp = new Date();
+    const entryId = `custody_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';const timestamp = new Date();
 
     // Calculate hash of entry data
     const entryData = JSON.stringify({
@@ -1128,10 +928,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       notes,
     });
 
-    const hash = crypto.createHash('sha256').update(entryData).digest('hex');
-
-    // Generate digital signature
-    const digitalSignature = crypto
+    const hash = crypto.createHash('sha256').update(entryData).digest('hex');// Generate digital signatureconst digitalSignature = crypto
       .createHash('sha256')
       .update(`${hash}:${custodian}:${timestamp.toISOString()}`)
       .digest('hex');
@@ -1159,9 +956,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     collectionMethod: string,
     collector: string
   ): Promise<EvidenceReference> {
-    const evidenceId = `evidence_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-
-    // Serialize and optionally compress the event
+    const evidenceId = `evidence_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';// Serialize and optionally compress the event
     let eventData = JSON.stringify(event);
     if (this.config.compressionEnabled) {
       const compressed = await gzip(Buffer.from(eventData));
@@ -1175,18 +970,13 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     const evidencePath = path.join(
       this.config.evidenceStoragePath,
       investigationId,
-      `${evidenceId}.json${this.config.compressionEnabled ? '.gz' : ''}`
-    );
-
-    await fs.mkdir(path.dirname(evidencePath), { recursive: true });
+      `${evidenceId}.json${this.config.compressionEnabled ? '.gz' : ''}`);await fs.mkdir(path.dirname(evidencePath), { recursive: true });
     await fs.writeFile(evidencePath, eventData);
 
     return {
       evidenceId,
       evidenceType: EvidenceType.AUDIT_LOG,
-      description: `Audit event: ${event.operationType} by ${event.userId}`,
-      source: event.eventId,
-      collectionMethod,
+      description: `Audit event: ${event.operationType} by ${event.userId}`,source: event.eventId,collectionMethod,
       hash: event.integrity.eventHash,
       size,
       location: evidencePath,
@@ -1211,16 +1001,11 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     collectionMethod: string,
     collector: string
   ): Promise<EvidenceReference> {
-    const evidenceId = `evidence_${key}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-
-    // Serialize data
+    const evidenceId = `evidence_${key}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';// Serialize data
     let serializedData = JSON.stringify(data);
     if (this.config.compressionEnabled) {
       const compressed = await gzip(Buffer.from(serializedData));
-      serializedData = compressed.toString('base64');
-    }
-
-    // Calculate hash
+      serializedData = compressed.toString('base64');}// Calculate hash
     const hash = crypto.createHash('sha256').update(serializedData).digest('hex');
 
     // Calculate size
@@ -1230,10 +1015,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
     const evidencePath = path.join(
       this.config.evidenceStoragePath,
       investigationId,
-      `${evidenceId}_${key}.json${this.config.compressionEnabled ? '.gz' : ''}`
-    );
-
-    await fs.mkdir(path.dirname(evidencePath), { recursive: true });
+      `${evidenceId}_${key}.json${this.config.compressionEnabled ? '.gz' : ''}`);await fs.mkdir(path.dirname(evidencePath), { recursive: true });
     await fs.writeFile(evidencePath, serializedData);
 
     return {
@@ -1280,9 +1062,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
 
         // Verify hash (simplified)
         const fileContent = await fs.readFile(evidence.location);
-        const calculatedHash = crypto.createHash('sha256').update(fileContent).digest('hex');
-
-        // For compressed evidence, we'd need to decompress first
+        const calculatedHash = crypto.createHash('sha256').update(fileContent).digest('hex');// For compressed evidence, we'd need to decompress first
         // This is a simplified check
         if (evidence.metadata.compressionUsed) {
           // Would implement proper decompression and hash verification
@@ -1314,14 +1094,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       for (const analysisType of analysisTypes) {
         // Schedule analysis (would use job queue in production)
         setTimeout(() => {
-          this.performForensicAnalysis(investigationId, analysisType, 'automated-system', {
-            evidenceIds,
-            methodology: 'Automated analysis',
-            tools: ['AI Pattern Detector', 'Timeline Analyzer'],
-          }).catch(error => {
-            this.logger.error('Automatic analysis failed', {
-              investigationId,
-              analysisType,
+          this.performForensicAnalysis(investigationId, analysisType, 'automated-system', {evidenceIds,methodology: 'Automated analysis',tools: ['AI Pattern Detector', 'Timeline Analyzer'],}).catch(error => {this.logger.error('Automatic analysis failed', {investigationId,analysisType,
               error: error instanceof Error ? error.message : String(error),
             });
           });
@@ -1329,9 +1102,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       }
 
     } catch (error) {
-      this.logger.error('Failed to trigger automatic analysis', {
-        investigationId,
-        error: error instanceof Error ? error.message : String(error),
+      this.logger.error('Failed to trigger automatic analysis', {investigationId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1349,21 +1120,11 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       timestamp: new Date(),
       analysisType: ForensicAnalysisType.TIMELINE_ANALYSIS,
       analyst,
-      tools: ['Timeline Analyzer'],
-      methodology: 'Chronological event reconstruction',
-      findings: [],
-      timeline: [],
+      tools: ['Timeline Analyzer'],methodology: 'Chronological event reconstruction',findings: [],timeline: [],
       relationships: [],
       patterns: [],
       conclusions: {
-        summary: 'Timeline analysis completed',
-        keyFindings: [],
-        evidenceQuality: 'GOOD',
-        confidence: 0.85,
-        limitations: ['Limited to available audit events'],
-        recommendations: ['Enhance logging coverage'],
-      },
-      admissibility: {
+        summary: 'Timeline analysis completed',keyFindings: [],evidenceQuality: 'GOOD',confidence: 0.85,limitations: ['Limited to available audit events'],recommendations: ['Enhance logging coverage'],},admissibility: {
         meetsLegalStandards: true,
         chainOfCustodyIntact: true,
         evidenceAuthenticity: true,
@@ -1385,28 +1146,16 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       timestamp: new Date(),
       analysisType: ForensicAnalysisType.PATTERN_ANALYSIS,
       analyst,
-      tools: ['Pattern Detector'],
-      methodology: 'Statistical pattern recognition',
-      findings: [],
-      timeline: [],
+      tools: ['Pattern Detector'],methodology: 'Statistical pattern recognition',findings: [],timeline: [],
       relationships: [],
       patterns: [],
       conclusions: {
-        summary: 'Pattern analysis completed',
-        keyFindings: [],
-        evidenceQuality: 'GOOD',
-        confidence: 0.80,
-        limitations: ['Requires larger dataset for better accuracy'],
-        recommendations: ['Increase monitoring scope'],
-      },
-      admissibility: {
+        summary: 'Pattern analysis completed',keyFindings: [],evidenceQuality: 'GOOD',confidence: 0.80,limitations: ['Requires larger dataset for better accuracy'],recommendations: ['Increase monitoring scope'],},admissibility: {
         meetsLegalStandards: true,
         chainOfCustodyIntact: true,
         evidenceAuthenticity: true,
         expertOpinionRequired: true,
-        potentialChallenges: ['Statistical methodology may be challenged'],
-      },
-    };
+        potentialChallenges: ['Statistical methodology may be challenged'],},};
   }
 
   // Additional simplified analysis methods...
@@ -1428,8 +1177,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
       timestamp: new Date(),
       analysisType,
       analyst,
-      tools: ['Automated Analyzer'],
-      methodology: 'Standard analysis methodology',
+      tools: ['Automated Analyzer'],methodology: 'Standard analysis methodology',
       findings: [],
       timeline: [],
       relationships: [],
@@ -1458,24 +1206,11 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   }
 
   private async generateMethodologySection(investigation: ForensicInvestigation): Promise<string> {
-    return 'Standard digital forensic methodology following ISO/IEC 27037:2012 guidelines.';
-  }
-
-  private async generateConclusions(investigation: ForensicInvestigation, findings: ForensicFinding[]): Promise<string> {
-    return 'Analysis completed with high confidence in findings.';
-  }
-
-  private async generateRecommendations(investigation: ForensicInvestigation, findings: ForensicFinding[]): Promise<string[]> {
-    return ['Enhance monitoring', 'Implement additional controls', 'Conduct security training'];
-  }
-
-  private async generateChainOfCustodyAppendix(investigation: ForensicInvestigation): Promise<ReportAppendix> {
+    return 'Standard digital forensic methodology following ISO/IEC 27037:2012 guidelines.';}private async generateConclusions(investigation: ForensicInvestigation, findings: ForensicFinding[]): Promise<string> {
+    return 'Analysis completed with high confidence in findings.';}private async generateRecommendations(investigation: ForensicInvestigation, findings: ForensicFinding[]): Promise<string[]> {
+    return ['Enhance monitoring', 'Implement additional controls', 'Conduct security training'];}private async generateChainOfCustodyAppendix(investigation: ForensicInvestigation): Promise<ReportAppendix> {
     return {
-      appendixId: 'custody_appendix',
-      title: 'Chain of Custody Log',
-      type: 'EVIDENCE',
-      content: JSON.stringify(investigation.chainOfCustody, null, 2),
-      attachments: [],
+      appendixId: 'custody_appendix',title: 'Chain of Custody Log',type: 'EVIDENCE',content: JSON.stringify(investigation.chainOfCustody, null, 2),attachments: [],
     };
   }
 
@@ -1488,20 +1223,12 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   }
 
   private generateLimitationsAndCaveats(investigation: ForensicInvestigation): string[] {
-    return ['Analysis limited to available digital evidence', 'Conclusions based on evidence examined'];
-  }
-
-  private generateChainOfCustodyAffidavit(investigation: ForensicInvestigation): string {
-    return 'I hereby certify that the evidence has been properly collected, preserved, and analyzed according to established forensic procedures.';
-  }
-
-  // Utility methods for forensic tools
+    return ['Analysis limited to available digital evidence', 'Conclusions based on evidence examined'];}private generateChainOfCustodyAffidavit(investigation: ForensicInvestigation): string {
+    return 'I hereby certify that the evidence has been properly collected, preserved, and analyzed according to established forensic procedures.';}// Utility methods for forensic tools
   private createHashValidator() {
     return {
       validate: (data: string, expectedHash: string) => {
-        const calculatedHash = crypto.createHash('sha256').update(data).digest('hex');
-        return calculatedHash === expectedHash;
-      }
+        const calculatedHash = crypto.createHash('sha256').update(data).digest('hex');return calculatedHash === expectedHash;}
     };
   }
 
@@ -1545,9 +1272,7 @@ export class ForensicInvestigationService extends EventEmitter implements OnModu
   private startIntegrityMonitoring(): void {
     setInterval(async () => {
       // Periodic evidence integrity checks
-      this.logger.debug('Performing evidence integrity checks');
-    }, 300000); // Every 5 minutes
-  }
+      this.logger.debug('Performing evidence integrity checks');}, 300000); // Every 5 minutes}
 
   private startAutomaticAnalysis(): void {
     // Would implement automatic analysis scheduling

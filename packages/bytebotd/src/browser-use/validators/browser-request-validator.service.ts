@@ -27,36 +27,19 @@ import {
   Logger,
   BadRequestException,
   UnprocessableEntityException,
-} from '@nestjs/common';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
-import * as validator from 'validator';
-import { URL } from 'url';
-
-// DTOs and types for browser operations
-import {
+} from '@nestjs/common';import { performance } from 'perf_hooks';import * as crypto from 'crypto';import * as validator from 'validator';import { URL } from 'url';// DTOs and types for browser operationsimport {
   CreateBrowserTaskDto,
   BrowserActionType,
   BrowserTaskAction,
-} from '../dto/browser-task.dto';
-import {
-  CreateBrowserSessionDto,
+} from '../dto/browser-task.dto';import {CreateBrowserSessionDto,
   BrowserSessionConfig,
-} from '../dto/browser-session.dto';
-import {
-  CreateAsyncJobDto,
+} from '../dto/browser-session.dto';import {CreateAsyncJobDto,
   AsyncJobType,
   AsyncJobPriority,
-} from '../dto/async-job.dto';
-
-// Security context types
-import {
+} from '../dto/async-job.dto';// Security context typesimport {
   BrowserUseSecurityContext,
   BrowserUseUserContext,
-} from '../middleware/browser-use-auth.middleware';
-
-/**
- * Validation result for request processing
+} from '../middleware/browser-use-auth.middleware';/*** Validation result for request processing
  */
 export interface RequestValidationResult {
   valid: boolean;
@@ -73,9 +56,7 @@ export interface RequestValidationResult {
  */
 export interface SecurityViolation {
   type: ViolationType;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  field: string;
-  value: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';field: string;value: string;
   description: string;
   remediation: string;
   evidence: Record<string, unknown>;
@@ -101,19 +82,7 @@ export interface ValidationMetadata {
  * Violation types
  */
 export enum ViolationType {
-  SQL_INJECTION = 'sql_injection',
-  XSS_ATTACK = 'xss_attack',
-  COMMAND_INJECTION = 'command_injection',
-  PATH_TRAVERSAL = 'path_traversal',
-  MALICIOUS_URL = 'malicious_url',
-  OVERSIZED_REQUEST = 'oversized_request',
-  INVALID_FORMAT = 'invalid_format',
-  BUSINESS_RULE_VIOLATION = 'business_rule_violation',
-  COMPLIANCE_VIOLATION = 'compliance_violation',
-  SUSPICIOUS_PATTERN = 'suspicious_pattern',
-}
-
-/**
+  SQL_INJECTION = 'sql_injection',XSS_ATTACK = 'xss_attack',COMMAND_INJECTION = 'command_injection',PATH_TRAVERSAL = 'path_traversal',MALICIOUS_URL = 'malicious_url',OVERSIZED_REQUEST = 'oversized_request',INVALID_FORMAT = 'invalid_format',BUSINESS_RULE_VIOLATION = 'business_rule_violation',COMPLIANCE_VIOLATION = 'compliance_violation',SUSPICIOUS_PATTERN = 'suspicious_pattern',}/**
  * Validation configuration
  */
 interface ValidationConfig {
@@ -137,19 +106,14 @@ interface ContentAnalysisResult {
   malwareIndicators: string[];
   sensitiveDataDetected: boolean;
   complianceFlags: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
-
-/**
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
  * URL validation result
  */
 interface UrlValidationResult {
   valid: boolean;
   sanitizedUrl?: string;
   violations: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  metadata: {
-    domain: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';metadata: {domain: string;
     protocol: string;
     hasQuery: boolean;
     hasFragment: boolean;
@@ -174,11 +138,7 @@ export class BrowserRequestValidatorService {
     maxActionsPerTask: 100,
     maxUrlLength: 2048,
     maxStringLength: 10000,
-    allowedDomains: ['localhost', '127.0.0.1', '*.local.dev', '*.staging.com'],
-    blockedDomains: ['malicious.com', 'phishing.net', 'suspicious.org'],
-    allowedFileExtensions: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'],
-    maxComplexityScore: 80,
-    enableContentScanning: true,
+    allowedDomains: ['localhost', '127.0.0.1', '*.local.dev', '*.staging.com'],blockedDomains: ['malicious.com', 'phishing.net', 'suspicious.org'],allowedFileExtensions: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'],maxComplexityScore: 80,enableContentScanning: true,
     enableMalwareDetection: true,
   };
 
@@ -229,8 +189,7 @@ export class BrowserRequestValidatorService {
   };
 
   constructor() {
-    this.logger.log('🔍 Browser Request Validator Service initialized');
-    this.logger.log('🛡️ Security validation enabled: injection prevention, content scanning, malware detection');
+    this.logger.log('🔍 Browser Request Validator Service initialized');this.logger.log('🛡️ Security validation enabled: injection prevention, content scanning, malware detection');
 
     // Initialize violation counters
     Object.values(ViolationType).forEach(type => {
@@ -253,9 +212,7 @@ export class BrowserRequestValidatorService {
     const startTime = performance.now();
 
     this.logger.debug(
-      `[${validationId}] Validating browser task request`,
-      {
-        taskName: taskDto.name,
+      `[${validationId}] Validating browser task request`,{taskName: taskDto.name,
         actionsCount: taskDto.actions.length,
         userId: userContext.userId,
         riskLevel: securityContext.riskLevel,
@@ -309,23 +266,16 @@ export class BrowserRequestValidatorService {
 
       if (result.valid) {
         this.metrics.passedValidations++;
-        this.logger.debug(`[${validationId}] Browser task validation passed`);
-      } else {
-        this.metrics.failedValidations++;
+        this.logger.debug(`[${validationId}] Browser task validation passed`);} else {this.metrics.failedValidations++;
         this.logValidationFailure(validationId, result.violations);
-        throw new BadRequestException(`Validation failed: ${this.summarizeViolations(allViolations)}`);
-      }
-
-      return result;
+        throw new BadRequestException(`Validation failed: ${this.summarizeViolations(allViolations)}`);}return result;
 
     } catch (error) {
       const processingTime = performance.now() - startTime;
       this.updateValidationMetrics({ processingTime } as any);
 
       this.logger.error(
-        `[${validationId}] Browser task validation failed`,
-        {
-          error: error instanceof Error ? error.message : String(error),
+        `[${validationId}] Browser task validation failed`,{error: error instanceof Error ? error.message : String(error),
           taskName: taskDto.name,
           processingTime: `${processingTime.toFixed(2)}ms`,
         }
@@ -386,11 +336,7 @@ export class BrowserRequestValidatorService {
       this.updateValidationMetrics(result);
 
       if (!result.valid) {
-        this.logger.warn(`[${validationId}] Browser session validation failed`);
-        throw new BadRequestException(`Validation failed: ${this.summarizeViolations(violations)}`);
-      }
-
-      return result;
+        this.logger.warn(`[${validationId}] Browser session validation failed`);throw new BadRequestException(`Validation failed: ${this.summarizeViolations(violations)}`);}return result;
 
     } catch (error) {
       this.logger.error(`[${validationId}] Browser session validation error`, error);
@@ -456,17 +402,11 @@ export class BrowserRequestValidatorService {
       this.updateValidationMetrics(result);
 
       if (!result.valid) {
-        this.logger.warn(`[${validationId}] Async job validation failed`);
-        throw new BadRequestException(`Validation failed: ${this.summarizeViolations(violations)}`);
-      }
-
-      return result;
+        this.logger.warn(`[${validationId}] Async job validation failed`);throw new BadRequestException(`Validation failed: ${this.summarizeViolations(violations)}`);}return result;
 
     } catch (error) {
       this.logger.error(`[${validationId}] Async job validation error`, error);
-      throw error instanceof BadRequestException ? error : new UnprocessableEntityException('Async job validation failed');
-    }
-  }
+      throw error instanceof BadRequestException ? error : new UnprocessableEntityException('Async job validation failed');}}
 
   // ===== VALIDATION METHODS =====
 
@@ -479,57 +419,31 @@ export class BrowserRequestValidatorService {
     const violations: SecurityViolation[] = [];
 
     // Check required fields
-    if (!taskDto.name || typeof taskDto.name !== 'string') {
-      violations.push({
-        type: ViolationType.INVALID_FORMAT,
-        severity: 'HIGH',
-        field: 'name',
-        value: String(taskDto.name),
-        description: 'Task name is required and must be a string',
-        remediation: 'Provide a valid task name',
-        evidence: { field: 'name', type: typeof taskDto.name },
-      });
-    }
+    if (!taskDto.name || typeof taskDto.name !== 'string') {violations.push({type: ViolationType.INVALID_FORMAT,
+        severity: 'HIGH',field: 'name',value: String(taskDto.name),description: 'Task name is required and must be a string',remediation: 'Provide a valid task name',evidence: { field: 'name', type: typeof taskDto.name },});}
 
     // Check name length and content
     if (taskDto.name && taskDto.name.length > this.config.maxStringLength) {
       violations.push({
         type: ViolationType.OVERSIZED_REQUEST,
-        severity: 'MEDIUM',
-        field: 'name',
+        severity: 'MEDIUM',field: 'name',
         value: taskDto.name,
         description: `Task name exceeds maximum length of ${this.config.maxStringLength}`,
-        remediation: 'Shorten the task name',
-        evidence: { length: taskDto.name.length, maxLength: this.config.maxStringLength },
-      });
+        remediation: 'Shorten the task name',evidence: { length: taskDto.name.length, maxLength: this.config.maxStringLength },});
     }
 
     // Check actions array
     if (!taskDto.actions || !Array.isArray(taskDto.actions)) {
       violations.push({
         type: ViolationType.INVALID_FORMAT,
-        severity: 'CRITICAL',
-        field: 'actions',
-        value: String(taskDto.actions),
-        description: 'Actions array is required',
-        remediation: 'Provide a valid actions array',
-        evidence: { field: 'actions', type: typeof taskDto.actions },
-      });
-    } else if (taskDto.actions.length === 0) {
+        severity: 'CRITICAL',field: 'actions',value: String(taskDto.actions),description: 'Actions array is required',remediation: 'Provide a valid actions array',evidence: { field: 'actions', type: typeof taskDto.actions },});} else if (taskDto.actions.length === 0) {
       violations.push({
         type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'HIGH',
-        field: 'actions',
-        value: '[]',
-        description: 'At least one action is required',
-        remediation: 'Add one or more actions to the task',
-        evidence: { actionsCount: 0 },
-      });
+        severity: 'HIGH',field: 'actions',value: '[]',description: 'At least one action is required',remediation: 'Add one or more actions to the task',evidence: { actionsCount: 0 },});
     } else if (taskDto.actions.length > this.config.maxActionsPerTask) {
       violations.push({
         type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'HIGH',
-        field: 'actions',
+        severity: 'HIGH',field: 'actions',
         value: String(taskDto.actions.length),
         description: `Too many actions (${taskDto.actions.length}), maximum allowed: ${this.config.maxActionsPerTask}`,
         remediation: 'Reduce the number of actions',
@@ -560,8 +474,7 @@ export class BrowserRequestValidatorService {
           field: `${fieldPath}.type`,
           value: String(action.type),
           description: 'Invalid action type',
-          remediation: `Use one of: ${Object.values(BrowserActionType).join(', ')}`,
-          evidence: { actionIndex: i, providedType: action.type },
+          remediation: `Use one of: ${Object.values(BrowserActionType).join(`, ')}',evidence: { actionIndex: i, providedType: action.type },
         });
       }
 
@@ -583,15 +496,11 @@ export class BrowserRequestValidatorService {
 
       // Validate selector if present
       if (action.selector) {
-        const selectorValidation = this.validateSelector(action.selector, `${fieldPath}.selector`);
-        violations.push(...selectorValidation);
-      }
+        const selectorValidation = this.validateSelector(action.selector, `${fieldPath}.selector`);violations.push(...selectorValidation);}
 
       // Validate text content if present
       if (action.text) {
-        const textValidation = this.validateTextContent(action.text, `${fieldPath}.text`);
-        violations.push(...textValidation);
-      }
+        const textValidation = this.validateTextContent(action.text, `${fieldPath}.text`);violations.push(...textValidation);}
 
       // Validate file paths for upload actions
       if (action.type === BrowserActionType.UPLOAD_FILE && action.filePath) {
@@ -613,17 +522,11 @@ export class BrowserRequestValidatorService {
     const requestString = JSON.stringify(requestData);
 
     // Check request size
-    const requestSize = Buffer.byteLength(requestString, 'utf8');
-    if (requestSize > this.config.maxRequestSize) {
-      violations.push({
+    const requestSize = Buffer.byteLength(requestString, 'utf8');if (requestSize > this.config.maxRequestSize) {violations.push({
         type: ViolationType.OVERSIZED_REQUEST,
-        severity: 'HIGH',
-        field: 'request',
-        value: `${requestSize} bytes`,
-        description: `Request size (${requestSize} bytes) exceeds maximum allowed (${this.config.maxRequestSize} bytes)`,
-        remediation: 'Reduce request size',
-        evidence: { requestSize, maxSize: this.config.maxRequestSize },
-      });
+        severity: 'HIGH',field: 'request',
+        value: `${requestSize} bytes`,description: `Request size (${requestSize} bytes) exceeds maximum allowed (${this.config.maxRequestSize} bytes)`,
+        remediation: 'Reduce request size',evidence: { requestSize, maxSize: this.config.maxRequestSize },});
     }
 
     // SQL Injection checks
@@ -631,14 +534,7 @@ export class BrowserRequestValidatorService {
       if (pattern.test(requestString)) {
         violations.push({
           type: ViolationType.SQL_INJECTION,
-          severity: 'CRITICAL',
-          field: 'request',
-          value: '[DETECTED]',
-          description: 'Potential SQL injection detected',
-          remediation: 'Remove SQL injection patterns',
-          evidence: { pattern: pattern.source, detectedIn: 'request_body' },
-        });
-        this.metrics.violationCounts.set(ViolationType.SQL_INJECTION,
+          severity: 'CRITICAL',field: 'request',value: '[DETECTED]',description: 'Potential SQL injection detected',remediation: 'Remove SQL injection patterns',evidence: { pattern: pattern.source, detectedIn: 'request_body' },});this.metrics.violationCounts.set(ViolationType.SQL_INJECTION,
           (this.metrics.violationCounts.get(ViolationType.SQL_INJECTION) || 0) + 1);
         break;
       }
@@ -649,14 +545,7 @@ export class BrowserRequestValidatorService {
       if (pattern.test(requestString)) {
         violations.push({
           type: ViolationType.XSS_ATTACK,
-          severity: 'CRITICAL',
-          field: 'request',
-          value: '[DETECTED]',
-          description: 'Potential XSS attack detected',
-          remediation: 'Remove XSS attack patterns',
-          evidence: { pattern: pattern.source, detectedIn: 'request_body' },
-        });
-        this.metrics.violationCounts.set(ViolationType.XSS_ATTACK,
+          severity: 'CRITICAL',field: 'request',value: '[DETECTED]',description: 'Potential XSS attack detected',remediation: 'Remove XSS attack patterns',evidence: { pattern: pattern.source, detectedIn: 'request_body' },});this.metrics.violationCounts.set(ViolationType.XSS_ATTACK,
           (this.metrics.violationCounts.get(ViolationType.XSS_ATTACK) || 0) + 1);
         break;
       }
@@ -667,14 +556,7 @@ export class BrowserRequestValidatorService {
       if (pattern.test(requestString)) {
         violations.push({
           type: ViolationType.COMMAND_INJECTION,
-          severity: 'CRITICAL',
-          field: 'request',
-          value: '[DETECTED]',
-          description: 'Potential command injection detected',
-          remediation: 'Remove command injection patterns',
-          evidence: { pattern: pattern.source, detectedIn: 'request_body' },
-        });
-        this.metrics.violationCounts.set(ViolationType.COMMAND_INJECTION,
+          severity: 'CRITICAL',field: 'request',value: '[DETECTED]',description: 'Potential command injection detected',remediation: 'Remove command injection patterns',evidence: { pattern: pattern.source, detectedIn: 'request_body' },});this.metrics.violationCounts.set(ViolationType.COMMAND_INJECTION,
           (this.metrics.violationCounts.get(ViolationType.COMMAND_INJECTION) || 0) + 1);
         break;
       }
@@ -685,14 +567,7 @@ export class BrowserRequestValidatorService {
       if (pattern.test(requestString)) {
         violations.push({
           type: ViolationType.PATH_TRAVERSAL,
-          severity: 'HIGH',
-          field: 'request',
-          value: '[DETECTED]',
-          description: 'Potential path traversal detected',
-          remediation: 'Remove path traversal patterns',
-          evidence: { pattern: pattern.source, detectedIn: 'request_body' },
-        });
-        this.metrics.violationCounts.set(ViolationType.PATH_TRAVERSAL,
+          severity: 'HIGH',field: 'request',value: '[DETECTED]',description: 'Potential path traversal detected',remediation: 'Remove path traversal patterns',evidence: { pattern: pattern.source, detectedIn: 'request_body' },});this.metrics.violationCounts.set(ViolationType.PATH_TRAVERSAL,
           (this.metrics.violationCounts.get(ViolationType.PATH_TRAVERSAL) || 0) + 1);
         break;
       }
@@ -711,12 +586,9 @@ export class BrowserRequestValidatorService {
     try {
       // Basic URL validation
       if (!validator.isURL(url, { require_protocol: true })) {
-        violations.push('Invalid URL format');
-        return {
-          valid: false,
+        violations.push('Invalid URL format');return {valid: false,
           violations,
-          riskLevel: 'HIGH',
-          metadata: { domain: '', protocol: '', hasQuery: false, hasFragment: false, isExternal: true },
+          riskLevel: 'HIGH',metadata: { domain: '', protocol: '', hasQuery: false, hasFragment: false, isExternal: true },
         };
       }
 
@@ -729,16 +601,10 @@ export class BrowserRequestValidatorService {
 
       // Check protocol
       if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        violations.push(`Unsupported protocol: ${urlObj.protocol}`);
-      }
-
-      // Check domain against blocklist
+        violations.push(`Unsupported protocol: ${urlObj.protocol}`);}// Check domain against blocklist
       const domain = urlObj.hostname.toLowerCase();
       if (this.config.blockedDomains.some(blocked => domain.includes(blocked))) {
-        violations.push(`Domain ${domain} is blocked`);
-      }
-
-      // Check if external domain is allowed
+        violations.push(`Domain ${domain} is blocked`);}// Check if external domain is allowed
       const isExternal = !this.isInternalDomain(domain);
       if (isExternal && !this.isAllowedExternalDomain(domain)) {
         violations.push(`External domain ${domain} not in allowlist`);
@@ -746,16 +612,11 @@ export class BrowserRequestValidatorService {
 
       // Malware and phishing detection (placeholder)
       if (await this.isMaliciousUrl(url)) {
-        violations.push('URL detected as malicious by threat intelligence');
-      }
-
-      return {
+        violations.push('URL detected as malicious by threat intelligence');}return {
         valid: violations.length === 0,
         sanitizedUrl: violations.length === 0 ? sanitizedUrl : undefined,
         violations,
-        riskLevel: violations.length > 0 ? 'HIGH' : (isExternal ? 'MEDIUM' : 'LOW'),
-        metadata: {
-          domain,
+        riskLevel: violations.length > 0 ? 'HIGH' : (isExternal ? 'MEDIUM' : 'LOW'),metadata: {domain,
           protocol: urlObj.protocol,
           hasQuery: urlObj.search.length > 0,
           hasFragment: urlObj.hash.length > 0,
@@ -766,11 +627,7 @@ export class BrowserRequestValidatorService {
     } catch (error) {
       return {
         valid: false,
-        violations: ['URL parsing failed'],
-        riskLevel: 'CRITICAL',
-        metadata: { domain: '', protocol: '', hasQuery: false, hasFragment: false, isExternal: true },
-      };
-    }
+        violations: ['URL parsing failed'],riskLevel: 'CRITICAL',metadata: { domain: '', protocol: '', hasQuery: false, hasFragment: false, isExternal: true },};}
   }
 
   /**
@@ -784,13 +641,8 @@ export class BrowserRequestValidatorService {
       if (pattern.test(selector)) {
         violations.push({
           type: ViolationType.SUSPICIOUS_PATTERN,
-          severity: 'MEDIUM',
-          field: fieldPath,
-          value: selector,
-          description: 'Suspicious pattern detected in selector',
-          remediation: 'Use a clean CSS selector',
-          evidence: { pattern: pattern.source, selector },
-        });
+          severity: 'MEDIUM',field: fieldPath,value: selector,
+          description: 'Suspicious pattern detected in selector',remediation: 'Use a clean CSS selector',evidence: { pattern: pattern.source, selector },});
         break;
       }
     }
@@ -803,9 +655,7 @@ export class BrowserRequestValidatorService {
         field: fieldPath,
         value: selector,
         description: `Selector too long (${selector.length} > ${this.config.maxStringLength})`,
-        remediation: 'Shorten the selector',
-        evidence: { length: selector.length, maxLength: this.config.maxStringLength },
-      });
+        remediation: 'Shorten the selector',evidence: { length: selector.length, maxLength: this.config.maxStringLength },});
     }
 
     return violations;
@@ -822,13 +672,8 @@ export class BrowserRequestValidatorService {
       if (pattern.test(text)) {
         violations.push({
           type: ViolationType.XSS_ATTACK,
-          severity: 'HIGH',
-          field: fieldPath,
-          value: text,
-          description: 'Potential XSS pattern detected in text',
-          remediation: 'Remove script tags and JavaScript',
-          evidence: { pattern: pattern.source, text },
-        });
+          severity: 'HIGH',field: fieldPath,value: text,
+          description: 'Potential XSS pattern detected in text',remediation: 'Remove script tags and JavaScript',evidence: { pattern: pattern.source, text },});
         break;
       }
     }
@@ -841,9 +686,7 @@ export class BrowserRequestValidatorService {
         field: fieldPath,
         value: text,
         description: `Text too long (${text.length} > ${this.config.maxStringLength})`,
-        remediation: 'Shorten the text content',
-        evidence: { length: text.length, maxLength: this.config.maxStringLength },
-      });
+        remediation: 'Shorten the text content',evidence: { length: text.length, maxLength: this.config.maxStringLength },});
     }
 
     return violations;
@@ -860,28 +703,19 @@ export class BrowserRequestValidatorService {
       if (pattern.test(filePath)) {
         violations.push({
           type: ViolationType.PATH_TRAVERSAL,
-          severity: 'CRITICAL',
-          field: fieldPath,
-          value: filePath,
-          description: 'Path traversal detected in file path',
-          remediation: 'Use a relative file path without directory traversal',
-          evidence: { pattern: pattern.source, filePath },
-        });
+          severity: 'CRITICAL',field: fieldPath,value: filePath,
+          description: 'Path traversal detected in file path',remediation: 'Use a relative file path without directory traversal',evidence: { pattern: pattern.source, filePath },});
         break;
       }
     }
 
     // Check file extension
-    const extension = filePath.toLowerCase().substring(filePath.lastIndexOf('.'));
-    if (extension && !this.config.allowedFileExtensions.includes(extension)) {
-      violations.push({
+    const extension = filePath.toLowerCase().substring(filePath.lastIndexOf('.'));if (extension && !this.config.allowedFileExtensions.includes(extension)) {violations.push({
         type: ViolationType.BUSINESS_RULE_VIOLATION,
         severity: 'MEDIUM',
         field: fieldPath,
         value: filePath,
-        description: `File extension ${extension} not allowed`,
-        remediation: `Use one of: ${this.config.allowedFileExtensions.join(', ')}`,
-        evidence: { extension, allowedExtensions: this.config.allowedFileExtensions },
+        description: `File extension ${extension} not allowed`,remediation: `Use one of: ${this.config.allowedFileExtensions.join(`, ')}',evidence: { extension, allowedExtensions: this.config.allowedFileExtensions },
       });
     }
 
@@ -905,13 +739,10 @@ export class BrowserRequestValidatorService {
     if (complexityScore > this.getMaxComplexityForTrustLevel(userContext.trustLevel)) {
       violations.push({
         type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'HIGH',
-        field: 'task',
+        severity: 'HIGH',field: 'task',
         value: String(complexityScore),
         description: `Task complexity (${complexityScore}) exceeds user trust level (${userContext.trustLevel})`,
-        remediation: 'Reduce task complexity or request permission escalation',
-        evidence: { complexityScore, trustLevel: userContext.trustLevel },
-      });
+        remediation: 'Reduce task complexity or request permission escalation',evidence: { complexityScore, trustLevel: userContext.trustLevel },});
     }
 
     // Check for external domain access requirements
@@ -919,16 +750,8 @@ export class BrowserRequestValidatorService {
       action.url && this.isExternalUrl(action.url)
     );
 
-    if (hasExternalUrls && !userContext.permissions.includes('EXTERNAL_DOMAINS' as any)) {
-      violations.push({
-        type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'HIGH',
-        field: 'actions',
-        value: 'external_urls_detected',
-        description: 'Task contains external URLs but user lacks external domain permission',
-        remediation: 'Remove external URLs or request external domain permission',
-        evidence: { hasExternalUrls, userPermissions: userContext.permissions },
-      });
+    if (hasExternalUrls && !userContext.permissions.includes('EXTERNAL_DOMAINS' as any)) {violations.push({type: ViolationType.BUSINESS_RULE_VIOLATION,
+        severity: 'HIGH',field: 'actions',value: 'external_urls_detected',description: 'Task contains external URLs but user lacks external domain permission',remediation: 'Remove external URLs or request external domain permission',evidence: { hasExternalUrls, userPermissions: userContext.permissions },});
     }
 
     return { violations };
@@ -961,29 +784,15 @@ export class BrowserRequestValidatorService {
     const violations: SecurityViolation[] = [];
 
     // Check if user can create async jobs
-    if (!userContext.permissions.includes('ASYNC_JOBS' as any)) {
-      violations.push({
-        type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'HIGH',
-        field: 'jobType',
-        value: jobDto.jobType,
-        description: 'User lacks permission to create async jobs',
-        remediation: 'Request async job permission',
-        evidence: { jobType: jobDto.jobType, userPermissions: userContext.permissions },
-      });
+    if (!userContext.permissions.includes('ASYNC_JOBS' as any)) {violations.push({type: ViolationType.BUSINESS_RULE_VIOLATION,
+        severity: 'HIGH',field: 'jobType',value: jobDto.jobType,description: 'User lacks permission to create async jobs',remediation: 'Request async job permission',evidence: { jobType: jobDto.jobType, userPermissions: userContext.permissions },});
     }
 
     // Check job duration limits
     if (jobDto.estimatedDurationMs && jobDto.estimatedDurationMs > 3600000) { // 1 hour
       violations.push({
         type: ViolationType.BUSINESS_RULE_VIOLATION,
-        severity: 'MEDIUM',
-        field: 'estimatedDurationMs',
-        value: String(jobDto.estimatedDurationMs),
-        description: 'Job duration exceeds maximum allowed (1 hour)',
-        remediation: 'Reduce estimated duration or split into multiple jobs',
-        evidence: { duration: jobDto.estimatedDurationMs, maxDuration: 3600000 },
-      });
+        severity: 'MEDIUM',field: 'estimatedDurationMs',value: String(jobDto.estimatedDurationMs),description: 'Job duration exceeds maximum allowed (1 hour)',remediation: 'Reduce estimated duration or split into multiple jobs',evidence: { duration: jobDto.estimatedDurationMs, maxDuration: 3600000 },});
     }
 
     return { violations };
@@ -996,47 +805,23 @@ export class BrowserRequestValidatorService {
    */
   private async performContentAnalysis(requestData: any, validationId: string): Promise<{
     violations: SecurityViolation[];
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  }> {
-    if (!this.config.enableContentScanning) {
-      return { violations: [], riskLevel: 'LOW' };
-    }
-
-    const violations: SecurityViolation[] = [];
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}> {if (!this.config.enableContentScanning) {
+      return { violations: [], riskLevel: 'LOW' };}const violations: SecurityViolation[] = [];
     const content = JSON.stringify(requestData);
 
     // Malware detection (placeholder)
     if (this.config.enableMalwareDetection && await this.detectMalware(content)) {
       violations.push({
         type: ViolationType.SUSPICIOUS_PATTERN,
-        severity: 'CRITICAL',
-        field: 'request',
-        value: '[DETECTED]',
-        description: 'Malware signature detected',
-        remediation: 'Remove malicious content',
-        evidence: { detectionType: 'malware_signature' },
-      });
-    }
+        severity: 'CRITICAL',field: 'request',value: '[DETECTED]',description: 'Malware signature detected',remediation: 'Remove malicious content',evidence: { detectionType: 'malware_signature' },});}
 
     // Sensitive data detection
     if (this.detectSensitiveData(content)) {
       violations.push({
         type: ViolationType.COMPLIANCE_VIOLATION,
-        severity: 'HIGH',
-        field: 'request',
-        value: '[DETECTED]',
-        description: 'Sensitive data detected in request',
-        remediation: 'Remove or encrypt sensitive data',
-        evidence: { detectionType: 'sensitive_data' },
-      });
-    }
+        severity: 'HIGH',field: 'request',value: '[DETECTED]',description: 'Sensitive data detected in request',remediation: 'Remove or encrypt sensitive data',evidence: { detectionType: 'sensitive_data' },});}
 
-    const riskLevel = violations.length === 0 ? 'LOW' :
-                    violations.some(v => v.severity === 'CRITICAL') ? 'CRITICAL' :
-                    violations.some(v => v.severity === 'HIGH') ? 'HIGH' : 'MEDIUM';
-
-    return { violations, riskLevel };
-  }
+    const riskLevel = violations.length === 0 ? 'LOW' :violations.some(v => v.severity === 'CRITICAL') ? 'CRITICAL' :violations.some(v => v.severity === 'HIGH') ? 'HIGH' : 'MEDIUM';return { violations, riskLevel };}
 
   // ===== UTILITY METHODS =====
 
@@ -1048,22 +833,11 @@ export class BrowserRequestValidatorService {
 
     violations.forEach(violation => {
       switch (violation.severity) {
-        case 'CRITICAL': score += 25; break;
-        case 'HIGH': score += 15; break;
-        case 'MEDIUM': score += 10; break;
-        case 'LOW': score += 5; break;
-      }
-    });
+        case 'CRITICAL': score += 25; break;case 'HIGH': score += 15; break;case 'MEDIUM': score += 10; break;case 'LOW': score += 5; break;}});
 
     // Adjust based on base risk level
     switch (baseRiskLevel) {
-      case 'CRITICAL': score += 20; break;
-      case 'HIGH': score += 15; break;
-      case 'MEDIUM': score += 10; break;
-      case 'LOW': score += 5; break;
-    }
-
-    return Math.min(100, score);
+      case 'CRITICAL': score += 20; break;case 'HIGH': score += 15; break;case 'MEDIUM': score += 10; break;case 'LOW': score += 5; break;}return Math.min(100, score);
   }
 
   /**
@@ -1101,30 +875,21 @@ export class BrowserRequestValidatorService {
    */
   private getMaxComplexityForTrustLevel(trustLevel: string): number {
     switch (trustLevel) {
-      case 'CRITICAL': return 100;
-      case 'HIGH': return 80;
-      case 'MEDIUM': return 60;
-      case 'LOW': return 40;
-      default: return 20;
-    }
+      case 'CRITICAL': return 100;case 'HIGH': return 80;case 'MEDIUM': return 60;case 'LOW': return 40;default: return 20;}
   }
 
   /**
    * Check if domain is internal
    */
   private isInternalDomain(domain: string): boolean {
-    const internalPatterns = ['localhost', '127.0.0.1', '10.', '192.168.', '172.'];
-    return internalPatterns.some(pattern => domain.includes(pattern));
-  }
+    const internalPatterns = ['localhost', '127.0.0.1', '10.', '192.168.', '172.'];return internalPatterns.some(pattern => domain.includes(pattern));}
 
   /**
    * Check if external domain is allowed
    */
   private isAllowedExternalDomain(domain: string): boolean {
     return this.config.allowedDomains.some(allowed => {
-      if (allowed.startsWith('*.')) {
-        return domain.endsWith(allowed.substring(2));
-      }
+      if (allowed.startsWith('*.')) {return domain.endsWith(allowed.substring(2));}
       return domain === allowed;
     });
   }
@@ -1184,13 +949,7 @@ export class BrowserRequestValidatorService {
 
     // Apply sanitization based on violations
     violations.forEach(violation => {
-      if (violation.type === ViolationType.XSS_ATTACK && violation.field.includes('text')) {
-        // Sanitize text content
-        const fieldPath = violation.field.split('.');
-        if (fieldPath.length >= 2) {
-          const actionIndex = parseInt(fieldPath[0].match(/\d+/)?.[0] || '0');
-          if (sanitized.actions[actionIndex]?.text) {
-            sanitized.actions[actionIndex].text = this.sanitizeText(sanitized.actions[actionIndex].text);
+      if (violation.type === ViolationType.XSS_ATTACK && violation.field.includes('text')) {// Sanitize text contentconst fieldPath = violation.field.split('.');if (fieldPath.length >= 2) {const actionIndex = parseInt(fieldPath[0].match(/\d+/)?.[0] || '0');if (sanitized.actions[actionIndex]?.text) {sanitized.actions[actionIndex].text = this.sanitizeText(sanitized.actions[actionIndex].text);
           }
         }
       }
@@ -1226,19 +985,13 @@ export class BrowserRequestValidatorService {
    */
   private sanitizeText(text: string): string {
     return text
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=/gi, '');
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '').replace(/javascript:/gi, '').replace(/on\w+\s*=/gi, '');
   }
 
   // ===== HELPER METHODS =====
 
   private generateValidationId(): string {
-    return `val_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  }
-
-  private createValidationResult(
+    return `val_${Date.now()}_${Math.random().toString(36).substring(7)}`;}private createValidationResult(
     validationId: string,
     valid: boolean,
     sanitizedRequest: any,
@@ -1273,8 +1026,7 @@ export class BrowserRequestValidatorService {
   private summarizeViolations(violations: SecurityViolation[]): string {
     const summary = violations
       .slice(0, 3) // Limit to first 3 violations
-      .map(v => `${v.field}: ${v.description}`)
-      .join('; ');
+      .map(v => `${v.field}: ${v.description}`).join(`; ');
 
     return violations.length > 3 ? `${summary} (and ${violations.length - 3} more)` : summary;
   }
@@ -1291,12 +1043,7 @@ export class BrowserRequestValidatorService {
 
   private getAppliedValidationRules(): string[] {
     return [
-      'structure_validation',
-      'security_injection_check',
-      'business_rules_check',
-      'content_analysis',
-      'url_validation',
-      'file_path_validation',
+      'structure_validation','security_injection_check','business_rules_check','content_analysis','url_validation','file_path_validation',
     ];
   }
 
@@ -1334,8 +1081,7 @@ export class BrowserRequestValidatorService {
       totalValidations: this.metrics.totalValidations,
       passedValidations: this.metrics.passedValidations,
       failedValidations: this.metrics.failedValidations,
-      successRate: `${successRate.toFixed(2)}%`,
-      averageValidationTime: `${this.metrics.averageValidationTime.toFixed(2)}ms`,
+      successRate: `${successRate.toFixed(2)}%`,averageValidationTime: `${this.metrics.averageValidationTime.toFixed(2)}ms`,
       violationCounts: Object.fromEntries(this.metrics.violationCounts),
       riskDistribution: this.metrics.riskDistribution,
     });

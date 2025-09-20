@@ -1,6 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -12,118 +10,55 @@ import {
   Min,
   Max,
   IsUUID,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-
-/**
- * Browser execution task types
+} from 'class-validator';import { Type } from 'class-transformer';/*** Browser execution task types
  */
 export enum BrowserExecutionType {
-  NAVIGATION = 'navigation',
-  INTERACTION = 'interaction',
-  DATA_EXTRACTION = 'data_extraction',
-  FORM_SUBMISSION = 'form_submission',
-  WAIT_OPERATION = 'wait_operation',
-  SCREENSHOT = 'screenshot',
-  CUSTOM_SCRIPT = 'custom_script',
-}
-
-/**
+  NAVIGATION = 'navigation',INTERACTION = 'interaction',DATA_EXTRACTION = 'data_extraction',FORM_SUBMISSION = 'form_submission',WAIT_OPERATION = 'wait_operation',SCREENSHOT = 'screenshot',CUSTOM_SCRIPT = 'custom_script',}/**
  * Navigation execution options
  */
 export enum NavigationType {
-  GOTO = 'goto',
-  BACK = 'back',
-  FORWARD = 'forward',
-  RELOAD = 'reload',
-  REFRESH = 'refresh',
-}
-
-/**
+  GOTO = 'goto',BACK = 'back',FORWARD = 'forward',RELOAD = 'reload',REFRESH = 'refresh',}/**
  * Wait operation types
  */
 export enum WaitType {
-  ELEMENT = 'element',
-  TIMEOUT = 'timeout',
-  NETWORK_IDLE = 'network_idle',
-  LOAD_STATE = 'load_state',
-  URL_CHANGE = 'url_change',
-  CUSTOM_CONDITION = 'custom_condition',
-}
-
-/**
+  ELEMENT = 'element',TIMEOUT = 'timeout',NETWORK_IDLE = 'network_idle',LOAD_STATE = 'load_state',URL_CHANGE = 'url_change',CUSTOM_CONDITION = 'custom_condition',}/**
  * Task execution status for browser operations
  */
 export enum BrowserExecutionStatus {
-  QUEUED = 'queued',
-  INITIALIZING = 'initializing',
-  EXECUTING = 'executing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout',
-  RETRY = 'retry',
-}
-
-/**
+  QUEUED = 'queued',INITIALIZING = 'initializing',EXECUTING = 'executing',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',RETRY = 'retry',}/**
  * Browser execution request DTO
  */
 export class BrowserExecuteDto {
   @ApiProperty({
-    description: 'Type of browser execution to perform',
-    enum: BrowserExecutionType,
-  })
+    description: 'Type of browser execution to perform',enum: BrowserExecutionType,})
   @IsEnum(BrowserExecutionType)
   executionType: BrowserExecutionType = BrowserExecutionType.INTERACTION;
 
   @ApiProperty({
-    description: 'Task name for tracking and logging',
-    example: 'Extract product data from e-commerce page',
-  })
-  @IsString()
-  taskName: string = '';
-
-  @ApiProperty({
-    description: 'Detailed execution instructions',
-    example: 'Navigate to product page, wait for content, extract title and price',
-  })
-  @IsString()
-  instructions: string = '';
-
-  @ApiPropertyOptional({
-    description: 'Target URL for navigation operations',
-  })
-  @IsOptional()
+    description: 'Task name for tracking and logging',example: 'Extract product data from e-commerce page',})@IsString()
+  taskName: string = '';@ApiProperty({description: 'Detailed execution instructions',example: 'Navigate to product page, wait for content, extract title and price',})@IsString()
+  instructions: string = '';@ApiPropertyOptional({description: 'Target URL for navigation operations',})@IsOptional()
   @IsUrl({ require_protocol: true })
   targetUrl?: string;
 
   @ApiPropertyOptional({
-    description: 'CSS selector for element targeting',
-  })
-  @IsOptional()
+    description: 'CSS selector for element targeting',})@IsOptional()
   @IsString()
   selector?: string;
 
   @ApiPropertyOptional({
-    description: 'JavaScript code to execute in browser context',
-  })
-  @IsOptional()
+    description: 'JavaScript code to execute in browser context',})@IsOptional()
   @IsString()
   scriptCode?: string;
 
   @ApiPropertyOptional({
-    description: 'Execution parameters and configuration',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Execution parameters and configuration',type: 'object',additionalProperties: true,})
   @IsOptional()
   @IsObject()
   parameters?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Maximum execution timeout in milliseconds',
-    minimum: 1000,
-    maximum: 300000,
+    description: 'Maximum execution timeout in milliseconds',minimum: 1000,maximum: 300000,
     default: 30000,
   })
   @IsOptional()
@@ -133,33 +68,24 @@ export class BrowserExecuteDto {
   timeoutMs?: number = 30000;
 
   @ApiPropertyOptional({
-    description: 'Whether to capture screenshots during execution',
-    default: true,
-  })
+    description: 'Whether to capture screenshots during execution',default: true,})
   @IsOptional()
   @IsBoolean()
   captureScreenshots?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Enable detailed execution logging',
-    default: true,
-  })
+    description: 'Enable detailed execution logging',default: true,})
   @IsOptional()
   @IsBoolean()
   enableLogging?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Session ID to reuse existing browser session',
-  })
-  @IsOptional()
+    description: 'Session ID to reuse existing browser session',})@IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Retry configuration for failed executions',
-    type: 'object',
-  })
-  @IsOptional()
+    description: 'Retry configuration for failed executions',type: 'object',})@IsOptional()
   @IsObject()
   retryConfig?: {
     maxRetries: number;
@@ -173,24 +99,17 @@ export class BrowserExecuteDto {
  */
 export class BrowserNavigateDto {
   @ApiProperty({
-    description: 'Type of navigation to perform',
-    enum: NavigationType,
-  })
+    description: 'Type of navigation to perform',enum: NavigationType,})
   @IsEnum(NavigationType)
   navigationType: NavigationType = NavigationType.GOTO;
 
   @ApiPropertyOptional({
-    description: 'Target URL for navigation (required for GOTO)',
-  })
-  @IsOptional()
+    description: 'Target URL for navigation (required for GOTO)',})@IsOptional()
   @IsUrl({ require_protocol: true })
   url?: string;
 
   @ApiPropertyOptional({
-    description: 'Wait for specific condition after navigation',
-    type: 'object',
-  })
-  @IsOptional()
+    description: 'Wait for specific condition after navigation',type: 'object',})@IsOptional()
   @IsObject()
   waitCondition?: {
     type: WaitType;
@@ -200,16 +119,12 @@ export class BrowserNavigateDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Session ID to perform navigation in',
-  })
-  @IsOptional()
+    description: 'Session ID to perform navigation in',})@IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Navigation timeout in milliseconds',
-    minimum: 5000,
-    maximum: 120000,
+    description: 'Navigation timeout in milliseconds',minimum: 5000,maximum: 120000,
     default: 30000,
   })
   @IsOptional()
@@ -219,15 +134,10 @@ export class BrowserNavigateDto {
   timeoutMs?: number = 30000;
 
   @ApiPropertyOptional({
-    description: 'Additional navigation options',
-    type: 'object',
-  })
-  @IsOptional()
+    description: 'Additional navigation options',type: 'object',})@IsOptional()
   @IsObject()
   options?: {
-    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
-    referer?: string;
-    userAgent?: string;
+    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';referer?: string;userAgent?: string;
   };
 }
 
@@ -236,23 +146,17 @@ export class BrowserNavigateDto {
  */
 export class BrowserWaitDto {
   @ApiProperty({
-    description: 'Type of wait operation to perform',
-    enum: WaitType,
-  })
+    description: 'Type of wait operation to perform',enum: WaitType,})
   @IsEnum(WaitType)
   waitType: WaitType = WaitType.ELEMENT;
 
   @ApiPropertyOptional({
-    description: 'CSS selector to wait for (required for ELEMENT wait)',
-  })
-  @IsOptional()
+    description: 'CSS selector to wait for (required for ELEMENT wait)',})@IsOptional()
   @IsString()
   selector?: string;
 
   @ApiPropertyOptional({
-    description: 'Wait timeout in milliseconds',
-    minimum: 100,
-    maximum: 120000,
+    description: 'Wait timeout in milliseconds',minimum: 100,maximum: 120000,
     default: 10000,
   })
   @IsOptional()
@@ -262,30 +166,22 @@ export class BrowserWaitDto {
   timeoutMs?: number = 10000;
 
   @ApiPropertyOptional({
-    description: 'Custom condition JavaScript code',
-  })
-  @IsOptional()
+    description: 'Custom condition JavaScript code',})@IsOptional()
   @IsString()
   customCondition?: string;
 
   @ApiPropertyOptional({
-    description: 'Expected URL pattern for URL_CHANGE wait',
-  })
-  @IsOptional()
+    description: 'Expected URL pattern for URL_CHANGE wait',})@IsOptional()
   @IsString()
   expectedUrl?: string;
 
   @ApiPropertyOptional({
-    description: 'Session ID to perform wait operation in',
-  })
-  @IsOptional()
+    description: 'Session ID to perform wait operation in',})@IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Polling interval for custom conditions in milliseconds',
-    minimum: 100,
-    maximum: 5000,
+    description: 'Polling interval for custom conditions in milliseconds',minimum: 100,maximum: 5000,
     default: 500,
   })
   @IsOptional()
@@ -295,10 +191,7 @@ export class BrowserWaitDto {
   pollingIntervalMs?: number = 500;
 
   @ApiPropertyOptional({
-    description: 'Additional wait options',
-    type: 'object',
-  })
-  @IsOptional()
+    description: 'Additional wait options',type: 'object',})@IsOptional()
   @IsObject()
   options?: {
     visible?: boolean;
@@ -312,70 +205,38 @@ export class BrowserWaitDto {
  */
 export class BrowserExecutionResultDto {
   @ApiProperty({
-    description: 'Unique execution identifier',
-  })
-  executionId: string = '';
-
-  @ApiProperty({
-    description: 'Current execution status',
-    enum: BrowserExecutionStatus,
-  })
+    description: 'Unique execution identifier',})executionId: string = '';@ApiProperty({description: 'Current execution status',enum: BrowserExecutionStatus,})
   status: BrowserExecutionStatus = BrowserExecutionStatus.QUEUED;
 
   @ApiProperty({
-    description: 'Task name that was executed',
-  })
-  taskName: string = '';
-
-  @ApiProperty({
-    description: 'Execution type that was performed',
-    enum: BrowserExecutionType,
-  })
+    description: 'Task name that was executed',})taskName: string = '';@ApiProperty({description: 'Execution type that was performed',enum: BrowserExecutionType,})
   executionType: BrowserExecutionType = BrowserExecutionType.INTERACTION;
 
   @ApiProperty({
-    description: 'Execution start timestamp',
-  })
-  startedAt: Date = new Date();
+    description: 'Execution start timestamp',})startedAt: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Execution completion timestamp',
-  })
-  completedAt?: Date;
+    description: 'Execution completion timestamp',})completedAt?: Date;
 
   @ApiProperty({
-    description: 'Execution duration in milliseconds',
-  })
-  durationMs: number = 0;
+    description: 'Execution duration in milliseconds',})durationMs: number = 0;
 
   @ApiPropertyOptional({
-    description: 'Success indicator',
-  })
-  success?: boolean;
+    description: 'Success indicator',})success?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Result data from execution',
-    type: 'object',
-    additionalProperties: true,
-  })
+    description: 'Result data from execution',type: 'object',additionalProperties: true,})
   result?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Screenshots captured during execution',
-    type: [String],
-  })
+    description: 'Screenshots captured during execution',type: [String],})
   screenshots?: string[];
 
   @ApiPropertyOptional({
-    description: 'Error message if execution failed',
-  })
-  errorMessage?: string;
+    description: 'Error message if execution failed',})errorMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed error information',
-    type: 'object',
-  })
-  errorDetails?: {
+    description: 'Detailed error information',type: 'object',})errorDetails?: {
     code: string;
     type: string;
     stack?: string;
@@ -383,37 +244,25 @@ export class BrowserExecutionResultDto {
   };
 
   @ApiProperty({
-    description: 'Execution logs and events',
-    type: [Object],
-  })
+    description: 'Execution logs and events',type: [Object],})
   logs: Array<{
     timestamp: Date;
-    level: 'debug' | 'info' | 'warn' | 'error';
-    message: string;
-    category?: string;
+    level: 'debug' | 'info' | 'warn' | 'error';message: string;category?: string;
     data?: Record<string, unknown>;
   }> = [];
 
   @ApiPropertyOptional({
-    description: 'Session ID used for execution',
-  })
-  sessionId?: string;
+    description: 'Session ID used for execution',})sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Retry information if applicable',
-    type: 'object',
-  })
-  retryInfo?: {
+    description: 'Retry information if applicable',type: 'object',})retryInfo?: {
     attemptNumber: number;
     maxRetries: number;
     nextRetryAt?: Date;
   };
 
   @ApiPropertyOptional({
-    description: 'Performance metrics',
-    type: 'object',
-  })
-  metrics?: {
+    description: 'Performance metrics',type: 'object',})metrics?: {
     networkRequests: number;
     domNodes: number;
     memoryUsage: number;
@@ -426,45 +275,25 @@ export class BrowserExecutionResultDto {
  */
 export class BrowserStatusDto {
   @ApiProperty({
-    description: 'Overall browser service status',
-  })
-  serviceStatus: 'healthy' | 'degraded' | 'down' = 'healthy';
+    description: 'Overall browser service status',})serviceStatus: 'healthy' | 'degraded' | 'down' = 'healthy';@ApiProperty({description: 'Active browser sessions count',})activeSessions: number = 0;
 
   @ApiProperty({
-    description: 'Active browser sessions count',
-  })
-  activeSessions: number = 0;
+    description: 'Running executions count',})runningExecutions: number = 0;
 
   @ApiProperty({
-    description: 'Running executions count',
-  })
-  runningExecutions: number = 0;
+    description: 'Queued executions count',})queuedExecutions: number = 0;
 
   @ApiProperty({
-    description: 'Queued executions count',
-  })
-  queuedExecutions: number = 0;
+    description: 'Total executions today',})totalExecutionsToday: number = 0;
 
   @ApiProperty({
-    description: 'Total executions today',
-  })
-  totalExecutionsToday: number = 0;
+    description: 'Success rate percentage for today',})successRateToday: number = 0;
 
   @ApiProperty({
-    description: 'Success rate percentage for today',
-  })
-  successRateToday: number = 0;
-
-  @ApiProperty({
-    description: 'Average execution time in milliseconds',
-  })
-  averageExecutionTimeMs: number = 0;
+    description: 'Average execution time in milliseconds',})averageExecutionTimeMs: number = 0;
 
   @ApiPropertyOptional({
-    description: 'System resource usage',
-    type: 'object',
-  })
-  resourceUsage?: {
+    description: 'System resource usage',type: 'object',})resourceUsage?: {
     cpuPercent: number;
     memoryPercent: number;
     diskSpacePercent: number;
@@ -472,9 +301,7 @@ export class BrowserStatusDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Recent execution summary',
-    type: [Object],
-  })
+    description: 'Recent execution summary',type: [Object],})
   recentExecutions?: Array<{
     executionId: string;
     taskName: string;
@@ -484,20 +311,13 @@ export class BrowserStatusDto {
   }>;
 
   @ApiProperty({
-    description: 'Status check timestamp',
-  })
-  timestamp: Date = new Date();
+    description: 'Status check timestamp',})timestamp: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Service uptime in seconds',
-  })
-  uptimeSeconds?: number;
+    description: 'Service uptime in seconds',})uptimeSeconds?: number;
 
   @ApiPropertyOptional({
-    description: 'Last error information',
-    type: 'object',
-  })
-  lastError?: {
+    description: 'Last error information',type: 'object',})lastError?: {
     message: string;
     timestamp: Date;
     executionId?: string;
@@ -509,25 +329,16 @@ export class BrowserStatusDto {
  */
 export class ExecutionQueueStatusDto {
   @ApiProperty({
-    description: 'Queue length',
-  })
-  queueLength: number = 0;
+    description: 'Queue length',})queueLength: number = 0;
 
   @ApiProperty({
-    description: 'Processing capacity',
-  })
-  processingCapacity: number = 0;
+    description: 'Processing capacity',})processingCapacity: number = 0;
 
   @ApiProperty({
-    description: 'Estimated wait time in milliseconds',
-  })
-  estimatedWaitTimeMs: number = 0;
+    description: 'Estimated wait time in milliseconds',})estimatedWaitTimeMs: number = 0;
 
   @ApiProperty({
-    description: 'Queue items by priority',
-    type: 'object',
-  })
-  queueByPriority: {
+    description: 'Queue items by priority',type: 'object',})queueByPriority: {
     critical: number;
     high: number;
     normal: number;
@@ -535,9 +346,7 @@ export class ExecutionQueueStatusDto {
   } = { critical: 0, high: 0, normal: 0, low: 0 };
 
   @ApiProperty({
-    description: 'Active workers count',
-  })
-  activeWorkers: number = 0;
+    description: 'Active workers count',})activeWorkers: number = 0;
 
   @ApiProperty({
     description: 'Available workers count',

@@ -1,7 +1,4 @@
-import { Module } from '@nestjs/common';
-import { DataExtractionController } from './data-extraction.controller';
-import { DataExtractionService } from './data-extraction.service';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { Module } from '@nestjs/common';import { DataExtractionController } from './data-extraction.controller';import { DataExtractionService } from './data-extraction.service';import { ComputerUseModule } from '../computer-use/computer-use.module';
 
 /**
  * Data Extraction Module

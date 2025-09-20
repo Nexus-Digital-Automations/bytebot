@@ -23,46 +23,14 @@
  * @created 2025-09-19
  */
 
-import { Module, Global } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-
-// Enhanced 3-Tier Cache Services
-import { ParlantEnhanced3TierCacheService } from './parlant-enhanced-three-tier-cache.service';
-import { RedisClusterCacheService } from './redis-cluster-cache.service';
-import { DatabasePersistentCacheService } from './database-persistent-cache.service';
-import { IntelligentCacheInvalidationService } from './intelligent-cache-invalidation.service';
-
-// Existing Cache Services
-import { CacheService } from '../../cache/cache.service';
-import { CacheKeyGenerator } from '../../cache/cache-key.generator';
-import { ParlantIntelligentCacheService } from './parlant-intelligent-cache.service';
-import { ParlantMultiLevelCacheService } from './parlant-multi-level-cache.service';
-
-/**
- * Cache Configuration Factory
+import { Module, Global } from '@nestjs/common';import { ConfigModule, ConfigService } from '@nestjs/config';import { CacheModule } from '@nestjs/cache-manager';import { EventEmitterModule } from '@nestjs/event-emitter';// Enhanced 3-Tier Cache Servicesimport { ParlantEnhanced3TierCacheService } from './parlant-enhanced-three-tier-cache.service';import { RedisClusterCacheService } from './redis-cluster-cache.service';import { DatabasePersistentCacheService } from './database-persistent-cache.service';import { IntelligentCacheInvalidationService } from './intelligent-cache-invalidation.service';// Existing Cache Servicesimport { CacheService } from '../../cache/cache.service';import { CacheKeyGenerator } from '../../cache/cache-key.generator';import { ParlantIntelligentCacheService } from './parlant-intelligent-cache.service';import { ParlantMultiLevelCacheService } from './parlant-multi-level-cache.service';/*** Cache Configuration Factory
  */
 export const createCacheConfig = (configService: ConfigService) => ({
-  ttl: configService.get<number>('CACHE_TTL', 300), // 5 minutes default
-  max: configService.get<number>('CACHE_MAX_ITEMS', 1000),
-  store: 'memory',
-});
-
-/**
+  ttl: configService.get<number>('CACHE_TTL', 300), // 5 minutes defaultmax: configService.get<number>('CACHE_MAX_ITEMS', 1000),store: 'memory',});/**
  * Redis Configuration Factory
  */
 export const createRedisConfig = (configService: ConfigService) => ({
-  host: configService.get<string>('REDIS_HOST', 'localhost'),
-  port: configService.get<number>('REDIS_PORT', 6379),
-  password: configService.get<string>('REDIS_PASSWORD'),
-  db: configService.get<number>('REDIS_DB', 0),
-  keyPrefix: configService.get<string>('REDIS_KEY_PREFIX', 'parlant:cache:'),
-  retryAttempts: configService.get<number>('REDIS_RETRY_ATTEMPTS', 3),
-  retryDelay: configService.get<number>('REDIS_RETRY_DELAY', 1000),
-});
-
-@Global()
+  host: configService.get<string>('REDIS_HOST', 'localhost'),port: configService.get<number>('REDIS_PORT', 6379),password: configService.get<string>('REDIS_PASSWORD'),db: configService.get<number>('REDIS_DB', 0),keyPrefix: configService.get<string>('REDIS_KEY_PREFIX', 'parlant:cache:'),retryAttempts: configService.get<number>('REDIS_RETRY_ATTEMPTS', 3),retryDelay: configService.get<number>('REDIS_RETRY_DELAY', 1000),});@Global()
 @Module({
   imports: [
     ConfigModule,
@@ -73,9 +41,7 @@ export const createRedisConfig = (configService: ConfigService) => ({
     }),
     EventEmitterModule.forRoot({
       wildcard: true,
-      delimiter: '.',
-      newListener: false,
-      removeListener: false,
+      delimiter: '.',newListener: false,removeListener: false,
       maxListeners: 20,
       verboseMemoryLeak: false,
       ignoreErrors: false,
@@ -98,45 +64,21 @@ export const createRedisConfig = (configService: ConfigService) => ({
 
     // Cache Configuration Provider
     {
-      provide: 'CACHE_CONFIG',
-      useFactory: (configService: ConfigService) => ({
-        enabled: configService.get<boolean>('CACHE_ENABLED', true),
-        performance: {
-          targetHitRate: configService.get<number>('CACHE_TARGET_HIT_RATE', 85),
-          targetL1AccessTime: configService.get<number>('CACHE_L1_TARGET_MS', 5),
-          targetL2AccessTime: configService.get<number>('CACHE_L2_TARGET_MS', 15),
-          targetL3AccessTime: configService.get<number>('CACHE_L3_TARGET_MS', 50),
-        },
-        monitoring: {
-          enabled: configService.get<boolean>('CACHE_MONITORING_ENABLED', true),
-          reportingInterval: configService.get<number>('CACHE_REPORTING_INTERVAL_MINUTES', 10),
-          alertThresholds: {
-            hitRate: configService.get<number>('CACHE_ALERT_HIT_RATE_THRESHOLD', 70),
-            latency: configService.get<number>('CACHE_ALERT_LATENCY_THRESHOLD', 100),
-            errorRate: configService.get<number>('CACHE_ALERT_ERROR_RATE_THRESHOLD', 5),
-          },
-        },
+      provide: 'CACHE_CONFIG',useFactory: (configService: ConfigService) => ({enabled: configService.get<boolean>('CACHE_ENABLED', true),performance: {targetHitRate: configService.get<number>('CACHE_TARGET_HIT_RATE', 85),targetL1AccessTime: configService.get<number>('CACHE_L1_TARGET_MS', 5),targetL2AccessTime: configService.get<number>('CACHE_L2_TARGET_MS', 15),targetL3AccessTime: configService.get<number>('CACHE_L3_TARGET_MS', 50),},monitoring: {
+          enabled: configService.get<boolean>('CACHE_MONITORING_ENABLED', true),reportingInterval: configService.get<number>('CACHE_REPORTING_INTERVAL_MINUTES', 10),alertThresholds: {hitRate: configService.get<number>('CACHE_ALERT_HIT_RATE_THRESHOLD', 70),latency: configService.get<number>('CACHE_ALERT_LATENCY_THRESHOLD', 100),errorRate: configService.get<number>('CACHE_ALERT_ERROR_RATE_THRESHOLD', 5),},},
         optimization: {
-          autoTuning: configService.get<boolean>('CACHE_AUTO_TUNING_ENABLED', true),
-          adaptiveTtl: configService.get<boolean>('CACHE_ADAPTIVE_TTL_ENABLED', true),
-          predictiveWarming: configService.get<boolean>('CACHE_PREDICTIVE_WARMING_ENABLED', false),
-        },
-      }),
+          autoTuning: configService.get<boolean>('CACHE_AUTO_TUNING_ENABLED', true),adaptiveTtl: configService.get<boolean>('CACHE_ADAPTIVE_TTL_ENABLED', true),predictiveWarming: configService.get<boolean>('CACHE_PREDICTIVE_WARMING_ENABLED', false),},}),
       inject: [ConfigService],
     },
 
     // Redis Configuration Provider
     {
-      provide: 'REDIS_CONFIG',
-      useFactory: createRedisConfig,
-      inject: [ConfigService],
+      provide: 'REDIS_CONFIG',useFactory: createRedisConfig,inject: [ConfigService],
     },
 
     // Cache Health Monitor
     {
-      provide: 'CACHE_HEALTH_MONITOR',
-      useFactory: (
-        enhanced3TierCache: ParlantEnhanced3TierCacheService,
+      provide: 'CACHE_HEALTH_MONITOR',useFactory: (enhanced3TierCache: ParlantEnhanced3TierCacheService,
         redisCache: RedisClusterCacheService,
         dbCache: DatabasePersistentCacheService,
         invalidationService: IntelligentCacheInvalidationService
@@ -150,9 +92,7 @@ export const createRedisConfig = (configService: ConfigService) => ({
 
             return {
               overall: {
-                healthy: enhanced3TierHealth.healthStatus === 'EXCELLENT' || enhanced3TierHealth.healthStatus === 'GOOD',
-                hitRate: enhanced3TierHealth.overallMetrics.overallHitRate,
-                avgResponseTime: enhanced3TierHealth.overallMetrics.avgResponseTime,
+                healthy: enhanced3TierHealth.healthStatus === 'EXCELLENT' || enhanced3TierHealth.healthStatus === 'GOOD',hitRate: enhanced3TierHealth.overallMetrics.overallHitRate,avgResponseTime: enhanced3TierHealth.overallMetrics.avgResponseTime,
                 timestamp: new Date(),
               },
               l1: {
@@ -228,11 +168,7 @@ export const createRedisConfig = (configService: ConfigService) => ({
                 },
               },
               trends: {
-                hitRateImprovement: 'Stable', // Could be calculated from historical data
-                latencyTrend: 'Improving',
-                errorRateTrend: 'Stable',
-              },
-            };
+                hitRateImprovement: 'Stable', // Could be calculated from historical datalatencyTrend: 'Improving',errorRateTrend: 'Stable',},};
           },
 
           async optimizePerformance() {
@@ -242,67 +178,34 @@ export const createRedisConfig = (configService: ConfigService) => ({
             // L1 Cache Optimizations
             if (healthStatus.l1.hitRate < 40) {
               optimizations.push({
-                level: 'L1',
-                action: 'increase_size',
-                reason: 'Hit rate below 40% target',
-                impact: 'Medium',
-              });
-            }
+                level: 'L1',action: 'increase_size',reason: 'Hit rate below 40% target',impact: 'Medium',});}
 
             if (healthStatus.l1.avgAccessTime > 5) {
               optimizations.push({
-                level: 'L1',
-                action: 'optimize_eviction',
-                reason: 'Access time above 5ms target',
-                impact: 'High',
-              });
-            }
+                level: 'L1',action: 'optimize_eviction',reason: 'Access time above 5ms target',impact: 'High',});}
 
             // L2 Cache Optimizations
             if (healthStatus.l2.hitRate < 30) {
               optimizations.push({
-                level: 'L2',
-                action: 'increase_ttl',
-                reason: 'Hit rate below 30% target',
-                impact: 'Medium',
-              });
-            }
+                level: 'L2',action: 'increase_ttl',reason: 'Hit rate below 30% target',impact: 'Medium',});}
 
             if (healthStatus.l2.errorRate > 5) {
               optimizations.push({
-                level: 'L2',
-                action: 'check_cluster_health',
-                reason: 'Error rate above 5% threshold',
-                impact: 'Critical',
-              });
-            }
+                level: 'L2',action: 'check_cluster_health',reason: 'Error rate above 5% threshold',impact: 'Critical',});}
 
             // L3 Cache Optimizations
             if (healthStatus.l3.hitRate < 15) {
               optimizations.push({
-                level: 'L3',
-                action: 'optimize_queries',
-                reason: 'Hit rate below 15% target',
-                impact: 'Low',
-              });
-            }
+                level: 'L3',action: 'optimize_queries',reason: 'Hit rate below 15% target',impact: 'Low',});}
 
             if (healthStatus.l3.avgAccessTime > 50) {
               optimizations.push({
-                level: 'L3',
-                action: 'add_indexes',
-                reason: 'Access time above 50ms target',
-                impact: 'High',
-              });
-            }
+                level: 'L3',action: 'add_indexes',reason: 'Access time above 50ms target',impact: 'High',});}
 
             return {
               timestamp: new Date(),
               optimizations,
-              automaticActionsAvailable: optimizations.filter(opt => opt.impact !== 'Critical').length,
-              manualInterventionRequired: optimizations.filter(opt => opt.impact === 'Critical').length,
-            };
-          },
+              automaticActionsAvailable: optimizations.filter(opt => opt.impact !== 'Critical').length,manualInterventionRequired: optimizations.filter(opt => opt.impact === 'Critical').length,};},
         };
       },
       inject: [
@@ -323,9 +226,7 @@ export const createRedisConfig = (configService: ConfigService) => ({
     IntelligentCacheInvalidationService,
     ParlantIntelligentCacheService,
     ParlantMultiLevelCacheService,
-    'CACHE_CONFIG',
-    'REDIS_CONFIG',
-    'CACHE_HEALTH_MONITOR',
+    'CACHE_CONFIG','REDIS_CONFIG','CACHE_HEALTH_MONITOR',
   ],
 })
 export class CacheIntegrationModule {
@@ -339,9 +240,7 @@ export class CacheIntegrationModule {
   }
 
   private logModuleInitialization(): void {
-    console.log(`
-╔═══════════════════════════════════════════════════════════════════════════════╗
-║                   🚀 PARLANT 3-TIER CACHE SYSTEM INITIALIZED                 ║
+    console.log(`╔═══════════════════════════════════════════════════════════════════════════════╗║                   🚀 PARLANT 3-TIER CACHE SYSTEM INITIALIZED                 ║
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                               ║
 ║  🎯 Performance Targets:                                                      ║
@@ -395,9 +294,7 @@ export class CacheIntegrationModule {
           memoryUsage: `${(enhanced3TierHealth.l1Metrics.memoryUsage / 1024 / 1024).toFixed(2)}MB`,
         },
         l2: {
-          status: redisHealth.healthy ? 'Healthy' : 'Needs Attention',
-          hitRate: redisHealth.metrics.cache.hitRate,
-          avgAccessTime: redisHealth.metrics.performance.avgLatency,
+          status: redisHealth.healthy ? 'Healthy' : 'Needs Attention',hitRate: redisHealth.metrics.cache.hitRate,avgAccessTime: redisHealth.metrics.performance.avgLatency,
           circuitBreaker: redisHealth.metrics.health.circuitBreakerState,
         },
         l3: {
@@ -409,8 +306,7 @@ export class CacheIntegrationModule {
       },
       invalidation: {
         status: invalidationHealth.summary.successRate > 0.95 ? 'Healthy' : 'Needs Attention',
-        successRate: `${(invalidationHealth.summary.successRate * 100).toFixed(1)}%`,
-        avgDuration: `${invalidationHealth.summary.avgDuration.toFixed(2)}ms`,
+        successRate: `${(invalidationHealth.summary.successRate * 100).toFixed(1)}%`,avgDuration: `${invalidationHealth.summary.avgDuration.toFixed(2)}ms`,
         totalRequests: invalidationHealth.summary.totalRequests,
       },
       recommendations: [
@@ -447,9 +343,7 @@ export class CacheIntegrationModule {
         totalTime,
       };
     } catch (error) {
-      console.error('Cache warming failed:', error);
-      throw error;
-    }
+      console.error('Cache warming failed:', error);throw error;}
   }
 
   /**
@@ -466,12 +360,7 @@ export class CacheIntegrationModule {
     try {
       // Use intelligent invalidation service
       const result = await this.invalidationService.invalidateByPattern(pattern, {
-        strategy: 'immediate',
-        scope: 'all',
-        priority: 'high',
-      });
-
-      const totalTime = Date.now() - startTime;
+        strategy: 'immediate',scope: 'all',priority: 'high',});const totalTime = Date.now() - startTime;
 
       return {
         l1Invalidated: Math.floor(result.invalidatedCount * 0.5), // Mock distribution

@@ -12,17 +12,13 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Injectable,
-} from '@nestjs/common';
-import {
-  ApiTags,
+} from '@nestjs/common';import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
-} from '@nestjs/swagger';
-import {
-  BrowserExecuteDto,
+} from '@nestjs/swagger';import {BrowserExecuteDto,
   BrowserNavigateDto,
   BrowserWaitDto,
   BrowserExecutionResultDto,
@@ -32,13 +28,7 @@ import {
   BrowserExecutionType,
   NavigationType,
   WaitType,
-} from './dto/browser-execution.dto';
-import { BrowserUseService } from './browser-use.service';
-import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
-
-/**
- * Wait condition interface for type safety
+} from './dto/browser-execution.dto';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';/*** Wait condition interface for type safety
  */
 interface WaitCondition {
   type: WaitType;
@@ -88,10 +78,7 @@ interface WaitResult {
  * - Request/response logging
  * - Error handling with sanitized responses
  */
-@ApiTags('Browser Task Execution')
-@Controller('browser')
-@Injectable()
-export class BrowserTaskExecutionController {
+@ApiTags('Browser Task Execution')@Controller('browser')@Injectable()export class BrowserTaskExecutionController {
   private readonly logger = new Logger(BrowserTaskExecutionController.name);
   private readonly executionMap = new Map<string, BrowserExecutionResultDto>();
   private readonly queuedExecutions = new Map<string, BrowserExecuteDto>();
@@ -102,45 +89,29 @@ export class BrowserTaskExecutionController {
     private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
   ) {
-    this.logger.log('Browser Task Execution Controller initialized');
-  }
-
-  /**
+    this.logger.log('Browser Task Execution Controller initialized');}/**
    * Execute browser automation task
    *
    * Primary endpoint for executing browser automation tasks with simplified interface.
    * Supports various execution types including navigation, interaction, data extraction,
    * and custom script execution.
    */
-  @Post('execute')
-  @HttpCode(HttpStatus.ACCEPTED)
-  @ApiOperation({
-    summary: 'Execute browser automation task',
-    description: 'Execute a browser automation task with real-time progress tracking. Returns execution ID for monitoring.',
-  })
-  @ApiBody({
+  @Post('execute')@HttpCode(HttpStatus.ACCEPTED)@ApiOperation({
+    summary: 'Execute browser automation task',description: 'Execute a browser automation task with real-time progress tracking. Returns execution ID for monitoring.',})@ApiBody({
     type: BrowserExecuteDto,
-    description: 'Browser execution configuration and instructions',
-  })
-  @ApiResponse({
+    description: 'Browser execution configuration and instructions',})@ApiResponse({
     status: HttpStatus.ACCEPTED,
-    description: 'Task accepted for execution',
-    type: BrowserExecutionResultDto,
-  })
+    description: 'Task accepted for execution',type: BrowserExecutionResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid execution configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid execution configuration',})@ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Task execution failed to start',
   })
   async executeTask(
     @Body() executeDto: BrowserExecuteDto,
   ): Promise<BrowserExecutionResultDto> {
-    const executionId = `exec_${Date.now()}_${++this.executionCounter}`;
-
-    this.logger.log(`Starting browser execution: ${executeDto.taskName}`, {
+    const executionId = `exec_${Date.now()}_${++this.executionCounter}`;this.logger.log(`Starting browser execution: ${executeDto.taskName}`, {
       executionId,
       executionType: executeDto.executionType,
       targetUrl: executeDto.targetUrl,
@@ -161,9 +132,7 @@ export class BrowserTaskExecutionController {
       durationMs: 0,
       logs: [{
         timestamp: new Date(),
-        level: 'info',
-        message: 'Execution queued',
-        category: 'system',
+        level: 'info',message: 'Execution queued',category: 'system',
         data: { executionId, taskName: executeDto.taskName },
       }],
     };
@@ -191,9 +160,7 @@ export class BrowserTaskExecutionController {
       this.logger.error(`Failed to start execution: ${executeDto.taskName}`, error);
 
       throw new InternalServerErrorException({
-        message: 'Failed to start browser task execution',
-        error: error instanceof Error ? error.message : String(error),
-        executionId,
+        message: 'Failed to start browser task execution',error: error instanceof Error ? error.message : String(error),executionId,
         taskName: executeDto.taskName,
       });
     }
@@ -204,35 +171,22 @@ export class BrowserTaskExecutionController {
    *
    * Simplified navigation endpoint with built-in wait conditions and error handling.
    */
-  @Post('navigate')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Navigate browser',
-    description: 'Perform browser navigation with optional wait conditions and timeout management.',
-  })
-  @ApiBody({
+  @Post('navigate')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Navigate browser',description: 'Perform browser navigation with optional wait conditions and timeout management.',})@ApiBody({
     type: BrowserNavigateDto,
-    description: 'Navigation configuration and options',
-  })
-  @ApiResponse({
+    description: 'Navigation configuration and options',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Navigation completed successfully',
-    type: BrowserExecutionResultDto,
-  })
+    description: 'Navigation completed successfully',type: BrowserExecutionResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid navigation configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid navigation configuration',})@ApiResponse({
     status: HttpStatus.TIMEOUT,
     description: 'Navigation timeout',
   })
   async navigateBrowser(
     @Body() navigateDto: BrowserNavigateDto,
   ): Promise<BrowserExecutionResultDto> {
-    const executionId = `nav_${Date.now()}_${++this.executionCounter}`;
-
-    this.logger.log(`Starting browser navigation`, {
+    const executionId = `nav_${Date.now()}_${++this.executionCounter}`;this.logger.log(`Starting browser navigation`, {
       executionId,
       navigationType: navigateDto.navigationType,
       url: navigateDto.url,
@@ -257,9 +211,7 @@ export class BrowserTaskExecutionController {
         timestamp: new Date(),
         level: 'info',
         message: `Starting ${navigateDto.navigationType} navigation`,
-        category: 'navigation',
-        data: { url: navigateDto.url },
-      }],
+        category: 'navigation',data: { url: navigateDto.url },}],
     };
 
     this.executionMap.set(executionId, executionResult);
@@ -273,36 +225,26 @@ export class BrowserTaskExecutionController {
         case NavigationType.GOTO:
           if (navigateDto.url) {
             navigationResult = await this.performGotoNavigation(
-              navigateDto.sessionId ?? 'default',
-              navigateDto.url,
-              navigateDto.options,
+              navigateDto.sessionId ?? 'default',navigateDto.url,navigateDto.options,
             );
           }
           break;
         case NavigationType.BACK:
           navigationResult = await this.performBackNavigation(
-            navigateDto.sessionId ?? 'default',
-          );
-          break;
+            navigateDto.sessionId ?? 'default',);break;
         case NavigationType.FORWARD:
           navigationResult = await this.performForwardNavigation(
-            navigateDto.sessionId ?? 'default',
-          );
-          break;
+            navigateDto.sessionId ?? 'default',);break;
         case NavigationType.RELOAD:
         case NavigationType.REFRESH:
           navigationResult = await this.performReloadNavigation(
-            navigateDto.sessionId ?? 'default',
-          );
-          break;
+            navigateDto.sessionId ?? 'default',);break;
       }
 
       // Handle wait condition if specified
       if (navigateDto.waitCondition) {
         await this.handleWaitCondition(
-          navigateDto.sessionId ?? 'default',
-          navigateDto.waitCondition,
-          executionId,
+          navigateDto.sessionId ?? 'default',navigateDto.waitCondition,executionId,
         );
       }
 
@@ -320,9 +262,7 @@ export class BrowserTaskExecutionController {
           ...executionResult.logs,
           {
             timestamp: new Date(),
-            level: 'info' as const,
-            message: 'Navigation completed successfully',
-            category: 'navigation',
+            level: 'info' as const,message: 'Navigation completed successfully',category: 'navigation',
             data: { durationMs, result: navigationResult },
           },
         ],
@@ -344,28 +284,21 @@ export class BrowserTaskExecutionController {
         success: false,
         errorMessage: error instanceof Error ? error.message : String(error),
         errorDetails: {
-          code: 'NAVIGATION_ERROR',
-          type: error instanceof Error ? error.constructor.name : 'UnknownError',
-          stack: error instanceof Error ? error.stack : undefined,
-        },
+          code: 'NAVIGATION_ERROR',type: error instanceof Error ? error.constructor.name : 'UnknownError',stack: error instanceof Error ? error.stack : undefined,},
         logs: [
           ...executionResult.logs,
           {
             timestamp: new Date(),
             level: 'error' as const,
             message: `Navigation failed: ${error instanceof Error ? error.message : String(error)}`,
-            category: 'navigation',
-            data: { error: error instanceof Error ? error.message : String(error) },
-          },
+            category: 'navigation',data: { error: error instanceof Error ? error.message : String(error) },},
         ],
       };
 
       this.executionMap.set(executionId, errorResult);
 
       throw new InternalServerErrorException({
-        message: 'Browser navigation failed',
-        executionId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Browser navigation failed',executionId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -375,35 +308,22 @@ export class BrowserTaskExecutionController {
    *
    * Specialized endpoint for wait operations with various condition types.
    */
-  @Post('wait')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Wait for condition or timeout',
-    description: 'Wait for specific browser conditions like element presence, URL changes, or custom conditions.',
-  })
-  @ApiBody({
+  @Post('wait')@HttpCode(HttpStatus.OK)@ApiOperation({
+    summary: 'Wait for condition or timeout',description: 'Wait for specific browser conditions like element presence, URL changes, or custom conditions.',})@ApiBody({
     type: BrowserWaitDto,
-    description: 'Wait operation configuration',
-  })
-  @ApiResponse({
+    description: 'Wait operation configuration',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Wait condition met or timeout completed',
-    type: BrowserExecutionResultDto,
-  })
+    description: 'Wait condition met or timeout completed',type: BrowserExecutionResultDto,})
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid wait configuration',
-  })
-  @ApiResponse({
+    description: 'Invalid wait configuration',})@ApiResponse({
     status: HttpStatus.TIMEOUT,
     description: 'Wait condition timeout',
   })
   async waitForCondition(
     @Body() waitDto: BrowserWaitDto,
   ): Promise<BrowserExecutionResultDto> {
-    const executionId = `wait_${Date.now()}_${++this.executionCounter}`;
-
-    this.logger.log(`Starting wait operation`, {
+    const executionId = `wait_${Date.now()}_${++this.executionCounter}`;this.logger.log(`Starting wait operation`, {
       executionId,
       waitType: waitDto.waitType,
       selector: waitDto.selector,
@@ -413,10 +333,7 @@ export class BrowserTaskExecutionController {
 
     // Validate wait request
     if (waitDto.waitType === WaitType.ELEMENT && !waitDto.selector) {
-      throw new BadRequestException('Selector is required for ELEMENT wait type');
-    }
-
-    if (waitDto.waitType === WaitType.CUSTOM_CONDITION && !waitDto.customCondition) {
+      throw new BadRequestException('Selector is required for ELEMENT wait type');}if (waitDto.waitType === WaitType.CUSTOM_CONDITION && !waitDto.customCondition) {
       throw new BadRequestException('Custom condition is required for CUSTOM_CONDITION wait type');
     }
 
@@ -432,9 +349,7 @@ export class BrowserTaskExecutionController {
         timestamp: new Date(),
         level: 'info',
         message: `Starting ${waitDto.waitType} wait operation`,
-        category: 'wait',
-        data: { selector: waitDto.selector, timeoutMs: waitDto.timeoutMs },
-      }],
+        category: 'wait',data: { selector: waitDto.selector, timeoutMs: waitDto.timeoutMs },}],
     };
 
     this.executionMap.set(executionId, executionResult);
@@ -443,9 +358,7 @@ export class BrowserTaskExecutionController {
       const startTime = Date.now();
 
       const waitResult = await this.handleWaitCondition(
-        waitDto.sessionId ?? 'default',
-        {
-          type: waitDto.waitType,
+        waitDto.sessionId ?? 'default',{type: waitDto.waitType,
           selector: waitDto.selector,
           timeout: waitDto.timeoutMs,
           condition: waitDto.customCondition,
@@ -467,9 +380,7 @@ export class BrowserTaskExecutionController {
           ...executionResult.logs,
           {
             timestamp: new Date(),
-            level: 'info' as const,
-            message: 'Wait condition met successfully',
-            category: 'wait',
+            level: 'info' as const,message: 'Wait condition met successfully',category: 'wait',
             data: { durationMs, result: waitResult },
           },
         ],
@@ -491,28 +402,21 @@ export class BrowserTaskExecutionController {
         success: false,
         errorMessage: error instanceof Error ? error.message : String(error),
         errorDetails: {
-          code: 'WAIT_TIMEOUT',
-          type: error instanceof Error ? error.constructor.name : 'UnknownError',
-          stack: error instanceof Error ? error.stack : undefined,
-        },
+          code: 'WAIT_TIMEOUT',type: error instanceof Error ? error.constructor.name : 'UnknownError',stack: error instanceof Error ? error.stack : undefined,},
         logs: [
           ...executionResult.logs,
           {
             timestamp: new Date(),
             level: 'error' as const,
             message: `Wait operation failed: ${error instanceof Error ? error.message : String(error)}`,
-            category: 'wait',
-            data: { error: error instanceof Error ? error.message : String(error) },
-          },
+            category: 'wait',data: { error: error instanceof Error ? error.message : String(error) },},
         ],
       };
 
       this.executionMap.set(executionId, errorResult);
 
       throw new InternalServerErrorException({
-        message: 'Wait operation failed',
-        executionId,
-        error: error instanceof Error ? error.message : String(error),
+        message: 'Wait operation failed',executionId,error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -522,32 +426,16 @@ export class BrowserTaskExecutionController {
    *
    * Retrieve current status and results of browser task executions.
    */
-  @Get('status/:executionId')
-  @ApiOperation({
-    summary: 'Get execution status',
-    description: 'Retrieve the current status, progress, and results of a browser task execution.',
-  })
-  @ApiParam({
-    name: 'executionId',
-    description: 'Unique execution identifier',
-    type: 'string',
-  })
-  @ApiResponse({
+  @Get('status/:executionId')@ApiOperation({summary: 'Get execution status',description: 'Retrieve the current status, progress, and results of a browser task execution.',})@ApiParam({
+    name: 'executionId',description: 'Unique execution identifier',type: 'string',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Execution status retrieved',
-    type: BrowserExecutionResultDto,
-  })
+    description: 'Execution status retrieved',type: BrowserExecutionResultDto,})
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Execution not found',
-  })
-  async getExecutionStatus(
+    description: 'Execution not found',})async getExecutionStatus(
     @Param('executionId') executionId: string,
   ): Promise<BrowserExecutionResultDto> {
-    this.logger.log(`Getting execution status: ${executionId}`);
-
-    const execution = this.executionMap.get(executionId);
-    if (!execution) {
+    this.logger.log(`Getting execution status: ${executionId}`);const execution = this.executionMap.get(executionId);if (!execution) {
       throw new NotFoundException(`Execution not found: ${executionId}`);
     }
 
@@ -559,29 +447,12 @@ export class BrowserTaskExecutionController {
    *
    * Comprehensive status endpoint showing service health, active sessions, and execution metrics.
    */
-  @Get('status')
-  @ApiOperation({
-    summary: 'Get browser service status',
-    description: 'Get comprehensive status information about the browser automation service.',
-  })
-  @ApiQuery({
-    name: 'includeMetrics',
-    required: false,
-    type: 'boolean',
-    description: 'Include detailed performance metrics',
-  })
-  @ApiResponse({
+  @Get('status')@ApiOperation({summary: 'Get browser service status',description: 'Get comprehensive status information about the browser automation service.',})@ApiQuery({
+    name: 'includeMetrics',required: false,type: 'boolean',description: 'Include detailed performance metrics',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Browser service status retrieved',
-    type: BrowserStatusDto,
-  })
+    description: 'Browser service status retrieved',type: BrowserStatusDto,})
   async getBrowserStatus(
-    @Query('includeMetrics') includeMetrics?: boolean,
-  ): Promise<BrowserStatusDto> {
-    this.logger.log('Getting browser service status', { includeMetrics });
-
-    try {
-      const activeSessions = await this.sessionService.getAllSessions();
+    @Query('includeMetrics') includeMetrics?: boolean,): Promise<BrowserStatusDto> {this.logger.log('Getting browser service status', { includeMetrics });try {const activeSessions = await this.sessionService.getAllSessions();
       const activeExecutions = Array.from(this.executionMap.values());
 
       // Calculate metrics
@@ -613,9 +484,7 @@ export class BrowserTaskExecutionController {
         : 0;
 
       const status: BrowserStatusDto = {
-        serviceStatus: runningExecutions > 0 ? 'healthy' : 'healthy',
-        activeSessions: activeSessions.length,
-        runningExecutions,
+        serviceStatus: runningExecutions > 0 ? 'healthy' : 'healthy',activeSessions: activeSessions.length,runningExecutions,
         queuedExecutions,
         totalExecutionsToday: todayExecutions.length,
         successRateToday: Math.round(successRateToday),
@@ -651,42 +520,25 @@ export class BrowserTaskExecutionController {
 
       if (recentErrors.length > 0) {
         status.lastError = {
-          message: recentErrors[0].errorMessage ?? 'Unknown error',
-          timestamp: recentErrors[0].completedAt ?? recentErrors[0].startedAt,
-          executionId: recentErrors[0].executionId,
+          message: recentErrors[0].errorMessage ?? 'Unknown error',timestamp: recentErrors[0].completedAt ?? recentErrors[0].startedAt,executionId: recentErrors[0].executionId,
         };
       }
 
       return status;
 
     } catch (error: unknown) {
-      this.logger.error('Failed to get browser status', error);
-
-      throw new InternalServerErrorException({
-        message: 'Failed to retrieve browser service status',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error('Failed to get browser status', error);throw new InternalServerErrorException({message: 'Failed to retrieve browser service status',error: error instanceof Error ? error.message : String(error),});
     }
   }
 
   /**
    * Get execution queue status
    */
-  @Get('queue/status')
-  @ApiOperation({
-    summary: 'Get execution queue status',
-    description: 'Get detailed information about the execution queue and processing capacity.',
-  })
-  @ApiResponse({
+  @Get('queue/status')@ApiOperation({summary: 'Get execution queue status',description: 'Get detailed information about the execution queue and processing capacity.',})@ApiResponse({
     status: HttpStatus.OK,
-    description: 'Queue status retrieved',
-    type: ExecutionQueueStatusDto,
-  })
+    description: 'Queue status retrieved',type: ExecutionQueueStatusDto,})
   async getQueueStatus(): Promise<ExecutionQueueStatusDto> {
-    this.logger.log('Getting execution queue status');
-
-    const queuedItems = Array.from(this.queuedExecutions.values());
-    const activeExecutions = Array.from(this.executionMap.values()).filter(
+    this.logger.log('Getting execution queue status');const queuedItems = Array.from(this.queuedExecutions.values());const activeExecutions = Array.from(this.executionMap.values()).filter(
       e => e.status === BrowserExecutionStatus.EXECUTING || e.status === BrowserExecutionStatus.INITIALIZING
     );
 
@@ -712,14 +564,10 @@ export class BrowserTaskExecutionController {
     switch (executeDto.executionType) {
       case BrowserExecutionType.NAVIGATION:
         if (!executeDto.targetUrl) {
-          throw new BadRequestException('Target URL is required for navigation execution');
-        }
-        break;
+          throw new BadRequestException('Target URL is required for navigation execution');}break;
       case BrowserExecutionType.INTERACTION:
         if (!executeDto.selector && !executeDto.scriptCode) {
-          throw new BadRequestException('Selector or script code is required for interaction execution');
-        }
-        break;
+          throw new BadRequestException('Selector or script code is required for interaction execution');}break;
       case BrowserExecutionType.CUSTOM_SCRIPT:
         if (!executeDto.scriptCode) {
           throw new BadRequestException('Script code is required for custom script execution');
@@ -785,10 +633,7 @@ export class BrowserTaskExecutionController {
         success: false,
         errorMessage: error instanceof Error ? error.message : String(error),
         errorDetails: {
-          code: 'ASYNC_EXECUTION_ERROR',
-          type: error instanceof Error ? error.constructor.name : 'UnknownError',
-          stack: error instanceof Error ? error.stack : undefined,
-        },
+          code: 'ASYNC_EXECUTION_ERROR',type: error instanceof Error ? error.constructor.name : 'UnknownError',stack: error instanceof Error ? error.stack : undefined,},
       });
     } finally {
       // Remove from queued executions
@@ -814,9 +659,7 @@ export class BrowserTaskExecutionController {
           timestamp: new Date(),
           level: status === BrowserExecutionStatus.FAILED ? 'error' as const : 'info' as const,
           message: `Status updated to ${status}`,
-          category: 'system',
-          data: { status, ...updates },
-        },
+          category: 'system',data: { status, ...updates },},
       ],
     };
 
@@ -831,22 +674,13 @@ export class BrowserTaskExecutionController {
     switch (waitCondition.type) {
       case WaitType.ELEMENT:
         this.addLogToExecution(executionId, 'info', `Waiting for element: ${waitCondition.selector ?? 'unknown'}`);
-        return { success: true, element: 'found' };
-
-      case WaitType.TIMEOUT:
-        this.addLogToExecution(executionId, 'info', `Waiting for timeout: ${waitCondition.timeout ?? 0}ms`);
+        return { success: true, element: 'found' };case WaitType.TIMEOUT:this.addLogToExecution(executionId, 'info', `Waiting for timeout: ${waitCondition.timeout ?? 0}ms`);
         await new Promise(resolve => setTimeout(resolve, waitCondition.timeout ?? 0));
         return { success: true };
 
       case WaitType.NETWORK_IDLE:
-        this.addLogToExecution(executionId, 'info', 'Waiting for network idle');
-        return { success: true };
-
-      case WaitType.LOAD_STATE:
-        this.addLogToExecution(executionId, 'info', 'Waiting for load state');
-        return { success: true };
-
-      case WaitType.CUSTOM_CONDITION:
+        this.addLogToExecution(executionId, 'info', 'Waiting for network idle');return { success: true };case WaitType.LOAD_STATE:
+        this.addLogToExecution(executionId, 'info', 'Waiting for load state');return { success: true };case WaitType.CUSTOM_CONDITION:
         this.addLogToExecution(executionId, 'info', 'Waiting for custom condition');
         return { success: true, condition: waitCondition.condition };
 
@@ -855,9 +689,7 @@ export class BrowserTaskExecutionController {
     }
   }
 
-  private addLogToExecution(executionId: string, level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {
-    const execution = this.executionMap.get(executionId);
-    if (!execution) return;
+  private addLogToExecution(executionId: string, level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {const execution = this.executionMap.get(executionId);if (!execution) return;
 
     execution.logs.push({
       timestamp: new Date(),

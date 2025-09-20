@@ -23,12 +23,13 @@ import { Reflector } from '@nestjs/core';
 import { UserRole, Permission } from '@bytebot/shared';
 
 // UserRole and Permission are now imported from @bytebot/shared
-
 interface AuthenticatedUser {
   id: string;
   email: string;
-  role: UserRole;
-  permissions: Permission[];
+  rol,
+        e: UserRole;
+  permission,
+      s: Permission[];
 }
 
 // Type definitions for request and context
@@ -40,18 +41,15 @@ interface AuthenticatedRequest {
 
 // Mock RBAC Roles Guard implementation for Phase 1 requirements
 class MockRolesGuard {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflecto,
+      r: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      'roles',
-      [context.getHandler(), context.getClass()],
-    );
+      'roles',[context.getHandler(), context.getClass()],);
 
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
-      'permissions',
-      [context.getHandler(), context.getClass()],
-    );
+      'permissions',[context.getHandler(), context.getClass()],);
 
     // If no role or permission requirements, allow access
     if (!requiredRoles && !requiredPermissions) {
@@ -70,8 +68,8 @@ class MockRolesGuard {
       const hasRole = this.hasRequiredRole(user, requiredRoles);
       if (!hasRole) {
         throw new ForbiddenException(
-          `Access denied. Required roles: ${requiredRoles.join(', ')}`,
-        );
+          `Access denied. Required role,
+      s: ${requiredRoles.join(`, ')}',);
       }
     }
 
@@ -83,8 +81,8 @@ class MockRolesGuard {
       );
       if (!hasPermission) {
         throw new ForbiddenException(
-          `Access denied. Required permissions: ${requiredPermissions.join(', ')}`,
-        );
+          `Access denied. Required permission,
+      s: ${requiredPermissions.join(`, ')}',);
       }
     }
 
@@ -110,8 +108,10 @@ class MockRolesGuard {
     userRole: UserRole,
     requiredRoles: UserRole[],
   ): boolean {
-    // Role hierarchy: admin > operator > viewer
-    const roleHierarchy: Record<UserRole, UserRole[]> = {
+    // Role hierarch,
+        y: admin > operator > viewer
+    const roleHierarch,
+      y: Record<UserRole, UserRole[]> = {
       [UserRole._ADMIN]: [
         UserRole._ADMIN,
         UserRole._OPERATOR,
@@ -158,7 +158,8 @@ class MockRolesGuard {
 
   // Helper method for testing permission sets
   getRolePermissions(role: UserRole): Permission[] {
-    const rolePermissions: Record<UserRole, Permission[]> = {
+    const rolePermission,
+      s: Record<UserRole, Permission[]> = {
       [UserRole._ADMIN]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
@@ -180,8 +181,10 @@ class MockRolesGuard {
 }
 
 describe('RolesGuard', () => {
-  let guard: MockRolesGuard;
-  let reflector: Reflector;
+  let guar,
+        d: MockRolesGuard;
+  let reflecto,
+      r: Reflector;
 
   const operationId = `roles_guard_test${Date.now()}`;
 
@@ -189,12 +192,15 @@ describe('RolesGuard', () => {
   const createMockExecutionContext = (
     user?: AuthenticatedUser,
   ): ExecutionContext => {
-    const mockRequest: AuthenticatedRequest = { user };
+    const mockReques,
+      t: AuthenticatedRequest = { user };
 
     return {
       switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
-        getResponse: jest.fn().mockReturnValue({}),
+        getReques,
+        t: jest.fn().mockReturnValue(mockRequest),
+        getRespons,
+      e: jest.fn().mockReturnValue({}),
         getNext: jest.fn().mockReturnValue({}),
       }),
       getHandler: jest.fn(),
@@ -213,22 +219,25 @@ describe('RolesGuard', () => {
     permissions?: Permission[],
     overrides?: Partial<AuthenticatedUser>,
   ): AuthenticatedUser => ({
-    id: `user${Date.now()}`,
+    i,
+      d: `user${Date.now()}`,
     email: `${role}@bytebot.ai`,
     role,
     permissions: permissions ?? guard?.getRolePermissions(role) ?? [],
     ...overrides,
   });
 
-  beforeEach(async () => {
-    console.log(`[${operationId}] Setting up RolesGuard test module`);
-
-    const module: TestingModule = await Test.createTestingModule({
+    beforeEach(async () => {
+    console.log(
+    );
+      const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
           provide: Reflector,
-          useValue: {
-            getAllAndOverride: jest.fn(),
+          useValu,
+        e: {
+            getAllAndOverrid,
+      e: jest.fn(),
           },
         },
       ],
@@ -237,25 +246,22 @@ describe('RolesGuard', () => {
     reflector = module.get<Reflector>(Reflector);
     guard = new MockRolesGuard(reflector);
 
-    console.log(`[${operationId}] RolesGuard test setup completed`);
-  });
+    console.log(`[${operationId}] RolesGuard test setup completed`);});
 
-  afterEach(() => {
+    afterEach(() => {
     console.log(`[${operationId}] RolesGuard test cleanup completed`);
   });
 
-  describe('Basic Role Authorization', () => {
-    it('should allow access when no roles or permissions required', async () => {
-      const testId = `${operationId}_no_requirements`;
-      console.log(`[${testId}] Testing unrestricted access`);
+    describe('Basic Role Authorization', () => {it('should allow access when no roles or permissions required', async () => {
+      const testId = `${operationId}_no_requirements`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -264,9 +270,9 @@ describe('RolesGuard', () => {
     });
 
     it('should allow admin access to admin-only routes', async () => {
-      const testId = `${operationId}_admin_access`;
-      console.log(`[${testId}] Testing admin role access`);
+      const testId = `${operationId}_admin_access`;console.log(
 
+      );
       const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
@@ -276,23 +282,20 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(`[${testId}] Admin role access test completed successfully`);
     });
 
     it('should deny viewer access to admin-only routes', async () => {
-      const testId = `${operationId}_viewer_denied_admin`;
-      console.log(`[${testId}] Testing viewer access denial to admin routes`);
+      const testId = `${operationId}_viewer_denied_admin`;console.log(
 
+      );
       const viewerUser = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(viewerUser);
 
       jest
-        .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole._ADMIN]) // roles
-        .mockReturnValueOnce(undefined); // permissions
+        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]) // roles.mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new ForbiddenException('Access denied. Required roles: admin'),
@@ -302,9 +305,9 @@ describe('RolesGuard', () => {
     });
 
     it('should allow operator access to operator routes', async () => {
-      const testId = `${operationId}_operator_access`;
-      console.log(`[${testId}] Testing operator role access`);
+      const testId = `${operationId}_operator_access`;console.log(
 
+      );
       const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
@@ -314,7 +317,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -323,13 +325,10 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Role Hierarchy and Inheritance', () => {
-    it('should allow admin access to operator routes (role hierarchy)', async () => {
-      const testId = `${operationId}_admin_operator_hierarchy`;
-      console.log(
-        `[${testId}] Testing admin access to operator routes via hierarchy`,
-      );
+    describe('Role Hierarchy and Inheritance', () => {it('should allow admin access to operator routes (role hierarchy)', async () => {
+      const testId = `${operationId}_admin_operator_hierarchy`;console.log(
 
+      );
       const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
@@ -339,7 +338,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -348,11 +346,9 @@ describe('RolesGuard', () => {
     });
 
     it('should allow admin access to viewer routes (role hierarchy)', async () => {
-      const testId = `${operationId}_admin_viewer_hierarchy`;
-      console.log(
-        `[${testId}] Testing admin access to viewer routes via hierarchy`,
-      );
+      const testId = `${operationId}_admin_viewer_hierarchy`;console.log(
 
+      );
       const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
@@ -362,7 +358,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -371,11 +366,9 @@ describe('RolesGuard', () => {
     });
 
     it('should allow operator access to viewer routes (role hierarchy)', async () => {
-      const testId = `${operationId}_operator_viewer_hierarchy`;
-      console.log(
-        `[${testId}] Testing operator access to viewer routes via hierarchy`,
-      );
+      const testId = `${operationId}_operator_viewer_hierarchy`;console.log(
 
+      );
       const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
@@ -385,7 +378,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -394,9 +386,9 @@ describe('RolesGuard', () => {
     });
 
     it('should deny operator access to admin routes (no upward hierarchy)', async () => {
-      const testId = `${operationId}_operator_denied_admin`;
-      console.log(`[${testId}] Testing operator access denial to admin routes`);
+      const testId = `${operationId}_operator_denied_admin`;console.log(
 
+      );
       const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
@@ -413,19 +405,14 @@ describe('RolesGuard', () => {
     });
 
     it('should validate role hierarchy structure', () => {
-      const testId = `${operationId}_role_hierarchy_structure`;
-      console.log(`[${testId}] Testing role hierarchy structure`);
-
+      const testId = `${operationId}_role_hierarchy_structure`;console.log();
       const hierarchy = guard.getRoleHierarchy();
-
       expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._ADMIN);
       expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._OPERATOR);
       expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._VIEWER);
-
       expect(hierarchy[UserRole._OPERATOR]).toContain(UserRole._OPERATOR);
       expect(hierarchy[UserRole._OPERATOR]).toContain(UserRole._VIEWER);
       expect(hierarchy[UserRole._OPERATOR]).not.toContain(UserRole._ADMIN);
-
       expect(hierarchy[UserRole._VIEWER]).toContain(UserRole._VIEWER);
       expect(hierarchy[UserRole._VIEWER]).not.toContain(UserRole._OPERATOR);
       expect(hierarchy[UserRole._VIEWER]).not.toContain(UserRole._ADMIN);
@@ -434,11 +421,10 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Permission-Based Access Control', () => {
-    it('should allow access with exact permission match', async () => {
-      const testId = `${operationId}_exact_permission`;
-      console.log(`[${testId}] Testing exact permission match`);
+    describe('Permission-Based Access Control', () => {it('should allow access with exact permission match', async () => {
+      const testId = `${operationId}_exact_permission`;console.log(
 
+      );
       const user = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(user);
 
@@ -448,7 +434,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._TASK_READ]); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -457,16 +442,14 @@ describe('RolesGuard', () => {
     });
 
     it('should deny access without required permission', async () => {
-      const testId = `${operationId}_missing_permission`;
-      console.log(`[${testId}] Testing access denial for missing permission`);
+      const testId = `${operationId}_missing_permission`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER); // Only has TASK_READ
       const context = createMockExecutionContext(user);
 
       jest
-        .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce(undefined) // roles
-        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
+        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce(undefined) // roles.mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new ForbiddenException(
@@ -478,9 +461,9 @@ describe('RolesGuard', () => {
     });
 
     it('should require ALL specified permissions', async () => {
-      const testId = `${operationId}_multiple_permissions`;
-      console.log(`[${testId}] Testing multiple permission requirements`);
+      const testId = `${operationId}_multiple_permissions`;console.log(
 
+      );
       const user = createMockUser(UserRole._ADMIN); // Has all permissions
       const context = createMockExecutionContext(user);
 
@@ -493,7 +476,6 @@ describe('RolesGuard', () => {
         ]); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(
@@ -502,9 +484,9 @@ describe('RolesGuard', () => {
     });
 
     it('should deny access when missing any required permission', async () => {
-      const testId = `${operationId}_partial_permissions`;
-      console.log(`[${testId}] Testing partial permission denial`);
+      const testId = `${operationId}_partial_permissions`;console.log(
 
+      );
       const user = createMockUser(UserRole._OPERATOR); // Missing SYSTEM_ADMIN
       const context = createMockExecutionContext(user);
 
@@ -524,37 +506,30 @@ describe('RolesGuard', () => {
     });
 
     it('should validate default role permissions', () => {
-      const testId = `${operationId}_default_permissions`;
-      console.log(`[${testId}] Testing default role permission sets`);
-
-      const adminPermissions = guard.getRolePermissions(UserRole._ADMIN);
-      const operatorPermissions = guard.getRolePermissions(UserRole._OPERATOR);
+      const testId = `${operationId}_default_permissions`;console.log();
+      const adminPermissions = guard.getRolePermissions(UserRole._ADMIN);const operatorPermissions = guard.getRolePermissions(UserRole._OPERATOR);
       const viewerPermissions = guard.getRolePermissions(UserRole._VIEWER);
-
       expect(adminPermissions).toEqual([
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
         Permission._SYSTEM_ADMIN,
       ]);
-
       expect(operatorPermissions).toEqual([
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
       ]);
-
       expect(viewerPermissions).toEqual([Permission._TASK_READ]);
 
       console.log(`[${testId}] Default role permissions test completed`);
     });
   });
 
-  describe('Combined Role and Permission Checks', () => {
-    it('should allow access when both role and permission requirements are met', async () => {
-      const testId = `${operationId}_combined_access`;
-      console.log(`[${testId}] Testing combined role and permission access`);
+    describe('Combined Role and Permission Checks', () => {it('should allow access when both role and permission requirements are met', async () => {
+      const testId = `${operationId}_combined_access`;console.log(
 
+      );
       const user = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(user);
 
@@ -564,18 +539,15 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(`[${testId}] Combined access test completed successfully`);
     });
 
     it('should deny access when role is sufficient but permission is missing', async () => {
-      const testId = `${operationId}_role_ok_permission_fail`;
-      console.log(
-        `[${testId}] Testing role sufficient, permission insufficient`,
-      );
+      const testId = `${operationId}_role_ok_permission_fail`;console.log(
 
+      );
       const user = createMockUser(UserRole._OPERATOR, [Permission._TASK_READ]); // Custom limited permissions
       const context = createMockExecutionContext(user);
 
@@ -592,11 +564,9 @@ describe('RolesGuard', () => {
     });
 
     it('should deny access when permission is sufficient but role is missing', async () => {
-      const testId = `${operationId}_permission_ok_role_fail`;
-      console.log(
-        `[${testId}] Testing permission sufficient, role insufficient`,
-      );
+      const testId = `${operationId}_permission_ok_role_fail`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER, [Permission._SYSTEM_ADMIN]); // Custom elevated permissions
       const context = createMockExecutionContext(user);
 
@@ -613,17 +583,14 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Authentication Requirements', () => {
-    it('should deny access for unauthenticated users', async () => {
-      const testId = `${operationId}_unauthenticated`;
-      console.log(`[${testId}] Testing unauthenticated access denial`);
+    describe('Authentication Requirements', () => {it('should deny access for unauthenticated users', async () => {
+      const testId = `${operationId}_unauthenticated`;console.log(
 
+      );
       const context = createMockExecutionContext(); // No user
 
       jest
-        .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole._VIEWER]) // roles
-        .mockReturnValueOnce(undefined); // permissions
+        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._VIEWER]) // roles.mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new ForbiddenException('User authentication required'),
@@ -633,13 +600,12 @@ describe('RolesGuard', () => {
     });
 
     it('should deny access for users with invalid role', async () => {
-      const testId = `${operationId}_invalid_role`;
-      console.log(`[${testId}] Testing invalid role handling`);
+      const testId = `${operationId}_invalid_role`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER, [], {
-        role: 'invalid-role' as UserRole,
-      });
-      const context = createMockExecutionContext(user);
+        rol,
+      e: 'invalid-role' as UserRole,});const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
@@ -654,11 +620,12 @@ describe('RolesGuard', () => {
     });
 
     it('should handle users with null/undefined role', async () => {
-      const testId = `${operationId}_null_role`;
-      console.log(`[${testId}] Testing null role handling`);
+      const testId = `${operationId}_null_role`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER, [], {
-        role: null as unknown as UserRole,
+        rol,
+      e: null as unknown as UserRole,
       });
       const context = createMockExecutionContext(user);
 
@@ -675,9 +642,9 @@ describe('RolesGuard', () => {
     });
 
     it('should handle users with null/undefined permissions', async () => {
-      const testId = `${operationId}_null_permissions`;
-      console.log(`[${testId}] Testing null permissions handling`);
+      const testId = `${operationId}_null_permissions`;console.log(
 
+      );
       const user = createMockUser(
         UserRole._OPERATOR,
         undefined as Permission[] | undefined,
@@ -697,11 +664,10 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Performance & Reliability', () => {
-    it('should complete authorization within performance threshold', async () => {
-      const testId = `${operationId}_performance_threshold`;
-      console.log(`[${testId}] Testing authorization performance threshold`);
+    describe('Performance & Reliability', () => {it('should complete authorization within performance threshold', async () => {
+      const testId = `${operationId}_performance_threshold`;console.log(
 
+      );
       const user = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(user);
 
@@ -723,14 +689,12 @@ describe('RolesGuard', () => {
     });
 
     it('should handle concurrent authorization requests', async () => {
-      const testId = `${operationId}_concurrent_authorization`;
-      console.log(`[${testId}] Testing concurrent authorization requests`);
-
-      const users = Array(20)
-        .fill(null)
+      const testId = `${operationId}_concurrent_authorization`;console.log();
+      const users = Array(20).fill(null)
         .map((_, _i) =>
           createMockUser(UserRole._OPERATOR, [], {
-            id: `concurrent_user${_i}`,
+            i,
+      d: `concurrent_user${_i}`,
           }),
         );
 
@@ -744,7 +708,6 @@ describe('RolesGuard', () => {
       });
 
       const results = await Promise.all(promises);
-
       expect(results.every((result) => result === true)).toBe(true);
 
       console.log(
@@ -753,9 +716,9 @@ describe('RolesGuard', () => {
     });
 
     it('should handle high-frequency authorization checks', async () => {
-      const testId = `${operationId}_high_frequency`;
-      console.log(`[${testId}] Testing high-frequency authorization checks`);
+      const testId = `${operationId}_high_frequency`;console.log(
 
+      );
       const user = createMockUser(UserRole._ADMIN);
 
       jest
@@ -782,30 +745,37 @@ describe('RolesGuard', () => {
     });
 
     it('should maintain consistent behavior under load', async () => {
-      const testId = `${operationId}_load_consistency`;
-      console.log(`[${testId}] Testing authorization consistency under load`);
+      const testId = `${operationId}_load_consistency`;console.log(`[${testId}] Testing authorization consistency under load`);
 
       // Mix of different users and access patterns
       const testCases = [
         {
           user: createMockUser(UserRole._ADMIN),
-          roles: [UserRole._ADMIN],
-          shouldPass: true,
+          role,
+        s: [UserRole._ADMIN],
+          shouldPas,
+      s: true,
         },
         {
           user: createMockUser(UserRole._OPERATOR),
-          roles: [UserRole._ADMIN],
-          shouldPass: false,
+          role,
+        s: [UserRole._ADMIN],
+          shouldPas,
+      s: false,
         },
         {
           user: createMockUser(UserRole._VIEWER),
-          roles: [UserRole._VIEWER],
-          shouldPass: true,
+          role,
+        s: [UserRole._VIEWER],
+          shouldPas,
+      s: true,
         },
         {
           user: createMockUser(UserRole._ADMIN),
-          roles: [UserRole._VIEWER],
-          shouldPass: true,
+          role,
+        s: [UserRole._VIEWER],
+          shouldPas,
+      s: true,
         },
       ];
 
@@ -821,9 +791,13 @@ describe('RolesGuard', () => {
 
             try {
               const result = await guard.canActivate(context);
-              return { success: result, expected: testCase.shouldPass };
+              return { succes,
+        s: result, expecte,
+      d: testCase.shouldPass };
             } catch (_error) {
-              return { success: false, expected: testCase.shouldPass };
+              return { succes,
+        s: false, expecte,
+      d: testCase.shouldPass };
             }
           }),
       );
@@ -840,10 +814,8 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Edge Cases and Error Scenarios', () => {
-    it('should handle multiple role requirements (OR logic)', async () => {
-      const testId = `${operationId}_multiple_roles`;
-      console.log(`[${testId}] Testing multiple role requirements (OR logic)`);
+    describe('Edge Cases and Error Scenarios', () => {it('should handle multiple role requirements (OR logic)', async () => {
+      const testId = `${operationId}_multiple_roles`;console.log(`[${testId}] Testing multiple role requirements (OR logic)`);
 
       const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
@@ -854,7 +826,6 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true); // Should pass because user is OPERATOR
 
       console.log(
@@ -863,9 +834,9 @@ describe('RolesGuard', () => {
     });
 
     it('should handle empty role and permission arrays', async () => {
-      const testId = `${operationId}_empty_arrays`;
-      console.log(`[${testId}] Testing empty role and permission arrays`);
+      const testId = `${operationId}_empty_arrays`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
@@ -875,19 +846,17 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([]); // Empty permissions array
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true); // Should allow access when arrays are empty
 
       console.log(`[${testId}] Empty arrays test completed successfully`);
     });
 
     it('should handle malformed user objects', async () => {
-      const testId = `${operationId}_malformed_user`;
-      console.log(`[${testId}] Testing malformed user object handling`);
+      const testId = `${operationId}_malformed_user`;console.log(
 
-      const malformedUser = { invalid: 'user' } as unknown as
-        | AuthenticatedUser
-        | undefined;
+      );
+      const malformedUser = { invali,
+      d: 'user' } as unknown as| AuthenticatedUser| undefined;
       const context = createMockExecutionContext(malformedUser);
 
       jest
@@ -903,30 +872,23 @@ describe('RolesGuard', () => {
     });
 
     it('should provide detailed _error messages for debugging', async () => {
-      const testId = `${operationId}_detailed_errors`;
-      console.log(`[${testId}] Testing detailed error messages`);
+      const testId = `${operationId}_detailed_errors`;console.log(
 
+      );
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
       jest
-        .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole._ADMIN, UserRole._OPERATOR])
-        .mockReturnValueOnce([
+        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN, UserRole._OPERATOR]).mockReturnValueOnce([
           Permission._SYSTEM_ADMIN,
           Permission._COMPUTER_CONTROL,
         ]);
 
       try {
         await guard.canActivate(context);
-        fail('Expected ForbiddenException');
-      } catch (error: unknown) {
-        // Type guard for Error-like objects with message property
-        if (error && typeof error === 'object' && 'message' in error) {
-          expect((error as { message: string }).message).toContain(
-            'admin, operator',
-          );
-        } else {
+        fail('Expected ForbiddenException');} catch (error: unknown) {// Type guard for Error-like objects with message property
+        if (error && typeof error === 'object' && 'message' in error) {expect((error as { messag,
+      e: string }).message).toContain('admin, operator',);} else {
           throw new Error('Expected error with message property');
         }
       }
@@ -935,26 +897,22 @@ describe('RolesGuard', () => {
     });
   });
 
-  describe('Security Validation', () => {
-    it('should prevent role elevation attacks', async () => {
-      const testId = `${operationId}_role_elevation`;
-      console.log(`[${testId}] Testing role elevation attack prevention`);
+    describe('Security Validation', () => {it('should prevent role elevation attacks', async () => {
+      const testId = `${operationId}_role_elevation`;console.log(`[${testId}] Testing role elevation attack prevention`);
 
       // Simulate an attack where user manipulates their role
       const maliciousUser = createMockUser(UserRole._VIEWER, [], {
-        role: UserRole._ADMIN,
+        rol,
+      e: UserRole._ADMIN,
       });
       const context = createMockExecutionContext(maliciousUser);
 
       jest
-        .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole._ADMIN])
-        .mockReturnValueOnce(undefined);
+        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]).mockReturnValueOnce(undefined);
 
       // This should still pass because we're testing the guard logic itself
       // In real implementation, token validation would prevent this
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true); // Guard trusts the authenticated user object
 
       console.log(
@@ -963,13 +921,12 @@ describe('RolesGuard', () => {
     });
 
     it('should validate role case sensitivity', async () => {
-      const testId = `${operationId}_case_sensitivity`;
-      console.log(`[${testId}] Testing role case sensitivity`);
+      const testId = `${operationId}_case_sensitivity`;console.log(
 
+      );
       const user = createMockUser(UserRole._ADMIN, [], {
-        role: 'ADMIN' as UserRole,
-      });
-      const context = createMockExecutionContext(user);
+        rol,
+      e: 'ADMIN' as UserRole,});const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
@@ -977,15 +934,13 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined);
 
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(`[${testId}] Case sensitivity test completed`);
     });
 
     it('should handle permission spoofing attempts', async () => {
-      const testId = `${operationId}_permission_spoofing`;
-      console.log(`[${testId}] Testing permission spoofing prevention`);
+      const testId = `${operationId}_permission_spoofing`;console.log(`[${testId}] Testing permission spoofing prevention`);
 
       // User with viewer role but admin permissions (inconsistent state)
       const spoofedUser = createMockUser(UserRole._VIEWER, [
@@ -1000,7 +955,6 @@ describe('RolesGuard', () => {
 
       // Guard should allow this based on permissions, regardless of role
       const result = await guard.canActivate(context);
-
       expect(result).toBe(true);
 
       console.log(`[${testId}] Permission spoofing test completed`);

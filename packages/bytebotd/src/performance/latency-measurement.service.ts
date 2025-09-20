@@ -26,32 +26,11 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as WebSocket from 'ws';
-import { performance } from 'perf_hooks';
-import { Worker as _Worker, isMainThread as _isMainThread, parentPort as _parentPort, workerData as _workerData } from 'worker_threads';
-import * as crypto from 'crypto';
-
-// ===== LATENCY MEASUREMENT TYPES =====
-
-/**
+} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as WebSocket from 'ws';import { performance } from 'perf_hooks';import { Worker as _Worker, isMainThread as _isMainThread, parentPort as _parentPort, workerData as _workerData } from 'worker_threads';import * as crypto from 'crypto';// ===== LATENCY MEASUREMENT TYPES =====/**
  * Latency measurement test types
  */
 export enum LatencyTestType {
-  BASELINE_LATENCY = 'baseline_latency',
-  ROUND_TRIP_TIME = 'round_trip_time',
-  VARIABLE_PAYLOAD = 'variable_payload_latency',
-  CONNECTION_WARMUP = 'connection_warmup_latency',
-  SUSTAINED_LATENCY = 'sustained_latency',
-  BURST_LATENCY = 'burst_latency_impact',
-  NETWORK_LATENCY = 'network_latency_analysis',
-  APPLICATION_LATENCY = 'application_latency_analysis',
-  PARLANT_VALIDATION_LATENCY = 'parlant_validation_latency',
-}
-
-/**
+  BASELINE_LATENCY = 'baseline_latency',ROUND_TRIP_TIME = 'round_trip_time',VARIABLE_PAYLOAD = 'variable_payload_latency',CONNECTION_WARMUP = 'connection_warmup_latency',SUSTAINED_LATENCY = 'sustained_latency',BURST_LATENCY = 'burst_latency_impact',NETWORK_LATENCY = 'network_latency_analysis',APPLICATION_LATENCY = 'application_latency_analysis',PARLANT_VALIDATION_LATENCY = 'parlant_validation_latency',}/**
  * Latency measurement configuration
  */
 export interface LatencyMeasurementConfig {
@@ -65,10 +44,7 @@ export interface LatencyMeasurementConfig {
 
   // Message configuration
   payloadSize: number;           // Message payload size in bytes
-  messagePattern: 'sequential' | 'random' | 'echo' | 'ping_pong';
-
-  // Latency targets and thresholds
-  targets: {
+  messagePattern: 'sequential' | 'random' | 'echo' | 'ping_pong';// Latency targets and thresholdstargets: {
     p50: number;                 // Target P50 latency (ms)
     p95: number;                 // Target P95 latency (ms) - PRIMARY: 50ms
     p99: number;                 // Target P99 latency (ms)
@@ -84,9 +60,7 @@ export interface LatencyMeasurementConfig {
   // Validation settings (for PARLANT integration testing)
   validationConfig?: {
     enableValidation: boolean;
-    validationComplexity: 'low' | 'medium' | 'high';
-    cacheEnabled: boolean;
-    validationTimeout: number;
+    validationComplexity: 'low' | 'medium' | 'high';cacheEnabled: boolean;validationTimeout: number;
   };
 }
 
@@ -194,11 +168,7 @@ export interface LatencyTestResults {
   insights: {
     bottlenecks: LatencyBottleneck[];
     optimizationRecommendations: string[];
-    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    latencyProfile: 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable';
-  };
-
-  // Raw measurement data
+    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';latencyProfile: 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable';};// Raw measurement data
   measurements: LatencyMeasurement[];
 
   // Comparative analysis
@@ -221,10 +191,7 @@ export interface LatencyTestResults {
  * Latency bottleneck identification
  */
 export interface LatencyBottleneck {
-  type: 'network' | 'server' | 'client' | 'connection' | 'validation';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  impact: number;                // Impact on overall latency (ms)
+  type: 'network' | 'server' | 'client' | 'connection' | 'validation';severity: 'low' | 'medium' | 'high' | 'critical';description: string;impact: number;                // Impact on overall latency (ms)
   frequency: number;             // How often this bottleneck occurs (%)
   recommendation: string;
 }
@@ -281,14 +248,8 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 WebSocket Latency Measurement Service initializing...');
-  }
-
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing WebSocket Latency Measurement Framework');
-
-    // Initialize alert thresholds
-    this.initializeAlertThresholds();
+    this.logger.log('🚀 WebSocket Latency Measurement Service initializing...');}async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing WebSocket Latency Measurement Framework');// Initialize alert thresholdsthis.initializeAlertThresholds();
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
@@ -296,42 +257,28 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     // Load baseline results
     await this.loadBaselineResults();
 
-    this.logger.log('✅ WebSocket Latency Measurement Framework ready');
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down WebSocket Latency Measurement Framework');
-
-    // Stop all active tests
-    for (const testId of this.activeTests.keys()) {
+    this.logger.log('✅ WebSocket Latency Measurement Framework ready');}async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down WebSocket Latency Measurement Framework');// Stop all active testsfor (const testId of this.activeTests.keys()) {
       await this.stopLatencyTest(testId);
     }
 
     // Stop monitoring
     this.stopRealTimeMonitoring();
 
-    this.logger.log('✅ WebSocket Latency Measurement Framework shutdown complete');
-  }
-
-  // ===== BASELINE LATENCY TESTING =====
+    this.logger.log('✅ WebSocket Latency Measurement Framework shutdown complete');}// ===== BASELINE LATENCY TESTING =====
 
   /**
    * Execute baseline latency test with standard parameters
    * TARGET: Establish sub-50ms P95 baseline performance
    */
   async executeBaselineLatencyTest(): Promise<LatencyTestResults> {
-    this.logger.log('🧪 Starting baseline latency test (target: <50ms P95)');
-
-    const config: LatencyMeasurementConfig = {
-      testType: LatencyTestType.BASELINE_LATENCY,
+    this.logger.log('🧪 Starting baseline latency test (target: <50ms P95)');const config: LatencyMeasurementConfig = {testType: LatencyTestType.BASELINE_LATENCY,
       duration: 120000,            // 2 minutes
       messageCount: 2000,          // 2000 messages for statistical significance
       concurrentConnections: 50,
       messageInterval: 30,         // 30ms interval between messages
       payloadSize: 1024,           // 1KB standard payload
-      messagePattern: 'ping_pong',
-      targets: {
-        p50: 25,                   // Target P50: 25ms
+      messagePattern: 'ping_pong',targets: {p50: 25,                   // Target P50: 25ms
         p95: this.LATENCY_TARGETS.TARGET_P95,    // Primary target: 50ms
         p99: this.LATENCY_TARGETS.TARGET_P99,    // Target P99: 100ms
         p999: 200,                 // Target P99.9: 200ms
@@ -342,10 +289,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 3,
     };
 
-    const results = await this.executeLatencyTest('baseline', config);
-
-    // Store as baseline for future comparisons
-    this.baselineResults = results;
+    const results = await this.executeLatencyTest('baseline', config);// Store as baseline for future comparisonsthis.baselineResults = results;
 
     this.logLatencyResults(results);
     return results;
@@ -355,18 +299,13 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    * Execute round-trip time measurement
    */
   async executeRoundTripTimeTest(): Promise<LatencyTestResults> {
-    this.logger.log('🔄 Starting round-trip time measurement test');
-
-    const config: LatencyMeasurementConfig = {
-      testType: LatencyTestType.ROUND_TRIP_TIME,
+    this.logger.log('🔄 Starting round-trip time measurement test');const config: LatencyMeasurementConfig = {testType: LatencyTestType.ROUND_TRIP_TIME,
       duration: 60000,             // 1 minute
       messageCount: 1000,
       concurrentConnections: 20,
       messageInterval: 50,         // 50ms interval for precise measurement
       payloadSize: 64,             // Minimal payload for pure RTT
-      messagePattern: 'echo',      // Echo pattern for exact RTT
-      targets: {
-        p50: 20,
+      messagePattern: 'echo',      // Echo pattern for exact RTTtargets: {p50: 20,
         p95: 40,                   // Tighter target for RTT
         p99: 80,
         p999: 150,
@@ -377,10 +316,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
     };
 
-    return await this.executeLatencyTest('rtt', config);
-  }
-
-  /**
+    return await this.executeLatencyTest('rtt', config);}/**
    * Execute variable payload latency testing
    */
   async executeVariablePayloadLatencyTest(): Promise<Map<number, LatencyTestResults>> {
@@ -412,13 +348,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
         retryAttempts: 2,
       };
 
-      const result = await this.executeLatencyTest(`payload_${payloadSize}`, config);
-      results.set(payloadSize, result);
-
-      this.logger.log(`Payload ${payloadSize}B - P95: ${result.statistics.p95.toFixed(2)}ms`);
-    }
-
-    this.analyzePayloadLatencyImpact(results);
+      const result = await this.executeLatencyTest(`payload_${payloadSize}`, config);results.set(payloadSize, result);this.logger.log(`Payload ${payloadSize}B - P95: ${result.statistics.p95.toFixed(2)}ms`);}this.analyzePayloadLatencyImpact(results);
     return results;
   }
 
@@ -437,9 +367,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       concurrentConnections: 100,
       messageInterval: 60,         // 60ms interval for sustained testing
       payloadSize: 1024,
-      messagePattern: 'ping_pong',
-      targets: {
-        p50: 30,
+      messagePattern: 'ping_pong',targets: {p50: 30,
         p95: this.LATENCY_TARGETS.TARGET_P95,
         p99: this.LATENCY_TARGETS.TARGET_P99,
         p999: 250,
@@ -450,25 +378,17 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 3,
     };
 
-    return await this.executeLatencyTest('sustained', config);
-  }
-
-  /**
+    return await this.executeLatencyTest('sustained', config);}/**
    * Execute burst latency impact test
    */
   async executeBurstLatencyImpactTest(): Promise<LatencyTestResults> {
-    this.logger.log('💥 Starting burst latency impact test');
-
-    const config: LatencyMeasurementConfig = {
-      testType: LatencyTestType.BURST_LATENCY,
+    this.logger.log('💥 Starting burst latency impact test');const config: LatencyMeasurementConfig = {testType: LatencyTestType.BURST_LATENCY,
       duration: 180000,            // 3 minutes
       messageCount: 3000,
       concurrentConnections: 200,  // High connection count for burst testing
       messageInterval: 10,         // High frequency bursts
       payloadSize: 512,
-      messagePattern: 'ping_pong',
-      targets: {
-        p50: 40,                   // Higher targets during burst conditions
+      messagePattern: 'ping_pong',targets: {p50: 40,                   // Higher targets during burst conditions
         p95: 80,
         p99: 150,
         p999: 300,
@@ -479,10 +399,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
     };
 
-    return await this.executeLatencyTest('burst', config);
-  }
-
-  // ===== PARLANT VALIDATION LATENCY TESTING =====
+    return await this.executeLatencyTest('burst', config);}// ===== PARLANT VALIDATION LATENCY TESTING =====
 
   /**
    * Execute PARLANT validation latency impact test
@@ -497,19 +414,14 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       recommendations: string[];
     };
   }> {
-    this.logger.log('🔍 Starting PARLANT validation latency impact analysis');
-
-    // Test without validation
-    const baseConfig: LatencyMeasurementConfig = {
+    this.logger.log('🔍 Starting PARLANT validation latency impact analysis');// Test without validationconst baseConfig: LatencyMeasurementConfig = {
       testType: LatencyTestType.PARLANT_VALIDATION_LATENCY,
       duration: 120000,
       messageCount: 1000,
       concurrentConnections: 50,
       messageInterval: 100,
       payloadSize: 2048,
-      messagePattern: 'ping_pong',
-      targets: {
-        p50: 25,
+      messagePattern: 'ping_pong',targets: {p50: 25,
         p95: this.LATENCY_TARGETS.TARGET_P95,
         p99: this.LATENCY_TARGETS.TARGET_P99,
         p999: 200,
@@ -520,22 +432,15 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
       validationConfig: {
         enableValidation: false,
-        validationComplexity: 'low',
-        cacheEnabled: false,
-        validationTimeout: 1000,
+        validationComplexity: 'low',cacheEnabled: false,validationTimeout: 1000,
       },
     };
 
-    const withoutValidation = await this.executeLatencyTest('no_validation', baseConfig);
-
-    // Test with validation enabled
-    const validationConfig = {
+    const withoutValidation = await this.executeLatencyTest('no_validation', baseConfig);// Test with validation enabledconst validationConfig = {
       ...baseConfig,
       validationConfig: {
         enableValidation: true,
-        validationComplexity: 'medium' as const,
-        cacheEnabled: true,
-        validationTimeout: 2000,
+        validationComplexity: 'medium' as const,cacheEnabled: true,validationTimeout: 2000,
       },
     };
 
@@ -556,13 +461,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       ),
     };
 
-    this.logger.log(`📊 PARLANT Validation Impact:`);
-    this.logger.log(`   Latency Increase: +${latencyIncrease.toFixed(2)}ms`);
-    this.logger.log(`   Percentage Increase: +${percentageIncrease.toFixed(1)}%`);
-    this.logger.log(`   P95 Impact: +${p95Impact.toFixed(2)}ms`);
-
-    return {
-      withoutValidation,
+    this.logger.log(`📊 PARLANT Validation Impact:`);this.logger.log(`   Latency Increase: +${latencyIncrease.toFixed(2)}ms`);this.logger.log(`   Percentage Increase: +${percentageIncrease.toFixed(1)}%`);this.logger.log(`   P95 Impact: +${p95Impact.toFixed(2)}ms`);return {withoutValidation,
       withValidation,
       impactAnalysis,
     };
@@ -578,11 +477,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     config: LatencyMeasurementConfig
   ): Promise<LatencyTestResults> {
     const fullTestId = this.generateTestId(testId);
-    this.logger.log(`🧪 Executing latency test: ${fullTestId}`);
-
-    this.activeTests.set(fullTestId, config);
-
-    const startTime = new Date();
+    this.logger.log(`🧪 Executing latency test: ${fullTestId}`);this.activeTests.set(fullTestId, config);const startTime = new Date();
     const measurements: LatencyMeasurement[] = [];
 
     try {
@@ -613,13 +508,8 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       // Store results
       this.testResults.set(fullTestId, results);
 
-      this.logger.log(`✅ Latency test completed: ${fullTestId}`);
-      return results;
-
-    } catch (error) {
-      this.logger.error(`❌ Latency test failed: ${fullTestId}`, error.stack);
-      throw error;
-    } finally {
+      this.logger.log(`✅ Latency test completed: ${fullTestId}`);return results;} catch (error) {
+      this.logger.error(`❌ Latency test failed: ${fullTestId}`, error.stack);throw error;} finally {
       this.activeTests.delete(fullTestId);
     }
   }
@@ -641,20 +531,14 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
           reject(new Error(`Connection timeout for connection ${i}`));
         }, 5000);
 
-        ws.on('open', () => {
-          clearTimeout(timeout);
-          resolve(ws);
+        ws.on('open', () => {clearTimeout(timeout);resolve(ws);
         });
 
-        ws.on('error', (error) => {
-          clearTimeout(timeout);
-          reject(error);
+        ws.on('error', (error) => {clearTimeout(timeout);reject(error);
         });
 
         // Setup message handling for latency measurement
-        ws.on('message', (data) => {
-          this.handleLatencyResponse(data, ws);
-        });
+        ws.on('message', (data) => {this.handleLatencyResponse(data, ws);});
       });
 
       connectPromises.push(connectPromise);
@@ -666,13 +550,9 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       if (result.status === 'fulfilled') {
         connections.push(result.value);
       } else {
-        this.logger.warn(`Failed to create connection ${index}: ${result.reason}`);
-      }
-    });
+        this.logger.warn(`Failed to create connection ${index}: ${result.reason}`);}});
 
-    this.logger.log(`Created ${connections.length}/${config.concurrentConnections} connections`);
-    return connections;
-  }
+    this.logger.log(`Created ${connections.length}/${config.concurrentConnections} connections`);return connections;}
 
   /**
    * Execute measurement phase
@@ -711,13 +591,9 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       if (result.status === 'fulfilled') {
         measurements.push(result.value);
       } else {
-        this.logger.warn(`Measurement ${index} failed: ${result.reason}`);
-      }
-    });
+        this.logger.warn(`Measurement ${index} failed: ${result.reason}`);}});
 
-    this.logger.log(`Completed ${measurements.length}/${config.messageCount} measurements`);
-    return measurements;
-  }
+    this.logger.log(`Completed ${measurements.length}/${config.messageCount} measurements`);return measurements;}
 
   /**
    * Send latency measurement message
@@ -753,9 +629,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
 
       const message = JSON.stringify({
         id: messageId,
-        type: 'latency_test',
-        payload,
-        timestamp: sentTimestamp,
+        type: 'latency_test',payload,timestamp: sentTimestamp,
       });
 
       connection.send(message, (error) => {
@@ -767,9 +641,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       });
 
       // Setup response handler
-      const originalHandler = connection.listeners('message')[0] as any;
-      const responseHandler = (data: Buffer) => {
-        try {
+      const originalHandler = connection.listeners('message')[0] as any;const responseHandler = (data: Buffer) => {try {
           const response = JSON.parse(data.toString());
 
           if (response.id === messageId) {
@@ -797,9 +669,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
         }
       };
 
-      connection.once('message', responseHandler);
-    });
-  }
+      connection.once('message', responseHandler);});}
 
   /**
    * Handle latency response message
@@ -808,10 +678,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     try {
       const response = JSON.parse(data.toString());
 
-      if (response.type === 'latency_response' && response.id) {
-        const pendingMeasurement = this.pendingMeasurements.get(response.id);
-
-        if (pendingMeasurement) {
+      if (response.type === 'latency_response' && response.id) {const pendingMeasurement = this.pendingMeasurements.get(response.id);if (pendingMeasurement) {
           const receivedTimestamp = performance.now();
           const latency = receivedTimestamp - pendingMeasurement.sentTimestamp;
 
@@ -896,10 +763,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     const latencies = successfulMeasurements.map(m => m.latency).sort((a, b) => a - b);
 
     if (latencies.length === 0) {
-      throw new Error('No successful latency measurements');
-    }
-
-    // Calculate percentiles
+      throw new Error('No successful latency measurements');}// Calculate percentiles
     const p50 = this.calculatePercentile(latencies, 50);
     const p90 = this.calculatePercentile(latencies, 90);
     const p95 = this.calculatePercentile(latencies, 95);
@@ -919,11 +783,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     // Calculate reliability metrics
     const reliability = {
       successRate: (successfulMeasurements.length / measurements.length) * 100,
-      timeoutRate: (measurements.filter(m => !m.success && m.errorReason === 'timeout').length / measurements.length) * 100,
-      errorRate: (measurements.filter(m => !m.success && m.errorReason !== 'timeout').length / measurements.length) * 100,
-    };
-
-    // Calculate trends
+      timeoutRate: (measurements.filter(m => !m.success && m.errorReason === 'timeout').length / measurements.length) * 100,errorRate: (measurements.filter(m => !m.success && m.errorReason !== 'timeout').length / measurements.length) * 100,};// Calculate trends
     const trends = this.calculateLatencyTrends(latencies);
 
     return {
@@ -966,16 +826,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    */
   private calculateDistribution(latencies: number[]) {
     const buckets: LatencyBucket[] = [
-      { range: '0-10ms', count: 0, percentage: 0, minLatency: 0, maxLatency: 10 },
-      { range: '10-25ms', count: 0, percentage: 0, minLatency: 10, maxLatency: 25 },
-      { range: '25-50ms', count: 0, percentage: 0, minLatency: 25, maxLatency: 50 },
-      { range: '50-100ms', count: 0, percentage: 0, minLatency: 50, maxLatency: 100 },
-      { range: '100-250ms', count: 0, percentage: 0, minLatency: 100, maxLatency: 250 },
-      { range: '250-500ms', count: 0, percentage: 0, minLatency: 250, maxLatency: 500 },
-      { range: '500ms+', count: 0, percentage: 0, minLatency: 500, maxLatency: Infinity },
-    ];
-
-    // Count latencies in each bucket
+      { range: '0-10ms', count: 0, percentage: 0, minLatency: 0, maxLatency: 10 },{ range: '10-25ms', count: 0, percentage: 0, minLatency: 10, maxLatency: 25 },{ range: '25-50ms', count: 0, percentage: 0, minLatency: 25, maxLatency: 50 },{ range: '50-100ms', count: 0, percentage: 0, minLatency: 50, maxLatency: 100 },{ range: '100-250ms', count: 0, percentage: 0, minLatency: 100, maxLatency: 250 },{ range: '250-500ms', count: 0, percentage: 0, minLatency: 250, maxLatency: 500 },{ range: '500ms+', count: 0, percentage: 0, minLatency: 500, maxLatency: Infinity },];// Count latencies in each bucket
     latencies.forEach(latency => {
       for (const bucket of buckets) {
         if (latency >= bucket.minLatency && latency < bucket.maxLatency) {
@@ -1021,34 +872,24 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
         description: `P95 latency (${statistics.p95.toFixed(2)}ms) exceeds target (${this.LATENCY_TARGETS.TARGET_P95}ms)`,
         impact: statistics.p95 - this.LATENCY_TARGETS.TARGET_P95,
         frequency: 95,
-        recommendation: severity === 'critical' ? 'Immediate optimization required' : 'Consider performance optimization',
-      });
-    }
+        recommendation: severity === 'critical' ? 'Immediate optimization required' : 'Consider performance optimization',});}
 
     // High variability analysis
     const coefficientOfVariation = (statistics.standardDeviation / statistics.mean) * 100;
     if (coefficientOfVariation > 50) {
       bottlenecks.push({
-        type: 'network',
-        severity: coefficientOfVariation > 100 ? 'high' : 'medium',
+        type: 'network',severity: coefficientOfVariation > 100 ? 'high' : 'medium',
         description: `High latency variability (CV: ${coefficientOfVariation.toFixed(1)}%)`,
         impact: statistics.standardDeviation,
         frequency: 50,
-        recommendation: 'Investigate network stability and connection quality',
-      });
-    }
+        recommendation: 'Investigate network stability and connection quality',});}
 
     // Error rate analysis
     if (statistics.reliability.errorRate > 1) {
       bottlenecks.push({
-        type: 'connection',
-        severity: statistics.reliability.errorRate > 5 ? 'high' : 'medium',
+        type: 'connection',severity: statistics.reliability.errorRate > 5 ? 'high' : 'medium',
         description: `High error rate (${statistics.reliability.errorRate.toFixed(1)}%)`,
-        impact: 0, // Errors don't contribute to latency but affect reliability
-        frequency: statistics.reliability.errorRate,
-        recommendation: 'Improve connection stability and error handling',
-      });
-    }
+        impact: 0, // Errors don't contribute to latency but affect reliabilityfrequency: statistics.reliability.errorRate,recommendation: 'Improve connection stability and error handling',});}
 
     return bottlenecks;
   }
@@ -1065,20 +906,11 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
 
     // P95 analysis
     if (statistics.p95 > this.LATENCY_TARGETS.TARGET_P95) {
-      optimizationRecommendations.push('Optimize server-side processing to reduce P95 latency');
-    }
-
-    // Variability analysis
+      optimizationRecommendations.push('Optimize server-side processing to reduce P95 latency');}// Variability analysis
     if (statistics.standardDeviation > 25) {
-      optimizationRecommendations.push('Reduce latency variability through connection pooling');
-    }
-
-    // High percentile analysis
+      optimizationRecommendations.push('Reduce latency variability through connection pooling');}// High percentile analysis
     if (statistics.p99 > statistics.p95 * 2) {
-      optimizationRecommendations.push('Investigate and fix outlier latencies affecting P99');
-    }
-
-    // Performance grading
+      optimizationRecommendations.push('Investigate and fix outlier latencies affecting P99');}// Performance grading
     const performanceGrade = this.calculatePerformanceGrade(statistics.p95);
     const latencyProfile = this.determineLatencyProfile(statistics);
 
@@ -1106,37 +938,13 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
   /**
    * Determine latency severity
    */
-  private determineLatencySeverity(latency: number): 'low' | 'medium' | 'high' | 'critical' {
-    if (latency <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'low';
-    if (latency <= this.LATENCY_TARGETS.TARGET_P95) return 'low';
-    if (latency <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'medium';
-    if (latency <= this.LATENCY_TARGETS.POOR_P95) return 'high';
-    return 'critical';
-  }
-
-  /**
+  private determineLatencySeverity(latency: number): 'low' | 'medium' | 'high' | 'critical' {if (latency <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'low';if (latency <= this.LATENCY_TARGETS.TARGET_P95) return 'low';if (latency <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'medium';if (latency <= this.LATENCY_TARGETS.POOR_P95) return 'high';return 'critical';}/**
    * Calculate performance grade
    */
-  private calculatePerformanceGrade(p95Latency: number): 'A' | 'B' | 'C' | 'D' | 'F' {
-    if (p95Latency <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'A';
-    if (p95Latency <= this.LATENCY_TARGETS.TARGET_P95) return 'B';
-    if (p95Latency <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'C';
-    if (p95Latency <= this.LATENCY_TARGETS.POOR_P95) return 'D';
-    return 'F';
-  }
-
-  /**
+  private calculatePerformanceGrade(p95Latency: number): 'A' | 'B' | 'C' | 'D' | 'F' {if (p95Latency <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'A';if (p95Latency <= this.LATENCY_TARGETS.TARGET_P95) return 'B';if (p95Latency <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'C';if (p95Latency <= this.LATENCY_TARGETS.POOR_P95) return 'D';return 'F';}/**
    * Determine latency profile
    */
-  private determineLatencyProfile(statistics: LatencyStatistics): 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable' {
-    if (statistics.p95 <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'excellent';
-    if (statistics.p95 <= this.LATENCY_TARGETS.TARGET_P95) return 'good';
-    if (statistics.p95 <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'acceptable';
-    if (statistics.p95 <= this.LATENCY_TARGETS.POOR_P95) return 'poor';
-    return 'unacceptable';
-  }
-
-  /**
+  private determineLatencyProfile(statistics: LatencyStatistics): 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable' {if (statistics.p95 <= this.LATENCY_TARGETS.EXCELLENT_P95) return 'excellent';if (statistics.p95 <= this.LATENCY_TARGETS.TARGET_P95) return 'good';if (statistics.p95 <= this.LATENCY_TARGETS.ACCEPTABLE_P95) return 'acceptable';if (statistics.p95 <= this.LATENCY_TARGETS.POOR_P95) return 'poor';return 'unacceptable';}/**
    * Calculate statistical mean
    */
   private calculateMean(values: number[]): number {
@@ -1187,9 +995,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
   private calculateLatencyTrends(latencies: number[]) {
     if (latencies.length < 10) {
       return {
-        trend: 'stable' as const,
-        changeRate: 0,
-        volatility: 0,
+        trend: 'stable' as const,changeRate: 0,volatility: 0,
       };
     }
 
@@ -1202,10 +1008,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     const lastMean = this.calculateMean(lastQuarter);
 
     const changeRate = ((lastMean - firstMean) / firstMean) * 100;
-    const trend = changeRate > 5 ? 'degrading' as const : changeRate < -5 ? 'improving' as const : 'stable' as const;
-
-    // Calculate volatility as coefficient of variation
-    const mean = this.calculateMean(latencies);
+    const trend = changeRate > 5 ? 'degrading' as const : changeRate < -5 ? 'improving' as const : 'stable' as const;// Calculate volatility as coefficient of variationconst mean = this.calculateMean(latencies);
     const variance = this.calculateVariance(latencies, mean);
     const volatility = (Math.sqrt(variance) / mean) * 100;
 
@@ -1288,10 +1091,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       current.p95Latency < min.p95Latency ? current : min
     );
 
-    this.logger.log(`   Optimal payload size for latency: ${optimalForLatency.payloadSize}B (${optimalForLatency.p95Latency.toFixed(2)}ms P95)`);
-
-    // Analyze latency scaling with payload size
-    const smallestPayload = analysis[0];
+    this.logger.log(`   Optimal payload size for latency: ${optimalForLatency.payloadSize}B (${optimalForLatency.p95Latency.toFixed(2)}ms P95)`);// Analyze latency scaling with payload sizeconst smallestPayload = analysis[0];
     const largestPayload = analysis[analysis.length - 1];
     const scalingFactor = largestPayload.p95Latency / smallestPayload.p95Latency;
 
@@ -1310,18 +1110,9 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     const latencyIncrease = withValidation.statistics.p95 - withoutValidation.statistics.p95;
 
     if (latencyIncrease > 25) {
-      recommendations.push('Implement caching for frequently validated operations');
-      recommendations.push('Consider async validation patterns for non-critical operations');
-    }
-
-    if (latencyIncrease > 50) {
-      recommendations.push('Optimize PARLANT validation response time');
-      recommendations.push('Implement validation request batching');
-    }
-
-    if (latencyIncrease > 100) {
-      recommendations.push('Consider validation timeout optimization');
-      recommendations.push('Implement fallback validation strategies');
+      recommendations.push('Implement caching for frequently validated operations');recommendations.push('Consider async validation patterns for non-critical operations');}if (latencyIncrease > 50) {
+      recommendations.push('Optimize PARLANT validation response time');recommendations.push('Implement validation request batching');}if (latencyIncrease > 100) {
+      recommendations.push('Consider validation timeout optimization');recommendations.push('Implement fallback validation strategies');
     }
 
     return recommendations;
@@ -1338,11 +1129,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
   ): Promise<void> {
     if (config.warmupMessages === 0) return;
 
-    this.logger.log(`🔥 Warmup phase: ${config.warmupMessages} messages`);
-
-    const warmupPromises: Promise<void>[] = [];
-
-    for (let i = 0; i < config.warmupMessages; i++) {
+    this.logger.log(`🔥 Warmup phase: ${config.warmupMessages} messages`);const warmupPromises: Promise<void>[] = [];for (let i = 0; i < config.warmupMessages; i++) {
       const connectionIndex = i % connections.length;
       const connection = connections[connectionIndex];
 
@@ -1406,9 +1193,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
           resolve();
         }, 1000);
 
-        connection.once('close', () => {
-          clearTimeout(timeout);
-          resolve();
+        connection.once('close', () => {clearTimeout(timeout);resolve();
         });
       });
     });
@@ -1420,12 +1205,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    * Initialize alert thresholds
    */
   private initializeAlertThresholds(): void {
-    this.alertThresholds.set('p95_warning', this.LATENCY_TARGETS.TARGET_P95);
-    this.alertThresholds.set('p95_critical', this.LATENCY_TARGETS.ACCEPTABLE_P95);
-    this.alertThresholds.set('p99_warning', this.LATENCY_TARGETS.TARGET_P99);
-  }
-
-  /**
+    this.alertThresholds.set('p95_warning', this.LATENCY_TARGETS.TARGET_P95);this.alertThresholds.set('p95_critical', this.LATENCY_TARGETS.ACCEPTABLE_P95);this.alertThresholds.set('p99_warning', this.LATENCY_TARGETS.TARGET_P99);}/**
    * Start real-time monitoring
    */
   private startRealTimeMonitoring(): void {
@@ -1473,41 +1253,29 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    * Check latency alerts
    */
   private checkLatencyAlerts(latency: number): void {
-    const p95Warning = this.alertThresholds.get('p95_warning') || 50;
-    const p95Critical = this.alertThresholds.get('p95_critical') || 100;
-
-    if (latency > p95Critical) {
-      this.eventEmitter.emit('latency_alert', {
-        level: 'critical',
+    const p95Warning = this.alertThresholds.get('p95_warning') || 50;const p95Critical = this.alertThresholds.get('p95_critical') || 100;if (latency > p95Critical) {this.eventEmitter.emit('latency_alert', {level: 'critical',
         latency,
         threshold: p95Critical,
         message: `Critical latency detected: ${latency.toFixed(2)}ms`,
       });
     } else if (latency > p95Warning) {
-      this.eventEmitter.emit('latency_alert', {
-        level: 'warning',
+      this.eventEmitter.emit('latency_alert', {level: 'warning',
         latency,
         threshold: p95Warning,
-        message: `High latency detected: ${latency.toFixed(2)}ms`,
-      });
-    }
+        message: `High latency detected: ${latency.toFixed(2)}ms`,});}
   }
 
   /**
    * Generate unique message ID
    */
   private generateMessageId(): string {
-    return `latency_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-  }
+    return `latency_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
 
   /**
    * Generate test payload
    */
   private generatePayload(size: number): string {
-    return 'x'.repeat(size);
-  }
-
-  /**
+    return 'x'.repeat(size);}/**
    * Sleep utility
    */
   private async sleep(ms: number): Promise<void> {
@@ -1549,20 +1317,7 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    */
   private logLatencyResults(results: LatencyTestResults): void {
     this.logger.log('📊 Latency Test Results:');
-    this.logger.log(`   Test ID: ${results.testId}`);
-    this.logger.log(`   Test Type: ${results.testType}`);
-    this.logger.log(`   P50 Latency: ${results.statistics.p50.toFixed(2)}ms`);
-    this.logger.log(`   P95 Latency: ${results.statistics.p95.toFixed(2)}ms (target: ${results.config.targets.p95}ms) ${results.targetsAchieved.p95 ? '✅' : '❌'}`);
-    this.logger.log(`   P99 Latency: ${results.statistics.p99.toFixed(2)}ms (target: ${results.config.targets.p99}ms) ${results.targetsAchieved.p99 ? '✅' : '❌'}`);
-    this.logger.log(`   Success Rate: ${results.statistics.reliability.successRate.toFixed(1)}%`);
-    this.logger.log(`   Performance Grade: ${results.insights.performanceGrade}`);
-    this.logger.log(`   Latency Profile: ${results.insights.latencyProfile}`);
-
-    if (results.insights.bottlenecks.length > 0) {
-      this.logger.log(`   Bottlenecks: ${results.insights.bottlenecks.length} detected`);
-    }
-
-    if (results.baselineComparison) {
+    this.logger.log(`   Test ID: ${results.testId}`);this.logger.log(`   Test Type: ${results.testType}`);this.logger.log(`   P50 Latency: ${results.statistics.p50.toFixed(2)}ms`);this.logger.log(`   P95 Latency: ${results.statistics.p95.toFixed(2)}ms (target: ${results.config.targets.p95}ms) ${results.targetsAchieved.p95 ? '✅' : '❌'}`);this.logger.log(`   P99 Latency: ${results.statistics.p99.toFixed(2)}ms (target: ${results.config.targets.p99}ms) ${results.targetsAchieved.p99 ? '✅' : '❌'}`);this.logger.log(`   Success Rate: ${results.statistics.reliability.successRate.toFixed(1)}%`);this.logger.log(`   Performance Grade: ${results.insights.performanceGrade}`);this.logger.log(`   Latency Profile: ${results.insights.latencyProfile}`);if (results.insights.bottlenecks.length > 0) {this.logger.log(`   Bottlenecks: ${results.insights.bottlenecks.length} detected`);}if (results.baselineComparison) {
       const improvement = results.baselineComparison.improvementPercentage;
       this.logger.log(`   Baseline Comparison: ${improvement >= 0 ? 'improved' : 'degraded'} by ${Math.abs(improvement).toFixed(1)}%`);
     }

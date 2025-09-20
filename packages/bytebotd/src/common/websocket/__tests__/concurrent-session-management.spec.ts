@@ -24,16 +24,7 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import * as WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { createServer, Server } from 'http';
-import { randomUUID } from 'crypto';
-
-import {
-  ConversationalWebSocketBridgeService,
+import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import * as WebSocket from 'ws';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import { createServer, Server } from 'http';import { randomUUID } from 'crypto';import {ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -41,13 +32,7 @@ import {
   SecurityContext,
   ActionImpact,
   ValidationAction,
-} from '../conversational-websocket-bridge.service';
-import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
-import { createSafeWebSocketServer } from '../websocket-types';
-
-// ===== TYPE DEFINITIONS =====
-
-/**
+} from '../conversational-websocket-bridge.service';import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';import { createSafeWebSocketServer } from '../websocket-types';// ===== TYPE DEFINITIONS =====/**
  * Represents the payload of a validation response message
  */
 interface ValidationResponsePayload {
@@ -120,9 +105,7 @@ class TestSession extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket.WebSocket(this.url, {
         headers: {
-          'X-Session-ID': this.sessionId,
-          'X-User-ID': this.userId,
-          'X-Device-ID': this.deviceId,
+          'X-Session-ID': this.sessionId,'X-User-ID': this.userId,'X-Device-ID': this.deviceId,
         },
       });
 
@@ -130,24 +113,13 @@ class TestSession extends EventEmitter {
         reject(new Error(`Session ${this.sessionId} connection timeout`));
       }, 10000);
 
-      this.ws.on('open', () => {
-        clearTimeout(timeout);
-        this.sessionState.connected = true;
+      this.ws.on('open', () => {clearTimeout(timeout);this.sessionState.connected = true;
         this.sessionState.lastActivity = Date.now();
-        this.emit('connected');
-        resolve();
-      });
+        this.emit('connected');resolve();});
 
-      this.ws.on('message', (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
-          this.sessionState.messagesReceived.push(message);
-          this.sessionState.messageCount++;
+      this.ws.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;this.sessionState.messagesReceived.push(message);this.sessionState.messageCount++;
           this.sessionState.lastActivity = Date.now();
-          this.emit('message', message);
-
-          // Track validations
-          if (message.type === ConversationalMessageType.VALIDATION_RESPONSE) {
+          this.emit('message', message);// Track validationsif (message.type === ConversationalMessageType.VALIDATION_RESPONSE) {
             this.sessionState.validations.set(message.payload.validationId, message.payload);
           }
         } catch (error) {
@@ -155,16 +127,10 @@ class TestSession extends EventEmitter {
         }
       });
 
-      this.ws.on('error', (error) => {
-        clearTimeout(timeout);
-        this.sessionState.connected = false;
-        this.emit('error', error);
-        reject(error);
-      });
+      this.ws.on('error', (error) => {clearTimeout(timeout);this.sessionState.connected = false;
+        this.emit('error', error);reject(error);});
 
-      this.ws.on('close', () => {
-        this.sessionState.connected = false;
-        this.emit('disconnected');
+      this.ws.on('close', () => {this.sessionState.connected = false;this.emit('disconnected');
       });
     });
   }
@@ -209,16 +175,11 @@ class TestSession extends EventEmitter {
           environmentInfo: { deviceId: this.deviceId },
           previousActions: [],
           securityContext: {
-            authenticationLevel: 'basic',
-            permissions: ['read', 'write'],
-            auditRequired: false,
-            complianceFlags: [],
+            authenticationLevel: 'basic',permissions: ['read', 'write'],auditRequired: false,complianceFlags: [],
           } as SecurityContext,
         },
         action,
-        riskLevel: 'low',
-        streamingOptions: {
-          enableProgressUpdates: false,
+        riskLevel: 'low',streamingOptions: {enableProgressUpdates: false,
           updateInterval: 1000,
           maxUpdateCount: 3,
           compressionEnabled: false,
@@ -226,9 +187,7 @@ class TestSession extends EventEmitter {
         },
       },
       metadata: {
-        priority: 'normal',
-        requiresAck: true,
-        compression: false,
+        priority: 'normal',requiresAck: true,compression: false,
         routingHints: ['validation'],
       },
     };
@@ -248,10 +207,7 @@ class TestSession extends EventEmitter {
       await new Promise(resolve => setTimeout(resolve, 10));
     }
 
-    throw new Error(`Validation ${validationId} response timeout in session ${this.sessionId}`);
-  }
-
-  async disconnect(): Promise<void> {
+    throw new Error(`Validation ${validationId} response timeout in session ${this.sessionId}`);}async disconnect(): Promise<void> {
     if (this.ws) {
       this.ws.close();
       this.sessionState.connected = false;
@@ -296,27 +252,18 @@ class ConcurrentSessionManager {
   async createSession(userId: string, deviceId?: string): Promise<TestSession> {
     const sessionId = randomUUID();
     const actualDeviceId = deviceId ?? `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');
-
-    // Track user sessions
-    if (!this.userSessions.has(userId)) {
+    const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');// Track user sessionsif (!this.userSessions.has(userId)) {
       this.userSessions.set(userId, []);
     }
     this.userSessions.get(userId)!.push(sessionId);
 
     // Set up session event handlers
-    session.on('connected', () => {
-      this.metrics.activeSessions++;
-      this.metrics.successfulConnections++;
+    session.on('connected', () => {this.metrics.activeSessions++;this.metrics.successfulConnections++;
     });
 
-    session.on('disconnected', () => {
-      this.metrics.activeSessions--;
-    });
+    session.on('disconnected', () => {this.metrics.activeSessions--;});
 
-    session.on('error', () => {
-      this.metrics.failedConnections++;
-    });
+    session.on('error', () => {this.metrics.failedConnections++;});
 
     this.sessions.set(sessionId, session);
     this.metrics.totalSessions++;
@@ -326,25 +273,18 @@ class ConcurrentSessionManager {
 
   async createConcurrentSessions(
     sessionCount: number,
-    userPattern: 'single' | 'multiple' | 'mixed' = 'multiple'
-  ): Promise<TestSession[]> {
-    const sessions: TestSession[] = [];
+    userPattern: 'single' | 'multiple' | 'mixed' = 'multiple'): Promise<TestSession[]> {const sessions: TestSession[] = [];
     const connectionPromises: Promise<void>[] = [];
 
     for (let i = 0; i < sessionCount; i++) {
       let userId: string;
 
       switch (userPattern) {
-        case 'single':
-          userId = 'test-user-single';
-          break;
-        case 'multiple':
+        case 'single':userId = 'test-user-single';break;case 'multiple':
           userId = `test-user-${i}`;
           break;
         case 'mixed':
-          userId = `test-user-${Math.floor(i / 3)}`; // 3 sessions per user
-          break;
-      }
+          userId = `test-user-${Math.floor(i / 3)}`; // 3 sessions per userbreak;}
 
       const session = await this.createSession(userId);
       sessions.push(session);
@@ -387,10 +327,7 @@ class ConcurrentSessionManager {
 
         await session.sendMessage({
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { uniqueData, testType: 'isolation' },
-        });
-
-        totalTests++;
+          payload: { uniqueData, testType: 'isolation' },});totalTests++;
       }
     }
 
@@ -422,9 +359,7 @@ class ConcurrentSessionManager {
             if (hasOtherMessage) {
               violations.push({
                 sessionId: session.sessionId,
-                violation: 'cross_session_data_leak',
-                details: {
-                  receivedData: otherUniqueData,
+                violation: 'cross_session_data_leak',details: {receivedData: otherUniqueData,
                   fromSession: otherSessionId,
                 },
               });
@@ -442,17 +377,12 @@ class ConcurrentSessionManager {
 
         // Verify session has unique identifier in received messages
         const hasSessionSpecificMessages = state.messagesReceived.every(msg =>
-          msg.sessionId === session.sessionId || msg.sessionId === 'system'
-        );
-
-        if (hasSessionSpecificMessages) {
+          msg.sessionId === session.sessionId || msg.sessionId === 'system');if (hasSessionSpecificMessages) {
           passedTests++;
         } else {
           violations.push({
             sessionId: session.sessionId,
-            violation: 'session_id_mismatch',
-            details: {
-              expectedSessionId: session.sessionId,
+            violation: 'session_id_mismatch',details: {expectedSessionId: session.sessionId,
               foundMessages: state.messagesReceived.filter(msg =>
                 msg.sessionId !== session.sessionId && msg.sessionId !== 'system'
               ),
@@ -482,14 +412,10 @@ class ConcurrentSessionManager {
       const session = sessions[i];
       if (session.isConnected()) {
         const testAction: ValidationAction = {
-          actionType: `concurrent_validation_${i}`,
-          parameters: { sessionId: session.sessionId, index: i },
-          expectedOutcome: `Validation ${i} completed`,
+          actionType: `concurrent_validation_${i}`,parameters: { sessionId: session.sessionId, index: i },expectedOutcome: `Validation ${i} completed`,
           reversible: true,
           impact: {
-            scope: 'local',
-            dataAccess: false,
-            stateChanges: true,
+            scope: 'local',dataAccess: false,stateChanges: true,
             userInteraction: false,
           } as ActionImpact,
         };
@@ -591,22 +517,13 @@ class ConcurrentSessionManager {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8185,
-      'PARLANT_WEBSOCKET_PORT': 8186,
-      'WEBSOCKET_MAX_CONCURRENT_SESSIONS': 2000,
-      'WEBSOCKET_SESSION_TIMEOUT': 300000, // 5 minutes
-      'WEBSOCKET_CLEANUP_INTERVAL': 60000, // 1 minute
-      'WEBSOCKET_MEMORY_LIMIT_PER_SESSION': 10485760, // 10MB
-    };
-    return config[key] ?? defaultValue;
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8185,'PARLANT_WEBSOCKET_PORT': 8186,'WEBSOCKET_MAX_CONCURRENT_SESSIONS': 2000,'WEBSOCKET_SESSION_TIMEOUT': 300000, // 5 minutes'WEBSOCKET_CLEANUP_INTERVAL': 60000, // 1 minute'WEBSOCKET_MEMORY_LIMIT_PER_SESSION': 10485760, // 10MB};return config[key] ?? defaultValue;
   }),
 };
 
 // ===== CONCURRENT SESSION MANAGEMENT TEST SUITE =====
 
-describe('Concurrent Session Management Tests', () => {
-  let conversationalService: ConversationalWebSocketBridgeService;
-  let integrationService: ParlantWebSocketIntegrationService;
+describe('Concurrent Session Management Tests', () => {let conversationalService: ConversationalWebSocketBridgeService;let integrationService: ParlantWebSocketIntegrationService;
   let module: TestingModule;
   let testServer: Server;
   let wsServer: WebSocket.Server;
@@ -644,10 +561,7 @@ describe('Concurrent Session Management Tests', () => {
       messageCount: number;
     }>();
 
-    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {
-      const sessionId = req.headers['x-session-id'] as string || randomUUID();
-      const userId = req.headers['x-user-id'] as string || 'anonymous';
-      const deviceId = req.headers['x-device-id'] as string || 'unknown';
+    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {const sessionId = req.headers['x-session-id'] as string || randomUUID();const userId = req.headers['x-user-id'] as string || 'anonymous';const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
       console.log(`New session: ${sessionId} for user ${userId} on device ${deviceId}`);
 
@@ -661,9 +575,7 @@ describe('Concurrent Session Management Tests', () => {
 
       activeSessions.set(sessionId, sessionInfo);
 
-      ws.on('message', async (data: WebSocket.RawData) => {
-        try {
-          const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
+      ws.on('message', async (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
           sessionInfo.messageCount++;
 
           // Verify session isolation - message should belong to this session
@@ -686,17 +598,11 @@ describe('Concurrent Session Management Tests', () => {
                 sequence: sessionInfo.messageCount,
                 type: ConversationalMessageType.STATUS_UPDATE,
                 payload: {
-                  status: 'received',
-                  originalPayload: message.payload,
-                  sessionConfirmation: sessionId,
+                  status: 'received',originalPayload: message.payload,sessionConfirmation: sessionId,
                 },
                 metadata: {
-                  priority: 'normal',
-                  requiresAck: false,
-                  compression: false,
-                  routingHints: ['status-response'],
-                },
-              };
+                  priority: 'normal',requiresAck: false,compression: false,
+                  routingHints: ['status-response'],},};
 
               ws.send(JSON.stringify(statusResponse));
               break;
@@ -752,9 +658,7 @@ describe('Concurrent Session Management Tests', () => {
           serverTime: Date.now(),
         },
         metadata: {
-          priority: 'high',
-          requiresAck: false,
-          compression: false,
+          priority: 'high',requiresAck: false,compression: false,
           routingHints: ['session-management'],
         },
       };
@@ -780,8 +684,7 @@ describe('Concurrent Session Management Tests', () => {
             validationId,
             approved: true,
             confidence: 0.9,
-            reasoning: `Validation approved for session ${sessionInfo.sessionId}`,
-            conversationId: `conv_${validationId}`,
+            reasoning: `Validation approved for session ${sessionInfo.sessionId}`,conversationId: `conv_${validationId}`,
             requiresUserConfirmation: false,
             metadata: {
               processingTime: Math.random() * 50 + 25, // 25-75ms
@@ -790,12 +693,8 @@ describe('Concurrent Session Management Tests', () => {
             },
           },
           metadata: {
-            priority: 'high',
-            requiresAck: false,
-            compression: false,
-            routingHints: ['validation-response'],
-          },
-        };
+            priority: 'high',requiresAck: false,compression: false,
+            routingHints: ['validation-response'],},};
 
         sessionInfo.ws.send(JSON.stringify(response));
       }, Math.random() * 100 + 50); // 50-150ms processing time
@@ -828,21 +727,13 @@ describe('Concurrent Session Management Tests', () => {
 
   // ===== CONCURRENT SESSION CREATION =====
 
-  describe('Concurrent Session Creation', () => {
-    it('should create and manage 100 concurrent sessions successfully', async () => {
-      const sessionCount = 100;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
-
-      expect(sessions.length).toBe(sessionCount);
-
-      const connectedSessions = sessions.filter(session => session.isConnected());
+  describe('Concurrent Session Creation', () => {it('should create and manage 100 concurrent sessions successfully', async () => {const sessionCount = 100;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');expect(sessions.length).toBe(sessionCount);const connectedSessions = sessions.filter(session => session.isConnected());
       const metrics = sessionManager.getMetrics();
 
       console.log('100 Concurrent Sessions Results:', {
         totalSessions: sessionCount,
         connectedSessions: connectedSessions.length,
-        successRate: `${(metrics.sessionSuccessRate * 100).toFixed(2)}%`,
-        averageConnectionTime: `${metrics.averageConnectionTime.toFixed(2)}ms`,
+        successRate: `${(metrics.sessionSuccessRate * 100).toFixed(2)}%`,averageConnectionTime: `${metrics.averageConnectionTime.toFixed(2)}ms`,
         activeSessions: metrics.activeSessions,
       });
 
@@ -850,19 +741,14 @@ describe('Concurrent Session Management Tests', () => {
       expect(metrics.averageConnectionTime).toBeLessThan(200); // Sub-200ms average connection
     });
 
-    it('should handle 1000+ concurrent sessions under load', async () => {
-      const sessionCount = 1000;
-      const batchSize = 50;
+    it('should handle 1000+ concurrent sessions under load', async () => {const sessionCount = 1000;const batchSize = 50;
       const sessions: TestSession[] = [];
 
       // Create sessions in batches to avoid overwhelming
       for (let i = 0; i < sessionCount; i += batchSize) {
         const batchSessions = await sessionManager.createConcurrentSessions(
           Math.min(batchSize, sessionCount - i),
-          'mixed'
-        );
-
-        sessions.push(...batchSessions);
+          'mixed');sessions.push(...batchSessions);
 
         // Small delay between batches
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -875,8 +761,7 @@ describe('Concurrent Session Management Tests', () => {
         targetSessions: sessionCount,
         actualSessions: sessions.length,
         connectedSessions: connectedSessions.length,
-        successRate: `${(metrics.sessionSuccessRate * 100).toFixed(2)}%`,
-        averageConnectionTime: `${metrics.averageConnectionTime.toFixed(2)}ms`,
+        successRate: `${(metrics.sessionSuccessRate * 100).toFixed(2)}%`,averageConnectionTime: `${metrics.averageConnectionTime.toFixed(2)}ms`,
         failedConnections: metrics.failedConnections,
       });
 
@@ -885,9 +770,7 @@ describe('Concurrent Session Management Tests', () => {
       expect(metrics.averageConnectionTime).toBeLessThan(500); // Under 500ms average under load
     });
 
-    it('should maintain session creation performance under concurrent load', async () => {
-      const testRounds = 5;
-      const sessionsPerRound = 50;
+    it('should maintain session creation performance under concurrent load', async () => {const testRounds = 5;const sessionsPerRound = 50;
       const performanceResults: Array<{ round: number; averageTime: number; successRate: number }> = [];
 
       for (let round = 0; round < testRounds; round++) {
@@ -922,21 +805,14 @@ describe('Concurrent Session Management Tests', () => {
       console.log('Performance Consistency Results:', {
         testRounds,
         sessionsPerRound,
-        averagePerformance: `${averagePerformance.toFixed(2)}ms`,
-        averageSuccessRate: `${(averageSuccessRate * 100).toFixed(2)}%`,
+        averagePerformance: `${averagePerformance.toFixed(2)}ms`,averageSuccessRate: `${(averageSuccessRate * 100).toFixed(2)}%`,
       });
     });
   });
 
   // ===== SESSION ISOLATION AND DATA INTEGRITY =====
 
-  describe('Session Isolation and Data Integrity', () => {
-    it('should maintain perfect session isolation across concurrent sessions', async () => {
-      const sessionCount = 50;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
-
-      const connectedSessions = sessions.filter(session => session.isConnected());
-      expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
+  describe('Session Isolation and Data Integrity', () => {it('should maintain perfect session isolation across concurrent sessions', async () => {const sessionCount = 50;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');const connectedSessions = sessions.filter(session => session.isConnected());expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
       // Test session isolation
       const isolationResults = await sessionManager.testSessionIsolation(connectedSessions);
@@ -952,13 +828,9 @@ describe('Concurrent Session Management Tests', () => {
       expect(isolationResults.violations.length).toBeLessThan(connectedSessions.length * 0.01); // <1% violations
 
       if (isolationResults.violations.length > 0) {
-        console.warn('Session isolation violations detected:', isolationResults.violations);
-      }
-    });
+        console.warn('Session isolation violations detected:', isolationResults.violations);}});
 
-    it('should prevent cross-session data leakage', async () => {
-      const sessionCount = 20;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
+    it('should prevent cross-session data leakage', async () => {const sessionCount = 20;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
 
       const connectedSessions = sessions.filter(session => session.isConnected());
       const sensitiveData = new Map<string, string>();
@@ -972,9 +844,7 @@ describe('Concurrent Session Management Tests', () => {
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: {
             sensitiveData: secretData,
-            classification: 'confidential',
-            sessionOwner: session.sessionId,
-          },
+            classification: 'confidential',sessionOwner: session.sessionId,},
         });
       }
 
@@ -993,9 +863,7 @@ describe('Concurrent Session Management Tests', () => {
           if (message.payload?.sensitiveData && message.payload.sensitiveData !== ownSecretData) {
             leakageDetected++;
             leakageDetails.push({
-              fromSession: message.payload.sessionOwner ?? 'unknown',
-              toSession: session.sessionId,
-              data: message.payload.sensitiveData,
+              fromSession: message.payload.sessionOwner ?? 'unknown',toSession: session.sessionId,data: message.payload.sensitiveData,
             });
           }
         }
@@ -1011,12 +879,7 @@ describe('Concurrent Session Management Tests', () => {
       expect(leakageDetected).toBe(0); // Zero data leakage tolerance
     });
 
-    it('should handle concurrent validations without interference', async () => {
-      const sessionCount = 30;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
-
-      const connectedSessions = sessions.filter(session => session.isConnected());
-      expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
+    it('should handle concurrent validations without interference', async () => {const sessionCount = 30;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');const connectedSessions = sessions.filter(session => session.isConnected());expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
       // Perform concurrent validations
       const validationResults = await sessionManager.performConcurrentValidations(connectedSessions);
@@ -1025,9 +888,7 @@ describe('Concurrent Session Management Tests', () => {
         totalSessions: connectedSessions.length,
         completedValidations: validationResults.completedValidations,
         failedValidations: validationResults.failedValidations,
-        averageValidationTime: `${validationResults.averageValidationTime.toFixed(2)}ms`,
-        concurrencyIssues: validationResults.concurrencyIssues,
-        successRate: `${((validationResults.completedValidations / connectedSessions.length) * 100).toFixed(2)}%`,
+        averageValidationTime: `${validationResults.averageValidationTime.toFixed(2)}ms`,concurrencyIssues: validationResults.concurrencyIssues,successRate: `${((validationResults.completedValidations / connectedSessions.length) * 100).toFixed(2)}%`,
       });
 
       expect(validationResults.completedValidations).toBeGreaterThan(connectedSessions.length * 0.95); // 95%+ success
@@ -1038,10 +899,7 @@ describe('Concurrent Session Management Tests', () => {
 
   // ===== MULTI-USER SESSION MANAGEMENT =====
 
-  describe('Multi-user Session Management', () => {
-    it('should handle multiple sessions per user correctly', async () => {
-      const usersCount = 10;
-      const sessionsPerUser = 5;
+  describe('Multi-user Session Management', () => {it('should handle multiple sessions per user correctly', async () => {const usersCount = 10;const sessionsPerUser = 5;
       const sessions: TestSession[] = [];
 
       // Create multiple sessions for each user
@@ -1066,9 +924,7 @@ describe('Concurrent Session Management Tests', () => {
         userSessionCounts.set(session.userId, count + 1);
       }
 
-      console.log('Multi-user Session Distribution:', {
-        targetUsers: usersCount,
-        targetSessionsPerUser: sessionsPerUser,
+      console.log('Multi-user Session Distribution:', {targetUsers: usersCount,targetSessionsPerUser: sessionsPerUser,
         totalSessions: connectedSessions.length,
         actualUsers: userSessionCounts.size,
         sessionDistribution: Array.from(userSessionCounts.entries()).slice(0, 5),
@@ -1083,8 +939,7 @@ describe('Concurrent Session Management Tests', () => {
       expect(usersWithMultipleSessions).toBeGreaterThan(usersCount * 0.7); // 70%+ users have multiple sessions
     });
 
-    it('should synchronize session state across devices for same user', async () => {
-      const userId = 'sync-test-user';
+    it('should synchronize session state across devices for same user', async () => {const userId = 'sync-test-user';
       const deviceCount = 3;
       const userSessions: TestSession[] = [];
 
@@ -1100,10 +955,7 @@ describe('Concurrent Session Management Tests', () => {
 
       // Send sync message from first device
       const syncData = {
-        userPreferences: { theme: 'dark', language: 'en' },
-        applicationState: { lastAction: 'file_read', timestamp: Date.now() },
-        syncId: randomUUID(),
-      };
+        userPreferences: { theme: 'dark', language: 'en' },applicationState: { lastAction: 'file_read', timestamp: Date.now() },syncId: randomUUID(),};
 
       const syncMessage: SessionSyncMessage = {
         type: ConversationalMessageType.SESSION_SYNC,
@@ -1116,15 +968,9 @@ describe('Concurrent Session Management Tests', () => {
           userId,
           deviceSessions: connectedSessions.map(s => s.deviceId),
           stateUpdate: syncData,
-          syncPriority: 'high',
-        },
-        metadata: {
-          priority: 'high',
-          requiresAck: true,
-          compression: false,
-          routingHints: ['session-sync'],
-        },
-      };
+          syncPriority: 'high',},metadata: {
+          priority: 'high',requiresAck: true,compression: false,
+          routingHints: ['session-sync'],},};
 
       await connectedSessions[0].sendMessage(syncMessage);
 
@@ -1139,9 +985,7 @@ describe('Concurrent Session Management Tests', () => {
 
       expect(hasSyncResponse).toBe(true);
 
-      console.log('Session Sync Test:', {
-        userId,
-        deviceCount,
+      console.log('Session Sync Test:', {userId,deviceCount,
         connectedDevices: connectedSessions.length,
         syncMessageSent: true,
         syncResponseReceived: hasSyncResponse,
@@ -1151,22 +995,13 @@ describe('Concurrent Session Management Tests', () => {
 
   // ===== RESOURCE MANAGEMENT AND CLEANUP =====
 
-  describe('Resource Management and Cleanup', () => {
-    it('should manage memory usage efficiently across sessions', async () => {
-      const sessionCount = 100;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'mixed');
-
-      const connectedSessions = sessions.filter(session => session.isConnected());
-
-      // Generate some activity in each session
+  describe('Resource Management and Cleanup', () => {it('should manage memory usage efficiently across sessions', async () => {const sessionCount = 100;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'mixed');const connectedSessions = sessions.filter(session => session.isConnected());// Generate some activity in each session
       for (const session of connectedSessions) {
         // Send multiple messages to build up session state
         for (let i = 0; i < 10; i++) {
           await session.sendMessage({
             type: ConversationalMessageType.STATUS_UPDATE,
-            payload: { activityIndex: i, largeData: 'x'.repeat(1000) }, // 1KB per message
-          });
-        }
+            payload: { activityIndex: i, largeData: 'x'.repeat(1000) }, // 1KB per message});}
       }
 
       // Wait for message processing
@@ -1190,21 +1025,14 @@ describe('Concurrent Session Management Tests', () => {
       console.log('Memory Usage Analysis:', {
         connectedSessions: connectedSessions.length,
         totalMessages,
-        totalMemoryEstimate: `${(totalMemoryEstimate / 1024 / 1024).toFixed(2)} MB`,
-        averageMemoryPerSession: `${(averageMemoryPerSession / 1024).toFixed(2)} KB`,
-        memoryEfficiency: `${(1024 * 1024 / averageMemoryPerSession).toFixed(1)}x target`,
+        totalMemoryEstimate: `${(totalMemoryEstimate / 1024 / 1024).toFixed(2)} MB`,averageMemoryPerSession: `${(averageMemoryPerSession / 1024).toFixed(2)} KB`,memoryEfficiency: `${(1024 * 1024 / averageMemoryPerSession).toFixed(1)}x target`,
       });
 
       expect(averageMemoryPerSession).toBeLessThan(50 * 1024); // Under 50KB per session average
       expect(totalMemoryEstimate).toBeLessThan(100 * 1024 * 1024); // Under 100MB total
     });
 
-    it('should handle session cleanup and resource release', async () => {
-      const sessionCount = 50;
-      const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
-
-      const initialMetrics = sessionManager.getMetrics();
-      expect(initialMetrics.activeSessions).toBeGreaterThan(sessionCount * 0.9);
+    it('should handle session cleanup and resource release', async () => {const sessionCount = 50;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');const initialMetrics = sessionManager.getMetrics();expect(initialMetrics.activeSessions).toBeGreaterThan(sessionCount * 0.9);
 
       // Disconnect half the sessions
       const sessionsToDisconnect = sessions.slice(0, Math.floor(sessions.length / 2));
