@@ -123,15 +123,19 @@ describe('JwtAuthGuard', () => {
   let parlantAuthBridge: jest.Mocked<ParlantAuthBridgeService>;
 
   beforeEach(async () => {
-    jwtService = {,
-  verify: jest.fn(), decode: jest.fn(), sign: jest.fn(),
-    
-} as jest.Mocked<JwtService>;
+    jwtService = {
+      verify: jest.fn(),
+      decode: jest.fn(),
+      sign: jest.fn(),
+    } as jest.Mocked<JwtService>;
 
     configService = {
-  get: jest.fn((key: strin, g) => {
+      get: jest.fn((key: string) => {
         const config: Record<string, unknown> = {
-          'jwt.secret': 'test-secret','jwt.expiresIn': '1h','parlant.enabled': true,'security.strictMode': true,
+          'jwt.secret': 'test-secret',
+          'jwt.expiresIn': '1h',
+          'parlant.enabled': true,
+          'security.strictMode': true,
 };return config[key];
       }),
     } as jest.Mocked<ConfigService>;
@@ -146,18 +150,19 @@ describe('JwtAuthGuard', () => {
     parlantAuthBridge = createMockParlantAuthBridge();
 
     const module: TestingModule = await Test.createTestingModule({
-  providers: [
+      providers: [
         JwtAuthGuard,
-        {,
-  provide: JwtService, useValue: jwtService,
-        
-},
         {
-  provide: ConfigService, useValue: configService,
-        
-},
+          provide: JwtService,
+          useValue: jwtService,
+        },
         {
-  provide: Logger, useValue: mockLogger,
+          provide: ConfigService,
+          useValue: configService,
+        },
+        {
+          provide: Logger,
+          useValue: mockLogger,
         
 },
         {
@@ -176,8 +181,8 @@ describe('JwtAuthGuard', () => {
     describe('canActivate', () => {
   it('should allow access with valid JWT token', async () => {
         // Arrange
-        const mockUser = {,
-  id: 'user-123',
+        const mockUser = {
+          id: 'user-123',
           email: 'test@example.com',
           roles: ['user'],
           permissions: ['read'],

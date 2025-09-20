@@ -13,7 +13,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 
 describe('Security Validation Tests', () => {
 
-  describe('XSS Protection Logic Tests', () => 
+  describe('XSS Protection Logic Tests', () => {
     const isXSSPayload = (text: string): boolean => {
       const xssPatterns = [
         /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,

@@ -231,7 +231,9 @@ let context: CrossModuleEventContext;let testModule: TestingModule;
 
 
   describe('Core Event Propagation Patterns', () => {
-it('should propagate events through ComputerUse → MCP workflow', async () => const correlationId = generateCorrelationId();const flowId = generateFlowId();
+    it('should propagate events through ComputerUse → MCP workflow', async () => {
+      const correlationId = generateCorrelationId();
+      const flowId = generateFlowId();
       
       // Setup event sequence tracking
       const expectedEvents = [
@@ -298,7 +300,8 @@ const correlationId = generateCorrelationId();const flowId = generateFlowId();
         'parlant.validation.requested','parlant.validation.analyzing','parlant.validation.context-evaluated','parlant.validation.decision-made','computer-use.action.approved','computer-use.action.executing','computer-use.action.completed','parlant.validation.completed',];const startTime = Date.now();
 
       // Simulate Parlant validation workflow
-      context.eventEmitter.emit('parlant.validation.requested', source: 'ParlantValidatedComputerUseService',
+      context.eventEmitter.emit('parlant.validation.requested', {
+        source: 'ParlantValidatedComputerUseService',
       correlationId,sequenceNumber: 1,
         action: 'screenshot',
       validationContext: {userId: 'test-user',

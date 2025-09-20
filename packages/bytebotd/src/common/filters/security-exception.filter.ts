@@ -75,12 +75,11 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   // Track error patterns for security analysis
   private errorPatterns = new Map<
     string,
-    {,
-  count: number;
+    {
+      count: number;
       lastSeen: Date;
       riskScore: number;
-    
-}
+    }
   >();
 
   /**

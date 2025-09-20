@@ -16,12 +16,12 @@ import { SecurityExceptionFilter } from '../filters/security-exception.filter';
 
 describe('Security Validation Mock Tests', () => {
 
-  describe('XSS Protection Tests', () => 
+  describe('XSS Protection Tests', () => {
     let sanitizationPipe: SecuritySanitizationPipe;
 
     beforeEach(() => {
-      sanitizationPipe = new SecuritySanitizationPipe({,
-  enableSanitization: true,
+      sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         enableXSSDetection: true,
         strictMode: true,
         maxInputLength: 1000,

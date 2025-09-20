@@ -40,43 +40,41 @@ STRICT_BLOCK = 'strict_block',
  * Deprecation policy configuration for BytebotD
  */
 interface DeprecationPolicy {
-  /** Enforcement level for deprecated APIs */;
+  /** Enforcement level for deprecated APIs */
   enforcement: DeprecationEnforcement;
 
-  /** Grace period after deprecation before blocking (days) */;
+  /** Grace period after deprecation before blocking (days) */
   gracePeriodDays: number;
 
-  /** Grace period after sunset before strict blocking (days) */;
+  /** Grace period after sunset before strict blocking (days) */
   sunsetGracePeriodDays: number;
 
-  /** Extended grace period for desktop clients (days) */;
+  /** Extended grace period for desktop clients (days) */
   desktopGracePeriodDays: number;
 
-  /** Whether to allow requests with special bypass header */;
+  /** Whether to allow requests with special bypass header */
   allowBypass: boolean;
 
-  /** Special bypass header name */;
+  /** Special bypass header name */
   bypassHeader: string;
 
-  /** Whether to track usage statistics */;
+  /** Whether to track usage statistics */
   trackUsage: boolean;
 
-  /** Rate limit deprecated endpoint usage */;
+  /** Rate limit deprecated endpoint usage */
   rateLimitDeprecated: boolean;
 
-  /** Desktop-specific deprecation settings */;
+  /** Desktop-specific deprecation settings */
   desktopSpecific: {
-    /** Allow legacy desktop clients extended access */;
-  allowLegacyClients: boolean;
+    /** Allow legacy desktop clients extended access */
+    allowLegacyClients: boolean;
 
-    /** Minimum desktop client version for deprecation enforcement */;
-  minClientVersionForEnforcement: string;
+    /** Minimum desktop client version for deprecation enforcement */
+    minClientVersionForEnforcement: string;
 
-    /** Computer use feature deprecation grace period */;
-  computerUseGracePeriodDays: number;
-  
-
-};
+    /** Computer use feature deprecation grace period */
+    computerUseGracePeriodDays: number;
+  };
 }
 
 /**
@@ -126,28 +124,28 @@ interface DeprecationResult {
  * Deprecation usage statistics for BytebotD
  */
 interface DeprecationStats {
-  /** Total requests to deprecated endpoints */;
+  /** Total requests to deprecated endpoints */
   deprecatedRequests: number;
 
-  /** Unique desktop clients accessing deprecated endpoints */;
+  /** Unique desktop clients accessing deprecated endpoints */
   uniqueDesktopClients: Set<string>;
 
-  /** Endpoints and their usage counts */;
+  /** Endpoints and their usage counts */
   endpointUsage: Map<string, number>;
 
-  /** Computer use specific deprecated requests */;
+  /** Computer use specific deprecated requests */
   computerUseDeprecatedRequests: number;
 
-  /** First seen timestamp */;
+  /** First seen timestamp */
   firstSeen: Date;
 
-  /** Last seen timestamp */;
+  /** Last seen timestamp */
   lastSeen: Date;
 
-  /** Desktop client versions accessing deprecated endpoints */;
+  /** Desktop client versions accessing deprecated endpoints */
   desktopClientVersions: Set<string>;
 
-  /** VNC client information */;
+  /** VNC client information */
   vncClients: Set<string>;
 
 

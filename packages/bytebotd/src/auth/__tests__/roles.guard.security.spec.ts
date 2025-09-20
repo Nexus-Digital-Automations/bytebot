@@ -90,31 +90,42 @@ describe('RolesGuard - Advanced Security Tests', () => {
   let reflector: Reflector;
   let module: TestingModule;
 
-  const operationId = `roles_security_test${Date.now()
-}`;const securityLogger = {
-  info: (message: string, meta?: Record<stringunknown>) =>
-      console.log(`[RBAC-SECURITY] ${message
-}`, meta ?? ''),
-    warn: (message: string, meta?: Record<stringunknown>) =>
+  const operationId = `roles_security_test${Date.now()}`;
+
+  const securityLogger = {
+  info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[RBAC-SECURITY] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[RBAC-WARNING] ${message}`, meta ?? ''),
-    error: (message: string, meta?: Record<stringunknown>) =>
-      console.error(`[RBAC-ERROR] ${message}`, meta ?? ''),};// Mock execution context factory with security metadata
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[RBAC-ERROR] ${message}`, meta ?? ''),
+  };
+
+  // Mock execution context factory with security metadata
   const createMockExecutionContext = (
     user?: ByteBotdUser,
-    route = 'test-route',method = 'GET',ip = '127.0.0.1'): ExecutionContext => {
-  const mockRequest = {,
-  userurl: `/${route
-}`,
-      methodipheaders: {
-        'user-agent': 'Test-Agent/1.0','x-forwarded-for': ip,},connection: { remoteAddress: ip },
+    route = 'test-route',
+    method = 'GET',
+    ip = '127.0.0.1'
+  ): ExecutionContext => {
+    const mockRequest = {
+      user: user,
+      url: `/${route}`,
+      method: method,
+      ip: ip,
+      headers: {
+        'user-agent': 'Test-Agent/1.0',
+        'x-forwarded-for': ip,
+      },
+      connection: { remoteAddress: ip },
       socket: { remoteAddress: ip },
     };
 
     return {
-  switchToHttp: jest.fn().mockReturnValue({,
-  getRequest: jest.fn().mockReturnValue(mockRequest), getResponse: jest.fn().mockReturnValue({
-}),
-        getNext: jest.fn().mockReturnValue({})
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+        getResponse: jest.fn().mockReturnValue({}),
+        getNext: jest.fn().mockReturnValue({}),
       }),
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
@@ -127,12 +138,14 @@ describe('RolesGuard - Advanced Security Tests', () => {
   // Create malicious user objects for security testing
   const createMaliciousUsers = () => {
   return {
-      // User with prototype pollution attempt,
-  prototypePollution: {,
-  sub: 'user_123',
+    // User with prototype pollution attempt
+    prototypePollution: {
+      sub: 'user_123',
       id: 'user_123',
-        email: 'user@test.com',
-      username: 'testuser', role: UserRole._VIEWERisActiv, e: true,
+      email: 'user@test.com',
+      username: 'testuser',
+      role: UserRole._VIEWER,
+      isActive: true,
         // Prototype pollution attempt (removed __proto__ due to TypeScript strict mode)
         // Constructor manipulation attempt (removed due to TypeScript strict mode)
       

@@ -40,7 +40,9 @@ export interface MessageProcessingContext extends ParlantConversationContext {
  */
 export interface MessageContent {
   readonly id: string;
-  readonly type: 'text' | 'image' | 'file' | 'code' | 'structured';readonly content: string | Buffer | Record<string, unknown>;readonly metadata?: {
+  readonly type: 'text' | 'image' | 'file' | 'code' | 'structured';
+  readonly content: string | Buffer | Record<string, unknown>;
+  readonly metadata?: {
     readonly size?: number;
     readonly mimeType?: string;
     readonly language?: string;
@@ -53,9 +55,13 @@ export interface MessageContent {
  */
 export interface MessageProcessingRequest {
   readonly messages: MessageContent[];
-  readonly processingType: 'analyze' | 'generate' | 'translate' | 'classify' | 'summarize' | 'enhance';readonly parameters?: {readonly targetLanguage?: string;
+  readonly processingType: 'analyze' | 'generate' | 'translate' | 'classify' | 'summarize' | 'enhance';
+  readonly parameters?: {
+    readonly targetLanguage?: string;
     readonly maxLength?: number;
-    readonly tone?: 'formal' | 'casual' | 'professional' | 'friendly';readonly style?: string;readonly template?: string;
+    readonly tone?: 'formal' | 'casual' | 'professional' | 'friendly';
+    readonly style?: string;
+    readonly template?: string;
   };
   readonly context: MessageProcessingContext;
   readonly operationId: string;

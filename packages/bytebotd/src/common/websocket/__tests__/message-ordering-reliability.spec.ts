@@ -828,10 +828,13 @@ const client = new ReliabilityTestClient(TEST_URL);await client.connect();
 
       const sessionId = 'burst-test-session';
 const messageCount = 200;// Send rapid burst of messages (no delay)
-      await client.sendSequencedMessages(messageCount, sessionId, 
+      await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 0,
         requiresAck: false,
-        priority: 'high',});// Wait for all responses
+        priority: 'high',
+      });
+
+      // Wait for all responses
       await new Promise(resolve => setTimeout(resolve, 5000));
 
       const sequenceTracker = client.getSequenceTracker();
@@ -855,27 +858,41 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
 
 
     it('should handle out-of-order delivery and recovery', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'out-of-order-test';
-const sequenceTracker = client.getSequenceTracker();// Send messages with intentionally mixed sequences
+      const sequenceTracker = client.getSequenceTracker();
+      // Send messages with intentionally mixed sequences
       const messages: ConversationalMessage[] = [
-        
+        {
           messageId: 'msg-3',
-      sessionId,timestamp: Date.now(),
+          sessionId,
+          timestamp: Date.now(),
           sequence: 3,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'third' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},{
+          payload: { order: 'third' },
+          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
+        },
+        {
           messageId: 'msg-1',
-      sessionId,timestamp: Date.now(),
+          sessionId,
+          timestamp: Date.now(),
           sequence: 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'first' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},{
+          payload: { order: 'first' },
+          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
+        },
+        {
           messageId: 'msg-2',
-      sessionId,timestamp: Date.now(),
+          sessionId,
+          timestamp: Date.now(),
           sequence: 2,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { order: 'second' },metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] },},];
+          payload: { order: 'second' },
+          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
+        }
+      ];
 
       // Send messages in out-of-order sequence
       for (const message of messages) {
@@ -895,13 +912,17 @@ const sequenceTracker = client.getSequenceTracker();// Send messages with intent
 
       // Should detect out-of-order messages
       expect(orderingValidation.violations.length).toBeGreaterThan(0);
-      expect(orderingValidation.violations.some(v => v.violationType === 'gap')).toBe(true);await client.disconnect();});
+      expect(orderingValidation.violations.some(v => v.violationType === 'gap')).toBe(true);
+      await client.disconnect();
+    });
   });
 
   // ===== DELIVERY ACKNOWLEDGMENT SYSTEMS =====
 
   describe('Delivery Acknowledgment Systems', () => {
-it('should provide sub-5ms acknowledgment latency for critical messages', async () => const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+    it('should provide sub-5ms acknowledgment latency for critical messages', async () => {
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'ack-latency-test';
       const messageCount = 50;

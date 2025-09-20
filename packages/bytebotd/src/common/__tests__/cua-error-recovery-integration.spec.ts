@@ -445,14 +445,15 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 });const startTime = Date.now();
 
       // Mock NUT service failure
-      jest.spyOn(context.nutService, 'getCursorPosition').mockRejectedValue(new Error('NUT service unavailable for cursor position'));// Implement graceful degradation (return cached or default position)const gracefulCursorPosition = async (): Promise<{ x: number; y: number }> => {
-  try {
+      jest.spyOn(context.nutService, 'getCursorPosition').mockRejectedValue(new Error('NUT service unavailable for cursor position'));
+
+      // Implement graceful degradation (return cached or default position)
+      const gracefulCursorPosition = async (): Promise<{ x: number; y: number }> => {
+        try {
           return await context.nutService.getCursorPosition();
-        
-} catch (_error) {
-  // Graceful degradation: return last known or default position
-          return { x: 0, y: 0 
-}; // Default position
+        } catch (_error) {
+          // Graceful degradation: return last known or default position
+          return { x: 0, y: 0 }; // Default position
         }
       };
 

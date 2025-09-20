@@ -2702,12 +2702,24 @@
       "updated_at": "2025-09-19T00:37:09.932Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-19T00:34:45.704Z",
       "title": "Fix linting errors in WebSocket implementation and existing codebase",
       "description": "Resolve TypeScript linting violations including no-unused-vars, no-explicit-any, prefer-nullish-coalescing, and no-unsafe-* errors in WebSocket services and related files",
       "category": "error",
-      "id": "error_1758242085704_6syi233ool2"
+      "id": "error_1758242085704_6syi233ool2",
+      "assigned_agent": "dev_session_1758406966282_1_general_52f56c0c",
+      "started_at": "2025-09-20T22:23:37.696Z",
+      "claimed_by": "dev_session_1758406966282_1_general_52f56c0c",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758406966282_1_general_52f56c0c",
+          "role": "primary",
+          "assignedAt": "2025-09-20T22:23:37.696Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
@@ -3341,13 +3353,25 @@
       "updated_at": "2025-09-20T15:16:05.995Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T15:08:48.930Z",
       "title": "EMERGENCY: Fix systematic import statement formatting in AI services causing 28k+ TypeScript errors",
       "description": "Critical systematic fix needed: All AI service files have malformed import statements where multiple imports are merged into single lines without semicolons. Fix: anthropic.service.ts line 21, google.service.ts line 21, messages.service.ts line 21, openai.service.ts line 21+434+439+449+466+473. This is causing cascading TypeScript compilation failures across the entire codebase.",
       "category": "error",
       "priority": "normal",
-      "id": "error_1758380928930_l58qr1m3gs"
+      "id": "error_1758380928930_l58qr1m3gs",
+      "assigned_agent": "IMPORT_FORMATTING_AGENT",
+      "started_at": "2025-09-20T22:23:05.665Z",
+      "claimed_by": "IMPORT_FORMATTING_AGENT",
+      "agent_assignment_history": [
+        {
+          "agentId": "IMPORT_FORMATTING_AGENT",
+          "role": "primary",
+          "assignedAt": "2025-09-20T22:23:05.665Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -3365,6 +3389,56 @@
       "description": "Fix all syntax errors across multiple test files in bytebotd package - deploy concurrent agents to handle 5 files simultaneously",
       "category": "error",
       "id": "error_1758383880316_0av96bx9s0ka"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T22:10:24.223Z",
+      "title": "Check codebase for dead code and create removal tasks",
+      "description": "Comprehensive analysis of the entire codebase to identify unused functions, variables, imports, files, and other dead code. Create specific removal tasks for each category of dead code found. Analyze JavaScript/TypeScript files, configuration files, and assets.",
+      "category": "feature",
+      "id": "feature_1758406224223_zel5me3xrdq"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T22:21:09.133Z",
+      "title": "Consolidate ESLint configurations and remove redundant config files",
+      "description": "Consolidate 134 ESLint configuration files found across workspace, migrate legacy .eslintrc to modern flat config format, remove redundant configurations in packages/, and standardize linting setup. Focus on bytebot packages and core src/ directory. Simplifies maintenance and ensures consistent code quality standards.",
+      "category": "subtask",
+      "id": "subtask_1758406869133_w44uhsi4g6r"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T22:23:02.841Z",
+      "title": "Cleanup build artifacts and TypeScript declaration files",
+      "description": "Remove TypeScript declaration files from dist/, clean cache directories, remove .tsbuildinfo files, and delete large temporary lint/report files. Target: ~150MB+ storage recovery",
+      "category": "subtask",
+      "id": "subtask_1758406982841_9yx053tv4g"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T22:23:07.829Z",
+      "title": "Organize root level orphaned scripts to development/archived-scripts",
+      "description": "Move 47 root-level orphaned files to development/archived-scripts/ directory including integration-test-browser-automation.js, performance-validation-browser-automation.js, browser-use-documentation-validation-script.js, workspace-performance-test.js, validate-build-pipeline.js, temp.js and other temporary scripts. Create development/archived-scripts/ directory if needed, identify all root level .js and .ts files excluding essential ones, move orphaned scripts to archived directory, commit and push changes.",
+      "category": "subtask",
+      "id": "subtask_1758406987829_0nme3amvwmp"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-20T22:23:20.617Z",
+      "title": "Remove unused imports from security files",
+      "description": "Execute removal of unused imports from security files. Target Areas: 8 instances of crypto module over-imports (createHmac, timingSafeEqual, randomBytes), 6 instances of unused security interface imports (SecurityContext, MFAValidationRequest), 4 instances of unused test framework imports. Focus on src/security/ directory files. Use ESLint autofix and manual cleanup to remove all unused imports and improve bundle size.",
+      "category": "subtask",
+      "id": "subtask_1758407000617_u8mrv2j9zu"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T22:23:24.251Z",
+      "title": "Complete removal verification for confirmed dead test files",
+      "description": "Verify that the requested dead test files (test_ml_security_integration.js, run_ml_security_integration_test.js, ml_functional_test.ts) have been properly removed from the codebase. These files do not exist in the current codebase, indicating they were already removed in a previous operation.",
+      "category": "subtask",
+      "id": "subtask_1758407004251_iojuw639b7b",
+      "completed_at": "2025-09-20T22:24:29.166Z",
+      "updated_at": "2025-09-20T22:24:29.167Z"
     }
   ],
   "agents": {
@@ -9264,6 +9338,90 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-20T15:57:10.401Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758406937475_1_general_8606bb22": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:22:17.476Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:22:17.476Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758406966282_1_general_52f56c0c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:22:46.283Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:22:46.283Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758406983591_1_general_a73685bc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:23:03.592Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:23:03.592Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758406988991_1_general_3dfb297f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:23:08.992Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:23:08.992Z",
       "sessionId": null,
       "metadata": {}
     }

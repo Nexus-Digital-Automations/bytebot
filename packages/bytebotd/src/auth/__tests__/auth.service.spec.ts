@@ -471,7 +471,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Token refresh test completed successfully`);
     });
 
-    it('should reject invalid refresh tokens'async () => {
+    it('should reject invalid refresh tokens', async () => {
       const testId = `${operationId}_token_refresh_invalid`;console.log(
 
       );
@@ -488,7 +488,7 @@ describe('AuthService', () => {
   });
 
     describe('Role-Based Permissions', () => {
-  it('should assign correct permissions for admin role'() => {
+  it('should assign correct permissions for admin role', () => {
       const testId = `${operationId
 }_permissions_admin`;console.log(
 
@@ -499,7 +499,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Admin permissions test completed`);
     });
 
-    it('should assign correct permissions for operator role'() => {
+    it('should assign correct permissions for operator role', () => {
       const testId = `${operationId}_permissions_operator`;console.log(
 
       );
@@ -509,20 +509,18 @@ describe('AuthService', () => {
       console.log(`[${testId}] Operator permissions test completed`);
     });
 
-    it('should assign correct permissions for viewer role'() => {
-      const testId = `${operationId}_permissions_viewer`;console.log(
-
-      );
+    it('should assign correct permissions for viewer role', () => {
+      const testId = `${operationId}_permissions_viewer`;
+      console.log(`[${testId}] Testing viewer role permissions`);
       const permissions = service['getRolePermissions']('viewer');
       expect(permissions).toEqual(['task:read']);
 
       console.log(`[${testId}] Viewer permissions test completed`);
     });
 
-    it('should default to viewer permissions for unknown role'() => {
-      const testId = `${operationId}_permissions_unknown`;console.log(
-
-      );
+    it('should default to viewer permissions for unknown role', () => {
+      const testId = `${operationId}_permissions_unknown`;
+      console.log(`[${testId}] Testing unknown role permissions`);
       const permissions = service['getRolePermissions']('unknown');
       expect(permissions).toEqual(['task:read']);
 
@@ -531,7 +529,7 @@ describe('AuthService', () => {
   });
 
     describe('Security Features', () => {
-  it('should use strong password hashing'async () => {
+  it('should use strong password hashing', async () => {
       const testId = `${operationId
 }_security_hashing`;console.log(
 

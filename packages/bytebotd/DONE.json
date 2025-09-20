@@ -5008,10 +5008,22 @@
       "updated_at": "2025-09-20T15:20:17.615Z",
       "archived_at": "2025-09-20T15:20:17.646Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T22:23:24.251Z",
+      "title": "Complete removal verification for confirmed dead test files",
+      "description": "Verify that the requested dead test files (test_ml_security_integration.js, run_ml_security_integration_test.js, ml_functional_test.ts) have been properly removed from the codebase. These files do not exist in the current codebase, indicating they were already removed in a previous operation.",
+      "category": "subtask",
+      "id": "subtask_1758407004251_iojuw639b7b",
+      "completed_at": "2025-09-20T22:24:29.166Z",
+      "updated_at": "2025-09-20T22:24:29.167Z",
+      "archived_at": "2025-09-20T22:24:29.173Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 149,
+  "total_completed": 150,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-20T15:20:17.646Z"
+  "last_archived": "2025-09-20T22:24:29.173Z"
 }

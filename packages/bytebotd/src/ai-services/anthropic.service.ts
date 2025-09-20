@@ -38,7 +38,9 @@ export interface ClaudeModelConfig {
  * Claude chat message interface
  */
 export interface ClaudeMessage {
-  readonly role: 'user' | 'assistant' | 'system';readonly content: string;readonly metadata?: Record<string, unknown>;
+  readonly role: 'user' | 'assistant' | 'system';
+  readonly content: string;
+  readonly metadata?: Record<string, unknown>;
 }
 
 /**
@@ -68,18 +70,24 @@ export interface ClaudeToolDefinition {
 export interface ClaudeChatResponse {
   readonly id: string;
   readonly content: string;
-  readonly role: 'assistant';readonly model: string;readonly usage: {
+  readonly role: 'assistant';
+  readonly model: string;
+  readonly usage: {
     readonly inputTokens: number;
     readonly outputTokens: number;
   };
-  readonly stopReason: 'end_turn' | 'max_tokens' | 'stop_sequence' | 'tool_use';readonly toolCalls?: ClaudeToolCall[];}
+  readonly stopReason: 'end_turn' | 'max_tokens' | 'stop_sequence' | 'tool_use';
+  readonly toolCalls?: ClaudeToolCall[];
+}
 
 /**
  * Claude tool call interface
  */
 export interface ClaudeToolCall {
   readonly id: string;
-  readonly type: 'function';readonly function: {readonly name: string;
+  readonly type: 'function';
+  readonly function: {
+    readonly name: string;
     readonly arguments: string;
   };
 }
@@ -88,7 +96,9 @@ export interface ClaudeToolCall {
  * Claude streaming response chunk
  */
 export interface ClaudeStreamChunk {
-  readonly type: 'content_block_delta' | 'message_start' | 'message_stop';readonly delta?: {readonly text?: string;
+  readonly type: 'content_block_delta' | 'message_start' | 'message_stop';
+  readonly delta?: {
+    readonly text?: string;
   };
   readonly message?: Partial<ClaudeChatResponse>;
 }

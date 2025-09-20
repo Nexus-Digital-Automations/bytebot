@@ -85,9 +85,11 @@ interface SafeNextFunction {
  */
 interface App {
   getHttpAdapter(): {
-    get(;
-  path: string, handler: (;
-  req: SafeRequest, res: SafeResponse,
+    get(
+      path: string,
+      handler: (
+        req: SafeRequest,
+        res: SafeResponse,
         next?: SafeNextFunction,
       ) => void,
     ): void;
@@ -198,18 +200,19 @@ class MockSecureController {
   }
 
   // Sensitive operation endpoint
-  deleteResource(user: JwtPayloadi, d: strin, g) {
-  return {,
-  message: 'Resource deleted',
-      deletedId: iddeletedB, y: user.subdeletedA, t: Date.now(),
-    
-};
+  deleteResource(user: JwtPayload, id: string) {
+    return {
+      message: 'Resource deleted',
+      deletedId: id,
+      deletedBy: user.sub,
+      deletedAt: Date.now(),
+    };
   }
 
   // File upload endpoint (potential security risk)
   uploadFile(user: JwtPayload, file: SafeFile) {
-  return {,
-  message: 'File uploaded',
+    return {
+      message: 'File uploaded',
       filename: file.originalname,
       size: file.size,
       uploadedBy: user.sub,
@@ -220,8 +223,8 @@ class MockSecureController {
 
   // User search endpoint (potential injection risk)
   searchUsers(user: JwtPayload, query: string) {
-  return {,
-  query: query,
+  return {
+    query: query,
       results: [
         { id: '1', name: 'John Doe', email: 'john@test.com' 
 },

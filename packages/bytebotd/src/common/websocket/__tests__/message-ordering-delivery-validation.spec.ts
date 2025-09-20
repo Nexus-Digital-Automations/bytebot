@@ -236,7 +236,7 @@ describe('MessageOrderingDeliveryValidationService', () => {
 
   let service: MessageOrderingDeliveryValidationService;let module: TestingModule;
 
-  beforeAll(async () => 
+  beforeAll(async () => {
     jest.setTimeout(60000); // 60 seconds for comprehensive tests
 
     module = await Test.createTestingModule({,

@@ -367,7 +367,9 @@ describe('WebSocket Integration Tests', () => {
 
   describe('Connection and Session Management', () => {
 
-  it('should establish WebSocket connection successfully', async () => // Note: This test requires actual WebSocket server to be running// For unit testing, we'll verify the service configuration
+  it('should establish WebSocket connection successfully', async () => {
+    // Note: This test requires actual WebSocket server to be running
+    // For unit testing, we'll verify the service configuration
       const stats = conversationalService.getServerStatistics();
       expect(stats.performance.maxConcurrentSessions).toBe(1000);
       expect(stats.performance.targetLatency).toBe(50);

@@ -27,6 +27,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AIgentParlantSecurityBridgeService } from './services/aigent-parlant-security-bridge.service';
 import { ParlantModule } from '../parlant/parlant.module';
 import { SecurityAuditService } from '../security/security-audit.service';
+import { ParlantAuthModule } from '../../shared/src/modules/parlant-auth.module';
 
 /**
  * Enhanced enterprise authentication configuration factory
@@ -69,12 +70,28 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      envFilePath: ['.env.local', '.env'],}),// Import Parlant module for conversational validation
+      envFilePath: ['.env.local', '.env'],
+    }),
+
+    // Import Parlant module for conversational validation
     forwardRef(() => ParlantModule),
+
+    // Import ParlantAuthModule for enhanced authentication features
+    forwardRef(() => ParlantAuthModule.forFeature({
+      auth: true,
+      authz: true,
+      mfa: true,
+      riskAssessment: true,
+    })),
 
     // Configure Passport with enhanced JWT strategy
     PassportModule.register({
-      defaultStrategy: 'enhanced-jwt',session: false,property: 'user',}),// Enhanced JWT module with multi-algorithm support
+      defaultStrategy: 'enhanced-jwt',
+      session: false,
+      property: 'user',
+    }),
+
+    // Enhanced JWT module with multi-algorithm support
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: enhancedJwtConfigFactory,
@@ -114,10 +131,18 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
 
     // Export audit service for security monitoring
     SecurityAuditService,
+
+    // Re-export ParlantAuthModule services for easy access
+    ParlantAuthModule,
   ],
 })
 export class AuthModule {
   constructor() {
-    console.log('Enhanced AIgent-Parlant Authentication Module initialized');console.log('Enterprise JWT authentication with conversational security bridge active');console.log('Multi-algorithm support: HS256, RS256, ES256, EdDSA');console.log('5-tier security classification system enabled');console.log('Redis session clustering and emergency overrides available');
+    console.log('Enhanced AIgent-Parlant Authentication Module initialized');
+    console.log('Enterprise JWT authentication with conversational security bridge active');
+    console.log('Multi-algorithm support: HS256, RS256, ES256, EdDSA');
+    console.log('5-tier security classification system enabled');
+    console.log('Redis session clustering and emergency overrides available');
+    console.log('PARLANT Authentication Module integration completed');
   }
 }

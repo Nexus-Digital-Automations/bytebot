@@ -59,27 +59,26 @@ import { createSafeWebSocketServer } from '../websocket-types';
 class MockParlantService {
   private httpServer: Server;
   private wsServer: WebSocket.Server | null = null;
-  private activeValidations = new Map<string, {,
-  validationId: string;
-  startTime: number;
+  private activeValidations = new Map<string, {
+    validationId: string;
+    startTime: number;
     action: ValidationAction;
-  context: any;
+    context: any;
     status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-}>();
+    progress: number;
+  }>();
 
   private responses = new Map<string, any>();
   private connectionMetrics = {
-  totalConnections: 0,
+    totalConnections: 0,
     activeConnections: 0,
     messagesProcessed: 0,
     averageProcessingTime: 0,
     processingTimes: [] as number[],
-  
-};
+  };
 
   constructor(private port: number) {
-  this.httpServer = createServer();
+    this.httpServer = createServer();
     this.setupRoutes();
   
 }

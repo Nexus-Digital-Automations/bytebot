@@ -17,12 +17,17 @@
  * Performance: Sub-500ms API security validation with intelligent caching
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, 
-  ParlantValidationRequest, 
-  ParlantConversationContext, 
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError 
-} from '../parlant/parlant-integration.service';// ===== API SECURITY INTERFACES =====/**
+  ConversationalValidationError
+} from '../parlant/parlant-integration.service';
+
+// ===== API SECURITY INTERFACES =====
+/**
  * API security scan types
  */
 export enum ApiSecurityScanType {

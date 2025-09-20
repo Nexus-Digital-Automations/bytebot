@@ -19,8 +19,18 @@
  * Performance: Sub-800ms validation with multi-level caching for compliance operations
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';// ===== COMPLIANCE FRAMEWORK INTEGRATION INTERFACES =====export interface ComplianceContext extends ParlantConversationContext {
-  readonly frameworkType: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST' | 'SOC2' | 'FedRAMP';readonly operationType: 'assessment' | 'audit' | 'reporting' | 'mapping' | 'remediation' | 'certification';readonly scope: 'organization' | 'department' | 'application' | 'process' | 'control';readonly regulatoryImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';readonly assessmentPeriod?: string;readonly auditRequired: boolean;
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+
+// ===== COMPLIANCE FRAMEWORK INTEGRATION INTERFACES =====
+export interface ComplianceContext extends ParlantConversationContext {
+  readonly frameworkType: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO27001' | 'NIST' | 'SOC2' | 'FedRAMP';
+  readonly operationType: 'assessment' | 'audit' | 'reporting' | 'mapping' | 'remediation' | 'certification';
+  readonly scope: 'organization' | 'department' | 'application' | 'process' | 'control';
+  readonly regulatoryImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly assessmentPeriod?: string;
+  readonly auditRequired: boolean;
   readonly externalAuditor?: string;
 }
 

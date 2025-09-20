@@ -427,7 +427,9 @@ let testModule: TestingModule;
 
 
   describe('Throughput Performance Tests', () => {
-it('should handle high-throughput computer use operations', async () => const testConfig: LoadTestConfiguration = {testName: 'high_throughput_computer_use',
+    it('should handle high-throughput computer use operations', async () => {
+      const testConfig: LoadTestConfiguration = {
+        testName: 'high_throughput_computer_use',
       concurrentUsers: 50,
       operationsPerUser: 20,
         rampUpTime: 5000,
@@ -489,7 +491,8 @@ it('should handle high-throughput computer use operations', async () => const te
 
 
     it('should maintain performance under mixed operation types', async () => {
-const testConfig: LoadTestConfiguration = testName: 'mixed_operations_throughput',
+      const testConfig: LoadTestConfiguration = {
+        testName: 'mixed_operations_throughput',
       concurrentUsers: 30,
       operationsPerUser: 15,
         rampUpTime: 3000,

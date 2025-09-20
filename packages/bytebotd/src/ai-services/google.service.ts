@@ -92,7 +92,9 @@ export interface GeminiFunctionDeclaration {
   readonly name: string;
   readonly description: string;
   readonly parameters: {
-    readonly type: 'object';readonly properties: Record<string, {readonly type: string;
+    readonly type: 'object';
+    readonly properties: Record<string, {
+      readonly type: string;
       readonly description: string;
       readonly enum?: string[];
     }>;
@@ -105,7 +107,9 @@ export interface GeminiFunctionDeclaration {
  */
 export interface GeminiCandidate {
   readonly content: GeminiContent;
-  readonly finishReason: 'FINISH_REASON_UNSPECIFIED' | 'STOP' | 'MAX_TOKENS' | 'SAFETY' | 'RECITATION' | 'OTHER';readonly safetyRatings: GeminiSafetyRating[];readonly citationMetadata?: {
+  readonly finishReason: 'FINISH_REASON_UNSPECIFIED' | 'STOP' | 'MAX_TOKENS' | 'SAFETY' | 'RECITATION' | 'OTHER';
+  readonly safetyRatings: GeminiSafetyRating[];
+  readonly citationMetadata?: {
     readonly citationSources: Array<{
       readonly startIndex?: number;
       readonly endIndex?: number;

@@ -142,31 +142,34 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
     securityLogger.info(`[${operationId}] Setting up JWT Security test module`);
 
     module = await Test.createTestingModule({
-  providers: [
+      providers: [
         JwtAuthGuard,
-        {,
-  provide: JwtService, useValue: {,
-  verifyAsync: jest.fn(), sign: jest.fn(),
-          
-},
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+            sign: jest.fn(),
+          },
         },
         {
-  provide: ConfigService, useValue: {,
-  get: jest.fn((key: strin, g) => {
-              const config: Record<string, string> = {,
-  JWT_SECRET: 'test-jwt-secret',
-      JWT_REFRESH_SECRET: 'test-refresh-secret', JWT_EXPIRATION: '15m', JWT_REFRESH_EXPIRATION: '7d',
-              
-};
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, string> = {
+                JWT_SECRET: 'test-jwt-secret',
+                JWT_REFRESH_SECRET: 'test-refresh-secret',
+                JWT_EXPIRATION: '15m',
+                JWT_REFRESH_EXPIRATION: '7d',
+              };
               return config[key] ?? null;
             }),
           },
         },
         {
-  provide: Reflector, useValue: {,
-  getAllAndOverride: jest.fn(),
-          
-},
+          provide: Reflector,
+          useValue: {
+            getAllAndOverride: jest.fn(),
+          },
         }]
       }).compile();
 
@@ -279,7 +282,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 });
 
       (jest.spyOn(reflector, 'getAllAndOverride')).mockReturnValue(false);
-      (jest.spyOn(jwtService'verifyAsync')).mockResolvedValue(maliciousPayload);
+      (jest.spyOn(jwtService, 'verifyAsync')).mockResolvedValue(maliciousPayload);
 
       // Should succeed but user object should be sanitized
       const result = await guard.canActivate(context);

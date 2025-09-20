@@ -133,50 +133,46 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Algorithm confusion attack vectors
-    createAlgorithmConfusionTokens: (_payload: SecurityTestPayloa, d) => {
-  return {,
-  noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {,
-  algorithm: 'none'
-      
-}),rsaToHmac: JWTManipulator.createVulnerableJWT(_payload, {
-  algorithm: 'RS256'
-      
-}),weakAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
-  algorithm: 'HS1'
-      
-}),invalidAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
-  algorithm: 'INVALID'
-      
-}),};
+    createAlgorithmConfusionTokens: (_payload: SecurityTestPayload) => {
+      return {
+        noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
+          algorithm: 'none'
+        }),
+        rsaToHmac: JWTManipulator.createVulnerableJWT(_payload, {
+          algorithm: 'RS256'
+        }),
+        weakAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
+          algorithm: 'HS1'
+        }),
+        invalidAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
+          algorithm: 'INVALID'
+        }),
+      };
     },
 
     // Payload injection attack vectors
-    createPayloadInjectionTokens: (basePayload: SecurityTestPayloa, d) => {
-  return {,
-  prototypeInjection: JWTManipulator.createVulnerableJWT({
+    createPayloadInjectionTokens: (basePayload: SecurityTestPayload) => {
+      return {
+        prototypeInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          __proto__: { role: UserRole.ADMIN, isAdmin: true 
-}
+          __proto__: { role: UserRole.ADMIN, isAdmin: true }
         }),
         constructorInjection: JWTManipulator.createVulnerableJWT({
-  ...basePayload,
-          constructor: { prototype: { role: UserRole.ADMIN 
-} }
+          ...basePayload,
+          constructor: { prototype: { role: UserRole.ADMIN } }
         }),
         roleConfusion: JWTManipulator.createVulnerableJWT({
-  ...basePayload,
+          ...basePayload,
           role: UserRole.VIEWER,
           admin: true,
           roles: [UserRole.ADMIN],
           privileges: ['admin']
-      
-}),
+        }),
         xssInjection: JWTManipulator.createVulnerableJWT({
-  ...basePayload,
+          ...basePayload,
           sub: '<script>alert("XSS")</script>',
           email: '<img src=x onerror=alert("XSS")>@test.com'
-        
-}),
+        }),
       };
     },
 
@@ -199,64 +195,69 @@ describe('Security Penetration Testing Suite', () => {
 
   // Attack simulation utilities
   const AttackSimulator = {
-  // Brute force attack simulation,
-  simulateBruteForceAttack: async (,
-  targetFunction: (token: strin, g) => Promise<unknown>,
-      attempts: number = 100): Promise<{,
-  totalTime: number;,
-  attempts: number;
+    // Brute force attack simulation
+    simulateBruteForceAttack: async (
+      targetFunction: (token: string) => Promise<unknown>,
+      attempts: number = 100
+    ): Promise<{
+      totalTime: number;
+      attempts: number;
       successful: number;
-  failed: number;
+      failed: number;
       averageTime: number;
-  results: Array<{,
-  success: boolean;,
-  token: string;
+      results: Array<{
+        success: boolean;
+        token: string;
         time: number;
         error?: string;
-      
-}>;
+      }>;
     }> => {
-  const results = [];
+      const results = [];
       const startTime = Date.now();
 
       for (let i = 0; i < attempts; i++) {
-        const attackToken = `attack-token-${i
-}-${Math.random()}`;
+        const attackToken = `attack-token-${i}-${Math.random()}`;
         const attackStart = Date.now();
 
         try {
-  await targetFunction(attackToken);
-          results.push({,
-  success: truetoke, n: attackTokentim, e: Date.now() - attackStart
-      
-});
+          await targetFunction(attackToken);
+          results.push({
+            success: true,
+            token: attackToken,
+            time: Date.now() - attackStart
+          });
         } catch (_error) {
-  results.push({,
-  success: falsetoke, n: attackTokenerro, r: _error instanceof Error ? _error.message : String(_error), time: Date.now() - attackStart
-      
-});
+          results.push({
+            success: false,
+            token: attackToken,
+            error: _error instanceof Error ? _error.message : String(_error),
+            time: Date.now() - attackStart
+          });
         }
       }
 
       return {
-  totalTime: Date.now() - startTimeattempts: attemptssuccessfu, l: results.filter((r) => r.success).lengthfailed: results.filter((r) => !r.success).lengthaverageTime:
-          results.reduce((sum, r) => sum + r.time, 0) / results.lengthresults: results,
-      
-};
+        totalTime: Date.now() - startTime,
+        attempts: attempts,
+        successful: results.filter((r) => r.success).length,
+        failed: results.filter((r) => !r.success).length,
+        averageTime: results.reduce((sum, r) => sum + r.time, 0) / results.length,
+        results: results,
+      };
     },
 
     // Session replay attack simulation
     simulateSessionReplayAttack: async (
-      validToken: string, targetFunction: (token: strin, g) => Promise<unknown>,
+      validToken: string,
+      targetFunction: (token: string) => Promise<unknown>
     ): Promise<
       Array<{
-  token: string;,
-  success: boolean;
+        token: string;
+        success: boolean;
         error?: string;
-      
-}>
+      }>
     > => {
-  const replayAttempts = [
+      const replayAttempts = [
         validToken, // Original token
         validToken.replace(/.$/, '1'), // Modified last character
         validToken.substring(0, validToken.length - 5) + 'AAAAA', // Modified signature
@@ -285,17 +286,17 @@ describe('Security Penetration Testing Suite', () => {
 
     // Race condition attack simulation
     simulateRaceConditionAttack: async (
-      user: ByteBotdUsertargetFunctio, n: (user: ByteBotdUse, r) => Promise<unknown>,
+      user: ByteBotdUser,
+      targetFunction: (user: ByteBotdUser) => Promise<unknown>
     ): Promise<
       Array<{
-  success: boolean;,
-  index: number;
+        success: boolean;
+        index: number;
         userRole: UserRole;
         error?: string;
-      
-}>
+      }>
     > => {
-  const originalRole = user.role;
+      const originalRole = user.role;
       const concurrentRequests = 20;
 
       const promises = Array(concurrentRequests)
@@ -305,19 +306,23 @@ describe('Security Penetration Testing Suite', () => {
           if (_index === 10) {
             setTimeout(() => {
               user.role = UserRole._ADMIN;
-            
-}, 5);
+            }, 5);
           }
 
           try {
-  const _result = await targetFunction(user);
-            return { success: trueinde, x: _indexuserRol, e: user.role 
-};
+            const _result = await targetFunction(user);
+            return {
+              success: true,
+              index: _index,
+              userRole: user.role
+            };
           } catch (_error) {
-  return {,
-  success: falseinde, x: _indexerro, r: _error instanceof Error ? _error.message : String(_error), userRole: user.role,
-            
-};
+            return {
+              success: false,
+              index: _index,
+              error: _error instanceof Error ? _error.message : String(_error),
+              userRole: user.role,
+            };
           }
         });
 
@@ -332,21 +337,30 @@ describe('Security Penetration Testing Suite', () => {
 
   // Mock execution context for penetration testing
   const createPentestExecutionContext = (
-    _user?: ByteBotdUserheaders: PentestHeaders = {},
+    _user?: ByteBotdUser,
+    headers: PentestHeaders = {},
     metadata: PentestMetadata = {},
   ): ExecutionContext => {
-  const mockRequest = {,
-  user: _userheader, s: {
-        'user-agent': 'PenetrationTestBot/1.0','x-forwarded-for': metadata.ip ?? '10.0.0.100','x-real-ip': metadata.ip ?? '10.0.0.100','x-attack-vector': metadata.attackVector ?? 'unknown',...headers,
-},
+    const mockRequest = {
+      user: _user,
+      headers: {
+        'user-agent': 'PenetrationTestBot/1.0',
+        'x-forwarded-for': metadata.ip ?? '10.0.0.100',
+        'x-real-ip': metadata.ip ?? '10.0.0.100',
+        'x-attack-vector': metadata.attackVector ?? 'unknown',
+        ...headers,
+      },
       ip: metadata.ip ?? '10.0.0.100',
       url: metadata.url ?? '/api/pentest',
-        method: metadata.method ?? 'GET',
+      method: metadata.method ?? 'GET',
       connection: { remoteAddress: metadata.ip ?? '10.0.0.100' },
-      socket: { remoteAddress: metadata.ip ?? '10.0.0.100' },};return {
-  switchToHttp: jest.fn().mockReturnValue({,
-  getRequest: jest.fn().mockReturnValue(mockRequest), getResponse: jest.fn().mockReturnValue({
-})
+      socket: { remoteAddress: metadata.ip ?? '10.0.0.100' },
+    };
+
+    return {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+        getResponse: jest.fn().mockReturnValue({}),
       }),
       switchToRpc: jest.fn().mockReturnValue({}),
       switchToWs: jest.fn().mockReturnValue({}),
@@ -364,24 +378,27 @@ describe('Security Penetration Testing Suite', () => {
     );
 
     module = await Test.createTestingModule({
-  providers: [
+      providers: [
         JwtAuthGuard,
         RolesGuard,
-        {,
-  provide: JwtService, useValue: {,
-  verifyAsync: jest.fn(), sign: jest.fn(),
-          
-},
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+            sign: jest.fn(),
+          },
         },
         {
-  provide: ConfigService, useValue: {,
-  get: jest.fn((key: strin, g): string | boolean | undefined => {
-              const config: Record<string, string | boolean> = {,
-  JWT_SECRET: 'pentest-secret-key',
-      JWT_REFRESH_SECRET: 'pentest-refresh-secret',
-        JWT_EXPIRATION: '15m', SECURITY_AUDIT_ENABLED: trueRATE_LIMIT_ENABLE, D: true,
-              
-};
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string): string | boolean | undefined => {
+              const config: Record<string, string | boolean> = {
+                JWT_SECRET: 'pentest-secret-key',
+                JWT_REFRESH_SECRET: 'pentest-refresh-secret',
+                JWT_EXPIRATION: '15m',
+                SECURITY_AUDIT_ENABLED: true,
+                RATE_LIMIT_ENABLED: true,
+              };
               return config[key] ?? '';
             }),
           },
