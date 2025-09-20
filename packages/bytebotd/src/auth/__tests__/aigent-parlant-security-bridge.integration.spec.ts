@@ -28,7 +28,6 @@ import {
   EnhancedJwtPayload,
   SessionState,
   EmergencyOverrideRequest,
-
 } from '../services/aigent-parlant-security-bridge.service';
 import { EnhancedJwtStrategy } from '../strategies/enhanced-jwt.strategy';
 import { ParlantIntegrationService } from '../../parlant/parlant-integration.service';
@@ -560,23 +559,34 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
         },
       });
       expect(session.complianceFrameworks).toContain(ComplianceFramework.GDPR);
-      expect(session.metadata.organizationId).toBe('eu-subsidiary-789');});
+      expect(session.metadata.organizationId).toBe('eu-subsidiary-789');
+    });
 
     it('should validate HIPAA compliance for healthcare operations', async () => {
-  const payload: EnhancedJwtPayload = {sub: 'hipaa-user-789',
-      email: 'hipaa@healthcare.org',
+      const payload: EnhancedJwtPayload = {
+        sub: 'hipaa-user-789',
+        email: 'hipaa@healthcare.org',
         username: 'hipaauser',
-      role: UserRole._VIEWERisActiv, e: trueia, t: Math.floor(Date.now() / 1000),
+        role: UserRole._VIEWER,
+        isActive: true,
+        iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
         iss: 'aigent-bytebot-system',
-      aud: 'bytebotd-enterprise-control',
-        securityClassification: SecurityClassification.RESTRICTEDpermission, s: [Permission._TASK_READ],
-        complianceRequirements: [ComplianceFramework.HIPAA, ComplianceFramework.ISO_27001], organizationId: 'healthcare-system-101', departmentId: 'patient-records-dept',
-};const session = await securityBridge.createSecureSessionBridge(payload, {
-  ipAddress: '10.200.50.15',
-      userAgent: 'Healthcare Terminal',
-        sessionMetadata: { patientDataAccess: truehipaaComplian, t: true 
-}
+        aud: 'bytebotd-enterprise-control',
+        securityClassification: SecurityClassification.RESTRICTED,
+        permissions: [Permission._TASK_READ],
+        complianceRequirements: [ComplianceFramework.HIPAA, ComplianceFramework.ISO_27001],
+        organizationId: 'healthcare-system-101',
+        departmentId: 'patient-records-dept',
+      };
+
+      const session = await securityBridge.createSecureSessionBridge(payload, {
+        ipAddress: '10.200.50.15',
+        userAgent: 'Healthcare Terminal',
+        sessionMetadata: {
+          patientDataAccess: true,
+          hipaaCompliant: true
+        }
       });
       expect(session.complianceFrameworks).toContain(ComplianceFramework.HIPAA);
       expect(session.securityClassification).toBe(SecurityClassification.RESTRICTED);
@@ -749,7 +759,6 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
                 securityLevel: 'MEDIUM',
                 conversationHistory: [],
                 metadata: {},
-                },
               },
             }),
             validateSessionSecurity: jest.fn().mockResolvedValue(true),
@@ -796,43 +805,50 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     });
 
     it('should handle RS256 public key configuration', () => {
-  expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_RS256', '');
+      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PUBLIC_KEY_RS256', '');
       expect(mockConfigService.get).toHaveBeenCalledWith('JWT_PRIVATE_KEY_RS256', '');
-});});
+    });
+  });
 
     describe('Security Context Validation', () => {
-  const mockValidPayload: EnhancedJwtPayload = {sub: 'strategy-test-user',
-      email: 'strategy@example.com',
+      const mockValidPayload: EnhancedJwtPayload = {
+        sub: 'strategy-test-user',
+        email: 'strategy@example.com',
         username: 'strategyuser',
-      firstName: 'Strategy',
+        firstName: 'Strategy',
         lastName: 'User',
-      role: UserRole._OPERATORisActiv, e: trueia, t: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600,
-      iss: 'aigent-bytebot-system',
-      aud: 'bytebotd-enterprise-control',
-        securityClassification: SecurityClassification.CONFIDENTIALpermission, s: [Permission._TASK_READ, Permission._TASK_WRITE], complianceRequirements: [ComplianceFramework.GDPR], organizationId: 'test-org',
-};it('should validate required JWT claims', () => {
-  // Mock payload validation - strategy should check all required fieldsexpect(mockValidPayload.sub).toBeDefined();
-      expect(mockValidPayload.email).toBeDefined();
-      expect(mockValidPayload.username).toBeDefined();
-      expect(mockValidPayload.role).toBeDefined();
-      expect(mockValidPayload.securityClassification).toBeDefined();
-      expect(mockValidPayload.permissions).toBeDefined();
-      expect(mockValidPayload.complianceRequirements).toBeDefined();
-    
-});
+        role: UserRole._OPERATOR,
+        isActive: true,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iss: 'aigent-bytebot-system',
+        aud: 'bytebotd-enterprise-control',
+        securityClassification: SecurityClassification.CONFIDENTIAL,
+        permissions: [Permission._TASK_READ, Permission._TASK_WRITE],
+        complianceRequirements: [ComplianceFramework.GDPR],
+        organizationId: 'test-org',
+      };
 
-    it('should validate token timing claims', () => {
-  const now = Math.floor(Date.now() / 1000);
-      expect(mockValidPayload.iat).toBeLessThanOrEqual(now);
-      expect(mockValidPayload.exp).toBeGreaterThan(now);
-    
-});
+      it('should validate required JWT claims', () => {
+        // Mock payload validation - strategy should check all required fields
+        expect(mockValidPayload.sub).toBeDefined();
+        expect(mockValidPayload.email).toBeDefined();
+        expect(mockValidPayload.username).toBeDefined();
+        expect(mockValidPayload.role).toBeDefined();
+        expect(mockValidPayload.securityClassification).toBeDefined();
+        expect(mockValidPayload.permissions).toBeDefined();
+        expect(mockValidPayload.complianceRequirements).toBeDefined();
+      });
 
-    it('should validate issuer and audience claims', () => {
-  expect(mockValidPayload.iss).toBe('aigent-bytebot-system');
-      expect(mockValidPayload.aud).toBe('bytebotd-enterprise-control');
-    
-});
-  });
+      it('should validate token timing claims', () => {
+        const now = Math.floor(Date.now() / 1000);
+        expect(mockValidPayload.iat).toBeLessThanOrEqual(now);
+        expect(mockValidPayload.exp).toBeGreaterThan(now);
+      });
+
+      it('should validate issuer and audience claims', () => {
+        expect(mockValidPayload.iss).toBe('aigent-bytebot-system');
+        expect(mockValidPayload.aud).toBe('bytebotd-enterprise-control');
+      });
+    });
 });

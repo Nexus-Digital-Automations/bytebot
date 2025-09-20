@@ -336,7 +336,10 @@ Use Cases:
       const sourceAgents = await this.assignSourceAgents(request.sources);
 
       // Create extraction job
-      const job = this.createExtractionJob('multi-source', request, Object.values(sourceAgents));// Execute parallel extractionsconst sourceResults = await Promise.all(
+      const job = this.createExtractionJob('multi-source', request, Object.values(sourceAgents));
+
+      // Execute parallel extractions
+      const sourceResults = await Promise.all(
         request.sources.map(async (source, index) => {
           const agent = sourceAgents[source.sourceId];
           return this.executeSourceExtraction(agent, source, operationId);

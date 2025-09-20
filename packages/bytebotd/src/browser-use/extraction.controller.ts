@@ -404,7 +404,7 @@ Use cases:
         summary: 'Basic structured data extraction',description: 'Extract all common structured data types',value: {sessionId: 'session_123456789',timeout: 30000,},
       },
       custom: {
-        summary: 'Custom structured data extraction',description: 'Extract with custom selectors',value: {sessionId: 'session_123456789',jsonLdSelectors: ['script[type="application/ld+json"]", '.structured-data script'],microdataSelectors: ['[itemscope]', '[itemtype]'],openGraphSelectors: ['meta[property^="og:"]", 'meta[name^="twitter:"]'],waitForSelector: '.metadata-loaded',timeout: 30000,},
+        summary: 'Custom structured data extraction',description: 'Extract with custom selectors',value: {sessionId: 'session_123456789',jsonLdSelectors: ['script[type="application/ld+json"]', '.structured-data script'],microdataSelectors: ['[itemscope]', '[itemtype]'],openGraphSelectors: ['meta[property^="og:"]', 'meta[name^="twitter:"]'],waitForSelector: '.metadata-loaded',timeout: 30000,},
       },
     },
   })

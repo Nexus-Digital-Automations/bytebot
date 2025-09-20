@@ -123,7 +123,8 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
       });
 
       it('should reject task with invalid actions', async () => {const invalidTaskDto = {name: 'Invalid Task',actions: [{
-              type: 'invalid_action', // Invalid action typeurl: 'https://example.com',},],
+              type: 'invalid_action', // Invalid action type
+              url: 'https://example.com',},],
           priority: BrowserTaskPriority.NORMAL,
         };
 

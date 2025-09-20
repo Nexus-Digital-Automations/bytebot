@@ -756,7 +756,9 @@ export class BrowserUseService {
 
           childProcess.stderr.on('data', (_data: Buffer) => {stderr += _data.toString();});
 
-          childProcess.on('close', async (code) => {// Cleanup script filetry {
+          childProcess.on('close', async (code) => {
+            // Cleanup script file
+            try {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {
               this.logger.warn('Failed to cleanup script file', cleanupErr);

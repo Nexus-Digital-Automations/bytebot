@@ -169,16 +169,16 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
               type: 'navigate',url: 'https://httpbin.org/forms/post',},{
               type: 'wait',selector: 'form',timeout: 5000,},
             {
-              type: 'fill',selector: 'input[name="custname"]",value: 'Test Customer',},{
-              type: 'fill',selector: 'input[name="custtel"]",value: '123-456-7890',},{
-              type: 'fill',selector: 'input[name="custemail"]",value: 'test@example.com',},{
-              type: 'select',selector: 'select[name="size"]",value: 'medium',},{
-              type: 'check',selector: 'input[name="topping"][value="bacon"]",},
+              type: 'fill',selector: 'input[name="custname"]',value: 'Test Customer',},{
+              type: 'fill',selector: 'input[name="custtel"]',value: '123-456-7890',},{
+              type: 'fill',selector: 'input[name="custemail"]',value: 'test@example.com',},{
+              type: 'select',selector: 'select[name="size"]',value: 'medium',},{
+              type: 'check',selector: 'input[name="topping"][value="bacon"]',},
             {
-              type: 'fill',selector: 'textarea[name="comments"]",value: 'This is a test comment for E2E automation.',},{
+              type: 'fill',selector: 'textarea[name="comments"]',value: 'This is a test comment for E2E automation.',},{
               type: 'screenshot',fullPage: true,},
             {
-              type: 'click',selector: 'input[type="submit"]",},
+              type: 'click',selector: 'input[type="submit"]',},
             {
               type: 'wait',selector: 'pre',timeout: 10000,},
             {

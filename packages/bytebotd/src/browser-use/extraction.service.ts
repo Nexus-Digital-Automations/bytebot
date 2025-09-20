@@ -590,88 +590,103 @@ asyncio.run(extract_text())
     timeout: number = 30000,
   ): string {
     const configJson = JSON.stringify(config);
+    const waitForSelectorCode = waitForSelector
+      ? '        # Wait for selector if specified\n        await agent.browser.wait_for_selector("' + waitForSelector + '", timeout=' + timeout + ')\n'
+      : '';
 
-    return `
-import asyncio
-import json
-import sys
-from browser_use import Agent
+    const pythonScript = [
+      'import asyncio',
+      'import json',
+      'import sys',
+      'from browser_use import Agent',
+      '',
+      'async def extract_table():',
+      '    agent = Agent()',
+      '',
+      '    try:',
+      '        session_id = "' + sessionId + '"',
+      "        config_json = '''" + configJson + "'''",
+      '        config = json.loads(config_json)',
+      "        selector = config['selector']",
+      waitForSelectorCode,
+      '',
+      '        # Find table element',
+      '        table = await agent.browser.query_selector(selector)',
+      '        if not table:',
+      '            raise Exception(f"Table not found with selector: {selector}")',
+      '',
+      '        # Extract headers',
+      '        headers = []',
+      '        header_rows = await table.query_selector_all("thead tr, tr:first-child")',
+      "        if header_rows and config.get('includeHeaders', True):",
+      '            header_cells = await header_rows[0].query_selector_all("th, td")',
+      '            for cell in header_cells:',
+      '                header_text = await cell.text_content()',
+      '                headers.append(header_text.strip())',
+      '',
+      '        # Extract data rows',
+      '        rows = []',
+      '        data_rows = await table.query_selector_all("tbody tr, tr")',
+      '',
+      '        # Skip header row if it was included in data rows',
+      "        start_index = 1 if config.get('includeHeaders', True) and not await table.query_selector('thead') else 0",
+      '',
+      '        for i, row in enumerate(data_rows[start_index:]):',
+      "            if config.get('maxRows') and i >= config['maxRows']:",
+      '                break',
+      '',
+      '            cells = await row.query_selector_all("td, th")',
+      '            row_data = {}',
+      '',
+      '            for j, cell in enumerate(cells):',
+      '                cell_text = await cell.text_content()',
+      '                cell_text = cell_text.strip()',
+      '',
+      '                # Skip empty rows if configured',
+      "                if config.get('skipEmptyRows', True) and not cell_text:",
+      '                    continue',
+      '',
+      '                # Use header as key or fallback to column index',
+      '                if j < len(headers):',
+      '                    column_key = headers[j]',
+      '                    # Apply column mapping if provided',
+      "                    if config.get('columnMapping') and column_key in config['columnMapping']:",
+      "                        column_key = config['columnMapping'][column_key]",
+      '                else:',
+      '                    column_key = f"column_{j}"',
+      '',
+      '                # Try to convert to number if possible',
+      '                try:',
+      "                    if '.' in cell_text:",
+      '                        row_data[column_key] = float(cell_text)',
+      '                    else:',
+      '                        row_data[column_key] = int(cell_text)',
+      '                except ValueError:',
+      '                    row_data[column_key] = cell_text',
+      '',
+      '            if row_data:  # Only add non-empty rows',
+      '                rows.append(row_data)',
+      '',
+      '        result = {',
+      "            'headers': headers,",
+      "            'rows': rows,",
+      "            'metadata': {",
+      "                'rowCount': len(rows),",
+      "                'columnCount': len(headers),",
+      "                'selector': selector",
+      '            }',
+      '        }',
+      '',
+      '        print(json.dumps(result))',
+      '',
+      '    except Exception as e:',
+      '        sys.stderr.write(f"Table extraction error: {str(e)}\\n")',
+      '        sys.exit(1)',
+      '',
+      'asyncio.run(extract_table())'
+    ];
 
-async def extract_table():
-    agent = Agent()
-
-    try:
-        session_id = "${sessionId}"
-        config = ${configJson}
-        selector = config['selector']${waitForSelector ? '
-        # Wait for selector if specified
-        await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}
-
-        # Find table element
-        table = await agent.browser.query_selector(selector)
-        if not table:
-            raise Exception(f"Table not found with selector: {selector}")# Extract headersheaders = []
-        header_rows = await table.query_selector_all("thead tr, tr:first-child")
-        if header_rows and config.get('includeHeaders', True):
-            header_cells = await header_rows[0].query_selector_all("th, td")for cell in header_cells:header_text = await cell.text_content()
-                headers.append(header_text.strip())
-
-        # Extract data rows
-        rows = []
-        data_rows = await table.query_selector_all("tbody tr, tr")
-
-        # Skip header row if it was included in data rows
-        start_index = 1 if config.get('includeHeaders', True) and not await table.query_selector("thead") else 0
-
-        for i, row in enumerate(data_rows[start_index:]):
-            if config.get('maxRows') and i >= config['maxRows']:
-                break
-
-            cells = await row.query_selector_all("td, th")
-            row_data = {}
-
-            for j, cell in enumerate(cells):
-                cell_text = await cell.text_content()
-                cell_text = cell_text.strip()
-
-                # Skip empty rows if configured
-                if config.get('skipEmptyRows', True) and not cell_text:continue# Use header as key or fallback to column index
-                if j < len(headers):
-                    column_key = headers[j]
-                    # Apply column mapping if provided
-                    if config.get('columnMapping') and column_key in config['columnMapping']:column_key = config['columnMapping'][column_key]
-                else:
-                    column_key = f"column_{j}"
-
-                # Try to convert to number if possible
-                try:
-                    if '.' in cell_text:row_data[column_key] = float(cell_text)else:
-                        row_data[column_key] = int(cell_text)
-                except ValueError:
-                    row_data[column_key] = cell_text
-
-            if row_data:  # Only add non-empty rows
-                rows.append(row_data)
-
-        result = {
-            'headers': headers,
-            'rows': rows,
-            'metadata': {
-                'rowCount': len(rows),
-                'columnCount': len(headers),
-                'selector': selector
-            }
-        }
-
-        print(json.dumps(result))
-
-    except Exception as e:
-        sys.stderr.write(f"Table extraction error: {str(e)}\n")
-        sys.exit(1)
-
-asyncio.run(extract_table())
-`;
+    return pythonScript.join('\n');
 
   /**
    * Generate Python script for link extraction

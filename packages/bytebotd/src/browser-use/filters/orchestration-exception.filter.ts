@@ -223,7 +223,10 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     // System-wide failures require immediate intervention
     if (impactAssessment.systemWideImpact) {
       return {
-        strategy: 'system_restart',priority: 'immediate',estimatedRecoveryTime: 60000, // 60 secondsresourceRequirements: {
+        strategy: 'system_restart',
+        priority: 'immediate',
+        estimatedRecoveryTime: 60000, // 60 seconds
+        resourceRequirements: {
           coordinatorNodes: 1,
         },
       };

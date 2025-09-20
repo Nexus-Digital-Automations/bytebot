@@ -1,4 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';import { Observable, Subject, BehaviorSubject, MessageEvent } from 'rxjs';import { filter, map } from 'rxjs/operators';import { v4 as uuidv4 } from 'uuid';import { spawn, ChildProcess } from 'child_process';import { promises as fs } from 'fs';import * as path from 'path';// Import existing servicesimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';// Import enhanced DTOsimport {
+import { Injectable, Logger } from '@nestjs/common';
+import { Observable, Subject, BehaviorSubject, MessageEvent } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
+import { spawn, ChildProcess } from 'child_process';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+
+// Import existing services
+import { BrowserUseService } from './browser-use.service';
+import { BrowserSessionService } from './browser-session.service';
+import { BrowserTaskService } from './browser-task.service';
+
+// Import enhanced DTOs
+import {
   ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,

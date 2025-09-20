@@ -91,15 +91,62 @@ import type {
   FormAutomationConfigDto,
   FormActionType,
   FormFieldType,
-} from '../form-automation/dto/form-action.dto';import {FormAutomationResponseDto,
+} from '../form-automation/dto/form-action.dto';
+import {
+  FormAutomationResponseDto,
   FormDetectionResponseDto,
   FormSubmissionResponseDto,
-} from '../form-automation/dto/form-response.dto';// ===== DOM ORCHESTRATION ENUMS =====export enum DOMOrchestrationWorkflowType {
-  MULTI_STEP_FORM = 'multi_step_form',PARALLEL_INTERACTIONS = 'parallel_interactions',FORM_VALIDATION_WORKFLOW = 'form_validation_workflow',ELEMENT_COORDINATION = 'element_coordination',CROSS_SESSION_WORKFLOW = 'cross_session_workflow',CONDITIONAL_FORM_FLOW = 'conditional_form_flow',DATA_COLLECTION_PIPELINE = 'data_collection_pipeline',}export enum ValidationScope {
-  FIELD_LEVEL = 'field_level',FORM_LEVEL = 'form_level',CROSS_FORM = 'cross_form',SESSION_LEVEL = 'session_level',WORKFLOW_LEVEL = 'workflow_level',}export enum CoordinationStrategy {
-  SEQUENTIAL = 'sequential',PARALLEL = 'parallel',CONDITIONAL = 'conditional',PIPELINE = 'pipeline',BROADCAST = 'broadcast',AGGREGATION = 'aggregation',}export enum WorkflowPriority {
-  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',EMERGENCY = 'emergency',}export enum WorkflowStatus {
-  PENDING = 'pending',INITIALIZING = 'initializing',EXECUTING = 'executing',COORDINATING = 'coordinating',VALIDATING = 'validating',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',SUSPENDED = 'suspended',}// ===== DTO CLASSES =====
+} from '../form-automation/dto/form-response.dto';
+
+// ===== DOM ORCHESTRATION ENUMS =====
+export enum DOMOrchestrationWorkflowType {
+  MULTI_STEP_FORM = 'multi_step_form',
+  PARALLEL_INTERACTIONS = 'parallel_interactions',
+  FORM_VALIDATION_WORKFLOW = 'form_validation_workflow',
+  ELEMENT_COORDINATION = 'element_coordination',
+  CROSS_SESSION_WORKFLOW = 'cross_session_workflow',
+  CONDITIONAL_FORM_FLOW = 'conditional_form_flow',
+  DATA_COLLECTION_PIPELINE = 'data_collection_pipeline',
+}
+
+export enum ValidationScope {
+  FIELD_LEVEL = 'field_level',
+  FORM_LEVEL = 'form_level',
+  CROSS_FORM = 'cross_form',
+  SESSION_LEVEL = 'session_level',
+  WORKFLOW_LEVEL = 'workflow_level',
+}
+
+export enum CoordinationStrategy {
+  SEQUENTIAL = 'sequential',
+  PARALLEL = 'parallel',
+  CONDITIONAL = 'conditional',
+  PIPELINE = 'pipeline',
+  BROADCAST = 'broadcast',
+  AGGREGATION = 'aggregation',
+}
+
+export enum WorkflowPriority {
+  LOW = 'low',
+  NORMAL = 'normal',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+  EMERGENCY = 'emergency',
+}
+
+export enum WorkflowStatus {
+  PENDING = 'pending',
+  INITIALIZING = 'initializing',
+  EXECUTING = 'executing',
+  COORDINATING = 'coordinating',
+  VALIDATING = 'validating',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  SUSPENDED = 'suspended',
+}
+
+// ===== DTO CLASSES =====
 
 /**
  * Workflow step for DOM orchestration

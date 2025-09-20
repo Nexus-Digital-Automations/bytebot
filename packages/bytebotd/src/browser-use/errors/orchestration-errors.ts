@@ -51,11 +51,21 @@ export enum OrchestrationOperationType {
   COORDINATED_INTERACTION = 'coordinated_interaction',
   SYNCHRONIZED_NAVIGATION = 'synchronized_navigation',
   AGGREGATED_REPORTING = 'aggregated_reporting',
-}/**
+}
+
+/**
  * Orchestration error severity with additional levels for distributed operations
  */
 export enum OrchestrationErrorSeverity {
-  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',SYSTEM_WIDE = 'system_wide', // Affects entire orchestration systemWORKFLOW_BREAKING = 'workflow_breaking' // Breaks multi-step workflows}/**
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+  SYSTEM_WIDE = 'system_wide', // Affects entire orchestration system
+  WORKFLOW_BREAKING = 'workflow_breaking' // Breaks multi-step workflows
+}
+
+/**
  * Orchestration-specific error interface extending BaseError
  */
 export interface OrchestrationError extends BaseError {
@@ -386,15 +396,38 @@ export class OrchestrationErrorAnalyzer {
     const affectedOperationsCount = error.affectedOperations.length;
     const criticalPathAffected = error.dependencies.criticalPath;
 
-    let impactLevel: 'minimal' | 'moderate' | 'severe' | 'critical';let recoveryComplexity: 'simple' | 'moderate' | 'complex' | 'manual';let estimatedRecoveryTime: number;// Determine impact level
+    let impactLevel: 'minimal' | 'moderate' | 'severe' | 'critical';
+    let recoveryComplexity: 'simple' | 'moderate' | 'complex' | 'manual';
+    let estimatedRecoveryTime: number;
+
+    // Determine impact level
     if (error.severity === OrchestrationErrorSeverity.SYSTEM_WIDE) {
-      impactLevel = 'critical';} else if (error.severity === OrchestrationErrorSeverity.WORKFLOW_BREAKING || criticalPathAffected) {impactLevel = 'severe';} else if (affectedOperationsCount > 5 || error.severity === OrchestrationErrorSeverity.HIGH) {impactLevel = 'moderate';} else {impactLevel = 'minimal';}// Determine recovery complexity
+      impactLevel = 'critical';
+    } else if (error.severity === OrchestrationErrorSeverity.WORKFLOW_BREAKING || criticalPathAffected) {
+      impactLevel = 'severe';
+    } else if (affectedOperationsCount > 5 || error.severity === OrchestrationErrorSeverity.HIGH) {
+      impactLevel = 'moderate';
+    } else {
+      impactLevel = 'minimal';
+    }
+
+    // Determine recovery complexity
     if (isWorkflowCoordinationError(error) && error.workflowError.rollbackRequired) {
-      recoveryComplexity = 'complex';estimatedRecoveryTime = 30000; // 30 seconds} else if (isDistributedOperationError(error) && error.distributedError.coordinationFailure) {
-      recoveryComplexity = 'complex';estimatedRecoveryTime = 20000; // 20 seconds} else if (isAggregationError(error)) {
-      recoveryComplexity = 'moderate';estimatedRecoveryTime = 10000; // 10 seconds} else if (error.severity === OrchestrationErrorSeverity.SYSTEM_WIDE) {
-      recoveryComplexity = 'manual';estimatedRecoveryTime = -1; // Manual intervention required} else {
-      recoveryComplexity = 'simple';estimatedRecoveryTime = 5000; // 5 seconds}
+      recoveryComplexity = 'complex';
+      estimatedRecoveryTime = 30000; // 30 seconds
+    } else if (isDistributedOperationError(error) && error.distributedError.coordinationFailure) {
+      recoveryComplexity = 'complex';
+      estimatedRecoveryTime = 20000; // 20 seconds
+    } else if (isAggregationError(error)) {
+      recoveryComplexity = 'moderate';
+      estimatedRecoveryTime = 10000; // 10 seconds
+    } else if (error.severity === OrchestrationErrorSeverity.SYSTEM_WIDE) {
+      recoveryComplexity = 'manual';
+      estimatedRecoveryTime = -1; // Manual intervention required
+    } else {
+      recoveryComplexity = 'simple';
+      estimatedRecoveryTime = 5000; // 5 seconds
+    }
 
     return {
       impactLevel,
@@ -413,17 +446,42 @@ export class OrchestrationErrorAnalyzer {
     const recommendations: string[] = [];
 
     if (isDistributedOperationError(error)) {
-      recommendations.push('Consider reducing parallel operation count');recommendations.push('Implement better coordination mechanisms');if (error.distributedError.partialResults) {recommendations.push('Salvage partial results and retry failed operations');}}
+      recommendations.push('Consider reducing parallel operation count');
+      recommendations.push('Implement better coordination mechanisms');
+      if (error.distributedError.partialResults) {
+        recommendations.push('Salvage partial results and retry failed operations');
+      }
+    }
 
     if (isWorkflowCoordinationError(error)) {
-      recommendations.push('Review workflow step dependencies');recommendations.push('Implement checkpointing for long workflows');if (error.workflowError.rollbackRequired) {recommendations.push('Execute compensation actions to rollback changes');}}
+      recommendations.push('Review workflow step dependencies');
+      recommendations.push('Implement checkpointing for long workflows');
+      if (error.workflowError.rollbackRequired) {
+        recommendations.push('Execute compensation actions to rollback changes');
+      }
+    }
 
     if (isResourceAllocationError(error)) {
-      recommendations.push('Scale up resource allocation');recommendations.push('Implement resource pooling and sharing');recommendations.push('Consider load balancing strategies');}if (isAggregationError(error)) {
-      recommendations.push('Implement partial result recovery');recommendations.push('Add data validation and conflict resolution');recommendations.push('Use streaming aggregation for large datasets');}// General recommendations based on severity
+      recommendations.push('Scale up resource allocation');
+      recommendations.push('Implement resource pooling and sharing');
+      recommendations.push('Consider load balancing strategies');
+    }
+
+    if (isAggregationError(error)) {
+      recommendations.push('Implement partial result recovery');
+      recommendations.push('Add data validation and conflict resolution');
+      recommendations.push('Use streaming aggregation for large datasets');
+    }
+
+    // General recommendations based on severity
     if (error.severity === OrchestrationErrorSeverity.SYSTEM_WIDE) {
-      recommendations.push('System-wide restart may be required');recommendations.push('Contact system administrator');}if (error.dependencies.criticalPath) {
-      recommendations.push('Priority handling for critical path operations');recommendations.push('Consider alternative execution paths');
+      recommendations.push('System-wide restart may be required');
+      recommendations.push('Contact system administrator');
+    }
+
+    if (error.dependencies.criticalPath) {
+      recommendations.push('Priority handling for critical path operations');
+      recommendations.push('Consider alternative execution paths');
     }
 
     return recommendations;

@@ -19,14 +19,28 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
-} from '@nestjs/swagger';import { Observable } from 'rxjs';// Existing importsimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import {CreateBrowserTaskDto,
+} from '@nestjs/swagger';
+import { Observable } from 'rxjs';
+
+// Existing imports
+import { BrowserUseService } from './browser-use.service';
+import { BrowserSessionService } from './browser-session.service';
+import { BrowserTaskService } from './browser-task.service';
+import {
+  CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
-} from './dto/browser-task.dto';import {CreateBrowserSessionDto,
+} from './dto/browser-task.dto';
+import {
+  CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserSessionStatus,
-} from './dto/browser-session.dto';import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';// New enhanced DTOsimport {
+} from './dto/browser-session.dto';
+import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
+
+// New enhanced DTOs
+import {
   ScreenshotCaptureDto,
   BatchScreenshotCaptureDto,
   ScreenshotResultDto,

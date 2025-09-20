@@ -20,13 +20,46 @@ import {
   ValidateNested,
   ArrayMinSize,
   ArrayMaxSize,
-} from 'class-validator';import { Type } from 'class-transformer';import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';// Enumsexport enum ExportFormat {
-  JSON = 'json',CSV = 'csv',XML = 'xml',XLSX = 'xlsx',PDF = 'pdf',}export enum AggregationStrategy {
-  MERGE = 'merge',DEDUPLICATE = 'deduplicate',VALIDATE = 'validate',TRANSFORM = 'transform',}export enum JobStatus {
-  PENDING = 'pending',RUNNING = 'running',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',}export enum AgentStatus {
-  IDLE = 'idle',BUSY = 'busy',ERROR = 'error',OFFLINE = 'offline',}// Configuration Classes
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+// Enums
+export enum ExportFormat {
+  JSON = 'json',
+  CSV = 'csv',
+  XML = 'xml',
+  XLSX = 'xlsx',
+  PDF = 'pdf',
+}
+
+export enum AggregationStrategy {
+  MERGE = 'merge',
+  DEDUPLICATE = 'deduplicate',
+  VALIDATE = 'validate',
+  TRANSFORM = 'transform',
+}
+
+export enum JobStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}
+
+export enum AgentStatus {
+  IDLE = 'idle',
+  BUSY = 'busy',
+  ERROR = 'error',
+  OFFLINE = 'offline',
+}
+
+// Configuration Classes
 export class ThrottleConfig {
-  @ApiProperty({ description: 'Maximum requests per minute', example: 60 })@IsNumber()@Min(1)
+  @ApiProperty({ description: 'Maximum requests per minute', example: 60 })
+  @IsNumber()
+  @Min(1)
   @Max(1000)
   requestsPerMinute!: number;
 
