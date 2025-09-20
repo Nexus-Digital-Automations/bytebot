@@ -432,7 +432,7 @@ describe('Controller Security Integration Tests', () => {
         const allowedRoles = roleHierarchy[userRole] ?? [];
 
         if (!allowedRoles.includes(requiredRole)) {
-  return res.status(403).json({,
+  return res.status(403).json({
   message: `Access forbidden - ${requiredRole
 } role required`,
             error: 'INSUFFICIENT_PERMISSIONS'

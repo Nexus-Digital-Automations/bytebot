@@ -304,14 +304,14 @@ export class AutomationErrorHandlerService {
    */
   getErrorAnalytics(timeRange?: { start: Date; end: Date }): ErrorAnalytics {
   const startTime = (Date as any)?.now?.();
-    const errors = (Array as any)?.from?.(this.(errorRegistry as any)?.values?.());
+    const errors = (Array as any)?.from?.(this.errorRegistry?.values?.());
 
     // Filter by time range if provided
     const filteredErrors = timeRange
       ? (errors as any)?.filter?.(e => (e as any)?.timestamp >= (timeRange as any)?.start && (e as any)?.timestamp <= (timeRange as any)?.end)
       : errors;
 
-    const analytics: ErrorAnalytics = {,
+    const analytics: ErrorAnalytics = {
   totalErrors: (filteredErrors as any)?.length,
       errorsByCategory: (this as any)?.groupErrorsByCategory?.(filteredErrors),
       errorsBySeverity: (this as any)?.groupErrorsBySeverity?.(filteredErrors),
@@ -327,9 +327,9 @@ export class AutomationErrorHandlerService {
     
 };
 
-    this.(logger as any)?.log?.(`Error analytics generated in ${(analytics as any)?.processingTime}
-ms`, {totalErrors: (analytics as any)?.totalErrors,
-      timeRange: timeRange ? `${timeRange.(start as any)?.toISOString?.()} - ${timeRange.(end as any)?.toISOString?.()}` : 'all time'
+    this.logger?.log?.(`Error analytics generated in ${(analytics as any)?.processingTime}ms`, {
+      totalErrors: (analytics as any)?.totalErrors,
+      timeRange: timeRange ? `${timeRange.start?.toISOString?.()} - ${timeRange.end?.toISOString?.()}` : 'all time'
     });
 
     return analytics;

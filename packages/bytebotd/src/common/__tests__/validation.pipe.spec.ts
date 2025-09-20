@@ -369,10 +369,9 @@ expect(result.password).toBe('password123');
 
   describe('Input Sanitization', () => {
 
-  it('should sanitize XSS attempts in string fields', async () => 
-      const testId = `${operationId
-}
-_xss_sanitization`;console.log(`[${testId}] Testing XSS sanitization`);
+  it('should sanitize XSS attempts in string fields', async () => {
+      const testId = `${operationId}_xss_sanitization`;
+      console.log(`[${testId}] Testing XSS sanitization`);
 
       const maliciousData = {
   email: 'test@example.com',

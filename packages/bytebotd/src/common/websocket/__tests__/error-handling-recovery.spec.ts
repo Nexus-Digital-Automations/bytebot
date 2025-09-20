@@ -41,12 +41,14 @@ import {
 } from '../conversational-websocket-bridge.service';
 import { createSafeWebSocketServer } from '../websocket-types';
 
-// ===== ERROR HANDLING AND RECOVERY TEST UTILITIES =====/**
+// ===== ERROR HANDLING AND RECOVERY TEST UTILITIES =====
+
+/**
  * Fault injection utility for testing error scenarios
  */
 class FaultInjector {
   private activeFaults = new Set<string>();
-  private faultHistory: Array<{,
+  private faultHistory: Array<{
   faultType: string;
   injectedAt: number;
     duration?: number;
