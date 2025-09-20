@@ -43,7 +43,9 @@ export interface TaskDefinition {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly type: 'single' | 'workflow' | 'recurring' | 'conditional';readonly parameters: Record<string, unknown>;readonly dependencies: string[];
+  readonly type: 'single' | 'workflow' | 'recurring' | 'conditional';
+  readonly parameters: Record<string, unknown>;
+  readonly dependencies: string[];
   readonly constraints: {
     readonly timeLimit?: number;
     readonly resourceLimits?: Record<string, number>;
@@ -58,7 +60,9 @@ export interface TaskDefinition {
  */
 export interface TaskProcessingRequest {
   readonly tasks: TaskDefinition[];
-  readonly processingMode: 'analyze' | 'plan' | 'execute' | 'monitor' | 'optimize';readonly executionParameters?: {readonly parallel?: boolean;
+  readonly processingMode: 'analyze' | 'plan' | 'execute' | 'monitor' | 'optimize';
+  readonly executionParameters?: {
+    readonly parallel?: boolean;
     readonly maxConcurrency?: number;
     readonly timeoutMs?: number;
     readonly retryPolicy?: {
@@ -75,7 +79,9 @@ export interface TaskProcessingRequest {
  */
 export interface TaskAnalysisResult {
   readonly taskId: string;
-  readonly complexity: 'simple' | 'moderate' | 'complex' | 'very_complex';readonly estimatedDuration: number;readonly riskAssessment: {
+  readonly complexity: 'simple' | 'moderate' | 'complex' | 'very_complex';
+  readonly estimatedDuration: number;
+  readonly riskAssessment: {
     readonly level: 'low' | 'medium' | 'high' | 'critical';
     readonly factors: string[];
     readonly mitigations: string[];

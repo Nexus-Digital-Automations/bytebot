@@ -72,7 +72,9 @@ export interface MessageProcessingRequest {
  */
 export interface MessageAnalysisResult {
   readonly messageId: string;
-  readonly sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';readonly topics: string[];readonly intent: {
+  readonly sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';
+  readonly topics: string[];
+  readonly intent: {
     readonly primary: string;
     readonly confidence: number;
     readonly alternatives: Array<{ intent: string; confidence: number }>;
