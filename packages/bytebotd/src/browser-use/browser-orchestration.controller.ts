@@ -111,12 +111,28 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     // Initialize Python BrowserOrchestrator path
     this.browserOrchestratorPath = join(
       process.cwd(),
-      '..','..','orchestrator','browser_orchestration','browser_orchestrator.py');this.logger.log('Browser Orchestration Controller initialized');}async onModuleInit() {
-    this.logger.log('Browser Orchestration module initializing');// Verify Python BrowserOrchestrator availabilityif (!existsSync(this.browserOrchestratorPath)) {
+      '..',
+      '..',
+      'orchestrator',
+      'browser_orchestration',
+      'browser_orchestrator.py'
+    );
+    this.logger.log('Browser Orchestration Controller initialized');
+  }
+
+  async onModuleInit() {
+    this.logger.log('Browser Orchestration module initializing');
+
+    // Verify Python BrowserOrchestrator availability
+    if (!existsSync(this.browserOrchestratorPath)) {
       this.logger.warn(
-        'Python BrowserOrchestrator not found, orchestration will use fallback implementation',{ expectedPath: this.browserOrchestratorPath });
+        'Python BrowserOrchestrator not found, orchestration will use fallback implementation',
+        { expectedPath: this.browserOrchestratorPath }
+      );
     } else {
-      this.logger.log('Python BrowserOrchestrator detected', {path: this.browserOrchestratorPath,});
+      this.logger.log('Python BrowserOrchestrator detected', {
+        path: this.browserOrchestratorPath,
+      });
     }
 
     // Initialize WebSocket event handlers
@@ -582,7 +598,10 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
     // Simple sequential execution as fallback
     for (const [index, task] of orchestrationDto.tasks.entries()) {
       try {
-        this.logger.log(`Executing fallback task ${index + 1}/${orchestrationDto.tasks.length}: ${task.name}`);// Convert to browser task formatconst browserTask = await this.taskService.createTask({
+        this.logger.log(`Executing fallback task ${index + 1}/${orchestrationDto.tasks.length}: ${task.name}`);
+
+        // Convert to browser task format
+        const browserTask = await this.taskService.createTask({
           name: task.name,
           description: task.description,
           actions: task.actions,

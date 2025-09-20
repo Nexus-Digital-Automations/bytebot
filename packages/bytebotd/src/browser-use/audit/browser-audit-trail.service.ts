@@ -306,7 +306,14 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   constructor() {
     super();
 
-    this.logger.log('📊 Browser Audit Trail Service initializing...');// Generate cryptographic keys (in production, use proper key management)this.signingKey = crypto.randomBytes(32).toString('hex');this.encryptionKey = crypto.randomBytes(32).toString('hex');// Initialize event countersObject.values(BrowserAuditEventType).forEach(type => {
+    this.logger.log('📊 Browser Audit Trail Service initializing...');
+
+    // Generate cryptographic keys (in production, use proper key management)
+    this.signingKey = crypto.randomBytes(32).toString('hex');
+    this.encryptionKey = crypto.randomBytes(32).toString('hex');
+
+    // Initialize event counters
+    Object.values(BrowserAuditEventType).forEach(type => {
       this.statistics.eventsByType.set(type, 0);
     });
 
@@ -736,11 +743,19 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
    */
   private createEventMetadata(eventData: Partial<BrowserAuditEvent>): AuditEventMetadata {
     return {
-      sourceComponent: 'browser-audit-trail-service',sourceVersion: '1.0.0',environment: process.env.NODE_ENV || 'development',processId: process.pid.toString(),threadId: '0', // Node.js is single-threadedperformanceMetrics: {processingTime: 0, // Will be updated
+      sourceComponent: 'browser-audit-trail-service',
+      sourceVersion: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      processId: process.pid.toString(),
+      threadId: '0', // Node.js is single-threaded
+      performanceMetrics: {
+        processingTime: 0, // Will be updated
         memoryUsage: process.memoryUsage().heapUsed,
         cpuUsage: process.cpuUsage().user,
       },
-      securityClassification: this.determineSecurityClassification(eventData.eventType || 'UNKNOWN', eventData.data || {}),dataCategories: this.identifyDataCategories(eventData.data || {}),additionalContext: {
+      securityClassification: this.determineSecurityClassification(eventData.eventType || 'UNKNOWN', eventData.data || {}),
+      dataCategories: this.identifyDataCategories(eventData.data || {}),
+      additionalContext: {
         nodeVersion: process.version,
         platform: process.platform,
         uptime: process.uptime(),
@@ -962,18 +977,27 @@ export class BrowserAuditTrailService extends EventEmitter implements OnModuleIn
   // ===== UTILITY METHODS =====
 
   private generateEventId(): string {
-    return `audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
+    return `audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  }
 
   private generateQueryId(): string {
-    return `query_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
+    return `query_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  }
 
   private generateStreamId(): string {
-    return `stream_${Date.now()}_${crypto.randomBytes(4).toString('hex')}';}
+    return `stream_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  }
 
   private generateTraceId(): string {
-    return `trace_${Date.now()}_${crypto.randomBytes(8).toString('hex')}';}
+    return `trace_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+  }
 
-  private determineRetentionCategory(eventType: BrowserAuditEventType, severity: AuditEventSeverity): 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE' {if (severity === AuditEventSeverity.CRITICAL || severity === AuditEventSeverity.HIGH) {return 'HOT';}const criticalEventTypes = [
+  private determineRetentionCategory(eventType: BrowserAuditEventType, severity: AuditEventSeverity): 'HOT' | 'WARM' | 'COLD' | 'ARCHIVE' {
+    if (severity === AuditEventSeverity.CRITICAL || severity === AuditEventSeverity.HIGH) {
+      return 'HOT';
+    }
+
+    const criticalEventTypes = [
       BrowserAuditEventType.AUTHENTICATION_FAILURE,
       BrowserAuditEventType.AUTHORIZATION_DENIED,
       BrowserAuditEventType.SECURITY_VIOLATION,
