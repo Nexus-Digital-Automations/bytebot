@@ -14,28 +14,38 @@
  * - Real-time health monitoring and diagnostics
  */
 
-import { Injectable, Logger, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  Inject,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Core Services
-import { BrowserAutomationRecoveryManager, RecoveryResult } from './recovery/browser-automation-recovery-manager';
+import {
+  BrowserAutomationRecoveryManager,
+  RecoveryResult,
+} from './recovery/browser-automation-recovery-manager';
 import { BrowserAutomationMonitoringService } from './monitoring/browser-automation-monitoring.service';
-import { BrowserAutomationDegradationManager, DegradationLevel } from './degradation/browser-automation-degradation-manager';
+import {
+  BrowserAutomationDegradationManager,
+  DegradationLevel,
+} from './degradation/browser-automation-degradation-manager';
 
 // Utility Classes
 import {
   BrowserAutomationErrorClassifier,
   BrowserAutomationErrorCode,
   BrowserAutomationErrorCategory,
-  BrowserAutomationErrorSeverity
+  BrowserAutomationErrorSeverity,
 } from './errors/browser-automation-error-classification';
 
 import {
   BrowserAutomationResponseFormatter,
   BrowserAutomationOperationType,
   BrowserAutomationBaseResponse,
-  BrowserAutomationSuccessResponse,
-  BrowserAutomationErrorResponse
 } from './response/browser-automation-response-formatter';
 
 // Configuration
@@ -72,8 +82,12 @@ export interface ErrorHandlingResult<T = unknown> {
  * Main orchestrator for browser automation error handling
  */
 @Injectable()
-export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(BrowserAutomationErrorHandlingOrchestrator.name);
+export class BrowserAutomationErrorHandlingOrchestrator
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(
+    BrowserAutomationErrorHandlingOrchestrator.name,
+  );
   private readonly errorProcessingQueue: Array<{
     error: Error;
     context: ErrorHandlingContext;
@@ -91,7 +105,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     totalRecoveriesSuccessful: 0,
     totalDegradationsTriggered: 0,
     averageProcessingTimeMs: 0,
-    lastHealthCheck: new Date()
+    lastHealthCheck: new Date(),
   };
 
   constructor(
@@ -100,11 +114,13 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     private readonly degradationManager: BrowserAutomationDegradationManager,
     private readonly eventEmitter: EventEmitter2,
     @Inject('ERROR_HANDLING_CONFIG')
-    private readonly config: BrowserAutomationErrorHandlingConfig
+    private readonly config: BrowserAutomationErrorHandlingConfig,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Browser Automation Error Handling Orchestrator');
+    this.logger.log(
+      'Initializing Browser Automation Error Handling Orchestrator',
+    );
 
     // Start background processing
     this.startErrorProcessing();
@@ -114,11 +130,15 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     // Set up event listeners
     this.setupEventListeners();
 
-    this.logger.log('Browser Automation Error Handling Orchestrator initialized');
+    this.logger.log(
+      'Browser Automation Error Handling Orchestrator initialized',
+    );
   }
 
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Browser Automation Error Handling Orchestrator');
+    this.logger.log(
+      'Shutting down Browser Automation Error Handling Orchestrator',
+    );
 
     // Stop background processes
     if (this.processingInterval) {
@@ -134,7 +154,9 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     // Process remaining queue
     await this.flushErrorProcessingQueue();
 
-    this.logger.log('Browser Automation Error Handling Orchestrator shutdown complete');
+    this.logger.log(
+      'Browser Automation Error Handling Orchestrator shutdown complete',
+    );
   }
 
   /**
@@ -142,37 +164,41 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
    */
   async executeWithErrorHandling<T>(
     operation: () => Promise<T>,
-    context: Omit<ErrorHandlingContext, 'startTime'>
+    context: Omit<ErrorHandlingContext, 'startTime'>,
   ): Promise<ErrorHandlingResult<T>> {
     const fullContext: ErrorHandlingContext = {
       ...context,
       startTime: Date.now(),
       correlationId: context.correlationId || this.generateCorrelationId(),
       retryCount: context.retryCount || 0,
-      previousErrors: context.previousErrors || []
+      previousErrors: context.previousErrors || [],
     };
 
     const startTime = Date.now();
-    let recoveryApplied = false;
-    let degradationTriggered = false;
+    const recoveryApplied = false;
+    // Track degradation status through execution results
     let fallbackUsed = false;
     let result: T | undefined;
     let finalError: Error | undefined;
 
     try {
-      this.logger.debug(`Executing operation with error handling: ${fullContext.operationType}`, {
-        correlationId: fullContext.correlationId,
-        sessionId: fullContext.sessionId,
-        taskId: fullContext.taskId
-      });
+      this.logger.debug(
+        `Executing operation with error handling: ${fullContext.operationType}`,
+        {
+          correlationId: fullContext.correlationId,
+          sessionId: fullContext.sessionId,
+          taskId: fullContext.taskId,
+        },
+      );
 
       // Check for degradation before operation
       const degradationCheckStart = Date.now();
-      const executionResult = await this.degradationManager.executeWithDegradation(
-        fullContext.operationType,
-        operation,
-        fullContext.metadata
-      );
+      const executionResult =
+        await this.degradationManager.executeWithDegradation(
+          fullContext.operationType,
+          operation,
+          fullContext.metadata,
+        );
       const degradationCheckMs = Date.now() - degradationCheckStart;
 
       if (executionResult.success) {
@@ -189,26 +215,27 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
           additionalContext: {
             degraded: executionResult.degraded,
             fallbackUsed: fallbackUsed,
-            qualityReduction: executionResult.qualityReduction
-          }
+            qualityReduction: executionResult.qualityReduction,
+          },
         });
 
         // Create success response
-        const response = BrowserAutomationResponseFormatter.createSuccessResponse(
-          fullContext.operationType,
-          result,
-          {
-            correlationId: fullContext.correlationId!,
-            sessionId: fullContext.sessionId,
-            taskId: fullContext.taskId,
-            durationMs: Date.now() - startTime,
-            metadata: {
-              degraded: executionResult.degraded,
-              fallbackUsed: fallbackUsed,
-              qualityReduction: executionResult.qualityReduction
-            }
-          }
-        );
+        const response =
+          BrowserAutomationResponseFormatter.createSuccessResponse(
+            fullContext.operationType,
+            result,
+            {
+              correlationId: fullContext.correlationId!,
+              sessionId: fullContext.sessionId,
+              taskId: fullContext.taskId,
+              durationMs: Date.now() - startTime,
+              metadata: {
+                degraded: executionResult.degraded,
+                fallbackUsed: fallbackUsed,
+                qualityReduction: executionResult.qualityReduction,
+              },
+            },
+          );
 
         this.performanceStats.totalErrorsProcessed++;
         this.updateAverageProcessingTime(Date.now() - startTime);
@@ -223,13 +250,13 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
           performanceMetrics: {
             totalDurationMs: Date.now() - startTime,
             degradationCheckMs,
-            monitoringOverheadMs: 0
-          }
+            monitoringOverheadMs: 0,
+          },
         };
       } else {
-        finalError = executionResult.error || new Error('Unknown execution error');
+        finalError =
+          executionResult.error || new Error('Unknown execution error');
       }
-
     } catch (error) {
       finalError = error instanceof Error ? error : new Error(String(error));
     }
@@ -247,7 +274,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
    */
   async processError(
     error: Error,
-    context: ErrorHandlingContext
+    context: ErrorHandlingContext,
   ): Promise<ErrorHandlingResult> {
     const startTime = Date.now();
     let recoveryResult: RecoveryResult | undefined;
@@ -258,14 +285,12 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         correlationId: context.correlationId,
         operationType: context.operationType,
         sessionId: context.sessionId,
-        taskId: context.taskId
+        taskId: context.taskId,
       });
 
       // 1. Classify the error
-      const errorClassification = BrowserAutomationErrorClassifier.classifyError(
-        error,
-        context.metadata
-      );
+      const errorClassification =
+        BrowserAutomationErrorClassifier.classifyError(error, context.metadata);
 
       // 2. Record error for monitoring
       const monitoringStart = Date.now();
@@ -275,14 +300,17 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         sessionId: context.sessionId,
         taskId: context.taskId,
         durationMs: Date.now() - context.startTime,
-        additionalContext: context.metadata
+        additionalContext: context.metadata,
       });
       const monitoringOverheadMs = Date.now() - monitoringStart;
 
       // 3. Attempt recovery if error is recoverable
       let recoveryApplied = false;
-      if (this.config.recovery.enabled && this.shouldAttemptRecovery(errorClassification, context)) {
-        const recoveryStart = Date.now();
+      if (
+        this.config.recovery.enabled &&
+        this.shouldAttemptRecovery(errorClassification, context)
+      ) {
+        // Recovery timing tracked in monitoring
         try {
           recoveryResult = await this.recoveryManager.attemptRecovery(
             error,
@@ -290,8 +318,8 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
             {
               sessionId: context.sessionId,
               taskId: context.taskId,
-              ...context.metadata
-            }
+              ...context.metadata,
+            },
           );
 
           recoveryApplied = recoveryResult.success;
@@ -302,7 +330,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
             this.logger.log(`Recovery successful: ${recoveryResult.strategy}`, {
               correlationId: context.correlationId,
               strategy: recoveryResult.strategy,
-              attemptNumber: recoveryResult.attemptNumber
+              attemptNumber: recoveryResult.attemptNumber,
             });
           }
 
@@ -312,44 +340,57 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
             operationType: context.operationType,
             sessionId: context.sessionId,
             taskId: context.taskId,
-            originalError: errorClassification.code
+            originalError: errorClassification.code,
           });
-
         } catch (recoveryError) {
-          this.logger.error(`Recovery attempt failed: ${recoveryError}`, recoveryError);
+          this.logger.error(
+            `Recovery attempt failed: ${recoveryError}`,
+            recoveryError,
+          );
         }
       }
 
       // 4. Check if degradation should be triggered
-      if (this.config.degradation.enabled && this.shouldTriggerDegradation(errorClassification, context)) {
+      if (
+        this.config.degradation.enabled &&
+        this.shouldTriggerDegradation(errorClassification, context)
+      ) {
         try {
-          const degradationEvaluation = await this.degradationManager.evaluateDegradationNeed();
+          const degradationEvaluation =
+            await this.degradationManager.evaluateDegradationNeed();
 
           if (degradationEvaluation.shouldActivate) {
-            const degradationResult = await this.degradationManager.activateDegradation(
-              degradationEvaluation.recommendedLevel,
-              degradationEvaluation.trigger,
-              degradationEvaluation.strategy,
-              {
-                triggeredByError: errorClassification.code,
-                correlationId: context.correlationId,
-                automaticActivation: true
-              }
-            );
+            const degradationResult =
+              await this.degradationManager.activateDegradation(
+                degradationEvaluation.recommendedLevel,
+                degradationEvaluation.trigger,
+                degradationEvaluation.strategy,
+                {
+                  triggeredByError: errorClassification.code,
+                  correlationId: context.correlationId,
+                  automaticActivation: true,
+                },
+              );
 
             degradationTriggered = degradationResult.success;
             this.performanceStats.totalDegradationsTriggered++;
 
             if (degradationResult.success) {
-              this.logger.warn(`Degradation activated: ${degradationEvaluation.recommendedLevel}`, {
-                correlationId: context.correlationId,
-                trigger: degradationEvaluation.trigger,
-                strategy: degradationEvaluation.strategy
-              });
+              this.logger.warn(
+                `Degradation activated: ${degradationEvaluation.recommendedLevel}`,
+                {
+                  correlationId: context.correlationId,
+                  trigger: degradationEvaluation.trigger,
+                  strategy: degradationEvaluation.strategy,
+                },
+              );
             }
           }
         } catch (degradationError) {
-          this.logger.error(`Degradation evaluation failed: ${degradationError}`, degradationError);
+          this.logger.error(
+            `Degradation evaluation failed: ${degradationError}`,
+            degradationError,
+          );
         }
       }
 
@@ -364,7 +405,9 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
           message: error.message,
           context: context.metadata,
           recoveryActions: errorClassification.recoveryStrategies,
-          troubleshootingSteps: errorClassification.commonCauses.map(cause => `Check: ${cause}`)
+          troubleshootingSteps: errorClassification.commonCauses.map(
+            (cause) => `Check: ${cause}`,
+          ),
         },
         {
           correlationId: context.correlationId!,
@@ -375,9 +418,9 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
           includeStackTrace: this.config.responses.includeStackTrace,
           metrics: {
             retryCount: context.retryCount || 0,
-            recoveryAttempts: recoveryResult ? 1 : 0
-          }
-        }
+            recoveryAttempts: recoveryResult ? 1 : 0,
+          },
+        },
       );
 
       // 6. Emit error event for additional processing
@@ -387,7 +430,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         context,
         recoveryResult,
         degradationTriggered,
-        response
+        response,
       });
 
       // 7. Update performance statistics
@@ -403,25 +446,31 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         performanceMetrics: {
           totalDurationMs: Date.now() - startTime,
           recoveryDurationMs: recoveryResult?.durationMs,
-          monitoringOverheadMs
-        }
+          monitoringOverheadMs,
+        },
       };
-
     } catch (processingError) {
       // Error in error processing - create minimal response
-      this.logger.error(`Error processing pipeline failed: ${processingError}`, processingError);
-
-      const fallbackResponse = BrowserAutomationResponseFormatter.createErrorResponse(
-        context.operationType,
-        new Error(`Error processing failed: ${processingError}`),
-        {
-          correlationId: context.correlationId!,
-          sessionId: context.sessionId,
-          taskId: context.taskId,
-          durationMs: Date.now() - context.startTime,
-          context: { originalError: error.message, processingError: String(processingError) }
-        }
+      this.logger.error(
+        `Error processing pipeline failed: ${processingError}`,
+        processingError,
       );
+
+      const fallbackResponse =
+        BrowserAutomationResponseFormatter.createErrorResponse(
+          context.operationType,
+          new Error(`Error processing failed: ${processingError}`),
+          {
+            correlationId: context.correlationId!,
+            sessionId: context.sessionId,
+            taskId: context.taskId,
+            durationMs: Date.now() - context.startTime,
+            context: {
+              originalError: error.message,
+              processingError: String(processingError),
+            },
+          },
+        );
 
       return {
         success: false,
@@ -430,8 +479,8 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         degradationTriggered,
         fallbackUsed: false,
         performanceMetrics: {
-          totalDurationMs: Date.now() - startTime
-        }
+          totalDurationMs: Date.now() - startTime,
+        },
       };
     }
   }
@@ -464,26 +513,46 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     }>;
   } {
     const systemHealth = this.monitoringService.getSystemHealthMetrics();
-    const degradationState = this.degradationManager.getCurrentDegradationState();
+    const degradationState =
+      this.degradationManager.getCurrentDegradationState();
     const recoveryStats = this.recoveryManager.getRecoveryStatistics();
     const activeAlerts = this.monitoringService.getActiveAlerts();
 
     // Determine component health
     const components = {
-      errorHandling: this.errorProcessingQueue.length > 100 ? 'UNHEALTHY' : 'HEALTHY' as const,
-      recovery: recoveryStats.strategies.some(s => s.circuitState === 'OPEN') ? 'DEGRADED' : 'HEALTHY' as const,
-      monitoring: systemHealth.resources.memoryUsagePercent > 90 ? 'DEGRADED' : 'HEALTHY' as const,
-      degradation: degradationState?.level === DegradationLevel.EMERGENCY ? 'UNHEALTHY' :
-                   degradationState?.level && degradationState.level !== DegradationLevel.NONE ? 'DEGRADED' : 'HEALTHY' as const
+      errorHandling:
+        this.errorProcessingQueue.length > 100
+          ? 'UNHEALTHY'
+          : ('HEALTHY' as const),
+      recovery: recoveryStats.strategies.some((s) => s.circuitState === 'OPEN')
+        ? 'DEGRADED'
+        : ('HEALTHY' as const),
+      monitoring:
+        systemHealth.resources.memoryUsagePercent > 90
+          ? 'DEGRADED'
+          : ('HEALTHY' as const),
+      degradation:
+        degradationState?.level === DegradationLevel.EMERGENCY
+          ? 'UNHEALTHY'
+          : degradationState?.level &&
+              degradationState.level !== DegradationLevel.NONE
+            ? 'DEGRADED'
+            : ('HEALTHY' as const),
     };
 
     // Determine overall health
-    const overall = Object.values(components).includes('UNHEALTHY') ? 'UNHEALTHY' :
-                    Object.values(components).includes('DEGRADED') ? 'DEGRADED' : 'HEALTHY';
+    const overall = Object.values(components).includes('UNHEALTHY')
+      ? 'UNHEALTHY'
+      : Object.values(components).includes('DEGRADED')
+        ? 'DEGRADED'
+        : 'HEALTHY';
 
     // Calculate recovery success rate
-    const recoverySuccessRate = this.performanceStats.totalRecoveriesAttempted > 0 ?
-      this.performanceStats.totalRecoveriesSuccessful / this.performanceStats.totalRecoveriesAttempted : 1;
+    const recoverySuccessRate =
+      this.performanceStats.totalRecoveriesAttempted > 0
+        ? this.performanceStats.totalRecoveriesSuccessful /
+          this.performanceStats.totalRecoveriesAttempted
+        : 1;
 
     return {
       overall,
@@ -493,16 +562,17 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
         totalErrorsProcessed: this.performanceStats.totalErrorsProcessed,
         recoverySuccessRate,
         averageProcessingTimeMs: this.performanceStats.averageProcessingTimeMs,
-        currentDegradationLevel: degradationState?.level || DegradationLevel.NONE,
+        currentDegradationLevel:
+          degradationState?.level || DegradationLevel.NONE,
         uptime: process.uptime(),
-        lastHealthCheck: this.performanceStats.lastHealthCheck
+        lastHealthCheck: this.performanceStats.lastHealthCheck,
       },
-      alerts: activeAlerts.map(alert => ({
+      alerts: activeAlerts.map((alert) => ({
         type: 'monitoring_alert',
         severity: alert.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
         message: alert.ruleName,
-        timestamp: alert.triggeredAt
-      }))
+        timestamp: alert.triggeredAt,
+      })),
     };
   }
 
@@ -514,7 +584,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
       errorHandling: this.performanceStats,
       monitoring: this.monitoringService.getPerformanceMetrics(),
       recovery: this.recoveryManager.getRecoveryStatistics(),
-      degradation: this.degradationManager.getCurrentDegradationState()
+      degradation: this.degradationManager.getCurrentDegradationState(),
     };
   }
 
@@ -526,7 +596,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
       timestamp: new Date().toISOString(),
       systemHealth: this.getSystemHealth(),
       performanceMetrics: this.getPerformanceMetrics(),
-      configuration: this.config
+      configuration: this.config,
     };
 
     switch (format) {
@@ -547,22 +617,31 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
 
   private shouldAttemptRecovery(
     errorClassification: BrowserAutomationErrorCode,
-    context: ErrorHandlingContext
+    context: ErrorHandlingContext,
   ): boolean {
     // Don't attempt recovery if max retries exceeded
-    if (context.retryCount && context.retryCount >= this.config.recovery.maxRetryAttempts) {
+    if (
+      context.retryCount &&
+      context.retryCount >= this.config.recovery.maxRetryAttempts
+    ) {
       return false;
     }
 
     // Don't attempt recovery for non-recoverable errors
-    if (!BrowserAutomationErrorClassifier.isRecoverable(errorClassification.code)) {
+    if (
+      !BrowserAutomationErrorClassifier.isRecoverable(errorClassification.code)
+    ) {
       return false;
     }
 
     // Don't attempt recovery for low severity errors in degraded mode
-    const degradationState = this.degradationManager.getCurrentDegradationState();
-    if (degradationState && degradationState.level === DegradationLevel.EMERGENCY &&
-        errorClassification.severity === BrowserAutomationErrorSeverity.LOW) {
+    const degradationState =
+      this.degradationManager.getCurrentDegradationState();
+    if (
+      degradationState &&
+      degradationState.level === DegradationLevel.EMERGENCY &&
+      errorClassification.severity === BrowserAutomationErrorSeverity.LOW
+    ) {
       return false;
     }
 
@@ -571,26 +650,34 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
 
   private shouldTriggerDegradation(
     errorClassification: BrowserAutomationErrorCode,
-    context: ErrorHandlingContext
+    _context: ErrorHandlingContext,
   ): boolean {
     // Don't trigger degradation if already at emergency level
-    const degradationState = this.degradationManager.getCurrentDegradationState();
-    if (degradationState && degradationState.level === DegradationLevel.EMERGENCY) {
+    const degradationState =
+      this.degradationManager.getCurrentDegradationState();
+    if (
+      degradationState &&
+      degradationState.level === DegradationLevel.EMERGENCY
+    ) {
       return false;
     }
 
     // Trigger degradation for critical errors
-    if (errorClassification.severity === BrowserAutomationErrorSeverity.CRITICAL) {
+    if (
+      errorClassification.severity === BrowserAutomationErrorSeverity.CRITICAL
+    ) {
       return true;
     }
 
     // Trigger degradation for high severity errors in certain categories
-    if (errorClassification.severity === BrowserAutomationErrorSeverity.HIGH &&
-        [
-          BrowserAutomationErrorCategory.BROWSER_PROCESS,
-          BrowserAutomationErrorCategory.MEMORY_EXHAUSTION,
-          BrowserAutomationErrorCategory.RESOURCE_ALLOCATION
-        ].includes(errorClassification.category)) {
+    if (
+      errorClassification.severity === BrowserAutomationErrorSeverity.HIGH &&
+      [
+        BrowserAutomationErrorCategory.BROWSER_PROCESS,
+        BrowserAutomationErrorCategory.MEMORY_EXHAUSTION,
+        BrowserAutomationErrorCategory.RESOURCE_ALLOCATION,
+      ].includes(errorClassification.category)
+    ) {
       return true;
     }
 
@@ -623,14 +710,14 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     this.eventEmitter.on('browser-automation.error.processed', (event) => {
       this.logger.debug('Error processing event received', {
         errorCode: event.classification?.code,
-        correlationId: event.context?.correlationId
+        correlationId: event.context?.correlationId,
       });
     });
 
     this.eventEmitter.on('monitoring.alert', (event) => {
       this.logger.warn('Monitoring alert triggered', {
         ruleName: event.rule?.name,
-        severity: event.rule?.severity
+        severity: event.rule?.severity,
       });
     });
   }
@@ -657,9 +744,11 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
 
   private flushMetrics(): void {
     try {
-      const metrics = this.exportMetrics(this.config.monitoring.exportFormat);
+      this.exportMetrics(this.config.monitoring.exportFormat);
       // In a real implementation, this would send metrics to external systems
-      this.logger.debug('Metrics flushed', { format: this.config.monitoring.exportFormat });
+      this.logger.debug('Metrics flushed', {
+        format: this.config.monitoring.exportFormat,
+      });
     } catch (error) {
       this.logger.error('Failed to flush metrics', error);
     }
@@ -667,7 +756,9 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
 
   private async flushErrorProcessingQueue(): Promise<void> {
     if (this.errorProcessingQueue.length > 0) {
-      this.logger.log(`Flushing ${this.errorProcessingQueue.length} queued errors`);
+      this.logger.log(
+        `Flushing ${this.errorProcessingQueue.length} queued errors`,
+      );
       // Process remaining errors in queue
       this.errorProcessingQueue.length = 0;
     }
@@ -682,7 +773,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     }
   }
 
-  private convertToPrometheusFormat(metrics: any): string {
+  private convertToPrometheusFormat(_metrics: any): string {
     let prometheus = '';
 
     // Add error handling metrics
@@ -695,7 +786,7 @@ export class BrowserAutomationErrorHandlingOrchestrator implements OnModuleInit,
     return prometheus;
   }
 
-  private convertToCsvFormat(metrics: any): string {
+  private convertToCsvFormat(_metrics: any): string {
     let csv = 'metric_name,value,timestamp\n';
 
     csv += `errors_processed,${this.performanceStats.totalErrorsProcessed},${new Date().toISOString()}\n`;

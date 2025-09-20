@@ -86,14 +86,14 @@ const DEFAULT_CONFIG: BrowserAutomationErrorHandlingConfig = {
     metricsRetentionHours: 24,
     alertingEnabled: true,
     exportFormat: 'json',
-    healthCheckIntervalSeconds: 30
+    healthCheckIntervalSeconds: 30,
   },
   recovery: {
     enabled: true,
     maxRetryAttempts: 3,
     defaultBackoffStrategy: 'exponential',
     circuitBreakerEnabled: true,
-    circuitBreakerThreshold: 5
+    circuitBreakerThreshold: 5,
   },
   degradation: {
     enabled: true,
@@ -102,24 +102,24 @@ const DEFAULT_CONFIG: BrowserAutomationErrorHandlingConfig = {
       minimal: 0.05,
       moderate: 0.15,
       severe: 0.3,
-      emergency: 0.5
+      emergency: 0.5,
     },
     resourceThresholds: {
       memoryPercent: 85,
-      cpuPercent: 90
-    }
+      cpuPercent: 90,
+    },
   },
   responses: {
     includeStackTrace: false,
     sanitizeSensitiveData: true,
     includeRecoveryInfo: true,
-    correlationIdPrefix: 'ba'
+    correlationIdPrefix: 'ba',
   },
   logging: {
     logLevel: 'INFO',
     structuredLogging: true,
-    includeErrorContext: true
-  }
+    includeErrorContext: true,
+  },
 };
 
 @Global()
@@ -134,8 +134,8 @@ const DEFAULT_CONFIG: BrowserAutomationErrorHandlingConfig = {
       removeListener: false,
       maxListeners: 20,
       verboseMemoryLeak: false,
-      ignoreErrors: false
-    })
+      ignoreErrors: false,
+    }),
   ],
   providers: [
     // Core Services
@@ -149,25 +149,26 @@ const DEFAULT_CONFIG: BrowserAutomationErrorHandlingConfig = {
     // Utility Providers
     {
       provide: 'ERROR_CLASSIFIER',
-      useClass: BrowserAutomationErrorClassifier
+      useClass: BrowserAutomationErrorClassifier,
     },
     {
       provide: 'RESPONSE_FORMATTER',
-      useClass: BrowserAutomationResponseFormatter
+      useClass: BrowserAutomationResponseFormatter,
     },
 
     // Configuration Provider
     {
       provide: 'ERROR_HANDLING_CONFIG',
       useFactory: (configService: any) => {
-        const config = configService.get('browserAutomationErrorHandling') || {};
+        const config =
+          configService.get('browserAutomationErrorHandling') || {};
         return { ...DEFAULT_CONFIG, ...config };
       },
-      inject: ['ConfigService']
+      inject: ['ConfigService'],
     },
 
     // Exception Filter
-    BrowserUseExceptionFilter
+    BrowserUseExceptionFilter,
   ],
   exports: [
     BrowserAutomationRecoveryManager,
@@ -177,8 +178,8 @@ const DEFAULT_CONFIG: BrowserAutomationErrorHandlingConfig = {
     'ERROR_CLASSIFIER',
     'RESPONSE_FORMATTER',
     'ERROR_HANDLING_CONFIG',
-    BrowserUseExceptionFilter
-  ]
+    BrowserUseExceptionFilter,
+  ],
 })
 export class BrowserAutomationErrorHandlingModule {
   /**
@@ -190,9 +191,9 @@ export class BrowserAutomationErrorHandlingModule {
       providers: [
         {
           provide: 'ERROR_HANDLING_CONFIG',
-          useValue: { ...DEFAULT_CONFIG, ...config }
-        }
-      ]
+          useValue: { ...DEFAULT_CONFIG, ...config },
+        },
+      ],
     };
   }
 
@@ -201,7 +202,7 @@ export class BrowserAutomationErrorHandlingModule {
    */
   static forFeature() {
     return {
-      module: BrowserAutomationErrorHandlingModule
+      module: BrowserAutomationErrorHandlingModule,
     };
   }
 }

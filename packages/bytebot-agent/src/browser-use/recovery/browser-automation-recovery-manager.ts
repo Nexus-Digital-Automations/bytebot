@@ -15,11 +15,9 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  BrowserAutomationErrorCategory,
   BrowserAutomationErrorSeverity,
   BrowserAutomationErrorRecoverability,
   BrowserAutomationErrorClassifier,
-  BROWSER_AUTOMATION_ERROR_REGISTRY
 } from '../errors/browser-automation-error-classification';
 
 export interface RecoveryContext {
@@ -85,7 +83,8 @@ export interface CircuitBreakerState {
 export class BrowserAutomationRecoveryManager {
   private readonly logger = new Logger(BrowserAutomationRecoveryManager.name);
   private readonly circuitBreakers = new Map<string, CircuitBreakerState>();
-  private readonly recoveryStrategies: Map<string, RecoveryStrategy> = new Map();
+  private readonly recoveryStrategies: Map<string, RecoveryStrategy> =
+    new Map();
   private readonly activeRecoveries = new Map<string, RecoveryContext>();
 
   constructor() {
@@ -99,7 +98,11 @@ export class BrowserAutomationRecoveryManager {
     // Network Connection Recovery
     this.registerStrategy({
       name: 'network_connection_recovery',
-      applicableErrors: ['NET_CONNECTION_REFUSED', 'NET_TIMEOUT', 'NET_DNS_RESOLUTION_FAILED'],
+      applicableErrors: [
+        'NET_CONNECTION_REFUSED',
+        'NET_TIMEOUT',
+        'NET_DNS_RESOLUTION_FAILED',
+      ],
       priority: 1,
       maxRetries: 3,
       backoffStrategy: 'exponential',
@@ -111,17 +114,20 @@ export class BrowserAutomationRecoveryManager {
       conditions: {
         errorCountThreshold: 5,
         timeWindowMs: 300000, // 5 minutes
-        severityThreshold: BrowserAutomationErrorSeverity.HIGH
+        severityThreshold: BrowserAutomationErrorSeverity.HIGH,
       },
       execute: async (context: RecoveryContext) => {
         return this.executeNetworkRecovery(context);
-      }
+      },
     });
 
     // Browser Process Recovery
     this.registerStrategy({
       name: 'browser_process_recovery',
-      applicableErrors: ['BROWSER_PROCESS_CRASHED', 'BROWSER_PROCESS_STARTUP_FAILED'],
+      applicableErrors: [
+        'BROWSER_PROCESS_CRASHED',
+        'BROWSER_PROCESS_STARTUP_FAILED',
+      ],
       priority: 1,
       maxRetries: 2,
       backoffStrategy: 'linear',
@@ -132,7 +138,7 @@ export class BrowserAutomationRecoveryManager {
       circuitBreakerEnabled: true,
       execute: async (context: RecoveryContext) => {
         return this.executeBrowserProcessRecovery(context);
-      }
+      },
     });
 
     // Session Recovery
@@ -149,7 +155,7 @@ export class BrowserAutomationRecoveryManager {
       circuitBreakerEnabled: false,
       execute: async (context: RecoveryContext) => {
         return this.executeSessionRecovery(context);
-      }
+      },
     });
 
     // Element Interaction Recovery
@@ -166,7 +172,7 @@ export class BrowserAutomationRecoveryManager {
       circuitBreakerEnabled: false,
       execute: async (context: RecoveryContext) => {
         return this.executeElementInteractionRecovery(context);
-      }
+      },
     });
 
     // Page Load Recovery
@@ -184,7 +190,7 @@ export class BrowserAutomationRecoveryManager {
       fallbackStrategy: 'alternative_navigation',
       execute: async (context: RecoveryContext) => {
         return this.executePageLoadRecovery(context);
-      }
+      },
     });
 
     // Memory Recovery
@@ -201,7 +207,7 @@ export class BrowserAutomationRecoveryManager {
       circuitBreakerEnabled: true,
       execute: async (context: RecoveryContext) => {
         return this.executeMemoryRecovery(context);
-      }
+      },
     });
 
     // Generic Task Recovery
@@ -218,7 +224,7 @@ export class BrowserAutomationRecoveryManager {
       circuitBreakerEnabled: false,
       execute: async (context: RecoveryContext) => {
         return this.executeGenericTaskRecovery(context);
-      }
+      },
     });
   }
 
@@ -236,42 +242,59 @@ export class BrowserAutomationRecoveryManager {
   async attemptRecovery(
     error: Error,
     operationType: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     // Classify the error
-    const errorClassification = BrowserAutomationErrorClassifier.classifyError(error, context);
-    this.logger.warn(`Attempting recovery for error: ${errorClassification.code}`, {
-      error: error.message,
-      operationType,
-      category: errorClassification.category,
-      severity: errorClassification.severity
-    });
+    const errorClassification = BrowserAutomationErrorClassifier.classifyError(
+      error,
+      context,
+    );
+    this.logger.warn(
+      `Attempting recovery for error: ${errorClassification.code}`,
+      {
+        error: error.message,
+        operationType,
+        category: errorClassification.category,
+        severity: errorClassification.severity,
+      },
+    );
 
     // Check if error is recoverable
-    if (errorClassification.recoverability === BrowserAutomationErrorRecoverability.NON_RECOVERABLE) {
+    if (
+      errorClassification.recoverability ===
+      BrowserAutomationErrorRecoverability.NON_RECOVERABLE
+    ) {
       return {
         success: false,
         strategy: 'none',
         attemptNumber: 0,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: new Error(`Error is non-recoverable: ${errorClassification.code}`)
+        error: new Error(
+          `Error is non-recoverable: ${errorClassification.code}`,
+        ),
       };
     }
 
     // Find applicable recovery strategies
-    const applicableStrategies = this.findApplicableStrategies(errorClassification.code);
+    const applicableStrategies = this.findApplicableStrategies(
+      errorClassification.code,
+    );
     if (applicableStrategies.length === 0) {
-      this.logger.warn(`No recovery strategies found for error: ${errorClassification.code}`);
+      this.logger.warn(
+        `No recovery strategies found for error: ${errorClassification.code}`,
+      );
       return {
         success: false,
         strategy: 'none',
         attemptNumber: 0,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: new Error(`No recovery strategies available for: ${errorClassification.code}`)
+        error: new Error(
+          `No recovery strategies available for: ${errorClassification.code}`,
+        ),
       };
     }
 
@@ -281,15 +304,17 @@ export class BrowserAutomationRecoveryManager {
       sessionId: context?.sessionId as string,
       taskId: context?.taskId as string,
       attemptNumber: 1,
-      maxAttempts: Math.max(...applicableStrategies.map(s => s.maxRetries)),
+      maxAttempts: Math.max(...applicableStrategies.map((s) => s.maxRetries)),
       lastError: error,
-      errorHistory: [{
-        error,
-        timestamp: new Date(),
-        recoveryAttempted: 'initial',
-        outcome: 'failure'
-      }],
-      metadata: context
+      errorHistory: [
+        {
+          error,
+          timestamp: new Date(),
+          recoveryAttempted: 'initial',
+          outcome: 'failure',
+        },
+      ],
+      metadata: context,
     };
 
     // Attempt recovery with strategies in priority order
@@ -301,24 +326,37 @@ export class BrowserAutomationRecoveryManager {
       }
 
       try {
-        const result = await this.executeStrategyWithBackoff(strategy, recoveryContext);
+        const result = await this.executeStrategyWithBackoff(
+          strategy,
+          recoveryContext,
+        );
 
         if (result.success) {
           this.recordSuccessfulRecovery(strategy.name);
-          this.logger.log(`Recovery successful with strategy: ${strategy.name}`, {
-            attemptNumber: result.attemptNumber,
-            durationMs: result.durationMs
-          });
+          this.logger.log(
+            `Recovery successful with strategy: ${strategy.name}`,
+            {
+              attemptNumber: result.attemptNumber,
+              durationMs: result.durationMs,
+            },
+          );
           return result;
         } else {
           this.recordFailedRecovery(strategy.name);
 
           // Check if we should try fallback strategy
           if (result.nextAction === 'fallback' && strategy.fallbackStrategy) {
-            const fallbackStrategy = this.recoveryStrategies.get(strategy.fallbackStrategy);
+            const fallbackStrategy = this.recoveryStrategies.get(
+              strategy.fallbackStrategy,
+            );
             if (fallbackStrategy) {
-              this.logger.debug(`Attempting fallback strategy: ${strategy.fallbackStrategy}`);
-              const fallbackResult = await this.executeStrategyWithBackoff(fallbackStrategy, recoveryContext);
+              this.logger.debug(
+                `Attempting fallback strategy: ${strategy.fallbackStrategy}`,
+              );
+              const fallbackResult = await this.executeStrategyWithBackoff(
+                fallbackStrategy,
+                recoveryContext,
+              );
               if (fallbackResult.success) {
                 return fallbackResult;
               }
@@ -326,7 +364,10 @@ export class BrowserAutomationRecoveryManager {
           }
         }
       } catch (strategyError) {
-        this.logger.error(`Recovery strategy failed: ${strategy.name}`, strategyError);
+        this.logger.error(
+          `Recovery strategy failed: ${strategy.name}`,
+          strategyError,
+        );
         this.recordFailedRecovery(strategy.name);
       }
     }
@@ -338,7 +379,9 @@ export class BrowserAutomationRecoveryManager {
       attemptNumber: recoveryContext.attemptNumber,
       durationMs: Date.now() - startTime,
       nextAction: 'abort',
-      error: new Error(`All recovery strategies failed for: ${errorClassification.code}`)
+      error: new Error(
+        `All recovery strategies failed for: ${errorClassification.code}`,
+      ),
     };
   }
 
@@ -347,7 +390,7 @@ export class BrowserAutomationRecoveryManager {
    */
   private async executeStrategyWithBackoff(
     strategy: RecoveryStrategy,
-    context: RecoveryContext
+    context: RecoveryContext,
   ): Promise<RecoveryResult> {
     let attempt = 1;
     let lastError: Error | undefined;
@@ -358,7 +401,9 @@ export class BrowserAutomationRecoveryManager {
         const delay = this.calculateBackoffDelay(strategy, attempt);
 
         if (attempt > 1) {
-          this.logger.debug(`Waiting ${delay}ms before retry attempt ${attempt}/${strategy.maxRetries}`);
+          this.logger.debug(
+            `Waiting ${delay}ms before retry attempt ${attempt}/${strategy.maxRetries}`,
+          );
           await this.sleep(delay);
         }
 
@@ -375,7 +420,6 @@ export class BrowserAutomationRecoveryManager {
 
         lastError = result.error;
         attempt++;
-
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         attempt++;
@@ -390,14 +434,17 @@ export class BrowserAutomationRecoveryManager {
       durationMs: 0,
       nextAction: strategy.fallbackStrategy ? 'fallback' : 'abort',
       fallbackStrategy: strategy.fallbackStrategy,
-      error: lastError
+      error: lastError,
     };
   }
 
   /**
    * Calculate backoff delay based on strategy configuration
    */
-  private calculateBackoffDelay(strategy: RecoveryStrategy, attempt: number): number {
+  private calculateBackoffDelay(
+    strategy: RecoveryStrategy,
+    attempt: number,
+  ): number {
     let delay: number;
 
     switch (strategy.backoffStrategy) {
@@ -405,7 +452,9 @@ export class BrowserAutomationRecoveryManager {
         delay = strategy.initialDelayMs * attempt;
         break;
       case 'exponential':
-        delay = strategy.initialDelayMs * Math.pow(strategy.backoffMultiplier, attempt - 1);
+        delay =
+          strategy.initialDelayMs *
+          Math.pow(strategy.backoffMultiplier, attempt - 1);
         break;
       case 'fixed':
         delay = strategy.initialDelayMs;
@@ -429,12 +478,16 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Network recovery implementation
    */
-  private async executeNetworkRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeNetworkRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
       // Implement network-specific recovery logic
-      this.logger.debug('Executing network recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing network recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate network recovery steps
       await this.sleep(1000); // Simulate recovery time
@@ -451,8 +504,8 @@ export class BrowserAutomationRecoveryManager {
         nextAction: recoverySuccessful ? 'retry' : 'abort',
         metadata: {
           networkTest: recoverySuccessful ? 'passed' : 'failed',
-          connectivity: 'verified'
-        }
+          connectivity: 'verified',
+        },
       };
     } catch (error) {
       return {
@@ -461,7 +514,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -469,11 +522,15 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Browser process recovery implementation
    */
-  private async executeBrowserProcessRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeBrowserProcessRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing browser process recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing browser process recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate browser process restart
       await this.sleep(5000); // Simulate process restart time
@@ -490,8 +547,8 @@ export class BrowserAutomationRecoveryManager {
         metadata: {
           processRestarted: true,
           memoryCleared: true,
-          resourcesFreed: true
-        }
+          resourcesFreed: true,
+        },
       };
     } catch (error) {
       return {
@@ -500,7 +557,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'escalate',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -508,11 +565,15 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Session recovery implementation
    */
-  private async executeSessionRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeSessionRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing session recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing session recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate session recreation
       await this.sleep(2000);
@@ -527,8 +588,8 @@ export class BrowserAutomationRecoveryManager {
         nextAction: recoverySuccessful ? 'retry' : 'abort',
         metadata: {
           sessionRecreated: true,
-          authenticationRefreshed: recoverySuccessful
-        }
+          authenticationRefreshed: recoverySuccessful,
+        },
       };
     } catch (error) {
       return {
@@ -537,7 +598,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -545,28 +606,36 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Element interaction recovery implementation
    */
-  private async executeElementInteractionRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeElementInteractionRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing element interaction recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing element interaction recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate waiting for element to become available/interactive
       await this.sleep(500 * context.attemptNumber); // Progressive waiting
 
-      const recoverySuccessful = Math.random() > (0.1 * context.attemptNumber); // Decreasing success rate
+      const recoverySuccessful = Math.random() > 0.1 * context.attemptNumber; // Decreasing success rate
 
       return {
         success: recoverySuccessful,
         strategy: 'element_interaction_recovery',
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
-        nextAction: recoverySuccessful ? 'retry' : (context.attemptNumber < 5 ? 'retry' : 'abort'),
+        nextAction: recoverySuccessful
+          ? 'retry'
+          : context.attemptNumber < 5
+            ? 'retry'
+            : 'abort',
         metadata: {
           waitTimeMs: 500 * context.attemptNumber,
           elementFound: recoverySuccessful,
-          alternativeSelectorTried: context.attemptNumber > 2
-        }
+          alternativeSelectorTried: context.attemptNumber > 2,
+        },
       };
     } catch (error) {
       return {
@@ -575,7 +644,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: context.attemptNumber < 5 ? 'retry' : 'abort',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -583,11 +652,15 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Page load recovery implementation
    */
-  private async executePageLoadRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executePageLoadRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing page load recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing page load recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate page load optimization or alternative navigation
       await this.sleep(3000);
@@ -604,8 +677,8 @@ export class BrowserAutomationRecoveryManager {
         metadata: {
           pageLoadOptimized: true,
           timeoutIncreased: true,
-          cacheCleared: context.attemptNumber > 1
-        }
+          cacheCleared: context.attemptNumber > 1,
+        },
       };
     } catch (error) {
       return {
@@ -615,7 +688,7 @@ export class BrowserAutomationRecoveryManager {
         durationMs: Date.now() - startTime,
         nextAction: 'fallback',
         fallbackStrategy: 'alternative_navigation',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -623,11 +696,15 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Memory recovery implementation
    */
-  private async executeMemoryRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeMemoryRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing memory recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing memory recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate memory cleanup and garbage collection
       await this.sleep(5000);
@@ -643,8 +720,8 @@ export class BrowserAutomationRecoveryManager {
         metadata: {
           memoryFreed: recoverySuccessful,
           garbageCollected: true,
-          processRestarted: !recoverySuccessful
-        }
+          processRestarted: !recoverySuccessful,
+        },
       };
     } catch (error) {
       return {
@@ -653,7 +730,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'escalate',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -661,11 +738,15 @@ export class BrowserAutomationRecoveryManager {
   /**
    * Generic task recovery implementation
    */
-  private async executeGenericTaskRecovery(context: RecoveryContext): Promise<RecoveryResult> {
+  private async executeGenericTaskRecovery(
+    context: RecoveryContext,
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Executing generic task recovery', { attempt: context.attemptNumber });
+      this.logger.debug('Executing generic task recovery', {
+        attempt: context.attemptNumber,
+      });
 
       // Simulate generic recovery steps
       await this.sleep(2000);
@@ -680,8 +761,8 @@ export class BrowserAutomationRecoveryManager {
         nextAction: recoverySuccessful ? 'retry' : 'abort',
         metadata: {
           genericRecoveryApplied: true,
-          contextPreserved: true
-        }
+          contextPreserved: true,
+        },
       };
     } catch (error) {
       return {
@@ -690,7 +771,7 @@ export class BrowserAutomationRecoveryManager {
         attemptNumber: context.attemptNumber,
         durationMs: Date.now() - startTime,
         nextAction: 'abort',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -700,7 +781,7 @@ export class BrowserAutomationRecoveryManager {
    */
   private findApplicableStrategies(errorCode: string): RecoveryStrategy[] {
     const strategies = Array.from(this.recoveryStrategies.values())
-      .filter(strategy => strategy.applicableErrors.includes(errorCode))
+      .filter((strategy) => strategy.applicableErrors.includes(errorCode))
       .sort((a, b) => a.priority - b.priority);
 
     return strategies;
@@ -716,10 +797,15 @@ export class BrowserAutomationRecoveryManager {
     }
 
     if (circuitState.state === 'OPEN') {
-      if (circuitState.nextAttemptTime && Date.now() >= circuitState.nextAttemptTime.getTime()) {
+      if (
+        circuitState.nextAttemptTime &&
+        Date.now() >= circuitState.nextAttemptTime.getTime()
+      ) {
         // Transition to half-open
         circuitState.state = 'HALF_OPEN';
-        this.logger.debug(`Circuit breaker transitioning to HALF_OPEN: ${strategyName}`);
+        this.logger.debug(
+          `Circuit breaker transitioning to HALF_OPEN: ${strategyName}`,
+        );
         return false;
       }
       return true;
@@ -750,7 +836,7 @@ export class BrowserAutomationRecoveryManager {
       circuitState = {
         state: 'CLOSED',
         failureCount: 0,
-        openStateTimeoutMs: 60000 // 1 minute
+        openStateTimeoutMs: 60000, // 1 minute
       };
       this.circuitBreakers.set(strategyName, circuitState);
     }
@@ -759,9 +845,12 @@ export class BrowserAutomationRecoveryManager {
     circuitState.lastFailureTime = new Date();
 
     // Open circuit if failure threshold reached
-    if (circuitState.failureCount >= 5) { // Configurable threshold
+    if (circuitState.failureCount >= 5) {
+      // Configurable threshold
       circuitState.state = 'OPEN';
-      circuitState.nextAttemptTime = new Date(Date.now() + circuitState.openStateTimeoutMs);
+      circuitState.nextAttemptTime = new Date(
+        Date.now() + circuitState.openStateTimeoutMs,
+      );
       this.logger.warn(`Circuit breaker opened for strategy: ${strategyName}`);
     }
   }
@@ -770,7 +859,7 @@ export class BrowserAutomationRecoveryManager {
    * Sleep utility function
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -785,16 +874,18 @@ export class BrowserAutomationRecoveryManager {
     }>;
     activeRecoveries: number;
   } {
-    const strategies = Array.from(this.circuitBreakers.entries()).map(([name, state]) => ({
-      name,
-      circuitState: state.state,
-      failureCount: state.failureCount,
-      lastFailure: state.lastFailureTime
-    }));
+    const strategies = Array.from(this.circuitBreakers.entries()).map(
+      ([name, state]) => ({
+        name,
+        circuitState: state.state,
+        failureCount: state.failureCount,
+        lastFailure: state.lastFailureTime,
+      }),
+    );
 
     return {
       strategies,
-      activeRecoveries: this.activeRecoveries.size
+      activeRecoveries: this.activeRecoveries.size,
     };
   }
 

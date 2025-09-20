@@ -13,13 +13,18 @@
  * - Trend analysis and anomaly detection
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   BrowserAutomationErrorCategory,
   BrowserAutomationErrorSeverity,
-  BrowserAutomationErrorClassifier
+  BrowserAutomationErrorClassifier,
 } from '../errors/browser-automation-error-classification';
 import { RecoveryResult } from '../recovery/browser-automation-recovery-manager';
 import { BrowserAutomationOperationType } from '../response/browser-automation-response-formatter';
@@ -118,13 +123,21 @@ export interface AlertRule {
  * Browser Automation Monitoring Service
  */
 @Injectable()
-export class BrowserAutomationMonitoringService implements OnModuleInit, OnModuleDestroy {
+export class BrowserAutomationMonitoringService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(BrowserAutomationMonitoringService.name);
   private readonly eventBuffer: MonitoringEvent[] = [];
   private readonly errorMetrics = new Map<string, ErrorMetrics>();
-  private readonly performanceMetrics = new Map<BrowserAutomationOperationType, PerformanceMetrics>();
+  private readonly performanceMetrics = new Map<
+    BrowserAutomationOperationType,
+    PerformanceMetrics
+  >();
   private readonly alertRules = new Map<string, AlertRule>();
-  private readonly activeAlerts = new Map<string, { triggeredAt: Date; count: number }>();
+  private readonly activeAlerts = new Map<
+    string,
+    { triggeredAt: Date; count: number }
+  >();
 
   private metricsCollectionInterval?: NodeJS.Timeout;
   private healthCheckInterval?: NodeJS.Timeout;
@@ -134,14 +147,19 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     browserProcesses: { active: 0, crashed: 0, memory: 0, cpu: 0 },
     sessions: { active: 0, expired: 0, total: 0 },
     tasks: { pending: 0, running: 0, completed: 0, failed: 0 },
-    resources: { memoryUsagePercent: 0, cpuUsagePercent: 0, diskUsagePercent: 0, networkUtilization: 0 },
+    resources: {
+      memoryUsagePercent: 0,
+      cpuUsagePercent: 0,
+      diskUsagePercent: 0,
+      networkUtilization: 0,
+    },
     uptime: 0,
-    lastHealthCheck: new Date()
+    lastHealthCheck: new Date(),
   };
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.initializeDefaultAlertRules();
   }
@@ -198,10 +216,15 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       durationMs: number;
       recoveryAttempt?: RecoveryResult;
       additionalContext?: Record<string, unknown>;
-    }
+    },
   ): void {
-    const errorClassification = BrowserAutomationErrorClassifier.classifyError(error, context.additionalContext);
-    const monitoringTags = BrowserAutomationErrorClassifier.getMonitoringTags(errorClassification.code);
+    const errorClassification = BrowserAutomationErrorClassifier.classifyError(
+      error,
+      context.additionalContext,
+    );
+    const monitoringTags = BrowserAutomationErrorClassifier.getMonitoringTags(
+      errorClassification.code,
+    );
 
     // Create monitoring event
     const event: MonitoringEvent = {
@@ -221,41 +244,50 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
         recoveryAttempted: !!context.recoveryAttempt,
         recoverySuccess: context.recoveryAttempt?.success,
         recoveryStrategy: context.recoveryAttempt?.strategy,
-        ...context.additionalContext
+        ...context.additionalContext,
       },
-      tags: ['error', ...monitoringTags]
+      tags: ['error', ...monitoringTags],
     };
 
     this.addEvent(event);
 
     // Update error metrics
-    this.updateErrorMetrics(errorClassification.code, errorClassification, context);
+    this.updateErrorMetrics(
+      errorClassification.code,
+      errorClassification,
+      context,
+    );
 
     // Update performance metrics
-    this.updatePerformanceMetrics(context.operationType, false, context.durationMs);
+    this.updatePerformanceMetrics(
+      context.operationType,
+      false,
+      context.durationMs,
+    );
 
-    this.logger.error(`Browser automation error recorded: ${errorClassification.code}`, {
-      correlationId: context.correlationId,
-      errorCode: errorClassification.code,
-      operationType: context.operationType
-    });
+    this.logger.error(
+      `Browser automation error recorded: ${errorClassification.code}`,
+      {
+        correlationId: context.correlationId,
+        errorCode: errorClassification.code,
+        operationType: context.operationType,
+      },
+    );
   }
 
   /**
    * Record a successful operation
    */
-  recordSuccess(
-    context: {
-      correlationId: string;
-      operationType: BrowserAutomationOperationType;
-      sessionId?: string;
-      taskId?: string;
-      durationMs: number;
-      dataSize?: number;
-      cacheHit?: boolean;
-      additionalContext?: Record<string, unknown>;
-    }
-  ): void {
+  recordSuccess(context: {
+    correlationId: string;
+    operationType: BrowserAutomationOperationType;
+    sessionId?: string;
+    taskId?: string;
+    durationMs: number;
+    dataSize?: number;
+    cacheHit?: boolean;
+    additionalContext?: Record<string, unknown>;
+  }): void {
     const event: MonitoringEvent = {
       type: 'success',
       timestamp: new Date(),
@@ -267,15 +299,19 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
         durationMs: context.durationMs,
         dataSize: context.dataSize,
         cacheHit: context.cacheHit,
-        ...context.additionalContext
+        ...context.additionalContext,
       },
-      tags: ['success', context.operationType.toLowerCase()]
+      tags: ['success', context.operationType.toLowerCase()],
     };
 
     this.addEvent(event);
 
     // Update performance metrics
-    this.updatePerformanceMetrics(context.operationType, true, context.durationMs);
+    this.updatePerformanceMetrics(
+      context.operationType,
+      true,
+      context.durationMs,
+    );
   }
 
   /**
@@ -290,7 +326,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       networkLatencyMs?: number;
       cacheHitRatio?: number;
       throughput?: number;
-    }
+    },
   ): void {
     const event: MonitoringEvent = {
       type: 'performance',
@@ -298,7 +334,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       correlationId: `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       operationType,
       data: metrics,
-      tags: ['performance', operationType.toLowerCase()]
+      tags: ['performance', operationType.toLowerCase()],
     };
 
     this.addEvent(event);
@@ -315,7 +351,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       sessionId?: string;
       taskId?: string;
       originalError: string;
-    }
+    },
   ): void {
     const event: MonitoringEvent = {
       type: 'recovery',
@@ -331,9 +367,13 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
         durationMs: recoveryResult.durationMs,
         nextAction: recoveryResult.nextAction,
         originalError: context.originalError,
-        ...recoveryResult.metadata
+        ...recoveryResult.metadata,
       },
-      tags: ['recovery', recoveryResult.strategy, recoveryResult.success ? 'success' : 'failure']
+      tags: [
+        'recovery',
+        recoveryResult.strategy,
+        recoveryResult.success ? 'success' : 'failure',
+      ],
     };
 
     this.addEvent(event);
@@ -349,7 +389,10 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
   /**
    * Get current performance metrics
    */
-  getPerformanceMetrics(): Map<BrowserAutomationOperationType, PerformanceMetrics> {
+  getPerformanceMetrics(): Map<
+    BrowserAutomationOperationType,
+    PerformanceMetrics
+  > {
     return new Map(this.performanceMetrics);
   }
 
@@ -372,12 +415,14 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     const cutoffTime = new Date(Date.now() - timeWindowHours * 60 * 60 * 1000);
 
     return this.eventBuffer
-      .filter(event => event.type === 'error' && event.timestamp >= cutoffTime)
-      .map(event => ({
+      .filter(
+        (event) => event.type === 'error' && event.timestamp >= cutoffTime,
+      )
+      .map((event) => ({
         timestamp: event.timestamp,
         errorCode: event.data.errorCode as string,
         count: 1,
-        severity: event.data.errorSeverity as BrowserAutomationErrorSeverity
+        severity: event.data.errorSeverity as BrowserAutomationErrorSeverity,
       }));
   }
 
@@ -386,7 +431,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
    */
   getPerformanceTrends(
     operationType: BrowserAutomationOperationType,
-    timeWindowHours: number = 24
+    timeWindowHours: number = 24,
   ): Array<{
     timestamp: Date;
     durationMs: number;
@@ -395,15 +440,16 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     const cutoffTime = new Date(Date.now() - timeWindowHours * 60 * 60 * 1000);
 
     return this.eventBuffer
-      .filter(event =>
-        (event.type === 'success' || event.type === 'error') &&
-        event.operationType === operationType &&
-        event.timestamp >= cutoffTime
+      .filter(
+        (event) =>
+          (event.type === 'success' || event.type === 'error') &&
+          event.operationType === operationType &&
+          event.timestamp >= cutoffTime,
       )
-      .map(event => ({
+      .map((event) => ({
         timestamp: event.timestamp,
         durationMs: event.data.durationMs as number,
-        success: event.type === 'success'
+        success: event.type === 'success',
       }));
   }
 
@@ -415,7 +461,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
 
     this.alertRules.set(ruleId, {
       id: ruleId,
-      ...rule
+      ...rule,
     });
 
     this.logger.log(`Created alert rule: ${rule.name} (${ruleId})`);
@@ -433,7 +479,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
 
     this.alertRules.set(ruleId, {
       ...existingRule,
-      ...updates
+      ...updates,
     });
 
     this.logger.log(`Updated alert rule: ${ruleId}`);
@@ -484,7 +530,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
           ruleName: rule.name,
           triggeredAt: alertInfo.triggeredAt,
           count: alertInfo.count,
-          severity: rule.severity
+          severity: rule.severity,
         });
       }
     }
@@ -501,7 +547,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       errorMetrics: Object.fromEntries(this.errorMetrics),
       performanceMetrics: Object.fromEntries(this.performanceMetrics),
       systemHealth: this.systemHealthMetrics,
-      activeAlerts: this.getActiveAlerts()
+      activeAlerts: this.getActiveAlerts(),
     };
 
     switch (format) {
@@ -535,7 +581,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
   private updateErrorMetrics(
     errorCode: string,
     classification: any,
-    context: any
+    context: any,
   ): void {
     let metrics = this.errorMetrics.get(errorCode);
 
@@ -551,14 +597,15 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
         recoverySuccessRate: 0,
         affectedSessions: new Set(),
         affectedTasks: new Set(),
-        trendDirection: 'stable'
+        trendDirection: 'stable',
       };
       this.errorMetrics.set(errorCode, metrics);
     }
 
     metrics.count++;
     metrics.lastOccurrence = new Date();
-    metrics.averageDurationMs = (metrics.averageDurationMs + context.durationMs) / 2;
+    metrics.averageDurationMs =
+      (metrics.averageDurationMs + context.durationMs) / 2;
 
     if (context.sessionId) {
       metrics.affectedSessions.add(context.sessionId);
@@ -570,21 +617,25 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
 
     // Calculate recovery success rate
     if (context.recoveryAttempt) {
-      const totalRecoveries = Array.from(this.eventBuffer)
-        .filter(e => e.type === 'recovery' && e.data.originalError === errorCode)
-        .length;
-      const successfulRecoveries = Array.from(this.eventBuffer)
-        .filter(e => e.type === 'recovery' && e.data.originalError === errorCode && e.data.recoverySuccess)
-        .length;
+      const totalRecoveries = Array.from(this.eventBuffer).filter(
+        (e) => e.type === 'recovery' && e.data.originalError === errorCode,
+      ).length;
+      const successfulRecoveries = Array.from(this.eventBuffer).filter(
+        (e) =>
+          e.type === 'recovery' &&
+          e.data.originalError === errorCode &&
+          e.data.recoverySuccess,
+      ).length;
 
-      metrics.recoverySuccessRate = totalRecoveries > 0 ? successfulRecoveries / totalRecoveries : 0;
+      metrics.recoverySuccessRate =
+        totalRecoveries > 0 ? successfulRecoveries / totalRecoveries : 0;
     }
   }
 
   private updatePerformanceMetrics(
     operationType: BrowserAutomationOperationType,
     success: boolean,
-    durationMs: number
+    durationMs: number,
   ): void {
     let metrics = this.performanceMetrics.get(operationType);
 
@@ -602,7 +653,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
         memoryUsageMB: 0,
         cpuUsagePercent: 0,
         networkLatencyMs: 0,
-        cacheHitRatio: 0
+        cacheHitRatio: 0,
       };
       this.performanceMetrics.set(operationType, metrics);
     }
@@ -619,17 +670,20 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
 
     // Calculate percentiles (simplified)
     const recentDurations = this.eventBuffer
-      .filter(e =>
-        (e.type === 'success' || e.type === 'error') &&
-        e.operationType === operationType &&
-        e.timestamp > new Date(Date.now() - 3600000) // Last hour
+      .filter(
+        (e) =>
+          (e.type === 'success' || e.type === 'error') &&
+          e.operationType === operationType &&
+          e.timestamp > new Date(Date.now() - 3600000), // Last hour
       )
-      .map(e => e.data.durationMs as number)
+      .map((e) => e.data.durationMs as number)
       .sort((a, b) => a - b);
 
     if (recentDurations.length > 0) {
-      metrics.p95DurationMs = recentDurations[Math.floor(recentDurations.length * 0.95)];
-      metrics.p99DurationMs = recentDurations[Math.floor(recentDurations.length * 0.99)];
+      metrics.p95DurationMs =
+        recentDurations[Math.floor(recentDurations.length * 0.95)];
+      metrics.p99DurationMs =
+        recentDurations[Math.floor(recentDurations.length * 0.99)];
     }
   }
 
@@ -656,7 +710,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       // Additional real-time processing can be added here
       this.logger.debug(`Monitoring event: ${event.type}`, {
         correlationId: event.correlationId,
-        operationType: event.operationType
+        operationType: event.operationType,
       });
     });
   }
@@ -684,7 +738,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     this.recordPerformanceMetrics(BrowserAutomationOperationType.SYSTEM_INFO, {
       durationMs: 0,
       memoryUsageMB: memoryUsage.heapUsed / 1024 / 1024,
-      cpuUsagePercent: (cpuUsage.user + cpuUsage.system) / 1000 / 1000 * 100
+      cpuUsagePercent: ((cpuUsage.user + cpuUsage.system) / 1000 / 1000) * 100,
     });
   }
 
@@ -693,14 +747,11 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     const isHealthy = Math.random() > 0.05; // 95% healthy
 
     if (!isHealthy) {
-      this.recordError(
-        new Error('Health check failed'),
-        {
-          correlationId: `health_${Date.now()}`,
-          operationType: BrowserAutomationOperationType.HEALTH_CHECK,
-          durationMs: 1000
-        }
-      );
+      this.recordError(new Error('Health check failed'), {
+        correlationId: `health_${Date.now()}`,
+        operationType: BrowserAutomationOperationType.HEALTH_CHECK,
+        durationMs: 1000,
+      });
     }
   }
 
@@ -713,7 +764,9 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       // Check if rule is in cooldown
       const activeAlert = this.activeAlerts.get(ruleId);
       if (activeAlert && rule.lastTriggered) {
-        const cooldownEnd = new Date(rule.lastTriggered.getTime() + rule.cooldownMinutes * 60000);
+        const cooldownEnd = new Date(
+          rule.lastTriggered.getTime() + rule.cooldownMinutes * 60000,
+        );
         if (new Date() < cooldownEnd) {
           continue;
         }
@@ -735,7 +788,13 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     for (const condition of rule.conditions) {
       const metricValue = this.getMetricValue(condition.metric);
 
-      if (!this.evaluateCondition(metricValue, condition.operator, condition.threshold)) {
+      if (
+        !this.evaluateCondition(
+          metricValue,
+          condition.operator,
+          condition.threshold,
+        )
+      ) {
         return false;
       }
     }
@@ -746,12 +805,17 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
   private getMetricValue(metricName: string): number {
     // Return metric values based on metric name
     switch (metricName) {
-      case 'error_rate':
-        const totalOps = Array.from(this.performanceMetrics.values())
-          .reduce((sum, m) => sum + m.totalOperations, 0);
-        const totalErrors = Array.from(this.performanceMetrics.values())
-          .reduce((sum, m) => sum + m.failedOperations, 0);
+      case 'error_rate': {
+        const totalOps = Array.from(this.performanceMetrics.values()).reduce(
+          (sum, m) => sum + m.totalOperations,
+          0,
+        );
+        const totalErrors = Array.from(this.performanceMetrics.values()).reduce(
+          (sum, m) => sum + m.failedOperations,
+          0,
+        );
         return totalOps > 0 ? totalErrors / totalOps : 0;
+      }
 
       case 'memory_usage':
         return this.systemHealthMetrics.resources.memoryUsagePercent;
@@ -764,14 +828,24 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     }
   }
 
-  private evaluateCondition(value: number, operator: string, threshold: number): boolean {
+  private evaluateCondition(
+    value: number,
+    operator: string,
+    threshold: number,
+  ): boolean {
     switch (operator) {
-      case 'gt': return value > threshold;
-      case 'lt': return value < threshold;
-      case 'eq': return value === threshold;
-      case 'gte': return value >= threshold;
-      case 'lte': return value <= threshold;
-      default: return false;
+      case 'gt':
+        return value > threshold;
+      case 'lt':
+        return value < threshold;
+      case 'eq':
+        return value === threshold;
+      case 'gte':
+        return value >= threshold;
+      case 'lte':
+        return value <= threshold;
+      default:
+        return false;
     }
   }
 
@@ -788,7 +862,7 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     } else {
       this.activeAlerts.set(rule.id, {
         triggeredAt: new Date(),
-        count: 1
+        count: 1,
       });
     }
 
@@ -800,12 +874,17 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     // Emit alert event
     this.eventEmitter.emit('monitoring.alert', {
       rule,
-      triggeredAt: new Date()
+      triggeredAt: new Date(),
     });
   }
 
-  private executeAlertAction(rule: AlertRule, action: AlertRule['actions'][0]): void {
-    this.logger.log(`Executing alert action: ${action.type} for rule: ${rule.name}`);
+  private executeAlertAction(
+    rule: AlertRule,
+    action: AlertRule['actions'][0],
+  ): void {
+    this.logger.log(
+      `Executing alert action: ${action.type} for rule: ${rule.name}`,
+    );
 
     // In a real implementation, this would send emails, webhooks, etc.
     switch (action.type) {
@@ -830,18 +909,22 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       name: 'High Error Rate',
       description: 'Triggers when error rate exceeds 10%',
       enabled: true,
-      conditions: [{
-        metric: 'error_rate',
-        operator: 'gt',
-        threshold: 0.1,
-        timeWindowMinutes: 5
-      }],
-      actions: [{
-        type: 'log',
-        target: 'system'
-      }],
+      conditions: [
+        {
+          metric: 'error_rate',
+          operator: 'gt',
+          threshold: 0.1,
+          timeWindowMinutes: 5,
+        },
+      ],
+      actions: [
+        {
+          type: 'log',
+          target: 'system',
+        },
+      ],
       cooldownMinutes: 15,
-      severity: 'HIGH'
+      severity: 'HIGH',
     });
 
     // High memory usage alert
@@ -849,18 +932,22 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
       name: 'High Memory Usage',
       description: 'Triggers when memory usage exceeds 90%',
       enabled: true,
-      conditions: [{
-        metric: 'memory_usage',
-        operator: 'gt',
-        threshold: 90,
-        timeWindowMinutes: 5
-      }],
-      actions: [{
-        type: 'log',
-        target: 'system'
-      }],
+      conditions: [
+        {
+          metric: 'memory_usage',
+          operator: 'gt',
+          threshold: 90,
+          timeWindowMinutes: 5,
+        },
+      ],
+      actions: [
+        {
+          type: 'log',
+          target: 'system',
+        },
+      ],
       cooldownMinutes: 10,
-      severity: 'MEDIUM'
+      severity: 'MEDIUM',
     });
   }
 
@@ -874,7 +961,9 @@ export class BrowserAutomationMonitoringService implements OnModuleInit, OnModul
     }
 
     // Add performance metrics
-    for (const [type, metrics] of Object.entries(data.performanceMetrics as any)) {
+    for (const [type, metrics] of Object.entries(
+      data.performanceMetrics as any,
+    )) {
       prometheus += `browser_automation_operations_total{operation_type="${type}"} ${metrics.totalOperations}\n`;
       prometheus += `browser_automation_operation_duration_seconds{operation_type="${type}"} ${metrics.averageDurationMs / 1000}\n`;
     }

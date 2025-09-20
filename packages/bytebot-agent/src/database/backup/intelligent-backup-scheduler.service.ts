@@ -26,8 +26,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   ParlantBackupValidationService,
   BackupSchedule,
-  BackupValidationMetadata,
-  BackupRiskAssessment,
 } from './parlant-backup-validation.service';
 import {
   DatabaseBackupService,
@@ -37,7 +35,6 @@ import {
 import {
   ParlantValidationResponse,
   ParlantUserContext,
-  SecurityLevel,
 } from '@shared/types/parlant-integration.types';
 import {
   DatabaseOperationMetadata,
@@ -399,7 +396,7 @@ export class IntelligentBackupSchedulerService {
    */
   async executeScheduledBackup(
     scheduleId: string,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<ScheduleExecutionResult> {
     const executionId = this.generateExecutionId();
     const startTime = Date.now();
@@ -735,7 +732,7 @@ export class IntelligentBackupSchedulerService {
    * Evaluate all conditions for a schedule
    */
   private async evaluateScheduleConditions(
-    schedule: BackupSchedule,
+    _schedule: BackupSchedule,
   ): Promise<ConditionEvaluationResult[]> {
     const results: ConditionEvaluationResult[] = [];
 
@@ -900,7 +897,7 @@ export class IntelligentBackupSchedulerService {
   private async handleScheduleConflicts(
     conflicts: ScheduleConflict[],
     request: ScheduleCreationRequest,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<void> {
     for (const conflict of conflicts) {
       this.scheduleConflicts.set(conflict.conflictId, conflict);
@@ -1004,8 +1001,7 @@ export class IntelligentBackupSchedulerService {
     // Analyze system load patterns
     if (this.systemLoadHistory.length >= 48) {
       // At least 4 hours of data
-      const averageLoad =
-        this.systemLoadHistory.reduce((sum, load) => sum + load, 0) /
+      this.systemLoadHistory.reduce((sum, load) => sum + load, 0) /
         this.systemLoadHistory.length;
       const lowLoadPeriods = this.identifyLowLoadPeriods();
 
@@ -1071,7 +1067,7 @@ export class IntelligentBackupSchedulerService {
   /**
    * Calculate next execution time from cron expression
    */
-  private calculateNextExecution(cronExpression: string): Date {
+  private calculateNextExecution(_cronExpression: string): Date {
     // Simplified implementation - in production, use a proper cron parser
     const now = new Date();
     const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
@@ -1082,7 +1078,7 @@ export class IntelligentBackupSchedulerService {
    * Generate execution times for a cron expression
    */
   private generateExecutionTimes(
-    cronExpression: string,
+    _cronExpression: string,
     hours: number,
   ): Date[] {
     const times: Date[] = [];

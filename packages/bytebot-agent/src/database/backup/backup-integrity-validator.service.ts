@@ -28,8 +28,6 @@ import {
 } from './parlant-backup-validation.service';
 import {
   DatabaseBackupService,
-  BackupCreationResult,
-  BackupRestorationRequest,
 } from '../database-backup.service';
 import {
   ParlantValidationResponse,
@@ -37,7 +35,6 @@ import {
   SecurityLevel,
 } from '@shared/types/parlant-integration.types';
 import {
-  DatabaseOperationMetadata,
   RiskLevel,
 } from '../parlant-validated-database.service';
 import * as crypto from 'crypto';

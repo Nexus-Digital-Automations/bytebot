@@ -14,11 +14,18 @@
  */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsNumber, IsOptional, IsArray, IsObject, IsEnum, IsDate } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsEnum,
+  IsDate,
+} from 'class-validator';
 import {
   BrowserAutomationErrorCategory,
   BrowserAutomationErrorSeverity,
-  BrowserAutomationErrorRecoverability
+  BrowserAutomationErrorRecoverability,
 } from '../errors/browser-automation-error-classification';
 import { RecoveryResult } from '../recovery/browser-automation-recovery-manager';
 
@@ -28,7 +35,7 @@ export enum BrowserAutomationResponseStatus {
   ERROR = 'ERROR',
   TIMEOUT = 'TIMEOUT',
   CANCELLED = 'CANCELLED',
-  DEGRADED = 'DEGRADED'
+  DEGRADED = 'DEGRADED',
 }
 
 export enum BrowserAutomationOperationType {
@@ -41,7 +48,7 @@ export enum BrowserAutomationOperationType {
   SESSION_MANAGEMENT = 'SESSION_MANAGEMENT',
   TASK_EXECUTION = 'TASK_EXECUTION',
   HEALTH_CHECK = 'HEALTH_CHECK',
-  SYSTEM_INFO = 'SYSTEM_INFO'
+  SYSTEM_INFO = 'SYSTEM_INFO',
 }
 
 /**
@@ -50,52 +57,52 @@ export enum BrowserAutomationOperationType {
 export class BrowserAutomationBaseResponse {
   @ApiProperty({
     description: 'Operation success status',
-    enum: BrowserAutomationResponseStatus
+    enum: BrowserAutomationResponseStatus,
   })
   @IsEnum(BrowserAutomationResponseStatus)
   status!: BrowserAutomationResponseStatus;
 
   @ApiProperty({
-    description: 'Human-readable message describing the operation result'
+    description: 'Human-readable message describing the operation result',
   })
   @IsString()
   message!: string;
 
   @ApiProperty({
-    description: 'Unique correlation ID for request tracking and debugging'
+    description: 'Unique correlation ID for request tracking and debugging',
   })
   @IsString()
   correlationId!: string;
 
   @ApiProperty({
-    description: 'Response timestamp in ISO format'
+    description: 'Response timestamp in ISO format',
   })
   @IsDate()
   timestamp!: Date;
 
   @ApiProperty({
     description: 'Type of operation performed',
-    enum: BrowserAutomationOperationType
+    enum: BrowserAutomationOperationType,
   })
   @IsEnum(BrowserAutomationOperationType)
   operationType!: BrowserAutomationOperationType;
 
   @ApiPropertyOptional({
-    description: 'Session ID associated with this operation'
+    description: 'Session ID associated with this operation',
   })
   @IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiPropertyOptional({
-    description: 'Task ID associated with this operation'
+    description: 'Task ID associated with this operation',
   })
   @IsOptional()
   @IsString()
   taskId?: string;
 
   @ApiProperty({
-    description: 'Performance metrics for the operation'
+    description: 'Performance metrics for the operation',
   })
   @IsObject()
   metrics!: {
@@ -114,68 +121,68 @@ export class BrowserAutomationBaseResponse {
  */
 export class BrowserAutomationErrorDetails {
   @ApiProperty({
-    description: 'Specific error code for programmatic handling'
+    description: 'Specific error code for programmatic handling',
   })
   @IsString()
   code!: string;
 
   @ApiProperty({
     description: 'Error category for classification',
-    enum: BrowserAutomationErrorCategory
+    enum: BrowserAutomationErrorCategory,
   })
   @IsEnum(BrowserAutomationErrorCategory)
   category!: BrowserAutomationErrorCategory;
 
   @ApiProperty({
     description: 'Error severity level',
-    enum: BrowserAutomationErrorSeverity
+    enum: BrowserAutomationErrorSeverity,
   })
   @IsEnum(BrowserAutomationErrorSeverity)
   severity!: BrowserAutomationErrorSeverity;
 
   @ApiProperty({
     description: 'Whether the error can be automatically recovered',
-    enum: BrowserAutomationErrorRecoverability
+    enum: BrowserAutomationErrorRecoverability,
   })
   @IsEnum(BrowserAutomationErrorRecoverability)
   recoverability!: BrowserAutomationErrorRecoverability;
 
   @ApiProperty({
-    description: 'Detailed error message'
+    description: 'Detailed error message',
   })
   @IsString()
   message!: string;
 
   @ApiPropertyOptional({
-    description: 'Additional error context and metadata'
+    description: 'Additional error context and metadata',
   })
   @IsOptional()
   @IsObject()
   context?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Stack trace for debugging (in development mode)'
+    description: 'Stack trace for debugging (in development mode)',
   })
   @IsOptional()
   @IsString()
   stackTrace?: string;
 
   @ApiProperty({
-    description: 'Suggested recovery actions'
+    description: 'Suggested recovery actions',
   })
   @IsArray()
   @IsString({ each: true })
   recoveryActions!: string[];
 
   @ApiProperty({
-    description: 'Troubleshooting steps for resolving the issue'
+    description: 'Troubleshooting steps for resolving the issue',
   })
   @IsArray()
   @IsString({ each: true })
   troubleshootingSteps!: string[];
 
   @ApiPropertyOptional({
-    description: 'Links to relevant documentation or resources'
+    description: 'Links to relevant documentation or resources',
   })
   @IsOptional()
   @IsArray()
@@ -183,7 +190,7 @@ export class BrowserAutomationErrorDetails {
   documentationLinks?: string[];
 
   @ApiPropertyOptional({
-    description: 'Recovery attempt results if recovery was attempted'
+    description: 'Recovery attempt results if recovery was attempted',
   })
   @IsOptional()
   @IsObject()
@@ -200,22 +207,24 @@ export class BrowserAutomationErrorDetails {
 /**
  * Success response with operation results
  */
-export class BrowserAutomationSuccessResponse<T = unknown> extends BrowserAutomationBaseResponse {
+export class BrowserAutomationSuccessResponse<
+  T = unknown,
+> extends BrowserAutomationBaseResponse {
   @ApiProperty({
-    description: 'Operation result data'
+    description: 'Operation result data',
   })
   @IsObject()
   data!: T;
 
   @ApiPropertyOptional({
-    description: 'Additional metadata about the operation'
+    description: 'Additional metadata about the operation',
   })
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 
   @ApiPropertyOptional({
-    description: 'Warnings that occurred during successful operation'
+    description: 'Warnings that occurred during successful operation',
   })
   @IsOptional()
   @IsArray()
@@ -231,20 +240,20 @@ export class BrowserAutomationSuccessResponse<T = unknown> extends BrowserAutoma
  */
 export class BrowserAutomationErrorResponse extends BrowserAutomationBaseResponse {
   @ApiProperty({
-    description: 'Detailed error information'
+    description: 'Detailed error information',
   })
   @IsObject()
   error!: BrowserAutomationErrorDetails;
 
   @ApiPropertyOptional({
-    description: 'Partial results if operation completed partially'
+    description: 'Partial results if operation completed partially',
   })
   @IsOptional()
   @IsObject()
   partialData?: unknown;
 
   @ApiPropertyOptional({
-    description: 'Error history for debugging recurring issues'
+    description: 'Error history for debugging recurring issues',
   })
   @IsOptional()
   @IsArray()
@@ -277,9 +286,13 @@ export class BrowserAutomationResponseFormatter {
       taskId?: string;
       durationMs: number;
       metadata?: Record<string, unknown>;
-      warnings?: Array<{ code: string; message: string; severity: 'LOW' | 'MEDIUM' | 'HIGH' }>;
+      warnings?: Array<{
+        code: string;
+        message: string;
+        severity: 'LOW' | 'MEDIUM' | 'HIGH';
+      }>;
       metrics?: Partial<BrowserAutomationBaseResponse['metrics']>;
-    }
+    },
   ): BrowserAutomationSuccessResponse<T> {
     return {
       status: BrowserAutomationResponseStatus.SUCCESS,
@@ -293,11 +306,11 @@ export class BrowserAutomationResponseFormatter {
         durationMs: options.durationMs,
         retryCount: 0,
         recoveryAttempts: 0,
-        ...options.metrics
+        ...options.metrics,
       },
       data,
       metadata: options.metadata,
-      warnings: options.warnings
+      warnings: options.warnings,
     };
   }
 
@@ -323,7 +336,7 @@ export class BrowserAutomationResponseFormatter {
         message: string;
         context?: Record<string, unknown>;
       }>;
-    }
+    },
   ): BrowserAutomationErrorResponse {
     let errorDetails: BrowserAutomationErrorDetails;
 
@@ -340,19 +353,21 @@ export class BrowserAutomationResponseFormatter {
         recoveryActions: [
           'Retry the operation',
           'Check system logs for more details',
-          'Contact support if issue persists'
+          'Contact support if issue persists',
         ],
         troubleshootingSteps: [
           'Verify operation parameters',
           'Check network connectivity',
           'Ensure browser service is running',
-          'Review system resources'
-        ]
+          'Review system resources',
+        ],
       };
     } else {
       errorDetails = {
         ...error,
-        stackTrace: options.includeStackTrace ? errorDetails?.stackTrace : undefined
+        stackTrace: options.includeStackTrace
+          ? errorDetails?.stackTrace
+          : undefined,
       };
     }
 
@@ -364,7 +379,7 @@ export class BrowserAutomationResponseFormatter {
         success: options.recoveryAttempt.success,
         attemptNumber: options.recoveryAttempt.attemptNumber,
         durationMs: options.recoveryAttempt.durationMs,
-        nextAction: options.recoveryAttempt.nextAction
+        nextAction: options.recoveryAttempt.nextAction,
       };
     }
 
@@ -380,11 +395,11 @@ export class BrowserAutomationResponseFormatter {
         durationMs: options.durationMs,
         retryCount: options.recoveryAttempt?.attemptNumber || 0,
         recoveryAttempts: options.recoveryAttempt ? 1 : 0,
-        ...options.metrics
+        ...options.metrics,
       },
       error: errorDetails,
       partialData: options.partialData,
-      errorHistory: options.errorHistory
+      errorHistory: options.errorHistory,
     };
   }
 
@@ -403,17 +418,19 @@ export class BrowserAutomationResponseFormatter {
       durationMs: number;
       metadata?: Record<string, unknown>;
       metrics?: Partial<BrowserAutomationBaseResponse['metrics']>;
-    }
-  ): BrowserAutomationSuccessResponse<T> & { errors: BrowserAutomationErrorDetails[] } {
+    },
+  ): BrowserAutomationSuccessResponse<T> & {
+    errors: BrowserAutomationErrorDetails[];
+  } {
     const baseResponse = this.createSuccessResponse(operationType, data, {
       ...options,
-      message: options.message || 'Operation completed with some errors'
+      message: options.message || 'Operation completed with some errors',
     });
 
     return {
       ...baseResponse,
       status: BrowserAutomationResponseStatus.PARTIAL_SUCCESS,
-      errors
+      errors,
     };
   }
 
@@ -430,7 +447,7 @@ export class BrowserAutomationResponseFormatter {
       partialData?: unknown;
       context?: Record<string, unknown>;
       metrics?: Partial<BrowserAutomationBaseResponse['metrics']>;
-    }
+    },
   ): BrowserAutomationErrorResponse {
     const errorDetails: BrowserAutomationErrorDetails = {
       code: 'OPERATION_TIMEOUT',
@@ -440,19 +457,19 @@ export class BrowserAutomationResponseFormatter {
       message: `Operation timed out after ${timeoutMs}ms`,
       context: {
         timeoutMs,
-        ...options.context
+        ...options.context,
       },
       recoveryActions: [
         'Increase timeout value',
         'Retry with optimized parameters',
-        'Break down operation into smaller steps'
+        'Break down operation into smaller steps',
       ],
       troubleshootingSteps: [
         'Check network connectivity',
         'Verify server response time',
         'Review operation complexity',
-        'Monitor system resources'
-      ]
+        'Monitor system resources',
+      ],
     };
 
     return {
@@ -467,10 +484,10 @@ export class BrowserAutomationResponseFormatter {
         durationMs: timeoutMs,
         retryCount: 0,
         recoveryAttempts: 0,
-        ...options.metrics
+        ...options.metrics,
       },
       error: errorDetails,
-      partialData: options.partialData
+      partialData: options.partialData,
     };
   }
 
@@ -487,7 +504,7 @@ export class BrowserAutomationResponseFormatter {
       durationMs: number;
       partialData?: unknown;
       metrics?: Partial<BrowserAutomationBaseResponse['metrics']>;
-    }
+    },
   ): BrowserAutomationErrorResponse {
     const errorDetails: BrowserAutomationErrorDetails = {
       code: 'OPERATION_CANCELLED',
@@ -499,13 +516,13 @@ export class BrowserAutomationResponseFormatter {
       recoveryActions: [
         'Restart the operation if needed',
         'Check cancellation reason',
-        'Verify operation parameters'
+        'Verify operation parameters',
       ],
       troubleshootingSteps: [
         'Review cancellation trigger',
         'Check user permissions',
-        'Verify operation state'
-      ]
+        'Verify operation state',
+      ],
     };
 
     return {
@@ -520,10 +537,10 @@ export class BrowserAutomationResponseFormatter {
         durationMs: options.durationMs,
         retryCount: 0,
         recoveryAttempts: 0,
-        ...options.metrics
+        ...options.metrics,
       },
       error: errorDetails,
-      partialData: options.partialData
+      partialData: options.partialData,
     };
   }
 
@@ -542,11 +559,13 @@ export class BrowserAutomationResponseFormatter {
       durationMs: number;
       metadata?: Record<string, unknown>;
       metrics?: Partial<BrowserAutomationBaseResponse['metrics']>;
-    }
-  ): BrowserAutomationSuccessResponse<T> & { degradationInfo: { reason: string; impact: string } } {
+    },
+  ): BrowserAutomationSuccessResponse<T> & {
+    degradationInfo: { reason: string; impact: string };
+  } {
     const baseResponse = this.createSuccessResponse(operationType, data, {
       ...options,
-      message: options.message || 'Operation completed in degraded mode'
+      message: options.message || 'Operation completed in degraded mode',
     });
 
     return {
@@ -554,8 +573,8 @@ export class BrowserAutomationResponseFormatter {
       status: BrowserAutomationResponseStatus.DEGRADED,
       degradationInfo: {
         reason: degradationReason,
-        impact: 'Reduced functionality or performance'
-      }
+        impact: 'Reduced functionality or performance',
+      },
     };
   }
 
@@ -570,11 +589,11 @@ export class BrowserAutomationResponseFormatter {
       clientInfo?: Record<string, unknown>;
       environment?: string;
       version?: string;
-    }
+    },
   ): T & { monitoringContext: typeof context } {
     return {
       ...response,
-      monitoringContext: context
+      monitoringContext: context,
     };
   }
 }
@@ -622,7 +641,7 @@ export class BrowserAutomationResponseValidator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -635,7 +654,7 @@ export class BrowserAutomationResponseValidator {
       removeStackTrace?: boolean;
       removeSensitiveData?: boolean;
       includeDebugInfo?: boolean;
-    } = {}
+    } = {},
   ): T {
     const sanitized = { ...response };
 
@@ -651,7 +670,9 @@ export class BrowserAutomationResponseValidator {
       const removeSensitiveFromObject = (obj: any) => {
         if (typeof obj === 'object' && obj !== null) {
           for (const key of Object.keys(obj)) {
-            if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
+            if (
+              sensitiveFields.some((field) => key.toLowerCase().includes(field))
+            ) {
               delete obj[key];
             } else if (typeof obj[key] === 'object') {
               removeSensitiveFromObject(obj[key]);

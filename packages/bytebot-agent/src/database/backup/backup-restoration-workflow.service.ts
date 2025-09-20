@@ -24,14 +24,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantBackupValidationService,
-  BackupOperationType,
 } from './parlant-backup-validation.service';
 import {
   BackupIntegrityValidatorService,
   IntegrityValidationRequest,
   IntegrityValidationType,
   IntegrityValidationLevel,
-  IntegrityValidationResult,
   IntegrityStatus,
 } from './backup-integrity-validator.service';
 import {
@@ -39,12 +37,9 @@ import {
   BackupRestorationRequest,
 } from '../database-backup.service';
 import {
-  ParlantValidationResponse,
   ParlantUserContext,
-  SecurityLevel,
 } from '@shared/types/parlant-integration.types';
 import {
-  DatabaseOperationMetadata,
   RiskLevel,
 } from '../parlant-validated-database.service';
 
@@ -1612,7 +1607,7 @@ export class BackupRestorationWorkflowService {
 
   // Placeholder methods for complex operations
   private generateMitigationStrategies(
-    riskFactors: RiskFactor[],
+    _riskFactors: RiskFactor[],
   ): MitigationStrategy[] {
     return [];
   }

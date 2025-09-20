@@ -677,7 +677,7 @@ export class BackupAuditComplianceReportingService {
       );
 
       // Validate cryptographic integrity of results
-      const integrityValidation =
+      const _integrityValidation =
         await this.validateResultIntegrity(filteredResults);
 
       // Generate search statistics
@@ -870,7 +870,7 @@ export class BackupAuditComplianceReportingService {
 
     try {
       // Initialize monitoring infrastructure
-      const monitoringSystem =
+      const _monitoringSystem =
         await this.initializeMonitoringInfrastructure(request);
 
       // Deploy monitoring rules
@@ -1440,7 +1440,7 @@ Comprehensive analysis of ${report.framework} compliance report:
   // For brevity, including key method signatures:
 
   private async executeAuditSearch(
-    request: AuditTrailQueryRequest,
+    _request: AuditTrailQueryRequest,
   ): Promise<AuditTrailEntry[]> {
     // Mock search implementation
     return [];
@@ -1448,64 +1448,64 @@ Comprehensive analysis of ${report.framework} compliance report:
 
   private async applyComplianceFilters(
     results: AuditTrailEntry[],
-    request: AuditTrailQueryRequest,
+    _request: AuditTrailQueryRequest,
   ): Promise<AuditTrailEntry[]> {
     return results;
   }
 
   private async generateAggregatedMetrics(
-    results: AuditTrailEntry[],
-    request: AuditTrailQueryRequest,
+    _results: AuditTrailEntry[],
+    _request: AuditTrailQueryRequest,
   ): Promise<AggregatedMetrics> {
     return {} as AggregatedMetrics;
   }
 
   private async analyzeComplianceStatus(
-    results: AuditTrailEntry[],
-    request: AuditTrailQueryRequest,
+    _results: AuditTrailEntry[],
+    _request: AuditTrailQueryRequest,
   ): Promise<ComplianceAnalysis> {
     return {} as ComplianceAnalysis;
   }
 
   private async validateResultIntegrity(
-    results: AuditTrailEntry[],
+    _results: AuditTrailEntry[],
   ): Promise<boolean> {
     return true;
   }
 
   private async generateSearchStatistics(
-    request: AuditTrailQueryRequest,
-    results: AuditTrailEntry[],
+    _request: AuditTrailQueryRequest,
+    _results: AuditTrailEntry[],
   ): Promise<SearchStatistics> {
     return {} as SearchStatistics;
   }
 
   // Continue with additional mock implementations...
   private async collectAuditDataForPeriod(
-    period: ReportingPeriod,
-    frameworks: ComplianceFramework[],
+    _period: ReportingPeriod,
+    _frameworks: ComplianceFramework[],
   ): Promise<AuditTrailEntry[]> {
     return [];
   }
 
   private async analyzeMultiFrameworkCompliance(
-    auditData: AuditTrailEntry[],
-    frameworks: ComplianceFramework[],
+    _auditData: AuditTrailEntry[],
+    _frameworks: ComplianceFramework[],
   ): Promise<any> {
     return {};
   }
 
-  private determineOverallComplianceStatus(analysis: any): ComplianceStatus {
+  private determineOverallComplianceStatus(_analysis: any): ComplianceStatus {
     return ComplianceStatus.COMPLIANT;
   }
 
-  private calculateOverallComplianceScore(analysis: any): number {
+  private calculateOverallComplianceScore(_analysis: any): number {
     return 95;
   }
 
   private generateCertificationRecommendation(
     score: number,
-    findings: ComplianceFinding[],
+    _findings: ComplianceFinding[],
   ): string {
     return score >= 90
       ? 'Ready for certification'

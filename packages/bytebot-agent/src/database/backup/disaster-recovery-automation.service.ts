@@ -23,38 +23,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  ParlantBackupValidationService,
-  BackupOperationType,
-  DisasterRecoveryPlan,
-  RecoveryStep,
-} from './parlant-backup-validation.service';
-import {
-  BackupIntegrityValidatorService,
-  IntegrityValidationRequest,
-  IntegrityValidationType,
-  IntegrityValidationLevel,
-} from './backup-integrity-validator.service';
-import {
-  BackupRestorationWorkflowService,
-  RestorationWorkflowRequest,
-  RestorationType,
-  UrgencyLevel,
-  TargetEnvironment,
-} from './backup-restoration-workflow.service';
-import {
-  DatabaseBackupService,
-  BackupCreationResult,
-} from '../database-backup.service';
+import { ParlantBackupValidationService } from './parlant-backup-validation.service';
+import { BackupIntegrityValidatorService } from './backup-integrity-validator.service';
+import { BackupRestorationWorkflowService } from './backup-restoration-workflow.service';
+import { DatabaseBackupService } from '../database-backup.service';
 import {
   ParlantValidationResponse,
   ParlantUserContext,
-  SecurityLevel,
 } from '@shared/types/parlant-integration.types';
-import {
-  DatabaseOperationMetadata,
-  RiskLevel,
-} from '../parlant-validated-database.service';
+import { RiskLevel } from '../parlant-validated-database.service';
 
 // ===== DISASTER RECOVERY INTERFACES =====
 
@@ -1498,9 +1475,9 @@ export class DisasterRecoveryAutomationService {
    */
   private async validateDisasterResponse(
     incident: DisasterIncident,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<ParlantValidationResponse> {
-    const conversationalPrompt = this.generateDisasterResponsePrompt(incident);
+    this.generateDisasterResponsePrompt(incident);
 
     // Mock PARLANT validation - replace with actual PARLANT service integration
     const mockValidation: ParlantValidationResponse = {
@@ -2031,8 +2008,8 @@ export class DisasterRecoveryAutomationService {
 
   // Additional placeholder methods continue...
   private async allocateResources(
-    incident: DisasterIncident,
-    steps: RecoveryExecutionStep[],
+    _incident: DisasterIncident,
+    _steps: RecoveryExecutionStep[],
   ): Promise<ResourceAllocation> {
     return {
       personnelAssignment: [],
@@ -2049,7 +2026,7 @@ export class DisasterRecoveryAutomationService {
 
   private createRecoveryTimeline(
     steps: RecoveryExecutionStep[],
-    objectives: RecoveryObjectives,
+    _objectives: RecoveryObjectives,
   ): RecoveryTimeline {
     const now = new Date();
     const totalDuration = steps.reduce(
@@ -2066,13 +2043,13 @@ export class DisasterRecoveryAutomationService {
   }
 
   private async createContingencyPlans(
-    incident: DisasterIncident,
+    _incident: DisasterIncident,
   ): Promise<ContingencyPlan[]> {
     return [];
   }
 
   private createValidationChecks(
-    incident: DisasterIncident,
+    _incident: DisasterIncident,
   ): ValidationCheck[] {
     return [
       {
@@ -2088,7 +2065,7 @@ export class DisasterRecoveryAutomationService {
   }
 
   private async createRollbackPlan(
-    incident: DisasterIncident,
+    _incident: DisasterIncident,
   ): Promise<RollbackPlan> {
     return {
       planId: `rollback_${incident.incidentId}`,
@@ -2100,8 +2077,8 @@ export class DisasterRecoveryAutomationService {
   }
 
   private async validateRecoveryPlan(
-    plan: RecoveryExecutionPlan,
-    userContext: ParlantUserContext,
+    _plan: RecoveryExecutionPlan,
+    _userContext: ParlantUserContext,
   ): Promise<ParlantValidationResponse> {
     // Mock validation
     return {
@@ -2114,7 +2091,7 @@ export class DisasterRecoveryAutomationService {
 
   private async executeAutomatedStep(
     step: RecoveryExecutionStep,
-    plan: RecoveryExecutionPlan,
+    _plan: RecoveryExecutionPlan,
   ): Promise<void> {
     // Simulate automated step execution
     await new Promise((resolve) =>
@@ -2124,7 +2101,7 @@ export class DisasterRecoveryAutomationService {
 
   private async executeSemiAutomatedStep(
     step: RecoveryExecutionStep,
-    plan: RecoveryExecutionPlan,
+    _plan: RecoveryExecutionPlan,
   ): Promise<void> {
     // Simulate semi-automated step execution
     await new Promise((resolve) =>
@@ -2134,7 +2111,7 @@ export class DisasterRecoveryAutomationService {
 
   private async executeManualStep(
     step: RecoveryExecutionStep,
-    plan: RecoveryExecutionPlan,
+    _plan: RecoveryExecutionPlan,
   ): Promise<void> {
     // Simulate manual step execution (would require human intervention in production)
     this.logger.log(`Manual step requires intervention: ${step.stepName}`);
@@ -2143,7 +2120,7 @@ export class DisasterRecoveryAutomationService {
 
   private async validateStepCompletion(
     step: RecoveryExecutionStep,
-    plan: RecoveryExecutionPlan,
+    _plan: RecoveryExecutionPlan,
   ): Promise<void> {
     // Validate step completion criteria
     for (const criteria of step.validationCriteria) {
@@ -2154,7 +2131,7 @@ export class DisasterRecoveryAutomationService {
     }
   }
 
-  private async checkValidationCriteria(criteria: string): Promise<boolean> {
+  private async checkValidationCriteria(_criteria: string): Promise<boolean> {
     // Mock validation criteria check
     return Math.random() > 0.1; // 90% success rate
   }
@@ -2178,7 +2155,7 @@ export class DisasterRecoveryAutomationService {
 
   private async validateDRTest(
     test: DRTestExecution,
-    userContext: ParlantUserContext,
+    _userContext: ParlantUserContext,
   ): Promise<ParlantValidationResponse> {
     // Mock DR test validation
     return {
@@ -2262,7 +2239,7 @@ export class DisasterRecoveryAutomationService {
     return [];
   }
 
-  private shouldExecuteTest(test: DRTestExecution): boolean {
+  private shouldExecuteTest(_test: DRTestExecution): boolean {
     // Mock test execution decision
     return false;
   }
