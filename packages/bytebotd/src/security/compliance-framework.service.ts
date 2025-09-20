@@ -20,7 +20,6 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== COMPLIANCE FRAMEWORK INTEGRATION INTERFACES =====
@@ -194,7 +193,6 @@ export class ComplianceFrameworkService {
   private frameworksCovered = new Set<string>();
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `compliance_framework_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Compliance Framework Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,

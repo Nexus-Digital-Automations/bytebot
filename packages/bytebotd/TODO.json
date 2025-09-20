@@ -3059,12 +3059,24 @@
       "updated_at": "2025-09-19T07:19:03.575Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-19T07:21:39.012Z",
       "title": "TS2339 Property Resolution - Phase 4B",
       "description": "Systematic resolution of TS2339 property does not exist errors in BytebotD package. Focus on highest-frequency properties and core interfaces. Target: 30-50 error reduction from 163 remaining.",
       "category": "error",
-      "id": "error_1758266499011_k83bb9wjs1"
+      "id": "error_1758266499011_k83bb9wjs1",
+      "assigned_agent": "TS2339_PROPERTY_AGENT",
+      "started_at": "2025-09-20T22:28:11.261Z",
+      "claimed_by": "TS2339_PROPERTY_AGENT",
+      "agent_assignment_history": [
+        {
+          "agentId": "TS2339_PROPERTY_AGENT",
+          "role": "primary",
+          "assignedAt": "2025-09-20T22:28:11.261Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "in_progress",
@@ -3353,7 +3365,7 @@
       "updated_at": "2025-09-20T15:16:05.995Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-20T15:08:48.930Z",
       "title": "EMERGENCY: Fix systematic import statement formatting in AI services causing 28k+ TypeScript errors",
       "description": "Critical systematic fix needed: All AI service files have malformed import statements where multiple imports are merged into single lines without semicolons. Fix: anthropic.service.ts line 21, google.service.ts line 21, messages.service.ts line 21, openai.service.ts line 21+434+439+449+466+473. This is causing cascading TypeScript compilation failures across the entire codebase.",
@@ -3371,7 +3383,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-20T22:27:40.540Z",
+      "updated_at": "2025-09-20T22:27:40.540Z"
     },
     {
       "status": "pending",

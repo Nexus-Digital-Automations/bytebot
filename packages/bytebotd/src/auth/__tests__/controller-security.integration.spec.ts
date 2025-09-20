@@ -301,19 +301,21 @@ describe('Controller Security Integration Tests', () => {
     moduleRef = await Test.createTestingModule({
   controllers: [],
       providers: [
-  {,
-  provide: JwtService, useClass: MockSecurityJwtService,
-        
-},
         {
-  provide: ConfigService, useValue: {,
-  get: (key: strin, g) => {
-              const config: Record<string, string | number> = {,
-  JWT_SECRET: 'test-security-secret',
-      JWT_EXPIRATION: '15m',
-        CORS_ORIGIN: 'https://trusted-domain.com', RATE_LIMIT_MAX: 100, RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 minutes
-              
-};
+          provide: JwtService,
+          useClass: MockSecurityJwtService,
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: (key: string) => {
+              const config: Record<string, string | number> = {
+                JWT_SECRET: 'test-security-secret',
+                JWT_EXPIRATION: '15m',
+                CORS_ORIGIN: 'https://trusted-domain.com',
+                RATE_LIMIT_MAX: 100,
+                RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 minutes
+              };
               return config[key];
             },
           },

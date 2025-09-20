@@ -18,7 +18,6 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
@@ -273,8 +272,7 @@ export class SecurityAuditService {
   private complianceChecksPerformed = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
-    private readonly configService: ConfigService
+    private readonly parlantService: ParlantIntegrationService
   ) {
     const operationId = `security_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Audit Service with Parlant integration`, {
       parlantIntegrationEnabled: true,

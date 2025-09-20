@@ -163,12 +163,17 @@ export class ElementDetectionCriteriaDto {
   strategy: DetectionStrategy = DetectionStrategy.CSS_SELECTOR;
 
   @ApiPropertyOptional({
-    description: 'CSS selector for CSS_SELECTOR strategy',example: '#submit-button',})@IsOptional()
+    description: 'CSS selector for CSS_SELECTOR strategy',
+    example: '#submit-button',
+  })
+  @IsOptional()
   @IsString()
   cssSelector?: string;
 
   @ApiPropertyOptional({
-    description: 'XPath expression for XPATH strategy',example: '//button[@type="submit"]",})
+    description: 'XPath expression for XPATH strategy',
+    example: '//button[@type="submit"]',
+  })
   @IsOptional()
   @IsString()
   xpath?: string;

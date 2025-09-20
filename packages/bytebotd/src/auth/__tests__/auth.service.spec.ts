@@ -547,12 +547,16 @@ describe('AuthService', () => {
     });
 
     it('should handle concurrent login attempts safely', async () => {
-      const testId = `${operationId}_security_concurrent`;console.log(
-
-      );
+      const testId = `${operationId}_security_concurrent`;
+      console.log(`[${testId}] Starting concurrent login test`);
       const loginDto = {
-        email: 'admin@bytebot.ai', password: 'admin123',};(
-        jest.spyOn(jwtService'sign')).mockReturnValue('concurrent-test-token');// Simulate concurrent login attemptsconst promises = Array(10)
+        email: 'admin@bytebot.ai',
+        password: 'admin123'
+      };
+      jest.spyOn(jwtService, 'sign').mockReturnValue('concurrent-test-token');
+
+      // Simulate concurrent login attempts
+      const promises = Array(10)
         .fill(null)
         .map(() => service.login(loginDto));
       const results = await Promise.all(promises);
@@ -567,12 +571,16 @@ describe('AuthService', () => {
       console.log(`[${testId}] Concurrent login safety test completed`);
     });
 
-    it('should validate token expiration correctly'async () => {
-      const testId = `${operationId}_security_expiration`;console.log(`[${testId}] Testing token expiration handling`);
+    it('should validate token expiration correctly', async () => {
+      const testId = `${operationId}_security_expiration`;
+      console.log(`[${testId}] Testing token expiration handling`);
 
       // Mock expired token verification
-      (
-        jest.spyOn(jwtService, 'verify')).mockImplementation(() => {const error = new Error('Token expired');error.name = 'TokenExpiredError';throw error;});
+      jest.spyOn(jwtService, 'verify').mockImplementation(() => {
+        const error = new Error('Token expired');
+        error.name = 'TokenExpiredError';
+        throw error;
+      });
 
       const expiredToken = 'expired-refresh-token';
 

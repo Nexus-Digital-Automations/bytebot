@@ -95,11 +95,16 @@ export class ClickInteractionDto {
  */
 export class TypeInteractionDto {
   @ApiProperty({
-    description: 'Browser session identifier',example: 'session_abc123',})@IsString()
+    description: 'Browser session identifier',
+    example: 'session_abc123',
+  })
+  @IsString()
   sessionId: string;
 
   @ApiProperty({
-    description: 'Element selector where to type',example: 'input[name="username"]",})
+    description: 'Element selector where to type',
+    example: 'input[name="username"]',
+  })
   @IsString()
   selector: string;
 
