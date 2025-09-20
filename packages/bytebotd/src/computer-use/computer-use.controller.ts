@@ -35,7 +35,9 @@ import {
 } from '../auth/decorators/roles.decorator';
 import { ComputerUseService } from './computer-use.service';
 import { AsyncJobService } from './async-job.service';
+import { EnhancedAsyncJobService } from './enhanced-async-job.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
+import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';
 import { ComputerActionDto } from './dto/computer-action.dto';
 import {
   JobSubmissionResponseDto,
@@ -43,6 +45,14 @@ import {
   JobResultResponseDto,
   AsyncActionSubmissionDto,
 } from './dto/async-job.dto';
+import {
+  BatchJobSubmissionDto,
+  BatchJobSubmissionResponseDto,
+  JobSearchCriteriaDto,
+  JobSearchResultsDto,
+  JobAnalyticsDto,
+  JobProgressUpdateDto,
+} from './dto/batch-job.dto';
 
 // Define interfaces for proper error handling
 interface ErrorWithMessage {
@@ -210,19 +220,546 @@ export class ComputerUseController {
   constructor(
     private readonly computerUseService: ComputerUseService,
     private readonly asyncJobService: AsyncJobService,
+    private readonly enhancedAsyncJobService: EnhancedAsyncJobService,
   ) {}
 
-  // ===== ASYNC ENDPOINTS =====
+  // ===== ENHANCED ASYNC ENDPOINTS - ENTERPRISE BATCH & ANALYTICS =====
 
   /**
-   * Submit computer action for asynchronous execution
+   * Submit batch of computer actions for asynchronous execution
    *
-   * This endpoint queues a computer action for background execution and returns
-   * immediately with a job ID for tracking. Supports priority queuing, caching,
-   * and comprehensive job lifecycle management.
+   * Enterprise-grade batch submission with dependency management, priority queuing,
+   * and comprehensive execution control. Supports sequential, parallel, and mixed
+   * execution modes with automatic dependency resolution.
+   *
+   * @param batchRequest Batch job submission with dependency configuration
+   * @param user Authenticated user context
+   * @returns Promise<BatchJobSubmissionResponseDto> Batch submission details with job IDs
+   */
+  @Post('jobs/batch')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Submit batch computer actions',
+    description:
+      'Submit multiple computer actions as a batch with dependency management and execution control. Supports sequential, parallel, and mixed execution modes.',
+    operationId: 'submitBatchComputerActions',
+  })
+  @ApiResponse({
+    status: 202,
+    description: 'Batch submitted successfully for async execution',
+    type: BatchJobSubmissionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid batch parameters or dependency configuration',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Rate limit exceeded',
+  })
+  // ParlantCritical: Submits batch computer automation with dependency management - requires validation for system security
+  async submitBatchActions(
+    @Body(new BatchJobValidationPipe()) batchRequest: BatchJobSubmissionDto,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<BatchJobSubmissionResponseDto> {
+    const operationId = `batch_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(
+        `[${operationId}] Batch computer action submission: ${batchRequest.jobs.length} jobs`,
+        {
+          operationId,
+          userId: user.id,
+          username: user.username,
+          userRole: user.role,
+          executionMode: batchRequest.executionMode,
+          totalJobs: batchRequest.jobs.length,
+          batchPriority: batchRequest.batchPriority,
+        },
+      );
+
+      // Submit batch to enhanced service
+      const batchResponse = await this.enhancedAsyncJobService.submitBatch(
+        batchRequest,
+        {
+          userId: user.id,
+          username: user.username,
+          operationId,
+          submittedVia: 'api',
+        },
+      );
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Batch submitted successfully: ${batchResponse.batchId} (${processingTime}ms)`,
+        {
+          operationId,
+          batchId: batchResponse.batchId,
+          totalJobs: batchResponse.totalJobs,
+          processingTime,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      return batchResponse;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Error submitting batch: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          totalJobs: batchRequest.jobs.length,
+          executionMode: batchRequest.executionMode,
+          processingTime,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to submit batch computer actions: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Search jobs with advanced filtering and pagination
+   *
+   * Enterprise-grade job search with comprehensive filtering capabilities including
+   * status, priority, date ranges, execution times, and metadata search.
+   *
+   * @param criteria Search and filtering criteria
+   * @param user Authenticated user context
+   * @returns Promise<JobSearchResultsDto> Paginated search results
+   */
+  @Post('jobs/search')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Search jobs with advanced filtering',
+    description:
+      'Search and filter jobs with comprehensive criteria including status, priority, date ranges, execution times, and metadata search.',
+    operationId: 'searchJobs',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job search results retrieved successfully',
+    type: JobSearchResultsDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid search criteria',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  // ParlantSecure: Searches computer automation job history with filtering (SecurityLevel.MEDIUM)
+  async searchJobs(
+    @Body() criteria: JobSearchCriteriaDto,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<JobSearchResultsDto> {
+    const operationId = `job_search_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(
+        `[${operationId}] Job search request`,
+        {
+          operationId,
+          userId: user.id,
+          username: user.username,
+          searchCriteria: {
+            status: criteria.status,
+            priority: criteria.priority,
+            actionType: criteria.actionType,
+            limit: criteria.limit,
+            offset: criteria.offset,
+          },
+        },
+      );
+
+      const searchResults = await this.enhancedAsyncJobService.searchJobs(criteria);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Job search completed: ${searchResults.totalCount} total, ${searchResults.jobs.length} returned (${processingTime}ms)`,
+        {
+          operationId,
+          totalCount: searchResults.totalCount,
+          returnedCount: searchResults.jobs.length,
+          processingTime,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      return searchResults;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Error searching jobs: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          processingTime,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to search jobs: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get real-time job progress information
+   *
+   * Provides real-time progress tracking with current step information,
+   * estimated completion times, and detailed progress metadata.
+   *
+   * @param jobId Unique job identifier
+   * @param user Authenticated user context
+   * @returns Promise<JobProgressUpdateDto> Real-time progress information
+   */
+  @Get('jobs/:jobId/progress')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Get real-time job progress',
+    description:
+      'Retrieve real-time progress information including current step, completion estimates, and detailed progress metadata.',
+    operationId: 'getJobProgress',
+  })
+  @ApiParam({
+    name: 'jobId',
+    description: 'Unique job identifier',
+    example: 'job_1702983456789_abc123',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job progress retrieved successfully',
+    type: JobProgressUpdateDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  // ParlantSecure: Retrieves real-time progress of computer automation jobs (SecurityLevel.MEDIUM)
+  async getJobProgress(
+    @Param('jobId') jobId: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<JobProgressUpdateDto> {
+    const operationId = `progress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Job progress request for: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+        username: user.username,
+      });
+
+      const progressUpdate = await this.enhancedAsyncJobService.getJobProgress(jobId);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Job progress retrieved: ${progressUpdate.progress}% (${processingTime}ms)`,
+        {
+          operationId,
+          jobId,
+          progress: progressUpdate.progress,
+          status: progressUpdate.status,
+          processingTime,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      return progressUpdate;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Error retrieving job progress: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          jobId,
+          processingTime,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      if (errorMessage.includes('not found')) {
+        throw new HttpException(
+          `Job not found: ${jobId}`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw new HttpException(
+        `Failed to retrieve job progress: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive job analytics and performance metrics
+   *
+   * Provides detailed analytics including success rates, execution times,
+   * action type breakdowns, priority distributions, and performance trends.
+   *
+   * @param timeframeHours Optional timeframe in hours (default: 24)
+   * @param user Authenticated user context
+   * @returns Promise<JobAnalyticsDto> Comprehensive analytics summary
+   */
+  @Get('jobs/analytics')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Get job analytics and performance metrics',
+    description:
+      'Retrieve comprehensive job analytics including success rates, execution times, and performance trends.',
+    operationId: 'getJobAnalytics',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job analytics retrieved successfully',
+    type: JobAnalyticsDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  // ParlantSecure: Retrieves analytics and performance metrics for computer automation jobs (SecurityLevel.MEDIUM)
+  async getJobAnalytics(
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<JobAnalyticsDto> {
+    const operationId = `analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(
+        `[${operationId}] Job analytics request`,
+        {
+          operationId,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      const analytics = await this.enhancedAsyncJobService.getJobAnalytics(24);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Job analytics retrieved: ${analytics.totalJobs} total jobs (${processingTime}ms)`,
+        {
+          operationId,
+          totalJobs: analytics.totalJobs,
+          successRate: analytics.successRate,
+          processingTime,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      return analytics;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Error retrieving job analytics: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          processingTime,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to retrieve job analytics: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Cancel multiple jobs by batch ID or criteria
+   *
+   * Enterprise-grade bulk cancellation with flexible criteria including
+   * batch ID, job status, and age-based filtering.
+   *
+   * @param batchId Optional batch ID to cancel all jobs in batch
+   * @param user Authenticated user context
+   * @returns Promise<{ cancelled: string[]; failed: string[] }> Cancellation results
+   */
+  @Delete('jobs/batch/:batchId')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Cancel jobs by batch ID',
+    description:
+      'Cancel all jobs within a specific batch. Useful for stopping entire workflows or cleaning up failed batches.',
+    operationId: 'cancelJobsBatch',
+  })
+  @ApiParam({
+    name: 'batchId',
+    description: 'Batch identifier to cancel all jobs within',
+    example: 'batch_1702983456789_xyz789',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Batch cancellation processed',
+    schema: {
+      type: 'object',
+      properties: {
+        cancelled: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of successfully cancelled job IDs',
+        },
+        failed: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of job IDs that could not be cancelled',
+        },
+        batchId: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Batch not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  async cancelJobsBatch(
+    @Param('batchId') batchId: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ cancelled: string[]; failed: string[]; batchId: string }> {
+    const operationId = `cancel_batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(
+        `[${operationId}] Batch cancellation request for: ${batchId}`,
+        {
+          operationId,
+          batchId,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      const results = await this.enhancedAsyncJobService.cancelJobsByCriteria({
+        batchId,
+      });
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Batch cancellation completed: ${results.cancelled.length} cancelled, ${results.failed.length} failed (${processingTime}ms)`,
+        {
+          operationId,
+          batchId,
+          cancelledCount: results.cancelled.length,
+          failedCount: results.failed.length,
+          processingTime,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      return {
+        ...results,
+        batchId,
+      };
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Error cancelling batch: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          batchId,
+          processingTime,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to cancel batch: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // ===== ASYNC ENDPOINTS (Legacy Compatibility) =====
+
+  /**
+   * Submit computer action for asynchronous execution (Legacy)
+   *
+   * Legacy endpoint for single job submission. For enhanced functionality including
+   * batch operations and dependency management, use the /jobs/batch endpoint.
    *
    * @param params - Validated computer action parameters
-   * @param options - Async execution options (priority, timeout, caching)
    * @param user - Authenticated user context
    * @returns Promise<JobSubmissionResponseDto> - Job submission details with tracking ID
    */

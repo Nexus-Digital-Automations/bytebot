@@ -45,8 +45,13 @@ export * from './security/vulnerability-scanner';
 
 // Coverage and Reporting
 export * from './coverage/coverage-analyzer';
+export * from './coverage/coverage-reporting-dashboard';
+export * from './coverage/coverage-export-integration';
 export * from './coverage/coverage-reporter';
 export * from './coverage/regression-detector';
+
+// Regression Testing
+export * from './regression/regression-testing-engine';
 
 // Integration and Automation
 export * from './automation/ci-cd-integration';
@@ -59,6 +64,7 @@ export * from './types/test-execution.types';
 export * from './types/performance-testing.types';
 export * from './types/security-testing.types';
 export * from './types/coverage-reporting.types';
+export * from './types/regression-testing.types';
 
 /**
  * Framework Version and Metadata

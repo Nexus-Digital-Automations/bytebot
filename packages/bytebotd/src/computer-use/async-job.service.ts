@@ -30,6 +30,7 @@ import { ComputerActionDto } from './dto/computer-action.dto';
 import { ComputerUseService } from './computer-use.service';
 import { CacheService } from '../cache/cache.service';
 import { MetricsService } from '../metrics/metrics.service';
+import { JobMonitoringService } from './services/job-monitoring.service';
 
 /**
  * Internal job data structure for queue management
@@ -85,8 +86,9 @@ export class AsyncJobService {
     private readonly computerUseService: ComputerUseService,
     private readonly cacheService: CacheService,
     private readonly metricsService: MetricsService,
+    private readonly jobMonitoringService: JobMonitoringService,
   ) {
-    this.logger.log('Async Job Service initialized');
+    this.logger.log('Async Job Service initialized with comprehensive monitoring');
     this.startJobProcessor();
     this.startJobCleanup();
   }
@@ -458,6 +460,19 @@ export class AsyncJobService {
 
       // Record metrics
       this.recordJobMetrics(jobData, executionTime, true);
+
+      // Record comprehensive monitoring metrics
+      this.jobMonitoringService.recordJobExecution({
+        jobId: jobData.jobId,
+        jobType: jobData.action.action,
+        status: jobData.status,
+        priority: jobData.priority,
+        submittedAt: jobData.submittedAt,
+        startedAt: jobData.startedAt,
+        completedAt: jobData.completedAt,
+        retryCount: jobData.retryCount,
+        metadata: jobData.metadata,
+      });
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown error';
@@ -496,6 +511,21 @@ export class AsyncJobService {
 
       // Record error metrics
       this.recordJobMetrics(jobData, executionTime, false);
+
+      // Record comprehensive monitoring metrics for failed job
+      this.jobMonitoringService.recordJobExecution({
+        jobId: jobData.jobId,
+        jobType: jobData.action.action,
+        status: jobData.status,
+        priority: jobData.priority,
+        submittedAt: jobData.submittedAt,
+        startedAt: jobData.startedAt,
+        completedAt: jobData.completedAt,
+        retryCount: jobData.retryCount,
+        errorType: 'execution_failure',
+        errorMessage: errorMessage,
+        metadata: jobData.metadata,
+      });
     }
   }
 

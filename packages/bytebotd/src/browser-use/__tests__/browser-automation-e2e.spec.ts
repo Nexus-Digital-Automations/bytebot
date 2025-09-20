@@ -355,7 +355,7 @@ describe('Browser Automation E2E Workflows', () => {
 
   describe('Multi-Tab Parallel Processing Workflow', () => {
     let sessionId: string;
-    let tabIds: string[] = [];
+    const tabIds: string[] = [];
 
     it('should handle multi-tab parallel processing', async () => {
       // Step 1: Create session
@@ -770,7 +770,7 @@ async function getTestAuthToken(app: INestApplication): Promise<string> {
         password: 'test-password',
       });
 
-    if (authResponse.body && authResponse.body.accessToken) {
+    if (authResponse.body?.accessToken) {
       return authResponse.body.accessToken;
     }
   } catch (error) {

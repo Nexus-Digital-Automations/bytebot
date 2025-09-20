@@ -390,7 +390,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
 
     // Extract Bearer token
     let token: string | undefined;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader?.startsWith('Bearer ')) {
       token = authHeader.substring(7);
     }
 

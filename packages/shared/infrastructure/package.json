@@ -1,0 +1,245 @@
+{
+  "name": "@parlant/infrastructure",
+  "version": "1.0.0",
+  "description": "PARLANT Database Function Wrapping System - Comprehensive Environment Management and Deployment Automation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "build:config-manager": "tsc config-management/config-manager.ts --outDir dist/config-management --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:database-manager": "tsc database-management/migration-manager.ts --outDir dist/database-management --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:orchestrator": "tsc orchestration/kubernetes-orchestrator.ts --outDir dist/orchestration --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:scaling-manager": "tsc scaling/auto-scaling-manager.ts --outDir dist/scaling --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:dr-manager": "tsc disaster-recovery/dr-manager.ts --outDir dist/disaster-recovery --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:compliance-manager": "tsc security/compliance-manager.ts --outDir dist/security --target es2020 --module commonjs --moduleResolution node --esModuleInterop true --resolveJsonModule true",
+    "build:performance-tests": "tsc tests/performance-tests.ts --outDir dist/tests --target es2020 --module commonjs --moduleResolution node --esModuleInterop true",
+    "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
+    "start": "node dist/index.js",
+    "start:dev": "nodemon --watch dist --exec \"node dist/index.js\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "test:performance": "node dist/tests/performance-tests.js",
+    "lint": "eslint **/*.ts --fix",
+    "lint:check": "eslint **/*.ts",
+    "format": "prettier --write **/*.{ts,js,json,yaml,yml,md}",
+    "format:check": "prettier --check **/*.{ts,js,json,yaml,yml,md}",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "clean": "rimraf dist coverage",
+    "docs:generate": "typedoc --entryPoints config-management/config-manager.ts database-management/migration-manager.ts orchestration/kubernetes-orchestrator.ts scaling/auto-scaling-manager.ts disaster-recovery/dr-manager.ts security/compliance-manager.ts --out docs",
+    "deploy:development": "./deploy.sh development deploy",
+    "deploy:staging": "./deploy.sh staging deploy",
+    "deploy:production": "./deploy.sh production deploy",
+    "deploy:plan": "./deploy.sh",
+    "deploy:rollback": "./deploy.sh",
+    "health:check": "./deploy.sh",
+    "terraform:init": "cd terraform && terraform init",
+    "terraform:plan": "cd terraform && terraform plan",
+    "terraform:apply": "cd terraform && terraform apply",
+    "terraform:destroy": "cd terraform && terraform destroy",
+    "k8s:apply": "kubectl apply -f orchestration/deployments/",
+    "k8s:delete": "kubectl delete -f orchestration/deployments/",
+    "k8s:status": "kubectl get pods,svc,ingress -o wide",
+    "k8s:logs": "kubectl logs -f -l app=parlant",
+    "security:scan": "node dist/security/compliance-manager.js --vulnerability-scan",
+    "security:assess": "node dist/security/compliance-manager.js --assess-compliance",
+    "security:report": "node dist/security/compliance-manager.js --generate-report",
+    "dr:test": "node dist/disaster-recovery/dr-manager.js --test-dr-plan",
+    "dr:backup": "node dist/disaster-recovery/dr-manager.js --trigger-backup",
+    "dr:restore": "node dist/disaster-recovery/dr-manager.js --restore-backup",
+    "scaling:status": "node dist/scaling/auto-scaling-manager.js --status",
+    "scaling:metrics": "node dist/scaling/auto-scaling-manager.js --metrics",
+    "scaling:optimize": "node dist/scaling/auto-scaling-manager.js --optimize",
+    "db:migrate": "node dist/database-management/migration-manager.js --migrate",
+    "db:rollback": "node dist/database-management/migration-manager.js --rollback",
+    "db:health": "node dist/database-management/migration-manager.js --health-check",
+    "db:backup": "node dist/database-management/migration-manager.js --backup",
+    "config:validate": "node dist/config-management/config-manager.js --validate",
+    "config:reload": "node dist/config-management/config-manager.js --reload",
+    "config:export": "node dist/config-management/config-manager.js --export",
+    "monitor:start": "npm run start",
+    "monitor:stop": "pkill -f \"node dist/index.js\"",
+    "monitor:restart": "npm run monitor:stop && npm run monitor:start",
+    "logs:view": "tail -f logs/*.log",
+    "logs:clean": "rm -f logs/*.log",
+    "install:tools": "npm run install:terraform && npm run install:kubectl && npm run install:helm",
+    "install:terraform": "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add - && sudo apt-add-repository \"deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main\" && sudo apt-get update && sudo apt-get install terraform",
+    "install:kubectl": "curl -LO \"https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl\" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl",
+    "install:helm": "curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null && echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list && sudo apt-get update && sudo apt-get install helm"
+  },
+  "keywords": [
+    "parlant",
+    "infrastructure",
+    "kubernetes",
+    "terraform",
+    "auto-scaling",
+    "disaster-recovery",
+    "security-compliance",
+    "environment-management",
+    "database-management",
+    "configuration-management",
+    "container-orchestration",
+    "monitoring",
+    "enterprise",
+    "devops",
+    "cloud-native"
+  ],
+  "author": "PARLANT Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parlant/infrastructure.git"
+  },
+  "bugs": {
+    "url": "https://github.com/parlant/infrastructure/issues"
+  },
+  "homepage": "https://github.com/parlant/infrastructure#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "@aws-sdk/client-secrets-manager": "^3.450.0",
+    "@aws-sdk/client-ssm": "^3.450.0",
+    "@aws-sdk/client-kms": "^3.450.0",
+    "@kubernetes/client-node": "^0.19.0",
+    "pg": "^8.11.3",
+    "js-yaml": "^4.1.0",
+    "crypto": "^1.0.1",
+    "fs-extra": "^11.1.1",
+    "node-cron": "^3.0.2",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.1",
+    "semver": "^7.5.4",
+    "joi": "^17.11.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/pg": "^8.10.7",
+    "@types/js-yaml": "^4.0.8",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.14.200",
+    "@types/uuid": "^9.0.6",
+    "@types/bcrypt": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.4",
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/compression": "^1.7.4",
+    "@types/morgan": "^1.9.7",
+    "@types/jest": "^29.5.6",
+    "@types/supertest": "^2.0.15",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5",
+    "typedoc": "^0.25.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
+    "commitizen": "^4.3.0",
+    "conventional-changelog-cli": "^4.1.0"
+  },
+  "peerDependencies": {
+    "terraform": ">=1.5.0",
+    "kubectl": ">=1.24.0",
+    "docker": ">=20.10.0",
+    "aws-cli": ">=2.0.0"
+  },
+  "files": [
+    "dist",
+    "terraform",
+    "config-management/configs",
+    "database-management/migrations",
+    "orchestration/deployments",
+    "orchestration/configmaps",
+    "scaling/rules",
+    "disaster-recovery/plans",
+    "security/frameworks",
+    "security/policies",
+    "monitoring",
+    "alerts",
+    "dashboards",
+    "deploy.sh",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,yaml,yml,md}": [
+      "prettier --write"
+    ]
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "collectCoverageFrom": [
+      "**/*.ts",
+      "!**/*.d.ts",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/coverage/**",
+      "!**/*.config.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/parlant"
+  }
+}

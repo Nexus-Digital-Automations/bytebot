@@ -706,7 +706,7 @@ export class BrowserRequestValidatorService {
    */
   private async validateUrl(url: string, fieldPath: string, validationId: string): Promise<UrlValidationResult> {
     const violations: string[] = [];
-    let sanitizedUrl: string | undefined = url;
+    const sanitizedUrl: string | undefined = url;
 
     try {
       // Basic URL validation

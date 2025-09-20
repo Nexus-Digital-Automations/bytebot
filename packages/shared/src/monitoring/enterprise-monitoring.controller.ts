@@ -468,7 +468,7 @@ export class EnterpriseMonitoringController {
     description: "Retrieve current capacity and resource utilization metrics",
   })
   @ApiResponse({ status: 200, description: "Capacity metrics retrieved successfully" })
-  getCapacityMetrics() {
+  getCapacityMetrics(): any {
     return this.parlantMonitor.getCapacityMetrics();
   }
 
@@ -478,7 +478,7 @@ export class EnterpriseMonitoringController {
     description: "Retrieve security monitoring metrics",
   })
   @ApiResponse({ status: 200, description: "Security metrics retrieved successfully" })
-  getSecurityMetrics() {
+  getSecurityMetrics(): any {
     return this.parlantMonitor.getSecurityMetrics();
   }
 

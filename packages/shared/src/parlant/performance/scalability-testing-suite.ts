@@ -684,7 +684,6 @@ export class ScalabilityTestingSuiteService {
       await this.adjustConcurrencyLevel(infrastructure, step.concurrency);
 
       // Collect metrics for this step
-      await this.collectExtremeLo...continue generating extreme load metrics
       const stepMetrics = await this.collectExtremeLoadStepMetrics(
         infrastructure,
         step.duration

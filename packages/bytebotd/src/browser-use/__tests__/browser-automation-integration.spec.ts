@@ -531,7 +531,7 @@ async function getTestAuthToken(app: INestApplication): Promise<string> {
       password: 'test-password',
     });
 
-  if (authResponse.body && authResponse.body.accessToken) {
+  if (authResponse.body?.accessToken) {
     return authResponse.body.accessToken;
   }
 
