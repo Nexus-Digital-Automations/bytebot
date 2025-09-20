@@ -8,19 +8,91 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsStr
   ValidateNested,
   Min,
   Max,
-} from 'class-validator';import { Type } from 'class-transformer';/*** Real-time event types
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+/*** Real-time event types
  */
 export enum RealtimeEventType {
   // Browser session events
-  SESSION_CREATED = 'session_created',SESSION_CLOSED = 'session_closed',SESSION_ERROR = 'session_error',// Page eventsPAGE_LOADED = 'page_loaded',PAGE_NAVIGATION = 'page_navigation',PAGE_ERROR = 'page_error',PAGE_CONSOLE = 'page_console',// DOM eventsDOM_CHANGED = 'dom_changed',DOM_NODE_ADDED = 'dom_node_added',DOM_NODE_REMOVED = 'dom_node_removed',DOM_ATTRIBUTE_CHANGED = 'dom_attribute_changed',// User interaction eventsCLICK_EVENT = 'click_event',SCROLL_EVENT = 'scroll_event',INPUT_EVENT = 'input_event',FORM_SUBMIT = 'form_submit',// Network eventsREQUEST_STARTED = 'request_started',REQUEST_COMPLETED = 'request_completed',REQUEST_FAILED = 'request_failed',RESPONSE_RECEIVED = 'response_received',// Task execution eventsTASK_STARTED = 'task_started',TASK_PROGRESS = 'task_progress',TASK_COMPLETED = 'task_completed',TASK_FAILED = 'task_failed',// Screenshot eventsSCREENSHOT_CAPTURED = 'screenshot_captured',SCREENSHOT_FAILED = 'screenshot_failed',// Element detection eventsELEMENT_DETECTED = 'element_detected',ELEMENT_INTERACTION = 'element_interaction',// Performance eventsPERFORMANCE_METRIC = 'performance_metric',MEMORY_USAGE = 'memory_usage',// Error eventsJAVASCRIPT_ERROR = 'javascript_error',NETWORK_ERROR = 'network_error',BROWSER_ERROR = 'browser_error',// Custom eventsCUSTOM_EVENT = 'custom_event',}/**
+  SESSION_CREATED = 'session_created',
+  SESSION_CLOSED = 'session_closed',
+  SESSION_ERROR = 'session_error',
+
+  // Page events
+  PAGE_LOADED = 'page_loaded',
+  PAGE_NAVIGATION = 'page_navigation',
+  PAGE_ERROR = 'page_error',
+  PAGE_CONSOLE = 'page_console',
+
+  // DOM events
+  DOM_CHANGED = 'dom_changed',
+  DOM_NODE_ADDED = 'dom_node_added',
+  DOM_NODE_REMOVED = 'dom_node_removed',
+  DOM_ATTRIBUTE_CHANGED = 'dom_attribute_changed',
+
+  // User interaction events
+  CLICK_EVENT = 'click_event',
+  SCROLL_EVENT = 'scroll_event',
+  INPUT_EVENT = 'input_event',
+  FORM_SUBMIT = 'form_submit',
+
+  // Network events
+  REQUEST_STARTED = 'request_started',
+  REQUEST_COMPLETED = 'request_completed',
+  REQUEST_FAILED = 'request_failed',
+  RESPONSE_RECEIVED = 'response_received',
+
+  // Task execution events
+  TASK_STARTED = 'task_started',
+  TASK_PROGRESS = 'task_progress',
+  TASK_COMPLETED = 'task_completed',
+  TASK_FAILED = 'task_failed',
+
+  // Screenshot events
+  SCREENSHOT_CAPTURED = 'screenshot_captured',
+  SCREENSHOT_FAILED = 'screenshot_failed',
+
+  // Element detection events
+  ELEMENT_DETECTED = 'element_detected',
+  ELEMENT_INTERACTION = 'element_interaction',
+
+  // Performance events
+  PERFORMANCE_METRIC = 'performance_metric',
+  MEMORY_USAGE = 'memory_usage',
+
+  // Error events
+  JAVASCRIPT_ERROR = 'javascript_error',
+  NETWORK_ERROR = 'network_error',
+  BROWSER_ERROR = 'browser_error',
+
+  // Custom events
+  CUSTOM_EVENT = 'custom_event',
+}/**
  * Real-time subscription types
  */
 export enum SubscriptionType {
-  SESSION_EVENTS = 'session_events',PAGE_EVENTS = 'page_events',DOM_EVENTS = 'dom_events',INTERACTION_EVENTS = 'interaction_events',NETWORK_EVENTS = 'network_events',TASK_EVENTS = 'task_events',SCREENSHOT_EVENTS = 'screenshot_events',ELEMENT_EVENTS = 'element_events',PERFORMANCE_EVENTS = 'performance_events',ERROR_EVENTS = 'error_events',ALL_EVENTS = 'all_events',}/**
+  SESSION_EVENTS = 'session_events',
+  PAGE_EVENTS = 'page_events',
+  DOM_EVENTS = 'dom_events',
+  INTERACTION_EVENTS = 'interaction_events',
+  NETWORK_EVENTS = 'network_events',
+  TASK_EVENTS = 'task_events',
+  SCREENSHOT_EVENTS = 'screenshot_events',
+  ELEMENT_EVENTS = 'element_events',
+  PERFORMANCE_EVENTS = 'performance_events',
+  ERROR_EVENTS = 'error_events',
+  ALL_EVENTS = 'all_events',
+}/**
  * WebSocket connection states
  */
 export enum WebSocketState {
-  CONNECTING = 'connecting',CONNECTED = 'connected',DISCONNECTING = 'disconnecting',DISCONNECTED = 'disconnected',ERROR = 'error',}/**
+  CONNECTING = 'connecting',
+  CONNECTED = 'connected',
+  DISCONNECTING = 'disconnecting',
+  DISCONNECTED = 'disconnected',
+  ERROR = 'error',
+}/**
  * Event filter criteria
  */
 export class EventFilterDto {

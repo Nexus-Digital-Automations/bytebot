@@ -27,7 +27,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AIgentParlantSecurityBridgeService } from './services/aigent-parlant-security-bridge.service';
 import { ParlantModule } from '../parlant/parlant.module';
 import { SecurityAuditService } from '../security/security-audit.service';
-import { ParlantAuthModule } from '../../shared/src/modules/parlant-auth.module';
+import { ParlantAuthModule } from '@shared/modules/parlant-auth.module';
 
 /**
  * Enhanced enterprise authentication configuration factory

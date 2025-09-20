@@ -100,7 +100,9 @@ export interface ApiScanConfiguration {
   readonly deepScanEnabled: boolean;
   readonly authenticationBypass: boolean;
   readonly payloadFuzzing: boolean;
-  readonly complianceChecks: string[]; // e.g., ['OWASP', 'PCI-DSS', 'GDPR']readonly customRules: ApiSecurityRule[];}
+  readonly complianceChecks: string[]; // e.g., ['OWASP', 'PCI-DSS', 'GDPR']
+  readonly customRules: ApiSecurityRule[];
+}
 
 /**
  * Custom API security rule
@@ -458,7 +460,9 @@ export class ApiSecurityService {
       await this.applyRateLimitingPolicy(policy, validation.conversationId);
 
       this.logger.log(
-        `[${operationId}] API rate limiting configured successfully`,{operationId,
+        `[${operationId}] API rate limiting configured successfully`,
+        {
+          operationId,
           policyId: policy.policyId,
           endpoint: policy.endpoint,
           conversationId: validation.conversationId,

@@ -592,7 +592,7 @@ describe('AuthService', () => {
   });
 
     describe('Performance & Reliability', () => {
-  it('should complete authentication within performance threshold'async () => {
+  it('should complete authentication within performance threshold', async () => {
       const testId = `${operationId
 }_performance_auth`;console.log(
 

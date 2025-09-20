@@ -52,11 +52,19 @@ export class BrowserTaskExecutionService {
     this.logger.log(`Navigating back`, { sessionId });
 
     try {
-      // Implementation would use browser's back functionalityreturn await this.browserUseService.executeBrowserTask({name: 'Navigate Back',description: 'Navigate back in browser history',actions: [{type: 'custom' as any,parameters: { action: 'back' },
+      // Implementation would use browser's back functionality
+      return await this.browserUseService.executeBrowserTask({
+        name: 'Navigate Back',
+        description: 'Navigate back in browser history',
+        actions: [{
+          type: 'custom' as any,
+          parameters: { action: 'back' },
         }],
       });
     } catch (error) {
-      this.logger.error(`Navigate back failed`, error);throw error;}
+      this.logger.error(`Navigate back failed`, error);
+      throw error;
+    }
   }
 
   /**

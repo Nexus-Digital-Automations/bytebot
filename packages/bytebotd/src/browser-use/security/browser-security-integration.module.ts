@@ -184,12 +184,14 @@ export class BrowserSecurityIntegrationModule {
     const securityConfig = { ...DEFAULT_SECURITY_CONFIG, ...config };
 
     this.logger.log('🔐 Initializing Browser Security Integration Module');
-    this.logger.log(`🛡️ Security features enabled: ${this.getEnabledFeatures(securityConfig).join(`, ')}`);
+    this.logger.log(`🛡️ Security features enabled: ${this.getEnabledFeatures(securityConfig).join(', ')}`);
 
     const providers: Provider[] = [
       // Configuration provider
       {
-        provide: 'BROWSER_SECURITY_CONFIG',useValue: securityConfig,},
+        provide: 'BROWSER_SECURITY_CONFIG',
+        useValue: securityConfig,
+      },
 
       // Core security services
       SecurityConfigurationService,

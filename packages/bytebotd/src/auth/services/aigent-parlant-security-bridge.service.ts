@@ -486,24 +486,25 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       // Retrieve session from Redis cluster or memory
       const session = await (this as any)?.retrieveSession?.(sessionId);
       if (!session) {
-  return {,
-  valid: false,
+        return {
+          valid: false,
           validationTimestamp: new Date(),
-          reasoning: 'Session not found or expired',securityViolations: ['SESSION_NOT_FOUND'],
+          reasoning: 'Session not found or expired',
+          securityViolations: ['SESSION_NOT_FOUND'],
           complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),
-        
-};
+        };
       }
 
       // Check session state and expiration
       if ((session as any)?.state !== (SessionState as any)?.ACTIVE || new Date() > (session as any)?.expiresAt) {
-  return {,
-  valid: false,
+        return {
+          valid: false,
           session,
           validationTimestamp: new Date(),
-          reasoning: `Session is ${(session.state as any)?.toLowerCase?.()
-} or expired`,
-          securityViolations: ['SESSION_EXPIRED'],complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),};
+          reasoning: `Session is ${(session.state as any)?.toLowerCase?.() || 'unknown'} or expired`,
+          securityViolations: ['SESSION_EXPIRED'],
+          complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),
+        };
       }
 
       // Validate through Parlant with current context

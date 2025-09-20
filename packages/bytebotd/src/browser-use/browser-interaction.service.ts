@@ -422,7 +422,10 @@ export class BrowserInteractionService {
 
       return findResult;
     } catch (error) {
-      this.logger.error(`Element finding failed`, error);// Return empty result on errorconst findResult: ElementFindResultDto = {
+      this.logger.error(`Element finding failed`, error);
+
+      // Return empty result on error
+      const findResult: ElementFindResultDto = {
         elements: [],
         sessionId: findDto.sessionId,
         count: 0,

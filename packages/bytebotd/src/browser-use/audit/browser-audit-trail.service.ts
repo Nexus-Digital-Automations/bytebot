@@ -26,20 +26,89 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import * as crypto from 'crypto';import { Readable } from 'stream';// Authentication and security context typesimport {
+} from '@nestjs/common';
+import { EventEmitter } from 'events';
+import { performance } from 'perf_hooks';
+import * as crypto from 'crypto';
+import { Readable } from 'stream';
+
+// Authentication and security context types
+import {
   BrowserUseUserContext,
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserUseAuditContext,
-} from '../middleware/browser-use-auth.middleware';// Rate limiting and authorization contextimport { RateLimitDecision } from '../rate-limiters/browser-rate-limiter.service';import { AuthorizationDecision } from '../guards/browser-use-rbac.guard';// Request validation contextimport { RequestValidationResult } from '../validators/browser-request-validator.service';/*** Audit event types for browser operations
+} from '../middleware/browser-use-auth.middleware';
+
+// Rate limiting and authorization context
+import { RateLimitDecision } from '../rate-limiters/browser-rate-limiter.service';
+import { AuthorizationDecision } from '../guards/browser-use-rbac.guard';
+
+// Request validation context
+import { RequestValidationResult } from '../validators/browser-request-validator.service';
+
+/*** Audit event types for browser operations
  */
 export enum BrowserAuditEventType {
   // Authentication events
-  AUTHENTICATION_SUCCESS = 'auth.success',AUTHENTICATION_FAILURE = 'auth.failure',SESSION_CREATED = 'session.created',SESSION_EXPIRED = 'session.expired',SESSION_TERMINATED = 'session.terminated',// Authorization eventsAUTHORIZATION_GRANTED = 'authz.granted',AUTHORIZATION_DENIED = 'authz.denied',PERMISSION_ESCALATION = 'authz.escalation',ROLE_ASSIGNMENT = 'authz.role_assignment',// Browser operation eventsTASK_CREATED = 'task.created',TASK_STARTED = 'task.started',TASK_COMPLETED = 'task.completed',TASK_FAILED = 'task.failed',TASK_CANCELLED = 'task.cancelled',// Session management eventsBROWSER_SESSION_CREATED = 'browser_session.created',BROWSER_SESSION_CLOSED = 'browser_session.closed',PAGE_NAVIGATED = 'page.navigated',ACTION_EXECUTED = 'action.executed',// Data eventsDATA_EXTRACTED = 'data.extracted',FILE_UPLOADED = 'file.uploaded',FORM_SUBMITTED = 'form.submitted',SCREENSHOT_TAKEN = 'screenshot.taken',// Security eventsRATE_LIMIT_EXCEEDED = 'security.rate_limit_exceeded',VALIDATION_FAILED = 'security.validation_failed',SUSPICIOUS_ACTIVITY = 'security.suspicious_activity',SECURITY_VIOLATION = 'security.violation',// Compliance eventsPII_ACCESS = 'compliance.pii_access',DATA_RETENTION_APPLIED = 'compliance.data_retention',CONSENT_RECORDED = 'compliance.consent',GDPR_REQUEST = 'compliance.gdpr_request',// System eventsSERVICE_STARTED = 'system.service_started',SERVICE_STOPPED = 'system.service_stopped',CONFIGURATION_CHANGED = 'system.config_changed',ERROR_OCCURRED = 'system.error',}/**
+  AUTHENTICATION_SUCCESS = 'auth.success',
+  AUTHENTICATION_FAILURE = 'auth.failure',
+  SESSION_CREATED = 'session.created',
+  SESSION_EXPIRED = 'session.expired',
+  SESSION_TERMINATED = 'session.terminated',
+
+  // Authorization events
+  AUTHORIZATION_GRANTED = 'authz.granted',
+  AUTHORIZATION_DENIED = 'authz.denied',
+  PERMISSION_ESCALATION = 'authz.escalation',
+  ROLE_ASSIGNMENT = 'authz.role_assignment',
+
+  // Browser operation events
+  TASK_CREATED = 'task.created',
+  TASK_STARTED = 'task.started',
+  TASK_COMPLETED = 'task.completed',
+  TASK_FAILED = 'task.failed',
+  TASK_CANCELLED = 'task.cancelled',
+
+  // Session management events
+  BROWSER_SESSION_CREATED = 'browser_session.created',
+  BROWSER_SESSION_CLOSED = 'browser_session.closed',
+  PAGE_NAVIGATED = 'page.navigated',
+  ACTION_EXECUTED = 'action.executed',
+
+  // Data events
+  DATA_EXTRACTED = 'data.extracted',
+  FILE_UPLOADED = 'file.uploaded',
+  FORM_SUBMITTED = 'form.submitted',
+  SCREENSHOT_TAKEN = 'screenshot.taken',
+
+  // Security events
+  RATE_LIMIT_EXCEEDED = 'security.rate_limit_exceeded',
+  VALIDATION_FAILED = 'security.validation_failed',
+  SUSPICIOUS_ACTIVITY = 'security.suspicious_activity',
+  SECURITY_VIOLATION = 'security.violation',
+
+  // Compliance events
+  PII_ACCESS = 'compliance.pii_access',
+  DATA_RETENTION_APPLIED = 'compliance.data_retention',
+  CONSENT_RECORDED = 'compliance.consent',
+  GDPR_REQUEST = 'compliance.gdpr_request',
+
+  // System events
+  SERVICE_STARTED = 'system.service_started',
+  SERVICE_STOPPED = 'system.service_stopped',
+  CONFIGURATION_CHANGED = 'system.config_changed',
+  ERROR_OCCURRED = 'system.error',
+}/**
  * Audit event severity levels
  */
 export enum AuditEventSeverity {
-  INFO = 'info',LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',}/**
+  INFO = 'info',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}/**
  * Base audit event structure
  */
 export interface BrowserAuditEvent {

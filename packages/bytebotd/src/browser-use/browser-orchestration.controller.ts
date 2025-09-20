@@ -26,12 +26,25 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets';import { Server, Socket } from 'socket.io';import { spawn, ChildProcess } from 'child_process';import { join } from 'path';import { existsSync } from 'fs';// Existing importsimport { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import {CreateBrowserTaskDto,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { spawn, ChildProcess } from 'child_process';
+import { join } from 'path';
+import { existsSync } from 'fs';
+
+// Existing imports
+import { BrowserUseService } from './browser-use.service';
+import { BrowserSessionService } from './browser-session.service';
+import { BrowserTaskService } from './browser-task.service';
+import {
+  CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
   BrowserActionDto,
-} from './dto/browser-task.dto';import {BrowserOrchestrationDto,
+} from './dto/browser-task.dto';
+import {
+  BrowserOrchestrationDto,
   BrowserOrchestrationResultDto,
   OrchestrationProgressUpdateDto,
   OrchestrationSubscriptionDto,

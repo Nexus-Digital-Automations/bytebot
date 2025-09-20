@@ -47,7 +47,12 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
         sessionId = response.body.sessionId;
       });
 
-      it('should reject session creation with invalid data', async () => {const invalidSessionDto = {name: '', // Invalid: empty nameheadless: 'not_boolean', // Invalid: wrong typeviewportWidth: -100, // Invalid: negative width};
+      it('should reject session creation with invalid data', async () => {
+        const invalidSessionDto = {
+          name: '', // Invalid: empty name
+          headless: 'not_boolean', // Invalid: wrong type
+          viewportWidth: -100, // Invalid: negative width
+        };
 
         await request(app.getHttpServer())
           .post('/browser-use/sessions').set('Authorization', `Bearer ${authToken}`)

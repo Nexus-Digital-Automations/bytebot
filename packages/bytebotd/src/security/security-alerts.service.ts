@@ -32,15 +32,39 @@ import { SecurityEvent, SecurityEventType } from './security-monitoring.service'
  * Alert channel types for multi-channel distribution
  */
 export enum AlertChannel {
-  EMAIL = 'EMAIL',SMS = 'SMS',SLACK = 'SLACK',TEAMS = 'TEAMS',WEBHOOK = 'WEBHOOK',PAGER_DUTY = 'PAGER_DUTY',SOAR_PLATFORM = 'SOAR_PLATFORM',SIEM_SYSTEM = 'SIEM_SYSTEM'}/**
+  EMAIL = 'EMAIL',
+  SMS = 'SMS',
+  SLACK = 'SLACK',
+  TEAMS = 'TEAMS',
+  WEBHOOK = 'WEBHOOK',
+  PAGER_DUTY = 'PAGER_DUTY',
+  SOAR_PLATFORM = 'SOAR_PLATFORM',
+  SIEM_SYSTEM = 'SIEM_SYSTEM'
+}
+
+/**
  * Alert priority levels for escalation
  */
 export enum AlertPriority {
-  P0_CRITICAL = 'P0_CRITICAL',     // Immediate response requiredP1_HIGH = 'P1_HIGH',             // Response within 15 minutesP2_MEDIUM = 'P2_MEDIUM',         // Response within 1 hourP3_LOW = 'P3_LOW',               // Response within 24 hoursP4_INFO = 'P4_INFO'              // Informational only}/**
+  P0_CRITICAL = 'P0_CRITICAL',     // Immediate response required
+  P1_HIGH = 'P1_HIGH',             // Response within 15 minutes
+  P2_MEDIUM = 'P2_MEDIUM',         // Response within 1 hour
+  P3_LOW = 'P3_LOW',               // Response within 24 hours
+  P4_INFO = 'P4_INFO'              // Informational only
+}
+
+/**
  * Alert status for tracking
  */
 export enum AlertStatus {
-  PENDING = 'PENDING',SENT = 'SENT',ACKNOWLEDGED = 'ACKNOWLEDGED',INVESTIGATING = 'INVESTIGATING',RESOLVED = 'RESOLVED',CLOSED = 'CLOSED',ESCALATED = 'ESCALATED',BLOCKED = 'BLOCKED'
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  ACKNOWLEDGED = 'ACKNOWLEDGED',
+  INVESTIGATING = 'INVESTIGATING',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  ESCALATED = 'ESCALATED',
+  BLOCKED = 'BLOCKED'
 }
 
 /**
@@ -158,7 +182,10 @@ export class SecurityAlertsService {
     private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_alerts_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Alerts Service with Parlant integration`, {parlantIntegrationEnabled: true,alertingEnabled: this.getAlertConfig().alertingEnabled,
+    const operationId = `security_alerts_init${Date.now()}${Math.random().toString(36).substring(7)}`;
+    this.logger.log(`[${operationId}] Initializing Security Alerts Service with Parlant integration`, {
+      parlantIntegrationEnabled: true,
+      alertingEnabled: this.getAlertConfig().alertingEnabled,
       escalationEnabled: this.getAlertConfig().escalationEnabled,
       conversationalValidationRequired: this.getAlertConfig().conversationalValidationRequired,
       supportedChannels: this.getAlertConfig().channels,
@@ -206,7 +233,9 @@ export class SecurityAlertsService {
           channels: request.targetChannels,
           customMessage: request.customMessage,
         },
-        actionDescription: `Generate ${request.alertPriority} security alert for ${request.sourceEvent.eventType} event to ${request.targetChannels.length} channels`,context: request.context,riskLevel: this.getAlertRiskLevel(request.alertPriority),
+        actionDescription: `Generate ${request.alertPriority} security alert for ${request.sourceEvent.eventType} event to ${request.targetChannels.length} channels`,
+        context: request.context,
+        riskLevel: this.getAlertRiskLevel(request.alertPriority),
         operationId: request.operationId,
       };
 
@@ -214,7 +243,9 @@ export class SecurityAlertsService {
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Security alert generation blocked by Parlant validation`,{operationId: request.operationId,
+          `[${request.operationId}] Security alert generation blocked by Parlant validation`,
+          {
+            operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
           }
@@ -228,7 +259,9 @@ export class SecurityAlertsService {
       }
 
       this.logger.log(
-        `[${request.operationId}] Security alert generation approved by Parlant`,{operationId: request.operationId,
+        `[${request.operationId}] Security alert generation approved by Parlant`,
+        {
+          operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
         }
@@ -312,7 +345,8 @@ export class SecurityAlertsService {
           acknowledgedBy: request.acknowledgedBy,
           responseNotes: request.responseNotes,
         },
-        actionDescription: `Acknowledge security alert ${request.alertId} with response: "${request.responseNotes}"",context: request.context,
+        actionDescription: `Acknowledge security alert ${request.alertId} with response: "${request.responseNotes}"`,
+        context: request.context,
         riskLevel: RiskLevel._MODERATE,
         operationId,
       };
@@ -634,11 +668,14 @@ export class SecurityAlertsService {
         acc[channel] = true;
         return acc;
       }, {} as Record<AlertChannel, boolean>),
-      conversationalAuditTrail: [`Duplicate alert prevented via conversation ${conversationId}`],escalationScheduled: false,};
+      conversationalAuditTrail: [`Duplicate alert prevented via conversation ${conversationId}`],
+      escalationScheduled: false,
+    };
   }
 
   private generateAlertTitle(event: SecurityEvent): string {
-    return `${event.severity.toUpperCase()}: ${event.eventType.replace(/_/g, ' ')}';}
+    return `${event.severity.toUpperCase()}: ${event.eventType.replace(/_/g, ' ')}`;
+  }
 
   private generateAlertDescription(event: SecurityEvent, customMessage?: string): string {
     let description = event.description;
@@ -711,7 +748,9 @@ export class SecurityAlertsService {
     const afterCount = this.alertHistory.length;
 
     if (beforeCount > afterCount) {
-      this.logger.log(`Cleaned up ${beforeCount - afterCount} old alerts`);}}
+      this.logger.log(`Cleaned up ${beforeCount - afterCount} old alerts`);
+    }
+  }
 
   private checkEscalationTimers(): void {
     this.logger.debug(`Checking ${this.escalationTimers.size} escalation timers`);
@@ -724,7 +763,13 @@ export class SecurityAlertsService {
 
   private getAlertConfig(): SecurityAlertConfig {
     return {
-      alertingEnabled: this.configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),channels: this.configService.get<AlertChannel[]>('ALERT_CHANNELS', [AlertChannel.EMAIL, AlertChannel.SLACK]),escalationEnabled: this.configService.get<boolean>('ALERT_ESCALATION_ENABLED', true),deduplicationEnabled: this.configService.get<boolean>('ALERT_DEDUPLICATION_ENABLED', true),conversationalValidationRequired: this.configService.get<boolean>('ALERT_CONVERSATIONAL_VALIDATION', true),alertRetentionDays: this.configService.get<number>('ALERT_RETENTION_DAYS', 365),maxAlertsPerHour: this.configService.get<number>('MAX_ALERTS_PER_HOUR', 100),
+      alertingEnabled: this.configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),
+      channels: this.configService.get<AlertChannel[]>('ALERT_CHANNELS', [AlertChannel.EMAIL, AlertChannel.SLACK]),
+      escalationEnabled: this.configService.get<boolean>('ALERT_ESCALATION_ENABLED', true),
+      deduplicationEnabled: this.configService.get<boolean>('ALERT_DEDUPLICATION_ENABLED', true),
+      conversationalValidationRequired: this.configService.get<boolean>('ALERT_CONVERSATIONAL_VALIDATION', true),
+      alertRetentionDays: this.configService.get<number>('ALERT_RETENTION_DAYS', 365),
+      maxAlertsPerHour: this.configService.get<number>('MAX_ALERTS_PER_HOUR', 100),
     };
   }
 }

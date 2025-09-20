@@ -221,10 +221,9 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should reject access with missing authorization header', async () => {
-  // Arrange
-      const context = createMockExecutionContext({,
-  headers: {
-}, // No authorization header
+      // Arrange
+      const context = createMockExecutionContext({
+        headers: {}, // No authorization header
       });
 
       // Act & Assert

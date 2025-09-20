@@ -321,10 +321,10 @@ describe('Controller Security Integration Tests', () => {
           },
         },
         {
-  provide: Reflector, useValue: {,
-  getAllAndOverride: jest.fn(),
-          
-},
+          provide: Reflector,
+          useValue: {
+            getAllAndOverride: jest.fn(),
+          },
         },
         JwtAuthGuard,
         RolesGuard,

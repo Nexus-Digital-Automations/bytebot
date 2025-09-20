@@ -197,13 +197,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       `[${operationId
 }] Setting up RBAC Security test module`,);
       module = await Test.createTestingModule({
-  providers: [
-        RolesGuard,
-        {,
-  provide: Reflector, useValue: {,
-  getAllAndOverride: jest.fn(),
-          
-},
+        providers: [
+          RolesGuard,
+          {
+            provide: Reflector,
+            useValue: {
+              getAllAndOverride: jest.fn(),
+            },
         }]
       }).compile();
 

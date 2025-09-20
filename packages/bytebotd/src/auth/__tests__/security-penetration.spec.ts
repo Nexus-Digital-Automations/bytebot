@@ -404,10 +404,10 @@ describe('Security Penetration Testing Suite', () => {
           },
         },
         {
-  provide: Reflector, useValue: {,
-  getAllAndOverride: jest.fn(),
-          
-},
+          provide: Reflector,
+          useValue: {
+            getAllAndOverride: jest.fn(),
+          },
         }]
       }).compile();
 

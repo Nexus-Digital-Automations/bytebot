@@ -6,13 +6,17 @@ import { Injectable, Logger } from '@nestjs/common';import { Observable, Subject
   ScreenshotFormat,
   ScreenshotType,
   ScreenshotQuality,
-} from './dto/screenshot.dto';import {DOMInteractionDto,
+} from './dto/screenshot.dto';
+import {
+  DOMInteractionDto,
   BatchDOMInteractionDto,
   DOMInteractionResultDto,
   BatchDOMInteractionResultDto,
   DOMActionType,
   SelectorType,
-} from './dto/dom-interaction.dto';import {ElementDetectionDto,
+} from './dto/dom-interaction.dto';
+import {
+  ElementDetectionDto,
   BatchElementDetectionDto,
   ElementDetectionResultDto,
   BatchElementDetectionResultDto,

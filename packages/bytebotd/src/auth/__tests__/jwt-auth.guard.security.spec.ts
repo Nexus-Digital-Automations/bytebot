@@ -300,7 +300,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   });
 
     describe('Timing Attack Prevention', () => {
-  it('should maintain consistent response times to prevent timing attacks'async () => {
+    it('should maintain consistent response times to prevent timing attacks', async () => {
       const testId = `${operationId
 }_timing_consistency`;securityLogger.info(`[${testId}] Testing timing attack prevention through consistent response times`,
       );

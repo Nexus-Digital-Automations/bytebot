@@ -248,10 +248,10 @@ describe('JwtAuthGuard', () => {
           },
         },
         {
-  provide: Reflector, useValue: {,
-  getAllAndOverride: jest.fn(),
-          
-},
+          provide: Reflector,
+          useValue: {
+            getAllAndOverride: jest.fn(),
+          },
         },
       ]
       }).compile();

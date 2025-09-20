@@ -193,9 +193,15 @@ export class BrowserAsyncJobService {
     // Update job status
     job.status = AsyncJobStatus.CANCELLED;
     job.completedAt = new Date();
-    job.progress.currentStep = 'Job cancelled by user';// Add cancellation logjob.results.logs.push({
+    job.progress.currentStep = 'Job cancelled by user';
+
+    // Add cancellation log
+    job.results.logs.push({
       timestamp: new Date(),
-      level: 'warn',message: 'Async job cancelled by user',metadata: {reason: 'user_cancellation',
+      level: 'warn',
+      message: 'Async job cancelled by user',
+      metadata: {
+        reason: 'user_cancellation',
         completedSteps: job.progress.completedSteps,
         totalSteps: job.progress.totalSteps,
       },

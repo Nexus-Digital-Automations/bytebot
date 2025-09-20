@@ -751,7 +751,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
                 metadata: {},
                 },
               },
-            })),
+            }),
             validateSessionSecurity: jest.fn().mockResolvedValue(true),
             handleEmergencyOverride: jest.fn().mockResolvedValue({}),
             getSecurityMetrics: jest.fn().mockResolvedValue({})
@@ -765,8 +765,8 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
-      ]
-      }).compile();
+      ],
+    }).compile();
 
     _strategy = module.get<EnhancedJwtStrategy>(EnhancedJwtStrategy);
   });

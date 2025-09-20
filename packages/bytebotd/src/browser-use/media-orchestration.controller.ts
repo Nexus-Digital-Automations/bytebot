@@ -880,9 +880,13 @@ export class OrchestrationSummary {
 }
 
 export class VideoRecordingSummary {
-  recordingId: string = '';status: string = '';sessionCount: number = 0;startTime: Date = new Date();
+  recordingId: string = '';
+  status: string = '';
+  sessionCount: number = 0;
+  startTime: Date = new Date();
   endTime?: Date;
-  format: string = '';quality: string = '';
+  format: string = '';
+  quality: string = '';
 }
 
 export class SystemResourceUsage {
