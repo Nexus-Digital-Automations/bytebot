@@ -485,10 +485,8 @@ export class PerformanceQualityGate implements QualityGate {
     }
 
     // Aggregate samples into final measurement
-    const measurement = this.aggregateSamples(samples);
-    measurement.timestamp = new Date(startTime);
-    measurement.duration = Date.now() - startTime;
-    measurement.sampleCount = samples.length;
+    const duration = Date.now() - startTime;
+    const measurement = this.aggregateSamples(samples, new Date(startTime), duration, samples.length);
 
     return measurement;
   }
@@ -533,7 +531,7 @@ export class PerformanceQualityGate implements QualityGate {
    * @param samples - Performance samples
    * @returns Aggregated measurement
    */
-  private aggregateSamples(samples: PerformanceSample[]): PerformanceMeasurement {
+  private aggregateSamples(samples: PerformanceSample[], timestamp: Date, duration: number, sampleCount: number): PerformanceMeasurement {
     const count = samples.length;
 
     const responseTime = samples.reduce((sum, s) => sum + s.responseTime, 0) / count;
@@ -556,9 +554,9 @@ export class PerformanceQualityGate implements QualityGate {
       cpuUsage,
       errorRate,
       resourceUtilization,
-      timestamp: new Date(),
-      duration: 0, // Will be set by caller
-      sampleCount: count
+      timestamp,
+      duration,
+      sampleCount
     };
   }
 

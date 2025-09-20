@@ -92,6 +92,7 @@ interface AuthValidationResult {
     conversationId: string;
     sessionId: string;
     capabilities: string[];
+    preferences: Record<string, unknown>;
   };
   /** Error details */
   error?: {
@@ -235,7 +236,10 @@ export class EnhancedParlantAuthGuard implements CanActivate {
         failoverUsed: false,
         performanceMetrics: validationResult.metrics,
       };
-      request.parlantContext = validationResult.parlantContext!;
+      request.parlantContext = {
+        ...validationResult.parlantContext!,
+        preferences: validationResult.parlantContext!.preferences || {},
+      };
 
       // Post-authentication security checks
       await this.performPostAuthSecurityChecks(request, operationId);
@@ -618,7 +622,7 @@ export class EnhancedParlantAuthGuard implements CanActivate {
     return {
       user: userContextObj,
       resource: {
-        type: ResourceType.API_ENDPOINT,
+        type: ResourceType._API,
         metadata: {
           path: request.url,
           method: request.method,

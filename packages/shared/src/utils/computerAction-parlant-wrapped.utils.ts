@@ -11,26 +11,25 @@
  */
 
 import {
-  createParlantWrapper,
   parlantWrapper,
   ParlantWrapperRegistry,
   FunctionWrapperConfig,
-} from './parlant-wrapper.utils';
+} from "./parlant-wrapper.utils";
 import {
   ValidationMode,
   ApprovalLevel,
   FunctionSecurityLevel,
   RiskLevel,
   ConversationPriority,
-} from '../types/parlant.types';
-import { ParlantIntegrationService } from '../services/parlant-integration.service';
-import { Logger } from '@nestjs/common';
+} from "../types/parlant.types";
+import { ParlantIntegrationService } from "../services/parlant-integration.service";
+import { Logger } from "@nestjs/common";
 
 // Import original computer action functions
-import * as ComputerActionUtils from './computerAction.utils';
+import * as ComputerActionUtils from "./computerAction.utils";
 
 // Initialize logger and Parlant service
-const logger = new Logger('ParlantComputerActionUtils');
+const logger = new Logger("ParlantComputerActionUtils");
 const parlantService = new ParlantIntegrationService(); // This would be injected in real usage
 const registry = ParlantWrapperRegistry.getInstance();
 
@@ -44,7 +43,7 @@ const registry = ParlantWrapperRegistry.getInstance();
  */
 export const convertMoveMouseActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertMoveMouseActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -61,7 +60,7 @@ export const convertMoveMouseActionToToolUseBlock = parlantWrapper(
  */
 export const convertTraceMouseActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertTraceMouseActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -78,7 +77,7 @@ export const convertTraceMouseActionToToolUseBlock = parlantWrapper(
  */
 export const convertClickMouseActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertClickMouseActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -95,7 +94,7 @@ export const convertClickMouseActionToToolUseBlock = parlantWrapper(
  */
 export const convertPressMouseActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertPressMouseActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -112,7 +111,7 @@ export const convertPressMouseActionToToolUseBlock = parlantWrapper(
  */
 export const convertDragMouseActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertDragMouseActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -129,7 +128,7 @@ export const convertDragMouseActionToToolUseBlock = parlantWrapper(
  */
 export const convertScrollActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertScrollActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -146,7 +145,7 @@ export const convertScrollActionToToolUseBlock = parlantWrapper(
  */
 export const convertTypeKeysActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertTypeKeysActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -163,7 +162,7 @@ export const convertTypeKeysActionToToolUseBlock = parlantWrapper(
  */
 export const convertPressKeysActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertPressKeysActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -180,7 +179,7 @@ export const convertPressKeysActionToToolUseBlock = parlantWrapper(
  */
 export const convertTypeTextActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertTypeTextActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -197,7 +196,7 @@ export const convertTypeTextActionToToolUseBlock = parlantWrapper(
  */
 export const convertPasteTextActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertPasteTextActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -214,7 +213,7 @@ export const convertPasteTextActionToToolUseBlock = parlantWrapper(
  */
 export const convertWaitActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertWaitActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
@@ -231,7 +230,7 @@ export const convertWaitActionToToolUseBlock = parlantWrapper(
  */
 export const convertScreenshotActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertScreenshotActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
@@ -248,7 +247,7 @@ export const convertScreenshotActionToToolUseBlock = parlantWrapper(
  */
 export const convertCursorPositionActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertCursorPositionActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
@@ -265,7 +264,7 @@ export const convertCursorPositionActionToToolUseBlock = parlantWrapper(
  */
 export const convertApplicationActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertApplicationActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -286,7 +285,7 @@ export const convertApplicationActionToToolUseBlock = parlantWrapper(
  */
 export const convertWriteFileActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertWriteFileActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._DUAL_APPROVAL)
@@ -303,7 +302,7 @@ export const convertWriteFileActionToToolUseBlock = parlantWrapper(
  */
 export const convertReadFileActionToToolUseBlock = parlantWrapper(
   ComputerActionUtils.convertReadFileActionToToolUseBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
@@ -324,7 +323,7 @@ export const convertReadFileActionToToolUseBlock = parlantWrapper(
  */
 export const isComputerToolUseContentBlock = parlantWrapper(
   ComputerActionUtils.isComputerToolUseContentBlock,
-  parlantService
+  parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
@@ -343,69 +342,158 @@ export const isComputerToolUseContentBlock = parlantWrapper(
  * Register all Parlant-wrapped computer action functions with the global registry
  */
 export function registerParlantComputerActionFunctions(): void {
-  const functions: Array<{ name: string; func: any; level: FunctionSecurityLevel }> = [
+  const functions: Array<{
+    name: string;
+    func: (..._args: unknown[]) => unknown;
+    level: FunctionSecurityLevel;
+  }> = [
     // Critical Computer Automation Functions
-    { name: 'convertMoveMouseActionToToolUseBlock', func: convertMoveMouseActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertTraceMouseActionToToolUseBlock', func: convertTraceMouseActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertClickMouseActionToToolUseBlock', func: convertClickMouseActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertPressMouseActionToToolUseBlock', func: convertPressMouseActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertDragMouseActionToToolUseBlock', func: convertDragMouseActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertScrollActionToToolUseBlock', func: convertScrollActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertTypeKeysActionToToolUseBlock', func: convertTypeKeysActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertPressKeysActionToToolUseBlock', func: convertPressKeysActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertTypeTextActionToToolUseBlock', func: convertTypeTextActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertPasteTextActionToToolUseBlock', func: convertPasteTextActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertApplicationActionToToolUseBlock', func: convertApplicationActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
-    { name: 'convertWriteFileActionToToolUseBlock', func: convertWriteFileActionToToolUseBlock, level: FunctionSecurityLevel._RESTRICTED },
+    {
+      name: "convertMoveMouseActionToToolUseBlock",
+      func: convertMoveMouseActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertTraceMouseActionToToolUseBlock",
+      func: convertTraceMouseActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertClickMouseActionToToolUseBlock",
+      func: convertClickMouseActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertPressMouseActionToToolUseBlock",
+      func: convertPressMouseActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertDragMouseActionToToolUseBlock",
+      func: convertDragMouseActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertScrollActionToToolUseBlock",
+      func: convertScrollActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertTypeKeysActionToToolUseBlock",
+      func: convertTypeKeysActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertPressKeysActionToToolUseBlock",
+      func: convertPressKeysActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertTypeTextActionToToolUseBlock",
+      func: convertTypeTextActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertPasteTextActionToToolUseBlock",
+      func: convertPasteTextActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertApplicationActionToToolUseBlock",
+      func: convertApplicationActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
+    {
+      name: "convertWriteFileActionToToolUseBlock",
+      func: convertWriteFileActionToToolUseBlock,
+      level: FunctionSecurityLevel._RESTRICTED,
+    },
 
     // High Security Functions
-    { name: 'convertWaitActionToToolUseBlock', func: convertWaitActionToToolUseBlock, level: FunctionSecurityLevel._CONFIDENTIAL },
-    { name: 'convertScreenshotActionToToolUseBlock', func: convertScreenshotActionToToolUseBlock, level: FunctionSecurityLevel._CONFIDENTIAL },
-    { name: 'convertReadFileActionToToolUseBlock', func: convertReadFileActionToToolUseBlock, level: FunctionSecurityLevel._CONFIDENTIAL },
-    { name: 'isComputerToolUseContentBlock', func: isComputerToolUseContentBlock, level: FunctionSecurityLevel._CONFIDENTIAL },
+    {
+      name: "convertWaitActionToToolUseBlock",
+      func: convertWaitActionToToolUseBlock,
+      level: FunctionSecurityLevel._CONFIDENTIAL,
+    },
+    {
+      name: "convertScreenshotActionToToolUseBlock",
+      func: convertScreenshotActionToToolUseBlock,
+      level: FunctionSecurityLevel._CONFIDENTIAL,
+    },
+    {
+      name: "convertReadFileActionToToolUseBlock",
+      func: convertReadFileActionToToolUseBlock,
+      level: FunctionSecurityLevel._CONFIDENTIAL,
+    },
+    {
+      name: "isComputerToolUseContentBlock",
+      func: isComputerToolUseContentBlock,
+      level: FunctionSecurityLevel._CONFIDENTIAL,
+    },
 
     // Medium Security Functions
-    { name: 'convertCursorPositionActionToToolUseBlock', func: convertCursorPositionActionToToolUseBlock, level: FunctionSecurityLevel._INTERNAL },
+    {
+      name: "convertCursorPositionActionToToolUseBlock",
+      func: convertCursorPositionActionToToolUseBlock,
+      level: FunctionSecurityLevel._INTERNAL,
+    },
   ];
 
   for (const { name, func, level } of functions) {
     const config: FunctionWrapperConfig = {
       enabled: true,
-      validationMode: level === FunctionSecurityLevel._RESTRICTED 
-        ? ValidationMode._INTERACTIVE 
-        : level === FunctionSecurityLevel._CONFIDENTIAL
-        ? ValidationMode._INTERACTIVE
-        : ValidationMode._AUTOMATED,
-      approvalLevel: level === FunctionSecurityLevel._RESTRICTED
-        ? ApprovalLevel._DUAL_APPROVAL
-        : level === FunctionSecurityLevel._CONFIDENTIAL
-        ? ApprovalLevel._SINGLE_APPROVAL
-        : ApprovalLevel._AUTOMATIC,
+      validationMode:
+        level === FunctionSecurityLevel._RESTRICTED
+          ? ValidationMode._INTERACTIVE
+          : level === FunctionSecurityLevel._CONFIDENTIAL
+            ? ValidationMode._INTERACTIVE
+            : ValidationMode._AUTOMATED,
+      approvalLevel:
+        level === FunctionSecurityLevel._RESTRICTED
+          ? ApprovalLevel._DUAL_APPROVAL
+          : level === FunctionSecurityLevel._CONFIDENTIAL
+            ? ApprovalLevel._SINGLE_APPROVAL
+            : ApprovalLevel._AUTOMATIC,
       securityLevel: level,
-      riskLevel: level === FunctionSecurityLevel._RESTRICTED
-        ? RiskLevel._CRITICAL
-        : level === FunctionSecurityLevel._CONFIDENTIAL
-        ? RiskLevel._HIGH
-        : RiskLevel._MODERATE,
-      timeout: level === FunctionSecurityLevel._RESTRICTED ? 60000 : 
-               level === FunctionSecurityLevel._CONFIDENTIAL ? 30000 : 15000,
+      riskLevel:
+        level === FunctionSecurityLevel._RESTRICTED
+          ? RiskLevel._CRITICAL
+          : level === FunctionSecurityLevel._CONFIDENTIAL
+            ? RiskLevel._HIGH
+            : RiskLevel._MODERATE,
+      timeout:
+        level === FunctionSecurityLevel._RESTRICTED
+          ? 60000
+          : level === FunctionSecurityLevel._CONFIDENTIAL
+            ? 30000
+            : 15000,
       cacheable: level === FunctionSecurityLevel._INTERNAL, // Only cache low-risk operations
       rules: [],
-      conversationPriority: level === FunctionSecurityLevel._RESTRICTED
-        ? ConversationPriority._CRITICAL
-        : level === FunctionSecurityLevel._CONFIDENTIAL
-        ? ConversationPriority._HIGH
-        : ConversationPriority._NORMAL,
+      conversationPriority:
+        level === FunctionSecurityLevel._RESTRICTED
+          ? ConversationPriority._CRITICAL
+          : level === FunctionSecurityLevel._CONFIDENTIAL
+            ? ConversationPriority._HIGH
+            : ConversationPriority._NORMAL,
     };
 
     registry.register(`computerAction.${name}`, func, config);
   }
 
-  logger.log(`Registered ${functions.length} Parlant-wrapped computer action functions`, {
-    critical: functions.filter(f => f.level === FunctionSecurityLevel._RESTRICTED).length,
-    high: functions.filter(f => f.level === FunctionSecurityLevel._CONFIDENTIAL).length,
-    medium: functions.filter(f => f.level === FunctionSecurityLevel._INTERNAL).length,
-  });
+  logger.log(
+    `Registered ${functions.length} Parlant-wrapped computer action functions`,
+    {
+      critical: functions.filter(
+        (f) => f.level === FunctionSecurityLevel._RESTRICTED,
+      ).length,
+      high: functions.filter(
+        (f) => f.level === FunctionSecurityLevel._CONFIDENTIAL,
+      ).length,
+      medium: functions.filter(
+        (f) => f.level === FunctionSecurityLevel._INTERNAL,
+      ).length,
+    },
+  );
 }
 
 /**
@@ -421,10 +509,12 @@ registerParlantComputerActionFunctions();
 // Re-export original functions for backwards compatibility (with warning)
 export const originalComputerActionUtils = ComputerActionUtils;
 
-logger.log('Parlant-wrapped computer action utilities initialized', {
-  message: 'ALL computer automation functions now protected by conversational AI validation',
+logger.log("Parlant-wrapped computer action utilities initialized", {
+  message:
+    "ALL computer automation functions now protected by conversational AI validation",
   criticalFunctions: 12,
   highSecurityFunctions: 4,
   mediumSecurityFunctions: 1,
-  warningMessage: 'Computer automation requires dual approval and conversational validation',
+  warningMessage:
+    "Computer automation requires dual approval and conversational validation",
 });

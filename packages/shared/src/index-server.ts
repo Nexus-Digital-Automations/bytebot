@@ -6,8 +6,16 @@
  * dependencies and cannot be used in browser environments.
  */
 
-// Re-export everything from the client-safe index
-export * from "./index-client";
+// Re-export client-safe index - selective to avoid conflicts with server modules
+export {
+  // Core types
+  MessageContentType,
+  ComputerAction,
+  Role as ClientRole,
+
+  // Basic exports without conflicts
+  ParlantIntegrationError,
+} from "./index-client";
 
 // Explicitly re-export the correct SecurityLevel from parlant-integration.types to resolve ambiguity
 export { SecurityLevel } from "./types/parlant-integration.types";
@@ -29,8 +37,6 @@ export * from "./decorators/security-validation.decorators";
 
 // RBAC Authorization Decorators - server-only (NestJS) - specific exports to avoid conflicts
 export {
-  Role,
-  ResourceType,
   RequireRole,
   RequirePermission as RequireRBACPermission,
   RequireAllPermissions,
@@ -44,8 +50,12 @@ export {
   validateIPBasedAccess,
 } from "./decorators/rbac-authorization.decorators";
 
-// Re-export Permission enum from RBAC decorators as RBACPermission to avoid conflicts
-export { Permission as RBACPermission } from "./decorators/rbac-authorization.decorators";
+// Re-export RBAC types from rbac.types to avoid conflicts
+export {
+  Role,
+  Permission as RBACPermission,
+  ResourceType,
+} from "./types/rbac.types";
 
 // RBAC Types and Utilities - specific exports to avoid conflicts with parlant.types
 export {
@@ -255,7 +265,14 @@ export {
 } from "./audit/types";
 export * from "./audit/services/audit-logger.service";
 export * from "./audit/processors/audit-event.processor";
-export * from "./audit/compliance/compliance-framework.service";
+// Compliance Framework - specific exports to avoid conflicts
+export {
+  ComplianceFrameworkService,
+  ComplianceReport as FrameworkComplianceReport,
+  ComplianceConfig,
+  DataClassificationLevel,
+  ComplianceViolation,
+} from "./audit/compliance/compliance-framework.service";
 export * from "./audit/integrations/audit.module";
 
 // Security Framework - server-only security services and ML algorithms
@@ -269,14 +286,31 @@ export * from "./audit/integrations/audit.module";
 export * from "./services/parlant-integration.service";
 
 // Enhanced JWT-Parlant Bridge Service - PARLANT Phase 1 Implementation
-export * from "./services/enhanced-jwt-parlant-bridge.service";
+export {
+  EnhancedJwtParlantBridgeService,
+  EnhancedParlantJwtPayload,
+  TokenExchangeRequest,
+  TokenExchangeResponse,
+  IdentityMapping,
+  SecurityMonitoringAlert,
+  PerformanceMetrics as BridgePerformanceMetrics,
+} from "./services/enhanced-jwt-parlant-bridge.service";
+
 export * from "./services/jwt-parlant-bridge.service";
 
 // Enhanced Parlant Authentication Guard
 export * from "./guards/enhanced-parlant-auth.guard";
 
-// Enhanced JWT Bridge Types
-export * from "./types/enhanced-jwt-bridge.types";
+// Enhanced JWT Bridge Types - specific exports to avoid conflicts
+export {
+  TokenExchangeAlgorithm,
+  Platform,
+  SecurityValidationLevel,
+  TokenValidationContext as BridgeTokenValidationContext,
+  SystemHealthStatus as BridgeSystemHealthStatus,
+  AlertSeverity as BridgeAlertSeverity,
+  TokenSecurityProperties,
+} from "./types/enhanced-jwt-bridge.types";
 // Parlant Decorators - specific exports to avoid ParlantValidationConfig conflict
 export {
   PARLANT_VALIDATION_KEY,
@@ -329,7 +363,6 @@ export * from "./utils/parlant-wrapper.utils";
 
 // Parlant Services - integration service and interfaces
 export {
-  ParlantIntegrationService,
   ParlantIntegrationConfig,
   ConversationManager,
   ValidationEngine,
@@ -360,8 +393,17 @@ export {
 //   ParlantServiceUnavailableError,
 // } from "./interceptors/parlant-validation.interceptor";
 
-// Local Monitoring System - server-only (NestJS + Prometheus)
-export * from "./monitoring";
+// Local Monitoring System - server-only (NestJS + Prometheus) - specific exports to avoid conflicts
+export {
+  MetricsService,
+  MonitoringController,
+  MonitoringModule,
+  ParlantFunctionMonitorService,
+  AlertingService,
+  DashboardService,
+  FunctionPerformanceMetrics as MonitoringFunctionPerformanceMetrics,
+  NotificationChannel as MonitoringNotificationChannel,
+} from "./monitoring";
 
 // PARLANT Emergency Bypass System - Phase 1 Complete Implementation
 // Enterprise-grade emergency bypass with multi-tier authorization, time-limited tokens,

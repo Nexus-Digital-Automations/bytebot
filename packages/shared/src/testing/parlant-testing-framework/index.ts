@@ -66,6 +66,15 @@ export * from './types/security-testing.types';
 export * from './types/coverage-reporting.types';
 export * from './types/regression-testing.types';
 
+// Explicit re-exports to resolve ambiguity
+export { ResourceLimits } from './core/parallel-execution-manager';
+export { DashboardWidget } from './coverage/coverage-reporting-dashboard';
+export { PerformanceTestScenario } from './performance/performance-testing-suite';
+export { PerformanceThresholds } from './types/test-framework.types';
+export { DataClassification } from './security/security-testing-framework';
+export { CoverageDataSource } from './coverage/coverage-analyzer';
+export { AlertSeverity, ComparisonVerdict, FilterType } from './types/performance-testing.types';
+
 /**
  * Framework Version and Metadata
  */

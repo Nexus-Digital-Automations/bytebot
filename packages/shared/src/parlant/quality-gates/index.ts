@@ -19,6 +19,9 @@ export * from './core/quality-gate-framework';
 export * from './gates/performance-gate';
 export * from './gates/security-gate';
 
+// Explicitly re-export to resolve ambiguity
+export { ComplianceStatus } from './core/quality-gate-types';
+
 // Rollback System
 export * from './rollback/rollback-engine';
 

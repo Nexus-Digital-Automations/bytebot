@@ -31,7 +31,7 @@ import {
   AuditSeverity,
   AuditOutcome,
 } from "../services/security-audit-trail.service";
-import { UserContext } from "../types/rbac.types";
+import { UserContext, ResourceType } from "../types/rbac.types";
 
 /**
  * Authentication metadata for decorator configuration
@@ -114,7 +114,10 @@ export class JwtParlantAuthGuard implements CanActivate {
       const controllerClass = context.getClass();
 
       // Get authentication metadata from decorators
-      const authMetadata = this.getAuthMetadata(handler, controllerClass);
+      const authMetadata = this.getAuthMetadata(
+        handler as unknown as (..._args: unknown[]) => unknown,
+        controllerClass as unknown as (..._args: unknown[]) => unknown,
+      );
 
       this.logger.debug(`[${operationId}] Authentication guard activated`, {
         operationId,
@@ -509,7 +512,7 @@ export class JwtParlantAuthGuard implements CanActivate {
         userAgent: request.headers["user-agent"],
       },
       {
-        type: "api_endpoint",
+        type: ResourceType._API,
         path: request.path,
         classification: "internal",
       },
@@ -524,7 +527,14 @@ export class JwtParlantAuthGuard implements CanActivate {
         source: "jwt-parlant-auth-guard",
       },
       {
-        riskLevel: validationContext.security?.riskAssessment?.overall || "low",
+        riskLevel:
+          (validationContext.security?.riskAssessment?.overall as
+            | "critical"
+            | "high"
+            | "low"
+            | "minimal"
+            | "medium"
+            | "extreme") || "low",
         flags: ["AUTHENTICATION_SUCCESS"],
       },
       {
@@ -555,7 +565,7 @@ export class JwtParlantAuthGuard implements CanActivate {
         userAgent: request.headers["user-agent"],
       },
       {
-        type: "api_endpoint",
+        type: ResourceType._API,
         path: request.path,
         classification: "internal",
       },

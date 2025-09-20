@@ -556,10 +556,10 @@ export class EnterpriseMonitoringController {
   @ApiQuery({ name: "sections", required: false, description: "Comma-separated sections to include" })
   @ApiResponse({ status: 200, description: "Dashboard data exported successfully" })
   async exportDashboard(
+    @Res() res: Response,
     @Query("format") format: "csv" | "json" | "pdf" = "json",
     @Query("timeRange") timeRange = "24h",
     @Query("sections") sections?: string,
-    @Res() res: Response,
   ): Promise<void> {
     try {
       const sectionsArray = sections ? sections.split(",") : undefined;

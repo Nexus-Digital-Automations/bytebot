@@ -779,11 +779,14 @@ export class ParallelExecutionManager extends EventEmitter {
     const memUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
 
-    this.metrics.resourceUtilization = {
-      cpuUsage: cpuUsage.user + cpuUsage.system,
-      memoryUsage: memUsage.heapUsed,
-      networkUsage: 0, // Would need additional monitoring
-      diskUsage: 0     // Would need additional monitoring
+    this.metrics = {
+      ...this.metrics,
+      resourceUtilization: {
+        cpuUsage: cpuUsage.user + cpuUsage.system,
+        memoryUsage: memUsage.heapUsed,
+        networkUsage: 0, // Would need additional monitoring
+        diskUsage: 0     // Would need additional monitoring
+      }
     };
 
     this.emit('metrics:updated', this.metrics);

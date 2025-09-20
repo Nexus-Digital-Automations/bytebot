@@ -1559,7 +1559,7 @@ export class ResultTransformationEngine {
       let sanitized = value;
       sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, 'XXX-XX-XXXX'); // SSN
       sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]'); // Email
-      return sanitized as T;
+      return sanitized as unknown as T;
     }
 
     if (typeof value === 'object' && value !== null) {
@@ -1588,7 +1588,7 @@ export class ResultTransformationEngine {
       redacted = redacted.replace(/password["\s]*[:=]["\s]*[^"\s,}]+/gi, 'password: "[REDACTED]"');
       redacted = redacted.replace(/token["\s]*[:=]["\s]*[^"\s,}]+/gi, 'token: "[REDACTED]"');
       redacted = redacted.replace(/key["\s]*[:=]["\s]*[^"\s,}]+/gi, 'key: "[REDACTED]"');
-      return redacted as T;
+      return redacted as unknown as T;
     }
 
     return value;

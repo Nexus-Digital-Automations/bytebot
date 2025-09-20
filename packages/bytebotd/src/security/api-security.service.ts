@@ -441,7 +441,8 @@ export class ApiSecurityService {
           requestsPerHour: policy.requestsPerHour,
           blockDurationMinutes: policy.blockDurationMinutes,
         },
-        actionDescription: `Configure rate limiting policy "${policy.name}" for ${policy.endpoint}: ${policy.requestsPerMinute} req/min, ${policy.requestsPerHour} req/hour",context,
+        actionDescription: `Configure rate limiting policy "${policy.name}" for ${policy.endpoint}: ${policy.requestsPerMinute} req/min, ${policy.requestsPerHour} req/hour`,
+        context,
         riskLevel: RiskLevel._CRITICAL, // Rate limiting changes are CRITICAL
         operationId,
       };
@@ -477,7 +478,9 @@ export class ApiSecurityService {
 
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Rate limiting configuration failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
+        `[${operationId}] Rate limiting configuration failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
           policyId: policy.policyId,
           error: error instanceof Error ? error.message : String(error),
         }

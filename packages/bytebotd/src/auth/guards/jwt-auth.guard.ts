@@ -257,7 +257,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: info?.message ?? info?.name ?? String(info),
+          info: info?.message ?? info?.name ?? (info ? JSON.stringify(info) : 'unknown'),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
@@ -274,9 +274,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       `[${operationId}] Computer control authentication request handled successfully`,
       {
         operationId,
-        userId: (user as ByteBotdUser).id,
-        username: (user as ByteBotdUser).username,
-        role: (user as ByteBotdUser).role,
+        userId: user.id,
+        username: user.username,
+        role: user.role,
         url: request.url,
         method: request.method,
         securityEvent: 'computer_control_auth_handled',},);

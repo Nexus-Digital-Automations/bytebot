@@ -335,7 +335,8 @@ export class OrchestrationAnalyticsService {
     });
 
     // Store error for analytics
-    const errorKey = `${context.operationType}_${error.timestamp.toISOString().split('T')[0]}';const existing = this.errorHistory.get(errorKey) || [];
+    const errorKey = `${context.operationType}_${error.timestamp.toISOString().split('T')[0]}`;
+    const existing = this.errorHistory.get(errorKey) || [];
     existing.push(error);
     this.errorHistory.set(errorKey, existing);
 

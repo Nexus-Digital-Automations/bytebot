@@ -1099,30 +1099,4 @@ export interface PerformanceBaseline {
 // Export All Types
 // ============================================================================
 
-export type {
-  RegressionTestConfig,
-  RegressionBaseline,
-  FunctionBaselineTest,
-  FunctionTestScenario,
-  TestCondition,
-  ValidationRule,
-  RegressionTestSuite,
-  FunctionRegressionTest,
-  ValidationCriteria,
-  ChangeDetector,
-  RegressionTestResult,
-  FunctionTestResult,
-  ValidationResult,
-  ChangeDetectionResult,
-  DetectedChange,
-  ChangeDetail,
-  StabilityAnalysis,
-  BaselineComparison,
-  FunctionComparison,
-  ComparisonDetail,
-  RegressionAlert,
-  RegressionTestExecution,
-  ExecutionStatistics,
-  TrendAnalysis,
-  PerformanceBaseline
-};
+// Types are already exported via 'export interface' declarations above

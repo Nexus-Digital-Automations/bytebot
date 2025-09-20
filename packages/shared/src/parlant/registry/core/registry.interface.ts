@@ -22,6 +22,13 @@ import {
   RegistrationStatus
 } from './registry.types';
 
+// Re-export commonly used types
+export {
+  FunctionRegistrationConfig,
+  FunctionHealthStatus,
+  FunctionVersionInfo
+};
+
 // ===========================
 // CORE REGISTRY INTERFACES
 // ===========================

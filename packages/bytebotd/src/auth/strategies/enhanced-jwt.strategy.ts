@@ -17,6 +17,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';import { Conf
       throw new UnauthorizedException('Invalid JWT payload');
     }
 
+    // Ensure async compliance for future database lookups
+    await Promise.resolve();
+
     // Create user from payload
     const user: ByteBotdUser = {
       id: payload.sub as string,

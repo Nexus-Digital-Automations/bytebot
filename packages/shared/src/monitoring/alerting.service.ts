@@ -280,7 +280,7 @@ export class AlertingService implements OnModuleInit {
     // Cancel pending escalations
     await this.cancelEscalation(alert);
 
-    this.logger.info(`Alert acknowledged: ${alert.name}`, {
+    this.logger.log(`Alert acknowledged: ${alert.name}`, {
       alertId,
       acknowledgerId,
       acknowledgedAt: alert.acknowledgedAt,
@@ -317,7 +317,7 @@ export class AlertingService implements OnModuleInit {
       this.alertHistory.splice(0, this.alertHistory.length - this.maxAlertHistory);
     }
 
-    this.logger.info(`Alert resolved: ${alert.name}`, {
+    this.logger.log(`Alert resolved: ${alert.name}`, {
       alertId,
       resolverId,
       resolvedAt: alert.resolvedAt,
@@ -346,7 +346,7 @@ export class AlertingService implements OnModuleInit {
     alert.metadata.suppressionReason = reason;
     alert.metadata.suppressedAt = new Date();
 
-    this.logger.info(`Alert suppressed: ${alert.name}`, {
+    this.logger.log(`Alert suppressed: ${alert.name}`, {
       alertId,
       reason,
       suppressedAt: alert.metadata.suppressedAt,

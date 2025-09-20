@@ -39,11 +39,8 @@ import {
   AuthorizationResult,
 } from "./rbac-authorization.guard";
 
-// Import RBAC decorators and types
-import {
-  Role,
-  Permission as _Permission,
-} from "../decorators/rbac-authorization.decorators";
+// Import RBAC types
+import { Role } from "../types/rbac.types";
 import { RBACMetadata } from "../types/rbac.types";
 
 // Import Parlant integration types (for service compatibility)

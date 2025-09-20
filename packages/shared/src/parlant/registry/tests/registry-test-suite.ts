@@ -832,5 +832,4 @@ export class TestRunner {
   }
 }
 
-// Export test utilities
-export { MockDataGenerator, TestCaseType, TestStatus };
+// Test utilities are already exported above

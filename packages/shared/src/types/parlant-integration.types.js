@@ -1,15 +1,4 @@
 "use strict";
-/**
- * Parlant Integration Types and Interfaces
- *
- * Comprehensive type definitions for Maximum Parlant Integration with AIgent ecosystem.
- * Supports function-level wrapping across ALL 1,520+ functions with enterprise-grade
- * validation, authentication, and performance optimization.
- *
- * @module ParlantIntegrationTypes
- * @version 1.0.0
- * @author AIgent Integration Team
- */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParlantTimeoutError = exports.ParlantAuthenticationError = exports.ParlantConnectionError = exports.ParlantValidationError = exports.ParlantIntegrationError = exports.ParlantMessageType = exports.SecurityLevel = void 0;
 var SecurityLevel;
@@ -30,12 +19,7 @@ var ParlantMessageType;
     ParlantMessageType["_AUTH_CHALLENGE"] = "auth_challenge";
     ParlantMessageType["_AUTH_RESPONSE"] = "auth_response";
 })(ParlantMessageType || (exports.ParlantMessageType = ParlantMessageType = {}));
-/**
- * Error types for Parlant Integration
- */
 class ParlantIntegrationError extends Error {
-    _code;
-    _details;
     constructor(message, _code, _details) {
         super(message);
         this._code = _code;

@@ -543,7 +543,9 @@ export function validateContentBlock(block: unknown): boolean {
 /**
  * Sanitize a content block (basic implementation)
  */
-export function sanitizeContentBlock(block: MessageContentBlock): MessageContentBlock {
+export function sanitizeContentBlock(
+  block: MessageContentBlock,
+): MessageContentBlock {
   // Basic sanitization - can be extended based on requirements
   return block;
 }
@@ -551,7 +553,9 @@ export function sanitizeContentBlock(block: MessageContentBlock): MessageContent
 /**
  * Transform a content block (basic implementation)
  */
-export function transformContentBlock(block: MessageContentBlock): MessageContentBlock {
+export function transformContentBlock(
+  block: MessageContentBlock,
+): MessageContentBlock {
   // Basic transformation - can be extended based on requirements
   return block;
 }

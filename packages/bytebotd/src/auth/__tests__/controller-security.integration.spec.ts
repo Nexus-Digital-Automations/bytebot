@@ -347,12 +347,16 @@ describe('Controller Security Integration Tests', () => {
 
     // Rate limiting middleware
     const requestCounts = new Map<string, number>();
-    app.use((req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunctio, n) => {
-  const ip = req.ip ?? req.connection?.remoteAddress ?? '127.0.0.1';const count = requestCounts.get(ip) ?? 0;if (count > 100) {
-        return res.status(429).json({,
-  message: 'Too Many Requests', retryAfter: 900, error: 'RATE_LIMIT_EXCEEDED'
-      
-});}
+    app.use((req: any, res: any, next: any) => {
+      const ip = req.ip ?? req.connection?.remoteAddress ?? '127.0.0.1';
+      const count = requestCounts.get(ip) ?? 0;
+      if (count > 100) {
+        return res.status(429).json({
+          message: 'Too Many Requests',
+          retryAfter: 900,
+          error: 'RATE_LIMIT_EXCEEDED'
+        });
+      }
 
       requestCounts.set(ip, count + 1);
 

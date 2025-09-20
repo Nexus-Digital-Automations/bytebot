@@ -22,7 +22,8 @@ import {
   ServiceStatus,
   SystemHealthStatus,
   BusinessImpactLevel,
-  BypassPriority
+  BypassPriority,
+  SecurityViolationType
 } from '../types/bypass-core.types';
 
 // Import bypass services
@@ -518,12 +519,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         this.parlantServiceContext.responseTime = Date.now() - startTime;
       }
 
-      // Update monitoring service
-      await this.monitoringHealth.updateServiceHealth(
-        'parlant',
-        this.parlantServiceContext.status,
-        this.parlantServiceContext.responseTime
-      );
+      // Note: updateServiceHealth method not available on BypassMonitoringHealthService
+      // The service health is tracked internally through health checks
 
       return this.parlantServiceContext;
 
@@ -681,7 +678,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     // Log mode change
     await this.auditForensics.logSecurityViolation(
       {
-        type: 'configuration_change',
+        type: SecurityViolationType.POLICY_VIOLATION,
         severity: ViolationSeverity.MEDIUM,
         description: `Integration mode changed to ${mode}`,
         remediation: 'Monitor system behavior'
@@ -969,7 +966,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             riskScore: 100,
             checksPerformed: [],
             violations: [{
-              type: 'system_failure',
+              type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
               severity: ViolationSeverity.CRITICAL,
               description: 'Both systems failed',
               remediation: 'Manual intervention required'
@@ -1241,7 +1238,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           }
         ],
         violations: success ? [] : [{
-          type: 'execution_failure',
+          type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
           severity: ViolationSeverity.MEDIUM,
           description: 'Bypass operation failed',
           remediation: 'Retry operation'
@@ -1348,7 +1345,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         riskScore: 100,
         checksPerformed: [],
         violations: [{
-          type: 'execution_failure',
+          type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
           severity: ViolationSeverity.HIGH,
           description: 'Operation execution failed',
           remediation: 'Review error and retry'

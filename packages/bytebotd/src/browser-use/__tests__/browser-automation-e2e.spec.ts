@@ -142,10 +142,16 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     });
   });
 
-  describe('Complex Form Automation Workflow', () => {let sessionId: string;let executionId: string;
+  describe('Complex Form Automation Workflow', () => {
+    let sessionId: string;
+    let executionId: string;
 
-    it('should complete complex form automation workflow', async () => {// Step 1: Create sessionconst createSessionDto: CreateBrowserSessionDto = {
-        name: 'E2E Form Automation Session',headless: true,viewportWidth: 1280,
+    it('should complete complex form automation workflow', async () => {
+      // Step 1: Create session
+      const createSessionDto: CreateBrowserSessionDto = {
+        name: 'E2E Form Automation Session',
+        headless: true,
+        viewportWidth: 1280,
         viewportHeight: 720,
       };
 

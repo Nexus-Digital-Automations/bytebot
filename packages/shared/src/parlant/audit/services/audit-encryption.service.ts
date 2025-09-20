@@ -28,7 +28,7 @@ import {
   AuditEventSeverity,
   IntegrityVerification,
 } from '../types/audit-core.types';
-import { createCipherGCM, createDecipherGCM, randomBytes, createHash, createHmac, createSign, createVerify } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes, createHash, createHmac, createSign, createVerify } from 'crypto';
 import { performance } from 'perf_hooks';
 
 // ===========================

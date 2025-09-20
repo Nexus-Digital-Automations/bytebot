@@ -1,3 +1,28 @@
+export interface ValidationSecurityConfig {
+    encryptionRequired: boolean;
+    integrityValidation: boolean;
+    threatDetection: boolean;
+    auditLevel: "basic" | "detailed" | "comprehensive";
+}
+export interface ValidationComplianceConfig {
+    frameworks: string[];
+    strictMode: boolean;
+    auditRequired: boolean;
+    dataRetention: number;
+}
+export interface SecurityValidationContext {
+    securityLevel: "low" | "medium" | "high" | "critical";
+    threatLevel: number;
+    encryptionStatus: boolean;
+    auditTrail: string[];
+}
+export interface ComplianceValidationContext {
+    operationId: string;
+    timestamp: Date;
+    frameworks: string[];
+    scope: string;
+    status: "pending" | "validated" | "failed";
+}
 export declare enum ParlantStreamingProtocolType {
     PROTOCOL_HANDSHAKE = "protocol_handshake",
     PROTOCOL_ACKNOWLEDGED = "protocol_acknowledged",
@@ -1114,5 +1139,4 @@ export interface ComplianceCertification {
     readonly status: "active" | "expired" | "revoked" | "suspended";
     readonly scope: string[];
 }
-export { ParlantStreamingProtocolType, ParlantProtocolMessage, ParlantProtocolHeaders, ProtocolPriority, ProtocolReliability, ProtocolCompression, ProtocolEncryption, ProtocolRouting, ProtocolAudit, ProtocolPerformance, EnhancedParlantValidationRequest, ValidationType, EnhancedValidationContext, EnhancedParlantValidationResponse, ValidationResult, ValidationDecision, ValidationConstraints, ValidationStreamingConfig, ValidationWorkflowConfig, };
 //# sourceMappingURL=parlant-streaming-integration.types.d.ts.map

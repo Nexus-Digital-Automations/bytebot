@@ -51,12 +51,35 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiSecurity,
-} from '@nestjs/swagger';import { IsUUID, IsOptional, IsEnum, IsNumber, IsString, IsBoolean, IsArray, ValidateNested, IsObject } from 'class-validator';import { Type, Transform } from 'class-transformer';// Security and middlewareimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {OperatorOrAdmin,
+} from '@nestjs/swagger';
+import { IsUUID, IsOptional, IsEnum, IsNumber, IsString, IsBoolean, IsArray, ValidateNested, IsObject } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+
+// Security and middleware
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import {
+  OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import {ForVersion,
+} from '../auth/decorators/roles.decorator';
+import {
+  ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';// Core servicesimport { FormAutomationService } from '../form-automation/form-automation.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';// Orchestration integrationimport { ParlantOrchestratorService } from '../../orchestrator/src/services/parlant-orchestrator.service';import type {ParlantOrchestrationRequest,
+} from '../common/versioning/api-version.decorator';
+
+// Core services
+import { FormAutomationService } from '../form-automation/form-automation.service';
+import { BrowserSessionService } from './browser-session.service';
+import { BrowserTaskService } from './browser-task.service';
+
+// Orchestration integration
+import { ParlantOrchestratorService } from '../../orchestrator/src/services/parlant-orchestrator.service';
+import type {
+  ParlantOrchestrationRequest,
   ParlantOrchestrationResult,
   OrchestrationUserContext,
 } from '../../orchestrator/src/services/parlant-orchestrator.service';import type {OrchestrationTask,

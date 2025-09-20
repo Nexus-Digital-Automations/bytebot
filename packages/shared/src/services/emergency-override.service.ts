@@ -33,10 +33,9 @@ import { ConfigService } from "@nestjs/config";
 import { EventEmitter } from "events";
 import * as crypto from "crypto";
 import Redis from "ioredis";
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import {
   UserContext,
-  SecurityContext,
   Role,
   Permission,
   ResourceType,
@@ -46,24 +45,24 @@ import {
  * Emergency override request status
  */
 export enum OverrideStatus {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-  ACTIVE = "active",
-  EXPIRED = "expired",
-  REVOKED = "revoked",
-  CONSUMED = "consumed",
+  _PENDING = "pending",
+  _APPROVED = "approved",
+  _REJECTED = "rejected",
+  _ACTIVE = "active",
+  _EXPIRED = "expired",
+  _REVOKED = "revoked",
+  _CONSUMED = "consumed",
 }
 
 /**
  * Emergency override priority levels
  */
 export enum OverridePriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
-  EMERGENCY = "emergency",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _EMERGENCY = "emergency",
 }
 
 /**
@@ -220,9 +219,16 @@ export interface EmergencyAuditEvent {
   eventId: string;
 
   /** Event type */
-  type: "request_created" | "approval_granted" | "approval_rejected" |
-        "override_activated" | "override_used" | "override_expired" |
-        "override_revoked" | "suspicious_activity" | "compliance_violation";
+  type:
+    | "request_created"
+    | "approval_granted"
+    | "approval_rejected"
+    | "override_activated"
+    | "override_used"
+    | "override_expired"
+    | "override_revoked"
+    | "suspicious_activity"
+    | "compliance_violation";
 
   /** Event timestamp */
   timestamp: Date;
@@ -255,7 +261,12 @@ export interface EmergencyAuditEvent {
   complianceTags: string[];
 
   /** Security classification */
-  classification: "public" | "internal" | "confidential" | "restricted" | "top_secret";
+  classification:
+    | "public"
+    | "internal"
+    | "confidential"
+    | "restricted"
+    | "top_secret";
 }
 
 /**
@@ -293,7 +304,7 @@ export class EmergencyOverrideService
   private monitoringTimer: NodeJS.Timeout | null = null;
   private auditFlushTimer: NodeJS.Timeout | null = null;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly _configService: ConfigService) {
     super();
     this.logger.log("🚀 Initializing Emergency Override Service");
   }
@@ -315,7 +326,10 @@ export class EmergencyOverrideService
       this.logger.log("✅ Emergency Override Service initialized successfully");
       this.emit("emergency:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Emergency Override Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Emergency Override Service",
+        error,
+      );
       throw error;
     }
   }
@@ -365,7 +379,12 @@ export class EmergencyOverrideService
 
     try {
       // Validate request
-      this.validateEmergencyRequest(requester, reason, resourcePatterns, permissionsRequested);
+      this.validateEmergencyRequest(
+        requester,
+        reason,
+        resourcePatterns,
+        permissionsRequested,
+      );
 
       // Determine approval requirements
       const approvalRequirements = await this.determineApprovalRequirements(
@@ -377,7 +396,9 @@ export class EmergencyOverrideService
       // Create request
       const requestId = crypto.randomUUID();
       const now = new Date();
-      const approvalDeadline = new Date(now.getTime() + approvalRequirements.approvalTimeout * 1000);
+      const approvalDeadline = new Date(
+        now.getTime() + approvalRequirements.approvalTimeout * 1000,
+      );
 
       const request: EmergencyOverrideRequest = {
         requestId,
@@ -391,14 +412,18 @@ export class EmergencyOverrideService
           reason,
           justification,
           priority,
-          requestedDuration: requestedDuration || this.getDefaultDuration(priority),
+          requestedDuration:
+            requestedDuration || this.getDefaultDuration(priority),
           resourcePatterns,
           permissionsRequested,
           emergencyContact,
         },
         approval: {
           requirements: approvalRequirements,
-          approvers: await this.identifyApprovers(approvalRequirements, requester),
+          approvers: await this.identifyApprovers(
+            approvalRequirements,
+            requester,
+          ),
           currentStatus: OverrideStatus.PENDING,
           approvalCount: 0,
           rejectionCount: 0,
@@ -408,10 +433,18 @@ export class EmergencyOverrideService
           approvalDeadline,
         },
         security: {
-          riskLevel: this.assessEmergencyRisk(priority, permissionsRequested, resourcePatterns),
-          securityFlags: await this.generateSecurityFlags(requester, resourcePatterns),
+          riskLevel: this.assessEmergencyRisk(
+            priority,
+            permissionsRequested,
+            resourcePatterns,
+          ),
+          securityFlags: await this.generateSecurityFlags(
+            requester,
+            resourcePatterns,
+          ),
           auditLevel: this.determineAuditLevel(priority, permissionsRequested),
-          complianceRequirements: await this.getComplianceRequirements(permissionsRequested),
+          complianceRequirements:
+            await this.getComplianceRequirements(permissionsRequested),
         },
         usage: {
           activationCount: 0,
@@ -441,8 +474,8 @@ export class EmergencyOverrideService
           id: requester.id,
           username: requester.username,
           role: requester.roles[0] || Role.USER,
-          ipAddress: requester.metadata?.clientIP as string || "unknown",
-          userAgent: requester.metadata?.userAgent as string || "unknown",
+          ipAddress: (requester.metadata?.clientIP as string) || "unknown",
+          userAgent: (requester.metadata?.userAgent as string) || "unknown",
         },
         details: {
           action: "emergency_override_requested",
@@ -469,11 +502,14 @@ export class EmergencyOverrideService
 
       return request;
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to create emergency override request`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        createTimeMs: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Failed to create emergency override request`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          createTimeMs: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -496,15 +532,18 @@ export class EmergencyOverrideService
       comment,
     });
 
-    const request = this.pendingRequests.get(requestId) ||
-                   await this.getPendingRequestFromRedis(requestId);
+    const request =
+      this.pendingRequests.get(requestId) ||
+      (await this.getPendingRequestFromRedis(requestId));
 
     if (!request) {
       throw new BadRequestException("Emergency override request not found");
     }
 
     if (request.approval.currentStatus !== OverrideStatus.PENDING) {
-      throw new BadRequestException(`Request is no longer pending: ${request.approval.currentStatus}`);
+      throw new BadRequestException(
+        `Request is no longer pending: ${request.approval.currentStatus}`,
+      );
     }
 
     if (request.timing.approvalDeadline < new Date()) {
@@ -513,14 +552,20 @@ export class EmergencyOverrideService
     }
 
     // Validate approver
-    const approverIndex = request.approval.approvers.findIndex(a => a.id === approverId);
+    const approverIndex = request.approval.approvers.findIndex(
+      (a) => a.id === approverId,
+    );
     if (approverIndex === -1) {
-      throw new ForbiddenException("User is not authorized to approve this request");
+      throw new ForbiddenException(
+        "User is not authorized to approve this request",
+      );
     }
 
     const approver = request.approval.approvers[approverIndex];
     if (approver.status !== "pending") {
-      throw new BadRequestException(`Approver has already ${approver.status} this request`);
+      throw new BadRequestException(
+        `Approver has already ${approver.status} this request`,
+      );
     }
 
     // Update approval
@@ -530,7 +575,10 @@ export class EmergencyOverrideService
     request.approval.approvalCount++;
 
     // Check if approval threshold is met
-    if (request.approval.approvalCount >= request.approval.requirements.minApprovers) {
+    if (
+      request.approval.approvalCount >=
+      request.approval.requirements.minApprovers
+    ) {
       request.approval.currentStatus = OverrideStatus.APPROVED;
       await this.activateEmergencyOverride(request);
     }
@@ -546,8 +594,8 @@ export class EmergencyOverrideService
         id: approverId,
         username: approverContext.username,
         role: approverContext.roles[0] || Role.USER,
-        ipAddress: approverContext.metadata?.clientIP as string || "unknown",
-        userAgent: approverContext.metadata?.userAgent as string || "unknown",
+        ipAddress: (approverContext.metadata?.clientIP as string) || "unknown",
+        userAgent: (approverContext.metadata?.userAgent as string) || "unknown",
       },
       details: {
         action: "emergency_override_approved",
@@ -559,7 +607,11 @@ export class EmergencyOverrideService
           comment,
         },
       },
-      complianceTags: ["EMERGENCY_ACCESS", "APPROVAL_GRANTED", "CRITICAL_AUDIT"],
+      complianceTags: [
+        "EMERGENCY_ACCESS",
+        "APPROVAL_GRANTED",
+        "CRITICAL_AUDIT",
+      ],
       classification: "confidential",
     });
 
@@ -577,9 +629,14 @@ export class EmergencyOverrideService
   /**
    * Check if user has active emergency override
    */
-  async hasActiveEmergencyOverride(userId: string): Promise<ActiveEmergencyOverride | null> {
+  async hasActiveEmergencyOverride(
+    userId: string,
+  ): Promise<ActiveEmergencyOverride | null> {
     for (const override of this.activeOverrides.values()) {
-      if (override.elevatedUser.id === userId && override.timing.expiresAt > new Date()) {
+      if (
+        override.elevatedUser.id === userId &&
+        override.timing.expiresAt > new Date()
+      ) {
         return override;
       }
     }
@@ -602,9 +659,11 @@ export class EmergencyOverrideService
     }
 
     // Check resource patterns
-    const resourcePath = resourceId ? `${resourceType}:${resourceId}` : resourceType;
-    const hasAccess = activeOverride.resourcePatterns.some(pattern =>
-      this.matchesPattern(resourcePath, pattern)
+    const resourcePath = resourceId
+      ? `${resourceType}:${resourceId}`
+      : resourceType;
+    const hasAccess = activeOverride.resourcePatterns.some((pattern) =>
+      this.matchesPattern(resourcePath, pattern),
     );
 
     if (hasAccess) {
@@ -613,7 +672,11 @@ export class EmergencyOverrideService
       activeOverride.timing.lastActivity = new Date();
 
       await this.logOverrideUsage(activeOverride, resourcePath, action);
-      await this.monitorSuspiciousActivity(activeOverride, resourcePath, action);
+      await this.monitorSuspiciousActivity(
+        activeOverride,
+        resourcePath,
+        action,
+      );
     }
 
     return hasAccess;
@@ -670,7 +733,11 @@ export class EmergencyOverrideService
           duration: Date.now() - activeOverride.timing.activatedAt.getTime(),
         },
       },
-      complianceTags: ["EMERGENCY_ACCESS", "OVERRIDE_REVOKED", "CRITICAL_AUDIT"],
+      complianceTags: [
+        "EMERGENCY_ACCESS",
+        "OVERRIDE_REVOKED",
+        "CRITICAL_AUDIT",
+      ],
       classification: "confidential",
     });
 
@@ -687,11 +754,13 @@ export class EmergencyOverrideService
   /**
    * Get emergency override statistics
    */
-  async getEmergencyOverrideStats(): Promise<any> {
+  async getEmergencyOverrideStats(): Promise<unknown> {
     const now = new Date();
     const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const recentEvents = this.auditEvents.filter(event => event.timestamp >= last24Hours);
+    const recentEvents = this.auditEvents.filter(
+      (event) => event.timestamp >= last24Hours,
+    );
 
     return {
       current: {
@@ -700,11 +769,21 @@ export class EmergencyOverrideService
         totalEvents: this.auditEvents.length,
       },
       last24Hours: {
-        requestsCreated: recentEvents.filter(e => e.type === "request_created").length,
-        approvalsGranted: recentEvents.filter(e => e.type === "approval_granted").length,
-        overridesActivated: recentEvents.filter(e => e.type === "override_activated").length,
-        overridesRevoked: recentEvents.filter(e => e.type === "override_revoked").length,
-        suspiciousActivity: recentEvents.filter(e => e.type === "suspicious_activity").length,
+        requestsCreated: recentEvents.filter(
+          (e) => e.type === "request_created",
+        ).length,
+        approvalsGranted: recentEvents.filter(
+          (e) => e.type === "approval_granted",
+        ).length,
+        overridesActivated: recentEvents.filter(
+          (e) => e.type === "override_activated",
+        ).length,
+        overridesRevoked: recentEvents.filter(
+          (e) => e.type === "override_revoked",
+        ).length,
+        suspiciousActivity: recentEvents.filter(
+          (e) => e.type === "suspicious_activity",
+        ).length,
       },
       compliance: {
         auditEventsRetained: this.auditEvents.length,
@@ -723,15 +802,21 @@ export class EmergencyOverrideService
     permissionsRequested: Permission[],
   ): void {
     if (!reason || reason.trim().length < 10) {
-      throw new BadRequestException("Emergency reason must be at least 10 characters");
+      throw new BadRequestException(
+        "Emergency reason must be at least 10 characters",
+      );
     }
 
     if (!resourcePatterns || resourcePatterns.length === 0) {
-      throw new BadRequestException("At least one resource pattern must be specified");
+      throw new BadRequestException(
+        "At least one resource pattern must be specified",
+      );
     }
 
     if (!permissionsRequested || permissionsRequested.length === 0) {
-      throw new BadRequestException("At least one permission must be requested");
+      throw new BadRequestException(
+        "At least one permission must be requested",
+      );
     }
 
     // Additional validation logic here
@@ -743,7 +828,10 @@ export class EmergencyOverrideService
     resourcePatterns: string[],
   ): Promise<ApprovalRequirement> {
     // Determine approval requirements based on priority and permissions
-    const baseRequirements: Record<OverridePriority, Partial<ApprovalRequirement>> = {
+    const baseRequirements: Record<
+      OverridePriority,
+      Partial<ApprovalRequirement>
+    > = {
       [OverridePriority.LOW]: { minApprovers: 1, approvalTimeout: 3600 },
       [OverridePriority.MEDIUM]: { minApprovers: 2, approvalTimeout: 1800 },
       [OverridePriority.HIGH]: { minApprovers: 3, approvalTimeout: 900 },
@@ -762,7 +850,8 @@ export class EmergencyOverrideService
       escalationRules: {
         escalateAfter: base.approvalTimeout! / 2,
         escalateTo: [Role.SUPER_ADMIN],
-        autoApproveAfter: priority === OverridePriority.EMERGENCY ? 600 : undefined,
+        autoApproveAfter:
+          priority === OverridePriority.EMERGENCY ? 600 : undefined,
       },
     };
   }
@@ -770,17 +859,24 @@ export class EmergencyOverrideService
   private async identifyApprovers(
     requirements: ApprovalRequirement,
     requester: UserContext,
-  ): Promise<Array<{
-    id: string;
-    username: string;
-    role: Role;
-    status: "pending" | "approved" | "rejected";
-  }>> {
+  ): Promise<
+    Array<{
+      id: string;
+      username: string;
+      role: Role;
+      status: "pending" | "approved" | "rejected";
+    }>
+  > {
     // In a real implementation, this would query the user database
     return [
       { id: "admin1", username: "admin1", role: Role.ADMIN, status: "pending" },
       { id: "admin2", username: "admin2", role: Role.ADMIN, status: "pending" },
-      { id: "manager1", username: "manager1", role: Role.MANAGER, status: "pending" },
+      {
+        id: "manager1",
+        username: "manager1",
+        role: Role.MANAGER,
+        status: "pending",
+      },
     ];
   }
 
@@ -800,7 +896,10 @@ export class EmergencyOverrideService
     permissions: Permission[],
     resourcePatterns: string[],
   ): "low" | "medium" | "high" | "critical" {
-    if (priority === OverridePriority.CRITICAL || priority === OverridePriority.EMERGENCY) {
+    if (
+      priority === OverridePriority.CRITICAL ||
+      priority === OverridePriority.EMERGENCY
+    ) {
       return "critical";
     }
     if (priority === OverridePriority.HIGH) {
@@ -815,7 +914,7 @@ export class EmergencyOverrideService
   ): Promise<string[]> {
     const flags: string[] = ["EMERGENCY_ACCESS"];
 
-    if (resourcePatterns.some(pattern => pattern.includes("*"))) {
+    if (resourcePatterns.some((pattern) => pattern.includes("*"))) {
       flags.push("WILDCARD_ACCESS");
     }
 
@@ -826,7 +925,10 @@ export class EmergencyOverrideService
     priority: OverridePriority,
     permissions: Permission[],
   ): "basic" | "enhanced" | "comprehensive" {
-    if (priority === OverridePriority.CRITICAL || priority === OverridePriority.EMERGENCY) {
+    if (
+      priority === OverridePriority.CRITICAL ||
+      priority === OverridePriority.EMERGENCY
+    ) {
       return "comprehensive";
     }
     if (priority === OverridePriority.HIGH) {
@@ -835,7 +937,9 @@ export class EmergencyOverrideService
     return "basic";
   }
 
-  private async getComplianceRequirements(permissions: Permission[]): Promise<string[]> {
+  private async getComplianceRequirements(
+    permissions: Permission[],
+  ): Promise<string[]> {
     return ["SOX", "GDPR", "AUDIT_REQUIRED"];
   }
 
@@ -850,10 +954,14 @@ export class EmergencyOverrideService
     return maxActivations[priority];
   }
 
-  private async activateEmergencyOverride(request: EmergencyOverrideRequest): Promise<void> {
+  private async activateEmergencyOverride(
+    request: EmergencyOverrideRequest,
+  ): Promise<void> {
     const sessionId = crypto.randomUUID();
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + request.override.requestedDuration * 1000);
+    const expiresAt = new Date(
+      now.getTime() + request.override.requestedDuration * 1000,
+    );
 
     const activeOverride: ActiveEmergencyOverride = {
       sessionId,
@@ -916,7 +1024,11 @@ export class EmergencyOverrideService
           resourcePatterns: request.override.resourcePatterns,
         },
       },
-      complianceTags: ["EMERGENCY_ACCESS", "OVERRIDE_ACTIVATED", "CRITICAL_AUDIT"],
+      complianceTags: [
+        "EMERGENCY_ACCESS",
+        "OVERRIDE_ACTIVATED",
+        "CRITICAL_AUDIT",
+      ],
       classification: "confidential",
     });
 
@@ -941,7 +1053,9 @@ export class EmergencyOverrideService
 
   private async initializeParlantClient(): Promise<void> {
     // Initialize Parlant client
-    this.logger.debug("Initializing Parlant client for conversational approvals");
+    this.logger.debug(
+      "Initializing Parlant client for conversational approvals",
+    );
   }
 
   private async initializeNotificationClient(): Promise<void> {
@@ -979,12 +1093,18 @@ export class EmergencyOverrideService
 
     for (const [sessionId, override] of this.activeOverrides.entries()) {
       if (override.timing.expiresAt <= now) {
-        await this.revokeEmergencyOverride(sessionId, "system", "Override expired");
+        await this.revokeEmergencyOverride(
+          sessionId,
+          "system",
+          "Override expired",
+        );
       }
     }
   }
 
-  private async logAuditEvent(eventData: Omit<EmergencyAuditEvent, "eventId" | "timestamp">): Promise<void> {
+  private async logAuditEvent(
+    eventData: Omit<EmergencyAuditEvent, "eventId" | "timestamp">,
+  ): Promise<void> {
     const auditEvent: EmergencyAuditEvent = {
       eventId: crypto.randomUUID(),
       timestamp: new Date(),
@@ -997,39 +1117,62 @@ export class EmergencyOverrideService
 
   private async flushAuditEvents(): Promise<void> {
     // Flush audit events to persistent storage
-    this.logger.debug(`Flushing ${this.auditEvents.length} emergency audit events`);
+    this.logger.debug(
+      `Flushing ${this.auditEvents.length} emergency audit events`,
+    );
   }
 
-  private async storePendingRequestInRedis(request: EmergencyOverrideRequest): Promise<void> {
+  private async storePendingRequestInRedis(
+    request: EmergencyOverrideRequest,
+  ): Promise<void> {
     // Store in Redis
   }
 
-  private async getPendingRequestFromRedis(requestId: string): Promise<EmergencyOverrideRequest | null> {
+  private async getPendingRequestFromRedis(
+    requestId: string,
+  ): Promise<EmergencyOverrideRequest | null> {
     // Get from Redis
     return null;
   }
 
-  private async storeActiveOverrideInRedis(override: ActiveEmergencyOverride): Promise<void> {
+  private async storeActiveOverrideInRedis(
+    override: ActiveEmergencyOverride,
+  ): Promise<void> {
     // Store in Redis
   }
 
-  private async removeActiveOverrideFromRedis(sessionId: string): Promise<void> {
+  private async removeActiveOverrideFromRedis(
+    sessionId: string,
+  ): Promise<void> {
     // Remove from Redis
   }
 
-  private async expireRequest(requestId: string, reason: string): Promise<void> {
+  private async expireRequest(
+    requestId: string,
+    reason: string,
+  ): Promise<void> {
     // Expire request
   }
 
-  private async initiateApprovalWorkflow(request: EmergencyOverrideRequest): Promise<void> {
+  private async initiateApprovalWorkflow(
+    request: EmergencyOverrideRequest,
+  ): Promise<void> {
     // Initiate approval workflow
   }
 
-  private async logOverrideUsage(override: ActiveEmergencyOverride, resource: string, action: string): Promise<void> {
+  private async logOverrideUsage(
+    override: ActiveEmergencyOverride,
+    resource: string,
+    action: string,
+  ): Promise<void> {
     // Log usage
   }
 
-  private async monitorSuspiciousActivity(override: ActiveEmergencyOverride, resource: string, action: string): Promise<void> {
+  private async monitorSuspiciousActivity(
+    override: ActiveEmergencyOverride,
+    resource: string,
+    action: string,
+  ): Promise<void> {
     // Monitor for suspicious activity
   }
 
@@ -1038,11 +1181,17 @@ export class EmergencyOverrideService
     return true;
   }
 
-  private async sendActivationNotification(request: EmergencyOverrideRequest, override: ActiveEmergencyOverride): Promise<void> {
+  private async sendActivationNotification(
+    request: EmergencyOverrideRequest,
+    override: ActiveEmergencyOverride,
+  ): Promise<void> {
     // Send activation notification
   }
 
-  private async sendRevocationNotification(override: ActiveEmergencyOverride, reason: string): Promise<void> {
+  private async sendRevocationNotification(
+    override: ActiveEmergencyOverride,
+    reason: string,
+  ): Promise<void> {
     // Send revocation notification
   }
 

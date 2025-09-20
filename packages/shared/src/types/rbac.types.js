@@ -1,0 +1,55 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Permission = exports.Role = exports.ResourceType = void 0;
+var ResourceType;
+(function (ResourceType) {
+    ResourceType["_USER"] = "user";
+    ResourceType["_TASK"] = "task";
+    ResourceType["_SYSTEM"] = "system";
+    ResourceType["_FILE"] = "file";
+    ResourceType["_API"] = "api";
+    ResourceType["_COMPUTER"] = "computer";
+    ResourceType["_AUDIT"] = "audit";
+    ResourceType["_SECURITY"] = "security";
+})(ResourceType || (exports.ResourceType = ResourceType = {}));
+var Role;
+(function (Role) {
+    Role["_ADMIN"] = "admin";
+    Role["_USER"] = "user";
+    Role["_MODERATOR"] = "moderator";
+    Role["_SYSTEM"] = "system";
+    Role["_GUEST"] = "guest";
+    Role["_DEVELOPER"] = "developer";
+    Role["_OPERATOR"] = "operator";
+    Role["_ANALYST"] = "analyst";
+    Role["_AUDITOR"] = "auditor";
+    Role["_SUPER_ADMIN"] = "super_admin";
+})(Role || (exports.Role = Role = {}));
+var Permission;
+(function (Permission) {
+    Permission["_READ"] = "read";
+    Permission["_WRITE"] = "write";
+    Permission["_DELETE"] = "delete";
+    Permission["_UPDATE"] = "update";
+    Permission["_CREATE"] = "create";
+    Permission["_TASK_READ"] = "task:read";
+    Permission["_TASK_WRITE"] = "task:write";
+    Permission["_TASK_DELETE"] = "task:delete";
+    Permission["_EXECUTE"] = "execute";
+    Permission["_ADMIN"] = "admin";
+    Permission["_CONFIGURE"] = "configure";
+    Permission["_MONITOR"] = "monitor";
+    Permission["_USER_MANAGEMENT"] = "user_management";
+    Permission["_TASK_MANAGEMENT"] = "task_management";
+    Permission["_SYSTEM_MANAGEMENT"] = "system_management";
+    Permission["_AUDIT_ACCESS"] = "audit_access";
+    Permission["_SECURITY_MANAGEMENT"] = "security_management";
+    Permission["_API_ACCESS"] = "api_access";
+    Permission["_API_WRITE"] = "api_write";
+    Permission["_API_ADMIN"] = "api_admin";
+    Permission["_COMPUTER_USE"] = "computer_use";
+    Permission["_COMPUTER_ADMIN"] = "computer_admin";
+    Permission["_SCREEN_CAPTURE"] = "screen_capture";
+    Permission["_FILE_ACCESS"] = "file_access";
+})(Permission || (exports.Permission = Permission = {}));
+//# sourceMappingURL=rbac.types.js.map

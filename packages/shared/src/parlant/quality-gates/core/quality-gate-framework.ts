@@ -44,7 +44,7 @@ import { WrapperError, ErrorCategory } from '../../function-wrapper/interfaces/w
 export class QualityGateFrameworkService {
   private readonly logger = new Logger(QualityGateFrameworkService.name);
   private readonly pipelines = new Map<string, QualityGatePipeline>();
-  private readonly gates = new Map<string, QualityGate>();
+  private readonly gatesMap = new Map<string, QualityGate>();
   private readonly executionHistory = new Map<string, QualityGatePipelineResult[]>();
 
   /**
@@ -60,7 +60,7 @@ export class QualityGateFrameworkService {
       throw new Error(`Invalid gate configuration: ${validation.errors.join(', ')}`);
     }
 
-    this.gates.set(gate.id, gate);
+    this.gatesMap.set(gate.id, gate);
     this.logger.log(`Successfully registered quality gate: ${gate.id}`);
   }
 
@@ -71,7 +71,7 @@ export class QualityGateFrameworkService {
   unregisterGate(gateId: string): void {
     this.logger.log(`Unregistering quality gate: ${gateId}`);
 
-    if (!this.gates.has(gateId)) {
+    if (!this.gatesMap.has(gateId)) {
       throw new Error(`Quality gate not found: ${gateId}`);
     }
 
@@ -80,7 +80,7 @@ export class QualityGateFrameworkService {
       pipeline.removeGate(gateId);
     }
 
-    this.gates.delete(gateId);
+    this.gatesMap.delete(gateId);
     this.logger.log(`Successfully unregistered quality gate: ${gateId}`);
   }
 
@@ -166,7 +166,7 @@ export class QualityGateFrameworkService {
    * @returns Array of quality gates
    */
   getAllGates(): QualityGate[] {
-    return Array.from(this.gates.values());
+    return Array.from(this.gatesMap.values());
   }
 
   /**
@@ -175,7 +175,7 @@ export class QualityGateFrameworkService {
    * @returns Array of gates matching type
    */
   getGatesByType(type: QualityGateType): QualityGate[] {
-    return Array.from(this.gates.values()).filter(gate => gate.type === type);
+    return Array.from(this.gatesMap.values()).filter(gate => gate.type === type);
   }
 
   /**
@@ -184,7 +184,7 @@ export class QualityGateFrameworkService {
    * @returns Array of gates matching priority
    */
   getGatesByPriority(priority: QualityGatePriority): QualityGate[] {
-    return Array.from(this.gates.values()).filter(gate => gate.priority === priority);
+    return Array.from(this.gatesMap.values()).filter(gate => gate.priority === priority);
   }
 
   /**
@@ -206,12 +206,12 @@ export class QualityGateFrameworkService {
    * @returns Framework statistics
    */
   getFrameworkStatistics(): QualityGateFrameworkStatistics {
-    const totalGates = this.gates.size;
+    const totalGates = this.gatesMap.size;
     const totalPipelines = this.pipelines.size;
     const gatesByType = new Map<QualityGateType, number>();
     const gatesByPriority = new Map<QualityGatePriority, number>();
 
-    for (const gate of this.gates.values()) {
+    for (const gate of this.gatesMap.values()) {
       gatesByType.set(gate.type, (gatesByType.get(gate.type) || 0) + 1);
       gatesByPriority.set(gate.priority, (gatesByPriority.get(gate.priority) || 0) + 1);
     }
@@ -260,7 +260,7 @@ export class QualityGateFrameworkService {
  * Implementation of quality gate pipeline interface
  */
 class QualityGatePipelineImpl implements QualityGatePipeline {
-  private readonly gates = new Map<string, QualityGate>();
+  private readonly gatesMap = new Map<string, QualityGate>();
 
   constructor(
     public readonly id: string,
@@ -341,7 +341,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       this.logger.warn(`Adding disabled gate to pipeline: ${gate.id}`);
     }
 
-    this.gates.set(gate.id, gate);
+    this.gatesMap.set(gate.id, gate);
     this.logger.log(`Added gate to pipeline ${this.id}: ${gate.id}`);
   }
 
@@ -350,7 +350,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param gateId - ID of gate to remove
    */
   removeGate(gateId: string): void {
-    if (this.gates.delete(gateId)) {
+    if (this.gatesMap.delete(gateId)) {
       this.logger.log(`Removed gate from pipeline ${this.id}: ${gateId}`);
     } else {
       this.logger.warn(`Gate not found in pipeline ${this.id}: ${gateId}`);
@@ -363,7 +363,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @returns Quality gate or undefined
    */
   getGate(gateId: string): QualityGate | undefined {
-    return this.gates.get(gateId);
+    return this.gatesMap.get(gateId);
   }
 
   /**
@@ -371,7 +371,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @returns Array of quality gates
    */
   get gates(): readonly QualityGate[] {
-    return Array.from(this.gates.values());
+    return Array.from(this.gatesMap.values());
   }
 
   /**
@@ -379,7 +379,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @returns Ordered array of gates
    */
   private getOrderedGates(): QualityGate[] {
-    const gates = Array.from(this.gates.values()).filter(gate => gate.enabled);
+    const gates = Array.from(this.gatesMap.values()).filter(gate => gate.enabled);
 
     // Sort by priority (CRITICAL first, then HIGH, MEDIUM, LOW)
     const priorityOrder = {
@@ -597,7 +597,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
 
     // For priority-based execution, only stop on critical failures
     if (this.config.executionMode === PipelineExecutionMode.PRIORITY_BASED) {
-      const gate = this.gates.get(result.gateId);
+      const gate = this.gatesMap.get(result.gateId);
       return gate?.priority === QualityGatePriority.CRITICAL &&
              (result.status === QualityGateStatus.FAILED || result.status === QualityGateStatus.ERROR);
     }
@@ -621,7 +621,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     }
 
     const hasCriticalFailure = results.some(r => {
-      const gate = this.gates.get(r.gateId);
+      const gate = this.gatesMap.get(r.gateId);
       return gate?.priority === QualityGatePriority.CRITICAL && r.status === QualityGateStatus.FAILED;
     });
 
@@ -746,7 +746,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     const success = status === QualityGateStatus.PASSED;
     const criticalFailures = results
       .filter(r => {
-        const gate = this.gates.get(r.gateId);
+        const gate = this.gatesMap.get(r.gateId);
         return gate?.priority === QualityGatePriority.CRITICAL && r.status === QualityGateStatus.FAILED;
       })
       .map(r => `${r.gateId}: ${r.error?.message || 'Critical failure'}`);
@@ -861,7 +861,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
 
     // Add specific improvement areas based on gate types
     const performanceIssues = results.filter(r => {
-      const gate = this.gates.get(r.gateId);
+      const gate = this.gatesMap.get(r.gateId);
       return gate?.type === QualityGateType.PERFORMANCE && r.score < 80;
     });
 

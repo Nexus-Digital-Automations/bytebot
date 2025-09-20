@@ -412,7 +412,7 @@ export class IncidentResponseService implements OnModuleInit {
       await this.handleIncidentClosed(incident);
     }
 
-    this.logger.info(`Incident status updated: ${incidentId}`, {
+    this.logger.log(`Incident status updated: ${incidentId}`, {
       incidentId,
       previousStatus,
       newStatus: status,
@@ -471,7 +471,7 @@ export class IncidentResponseService implements OnModuleInit {
       metadata: { actionId, executionId },
     });
 
-    this.logger.info(`Executing remediation action: ${action.name}`, {
+    this.logger.log(`Executing remediation action: ${action.name}`, {
       incidentId,
       actionId,
       executor,
@@ -975,7 +975,7 @@ export class IncidentResponseService implements OnModuleInit {
   }
 
   private async handleIncidentResolved(incident: Incident): Promise<void> {
-    this.logger.info(`Incident resolved: ${incident.id}`);
+    this.logger.log(`Incident resolved: ${incident.id}`);
   }
 
   private async handleIncidentClosed(incident: Incident): Promise<void> {
@@ -988,7 +988,7 @@ export class IncidentResponseService implements OnModuleInit {
       this.incidentHistory.splice(0, this.incidentHistory.length - this.maxIncidentHistory);
     }
 
-    this.logger.info(`Incident closed: ${incident.id}`);
+    this.logger.log(`Incident closed: ${incident.id}`);
   }
 
   private async executeRemediationScript(
@@ -1004,7 +1004,7 @@ export class IncidentResponseService implements OnModuleInit {
       execution.status = "success";
       execution.completedAt = new Date();
 
-      this.logger.info(`Remediation action completed successfully: ${action.name}`, {
+      this.logger.log(`Remediation action completed successfully: ${action.name}`, {
         incidentId: incident.id,
         actionId: action.id,
       });

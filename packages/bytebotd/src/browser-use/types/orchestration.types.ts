@@ -24,15 +24,29 @@
  * Task priority levels for orchestration
  */
 export enum TaskPriority {
-  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',EMERGENCY = 'emergency',}/**
+  LOW = 'low',
+  NORMAL = 'normal',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+  EMERGENCY = 'emergency',
+}/**
  * Coordination modes for multi-agent operations
  */
 export enum CoordinationMode {
-  SIMPLE = 'simple',              // Single coordinator, simple distributionPEER_TO_PEER = 'peer_to_peer',  // Agents coordinate directly with each otherHIERARCHICAL = 'hierarchical',  // Tree-based coordination hierarchyCUSTOM = 'custom',              // Custom coordination logic}/**
+  SIMPLE = 'simple',              // Single coordinator, simple distribution
+  PEER_TO_PEER = 'peer_to_peer',  // Agents coordinate directly with each other
+  HIERARCHICAL = 'hierarchical',  // Tree-based coordination hierarchy
+  CUSTOM = 'custom',              // Custom coordination logic
+}/**
  * Task distribution strategies
  */
 export enum TaskDistributionStrategy {
-  ROUND_ROBIN = 'round_robin',    // Distribute tasks in round-robin fashionWEIGHTED = 'weighted',          // Distribute based on agent capabilitiesPRIORITY = 'priority',          // Distribute based on task priorityLOAD_BALANCED = 'load_balanced', // Distribute based on current loadCUSTOM = 'custom',              // Custom distribution logic}/**
+  ROUND_ROBIN = 'round_robin',    // Distribute tasks in round-robin fashion
+  WEIGHTED = 'weighted',          // Distribute based on agent capabilities
+  PRIORITY = 'priority',          // Distribute based on task priority
+  LOAD_BALANCED = 'load_balanced', // Distribute based on current load
+  CUSTOM = 'custom',              // Custom distribution logic
+}/**
  * Agent capability types
  */
 export enum AgentCapability {

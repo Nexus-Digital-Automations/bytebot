@@ -1121,15 +1121,16 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     // Adjust priorities for balanced approach
     const allRecommendations = [...throughputRecs, ...latencyRecs, ...resourceRecs];
 
-    allRecommendations.forEach(rec => {
+    const adjustedRecommendations = allRecommendations.map(rec => {
       if (rec.priority === 'CRITICAL') {
-        rec.priority = 'HIGH';
+        return { ...rec, priority: 'HIGH' as const };
       } else if (rec.priority === 'LOW') {
-        rec.priority = 'MEDIUM';
+        return { ...rec, priority: 'MEDIUM' as const };
       }
+      return rec;
     });
 
-    return allRecommendations;
+    return adjustedRecommendations;
   }
 
   /**

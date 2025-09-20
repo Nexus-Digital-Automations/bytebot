@@ -598,8 +598,11 @@ describe('AuthService', () => {
 
       );
       const loginDto = {
-        email: 'admin@bytebot.ai', password: 'admin123',};(
-        jest.spyOn(jwtService'sign')).mockReturnValue('performance-test-token');
+        email: 'admin@bytebot.ai',
+        password: 'admin123',
+      };
+
+      jest.spyOn(jwtService, 'sign').mockReturnValue('performance-test-token');
 
       const startTime = Date.now();
       await service.login(loginDto);

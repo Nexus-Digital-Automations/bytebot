@@ -10,7 +10,7 @@ import helmet from "helmet";
 import cors from "cors";
 
 // Import standardized security configuration for UI service
-import { SecurityLevel, ServiceType } from "@bytebot/shared/server";
+import { SecurityLevelMiddleware as SecurityLevel, ServiceType } from "@bytebot/shared/server";
 
 // Load environment variables
 dotenv.config();
@@ -58,10 +58,10 @@ app
     // Determine security level based on environment for standardized security
     const securityLevel =
       environment === "production"
-        ? SecurityLevel._HIGH
+        ? SecurityLevel._MAXIMUM
         : environment === "staging"
-          ? SecurityLevel._MEDIUM
-          : SecurityLevel._MINIMAL;
+          ? SecurityLevel._HIGH
+          : SecurityLevel._DEVELOPMENT;
 
     console.log(`Bytebot-UI standardized security configuration applied`, {
       serviceType: ServiceType._BYTEBOT_UI,

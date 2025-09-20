@@ -38,6 +38,9 @@ import {
   WrapperStatistics
 } from '../core/signature-preserving-wrapper';
 
+// Re-export types for external use
+export { WrapperStatistics };
+
 /**
  * Enterprise Function Wrapper Factory
  * Creates and manages PARLANT-validated function wrappers with comprehensive configuration

@@ -18,6 +18,9 @@ import {
   RiskLevel,
 } from './audit-core.types';
 
+// Re-export commonly used types
+export { SensitiveDataType, RiskLevel };
+
 // ===========================
 // COMPLIANCE METADATA
 // ===========================

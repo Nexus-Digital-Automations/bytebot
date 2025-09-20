@@ -609,9 +609,16 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       // Store old config for rollback
       const oldConfig = { ...registration.config };
 
-      // Apply update
-      registration.config = newConfig;
-      registration.metadata.lastUpdated = new Date();
+      // Apply update by creating new registration with updated config and metadata
+      const updatedRegistration: RegisteredWrapper = {
+        ...registration,
+        config: newConfig,
+        metadata: {
+          ...registration.metadata,
+          lastUpdated: new Date()
+        }
+      };
+      this.wrapperRegistry.set(functionId, updatedRegistration);
 
       // Emit update event
       this.eventEmitter.emit('wrapper-config-updated', {
@@ -1198,13 +1205,18 @@ export class WrapperPerformanceMonitor {
 
     const recentMetrics = metrics.slice(-100); // Last 100 data points
 
-    aggregated.totalInvocations = metrics.length;
-    aggregated.averageExecutionTime = recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length;
-    aggregated.minExecutionTime = Math.min(...recentMetrics.map(m => m.executionTime));
-    aggregated.maxExecutionTime = Math.max(...recentMetrics.map(m => m.executionTime));
-    aggregated.averageMemoryUsage = recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) / recentMetrics.length;
-    aggregated.errorRate = recentMetrics.filter(m => !m.success).length / recentMetrics.length;
-    aggregated.lastUpdated = new Date();
+    const updatedAggregated: AggregatedPerformanceMetrics = {
+      totalInvocations: metrics.length,
+      averageExecutionTime: recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length,
+      minExecutionTime: Math.min(...recentMetrics.map(m => m.executionTime)),
+      maxExecutionTime: Math.max(...recentMetrics.map(m => m.executionTime)),
+      totalMemoryUsage: aggregated?.totalMemoryUsage || 0,
+      averageMemoryUsage: recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) / recentMetrics.length,
+      errorRate: recentMetrics.filter(m => !m.success).length / recentMetrics.length,
+      throughput: aggregated?.throughput || 0,
+      lastUpdated: new Date()
+    };
+    this.aggregatedMetrics.set(functionId, updatedAggregated);
   }
 }
 

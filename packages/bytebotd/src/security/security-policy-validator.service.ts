@@ -190,13 +190,18 @@ export class SecurityPolicyValidatorService {
       const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
 
       if (!validationResponse.approved) {
-        throw new Error(`Security policy change blocked by conversational validation: ${validationResponse.reasoning}`);}const response = await this.performPolicyValidation(request, validationResponse.conversationId);
+        throw new Error(`Security policy change blocked by conversational validation: ${validationResponse.reasoning}`);
+      }
+
+      const response = await this.performPolicyValidation(request, validationResponse.conversationId);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.validationResult.violations.length);
 
       this.logger.log(
-        `[${request.operationId}] Security policy validation completed successfully with Parlant validation`,{operationId: request.operationId,
+        `[${request.operationId}] Security policy validation completed successfully with Parlant validation`,
+        {
+          operationId: request.operationId,
           responseId: response.id,
           valid: response.validationResult.valid,
           violations: response.validationResult.violations.length,
@@ -241,14 +246,25 @@ export class SecurityPolicyValidatorService {
       conditionsChecked += rule.conditions.length;
       
       // Simulate some validation logic that might find violations
-      if (rule.severity === 'CRITICAL' && !rule.enabled) {violations.push({ruleId: rule.id,
+      if (rule.severity === 'CRITICAL' && !rule.enabled) {
+        violations.push({
+          ruleId: rule.id,
           severity: 'HIGH',
-          description: `Critical security rule '${rule.name}' is disabled',recommendation: 'Enable critical security rules or provide business justification',
-          complianceImpact: `May violate ${request.context.complianceFramework} requirements`,});}
+          description: `Critical security rule '${rule.name}' is disabled`,
+          recommendation: 'Enable critical security rules or provide business justification',
+          complianceImpact: `May violate ${request.context.complianceFramework} requirements`,
+        });
+      }
     }
 
     // Add some recommendations based on policy domain
-    recommendations.push(`Consider regular review cycles for ${request.context.policyDomain} policies`);if (request.context.complianceFramework) {recommendations.push(`Ensure compliance with ${request.context.complianceFramework} framework requirements`);}const complianceStatus = request.context.complianceFramework ? [{
+    recommendations.push(`Consider regular review cycles for ${request.context.policyDomain} policies`);
+
+    if (request.context.complianceFramework) {
+      recommendations.push(`Ensure compliance with ${request.context.complianceFramework} framework requirements`);
+    }
+
+    const complianceStatus = request.context.complianceFramework ? [{
       framework: request.context.complianceFramework,
       compliant: violations.length === 0,
       gaps: violations.map(v => v.description),

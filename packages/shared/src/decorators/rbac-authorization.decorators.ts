@@ -12,6 +12,7 @@
 
 import { SetMetadata, CustomDecorator } from "@nestjs/common";
 import "reflect-metadata";
+import { Role, Permission, ResourceType } from "../types/rbac.types";
 
 // Type for constructor functions (classes) - compatible with strict TypeScript
 // Ensures proper type constraints for decorator target parameters
@@ -19,104 +20,6 @@ import "reflect-metadata";
 // ===========================
 // TYPE DEFINITIONS
 // ===========================
-
-/**
- * Standard roles in the Bytebot system
- *
- * ARCHITECTURAL PRESERVATION: Complete role coverage intentionally maintained for:
- * - Enterprise compliance requirements (SOC 2, ISO 27001, GDPR)
- * - Future platform expansion and scaling
- * - SIEM integration and comprehensive audit trails
- * - Regulatory compliance mapping
- *
- * Note: "Unused" enum values are architectural design choices, not code defects.
- */
-
-export enum Role {
-  _ADMIN = "admin",
-  _USER = "user",
-  _MODERATOR = "moderator",
-  _SYSTEM = "system",
-  _GUEST = "guest",
-  _DEVELOPER = "developer",
-  _OPERATOR = "operator",
-  _ANALYST = "analyst",
-  _AUDITOR = "auditor",
-  _SUPER_ADMIN = "super_admin",
-}
-
-/**
- * Permission types for granular access control
- *
- * ARCHITECTURAL PRESERVATION: Complete permission coverage intentionally maintained for:
- * - Enterprise compliance requirements (SOC 2, ISO 27001, GDPR)
- * - Granular access control capabilities
- * - SIEM integration and comprehensive audit trails
- * - Future API expansion and resource-specific permissions
- *
- * Note: "Unused" enum values are architectural design choices, not code defects.
- */
-
-export enum Permission {
-  // Data permissions
-  _READ = "read",
-  _WRITE = "write",
-  _DELETE = "delete",
-  _UPDATE = "update",
-  _CREATE = "create",
-
-  // Task-specific permissions
-  _TASK_READ = "task:read",
-  _TASK_WRITE = "task:write",
-  _TASK_DELETE = "task:delete",
-
-  // System permissions
-  _EXECUTE = "execute",
-  _ADMIN = "admin",
-  _CONFIGURE = "configure",
-  _MONITOR = "monitor",
-
-  // Resource-specific permissions
-  _USER_MANAGEMENT = "user_management",
-  _TASK_MANAGEMENT = "task_management",
-  _SYSTEM_MANAGEMENT = "system_management",
-  _AUDIT_ACCESS = "audit_access",
-  _SECURITY_MANAGEMENT = "security_management",
-
-  // API permissions
-  _API_ACCESS = "api_access",
-  _API_WRITE = "api_write",
-  _API_ADMIN = "api_admin",
-
-  // Computer-use permissions
-  _COMPUTER_USE = "computer_use",
-  _COMPUTER_ADMIN = "computer_admin",
-  _SCREEN_CAPTURE = "screen_capture",
-  _FILE_ACCESS = "file_access",
-}
-
-/**
- * Resource types for permission checking
- *
- * ARCHITECTURAL PRESERVATION: Complete resource type coverage intentionally maintained for:
- * - Enterprise resource-based access control (RBAC)
- * - Granular permission mapping across all system components
- * - SIEM integration and comprehensive audit trails
- * - Future service expansion and API resource protection
- *
- * Note: "Unused" enum values are architectural design choices, not code defects.
- */
-
-export enum ResourceType {
-  _USER = "user",
-  _TASK = "task",
-  _SYSTEM = "system",
-  _FILE = "file",
-  _API = "api",
-  _COMPUTER = "computer",
-  _AUDIT = "audit",
-  _SECURITY = "security",
-}
 
 /**
  * Time-based access configuration

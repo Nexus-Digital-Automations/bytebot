@@ -25,7 +25,8 @@ import {
   EscalationAction,
   SecurityFlag,
   BusinessImpactLevel,
-  BypassPriority
+  BypassPriority,
+  ApprovalDecision
 } from '../types/bypass-core.types';
 
 /**
@@ -328,7 +329,7 @@ export class BypassAuthorizationEngineService {
     // Process step
     step.status = ApprovalStepStatus.COMPLETED;
     step.completedAt = new Date();
-    step.result = decision === 'approve' ? 'approved' : 'denied';
+    step.result = decision === 'approve' ? ApprovalDecision.APPROVED : ApprovalDecision.DENIED;
     step.reason = reason;
 
     // Update workflow status

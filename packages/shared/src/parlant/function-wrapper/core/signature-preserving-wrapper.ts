@@ -12,6 +12,7 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { ConversationState } from '../../types/parlant.types';
 import {
   AnyFunction,
   AsyncFunction,
@@ -294,7 +295,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         ],
         appliedGuidelines: ['security-validation', 'parameter-safety'],
         toolsInvoked: ['parameter-validator', 'permission-checker'],
-        state: approved ? 'approved' : 'rejected'
+        state: approved ? ConversationState._APPROVED : ConversationState._DENIED
       };
 
       return {
@@ -326,7 +327,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           messages: [],
           appliedGuidelines: [],
           toolsInvoked: [],
-          state: 'error'
+          state: ConversationState._ERROR
         },
         confidence: 0.0,
         executionTime: Date.now() - startTime,
@@ -523,7 +524,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         messages: [],
         appliedGuidelines: [],
         toolsInvoked: [],
-        state: 'error'
+        state: ConversationState._ERROR
       },
       confidence: 0.0,
       executionTime: 0,
@@ -554,7 +555,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         cpuTime: totalExecutionTime,
         networkRequests: 0,
         databaseQueries: 0,
-        customMetrics: { error: error.code }
+        customMetrics: { errorCode: typeof error.code === 'string' ? parseInt(error.code) || 500 : error.code }
       },
       auditTrail
     };

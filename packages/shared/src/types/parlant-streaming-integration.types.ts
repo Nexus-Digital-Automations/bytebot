@@ -23,6 +23,50 @@
  * @author AIgent Integration Team
  */
 
+// ===== MISSING TYPE DEFINITIONS =====
+// Define types that are referenced but not exported from other modules
+
+/**
+ * Validation security configuration
+ */
+export interface ValidationSecurityConfig {
+  encryptionRequired: boolean;
+  integrityValidation: boolean;
+  threatDetection: boolean;
+  auditLevel: "basic" | "detailed" | "comprehensive";
+}
+
+/**
+ * Validation compliance configuration
+ */
+export interface ValidationComplianceConfig {
+  frameworks: string[];
+  strictMode: boolean;
+  auditRequired: boolean;
+  dataRetention: number;
+}
+
+/**
+ * Security validation context
+ */
+export interface SecurityValidationContext {
+  securityLevel: "low" | "medium" | "high" | "critical";
+  threatLevel: number;
+  encryptionStatus: boolean;
+  auditTrail: string[];
+}
+
+/**
+ * Compliance validation context
+ */
+export interface ComplianceValidationContext {
+  operationId: string;
+  timestamp: Date;
+  frameworks: string[];
+  scope: string;
+  status: "pending" | "validated" | "failed";
+}
+
 // ===== CORE STREAMING PROTOCOL TYPES =====
 
 /**
@@ -1767,33 +1811,4 @@ export interface ComplianceCertification {
 
 // ===== EXPORT ALL TYPES =====
 
-export {
-  // Core protocol types
-  ParlantStreamingProtocolType,
-  ParlantProtocolMessage,
-  ParlantProtocolHeaders,
-  ProtocolPriority,
-  ProtocolReliability,
-  ProtocolCompression,
-  ProtocolEncryption,
-  ProtocolRouting,
-  ProtocolAudit,
-  ProtocolPerformance,
-
-  // Enhanced validation types
-  EnhancedParlantValidationRequest,
-  ValidationType,
-  EnhancedValidationContext,
-
-  // Enhanced response types
-  EnhancedParlantValidationResponse,
-  ValidationResult,
-  ValidationDecision,
-
-  // Configuration types
-  ValidationConstraints,
-  ValidationStreamingConfig,
-  ValidationWorkflowConfig,
-
-  // All other types...
-};
+// Types are already exported via 'export interface/enum/type' declarations above

@@ -10,15 +10,48 @@
  * @security-focus Critical
  */
 
-import { BaseError, ApplicationError, ErrorSeverity } from '../../types/error-types';/*** Orchestration-specific error categories extending the base automation categories
+import { BaseError, ApplicationError, ErrorSeverity } from '../../types/error-types';
+
+/*** Orchestration-specific error categories extending the base automation categories
  */
 export enum OrchestrationErrorCategory {
   // Distributed operation errors
-  DISTRIBUTED_TASK_ERROR = 'distributed_task_error',PARALLEL_EXECUTION_ERROR = 'parallel_execution_error',WORKFLOW_COORDINATION_ERROR = 'workflow_coordination_error',// Resource management errorsRESOURCE_ALLOCATION_ERROR = 'resource_allocation_error',BROWSER_POOL_ERROR = 'browser_pool_error',SESSION_COORDINATION_ERROR = 'session_coordination_error',// Synchronization errorsSTATE_SYNCHRONIZATION_ERROR = 'state_synchronization_error',COORDINATION_TIMEOUT_ERROR = 'coordination_timeout_error',DEPENDENCY_RESOLUTION_ERROR = 'dependency_resolution_error',// Aggregation errorsRESULT_AGGREGATION_ERROR = 'result_aggregation_error',DATA_MERGE_ERROR = 'data_merge_error',OUTPUT_COORDINATION_ERROR = 'output_coordination_error',// Performance and scaling errorsPERFORMANCE_THRESHOLD_ERROR = 'performance_threshold_error',SCALING_LIMIT_ERROR = 'scaling_limit_error',LOAD_BALANCING_ERROR = 'load_balancing_error'}/**
+  DISTRIBUTED_TASK_ERROR = 'distributed_task_error',
+  PARALLEL_EXECUTION_ERROR = 'parallel_execution_error',
+  WORKFLOW_COORDINATION_ERROR = 'workflow_coordination_error',
+
+  // Resource management errors
+  RESOURCE_ALLOCATION_ERROR = 'resource_allocation_error',
+  BROWSER_POOL_ERROR = 'browser_pool_error',
+  SESSION_COORDINATION_ERROR = 'session_coordination_error',
+
+  // Synchronization errors
+  STATE_SYNCHRONIZATION_ERROR = 'state_synchronization_error',
+  COORDINATION_TIMEOUT_ERROR = 'coordination_timeout_error',
+  DEPENDENCY_RESOLUTION_ERROR = 'dependency_resolution_error',
+
+  // Aggregation errors
+  RESULT_AGGREGATION_ERROR = 'result_aggregation_error',
+  DATA_MERGE_ERROR = 'data_merge_error',
+  OUTPUT_COORDINATION_ERROR = 'output_coordination_error',
+
+  // Performance and scaling errors
+  PERFORMANCE_THRESHOLD_ERROR = 'performance_threshold_error',
+  SCALING_LIMIT_ERROR = 'scaling_limit_error',
+  LOAD_BALANCING_ERROR = 'load_balancing_error',
+}/**
  * Orchestration operation types for context identification
  */
 export enum OrchestrationOperationType {
-  PARALLEL_EXTRACTION = 'parallel_extraction',DISTRIBUTED_FORM_FILLING = 'distributed_form_filling',MULTI_SITE_MONITORING = 'multi_site_monitoring',WORKFLOW_EXECUTION = 'workflow_execution',BATCH_PROCESSING = 'batch_processing',COORDINATED_INTERACTION = 'coordinated_interaction',SYNCHRONIZED_NAVIGATION = 'synchronized_navigation',AGGREGATED_REPORTING = 'aggregated_reporting'}/**
+  PARALLEL_EXTRACTION = 'parallel_extraction',
+  DISTRIBUTED_FORM_FILLING = 'distributed_form_filling',
+  MULTI_SITE_MONITORING = 'multi_site_monitoring',
+  WORKFLOW_EXECUTION = 'workflow_execution',
+  BATCH_PROCESSING = 'batch_processing',
+  COORDINATED_INTERACTION = 'coordinated_interaction',
+  SYNCHRONIZED_NAVIGATION = 'synchronized_navigation',
+  AGGREGATED_REPORTING = 'aggregated_reporting',
+}/**
  * Orchestration error severity with additional levels for distributed operations
  */
 export enum OrchestrationErrorSeverity {

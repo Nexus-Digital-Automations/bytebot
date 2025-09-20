@@ -10,11 +10,7 @@
  * @author PARLANT Phase 1 JWT Bridge Security Specialist
  */
 
-import {
-  Role as _Role,
-  Permission as _Permission,
-  ResourceType as _ResourceType,
-} from "./rbac.types";
+import { Permission } from "./rbac.types";
 
 /**
  * Token exchange algorithms supported by the bridge
@@ -575,21 +571,4 @@ export interface IdentitySynchronizationStatus {
   };
 }
 
-/**
- * Export types for use in other modules
- */
-export type {
-  TokenValidationContext,
-  TokenSecurityProperties,
-  IdentityVerificationResult,
-  CrossPlatformUserContext,
-  TokenExchangeAuditTrail,
-  FailoverEventDetails,
-  SecurityMonitoringConfig,
-  PerformanceOptimizationConfig,
-  ComplianceAuditConfig,
-  EnhancedBridgeServiceConfig,
-  BridgeHealthCheckResult,
-  TokenExchangeRateLimiting,
-  IdentitySynchronizationStatus,
-};
+// Types are already exported via 'export interface' declarations above

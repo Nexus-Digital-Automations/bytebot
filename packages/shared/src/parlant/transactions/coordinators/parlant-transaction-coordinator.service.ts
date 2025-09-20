@@ -440,7 +440,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       await this.updateTransactionState(transactionId, TransactionState.ROLLED_BACK, `Rollback initiated: ${reason}`);
 
       // Create rollback info
-      const rollbackInfo: TransactionRollbackInfo = {
+      let rollbackInfo: TransactionRollbackInfo = {
         reason,
         status: 'PENDING',
         operationsToRollback: operations.map(op => op.operationId),
@@ -473,22 +473,28 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
             }
           } catch (rollbackError) {
             this.logger.error(`Failed to rollback operation ${operation.operationId}: ${rollbackError.message}`);
-            rollbackInfo.rollbackError = {
-              type: TransactionErrorType.ROLLBACK_FAILED,
-              message: rollbackError.message,
-              code: 'ROLLBACK_ERROR',
-              details: { operationId: operation.operationId, originalError: rollbackError },
-              timestamp: new Date(),
-              recoverySuggestions: ['Manual rollback required', 'Check database state', 'Contact administrator'],
-              isRecoverable: false,
+            rollbackInfo = {
+              ...rollbackInfo,
+              rollbackError: {
+                type: TransactionErrorType.ROLLBACK_FAILED,
+                message: rollbackError.message,
+                code: 'ROLLBACK_ERROR',
+                details: { operationId: operation.operationId, originalError: rollbackError },
+                timestamp: new Date(),
+                recoverySuggestions: ['Manual rollback required', 'Check database state', 'Contact administrator'],
+                isRecoverable: false,
+              }
             };
           }
         }
       }
 
       // Update rollback completion
-      rollbackInfo.status = rollbackInfo.rollbackError ? 'FAILED' : 'COMPLETED';
-      rollbackInfo.completionTime = new Date();
+      rollbackInfo = {
+        ...rollbackInfo,
+        status: rollbackInfo.rollbackError ? 'FAILED' : 'COMPLETED',
+        completionTime: new Date()
+      };
 
       // Log rollback completion
       auditLogger.logStateChange(TransactionState.EXECUTING, TransactionState.ROLLED_BACK, `Rollback ${rollbackInfo.status.toLowerCase()}`);

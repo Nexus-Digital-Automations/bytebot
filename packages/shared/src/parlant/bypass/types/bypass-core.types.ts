@@ -799,22 +799,4 @@ export const EmergencyBypassRequestSchema = z.object({
 // EXPORT ALL TYPES
 // =============================================================================
 
-export type {
-  EmergencyBypassToken,
-  TokenApproval,
-  TokenSecurityMetadata,
-  EmergencyBypassRequest,
-  BypassRequestContext,
-  ApprovalWorkflow,
-  ApprovalStep,
-  WorkflowMetadata,
-  EscalationRule,
-  NotificationSetting,
-  BypassOperationResult,
-  BypassOperationError,
-  BypassPerformanceMetrics,
-  SecurityValidationResult,
-  SecurityCheck,
-  SecurityViolation,
-  FraudDetectionResult
-};
+// Types are already exported via 'export interface' declarations above

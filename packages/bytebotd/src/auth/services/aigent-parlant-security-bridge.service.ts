@@ -628,10 +628,10 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     if (!(this as any)?.bridgeConfig.emergencyOverrideEnabled) {
       throw new Error('Emergency override is disabled in current configuration');}try {
   // CRITICAL: Validate emergency override through Parlant
-      const validationRequest: ParlantValidationRequest = {,
-  functionName: '(AIgentParlantSecurityBridge as any)?.handleEmergencyOverride',
-        functionParams: {,
-  userId: (request as any)?.userId,
+      const validationRequest: ParlantValidationRequest = {
+        functionName: '(AIgentParlantSecurityBridge as any)?.handleEmergencyOverride',
+        functionParams: {
+          userId: (request as any)?.userId,
           approverUserId: (request as any)?.approverUserId,
           overrideScope: (request as any)?.overrideScope,
           durationMinutes: (request as any)?.durationMinutes,
@@ -649,9 +649,10 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
       if (!(validation as any)?.approved) {
   // Log denied override attempt
-        const auditEntry: SessionAuditEntry = {,
-  timestamp: new Date(),
-          action: 'OVERRIDE',outcome: 'BLOCKED',
+        const auditEntry: SessionAuditEntry = {
+          timestamp: new Date(),
+          action: 'OVERRIDE',
+          outcome: 'BLOCKED',
           details: `Emergency override DENIED: ${(validation as any)?.reasoning
 }`,
           ipAddress: 'system',userAgent: 'emergency-override-system',

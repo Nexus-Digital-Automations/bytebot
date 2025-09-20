@@ -655,17 +655,23 @@ async def extract_table():
                 rows.append(row_data)
 
         result = {
-            'headers': headers,'rows': rows,'metadata': {'rowCount': len(rows),'columnCount': len(headers),'selector': selector
+            'headers': headers,
+            'rows': rows,
+            'metadata': {
+                'rowCount': len(rows),
+                'columnCount': len(headers),
+                'selector': selector
             }
         }
 
         print(json.dumps(result))
 
     except Exception as e:
-        sys.stderr.write(f"Table extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"Table extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_table())
-";}
+`;
 
   /**
    * Generate Python script for link extraction

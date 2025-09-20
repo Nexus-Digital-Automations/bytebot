@@ -9,11 +9,80 @@
  * @author RBAC Decorators Specialist
  */
 
-import {
-  Role,
-  Permission,
-  ResourceType,
-} from "../decorators/rbac-authorization.decorators";
+// ===========================
+// CORE ENUM DEFINITIONS (avoiding circular imports)
+// ===========================
+
+/**
+ * Resource types for permission checking
+ */
+export enum ResourceType {
+  _USER = "user",
+  _TASK = "task",
+  _SYSTEM = "system",
+  _FILE = "file",
+  _API = "api",
+  _COMPUTER = "computer",
+  _AUDIT = "audit",
+  _SECURITY = "security",
+}
+
+/**
+ * Standard roles in the Bytebot system
+ */
+export enum Role {
+  _ADMIN = "admin",
+  _USER = "user",
+  _MODERATOR = "moderator",
+  _SYSTEM = "system",
+  _GUEST = "guest",
+  _DEVELOPER = "developer",
+  _OPERATOR = "operator",
+  _ANALYST = "analyst",
+  _AUDITOR = "auditor",
+  _SUPER_ADMIN = "super_admin",
+}
+
+/**
+ * Permission types for granular access control
+ */
+export enum Permission {
+  // Data permissions
+  _READ = "read",
+  _WRITE = "write",
+  _DELETE = "delete",
+  _UPDATE = "update",
+  _CREATE = "create",
+
+  // Task-specific permissions
+  _TASK_READ = "task:read",
+  _TASK_WRITE = "task:write",
+  _TASK_DELETE = "task:delete",
+
+  // System permissions
+  _EXECUTE = "execute",
+  _ADMIN = "admin",
+  _CONFIGURE = "configure",
+  _MONITOR = "monitor",
+
+  // Resource-specific permissions
+  _USER_MANAGEMENT = "user_management",
+  _TASK_MANAGEMENT = "task_management",
+  _SYSTEM_MANAGEMENT = "system_management",
+  _AUDIT_ACCESS = "audit_access",
+  _SECURITY_MANAGEMENT = "security_management",
+
+  // API permissions
+  _API_ACCESS = "api_access",
+  _API_WRITE = "api_write",
+  _API_ADMIN = "api_admin",
+
+  // Computer-use permissions
+  _COMPUTER_USE = "computer_use",
+  _COMPUTER_ADMIN = "computer_admin",
+  _SCREEN_CAPTURE = "screen_capture",
+  _FILE_ACCESS = "file_access",
+}
 
 // ===========================
 // USER CONTEXT TYPES

@@ -25,7 +25,7 @@ import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
 import { Request } from "express";
 
-// Import RBAC decorators and types
+// Import RBAC decorators
 import {
   ROLES_KEY,
   PERMISSIONS_KEY,
@@ -39,8 +39,6 @@ import {
   AUDIT_ACCESS_KEY,
   SECURE_ENDPOINT_KEY,
   ADMIN_ONLY_KEY,
-  Role,
-  Permission,
   TimeBasedAccessConfig,
   IPBasedAccessConfig,
   ConditionalAccessConfig,
@@ -48,6 +46,9 @@ import {
   validateTimeBasedAccess,
   validateIPBasedAccess,
 } from "../decorators/rbac-authorization.decorators";
+
+// Import RBAC types
+import { Role, Permission } from "../types/rbac.types";
 import { RBACMetadata } from "../types/rbac.types";
 
 /**

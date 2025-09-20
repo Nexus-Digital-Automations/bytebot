@@ -49,7 +49,7 @@ export interface JwtParlantSecurityConfig {
   /** JWT configuration */
   jwt: {
     /** Algorithm support */
-    algorithms: ('HS256' | 'RS256' | 'ES256' | 'EdDSA')[];
+    algorithms: ('HS256' | 'RS256' | 'ES256')[];
     /** Secret for HMAC algorithms */
     hmacSecret?: string;
     /** RSA private key */
@@ -211,6 +211,8 @@ const DEFAULT_CONFIG: Partial<JwtParlantSecurityConfig> = {
     refreshExpiresIn: '7d',
   },
   parlant: {
+    apiUrl: 'http://localhost:3000/api/parlant',
+    apiKey: 'default-api-key',
     timeout: 10000,
     retry: {
       attempts: 3,
@@ -318,7 +320,7 @@ export class JwtParlantSecurityModule {
             secret: mergedConfig.jwt.hmacSecret || configService.get('JWT_SECRET'),
             signOptions: {
               expiresIn: mergedConfig.jwt.expiresIn,
-              algorithm: mergedConfig.jwt.algorithms[0],
+              algorithm: mergedConfig.jwt.algorithms[0] as 'HS256' | 'RS256' | 'ES256',
             },
           }),
         }),
@@ -426,7 +428,7 @@ export class JwtParlantSecurityModule {
             secret: config.jwt.hmacSecret,
             signOptions: {
               expiresIn: config.jwt.expiresIn,
-              algorithm: config.jwt.algorithms[0],
+              algorithm: config.jwt.algorithms[0] as 'HS256' | 'RS256' | 'ES256',
             },
           }),
         }),
@@ -469,15 +471,29 @@ export class JwtParlantSecurityModule {
         host: 'localhost',
         port: 6379,
         db: 15, // Use test database
+        connectTimeout: 10000,
+        commandTimeout: 5000,
       },
       parlant: {
         apiUrl: 'http://localhost:8000',
         apiKey: 'test-key',
+        timeout: 10000,
+        retry: {
+          attempts: 3,
+          delay: 1000,
+        },
       },
       audit: {
         bufferSize: 10,
         flushInterval: 1000,
         integrityProtection: false,
+        retentionPeriods: { test: 30 },
+        realTimeMonitoring: false,
+        threatCorrelation: {
+          enabled: false,
+          timeWindow: 3600000,
+          analysisInterval: 300000,
+        },
       },
     });
 
@@ -544,7 +560,6 @@ export class JwtParlantSecurityModule {
 /**
  * Export configuration interface for external use
  */
-export { JwtParlantSecurityConfig };
 
 /**
  * Export decorator for easy configuration injection

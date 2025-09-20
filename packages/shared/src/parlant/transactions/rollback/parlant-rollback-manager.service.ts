@@ -340,12 +340,15 @@ export class ParlantRollbackManagerService extends EventEmitter {
       const performanceMonitor = this.createRollbackPerformanceMonitor(transactionId);
       const auditLogger = this.createRollbackAuditLogger(transactionId, originalTransaction.userContext);
 
-      // Update context with monitoring
-      rollbackContext.performanceMonitor = performanceMonitor;
-      rollbackContext.auditLogger = auditLogger;
+      // Create new context with monitoring (readonly properties require new object)
+      const contextWithMonitoring: RollbackExecutionContext = {
+        ...rollbackContext,
+        performanceMonitor,
+        auditLogger
+      };
 
       // Register rollback
-      this.activeRollbacks.set(transactionId, rollbackContext);
+      this.activeRollbacks.set(transactionId, contextWithMonitoring);
       this.performanceMonitors.set(transactionId, performanceMonitor);
       this.auditLoggers.set(transactionId, auditLogger);
 

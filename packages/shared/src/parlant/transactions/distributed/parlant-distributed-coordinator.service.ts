@@ -670,7 +670,7 @@ export class ParlantDistributedCoordinatorService extends EventEmitter {
     try {
       // Phase 1: Prepare
       context.status = CoordinatorStatus.PREPARING;
-      context.distributedInfo.commitPhase = 'PREPARE';
+      // commitPhase is tracked via context.status
       context.auditLogger.logPhaseTransition('ACTIVE', 'PREPARING', 'Starting prepare phase');
 
       const prepareSuccess = await this.executePreparePhase(context);
@@ -682,7 +682,7 @@ export class ParlantDistributedCoordinatorService extends EventEmitter {
 
       // Phase 2: Commit
       context.status = CoordinatorStatus.COMMITTING;
-      context.distributedInfo.commitPhase = 'COMMIT';
+      // commitPhase is tracked via context.status
       context.auditLogger.logPhaseTransition('PREPARING', 'COMMITTING', 'All participants prepared, starting commit phase');
 
       const commitSuccess = await this.executeCommitPhase(context);
@@ -808,7 +808,7 @@ export class ParlantDistributedCoordinatorService extends EventEmitter {
     this.logger.log(`Executing abort phase for transaction ${context.globalTransactionId}`);
 
     context.status = CoordinatorStatus.ABORTING;
-    context.distributedInfo.commitPhase = 'ABORT';
+    // commitPhase is tracked via context.status
     context.auditLogger.logPhaseTransition('PREPARING', 'ABORTING', 'Aborting due to prepare phase failure');
 
     const abortPromises = context.distributedInfo.participants.map(async (participant) => {

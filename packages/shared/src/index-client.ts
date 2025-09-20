@@ -52,6 +52,13 @@ export type {
   SecurityError,
 } from "./types/security.types";
 
+// RBAC types - Runtime exports (enums)
+export {
+  ResourceType,
+  Role as RBACRole,
+  Permission as RBACPermission,
+} from "./types/rbac.types";
+
 // RBAC types - Type-only exports (interfaces, aliased to avoid conflicts with Parlant types)
 export type {
   UserContext as RBACUserContext,

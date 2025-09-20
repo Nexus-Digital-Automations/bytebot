@@ -604,7 +604,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
           ComputerUsePermission.KEYBOARD_CONTROL
         : ComputerUsePermission.NONE;
 
-    if ((userPermissions & requiredPermissions) !== requiredPermissions) {
+    if ((Number(userPermissions) & Number(requiredPermissions)) !== Number(requiredPermissions)) {
       throw new ForbiddenException(
         'Insufficient computer use permissions for this operation',
       );
@@ -771,7 +771,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Enhanced authentication failed - no user`,
         {
           operationId,
-          info: info?.message ?? info?.name ?? String(info),
+          info: info?.message ?? info?.name ?? (info ? JSON.stringify(info) : 'unknown'),
           url: request.url,
           method: request.method,
           errorMessage,
@@ -802,7 +802,9 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    */
   private getEnhancedAuthErrorMessage(info: JwtAuthInfo | null): string {
     if (!info) {
-      return 'Enhanced authentication required for computer control';}const message = info.message ?? info.name ?? String(info);
+      return 'Enhanced authentication required for computer control';
+    }
+    const message = info.message ?? info.name ?? (info ? JSON.stringify(info) : 'unknown');
 
     switch (message) {
       case 'TokenExpiredError':case 'jwt expired':return 'Access token has expired - refresh required';case 'JsonWebTokenError':case 'invalid token':return 'Invalid access token format';case 'NotBeforeError':return 'Token not yet valid';case 'No auth token':return 'Access token required for computer control operations';default:return 'Enhanced authentication failed for computer control';
