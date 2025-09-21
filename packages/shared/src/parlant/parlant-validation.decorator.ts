@@ -39,6 +39,7 @@ import {
   ConversationalValidationError,
   ParlantConversationContext
 } from './monitoring/parlant-integration.service';
+import { ConversationPriority, ConversationState } from '../types/parlant.types';
 
 // Re-export types for external use
 export { ParlantValidationRequest, ParlantValidationResponse, ConversationalValidationError, RiskLevel };
@@ -452,20 +453,28 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     user: any,
     config: ParlantValidationConfig
   ): ParlantConversationContext {
+    const conversationId = this.generateOperationId();
     return {
+      conversationId,
       userId: user.id || 'anonymous',
       sessionId: request.headers?.['x-session-id'] || `session_${Date.now()}`,
-      agentRole: user.role || 'USER',
-      securityLevel: config.securityLevel,
-      conversationHistory: [],
+      state: ConversationState._ACTIVE,
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
       metadata: {
-        operationId: this.generateOperationId(),
-        businessCategory: config.businessCategory,
-        complianceFlags: config.complianceFlags || [],
-        endpoint: `${request.method} ${request.url}`,
-        timestamp: new Date().toISOString(),
-        requiredRoles: config.requiredRoles || [],
-        customRules: config.customRules || []
+        priority: ConversationPriority._NORMAL,
+        tags: ['function-validation'],
+        properties: {
+          operationId: this.generateOperationId(),
+          businessCategory: config.businessCategory,
+          complianceFlags: config.complianceFlags || [],
+          endpoint: `${request.method} ${request.url}`,
+          timestamp: new Date().toISOString(),
+          requiredRoles: config.requiredRoles || [],
+          customRules: config.customRules || []
+        },
+        history: []
       }
     };
   }
@@ -647,18 +656,26 @@ export const ConversationContext = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const user = request.user || {};
 
+    const conversationId = `ctx_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
     return {
+      conversationId,
       userId: user.id || 'anonymous',
       sessionId: request.headers?.['x-session-id'] || request.sessionID || `session_${Date.now()}`,
-      agentRole: user.role || 'USER',
-      securityLevel: SecurityLevel.MEDIUM,
-      conversationHistory: [],
+      state: ConversationState._ACTIVE,
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
       metadata: {
-        endpoint: `${request.method} ${request.url}`,
-        timestamp: new Date().toISOString(),
-        userAgent: request.headers?.['user-agent']?.substring(0, 100),
-        ipAddress: request.headers?.['x-forwarded-for']?.split(',')[0]?.trim() ||
-                  request.connection?.remoteAddress || 'unknown'
+        priority: ConversationPriority._NORMAL,
+        tags: ['context-extraction'],
+        properties: {
+          endpoint: `${request.method} ${request.url}`,
+          timestamp: new Date().toISOString(),
+          userAgent: request.headers?.['user-agent']?.substring(0, 100),
+          ipAddress: request.headers?.['x-forwarded-for']?.split(',')[0]?.trim() ||
+                    request.connection?.remoteAddress || 'unknown'
+        },
+        history: []
       }
     };
   },

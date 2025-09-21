@@ -17,7 +17,7 @@
  * @author AIgent Testing Framework
  */
 
-import { DatabaseFunction } from './framework.types';
+import { DatabaseFunction } from "./framework.types";
 
 // ============================================================================
 // Core Security Testing Types
@@ -27,64 +27,64 @@ import { DatabaseFunction } from './framework.types';
  * Security test categories for comprehensive security validation
  */
 export enum SecurityTestCategory {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  DATA_PROTECTION = 'data_protection',
-  INPUT_VALIDATION = 'input_validation',
-  SESSION_MANAGEMENT = 'session_management',
-  CRYPTOGRAPHY = 'cryptography',
-  VULNERABILITY_SCANNING = 'vulnerability_scanning',
-  THREAT_MODELING = 'threat_modeling',
-  COMPLIANCE = 'compliance',
-  PENETRATION_TESTING = 'penetration_testing'
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  DATA_PROTECTION = "data_protection",
+  INPUT_VALIDATION = "input_validation",
+  SESSION_MANAGEMENT = "session_management",
+  CRYPTOGRAPHY = "cryptography",
+  VULNERABILITY_SCANNING = "vulnerability_scanning",
+  THREAT_MODELING = "threat_modeling",
+  COMPLIANCE = "compliance",
+  PENETRATION_TESTING = "penetration_testing",
 }
 
 /**
  * Security threat levels for risk assessment
  */
 export enum SecurityThreatLevel {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-  INFO = 'info'
+  CRITICAL = "critical",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
+  INFO = "info",
 }
 
 /**
  * Security compliance frameworks
  */
 export enum ComplianceFramework {
-  OWASP_TOP_10 = 'owasp_top_10',
-  NIST_CYBERSECURITY = 'nist_cybersecurity',
-  ISO_27001 = 'iso_27001',
-  SOC_2 = 'soc_2',
-  GDPR = 'gdpr',
-  HIPAA = 'hipaa',
-  PCI_DSS = 'pci_dss'
+  OWASP_TOP_10 = "owasp_top_10",
+  NIST_CYBERSECURITY = "nist_cybersecurity",
+  ISO_27001 = "iso_27001",
+  SOC_2 = "soc_2",
+  GDPR = "gdpr",
+  HIPAA = "hipaa",
+  PCI_DSS = "pci_dss",
 }
 
 /**
  * Authentication mechanisms for testing
  */
 export enum AuthenticationMechanism {
-  PASSWORD = 'password',
-  MULTI_FACTOR = 'multi_factor',
-  BIOMETRIC = 'biometric',
-  TOKEN_BASED = 'token_based',
-  CERTIFICATE = 'certificate',
-  OAUTH = 'oauth',
-  SAML = 'saml',
-  LDAP = 'ldap'
+  PASSWORD = "password",
+  MULTI_FACTOR = "multi_factor",
+  BIOMETRIC = "biometric",
+  TOKEN_BASED = "token_based",
+  CERTIFICATE = "certificate",
+  OAUTH = "oauth",
+  SAML = "saml",
+  LDAP = "ldap",
 }
 
 /**
  * Authorization models for testing
  */
 export enum AuthorizationModel {
-  RBAC = 'rbac', // Role-Based Access Control
-  ABAC = 'abac', // Attribute-Based Access Control
-  DAC = 'dac',   // Discretionary Access Control
-  MAC = 'mac'    // Mandatory Access Control
+  RBAC = "rbac", // Role-Based Access Control
+  ABAC = "abac", // Attribute-Based Access Control
+  DAC = "dac", // Discretionary Access Control
+  MAC = "mac", // Mandatory Access Control
 }
 
 // ============================================================================
@@ -130,14 +130,14 @@ export interface SecurityTestConfig {
   testData: {
     useRealData: boolean;
     anonymizeData: boolean;
-    dataRetentionPolicy: 'delete_after_test' | 'archive' | 'retain';
+    dataRetentionPolicy: "delete_after_test" | "archive" | "retain";
   };
 
   /** Reporting configuration */
   reporting: {
     generateDetailedReports: boolean;
     includeRemediation: boolean;
-    exportFormats: ('json' | 'xml' | 'pdf' | 'html')[];
+    exportFormats: ("json" | "xml" | "pdf" | "html")[];
   };
 }
 
@@ -182,7 +182,7 @@ export interface AuthenticationTestCase {
   };
 
   /** Expected result */
-  expectedResult: 'success' | 'failure' | 'error';
+  expectedResult: "success" | "failure" | "error";
 
   /** Security assertions to validate */
   securityAssertions: SecurityAssertion[];
@@ -193,7 +193,11 @@ export interface AuthenticationTestCase {
  */
 export interface AuthenticationExpectedOutcome {
   /** Outcome type */
-  type: 'credential_validation' | 'session_creation' | 'audit_logging' | 'rate_limiting';
+  type:
+    | "credential_validation"
+    | "session_creation"
+    | "audit_logging"
+    | "rate_limiting";
 
   /** Expected behavior */
   expectedBehavior: string;
@@ -237,7 +241,7 @@ export interface ResourceAccessPattern {
   resourceType: string;
 
   /** Access operations to test */
-  operations: ('create' | 'read' | 'update' | 'delete' | 'execute')[];
+  operations: ("create" | "read" | "update" | "delete" | "execute")[];
 
   /** User roles and permissions */
   userRolePermissions: UserRolePermission[];
@@ -277,7 +281,7 @@ export interface AccessControlPolicy {
   rules: PolicyRule[];
 
   /** Policy evaluation logic */
-  evaluationLogic: 'allow_by_default' | 'deny_by_default';
+  evaluationLogic: "allow_by_default" | "deny_by_default";
 }
 
 /**
@@ -291,7 +295,7 @@ export interface PolicyRule {
   condition: string;
 
   /** Rule action */
-  action: 'allow' | 'deny';
+  action: "allow" | "deny";
 
   /** Rule priority */
   priority: number;
@@ -360,7 +364,7 @@ export interface DataProtectionTestScenario {
  */
 export interface DataClassification {
   /** Classification level */
-  level: 'public' | 'internal' | 'confidential' | 'restricted' | 'top_secret';
+  level: "public" | "internal" | "confidential" | "restricted" | "top_secret";
 
   /** Data types in this classification */
   dataTypes: string[];
@@ -377,7 +381,12 @@ export interface DataClassification {
  */
 export interface DataProtectionRequirement {
   /** Requirement type */
-  type: 'encryption' | 'masking' | 'anonymization' | 'pseudonymization' | 'deletion';
+  type:
+    | "encryption"
+    | "masking"
+    | "anonymization"
+    | "pseudonymization"
+    | "deletion";
 
   /** Implementation details */
   implementation: Record<string, any>;
@@ -391,7 +400,7 @@ export interface DataProtectionRequirement {
  */
 export interface EncryptionRequirement {
   /** Encryption scope */
-  scope: 'data_at_rest' | 'data_in_transit' | 'data_in_use';
+  scope: "data_at_rest" | "data_in_transit" | "data_in_use";
 
   /** Encryption algorithms */
   algorithms: string[];
@@ -419,7 +428,7 @@ export interface KeyManagementRequirement {
 
   /** Key storage requirements */
   keyStorage: {
-    location: 'hsm' | 'kms' | 'secure_enclave' | 'software';
+    location: "hsm" | "kms" | "secure_enclave" | "software";
     accessControls: string[];
   };
 
@@ -464,7 +473,7 @@ export interface DataPrivacyPolicy {
  */
 export interface DataSubjectRight {
   /** Right type */
-  type: 'access' | 'rectification' | 'erasure' | 'portability' | 'objection';
+  type: "access" | "rectification" | "erasure" | "portability" | "objection";
 
   /** Implementation requirements */
   implementation: string[];
@@ -488,7 +497,7 @@ export interface DataRetentionPolicy {
 
   /** Deletion requirements */
   deletionRequirements: {
-    method: 'logical' | 'physical' | 'cryptographic';
+    method: "logical" | "physical" | "cryptographic";
     verification: boolean;
   };
 }
@@ -508,7 +517,7 @@ export interface VulnerabilityScanConfig {
   targets: ScanTarget[];
 
   /** Scan depth and intensity */
-  scanDepth: 'surface' | 'intermediate' | 'deep';
+  scanDepth: "surface" | "intermediate" | "deep";
 
   /** Vulnerability databases to check against */
   vulnerabilityDatabases: string[];
@@ -521,12 +530,12 @@ export interface VulnerabilityScanConfig {
  * Types of vulnerability scans
  */
 export enum VulnerabilityScanType {
-  STATIC_CODE_ANALYSIS = 'static_code_analysis',
-  DYNAMIC_ANALYSIS = 'dynamic_analysis',
-  DEPENDENCY_SCANNING = 'dependency_scanning',
-  CONTAINER_SCANNING = 'container_scanning',
-  INFRASTRUCTURE_SCANNING = 'infrastructure_scanning',
-  WEB_APPLICATION_SCANNING = 'web_application_scanning'
+  STATIC_CODE_ANALYSIS = "static_code_analysis",
+  DYNAMIC_ANALYSIS = "dynamic_analysis",
+  DEPENDENCY_SCANNING = "dependency_scanning",
+  CONTAINER_SCANNING = "container_scanning",
+  INFRASTRUCTURE_SCANNING = "infrastructure_scanning",
+  WEB_APPLICATION_SCANNING = "web_application_scanning",
 }
 
 /**
@@ -537,7 +546,11 @@ export interface ScanTarget {
   id: string;
 
   /** Target type */
-  type: 'database_function' | 'api_endpoint' | 'web_interface' | 'infrastructure';
+  type:
+    | "database_function"
+    | "api_endpoint"
+    | "web_interface"
+    | "infrastructure";
 
   /** Target location/address */
   location: string;
@@ -598,7 +611,7 @@ export interface VulnerabilityScanResult {
   errorMessage?: string;
 
   /** Scan status */
-  status?: 'completed' | 'failed' | 'partial';
+  status?: "completed" | "failed" | "partial";
 
   /** Discovered vulnerabilities */
   vulnerabilities: SecurityVulnerability[];
@@ -642,7 +655,7 @@ export interface Vulnerability {
 
   /** Remediation recommendations */
   remediation: {
-    priority: 'immediate' | 'high' | 'medium' | 'low';
+    priority: "immediate" | "high" | "medium" | "low";
     steps: string[];
     estimatedEffort: string;
   };
@@ -739,7 +752,7 @@ export interface SecurityTestResult {
   duration: number;
 
   /** Overall security status */
-  overallStatus: 'secure' | 'at_risk' | 'vulnerable' | 'critical';
+  overallStatus: "secure" | "at_risk" | "vulnerable" | "critical";
 
   /** Test results by category */
   categoryResults: Record<SecurityTestCategory, SecurityCategoryResult>;
@@ -765,7 +778,7 @@ export interface SecurityCategoryResult {
   category: SecurityTestCategory;
 
   /** Category test status */
-  status: 'passed' | 'failed' | 'warning' | 'error';
+  status: "passed" | "failed" | "warning" | "error";
 
   /** Category score */
   score: number; // 0-100
@@ -824,9 +837,9 @@ export interface SecurityFinding {
 
   /** Impact assessment */
   impact: {
-    confidentiality: 'none' | 'low' | 'medium' | 'high';
-    integrity: 'none' | 'low' | 'medium' | 'high';
-    availability: 'none' | 'low' | 'medium' | 'high';
+    confidentiality: "none" | "low" | "medium" | "high";
+    integrity: "none" | "low" | "medium" | "high";
+    availability: "none" | "low" | "medium" | "high";
     businessImpact: string;
   };
 
@@ -845,7 +858,7 @@ export interface SecurityFinding {
  */
 export interface ComplianceAssessment {
   /** Overall compliance status */
-  overallStatus: 'compliant' | 'non_compliant' | 'partially_compliant';
+  overallStatus: "compliant" | "non_compliant" | "partially_compliant";
 
   /** Compliance by framework */
   frameworkCompliance: Record<ComplianceFramework, FrameworkComplianceResult>;
@@ -865,7 +878,7 @@ export interface FrameworkComplianceResult {
   framework: ComplianceFramework;
 
   /** Compliance status */
-  status: 'compliant' | 'non_compliant' | 'partially_compliant';
+  status: "compliant" | "non_compliant" | "partially_compliant";
 
   /** Compliance percentage */
   compliancePercentage: number;
@@ -1009,7 +1022,7 @@ export interface RemediationAction {
   description: string;
 
   /** Priority level */
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  priority: "critical" | "high" | "medium" | "low";
 
   /** Responsible party */
   responsibleParty: string;
@@ -1033,7 +1046,13 @@ export interface RemediationAction {
  */
 export interface SecurityAssertion {
   /** Assertion type */
-  type: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'matches_pattern' | 'custom';
+  type:
+    | "equals"
+    | "not_equals"
+    | "contains"
+    | "not_contains"
+    | "matches_pattern"
+    | "custom";
 
   /** Expected value */
   expected: unknown;
@@ -1059,10 +1078,13 @@ export interface ValidationCriteria {
   description: string;
 
   /** Validation method */
-  validationMethod: 'automated' | 'manual' | 'hybrid';
+  validationMethod: "automated" | "manual" | "hybrid";
 
   /** Pass/fail threshold */
-  threshold: number | string | { min?: number; max?: number; percentage?: number };
+  threshold:
+    | number
+    | string
+    | { min?: number; max?: number; percentage?: number };
 
   /** Measurement unit */
   unit?: string;
@@ -1179,7 +1201,7 @@ export interface SecurityTestExecutionContext {
   executionId: string;
 
   /** Test environment */
-  environment: 'development' | 'staging' | 'production' | 'testing';
+  environment: "development" | "staging" | "production" | "testing";
 
   /** Test data sources */
   testDataSources: string[];
@@ -1360,7 +1382,7 @@ export interface SecurityScanResult {
   functionName: string;
 
   /** Scan status */
-  status: 'completed' | 'failed' | 'partial';
+  status: "completed" | "failed" | "partial";
 
   /** Scan duration */
   scanDuration: number;
@@ -1389,7 +1411,7 @@ export interface SecurityVulnerability {
   description: string;
 
   /** Severity level */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Vulnerability category */
   category: string;
@@ -1421,10 +1443,10 @@ export interface SecurityThreat {
   description: string;
 
   /** Likelihood level */
-  likelihood: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  likelihood: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Impact level */
-  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  impact: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Threat category */
   category: string;
@@ -1464,7 +1486,7 @@ export interface SecurityRecommendation {
   id: string;
 
   /** Priority level */
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Recommendation category */
   category: string;
@@ -1479,16 +1501,16 @@ export interface SecurityRecommendation {
   implementation: string;
 
   /** Implementation effort */
-  effort: 'LOW' | 'MEDIUM' | 'HIGH';
+  effort: "LOW" | "MEDIUM" | "HIGH";
 
   /** Expected impact */
-  impact: 'LOW' | 'MEDIUM' | 'HIGH';
+  impact: "LOW" | "MEDIUM" | "HIGH";
 }
 
 /**
  * Test result enumeration
  */
-export type TestResult = 'PASSED' | 'FAILED' | 'SKIPPED';
+export type TestResult = "PASSED" | "FAILED" | "SKIPPED";
 
 // DataClassification interface removed - using DataClassificationLevel enum instead
 
@@ -1497,10 +1519,10 @@ export type TestResult = 'PASSED' | 'FAILED' | 'SKIPPED';
  */
 export interface ComplianceStatus {
   /** Overall compliance status */
-  overall: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL';
+  overall: "COMPLIANT" | "NON_COMPLIANT" | "PARTIAL";
 
   /** Framework-specific compliance */
-  frameworks: Record<string, 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL'>;
+  frameworks: Record<string, "COMPLIANT" | "NON_COMPLIANT" | "PARTIAL">;
 }
 
 /**
@@ -1533,21 +1555,21 @@ export interface SecurityProfile {
  * Security risk levels for assessment
  */
 export enum SecurityRiskLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Data classification levels for security
  */
 export enum DataClassificationLevel {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  TOP_SECRET = 'TOP_SECRET'
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
+  TOP_SECRET = "TOP_SECRET",
 }
 
 /**
@@ -1573,7 +1595,7 @@ export interface RiskAssessment {
   lowIssues: number;
 
   /** Mitigation priority */
-  mitigationPriority: 'IMMEDIATE' | 'HIGH' | 'MEDIUM' | 'LOW';
+  mitigationPriority: "IMMEDIATE" | "HIGH" | "MEDIUM" | "LOW";
 }
 
 /**
@@ -1647,7 +1669,12 @@ export interface DataProtectionTestCaseResult {
   testName: string;
 
   /** Test type */
-  testType: 'ENCRYPTION' | 'MASKING' | 'SANITIZATION' | 'PII_HANDLING' | 'LEAKAGE_PREVENTION';
+  testType:
+    | "ENCRYPTION"
+    | "MASKING"
+    | "SANITIZATION"
+    | "PII_HANDLING"
+    | "LEAKAGE_PREVENTION";
 
   /** Whether test passed */
   passed: boolean;

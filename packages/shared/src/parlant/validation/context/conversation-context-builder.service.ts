@@ -101,9 +101,9 @@ interface OperationPattern {
 @Injectable()
 export class ConversationContextBuilder {
   private readonly logger = new Logger(ConversationContextBuilder.name);
-  private config: ContextBuilderConfig;
+  private config!: ContextBuilderConfig;
   private operationPatterns = new Map<string, OperationPattern>();
-  private sensitiveDataPatterns: RegExp[];
+  private sensitiveDataPatterns!: RegExp[];
 
   constructor(private readonly configService: ConfigService) {
     this.initializeConfiguration();

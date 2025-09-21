@@ -394,7 +394,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @returns Function result
    */
   private async executeWithMonitoring<U>(
-    func: (...args: any[]) => U,
+    func: (...args: any[]) => U | Promise<U>,
     args: any[],
     executionId: string
   ): Promise<U> {
@@ -412,8 +412,8 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         // Async function - await the promise
         return await (result as Promise<U>);
       } else {
-        // Sync function - return directly
-        return result;
+        // Sync function - wrap in resolved promise and return
+        return Promise.resolve(result as U).then(val => val);
       }
 
     } finally {

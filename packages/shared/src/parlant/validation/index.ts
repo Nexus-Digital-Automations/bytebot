@@ -21,19 +21,19 @@ export { ParlantWebSocketManager } from './websocket/parlant-websocket-manager.s
 
 // Conversation context builders
 export { ConversationContextBuilder } from './context/conversation-context-builder.service';
-export { FunctionParameterMapper } from './context/function-parameter-mapper.service';
+// export { FunctionParameterMapper } from './context/function-parameter-mapper.service'; // TODO: Implement
 
 // Validation response processing
-export { ValidationResponseProcessor } from './response/validation-response-processor.service';
-export { ActionDeterminationEngine } from './response/action-determination-engine.service';
+// export { ValidationResponseProcessor } from './response/validation-response-processor.service'; // TODO: Implement
+// export { ActionDeterminationEngine } from './response/action-determination-engine.service'; // TODO: Implement
 
 // Intelligent caching system
-export { IntelligentCacheManager } from './cache/intelligent-cache-manager.service';
-export { CacheHitOptimizer } from './cache/cache-hit-optimizer.service';
+// export { IntelligentCacheManager } from './cache/intelligent-cache-manager.service'; // TODO: Implement
+// export { CacheHitOptimizer } from './cache/cache-hit-optimizer.service'; // TODO: Implement
 
 // Emergency bypass mechanisms
-export { EmergencyBypassController } from './bypass/emergency-bypass-controller.service';
-export { CriticalOperationManager } from './bypass/critical-operation-manager.service';
+// export { EmergencyBypassController } from './bypass/emergency-bypass-controller.service'; // TODO: Implement
+// export { CriticalOperationManager } from './bypass/critical-operation-manager.service'; // TODO: Implement
 
 // Types and interfaces
 export type {

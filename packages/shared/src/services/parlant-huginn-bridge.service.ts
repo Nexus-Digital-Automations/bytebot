@@ -143,7 +143,7 @@ export class ParlantHuginnBridgeService
   private readonly logger = new Logger(ParlantHuginnBridgeService.name);
 
   // Core connections
-  private httpClient!: AxiosInstance;
+  private httpClient: AxiosInstance | null = null;
   private websocket: WebSocket | null = null;
   private isConnected: boolean = false;
 
@@ -162,7 +162,7 @@ export class ParlantHuginnBridgeService
   };
 
   // Configuration
-  private config!: HuginnIntegrationConfig;
+  private config: HuginnIntegrationConfig | null = null;
 
   // Call tracking
   private activeCalls: Map<string, Record<string, unknown>> = new Map();
@@ -271,7 +271,7 @@ export class ParlantHuginnBridgeService
         performanceAchieved:
           executionTime <
           (callConfig.performanceRequirements?.targetTimeMs ||
-            this.config.performanceTarget),
+            this.getConfig().performanceTarget),
         bridgeMetadata: {
           sourceLanguage: "typescript",
           targetLanguage: "ruby",
@@ -340,7 +340,7 @@ export class ParlantHuginnBridgeService
         success: true,
         result: enhancedResult,
         totalExecutionTimeMs: totalExecutionTime,
-        performanceAchieved: totalExecutionTime < this.config.performanceTarget,
+        performanceAchieved: totalExecutionTime < this.getConfig().performanceTarget,
         intelligenceMetadata: {
           validationLevel: workflowConfig.validationLevel,
           autonomousApproval: workflowConfig.autonomousApproval || false,
@@ -482,6 +482,10 @@ export class ParlantHuginnBridgeService
   }
 
   private initializeHttpClient(): void {
+    if (!this.config) {
+      throw new Error('Configuration must be loaded before initializing HTTP client');
+    }
+
     this.httpClient = axios.create({
       baseURL: this.config.huginnBaseUrl,
       timeout: this.config.requestTimeout,
@@ -494,7 +498,7 @@ export class ParlantHuginnBridgeService
     });
 
     // Add request interceptor for performance monitoring
-    this.httpClient.interceptors.request.use(
+    this.getHttpClient().interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // Extend config with metadata for performance tracking
         (
@@ -507,7 +511,7 @@ export class ParlantHuginnBridgeService
     );
 
     // Add response interceptor for metrics collection
-    this.httpClient.interceptors.response.use(
+    this.getHttpClient().interceptors.response.use(
       (response: AxiosResponse) => {
         const config = response.config as InternalAxiosRequestConfig & {
           metadata?: { startTime: number };
@@ -531,7 +535,31 @@ export class ParlantHuginnBridgeService
     this.logger.log("✅ HTTP client initialized for Huginn communication");
   }
 
+  /**
+   * Get the HTTP client, ensuring it's initialized
+   */
+  private getHttpClient(): AxiosInstance {
+    if (!this.httpClient) {
+      throw new Error('HTTP client not initialized. Call onModuleInit() first.');
+    }
+    return this.httpClient;
+  }
+
+  /**
+   * Get the configuration, ensuring it's loaded
+   */
+  private getConfig(): HuginnIntegrationConfig {
+    if (!this.config) {
+      throw new Error('Configuration not loaded. Call onModuleInit() first.');
+    }
+    return this.config;
+  }
+
   private initializeWebSocketConnection(): void {
+    if (!this.config) {
+      throw new Error('Configuration must be loaded before initializing WebSocket connection');
+    }
+
     // WebSocket implementation for real-time communication with Huginn
     try {
       this.websocket = new WebSocket(this.config.huginnWebSocketUrl);
@@ -576,16 +604,16 @@ export class ParlantHuginnBridgeService
       metadata: {
         source: "typescript-bridge",
         timestamp: new Date().toISOString(),
-        performance_target_ms: this.config.performanceTarget,
+        performance_target_ms: this.getConfig().performanceTarget,
       },
     };
 
-    const response = await this.httpClient.post(endpoint, requestPayload, {
+    const response = await this.getHttpClient().post(endpoint, requestPayload, {
       headers: {
         "X-Call-ID": callId,
         "X-Source-Language": "typescript",
         "X-Target-Language": "ruby",
-        Authorization: `Bearer ${this.config.apiKey}`,
+        Authorization: `Bearer ${this.getConfig().apiKey}`,
       },
     });
 
@@ -686,8 +714,8 @@ export class ParlantHuginnBridgeService
         autonomous_approval: workflowConfig.autonomousApproval || false,
       },
       performanceRequirements: {
-        targetTimeMs: this.config.performanceTarget,
-        maxTimeMs: this.config.requestTimeout,
+        targetTimeMs: this.getConfig().performanceTarget,
+        maxTimeMs: this.getConfig().requestTimeout,
       },
     };
   }
@@ -741,7 +769,7 @@ export class ParlantHuginnBridgeService
       this.metrics.failedCalls++;
     }
 
-    if (executionTime < this.config.performanceTarget) {
+    if (executionTime < this.getConfig().performanceTarget) {
       this.metrics.sub300msCalls++;
     }
 
@@ -856,7 +884,7 @@ export class ParlantHuginnBridgeService
 
   private async testHuginnConnectivity(): Promise<boolean> {
     try {
-      await this.httpClient.get("/api/v1/health");
+      await this.getHttpClient().get("/api/v1/health");
       return true;
     } catch (error) {
       return false;
@@ -1049,7 +1077,7 @@ export class ParlantHuginnBridgeService
       this.metrics.failedCalls++;
     }
 
-    if (duration < this.config.performanceTarget) {
+    if (duration < this.getConfig().performanceTarget) {
       this.metrics.sub300msCalls++;
     }
 
@@ -1442,8 +1470,8 @@ export class ParlantHuginnBridgeService
         totalExecutionTime > 0
           ? stepTimes.reduce((sum, time) => sum + time, 0) / totalExecutionTime
           : 1,
-      performanceTarget: this.config.performanceTarget,
-      targetAchieved: totalExecutionTime < this.config.performanceTarget,
+      performanceTarget: this.getConfig().performanceTarget,
+      targetAchieved: totalExecutionTime < this.getConfig().performanceTarget,
       bottlenecks: stepResults
         .filter(
           (result) => (result.executionTimeMs as number) > averageStepTime * 2,
@@ -1472,7 +1500,7 @@ export class ParlantHuginnBridgeService
   ): string[] {
     const recommendations: string[] = [];
 
-    if (totalExecutionTime > this.config.performanceTarget) {
+    if (totalExecutionTime > this.getConfig().performanceTarget) {
       recommendations.push(
         "Consider optimizing step execution order for better parallelization",
       );
@@ -1489,7 +1517,7 @@ export class ParlantHuginnBridgeService
 
     const longRunningSteps = stepResults.filter(
       (result) =>
-        (result.executionTimeMs as number) > this.config.performanceTarget / 2,
+        (result.executionTimeMs as number) > this.getConfig().performanceTarget / 2,
     );
     if (longRunningSteps.length > 0) {
       recommendations.push(

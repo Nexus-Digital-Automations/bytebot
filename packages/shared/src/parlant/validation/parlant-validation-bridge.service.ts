@@ -136,9 +136,9 @@ interface WorkflowMetrics {
 @Injectable()
 export class ParlantValidationBridge extends EventEmitter implements OnApplicationShutdown {
   private readonly logger = new Logger(ParlantValidationBridge.name);
-  private config: ValidationBridgeConfig;
+  private config!: ValidationBridgeConfig;
   private activeWorkflows = new Map<string, ValidationWorkflow>();
-  private validationMetrics: ValidationMetrics;
+  private validationMetrics!: ValidationMetrics;
   private circuitBreakerState = CircuitBreakerState.CLOSED;
   private circuitBreakerFailureCount = 0;
   private circuitBreakerLastFailure = 0;

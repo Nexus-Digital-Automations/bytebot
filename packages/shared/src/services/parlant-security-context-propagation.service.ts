@@ -242,13 +242,18 @@ export class ParlantSecurityContextPropagationService
   extends EventEmitter
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(ParlantSecurityContextPropagationService.name);
+  private readonly logger = new Logger(
+    ParlantSecurityContextPropagationService.name,
+  );
 
   // Context storage and management
   private readonly activeContexts = new Map<string, SecurityContext>();
   private readonly contextCache = new Map<string, ContextCacheEntry>();
   private readonly contextCorrelations = new Map<string, ContextCorrelation>();
-  private readonly transmissionHistory = new Map<string, ContextTransmissionPackage[]>();
+  private readonly transmissionHistory = new Map<
+    string,
+    ContextTransmissionPackage[]
+  >();
 
   // Security configuration
   private readonly encryptionKey = this.generateMasterEncryptionKey();
@@ -284,24 +289,33 @@ export class ParlantSecurityContextPropagationService
 
   constructor() {
     super();
-    this.logger.log("🚀 Initializing PARLANT Security Context Propagation Service");
+    this.logger.log(
+      "🚀 Initializing PARLANT Security Context Propagation Service",
+    );
   }
 
   /**
    * Initialize the Security Context Propagation Service
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log("🔄 Starting Security Context Propagation initialization...");
+    this.logger.log(
+      "🔄 Starting Security Context Propagation initialization...",
+    );
 
     try {
       await this.initializeSecurityPolicies();
       await this.startPeriodicTasks();
       await this.validateSystemSecurity();
 
-      this.logger.log("✅ Security Context Propagation Service initialized successfully");
+      this.logger.log(
+        "✅ Security Context Propagation Service initialized successfully",
+      );
       this.emit("context:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Security Context Propagation Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Security Context Propagation Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Security Context Propagation initialization failed",
         "CONTEXT_INIT_ERROR",
@@ -320,7 +334,9 @@ export class ParlantSecurityContextPropagationService
     await this.cleanupAllContexts();
     await this.saveContextState();
 
-    this.logger.log("✅ Security Context Propagation Service shutdown complete");
+    this.logger.log(
+      "✅ Security Context Propagation Service shutdown complete",
+    );
   }
 
   /**
@@ -351,11 +367,12 @@ export class ParlantSecurityContextPropagationService
         integrityHash: "",
         childContextIds: [],
         propagationChain: [],
-        securityPolicies: await this.getApplicableSecurityPolicies(securityLevel),
+        securityPolicies:
+          await this.getApplicableSecurityPolicies(securityLevel),
         metadata: {
-          origin: metadata?.origin as string || "unknown",
-          clientInfo: metadata?.clientInfo as Record<string, unknown> || {},
-          networkInfo: metadata?.networkInfo as Record<string, unknown> || {},
+          origin: (metadata?.origin as string) || "unknown",
+          clientInfo: (metadata?.clientInfo as Record<string, unknown>) || {},
+          networkInfo: (metadata?.networkInfo as Record<string, unknown>) || {},
           performanceMetrics: {
             creationTime: 0, // Will be updated
             propagationTime: 0,
@@ -365,12 +382,14 @@ export class ParlantSecurityContextPropagationService
             memoryUsage: 0,
           },
           complianceRequirements: this.getComplianceRequirements(securityLevel),
-          customAttributes: metadata?.customAttributes as Record<string, unknown> || {},
+          customAttributes:
+            (metadata?.customAttributes as Record<string, unknown>) || {},
         },
       };
 
       // Generate integrity hash
-      securityContext.integrityHash = await this.generateIntegrityHash(securityContext);
+      securityContext.integrityHash =
+        await this.generateIntegrityHash(securityContext);
 
       // Store context
       this.activeContexts.set(contextId, securityContext);
@@ -388,7 +407,9 @@ export class ParlantSecurityContextPropagationService
         creationTime,
       });
 
-      this.logger.debug(`✅ Security context created: ${contextId} (${creationTime.toFixed(2)}ms)`);
+      this.logger.debug(
+        `✅ Security context created: ${contextId} (${creationTime.toFixed(2)}ms)`,
+      );
 
       return securityContext;
     } catch (error) {
@@ -396,7 +417,11 @@ export class ParlantSecurityContextPropagationService
       throw new ParlantIntegrationError(
         "Security context creation failed",
         "CONTEXT_CREATE_ERROR",
-        { operationId, securityLevel, error: error instanceof Error ? error.message : String(error) },
+        {
+          operationId,
+          securityLevel,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -420,7 +445,9 @@ export class ParlantSecurityContextPropagationService
       // Validate context before propagation
       const validationResult = await this.validateContext(context);
       if (!validationResult.isValid) {
-        throw new Error(`Invalid context for propagation: ${validationResult.errors.join(", ")}`);
+        throw new Error(
+          `Invalid context for propagation: ${validationResult.errors.join(", ")}`,
+        );
       }
 
       // Create transmission package
@@ -471,7 +498,12 @@ export class ParlantSecurityContextPropagationService
       throw new ParlantIntegrationError(
         "Security context propagation failed",
         "CONTEXT_PROPAGATE_ERROR",
-        { contextId, targetService, sourceService, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId,
+          targetService,
+          sourceService,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -495,7 +527,9 @@ export class ParlantSecurityContextPropagationService
       // Validate received context
       const validationResult = await this.validateContext(context);
       if (!validationResult.isValid) {
-        throw new Error(`Received invalid context: ${validationResult.errors.join(", ")}`);
+        throw new Error(
+          `Received invalid context: ${validationResult.errors.join(", ")}`,
+        );
       }
 
       // Update context with reception information
@@ -507,13 +541,15 @@ export class ParlantSecurityContextPropagationService
         timestamp: new Date(),
         validationResult,
         processingDuration: performance.now() - startTime,
-        modifications: [{
-          type: "read",
-          field: "context",
-          timestamp: new Date(),
-          serviceName: receivingService,
-          reason: "context_reception",
-        }],
+        modifications: [
+          {
+            type: "read",
+            field: "context",
+            timestamp: new Date(),
+            serviceName: receivingService,
+            reason: "context_reception",
+          },
+        ],
       };
 
       context.propagationChain.push(receptionEntry);
@@ -543,7 +579,10 @@ export class ParlantSecurityContextPropagationService
       throw new ParlantIntegrationError(
         "Security context reception failed",
         "CONTEXT_RECEIVE_ERROR",
-        { receivingService, error: error instanceof Error ? error.message : String(error) },
+        {
+          receivingService,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -551,7 +590,9 @@ export class ParlantSecurityContextPropagationService
   /**
    * Validate security context integrity and compliance
    */
-  async validateContext(context: SecurityContext): Promise<ContextValidationResult> {
+  async validateContext(
+    context: SecurityContext,
+  ): Promise<ContextValidationResult> {
     const startTime = performance.now();
 
     try {
@@ -586,7 +627,10 @@ export class ParlantSecurityContextPropagationService
 
       // Check for security policy compliance
       for (const policy of context.securityPolicies) {
-        const complianceResult = await this.validatePolicyCompliance(context, policy);
+        const complianceResult = await this.validatePolicyCompliance(
+          context,
+          policy,
+        );
         if (!complianceResult.compliant) {
           if (policy.enforcementLevel === "mandatory") {
             errors.push(`Mandatory policy violation: ${policy.name}`);
@@ -597,8 +641,13 @@ export class ParlantSecurityContextPropagationService
       }
 
       // Calculate scores
-      const integrityScore = errors.length === 0 ? 100 : Math.max(0, 100 - (errors.length * 25));
-      const complianceScore = this.calculateComplianceScore(context, errors, warnings);
+      const integrityScore =
+        errors.length === 0 ? 100 : Math.max(0, 100 - errors.length * 25);
+      const complianceScore = this.calculateComplianceScore(
+        context,
+        errors,
+        warnings,
+      );
 
       const validationResult: ContextValidationResult = {
         isValid: errors.length === 0,
@@ -624,7 +673,10 @@ export class ParlantSecurityContextPropagationService
       throw new ParlantIntegrationError(
         "Security context validation failed",
         "CONTEXT_VALIDATE_ERROR",
-        { contextId: context.contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId: context.contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -687,14 +739,18 @@ export class ParlantSecurityContextPropagationService
       };
 
       // Regenerate integrity hash
-      updatedContext.integrityHash = await this.generateIntegrityHash(updatedContext);
+      updatedContext.integrityHash =
+        await this.generateIntegrityHash(updatedContext);
 
       // Store updated context
       this.activeContexts.set(contextId, updatedContext);
 
       // Add modification to propagation chain
       if (updatedContext.propagationChain.length > 0) {
-        const lastEntry = updatedContext.propagationChain[updatedContext.propagationChain.length - 1];
+        const lastEntry =
+          updatedContext.propagationChain[
+            updatedContext.propagationChain.length - 1
+          ];
         lastEntry.modifications.push(modification);
       }
 
@@ -706,7 +762,11 @@ export class ParlantSecurityContextPropagationService
       throw new ParlantIntegrationError(
         "Security context update failed",
         "CONTEXT_UPDATE_ERROR",
-        { contextId, serviceName, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId,
+          serviceName,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -768,14 +828,19 @@ export class ParlantSecurityContextPropagationService
   }
 
   private generateMasterEncryptionKey(): string {
-    return process.env.PARLANT_CONTEXT_ENCRYPTION_KEY || crypto.randomBytes(32).toString("hex");
+    return (
+      process.env.PARLANT_CONTEXT_ENCRYPTION_KEY ||
+      crypto.randomBytes(32).toString("hex")
+    );
   }
 
   private generateContextEncryptionKey(): string {
     return crypto.randomBytes(32).toString("hex");
   }
 
-  private async generateIntegrityHash(context: SecurityContext): Promise<string> {
+  private async generateIntegrityHash(
+    context: SecurityContext,
+  ): Promise<string> {
     const contextData = {
       contextId: context.contextId,
       userContext: context.userContext,
@@ -789,7 +854,9 @@ export class ParlantSecurityContextPropagationService
     return crypto.createHash("sha256").update(data).digest("hex");
   }
 
-  private cloneUserContext(userContext: ParlantUserContext): ParlantUserContext {
+  private cloneUserContext(
+    userContext: ParlantUserContext,
+  ): ParlantUserContext {
     return {
       userId: userContext.userId,
       roles: [...userContext.roles],
@@ -818,7 +885,9 @@ export class ParlantSecurityContextPropagationService
     this.logger.debug("🔐 Initializing security policies...");
   }
 
-  private async getApplicableSecurityPolicies(securityLevel: SecurityLevel): Promise<SecurityPolicy[]> {
+  private async getApplicableSecurityPolicies(
+    securityLevel: SecurityLevel,
+  ): Promise<SecurityPolicy[]> {
     const policies: SecurityPolicy[] = [];
 
     // Add encryption policy for all levels
@@ -832,7 +901,10 @@ export class ParlantSecurityContextPropagationService
     });
 
     // Add access control based on security level
-    if (securityLevel === SecurityLevel._HIGH || securityLevel === SecurityLevel._CRITICAL) {
+    if (
+      securityLevel === SecurityLevel._HIGH ||
+      securityLevel === SecurityLevel._CRITICAL
+    ) {
       policies.push({
         policyId: "access_control_policy",
         name: "Enhanced Access Control Policy",
@@ -849,7 +921,10 @@ export class ParlantSecurityContextPropagationService
   private getComplianceRequirements(securityLevel: SecurityLevel): string[] {
     const requirements = ["data_protection", "audit_trail"];
 
-    if (securityLevel === SecurityLevel._HIGH || securityLevel === SecurityLevel._CRITICAL) {
+    if (
+      securityLevel === SecurityLevel._HIGH ||
+      securityLevel === SecurityLevel._CRITICAL
+    ) {
       requirements.push("enhanced_monitoring", "incident_response");
     }
 
@@ -908,12 +983,18 @@ export class ParlantSecurityContextPropagationService
     }
   }
 
-  private async decryptContextFromPackage(transmissionPackage: ContextTransmissionPackage): Promise<SecurityContext> {
+  private async decryptContextFromPackage(
+    transmissionPackage: ContextTransmissionPackage,
+  ): Promise<SecurityContext> {
     const startTime = performance.now();
 
     try {
       const decipher = crypto.createDecipher("aes-256-gcm", this.encryptionKey);
-      let decrypted = decipher.update(transmissionPackage.encryptedContext, "hex", "utf8");
+      let decrypted = decipher.update(
+        transmissionPackage.encryptedContext,
+        "hex",
+        "utf8",
+      );
       decrypted += decipher.final("utf8");
 
       const context = JSON.parse(decrypted) as SecurityContext;
@@ -929,12 +1010,19 @@ export class ParlantSecurityContextPropagationService
     }
   }
 
-  private generateTransmissionSignature(packageData: Record<string, unknown>): string {
+  private generateTransmissionSignature(
+    packageData: Record<string, unknown>,
+  ): string {
     const data = JSON.stringify(packageData);
-    return crypto.createHmac("sha256", this.encryptionKey).update(data).digest("hex");
+    return crypto
+      .createHmac("sha256", this.encryptionKey)
+      .update(data)
+      .digest("hex");
   }
 
-  private async validateTransmissionPackage(transmissionPackage: ContextTransmissionPackage): Promise<void> {
+  private async validateTransmissionPackage(
+    transmissionPackage: ContextTransmissionPackage,
+  ): Promise<void> {
     // Validate signature
     const packageData = {
       encryptedContext: transmissionPackage.encryptedContext,
@@ -949,8 +1037,10 @@ export class ParlantSecurityContextPropagationService
     }
 
     // Check transmission age
-    const transmissionAge = Date.now() - transmissionPackage.timestamp.getTime();
-    if (transmissionAge > 60000) { // 1 minute
+    const transmissionAge =
+      Date.now() - transmissionPackage.timestamp.getTime();
+    if (transmissionAge > 60000) {
+      // 1 minute
       throw new Error("Transmission package too old");
     }
   }
@@ -964,13 +1054,18 @@ export class ParlantSecurityContextPropagationService
       case "encryption":
         return {
           compliant: !!context.encryptionKey,
-          details: context.encryptionKey ? "Context is encrypted" : "Context lacks encryption",
+          details: context.encryptionKey
+            ? "Context is encrypted"
+            : "Context lacks encryption",
         };
 
       case "access_control":
         return {
           compliant: context.userContext.roles.length > 0,
-          details: context.userContext.roles.length > 0 ? "User has roles assigned" : "No user roles assigned",
+          details:
+            context.userContext.roles.length > 0
+              ? "User has roles assigned"
+              : "No user roles assigned",
         };
 
       default:
@@ -1024,17 +1119,22 @@ export class ParlantSecurityContextPropagationService
     }
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
   private calculateMemoryUsage(): number {
     return (
-      this.activeContexts.size +
-      this.contextCache.size +
-      this.contextCorrelations.size +
-      this.transmissionHistory.size
-    ) * 1024; // Rough estimate
+      (this.activeContexts.size +
+        this.contextCache.size +
+        this.contextCorrelations.size +
+        this.transmissionHistory.size) *
+      1024
+    ); // Rough estimate
   }
 
   private async archiveContext(context: SecurityContext): Promise<void> {

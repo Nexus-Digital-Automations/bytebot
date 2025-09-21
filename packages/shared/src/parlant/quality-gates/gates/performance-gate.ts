@@ -346,11 +346,11 @@ export class PerformanceQualityGate implements QualityGate {
         },
         error: {
           code: 'PERFORMANCE_GATE_ERROR',
-          message: error.message,
-          originalError: error,
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { gateId: this.id },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined
         },
         recommendations: ['Check system resources and performance monitoring configuration']
       };

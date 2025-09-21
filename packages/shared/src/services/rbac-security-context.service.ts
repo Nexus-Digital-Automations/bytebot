@@ -21,11 +21,7 @@
  * @author Security Context Specialist
  */
 
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EventEmitter } from "events";
 import * as crypto from "crypto";
@@ -141,13 +137,21 @@ export interface DynamicRoleContext {
   };
 
   /** Role metadata */
-  roleMetadata: Record<Role, {
-    source: "primary" | "inherited" | "conditional" | "temporary" | "escalated";
-    grantedBy?: string;
-    grantedAt?: Date;
-    expiresAt?: Date;
-    conditions?: string[];
-  }>;
+  roleMetadata: Record<
+    Role,
+    {
+      source:
+        | "primary"
+        | "inherited"
+        | "conditional"
+        | "temporary"
+        | "escalated";
+      grantedBy?: string;
+      grantedAt?: Date;
+      expiresAt?: Date;
+      conditions?: string[];
+    }
+  >;
 }
 
 /**
@@ -174,12 +178,15 @@ export interface DynamicPermissionContext {
   }>;
 
   /** Permission metadata */
-  permissionMetadata: Record<Permission, {
-    sources: string[];
-    conditions?: string[];
-    expiresAt?: Date;
-    riskLevel: SecurityRiskLevel;
-  }>;
+  permissionMetadata: Record<
+    Permission,
+    {
+      sources: string[];
+      conditions?: string[];
+      expiresAt?: Date;
+      riskLevel: SecurityRiskLevel;
+    }
+  >;
 }
 
 /**
@@ -199,36 +206,48 @@ export interface SecurityPolicy {
   enforcementMode: EnforcementMode;
 
   /** Role mappings */
-  roleMappings: Record<Role, {
-    permissions: Permission[];
-    restrictions: string[];
-    inheritance: Role[];
-    conditions: string[];
-  }>;
+  roleMappings: Record<
+    Role,
+    {
+      permissions: Permission[];
+      restrictions: string[];
+      inheritance: Role[];
+      conditions: string[];
+    }
+  >;
 
   /** Resource access rules */
-  resourceRules: Record<ResourceType, {
-    allowedRoles: Role[];
-    requiredPermissions: Permission[];
-    accessConditions: string[];
-    auditRequirements: string[];
-  }>;
+  resourceRules: Record<
+    ResourceType,
+    {
+      allowedRoles: Role[];
+      requiredPermissions: Permission[];
+      accessConditions: string[];
+      auditRequirements: string[];
+    }
+  >;
 
   /** Risk thresholds */
-  riskThresholds: Record<SecurityRiskLevel, {
-    maxScore: number;
-    requiredApprovals: number;
-    additionalVerification: string[];
-    auditLevel: string;
-  }>;
+  riskThresholds: Record<
+    SecurityRiskLevel,
+    {
+      maxScore: number;
+      requiredApprovals: number;
+      additionalVerification: string[];
+      auditLevel: string;
+    }
+  >;
 
   /** Compliance mappings */
-  complianceMappings: Record<string, {
-    requiredControls: string[];
-    auditLevel: string;
-    retentionPeriod: number;
-    encryptionRequired: boolean;
-  }>;
+  complianceMappings: Record<
+    string,
+    {
+      requiredControls: string[];
+      auditLevel: string;
+      retentionPeriod: number;
+      encryptionRequired: boolean;
+    }
+  >;
 }
 
 /**
@@ -305,7 +324,8 @@ export class RbacSecurityContextService
       const roleContext = await this.buildDynamicRoleContext(userContext);
 
       // Build dynamic permission context
-      const permissionContext = await this.buildDynamicPermissionContext(roleContext);
+      const permissionContext =
+        await this.buildDynamicPermissionContext(roleContext);
 
       // Perform risk assessment
       const riskAssessment = await this.performRiskAssessment(
@@ -360,8 +380,8 @@ export class RbacSecurityContextService
         },
         environment: {
           currentTime: new Date(),
-          clientIP: requestMetadata?.clientIP as string || "unknown",
-          headers: requestMetadata?.headers as Record<string, string> || {},
+          clientIP: (requestMetadata?.clientIP as string) || "unknown",
+          headers: (requestMetadata?.headers as Record<string, string>) || {},
           securityLevel: this.mapRiskToSecurityLevel(riskAssessment.overall),
         },
         riskAssessment,
@@ -420,37 +440,66 @@ export class RbacSecurityContextService
       const enhancedContext = context as EnhancedSecurityContext;
 
       // Check role-based authorization
-      const roleCheck = await this.checkRoleAuthorization(enhancedContext, metadata);
+      const roleCheck = await this.checkRoleAuthorization(
+        enhancedContext,
+        metadata,
+      );
 
       // Check permission-based authorization
-      const permissionCheck = await this.checkPermissionAuthorization(enhancedContext, metadata);
+      const permissionCheck = await this.checkPermissionAuthorization(
+        enhancedContext,
+        metadata,
+      );
 
       // Check resource-specific authorization
-      const resourceCheck = await this.checkResourceAuthorization(enhancedContext, metadata);
+      const resourceCheck = await this.checkResourceAuthorization(
+        enhancedContext,
+        metadata,
+      );
 
       // Check risk-based authorization
       const riskCheck = await this.checkRiskBasedAuthorization(enhancedContext);
 
       // Check compliance authorization
-      const complianceCheck = await this.checkComplianceAuthorization(enhancedContext);
+      const complianceCheck =
+        await this.checkComplianceAuthorization(enhancedContext);
 
       // Aggregate authorization results
-      const granted = roleCheck.granted &&
-                     permissionCheck.granted &&
-                     resourceCheck.granted &&
-                     riskCheck.granted &&
-                     complianceCheck.granted;
+      const granted =
+        roleCheck.granted &&
+        permissionCheck.granted &&
+        resourceCheck.granted &&
+        riskCheck.granted &&
+        complianceCheck.granted;
 
       const reason = granted
         ? "Access granted - all authorization checks passed"
-        : this.buildDenialReason([roleCheck, permissionCheck, resourceCheck, riskCheck, complianceCheck]);
+        : this.buildDenialReason([
+            roleCheck,
+            permissionCheck,
+            resourceCheck,
+            riskCheck,
+            complianceCheck,
+          ]);
 
       const result: AuthorizationResult = {
         granted,
         reason,
         context: {
-          matchedRules: this.aggregateMatchedRules([roleCheck, permissionCheck, resourceCheck, riskCheck, complianceCheck]),
-          failedConditions: this.aggregateFailedConditions([roleCheck, permissionCheck, resourceCheck, riskCheck, complianceCheck]),
+          matchedRules: this.aggregateMatchedRules([
+            roleCheck,
+            permissionCheck,
+            resourceCheck,
+            riskCheck,
+            complianceCheck,
+          ]),
+          failedConditions: this.aggregateFailedConditions([
+            roleCheck,
+            permissionCheck,
+            resourceCheck,
+            riskCheck,
+            complianceCheck,
+          ]),
           requiredPermissions: metadata.permissions || [],
           userPermissions: context.user.permissions,
           requiredRoles: metadata.roles || [],
@@ -469,14 +518,17 @@ export class RbacSecurityContextService
         },
       };
 
-      this.logger.log(`[${operationId}] Authorization ${granted ? "granted" : "denied"}`, {
-        operationId,
-        userId: context.user.id,
-        granted,
-        reason,
-        riskLevel: result.security.riskLevel,
-        durationMs: result.timing.durationMs,
-      });
+      this.logger.log(
+        `[${operationId}] Authorization ${granted ? "granted" : "denied"}`,
+        {
+          operationId,
+          userId: context.user.id,
+          granted,
+          reason,
+          riskLevel: result.security.riskLevel,
+          durationMs: result.timing.durationMs,
+        },
+      );
 
       // Emit authorization event
       this.emit("security:authorization", {
@@ -521,9 +573,9 @@ export class RbacSecurityContextService
     requireAll: boolean = false,
   ): boolean {
     if (requireAll) {
-      return requiredRoles.every(role => userRoles.includes(role));
+      return requiredRoles.every((role) => userRoles.includes(role));
     }
-    return requiredRoles.some(role => userRoles.includes(role));
+    return requiredRoles.some((role) => userRoles.includes(role));
   }
 
   /**
@@ -535,9 +587,13 @@ export class RbacSecurityContextService
     requireAll: boolean = false,
   ): boolean {
     if (requireAll) {
-      return requiredPermissions.every(permission => userPermissions.includes(permission));
+      return requiredPermissions.every((permission) =>
+        userPermissions.includes(permission),
+      );
     }
-    return requiredPermissions.some(permission => userPermissions.includes(permission));
+    return requiredPermissions.some((permission) =>
+      userPermissions.includes(permission),
+    );
   }
 
   /**
@@ -563,7 +619,10 @@ export class RbacSecurityContextService
       return false;
     }
 
-    if (config.allowedDaysOfWeek && !config.allowedDaysOfWeek.includes(dayOfWeek)) {
+    if (
+      config.allowedDaysOfWeek &&
+      !config.allowedDaysOfWeek.includes(dayOfWeek)
+    ) {
       return false;
     }
 
@@ -635,7 +694,10 @@ export class RbacSecurityContextService
     for (let i = 0; i < requests.length; i++) {
       const requestId = `batch_${i}`;
       try {
-        results[requestId] = await this.authorize(requests[i].metadata, requests[i].context);
+        results[requestId] = await this.authorize(
+          requests[i].metadata,
+          requests[i].context,
+        );
       } catch (error) {
         results[requestId] = {
           granted: false,
@@ -656,8 +718,8 @@ export class RbacSecurityContextService
       }
     }
 
-    const grantedCount = Object.values(results).filter(r => r.granted).length;
-    const deniedCount = Object.values(results).filter(r => !r.granted).length;
+    const grantedCount = Object.values(results).filter((r) => r.granted).length;
+    const deniedCount = Object.values(results).filter((r) => !r.granted).length;
 
     return {
       results,
@@ -674,7 +736,9 @@ export class RbacSecurityContextService
   /**
    * Build dynamic role context with inheritance
    */
-  private async buildDynamicRoleContext(userContext: UserContext): Promise<DynamicRoleContext> {
+  private async buildDynamicRoleContext(
+    userContext: UserContext,
+  ): Promise<DynamicRoleContext> {
     const primaryRoles = userContext.roles;
     const inheritedRoles = await this.resolveInheritedRoles(primaryRoles);
     const effectiveRoles = [...new Set([...primaryRoles, ...inheritedRoles])];
@@ -700,11 +764,20 @@ export class RbacSecurityContextService
   private async buildDynamicPermissionContext(
     roleContext: DynamicRoleContext,
   ): Promise<DynamicPermissionContext> {
-    const explicitPermissions = await this.getExplicitPermissions(roleContext.effectiveRoles);
-    const roleBasedPermissions = await this.getRoleBasedPermissions(roleContext.effectiveRoles);
-    const conditionalPermissions = await this.getConditionalPermissions(roleContext);
+    const explicitPermissions = await this.getExplicitPermissions(
+      roleContext.effectiveRoles,
+    );
+    const roleBasedPermissions = await this.getRoleBasedPermissions(
+      roleContext.effectiveRoles,
+    );
+    const conditionalPermissions =
+      await this.getConditionalPermissions(roleContext);
 
-    const allPermissions = [...explicitPermissions, ...roleBasedPermissions, ...conditionalPermissions];
+    const allPermissions = [
+      ...explicitPermissions,
+      ...roleBasedPermissions,
+      ...conditionalPermissions,
+    ];
     const effectivePermissions = [...new Set(allPermissions)];
 
     return {
@@ -713,7 +786,8 @@ export class RbacSecurityContextService
       conditionalPermissions,
       effectivePermissions,
       conflicts: await this.detectPermissionConflicts(allPermissions),
-      permissionMetadata: await this.buildPermissionMetadata(effectivePermissions),
+      permissionMetadata:
+        await this.buildPermissionMetadata(effectivePermissions),
     };
   }
 
@@ -730,13 +804,20 @@ export class RbacSecurityContextService
     const mitigations: string[] = [];
 
     // Authentication risk
-    const authRisk = this.assessAuthenticationRisk(userContext, requestMetadata);
+    const authRisk = this.assessAuthenticationRisk(
+      userContext,
+      requestMetadata,
+    );
     if (authRisk !== SecurityRiskLevel.LOW) {
       factors.push(`High authentication risk: ${authRisk}`);
     }
 
     // Authorization risk
-    const authzRisk = this.assessAuthorizationRisk(userContext, resourceType, action);
+    const authzRisk = this.assessAuthorizationRisk(
+      userContext,
+      resourceType,
+      action,
+    );
     if (authzRisk !== SecurityRiskLevel.LOW) {
       factors.push(`High authorization risk: ${authzRisk}`);
     }
@@ -748,7 +829,11 @@ export class RbacSecurityContextService
     }
 
     // Calculate overall risk
-    const overallRisk = this.calculateOverallRisk([authRisk, authzRisk, dataRisk]);
+    const overallRisk = this.calculateOverallRisk([
+      authRisk,
+      authzRisk,
+      dataRisk,
+    ]);
 
     return {
       overall: overallRisk,
@@ -812,7 +897,10 @@ export class RbacSecurityContextService
     return [];
   }
 
-  private async buildRoleMetadata(primaryRoles: Role[], inheritedRoles: Role[]): Promise<any> {
+  private async buildRoleMetadata(
+    primaryRoles: Role[],
+    inheritedRoles: Role[],
+  ): Promise<any> {
     // Build role metadata
     return {};
   }
@@ -827,32 +915,48 @@ export class RbacSecurityContextService
     return [];
   }
 
-  private async getConditionalPermissions(roleContext: DynamicRoleContext): Promise<Permission[]> {
+  private async getConditionalPermissions(
+    roleContext: DynamicRoleContext,
+  ): Promise<Permission[]> {
     // Get conditional permissions
     return [];
   }
 
-  private async detectPermissionConflicts(permissions: Permission[]): Promise<any[]> {
+  private async detectPermissionConflicts(
+    permissions: Permission[],
+  ): Promise<any[]> {
     // Detect permission conflicts
     return [];
   }
 
-  private async buildPermissionMetadata(permissions: Permission[]): Promise<any> {
+  private async buildPermissionMetadata(
+    permissions: Permission[],
+  ): Promise<any> {
     // Build permission metadata
     return {};
   }
 
-  private assessAuthenticationRisk(userContext: UserContext, requestMetadata?: Record<string, unknown>): SecurityRiskLevel {
+  private assessAuthenticationRisk(
+    userContext: UserContext,
+    requestMetadata?: Record<string, unknown>,
+  ): SecurityRiskLevel {
     // Assess authentication risk
     return SecurityRiskLevel.LOW;
   }
 
-  private assessAuthorizationRisk(userContext: UserContext, resourceType: ResourceType, action: string): SecurityRiskLevel {
+  private assessAuthorizationRisk(
+    userContext: UserContext,
+    resourceType: ResourceType,
+    action: string,
+  ): SecurityRiskLevel {
     // Assess authorization risk
     return SecurityRiskLevel.LOW;
   }
 
-  private assessDataAccessRisk(resourceType: ResourceType, action: string): SecurityRiskLevel {
+  private assessDataAccessRisk(
+    resourceType: ResourceType,
+    action: string,
+  ): SecurityRiskLevel {
     // Assess data access risk
     return SecurityRiskLevel.LOW;
   }
@@ -862,7 +966,11 @@ export class RbacSecurityContextService
     return SecurityRiskLevel.MEDIUM;
   }
 
-  private async analyzeBehavioralPatterns(userContext: UserContext, resourceType: ResourceType, action: string): Promise<any> {
+  private async analyzeBehavioralPatterns(
+    userContext: UserContext,
+    resourceType: ResourceType,
+    action: string,
+  ): Promise<any> {
     // Analyze behavioral patterns
     return {
       normalPatterns: [],
@@ -872,7 +980,11 @@ export class RbacSecurityContextService
     };
   }
 
-  private async determineComplianceContext(userContext: UserContext, resourceType: ResourceType, riskLevel: SecurityRiskLevel): Promise<any> {
+  private async determineComplianceContext(
+    userContext: UserContext,
+    resourceType: ResourceType,
+    riskLevel: SecurityRiskLevel,
+  ): Promise<any> {
     // Determine compliance context
     return {
       applicableFrameworks: ["GDPR", "SOX"],
@@ -882,7 +994,10 @@ export class RbacSecurityContextService
     };
   }
 
-  private async checkEmergencyContext(userContext: UserContext, requestMetadata?: Record<string, unknown>): Promise<any> {
+  private async checkEmergencyContext(
+    userContext: UserContext,
+    requestMetadata?: Record<string, unknown>,
+  ): Promise<any> {
     // Check emergency context
     return {
       isEmergency: false,
@@ -890,7 +1005,11 @@ export class RbacSecurityContextService
     };
   }
 
-  private async determinePolicyEnforcement(riskAssessment: any, behavioralContext: any, emergencyContext: any): Promise<any> {
+  private async determinePolicyEnforcement(
+    riskAssessment: any,
+    behavioralContext: any,
+    emergencyContext: any,
+  ): Promise<any> {
     // Determine policy enforcement
     return {
       mode: this.DEFAULT_ENFORCEMENT_MODE,
@@ -900,7 +1019,9 @@ export class RbacSecurityContextService
     };
   }
 
-  private mapRiskToSecurityLevel(risk: SecurityRiskLevel): "low" | "medium" | "high" | "critical" {
+  private mapRiskToSecurityLevel(
+    risk: SecurityRiskLevel,
+  ): "low" | "medium" | "high" | "critical" {
     switch (risk) {
       case SecurityRiskLevel.MINIMAL:
       case SecurityRiskLevel.LOW:
@@ -917,7 +1038,10 @@ export class RbacSecurityContextService
     }
   }
 
-  private async checkRoleAuthorization(context: EnhancedSecurityContext, metadata: any): Promise<AuthorizationResult> {
+  private async checkRoleAuthorization(
+    context: EnhancedSecurityContext,
+    metadata: any,
+  ): Promise<AuthorizationResult> {
     // Check role-based authorization
     return {
       granted: true,
@@ -937,7 +1061,10 @@ export class RbacSecurityContextService
     };
   }
 
-  private async checkPermissionAuthorization(context: EnhancedSecurityContext, metadata: any): Promise<AuthorizationResult> {
+  private async checkPermissionAuthorization(
+    context: EnhancedSecurityContext,
+    metadata: any,
+  ): Promise<AuthorizationResult> {
     // Check permission-based authorization
     return {
       granted: true,
@@ -957,7 +1084,10 @@ export class RbacSecurityContextService
     };
   }
 
-  private async checkResourceAuthorization(context: EnhancedSecurityContext, metadata: any): Promise<AuthorizationResult> {
+  private async checkResourceAuthorization(
+    context: EnhancedSecurityContext,
+    metadata: any,
+  ): Promise<AuthorizationResult> {
     // Check resource-specific authorization
     return {
       granted: true,
@@ -977,7 +1107,9 @@ export class RbacSecurityContextService
     };
   }
 
-  private async checkRiskBasedAuthorization(context: EnhancedSecurityContext): Promise<AuthorizationResult> {
+  private async checkRiskBasedAuthorization(
+    context: EnhancedSecurityContext,
+  ): Promise<AuthorizationResult> {
     // Check risk-based authorization
     return {
       granted: true,
@@ -997,7 +1129,9 @@ export class RbacSecurityContextService
     };
   }
 
-  private async checkComplianceAuthorization(context: EnhancedSecurityContext): Promise<AuthorizationResult> {
+  private async checkComplianceAuthorization(
+    context: EnhancedSecurityContext,
+  ): Promise<AuthorizationResult> {
     // Check compliance authorization
     return {
       granted: true,
@@ -1018,16 +1152,16 @@ export class RbacSecurityContextService
   }
 
   private buildDenialReason(results: AuthorizationResult[]): string {
-    const failures = results.filter(r => !r.granted).map(r => r.reason);
+    const failures = results.filter((r) => !r.granted).map((r) => r.reason);
     return `Access denied: ${failures.join(", ")}`;
   }
 
   private aggregateMatchedRules(results: AuthorizationResult[]): string[] {
-    return results.flatMap(r => r.context.matchedRules || []);
+    return results.flatMap((r) => r.context.matchedRules || []);
   }
 
   private aggregateFailedConditions(results: AuthorizationResult[]): string[] {
-    return results.flatMap(r => r.context.failedConditions || []);
+    return results.flatMap((r) => r.context.failedConditions || []);
   }
 
   private generateSecurityFlags(context: EnhancedSecurityContext): string[] {
@@ -1044,16 +1178,26 @@ export class RbacSecurityContextService
     return flags;
   }
 
-  private isAuditRequired(context: EnhancedSecurityContext, granted: boolean): boolean {
-    return context.complianceContext.auditLevel !== "basic" ||
-           context.riskAssessment.overall !== SecurityRiskLevel.LOW ||
-           !granted;
+  private isAuditRequired(
+    context: EnhancedSecurityContext,
+    granted: boolean,
+  ): boolean {
+    return (
+      context.complianceContext.auditLevel !== "basic" ||
+      context.riskAssessment.overall !== SecurityRiskLevel.LOW ||
+      !granted
+    );
   }
 
-  private requiresMonitoring(context: EnhancedSecurityContext, granted: boolean): boolean {
-    return context.riskAssessment.overall === SecurityRiskLevel.HIGH ||
-           context.riskAssessment.overall === SecurityRiskLevel.CRITICAL ||
-           context.emergencyContext.overrideActive;
+  private requiresMonitoring(
+    context: EnhancedSecurityContext,
+    granted: boolean,
+  ): boolean {
+    return (
+      context.riskAssessment.overall === SecurityRiskLevel.HIGH ||
+      context.riskAssessment.overall === SecurityRiskLevel.CRITICAL ||
+      context.emergencyContext.overrideActive
+    );
   }
 
   /**
@@ -1061,7 +1205,10 @@ export class RbacSecurityContextService
    */
   async getHealthStatus(): Promise<{
     status: "healthy" | "degraded" | "unhealthy";
-    components: Record<string, { status: string; lastChecked: Date; details?: any }>;
+    components: Record<
+      string,
+      { status: string; lastChecked: Date; details?: any }
+    >;
     metrics: {
       loadedPolicies: number;
       permissionMatrixSize: number;
@@ -1076,12 +1223,16 @@ export class RbacSecurityContextService
 
     // Initialize health status
     let overallStatus: "healthy" | "degraded" | "unhealthy" = "healthy";
-    const components: Record<string, { status: string; lastChecked: Date; details?: any }> = {};
+    const components: Record<
+      string,
+      { status: string; lastChecked: Date; details?: any }
+    > = {};
 
     try {
       // Check security policies
       try {
-        const policiesStatus = this.securityPolicies.size > 0 ? "healthy" : "degraded";
+        const policiesStatus =
+          this.securityPolicies.size > 0 ? "healthy" : "degraded";
         components.securityPolicies = {
           status: policiesStatus,
           lastChecked: timestamp,
@@ -1157,7 +1308,9 @@ export class RbacSecurityContextService
 
       // Check behavioral analysis
       try {
-        const behavioralStatus = this.BEHAVIORAL_ANALYSIS_ENABLED ? "healthy" : "disabled";
+        const behavioralStatus = this.BEHAVIORAL_ANALYSIS_ENABLED
+          ? "healthy"
+          : "disabled";
         components.behavioralAnalysis = {
           status: behavioralStatus,
           lastChecked: timestamp,

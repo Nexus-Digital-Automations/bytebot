@@ -138,7 +138,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         isolationLevel: options.isolationLevel || TransactionIsolationLevel.READ_COMMITTED,
         priority: options.priority || TransactionPriority.NORMAL,
         userContext,
-        securityLevel: options.securityLevel || SecurityLevel.MEDIUM,
+        securityLevel: options.securityLevel || SecurityLevel._MEDIUM,
         timeout: options.timeout || 60000,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -877,7 +877,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { oldState, newState, reason },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -888,7 +888,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { operation: operation.operationId, success: result.success, error: result.error },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -910,7 +910,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { approved: response.approved, reason: response.reason },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 

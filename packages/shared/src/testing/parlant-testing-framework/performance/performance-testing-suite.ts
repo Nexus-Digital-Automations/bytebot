@@ -82,7 +82,7 @@ export interface StressTestConfig {
 @Injectable()
 export class PerformanceTestingSuite extends EventEmitter {
   private readonly logger = new Logger(PerformanceTestingSuite.name);
-  private config: PerformanceTestConfig;
+  private config!: PerformanceTestConfig;
   private benchmarks: Map<string, PerformanceBenchmark> = new Map();
   private isInitialized = false;
 

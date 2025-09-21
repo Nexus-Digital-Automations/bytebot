@@ -181,8 +181,8 @@ export interface AuditLoggerConfig {
 @Injectable()
 export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AuditLoggerService.name);
-  private winstonLogger!: WinstonLogger;
-  private config!: AuditLoggerConfig;
+  private winstonLogger: WinstonLogger | null = null;
+  private config: AuditLoggerConfig | null = null;
   private eventEmitter: EventEmitter2;
   private isInitialized = false;
   private eventBuffer: AuditEvent[] = [];
@@ -277,7 +277,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       if (this.winstonLogger) {
         await new Promise<void>((resolve) => {
           if (this.winstonLogger?.close) {
-            this.winstonLogger.close(() => resolve());
+            this.winstonLogger!.close(() => resolve());
           } else {
             resolve();
           }
@@ -288,6 +288,26 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
     } catch (err) {
       this.logger.error("Error during Audit Logger Service shutdown", err);
     }
+  }
+
+  /**
+   * Get the Winston logger, ensuring it's initialized
+   */
+  private getWinstonLogger(): WinstonLogger {
+    if (!this.winstonLogger) {
+      throw new Error('Winston logger not initialized. Call onModuleInit() first.');
+    }
+    return this.winstonLogger;
+  }
+
+  /**
+   * Get the configuration, ensuring it's loaded
+   */
+  private getConfig(): AuditLoggerConfig {
+    if (!this.config) {
+      throw new Error('Configuration not loaded. Call onModuleInit() first.');
+    }
+    return this.config;
   }
 
   /**
@@ -754,29 +774,29 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       }
 
       // File transport
-      if (this.config.file.enabled) {
+      if (this.config!.file.enabled) {
         loggerTransports.push(
           new transports.File({
-            filename: this.config.file.filename,
-            maxsize: this.config.file.maxsize,
-            maxFiles: this.config.file.maxFiles,
+            filename: this.config!.file.filename,
+            maxsize: this.config!.file.maxsize,
+            maxFiles: this.config!.file.maxFiles,
             format: format.combine(format.timestamp(), format.json()),
           }),
         );
       }
 
       // Database transport (custom implementation would be added here)
-      if (this.config.database.enabled) {
+      if (this.config!.database.enabled) {
         // Custom database transport implementation
       }
 
       // SIEM transport (custom implementation would be added here)
-      if (this.config.siem.enabled) {
+      if (this.config!.siem.enabled) {
         // Custom SIEM transport implementation
       }
 
       this.winstonLogger = createLogger({
-        level: this.config.level,
+        level: this.config!.level,
         format: format.combine(
           format.timestamp(),
           format.errors({ stack: true }),
@@ -926,7 +946,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
         id: "default",
         name: "Default Retention Policy",
         categories: Object.values(SecurityEventCategory),
-        retentionDays: this.config.performance.retentionDays,
+        retentionDays: this.config!.performance.retentionDays,
         complianceRequirements: [],
         autoDelete: true,
         backupBeforeDelete: true,
@@ -958,7 +978,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
     // Start periodic flush process
     setInterval(() => {
       void this.flushPendingEvents();
-    }, this.config.performance.flushInterval);
+    }, this.config!.performance.flushInterval);
   }
 
   /**
@@ -971,7 +991,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       // Process buffered events
       const eventsToProcess = this.eventBuffer.splice(
         0,
-        this.config.performance.batchSize,
+        this.config!.performance.batchSize,
       );
 
       for (const event of eventsToProcess) {
@@ -991,7 +1011,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
         // Log to Winston - convert AuditSeverity to LogLevel
         if (this.winstonLogger?.log) {
           const logLevel = auditSeverityToLogLevel(event.severity);
-          this.winstonLogger.log(
+          this.winstonLogger!.log(
             logLevel,
             event.message,
             event as unknown as LogMetadata,

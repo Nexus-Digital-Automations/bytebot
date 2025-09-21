@@ -155,7 +155,7 @@ export class ConversationalValidationError extends Error {
 export interface IParlantIntegrationService {
   validateFunction(request: ParlantValidationRequestType): Promise<ParlantValidationResponseType>;
   validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
-  getCachedValidation(cacheKey: string): Promise<ParlantValidationResponse | null>;
+  getCachedValidation(cacheKey: string): Promise<ParlantValidationResponseType | null>;
   createConversationContext(userId?: string, sessionId?: string): Promise<ParlantConversationContext>;
   healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; details: Record<string, unknown> }>;
 }
@@ -303,7 +303,7 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
   /**
    * Get cached validation response
    */
-  async getCachedValidation(cacheKey: string): Promise<ParlantValidationResponse | null> {
+  async getCachedValidation(cacheKey: string): Promise<ParlantValidationResponseType | null> {
     const cached = this.cache.get(cacheKey);
 
     if (!cached) {

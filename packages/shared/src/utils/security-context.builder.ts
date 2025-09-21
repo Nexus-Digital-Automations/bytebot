@@ -169,7 +169,8 @@ export class SecurityContextBuilder {
 
     return {
       id: (user.id as string) || (user.sub as string) || "unknown",
-      username: (user.username as string) || (user.email as string) || "unknown",
+      username:
+        (user.username as string) || (user.email as string) || "unknown",
       roles: (user.roles as Role[]) || [Role._USER],
       permissions: (user.permissions as Permission[]) || [],
       metadata: {
@@ -403,7 +404,8 @@ export class SecurityContextBuilder {
       anomalies: this.detectAnomalies(context, request),
     };
 
-    (context as unknown as Record<string, unknown>).sessionAnalysis = sessionAnalysis;
+    (context as unknown as Record<string, unknown>).sessionAnalysis =
+      sessionAnalysis;
   }
 
   /**

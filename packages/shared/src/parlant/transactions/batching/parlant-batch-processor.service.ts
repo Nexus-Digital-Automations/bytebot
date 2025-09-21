@@ -397,7 +397,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
         priority: options.priority || BatchPriority.NORMAL,
         state: BatchState.PENDING,
         userContext,
-        securityLevel: options.securityLevel || SecurityLevel.MEDIUM,
+        securityLevel: options.securityLevel || SecurityLevel._MEDIUM,
         createdAt: new Date(),
         totalTransactions: transactions.length,
         completedTransactions: 0,
@@ -1352,7 +1352,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
         timestamp: new Date(),
         userContext: {} as ParlantUserContext,
         details: { error: errorMessage },
-        securityLevel: SecurityLevel.MEDIUM,
+        securityLevel: SecurityLevel._MEDIUM,
       },
     };
   }
@@ -1566,7 +1566,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { oldState, newState, reason },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -1577,7 +1577,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { transactionId, status },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -1591,7 +1591,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
             totalValidations: results.size,
             approvedValidations: Array.from(results.values()).filter(r => r.approved).length,
           },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 

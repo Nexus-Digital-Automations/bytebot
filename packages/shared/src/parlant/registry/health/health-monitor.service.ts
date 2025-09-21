@@ -193,7 +193,7 @@ export class HealthMonitorService implements IHealthMonitor {
         score: healthScore,
         indicators: allIndicators,
         lastCheck: new Date(),
-        trend,
+        trend: trend as HealthTrend,
         history: previousStatus ? [...previousStatus.history.slice(-99), healthCheckResult] : [healthCheckResult]
       };
 

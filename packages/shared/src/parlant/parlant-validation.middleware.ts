@@ -33,8 +33,9 @@ import {
   RiskLevel,
   ConversationalValidationError,
   ParlantConversationContext
-} from '../monitoring/parlant-integration.service';
+} from './monitoring/parlant-integration.service';
 import { SecurityLevel, ValidationMode } from './parlant-validation.decorator';
+import { ConversationPriority } from '../types/parlant.types';
 
 // ===== MIDDLEWARE INTERFACES =====
 
@@ -543,23 +544,31 @@ export class ParlantValidationMiddleware implements NestMiddleware {
   ): ParlantConversationContext {
     const user = (req as any).user || {};
 
+    const conversationId = this.generateOperationId();
     return {
+      conversationId,
       userId: user.id || 'anonymous',
       sessionId: req.headers?.['x-session-id'] as string || `session_${Date.now()}`,
-      agentRole: user.role || 'USER',
-      securityLevel: config.securityLevel,
-      conversationHistory: [],
+      state: ConversationState._ACTIVE,
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
       metadata: {
-        operationId: this.generateOperationId(),
-        businessCategory: config.businessCategory,
-        complianceFlags: config.complianceFlags || [],
-        endpoint: `${req.method} ${req.path}`,
-        timestamp: new Date().toISOString(),
-        validationMode: config.validationMode,
-        requiredRoles: config.requiredRoles || [],
-        routePattern: config.route,
-        requestSize: JSON.stringify(req.body || {}).length,
-        cacheable: config.cacheable
+        priority: ConversationPriority._NORMAL,
+        tags: ['middleware-validation'],
+        properties: {
+          operationId: this.generateOperationId(),
+          businessCategory: config.businessCategory,
+          complianceFlags: config.complianceFlags || [],
+          endpoint: `${req.method} ${req.path}`,
+          timestamp: new Date().toISOString(),
+          validationMode: config.validationMode,
+          requiredRoles: config.requiredRoles || [],
+          routePattern: config.route,
+          requestSize: JSON.stringify(req.body || {}).length,
+          cacheable: config.cacheable
+        },
+        history: []
       }
     };
   }
@@ -579,7 +588,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       error: 'Conversational Validation Failed',
       details: {
         intent: config.intent,
-        reasoning: validationResult.reasoning,
+        reasoning: validationResult.reason,
         conversationId: validationResult.conversationId,
         suggestedAlternatives: validationResult.suggestedAlternatives || [],
         securityLevel: config.securityLevel,
@@ -599,7 +608,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       `[${operationId}] Request denied by PARLANT validation`,
       {
         operationId,
-        reasoning: validationResult.reasoning,
+        reasoning: validationResult.reason,
         conversationId: validationResult.conversationId,
         securityLevel: config.securityLevel,
         businessCategory: config.businessCategory
@@ -639,7 +648,8 @@ export class ParlantValidationMiddleware implements NestMiddleware {
         }
       };
 
-      return res.status(HttpStatus.FORBIDDEN).json(errorResponse);
+      res.status(HttpStatus.FORBIDDEN).json(errorResponse);
+      return;
     }
 
     this.logger.error(
@@ -701,7 +711,12 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     securityNotes: string[];
     contactInfo?: string;
   } {
-    const guidance = {
+    const guidance: {
+      nextSteps: string[];
+      alternatives: string[];
+      securityNotes: string[];
+      contactInfo?: string;
+    } = {
       nextSteps: [
         'Review the request parameters and ensure they align with security policies',
         'Verify you have appropriate permissions for this operation',
@@ -735,12 +750,12 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
   private mapSecurityLevelToRiskLevel(securityLevel: SecurityLevel): RiskLevel {
     switch (securityLevel) {
-      case SecurityLevel.MINIMAL: return RiskLevel.MINIMAL;
-      case SecurityLevel.LOW: return RiskLevel.LOW;
-      case SecurityLevel.MEDIUM: return RiskLevel.MEDIUM;
-      case SecurityLevel.HIGH: return RiskLevel.HIGH;
-      case SecurityLevel.CRITICAL: return RiskLevel.CRITICAL;
-      default: return RiskLevel.MEDIUM;
+      case SecurityLevel.MINIMAL: return RiskLevel._MINIMAL;
+      case SecurityLevel.LOW: return RiskLevel._LOW;
+      case SecurityLevel.MEDIUM: return RiskLevel._MODERATE;
+      case SecurityLevel.HIGH: return RiskLevel._HIGH;
+      case SecurityLevel.CRITICAL: return RiskLevel._CRITICAL;
+      default: return RiskLevel._MODERATE;
     }
   }
 

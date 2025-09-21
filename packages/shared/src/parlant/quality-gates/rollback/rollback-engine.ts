@@ -363,11 +363,11 @@ export class RollbackEngine {
         proceduresExecuted: [],
         error: {
           code: 'ROLLBACK_EXECUTION_ERROR',
-          message: error.message,
-          originalError: error,
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { rollbackId, context },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined
         }
       };
 
@@ -917,11 +917,11 @@ class RollbackExecution {
         proceduresExecuted: procedureResults,
         error: {
           code: 'ROLLBACK_EXECUTION_ERROR',
-          message: error.message,
-          originalError: error,
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { rollbackId: this.rollbackId },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined
         }
       };
     }
@@ -1001,11 +1001,11 @@ class RollbackExecution {
         stepResults,
         error: {
           code: 'PROCEDURE_EXECUTION_ERROR',
-          message: error.message,
-          originalError: error,
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { procedureId: procedure.id },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined
         }
       };
     }
@@ -1041,11 +1041,11 @@ class RollbackExecution {
         output: {},
         error: {
           code: 'STEP_EXECUTION_ERROR',
-          message: error.message,
-          originalError: error,
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { stepId: step.id },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined
         }
       };
     }

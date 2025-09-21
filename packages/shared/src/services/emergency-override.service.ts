@@ -361,7 +361,7 @@ export class EmergencyOverrideService
     justification: string,
     resourcePatterns: string[],
     permissionsRequested: Permission[],
-    priority: OverridePriority = OverridePriority.MEDIUM,
+    priority: OverridePriority = OverridePriority._MEDIUM,
     requestedDuration?: number,
     emergencyContact?: string,
   ): Promise<EmergencyOverrideRequest> {
@@ -833,7 +833,7 @@ export class EmergencyOverrideService
       Partial<ApprovalRequirement>
     > = {
       [OverridePriority.LOW]: { minApprovers: 1, approvalTimeout: 3600 },
-      [OverridePriority.MEDIUM]: { minApprovers: 2, approvalTimeout: 1800 },
+      [OverridePriority._MEDIUM]: { minApprovers: 2, approvalTimeout: 1800 },
       [OverridePriority.HIGH]: { minApprovers: 3, approvalTimeout: 900 },
       [OverridePriority.CRITICAL]: { minApprovers: 3, approvalTimeout: 600 },
       [OverridePriority.EMERGENCY]: { minApprovers: 2, approvalTimeout: 300 },
@@ -883,7 +883,7 @@ export class EmergencyOverrideService
   private getDefaultDuration(priority: OverridePriority): number {
     const durations: Record<OverridePriority, number> = {
       [OverridePriority.LOW]: 3600, // 1 hour
-      [OverridePriority.MEDIUM]: 7200, // 2 hours
+      [OverridePriority._MEDIUM]: 7200, // 2 hours
       [OverridePriority.HIGH]: 14400, // 4 hours
       [OverridePriority.CRITICAL]: 7200, // 2 hours
       [OverridePriority.EMERGENCY]: 3600, // 1 hour
@@ -946,7 +946,7 @@ export class EmergencyOverrideService
   private getMaxActivations(priority: OverridePriority): number {
     const maxActivations: Record<OverridePriority, number> = {
       [OverridePriority.LOW]: 50,
-      [OverridePriority.MEDIUM]: 30,
+      [OverridePriority._MEDIUM]: 30,
       [OverridePriority.HIGH]: 20,
       [OverridePriority.CRITICAL]: 10,
       [OverridePriority.EMERGENCY]: 100,

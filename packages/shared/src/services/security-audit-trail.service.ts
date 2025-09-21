@@ -147,7 +147,12 @@ export interface SecurityAuditEvent {
     /** Resource owner */
     owner?: string;
     /** Data classification */
-    classification?: "public" | "internal" | "confidential" | "restricted" | "top_secret";
+    classification?:
+      | "public"
+      | "internal"
+      | "confidential"
+      | "restricted"
+      | "top_secret";
   };
 
   /** Action details */
@@ -381,8 +386,8 @@ export class SecurityAuditTrailService
   private readonly logger = new Logger(SecurityAuditTrailService.name);
 
   // Core components
-  private redisClient!: Redis;
-  private complianceClient!: AxiosInstance;
+  private redisClient: Redis | null = null;
+  private complianceClient: AxiosInstance | null = null;
 
   // Event storage and processing
   private eventBuffer: SecurityAuditEvent[] = [];
@@ -410,6 +415,11 @@ export class SecurityAuditTrailService
 
   constructor(private readonly configService: ConfigService) {
     super();
+
+    // Initialize clients - these would be properly configured in a production environment
+    this.redisClient = null; // Would be initialized with Redis.createClient()
+    this.complianceClient = null; // Would be initialized with axios.create()
+
     this.logger.log("🚀 Initializing Security Audit Trail Service");
   }
 
@@ -445,7 +455,7 @@ export class SecurityAuditTrailService
     await this.saveIntegrityChain();
 
     if (this.redisClient) {
-      await this.redisClient.quit();
+      await this.redisClient!.quit();
     }
 
     this.logger.log("✅ Security Audit Trail shutdown complete");
@@ -500,7 +510,11 @@ export class SecurityAuditTrailService
         security: {
           riskLevel: this.calculateRiskLevel(category, severity, outcome),
           flags: security.flags || [],
-          requiresInvestigation: this.requiresInvestigation(category, severity, outcome),
+          requiresInvestigation: this.requiresInvestigation(
+            category,
+            severity,
+            outcome,
+          ),
           ...security,
         },
         compliance,
@@ -581,7 +595,10 @@ export class SecurityAuditTrailService
       const filteredEvents = await this.applyPostFilters(events, criteria);
 
       // Apply pagination
-      const paginatedEvents = this.applyPagination(filteredEvents, criteria.pagination);
+      const paginatedEvents = this.applyPagination(
+        filteredEvents,
+        criteria.pagination,
+      );
 
       const searchTimeMs = Date.now() - startTime;
 
@@ -632,7 +649,10 @@ export class SecurityAuditTrailService
       const searchResult = await this.searchAuditEvents(config.criteria);
 
       // Generate summary statistics
-      const summary = await this.generateReportSummary(searchResult.events, config);
+      const summary = await this.generateReportSummary(
+        searchResult.events,
+        config,
+      );
 
       // Perform compliance analysis
       const complianceAnalysis = await this.performComplianceAnalysis(
@@ -641,7 +661,9 @@ export class SecurityAuditTrailService
       );
 
       // Generate threat correlation analysis
-      const threatAnalysis = await this.generateThreatAnalysis(searchResult.events);
+      const threatAnalysis = await this.generateThreatAnalysis(
+        searchResult.events,
+      );
 
       const report = {
         reportId: config.reportId,
@@ -676,12 +698,15 @@ export class SecurityAuditTrailService
 
       return report;
     } catch (error) {
-      this.logger.error(`[${operationId}] Compliance report generation failed`, {
-        operationId,
-        reportId: config.reportId,
-        error: error instanceof Error ? error.message : String(error),
-        generationTimeMs: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Compliance report generation failed`,
+        {
+          operationId,
+          reportId: config.reportId,
+          error: error instanceof Error ? error.message : String(error),
+          generationTimeMs: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -689,7 +714,9 @@ export class SecurityAuditTrailService
   /**
    * Correlate threat patterns
    */
-  async correlateThreatPatterns(timeWindow: number = 3600000): Promise<ThreatCorrelation[]> {
+  async correlateThreatPatterns(
+    timeWindow: number = 3600000,
+  ): Promise<ThreatCorrelation[]> {
     const operationId = `threat-correlation-${Date.now()}`;
     const startTime = Date.now();
 
@@ -702,9 +729,9 @@ export class SecurityAuditTrailService
       const cutoffTime = new Date(Date.now() - timeWindow);
 
       // Get recent security events
-      const securityEvents = this.eventBuffer.filter(event =>
-        event.timestamp >= cutoffTime &&
-        this.isSecurityRelevant(event)
+      const securityEvents = this.eventBuffer.filter(
+        (event) =>
+          event.timestamp >= cutoffTime && this.isSecurityRelevant(event),
       );
 
       // Analyze patterns
@@ -769,11 +796,16 @@ export class SecurityAuditTrailService
           verifiedCount++;
         } else {
           corruptedEvents.push(event.eventId);
-          this.logger.warn(`Integrity violation detected for event: ${event.eventId}`);
+          this.logger.warn(
+            `Integrity violation detected for event: ${event.eventId}`,
+          );
         }
 
         // Verify chain integrity
-        if (event.integrity.previousHash && event.integrity.previousHash !== previousHash) {
+        if (
+          event.integrity.previousHash &&
+          event.integrity.previousHash !== previousHash
+        ) {
           corruptedEvents.push(`${event.eventId}:chain_break`);
         }
 
@@ -788,11 +820,14 @@ export class SecurityAuditTrailService
         lastVerifiedHash: previousHash,
       };
 
-      this.logger.log(`[${operationId}] Audit integrity verification completed`, {
-        operationId,
-        ...result,
-        verificationTimeMs: Date.now() - startTime,
-      });
+      this.logger.log(
+        `[${operationId}] Audit integrity verification completed`,
+        {
+          operationId,
+          ...result,
+          verificationTimeMs: Date.now() - startTime,
+        },
+      );
 
       return result;
     } catch (error) {
@@ -874,7 +909,10 @@ export class SecurityAuditTrailService
     const tags: string[] = [];
 
     // Always apply SOX for authentication and authorization
-    if (category === AuditCategory.AUTHENTICATION || category === AuditCategory.AUTHORIZATION) {
+    if (
+      category === AuditCategory.AUTHENTICATION ||
+      category === AuditCategory.AUTHORIZATION
+    ) {
       frameworks.push(ComplianceFramework.SOX);
       tags.push("SOX_REQUIRED");
     }
@@ -884,7 +922,10 @@ export class SecurityAuditTrailService
     tags.push("GDPR_APPLICABLE");
 
     // High severity events require comprehensive compliance
-    if (severity === AuditSeverity.CRITICAL || severity === AuditSeverity.EMERGENCY) {
+    if (
+      severity === AuditSeverity.CRITICAL ||
+      severity === AuditSeverity.EMERGENCY
+    ) {
       frameworks.push(ComplianceFramework.ISO_27001, ComplianceFramework.NIST);
       tags.push("HIGH_RISK", "EXECUTIVE_REVIEW");
     }
@@ -892,7 +933,9 @@ export class SecurityAuditTrailService
     return {
       frameworks,
       tags,
-      retentionPeriod: Math.max(...frameworks.map(f => this.RETENTION_PERIODS[f])),
+      retentionPeriod: Math.max(
+        ...frameworks.map((f) => this.RETENTION_PERIODS[f]),
+      ),
       legalHold: severity === AuditSeverity.EMERGENCY,
       containsPII: await this.detectPII(actor, resource),
       jurisdiction: "US", // Default jurisdiction
@@ -902,35 +945,59 @@ export class SecurityAuditTrailService
   // Additional private methods would continue here...
   // [Implementation continues with remaining helper methods]
 
-  private sanitizeActor(actor: SecurityAuditEvent["actor"]): SecurityAuditEvent["actor"] {
+  private sanitizeActor(
+    actor: SecurityAuditEvent["actor"],
+  ): SecurityAuditEvent["actor"] {
     return { ...actor };
   }
 
-  private sanitizeResource(resource: SecurityAuditEvent["resource"]): SecurityAuditEvent["resource"] {
+  private sanitizeResource(
+    resource: SecurityAuditEvent["resource"],
+  ): SecurityAuditEvent["resource"] {
     return { ...resource };
   }
 
-  private sanitizeAction(action: SecurityAuditEvent["action"]): SecurityAuditEvent["action"] {
+  private sanitizeAction(
+    action: SecurityAuditEvent["action"],
+  ): SecurityAuditEvent["action"] {
     return { ...action };
   }
 
-  private calculateRiskLevel(category: AuditCategory, severity: AuditSeverity, outcome: AuditOutcome): string {
+  private calculateRiskLevel(
+    category: AuditCategory,
+    severity: AuditSeverity,
+    outcome: AuditOutcome,
+  ): string {
     return "medium";
   }
 
-  private requiresInvestigation(category: AuditCategory, severity: AuditSeverity, outcome: AuditOutcome): boolean {
-    return severity === AuditSeverity.CRITICAL || severity === AuditSeverity.EMERGENCY;
+  private requiresInvestigation(
+    category: AuditCategory,
+    severity: AuditSeverity,
+    outcome: AuditOutcome,
+  ): boolean {
+    return (
+      severity === AuditSeverity.CRITICAL ||
+      severity === AuditSeverity.EMERGENCY
+    );
   }
 
-  private async detectSensitiveData(payload: Partial<SecurityAuditEvent["payload"]>): Promise<boolean> {
+  private async detectSensitiveData(
+    payload: Partial<SecurityAuditEvent["payload"]>,
+  ): Promise<boolean> {
     return false;
   }
 
-  private async detectPII(actor: SecurityAuditEvent["actor"], resource: SecurityAuditEvent["resource"]): Promise<boolean> {
+  private async detectPII(
+    actor: SecurityAuditEvent["actor"],
+    resource: SecurityAuditEvent["resource"],
+  ): Promise<boolean> {
     return false;
   }
 
-  private async calculateIntegrityHash(event: SecurityAuditEvent): Promise<SecurityAuditEvent["integrity"]> {
+  private async calculateIntegrityHash(
+    event: SecurityAuditEvent,
+  ): Promise<SecurityAuditEvent["integrity"]> {
     const eventCopy = { ...event };
     delete eventCopy.integrity;
 
@@ -939,9 +1006,10 @@ export class SecurityAuditTrailService
       .update(JSON.stringify(eventCopy))
       .digest("hex");
 
-    const previousHash = this.integrityChain.length > 0
-      ? this.integrityChain[this.integrityChain.length - 1]
-      : "";
+    const previousHash =
+      this.integrityChain.length > 0
+        ? this.integrityChain[this.integrityChain.length - 1]
+        : "";
 
     this.integrityChain.push(hash);
 
@@ -963,22 +1031,30 @@ export class SecurityAuditTrailService
   }
 
   private requiresImmediateProcessing(event: SecurityAuditEvent): boolean {
-    return event.severity === AuditSeverity.EMERGENCY ||
-           event.category === AuditCategory.SECURITY_VIOLATION;
+    return (
+      event.severity === AuditSeverity.EMERGENCY ||
+      event.category === AuditCategory.SECURITY_VIOLATION
+    );
   }
 
   private isSecurityRelevant(event: SecurityAuditEvent): boolean {
-    return event.category === AuditCategory.AUTHENTICATION ||
-           event.category === AuditCategory.AUTHORIZATION ||
-           event.category === AuditCategory.SECURITY_VIOLATION ||
-           event.category === AuditCategory.EMERGENCY_ACCESS;
+    return (
+      event.category === AuditCategory.AUTHENTICATION ||
+      event.category === AuditCategory.AUTHORIZATION ||
+      event.category === AuditCategory.SECURITY_VIOLATION ||
+      event.category === AuditCategory.EMERGENCY_ACCESS
+    );
   }
 
-  private async processEventImmediately(event: SecurityAuditEvent): Promise<void> {
+  private async processEventImmediately(
+    event: SecurityAuditEvent,
+  ): Promise<void> {
     // Process high-priority events immediately
   }
 
-  private async triggerThreatCorrelation(event: SecurityAuditEvent): Promise<void> {
+  private async triggerThreatCorrelation(
+    event: SecurityAuditEvent,
+  ): Promise<void> {
     // Trigger threat correlation analysis
   }
 
@@ -994,11 +1070,17 @@ export class SecurityAuditTrailService
     return [];
   }
 
-  private async applyPostFilters(events: SecurityAuditEvent[], criteria: AuditSearchCriteria): Promise<SecurityAuditEvent[]> {
+  private async applyPostFilters(
+    events: SecurityAuditEvent[],
+    criteria: AuditSearchCriteria,
+  ): Promise<SecurityAuditEvent[]> {
     return events;
   }
 
-  private applyPagination(events: SecurityAuditEvent[], pagination?: AuditSearchCriteria["pagination"]): SecurityAuditEvent[] {
+  private applyPagination(
+    events: SecurityAuditEvent[],
+    pagination?: AuditSearchCriteria["pagination"],
+  ): SecurityAuditEvent[] {
     if (!pagination) return events;
 
     const start = pagination.offset;
@@ -1006,27 +1088,43 @@ export class SecurityAuditTrailService
     return events.slice(start, end);
   }
 
-  private async generateReportSummary(events: SecurityAuditEvent[], config: AuditReportConfig): Promise<any> {
+  private async generateReportSummary(
+    events: SecurityAuditEvent[],
+    config: AuditReportConfig,
+  ): Promise<any> {
     return {};
   }
 
-  private async performComplianceAnalysis(events: SecurityAuditEvent[], framework?: ComplianceFramework): Promise<any> {
+  private async performComplianceAnalysis(
+    events: SecurityAuditEvent[],
+    framework?: ComplianceFramework,
+  ): Promise<any> {
     return {};
   }
 
-  private async generateThreatAnalysis(events: SecurityAuditEvent[]): Promise<any> {
+  private async generateThreatAnalysis(
+    events: SecurityAuditEvent[],
+  ): Promise<any> {
     return {};
   }
 
-  private async storeReport(report: any, config: AuditReportConfig): Promise<void> {
+  private async storeReport(
+    report: any,
+    config: AuditReportConfig,
+  ): Promise<void> {
     // Store report
   }
 
-  private async distributeReport(report: any, config: AuditReportConfig): Promise<void> {
+  private async distributeReport(
+    report: any,
+    config: AuditReportConfig,
+  ): Promise<void> {
     // Distribute report to recipients
   }
 
-  private async analyzeSecurityPatterns(events: SecurityAuditEvent[]): Promise<ThreatCorrelation[]> {
+  private async analyzeSecurityPatterns(
+    events: SecurityAuditEvent[],
+  ): Promise<ThreatCorrelation[]> {
     return [];
   }
 

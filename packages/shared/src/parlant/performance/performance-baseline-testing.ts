@@ -15,6 +15,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 import { cpus, freemem, totalmem } from 'os';
+
+// Type guard utilities for error handling
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 import {
   WrapperRegistryManagementService,
   WrapperInfo,

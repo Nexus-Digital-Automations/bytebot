@@ -224,9 +224,14 @@ export class JwtParlantAuthGuard implements CanActivate {
     }
 
     // Check cookies
-    if (request.cookies && typeof request.cookies === 'object' && 'access_token' in request.cookies) {
-      const accessToken = (request.cookies as Record<string, unknown>).access_token;
-      if (typeof accessToken === 'string') {
+    if (
+      request.cookies &&
+      typeof request.cookies === "object" &&
+      "access_token" in request.cookies
+    ) {
+      const accessToken = (request.cookies as Record<string, unknown>)
+        .access_token;
+      if (typeof accessToken === "string") {
         return accessToken;
       }
     }

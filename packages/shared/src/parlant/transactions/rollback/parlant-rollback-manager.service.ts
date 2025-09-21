@@ -1146,7 +1146,7 @@ export class ParlantRollbackManagerService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { oldPhase, newPhase },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -1157,7 +1157,7 @@ export class ParlantRollbackManagerService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { operation: operationId, success, error },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 

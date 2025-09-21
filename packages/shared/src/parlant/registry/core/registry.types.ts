@@ -15,7 +15,7 @@ import {
   ApprovalLevel,
   RiskLevel,
   FunctionSecurityLevel
-} from '../../types/parlant-integration.types';
+} from '../../../types/parlant-integration.types';
 
 // ===========================
 // CORE REGISTRY TYPES

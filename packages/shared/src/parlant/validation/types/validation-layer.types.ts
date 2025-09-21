@@ -10,7 +10,7 @@
  * @author AIgent Integration Team
  */
 
-import { SecurityLevel } from '../../types/parlant-integration.types';
+import { SecurityLevel } from '../../../types/parlant-integration.types';
 
 // ===== CORE VALIDATION TYPES =====
 

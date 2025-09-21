@@ -47,7 +47,7 @@ import {
   ValidationMode,
   ApprovalLevel,
   SecurityLevel
-} from '../../types/parlant-integration.types';
+} from '../../../types/parlant-integration.types';
 
 /**
  * Configuration change types
@@ -424,7 +424,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       // Get validation context
       const context: ValidationContext = {
         functionId: functionId || 'unknown',
-        currentConfig: functionId ? await this.getConfiguration(functionId) : undefined,
+        currentConfig: functionId ? (await this.getConfiguration(functionId)) || undefined : undefined,
         globalConfig: await this.getGlobalConfiguration(),
         enforcementPolicies: await this.getEnforcementPolicies(),
         userPermissions: [], // Would be populated from actual user context

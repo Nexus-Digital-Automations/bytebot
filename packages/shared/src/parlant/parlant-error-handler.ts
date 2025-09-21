@@ -378,6 +378,12 @@ export class ParlantErrorFilter implements ExceptionFilter {
       statusCode = HttpStatus.FORBIDDEN;
       message = exception.message;
       errorType = 'Conversational Validation Failed';
+    } else if (exception instanceof Error) {
+      message = exception.message;
+      errorType = exception.constructor.name;
+    } else if (typeof exception === 'string') {
+      message = exception;
+      errorType = 'String Error';
     }
 
     // Generate conversational guidance
@@ -707,7 +713,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
   private extractConversationContext(exception: unknown): ParlantErrorResponse['details']['conversationContext'] {
     if (exception instanceof ConversationalValidationError) {
       return {
-        conversationId: exception.conversationId,
+        conversationId: exception.conversationId || 'unknown',
         securityLevel: SecurityLevel.MEDIUM, // Default, would be extracted from context
         validationMode: 'CONVERSATIONAL',
         businessCategory: 'UNKNOWN'
@@ -722,7 +728,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
   private extractSecurityContext(exception: unknown): ParlantErrorResponse['details']['securityContext'] {
     if (exception instanceof ConversationalValidationError) {
       return {
-        riskLevel: exception.riskLevel || RiskLevel.MEDIUM,
+        riskLevel: exception.riskLevel || RiskLevel._MODERATE,
         requiredPermissions: [],
         complianceFlags: []
       };
@@ -870,14 +876,14 @@ export class ParlantErrorFilter implements ExceptionFilter {
 
   private mapRiskLevelToSeverity(riskLevel?: RiskLevel): ErrorSeverity {
     switch (riskLevel) {
-      case RiskLevel.MINIMAL:
-      case RiskLevel.LOW:
+      case RiskLevel._MINIMAL:
+      case RiskLevel._LOW:
         return ErrorSeverity.LOW;
-      case RiskLevel.MEDIUM:
+      case RiskLevel._MODERATE:
         return ErrorSeverity.MEDIUM;
-      case RiskLevel.HIGH:
+      case RiskLevel._HIGH:
         return ErrorSeverity.HIGH;
-      case RiskLevel.CRITICAL:
+      case RiskLevel._CRITICAL:
         return ErrorSeverity.CRITICAL;
       default:
         return ErrorSeverity.MEDIUM;

@@ -1610,7 +1610,7 @@ export class ParlantDistributedCoordinatorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { fromPhase, toPhase, reason },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -1621,7 +1621,7 @@ export class ParlantDistributedCoordinatorService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { participantId, action, result },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 

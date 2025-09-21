@@ -1892,7 +1892,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
             priority: recommendation.priority,
             expectedImprovement: recommendation.expectedImprovement,
           },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 
@@ -1903,7 +1903,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           timestamp: new Date(),
           userContext,
           details: { recommendationId, success, ...details },
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
         });
       },
 

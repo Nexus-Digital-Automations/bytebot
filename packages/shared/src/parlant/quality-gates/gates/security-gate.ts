@@ -11,8 +11,8 @@
  * @created 2025-09-20
  */
 
-import { Logger } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   QualityGate,
   QualityGateContext,
@@ -27,9 +27,12 @@ import {
   VulnerabilityCount,
   ThresholdEvaluation,
   ValidationStep,
-  QualityGateLogEntry
-} from '../core/quality-gate-types';
-import { WrapperError, ErrorCategory } from '../../function-wrapper/interfaces/wrapper-types';
+  QualityGateLogEntry,
+} from "../core/quality-gate-types";
+import {
+  WrapperError,
+  ErrorCategory,
+} from "../../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Security Gate Configuration Interface
@@ -114,12 +117,12 @@ export interface SecurityScanningTool {
  * Types of security scanning tools
  */
 export enum ScanningToolType {
-  STATIC_ANALYSIS = 'static_analysis',
-  DYNAMIC_ANALYSIS = 'dynamic_analysis',
-  DEPENDENCY_SCAN = 'dependency_scan',
-  CONTAINER_SCAN = 'container_scan',
-  INFRASTRUCTURE_SCAN = 'infrastructure_scan',
-  SECRETS_SCAN = 'secrets_scan'
+  STATIC_ANALYSIS = "static_analysis",
+  DYNAMIC_ANALYSIS = "dynamic_analysis",
+  DEPENDENCY_SCAN = "dependency_scan",
+  CONTAINER_SCAN = "container_scan",
+  INFRASTRUCTURE_SCAN = "infrastructure_scan",
+  SECRETS_SCAN = "secrets_scan",
 }
 
 /**
@@ -127,13 +130,13 @@ export enum ScanningToolType {
  * Supported compliance frameworks
  */
 export enum ComplianceFramework {
-  GDPR = 'gdpr',
-  HIPAA = 'hipaa',
-  SOX = 'sox',
-  PCI_DSS = 'pci_dss',
-  ISO_27001 = 'iso_27001',
-  NIST = 'nist',
-  SOC2 = 'soc2'
+  GDPR = "gdpr",
+  HIPAA = "hipaa",
+  SOX = "sox",
+  PCI_DSS = "pci_dss",
+  ISO_27001 = "iso_27001",
+  NIST = "nist",
+  SOC2 = "soc2",
 }
 
 /**
@@ -162,12 +165,12 @@ export interface AuthenticationMethod {
  * Types of authentication methods
  */
 export enum AuthMethodType {
-  JWT = 'jwt',
-  OAUTH2 = 'oauth2',
-  API_KEY = 'api_key',
-  BASIC_AUTH = 'basic_auth',
-  CERTIFICATE = 'certificate',
-  MULTI_FACTOR = 'multi_factor'
+  JWT = "jwt",
+  OAUTH2 = "oauth2",
+  API_KEY = "api_key",
+  BASIC_AUTH = "basic_auth",
+  CERTIFICATE = "certificate",
+  MULTI_FACTOR = "multi_factor",
 }
 
 /**
@@ -175,10 +178,10 @@ export enum AuthMethodType {
  * Strength levels for authentication
  */
 export enum AuthStrengthLevel {
-  BASIC = 'basic',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  BASIC = "basic",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -210,10 +213,10 @@ export interface AuthorizationPolicy {
  * Types of authorization policies
  */
 export enum AuthzPolicyType {
-  RBAC = 'rbac',
-  ABAC = 'abac',
-  RESOURCE_BASED = 'resource_based',
-  CUSTOM = 'custom'
+  RBAC = "rbac",
+  ABAC = "abac",
+  RESOURCE_BASED = "resource_based",
+  CUSTOM = "custom",
 }
 
 /**
@@ -239,9 +242,9 @@ export interface AuthzRule {
  * Actions for authorization rules
  */
 export enum AuthzAction {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  CONDITIONAL = 'conditional'
+  ALLOW = "allow",
+  DENY = "deny",
+  CONDITIONAL = "conditional",
 }
 
 /**
@@ -249,9 +252,9 @@ export enum AuthzAction {
  * Modes for policy enforcement
  */
 export enum EnforcementMode {
-  ENFORCE = 'enforce',
-  WARN = 'warn',
-  AUDIT = 'audit'
+  ENFORCE = "enforce",
+  WARN = "warn",
+  AUDIT = "audit",
 }
 
 /**
@@ -283,16 +286,16 @@ export interface ThreatDetectionRule {
  * Categories of security threats
  */
 export enum ThreatCategory {
-  INJECTION = 'injection',
-  BROKEN_AUTH = 'broken_auth',
-  DATA_EXPOSURE = 'data_exposure',
-  XXE = 'xxe',
-  BROKEN_ACCESS = 'broken_access',
-  SECURITY_MISCONFIG = 'security_misconfig',
-  XSS = 'xss',
-  DESERIALIZATION = 'deserialization',
-  VULNERABLE_COMPONENTS = 'vulnerable_components',
-  INSUFFICIENT_LOGGING = 'insufficient_logging'
+  INJECTION = "injection",
+  BROKEN_AUTH = "broken_auth",
+  DATA_EXPOSURE = "data_exposure",
+  XXE = "xxe",
+  BROKEN_ACCESS = "broken_access",
+  SECURITY_MISCONFIG = "security_misconfig",
+  XSS = "xss",
+  DESERIALIZATION = "deserialization",
+  VULNERABLE_COMPONENTS = "vulnerable_components",
+  INSUFFICIENT_LOGGING = "insufficient_logging",
 }
 
 /**
@@ -300,11 +303,11 @@ export enum ThreatCategory {
  * Severity levels for threats
  */
 export enum ThreatSeverity {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-  INFO = 'info'
+  CRITICAL = "critical",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
+  INFO = "info",
 }
 
 /**
@@ -510,12 +513,12 @@ export interface AuthenticationIssue {
  * Types of authentication issues
  */
 export enum AuthIssueType {
-  WEAK_CREDENTIALS = 'weak_credentials',
-  INSECURE_TRANSPORT = 'insecure_transport',
-  TOKEN_EXPOSURE = 'token_exposure',
-  INSUFFICIENT_ENTROPY = 'insufficient_entropy',
-  MISSING_EXPIRATION = 'missing_expiration',
-  BRUTE_FORCE_VULNERABILITY = 'brute_force_vulnerability'
+  WEAK_CREDENTIALS = "weak_credentials",
+  INSECURE_TRANSPORT = "insecure_transport",
+  TOKEN_EXPOSURE = "token_exposure",
+  INSUFFICIENT_ENTROPY = "insufficient_entropy",
+  MISSING_EXPIRATION = "missing_expiration",
+  BRUTE_FORCE_VULNERABILITY = "brute_force_vulnerability",
 }
 
 /**
@@ -595,10 +598,10 @@ export interface RuleViolation {
  * Types of authorization violations
  */
 export enum ViolationType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  RESOURCE_VIOLATION = 'resource_violation',
-  POLICY_BYPASS = 'policy_bypass'
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  RESOURCE_VIOLATION = "resource_violation",
+  POLICY_BYPASS = "policy_bypass",
 }
 
 /**
@@ -630,10 +633,10 @@ export interface AccessControlIssue {
  * Types of access control issues
  */
 export enum AccessIssueType {
-  MISSING_AUTHORIZATION = 'missing_authorization',
-  OVERPRIVILEGED_ACCESS = 'overprivileged_access',
-  INSECURE_DEFAULTS = 'insecure_defaults',
-  BROKEN_AUTHENTICATION = 'broken_authentication'
+  MISSING_AUTHORIZATION = "missing_authorization",
+  OVERPRIVILEGED_ACCESS = "overprivileged_access",
+  INSECURE_DEFAULTS = "insecure_defaults",
+  BROKEN_AUTHENTICATION = "broken_authentication",
 }
 
 /**
@@ -665,10 +668,10 @@ export interface PrivilegeRisk {
  * Levels of security risk
  */
 export enum RiskLevel {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low'
+  CRITICAL = "critical",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
 }
 
 /**
@@ -724,10 +727,10 @@ export interface FrameworkComplianceResult {
  * Status of compliance checking
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIAL = 'partial',
-  NOT_ASSESSED = 'not_assessed'
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIAL = "partial",
+  NOT_ASSESSED = "not_assessed",
 }
 
 /**
@@ -762,10 +765,10 @@ export interface ComplianceGap {
  * Levels of effort for remediation
  */
 export enum EffortLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -800,12 +803,12 @@ export interface ComplianceAction {
  * Types of compliance actions
  */
 export enum ActionType {
-  POLICY_UPDATE = 'policy_update',
-  TECHNICAL_IMPLEMENTATION = 'technical_implementation',
-  PROCESS_CHANGE = 'process_change',
-  TRAINING = 'training',
-  DOCUMENTATION = 'documentation',
-  AUDIT = 'audit'
+  POLICY_UPDATE = "policy_update",
+  TECHNICAL_IMPLEMENTATION = "technical_implementation",
+  PROCESS_CHANGE = "process_change",
+  TRAINING = "training",
+  DOCUMENTATION = "documentation",
+  AUDIT = "audit",
 }
 
 /**
@@ -852,10 +855,10 @@ export interface ComplianceMilestone {
  * Status of compliance milestones
  */
 export enum MilestoneStatus {
-  NOT_STARTED = 'not_started',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  DELAYED = 'delayed'
+  NOT_STARTED = "not_started",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  DELAYED = "delayed",
 }
 
 /**
@@ -962,18 +965,18 @@ export interface AttackPattern {
  * Types of attack patterns
  */
 export enum AttackType {
-  RECONNAISSANCE = 'reconnaissance',
-  INITIAL_ACCESS = 'initial_access',
-  EXECUTION = 'execution',
-  PERSISTENCE = 'persistence',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  DEFENSE_EVASION = 'defense_evasion',
-  CREDENTIAL_ACCESS = 'credential_access',
-  DISCOVERY = 'discovery',
-  LATERAL_MOVEMENT = 'lateral_movement',
-  COLLECTION = 'collection',
-  EXFILTRATION = 'exfiltration',
-  IMPACT = 'impact'
+  RECONNAISSANCE = "reconnaissance",
+  INITIAL_ACCESS = "initial_access",
+  EXECUTION = "execution",
+  PERSISTENCE = "persistence",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  DEFENSE_EVASION = "defense_evasion",
+  CREDENTIAL_ACCESS = "credential_access",
+  DISCOVERY = "discovery",
+  LATERAL_MOVEMENT = "lateral_movement",
+  COLLECTION = "collection",
+  EXFILTRATION = "exfiltration",
+  IMPACT = "impact",
 }
 
 /**
@@ -991,7 +994,7 @@ export class SecurityQualityGate implements QualityGate {
     public readonly priority: QualityGatePriority,
     public readonly enabled: boolean,
     public readonly config: SecurityGateConfig,
-    public readonly thresholds: QualityGateThresholds
+    public readonly thresholds: QualityGateThresholds,
   ) {}
 
   /**
@@ -1020,12 +1023,12 @@ export class SecurityQualityGate implements QualityGate {
     try {
       // Step 1: Initialize security assessment
       const initStep: ValidationStep = {
-        stepId: 'init-security',
-        stepName: 'Initialize Security Assessment',
-        status: 'passed',
+        stepId: "init-security",
+        stepName: "Initialize Security Assessment",
+        status: "passed",
         executionTime: 0,
-        details: 'Security assessment initialized successfully',
-        output: {}
+        details: "Security assessment initialized successfully",
+        output: {},
       };
       validationSteps.push(initStep);
 
@@ -1033,38 +1036,44 @@ export class SecurityQualityGate implements QualityGate {
       const assessment = await this.performSecurityAssessment(context);
 
       const assessmentStep: ValidationStep = {
-        stepId: 'security-assessment',
-        stepName: 'Comprehensive Security Assessment',
-        status: 'passed',
+        stepId: "security-assessment",
+        stepName: "Comprehensive Security Assessment",
+        status: "passed",
         executionTime: Date.now() - startTime,
         details: `Security assessment completed with score: ${assessment.overallScore}`,
-        output: { assessment }
+        output: { assessment },
       };
       validationSteps.push(assessmentStep);
 
       // Step 3: Evaluate security thresholds
-      const thresholdEvaluations = await this.evaluateSecurityThresholds(assessment);
+      const thresholdEvaluations =
+        await this.evaluateSecurityThresholds(assessment);
 
       const thresholdStep: ValidationStep = {
-        stepId: 'evaluate-thresholds',
-        stepName: 'Evaluate Security Thresholds',
-        status: thresholdEvaluations.every(e => e.passed) ? 'passed' : 'failed',
+        stepId: "evaluate-thresholds",
+        stepName: "Evaluate Security Thresholds",
+        status: thresholdEvaluations.every((e) => e.passed)
+          ? "passed"
+          : "failed",
         executionTime: Date.now() - startTime,
         details: `Evaluated ${thresholdEvaluations.length} security thresholds`,
-        output: { thresholdEvaluations }
+        output: { thresholdEvaluations },
       };
       validationSteps.push(thresholdStep);
 
       // Step 4: Generate security analysis
-      const analysis = this.analyzeSecurityResults(assessment, thresholdEvaluations);
+      const analysis = this.analyzeSecurityResults(
+        assessment,
+        thresholdEvaluations,
+      );
 
       const analysisStep: ValidationStep = {
-        stepId: 'security-analysis',
-        stepName: 'Security Analysis',
-        status: 'passed',
+        stepId: "security-analysis",
+        stepName: "Security Analysis",
+        status: "passed",
         executionTime: Date.now() - startTime,
-        details: 'Security analysis completed',
-        output: { analysis }
+        details: "Security analysis completed",
+        output: { analysis },
       };
       validationSteps.push(analysisStep);
 
@@ -1073,16 +1082,25 @@ export class SecurityQualityGate implements QualityGate {
       const score = this.calculateSecurityScore(assessment);
 
       // Generate recommendations
-      const recommendations = this.generateSecurityRecommendations(assessment, analysis);
+      const recommendations = this.generateSecurityRecommendations(
+        assessment,
+        analysis,
+      );
 
       // Add security warnings
       this.addSecurityWarnings(assessment, warnings);
 
       // Add informational messages
       info.push(`Security score: ${assessment.overallScore}/100`);
-      info.push(`Critical vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.critical}`);
-      info.push(`Authentication success rate: ${assessment.authentication.successRate}%`);
-      info.push(`Authorization violations: ${assessment.authorization.violations}`);
+      info.push(
+        `Critical vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.critical}`,
+      );
+      info.push(
+        `Authentication success rate: ${assessment.authentication.successRate}%`,
+      );
+      info.push(
+        `Authorization violations: ${assessment.authorization.violations}`,
+      );
       info.push(`Compliance score: ${assessment.compliance.overallScore}/100`);
       info.push(`Threats detected: ${assessment.threats.threatsDetected}`);
 
@@ -1101,34 +1119,36 @@ export class SecurityQualityGate implements QualityGate {
           custom: {
             vulnerabilityScanTime: assessment.vulnerabilities.scanTime,
             complianceFrameworks: this.config.complianceFrameworks.length,
-            threatRulesEnabled: this.config.threatRules.filter(r => r.enabled).length
-          }
+            threatRulesEnabled: this.config.threatRules.filter((r) => r.enabled)
+              .length,
+          },
         },
         details: {
           thresholdEvaluations,
           validationSteps,
           warnings,
           info,
-          logs
+          logs,
         },
         metadata: {
           executionId,
-          gateVersion: '1.0.0',
+          gateVersion: "1.0.0",
           environment: context.environment,
-          host: 'unknown',
+          host: "unknown",
           retryAttempt: 0,
           correlationId: context.sessionId,
           additionalMetadata: {
             securityAssessment: assessment,
-            analysis
-          }
+            analysis,
+          },
         },
-        recommendations
+        recommendations,
       };
 
-      this.logger.log(`Security gate completed: ${this.id}, Status: ${status}, Score: ${score}`);
+      this.logger.log(
+        `Security gate completed: ${this.id}, Status: ${status}, Score: ${score}`,
+      );
       return result;
-
     } catch (error) {
       this.logger.error(`Security gate execution failed: ${this.id}`, error);
 
@@ -1141,33 +1161,33 @@ export class SecurityQualityGate implements QualityGate {
           performance: this.getEmptyPerformanceMetrics(),
           security: this.getEmptySecurityMetrics(),
           coverage: this.getEmptyCoverageMetrics(),
-          custom: {}
+          custom: {},
         },
         details: {
           thresholdEvaluations: [],
           validationSteps,
           warnings,
           info,
-          logs
+          logs,
         },
         metadata: {
           executionId,
-          gateVersion: '1.0.0',
+          gateVersion: "1.0.0",
           environment: context.environment,
-          host: 'unknown',
+          host: "unknown",
           retryAttempt: 0,
           correlationId: context.sessionId,
-          additionalMetadata: {}
+          additionalMetadata: {},
         },
         error: {
-          code: 'SECURITY_GATE_ERROR',
-          message: error.message,
-          originalError: error,
+          code: "SECURITY_GATE_ERROR",
+          message: error instanceof Error ? error.message : String(error),
+          originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { gateId: this.id },
-          stackTrace: error.stack
+          stackTrace: error instanceof Error ? error.stack : undefined,
         },
-        recommendations: ['Review security configuration and scanning tools']
+        recommendations: ["Review security configuration and scanning tools"],
       };
 
       return errorResult;
@@ -1185,71 +1205,113 @@ export class SecurityQualityGate implements QualityGate {
 
     // Validate critical vulnerability threshold
     if (this.config.maxCriticalVulnerabilities < 0) {
-      errors.push('Maximum critical vulnerabilities cannot be negative');
+      errors.push("Maximum critical vulnerabilities cannot be negative");
     }
 
     // For critical gates, enforce zero critical vulnerabilities
-    if (this.priority === QualityGatePriority.CRITICAL && this.config.maxCriticalVulnerabilities > 0) {
-      errors.push('Critical security gates must have zero tolerance for critical vulnerabilities');
+    if (
+      this.priority === QualityGatePriority.CRITICAL &&
+      this.config.maxCriticalVulnerabilities > 0
+    ) {
+      errors.push(
+        "Critical security gates must have zero tolerance for critical vulnerabilities",
+      );
     }
 
     // Validate authentication success rate
-    if (this.config.minAuthSuccessRate < 0 || this.config.minAuthSuccessRate > 100) {
-      errors.push('Minimum authentication success rate must be between 0 and 100');
+    if (
+      this.config.minAuthSuccessRate < 0 ||
+      this.config.minAuthSuccessRate > 100
+    ) {
+      errors.push(
+        "Minimum authentication success rate must be between 0 and 100",
+      );
     }
 
     if (this.config.minAuthSuccessRate < 95) {
-      warnings.push('Authentication success rate below 95% may indicate security issues');
+      warnings.push(
+        "Authentication success rate below 95% may indicate security issues",
+      );
     }
 
     // Validate compliance score
-    if (this.config.minComplianceScore < 0 || this.config.minComplianceScore > 100) {
-      errors.push('Minimum compliance score must be between 0 and 100');
+    if (
+      this.config.minComplianceScore < 0 ||
+      this.config.minComplianceScore > 100
+    ) {
+      errors.push("Minimum compliance score must be between 0 and 100");
     }
 
     // Validate scanning tools configuration
-    if (this.config.enableVulnerabilityScanning && this.config.scanningTools.length === 0) {
-      warnings.push('Vulnerability scanning enabled but no scanning tools configured');
+    if (
+      this.config.enableVulnerabilityScanning &&
+      this.config.scanningTools.length === 0
+    ) {
+      warnings.push(
+        "Vulnerability scanning enabled but no scanning tools configured",
+      );
     }
 
     // Validate compliance frameworks
-    if (this.config.enableComplianceChecking && this.config.complianceFrameworks.length === 0) {
-      warnings.push('Compliance checking enabled but no frameworks specified');
+    if (
+      this.config.enableComplianceChecking &&
+      this.config.complianceFrameworks.length === 0
+    ) {
+      warnings.push("Compliance checking enabled but no frameworks specified");
     }
 
     // Validate authentication methods
-    if (this.config.enableAuthValidation && this.config.authMethods.length === 0) {
-      warnings.push('Authentication validation enabled but no methods configured');
+    if (
+      this.config.enableAuthValidation &&
+      this.config.authMethods.length === 0
+    ) {
+      warnings.push(
+        "Authentication validation enabled but no methods configured",
+      );
     }
 
     // Validate authorization policies
-    if (this.config.enableAuthzValidation && this.config.authzPolicies.length === 0) {
-      warnings.push('Authorization validation enabled but no policies configured');
+    if (
+      this.config.enableAuthzValidation &&
+      this.config.authzPolicies.length === 0
+    ) {
+      warnings.push(
+        "Authorization validation enabled but no policies configured",
+      );
     }
 
     // Validate threat detection rules
-    if (this.config.enableThreatDetection && this.config.threatRules.length === 0) {
-      warnings.push('Threat detection enabled but no rules configured');
+    if (
+      this.config.enableThreatDetection &&
+      this.config.threatRules.length === 0
+    ) {
+      warnings.push("Threat detection enabled but no rules configured");
     }
 
     // Generate suggestions
     if (!this.config.enableVulnerabilityScanning) {
-      suggestions.push('Enable vulnerability scanning for comprehensive security assessment');
+      suggestions.push(
+        "Enable vulnerability scanning for comprehensive security assessment",
+      );
     }
 
     if (!this.config.enableThreatDetection) {
-      suggestions.push('Enable threat detection for proactive security monitoring');
+      suggestions.push(
+        "Enable threat detection for proactive security monitoring",
+      );
     }
 
     if (this.config.complianceFrameworks.length < 2) {
-      suggestions.push('Consider checking multiple compliance frameworks for comprehensive coverage');
+      suggestions.push(
+        "Consider checking multiple compliance frameworks for comprehensive coverage",
+      );
     }
 
     return {
       valid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -1258,8 +1320,10 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Security assessment results
    */
-  private async performSecurityAssessment(context: QualityGateContext): Promise<SecurityAssessment> {
-    this.logger.debug('Performing comprehensive security assessment');
+  private async performSecurityAssessment(
+    context: QualityGateContext,
+  ): Promise<SecurityAssessment> {
+    this.logger.debug("Performing comprehensive security assessment");
 
     // Perform vulnerability scanning
     const vulnerabilities = await this.performVulnerabilityScanning(context);
@@ -1282,7 +1346,7 @@ export class SecurityQualityGate implements QualityGate {
       authentication,
       authorization,
       compliance,
-      threats
+      threats,
     );
 
     // Generate security recommendations
@@ -1291,7 +1355,7 @@ export class SecurityQualityGate implements QualityGate {
       authentication,
       authorization,
       compliance,
-      threats
+      threats,
     );
 
     return {
@@ -1301,7 +1365,7 @@ export class SecurityQualityGate implements QualityGate {
       compliance,
       threats,
       overallScore,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1310,7 +1374,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Vulnerability report
    */
-  private async performVulnerabilityScanning(context: QualityGateContext): Promise<VulnerabilityReport> {
+  private async performVulnerabilityScanning(
+    context: QualityGateContext,
+  ): Promise<VulnerabilityReport> {
     if (!this.config.enableVulnerabilityScanning) {
       return this.getEmptyVulnerabilityReport();
     }
@@ -1340,7 +1406,7 @@ export class SecurityQualityGate implements QualityGate {
           duration: 0,
           findingsCount: 0,
           results: {},
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -1355,7 +1421,7 @@ export class SecurityQualityGate implements QualityGate {
       toolResults,
       scanTime,
       coverage,
-      criticalFindings
+      criticalFindings,
     };
   }
 
@@ -1365,7 +1431,10 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Scan tool result
    */
-  private async executeScanningTool(tool: SecurityScanningTool, context: QualityGateContext): Promise<ScanToolResult> {
+  private async executeScanningTool(
+    tool: SecurityScanningTool,
+    context: QualityGateContext,
+  ): Promise<ScanToolResult> {
     const startTime = Date.now();
 
     // Mock implementation - in real scenario, this would call actual scanning tools
@@ -1385,14 +1454,15 @@ export class SecurityQualityGate implements QualityGate {
         if (Math.random() < 0.3) {
           criticalFindings.push({
             id: `dep-${Date.now()}`,
-            title: 'Critical Dependency Vulnerability',
-            description: 'Outdated dependency with known security vulnerability',
+            title: "Critical Dependency Vulnerability",
+            description:
+              "Outdated dependency with known security vulnerability",
             severity: ThreatSeverity.CRITICAL,
-            cveId: 'CVE-2023-12345',
+            cveId: "CVE-2023-12345",
             cvssScore: 9.8,
-            component: 'example-package@1.0.0',
-            remediation: 'Update to version 2.0.0 or later',
-            source: tool.name
+            component: "example-package@1.0.0",
+            remediation: "Update to version 2.0.0 or later",
+            source: tool.name,
           });
         }
         break;
@@ -1410,8 +1480,8 @@ export class SecurityQualityGate implements QualityGate {
       findingsCount,
       results: {
         findings: findingsCount,
-        criticalFindings
-      }
+        criticalFindings,
+      },
     };
   }
 
@@ -1420,7 +1490,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param toolResults - Scan tool results
    * @returns Aggregated vulnerability counts
    */
-  private aggregateVulnerabilities(toolResults: ScanToolResult[]): VulnerabilityCount {
+  private aggregateVulnerabilities(
+    toolResults: ScanToolResult[],
+  ): VulnerabilityCount {
     let critical = 0;
     let high = 0;
     let medium = 0;
@@ -1448,7 +1520,7 @@ export class SecurityQualityGate implements QualityGate {
    * @returns Coverage percentage
    */
   private calculateScanCoverage(toolResults: ScanToolResult[]): number {
-    const successfulScans = toolResults.filter(r => r.success).length;
+    const successfulScans = toolResults.filter((r) => r.success).length;
     const totalScans = toolResults.length;
 
     if (totalScans === 0) return 0;
@@ -1460,7 +1532,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Authentication report
    */
-  private async validateAuthentication(context: QualityGateContext): Promise<AuthenticationReport> {
+  private async validateAuthentication(
+    context: QualityGateContext,
+  ): Promise<AuthenticationReport> {
     if (!this.config.enableAuthValidation) {
       return this.getEmptyAuthenticationReport();
     }
@@ -1485,19 +1559,22 @@ export class SecurityQualityGate implements QualityGate {
           severity: ThreatSeverity.HIGH,
           description: `Authentication method ${method.type} validation failed`,
           affectedMethod: method.id,
-          remediation: methodResult.recommendations
+          remediation: methodResult.recommendations,
         });
       }
     }
 
-    const recommendations = this.generateAuthRecommendations(methodResults, issues);
+    const recommendations = this.generateAuthRecommendations(
+      methodResults,
+      issues,
+    );
 
     return {
       successRate,
       failedAttempts,
       methodResults,
       issues,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1507,7 +1584,10 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Authentication method result
    */
-  private async validateAuthMethod(method: AuthenticationMethod, context: QualityGateContext): Promise<AuthMethodResult> {
+  private async validateAuthMethod(
+    method: AuthenticationMethod,
+    context: QualityGateContext,
+  ): Promise<AuthMethodResult> {
     // Mock authentication method validation
     const success = Math.random() > 0.1; // 90% success rate
     const strengthScore = 70 + Math.random() * 30; // 70-100 score
@@ -1516,12 +1596,21 @@ export class SecurityQualityGate implements QualityGate {
       currentLevel: this.determineStrengthLevel(strengthScore),
       requiredLevel: method.strengthLevel,
       score: strengthScore,
-      weaknesses: success ? [] : ['Insufficient token entropy', 'Weak signature algorithm'],
-      improvements: ['Implement token rotation', 'Use stronger encryption']
+      weaknesses: success
+        ? []
+        : ["Insufficient token entropy", "Weak signature algorithm"],
+      improvements: ["Implement token rotation", "Use stronger encryption"],
     };
 
-    const issues = success ? [] : ['Token validation failed', 'Insufficient security headers'];
-    const recommendations = success ? ['Monitor token usage'] : ['Update authentication configuration', 'Implement stronger validation'];
+    const issues = success
+      ? []
+      : ["Token validation failed", "Insufficient security headers"];
+    const recommendations = success
+      ? ["Monitor token usage"]
+      : [
+          "Update authentication configuration",
+          "Implement stronger validation",
+        ];
 
     return {
       methodId: method.id,
@@ -1529,7 +1618,7 @@ export class SecurityQualityGate implements QualityGate {
       success,
       strengthAssessment,
       issues,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1550,13 +1639,17 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Authorization report
    */
-  private async validateAuthorization(context: QualityGateContext): Promise<AuthorizationReport> {
+  private async validateAuthorization(
+    context: QualityGateContext,
+  ): Promise<AuthorizationReport> {
     if (!this.config.enableAuthzValidation) {
       return this.getEmptyAuthorizationReport();
     }
 
     // Mock authorization validation
-    const violations = Math.floor(Math.random() * this.config.maxAuthzViolations);
+    const violations = Math.floor(
+      Math.random() * this.config.maxAuthzViolations,
+    );
     const policyResults: PolicyValidationResult[] = [];
     const accessIssues: AccessControlIssue[] = [];
     const privilegeRisks: PrivilegeRisk[] = [];
@@ -1574,19 +1667,22 @@ export class SecurityQualityGate implements QualityGate {
           severity: ThreatSeverity.MEDIUM,
           description: `Authorization policy ${policy.name} validation failed`,
           affectedResources: [`function-${context.functionId}`],
-          remediation: policyResult.recommendations
+          remediation: policyResult.recommendations,
         });
       }
     }
 
-    const recommendations = this.generateAuthzRecommendations(policyResults, accessIssues);
+    const recommendations = this.generateAuthzRecommendations(
+      policyResults,
+      accessIssues,
+    );
 
     return {
       violations,
       policyResults,
       accessIssues,
       privilegeRisks,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1596,7 +1692,10 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Policy validation result
    */
-  private async validateAuthzPolicy(policy: AuthorizationPolicy, context: QualityGateContext): Promise<PolicyValidationResult> {
+  private async validateAuthzPolicy(
+    policy: AuthorizationPolicy,
+    context: QualityGateContext,
+  ): Promise<PolicyValidationResult> {
     // Mock policy validation
     const success = Math.random() > 0.15; // 85% success rate
     const effectivenessScore = 75 + Math.random() * 25;
@@ -1605,20 +1704,23 @@ export class SecurityQualityGate implements QualityGate {
 
     if (!success) {
       ruleViolations.push({
-        ruleId: policy.rules[0]?.id || 'unknown',
+        ruleId: policy.rules[0]?.id || "unknown",
         type: ViolationType.UNAUTHORIZED_ACCESS,
-        description: 'Unauthorized access attempt detected',
+        description: "Unauthorized access attempt detected",
         severity: ThreatSeverity.HIGH,
         context: context.userContext.userId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      gaps.push('Missing resource-level permissions', 'Inadequate role separation');
+      gaps.push(
+        "Missing resource-level permissions",
+        "Inadequate role separation",
+      );
     }
 
-    const recommendations = success ?
-      ['Monitor policy effectiveness'] :
-      ['Review policy rules', 'Implement stricter access controls'];
+    const recommendations = success
+      ? ["Monitor policy effectiveness"]
+      : ["Review policy rules", "Implement stricter access controls"];
 
     return {
       policyId: policy.id,
@@ -1627,7 +1729,7 @@ export class SecurityQualityGate implements QualityGate {
       effectivenessScore,
       ruleViolations,
       gaps,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1636,7 +1738,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Compliance report
    */
-  private async checkCompliance(context: QualityGateContext): Promise<ComplianceReport> {
+  private async checkCompliance(
+    context: QualityGateContext,
+  ): Promise<ComplianceReport> {
     if (!this.config.enableComplianceChecking) {
       return this.getEmptyComplianceReport();
     }
@@ -1653,11 +1757,11 @@ export class SecurityQualityGate implements QualityGate {
         gaps.push({
           id: `gap-${framework}`,
           framework,
-          requirement: 'Data protection controls',
+          requirement: "Data protection controls",
           severity: ThreatSeverity.MEDIUM,
           description: `${framework} compliance requirements not fully met`,
           effort: EffortLevel.MEDIUM,
-          targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+          targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         });
 
         requiredActions.push({
@@ -1665,9 +1769,9 @@ export class SecurityQualityGate implements QualityGate {
           type: ActionType.TECHNICAL_IMPLEMENTATION,
           description: `Implement ${framework} compliance controls`,
           priority: 2,
-          responsible: 'Security Team',
+          responsible: "Security Team",
           dueDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days
-          dependencies: []
+          dependencies: [],
         });
       }
     }
@@ -1680,7 +1784,7 @@ export class SecurityQualityGate implements QualityGate {
       frameworkResults,
       gaps,
       requiredActions,
-      timeline
+      timeline,
     };
   }
 
@@ -1690,12 +1794,18 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Framework compliance result
    */
-  private async checkFrameworkCompliance(framework: ComplianceFramework, context: QualityGateContext): Promise<FrameworkComplianceResult> {
+  private async checkFrameworkCompliance(
+    framework: ComplianceFramework,
+    context: QualityGateContext,
+  ): Promise<FrameworkComplianceResult> {
     // Mock compliance checking
     const score = 80 + Math.random() * 20; // 80-100 score
-    const status = score >= 95 ? ComplianceStatus.COMPLIANT :
-                   score >= 75 ? ComplianceStatus.PARTIAL :
-                   ComplianceStatus.NON_COMPLIANT;
+    const status =
+      score >= 95
+        ? ComplianceStatus.COMPLIANT
+        : score >= 75
+          ? ComplianceStatus.PARTIAL
+          : ComplianceStatus.NON_COMPLIANT;
 
     const requirementsChecked = Math.floor(Math.random() * 50) + 10;
     const requirementsPassed = Math.floor(requirementsChecked * (score / 100));
@@ -1704,8 +1814,14 @@ export class SecurityQualityGate implements QualityGate {
     const recommendations: string[] = [];
 
     if (status !== ComplianceStatus.COMPLIANT) {
-      criticalFailures.push('Data encryption not implemented', 'Access logs incomplete');
-      recommendations.push('Implement end-to-end encryption', 'Enhance audit logging');
+      criticalFailures.push(
+        "Data encryption not implemented",
+        "Access logs incomplete",
+      );
+      recommendations.push(
+        "Implement end-to-end encryption",
+        "Enhance audit logging",
+      );
     }
 
     return {
@@ -1715,7 +1831,7 @@ export class SecurityQualityGate implements QualityGate {
       requirementsChecked,
       requirementsPassed,
       criticalFailures,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1724,10 +1840,15 @@ export class SecurityQualityGate implements QualityGate {
    * @param frameworkResults - Framework results
    * @returns Overall compliance score
    */
-  private calculateComplianceScore(frameworkResults: FrameworkComplianceResult[]): number {
+  private calculateComplianceScore(
+    frameworkResults: FrameworkComplianceResult[],
+  ): number {
     if (frameworkResults.length === 0) return 0;
 
-    const totalScore = frameworkResults.reduce((sum, result) => sum + result.score, 0);
+    const totalScore = frameworkResults.reduce(
+      (sum, result) => sum + result.score,
+      0,
+    );
     return totalScore / frameworkResults.length;
   }
 
@@ -1736,7 +1857,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param actions - Required actions
    * @returns Compliance timeline
    */
-  private createComplianceTimeline(actions: ComplianceAction[]): ComplianceTimeline {
+  private createComplianceTimeline(
+    actions: ComplianceAction[],
+  ): ComplianceTimeline {
     const now = new Date();
 
     return {
@@ -1748,8 +1871,8 @@ export class SecurityQualityGate implements QualityGate {
         name: action.description,
         targetDate: action.dueDate,
         status: MilestoneStatus.NOT_STARTED,
-        dependencies: action.dependencies
-      }))
+        dependencies: action.dependencies,
+      })),
     };
   }
 
@@ -1758,7 +1881,9 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Threat report
    */
-  private async detectThreats(context: QualityGateContext): Promise<ThreatReport> {
+  private async detectThreats(
+    context: QualityGateContext,
+  ): Promise<ThreatReport> {
     if (!this.config.enableThreatDetection) {
       return this.getEmptyThreatReport();
     }
@@ -1772,7 +1897,7 @@ export class SecurityQualityGate implements QualityGate {
       [ThreatSeverity.HIGH]: 0,
       [ThreatSeverity.MEDIUM]: 0,
       [ThreatSeverity.LOW]: 0,
-      [ThreatSeverity.INFO]: 0
+      [ThreatSeverity.INFO]: 0,
     };
 
     for (const rule of this.config.threatRules) {
@@ -1786,14 +1911,15 @@ export class SecurityQualityGate implements QualityGate {
       alertsBySeverity[rule.severity] += result.threatsDetected;
     }
 
-    const recommendations = this.generateThreatRecommendations(detectionResults);
+    const recommendations =
+      this.generateThreatRecommendations(detectionResults);
 
     return {
       threatsDetected: totalThreats,
       alertsBySeverity,
       detectionResults,
       attackPatterns,
-      recommendations
+      recommendations,
     };
   }
 
@@ -1803,9 +1929,13 @@ export class SecurityQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Threat detection result
    */
-  private async executeThreatRule(rule: ThreatDetectionRule, context: QualityGateContext): Promise<ThreatDetectionResult> {
+  private async executeThreatRule(
+    rule: ThreatDetectionRule,
+    context: QualityGateContext,
+  ): Promise<ThreatDetectionResult> {
     // Mock threat detection
-    const threatsDetected = Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 1 : 0;
+    const threatsDetected =
+      Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 1 : 0;
     const accuracy = 85 + Math.random() * 15; // 85-100% accuracy
     const falsePositiveRate = Math.random() * 10; // 0-10%
 
@@ -1819,7 +1949,7 @@ export class SecurityQualityGate implements QualityGate {
         timestamp: new Date(),
         source: context.functionId,
         confidence: accuracy / 100,
-        actions: ['Monitor activity', 'Review access logs']
+        actions: ["Monitor activity", "Review access logs"],
       });
     }
 
@@ -1829,7 +1959,7 @@ export class SecurityQualityGate implements QualityGate {
       threatsDetected,
       accuracy,
       falsePositiveRate,
-      threatDetails
+      threatDetails,
     };
   }
 
@@ -1838,73 +1968,82 @@ export class SecurityQualityGate implements QualityGate {
    * @param assessment - Security assessment
    * @returns Threshold evaluation results
    */
-  private async evaluateSecurityThresholds(assessment: SecurityAssessment): Promise<ThresholdEvaluation[]> {
+  private async evaluateSecurityThresholds(
+    assessment: SecurityAssessment,
+  ): Promise<ThresholdEvaluation[]> {
     const evaluations: ThresholdEvaluation[] = [];
 
     // Evaluate critical vulnerabilities threshold
     evaluations.push({
-      thresholdId: 'critical-vulnerabilities',
-      metric: 'criticalVulnerabilities',
+      thresholdId: "critical-vulnerabilities",
+      metric: "criticalVulnerabilities",
       actualValue: assessment.vulnerabilities.vulnerabilities.critical,
       thresholdValue: this.config.maxCriticalVulnerabilities,
-      operator: 'lte' as any,
-      passed: assessment.vulnerabilities.vulnerabilities.critical <= this.config.maxCriticalVulnerabilities,
-      details: `Critical vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.critical} vs threshold: ${this.config.maxCriticalVulnerabilities}`
+      operator: "lte" as any,
+      passed:
+        assessment.vulnerabilities.vulnerabilities.critical <=
+        this.config.maxCriticalVulnerabilities,
+      details: `Critical vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.critical} vs threshold: ${this.config.maxCriticalVulnerabilities}`,
     });
 
     // Evaluate high vulnerabilities threshold
     evaluations.push({
-      thresholdId: 'high-vulnerabilities',
-      metric: 'highVulnerabilities',
+      thresholdId: "high-vulnerabilities",
+      metric: "highVulnerabilities",
       actualValue: assessment.vulnerabilities.vulnerabilities.high,
       thresholdValue: this.config.maxHighVulnerabilities,
-      operator: 'lte' as any,
-      passed: assessment.vulnerabilities.vulnerabilities.high <= this.config.maxHighVulnerabilities,
-      details: `High vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.high} vs threshold: ${this.config.maxHighVulnerabilities}`
+      operator: "lte" as any,
+      passed:
+        assessment.vulnerabilities.vulnerabilities.high <=
+        this.config.maxHighVulnerabilities,
+      details: `High vulnerabilities: ${assessment.vulnerabilities.vulnerabilities.high} vs threshold: ${this.config.maxHighVulnerabilities}`,
     });
 
     // Evaluate authentication success rate
     evaluations.push({
-      thresholdId: 'auth-success-rate',
-      metric: 'authSuccessRate',
+      thresholdId: "auth-success-rate",
+      metric: "authSuccessRate",
       actualValue: assessment.authentication.successRate,
       thresholdValue: this.config.minAuthSuccessRate,
-      operator: 'gte' as any,
-      passed: assessment.authentication.successRate >= this.config.minAuthSuccessRate,
-      details: `Authentication success rate: ${assessment.authentication.successRate}% vs threshold: ${this.config.minAuthSuccessRate}%`
+      operator: "gte" as any,
+      passed:
+        assessment.authentication.successRate >= this.config.minAuthSuccessRate,
+      details: `Authentication success rate: ${assessment.authentication.successRate}% vs threshold: ${this.config.minAuthSuccessRate}%`,
     });
 
     // Evaluate authorization violations
     evaluations.push({
-      thresholdId: 'authz-violations',
-      metric: 'authzViolations',
+      thresholdId: "authz-violations",
+      metric: "authzViolations",
       actualValue: assessment.authorization.violations,
       thresholdValue: this.config.maxAuthzViolations,
-      operator: 'lte' as any,
-      passed: assessment.authorization.violations <= this.config.maxAuthzViolations,
-      details: `Authorization violations: ${assessment.authorization.violations} vs threshold: ${this.config.maxAuthzViolations}`
+      operator: "lte" as any,
+      passed:
+        assessment.authorization.violations <= this.config.maxAuthzViolations,
+      details: `Authorization violations: ${assessment.authorization.violations} vs threshold: ${this.config.maxAuthzViolations}`,
     });
 
     // Evaluate compliance score
     evaluations.push({
-      thresholdId: 'compliance-score',
-      metric: 'complianceScore',
+      thresholdId: "compliance-score",
+      metric: "complianceScore",
       actualValue: assessment.compliance.overallScore,
       thresholdValue: this.config.minComplianceScore,
-      operator: 'gte' as any,
-      passed: assessment.compliance.overallScore >= this.config.minComplianceScore,
-      details: `Compliance score: ${assessment.compliance.overallScore} vs threshold: ${this.config.minComplianceScore}`
+      operator: "gte" as any,
+      passed:
+        assessment.compliance.overallScore >= this.config.minComplianceScore,
+      details: `Compliance score: ${assessment.compliance.overallScore} vs threshold: ${this.config.minComplianceScore}`,
     });
 
     // Evaluate threat alerts
     evaluations.push({
-      thresholdId: 'threat-alerts',
-      metric: 'threatAlerts',
+      thresholdId: "threat-alerts",
+      metric: "threatAlerts",
       actualValue: assessment.threats.threatsDetected,
       thresholdValue: this.config.maxThreatAlerts,
-      operator: 'lte' as any,
+      operator: "lte" as any,
       passed: assessment.threats.threatsDetected <= this.config.maxThreatAlerts,
-      details: `Threat alerts: ${assessment.threats.threatsDetected} vs threshold: ${this.config.maxThreatAlerts}`
+      details: `Threat alerts: ${assessment.threats.threatsDetected} vs threshold: ${this.config.maxThreatAlerts}`,
     });
 
     return evaluations;
@@ -1916,10 +2055,15 @@ export class SecurityQualityGate implements QualityGate {
    * @param thresholdEvaluations - Threshold evaluations
    * @returns Security analysis
    */
-  private analyzeSecurityResults(assessment: SecurityAssessment, thresholdEvaluations: ThresholdEvaluation[]): any {
-    const failedThresholds = thresholdEvaluations.filter(e => !e.passed);
-    const criticalIssues = failedThresholds.filter(e =>
-      e.metric === 'criticalVulnerabilities' || e.metric === 'authSuccessRate'
+  private analyzeSecurityResults(
+    assessment: SecurityAssessment,
+    thresholdEvaluations: ThresholdEvaluation[],
+  ): any {
+    const failedThresholds = thresholdEvaluations.filter((e) => !e.passed);
+    const criticalIssues = failedThresholds.filter(
+      (e) =>
+        e.metric === "criticalVulnerabilities" ||
+        e.metric === "authSuccessRate",
     );
 
     let riskLevel: RiskLevel;
@@ -1935,10 +2079,16 @@ export class SecurityQualityGate implements QualityGate {
 
     return {
       riskLevel,
-      criticalIssues: criticalIssues.map(t => t.details),
-      securityGaps: assessment.compliance.gaps.map(g => g.description),
-      threatLandscape: assessment.threats.detectionResults.length > 0 ? 'Active threats detected' : 'No immediate threats',
-      recommendedActions: this.generateSecurityActions(assessment, failedThresholds)
+      criticalIssues: criticalIssues.map((t) => t.details),
+      securityGaps: assessment.compliance.gaps.map((g) => g.description),
+      threatLandscape:
+        assessment.threats.detectionResults.length > 0
+          ? "Active threats detected"
+          : "No immediate threats",
+      recommendedActions: this.generateSecurityActions(
+        assessment,
+        failedThresholds,
+      ),
     };
   }
 
@@ -1948,27 +2098,30 @@ export class SecurityQualityGate implements QualityGate {
    * @param failedThresholds - Failed thresholds
    * @returns Array of recommended actions
    */
-  private generateSecurityActions(assessment: SecurityAssessment, failedThresholds: ThresholdEvaluation[]): string[] {
+  private generateSecurityActions(
+    assessment: SecurityAssessment,
+    failedThresholds: ThresholdEvaluation[],
+  ): string[] {
     const actions: string[] = [];
 
     if (assessment.vulnerabilities.vulnerabilities.critical > 0) {
-      actions.push('Address critical vulnerabilities immediately');
+      actions.push("Address critical vulnerabilities immediately");
     }
 
     if (assessment.authentication.successRate < 95) {
-      actions.push('Investigate authentication failures and improve security');
+      actions.push("Investigate authentication failures and improve security");
     }
 
     if (assessment.authorization.violations > 0) {
-      actions.push('Review and strengthen authorization policies');
+      actions.push("Review and strengthen authorization policies");
     }
 
     if (assessment.compliance.overallScore < 90) {
-      actions.push('Implement compliance improvements');
+      actions.push("Implement compliance improvements");
     }
 
     if (assessment.threats.threatsDetected > 0) {
-      actions.push('Respond to detected security threats');
+      actions.push("Respond to detected security threats");
     }
 
     return actions;
@@ -1988,7 +2141,7 @@ export class SecurityQualityGate implements QualityGate {
     authentication: AuthenticationReport,
     authorization: AuthorizationReport,
     compliance: ComplianceReport,
-    threats: ThreatReport
+    threats: ThreatReport,
   ): number {
     let score = 100;
 
@@ -2027,13 +2180,13 @@ export class SecurityQualityGate implements QualityGate {
     authentication: AuthenticationReport,
     authorization: AuthorizationReport,
     compliance: ComplianceReport,
-    threats: ThreatReport
+    threats: ThreatReport,
   ): string[] {
     const recommendations: string[] = [];
 
     // Add vulnerability recommendations
     if (vulnerabilities.vulnerabilities.critical > 0) {
-      recommendations.push('Prioritize patching critical vulnerabilities');
+      recommendations.push("Prioritize patching critical vulnerabilities");
     }
 
     // Add authentication recommendations
@@ -2043,7 +2196,7 @@ export class SecurityQualityGate implements QualityGate {
     recommendations.push(...authorization.recommendations);
 
     // Add compliance recommendations
-    compliance.frameworkResults.forEach(result => {
+    compliance.frameworkResults.forEach((result) => {
       recommendations.push(...result.recommendations);
     });
 
@@ -2059,10 +2212,15 @@ export class SecurityQualityGate implements QualityGate {
    * @param thresholdEvaluations - Threshold evaluations
    * @returns Gate status
    */
-  private determineGateStatus(assessment: SecurityAssessment, thresholdEvaluations: ThresholdEvaluation[]): QualityGateStatus {
-    const failedThresholds = thresholdEvaluations.filter(e => !e.passed);
-    const criticalFailures = failedThresholds.filter(e =>
-      e.metric === 'criticalVulnerabilities' || e.metric === 'authSuccessRate'
+  private determineGateStatus(
+    assessment: SecurityAssessment,
+    thresholdEvaluations: ThresholdEvaluation[],
+  ): QualityGateStatus {
+    const failedThresholds = thresholdEvaluations.filter((e) => !e.passed);
+    const criticalFailures = failedThresholds.filter(
+      (e) =>
+        e.metric === "criticalVulnerabilities" ||
+        e.metric === "authSuccessRate",
     );
 
     if (criticalFailures.length > 0) {
@@ -2091,17 +2249,22 @@ export class SecurityQualityGate implements QualityGate {
    * @param analysis - Security analysis
    * @returns Array of recommendations
    */
-  private generateSecurityRecommendations(assessment: SecurityAssessment, analysis: any): string[] {
+  private generateSecurityRecommendations(
+    assessment: SecurityAssessment,
+    analysis: any,
+  ): string[] {
     const recommendations: string[] = [];
 
     recommendations.push(...assessment.recommendations);
 
     if (analysis.riskLevel === RiskLevel.CRITICAL) {
-      recommendations.push('Immediate security intervention required');
+      recommendations.push("Immediate security intervention required");
     }
 
     if (analysis.criticalIssues.length > 0) {
-      recommendations.push('Address critical security issues before deployment');
+      recommendations.push(
+        "Address critical security issues before deployment",
+      );
     }
 
     return [...new Set(recommendations)];
@@ -2112,25 +2275,34 @@ export class SecurityQualityGate implements QualityGate {
    * @param assessment - Security assessment
    * @param warnings - Warnings array to populate
    */
-  private addSecurityWarnings(assessment: SecurityAssessment, warnings: string[]): void {
+  private addSecurityWarnings(
+    assessment: SecurityAssessment,
+    warnings: string[],
+  ): void {
     if (assessment.vulnerabilities.vulnerabilities.critical > 0) {
-      warnings.push(`${assessment.vulnerabilities.vulnerabilities.critical} critical vulnerabilities detected`);
+      warnings.push(
+        `${assessment.vulnerabilities.vulnerabilities.critical} critical vulnerabilities detected`,
+      );
     }
 
     if (assessment.authentication.successRate < 95) {
-      warnings.push('Authentication success rate below recommended threshold');
+      warnings.push("Authentication success rate below recommended threshold");
     }
 
     if (assessment.authorization.violations > 0) {
-      warnings.push(`${assessment.authorization.violations} authorization violations detected`);
+      warnings.push(
+        `${assessment.authorization.violations} authorization violations detected`,
+      );
     }
 
     if (assessment.compliance.overallScore < 80) {
-      warnings.push('Compliance score below acceptable level');
+      warnings.push("Compliance score below acceptable level");
     }
 
     if (assessment.threats.threatsDetected > 0) {
-      warnings.push(`${assessment.threats.threatsDetected} security threats detected`);
+      warnings.push(
+        `${assessment.threats.threatsDetected} security threats detected`,
+      );
     }
   }
 
@@ -2139,13 +2311,15 @@ export class SecurityQualityGate implements QualityGate {
    * @param assessment - Security assessment
    * @returns Framework security metrics
    */
-  private convertToFrameworkSecurityMetrics(assessment: SecurityAssessment): SecurityMetrics {
+  private convertToFrameworkSecurityMetrics(
+    assessment: SecurityAssessment,
+  ): SecurityMetrics {
     return {
       vulnerabilities: assessment.vulnerabilities.vulnerabilities,
       authSuccessRate: assessment.authentication.successRate,
       authzViolations: assessment.authorization.violations,
       complianceScore: assessment.compliance.overallScore,
-      threatAlerts: assessment.threats.threatsDetected
+      threatAlerts: assessment.threats.threatsDetected,
     };
   }
 
@@ -2156,7 +2330,7 @@ export class SecurityQualityGate implements QualityGate {
       toolResults: [],
       scanTime: 0,
       coverage: 0,
-      criticalFindings: []
+      criticalFindings: [],
     };
   }
 
@@ -2166,7 +2340,7 @@ export class SecurityQualityGate implements QualityGate {
       failedAttempts: 0,
       methodResults: [],
       issues: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -2176,7 +2350,7 @@ export class SecurityQualityGate implements QualityGate {
       policyResults: [],
       accessIssues: [],
       privilegeRisks: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -2190,8 +2364,8 @@ export class SecurityQualityGate implements QualityGate {
         assessmentDate: new Date(),
         nextAssessment: new Date(),
         deadline: new Date(),
-        milestones: []
-      }
+        milestones: [],
+      },
     };
   }
 
@@ -2203,11 +2377,11 @@ export class SecurityQualityGate implements QualityGate {
         [ThreatSeverity.HIGH]: 0,
         [ThreatSeverity.MEDIUM]: 0,
         [ThreatSeverity.LOW]: 0,
-        [ThreatSeverity.INFO]: 0
+        [ThreatSeverity.INFO]: 0,
       },
       detectionResults: [],
       attackPatterns: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -2222,8 +2396,8 @@ export class SecurityQualityGate implements QualityGate {
         dbConnectionPool: 0,
         networkBandwidth: 0,
         diskIo: 0,
-        cacheHitRate: 0
-      }
+        cacheHitRate: 0,
+      },
     };
   }
 
@@ -2233,7 +2407,7 @@ export class SecurityQualityGate implements QualityGate {
       authSuccessRate: 100,
       authzViolations: 0,
       complianceScore: 100,
-      threatAlerts: 0
+      threatAlerts: 0,
     };
   }
 
@@ -2243,51 +2417,65 @@ export class SecurityQualityGate implements QualityGate {
       codeCoverage: 0,
       functionCoverage: 0,
       branchCoverage: 0,
-      integrationCoverage: 0
+      integrationCoverage: 0,
     };
   }
 
   // Helper methods for generating recommendations
-  private generateAuthRecommendations(methodResults: AuthMethodResult[], issues: AuthenticationIssue[]): string[] {
+  private generateAuthRecommendations(
+    methodResults: AuthMethodResult[],
+    issues: AuthenticationIssue[],
+  ): string[] {
     const recommendations: string[] = [];
 
     if (issues.length > 0) {
-      recommendations.push('Address authentication vulnerabilities');
+      recommendations.push("Address authentication vulnerabilities");
     }
 
-    methodResults.forEach(result => {
+    methodResults.forEach((result) => {
       recommendations.push(...result.recommendations);
     });
 
     return [...new Set(recommendations)];
   }
 
-  private generateAuthzRecommendations(policyResults: PolicyValidationResult[], issues: AccessControlIssue[]): string[] {
+  private generateAuthzRecommendations(
+    policyResults: PolicyValidationResult[],
+    issues: AccessControlIssue[],
+  ): string[] {
     const recommendations: string[] = [];
 
     if (issues.length > 0) {
-      recommendations.push('Strengthen access control policies');
+      recommendations.push("Strengthen access control policies");
     }
 
-    policyResults.forEach(result => {
+    policyResults.forEach((result) => {
       recommendations.push(...result.recommendations);
     });
 
     return [...new Set(recommendations)];
   }
 
-  private generateThreatRecommendations(detectionResults: ThreatDetectionResult[]): string[] {
+  private generateThreatRecommendations(
+    detectionResults: ThreatDetectionResult[],
+  ): string[] {
     const recommendations: string[] = [];
 
-    const highConfidenceThreats = detectionResults.filter(r => r.accuracy > 90 && r.threatsDetected > 0);
+    const highConfidenceThreats = detectionResults.filter(
+      (r) => r.accuracy > 90 && r.threatsDetected > 0,
+    );
 
     if (highConfidenceThreats.length > 0) {
-      recommendations.push('Investigate high-confidence threat detections');
-      recommendations.push('Review security monitoring and response procedures');
+      recommendations.push("Investigate high-confidence threat detections");
+      recommendations.push(
+        "Review security monitoring and response procedures",
+      );
     }
 
-    if (detectionResults.some(r => r.falsePositiveRate > 20)) {
-      recommendations.push('Tune threat detection rules to reduce false positives');
+    if (detectionResults.some((r) => r.falsePositiveRate > 20)) {
+      recommendations.push(
+        "Tune threat detection rules to reduce false positives",
+      );
     }
 
     return recommendations;

@@ -340,7 +340,11 @@ export interface ComplianceRequirement {
   /** Priority */
   priority: "low" | "medium" | "high" | "critical";
   /** Implementation status */
-  implementationStatus: "not_started" | "in_progress" | "implemented" | "verified";
+  implementationStatus:
+    | "not_started"
+    | "in_progress"
+    | "implemented"
+    | "verified";
 }
 
 /**
@@ -386,7 +390,13 @@ export interface RuleCondition {
   /** Field to evaluate */
   field: string;
   /** Operator */
-  operator: "equals" | "not_equals" | "contains" | "regex" | "greater_than" | "less_than";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "contains"
+    | "regex"
+    | "greater_than"
+    | "less_than";
   /** Value to compare */
   value: unknown;
   /** Logical operator */
@@ -456,7 +466,12 @@ export interface SecurityIncident {
   /** Incident ID */
   incidentId: string;
   /** Incident type */
-  type: "authentication_failure" | "authorization_breach" | "data_exfiltration" | "malware_detected" | "policy_violation";
+  type:
+    | "authentication_failure"
+    | "authorization_breach"
+    | "data_exfiltration"
+    | "malware_detected"
+    | "policy_violation";
   /** Severity */
   severity: "low" | "medium" | "high" | "critical";
   /** Status */
@@ -488,11 +503,19 @@ export class ParlantSecurityInfrastructureIntegrationService
   extends EventEmitter
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(ParlantSecurityInfrastructureIntegrationService.name);
+  private readonly logger = new Logger(
+    ParlantSecurityInfrastructureIntegrationService.name,
+  );
 
   // Integration management
-  private readonly activeIntegrations = new Map<string, SecurityInfrastructureRecord>();
-  private readonly threatIntelligenceFeeds = new Map<string, ThreatIntelligenceFeed>();
+  private readonly activeIntegrations = new Map<
+    string,
+    SecurityInfrastructureRecord
+  >();
+  private readonly threatIntelligenceFeeds = new Map<
+    string,
+    ThreatIntelligenceFeed
+  >();
   private readonly securityIncidents = new Map<string, SecurityIncident>();
   private readonly auditQueue = new Array<SecurityAuditEntry>();
 
@@ -538,14 +561,18 @@ export class ParlantSecurityInfrastructureIntegrationService
 
   constructor() {
     super();
-    this.logger.log("🚀 Initializing PARLANT Security Infrastructure Integration Service");
+    this.logger.log(
+      "🚀 Initializing PARLANT Security Infrastructure Integration Service",
+    );
   }
 
   /**
    * Initialize the Security Infrastructure Integration Service
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log("🔄 Starting Security Infrastructure Integration initialization...");
+    this.logger.log(
+      "🔄 Starting Security Infrastructure Integration initialization...",
+    );
 
     try {
       await this.initializeSecurityIntegrations();
@@ -553,10 +580,15 @@ export class ParlantSecurityInfrastructureIntegrationService
       await this.initializeThreatIntelligence();
       await this.startBackgroundTasks();
 
-      this.logger.log("✅ Security Infrastructure Integration Service initialized successfully");
+      this.logger.log(
+        "✅ Security Infrastructure Integration Service initialized successfully",
+      );
       this.emit("security:infrastructure:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Security Infrastructure Integration Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Security Infrastructure Integration Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Security Infrastructure Integration initialization failed",
         "SECURITY_INFRASTRUCTURE_INIT_ERROR",
@@ -569,13 +601,17 @@ export class ParlantSecurityInfrastructureIntegrationService
    * Clean up resources on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log("🔄 Shutting down Security Infrastructure Integration Service...");
+    this.logger.log(
+      "🔄 Shutting down Security Infrastructure Integration Service...",
+    );
 
     await this.stopBackgroundTasks();
     await this.processRemainingAuditEvents();
     await this.finalizeSecurityReports();
 
-    this.logger.log("✅ Security Infrastructure Integration Service shutdown complete");
+    this.logger.log(
+      "✅ Security Infrastructure Integration Service shutdown complete",
+    );
   }
 
   /**
@@ -602,7 +638,11 @@ export class ParlantSecurityInfrastructureIntegrationService
         eventData,
         riskLevel,
         complianceImpact: this.determineComplianceImpact(type, eventData),
-        responseActions: await this.determineResponseActions(type, riskLevel, eventData),
+        responseActions: await this.determineResponseActions(
+          type,
+          riskLevel,
+          eventData,
+        ),
       };
 
       // Add to audit queue
@@ -634,7 +674,11 @@ export class ParlantSecurityInfrastructureIntegrationService
       throw new ParlantIntegrationError(
         "Security audit logging failed",
         "SECURITY_AUDIT_LOG_ERROR",
-        { type, riskLevel, error: error instanceof Error ? error.message : String(error) },
+        {
+          type,
+          riskLevel,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -655,15 +699,20 @@ export class ParlantSecurityInfrastructureIntegrationService
       // Check against all threat intelligence feeds
       for (const feed of this.threatIntelligenceFeeds.values()) {
         const matchingIndicator = feed.indicators.find(
-          indicator => indicator.type === indicatorType && indicator.value === indicatorValue,
+          (indicator) =>
+            indicator.type === indicatorType &&
+            indicator.value === indicatorValue,
         );
 
         if (matchingIndicator) {
-          this.logger.warn(`🚨 Threat detected: ${indicatorType}:${indicatorValue}`, {
-            threatLevel: matchingIndicator.threatLevel,
-            confidence: matchingIndicator.confidenceScore,
-            feed: feed.name,
-          });
+          this.logger.warn(
+            `🚨 Threat detected: ${indicatorType}:${indicatorValue}`,
+            {
+              threatLevel: matchingIndicator.threatLevel,
+              confidence: matchingIndicator.confidenceScore,
+              feed: feed.name,
+            },
+          );
 
           return {
             isThreat: true,
@@ -685,7 +734,12 @@ export class ParlantSecurityInfrastructureIntegrationService
    * Create security incident
    */
   async createSecurityIncident(
-    type: "authentication_failure" | "authorization_breach" | "data_exfiltration" | "malware_detected" | "policy_violation",
+    type:
+      | "authentication_failure"
+      | "authorization_breach"
+      | "data_exfiltration"
+      | "malware_detected"
+      | "policy_violation",
     severity: "low" | "medium" | "high" | "critical",
     affectedSystems: string[],
     indicators?: ThreatIndicator[],
@@ -702,7 +756,10 @@ export class ParlantSecurityInfrastructureIntegrationService
         detectionTime: new Date(),
         affectedSystems,
         indicators: indicators || [],
-        responseActions: await this.generateIncidentResponseActions(type, severity),
+        responseActions: await this.generateIncidentResponseActions(
+          type,
+          severity,
+        ),
         investigationNotes: [description || "Incident created automatically"],
       };
 
@@ -733,7 +790,11 @@ export class ParlantSecurityInfrastructureIntegrationService
       throw new ParlantIntegrationError(
         "Security incident creation failed",
         "SECURITY_INCIDENT_CREATE_ERROR",
-        { type, severity, error: error instanceof Error ? error.message : String(error) },
+        {
+          type,
+          severity,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -757,7 +818,12 @@ export class ParlantSecurityInfrastructureIntegrationService
 
       // Run compliance rules
       for (const rule of this.complianceConfig.monitoringRules) {
-        const ruleResult = await this.evaluateComplianceRule(rule, operation, data, userContext);
+        const ruleResult = await this.evaluateComplianceRule(
+          rule,
+          operation,
+          data,
+          userContext,
+        );
 
         if (!ruleResult.compliant) {
           if (rule.severity === "error" || rule.severity === "critical") {
@@ -771,7 +837,8 @@ export class ParlantSecurityInfrastructureIntegrationService
       // Calculate compliance score
       const totalRules = this.complianceConfig.monitoringRules.length;
       const passedRules = totalRules - violations.length;
-      const complianceScore = totalRules > 0 ? (passedRules / totalRules) * 100 : 100;
+      const complianceScore =
+        totalRules > 0 ? (passedRules / totalRules) * 100 : 100;
 
       // Log compliance event
       await this.logSecurityAuditEvent(
@@ -799,7 +866,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       throw new ParlantIntegrationError(
         "Compliance validation failed",
         "COMPLIANCE_VALIDATION_ERROR",
-        { operation, error: error instanceof Error ? error.message : String(error) },
+        {
+          operation,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -809,11 +879,15 @@ export class ParlantSecurityInfrastructureIntegrationService
    */
   getSecurityMetrics(): Record<string, unknown> {
     const activeIncidents = Array.from(this.securityIncidents.values()).filter(
-      i => i.status === "open" || i.status === "investigating",
+      (i) => i.status === "open" || i.status === "investigating",
     );
 
-    const criticalIncidents = activeIncidents.filter(i => i.severity === "critical");
-    const highRiskAuditEvents = this.auditQueue.filter(e => e.riskLevel === "high" || e.riskLevel === "critical");
+    const criticalIncidents = activeIncidents.filter(
+      (i) => i.severity === "critical",
+    );
+    const highRiskAuditEvents = this.auditQueue.filter(
+      (e) => e.riskLevel === "high" || e.riskLevel === "critical",
+    );
 
     return {
       integrationStats: { ...this.integrationStats },
@@ -895,7 +969,10 @@ export class ParlantSecurityInfrastructureIntegrationService
         },
       });
 
-      if (type === SecurityAuditType.SECURITY_VIOLATION || type === SecurityAuditType.INCIDENT_DETECTED) {
+      if (
+        type === SecurityAuditType.SECURITY_VIOLATION ||
+        type === SecurityAuditType.INCIDENT_DETECTED
+      ) {
         actions.push({
           actionId: this.generateActionId(),
           type: "investigate",
@@ -922,7 +999,9 @@ export class ParlantSecurityInfrastructureIntegrationService
     return actions;
   }
 
-  private async processAuditEventImmediate(auditEntry: SecurityAuditEntry): Promise<void> {
+  private async processAuditEventImmediate(
+    auditEntry: SecurityAuditEntry,
+  ): Promise<void> {
     try {
       // Send to SIEM
       await this.sendToSIEM(auditEntry);
@@ -977,7 +1056,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       action.completedAt = new Date();
     } catch (error) {
       action.status = "failed";
-      this.logger.error(`❌ Failed to execute response action: ${action.actionId}`, error);
+      this.logger.error(
+        `❌ Failed to execute response action: ${action.actionId}`,
+        error,
+      );
     }
   }
 
@@ -985,27 +1067,40 @@ export class ParlantSecurityInfrastructureIntegrationService
     this.logger.debug("🚨 Sending security alert:", parameters);
   }
 
-  private async blockAccess(parameters: Record<string, unknown>): Promise<void> {
+  private async blockAccess(
+    parameters: Record<string, unknown>,
+  ): Promise<void> {
     this.logger.debug("🚫 Blocking access:", parameters);
   }
 
-  private async quarantineResource(parameters: Record<string, unknown>): Promise<void> {
+  private async quarantineResource(
+    parameters: Record<string, unknown>,
+  ): Promise<void> {
     this.logger.debug("🔒 Quarantining resource:", parameters);
   }
 
-  private async createInvestigation(parameters: Record<string, unknown>): Promise<void> {
+  private async createInvestigation(
+    parameters: Record<string, unknown>,
+  ): Promise<void> {
     this.logger.debug("🔍 Creating investigation:", parameters);
   }
 
-  private async performRemediation(parameters: Record<string, unknown>): Promise<void> {
+  private async performRemediation(
+    parameters: Record<string, unknown>,
+  ): Promise<void> {
     this.logger.debug("🛠️ Performing remediation:", parameters);
   }
 
-  private async processComplianceViolation(auditEntry: SecurityAuditEntry): Promise<void> {
-    this.logger.warn(`⚠️ Compliance violation detected: ${auditEntry.entryId}`, {
-      complianceImpact: auditEntry.complianceImpact,
-      riskLevel: auditEntry.riskLevel,
-    });
+  private async processComplianceViolation(
+    auditEntry: SecurityAuditEntry,
+  ): Promise<void> {
+    this.logger.warn(
+      `⚠️ Compliance violation detected: ${auditEntry.entryId}`,
+      {
+        complianceImpact: auditEntry.complianceImpact,
+        riskLevel: auditEntry.riskLevel,
+      },
+    );
   }
 
   private async evaluateComplianceRule(
@@ -1017,7 +1112,11 @@ export class ParlantSecurityInfrastructureIntegrationService
     try {
       // Evaluate rule conditions
       for (const condition of rule.conditions) {
-        const fieldValue = this.getFieldValue(condition.field, { operation, data, userContext });
+        const fieldValue = this.getFieldValue(condition.field, {
+          operation,
+          data,
+          userContext,
+        });
         const conditionResult = this.evaluateCondition(condition, fieldValue);
 
         if (!conditionResult) {
@@ -1039,7 +1138,11 @@ export class ParlantSecurityInfrastructureIntegrationService
 
   private getFieldValue(
     field: string,
-    context: { operation: string; data: Record<string, unknown>; userContext: ParlantUserContext },
+    context: {
+      operation: string;
+      data: Record<string, unknown>;
+      userContext: ParlantUserContext;
+    },
   ): unknown {
     const fieldParts = field.split(".");
 
@@ -1062,7 +1165,10 @@ export class ParlantSecurityInfrastructureIntegrationService
     return undefined;
   }
 
-  private evaluateCondition(condition: RuleCondition, fieldValue: unknown): boolean {
+  private evaluateCondition(
+    condition: RuleCondition,
+    fieldValue: unknown,
+  ): boolean {
     switch (condition.operator) {
       case "equals":
         return fieldValue === condition.value;
@@ -1100,7 +1206,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       status: "pending",
       parameters: {
         alertLevel: severity,
-        channels: severity === "critical" ? ["email", "sms", "slack"] : ["email", "slack"],
+        channels:
+          severity === "critical"
+            ? ["email", "sms", "slack"]
+            : ["email", "slack"],
       },
     });
 
@@ -1120,7 +1229,9 @@ export class ParlantSecurityInfrastructureIntegrationService
     return actions;
   }
 
-  private async triggerIncidentResponse(incident: SecurityIncident): Promise<void> {
+  private async triggerIncidentResponse(
+    incident: SecurityIncident,
+  ): Promise<void> {
     try {
       // Execute response actions
       for (const action of incident.responseActions) {
@@ -1147,12 +1258,16 @@ export class ParlantSecurityInfrastructureIntegrationService
 
     for (const framework of this.complianceConfig.frameworks) {
       const implementedRequirements = framework.requirements.filter(
-        r => r.implementationStatus === "implemented" || r.implementationStatus === "verified",
+        (r) =>
+          r.implementationStatus === "implemented" ||
+          r.implementationStatus === "verified",
       );
 
-      const frameworkScore = framework.requirements.length > 0
-        ? (implementedRequirements.length / framework.requirements.length) * 100
-        : 100;
+      const frameworkScore =
+        framework.requirements.length > 0
+          ? (implementedRequirements.length / framework.requirements.length) *
+            100
+          : 100;
 
       totalScore += frameworkScore;
       frameworkCount++;
@@ -1274,7 +1389,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       try {
         await this.processAuditEventImmediate(auditEntry);
       } catch (error) {
-        this.logger.error(`❌ Failed to process audit entry: ${auditEntry.entryId}`, error);
+        this.logger.error(
+          `❌ Failed to process audit entry: ${auditEntry.entryId}`,
+          error,
+        );
       }
     }
   }
@@ -1287,12 +1405,17 @@ export class ParlantSecurityInfrastructureIntegrationService
         integration.healthMetrics = healthStatus;
         integration.lastUpdated = new Date();
       } catch (error) {
-        this.logger.error(`❌ Health check failed for integration: ${integration.recordId}`, error);
+        this.logger.error(
+          `❌ Health check failed for integration: ${integration.recordId}`,
+          error,
+        );
       }
     }
   }
 
-  private async checkIntegrationHealth(integration: SecurityInfrastructureRecord): Promise<SecurityHealthMetrics> {
+  private async checkIntegrationHealth(
+    integration: SecurityInfrastructureRecord,
+  ): Promise<SecurityHealthMetrics> {
     // Simulate health check
     return {
       connectionStatus: "connected",
@@ -1312,8 +1435,11 @@ export class ParlantSecurityInfrastructureIntegrationService
 
   private async performComplianceMonitoring(): Promise<void> {
     // Monitor compliance across all frameworks
-    this.integrationStats.complianceScore = this.calculateOverallComplianceScore();
-    this.logger.debug(`📊 Compliance score updated: ${this.integrationStats.complianceScore}%`);
+    this.integrationStats.complianceScore =
+      this.calculateOverallComplianceScore();
+    this.logger.debug(
+      `📊 Compliance score updated: ${this.integrationStats.complianceScore}%`,
+    );
   }
 
   private async updateThreatIntelligence(): Promise<void> {
@@ -1322,7 +1448,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       try {
         await this.updateThreatFeed(feed);
       } catch (error) {
-        this.logger.error(`❌ Failed to update threat feed: ${feed.feedId}`, error);
+        this.logger.error(
+          `❌ Failed to update threat feed: ${feed.feedId}`,
+          error,
+        );
       }
     }
   }
@@ -1340,7 +1469,10 @@ export class ParlantSecurityInfrastructureIntegrationService
       try {
         await this.processAuditEventImmediate(auditEntry);
       } catch (error) {
-        this.logger.error(`❌ Failed to process remaining audit entry: ${auditEntry.entryId}`, error);
+        this.logger.error(
+          `❌ Failed to process remaining audit entry: ${auditEntry.entryId}`,
+          error,
+        );
       }
     }
   }

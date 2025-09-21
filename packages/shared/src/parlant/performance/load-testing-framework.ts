@@ -17,6 +17,21 @@ import { EventEmitter } from 'events';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { performance } from 'perf_hooks';
 import { cpus } from 'os';
+
+// Type guard utilities for error handling
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return getErrorMessage(error);
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 import {
   WrapperRegistryManagementService,
   WrapperInfo
@@ -152,9 +167,9 @@ export class LoadTestingFrameworkService {
     } catch (error) {
       this.logger.error(`Load testing failed: ${testId}`, error);
       await this.cleanupTestExecution(testId);
-      throw new LoadTestingError(`Load testing failed: ${error.message}`, {
+      throw new LoadTestingError(`Load testing failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -228,9 +243,9 @@ export class LoadTestingFrameworkService {
 
     } catch (error) {
       this.logger.error(`Response time validation failed: ${testId}`, error);
-      throw new LoadTestingError(`Response time validation failed: ${error.message}`, {
+      throw new LoadTestingError(`Response time validation failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -292,9 +307,9 @@ export class LoadTestingFrameworkService {
 
     } catch (error) {
       this.logger.error(`Concurrent load testing failed: ${testId}`, error);
-      throw new LoadTestingError(`Concurrent load testing failed: ${error.message}`, {
+      throw new LoadTestingError(`Concurrent load testing failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -380,7 +395,7 @@ export class LoadTestingFrameworkService {
 
     } catch (error) {
       this.logger.error('Failed to generate load testing report', error);
-      throw new LoadTestingError(`Report generation failed: ${error.message}`);
+      throw new LoadTestingError(`Report generation failed: ${getErrorMessage(error)}`);
     }
   }
 
@@ -886,7 +901,7 @@ export class LoadTestingFrameworkService {
         }
 
       } catch (error) {
-        errors.push(error.message);
+        errors.push(getErrorMessage(error));
       }
     }
 
@@ -1657,7 +1672,7 @@ async function executeWorkerLoadTest(data: any) {
     } catch (error) {
       parentPort?.postMessage({
         type: 'request-failed',
-        data: { error: error.message }
+        data: { error: getErrorMessage(error) }
       });
     }
   }

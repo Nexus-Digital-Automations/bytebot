@@ -53,7 +53,7 @@ import {
   RiskLevel,
   ValidationMode,
   ApprovalLevel
-} from '../../types/parlant-integration.types';
+} from '../../../types/parlant-integration.types';
 
 /**
  * Registration conflict types

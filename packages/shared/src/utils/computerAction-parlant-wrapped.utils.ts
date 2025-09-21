@@ -478,7 +478,10 @@ export function registerParlantComputerActionFunctions(): void {
     };
 
     // Cast the function to WrappedFunction type for registry compatibility
-    const wrappedFunc = func as unknown as import("./parlant-wrapper.utils").WrappedFunction<(..._args: unknown[]) => unknown>;
+    const wrappedFunc =
+      func as unknown as import("./parlant-wrapper.utils").WrappedFunction<
+        (..._args: unknown[]) => unknown
+      >;
     registry.register(`computerAction.${name}`, wrappedFunc, config);
   }
 

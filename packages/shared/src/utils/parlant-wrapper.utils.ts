@@ -29,7 +29,7 @@ interface DynamicObject {
  */
 interface ClassConstructor {
   prototype: Record<string, unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   new (..._args: unknown[]): unknown;
 }
 import {
@@ -863,7 +863,7 @@ export class ParlantWrapperRegistry {
   private static instance: ParlantWrapperRegistry;
   private wrappedFunctions = new Map<
     string,
-    WrappedFunction<(..._args: unknown[]) => unknown>
+    (..._args: unknown[]) => Promise<unknown>
   >();
   private wrapperMetadata = new Map<string, FunctionWrapperConfig>();
   private logger = new Logger("ParlantWrapperRegistry");
@@ -883,7 +883,7 @@ export class ParlantWrapperRegistry {
     wrappedFunction: WrappedFunction<T>,
     config: FunctionWrapperConfig,
   ): void {
-    this.wrappedFunctions.set(functionId, wrappedFunction);
+    this.wrappedFunctions.set(functionId, wrappedFunction as (..._args: unknown[]) => Promise<unknown>);
     this.wrapperMetadata.set(functionId, config);
 
     this.logger.log(`Registered wrapped function: ${functionId}`, {
@@ -899,7 +899,8 @@ export class ParlantWrapperRegistry {
   get<T extends (..._args: unknown[]) => unknown>(
     functionId: string,
   ): WrappedFunction<T> | undefined {
-    return this.wrappedFunctions.get(functionId);
+    const func = this.wrappedFunctions.get(functionId);
+    return func as WrappedFunction<T> | undefined;
   }
 
   /**

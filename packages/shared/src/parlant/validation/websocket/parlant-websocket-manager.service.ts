@@ -184,7 +184,7 @@ interface ConnectionMetrics {
 @Injectable()
 export class ParlantWebSocketManager extends EventEmitter implements OnApplicationShutdown {
   private readonly logger = new Logger(ParlantWebSocketManager.name);
-  private config: WebSocketManagerConfig;
+  private config!: WebSocketManagerConfig;
   private connectionPool = new Map<string, ManagedConnection>();
   private serverHealth = new Map<string, ServerHealth>();
   private sessionAffinity = new Map<string, string>();

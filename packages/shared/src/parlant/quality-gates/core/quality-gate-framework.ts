@@ -449,11 +449,11 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
           },
           error: {
             code: 'GATE_EXECUTION_ERROR',
-            message: error.message,
-            originalError: error,
+            message: error instanceof Error ? error.message : String(error),
+            originalError: error instanceof Error ? error : undefined,
             category: ErrorCategory.SYSTEM_ERROR,
             metadata: { gateId: gate.id },
-            stackTrace: error.stack
+            stackTrace: error instanceof Error ? error.stack : undefined
           },
           recommendations: ['Check gate configuration and dependencies']
         };

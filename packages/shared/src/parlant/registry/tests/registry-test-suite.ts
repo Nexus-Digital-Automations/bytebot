@@ -276,7 +276,7 @@ export class MockDataGenerator {
  * Comprehensive test suite for PARLANT Function Registration System
  */
 export class RegistryTestSuite {
-  private testingModule: TestingModule;
+  private testingModule!: TestingModule;
   private config: TestSuiteConfig;
   private testResults: Map<string, TestResult> = new Map();
 

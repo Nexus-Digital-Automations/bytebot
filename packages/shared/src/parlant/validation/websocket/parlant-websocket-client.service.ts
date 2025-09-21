@@ -103,14 +103,14 @@ interface ConnectionMetrics {
 export class ParlantWebSocketClient extends EventEmitter implements OnApplicationShutdown {
   private readonly logger = new Logger(ParlantWebSocketClient.name);
   private websocket: WebSocket | null = null;
-  private connectionConfig: ConnectionConfig;
+  private connectionConfig!: ConnectionConfig;
   private isConnected = false;
   private isConnecting = false;
   private reconnectAttempts = 0;
   private sessionContext: SessionContext | null = null;
   private pendingRequests = new Map<string, PendingRequest>();
   private heartbeatTimer: NodeJS.Timeout | null = null;
-  private connectionMetrics: ConnectionMetrics;
+  private connectionMetrics!: ConnectionMetrics;
   private circuitBreakerState: CircuitBreakerState = CircuitBreakerState.CLOSED;
   private lastFailureTime = 0;
 

@@ -149,12 +149,12 @@ export interface WorkerExecutionResult {
 @Injectable()
 export class ParallelExecutionManager extends EventEmitter {
   private readonly logger = new Logger(ParallelExecutionManager.name);
-  private config: ParallelExecutionConfig;
+  private config!: ParallelExecutionConfig;
   private workers: Map<number, Worker> = new Map();
   private workerStatus: Map<number, WorkerStatus> = new Map();
   private executionQueue: ExecutionBatch[] = [];
   private currentExecution: string | null = null;
-  private metrics: ParallelExecutionMetrics;
+  private metrics!: ParallelExecutionMetrics;
   private isInitialized = false;
 
   constructor() {

@@ -448,6 +448,38 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     private readonly monitoringHealth: BypassMonitoringHealthService
   ) {
     super();
+
+    // Initialize properties before calling methods that use them
+    this.parlantServiceContext = {
+      status: ServiceStatus.OPERATIONAL,
+      lastSuccessfulPing: new Date(),
+      responseTime: 0,
+      consecutiveFailures: 0,
+      currentWorkload: 0,
+      availableEndpoints: [],
+      version: 'unknown',
+      capabilities: []
+    };
+
+    this.integrationConfig = {
+      parlantEndpoint: process.env.PARLANT_ENDPOINT || 'http://localhost:3001',
+      serviceTimeoutMs: 5000,
+      healthCheckIntervalMs: 30000,
+      failureThreshold: 3,
+      autoRecoveryEnabled: true,
+      bypassMode: BypassMode.PARLANT_FIRST,
+      fallbackStrategies: [
+        FallbackStrategy.AUTOMATIC_BYPASS,
+        FallbackStrategy.CIRCUIT_BREAKER
+      ],
+      features: [
+        IntegrationFeature.HEALTH_MONITORING,
+        IntegrationFeature.AUTOMATIC_FAILOVER,
+        IntegrationFeature.PERFORMANCE_MONITORING,
+        IntegrationFeature.AUDIT_INTEGRATION
+      ]
+    };
+
     this.initializeIntegration();
     this.startHealthMonitoring();
   }
@@ -704,38 +736,6 @@ export class ParlantBypassIntegrationService extends EventEmitter {
    * Initialize integration
    */
   private initializeIntegration(): void {
-    // Default configuration
-    this.integrationConfig = {
-      parlantEndpoint: process.env.PARLANT_ENDPOINT || 'http://localhost:3001',
-      serviceTimeoutMs: 5000,
-      healthCheckIntervalMs: 30000,
-      failureThreshold: 3,
-      autoRecoveryEnabled: true,
-      bypassMode: BypassMode.PARLANT_FIRST,
-      fallbackStrategies: [
-        FallbackStrategy.AUTOMATIC_BYPASS,
-        FallbackStrategy.CIRCUIT_BREAKER
-      ],
-      features: [
-        IntegrationFeature.HEALTH_MONITORING,
-        IntegrationFeature.AUTOMATIC_FAILOVER,
-        IntegrationFeature.PERFORMANCE_MONITORING,
-        IntegrationFeature.AUDIT_INTEGRATION
-      ]
-    };
-
-    // Initialize PARLANT service context
-    this.parlantServiceContext = {
-      status: ServiceStatus.OPERATIONAL,
-      lastSuccessfulPing: new Date(),
-      responseTime: 0,
-      consecutiveFailures: 0,
-      currentWorkload: 0,
-      availableEndpoints: [],
-      version: 'unknown',
-      capabilities: []
-    };
-
     // Initialize execution strategies
     this.initializeExecutionStrategies();
 

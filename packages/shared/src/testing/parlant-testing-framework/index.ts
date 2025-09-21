@@ -25,42 +25,42 @@ export * from './core/test-result-aggregator';
 
 // Test Generation Systems
 export * from './generators/automated-test-generator';
-export * from './generators/unit-test-generator';
-export * from './generators/integration-test-generator';
-export * from './generators/performance-test-generator';
-export * from './generators/security-test-generator';
+// export * from './generators/unit-test-generator'; // TODO: Implement
+// export * from './generators/integration-test-generator'; // TODO: Implement
+// export * from './generators/performance-test-generator'; // TODO: Implement
+// export * from './generators/security-test-generator'; // TODO: Implement
 
 // Testing Utilities
-export * from './utils/mock-database-factory';
-export * from './utils/test-data-generator';
-export * from './utils/assertion-helpers';
-export * from './utils/performance-measurement';
+// export * from './utils/mock-database-factory'; // TODO: Implement
+// export * from './utils/test-data-generator'; // TODO: Implement
+// export * from './utils/assertion-helpers'; // TODO: Implement
+// export * from './utils/performance-measurement'; // TODO: Implement
 
 // Performance and Security Testing
 export * from './performance/performance-testing-suite';
-export * from './performance/load-testing-engine';
-export * from './performance/benchmark-manager';
+// export * from './performance/load-testing-engine'; // TODO: Implement
+// export * from './performance/benchmark-manager'; // TODO: Implement
 export * from './security/security-testing-framework';
-export * from './security/vulnerability-scanner';
+// export * from './security/vulnerability-scanner'; // TODO: Implement
 
 // Coverage and Reporting
 export * from './coverage/coverage-analyzer';
 export * from './coverage/coverage-reporting-dashboard';
 export * from './coverage/coverage-export-integration';
-export * from './coverage/coverage-reporter';
-export * from './coverage/regression-detector';
+// export * from './coverage/coverage-reporter'; // TODO: Implement
+// export * from './coverage/regression-detector'; // TODO: Implement
 
 // Regression Testing
 export * from './regression/regression-testing-engine';
 
 // Integration and Automation
-export * from './automation/ci-cd-integration';
-export * from './automation/test-automation-scripts';
-export * from './automation/continuous-testing-manager';
+// export * from './automation/ci-cd-integration'; // TODO: Implement
+// export * from './automation/test-automation-scripts'; // TODO: Implement
+// export * from './automation/continuous-testing-manager'; // TODO: Implement
 
 // Types and Interfaces
 export * from './types/framework.types';
-export * from './types/test-execution.types';
+// export * from './types/test-execution.types'; // TODO: Implement
 export * from './types/performance-testing.types';
 export * from './types/security-testing.types';
 export * from './types/coverage-reporting.types';

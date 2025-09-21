@@ -1825,7 +1825,7 @@ export function detectCommandInjection(
 
   // Analyze encoding bypass patterns
   console.log(`[CMD-INJECTION-ENGINE] Executing encoding bypass analysis...`);
-  /* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+
   for (const {
     pattern,
     threat,
@@ -1880,7 +1880,7 @@ export function detectCommandInjection(
     console.log(
       `[CMD-INJECTION-ENGINE] Executing contextual pattern analysis...`,
     );
-    /* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+    /* eslint-disable no-unused-vars */
     for (const {
       pattern,
       threat,

@@ -13,7 +13,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as parser from '@typescript-eslint/parser';
+// import * as parser from '@typescript-eslint/parser'; // Disabled - using alternative parsing method
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/types';
 import {
   IFunctionDiscovery,

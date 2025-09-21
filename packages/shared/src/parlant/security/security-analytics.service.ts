@@ -38,12 +38,25 @@ import { EnhancedSecurityContext } from "./context-manager.service";
 /**
  * Analytics time periods
  */
-export type AnalyticsPeriod = "hour" | "day" | "week" | "month" | "quarter" | "year";
+export type AnalyticsPeriod =
+  | "hour"
+  | "day"
+  | "week"
+  | "month"
+  | "quarter"
+  | "year";
 
 /**
  * Metric aggregation types
  */
-export type AggregationType = "count" | "sum" | "avg" | "min" | "max" | "percentile" | "rate";
+export type AggregationType =
+  | "count"
+  | "sum"
+  | "avg"
+  | "min"
+  | "max"
+  | "percentile"
+  | "rate";
 
 /**
  * Alert severity levels
@@ -541,7 +554,13 @@ export interface ComplianceEvidence {
   /** Evidence identifier */
   evidenceId: string;
   /** Evidence type */
-  type: "log" | "configuration" | "policy" | "audit" | "screenshot" | "document";
+  type:
+    | "log"
+    | "configuration"
+    | "policy"
+    | "audit"
+    | "screenshot"
+    | "document";
   /** Evidence description */
   description: string;
   /** Evidence data */
@@ -731,10 +750,15 @@ export class ParlantSecurityAnalyticsService
       await this.startPeriodicTasks();
       await this.validateAnalyticsConfig();
 
-      this.logger.log("✅ Advanced Security Analytics Service initialized successfully");
+      this.logger.log(
+        "✅ Advanced Security Analytics Service initialized successfully",
+      );
       this.emit("analytics:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Security Analytics Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Security Analytics Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Security Analytics Service initialization failed",
         "ANALYTICS_SERVICE_INIT_ERROR",
@@ -773,8 +797,11 @@ export class ParlantSecurityAnalyticsService
       metrics.push(metric);
 
       // Maintain retention period
-      const cutoffTime = Date.now() - this.analyticsConfig.metricsRetentionPeriod;
-      const filteredMetrics = metrics.filter(m => m.timestamp.getTime() > cutoffTime);
+      const cutoffTime =
+        Date.now() - this.analyticsConfig.metricsRetentionPeriod;
+      const filteredMetrics = metrics.filter(
+        (m) => m.timestamp.getTime() > cutoffTime,
+      );
       this.securityMetrics.set(metricKey, filteredMetrics);
 
       // Check alert rules
@@ -794,7 +821,7 @@ export class ParlantSecurityAnalyticsService
       });
 
       this.logger.debug(
-        `📈 Security metric ingested: ${metric.category}/${metric.name} = ${metric.value} (${ingestionTime.toFixed(2)}ms)`
+        `📈 Security metric ingested: ${metric.category}/${metric.name} = ${metric.value} (${ingestionTime.toFixed(2)}ms)`,
       );
     } catch (error) {
       this.logger.error("❌ Metric ingestion failed", error);
@@ -866,7 +893,7 @@ export class ParlantSecurityAnalyticsService
       });
 
       this.logger.debug(
-        `🔍 Analytics query executed: ${query.queryId} - ${dataPoints.length} points (${result.statistics.executionTime.toFixed(2)}ms)`
+        `🔍 Analytics query executed: ${query.queryId} - ${dataPoints.length} points (${result.statistics.executionTime.toFixed(2)}ms)`,
       );
 
       return result;
@@ -897,7 +924,11 @@ export class ParlantSecurityAnalyticsService
       const reportId = crypto.randomUUID();
 
       // Generate report sections
-      const reportSections = await this.generateComplianceSections(framework, period, sections);
+      const reportSections = await this.generateComplianceSections(
+        framework,
+        period,
+        sections,
+      );
 
       // Calculate overall compliance score
       const overallScore = this.calculateOverallComplianceScore(reportSections);
@@ -941,7 +972,7 @@ export class ParlantSecurityAnalyticsService
       });
 
       this.logger.debug(
-        `📋 Compliance report generated: ${reportId} for ${framework} - score: ${overallScore.toFixed(2)} (${(performance.now() - startTime).toFixed(2)}ms)`
+        `📋 Compliance report generated: ${reportId} for ${framework} - score: ${overallScore.toFixed(2)} (${(performance.now() - startTime).toFixed(2)}ms)`,
       );
 
       return report;
@@ -1014,7 +1045,9 @@ export class ParlantSecurityAnalyticsService
         timestamp: alert.timestamp,
       });
 
-      this.logger.warn(`🚨 Security alert created: ${alertId} - ${title} [${severity}]`);
+      this.logger.warn(
+        `🚨 Security alert created: ${alertId} - ${title} [${severity}]`,
+      );
 
       return alert;
     } catch (error) {
@@ -1034,7 +1067,9 @@ export class ParlantSecurityAnalyticsService
   /**
    * Get security dashboard data
    */
-  async getSecurityDashboardData(dashboardId: string): Promise<Record<string, AnalyticsResult>> {
+  async getSecurityDashboardData(
+    dashboardId: string,
+  ): Promise<Record<string, AnalyticsResult>> {
     try {
       const dashboard = this.dashboardConfigs.get(dashboardId);
       if (!dashboard) {
@@ -1072,7 +1107,9 @@ export class ParlantSecurityAnalyticsService
         renderTime: Date.now(),
       });
 
-      this.logger.debug(`📊 Dashboard data retrieved: ${dashboardId} - ${Object.keys(dashboardData).length} widgets`);
+      this.logger.debug(
+        `📊 Dashboard data retrieved: ${dashboardId} - ${Object.keys(dashboardData).length} widgets`,
+      );
 
       return dashboardData;
     } catch (error) {
@@ -1136,21 +1173,26 @@ export class ParlantSecurityAnalyticsService
           `Alert: ${rule.name}`,
           rule.description,
           rule.severity,
-          [{
-            type: "metric",
-            value: metric.value,
-            source: "metrics_evaluation",
-            timestamp: metric.timestamp,
-            confidence: 0.9,
-            description: `Metric ${metric.name} triggered alert rule`,
-          }],
+          [
+            {
+              type: "metric",
+              value: metric.value,
+              source: "metrics_evaluation",
+              timestamp: metric.timestamp,
+              confidence: 0.9,
+              description: `Metric ${metric.name} triggered alert rule`,
+            },
+          ],
           [metric],
         );
       }
     }
   }
 
-  private async evaluateRule(rule: AlertRule, metric: SecurityMetric): Promise<boolean> {
+  private async evaluateRule(
+    rule: AlertRule,
+    metric: SecurityMetric,
+  ): Promise<boolean> {
     for (const condition of rule.conditions) {
       if (condition.type === "metric") {
         const result = this.evaluateMetricCondition(condition, metric);
@@ -1162,7 +1204,10 @@ export class ParlantSecurityAnalyticsService
     return false;
   }
 
-  private evaluateMetricCondition(condition: AlertCondition, metric: SecurityMetric): boolean {
+  private evaluateMetricCondition(
+    condition: AlertCondition,
+    metric: SecurityMetric,
+  ): boolean {
     if (condition.field !== metric.name) {
       return false;
     }
@@ -1196,7 +1241,10 @@ export class ParlantSecurityAnalyticsService
       limit: query.limit,
     };
 
-    return crypto.createHash("sha256").update(JSON.stringify(keyData)).digest("hex");
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(keyData))
+      .digest("hex");
   }
 
   private isCacheValid(result: AnalyticsResult): boolean {
@@ -1227,7 +1275,9 @@ export class ParlantSecurityAnalyticsService
     }
   }
 
-  private async executeQuery(query: AnalyticsQuery): Promise<AnalyticsDataPoint[]> {
+  private async executeQuery(
+    query: AnalyticsQuery,
+  ): Promise<AnalyticsDataPoint[]> {
     // This is a simplified query execution
     // In a real implementation, this would query the actual data store
     const dataPoints: AnalyticsDataPoint[] = [];
@@ -1238,7 +1288,7 @@ export class ParlantSecurityAnalyticsService
     const interval = (endTime - startTime) / Math.min(query.limit, 100);
 
     for (let i = 0; i < Math.min(query.limit, 100); i++) {
-      const timestamp = new Date(startTime + (i * interval));
+      const timestamp = new Date(startTime + i * interval);
       dataPoints.push({
         timestamp,
         value: Math.random() * 100,
@@ -1291,7 +1341,9 @@ export class ParlantSecurityAnalyticsService
     return complianceSections;
   }
 
-  private async generateComplianceControls(sectionName: string): Promise<ComplianceControl[]> {
+  private async generateComplianceControls(
+    sectionName: string,
+  ): Promise<ComplianceControl[]> {
     // Generate sample compliance controls
     return [
       {
@@ -1324,16 +1376,23 @@ export class ParlantSecurityAnalyticsService
     ];
   }
 
-  private calculateOverallComplianceScore(sections: ComplianceSection[]): number {
+  private calculateOverallComplianceScore(
+    sections: ComplianceSection[],
+  ): number {
     if (sections.length === 0) {
       return 0;
     }
 
-    const totalScore = sections.reduce((sum, section) => sum + section.score, 0);
+    const totalScore = sections.reduce(
+      (sum, section) => sum + section.score,
+      0,
+    );
     return totalScore / sections.length;
   }
 
-  private determineComplianceStatus(score: number): "compliant" | "non_compliant" | "partial" | "unknown" {
+  private determineComplianceStatus(
+    score: number,
+  ): "compliant" | "non_compliant" | "partial" | "unknown" {
     if (score >= 95) return "compliant";
     if (score >= 70) return "partial";
     if (score >= 0) return "non_compliant";
@@ -1360,18 +1419,26 @@ export class ParlantSecurityAnalyticsService
 
   private updateCacheStats(hit: boolean): void {
     const totalQueries = this.performanceMetrics.queriesExecuted + 1;
-    const currentHits = this.performanceMetrics.cacheHitRate * (totalQueries - 1);
-    this.performanceMetrics.cacheHitRate = hit ?
-      (currentHits + 1) / totalQueries :
-      currentHits / totalQueries;
+    const currentHits =
+      this.performanceMetrics.cacheHitRate * (totalQueries - 1);
+    this.performanceMetrics.cacheHitRate = hit
+      ? (currentHits + 1) / totalQueries
+      : currentHits / totalQueries;
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
   private calculateTotalMetrics(): number {
-    return Array.from(this.securityMetrics.values()).reduce((total, metrics) => total + metrics.length, 0);
+    return Array.from(this.securityMetrics.values()).reduce(
+      (total, metrics) => total + metrics.length,
+      0,
+    );
   }
 
   private getAlertsByStatus(): Record<string, number> {
@@ -1385,7 +1452,10 @@ export class ParlantSecurityAnalyticsService
   }
 
   private calculateTotalWidgets(): number {
-    return Array.from(this.dashboardConfigs.values()).reduce((total, dashboard) => total + dashboard.widgets.length, 0);
+    return Array.from(this.dashboardConfigs.values()).reduce(
+      (total, dashboard) => total + dashboard.widgets.length,
+      0,
+    );
   }
 
   private async initializeDefaultDashboards(): Promise<void> {
@@ -1407,7 +1477,11 @@ export class ParlantSecurityAnalyticsService
           position: { row: 0, column: 0, rowSpan: 1, columnSpan: 3 },
           size: { width: 300, height: 150, minWidth: 200, minHeight: 100 },
           config: {
-            timeRange: { start: new Date(Date.now() - 86400000), end: new Date(), relative: "24h" },
+            timeRange: {
+              start: new Date(Date.now() - 86400000),
+              end: new Date(),
+              relative: "24h",
+            },
             refreshInterval: 60000,
             autoRefresh: true,
             colorScheme: ["#ff4757", "#ff6b7a"],
@@ -1416,7 +1490,8 @@ export class ParlantSecurityAnalyticsService
           dataSource: {
             type: "metrics",
             query: {
-              query: "SELECT COUNT(*) FROM threats WHERE timestamp >= NOW() - INTERVAL '24 hours'",
+              query:
+                "SELECT COUNT(*) FROM threats WHERE timestamp >= NOW() - INTERVAL '24 hours'",
               parameters: {},
               timeout: 10000,
               maxResults: 1,
@@ -1508,24 +1583,36 @@ export class ParlantSecurityAnalyticsService
   }
 
   private async savePerformanceMetrics(): Promise<void> {
-    this.logger.debug("📊 Saving performance metrics...", this.performanceMetrics);
+    this.logger.debug(
+      "📊 Saving performance metrics...",
+      this.performanceMetrics,
+    );
   }
 
   private async startPeriodicTasks(): Promise<void> {
     // Metrics cleanup every 30 minutes
-    this.metricsCleanupTimer = setInterval(() => {
-      this.performMetricsCleanup();
-    }, 30 * 60 * 1000);
+    this.metricsCleanupTimer = setInterval(
+      () => {
+        this.performMetricsCleanup();
+      },
+      30 * 60 * 1000,
+    );
 
     // Alerts cleanup every hour
-    this.alertsCleanupTimer = setInterval(() => {
-      this.performAlertsCleanup();
-    }, 60 * 60 * 1000);
+    this.alertsCleanupTimer = setInterval(
+      () => {
+        this.performAlertsCleanup();
+      },
+      60 * 60 * 1000,
+    );
 
     // Cache cleanup every 10 minutes
-    this.cacheCleanupTimer = setInterval(() => {
-      this.performCacheCleanup();
-    }, 10 * 60 * 1000);
+    this.cacheCleanupTimer = setInterval(
+      () => {
+        this.performCacheCleanup();
+      },
+      10 * 60 * 1000,
+    );
 
     // Performance monitoring every minute
     this.performanceTimer = setInterval(() => {
@@ -1561,7 +1648,9 @@ export class ParlantSecurityAnalyticsService
 
     for (const [key, metrics] of this.securityMetrics.entries()) {
       const originalCount = metrics.length;
-      const filteredMetrics = metrics.filter(m => m.timestamp.getTime() > cutoffTime);
+      const filteredMetrics = metrics.filter(
+        (m) => m.timestamp.getTime() > cutoffTime,
+      );
 
       if (filteredMetrics.length !== originalCount) {
         cleanedCount += originalCount - filteredMetrics.length;
@@ -1583,7 +1672,10 @@ export class ParlantSecurityAnalyticsService
     let cleanedCount = 0;
 
     for (const [alertId, alert] of this.securityAlerts.entries()) {
-      if (alert.timestamp.getTime() < cutoffTime && alert.status === "resolved") {
+      if (
+        alert.timestamp.getTime() < cutoffTime &&
+        alert.status === "resolved"
+      ) {
         this.securityAlerts.delete(alertId);
         cleanedCount++;
       }
