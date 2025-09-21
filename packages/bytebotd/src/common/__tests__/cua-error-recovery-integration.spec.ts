@@ -47,6 +47,52 @@ import {
 
 } from '@bytebot/shared';
 
+// Type definitions for test functions
+type MockImplementation<T = unknown> = (...args: unknown[]) => T;
+type JestSpyMethod<T = unknown> = jest.SpyInstance<T, unknown[]>;
+
+// Type-safe interfaces for validation context
+interface ValidationContext {
+  userId: string;
+  sessionId: string;
+  agentRole: 'OPERATOR' | 'SUPERVISOR' | 'ADMIN';
+  securityLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  conversationHistory: unknown[];
+  metadata: { operationId: string };
+  recentActions: unknown[];
+  systemState: {
+    cpuUsage: number;
+    memoryUsage: number;
+    networkActivity: boolean;
+    securityAlerts: unknown[];
+    maintenanceMode: boolean;
+  };
+}
+
+interface ValidationRequest {
+  functionName: string;
+  functionParams: unknown;
+  actionDescription: string;
+  context: ValidationContext;
+  riskLevel: RiskLevel;
+  operationId: string;
+}
+
+interface ValidationResponse {
+  approved: boolean;
+  conversationId: string;
+  validationTimestamp: Date;
+  reasoning: string;
+  confidence: number;
+  metadata?: Record<string, unknown>;
+}
+
+// Type-safe jest spy functions
+type TypedJestSpy<T> = jest.SpyInstance<
+  T extends (...args: unknown[]) => infer R ? R : unknown,
+  T extends (...args: infer A) => unknown ? A : unknown[]
+>;
+
 // Error recovery test interfaces
 interface ErrorRecoveryContext {
   app: INestApplication;
@@ -487,7 +533,8 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 });const startTime = Date.now();
 
       // Mock Parlant service timeout
-      jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockImplementation(() => new Promise((_, reject) => 
+      const validateSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution') as jest.MockedFunction<typeof context.parlantIntegrationService.validateFunctionExecution>;
+      validateSpy.mockImplementation(() => new Promise<ValidationResponse>((_, reject) =>
             setTimeout(() => reject(new Error('Parlant validation timeout')), 10000)));
 
       const action: MoveMouseAction = {
@@ -520,7 +567,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       functionParams: action,
       actionDescription: 'Move mouse cursor',
       context: validationContext,
-      riskLevel: RiskLevel._LOW,
+      riskLevel: RiskLevel.LOW,
               operationId: 'test-op',
 }),new Promise((_, reject) => 
               setTimeout(() => reject(new Error('Validation timeout')), 5000)),]);
@@ -562,16 +609,15 @@ return isLowRisk;
       let authAttempts = 0;
 
       // Mock authentication failure then recovery
-      jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockImplementation(() => {
-
-  authAttempts++;
-          if (authAttempts <= 2) {
-            throw new Error('Authentication failed - invalid token');
-
-};
-return Promise.resolve({
-  approved: true,
-            conversationId: 'recovered-session',
+      const authSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution') as jest.MockedFunction<typeof context.parlantIntegrationService.validateFunctionExecution>;
+      authSpy.mockImplementation(() => {
+        authAttempts++;
+        if (authAttempts <= 2) {
+          throw new Error('Authentication failed - invalid token');
+        }
+        return Promise.resolve({
+          approved: true,
+          conversationId: 'recovered-session',
       validationTimestamp: new Date(),
       reasoning: 'Action approved after authentication recovery',
       confidence: 0.9,
@@ -622,7 +668,8 @@ return Promise.resolve({
 
       // Mock MCP connection failures then recovery
       const originalMoveMouse = context.mcpTools.moveMouse;
-      jest.spyOn(context.mcpTools, 'moveMouse').mockImplementation(async (params) => {
+      const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse') as jest.MockedFunction<typeof context.mcpTools.moveMouse>;
+      mouseMoveSpy.mockImplementation(async (params) => {
   connectionAttempts++;
           if (connectionAttempts <= 3) {
             throw new Error('MCP server connection lost');
@@ -662,7 +709,8 @@ expect(connectionAttempts).toBe(4); // 3 failures + 1 success
 });const startTime = Date.now();
 
       // Mock MCP tool failure
-      jest.spyOn(context.mcpTools, 'screenshot').mockRejectedValue(new Error('MCP server unavailable'));
+      const screenshotSpy = jest.spyOn(context.mcpTools, 'screenshot') as jest.MockedFunction<typeof context.mcpTools.screenshot>;
+      screenshotSpy.mockRejectedValue(new Error('MCP server unavailable'));
 
       // Implement fallback to direct computer use service
       const fallbackScreenshot = async () => {
@@ -710,8 +758,10 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 });const startTime = Date.now();
 
       // Mock cache service failures
-      jest.spyOn(context.cacheService, 'get').mockRejectedValue(new Error('Cache service unavailable'));
-      jest.spyOn(context.cacheService, 'set').mockRejectedValue(new Error('Cache service unavailable'));
+      const cacheGetSpy = jest.spyOn(context.cacheService, 'get') as jest.MockedFunction<typeof context.cacheService.get>;
+      const cacheSetSpy = jest.spyOn(context.cacheService, 'set') as jest.MockedFunction<typeof context.cacheService.set>;
+      cacheGetSpy.mockRejectedValue(new Error('Cache service unavailable'));
+      cacheSetSpy.mockRejectedValue(new Error('Cache service unavailable'));
 
       // Operations should still work without cache
       const action: ScreenshotAction = {
@@ -748,7 +798,8 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       let cacheAttempts = 0;
 
       // Mock cache service recovery
-      jest.spyOn(context.cacheService, 'set').mockImplementation((_key, _value, _ttl) => {
+      const cacheSetAsyncSpy = jest.spyOn(context.cacheService, 'set') as jest.MockedFunction<typeof context.cacheService.set>;
+      cacheSetAsyncSpy.mockImplementation((_key, _value, _ttl) => {
   cacheAttempts++;
           if (cacheAttempts <= 2) {
             throw new Error('Cache service recovering');
@@ -817,13 +868,20 @@ return; // Successful cache operation
       });
 
       // Mock multiple service failures
-      jest.spyOn(context.nutService, 'mouseMoveEvent').mockRejectedValueOnce(new Error('NUT service unavailable')).mockResolvedValue({ success: true });jest.spyOn(context.cacheService, 'get').mockRejectedValueOnce(new Error('Cache service unavailable')).mockResolvedValue(null);jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockRejectedValueOnce(new Error('Parlant service unavailable')).mockResolvedValue({
-  approved: true,
-          conversationId: 'recovered',
-      validationTimestamp: new Date(),
-      reasoning: 'Recovered validation',
-      confidence: 0.8,
-});
+      const nutMouseCascadeSpy = jest.spyOn(context.nutService, 'mouseMoveEvent') as jest.MockedFunction<typeof context.nutService.mouseMoveEvent>;
+      nutMouseCascadeSpy.mockRejectedValueOnce(new Error('NUT service unavailable')).mockResolvedValue({ success: true });
+
+      const cacheGetSpy2 = jest.spyOn(context.cacheService, 'get') as jest.MockedFunction<typeof context.cacheService.get>;
+      cacheGetSpy2.mockRejectedValueOnce(new Error('Cache service unavailable')).mockResolvedValue(null);
+
+      const parlantCascadeSpy2 = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution') as jest.MockedFunction<typeof context.parlantIntegrationService.validateFunctionExecution>;
+      parlantCascadeSpy2.mockRejectedValueOnce(new Error('Parlant service unavailable')).mockResolvedValue({
+        approved: true,
+        conversationId: 'recovered',
+        validationTimestamp: new Date(),
+        reasoning: 'Recovered validation',
+        confidence: 0.8,
+      } as ValidationResponse);
 
       // Simulate coordinated recovery
       const services = ['NutService', 'CacheService', 'ParlantService'];for (const serviceId of services) {context.eventEmitter.emit('service.recovery.started', { serviceId });await context.circuitBreakerService.executeWithCircuitBreaker(serviceId, async () => {
@@ -872,7 +930,8 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       let healthCheckAttempts = 0;
 
       // Mock health check recovery process
-      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<() => Promise<{ status: string; details: Record<string, string> }>>;checkHealthSpy.mockImplementation((): Promise<{ status: string; details: Record<string, string> }> => {
+      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<typeof context.healthService.checkHealth>;
+      checkHealthSpy.mockImplementation((): Promise<{ status: string; details: Record<string, string> }> => {
   healthCheckAttempts++;
           if (healthCheckAttempts <= 3) {
             return Promise.resolve({
