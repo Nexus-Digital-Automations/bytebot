@@ -598,33 +598,41 @@ expect(requiresApproval).toBe(true);
 
   describe('Error Handling and Recovery', () => {
 
-  it('should handle validation timeout gracefully', async () => const timeoutMs = 5000;// Simulate validation timeout
+  it('should handle validation timeout gracefully', async () => {
+      const timeoutMs = 5000;
+
+      // Simulate validation timeout
       const validationPromise = new Promise((resolve, reject) => {
         setTimeout(() => {
           reject(new Error('Validation timeout'));
-}, timeoutMs + 100);});
+        }, timeoutMs + 100);
+      });
 
-      await expect(validationPromise).rejects.toThrow('Validation timeout');});
+      await expect(validationPromise).rejects.toThrow('Validation timeout');
+    });
 
 
-it('should recover from connection failures', async () => {
+    it('should recover from connection failures', async () => {
 
-  // Test connection recovery logiclet reconnectionAttempts = 0;
+  // Test connection recovery logic
+      let reconnectionAttempts = 0;
       const maxReconnectionAttempts = 5;
 
-      while (reconnectionAttempts < maxReconnectionAttempts) 
+      while (reconnectionAttempts < maxReconnectionAttempts) {
         try {
           // Simulate connection attempt
           const connected = Math.random() > 0.7; // 30% success rate
           if (connected) {
             break;
-          
-}
-          throw new Error('Connection failed');} catch (_error) {
-  reconnectionAttempts++;
+          }
+          throw new Error('Connection failed');
+        } catch (_error) {
+          reconnectionAttempts++;
           if (reconnectionAttempts >= maxReconnectionAttempts) {
             throw new Error('Max reconnection attempts exceeded');
-}// Exponential backoff
+          }
+
+          // Exponential backoff
           await new Promise(resolve =>
             setTimeout(resolve, Math.pow(2, reconnectionAttempts) * 1000)
           );
@@ -637,11 +645,16 @@ it('should recover from connection failures', async () => {
 
 
     it('should handle malformed messages', async () => {
-const malformedMessages = [' invalid json','{"type": "unknown"}','{"type": "validation_request"}', // Missing required fields];malformedMessages.forEach(message => {
-  expect(() => {
+      const malformedMessages = [
+        ' invalid json',
+        '{"type": "unknown"}',
+        '{"type": "validation_request"}', // Missing required fields
+      ];
+
+      malformedMessages.forEach(message => {
+        expect(() => {
           JSON.parse(message);
-        
-}).toThrow();
+        }).toThrow();
       });
     });
   });
@@ -650,15 +663,23 @@ const malformedMessages = [' invalid json','{"type": "unknown"}','{"type": "vali
 
   describe('Security and Compliance', () => {
 
-  it('should enforce authentication levels', () => const authLevels = ['basic', 'multi_factor', 'enterprise'];authLevels.forEach(level => {const securityContext: SecurityContext = {
-  authenticationLevel: level as 'basic' | 'multi_factor' | 'enterprise',
-      permissions: ['read'],
-      auditRequired: level === 'enterprise',
-      complianceFlags: level === 'enterprise' ? ['GDPR', 'SOX'] : [],
-};
-expect(securityContext.authenticationLevel).toBe(level);
-        if (level === 'enterprise') {expect(securityContext.auditRequired).toBe(true);
-expect(securityContext.complianceFlags).toContain('GDPR');}});
+  it('should enforce authentication levels', () => {
+      const authLevels = ['basic', 'multi_factor', 'enterprise'];
+
+      authLevels.forEach(level => {
+        const securityContext: SecurityContext = {
+          authenticationLevel: level as 'basic' | 'multi_factor' | 'enterprise',
+          permissions: ['read'],
+          auditRequired: level === 'enterprise',
+          complianceFlags: level === 'enterprise' ? ['GDPR', 'SOX'] : [],
+        };
+
+        expect(securityContext.authenticationLevel).toBe(level);
+        if (level === 'enterprise') {
+          expect(securityContext.auditRequired).toBe(true);
+          expect(securityContext.complianceFlags).toContain('GDPR');
+        }
+      });
     });
 
 
@@ -682,18 +703,23 @@ expect(securityContext.complianceFlags).toContain('GDPR');}});
 },complianceFlags: ['compliance_check', 'audit_required'],},];
 
       expect(auditTrail).toHaveLength(3);
-      expect(auditTrail.every(entry => entry.complianceFlags.includes('audit_required'))).toBe(true);});});
+      expect(auditTrail.every(entry => entry.complianceFlags.includes('audit_required'))).toBe(true);
+    });
+  });
 
   // ===== INTEGRATION SERVICE TESTS =====
 
   describe('Parlant Integration Service', () => {
-it('should provide integration statistics', () => const stats = integrationService.getIntegrationStatistics();
-expect(stats).toHaveProperty('activeValidations');
-expect(stats).toHaveProperty('completedValidations');
-expect(stats).toHaveProperty('activeSessions');
-expect(stats).toHaveProperty('performanceTargets');
-expect(stats).toHaveProperty('averageValidationTime');
-expect(stats).toHaveProperty('successRate');});
+    it('should provide integration statistics', () => {
+      const stats = integrationService.getIntegrationStatistics();
+
+      expect(stats).toHaveProperty('activeValidations');
+      expect(stats).toHaveProperty('completedValidations');
+      expect(stats).toHaveProperty('activeSessions');
+      expect(stats).toHaveProperty('performanceTargets');
+      expect(stats).toHaveProperty('averageValidationTime');
+      expect(stats).toHaveProperty('successRate');
+    });
 
 
 it('should handle integration events', () => {
