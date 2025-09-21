@@ -301,7 +301,8 @@ export class OrchestrationAnalyticsService {
     });
 
     // Store performance data for analytics
-    const performanceKey = `${operationType}_${startTime.toISOString().split('T')[0]}';const existing = this.performanceHistory.get(performanceKey) || [];
+    const performanceKey = `${operationType}_${startTime.toISOString().split('T')[0]}`;
+    const existing = this.performanceHistory.get(performanceKey) || [];
     existing.push(executionTime);
     this.performanceHistory.set(performanceKey, existing);
 
