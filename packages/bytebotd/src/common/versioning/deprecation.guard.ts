@@ -8,7 +8,7 @@
  * @fileoverview API deprecation lifecycle management for BytebotD desktop services
  * @version 1.0.0
  * @author Input Validation & API Security Specialist
- */;
+ */
 
 import {
   Injectable,
@@ -27,16 +27,24 @@ import {
   isDesktopApiVersion,
   getDesktopCompatibility,
 
-} from './api-version.decorator';/*** Deprecation enforcement levels for BytebotD desktop services
- */;
+} from './api-version.decorator';
+
+/**
+ * Deprecation enforcement levels for BytebotD desktop services
+ */
 
 export enum DeprecationEnforcement {
   /** Log usage but allow requests */
-  LOG_ONLY = 'log_only',/** Add warning headers but allow requests */
-WARN = 'warn',/** Block requests with deprecation warnings (grace period for desktop clients) */
-BLOCK_WITH_WARNING = 'block_with_warning',/** Block all requests to deprecated endpoints */
-STRICT_BLOCK = 'strict_block',
-}/**
+  LOG_ONLY = 'log_only',
+  /** Add warning headers but allow requests */
+  WARN = 'warn',
+  /** Block requests with deprecation warnings (grace period for desktop clients) */
+  BLOCK_WITH_WARNING = 'block_with_warning',
+  /** Block all requests to deprecated endpoints */
+  STRICT_BLOCK = 'strict_block',
+}
+
+/**
  * Deprecation policy configuration for BytebotD
  */
 interface DeprecationPolicy {
@@ -86,9 +94,7 @@ interface VersionConfig {
     sunset?: string | Date;
     migration?: string;
     desktopMigrationNotes?: string;
-  
-
-};
+  };
   isComputerUse?: boolean;
   version?: string;
 }
@@ -162,40 +168,57 @@ export class DeprecationGuard implements CanActivate {
     private readonly configService: ConfigService,
   ) {
     // Load deprecation policy from configuration with BytebotD defaults
-    this.policy = {,
+    this.policy = {
   enforcement: this.configService.get<DeprecationEnforcement>(
         'api.deprecation.enforcement',
       DeprecationEnforcement.WARN,),
       gracePeriodDays: this.configService.get<number>(
-        'api.deprecation.gracePeriodDays',30,),
+        'api.deprecation.gracePeriodDays',
+        30,
+      ),
       sunsetGracePeriodDays: this.configService.get<number>(
-        'api.deprecation.sunsetGracePeriodDays',7,),
+        'api.deprecation.sunsetGracePeriodDays',
+        7,
+      ),
       desktopGracePeriodDays: this.configService.get<number>(
-        'api.deprecation.desktopGracePeriodDays',60, // Extended grace period for desktop clients),
+        'api.deprecation.desktopGracePeriodDays',
+        60, // Extended grace period for desktop clients
+      ),
       allowBypass: this.configService.get<boolean>(
         'api.deprecation.allowBypass',
-      false,),
+        false,
+      ),
       bypassHeader: this.configService.get<string>(
-        'api.deprecation.bypassHeader','X-Deprecation-Bypass',),trackUsage: this.configService.get<boolean>(
+        'api.deprecation.bypassHeader',
+        'X-Deprecation-Bypass',
+      ),
+      trackUsage: this.configService.get<boolean>(
         'api.deprecation.trackUsage',
-      true,),
+        true,
+      ),
       rateLimitDeprecated: this.configService.get<boolean>(
         'api.deprecation.rateLimitDeprecated',
-      true,),
+        true,
+      ),
       desktopSpecific: {
-  allowLegacyClients: this.configService.get<boolean>(
+        allowLegacyClients: this.configService.get<boolean>(
           'api.deprecation.desktop.allowLegacyClients',
-      true,),
+          true,
+        ),
         minClientVersionForEnforcement: this.configService.get<string>(
-          'api.deprecation.desktop.minClientVersion','1.0.0',),computerUseGracePeriodDays: this.configService.get<number>(
-          'api.deprecation.desktop.computerUseGracePeriod',90, // Extended grace for computer use operations),
-      
-},
+          'api.deprecation.desktop.minClientVersion',
+          '1.0.0',
+        ),
+        computerUseGracePeriodDays: this.configService.get<number>(
+          'api.deprecation.desktop.computerUseGracePeriod',
+          90, // Extended grace for computer use operations
+        ),
+      },
     };
 
     // Initialize usage statistics
     this.stats = {
-  deprecatedRequests: 0,
+      deprecatedRequests: 0,
       uniqueDesktopClients: new Set(),
       endpointUsage: new Map(),
       computerUseDeprecatedRequests: 0,
@@ -203,30 +226,30 @@ export class DeprecationGuard implements CanActivate {
       lastSeen: new Date(),
       desktopClientVersions: new Set(),
       vncClients: new Set(),
-    
-};
+    };
 
     this.logger.log('BytebotD deprecation guard initialized', {
-  enforcement: this.policy.enforcement,
+      enforcement: this.policy.enforcement,
       gracePeriodDays: this.policy.gracePeriodDays,
       desktopGracePeriodDays: this.policy.desktopGracePeriodDays,
       sunsetGracePeriodDays: this.policy.sunsetGracePeriodDays,
       allowBypass: this.policy.allowBypass,
       trackUsage: this.policy.trackUsage,
       desktopSpecific: this.policy.desktopSpecific,
-    
-});
+    });
   }
 
   /**
    * Check if request can access potentially deprecated desktop endpoint
    * @param context - Execution context
-   * @return s Promise<boolean> - Whether request is allowed
+   * @returns Promise<boolean> - Whether request is allowed
    */
-  async canActivate(context: ExecutionContext): Promise<boolean>  {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const operationId = `bytebotd-deprecation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();try {
-  const request = context.switchToHttp().getRequest<Request>();
+    const startTime = Date.now();
+
+    try {
+      const request = context.switchToHttp().getRequest<Request>();
       const response = context.switchToHttp().getResponse<Response>();
 
       // Get version configuration from endpoint
@@ -239,12 +262,12 @@ export class DeprecationGuard implements CanActivate {
       if (!versionConfig?.deprecation?.deprecated) {
         // Endpoint is not deprecated, allow request
         return true;
-      
-}
+      }
 
       this.logger.debug(
-        `[${operationId}] Checking deprecated BytebotD endpoint access`,{
-  operationId,
+        `[${operationId}] Checking deprecated BytebotD endpoint access`,
+        {
+          operationId,
           endpoint: request.url,
           method: request.method,
           isDesktopEndpoint,
@@ -252,8 +275,7 @@ export class DeprecationGuard implements CanActivate {
           sunsetDate: versionConfig.deprecation.sunset,
           enforcement: this.policy.enforcement,
           desktopCompatibility,
-        
-},
+        },
       );
 
       // Extract desktop client information
@@ -261,23 +283,22 @@ export class DeprecationGuard implements CanActivate {
 
       // Track usage if enabled
       if (this.policy.trackUsage) {
-  this.trackDeprecatedUsage(
+        this.trackDeprecatedUsage(
           request,
           versionConfig,
           desktopClientInfo,
           operationId,
         );
-      
-}
+      }
 
       // Check for bypass header
       if (this.policy.allowBypass && request.get(this.policy.bypassHeader)) {
         this.logger.warn(`[${operationId}] BytebotD deprecation bypass used`, {
-  operationId,endpoint: request.url,
+          operationId,
+          endpoint: request.url,
           bypassHeader: this.policy.bypassHeader,
           desktopClient: desktopClientInfo,
-        
-});
+        });
 
         // Log security event for bypass usage
         await this.logDeprecationBypass(
@@ -328,45 +349,41 @@ export class DeprecationGuard implements CanActivate {
       const processingTime = Date.now() - startTime;
 
       if (allowed) {
-  this.logger.debug(
-          `[${operationId
-}] Deprecated BytebotD endpoint access allowed`,{
-  operationId,
+        this.logger.debug(
+          `[${operationId}] Deprecated BytebotD endpoint access allowed`,
+          {
+            operationId,
             enforcement: this.policy.enforcement,
             deprecationState: deprecationResult.state,
             isDesktopEndpoint,
             desktopClient: desktopClientInfo,
             processingTimeMs: processingTime,
-          
-},
+          },
         );
       } else {
-  this.logger.warn(
-          `[${operationId
-}] Deprecated BytebotD endpoint access blocked`,{
-  operationId,
+        this.logger.warn(
+          `[${operationId}] Deprecated BytebotD endpoint access blocked`,
+          {
+            operationId,
             enforcement: this.policy.enforcement,
             deprecationState: deprecationResult.state,
             isDesktopEndpoint,
             desktopClient: desktopClientInfo,
             processingTimeMs: processingTime,
-          
-},
+          },
         );
       }
 
       return allowed;
     } catch (_error) {
-  const processingTime = Date.now() - startTime;
+      const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId
-}] BytebotD deprecation guard error`, {
-  operationId,
+      this.logger.error(`[${operationId}] BytebotD deprecation guard error`, {
+        operationId,
         error: (_error as Error).message,
         stack: (_error as Error).stack,
         processingTimeMs: processingTime,
-      
-});
+      });
 
       // Allow request on error (fail open)
       return true;
@@ -379,26 +396,33 @@ export class DeprecationGuard implements CanActivate {
    * @returns Desktop client information
    */
   private extractDesktopClientInfo(request: Request): {
-  clientId: string;
+    clientId: string;
     version: string;
     vncClient: string;
     isComputerUse: boolean;
-  
-} {
-  const desktopClient = request.get('X-Desktop-Client') ?? 'unknown';
-const computerUseClient = request.get('X-Computer-Use-Client');const vncClient = request.get('X-VNC-Client') ?? 'unknown';
-const _userAgent = request.get('User-Agent') ?? 'unknown';
+  } {
+    const desktopClient = request.get('X-Desktop-Client') ?? 'unknown';
+    const computerUseClient = request.get('X-Computer-Use-Client');
+    const vncClient = request.get('X-VNC-Client') ?? 'unknown';
+    const _userAgent = request.get('User-Agent') ?? 'unknown';
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
     const versionMatch = desktopClient.match(/-([0-9]+\.[0-9]+\.[0-9]+)/);
     const version = versionMatch ? versionMatch[1] : '0.0.0';
-const isComputerUse = !!(computerUseClient ??
-      request.path.includes('computer-use') ??request.path.includes('screenshot') ??request.path.includes('click') ??request.path.includes('type'));return {,
-  clientId: desktopClient,
+    const isComputerUse = !!(
+      computerUseClient ??
+      request.path.includes('computer-use') ??
+      request.path.includes('screenshot') ??
+      request.path.includes('click') ??
+      request.path.includes('type')
+    );
+
+    return {
+      clientId: desktopClient,
       version: version ?? 'unknown',
-      vncClient,isComputerUse,
-    
-};
+      vncClient,
+      isComputerUse,
+    };
   }
 
   /**
@@ -416,19 +440,18 @@ const isComputerUse = !!(computerUseClient ??
     isDesktopEndpoint: boolean,
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
-  ) {
-  const deprecation = versionConfig.deprecation;
+  ): DeprecationResult {
+    const deprecation = versionConfig.deprecation;
 
     if (!deprecation) {
-      return {,
-  state: 'not_deprecated',
-      inGracePeriod: false,
-      inDesktopGracePeriod: false,
+      return {
+        state: 'not_deprecated',
+        inGracePeriod: false,
+        inDesktopGracePeriod: false,
         isSunset: false,
         isPastSunsetGrace: false,
         daysUntilSunset: null,
-      
-};
+      };
     }
 
     const deprecatedSince = deprecation.since
@@ -480,15 +503,20 @@ const isComputerUse = !!(computerUseClient ??
         : null;
 
     let state = 'deprecated';
-if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if (inGracePeriod) {
-  state = computerUseGracePeriod
-        ? 'computer_use_grace': desktopGracePeriod? 'desktop_grace': 'deprecated_grace';
-    
-}
+    if (isSunset) {
+      state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';
+    } else if (inGracePeriod) {
+      state = computerUseGracePeriod
+        ? 'computer_use_grace'
+        : desktopGracePeriod
+          ? 'desktop_grace'
+          : 'deprecated_grace';
+    }
 
     this.logger.debug(
-      `[${operationId}] BytebotD deprecation evaluation completed`,{
-  operationId,
+      `[${operationId}] BytebotD deprecation evaluation completed`,
+      {
+        operationId,
         state,
         inGracePeriod,
         inDesktopGracePeriod,
@@ -499,19 +527,17 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
         desktopClientVersion: desktopClientInfo.version,
         deprecatedSince: deprecatedSince?.toISOString(),
         sunsetDate: sunsetDate?.toISOString(),
-      
-},
+      },
     );
 
     return {
-  state,
+      state,
       inGracePeriod,
       inDesktopGracePeriod,
       isSunset,
       isPastSunsetGrace,
       daysUntilSunset,
-    
-};
+    };
   }
 
   /**
@@ -539,21 +565,18 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
       this.isLegacyDesktopClient(desktopClientInfo)
     ) {
       this.logger.warn(
-        `[${operationId
-}] Legacy desktop client allowed deprecated access`,
+        `[${operationId}] Legacy desktop client allowed deprecated access`,
         {
-  operationId,
+          operationId,
           desktopClient: desktopClientInfo,
           deprecationState: deprecationResult.state,
-        
-},
+        },
       );
       return true;
     }
 
-  switch (this.policy.enforcement) {
-
-  case DeprecationEnforcement.LOG_ONLY:
+    switch (this.policy.enforcement) {
+      case DeprecationEnforcement.LOG_ONLY:
         // Always allow, just log
         this.logDeprecationAccess(
           request,
@@ -578,9 +601,15 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
       case DeprecationEnforcement.BLOCK_WITH_WARNING:
         // Block if past grace period or sunset, considering desktop extensions
         if (
-          deprecationResult.state === 'sunset_strict' ||(!deprecationResult.inGracePeriod &&!deprecationResult.inDesktopGracePeriod &&
+          deprecationResult.state === 'sunset_strict' ||
+          (!deprecationResult.inGracePeriod &&
+            !deprecationResult.inDesktopGracePeriod &&
             ![
-              'deprecated_grace','desktop_grace','computer_use_grace',].includes(deprecationResult.state))) {
+              'deprecated_grace',
+              'desktop_grace',
+              'computer_use_grace',
+            ].includes(deprecationResult.state))
+        ) {
           this.throwDeprecationError(
             versionConfig,
             deprecationResult,
@@ -588,21 +617,18 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
             operationId,
           );
           return false;
-        
-
-    }
+        }
         return true;
 
       case DeprecationEnforcement.STRICT_BLOCK:
         // Block all deprecated endpoint access, except for computer use grace period
         if (deprecationResult.state === 'computer_use_grace') {
-  this.logger.warn(
-            `[${operationId
-}] Computer use endpoint allowed despite strict block policy`,{
-  operationId,
+          this.logger.warn(
+            `[${operationId}] Computer use endpoint allowed despite strict block policy`,
+            {
+              operationId,
               desktopClient: desktopClientInfo,
-            
-},
+            },
           );
           return true;
         }
@@ -629,28 +655,31 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
    * @returns Boolean indicating if client is legacy
    */
   private isLegacyDesktopClient(desktopClientInfo: DesktopClientInfo): boolean {
-  const minVersion =
+    const minVersion =
       this.policy.desktopSpecific.minClientVersionForEnforcement;
     const clientVersion = desktopClientInfo.version;
 
     // Simple version comparison (assumes semantic versioning)
     if (
       !clientVersion ||
-      clientVersion === '0.0.0' ||clientVersion === 'unknown') {return true; // Unknown versions are considered legacy
-    
-}
+      clientVersion === '0.0.0' ||
+      clientVersion === 'unknown'
+    ) {
+      return true; // Unknown versions are considered legacy
+    }
 
-    const minParts = minVersion.split('.').map(Number);const clientParts = clientVersion.split('.').map(Number);for (let i = 0; i < Math.max(minParts.length, clientParts.length); i++) {
-  const minPart = minParts[i] ?? 0;
+    const minParts = minVersion.split('.').map(Number);
+    const clientParts = clientVersion.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(minParts.length, clientParts.length); i++) {
+      const minPart = minParts[i] ?? 0;
       const clientPart = clientParts[i] ?? 0;
 
       if (clientPart < minPart) {
         return true;
-      
-} else if (clientPart > minPart) {
-  return false;
-      
-}
+      } else if (clientPart > minPart) {
+        return false;
+      }
     }
 
     return false; // Versions are equal, not legacy
@@ -669,55 +698,66 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     bypassUsed: boolean,
     desktopClientInfo: DesktopClientInfo,
   ): void {
-  const deprecation = versionConfig.deprecation;
+    const deprecation = versionConfig.deprecation;
 
     if (!deprecation) {
       return;
-    
-}
-
-  if(deprecation.since) {
-  const sinceDate =
-        typeof deprecation.since === 'string'? new Date(deprecation.since): deprecation.since;
-      response.setHeader('Deprecation', `date="${sinceDate.toISOString()
-}"`);
     }
 
-  if(deprecation.sunset) {
-  const sunsetDate =
-        typeof deprecation.sunset === 'string'? new Date(deprecation.sunset): deprecation.sunset;
-      response.setHeader('Sunset', sunsetDate.toISOString());
-}
+    if (deprecation.since) {
+      const sinceDate =
+        typeof deprecation.since === 'string'
+          ? new Date(deprecation.since)
+          : deprecation.since;
+      response.setHeader('Deprecation', `date="${sinceDate.toISOString()}"`);
+    }
 
-  if(deprecation.migration) {
-      response.setHeader('API-Migration-Guide', deprecation.migration);}
-
-  if(deprecation.desktopMigrationNotes) {
-  response.setHeader(
-        'X-Desktop-Migration-Notes',
-        deprecation.desktopMigrationNotes,
-      );
-    
-}
-
-    // Add desktop-specific warning header
-    let warningMessage = `299 - "BytebotD desktop API endpoint is deprecated"";
     if (deprecation.sunset) {
-  const sunsetDate =
+      const sunsetDate =
         typeof deprecation.sunset === 'string'
           ? new Date(deprecation.sunset)
           : deprecation.sunset;
-      warningMessage += ` and will be removed on ${sunsetDate.toISOString()
-}`;}
+      response.setHeader('Sunset', sunsetDate.toISOString());
+    }
 
-  if(desktopClientInfo.isComputerUse) {
-  warningMessage += ` (Computer use operations have extended grace period)`;
-    
-}
+    if (deprecation.migration) {
+      response.setHeader('API-Migration-Guide', deprecation.migration);
+    }
 
-    response.setHeader('Warning', warningMessage);response.setHeader('X-Desktop-Client-Detected',desktopClientInfo.clientId ?? 'unknown',);response.setHeader(
-      'X-Desktop-Client-Version',desktopClientInfo.version ?? 'unknown',);if (bypassUsed) {
-      response.setHeader('X-Deprecation-Bypass-Used', 'true');}}
+    if (deprecation.desktopMigrationNotes) {
+      response.setHeader(
+        'X-Desktop-Migration-Notes',
+        deprecation.desktopMigrationNotes,
+      );
+    }
+
+    // Add desktop-specific warning header
+    let warningMessage = `299 - "BytebotD desktop API endpoint is deprecated"`;
+    if (deprecation.sunset) {
+      const sunsetDate =
+        typeof deprecation.sunset === 'string'
+          ? new Date(deprecation.sunset)
+          : deprecation.sunset;
+      warningMessage += ` and will be removed on ${sunsetDate.toISOString()}`;
+    }
+
+    if (desktopClientInfo.isComputerUse) {
+      warningMessage += ` (Computer use operations have extended grace period)`;
+    }
+
+    response.setHeader('Warning', warningMessage);
+    response.setHeader(
+      'X-Desktop-Client-Detected',
+      desktopClientInfo.clientId ?? 'unknown',
+    );
+    response.setHeader(
+      'X-Desktop-Client-Version',
+      desktopClientInfo.version ?? 'unknown',
+    );
+    if (bypassUsed) {
+      response.setHeader('X-Deprecation-Bypass-Used', 'true');
+    }
+  }
 
   /**
    * Track usage statistics for deprecated desktop endpoints
@@ -732,24 +772,30 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
-  try {
+    try {
       this.stats.deprecatedRequests++;
       this.stats.lastSeen = new Date();
 
       this.stats.uniqueDesktopClients.add(
-        desktopClientInfo.clientId ?? 'unknown',);this.stats.desktopClientVersions.add(
-        desktopClientInfo.version ?? 'unknown',);this.stats.vncClients.add(desktopClientInfo.vncClient ?? 'unknown');
+        desktopClientInfo.clientId ?? 'unknown',
+      );
+      this.stats.desktopClientVersions.add(
+        desktopClientInfo.version ?? 'unknown',
+      );
+      this.stats.vncClients.add(desktopClientInfo.vncClient ?? 'unknown');
 
       if (desktopClientInfo.isComputerUse) {
         this.stats.computerUseDeprecatedRequests++;
-      
-}
+      }
 
-      const endpoint = `${request.method} ${request.url}`;const currentCount = this.stats.endpointUsage.get(endpoint) ?? 0;this.stats.endpointUsage.set(endpoint, currentCount + 1);
+      const endpoint = `${request.method} ${request.url}`;
+      const currentCount = this.stats.endpointUsage.get(endpoint) ?? 0;
+      this.stats.endpointUsage.set(endpoint, currentCount + 1);
 
       this.logger.debug(
-        `[${operationId}] BytebotD deprecated endpoint usage tracked`,{
-  operationId,
+        `[${operationId}] BytebotD deprecated endpoint usage tracked`,
+        {
+          operationId,
           endpoint,
           desktopClient: desktopClientInfo.clientId,
           version: desktopClientInfo.version,
@@ -757,17 +803,15 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
           totalDeprecatedRequests: this.stats.deprecatedRequests,
           uniqueDesktopClients: this.stats.uniqueDesktopClients.size,
           computerUseRequests: this.stats.computerUseDeprecatedRequests,
-        
-},
+        },
       );
     } catch (_error) {
-  this.logger.error(
-        `[${operationId
-}] Failed to track BytebotD deprecated usage`,{
-  operationId,
+      this.logger.error(
+        `[${operationId}] Failed to track BytebotD deprecated usage`,
+        {
+          operationId,
           error: (_error as Error).message,
-        
-},
+        },
       );
     }
   }
@@ -787,10 +831,9 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
-  try {
-      this.logger.warn(`BytebotD deprecated API access: ${operationId
-}`, {
-  operationId,
+    try {
+      this.logger.warn(`BytebotD deprecated API access: ${operationId}`, {
+        operationId,
         endpoint: request.url,
         method: request.method,
         apiVersion: versionConfig.version,
@@ -806,14 +849,13 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
         desktopMigrationNotes: versionConfig.deprecation?.desktopMigrationNotes,
         desktopClient: desktopClientInfo,
         userAgent: request.get('User-Agent'),
-      ip: request.ip,
-});
+        ip: request.ip,
+      });
     } catch (_error) {
-  this.logger.error('Failed to log BytebotD deprecation access', {
+      this.logger.error('Failed to log BytebotD deprecation access', {
         operationId,
         error: (_error as Error).message,
-      
-});
+      });
     }
   }
 
@@ -830,25 +872,23 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
-  try {
-      this.logger.warn(`BytebotD deprecation bypass used: ${operationId
-}`, {
-  operationId,
+    try {
+      this.logger.warn(`BytebotD deprecation bypass used: ${operationId}`, {
+        operationId,
         endpoint: request.url,
         method: request.method,
         apiVersion: versionConfig.version,
         bypassType: 'deprecation_bypass',
-      bypassHeader: this.policy.bypassHeader,
-      desktopClient: desktopClientInfo,
+        bypassHeader: this.policy.bypassHeader,
+        desktopClient: desktopClientInfo,
         userAgent: request.get('User-Agent'),
-      ip: request.ip,
-});
+        ip: request.ip,
+      });
     } catch (_error) {
-  this.logger.error('Failed to log BytebotD deprecation bypass', {
+      this.logger.error('Failed to log BytebotD deprecation bypass', {
         operationId,
         error: (_error as Error).message,
-      
-});
+      });
     }
   }
 
@@ -865,65 +905,64 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
-  const deprecation = versionConfig.deprecation;
+    const deprecation = versionConfig.deprecation;
     let message = `BytebotD desktop API endpoint is deprecated`;
     let statusCode = HttpStatus.GONE; // 410 Gone
 
     if (!deprecation) {
       throw new HttpException(
-        {,
-  statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Deprecation configuration is missing',
-      error: 'Internal Server Error',
+          error: 'Internal Server Error',
           operationId,
-        
-},
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-  if(deprecationResult.isSunset) {
-  message = `BytebotD desktop API endpoint has been sunset and is no longer available`;
+    if (deprecationResult.isSunset) {
+      message = `BytebotD desktop API endpoint has been sunset and is no longer available`;
       statusCode = HttpStatus.GONE;
-    
-} else if (deprecation.sunset) {
-  const sunsetDate =
+    } else if (deprecation.sunset) {
+      const sunsetDate =
         typeof deprecation.sunset === 'string'
           ? new Date(deprecation.sunset)
           : deprecation.sunset;
-      message += ` and will be removed on ${sunsetDate.toISOString()
-}`;}
+      message += ` and will be removed on ${sunsetDate.toISOString()}`;
+    }
 
-  if(desktopClientInfo.isComputerUse) {
-      message += `. Note: Computer use operations may have extended grace periods`;}
+    if (desktopClientInfo.isComputerUse) {
+      message += `. Note: Computer use operations may have extended grace periods`;
+    }
 
-  if(deprecation.migration) {
-      message += `. Migration guide: ${deprecation.migration}`;}
+    if (deprecation.migration) {
+      message += `. Migration guide: ${deprecation.migration}`;
+    }
 
-  if(deprecation.desktopMigrationNotes) {
+    if (deprecation.desktopMigrationNotes) {
       message += `. Desktop migration notes: ${deprecation.desktopMigrationNotes}`;
     }
 
     throw new HttpException(
       {
-  statusCode,
+        statusCode,
         message,
         error: 'Gone',
-      service: 'BytebotD',
-      deprecation: {since: deprecation.since,
+        service: 'BytebotD',
+        deprecation: {
+          since: deprecation.since,
           sunset: deprecation.sunset,
           migration: deprecation.migration,
           desktopMigrationNotes: deprecation.desktopMigrationNotes,
           state: deprecationResult.state,
           daysUntilSunset: deprecationResult.daysUntilSunset,
-        
-},
+        },
         desktopClient: {
-  clientId: desktopClientInfo.clientId,
+          clientId: desktopClientInfo.clientId,
           version: desktopClientInfo.version,
           isComputerUse: desktopClientInfo.isComputerUse,
-        
-},
+        },
         operationId,
       },
       statusCode,
@@ -936,14 +975,14 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
    */
   getUsageStatistics(): Omit<
     DeprecationStats,
-    'uniqueDesktopClients' | 'desktopClientVersions' | 'vncClients'> & {
-  uniqueDesktopClients: number;
+    'uniqueDesktopClients' | 'desktopClientVersions' | 'vncClients'
+  > & {
+    uniqueDesktopClients: number;
     desktopClientVersions: number;
     vncClients: number;
-  
-} {
-  return {,
-  deprecatedRequests: this.stats.deprecatedRequests,
+  } {
+    return {
+      deprecatedRequests: this.stats.deprecatedRequests,
       uniqueDesktopClients: this.stats.uniqueDesktopClients.size,
       endpointUsage: this.stats.endpointUsage,
       computerUseDeprecatedRequests: this.stats.computerUseDeprecatedRequests,
@@ -951,15 +990,14 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
       lastSeen: this.stats.lastSeen,
       desktopClientVersions: this.stats.desktopClientVersions.size,
       vncClients: this.stats.vncClients.size,
-    
-};
+    };
   }
 
   /**
    * Clear usage statistics
    */
   clearStatistics(): void {
-  this.stats.deprecatedRequests = 0;
+    this.stats.deprecatedRequests = 0;
     this.stats.uniqueDesktopClients.clear();
     this.stats.endpointUsage.clear();
     this.stats.computerUseDeprecatedRequests = 0;
@@ -969,14 +1007,15 @@ if (isSunset) {state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';} else if 
     this.stats.lastSeen = new Date();
 
     this.logger.log('BytebotD deprecation usage statistics cleared');
-}/**
+  }
+
+  /**
    * Get desktop-specific deprecation policy
    * @returns Desktop deprecation policy
    */
   getDesktopPolicy(): DeprecationPolicy['desktopSpecific'] {
-  return this.policy.desktopSpecific;
-  
+    return this.policy.desktopSpecific;
+  }
 }
-};
 
 export default DeprecationGuard;

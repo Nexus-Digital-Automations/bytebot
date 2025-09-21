@@ -8,7 +8,7 @@
  * @fileoverview API version management interceptor for BytebotD desktop services
  * @version 1.0.0
  * @author Input Validation & API Security Specialist
- */;
+ */
 
 import {
   Injectable,
@@ -34,35 +34,38 @@ import {
   SUPPORTED_API_VERSIONS,
   SupportedVersion,
 
-} from './api-version.decorator';/*** Version resolution result
+} from './api-version.decorator';
+
+/**
+ * Version resolution result
  */
 interface VersionResolution {
-  /** Resolved API version */;
+  /** Resolved API version */
   resolvedVersion: string;
 
-  /** Version source (header, query, url, default) */;
-  source: 'header' | 'query' | 'url' | 'default';/** Whether version is supported */
-isSupported: boolean;
+  /** Version source (header, query, url, default) */
+  source: 'header' | 'query' | 'url' | 'default';
 
-  /** Desktop client compatibility */;
+  /** Whether version is supported */
+  isSupported: boolean;
+
+  /** Desktop client compatibility */
   desktopCompatibility: {
-    /** Is desktop client */;
-  isDesktopClient: boolean;
+    /** Is desktop client */
+    isDesktopClient: boolean;
 
-    /** Desktop client version */;
-  clientVersion: string;
+    /** Desktop client version */
+    clientVersion: string;
 
-    /** VNC client information */;
-  vncClient: string;
+    /** VNC client information */
+    vncClient: string;
 
-    /** Is computer use request */;
-  isComputerUse: boolean;
+    /** Is computer use request */
+    isComputerUse: boolean;
 
-    /** Desktop compatibility issues */;
-  compatibilityIssues: string[];
-  
-
-};
+    /** Desktop compatibility issues */
+    compatibilityIssues: string[];
+  };
 
   /** Validation warnings */
   warnings: string[];
@@ -95,21 +98,27 @@ export class VersionInterceptor implements NestInterceptor {
     private readonly configService: ConfigService,
   ) {
     this.defaultVersion = this.configService.get<SupportedVersion>(
-      'api.version.default',SUPPORTED_API_VERSIONS.V1,);
+      'api.version.default',
+      SUPPORTED_API_VERSIONS.V1,
+    );
     this.strictVersioning = this.configService.get<boolean>(
-      'api.version.strict',false,);
+      'api.version.strict',
+      false,
+    );
 
-    this.logger.log('BytebotD version interceptor initialized', {,
-  defaultVersion: this.defaultVersion,
+    this.logger.log('BytebotD version interceptor initialized', {
+      defaultVersion: this.defaultVersion,
       strictVersioning: this.strictVersioning,
       supportedVersions: Object.values(SUPPORTED_API_VERSIONS),
-    
-});
+    });
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const operationId = `bytebotd-version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();try {
-  const request = context.switchToHttp().getRequest<Request>();
+    const operationId = `bytebotd-version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();
+
+    try {
+      const request = context.switchToHttp().getRequest<Request>();
       const response = context.switchToHttp().getResponse<Response>();
 
       // Get endpoint version configuration
@@ -120,16 +129,15 @@ export class VersionInterceptor implements NestInterceptor {
       const desktopCompatibility: DesktopCompatibility | null =
         getDesktopCompatibility(context.getHandler()) ?? null;
 
-      this.logger.debug(`[${operationId
-}] Processing BytebotD API version`, {
-  operationId,endpoint: request.path,
+      this.logger.debug(`[${operationId}] Processing BytebotD API version`, {
+        operationId,
+        endpoint: request.path,
         method: request.method,
         endpointVersion,
         multiVersions,
         isDesktopEndpoint,
         desktopCompatibility,
-      
-});
+      });
 
       // Resolve API version from request
       const versionResolution = this.resolveVersion(
@@ -163,57 +171,54 @@ export class VersionInterceptor implements NestInterceptor {
       // Log version resolution
       if (versionResolution.warnings.length > 0) {
         this.logger.warn(`[${operationId}] Version resolution warnings`, {
-  operationId,warnings: versionResolution.warnings,
+          operationId,
+          warnings: versionResolution.warnings,
           resolvedVersion: versionResolution.resolvedVersion,
           desktopClient: versionResolution.desktopCompatibility,
-        
-});
+        });
       }
 
       return next.handle().pipe(
         tap(() => {
-  const processingTime = Date.now() - startTime;
+          const processingTime = Date.now() - startTime;
           this.logger.debug(
-            `[${operationId
-}] BytebotD version processing completed`,
+            `[${operationId}] BytebotD version processing completed`,
             {
-  operationId,
+              operationId,
               resolvedVersion: versionResolution.resolvedVersion,
               source: versionResolution.source,
               isDesktopClient:
                 versionResolution.desktopCompatibility.isDesktopClient,
               processingTimeMs: processingTime,
-            
-},
+            },
           );
         }),
         map((data: unknown) => {
-  // Add version metadata to response
-          if (typeof data === 'object' && data !== null) {return {...(data as Record<string, unknown>),
+          // Add version metadata to response
+          if (typeof data === 'object' && data !== null) {
+            return {
+              ...(data as Record<string, unknown>),
               metadata: {
-  apiVersion: versionResolution.resolvedVersion,
+                apiVersion: versionResolution.resolvedVersion,
                 service: 'BytebotD',
                 isDesktopEndpoint,
                 desktopClient:
                   versionResolution.desktopCompatibility.isDesktopClient,
                 operationId,
-              
-},
+              },
             } as unknown;
           }
           return data;
         }),
       );
     } catch (_error) {
-  const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId
-}] BytebotD version interceptor error`, {
-  operationId,
+      const processingTime = Date.now() - startTime;
+      this.logger.error(`[${operationId}] BytebotD version interceptor error`, {
+        operationId,
         error: _error instanceof Error ? _error.message : String(_error),
         stack: _error instanceof Error ? _error.stack : undefined,
         processingTimeMs: processingTime,
-      
-});
+      });
 
       // Allow request to continue on error (fail open)
       return next.handle();
@@ -223,7 +228,9 @@ export class VersionInterceptor implements NestInterceptor {
   /**
    * Resolve API version from request with desktop client awareness
    * @param request - Express request
-   * @param endpointVersion - Endpoint's declared version* @param multiVersions - Array of supported versions* @param isDesktopEndpoint - Whether endpoint is desktop-specific
+   * @param endpointVersion - Endpoint's declared version
+   * @param multiVersions - Array of supported versions
+   * @param isDesktopEndpoint - Whether endpoint is desktop-specific
    * @param desktopCompatibility - Desktop compatibility requirements
    * @param operationId - Operation ID for logging
    * @returns Version resolution result
@@ -236,19 +243,22 @@ export class VersionInterceptor implements NestInterceptor {
     desktopCompatibility: DesktopCompatibility | null,
     operationId: string,
   ): VersionResolution {
-  let resolvedVersion = this.defaultVersion;
+    let resolvedVersion = this.defaultVersion;
     let source: VersionResolution['source'] = 'default';
-const warnings: string[] = [];// Extract desktop client information
+    const warnings: string[] = [];
+
+    // Extract desktop client information
     const desktopClientInfo = this.extractDesktopClientInfo(request);
 
     // Try to resolve version from different sources (in order of precedence)
 
     // 1. Accept-Version header (most specific)
-    const acceptVersion = request.get('Accept-Version');if (acceptVersion) {if (this.isValidVersion(acceptVersion)) {
+    const acceptVersion = request.get('Accept-Version');
+    if (acceptVersion) {
+      if (this.isValidVersion(acceptVersion)) {
         resolvedVersion = acceptVersion;
         source = 'header';
-      
-} else {
+      } else {
         warnings.push(`Invalid Accept-Version header: ${acceptVersion}`);
       }
     }
@@ -256,10 +266,10 @@ const warnings: string[] = [];// Extract desktop client information
     // 2. Query parameter version
     const queryVersion = request.query.version as string;
     if (queryVersion && source === 'default') {
-  if (this.isValidVersion(queryVersion)) {resolvedVersion = queryVersion;
+      if (this.isValidVersion(queryVersion)) {
+        resolvedVersion = queryVersion;
         source = 'query';
-      
-} else {
+      } else {
         warnings.push(`Invalid query version parameter: ${queryVersion}`);
       }
     }
@@ -269,18 +279,17 @@ const warnings: string[] = [];// Extract desktop client information
     if (urlVersionMatch && source === 'default') {
       const urlVersion = `v${urlVersionMatch[1]}`;
       if (this.isValidVersion(urlVersion)) {
-  resolvedVersion = urlVersion;
+        resolvedVersion = urlVersion;
         source = 'url';
-      
-} else {
+      } else {
         warnings.push(`Invalid URL version: ${urlVersion}`);
       }
     }
 
-    // 4. Use endpoint's declared version if no version specifiedif (source === 'default' && endpointVersion) {
-  resolvedVersion = endpointVersion;
-    
-}
+    // 4. Use endpoint's declared version if no version specified
+    if (source === 'default' && endpointVersion) {
+      resolvedVersion = endpointVersion;
+    }
 
     // Validate version against endpoint constraints
     const isSupported = this.validateEndpointVersion(
@@ -298,35 +307,34 @@ const warnings: string[] = [];// Extract desktop client information
     );
 
     if (compatibilityIssues.length > 0) {
-  warnings.push(
+      warnings.push(
         ...compatibilityIssues.map(
-          (issue) => `Desktop compatibility: ${issue
-}`,),);
+          (issue) => `Desktop compatibility: ${issue}`,
+        ),
+      );
     }
 
     this.logger.debug(`[${operationId}] BytebotD version resolved`, {
-  operationId,
+      operationId,
       resolvedVersion,
       source,
       isSupported,
       warnings,
       desktopClient: desktopClientInfo,
       compatibilityIssues,
-    
-});
+    });
 
     return {
-  resolvedVersion,
+      resolvedVersion,
       source,
       isSupported,
       desktopCompatibility: {
-  isDesktopClient: desktopClientInfo.isDesktopClient,
+        isDesktopClient: desktopClientInfo.isDesktopClient,
         clientVersion: desktopClientInfo.clientVersion ?? 'unknown',
-      vncClient: desktopClientInfo.vncClient,
-      isComputerUse: desktopClientInfo.isComputerUse,
+        vncClient: desktopClientInfo.vncClient,
+        isComputerUse: desktopClientInfo.isComputerUse,
         compatibilityIssues,
-      
-},
+      },
       warnings,
     };
   }
@@ -337,13 +345,17 @@ const warnings: string[] = [];// Extract desktop client information
    * @returns Desktop client information
    */
   private extractDesktopClientInfo(request: Request) {
-  const desktopClient = request.get('X-Desktop-Client') ?? '';
-const computerUseClient = request.get('X-Computer-Use-Client');const vncClient = request.get('X-VNC-Client') ?? 'unknown';
-const userAgent = request.get('User-Agent') ?? '';
+    const desktopClient = request.get('X-Desktop-Client') ?? '';
+    const computerUseClient = request.get('X-Computer-Use-Client');
+    const vncClient = request.get('X-VNC-Client') ?? 'unknown';
+    const userAgent = request.get('User-Agent') ?? '';
 
-// Detect if this is a desktop clientconst isDesktopClient = Boolean(
+    // Detect if this is a desktop client
+    const isDesktopClient = Boolean(
       desktopClient ||
-        (computerUseClient ?? '') ||userAgent.toLowerCase().includes('bytebotd') ||userAgent.toLowerCase().includes('desktop'),
+        (computerUseClient ?? '') ||
+        userAgent.toLowerCase().includes('bytebotd') ||
+        userAgent.toLowerCase().includes('desktop'),
     );
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
@@ -351,7 +363,16 @@ const userAgent = request.get('User-Agent') ?? '';
       /-([0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9]+)?)/,
     );
     const clientVersion = versionMatch ? versionMatch[1] : 'unknown';
-const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes('computer-use') ||request.path.includes('screenshot') ||request.path.includes('click') ||request.path.includes('type') ||request.path.includes('key'),);return {
+    const isComputerUse = Boolean(
+      (computerUseClient ?? '') ||
+        request.path.includes('computer-use') ||
+        request.path.includes('screenshot') ||
+        request.path.includes('click') ||
+        request.path.includes('type') ||
+        request.path.includes('key'),
+    );
+
+    return {
       isDesktopClient,
       clientVersion,
       vncClient,
@@ -359,8 +380,7 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
       userAgent,
       desktopClientHeader: desktopClient,
       computerUseClientHeader: computerUseClient,
-    
-};
+    };
   }
 
   /**
@@ -369,11 +389,10 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
    * @returns Boolean indicating if version is valid
    */
   private isValidVersion(version: string): boolean {
-  return Object.values(SUPPORTED_API_VERSIONS).includes(
+    return Object.values(SUPPORTED_API_VERSIONS).includes(
       version as SupportedVersion,
     );
-  
-}
+  }
 
   /**
    * Validate resolved version against endpoint constraints
@@ -393,8 +412,8 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
     if (multiVersions && multiVersions.length > 0) {
       if (!multiVersions.includes(resolvedVersion as SupportedVersion)) {
         warnings.push(
-          `Version ${resolvedVersion
-} not supported by this endpoint. Supported: ${multiVersions.join(`, ')}',);
+          `Version ${resolvedVersion} not supported by this endpoint. Supported: ${multiVersions.join(', ')}`,
+        );
         return false;
       }
       return true;
@@ -402,9 +421,10 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
 
     // If endpoint has a specific version, check compatibility
     if (endpointVersion && endpointVersion !== resolvedVersion) {
-  warnings.push(
-        `Version mismatch: endpoint requires ${endpointVersion
-}, requested ${resolvedVersion}`,);return false;
+      warnings.push(
+        `Version mismatch: endpoint requires ${endpointVersion}, requested ${resolvedVersion}`,
+      );
+      return false;
     }
 
     return true;
@@ -426,12 +446,11 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
 
     if (!desktopCompatibility || !desktopClientInfo.isDesktopClient) {
       return issues;
-    
-}
+    }
 
     // Check minimum desktop version
     if (desktopCompatibility.minDesktopVersion) {
-  const clientVersion = desktopClientInfo.clientVersion as string;
+      const clientVersion = desktopClientInfo.clientVersion as string;
       const isCompatible = this.compareVersions(
         clientVersion,
         desktopCompatibility.minDesktopVersion,
@@ -439,8 +458,7 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
 
       if (!isCompatible) {
         issues.push(
-          `Client version ${clientVersion
-} below minimum ${desktopCompatibility.minDesktopVersion}`,
+          `Client version ${clientVersion} below minimum ${desktopCompatibility.minDesktopVersion}`,
         );
       }
     }
@@ -450,13 +468,13 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
       desktopCompatibility.vncRequirements &&
       desktopCompatibility.vncRequirements.length > 0
     ) {
-  const vncVersion = desktopClientInfo.vncClient as string;
-      if (vncVersion === 'unknown') {issues.push('VNC client information not provided');
-} else {
-  // Could implement more sophisticated VNC compatibility checking here
+      const vncVersion = desktopClientInfo.vncClient as string;
+      if (vncVersion === 'unknown') {
+        issues.push('VNC client information not provided');
+      } else {
+        // Could implement more sophisticated VNC compatibility checking here
         // For now, just log the requirement
-      
-}
+      }
     }
 
     // Check computer use feature requirements
@@ -465,10 +483,9 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
       desktopCompatibility.computerUseFeatures.length > 0 &&
       (desktopClientInfo.isComputerUse as boolean)
     ) {
-  // Could implement feature capability checking here
+      // Could implement feature capability checking here
       // For now, assume all features are supported if client is computer use capable
-    
-}
+    }
 
     return issues;
   }
@@ -480,18 +497,20 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
    * @returns Boolean indicating if version1 >= version2
    */
   private compareVersions(version1: string, version2: string): boolean {
-    if (version1 === 'unknown' || version2 === 'unknown') {return false;}
+    if (version1 === 'unknown' || version2 === 'unknown') {
+      return false;
+    }
 
-    const v1Parts = version1.split('.').map(Number);const v2Parts = version2.split('.').map(Number);
+    const v1Parts = version1.split('.').map(Number);
+    const v2Parts = version2.split('.').map(Number);
 
     for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-  const v1Part = v1Parts[i] ?? 0;
+      const v1Part = v1Parts[i] ?? 0;
       const v2Part = v2Parts[i] ?? 0;
 
       if (v1Part > v2Part) return true;
       if (v1Part < v2Part) return false;
-    
-}
+    }
 
     return true; // Versions are equal
   }
@@ -580,24 +599,39 @@ const isComputerUse = Boolean((computerUseClient ?? '') ||request.path.includes(
     response: Response,
     versionResolution: VersionResolution,
   ): void {
-  response.setHeader('X-API-Version', versionResolution.resolvedVersion);response.setHeader('X-Version-Source', versionResolution.source);response.setHeader('X-Service', 'BytebotD');if (versionResolution.desktopCompatibility.isDesktopClient) {response.setHeader('X-Desktop-Client-Detected', 'true');response.setHeader('X-Desktop-Client-Version',versionResolution.desktopCompatibility.clientVersion,);
+    response.setHeader('X-API-Version', versionResolution.resolvedVersion);
+    response.setHeader('X-Version-Source', versionResolution.source);
+    response.setHeader('X-Service', 'BytebotD');
+
+    if (versionResolution.desktopCompatibility.isDesktopClient) {
+      response.setHeader('X-Desktop-Client-Detected', 'true');
       response.setHeader(
-        'X-VNC-Client',versionResolution.desktopCompatibility.vncClient,);
+        'X-Desktop-Client-Version',
+        versionResolution.desktopCompatibility.clientVersion,
+      );
+      response.setHeader(
+        'X-VNC-Client',
+        versionResolution.desktopCompatibility.vncClient,
+      );
 
       if (versionResolution.desktopCompatibility.isComputerUse) {
         response.setHeader('X-Computer-Use-Enabled', 'true');
-}}
+      }
+    }
 
-  if(versionResolution.warnings.length > 0) {
-  response.setHeader(
-        'X-Version-Warnings',versionResolution.warnings.join('; '),);
-}
+    if (versionResolution.warnings.length > 0) {
+      response.setHeader(
+        'X-Version-Warnings',
+        versionResolution.warnings.join('; '),
+      );
+    }
 
     // Add supported versions for client discovery
     response.setHeader(
-      'X-Supported-Versions',Object.values(SUPPORTED_API_VERSIONS).join(', '),
+      'X-Supported-Versions',
+      Object.values(SUPPORTED_API_VERSIONS).join(', '),
     );
   }
-};
+}
 
 export default VersionInterceptor;
