@@ -26,7 +26,7 @@ interface MessageWithContent {
  * Type guard to check if a value has a content property
  */
 function isMessageWithContent(value: unknown): value is MessageWithContent {
-  return value != null && typeof value === 'object' && 'content' in value;
+  return value !== null && typeof value === 'object' && 'content' in value;
 }
 
 /**
@@ -44,7 +44,7 @@ function getSafeMessageContent(
   if (Array.isArray(content)) {
     // Validate that all items are MessageContentBlock-like
     const isValidContentArray = content.every(
-      (item) => item != null && typeof item === 'object' && 'type' in item,
+      (item) => item !== null && typeof item === 'object' && 'type' in item,
     );
 
     if (isValidContentArray) {

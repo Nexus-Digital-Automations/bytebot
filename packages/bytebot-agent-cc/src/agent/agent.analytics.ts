@@ -26,7 +26,7 @@ export class AgentAnalyticsService {
   @OnEvent('task.failed')
   @OnEvent('task.completed')
   async handleTaskEvent(payload: { taskId: string }) {
-    if (!this.endpoint) return;
+    if (!this.endpoint) {return;}
 
     try {
       const task = await this.tasksService.findById(payload.taskId);
