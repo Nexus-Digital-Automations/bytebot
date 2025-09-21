@@ -737,20 +737,24 @@ describe('JwtAuthGuard', () => {
   });
 
     describe('Memory and Resource Management', () => {
-  it('should not leak memory during authentication'async, () => {
-      const testId = `${operationId
-}_memory_leak`;console.log();
-      const initialMemory = process.memoryUsage();// Perform multiple authentication operations
-      for (let i = 0; i < 50; i++) {
-  const context = createMockExecutionContext({
-  authorization: `Bearer token-${i
-}`
-      });
+  it('should not leak memory during authentication', async () => {
+      const testId = `${operationId}_memory_leak`;
+      console.log();
+      const initialMemory = process.memoryUsage();
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService'verifyAsync').mockResolvedValue({
-          sub: `user${i}`email: `user${i}@bytebot.ai`,
-          role: 'viewer', exp: Math.floor(Date.now() / 1000) + 3600
-      });
+      // Perform multiple authentication operations
+      for (let i = 0; i < 50; i++) {
+        const context = createMockExecutionContext({
+          authorization: `Bearer token-${i}`
+        });
+
+        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+          sub: `user${i}`,
+          email: `user${i}@bytebot.ai`,
+          role: 'viewer',
+          exp: Math.floor(Date.now() / 1000) + 3600
+        });
 
         await guard.canActivate(context);
       }
@@ -766,19 +770,21 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should clean up resources properly'async, () => {
-      const testId = `${operationId}_resource_cleanup`;console.log(
+    it('should clean up resources properly', async () => {
+      const testId = `${operationId}_resource_cleanup`;
+      console.log();
 
-      );
       const context = createMockExecutionContext({
-  authorization: 'Bearer cleanup-test-token'
-      
-});
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-  sub: 'cleanup_user',
-      email: 'cleanup@bytebot.ai', role: 'admin', exp: Math.floor(Date.now() / 1000) + 3600
-      
-});
+        authorization: 'Bearer cleanup-test-token'
+      });
+
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+        sub: 'cleanup_user',
+        email: 'cleanup@bytebot.ai',
+        role: 'admin',
+        exp: Math.floor(Date.now() / 1000) + 3600
+      });
 
       const result = await guard.canActivate(context);
       expect(result).toBe(true);
