@@ -662,18 +662,22 @@ expect(connectionAttempts).toBe(4); // 3 failures + 1 success
 });const startTime = Date.now();
 
       // Mock MCP tool failure
-      jest.spyOn(context.mcpTools, 'screenshot').mockRejectedValue(new Error('MCP server unavailable'));// Implement fallback to direct computer use serviceconst fallbackScreenshot = async () => {
-  try {
+      jest.spyOn(context.mcpTools, 'screenshot').mockRejectedValue(new Error('MCP server unavailable'));
+
+      // Implement fallback to direct computer use service
+      const fallbackScreenshot = async () => {
+        try {
           return await context.mcpTools.screenshot();
-        
-} catch (_error) {
-  // Fallback to direct service call
-          const result = await context.computerUseService.action({ action: 'screenshot' 
-});return {
-  content: [{
-      type: 'image' as const,
-      data: (result as { image: string 
-}).image,mimeType: 'image/png',}]};
+        } catch (_error) {
+          // Fallback to direct service call
+          const result = await context.computerUseService.action({ action: 'screenshot' });
+          return {
+            content: [{
+              type: 'image' as const,
+              data: (result as { image: string }).image,
+              mimeType: 'image/png',
+            }]
+          };
         }
       };
 
@@ -706,10 +710,15 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 });const startTime = Date.now();
 
       // Mock cache service failures
-      jest.spyOn(context.cacheService, 'get').mockRejectedValue(new Error('Cache service unavailable'));jest.spyOn(context.cacheService, 'set').mockRejectedValue(new Error('Cache service unavailable'));// Operations should still work without cacheconst action: ScreenshotAction = {
- action: 'screenshot' 
-};
-const result = await context.computerUseService.action(action);const endTime = Date.now();
+      jest.spyOn(context.cacheService, 'get').mockRejectedValue(new Error('Cache service unavailable'));
+      jest.spyOn(context.cacheService, 'set').mockRejectedValue(new Error('Cache service unavailable'));
+
+      // Operations should still work without cache
+      const action: ScreenshotAction = {
+        action: 'screenshot'
+      };
+      const result = await context.computerUseService.action(action);
+      const endTime = Date.now();
 
       expect(result).toBeDefined();
       expect((result as { image: string }).image).toBeDefined();
@@ -921,7 +930,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
   /**
    * Create failure scenario configuration
    */
-  function createFailureScenario({
+  function createFailureScenario(
     params: Partial<FailureScenario>): FailureScenario {
   return {
       scenarioId: params.scenarioId ?? generateScenarioId(),

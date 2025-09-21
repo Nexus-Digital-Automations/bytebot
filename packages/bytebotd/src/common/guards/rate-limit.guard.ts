@@ -43,9 +43,11 @@ interface RateLimitConfig {
   /** Time window in seconds */
   windowSeconds: number;
 
-  /** Rate limit tier (for logging/monitoring) */;
-  tier: 'strict' | 'moderate' | 'lenient';/** Custom error message */
-message?: string;
+  /** Rate limit tier (for logging/monitoring) */
+  tier: 'strict' | 'moderate' | 'lenient';
+
+  /** Custom error message */
+  message?: string;
 
 
 }
@@ -90,8 +92,11 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig | undefined> = {
  * Metadata key for rate limit configuration
  */;
 
-export const RATE_LIMIT_KEY = 'rate-limit';/*** Decorator to set custom rate limits for specific endpoints
- */;
+export const RATE_LIMIT_KEY = 'rate-limit';
+
+/**
+ * Decorator to set custom rate limits for specific endpoints
+ */
 
 export const RateLimit = (
   config: Partial<RateLimitConfig> & { type: string },
@@ -112,12 +117,11 @@ export class EnterpriseRateLimitGuard
   // In-memory tracking for suspicious activity
   private suspiciousActivityTracker = new Map<
     string,
-    {,
-  violations: number;
+    {
+      violations: number;
       firstViolation: Date;
       blocked: boolean;
-    
-}
+    }
   >();
 
   constructor(
@@ -129,17 +133,18 @@ export class EnterpriseRateLimitGuard
   
 }
 
-  async canActivate(context: ExecutionContext): Promise<boolean>  {
-  const request = context.switchToHttp().getRequest<Request>();
-    const operationId = `rate-limit-${Date.now()
-}-${Math.random().toString(36).substr(2, 9)}`;try {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    try {
   // Get rate limit configuration for this endpoint
       const rateLimitConfig = this.getRateLimitConfig(context);
       const clientIdentifier = this.getClientIdentifier(request);
 
-      this.logger.debug(`[${operationId
-}] Rate limit check initiated`, {
-  operationId,endpoint: request.path,
+      this.logger.debug(`[${operationId}] Rate limit check initiated`, {
+        operationId,
+        endpoint: request.path,
         method: request.method,
         clientIdentifier,
         rateLimitTier: rateLimitConfig.tier,
@@ -150,11 +155,10 @@ export class EnterpriseRateLimitGuard
 
       // Check if client is temporarily blocked for suspicious activity
       if (this.isClientBlocked(clientIdentifier)) {
-  this.logger.warn(
-          `[${operationId
-}] Client blocked due to suspicious activity`,
+        this.logger.warn(
+          `[${operationId}] Client blocked due to suspicious activity`,
           {
-  operationId,
+            operationId,
             clientIdentifier,
             endpoint: request.path,
             blocked: true,
@@ -172,7 +176,7 @@ export class EnterpriseRateLimitGuard
 
       if (allowed) {
         this.logger.debug(`[${operationId}] Rate limit check passed`, {
-  operationId,
+          operationId,
           clientIdentifier,
           endpoint: request.path,
           allowed: true,
@@ -186,10 +190,12 @@ export class EnterpriseRateLimitGuard
         return true;
       }
 
-      // This shouldn't be reached if super.canActivate throws on failurereturn false;} catch (_error) {
-  if (
+      // This shouldn't be reached if super.canActivate throws on failure
+      return false;
+    } catch (_error) {
+      if (
         _error instanceof ThrottlerException ||
-        (typeof _error === 'object' &&_error !== null &&'status' in _error &&
+        (typeof _error === 'object' && _error !== null && 'status' in _error &&
           _error.status === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
@@ -198,29 +204,27 @@ export class EnterpriseRateLimitGuard
         // Track rate limit violations for suspicious activity detection
         this.trackSuspiciousActivity(clientIdentifier);
 
-        this.logger.warn(`[${operationId
-}] Rate limit exceeded`, {
-  operationId,
+        this.logger.warn(`[${operationId}] Rate limit exceeded`, {
+          operationId,
           clientIdentifier,
           endpoint: request.path,
           method: request.method,
           rateLimitTier: rateLimitConfig.tier,
           limit: rateLimitConfig.limit,
           userAgent: request.headers['user-agent'] as string | undefined,
-      rateLimited: true,
-});
+          rateLimited: true,
+        });
 
         // Return custom error message
         throw new HttpException(
           {
-  statusCode: HttpStatus.TOO_MANY_REQUESTS,
+            statusCode: HttpStatus.TOO_MANY_REQUESTS,
             error: 'Too Many Requests',
-      message: rateLimitConfig.message ?? 'Rate limit exceeded',
-      retryAfter: rateLimitConfig.windowSeconds,
-      rateLimitTier: rateLimitConfig.tier,
+            message: rateLimitConfig.message ?? 'Rate limit exceeded',
+            retryAfter: rateLimitConfig.windowSeconds,
+            rateLimitTier: rateLimitConfig.tier,
             operationId,
-          
-},
+          },
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
@@ -287,12 +291,13 @@ export class EnterpriseRateLimitGuard
    * Get default rate limit configuration as fallback
    */
   private getDefaultConfig(): RateLimitConfig {
-  return {,
-  limit: 200,
+    return {
+      limit: 200,
       windowSeconds: 60,
       tier: 'lenient' as const,
       message: 'API rate limit exceeded. Please reduce request frequency.',
-};}
+    };
+  }
 
   /**
    * Generate client identifier for rate limiting
@@ -338,7 +343,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
         );
       }
     } else {
-  this.suspiciousActivityTracker.set(clientIdentifier, {,
+  this.suspiciousActivityTracker.set(clientIdentifier, {
   violations: 1,
         firstViolation: now,
         blocked: false,
@@ -381,8 +386,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
       // Reset violations but keep the entry for tracking
       entry.violations = 0;
       entry.blocked = false;
-    
-}
+    }
   }
 
   /**
@@ -408,12 +412,11 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
   getSuspiciousActivityStats(): {
   totalTracked: number;
     currentlyBlocked: number;
-    topViolators: Array<{,
-  client: string;
+    topViolators: Array<{
+      client: string;
       violations: number;
       blocked: boolean;
-    
-}>;
+    }>;
   } {
   const blocked = Array.from(this.suspiciousActivityTracker.entries()).filter(
       ([, entry]) => entry.blocked,
@@ -422,18 +425,16 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
     const topViolators = Array.from(this.suspiciousActivityTracker.entries())
       .sort(([, a], [, b]) => b.violations - a.violations)
       .slice(0, 10)
-      .map(([client, entry]) => ({,
-  client: client.substring(0, 20) + '...', // Truncate for privacy,
-  violations: entry.violations,
+      .map(([client, entry]) => ({
+        client: client.substring(0, 20) + '...', // Truncate for privacy
+        violations: entry.violations,
         blocked: entry.blocked,
-      
-}));
+      }));
 
     return {
-  totalTracked: this.suspiciousActivityTracker.size,
+      totalTracked: this.suspiciousActivityTracker.size,
       currentlyBlocked: blocked,
       topViolators,
-    
-};
+    };
   }
 }

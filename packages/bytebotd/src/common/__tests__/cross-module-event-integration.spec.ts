@@ -517,14 +517,14 @@ const correlationId = generateCorrelationId();const concurrentEventCount = 50;
       const orderedEvents: EventRecord[] = [];
 
       // Setup ordered event collector
-      context.eventEmitter.on('test.ordered.event', (payload: EventPayload) => 
+      context.eventEmitter.on('test.ordered.event', (payload: EventPayload) => {
         orderedEvents.push({
           eventId: `ordered-${payload.sequenceNumber}`,
           eventName: 'test.ordered.event',
-      source: 'test',
-      target: 'ordering-test',
-      timestamp: new Date(),
-      payload,
+          source: 'test',
+          target: 'ordering-test',
+          timestamp: new Date(),
+          payload,
           correlationId,
           sequenceNumber: payload.sequenceNumber,
         });
@@ -572,7 +572,9 @@ const correlationId = generateCorrelationId();const concurrentEventCount = 50;
 
 
   describe('Event Performance and Monitoring', () => {
-it('should monitor event processing performance', async () => const correlationId = generateCorrelationId();const flowId = generateFlowId();
+it('should monitor event processing performance', async () => {
+      const correlationId = generateCorrelationId();
+      const flowId = generateFlowId();
       const performanceEvents: Array<{ eventName: string; processingTime: number }> = [];
 
       // Setup performance monitoring
@@ -641,7 +643,7 @@ const correlationId = generateCorrelationId();const highVolumeEventCount = 1000;
       const processedEvents: EventRecord[] = [];
 
       // Setup high-throughput event processor
-      context.eventEmitter.on('throughput.test.event', (payload: EventPayload) => 
+      context.eventEmitter.on('throughput.test.event', (payload: EventPayload) => {
         processedEvents.push({
           eventId: `throughput-${payload.eventIndex}`,
           eventName: 'throughput.test.event',

@@ -765,7 +765,7 @@ const testId = generateTestId();const memoryIntensiveOperations = 500;
       context.performanceMonitor.startMonitoring(500);
 
       // Create memory-intensive operations
-      const largeDataOperations = Array.from( length: memoryIntensiveOperations }, (_, i) => {
+      const largeDataOperations = Array.from({ length: memoryIntensiveOperations }, (_, i) => {
         return async () => {
           // Create large data payload to simulate memory pressure
           const largeData = Buffer.alloc(1024 * 1024, i); // 1MB buffer
@@ -810,7 +810,7 @@ const testId = generateTestId();const memoryIntensiveOperations = 500;
 
 
   describe('Scalability Testing', () => {
-it('should demonstrate linear scaling characteristics', async () => 
+it('should demonstrate linear scaling characteristics', async () => {
       const scalabilityConfigurations = [
         { concurrentUsers: 10, operationsPerUser: 10, expectedThroughput: 20 },
         { concurrentUsers: 25, operationsPerUser: 10, expectedThroughput: 45 },
@@ -893,7 +893,8 @@ _users`,
 
 
     it('should identify performance bottlenecks under load', async () => {
-const bottleneckTestConfig: LoadTestConfiguration = testName: 'bottleneck_identification',
+      const bottleneckTestConfig: LoadTestConfiguration = {
+        testName: 'bottleneck_identification',
       concurrentUsers: 75,
       operationsPerUser: 20,
         rampUpTime: 5000,

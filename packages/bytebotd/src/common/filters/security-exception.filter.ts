@@ -257,7 +257,6 @@ return {
    */
   private getSecureErrorName(statusCode: number): string {
   const errorNames: Record<number, string> = {
-,
   400: 'Bad Request',401: 'Unauthorized',403: 'Forbidden',404: 'Not Found',405: 'Method Not Allowed',409: 'Conflict',422: 'Unprocessable Entity',429: 'Too Many Requests',500: 'Internal Server Error',502: 'Bad Gateway',503: 'Service Unavailable',504: 'Gateway Timeout',
 
 };
@@ -297,9 +296,20 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
   // Remove sensitive patterns
     const sanitizedMessage = message
       // Remove file paths
-      .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')// Remove database information.replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]')// Remove system information.replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]')// Remove stack traces.replace(/at [a-zA-Z0-9._]+\([^)]+\)/g, '[STACK_REMOVED]')// Remove sensitive environment variables.replace(
+      .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')
+      // Remove database information
+      .replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]')
+      // Remove system information
+      .replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]')
+      // Remove stack traces
+      .replace(/at [a-zA-Z0-9._]+\([^)]+\)/g, '[STACK_REMOVED]')
+      // Remove sensitive environment variables
+      .replace(
         /NODE_ENV|API_KEY|SECRET|PASSWORD|TOKEN/gi,
-        '[SENSITIVE_REMOVED]',);return sanitizedMessage.substring(0, 200); // Limit message length
+        '[SENSITIVE_REMOVED]'
+      );
+
+    return sanitizedMessage.substring(0, 200); // Limit message length
   
 }
 
@@ -327,21 +337,30 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
    * Safely extract cause from error with proper type checking
    */
   private getErrorCause(error: Error): string | null {
-    // Check if error has cause property and it's a valid typeif ('cause' in error) {const cause = (error as { cause?: unknown }).cause;if (typeof cause === 'string') {return cause;}
+    // Check if error has cause property and it's a valid type
+    if ('cause' in error) {
+      const cause = (error as { cause?: unknown }).cause;
+      if (typeof cause === 'string') {
+        return cause;
+      }
 
-  if(cause instanceof Error) {
-  return cause.message;
-      
-}
+      if (cause instanceof Error) {
+        return cause.message;
+      }
 
-  if(cause !== null && cause !== undefined) {
-  // Safely stringify non-null, non-undefined values
-        if (typeof cause === 'object') {return '[object Object]';
-}
+      if (cause !== null && cause !== undefined) {
+        // Safely stringify non-null, non-undefined values
+        if (typeof cause === 'object') {
+          return '[object Object]';
+        }
 
-  if(typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {return String(cause);}
+        if (typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {
+          return String(cause);
+        }
         // For other types, ensure it's a string or convertible
-        return typeof cause === 'string' ? cause : '[Unknown Type]';}}
+        return typeof cause === 'string' ? cause : '[Unknown Type]';
+      }
+    }
     return null;
   }
 
@@ -352,43 +371,47 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
     exception: unknown,
     request: Request,
     errorAnalysis: {
-  errorType: SecurityErrorType;
+      errorType: SecurityErrorType;
       statusCode: number;
       riskScore: number;
       threatIndicators: string[];
       isSecurityRelated: boolean;
-    
-},
+    },
     requestId: string,
   ): void {
-  const logData = {,
-  event: 'security_exception',
-      requestId,errorType: errorAnalysis.errorType,
+    const logData = {
+      event: 'security_exception',
+      requestId,
+      errorType: errorAnalysis.errorType,
       statusCode: errorAnalysis.statusCode,
       riskScore: errorAnalysis.riskScore,
       threatIndicators: errorAnalysis.threatIndicators,
       isSecurityRelated: errorAnalysis.isSecurityRelated,
       request: {
-  method: request.method,
+        method: request.method,
         url: request.url,
         path: request.path,
         query: request.query,
         headers: this.sanitizeHeaders(request.headers),
         clientIP: this.getClientIP(request),
         userAgent: request.headers['user-agent'],
-},exception: {
-  name: exception instanceof Error ? exception.name : 'Unknown',
+      },
+      exception: {
+        name: exception instanceof Error ? exception.name : 'Unknown',
         message:
           exception instanceof Error ? exception.message : String(exception),
         stack: exception instanceof Error ? exception.stack : undefined,
-      
-},
+      },
       timestamp: new Date().toISOString(),
     };
 
     // Log at appropriate level based on risk score
     if (errorAnalysis.riskScore >= 7) {
-      this.logger.error(`[${requestId}] HIGH RISK SECURITY EXCEPTION`, logData);} else if (errorAnalysis.isSecurityRelated) {this.logger.warn(`[${requestId}] Security-related exception`, logData);} else {this.logger.debug(`[${requestId}] Application exception`, logData);
+      this.logger.error(`[${requestId}] HIGH RISK SECURITY EXCEPTION`, logData);
+    } else if (errorAnalysis.isSecurityRelated) {
+      this.logger.warn(`[${requestId}] Security-related exception`, logData);
+    } else {
+      this.logger.debug(`[${requestId}] Application exception`, logData);
     }
   }
 
@@ -398,30 +421,27 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
   private trackErrorPattern(
     request: Request,
     errorAnalysis: {
-  errorType: SecurityErrorType;
+      errorType: SecurityErrorType;
       statusCode: number;
       riskScore: number;
       threatIndicators: string[];
       isSecurityRelated: boolean;
-    
-},
+    },
   ): void {
-  const clientIdentifier = this.getClientIdentifier(request);
+    const clientIdentifier = this.getClientIdentifier(request);
     const now = new Date();
 
     if (!this.errorPatterns.has(clientIdentifier)) {
-      this.errorPatterns.set(clientIdentifier, {,
-  count: 1,
+      this.errorPatterns.set(clientIdentifier, {
+        count: 1,
         lastSeen: now,
         riskScore: errorAnalysis.riskScore,
-      
-});
+      });
     } else {
-  const pattern = this.errorPatterns.get(clientIdentifier);
+      const pattern = this.errorPatterns.get(clientIdentifier);
       if (!pattern) {
         return; // Should not happen due to the check above, but being type-safe
-      
-}
+      }
       pattern.count += 1;
       pattern.lastSeen = now;
       pattern.riskScore = Math.max(pattern.riskScore, errorAnalysis.riskScore);
@@ -437,22 +457,21 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
   private handleHighRiskError(
     request: Request,
     errorAnalysis: {
-  errorType: SecurityErrorType;
+      errorType: SecurityErrorType;
       statusCode: number;
       riskScore: number;
       threatIndicators: string[];
       isSecurityRelated: boolean;
-    
-},
+    },
     requestId: string,
   ): void {
-  const clientIP = this.getClientIP(request);
+    const clientIP = this.getClientIP(request);
     const userAgent = request.headers['user-agent'];
 
-    this.logger.error(`[${requestId
-}] HIGH RISK SECURITY EVENT DETECTED`, {
-  event: 'high_risk_error',
-      requestId,clientIP,
+    this.logger.error(`[${requestId}] HIGH RISK SECURITY EVENT DETECTED`, {
+      event: 'high_risk_error',
+      requestId,
+      clientIP,
       userAgent,
       endpoint: request.path,
       riskScore: errorAnalysis.riskScore,
@@ -472,16 +491,22 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
    * Generate client identifier for tracking
    */
   private getClientIdentifier(request: Request): string {
-  const ip = this.getClientIP(request);
+    const ip = this.getClientIP(request);
     const userAgent = (request.headers['user-agent'] ?? '').substring(0, 50);
-    return `${ip
-}:${userAgent}`.replace(/[^a-zA-Z0-9:.-]/g, '');}/**
+    return `${ip}:${userAgent}`.replace(/[^a-zA-Z0-9:.-]/g, '');
+  }
+
+  /**
    * Get client IP address
    */
   private getClientIP(request: Request): string {
-  return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??(request.headers['x-real-ip'] as string) ??request.connection.remoteAddress ??request.socket.remoteAddress ??
-      'unknown');
+    return (
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??
+      (request.headers['x-real-ip'] as string) ??
+      request.connection.remoteAddress ??
+      request.socket.remoteAddress ??
+      'unknown'
+    );
 }
 
   /**
@@ -491,10 +516,18 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
     const sanitized = { ...headers };
 
     const sensitiveHeaders = [
-      'authorization','cookie','x-api-key','x-auth-token','proxy-authorization',];sensitiveHeaders.forEach((header) => {
-  if (sanitized[header]) {
+      'authorization',
+      'cookie',
+      'x-api-key',
+      'x-auth-token',
+      'proxy-authorization',
+    ];
+
+    sensitiveHeaders.forEach((header) => {
+      if (sanitized[header]) {
         sanitized[header] = '[REDACTED]';
-}});
+      }
+    });
 
     return sanitized;
   }
@@ -503,7 +536,7 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
    * Clean up old error patterns
    */
   private cleanupErrorPatterns(): void {
-  const now = Date.now();
+    const now = Date.now();
     const maxAge = 60 * 60 * 1000; // 1 hour
 
     // Convert to array to avoid iterator issues
@@ -511,45 +544,32 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
     for (const [key, pattern] of entries) {
       if (now - pattern.lastSeen.getTime() > maxAge) {
         this.errorPatterns.delete(key);
-      
-}
+      }
     }
   }
 
   /**
    * Get current error pattern statistics (for monitoring)
    */
-  getErrorPatternStats(): {
-  totalClients: number;
-    highRiskClients: number;
-    topErrorClients: Array<{,
-  client: string;
-      count: number;
-      riskScore: number;
-      lastSeen: Date;
-    
-}>;
-  } {
-  const highRiskClients = Array.from(this.errorPatterns.entries()).filter(
+  public getErrorPatternStats() {
+    const highRiskClients = Array.from(this.errorPatterns.entries()).filter(
       ([, pattern]) => pattern.riskScore >= 6,
     ).length;
 
     const topErrorClients = Array.from(this.errorPatterns.entries())
       .sort(([, a], [, b]) => b.count - a.count)
       .slice(0, 10)
-      .map(([client, pattern]) => ({,
-  client: client.substring(0, 30) + '...', // Truncate for privacy,
-  count: pattern.count,
+      .map(([client, pattern]) => ({
+        client: client.substring(0, 30) + '...', // Truncate for privacy
+        count: pattern.count,
         riskScore: pattern.riskScore,
         lastSeen: pattern.lastSeen,
-      
-}));
+      }));
 
     return {
-  totalClients: this.errorPatterns.size,
+      totalClients: this.errorPatterns.size,
       highRiskClients,
       topErrorClients,
-    
-};
+    };
   }
 }

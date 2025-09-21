@@ -69,14 +69,13 @@ expect(() => {
 
   let sanitizationPipe: SecuritySanitizationPipe;
 
-    beforeEach(() => 
-      sanitizationPipe = new SecuritySanitizationPipe({,
-  enableSanitization: true,
+    beforeEach(() => {
+      sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         enableSQLInjectionDetection: true,
         strictMode: true,
         maxInputLength: 1000,
-      
-});
+      });
     });
 
     const sqlInjectionPayloads = [
@@ -91,7 +90,7 @@ expect(() => {
       it(`should block SQL injection _payload #${_index + 1}`, () => {
   expect(() => {
           sanitizationPipe.transform(
-            {,
+            {
   action: 'write_file',
               path: `/tmp/test${_payload
 }.txt`,
@@ -111,11 +110,10 @@ expect(() => {
 
   describe('Rate Limiting Tests', () => {
 
-  it('should have proper rate limiting configuration', () => 
+  it('should have proper rate limiting configuration', () => {
       // Mock rate limit configurations
-      const rateLimitConfigs = {,
-  computer_use: { limit: 120, windowSeconds: 60, tier: 'moderate' 
-},
+      const rateLimitConfigs = {
+        computer_use: { limit: 120, windowSeconds: 60, tier: 'moderate' },
         auth: { limit: 10, windowSeconds: 60, tier: 'strict' },
         vision: { limit: 30, windowSeconds: 60, tier: 'moderate' },
         file_operations: { limit: 20, windowSeconds: 60, tier: 'strict' },
@@ -146,14 +144,14 @@ expect(exception.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);});
 
   describe('Input Validation Tests', () => {
 
-  let sanitizationPipe: SecuritySanitizationPipe;
-beforeEach(() => 
-      sanitizationPipe = new SecuritySanitizationPipe({,
-  enableSanitization: true,
+    let sanitizationPipe: SecuritySanitizationPipe;
+
+    beforeEach(() => {
+      sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         strictMode: true,
         maxInputLength: 1000,
-      
-});
+      });
     });
 
 
@@ -161,7 +159,7 @@ beforeEach(() =>
     it('should validate action types', () => {const _invalidAction = {action: 'malicious_action',
       data: 'test',};
 expect(() => {
-  sanitizationPipe.transform(_invalidAction, {,
+  sanitizationPipe.transform(_invalidAction, {
   metatype: Object,
           type: 'body',
       data: undefined,
@@ -171,14 +169,17 @@ expect(() => {
 
 
 
-    it('should enforce maximum input length', () => {const _largeInput = {action: 'type_text',
-      text: 'A'.repeat(2000), // Exceeds 1000 character limit};
-expect(() => {
-  sanitizationPipe.transform(_largeInput, {,
-  metatype: Object,
+    it('should enforce maximum input length', () => {
+      const _largeInput = {
+        action: 'type_text',
+        text: 'A'.repeat(2000), // Exceeds 1000 character limit
+      };
+      expect(() => {
+        sanitizationPipe.transform(_largeInput, {
+          metatype: Object,
           type: 'body',
-      data: undefined,
-});
+          data: undefined,
+        });
       }).toThrow();
     });
 
@@ -187,7 +188,7 @@ expect(() => {
     it('should allow valid input within limits', () => {const _validInput = {action: 'type_text',
       text: 'Valid text input',};
 expect(() => {
-  sanitizationPipe.transform(_validInput, {,
+  sanitizationPipe.transform(_validInput, {
   metatype: Object,
           type: 'body',
       data: undefined,
@@ -200,17 +201,17 @@ expect(() => {
 
   describe('Error Handling Security Tests', () => {
 
-  let securityFilter: SecurityExceptionFilter;
-beforeEach(() => 
+    let securityFilter: SecurityExceptionFilter;
+
+    beforeEach(() => {
       securityFilter = new SecurityExceptionFilter();
-    
-});
+    });
 
 
 
     it('should not leak sensitive information in errors', () => {
-  const mockHost: ArgumentsHost = {switchToHttp: () => ({,
-  getRequest: () => ({,
+  const mockHost: ArgumentsHost = {switchToHttp: () => ({
+  getRequest: () => ({
   method: 'POST',
       path: '/computer-use',
       headers: { 'user-agent': 'test-agent' 
@@ -248,10 +249,23 @@ expect(rateLimitError.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);});
 
   describe('Security Headers Tests', () => {
 
-  it('should have proper security header configuration', () => const expectedSecurityHeaders = ['x-frame-options','x-content-type-options','strict-transport-security','referrer-policy','content-security-policy',];// Mock security headers configuration
+  it('should have proper security header configuration', () => {
+      const expectedSecurityHeaders = [
+        'x-frame-options',
+        'x-content-type-options',
+        'strict-transport-security',
+        'referrer-policy',
+        'content-security-policy',
+      ];
+
+      // Mock security headers configuration
       const securityHeaders = {
-        'x-frame-options': 'DENY','x-content-type-options': 'nosniff','strict-transport-security': 'max-age=31536000; includeSubDomains','referrer-policy': 'strict-origin-when-cross-origin','content-security-policy': "default-src 'self'',
-};
+        'x-frame-options': 'DENY',
+        'x-content-type-options': 'nosniff',
+        'strict-transport-security': 'max-age=31536000; includeSubDomains',
+        'referrer-policy': 'strict-origin-when-cross-origin',
+        'content-security-policy': "default-src 'self'",
+      };
 
       expectedSecurityHeaders.forEach((header) => {
   expect(securityHeaders).toHaveProperty(header);
@@ -267,16 +281,23 @@ expect(rateLimitError.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);});
 
   describe('CORS Security Tests', () => {
 
-  it('should have secure CORS configuration', () => const corsConfig = {origin: (,
-  origin: string,
+  it('should have secure CORS configuration', () => {
+      const corsConfig = {
+        origin: (
+          origin: string,
           callback: (error: Error | null, result?: boolean) => void,
         ) => {
           const allowedOrigins = [
-            'http://localhost:3000','http://localhost:3001','http://127.0.0.1:3000',];if (!origin || allowedOrigins.includes(origin)) {
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3000',
+          ];
+          if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
-          
-} else {
-            callback(new Error('Not allowed by CORS'), false);}},
+          } else {
+            callback(new Error('Not allowed by CORS'), false);
+          }
+        },
         credentials: true,
         optionsSuccessStatus: 200,
       };
@@ -311,25 +332,29 @@ expect(mockCallback).toHaveBeenCalledWith(null, true);});
 
   describe('Command Injection Protection Tests', () => {
 
-  let sanitizationPipe: SecuritySanitizationPipe;
-beforeEach(() => 
-      sanitizationPipe = new SecuritySanitizationPipe({,
-  enableSanitization: true,
+    let sanitizationPipe: SecuritySanitizationPipe;
+
+    beforeEach(() => {
+      sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         strictMode: true,
         maxInputLength: 1000,
-      
-});
+      });
     });
 
     const commandInjectionPayloads = [
-      '; ls','| whoami','`id``,'$(whoami)','&& cat /etc/passwd',
+      '; ls',
+      '| whoami',
+      '`id`',
+      '$(whoami)',
+      '&& cat /etc/passwd',
     ];
 
     commandInjectionPayloads.forEach((_payload, _index) => {
       it(`should block command injection _payload #${_index + 1}`, () => {
   expect(() => {
           sanitizationPipe.transform(
-            {,
+            {
   action: 'application',
               application: `calculator${_payload
 }`,
@@ -350,14 +375,14 @@ beforeEach(() =>
 
   describe('Path Traversal Protection Tests', () => {
 
-  let sanitizationPipe: SecuritySanitizationPipe;
-beforeEach(() => 
-      sanitizationPipe = new SecuritySanitizationPipe({,
-  enableSanitization: true,
+    let sanitizationPipe: SecuritySanitizationPipe;
+
+    beforeEach(() => {
+      sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         strictMode: true,
         maxInputLength: 1000,
-      
-});
+      });
     });
 
     const pathTraversalPayloads = [
@@ -368,7 +393,7 @@ beforeEach(() =>
       it(`should block path traversal _payload #${_index + 1}`, () => {
   expect(() => {
           sanitizationPipe.transform(
-            {,
+            {
   action: 'read_file',
       path: _payload,
 },
@@ -388,11 +413,12 @@ beforeEach(() =>
 
   describe('Performance Security Tests', () => {
 
-  it('should complete validation within reasonable time', () => const sanitizationPipe = new SecuritySanitizationPipe({enableSanitization: true,
+  it('should complete validation within reasonable time', () => {
+      const sanitizationPipe = new SecuritySanitizationPipe({
+        enableSanitization: true,
         strictMode: false,
         maxInputLength: 1000,
-      
-});
+      });
 
       const startTime = Date.now();
 
@@ -453,13 +479,14 @@ const result = sanitizationPipe.transform(_validInput, {
 
 describe('Security Configuration Tests', () => {
 
-  it('should have secure default configurations', () => const securityConfig = {corsEnabled: true,
-      rateLimitingEnabled: true,
-      inputValidationEnabled: true,
-      securityHeadersEnabled: true,
-      errorSanitizationEnabled: true,
-    
-};
+  it('should have secure default configurations', () => {
+      const securityConfig = {
+        corsEnabled: true,
+        rateLimitingEnabled: true,
+        inputValidationEnabled: true,
+        securityHeadersEnabled: true,
+        errorSanitizationEnabled: true,
+      };
 
     // Verify all security features are enabled by default
     Object.values(securityConfig).forEach((enabled) => {
@@ -471,28 +498,32 @@ describe('Security Configuration Tests', () => {
 
 
   it('should have proper environment-specific security settings', () => {
-  const environments = ['development', 'staging', 'production'];environments.forEach((env) => {const config = getSecurityConfigForEnvironment(env);
+      const environments = ['development', 'staging', 'production'];
 
-      // Production should have strictest settings
-      if (env === 'production') {// Use type guard to access union type properties safelyif ('strictMode' in config && 'maxInputLength' in config) {expect(config.strictMode).toBe(true);
-expect(config.maxInputLength).toBeLessThanOrEqual(1000);
-        
-}
+      environments.forEach((env) => {
+        const config = getSecurityConfigForEnvironment(env);
 
-  expect(config.enableLogging).toBe(true);
-      }
+        // Production should have strictest settings
+        if (env === 'production') {
+          // Use type guard to access union type properties safely
+          if ('strictMode' in config && 'maxInputLength' in config) {
+            expect(config.strictMode).toBe(true);
+            expect(config.maxInputLength).toBeLessThanOrEqual(1000);
+          }
+          expect(config.enableLogging).toBe(true);
+        }
 
-      // All environments should have basic security enabled
-      expect(config.enableSanitization).toBe(true);
-      expect(config.enableXSSDetection).toBe(true);
-      expect(config.enableSQLInjectionDetection).toBe(true);
-    });
+        // All environments should have basic security enabled
+        expect(config.enableSanitization).toBe(true);
+        expect(config.enableXSSDetection).toBe(true);
+        expect(config.enableSQLInjectionDetection).toBe(true);
+      });
   });
 });
 
 // Mock function to simulate environment-specific configuration
 function getSecurityConfigForEnvironment(env: string) {
-  const baseConfig = {,
+  const baseConfig = {
   enableSanitization: true,
     enableXSSDetection: true,
     enableSQLInjectionDetection: true,

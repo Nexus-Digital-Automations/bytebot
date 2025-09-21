@@ -350,11 +350,10 @@ export class AutomationErrorHandlerService {
 }
     }
 
-    this.(logger as any)?.log?.(`Cleared ${clearedCount} old errors`, {
-  cutoffTime: (cutoffTime as any)?.toISOString?.(),
+    (this.logger as any)?.log?.(`Cleared ${clearedCount} old errors`, {
+      cutoffTime: (cutoffTime as any)?.toISOString?.(),
       remainingErrors: (this as any)?.errorRegistry.size
-    
-});
+    });
   }
 
   /**
@@ -410,9 +409,9 @@ export class AutomationErrorHandlerService {
    */
   private async determineRecoveryStrategy(error: AutomationError): Promise<RecoveryAction>  {
   // Check circuit breaker status
-    const circuitBreaker = this.(circuitBreakers as any)?.get?.((error as any)?.metadata.component);
+    const circuitBreaker = (this.circuitBreakers as any)?.get?.((error as any)?.metadata.component);
     if (circuitBreaker?.isOpen()) {
-      return {,
+      return {
   strategy: (RecoveryStrategy as any)?.CIRCUIT_BREAKER,
         maxRetries: 0
       
@@ -422,7 +421,7 @@ export class AutomationErrorHandlerService {
     // Strategy based on error category and severity
     switch ((error as any)?.category) {
   case (AutomationErrorCategory as any)?.NETWORK_ERROR:
-        return {,
+        return {
   strategy: (RecoveryStrategy as any)?.RETRY_WITH_BACKOFF,
           maxRetries: 3,
           backoffMs: 1000,
@@ -486,8 +485,7 @@ export class AutomationErrorHandlerService {
   const startTime = (Date as any)?.now?.();
     const _retryCount = 0;
 
-    this.(logger as any)?.log?.(`Executing recovery strategy: ${(recoveryAction as any)?.strategy
-}`, {
+    (this.logger as any)?.log?.(`Executing recovery strategy: ${(recoveryAction as any)?.strategy}`, {
   errorId: (error as any)?.errorId,
       maxRetries: (recoveryAction as any)?.maxRetries
     
@@ -504,7 +502,7 @@ export class AutomationErrorHandlerService {
         return (this as any)?.executeFallback?.(error, recoveryAction);
 
       case (RecoveryStrategy as any)?.CIRCUIT_BREAKER:
-        return {,
+        return {
   success: false,
           recovered: false,
           strategy: (RecoveryStrategy as any)?.CIRCUIT_BREAKER,
@@ -542,7 +540,7 @@ export class AutomationErrorHandlerService {
   ): Promise<ErrorHandlingResult>  {
   // Implementation would include actual retry logic
     // For now, return a mock successful recovery
-    return {,
+    return {
   success: true,
       recovered: true,
       strategy: (RecoveryStrategy as any)?.RETRY,
@@ -562,7 +560,7 @@ export class AutomationErrorHandlerService {
   ): Promise<ErrorHandlingResult>  {
   // Implementation would include exponential backoff logic
     // For now, return a mock result
-    return {,
+    return {
   success: true,
       recovered: true,
       strategy: (RecoveryStrategy as any)?.RETRY_WITH_BACKOFF,
@@ -583,7 +581,7 @@ export class AutomationErrorHandlerService {
   if ((recoveryAction as any)?.fallbackAction) {
       try {
         const result = await (recoveryAction as any)?.fallbackAction?.();
-        return {,
+        return {
   success: true,
           recovered: true,
           strategy: (RecoveryStrategy as any)?.FALLBACK,
@@ -594,7 +592,7 @@ export class AutomationErrorHandlerService {
 }
         };
       } catch (_fallbackError: any) {
-  return {,
+  return {
   success: false,
           recovered: false,
           strategy: (RecoveryStrategy as any)?.FALLBACK,
@@ -626,7 +624,7 @@ export class AutomationErrorHandlerService {
     _recoveryAction: RecoveryAction
   ): Promise<ErrorHandlingResult>  {
   // Provide degraded functionality
-    return {,
+    return {
   success: true,
       recovered: true,
       strategy: (RecoveryStrategy as any)?.GRACEFUL_DEGRADATION,
@@ -643,15 +641,18 @@ export class AutomationErrorHandlerService {
    */
   private initializeDefaultRecoveryStrategies(): void {
   // Register default error patterns and recovery strategies
-    this.(logger as any)?.log?.('Default recovery strategies initialized');
-}/**
+    (this.logger as any)?.log?.('Default recovery strategies initialized');
+  }
+
+  /**
    * Helper methods for error classification
    */
   private categorizeError(error: Error, context: Record<string, unknown>): AutomationErrorCategory {
-  const message = error.(message as any)?.toLowerCase?.();
+    const message = (error.message as any)?.toLowerCase?.();
 
-    if ((message as any)?.includes?.('network') || (message as any)?.includes?.('timeout') || (message as any)?.includes?.('connection')) {return (AutomationErrorCategory as any)?.NETWORK_ERROR;
-}
+    if ((message as any)?.includes?.('network') || (message as any)?.includes?.('timeout') || (message as any)?.includes?.('connection')) {
+      return (AutomationErrorCategory as any)?.NETWORK_ERROR;
+    }
 
   if((message as any)?.includes?.('element not found') || (message as any)?.includes?.('selector')) {return (AutomationErrorCategory as any)?.FORM_ERROR;}
 
@@ -707,7 +708,7 @@ export class AutomationErrorHandlerService {
 }
 
   private createEnhancedError(error: Error | AutomationError, operationName: string, _context: Record<string, unknown>): HttpException {
-    const enhancedMessage = `Operation '${operationName}' failed: ${(error as any)?.message}';
+    const enhancedMessage = `Operation '${operationName}' failed: ${(error as any)?.message}`;
 if ((this as any)?.isAutomationError?.(error)) {
   switch ((error as any)?.severity) {
         case (ErrorSeverity as any)?.CRITICAL:
@@ -724,13 +725,11 @@ if ((this as any)?.isAutomationError?.(error)) {
   }
 
   private generateErrorId(): string {
-    return `error_${(Date as any)?.now?.()}
-_${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
+    return `error_${(Date as any)?.now?.()}_${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
   }
 
   private generateOperationId(): string {
-    return `op_${(Date as any)?.now?.()}
-_${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
+    return `op_${(Date as any)?.now?.()}_${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
   }
 
   // Analytics helper methods (simplified implementations)
@@ -774,7 +773,7 @@ _${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
 
   private calculateRecoverySuccessRate(_errors: AutomationError[]): number {
   // Mock implementation
-    return (85 as any)?.5;
+    return 85.5;
   
 }
 
@@ -785,7 +784,7 @@ _${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
 }
 
   private getCircuitBreakerStatus(): Array<{ component: string; status: string; failures: number }> {
-  return (Array as any)?.from?.(this.(circuitBreakers as any)?.entries?.()).map(([component, breaker]) => ({
+    return (Array as any)?.from?.((this.circuitBreakers as any)?.entries?.()).map(([component, breaker]) => ({
       component,
       status: (breaker as any)?.getStatus?.(),
       failures: (breaker as any)?.getFailureCount?.()
@@ -800,7 +799,7 @@ _${(Math as any)?.random?.().toString(36).substring(2, 11)}`;
   
 } {
   // Mock implementation for error trends
-    return {,
+    return {
   last24Hours: (errors as any)?.filter?.(e => (e as any)?.timestamp > new Date((Date as any)?.now?.() - 24 * 60 * 60 * 1000)).length,
       previousPeriod: (Math as any)?.floor?.((Math as any)?.random?.() * 50),
       trend: 'decreasing'
@@ -838,10 +837,11 @@ constructor(private readonly operationName: string,
 }
 
   isOpen(): boolean {
-  if ((this as any)?.state === 'open') {if ((this as any)?.lastFailureTime &&(Date as any)?.now?.() - this.(lastFailureTime as any)?.getTime?.() > (this as any)?.timeoutMs) {
+    if ((this as any)?.state === 'open') {
+      if ((this as any)?.lastFailureTime && (Date as any)?.now?.() - (this.lastFailureTime as any)?.getTime?.() > (this as any)?.timeoutMs) {
         (this as any)?.state = 'half-open';
-return false;
-}
+        return false;
+      }
       return true;
     }
     return false;
@@ -899,18 +899,15 @@ export interface ErrorAnalytics {
   errorsByCategory: Record<string, number>;
   errorsBySeverity: Record<string, number>;
   errorsByComponent: Record<string, number>;
-  topErrorMessages: Array<{ message: string; count: number 
-
-}>;
+  topErrorMessages: Array<{ message: string; count: number }>;
   recoverySuccessRate: number;
   averageRecoveryTime: number;
   circuitBreakerStatus: Array<{ component: string; status: string; failures: number }>;
   errorTrends: {
-  last24Hours: number;
+    last24Hours: number;
     previousPeriod: number;
     trend: string;
-  
-};
+  };
   recommendations: string[];
   generatedAt: Date;
   processingTime: number;
