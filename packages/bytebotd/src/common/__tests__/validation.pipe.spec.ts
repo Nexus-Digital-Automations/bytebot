@@ -420,15 +420,15 @@ expect(result).not.toContain('javascript:');
 
     it('should remove event handlers from strings', async () => {
 
-      const testId = `$operationId}
-_event_handlers`;console.log(`[${testId}] Testing event handler removal`);
+      const testId = `${operationId}_event_handlers`;
+      console.log(`[${testId}] Testing event handler removal`);
 
-      const maliciousString = 'Hello onclick="alert(1)" world onload="evil()"";const metadata: ArgumentMetadata = {
-
+      const maliciousString = 'Hello onclick="alert(1)" world onload="evil()"';
+      const metadata: ArgumentMetadata = {
         type: 'query',
-      metatype: String,
-      data: 'message',
-};
+        metatype: String,
+        data: 'message',
+      };
 const result = await pipe.transform(maliciousString, metadata);
 
       expect(result).toBe('Hello  world ');
@@ -442,15 +442,16 @@ expect(result).not.toContain('onload');
 
     it('should sanitize nested objects', async () => {
 
-      const testId = `$operationId}
-_nested_sanitization`;console.log(`[${testId}] Testing nested object sanitization`);
+      const testId = `${operationId}_nested_sanitization`;
+      console.log(`[${testId}] Testing nested object sanitization`);
 
       const nestedMaliciousData = {
-  title: 'Clean Title',
-      description: '<script>alert("nested XSS")</script>Description",
-      metadata: {
-  tags: ['<script>tag1</script>', 'clean-tag'],author: 'onclick="evil()"Author Name",
-},
+        title: 'Clean Title',
+        description: '<script>alert("nested XSS")</script>Description',
+        metadata: {
+          tags: ['<script>tag1</script>', 'clean-tag'],
+          author: 'onclick="evil()"Author Name',
+        },
       };
 
       const metadata: ArgumentMetadata = {
@@ -500,16 +501,15 @@ expect(result.email).toBe('test@example.com');
 
   describe('Type Transformation', () => {
 
-  it('should transform string numbers to actual numbers', async () => 
-      const testId = `${operationId
-}
-_number_transformation`;console.log(`[${testId}] Testing number transformation`);
+  it('should transform string numbers to actual numbers', async () => {
+      const testId = `${operationId}_number_transformation`;
+      console.log(`[${testId}] Testing number transformation`);
 
       const searchData = {
-
         query: 'test search',
-      limit: '25', // String that should be transformed to numberoffset: '10',
-};
+        limit: '25', // String that should be transformed to number
+        offset: '10',
+      };
 const metadata: ArgumentMetadata = {
 
         type: 'query',
@@ -582,18 +582,19 @@ const metadata: ArgumentMetadata = {
 
     it('should preserve default values when fields are missing', async () => {
 
-      const testId = `$operationId}
-_default_values`;console.log(`[${testId}] Testing default value preservation`);
+      const testId = `${operationId}_default_values`;
+      console.log(`[${testId}] Testing default value preservation`);
 
       const searchData = {
-        query: 'test search',// limit and offset not provided};
+        query: 'test search',
+        // limit and offset not provided
+      };
 
       const metadata: ArgumentMetadata = {
-  type: 'query',
-      metatype: SearchDto,
-      data: '',
-      
-};
+        type: 'query',
+        metatype: SearchDto,
+        data: '',
+      };
 
       const result = await pipe.transform(searchData, metadata) as Record<string, unknown>;
 
@@ -608,10 +609,9 @@ _default_values`;console.log(`[${testId}] Testing default value preservation`);
 
   describe('Error Handling and Reporting', () => {
 
-  it('should provide detailed validation _error messages', async () => 
-      const testId = `${operationId
-}
-_detailed_errors`;console.log(`[${testId}] Testing detailed validation error messages`);
+  it('should provide detailed validation error messages', async () => {
+      const testId = `${operationId}_detailed_errors`;
+      console.log(`[${testId}] Testing detailed validation error messages`);
 
       const invalidData = {
 
@@ -742,14 +742,16 @@ await pipe.transform(validData, metadata);
 
   describe('Security Edge Cases', () => {
 
-  it('should handle extremely large payloads gracefully', async () => 
-      const testId = `${operationId
-}
-_large_payloads`;console.log(`[${testId}] Testing large _payload handling`);
+  it('should handle extremely large payloads gracefully', async () => {
+      const testId = `${operationId}_large_payloads`;
+      console.log(`[${testId}] Testing large payload handling`);
 
-      const largeString = 'A'.repeat(10000); // 10KB stringconst largeData = {email: 'test@example.com',
-      password: 'password123',
-      name: largeString,};
+      const largeString = 'A'.repeat(10000); // 10KB string
+      const largeData = {
+        email: 'test@example.com',
+        password: 'password123',
+        name: largeString,
+      };
 
       const metadata: ArgumentMetadata = {
   type: 'body',
@@ -797,17 +799,16 @@ _deep_nesting`;console.log(`[${testId}] Testing deeply nested object handling`);
 
     it('should sanitize SQL injection attempts', async () => {
 
-      const testId = `$operationId}
-_sql_injection`;console.log(`[${testId}] Testing SQL injection sanitization`);
+      const testId = `${operationId}_sql_injection`;
+      console.log(`[${testId}] Testing SQL injection sanitization`);
 
-      const sqlInjectionAttempt = ""; DROP TABLE users; --";
+      const sqlInjectionAttempt = '"; DROP TABLE users; --';
 
       const metadata: ArgumentMetadata = {
-
         type: 'query',
-      metatype: String,
-      data: 'search',
-};
+        metatype: String,
+        data: 'search',
+      };
 const result = await pipe.transform(sqlInjectionAttempt, metadata);
 
       // Basic sanitization should remove dangerous characters
@@ -843,15 +844,15 @@ _null_undefined`;console.log(`[${testId}] Testing null and undefined value handl
 
     it('should prevent buffer overflow attempts', async () => {
 
-      const testId = `$operationId}
-_buffer_overflow`;console.log(`[${testId}] Testing buffer overflow prevention`);
+      const testId = `${operationId}_buffer_overflow`;
+      console.log(`[${testId}] Testing buffer overflow prevention`);
 
-      const overflowAttempt = Buffer.alloc(1024 * 1024, 'A'); // 1MB bufferconst metadata: ArgumentMetadata = {
-  type: 'body',
-      metatype: String,
-      data: 'data',
-      
-};
+      const overflowAttempt = Buffer.alloc(1024 * 1024, 'A'); // 1MB buffer
+      const metadata: ArgumentMetadata = {
+        type: 'body',
+        metatype: String,
+        data: 'data',
+      };
 
       // Should handle buffer gracefully
       const result = await pipe.transform(overflowAttempt, metadata);
@@ -865,17 +866,15 @@ _buffer_overflow`;console.log(`[${testId}] Testing buffer overflow prevention`);
 
   describe('Performance and Reliability', () => {
 
-  it('should complete validation within performance threshold', async () => 
-      const testId = `${operationId
-}
-_performance_threshold`;console.log(`[${testId}] Testing validation performance threshold`);
+  it('should complete validation within performance threshold', async () => {
+      const testId = `${operationId}_performance_threshold`;
+      console.log(`[${testId}] Testing validation performance threshold`);
 
       const validData = {
-
         email: 'perf@example.com',
-      password: 'password123',
-      name: 'Performance Test User',
-};
+        password: 'password123',
+        name: 'Performance Test User',
+      };
 const metadata: ArgumentMetadata = {
   type: 'body',
       metatype: CreateUserDto,
@@ -943,9 +942,12 @@ _memory_efficiency`;console.log(`[${testId}] Testing memory efficiency during va
 
       // Perform many validations
       for (let i = 0; i < 100; i++) {
-  const data = {,
-  email: `test${i
-}@example.com`,password: `password${i}`,name: `Test User ${i}`,};await pipe.transform(data, metadata);
+        const data = {
+          email: `test${i}@example.com`,
+          password: `password${i}`,
+          name: `Test User ${i}`,
+        };
+        await pipe.transform(data, metadata);
       }
 
       const finalMemory = process.memoryUsage();
@@ -998,20 +1000,22 @@ ms)`,
 
     it('should provide consistent behavior under load', async () => {
 
-      const testId = `$operationId}
-_load_consistency`;console.log(`[${testId}] Testing behavior consistency under load`);
+      const testId = `${operationId}_load_consistency`;
+      console.log(`[${testId}] Testing behavior consistency under load`);
 
       const testCases = [
-  {
-  ,
-  email: 'valid@example.com',
-      password: 'password123',
-      shouldPass: true,
-},
-        { email: 'invalid-email', password: 'password123', shouldPass: false },{ email: 'valid@example.com', password: '123', shouldPass: false },];const metadata: ArgumentMetadata = {
-  type: 'body',
-      metatype: CreateUserDto,
-      data: '',
+        {
+          email: 'valid@example.com',
+          password: 'password123',
+          shouldPass: true,
+        },
+        { email: 'invalid-email', password: 'password123', shouldPass: false },
+        { email: 'valid@example.com', password: '123', shouldPass: false },
+      ];
+      const metadata: ArgumentMetadata = {
+        type: 'body',
+        metatype: CreateUserDto,
+        data: '',
       
 };
 

@@ -73,8 +73,9 @@ const mockConfigService = {
 
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,'CONVERSATIONAL_ALLOWED_ORIGINS': 'http: //localhost:3000,
-      https://app.example.com','CONVERSATIONAL_REQUIRE_HTTPS': false,
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
+      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000,https://app.example.com',
+      'CONVERSATIONAL_REQUIRE_HTTPS': false,
 
 };
 return config[key] ?? defaultValue;
@@ -127,14 +128,15 @@ class PerformanceTestHelper {
 
 describe('ConversationalWebSocketBridgeService', () => {
 
-  let service: ConversationalWebSocketBridgeService;let module: TestingModule;
+  let service: ConversationalWebSocketBridgeService;
+  let module: TestingModule;
 
-  beforeEach(async () => 
-    module = await Test.createTestingModule({,
-  providers: [
+  beforeEach(async () => {
+    module = await Test.createTestingModule({
+      providers: [
         ConversationalWebSocketBridgeService,
-        {,
-  provide: ConfigService,
+        {
+          provide: ConfigService,
           useValue: mockConfigService,
         
 },
@@ -154,10 +156,10 @@ describe('ConversationalWebSocketBridgeService', () => {
 
   describe('Service Initialization', () => {
 
-  it('should initialize service successfully', () => expect(service).toBeDefined();
-expect(service.getServerStatistics).toBeDefined();
-    
-});
+  it('should initialize service successfully', () => {
+      expect(service).toBeDefined();
+      expect(service.getServerStatistics).toBeDefined();
+    });
 
 
 
@@ -184,12 +186,16 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
   // ===== SESSION MANAGEMENT TESTS =====
 
   describe('Session Management', () => {
-it('should create validation request successfully', async () => const _mockContext: ValidationContext = {userId: 'test-user-123',
-      applicationContext: 'test-app',
-      environmentInfo: { env: 'test' },previousActions: [],
-      securityContext: {
+it('should create validation request successfully', async () => {
+      const _mockContext: ValidationContext = {
+        userId: 'test-user-123',
+        applicationContext: 'test-app',
+        environmentInfo: { env: 'test' },
+        previousActions: [],
+        securityContext: {
           authenticationLevel: 'basic',
-      permissions: ['read', 'write'],auditRequired: true,
+          permissions: ['read', 'write'],
+          auditRequired: true,
       complianceFlags: ['GDPR'],} as SecurityContext,};
 
       const _mockAction: ValidationAction = {
