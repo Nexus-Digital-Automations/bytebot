@@ -400,7 +400,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       );
 
       // Step 6: Validate authentication results
-      const validationResult = await this.validateAuthenticationResult(
+      const validationResult: AuthenticationValidationResult = await this.validateAuthenticationResult(
         conversationResult,
         authRequest.userProfile
       );

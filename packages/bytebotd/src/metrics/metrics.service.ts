@@ -269,7 +269,13 @@ export class BytebotMetricsService {
       this.logger.error(
         `[${operationId}] Failed to collect Prometheus metrics: ${errorMessage}`,
       );
-      throw _error;
+
+      // Ensure we only throw Error objects
+      if (_error instanceof Error) {
+        throw _error;
+      } else {
+        throw new Error(`Failed to collect Prometheus metrics: ${errorMessage}`);
+      }
     }
   }
 

@@ -117,7 +117,13 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         error: errorMessage,
         context: operationContext,
       });
-      throw error;
+
+      // Ensure we only throw Error objects
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(`Failed to find ${this.getEntityType()} by ID: ${errorMessage}`);
+      }
     }
   }
 
