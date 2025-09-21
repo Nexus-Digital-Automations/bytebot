@@ -968,14 +968,20 @@ expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
 
 
     it('should achieve 99.95% message delivery success rate', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'delivery-rate-test';
-const messageCount = 1000;// Send large volume of messages
-      await client.sendSequencedMessages(messageCount, sessionId, 
+      const messageCount = 1000;
+
+      // Send large volume of messages
+      await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 2,
         requiresAck: true,
-        priority: 'normal',});// Wait for all deliveries and acknowledgments
+        priority: 'normal',
+      });
+
+      // Wait for all deliveries and acknowledgments
       await new Promise(resolve => setTimeout(resolve, 10000));
 
       const sequenceTracker = client.getSequenceTracker();
@@ -999,13 +1005,14 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
 
 
     it('should handle acknowledgment timeouts and retries', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'timeout-test';
       const timeoutMessages: ConversationalMessage[] = [];
 
       // Send messages that would normally require acks
-      for (let i = 1; i <= 10; i++) 
+      for (let i = 1; i <= 10; i++) {
         const message: ConversationalMessage = {
           messageId: `timeout-msg-${i}`,
           sessionId,
@@ -1015,9 +1022,11 @@ const client = new ReliabilityTestClient(TEST_URL);await client.connect();
           payload: { timeoutTest: true, index: i },
           metadata: {
             priority: 'normal',
-      requiresAck: true,
-      compression: false,
-            routingHints: ['timeout-test'],},};
+            requiresAck: true,
+            compression: false,
+            routingHints: ['timeout-test']
+          }
+        };
 
         timeoutMessages.push(message);
         await client.sendMessage(message);
@@ -1047,10 +1056,14 @@ const client = new ReliabilityTestClient(TEST_URL);await client.connect();
   // ===== MESSAGE PRIORITY QUEUE MANAGEMENT =====
 
   describe('Message Priority Queue Management', () => {
-it('should process messages in correct priority order', async () => const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+    it('should process messages in correct priority order', async () => {
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'priority-test-session';
-const messageCount = 40;// Send mixed priority messages
+      const messageCount = 40;
+
+      // Send mixed priority messages
       await client.sendPriorityTestMessages(messageCount, sessionId);
 
       // Wait for processing
@@ -1079,24 +1092,27 @@ ms`,
 
 
     it('should prevent starvation of low priority messages', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'starvation-test';
       const priorityTester = client.getPriorityTester();
 
       // Send many high priority messages followed by low priority
-      for (let i = 0; i < 20; i++) 
+      for (let i = 0; i < 20; i++) {
         const highPriorityMessage: ConversationalMessage = {
           messageId: `high-${i}`,
           sessionId,
           timestamp: Date.now(),
           sequence: i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { priority: 'high', index: i },metadata: {priority: 'high',
-      requiresAck: false,
-      compression: false,
-            routingHints: ['starvation-test'],
-          },
+          payload: { priority: 'high', index: i },
+          metadata: {
+            priority: 'high',
+            requiresAck: false,
+            compression: false,
+            routingHints: ['starvation-test']
+          }
         };
 
         await client.sendMessage(highPriorityMessage);
@@ -1110,10 +1126,14 @@ const client = new ReliabilityTestClient(TEST_URL);await client.connect();
           timestamp: Date.now(),
           sequence: 20 + i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { priority: 'low', index: i },metadata: {priority: 'low',
-      requiresAck: false,
-      compression: false,
-            routingHints: ['starvation-test'],},};
+          payload: { priority: 'low', index: i },
+          metadata: {
+            priority: 'low',
+            requiresAck: false,
+            compression: false,
+            routingHints: ['starvation-test']
+          }
+        };
 
         await client.sendMessage(lowPriorityMessage);
       }

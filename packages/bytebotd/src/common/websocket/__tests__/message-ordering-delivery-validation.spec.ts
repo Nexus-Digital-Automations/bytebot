@@ -239,14 +239,13 @@ describe('MessageOrderingDeliveryValidationService', () => {
   beforeAll(async () => {
     jest.setTimeout(60000); // 60 seconds for comprehensive tests
 
-    module = await Test.createTestingModule({,
-  providers: [
+    module = await Test.createTestingModule({
+      providers: [
         MessageOrderingDeliveryValidationService,
-        {,
-  provide: ConfigService,
+        {
+          provide: ConfigService,
           useValue: mockConfigService,
-        
-},
+        },
       ],
     }).compile();
 
@@ -272,8 +271,14 @@ describe('MessageOrderingDeliveryValidationService', () => {
 
   describe('Message Sequence Validation', () => {
 
-  it('should validate correct message sequence ordering', async () => const sessionId = 'test_session_sequence_001';
-const messages = [TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 2),TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 3),];const results: MessageIntegrityResult[] = [];
+    it('should validate correct message sequence ordering', async () => {
+      const sessionId = 'test_session_sequence_001';
+      const messages = [
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 2),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 3),
+      ];
+      const results: MessageIntegrityResult[] = [];
 
       for (const message of messages) {
         const result = service.validateMessageSequence(message);
@@ -292,14 +297,18 @@ const messages = [TestMessageFactory.createTestMessage(ConversationalMessageType
 
     it('should detect out-of-order messages', async () => {
 
-  const sessionId = 'test_session_sequence_002';
-const messages = [TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 3), // Skip sequence 2TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 2), // Out of order];const results: MessageIntegrityResult[] = [];
+      const sessionId = 'test_session_sequence_002';
+      const messages = [
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 3), // Skip sequence 2
+        TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 2), // Out of order
+      ];
+      const results: MessageIntegrityResult[] = [];
 
-      for (const message of messages) 
+      for (const message of messages) {
         const result = service.validateMessageSequence(message);
         results.push(result);
-      
-}
+      }
 
       // First message should be valid
       expect(results[0].sequenceValid).toBe(true);
@@ -323,8 +332,7 @@ const originalMessage = TestMessageFactory.createTestMessage(ConversationalMessa
       expect(firstResult.isDuplicate).toBe(false);
 
       // Process duplicate message (same messageId)
-      const duplicateMessage =  ...originalMessage 
-};
+      const duplicateMessage = { ...originalMessage };
       const secondResult = service.validateMessageSequence(duplicateMessage);
       expect(secondResult.isDuplicate).toBe(true);
       expect(secondResult.validationErrors.some(err => err.errorCode === 'DUPLICATE_MESSAGE')).toBe(true);});
@@ -332,14 +340,18 @@ const originalMessage = TestMessageFactory.createTestMessage(ConversationalMessa
 
 it('should handle message sequence gaps correctly', async () => {
 
-  const sessionId = 'test_session_sequence_004';
-const messages = [TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 5), // Gap: missing 2, 3, 4TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 6),];const results: MessageIntegrityResult[] = [];
+      const sessionId = 'test_session_sequence_004';
+      const messages = [
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'normal', 5), // Gap: missing 2, 3, 4
+        TestMessageFactory.createTestMessage(ConversationalMessageType.USER_CONFIRMATION, sessionId, 'high', 6),
+      ];
+      const results: MessageIntegrityResult[] = [];
 
-      for (const message of messages) 
+      for (const message of messages) {
         const result = service.validateMessageSequence(message);
         results.push(result);
-      
-}
+      }
 
       // First message should be valid
       expect(results[0].sequenceValid).toBe(true);
@@ -356,10 +368,11 @@ const messages = [TestMessageFactory.createTestMessage(ConversationalMessageType
 
   describe('Delivery Acknowledgment and Confirmation', () => {
 
-  it('should process delivery acknowledgments correctly', async () => const sessionId = 'test_session_ack_001';
-const message = TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST,
+    it('should process delivery acknowledgments correctly', async () => {
+      const sessionId = 'test_session_ack_001';
+      const message = TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST,
         sessionId,
-        'high',1);
+        'high', 1);
 
       // Validate message first
       const validationResult = service.validateMessageSequence(message);
@@ -390,21 +403,22 @@ const message = TestMessageFactory.createTestMessage(ConversationalMessageType.V
 const messageCount = 50;const acknowledgments: DeliveryAcknowledgment[] = [];
 
       // Create and acknowledge multiple messages
-      for (let i = 1; i <= messageCount; i++) 
+      for (let i = 1; i <= messageCount; i++) {
         const message = TestMessageFactory.createTestMessage(
           ConversationalMessageType.PROGRESS_UPDATE,
           sessionId,
-          'normal',i);
+          'normal',
+          i
+        );
 
         service.validateMessageSequence(message);
 
         const latency = Math.random() * 200 + 50; // 50-250ms
         const ack = service.processDeliveryAcknowledgment(message.messageId, sessionId, latency);
         acknowledgments.push(ack);
-      
-}
+      }
 
-  expect(acknowledgments).toHaveLength(messageCount);
+      expect(acknowledgments).toHaveLength(messageCount);
 
       // Check metrics updated
       const metrics = service.getPerformanceMetrics();
@@ -415,27 +429,39 @@ const messageCount = 50;const acknowledgments: DeliveryAcknowledgment[] = [];
 
 
     it('should handle acknowledgment errors gracefully', async () => {
+      const invalidMessageId = 'non_existent_message_id';
+      const sessionId = 'test_session_ack_003';
 
-  const invalidMessageId = 'non_existent_message_id';
-const sessionId = 'test_session_ack_003';
-expect(() => service.processDeliveryAcknowledgment(invalidMessageId, sessionId, 100);
-      
-}).toThrow('Message sequence not found for acknowledgment');});});
+      expect(() => {
+        service.processDeliveryAcknowledgment(invalidMessageId, sessionId, 100);
+      }).toThrow('Message sequence not found for acknowledgment');
+    });
+  });
 
   // ===== MESSAGE DEDUPLICATION TESTS =====
 
   describe('Message Deduplication and Duplicate Detection', () => {
 
-  it('should detect and handle duplicate messages across sessions', async () => const sessionId1 = 'test_session_dedup_001';
-const sessionId2 = 'test_session_dedup_002';
+    it('should detect and handle duplicate messages across sessions', async () => {
+      const sessionId1 = 'test_session_dedup_001';
+      const sessionId2 = 'test_session_dedup_002';
 
-// Create identical message for different sessionsconst messageTemplate = {,
-  type: ConversationalMessageType.VALIDATION_REQUEST,
+      // Create identical message for different sessions
+      const messageTemplate = {
+        type: ConversationalMessageType.VALIDATION_REQUEST,
         messageId: 'duplicate_test_message',
-      timestamp: Date.now(),
-      sequence: 1,
-        payload: { test: 'duplicate detection' 
-},metadata: { priority: 'normal', requiresAck: true, compression: false, routingHints: [] },} as ConversationalMessage;const message1 = { ...messageTemplate, sessionId: sessionId1 };
+        timestamp: Date.now(),
+        sequence: 1,
+        payload: { test: 'duplicate detection' },
+        metadata: {
+          priority: 'normal',
+          requiresAck: true,
+          compression: false,
+          routingHints: []
+        }
+      } as ConversationalMessage;
+
+      const message1 = { ...messageTemplate, sessionId: sessionId1 };
       const message2 = { ...messageTemplate, sessionId: sessionId2 };
 
       const result1 = service.validateMessageSequence(message1);
@@ -461,9 +487,8 @@ const originalMessage = TestMessageFactory.createTestMessage(ConversationalMessa
 
       // Process duplicates
       const duplicateCount = 10;
-      for (let i = 0; i < duplicateCount; i++) 
-        const duplicate = { ...originalMessage 
-};
+      for (let i = 0; i < duplicateCount; i++) {
+        const duplicate = { ...originalMessage };
         service.validateMessageSequence(duplicate);
       }
 
@@ -513,7 +538,8 @@ const messageCount = 1000;const duplicateRatio = 0.3; // 30% duplicates
 
   describe('Priority Queue Management and Processing', () => {
 
-  it('should process messages according to priority order', async () => const sessionId = 'test_session_priority_001';
+    it('should process messages according to priority order', async () => {
+      const sessionId = 'test_session_priority_001';
 const processedMessages: string[] = [];// Listen for message processing events
       service.on('message_queued', (event) => {
         processedMessages.push(`${event.messageId
@@ -599,7 +625,8 @@ const queuedMessages: Array< messageId: string; timestamp: number }>  =  [];
 
   describe('Message Buffering and Queue Overflow Handling', () => {
 
-  it('should create and manage message buffers per session', async () => const sessionId = 'test_session_buffer_001';
+    it('should create and manage message buffers per session', async () => {
+      const sessionId = 'test_session_buffer_001';
 
 // Create bufferconst buffer = service.createMessageBuffer(sessionId);
 
@@ -654,7 +681,8 @@ expect(buffer.highWaterMark).toBe(Math.floor(buffer.capacity * 0.8));
   // ===== TIMEOUT AND RETRY MECHANISM TESTS =====
 
   describe('Timeout and Retry Mechanism Testing', () => 
-it('should schedule retries for failed message deliveries', async () => const sessionId = 'test_session_retry_001';
+  it('should schedule retries for failed message deliveries', async () => {
+    const sessionId = 'test_session_retry_001';
 const retriedMessages: string[]  =  [];
     service.on('message_retry_scheduled', (event) => {retriedMessages.push(event.messageId);});
 
@@ -741,7 +769,8 @@ service.on('message_retry_scheduled', (event) => retryDelays.push(event.retryDel
 
   describe('Conversational Flow Ordering Validation with PARLANT Integration', () => {
 
-  it('should validate complete PARLANT validation workflow', async () => const sessionId = 'test_session_parlant_001';
+    it('should validate complete PARLANT validation workflow', async () => {
+      const sessionId = 'test_session_parlant_001';
 const validationId = 'validation_parlant_test_001';
 
 // Create complete PARLANT validation flowconst validationRequest = TestMessageFactory.createValidationRequestMessage(sessionId, validationId, 1);
@@ -870,7 +899,8 @@ const operationId = 'operation_parlant_test_003';
 
   describe('Message Integrity and Checksum Validation', () => {
 
-  it('should calculate and verify message checksums', async () => const message = TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST,
+    it('should calculate and verify message checksums', async () => {
+      const message = TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST,
         'test_session_checksum_001','high',1);
 
       // Validate message (includes checksum calculation)
@@ -899,7 +929,8 @@ expect(verified).toBe(false);
 
 
 
-    it('should handle high-volume checksum validation efficiently', async () => const sessionId = 'test_session_checksum_003';
+    it('should handle high-volume checksum validation efficiently', async () => {
+      const sessionId = 'test_session_checksum_003';
 const messageCount = 1000;const { throughput, averageLatency } = await PerformanceTestUtils.measureThroughput(
         async () => {
   const message = TestMessageFactory.createTestMessage(
@@ -920,7 +951,8 @@ const messageCount = 1000;const { throughput, averageLatency } = await Performan
   // ===== PERFORMANCE METRICS AND MONITORING TESTS =====
 
   describe('Performance Metrics Collection and Validation', () => {
-it('should collect comprehensive performance metrics', async () => const metrics = service.getPerformanceMetrics();
+  it('should collect comprehensive performance metrics', async () => {
+    const metrics = service.getPerformanceMetrics();
 expect(metrics).toHaveProperty('totalMessages');
 expect(metrics).toHaveProperty('successfulDeliveries');
 expect(metrics).toHaveProperty('failedDeliveries');
@@ -1042,7 +1074,8 @@ const messageCount = 100;const latencies: number[] = [];
 
   describe('Integration and End-to-End Validation', () => {
 
-  it('should handle complete end-to-end message lifecycle', async () => const sessionId = 'test_session_e2e_001';
+    it('should handle complete end-to-end message lifecycle', async () => {
+      const sessionId = 'test_session_e2e_001';
 const validationId = 'validation_e2e_001';
 
 // Complete lifecycle: validation request -> response -> confirmation -> resultconst messages = [

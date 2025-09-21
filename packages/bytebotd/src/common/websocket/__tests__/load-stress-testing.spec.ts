@@ -948,8 +948,8 @@ test('should perform sustained load test with memory monitoring', async () => {
 
   describe('Memory Leak Detection', () => {
 
-  test('should monitor memory usage over time', async () => 
-      const detector = new MemoryLeakDetector();
+  test('should monitor memory usage over time', async () => {
+    const detector = new MemoryLeakDetector();
 
       detector.startMonitoring(1000); // Monitor every second
 
@@ -1000,7 +1000,10 @@ test('should perform sustained load test with memory monitoring', async () => {
 
   describe('Performance Under Load', () => {
 
-  test('should maintain performance under 80% of max load', async () => const testClient = new LoadTestingWebSocketClient('perf_test', metrics);await testClient.connect();const startTime = performance.now();
+  test('should maintain performance under 80% of max load', async () => {
+    const testClient = new LoadTestingWebSocketClient('perf_test', metrics);
+    await testClient.connect();
+    const startTime = performance.now();
       const messageCount = 1000;
 
       // Send burst of messages
@@ -1061,7 +1064,9 @@ test('should perform sustained load test with memory monitoring', async () => {
 
   describe('System Recovery Testing', () => {
 
-  test('should recover from overload conditions', async () => const config: LoadTestConfig = {baselineConnections: 100,
+  test('should recover from overload conditions', async () => {
+    const config: LoadTestConfig = {
+      baselineConnections: 100,
         targetConnections: 200,
         peakRPS: 5000,
         baselineRPS: 1000,
@@ -1116,7 +1121,9 @@ expect(recoveryPhase).toBeDefined();// System should stabilize during recovery
 
   describe('Resource Cleanup Validation', () => {
 
-  test('should properly cleanup resources after load test', async () => const initialMemory = process.memoryUsage().heapUsed;const config: LoadTestConfig = {
+  test('should properly cleanup resources after load test', async () => {
+    const initialMemory = process.memoryUsage().heapUsed;
+    const config: LoadTestConfig = {
   baselineConnections: 200,
         targetConnections: 500,
         peakRPS: 3000,
