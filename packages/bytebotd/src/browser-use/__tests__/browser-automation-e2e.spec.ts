@@ -451,7 +451,10 @@ describe('Browser Automation E2E Workflows', () => {
       };
 
       const taskResponse = await request(app.getHttpServer())
-        .post('/browser-use/tasks').set('Authorization', `Bearer ${authToken}`).send(resilientTaskDto).expect(HttpStatus.CREATED);
+        .post('/browser-use/tasks')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(resilientTaskDto)
+        .expect(HttpStatus.CREATED);
 
       const taskId = taskResponse.body.taskId;
 
@@ -471,7 +474,10 @@ describe('Browser Automation E2E Workflows', () => {
           // Should complete successfully despite the failed click action
           expect(statusResponse.body.actionsCompleted).toBeGreaterThan(3);
         } else if (statusResponse.body.status === BrowserTaskStatus.FAILED) {
-          // Only fail if error recovery didn't workconsole.log('Task failed:', statusResponse.body.error);break;}
+          // Only fail if error recovery didn't work
+          console.log('Task failed:', statusResponse.body.error);
+          break;
+        }
 
         attempts++;
         if (!taskCompleted) {
@@ -484,9 +490,17 @@ describe('Browser Automation E2E Workflows', () => {
 
       // Step 4: Test task cancellation and cleanup
       const cancelTaskDto: CreateBrowserTaskDto = {
-        name: 'Task to be Cancelled',actions: [{
-            type: 'navigate',url: 'https://httpbin.org/delay/10', // Long delay},{
-            type: 'wait',selector: 'body',timeout: 30000,},
+        name: 'Task to be Cancelled',
+        actions: [
+          {
+            type: 'navigate',
+            url: 'https://httpbin.org/delay/10', // Long delay
+          },
+          {
+            type: 'wait',
+            selector: 'body',
+            timeout: 30000,
+          },
         ],
         priority: BrowserTaskPriority.LOW,
         sessionConfig: {
@@ -495,7 +509,10 @@ describe('Browser Automation E2E Workflows', () => {
       };
 
       const cancelTaskResponse = await request(app.getHttpServer())
-        .post('/browser-use/tasks').set('Authorization', `Bearer ${authToken}`).send(cancelTaskDto).expect(HttpStatus.CREATED);
+        .post('/browser-use/tasks')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(cancelTaskDto)
+        .expect(HttpStatus.CREATED);
 
       const cancelTaskId = cancelTaskResponse.body.taskId;
 
@@ -505,10 +522,16 @@ describe('Browser Automation E2E Workflows', () => {
       // Cancel the task
       await request(app.getHttpServer())
         .delete(`/browser-use/tasks/${cancelTaskId}`)
-        .set('Authorization', `Bearer ${authToken}`).expect(HttpStatus.NO_CONTENT);// Verify cancellation
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(HttpStatus.NO_CONTENT);
+
+      // Verify cancellation
       const cancelledTaskStatus = await request(app.getHttpServer())
         .get(`/browser-use/tasks/${cancelTaskId}`)
-        .set('Authorization', `Bearer ${authToken}`).expect(HttpStatus.OK);expect(cancelledTaskStatus.body.status).toBeOneOf([
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(HttpStatus.OK);
+
+      expect(cancelledTaskStatus.body.status).toBeOneOf([
         BrowserTaskStatus.CANCELLED,
         BrowserTaskStatus.FAILED,
       ]);
@@ -540,7 +563,10 @@ describe('Browser Automation E2E Workflows', () => {
       };
 
       const sessionResponse = await request(app.getHttpServer())
-        .post('/browser-use/sessions').set('Authorization', `Bearer ${authToken}`).send(sessionDto).expect(HttpStatus.CREATED);
+        .post('/browser-use/sessions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(sessionDto)
+        .expect(HttpStatus.CREATED);
 
       const sessionId = sessionResponse.body.sessionId;
 
@@ -554,9 +580,16 @@ describe('Browser Automation E2E Workflows', () => {
               url: `https://httpbin.org/delay/${index + 1}`,
             },
             {
-              type: 'wait',selector: 'body',timeout: 5000,},
+              type: 'wait',
+              selector: 'body',
+              timeout: 5000,
+            },
             {
-              type: 'extract',selector: 'body',property: 'textContent',},],
+              type: 'extract',
+              selector: 'body',
+              property: 'textContent',
+            },
+          ],
           priority: BrowserTaskPriority.NORMAL,
           sessionConfig: {
             sessionId: sessionId,
