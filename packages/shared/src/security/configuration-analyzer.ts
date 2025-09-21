@@ -2013,7 +2013,17 @@ export class ConfigurationAnalyzer extends EventEmitter {
     });
   }
 
-  private calculateIssueSummary(issues: ConfigurationIssue[]) {
+  private calculateIssueSummary(issues: ConfigurationIssue[]): {
+    total: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    info: number;
+    byCategory: Record<string, number>;
+    byConfigType: Record<ConfigurationType, number>;
+    securityLevel: SecurityLevel;
+  } {
     const summary = {
       total: issues.length,
       critical: 0,
@@ -2281,7 +2291,12 @@ limit_except GET POST HEAD {
     return secureDefaults;
   }
 
-  private generateFixScripts(issues: ConfigurationIssue[]) {
+  private generateFixScripts(issues: ConfigurationIssue[]): ReadonlyArray<{
+    readonly name: string;
+    readonly description: string;
+    readonly script: string;
+    readonly platform: string;
+  }> {
     const fixScripts: {
       readonly name: string;
       readonly description: string;
