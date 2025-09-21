@@ -53,12 +53,12 @@ import { createSafeWebSocketServer } from '../websocket-types';
  * Message flow validator for testing bidirectional communication
  */
 class MessageFlowValidator extends EventEmitter {
-  private messageLog: Array<{,
-  timestamp: number;
-  direction: 'sent' | 'received';
-  message: ConversationalMessage;latency?: number;
-  
-}> = [];
+  private messageLog: Array<{
+    timestamp: number;
+    direction: 'sent' | 'received';
+    message: ConversationalMessage;
+    latency?: number;
+  }> = [];
 
   private acknowledgments = new Map<string, {
   timestamp: number;
@@ -119,7 +119,7 @@ class MessageFlowValidator extends EventEmitter {
     try {
       // Track message for acknowledgment
       if (message.metadata.requiresAck) {
-        this.acknowledgments.set(message.messageId, {,
+        this.acknowledgments.set(message.messageId, {
   timestamp: sendTime,
           acknowledged: false,
         
@@ -225,7 +225,7 @@ ms`));
   clearMetrics(): void {
   this.messageLog = [];
     this.acknowledgments.clear();
-    this.flowMetrics = {,
+    this.flowMetrics = {
   totalSent: 0,
       totalReceived: 0,
       totalAcknowledged: 0,
@@ -243,7 +243,7 @@ ms`));
  */
 class StreamingValidationTester {
   private progressUpdates: ProgressUpdateMessage[] = [];
-  private validationWorkflows = new Map<string, {,
+  private validationWorkflows = new Map<string, {
   startTime: number;
     endTime?: number;
     progressCount: number;
@@ -344,7 +344,7 @@ _${Math.random().toString(36).substring(7)}`;const sessionId = `session_${Date.n
           update => update.payload.operationId === validationId
         );
 
-        return {,
+        return {
   duration: (workflow.endTime || Date.now()) - workflow.startTime,
           progressCount: workflow.progressCount,
           status: workflow.status,
@@ -370,7 +370,7 @@ ms`);
       ? completedWorkflows.reduce((sum, workflow) => sum + workflow.progressCount, 0) / completedWorkflows.length
       : 0;
 
-    return {,
+    return {
   totalWorkflows: this.validationWorkflows.size,
       completedWorkflows: completedWorkflows.length,
       failedWorkflows: Array.from(this.validationWorkflows.values()).filter(w => w.status === 'failed').length,
@@ -412,11 +412,11 @@ describe('Real-time Message Flow Tests', () => {
   beforeAll(async () => {
   jest.setTimeout(120000); // 2 minutes for message flow tests
 
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
         ParlantWebSocketStreamingBridgeService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -451,7 +451,7 @@ describe('Real-time Message Flow Tests', () => {
 
             default:
               // Echo back with acknowledgment
-              const ackMessage: ConversationalMessage = {,
+              const ackMessage: ConversationalMessage = {
   messageId: `ack_${message.messageId
 
     }`,
@@ -492,7 +492,7 @@ describe('Real-time Message Flow Tests', () => {
           const progress = Math.min((updateCount / maxUpdates) * 100, 100);
           const stage = updateCount <= 2 ? 'analyzing' : updateCount <= 4 ? 'validating' : 'completing';
 
-          const progressUpdate: ProgressUpdateMessage = {,
+          const progressUpdate: ProgressUpdateMessage = {
   type: ConversationalMessageType.PROGRESS_UPDATE,
             messageId: `progress_${validationId
 }
@@ -527,7 +527,7 @@ _${updateCount}`,sessionId: request.sessionId,
 
       // Send validation response
       setTimeout(() => {
-  const response: ValidationResponseMessage = {,
+  const response: ValidationResponseMessage = {
   type: ConversationalMessageType.VALIDATION_RESPONSE,
           messageId: `response_${validationId
 }`,
@@ -560,7 +560,7 @@ _${updateCount}`,sessionId: request.sessionId,
     }
 
   async function handleUserConfirmation(ws: WebSocket.WebSocket, confirmation: UserConfirmationMessage): Promise<void> {
-  const result: ConversationalMessage = {,
+  const result: ConversationalMessage = {
   type: ConversationalMessageType.CONFIRMATION_RESULT,
         messageId: `result_${confirmation.payload.confirmationId
 }`,
@@ -590,7 +590,7 @@ _${updateCount}`,sessionId: request.sessionId,
     }
 
   async function handleHeartbeat(ws: WebSocket.WebSocket, heartbeat: ConversationalMessage): Promise<void> {
-  const response: ConversationalMessage = {,
+  const response: ConversationalMessage = {
   type: ConversationalMessageType.HEARTBEAT,
         messageId: `heartbeat_response_${Date.now()
 }`,
@@ -633,9 +633,13 @@ _${updateCount}`,sessionId: request.sessionId,
 
   describe('Bidirectional Message Exchange', () => {
 
-  it('should handle bidirectional message flow correctly', async () => const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
-        ws.on('open', resolve);ws.on('error', reject);
-});const messageValidator = new MessageFlowValidator(ws);
+  it('should handle bidirectional message flow correctly', async () => {
+    const ws = new WebSocket.WebSocket(TEST_URL);
+    await new Promise<void>((resolve, reject) => {
+      ws.on('open', resolve);
+      ws.on('error', reject);
+    });
+    const messageValidator = new MessageFlowValidator(ws);
       const testMessage: ConversationalMessage = {
   messageId: 'bidirectional-test-001',
       sessionId: 'test-session-bidirectional',
@@ -672,9 +676,10 @@ _${updateCount}`,sessionId: request.sessionId,
 
 
     it('should maintain message ordering in bidirectional flow', async () => {
-
-  const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => 
-        ws.on('open', resolve);ws.on('error', reject);
+      const ws = new WebSocket.WebSocket(TEST_URL);
+      await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);
+        ws.on('error', reject);
       
 });
 
@@ -684,7 +689,7 @@ _${updateCount}`,sessionId: request.sessionId,
 
       // Create sequence of messages
       for (let i = 0; i < messageCount; i++) {
-  messages.push({,
+  messages.push({
   messageId: `ordered-message-${i
 }`,
           sessionId: 'test-session-ordering',
@@ -730,7 +735,9 @@ expect(receivedMessages.length).toBe(messageCount);
 
   describe('Message Serialization and Performance', () => {
 
-  it('should handle message serialization/deserialization efficiently', async () => const largePayload = {data: 'x'.repeat(10000), // 10KB of data,
+  it('should handle message serialization/deserialization efficiently', async () => {
+    const largePayload = {
+      data: 'x'.repeat(10000), // 10KB of data
   metadata: {
   fields: Array.from({ length: 100 
 }, (_, i) => ({ field: `field_${i}`, value: Math.random() })),
@@ -777,9 +784,10 @@ ms`,
 
 
     it('should achieve sub-50ms message delivery latency target', async () => {
-
-  const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => 
-        ws.on('open', resolve);ws.on('error', reject);
+      const ws = new WebSocket.WebSocket(TEST_URL);
+      await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);
+        ws.on('error', reject);
       
 });
 
@@ -788,7 +796,7 @@ ms`,
 
       // Send test messages
       for (let i = 0; i < testCount; i++) {
-  const testMessage: ConversationalMessage = {,
+  const testMessage: ConversationalMessage = {
   messageId: `latency-test-${i
 }`,
           sessionId: 'test-session-latency',
@@ -832,7 +840,9 @@ expect(metrics.deliverySuccessRate).toBeGreaterThan(0.99); // 99%+ success rate
 
   describe('Streaming Validation Workflows', () => {
 
-  it('should handle real-time streaming validation workflow', async () => const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+  it('should handle real-time streaming validation workflow', async () => {
+    const ws = new WebSocket.WebSocket(TEST_URL);
+    await new Promise<void>((resolve, reject) => {
         ws.on('open', resolve);ws.on('error', reject);
 });const messageValidator = new MessageFlowValidator(ws);
       const streamingTester = new StreamingValidationTester(messageValidator);
@@ -882,9 +892,10 @@ ms`,
 
 
     it('should handle multiple concurrent streaming workflows', async () => {
-
-  const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => 
-        ws.on('open', resolve);ws.on('error', reject);
+      const ws = new WebSocket.WebSocket(TEST_URL);
+      await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);
+        ws.on('error', reject);
       
 });
 
@@ -896,7 +907,7 @@ ms`,
 
       // Start multiple concurrent workflows
       for (let i = 0; i < workflowCount; i++) {
-  const testAction: ValidationAction = {,
+  const testAction: ValidationAction = {
   actionType: `concurrent_action_${i
 }`,parameters: { index: i, data: `test-data-${i}` },expectedOutcome: `Action ${i} completed`,
           reversible: true,
@@ -940,7 +951,9 @@ ms`,
 
   describe('Flow Control and Backpressure', () => {
 
-  it('should handle high-throughput message flow without loss', async () => const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => {
+  it('should handle high-throughput message flow without loss', async () => {
+    const ws = new WebSocket.WebSocket(TEST_URL);
+    await new Promise<void>((resolve, reject) => {
         ws.on('open', resolve);ws.on('error', reject);
       
 });
@@ -991,9 +1004,10 @@ expect(metrics.totalSent).toBe(messageCount);
 
 
     it('should implement proper backpressure handling', async () => {
-
-  const ws = new WebSocket.WebSocket(TEST_URL);await new Promise<void>((resolve, reject) => 
-        ws.on('open', resolve);ws.on('error', reject);
+      const ws = new WebSocket.WebSocket(TEST_URL);
+      await new Promise<void>((resolve, reject) => {
+        ws.on('open', resolve);
+        ws.on('error', reject);
       
 });
 
