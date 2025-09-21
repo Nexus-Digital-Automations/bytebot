@@ -3613,12 +3613,24 @@
       "updated_at": "2025-09-21T00:35:58.481Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-21T00:29:22.816Z",
       "title": "Fix TypeScript compilation errors in audit types",
       "description": "Fix import paths, missing type definitions, and duplicate identifiers in audit-core.types.ts, audit-extended.types.ts, and compliance-forensic.types.ts",
       "category": "error",
-      "id": "error_1758414562816_fmyrafmoqsi"
+      "id": "error_1758414562816_fmyrafmoqsi",
+      "assigned_agent": "dev_session_1758485419141_1_general_f1170198",
+      "started_at": "2025-09-21T20:28:46.269Z",
+      "claimed_by": "dev_session_1758485419141_1_general_f1170198",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758485419141_1_general_f1170198",
+          "role": "primary",
+          "assignedAt": "2025-09-21T20:28:46.269Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -4178,6 +4190,139 @@
       "id": "error_1758485997148_hxk6a1b8ml9",
       "completed_at": "2025-09-21T20:21:50.274Z",
       "updated_at": "2025-09-21T20:21:50.274Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T20:28:10.761Z",
+      "title": "Parlant Phase 1 Research Validation and Consolidation",
+      "description": "Validate and consolidate the extensive Parlant Phase 1 research documentation found in development/essentials/parlant-phase1/. Review all research deliverables from the 8 specialized concurrent agents: WebSocket architecture analysis, function mapping (1,520+ functions), performance optimization research (sub-1000ms targets), security integration patterns, database wrapper architecture, authentication bridge service design, API integration patterns, and frontend transformation architecture. Create comprehensive validation report and implementation readiness assessment.",
+      "category": "feature",
+      "id": "feature_1758486490761_1uoqgj3gf0g"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-21T21:07:12.972Z",
+      "title": "Fix TypeScript compilation errors in shared package - 170+ type definition failures",
+      "description": "Multiple TypeScript compilation errors blocking build: missing type definitions (PerformanceMonitor, CacheAnalyzer, etc.), type incompatibilities in parlant wrapper functions, provider configuration issues, property initialization problems. Root cause: Missing type declarations and interface mismatches in parlant integration modules.",
+      "category": "error",
+      "files": [
+        "src/modules/jwt-parlant-security.module.ts",
+        "src/parlant/bypass/integration/parlant-bypass-integration.service.ts",
+        "src/parlant/function-wrapper/core/signature-preserving-wrapper.ts",
+        "src/parlant/monitoring/index.ts",
+        "src/utils/security-parlant-wrapped.utils.ts"
+      ],
+      "context": {
+        "buildCommand": "npm run build",
+        "errorCount": "170+",
+        "severity": "blocking"
+      },
+      "priority": "normal",
+      "id": "error_1758488832972_csgu62g0fjw",
+      "assigned_agent": "dev_session_1758488934835_1_general_87bfcc0e",
+      "started_at": "2025-09-21T21:19:08.137Z",
+      "claimed_by": "dev_session_1758488934835_1_general_87bfcc0e",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758488934835_1_general_87bfcc0e",
+          "role": "primary",
+          "assignedAt": "2025-09-21T21:19:08.137Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T22:06:42.757Z",
+      "title": "Fix Analytics Service Corruption - Template Literal and Syntax Errors",
+      "description": "Fix critical corruption in orchestration-analytics.service.ts: unterminated template literal at line 668 and multiple comma/syntax errors at line 338. Focus on restoring proper template literal syntax and fixing all syntax errors.",
+      "category": "error",
+      "id": "error_1758492402757_5tjmuq86q18",
+      "completed_at": "2025-09-21T22:09:22.595Z",
+      "updated_at": "2025-09-21T22:09:22.595Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T22:06:43.058Z",
+      "title": "Fix browser service corruption - lines 825-833 statement integrity",
+      "description": "Fix critical corruption in browser-use.service.ts lines 825-833: missing semicolons, malformed statements, invalid characters. Complete statement integrity restoration.",
+      "category": "error",
+      "id": "error_1758492403058_ih0njud5cbc",
+      "completed_at": "2025-09-21T22:10:44.494Z",
+      "updated_at": "2025-09-21T22:10:44.494Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T22:06:43.504Z",
+      "title": "Fix critical syntax corruption in browser-automation-e2e.spec.ts at line 521",
+      "description": "Fix Declaration or statement expected error at line 521 in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/__tests__/browser-automation-e2e.spec.ts. Focus on restoring proper TypeScript syntax and test structure.",
+      "category": "error",
+      "id": "error_1758492403504_pl17nz7ekw",
+      "assigned_agent": "dev_session_1758492384830_1_general_3f769206",
+      "started_at": "2025-09-21T22:10:27.271Z",
+      "claimed_by": "dev_session_1758492384830_1_general_3f769206",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758492384830_1_general_3f769206",
+          "role": "primary",
+          "assignedAt": "2025-09-21T22:10:27.271Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T22:11:22.627Z",
+      "updated_at": "2025-09-21T22:11:22.627Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T22:06:45.010Z",
+      "title": "Object Definition Corruption Restoration in browser-use directory",
+      "description": "Comprehensive scan and repair of all JavaScript/TypeScript files in browser-use directory for: corrupted object definitions, merged object literals, malformed class structures, interface corruption, object property integrity issues, and structural inconsistencies. Apply object structure fixes with complete integrity restoration.",
+      "category": "error",
+      "id": "error_1758492405010_4upobl9nfba"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T22:06:46.243Z",
+      "title": "TEMPLATE LITERAL CORRUPTION SCAN: Fix all template literal integrity issues in browser-use directory",
+      "description": "Scan all files in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/ for: 1) Unterminated template literals, 2) Merged template strings, 3) Template syntax corruption, 4) Malformed backtick usage. Fix ALL template literal integrity issues with zero tolerance. Target: Complete template literal corruption elimination.",
+      "category": "error",
+      "id": "error_1758492406242_20w6aj892xi"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T22:17:46.244Z",
+      "title": "TypeScript Compilation Verification - browser-use directory",
+      "description": "Run comprehensive TypeScript compilation verification across entire /src/browser-use/ directory to identify any remaining TS1005 or critical syntax errors. Target: Zero critical compilation errors.",
+      "category": "error",
+      "id": "error_1758493066244_6y8s1msmvts"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T22:17:52.509Z",
+      "title": "Fix TS1005 syntax errors in extraction.controller.ts lines 482, 486, 487",
+      "description": "Fix ALL TS1005 syntax errors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/extraction.controller.ts at lines 482, 486, 487. Focus on missing commas and expression syntax corruption. Target: ZERO syntax errors.",
+      "category": "error",
+      "id": "error_1758493072509_f3y2ajbier",
+      "completed_at": "2025-09-21T22:20:22.949Z",
+      "updated_at": "2025-09-21T22:20:22.949Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T22:17:54.068Z",
+      "title": "Fix 9 critical TS1005 syntax errors in DOM orchestration controller",
+      "description": "Fix ALL 9 critical TS1005 syntax errors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/dom-orchestration.controller.ts at lines 956, 981, 984, 1056, 1081, 1097, 1111, 1128, 1136. Focus on missing colons, commas, and parentheses corruption. Target: ZERO TS1005 errors.",
+      "category": "error",
+      "id": "error_1758493074067_tson4o7ar"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T22:17:54.740Z",
+      "title": "Fix TS1005 syntax errors in extraction.service.ts lines 720-723",
+      "description": "Fix ALL TS1005 syntax errors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/extraction.service.ts at lines 720-723. Focus on missing equals signs, semicolons, and brace syntax corruption. Target: Complete statement integrity restoration.",
+      "category": "error",
+      "id": "error_1758493074739_rfb9ustk0m"
     }
   ],
   "agents": {
@@ -11325,7 +11470,7 @@
       "specialization": [],
       "status": "active",
       "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T20:19:39.136Z",
+      "lastHeartbeat": "2025-09-21T20:36:56.115Z",
       "parentAgentId": null,
       "capabilities": [
         "file-operations",
@@ -11337,6 +11482,200 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T20:19:39.136Z",
+      "sessionId": null,
+      "metadata": {
+        "renewedAt": "2025-09-21T20:36:56.115Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-21T20:36:56.115Z",
+      "renewalCount": 1
+    },
+    "dev_session_1758492384830_1_general_3f769206": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:06:24.831Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:06:24.831Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758492385326_1_general_9c771ddc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:06:25.328Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:06:25.328Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758492385875_1_general_f91e08ed": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:06:25.877Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:06:25.877Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758492386549_1_general_f0b06593": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:06:26.551Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:06:26.551Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758492386942_1_general_abe62cc9": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:06:26.944Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:06:26.944Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758493048430_1_general_dfd92139": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:17:28.432Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:17:28.432Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758493050686_1_general_440983ec": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:17:30.688Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:17:30.688Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758493051305_1_general_74d796a8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:17:31.306Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:17:31.306Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758493051879_1_general_385219b4": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T22:17:31.882Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T22:17:31.882Z",
       "sessionId": null,
       "metadata": {}
     }

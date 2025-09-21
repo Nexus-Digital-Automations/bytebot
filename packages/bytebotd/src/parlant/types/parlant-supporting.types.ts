@@ -859,7 +859,9 @@ export interface TimelinePhase {
   readonly deliverables: string[];
 }
 
-// Export all supporting types
+// Note: All types are already exported when declared with 'export interface' above
+// The following export block has been removed to prevent duplicate export conflicts
+/*
 export type {
   EmotionalTone,
   ContextualFactor,
@@ -951,6 +953,7 @@ export type {
   RollbackTimeline,
   TimelinePhase,
 };
+*/
 
 // Default export for enums
 export default {

@@ -94,6 +94,13 @@ type TypedJestSpy<T> = jest.SpyInstance<
   T extends (...args: infer A) => unknown ? A : unknown[]
 >;
 
+// Specific typed spy for ComputerUseTools methods
+type MockedComputerUseTools = {
+  [K in keyof ComputerUseTools]: ComputerUseTools[K] extends (...args: infer Args) => infer Return
+    ? jest.MockedFunction<(...args: Args) => Return>
+    : ComputerUseTools[K];
+};
+
 // Error recovery test interfaces
 interface ErrorRecoveryContext {
   app: INestApplication;
@@ -685,10 +692,9 @@ return isLowRisk;
       // Mock MCP connection failures then recovery
       const originalMoveMouse = async (params: MouseMoveParams): Promise<McpToolResponse> => {
         const tools = context.mcpTools as ComputerUseTools;
-        const result: McpToolResponse = await tools.moveMouse(params);
-        return result;
+        return tools.moveMouse(params);
       };
-      const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse');
+      const mouseMoveSpy = jest.spyOn(context.mcpTools as ComputerUseTools, 'moveMouse');
       mouseMoveSpy.mockImplementation(async (params: MouseMoveParams): Promise<McpToolResponse> => {
         connectionAttempts++;
         if (connectionAttempts <= 3) {
@@ -702,8 +708,7 @@ return isLowRisk;
         'McpService',
         async (): Promise<McpToolResponse> => {
           const tools = context.mcpTools as ComputerUseTools;
-          const result: McpToolResponse = await tools.moveMouse({ coordinates: { x: 150, y: 250 } });
-          return result;
+          return tools.moveMouse({ coordinates: { x: 150, y: 250 } });
         }
       );
 
@@ -959,8 +964,9 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       let healthCheckAttempts = 0;
 
       // Mock health check recovery process
-      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<typeof context.healthService.checkHealth>;
-      checkHealthSpy.mockImplementation((): Promise<{ status: string; details: Record<string, string> }> => {
+      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth');
+      const typedCheckHealthSpy = checkHealthSpy as jest.MockedFunction<() => Promise<{ status: string; details: Record<string, string> }>>;
+      typedCheckHealthSpy.mockImplementation((): Promise<{ status: string; details: Record<string, string> }> => {
   healthCheckAttempts++;
           if (healthCheckAttempts <= 3) {
             return Promise.resolve({

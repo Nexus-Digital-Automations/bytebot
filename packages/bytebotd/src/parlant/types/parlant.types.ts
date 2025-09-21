@@ -38,6 +38,17 @@ import type {
   ReviewSchedule,
   DurationExtension,
   DurationNotification,
+  AccessControl,
+  CustodianInfo,
+  LocationInfo,
+  EvidenceSource,
+  EvidenceContent,
+  EvidenceMetadata,
+  LegalHold,
+  AdmissibilityAssessment,
+  PrivilegeAssessment,
+  DisclosureRestriction,
+  LitigationReadiness,
 } from './parlant-supporting.types';
 
 // Import additional types needed for complete definitions
@@ -45,7 +56,35 @@ import type {
   QualityMetric,
   ValidationRequirement,
   ResourceRequirement,
+  ImpactAssessment,
+  IntegrityVerification,
+  ComplianceRequirement,
+  NotificationTimeline,
+  RequiredAction,
+  CustodyAction,
+  PreservationOrder,
+  RetentionSchedule,
+  StorageRequirement,
+  EnvironmentalControl,
+  BackupStrategy,
+  MigrationPlan,
+  ConfidentialityLevel,
 } from './parlant-additional.types';
+
+// Import compliance types
+import type {
+  ComplianceFramework,
+  ComplianceViolation,
+  ComplianceCertification,
+  AuditFinding,
+  RemediationAction,
+  DataClassification,
+  RegulatoryClassification,
+  IndustryClassification,
+  GeographicClassification,
+  HandlingRequirements,
+  RetentionRequirements,
+} from './parlant-compliance.types';
 
 // =============================================================================
 // Core Parlant Integration Types

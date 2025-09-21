@@ -200,7 +200,10 @@ export class ParlantValidatedBrowserTaskService {
     private readonly originalBrowserTaskService: BrowserTaskService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Task Service`, {hasOriginalService: !!this.originalBrowserTaskService,hasParlantService: !!this.parlantIntegrationService,
+    const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;
+    this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Task Service`, {
+      hasOriginalService: !!this.originalBrowserTaskService,
+      hasParlantService: !!this.parlantIntegrationService,
       validationEnabled: true,
     });
 
@@ -224,10 +227,14 @@ export class ParlantValidatedBrowserTaskService {
     taskData: TaskCreationData,
     context: BrowserTaskValidationContext
   ): Promise<TaskValidationResult> {
-    const operationId = `parlant_task_create${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.totalTaskOperations++;
+    const operationId = `parlant_task_create${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+    this.totalTaskOperations++;
 
     this.logger.log(
-      `[${operationId}] Starting Parlant-validated task creation: ${taskData.name}`,{operationId,
+      `[${operationId}] Starting Parlant-validated task creation: ${taskData.name}`,
+      {
+        operationId,
         taskName: taskData.name,
         taskId: taskData.taskId,
         userId: context.userId,
@@ -242,7 +249,9 @@ export class ParlantValidatedBrowserTaskService {
       const riskAssessment = this.assessTaskCreationRisk(taskData, context);
       
       this.logger.log(
-        `[${operationId}] Task creation risk assessment completed: ${riskAssessment.riskLevel}`,{operationId,
+        `[${operationId}] Task creation risk assessment completed: ${riskAssessment.riskLevel}`,
+        {
+          operationId,
           riskLevel: riskAssessment.riskLevel,
           riskFactors: riskAssessment.riskFactors,
           requiresApproval: riskAssessment.requiresApproval,
@@ -414,8 +423,12 @@ export class ParlantValidatedBrowserTaskService {
     updateData: TaskUpdateData,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto> {
-    const operationId = `parlant_task_update${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
-      `[${operationId}] Starting Parlant-validated task update: ${taskId}`,{operationId,
+    const operationId = `parlant_task_update${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+    this.logger.log(
+      `[${operationId}] Starting Parlant-validated task update: ${taskId}`,
+      {
+        operationId,
         taskId,
         userId: context.userId,
         hasStatusUpdate: !!updateData.status,
@@ -429,7 +442,11 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.updateTask`,functionParams: this.sanitizeUpdateDataForValidation(updateData),actionDescription: `Update browser task ${taskId} with new status and data`,context: context,riskLevel: riskAssessment.riskLevel,
+        functionName: `BrowserTaskService.updateTask`,
+        functionParams: this.sanitizeUpdateDataForValidation(updateData),
+        actionDescription: `Update browser task ${taskId} with new status and data`,
+        context: context,
+        riskLevel: riskAssessment.riskLevel,
         operationId,
       };
 
@@ -505,8 +522,12 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto | null> {
-    const operationId = `parlant_task_get${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
-      `[${operationId}] Starting Parlant-validated task retrieval: ${taskId}`,{operationId,
+    const operationId = `parlant_task_get${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+    this.logger.log(
+      `[${operationId}] Starting Parlant-validated task retrieval: ${taskId}`,
+      {
+        operationId,
         taskId,
         userId: context.userId,
       }
@@ -518,7 +539,9 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.getTask`,functionParams: { taskId },actionDescription: `Retrieve browser task information for ${taskId}`,
+        functionName: `BrowserTaskService.getTask`,
+        functionParams: { taskId },
+        actionDescription: `Retrieve browser task information for ${taskId}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -584,8 +607,12 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<void> {
-    const operationId = `parlant_task_delete${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
-      `[${operationId}] Starting Parlant-validated task deletion: ${taskId}`,{operationId,
+    const operationId = `parlant_task_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+    this.logger.log(
+      `[${operationId}] Starting Parlant-validated task deletion: ${taskId}`,
+      {
+        operationId,
         taskId,
         userId: context.userId,
       }
@@ -597,7 +624,9 @@ export class ParlantValidatedBrowserTaskService {
 
       // Step 2: Perform Parlant conversational validation
       const validationRequest: ParlantValidationRequest = {
-        functionName: `BrowserTaskService.deleteTask`,functionParams: { taskId },actionDescription: `Delete browser task ${taskId}`,
+        functionName: `BrowserTaskService.deleteTask`,
+        functionParams: { taskId },
+        actionDescription: `Delete browser task ${taskId}`,
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
@@ -1008,7 +1037,9 @@ export class ParlantValidatedBrowserTaskService {
       totalTaskOperations: this.totalTaskOperations,
       approvedTaskOperations: this.approvedTaskOperations,
       deniedTaskOperations: this.deniedTaskOperations,
-      approvalRate: `${approvalRate.toFixed(2)}%`,denialRate: `${denialRate.toFixed(2)}%`,averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
+      approvalRate: `${approvalRate.toFixed(2)}%`,
+      denialRate: `${denialRate.toFixed(2)}%`,
+      averageValidationTime: `${this.averageValidationTime.toFixed(2)}ms`,
       taskHistorySize: this.taskHistory.length,
     });
   }

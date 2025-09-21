@@ -594,7 +594,7 @@ async def extract_text():
         sys.stderr.write(f"Text extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_text())
-";}
+`;
 
   /**
    * Generate Python script for table extraction
@@ -703,6 +703,7 @@ asyncio.run(extract_text())
     ];
 
     return pythonScript.join('\n');
+  }
 
   /**
    * Generate Python script for link extraction
@@ -803,7 +804,7 @@ async def extract_links():
         sys.exit(1)
 
 asyncio.run(extract_links())
-";}
+`;
 
   /**
    * Generate Python script for image extraction
@@ -872,7 +873,7 @@ async def extract_images():
         sys.stderr.write(f"Image extraction error: {str(e)}\n")sys.exit(1)
 
 asyncio.run(extract_images())
-";}
+`;
 
   /**
    * Generate Python script for structured data extraction
@@ -952,10 +953,11 @@ async def extract_structured_data():
         print(json.dumps(result))
 
     except Exception as e:
-        sys.stderr.write(f"Structured data extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"Structured data extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_structured_data())
-";}
+`;
 
   /**
    * Generate Python script for XPath extraction
@@ -1052,14 +1054,25 @@ asyncio.run(extract_xpath())
 
     // Add headers
     if (headers.length > 0) {
-      csvLines.push(headers.map(this.escapeCsvValue).join(','));}// Add data rows
+      csvLines.push(headers.map(this.escapeCsvValue).join(','));
+    }
+
+    // Add data rows
     for (const row of rows) {
-      const values = headers.map(header => this.escapeCsvValue(String(row[header] ?? '')));csvLines.push(values.join(','));}return csvLines.join('\n');}/**
+      const values = headers.map(header => this.escapeCsvValue(String(row[header] ?? '')));
+      csvLines.push(values.join(','));
+    }
+
+    return csvLines.join('\n');
+  }
+
+  /**
    * Escape CSV values (handle quotes and commas)
    */
   private escapeCsvValue(value: string): string {
     if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-      return `"${value.replace(/"/g, '""')}"";}
+      return `"${value.replace(/"/g, '""')}"`;
+    }
     return value;
   }
 

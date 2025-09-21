@@ -261,7 +261,10 @@ export class OrchestrationAnalyticsService {
       };
 
     } catch (error) {
-      this.logger.error('Failed to generate orchestration analytics', {error: error instanceof Error ? error.message : 'Unknown error',timeRange,operationType,
+      this.logger.error('Failed to generate orchestration analytics', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timeRange,
+        operationType,
         duration: Date.now() - startTime,
       });
       throw error;

@@ -60,7 +60,9 @@ export enum FailureStrategy {
  */
 export class MultiAgentConfigDto {
   @ApiPropertyOptional({
-    description: 'Maximum number of concurrent browser agents',minimum: 1,maximum: 10,
+    description: 'Maximum number of concurrent browser agents',
+    minimum: 1,
+    maximum: 10,
     default: 3,
   })
   @IsOptional()
@@ -70,7 +72,9 @@ export class MultiAgentConfigDto {
   maxConcurrentAgents?: number = 3;
 
   @ApiPropertyOptional({
-    description: 'Maximum number of concurrent browser sessions',minimum: 1,maximum: 20,
+    description: 'Maximum number of concurrent browser sessions',
+    minimum: 1,
+    maximum: 20,
     default: 5,
   })
   @IsOptional()

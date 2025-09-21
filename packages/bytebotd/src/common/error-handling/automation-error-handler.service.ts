@@ -1,23 +1,49 @@
- ;
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';/*** Automation Error Categories
- */;
-
+/**
+ * Automation Error Categories
+ */
 export enum AutomationErrorCategory {
-  BROWSER_ERROR = 'browser_error',FORM_ERROR = 'form_error',DATA_EXTRACTION_ERROR = 'data_extraction_error',WORKFLOW_ERROR = 'workflow_error',FILE_OPERATION_ERROR = 'file_operation_error',MONITORING_ERROR = 'monitoring_error',NETWORK_ERROR = 'network_error',VALIDATION_ERROR = 'validation_error',AUTHENTICATION_ERROR = 'authentication_error',RATE_LIMIT_ERROR = 'rate_limit_error',SYSTEM_ERROR = 'system_error',UNKNOWN_ERROR = 'unknown_error'}/**
+  BROWSER_ERROR = 'browser_error',
+  FORM_ERROR = 'form_error',
+  DATA_EXTRACTION_ERROR = 'data_extraction_error',
+  WORKFLOW_ERROR = 'workflow_error',
+  FILE_OPERATION_ERROR = 'file_operation_error',
+  MONITORING_ERROR = 'monitoring_error',
+  NETWORK_ERROR = 'network_error',
+  VALIDATION_ERROR = 'validation_error',
+  AUTHENTICATION_ERROR = 'authentication_error',
+  RATE_LIMIT_ERROR = 'rate_limit_error',
+  SYSTEM_ERROR = 'system_error',
+  UNKNOWN_ERROR = 'unknown_error'
+}
+
+/**
  * Error Severity Levels
- */;
-
+ */
 export enum ErrorSeverity {
-  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical'}/**
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+/**
  * Recovery Strategy Types
- */;
-
+ */
 export enum RecoveryStrategy {
-  RETRY = 'retry',RETRY_WITH_BACKOFF = 'retry_with_backoff',FALLBACK = 'fallback',CIRCUIT_BREAKER = 'circuit_breaker',GRACEFUL_DEGRADATION = 'graceful_degradation',MANUAL_INTERVENTION = 'manual_intervention',ABORT = 'abort'}/**
- * Comprehensive automation error interface
- */;
+  RETRY = 'retry',
+  RETRY_WITH_BACKOFF = 'retry_with_backoff',
+  FALLBACK = 'fallback',
+  CIRCUIT_BREAKER = 'circuit_breaker',
+  GRACEFUL_DEGRADATION = 'graceful_degradation',
+  MANUAL_INTERVENTION = 'manual_intervention',
+  ABORT = 'abort'
+}
 
+/**
+ * Comprehensive automation error interface
+ */
 export interface AutomationError {
   readonly errorId: string;
   readonly category: AutomationErrorCategory;
@@ -40,15 +66,12 @@ export interface AutomationError {
     readonly retryCount?: number;
     readonly maxRetries?: number;
     readonly recoveryStrategy?: RecoveryStrategy;
-  
-
-};
+  };
 }
 
 /**
  * Recovery action configuration
- */;
-
+ */
 export interface RecoveryAction {
   readonly strategy: RecoveryStrategy;
   readonly maxRetries: number;
@@ -58,14 +81,11 @@ export interface RecoveryAction {
   readonly customRecovery?: (error: AutomationError) => Promise<unknown>;
   readonly circuitBreakerThreshold?: number;
   readonly condition?: (error: AutomationError) => boolean;
-
-
 }
 
 /**
  * Error handling result
- */;
-
+ */
 export interface ErrorHandlingResult {
   readonly success: boolean;
   readonly recovered: boolean;
@@ -75,8 +95,48 @@ export interface ErrorHandlingResult {
   readonly finalError?: AutomationError;
   readonly recoveryTime: number;
   readonly metadata: Record<string, unknown>;
+}
 
+/**
+ * Error Analytics interface
+ */
+export interface ErrorAnalytics {
+  totalErrors: number;
+  errorsByCategory: Record<string, number>;
+  errorsBySeverity: Record<string, number>;
+  errorsByComponent: Record<string, number>;
+  topErrorMessages: Array<{ message: string; count: number }>;
+  recoverySuccessRate: number;
+  averageRecoveryTime: number;
+  circuitBreakerStatus: Array<{ component: string; status: string; failures: number }>;
+  errorTrends: {
+    last24Hours: number;
+    previousPeriod: number;
+    trend: string;
+  };
+  recommendations: string[];
+  generatedAt: Date;
+  processingTime: number;
+}
 
+/**
+ * Error Pattern interface
+ */
+interface ErrorPattern {
+  pattern: RegExp;
+  category: AutomationErrorCategory;
+  severity: ErrorSeverity;
+  recoveryStrategy: RecoveryStrategy;
+}
+
+/**
+ * Recovery Attempt interface
+ */
+interface RecoveryAttempt {
+  timestamp: Date;
+  strategy: RecoveryStrategy;
+  success: boolean;
+  duration: number;
 }
 
 /**
@@ -91,14 +151,6 @@ export interface ErrorHandlingResult {
  * - Recovery action orchestration
  * - Error analytics and reporting
  * - Integration with monitoring and alerting systems
- *
- * Features:
- * - Context-aware error handling with operation metadata
- * - Configurable recovery strategies per error type
- * - Performance impact minimization during recovery
- * - Comprehensive error logging and audit trails
- * - Real-time error monitoring and dashboards
- * - Error pattern detection and prevention
  */
 @Injectable()
 export class AutomationErrorHandlerService {
@@ -116,28 +168,29 @@ export class AutomationErrorHandlerService {
   /**
    * Handle automation error with intelligent recovery
    */
-  async handleError(error: Error | AutomationError,
+  async handleError(
+    error: Error | AutomationError,
     context: Record<string, unknown>,
     recoveryAction?: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  const startTime = Date.now();
+  ): Promise<ErrorHandlingResult> {
+    const startTime = Date.now();
     const errorId = this.generateErrorId();
 
     this.logger.warn(`Handling automation error: ${errorId}`, {
-      errorMessage: (error as Error).message,
+      errorMessage: error.message,
       context,
       timestamp: new Date().toISOString()
     });
 
     try {
-  // Classify and enrich error
-      const automationError = await this.classifyError(error, context, errorId);
+      // Classify and enrich error
+      const automationError = this.classifyError(error, context, errorId);
 
       // Store error for tracking
       this.errorRegistry.set(errorId, automationError);
 
       // Determine recovery strategy
-      const strategy = recoveryAction ?? await this.determineRecoveryStrategy(automationError);
+      const strategy = recoveryAction ?? this.determineRecoveryStrategy(automationError);
 
       // Execute recovery
       const result = await this.executeRecovery(automationError, strategy);
@@ -162,13 +215,13 @@ export class AutomationErrorHandlerService {
         }
       };
 
-    } catch (recoveryError: any) {
+    } catch (recoveryError: unknown) {
       const recoveryTime = Date.now() - startTime;
-      const recoveryErrorTyped = recoveryError as Error;
+      const safeRecoveryError = recoveryError instanceof Error ? recoveryError : new Error(String(recoveryError));
 
       this.logger.error(`Error recovery failed for: ${errorId}`, {
-        originalError: (error as { message?: string }).message ?? 'Unknown error',
-        recoveryError: recoveryErrorTyped.message,
+        originalError: error.message,
+        recoveryError: safeRecoveryError.message,
         recoveryTime
       });
 
@@ -177,7 +230,7 @@ export class AutomationErrorHandlerService {
         recovered: false,
         strategy: RecoveryStrategy.ABORT,
         retryCount: 0,
-        finalError: await this.classifyError(recoveryErrorTyped, context, errorId),
+        finalError: this.classifyError(safeRecoveryError, context, errorId),
         recoveryTime,
         metadata: { errorId, recoveryFailed: true }
       };
@@ -193,7 +246,7 @@ export class AutomationErrorHandlerService {
     context: Record<string, unknown>,
     recoveryConfig?: RecoveryAction
   ): Promise<T> {
-  const operationId = this.generateOperationId?.();
+    const operationId = this.generateOperationId();
     const startTime = Date.now();
 
     this.logger.log(`Executing operation with recovery: ${operationName}`, {
@@ -202,7 +255,7 @@ export class AutomationErrorHandlerService {
     });
 
     try {
-  const result = await operation();
+      const result = await operation();
 
       this.logger.log(`Operation completed successfully in ${Date.now() - startTime}ms`, {
         operationId,
@@ -213,10 +266,10 @@ export class AutomationErrorHandlerService {
 
     } catch (error: unknown) {
       const safeError = error instanceof Error ? error : new Error(String(error));
-      const errorMessage = safeError.message;
+
       this.logger.warn(`Operation failed, attempting recovery: ${operationName}`, {
         operationId,
-        error: errorMessage
+        error: safeError.message
       });
 
       const errorContext = {
@@ -226,20 +279,15 @@ export class AutomationErrorHandlerService {
         attemptTime: new Date().toISOString()
       };
 
-      const handlingResult = await this.handleError?.(safeError, errorContext, recoveryConfig);
+      const handlingResult = await this.handleError(safeError, errorContext, recoveryConfig);
 
       if (handlingResult.success && handlingResult.result !== undefined) {
-  return handlingResult.result as T;
-      
-}
+        return handlingResult.result as T;
+      }
 
       // If recovery failed, throw enhanced error
       const errorToThrow = handlingResult.finalError ?? safeError;
-      throw this.createEnhancedError?.(
-        errorToThrow,
-        operationName,
-        errorContext
-      );
+      throw this.createEnhancedError(errorToThrow, operationName, errorContext);
     }
   }
 
@@ -252,16 +300,15 @@ export class AutomationErrorHandlerService {
     maxRetries: number = 3,
     backoffMs: number = 1000
   ): () => Promise<T> {
-  return async (): Promise<T> => {
+    return async (): Promise<T> => {
       const recoveryConfig: RecoveryAction = {
-  strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
+        strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
         maxRetries,
         backoffMs,
-        maxBackoffMs: backoffMs * Math.pow?.(2, maxRetries)
-      
-};
+        maxBackoffMs: backoffMs * Math.pow(2, maxRetries)
+      };
 
-      return this.executeWithRecovery?.(
+      return this.executeWithRecovery(
         operation,
         operationName,
         { retryEnabled: true, maxRetries },
@@ -278,19 +325,18 @@ export class AutomationErrorHandlerService {
     threshold: number = 5,
     timeoutMs: number = 60000
   ): CircuitBreaker {
-  const existingBreaker = this.circuitBreakers?.get?.(operationName);
+    const existingBreaker = this.circuitBreakers.get(operationName);
     if (existingBreaker) {
       return existingBreaker;
-    
-}
+    }
 
     const breaker = new CircuitBreaker(operationName, threshold, timeoutMs);
-    this.circuitBreakers?.set?.(operationName, breaker);
+    this.circuitBreakers.set(operationName, breaker);
 
     this.logger.log(`Circuit breaker created for operation: ${operationName}`, {
-  threshold,timeoutMs
-    
-});
+      threshold,
+      timeoutMs
+    });
 
     return breaker;
   }
@@ -299,7 +345,7 @@ export class AutomationErrorHandlerService {
    * Get error statistics and analytics
    */
   getErrorAnalytics(timeRange?: { start: Date; end: Date }): ErrorAnalytics {
-  const startTime = Date.now();
+    const startTime = Date.now();
     const errors = Array.from(this.errorRegistry.values());
 
     // Filter by time range if provided
@@ -320,8 +366,7 @@ export class AutomationErrorHandlerService {
       recommendations: this.generateRecommendations(filteredErrors),
       generatedAt: new Date(),
       processingTime: Date.now() - startTime
-    
-};
+    };
 
     this.logger.log(`Error analytics generated in ${analytics.processingTime}ms`, {
       totalErrors: analytics.totalErrors,
@@ -335,19 +380,19 @@ export class AutomationErrorHandlerService {
    * Clear error history (for maintenance)
    */
   clearErrorHistory(olderThan?: Date): void {
-  const cutoffTime = olderThan ?? new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours default
+    const cutoffTime = olderThan ?? new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours default
 
     let clearedCount = 0;
-    for (const [errorId, error] of this.errorRegistry?.entries?.()) {
-      if ((error as any)?.timestamp < cutoffTime) {
-        this.errorRegistry?.delete?.(errorId);
+    const entries = Array.from(this.errorRegistry.entries());
+    for (const [errorId, error] of entries) {
+      if (error.timestamp < cutoffTime) {
+        this.errorRegistry.delete(errorId);
         clearedCount++;
-      
-}
+      }
     }
 
-    (this.logger as any)?.log?.(`Cleared ${clearedCount} old errors`, {
-      cutoffTime: (cutoffTime as any)?.toISOString?.(),
+    this.logger.log(`Cleared ${clearedCount} old errors`, {
+      cutoffTime: cutoffTime.toISOString(),
       remainingErrors: this.errorRegistry.size
     });
   }
@@ -355,175 +400,164 @@ export class AutomationErrorHandlerService {
   /**
    * Classify error into automation error categories
    */
-  private async classifyError(error: Error | AutomationError,
+  private classifyError(
+    error: Error | AutomationError,
     context: Record<string, unknown>,
     errorId: string
-  ): Promise<AutomationError>  {
-  // If already an AutomationError, return enhanced version
-    if (this.isAutomationError?.(error)) {
+  ): AutomationError {
+    // If already an AutomationError, return enhanced version
+    if (this.isAutomationError(error)) {
       return {
         ...error,
         errorId,
-        context: { ...(error as any)?.context, ...context 
-},
+        context: { ...error.context, ...context },
         timestamp: new Date()
       };
     }
 
     // Classify based on error message and context
-    const category = this.categorizeError?.(error, context);
-    const severity = this.determineSeverity?.(error, category, context);
+    const category = this.categorizeError(error, context);
+    const severity = this.determineSeverity(error, category, context);
 
     return {
-  errorId,
+      errorId,
       category,
       severity,
-      message: (error as any)?.message,
+      message: error.message,
       originalError: error,
       context,
       timestamp: new Date(),
-      operationId: (context as any)?.operationId as string | undefined,
-      userId: (context as any)?.userId as string | undefined,
-      sessionId: (context as any)?.sessionId as string | undefined,
-      stackTrace: (error as any)?.stack,
+      operationId: this.extractString(context.operationId),
+      userId: this.extractString(context.userId),
+      sessionId: this.extractString(context.sessionId),
+      stackTrace: error.stack,
       metadata: {
-  component: ((context as any)?.component as string) ?? 'unknown',
-      method: ((context as any)?.method as string) ?? 'unknown',
-        url: (context as any)?.url as string | undefined,
-        selector: (context as any)?.selector as string | undefined,
-        userAgent: (context as any)?.userAgent as string | undefined,
-        browserVersion: (context as any)?.browserVersion as string | undefined,
-        retryCount: ((context as any)?.retryCount as number) ?? 0,
-        maxRetries: (context as any)?.maxRetries as number | undefined
-      
-}
+        component: this.extractString(context.component) ?? 'unknown',
+        method: this.extractString(context.method) ?? 'unknown',
+        url: this.extractString(context.url),
+        selector: this.extractString(context.selector),
+        userAgent: this.extractString(context.userAgent),
+        browserVersion: this.extractString(context.browserVersion),
+        retryCount: this.extractNumber(context.retryCount) ?? 0,
+        maxRetries: this.extractNumber(context.maxRetries)
+      }
     };
   }
 
   /**
    * Determine appropriate recovery strategy
    */
-  private async determineRecoveryStrategy(error: AutomationError): Promise<RecoveryAction>  {
-  // Check circuit breaker status
-    const circuitBreaker = (this.circuitBreakers as any)?.get?.((error as any)?.metadata.component);
+  private determineRecoveryStrategy(error: AutomationError): RecoveryAction {
+    // Check circuit breaker status
+    const circuitBreaker = this.circuitBreakers.get(error.metadata.component);
     if (circuitBreaker?.isOpen()) {
       return {
-  strategy: RecoveryStrategy.CIRCUIT_BREAKER,
+        strategy: RecoveryStrategy.CIRCUIT_BREAKER,
         maxRetries: 0
-      
-};
+      };
     }
 
     // Strategy based on error category and severity
-    switch ((error as any)?.category) {
-  case AutomationErrorCategory.NETWORK_ERROR:
+    switch (error.category) {
+      case AutomationErrorCategory.NETWORK_ERROR:
         return {
-  strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
+          strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
           maxRetries: 3,
           backoffMs: 1000,
           maxBackoffMs: 8000
-        
-};
+        };
 
       case AutomationErrorCategory.BROWSER_ERROR:
         return {
-  strategy: RecoveryStrategy.RETRY,
+          strategy: RecoveryStrategy.RETRY,
           maxRetries: 2,
           backoffMs: 2000
-        
-};
+        };
 
       case AutomationErrorCategory.FORM_ERROR:
         return {
-  strategy: RecoveryStrategy.FALLBACK,
+          strategy: RecoveryStrategy.FALLBACK,
           maxRetries: 1,
-          fallbackAction: async () => {
+          fallbackAction: () => {
             // Implement fallback form interaction
-            return null;
-          
-}
+            return Promise.resolve(null);
+          }
         };
 
       case AutomationErrorCategory.RATE_LIMIT_ERROR:
         return {
-  strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
+          strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
           maxRetries: 5,
           backoffMs: 5000,
           maxBackoffMs: 60000
-        
-};
+        };
 
       case AutomationErrorCategory.VALIDATION_ERROR:
         return {
-  strategy: RecoveryStrategy.ABORT,
+          strategy: RecoveryStrategy.ABORT,
           maxRetries: 0
-        
-};
+        };
 
       default:
         return {
-  strategy: (error as any)?.severity === ErrorSeverity.CRITICAL
+          strategy: error.severity === ErrorSeverity.CRITICAL
             ? RecoveryStrategy.MANUAL_INTERVENTION
             : RecoveryStrategy.RETRY,
-          maxRetries: (error as any)?.severity === ErrorSeverity.LOW ? 3 : 1,
+          maxRetries: error.severity === ErrorSeverity.LOW ? 3 : 1,
           backoffMs: 1000
-        
-};
+        };
     }
   }
 
   /**
    * Execute recovery strategy
    */
-  private async executeRecovery(error: AutomationError,
+  private async executeRecovery(
+    error: AutomationError,
     recoveryAction: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  const startTime = Date.now();
-    const _retryCount = 0;
+  ): Promise<ErrorHandlingResult> {
+    const startTime = Date.now();
 
-    (this.logger as any)?.log?.(`Executing recovery strategy: ${(recoveryAction as any)?.strategy}`, {
-  errorId: (error as any)?.errorId,
-      maxRetries: (recoveryAction as any)?.maxRetries
-    
-});
+    this.logger.log(`Executing recovery strategy: ${recoveryAction.strategy}`, {
+      errorId: error.errorId,
+      maxRetries: recoveryAction.maxRetries
+    });
 
-    switch ((recoveryAction as any)?.strategy) {
-  case RecoveryStrategy.RETRY:
-        return this.executeRetry?.(error, recoveryAction);
+    switch (recoveryAction.strategy) {
+      case RecoveryStrategy.RETRY:
+        return this.executeRetry(error, recoveryAction);
 
       case RecoveryStrategy.RETRY_WITH_BACKOFF:
-        return this.executeRetryWithBackoff?.(error, recoveryAction);
+        return this.executeRetryWithBackoff(error, recoveryAction);
 
       case RecoveryStrategy.FALLBACK:
-        return this.executeFallback?.(error, recoveryAction);
+        return this.executeFallback(error, recoveryAction);
 
       case RecoveryStrategy.CIRCUIT_BREAKER:
         return {
-  success: false,
+          success: false,
           recovered: false,
           strategy: RecoveryStrategy.CIRCUIT_BREAKER,
           retryCount: 0,
           finalError: error,
           recoveryTime: Date.now() - startTime,
-          metadata: { circuitBreakerOpen: true 
-}
+          metadata: { circuitBreakerOpen: true }
         };
 
       case RecoveryStrategy.GRACEFUL_DEGRADATION:
-        return this.executeGracefulDegradation?.(error, recoveryAction);
+        return this.executeGracefulDegradation(error, recoveryAction);
 
       case RecoveryStrategy.ABORT:
       case RecoveryStrategy.MANUAL_INTERVENTION:
       default:
         return {
-  success: false,
+          success: false,
           recovered: false,
-          strategy: (recoveryAction as any)?.strategy,
+          strategy: recoveryAction.strategy,
           retryCount: 0,
           finalError: error,
           recoveryTime: Date.now() - startTime,
-          metadata: { aborted: true 
-}
+          metadata: { aborted: true }
         };
     }
   }
@@ -531,142 +565,158 @@ export class AutomationErrorHandlerService {
   /**
    * Execute simple retry strategy
    */
-  private async executeRetry(_error: AutomationError,
+  private executeRetry(
+    _error: AutomationError,
     _recoveryAction: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  // Implementation would include actual retry logic
+  ): Promise<ErrorHandlingResult> {
+    // Implementation would include actual retry logic
     // For now, return a mock successful recovery
-    return {
-  success: true,
+    return Promise.resolve({
+      success: true,
       recovered: true,
       strategy: RecoveryStrategy.RETRY,
       retryCount: 1,
       result: null,
       recoveryTime: 100,
-      metadata: { retrySuccessful: true 
-}
-    };
+      metadata: { retrySuccessful: true }
+    });
   }
 
   /**
    * Execute retry with exponential backoff
    */
-  private async executeRetryWithBackoff(_error: AutomationError,
+  private executeRetryWithBackoff(
+    _error: AutomationError,
     _recoveryAction: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  // Implementation would include exponential backoff logic
+  ): Promise<ErrorHandlingResult> {
+    // Implementation would include exponential backoff logic
     // For now, return a mock result
-    return {
-  success: true,
+    return Promise.resolve({
+      success: true,
       recovered: true,
       strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
       retryCount: 2,
       result: null,
       recoveryTime: 250,
-      metadata: { backoffUsed: true 
-}
-    };
+      metadata: { backoffUsed: true }
+    });
   }
 
   /**
    * Execute fallback strategy
    */
-  private async executeFallback(error: AutomationError,
+  private async executeFallback(
+    error: AutomationError,
     recoveryAction: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  if ((recoveryAction as any)?.fallbackAction) {
+  ): Promise<ErrorHandlingResult> {
+    if (recoveryAction.fallbackAction) {
       try {
-        const result = await (recoveryAction as any)?.fallbackAction?.();
+        const result = await recoveryAction.fallbackAction();
         return {
-  success: true,
+          success: true,
           recovered: true,
           strategy: RecoveryStrategy.FALLBACK,
           retryCount: 0,
           result,
           recoveryTime: 150,
-          metadata: { fallbackUsed: true 
-}
+          metadata: { fallbackUsed: true }
         };
-      } catch (_fallbackError: any) {
-  return {
-  success: false,
+      } catch (_fallbackError: unknown) {
+        return {
+          success: false,
           recovered: false,
           strategy: RecoveryStrategy.FALLBACK,
           retryCount: 0,
           finalError: error,
           recoveryTime: 150,
-          metadata: { fallbackFailed: true 
-}
+          metadata: { fallbackFailed: true }
         };
       }
     }
 
     return {
-  success: false,
+      success: false,
       recovered: false,
       strategy: RecoveryStrategy.FALLBACK,
       retryCount: 0,
       finalError: error,
       recoveryTime: 50,
-      metadata: { noFallbackAction: true 
-}
+      metadata: { noFallbackAction: true }
     };
   }
 
   /**
    * Execute graceful degradation
    */
-  private async executeGracefulDegradation(_error: AutomationError,
+  private executeGracefulDegradation(
+    _error: AutomationError,
     _recoveryAction: RecoveryAction
-  ): Promise<ErrorHandlingResult>  {
-  // Provide degraded functionality
-    return {
-  success: true,
+  ): Promise<ErrorHandlingResult> {
+    // Provide degraded functionality
+    return Promise.resolve({
+      success: true,
       recovered: true,
       strategy: RecoveryStrategy.GRACEFUL_DEGRADATION,
       retryCount: 0,
-      result: { degraded: true, limitedFunctionality: true 
-},
+      result: { degraded: true, limitedFunctionality: true },
       recoveryTime: 75,
       metadata: { gracefulDegradation: true }
-    };
+    });
   }
 
   /**
    * Initialize default recovery strategies
    */
   private initializeDefaultRecoveryStrategies(): void {
-  // Register default error patterns and recovery strategies
-    (this.logger as any)?.log?.('Default recovery strategies initialized');
+    // Register default error patterns and recovery strategies
+    this.logger.log('Default recovery strategies initialized');
   }
 
   /**
    * Helper methods for error classification
    */
   private categorizeError(error: Error, context: Record<string, unknown>): AutomationErrorCategory {
-    const message = (error.message as any)?.toLowerCase?.();
+    const message = error.message.toLowerCase();
 
-    if ((message as any)?.includes?.('network') || (message as any)?.includes?.('timeout') || (message as any)?.includes?.('connection')) {
+    if (message.includes('network') || message.includes('timeout') || message.includes('connection')) {
       return AutomationErrorCategory.NETWORK_ERROR;
     }
 
-  if((message as any)?.includes?.('element not found') || (message as any)?.includes?.('selector')) {return AutomationErrorCategory.FORM_ERROR;}
+    if (message.includes('element not found') || message.includes('selector')) {
+      return AutomationErrorCategory.FORM_ERROR;
+    }
 
-  if((message as any)?.includes?.('rate limit') || (message as any)?.includes?.('too many requests')) {return AutomationErrorCategory.RATE_LIMIT_ERROR;}
+    if (message.includes('rate limit') || message.includes('too many requests')) {
+      return AutomationErrorCategory.RATE_LIMIT_ERROR;
+    }
 
-  if((message as any)?.includes?.('validation') || (message as any)?.includes?.('invalid')) {return AutomationErrorCategory.VALIDATION_ERROR;}
+    if (message.includes('validation') || message.includes('invalid')) {
+      return AutomationErrorCategory.VALIDATION_ERROR;
+    }
 
-  if((context as any)?.component === 'form-automation') {return AutomationErrorCategory.FORM_ERROR;}
+    // Context-based categorization
+    const component = this.extractString(context.component);
+    if (component === 'form-automation') {
+      return AutomationErrorCategory.FORM_ERROR;
+    }
 
-  if((context as any)?.component === 'data-extraction') {return AutomationErrorCategory.DATA_EXTRACTION_ERROR;}
+    if (component === 'data-extraction') {
+      return AutomationErrorCategory.DATA_EXTRACTION_ERROR;
+    }
 
-  if((context as any)?.component === 'workflow-automation') {return AutomationErrorCategory.WORKFLOW_ERROR;}
+    if (component === 'workflow-automation') {
+      return AutomationErrorCategory.WORKFLOW_ERROR;
+    }
 
-  if((context as any)?.component === 'file-management') {return AutomationErrorCategory.FILE_OPERATION_ERROR;}
+    if (component === 'file-management') {
+      return AutomationErrorCategory.FILE_OPERATION_ERROR;
+    }
 
-  if((context as any)?.component === 'content-monitoring') {return AutomationErrorCategory.MONITORING_ERROR;}
+    if (component === 'content-monitoring') {
+      return AutomationErrorCategory.MONITORING_ERROR;
+    }
 
-  returnAutomationErrorCategory.UNKNOWN_ERROR;
+    return AutomationErrorCategory.UNKNOWN_ERROR;
   }
 
   private determineSeverity(
@@ -674,148 +724,160 @@ export class AutomationErrorHandlerService {
     category: AutomationErrorCategory,
     _context: Record<string, unknown>
   ): ErrorSeverity {
-  // Critical errors that require immediate attention
+    // Critical errors that require immediate attention
     if (category === AutomationErrorCategory.SYSTEM_ERROR) {
       return ErrorSeverity.CRITICAL;
-    
-}
+    }
 
     // High severity for authentication and validation errors
     if (category === AutomationErrorCategory.AUTHENTICATION_ERROR ||
         category === AutomationErrorCategory.VALIDATION_ERROR) {
-  return ErrorSeverity.HIGH;
-    
-}
+      return ErrorSeverity.HIGH;
+    }
 
     // Medium severity for network and form errors
     if (category === AutomationErrorCategory.NETWORK_ERROR ||
         category === AutomationErrorCategory.FORM_ERROR) {
-  return ErrorSeverity.MEDIUM;
-    
-}
+      return ErrorSeverity.MEDIUM;
+    }
 
     // Default to low severity
     return ErrorSeverity.LOW;
   }
 
   private isAutomationError(error: unknown): error is AutomationError {
-  return error && typeof (error as any)?.errorId === 'string' && typeof (error as any)?.category === 'string';
-  
-}
+    return (
+      error !== null &&
+      typeof error === 'object' &&
+      'errorId' in error &&
+      'category' in error &&
+      typeof (error as AutomationError).errorId === 'string' &&
+      typeof (error as AutomationError).category === 'string'
+    );
+  }
 
-  private createEnhancedError(error: Error | AutomationError, operationName: string, _context: Record<string, unknown>): HttpException {
-    const enhancedMessage = `Operation '${operationName}' failed: ${(error as any)?.message}`;
-if (this.isAutomationError?.(error)) {
-  switch ((error as any)?.severity) {
+  private createEnhancedError(
+    error: Error | AutomationError,
+    operationName: string,
+    _context: Record<string, unknown>
+  ): HttpException {
+    const enhancedMessage = `Operation '${operationName}' failed: ${error.message}`;
+
+    if (this.isAutomationError(error)) {
+      switch (error.severity) {
         case ErrorSeverity.CRITICAL:
-          return new HttpException(enhancedMessage, (HttpStatus as any)?.INTERNAL_SERVER_ERROR);
+          return new HttpException(enhancedMessage, HttpStatus.INTERNAL_SERVER_ERROR);
         case ErrorSeverity.HIGH:
-          return new HttpException(enhancedMessage, (HttpStatus as any)?.BAD_REQUEST);
+          return new HttpException(enhancedMessage, HttpStatus.BAD_REQUEST);
         default:
-          return new HttpException(enhancedMessage, (HttpStatus as any)?.UNPROCESSABLE_ENTITY);
-      
-}
+          return new HttpException(enhancedMessage, HttpStatus.UNPROCESSABLE_ENTITY);
+      }
     }
 
-    return new HttpException(enhancedMessage, (HttpStatus as any)?.INTERNAL_SERVER_ERROR);
+    return new HttpException(enhancedMessage, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   private generateErrorId(): string {
-    return `error_${Date.now()}_${Math.random?.().toString(36).substring(2, 11)}`;
+    return `error_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private generateOperationId(): string {
-    return `op_${Date.now()}_${Math.random?.().toString(36).substring(2, 11)}`;
+    return `op_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  // Analytics helper methods (simplified implementations)
+  // Type-safe utility methods
+  private extractString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  private extractNumber(value: unknown): number | undefined {
+    return typeof value === 'number' ? value : undefined;
+  }
+
+  // Analytics helper methods
   private groupErrorsByCategory(errors: AutomationError[]): Record<string, number> {
-  return (errors as any)?.reduce?.((acc, error) => {
-      acc[(error as any)?.category] = (acc[(error as any)?.category] ?? 0) + 1;
+    return errors.reduce((acc, error) => {
+      acc[error.category] = (acc[error.category] ?? 0) + 1;
       return acc;
-    
-}, {} as Record<string, number>);
+    }, {} as Record<string, number>);
   }
 
   private groupErrorsBySeverity(errors: AutomationError[]): Record<string, number> {
-  return (errors as any)?.reduce?.((acc, error) => {
-      acc[(error as any)?.severity] = (acc[(error as any)?.severity] ?? 0) + 1;
+    return errors.reduce((acc, error) => {
+      acc[error.severity] = (acc[error.severity] ?? 0) + 1;
       return acc;
-    
-}, {} as Record<string, number>);
+    }, {} as Record<string, number>);
   }
 
   private groupErrorsByComponent(errors: AutomationError[]): Record<string, number> {
-  return (errors as any)?.reduce?.((acc, error) => {
-      const component = (error as any)?.metadata.component;
+    return errors.reduce((acc, error) => {
+      const component = error.metadata.component;
       acc[component] = (acc[component] ?? 0) + 1;
       return acc;
-    
-}, {} as Record<string, number>);
+    }, {} as Record<string, number>);
   }
 
   private getTopErrorMessages(errors: AutomationError[]): Array<{ message: string; count: number }> {
-  const messageCounts = (errors as any)?.reduce?.((acc, error) => {
-      acc[(error as any)?.message] = (acc[(error as any)?.message] ?? 0) + 1;
+    const messageCounts = errors.reduce((acc, error) => {
+      acc[error.message] = (acc[error.message] ?? 0) + 1;
       return acc;
-    
-}, {} as Record<string, number>);
+    }, {} as Record<string, number>);
 
-    return Object.entries?.(messageCounts)
+    return Object.entries(messageCounts)
       .map(([message, count]) => ({ message, count }))
-      .sort((a, b) => (b as any)?.count - (a as any)?.count)
+      .sort((a, b) => b.count - a.count)
       .slice(0, 10);
   }
 
   private calculateRecoverySuccessRate(_errors: AutomationError[]): number {
-  // Mock implementation
+    // Mock implementation
     return 85.5;
-  
-}
+  }
 
   private calculateAverageRecoveryTime(): number {
-  // Mock implementation
+    // Mock implementation
     return 1250;
-  
-}
+  }
 
   private getCircuitBreakerStatus(): Array<{ component: string; status: string; failures: number }> {
-    return Array.from?.((this.circuitBreakers as any)?.entries?.()).map(([component, breaker]) => ({
+    return Array.from(this.circuitBreakers.entries()).map(([component, breaker]) => ({
       component,
-      status: (breaker as any)?.getStatus?.(),
-      failures: (breaker as any)?.getFailureCount?.()
-    
-}));
+      status: breaker.getStatus(),
+      failures: breaker.getFailureCount()
+    }));
   }
 
   private calculateErrorTrends(errors: AutomationError[]): {
-  last24Hours: number;
+    last24Hours: number;
     previousPeriod: number;
     trend: string;
-  
-} {
-  // Mock implementation for error trends
+  } {
+    // Mock implementation for error trends
     return {
-  last24Hours: (errors as any)?.filter?.(e => (e as any)?.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
-      previousPeriod: Math.floor?.(Math.random?.() * 50),
+      last24Hours: errors.filter(e => e.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
+      previousPeriod: Math.floor(Math.random() * 50),
       trend: 'decreasing'
-};}
+    };
+  }
 
   private generateRecommendations(errors: AutomationError[]): string[] {
-  const recommendations: string[] = [];
+    const recommendations: string[] = [];
 
-    const categoryStats = this.groupErrorsByCategory?.(errors);
+    const categoryStats = this.groupErrorsByCategory(errors);
 
     if (categoryStats[AutomationErrorCategory.NETWORK_ERROR] > 10) {
-      (recommendations as any)?.push?.('Consider implementing connection pooling and timeout optimization');
-}
+      recommendations.push('Consider implementing connection pooling and timeout optimization');
+    }
 
-  if(categoryStats[AutomationErrorCategory.FORM_ERROR] > 5) {
-      (recommendations as any)?.push?.('Review form selectors and add fallback strategies');}
+    if (categoryStats[AutomationErrorCategory.FORM_ERROR] > 5) {
+      recommendations.push('Review form selectors and add fallback strategies');
+    }
 
-  if((recommendations as any)?.length === 0) {
-      (recommendations as any)?.push?.('Error patterns are within normal ranges');}
-return recommendations;
+    if (recommendations.length === 0) {
+      recommendations.push('Error patterns are within normal ranges');
+    }
+
+    return recommendations;
   }
 }
 
@@ -826,15 +888,16 @@ class CircuitBreaker {
   private failureCount: number = 0;
   private lastFailureTime?: Date;
   private state: 'closed' | 'open' | 'half-open' = 'closed';
-constructor(private readonly operationName: string,
+
+  constructor(
+    private readonly operationName: string,
     private readonly threshold: number,
     private readonly timeoutMs: number
-  ) {
-}
+  ) {}
 
   isOpen(): boolean {
     if (this.state === 'open') {
-      if (this.lastFailureTime && Date.now() - (this.lastFailureTime as any)?.getTime?.() > this.timeoutMs) {
+      if (this.lastFailureTime && Date.now() - this.lastFailureTime.getTime() > this.timeoutMs) {
         this.state = 'half-open';
         return false;
       }
@@ -844,14 +907,12 @@ constructor(private readonly operationName: string,
   }
 
   recordSuccess(): void {
-  this.failureCount = 0;
+    this.failureCount = 0;
     this.state = 'closed';
-}
+  }
 
   recordFailure(): void {
-    if (this.failureCount !== undefined) {
-      (this as any).failureCount += 1;
-    }
+    this.failureCount += 1;
     this.lastFailureTime = new Date();
 
     if (this.failureCount >= this.threshold) {
@@ -860,52 +921,10 @@ constructor(private readonly operationName: string,
   }
 
   getStatus(): string {
-  return this.state;
-  
-}
+    return this.state;
+  }
 
   getFailureCount(): number {
-  return this.failureCount;
-  
-}
-}
-
-/**
- * Supporting interfaces and types
- */
-interface ErrorPattern {
-  pattern: RegExp;
-  category: AutomationErrorCategory;
-  severity: ErrorSeverity;
-  recoveryStrategy: RecoveryStrategy;
-
-
-}
-
-interface RecoveryAttempt {
-  timestamp: Date;
-  strategy: RecoveryStrategy;
-  success: boolean;
-  duration: number;
-
-
-};
-
-export interface ErrorAnalytics {
-  totalErrors: number;
-  errorsByCategory: Record<string, number>;
-  errorsBySeverity: Record<string, number>;
-  errorsByComponent: Record<string, number>;
-  topErrorMessages: Array<{ message: string; count: number }>;
-  recoverySuccessRate: number;
-  averageRecoveryTime: number;
-  circuitBreakerStatus: Array<{ component: string; status: string; failures: number }>;
-  errorTrends: {
-    last24Hours: number;
-    previousPeriod: number;
-    trend: string;
-  };
-  recommendations: string[];
-  generatedAt: Date;
-  processingTime: number;
+    return this.failureCount;
+  }
 }

@@ -50,8 +50,31 @@ export interface RemediationPlan {
   readonly milestones: string[];
 }
 
-// Import shared interfaces from parlant.types.ts
-import { TimelinePhase, Milestone, TimelineDependency } from './parlant.types';
+// Define required interfaces directly to avoid circular imports
+export interface TimelinePhase {
+  readonly phaseId: string;
+  readonly name: string;
+  readonly startDate: Date;
+  readonly endDate: Date;
+  readonly status: string;
+  readonly deliverables: string[];
+}
+
+export interface Milestone {
+  readonly milestoneId: string;
+  readonly name: string;
+  readonly date: Date;
+  readonly status: string;
+  readonly dependencies: string[];
+}
+
+export interface TimelineDependency {
+  readonly dependencyId: string;
+  readonly fromTask: string;
+  readonly toTask: string;
+  readonly type: string;
+  readonly lag: number;
+}
 
 export interface RemediationTimeline {
   readonly timelineId: string;
@@ -1210,6 +1233,595 @@ export interface RollbackTrigger {
   readonly threshold: number;
   readonly duration: number;
   readonly action: 'AUTOMATIC' | 'MANUAL' | 'ALERT';
+}
+
+// =============================================================================
+// Missing Type Definitions for Parlant Compliance Types
+// =============================================================================
+
+export interface CalibrationStandard {
+  readonly standardId: string;
+  readonly name: string;
+  readonly version: string;
+  readonly uncertainty: number;
+  readonly traceability: string[];
+}
+
+export interface CalibrationProcedure {
+  readonly procedureId: string;
+  readonly steps: string[];
+  readonly equipment: string[];
+  readonly conditions: string[];
+  readonly acceptance: string[];
+}
+
+export interface CalibrationResult {
+  readonly resultId: string;
+  readonly measurements: number[];
+  readonly deviations: number[];
+  readonly uncertainty: number;
+  readonly status: 'PASS' | 'FAIL' | 'CONDITIONAL';
+}
+
+export interface CalibrationCertification {
+  readonly certificateId: string;
+  readonly issuer: string;
+  readonly validUntil: Date;
+  readonly scope: string[];
+  readonly limitations: string[];
+}
+
+export interface CalibrationStatus {
+  readonly status: 'CURRENT' | 'DUE' | 'OVERDUE' | 'INVALID';
+  readonly lastCalibration: Date;
+  readonly nextDue: Date;
+  readonly alertsEnabled: boolean;
+}
+
+export interface LimitationType {
+  readonly type: 'TECHNICAL' | 'FUNCTIONAL' | 'OPERATIONAL' | 'ENVIRONMENTAL';
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly category: string;
+}
+
+export interface LimitationImpact {
+  readonly impactId: string;
+  readonly description: string;
+  readonly affected: string[];
+  readonly severity: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'CRITICAL';
+  readonly mitigation: string[];
+}
+
+export interface WorkaroundProcedure {
+  readonly procedureId: string;
+  readonly steps: string[];
+  readonly conditions: string[];
+  readonly effectiveness: number;
+  readonly risks: string[];
+}
+
+export interface AlternativeTool {
+  readonly toolId: string;
+  readonly name: string;
+  readonly capabilities: string[];
+  readonly advantages: string[];
+  readonly disadvantages: string[];
+}
+
+export interface MitigationStrategy {
+  readonly strategyId: string;
+  readonly approach: string;
+  readonly actions: string[];
+  readonly timeline: number;
+  readonly effectiveness: number;
+}
+
+export interface LimitationDocumentation {
+  readonly documentId: string;
+  readonly description: string;
+  readonly impact: string;
+  readonly workarounds: string[];
+  readonly alternatives: string[];
+}
+
+export interface CompletenessScope {
+  readonly scopeId: string;
+  readonly areas: string[];
+  readonly criteria: string[];
+  readonly measurements: string[];
+  readonly targets: number[];
+}
+
+export interface CoverageAnalysis {
+  readonly analysisId: string;
+  readonly coverage: number;
+  readonly gaps: string[];
+  readonly recommendations: string[];
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+export interface IdentifiedGap {
+  readonly gapId: string;
+  readonly description: string;
+  readonly impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly recommendation: string;
+  readonly effort: number;
+}
+
+export interface CompletenessAssessment {
+  readonly assessmentId: string;
+  readonly score: number;
+  readonly criteria: string[];
+  readonly gaps: IdentifiedGap[];
+  readonly improvement: string[];
+}
+
+export interface ImprovementRecommendation {
+  readonly recommendationId: string;
+  readonly description: string;
+  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly effort: number;
+  readonly benefit: number;
+}
+
+export interface CompletenessValidation {
+  readonly validationId: string;
+  readonly criteria: string[];
+  readonly results: boolean[];
+  readonly score: number;
+  readonly certification: boolean;
+}
+
+export interface CompletenessReporting {
+  readonly reportId: string;
+  readonly format: string[];
+  readonly frequency: string;
+  readonly recipients: string[];
+  readonly automation: boolean;
+}
+
+export interface AccuracyMethod {
+  readonly methodId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly procedure: string[];
+  readonly validation: string[];
+}
+
+export interface AccuracyBaseline {
+  readonly baselineId: string;
+  readonly reference: string;
+  readonly measurements: number[];
+  readonly confidence: number;
+  readonly date: Date;
+}
+
+export interface AccuracyMeasurement {
+  readonly measurementId: string;
+  readonly value: number;
+  readonly uncertainty: number;
+  readonly method: string;
+  readonly timestamp: Date;
+}
+
+export interface AccuracyValidation {
+  readonly validationId: string;
+  readonly criteria: number;
+  readonly result: boolean;
+  readonly deviation: number;
+  readonly acceptable: boolean;
+}
+
+export interface AccuracyBenchmark {
+  readonly benchmarkId: string;
+  readonly industry: string;
+  readonly target: number;
+  readonly bestPractice: number;
+  readonly source: string;
+}
+
+export interface AccuracyTrend {
+  readonly trendId: string;
+  readonly direction: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  readonly rate: number;
+  readonly period: number;
+  readonly projection: number;
+}
+
+export interface AccuracyImprovement {
+  readonly improvementId: string;
+  readonly action: string;
+  readonly expected: number;
+  readonly timeline: number;
+  readonly resources: string[];
+}
+
+// Add all the remaining missing types for Reliability, Timeliness, Integrity, Authenticity, etc.
+export interface ReliabilityDimension {
+  readonly dimensionId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly metrics: string[];
+  readonly weight: number;
+}
+
+export interface ReliabilityMeasurement {
+  readonly measurementId: string;
+  readonly availability: number;
+  readonly consistency: number;
+  readonly accuracy: number;
+  readonly completeness: number;
+}
+
+export interface ReliabilityFactor {
+  readonly factorId: string;
+  readonly name: string;
+  readonly impact: number;
+  readonly controllable: boolean;
+  readonly mitigation: string[];
+}
+
+export interface ReliabilityAssessment {
+  readonly assessmentId: string;
+  readonly score: number;
+  readonly factors: ReliabilityFactor[];
+  readonly recommendations: string[];
+  readonly targets: number[];
+}
+
+export interface ReliabilityMonitoring {
+  readonly monitoringId: string;
+  readonly metrics: string[];
+  readonly thresholds: number[];
+  readonly alerts: string[];
+  readonly automation: boolean;
+}
+
+export interface ReliabilityImprovement {
+  readonly improvementId: string;
+  readonly action: string;
+  readonly expected: number;
+  readonly timeline: number;
+  readonly cost: number;
+}
+
+export interface ReliabilityReporting {
+  readonly reportId: string;
+  readonly frequency: string;
+  readonly format: string[];
+  readonly recipients: string[];
+  readonly automation: boolean;
+}
+
+// Timeliness Metrics Types
+export interface TimelinessRequirement {
+  readonly requirementId: string;
+  readonly description: string;
+  readonly target: number;
+  readonly tolerance: number;
+  readonly critical: boolean;
+}
+
+export interface TimelinessMeasurement {
+  readonly measurementId: string;
+  readonly actual: number;
+  readonly target: number;
+  readonly variance: number;
+  readonly acceptable: boolean;
+}
+
+export interface TimelinessPerformance {
+  readonly performanceId: string;
+  readonly period: string;
+  readonly average: number;
+  readonly percentile95: number;
+  readonly compliance: number;
+}
+
+export interface TimelinessFactor {
+  readonly factorId: string;
+  readonly name: string;
+  readonly impact: number;
+  readonly frequency: number;
+  readonly mitigation: string[];
+}
+
+export interface TimelinessImprovement {
+  readonly improvementId: string;
+  readonly action: string;
+  readonly expectedGain: number;
+  readonly investment: number;
+  readonly timeline: number;
+}
+
+export interface TimelinessMonitoring {
+  readonly monitoringId: string;
+  readonly realTime: boolean;
+  readonly alerts: string[];
+  readonly dashboards: string[];
+  readonly automation: boolean;
+}
+
+export interface TimelinessReporting {
+  readonly reportId: string;
+  readonly frequency: string;
+  readonly format: string[];
+  readonly recipients: string[];
+  readonly sla: boolean;
+}
+
+// Integrity Metrics Types
+export interface IntegrityVerification {
+  readonly verificationId: string;
+  readonly method: string;
+  readonly frequency: string;
+  readonly scope: string[];
+  readonly automation: boolean;
+}
+
+export interface IntegrityMonitoring {
+  readonly monitoringId: string;
+  readonly continuous: boolean;
+  readonly checks: string[];
+  readonly alerts: string[];
+  readonly response: string[];
+}
+
+export interface IntegrityViolation {
+  readonly violationId: string;
+  readonly type: string;
+  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly detected: Date;
+  readonly impact: string[];
+}
+
+export interface IntegrityProtection {
+  readonly protectionId: string;
+  readonly mechanisms: string[];
+  readonly coverage: number;
+  readonly effectiveness: number;
+  readonly testing: string[];
+}
+
+export interface IntegrityRestoration {
+  readonly restorationId: string;
+  readonly procedures: string[];
+  readonly timeline: number;
+  readonly validation: string[];
+  readonly certification: boolean;
+}
+
+export interface IntegrityAssessment {
+  readonly assessmentId: string;
+  readonly score: number;
+  readonly risks: string[];
+  readonly controls: string[];
+  readonly recommendations: string[];
+}
+
+export interface IntegrityReporting {
+  readonly reportId: string;
+  readonly frequency: string;
+  readonly scope: string[];
+  readonly recipients: string[];
+  readonly compliance: boolean;
+}
+
+// Authenticity Metrics Types
+export interface AuthenticityVerification {
+  readonly verificationId: string;
+  readonly methods: string[];
+  readonly confidence: number;
+  readonly automation: boolean;
+  readonly fallback: string[];
+}
+
+export interface AuthenticationMethod {
+  readonly methodId: string;
+  readonly type: string;
+  readonly strength: number;
+  readonly reliability: number;
+  readonly implementation: string[];
+}
+
+export interface Authenticitycertificate {
+  readonly certificateId: string;
+  readonly issuer: string;
+  readonly subject: string;
+  readonly validFrom: Date;
+  readonly validTo: Date;
+}
+
+export interface AuthenticityValidation {
+  readonly validationId: string;
+  readonly criteria: string[];
+  readonly result: boolean;
+  readonly confidence: number;
+  readonly evidence: string[];
+}
+
+export interface AuthenticityChallenge {
+  readonly challengeId: string;
+  readonly type: string;
+  readonly difficulty: number;
+  readonly success: boolean;
+  readonly response: string;
+}
+
+export interface AuthenticityMonitoring {
+  readonly monitoringId: string;
+  readonly continuous: boolean;
+  readonly sampling: number;
+  readonly alerts: string[];
+  readonly escalation: string[];
+}
+
+export interface AuthenticityReporting {
+  readonly reportId: string;
+  readonly frequency: string;
+  readonly format: string[];
+  readonly compliance: boolean;
+  readonly stakeholders: string[];
+}
+
+// Auditability Metrics Types
+export interface AuditCoverage {
+  readonly coverageId: string;
+  readonly scope: string[];
+  readonly percentage: number;
+  readonly gaps: string[];
+  readonly recommendations: string[];
+}
+
+export interface AuditTrail {
+  readonly trailId: string;
+  readonly events: string[];
+  readonly integrity: boolean;
+  readonly searchable: boolean;
+  readonly retention: number;
+}
+
+export interface AuditDocumentation {
+  readonly documentationId: string;
+  readonly complete: boolean;
+  readonly quality: number;
+  readonly accessible: boolean;
+  readonly current: boolean;
+}
+
+export interface AuditAccessibility {
+  readonly accessibilityId: string;
+  readonly authorized: string[];
+  readonly restrictions: string[];
+  readonly controls: string[];
+  readonly monitoring: boolean;
+}
+
+export interface AuditRetention {
+  readonly retentionId: string;
+  readonly period: number;
+  readonly policy: string;
+  readonly compliance: boolean;
+  readonly disposal: string[];
+}
+
+export interface AuditQuality {
+  readonly qualityId: string;
+  readonly accuracy: number;
+  readonly completeness: number;
+  readonly consistency: number;
+  readonly timeliness: number;
+}
+
+export interface AuditCompliance {
+  readonly complianceId: string;
+  readonly frameworks: string[];
+  readonly requirements: string[];
+  readonly gaps: string[];
+  readonly certification: boolean;
+}
+
+// Additional missing types for parlant.types.ts
+export interface ComplianceRequirement {
+  readonly requirementId: string;
+  readonly description: string;
+  readonly mandatory: boolean;
+  readonly framework: string;
+  readonly controls: string[];
+}
+
+export interface ComplianceAssessment {
+  readonly assessmentId: string;
+  readonly type: string;
+  readonly scope: string[];
+  readonly findings: string[];
+  readonly score: number;
+}
+
+export interface RegulatoryNotification {
+  readonly notificationId: string;
+  readonly type: string;
+  readonly jurisdiction: string;
+  readonly requirements: string[];
+  readonly deadline: Date;
+}
+
+export interface NotificationTimeline {
+  readonly timelineId: string;
+  readonly events: string[];
+  readonly deadlines: Date[];
+  readonly reminders: string[];
+}
+
+export interface RequiredAction {
+  readonly actionId: string;
+  readonly description: string;
+  readonly responsible: string;
+  readonly deadline: Date;
+  readonly status: string;
+}
+
+export interface CustodyAction {
+  readonly actionId: string;
+  readonly type: string;
+  readonly performed: Date;
+  readonly responsible: string;
+  readonly evidence: string[];
+}
+
+export interface PreservationOrder {
+  readonly orderId: string;
+  readonly issuer: string;
+  readonly scope: string[];
+  readonly effective: Date;
+  readonly requirements: string[];
+}
+
+export interface RetentionSchedule {
+  readonly scheduleId: string;
+  readonly policy: string;
+  readonly periods: number[];
+  readonly triggers: string[];
+  readonly exceptions: string[];
+}
+
+export interface StorageRequirement {
+  readonly requirementId: string;
+  readonly type: string;
+  readonly conditions: string[];
+  readonly location: string;
+  readonly encryption: boolean;
+}
+
+export interface EnvironmentalControl {
+  readonly controlId: string;
+  readonly temperature: number;
+  readonly humidity: number;
+  readonly access: string[];
+  readonly monitoring: boolean;
+}
+
+export interface BackupStrategy {
+  readonly strategyId: string;
+  readonly frequency: string;
+  readonly locations: string[];
+  readonly encryption: boolean;
+  readonly testing: string[];
+}
+
+export interface MigrationPlan {
+  readonly planId: string;
+  readonly phases: string[];
+  readonly timeline: number;
+  readonly risks: string[];
+  readonly validation: string[];
+}
+
+export interface ConfidentialityLevel {
+  readonly level: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  readonly description: string;
+  readonly handling: string[];
+  readonly access: string[];
 }
 
 // Note: All types are already exported when declared above

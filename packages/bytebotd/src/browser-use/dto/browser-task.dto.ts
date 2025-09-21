@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -9,23 +11,57 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsStr
   ValidateNested,
   Min,
   Max,
-} from 'class-validator';import { Type } from 'class-transformer';/*** Browser task execution priorities
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+/**
+ * Browser task execution priorities
  */
 export enum BrowserTaskPriority {
-  LOW = 'low',NORMAL = 'normal',HIGH = 'high',CRITICAL = 'critical',}/**
+  LOW = 'low',
+  NORMAL = 'normal',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
  * Browser task execution status
  */
 export enum BrowserTaskStatus {
-  PENDING = 'pending',RUNNING = 'running',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',}/**
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  TIMEOUT = 'timeout',
+}
+
+/**
  * Browser automation action types
  */
 export enum BrowserActionType {
-  NAVIGATE = 'navigate',CLICK = 'click',TYPE = 'type',SCROLL = 'scroll',SCREENSHOT = 'screenshot',EXTRACT_TEXT = 'extract_text',EXTRACT_DATA = 'extract_data',FILL_FORM = 'fill_form',SUBMIT_FORM = 'submit_form',WAIT_FOR_ELEMENT = 'wait_for_element',WAIT_FOR_URL = 'wait_for_url',CUSTOM = 'custom',}/**
+  NAVIGATE = 'navigate',
+  CLICK = 'click',
+  TYPE = 'type',
+  SCROLL = 'scroll',
+  SCREENSHOT = 'screenshot',
+  EXTRACT_TEXT = 'extract_text',
+  EXTRACT_DATA = 'extract_data',
+  FILL_FORM = 'fill_form',
+  SUBMIT_FORM = 'submit_form',
+  WAIT_FOR_ELEMENT = 'wait_for_element',
+  WAIT_FOR_URL = 'wait_for_url',
+  CUSTOM = 'custom',
+}
+
+/**
  * Browser session configuration
  */
 export class BrowserSessionConfigDto {
   @ApiPropertyOptional({
-    description: 'Browser viewport width',minimum: 320,maximum: 3840,
+    description: 'Browser viewport width',
+    minimum: 320,
+    maximum: 3840,
     default: 1920,
   })
   @IsOptional()
@@ -35,7 +71,9 @@ export class BrowserSessionConfigDto {
   viewportWidth?: number = 1920;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport height',minimum: 240,maximum: 2160,
+    description: 'Browser viewport height',
+    minimum: 240,
+    maximum: 2160,
     default: 1080,
   })
   @IsOptional()
@@ -45,7 +83,13 @@ export class BrowserSessionConfigDto {
   viewportHeight?: number = 1080;
 
   @ApiPropertyOptional({
-    description: 'Browser viewport configuration',type: 'object',properties: {width: { type: 'number', minimum: 320, maximum: 3840 },height: { type: 'number', minimum: 240, maximum: 2160 },},})
+    description: 'Browser viewport configuration',
+    type: 'object',
+    properties: {
+      width: { type: 'number', minimum: 320, maximum: 3840 },
+      height: { type: 'number', minimum: 240, maximum: 2160 },
+    },
+  })
   @IsOptional()
   @IsObject()
   viewport?: {
@@ -159,9 +203,23 @@ export class BrowserActionDto {
  */
 export class CreateBrowserTaskDto {
   @ApiProperty({
-    description: 'Descriptive _name for the browser task',example: 'Extract product information from e-commerce site',})@IsString()
-  name: string = '';@ApiProperty({description: 'Detailed task description or instructions',example: 'Navigate to product page, extract _name, price, and description',})@IsString()
-  description: string = '';@ApiProperty({description: 'Array of browser actions to execute sequentially',type: [BrowserActionDto],})
+    description: 'Descriptive name for the browser task',
+    example: 'Extract product information from e-commerce site',
+  })
+  @IsString()
+  name: string = '';
+
+  @ApiProperty({
+    description: 'Detailed task description or instructions',
+    example: 'Navigate to product page, extract name, price, and description',
+  })
+  @IsString()
+  description: string = '';
+
+  @ApiProperty({
+    description: 'Array of browser actions to execute sequentially',
+    type: [BrowserActionDto],
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BrowserActionDto)

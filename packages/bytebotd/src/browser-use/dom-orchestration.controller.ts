@@ -82,11 +82,16 @@ import type {
   ParlantOrchestrationRequest,
   ParlantOrchestrationResult,
   OrchestrationUserContext,
-} from '../../orchestrator/src/services/parlant-orchestrator.service';import type {OrchestrationTask,
+} from '../../orchestrator/src/services/parlant-orchestrator.service';
+import type {
+  OrchestrationTask,
   OrchestrationPriority,
   WorkflowStep,
   WorkflowStepType,
-} from '../../orchestrator/src/types/orchestrator.types';// Form automation typesimport {
+} from '../../orchestrator/src/types/orchestrator.types';
+
+// Form automation types
+import {
   FormFieldDto,
   FormAutomationConfigDto,
   FormActionType,
@@ -645,7 +650,11 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
     try {
       // Create validation steps for each form
       const validationSteps: DOMOrchestrationStepDto[] = validationDto.formSelectors.map((formSelector, index) => ({
-        stepId: `validation_${index}_${formSelector.replace(/[^a-zA-Z0-9]/g, '_')}',name: `Validate Form: ${formSelector}`,description: `Validate form ${formSelector} according to specified rules`,actionType: FormActionType.VALIDATE_FORM,sessionId: validationDto.sessionIds[index % validationDto.sessionIds.length],
+        stepId: `validation_${index}_${formSelector.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        name: `Validate Form: ${formSelector}`,
+        description: `Validate form ${formSelector} according to specified rules`,
+        actionType: FormActionType.VALIDATE_FORM,
+        sessionId: validationDto.sessionIds[index % validationDto.sessionIds.length],
         formSelector,
         validationScope: ValidationScope.FORM_LEVEL,
         timeoutMs: 30000,
@@ -719,7 +728,11 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
       for (const action of coordinationDto.actions) {
         for (const elementSelector of coordinationDto.elementSelectors) {
           coordinationSteps.push({
-            stepId: `coord_${stepIndex}_${action}_${elementSelector.replace(/[^a-zA-Z0-9]/g, '_')}',name: `${action}: ${elementSelector}`,description: `Execute ${action} for element ${elementSelector}`,actionType: this.mapCoordinationActionToFormAction(action),sessionId: coordinationDto.sessionIds[stepIndex % coordinationDto.sessionIds.length],
+            stepId: `coord_${stepIndex}_${action}_${elementSelector.replace(/[^a-zA-Z0-9]/g, '_')}`,
+            name: `${action}: ${elementSelector}`,
+            description: `Execute ${action} for element ${elementSelector}`,
+            actionType: this.mapCoordinationActionToFormAction(action),
+            sessionId: coordinationDto.sessionIds[stepIndex % coordinationDto.sessionIds.length],
             formSelector: elementSelector,
             validationScope: ValidationScope.SESSION_LEVEL,
             timeoutMs: coordinationDto.coordination.coordinationTimeoutMs || 30000,
@@ -935,10 +948,17 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
       },
       parlantValidation: {
         enabled: true,
-        approvalLevel: 'HUMAN_REVIEW' as any,validationRules: [],timeoutMs: 30000,
+        approvalLevel: 'HUMAN_REVIEW' as any,
+        validationRules: [],
+        timeoutMs: 30000,
       },
       condition: step.conditions ? {
-        expression: 'true', // Simplified - would need proper condition parsingvariables: step.conditions,onTrue: 'continue',onFalse: 'skip',} : undefined,}));
+        expression: 'true', // Simplified - would need proper condition parsing
+        variables: step.conditions,
+        onTrue: 'continue',
+        onFalse: 'skip',
+      } : undefined,
+    }));
 
     return {
       taskId: workflow.workflowId,
@@ -962,7 +982,13 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
       },
       complianceRequirements: {
         frameworks: [{
-          name: 'GDPR',version: '2018',level: 'standard',requirements: ['data_protection', 'user_consent'],}],dataClassification: 'internal',auditingLevel: 'detailed',
+          name: 'GDPR',
+          version: '2018',
+          level: 'standard',
+          requirements: ['data_protection', 'user_consent'],
+        }],
+        dataClassification: 'internal',
+        auditingLevel: 'detailed',
         retentionDays: 90,
       },
     };
@@ -983,7 +1009,10 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
         conversationContext: {
           userId: user.id,
           sessionId: `workflow_${workflowId}`,
-          roles: user.roles || ['user'],ipAddress: 'unknown',metadata: { workflowId },},
+          roles: user.roles || ['user'],
+          ipAddress: 'unknown',
+          metadata: { workflowId },
+        },
         userContext: {
           userId: user.id,
           roles: user.roles || ['user'],
@@ -1034,7 +1063,9 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
 
       this.updateWorkflowStatus(workflowId, WorkflowStatus.FAILED, {
         error: {
-          code: 'EXECUTION_ERROR',message: error instanceof Error ? error.message : String(error),details: error,
+          code: 'EXECUTION_ERROR',
+          message: error instanceof Error ? error.message : String(error),
+          details: error,
         },
       });
     }
@@ -1113,8 +1144,15 @@ export class WorkflowExecutionResultDto extends WorkflowProgressDto {
   }
 
   private mapCoordinationActionToFormAction(
-    action: 'sync_state' | 'update_values' | 'trigger_events' | 'validate_consistency'): FormActionType {switch (action) {
-      case 'sync_state':case 'update_values':return FormActionType.FILL_FORM;case 'trigger_events':return FormActionType.SUBMIT_FORM;case 'validate_consistency':
+    action: 'sync_state' | 'update_values' | 'trigger_events' | 'validate_consistency'
+  ): FormActionType {
+    switch (action) {
+      case 'sync_state':
+      case 'update_values':
+        return FormActionType.FILL_FORM;
+      case 'trigger_events':
+        return FormActionType.SUBMIT_FORM;
+      case 'validate_consistency':
         return FormActionType.VALIDATE_FORM;
       default:
         return FormActionType.FILL_FORM;
