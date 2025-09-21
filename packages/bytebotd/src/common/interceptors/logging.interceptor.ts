@@ -125,7 +125,11 @@ export class LoggingInterceptor implements NestInterceptor {
     const correlationId = this.generateCorrelationId(request);
 
     // Add correlation ID to request headers for downstream services
-    request.headers['x-correlation-id'] = correlationId;response.setHeader('X-Correlation-ID', correlationId);// Create request contextconst requestContext = this.createRequestContext(request, correlationId);
+    request.headers['x-correlation-id'] = correlationId;
+    response.setHeader('X-Correlation-ID', correlationId);
+
+    // Create request context
+    const requestContext: RequestContext = this.createRequestContext(request, correlationId);
 
     const startTime = Date.now();
     const route = this.extractRoute(request);

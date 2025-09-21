@@ -178,11 +178,11 @@ ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
     // Check cache first if caching is enabled
     if (
       this.config.enableQueryCaching &&
-      this.isCacheableOperation(dbOperation)
+      this.isCacheableOperation(dbOperation as DatabaseOperation)
     ) {
   return this.handleCachedDatabaseOperation(
         operationId,
-        dbOperation,
+        dbOperation as DatabaseOperation,
         startTime,
         next,
       );
@@ -191,7 +191,7 @@ ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
 
     return this.handleDatabaseOperation(
       operationId,
-      dbOperation,
+      dbOperation as DatabaseOperation,
       startTime,
       next,
     );

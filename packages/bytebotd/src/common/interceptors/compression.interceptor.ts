@@ -33,9 +33,10 @@ import { gzip, brotliCompress, deflate, constants as zlibConstants } from 'zlib'
 import { promisify } from 'util';
 import { MetricsService } from '../../metrics/metrics.service';
 
-// Promisify compression functionsconst gzipAsync = promisify(gzip);
-const brotliCompressAsync = promisify(brotliCompress);
-const deflateAsync = promisify(deflate);
+// Promisify compression functions
+const gzipAsync = promisify(gzip) as (buffer: Buffer, options?: { level?: number }) => Promise<Buffer>;
+const brotliCompressAsync = promisify(brotliCompress) as (buffer: Buffer, options?: { params?: Record<number, number> }) => Promise<Buffer>;
+const deflateAsync = promisify(deflate) as (buffer: Buffer, options?: { level?: number }) => Promise<Buffer>;
 
 /**
  * Compression algorithm types

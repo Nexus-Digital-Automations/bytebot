@@ -165,7 +165,7 @@ export class ErrorAnalyticsController {
       }
     }
   })
-  async getErrorAnalytics(
+  getErrorAnalytics(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ): Promise<{
@@ -247,7 +247,7 @@ ms`, {
       }
     }
   })
-  async getErrorStatisticsByCategory(
+  getErrorStatisticsByCategory(
     @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number = 7
   ): Promise<{
     success: boolean;
@@ -340,7 +340,7 @@ ms`, {
       }
     }
   })
-  async getCircuitBreakerStatus(): Promise< {
+  getCircuitBreakerStatus(): Promise< {
     success: boolean;
     data: {
       circuitBreakers: EnhancedCircuitBreaker[];
@@ -435,7 +435,7 @@ ms`, {
       }
     }
   })
-  async clearErrorHistory(
+  clearErrorHistory(
     @Body() clearRequest: ClearHistoryRequest
   ): Promise<{
     success: boolean;
@@ -524,7 +524,7 @@ ms`, {
       }
     }
   })
-  async getRecommendations(): Promise< {
+  getRecommendations(): Promise< {
     success: boolean;
     data: {
       recommendations: Recommendation[];
