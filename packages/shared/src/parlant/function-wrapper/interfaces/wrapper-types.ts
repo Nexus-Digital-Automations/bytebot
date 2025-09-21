@@ -681,6 +681,29 @@ export enum DataClassification {
 }
 
 /**
+ * Security risk level enumeration
+ * Defines security risk assessment levels
+ */
+export enum SecurityRiskLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+/**
+ * Wrapper status enumeration
+ * Defines wrapper operational states
+ */
+export enum WrapperStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  ERROR = 'error',
+  DEACTIVATING = 'deactivating',
+  MAINTENANCE = 'maintenance'
+}
+
+/**
  * SLA requirements definition
  * Performance and availability requirements
  */

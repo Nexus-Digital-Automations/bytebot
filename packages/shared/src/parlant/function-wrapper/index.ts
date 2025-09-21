@@ -175,18 +175,18 @@ export class DefaultConfigurationFactory {
   /**
    * Create default configuration for database read operations
    */
-  static createDatabaseReadConfig(functionId: string): import('./interfaces/wrapper-types').WrapperConfig {
+  static createDatabaseReadConfig(functionId: string): WrapperConfig {
     return {
       functionId,
       description: `Database read operation: ${functionId}`,
-      validationLevel: import('./interfaces/wrapper-types').ValidationLevel.MEDIUM,
+      validationLevel: ValidationLevel.MEDIUM,
       cacheable: true,
       cacheTtl: 300000, // 5 minutes
       monitoring: true,
       metadata: {
-        category: import('./interfaces/wrapper-types').FunctionCategory.DATABASE_READ,
+        category: FunctionCategory.DATABASE_READ,
         domain: 'database',
-        dataClassification: import('./interfaces/wrapper-types').DataClassification.INTERNAL,
+        dataClassification: DataClassification.INTERNAL,
         dependencies: ['database'],
         tags: ['database', 'read', 'cacheable']
       }
@@ -196,17 +196,17 @@ export class DefaultConfigurationFactory {
   /**
    * Create default configuration for database write operations
    */
-  static createDatabaseWriteConfig(functionId: string): import('./interfaces/wrapper-types').WrapperConfig {
+  static createDatabaseWriteConfig(functionId: string): WrapperConfig {
     return {
       functionId,
       description: `Database write operation: ${functionId}`,
-      validationLevel: import('./interfaces/wrapper-types').ValidationLevel.HIGH,
+      validationLevel: ValidationLevel.HIGH,
       cacheable: false,
       monitoring: true,
       metadata: {
-        category: import('./interfaces/wrapper-types').FunctionCategory.DATABASE_WRITE,
+        category: FunctionCategory.DATABASE_WRITE,
         domain: 'database',
-        dataClassification: import('./interfaces/wrapper-types').DataClassification.CONFIDENTIAL,
+        dataClassification: DataClassification.CONFIDENTIAL,
         dependencies: ['database'],
         tags: ['database', 'write', 'transaction']
       }
@@ -216,18 +216,18 @@ export class DefaultConfigurationFactory {
   /**
    * Create default configuration for API operations
    */
-  static createApiConfig(functionId: string): import('./interfaces/wrapper-types').WrapperConfig {
+  static createApiConfig(functionId: string): WrapperConfig {
     return {
       functionId,
       description: `API operation: ${functionId}`,
-      validationLevel: import('./interfaces/wrapper-types').ValidationLevel.MEDIUM,
+      validationLevel: ValidationLevel.MEDIUM,
       cacheable: true,
       cacheTtl: 60000, // 1 minute
       monitoring: true,
       metadata: {
-        category: import('./interfaces/wrapper-types').FunctionCategory.API_CALL,
+        category: FunctionCategory.API_CALL,
         domain: 'api',
-        dataClassification: import('./interfaces/wrapper-types').DataClassification.INTERNAL,
+        dataClassification: DataClassification.INTERNAL,
         dependencies: ['network'],
         tags: ['api', 'external', 'network']
       }
@@ -237,17 +237,17 @@ export class DefaultConfigurationFactory {
   /**
    * Create default configuration for authentication operations
    */
-  static createAuthConfig(functionId: string): import('./interfaces/wrapper-types').WrapperConfig {
+  static createAuthConfig(functionId: string): WrapperConfig {
     return {
       functionId,
       description: `Authentication operation: ${functionId}`,
-      validationLevel: import('./interfaces/wrapper-types').ValidationLevel.CRITICAL,
+      validationLevel: ValidationLevel.CRITICAL,
       cacheable: false,
       monitoring: true,
       metadata: {
-        category: import('./interfaces/wrapper-types').FunctionCategory.AUTHENTICATION,
+        category: FunctionCategory.AUTHENTICATION,
         domain: 'security',
-        dataClassification: import('./interfaces/wrapper-types').DataClassification.RESTRICTED,
+        dataClassification: DataClassification.RESTRICTED,
         dependencies: ['auth-service'],
         tags: ['auth', 'security', 'critical']
       }
@@ -257,18 +257,18 @@ export class DefaultConfigurationFactory {
   /**
    * Create default configuration for utility operations
    */
-  static createUtilityConfig(functionId: string): import('./interfaces/wrapper-types').WrapperConfig {
+  static createUtilityConfig(functionId: string): WrapperConfig {
     return {
       functionId,
       description: `Utility operation: ${functionId}`,
-      validationLevel: import('./interfaces/wrapper-types').ValidationLevel.LOW,
+      validationLevel: ValidationLevel.LOW,
       cacheable: true,
       cacheTtl: 600000, // 10 minutes
       monitoring: true,
       metadata: {
-        category: import('./interfaces/wrapper-types').FunctionCategory.UTILITY,
+        category: FunctionCategory.UTILITY,
         domain: 'utility',
-        dataClassification: import('./interfaces/wrapper-types').DataClassification.INTERNAL,
+        dataClassification: DataClassification.INTERNAL,
         dependencies: [],
         tags: ['utility', 'helper', 'general']
       }
@@ -286,10 +286,10 @@ export class QuickStartHelper {
   /**
    * Quickly wrap a database read function
    */
-  static wrapDatabaseRead<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static wrapDatabaseRead<T extends AnyFunction>(
     func: T,
     functionId: string
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
@@ -297,10 +297,10 @@ export class QuickStartHelper {
   /**
    * Quickly wrap a database write function
    */
-  static wrapDatabaseWrite<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static wrapDatabaseWrite<T extends AnyFunction>(
     func: T,
     functionId: string
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
@@ -308,10 +308,10 @@ export class QuickStartHelper {
   /**
    * Quickly wrap an API function
    */
-  static wrapApi<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static wrapApi<T extends AnyFunction>(
     func: T,
     functionId: string
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createApiConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
@@ -319,10 +319,10 @@ export class QuickStartHelper {
   /**
    * Quickly wrap an authentication function
    */
-  static wrapAuth<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static wrapAuth<T extends AnyFunction>(
     func: T,
     functionId: string
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createAuthConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
@@ -330,10 +330,10 @@ export class QuickStartHelper {
   /**
    * Quickly wrap a utility function
    */
-  static wrapUtility<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static wrapUtility<T extends AnyFunction>(
     func: T,
     functionId: string
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createUtilityConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
@@ -341,7 +341,7 @@ export class QuickStartHelper {
   /**
    * Auto-wrap function with intelligent configuration detection
    */
-  static autoWrap<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static autoWrap<T extends AnyFunction>(
     func: T,
     functionId: string,
     hints?: {
@@ -350,9 +350,9 @@ export class QuickStartHelper {
       isAuth?: boolean;
       isApi?: boolean;
     }
-  ): import('./interfaces/wrapper-types').WrapFunction<T> {
+  ): WrapFunction<T> {
     // Intelligent configuration selection based on hints and function analysis
-    let config: import('./interfaces/wrapper-types').WrapperConfig;
+    let config: WrapperConfig;
 
     if (hints?.isAuth) {
       config = DefaultConfigurationFactory.createAuthConfig(functionId);
@@ -423,7 +423,7 @@ export class FrameworkValidationUtils {
   /**
    * Validate wrapper configuration
    */
-  static validateWrapperConfig(config: import('./interfaces/wrapper-types').WrapperConfig): ConfigValidationResult {
+  static validateWrapperConfig(config: WrapperConfig): ConfigValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -450,7 +450,7 @@ export class FrameworkValidationUtils {
       warnings.push('Cache TTL is very long, consider shorter duration for better data freshness');
     }
 
-    if (config.validationLevel === import('./interfaces/wrapper-types').ValidationLevel.CRITICAL && config.cacheable) {
+    if (config.validationLevel === ValidationLevel.CRITICAL && config.cacheable) {
       warnings.push('Critical validation functions should typically not be cached');
     }
 
@@ -464,7 +464,7 @@ export class FrameworkValidationUtils {
   /**
    * Analyze function compatibility
    */
-  static analyzeFunctionCompatibility<T extends import('./interfaces/wrapper-types').AnyFunction>(
+  static analyzeFunctionCompatibility<T extends AnyFunction>(
     func: T
   ): CompatibilityAnalysisResult {
     try {
@@ -525,9 +525,9 @@ export const FRAMEWORK_CONSTANTS = {
   DEFAULT_HEALTH_CHECK_INTERVAL: 60000,
   DEFAULT_CLEANUP_INTERVAL: 300000,
 
-  VALIDATION_LEVELS: Object.values(import('./interfaces/wrapper-types').ValidationLevel),
-  FUNCTION_CATEGORIES: Object.values(import('./interfaces/wrapper-types').FunctionCategory),
-  DATA_CLASSIFICATIONS: Object.values(import('./interfaces/wrapper-types').DataClassification),
+  VALIDATION_LEVELS: Object.values(ValidationLevel),
+  FUNCTION_CATEGORIES: Object.values(FunctionCategory),
+  DATA_CLASSIFICATIONS: Object.values(DataClassification),
   SECURITY_RISK_LEVELS: Object.values(SecurityRiskLevel),
 
   SUPPORTED_PARAMETER_TYPES: [
@@ -546,7 +546,7 @@ export class FrameworkError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly category: import('./interfaces/wrapper-types').ErrorCategory,
+    public readonly category: ErrorCategory,
     public readonly metadata: Record<string, any> = {}
   ) {
     super(message);
@@ -559,7 +559,7 @@ export class ConfigurationError extends FrameworkError {
     super(
       message,
       'CONFIGURATION_ERROR',
-      import('./interfaces/wrapper-types').ErrorCategory.CONFIGURATION_ERROR,
+      ErrorCategory.CONFIGURATION_ERROR,
       metadata
     );
     this.name = 'ConfigurationError';
@@ -571,7 +571,7 @@ export class ValidationError extends FrameworkError {
     super(
       message,
       'VALIDATION_ERROR',
-      import('./interfaces/wrapper-types').ErrorCategory.VALIDATION_ERROR,
+      ErrorCategory.VALIDATION_ERROR,
       metadata
     );
     this.name = 'ValidationError';

@@ -515,9 +515,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       activeWrappers: statusDistribution.get(WrapperStatus.ACTIVE) || 0,
       inactiveWrappers: statusDistribution.get(WrapperStatus.INACTIVE) || 0,
       errorWrappers: statusDistribution.get(WrapperStatus.ERROR) || 0,
-      statusDistribution: Object.fromEntries(statusDistribution),
-      categoryDistribution: Object.fromEntries(categoryDistribution),
-      validationLevelDistribution: Object.fromEntries(validationLevelDistribution),
+      statusDistribution: this.createCompleteStatusDistribution(statusDistribution),
+      categoryDistribution: this.createCompleteCategoryDistribution(categoryDistribution),
+      validationLevelDistribution: this.createCompleteValidationLevelDistribution(validationLevelDistribution),
       totalInvocations,
       totalErrors,
       errorRate,
@@ -526,6 +526,49 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       memoryUsage: this.calculateMemoryUsage(),
       uptime: Date.now() - this.lifecycleManager.getStartTime()
     };
+  }
+
+  /**
+   * Create complete status distribution with all enum values
+   */
+  private createCompleteStatusDistribution(statusMap: Map<WrapperStatus, number>): Record<WrapperStatus, number> {
+    return {
+      [WrapperStatus.ACTIVE]: statusMap.get(WrapperStatus.ACTIVE) || 0,
+      [WrapperStatus.INACTIVE]: statusMap.get(WrapperStatus.INACTIVE) || 0,
+      [WrapperStatus.ERROR]: statusMap.get(WrapperStatus.ERROR) || 0,
+      [WrapperStatus.DEACTIVATING]: statusMap.get(WrapperStatus.DEACTIVATING) || 0,
+      [WrapperStatus.MAINTENANCE]: statusMap.get(WrapperStatus.MAINTENANCE) || 0,
+    } as Record<WrapperStatus, number>;
+  }
+
+  /**
+   * Create complete category distribution with all enum values
+   */
+  private createCompleteCategoryDistribution(categoryMap: Map<FunctionCategory, number>): Record<FunctionCategory, number> {
+    return {
+      [FunctionCategory.DATABASE_READ]: categoryMap.get(FunctionCategory.DATABASE_READ) || 0,
+      [FunctionCategory.DATABASE_WRITE]: categoryMap.get(FunctionCategory.DATABASE_WRITE) || 0,
+      [FunctionCategory.API_CALL]: categoryMap.get(FunctionCategory.API_CALL) || 0,
+      [FunctionCategory.FILE_OPERATION]: categoryMap.get(FunctionCategory.FILE_OPERATION) || 0,
+      [FunctionCategory.COMPUTATION]: categoryMap.get(FunctionCategory.COMPUTATION) || 0,
+      [FunctionCategory.AUTHENTICATION]: categoryMap.get(FunctionCategory.AUTHENTICATION) || 0,
+      [FunctionCategory.AUTHORIZATION]: categoryMap.get(FunctionCategory.AUTHORIZATION) || 0,
+      [FunctionCategory.MONITORING]: categoryMap.get(FunctionCategory.MONITORING) || 0,
+      [FunctionCategory.UTILITY]: categoryMap.get(FunctionCategory.UTILITY) || 0,
+    } as Record<FunctionCategory, number>;
+  }
+
+  /**
+   * Create complete validation level distribution with all enum values
+   */
+  private createCompleteValidationLevelDistribution(validationMap: Map<ValidationLevel, number>): Record<ValidationLevel, number> {
+    return {
+      [ValidationLevel.CRITICAL]: validationMap.get(ValidationLevel.CRITICAL) || 0,
+      [ValidationLevel.HIGH]: validationMap.get(ValidationLevel.HIGH) || 0,
+      [ValidationLevel.MEDIUM]: validationMap.get(ValidationLevel.MEDIUM) || 0,
+      [ValidationLevel.LOW]: validationMap.get(ValidationLevel.LOW) || 0,
+      [ValidationLevel.OPTIONAL]: validationMap.get(ValidationLevel.OPTIONAL) || 0,
+    } as Record<ValidationLevel, number>;
   }
 
   /**

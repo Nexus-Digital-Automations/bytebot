@@ -649,12 +649,32 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   }
 
   /**
+   * Convert ServiceStatus enum to numeric metric value
+   */
+  private serviceStatusToNumber(status: ServiceStatus): number {
+    switch (status) {
+      case ServiceStatus.OPERATIONAL:
+        return 1.0; // Fully operational
+      case ServiceStatus.DEGRADED:
+        return 0.7; // Partially operational
+      case ServiceStatus.PARTIAL_OUTAGE:
+        return 0.3; // Limited functionality
+      case ServiceStatus.MAJOR_OUTAGE:
+        return 0.0; // Not operational
+      case ServiceStatus.MAINTENANCE:
+        return 0.5; // Planned downtime
+      default:
+        return 0.0; // Unknown status, assume worst case
+    }
+  }
+
+  /**
    * Get service availability metric
    */
   private async getServiceAvailabilityMetric(metric: string): Promise<number> {
     if (metric === 'parlant_service') {
       const health = this.serviceHealth.get('parlant');
-      return health ? health.status as number : ServiceStatus.MAJOR_OUTAGE as number;
+      return health ? this.serviceStatusToNumber(health.status) : this.serviceStatusToNumber(ServiceStatus.MAJOR_OUTAGE);
     }
 
     if (metric === 'maintenance_mode') {
@@ -662,7 +682,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       return 0; // 0 = not in maintenance, 1 = in maintenance
     }
 
-    return ServiceStatus.OPERATIONAL as number;
+    return this.serviceStatusToNumber(ServiceStatus.OPERATIONAL);
   }
 
   /**

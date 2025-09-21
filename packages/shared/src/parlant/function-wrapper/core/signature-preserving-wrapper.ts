@@ -12,7 +12,7 @@
  */
 
 import { Logger } from '@nestjs/common';
-import { ConversationState } from '../../../types/parlant.types';
+// ConversationState is imported from wrapper-types below
 import {
   AnyFunction,
   AsyncFunction,
@@ -33,7 +33,8 @@ import {
   ResultSummary,
   BusinessImpact,
   ValidationLevel,
-  ConversationContext
+  ConversationContext,
+  ConversationState
 } from '../interfaces/wrapper-types';
 
 /**
@@ -87,16 +88,15 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         if (!validationResult.approved) {
-          throw new WrapperError({
-            code: 'VALIDATION_REJECTED',
-            message: `Function execution rejected: ${validationResult.reason}`,
-            category: ErrorCategory.VALIDATION_ERROR,
-            metadata: {
-              validationId: validationResult.validationId,
-              functionName,
-              arguments: args
-            }
-          });
+          const error = new Error(`Function execution rejected: ${validationResult.reason}`);
+          (error as any).code = 'VALIDATION_REJECTED';
+          (error as any).category = ErrorCategory.VALIDATION_ERROR;
+          (error as any).metadata = {
+            validationId: validationResult.validationId,
+            functionName,
+            arguments: args
+          };
+          throw error;
         }
 
         // Step 3: Execute original function with monitoring
@@ -295,7 +295,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         ],
         appliedGuidelines: ['security-validation', 'parameter-safety'],
         toolsInvoked: ['parameter-validator', 'permission-checker'],
-        state: approved ? ConversationState._APPROVED : ConversationState._DENIED
+        state: approved ? ConversationState.APPROVED : ConversationState.REJECTED
       };
 
       return {
@@ -327,7 +327,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           messages: [],
           appliedGuidelines: [],
           toolsInvoked: [],
-          state: ConversationState._ERROR
+          state: ConversationState.ERROR
         },
         confidence: 0.0,
         executionTime: Date.now() - startTime,
@@ -524,7 +524,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         messages: [],
         appliedGuidelines: [],
         toolsInvoked: [],
-        state: ConversationState._ERROR
+        state: ConversationState.ERROR
       },
       confidence: 0.0,
       executionTime: 0,
