@@ -195,7 +195,12 @@ export interface CorrelationMetadata {
  */
 export interface CorrelationQuery {
   /** Query type */
-  type: "by_correlation_id" | "by_context_id" | "by_user" | "by_service" | "by_timerange";
+  type:
+    | "by_correlation_id"
+    | "by_context_id"
+    | "by_user"
+    | "by_service"
+    | "by_timerange";
   /** Query parameters */
   parameters: Record<string, unknown>;
   /** Time range filter */
@@ -315,9 +320,15 @@ export class ParlantContextCorrelationService
   private readonly logger = new Logger(ParlantContextCorrelationService.name);
 
   // Correlation storage
-  private readonly correlationRecords = new Map<string, ContextCorrelationRecord>();
+  private readonly correlationRecords = new Map<
+    string,
+    ContextCorrelationRecord
+  >();
   private readonly contextToCorrelationMap = new Map<string, string[]>();
-  private readonly serviceInteractionMap = new Map<string, CrossServiceTrackingEntry[]>();
+  private readonly serviceInteractionMap = new Map<
+    string,
+    CrossServiceTrackingEntry[]
+  >();
 
   // Configuration
   private readonly correlationConfig: CorrelationConfig = {
@@ -366,10 +377,15 @@ export class ParlantContextCorrelationService
       await this.initializeCorrelationIndexes();
       await this.startBackgroundTasks();
 
-      this.logger.log("✅ Context Correlation Service initialized successfully");
+      this.logger.log(
+        "✅ Context Correlation Service initialized successfully",
+      );
       this.emit("correlation:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Correlation Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Correlation Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Correlation initialization failed",
         "CORRELATION_INIT_ERROR",
@@ -394,7 +410,7 @@ export class ParlantContextCorrelationService
   /**
    * Create new correlation
    */
-  async createCorrelation(
+  createCorrelation(
     rootContextId: string,
     type: CorrelationType,
     userContext: ParlantUserContext,
@@ -403,7 +419,7 @@ export class ParlantContextCorrelationService
       businessContext?: Record<string, unknown>;
       tags?: string[];
     },
-  ): Promise<string> {
+  ): string {
     const startTime = performance.now();
 
     try {
@@ -468,7 +484,11 @@ export class ParlantContextCorrelationService
       throw new ParlantIntegrationError(
         "Correlation creation failed",
         "CORRELATION_CREATE_ERROR",
-        { rootContextId, type, error: error instanceof Error ? error.message : String(error) },
+        {
+          rootContextId,
+          type,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -476,12 +496,12 @@ export class ParlantContextCorrelationService
   /**
    * Add context to existing correlation
    */
-  async addContextToCorrelation(
+  addContextToCorrelation(
     correlationId: string,
     contextId: string,
     serviceName: string,
     operationName: string,
-  ): Promise<void> {
+  ): void {
     try {
       const correlation = this.correlationRecords.get(correlationId);
       if (!correlation) {
@@ -533,7 +553,11 @@ export class ParlantContextCorrelationService
       throw new ParlantIntegrationError(
         "Context addition to correlation failed",
         "CORRELATION_ADD_CONTEXT_ERROR",
-        { correlationId, contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          correlationId,
+          contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -541,12 +565,12 @@ export class ParlantContextCorrelationService
   /**
    * Track cross-service interaction
    */
-  async trackCrossServiceInteraction(
+  trackCrossServiceInteraction(
     correlationId: string,
     sourceService: string,
     targetService: string,
     requestData?: Record<string, unknown>,
-  ): Promise<string> {
+  ): string {
     try {
       const correlation = this.correlationRecords.get(correlationId);
       if (!correlation) {
@@ -598,7 +622,12 @@ export class ParlantContextCorrelationService
       throw new ParlantIntegrationError(
         "Cross-service tracking failed",
         "CORRELATION_TRACK_ERROR",
-        { correlationId, sourceService, targetService, error: error instanceof Error ? error.message : String(error) },
+        {
+          correlationId,
+          sourceService,
+          targetService,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -606,18 +635,20 @@ export class ParlantContextCorrelationService
   /**
    * Complete cross-service interaction tracking
    */
-  async completeCrossServiceTracking(
+  completeCrossServiceTracking(
     trackingId: string,
     responseData?: Record<string, unknown>,
     error?: string,
-  ): Promise<void> {
+  ): void {
     try {
       // Find tracking entry
       let foundEntry: CrossServiceTrackingEntry | null = null;
       let foundCorrelation: ContextCorrelationRecord | null = null;
 
       for (const correlation of this.correlationRecords.values()) {
-        const entry = correlation.crossServiceTracking.find(t => t.trackingId === trackingId);
+        const entry = correlation.crossServiceTracking.find(
+          (t) => t.trackingId === trackingId,
+        );
         if (entry) {
           foundEntry = entry;
           foundCorrelation = correlation;
@@ -631,16 +662,19 @@ export class ParlantContextCorrelationService
 
       // Update tracking entry
       foundEntry.responseTime = new Date();
-      foundEntry.duration = foundEntry.responseTime.getTime() - foundEntry.requestTime.getTime();
+      foundEntry.duration =
+        foundEntry.responseTime.getTime() - foundEntry.requestTime.getTime();
       foundEntry.status = error ? "error" : "success";
       foundEntry.responseData = responseData;
       foundEntry.error = error;
 
       // Update correlation performance metrics
       const totalLatency = foundCorrelation.crossServiceTracking
-        .filter(t => t.duration !== undefined)
+        .filter((t) => t.duration !== undefined)
         .reduce((sum, t) => sum + t.duration!, 0);
-      const completedCalls = foundCorrelation.crossServiceTracking.filter(t => t.duration !== undefined).length;
+      const completedCalls = foundCorrelation.crossServiceTracking.filter(
+        (t) => t.duration !== undefined,
+      ).length;
 
       foundCorrelation.performanceMetrics.averageCrossServiceLatency =
         completedCalls > 0 ? totalLatency / completedCalls : 0;
@@ -664,19 +698,21 @@ export class ParlantContextCorrelationService
   /**
    * Complete workflow step
    */
-  async completeWorkflowStep(
+  completeWorkflowStep(
     correlationId: string,
     stepNumber: number,
     result: WorkflowStepResult,
     outputContextId?: string,
-  ): Promise<void> {
+  ): void {
     try {
       const correlation = this.correlationRecords.get(correlationId);
       if (!correlation) {
         throw new Error(`Correlation not found: ${correlationId}`);
       }
 
-      const step = correlation.workflowChain.find(s => s.stepNumber === stepNumber);
+      const step = correlation.workflowChain.find(
+        (s) => s.stepNumber === stepNumber,
+      );
       if (!step) {
         throw new Error(`Workflow step not found: ${stepNumber}`);
       }
@@ -696,13 +732,21 @@ export class ParlantContextCorrelationService
       }
 
       // Calculate average step duration
-      const completedSteps = correlation.workflowChain.filter(s => s.duration !== undefined);
-      const totalDuration = completedSteps.reduce((sum, s) => sum + s.duration!, 0);
+      const completedSteps = correlation.workflowChain.filter(
+        (s) => s.duration !== undefined,
+      );
+      const totalDuration = completedSteps.reduce(
+        (sum, s) => sum + s.duration!,
+        0,
+      );
       correlation.performanceMetrics.averageStepDuration =
         completedSteps.length > 0 ? totalDuration / completedSteps.length : 0;
 
       // Add output context to correlation if provided
-      if (outputContextId && !correlation.relatedContextIds.includes(outputContextId)) {
+      if (
+        outputContextId &&
+        !correlation.relatedContextIds.includes(outputContextId)
+      ) {
         correlation.relatedContextIds.push(outputContextId);
         this.updateCorrelationIndexes(correlationId, outputContextId);
       }
@@ -726,7 +770,10 @@ export class ParlantContextCorrelationService
   /**
    * Complete correlation
    */
-  async completeCorrelation(correlationId: string, success = true): Promise<void> {
+  completeCorrelation(
+    correlationId: string,
+    success = true,
+  ): void {
     try {
       const correlation = this.correlationRecords.get(correlationId);
       if (!correlation) {
@@ -740,7 +787,8 @@ export class ParlantContextCorrelationService
         correlation.endTime.getTime() - correlation.startTime.getTime();
 
       // Calculate efficiency score
-      correlation.performanceMetrics.efficiencyScore = this.calculateEfficiencyScore(correlation);
+      correlation.performanceMetrics.efficiencyScore =
+        this.calculateEfficiencyScore(correlation);
 
       // Update statistics
       this.correlationStats.activeCorrelations--;
@@ -751,10 +799,13 @@ export class ParlantContextCorrelationService
       }
 
       // Update average completion time
-      const totalCompleted = this.correlationStats.completedCorrelations + this.correlationStats.failedCorrelations;
+      const totalCompleted =
+        this.correlationStats.completedCorrelations +
+        this.correlationStats.failedCorrelations;
       this.correlationStats.averageCompletionTime =
         (this.correlationStats.averageCompletionTime * (totalCompleted - 1) +
-          correlation.performanceMetrics.totalDuration) / totalCompleted;
+          correlation.performanceMetrics.totalDuration) /
+        totalCompleted;
 
       // Emit completion event
       this.emit("correlation:completed", {
@@ -776,37 +827,50 @@ export class ParlantContextCorrelationService
   /**
    * Query correlations
    */
-  async queryCorrelations(query: CorrelationQuery): Promise<ContextCorrelationRecord[]> {
+  queryCorrelations(
+    query: CorrelationQuery,
+  ): ContextCorrelationRecord[] {
     try {
       let results: ContextCorrelationRecord[] = [];
 
       switch (query.type) {
         case "by_correlation_id":
-          const correlation = this.correlationRecords.get(query.parameters.correlationId as string);
+          const correlation = this.correlationRecords.get(
+            query.parameters.correlationId as string,
+          );
           results = correlation ? [correlation] : [];
           break;
 
         case "by_context_id":
-          const correlationIds = this.contextToCorrelationMap.get(query.parameters.contextId as string) || [];
-          results = correlationIds.map(id => this.correlationRecords.get(id)!).filter(Boolean);
+          const correlationIds =
+            this.contextToCorrelationMap.get(
+              query.parameters.contextId as string,
+            ) || [];
+          results = correlationIds
+            .map((id) => this.correlationRecords.get(id)!)
+            .filter(Boolean);
           break;
 
         case "by_user":
           results = Array.from(this.correlationRecords.values()).filter(
-            c => c.metadata.userContext.userId === query.parameters.userId,
+            (c) => c.metadata.userContext.userId === query.parameters.userId,
           );
           break;
 
         case "by_service":
-          results = Array.from(this.correlationRecords.values()).filter(
-            c => c.workflowChain.some(step => step.serviceName === query.parameters.serviceName),
+          results = Array.from(this.correlationRecords.values()).filter((c) =>
+            c.workflowChain.some(
+              (step) => step.serviceName === query.parameters.serviceName,
+            ),
           );
           break;
 
         case "by_timerange":
           if (query.timeRange) {
             results = Array.from(this.correlationRecords.values()).filter(
-              c => c.startTime >= query.timeRange!.startTime && c.startTime <= query.timeRange!.endTime,
+              (c) =>
+                c.startTime >= query.timeRange!.startTime &&
+                c.startTime <= query.timeRange!.endTime,
             );
           }
           break;
@@ -817,7 +881,7 @@ export class ParlantContextCorrelationService
 
       // Apply status filter
       if (query.statusFilter && query.statusFilter.length > 0) {
-        results = results.filter(c => query.statusFilter!.includes(c.status));
+        results = results.filter((c) => query.statusFilter!.includes(c.status));
       }
 
       // Apply pagination
@@ -831,7 +895,10 @@ export class ParlantContextCorrelationService
       throw new ParlantIntegrationError(
         "Correlation query failed",
         "CORRELATION_QUERY_ERROR",
-        { query, error: error instanceof Error ? error.message : String(error) },
+        {
+          query,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -842,7 +909,8 @@ export class ParlantContextCorrelationService
   async getCorrelationAnalytics(): Promise<CorrelationAnalytics> {
     try {
       const performanceTrends = await this.generatePerformanceTrends();
-      const serviceInteractionPatterns = await this.generateServiceInteractionPatterns();
+      const serviceInteractionPatterns =
+        await this.generateServiceInteractionPatterns();
 
       const analytics: CorrelationAnalytics = {
         totalCorrelations: this.correlationStats.totalCorrelations,
@@ -882,7 +950,10 @@ export class ParlantContextCorrelationService
     return `track_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
-  private updateCorrelationIndexes(correlationId: string, contextId: string): void {
+  private updateCorrelationIndexes(
+    correlationId: string,
+    contextId: string,
+  ): void {
     if (!this.contextToCorrelationMap.has(contextId)) {
       this.contextToCorrelationMap.set(contextId, []);
     }
@@ -893,21 +964,35 @@ export class ParlantContextCorrelationService
     }
   }
 
-  private calculateEfficiencyScore(correlation: ContextCorrelationRecord): number {
-    const successRate = correlation.performanceMetrics.totalSteps > 0
-      ? (correlation.performanceMetrics.successfulSteps / correlation.performanceMetrics.totalSteps) * 100
-      : 0;
+  private calculateEfficiencyScore(
+    correlation: ContextCorrelationRecord,
+  ): number {
+    const successRate =
+      correlation.performanceMetrics.totalSteps > 0
+        ? (correlation.performanceMetrics.successfulSteps /
+            correlation.performanceMetrics.totalSteps) *
+          100
+        : 0;
 
-    const speedScore = correlation.performanceMetrics.averageStepDuration > 0
-      ? Math.max(0, 100 - (correlation.performanceMetrics.averageStepDuration / 1000) * 10)
-      : 0;
+    const speedScore =
+      correlation.performanceMetrics.averageStepDuration > 0
+        ? Math.max(
+            0,
+            100 -
+              (correlation.performanceMetrics.averageStepDuration / 1000) * 10,
+          )
+        : 0;
 
-    return Math.round((successRate * 0.7) + (speedScore * 0.3));
+    return Math.round(successRate * 0.7 + speedScore * 0.3);
   }
 
   private calculateSuccessRate(): number {
-    const totalCompleted = this.correlationStats.completedCorrelations + this.correlationStats.failedCorrelations;
-    return totalCompleted > 0 ? (this.correlationStats.completedCorrelations / totalCompleted) * 100 : 0;
+    const totalCompleted =
+      this.correlationStats.completedCorrelations +
+      this.correlationStats.failedCorrelations;
+    return totalCompleted > 0
+      ? (this.correlationStats.completedCorrelations / totalCompleted) * 100
+      : 0;
   }
 
   private getComplianceRequirements(type: CorrelationType): string[] {
@@ -923,7 +1008,7 @@ export class ParlantContextCorrelationService
     }
   }
 
-  private async generatePerformanceTrends(): Promise<PerformanceTrend[]> {
+  private generatePerformanceTrends(): PerformanceTrend[] {
     const trends: PerformanceTrend[] = [];
     const now = new Date();
 
@@ -932,24 +1017,34 @@ export class ParlantContextCorrelationService
       const periodStart = new Date(now.getTime() - (i + 1) * 3600000);
       const periodEnd = new Date(now.getTime() - i * 3600000);
 
-      const periodCorrelations = Array.from(this.correlationRecords.values()).filter(
-        c => c.startTime >= periodStart && c.startTime < periodEnd,
+      const periodCorrelations = Array.from(
+        this.correlationRecords.values(),
+      ).filter((c) => c.startTime >= periodStart && c.startTime < periodEnd);
+
+      const completedInPeriod = periodCorrelations.filter(
+        (c) => c.status === "completed",
+      );
+      const failedInPeriod = periodCorrelations.filter(
+        (c) => c.status === "failed",
       );
 
-      const completedInPeriod = periodCorrelations.filter(c => c.status === "completed");
-      const failedInPeriod = periodCorrelations.filter(c => c.status === "failed");
+      const averageDuration =
+        completedInPeriod.length > 0
+          ? completedInPeriod.reduce(
+              (sum, c) => sum + c.performanceMetrics.totalDuration,
+              0,
+            ) / completedInPeriod.length
+          : 0;
 
-      const averageDuration = completedInPeriod.length > 0
-        ? completedInPeriod.reduce((sum, c) => sum + c.performanceMetrics.totalDuration, 0) / completedInPeriod.length
-        : 0;
+      const successRate =
+        periodCorrelations.length > 0
+          ? (completedInPeriod.length / periodCorrelations.length) * 100
+          : 0;
 
-      const successRate = periodCorrelations.length > 0
-        ? (completedInPeriod.length / periodCorrelations.length) * 100
-        : 0;
-
-      const errorRate = periodCorrelations.length > 0
-        ? (failedInPeriod.length / periodCorrelations.length) * 100
-        : 0;
+      const errorRate =
+        periodCorrelations.length > 0
+          ? (failedInPeriod.length / periodCorrelations.length) * 100
+          : 0;
 
       trends.push({
         timePeriod: periodStart,
@@ -963,22 +1058,34 @@ export class ParlantContextCorrelationService
     return trends;
   }
 
-  private async generateServiceInteractionPatterns(): Promise<ServiceInteractionPattern[]> {
+  private generateServiceInteractionPatterns():
+    ServiceInteractionPattern[]
+   {
     const patterns = new Map<string, ServiceInteractionPattern>();
 
-    for (const [serviceKey, interactions] of this.serviceInteractionMap.entries()) {
+    for (const [
+      serviceKey,
+      interactions,
+    ] of this.serviceInteractionMap.entries()) {
       const [sourceService, targetService] = serviceKey.split("->", 2);
 
-      const completedInteractions = interactions.filter(i => i.duration !== undefined);
-      const errorInteractions = interactions.filter(i => i.status === "error");
+      const completedInteractions = interactions.filter(
+        (i) => i.duration !== undefined,
+      );
+      const errorInteractions = interactions.filter(
+        (i) => i.status === "error",
+      );
 
-      const averageLatency = completedInteractions.length > 0
-        ? completedInteractions.reduce((sum, i) => sum + i.duration!, 0) / completedInteractions.length
-        : 0;
+      const averageLatency =
+        completedInteractions.length > 0
+          ? completedInteractions.reduce((sum, i) => sum + i.duration!, 0) /
+            completedInteractions.length
+          : 0;
 
-      const errorRate = interactions.length > 0
-        ? (errorInteractions.length / interactions.length) * 100
-        : 0;
+      const errorRate =
+        interactions.length > 0
+          ? (errorInteractions.length / interactions.length) * 100
+          : 0;
 
       patterns.set(serviceKey, {
         sourceService,
@@ -993,7 +1100,9 @@ export class ParlantContextCorrelationService
     return Array.from(patterns.values());
   }
 
-  private findPeakUsageTimes(interactions: CrossServiceTrackingEntry[]): Date[] {
+  private findPeakUsageTimes(
+    interactions: CrossServiceTrackingEntry[],
+  ): Date[] {
     // Simplified peak detection - find hours with most interactions
     const hourlyUsage = new Map<string, number>();
 
@@ -1014,17 +1123,17 @@ export class ParlantContextCorrelationService
     return sortedHours;
   }
 
-  private async loadCorrelationConfiguration(): Promise<void> {
+  private loadCorrelationConfiguration(): void {
     // Load correlation configuration
     this.logger.debug("🔧 Loading correlation configuration...");
   }
 
-  private async initializeCorrelationIndexes(): Promise<void> {
+  private initializeCorrelationIndexes(): void {
     // Initialize correlation indexes
     this.logger.debug("🗂️ Initializing correlation indexes...");
   }
 
-  private async startBackgroundTasks(): Promise<void> {
+  private startBackgroundTasks(): void {
     if (this.correlationConfig.cleanupConfig.enableAutoCleanup) {
       this.cleanupTimer = setInterval(() => {
         this.performCorrelationCleanup();
@@ -1044,7 +1153,7 @@ export class ParlantContextCorrelationService
     }
   }
 
-  private async stopBackgroundTasks(): Promise<void> {
+  private stopBackgroundTasks(): void {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
@@ -1062,10 +1171,15 @@ export class ParlantContextCorrelationService
   }
 
   private async performCorrelationCleanup(): Promise<void> {
-    const cutoffTime = new Date(Date.now() - this.correlationConfig.cleanupConfig.retentionPeriod);
+    const cutoffTime = new Date(
+      Date.now() - this.correlationConfig.cleanupConfig.retentionPeriod,
+    );
     let cleanedCount = 0;
 
-    for (const [correlationId, correlation] of this.correlationRecords.entries()) {
+    for (const [
+      correlationId,
+      correlation,
+    ] of this.correlationRecords.entries()) {
       if (correlation.endTime && correlation.endTime < cutoffTime) {
         if (this.correlationConfig.cleanupConfig.archiveBeforeDeletion) {
           await this.archiveCorrelation(correlation);
@@ -1095,33 +1209,38 @@ export class ParlantContextCorrelationService
     }
   }
 
-  private async generateAnalytics(): Promise<void> {
+  private generateAnalytics(): void {
     // Generate and cache analytics
     this.logger.debug("📊 Generating correlation analytics...");
   }
 
   private updatePerformanceStats(): void {
-    this.correlationStats.memoryUsage = (
-      this.correlationRecords.size +
-      this.contextToCorrelationMap.size +
-      this.serviceInteractionMap.size
-    ) * 1024; // Rough estimate
+    this.correlationStats.memoryUsage =
+      (this.correlationRecords.size +
+        this.contextToCorrelationMap.size +
+        this.serviceInteractionMap.size) *
+      1024; // Rough estimate
   }
 
   private async finalizeActiveCorrelations(): Promise<void> {
-    for (const [correlationId, correlation] of this.correlationRecords.entries()) {
+    for (const [
+      correlationId,
+      correlation,
+    ] of this.correlationRecords.entries()) {
       if (correlation.status === "active") {
         await this.completeCorrelation(correlationId, false);
       }
     }
   }
 
-  private async saveCorrelationAnalytics(): Promise<void> {
+  private saveCorrelationAnalytics(): void {
     // Save analytics for persistence
     this.logger.debug("💾 Saving correlation analytics...");
   }
 
-  private async archiveCorrelation(correlation: ContextCorrelationRecord): Promise<void> {
+  private archiveCorrelation(
+    correlation: ContextCorrelationRecord,
+  ): void {
     // Archive correlation for compliance
     this.logger.debug(`📦 Archiving correlation: ${correlation.correlationId}`);
   }

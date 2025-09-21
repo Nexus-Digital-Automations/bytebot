@@ -465,7 +465,7 @@ export class ParlantHuginnBridgeService
     };
   }
 
-  private async loadConfiguration(): Promise<void> {
+  private loadConfiguration(): void {
     this.config = {
       huginnBaseUrl: process.env.HUGINN_BASE_URL || "http://localhost:3000",
       huginnWebSocketUrl:
@@ -481,7 +481,7 @@ export class ParlantHuginnBridgeService
     this.logger.log("✅ Huginn bridge configuration loaded");
   }
 
-  private async initializeHttpClient(): Promise<void> {
+  private initializeHttpClient(): void {
     this.httpClient = axios.create({
       baseURL: this.config.huginnBaseUrl,
       timeout: this.config.requestTimeout,
@@ -531,7 +531,7 @@ export class ParlantHuginnBridgeService
     this.logger.log("✅ HTTP client initialized for Huginn communication");
   }
 
-  private async initializeWebSocketConnection(): Promise<void> {
+  private initializeWebSocketConnection(): void {
     // WebSocket implementation for real-time communication with Huginn
     try {
       this.websocket = new WebSocket(this.config.huginnWebSocketUrl);
@@ -692,10 +692,10 @@ export class ParlantHuginnBridgeService
     };
   }
 
-  private async validateHuginnServiceCall(
+  private validateHuginnServiceCall(
     callId: string,
     callConfig: RubyServiceCallConfig,
-  ): Promise<ParlantValidationResponse> {
+  ): ParlantValidationResponse {
     // Implementation would integrate with the main Parlant validation service
     // For now, return a basic validation structure
     return {
@@ -752,7 +752,7 @@ export class ParlantHuginnBridgeService
       this.metrics.totalCalls;
   }
 
-  private async startPerformanceMonitoring(): Promise<void> {
+  private startPerformanceMonitoring(): void {
     setInterval(() => {
       this.monitorPerformance();
     }, 30000); // Monitor every 30 seconds
@@ -1066,11 +1066,11 @@ export class ParlantHuginnBridgeService
    * Enhanced processing for intelligence workflow results with validation
    * and metadata enrichment.
    */
-  private async processIntelligenceWorkflowResult(
+  private processIntelligenceWorkflowResult(
     workflowId: string,
     workflowResult: unknown,
     workflowConfig: Record<string, unknown>,
-  ): Promise<Record<string, unknown>> {
+  ): Record<string, unknown> {
     this.logger.debug(
       `🔍 Processing intelligence workflow result: ${workflowId}`,
     );
@@ -1156,10 +1156,10 @@ export class ParlantHuginnBridgeService
    * Validates entire multi-language workflow configuration for dependencies,
    * security, and performance requirements.
    */
-  private async validateMultiLanguageWorkflow(
+  private validateMultiLanguageWorkflow(
     workflowId: string,
     workflowConfig: Record<string, unknown>,
-  ): Promise<ParlantValidationResponse> {
+  ): ParlantValidationResponse {
     this.logger.debug(`🔍 Validating multi-language workflow: ${workflowId}`);
 
     // Basic validation logic - in real implementation would integrate with Parlant
