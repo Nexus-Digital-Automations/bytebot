@@ -26,12 +26,12 @@ import {
   ParlantIntegrationService,
   ParlantConversationContext,
   ParlantValidationRequest,
-  RiskLevel,
+  ParlantValidationResponse,
   ConversationalValidationError
 } from '../../parlant/parlant-integration.service';
 // Removed unused import: ByteBotdUser;
 
-import { UserRole, Permission } from '@bytebot/shared';
+import { UserRole, Permission, RiskLevel } from '@bytebot/shared';
 import {
   SecurityAuditService,
   AuditEventType,
@@ -335,7 +335,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         operationId,
       };
 
-      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
 
       if (!validation.approved) {
         throw new ConversationalValidationError(
@@ -523,13 +523,13 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         operationId,
       };
 
-      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
 
       // Check for security violations
       const securityViolations = this.detectSecurityViolations(session, context);
 
       // Check compliance status
-      const complianceStatus = await this.checkComplianceStatus(session);
+      const complianceStatus = this.checkComplianceStatus(session);
 
       let currentSession = session;
 
@@ -621,7 +621,9 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
     if (!this.bridgeConfig.emergencyOverrideEnabled) {
       throw new Error('Emergency override is disabled in current configuration');
-    }    try {
+    }
+
+    try {
       // CRITICAL: Validate emergency override through Parlant
       const validationRequest: ParlantValidationRequest = {
         functionName: 'AIgentParlantSecurityBridge.handleEmergencyOverride',
@@ -638,7 +640,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         operationId,
       };
 
-      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
 
       const overrideId = `override_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       const expiresAt = new Date(Date.now() + request.durationMinutes * 60 * 1000);
@@ -676,76 +678,76 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
       // Process approved override
       const auditEntry: SessionAuditEntry = {
-  timestamp: new Date(),
-        action: 'OVERRIDE',outcome: 'SUCCESS',
-        details: `Emergency override APPROVED: ${(request as any)?.justification
-}`,
-        ipAddress: 'system',userAgent: 'emergency-override-system',conversationId: (validation as any)?.conversationId,};
+        timestamp: new Date(),
+        action: 'OVERRIDE',
+        outcome: 'SUCCESS',
+        details: `Emergency override APPROVED: ${request.justification}`,
+        ipAddress: 'system',
+        userAgent: 'emergency-override-system',
+        conversationId: validation.conversationId,
+      };
 
       // Apply override to active session if exists
-      const userSession = (Array as any)?.from?.((this.activeSessions as any)?.values?.())
-        .find(session => (session as any)?.userId === (request as any)?.userId);
+      const userSession = Array.from(this.activeSessions.values())
+        .find(session => session.userId === request.userId);
 
       if (userSession) {
-  (userSession.auditTrail as any)?.push?.(auditEntry);
+        userSession.auditTrail.push(auditEntry);
         // Override could modify session state here based on scope
-      
-}
+      }
 
       // Comprehensive audit trail for override
-      await (this.auditService as any)?.createAuditEntry?.({
-  eventType: (AuditEventType as any)?.PRIVILEGE_ESCALATION_EVENT,
-        severity: (AuditSeverity as any)?.CRITICAL,
-        userId: (request as any)?.userId,
-        sessionId: userSession?.sessionId ?? 'NO_SESSION',sourceIp: 'emergency-override-system',userAgent: 'emergency-override-system',resource: 'Emergency Override System',action: 'EMERGENCY_OVERRIDE',outcome: 'SUCCESS',
+      await this.auditService.createAuditEntry({
+        eventType: AuditEventType.PRIVILEGE_ESCALATION_EVENT,
+        severity: AuditSeverity.CRITICAL,
+        userId: request.userId,
+        sessionId: userSession?.sessionId ?? 'NO_SESSION',
+        sourceIp: 'emergency-override-system',
+        userAgent: 'emergency-override-system',
+        resource: 'Emergency Override System',
+        action: 'EMERGENCY_OVERRIDE',
+        outcome: 'SUCCESS',
         details: {
           operationId,
           overrideId,
-          approverUserId: (request as any)?.approverUserId,
-          overrideScope: (request as any)?.overrideScope,
-          durationMinutes: (request as any)?.durationMinutes,
-          justification: (request as any)?.justification,
-          conversationId: (validation as any)?.conversationId,
-          expiresAt: (expiresAt as any)?.toISOString?.(),
-        
-},
-        complianceFrameworks: (this as any)?.bridgeConfig.complianceFrameworks,
-      }, (request as any)?.context);
+          approverUserId: request.approverUserId,
+          overrideScope: request.overrideScope,
+          durationMinutes: request.durationMinutes,
+          justification: request.justification,
+          conversationId: validation.conversationId,
+          expiresAt: expiresAt.toISOString(),
+        },
+        complianceFrameworks: this.bridgeConfig.complianceFrameworks,
+      }, request.context);
 
-      if ((this as any)?.totalEmergencyOverrides !== undefined) {
-        (this as any).totalEmergencyOverrides += 1;
-      }
+      this.totalEmergencyOverrides++;
 
-      (this.logger as any)?.warn?.(
+      this.logger.warn(
         `[${operationId}] Emergency override APPROVED`,
         {
           operationId,
           overrideId,
-          conversationId: (validation as any)?.conversationId,
-          expiresAt: (expiresAt as any)?.toISOString?.(),
-        
-}
+          conversationId: validation.conversationId,
+          expiresAt: expiresAt.toISOString(),
+        }
       );
 
       return {
-  overrideId,
+        overrideId,
         approved: true,
-        reasoning: (validation as any)?.reasoning,
-        conversationId: (validation as any)?.conversationId,
+        reasoning: validation.reasoning,
+        conversationId: validation.conversationId,
         expiresAt,
         auditEntry,
-      
-};
+      };
 
-    } catch (error: any) {
-  (this.logger as any)?.error?.(
-        `[${operationId
-}] Emergency override processing failed: ${error instanceof Error ? (error as any)?.message : String(error)}`,
+    } catch (error: unknown) {
+      this.logger.error(
+        `[${operationId}] Emergency override processing failed: ${error instanceof Error ? error.message : String(error)}`,
         {
-  operationId,
-          error: error instanceof Error ? (error as any)?.message : String(error),
-        
-}
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+        }
       );
 
       throw error;
@@ -758,7 +760,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
    * @returns Security bridge metrics and operational status
    */
   getSecurityMetrics(): {
-  activeSessions: number;
+    activeSessions: number;
     sessionsByClassification: Record<SecurityClassification, number>;
     sessionsByRole: Record<UserRole, number>;
     totalSessionsCreated: number;
@@ -766,15 +768,14 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     totalEmergencyOverrides: number;
     averageValidationTime: number;
     sessionHealth: {
-  healthy: number;
+      healthy: number;
       suspended: number;
       expired: number;
       revoked: number;
-    
-};
+    };
     complianceStatus: Record<ComplianceFramework, boolean>;
     redisClusterHealth: boolean;
-  }> {
+  } {
     const sessionsByClassification = {} as Record<SecurityClassification, number>;
     const sessionsByRole = {} as Record<UserRole, number>;
     const sessionHealth = { healthy: 0, suspended: 0, expired: 0, revoked: 0 };
@@ -833,69 +834,77 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   // ===== PRIVATE HELPER METHODS =====
 
   private loadBridgeConfiguration(): AIgentParlantBridgeConfig {
-  return {
-  redisUrl: (this as any)?.configService.get<string>('REDIS_URL', 'redis://localhost:6379'),
-      sessionTimeoutMs: (this as any)?.configService.get<number>('BRIDGE_SESSION_TIMEOUT_MS', 3600000), // 1 hour
-      maxConcurrentSessions: (this as any)?.configService.get<number>('BRIDGE_MAX_CONCURRENT_SESSIONS', 10000),
-      emergencyOverrideEnabled: (this as any)?.configService.get<boolean>('BRIDGE_EMERGENCY_OVERRIDE_ENABLED', true),
-      auditAllSessions: (this as any)?.configService.get<boolean>('BRIDGE_AUDIT_ALL_SESSIONS', true),
-      defaultSecurityClassification: (SecurityClassification as any)?.INTERNAL,
-      supportedJwtAlgorithms: [(JwtAlgorithmType as any)?.HS256, (JwtAlgorithmType as any)?.RS256, (JwtAlgorithmType as any)?.ES256, (JwtAlgorithmType as any)?.EdDSA],
-      sessionClusteringEnabled: (this as any)?.configService.get<boolean>('BRIDGE_SESSION_CLUSTERING_ENABLED', true),complianceFrameworks: [(ComplianceFramework as any)?.SOX,
-        (ComplianceFramework as any)?.GDPR,
-        (ComplianceFramework as any)?.HIPAA,
-        (ComplianceFramework as any)?.PCI_DSS,
-        (ComplianceFramework as any)?.ISO_27001,
+    return {
+      redisUrl: this.configService.get<string>('REDIS_URL', 'redis://localhost:6379'),
+      sessionTimeoutMs: this.configService.get<number>('BRIDGE_SESSION_TIMEOUT_MS', 3600000), // 1 hour
+      maxConcurrentSessions: this.configService.get<number>('BRIDGE_MAX_CONCURRENT_SESSIONS', 10000),
+      emergencyOverrideEnabled: this.configService.get<boolean>('BRIDGE_EMERGENCY_OVERRIDE_ENABLED', true),
+      auditAllSessions: this.configService.get<boolean>('BRIDGE_AUDIT_ALL_SESSIONS', true),
+      defaultSecurityClassification: SecurityClassification.INTERNAL,
+      supportedJwtAlgorithms: [JwtAlgorithmType.HS256, JwtAlgorithmType.RS256, JwtAlgorithmType.ES256, JwtAlgorithmType.EdDSA],
+      sessionClusteringEnabled: this.configService.get<boolean>('BRIDGE_SESSION_CLUSTERING_ENABLED', true),
+      complianceFrameworks: [
+        ComplianceFramework.SOX,
+        ComplianceFramework.GDPR,
+        ComplianceFramework.HIPAA,
+        ComplianceFramework.PCI_DSS,
+        ComplianceFramework.ISO_27001,
       ],
-    
-};
+    };
   }
 
   private initializeRoleClassificationMappings(): Map<UserRole, RoleClassificationMapping> {
-  const mappings = new Map<UserRole, RoleClassificationMapping>();
+    const mappings = new Map<UserRole, RoleClassificationMapping>();
 
-    (mappings as any)?.set?.((UserRole as any)?._ADMIN, {
-  role: (UserRole as any)?._ADMIN,
-      defaultClassification: (SecurityClassification as any)?.CLASSIFIED,
-      allowedClassifications: (Object as any)?.values?.(SecurityClassification),
+    mappings.set(UserRole._ADMIN, {
+      role: UserRole._ADMIN,
+      defaultClassification: SecurityClassification.CLASSIFIED,
+      allowedClassifications: Object.values(SecurityClassification),
       maxSessionDuration: 8 * 60 * 60 * 1000, // 8 hours
-  requiresMultiFactor: true,
+      requiresMultiFactor: true,
       auditLevel: 'COMPREHENSIVE',
-});
-    (mappings as any)?.set?.((UserRole as any)?._OPERATOR, {
-  role: (UserRole as any)?._OPERATOR,
-      defaultClassification: (SecurityClassification as any)?.CONFIDENTIAL,
+    });
+
+    mappings.set(UserRole._OPERATOR, {
+      role: UserRole._OPERATOR,
+      defaultClassification: SecurityClassification.CONFIDENTIAL,
       allowedClassifications: [
-        (SecurityClassification as any)?.PUBLIC,
-        (SecurityClassification as any)?.INTERNAL,
-        (SecurityClassification as any)?.CONFIDENTIAL,
+        SecurityClassification.PUBLIC,
+        SecurityClassification.INTERNAL,
+        SecurityClassification.CONFIDENTIAL,
       ],
-      maxSessionDuration: 4 * 60 * 60 * 1000, // 4 hours,
-  requiresMultiFactor: true,
+      maxSessionDuration: 4 * 60 * 60 * 1000, // 4 hours
+      requiresMultiFactor: true,
       auditLevel: 'STANDARD',
-});(mappings as any)?.set?.((UserRole as any)?._VIEWER, {
-  role: (UserRole as any)?._VIEWER,
-      defaultClassification: (SecurityClassification as any)?.INTERNAL,
+    });
+
+    mappings.set(UserRole._VIEWER, {
+      role: UserRole._VIEWER,
+      defaultClassification: SecurityClassification.INTERNAL,
       allowedClassifications: [
-        (SecurityClassification as any)?.PUBLIC,
-        (SecurityClassification as any)?.INTERNAL,
+        SecurityClassification.PUBLIC,
+        SecurityClassification.INTERNAL,
       ],
-      maxSessionDuration: 2 * 60 * 60 * 1000, // 2 hours,
-  requiresMultiFactor: false,
+      maxSessionDuration: 2 * 60 * 60 * 1000, // 2 hours
+      requiresMultiFactor: false,
       auditLevel: 'STANDARD',
-});(mappings as any)?.set?.((UserRole as any)?._USER, {
-  role: (UserRole as any)?._USER,
-      defaultClassification: (SecurityClassification as any)?.PUBLIC,
-      allowedClassifications: [(SecurityClassification as any)?.PUBLIC],
-      maxSessionDuration: 1 * 60 * 60 * 1000, // 1 hour,
-  requiresMultiFactor: false,
+    });
+
+    mappings.set(UserRole._USER, {
+      role: UserRole._USER,
+      defaultClassification: SecurityClassification.PUBLIC,
+      allowedClassifications: [SecurityClassification.PUBLIC],
+      maxSessionDuration: 1 * 60 * 60 * 1000, // 1 hour
+      requiresMultiFactor: false,
       auditLevel: 'MINIMAL',
-});(mappings as any)?.set?.((UserRole as any)?._GUEST, {
-  role: (UserRole as any)?._GUEST,
-      defaultClassification: (SecurityClassification as any)?.PUBLIC,
-      allowedClassifications: [(SecurityClassification as any)?.PUBLIC],
-      maxSessionDuration: 30 * 60 * 1000, // 30 minutes,
-  requiresMultiFactor: false,
+    });
+
+    mappings.set(UserRole._GUEST, {
+      role: UserRole._GUEST,
+      defaultClassification: SecurityClassification.PUBLIC,
+      allowedClassifications: [SecurityClassification.PUBLIC],
+      maxSessionDuration: 30 * 60 * 1000, // 30 minutes
+      requiresMultiFactor: false,
       auditLevel: 'MINIMAL',
     });
 
@@ -903,35 +912,33 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   }
 
   private async initializeRedisCluster(): Promise<void> {
-    if (!(this as any)?.bridgeConfig.sessionClusteringEnabled) {
-      (this.logger as any)?.log?.('Redis session clustering disabled');
+    if (!this.bridgeConfig.sessionClusteringEnabled) {
+      this.logger.log('Redis session clustering disabled');
       return;
-}
+    }
 
     try {
-  (this as any)?.redisCluster = new Redis((this as any)?.bridgeConfig.redisUrl, {
-  enableReadyCheck: true,
+      this.redisCluster = new Redis(this.bridgeConfig.redisUrl, {
+        enableReadyCheck: true,
         maxRetriesPerRequest: 3,
         commandTimeout: 5000,
         connectTimeout: 10000,
-
-});
-
-      (this.redisCluster as any)?.on?.('connect', () => {
-        (this.logger as any)?.log?.('Redis cluster connected successfully');
       });
-      (this.redisCluster as any)?.on?.('error', (error) => {
-        (this.logger as any)?.error?.('Redis cluster error', { error: (error as any)?.message });
-      });
-      await (this.redisCluster as any)?.ping?.();
-      (this.logger as any)?.log?.('Redis cluster initialized and responsive');
 
-    } catch (error: any) {
-  (this.logger as any)?.error?.(
-        `Redis cluster initialization failed: ${error instanceof Error ? (error as any)?.message : String(error)
-}`
+      this.redisCluster.on('connect', () => {
+        this.logger.log('Redis cluster connected successfully');
+      });
+      this.redisCluster.on('error', (error) => {
+        this.logger.error('Redis cluster error', { error: error.message });
+      });
+      await this.redisCluster.ping();
+      this.logger.log('Redis cluster initialized and responsive');
+
+    } catch (error: unknown) {
+      this.logger.error(
+        `Redis cluster initialization failed: ${error instanceof Error ? error.message : String(error)}`
       );
-      (this as any)?.redisCluster = null;
+      this.redisCluster = null;
     }
   }
 
@@ -955,59 +962,55 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     permissions: Permission[];
   } {
     // Validate and extract security context from JWT
-    const roleMapping = (this.roleClassificationMappings as any)?.get?.((jwtPayload as any)?.role);
+    const roleMapping = this.roleClassificationMappings.get(jwtPayload.role);
     if (!roleMapping) {
-      throw new Error(`Unsupported user role: ${(jwtPayload as any)?.role}`);
+      throw new Error(`Unsupported user role: ${jwtPayload.role}`);
     }
 
     // Determine security classification
-    let securityClassification = (jwtPayload as any)?.securityClassification;
-    if (!(roleMapping.allowedClassifications as any)?.includes?.(securityClassification)) {
-      (this.logger as any)?.warn?.(
-        `[${operationId
-}] User role ${(jwtPayload as any)?.role} not authorized for ${securityClassification}, defaulting to ${(roleMapping as any)?.defaultClassification}`
+    let securityClassification = jwtPayload.securityClassification;
+    if (!roleMapping.allowedClassifications.includes(securityClassification)) {
+      this.logger.warn(
+        `[${operationId}] User role ${jwtPayload.role} not authorized for ${securityClassification}, defaulting to ${roleMapping.defaultClassification}`
       );
-      securityClassification = (roleMapping as any)?.defaultClassification;
+      securityClassification = roleMapping.defaultClassification;
     }
 
     return {
-  userId: (jwtPayload as any)?.sub,
-      role: (jwtPayload as any)?.role,
+      userId: jwtPayload.sub,
+      role: jwtPayload.role,
       securityClassification,
-      permissions: (jwtPayload as any)?.permissions,
-    
-};
+      permissions: jwtPayload.permissions,
+    };
   }
 
   private createParlantConversationContext(
     securityContext: {
-  userId: string;
+      userId: string;
       role: UserRole;
       securityClassification: SecurityClassification;
       permissions: Permission[];
-    
-},
+    },
     request: {
-  ipAddress: string;
+      ipAddress: string;
       userAgent: string;
       sessionMetadata?: Record<string, unknown>;
-    
-}
+    }
   ): ParlantConversationContext {
-  return {
-  userId: (securityContext as any)?.userId,
-      agentRole: (securityContext as any)?.role?.toString?.(),
-      securityLevel: (this as any)?.mapClassificationToSecurityLevel?.((securityContext as any)?.securityClassification),
+    return {
+      userId: securityContext.userId,
+      agentRole: securityContext.role.toString(),
+      securityLevel: this.mapClassificationToSecurityLevel(securityContext.securityClassification),
       conversationHistory: [],
       metadata: {
-  securityClassification: (securityContext as any)?.securityClassification,
-        permissions: (securityContext as any)?.permissions,
-        ipAddress: (request as any)?.ipAddress,
-        userAgent: (request as any)?.userAgent,
-        sessionMetadata: (request as any)?.sessionMetadata,
+        securityClassification: securityContext.securityClassification,
+        permissions: securityContext.permissions,
+        ipAddress: request.ipAddress,
+        userAgent: request.userAgent,
+        sessionMetadata: request.sessionMetadata,
         bridgeVersion: '1.0.0',
         createdAt: new Date().toISOString(),
-},
+      },
     };
   }
 
@@ -1048,125 +1051,128 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       sessionMetadata?: Record<string, unknown>;
     }
   ): ParlantSecuritySession {
-    const sessionId = `session_${(Date as any)?.now?.()}_${(Math as any)?.random?.().toString(36).substring(7)}`;
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const now = new Date();
-    const sessionDuration = (this as any)?.calculateSessionDuration?.((jwtPayload as any)?.role);
-    const expiresAt = new Date((now as any)?.getTime?.() + sessionDuration);
+    const sessionDuration = this.calculateSessionDuration(jwtPayload.role);
+    const expiresAt = new Date(now.getTime() + sessionDuration);
 
     const session: ParlantSecuritySession = {
-  sessionId,
+      sessionId,
       parlantSessionId,
-      userId: (jwtPayload as any)?.sub,
-      userRole: (jwtPayload as any)?.role,
-      securityClassification: (jwtPayload as any)?.securityClassification,
-      permissions: (jwtPayload as any)?.permissions,
-      state: (SessionState as any)?.ACTIVE,
+      userId: jwtPayload.sub,
+      userRole: jwtPayload.role,
+      securityClassification: jwtPayload.securityClassification,
+      permissions: jwtPayload.permissions,
+      state: SessionState.ACTIVE,
       createdAt: now,
       lastAccessedAt: now,
       expiresAt,
       conversationContext: parlantContext,
       auditTrail: [{
-  timestamp: now,
-        action: 'CREATE',outcome: 'SUCCESS',
-        details: `Session created with ${(jwtPayload as any)?.securityClassification
-} classification`,ipAddress: (request as any)?.ipAddress,userAgent: (request as any)?.userAgent,
+        timestamp: now,
+        action: 'CREATE',
+        outcome: 'SUCCESS',
+        details: `Session created with ${jwtPayload.securityClassification} classification`,
+        ipAddress: request.ipAddress,
+        userAgent: request.userAgent,
         conversationId,
       }],
-      complianceFrameworks: (jwtPayload as any)?.complianceRequirements,
+      complianceFrameworks: jwtPayload.complianceRequirements,
       metadata: {
-  ...(request as any)?.sessionMetadata,
-        jwtIssuedAt: (jwtPayload as any)?.iat,
-        jwtExpiresAt: (jwtPayload as any)?.exp,
-        organizationId: (jwtPayload as any)?.organizationId,
-        departmentId: (jwtPayload as any)?.departmentId,
-      
-},
+        ...request.sessionMetadata,
+        jwtIssuedAt: jwtPayload.iat,
+        jwtExpiresAt: jwtPayload.exp,
+        organizationId: jwtPayload.organizationId,
+        departmentId: jwtPayload.departmentId,
+      },
     };
 
     return session;
   }
 
   private calculateSessionDuration(role: UserRole): number {
-  const roleMapping = (this.roleClassificationMappings as any)?.get?.(role);
-    return roleMapping?.maxSessionDuration ?? (this as any)?.bridgeConfig.sessionTimeoutMs;
-  
-}
+    const roleMapping = this.roleClassificationMappings.get(role);
+    return roleMapping?.maxSessionDuration ?? this.bridgeConfig.sessionTimeoutMs;
+  }
 
   private async storeSessionInCluster(session: ParlantSecuritySession): Promise<void> {
-  if (!(this as any)?.redisCluster) return;
+    if (!this.redisCluster) return;
 
     try {
-      const sessionData = (JSON as any)?.stringify?.(session);
-      const ttlSeconds = (Math as any)?.floor?.(((session.expiresAt as any)?.getTime?.() - (Date as any)?.now?.()) / 1000);
+      const sessionData = JSON.stringify(session);
+      const ttlSeconds = Math.floor((session.expiresAt.getTime() - Date.now()) / 1000);
 
-      await (this.redisCluster as any)?.setex?.(`session:${(session as any)?.sessionId
-}`, ttlSeconds, sessionData);
-      (this.logger as any)?.debug?.(`Session ${(session as any)?.sessionId} stored in Redis cluster`);
-    } catch (error: any) {
-  (this.logger as any)?.error?.(
-        `Failed to store session in Redis cluster: ${error instanceof Error ? (error as any)?.message : String(error)
-}`);}
+      await this.redisCluster.setex(`session:${session.sessionId}`, ttlSeconds, sessionData);
+      this.logger.debug(`Session ${session.sessionId} stored in Redis cluster`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to store session in Redis cluster: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   private async retrieveSession(sessionId: string): Promise<ParlantSecuritySession | null> {
-  // Try Redis cluster first
-    if ((this as any)?.redisCluster) {
+    // Try Redis cluster first
+    if (this.redisCluster) {
       try {
-        const sessionData = await (this.redisCluster as any)?.get?.(`session:${sessionId
-}`);if (sessionData) {
-  return (JSON as any)?.parse?.(sessionData) as ParlantSecuritySession;
-        
-}
-      } catch (error: any) {
-  (this.logger as any)?.error?.(
-          `Failed to retrieve session from Redis: ${error instanceof Error ? (error as any)?.message : String(error)
-}`
+        const sessionData = await this.redisCluster.get(`session:${sessionId}`);
+        if (sessionData) {
+          return JSON.parse(sessionData) as ParlantSecuritySession;
+        }
+      } catch (error: unknown) {
+        this.logger.error(
+          `Failed to retrieve session from Redis: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
 
     // Fallback to in-memory store
-    return (this.activeSessions as any)?.get?.(sessionId) ?? null;
+    return this.activeSessions.get(sessionId) ?? null;
   }
 
   private isValidationCacheValid(validation: SessionValidationResult): boolean {
-  const cacheMaxAge = 60000; // 1 minute
-    return Date.now() - (validation as any)?.validationTimestamp?.getTime?.() < cacheMaxAge;
-  
-}
+    const cacheMaxAge = 60000; // 1 minute
+    return Date.now() - validation.validationTimestamp.getTime() < cacheMaxAge;
+  }
 
   private detectSecurityViolations(
     session: ParlantSecuritySession,
     context: {
-  ipAddress: string;
+      ipAddress: string;
       userAgent: string;
-    
-}
+    }
   ): string[] {
-  const violations: string[] = [];
+    const violations: string[] = [];
 
     // Check for IP address changes (simplified - real implementation would be more sophisticated)
-    const originalIp = (session as any)?.auditTrail[0]?.ipAddress;
-    if (originalIp && originalIp !== (context as any)?.ipAddress) {
-      (violations as any)?.push?.('IP_ADDRESS_CHANGE');
-}// Check for user agent changes
-    const originalUserAgent = (session as any)?.auditTrail[0]?.userAgent;
-    if (originalUserAgent && originalUserAgent !== (context as any)?.userAgent) {
-      (violations as any)?.push?.('USER_AGENT_CHANGE');}// Check session duration
-    const sessionAge = (Date as any)?.now?.() - (session.createdAt as any)?.getTime?.();
-    const maxDuration = (this as any)?.calculateSessionDuration?.((session as any)?.userRole);
+    const originalIp = session.auditTrail[0]?.ipAddress;
+    if (originalIp && originalIp !== context.ipAddress) {
+      violations.push('IP_ADDRESS_CHANGE');
+    }
+
+    // Check for user agent changes
+    const originalUserAgent = session.auditTrail[0]?.userAgent;
+    if (originalUserAgent && originalUserAgent !== context.userAgent) {
+      violations.push('USER_AGENT_CHANGE');
+    }
+
+    // Check session duration
+    const sessionAge = Date.now() - session.createdAt.getTime();
+    const maxDuration = this.calculateSessionDuration(session.userRole);
     if (sessionAge > maxDuration) {
-      (violations as any)?.push?.('SESSION_DURATION_EXCEEDED');}return violations;
+      violations.push('SESSION_DURATION_EXCEEDED');
+    }
+
+    return violations;
   }
 
-  private async checkComplianceStatus(session: ParlantSecuritySession): Promise<Record<ComplianceFramework, boolean>> {
+  private checkComplianceStatus(session: ParlantSecuritySession): Record<ComplianceFramework, boolean> {
     const status = {} as Record<ComplianceFramework, boolean>;
 
     // Simplified compliance check - real implementation would check actual compliance rules
-    (session.complianceFrameworks as any)?.forEach?.(framework => {
-  status[framework] = true; // Assume compliant for now
-    
-});
+    session.complianceFrameworks.forEach(framework => {
+      status[framework] = true; // Assume compliant for now
+    });
 
     return status;
   }
@@ -1174,91 +1180,87 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   private async updateSessionAccess(
     session: ParlantSecuritySession,
     context: {
-  ipAddress: string;
+      ipAddress: string;
       userAgent: string;
       requestedAction?: string;
-    
-}
+    }
   ): Promise<ParlantSecuritySession> {
-  const auditEntry: SessionAuditEntry = {
-  timestamp: new Date(),
-      action: 'ACCESS',outcome: 'SUCCESS',
-      details: `Session accessed for: ${(context as any)?.requestedAction ?? 'general operation'
-}`,ipAddress: (context as any)?.ipAddress,userAgent: (context as any)?.userAgent,
+    const auditEntry: SessionAuditEntry = {
+      timestamp: new Date(),
+      action: 'ACCESS',
+      outcome: 'SUCCESS',
+      details: `Session accessed for: ${context.requestedAction ?? 'general operation'}`,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
     };
 
     const updatedSession: ParlantSecuritySession = {
-  ...session,
+      ...session,
       lastAccessedAt: new Date(),
-      auditTrail: [...(session as any)?.auditTrail, auditEntry],
-    
-};
+      auditTrail: [...session.auditTrail, auditEntry],
+    };
 
     // Update in Redis cluster
-    if ((this as any)?.bridgeConfig.sessionClusteringEnabled) {
-  await (this as any)?.storeSessionInCluster?.(updatedSession);
-    
-}
+    if (this.bridgeConfig.sessionClusteringEnabled) {
+      await this.storeSessionInCluster(updatedSession);
+    }
 
     return updatedSession;
   }
 
   private updatePerformanceMetrics(duration: number): void {
-  // Update session creation metrics
-    (this as any)?.averageValidationTime =
-      ((this as any)?.averageValidationTime * ((this as any)?.totalSessionsCreated - 1) + duration) / (this as any)?.totalSessionsCreated;
-  
-}
+    // Update session creation metrics
+    this.averageValidationTime =
+      (this.averageValidationTime * (this.totalSessionsCreated - 1) + duration) / this.totalSessionsCreated;
+  }
 
   private updateValidationMetrics(duration: number): void {
-  // Update validation metrics
-    (this as any)?.averageValidationTime =
-      ((this as any)?.averageValidationTime * ((this as any)?.totalValidationsPerformed - 1) + duration) / (this as any)?.totalValidationsPerformed;
-  
-}
+    // Update validation metrics
+    this.averageValidationTime =
+      (this.averageValidationTime * (this.totalValidationsPerformed - 1) + duration) / this.totalValidationsPerformed;
+  }
 
   private async performSessionCleanup(): Promise<void> {
-  const now = (Date as any)?.now?.();
+    const now = Date.now();
     let cleanedSessions = 0;
 
-    for (const [sessionId, session] of (this.activeSessions as any)?.entries?.()) {
-      if ((session.expiresAt as any)?.getTime?.() < now || (session as any)?.state === (SessionState as any)?.EXPIRED) {
-        (this.activeSessions as any)?.delete?.(sessionId);
+    for (const [sessionId, session] of this.activeSessions.entries()) {
+      if (session.expiresAt.getTime() < now || session.state === SessionState.EXPIRED) {
+        this.activeSessions.delete(sessionId);
 
         // Remove from Redis cluster
-        if ((this as any)?.redisCluster) {
+        if (this.redisCluster) {
           try {
-            await (this.redisCluster as any)?.del?.(`session:${sessionId
-}`);
-            } catch (_error: any) {
-              (this.logger as any)?.debug?.(`Failed to remove expired session from Redis: ${sessionId}`);
-            }}
+            await this.redisCluster.del(`session:${sessionId}`);
+          } catch (_error: unknown) {
+            this.logger.debug(`Failed to remove expired session from Redis: ${sessionId}`);
+          }
+        }
 
         cleanedSessions++;
       }
     }
 
     if (cleanedSessions > 0) {
-      (this.logger as any)?.log?.(`Cleaned up ${cleanedSessions} expired sessions`);
+      this.logger.log(`Cleaned up ${cleanedSessions} expired sessions`);
     }
   }
 
   private monitorSessionHealth(): void {
-  const metrics = {
-  totalSessions: (this as any)?.activeSessions.size,
-      activeSessions: (Array as any)?.from?.((this.activeSessions as any)?.values?.()).filter(s => (s as any)?.state === (SessionState as any)?.ACTIVE).length,
-      suspendedSessions: (Array as any)?.from?.((this.activeSessions as any)?.values?.()).filter(s => (s as any)?.state === (SessionState as any)?.SUSPENDED).length,
-      redisConnected: (this as any)?.redisCluster?.status === 'ready',
-};
-    (this.logger as any)?.debug?.('Session health check', metrics);
+    const metrics = {
+      totalSessions: this.activeSessions.size,
+      activeSessions: Array.from(this.activeSessions.values()).filter(s => s.state === SessionState.ACTIVE).length,
+      suspendedSessions: Array.from(this.activeSessions.values()).filter(s => s.state === SessionState.SUSPENDED).length,
+      redisConnected: this.redisCluster?.status === 'ready',
+    };
+    this.logger.debug('Session health check', metrics);
   }
 
   async onApplicationShutdown(): Promise<void> {
-  if ((this as any)?.redisCluster) {
-      await (this.redisCluster as any)?.quit?.();
-      (this as any)?.redisCluster = null;
-    
-}
-    (this.logger as any)?.log?.('AIgent-Parlant Security Bridge shutdown complete');
+    if (this.redisCluster) {
+      await this.redisCluster.quit();
+      this.redisCluster = null;
+    }
+    this.logger.log('AIgent-Parlant Security Bridge shutdown complete');
   }
 }
