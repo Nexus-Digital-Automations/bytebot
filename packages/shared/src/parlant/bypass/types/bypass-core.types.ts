@@ -217,6 +217,87 @@ export interface TokenSecurityMetadata {
 }
 
 /**
+ * Bypass operation request
+ */
+export interface BypassOperationRequest {
+  operationType: BypassOperationType;
+  requestContext: UserOperationContext;
+  emergencyToken: EmergencyBypassToken;
+  operationData: Record<string, unknown>;
+  justification: string;
+  requestedBy: string;
+  timestamp: Date;
+}
+
+
+/**
+ * User operation context
+ */
+export interface UserOperationContext {
+  userId: string;
+  sessionId: string;
+  userRole: string;
+  permissions: string[];
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+  riskLevel: string;
+}
+
+/**
+ * Compliance tag for bypass operations
+ */
+export interface ComplianceTag {
+  tagId: string;
+  tagName: string;
+  framework: string;
+  severity: string;
+  required: boolean;
+  description: string;
+}
+
+/**
+ * Compliance report for bypass auditing
+ */
+export interface ComplianceReport {
+  reportId: string;
+  generatedAt: Date;
+  complianceScore: number;
+  violations: string[];
+  recommendations: string[];
+  framework: string;
+  period: string;
+  status: string;
+}
+
+
+
+/**
+ * Violation severity levels
+ */
+export enum ViolationSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Workflow status
+ */
+export enum WorkflowStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  APPROVED = 'approved',
+  DENIED = 'denied',
+  FAILED = 'failed',
+  TIMEOUT = 'timeout',
+  CANCELLED = 'cancelled',
+}
+
+/**
  * Security flags for tokens
  */
 export enum SecurityFlag {
@@ -435,17 +516,6 @@ export enum ApprovalStepStatus {
   SKIPPED = 'skipped'
 }
 
-/**
- * Workflow status
- */
-export enum WorkflowStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  TIMEOUT = 'timeout',
-  CANCELLED = 'cancelled'
-}
 
 /**
  * Workflow metadata
@@ -691,15 +761,6 @@ export enum SecurityViolationType {
   ANOMALOUS_BEHAVIOR = 'anomalous_behavior'
 }
 
-/**
- * Violation severity levels
- */
-export enum ViolationSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
 
 /**
  * Fraud detection result

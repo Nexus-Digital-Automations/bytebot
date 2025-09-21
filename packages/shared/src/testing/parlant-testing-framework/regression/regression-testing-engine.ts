@@ -19,6 +19,7 @@ import { DatabaseFunction } from '../types/test-framework.types';
 import {
   RegressionTestConfig,
   RegressionTestResult,
+  RegressionTestStatus,
   RegressionBaseline,
   RegressionTestSuite,
   ChangeDetectionResult,
@@ -202,7 +203,7 @@ export class RegressionTestingEngine extends EventEmitter {
         executionId,
         timestamp: new Date(),
         duration: Date.now() - startTime,
-        status: 'ERROR',
+        status: RegressionTestStatus.ERROR,
         functionsTestested: functions.length,
         testsExecuted: 0,
         testsPassed: 0,
@@ -1049,14 +1050,14 @@ export class RegressionTestingEngine extends EventEmitter {
   /**
    * Determine execution status
    */
-  private determineExecutionStatus(testResults: any[], alerts: RegressionAlert[]): 'PASSED' | 'FAILED' | 'WARNING' | 'ERROR' {
+  private determineExecutionStatus(testResults: any[], alerts: RegressionAlert[]): RegressionTestStatus {
     const criticalAlerts = alerts.filter(a => a.severity === 'CRITICAL').length;
     const highAlerts = alerts.filter(a => a.severity === 'HIGH').length;
     const failedTests = testResults.filter(r => r.status === 'FAILED').length;
 
-    if (criticalAlerts > 0 || failedTests > testResults.length * 0.1) return 'FAILED';
-    if (highAlerts > 0 || failedTests > 0) return 'WARNING';
-    return 'PASSED';
+    if (criticalAlerts > 0 || failedTests > testResults.length * 0.1) return RegressionTestStatus.FAILED;
+    if (highAlerts > 0 || failedTests > 0) return RegressionTestStatus.WARNING;
+    return RegressionTestStatus.PASSED;
   }
 
   /**

@@ -33,10 +33,69 @@ import {
   ValidationResult,
   ErrorDetails,
   PerformanceMetrics,
-} from '../../types/parlant.types';
+} from '../../../types/parlant.types';
+
+// Import types from compliance-forensic for early usage
+import {
+  ComplianceMetadata,
+} from './compliance-forensic.types';
+
+// Import types from audit-extended for early usage
+import {
+  AuditParlantResponse,
+} from './audit-extended.types';
 
 // Re-export types needed by other modules
 export { RiskLevel };
+
+// ===========================
+// MISSING TYPE DEFINITIONS
+// ===========================
+
+/**
+ * Compliance classification for data and operations
+ */
+export interface ComplianceClassification {
+  classificationLevel: string;
+  dataCategory: string;
+  sensitivityLevel: string;
+  retentionPeriod: string;
+  handlingRequirements: string[];
+}
+
+/**
+ * Parlant validation session context
+ */
+export interface ParlantValidationSession {
+  sessionId: string;
+  timestamp: Date;
+  validationType: string;
+  context: Record<string, unknown>;
+}
+
+/**
+ * Conversation analysis data
+ */
+export interface ConversationAnalysis {
+  analysisId: string;
+  sentiment: string;
+  topics: string[];
+  confidence: number;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Decision reasoning information
+ */
+export interface DecisionReasoning {
+  decisionId: string;
+  reasoning: string;
+  factors: string[];
+  confidence: number;
+  timestamp: Date;
+}
+
+// BypassInfo is defined later in the file with more comprehensive properties
 
 // ===========================
 // CORE AUDIT TYPES
@@ -923,7 +982,7 @@ export interface AuditParlantContext {
   validationResponse?: AuditParlantResponse;
 
   /** Validation session information */
-  validationSession: ParlantValidationSession;
+  validationSession: ParlantValidationResponse;
 
   /** Conversation analysis */
   conversationAnalysis: ConversationAnalysis;
@@ -1303,16 +1362,6 @@ export interface ComplianceValidationResult {
   complianceScore: number;
 }
 
-/**
- * Compliance status enumeration
- */
-export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  EXEMPTED = 'exempted',
-}
 
 /**
  * Compliance check details
@@ -5736,6 +5785,526 @@ export interface IValidationEngine {
 
   /** Shutdown the validation engine */
   shutdown(): Promise<void>;
+}
+
+// ===========================
+// MISSING TYPE DEFINITIONS
+// ===========================
+
+/**
+ * Compliance classification for audit data
+ */
+export interface ComplianceClassification {
+  /** Classification level */
+  level: ComplianceLevel;
+
+  /** Applicable frameworks */
+  frameworks: ComplianceFramework[];
+
+  /** Classification reason */
+  reason: string;
+
+  /** Data retention requirements */
+  retentionRequirements: RetentionRequirement[];
+
+  /** Access restrictions */
+  accessRestrictions: AccessRestriction[];
+}
+
+/**
+ * Compliance classification levels
+ */
+export enum ComplianceLevel {
+  PUBLIC = 'public',
+  INTERNAL = 'internal',
+  CONFIDENTIAL = 'confidential',
+  RESTRICTED = 'restricted',
+  TOP_SECRET = 'top_secret',
+}
+
+/**
+ * Data retention requirement
+ */
+export interface RetentionRequirement {
+  /** Retention period in days */
+  retentionPeriod: number;
+
+  /** Framework requiring retention */
+  framework: ComplianceFramework;
+
+  /** Disposal method */
+  disposalMethod: DisposalMethod;
+}
+
+/**
+ * Data disposal methods
+ */
+export enum DisposalMethod {
+  SECURE_DELETE = 'secure_delete',
+  PHYSICAL_DESTRUCTION = 'physical_destruction',
+  CRYPTOGRAPHIC_ERASURE = 'cryptographic_erasure',
+  DEGAUSSING = 'degaussing',
+}
+
+/**
+ * Access restriction definition
+ */
+export interface AccessRestriction {
+  /** Restriction type */
+  type: RestrictionType;
+
+  /** Allowed roles */
+  allowedRoles: string[];
+
+  /** Required permissions */
+  requiredPermissions: string[];
+
+  /** Geographic restrictions */
+  geographicRestrictions?: string[];
+}
+
+/**
+ * Conversation analysis for PARLANT interactions
+ */
+export interface ConversationAnalysis {
+  /** Conversation ID */
+  conversationId: string;
+
+  /** Message count */
+  messageCount: number;
+
+  /** Conversation duration */
+  duration: number;
+
+  /** Intent analysis */
+  intentAnalysis: IntentAnalysis;
+
+  /** Sentiment analysis */
+  sentimentAnalysis: SentimentAnalysis;
+
+  /** Topics discussed */
+  topics: string[];
+
+  /** Risk indicators */
+  riskIndicators: RiskIndicator[];
+}
+
+/**
+ * Intent analysis results
+ */
+export interface IntentAnalysis {
+  /** Primary intent */
+  primaryIntent: string;
+
+  /** Confidence score */
+  confidence: number;
+
+  /** Alternative intents */
+  alternativeIntents: Array<{
+    intent: string;
+    confidence: number;
+  }>;
+}
+
+/**
+ * Sentiment analysis results
+ */
+export interface SentimentAnalysis {
+  /** Overall sentiment */
+  sentiment: SentimentType;
+
+  /** Confidence score */
+  confidence: number;
+
+  /** Emotional indicators */
+  emotions: EmotionIndicator[];
+}
+
+/**
+ * Sentiment types
+ */
+export enum SentimentType {
+  POSITIVE = 'positive',
+  NEGATIVE = 'negative',
+  NEUTRAL = 'neutral',
+  MIXED = 'mixed',
+}
+
+/**
+ * Emotion indicator
+ */
+export interface EmotionIndicator {
+  /** Emotion type */
+  emotion: string;
+
+  /** Intensity score */
+  intensity: number;
+}
+
+/**
+ * Risk indicator for conversation
+ */
+export interface RiskIndicator {
+  /** Risk type */
+  type: ConversationRiskType;
+
+  /** Risk level */
+  level: RiskLevel;
+
+  /** Description */
+  description: string;
+
+  /** Evidence */
+  evidence: string[];
+}
+
+/**
+ * Conversation risk types
+ */
+export enum ConversationRiskType {
+  POLICY_VIOLATION = 'policy_violation',
+  SECURITY_THREAT = 'security_threat',
+  COMPLIANCE_RISK = 'compliance_risk',
+  INAPPROPRIATE_CONTENT = 'inappropriate_content',
+  DATA_BREACH_RISK = 'data_breach_risk',
+}
+
+/**
+ * Decision reasoning for PARLANT validation
+ */
+export interface DecisionReasoning {
+  /** Decision made */
+  decision: ValidationDecision;
+
+  /** Reasoning steps */
+  reasoningSteps: ReasoningStep[];
+
+  /** Evidence considered */
+  evidence: DecisionEvidence[];
+
+  /** Confidence level */
+  confidence: number;
+
+  /** Alternative decisions */
+  alternatives: AlternativeDecision[];
+}
+
+/**
+ * Validation decision types
+ */
+export enum ValidationDecision {
+  APPROVE = 'approve',
+  DENY = 'deny',
+  REQUIRE_REVIEW = 'require_review',
+  REQUEST_ADDITIONAL_INFO = 'request_additional_info',
+  ESCALATE = 'escalate',
+}
+
+/**
+ * Reasoning step in decision process
+ */
+export interface ReasoningStep {
+  /** Step number */
+  step: number;
+
+  /** Step description */
+  description: string;
+
+  /** Rule applied */
+  ruleApplied?: string;
+
+  /** Result of step */
+  result: string;
+}
+
+/**
+ * Evidence used in decision making
+ */
+export interface DecisionEvidence {
+  /** Evidence type */
+  type: EvidenceType;
+
+  /** Evidence description */
+  description: string;
+
+  /** Source of evidence */
+  source: string;
+
+  /** Reliability score */
+  reliability: number;
+}
+
+/**
+ * Evidence types for audit trail
+ */
+export enum EvidenceType {
+  USER_INPUT = 'user_input',
+  SYSTEM_LOG = 'system_log',
+  VALIDATION_RESULT = 'validation_result',
+  POLICY_RULE = 'policy_rule',
+  HISTORICAL_DATA = 'historical_data',
+  EXTERNAL_SOURCE = 'external_source',
+  BIOMETRIC_DATA = 'biometric_data',
+  CRYPTOGRAPHIC_PROOF = 'cryptographic_proof',
+}
+
+/**
+ * Alternative decision option
+ */
+export interface AlternativeDecision {
+  /** Alternative decision */
+  decision: ValidationDecision;
+
+  /** Reasoning for alternative */
+  reasoning: string;
+
+  /** Confidence in alternative */
+  confidence: number;
+}
+
+/**
+ * Bypass information for audit trail
+ */
+export interface BypassInfo {
+  /** Bypass type */
+  type: BypassType;
+
+  /** Authorization provided */
+  authorization: BypassAuthorization;
+
+  /** Reason for bypass */
+  reason: string;
+
+  /** Bypass duration */
+  duration?: number;
+
+  /** Conditions applied */
+  conditions: string[];
+
+  /** Approver information */
+  approver: ApproverInfo;
+}
+
+/**
+ * Bypass types
+ */
+export enum BypassType {
+  EMERGENCY_OVERRIDE = 'emergency_override',
+  ADMINISTRATIVE_BYPASS = 'administrative_bypass',
+  MAINTENANCE_BYPASS = 'maintenance_bypass',
+  TESTING_BYPASS = 'testing_bypass',
+  COMPLIANCE_EXCEPTION = 'compliance_exception',
+}
+
+/**
+ * Bypass authorization details
+ */
+export interface BypassAuthorization {
+  /** Authorization ID */
+  authorizationId: string;
+
+  /** Authorization level */
+  level: AuthorizationLevel;
+
+  /** Issuing authority */
+  issuingAuthority: string;
+
+  /** Valid from */
+  validFrom: Date;
+
+  /** Valid until */
+  validUntil?: Date;
+}
+
+/**
+ * Authorization levels
+ */
+export enum AuthorizationLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+  EMERGENCY = 'emergency',
+}
+
+/**
+ * Approver information
+ */
+export interface ApproverInfo {
+  /** Approver ID */
+  approverId: string;
+
+  /** Approver name */
+  name: string;
+
+  /** Approver role */
+  role: string;
+
+  /** Approval timestamp */
+  approvalTimestamp: Date;
+
+  /** Digital signature */
+  digitalSignature?: string;
+}
+
+/**
+ * Implementation status for audit controls
+ */
+export enum ImplementationStatus {
+  NOT_IMPLEMENTED = 'not_implemented',
+  PLANNED = 'planned',
+  IN_PROGRESS = 'in_progress',
+  IMPLEMENTED = 'implemented',
+  PARTIALLY_IMPLEMENTED = 'partially_implemented',
+  DEFERRED = 'deferred',
+  CANCELLED = 'cancelled',
+}
+
+/**
+ * Effectiveness rating for controls
+ */
+export enum EffectivenessRating {
+  INEFFECTIVE = 'ineffective',
+  PARTIALLY_EFFECTIVE = 'partially_effective',
+  LARGELY_EFFECTIVE = 'largely_effective',
+  EFFECTIVE = 'effective',
+  HIGHLY_EFFECTIVE = 'highly_effective',
+}
+
+/**
+ * Risk mitigation strategy
+ */
+export interface RiskMitigation {
+  /** Mitigation strategy */
+  strategy: MitigationStrategy;
+
+  /** Implementation plan */
+  implementationPlan: ImplementationPlan;
+
+  /** Expected effectiveness */
+  expectedEffectiveness: EffectivenessRating;
+
+  /** Cost estimate */
+  costEstimate?: number;
+
+  /** Timeline */
+  timeline: MitigationTimeline;
+
+  /** Success metrics */
+  successMetrics: string[];
+}
+
+/**
+ * Mitigation strategies
+ */
+export enum MitigationStrategy {
+  AVOID = 'avoid',
+  MITIGATE = 'mitigate',
+  TRANSFER = 'transfer',
+  ACCEPT = 'accept',
+  MONITOR = 'monitor',
+}
+
+/**
+ * Implementation plan for mitigation
+ */
+export interface ImplementationPlan {
+  /** Plan phases */
+  phases: ImplementationPhase[];
+
+  /** Required resources */
+  requiredResources: ResourceRequirement[];
+
+  /** Dependencies */
+  dependencies: string[];
+
+  /** Success criteria */
+  successCriteria: string[];
+}
+
+/**
+ * Implementation phase
+ */
+export interface ImplementationPhase {
+  /** Phase name */
+  name: string;
+
+  /** Phase description */
+  description: string;
+
+  /** Start date */
+  startDate: Date;
+
+  /** End date */
+  endDate: Date;
+
+  /** Deliverables */
+  deliverables: string[];
+
+  /** Status */
+  status: ImplementationStatus;
+}
+
+/**
+ * Resource requirement
+ */
+export interface ResourceRequirement {
+  /** Resource type */
+  type: ResourceType;
+
+  /** Quantity needed */
+  quantity: number;
+
+  /** Duration needed */
+  duration: number;
+
+  /** Cost */
+  cost?: number;
+}
+
+/**
+ * Resource types
+ */
+export enum ResourceType {
+  PERSONNEL = 'personnel',
+  TECHNOLOGY = 'technology',
+  BUDGET = 'budget',
+  TIME = 'time',
+  INFRASTRUCTURE = 'infrastructure',
+}
+
+/**
+ * Mitigation timeline
+ */
+export interface MitigationTimeline {
+  /** Start date */
+  startDate: Date;
+
+  /** Target completion date */
+  targetCompletionDate: Date;
+
+  /** Milestones */
+  milestones: TimelineMilestone[];
+
+  /** Critical path */
+  criticalPath: string[];
+}
+
+/**
+ * Timeline milestone
+ */
+export interface TimelineMilestone {
+  /** Milestone name */
+  name: string;
+
+  /** Target date */
+  targetDate: Date;
+
+  /** Completion status */
+  completed: boolean;
+
+  /** Completion date */
+  completionDate?: Date;
 }
 
 // Export additional types from compliance-forensic.types

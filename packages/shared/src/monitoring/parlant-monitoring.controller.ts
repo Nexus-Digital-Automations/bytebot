@@ -59,6 +59,7 @@ import {
   ConversationalDashboardResponseDto,
   PeriodicInsightsResponseDto,
   MonitoringQueryDto,
+  FollowUpQueryDto,
 } from "./parlant-monitoring.dto";
 
 // Note: MonitoringQueryDto is now imported from parlant-monitoring.dto.ts
@@ -189,7 +190,7 @@ export class ParlantMonitoringController {
               }
             : undefined,
         services: queryDto.services,
-        securityLevels: queryDto.securityLevels,
+        securityLevels: queryDto.securityLevels as SecurityLevel[],
         includePerformance: queryDto.includePerformance,
         includeValidation: queryDto.includeValidation,
       };

@@ -186,6 +186,40 @@ export interface RegressionTestConfig {
     /** Maximum CPU usage percentage */
     maxCpuUsagePercent: number;
   };
+
+  // Flattened properties for backward compatibility
+  /** Enable parallel test execution */
+  parallelExecution: boolean;
+
+  /** Maximum concurrent test workers */
+  maxConcurrency: number;
+
+  /** Test batch size for parallel execution */
+  batchSize: number;
+
+  /** Stop execution on first failure */
+  failFast: boolean;
+
+  /** Test timeout in milliseconds */
+  testTimeout: number;
+
+  /** Maximum retry attempts for failed tests */
+  maxRetries: number;
+
+  /** Automatically update baseline on successful runs */
+  autoUpdateBaseline: boolean;
+
+  /** Minimum compatibility score required */
+  minCompatibilityScore: number;
+
+  /** Maximum allowed performance deviation percentage */
+  maxPerformanceDeviation: number;
+
+  /** Maximum response time in milliseconds */
+  maxResponseTimeMs: number;
+
+  /** Maximum number of execution results to retain */
+  maxHistorySize: number;
 }
 
 // ============================================================================

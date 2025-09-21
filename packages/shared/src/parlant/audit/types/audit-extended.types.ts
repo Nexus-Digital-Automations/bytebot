@@ -20,7 +20,7 @@ import {
   SensitiveDataType,
   RiskLevel,
 } from './audit-core.types';
-import { ParlantValidationResponse } from '../../types/parlant.types';
+import { ParlantValidationResponse } from '../../../types/parlant.types';
 
 // ===========================
 // AUDIT PARLANT RESPONSE

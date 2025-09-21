@@ -28,16 +28,16 @@ export interface ConversationContext {
   lastActivity?: Date;
 
   /** Current conversation state */
-  state?: 'active' | 'paused' | 'ended';
+  state?: "active" | "paused" | "ended";
 
   /** Current topic or focus area */
   currentTopic?: string;
 
   /** User preferences for this conversation */
   preferences?: {
-    verbosity?: 'low' | 'medium' | 'high';
+    verbosity?: "low" | "medium" | "high";
     includeDetails?: boolean;
-    format?: 'concise' | 'detailed' | 'technical';
+    format?: "concise" | "detailed" | "technical";
   };
 
   /** Security context */
@@ -53,7 +53,7 @@ export interface ParlantConversationContext extends ConversationContext {
   parlantData?: {
     /** Conversation analysis */
     analysis?: {
-      sentiment?: 'positive' | 'neutral' | 'negative';
+      sentiment?: "positive" | "neutral" | "negative";
       intent?: string;
       confidence?: number;
     };
@@ -70,4 +70,7 @@ export interface ParlantConversationContext extends ConversationContext {
   };
 }
 
-export type ConversationContextParameter = ConversationContext | ParlantConversationContext | undefined;
+export type ConversationContextParameter =
+  | ConversationContext
+  | ParlantConversationContext
+  | undefined;

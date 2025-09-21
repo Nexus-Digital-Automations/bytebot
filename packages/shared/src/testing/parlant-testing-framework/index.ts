@@ -71,7 +71,7 @@ export { ResourceLimits } from './core/parallel-execution-manager';
 export { DashboardWidget } from './coverage/coverage-reporting-dashboard';
 export { PerformanceTestScenario } from './performance/performance-testing-suite';
 export { PerformanceThresholds } from './types/test-framework.types';
-export { DataClassification } from './security/security-testing-framework';
+// DataClassification is now exported from './types/security-testing.types'
 export { CoverageDataSource } from './coverage/coverage-analyzer';
 export { AlertSeverity, ComparisonVerdict, FilterType } from './types/performance-testing.types';
 

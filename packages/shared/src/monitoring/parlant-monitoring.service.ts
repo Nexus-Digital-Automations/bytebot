@@ -284,18 +284,28 @@ export class ParlantMonitoringService {
     overallStatus: string;
     conversationalSummary: string;
     keyMetrics: Array<{
-      metric: string;
+      name: string;
       value: string | number;
+      status: string;
       trend: "UP" | "DOWN" | "STABLE";
-      conversationalDescription: string;
-    }>;
-    alerts: Array<{
-      level: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
-      message: string;
       conversationalExplanation: string;
       suggestedActions: string[];
     }>;
-    recentActivity: MonitoringEvent[];
+    alerts: Array<{
+      id: string;
+      severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+      message: string;
+      timestamp: Date;
+      conversationalExplanation: string;
+      suggestedActions: string[];
+    }>;
+    recentActivity: Array<{
+      id: string;
+      type: string;
+      description: string;
+      timestamp: Date;
+      metadata: Record<string, unknown>;
+    }>;
     timestamp: Date;
   }> {
     const operationId = this.generateOperationId();
@@ -850,7 +860,13 @@ export class ParlantMonitoringService {
     return "HEALTHY";
   }
 
-  private getRecentActivity(limit: number): MonitoringEvent[] {
+  private getRecentActivity(limit: number): Array<{
+    id: string;
+    type: string;
+    description: string;
+    timestamp: Date;
+    metadata: Record<string, unknown>;
+  }> {
     return [];
   }
 

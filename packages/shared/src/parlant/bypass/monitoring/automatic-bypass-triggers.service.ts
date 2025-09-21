@@ -20,7 +20,8 @@ import {
   SystemHealthStatus,
   ServiceStatus,
   EmergencyBypassRequest,
-  BypassRequestStatus
+  BypassRequestStatus,
+  WorkflowStatus
 } from '../types/bypass-core.types';
 
 /**

@@ -675,6 +675,45 @@ export interface VulnerabilityScanStatistics {
  * Comprehensive security test results
  */
 export interface SecurityTestResult {
+  /** Test identifier for compatibility */
+  testId: string;
+
+  /** Function name being tested */
+  functionName: string;
+
+  /** Security profile used for testing */
+  securityProfile: SecurityProfile;
+
+  /** Test start time */
+  startTime: number;
+
+  /** Test end time */
+  endTime: number;
+
+  /** Total test duration */
+  totalDuration: number;
+
+  /** Tests executed count */
+  testsExecuted: number;
+
+  /** Tests passed count */
+  testsPassed: number;
+
+  /** Tests failed count */
+  testsFailed: number;
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Overall security score */
+  securityScore: number; // 0-100
+
+  /** Risk assessment */
+  riskAssessment: RiskAssessment;
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+
   /** Test execution identifier */
   executionId: string;
 
@@ -689,9 +728,6 @@ export interface SecurityTestResult {
 
   /** Test results by category */
   categoryResults: Record<SecurityTestCategory, SecurityCategoryResult>;
-
-  /** Overall security score */
-  securityScore: number; // 0-100
 
   /** Compliance assessment */
   complianceAssessment: ComplianceAssessment;
@@ -1046,13 +1082,49 @@ export interface ComplianceRequirement {
  */
 export interface SecurityTestSuite {
   /** Suite identifier */
-  id: string;
+  suiteId: string;
 
   /** Suite name */
   name: string;
 
   /** Suite description */
   description: string;
+
+  /** Suite start time */
+  startTime: number;
+
+  /** Suite end time */
+  endTime: number;
+
+  /** Total suite duration */
+  totalDuration: number;
+
+  /** Functions tested count */
+  functionsTestedCount: number;
+
+  /** Total tests executed */
+  totalTests: number;
+
+  /** Tests passed count */
+  passedTests: number;
+
+  /** Tests failed count */
+  failedTests: number;
+
+  /** Vulnerabilities found count */
+  vulnerabilitiesFound: number;
+
+  /** Overall security score */
+  overallSecurityScore: number;
+
+  /** Test results */
+  results: SecurityTestResult[];
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+
+  /** Compliance status */
+  complianceStatus: ComplianceStatus;
 
   /** Target functions for testing */
   targetFunctions: DatabaseFunction[];
@@ -1110,6 +1182,469 @@ export interface SecurityTestExecutionContext {
     version: string;
     platform: string;
   };
+}
+
+// ============================================================================
+// Additional Required Types for Framework Implementation
+// ============================================================================
+
+/**
+ * Vulnerability test result for individual vulnerability scans
+ */
+export interface VulnerabilityTestResult {
+  /** Scan identifier */
+  scanId: string;
+
+  /** Function name tested */
+  functionName: string;
+
+  /** Scan start time */
+  startTime: number;
+
+  /** Scan end time */
+  endTime: number;
+
+  /** Total scan duration */
+  totalDuration: number;
+
+  /** Scan results */
+  scanResults: VulnerabilityScanResult[];
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Risk score (0-100) */
+  riskScore: number;
+
+  /** Critical vulnerabilities count */
+  criticalVulnerabilities: number;
+
+  /** High vulnerabilities count */
+  highVulnerabilities: number;
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+}
+
+/**
+ * Authentication test result for authentication scenarios
+ */
+export interface AuthenticationTestResult {
+  /** Test identifier */
+  testId: string;
+
+  /** Function name tested */
+  functionName: string;
+
+  /** Test start time */
+  startTime: number;
+
+  /** Test end time */
+  endTime: number;
+
+  /** Total test duration */
+  totalDuration: number;
+
+  /** Scenario results */
+  scenarioResults: AuthTestCaseResult[];
+
+  /** Overall test result */
+  overallResult: TestResult;
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+}
+
+/**
+ * Authorization test result for authorization scenarios
+ */
+export interface AuthorizationTestResult {
+  /** Test identifier */
+  testId: string;
+
+  /** Function name tested */
+  functionName: string;
+
+  /** Test start time */
+  startTime: number;
+
+  /** Test end time */
+  endTime: number;
+
+  /** Total test duration */
+  totalDuration: number;
+
+  /** Role test results */
+  roleResults: AuthzTestCaseResult[];
+
+  /** Privilege escalation results */
+  escalationResults: PrivilegeEscalationResult[];
+
+  /** Overall test result */
+  overallResult: TestResult;
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+}
+
+/**
+ * Data protection test result for data protection scenarios
+ */
+export interface DataProtectionTestResult {
+  /** Test identifier */
+  testId: string;
+
+  /** Function name tested */
+  functionName: string;
+
+  /** Data classification tested */
+  dataClassification: DataClassificationLevel;
+
+  /** Test start time */
+  startTime: number;
+
+  /** Test end time */
+  endTime: number;
+
+  /** Total test duration */
+  totalDuration: number;
+
+  /** Test case results */
+  testResults: DataProtectionTestCaseResult[];
+
+  /** Overall test result */
+  overallResult: TestResult;
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Compliance status */
+  complianceStatus: ComplianceStatus;
+
+  /** Security recommendations */
+  recommendations: SecurityRecommendation[];
+}
+
+/**
+ * Security scan result wrapper
+ */
+export interface SecurityScanResult {
+  /** Scan identifier */
+  scanId: string;
+
+  /** Scan type */
+  scanType: string;
+
+  /** Function name scanned */
+  functionName: string;
+
+  /** Scan status */
+  status: 'completed' | 'failed' | 'partial';
+
+  /** Scan duration */
+  scanDuration: number;
+
+  /** Discovered vulnerabilities */
+  vulnerabilities: SecurityVulnerability[];
+
+  /** Scan completion status */
+  completed: boolean;
+
+  /** Error message if failed */
+  errorMessage?: string;
+}
+
+/**
+ * Security vulnerability definition
+ */
+export interface SecurityVulnerability {
+  /** Vulnerability identifier */
+  id: string;
+
+  /** Vulnerability name */
+  name: string;
+
+  /** Vulnerability description */
+  description: string;
+
+  /** Severity level */
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+  /** Vulnerability category */
+  category: string;
+
+  /** CWE identifier */
+  cweId?: string;
+
+  /** Mitigation guidance */
+  mitigation: string;
+
+  /** Affected function */
+  affectedFunction: string;
+
+  /** Discovery timestamp */
+  discoveredAt: number;
+}
+
+/**
+ * Security threat definition
+ */
+export interface SecurityThreat {
+  /** Threat identifier */
+  id: string;
+
+  /** Threat name */
+  name: string;
+
+  /** Threat description */
+  description: string;
+
+  /** Likelihood level */
+  likelihood: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+  /** Impact level */
+  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+  /** Threat category */
+  category: string;
+
+  /** Attack vectors */
+  attackVectors: string[];
+}
+
+/**
+ * Security control definition
+ */
+export interface SecurityControl {
+  /** Control identifier */
+  id: string;
+
+  /** Control name */
+  name: string;
+
+  /** Control description */
+  description: string;
+
+  /** Control type */
+  type: string;
+
+  /** Whether control is mandatory */
+  mandatory: boolean;
+
+  /** Implementation details */
+  implementation: string;
+}
+
+/**
+ * Security recommendation definition
+ */
+export interface SecurityRecommendation {
+  /** Recommendation identifier */
+  id: string;
+
+  /** Priority level */
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+  /** Recommendation category */
+  category: string;
+
+  /** Recommendation title */
+  title: string;
+
+  /** Recommendation description */
+  description: string;
+
+  /** Implementation guidance */
+  implementation: string;
+
+  /** Implementation effort */
+  effort: 'LOW' | 'MEDIUM' | 'HIGH';
+
+  /** Expected impact */
+  impact: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
+/**
+ * Test result enumeration
+ */
+export type TestResult = 'PASSED' | 'FAILED' | 'SKIPPED';
+
+// DataClassification interface removed - using DataClassificationLevel enum instead
+
+/**
+ * Compliance status definition
+ */
+export interface ComplianceStatus {
+  /** Overall compliance status */
+  overall: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL';
+
+  /** Framework-specific compliance */
+  frameworks: Record<string, 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL'>;
+}
+
+/**
+ * Security profile for function testing
+ */
+export interface SecurityProfile {
+  /** Risk level assessment */
+  readonly riskLevel: SecurityRiskLevel;
+
+  /** Whether authentication is required */
+  readonly authenticationRequired: boolean;
+
+  /** Required authorization roles */
+  readonly authorizationRoles: string[];
+
+  /** Data classification level */
+  readonly dataClassification: DataClassificationLevel;
+
+  /** Whether encryption is required */
+  readonly encryptionRequired: boolean;
+
+  /** Whether auditing is required */
+  readonly auditingRequired: boolean;
+
+  /** Applicable compliance frameworks */
+  readonly complianceFrameworks: string[];
+}
+
+/**
+ * Security risk levels for assessment
+ */
+export enum SecurityRiskLevel {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+/**
+ * Data classification levels for security
+ */
+export enum DataClassificationLevel {
+  PUBLIC = 'PUBLIC',
+  INTERNAL = 'INTERNAL',
+  CONFIDENTIAL = 'CONFIDENTIAL',
+  RESTRICTED = 'RESTRICTED',
+  TOP_SECRET = 'TOP_SECRET'
+}
+
+/**
+ * Risk assessment definition
+ */
+export interface RiskAssessment {
+  /** Overall risk level */
+  riskLevel: SecurityRiskLevel;
+
+  /** Numerical risk score */
+  riskScore: number;
+
+  /** Number of critical issues */
+  criticalIssues: number;
+
+  /** Number of high issues */
+  highIssues: number;
+
+  /** Number of medium issues */
+  mediumIssues: number;
+
+  /** Number of low issues */
+  lowIssues: number;
+
+  /** Mitigation priority */
+  mitigationPriority: 'IMMEDIATE' | 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+/**
+ * Supporting type definitions for test results
+ */
+export interface AuthTestCaseResult {
+  /** Test scenario name */
+  scenario: string;
+
+  /** Test credentials */
+  credentials: any;
+
+  /** Whether test passed */
+  passed: boolean;
+
+  /** Response time */
+  responseTime: number;
+
+  /** Error message if failed */
+  errorMessage?: string;
+
+  /** Security issues found */
+  securityIssues: string[];
+}
+
+export interface AuthzTestCaseResult {
+  /** User role tested */
+  role: string;
+
+  /** Expected access */
+  expectedAccess: boolean;
+
+  /** Actual access granted */
+  actualAccess: boolean;
+
+  /** Whether test passed */
+  passed: boolean;
+
+  /** Response time */
+  responseTime: number;
+
+  /** Error message if failed */
+  errorMessage?: string;
+
+  /** Security issues found */
+  securityIssues: string[];
+}
+
+export interface PrivilegeEscalationResult {
+  /** Source role */
+  fromRole: string;
+
+  /** Target role */
+  toRole: string;
+
+  /** Whether escalation was attempted */
+  escalationAttempted: boolean;
+
+  /** Whether escalation succeeded */
+  escalationSucceeded: boolean;
+
+  /** Whether vulnerability was found */
+  vulnerabilityFound: boolean;
+
+  /** Result description */
+  description: string;
+}
+
+export interface DataProtectionTestCaseResult {
+  /** Test name */
+  testName: string;
+
+  /** Test type */
+  testType: 'ENCRYPTION' | 'MASKING' | 'SANITIZATION' | 'PII_HANDLING' | 'LEAKAGE_PREVENTION';
+
+  /** Whether test passed */
+  passed: boolean;
+
+  /** Test description */
+  description: string;
+
+  /** Test findings */
+  findings: string[];
+
+  /** Test recommendations */
+  recommendations: string[];
 }
 
 // ============================================================================

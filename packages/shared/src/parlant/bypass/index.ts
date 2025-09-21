@@ -19,6 +19,36 @@ export * from './types/bypass-core.types';
 // SERVICES
 // =============================================================================
 
+// Import services for internal use
+import { EmergencyTokenManagerService } from './tokens/emergency-token-manager.service';
+import { BypassAuthorizationEngineService } from './authorization/bypass-authorization-engine.service';
+import { AutomaticBypassTriggersService } from './monitoring/automatic-bypass-triggers.service';
+import { BypassAbuseDetectionService } from './prevention/bypass-abuse-detection.service';
+import { BypassAuditForensicsService } from './audit/bypass-audit-forensics.service';
+import { BypassMonitoringHealthService } from './monitoring/bypass-monitoring-health.service';
+import { ParlantBypassIntegrationService } from './integration/parlant-bypass-integration.service';
+
+// Import types for internal use
+import type {
+  BypassOperationRequest,
+  BypassOperationType,
+  UserOperationContext,
+  EmergencyBypassToken,
+  ComplianceTag,
+  ComplianceReport,
+  ViolationSeverity,
+  WorkflowStatus,
+} from './types/bypass-core.types';
+
+// Import service-specific types
+import type {
+  HealthCheckResult,
+} from './monitoring/bypass-monitoring-health.service';
+import type {
+  OperationExecutionResult,
+  IntegrationStatus,
+} from './integration/parlant-bypass-integration.service';
+
 // Token Management
 export { EmergencyTokenManagerService } from './tokens/emergency-token-manager.service';
 export type {

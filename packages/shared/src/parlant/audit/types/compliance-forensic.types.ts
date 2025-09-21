@@ -4019,6 +4019,315 @@ export enum EvidenceVerificationStatus {
   NOT_REQUIRED = 'not_required',
 }
 
-// Continue with remaining types...
+// ===========================
+// MISSING TYPE DEFINITIONS
+// ===========================
 
-export * from './compliance-forensic.types';
+/**
+ * Regulatory notification
+ */
+export interface RegulatoryNotification {
+  /** Notification ID */
+  notificationId: string;
+
+  /** Regulatory body */
+  regulatoryBody: string;
+
+  /** Notification type */
+  type: NotificationType;
+
+  /** Subject */
+  subject: string;
+
+  /** Description */
+  description: string;
+
+  /** Date issued */
+  dateIssued: Date;
+
+  /** Effective date */
+  effectiveDate: Date;
+
+  /** Compliance deadline */
+  complianceDeadline?: Date;
+
+  /** Related regulations */
+  relatedRegulations: string[];
+
+  /** Severity level */
+  severity: NotificationSeverity;
+}
+
+/**
+ * Notification types
+ */
+export enum NotificationType {
+  REGULATORY_CHANGE = 'regulatory_change',
+  COMPLIANCE_DEADLINE = 'compliance_deadline',
+  VIOLATION_NOTICE = 'violation_notice',
+  AUDIT_REQUIREMENT = 'audit_requirement',
+  REPORTING_OBLIGATION = 'reporting_obligation',
+  ENFORCEMENT_ACTION = 'enforcement_action',
+}
+
+/**
+ * Notification severity levels
+ */
+export enum NotificationSeverity {
+  INFO = 'info',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Compliance documentation
+ */
+export interface ComplianceDocumentation {
+  /** Document ID */
+  documentId: string;
+
+  /** Document type */
+  type: DocumentationType;
+
+  /** Title */
+  title: string;
+
+  /** Description */
+  description: string;
+
+  /** Version */
+  version: string;
+
+  /** Creation date */
+  createdDate: Date;
+
+  /** Last modified date */
+  lastModified: Date;
+
+  /** Author */
+  author: string;
+
+  /** Approval status */
+  approvalStatus: DocumentApprovalStatus;
+
+  /** Compliance frameworks */
+  frameworks: ComplianceFramework[];
+
+  /** Document sections */
+  sections: DocumentSection[];
+
+  /** Attachments */
+  attachments: DocumentAttachment[];
+}
+
+/**
+ * Documentation types
+ */
+export enum DocumentationType {
+  POLICY = 'policy',
+  PROCEDURE = 'procedure',
+  STANDARD = 'standard',
+  GUIDELINE = 'guideline',
+  FRAMEWORK = 'framework',
+  REPORT = 'report',
+  CERTIFICATE = 'certificate',
+  ASSESSMENT = 'assessment',
+}
+
+/**
+ * Document approval status
+ */
+export enum DocumentApprovalStatus {
+  DRAFT = 'draft',
+  UNDER_REVIEW = 'under_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired',
+  ARCHIVED = 'archived',
+}
+
+/**
+ * Document section
+ */
+export interface DocumentSection {
+  /** Section ID */
+  sectionId: string;
+
+  /** Section title */
+  title: string;
+
+  /** Section content */
+  content: string;
+
+  /** Section order */
+  order: number;
+
+  /** Subsections */
+  subsections: DocumentSection[];
+}
+
+/**
+ * Document attachment
+ */
+export interface DocumentAttachment {
+  /** Attachment ID */
+  attachmentId: string;
+
+  /** File name */
+  fileName: string;
+
+  /** File type */
+  fileType: string;
+
+  /** File size */
+  fileSize: number;
+
+  /** Upload date */
+  uploadDate: Date;
+
+  /** Description */
+  description?: string;
+}
+
+/**
+ * Sampling approach for audits
+ */
+export interface SamplingApproach {
+  /** Sampling method */
+  method: SamplingMethod;
+
+  /** Sample size */
+  sampleSize: number;
+
+  /** Population size */
+  populationSize: number;
+
+  /** Confidence level */
+  confidenceLevel: number;
+
+  /** Margin of error */
+  marginOfError: number;
+
+  /** Stratification criteria */
+  stratificationCriteria?: StratificationCriteria[];
+
+  /** Selection criteria */
+  selectionCriteria: SelectionCriteria;
+
+  /** Sampling rationale */
+  rationale: string;
+}
+
+/**
+ * Sampling methods
+ */
+export enum SamplingMethod {
+  RANDOM = 'random',
+  SYSTEMATIC = 'systematic',
+  STRATIFIED = 'stratified',
+  CLUSTER = 'cluster',
+  CONVENIENCE = 'convenience',
+  JUDGMENTAL = 'judgmental',
+  QUOTA = 'quota',
+}
+
+/**
+ * Stratification criteria
+ */
+export interface StratificationCriteria {
+  /** Criteria name */
+  name: string;
+
+  /** Criteria values */
+  values: string[];
+
+  /** Weight */
+  weight: number;
+}
+
+/**
+ * Selection criteria
+ */
+export interface SelectionCriteria {
+  /** Inclusion criteria */
+  inclusionCriteria: string[];
+
+  /** Exclusion criteria */
+  exclusionCriteria: string[];
+
+  /** Risk factors */
+  riskFactors: string[];
+
+  /** Material thresholds */
+  materialThresholds: MaterialThreshold[];
+}
+
+/**
+ * Material threshold
+ */
+export interface MaterialThreshold {
+  /** Threshold type */
+  type: ThresholdType;
+
+  /** Value */
+  value: number;
+
+  /** Currency (for financial thresholds) */
+  currency?: string;
+
+  /** Description */
+  description: string;
+}
+
+/**
+ * Threshold types
+ */
+export enum ThresholdType {
+  FINANCIAL = 'financial',
+  PERCENTAGE = 'percentage',
+  COUNT = 'count',
+  TIME = 'time',
+  RISK_SCORE = 'risk_score',
+}
+
+/**
+ * Risk probability assessment
+ */
+export enum RiskProbability {
+  VERY_LOW = 'very_low',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  VERY_HIGH = 'very_high',
+}
+
+/**
+ * Risk impact assessment
+ */
+export enum RiskImpact {
+  NEGLIGIBLE = 'negligible',
+  MINOR = 'minor',
+  MODERATE = 'moderate',
+  MAJOR = 'major',
+  SEVERE = 'severe',
+}
+
+/**
+ * Reporting frequency options
+ */
+export enum ReportingFrequency {
+  REAL_TIME = 'real_time',
+  HOURLY = 'hourly',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  SEMI_ANNUALLY = 'semi_annually',
+  ANNUALLY = 'annually',
+  ON_DEMAND = 'on_demand',
+  TRIGGERED = 'triggered',
+}
+
+// Continue with remaining types...

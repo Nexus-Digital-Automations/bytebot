@@ -12,7 +12,7 @@
  */
 
 import { Logger } from '@nestjs/common';
-import { ConversationState } from '../../types/parlant.types';
+import { ConversationState } from '../../../types/parlant.types';
 import {
   AnyFunction,
   AsyncFunction,

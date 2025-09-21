@@ -23,7 +23,8 @@ import {
   SystemHealthStatus,
   BusinessImpactLevel,
   BypassPriority,
-  SecurityViolationType
+  SecurityViolationType,
+  ViolationSeverity
 } from '../types/bypass-core.types';
 
 // Import bypass services

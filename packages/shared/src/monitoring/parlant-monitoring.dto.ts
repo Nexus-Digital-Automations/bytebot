@@ -12,17 +12,18 @@ import { IsString, IsOptional, IsArray, IsBoolean, IsDateString, IsNumber, IsObj
 
 export interface ConversationalDashboardData {
   overallStatus: string;
+  conversationalSummary: string;
   keyMetrics: Array<{
     name: string;
     value: number | string;
     status: string;
-    trend: string;
+    trend: "UP" | "DOWN" | "STABLE";
     conversationalExplanation: string;
     suggestedActions: string[];
   }>;
   alerts: Array<{
     id: string;
-    severity: string;
+    severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
     message: string;
     timestamp: Date;
     conversationalExplanation: string;
@@ -113,6 +114,38 @@ export class MonitoringQueryDto {
   @IsOptional()
   @IsBoolean()
   includePerformance?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Include validation metrics in response',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  includeValidation?: boolean;
+}
+
+export class FollowUpQueryDto {
+  @ApiProperty({
+    description: 'Follow-up natural language query',
+    example: 'What about the security metrics from earlier?',
+  })
+  @IsString()
+  query!: string;
+
+  @ApiProperty({
+    description: 'Conversation context ID from previous query',
+    example: 'parlant_monitor_1234567890_abc123',
+  })
+  @IsString()
+  conversationContext!: string;
+
+  @ApiPropertyOptional({
+    description: 'Include additional context for follow-up',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  includeAdditionalContext?: boolean;
 }
 
 // ===== RESPONSE DTOs =====
@@ -120,6 +153,9 @@ export class MonitoringQueryDto {
 export class ConversationalDashboardResponseDto {
   @ApiProperty({ description: 'Overall system status' })
   overallStatus!: string;
+
+  @ApiProperty({ description: 'Human-readable summary of current system state' })
+  conversationalSummary!: string;
 
   @ApiProperty({
     description: 'Key metrics with conversational explanations',
@@ -130,7 +166,7 @@ export class ConversationalDashboardResponseDto {
         name: { type: 'string' },
         value: { oneOf: [{ type: 'number' }, { type: 'string' }] },
         status: { type: 'string' },
-        trend: { type: 'string' },
+        trend: { type: 'string', enum: ['UP', 'DOWN', 'STABLE'] },
         conversationalExplanation: { type: 'string' },
         suggestedActions: { type: 'array', items: { type: 'string' } },
       },
@@ -140,7 +176,7 @@ export class ConversationalDashboardResponseDto {
     name: string;
     value: number | string;
     status: string;
-    trend: string;
+    trend: "UP" | "DOWN" | "STABLE";
     conversationalExplanation: string;
     suggestedActions: string[];
   }>;
@@ -152,7 +188,7 @@ export class ConversationalDashboardResponseDto {
       type: 'object',
       properties: {
         id: { type: 'string' },
-        severity: { type: 'string' },
+        severity: { type: 'string', enum: ['INFO', 'WARNING', 'ERROR', 'CRITICAL'] },
         message: { type: 'string' },
         timestamp: { type: 'string', format: 'date-time' },
         conversationalExplanation: { type: 'string' },
@@ -162,7 +198,7 @@ export class ConversationalDashboardResponseDto {
   })
   alerts!: Array<{
     id: string;
-    severity: string;
+    severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
     message: string;
     timestamp: Date;
     conversationalExplanation: string;
