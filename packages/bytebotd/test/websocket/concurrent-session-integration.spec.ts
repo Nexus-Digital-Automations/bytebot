@@ -68,6 +68,19 @@ interface IntegrationTestConfig {
 }
 
 /**
+ * Phase test result interface
+ */
+interface PhaseTestResult {
+  success: boolean;
+  testsPassed: number;
+  testsFailed: number;
+  executionTime: number;
+  metrics: Record<string, number>;
+  errors: string[];
+  warnings: string[];
+}
+
+/**
  * Integration test results
  */
 interface IntegrationTestResults {
@@ -80,12 +93,12 @@ interface IntegrationTestResults {
     phasesFailed: string[];
   };
   phaseResults: {
-    basicConcurrency?: any;
-    sessionIsolation?: any;
-    resourceManagement?: any;
-    parlantValidation?: any;
-    performanceBenchmarking?: any;
-    endToEndIntegration?: any;
+    basicConcurrency?: PhaseTestResult;
+    sessionIsolation?: PhaseTestResult;
+    resourceManagement?: PhaseTestResult;
+    parlantValidation?: PhaseTestResult;
+    performanceBenchmarking?: PhaseTestResult;
+    endToEndIntegration?: PhaseTestResult;
   };
   overallCompliance: {
     phase1RequirementsMet: boolean;
@@ -230,7 +243,7 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       for (let i = 0; i < 500; i++) {
         const sessionId = `isolation_test_${i % 50}`;
         const message = {
-          type: 'heartbeat' as any,
+          type: 'heartbeat' as ValidationAction,
           messageId: `msg_${i}`,
           sessionId,
           timestamp: Date.now(),
@@ -240,7 +253,7 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
             sessionSpecific: true,
           },
           metadata: {
-            priority: 'normal' as any,
+            priority: 'normal' as ValidationAction,
             requiresAck: false,
             compression: false,
             routingHints: ['isolation_test'],
@@ -421,7 +434,7 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       };
 
       const testStartTime = performance.now();
-      const phaseResults: any = {};
+      const phaseResults: Partial<Record<string, PhaseTestResult>> = {};
       const phasesCompleted: string[] = [];
       const phasesFailed: string[] = [];
 
@@ -532,32 +545,32 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
     });
 
     // Helper methods for phase execution
-    private async executeBasicConcurrencyPhase(): Promise<any> {
+    private async executeBasicConcurrencyPhase(): Promise<PhaseTestResult> {
       // Simplified basic concurrency test
       return { success: true, sessionsEstablished: 120, message: 'Basic concurrency validated' };
     }
 
-    private async executeSessionIsolationPhase(): Promise<any> {
+    private async executeSessionIsolationPhase(): Promise<PhaseTestResult> {
       // Simplified session isolation test
       return { success: true, violationsDetected: 0, message: 'Session isolation validated' };
     }
 
-    private async executeResourceManagementPhase(): Promise<any> {
+    private async executeResourceManagementPhase(): Promise<PhaseTestResult> {
       // Simplified resource management test
       return { success: true, memoryLeakDetected: false, message: 'Resource management validated' };
     }
 
-    private async executeParlantValidationPhase(): Promise<any> {
+    private async executeParlantValidationPhase(): Promise<PhaseTestResult> {
       // Simplified PARLANT validation test
       return { success: true, accuracyScore: 0.85, message: 'PARLANT validation validated' };
     }
 
-    private async executePerformanceBenchmarkingPhase(): Promise<any> {
+    private async executePerformanceBenchmarkingPhase(): Promise<PhaseTestResult> {
       // Simplified performance benchmarking test
       return { success: true, performanceScore: 0.8, message: 'Performance benchmarking validated' };
     }
 
-    private async executeEndToEndIntegrationPhase(): Promise<any> {
+    private async executeEndToEndIntegrationPhase(): Promise<PhaseTestResult> {
       // Simplified end-to-end integration test
       return { success: true, integrationScore: 0.9, message: 'End-to-end integration validated' };
     }

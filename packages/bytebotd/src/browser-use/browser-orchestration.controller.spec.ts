@@ -10,7 +10,11 @@
  * @date 2025-09-20
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, INestApplication } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import * as request from 'supertest';import { BrowserOrchestrationController } from './browser-orchestration.controller';import { BrowserOrchestrationService } from './browser-orchestration.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import { SecurityModule } from '../common/security/security.module';import { AuthModule } from '../auth/auth.module';import { PrismaService } from '../database/prisma.service';import {CreateOrchestrationDto,
+import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import * as request from 'supertest';
+import { Response } from 'supertest';import { BrowserOrchestrationController } from './browser-orchestration.controller';import { BrowserOrchestrationService } from './browser-orchestration.service';import { BrowserSessionService } from './browser-session.service';import { BrowserTaskService } from './browser-task.service';import { SecurityModule } from '../common/security/security.module';import { AuthModule } from '../auth/auth.module';import { PrismaService } from '../database/prisma.service';import {CreateOrchestrationDto,
   OrchestrationStrategy,
   TaskPriority,
   OrchestrationStatus
@@ -157,7 +161,8 @@ import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, INest
       const response = await request(app.getHttpServer())
         .post('/browser-orchestration/orchestrations').send(createOrchestrationDto).expect(HttpStatus.CREATED);
 
-      expect(response.body).toEqual(mockOrchestration);
+      const responseBody = response.body as typeof mockOrchestration;
+      expect(responseBody).toEqual(mockOrchestration);
       expect(mockOrchestrationService.createOrchestration).toHaveBeenCalledWith(
         createOrchestrationDto
       );

@@ -31,6 +31,56 @@ import {
   SecurityTestUtils
 } from '../framework/security-test-framework';
 
+// Type-safe interfaces for JWT testing
+interface JWTPayload {
+  userId?: string;
+  username?: string;
+  role?: string;
+  iss?: string;
+  iat?: number;
+  exp?: number;
+  permissions?: string[];
+  password?: unknown;
+  secret?: unknown;
+  apiKey?: unknown;
+  emergency?: boolean;
+  reason?: string;
+}
+
+interface JWTHeader {
+  typ?: string;
+  alg?: string;
+  secret?: unknown;
+  key?: unknown;
+}
+
+interface APIErrorResponse {
+  message?: string;
+  statusCode?: number;
+  error?: string;
+}
+
+// Type guards for safe type checking
+function isJWTPayload(obj: unknown): obj is JWTPayload {
+  return typeof obj === 'object' && obj !== null;
+}
+
+function isJWTHeader(obj: unknown): obj is JWTHeader {
+  return typeof obj === 'object' && obj !== null;
+}
+
+function isAPIErrorResponse(obj: unknown): obj is APIErrorResponse {
+  return typeof obj === 'object' && obj !== null;
+}
+
+// Safe member access helpers
+function safeGetProperty<T>(obj: unknown, property: string): T | undefined {
+  if (typeof obj === 'object' && obj !== null && property in obj) {
+    return (obj as Record<string, unknown>)[property] as T;
+  }
+  return undefined;
+}
+
 describe('JWT Security Testing Suite', () => {
   let app: INestApplication;
   let securityFramework: SecurityTestFramework;
@@ -78,7 +128,10 @@ describe('JWT Security Testing Suite', () => {
           expect(typeof token).toBe('string');
           expect(token.split('.').length).toBe(3);
 
-          const decoded = jwt.decode(token) as { userId?: string; username?: string; role?: string; iss?: string };
+          const decodedToken = jwt.decode(token);
+          expect(isJWTPayload(decodedToken)).toBe(true);
+
+          const decoded = decodedToken as JWTPayload;
           expect(decoded.userId).toBe(payload.userId);
           expect(decoded.username).toBe(payload.username);
           expect(decoded.role).toBe(payload.role);
@@ -102,7 +155,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${expiredToken}`)
             .expect(401);
 
-          const responseBody = response.body as { message?: string };
+          expect(isAPIErrorResponse(response.body)).toBe(true);
+          const responseBody = response.body as APIErrorResponse;
           expect(responseBody.message).toContain('expired');
         }
       );
@@ -181,7 +235,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${invalidSignatureToken}`)
             .expect(401);
 
-          const responseBody = response.body as { message?: string };
+          expect(isAPIErrorResponse(response.body)).toBe(true);
+          const responseBody = response.body as APIErrorResponse;
           expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
         }
       );
@@ -200,7 +255,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${noneAlgorithmToken}`)
             .expect(401);
 
-          const responseBody = response.body as { message?: string };
+          expect(isAPIErrorResponse(response.body)).toBe(true);
+          const responseBody = response.body as APIErrorResponse;
           expect(responseBody.message).toMatch(/invalid|unauthorized|algorithm/i);
         }
       );
@@ -219,7 +275,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${tamperedToken}`)
             .expect(401);
 
-          const responseBody = response.body as { message?: string };
+          expect(isAPIErrorResponse(response.body)).toBe(true);
+          const responseBody = response.body as APIErrorResponse;
           expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
         }
       );
@@ -299,7 +356,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${shortToken}`)
             .expect(401);
 
-          const responseBody = expiredResponse.body as { message?: string };
+          expect(isAPIErrorResponse(expiredResponse.body)).toBe(true);
+          const responseBody = expiredResponse.body as APIErrorResponse;
           expect(responseBody.message).toMatch(/expired|invalid/i);
         }
       );
@@ -337,7 +395,10 @@ describe('JWT Security Testing Suite', () => {
           };
 
           const token = securityFramework.generateTestJWT(payload);
-          const decoded = jwt.decode(token) as { iat?: number; exp?: number; iss?: string; password?: unknown; secret?: unknown; apiKey?: unknown };
+          const decodedToken = jwt.decode(token);
+          expect(isJWTPayload(decodedToken)).toBe(true);
+
+          const decoded = decodedToken as JWTPayload;
 
           // Validate standard claims are present
           expect(decoded.iat).toBeDefined();
@@ -360,7 +421,10 @@ describe('JWT Security Testing Suite', () => {
           const payload = { userId: '123', username: 'testuser' };
           const token = securityFramework.generateTestJWT(payload);
 
-          const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64url').toString()) as { typ?: string; alg?: string; secret?: unknown; key?: unknown };
+          const headerData = JSON.parse(Buffer.from(token.split('.')[0], 'base64url').toString());
+          expect(isJWTHeader(headerData)).toBe(true);
+
+          const header = headerData as JWTHeader;
 
           // Validate header structure
           expect(header.typ).toBe('JWT');
@@ -415,7 +479,10 @@ describe('JWT Security Testing Suite', () => {
           });
 
           // Validate header compliance
-          const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString()) as { typ?: string; alg?: string };
+          const headerData = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+          expect(isJWTHeader(headerData)).toBe(true);
+
+          const header = headerData as JWTHeader;
           expect(header.typ).toBe('JWT');
           expect(header.alg).toMatch(/^(HS256|HS384|HS512|RS256|RS384|RS512|ES256|ES384|ES512)$/);
         }

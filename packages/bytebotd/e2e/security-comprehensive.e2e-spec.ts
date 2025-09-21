@@ -16,9 +16,7 @@
  * @security-focus Critical
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// TypeScript safety: Implementing proper type safety for E2E security testing
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -97,6 +95,37 @@ interface _SecurityUser {
   email: string;
   role: string;
   password: string;
+}
+
+/**
+ * Response type interfaces for proper TypeScript safety
+ */
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: UserRole;
+  };
+}
+
+interface RefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface UserProfileResponse {
+  id: string;
+  email: string;
+  role: UserRole;
+  permissions: Permission[];
+}
+
+interface ErrorResponse {
+  statusCode: number;
+  message: string;
+  error?: string;
 }
 
 /**
@@ -1282,7 +1311,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         (loginResponse.body as { user: { role: UserRole } }).user.role,
       ).toBe(UserRole._ADMIN);
 
-      const { accessToken, refreshToken } = loginResponse.body;
+      const { accessToken, refreshToken } = loginResponse.body as LoginResponse;
 
       // Step 2: Access protected resource with token
       const profileResponse = await request(app.getHttpAdapter().getInstance())
@@ -1515,7 +1544,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      const operatorToken = operatorLogin.body.accessToken;
+      const operatorToken = (operatorLogin.body as LoginResponse).accessToken;
 
       // Try to access another user's data (should be prevented by proper implementation)
       // This test assumes the API properly validates user ownership

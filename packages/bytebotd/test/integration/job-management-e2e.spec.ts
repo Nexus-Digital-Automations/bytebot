@@ -37,6 +37,22 @@ import {
 import { ComputerUseService } from '../../src/computer-use/computer-use.service';
 import { ComputerAction } from '@bytebot/shared';
 
+// ===== TEST INTERFACES =====
+
+/**
+ * Job management statistics interface
+ */
+interface JobManagementStats {
+  workerId: string;
+  isRunning: boolean;
+  jobsProcessed: number;
+  jobsSucceeded: number;
+  jobsFailed: number;
+  avgExecutionTime: number;
+  uptime: number;
+  memoryUsage: number;
+}
+
 /**
  * Test configuration for integration tests
  */
@@ -607,7 +623,7 @@ describe('Job Management Service - Integration Tests', () => {
       // Monitor statistics during processing
       const statsHistory: Array<{
         timestamp: number;
-        stats: any;
+        stats: JobManagementStats;
       }> = [];
 
       for (let i = 0; i < 10; i++) {
@@ -710,7 +726,7 @@ describe('Job Management Service - Integration Tests', () => {
 
     it('should handle concurrent job operations without race conditions', async () => {
       const concurrentJobs = 15;
-      const operations: Promise<any>[] = [];
+      const operations: Promise<JobResult>[] = [];
 
       // Start concurrent operations
       for (let i = 0; i < concurrentJobs; i++) {

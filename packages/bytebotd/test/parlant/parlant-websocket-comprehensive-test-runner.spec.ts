@@ -73,6 +73,79 @@ import { AIgentParlantSecurityBridgeService } from '../../src/auth/services/aige
 // ===== COMPREHENSIVE TEST FRAMEWORK TYPES =====
 
 /**
+ * Test services interface for dependency injection
+ */
+interface TestServices {
+  conversationalBridge: ConversationalWebSocketBridgeService;
+  parlantService: ParlantIntegrationService;
+  securityBridge: AIgentParlantSecurityBridgeService;
+  websocketBridge?: ParlantWebSocketBridgeService;
+}
+
+/**
+ * Security test result interface
+ */
+interface SecurityTestResult {
+  success: boolean;
+  authLatency?: number;
+  authzLatency?: number;
+  encryptionOverhead?: number;
+  verificationTime?: number;
+  completenessScore?: number;
+  auditLatency?: number;
+  effectiveness?: number;
+  protectionScore?: number;
+  preventionScore?: number;
+  validationLatency?: number;
+}
+
+/**
+ * Performance test result interface
+ */
+interface PerformanceTestResult {
+  success: boolean;
+  actualConnections?: number;
+  averageThroughput?: number;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  networkUtilization?: number;
+  degradationFactor?: number;
+  comparisonScore?: number;
+  degradationPercentage?: number;
+}
+
+/**
+ * Error handling test result interface
+ */
+interface ErrorHandlingTestResult {
+  success: boolean;
+  recoveryTime?: number;
+  dataLossRate?: number;
+  recoveryRate?: number;
+  retryEffectiveness?: number;
+  integrityScore?: number;
+  failoverTime?: number;
+  availabilityScore?: number;
+}
+
+/**
+ * Regression test result interface
+ */
+interface RegressionTestResult {
+  success: boolean;
+  compatibilityScore?: number;
+  backwardCompatibility?: number;
+  forwardCompatibility?: number;
+  complianceScore?: number;
+  violations?: number;
+  readinessScore?: number;
+  scalabilityScore?: number;
+  integrityScore?: number;
+  regressionsFound?: number;
+  successRate?: number;
+}
+
+/**
  * Test suite configuration for comprehensive testing
  */
 interface ComprehensiveTestConfig {
@@ -632,7 +705,7 @@ class ComprehensiveTestRunner {
    */
   private static async testMaxConcurrentConnections(
     maxConnections: number,
-    services: any
+    services: TestServices
   ): Promise<{
     success: boolean;
     actualConnections: number;
@@ -687,7 +760,7 @@ class ComprehensiveTestRunner {
    */
   private static async testSustainedLoad(
     duration: number,
-    services: any
+    services: TestServices
   ): Promise<{
     success: boolean;
     averageThroughput: number;
@@ -777,7 +850,7 @@ class ComprehensiveTestRunner {
    */
   private static async testResourceUtilization(
     limits: ResourceLimits,
-    services: any
+    services: TestServices
   ): Promise<{
     success: boolean;
     cpuUsage: number;
@@ -825,7 +898,7 @@ class ComprehensiveTestRunner {
    * Test performance degradation
    */
   private static async testPerformanceDegradation(
-    services: any
+    services: TestServices
   ): Promise<{
     success: boolean;
     degradationFactor: number;
@@ -863,23 +936,23 @@ class ComprehensiveTestRunner {
   }
 
   // Security test implementations
-  private static async testAuthenticationSecurity(services: any): Promise<any> {
+  private static async testAuthenticationSecurity(services: TestServices): Promise<SecurityTestResult> {
     return { success: true, authLatency: 50, authzLatency: 30 };
   }
 
-  private static async testDataEncryption(services: any): Promise<any> {
+  private static async testDataEncryption(services: TestServices): Promise<SecurityTestResult> {
     return { success: true, encryptionOverhead: 5, verificationTime: 10 };
   }
 
-  private static async testAuditTrail(services: any): Promise<any> {
+  private static async testAuditTrail(services: TestServices): Promise<SecurityTestResult> {
     return { success: true, completenessScore: 0.98, auditLatency: 25 };
   }
 
-  private static async testRateLimiting(services: any): Promise<any> {
+  private static async testRateLimiting(services: TestServices): Promise<SecurityTestResult> {
     return { success: true, effectiveness: 0.95, protectionScore: 0.92 };
   }
 
-  private static async testInjectionPrevention(services: any): Promise<any> {
+  private static async testInjectionPrevention(services: TestServices): Promise<SecurityTestResult> {
     return { success: true, preventionScore: 0.99, validationLatency: 15 };
   }
 
@@ -888,7 +961,7 @@ class ComprehensiveTestRunner {
    * Test WebSocket connection failure recovery for PARLANT integration
    * Simulates various connection failure scenarios and validates recovery mechanisms
    */
-  private static async testConnectionFailureRecovery(services: any): Promise<{
+  private static async testConnectionFailureRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
     success: boolean;
     recoveryTime: number;
     dataLossRate: number;
@@ -991,7 +1064,7 @@ class ComprehensiveTestRunner {
    * Test timeout recovery mechanisms for PARLANT validation
    * Validates that the system can handle and recover from validation timeouts
    */
-  private static async testTimeoutRecovery(services: any): Promise<{
+  private static async testTimeoutRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
     success: boolean;
     recoveryRate: number;
     retryEffectiveness: number;
@@ -1107,7 +1180,7 @@ class ComprehensiveTestRunner {
    * Test state corruption detection and recovery for PARLANT conversations
    * Validates that the system can detect and recover from corrupted conversation state
    */
-  private static async testStateCorruptionRecovery(services: any): Promise<{
+  private static async testStateCorruptionRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
     success: boolean;
     recoveryTime: number;
     integrityScore: number;
@@ -1286,7 +1359,7 @@ class ComprehensiveTestRunner {
    * Test service failover capabilities for PARLANT integration
    * Validates that the system can failover to backup services when primary services fail
    */
-  private static async testServiceFailover(services: any): Promise<{
+  private static async testServiceFailover(services: TestServices): Promise<ErrorHandlingTestResult & {
     success: boolean;
     failoverTime: number;
     availabilityScore: number;
@@ -1477,7 +1550,7 @@ class ComprehensiveTestRunner {
             return;
           }
 
-          // For test purposes, accept any valid JSON response
+          // For test purposes, accept any valid JSON response (test context allows flexibility)
           resolve();
         } catch (parseError) {
           reject(new Error(`Failed to parse response: ${parseError.message}`));
@@ -1502,7 +1575,7 @@ class ComprehensiveTestRunner {
    */
   static async executePerformanceStressTest(
     config: ComprehensiveTestConfig,
-    services: any
+    services: TestServices
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1596,7 +1669,7 @@ class ComprehensiveTestRunner {
    */
   static async executeSecurityValidationTest(
     config: ComprehensiveTestConfig,
-    services: any
+    services: TestServices
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1715,7 +1788,7 @@ class ComprehensiveTestRunner {
    */
   static async executeErrorHandlingTest(
     config: ComprehensiveTestConfig,
-    services: any
+    services: TestServices
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1821,7 +1894,7 @@ class ComprehensiveTestRunner {
    */
   static async executeRegressionTest(
     config: ComprehensiveTestConfig,
-    services: any
+    services: TestServices
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1973,7 +2046,7 @@ class ComprehensiveTestRunner {
   /**
    * Test baseline performance comparison for regression detection
    */
-  private static async testBaselinePerformanceComparison(services: any): Promise<{
+  private static async testBaselinePerformanceComparison(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     comparisonScore: number;
     degradationPercentage: number;
@@ -2018,7 +2091,7 @@ class ComprehensiveTestRunner {
   /**
    * Test cross-version compatibility for PARLANT WebSocket integration
    */
-  private static async testCrossVersionCompatibility(services: any): Promise<{
+  private static async testCrossVersionCompatibility(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     compatibilityScore: number;
     backwardCompatibility: number;
@@ -2093,7 +2166,7 @@ class ComprehensiveTestRunner {
   /**
    * Test API contract verification for PARLANT WebSocket integration
    */
-  private static async testApiContractVerification(services: any): Promise<{
+  private static async testApiContractVerification(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     complianceScore: number;
     violations: number;
@@ -2185,7 +2258,7 @@ class ComprehensiveTestRunner {
   /**
    * Test production environment simulation for PARLANT WebSocket integration
    */
-  private static async testProductionSimulation(services: any): Promise<{
+  private static async testProductionSimulation(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     readinessScore: number;
     scalabilityScore: number;
@@ -2258,7 +2331,7 @@ class ComprehensiveTestRunner {
   /**
    * Test feature regression validation for PARLANT WebSocket integration
    */
-  private static async testFeatureRegression(services: any): Promise<{
+  private static async testFeatureRegression(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     integrityScore: number;
     regressionsFound: number;
@@ -2329,7 +2402,7 @@ class ComprehensiveTestRunner {
   /**
    * Test data migration and schema compatibility for PARLANT WebSocket integration
    */
-  private static async testDataMigrationCompatibility(services: any): Promise<{
+  private static async testDataMigrationCompatibility(services: TestServices): Promise<RegressionTestResult & {
     success: boolean;
     successRate: number;
     compatibilityScore: number;

@@ -27,6 +27,51 @@ import {
   OrchestrationStatus
 } from '../src/browser-use/dto/browser-orchestration.dto';
 
+// ===== PERFORMANCE TEST INTERFACES =====
+
+/**
+ * Performance test metrics interface
+ */
+interface PerformanceMetrics {
+  averageResponseTime: number;
+  successRate: number;
+  throughput: number;
+  memoryIncrease: number;
+  systemStability: number;
+  circuitBreakerActivations: number;
+  degradation?: number;
+  failover?: {
+    speed: number;
+  };
+  taskRedistribution?: {
+    efficiency: number;
+  };
+  systemRecovery?: {
+    time: number;
+  };
+}
+
+/**
+ * Orchestration test result interface
+ */
+interface OrchestrationTestResult {
+  id: string;
+  status: OrchestrationStatus;
+  duration: number;
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Session monitoring response interface
+ */
+interface SessionResponse {
+  body: Array<{
+    status: string;
+    id: string;
+  }>;
+}
+
 describe('Browser Orchestration Performance Tests', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
@@ -316,7 +361,7 @@ describe('Browser Orchestration Performance Tests', () => {
     expectedSuccessRate: number;
     enableAutoScaling?: boolean;
     enableCircuitBreaker?: boolean;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       averageResponseTime: 0,
       successRate: 0,
@@ -330,7 +375,7 @@ describe('Browser Orchestration Performance Tests', () => {
     const initialMemory = process.memoryUsage();
 
     // Create orchestrations
-    const orchestrationPromises: Promise<any>[] = [];
+    const orchestrationPromises: Promise<OrchestrationTestResult>[] = [];
 
     for (let i = 0; i < config.concurrentOrchestrations; i++) {
       const orchestrationDto: CreateOrchestrationDto = {
@@ -378,7 +423,7 @@ describe('Browser Orchestration Performance Tests', () => {
     testDuration: number;
     loadPattern: string;
     monitoringInterval: number;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       cpuUtilization: { average: 0, peak: 0 },
       memoryUtilization: { average: 0, leaks: 0 },
@@ -440,7 +485,7 @@ describe('Browser Orchestration Performance Tests', () => {
     initialAgents: number;
     maxAgents: number;
     loadSpikes: Array<{ time: number; load: number }>;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       scalingEvents: { scaleUp: 0, scaleDown: 0 },
       scalingLatency: { average: 0 },
@@ -506,7 +551,7 @@ describe('Browser Orchestration Performance Tests', () => {
       imageProcessingTasks: number;
       longRunningTasks: number;
     };
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       memoryLeaks: { detected: false },
       memoryUsage: { peak: 0 },
@@ -582,7 +627,7 @@ describe('Browser Orchestration Performance Tests', () => {
         .get('/browser-orchestration/sessions')
         .set('Authorization', `Bearer ${authToken}`);
 
-      const activeSessions = sessionsResponse.body.filter((s: any) => s.status === 'active').length;
+      const activeSessions = (sessionsResponse as SessionResponse).body.filter((s) => s.status === 'active').length;
       metrics.sessionCleanup.success = activeSessions === 0;
     } catch (error) {
       metrics.sessionCleanup.success = false;
@@ -601,7 +646,7 @@ describe('Browser Orchestration Performance Tests', () => {
       successRateThreshold: number;
       errorRateThreshold: number;
     };
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       breakingPoint: { identified: false, maxConcurrentTasks: 0 },
       bottlenecks: { identified: [] as string[] },
@@ -659,7 +704,7 @@ describe('Browser Orchestration Performance Tests', () => {
     testDuration: number;
     constantLoad: number;
     measurementInterval: number;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       responseTime: { variance: 0 },
       throughput: { degradation: 0 },
@@ -724,9 +769,9 @@ describe('Browser Orchestration Performance Tests', () => {
   async function runMultiStrategyTest(config: {
     strategies: Array<{ strategy: OrchestrationStrategy; concurrent: number }>;
     testDuration: number;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
-      strategies: {} as any,
+      strategies: {} as Record<string, unknown>,
       overall: { resourceConflicts: 0 },
     };
 
@@ -767,7 +812,7 @@ describe('Browser Orchestration Performance Tests', () => {
     totalTasks: number;
     errorTypes: string[];
     recoveryStrategies: string[];
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       systemStability: { duringErrors: 0 },
       recovery: { averageTime: 0, successRate: 0 },
@@ -816,7 +861,7 @@ describe('Browser Orchestration Performance Tests', () => {
     failureRate: number;
     failureTypes: string[];
     testDuration: number;
-  }): Promise<any> {
+  }): Promise<PerformanceMetrics> {
     const metrics = {
       performance: { degradation: 0 },
       failover: { speed: 0 },
@@ -831,7 +876,7 @@ describe('Browser Orchestration Performance Tests', () => {
   }
 
   // Utility functions
-  async function createAndExecuteOrchestration(dto: CreateOrchestrationDto): Promise<any> {
+  async function createAndExecuteOrchestration(dto: CreateOrchestrationDto): Promise<OrchestrationTestResult> {
     const createResponse = await request(app.getHttpServer())
       .post('/browser-orchestration/orchestrations')
       .set('Authorization', `Bearer ${authToken}`)

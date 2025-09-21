@@ -1,14 +1,94 @@
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication, HttpStatus } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import * as request from 'supertest';import { BrowserUseModule } from '../browser-use.module';import { ParlantModule } from '../../parlant/parlant.module';import { SecurityModule } from '../../common/security/security.module';import { AuthModule } from '../../auth/auth.module';import {CreateBrowserSessionDto,
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, HttpStatus } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import * as request from 'supertest';
+import { Response } from 'supertest';
+import { BrowserUseModule } from '../browser-use.module';
+import { ParlantModule } from '../../parlant/parlant.module';
+import { SecurityModule } from '../../common/security/security.module';
+import { AuthModule } from '../../auth/auth.module';
+import {
+  CreateBrowserSessionDto,
   BrowserSessionStatus
-} from '../dto/browser-session.dto';import {CreateBrowserTaskDto,
+} from '../dto/browser-session.dto';
+import {
+  CreateBrowserTaskDto,
   BrowserTaskPriority,
   BrowserTaskStatus
-} from '../dto/browser-task.dto';import {ScreenshotCaptureDto,
+} from '../dto/browser-task.dto';
+import {
+  ScreenshotCaptureDto,
   ScreenshotFormat,
   ScreenshotType
-} from '../dto/screenshot.dto';import {DOMInteractionDto,
+} from '../dto/screenshot.dto';
+import {
+  DOMInteractionDto,
   DOMActionType
-} from '../dto/dom-interaction.dto';describe('Browser Automation Integration Tests', () => {let app: INestApplication;let sessionId: string;
+} from '../dto/dom-interaction.dto';
+
+// Type definitions for API responses to fix no-unsafe-call violations
+interface BrowserSessionResponse {
+  sessionId: string;
+  name: string;
+  status: BrowserSessionStatus;
+  tabs: Array<{
+    id: string;
+    url: string;
+    title: string;
+    isActive: boolean;
+  }>;
+  statistics?: {
+    totalRequests: number;
+    totalErrors: number;
+    uptime: number;
+  };
+}
+
+interface BrowserTaskResponse {
+  taskId: string;
+  sessionId: string;
+  type: string;
+  status: BrowserTaskStatus;
+  priority: BrowserTaskPriority;
+  description: string;
+  result?: unknown;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ScreenshotResponse {
+  screenshotId: string;
+  format: ScreenshotFormat;
+  type: ScreenshotType;
+  data: string;
+  metadata: {
+    width: number;
+    height: number;
+    timestamp: string;
+  };
+}
+
+interface DOMInteractionResponse {
+  interactionId: string;
+  sessionId: string;
+  tabId: string;
+  action: DOMActionType;
+  selector: string;
+  result: {
+    success: boolean;
+    elementFound: boolean;
+    value?: string;
+    error?: string;
+  };
+  timestamp: string;
+}
+
+interface ErrorResponse {
+  message: string;
+  statusCode: number;
+  error?: string;
+}describe('Browser Automation Integration Tests', () => {let app: INestApplication;let sessionId: string;
   let authToken: string;
 
   beforeAll(async () => {
@@ -41,10 +121,13 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(createSessionDto)
           .expect(HttpStatus.CREATED);
 
-        expect(response.body).toHaveProperty('sessionId');expect(response.body.name).toBe(createSessionDto.name);expect(response.body.status).toBe(BrowserSessionStatus.ACTIVE);
-        expect(response.body.tabs).toHaveLength(1);
+        const sessionResponse = response.body as BrowserSessionResponse;
+        expect(sessionResponse).toHaveProperty('sessionId');
+        expect(sessionResponse.name).toBe(createSessionDto.name);
+        expect(sessionResponse.status).toBe(BrowserSessionStatus.ACTIVE);
+        expect(sessionResponse.tabs).toHaveLength(1);
 
-        sessionId = response.body.sessionId;
+        sessionId = sessionResponse.sessionId;
       });
 
       it('should reject session creation with invalid data', async () => {
@@ -75,9 +158,11 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(response.body.sessionId).toBe(sessionId);
-        expect(response.body.status).toBe(BrowserSessionStatus.ACTIVE);
-        expect(response.body).toHaveProperty('tabs');expect(response.body).toHaveProperty('statistics');});it('should return 404 for non-existent session', async () => {await request(app.getHttpServer()).get('/browser-use/sessions/non-existent-session').set('Authorization', `Bearer ${authToken}`)
+        const sessionResponse = response.body as BrowserSessionResponse;
+        expect(sessionResponse.sessionId).toBe(sessionId);
+        expect(sessionResponse.status).toBe(BrowserSessionStatus.ACTIVE);
+        expect(sessionResponse).toHaveProperty('tabs');
+        expect(sessionResponse).toHaveProperty('statistics');});it('should return 404 for non-existent session', async () => {await request(app.getHttpServer()).get('/browser-use/sessions/non-existent-session').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.NOT_FOUND);
       });
     });
@@ -85,13 +170,15 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     describe('GET /browser-use/sessions', () => {it('should retrieve all sessions', async () => {const response = await request(app.getHttpServer()).get('/browser-use/sessions').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThan(0);
-        expect(response.body[0]).toHaveProperty('sessionId');});it('should filter sessions by status', async () => {const response = await request(app.getHttpServer()).get('/browser-use/sessions').query({ status: BrowserSessionStatus.ACTIVE }).set('Authorization', `Bearer ${authToken}`)
+        const sessions = response.body as BrowserSessionResponse[];
+        expect(Array.isArray(sessions)).toBe(true);
+        expect(sessions.length).toBeGreaterThan(0);
+        expect(sessions[0]).toHaveProperty('sessionId');});it('should filter sessions by status', async () => {const response = await request(app.getHttpServer()).get('/browser-use/sessions').query({ status: BrowserSessionStatus.ACTIVE }).set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(Array.isArray(response.body)).toBe(true);
-        response.body.forEach((session: { status: BrowserSessionStatus }) => {
+        const sessions = response.body as BrowserSessionResponse[];
+        expect(Array.isArray(sessions)).toBe(true);
+        sessions.forEach((session: BrowserSessionResponse) => {
           expect(session.status).toBe(BrowserSessionStatus.ACTIVE);
         });
       });
@@ -115,11 +202,14 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(createTaskDto)
           .expect(HttpStatus.CREATED);
 
-        expect(response.body).toHaveProperty('taskId');expect(response.body.name).toBe(createTaskDto.name);expect(response.body.status).toBeOneOf([
+        const taskResponse = response.body as BrowserTaskResponse;
+        expect(taskResponse).toHaveProperty('taskId');
+        expect(taskResponse.description).toBe(createTaskDto.name);
+        expect(taskResponse.status).toBeOneOf([
           BrowserTaskStatus.RUNNING,
           BrowserTaskStatus.COMPLETED,
         ]);
-        expect(response.body.actionsCompleted).toBeGreaterThanOrEqual(0);
+        expect(taskResponse).toHaveProperty('result');
       });
 
       it('should reject task with invalid actions', async () => {const invalidTaskDto = {name: 'Invalid Task',actions: [{
@@ -138,15 +228,19 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     describe('GET /browser-use/tasks', () => {it('should retrieve all tasks', async () => {const response = await request(app.getHttpServer()).get('/browser-use/tasks').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(Array.isArray(response.body)).toBe(true);
-        if (response.body.length > 0) {
-          expect(response.body[0]).toHaveProperty('taskId');expect(response.body[0]).toHaveProperty('status');}});
+        const tasks = response.body as BrowserTaskResponse[];
+        expect(Array.isArray(tasks)).toBe(true);
+        if (tasks.length > 0) {
+          expect(tasks[0]).toHaveProperty('taskId');
+          expect(tasks[0]).toHaveProperty('status');
+        }});
 
       it('should filter tasks by status', async () => {const response = await request(app.getHttpServer()).get('/browser-use/tasks').query({ status: BrowserTaskStatus.COMPLETED }).set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(Array.isArray(response.body)).toBe(true);
-        response.body.forEach((task: { status: BrowserTaskStatus; priority: BrowserTaskPriority }) => {
+        const tasks = response.body as BrowserTaskResponse[];
+        expect(Array.isArray(tasks)).toBe(true);
+        tasks.forEach((task: BrowserTaskResponse) => {
           expect(task.status).toBe(BrowserTaskStatus.COMPLETED);
         });
       });
@@ -155,7 +249,20 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     describe('GET /browser-use/tasks/metrics/summary', () => {it('should retrieve task metrics', async () => {const response = await request(app.getHttpServer()).get('/browser-use/tasks/metrics/summary').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(response.body.status).toBe('success');expect(response.body.data).toHaveProperty('totalTasks');expect(response.body.data).toHaveProperty('completedTasks');expect(response.body.data).toHaveProperty('successRate');expect(response.body).toHaveProperty('timestamp');});});
+        const metricsResponse = response.body as {
+          status: string;
+          data: {
+            totalTasks: number;
+            completedTasks: number;
+            successRate: number;
+          };
+          timestamp: string;
+        };
+        expect(metricsResponse.status).toBe('success');
+        expect(metricsResponse.data).toHaveProperty('totalTasks');
+        expect(metricsResponse.data).toHaveProperty('completedTasks');
+        expect(metricsResponse.data).toHaveProperty('successRate');
+        expect(metricsResponse).toHaveProperty('timestamp');});});
   });
 
   describe('Enhanced Browser Automation', () => {describe('POST /browser-automation/screenshots/capture', () => {it('should capture enhanced screenshot', async () => {const screenshotDto: ScreenshotCaptureDto = {sessionId: sessionId,
@@ -170,10 +277,17 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(screenshotDto)
           .expect(HttpStatus.OK);
 
-        expect(response.body).toHaveProperty('screenshotId');expect(response.body.success).toBe(true);expect(response.body.format).toBe(ScreenshotFormat.PNG);
-        expect(response.body.type).toBe(ScreenshotType.FULLPAGE);
-        expect(response.body).toHaveProperty('base64Data');
-        expect(response.body).toHaveProperty('dimensions');
+        const screenshotResponse = response.body as ScreenshotResponse & {
+          success: boolean;
+          base64Data: string;
+          dimensions: { width: number; height: number };
+        };
+        expect(screenshotResponse).toHaveProperty('screenshotId');
+        expect(screenshotResponse.success).toBe(true);
+        expect(screenshotResponse.format).toBe(ScreenshotFormat.PNG);
+        expect(screenshotResponse.type).toBe(ScreenshotType.FULLPAGE);
+        expect(screenshotResponse).toHaveProperty('base64Data');
+        expect(screenshotResponse).toHaveProperty('dimensions');
       });
 
       it('should reject invalid screenshot request', async () => {
@@ -204,21 +318,67 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(interactionDto)
           .expect(HttpStatus.OK);
 
-        expect(response.body).toHaveProperty('interactionId');expect(response.body.success).toBe(true);expect(response.body.action).toBe(DOMActionType.CLICK);
-        expect(response.body).toHaveProperty('durationMs');expect(response.body).toHaveProperty('timestamp');});});
+        const interactionResponse = response.body as DOMInteractionResponse & {
+          success: boolean;
+          durationMs: number;
+          timestamp: string;
+        };
+        expect(interactionResponse).toHaveProperty('interactionId');
+        expect(interactionResponse.success).toBe(true);
+        expect(interactionResponse.action).toBe(DOMActionType.CLICK);
+        expect(interactionResponse).toHaveProperty('durationMs');
+        expect(interactionResponse).toHaveProperty('timestamp');});});
 
     describe('GET /browser-automation/health', () => {it('should return enhanced health status', async () => {const response = await request(app.getHttpServer()).get('/browser-automation/health').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(response.body.status).toBe('healthy');expect(response.body.service).toBe('Enhanced Browser Automation Controller');expect(response.body.version).toBe('3.0.0');expect(response.body).toHaveProperty('capabilities');expect(response.body).toHaveProperty('statistics');expect(response.body).toHaveProperty('performance');expect(response.body.capabilities.multiFormatScreenshots).toBe(true);});
+        const healthResponse = response.body as {
+          status: string;
+          service: string;
+          version: string;
+          capabilities: {
+            multiFormatScreenshots: boolean;
+          };
+          statistics: unknown;
+          performance: unknown;
+        };
+        expect(healthResponse.status).toBe('healthy');
+        expect(healthResponse.service).toBe('Enhanced Browser Automation Controller');
+        expect(healthResponse.version).toBe('3.0.0');
+        expect(healthResponse).toHaveProperty('capabilities');
+        expect(healthResponse).toHaveProperty('statistics');
+        expect(healthResponse).toHaveProperty('performance');
+        expect(healthResponse.capabilities.multiFormatScreenshots).toBe(true);});
     });
 
     describe('GET /browser-automation/capabilities', () => {it('should return automation capabilities', async () => {const response = await request(app.getHttpServer()).get('/browser-automation/capabilities').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(response.body).toHaveProperty('screenshots');expect(response.body).toHaveProperty('domInteraction');expect(response.body).toHaveProperty('elementDetection');expect(response.body).toHaveProperty('visualAutomation');expect(response.body).toHaveProperty('realtimeUpdates');expect(response.body).toHaveProperty('general');expect(response.body.general.localOnly).toBe(true);expect(response.body.general.enterpriseGrade).toBe(true);
-        expect(response.body.screenshots.formats).toContain(ScreenshotFormat.PNG);
-        expect(response.body.domInteraction.actions).toContain(DOMActionType.CLICK);
+        const capabilitiesResponse = response.body as {
+          screenshots: {
+            formats: ScreenshotFormat[];
+          };
+          domInteraction: {
+            actions: DOMActionType[];
+          };
+          elementDetection: unknown;
+          visualAutomation: unknown;
+          realtimeUpdates: unknown;
+          general: {
+            localOnly: boolean;
+            enterpriseGrade: boolean;
+          };
+        };
+        expect(capabilitiesResponse).toHaveProperty('screenshots');
+        expect(capabilitiesResponse).toHaveProperty('domInteraction');
+        expect(capabilitiesResponse).toHaveProperty('elementDetection');
+        expect(capabilitiesResponse).toHaveProperty('visualAutomation');
+        expect(capabilitiesResponse).toHaveProperty('realtimeUpdates');
+        expect(capabilitiesResponse).toHaveProperty('general');
+        expect(capabilitiesResponse.general.localOnly).toBe(true);
+        expect(capabilitiesResponse.general.enterpriseGrade).toBe(true);
+        expect(capabilitiesResponse.screenshots.formats).toContain(ScreenshotFormat.PNG);
+        expect(capabilitiesResponse.domInteraction.actions).toContain(DOMActionType.CLICK);
       });
     });
   });
@@ -233,7 +393,18 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(tabOptions)
           .expect(HttpStatus.CREATED);
 
-        expect(response.body.status).toBe('success');expect(response.body.data).toHaveProperty('tabId');expect(response.body.data.url).toBe(tabOptions.url);expect(response.body.data.isActive).toBe(true);
+        const tabResponse = response.body as {
+          status: string;
+          data: {
+            tabId: string;
+            url: string;
+            isActive: boolean;
+          };
+        };
+        expect(tabResponse.status).toBe('success');
+        expect(tabResponse.data).toHaveProperty('tabId');
+        expect(tabResponse.data.url).toBe(tabOptions.url);
+        expect(tabResponse.data.isActive).toBe(true);
       });
     });
   });
@@ -250,7 +421,20 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(screenshotOptions)
           .expect(HttpStatus.OK);
 
-        expect(response.body.status).toBe('success');expect(response.body.data).toHaveProperty('screenshotId');expect(response.body.data).toHaveProperty('base64Data');expect(response.body.data).toHaveProperty('format');expect(response.body).toHaveProperty('timestamp');});});
+        const screenshotResponse = response.body as {
+          status: string;
+          data: {
+            screenshotId: string;
+            base64Data: string;
+            format: string;
+          };
+          timestamp: string;
+        };
+        expect(screenshotResponse.status).toBe('success');
+        expect(screenshotResponse.data).toHaveProperty('screenshotId');
+        expect(screenshotResponse.data).toHaveProperty('base64Data');
+        expect(screenshotResponse.data).toHaveProperty('format');
+        expect(screenshotResponse).toHaveProperty('timestamp');});});
   });
 
   describe('Data Extraction', () => {
@@ -271,13 +455,36 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .send(extractConfig)
           .expect(HttpStatus.OK);
 
-        expect(response.body.status).toBe('success');expect(response.body.data).toHaveProperty('title');expect(response.body).toHaveProperty('timestamp');});});
+        const extractResponse = response.body as {
+          status: string;
+          data: {
+            title: string;
+          };
+          timestamp: string;
+        };
+        expect(extractResponse.status).toBe('success');
+        expect(extractResponse.data).toHaveProperty('title');
+        expect(extractResponse).toHaveProperty('timestamp');});});
   });
 
   describe('Health and Status', () => {describe('GET /browser-use/health', () => {it('should return browser use health status', async () => {const response = await request(app.getHttpServer()).get('/browser-use/health').set('Authorization', `Bearer ${authToken}`)
           .expect(HttpStatus.OK);
 
-        expect(response.body.status).toBe('healthy');expect(response.body.service).toBe('Browser Use Controller');expect(response.body.version).toBe('2.0.0');expect(response.body).toHaveProperty('statistics');expect(response.body.statistics).toHaveProperty('activeSessions');expect(response.body.statistics).toHaveProperty('runningTasks');});});
+        const healthResponse = response.body as {
+          status: string;
+          service: string;
+          version: string;
+          statistics: {
+            activeSessions: number;
+            runningTasks: number;
+          };
+        };
+        expect(healthResponse.status).toBe('healthy');
+        expect(healthResponse.service).toBe('Browser Use Controller');
+        expect(healthResponse.version).toBe('2.0.0');
+        expect(healthResponse).toHaveProperty('statistics');
+        expect(healthResponse.statistics).toHaveProperty('activeSessions');
+        expect(healthResponse.statistics).toHaveProperty('runningTasks');});});
   });
 
   describe('Error Handling', () => {
@@ -292,7 +499,9 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
       const responses = await Promise.allSettled(requests);
       const hasRateLimitedResponse = responses.some(
         (result) =>
-          result.status === 'fulfilled' &&result.value.status === HttpStatus.TOO_MANY_REQUESTS);
+          result.status === 'fulfilled' &&
+          (result.value as Response).status === HttpStatus.TOO_MANY_REQUESTS
+      );
 
       // Rate limiting might not trigger in test environment
       // This test verifies the system handles rapid requests gracefully
@@ -328,8 +537,15 @@ async function getTestAuthToken(app: INestApplication): Promise<string> {
   // This would typically authenticate with a test user
   // For now, return a mock token or implement actual auth flow
   const authResponse = await request(app.getHttpServer())
-    .post('/auth/login').send({username: 'test-user',password: 'test-password',});if (authResponse.body?.accessToken) {
-    return authResponse.body.accessToken;
+    .post('/auth/login')
+    .send({
+      username: 'test-user',
+      password: 'test-password',
+    });
+
+  const authResponseBody = authResponse.body as { accessToken?: string };
+  if (authResponseBody.accessToken) {
+    return authResponseBody.accessToken;
   }
 
   // Return a mock token for testing if auth is not fully implemented
@@ -348,11 +564,13 @@ declare global {
 }
 
 expect.extend({
-  toBeOneOf(received, argument) {
-    const pass = argument.includes(received);
+  toBeOneOf(received: unknown, argument: unknown[]) {
+    const pass = (argument as unknown[]).includes(received);
     if (pass) {
       return {
-        message: () => `expected ${received} not to be one of ${argument}`,pass: true,};
+        message: () => `expected ${received} not to be one of ${argument}`,
+        pass: true,
+      };
     } else {
       return {
         message: () => `expected ${received} to be one of ${argument}`,

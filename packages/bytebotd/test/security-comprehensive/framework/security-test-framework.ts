@@ -151,7 +151,7 @@ export interface SecurityAuditEntry {
   actor: string;
   resource: string;
   outcome: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   riskLevel: SecurityRiskLevel;
 }
 
@@ -166,6 +166,52 @@ export interface SecurityRecommendation {
   implementation: string;
   estimatedEffort: string;
   businessImpact: string;
+}
+
+/**
+ * Security test execution result interface
+ */
+export interface SecurityTestExecutionResult {
+  success: boolean;
+  data?: Record<string, unknown>;
+  errors?: string[];
+  warnings?: string[];
+}
+
+/**
+ * Security test response interface
+ */
+export interface SecurityTestResponse {
+  status: number;
+  headers: Record<string, string>;
+  body: unknown;
+  data?: Record<string, unknown>;
+}
+
+/**
+ * Security report summary interface
+ */
+export interface SecurityReportSummary {
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  vulnerabilitiesFound: number;
+  complianceViolations: number;
+  riskScore: number;
+  executionTime: number;
+}
+
+/**
+ * Test user interface
+ */
+export interface TestUser {
+  id: string;
+  username: string;
+  email: string;
+  permissions: string[];
+  role: string;
+  createdAt: Date;
+  isActive: boolean;
 }
 
 // ===== SECURITY TEST FRAMEWORK CLASS =====
@@ -216,7 +262,7 @@ export class SecurityTestFramework {
   async executeSecurityTest(
     testName: string,
     testType: SecurityTestType,
-    testFunction: () => Promise<any>
+    testFunction: () => Promise<SecurityTestExecutionResult>
   ): Promise<SecurityTestResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
@@ -270,7 +316,7 @@ export class SecurityTestFramework {
   /**
    * Generate secure JWT token for testing
    */
-  generateTestJWT(payload: any, options?: jwt.SignOptions): string {
+  generateTestJWT(payload: Record<string, unknown>, options?: jwt.SignOptions): string {
     const secret = this.configService.get<string>('JWT_SECRET', 'test-secret');
     return jwt.sign(payload, secret, {
       expiresIn: '1h',
@@ -282,7 +328,7 @@ export class SecurityTestFramework {
   /**
    * Generate malicious JWT token for security testing
    */
-  generateMaliciousJWT(payload: any, manipulation: 'expired' | 'invalid-signature' | 'none-algorithm' | 'tampered-payload'): string {
+  generateMaliciousJWT(payload: Record<string, unknown>, manipulation: 'expired' | 'invalid-signature' | 'none-algorithm' | 'tampered-payload'): string {
     const secret = this.configService.get<string>('JWT_SECRET', 'test-secret');
 
     switch (manipulation) {
@@ -293,7 +339,7 @@ export class SecurityTestFramework {
         return jwt.sign(payload, 'wrong-secret');
 
       case 'none-algorithm':
-        return jwt.sign(payload, '', { algorithm: 'none' as any });
+        return jwt.sign(payload, '', { algorithm: 'none' as jwt.Algorithm });
 
       case 'tampered-payload':
         const token = jwt.sign(payload, secret);
@@ -352,7 +398,7 @@ export class SecurityTestFramework {
   /**
    * Perform HTTP security testing
    */
-  async performHttpSecurityTest(endpoint: string, method: string = 'GET', payload?: any): Promise<any> {
+  async performHttpSecurityTest(endpoint: string, method: string = 'GET', payload?: Record<string, unknown>): Promise<SecurityTestResponse> {
     const req = request(this.app.getHttpServer());
 
     switch (method.toUpperCase()) {
@@ -374,7 +420,7 @@ export class SecurityTestFramework {
   /**
    * Validate security headers
    */
-  validateSecurityHeaders(response: any): SecurityVulnerability[] {
+  validateSecurityHeaders(response: SecurityTestResponse): SecurityVulnerability[] {
     const vulnerabilities: SecurityVulnerability[] = [];
     const headers = (response as { headers?: Record<string, string> }).headers ?? {};
 
@@ -408,7 +454,7 @@ export class SecurityTestFramework {
    * Generate test report
    */
   generateSecurityReport(): {
-    summary: any;
+    summary: SecurityReportSummary;
     vulnerabilities: SecurityVulnerability[];
     compliance: ComplianceViolation[];
     recommendations: SecurityRecommendation[];
@@ -456,7 +502,7 @@ export class SecurityTestFramework {
     return `vuln_${Date.now()}_${randomBytes(4).toString('hex')}`;
   }
 
-  private analyzeError(error: any): SecurityVulnerability[] {
+  private analyzeError(error: Error): SecurityVulnerability[] {
     const vulnerabilities: SecurityVulnerability[] = [];
 
     if ((error as { message?: string }).message?.includes('unauthorized')) {
@@ -474,7 +520,7 @@ export class SecurityTestFramework {
     return vulnerabilities;
   }
 
-  private generateRecommendations(error: any): SecurityRecommendation[] {
+  private generateRecommendations(error: Error): SecurityRecommendation[] {
     return [
       {
         id: this.generateTestId(),
@@ -521,7 +567,7 @@ export class SecurityTestUtils {
   /**
    * Create test user with specific permissions
    */
-  static createTestUser(permissions: string[] = []): any {
+  static createTestUser(permissions: string[] = []): TestUser {
     return {
       id: this.generateRandomData(8),
       username: `testuser_${this.generateRandomData(4)}`,
@@ -536,7 +582,7 @@ export class SecurityTestUtils {
   /**
    * Create admin test user
    */
-  static createAdminUser(): any {
+  static createAdminUser(): TestUser {
     return {
       ...this.createTestUser(['read', 'write', 'admin', 'delete']),
       role: 'admin'
@@ -546,14 +592,14 @@ export class SecurityTestUtils {
   /**
    * Encode payload for testing
    */
-  static encodePayload(payload: any): string {
+  static encodePayload(payload: Record<string, unknown>): string {
     return Buffer.from(JSON.stringify(payload)).toString('base64');
   }
 
   /**
    * Decode payload from response
    */
-  static decodePayload(encoded: string): any {
+  static decodePayload(encoded: string): Record<string, unknown> {
     return JSON.parse(Buffer.from(encoded, 'base64').toString());
   }
 
@@ -567,7 +613,7 @@ export class SecurityTestUtils {
   /**
    * Validate response structure
    */
-  static validateResponseStructure(response: any, expectedStructure: any): boolean {
+  static validateResponseStructure(response: unknown, expectedStructure: Record<string, unknown>): boolean {
     const responseObj = response as Record<string, unknown>;
     for (const [key, type] of Object.entries(expectedStructure)) {
       if (typeof responseObj[key] !== type) {

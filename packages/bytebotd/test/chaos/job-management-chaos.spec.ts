@@ -48,6 +48,51 @@ import {
   JobResult,
   JobOptions,
 } from '../../src/computer-use/job-management.service';
+
+// Type-safe interfaces for chaos testing
+interface ServiceWithMethods {
+  [methodName: string]: (...args: unknown[]) => unknown;
+  constructor: {
+    name: string;
+  };
+}
+
+interface ChaosTestResult {
+  success: boolean;
+  error?: string;
+  metrics?: {
+    responseTime?: number;
+    recoveryTime?: number;
+    failureCount?: number;
+  };
+}
+
+// Type guard for service objects
+function isServiceWithMethods(obj: unknown): obj is ServiceWithMethods {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'constructor' in obj &&
+    typeof (obj as ServiceWithMethods).constructor === 'object' &&
+    'name' in (obj as ServiceWithMethods).constructor
+  );
+}
+
+// Helper function for safe method access
+function safeMethodAccess(service: unknown, methodName: string): ((...args: unknown[]) => unknown) | undefined {
+  if (isServiceWithMethods(service) && typeof service[methodName] === 'function') {
+    return service[methodName] as (...args: unknown[]) => unknown;
+  }
+  return undefined;
+}
+
+// Helper function for safe constructor name access
+function safeGetConstructorName(service: unknown): string {
+  if (isServiceWithMethods(service)) {
+    return service.constructor.name;
+  }
+  return 'UnknownService';
+}
 import { ComputerUseService } from '../../src/computer-use/computer-use.service';
 import { ComputerAction } from '@bytebot/shared';
 
@@ -149,28 +194,38 @@ class ChaosInjector {
   /**
    * Inject network latency
    */
-  injectNetworkLatency(service: any, methodName: string, latency: number): void {
-    const originalMethod = service[methodName].bind(service);
-    this.originalMethods.set(`${service.constructor.name}.${methodName}`, originalMethod);
+  injectNetworkLatency(service: unknown, methodName: string, latency: number): void {
+    const originalMethod = safeMethodAccess(service, methodName);
+    if (!originalMethod || !isServiceWithMethods(service)) {
+      throw new Error(`Method ${methodName} not found on service`);
+    }
 
-    service[methodName] = jest.fn().mockImplementation(async (...args) => {
+    const boundMethod = originalMethod.bind(service);
+    this.originalMethods.set(`${safeGetConstructorName(service)}.${methodName}`, boundMethod);
+
+    (service as ServiceWithMethods)[methodName] = jest.fn().mockImplementation(async (...args: unknown[]) => {
       await new Promise(resolve => setTimeout(resolve, latency));
-      return originalMethod(...args);
+      return boundMethod(...args);
     });
   }
 
   /**
    * Inject random service failures
    */
-  injectServiceFailures(service: any, methodName: string, failureRate: number): void {
-    const originalMethod = service[methodName].bind(service);
-    this.originalMethods.set(`${service.constructor.name}.${methodName}`, originalMethod);
+  injectServiceFailures(service: unknown, methodName: string, failureRate: number): void {
+    const originalMethod = safeMethodAccess(service, methodName);
+    if (!originalMethod || !isServiceWithMethods(service)) {
+      throw new Error(`Method ${methodName} not found on service`);
+    }
 
-    service[methodName] = jest.fn().mockImplementation((...args) => {
+    const boundMethod = originalMethod.bind(service);
+    this.originalMethods.set(`${safeGetConstructorName(service)}.${methodName}`, boundMethod);
+
+    (service as ServiceWithMethods)[methodName] = jest.fn().mockImplementation((...args: unknown[]) => {
       if (Math.random() < failureRate) {
         return Promise.reject(new Error(`CHAOS: ${methodName} service failure`));
       }
-      return originalMethod(...args);
+      return boundMethod(...args);
     });
   }
 
@@ -218,10 +273,15 @@ class ChaosInjector {
    * Simulate worker crash
    */
   async simulateWorkerCrash(worker: BackgroundWorker): Promise<void> {
-    await worker.stop();
-    // Simulate crash recovery delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await worker.start();
+    try {
+      await worker.stop();
+      // Simulate crash recovery delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await worker.start();
+    } catch (error) {
+      console.error('Worker crash simulation failed:', error);
+      throw error;
+    }
   }
 
   /**

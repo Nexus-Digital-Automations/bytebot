@@ -4102,12 +4102,24 @@
       "updated_at": "2025-09-21T16:48:07.260Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-21T16:39:03.827Z",
       "title": "Fix @typescript-eslint/no-unsafe-argument violations",
       "description": "Fix unsafe argument violations in TypeScript files by adding proper parameter typing, type guards before function calls, and safe argument passing. Focus on shared package and bytebotd package files.",
       "category": "error",
-      "id": "error_1758472743827_gds5rmlbuyp"
+      "id": "error_1758472743827_gds5rmlbuyp",
+      "assigned_agent": "dev_session_1758474911203_1_general_d8492ea5",
+      "started_at": "2025-09-21T17:15:56.587Z",
+      "claimed_by": "dev_session_1758474911203_1_general_d8492ea5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758474911203_1_general_d8492ea5",
+          "role": "primary",
+          "assignedAt": "2025-09-21T17:15:56.587Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
@@ -11180,6 +11192,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T16:38:46.255Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758474911203_1_general_d8492ea5": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T17:15:11.205Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T17:15:11.205Z",
       "sessionId": null,
       "metadata": {}
     }
