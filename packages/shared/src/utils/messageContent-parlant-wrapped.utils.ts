@@ -419,7 +419,9 @@ export function registerParlantMessageContentFunctions(): void {
               : ConversationPriority._LOW,
     };
 
-    registry.register(`messageContent.${name}`, func, config);
+    // Cast the function to WrappedFunction type for registry compatibility
+    const wrappedFunc = func as unknown as import("./parlant-wrapper.utils").WrappedFunction<(..._args: unknown[]) => unknown>;
+    registry.register(`messageContent.${name}`, wrappedFunc, config);
   }
 
   logger.log(

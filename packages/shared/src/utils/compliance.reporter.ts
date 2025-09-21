@@ -166,9 +166,9 @@ export class ComplianceReporter {
       const reportEntry: ComplianceReportEntry = {
         id: this.generateEventId(),
         timestamp: new Date(),
-        eventType: ComplianceEventType.ADMIN_ACTION,
+        eventType: ComplianceEventType._ADMIN_ACTION,
         frameworks: this.getApplicableFrameworks(
-          ComplianceEventType.ADMIN_ACTION,
+          ComplianceEventType._ADMIN_ACTION,
         ),
         user: {
           id: user.id,
@@ -188,15 +188,15 @@ export class ComplianceReporter {
         },
         compliance: {
           requiresReview: this.requiresReview(
-            ComplianceEventType.ADMIN_ACTION,
+            ComplianceEventType._ADMIN_ACTION,
             user.roles,
           ),
           riskLevel: this.calculateRiskLevel(
-            ComplianceEventType.ADMIN_ACTION,
+            ComplianceEventType._ADMIN_ACTION,
             user.roles,
           ),
           retentionPeriod: this.getRetentionPeriod(
-            ComplianceEventType.ADMIN_ACTION,
+            ComplianceEventType._ADMIN_ACTION,
           ),
           auditTrail: [`Admin action: ${action} on ${resource}`],
         },
@@ -222,9 +222,9 @@ export class ComplianceReporter {
       const reportEntry: ComplianceReportEntry = {
         id: this.generateEventId(),
         timestamp: new Date(),
-        eventType: ComplianceEventType.SECURITY_VIOLATION,
+        eventType: ComplianceEventType._SECURITY_VIOLATION,
         frameworks: this.getApplicableFrameworks(
-          ComplianceEventType.SECURITY_VIOLATION,
+          ComplianceEventType._SECURITY_VIOLATION,
         ),
         user: user
           ? {
@@ -254,7 +254,7 @@ export class ComplianceReporter {
           requiresReview: true,
           riskLevel: "CRITICAL",
           retentionPeriod: this.getRetentionPeriod(
-            ComplianceEventType.SECURITY_VIOLATION,
+            ComplianceEventType._SECURITY_VIOLATION,
           ),
           auditTrail: [`Security violation: ${violation}`],
         },
@@ -320,8 +320,8 @@ export class ComplianceReporter {
     result: AuthorizationResult,
   ): ComplianceReportEntry {
     const eventType = result.granted
-      ? ComplianceEventType.ACCESS_GRANTED
-      : ComplianceEventType.ACCESS_DENIED;
+      ? ComplianceEventType._ACCESS_GRANTED
+      : ComplianceEventType._ACCESS_DENIED;
 
     return {
       id: this.generateEventId(),
@@ -371,24 +371,24 @@ export class ComplianceReporter {
 
     // Different event types may apply to different frameworks
     switch (eventType) {
-      case ComplianceEventType.ACCESS_GRANTED:
-      case ComplianceEventType.ACCESS_DENIED:
+      case ComplianceEventType._ACCESS_GRANTED:
+      case ComplianceEventType._ACCESS_DENIED:
         return allFrameworks.filter((f) =>
           [
-            ComplianceFramework.SOC2,
-            ComplianceFramework.ISO27001,
-            ComplianceFramework.NIST,
+            ComplianceFramework._SOC2,
+            ComplianceFramework._ISO27001,
+            ComplianceFramework._NIST,
           ].includes(f),
         );
 
-      case ComplianceEventType.ADMIN_ACTION:
+      case ComplianceEventType._ADMIN_ACTION:
         return allFrameworks;
 
-      case ComplianceEventType.SECURITY_VIOLATION:
+      case ComplianceEventType._SECURITY_VIOLATION:
         return allFrameworks;
 
       default:
-        return [ComplianceFramework.SOC2];
+        return [ComplianceFramework._SOC2];
     }
   }
 
@@ -403,16 +403,16 @@ export class ComplianceReporter {
 
     // Base risk by event type
     switch (eventType) {
-      case ComplianceEventType.SECURITY_VIOLATION:
+      case ComplianceEventType._SECURITY_VIOLATION:
         riskScore += 80;
         break;
-      case ComplianceEventType.ADMIN_ACTION:
+      case ComplianceEventType._ADMIN_ACTION:
         riskScore += 60;
         break;
-      case ComplianceEventType.ACCESS_DENIED:
+      case ComplianceEventType._ACCESS_DENIED:
         riskScore += 30;
         break;
-      case ComplianceEventType.ACCESS_GRANTED:
+      case ComplianceEventType._ACCESS_GRANTED:
         riskScore += 10;
         break;
     }
@@ -440,14 +440,14 @@ export class ComplianceReporter {
   ): boolean {
     // Always review security violations and super admin actions
     if (
-      eventType === ComplianceEventType.SECURITY_VIOLATION ||
+      eventType === ComplianceEventType._SECURITY_VIOLATION ||
       userRoles.includes(Role._SUPER_ADMIN)
     ) {
       return true;
     }
 
     // Review admin actions
-    if (eventType === ComplianceEventType.ADMIN_ACTION) {
+    if (eventType === ComplianceEventType._ADMIN_ACTION) {
       return true;
     }
 
@@ -471,7 +471,7 @@ export class ComplianceReporter {
     }
 
     // Extend for critical events
-    if (eventType === ComplianceEventType.SECURITY_VIOLATION) {
+    if (eventType === ComplianceEventType._SECURITY_VIOLATION) {
       maxRetention = Math.max(maxRetention, 2555); // Minimum 7 years
     }
 
@@ -613,7 +613,7 @@ export class ComplianceReporter {
       (e) => e.compliance.riskLevel === "CRITICAL",
     ).length;
     const deniedAccess = events.filter(
-      (e) => e.eventType === ComplianceEventType.ACCESS_DENIED,
+      (e) => e.eventType === ComplianceEventType._ACCESS_DENIED,
     ).length;
 
     if (criticalEvents > 0) {
@@ -629,13 +629,13 @@ export class ComplianceReporter {
     }
 
     // Framework-specific recommendations
-    if (framework === ComplianceFramework.SOC2) {
+    if (framework === ComplianceFramework._SOC2) {
       recommendations.push(
         "Ensure all administrative actions are properly documented",
       );
     }
 
-    if (framework === ComplianceFramework.GDPR) {
+    if (framework === ComplianceFramework._GDPR) {
       recommendations.push(
         "Verify data access events comply with data minimization principles",
       );
@@ -649,29 +649,29 @@ export class ComplianceReporter {
    */
   private getComplianceConfig(): ComplianceConfig {
     return {
-      enabledFrameworks: this.configService.get<ComplianceFramework[]>(
+      enabledFrameworks: this._configService.get<ComplianceFramework[]>(
         "compliance.frameworks",
-        [ComplianceFramework.SOC2, ComplianceFramework.ISO27001],
+        [ComplianceFramework._SOC2, ComplianceFramework._ISO27001],
       ),
       retentionPeriods: {
-        [ComplianceFramework.SOC2]: 2555, // 7 years
-        [ComplianceFramework.ISO27001]: 2190, // 6 years
-        [ComplianceFramework.GDPR]: 2555, // 7 years
-        [ComplianceFramework.HIPAA]: 2555, // 7 years
-        [ComplianceFramework.PCI_DSS]: 365, // 1 year
-        [ComplianceFramework.NIST]: 2190, // 6 years
-        [ComplianceFramework.SOX]: 2555, // 7 years
+        [ComplianceFramework._SOC2]: 2555, // 7 years
+        [ComplianceFramework._ISO27001]: 2190, // 6 years
+        [ComplianceFramework._GDPR]: 2555, // 7 years
+        [ComplianceFramework._HIPAA]: 2555, // 7 years
+        [ComplianceFramework._PCI_DSS]: 365, // 1 year
+        [ComplianceFramework._NIST]: 2190, // 6 years
+        [ComplianceFramework._SOX]: 2555, // 7 years
       },
       autoReporting: {
-        enabled: this.configService.get<boolean>(
+        enabled: this._configService.get<boolean>(
           "compliance.autoReporting.enabled",
           true,
         ),
-        frequency: this.configService.get<"DAILY" | "WEEKLY" | "MONTHLY">(
+        frequency: this._configService.get<"DAILY" | "WEEKLY" | "MONTHLY">(
           "compliance.autoReporting.frequency",
           "WEEKLY",
         ),
-        recipients: this.configService.get<string[]>(
+        recipients: this._configService.get<string[]>(
           "compliance.autoReporting.recipients",
           [],
         ),

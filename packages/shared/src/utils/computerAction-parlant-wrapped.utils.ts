@@ -477,7 +477,9 @@ export function registerParlantComputerActionFunctions(): void {
             : ConversationPriority._NORMAL,
     };
 
-    registry.register(`computerAction.${name}`, func, config);
+    // Cast the function to WrappedFunction type for registry compatibility
+    const wrappedFunc = func as unknown as import("./parlant-wrapper.utils").WrappedFunction<(..._args: unknown[]) => unknown>;
+    registry.register(`computerAction.${name}`, wrappedFunc, config);
   }
 
   logger.log(
