@@ -26,6 +26,9 @@ import {
   ErrorCategory,
   WrapperStatus
 } from '../interfaces/wrapper-types';
+
+// Re-export WrapperStatus for external use
+export { WrapperStatus } from '../interfaces/wrapper-types';
 import {
   SignaturePreservingWrapper,
   WrapperStatistics

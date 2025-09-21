@@ -1406,7 +1406,7 @@ export class SecurityQualityGate implements QualityGate {
           duration: 0,
           findingsCount: 0,
           results: {},
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }

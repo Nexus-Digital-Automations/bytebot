@@ -20,13 +20,13 @@ import {
   ExampleCategory,
   PerformanceCharacteristics,
   IntensityLevel,
-  AuthorInfo,
   DocumentationLink,
   DocumentationType,
   DeprecationInfo,
   FunctionRegistryEntry,
   SourceLocation
 } from '../core/registry.interface';
+import { AuthorInfo } from '../../../types/parlant-integration.types';
 
 /**
  * Metadata extraction modes

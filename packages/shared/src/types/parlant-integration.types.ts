@@ -427,3 +427,129 @@ export class ParlantTimeoutError extends ParlantIntegrationError {
     this.name = "ParlantTimeoutError";
   }
 }
+
+// ===========================
+// FUNCTION SECURITY TYPES
+// ===========================
+
+/**
+ * Function-specific security levels
+ */
+export enum FunctionSecurityLevel {
+  _PUBLIC = "public",
+  _INTERNAL = "internal",
+  _RESTRICTED = "restricted",
+  _CONFIDENTIAL = "confidential",
+  _SECRET = "secret",
+}
+
+/**
+ * Security consideration types
+ */
+export enum SecurityConsiderationType {
+  _AUTHENTICATION_BYPASS = "authentication_bypass",
+  _PRIVILEGE_ESCALATION = "privilege_escalation",
+  _DATA_EXPOSURE = "data_exposure",
+  _INJECTION_VULNERABILITY = "injection_vulnerability",
+  _DENIAL_OF_SERVICE = "denial_of_service",
+  _CROSS_SITE_SCRIPTING = "cross_site_scripting",
+  _SENSITIVE_DATA_ACCESS = "sensitive_data_access",
+}
+
+/**
+ * Security severity levels
+ */
+export enum SecuritySeverity {
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+}
+
+/**
+ * Security consideration for function assessment
+ */
+export interface SecurityConsideration {
+  /** Type of security consideration */
+  type: SecurityConsiderationType;
+  /** Description of the security concern */
+  description: string;
+  /** Severity level of the concern */
+  severity: SecuritySeverity;
+  /** Recommended mitigations */
+  mitigations: string[];
+}
+
+/**
+ * Security constraint for function execution
+ */
+export interface SecurityConstraint {
+  /** Constraint type */
+  type: string;
+  /** Constraint description */
+  description: string;
+  /** Constraint parameters */
+  parameters: Record<string, unknown>;
+  /** Whether constraint is mandatory */
+  mandatory: boolean;
+}
+
+/**
+ * Function security assessment
+ */
+export interface FunctionSecurityAssessment {
+  /** Security level assigned to function */
+  securityLevel: FunctionSecurityLevel;
+  /** Risk level assessment */
+  riskLevel: RiskLevel;
+  /** Security considerations identified */
+  considerations: SecurityConsideration[];
+  /** Security constraints to apply */
+  constraints: SecurityConstraint[];
+  /** Assessment timestamp */
+  assessedAt: Date;
+  /** Assessment metadata */
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Author information for functions
+ */
+export interface AuthorInfo {
+  /** Author name */
+  name: string;
+  /** Author email (optional) */
+  email?: string;
+  /** Team or organization */
+  team: string;
+  /** Creation timestamp */
+  createdAt: Date;
+}
+
+/**
+ * Risk level enumeration
+ */
+export enum RiskLevel {
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+}
+
+/**
+ * Validation mode enumeration
+ */
+export enum ValidationMode {
+  _STRICT = "strict",
+  _PERMISSIVE = "permissive",
+  _ADVISORY = "advisory",
+}
+
+/**
+ * Approval level enumeration
+ */
+export enum ApprovalLevel {
+  _AUTOMATIC = "automatic",
+  _MANUAL = "manual",
+  _ESCALATED = "escalated",
+}

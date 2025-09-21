@@ -212,8 +212,8 @@ export class JwtParlantBridgeService
   private readonly logger = new Logger(JwtParlantBridgeService.name);
 
   // Core components
-  private parlantClient!: AxiosInstance;
-  private redisClient!: Redis;
+  private parlantClient: AxiosInstance | null = null;
+  private redisClient: Redis | null = null;
   private sessionBridges = new Map<string, SessionBridge>();
   private emergencyOverrides = new Map<string, EmergencyOverride>();
   private auditEvents: SecurityAuditEvent[] = [];
@@ -264,7 +264,7 @@ export class JwtParlantBridgeService
     await this.cleanupActiveSessions();
 
     if (this.redisClient) {
-      await this.redisClient.quit();
+      await this.redisClient!.quit();
     }
 
     this.logger.log("✅ JWT-Parlant Bridge shutdown complete");
@@ -549,7 +549,7 @@ export class JwtParlantBridgeService
     userAgent: string,
   ): Promise<string> {
     try {
-      const response = await this.parlantClient.post("/sessions", {
+      const response = await this.parlantClient!.post("/sessions", {
         user_id: payload.sub,
         username: payload.username,
         roles: payload.roles,
@@ -593,7 +593,7 @@ export class JwtParlantBridgeService
       lazyConnect: true,
     });
 
-    await this.redisClient.connect();
+    await this.redisClient!.connect();
     this.logger.log("✅ Redis client connected");
   }
 
@@ -616,7 +616,7 @@ export class JwtParlantBridgeService
 
     // Test connection
     try {
-      await this.parlantClient.get("/health");
+      await this.parlantClient!.get("/health");
       this.logger.log("✅ Parlant API client connected");
     } catch (error) {
       this.logger.warn("⚠️ Parlant API unavailable, using offline mode");
@@ -743,7 +743,7 @@ export class JwtParlantBridgeService
    */
   private async storeSessionInRedis(sessionBridge: SessionBridge): Promise<void> {
     const key = `session:${sessionBridge.aigentSessionId}`;
-    await this.redisClient.setex(
+    await this.redisClient!.setex(
       key,
       this.SESSION_TTL,
       JSON.stringify(sessionBridge),
@@ -755,7 +755,7 @@ export class JwtParlantBridgeService
    */
   private async getSessionFromRedis(sessionId: string): Promise<SessionBridge | null> {
     const key = `session:${sessionId}`;
-    const data = await this.redisClient.get(key);
+    const data = await this.redisClient!.get(key);
 
     if (!data) {
       return null;
@@ -778,7 +778,7 @@ export class JwtParlantBridgeService
    */
   private async storeEmergencyOverrideInRedis(override: EmergencyOverride): Promise<void> {
     const key = `emergency:${override.overrideId}`;
-    await this.redisClient.setex(
+    await this.redisClient!.setex(
       key,
       this.EMERGENCY_OVERRIDE_TTL,
       JSON.stringify(override),
@@ -790,7 +790,7 @@ export class JwtParlantBridgeService
    */
   private async validateParlantSession(parlantSessionId: string): Promise<boolean> {
     try {
-      const response = await this.parlantClient.get(`/sessions/${parlantSessionId}/validate`);
+      const response = await this.parlantClient!.get(`/sessions/${parlantSessionId}/validate`);
       return response.data.valid === true;
     } catch (error) {
       this.logger.warn(`Failed to validate Parlant session: ${parlantSessionId}`, error);
@@ -807,7 +807,7 @@ export class JwtParlantBridgeService
     if (sessionBridge) {
       // Invalidate Parlant session
       try {
-        await this.parlantClient.delete(`/sessions/${sessionBridge.parlantSessionId}`);
+        await this.parlantClient!.delete(`/sessions/${sessionBridge.parlantSessionId}`);
       } catch (error) {
         this.logger.warn("Failed to invalidate Parlant session", error);
       }
@@ -817,7 +817,7 @@ export class JwtParlantBridgeService
     }
 
     // Remove from Redis
-    await this.redisClient.del(`session:${sessionId}`);
+    await this.redisClient!.del(`session:${sessionId}`);
   }
 
   /**
@@ -837,7 +837,7 @@ export class JwtParlantBridgeService
 
     // Store in Redis for persistence
     const key = `audit:${auditEvent.eventId}`;
-    await this.redisClient.setex(
+    await this.redisClient!.setex(
       key,
       this.AUDIT_RETENTION_DAYS * 24 * 60 * 60,
       JSON.stringify(auditEvent),
@@ -945,7 +945,7 @@ export class JwtParlantBridgeService
     try {
       // Check Redis connection
       try {
-        await this.redisClient.ping();
+        await this.redisClient!.ping();
         components.redis = {
           status: "healthy",
           lastChecked: timestamp,
@@ -969,7 +969,7 @@ export class JwtParlantBridgeService
       // Check Parlant API connection
       try {
         const parlantStart = Date.now();
-        await this.parlantClient.get("/health");
+        await this.parlantClient!.get("/health");
         components.parlantApi = {
           status: "healthy",
           lastChecked: timestamp,

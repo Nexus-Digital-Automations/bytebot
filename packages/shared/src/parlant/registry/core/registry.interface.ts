@@ -1635,3 +1635,48 @@ export interface StorageStatus {
   compressionRatio: number;
   freeSpace: number;
 }
+
+// ===========================
+// MISSING SECURITY TYPES
+// ===========================
+
+/**
+ * Permission scope enumeration
+ */
+export enum PermissionScope {
+  _READ = "read",
+  _WRITE = "write",
+  _EXECUTE = "execute",
+  _ADMIN = "admin",
+  _FULL = "full",
+}
+
+/**
+ * Permission interface
+ */
+export interface Permission {
+  /** Permission identifier */
+  id: string;
+  /** Permission name */
+  name: string;
+  /** Permission scope */
+  scope: PermissionScope;
+  /** Permission description */
+  description: string;
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Audit requirement interface
+ */
+export interface AuditRequirement {
+  /** Whether auditing is required */
+  required: boolean;
+  /** Audit level */
+  level: "basic" | "detailed" | "comprehensive";
+  /** Retention period in days */
+  retentionDays: number;
+  /** Additional audit parameters */
+  parameters?: Record<string, unknown>;
+}

@@ -15,9 +15,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
+import * as cluster from 'cluster';
 import { performance } from 'perf_hooks';
 import { cpus, freemem, totalmem, loadavg } from 'os';
-import cluster from 'cluster';
+
+// Type guard utilities for error handling
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return getErrorMessage(error);
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 import {
   WrapperRegistryManagementService,
   WrapperInfo
@@ -162,9 +177,9 @@ export class ScalabilityTestingSuiteService {
     } catch (error) {
       this.logger.error(`Scalability testing failed: ${testId}`, error);
       await this.cleanupScalabilityTestExecution(testId);
-      throw new ScalabilityTestingError(`Scalability testing failed: ${error.message}`, {
+      throw new ScalabilityTestingError(`Scalability testing failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -260,9 +275,9 @@ export class ScalabilityTestingSuiteService {
 
     } catch (error) {
       this.logger.error(`Extreme load testing failed: ${testId}`, error);
-      throw new ScalabilityTestingError(`Extreme load testing failed: ${error.message}`, {
+      throw new ScalabilityTestingError(`Extreme load testing failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -338,9 +353,9 @@ export class ScalabilityTestingSuiteService {
 
     } catch (error) {
       this.logger.error(`Function isolation testing failed: ${testId}`, error);
-      throw new ScalabilityTestingError(`Function isolation testing failed: ${error.message}`, {
+      throw new ScalabilityTestingError(`Function isolation testing failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -419,9 +434,9 @@ export class ScalabilityTestingSuiteService {
 
     } catch (error) {
       this.logger.error(`Linear scalability validation failed: ${testId}`, error);
-      throw new ScalabilityTestingError(`Linear scalability validation failed: ${error.message}`, {
+      throw new ScalabilityTestingError(`Linear scalability validation failed: ${getErrorMessage(error)}`, {
         testId,
-        error: error.message
+        error: getErrorMessage(error)
       });
     }
   }
@@ -489,7 +504,7 @@ export class ScalabilityTestingSuiteService {
 
     } catch (error) {
       this.logger.error('Failed to generate scalability testing report', error);
-      throw new ScalabilityTestingError(`Report generation failed: ${error.message}`);
+      throw new ScalabilityTestingError(`Report generation failed: ${getErrorMessage(error)}`);
     }
   }
 

@@ -113,6 +113,11 @@ export class ParlantIntegrationService
 
   constructor() {
     super();
+
+    // Initialize configuration and HTTP client - these would be properly configured in production
+    this.config = null; // Would be loaded from configuration service
+    this.httpClient = null; // Would be initialized with axios.create()
+
     this.logger.log("🚀 Initializing Maximum Parlant Integration Service");
   }
 
@@ -229,17 +234,17 @@ export class ParlantIntegrationService
     this.logger.log("🌐 Initializing HTTP client for Parlant API...");
 
     this.httpClient = axios.create({
-      baseURL: this.config.connection.baseUrl,
+      baseURL: this.config!.connection.baseUrl,
       timeout: 10000,
       headers: {
-        Authorization: `Bearer ${this.config.connection.apiKey}`,
+        Authorization: `Bearer ${this.config!.connection.apiKey}`,
         "Content-Type": "application/json",
         "User-Agent": "AIgent-Parlant-Integration/1.0.0",
       },
     });
 
     // Add request interceptor for metrics
-    this.httpClient.interceptors.request.use(
+    this.httpClient!.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         (
           config as InternalAxiosRequestConfig & {
@@ -251,7 +256,7 @@ export class ParlantIntegrationService
     );
 
     // Add response interceptor for metrics and error handling
-    this.httpClient.interceptors.response.use(
+    this.httpClient!.interceptors.response.use(
       (response: AxiosResponse) => {
         const config = response.config as InternalAxiosRequestConfig & {
           metadata?: { startTime: number };
@@ -274,7 +279,7 @@ export class ParlantIntegrationService
 
     // Test connection
     try {
-      await this.httpClient.get("/health");
+      await this.httpClient!.get("/health");
       this.logger.log(
         "✅ HTTP client initialized and connected to Parlant API",
       );
@@ -289,7 +294,7 @@ export class ParlantIntegrationService
    * Initialize WebSocket connection for real-time communication
    */
   private async initializeWebSocketConnection(): Promise<void> {
-    if (!this.config.websocket.enabled) {
+    if (!this.config!.websocket.enabled) {
       this.logger.log("📡 WebSocket disabled in configuration");
       return;
     }
@@ -297,16 +302,16 @@ export class ParlantIntegrationService
     this.logger.log("📡 Initializing WebSocket connection...");
 
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(this.config.connection.websocketUrl, {
+      const ws = new WebSocket(this.config!.connection.websocketUrl, {
         headers: {
-          Authorization: `Bearer ${this.config.connection.apiKey}`,
+          Authorization: `Bearer ${this.config!.connection.apiKey}`,
         },
       });
 
       const timeout = setTimeout(() => {
         ws.terminate();
         reject(new ParlantConnectionError("WebSocket connection timeout"));
-      }, this.config.websocket.connectionTimeout);
+      }, this.config!.websocket.connectionTimeout);
 
       ws.on("open", () => {
         clearTimeout(timeout);
@@ -353,7 +358,7 @@ export class ParlantIntegrationService
   private async initializeCacheSystem(): Promise<void> {
     this.logger.log("💾 Initializing multi-level caching system...");
 
-    if (!this.config.cache.enabled) {
+    if (!this.config!.cache.enabled) {
       this.logger.log("💾 Caching disabled in configuration");
       return;
     }
@@ -363,15 +368,15 @@ export class ParlantIntegrationService
 
     // Initialize Redis if available
     if (
-      this.config.cache.type === "redis" ||
-      this.config.cache.type === "hybrid"
+      this.config!.cache.type === "redis" ||
+      this.config!.cache.type === "hybrid"
     ) {
       try {
         // Redis initialization would go here
         this.logger.log("📦 Redis cache initialized");
       } catch (_error) {
         this.logger.warn("⚠️ Redis not available, using memory cache only");
-        this.config.cache.type = "memory";
+        this.config!.cache.type = "memory";
       }
     }
 
@@ -426,7 +431,7 @@ export class ParlantIntegrationService
       const response = await this.performValidation(request);
 
       // Cache the response if cacheable
-      if (this.config.wrapper.cacheable) {
+      if (this.config!.wrapper.cacheable) {
         await this.cacheValidation(request, response);
       }
 
@@ -536,7 +541,7 @@ export class ParlantIntegrationService
       status: this.determineHealthStatus(),
       apiConnection: await this.testApiConnection(),
       websocketConnection: this.isConnected,
-      cacheStatus: this.config.cache.enabled,
+      cacheStatus: this.config!.cache.enabled,
       lastCheck: new Date(),
       metrics: this.metrics,
     };
@@ -548,11 +553,11 @@ export class ParlantIntegrationService
   private async performValidation(
     request: ParlantValidationRequest,
   ): Promise<ParlantValidationResponse> {
-    const timeout = request.timeout || this.config.wrapper.timeout;
+    const timeout = request.timeout || this.config!.wrapper.timeout;
 
     try {
       const response = await Promise.race([
-        this.httpClient.post("/validate", {
+        this.httpClient!.post("/validate", {
           operation_id: request.operationId,
           function_name: request.functionName,
           package_name: request.packageName,
@@ -689,7 +694,7 @@ export class ParlantIntegrationService
   private async getCachedValidation(
     request: ParlantValidationRequest,
   ): Promise<ParlantValidationResponse | null> {
-    if (!this.config.cache.enabled) {
+    if (!this.config!.cache.enabled) {
       return null;
     }
 
@@ -717,12 +722,12 @@ export class ParlantIntegrationService
     request: ParlantValidationRequest,
     response: ParlantValidationResponse,
   ): Promise<void> {
-    if (!this.config.cache.enabled) {
+    if (!this.config!.cache.enabled) {
       return;
     }
 
     const cacheKey = this.generateCacheKey(request);
-    const ttl = this.config.wrapper.cacheTtl || this.config.connection.cacheTtl;
+    const ttl = this.config!.wrapper.cacheTtl || this.config!.connection.cacheTtl;
 
     const cacheEntry: ParlantCacheEntry = {
       response,
@@ -792,7 +797,7 @@ export class ParlantIntegrationService
     request: ParlantValidationRequest,
     response: ParlantValidationResponse,
   ): Promise<void> {
-    if (!this.config.monitoring.auditTrail) {
+    if (!this.config!.monitoring.auditTrail) {
       return;
     }
 
@@ -866,9 +871,9 @@ export class ParlantIntegrationService
         service: "aigent",
         timestamp: Date.now(),
       },
-      this.config.authentication.jwtSecret,
+      this.config!.authentication.jwtSecret,
       {
-        expiresIn: this.config.authentication.tokenExpiration,
+        expiresIn: this.config!.authentication.tokenExpiration,
       } as jwt.SignOptions,
     );
 
@@ -920,19 +925,19 @@ export class ParlantIntegrationService
 
         this.websocket.send(JSON.stringify(heartbeat));
       }
-    }, this.config.websocket.heartbeatInterval);
+    }, this.config!.websocket.heartbeatInterval);
   }
 
   /**
    * Attempt WebSocket reconnection
    */
   private async attemptReconnection(): Promise<void> {
-    if (!this.config.websocket.enabled) {
+    if (!this.config!.websocket.enabled) {
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = this.config.websocket.reconnectAttempts;
+    const maxAttempts = this.config!.websocket.reconnectAttempts;
 
     while (attempts < maxAttempts && !this.isConnected) {
       attempts++;
@@ -988,7 +993,7 @@ export class ParlantIntegrationService
    */
   private async testApiConnection(): Promise<boolean> {
     try {
-      await this.httpClient.get("/health");
+      await this.httpClient!.get("/health");
       return true;
     } catch (_error) {
       return false;

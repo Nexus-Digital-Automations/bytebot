@@ -17,22 +17,16 @@ import {
   FunctionRegistryEntry,
   RegistrationResult,
   FunctionMetadata,
-  FunctionSecurityAssessment,
   FunctionRegistrationConfig,
   FunctionDependencyInfo,
   FunctionHealthStatus,
   FunctionVersionInfo,
   RegistrationTimestamps,
   RegistrationStatus,
-  AuthorInfo,
   PerformanceCharacteristics,
   IntensityLevel,
-  SecurityConsideration,
-  SecurityConsiderationType,
-  SecuritySeverity,
   Permission,
   PermissionScope,
-  SecurityConstraint,
   AuditRequirement,
   AuditType,
   AuditLevel,
@@ -52,7 +46,13 @@ import {
   FunctionSecurityLevel,
   RiskLevel,
   ValidationMode,
-  ApprovalLevel
+  ApprovalLevel,
+  FunctionSecurityAssessment,
+  AuthorInfo,
+  SecurityConsideration,
+  SecurityConsiderationType,
+  SecuritySeverity,
+  SecurityConstraint
 } from '../../../types/parlant-integration.types';
 
 /**
