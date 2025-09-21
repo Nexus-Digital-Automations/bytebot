@@ -49,7 +49,7 @@ class MockValidationPipe {
 }
   }
 
-  async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown>  {
+  transform(value: unknown, metadata: ArgumentMetadata): unknown  {
     const operationId = `validation${Date.now()}`;
     console.log(`[${operationId}] Validating input`, {
   type: metadata.type,
@@ -66,7 +66,7 @@ class MockValidationPipe {
 }
 
       // Validate and transform complex objects
-      const validatedValue = await this.validateAndTransform(
+      const validatedValue = this.validateAndTransform(
         value,
         metadata.metatype as new () => object,
       );
@@ -228,7 +228,7 @@ afterEach(() => {
 
   describe('Basic Validation', () => {
 
-  it('should validate and transform valid user data', async () => {
+  it('should validate and transform valid user data', () => {
       const testId = `${operationId}_valid_user_data`;
       console.log(`[${testId}] Testing valid user data validation`);
 
@@ -245,7 +245,7 @@ const metadata: ArgumentMetadata = {
       metatype: CreateUserDto,
       data: '',
 };
-const result = await pipe.transform(validUserData, metadata);
+const result = pipe.transform(validUserData, metadata);
 
       expect(result).toMatchObject({
   email: 'test@example.com',
@@ -262,7 +262,7 @@ const result = await pipe.transform(validUserData, metadata);
 
 
 
-    it('should reject invalid email addresses', async () => {
+    it('should reject invalid email addresses', () => {
 
       const testId = `$operationId}
 _invalid_email`;console.log(`[${testId}] Testing invalid email address rejection`);
@@ -279,7 +279,7 @@ const metadata: ArgumentMetadata = {
       
 };
 
-      await expect(pipe.transform(invalidUserData, metadata)).rejects.toThrow(
+      expect(() => pipe.transform(invalidUserData, metadata)).toThrow(
         BadRequestException,
       );
 
@@ -288,7 +288,7 @@ const metadata: ArgumentMetadata = {
 
 
 
-    it('should reject short passwords', async () => {
+    it('should reject short passwords', () => {
 
       const testId = `$operationId}
 _short_password`;console.log(`[${testId}] Testing short password rejection`);
@@ -305,7 +305,7 @@ const metadata: ArgumentMetadata = {
       
 };
 
-      await expect(pipe.transform(invalidUserData, metadata)).rejects.toThrow(
+      expect(() => pipe.transform(invalidUserData, metadata)).toThrow(
         BadRequestException,
       );
 

@@ -627,7 +627,7 @@ return Promise.resolve({
           if (connectionAttempts <= 3) {
             throw new Error('MCP server connection lost');
 }// Simulate successful reconnection
-          return originalMoveMouse.call(context.mcpTools, params);
+          return await originalMoveMouse.call(context.mcpTools, params);
         });
 
       const result = await context.circuitBreakerService.executeWithCircuitBreaker(
@@ -748,7 +748,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       let cacheAttempts = 0;
 
       // Mock cache service recovery
-      jest.spyOn(context.cacheService, 'set').mockImplementation(async (_key, _value, _ttl) => {
+      jest.spyOn(context.cacheService, 'set').mockImplementation((_key, _value, _ttl) => {
   cacheAttempts++;
           if (cacheAttempts <= 2) {
             throw new Error('Cache service recovering');
@@ -872,21 +872,21 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       let healthCheckAttempts = 0;
 
       // Mock health check recovery process
-      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<() => Promise<{ status: string; details: Record<string, string> }>>;checkHealthSpy.mockImplementation(async (): Promise<{ status: string; details: Record<string, string> }> => {
+      const checkHealthSpy = jest.spyOn(context.healthService, 'checkHealth') as jest.MockedFunction<() => Promise<{ status: string; details: Record<string, string> }>>;checkHealthSpy.mockImplementation((): Promise<{ status: string; details: Record<string, string> }> => {
   healthCheckAttempts++;
           if (healthCheckAttempts <= 3) {
-            return {
+            return Promise.resolve({
       status: 'unhealthy',
       details: {nutService: 'degraded',
       cacheService: 'down',
       parlantService: 'recovering',
-},};
+},});
           }
-          return {
+          return Promise.resolve({
             status: 'healthy',
       details: {nutService: 'healthy',
       cacheService: 'healthy',
-      parlantService: 'healthy',},};
+      parlantService: 'healthy',},});
         });
 
       // Implement automated recovery based on health checks

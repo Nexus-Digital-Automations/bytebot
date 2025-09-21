@@ -114,7 +114,7 @@ export class EventCollectorService {
   private eventSequences: Map<string, string[]> = new Map();
   private eventMetrics: Map<string, number> = new Map();
 
-  @OnEvent('**', { async: true })async handleAllEvents(eventName: string, payload: EventPayload): Promise<void>  {const event: EventRecord = {
+  @OnEvent('**', { async: true })handleAllEvents(eventName: string, payload: EventPayload): void  {const event: EventRecord = {
       eventId: this.generateEventId(),
       eventName,
       source: payload?.source ?? 'unknown',

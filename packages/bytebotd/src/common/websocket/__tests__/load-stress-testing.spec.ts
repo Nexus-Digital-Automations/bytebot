@@ -72,22 +72,29 @@ reject(error);
     });
   }
 
-  async sendMessage(message: any): Promise<void>  {
-  if (!this.isConnected) {
+  sendMessage(message: any): Promise<void> {
+    if (!this.isConnected) {
       throw new Error('Connection not established');
-}const messageData = JSON.stringify(message);
-    const messageSize = Buffer.byteLength(messageData, 'utf8');this.messagesSent++;this.bytesTransferred += messageSize;
+    }
+    const messageData = JSON.stringify(message);
+    const messageSize = Buffer.byteLength(messageData, 'utf8');
+    this.messagesSent++;
+    this.bytesTransferred += messageSize;
     this.lastActivityTime = performance.now();
 
     this.metrics.recordMessageSent(this.connectionId, messageSize);
 
     // Simulate message processing delay
     setTimeout(() => {
-  this.messagesReceived++;
+      this.messagesReceived++;
       this.metrics.recordMessageReceived(this.connectionId, messageSize);
-      this.emit('message_received', { id: message.id, timestamp: performance.now() 
-});
+      this.emit('message_received', {
+        id: (message as { id?: string }).id || 'unknown',
+        timestamp: performance.now()
+      });
     }, Math.random() * 50);
+
+    return Promise.resolve();
   }
 
   async sendBurstMessages(count: number, messageSize: number = 1024): Promise<void>  {
@@ -113,16 +120,18 @@ reject(error);
 });}}, 30000); // 30 second ping
   }
 
-  async disconnect(): Promise<void>  {
-  if (this.pingInterval) {
+  disconnect(): Promise<void> {
+    if (this.pingInterval) {
       clearInterval(this.pingInterval);
       this.pingInterval = null;
-    
-}
+    }
 
     this.isConnected = false;
     this.metrics.recordDisconnection(this.connectionId);
-    this.emit('disconnected');}
+    this.emit('disconnected');
+
+    return Promise.resolve();
+  }
 
   getStats(): ConnectionStats {
   return {
@@ -827,11 +836,10 @@ describe('WebSocket Load Testing and Stress Testing', () => {
     resourceTester = new ResourceExhaustionTester(metrics);
   });
 
-  afterEach(async () => {
-  // Cleanup any running tests
+  afterEach(() => {
+    // Cleanup any running tests
     jest.clearAllTimers();
-  
-});
+  });
 
 
 
@@ -933,15 +941,15 @@ expect(result.success).toBe(true);
       expect(result.testType).toBe('message_queue_overflow');
 }, 60000);
 test('should perform sustained load test with memory monitoring', async () => {
-  const sustainedDuration = 120000; // 2 minutes for testingconst result = await resourceTester.testSustainedLoad(sustainedDuration);
+      const sustainedDuration = 120000; // 2 minutes for testing
+      const result = await resourceTester.testSustainedLoad(sustainedDuration);
 
-      expect(result.success).toBe(true);
-      expect(result.loadTestResults.success).toBe(true);
-      expect(result.memoryLeakAnalysis).toBeDefined();
-      expect(result.memoryLeakAnalysis.snapshots.length).toBeGreaterThan(5);
-      expect(result.sustainedDuration).toBe(sustainedDuration);
-    
-}, 180000);
+      expect((result as any).success).toBe(true);
+      expect((result as any).loadTestResults.success).toBe(true);
+      expect((result as any).memoryLeakAnalysis).toBeDefined();
+      expect((result as any).memoryLeakAnalysis.snapshots.length).toBeGreaterThan(5);
+      expect((result as any).sustainedDuration).toBe(sustainedDuration);
+    }, 180000);
   });
 
 

@@ -591,7 +591,7 @@ reject(error);});
       this.ws.on('close', () => {this.connected = false;this.emit('disconnected');});});
   }
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): Promise<void> {
   if (!this.ws || !this.connected) {
       throw new Error('WebSocket not connected');
 }
@@ -602,6 +602,7 @@ const messageData = JSON.stringify(message);
     this.benchmark.recordSentMessage(messageData.length);
 
     this.ws.send(messageData);
+    return Promise.resolve();
   }
 
   async runThroughputTest(messageCount: number,
@@ -652,12 +653,12 @@ _${Date.now()}`,
     return this.benchmark.getResults();
   }
 
-  async disconnect(): Promise<void>  {
+  disconnect(): Promise<void> {
   if (this.ws) {
       this.ws.close();
       this.connected = false;
-    
-}
+    }
+    return Promise.resolve();
   }
 
   getBenchmark(): ThroughputBenchmark {

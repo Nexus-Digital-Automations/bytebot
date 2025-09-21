@@ -747,7 +747,9 @@ it('should handle integration events', () => {
 
 describe('Load Testing', () => {
 
-  jest.setTimeout(120000); // 2 minutes for load testsit('should handle 1000+ concurrent sessions simulation', async () => 
+  jest.setTimeout(120000); // 2 minutes for load tests
+
+  it('should handle 1000+ concurrent sessions simulation', async () => { 
     const targetSessions = 1000;
     const sessionBatch = 100;
     const sessions: { id: string; connected: boolean 

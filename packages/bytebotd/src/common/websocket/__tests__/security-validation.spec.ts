@@ -120,7 +120,7 @@ reject(error);});
 });this.emit('disconnected', { code, reason });});});
   }
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): void {
   if (!this.ws || !this.connected) {
       throw new Error('Security test client not connected');
 }this.recordSecurityEvent('message_sent', {
@@ -133,7 +133,7 @@ reject(error);});
     this.ws.send(JSON.stringify(message));
   }
 
-  async sendMaliciousPayload(payload: string): Promise<void>  {
+  sendMaliciousPayload(payload: string): void {
   if (!this.ws || !this.connected) {
       throw new Error('Security test client not connected');
 }
@@ -153,7 +153,7 @@ this.recordSecurityEvent('malicious_payload_sent', { payloadLength: payload.leng
   
 }
 
-  async disconnect(): Promise<void>  {
+  disconnect(): void {
   if (this.ws) {
       this.ws.close(1000, 'Normal closure');
 }}
@@ -621,7 +621,7 @@ describe('WebSocket Security Validation Tests', () => {
 
       console.log(`Secure WebSocket connection: ${clientId} (User: ${userContext.sub})`);
 
-      ws.on('message', async (data: WebSocket.RawData) => {
+      ws.on('message', (data: WebSocket.RawData) => {
   try {// Rate limiting check
           if (!rateLimiter.isAllowed(clientId)) {
             securityAuditLog.push({

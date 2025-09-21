@@ -169,7 +169,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         email: '<img src=x onerror=alert("XSS")>@test.com',
         username: 'javascript:alert("XSS")',
         firstName: '<svg onload=alert("XSS")>',
-        lastName: '\u003cscript\u003ealert("XSS")\u003c/script\u003e', role: UserRole._VIEWERisActiv, e: true,
+        lastName: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
+        role: UserRole._VIEWER,
+        isActive: true,
       
 } satisfies ByteBotdUser,
 
@@ -178,7 +180,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
   sub: "\"; DROP TABLE users; --",
         id: "\"; DROP TABLE users; --",
         email: "admin@test.com\"; DELETE FROM sessions WHERE '1'='1",
-        username: "admin' OR '1'='1", role: UserRole._VIEWERisActiv, e: true,
+        username: "admin' OR '1'='1",
+        role: UserRole._VIEWER,
+        isActive: true,
       
 } satisfies ByteBotdUser,
 
@@ -187,7 +191,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
   sub: 'inactive_user',
         id: 'inactive_user',
         email: 'inactive@test.com',
-        username: 'inactive', role: UserRole._ADMINisActiv, e: false, // Inactive user with admin role
+        username: 'inactive',
+        role: UserRole._ADMIN,
+        isActive: false, // Inactive user with admin role
       
 } satisfies ByteBotdUser};
   };
@@ -306,12 +312,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
-  sub: 'mutable_user',
-      id: 'mutable_user',
+        sub: 'mutable_user',
+        id: 'mutable_user',
         email: 'user@test.com',
-      username: 'mutableuser', role: UserRole._VIEWERisActiv, e: true,
-      
-};
+        username: 'mutableuser',
+        role: UserRole._VIEWER,
+        isActive: true,
+      };
 
       const contexts = Array(10)
         .fill(null)
@@ -357,12 +364,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
-  sub: 'perm_user',
-      id: 'perm_user',
+        sub: 'perm_user',
+        id: 'perm_user',
         email: 'user@test.com',
-      username: 'permuser', role: UserRole._VIEWERisActiv, e: true,
-      
-};
+        username: 'permuser',
+        role: UserRole._VIEWER,
+        isActive: true,
+      };
 
       const context = createMockExecutionContext(user, 'system-admin', 'POST');jest.spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
@@ -494,12 +502,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
-  sub: 'rapid_user',
-      id: 'rapid_user',
+        sub: 'rapid_user',
+        id: 'rapid_user',
         email: 'rapid@test.com',
-      username: 'rapiduser', role: UserRole._ADMINisActiv, e: true,
-      
-};
+        username: 'rapiduser',
+        role: UserRole._ADMIN,
+        isActive: true,
+      };
 
       jest
         .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);
@@ -617,19 +626,24 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // Launch concurrent attacks
       const promises = attackUsers.map(async (user, _index) => {
-  const context = createMockExecutionContext(
-          user`admin-endpoint-${_index
-}`,
-          'POST'`192.168.1.${100 + (_index % 155)}`, // Different IPs
+        const context = createMockExecutionContext(
+          user,
+          `admin-endpoint-${_index}`,
+          'POST',
+          `192.168.1.${100 + (_index % 155)}`, // Different IPs
         );
         try {
-  const _result = await guard.canActivate(context);
-          return { success: trueuserI, d: user.id 
-};
+          const _result = await guard.canActivate(context);
+          return {
+            success: true,
+            userId: user.id
+          };
         } catch (error) {
-  return {
-  success: falseuserI, d: user.iderro, r: (error as Error).message
-};
+          return {
+            success: false,
+            userId: user.id,
+            error: (error as Error).message
+          };
         }
       });
 
@@ -653,12 +667,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const sharedUser: ByteBotdUser = {
-  sub: 'race_user',
-      id: 'race_user',
+        sub: 'race_user',
+        id: 'race_user',
         email: 'race@test.com',
-      username: 'raceuser', role: UserRole._VIEWERisActiv, e: true,
-      
-};
+        username: 'raceuser',
+        role: UserRole._VIEWER,
+        isActive: true,
+      };
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
@@ -669,7 +684,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .fill(null)
         .map((_, _index) =>
           createMockExecutionContext(
-            sharedUser`race-endpoint-${_index}`,
+            sharedUser,
+            `race-endpoint-${_index}`,
             'GET',
           ),
         );
@@ -758,12 +774,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const testId = `${operationId}_anomaly_tracking`;securityLogger.info(`[${testId}] Testing authorization pattern tracking`);
 
       const normalUser: ByteBotdUser = {
-  sub: 'normal_user',
-      id: 'normal_user',
+        sub: 'normal_user',
+        id: 'normal_user',
         email: 'user@company.com',
-      username: 'normaluser', role: UserRole._OPERATORisActiv, e: true,
-      
-};
+        username: 'normaluser',
+        role: UserRole._OPERATOR,
+        isActive: true,
+      };
 
       // Simulate normal access pattern
       const normalEndpoints = ['tasks', 'reports', 'dashboard'];const normalPromises = normalEndpoints.map((endpoint) => {
@@ -858,12 +875,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const loadUser: ByteBotdUser = {
-  sub: 'load_user',
-      id: 'load_user',
+        sub: 'load_user',
+        id: 'load_user',
         email: 'load@test.com',
-      username: 'loaduser', role: UserRole._ADMINisActiv, e: true,
-      
-};
+        username: 'loaduser',
+        role: UserRole._ADMIN,
+        isActive: true,
+      };
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
@@ -873,10 +891,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const timings: number[] = [];
 
       for (let i = 0; i < iterations; i++) {
-  const context = createMockExecutionContext(
-          loadUser`load-test-${i
-}`,
-          'GET',);const startTime = process.hrtime.bigint();
+        const context = createMockExecutionContext(
+          loadUser,
+          `load-test-${i}`,
+          'GET',
+        );
+        const startTime = process.hrtime.bigint();
         await guard.canActivate(context);
         const endTime = process.hrtime.bigint();
 
@@ -885,7 +905,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       }
 
       const avgTime =
-        timings.reduce((sum, time) => sum + time0) / timings.length;
+        timings.reduce((sum, time) => sum + time, 0) / timings.length;
       const maxTime = Math.max(...timings);
       const minTime = Math.min(...timings);
 

@@ -1312,7 +1312,12 @@ expect(result.suiteResults.length).toBe(8); // All major suites except load test
 expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOrder.indexOf('message-ordering'));}, 300000);
 
     test('should handle fail-fast behavior correctly', async () => {
-  // Mock a failing test suite for this testconst originalExecute = orchestrator['executeSingleSuite'];let callCount = 0;orchestrator['executeSingleSuite'] = async function(suite: TestSuiteConfig) {callCount++;if (callCount === 2) {
+      // Mock a failing test suite for this test
+      const originalExecute = orchestrator['executeSingleSuite'];
+      let callCount = 0;
+      orchestrator['executeSingleSuite'] = async function(suite: TestSuiteConfig) {
+        callCount++;
+        if (callCount === 2) {
           // Make second suite fail
           return {
   suiteId: suite.id,
@@ -1351,7 +1356,8 @@ expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOr
 
   describe('CI/CD Integration', () => {
 
-  test('should generate GitHub Actions workflow', async () => const workflow = await cicdManager.generateGitHubActionsWorkflow();
+  test('should generate GitHub Actions workflow', async () => {
+    const workflow = await cicdManager.generateGitHubActionsWorkflow();
 expect(workflow.name).toBe('WebSocket Test Suite');
 expect(workflow.on.push).toBeDefined();
 expect(workflow.on.pull_request).toBeDefined();

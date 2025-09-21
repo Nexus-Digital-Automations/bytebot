@@ -610,7 +610,7 @@ describe('Enterprise Conversational Database Validation', () => {
 
       // Mock Parlant service for mixed approval results
       let approvalCount = 0;
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(async () => {
+      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(() => {
         approvalCount++;
         const approved = approvalCount % 20 !== 0; // 95% approval rate
 
@@ -746,7 +746,7 @@ describe('Enterprise Conversational Database Validation', () => {
 
       // Mock Parlant service to reject specific operations
       let operationCount = 0;
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(async () => {
+      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(() => {
         operationCount++;
         const shouldReject = operationCount % 5 === 0; // Reject every 5th operation
 
@@ -943,7 +943,7 @@ describe('Enterprise Conversational Database Validation', () => {
       const testResults: Array<{ config: DatabaseTransactionTestConfig; auditData: any }> = [];
 
       // Mock Parlant service with detailed audit information
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(async (request) => {
+      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation((request) => {
         return {
           approved: true,
           conversationId: `conv-audit-${Date.now()}`,

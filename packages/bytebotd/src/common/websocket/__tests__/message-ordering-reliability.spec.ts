@@ -445,12 +445,13 @@ reject(error);});
       this.ws.on('close', () => {this.connected = false;this.emit('disconnected');});});
   }
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): Promise<void> {
     if (!this.ws || !this.connected) {
       throw new Error('WebSocket not connected');}
 this.sequenceTracker.trackSentMessage(message);
     this.priorityTester.enqueueMessage(message);
     this.ws.send(JSON.stringify(message));
+    return Promise.resolve();
   }
 
   async sendSequencedMessages(count: number,
@@ -465,7 +466,7 @@ requiresAck?: boolean;
     const delay = options.delay || 0;
     const priority = options.priority || 'normal';
     const requiresAck = options.requiresAck || false;
-    const messageType = options.messageType || ConversationalMessageType.STATUS_UPDATE;
+    const messageType: ConversationalMessageType = options.messageType || ConversationalMessageType.STATUS_UPDATE;
 
     for (let i = 1; i <= count; i++) {
       const message: ConversationalMessage = {
@@ -473,7 +474,7 @@ requiresAck?: boolean;
 _${i}
 _${Date.now()}`,sessionId,timestamp: Date.now(),
         sequence: i,
-        type: messageType,
+        type: messageType as ConversationalMessageType,
         payload: {
           sequenceNumber: i,
           totalMessages: count,
@@ -537,11 +538,12 @@ _${Date.now()}`,
     this.priorityTester.processQueue();
   }
 
-  async disconnect(): Promise<void>  {
+  disconnect(): Promise<void> {
     if (this.ws) {
       this.ws.close();
       this.connected = false;
     }
+    return Promise.resolve();
   }
 
   getSequenceTracker(): MessageSequenceTracker {
@@ -705,7 +707,7 @@ describe('Message Ordering and Reliability Tests', () => {
     }
     }
 
-  async function handleValidationWithProgress(
+  function handleValidationWithProgress(
       sessionInfo: { ws: WebSocket.WebSocket; sessionId: string; messageSequence: number },
       request: ValidationRequestMessage
     ): Promise<void> {
@@ -768,6 +770,8 @@ describe('Message Ordering and Reliability Tests', () => {
 
         sessionInfo.ws.send(JSON.stringify(response));
       }, (streamingOptions?.maxUpdateCount || 3) * (streamingOptions?.updateInterval || 100) + 50);
+
+      return Promise.resolve();
     }
 
     // Start test server

@@ -179,12 +179,12 @@ this.reconnectionAttempts++;this.connectionMetrics.reconnectionCount++;
         this.emit('reconnection-failed', { attempt: this.reconnectionAttempts, error });}}, delay);
   }
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): void  {
     if (this.connectionState !== 'connected' || !this.ws) {throw new Error('WebSocket not connected');}
 this.ws.send(JSON.stringify(message));
   }
 
-  async disconnect(code = 1000, reason = 'Normal closure'): Promise<void>  {if (this.ws && this.connectionState === 'connected') {this.ws.close(code, reason);}
+  disconnect(code = 1000, reason = 'Normal closure'): void  {if (this.ws && this.connectionState === 'connected') {this.ws.close(code, reason);}
   }
 
   forceDisconnect(): void {
@@ -440,7 +440,7 @@ expect(connectionEvent?.connectionTime).toBeLessThan(1000); // Sub-1000ms connec
 
 
 
-    it('should validate WebSocket headers correctly', async () => {
+    it('should validate WebSocket headers correctly', () => {
       const validHeaders = {
         'upgrade': 'websocket',
         'connection': 'upgrade',

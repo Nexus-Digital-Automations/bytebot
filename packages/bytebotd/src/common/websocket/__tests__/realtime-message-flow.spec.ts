@@ -85,8 +85,13 @@ class MessageFlowValidator extends EventEmitter {
 }
 
   private setupMessageHandling(): void {
-  this.ws.on('message', (data: WebSocket.RawData) => {const receiveTime = performance.now();try {
-        const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;// Calculate latency if this is a response to a sent messageconst sentMessage = this.acknowledgments.get(message.messageId);
+  this.ws.on('message', (data: WebSocket.RawData) => {
+      const receiveTime = performance.now();
+      try {
+        const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
+
+        // Calculate latency if this is a response to a sent message
+        const sentMessage = this.acknowledgments.get(message.messageId);
         if (sentMessage) {
           const latency = receiveTime - sentMessage.timestamp;
           sentMessage.acknowledged = true;
@@ -101,19 +106,20 @@ class MessageFlowValidator extends EventEmitter {
         this.messageLog.push({
   timestamp: receiveTime,
           direction: 'received',
-      message,latency: sentMessage?.ackLatency,
+      message,
+      latency: sentMessage?.ackLatency ?? undefined,
         
 });
 
         this.flowMetrics.totalReceived++;
-        this.emit('message-received', { message, timestamp: receiveTime });} catch (error) {
+        this.emit('message-received', { message, timestamp: receiveTime });} catch (error: unknown) {
   this.flowMetrics.deliveryFailures++;
-        this.emit('parse-error', { error, timestamp: receiveTime 
+        this.emit('parse-error', { error: error instanceof Error ? error.message : String(error), timestamp: receiveTime 
 });}});
 
     this.ws.on('error', (error) => {this.emit('connection-error', error);});}
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): void {
   const sendTime = performance.now();
 
     try {
@@ -135,9 +141,9 @@ class MessageFlowValidator extends EventEmitter {
 });
 
       this.flowMetrics.totalSent++;
-      this.emit('message-sent', { message, timestamp: sendTime });} catch (error) {
+      this.emit('message-sent', { message, timestamp: sendTime });} catch (error: unknown) {
   this.flowMetrics.deliveryFailures++;
-      this.emit('send-error', { error, message 
+      this.emit('send-error', { error: error instanceof Error ? error.message : String(error), message 
 });}}
 
   async sendBulkMessages(messages: ConversationalMessage[], batchSize = 10): Promise<void>  {
@@ -256,7 +262,8 @@ constructor(private messageValidator: MessageFlowValidator) {
 
   private setupProgressTracking(): void {
     this.messageValidator.on('message-received', ({ message }) => {
-  if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {const progressMsg = message as ProgressUpdateMessage;
+  if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
+        const progressMsg = message as ProgressUpdateMessage;
         this.progressUpdates.push(progressMsg);
 
         const workflow = this.validationWorkflows.get(progressMsg.payload.operationId);
@@ -452,9 +459,7 @@ describe('Real-time Message Flow Tests', () => {
             default:
               // Echo back with acknowledgment
               const ackMessage: ConversationalMessage = {
-  messageId: `ack_${message.messageId
-
-    }`,
+                messageId: `ack_${message.messageId}`,
                 sessionId: message.sessionId,
                 timestamp: Date.now(),
                 sequence: message.sequence + 1,
@@ -472,13 +477,16 @@ describe('Real-time Message Flow Tests', () => {
               ws.send(JSON.stringify(ackMessage));
               break;
           }
-        } catch (error) {
-          console.error('Error processing message:', error);ws.send(JSON.stringify({ error: 'Invalid message format' }));}});
+        } catch (error: unknown) {
+          console.error('Error processing message:', error);
+          ws.send(JSON.stringify({ error: 'Invalid message format' }));
+        }
+      });
 
       ws.on('error', (error) => {console.error('WebSocket error in message flow test:', error);});});
 
     // Message handling functions
-    async function handleValidationRequest(ws: WebSocket.WebSocket, request: ValidationRequestMessage): Promise<void> {
+    function handleValidationRequest(ws: WebSocket.WebSocket, request: ValidationRequestMessage): void {
       const { validationId, streamingOptions } = request.payload;
 
       // Send progress updates if streaming is enabled
@@ -559,7 +567,7 @@ _${updateCount}`,sessionId: request.sessionId,
       }, 100); // Small delay to simulate processing
     }
 
-  async function handleUserConfirmation(ws: WebSocket.WebSocket, confirmation: UserConfirmationMessage): Promise<void> {
+  function handleUserConfirmation(ws: WebSocket.WebSocket, confirmation: UserConfirmationMessage): void {
   const result: ConversationalMessage = {
   type: ConversationalMessageType.CONFIRMATION_RESULT,
         messageId: `result_${confirmation.payload.confirmationId
@@ -589,7 +597,7 @@ _${updateCount}`,sessionId: request.sessionId,
       ws.send(JSON.stringify(result));
     }
 
-  async function handleHeartbeat(ws: WebSocket.WebSocket, heartbeat: ConversationalMessage): Promise<void> {
+  function handleHeartbeat(ws: WebSocket.WebSocket, heartbeat: ConversationalMessage): void {
   const response: ConversationalMessage = {
   type: ConversationalMessageType.HEARTBEAT,
         messageId: `heartbeat_response_${Date.now()
@@ -734,7 +742,7 @@ expect(receivedMessages.length).toBe(messageCount);
 
   describe('Message Serialization and Performance', () => {
 
-  it('should handle message serialization/deserialization efficiently', async () => {
+  it('should handle message serialization/deserialization efficiently', () => {
     const largePayload = {
       data: 'x'.repeat(10000), // 10KB of data
   metadata: {

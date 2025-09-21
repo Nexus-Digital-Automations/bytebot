@@ -294,7 +294,7 @@ export class MessageOrderingDeliveryValidationService
 });
   }
 
-  async onModuleInit(): Promise<void>  {
+  onModuleInit(): void {
   this.validationStartTime = performance.now();
 
     // Start metrics collection
@@ -306,11 +306,11 @@ export class MessageOrderingDeliveryValidationService
     this.logger.log('Message ordering and delivery validation service started');
 }
 
-  async onApplicationShutdown(): Promise<void>  {
+  onApplicationShutdown(): void {
   // Stop metrics collection
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
-    
+
 }
 
     // Generate final validation report
@@ -568,14 +568,14 @@ export class MessageOrderingDeliveryValidationService
       error: error instanceof Error ? error.message : 'Unknown error',
       deliveryAttempt: messageSequence.deliveryAttempts,});
 
-      await this.handleDeliveryFailure(messageSequence);
+      this.handleDeliveryFailure(messageSequence);
     }
   }
 
   /**
    * Handle message delivery failure with retry mechanism
    */
-  private async handleDeliveryFailure(messageSequence: MessageSequence): Promise<void>  {
+  private handleDeliveryFailure(messageSequence: MessageSequence): void {
   const updatedSequence: MessageSequence = {
       ...messageSequence,
       deliveryAttempts: messageSequence.deliveryAttempts + 1,

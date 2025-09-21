@@ -176,7 +176,7 @@ reject(error);
     });
   }
 
-  async sendMessage(message: Partial<ConversationalMessage>): Promise<void>  {
+  sendMessage(message: Partial<ConversationalMessage>): void  {
   if (!this.ws || !this.sessionState.connected) {
       throw new Error(`Session ${this.sessionId
 } not connected`);
@@ -263,7 +263,7 @@ reject(error);
 
     throw new Error(`Validation ${validationId} response timeout in session ${this.sessionId}`);}
 
-  async disconnect(): Promise<void>  {
+  disconnect(): void  {
   if (this.ws) {
       this.ws.close();
       this.sessionState.connected = false;
@@ -310,7 +310,7 @@ class ConcurrentSessionManager {
   
 };
 
-  async createSession(userId: string, deviceId?: string): Promise<TestSession>  {
+  createSession(userId: string, deviceId?: string): TestSession  {
   const sessionId = randomUUID();
     const actualDeviceId = deviceId ?? `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');
@@ -685,7 +685,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
       activeSessions.set(sessionId, sessionInfo);
 
-      ws.on('message', async (data: WebSocket.RawData) => {
+      ws.on('message', (data: WebSocket.RawData) => {
   try {const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
           sessionInfo.messageCount++;
 
@@ -699,7 +699,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
           switch (message.type) {
 
   case ConversationalMessageType.VALIDATION_REQUEST:
-              await handleValidationRequest(sessionInfo, message as ValidationRequestMessage);
+              handleValidationRequest(sessionInfo, message as ValidationRequestMessage);
               break;
 
             case ConversationalMessageType.STATUS_UPDATE: {
@@ -792,10 +792,10 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
       ws.send(JSON.stringify(welcomeMessage));
     });
 
-    async function handleValidationRequest(
+    function handleValidationRequest(
       sessionInfo: { sessionId: string; userId: string; deviceId: string; ws: WebSocket.WebSocket },
       request: ValidationRequestMessage
-    ): Promise<void> {
+    ): void {
       const { validationId } = request.payload;
 
       // Simulate validation processing

@@ -38,7 +38,20 @@ import {
   BadRequestException,
   Logger,
   ServiceUnavailableException,
-} from '@nestjs/common';import { Reflector } from '@nestjs/core';import { ConfigService } from '@nestjs/config';import { Request, Response } from 'express';import { performance } from 'perf_hooks';import * as crypto from 'crypto';// Import base security componentsimport { BrowserSecurityGuard } from '../../browser/guards/browser-security.guard';import { BrowserUseRbacGuard } from './browser-use-rbac.guard';import { BrowserValidationService } from '../../browser/validation.service';// Import orchestration types and servicesimport {
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { Request, Response } from 'express';
+import { performance } from 'perf_hooks';
+import * as crypto from 'crypto';
+
+// Import base security components
+import { BrowserSecurityGuard } from '../../browser/guards/browser-security.guard';
+import { BrowserUseRbacGuard } from './browser-use-rbac.guard';
+import { BrowserValidationService } from '../../browser/validation.service';
+
+// Import orchestration types and services
+import {
   OrchestrationStrategy,
   TaskPriority,
   ResourceLimits,
@@ -63,14 +76,29 @@ import {
   ParlantValidationRequest,
   ConversationalValidationError,
   RiskLevel,
-} from '../parlant/parlant-integration.service';/*** Orchestration security levels
+} from '../parlant/parlant-integration.service';
+
+/**
+ * Orchestration security levels
  */
 export enum OrchestrationSecurityLevel {
-  BASIC = 'basic',                    // Single-agent operationsCOORDINATED = 'coordinated',        // Multi-agent coordinationDISTRIBUTED = 'distributed',       // Complex distributed operationsENTERPRISE = 'enterprise',         // Enterprise-grade orchestrationCRITICAL = 'critical',             // Mission-critical orchestration}/**
+  BASIC = 'basic',                    // Single-agent operations
+  COORDINATED = 'coordinated',        // Multi-agent coordination
+  DISTRIBUTED = 'distributed',       // Complex distributed operations
+  ENTERPRISE = 'enterprise',         // Enterprise-grade orchestration
+  CRITICAL = 'critical',             // Mission-critical orchestration
+}
+
+/**
  * Orchestration risk assessment levels
  */
 export enum OrchestrationRiskLevel {
-  MINIMAL = 'minimal',               // Low-risk single operationsMODERATE = 'moderate',             // Standard multi-agent operationsELEVATED = 'elevated',             // Complex orchestration patternsHIGH = 'high',                     // High-impact distributed operationsCRITICAL = 'critical',             // Critical infrastructure operations}/**
+  MINIMAL = 'minimal',               // Low-risk single operations
+  MODERATE = 'moderate',             // Standard multi-agent operations
+  ELEVATED = 'elevated',             // Complex orchestration patterns
+  HIGH = 'high',                     // High-impact distributed operations
+  CRITICAL = 'critical',             // Critical infrastructure operations
+}/**
  * Resource allocation security context
  */
 export interface ResourceSecurityContext {
@@ -89,12 +117,18 @@ export interface ResourceSecurityContext {
  */
 export interface OrchestrationOperationContext {
   operationId: string;
-  operationType: 'CREATE' | 'COORDINATE' | 'MONITOR' | 'TERMINATE' | 'SCALE';strategy: OrchestrationStrategy;agentCount: number;
+  operationType: 'CREATE' | 'COORDINATE' | 'MONITOR' | 'TERMINATE' | 'SCALE';
+  strategy: OrchestrationStrategy;
+  agentCount: number;
   sessionCount: number;
-  taskComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'CRITICAL';estimatedDuration: number;resourceRequirements: ResourceLimits;
+  taskComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'CRITICAL';
+  estimatedDuration: number;
+  resourceRequirements: ResourceLimits;
   securityLevel: OrchestrationSecurityLevel;
   riskLevel: OrchestrationRiskLevel;
-  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';complianceRequirements: string[];}
+  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  complianceRequirements: string[];
+}
 
 /**
  * Orchestration security validation result
@@ -105,7 +139,9 @@ export interface OrchestrationSecurityResult {
   riskScore: number;
   violations: OrchestrationViolation[];
   resourceConstraints: ResourceConstraint[];
-  recommendedAction: 'ALLOW' | 'BLOCK' | 'MONITOR' | 'RESTRICT' | 'ESCALATE';requiredApprovals: string[];conditions: OrchestrationCondition[];
+  recommendedAction: 'ALLOW' | 'BLOCK' | 'MONITOR' | 'RESTRICT' | 'ESCALATE';
+  requiredApprovals: string[];
+  conditions: OrchestrationCondition[];
   auditTrail: OrchestrationAuditEntry;
 }
 
@@ -113,7 +149,10 @@ export interface OrchestrationSecurityResult {
  * Orchestration security violation
  */
 export interface OrchestrationViolation {
-  type: 'RESOURCE' | 'PERMISSION' | 'RATE_LIMIT' | 'SECURITY' | 'COMPLIANCE';severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';description: string;field?: string;
+  type: 'RESOURCE' | 'PERMISSION' | 'RATE_LIMIT' | 'SECURITY' | 'COMPLIANCE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  description: string;
+  field?: string;
   value?: unknown;
   constraint?: string;
   recommendation?: string;
@@ -123,14 +162,20 @@ export interface OrchestrationViolation {
  * Resource constraint enforcement
  */
 export interface ResourceConstraint {
-  type: 'CPU' | 'MEMORY' | 'NETWORK' | 'STORAGE' | 'TIME' | 'AGENTS';limit: number;current: number;
-  enforcement: 'SOFT' | 'HARD' | 'ADAPTIVE';escalationThreshold: number;}
+  type: 'CPU' | 'MEMORY' | 'NETWORK' | 'STORAGE' | 'TIME' | 'AGENTS';
+  limit: number;
+  current: number;
+  enforcement: 'SOFT' | 'HARD' | 'ADAPTIVE';
+  escalationThreshold: number;
+}
 
 /**
  * Orchestration security condition
  */
 export interface OrchestrationCondition {
-  type: 'MONITORING' | 'APPROVAL' | 'RESOURCE_LIMIT' | 'TIME_LIMIT' | 'COMPLIANCE';description: string;parameters: Record<string, unknown>;
+  type: 'MONITORING' | 'APPROVAL' | 'RESOURCE_LIMIT' | 'TIME_LIMIT' | 'COMPLIANCE';
+  description: string;
+  parameters: Record<string, unknown>;
   mandatory: boolean;
   validUntil?: Date;
 }
@@ -145,7 +190,9 @@ export interface OrchestrationAuditEntry {
   sessionId: string;
   operationId: string;
   operationType: string;
-  decision: 'GRANTED' | 'DENIED' | 'RESTRICTED' | 'ESCALATED';securityLevel: OrchestrationSecurityLevel;riskLevel: OrchestrationRiskLevel;
+  decision: 'GRANTED' | 'DENIED' | 'RESTRICTED' | 'ESCALATED';
+  securityLevel: OrchestrationSecurityLevel;
+  riskLevel: OrchestrationRiskLevel;
   riskScore: number;
   resourceUsage: Record<string, number>;
   agentCoordination: AgentCoordinationInfo[];
@@ -275,13 +322,17 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
       // Step 1: Apply base browser security validation
       const baseSecurityResult = await this.baseSecurityGuard.canActivate(context);
       if (!baseSecurityResult) {
-        this.logger.warn(`[${operationId}] Base security validation failed`);this.securityMetrics.blockedOperations++;return false;
+        this.logger.warn(`[${operationId}] Base security validation failed`);
+        this.securityMetrics.blockedOperations++;
+        return false;
       }
 
       // Step 2: Apply RBAC validation
       const rbacResult = await this.rbacGuard.canActivate(context);
       if (!rbacResult) {
-        this.logger.warn(`[${operationId}] RBAC validation failed`);this.securityMetrics.blockedOperations++;return false;
+        this.logger.warn(`[${operationId}] RBAC validation failed`);
+        this.securityMetrics.blockedOperations++;
+        return false;
       }
 
       // Step 3: Build orchestration operation context
@@ -310,9 +361,13 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
       const processingTime = performance.now() - startTime;
       this.updateSecurityMetrics(securityResult, processingTime);
 
-      this.logger.log(`[${operationId}] Orchestration security validation completed`, {operationId,allowed: securityResult.allowed,
+      this.logger.log(`[${operationId}] Orchestration security validation completed`, {
+        operationId,
+        allowed: securityResult.allowed,
         riskScore: securityResult.riskScore,
-        processingTime: `${processingTime.toFixed(2)}ms`,recommendedAction: securityResult.recommendedAction,});
+        processingTime: `${processingTime.toFixed(2)}ms`,
+        recommendedAction: securityResult.recommendedAction,
+      });
 
       if (securityResult.allowed) {
         this.securityMetrics.allowedOperations++;
@@ -325,9 +380,12 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     } catch (error) {
       const processingTime = performance.now() - startTime;
 
-      this.logger.error(`[${operationId}] Orchestration security validation failed`, {operationId,error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Orchestration security validation failed`, {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        processingTime: `${processingTime.toFixed(2)}ms`,endpoint: `${request.method} ${request.url}`,
+        processingTime: `${processingTime.toFixed(2)}ms`,
+        endpoint: `${request.method} ${request.url}`,
         userId: request.user?.userId,
       });
 
@@ -344,7 +402,10 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
 
       // Generic orchestration security failure
       throw new ForbiddenException({
-        message: 'Orchestration security validation failed',type: 'orchestration_security_failure',operationId,});
+        message: 'Orchestration security validation failed',
+        type: 'orchestration_security_failure',
+        operationId,
+      });
     }
   }
 
@@ -439,7 +500,10 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     const conversationalValidation = await this.assessConversationalValidation(context, executionContext);
     if (conversationalValidation.required && !conversationalValidation.approved) {
       riskScore += 25;
-      requiredApprovals.push('conversational_approval');}// 7. Determine final security decision
+      requiredApprovals.push('conversational_approval');
+    }
+
+    // 7. Determine final security decision
     const recommendedAction = this.determineSecurityAction(riskScore, violations, context);
     const allowed = this.determineAllowedStatus(recommendedAction, violations);
 
@@ -497,11 +561,29 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     }
 
     // Validate coordination complexity
-    if (strategy.coordinationMode === 'HIERARCHICAL' && strategy.maxAgents > 20) {violations.push({type: 'SECURITY',severity: 'MEDIUM',description: 'Complex hierarchical coordination may pose coordination risks',field: 'coordinationMode',value: strategy.coordinationMode,recommendation: 'Consider peer-to-peer coordination for large agent counts',});riskScore += 10;
+    if (strategy.coordinationMode === 'HIERARCHICAL' && strategy.maxAgents > 20) {
+      violations.push({
+        type: 'SECURITY',
+        severity: 'MEDIUM',
+        description: 'Complex hierarchical coordination may pose coordination risks',
+        field: 'coordinationMode',
+        value: strategy.coordinationMode,
+        recommendation: 'Consider peer-to-peer coordination for large agent counts',
+      });
+      riskScore += 10;
     }
 
     // Validate task distribution strategy
-    if (strategy.taskDistribution === 'CUSTOM' && !strategy.customDistributionLogic) {violations.push({type: 'SECURITY',severity: 'MEDIUM',description: 'Custom task distribution without defined logic',field: 'taskDistribution',value: strategy.taskDistribution,recommendation: 'Provide custom distribution logic or use standard strategies',});riskScore += 8;
+    if (strategy.taskDistribution === 'CUSTOM' && !strategy.customDistributionLogic) {
+      violations.push({
+        type: 'SECURITY',
+        severity: 'MEDIUM',
+        description: 'Custom task distribution without defined logic',
+        field: 'taskDistribution',
+        value: strategy.taskDistribution,
+        recommendation: 'Provide custom distribution logic or use standard strategies',
+      });
+      riskScore += 8;
     }
 
     // Validate failover configuration
@@ -804,17 +886,40 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
   private assessBusinessImpact(
     strategy: OrchestrationStrategy,
     resources: ResourceLimits,
-  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (strategy.maxAgents > 50 || resources.maxMemoryGB > 64) return 'CRITICAL';if (strategy.maxAgents > 20 || resources.maxMemoryGB > 32) return 'HIGH';if (strategy.maxAgents > 5 || resources.maxMemoryGB > 8) return 'MEDIUM';return 'LOW';}private estimateOperationDuration(
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    if (strategy.maxAgents > 50 || resources.maxMemoryGB > 64) return 'CRITICAL';
+    if (strategy.maxAgents > 20 || resources.maxMemoryGB > 32) return 'HIGH';
+    if (strategy.maxAgents > 5 || resources.maxMemoryGB > 8) return 'MEDIUM';
+    return 'LOW';
+  }
+
+  private estimateOperationDuration(
     strategy: OrchestrationStrategy,
-    complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'CRITICAL',): number {const baseTime = {
-      'SIMPLE': 300000,    // 5 minutes'MODERATE': 900000,  // 15 minutes'COMPLEX': 1800000,  // 30 minutes'CRITICAL': 3600000, // 60 minutes}[complexity];return baseTime * Math.log(strategy.maxAgents + 1);
+    complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'CRITICAL',
+  ): number {
+    const baseTime = {
+      'SIMPLE': 300000,    // 5 minutes
+      'MODERATE': 900000,  // 15 minutes
+      'COMPLEX': 1800000,  // 30 minutes
+      'CRITICAL': 3600000, // 60 minutes
+    }[complexity];
+    return baseTime * Math.log(strategy.maxAgents + 1);
   }
 
   private determineComplianceRequirements(
     strategy: OrchestrationStrategy,
-    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',): string[] {const requirements: string[] = [];
+    businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+  ): string[] {
+    const requirements: string[] = [];
 
-    if (businessImpact === 'CRITICAL') {requirements.push('SOC2', 'GDPR', 'HIPAA');} else if (businessImpact === 'HIGH') {requirements.push('SOC2', 'GDPR');} else if (businessImpact === 'MEDIUM') {requirements.push('SOC2');}return requirements;
+    if (businessImpact === 'CRITICAL') {
+      requirements.push('SOC2', 'GDPR', 'HIPAA');
+    } else if (businessImpact === 'HIGH') {
+      requirements.push('SOC2', 'GDPR');
+    } else if (businessImpact === 'MEDIUM') {
+      requirements.push('SOC2');
+    }
+    return requirements;
   }
 
   private async assessConversationalValidation(
@@ -831,7 +936,11 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
           functionParams: this.sanitizeOrchestrationParams(context),
           actionDescription: this.generateOrchestrationDescription(context),
           context: {
-            userId: 'system', // Will be updated by callersessionId: context.operationId,agentRole: 'USER',conversationHistory: [],metadata: {
+            userId: 'system', // Will be updated by caller
+            sessionId: context.operationId,
+            agentRole: 'USER',
+            conversationHistory: [],
+            metadata: {
               operationType: context.operationType,
               riskLevel: context.riskLevel,
               businessImpact: context.businessImpact,
@@ -932,10 +1041,12 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
   // ===== UTILITY METHODS =====
 
   private generateOperationId(): string {
-    return `orch_sec_${Date.now()}_${crypto.randomBytes(6).toString('hex')}';}
+    return `orch_sec_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
+  }
 
   private generateAuditId(): string {
-    return `audit_${Date.now()}_${crypto.randomBytes(8).toString('hex')}';}
+    return `audit_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+  }
 
   private calculateGlobalResourceUsage(): Record<string, number> {
     let totalMemoryGB = 0;
@@ -1076,13 +1187,16 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
 
     const criticalViolations = violations.filter(v => v.severity === 'CRITICAL');
     if (criticalViolations.length > 0) {
-      return `Critical security violations: ${criticalViolations.map(v => v.description).join(`, ')}';}
+      return `Critical security violations: ${criticalViolations.map(v => v.description).join(', ')}`;
+    }
 
     const highViolations = violations.filter(v => v.severity === 'HIGH');
     if (highViolations.length > 0) {
-      return `High-severity violations: ${highViolations.map(v => v.description).join(`, ')}';}
+      return `High-severity violations: ${highViolations.map(v => v.description).join(', ')}`;
+    }
 
-    return `Security policy violations detected: ${violations.slice(0, 3).map(v => v.description).join(`, ')}';}
+    return `Security policy violations detected: ${violations.slice(0, 3).map(v => v.description).join(', ')}`;
+  }
 
   private calculateResourceUsage(limits: ResourceLimits): Record<string, number> {
     return {
@@ -1124,14 +1238,30 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     }
 
     // Apply restrictions for RESTRICT action
-    if (result.recommendedAction === 'RESTRICT') {response.setHeader('X-Orchestration-Restrictions', 'ACTIVE');response.setHeader('X-Orchestration-Conditions', JSON.stringify(result.conditions));}// Apply monitoring for MONITOR action
-    if (result.recommendedAction === 'MONITOR') {response.setHeader('X-Orchestration-Monitoring', 'ENHANCED');}// Handle escalation
-    if (result.recommendedAction === 'ESCALATE') {this.securityMetrics.escalatedOperations++;if (result.requiredApprovals.includes('conversational_approval')) {throw new ConversationalValidationError(context.operationId,
-          'Orchestration operation requires conversational approval',result.violations.map(v => v.description),);
+    if (result.recommendedAction === 'RESTRICT') {
+      response.setHeader('X-Orchestration-Restrictions', 'ACTIVE');
+      response.setHeader('X-Orchestration-Conditions', JSON.stringify(result.conditions));
+    }
+
+    // Apply monitoring for MONITOR action
+    if (result.recommendedAction === 'MONITOR') {
+      response.setHeader('X-Orchestration-Monitoring', 'ENHANCED');
+    }
+
+    // Handle escalation
+    if (result.recommendedAction === 'ESCALATE') {
+      this.securityMetrics.escalatedOperations++;
+      if (result.requiredApprovals.includes('conversational_approval')) {
+        throw new ConversationalValidationError(
+          context.operationId,
+          'Orchestration operation requires conversational approval',
+          result.violations.map(v => v.description),
+        );
       }
 
       throw new ForbiddenException({
-        message: 'Orchestration operation requires escalation and approval',type: 'orchestration_escalation_required',
+        message: 'Orchestration operation requires escalation and approval',
+        type: 'orchestration_escalation_required',
         operationId: context.operationId,
         requiredApprovals: result.requiredApprovals,
       });

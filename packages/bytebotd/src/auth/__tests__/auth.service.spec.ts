@@ -95,7 +95,7 @@ class MockAuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return await this.generateTokens(user);
+    return this.generateTokens(user);
   }
 
   async register(registerDto: RegisterDto): Promise<TokenResponse> {
@@ -117,16 +117,16 @@ class MockAuthService {
     return this.generateTokens(newUser);
   }
 
-  async refreshToken(refreshToken: string): Promise<TokenResponse> {
+  refreshToken(refreshToken: string): TokenResponse | never {
   try {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET')
       }) as JwtPayload;
-      const user = await this.findUserById(payload.sub);
+      const user = this.findUserById(payload.sub);
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-      return await this.generateTokens(user);
+      return this.generateTokens(user);
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -137,9 +137,9 @@ class MockAuthService {
     return;
   }
 
-  private async generateTokens(
+  private generateTokens(
     user: Omit<UserData, 'passwordHash'>
-  ): Promise<TokenResponse> {
+  ): TokenResponse {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -207,9 +207,9 @@ class MockAuthService {
     return mockUsers.find((u) => u.email === email) ?? null;
   }
 
-  private async findUserById(
+  private findUserById(
     id: string,
-  ): Promise<Omit<UserData, 'passwordHash'> | null> {
+  ): Omit<UserData, 'passwordHash'> | null {
   const mockUsers: Omit<UserData, 'passwordHash'>[] = [{id: 'user_1',
       email: 'admin@bytebot.ai',
         role: 'admin', createdAt: new Date(), isActive: true,

@@ -647,7 +647,7 @@ describe('Database Security and Compliance Validation', () => {
       logger.log(`Testing ${accessControlConfigs.length} access control configurations`);
 
       // Mock Parlant service for access control validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(async (request) => {
+      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation((request) => {
         // Simulate access control decisions based on user role
         const userRole = request.context.metadata?.userRole || 'user';
         const isAuthorized = userRole === 'admin' || userRole === 'database_admin';

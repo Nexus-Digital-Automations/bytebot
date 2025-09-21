@@ -121,7 +121,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
       // Role validation
       if (data.role && context?.requireRoleValidation !== false) {
-        const roleValidation = await this.validateUserRole(data.role, context);
+        const roleValidation = this.validateUserRole(data.role, context);
         if (!roleValidation.valid) {
           result.errors.push(`Invalid role: ${data.role}. Allowed roles: ${roleValidation.allowedRoles.join(', ')}`);
           result.valid = false;
@@ -131,25 +131,25 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       // Operation-specific validations
       switch (operation) {
         case 'create':
-          await this.validateUserCreation(data, result);
+          this.validateUserCreation(data, result);
           break;
 
         case 'update':
-          await this.validateUserUpdate(data, result, context);
+          this.validateUserUpdate(data, result, context);
           break;
 
         case 'delete':
-          await this.validateUserDeletion(data, result, context);
+          this.validateUserDeletion(data, result, context);
           break;
 
         case 'bulkDelete':
-          await this.validateBulkUserDeletion(data, result, context);
+          this.validateBulkUserDeletion(data, result, context);
           break;
       }
 
       // Security checks (unless bypassed)
       if (!context?.bypassSecurityChecks) {
-        await this.performSecurityChecks(operation, data, result, context);
+        this.performSecurityChecks(operation, data, result, context);
       }
 
       this.logger.debug(`Business rule validation completed for user ${operation}`, {
@@ -178,10 +178,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Transform user entity (redact sensitive data based on context)
    */
-  protected async transformEntity(
+  protected transformEntity(
     entity: UserEntity,
     context?: UserOperationContext,
-  ): Promise<UserEntity> {
+  ): UserEntity {
     // Create a copy to avoid modifying the original
     const transformed = { ...entity };
 
@@ -301,10 +301,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate user role and permissions
    */
-  private async validateUserRole(
+  private validateUserRole(
     role: string,
     context?: UserOperationContext,
-  ): Promise<UserRoleValidation> {
+  ): UserRoleValidation {
     const result: UserRoleValidation = {
       valid: false,
       allowedRoles: this.validRoles,
@@ -319,7 +319,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     // Check if current user has permission to assign this role
     if (context?.userRole) {
-      const canAssignRole = await this.canAssignRole(context.userRole, role);
+      const canAssignRole = this.canAssignRole(context.userRole, role);
       result.valid = canAssignRole;
 
       if (!canAssignRole) {
@@ -336,7 +336,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Check if current user can assign the specified role
    */
-  private async canAssignRole(currentRole: string, targetRole: string): Promise<boolean> {
+  private canAssignRole(currentRole: string, targetRole: string): boolean {
     // Role hierarchy: admin > moderator > user > guest
     const roleHierarchy = {
       admin: 4,
@@ -358,10 +358,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate user creation
    */
-  private async validateUserCreation(
+  private validateUserCreation(
     data: Partial<UserEntity>,
     result: BusinessValidationResult,
-  ): Promise<void> {
+  ): void {
     // Required fields check
     if (!data.email) {
       result.valid = false;
@@ -380,11 +380,11 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate user update
    */
-  private async validateUserUpdate(
+  private validateUserUpdate(
     data: Partial<UserEntity>,
     result: BusinessValidationResult,
     context?: UserOperationContext,
-  ): Promise<void> {
+  ): void {
     // Check if trying to update sensitive fields
     if (data.passwordHash && context?.userRole !== 'system') {
       result.valid = false;
@@ -393,7 +393,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     // Role change validation
     if (data.role && context?.userRole) {
-      const canChangeRole = await this.canAssignRole(context.userRole, data.role);
+      const canChangeRole = this.canAssignRole(context.userRole, data.role);
       if (!canChangeRole) {
         result.valid = false;
         result.errors.push(`Insufficient permissions to change role to '${data.role}'`);
@@ -409,11 +409,11 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate user deletion
    */
-  private async validateUserDeletion(
+  private validateUserDeletion(
     data: Partial<UserEntity>,
     result: BusinessValidationResult,
     context?: UserOperationContext,
-  ): Promise<void> {
+  ): void {
     // Check if trying to delete self
     if (data.id === context?.userId) {
       result.valid = false;
@@ -433,11 +433,11 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate bulk user deletion
    */
-  private async validateBulkUserDeletion(
+  private validateBulkUserDeletion(
     data: Partial<UserEntity>,
     result: BusinessValidationResult,
     context?: UserOperationContext,
-  ): Promise<void> {
+  ): void {
     // Only system and admin can perform bulk deletions
     if (context?.userRole && !['admin', 'system'].includes(context.userRole)) {
       result.valid = false;
@@ -452,19 +452,19 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Perform security checks
    */
-  private async performSecurityChecks(
+  private performSecurityChecks(
     operation: string,
     data: Partial<UserEntity>,
     result: BusinessValidationResult,
     context?: UserOperationContext,
-  ): Promise<void> {
+  ): void {
     // Check for suspicious patterns
     if (data.email && this.isSuspiciousEmail(data.email)) {
       result.warnings.push('Email pattern appears suspicious - may require additional verification');
     }
 
     // Rate limiting check (simplified)
-    if (operation === 'create' && await this.isRateLimited(context?.userId)) {
+    if (operation === 'create' && this.isRateLimited(context?.userId)) {
       result.valid = false;
       result.errors.push('Rate limit exceeded for user creation operations');
     }
@@ -499,7 +499,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Check if user is rate limited (simplified implementation)
    */
-  private async isRateLimited(_userId?: string): Promise<boolean> {
+  private isRateLimited(_userId?: string): boolean {
     // In a real implementation, this would check against a rate limiting service
     // For now, we'll just return false
     return false;

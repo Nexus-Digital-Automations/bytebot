@@ -578,30 +578,35 @@ expect(auditEntry.complianceFlags).toContain('audit_required');});});
 
   describe('Integration Compatibility', () => {
 
-  it('should be compatible with existing WebSocket types', () => // Test compatibility with base WebSocket typesconst webSocketReadyState = WebSocket.WebSocket.OPEN;
-      expect(webSocketReadyState).toBe(1);
-    
-});
+  it('should be compatible with existing WebSocket types', () => {
+    // Test compatibility with base WebSocket types
+    const webSocketReadyState = WebSocket.WebSocket.OPEN;
+    expect(webSocketReadyState).toBe(1);
+  });
 
 
 
     it('should support existing parlant message format', () => {
-  // Test compatibility with existing Parlant message structureconst parlantMessage = {
-  type: 'conversation_start',
+    // Test compatibility with existing Parlant message structure
+    const parlantMessage = {
+      type: 'conversation_start',
       conversation_id: 'test-conv-123',
       session_id: 'test-session-123',
-      payload: { test: 'data' 
-},timestamp: Date.now(),};
+      payload: { test: 'data' },
+      timestamp: Date.now(),
+    };
 
-      expect(parlantMessage.type).toBe('conversation_start');
-expect(parlantMessage.conversation_id).toBeDefined();});
+    expect(parlantMessage.type).toBe('conversation_start');
+    expect(parlantMessage.conversation_id).toBeDefined();
+  });
   });
 
   // ===== REAL-TIME STREAMING TESTS =====
 
   describe('Real-time Streaming Validation', () => {
 
-  it('should support progress update streaming', () => const progressUpdate: ProgressUpdateMessage = {type: ConversationalMessageType.PROGRESS_UPDATE,
+  it('should support progress update streaming', () => {
+    const progressUpdate: ProgressUpdateMessage = {type: ConversationalMessageType.PROGRESS_UPDATE,
         messageId: 'progress-msg-123',
       sessionId: 'session-123',
       timestamp: Date.now(),
@@ -645,18 +650,28 @@ expect(parlantMessage.conversation_id).toBeDefined();});
       totalUpdates: 10,
         finalResult: 'approved',
 };
-expect(streamingComplete.type).toBe(ConversationalMessageType.STREAMING_COMPLETE);
-      expect(streamingComplete.operationId).toBe('validation-op-123');});});
+      expect(streamingComplete.type).toBe(ConversationalMessageType.STREAMING_COMPLETE);
+      expect(streamingComplete.operationId).toBe('validation-op-123');
+    });
+  });
+
+  // Additional test suites should be inside the main describe block
 });
 
 // ===== BENCHMARK TESTS =====
 
 describe('Performance Benchmarks', () => {
 
-  jest.setTimeout(60000); // 60 seconds for benchmark testsit('should benchmark message serialization performance', () => const iterations = 10000;const message = {
+  jest.setTimeout(60000); // 60 seconds for benchmark tests
+
+  it('should benchmark message serialization performance', () => {
+    const iterations = 10000;
+    const message = {
   type: 'validation_request',
-      payload: {data: 'test'.repeat(1000), // ~4KB messagemetadata: { complex: true 
-},},
+      payload: {
+        data: 'test'.repeat(1000), // ~4KB message
+        metadata: { complex: true }
+      },
       timestamp: Date.now(),
     };
 
@@ -674,10 +689,8 @@ describe('Performance Benchmarks', () => {
 
     console.log('Serialization Benchmark:', {
   iterations,
-      totalTime: `${totalTime.toFixed(2)
-}
-ms`,averageTime: `${averageTime.toFixed(4)}
-ms`,
+      totalTime: `${totalTime.toFixed(2)}ms`,
+      averageTime: `${averageTime.toFixed(4)}ms`,
       messagesPerSecond: Math.floor(messagesPerSecond),
     });
 
@@ -690,11 +703,12 @@ ms`,
 
   it('should benchmark concurrent validation processing', async () => {
 
-  const concurrentValidations = 100;const validationPromises: Promise<void>[] = [];
+    const concurrentValidations = 100;
+    const validationPromises: Promise<void>[] = [];
 
     const start = performance.now();
 
-    for (let i = 0; i < concurrentValidations; i++) 
+    for (let i = 0; i < concurrentValidations; i++) {
       validationPromises.push(
         new Promise(resolve => {
           // Simulate validation processing
@@ -717,10 +731,8 @@ ms`,
 
     console.log('Concurrent Validation Benchmark:', {
   concurrentValidations,
-      totalTime: `${totalTime.toFixed(2)
-}
-ms`,averageTime: `${averageTime.toFixed(2)}
-ms`,
+      totalTime: `${totalTime.toFixed(2)}ms`,
+      averageTime: `${averageTime.toFixed(2)}ms`,
       validationsPerSecond: Math.floor(concurrentValidations / (totalTime / 1000)),
     });
 

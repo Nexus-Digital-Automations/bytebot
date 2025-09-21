@@ -79,25 +79,67 @@ export class BytebotMetricsService {
   constructor(
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
-    this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');// Enable default system metrics collectioncollectDefaultMetrics({
-      prefix: 'bytebot_',gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],});
+    this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');
+
+    // Enable default system metrics collection
+    collectDefaultMetrics({
+      prefix: 'bytebot_',
+      gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
+    });
 
     // Initialize API Request Metrics
     this.httpRequestsTotal = new Counter({
-      name: 'bytebot_http_requests_total',help: 'Total number of HTTP requests',labelNames: ['method', 'route', 'status_code'],});this.httpRequestDuration = new Histogram({
-      name: 'bytebot_http_request_duration_seconds',help: 'HTTP request duration in seconds',labelNames: ['method', 'route', 'status_code'],buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],});
+      name: 'bytebot_http_requests_total',
+      help: 'Total number of HTTP requests',
+      labelNames: ['method', 'route', 'status_code'],
+    });
+
+    this.httpRequestDuration = new Histogram({
+      name: 'bytebot_http_request_duration_seconds',
+      help: 'HTTP request duration in seconds',
+      labelNames: ['method', 'route', 'status_code'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
+    });
 
     this.httpRequestsInFlight = new Gauge({
-      name: 'bytebot_http_requests_in_flight',help: 'Number of HTTP requests currently being processed',labelNames: ['method', 'route'],});// Initialize Task Processing Metrics
+      name: 'bytebot_http_requests_in_flight',
+      help: 'Number of HTTP requests currently being processed',
+      labelNames: ['method', 'route'],
+    });
+
+    // Initialize Task Processing Metrics
     this.taskProcessingDuration = new Histogram({
-      name: 'bytebot_task_processing_duration_seconds',help: 'Task processing duration in seconds',labelNames: ['task_type', 'status'],buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300],});
+      name: 'bytebot_task_processing_duration_seconds',
+      help: 'Task processing duration in seconds',
+      labelNames: ['task_type', 'status'],
+      buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300],
+    });
 
     this.taskProcessingTotal = new Counter({
-      name: 'bytebot_task_processing_total',help: 'Total number of processed tasks',labelNames: ['task_type', 'status'],});this.tasksInProgress = new Gauge({
-      name: 'bytebot_tasks_in_progress',help: 'Number of tasks currently being processed',labelNames: ['task_type'],});// Initialize Computer-use Operation Metrics
+      name: 'bytebot_task_processing_total',
+      help: 'Total number of processed tasks',
+      labelNames: ['task_type', 'status'],
+    });
+
+    this.tasksInProgress = new Gauge({
+      name: 'bytebot_tasks_in_progress',
+      help: 'Number of tasks currently being processed',
+      labelNames: ['task_type'],
+    });
+
+    // Initialize Computer-use Operation Metrics
     this.computerUseOperationsTotal = new Counter({
-      name: 'bytebot_computer_use_operations_total',help: 'Total number of computer-use operations',labelNames: ['operation_type', 'status'],});this.computerUseOperationDuration = new Histogram({
-      name: 'bytebot_computer_use_operation_duration_seconds',help: 'Computer-use operation duration in seconds',labelNames: ['operation_type', 'status'],buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2],});
+      name: 'bytebot_computer_use_operations_total',
+      help: 'Total number of computer-use operations',
+      labelNames: ['operation_type', 'status'],
+    });
+
+    this.computerUseOperationDuration = new Histogram({
+      name: 'bytebot_computer_use_operation_duration_seconds',
+      help: 'Computer-use operation duration in seconds',
+      labelNames: ['operation_type', 'status'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2],
+    });
 
     this.computerUseErrors = new Counter({
       name: 'bytebot_computer_use_errors_total',help: 'Total number of computer-use operation errors',labelNames: ['operation_type', 'error_type'],});// Initialize WebSocket Metrics

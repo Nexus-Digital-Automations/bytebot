@@ -335,7 +335,10 @@ export class ConversationalDatabaseService {
       async () => {
         // Create backup before operation
         if (operationContext.requiresBackup) {
-          await this.createBackup(operationContext, { operation: 'CREATE', data });}return repository.create(data);
+          this.createBackup(operationContext, { operation: 'CREATE', data });
+        }
+
+        return repository.create(data);
       },
     );
   }
@@ -387,7 +390,7 @@ export class ConversationalDatabaseService {
       async () => {
         // Create backup before operation
         if (operationContext.requiresBackup && currentEntity) {
-          await this.createBackup(operationContext, currentEntity);
+          this.createBackup(operationContext, currentEntity);
         }
 
         return repository.update(id, data);
@@ -435,7 +438,7 @@ export class ConversationalDatabaseService {
 
     // Check for multi-party approval if required
     if (operationContext.requiresMultiPartyApproval) {
-      const approvalResult = await this.checkMultiPartyApproval(operationContext);
+      const approvalResult = this.checkMultiPartyApproval(operationContext);
       if (!approvalResult.approved) {
         throw new ConversationalValidationError(
           `Multi-party approval required for delete operation: ${approvalResult.reason}`,
@@ -450,7 +453,7 @@ export class ConversationalDatabaseService {
       async () => {
         // Create backup before deletion
         if (operationContext.requiresBackup && currentEntity) {
-          await this.createBackup(operationContext, currentEntity);
+          this.createBackup(operationContext, currentEntity);
         }
 
         return repository.delete(id);
@@ -536,7 +539,10 @@ export class ConversationalDatabaseService {
       async () => {
         // Create backup metadata
         if (operationContext.requiresBackup) {
-          await this.createBackup(operationContext, { operation: 'BULK_CREATE', count: dataArray.length });}// Execute individual creates with transaction
+          this.createBackup(operationContext, { operation: 'BULK_CREATE', count: dataArray.length });
+        }
+
+        // Execute individual creates with transaction
         const results: T[] = [];
         for (const data of dataArray) {
           const result = await repository.create(data);
@@ -585,7 +591,7 @@ export class ConversationalDatabaseService {
 
     // Require multi-party approval for bulk deletions
     if (operationContext.requiresMultiPartyApproval) {
-      const approvalResult = await this.checkMultiPartyApproval(operationContext);
+      const approvalResult = this.checkMultiPartyApproval(operationContext);
       if (!approvalResult.approved) {
         throw new ConversationalValidationError(
           `Multi-party approval required for bulk delete operation: ${approvalResult.reason}`,
@@ -601,7 +607,7 @@ export class ConversationalDatabaseService {
         // Create comprehensive backup before bulk deletion
         if (operationContext.requiresBackup) {
           const recordsToDelete = await repository.findAll({ filter } as QueryOptions);
-          await this.createBackup(operationContext, {
+          this.createBackup(operationContext, {
             operation: 'BULK_DELETE',
             records: recordsToDelete,
             filter,
@@ -695,7 +701,8 @@ export class ConversationalDatabaseService {
       // Create Parlant validation request
       const parlantRequest: ParlantValidationRequest = {
         operationType: `DATABASE_${context.operationType}`,
-        riskLevel: context.riskLevel as RiskLevel,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        riskLevel: this.mapRiskLevel(context.riskLevel),
         parameters: {
           databaseOperation: context.operationType,
           entityType: context.entityType,
@@ -715,13 +722,13 @@ export class ConversationalDatabaseService {
       };
 
       // Perform conversational validation
-      const parlantResponse = (await (this.parlantService.validateOperation as unknown as (req: ParlantValidationRequest) => Promise<unknown>)(parlantRequest)) as {
+      const parlantResponse = await (this.parlantService.validateOperation as (req: ParlantValidationRequest) => Promise<{
         approved: boolean;
         conversationId: string;
         reason: string;
         recommendations: string[];
         requiresManualApproval: boolean;
-      };
+      }>)(parlantRequest);
 
       const validationResult: DatabaseValidationResult = {
         approved: parlantResponse.approved,
@@ -775,6 +782,24 @@ export class ConversationalDatabaseService {
   }
 
   // ===== HELPER METHODS =====
+
+  /**
+   * Map DatabaseRiskLevel to RiskLevel
+   */
+  private mapRiskLevel(databaseRiskLevel: DatabaseRiskLevel): RiskLevel {
+    switch (databaseRiskLevel) {
+      case DatabaseRiskLevel.LOW:
+        return 'LOW' as RiskLevel;
+      case DatabaseRiskLevel.MEDIUM:
+        return 'MEDIUM' as RiskLevel;
+      case DatabaseRiskLevel.HIGH:
+        return 'HIGH' as RiskLevel;
+      case DatabaseRiskLevel.CRITICAL:
+        return 'CRITICAL' as RiskLevel;
+      default:
+        return 'MEDIUM' as RiskLevel;
+    }
+  }
 
   /**
    * Initialize operation risk mappings
@@ -842,10 +867,10 @@ export class ConversationalDatabaseService {
   /**
    * Create backup for write operations
    */
-  private async createBackup(
+  private createBackup(
     context: DatabaseOperationContext,
     data: unknown,
-  ): Promise<DatabaseBackupInfo> {
+  ): DatabaseBackupInfo {
     const backupId = `backup${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const backupInfo: DatabaseBackupInfo = {
       backupId,
       operationId: context.operationId,
@@ -871,9 +896,9 @@ export class ConversationalDatabaseService {
   /**
    * Check multi-party approval for critical operations
    */
-  private async checkMultiPartyApproval(
+  private checkMultiPartyApproval(
     context: DatabaseOperationContext,
-  ): Promise<{ approved: boolean; reason?: string }> {
+  ): { approved: boolean; reason?: string } {
     // In production, this would integrate with an approval workflow system
     this.logger.debug(`[${context.operationId}] Multi-party approval required for ${context.operationType}`);
 
@@ -1072,7 +1097,7 @@ export class ConversationalDatabaseService {
   /**
    * Clear expired cache entries and backups
    */
-  async cleanup(): Promise<void> {
+  cleanup(): void {
     this.logger.debug('Running database service cleanup');// Clear expired cache entriesconst now = Date.now();
     const cacheKeysToDelete: string[] = [];
 

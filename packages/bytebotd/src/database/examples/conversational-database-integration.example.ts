@@ -63,7 +63,7 @@ export class ExampleUserManagementService {
       const newUser = await this.userRepository.create(
         {
           email: userData.email,
-          passwordHash: await this.hashPassword(userData.password),
+          passwordHash: this.hashPassword(userData.password),
           role: userData.role,
           isActive: true,
           ...(userData.name && { name: userData.name }),
@@ -217,7 +217,7 @@ export class ExampleUserManagementService {
       const repoData = await Promise.all(
         usersData.map(async (userData) => ({
           email: userData.email,
-          passwordHash: await this.hashPassword(userData.password),
+          passwordHash: this.hashPassword(userData.password),
           role: userData.role,
           isActive: true,
           ...(userData.name && { name: userData.name }),
@@ -408,8 +408,15 @@ export class ExampleUserManagementService {
   /**
    * Example: Get repository metrics and health information
    */
-  async getRepositoryHealth(): Promise<{
-    metrics: ReturnType<ConversationalDatabaseService['getMetrics']>;cacheStatus: ReturnType<ConversationalDatabaseService['getCacheStatus']>;backupStatus: ReturnType<ConversationalDatabaseService['getBackupStatus']>;}> {this.logger.log('Getting repository health information');try {const metrics = this.conversationalDbService.getMetrics();
+  getRepositoryHealth(): {
+    metrics: ReturnType<ConversationalDatabaseService['getMetrics']>;
+    cacheStatus: ReturnType<ConversationalDatabaseService['getCacheStatus']>;
+    backupStatus: ReturnType<ConversationalDatabaseService['getBackupStatus']>;
+  } {
+    this.logger.log('Getting repository health information');
+
+    try {
+      const metrics = this.conversationalDbService.getMetrics();
       const cacheStatus = this.conversationalDbService.getCacheStatus();
       const backupStatus = this.conversationalDbService.getBackupStatus();
 
@@ -430,7 +437,7 @@ export class ExampleUserManagementService {
   /**
    * Helper method to hash passwords (mock implementation)
    */
-  private async hashPassword(password: string): Promise<string> {
+  private hashPassword(password: string): string {
     // In a real implementation, this would use bcrypt or similar
     return `hashed_${password}_${Date.now()}`;
   }
@@ -634,12 +641,12 @@ export class ConversationalDatabaseUsageExamples {
       useFactory: (conversationalDbService: ConversationalDatabaseService) => {
         // Mock repository for example purposes
         const mockRepository = {
-          findById: async () => null,
-          findAll: async () => [],
-          create: async (data: Partial<UserEntity>) => ({ id: 'mock-id', ...data } as UserEntity),
-          update: async () => null,
-          delete: async () => false,
-          count: async () => 0,
+          findById: () => null,
+          findAll: () => [],
+          create: (data: Partial<UserEntity>) => ({ id: 'mock-id', ...data } as UserEntity),
+          update: () => null,
+          delete: () => false,
+          count: () => 0,
         };
         return new UserConversationalRepositoryService(conversationalDbService, mockRepository as unknown as Repository<UserEntity>);
       },

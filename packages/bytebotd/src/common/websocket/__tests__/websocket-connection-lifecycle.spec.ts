@@ -531,7 +531,7 @@ resolve();
   
 }
 
-  private async initiateReconnection(trigger: string): Promise<void>  {
+  private initiateReconnection(trigger: string): void {
   if (this.state === ConnectionState.RECONNECTING) return;
 
     this.setState(ConnectionState.RECONNECTING);
@@ -683,7 +683,7 @@ const timeout = setTimeout(() => {
     });
   }
 
-  async forceDisconnect(): Promise<void>  {
+  forceDisconnect(): void {
   if (this.ws) {
       this.ws.terminate();
       this.setState(ConnectionState.CLOSED);

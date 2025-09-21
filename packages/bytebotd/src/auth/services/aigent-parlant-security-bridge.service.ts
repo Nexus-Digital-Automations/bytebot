@@ -216,7 +216,7 @@ export interface EmergencyOverrideResult {
 @Injectable()
 
 export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnApplicationShutdown {
-  private readonly logger = new Logger((AIgentParlantSecurityBridgeService as any)?.name);
+  private readonly logger = new Logger(AIgentParlantSecurityBridgeService.name);
 
   // Redis clustering for session management
   private redisCluster: Redis | null = null;
@@ -475,127 +475,120 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     );
 
     try {
-  // Check cache first for performance
-      const cachedValidation = (this.sessionValidationCache as any)?.get?.(sessionId);
-      if (cachedValidation && (this as any)?.isValidationCacheValid?.(cachedValidation)) {
-        (this.logger as any)?.debug?.(`[${operationId
-}] Using cached session validation`);
+      // Check cache first for performance
+      const cachedValidation = this.sessionValidationCache.get(sessionId);
+      if (cachedValidation && this.isValidationCacheValid(cachedValidation)) {
+        this.logger.debug(`[${operationId}] Using cached session validation`);
         return cachedValidation;
       }
 
       // Retrieve session from Redis cluster or memory
-      const session = await (this as any)?.retrieveSession?.(sessionId);
+      const session = await this.retrieveSession(sessionId);
       if (!session) {
         return {
           valid: false,
           validationTimestamp: new Date(),
           reasoning: 'Session not found or expired',
           securityViolations: ['SESSION_NOT_FOUND'],
-          complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),
+          complianceStatus: this.createDefaultComplianceStatus(),
         };
       }
 
       // Check session state and expiration
-      if ((session as any)?.state !== (SessionState as any)?.ACTIVE || new Date() > (session as any)?.expiresAt) {
+      if (session.state !== SessionState.ACTIVE || new Date() > session.expiresAt) {
         return {
           valid: false,
           session,
           validationTimestamp: new Date(),
-          reasoning: `Session is ${(session.state as any)?.toLowerCase?.() || 'unknown'} or expired`,
+          reasoning: `Session is ${session.state.toLowerCase()} or expired`,
           securityViolations: ['SESSION_EXPIRED'],
-          complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),
+          complianceStatus: this.createDefaultComplianceStatus(),
         };
       }
 
       // Validate through Parlant with current context
       const validationRequest: ParlantValidationRequest = {
-  functionName: '(AIgentParlantSecurityBridge as any)?.validateSessionSecurity',
+        functionName: 'AIgentParlantSecurityBridge.validateSessionSecurity',
         functionParams: {
           sessionId,
-          currentIpAddress: (context as any)?.ipAddress,
-          currentUserAgent: (context as any)?.userAgent,
-          requestedAction: (context as any)?.requestedAction,
-          sessionState: (session as any)?.state,
-          securityClassification: (session as any)?.securityClassification,
-        
-},
-        actionDescription: `Validate ${(session as any)?.securityClassification} session security for user ${(session as any)?.userId} requesting: ${(context as any)?.requestedAction ?? 'general access'}`,context: (session as any)?.conversationContext,riskLevel: (RiskLevel as any)?._HIGH, // Session validation is HIGH risk
+          currentIpAddress: context.ipAddress,
+          currentUserAgent: context.userAgent,
+          requestedAction: context.requestedAction,
+          sessionState: session.state,
+          securityClassification: session.securityClassification,
+        },
+        actionDescription: `Validate ${session.securityClassification} session security for user ${session.userId} requesting: ${context.requestedAction ?? 'general access'}`,
+        context: session.conversationContext,
+        riskLevel: RiskLevel.HIGH, // Session validation is HIGH risk
         operationId,
       };
 
-      const validation = await (this.parlantService as any)?.validateFunctionExecution?.(validationRequest);
+      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
 
       // Check for security violations
-      const securityViolations = (this as any)?.detectSecurityViolations?.(session, context);
+      const securityViolations = this.detectSecurityViolations(session, context);
 
       // Check compliance status
-      const complianceStatus = await (this as any)?.checkComplianceStatus?.(session);
+      const complianceStatus = await this.checkComplianceStatus(session);
 
       let currentSession = session;
 
       // Update session last accessed time if validation succeeds
-      if ((validation as any)?.approved && (securityViolations as any)?.length === 0) {
-  currentSession = await (this as any)?.updateSessionAccess?.(session, context);
-      
-}
-
-      const result: SessionValidationResult = {
-  valid: (validation as any)?.approved && (securityViolations as any)?.length === 0,
-        session: currentSession,
-        validationTimestamp: new Date(),
-        reasoning: (validation as any)?.reasoning,
-        conversationId: (validation as any)?.conversationId,
-        securityViolations,
-        complianceStatus,
-      
-};
-
-      // Cache the validation result
-      (this.sessionValidationCache as any)?.set?.(sessionId, result);
-
-      // Update performance metrics
-      const duration = (Date as any)?.now?.() - startTime;
-      (this as any)?.updateValidationMetrics?.(duration);
-      if ((this as any)?.totalValidationsPerformed !== undefined) {
-        (this as any).totalValidationsPerformed += 1;
+      if (validation.approved && securityViolations.length === 0) {
+        currentSession = await this.updateSessionAccess(session, context);
       }
 
-      (this.logger as any)?.log?.(
-        `[${operationId}] Session validation completed: ${(result as any)?.valid ? 'VALID' : 'INVALID'}`,
+      const result: SessionValidationResult = {
+        valid: validation.approved && securityViolations.length === 0,
+        session: currentSession,
+        validationTimestamp: new Date(),
+        reasoning: validation.reasoning,
+        conversationId: validation.conversationId,
+        securityViolations,
+        complianceStatus,
+      };
+
+      // Cache the validation result
+      this.sessionValidationCache.set(sessionId, result);
+
+      // Update performance metrics
+      const duration = Date.now() - startTime;
+      this.updateValidationMetrics(duration);
+      this.totalValidationsPerformed++;
+
+      this.logger.log(
+        `[${operationId}] Session validation completed: ${result.valid ? 'VALID' : 'INVALID'}`,
         {
           operationId,
           sessionId,
-          valid: (result as any)?.valid,
-          securityViolations: (result as any)?.securityViolations.length,
-          conversationId: (validation as any)?.conversationId,
+          valid: result.valid,
+          securityViolations: result.securityViolations.length,
+          conversationId: validation.conversationId,
           duration,
-        
-}
+        }
       );
 
       return result;
 
-    } catch (error: any) {
-  const duration = (Date as any)?.now?.() - startTime;
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
 
-      (this.logger as any)?.error?.(
-        `[${operationId
-}] Session validation failed: ${error instanceof Error ? (error as any)?.message : String(error)}`,{
-  operationId,
+      this.logger.error(
+        `[${operationId}] Session validation failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
           sessionId,
-          error: error instanceof Error ? (error as any)?.message : String(error),
+          error: error instanceof Error ? error.message : String(error),
           duration,
-        
-}
+        }
       );
 
       return {
-  valid: false,
+        valid: false,
         validationTimestamp: new Date(),
-        reasoning: `Validation error: ${error instanceof Error ? (error as any)?.message : String(error)
-}`,
+        reasoning: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
         securityViolations: ['VALIDATION_ERROR'],
-        complianceStatus: (this as any)?.createDefaultComplianceStatus?.(),
+        complianceStatus: this.createDefaultComplianceStatus(),
       };
     }
   }
@@ -612,77 +605,73 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   async handleEmergencyOverride(
     request: EmergencyOverrideRequest
   ): Promise<EmergencyOverrideResult> {
-  const operationId = (request as any)?.operationId;
+    const operationId = request.operationId;
 
-    (this.logger as any)?.warn?.(
-      `[${operationId
-}] Emergency override requested`,
+    this.logger.warn(
+      `[${operationId}] Emergency override requested`,
       {
-  operationId,
-        userId: (request as any)?.userId,
-        approverUserId: (request as any)?.approverUserId,
-        overrideScope: (request as any)?.overrideScope,
-        durationMinutes: (request as any)?.durationMinutes,
-        justification: (request as any)?.justification,
-      
-}
+        operationId,
+        userId: request.userId,
+        approverUserId: request.approverUserId,
+        overrideScope: request.overrideScope,
+        durationMinutes: request.durationMinutes,
+        justification: request.justification,
+      }
     );
 
-    if (!(this as any)?.bridgeConfig.emergencyOverrideEnabled) {
-      throw new Error('Emergency override is disabled in current configuration');}try {
-  // CRITICAL: Validate emergency override through Parlant
+    if (!this.bridgeConfig.emergencyOverrideEnabled) {
+      throw new Error('Emergency override is disabled in current configuration');
+    }    try {
+      // CRITICAL: Validate emergency override through Parlant
       const validationRequest: ParlantValidationRequest = {
-        functionName: '(AIgentParlantSecurityBridge as any)?.handleEmergencyOverride',
+        functionName: 'AIgentParlantSecurityBridge.handleEmergencyOverride',
         functionParams: {
-          userId: (request as any)?.userId,
-          approverUserId: (request as any)?.approverUserId,
-          overrideScope: (request as any)?.overrideScope,
-          durationMinutes: (request as any)?.durationMinutes,
-          justification: (request as any)?.justification,
-        
-},
-        actionDescription: `Emergency override: ${(request as any)?.overrideScope} for user ${(request as any)?.userId} - ${(request as any)?.justification}`,
-        context: (request as any)?.context,
-        riskLevel: (RiskLevel as any)?._CRITICAL, // Emergency overrides are CRITICAL risk
+          userId: request.userId,
+          approverUserId: request.approverUserId,
+          overrideScope: request.overrideScope,
+          durationMinutes: request.durationMinutes,
+          justification: request.justification,
+        },
+        actionDescription: `Emergency override: ${request.overrideScope} for user ${request.userId} - ${request.justification}`,
+        context: request.context,
+        riskLevel: RiskLevel.CRITICAL, // Emergency overrides are CRITICAL risk
         operationId,
       };
 
-      const validation = await (this.parlantService as any)?.validateFunctionExecution?.(validationRequest);
+      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
 
-      const overrideId = `override_${(Date as any)?.now?.()}_${(Math as any)?.random?.().toString(36).substring(7)}`;
-      const expiresAt = new Date((Date as any)?.now?.() + (request as any)?.durationMinutes * 60 * 1000);
+      const overrideId = `override_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const expiresAt = new Date(Date.now() + request.durationMinutes * 60 * 1000);
 
-      if (!(validation as any)?.approved) {
-  // Log denied override attempt
+      if (!validation.approved) {
+        // Log denied override attempt
         const auditEntry: SessionAuditEntry = {
           timestamp: new Date(),
           action: 'OVERRIDE',
           outcome: 'BLOCKED',
-          details: `Emergency override DENIED: ${(validation as any)?.reasoning || 'Unknown reason'}`,
+          details: `Emergency override DENIED: ${validation.reasoning || 'Unknown reason'}`,
           ipAddress: 'system',
           userAgent: 'emergency-override-system',
-          conversationId: (validation as any)?.conversationId,
+          conversationId: validation.conversationId,
         };
 
-        (this.logger as any)?.warn?.(
+        this.logger.warn(
           `[${operationId}] Emergency override DENIED by Parlant validation`,
           {
-  operationId,
-            reason: (validation as any)?.reasoning,
-            conversationId: (validation as any)?.conversationId,
-          
-}
+            operationId,
+            reason: validation.reasoning,
+            conversationId: validation.conversationId,
+          }
         );
 
         return {
-  overrideId,
+          overrideId,
           approved: false,
-          reasoning: (validation as any)?.reasoning,
-          conversationId: (validation as any)?.conversationId,
+          reasoning: validation.reasoning,
+          conversationId: validation.conversationId,
           expiresAt: new Date(0), // Invalid expiration for denied override
           auditEntry,
-        
-};
+        };
       }
 
       // Process approved override
@@ -768,7 +757,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
    *
    * @returns Security bridge metrics and operational status
    */
-  async getSecurityMetrics(): Promise<{
+  getSecurityMetrics(): {
   activeSessions: number;
     sessionsByClassification: Record<SecurityClassification, number>;
     sessionsByRole: Record<UserRole, number>;
@@ -791,64 +780,55 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     const sessionHealth = { healthy: 0, suspended: 0, expired: 0, revoked: 0 };
 
     // Initialize counters
-    (Object as any)?.values?.(SecurityClassification).forEach(classification => sessionsByClassification[classification] = 0);
-    (Object as any)?.values?.(UserRole).forEach(role => sessionsByRole[role] = 0);
+    Object.values(SecurityClassification).forEach(classification => sessionsByClassification[classification] = 0);
+    Object.values(UserRole).forEach(role => sessionsByRole[role] = 0);
 
     // Count sessions
-    for (const session of (this.activeSessions as any)?.values?.()) {
-      const classification = (session as any)?.securityClassification;
+    for (const session of this.activeSessions.values()) {
+      const classification = session.securityClassification;
       if (classification !== undefined) {
         sessionsByClassification[classification] = (sessionsByClassification[classification] || 0) + 1;
       }
-      const role = (session as any)?.userRole;
+      const role = session.userRole;
       if (role !== undefined) {
         sessionsByRole[role] = (sessionsByRole[role] || 0) + 1;
       }
 
-      switch ((session as any)?.state) {
-        case (SessionState as any)?.ACTIVE:
-          if ((sessionHealth as any)?.healthy !== undefined) {
-            (sessionHealth as any).healthy += 1;
-          }
+      switch (session.state) {
+        case SessionState.ACTIVE:
+          sessionHealth.healthy++;
           break;
-        case (SessionState as any)?.SUSPENDED:
-          if ((sessionHealth as any)?.suspended !== undefined) {
-            (sessionHealth as any).suspended += 1;
-          }
+        case SessionState.SUSPENDED:
+          sessionHealth.suspended++;
           break;
-        case (SessionState as any)?.EXPIRED:
-          if ((sessionHealth as any)?.expired !== undefined) {
-            (sessionHealth as any).expired += 1;
-          }
+        case SessionState.EXPIRED:
+          sessionHealth.expired++;
           break;
-        case (SessionState as any)?.REVOKED:
-          if ((sessionHealth as any)?.revoked !== undefined) {
-            (sessionHealth as any).revoked += 1;
-          }
+        case SessionState.REVOKED:
+          sessionHealth.revoked++;
           break;
-      
-}
+      }
     }
 
     // Check compliance status
     const complianceStatus = {} as Record<ComplianceFramework, boolean>;
-    ((this as any)?.bridgeConfig.complianceFrameworks as any)?.forEach?.(framework => {
-  complianceStatus[framework] = true; // Simplified - would check actual compliance
-    
-});
+    this.bridgeConfig.complianceFrameworks.forEach(framework => {
+      complianceStatus[framework] = true; // Simplified - would check actual compliance
+    });
 
     return {
-  activeSessions: (this as any)?.activeSessions.size,
+      activeSessions: this.activeSessions.size,
       sessionsByClassification,
       sessionsByRole,
-      totalSessionsCreated: (this as any)?.totalSessionsCreated,
-      totalValidationsPerformed: (this as any)?.totalValidationsPerformed,
-      totalEmergencyOverrides: (this as any)?.totalEmergencyOverrides,
-      averageValidationTime: (this as any)?.averageValidationTime,
+      totalSessionsCreated: this.totalSessionsCreated,
+      totalValidationsPerformed: this.totalValidationsPerformed,
+      totalEmergencyOverrides: this.totalEmergencyOverrides,
+      averageValidationTime: this.averageValidationTime,
       sessionHealth,
       complianceStatus,
-      redisClusterHealth: (this as any)?.redisCluster?.status === 'ready',
-};}
+      redisClusterHealth: this.redisCluster?.status === 'ready',
+    };
+  }
 
   // ===== PRIVATE HELPER METHODS =====
 
@@ -955,16 +935,15 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     }
   }
 
-  private async initializeSessionMonitoring(): Promise<void> {
-  // Start background session cleanup
-    setInterval(() => (this as any)?.performSessionCleanup?.(), 300000); // Every 5 minutes
+  private initializeSessionMonitoring(): void {
+    // Start background session cleanup
+    setInterval(() => this.performSessionCleanup(), 300000); // Every 5 minutes
 
     // Start session health monitoring
-    setInterval(() => (this as any)?.monitorSessionHealth?.(), 60000); // Every minute
+    setInterval(() => this.monitorSessionHealth(), 60000); // Every minute
 
-    (this.logger as any)?.log?.('Session monitoring initialized');
-  
-}
+    this.logger.log('Session monitoring initialized');
+  }
 
   private async extractSecurityContext(
     jwtPayload: EnhancedJwtPayload,

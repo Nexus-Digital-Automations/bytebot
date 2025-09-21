@@ -291,14 +291,14 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
   });
 
   describe('Multi-Algorithm JWT Support', () => {
-    it('should validate HS256 JWT tokens', async () => {
+    it('should validate HS256 JWT tokens', () => {
         const payload = {
           sub: 'user-hs256',
           email: 'hs256@example.com',
           username: 'hs256user',
-          role: UserRole.OPERATOR,
+          role: UserRole._OPERATOR,
           securityClassification: SecurityClassification.INTERNAL,
-          permissions: [Permission.TASK_READ],
+          permissions: [Permission._TASK_READ],
           complianceRequirements: [ComplianceFramework.GDPR],
           iat: Math.floor(Date.now() / 1000),
           exp: Math.floor(Date.now() / 1000) + 3600,

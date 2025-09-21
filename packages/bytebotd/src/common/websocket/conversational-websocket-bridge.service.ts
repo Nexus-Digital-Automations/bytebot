@@ -747,7 +747,7 @@ _${Date.now()}`;
 
     // Complete validation if approved
     if (approved) {
-      await this.completeValidation(sessionId, validationId, 'approved', message.payload.reasoning);} else {await this.completeValidation(sessionId, validationId, 'rejected', message.payload.reasoning);}
+      this.completeValidation(sessionId, validationId, 'approved', message.payload.reasoning);} else {this.completeValidation(sessionId, validationId, 'rejected', message.payload.reasoning);}
 this.emit('user_confirmation', { sessionId, confirmationId, validationId, approved });}/**
    * Start validation progress streaming
    */
@@ -906,11 +906,11 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
   /**
    * Complete validation processing
    */
-  private async completeValidation(sessionId: string,
+  private completeValidation(sessionId: string,
     validationId: string,
     result: 'approved' | 'rejected',
     reasoning?: string
-  ): Promise<void>  {
+  ): void {
   // Remove from pending validations
     this.pendingValidations.delete(validationId);
 

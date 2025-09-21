@@ -1099,9 +1099,12 @@ const messageCount = 100;const latencies: number[] = [];
       const sessionId = 'test_session_e2e_001';
 const validationId = 'validation_e2e_001';
 
-// Complete lifecycle: validation request -> response -> confirmation -> resultconst messages = [
+      // Complete lifecycle: validation request -> response -> confirmation -> result
+      const messages = [
         TestMessageFactory.createValidationRequestMessage(sessionId, validationId, 1),
-        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'high', 2),TestMessageFactory.createUserConfirmationMessage(sessionId, validationId, true, 3),TestMessageFactory.createTestMessage(ConversationalMessageType.CONFIRMATION_RESULT, sessionId, 'high', 4),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_RESPONSE, sessionId, 'high', 2),
+        TestMessageFactory.createUserConfirmationMessage(sessionId, validationId, true, 3),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.CONFIRMATION_RESULT, sessionId, 'high', 4),
       ];
 
       // Set proper message IDs for flow validation
@@ -1148,8 +1151,7 @@ const validationId = 'validation_e2e_001';
   const concurrentOperations = 20;
       const messagesPerOperation = 10;
 
-      const operationPromises = Array.from( length: concurrentOperations 
-}, async (_, operationIndex) => {
+      const operationPromises = Array.from({ length: concurrentOperations }, async (_, operationIndex) => {
         const sessionId = `test_session_concurrent_${operationIndex}`;const validationId = `validation_concurrent_${operationIndex}`;
 
         const operationMessages = Array.from({ length: messagesPerOperation }, (_, msgIndex) =>

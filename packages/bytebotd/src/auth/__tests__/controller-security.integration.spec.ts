@@ -136,7 +136,7 @@ interface App {
 
 /**
  * Type-safe helper function to create supertest requests
- * Eliminates need for 'as unknown' casting with proper typing*/function createRequest(app: INestApplicatio, n) {
+ * Eliminates need for 'as unknown' casting with proper typing*/function createRequest(app: INestApplication) {
   return request(app.getHttpServer() as Server);
 
 }
@@ -258,7 +258,7 @@ class MockSecurityJwtService {
     ['malicious-token', null], // Simulate invalid token
   ]);
 
-  verifyAsync(token: strin, g) {
+  verifyAsync(token: string) {
   const user = this.validTokens.get(token);
     if (!user) {
       throw new Error('Invalid or expired token');
@@ -339,7 +339,7 @@ describe('Controller Security Integration Tests', () => {
     const _reflector = moduleRef.get<Reflector>(Reflector);
 
     // Configure security middleware
-    app.use((req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunctio, n) => {
+    app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
   // Security headers middleware
       res.setHeader('X-Content-Type-Options', 'nosniff');res.setHeader('X-Frame-Options', 'DENY');res.setHeader('X-XSS-Protection', '1; mode=block');res.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains',);res.setHeader('Content-Security-Policy', "default-src 'self'");
       res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');next();
@@ -347,8 +347,8 @@ describe('Controller Security Integration Tests', () => {
 
     // Rate limiting middleware
     const requestCounts = new Map<string, number>();
-    app.use((req: any, res: any, next: any) => {
-      const ip = req.ip ?? req.connection?.remoteAddress ?? '127.0.0.1';
+    app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
+      const ip = (req.ip as string) ?? (req.connection?.remoteAddress as string) ?? '127.0.0.1';
       const count = requestCounts.get(ip) ?? 0;
       if (count > 100) {
         return res.status(429).json({
@@ -374,7 +374,7 @@ describe('Controller Security Integration Tests', () => {
 
     // Authentication middleware
     app.use(
-      '/api/*',async (req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunctio, n) => {
+      '/api/*',async (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
   const authHeader = req.headers.authorization;
 
         if (!authHeader?.startsWith('Bearer ')) {return res.status(401).json({message: 'Authentication required', error: 'UNAUTHORIZED'
@@ -407,8 +407,8 @@ describe('Controller Security Integration Tests', () => {
     );
 
     // Authorization middleware
-    const checkRole = (requiredRole: UserRol, e) => {
-  return (req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunctio, n) => {
+    const checkRole = (requiredRole: UserRole) => {
+  return (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
         if (!req.user) {
           return res.status(403).json({
   message: 'Access forbidden - authentication required', error: 'FORBIDDEN'
@@ -445,11 +445,11 @@ describe('Controller Security Integration Tests', () => {
     // Setup routes
     (app as App)
       .getHttpAdapter()
-      .get('/public/data', (req: SafeRequestre, s: SafeRespons, e) => {res.json(controller.getPublicData());});
+      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {res.json(controller.getPublicData());});
 
     (app as App)
       .getHttpAdapter()
-      .get('/api/protected', (req: SafeRequestre, s: SafeRespons, e) => {
+      .get('/api/protected', (req: SafeRequest, res: SafeResponse) => {
   if (req.user) {res.json(controller.getProtectedData(req.user));
         
 } else {
@@ -457,7 +457,7 @@ describe('Controller Security Integration Tests', () => {
 
     app
       .getHttpAdapter()
-      .get('/api/admin', (req: SafeRequestre, s: SafeRespons, e) => {
+      .get('/api/admin', (req: SafeRequest, res: SafeResponse) => {
   const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getAdminData(req.user));
@@ -468,7 +468,7 @@ describe('Controller Security Integration Tests', () => {
 
     app
       .getHttpAdapter()
-      .get('/api/system', (req: SafeRequestre, s: SafeRespons, e) => {
+      .get('/api/system', (req: SafeRequest, res: SafeResponse) => {
   const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getSystemData(req.user));
@@ -482,7 +482,7 @@ describe('Controller Security Integration Tests', () => {
 
     app
       .getHttpAdapter()
-      .post('/api/resources', (req: SafeRequestre, s: SafeRespons, e) => {
+      .post('/api/resources', (req: SafeRequest, res: SafeResponse) => {
   const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
           if (req.user) {
             res.json(controller.createResource(req.user, req.body));

@@ -27,7 +27,14 @@ import {
   ForbiddenException,
   Logger,
   UnauthorizedException,
-} from '@nestjs/common';import { Reflector } from '@nestjs/core';import { Observable } from 'rxjs';import { performance } from 'perf_hooks';import * as crypto from 'crypto';// Authentication context from middlewareimport {
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Observable } from 'rxjs';
+import { performance } from 'perf_hooks';
+import * as crypto from 'crypto';
+
+// Authentication context from middleware
+import {
   AuthenticatedRequest,
   BrowserUseUserContext,
   BrowserUseSessionContext,

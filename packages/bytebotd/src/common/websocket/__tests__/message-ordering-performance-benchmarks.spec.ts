@@ -432,7 +432,7 @@ describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
   describe('Throughput Performance Benchmarks', () => {
 
-    it('should achieve target throughput under normal load', async () => {
+    it('should achieve target throughput under normal load', () => {
       const testName = 'throughput_normal_load';
 const messageCount = 10000;analyzer.startMeasurement(testName);
 
@@ -475,7 +475,7 @@ MB`,
 
 
 
-    it('should maintain throughput under high priority message load', async () => {
+    it('should maintain throughput under high priority message load', () => {
 
       const testName = 'throughput_high_priority';
       const messageCount = 5000;
@@ -549,7 +549,8 @@ ms`,
 
     it('should maintain low latency under steady load', async () => {
       const testName = 'latency_steady_load';
-const duration = 30000; // 30 secondsconst messageInterval = 50; // 20 messages per second
+      const duration = 30000; // 30 seconds
+      const messageInterval: number = 50; // 20 messages per second
 
       analyzer.startMeasurement(testName);
 
@@ -794,7 +795,7 @@ MB`,cleanupEfficiency: `${(cleanupEfficiency * 100).toFixed(1)}%`,
 
   describe('Delivery Guarantee Performance Benchmarks', () => {
 
-    it('should maintain high delivery success rate under load', async () => {
+    it('should maintain high delivery success rate under load', () => {
       const testName = 'delivery_guarantees';
 const messageCount = 3000;let successfulDeliveries = 0;
       let failedDeliveries = 0;
@@ -842,7 +843,7 @@ ms`,
 
 
 
-    it('should handle acknowledgment processing efficiently', async () => {
+    it('should handle acknowledgment processing efficiently', () => {
 
   const testName = 'acknowledgment_performance';
 const messageCount = 2000;analyzer.startMeasurement(testName);
@@ -917,7 +918,8 @@ MB`,
     it('should demonstrate system stability over time', async () => {
 
   const testName = 'endurance_test';
-const duration = 30000; // 30 seconds (reduced from longer endurance test)const messageInterval = 100; // 10 messages per second
+      const duration = 30000; // 30 seconds (reduced from longer endurance test)
+      const messageInterval: number = 100; // 10 messages per second
 
       analyzer.startMeasurement(testName);
 

@@ -66,11 +66,13 @@ import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';impo
         { userId: user.id, userRole: user.role },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation completed for metrics collection`, {operationId,approved: validation.approved,
-        riskLevel: validation.riskLevel,
-        validationDuration: validation.performanceImpact.validationDuration,
-        cacheHit: validation.performanceImpact.cacheHit,
-        optimization: validation.performanceImpact.optimization,
+      this.logger.debug(`[${operationId}] Parlant validation completed for metrics collection`, {
+        operationId,
+        approved: Boolean(validation.approved),
+        riskLevel: String(validation.riskLevel || 'unknown'),
+        validationDuration: Number(validation.performanceImpact?.validationDuration || 0),
+        cacheHit: Boolean(validation.performanceImpact?.cacheHit),
+        optimization: String(validation.performanceImpact?.optimization || 'none'),
       });
 
       if (!validation.approved) {

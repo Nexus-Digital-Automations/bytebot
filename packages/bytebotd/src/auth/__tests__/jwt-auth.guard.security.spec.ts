@@ -312,7 +312,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       const timings = [];
 
       for (const scenario of scenarios) {
-        const headers: Record<stringstring> = {};
+        const headers: Record<string, string> = {};
         if (scenario.token) {
           headers.authorization = `Bearer ${scenario.token}`;
         }
