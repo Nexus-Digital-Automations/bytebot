@@ -3631,12 +3631,14 @@
       "updated_at": "2025-09-21T03:59:34.148Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T04:21:32.362Z",
       "title": "Fix missing comma errors in bytebotd TypeScript files",
       "description": "Fix , expected parsing errors in 4 specific test files: concurrent-session-management.spec.ts (line 903:6), error-handling-recovery.spec.ts (line 838:29), websocket-integration.spec.ts (line 581:6), and jwt-auth.guard.spec.ts (line 565:55)",
       "category": "error",
-      "id": "error_1758428492361_6bevt04hs77"
+      "id": "error_1758428492361_6bevt04hs77",
+      "completed_at": "2025-09-21T04:32:18.081Z",
+      "updated_at": "2025-09-21T04:32:18.081Z"
     },
     {
       "status": "completed",
@@ -3675,6 +3677,14 @@
       "id": "error_1758428495747_q7to41itxie",
       "completed_at": "2025-09-21T04:28:57.778Z",
       "updated_at": "2025-09-21T04:28:57.778Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:33:52.521Z",
+      "title": "Fix remaining 8 ESLint parsing errors in bytebotd test files",
+      "description": "Complete the systematic ESLint error resolution by fixing the final 8 parsing errors in bytebotd package: enterprise-auth-services.spec.ts (declaration syntax), conversational-websocket-bridge.spec.ts (missing parenthesis), error-handling-recovery.spec.ts (missing brace), message-ordering tests (missing commas), testing-framework-integration.spec.ts (comma syntax), websocket-integration.spec.ts (comma syntax), conversational-database.service.spec.ts (missing semicolon). These are the final errors after 67% reduction achieved by 10 concurrent agents.",
+      "category": "error",
+      "id": "error_1758429232521_07j4de138mc"
     }
   ],
   "agents": {

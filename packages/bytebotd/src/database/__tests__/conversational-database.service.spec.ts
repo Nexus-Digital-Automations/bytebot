@@ -677,38 +677,80 @@ describe('ConversationalDatabaseService', () => {
     });
 
     it('should provide backup status information', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
         conversationId: 'conv-backup-123',
-});mockRepository.create.mockResolvedValue({
-        id: 'backup-test',name: 'Backup Test',} as TestEntity);// Act
-      await service.create(mockRepository, { name: 'Backup Test' } as Omit<TestEntity, keyof BaseEntity>);// Assertconst backupStatus = service.getBackupStatus();
+      });
+
+      mockRepository.create.mockResolvedValue({
+        id: 'backup-test',
+        name: 'Backup Test',
+      } as TestEntity);
+
+      // Act
+      await service.create(mockRepository, { name: 'Backup Test' } as Omit<TestEntity, keyof BaseEntity>);
+
+      // Assert
+      const backupStatus = service.getBackupStatus();
       expect(backupStatus.totalBackups).toBeGreaterThan(0);
     });
   });
 
   // ===== CLEANUP TESTS =====
 
-  describe('Cleanup', () => {it('should clean up expired cache entries and backups', async () => {// This test would require time manipulation to test cache expiry// For now, we'll just test that cleanup doesn't throw errorsawait expect(service.cleanup()).resolves.not.toThrow();});
+  describe('Cleanup', () => {
+    it('should clean up expired cache entries and backups', async () => {
+      // This test would require time manipulation to test cache expiry
+      // For now, we'll just test that cleanup doesn't throw errors
+      await expect(service.cleanup()).resolves.not.toThrow();
+    });
   });
 
   // ===== ERROR HANDLING TESTS =====
 
   describe('Error Handling', () => {
-  it('should handle Parlant service unavailability gracefully', async () => {// ArrangeparlantService.validateOperation.mockRejectedValue(new Error('Service unavailable'));// Act & Assertawait expect(
-        service.findById(mockRepository, 'test-id')).rejects.toThrow('Service unavailable');
-});it('should handle repository errors during operations', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-error-123',
-});mockRepository.findById.mockRejectedValue(new Error('Database connection lost'));// Act & Assertawait expect(
-        service.findById(mockRepository, 'test-id')).rejects.toThrow('Database connection lost');});it('should provide meaningful error messages', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: false,
-        conversationId: 'conv-error-456',reason: 'User does not have permission to access this resource',
-});// Act & Assert
+    it('should handle Parlant service unavailability gracefully', async () => {
+      // Arrange
+      parlantService.validateOperation.mockRejectedValue(new Error('Service unavailable'));
+
+      // Act & Assert
       await expect(
-        service.findById(mockRepository, 'test-id', {userId: 'user-123',userRole: 'guest',})).rejects.toThrow('Database findById operation rejected: User does not have permission to access this resource');});});
+        service.findById(mockRepository, 'test-id')
+      ).rejects.toThrow('Service unavailable');
+    });
+
+    it('should handle repository errors during operations', async () => {
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
+        conversationId: 'conv-error-123',
+      });
+      mockRepository.findById.mockRejectedValue(new Error('Database connection lost'));
+
+      // Act & Assert
+      await expect(
+        service.findById(mockRepository, 'test-id')
+      ).rejects.toThrow('Database connection lost');
+    });
+
+    it('should provide meaningful error messages', async () => {
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: false,
+        conversationId: 'conv-error-456',
+        reason: 'User does not have permission to access this resource',
+      });
+
+      // Act & Assert
+      await expect(
+        service.findById(mockRepository, 'test-id', {
+          userId: 'user-123',
+          userRole: 'guest',
+        })
+      ).rejects.toThrow('Database findById operation rejected: User does not have permission to access this resource');
+    });
+  });
 
   // ===== INTEGRATION TESTS =====
 

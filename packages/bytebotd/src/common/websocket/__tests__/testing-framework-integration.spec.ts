@@ -1204,7 +1204,7 @@ interface RegressionDetection {
   regressionType: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   issues: string[];
-  baseline: {;
+  baseline: {
   duration: number;
   successRate: number;
     totalTests: number;
@@ -1232,17 +1232,17 @@ interface RegressionReport {
 // Test Suite
 describe('Testing Framework Integration and Automation', () => {
 
-  let orchestrator: WebSocketTestOrchestrator;let cicdManager: CICDIntegrationManager;
+  let orchestrator: WebSocketTestOrchestrator;
+  let cicdManager: CICDIntegrationManager;
   let reportGenerator: TestReportGenerator;
   let regressionManager: RegressionTestManager;
 
-  beforeEach(() => 
+  beforeEach(() => {
     orchestrator = new WebSocketTestOrchestrator();
     cicdManager = new CICDIntegrationManager(orchestrator);
     reportGenerator = new TestReportGenerator();
     regressionManager = new RegressionTestManager(orchestrator);
-  
-});
+  });
 
   afterEach(() => {
   jest.clearAllTimers();
@@ -1253,7 +1253,9 @@ describe('Testing Framework Integration and Automation', () => {
 
   describe('Test Orchestration', () => {
 
-  test('should execute development test plan successfully', async () => const plan = await cicdManager.createTestExecutionPlan('development');const result = await orchestrator.executeTestPlan(plan);
+  test('should execute development test plan successfully', async () => {
+    const plan = await cicdManager.createTestExecutionPlan('development');
+    const result = await orchestrator.executeTestPlan(plan);
 expect(result.success).toBe(true);
       expect(result.planId).toBe('dev-quick');
 expect(result.suiteResults.length).toBeGreaterThan(0);
@@ -1321,21 +1323,21 @@ expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOr
             duration: 1000,
             testResults: [],
             error: 'Simulated failure',
-      summary: { total: 0, passed: 0, failed: 1, skipped: 0 
-}};
+            summary: { total: 0, passed: 0, failed: 1, skipped: 0 }
+          };
         }
         return originalExecute.call(this, suite);
       };
 
       const plan: TestExecutionPlan = {
-  id: 'fail-fast-test',
-      name: 'Fail Fast Test',
-      suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],strategy: 'sequential',
-      environment: 'test',
-      failFast: true,
-      timeout: 180000
-      
-};
+        id: 'fail-fast-test',
+        name: 'Fail Fast Test',
+        suiteIds: ['connection-lifecycle', 'realtime-message-flow', 'security-validation'],
+        strategy: 'sequential',
+        environment: 'test',
+        failFast: true,
+        timeout: 180000
+      };
 
       const result = await orchestrator.executeTestPlan(plan);
 

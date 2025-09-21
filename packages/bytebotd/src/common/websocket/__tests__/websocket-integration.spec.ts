@@ -723,14 +723,22 @@ expect(requiresApproval).toBe(true);
 
 
 it('should handle integration events', () => {
-  // Test event handlingconst eventTypes = [
-        'session_integrated','validation_request','user_confirmation_processed','integration_metrics',];eventTypes.forEach(eventType => {
-        // Verify event listeners can be added
-        expect(() => {
-          integrationService.on(eventType, () => {
-});
-        }).not.toThrow();
+  // Test event handling
+  const eventTypes = [
+    'session_integrated',
+    'validation_request',
+    'user_confirmation_processed',
+    'integration_metrics',
+  ];
+
+  eventTypes.forEach(eventType => {
+    // Verify event listeners can be added
+    expect(() => {
+      integrationService.on(eventType, () => {
+        // Event handler logic
       });
+    }).not.toThrow();
+  });
     });
   });
 });
@@ -785,7 +793,8 @@ _${i}`;
 
 
   it('should benchmark message throughput', async () => {
-const messageCount = 10000;const messages:  id: number; processed: boolean }[] = [];
+    const messageCount = 10000;
+    const messages: { id: number; processed: boolean }[] = [];
 
     const start = performance.now();
 
@@ -823,10 +832,9 @@ const messageCount = 10000;const messages:  id: number; processed: boolean }[] =
     console.log('Message Throughput Benchmark:', {
   messageCount,
       totalTime: `${totalTime.toFixed(2)
-}
-ms`,messagesPerSecond: Math.floor(messagesPerSecond),
-      averageMessageTime: `${averageMessageTime.toFixed(3)}
-ms`,
+}ms`,
+      messagesPerSecond: Math.floor(messagesPerSecond),
+      averageMessageTime: `${averageMessageTime.toFixed(3)}ms`,
     });
 
     expect(messagesPerSecond).toBeGreaterThan(1000); // Target: 1000+ messages/second

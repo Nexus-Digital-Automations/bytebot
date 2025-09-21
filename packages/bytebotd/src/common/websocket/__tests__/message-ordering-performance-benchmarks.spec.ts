@@ -771,9 +771,8 @@ KB`,
 
       // Force garbage collection
       if (global.gc) {
-  global.gc();
-      
-}
+        global.gc();
+      }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -885,13 +884,14 @@ ms`,ackThroughput: `${result.throughput.toFixed(0)} ack/sec`,
 
   describe('Stress and Endurance Testing', () => {
 
-  it('should handle extreme load without degradation', async () => const testName = 'extreme_load';
-const config = {concurrentSessions: 200, // Reduced for test environment,
-  messagesPerSession: 50,
-        messageInterval: 20, // Very high frequency,
-  duration: 15000, // 15 seconds
-      
-};
+    it('should handle extreme load without degradation', async () => {
+      const testName = 'extreme_load';
+      const config = {
+        concurrentSessions: 200, // Reduced for test environment
+        messagesPerSession: 50,
+        messageInterval: 20, // Very high frequency
+        duration: 15000, // 15 seconds
+      };
 
       analyzer.startMeasurement(testName);
 
@@ -924,10 +924,12 @@ const duration = 30000; // 30 seconds (reduced from longer endurance test)const 
       const endTime = Date.now() + duration;
       let sequence = 1;
 
-      while (Date.now() < endTime) 
+      while (Date.now() < endTime) {
         const operationStart = performance.now();
 
-        const message = createBenchmarkMessage('endurance_session', sequence++);service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
+        const message = createBenchmarkMessage('endurance_session', sequence++);
+        service.validateMessageSequence(message);
+        service.addMessageToPriorityQueue(message);
 
         const operationTime = performance.now() - operationStart;
         analyzer.recordMeasurement(testName, operationTime);
@@ -944,12 +946,14 @@ const duration = 30000; // 30 seconds (reduced from longer endurance test)const 
       const finalResult = analyzer.stopMeasurement(testName);
 
       console.log('Endurance Test Results:', {
-        duration: `${duration / 1000}
-s`,totalMessages: finalResult.totalOperations,
-      averageThroughput: `${finalResult.throughput.toFixed(0)} msg/sec`,finalMemoryUsage: `${finalResult.memoryUsage.toFixed(2)}
-MB`,
-        performanceStability: 'Stable', // Would calculate variance in real implementation});
-expect(finalResult.throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput * 0.1);
+        duration: `${duration / 1000}s`,
+        totalMessages: finalResult.totalOperations,
+        averageThroughput: `${finalResult.throughput.toFixed(0)} msg/sec`,
+        finalMemoryUsage: `${finalResult.memoryUsage.toFixed(2)}MB`,
+        performanceStability: 'Stable', // Would calculate variance in real implementation
+      });
+
+      expect(finalResult.throughput).toBeGreaterThan(PERFORMANCE_TARGETS.minThroughput * 0.1);
       expect(finalResult.standardDeviation).toBeLessThan(finalResult.averageLatency * 2); // Reasonable variance
     });
   });

@@ -1309,7 +1309,7 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
 
       // Send messages during partition (should be queued)
       for (let i = 0; i < 3; i++) {
-  await client.sendMessage({
+        await client.sendMessage({
           messageId: `partition-msg-${i}`,
           sessionId: 'partition-test-session',
           timestamp: Date.now(),
@@ -1332,13 +1332,13 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
       const recoveryMetrics = client.getRecoveryMetrics();
 
       console.log('Network Partition Recovery Results:', {
-  partitionDuration: '3000ms',
+        partitionDuration: '3000ms',
         totalRecoveryTime: `${totalRecoveryTime}ms`,
         recoveryEvents: recoveryEvents.length,
-      finalConnectionState: client.isConnected(),
+        finalConnectionState: client.isConnected(),
         queueSizeAfterRecovery: client.getQueueSize(),
         recoveryMetrics: {
-  successfulRecoveries: recoveryMetrics.successfulRecoveries,
+          successfulRecoveries: recoveryMetrics.successfulRecoveries,
           averageRecoveryTime: `${recoveryMetrics.averageRecoveryTime.toFixed(0)}ms`,
           maxRecoveryTime: `${recoveryMetrics.maxRecoveryTime.toFixed(0)}ms`,
         },

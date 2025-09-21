@@ -412,16 +412,18 @@ ms`,
       const sessionOperations: (() => Promise<void>)[] = [];
 
       // Create simulated session operations
-      for (let i = 0; i < targetConcurrentSessions; i++) 
+      for (let i = 0; i < targetConcurrentSessions; i++) {
         sessionOperations.push(async () => {
           // Simulate session creation and message processing
-          const sessionId = `perf-test-session-${i
-}`;const message = {
+          const sessionId = `perf-test-session-${i}`;
+          const message = {
   sessionId,
-            messageId: `msg-${i
-}`,
+            messageId: `msg-${i}`,
             timestamp: Date.now(),
-            data: 'test-data',};// Simulate message processing time
+            data: 'test-data',
+          };
+
+          // Simulate message processing time
           await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
 
           // Simulate serialization
@@ -473,17 +475,22 @@ expect(uncompressedSize).toBeGreaterThan(compressionThreshold);
   // ===== ERROR HANDLING TESTS =====
 
   describe('Error Handling and Recovery', () => {
-it('should handle invalid message format gracefully', () => const invalidMessages = ['{ invalid json','{}', // Empty object'{ "type": "unknown" }', // Missing required fieldsnull,undefined,
+it('should handle invalid message format gracefully', () => {
+      const invalidMessages = [
+        '{ invalid json',
+        '{}', // Empty object
+        '{ "type": "unknown" }', // Missing required fields
+        null,
+        undefined,
       ];
 
       invalidMessages.forEach((invalidMessage, _index) => {
-  // Test that invalid messages don't crash the service
+        // Test that invalid messages don't crash the service
         // This would typically be tested through actual WebSocket connection
         expect(() => {
           if (invalidMessage) {
             JSON.parse(invalidMessage.toString());
-          
-}
+          }
         }).toThrowError();
       });
     });
@@ -496,9 +503,10 @@ it('should handle invalid message format gracefully', () => const invalidMessage
       mockClient.readyState = WebSocket.WebSocket.CLOSED;
 
       // Test that sending to closed connection is handled
-      expect(() => 
+      expect(() => {
         mockClient.send('test message');
-}).not.toThrow();});
+      }).not.toThrow();
+    });
 
 
 
@@ -517,12 +525,18 @@ it('should handle invalid message format gracefully', () => const invalidMessage
   // ===== SECURITY TESTS =====
 
   describe('Security and Compliance', () => {
-it('should validate security context requirements', () => const securityContext: SecurityContext = {authenticationLevel: 'enterprise',
-      permissions: ['admin', 'audit'],auditRequired: true,
-      complianceFlags: ['GDPR', 'SOX', 'HIPAA'],};
-expect(securityContext.authenticationLevel).toBe('enterprise');
-expect(securityContext.auditRequired).toBe(true);
-expect(securityContext.complianceFlags).toContain('GDPR');});
+it('should validate security context requirements', () => {
+      const securityContext: SecurityContext = {
+        authenticationLevel: 'enterprise',
+        permissions: ['admin', 'audit'],
+        auditRequired: true,
+        complianceFlags: ['GDPR', 'SOX', 'HIPAA'],
+      };
+
+      expect(securityContext.authenticationLevel).toBe('enterprise');
+      expect(securityContext.auditRequired).toBe(true);
+      expect(securityContext.complianceFlags).toContain('GDPR');
+    });
 
 
 it('should validate action impact assessment', () => {

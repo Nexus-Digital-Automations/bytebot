@@ -986,16 +986,20 @@ expect(typeof metrics.throughputPerSecond).toBe('number');});
 
 it('should generate comprehensive validation report', async () => {
 
-  // Process some messages to populate dataconst sessionId = 'test_session_report_001';
-const messageCount = 20;for (let i = 1; i <= messageCount; i++) 
-        const message = TestMessageFactory.createTestMessage(
-          ConversationalMessageType.PROGRESS_UPDATE,
-          sessionId,
-          'normal',i);
-        service.validateMessageSequence(message);
-        service.addMessageToPriorityQueue(message);
-      
-}
+  // Process some messages to populate data
+  const sessionId = 'test_session_report_001';
+  const messageCount = 20;
+
+  for (let i = 1; i <= messageCount; i++) {
+    const message = TestMessageFactory.createTestMessage(
+      ConversationalMessageType.PROGRESS_UPDATE,
+      sessionId,
+      'normal',
+      i
+    );
+    service.validateMessageSequence(message);
+    service.addMessageToPriorityQueue(message);
+  }
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -1020,11 +1024,13 @@ expect(Array.isArray(report.conversationFlowResults)).toBe(true);
 const messageCount = 100;const latencies: number[] = [];
 
       // Process messages with known latencies
-      for (let i = 1; i <= messageCount; i++) 
+      for (let i = 1; i <= messageCount; i++) {
         const message = TestMessageFactory.createTestMessage(
           ConversationalMessageType.HEARTBEAT,
           sessionId,
-          'normal',i);
+          'normal',
+          i
+        );
 
         service.validateMessageSequence(message);
 
@@ -1032,8 +1038,7 @@ const messageCount = 100;const latencies: number[] = [];
         latencies.push(latency);
 
         service.processDeliveryAcknowledgment(message.messageId, sessionId, latency);
-      
-}
+      }
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -1055,15 +1060,16 @@ const messageCount = 100;const latencies: number[] = [];
       const startTime = performance.now();
 
       // Create load across multiple sessions
-      for (let session = 1; session <= sessionCount; session++) 
-        const sessionId = `test_session_load_${session
-}`;
+      for (let session = 1; session <= sessionCount; session++) {
+        const sessionId = `test_session_load_${session}`;
 
         for (let msg = 1; msg <= messagesPerSession; msg++) {
-  const message = TestMessageFactory.createTestMessage(
+          const message = TestMessageFactory.createTestMessage(
             ConversationalMessageType.VALIDATION_REQUEST,
             sessionId,
-            'normal',msg);
+            'normal',
+            msg
+          );
 
           service.validateMessageSequence(message);
           service.addMessageToPriorityQueue(message);

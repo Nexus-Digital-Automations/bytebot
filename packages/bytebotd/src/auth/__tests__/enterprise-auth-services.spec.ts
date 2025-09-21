@@ -326,8 +326,8 @@ describe('JwtAuthGuard', () => {
     });
   });
 
-    describe('performance characteristics', () => {
-  it('should complete authentication within performance targets', async () => {
+  describe('performance characteristics', () => {
+    it('should complete authentication within performance targets', async () => {
       // Arrange
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       jwtService.verify.mockReturnValue(mockUser);
