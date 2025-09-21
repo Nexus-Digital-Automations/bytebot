@@ -209,7 +209,6 @@ export class ExtractionService {
       // Calculate metadata
       const internalLinks = extractedData.filter(link => link.type === 'internal').length;const externalLinks = extractedData.filter(link => link.type === 'external').length;const domains = [...new Set(extractedData
           .filter(link => link.type === 'external').map(link => {try {
-              // eslint-disable-next-line no-undef
               const urlObj = new URL(link.url);
               return urlObj.hostname;
             } catch {

@@ -517,20 +517,16 @@ import { keyInfoMap, KeyInfo as _KeyInfo } from '../input-tracking.helpers';impo
           // Should be valid UTF-8 characters
           expect(keyInfo.string.length).toBeGreaterThan(0);
           // Should not contain null bytes or other control characters
-           
-          expect(keyInfo.string).not.toMatch(
-            // eslint-disable-next-line no-control-regex
-            /[\x00-\x08\x0E-\x1F\x7F]/,
-          );
+          const controlCharPattern = new RegExp('[\\x00-\\x08\\x0E-\\x1F\\x7F]');
+          expect(keyInfo.string).not.toMatch(controlCharPattern);
         }
 
         if (keyInfo.shiftString) {
           expect(keyInfo.shiftString.length).toBeGreaterThan(0);
            
-          expect(keyInfo.shiftString).not.toMatch(
-            // eslint-disable-next-line no-control-regex
-            /[\x00-\x08\x0E-\x1F\x7F]/,
-          );
+          // Should not contain null bytes or other control characters
+          const shiftControlCharPattern = new RegExp('[\\x00-\\x08\\x0E-\\x1F\\x7F]');
+          expect(keyInfo.shiftString).not.toMatch(shiftControlCharPattern);
         }
       });
 
