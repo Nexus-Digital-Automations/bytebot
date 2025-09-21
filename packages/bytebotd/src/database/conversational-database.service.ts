@@ -701,7 +701,7 @@ export class ConversationalDatabaseService {
       // Create Parlant validation request
       const parlantRequest: ParlantValidationRequest = {
         operationType: `DATABASE_${context.operationType}`,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+         
         riskLevel: this.mapRiskLevel(context.riskLevel),
         parameters: {
           databaseOperation: context.operationType,

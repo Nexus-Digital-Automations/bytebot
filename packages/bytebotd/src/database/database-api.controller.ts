@@ -244,7 +244,7 @@ export interface DatabaseAnalyticsDto {
       limit,
       offset,
       userId: user.id,
-      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
+      conversationId: (conversationContext as ConversationContextParameter | undefined)?.conversationId,
       validationApproved: true
 
 });
@@ -408,9 +408,9 @@ export interface DatabaseAnalyticsDto {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
+      conversationId: (conversationContext as ConversationContextParameter | undefined)?.conversationId,
       validationApproved: true,
-      securityLevel: (conversationContext as ConversationContextType | undefined)?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
+      securityLevel: (conversationContext as ConversationContextParameter | undefined)?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
 
 });
 
@@ -523,7 +523,7 @@ export interface DatabaseAnalyticsDto {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
+      conversationId: (conversationContext as ConversationContextParameter | undefined)?.conversationId,
       validationApproved: true
 
 });
