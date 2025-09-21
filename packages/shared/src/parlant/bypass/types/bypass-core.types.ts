@@ -216,59 +216,10 @@ export interface TokenSecurityMetadata {
   tokenHash: string;
 }
 
-/**
- * Bypass operation request
- */
-export interface BypassOperationRequest {
-  operationType: BypassOperationType;
-  requestContext: UserOperationContext;
-  emergencyToken: EmergencyBypassToken;
-  operationData: Record<string, unknown>;
-  justification: string;
-  requestedBy: string;
-  timestamp: Date;
-}
 
 
-/**
- * User operation context
- */
-export interface UserOperationContext {
-  userId: string;
-  sessionId: string;
-  userRole: string;
-  permissions: string[];
-  ipAddress: string;
-  userAgent: string;
-  timestamp: Date;
-  riskLevel: string;
-}
 
-/**
- * Compliance tag for bypass operations
- */
-export interface ComplianceTag {
-  tagId: string;
-  tagName: string;
-  framework: string;
-  severity: string;
-  required: boolean;
-  description: string;
-}
 
-/**
- * Compliance report for bypass auditing
- */
-export interface ComplianceReport {
-  reportId: string;
-  generatedAt: Date;
-  complianceScore: number;
-  violations: string[];
-  recommendations: string[];
-  framework: string;
-  period: string;
-  status: string;
-}
 
 
 

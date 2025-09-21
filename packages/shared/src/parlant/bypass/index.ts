@@ -30,12 +30,8 @@ import { ParlantBypassIntegrationService } from './integration/parlant-bypass-in
 
 // Import types for internal use
 import type {
-  BypassOperationRequest,
   BypassOperationType,
-  UserOperationContext,
   EmergencyBypassToken,
-  ComplianceTag,
-  ComplianceReport,
   ViolationSeverity,
   WorkflowStatus,
 } from './types/bypass-core.types';
@@ -47,7 +43,13 @@ import type {
 import type {
   OperationExecutionResult,
   IntegrationStatus,
+  BypassOperationRequest,
+  UserOperationContext,
 } from './integration/parlant-bypass-integration.service';
+import type {
+  ComplianceReport,
+  ComplianceTag,
+} from './audit/bypass-audit-forensics.service';
 
 // Token Management
 export { EmergencyTokenManagerService } from './tokens/emergency-token-manager.service';
