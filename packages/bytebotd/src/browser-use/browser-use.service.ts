@@ -789,7 +789,9 @@ export class BrowserUseService {
           resolve({
             success: false,
             output: '',
-            error: `Failed to write script file: ${_writeErr.message}`,});});
+            error: `Failed to write script file: ${_writeErr.message}`,
+          });
+        });
     });
   }
 
@@ -811,13 +813,17 @@ async def main():
         # Navigate to URL
         await session.navigate(${JSON.stringify(url)})
         
-        print("Navigation completed successfully")await session.close()except Exception as e:
+        print("Navigation completed successfully")
+
+        await session.close()
+    except Exception as e:
         print(f"Navigation failed: {e}")
         raise e
 
 if __name__ == "__main__":
     asyncio.run(main())
-";}
+`;
+  }
 
   private generateClickScript(_sessionId: string, selector: string): string {
     return `
@@ -917,7 +923,8 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-";}
+`;
+  }
 
   private generateExtractionScript(
     sessionId: string,
@@ -964,7 +971,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-";
+`;
   }
 
   private generateDomExtractionScript(
@@ -985,15 +992,60 @@ if __name__ == "__main__":
   private convertActionType(
     actionType: BrowserActionType,
   ):
-    | 'click'| 'type'| 'navigate'| 'screenshot'| 'wait'| 'extract'| 'scroll'| 'fill_form'| 'submit_form'| 'custom' {switch (actionType) {case BrowserActionType.CLICK:
-        return 'click';case BrowserActionType.TYPE:return 'type';case BrowserActionType.NAVIGATE:return 'navigate';case BrowserActionType.SCREENSHOT:return 'screenshot';case BrowserActionType.WAIT_FOR_ELEMENT:case BrowserActionType.WAIT_FOR_URL:
-        return 'wait';case BrowserActionType.EXTRACT_DATA:case BrowserActionType.EXTRACT_TEXT:
-        return 'extract';case BrowserActionType.SCROLL:return 'scroll';case BrowserActionType.FILL_FORM:return 'fill_form';case BrowserActionType.SUBMIT_FORM:return 'submit_form';case BrowserActionType.CUSTOM:return 'custom';default:return 'click'; // fallback}}
+    | 'click'
+    | 'type'
+    | 'navigate'
+    | 'screenshot'
+    | 'wait'
+    | 'extract'
+    | 'scroll'
+    | 'fill_form'
+    | 'submit_form'
+    | 'custom' {
+    switch (actionType) {
+      case BrowserActionType.CLICK:
+        return 'click';
+      case BrowserActionType.TYPE:
+        return 'type';
+      case BrowserActionType.NAVIGATE:
+        return 'navigate';
+      case BrowserActionType.SCREENSHOT:
+        return 'screenshot';
+      case BrowserActionType.WAIT_FOR_ELEMENT:
+      case BrowserActionType.WAIT_FOR_URL:
+        return 'wait';
+      case BrowserActionType.EXTRACT_DATA:
+      case BrowserActionType.EXTRACT_TEXT:
+        return 'extract';
+      case BrowserActionType.SCROLL:
+        return 'scroll';
+      case BrowserActionType.FILL_FORM:
+        return 'fill_form';
+      case BrowserActionType.SUBMIT_FORM:
+        return 'submit_form';
+      case BrowserActionType.CUSTOM:
+        return 'custom';
+      default:
+        return 'click'; // fallback
+    }
+  }
 
   /**
    * Convert log level string to TaskLogEntry level
    */
-  private convertLogLevel(_level: string): 'debug' | 'info' | 'warn' | 'error' {switch (_level.toLowerCase()) {case 'debug':return 'debug';case 'info':return 'info';case 'warn':case 'warning':return 'warn';case 'error':return 'error';default:return 'info'; // fallback
+  private convertLogLevel(_level: string): 'debug' | 'info' | 'warn' | 'error' {
+    switch (_level.toLowerCase()) {
+      case 'debug':
+        return 'debug';
+      case 'info':
+        return 'info';
+      case 'warn':
+      case 'warning':
+        return 'warn';
+      case 'error':
+        return 'error';
+      default:
+        return 'info'; // fallback
     }
   }
 
