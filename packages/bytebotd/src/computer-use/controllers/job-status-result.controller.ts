@@ -179,7 +179,12 @@ import {EnhancedJobResultResponseDto,
     @Body() updateData: {
       status: string;
       progress: number;
-      progressDetails?: any;
+      progressDetails?: {
+        steps?: { name: string; completed: boolean; timestamp?: Date }[];
+        currentStep?: string;
+        estimatedCompletion?: Date;
+        details?: Record<string, unknown>;
+      };
       metadata?: Record<string, unknown>;
     },
   ): Promise<{ success: boolean; message: string }> {

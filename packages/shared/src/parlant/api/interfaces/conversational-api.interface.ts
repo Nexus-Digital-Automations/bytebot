@@ -26,14 +26,14 @@ export interface UserContext {
 }
 
 export interface UserProfile {
-  technicalLevel: 'NOVICE' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  technicalLevel: "NOVICE" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
   role: string;
   department: string;
   capabilities: UserCapability[];
 }
 
 export interface UserPreferences {
-  explanationStyle: 'BRIEF' | 'DETAILED' | 'TECHNICAL';
+  explanationStyle: "BRIEF" | "DETAILED" | "TECHNICAL";
   includeExamples: boolean;
   includeVisualAids: boolean;
   includeTechnicalDetails: boolean;
@@ -42,46 +42,46 @@ export interface UserPreferences {
 
 export interface UserCapability {
   domain: string;
-  level: 'BASIC' | 'INTERMEDIATE' | 'ADVANCED';
+  level: "BASIC" | "INTERMEDIATE" | "ADVANCED";
   certifications: string[];
 }
 
 export interface MonitoringPreferences {
-  technicalDetailLevel: 'LOW' | 'MEDIUM' | 'HIGH';
-  updateFrequency: 'REAL_TIME' | 'PERIODIC' | 'ON_DEMAND';
+  technicalDetailLevel: "LOW" | "MEDIUM" | "HIGH";
+  updateFrequency: "REAL_TIME" | "PERIODIC" | "ON_DEMAND";
   alertThresholds: AlertThreshold[];
 }
 
 export interface AlertThreshold {
   metric: string;
   threshold: number;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 export interface ConversationHistory {
   conversationId: string;
   timestamp: Date;
   intent: string;
-  outcome: 'SUCCESS' | 'FAILURE' | 'CANCELLED';
+  outcome: "SUCCESS" | "FAILURE" | "CANCELLED";
   duration: number;
 }
 
 export interface DatePreferences {
   format: string;
   timezone: string;
-  calendarType: 'GREGORIAN' | 'FISCAL' | 'CUSTOM';
+  calendarType: "GREGORIAN" | "FISCAL" | "CUSTOM";
 }
 
 export interface NotificationPreferences {
   channels: NotificationChannel[];
-  frequency: 'IMMEDIATE' | 'BATCHED' | 'DAILY_SUMMARY';
+  frequency: "IMMEDIATE" | "BATCHED" | "DAILY_SUMMARY";
   quietHours: TimeRange;
 }
 
 export interface NotificationChannel {
-  type: 'EMAIL' | 'SMS' | 'PUSH' | 'IN_APP' | 'WEBHOOK';
+  type: "EMAIL" | "SMS" | "PUSH" | "IN_APP" | "WEBHOOK";
   address: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  priority: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export interface TimeRange {
@@ -144,8 +144,13 @@ export interface VPNStatus {
   exitLocation?: GeographicLocation;
 }
 
-export type SecurityLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type AuthMethod = 'PASSWORD' | 'MFA' | 'SSO' | 'CERTIFICATE' | 'BIOMETRIC';
+export type SecurityLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type AuthMethod =
+  | "PASSWORD"
+  | "MFA"
+  | "SSO"
+  | "CERTIFICATE"
+  | "BIOMETRIC";
 
 export interface APIOperation {
   type: string;
@@ -159,8 +164,8 @@ export interface APIOperation {
 }
 
 export interface OperationState {
-  phase: 'VALIDATION' | 'EXECUTION' | 'COMPLETION' | 'ERROR';
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  phase: "VALIDATION" | "EXECUTION" | "COMPLETION" | "ERROR";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "CANCELLED";
   startTime: Date;
   currentStep: string;
   totalSteps: number;
@@ -184,12 +189,29 @@ export interface ProgressMilestone {
 // Conversational Validation Interfaces
 
 export interface ConversationalPreExecutionValidator {
-  analyzeUserIntent(naturalLanguageRequest: string, context: UserContext): Promise<IntentAnalysis>;
-  validateIntentAgainstCapabilities(intent: IntentAnalysis, apiCapabilities: APICapabilities): Promise<CapabilityValidation>;
-  negotiateParameters(intent: IntentAnalysis, apiSchema: APISchema): Promise<ParameterNegotiation>;
-  clarifyAmbiguousParameters(ambiguities: ParameterAmbiguity[]): Promise<ParameterClarification>;
-  assessOperationRisks(intent: IntentAnalysis, parameters: ResolvedParameters): Promise<RiskAssessment>;
-  requestUserConfirmation(risks: Risk[], operation: PlannedOperation): Promise<UserConfirmation>;
+  analyzeUserIntent(
+    naturalLanguageRequest: string,
+    context: UserContext,
+  ): Promise<IntentAnalysis>;
+  validateIntentAgainstCapabilities(
+    intent: IntentAnalysis,
+    apiCapabilities: APICapabilities,
+  ): Promise<CapabilityValidation>;
+  negotiateParameters(
+    intent: IntentAnalysis,
+    apiSchema: APISchema,
+  ): Promise<ParameterNegotiation>;
+  clarifyAmbiguousParameters(
+    ambiguities: ParameterAmbiguity[],
+  ): Promise<ParameterClarification>;
+  assessOperationRisks(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+  ): Promise<RiskAssessment>;
+  requestUserConfirmation(
+    risks: Risk[],
+    operation: PlannedOperation,
+  ): Promise<UserConfirmation>;
 }
 
 export interface IntentAnalysis {
@@ -254,10 +276,22 @@ export interface ParameterSchema {
   businessRules?: BusinessRule[];
 }
 
-export type ParameterType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object';
+export type ParameterType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "array"
+  | "object";
 
 export interface ValidationRule {
-  type: 'REQUIRED' | 'MIN_LENGTH' | 'MAX_LENGTH' | 'PATTERN' | 'RANGE' | 'CUSTOM';
+  type:
+    | "REQUIRED"
+    | "MIN_LENGTH"
+    | "MAX_LENGTH"
+    | "PATTERN"
+    | "RANGE"
+    | "CUSTOM";
   value?: any;
   message: string;
 }
@@ -267,7 +301,7 @@ export interface BusinessRule {
   description: string;
   condition: string;
   action: string;
-  severity: 'WARNING' | 'ERROR' | 'BLOCKING';
+  severity: "WARNING" | "ERROR" | "BLOCKING";
 }
 
 export interface ParameterNegotiation {
@@ -278,7 +312,11 @@ export interface ParameterNegotiation {
 }
 
 export interface NegotiationStep {
-  stepType: 'MISSING_PARAMETER' | 'AMBIGUOUS_VALUE' | 'VALIDATION_ERROR' | 'USER_INPUT';
+  stepType:
+    | "MISSING_PARAMETER"
+    | "AMBIGUOUS_VALUE"
+    | "VALIDATION_ERROR"
+    | "USER_INPUT";
   parameter: string;
   userInput: string;
   resolution: string;
@@ -319,8 +357,12 @@ export interface RiskAssessment {
   estimatedDuration: number;
 }
 
-export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type MonitoringLevel = 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' | 'REAL_TIME';
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type MonitoringLevel =
+  | "BASIC"
+  | "ENHANCED"
+  | "COMPREHENSIVE"
+  | "REAL_TIME";
 
 export interface Risk {
   type: RiskType;
@@ -331,7 +373,13 @@ export interface Risk {
   mitigation: string[];
 }
 
-export type RiskType = 'SECURITY' | 'BUSINESS' | 'COMPLIANCE' | 'PERFORMANCE' | 'DATA_LOSS' | 'FINANCIAL';
+export type RiskType =
+  | "SECURITY"
+  | "BUSINESS"
+  | "COMPLIANCE"
+  | "PERFORMANCE"
+  | "DATA_LOSS"
+  | "FINANCIAL";
 
 export interface ImpactAssessment {
   businessImpact: BusinessImpact;
@@ -414,7 +462,7 @@ export interface UserConfirmation {
 // API Execution and Response Interfaces
 
 export interface APIExecutionPlan {
-  status: 'APPROVED' | 'CANCELLED';
+  status: "APPROVED" | "CANCELLED";
   reason?: string;
   alternatives?: Alternative[];
   executionPlan?: ExecutionPlan;
@@ -457,7 +505,7 @@ export interface ValidationContext {
   intentAnalysis: IntentAnalysis;
   riskAssessment: RiskAssessment;
   userConfirmation: UserConfirmation;
-  decision: 'APPROVED' | 'REJECTED' | 'MODIFIED';
+  decision: "APPROVED" | "REJECTED" | "MODIFIED";
   reasoning: string;
   alternatives: Alternative[];
 }
@@ -474,7 +522,7 @@ export interface ExecutionContext {
 
 export interface DatabaseAccess {
   database: string;
-  operation: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';
+  operation: "SELECT" | "INSERT" | "UPDATE" | "DELETE";
   tables: string[];
   recordsAffected: number;
   duration: number;
@@ -537,16 +585,16 @@ export interface EncryptionDetails {
 }
 
 export interface DataClassification {
-  level: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+  level: "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
   categories: string[];
   retentionPeriod: number;
   handlingRequirements: string[];
 }
 
 export interface AccessControl {
-  type: 'RBAC' | 'ABAC' | 'MAC' | 'DAC';
+  type: "RBAC" | "ABAC" | "MAC" | "DAC";
   policy: string;
-  enforcement: 'STRICT' | 'ADVISORY';
+  enforcement: "STRICT" | "ADVISORY";
 }
 
 export interface ThreatAssessment {
@@ -564,5 +612,11 @@ export interface DetectedThreat {
   indicators: string[];
 }
 
-export type ThreatType = 'MALWARE' | 'PHISHING' | 'DATA_EXFILTRATION' | 'UNAUTHORIZED_ACCESS' | 'DDOS' | 'INJECTION';
-export type BiometricLevel = 'BASIC' | 'ENHANCED' | 'MULTI_MODAL';
+export type ThreatType =
+  | "MALWARE"
+  | "PHISHING"
+  | "DATA_EXFILTRATION"
+  | "UNAUTHORIZED_ACCESS"
+  | "DDOS"
+  | "INJECTION";
+export type BiometricLevel = "BASIC" | "ENHANCED" | "MULTI_MODAL";

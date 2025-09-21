@@ -8,8 +8,8 @@
  * @since 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger } from "@nestjs/common";
+import { v4 as uuidv4 } from "uuid";
 import {
   ConversationalPreExecutionValidator,
   UserContext,
@@ -41,8 +41,8 @@ import {
   ParameterType,
   ConversionContext,
   ConversionResult,
-  NegotiationStep
-} from '../interfaces/conversational-api.interface';
+  NegotiationStep,
+} from "../interfaces/conversational-api.interface";
 
 /**
  * Core Conversational API Patterns Service
@@ -55,14 +55,13 @@ import {
  * - Smart type conversion and inference
  */
 @Injectable()
-export class ConversationalAPIPatternsService implements ConversationalPreExecutionValidator {
+export class ConversationalAPIPatternsService
+  implements ConversationalPreExecutionValidator
+{
   private readonly logger = new Logger(ConversationalAPIPatternsService.name);
   private readonly navigationHistory: NegotiationStep[] = [];
 
-  constructor(
-    // TODO: Inject ParlantClient when available
-    // private readonly parlantClient: ParlantClient,
-  ) {}
+  constructor() {} // private readonly parlantClient: ParlantClient, // TODO: Inject ParlantClient when available
 
   /**
    * Processes natural language API requests with comprehensive validation
@@ -70,45 +69,58 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
   async processNaturalLanguageAPIRequest(
     request: string,
     userContext: UserContext,
-    availableAPIs: APICapabilities
+    availableAPIs: APICapabilities,
   ): Promise<APIExecutionPlan> {
     const startTime = performance.now();
-    this.logger.log(`Processing natural language API request for user ${userContext.userId}`, {
-      request: request.substring(0, 100),
-      userRole: userContext.profile.role,
-      technicalLevel: userContext.profile.technicalLevel
-    });
+    this.logger.log(
+      `Processing natural language API request for user ${userContext.userId}`,
+      {
+        request: request.substring(0, 100),
+        userRole: userContext.profile.role,
+        technicalLevel: userContext.profile.technicalLevel,
+      },
+    );
 
     try {
       // Step 1: Analyze user intent from natural language
       const intentAnalysis = await this.analyzeUserIntent(request, userContext);
-      this.logger.debug(`Intent analysis completed with confidence ${intentAnalysis.confidence}`, {
-        primaryIntent: intentAnalysis.primaryIntent,
-        alternativeCount: intentAnalysis.alternativeInterpretations.length
-      });
+      this.logger.debug(
+        `Intent analysis completed with confidence ${intentAnalysis.confidence}`,
+        {
+          primaryIntent: intentAnalysis.primaryIntent,
+          alternativeCount: intentAnalysis.alternativeInterpretations.length,
+        },
+      );
 
       if (intentAnalysis.confidence < 0.7) {
         // Request clarification for unclear intent
         const clarification = await this.requestIntentClarification({
           originalRequest: request,
           possibleIntents: intentAnalysis.alternativeInterpretations,
-          clarifyingQuestions: intentAnalysis.clarifyingQuestions
+          clarifyingQuestions: intentAnalysis.clarifyingQuestions,
         });
 
         // Re-analyze with clarification
         const enhancedRequest = `${request}. ${clarification.additionalDetails}`;
-        return await this.processNaturalLanguageAPIRequest(enhancedRequest, userContext, availableAPIs);
+        return await this.processNaturalLanguageAPIRequest(
+          enhancedRequest,
+          userContext,
+          availableAPIs,
+        );
       }
 
       // Step 2: Map intent to specific API operations
-      const apiMapping = await this.mapIntentToAPIs(intentAnalysis, availableAPIs);
+      const apiMapping = await this.mapIntentToAPIs(
+        intentAnalysis,
+        availableAPIs,
+      );
 
       if (apiMapping.multipleOptions.length > 1) {
         // Present options to user for selection
         const userSelection = await this.presentAPIOptions({
           intent: intentAnalysis.primaryIntent,
           options: apiMapping.multipleOptions,
-          recommendations: apiMapping.recommendations
+          recommendations: apiMapping.recommendations,
         });
 
         apiMapping.selectedAPI = userSelection.chosenOption;
@@ -118,13 +130,13 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
       const parameterNegotiation = await this.negotiateParameters({
         intent: intentAnalysis,
         selectedAPI: apiMapping.selectedAPI,
-        userProvidedData: this.extractDataFromIntent(intentAnalysis)
+        userProvidedData: this.extractDataFromIntent(intentAnalysis),
       });
 
       // Step 4: Risk assessment and user confirmation
       const riskAssessment = await this.assessOperationRisks(
         intentAnalysis,
-        parameterNegotiation.resolvedParameters
+        parameterNegotiation.resolvedParameters,
       );
 
       if (riskAssessment.requiresConfirmation) {
@@ -133,22 +145,22 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
           {
             api: apiMapping.selectedAPI,
             parameters: parameterNegotiation.resolvedParameters,
-            estimatedImpact: riskAssessment.estimatedImpact
-          }
+            estimatedImpact: riskAssessment.estimatedImpact,
+          },
         );
 
         if (!confirmation.approved) {
           return {
-            status: 'CANCELLED',
+            status: "CANCELLED",
             reason: confirmation.reason,
-            alternatives: riskAssessment.suggestedAlternatives
+            alternatives: riskAssessment.suggestedAlternatives,
           };
         }
       }
 
       // Step 5: Generate execution plan
       const executionPlan: APIExecutionPlan = {
-        status: 'APPROVED',
+        status: "APPROVED",
         executionPlan: {
           api: apiMapping.selectedAPI,
           method: parameterNegotiation.resolvedMethod,
@@ -157,29 +169,34 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
           validationId: uuidv4(),
           conversationId: intentAnalysis.conversationId,
           expectedDuration: riskAssessment.estimatedDuration,
-          monitoringLevel: riskAssessment.recommendedMonitoringLevel
-        }
+          monitoringLevel: riskAssessment.recommendedMonitoringLevel,
+        },
       };
 
       const processingTime = performance.now() - startTime;
-      this.logger.log(`Natural language API request processed successfully in ${processingTime.toFixed(2)}ms`, {
-        userId: userContext.userId,
-        intent: intentAnalysis.primaryIntent,
-        selectedAPI: apiMapping.selectedAPI.name,
-        riskLevel: riskAssessment.overallRiskLevel,
-        processingTime
-      });
+      this.logger.log(
+        `Natural language API request processed successfully in ${processingTime.toFixed(2)}ms`,
+        {
+          userId: userContext.userId,
+          intent: intentAnalysis.primaryIntent,
+          selectedAPI: apiMapping.selectedAPI.name,
+          riskLevel: riskAssessment.overallRiskLevel,
+          processingTime,
+        },
+      );
 
       return executionPlan;
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
-      this.logger.error(`Failed to process natural language API request after ${processingTime.toFixed(2)}ms`, {
-        error: error.message,
-        userId: userContext.userId,
-        request: request.substring(0, 100),
-        processingTime
-      });
+      this.logger.error(
+        `Failed to process natural language API request after ${processingTime.toFixed(2)}ms`,
+        {
+          error: error.message,
+          userId: userContext.userId,
+          request: request.substring(0, 100),
+          processingTime,
+        },
+      );
       throw error;
     }
   }
@@ -187,32 +204,45 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
   /**
    * Analyzes user intent from natural language input
    */
-  async analyzeUserIntent(naturalLanguageRequest: string, context: UserContext): Promise<IntentAnalysis> {
-    this.logger.debug(`Analyzing user intent for request: ${naturalLanguageRequest.substring(0, 50)}...`);
+  async analyzeUserIntent(
+    naturalLanguageRequest: string,
+    context: UserContext,
+  ): Promise<IntentAnalysis> {
+    this.logger.debug(
+      `Analyzing user intent for request: ${naturalLanguageRequest.substring(0, 50)}...`,
+    );
 
     // TODO: Integrate with actual Parlant client for intent analysis
     // For now, implement a sophisticated mock that demonstrates the pattern
 
     const mockIntentAnalysis: IntentAnalysis = {
       primaryIntent: this.extractPrimaryIntent(naturalLanguageRequest),
-      confidence: this.calculateIntentConfidence(naturalLanguageRequest, context),
-      alternativeInterpretations: this.generateAlternativeInterpretations(naturalLanguageRequest),
-      clarifyingQuestions: this.generateClarifyingQuestions(naturalLanguageRequest, context),
+      confidence: this.calculateIntentConfidence(
+        naturalLanguageRequest,
+        context,
+      ),
+      alternativeInterpretations: this.generateAlternativeInterpretations(
+        naturalLanguageRequest,
+      ),
+      clarifyingQuestions: this.generateClarifyingQuestions(
+        naturalLanguageRequest,
+        context,
+      ),
       conversationId: uuidv4(),
       explanation: this.generateIntentExplanation(naturalLanguageRequest),
-      alternatives: []
+      alternatives: [],
     };
 
     // Enhance confidence based on user's technical level and history
     mockIntentAnalysis.confidence = this.adjustConfidenceBasedOnUserContext(
       mockIntentAnalysis.confidence,
-      context
+      context,
     );
 
     this.logger.debug(`Intent analysis completed`, {
       primaryIntent: mockIntentAnalysis.primaryIntent,
       confidence: mockIntentAnalysis.confidence,
-      alternativeCount: mockIntentAnalysis.alternativeInterpretations.length
+      alternativeCount: mockIntentAnalysis.alternativeInterpretations.length,
     });
 
     return mockIntentAnalysis;
@@ -223,33 +253,42 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
    */
   async validateIntentAgainstCapabilities(
     intent: IntentAnalysis,
-    apiCapabilities: APICapabilities
+    apiCapabilities: APICapabilities,
   ): Promise<CapabilityValidation> {
     this.logger.debug(`Validating intent against API capabilities`, {
       intent: intent.primaryIntent,
-      availableOperations: apiCapabilities.supportedOperations.length
+      availableOperations: apiCapabilities.supportedOperations.length,
     });
 
-    const matchingCapabilities = apiCapabilities.supportedOperations.filter(operation =>
-      this.intentMatchesOperation(intent.primaryIntent, operation)
+    const matchingCapabilities = apiCapabilities.supportedOperations.filter(
+      (operation) =>
+        this.intentMatchesOperation(intent.primaryIntent, operation),
     );
 
     const isSupported = matchingCapabilities.length > 0;
 
-    const recommendations = matchingCapabilities.map(operation => ({
+    const recommendations = matchingCapabilities.map((operation) => ({
       operation,
-      confidence: this.calculateOperationMatchConfidence(intent.primaryIntent, operation),
+      confidence: this.calculateOperationMatchConfidence(
+        intent.primaryIntent,
+        operation,
+      ),
       reasoning: this.generateMatchReasoning(intent.primaryIntent, operation),
-      requiredModifications: this.identifyRequiredModifications(intent, operation)
+      requiredModifications: this.identifyRequiredModifications(
+        intent,
+        operation,
+      ),
     }));
 
-    const alternatives = isSupported ? [] : this.findAlternativeOperations(intent, apiCapabilities);
+    const alternatives = isSupported
+      ? []
+      : this.findAlternativeOperations(intent, apiCapabilities);
 
     return {
       isSupported,
       matchingCapabilities,
       recommendations,
-      alternatives
+      alternatives,
     };
   }
 
@@ -262,7 +301,9 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     userProvidedData: ExtractedData;
   }): Promise<ParameterNegotiation> {
     const startTime = performance.now();
-    this.logger.debug(`Negotiating parameters for API ${params.selectedAPI.name}`);
+    this.logger.debug(
+      `Negotiating parameters for API ${params.selectedAPI.name}`,
+    );
 
     const requiredParameters = params.selectedAPI.schema.required || [];
     const providedParameters = params.userProvidedData.parameters;
@@ -283,20 +324,25 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
         ambiguousParameters.push({
           parameter: key,
           providedValue: value,
-          possibleInterpretations: this.generateInterpretations(value, parameterSchema),
-          schema: parameterSchema
+          possibleInterpretations: this.generateInterpretations(
+            value,
+            parameterSchema,
+          ),
+          schema: parameterSchema,
         });
       }
     }
 
     // Request missing parameters through conversation
     if (missingParameters.length > 0) {
-      this.logger.debug(`Requesting ${missingParameters.length} missing parameters`);
+      this.logger.debug(
+        `Requesting ${missingParameters.length} missing parameters`,
+      );
       const missingParameterData = await this.requestMissingParameters({
         missingParameters: missingParameters,
         apiContext: params.selectedAPI,
         userIntent: params.intent,
-        currentParameters: providedParameters
+        currentParameters: providedParameters,
       });
 
       Object.assign(providedParameters, missingParameterData);
@@ -304,18 +350,22 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
 
     // Clarify ambiguous parameters
     if (ambiguousParameters.length > 0) {
-      this.logger.debug(`Clarifying ${ambiguousParameters.length} ambiguous parameters`);
-      const clarifications = await this.clarifyAmbiguousParameters(ambiguousParameters);
+      this.logger.debug(
+        `Clarifying ${ambiguousParameters.length} ambiguous parameters`,
+      );
+      const clarifications =
+        await this.clarifyAmbiguousParameters(ambiguousParameters);
 
       for (const clarification of clarifications) {
-        providedParameters[clarification.parameter] = clarification.resolvedValue;
+        providedParameters[clarification.parameter] =
+          clarification.resolvedValue;
       }
     }
 
     // Validate all parameters against schema
     const validationResult = await this.validateParametersAgainstSchema(
       providedParameters,
-      params.selectedAPI.schema
+      params.selectedAPI.schema,
     );
 
     if (!validationResult.valid) {
@@ -323,7 +373,7 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
       const corrections = await this.suggestParameterCorrections({
         invalidParameters: validationResult.errors,
         userIntent: params.intent,
-        schema: params.selectedAPI.schema
+        schema: params.selectedAPI.schema,
       });
 
       if (corrections.autoCorrectible) {
@@ -334,7 +384,7 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
         const manualCorrections = await this.requestParameterCorrections({
           errors: validationResult.errors,
           suggestions: corrections.suggestions,
-          currentParameters: providedParameters
+          currentParameters: providedParameters,
         });
 
         Object.assign(providedParameters, manualCorrections);
@@ -342,39 +392,48 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     }
 
     const processingTime = performance.now() - startTime;
-    this.logger.debug(`Parameter negotiation completed in ${processingTime.toFixed(2)}ms`, {
-      apiName: params.selectedAPI.name,
-      parametersResolved: Object.keys(providedParameters).length,
-      processingTime
-    });
+    this.logger.debug(
+      `Parameter negotiation completed in ${processingTime.toFixed(2)}ms`,
+      {
+        apiName: params.selectedAPI.name,
+        parametersResolved: Object.keys(providedParameters).length,
+        processingTime,
+      },
+    );
 
     return {
       resolvedParameters: providedParameters,
       resolvedMethod: params.selectedAPI.method,
       negotiationSteps: this.getNavigationHistory(),
-      parameterConfidence: this.calculateParameterConfidence(providedParameters, params.selectedAPI.schema)
+      parameterConfidence: this.calculateParameterConfidence(
+        providedParameters,
+        params.selectedAPI.schema,
+      ),
     };
   }
 
   /**
    * Clarifies ambiguous parameters through conversation
    */
-  async clarifyAmbiguousParameters(ambiguities: ParameterAmbiguity[]): Promise<ParameterClarification[]> {
+  async clarifyAmbiguousParameters(
+    ambiguities: ParameterAmbiguity[],
+  ): Promise<ParameterClarification[]> {
     const clarifications: ParameterClarification[] = [];
 
     for (const ambiguity of ambiguities) {
       // TODO: Implement actual conversational clarification with Parlant
       // For now, use the highest confidence interpretation
-      const bestInterpretation = ambiguity.possibleInterpretations.reduce((best, current) =>
-        current.confidence > best.confidence ? current : best
+      const bestInterpretation = ambiguity.possibleInterpretations.reduce(
+        (best, current) =>
+          current.confidence > best.confidence ? current : best,
       );
 
       clarifications.push({
         parameter: ambiguity.parameter,
         clarificationQuestion: `Did you mean ${bestInterpretation.reasoning}?`,
-        userResponse: 'yes', // Mock user response
+        userResponse: "yes", // Mock user response
         resolvedValue: bestInterpretation.value,
-        confidence: bestInterpretation.confidence
+        confidence: bestInterpretation.confidence,
       });
     }
 
@@ -386,9 +445,11 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
    */
   async assessOperationRisks(
     intent: IntentAnalysis,
-    parameters: ResolvedParameters
+    parameters: ResolvedParameters,
   ): Promise<RiskAssessment> {
-    this.logger.debug(`Assessing operational risks for intent: ${intent.primaryIntent}`);
+    this.logger.debug(
+      `Assessing operational risks for intent: ${intent.primaryIntent}`,
+    );
 
     const identifiedRisks: Risk[] = [];
 
@@ -412,8 +473,12 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     const overallRiskLevel = this.calculateOverallRiskLevel(identifiedRisks);
 
     // Determine if confirmation is required
-    const requiresConfirmation = overallRiskLevel === 'HIGH' || overallRiskLevel === 'CRITICAL' ||
-      identifiedRisks.some(risk => risk.type === 'SECURITY' || risk.type === 'COMPLIANCE');
+    const requiresConfirmation =
+      overallRiskLevel === "HIGH" ||
+      overallRiskLevel === "CRITICAL" ||
+      identifiedRisks.some(
+        (risk) => risk.type === "SECURITY" || risk.type === "COMPLIANCE",
+      );
 
     return {
       overallRiskLevel,
@@ -421,8 +486,13 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
       estimatedImpact: this.calculateEstimatedImpact(identifiedRisks),
       requiresConfirmation,
       suggestedAlternatives: this.generateAlternatives(intent, identifiedRisks),
-      recommendedMonitoringLevel: this.determineMonitoringLevel(overallRiskLevel),
-      estimatedDuration: this.estimateOperationDuration(intent, parameters, identifiedRisks)
+      recommendedMonitoringLevel:
+        this.determineMonitoringLevel(overallRiskLevel),
+      estimatedDuration: this.estimateOperationDuration(
+        intent,
+        parameters,
+        identifiedRisks,
+      ),
     };
   }
 
@@ -431,21 +501,28 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
    */
   async requestUserConfirmation(
     risks: Risk[],
-    operation: PlannedOperation
+    operation: PlannedOperation,
   ): Promise<UserConfirmation> {
-    this.logger.debug(`Requesting user confirmation for operation with ${risks.length} identified risks`);
+    this.logger.debug(
+      `Requesting user confirmation for operation with ${risks.length} identified risks`,
+    );
 
     // TODO: Implement actual user confirmation dialog with Parlant
     // For now, implement smart mock based on risk assessment
 
-    const criticalRisks = risks.filter(risk => risk.severity === 'CRITICAL');
-    const highRisks = risks.filter(risk => risk.severity === 'HIGH');
+    const criticalRisks = risks.filter((risk) => risk.severity === "CRITICAL");
+    const highRisks = risks.filter((risk) => risk.severity === "HIGH");
 
     // Auto-reject operations with critical security or compliance risks
-    if (criticalRisks.some(risk => risk.type === 'SECURITY' || risk.type === 'COMPLIANCE')) {
+    if (
+      criticalRisks.some(
+        (risk) => risk.type === "SECURITY" || risk.type === "COMPLIANCE",
+      )
+    ) {
       return {
         approved: false,
-        reason: 'Operation involves critical security or compliance risks that require additional authorization'
+        reason:
+          "Operation involves critical security or compliance risks that require additional authorization",
       };
     }
 
@@ -454,16 +531,16 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
       return {
         approved: true, // Mock approval for demo
         additionalRequirements: [
-          'Enhanced monitoring during execution',
-          'Immediate notification of any anomalies',
-          'Automatic rollback on first sign of issues'
-        ]
+          "Enhanced monitoring during execution",
+          "Immediate notification of any anomalies",
+          "Automatic rollback on first sign of issues",
+        ],
       };
     }
 
     // Auto-approve low to medium risk operations
     return {
-      approved: true
+      approved: true,
     };
   }
 
@@ -473,40 +550,72 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     // Sophisticated intent extraction logic
     const requestLower = request.toLowerCase();
 
-    if (requestLower.includes('create') || requestLower.includes('add') || requestLower.includes('new')) {
-      return 'CREATE_RESOURCE';
+    if (
+      requestLower.includes("create") ||
+      requestLower.includes("add") ||
+      requestLower.includes("new")
+    ) {
+      return "CREATE_RESOURCE";
     }
-    if (requestLower.includes('update') || requestLower.includes('modify') || requestLower.includes('change')) {
-      return 'UPDATE_RESOURCE';
+    if (
+      requestLower.includes("update") ||
+      requestLower.includes("modify") ||
+      requestLower.includes("change")
+    ) {
+      return "UPDATE_RESOURCE";
     }
-    if (requestLower.includes('delete') || requestLower.includes('remove')) {
-      return 'DELETE_RESOURCE';
+    if (requestLower.includes("delete") || requestLower.includes("remove")) {
+      return "DELETE_RESOURCE";
     }
-    if (requestLower.includes('get') || requestLower.includes('fetch') || requestLower.includes('retrieve')) {
-      return 'GET_RESOURCE';
+    if (
+      requestLower.includes("get") ||
+      requestLower.includes("fetch") ||
+      requestLower.includes("retrieve")
+    ) {
+      return "GET_RESOURCE";
     }
-    if (requestLower.includes('list') || requestLower.includes('show') || requestLower.includes('display')) {
-      return 'LIST_RESOURCES';
+    if (
+      requestLower.includes("list") ||
+      requestLower.includes("show") ||
+      requestLower.includes("display")
+    ) {
+      return "LIST_RESOURCES";
     }
 
-    return 'GENERIC_OPERATION';
+    return "GENERIC_OPERATION";
   }
 
-  private calculateIntentConfidence(request: string, context: UserContext): number {
+  private calculateIntentConfidence(
+    request: string,
+    context: UserContext,
+  ): number {
     let confidence = 0.5; // Base confidence
 
     // Increase confidence for clear action words
-    const actionWords = ['create', 'update', 'delete', 'get', 'list', 'add', 'remove', 'modify'];
-    const hasActionWord = actionWords.some(word => request.toLowerCase().includes(word));
+    const actionWords = [
+      "create",
+      "update",
+      "delete",
+      "get",
+      "list",
+      "add",
+      "remove",
+      "modify",
+    ];
+    const hasActionWord = actionWords.some((word) =>
+      request.toLowerCase().includes(word),
+    );
     if (hasActionWord) confidence += 0.2;
 
     // Increase confidence for technical users
-    if (context.profile.technicalLevel === 'EXPERT') confidence += 0.15;
-    if (context.profile.technicalLevel === 'ADVANCED') confidence += 0.1;
+    if (context.profile.technicalLevel === "EXPERT") confidence += 0.15;
+    if (context.profile.technicalLevel === "ADVANCED") confidence += 0.1;
 
     // Increase confidence based on recent conversation history
     if (context.recentConversations.length > 0) {
-      const recentSuccess = context.recentConversations.filter(c => c.outcome === 'SUCCESS').length;
+      const recentSuccess = context.recentConversations.filter(
+        (c) => c.outcome === "SUCCESS",
+      ).length;
       const successRate = recentSuccess / context.recentConversations.length;
       confidence += successRate * 0.15;
     }
@@ -518,27 +627,32 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     // Generate plausible alternative interpretations
     return [
       {
-        intent: 'ALTERNATIVE_INTERPRETATION_1',
+        intent: "ALTERNATIVE_INTERPRETATION_1",
         confidence: 0.3,
-        reasoning: 'Alternative interpretation based on context',
-        parameters: {}
-      }
+        reasoning: "Alternative interpretation based on context",
+        parameters: {},
+      },
     ];
   }
 
-  private generateClarifyingQuestions(request: string, context: UserContext): string[] {
+  private generateClarifyingQuestions(
+    request: string,
+    context: UserContext,
+  ): string[] {
     const questions: string[] = [];
 
     if (!this.hasSpecificResource(request)) {
-      questions.push('Which specific resource would you like to work with?');
+      questions.push("Which specific resource would you like to work with?");
     }
 
     if (!this.hasSpecificAction(request)) {
-      questions.push('What specific action would you like to perform?');
+      questions.push("What specific action would you like to perform?");
     }
 
-    if (context.profile.technicalLevel === 'NOVICE') {
-      questions.push('Would you like me to explain the implications of this operation?');
+    if (context.profile.technicalLevel === "NOVICE") {
+      questions.push(
+        "Would you like me to explain the implications of this operation?",
+      );
     }
 
     return questions;
@@ -548,13 +662,16 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return `Based on your request "${request}", I understand you want to perform an API operation. Let me help you execute this safely and efficiently.`;
   }
 
-  private adjustConfidenceBasedOnUserContext(confidence: number, context: UserContext): number {
+  private adjustConfidenceBasedOnUserContext(
+    confidence: number,
+    context: UserContext,
+  ): number {
     // Adjust confidence based on user's technical expertise and history
     let adjustedConfidence = confidence;
 
-    if (context.profile.technicalLevel === 'EXPERT') {
+    if (context.profile.technicalLevel === "EXPERT") {
       adjustedConfidence *= 1.1;
-    } else if (context.profile.technicalLevel === 'NOVICE') {
+    } else if (context.profile.technicalLevel === "NOVICE") {
       adjustedConfidence *= 0.9;
     }
 
@@ -562,22 +679,49 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
   }
 
   private hasSpecificResource(request: string): boolean {
-    const resourceKeywords = ['user', 'order', 'product', 'customer', 'invoice', 'report'];
-    return resourceKeywords.some(keyword => request.toLowerCase().includes(keyword));
+    const resourceKeywords = [
+      "user",
+      "order",
+      "product",
+      "customer",
+      "invoice",
+      "report",
+    ];
+    return resourceKeywords.some((keyword) =>
+      request.toLowerCase().includes(keyword),
+    );
   }
 
   private hasSpecificAction(request: string): boolean {
-    const actionKeywords = ['create', 'update', 'delete', 'get', 'list', 'add', 'remove'];
-    return actionKeywords.some(keyword => request.toLowerCase().includes(keyword));
+    const actionKeywords = [
+      "create",
+      "update",
+      "delete",
+      "get",
+      "list",
+      "add",
+      "remove",
+    ];
+    return actionKeywords.some((keyword) =>
+      request.toLowerCase().includes(keyword),
+    );
   }
 
-  private intentMatchesOperation(intent: string, operation: APIOperation): boolean {
+  private intentMatchesOperation(
+    intent: string,
+    operation: APIOperation,
+  ): boolean {
     // Sophisticated intent-to-operation matching logic
-    return operation.name.toLowerCase().includes(intent.toLowerCase()) ||
-           operation.description.toLowerCase().includes(intent.toLowerCase());
+    return (
+      operation.name.toLowerCase().includes(intent.toLowerCase()) ||
+      operation.description.toLowerCase().includes(intent.toLowerCase())
+    );
   }
 
-  private calculateOperationMatchConfidence(intent: string, operation: APIOperation): number {
+  private calculateOperationMatchConfidence(
+    intent: string,
+    operation: APIOperation,
+  ): number {
     // Calculate how well an operation matches the intent
     let confidence = 0.5;
 
@@ -592,29 +736,45 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return Math.min(confidence, 0.95);
   }
 
-  private generateMatchReasoning(intent: string, operation: APIOperation): string {
+  private generateMatchReasoning(
+    intent: string,
+    operation: APIOperation,
+  ): string {
     return `Operation "${operation.name}" matches your intent "${intent}" based on functionality and description analysis.`;
   }
 
-  private identifyRequiredModifications(intent: IntentAnalysis, operation: APIOperation): string[] {
+  private identifyRequiredModifications(
+    intent: IntentAnalysis,
+    operation: APIOperation,
+  ): string[] {
     // Identify what modifications might be needed
     const modifications: string[] = [];
 
-    if (operation.securityLevel === 'HIGH' || operation.securityLevel === 'CRITICAL') {
-      modifications.push('Enhanced security validation required');
+    if (
+      operation.securityLevel === "HIGH" ||
+      operation.securityLevel === "CRITICAL"
+    ) {
+      modifications.push("Enhanced security validation required");
     }
 
     if (intent.confidence < 0.8) {
-      modifications.push('Additional intent clarification recommended');
+      modifications.push("Additional intent clarification recommended");
     }
 
     return modifications;
   }
 
-  private findAlternativeOperations(intent: IntentAnalysis, apiCapabilities: APICapabilities): APIOperation[] {
+  private findAlternativeOperations(
+    intent: IntentAnalysis,
+    apiCapabilities: APICapabilities,
+  ): APIOperation[] {
     // Find alternative operations when direct match isn't available
     return apiCapabilities.supportedOperations
-      .filter(op => op.description.toLowerCase().includes('similar') || op.description.toLowerCase().includes('related'))
+      .filter(
+        (op) =>
+          op.description.toLowerCase().includes("similar") ||
+          op.description.toLowerCase().includes("related"),
+      )
       .slice(0, 3); // Return top 3 alternatives
   }
 
@@ -623,49 +783,55 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return {
       parameters: {},
       confidence: intent.confidence,
-      extractionMethod: 'intent_analysis'
+      extractionMethod: "intent_analysis",
     };
   }
 
-  private async mapIntentToAPIs(intent: IntentAnalysis, apiCapabilities: APICapabilities): Promise<any> {
+  private async mapIntentToAPIs(
+    intent: IntentAnalysis,
+    apiCapabilities: APICapabilities,
+  ): Promise<any> {
     // Map intent to available APIs
-    const matchingAPIs = apiCapabilities.supportedOperations.filter(op =>
-      this.intentMatchesOperation(intent.primaryIntent, op)
+    const matchingAPIs = apiCapabilities.supportedOperations.filter((op) =>
+      this.intentMatchesOperation(intent.primaryIntent, op),
     );
 
     return {
       multipleOptions: matchingAPIs,
-      recommendations: matchingAPIs.map(api => ({
+      recommendations: matchingAPIs.map((api) => ({
         operation: api,
-        confidence: this.calculateOperationMatchConfidence(intent.primaryIntent, api),
-        reasoning: this.generateMatchReasoning(intent.primaryIntent, api)
+        confidence: this.calculateOperationMatchConfidence(
+          intent.primaryIntent,
+          api,
+        ),
+        reasoning: this.generateMatchReasoning(intent.primaryIntent, api),
       })),
-      selectedAPI: matchingAPIs[0] // Select first match as default
+      selectedAPI: matchingAPIs[0], // Select first match as default
     };
   }
 
   private async requestIntentClarification(params: any): Promise<any> {
     // Mock intent clarification
     return {
-      additionalDetails: 'Clarified through user interaction',
-      clarifications: {}
+      additionalDetails: "Clarified through user interaction",
+      clarifications: {},
     };
   }
 
   private async presentAPIOptions(params: any): Promise<any> {
     // Mock API option presentation
     return {
-      chosenOption: params.options[0]
+      chosenOption: params.options[0],
     };
   }
 
   private isAmbiguous(value: any, schema: any): boolean {
     // Check if a parameter value is ambiguous
-    if (typeof value === 'string' && schema.type === 'number') {
+    if (typeof value === "string" && schema.type === "number") {
       return isNaN(Number(value));
     }
 
-    if (typeof value === 'string' && schema.type === 'date') {
+    if (typeof value === "string" && schema.type === "date") {
       return !this.isValidDate(value);
     }
 
@@ -683,13 +849,15 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
       {
         value: value,
         confidence: 0.8,
-        reasoning: 'Direct interpretation',
-        conversionMethod: 'none'
-      }
+        reasoning: "Direct interpretation",
+        conversionMethod: "none",
+      },
     ];
   }
 
-  private async requestMissingParameters(params: any): Promise<Record<string, any>> {
+  private async requestMissingParameters(
+    params: any,
+  ): Promise<Record<string, any>> {
     // Mock missing parameter request
     const missingParams: Record<string, any> = {};
 
@@ -700,7 +868,10 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return missingParams;
   }
 
-  private async validateParametersAgainstSchema(parameters: any, schema: APISchema): Promise<any> {
+  private async validateParametersAgainstSchema(
+    parameters: any,
+    schema: APISchema,
+  ): Promise<any> {
     // Validate parameters against schema
     const errors: any[] = [];
 
@@ -711,26 +882,26 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
           parameter: key,
           value: value,
           expectedType: paramSchema.type,
-          message: `Invalid value for parameter ${key}`
+          message: `Invalid value for parameter ${key}`,
         });
       }
     }
 
     return {
       valid: errors.length === 0,
-      errors: errors
+      errors: errors,
     };
   }
 
   private validateParameter(value: any, schema: any): boolean {
     // Basic parameter validation
     switch (schema.type) {
-      case 'string':
-        return typeof value === 'string';
-      case 'number':
-        return typeof value === 'number' || !isNaN(Number(value));
-      case 'boolean':
-        return typeof value === 'boolean';
+      case "string":
+        return typeof value === "string";
+      case "number":
+        return typeof value === "number" || !isNaN(Number(value));
+      case "boolean":
+        return typeof value === "boolean";
       default:
         return true;
     }
@@ -741,11 +912,13 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return {
       autoCorrectible: true,
       correctedValues: {},
-      suggestions: []
+      suggestions: [],
     };
   }
 
-  private async requestParameterCorrections(params: any): Promise<Record<string, any>> {
+  private async requestParameterCorrections(
+    params: any,
+  ): Promise<Record<string, any>> {
     // Request manual parameter corrections
     return {};
   }
@@ -754,7 +927,10 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return [...this.navigationHistory];
   }
 
-  private calculateParameterConfidence(parameters: any, schema: APISchema): number {
+  private calculateParameterConfidence(
+    parameters: any,
+    schema: APISchema,
+  ): number {
     // Calculate confidence in resolved parameters
     const totalParams = Object.keys(schema.properties).length;
     const providedParams = Object.keys(parameters).length;
@@ -762,83 +938,128 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     return Math.min(providedParams / totalParams, 1.0);
   }
 
-  private generateAPIHeaders(userContext: UserContext, riskAssessment: RiskAssessment): Record<string, string> {
+  private generateAPIHeaders(
+    userContext: UserContext,
+    riskAssessment: RiskAssessment,
+  ): Record<string, string> {
     return {
-      'X-User-ID': userContext.userId,
-      'X-Organization-ID': userContext.organizationId,
-      'X-Risk-Level': riskAssessment.overallRiskLevel,
-      'X-Monitoring-Level': riskAssessment.recommendedMonitoringLevel,
-      'Authorization': `Bearer ${userContext.sessionId}`,
-      'Content-Type': 'application/json'
+      "X-User-ID": userContext.userId,
+      "X-Organization-ID": userContext.organizationId,
+      "X-Risk-Level": riskAssessment.overallRiskLevel,
+      "X-Monitoring-Level": riskAssessment.recommendedMonitoringLevel,
+      Authorization: `Bearer ${userContext.sessionId}`,
+      "Content-Type": "application/json",
     };
   }
 
-  private assessSecurityRisks(intent: IntentAnalysis, parameters: ResolvedParameters): Risk[] {
+  private assessSecurityRisks(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+  ): Risk[] {
     const risks: Risk[] = [];
 
     // Check for potential security risks
-    if (intent.primaryIntent.includes('DELETE')) {
+    if (intent.primaryIntent.includes("DELETE")) {
       risks.push({
-        type: 'SECURITY',
-        severity: 'HIGH',
-        description: 'Delete operation poses data loss risk',
+        type: "SECURITY",
+        severity: "HIGH",
+        description: "Delete operation poses data loss risk",
         likelihood: 0.7,
-        impact: 'Potential irreversible data loss',
-        mitigation: ['Require additional confirmation', 'Create backup before deletion']
+        impact: "Potential irreversible data loss",
+        mitigation: [
+          "Require additional confirmation",
+          "Create backup before deletion",
+        ],
       });
     }
 
     return risks;
   }
 
-  private assessBusinessRisks(intent: IntentAnalysis, parameters: ResolvedParameters): Risk[] {
+  private assessBusinessRisks(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+  ): Risk[] {
     const risks: Risk[] = [];
 
     // Check for business impact risks
-    if (Object.keys(parameters).some(key => key.toLowerCase().includes('production'))) {
+    if (
+      Object.keys(parameters).some((key) =>
+        key.toLowerCase().includes("production"),
+      )
+    ) {
       risks.push({
-        type: 'BUSINESS',
-        severity: 'MEDIUM',
-        description: 'Operation affects production environment',
+        type: "BUSINESS",
+        severity: "MEDIUM",
+        description: "Operation affects production environment",
         likelihood: 0.5,
-        impact: 'Potential service disruption',
-        mitigation: ['Schedule during maintenance window', 'Enable rollback capabilities']
+        impact: "Potential service disruption",
+        mitigation: [
+          "Schedule during maintenance window",
+          "Enable rollback capabilities",
+        ],
       });
     }
 
     return risks;
   }
 
-  private assessComplianceRisks(intent: IntentAnalysis, parameters: ResolvedParameters): Risk[] {
+  private assessComplianceRisks(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+  ): Risk[] {
     const risks: Risk[] = [];
 
     // Check for compliance-related risks
-    if (Object.keys(parameters).some(key => key.toLowerCase().includes('personal') || key.toLowerCase().includes('pii'))) {
+    if (
+      Object.keys(parameters).some(
+        (key) =>
+          key.toLowerCase().includes("personal") ||
+          key.toLowerCase().includes("pii"),
+      )
+    ) {
       risks.push({
-        type: 'COMPLIANCE',
-        severity: 'HIGH',
-        description: 'Operation involves personal data subject to GDPR',
+        type: "COMPLIANCE",
+        severity: "HIGH",
+        description: "Operation involves personal data subject to GDPR",
         likelihood: 0.9,
-        impact: 'Potential regulatory violation',
-        mitigation: ['Verify consent', 'Ensure proper data handling', 'Maintain audit trail']
+        impact: "Potential regulatory violation",
+        mitigation: [
+          "Verify consent",
+          "Ensure proper data handling",
+          "Maintain audit trail",
+        ],
       });
     }
 
     return risks;
   }
 
-  private assessPerformanceRisks(intent: IntentAnalysis, parameters: ResolvedParameters): Risk[] {
+  private assessPerformanceRisks(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+  ): Risk[] {
     const risks: Risk[] = [];
 
     // Check for performance risks
-    if (Object.keys(parameters).some(key => key.toLowerCase().includes('bulk') || key.toLowerCase().includes('batch'))) {
+    if (
+      Object.keys(parameters).some(
+        (key) =>
+          key.toLowerCase().includes("bulk") ||
+          key.toLowerCase().includes("batch"),
+      )
+    ) {
       risks.push({
-        type: 'PERFORMANCE',
-        severity: 'MEDIUM',
-        description: 'Bulk operation may impact system performance',
+        type: "PERFORMANCE",
+        severity: "MEDIUM",
+        description: "Bulk operation may impact system performance",
         likelihood: 0.6,
-        impact: 'Potential system slowdown',
-        mitigation: ['Process in smaller batches', 'Schedule during low usage', 'Monitor system resources']
+        impact: "Potential system slowdown",
+        mitigation: [
+          "Process in smaller batches",
+          "Schedule during low usage",
+          "Monitor system resources",
+        ],
       });
     }
 
@@ -846,43 +1067,43 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
   }
 
   private calculateOverallRiskLevel(risks: Risk[]): any {
-    if (risks.some(r => r.severity === 'CRITICAL')) return 'CRITICAL';
-    if (risks.some(r => r.severity === 'HIGH')) return 'HIGH';
-    if (risks.some(r => r.severity === 'MEDIUM')) return 'MEDIUM';
-    return 'LOW';
+    if (risks.some((r) => r.severity === "CRITICAL")) return "CRITICAL";
+    if (risks.some((r) => r.severity === "HIGH")) return "HIGH";
+    if (risks.some((r) => r.severity === "MEDIUM")) return "MEDIUM";
+    return "LOW";
   }
 
   private calculateEstimatedImpact(risks: Risk[]): any {
     // Calculate estimated impact based on identified risks
     return {
       businessImpact: {
-        severity: 'MEDIUM',
-        description: 'Moderate business impact expected',
+        severity: "MEDIUM",
+        description: "Moderate business impact expected",
         affectedProcesses: [],
         estimatedCost: 0,
-        recovery: 'Standard recovery procedures'
+        recovery: "Standard recovery procedures",
       },
       technicalImpact: {
-        severity: 'LOW',
-        description: 'Minimal technical impact',
+        severity: "LOW",
+        description: "Minimal technical impact",
         affectedSystems: [],
         performanceImpact: 0.1,
-        recovery: 'Automatic recovery'
+        recovery: "Automatic recovery",
       },
       complianceImpact: {
-        severity: 'LOW',
-        description: 'No compliance issues expected',
+        severity: "LOW",
+        description: "No compliance issues expected",
         affectedRegulations: [],
         reportingRequired: false,
-        recovery: 'No recovery needed'
+        recovery: "No recovery needed",
       },
       userImpact: {
-        severity: 'LOW',
-        description: 'Minimal user impact',
+        severity: "LOW",
+        description: "Minimal user impact",
         affectedUsers: 0,
         serviceInterruption: 0,
-        recovery: 'No user action required'
-      }
+        recovery: "No user action required",
+      },
     };
   }
 
@@ -890,29 +1111,33 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     // Generate alternative approaches based on risks
     return [
       {
-        description: 'Safer alternative approach',
-        approach: 'Use read-only operations where possible',
-        reasoning: 'Reduces risk while achieving similar outcome',
-        advantages: ['Lower risk', 'Faster execution'],
-        disadvantages: ['Limited functionality']
-      }
+        description: "Safer alternative approach",
+        approach: "Use read-only operations where possible",
+        reasoning: "Reduces risk while achieving similar outcome",
+        advantages: ["Lower risk", "Faster execution"],
+        disadvantages: ["Limited functionality"],
+      },
     ];
   }
 
   private determineMonitoringLevel(riskLevel: any): any {
     switch (riskLevel) {
-      case 'CRITICAL':
-        return 'REAL_TIME';
-      case 'HIGH':
-        return 'COMPREHENSIVE';
-      case 'MEDIUM':
-        return 'ENHANCED';
+      case "CRITICAL":
+        return "REAL_TIME";
+      case "HIGH":
+        return "COMPREHENSIVE";
+      case "MEDIUM":
+        return "ENHANCED";
       default:
-        return 'BASIC';
+        return "BASIC";
     }
   }
 
-  private estimateOperationDuration(intent: IntentAnalysis, parameters: ResolvedParameters, risks: Risk[]): number {
+  private estimateOperationDuration(
+    intent: IntentAnalysis,
+    parameters: ResolvedParameters,
+    risks: Risk[],
+  ): number {
     // Estimate operation duration in milliseconds
     let baseDuration = 1000; // 1 second base
 
@@ -922,7 +1147,7 @@ export class ConversationalAPIPatternsService implements ConversationalPreExecut
     }
 
     // Increase for high-risk operations (more validation)
-    if (risks.some(r => r.severity === 'HIGH' || r.severity === 'CRITICAL')) {
+    if (risks.some((r) => r.severity === "HIGH" || r.severity === "CRITICAL")) {
       baseDuration *= 2;
     }
 
@@ -981,14 +1206,14 @@ interface SingleValidationResult {
 interface ValidationError {
   type: string;
   message: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   resolution?: string;
 }
 
 interface ValidationWarning {
   type: string;
   message: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH';
+  severity: "LOW" | "MEDIUM" | "HIGH";
   suggestion: string;
 }
 
@@ -999,7 +1224,7 @@ interface CorrectionSuggestions {
 }
 
 interface Correction {
-  type: 'AUTOMATIC' | 'SUGGESTION' | 'ALTERNATIVE';
+  type: "AUTOMATIC" | "SUGGESTION" | "ALTERNATIVE";
   description: string;
   correctedValue?: any;
   alternativeApproach?: string;

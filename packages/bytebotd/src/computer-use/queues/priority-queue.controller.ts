@@ -70,7 +70,7 @@ const JwtAuthGuard = class {};
 const RolesGuard = class {};
 const ApiKeyGuard = class {};
 const Roles = (..._roles: string[]) => () => {};
-const RequestId = () => (_target: any, _propertyKey: string, _parameterIndex: number) => {};
+const RequestId = () => (_target: unknown, _propertyKey: string, _parameterIndex: number) => {};
 
 /**
  * Priority Queue Management Controller

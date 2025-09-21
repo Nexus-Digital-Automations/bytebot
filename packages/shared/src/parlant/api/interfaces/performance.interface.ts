@@ -36,9 +36,9 @@ export interface SystemCapacity {
 
 export interface OptimizationStrategy {
   type: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   expectedGain: number;
-  implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  implementationComplexity: "LOW" | "MEDIUM" | "HIGH";
   estimatedTime: number; // milliseconds
   resourceRequirements: any;
 }
@@ -78,7 +78,12 @@ export interface PerformanceInsights {
 }
 
 export interface LoadBalancingStrategy {
-  algorithm: 'ROUND_ROBIN' | 'LEAST_CONNECTIONS' | 'WEIGHTED' | 'IP_HASH' | 'PERFORMANCE_BASED';
+  algorithm:
+    | "ROUND_ROBIN"
+    | "LEAST_CONNECTIONS"
+    | "WEIGHTED"
+    | "IP_HASH"
+    | "PERFORMANCE_BASED";
   healthCheck: boolean;
   sessionAffinity?: boolean;
   instances?: any[];
@@ -86,7 +91,7 @@ export interface LoadBalancingStrategy {
 }
 
 export interface CachingStrategy {
-  type: 'MEMORY' | 'REDIS' | 'DISTRIBUTED' | 'MULTI_TIER';
+  type: "MEMORY" | "REDIS" | "DISTRIBUTED" | "MULTI_TIER";
   targetHitRate: number;
   l1Config?: CacheConfig;
   l2Config?: CacheConfig;

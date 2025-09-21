@@ -13,14 +13,20 @@ import {
   Logger,
   DefaultValuePipe,
   ParseIntPipe
-} from '@nestjs/common';import {ApiTags,
+} from '@nestjs/common';
+import {
+  ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
   ApiBearerAuth
-} from '@nestjs/swagger';import { AutomationTestService, TestCategory, TestSeverity } from './automation-test.service';/*** Automation Test Controller
+} from '@nestjs/swagger';
+import { AutomationTestService, TestCategory, TestSeverity, TestSuiteResult } from './automation-test.service';
+
+/**
+ * Automation Test Controller
  *
  * Provides comprehensive testing and validation endpoints for all automation modules including:
  * - Comprehensive test suite execution and reporting
@@ -201,7 +207,7 @@ export class AutomationTestController {
   })
   getTestSuiteResults(
     @Param('suiteId') suiteId: string
-  ): any {
+  ): { success: boolean; data?: TestSuiteResult; message: string; executionTime: number } {
     const startTime = Date.now();
     this.logger.log(`Getting test suite results: ${suiteId}`);
 
@@ -313,7 +319,7 @@ export class AutomationTestController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number = 10,
     @Query('status') status?: string
-  ): any {
+  ): { success: boolean; data: TestSuiteResult[]; totalCount: number; page: number; pageSize: number; executionTime: number } {
     const startTime = Date.now();
     this.logger.log(`Getting all test suite results`, { page, pageSize, status });
 

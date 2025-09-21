@@ -92,11 +92,21 @@ export class FileValidationResultDto {
     description: 'Validation warnings',example: ['File may contain macros', 'Large file size detected']})warnings?: string[];
 
   @ApiPropertyOptional({
-    description: 'Virus scan result',example: { clean: true, engine: 'ClamAV', signature: 'v2024.01.15' }})virusScanResult?: any;
+    description: 'Virus scan result',example: { clean: true, engine: 'ClamAV', signature: 'v2024.01.15' }})virusScanResult?: {
+    clean: boolean;
+    engine: string;
+    signature?: string;
+    threats?: string[];
+  };
 
   @ApiPropertyOptional({
     description: 'Content validation result',example: { validFormat: true, corruptionDetected: false }})
-  contentValidation?: any;
+  contentValidation?: {
+    validFormat: boolean;
+    corruptionDetected: boolean;
+    mimeType?: string;
+    fileSize?: number;
+  };
 }
 
 /**
@@ -139,7 +149,12 @@ export class FileUploadResultDto {
   durationMs: number;
 
   @ApiPropertyOptional({
-    description: 'Server response after upload',example: { success: true, fileId: 'file_12345', message: 'Upload successful' }})serverResponse?: any;
+    description: 'Server response after upload',example: { success: true, fileId: 'file_12345', message: 'Upload successful' }})serverResponse?: {
+    success: boolean;
+    fileId?: string;
+    message: string;
+    metadata?: Record<string, unknown>;
+  };
 
   @ApiPropertyOptional({
     description: 'Upload error message if failed',example: 'Network timeout during upload'})errorMessage?: string;
@@ -194,7 +209,12 @@ export class FileDownloadResultDto {
 
   @ApiPropertyOptional({
     description: 'Download verification result',example: { verified: true, checksumMatch: true, sizeMatch: true }})
-  verification?: any;
+  verification?: {
+    checksumMatch: boolean;
+    integrityCheck: boolean;
+    algorithm: string;
+    computed?: string;
+  };
 
   @ApiPropertyOptional({
     description: 'Download error message if failed',example: 'File not found at specified URL'})errorMessage?: string;
@@ -242,7 +262,12 @@ export class FileOperationResponseDto {
     description: 'Operation error message if failed',example: 'Failed to access target directory'})errorMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed error information',example: { errorCode: 'PERMISSION_DENIED', details: 'Insufficient permissions' }})errorDetails?: any;
+    description: 'Detailed error information',example: { errorCode: 'PERMISSION_DENIED', details: 'Insufficient permissions' }})errorDetails?: {
+    errorCode: string;
+    details: string;
+    timestamp?: Date;
+    context?: Record<string, unknown>;
+  };
 
   @ApiPropertyOptional({
     description: 'Operation warnings',example: ['File already exists, overwriting', 'Large file may take longer to process']})warnings?: string[];
@@ -388,10 +413,19 @@ export class FileSyncResponseDto {
   durationMs: number;
 
   @ApiPropertyOptional({
-    description: 'Sync error details',example: [{ file: 'locked.txt', error: 'File is locked by another process' }]})errors?: any[];
+    description: 'Sync error details',example: [{ file: 'locked.txt', error: 'File is locked by another process' }]})errors?: {
+    file: string;
+    error: string;
+    code?: string;
+  }[];
 
   @ApiPropertyOptional({
-    description: 'Conflict resolution actions taken',example: [{ file: 'duplicate.txt', action: 'renamed to duplicate_1.txt' }]})conflictResolutions?: any[];
+    description: 'Conflict resolution actions taken',example: [{ file: 'duplicate.txt', action: 'renamed to duplicate_1.txt' }]})conflictResolutions?: {
+    file: string;
+    action: string;
+    originalName?: string;
+    newName?: string;
+  }[];
 
   @ApiProperty({
     description: 'Sync completion timestamp',example: '2024-01-15T10:33:00.000Z'

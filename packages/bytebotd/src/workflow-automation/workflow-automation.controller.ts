@@ -333,7 +333,15 @@ import {
         categories: { type: 'array', items: { type: 'string' } }}}
   })
   async getWorkflowTemplates(
-    @Query('category') category?: string,): Promise<{templates: any[];
+    @Query('category') category?: string,
+  ): Promise<{
+    templates: {
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      workflow: Record<string, unknown>;
+    }[];
     categories: string[];
   }> {
     // Return predefined workflow templates
@@ -390,7 +398,13 @@ import {
         executionModes: { type: 'array', items: { type: 'string' } }}}
   })
   async getStepTypes(): Promise<{
-    stepTypes: any[];
+    stepTypes: {
+      type: WorkflowStepType;
+      name: string;
+      description: string;
+      configSchema: Record<string, unknown>;
+      examples: unknown[];
+    }[];
     executionModes: WorkflowExecutionMode[];
   }> {
     const stepTypes = [

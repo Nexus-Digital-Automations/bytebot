@@ -25,7 +25,11 @@ export class ChangeDetectionResultDto {
   @ApiPropertyOptional({
     description: 'Detailed difference analysis',example: {additions: ['$79.99'],deletions: ['$99.99'],modifications: 1}
   })
-  diff?: any;
+  diff?: {
+    additions?: string[];
+    deletions?: string[];
+    modifications?: number;
+  };
 
   @ApiPropertyOptional({
     description: 'Screenshot before change',example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='})screenshotBefore?: string;
@@ -43,7 +47,11 @@ export class ChangeDetectionResultDto {
 
   @ApiPropertyOptional({
     description: 'Changed elements or regions',example: [{ selector: '.price', type: 'text', change: 'value' },{ selector: '.status', type: 'class', change: 'attribute' }]})
-  changedElements?: any[];
+  changedElements?: {
+    selector: string;
+    type: 'text' | 'class' | 'attribute' | 'style';
+    change: string;
+  }[];
 }
 
 /**

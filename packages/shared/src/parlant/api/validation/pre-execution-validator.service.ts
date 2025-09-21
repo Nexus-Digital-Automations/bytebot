@@ -8,8 +8,8 @@
  * @since 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger } from "@nestjs/common";
+import { v4 as uuidv4 } from "uuid";
 import {
   UserContext,
   IntentAnalysis,
@@ -36,8 +36,8 @@ import {
   ParameterValidationResult,
   RiskAssessment,
   Risk,
-  SecurityAssessment
-} from '../interfaces/conversational-api.interface';
+  SecurityAssessment,
+} from "../interfaces/conversational-api.interface";
 
 /**
  * Pre-Execution Validation Workflows Service
@@ -56,12 +56,7 @@ export class PreExecutionValidatorService {
   private readonly parameterCache = new Map<string, any>();
   private readonly intentCache = new Map<string, IntentAnalysis>();
 
-  constructor(
-    // TODO: Inject ParlantClient when available
-    // private readonly parlantClient: ParlantClient,
-    // private readonly securityService: SecurityService,
-    // private readonly complianceService: ComplianceService
-  ) {}
+  constructor() {} // private readonly complianceService: ComplianceService // private readonly securityService: SecurityService, // private readonly parlantClient: ParlantClient, // TODO: Inject ParlantClient when available
 
   /**
    * Validates API operation before execution with conversational interface
@@ -76,26 +71,29 @@ export class PreExecutionValidatorService {
     const startTime = performance.now();
     const validationId = uuidv4();
 
-    this.logger.log(`Starting pre-execution validation for intent: ${params.intent.primaryIntent}`, {
-      validationId,
-      userId: params.userContext.userId,
-      apiSchemaRequired: params.apiSchema.required?.length || 0,
-      providedParams: Object.keys(params.requestedParameters).length
-    });
+    this.logger.log(
+      `Starting pre-execution validation for intent: ${params.intent.primaryIntent}`,
+      {
+        validationId,
+        userId: params.userContext.userId,
+        apiSchemaRequired: params.apiSchema.required?.length || 0,
+        providedParams: Object.keys(params.requestedParameters).length,
+      },
+    );
 
     try {
       // Step 1: Validate intent against schema capabilities
       const intentValidation = await this.validateIntentAgainstSchema(
         params.intent,
         params.apiSchema,
-        params.userContext
+        params.userContext,
       );
 
       if (!intentValidation.valid) {
         return this.createValidationFailure(
-          'Intent validation failed',
+          "Intent validation failed",
           intentValidation.errors || [],
-          intentValidation.suggestions
+          intentValidation.suggestions,
         );
       }
 
@@ -104,14 +102,14 @@ export class PreExecutionValidatorService {
         intent: params.intent,
         apiSchema: params.apiSchema,
         userContext: params.userContext,
-        providedParameters: params.requestedParameters
+        providedParameters: params.requestedParameters,
       });
 
       if (!parameterNegotiation.valid) {
         return this.createValidationFailure(
-          'Parameter validation failed',
+          "Parameter validation failed",
           parameterNegotiation.errors || [],
-          parameterNegotiation.suggestions
+          parameterNegotiation.suggestions,
         );
       }
 
@@ -121,7 +119,7 @@ export class PreExecutionValidatorService {
         resolvedParameters: parameterNegotiation.resolvedParameters,
         apiSchema: params.apiSchema,
         userContext: params.userContext,
-        securityContext: params.securityContext
+        securityContext: params.securityContext,
       });
 
       // Step 4: Assess security and compliance risks
@@ -129,27 +127,28 @@ export class PreExecutionValidatorService {
         intent: params.intent,
         parameters: parameterNegotiation.resolvedParameters,
         userContext: params.userContext,
-        securityContext: params.securityContext
+        securityContext: params.securityContext,
       });
 
       // Step 5: Combine all validation results
-      const overallValid = intentValidation.valid &&
-                          parameterNegotiation.valid &&
-                          contextualValidation.valid &&
-                          securityValidation.valid;
+      const overallValid =
+        intentValidation.valid &&
+        parameterNegotiation.valid &&
+        contextualValidation.valid &&
+        securityValidation.valid;
 
       const allErrors = [
         ...(intentValidation.errors || []),
         ...(parameterNegotiation.errors || []),
         ...(contextualValidation.errors || []),
-        ...(securityValidation.errors || [])
+        ...(securityValidation.errors || []),
       ];
 
       const allWarnings = [
         ...(intentValidation.warnings || []),
         ...(parameterNegotiation.warnings || []),
         ...(contextualValidation.warnings || []),
-        ...(securityValidation.warnings || [])
+        ...(securityValidation.warnings || []),
       ];
 
       const validationResult: ValidationResult = {
@@ -160,21 +159,23 @@ export class PreExecutionValidatorService {
           overallValid,
           errors: allErrors,
           warnings: allWarnings,
-          userContext: params.userContext
+          userContext: params.userContext,
         }),
-        suggestedCorrections: overallValid ? undefined : await this.generateOverallCorrections({
-          errors: allErrors,
-          intent: params.intent,
-          schema: params.apiSchema,
-          userContext: params.userContext
-        }),
+        suggestedCorrections: overallValid
+          ? undefined
+          : await this.generateOverallCorrections({
+              errors: allErrors,
+              intent: params.intent,
+              schema: params.apiSchema,
+              userContext: params.userContext,
+            }),
         validationSummary: this.generateValidationSummary({
           intentValid: intentValidation.valid,
           parametersValid: parameterNegotiation.valid,
           contextValid: contextualValidation.valid,
           securityValid: securityValidation.valid,
-          warningCount: allWarnings.length
-        })
+          warningCount: allWarnings.length,
+        }),
       };
 
       // Cache successful validations for performance
@@ -183,23 +184,28 @@ export class PreExecutionValidatorService {
       }
 
       const processingTime = performance.now() - startTime;
-      this.logger.log(`Pre-execution validation completed in ${processingTime.toFixed(2)}ms`, {
-        validationId,
-        overallValid,
-        errorCount: allErrors.length,
-        warningCount: allWarnings.length,
-        processingTime
-      });
+      this.logger.log(
+        `Pre-execution validation completed in ${processingTime.toFixed(2)}ms`,
+        {
+          validationId,
+          overallValid,
+          errorCount: allErrors.length,
+          warningCount: allWarnings.length,
+          processingTime,
+        },
+      );
 
       return validationResult;
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
-      this.logger.error(`Pre-execution validation failed after ${processingTime.toFixed(2)}ms`, {
-        validationId,
-        error: error.message,
-        processingTime
-      });
+      this.logger.error(
+        `Pre-execution validation failed after ${processingTime.toFixed(2)}ms`,
+        {
+          validationId,
+          error: error.message,
+          processingTime,
+        },
+      );
       throw error;
     }
   }
@@ -214,7 +220,9 @@ export class PreExecutionValidatorService {
     intent: IntentAnalysis;
     currentParameters: Record<string, any>;
   }): Promise<Record<string, any>> {
-    this.logger.debug(`Requesting ${params.missingParameters.length} missing parameters`);
+    this.logger.debug(
+      `Requesting ${params.missingParameters.length} missing parameters`,
+    );
 
     const resolvedParameters: Record<string, any> = {};
 
@@ -230,7 +238,10 @@ export class PreExecutionValidatorService {
         parameter: parameter,
         schema: parameterSchema,
         userIntent: params.intent,
-        contextualHints: this.generateContextualHints(parameter, params.currentParameters)
+        contextualHints: this.generateContextualHints(
+          parameter,
+          params.currentParameters,
+        ),
       });
 
       // Request parameter value through conversation
@@ -238,7 +249,7 @@ export class PreExecutionValidatorService {
         question: question,
         userContext: params.userContext,
         parameter: parameter,
-        schema: parameterSchema
+        schema: parameterSchema,
       });
 
       // Validate and convert response
@@ -246,7 +257,7 @@ export class PreExecutionValidatorService {
         userResponse: response.answer,
         parameterName: parameter,
         schema: parameterSchema,
-        userIntent: params.intent
+        userIntent: params.intent,
       });
 
       if (validatedValue.valid && validatedValue.convertedValue !== undefined) {
@@ -257,14 +268,16 @@ export class PreExecutionValidatorService {
           parameter: parameter,
           userResponse: response.answer,
           validationErrors: validatedValue.errors || [],
-          suggestions: validatedValue.suggestions || []
+          suggestions: validatedValue.suggestions || [],
         });
 
         resolvedParameters[parameter] = clarification.correctedValue;
       }
     }
 
-    this.logger.debug(`Resolved ${Object.keys(resolvedParameters).length} missing parameters`);
+    this.logger.debug(
+      `Resolved ${Object.keys(resolvedParameters).length} missing parameters`,
+    );
     return resolvedParameters;
   }
 
@@ -279,17 +292,22 @@ export class PreExecutionValidatorService {
     const validationResults: SingleValidationResult[] = [];
 
     // Standard schema validation
-    const schemaValidation = await this.validateAgainstSchema(params.value, params.schema);
+    const schemaValidation = await this.validateAgainstSchema(
+      params.value,
+      params.schema,
+    );
     validationResults.push(schemaValidation);
 
     // Contextual validation using conversational AI
-    const contextualValidation = await this.performAdvancedContextualValidation({
-      value: params.value,
-      schema: params.schema,
-      userContext: params.context.userContext,
-      operationContext: params.context.operationContext,
-      historicalData: params.context.historicalValidations
-    });
+    const contextualValidation = await this.performAdvancedContextualValidation(
+      {
+        value: params.value,
+        schema: params.schema,
+        userContext: params.context.userContext,
+        operationContext: params.context.operationContext,
+        historicalData: params.context.historicalValidations,
+      },
+    );
     validationResults.push(contextualValidation);
 
     // Business logic validation
@@ -297,7 +315,7 @@ export class PreExecutionValidatorService {
       const businessValidation = await this.validateBusinessRules({
         value: params.value,
         businessRules: params.schema.businessRules,
-        context: params.context
+        context: params.context,
       });
       validationResults.push(businessValidation);
     }
@@ -306,37 +324,50 @@ export class PreExecutionValidatorService {
     const securityValidation = await this.performParameterSecurityValidation({
       value: params.value,
       schema: params.schema,
-      securityContext: params.context.securityContext
+      securityContext: params.context.securityContext,
     });
     validationResults.push(securityValidation);
 
     // Combine all validation results
-    const overallValid = validationResults.every(result => result.valid);
-    const allErrors = validationResults.flatMap(result => result.errors || []);
-    const allWarnings = validationResults.flatMap(result => result.warnings || []);
+    const overallValid = validationResults.every((result) => result.valid);
+    const allErrors = validationResults.flatMap(
+      (result) => result.errors || [],
+    );
+    const allWarnings = validationResults.flatMap(
+      (result) => result.warnings || [],
+    );
 
     if (!overallValid) {
       // Generate conversational error explanation
-      const errorExplanation = await this.generateConversationalErrorExplanation({
-        value: params.value,
-        schema: params.schema,
-        validationErrors: allErrors,
-        context: params.context
-      });
+      const errorExplanation =
+        await this.generateConversationalErrorExplanation({
+          value: params.value,
+          schema: params.schema,
+          validationErrors: allErrors,
+          context: params.context,
+        });
 
       return {
         valid: false,
         errors: allErrors,
         warnings: allWarnings,
         conversationalExplanation: errorExplanation,
-        suggestedCorrections: await this.suggestParameterCorrections(params.value, params.schema, allErrors)
+        suggestedCorrections: await this.suggestParameterCorrections(
+          params.value,
+          params.schema,
+          allErrors,
+        ),
       };
     }
 
     return {
       valid: true,
       warnings: allWarnings,
-      validationSummary: await this.generateValidationSummary(validationResults, params.value, params.schema)
+      validationSummary: await this.generateValidationSummary(
+        validationResults,
+        params.value,
+        params.schema,
+      ),
     };
   }
 
@@ -346,11 +377,11 @@ export class PreExecutionValidatorService {
   async suggestParameterCorrections(
     invalidValue: any,
     schema: any,
-    validationErrors: ValidationError[]
+    validationErrors: ValidationError[],
   ): Promise<CorrectionSuggestions> {
     this.logger.debug(`Generating correction suggestions for invalid value`, {
       valueType: typeof invalidValue,
-      errorCount: validationErrors.length
+      errorCount: validationErrors.length,
     });
 
     // TODO: Integrate with actual Parlant client for intelligent corrections
@@ -361,8 +392,8 @@ export class PreExecutionValidatorService {
       correctionContext: {
         userExpertiseLevel: this.determineUserExpertiseLevel(schema),
         operationType: this.getCurrentOperationType(),
-        similarSuccessfulValues: await this.getSimilarSuccessfulValues(schema)
-      }
+        similarSuccessfulValues: await this.getSimilarSuccessfulValues(schema),
+      },
     });
 
     const corrections: Correction[] = [];
@@ -371,11 +402,11 @@ export class PreExecutionValidatorService {
     for (const autoCorrection of correctionAnalysis.automaticCorrections) {
       if (autoCorrection.confidence >= 0.9) {
         corrections.push({
-          type: 'AUTOMATIC',
+          type: "AUTOMATIC",
           description: autoCorrection.description,
           correctedValue: autoCorrection.value,
           confidence: autoCorrection.confidence,
-          explanation: autoCorrection.reasoning
+          explanation: autoCorrection.reasoning,
         });
       }
     }
@@ -383,31 +414,35 @@ export class PreExecutionValidatorService {
     // Suggested corrections (require user confirmation)
     for (const suggestion of correctionAnalysis.suggestions) {
       corrections.push({
-        type: 'SUGGESTION',
+        type: "SUGGESTION",
         description: suggestion.description,
         correctedValue: suggestion.value,
         confidence: suggestion.confidence,
         explanation: suggestion.reasoning,
-        requiresConfirmation: true
+        requiresConfirmation: true,
       });
     }
 
     // Alternative approaches
     for (const alternative of correctionAnalysis.alternatives) {
       corrections.push({
-        type: 'ALTERNATIVE',
+        type: "ALTERNATIVE",
         description: alternative.description,
         alternativeApproach: alternative.approach,
         explanation: alternative.reasoning,
         pros: alternative.advantages,
-        cons: alternative.disadvantages
+        cons: alternative.disadvantages,
       });
     }
 
     return {
       corrections: corrections,
       overallRecommendation: correctionAnalysis.overallRecommendation,
-      explanatoryText: await this.generateCorrectionExplanation(correctionAnalysis, invalidValue, schema)
+      explanatoryText: await this.generateCorrectionExplanation(
+        correctionAnalysis,
+        invalidValue,
+        schema,
+      ),
     };
   }
 
@@ -416,7 +451,7 @@ export class PreExecutionValidatorService {
   private async validateIntentAgainstSchema(
     intent: IntentAnalysis,
     schema: APISchema,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<SingleValidationResult> {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
@@ -424,22 +459,26 @@ export class PreExecutionValidatorService {
     // Check if intent is compatible with schema requirements
     if (intent.confidence < 0.7) {
       warnings.push({
-        type: 'LOW_CONFIDENCE_INTENT',
-        message: 'Intent confidence is below recommended threshold',
-        severity: 'MEDIUM',
-        suggestion: 'Consider requesting additional clarification'
+        type: "LOW_CONFIDENCE_INTENT",
+        message: "Intent confidence is below recommended threshold",
+        severity: "MEDIUM",
+        suggestion: "Consider requesting additional clarification",
       });
     }
 
     // Check for missing required context
     if (schema.required && schema.required.length > 0) {
-      const intentHasRequiredContext = this.intentProvidesRequiredContext(intent, schema.required);
+      const intentHasRequiredContext = this.intentProvidesRequiredContext(
+        intent,
+        schema.required,
+      );
       if (!intentHasRequiredContext) {
         warnings.push({
-          type: 'MISSING_REQUIRED_CONTEXT',
-          message: 'Intent may not provide sufficient context for required parameters',
-          severity: 'HIGH',
-          suggestion: 'Prepare to request additional parameter information'
+          type: "MISSING_REQUIRED_CONTEXT",
+          message:
+            "Intent may not provide sufficient context for required parameters",
+          severity: "HIGH",
+          suggestion: "Prepare to request additional parameter information",
         });
       }
     }
@@ -447,7 +486,7 @@ export class PreExecutionValidatorService {
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -456,7 +495,9 @@ export class PreExecutionValidatorService {
     apiSchema: APISchema;
     userContext: UserContext;
     providedParameters: Record<string, any>;
-  }): Promise<SingleValidationResult & { resolvedParameters: Record<string, any> }> {
+  }): Promise<
+    SingleValidationResult & { resolvedParameters: Record<string, any> }
+  > {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const resolvedParameters = { ...params.providedParameters };
@@ -464,7 +505,7 @@ export class PreExecutionValidatorService {
     // Identify missing required parameters
     const missingRequired = this.identifyMissingRequiredParameters(
       resolvedParameters,
-      params.apiSchema.required || []
+      params.apiSchema.required || [],
     );
 
     if (missingRequired.length > 0) {
@@ -474,16 +515,16 @@ export class PreExecutionValidatorService {
           apiSchema: params.apiSchema,
           userContext: params.userContext,
           intent: params.intent,
-          currentParameters: resolvedParameters
+          currentParameters: resolvedParameters,
         });
 
         Object.assign(resolvedParameters, additionalParams);
       } catch (error) {
         errors.push({
-          type: 'PARAMETER_RESOLUTION_FAILED',
-          message: `Failed to resolve missing parameters: ${missingRequired.join(', ')}`,
-          severity: 'HIGH',
-          resolution: 'Manually provide missing parameters'
+          type: "PARAMETER_RESOLUTION_FAILED",
+          message: `Failed to resolve missing parameters: ${missingRequired.join(", ")}`,
+          severity: "HIGH",
+          resolution: "Manually provide missing parameters",
         });
       }
     }
@@ -495,7 +536,7 @@ export class PreExecutionValidatorService {
         const paramValidation = await this.validateSingleParameter(
           paramValue,
           paramSchema,
-          paramName
+          paramName,
         );
 
         if (!paramValidation.valid) {
@@ -509,7 +550,7 @@ export class PreExecutionValidatorService {
       valid: errors.length === 0,
       errors,
       warnings,
-      resolvedParameters
+      resolvedParameters,
     };
   }
 
@@ -529,23 +570,23 @@ export class PreExecutionValidatorService {
         const ruleResult = await this.evaluateBusinessRule(
           rule,
           params.resolvedParameters,
-          params.userContext
+          params.userContext,
         );
 
         if (!ruleResult.passed) {
-          if (rule.severity === 'BLOCKING') {
+          if (rule.severity === "BLOCKING") {
             errors.push({
-              type: 'BUSINESS_RULE_VIOLATION',
+              type: "BUSINESS_RULE_VIOLATION",
               message: ruleResult.message,
-              severity: 'HIGH',
-              resolution: ruleResult.suggestedResolution
+              severity: "HIGH",
+              resolution: ruleResult.suggestedResolution,
             });
           } else {
             warnings.push({
-              type: 'BUSINESS_RULE_WARNING',
+              type: "BUSINESS_RULE_WARNING",
               message: ruleResult.message,
-              severity: rule.severity === 'ERROR' ? 'HIGH' : 'MEDIUM',
-              suggestion: ruleResult.suggestedResolution
+              severity: rule.severity === "ERROR" ? "HIGH" : "MEDIUM",
+              suggestion: ruleResult.suggestedResolution,
             });
           }
         }
@@ -557,7 +598,7 @@ export class PreExecutionValidatorService {
       intent: params.intent,
       parameters: params.resolvedParameters,
       userContext: params.userContext,
-      securityContext: params.securityContext
+      securityContext: params.securityContext,
     });
 
     errors.push(...contextualIssues.errors);
@@ -566,7 +607,7 @@ export class PreExecutionValidatorService {
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -580,27 +621,30 @@ export class PreExecutionValidatorService {
     const warnings: ValidationWarning[] = [];
 
     // Security level validation
-    if (params.securityContext.level === 'CRITICAL' || params.securityContext.level === 'HIGH') {
+    if (
+      params.securityContext.level === "CRITICAL" ||
+      params.securityContext.level === "HIGH"
+    ) {
       const securityAssessment = await this.performSecurityAssessment({
         intent: params.intent,
         parameters: params.parameters,
         userContext: params.userContext,
-        securityContext: params.securityContext
+        securityContext: params.securityContext,
       });
 
       if (securityAssessment.riskScore > 0.7) {
         errors.push({
-          type: 'HIGH_SECURITY_RISK',
-          message: 'Operation presents high security risk',
-          severity: 'CRITICAL',
-          resolution: 'Additional security approval required'
+          type: "HIGH_SECURITY_RISK",
+          message: "Operation presents high security risk",
+          severity: "CRITICAL",
+          resolution: "Additional security approval required",
         });
       } else if (securityAssessment.riskScore > 0.4) {
         warnings.push({
-          type: 'MODERATE_SECURITY_RISK',
-          message: 'Operation presents moderate security risk',
-          severity: 'HIGH',
-          suggestion: 'Enhanced monitoring recommended'
+          type: "MODERATE_SECURITY_RISK",
+          message: "Operation presents moderate security risk",
+          severity: "HIGH",
+          suggestion: "Enhanced monitoring recommended",
         });
       }
     }
@@ -609,7 +653,7 @@ export class PreExecutionValidatorService {
     const dataClassificationIssues = await this.validateDataClassification(
       params.parameters,
       params.securityContext.dataClassification,
-      params.userContext
+      params.userContext,
     );
 
     errors.push(...dataClassificationIssues.errors);
@@ -618,7 +662,7 @@ export class PreExecutionValidatorService {
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -635,14 +679,17 @@ export class PreExecutionValidatorService {
       parameterDescription: params.schema.description,
       userIntent: params.userIntent.primaryIntent,
       contextualHints: params.contextualHints,
-      validationRules: params.schema.validation
+      validationRules: params.schema.validation,
     });
 
-    const examples = this.generateParameterExamples(params.parameter, params.schema);
+    const examples = this.generateParameterExamples(
+      params.parameter,
+      params.schema,
+    );
     const hints = [
       ...params.contextualHints,
       ...this.generateValidationHints(params.schema.validation),
-      ...this.generateTypeHints(params.schema.type)
+      ...this.generateTypeHints(params.schema.type),
     ];
 
     return {
@@ -651,7 +698,7 @@ export class PreExecutionValidatorService {
       expectedFormat: this.describeExpectedFormat(params.schema),
       examples: examples,
       hints: hints,
-      validation: params.schema.validation
+      validation: params.schema.validation,
     };
   }
 
@@ -663,11 +710,14 @@ export class PreExecutionValidatorService {
   }): Promise<{ answer: string; satisfied: boolean }> {
     // TODO: Implement actual conversational parameter collection
     // For now, provide intelligent mock response based on parameter type
-    const mockAnswer = this.generateMockParameterAnswer(params.parameter, params.schema);
+    const mockAnswer = this.generateMockParameterAnswer(
+      params.parameter,
+      params.schema,
+    );
 
     return {
       answer: mockAnswer,
-      satisfied: true
+      satisfied: true,
     };
   }
 
@@ -682,21 +732,21 @@ export class PreExecutionValidatorService {
       response: params.userResponse,
       expectedType: params.schema.type,
       parameterName: params.parameterName,
-      userIntent: params.userIntent
+      userIntent: params.userIntent,
     });
 
     if (!parseResult.success) {
       return {
         valid: false,
         errors: parseResult.errors,
-        suggestions: parseResult.suggestions
+        suggestions: parseResult.suggestions,
       };
     }
 
     // Validate against schema rules
     const validationResult = await this.validateAgainstSchema(
       parseResult.parsedValue,
-      params.schema
+      params.schema,
     );
 
     if (!validationResult.valid) {
@@ -706,38 +756,41 @@ export class PreExecutionValidatorService {
         suggestions: this.generateCorrectionSuggestions(
           parseResult.parsedValue,
           params.schema,
-          validationResult.errors
-        )
+          validationResult.errors,
+        ),
       };
     }
 
     return {
       valid: true,
       convertedValue: parseResult.parsedValue,
-      confidence: parseResult.confidence
+      confidence: parseResult.confidence,
     };
   }
 
   private createValidationFailure(
     message: string,
     errors: ValidationError[],
-    suggestions?: CorrectionSuggestions
+    suggestions?: CorrectionSuggestions,
   ): ValidationResult {
     return {
       valid: false,
       errors: [
         {
-          type: 'VALIDATION_FAILURE',
+          type: "VALIDATION_FAILURE",
           message,
-          severity: 'HIGH'
+          severity: "HIGH",
         },
-        ...errors
+        ...errors,
       ],
-      suggestedCorrections: suggestions
+      suggestedCorrections: suggestions,
     };
   }
 
-  private cacheValidationResult(validationId: string, result: ValidationResult): void {
+  private cacheValidationResult(
+    validationId: string,
+    result: ValidationResult,
+  ): void {
     this.validationCache.set(validationId, result);
 
     // Cleanup old cache entries (keep last 1000)
@@ -748,27 +801,37 @@ export class PreExecutionValidatorService {
   }
 
   // Additional helper methods with simplified implementations
-  private intentProvidesRequiredContext(intent: IntentAnalysis, required: string[]): boolean {
+  private intentProvidesRequiredContext(
+    intent: IntentAnalysis,
+    required: string[],
+  ): boolean {
     // Check if intent analysis provides context for required parameters
-    return required.some(param =>
-      intent.explanation.toLowerCase().includes(param.toLowerCase())
+    return required.some((param) =>
+      intent.explanation.toLowerCase().includes(param.toLowerCase()),
     );
   }
 
-  private identifyMissingRequiredParameters(provided: Record<string, any>, required: string[]): string[] {
-    return required.filter(param => !(param in provided));
+  private identifyMissingRequiredParameters(
+    provided: Record<string, any>,
+    required: string[],
+  ): string[] {
+    return required.filter((param) => !(param in provided));
   }
 
-  private async validateSingleParameter(value: any, schema: any, paramName: string): Promise<SingleValidationResult> {
+  private async validateSingleParameter(
+    value: any,
+    schema: any,
+    paramName: string,
+  ): Promise<SingleValidationResult> {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     // Type validation
     if (!this.validateParameterType(value, schema.type)) {
       errors.push({
-        type: 'TYPE_MISMATCH',
+        type: "TYPE_MISMATCH",
         message: `Parameter ${paramName} must be of type ${schema.type}`,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
@@ -778,9 +841,9 @@ export class PreExecutionValidatorService {
         const ruleResult = this.validateRule(value, rule);
         if (!ruleResult.valid) {
           errors.push({
-            type: 'VALIDATION_RULE_FAILED',
+            type: "VALIDATION_RULE_FAILED",
             message: ruleResult.message,
-            severity: 'MEDIUM'
+            severity: "MEDIUM",
           });
         }
       }
@@ -789,75 +852,89 @@ export class PreExecutionValidatorService {
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
-  private validateParameterType(value: any, expectedType: ParameterType): boolean {
+  private validateParameterType(
+    value: any,
+    expectedType: ParameterType,
+  ): boolean {
     switch (expectedType) {
-      case 'string':
-        return typeof value === 'string';
-      case 'number':
-        return typeof value === 'number' && !isNaN(value);
-      case 'boolean':
-        return typeof value === 'boolean';
-      case 'array':
+      case "string":
+        return typeof value === "string";
+      case "number":
+        return typeof value === "number" && !isNaN(value);
+      case "boolean":
+        return typeof value === "boolean";
+      case "array":
         return Array.isArray(value);
-      case 'object':
-        return typeof value === 'object' && value !== null && !Array.isArray(value);
-      case 'date':
+      case "object":
+        return (
+          typeof value === "object" && value !== null && !Array.isArray(value)
+        );
+      case "date":
         return value instanceof Date || !isNaN(Date.parse(value));
       default:
         return true;
     }
   }
 
-  private validateRule(value: any, rule: ValidationRule): { valid: boolean; message: string } {
+  private validateRule(
+    value: any,
+    rule: ValidationRule,
+  ): { valid: boolean; message: string } {
     switch (rule.type) {
-      case 'REQUIRED':
+      case "REQUIRED":
         return {
-          valid: value !== null && value !== undefined && value !== '',
-          message: rule.message || 'Value is required'
+          valid: value !== null && value !== undefined && value !== "",
+          message: rule.message || "Value is required",
         };
-      case 'MIN_LENGTH':
+      case "MIN_LENGTH":
         return {
-          valid: typeof value === 'string' && value.length >= (rule.value as number),
-          message: rule.message || `Minimum length is ${rule.value}`
+          valid:
+            typeof value === "string" && value.length >= (rule.value as number),
+          message: rule.message || `Minimum length is ${rule.value}`,
         };
-      case 'MAX_LENGTH':
+      case "MAX_LENGTH":
         return {
-          valid: typeof value === 'string' && value.length <= (rule.value as number),
-          message: rule.message || `Maximum length is ${rule.value}`
+          valid:
+            typeof value === "string" && value.length <= (rule.value as number),
+          message: rule.message || `Maximum length is ${rule.value}`,
         };
-      case 'PATTERN':
+      case "PATTERN":
         return {
-          valid: typeof value === 'string' && new RegExp(rule.value as string).test(value),
-          message: rule.message || 'Value does not match required pattern'
+          valid:
+            typeof value === "string" &&
+            new RegExp(rule.value as string).test(value),
+          message: rule.message || "Value does not match required pattern",
         };
       default:
-        return { valid: true, message: '' };
+        return { valid: true, message: "" };
     }
   }
 
   // Mock implementations for comprehensive functionality demonstration
-  private async generateMockParameterQuestion(params: any): Promise<{ question: string }> {
+  private async generateMockParameterQuestion(
+    params: any,
+  ): Promise<{ question: string }> {
     return {
-      question: `Please provide a value for ${params.parameterName} (${params.parameterType}): ${params.parameterDescription}`
+      question: `Please provide a value for ${params.parameterName} (${params.parameterType}): ${params.parameterDescription}`,
     };
   }
 
   private generateMockParameterAnswer(parameter: string, schema: any): string {
     switch (schema.type) {
-      case 'string':
+      case "string":
         return `sample_${parameter}_value`;
-      case 'number':
-        return '42';
-      case 'boolean':
-        return 'true';
-      case 'date':
+      case "number":
+        return "42";
+      case "boolean":
+        return "true";
+      case "date":
         return new Date().toISOString();
       default:
-        return 'default_value';
+        return "default_value";
     }
   }
 
@@ -865,17 +942,17 @@ export class PreExecutionValidatorService {
     const examples: string[] = [];
 
     switch (schema.type) {
-      case 'string':
+      case "string":
         examples.push(`"example_${parameter}"`, `"sample_value"`);
         break;
-      case 'number':
-        examples.push('42', '3.14', '100');
+      case "number":
+        examples.push("42", "3.14", "100");
         break;
-      case 'boolean':
-        examples.push('true', 'false');
+      case "boolean":
+        examples.push("true", "false");
         break;
-      case 'date':
-        examples.push('2025-09-21', 'today', 'tomorrow');
+      case "date":
+        examples.push("2025-09-21", "today", "tomorrow");
         break;
     }
 
@@ -887,13 +964,13 @@ export class PreExecutionValidatorService {
 
     for (const rule of validationRules || []) {
       switch (rule.type) {
-        case 'MIN_LENGTH':
+        case "MIN_LENGTH":
           hints.push(`Minimum ${rule.value} characters`);
           break;
-        case 'MAX_LENGTH':
+        case "MAX_LENGTH":
           hints.push(`Maximum ${rule.value} characters`);
           break;
-        case 'PATTERN':
+        case "PATTERN":
           hints.push(`Must match pattern: ${rule.value}`);
           break;
       }
@@ -904,16 +981,16 @@ export class PreExecutionValidatorService {
 
   private generateTypeHints(type: ParameterType): string[] {
     switch (type) {
-      case 'string':
-        return ['Use quotes for text values'];
-      case 'number':
-        return ['Use numeric values only'];
-      case 'boolean':
-        return ['Use true or false'];
-      case 'date':
-        return ['Use YYYY-MM-DD format or natural language'];
-      case 'array':
-        return ['Use comma-separated values'];
+      case "string":
+        return ["Use quotes for text values"];
+      case "number":
+        return ["Use numeric values only"];
+      case "boolean":
+        return ["Use true or false"];
+      case "date":
+        return ["Use YYYY-MM-DD format or natural language"];
+      case "array":
+        return ["Use comma-separated values"];
       default:
         return [];
     }
@@ -921,26 +998,29 @@ export class PreExecutionValidatorService {
 
   private describeExpectedFormat(schema: any): string {
     const type = schema.type;
-    const description = schema.description || '';
+    const description = schema.description || "";
 
-    return `${type}${description ? ` - ${description}` : ''}`;
+    return `${type}${description ? ` - ${description}` : ""}`;
   }
 
-  private generateContextualHints(parameter: string, currentParameters: Record<string, any>): string[] {
+  private generateContextualHints(
+    parameter: string,
+    currentParameters: Record<string, any>,
+  ): string[] {
     const hints: string[] = [];
 
     // Add contextual hints based on other parameters
     if (Object.keys(currentParameters).length > 0) {
-      hints.push('Consider consistency with other provided parameters');
+      hints.push("Consider consistency with other provided parameters");
     }
 
     // Add parameter-specific hints
-    if (parameter.toLowerCase().includes('email')) {
-      hints.push('Use valid email format (user@domain.com)');
+    if (parameter.toLowerCase().includes("email")) {
+      hints.push("Use valid email format (user@domain.com)");
     }
 
-    if (parameter.toLowerCase().includes('password')) {
-      hints.push('Use strong password with mixed characters');
+    if (parameter.toLowerCase().includes("password")) {
+      hints.push("Use strong password with mixed characters");
     }
 
     return hints;
@@ -952,54 +1032,75 @@ export class PreExecutionValidatorService {
   private async generateMockCorrectionAnalysis(params: any): Promise<any> {
     return {
       automaticCorrections: [],
-      suggestions: [{
-        description: 'Suggested correction based on context',
-        value: 'corrected_value',
-        confidence: 0.8,
-        reasoning: 'Based on similar successful operations'
-      }],
+      suggestions: [
+        {
+          description: "Suggested correction based on context",
+          value: "corrected_value",
+          confidence: 0.8,
+          reasoning: "Based on similar successful operations",
+        },
+      ],
       alternatives: [],
-      overallRecommendation: 'Apply suggested corrections and retry validation'
+      overallRecommendation: "Apply suggested corrections and retry validation",
     };
   }
 
   private determineUserExpertiseLevel(schema: any): string {
-    return 'intermediate';
+    return "intermediate";
   }
 
   private getCurrentOperationType(): string {
-    return 'api_operation';
+    return "api_operation";
   }
 
   private async getSimilarSuccessfulValues(schema: any): Promise<any[]> {
     return [];
   }
 
-  private async generateCorrectionExplanation(analysis: any, invalidValue: any, schema: any): Promise<string> {
-    return 'Here are some suggestions to correct the validation issues...';
+  private async generateCorrectionExplanation(
+    analysis: any,
+    invalidValue: any,
+    schema: any,
+  ): Promise<string> {
+    return "Here are some suggestions to correct the validation issues...";
   }
 
-  private async performAdvancedContextualValidation(params: any): Promise<SingleValidationResult> {
+  private async performAdvancedContextualValidation(
+    params: any,
+  ): Promise<SingleValidationResult> {
     return { valid: true, errors: [], warnings: [] };
   }
 
-  private async validateBusinessRules(params: any): Promise<SingleValidationResult> {
+  private async validateBusinessRules(
+    params: any,
+  ): Promise<SingleValidationResult> {
     return { valid: true, errors: [], warnings: [] };
   }
 
-  private async performParameterSecurityValidation(params: any): Promise<SingleValidationResult> {
+  private async performParameterSecurityValidation(
+    params: any,
+  ): Promise<SingleValidationResult> {
     return { valid: true, errors: [], warnings: [] };
   }
 
-  private async generateConversationalErrorExplanation(params: any): Promise<string> {
-    return 'The validation encountered some issues that need to be addressed...';
+  private async generateConversationalErrorExplanation(
+    params: any,
+  ): Promise<string> {
+    return "The validation encountered some issues that need to be addressed...";
   }
 
-  private async generateValidationSummary(results: any, value?: any, schema?: any): Promise<string> {
-    return 'Validation completed with analysis of all parameters and context.';
+  private async generateValidationSummary(
+    results: any,
+    value?: any,
+    schema?: any,
+  ): Promise<string> {
+    return "Validation completed with analysis of all parameters and context.";
   }
 
-  private async validateAgainstSchema(value: any, schema: any): Promise<SingleValidationResult> {
+  private async validateAgainstSchema(
+    value: any,
+    schema: any,
+  ): Promise<SingleValidationResult> {
     return { valid: true, errors: [], warnings: [] };
   }
 
@@ -1009,66 +1110,92 @@ export class PreExecutionValidatorService {
       parsedValue: params.response,
       confidence: 0.9,
       errors: [],
-      suggestions: []
+      suggestions: [],
     };
   }
 
-  private generateCorrectionSuggestions(value: any, schema: any, errors: ValidationError[]): string[] {
-    return ['Try using a different format', 'Check the parameter requirements'];
+  private generateCorrectionSuggestions(
+    value: any,
+    schema: any,
+    errors: ValidationError[],
+  ): string[] {
+    return ["Try using a different format", "Check the parameter requirements"];
   }
 
-  private async requestParameterClarification(params: any): Promise<{ correctedValue: any }> {
-    return { correctedValue: 'clarified_value' };
+  private async requestParameterClarification(
+    params: any,
+  ): Promise<{ correctedValue: any }> {
+    return { correctedValue: "clarified_value" };
   }
 
-  private async evaluateBusinessRule(rule: BusinessRule, parameters: any, userContext: UserContext): Promise<any> {
+  private async evaluateBusinessRule(
+    rule: BusinessRule,
+    parameters: any,
+    userContext: UserContext,
+  ): Promise<any> {
     return {
       passed: true,
-      message: 'Business rule validation passed',
-      suggestedResolution: ''
+      message: "Business rule validation passed",
+      suggestedResolution: "",
     };
   }
 
-  private async validateOperationalContext(params: any): Promise<{ errors: ValidationError[]; warnings: ValidationWarning[] }> {
+  private async validateOperationalContext(
+    params: any,
+  ): Promise<{ errors: ValidationError[]; warnings: ValidationWarning[] }> {
     return { errors: [], warnings: [] };
   }
 
-  private async performSecurityAssessment(params: any): Promise<SecurityAssessment> {
+  private async performSecurityAssessment(
+    params: any,
+  ): Promise<SecurityAssessment> {
     return {
       riskScore: 0.2,
       threats: [],
       mitigations: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
-  private async validateDataClassification(parameters: any, classification: any, userContext: UserContext): Promise<{ errors: ValidationError[]; warnings: ValidationWarning[] }> {
+  private async validateDataClassification(
+    parameters: any,
+    classification: any,
+    userContext: UserContext,
+  ): Promise<{ errors: ValidationError[]; warnings: ValidationWarning[] }> {
     return { errors: [], warnings: [] };
   }
 
   private async generateValidationExplanation(params: any): Promise<string> {
-    return 'The validation process completed successfully with comprehensive analysis.';
+    return "The validation process completed successfully with comprehensive analysis.";
   }
 
-  private async generateOverallCorrections(params: any): Promise<CorrectionSuggestions> {
+  private async generateOverallCorrections(
+    params: any,
+  ): Promise<CorrectionSuggestions> {
     return {
       corrections: [],
-      overallRecommendation: 'Address the identified issues and retry',
-      explanatoryText: 'Here are the recommended corrections...'
+      overallRecommendation: "Address the identified issues and retry",
+      explanatoryText: "Here are the recommended corrections...",
     };
   }
 
   private generateValidationSummary(params: any): string {
-    const { intentValid, parametersValid, contextValid, securityValid, warningCount } = params;
+    const {
+      intentValid,
+      parametersValid,
+      contextValid,
+      securityValid,
+      warningCount,
+    } = params;
 
     const validationAspects = [
-      intentValid ? 'Intent ✓' : 'Intent ✗',
-      parametersValid ? 'Parameters ✓' : 'Parameters ✗',
-      contextValid ? 'Context ✓' : 'Context ✗',
-      securityValid ? 'Security ✓' : 'Security ✗'
+      intentValid ? "Intent ✓" : "Intent ✗",
+      parametersValid ? "Parameters ✓" : "Parameters ✗",
+      contextValid ? "Context ✓" : "Context ✗",
+      securityValid ? "Security ✓" : "Security ✗",
     ];
 
-    return `Validation Summary: ${validationAspects.join(', ')}${warningCount > 0 ? ` (${warningCount} warnings)` : ''}`;
+    return `Validation Summary: ${validationAspects.join(", ")}${warningCount > 0 ? ` (${warningCount} warnings)` : ""}`;
   }
 }
 
