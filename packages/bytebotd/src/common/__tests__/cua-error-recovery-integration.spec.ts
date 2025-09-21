@@ -44,8 +44,8 @@ import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ScreenshotAction,
-
 } from '@bytebot/shared';
+import { McpToolResponse, MouseMoveParams } from '../../mcp/types';
 
 // Type definitions for test functions
 type MockImplementation<T = unknown> = (...args: unknown[]) => T;
@@ -533,7 +533,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 });const startTime = Date.now();
 
       // Mock Parlant service timeout
-      const validateSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution') as jest.MockedFunction<typeof context.parlantIntegrationService.validateFunctionExecution>;
+      const validateSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution');
       validateSpy.mockImplementation(() => new Promise<ValidationResponse>((_, reject) =>
             setTimeout(() => reject(new Error('Parlant validation timeout')), 10000)));
 
@@ -541,21 +541,13 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
         action: 'move_mouse',
       coordinates: { x: 100, y: 200 },};
 
-      const validationContext = {
+      const validationContext: ParlantConversationContext = {
         userId: 'test-user',
-      sessionId: 'test-session',
-      agentRole: 'OPERATOR' as const,
-      securityLevel: 'HIGH' as const,
-      conversationHistory: [],
-      metadata: { operationId: 'test-op' },recentActions: [],
-      systemState: {
-  cpuUsage: 25,
-          memoryUsage: 50,
-          networkActivity: false,
-          securityAlerts: [],
-          maintenanceMode: false,
-        
-},
+        sessionId: 'test-session',
+        agentRole: 'OPERATOR',
+        securityLevel: 'HIGH',
+        conversationHistory: [],
+        metadata: { operationId: 'test-op' },
       };
 
       // Implement fallback validation (basic rule-based validation)
@@ -609,8 +601,8 @@ return isLowRisk;
       let authAttempts = 0;
 
       // Mock authentication failure then recovery
-      const authSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution') as jest.MockedFunction<typeof context.parlantIntegrationService.validateFunctionExecution>;
-      authSpy.mockImplementation(() => {
+      const authSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution');
+      authSpy.mockImplementation((): Promise<ValidationResponse> => {
         authAttempts++;
         if (authAttempts <= 2) {
           throw new Error('Authentication failed - invalid token');
@@ -618,18 +610,39 @@ return isLowRisk;
         return Promise.resolve({
           approved: true,
           conversationId: 'recovered-session',
-      validationTimestamp: new Date(),
-      reasoning: 'Action approved after authentication recovery',
-      confidence: 0.9,
-});
+          validationTimestamp: new Date(),
+          reasoning: 'Action approved after authentication recovery',
+          confidence: 0.9,
         });
+      });
+
+      const mockValidationContext: ValidationContext = {
+        userId: 'test-user',
+        sessionId: 'test-session',
+        agentRole: 'OPERATOR',
+        securityLevel: 'LOW',
+        conversationHistory: [],
+        metadata: { operationId: 'test' },
+        recentActions: [],
+        systemState: {
+          cpuUsage: 25,
+          memoryUsage: 50,
+          networkActivity: false,
+          securityAlerts: [],
+          maintenanceMode: false,
+        },
+      };
 
       const result = await context.retryManager.executeWithRetry(
-        () => context.parlantIntegrationService.validateFunctionExecution({
+        (): Promise<ValidationResponse> => context.parlantIntegrationService.validateFunctionExecution({
           functionName: 'test',
-      functionParams: {},actionDescription: 'test',
-      context: {} as unknown,riskLevel: RiskLevel._LOW,
-          operationId: 'test',}),{
+          functionParams: {},
+          actionDescription: 'test',
+          context: mockValidationContext,
+          riskLevel: RiskLevel.LOW,
+          operationId: 'test',
+        }),
+        {
   maxAttempts: scenario.maxRetryAttempts,
           baseDelay: 500,
           maxDelay: 5000,
@@ -667,24 +680,29 @@ return isLowRisk;
       let connectionAttempts = 0;
 
       // Mock MCP connection failures then recovery
-      const originalMoveMouse = context.mcpTools.moveMouse;
-      const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse') as jest.MockedFunction<typeof context.mcpTools.moveMouse>;
-      mouseMoveSpy.mockImplementation(async (params) => {
-  connectionAttempts++;
-          if (connectionAttempts <= 3) {
-            throw new Error('MCP server connection lost');
-}// Simulate successful reconnection
-          return await originalMoveMouse.call(context.mcpTools, params);
-        });
+      const originalMoveMouse = context.mcpTools.moveMouse.bind(context.mcpTools);
+      const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse');
+      mouseMoveSpy.mockImplementation(async (params: MouseMoveParams): Promise<McpToolResponse> => {
+        connectionAttempts++;
+        if (connectionAttempts <= 3) {
+          throw new Error('MCP server connection lost');
+        }
+        // Simulate successful reconnection
+        return await originalMoveMouse(params);
+      });
 
       const result = await context.circuitBreakerService.executeWithCircuitBreaker(
-        'McpService',() => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }));
+        'McpService',
+        (): Promise<McpToolResponse> => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } })
+      );
 
       const endTime = Date.now();
 
       expect(result).toBeDefined();
-      expect(result.content[0]?.text).toBe('mouse moved');
-expect(connectionAttempts).toBe(4); // 3 failures + 1 success
+      if (result && result.content && result.content.length > 0 && result.content[0]) {
+        expect(result.content[0].text).toBe('mouse moved');
+      }
+      expect(connectionAttempts).toBe(4); // 3 failures + 1 success
 
       recordRecoveryMetrics(scenario, startTime, endTime, {
   totalFailures: 3,
@@ -894,7 +912,7 @@ return; // Successful cache operation
       functionParams: {
 
     },actionDescription: 'test',
-      context: {} as unknown,riskLevel: RiskLevel._LOW,
+      context: {} as ValidationContext,riskLevel: RiskLevel.LOW,
                 operationId: 'test',});}
         });
         

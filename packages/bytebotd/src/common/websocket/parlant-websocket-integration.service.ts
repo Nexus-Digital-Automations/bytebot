@@ -326,7 +326,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     const operationId = `parlant_integration_init_${Date.now()}`;this.logger.log(`[${operationId}] Initializing ParlantWebSocketIntegrationService`, {
   operationId,maxConcurrentValidations: this.performanceTargets.maxConcurrentValidations,
       targetResponseTime: this.performanceTargets.targetResponseTime,
-    
+
 });
 
     try {
@@ -338,6 +338,9 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
 
       // Initialize integration monitoring
       this.initializeIntegrationMonitoring();
+
+      // Add small delay to ensure proper initialization
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       this.logger.log(`[${operationId
 }] ParlantWebSocketIntegrationService initialized successfully`, {

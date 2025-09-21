@@ -27,7 +27,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AIgentParlantSecurityBridgeService } from './services/aigent-parlant-security-bridge.service';
 import { ParlantModule } from '../parlant/parlant.module';
 import { SecurityAuditService } from '../security/security-audit.service';
-import { ParlantAuthModule } from '@shared/modules/parlant-auth.module';
+// import { ParlantAuthModule } from '@bytebot/shared/server'; // TODO: Implement when package is available
 
 /**
  * Enhanced enterprise authentication configuration factory
@@ -76,13 +76,13 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
     // Import Parlant module for conversational validation
     forwardRef(() => ParlantModule),
 
-    // Import ParlantAuthModule for enhanced authentication features
-    forwardRef(() => ParlantAuthModule.forFeature({
-      auth: true,
-      authz: true,
-      mfa: true,
-      riskAssessment: true,
-    })),
+    // TODO: Import ParlantAuthModule for enhanced authentication features when package is available
+    // forwardRef(() => ParlantAuthModule.forFeature({
+    //   auth: true,
+    //   authz: true,
+    //   mfa: true,
+    //   riskAssessment: true,
+    // })),
 
     // Configure Passport with enhanced JWT strategy
     PassportModule.register({
@@ -132,8 +132,8 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
     // Export audit service for security monitoring
     SecurityAuditService,
 
-    // Re-export ParlantAuthModule services for easy access
-    ParlantAuthModule,
+    // TODO: Re-export ParlantAuthModule services for easy access when package is available
+    // ParlantAuthModule,
   ],
 })
 export class AuthModule {

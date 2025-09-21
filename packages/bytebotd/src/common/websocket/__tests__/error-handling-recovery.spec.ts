@@ -39,7 +39,19 @@ import {
   ValidationRequestMessage,
 
 } from '../conversational-websocket-bridge.service';
-import { createSafeWebSocketServer } from '../websocket-types';
+import {
+  createSafeWebSocketServer,
+  TypedError,
+  createTypedError,
+  isTypedError,
+  ErrorRecoveryMetrics,
+  TestErrorScenario,
+  TestPerformanceMetrics,
+  MetricsCollection,
+  safeGet,
+  safeToNumber,
+  safeToString
+} from '../websocket-types';
 
 // ===== ERROR HANDLING AND RECOVERY TEST UTILITIES =====
 
@@ -171,7 +183,7 @@ class RecoveryMetricsTracker {
   
 }>();
 
-  recordFailure(faultType: string, details?: any): string {
+  recordFailure(faultType: string, details?: Record<string, unknown>): string {
     const failureId = `failure_${Date.now()}
 _${Math.random().toString(36).substring(7)}`;
     const timestamp = Date.now();
@@ -193,7 +205,7 @@ _${Math.random().toString(36).substring(7)}`;
     return failureId;
   }
 
-  recordRecoveryAttempt(failureId: string, attempt: number, details?: any): void {
+  recordRecoveryAttempt(failureId: string, attempt: number, details?: Record<string, unknown>): void {
   const failure = this.activeFailures.get(failureId);
     if (failure) {
       failure.recoveryAttempts = attempt;
@@ -228,7 +240,7 @@ _${Math.random().toString(36).substring(7)}`;
     }
   }
 
-  recordRecoveryFailure(failureId: string, details?: any): void {
+  recordRecoveryFailure(failureId: string, details?: Record<string, unknown>): void {
   const failure = this.activeFailures.get(failureId);
     if (failure) {
       this.recoveryEvents.push({
@@ -558,14 +570,16 @@ class ServerFaultSimulator {
 
   simulateServerOverload(): void {
   this.faults.add('server_overload');// Introduce artificial delaysconst originalSend = WebSocket.prototype.send;
-    WebSocket.prototype.send = function(this: WebSocket.WebSocket, data: any) {
+    WebSocket.prototype.send = function(this: WebSocket.WebSocket, data: WebSocket.Data) {
       if (this.readyState === WebSocket.OPEN) {
         setTimeout(() => {
           try {
             originalSend.call(this, data);
           
-} catch (error) {
-  // Ignore errors during overload simulation
+} catch (error: unknown) {
+          // Ignore errors during overload simulation - typed error handling
+          const typedError = isTypedError(error) ? error : createTypedError('OverloadError', String(error));
+          console.warn('Error during overload simulation:', typedError.message);
           
 }
         }, Math.random() * 1000 + 500); // 500-1500ms delay
@@ -809,25 +823,26 @@ describe('Error Handling and Recovery Tests', () => {
       // Wait for disconnection and reconnection
       await new Promise(resolve => setTimeout(resolve, 8000));
 
-      const recoveryMetrics = client.getRecoveryMetrics();
+      const recoveryMetrics = client.getRecoveryMetrics() as ErrorRecoveryMetrics;
 
       console.log('Auto-reconnection Test Results:', {
-  connectionEvents,
-        recoveryEvents: recoveryEvents.slice(0, 3), // Show first few events,
-  finalConnectionState: client.isConnected(),
+        connectionEvents,
+        recoveryEvents: recoveryEvents.slice(0, 3), // Show first few events
+        finalConnectionState: client.isConnected(),
         recoveryMetrics: {
-  totalFailures: recoveryMetrics.totalFailures,
-          successfulRecoveries: recoveryMetrics.successfulRecoveries,
-          averageRecoveryTime: `${recoveryMetrics.averageRecoveryTime.toFixed(0)
-}
-ms`,recoverySuccessRate: `${(recoveryMetrics.recoverySuccessRate * 100).toFixed(1)}%`,
+          totalFailures: safeToNumber(recoveryMetrics.totalFailures),
+          successfulRecoveries: safeToNumber(recoveryMetrics.successfulRecoveries),
+          averageRecoveryTime: `${safeToNumber(recoveryMetrics.averageRecoveryTime).toFixed(0)}ms`,
+          recoverySuccessRate: `${(safeToNumber(recoveryMetrics.recoverySuccessRate) * 100).toFixed(1)}%`,
         },
       });
 
       expect(connectionEvents).toContain('connected');
 expect(connectionEvents).toContain('disconnected');
-expect(recoveryEvents.some(e => e.type === 'scheduled')).toBe(true);
-expect(recoveryMetrics.recoverySuccessRate).toBeGreaterThan(0.5); // 50%+ recovery rateawait client.disconnect();
+expect(recoveryEvents.some(e => safeGet(e as Record<string, unknown>, 'type', '') === 'scheduled')).toBe(true);
+      expect(safeToNumber(recoveryMetrics.recoverySuccessRate)).toBeGreaterThan(0.5); // 50%+ recovery rate
+
+      await client.disconnect();
     });
 
 

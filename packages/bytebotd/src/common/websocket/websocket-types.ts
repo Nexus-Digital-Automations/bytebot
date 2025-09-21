@@ -251,6 +251,214 @@ export function createSecureVerifyCallback(
   };
 }
 
+/**
+ * Testing and Error Handling Types
+ */
+
+/**
+ * Error recovery metrics for testing scenarios
+ */
+export interface ErrorRecoveryMetrics {
+  totalFailures: number;
+  successfulRecoveries: number;
+  averageRecoveryTime: number;
+  recoverySuccessRate: number;
+}
+
+/**
+ * Test error scenario configuration
+ */
+export interface TestErrorScenario {
+  type: string;
+  message?: string;
+  recoverySuccessRate: number;
+  attempt?: number;
+  delay?: number;
+}
+
+/**
+ * Performance metrics for testing
+ */
+export interface TestPerformanceMetrics {
+  duration: number;
+  messagesSent: number;
+  messagesReceived: number;
+  errors: number;
+  averageLatency: number;
+  throughput: number;
+}
+
+/**
+ * Connection lifecycle metrics
+ */
+export interface ConnectionLifecycleMetrics {
+  connectionsOpened: number;
+  connectionsClosed: number;
+  totalDuration: number;
+  averageConnectionTime: number;
+}
+
+/**
+ * Message validation result
+ */
+export interface MessageValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * WebSocket test client configuration
+ */
+export interface WebSocketTestClientConfig {
+  url: string;
+  protocols?: string[];
+  timeout?: number;
+  reconnectAttempts?: number;
+  reconnectDelay?: number;
+}
+
+/**
+ * Stress test configuration
+ */
+export interface StressTestConfig {
+  clientCount: number;
+  messagesPerClient: number;
+  messageSize: number;
+  duration: number;
+  rampUpTime: number;
+}
+
+/**
+ * Error injection configuration
+ */
+export interface ErrorInjectionConfig {
+  errorRate: number;
+  errorTypes: string[];
+  delayRange: [number, number];
+  recoveryTime: number;
+}
+
+/**
+ * Type-safe error object
+ */
+export interface TypedError {
+  name: string;
+  message: string;
+  stack?: string;
+  code?: string | number;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Typed metrics collection interface
+ */
+export interface MetricsCollection {
+  [key: string]: number | string | boolean | Record<string, unknown>;
+}
+
+/**
+ * Safe message handler type
+ */
+export type SafeMessageHandler<T = unknown> = (
+  message: T,
+  context?: Record<string, unknown>
+) => void | Promise<void>;
+
+/**
+ * Safe error handler type
+ */
+export type SafeErrorHandler = (
+  error: TypedError,
+  context?: Record<string, unknown>
+) => void | Promise<void>;
+
+/**
+ * Helper function to create typed error
+ */
+export function createTypedError(
+  name: string,
+  message: string,
+  details?: Record<string, unknown>
+): TypedError {
+  return {
+    name,
+    message,
+    details,
+    stack: new Error().stack,
+  };
+}
+
+/**
+ * Type guard for TypedError
+ */
+export function isTypedError(value: unknown): value is TypedError {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    'message' in value &&
+    typeof (value as TypedError).name === 'string' &&
+    typeof (value as TypedError).message === 'string'
+  );
+}
+
+/**
+ * Safe type assertion for unknown values
+ */
+export function assertType<T>(
+  value: unknown,
+  validator: (val: unknown) => val is T
+): T {
+  if (!validator(value)) {
+    throw createTypedError(
+      'TypeAssertionError',
+      'Value does not match expected type',
+      { value }
+    );
+  }
+  return value;
+}
+
+/**
+ * Type-safe object property access
+ */
+export function safeGet<T>(
+  obj: Record<string, unknown>,
+  key: string,
+  defaultValue: T
+): T {
+  const value = obj[key];
+  return value !== undefined ? (value as T) : defaultValue;
+}
+
+/**
+ * Type-safe numeric conversion
+ */
+export function safeToNumber(value: unknown, defaultValue = 0): number {
+  if (typeof value === 'number' && !isNaN(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? defaultValue : parsed;
+  }
+  return defaultValue;
+}
+
+/**
+ * Type-safe string conversion
+ */
+export function safeToString(value: unknown, defaultValue = ''): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+  return String(value);
+}
+
 // Default export with all utilities
 export default {
   createSafeWebSocketServer,
@@ -260,4 +468,10 @@ export default {
   validateWebSocketHeaders,
   createSecureVerifyCallback,
   isAsyncVerifyCallback,
+  createTypedError,
+  isTypedError,
+  assertType,
+  safeGet,
+  safeToNumber,
+  safeToString,
 };

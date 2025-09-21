@@ -139,8 +139,8 @@ export interface SecurityConfigurationDto {
     /** Audit settings */
     audit?: {
       logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
-retentionDays?: number;
-  realTimeAlerts?: boolean;
+      retentionDays?: number;
+      realTimeAlerts?: boolean;
     };
   };
 
@@ -171,8 +171,10 @@ export interface SystemConfigurationDto {
   description: string;
 
   /** Impact assessment */
-  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';/** Testing requirements */
-testingRequired?: boolean;
+  impact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+  /** Testing requirements */
+  testingRequired?: boolean;
 
   /** Rollback plan */
   rollbackPlan?: string;
@@ -186,8 +188,10 @@ export interface IntegrationConfigurationDto {
   name: string;
 
   /** Integration type */
-  type: 'API' | 'DATABASE' | 'WEBHOOK' | 'MESSAGE_QUEUE' | 'FILE_SYSTEM' | 'THIRD_PARTY';/** Configuration parameters */
-configuration: {
+  type: 'API' | 'DATABASE' | 'WEBHOOK' | 'MESSAGE_QUEUE' | 'FILE_SYSTEM' | 'THIRD_PARTY';
+
+  /** Configuration parameters */
+  configuration: {
     /** Connection settings */
     connection?: {
       url?: string;
@@ -199,7 +203,8 @@ configuration: {
     /** Authentication settings */
     authentication?: {
       type?: 'API_KEY' | 'OAUTH' | 'BASIC' | 'JWT' | 'CERTIFICATE';
-credentials?: Record<string, unknown>;};
+      credentials?: Record<string, unknown>;
+    };
 
     /** Security settings */
     security?: {
@@ -230,14 +235,22 @@ credentials?: Record<string, unknown>;};
 
 // ===== CONFIGURATION API CONTROLLER =====
 
-@ApiTags('Configuration API - PARLANT Validated')@Controller('config')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UseInterceptors(LoggingInterceptor, ParlantValidationInterceptor)
+@ApiTags('Configuration API - PARLANT Validated')
+@Controller('config')
+@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+@UseInterceptors(LoggingInterceptor, ParlantValidationInterceptor)
 @ApiBearerAuth()
-@ApiSecurity('bearer')export class ConfigurationApiController {private readonly logger = new Logger(ConfigurationApiController.name);
+@ApiSecurity('bearer')
+export class ConfigurationApiController {
+  private readonly logger = new Logger(ConfigurationApiController.name);
 
   constructor(
     // Configuration services would be injected here
   ) {
-    this.logger.log('Configuration API Controller initialized with comprehensive PARLANT validation');}// ===== CONFIGURATION RETRIEVAL (Low Risk) =====
+    this.logger.log('Configuration API Controller initialized with comprehensive PARLANT validation');
+  }
+
+  // ===== CONFIGURATION RETRIEVAL (Low Risk) =====
 
   /**
    * Get all configuration settings
@@ -247,24 +260,42 @@ credentials?: Record<string, unknown>;};
   @OperatorOrAdmin()
   @ParlantValidated({
     intent: 'Retrieve system configuration settings for monitoring and administration',
-      securityLevel: SecurityLevel.MEDIUM,
-      validationMode: ValidationMode.AUTOMATIC,
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'CONFIGURATION_ACCESS',
-      complianceFlags: ['CONFIG_ACCESS', 'SYSTEM_MONITORING'],cacheable: true,
-      timeout: 5000
+    complianceFlags: ['CONFIG_ACCESS', 'SYSTEM_MONITORING'],
+    cacheable: true,
+    timeout: 5000
   })
   @ApiOperation({
     summary: 'Get all configuration settings',
-      description: 'Retrieve all system configuration settings with PARLANT validation'})@ApiQuery({ name: 'category', required: false, enum: ['SYSTEM', 'SECURITY', 'PERFORMANCE', 'INTEGRATION', 'UI', 'API'] })@ApiQuery({ name: 'environment', required: false, enum: ['development', 'staging', 'production', 'all'] })@ApiQuery({ name: 'includeSecrets', required: false, type: 'boolean' })@ApiResponse({status: 200,
+    description: 'Retrieve all system configuration settings with PARLANT validation'
+  })
+  @ApiQuery({ name: 'category', required: false, enum: ['SYSTEM', 'SECURITY', 'PERFORMANCE', 'INTEGRATION', 'UI', 'API'] })
+  @ApiQuery({ name: 'environment', required: false, enum: ['development', 'staging', 'production', 'all'] })
+  @ApiQuery({ name: 'includeSecrets', required: false, type: 'boolean' })
+  @ApiResponse({
+    status: 200,
     description: 'Configuration settings retrieved successfully',
-      schema: {type: 'object',
-      properties: {settings: { type: 'object' },metadata: {type: 'object',
-      properties: {totalSettings: { type: 'number' },categories: { type: 'array', items: { type: 'string' } },lastModified: { type: 'string', format: 'date-time' }}}
+    schema: {
+      type: 'object',
+      properties: {
+        settings: { type: 'object' },
+        metadata: {
+          type: 'object',
+          properties: {
+            totalSettings: { type: 'number' },
+            categories: { type: 'array', items: { type: 'string' } },
+            lastModified: { type: 'string', format: 'date-time' }
+          }
+        }
       }
     }
   })
   async getAllSettings(
-    @Query('category') category?: string,@Query('environment') environment?: string,@Query('includeSecrets') includeSecrets?: boolean,
+    @Query('category') category?: string,
+    @Query('environment') environment?: string,
+    @Query('includeSecrets') includeSecrets?: boolean,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
@@ -292,25 +323,33 @@ credentials?: Record<string, unknown>;};
       settings: {},
       metadata: {
         totalSettings: 0,
-        categories: ['SYSTEM', 'SECURITY', 'PERFORMANCE'],lastModified: new Date()}
+        categories: ['SYSTEM', 'SECURITY', 'PERFORMANCE'],
+        lastModified: new Date()
+      }
     };
   }
 
   /**
    * Get specific configuration setting
    */
-  @Get(':key')@OperatorOrAdmin()@ParlantValidated({
+  @Get(':key')
+  @OperatorOrAdmin()
+  @ParlantValidated({
     intent: 'Retrieve specific configuration setting by key',
-      securityLevel: SecurityLevel.LOW,
-      validationMode: ValidationMode.AUTOMATIC,
+    securityLevel: SecurityLevel.LOW,
+    validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'CONFIGURATION_LOOKUP',
-      complianceFlags: ['CONFIG_ACCESS'],
-      cacheable: true,
-      timeout: 3000
+    complianceFlags: ['CONFIG_ACCESS'],
+    cacheable: true,
+    timeout: 3000
   })
   @ApiOperation({
     summary: 'Get configuration setting',
-      description: 'Retrieve specific configuration setting by key'})@ApiParam({ name: 'key', description: 'Configuration key' })async getSetting(@Param('key') key: string,
+    description: 'Retrieve specific configuration setting by key'
+  })
+  @ApiParam({ name: 'key', description: 'Configuration key' })
+  async getSetting(
+    @Param('key') key: string,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
@@ -338,9 +377,11 @@ credentials?: Record<string, unknown>;};
       value: null,
       metadata: {
         category: 'SYSTEM',
-      environment: 'all',
-      lastModified: new Date(),
-      modifiedBy: 'system'}};
+        environment: 'all',
+        lastModified: new Date(),
+        modifiedBy: 'system'
+      }
+    };
   }
 
   // ===== CONFIGURATION MODIFICATION (High to Critical Risk) =====

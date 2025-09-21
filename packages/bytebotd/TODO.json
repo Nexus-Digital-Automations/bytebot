@@ -3313,12 +3313,24 @@
       ]
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T08:03:27.090Z",
       "title": "Fix remaining TypeScript compilation errors in openai.service.ts",
       "description": "Resolve syntax errors around lines 470-548 in openai.service.ts to enable successful TypeScript compilation for performance validation",
       "category": "error",
-      "id": "error_1758355407090_6io59egktwc"
+      "id": "error_1758355407090_6io59egktwc",
+      "assigned_agent": "dev_session_1758432209524_1_general_cf7fae18",
+      "started_at": "2025-09-21T05:24:55.176Z",
+      "claimed_by": "dev_session_1758432209524_1_general_cf7fae18",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758432209524_1_general_cf7fae18",
+          "role": "primary",
+          "assignedAt": "2025-09-21T05:24:55.176Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
@@ -10694,6 +10706,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T05:20:49.423Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758432209524_1_general_cf7fae18": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T05:23:29.526Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T05:23:29.526Z",
       "sessionId": null,
       "metadata": {}
     }

@@ -1214,11 +1214,16 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     for (let i = 0; i < Math.min(context.agentCount, 10); i++) {
       coordination.push({
         agentId: `agent_${i + 1}`,
-        role: i === 0 ? 'coordinator' : 'worker',capabilities: ['browser_automation', 'data_extraction'],resourceAllocation: {memory: context.resourceRequirements.maxMemoryGB / context.agentCount,
+        role: i === 0 ? 'coordinator' : 'worker',
+        capabilities: ['browser_automation', 'data_extraction'],
+        resourceAllocation: {
+          memory: context.resourceRequirements.maxMemoryGB / context.agentCount,
           cpu: context.resourceRequirements.maxCpuCores / context.agentCount,
         },
         securityClearance: context.securityLevel,
-        coordinationProtocol: context.strategy.coordinationProtocol || 'HTTP',});}
+        coordinationProtocol: context.strategy.coordinationProtocol || 'HTTP',
+      });
+    }
 
     return coordination;
   }
@@ -1229,9 +1234,19 @@ export class BrowserOrchestrationSecurityGuard implements CanActivate {
     response: Response,
   ): Promise<void> {
     // Add orchestration security headers
-    response.setHeader('X-Orchestration-Security-Level', context.securityLevel);response.setHeader('X-Orchestration-Risk-Level', context.riskLevel);response.setHeader('X-Orchestration-Risk-Score', result.riskScore.toString());response.setHeader('X-Orchestration-Action', result.recommendedAction);response.setHeader('X-Orchestration-Operation-ID', context.operationId);// Apply security response based on recommendationif (!result.allowed) {
+    response.setHeader('X-Orchestration-Security-Level', context.securityLevel);
+    response.setHeader('X-Orchestration-Risk-Level', context.riskLevel);
+    response.setHeader('X-Orchestration-Risk-Score', result.riskScore.toString());
+    response.setHeader('X-Orchestration-Action', result.recommendedAction);
+    response.setHeader('X-Orchestration-Operation-ID', context.operationId);
+
+    // Apply security response based on recommendation
+    if (!result.allowed) {
       throw new ForbiddenException({
-        message: result.reason || 'Orchestration security policy violation',type: 'orchestration_security_violation',operationId: context.operationId,riskScore: result.riskScore,
+        message: result.reason || 'Orchestration security policy violation',
+        type: 'orchestration_security_violation',
+        operationId: context.operationId,
+        riskScore: result.riskScore,
         violations: result.violations.map(v => v.description),
         resourceConstraints: result.resourceConstraints,
       });
