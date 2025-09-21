@@ -587,7 +587,7 @@ export class ParlantWebSocketStreamingBridgeService
   /**
    * Initialize the Parlant WebSocket Streaming Bridge
    */
-  async onModuleInit(): Promise<void>  {
+  onModuleInit(): void {
     const operationId = `parlant_ws_init_${Date.now()}
 _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSocket Streaming Bridge initialization...`, {
   operationId,targetSessions: this.PERFORMANCE_TARGETS.MAX_CONCURRENT_SESSIONS,
@@ -597,10 +597,10 @@ _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSoc
 });
 
     try {
-  await this.initializeStreamingServer();
-      await this.initializeHeartbeatSystem();
-      await this.initializePerformanceMonitoring();
-      await this.initializeSecuritySystems();
+      this.initializeStreamingServer();
+      this.initializeHeartbeatSystem();
+      this.initializePerformanceMonitoring();
+      this.initializeSecuritySystems();
 
       this.logger.log(`[${operationId
 }] Parlant WebSocket Streaming Bridge initialized successfully`, {
@@ -627,7 +627,7 @@ _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSoc
   /**
    * Initialize the streaming WebSocket server with enterprise-grade configuration
    */
-  private async initializeStreamingServer(): Promise<void>  {
+  private initializeStreamingServer(): void {
   const port = this.getStreamingPort();
 
     this.logger.log(`🌐 Creating enterprise-grade WebSocket streaming server on port ${port
@@ -708,9 +708,9 @@ _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSoc
   /**
    * Handle new streaming connection with comprehensive session setup
    */
-  private async handleNewStreamingConnection(ws: WebSocket.WebSocket,
+  private handleNewStreamingConnection(ws: WebSocket.WebSocket,
     req: EnhancedRequestInfo
-  ): Promise<void>  {
+  ): void {
   const clientId = this.generateClientId();
     const sessionId = this.generateSessionId();
     const operationId = `streaming_connection_${sessionId
@@ -786,14 +786,14 @@ _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSoc
       this.setupClientStreamingEventHandlers(clientId, sessionId, ws);
 
       // Start authentication process
-      await this.initiateAuthentication(sessionId);
+      this.initiateAuthentication(sessionId);
 
       // Start heartbeat monitoring
       this.startSessionHeartbeat(sessionId);
 
       // Update session status and send connection ready
       this.updateSessionStatus(sessionId, StreamingSessionStatus.AUTHENTICATING);
-      await this.sendConnectionEstablished(sessionId, startTime);
+      this.sendConnectionEstablished(sessionId, startTime);
 
       this.logger.log(`[${operationId}] New streaming session established`, {
   operationId,
@@ -870,10 +870,9 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
 
       // Validate message structure
       if (!this.validateStreamingMessageStructure(message)) {
-  await this.sendErrorNotification(sessionId, 'Invalid message structure', operationId);
+        this.sendErrorNotification(sessionId, 'Invalid message structure', operationId);
         return;
-      
-}
+      }
 
       // Update session activity
       this.updateSessionActivity(sessionId);
@@ -905,7 +904,7 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
       
 });
 
-      await this.sendErrorNotification(sessionId, 'Message processing failed', operationId);
+      this.sendErrorNotification(sessionId, 'Message processing failed', operationId);
     }
   }
 
@@ -924,7 +923,7 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
         break;
 
       case ParlantStreamingMessageType.USER_CONFIRMATION_RESPONSE:
-        await this.handleUserConfirmationResponse(sessionId, message, operationId);
+        this.handleUserConfirmationResponse(sessionId, message, operationId);
         break;
 
       case ParlantStreamingMessageType.STREAM_CREATE:
@@ -936,15 +935,15 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
         break;
 
       case ParlantStreamingMessageType.STREAM_LEAVE:
-        await this.handleStreamLeave(sessionId, message, operationId);
+        this.handleStreamLeave(sessionId, message, operationId);
         break;
 
       case ParlantStreamingMessageType.HEARTBEAT_PING:
-        await this.handleHeartbeatPing(sessionId, message, operationId);
+        this.handleHeartbeatPing(sessionId, message, operationId);
         break;
 
       case ParlantStreamingMessageType.AUTH_RESPONSE:
-        await this.handleAuthResponse(sessionId, message, operationId);
+        this.handleAuthResponse(sessionId, message, operationId);
         break;
 
       case ParlantStreamingMessageType.CONNECTION_CLOSE:
@@ -1029,9 +1028,8 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
 
     // Handle user confirmation requirement
     if (request.requiresUserConfirmation) {
-  await this.requestUserConfirmation(sessionId, request, message.streamId);
-    
-}
+      this.requestUserConfirmation(sessionId, request, message.streamId);
+    }
 
     // Update session validation count
     this.updateSessionValidationCount(sessionId);
@@ -1163,13 +1161,13 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
     const stream = this.streams.get(streamId);
 
     if (!stream) {
-      await this.sendErrorNotification(sessionId, `Stream not found: ${streamId
-}`, operationId);return;}
+      this.sendErrorNotification(sessionId, `Stream not found: ${streamId}`, operationId);
+      return;}
 
     const participants = this.streamParticipants.get(streamId) ?? new Set();
 
     if (participants.size >= stream.capabilities.maxParticipants) {
-      await this.sendErrorNotification(sessionId, `Stream at capacity: ${streamId}`, operationId);
+      this.sendErrorNotification(sessionId, `Stream at capacity: ${streamId}`, operationId);
       return;
     }
 
@@ -1517,31 +1515,31 @@ private isEncryptionEnabled(): boolean {
 
   // === PLACEHOLDER METHODS (TO BE IMPLEMENTED) ===
 
-  private async initializeHeartbeatSystem(): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
+  private initializeHeartbeatSystem(): void {
+    // Implementation placeholder - will be implemented in next iteration
     this.logger.log('📡 Heartbeat system initialized');
-}private async initializePerformanceMonitoring(): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.log('📊 Performance monitoring initialized');
-}
-private async initializeSecuritySystems(): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.log('🔐 Security systems initialized');
-  
-}
+  }
 
-  private async initiateAuthentication(sessionId: string): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔐 Authentication initiated for session: ${sessionId
-}`);}
+  private initializePerformanceMonitoring(): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.log('📊 Performance monitoring initialized');
+  }
+
+  private initializeSecuritySystems(): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.log('🔐 Security systems initialized');
+  }
+
+  private initiateAuthentication(sessionId: string): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`🔐 Authentication initiated for session: ${sessionId}`);}
 private startSessionHeartbeat(sessionId: string): void {
   // Implementation placeholder - will be implemented in next iteration
     this.logger.debug(`💓 Heartbeat started for session: ${sessionId
 }`);}
-private async sendConnectionEstablished(sessionId: string, _connectionTime: number): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔗 Connection established notification sent: ${sessionId
-}`);}
+  private sendConnectionEstablished(sessionId: string, _connectionTime: number): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`🔗 Connection established notification sent: ${sessionId}`);}
 private handleHeartbeatResponse(sessionId: string): void {
   // Implementation placeholder - will be implemented in next iteration
     this.logger.debug(`💓 Heartbeat response received: ${sessionId
@@ -1555,34 +1553,30 @@ private handleStreamingDisconnection(sessionId: string, code: number, _reason: B
   // Implementation placeholder - will be implemented in next iteration
     this.logger.error(`❌ Streaming error handled: ${sessionId
 }`, error);}
-private async handleUserConfirmationResponse(sessionId: string,
+  private handleUserConfirmationResponse(sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`✅ User confirmation response handled: ${operationId
-}`);}
-private async handleStreamLeave(sessionId: string,
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`✅ User confirmation response handled: ${operationId}`);}
+  private handleStreamLeave(sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`👋 Stream leave handled: ${operationId
-}`);}
-private async handleHeartbeatPing(sessionId: string,
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`👋 Stream leave handled: ${operationId}`);}
+  private handleHeartbeatPing(sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`💓 Heartbeat ping handled: ${operationId
-}`);}
-private async handleAuthResponse(sessionId: string,
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`💓 Heartbeat ping handled: ${operationId}`);}
+  private handleAuthResponse(sessionId: string,
     message: ParlantStreamingMessage,
     operationId: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`🔐 Auth response handled: ${operationId
-}`);}
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`🔐 Auth response handled: ${operationId}`);}
 private handleConnectionCloseRequest(
     sessionId: string,
     message: ParlantStreamingMessage,
@@ -1591,26 +1585,23 @@ private handleConnectionCloseRequest(
   // Implementation placeholder - will be implemented in next iteration
     this.logger.debug(`🔌 Connection close request handled: ${operationId
 }`);}
-private async requestUserConfirmation(sessionId: string,
+  private requestUserConfirmation(sessionId: string,
     _request: ParlantValidationStreamRequest,
     _streamId?: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`❓ User confirmation requested for session: ${sessionId
-}`);}
-private async sendErrorNotification(sessionId: string,
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`❓ User confirmation requested for session: ${sessionId}`);}
+  private sendErrorNotification(sessionId: string,
     errorMessage: string,
     _operationId?: string
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`❌ Error notification sent: ${sessionId
-} - ${errorMessage}`);}
-private async sendStreamStatus(sessionId: string,
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`❌ Error notification sent: ${sessionId} - ${errorMessage}`);}
+  private sendStreamStatus(sessionId: string,
     _status: Record<string, unknown>
-  ): Promise<void>  {
-  // Implementation placeholder - will be implemented in next iteration
-    this.logger.debug(`📊 Stream status sent: ${sessionId
-}`);
+  ): void {
+    // Implementation placeholder - will be implemented in next iteration
+    this.logger.debug(`📊 Stream status sent: ${sessionId}`);
   }
 
   /**
