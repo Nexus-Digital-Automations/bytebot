@@ -15,16 +15,24 @@ import {
   UnauthorizedException,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Request } from 'express';
-import * as jwt from 'jsonwebtoken';
+} from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { Request } from "express";
+import * as jwt from "jsonwebtoken";
 
-import { JwtParlantBridgeService, ParlantJwtPayload } from '../services/jwt-parlant-bridge.service';
-import { RbacSecurityContextService } from '../services/rbac-security-context.service';
-import { SecurityAuditTrailService, AuditCategory, AuditSeverity, AuditOutcome } from '../services/security-audit-trail.service';
-import { UserContext, ResourceType } from '../types/rbac.types';
+import {
+  JwtParlantBridgeService,
+  ParlantJwtPayload,
+} from "../services/jwt-parlant-bridge.service";
+import { RbacSecurityContextService } from "../services/rbac-security-context.service";
+import {
+  SecurityAuditTrailService,
+  AuditCategory,
+  AuditSeverity,
+  AuditOutcome,
+} from "../services/security-audit-trail.service";
+import { UserContext, ResourceType } from "../types/rbac.types";
 
 /**
  * JWT validation result
@@ -57,20 +65,23 @@ export interface JwtValidationResult {
  * builds comprehensive security contexts for authorization decisions.
  */
 @Injectable()
-export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant') {
+export class JwtParlantStrategy extends PassportStrategy(
+  Strategy,
+  "jwt-parlant",
+) {
   private readonly logger = new Logger(JwtParlantStrategy.name);
 
   constructor(
     private readonly jwtParlantBridge: JwtParlantBridgeService,
     private readonly rbacSecurityContext: RbacSecurityContextService,
     private readonly securityAudit: SecurityAuditTrailService,
-    @Inject('JWT_PARLANT_CONFIG') private readonly config: any,
+    @Inject("JWT_PARLANT_CONFIG") private readonly config: any,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
-        ExtractJwt.fromUrlQueryParameter('token'),
-        ExtractJwt.fromBodyField('token'),
+        ExtractJwt.fromUrlQueryParameter("token"),
+        ExtractJwt.fromBodyField("token"),
         (request: Request) => {
           // Extract from cookies
           return request.cookies?.access_token || null;
@@ -78,17 +89,31 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       ]),
       ignoreExpiration: false,
       passReqToCallback: true,
-      secretOrKeyProvider: (request: Request, rawJwtToken: string, done: any) => {
+      secretOrKeyProvider: (
+        request: Request,
+        rawJwtToken: string,
+        done: any,
+      ) => {
         this.getSecretOrKey(rawJwtToken)
-          .then(secretOrKey => done(null, secretOrKey))
-          .catch(error => done(error, null));
+          .then((secretOrKey) => done(null, secretOrKey))
+          .catch((error) => done(error, null));
       },
-      algorithms: config.jwt?.algorithms || ['HS256', 'RS256', 'ES256', 'EdDSA'],
+      algorithms: config.jwt?.algorithms || [
+        "HS256",
+        "RS256",
+        "ES256",
+        "EdDSA",
+      ],
     });
 
-    this.logger.log('JWT-Parlant Strategy initialized', {
-      algorithms: config.jwt?.algorithms || ['HS256', 'RS256', 'ES256', 'EdDSA'],
-      extractors: ['bearer', 'query', 'body', 'cookie'],
+    this.logger.log("JWT-Parlant Strategy initialized", {
+      algorithms: config.jwt?.algorithms || [
+        "HS256",
+        "RS256",
+        "ES256",
+        "EdDSA",
+      ],
+      extractors: ["bearer", "query", "body", "cookie"],
     });
   }
 
@@ -119,7 +144,9 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
 
       // Check for existing bridge session
       let validationContext;
-      const existingSession = await this.jwtParlantBridge.validateSession(payload.sessionId);
+      const existingSession = await this.jwtParlantBridge.validateSession(
+        payload.sessionId,
+      );
 
       if (existingSession) {
         this.logger.debug(`[${operationId}] Using existing bridge session`, {
@@ -136,22 +163,28 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
 
         validationContext = await this.jwtParlantBridge.createBridgeSession(
           this.extractToken(request)!,
-          '', // Refresh token not available in strategy
+          "", // Refresh token not available in strategy
           requestMetadata.ipAddress,
           requestMetadata.userAgent,
         );
       }
 
       // Build comprehensive security context
-      const securityContext = await this.rbacSecurityContext.buildSecurityContext(
-        validationContext.user,
-        ResourceType.API_ENDPOINT,
-        'authenticate',
-        requestMetadata,
-      );
+      const securityContext =
+        await this.rbacSecurityContext.buildSecurityContext(
+          validationContext.user,
+          ResourceType.API_ENDPOINT,
+          "authenticate",
+          requestMetadata,
+        );
 
       // Perform security validation
-      await this.performSecurityValidation(payload, securityContext, requestMetadata, operationId);
+      await this.performSecurityValidation(
+        payload,
+        securityContext,
+        requestMetadata,
+        operationId,
+      );
 
       // Create validation result
       const result: JwtValidationResult = {
@@ -171,7 +204,12 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       };
 
       // Log successful validation
-      await this.logValidationSuccess(payload, result, requestMetadata, operationId);
+      await this.logValidationSuccess(
+        payload,
+        result,
+        requestMetadata,
+        operationId,
+      );
 
       const validationTime = Date.now() - startTime;
       this.logger.debug(`[${operationId}] JWT validation successful`, {
@@ -200,7 +238,7 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
         throw error;
       }
 
-      throw new UnauthorizedException('JWT validation failed');
+      throw new UnauthorizedException("JWT validation failed");
     }
   }
 
@@ -211,57 +249,81 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
     try {
       // Decode header to determine algorithm
       const decoded = jwt.decode(rawJwtToken, { complete: true });
-      if (!decoded || typeof decoded === 'string') {
-        throw new UnauthorizedException('Invalid JWT format');
+      if (!decoded || typeof decoded === "string") {
+        throw new UnauthorizedException("Invalid JWT format");
       }
 
       const algorithm = decoded.header.alg;
-      const supportedAlgorithms = this.config.jwt?.algorithms || ['HS256'];
+      const supportedAlgorithms = this.config.jwt?.algorithms || ["HS256"];
 
       if (!supportedAlgorithms.includes(algorithm)) {
-        throw new UnauthorizedException(`Unsupported JWT algorithm: ${algorithm}`);
+        throw new UnauthorizedException(
+          `Unsupported JWT algorithm: ${algorithm}`,
+        );
       }
 
       // Return appropriate secret/key based on algorithm
       switch (algorithm) {
-        case 'HS256':
-          return this.config.jwt?.hmacSecret || process.env.JWT_SECRET || 'default-secret';
+        case "HS256":
+          return (
+            this.config.jwt?.hmacSecret ||
+            process.env.JWT_SECRET ||
+            "default-secret"
+          );
 
-        case 'RS256':
-          const rsaKey = this.config.jwt?.rsaPrivateKey || process.env.JWT_RSA_PRIVATE_KEY;
+        case "RS256":
+          const rsaKey =
+            this.config.jwt?.rsaPrivateKey || process.env.JWT_RSA_PRIVATE_KEY;
           if (!rsaKey) {
-            throw new UnauthorizedException('RSA private key not configured');
+            throw new UnauthorizedException("RSA private key not configured");
           }
-          return Buffer.from(rsaKey, 'base64');
+          return Buffer.from(rsaKey, "base64");
 
-        case 'ES256':
-          const ecKey = this.config.jwt?.ecPrivateKey || process.env.JWT_EC_PRIVATE_KEY;
+        case "ES256":
+          const ecKey =
+            this.config.jwt?.ecPrivateKey || process.env.JWT_EC_PRIVATE_KEY;
           if (!ecKey) {
-            throw new UnauthorizedException('EC private key not configured');
+            throw new UnauthorizedException("EC private key not configured");
           }
-          return Buffer.from(ecKey, 'base64');
+          return Buffer.from(ecKey, "base64");
 
-        case 'EdDSA':
-          const eddsaKey = this.config.jwt?.eddsaPrivateKey || process.env.JWT_EDDSA_PRIVATE_KEY;
+        case "EdDSA":
+          const eddsaKey =
+            this.config.jwt?.eddsaPrivateKey ||
+            process.env.JWT_EDDSA_PRIVATE_KEY;
           if (!eddsaKey) {
-            throw new UnauthorizedException('EdDSA private key not configured');
+            throw new UnauthorizedException("EdDSA private key not configured");
           }
-          return Buffer.from(eddsaKey, 'base64');
+          return Buffer.from(eddsaKey, "base64");
 
         default:
-          throw new UnauthorizedException(`Unsupported algorithm: ${algorithm}`);
+          throw new UnauthorizedException(
+            `Unsupported algorithm: ${algorithm}`,
+          );
       }
     } catch (error) {
-      this.logger.error('Failed to get JWT secret/key', error);
-      throw new UnauthorizedException('JWT validation configuration error');
+      this.logger.error("Failed to get JWT secret/key", error);
+      throw new UnauthorizedException("JWT validation configuration error");
     }
   }
 
   /**
    * Validate JWT payload structure
    */
-  private validatePayloadStructure(payload: any): asserts payload is ParlantJwtPayload {
-    const required = ['sub', 'username', 'email', 'roles', 'permissions', 'sessionId', 'type', 'securityLevel', 'mfaVerified'];
+  private validatePayloadStructure(
+    payload: any,
+  ): asserts payload is ParlantJwtPayload {
+    const required = [
+      "sub",
+      "username",
+      "email",
+      "roles",
+      "permissions",
+      "sessionId",
+      "type",
+      "securityLevel",
+      "mfaVerified",
+    ];
 
     for (const field of required) {
       if (!(field in payload)) {
@@ -270,29 +332,33 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
     }
 
     // Validate token type
-    if (payload.type !== 'access') {
+    if (payload.type !== "access") {
       throw new UnauthorizedException(`Invalid token type: ${payload.type}`);
     }
 
     // Validate security level
-    const validSecurityLevels = ['standard', 'elevated', 'critical'];
+    const validSecurityLevels = ["standard", "elevated", "critical"];
     if (!validSecurityLevels.includes(payload.securityLevel)) {
-      throw new UnauthorizedException(`Invalid security level: ${payload.securityLevel}`);
+      throw new UnauthorizedException(
+        `Invalid security level: ${payload.securityLevel}`,
+      );
     }
 
     // Validate roles array
     if (!Array.isArray(payload.roles)) {
-      throw new UnauthorizedException('Roles must be an array');
+      throw new UnauthorizedException("Roles must be an array");
     }
 
     // Validate permissions array
     if (!Array.isArray(payload.permissions)) {
-      throw new UnauthorizedException('Permissions must be an array');
+      throw new UnauthorizedException("Permissions must be an array");
     }
 
     // Validate MFA status
-    if (typeof payload.mfaVerified !== 'boolean') {
-      throw new UnauthorizedException('MFA verification status must be boolean');
+    if (typeof payload.mfaVerified !== "boolean") {
+      throw new UnauthorizedException(
+        "MFA verification status must be boolean",
+      );
     }
   }
 
@@ -301,7 +367,7 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
    */
   private extractRequestMetadata(request: Request, operationId: string): any {
     const clientIP = this.getClientIP(request);
-    const userAgent = request.headers['user-agent'] || '';
+    const userAgent = request.headers["user-agent"] || "";
 
     return {
       operationId,
@@ -321,17 +387,17 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
   private extractToken(request: Request): string | null {
     // Check Authorization header
     const authHeader = request.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       return authHeader.substring(7);
     }
 
     // Check query parameter
-    if (request.query?.token && typeof request.query.token === 'string') {
+    if (request.query?.token && typeof request.query.token === "string") {
       return request.query.token;
     }
 
     // Check body
-    if (request.body?.token && typeof request.body.token === 'string') {
+    if (request.body?.token && typeof request.body.token === "string") {
       return request.body.token;
     }
 
@@ -348,11 +414,11 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
    */
   private getClientIP(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      (request.headers['x-real-ip'] as string) ||
+      (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      (request.headers["x-real-ip"] as string) ||
       request.connection?.remoteAddress ||
       request.socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
@@ -362,21 +428,24 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
   private sanitizeHeaders(headers: any): Record<string, string> {
     const sanitized: Record<string, string> = {};
     const allowedHeaders = [
-      'user-agent',
-      'accept',
-      'accept-language',
-      'accept-encoding',
-      'content-type',
-      'content-length',
-      'host',
-      'origin',
-      'referer',
-      'x-forwarded-for',
-      'x-real-ip',
+      "user-agent",
+      "accept",
+      "accept-language",
+      "accept-encoding",
+      "content-type",
+      "content-length",
+      "host",
+      "origin",
+      "referer",
+      "x-forwarded-for",
+      "x-real-ip",
     ];
 
     for (const [key, value] of Object.entries(headers)) {
-      if (allowedHeaders.includes(key.toLowerCase()) && typeof value === 'string') {
+      if (
+        allowedHeaders.includes(key.toLowerCase()) &&
+        typeof value === "string"
+      ) {
         sanitized[key] = value;
       }
     }
@@ -397,7 +466,7 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
     const now = Math.floor(Date.now() / 1000);
     const expirationBuffer = 30; // 30 seconds buffer
 
-    if (payload.exp && (payload.exp - now) < expirationBuffer) {
+    if (payload.exp && payload.exp - now < expirationBuffer) {
       this.logger.warn(`[${operationId}] Token near expiration`, {
         operationId,
         userId: payload.sub,
@@ -407,8 +476,12 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
     }
 
     // Check for elevated security requirements
-    if (payload.securityLevel === 'critical') {
-      await this.validateCriticalSecurity(payload, requestMetadata, operationId);
+    if (payload.securityLevel === "critical") {
+      await this.validateCriticalSecurity(
+        payload,
+        requestMetadata,
+        operationId,
+      );
     }
 
     // Check behavioral patterns
@@ -422,17 +495,22 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       });
 
       if (behavioralContext.riskScore > 90) {
-        throw new UnauthorizedException('Suspicious activity detected - authentication blocked');
+        throw new UnauthorizedException(
+          "Suspicious activity detected - authentication blocked",
+        );
       }
     }
 
     // Check for emergency context
     const emergencyContext = securityContext.emergencyContext;
     if (emergencyContext?.isEmergency && !emergencyContext.overrideActive) {
-      this.logger.warn(`[${operationId}] Emergency context without active override`, {
-        operationId,
-        userId: payload.sub,
-      });
+      this.logger.warn(
+        `[${operationId}] Emergency context without active override`,
+        {
+          operationId,
+          userId: payload.sub,
+        },
+      );
     }
   }
 
@@ -450,21 +528,26 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
         operationId,
         userId: payload.sub,
       });
-      throw new UnauthorizedException('Multi-factor authentication required for critical operations');
+      throw new UnauthorizedException(
+        "Multi-factor authentication required for critical operations",
+      );
     }
 
     // Additional IP validation for critical operations
     const clientIP = requestMetadata.ipAddress;
-    if (clientIP === 'unknown' || this.isPrivateIP(clientIP)) {
-      this.logger.warn(`[${operationId}] Critical operation from unknown/private IP`, {
-        operationId,
-        userId: payload.sub,
-        clientIP,
-      });
+    if (clientIP === "unknown" || this.isPrivateIP(clientIP)) {
+      this.logger.warn(
+        `[${operationId}] Critical operation from unknown/private IP`,
+        {
+          operationId,
+          userId: payload.sub,
+          clientIP,
+        },
+      );
     }
 
     // Check session age for critical operations
-    const sessionAge = Date.now() - (payload.iat! * 1000);
+    const sessionAge = Date.now() - payload.iat! * 1000;
     const maxCriticalSessionAge = 3600000; // 1 hour
 
     if (sessionAge > maxCriticalSessionAge) {
@@ -473,7 +556,9 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
         userId: payload.sub,
         sessionAgeMs: sessionAge,
       });
-      throw new UnauthorizedException('Session too old for critical operations - please re-authenticate');
+      throw new UnauthorizedException(
+        "Session too old for critical operations - please re-authenticate",
+      );
     }
   }
 
@@ -491,7 +576,7 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       /^fe80:/,
     ];
 
-    return privateRanges.some(range => range.test(ip));
+    return privateRanges.some((range) => range.test(ip));
   }
 
   /**
@@ -517,21 +602,21 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       },
       {
         type: ResourceType.AUTHENTICATION_TOKEN,
-        classification: 'internal',
+        classification: "internal",
       },
       {
-        type: 'jwt_token_validation',
+        type: "jwt_token_validation",
         method: requestMetadata.method,
         endpoint: requestMetadata.path,
-        description: 'JWT token validated successfully via Parlant strategy',
+        description: "JWT token validated successfully via Parlant strategy",
       },
       {
         requestId: operationId,
-        source: 'jwt-parlant-strategy',
+        source: "jwt-parlant-strategy",
       },
       {
-        riskLevel: result.securityContext.riskAssessment?.overall || 'low',
-        flags: ['TOKEN_VALIDATION_SUCCESS'],
+        riskLevel: result.securityContext.riskAssessment?.overall || "low",
+        flags: ["TOKEN_VALIDATION_SUCCESS"],
       },
       {
         data: {
@@ -569,21 +654,21 @@ export class JwtParlantStrategy extends PassportStrategy(Strategy, 'jwt-parlant'
       },
       {
         type: ResourceType.AUTHENTICATION_TOKEN,
-        classification: 'internal',
+        classification: "internal",
       },
       {
-        type: 'jwt_token_validation_failure',
+        type: "jwt_token_validation_failure",
         method: requestMetadata.method,
         endpoint: requestMetadata.path,
         description: `JWT token validation failed: ${error instanceof Error ? error.message : String(error)}`,
       },
       {
         requestId: operationId,
-        source: 'jwt-parlant-strategy',
+        source: "jwt-parlant-strategy",
       },
       {
-        riskLevel: 'medium',
-        flags: ['TOKEN_VALIDATION_FAILURE', 'SECURITY_VIOLATION'],
+        riskLevel: "medium",
+        flags: ["TOKEN_VALIDATION_FAILURE", "SECURITY_VIOLATION"],
         requiresInvestigation: true,
       },
       {
