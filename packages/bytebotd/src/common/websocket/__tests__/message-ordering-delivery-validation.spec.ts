@@ -288,8 +288,7 @@ describe('MessageOrderingDeliveryValidationService', () => {
       for (const message of messages) {
         const result = service.validateMessageSequence(message);
         results.push(result);
-      
-}
+      }
 
       // All messages should have valid sequences
       expect(results.every(result => result.sequenceValid)).toBe(true);

@@ -1009,9 +1009,11 @@ test('should perform sustained load test with memory monitoring', async () => {
 
       expect(analysis.snapshots.length).toBeGreaterThan(10);
       if (analysis.hasMemoryLeak) {
-  expect(analysis.heapGrowthPercentage).toBeGreaterThan(20);
+        expect(analysis.heapGrowthPercentage).toBeGreaterThan(20);
         expect(analysis.recommendations).toContain('Investigate connection cleanup procedures');
-}// Cleanup
+      }
+
+      // Cleanup
       largeObjects.length = 0;
     }, 20000);
   });

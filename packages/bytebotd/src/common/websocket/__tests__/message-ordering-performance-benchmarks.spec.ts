@@ -362,9 +362,13 @@ const performanceConfigService = {
 
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'MESSAGE_QUEUE_MAX_SIZE': 10000,'MESSAGE_QUEUE_FLUSH_INTERVAL': 25, // Faster processing for benchmarks'MESSAGE_QUEUE_BATCH_SIZE': 50,'MESSAGE_COMPRESSION_ENABLED': true,'MESSAGE_BUFFER_MAX_SIZE': 5000,'MESSAGE_VALIDATION_ENABLED': true,
-
-};
+      'MESSAGE_QUEUE_MAX_SIZE': 10000,
+      'MESSAGE_QUEUE_FLUSH_INTERVAL': 25, // Faster processing for benchmarks
+      'MESSAGE_QUEUE_BATCH_SIZE': 50,
+      'MESSAGE_COMPRESSION_ENABLED': true,
+      'MESSAGE_BUFFER_MAX_SIZE': 5000,
+      'MESSAGE_VALIDATION_ENABLED': true,
+    };
 return config[key] ?? defaultValue;
   }),
 };
