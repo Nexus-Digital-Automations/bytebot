@@ -373,7 +373,8 @@ return config[key] ?? defaultValue;
 
 describe('MessageOrderingDeliveryValidation Performance Benchmarks', () => {
 
-  let service: MessageOrderingDeliveryValidationService;let module: TestingModule;
+  let service: MessageOrderingDeliveryValidationService;
+  let module: TestingModule;
   let analyzer: AdvancedPerformanceAnalyzer;
   let loadSimulator: LoadSimulator;
 

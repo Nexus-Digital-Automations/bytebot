@@ -994,13 +994,15 @@ test('should perform sustained load test with memory monitoring', async () => {
     }, 30000);
 
     test('should detect consistent memory growth patterns', async () => {
-  const detector = new MemoryLeakDetector();detector.startMonitoring(500);
+      const detector = new MemoryLeakDetector();
+      detector.startMonitoring(500);
 
       // Simulate gradual memory growth
       const largeObjects: any[] = [];
       const growthInterval = setInterval(() => {
         largeObjects.push(new Array(10000).fill('memory-leak-test'));
-}, 1000);await new Promise(resolve => setTimeout(resolve, 8000));
+      }, 1000);
+      await new Promise(resolve => setTimeout(resolve, 8000));
       clearInterval(growthInterval);
 
       const analysis = detector.stopMonitoring();

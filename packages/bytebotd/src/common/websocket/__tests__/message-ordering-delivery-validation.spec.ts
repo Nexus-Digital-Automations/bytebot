@@ -455,6 +455,7 @@ const messageCount = 50;const acknowledgments: DeliveryAcknowledgment[] = [];
       const messageTemplate = {
         type: ConversationalMessageType.VALIDATION_REQUEST,
         messageId: 'duplicate_test_message',
+        sessionId: '', // Will be overridden for each session
         timestamp: Date.now(),
         sequence: 1,
         payload: { test: 'duplicate detection' },
@@ -555,11 +556,16 @@ const processedMessages: string[] = [];// Listen for message processing events
 
       // Create messages with different priorities
       const messages = [
-        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'low', 1),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'critical', 2),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 3),TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'high', 4),];// Add messages to queue
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'low', 1),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'critical', 2),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 3),
+        TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'high', 4),
+      ];
+
+      // Add messages to queue
       for (const message of messages) {
-  service.addMessageToPriorityQueue(message);
-      
-}
+        service.addMessageToPriorityQueue(message);
+      }
 
       // Wait for processing
       await new Promise(resolve => setTimeout(resolve, 200));
