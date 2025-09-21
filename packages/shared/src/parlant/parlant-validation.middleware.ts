@@ -35,7 +35,7 @@ import {
   ParlantConversationContext
 } from './monitoring/parlant-integration.service';
 import { SecurityLevel, ValidationMode } from './parlant-validation.decorator';
-import { ConversationPriority } from '../types/parlant.types';
+import { ConversationPriority, ConversationState } from '../types/parlant.types';
 
 // ===== MIDDLEWARE INTERFACES =====
 
