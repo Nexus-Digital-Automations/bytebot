@@ -24,6 +24,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { performance } from 'perf_hooks';
 import {
+  MetricsCollection,
+  safeGet,
+  safeToNumber
+} from '../websocket-types';
+import {
   MessageOrderingDeliveryValidationService,
   MessageIntegrityResult,
   ConversationFlowValidation,
@@ -295,7 +300,7 @@ describe('MessageOrderingDeliveryValidationService', () => {
 
 
 
-    it('should detect out-of-order messages', async () => {
+    it('should detect out-of-order messages', () => {
 
       const sessionId = 'test_session_sequence_002';
       const messages = [
@@ -542,9 +547,10 @@ const messageCount = 1000;
     it('should process messages according to priority order', async () => {
       const sessionId = 'test_session_priority_001';
 const processedMessages: string[] = [];// Listen for message processing events
-      service.on('message_queued', (event) => {
-        processedMessages.push(`${event.messageId
-}:${event.priority}`);
+      service.on('message_queued', (event: Record<string, unknown>) => {
+        const messageId = safeGet(event, 'messageId', '');
+        const priority = safeGet(event, 'priority', '');
+        processedMessages.push(`${messageId}:${priority}`);
       });
 
       // Create messages with different priorities

@@ -349,7 +349,10 @@ export class ComputerActionValidationPipe
   ): void {
     const startTime = Date.now();
     this.logger.debug(
-      `[${operationId}] Starting comprehensive security validation pipeline`,);// Initialize security event aggregation
+      `[${operationId}] Starting comprehensive security validation pipeline`,
+    );
+
+    // Initialize security event aggregation
     const securityContext = {
       threats: [] as string[],
       totalRiskScore: 0,

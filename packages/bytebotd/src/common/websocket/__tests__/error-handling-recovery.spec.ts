@@ -856,12 +856,13 @@ expect(recoveryEvents.some(e => safeGet(e as Record<string, unknown>, 'type', ''
     });
     const reconnectionEvents: Array<{ attempt: number; delay: number; timestamp: number }> = [];
 
-      client.on('reconnection-scheduled', (event) => {
-  reconnectionEvents.push({attempt: event.attempt,
-          delay: event.delay,
+      client.on('reconnection-scheduled', (event: Record<string, unknown>) => {
+        reconnectionEvents.push({
+          attempt: safeToNumber(event.attempt),
+          delay: safeToNumber(event.delay),
           timestamp: Date.now(),
-        
-});
+        });
+      });
       });
 
       client.on('recovery-failed', () => {// Stop after max attempts});
@@ -1367,5 +1368,4 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
       await client.disconnect();
     });
   });
-});
 });

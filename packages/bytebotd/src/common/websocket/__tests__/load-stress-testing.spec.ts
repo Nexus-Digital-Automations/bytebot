@@ -26,6 +26,12 @@
 
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
+import {
+  TestPerformanceMetrics,
+  MetricsCollection,
+  safeGet,
+  safeToNumber
+} from '../websocket-types';
 
 // Core Load Testing Client
 class LoadTestingWebSocketClient extends EventEmitter {
@@ -944,11 +950,15 @@ test('should perform sustained load test with memory monitoring', async () => {
       const sustainedDuration = 120000; // 2 minutes for testing
       const result = await resourceTester.testSustainedLoad(sustainedDuration);
 
-      expect((result as any).success).toBe(true);
-      expect((result as any).loadTestResults.success).toBe(true);
-      expect((result as any).memoryLeakAnalysis).toBeDefined();
-      expect((result as any).memoryLeakAnalysis.snapshots.length).toBeGreaterThan(5);
-      expect((result as any).sustainedDuration).toBe(sustainedDuration);
+      const typedResult = result as MetricsCollection;
+      expect(safeGet(typedResult, 'success', false)).toBe(true);
+      const loadTestResults = safeGet(typedResult, 'loadTestResults', {}) as MetricsCollection;
+      expect(safeGet(loadTestResults, 'success', false)).toBe(true);
+      expect(safeGet(typedResult, 'memoryLeakAnalysis', null)).toBeDefined();
+      const memoryAnalysis = safeGet(typedResult, 'memoryLeakAnalysis', {}) as MetricsCollection;
+      const snapshots = safeGet(memoryAnalysis, 'snapshots', []) as unknown[];
+      expect(snapshots.length).toBeGreaterThan(5);
+      expect(safeToNumber(safeGet(typedResult, 'sustainedDuration', 0))).toBe(sustainedDuration);
     }, 180000);
   });
 

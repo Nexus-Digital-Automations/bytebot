@@ -28,6 +28,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import * as WebSocket from 'ws';
+import {
+  TestPerformanceMetrics,
+  MetricsCollection,
+  TypedError,
+  createTypedError,
+  isTypedError,
+  safeGet,
+  safeToNumber
+} from '../websocket-types';
 import { EventEmitter } from 'events';
 import { performance, PerformanceObserver } from 'perf_hooks';
 import { createServer, Server } from 'http';

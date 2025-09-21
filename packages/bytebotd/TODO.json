@@ -3863,20 +3863,24 @@
       "id": "error_1758432062788_fypf1o0mvmv"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T05:21:03.246Z",
       "title": "Fix @typescript-eslint/no-unsafe-* violations in auth modules",
       "description": "Fix TypeScript unsafe violations in auth.module.ts line 80: unsafe return, call, and member access. Apply proper type annotations, interfaces, and type guards.",
       "category": "error",
-      "id": "error_1758432063246_s2dp9757qy"
+      "id": "error_1758432063246_s2dp9757qy",
+      "completed_at": "2025-09-21T05:25:38.698Z",
+      "updated_at": "2025-09-21T05:25:38.698Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T05:21:03.425Z",
       "title": "Fix TypeScript violations in guards and pipes",
       "description": "Fix @typescript-eslint/no-unsafe-* violations, type safety issues in validation logic, unsafe parameter handling, and request/response typing in NestJS guards and pipes components",
       "category": "error",
-      "id": "error_1758432063425_n00c7e6wdo"
+      "id": "error_1758432063425_n00c7e6wdo",
+      "completed_at": "2025-09-21T05:30:09.986Z",
+      "updated_at": "2025-09-21T05:30:09.986Z"
     },
     {
       "status": "pending",
@@ -3911,12 +3915,14 @@
       "id": "error_1758432064347_6lprm32gcbt"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T05:21:04.690Z",
       "title": "Fix @typescript-eslint/no-unsafe-* violations in cua-error-recovery-integration.spec.ts lines 536-570",
       "description": "Fix TypeScript ESLint unsafe violations in test file: unsafe assignments of error typed values, unsafe calls and member access on error typed values, unsafe mock implementations and enum access. Add proper TypeScript interfaces, Jest mock typing patterns, fix enum access, and add type assertions.",
       "category": "error",
-      "id": "error_1758432064690_afq36be2xgw"
+      "id": "error_1758432064690_afq36be2xgw",
+      "completed_at": "2025-09-21T05:28:39.769Z",
+      "updated_at": "2025-09-21T05:28:39.769Z"
     },
     {
       "status": "pending",
@@ -3925,6 +3931,14 @@
       "description": "Fix TypeScript violations in config modules at /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/config/ including @typescript-eslint/no-unsafe-* violations, type safety issues in configuration loading, unsafe property access in environment configuration, and async/await violations in configuration initialization",
       "category": "error",
       "id": "error_1758432065603_phpr8p5cawq"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T05:27:47.249Z",
+      "title": "Fix concatenated statements and TypeScript syntax errors in parlant-integration.service.ts",
+      "description": "Fix all concatenated statements without proper line breaks causing TypeScript compilation errors. Issues include concatenated logging statements, object literals, method calls, and property assignments throughout the file.",
+      "category": "error",
+      "id": "error_1758432467248_3c7yp9k8zfw"
     }
   ],
   "agents": {
@@ -10727,6 +10741,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T05:23:29.526Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758432451644_1_general_1bfb3205": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T05:27:31.646Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T05:27:31.646Z",
       "sessionId": null,
       "metadata": {}
     }

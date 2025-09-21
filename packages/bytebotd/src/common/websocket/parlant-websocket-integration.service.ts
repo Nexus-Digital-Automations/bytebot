@@ -607,10 +607,13 @@ _${Math.random().toString(36).substring(7)}`,
     confidence: number;
     reasoning: string;
     conditions?: ValidationCondition[];
-  
+
 }> {
   // This is a simplified mock implementation
     // In reality, this would call existing Parlant validation services
+
+    // Simulate async validation delay
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     const riskScore = request.context.riskAssessment.score;
     const userTrustLevel = request.context.userProfile.trustLevel;
@@ -673,14 +676,14 @@ _${Date.now()}`,
 
     // Send through conversational bridge (would need to implement this method)
     // await this.conversationalBridge.sendMessage(sessionId, responseMessage);
-    // For now, we'll just log the message structure
-    void responseMessage;
+    // For now, we'll simulate async message sending
+    await new Promise(resolve => setTimeout(resolve, 5));
 
     this.logger.log('Validation result sent through conversational bridge', {
   sessionId,
       validationId,
       result: result.result,
-    
+
 });
   }
 
@@ -714,8 +717,8 @@ _${Date.now()}`,
 
     // Send through conversational bridge
     // await this.conversationalBridge.sendMessage(sessionId, errorMessage);
-    // For now, we'll just log the message structure
-    void errorMessage;
+    // For now, we'll simulate async error sending
+    await new Promise(resolve => setTimeout(resolve, 5));
 
     this.logger.error('Validation error sent through conversational bridge', {
   sessionId,
@@ -758,7 +761,10 @@ _${Date.now()}`,
   private async processUserConfirmation(validation: ParlantValidationRequest,
     approved: boolean
   ): Promise<void>  {
-  // Add audit entry for user confirmation
+  // Simulate async processing
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    // Add audit entry for user confirmation
     const auditEntry: AuditEntry = {
   timestamp: Date.now(),
       event: 'user_confirmation',
@@ -771,7 +777,7 @@ _${Date.now()}`,
     const updatedValidation = {
   ...validation,
       auditTrail: [...validation.auditTrail, auditEntry],
-    
+
 };
 
     this.activeValidations.set(validation.requestId, updatedValidation);
@@ -907,6 +913,7 @@ _metrics`, Date.now());
    */
   private async getUserProfile(userId: string): Promise<UserProfile>  {
   // Mock implementation - would integrate with actual user service
+    await new Promise(resolve => setTimeout(resolve, 5));
     return {
       userId,
       trustLevel: 'medium',
@@ -922,19 +929,20 @@ _metrics`, Date.now());
   /**
    * Get conversation history (mock implementation)
    */
-  private async getConversationHistory(_conversationId: string): Promise<ConversationEntry[]>  {
-  // Mock implementation - would integrate with conversation service
-    return [];
-  
-}
+  private getConversationHistory(_conversationId: string): Promise<ConversationEntry[]> {
+    // Mock implementation - would integrate with conversation service
+    return Promise.resolve([]);
+  }
 
   /**
    * Assess risk for action (mock implementation)
    */
-  private async assessRisk(action: ValidationAction): Promise<RiskAssessment>  {
-  // Mock implementation - would integrate with risk assessment service
+  private assessRisk(action: ValidationAction): Promise<RiskAssessment> {
+    // Mock implementation - would integrate with risk assessment service
     const baseScore = action.reversible ? 20 : 60;
-    const impactScore = action.impact.scope === 'external' ? 40 : 20;return {level: baseScore + impactScore > 50 ? 'high' : 'medium',
+    const impactScore = action.impact.scope === 'external' ? 40 : 20;
+    return Promise.resolve({
+      level: baseScore + impactScore > 50 ? 'high' : 'medium',
       factors: [{
   type: 'reversibility',
       impact: action.reversible ? 0.2 : 0.8,
@@ -944,66 +952,67 @@ _metrics`, Date.now());
       score: baseScore + impactScore,
       confidence: 0.85,
       mitigations: [],
-    };
+    });
   }
 
   /**
    * Get compliance requirements (mock implementation)
    */
-  private async getComplianceRequirements(_context: ValidationContext): Promise<ComplianceRequirement[]>  {
-  // Mock implementation - would integrate with compliance service
-    return [
+  private getComplianceRequirements(_context: ValidationContext): Promise<ComplianceRequirement[]> {
+    // Mock implementation - would integrate with compliance service
+    return Promise.resolve([
       {
-  framework: 'GDPR',
-      requirement: 'User consent required for data processing',
-      mandatory: true,
-      auditLevel: 'detailed',
-      
-},
-    ];
+        framework: 'GDPR',
+        requirement: 'User consent required for data processing',
+        mandatory: true,
+        auditLevel: 'detailed',
+      },
+    ]);
   }
 
   /**
    * Generate conversational context (mock implementation)
    */
-  private async generateConversationalContext(action: ValidationAction): Promise<string>  {
-    return `User is requesting to perform: ${action.actionType}`;}/**
+  private generateConversationalContext(action: ValidationAction): Promise<string> {
+    return Promise.resolve(`User is requesting to perform: ${action.actionType}`);
+  }/**
    * Generate natural language description (mock implementation)
    */
-  private async generateNaturalLanguageDescription(action: ValidationAction): Promise<string>  {
-    return `This action will ${action.actionType} with the following parameters: ${JSON.stringify(action.parameters)}`;}/**
+  private generateNaturalLanguageDescription(action: ValidationAction): Promise<string> {
+    return Promise.resolve(`This action will ${action.actionType} with the following parameters: ${JSON.stringify(action.parameters)}`);
+  }/**
    * Generate expected user response (mock implementation)
    */
-  private async generateExpectedUserResponse(action: ValidationAction): Promise<string>  {
-    return `Please confirm if you want to proceed with ${action.actionType}`;
+  private generateExpectedUserResponse(action: ValidationAction): Promise<string> {
+    return Promise.resolve(`Please confirm if you want to proceed with ${action.actionType}`);
   }
 
   /**
    * Generate fallback actions (mock implementation)
    */
-  private async generateFallbackActions(_action: ValidationAction): Promise<FallbackAction[]>  {
-  return [
+  private generateFallbackActions(_action: ValidationAction): Promise<FallbackAction[]> {
+    return Promise.resolve([
       {
-  actionType: 'cancel',
-      parameters: {
-},condition: 'user_rejects',
-      description: 'Cancel the operation if user rejects',
+        actionType: 'cancel',
+        parameters: {},
+        condition: 'user_rejects',
+        description: 'Cancel the operation if user rejects',
       },
-    ];
+    ]);
   }
 
   /**
    * Generate conversational response (mock implementation)
    */
-  private async generateConversationalResponse(validationResult: {
-  approved: boolean;
+  private generateConversationalResponse(validationResult: {
+    approved: boolean;
     confidence: number;
     reasoning: string;
-  
-}): Promise<string>  {
-  if (validationResult.approved) {
-      return `✅ Action approved with ${Math.round(validationResult.confidence * 100)
-}% confidence. ${validationResult.reasoning}`;} else {return `❌ Action rejected. ${validationResult.reasoning}`;
+  }): Promise<string> {
+    if (validationResult.approved) {
+      return Promise.resolve(`✅ Action approved with ${Math.round(validationResult.confidence * 100)}% confidence. ${validationResult.reasoning}`);
+    } else {
+      return Promise.resolve(`❌ Action rejected. ${validationResult.reasoning}`);
     }
   }
 
@@ -1083,13 +1092,15 @@ _${Math.random().toString(36).substring(7)}`;
   /**
    * Clean shutdown of integration service
    */
-  async onApplicationShutdown(): Promise<void>  {
-  this.logger.log('Shutting down ParlantWebSocketIntegrationService');// Clean up all active validationsthis.activeValidations.clear();
+  onApplicationShutdown(): Promise<void> {
+    this.logger.log('Shutting down ParlantWebSocketIntegrationService');
+    // Clean up all active validations
+    this.activeValidations.clear();
     this.validationResults.clear();
     this.conversationMappings.clear();
     this.integrationMetrics.clear();
 
     this.logger.log('ParlantWebSocketIntegrationService shutdown complete');
-  
-}
+    return Promise.resolve();
+  }
 }

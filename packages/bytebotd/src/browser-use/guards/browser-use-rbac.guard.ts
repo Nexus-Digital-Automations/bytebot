@@ -48,7 +48,7 @@ import {
   ParlantValidationRequest,
   ConversationalValidationError,
   RiskLevel,
-} from '../parlant/parlant-integration.service';
+} from '../../parlant/parlant-integration.service';
 
 // Security context types
 import {
@@ -566,8 +566,20 @@ export class BrowserUseRbacGuard implements CanActivate {
     context: PermissionEvaluationContext
   ): { granted: boolean; reasoning: string } {
     switch (restriction.type) {
-      case 'TIME':return this.evaluateTimeRestriction(restriction, context);case 'LOCATION':return this.evaluateLocationRestriction(restriction, context);case 'IP_RANGE':return this.evaluateIpRangeRestriction(restriction, context);case 'DEVICE':return this.evaluateDeviceRestriction(restriction, context);case 'APPROVAL_REQUIRED':return this.evaluateApprovalRestriction(restriction, context);default:
-        return { granted: true, reasoning: 'Unknown restriction type' };}}
+      case 'TIME':
+        return this.evaluateTimeRestriction(restriction, context);
+      case 'LOCATION':
+        return this.evaluateLocationRestriction(restriction, context);
+      case 'IP_RANGE':
+        return this.evaluateIpRangeRestriction(restriction, context);
+      case 'DEVICE':
+        return this.evaluateDeviceRestriction(restriction, context);
+      case 'APPROVAL_REQUIRED':
+        return this.evaluateApprovalRestriction(restriction, context);
+      default:
+        return { granted: true, reasoning: 'Unknown restriction type' };
+    }
+  }
 
   /**
    * Evaluate conversational validation requirements

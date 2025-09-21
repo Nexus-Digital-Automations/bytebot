@@ -2,7 +2,9 @@
  * Parlant Integration Service - MAXIMUM IMPLEMENTATION
  * 
  * Provides comprehensive conversational AI validation for ALL Bytebot functions
- * implementing function-level wrapping with Parlant's conversational validation engine.* * Features:
+ * implementing function-level wrapping with Parlant's conversational validation engine.
+ *
+ * Features:
  * - Pre-execution conversational validation of all AI operations
  * - Real-time intent verification through natural language processing
  * - Safety guardrails and compliance enforcement
@@ -14,7 +16,15 @@
  * Performance: Sub-1000ms validation with multi-level caching (target: <500ms)
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import axios, { AxiosInstance, AxiosResponse } from 'axios';import WebSocket from 'ws';import { RiskLevel } from '@bytebot/shared';// ===== PARLANT INTEGRATION INTERFACES =====/**
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import WebSocket from 'ws';
+import { RiskLevel } from '@bytebot/shared';
+
+// ===== PARLANT INTEGRATION INTERFACES =====
+
+/**
  * Parlant WebSocket message structure
  */
 interface ParlantWebSocketMessage {
@@ -121,7 +131,9 @@ export class ConversationalValidationError extends Error {
     public readonly riskLevel?: RiskLevel
   ) {
     super(`Conversational validation failed: ${reasoning}`);
-    this.name = 'ConversationalValidationError';}}
+    this.name = 'ConversationalValidationError';
+  }
+}
 
 /**
  * Parlant audit trail entry for compliance
@@ -164,13 +176,22 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     const operationId = `parlant_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize Parlant connection configuration
-    this.parlantServerUrl = this.configService.get<string>('PARLANT_SERVER_URL', 'http://localhost:8000');this.parlantApiKey = this.configService.get<string>('PARLANT_API_KEY', '');// Initialize Parlant HTTP client with authenticationthis.parlantApiClient = axios.create({
+    this.parlantServerUrl = this.configService.get<string>('PARLANT_SERVER_URL', 'http://localhost:8000');
+    this.parlantApiKey = this.configService.get<string>('PARLANT_API_KEY', '');
+
+    // Initialize Parlant HTTP client with authentication
+    this.parlantApiClient = axios.create({
       baseURL: this.parlantServerUrl,
       headers: {
-        'Content-Type': 'application/json','Authorization', : this.parlantApiKey ? `Bearer ${this.parlantApiKey}` : undefined,},timeout: 10000, // 10 second timeout
+        'Content-Type': 'application/json',
+        'Authorization': this.parlantApiKey ? `Bearer ${this.parlantApiKey}` : undefined,
+      },
+      timeout: 10000, // 10 second timeout
     });
-    
-    this.logger.log(`[${operationId}] Initializing Parlant Integration Service`, {parlantEnabled: this.isParlantEnabled(),parlantServerUrl: this.parlantServerUrl,
+
+    this.logger.log(`[${operationId}] Initializing Parlant Integration Service`, {
+      parlantEnabled: this.isParlantEnabled(),
+      parlantServerUrl: this.parlantServerUrl,
       hasApiKey: !!this.parlantApiKey,
       cacheEnabled: this.isCacheEnabled(),
       auditEnabled: this.isAuditEnabled(),
@@ -200,7 +221,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     this.validationCount++;
 
     this.logger.log(
-      `[${request.operationId}] Starting Parlant validation for ${request.functionName}`,{operationId: request.operationId,
+      `[${request.operationId}] Starting Parlant validation for ${request.functionName}`,
+      {
+        operationId: request.operationId,
         functionName: request.functionName,
         riskLevel: request.riskLevel,
         userId: request.context.userId,
@@ -236,7 +259,8 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         conversationId: validationResponse.conversationId,
         functionName: request.functionName,
         actionDescription: request.actionDescription,
-        validationResult: validationResponse.approved ? 'APPROVED' : 'DENIED',executionResult: 'SUCCESS', // Validation successful, execution pending
+        validationResult: validationResponse.approved ? 'APPROVED' : 'DENIED',
+        executionResult: 'SUCCESS', // Validation successful, execution pending
         timestamp: new Date(),
         duration,
         userId: request.context.userId,
@@ -245,7 +269,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
       });
 
       this.logger.log(
-        `[${request.operationId}] Parlant validation completed: ${validationResponse.approved ? 'APPROVED' : 'DENIED'}`,{operationId: request.operationId,
+        `[${request.operationId}] Parlant validation completed: ${validationResponse.approved ? 'APPROVED' : 'DENIED'}`,
+        {
+          operationId: request.operationId,
           approved: validationResponse.approved,
           confidence: validationResponse.confidence,
           duration,
@@ -270,8 +296,11 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
       // Create error audit entry
       await this.createAuditEntry({
         operationId: request.operationId,
-        conversationId: 'ERROR',functionName: request.functionName,actionDescription: request.actionDescription,
-        validationResult: 'ERROR',executionResult: 'FAILURE',
+        conversationId: 'ERROR',
+        functionName: request.functionName,
+        actionDescription: request.actionDescription,
+        validationResult: 'ERROR',
+        executionResult: 'FAILURE',
         timestamp: new Date(),
         duration,
         userId: request.context.userId,
@@ -282,7 +311,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
       throw new ConversationalValidationError(
         'ERROR',
         `Parlant validation system error: ${error instanceof Error ? error.message : String(error)}`,
-        ['Retry the operation', 'Contact system administrator']);}
+        ['Retry the operation', 'Contact system administrator']
+      );
+    }
   }
 
   /**
@@ -292,17 +323,37 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     if (!this.isParlantEnabled()) return;
 
     try {
-      const wsUrl = this.parlantServerUrl.replace(/^http/, 'ws') + '/ws';this.parlantWebSocket = new WebSocket(wsUrl);if (this.parlantWebSocket) {
-        this.parlantWebSocket.on('open', () => {this.logger.log('Parlant WebSocket connection established');});this.parlantWebSocket.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
+      const wsUrl = this.parlantServerUrl.replace(/^http/, 'ws') + '/ws';
+      this.parlantWebSocket = new WebSocket(wsUrl);
+
+      if (this.parlantWebSocket) {
+        this.parlantWebSocket.on('open', () => {
+          this.logger.log('Parlant WebSocket connection established');
+        });
+
+        this.parlantWebSocket.on('message', (data: WebSocket.RawData) => {
+          try {
+            const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
             this.handleParlantWebSocketMessage(message);
           } catch (error) {
-            this.logger.error('Failed to parse Parlant WebSocket message', { error: error instanceof Error ? error.message : String(error) });}});
+            this.logger.error('Failed to parse Parlant WebSocket message', { error: error instanceof Error ? error.message : String(error) });
+          }
+        });
         
-        this.parlantWebSocket.on('error', (error: Error) => {this.logger.error('Parlant WebSocket error', { error: error.message });});this.parlantWebSocket.on('close', () => {this.logger.log('Parlant WebSocket connection closed');// Attempt to reconnect after 5 secondssetTimeout(() => this.initializeParlantWebSocket(), 5000);
+        this.parlantWebSocket.on('error', (error: Error) => {
+          this.logger.error('Parlant WebSocket error', { error: error.message });
+        });
+
+        this.parlantWebSocket.on('close', () => {
+          this.logger.log('Parlant WebSocket connection closed');
+          // Attempt to reconnect after 5 seconds
+          setTimeout(() => this.initializeParlantWebSocket(), 5000);
         });
       }
     } catch (error) {
-      this.logger.error('Failed to initialize Parlant WebSocket', { error: error instanceof Error ? error.message : String(error) });}}
+      this.logger.error('Failed to initialize Parlant WebSocket', { error: error instanceof Error ? error.message : String(error) });
+    }
+  }
 
   /**
    * Handle incoming WebSocket messages from Parlant
@@ -354,7 +405,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         userContext: request.context,
       });
       
-      // Step 4: Analyze response using Parlant's NLP capabilitiesconst intentAnalysis = await this.performParlantIntentAnalysis({conversationId: validationResult.conversationId,
+      // Step 4: Analyze response using Parlant's NLP capabilities
+      const intentAnalysis = await this.performParlantIntentAnalysis({
+        conversationId: validationResult.conversationId,
         userInput: request.actionDescription,
         context: request.context,
         functionName: request.functionName,
@@ -389,7 +442,10 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
    * Fallback mock validation when Parlant API is unavailable
    */
   private async performMockValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
-    const conversationId = `conv_mock${Date.now()}${Math.random().toString(36).substring(7)}`;// Risk-based validation logicconst riskBasedApproval = this.assessRiskBasedApproval(request);
+    const conversationId = `conv_mock${Date.now()}${Math.random().toString(36).substring(7)}`;
+
+    // Risk-based validation logic
+    const riskBasedApproval = this.assessRiskBasedApproval(request);
     
     // Context-aware validation
     const contextValidation = this.performContextValidation(request);
@@ -400,8 +456,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     // Combined validation decision
     const approved = riskBasedApproval && contextValidation && intentAnalysis.confidence > 0.7;
     
-    const reasoning = approved 
-      ? `Operation approved (mock): ${intentAnalysis.reasoning} (confidence: ${intentAnalysis.confidence})`: `Operation denied (mock): ${this.getDenialReason(riskBasedApproval, contextValidation, intentAnalysis)}`;
+    const reasoning = approved
+      ? `Operation approved (mock): ${intentAnalysis.reasoning} (confidence: ${intentAnalysis.confidence})`
+      : `Operation denied (mock): ${this.getDenialReason(riskBasedApproval, contextValidation, intentAnalysis)}`;
 
     return {
       approved,
@@ -463,7 +520,9 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     
     return {
       confidence: finalConfidence,
-      reasoning: `Intent analysis: ${request.actionDescription} aligns with user context and permissions`,};}
+      reasoning: `Intent analysis: ${request.actionDescription} aligns with user context and permissions`,
+    };
+  }
 
   // ===== HELPER METHODS =====
 

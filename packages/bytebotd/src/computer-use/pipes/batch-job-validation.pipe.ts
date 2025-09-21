@@ -52,9 +52,13 @@ interface DependencyNode {
   dependencies: Set<string>;
   visited: boolean;
   inStack: boolean;
-}\n\n@Injectable()
+}
+
+@Injectable()
 export class BatchJobValidationPipe implements PipeTransform {
-  private readonly logger = new Logger(BatchJobValidationPipe.name);\n  \n  // Business rule constants
+  private readonly logger = new Logger(BatchJobValidationPipe.name);
+
+  // Business rule constants
   private readonly MAX_BATCH_SIZE = 50;
   private readonly MAX_DEPENDENCY_DEPTH = 10;
   private readonly MAX_TIMEOUT = 3600000; // 1 hour
