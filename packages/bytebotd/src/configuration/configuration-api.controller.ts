@@ -52,7 +52,8 @@ import {ApiTags,
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -84,10 +85,16 @@ export interface ConfigurationSettingDto {
   description?: string;
 
   /** Environment scope */
-  environment?: 'development' | 'staging' | 'production' | 'all';/** Setting category */
-category: 'SYSTEM' | 'SECURITY' | 'PERFORMANCE' | 'INTEGRATION' | 'UI' | 'API';/** Sensitivity level */
-sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';/** Whether setting requires restart */
-requiresRestart?: boolean;
+  environment?: 'development' | 'staging' | 'production' | 'all';
+
+  /** Setting category */
+  category: 'SYSTEM' | 'SECURITY' | 'PERFORMANCE' | 'INTEGRATION' | 'UI' | 'API';
+
+  /** Sensitivity level */
+  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
+
+  /** Whether setting requires restart */
+  requiresRestart?: boolean;
 
   /** Business justification for change */
   justification: string;
@@ -748,37 +755,37 @@ _${Math.random().toString(36).substring(7)}`;
     }
   }
 
-  private getCurrentConfigValue(key: string): unknown {
-    // Mock implementation - would retrieve current value
+  private async getCurrentConfigValue(key: string): Promise<unknown> {
+    // Mock implementation - would retrieve current value from database
     return null;
   }
 
-  private createConfigurationChangeRecord(dto: ConfigurationSettingDto, userId: string): string {
-    // Mock implementation - would create change tracking record
+  private async createConfigurationChangeRecord(dto: ConfigurationSettingDto, userId: string): Promise<string> {
+    // Mock implementation - would create change tracking record in database
     return `change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
-  private createSecurityChangeRecord(
+  private async createSecurityChangeRecord(
     policyName: string,
     dto: SecurityConfigurationDto,
     userId: string
-  ): string {
-    // Mock implementation - would create security change record
+  ): Promise<string> {
+    // Mock implementation - would create security change record in database
     return `sec_change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
-  private applyConfigurationChange(key: string, value: unknown, changeId: string): void {
-    // Mock implementation - would apply actual configuration change
+  private async applyConfigurationChange(key: string, value: unknown, changeId: string): Promise<void> {
+    // Mock implementation - would apply actual configuration change to database
     this.logger.log(`Applying configuration change: ${key} (${changeId})`);
-  }}
-  private applySecurityConfiguration(
+  }
+  private async applySecurityConfiguration(
     policyName: string,
     dto: SecurityConfigurationDto,
     changeId: string
-  ): void {
-    // Mock implementation - would apply security configuration
+  ): Promise<void> {
+    // Mock implementation - would apply security configuration to database
     this.logger.log(`Applying security configuration: ${policyName} (${changeId})`);
-  }}
-private generateOperationId(): string {
-    return `config_${Date.now()}
-_${Math.random().toString(36).substring(2, 15)}`;
+  }
+
+  private generateOperationId(): string {
+    return `config_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 }

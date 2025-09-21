@@ -364,7 +364,11 @@ it('should create user confirmation message', () => {
 
   describe('Performance Requirements', () => {
 
-  jest.setTimeout(30000); // 30 seconds for performance testsit('should meet sub-50ms message delivery target', async () => const targetLatency = 50; // millisecondsconst testIterations = 100;
+    jest.setTimeout(30000); // 30 seconds for performance tests
+
+    it('should meet sub-50ms message delivery target', async () => {
+      const targetLatency = 50; // milliseconds
+      const testIterations = 100;
       const latencies: number[] = [];
 
       // Simulate message delivery timing
@@ -656,7 +660,6 @@ expect(auditEntry.complianceFlags).toContain('audit_required');});});
   });
 
   // Additional test suites should be inside the main describe block
-});
 
 // ===== BENCHMARK TESTS =====
 

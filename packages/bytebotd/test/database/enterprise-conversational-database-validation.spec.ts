@@ -33,7 +33,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
 import { BaseConversationalRepositoryService } from '../../src/database/repositories/base-conversational-repository.service';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest } from '../../src/parlant/parlant-integration.service';
+import { ParlantIntegrationService, ParlantValidationRequest } from '../../src/parlant/parlant-integration.service';
+
+// Define risk level type locally to avoid import issues
+type RiskLevelType = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 import { BaseEntity, Repository } from '../../src/types/index';
 
 /**
@@ -444,13 +447,13 @@ describe('Enterprise Conversational Database Validation', () => {
       logger.log(`Starting ${config.name} with ${config.entityCount} entities`);
 
       // Mock successful Parlant validation for low-risk operations
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-read-test',
         reasoning: 'Low-risk read operation approved',
         confidence: 0.95,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.LOW
+        riskLevel: 'LOW' as RiskLevelType
       });
 
       // Mock repository responses
@@ -522,13 +525,13 @@ describe('Enterprise Conversational Database Validation', () => {
       logger.log(`Starting ${config.name} with ${config.entityCount} entities`);
 
       // Mock Parlant validation for medium-risk operations
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-create-test',
         reasoning: 'Create operation approved with backup requirement',
         confidence: 0.92,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.MEDIUM
+        riskLevel: 'MEDIUM' as RiskLevelType
       });
 
       // Mock successful entity creation
@@ -610,7 +613,7 @@ describe('Enterprise Conversational Database Validation', () => {
 
       // Mock Parlant service for mixed approval results
       let approvalCount = 0;
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(() => {
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(() => {
         approvalCount++;
         const approved = approvalCount % 20 !== 0; // 95% approval rate
 
@@ -620,7 +623,7 @@ describe('Enterprise Conversational Database Validation', () => {
           reasoning: approved ? 'Operation approved' : 'Operation rejected for testing',
           confidence: 0.9,
           validationTimestamp: new Date(),
-          riskLevel: RiskLevel.MEDIUM
+          riskLevel: 'MEDIUM' as RiskLevelType
         };
       });
 
@@ -746,7 +749,7 @@ describe('Enterprise Conversational Database Validation', () => {
 
       // Mock Parlant service to reject specific operations
       let operationCount = 0;
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(() => {
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(() => {
         operationCount++;
         const shouldReject = operationCount % 5 === 0; // Reject every 5th operation
 
@@ -756,7 +759,7 @@ describe('Enterprise Conversational Database Validation', () => {
           reasoning: shouldReject ? 'Operation rejected for rollback testing' : 'Operation approved',
           confidence: 0.9,
           validationTimestamp: new Date(),
-          riskLevel: RiskLevel.MEDIUM
+          riskLevel: 'MEDIUM' as RiskLevelType
         };
       });
 
@@ -822,7 +825,7 @@ describe('Enterprise Conversational Database Validation', () => {
       const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(highLoadTestCount);
 
       // Mock Parlant service with realistic response times
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation(async () => {
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(async () => {
         // Simulate realistic Parlant validation time
         await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
 
@@ -832,7 +835,7 @@ describe('Enterprise Conversational Database Validation', () => {
           reasoning: 'High-load test operation approved',
           confidence: 0.95,
           validationTimestamp: new Date(),
-          riskLevel: RiskLevel.LOW
+          riskLevel: 'LOW' as RiskLevelType
         };
       });
 
@@ -943,16 +946,16 @@ describe('Enterprise Conversational Database Validation', () => {
       const testResults: Array<{ config: DatabaseTransactionTestConfig; auditData: any }> = [];
 
       // Mock Parlant service with detailed audit information
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation((request) => {
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation((request: { functionName?: string; operationId?: string }) => {
         return {
           approved: true,
           conversationId: `conv-audit-${Date.now()}`,
           reasoning: `Audit test operation approved for ${request.functionName}`,
           confidence: 0.95,
           validationTimestamp: new Date(),
-          riskLevel: RiskLevel.MEDIUM,
+          riskLevel: 'MEDIUM' as RiskLevelType,
           auditTrail: {
-            operationId: request.operationId,
+            operationId: request.operationId ?? 'unknown-operation',
             userId: 'audit-test-user',
             timestamp: new Date(),
             decision: 'APPROVED',
@@ -1034,11 +1037,11 @@ describe('Enterprise Conversational Database Validation', () => {
       let auditCompleteness = 0;
 
       for (const result of testResults) {
-        totalOperations += result.auditData.totalEntries;
-        totalAuditEntries += result.auditData.totalEntries;
-        auditCompleteness += result.auditData.completeness;
+        totalOperations += (result.auditData as { totalEntries: number; completeness: number }).totalEntries;
+        totalAuditEntries += (result.auditData as { totalEntries: number; completeness: number }).totalEntries;
+        auditCompleteness += (result.auditData as { totalEntries: number; completeness: number }).completeness;
 
-        logger.log(`${result.config.name}: ${result.auditData.totalEntries} audit entries (${result.auditData.completeness}% complete)`);
+        logger.log(`${result.config.name}: ${(result.auditData as { totalEntries: number; completeness: number }).totalEntries} audit entries (${(result.auditData as { totalEntries: number; completeness: number }).completeness}% complete)`);
       }
 
       const avgAuditCompleteness = auditCompleteness / testResults.length;

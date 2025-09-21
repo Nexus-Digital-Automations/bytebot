@@ -405,9 +405,10 @@ class ConcurrentSessionManager {
         uniqueMessages.set(session.sessionId, uniqueData);
 
         await session.sendMessage({
-  type: ConversationalMessageType.STATUS_UPDATE,
-          payload: { uniqueData, testType: 'isolation' 
-},});totalTests++;
+          type: ConversationalMessageType.CONNECTION_STATUS,
+          payload: { uniqueData, testType: 'isolation' } as Record<string, unknown>
+        });
+        totalTests++;
       }
     }
 
@@ -574,10 +575,13 @@ class ConcurrentSessionManager {
   }
 
   async disconnectAll(): Promise<void>  {
-  const disconnectPromises = Array.from(this.sessions.values()).map(session =>
-      session.disconnect().catch(() => {
-})
-    );
+    const disconnectPromises = Array.from(this.sessions.values()).map(async (session) => {
+      try {
+        await session.disconnect();
+      } catch {
+        // Ignore disconnect errors during cleanup
+      }
+    });
 
     await Promise.allSettled(disconnectPromises);
     this.sessions.clear();
@@ -702,14 +706,14 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
               handleValidationRequest(sessionInfo, message as ValidationRequestMessage);
               break;
 
-            case ConversationalMessageType.STATUS_UPDATE: {
+            case ConversationalMessageType.CONNECTION_STATUS: {
               // Echo back the status update with session confirmation
               const statusResponse: ConversationalMessage = {
   messageId: randomUUID(),
                 sessionId,
                 timestamp: Date.now(),
                 sequence: sessionInfo.messageCount,
-                type: ConversationalMessageType.STATUS_UPDATE,
+                type: ConversationalMessageType.CONNECTION_STATUS,
                 payload: {
   status: 'received',
       originalPayload: message.payload,
@@ -735,9 +739,8 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
                 sessionId,
                 timestamp: Date.now(),
                 sequence: sessionInfo.messageCount,
-                type: ConversationalMessageType.ACKNOWLEDGMENT,
-                payload: { acknowledgedMessageId: message.messageId 
-},
+                type: ConversationalMessageType.HEARTBEAT_ACK,
+                payload: { acknowledgedMessageId: message.messageId } as Record<string, unknown>,
                 metadata: {
   priority: 'normal',
                   requiresAck: false,
@@ -772,14 +775,13 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
         sessionId,
         timestamp: Date.now(),
         sequence: 0,
-        type: ConversationalMessageType.SESSION_CREATED,
+        type: ConversationalMessageType.SESSION_START,
         payload: {
           sessionId,
           userId,
           deviceId,
-          serverTime: Date.now(),
-        
-},
+          serverTime: Date.now()
+        } as Record<string, unknown>,
         metadata: {
   priority: 'high',
       requiresAck: false,
@@ -1011,12 +1013,12 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
         sensitiveData.set(session.sessionId, secretData);
 
         await session.sendMessage({
-  type: ConversationalMessageType.STATUS_UPDATE,
+          type: ConversationalMessageType.CONNECTION_STATUS,
           payload: {
-  sensitiveData: secretData,
+            sensitiveData: secretData,
             classification: 'confidential',
-      sessionOwner: session.sessionId,
-},
+            sessionOwner: session.sessionId
+          } as Record<string, unknown>
         });
       }
 
@@ -1158,24 +1160,26 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
         syncId: randomUUID(),
       };
 
-      const syncMessage: SessionSyncMessage = {
-  type: ConversationalMessageType.SESSION_SYNC,
+      const syncMessage: ConversationalMessage = {
+        type: ConversationalMessageType.PROGRESS_UPDATE,
         messageId: randomUUID(),
         sessionId: connectedSessions[0].sessionId,
         timestamp: Date.now(),
         sequence: 1,
         payload: {
-  syncId: syncData.syncId,
+          syncId: syncData.syncId,
           userId,
           deviceSessions: connectedSessions.map(s => s.deviceId),
           stateUpdate: syncData,
-          syncPriority: 'high',
-},metadata: {
-  priority: 'high',
-      requiresAck: true,
-      compression: false,
-          routingHints: ['session-sync'],
-},};
+          syncPriority: 'high'
+        } as Record<string, unknown>,
+        metadata: {
+          priority: 'high',
+          requiresAck: true,
+          compression: false,
+          routingHints: ['session-sync']
+        }
+      };
 
       await connectedSessions[0].sendMessage(syncMessage);
 
@@ -1213,8 +1217,8 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
         // Send multiple messages to build up session state
         for (let i = 0; i < 10; i++) {
           await session.sendMessage({
-  type: ConversationalMessageType.STATUS_UPDATE,
-            payload: { activityIndex: i, largeData: 'x'.repeat(1000) }, // 1KB per message
+            type: ConversationalMessageType.CONNECTION_STATUS,
+            payload: { activityIndex: i, largeData: 'x'.repeat(1000) } as Record<string, unknown>
           });
         }
       }

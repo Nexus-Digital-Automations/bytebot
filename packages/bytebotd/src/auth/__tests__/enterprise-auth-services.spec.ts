@@ -841,9 +841,12 @@ describe('Authentication Integration', () => {
     );
   });
 
-    it('should maintain performance under load', async () => {// Arrangeconst contexts = Array.from({ length: 50 }, () => createMockExecutionContext());
+  it('should maintain performance under load', async () => {
+    // Arrange
+    const contexts = Array.from({ length: 50 }, () => createMockExecutionContext());
 
-    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;parlantBridge.syncParlantSession.mockResolvedValue({ sessionId: 'parlant-123' });
+    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;
+    parlantBridge.syncParlantSession.mockResolvedValue({ sessionId: 'parlant-123' });
     parlantBridge.validateParlantPermissions.mockResolvedValue(true);
 
     // Act

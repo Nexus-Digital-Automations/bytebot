@@ -31,8 +31,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
-import { ParlantIntegrationService, RiskLevel } from '../../src/parlant/parlant-integration.service';
+import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
 import { BaseEntity } from '../../src/types/index';
+
+// Define risk level type locally to avoid import issues
+type RiskLevelType = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 /**
  * Compliance framework types
@@ -119,6 +122,33 @@ interface SecurityTestConfig {
   requiresSpecialHandling: boolean;
   expectedControls: string[];
   auditRequired: boolean;
+}
+
+/**
+ * Operation result interface for compliance validation
+ */
+interface OperationResult {
+  // GDPR properties
+  encryptionVerified?: boolean;
+  auditTrailComplete?: boolean;
+  deletionCapability?: boolean;
+  subjectAccessProvided?: boolean;
+  // HIPAA properties
+  phiProtection?: boolean;
+  minimumNecessaryRule?: boolean;
+  accessControlValidated?: boolean;
+  // PCI-DSS properties
+  cardDataEncryption?: boolean;
+  accessMonitoring?: boolean;
+  // SOX properties
+  financialDataIntegrity?: boolean;
+  auditTrailImmutable?: boolean;
+  // General properties
+  operationId?: string;
+  functionName?: string;
+  context?: Record<string, unknown>;
+  totalEntries?: number;
+  completeness?: boolean;
 }
 
 /**
@@ -390,7 +420,7 @@ class SecurityTestUtils {
    */
   static validateComplianceFramework(
     framework: ComplianceFramework,
-    operationResult: any,
+    operationResult: OperationResult,
     config: SecurityTestConfig
   ): ComplianceValidationResult {
     const violations: Array<{
@@ -581,7 +611,7 @@ class SecurityTestUtils {
 describe('Database Security and Compliance Validation', () => {
   let module: TestingModule;
   let conversationalDbService: ConversationalDatabaseService;
-  let parlantService: ParlantIntegrationService;
+  let parlantService: jest.Mocked<ParlantIntegrationService>;
   let logger: Logger;
 
   beforeAll(async () => {
@@ -603,7 +633,19 @@ describe('Database Security and Compliance Validation', () => {
       ],
       providers: [
         ConversationalDatabaseService,
-        ParlantIntegrationService,
+        {
+          provide: ParlantIntegrationService,
+          useValue: {
+            validateFunctionExecution: jest.fn().mockResolvedValue({
+              approved: true,
+              conversationId: 'test-conv-id',
+              reasoning: 'Test reasoning',
+              confidence: 0.95,
+              validationTimestamp: new Date(),
+              riskLevel: 'MEDIUM' as RiskLevelType
+            })
+          }
+        },
         Logger,
         {
           provide: ConfigService,
@@ -623,7 +665,7 @@ describe('Database Security and Compliance Validation', () => {
     }).compile();
 
     conversationalDbService = module.get<ConversationalDatabaseService>(ConversationalDatabaseService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService) as jest.Mocked<ParlantIntegrationService>;
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -647,7 +689,7 @@ describe('Database Security and Compliance Validation', () => {
       logger.log(`Testing ${accessControlConfigs.length} access control configurations`);
 
       // Mock Parlant service for access control validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockImplementation((request) => {
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation((request: { context: { metadata?: { userRole?: string } } }) => {
         // Simulate access control decisions based on user role
         const userRole = request.context.metadata?.userRole || 'user';
         const isAuthorized = userRole === 'admin' || userRole === 'database_admin';
@@ -660,7 +702,7 @@ describe('Database Security and Compliance Validation', () => {
             : 'Access denied - insufficient privileges for sensitive data operations',
           confidence: 0.95,
           validationTimestamp: new Date(),
-          riskLevel: RiskLevel.HIGH
+          riskLevel: 'HIGH' as const
         };
       });
 
@@ -770,13 +812,13 @@ describe('Database Security and Compliance Validation', () => {
       logger.log(`Testing ${encryptionConfigs.length} encryption configurations`);
 
       // Mock Parlant service for encryption validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-encryption-validation',
         reasoning: 'Encryption validation passed for sensitive data operations',
         confidence: 0.98,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.HIGH
+        riskLevel: 'HIGH' as const
       });
 
       const mockRepository = {
@@ -876,13 +918,13 @@ describe('Database Security and Compliance Validation', () => {
         .find(config => config.complianceFrameworks.includes(ComplianceFramework.GDPR))!;
 
       // Mock Parlant service for GDPR validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-gdpr-validation',
         reasoning: 'GDPR compliance validation passed for personal data processing',
         confidence: 0.92,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.HIGH
+        riskLevel: 'HIGH' as const
       });
 
       const mockRepository = {
@@ -971,13 +1013,13 @@ describe('Database Security and Compliance Validation', () => {
         .find(config => config.complianceFrameworks.includes(ComplianceFramework.HIPAA))!;
 
       // Mock Parlant service for HIPAA validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-hipaa-validation',
         reasoning: 'HIPAA compliance validation passed for PHI protection',
         confidence: 0.94,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.HIGH
+        riskLevel: 'HIGH' as const
       });
 
       const mockRepository = {
@@ -1065,13 +1107,13 @@ describe('Database Security and Compliance Validation', () => {
         .find(config => config.category === SecurityTestCategory.AUDIT_LOGGING)!;
 
       // Mock Parlant service for audit validation
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-audit-validation',
         reasoning: 'Audit trail validation passed with tamper-evidence verification',
         confidence: 0.97,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.MEDIUM
+        riskLevel: 'MEDIUM' as const
       });
 
       const mockRepository = {

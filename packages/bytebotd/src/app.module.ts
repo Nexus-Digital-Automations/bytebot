@@ -40,7 +40,7 @@ import { HighPerformanceParlantModule } from '../../../src/modules/high-performa
     // PARLANT Authentication Module - Enhanced conversational AI authentication
     ParlantAuthModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         const envConfig = createEnvironmentConfig();
 
         return {

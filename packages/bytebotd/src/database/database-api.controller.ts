@@ -409,7 +409,7 @@ export interface DatabaseAnalyticsDto {
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true,
-      securityLevel: (conversationContext?.securityLevel as string) ?? SecurityLevel.MEDIUM
+      securityLevel: conversationContext?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
     
 });
 

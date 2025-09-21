@@ -324,7 +324,7 @@ export class SecurityThreatDetectorService {
       );
 
       // Execute threat detection
-      const detectionResult = await this.executeThreatDetection(request, validation.conversationId);
+      const detectionResult = this.executeThreatDetection(request, validation.conversationId);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -504,7 +504,7 @@ export class SecurityThreatDetectorService {
       }
 
       // Execute behavioral analysis
-      const analysisResult = await this.performBehavioralAnalysis(entityId, entityType);
+      const analysisResult = this.performBehavioralAnalysis(entityId, entityType);
 
       this.behavioralProfiles.set(entityId, analysisResult);
 
@@ -537,7 +537,7 @@ export class SecurityThreatDetectorService {
    * 
    * @returns Threat detection statistics and performance metrics
    */
-  async getThreatDetectionStatistics(): Promise<{
+  getThreatDetectionStatistics(): {
     totalThreats: number;
     threatsByType: Record<ThreatType, number>;
     threatsBySeverity: Record<ThreatSeverity, number>;
@@ -579,10 +579,10 @@ export class SecurityThreatDetectorService {
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private async executeThreatDetection(
+  private executeThreatDetection(
     request: ThreatDetectionRequest,
     conversationId: string
-  ): Promise<ThreatDetectionResult> {
+  ): ThreatDetectionResult {
     const detectionId = `detection${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = new Date();
     
@@ -652,7 +652,7 @@ export class SecurityThreatDetectorService {
 
     for (const action of actions) {
       try {
-        const result = await this.executeResponseAction(action);
+        const result = this.executeResponseAction(action);
         actionsExecuted.push({
           ...action,
           executed: true,
@@ -675,10 +675,10 @@ export class SecurityThreatDetectorService {
     };
   }
 
-  private async performBehavioralAnalysis(
+  private performBehavioralAnalysis(
     entityId: string,
     entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK'
-  ): Promise<BehavioralAnalysisProfile> {
+  ): BehavioralAnalysisProfile {
     // Mock behavioral analysis - would integrate with ML models
     const profileId = `profile${entityId}${Date.now()}`;
 
@@ -846,9 +846,9 @@ export class SecurityThreatDetectorService {
     return actions;
   }
 
-  private async executeResponseAction(
+  private executeResponseAction(
     action: Omit<ThreatResponseAction, 'executed' | 'executedAt' | 'result' | 'details'>
-  ): Promise<boolean> {
+  ): boolean {
     // Mock response action execution - would integrate with actual security tools
     this.logger.log(`Executing response action: ${action.actionType} on ${action.target}`);
     

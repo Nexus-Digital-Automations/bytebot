@@ -596,7 +596,9 @@ export class BrowserUseRbacGuard implements CanActivate {
       context: {
         userId: evaluationContext.user.userId,
         sessionId: evaluationContext.session.sessionId,
-        agentRole: 'USER',conversationHistory: [],metadata: {
+        agentRole: 'USER',
+        conversationHistory: [],
+        metadata: {
           operation: evaluationContext.operation.endpoint,
           riskLevel: evaluationContext.operation.estimatedRiskLevel,
           businessImpact: evaluationContext.operation.businessImpact,

@@ -32,7 +32,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
-import { ParlantIntegrationService, RiskLevel } from '../../src/parlant/parlant-integration.service';
+import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
+
+// Define risk level type locally to avoid import issues
+type RiskLevelType = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 /**
  * Database migration operation types
@@ -493,13 +496,13 @@ describe('Database Migration Conversational Approval', () => {
       }> = [];
 
       // Mock Parlant service for low-risk approvals
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-migration-low-risk',
         reasoning: 'Low-risk migration operation approved with standard validation',
         confidence: 0.95,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.LOW
+        riskLevel: 'LOW' as RiskLevelType
       });
 
       for (const config of lowRiskConfigs) {
@@ -554,13 +557,13 @@ describe('Database Migration Conversational Approval', () => {
       logger.log(`Testing ${mediumRiskConfigs.length} medium-risk migration configurations`);
 
       // Mock Parlant service for medium-risk approvals
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-migration-medium-risk',
         reasoning: 'Medium-risk migration approved with database admin validation required',
         confidence: 0.88,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.MEDIUM
+        riskLevel: 'MEDIUM' as RiskLevelType
       });
 
       const migrationResults = [];
@@ -619,13 +622,13 @@ describe('Database Migration Conversational Approval', () => {
       logger.log(`Testing ${highRiskConfigs.length} high-risk migration configurations`);
 
       // Mock Parlant service for high-risk approvals
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-migration-high-risk',
         reasoning: 'High-risk migration requires comprehensive multi-party approval workflow',
         confidence: 0.82,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.HIGH
+        riskLevel: 'HIGH' as RiskLevelType
       });
 
       const migrationResults = [];
@@ -689,13 +692,13 @@ describe('Database Migration Conversational Approval', () => {
       logger.log(`Testing ${criticalRiskConfigs.length} critical-risk migration configurations`);
 
       // Mock Parlant service for critical-risk operations
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-migration-critical-risk',
         reasoning: 'Critical migration requires maximum security validation and multi-party approval',
         confidence: 0.75,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.HIGH // Critical operations map to HIGH risk in Parlant
+        riskLevel: 'HIGH' as RiskLevelType // Critical operations map to HIGH risk in Parlant
       });
 
       const migrationResults = [];
@@ -780,13 +783,13 @@ describe('Database Migration Conversational Approval', () => {
         .filter(config => config.rollbackSupported);
 
       // Mock Parlant service for rollback operations
-      jest.spyOn(parlantService, 'validateFunctionExecution').mockResolvedValue({
+      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
         approved: true,
         conversationId: 'conv-migration-rollback',
         reasoning: 'Rollback operation approved due to migration failure',
         confidence: 0.9,
         validationTimestamp: new Date(),
-        riskLevel: RiskLevel.MEDIUM
+        riskLevel: 'MEDIUM' as RiskLevelType
       });
 
       const rollbackResults = [];

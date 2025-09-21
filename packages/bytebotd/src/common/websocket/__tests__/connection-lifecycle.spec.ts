@@ -132,7 +132,12 @@ this.connectionMetrics.connectionTime = performance.now() - startTime;this.conne
 resolve();
 });
 
-        this.ws.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));this.emit('message', message);} catch (error) {this.emit('error', new Error(`Failed to parse message: ${String(error)}`));
+        this.ws.on('message', (data: WebSocket.RawData) => {
+          try {
+            const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as Record<string, unknown>;
+            this.emit('message', message);
+          } catch (error) {
+            this.emit('error', new Error(`Failed to parse message: ${String(error)}`));
           }
         });
 
@@ -246,20 +251,23 @@ class ConnectionPoolTester {
       client.on('error', () => {this.poolMetrics.failedConnections++;});
 
       this.connections.push(client);
-      connectionPromises.push(client.connect().catch(() => {
-  // Handle individual connection failures
-      
-}));
+      connectionPromises.push(client.connect().catch((): Promise<void> => {
+        // Handle individual connection failures
+        return Promise.resolve();
+      }));
     }
 
     await Promise.allSettled(connectionPromises);
   }
 
   async disconnectAll(): Promise<void>  {
-  const disconnectionPromises = this.connections.map(client =>
-      client.disconnect().catch(() => {
-})
-    );
+    const disconnectionPromises = this.connections.map(async (client) => {
+      try {
+        await client.disconnect();
+      } catch {
+        // Ignore disconnect errors during cleanup
+      }
+    });
 
     await Promise.allSettled(disconnectionPromises);
     this.connections = [];
@@ -357,15 +365,15 @@ describe('WebSocket Connection Lifecycle Tests', () => {
 
           // Echo back with confirmation
           const response: ConversationalMessage = {
-  messageId: `response_${Date.now()
-}`,
+            messageId: `response_${Date.now()}`,
             sessionId: message.sessionId ?? 'test-session',
       timestamp: Date.now(),
       sequence: (message.sequence ?? 0) + 1,
-            type: ConversationalMessageType.STATUS_UPDATE,
+            type: ConversationalMessageType.CONNECTION_STATUS,
             payload: {
               status: 'received',
-      originalMessage: message,},
+              originalMessage: message
+            } as Record<string, unknown>,
             metadata: {
   priority: 'normal',
       requiresAck: false,
@@ -594,13 +602,12 @@ it('should maintain connection metrics accurately', async () => {
       const maxAttempts = 3;
       const client = new ConnectionLifecycleTestClient('ws://localhost:99999', {
         autoReconnect: true,
-      maxReconnectionAttempts: maxAttempts,
-        reconnectionDelay: 100,
-      
-});
+        maxReconnectionAttempts: maxAttempts,
+        reconnectionDelay: 100
+      });
 
       let totalAttempts = 0;
-      client.on('reconnection-failed', ({ attempt }) => {
+      client.on('reconnection-failed', ({ attempt }: { attempt: number }) => {
         totalAttempts = attempt;
       });
 
@@ -708,17 +715,19 @@ const client = new ConnectionLifecycleTestClient(TEST_URL, {headers: {
 
       // Send a message with session correlation
       const testMessage: ConversationalMessage = {
-  messageId: 'session-correlation-test',
-      sessionId,timestamp: Date.now(),
+        messageId: 'session-correlation-test',
+        sessionId,
+        timestamp: Date.now(),
         sequence: 1,
         type: ConversationalMessageType.HEARTBEAT,
-        payload: { correlation: 'test' 
-},metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
-          routingHints: ['session-test'],
-},};
+        payload: { correlation: 'test' } as Record<string, unknown>,
+        metadata: {
+          priority: 'normal',
+          requiresAck: false,
+          compression: false,
+          routingHints: ['session-test']
+        }
+      };
 
       await client.sendMessage(testMessage);
 
@@ -728,7 +737,7 @@ const client = new ConnectionLifecycleTestClient(TEST_URL, {headers: {
       expect(receivedMessage).toBeTruthy();
       expect(receivedMessage?.sessionId).toBe(sessionId);
       if (receivedMessage?.payload) {
-  const payload = receivedMessage.payload;
+        const payload = receivedMessage.payload as Record<string, unknown>;
         if (typeof payload === 'object' && payload !== null && 'originalMessage' in payload) {const originalMessageValue = (payload as Record<string, unknown>).originalMessage;if (originalMessageValue && typeof originalMessageValue === 'object') {const originalMessage = originalMessageValue as ParsedMessage;
 expect(originalMessage.sessionId).toBe(sessionId);
           

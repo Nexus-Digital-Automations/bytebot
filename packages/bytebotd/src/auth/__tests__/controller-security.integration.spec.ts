@@ -36,22 +36,21 @@ import {
   FileUploadResponse,
 
 } from '../../test-utils/test-interfaces';
-import { ErrorHandlerUtils } from '../../utils/error-handler';/*** Type definitions for safe Express request/response handling
+import { ErrorHandlerUtils } from '../../utils/error-handler';
+
+/**
+ * Type definitions for safe Express request/response handling
  */
 interface SafeFile {
   originalname: string;
   size: number;
-
-
 }
 
 interface SafeRequest {
   ip?: string;
   connection?: {
     remoteAddress?: string;
-  
-
-};
+  };
   headers: {
     authorization?: string;
     'x-filename'?: string;
@@ -68,16 +67,12 @@ interface SafeResponse {
   setHeader(name: string, value: string): void;
   status(code: number): {
     json(data: Record<string, unknown>): void;
-  
-
-};
+  };
   json(data: Record<string, unknown>): void;
 }
 
 interface SafeNextFunction {
   (): void;
-
-
 }
 
 /**
@@ -117,9 +112,7 @@ interface App {
         next?: SafeNextFunction,
       ) => void,
     ): void;
-  
-
-};
+  };
   use(
     middleware: (
       req: SafeRequest,
@@ -128,17 +121,21 @@ interface App {
     ) => void,
   ): void;
   use(
-    path: string, middleware: (
-      req: SafeRequestre, s: SafeResponsenex, t: SafeNextFunction,
+    path: string,
+    middleware: (
+      req: SafeRequest,
+      res: SafeResponse,
+      next: SafeNextFunction,
     ) => void,
   ): void;
 }
 
 /**
  * Type-safe helper function to create supertest requests
- * Eliminates need for 'as unknown' casting with proper typing*/function createRequest(app: INestApplication) {
+ * Eliminates need for 'as unknown' casting with proper typing
+ */
+function createRequest(app: INestApplication) {
   return request(app.getHttpServer() as Server);
-
 }
 
 // UserRole is now imported from @bytebot/shared
@@ -162,8 +159,7 @@ class MockSecureController {
       userId: user.sub,
       role: user.role,
       timestamp: Date.now(),
-    
-};
+    };
   }
 
   // Role-restricted endpoint (admin only)
@@ -173,8 +169,7 @@ class MockSecureController {
       userId: user.sub,
       sensitiveInfo: 'classified',
       timestamp: Date.now(),
-    
-};
+    };
   }
 
   // Permission-restricted endpoint
@@ -184,8 +179,7 @@ class MockSecureController {
       userId: user.sub,
       systemConfig: 'sensitive-config',
       timestamp: Date.now(),
-    
-};
+    };
   }
 
   // Data modification endpoint
@@ -195,8 +189,7 @@ class MockSecureController {
       ...data,
       createdBy: user.sub,
       createdAt: Date.now(),
-    
-};
+    };
   }
 
   // Sensitive operation endpoint
@@ -217,17 +210,15 @@ class MockSecureController {
       size: file.size,
       uploadedBy: user.sub,
       uploadedAt: Date.now(),
-    
-};
+    };
   }
 
   // User search endpoint (potential injection risk)
   searchUsers(user: JwtPayload, query: string) {
-  return {
-    query: query,
+    return {
+      query: query,
       results: [
-        { id: '1', name: 'John Doe', email: 'john@test.com' 
-},
+        { id: '1', name: 'John Doe', email: 'john@test.com' },
         { id: '2', name: 'Jane Smith', email: 'jane@test.com' },
       ],
       searchedBy: user.sub,
@@ -241,10 +232,9 @@ class MockSecureController {
  */
 class MockSecurityJwtService {
   private validTokens = new Map([
-  [,
-  'admin-token',
-      { id: 'admin-1', email: 'admin@test.com', role: UserRole._ADMIN 
-},
+    [
+      'admin-token',
+      { id: 'admin-1', email: 'admin@test.com', role: UserRole._ADMIN },
     ],
     [
       'operator-token',
@@ -259,18 +249,16 @@ class MockSecurityJwtService {
   ]);
 
   verifyAsync(token: string) {
-  const user = this.validTokens.get(token);
+    const user = this.validTokens.get(token);
     if (!user) {
       throw new Error('Invalid or expired token');
-    
-}
+    }
     return Promise.resolve(user);
   }
 
   sign(_payload: Record<string, unknown>) {
-  return 'generated-token';
-  
-}
+    return 'generated-token';
+  }
 }
 
 /**
@@ -282,24 +270,23 @@ describe('Controller Security Integration Tests', () => {
   let jwtService: JwtService;
   let _configService: ConfigService;
 
-  const operationId = `controller_security_test${Date.now()
-}`;const securityLogger = {
-  info: (message: string, meta?: Record<stringunknown>) =>
-      console.log(`[CONTROLLER-SECURITY] ${message
-}`, meta ?? ''),
-    warn: (message: string, meta?: Record<stringunknown>) =>
+  const operationId = `controller_security_test${Date.now()}`;
+  const securityLogger = {
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[CONTROLLER-SECURITY] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[CONTROLLER-WARNING] ${message}`, meta ?? ''),
-    error: (message: string, meta?: Record<stringunknown>) =>
-      console.error(`[CONTROLLER-ERROR] ${message}`, meta ?? '')};
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[CONTROLLER-ERROR] ${message}`, meta ?? ''),
+  };
 
   beforeAll(async () => {
-  securityLogger.info(
-      `[${operationId
-}] Setting up Controller Security integration test`,
+    securityLogger.info(
+      `[${operationId}] Setting up Controller Security integration test`,
     );
 
     moduleRef = await Test.createTestingModule({
-  controllers: [],
+      controllers: [],
       providers: [
         {
           provide: JwtService,
@@ -329,7 +316,7 @@ describe('Controller Security Integration Tests', () => {
         JwtAuthGuard,
         RolesGuard,
       ]
-      }).compile();
+    }).compile();
 
     app = moduleRef.createNestApplication();
     jwtService = moduleRef.get<JwtService>(JwtService);
@@ -374,51 +361,61 @@ describe('Controller Security Integration Tests', () => {
 
     // Authentication middleware
     app.use(
-      '/api/*',async (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
-  const authHeader = req.headers.authorization;
+      '/api/*',
+      async (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
+        const authHeader = req.headers.authorization;
 
-        if (!authHeader?.startsWith('Bearer ')) {return res.status(401).json({message: 'Authentication required', error: 'UNAUTHORIZED'
-      
-});}
+        if (!authHeader?.startsWith('Bearer ')) {
+          return res.status(401).json({
+            message: 'Authentication required',
+            error: 'UNAUTHORIZED',
+          });
+        }
 
         const token = authHeader.substring(7);
 
         try {
-  const user: unknown = await jwtService.verifyAsync(token);
+          const user: unknown = await jwtService.verifyAsync(token);
           // Type guard for safe user assignment
           if (
             user &&
-            typeof user === 'object' &&'sub' in user &&'email' in user &&'role' in user) {req.user = user as JwtPayload;
+            typeof user === 'object' &&
+            'sub' in user &&
+            'email' in user &&
+            'role' in user
+          ) {
+            req.user = user as JwtPayload;
             next();
-          
-} else {
-  return res.status(401).json({
-  message: 'Invalid token payload structure', error: 'TOKEN_INVALID'
-      
-});}
+          } else {
+            return res.status(401).json({
+              message: 'Invalid token payload structure',
+              error: 'TOKEN_INVALID',
+            });
+          }
         } catch (error: unknown) {
-  const safeError = ErrorHandlerUtils.transformError(error);
+          const safeError = ErrorHandlerUtils.transformError(error);
           return res.status(401).json({
-  message: 'Invalid or expired token', error: 'TOKEN_INVALID', code: safeError.code
-      
-});
+            message: 'Invalid or expired token',
+            error: 'TOKEN_INVALID',
+            code: safeError.code,
+          });
         }
       },
     );
 
     // Authorization middleware
     const checkRole = (requiredRole: UserRole) => {
-  return (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
+      return (req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
         if (!req.user) {
           return res.status(403).json({
-  message: 'Access forbidden - authentication required', error: 'FORBIDDEN'
-      
-});
+            message: 'Access forbidden - authentication required',
+            error: 'FORBIDDEN',
+          });
         }
 
         const userRole = req.user.role;
         const roleHierarchy: Record<UserRole, UserRole[]> = {
-  [UserRole._ADMIN]: [
+          [UserRole._ADMIN]: [
             UserRole._ADMIN,
             UserRole._OPERATOR,
             UserRole._VIEWER,
@@ -426,17 +423,17 @@ describe('Controller Security Integration Tests', () => {
           [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
           [UserRole._VIEWER]: [UserRole._VIEWER],
           [UserRole._USER]: [UserRole._USER],
-          [UserRole._GUEST]: [UserRole._GUEST]
-};
+          [UserRole._GUEST]: [UserRole._GUEST],
+        };
 
         const allowedRoles = roleHierarchy[userRole] ?? [];
 
         if (!allowedRoles.includes(requiredRole)) {
-  return res.status(403).json({
-  message: `Access forbidden - ${requiredRole
-} role required`,
-            error: 'INSUFFICIENT_PERMISSIONS'
-      });}
+          return res.status(403).json({
+            message: `Access forbidden - ${requiredRole} role required`,
+            error: 'INSUFFICIENT_PERMISSIONS',
+          });
+        }
 
         next();
       };
@@ -445,133 +442,143 @@ describe('Controller Security Integration Tests', () => {
     // Setup routes
     (app as App)
       .getHttpAdapter()
-      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {res.json(controller.getPublicData());});
+      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {
+        res.json(controller.getPublicData());
+      });
 
     (app as App)
       .getHttpAdapter()
       .get('/api/protected', (req: SafeRequest, res: SafeResponse) => {
-  if (req.user) {res.json(controller.getProtectedData(req.user));
-        
-} else {
-          res.status(403).json({ error: 'User not authenticated' });}});
+        if (req.user) {
+          res.json(controller.getProtectedData(req.user));
+        } else {
+          res.status(403).json({ error: 'User not authenticated' });
+        }
+      });
 
-    app
+    (app as App)
       .getHttpAdapter()
       .get('/api/admin', (req: SafeRequest, res: SafeResponse) => {
-  const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getAdminData(req.user));
-          
-} else {
-            res.status(403).json({ error: 'Admin authentication required' });}});
+          } else {
+            res.status(403).json({ error: 'Admin authentication required' });
+          }
+        });
       });
 
-    app
+    (app as App)
       .getHttpAdapter()
       .get('/api/system', (req: SafeRequest, res: SafeResponse) => {
-  const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
           if (req.user) {
             res.json(controller.getSystemData(req.user));
-          
-} else {
-  res
+          } else {
+            res
               .status(403)
-              .json({ error: 'System access requires admin authentication' 
-});}});
+              .json({ error: 'System access requires admin authentication' });
+          }
+        });
       });
 
-    app
+    (app as App)
       .getHttpAdapter()
       .post('/api/resources', (req: SafeRequest, res: SafeResponse) => {
-  const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
           if (req.user) {
             res.json(controller.createResource(req.user, req.body));
-          
-} else {
-  res.status(403).json({
-  error: 'Resource creation requires operator authentication'
-      
-});}
+          } else {
+            res.status(403).json({
+              error: 'Resource creation requires operator authentication',
+            });
+          }
         });
       });
 
-    app
+    (app as App)
       .getHttpAdapter()
-      .delete('/api/resources/:id', (req: SafeRequestre, s: SafeRespons, e) => {
-  const middleware = checkRole(UserRole._ADMIN);middleware(req, res, () => {
+      .delete('/api/resources/:id', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
           if (req.user && req.params.id) {
             res.json(controller.deleteResource(req.user, req.params.id));
-          
-} else {
-  res.status(400).json({
-  error: 'Admin authentication and resource ID required'
-      
-});}
+          } else {
+            res.status(400).json({
+              error: 'Admin authentication and resource ID required',
+            });
+          }
         });
       });
 
-    app
+    (app as App)
       .getHttpAdapter()
-      .post('/api/upload', (req: SafeRequestre, s: SafeRespons, e) => {
-  const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
+      .post('/api/upload', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
           // Simulate file upload
           const mockFile: SafeFile = {
-  originalname: (req.headers['x-filename'] as string) ?? 'unknown',
+            originalname: (req.headers['x-filename'] as string) ?? 'unknown',
             size: parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
-};
+          };
 
-  if (req.user) {
-  res.json(controller.uploadFile(req.user, mockFile));
-          
-} else {
-  res.status(403).json({
-  error: 'File upload requires operator authentication'
-      
-});}
+          if (req.user) {
+            res.json(controller.uploadFile(req.user, mockFile));
+          } else {
+            res.status(403).json({
+              error: 'File upload requires operator authentication',
+            });
+          }
         });
       });
 
-    app
+    (app as App)
       .getHttpAdapter()
-      .get('/api/users/search', (req: SafeRequestre, s: SafeRespons, e) => {
-  const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
+      .get('/api/users/search', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
           if (req.user) {
             res.json(
-              controller.searchUsers(req.user, (req.query.q as string) ?? ''));
-} else {
-  res.status(403).json({
-  error: 'User search requires operator authentication'
-      
-});
+              controller.searchUsers(req.user, (req.query.q as string) ?? ''),
+            );
+          } else {
+            res.status(403).json({
+              error: 'User search requires operator authentication',
+            });
           }
         });
       });
 
     await app.init();
     securityLogger.info(
-      `[${operationId}] Controller Security integration test setup completed`);});
+      `[${operationId}] Controller Security integration test setup completed`,
+    );
+  });
 
   afterAll(async () => {
-  await app?.close();
+    await app?.close();
     securityLogger.info(
-      `[${operationId
-}] Controller Security integration test cleanup completed`,
+      `[${operationId}] Controller Security integration test cleanup completed`,
     );
   });
 
     describe('Authentication Flow Security', () => {
   it('should allow access to public endpoints without authentication', async () => {
-        const testId = `${operationId
-}_public_access`;
-        securityLogger.info(`[${testId}] Testing public endpoint access`);
+    const testId = `${operationId}_public_access`;
+    securityLogger.info(`[${testId}] Testing public endpoint access`);
 
-      const response = await createRequest(app).get('/public/data').expect(200);
-      expect((response.body as { message: string; timestamp: number }).message,
-      ).toBe('Public data');
-      expect(
-        (response.body as { message: string; timestamp: number }).timestamp).toBeDefined();
+    const response = await createRequest(app).get('/public/data').expect(200);
+    expect(
+      (response.body as { message: string; timestamp: number }).message,
+    ).toBe('Public data');
+    expect(
+      (response.body as { message: string; timestamp: number }).timestamp,
+    ).toBeDefined();
 
-      securityLogger.info(`[${testId}] Public endpoint access successful`);
+    securityLogger.info(`[${testId}] Public endpoint access successful`);
     });
 
     it('should require authentication for protected endpoints', async () => {

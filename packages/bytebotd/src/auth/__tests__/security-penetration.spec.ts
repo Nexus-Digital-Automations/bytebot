@@ -740,12 +740,20 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const timingTestCases = [
-        { name: 'valid-token', token: 'valid-token-123', shouldSucceed: true },{name: 'invalid-format', token: 'not-a-jwt-token', shouldSucceed: false,},
+        { name: 'valid-token', token: 'valid-token-123', shouldSucceed: true },
+        { name: 'invalid-format', token: 'not-a-jwt-token', shouldSucceed: false },
         {
-          name: 'expired-token', token: 'expired.token.signature', shouldSucceed: false,},
+          name: 'expired-token',
+          token: 'expired.token.signature',
+          shouldSucceed: false,
+        },
         {
-          name: 'malformed-signature', token: 'header.payload.invalid-sig', shouldSucceed: false,},
-        { name: 'empty-token', token: '', shouldSucceed: false },{ name: 'null-token', token: nullshouldSuccee, d: false },
+          name: 'malformed-signature',
+          token: 'header.payload.invalid-sig',
+          shouldSucceed: false,
+        },
+        { name: 'empty-token', token: '', shouldSucceed: false },
+        { name: 'null-token', token: null, shouldSucceed: false },
       ];
 
       const timingResults = [];
@@ -779,9 +787,10 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         timingResults.push({
-  testCase: testCase.nametim, e: processingTimeshouldSuccee, d: testCase.shouldSucceed
-      
-});
+          testCase: testCase.name,
+          time: processingTime,
+          shouldSucceed: testCase.shouldSucceed,
+        });
       }
 
       // Analyze timing consistency

@@ -331,11 +331,11 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         },
         actionDescription: `Create secure session bridge for ${jwtPayload.role} user with ${jwtPayload.securityClassification} classification`,
         context: parlantContext,
-        riskLevel: RiskLevel.CRITICAL, // Session creation is CRITICAL risk
+        riskLevel: 'CRITICAL' as RiskLevel, // Session creation is CRITICAL risk
         operationId,
       };
 
-      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation = await this.validateWithParlant(validationRequest);
 
       if (!validation.approved) {
         throw new ConversationalValidationError(
@@ -519,11 +519,11 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         },
         actionDescription: `Validate ${session.securityClassification} session security for user ${session.userId} requesting: ${context.requestedAction ?? 'general access'}`,
         context: session.conversationContext,
-        riskLevel: RiskLevel.HIGH, // Session validation is HIGH risk
+        riskLevel: 'HIGH' as RiskLevel, // Session validation is HIGH risk
         operationId,
       };
 
-      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation = await this.validateWithParlant(validationRequest);
 
       // Check for security violations
       const securityViolations = this.detectSecurityViolations(session, context);
@@ -636,11 +636,11 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         },
         actionDescription: `Emergency override: ${request.overrideScope} for user ${request.userId} - ${request.justification}`,
         context: request.context,
-        riskLevel: RiskLevel.CRITICAL, // Emergency overrides are CRITICAL risk
+        riskLevel: 'CRITICAL' as RiskLevel, // Emergency overrides are CRITICAL risk
         operationId,
       };
 
-      const validation: ParlantValidationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation = await this.validateWithParlant(validationRequest);
 
       const overrideId = `override_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       const expiresAt = new Date(Date.now() + request.durationMinutes * 60 * 1000);
@@ -832,6 +832,14 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   }
 
   // ===== PRIVATE HELPER METHODS =====
+
+  /**
+   * Type-safe wrapper for parlant validation calls to ensure proper TypeScript type resolution
+   */
+  private async validateWithParlant(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+    return await this.parlantService.validateFunctionExecution(request);
+  }
 
   private loadBridgeConfiguration(): AIgentParlantBridgeConfig {
     return {

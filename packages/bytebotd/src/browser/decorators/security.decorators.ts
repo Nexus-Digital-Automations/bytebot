@@ -69,7 +69,20 @@ export interface SecurityValidationConfig {
 
 // ===== METADATA KEYS =====
 
-export const BROWSER_AUTH_REQUIRED_KEY = 'browser_auth_required';export const BROWSER_ROLES_KEY = 'browser_roles';export const BROWSER_PERMISSIONS_KEY = 'browser_permissions';export const BROWSER_SECURITY_LEVEL_KEY = 'browser_security_level';export const BROWSER_RISK_LEVEL_KEY = 'browser_risk_level';export const BROWSER_RATE_LIMIT_KEY = 'browser_rate_limit';export const BROWSER_VALIDATION_KEY = 'browser_validation';export const BROWSER_PUBLIC_KEY = 'browser_public';export const BROWSER_SESSION_REQUIRED_KEY = 'browser_session_required';export const BROWSER_AUDIT_LOG_KEY = 'browser_audit_log';// ===== AUTHENTICATION DECORATORS =====/**
+export const BROWSER_AUTH_REQUIRED_KEY = 'browser_auth_required';
+export const BROWSER_ROLES_KEY = 'browser_roles';
+export const BROWSER_PERMISSIONS_KEY = 'browser_permissions';
+export const BROWSER_SECURITY_LEVEL_KEY = 'browser_security_level';
+export const BROWSER_RISK_LEVEL_KEY = 'browser_risk_level';
+export const BROWSER_RATE_LIMIT_KEY = 'browser_rate_limit';
+export const BROWSER_VALIDATION_KEY = 'browser_validation';
+export const BROWSER_PUBLIC_KEY = 'browser_public';
+export const BROWSER_SESSION_REQUIRED_KEY = 'browser_session_required';
+export const BROWSER_AUDIT_LOG_KEY = 'browser_audit_log';
+
+// ===== AUTHENTICATION DECORATORS =====
+
+/**
  * Require authentication for browser automation endpoint
  */
 export const BrowserAuth = () => {
@@ -78,7 +91,9 @@ export const BrowserAuth = () => {
     ApiBearerAuth(),
     ApiResponse({
       status: 401,
-      description: 'Unauthorized - Authentication required for browser automation',}),ApiResponse({
+      description: 'Unauthorized - Authentication required for browser automation',
+    }),
+    ApiResponse({
       status: 403,
       description: 'Forbidden - Insufficient permissions for browser automation',
     }),
@@ -114,7 +129,8 @@ export const BrowserPermissions = (...permissions: Permission[]) => {
     BrowserAuth(),
     ApiResponse({
       status: 403,
-      description: `Forbidden - Requires permissions: ${permissions.join(`, ')}',}),
+      description: `Forbidden - Requires permissions: ${permissions.join(', ')}`,
+    }),
   );
 };
 

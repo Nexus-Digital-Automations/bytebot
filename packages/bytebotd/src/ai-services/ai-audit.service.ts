@@ -19,7 +19,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel } from '../parlant/parlant-integration.service';
+import { ParlantIntegrationService } from '../parlant/parlant-integration.service';
+import { RiskLevel } from '@bytebot/shared';
 
 // ===== AI AUDIT INTERFACES =====
 
@@ -116,7 +117,7 @@ export class AIAuditService {
    * 
    * Central method for logging all AI operations across all services
    */
-  async recordAIOperation(entry: Omit<AIOperationAuditEntry, 'id' | 'timestamp'>): Promise<void> {
+  recordAIOperation(entry: Omit<AIOperationAuditEntry, 'id' | 'timestamp'>): void {
     const auditEntry: AIOperationAuditEntry = {
       id: `audit${Date.now()}${Math.random().toString(36).substring(7)}`,
       timestamp: new Date(),

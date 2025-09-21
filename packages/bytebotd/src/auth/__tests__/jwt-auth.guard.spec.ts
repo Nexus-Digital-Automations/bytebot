@@ -260,9 +260,10 @@ describe('JwtAuthGuard', () => {
     configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
-    guard = new MockJwtAuthGuard(jwtService, configServicereflector);
+    guard = new MockJwtAuthGuard(jwtService, configService, reflector);
 
-    console.log(`[${operationId}] JwtAuthGuard test setup completed`);});
+    console.log(`[${operationId}] JwtAuthGuard test setup completed`);
+  });
 
     afterEach(() => {
     console.log(`[${operationId}] JwtAuthGuard test cleanup completed`);

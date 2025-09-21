@@ -18,7 +18,13 @@
  * Performance: Cached configuration with validation
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import * as fs from 'fs';import * as path from 'path';/*** Parlant server environment configuration interface
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * Parlant server environment configuration interface
  */
 export interface ParlantEnvironmentConfig {
   // Core connection settings
@@ -26,7 +32,10 @@ export interface ParlantEnvironmentConfig {
   readonly serverUrl: string;
   readonly apiKey: string;
   readonly wsUrl: string;
-  readonly environment: 'development' | 'staging' | 'production';// Connection reliability settingsreadonly connection: {
+  readonly environment: 'development' | 'staging' | 'production';
+
+  // Connection reliability settings
+  readonly connection: {
     readonly timeout: number;
     readonly retries: number;
     readonly retryDelay: number;
@@ -243,19 +252,31 @@ export class ParlantEnvironmentConfigService implements OnModuleInit {
   /**
    * Initialize configuration service and validate environment
    */
-  async onModuleInit(): Promise<void> {
-    const operationId = `config_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;try {this.logger.log(`[${operationId}] Loading Parlant environment configuration`);// Load and validate configurationconst config = await this.loadConfiguration();
+  onModuleInit(): void {
+    const operationId = `config_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    try {
+      this.logger.log(`[${operationId}] Loading Parlant environment configuration`);
+
+      // Load and validate configuration
+      const config = this.loadConfiguration();
       const validation = this.validateConfiguration(config);
 
       if (!validation.valid) {
-        this.logger.error(`[${operationId}] Configuration validation failed`, {errors: validation.errors,missingRequired: validation.missingRequired,
+        this.logger.error(`[${operationId}] Configuration validation failed`, {
+          errors: validation.errors,
+          missingRequired: validation.missingRequired,
         });
 
         if (validation.errors.length > 0) {
-          throw new Error(`Invalid Parlant configuration: ${validation.errors.join(`, ')}`);}}
+          throw new Error(`Invalid Parlant configuration: ${validation.errors.join(', ')}`);
+        }
+      }
 
       if (validation.warnings.length > 0) {
-        this.logger.warn(`[${operationId}] Configuration warnings`, {warnings: validation.warnings,recommendations: validation.recommendations,
+        this.logger.warn(`[${operationId}] Configuration warnings`, {
+          warnings: validation.warnings,
+          recommendations: validation.recommendations,
         });
       }
 
@@ -332,15 +353,15 @@ export class ParlantEnvironmentConfigService implements OnModuleInit {
   /**
    * Reload configuration from environment variables
    */
-  async reloadConfiguration(): Promise<ParlantEnvironmentConfig> {
+  reloadConfiguration(): ParlantEnvironmentConfig {
     this.logger.log('Reloading Parlant configuration');
 
     try {
-      const config = await this.loadConfiguration();
+      const config = this.loadConfiguration();
       const validation = this.validateConfiguration(config);
 
       if (!validation.valid && validation.errors.length > 0) {
-        throw new Error(`Configuration reload failed: ${validation.errors.join(`, ')}`);
+        throw new Error(`Configuration reload failed: ${validation.errors.join(', ')}`);
       }
 
       // Update cached configuration
@@ -352,12 +373,18 @@ export class ParlantEnvironmentConfigService implements OnModuleInit {
         try {
           callback(config);
         } catch (error) {
-          this.logger.error('Configuration update callback failed', {error: error instanceof Error ? error.message : String(error),});
+          this.logger.error('Configuration update callback failed', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       });
 
-      this.logger.log('Parlant configuration reloaded successfully');return config;} catch (error) {
-      this.logger.error('Failed to reload Parlant configuration', {error: error instanceof Error ? error.message : String(error),});
+      this.logger.log('Parlant configuration reloaded successfully');
+      return config;
+    } catch (error) {
+      this.logger.error('Failed to reload Parlant configuration', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -365,7 +392,7 @@ export class ParlantEnvironmentConfigService implements OnModuleInit {
   /**
    * Load configuration from environment variables and presets
    */
-  private async loadConfiguration(): Promise<ParlantEnvironmentConfig> {
+  private loadConfiguration(): ParlantEnvironmentConfig {
     const environment = this.configService.get<string>('NODE_ENV', 'development') as 'development' | 'staging' | 'production';const envPreset = ENVIRONMENT_PRESETS[environment] ?? ENVIRONMENT_PRESETS.development;// Merge environment preset with environment variables
     const config: ParlantEnvironmentConfig = {
       enabled: this.configService.get<boolean>('PARLANT_ENABLED', envPreset?.enabled ?? true),serverUrl: this.configService.get<string>('PARLANT_API_BASE_URL', envPreset?.serverUrl ?? 'http://localhost:8000'),apiKey: this.configService.get<string>('PARLANT_API_KEY', ''),wsUrl: this.configService.get<string>('PARLANT_WS_URL', envPreset?.wsUrl ?? 'ws://localhost:8000/ws'),environment,connection: {

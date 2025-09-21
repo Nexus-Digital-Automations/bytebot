@@ -3777,12 +3777,14 @@
       "updated_at": "2025-09-21T04:47:11.466Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T04:42:43.559Z",
       "title": "Fix @typescript-eslint/require-await violations in auth test files group 1",
       "description": "Fix ESLint violations in auth test files: enterprise-auth-services.spec.ts, jwt-auth.guard.security.spec.ts, jwt-auth.guard.spec.ts, roles.guard.security.spec.ts, roles.guard.spec.ts, security-penetration.spec.ts. Address require-await, no-unsafe-assignment, no-unsafe-call, and no-unsafe-member-access errors.",
       "category": "error",
-      "id": "error_1758429763559_z481klmmn2"
+      "id": "error_1758429763559_z481klmmn2",
+      "completed_at": "2025-09-21T04:55:21.003Z",
+      "updated_at": "2025-09-21T04:55:21.003Z"
     },
     {
       "status": "pending",
@@ -3809,6 +3811,28 @@
       "id": "error_1758429849569_oxxgszvr6vi",
       "completed_at": "2025-09-21T04:49:17.632Z",
       "updated_at": "2025-09-21T04:49:17.632Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:54:27.655Z",
+      "title": "Fix 414 remaining @typescript-eslint/no-unsafe-* violations in security bridge service",
+      "description": "Complete the unsafe assignment fixes in src/auth/services/aigent-parlant-security-bridge.service.ts. There are 414 remaining violations involving error types and any types that need proper type safety implementation.",
+      "category": "error",
+      "id": "error_1758430467655_sgctf6g96lk",
+      "assigned_agent": "dev_session_1758430491594_1_general_dfbdfa79",
+      "started_at": "2025-09-21T04:55:09.662Z",
+      "claimed_by": "dev_session_1758430491594_1_general_dfbdfa79",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758430491594_1_general_dfbdfa79",
+          "role": "primary",
+          "assignedAt": "2025-09-21T04:55:09.662Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T05:05:11.653Z",
+      "updated_at": "2025-09-21T05:05:11.653Z"
     }
   ],
   "agents": {
@@ -10338,6 +10362,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T04:43:54.542Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430491594_1_general_dfbdfa79": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:54:51.595Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:54:51.595Z",
       "sessionId": null,
       "metadata": {}
     }
