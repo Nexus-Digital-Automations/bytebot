@@ -477,14 +477,32 @@ Use cases:
   })
   @ApiBody({
     type: XPathExtractionRequestDto,
-    description: 'XPath extraction configuration',examples: {basic: {
-        summary: 'Basic XPath extraction',description: 'Extract text using XPath expressions',value: {sessionId: 'session_123456789',xpaths: ['//h1/text()', '//p[@class="content"]/text()", '//a/@href'],extractAttributes: false,timeout: 30000,
+    description: 'XPath extraction configuration',
+    examples: {
+      basic: {
+        summary: 'Basic XPath extraction',
+        description: 'Extract text using XPath expressions',
+        value: {
+          sessionId: 'session_123456789',
+          xpaths: ['//h1/text()', '//p[@class="content"]/text()', '//a/@href'],
+          extractAttributes: false,
+          timeout: 30000,
         },
       },
       advanced: {
-        summary: 'Advanced XPath extraction',description: 'Extract with complex XPath expressions',value: {sessionId: 'session_123456789',xpaths: ['//div[contains(@class, "product")]//span[@class="price"]/text()",'//table//tr[position()>1]/td[1]/text()','//form//input[@type="hidden"]/@value",],
+        summary: 'Advanced XPath extraction',
+        description: 'Extract with complex XPath expressions',
+        value: {
+          sessionId: 'session_123456789',
+          xpaths: [
+            '//div[contains(@class, "product")]//span[@class="price"]/text()',
+            '//table//tr[position()>1]/td[1]/text()',
+            '//form//input[@type="hidden"]/@value'
+          ],
           extractAttributes: true,
-          waitForSelector: '.content-loaded',timeout: 45000,},
+          waitForSelector: '.content-loaded',
+          timeout: 45000
+        },
       },
     },
   })
