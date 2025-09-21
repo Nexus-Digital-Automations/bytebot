@@ -172,7 +172,17 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
 
         expect(response.body).toHaveProperty('screenshotId');expect(response.body.success).toBe(true);expect(response.body.format).toBe(ScreenshotFormat.PNG);
         expect(response.body.type).toBe(ScreenshotType.FULLPAGE);
-        expect(response.body).toHaveProperty('base64Data');expect(response.body).toHaveProperty('dimensions');});it('should reject invalid screenshot request', async () => {const invalidScreenshotDto = {sessionId: 'invalid-session',type: 'invalid_type',format: 'invalid_format',quality: 150, // Invalid: quality > 100};
+        expect(response.body).toHaveProperty('base64Data');
+        expect(response.body).toHaveProperty('dimensions');
+      });
+
+      it('should reject invalid screenshot request', async () => {
+        const invalidScreenshotDto = {
+          sessionId: 'invalid-session',
+          type: 'invalid_type',
+          format: 'invalid_format',
+          quality: 150, // Invalid: quality > 100
+        };
 
         await request(app.getHttpServer())
           .post('/browser-automation/screenshots/capture').set('Authorization', `Bearer ${authToken}`)
@@ -243,8 +253,14 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
         expect(response.body.status).toBe('success');expect(response.body.data).toHaveProperty('screenshotId');expect(response.body.data).toHaveProperty('base64Data');expect(response.body.data).toHaveProperty('format');expect(response.body).toHaveProperty('timestamp');});});
   });
 
-  describe('Data Extraction', () => {describe('POST /browser-use/sessions/:sessionId/extract', () => {it('should extract page data', async () => {const extractConfig = {selectors: {
-            title: 'h1',description: 'meta[name="description"]",},
+  describe('Data Extraction', () => {
+    describe('POST /browser-use/sessions/:sessionId/extract', () => {
+      it('should extract page data', async () => {
+        const extractConfig = {
+          selectors: {
+            title: 'h1',
+            description: 'meta[name="description"]',
+          },
           waitForSelector: 'body',
           timeout: 5000,
         };
@@ -264,9 +280,13 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
         expect(response.body.status).toBe('healthy');expect(response.body.service).toBe('Browser Use Controller');expect(response.body.version).toBe('2.0.0');expect(response.body).toHaveProperty('statistics');expect(response.body.statistics).toHaveProperty('activeSessions');expect(response.body.statistics).toHaveProperty('runningTasks');});});
   });
 
-  describe('Error Handling', () => {it('should handle rate limiting', async () => {// Attempt multiple rapid requests to trigger rate limitingconst requests = Array.from({ length: 20 }, () =>
+  describe('Error Handling', () => {
+    it('should handle rate limiting', async () => {
+      // Attempt multiple rapid requests to trigger rate limiting
+      const requests = Array.from({ length: 20 }, () =>
         request(app.getHttpServer())
-          .get('/browser-use/health').set('Authorization', `Bearer ${authToken}`)
+          .get('/browser-use/health')
+          .set('Authorization', `Bearer ${authToken}`)
       );
 
       const responses = await Promise.allSettled(requests);
