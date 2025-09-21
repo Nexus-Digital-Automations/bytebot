@@ -751,7 +751,7 @@ describe('Database Migration Conversational Approval', () => {
 
       const avgApprovalWorkflowTime = migrationResults
         .filter(r => r.metrics)
-        .reduce((sum, r) => sum + r.metrics!.approvalWorkflowTime, 0) / (executedMigrations || 1);
+        .reduce((sum, r) => sum + (r.metrics as { approvalWorkflowTime: number })!.approvalWorkflowTime, 0) / (executedMigrations || 1);
 
       logger.log(`Critical Risk Migration Results:
         Total Migrations: ${totalMigrations}
