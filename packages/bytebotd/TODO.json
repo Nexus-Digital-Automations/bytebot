@@ -4140,28 +4140,34 @@
       "id": "error_1758472744606_6z9ua04dp1i"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T20:19:55.848Z",
       "title": "Fix @typescript-eslint/no-unsafe-assignment violations in open-interpreter bridge service",
       "description": "Fix unsafe assignments of error typed values and any values in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/parlant/integration/open-interpreter-parlant-bridge.service.ts. Add proper type annotations and type assertions throughout the file.",
       "category": "error",
-      "id": "error_1758485995848_m48s9binzgr"
+      "id": "error_1758485995848_m48s9binzgr",
+      "completed_at": "2025-09-21T20:25:02.681Z",
+      "updated_at": "2025-09-21T20:25:02.681Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T20:19:56.487Z",
       "title": "Fix @typescript-eslint/no-unsafe-argument violations in open-interpreter bridge service",
       "description": "Fix unsafe arguments of type any assigned to typed parameters. Add proper type casting and validation. Focus on line 311 and any other unsafe argument violations in open-interpreter-parlant-bridge.service.ts",
       "category": "error",
-      "id": "error_1758485996486_kiq17hk88mp"
+      "id": "error_1758485996486_kiq17hk88mp",
+      "completed_at": "2025-09-21T20:25:23.205Z",
+      "updated_at": "2025-09-21T20:25:23.205Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T20:19:57.000Z",
       "title": "Fix @typescript-eslint/no-unsafe-member-access violations in open-interpreter bridge service",
       "description": "Fix unsafe member access on error objects and any typed values in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/parlant/integration/open-interpreter-parlant-bridge.service.ts. Create proper type interfaces and type guards for .approved, .ultraPerformanceMetadata, .status, .progress, and other unsafe member access operations.",
       "category": "error",
-      "id": "error_1758485997000_893cfjivksm"
+      "id": "error_1758485997000_893cfjivksm",
+      "completed_at": "2025-09-21T20:25:09.869Z",
+      "updated_at": "2025-09-21T20:25:09.869Z"
     },
     {
       "status": "completed",
