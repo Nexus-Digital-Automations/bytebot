@@ -33,7 +33,7 @@ import { ComputerUseModule } from '../../computer-use/computer-use.module';
 import { ComputerUseTools } from '../../mcp/computer-use.tools';
 import { BytebotMcpModule } from '../../mcp/bytebot-mcp.module';
 import { ParlantValidatedComputerUseService } from '../../parlant/parlant-validated-computer-use.service';
-import { ParlantIntegrationService, RiskLevel } from '../../parlant/parlant-integration.service';
+import { ParlantIntegrationService, ParlantConversationContext } from '../../parlant/parlant-integration.service';
 import { ParlantModule } from '../../parlant/parlant.module';
 import { EnterpriseApiGatewayController } from '../../enterprise-api/enterprise-api-gateway.controller';
 import { EnterpriseApiModule } from '../../enterprise-api/enterprise-api.module';
@@ -44,6 +44,7 @@ import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ScreenshotAction,
+  RiskLevel,
 } from '@bytebot/shared';
 import { McpToolResponse, MouseMoveParams } from '../../mcp/types';
 
@@ -534,7 +535,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
 
       // Mock Parlant service timeout
       const validateSpy = jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution');
-      validateSpy.mockImplementation(() => new Promise<ValidationResponse>((_, reject) =>
+      (validateSpy as jest.MockedFunction<(request: any) => Promise<ValidationResponse>>).mockImplementation(() => new Promise<ValidationResponse>((_, reject) =>
             setTimeout(() => reject(new Error('Parlant validation timeout')), 10000)));
 
       const action: MoveMouseAction = {
@@ -559,7 +560,7 @@ recordRecoveryMetrics(scenario, startTime, endTime, {
       functionParams: action,
       actionDescription: 'Move mouse cursor',
       context: validationContext,
-      riskLevel: RiskLevel.LOW,
+      riskLevel: RiskLevel._LOW,
               operationId: 'test-op',
 }),new Promise((_, reject) => 
               setTimeout(() => reject(new Error('Validation timeout')), 5000)),]);
@@ -639,7 +640,7 @@ return isLowRisk;
           functionParams: {},
           actionDescription: 'test',
           context: mockValidationContext,
-          riskLevel: RiskLevel.LOW,
+          riskLevel: RiskLevel._LOW,
           operationId: 'test',
         }),
         {
