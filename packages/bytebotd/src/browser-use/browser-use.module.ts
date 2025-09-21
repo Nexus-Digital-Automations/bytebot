@@ -1,4 +1,8 @@
-import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { EventEmitterModule } from '@nestjs/event-emitter';import { ScheduleModule } from '@nestjs/schedule';import { BrowserUseController } from './browser-use.controller';import { ParlantValidatedBrowserUseController } from './parlant-validated-browser-use.controller';import { EnhancedBrowserAutomationController } from './enhanced-browser-automation.controller';import { BrowserTaskExecutionController } from './browser-task-execution.controller';import { BrowserInteractionController } from './browser-interaction.controller';import { BrowserOrchestrationSessionController } from './browser-orchestration-session.controller';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserOrchestrationSessionService } from './browser-orchestration-session.service';import { BrowserTaskService } from './browser-task.service';import { BrowserAsyncJobService } from './browser-async-job.service';import { BrowserTaskExecutionService } from './browser-task-execution.service';import { BrowserInteractionService } from './browser-interaction.service';import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';import { MediaController } from './media.controller';import { MediaService } from './media.service';import { ExtractionController } from './extraction.controller';import { ExtractionService } from './extraction.service';import { ExtractionOrchestrationController } from './extraction-orchestration.controller';// Parlant-validated browser services importsimport { ParlantModule } from '../parlant/parlant.module';import { ParlantValidatedBrowserUseService } from './parlant-validated-browser-use.service';import { ParlantValidatedBrowserSessionService } from './parlant-validated-browser-session.service';import { ParlantValidatedBrowserTaskService } from './parlant-validated-browser-task.service';import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-browser-async-job.service';
+import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import { EventEmitterModule } from '@nestjs/event-emitter';import { ScheduleModule } from '@nestjs/schedule';import { BrowserUseController } from './browser-use.controller';import { ParlantValidatedBrowserUseController } from './parlant-validated-browser-use.controller';import { EnhancedBrowserAutomationController } from './enhanced-browser-automation.controller';import { BrowserTaskExecutionController } from './browser-task-execution.controller';import { BrowserInteractionController } from './browser-interaction.controller';import { BrowserOrchestrationSessionController } from './browser-orchestration-session.controller';import { BrowserUseService } from './browser-use.service';import { BrowserSessionService } from './browser-session.service';import { BrowserOrchestrationSessionService } from './browser-orchestration-session.service';import { BrowserTaskService } from './browser-task.service';import { BrowserAsyncJobService } from './browser-async-job.service';import { BrowserTaskExecutionService } from './browser-task-execution.service';import { BrowserInteractionService } from './browser-interaction.service';import { EnhancedBrowserAutomationService } from './enhanced-browser-automation.service';import { MediaController } from './media.controller';import { MediaService } from './media.service';import { ExtractionController } from './extraction.controller';import { ExtractionService } from './extraction.service';import { ExtractionOrchestrationController } from './extraction-orchestration.controller';
+import { AdvancedBrowserAutomationController } from './advanced-browser-automation.controller';
+import { AdvancedBrowserAutomationService } from './advanced-browser-automation.service';
+import { BrowserAutomationGateway } from './browser-automation.gateway';
+// Parlant-validated browser services importsimport { ParlantModule } from '../parlant/parlant.module';import { ParlantValidatedBrowserUseService } from './parlant-validated-browser-use.service';import { ParlantValidatedBrowserSessionService } from './parlant-validated-browser-session.service';import { ParlantValidatedBrowserTaskService } from './parlant-validated-browser-task.service';import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-browser-async-job.service';
 
 /**
  * Browser-Use Module - MAXIMUM PARLANT INTEGRATION
@@ -15,6 +19,12 @@ import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/co
  * - Comprehensive data extraction APIs (text, tables, links, images, structured data, XPath)
  * - Real-time status monitoring and logs with audit trails
  * - Results retrieval and export with compliance validation
+ * - Advanced browser automation with performance monitoring
+ * - Mobile device emulation and responsive testing
+ * - Browser extension management and injection
+ * - Real-time WebSocket communication for live automation
+ * - Intelligent form automation with field auto-detection
+ * - Browser automation recording and script generation
  *
  * Security Features:
  * - Parlant conversational AI validation for ALL browser operations
@@ -59,6 +69,8 @@ import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/co
     ExtractionController,
     // Extraction orchestration controller with distributed scraping and multi-source capabilities
     ExtractionOrchestrationController,
+    // Advanced browser automation controller with specialized features
+    AdvancedBrowserAutomationController,
   ],
   providers: [
     // Original browser services
@@ -78,6 +90,10 @@ import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/co
     MediaService,
     // Data extraction service for comprehensive web scraping
     ExtractionService,
+    // Advanced browser automation service for specialized features
+    AdvancedBrowserAutomationService,
+    // Browser automation WebSocket gateway for real-time communication
+    BrowserAutomationGateway,
 
     // Parlant-validated browser services with conversational AI validation
     ParlantValidatedBrowserUseService,
@@ -103,6 +119,10 @@ import { Module } from '@nestjs/common';import { ConfigModule } from '@nestjs/co
     MediaService,
     // Export data extraction service
     ExtractionService,
+    // Export advanced browser automation service
+    AdvancedBrowserAutomationService,
+    // Export browser automation WebSocket gateway
+    BrowserAutomationGateway,
 
     // Export Parlant-validated services as primary interfaces
     ParlantValidatedBrowserUseService,
