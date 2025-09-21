@@ -214,15 +214,13 @@ export class ExampleUserManagementService {
 
     try {
       // Convert to repository format
-      const repoData = await Promise.all(
-        usersData.map(async (userData) => ({
-          email: userData.email,
-          passwordHash: this.hashPassword(userData.password),
-          role: userData.role,
-          isActive: true,
-          ...(userData.name && { name: userData.name }),
-        }))
-      );
+      const repoData = usersData.map((userData) => ({
+        email: userData.email,
+        passwordHash: this.hashPassword(userData.password),
+        role: userData.role,
+        isActive: true,
+        ...(userData.name && { name: userData.name }),
+      }));
 
       const createdUsers = await this.userRepository.bulkCreate(
         repoData as Array<Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>>,{userId: operationContext.userId,

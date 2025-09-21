@@ -313,7 +313,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
     try {
       // Step 1: Validate JWT payload and extract security context
-      const securityContext = await this.extractSecurityContext(jwtPayload, operationId);
+      const securityContext = this.extractSecurityContext(jwtPayload, operationId);
 
       // Step 2: Create Parlant conversation context
       const parlantContext = this.createParlantConversationContext(securityContext, request);
@@ -346,10 +346,10 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       }
 
       // Step 4: Create Parlant session
-      const parlantSessionId = await this.createParlantSession(parlantContext, validation.conversationId);
+      const parlantSessionId = this.createParlantSession(parlantContext, validation.conversationId);
 
       // Step 5: Generate secure session
-      const session = await this.generateSecureSession(
+      const session = this.generateSecureSession(
         jwtPayload,
         parlantSessionId,
         parlantContext,
@@ -945,16 +945,15 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     this.logger.log('Session monitoring initialized');
   }
 
-  private async extractSecurityContext(
+  private extractSecurityContext(
     jwtPayload: EnhancedJwtPayload,
     operationId: string
-  ): Promise<{
-  userId: string;
+  ): {
+    userId: string;
     role: UserRole;
     securityClassification: SecurityClassification;
     permissions: Permission[];
-  
-}> {
+  } {
     // Validate and extract security context from JWT
     const roleMapping = (this.roleClassificationMappings as any)?.get?.((jwtPayload as any)?.role);
     if (!roleMapping) {
@@ -1029,27 +1028,26 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 }
   }
 
-  private async createParlantSession(
+  private createParlantSession(
     _parlantContext: ParlantConversationContext,
     _conversationId: string
-  ): Promise<string> {
-  // In real implementation, this would create a session via Parlant API
+  ): string {
+    // In real implementation, this would create a session via Parlant API
     // For now, return a mock session ID
     return `parlant_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async generateSecureSession(
+  private generateSecureSession(
     jwtPayload: EnhancedJwtPayload,
     parlantSessionId: string,
     parlantContext: ParlantConversationContext,
     conversationId: string,
     request: {
-  ipAddress: string;
+      ipAddress: string;
       userAgent: string;
       sessionMetadata?: Record<string, unknown>;
-    
-}
-  ): Promise<ParlantSecuritySession> {
+    }
+  ): ParlantSecuritySession {
     const sessionId = `session_${(Date as any)?.now?.()}_${(Math as any)?.random?.().toString(36).substring(7)}`;
     const now = new Date();
     const sessionDuration = (this as any)?.calculateSessionDuration?.((jwtPayload as any)?.role);

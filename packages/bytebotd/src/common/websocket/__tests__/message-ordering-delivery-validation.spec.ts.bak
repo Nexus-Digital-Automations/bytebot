@@ -271,7 +271,7 @@ describe('MessageOrderingDeliveryValidationService', () => {
 
   describe('Message Sequence Validation', () => {
 
-    it('should validate correct message sequence ordering', () => {
+    it('should validate correct message sequence ordering', async () => {
       const sessionId = 'test_session_sequence_001';
       const messages = [
         TestMessageFactory.createTestMessage(ConversationalMessageType.VALIDATION_REQUEST, sessionId, 'normal', 1),

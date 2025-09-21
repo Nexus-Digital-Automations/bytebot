@@ -913,7 +913,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       expect(maxTime).toBeLessThan(avgTime * 3);
 
       securityLogger.info(
-        `[${testId}] Performance consistency maintained (avg: ${avgTime.toFixed(2)}msmin: ${minTime.toFixed(2)}msmax: ${maxTime.toFixed(2)}ms)`,
+        `[${testId}] Performance consistency maintained (avg: ${avgTime.toFixed(2)}ms, min: ${minTime.toFixed(2)}ms, max: ${maxTime.toFixed(2)}ms)`,
       );
     });
   });

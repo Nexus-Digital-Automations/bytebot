@@ -75,7 +75,9 @@ export interface BrowserUseRole {
  * Role restriction definition
  */
 export interface RoleRestriction {
-  type: 'TIME' | 'LOCATION' | 'IP_RANGE' | 'DEVICE' | 'APPROVAL_REQUIRED';configuration: Record<string, unknown>;active: boolean;
+  type: 'TIME' | 'LOCATION' | 'IP_RANGE' | 'DEVICE' | 'APPROVAL_REQUIRED';
+  configuration: Record<string, unknown>;
+  active: boolean;
   exemptUsers: string[];
 }
 
@@ -96,16 +98,24 @@ export interface PermissionEvaluationContext {
 export interface BrowserOperationContext {
   endpoint: string;
   method: string;
-  operationType: 'READ' | 'WRITE' | 'DELETE' | 'ADMIN';resourceType: 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA' | 'SYSTEM';targetResource?: string;parameters: Record<string, unknown>;
+  operationType: 'READ' | 'WRITE' | 'DELETE' | 'ADMIN';
+  resourceType: 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA' | 'SYSTEM';
+  targetResource?: string;
+  parameters: Record<string, unknown>;
   estimatedRiskLevel: RiskLevel;
-  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
+  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+/**
  * Environment context for authorization decisions
  */
 export interface EnvironmentContext {
   currentTime: Date;
   userLocation?: GeolocationCoordinates;
   networkSegment: string;
-  securityPosture: 'NORMAL' | 'ELEVATED' | 'HIGH_ALERT' | 'MAINTENANCE';complianceMode: boolean;emergencyMode: boolean;
+  securityPosture: 'NORMAL' | 'ELEVATED' | 'HIGH_ALERT' | 'MAINTENANCE';
+  complianceMode: boolean;
+  emergencyMode: boolean;
 }
 
 /**
@@ -126,7 +136,9 @@ export interface AuthorizationDecision {
  * Authorization condition
  */
 export interface AuthorizationCondition {
-  type: 'MONITORING' | 'APPROVAL' | 'MFA' | 'TIME_LIMIT' | 'SUPERVISION';description: string;parameters: Record<string, unknown>;
+  type: 'MONITORING' | 'APPROVAL' | 'MFA' | 'TIME_LIMIT' | 'SUPERVISION';
+  description: string;
+  parameters: Record<string, unknown>;
   mandatory: boolean;
 }
 
@@ -139,7 +151,9 @@ export interface AuthorizationAuditEntry {
   userId: string;
   sessionId: string;
   operation: string;
-  decision: 'GRANTED' | 'DENIED' | 'ESCALATED';reasoning: string;riskLevel: RiskLevel;
+  decision: 'GRANTED' | 'DENIED' | 'ESCALATED';
+  reasoning: string;
+  riskLevel: RiskLevel;
   conditions: string[];
   processingTime: number;
   metadata: Record<string, unknown>;
@@ -154,7 +168,10 @@ export interface ConversationalAuthorizationResult {
   conversationId?: string;
   reasoning?: string;
   conditions?: string[];
-  escalationLevel?: 'STANDARD' | 'SUPERVISOR' | 'SECURITY_TEAM' | 'EMERGENCY';}/**
+  escalationLevel?: 'STANDARD' | 'SUPERVISOR' | 'SECURITY_TEAM' | 'EMERGENCY';
+}
+
+/**
  * Permission escalation request
  */
 export interface PermissionEscalationRequest {
@@ -164,17 +181,28 @@ export interface PermissionEscalationRequest {
   businessJustification: string;
   requestDuration: number;
   emergencyOverride: boolean;
-  approvalWorkflow: 'STANDARD' | 'EXPEDITED' | 'EMERGENCY';}/**
+  approvalWorkflow: 'STANDARD' | 'EXPEDITED' | 'EMERGENCY';
+}
+
+/**
  * Decorator for marking endpoints with required permissions
  */
 export const RequirePermissions = (permissions: BrowserPermission[]) =>
-  Reflector.createDecorator<BrowserPermission[]>({ key: 'permissions', value: permissions });/*** Decorator for marking endpoints with required roles
+  Reflector.createDecorator<BrowserPermission[]>({ key: 'permissions', value: permissions });
+
+/**
+ * Decorator for marking endpoints with required roles
  */
 export const RequireRoles = (roles: string[]) =>
-  Reflector.createDecorator<string[]>({ key: 'roles', value: roles });/*** Decorator for marking high-risk operations requiring conversational validation
+  Reflector.createDecorator<string[]>({ key: 'roles', value: roles });
+
+/**
+ * Decorator for marking high-risk operations requiring conversational validation
  */
 export const RequireConversationalApproval = (riskLevel: RiskLevel = RiskLevel._HIGH) =>
-  Reflector.createDecorator<RiskLevel>({ key: 'conversationalApproval', value: riskLevel });/*** Browser Use RBAC Guard
+  Reflector.createDecorator<RiskLevel>({ key: 'conversationalApproval', value: riskLevel });
+
+/** Browser Use RBAC Guard
  *
  * Comprehensive role-based access control implementation providing:
  * - Multi-level permission validation
@@ -189,17 +217,30 @@ export class BrowserUseRbacGuard implements CanActivate {
 
   // Role definitions with hierarchical structure
   private readonly roleDefinitions: Map<string, BrowserUseRole> = new Map([
-    ['browser_admin', {name: 'browser_admin',displayName: 'Browser Administrator',description: 'Full administrative access to all browser automation features',permissions: Object.values(BrowserPermission),inheritsFrom: [],
+    ['browser_admin', {
+      name: 'browser_admin',
+      displayName: 'Browser Administrator',
+      description: 'Full administrative access to all browser automation features',
+      permissions: Object.values(BrowserPermission),
+      inheritsFrom: [],
       restrictions: [
         {
-          type: 'APPROVAL_REQUIRED',configuration: { operationTypes: ['DELETE', 'ADMIN'] },active: true,exemptUsers: [],
+          type: 'APPROVAL_REQUIRED',
+          configuration: { operationTypes: ['DELETE', 'ADMIN'] },
+          active: true,
+          exemptUsers: [],
         },
       ],
       securityLevel: SecurityLevel._CRITICAL,
       maxSessionDuration: 14400000, // 4 hours
       emergencyAccess: true,
     }],
-    ['browser_power_user', {name: 'browser_power_user',displayName: 'Browser Power User',description: 'Advanced browser automation capabilities with some restrictions',permissions: [BrowserPermission.CREATE_TASK,
+    ['browser_power_user', {
+      name: 'browser_power_user',
+      displayName: 'Browser Power User',
+      description: 'Advanced browser automation capabilities with some restrictions',
+      permissions: [
+        BrowserPermission.CREATE_TASK,
         BrowserPermission.VIEW_TASK,
         BrowserPermission.STOP_TASK,
         BrowserPermission.CREATE_SESSION,
@@ -208,8 +249,12 @@ export class BrowserUseRbacGuard implements CanActivate {
         BrowserPermission.ASYNC_JOBS,
         BrowserPermission.EXTERNAL_DOMAINS,
       ],
-      inheritsFrom: ['browser_user'],restrictions: [{
-          type: 'TIME',configuration: { allowedHours: { start: 6, end: 22 } },active: true,
+      inheritsFrom: ['browser_user'],
+      restrictions: [
+        {
+          type: 'TIME',
+          configuration: { allowedHours: { start: 6, end: 22 } },
+          active: true,
           exemptUsers: [],
         },
       ],
@@ -217,7 +262,12 @@ export class BrowserUseRbacGuard implements CanActivate {
       maxSessionDuration: 28800000, // 8 hours
       emergencyAccess: false,
     }],
-    ['browser_user', {name: 'browser_user',displayName: 'Browser User',description: 'Standard browser automation access for routine operations',permissions: [BrowserPermission.CREATE_TASK,
+    ['browser_user', {
+      name: 'browser_user',
+      displayName: 'Browser User',
+      description: 'Standard browser automation access for routine operations',
+      permissions: [
+        BrowserPermission.CREATE_TASK,
         BrowserPermission.VIEW_TASK,
         BrowserPermission.STOP_TASK,
         BrowserPermission.CREATE_SESSION,
@@ -226,7 +276,9 @@ export class BrowserUseRbacGuard implements CanActivate {
       inheritsFrom: [],
       restrictions: [
         {
-          type: 'TIME',configuration: { allowedHours: { start: 8, end: 18 } },active: true,
+          type: 'TIME',
+          configuration: { allowedHours: { start: 8, end: 18 } },
+          active: true,
           exemptUsers: [],
         },
       ],
@@ -234,7 +286,12 @@ export class BrowserUseRbacGuard implements CanActivate {
       maxSessionDuration: 14400000, // 4 hours
       emergencyAccess: false,
     }],
-    ['browser_readonly', {name: 'browser_readonly',displayName: 'Browser Read-Only',description: 'Read-only access to browser automation results and status',permissions: [BrowserPermission.VIEW_TASK,
+    ['browser_readonly', {
+      name: 'browser_readonly',
+      displayName: 'Browser Read-Only',
+      description: 'Read-only access to browser automation results and status',
+      permissions: [
+        BrowserPermission.VIEW_TASK,
       ],
       inheritsFrom: [],
       restrictions: [],
@@ -266,7 +323,10 @@ export class BrowserUseRbacGuard implements CanActivate {
     private readonly parlantService: ParlantIntegrationService,
   ) {
     this.logger.log('🛡️ Browser Use RBAC Guard initialized');
-    this.logger.log(`📋 Configured roles: ${Array.from(this.roleDefinitions.keys()).join(`, ')}`);// Start periodic cleanupsetInterval(() => this.performAuthorizationCleanup(), 300000); // Every 5 minutes
+    this.logger.log(`📋 Configured roles: ${Array.from(this.roleDefinitions.keys()).join(', ')}`);
+
+    // Start periodic cleanup
+    setInterval(() => this.performAuthorizationCleanup(), 300000); // Every 5 minutes
     setInterval(() => this.logAuthorizationMetrics(), 600000); // Every 10 minutes
   }
 

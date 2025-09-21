@@ -5249,10 +5249,82 @@
       "updated_at": "2025-09-21T04:49:17.632Z",
       "archived_at": "2025-09-21T04:49:17.655Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:42:42.076Z",
+      "title": "Fix @typescript-eslint/require-await violations in bytebotd common module",
+      "description": "Fix TypeScript ESLint violations including @typescript-eslint/require-await, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, and @typescript-eslint/no-unsafe-member-access in common module directories: interceptors, pipes, guards, error-handling, filters, middleware",
+      "category": "error",
+      "id": "error_1758429762076_1xiqunex42m",
+      "completed_at": "2025-09-21T04:51:18.523Z",
+      "updated_at": "2025-09-21T04:51:18.523Z",
+      "archived_at": "2025-09-21T04:51:18.531Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:42:43.181Z",
+      "title": "Fix @typescript-eslint/require-await violations in bytebotd websocket test files group 3",
+      "description": "Fix TypeScript ESLint violations in websocket test files: load-stress-testing.spec.ts, message-ordering-delivery-validation.spec.ts, message-ordering-performance-benchmarks.spec.ts, message-ordering-reliability.spec.ts, performance-benchmarking.spec.ts. Focus on @typescript-eslint/require-await, no-unsafe-assignment, no-unsafe-call, and no-unsafe-member-access violations.",
+      "category": "error",
+      "id": "error_1758429763180_59eglecvq5h",
+      "completed_at": "2025-09-21T04:51:55.607Z",
+      "updated_at": "2025-09-21T04:51:55.607Z",
+      "archived_at": "2025-09-21T04:51:55.613Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:42:42.823Z",
+      "title": "Fix @typescript-eslint/require-await violations in websocket test files group 4",
+      "description": "Fix ESLint violations in realtime messaging and integration test files: realtime-message-flow.spec.ts, security-validation.spec.ts, testing-framework-integration.spec.ts, websocket-connection-lifecycle.spec.ts, websocket-integration.spec.ts. Remove async keyword from functions that don't use await OR add proper await calls for asynchronous operations.",
+      "category": "error",
+      "id": "error_1758429762822_cepepwf8nae",
+      "assigned_agent": "dev_session_1758429747562_1_general_b9fc641b",
+      "started_at": "2025-09-21T04:51:55.745Z",
+      "claimed_by": "dev_session_1758429747562_1_general_b9fc641b",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758429747562_1_general_b9fc641b",
+          "role": "primary",
+          "assignedAt": "2025-09-21T04:51:55.745Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T04:52:46.328Z",
+      "updated_at": "2025-09-21T04:52:46.329Z",
+      "archived_at": "2025-09-21T04:52:46.335Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:42:43.375Z",
+      "title": "Fix @typescript-eslint/require-await violations in bytebotd database module",
+      "description": "Fix TypeScript ESLint require-await violations in database files: conversational-database.service.ts, database-api.controller.ts, conversational-database-integration.example.ts, and user-conversational-repository.service.ts. Remove async keyword from functions without await or add proper await calls for database operations.",
+      "category": "error",
+      "id": "error_1758429763375_kgy5gvv4km",
+      "assigned_agent": "dev_session_1758429747681_1_general_839ea28a",
+      "started_at": "2025-09-21T04:52:53.380Z",
+      "claimed_by": "dev_session_1758429747681_1_general_839ea28a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758429747681_1_general_839ea28a",
+          "role": "primary",
+          "assignedAt": "2025-09-21T04:52:53.380Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T04:53:09.232Z",
+      "updated_at": "2025-09-21T04:53:09.232Z",
+      "archived_at": "2025-09-21T04:53:09.238Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 164,
+  "total_completed": 168,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-21T04:49:17.655Z"
+  "last_archived": "2025-09-21T04:53:09.238Z"
 }

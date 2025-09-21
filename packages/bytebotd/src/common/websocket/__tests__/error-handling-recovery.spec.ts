@@ -457,7 +457,7 @@ private scheduleReconnection(): void {
     }, delay);
   }
 
-  async sendMessage(message: ConversationalMessage): Promise<void>  {
+  sendMessage(message: ConversationalMessage): void  {
   if (!this.connected || !this.ws) {
       if (this.options.queueMessages) {
         this.messageQueue.push(message);
@@ -503,7 +503,7 @@ private scheduleReconnection(): void {
     await this.connect();
   }
 
-  async disconnect(): Promise<void>  {
+  disconnect(): void  {
   this.options.autoReconnect = false;
     if (this.ws) {
       this.ws.close(1000, 'Normal closure');

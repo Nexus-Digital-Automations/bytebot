@@ -155,17 +155,17 @@ describe('Security Penetration Testing Suite', () => {
       return {
         prototypeInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          __proto__: { role: UserRole.ADMIN, isAdmin: true }
+          __proto__: { role: UserRole._ADMIN, isAdmin: true }
         }),
         constructorInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          constructor: { prototype: { role: UserRole.ADMIN } }
+          constructor: { prototype: { role: UserRole._ADMIN } }
         }),
         roleConfusion: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          role: UserRole.VIEWER,
+          role: UserRole._VIEWER,
           admin: true,
-          roles: [UserRole.ADMIN],
+          roles: [UserRole._ADMIN],
           privileges: ['admin']
         }),
         xssInjection: JWTManipulator.createVulnerableJWT({
@@ -435,10 +435,11 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const basePayload = {
-  sub: 'attacker',
-      email: 'attacker@malicious.com', role: UserRole._ADMINex, p: Math.floor(Date.now() / 1000) + 3600,
-      
-};
+        sub: 'attacker',
+        email: 'attacker@malicious.com',
+        role: UserRole._ADMIN,
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
 
       const maliciousTokens =
         JWTManipulator.createAlgorithmConfusionTokens(basePayload);
@@ -534,10 +535,11 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const basePayload = {
-  sub: 'low-privilege-user',
-      email: 'user@test.com', role: UserRole._VIEWERex, p: Math.floor(Date.now() / 1000) + 3600,
-      
-};
+        sub: 'low-privilege-user',
+        email: 'user@test.com',
+        role: UserRole._VIEWER,
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
 
       const maliciousTokens =
         JWTManipulator.createPayloadInjectionTokens(basePayload);
@@ -579,11 +581,16 @@ describe('Security Penetration Testing Suite', () => {
               request.user.roles?.includes(UserRole._ADMIN));
 
           attackResults.push({
-  attackTypesuccess: escalationSuccessvulnerabilit, y: escalationSuccess ? 'CRITICAL' : 'NONE'
-      
-});
+            attackType: attackType,
+            success: escalationSuccess,
+            vulnerability: escalationSuccess ? 'CRITICAL' : 'NONE'
+          });
         } catch (_error) {
-          attackResults.push({ attackTypesuccess: falseblocke, d: true });
+          attackResults.push({
+            attackType: attackType,
+            success: false,
+            blocked: true
+          });
         }
       }
 
@@ -605,12 +612,13 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const _targetUser: ByteBotdUser = {
-  sub: 'escalation-target',
-      id: 'escalation-target',
+        sub: 'escalation-target',
+        id: 'escalation-target',
         email: 'target@test.com',
-      username: 'target', role: UserRole._VIEWERisActiv, e: true,
-      
-};
+        username: 'target',
+        role: UserRole._VIEWER,
+        isActive: true,
+      };
 
       jest
         .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);const raceAttackResults =
@@ -657,37 +665,41 @@ describe('Security Penetration Testing Suite', () => {
           } as SecurityTestUser,
         },
         {
-  name: 'constructor-manipulation',
-      user: {id: 'attacker-2',
-      email: 'attacker2@malicious.com',
-        username: 'attacker2',
-      role: UserRole._VIEWERisActiv, e: trueconstructo, r: {
-  prototype: {
-  role: UserRole._ADMINpermission, s: [Permission._SYSTEM_ADMIN],
-              
-},
+          name: 'constructor-manipulation',
+          user: {
+            id: 'attacker-2',
+            email: 'attacker2@malicious.com',
+            username: 'attacker2',
+            role: UserRole._VIEWER,
+            isActive: true,
+            constructor: {
+              prototype: {
+                role: UserRole._ADMIN,
+                permissions: [Permission._SYSTEM_ADMIN],
+              },
             },
           } as SecurityTestUser,
         },
         {
-  name: 'role-confusion',
-      user: {sub: 'attacker-3',
-      id: 'attacker-3',
-        email: 'attacker3@malicious.com',
-      username: 'attacker3',
-        role: UserRole._VIEWERisActiv, e: truepermission, s: [Permission._SYSTEM_ADMIN],
-          
-} as ByteBotdUser | undefined,
+          name: 'role-confusion',
+          user: {
+            sub: 'attacker-3',
+            id: 'attacker-3',
+            email: 'attacker3@malicious.com',
+            username: 'attacker3',
+            role: UserRole._VIEWER,
+            isActive: true,
+            permissions: [Permission._SYSTEM_ADMIN],
+          } as ByteBotdUser | undefined,
         },
       ];
 
       const escalationResults = [];
 
       for (const attackVector of attackVectors) {
-  const context = createPentestExecutionContext(
+        const context = createPentestExecutionContext(
           attackVector.user as ByteBotdUser,
-          {
-},
+          {},
           { attackVector: attackVector.name },
         );
 
@@ -695,16 +707,18 @@ describe('Security Penetration Testing Suite', () => {
           .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]).mockReturnValueOnce(undefined);
 
         try {
-  const result = await rolesGuard.canActivate(context);
+          const result = await rolesGuard.canActivate(context);
           escalationResults.push({
-  attack: attackVector.namesucces, s: resultvulnerabilit, y: result ? 'CRITICAL' : 'NONE'
-      
-});
+            attack: attackVector.name,
+            success: result,
+            vulnerability: result ? 'CRITICAL' : 'NONE'
+          });
         } catch (_error) {
-  escalationResults.push({
-  attack: attackVector.namesucces, s: falseblocke, d: true
-      
-});
+          escalationResults.push({
+            attack: attackVector.name,
+            success: false,
+            blocked: true
+          });
         }
       }
 
