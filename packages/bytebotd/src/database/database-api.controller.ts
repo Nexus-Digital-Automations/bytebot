@@ -223,17 +223,17 @@ export interface DatabaseAnalyticsDto {
     description: 'Query executed successfully',schema: {type: 'object',properties: {data: { type: 'array', items: { type: 'object' 
 } },totalRows: { type: 'number' },executionTime: { type: 'number' },operationId: { type: 'string' }}}
   })
-  async executeQuery(
+  executeQuery(
     @Query('query') query: string,@Query('limit') limit?: number,@Query('offset') offset?: number,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   data: unknown[];
     totalRows: number;
     executionTime: number;
     operationId: string;
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
     const startTime = Date.now();
 
@@ -253,7 +253,7 @@ export interface DatabaseAnalyticsDto {
       this.validateReadOnlyQuery(query);
 
       // Execute query with timeout and safety checks
-      const data = await this.executeReadOnlyQuery({
+      const data = this.executeReadOnlyQuery({
         query,
         parameters: {
 },
@@ -304,16 +304,16 @@ export interface DatabaseAnalyticsDto {
   
 })
   @ApiOperation({
-    summary: 'Get table schema',description: 'Retrieve schema information for specified database table'})@ApiParam({ name: 'tableName', description: 'Name of the table' })async getTableSchema(@Param('tableName') tableName: string,
+    summary: 'Get table schema',description: 'Retrieve schema information for specified database table'})@ApiParam({ name: 'tableName', description: 'Name of the table' })getTableSchema(@Param('tableName') tableName: string,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   tableName: string;
     columns: unknown[];
     indexes: unknown[];
     constraints: unknown[];
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId
@@ -387,17 +387,17 @@ export interface DatabaseAnalyticsDto {
       }
     }
   })
-  async executeModification(
+  executeModification(
     @Body() modificationDto: DatabaseModificationDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   success: boolean;
     affectedRows: number;
     operationId: string;
     backupId?: string;
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
     const startTime = Date.now();
 
@@ -409,7 +409,7 @@ export interface DatabaseAnalyticsDto {
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true,
-      securityLevel: conversationContext?.securityLevel
+      securityLevel: (conversationContext?.securityLevel as string) ?? SecurityLevel.MEDIUM
     
 });
 
@@ -423,7 +423,7 @@ export interface DatabaseAnalyticsDto {
         backupId = this.createPreModificationBackup(modificationDto.table);
         this.logger.log(`[${operationId
 }] Pre-modification backup created: ${backupId}`);}// Execute modification in transaction if requested
-      const result = await this.executeModificationOperation(modificationDto, operationId);
+      const result = this.executeModificationOperation(modificationDto, operationId);
 
       const executionTime = Date.now() - startTime;
       this.logger.log(`[${operationId}] Modification completed successfully (${executionTime}ms)`, {
@@ -504,16 +504,16 @@ export interface DatabaseAnalyticsDto {
 },ddl: { type: 'string' },description: { type: 'string' },reversible: { type: 'boolean' },rollbackInstructions: { type: 'string' }},required: ['operation', 'ddl', 'description']
     }
   })
-  async executeSchemaChange(
+  executeSchemaChange(
     @Body() schemaDto: DatabaseSchemaDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   success: boolean;
     migrationId: string;
     operationId: string;
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId
@@ -585,17 +585,17 @@ export interface DatabaseAnalyticsDto {
   summary: 'Create database backup',description: 'Create full or incremental database backup with encryption'
   
 })
-  async createBackup(
+  createBackup(
     @Body() backupDto: DatabaseBackupDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   success: boolean;
     backupId: string;
     location: string;
     size: number;
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId
@@ -629,18 +629,18 @@ export interface DatabaseAnalyticsDto {
 })
   @ApiOperation({
     summary: 'Get database analytics',description: 'Retrieve comprehensive database performance and usage analytics'})@ApiQuery({ name: 'timeRange', enum: ['1h', '24h', '7d', '30d'] })
-  async getAnalytics(
+  getAnalytics(
     @Query() analyticsDto: DatabaseAnalyticsDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
-  ): Promise<{
+  ): {
   timeRange: string;
     performance: unknown;
     security: unknown;
     usage: unknown;
     timestamp: Date;
-  
-}> {
+
+} {
   const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId
@@ -690,18 +690,18 @@ export interface DatabaseAnalyticsDto {
 }
   }
 
-  private async executeReadOnlyQuery(queryDto: DatabaseQueryDto): Promise<unknown[]> {
+  private executeReadOnlyQuery(queryDto: DatabaseQueryDto): unknown[] {
   // Mock implementation - would integrate with actual database
     return [];
-  
+
 }
 
-  private async executeModificationOperation(
+  private executeModificationOperation(
     dto: DatabaseModificationDto,
     operationId: string
-  ): Promise<{ affectedRows: number }> {
+  ): { affectedRows: number } {
   // Mock implementation - would integrate with actual database
-    return { affectedRows: 1 
+    return { affectedRows: 1
 };
   }
 
