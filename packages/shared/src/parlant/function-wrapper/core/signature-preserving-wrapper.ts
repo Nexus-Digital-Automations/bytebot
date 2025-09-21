@@ -83,7 +83,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         // Step 2: Pre-execution validation through PARLANT
-        const validationResult = await wrapper.performParlantValidation(
+        const validationResult = wrapper.performParlantValidation(
           validationContext
         );
 
@@ -107,7 +107,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         // Step 4: Post-execution processing
-        const executionMetadata = await wrapper.createExecutionMetadata(
+        const executionMetadata = wrapper.createExecutionMetadata(
           executionId,
           startTime,
           validationResult,
@@ -149,7 +149,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           startTime
         );
 
-        const executionMetadata = await wrapper.createErrorExecutionMetadata(
+        const executionMetadata = wrapper.createErrorExecutionMetadata(
           executionId,
           startTime,
           wrapperError
@@ -266,9 +266,9 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param context - Validation context
    * @returns Validation result
    */
-  private async performParlantValidation(
+  private performParlantValidation(
     context: ValidationContext
-  ): Promise<ValidationResult> {
+  ): ValidationResult {
     const startTime = Date.now();
 
     try {
@@ -458,12 +458,12 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param functionResult - Function execution result
    * @returns Execution metadata
    */
-  private async createExecutionMetadata(
+  private createExecutionMetadata(
     executionId: string,
     startTime: number,
     validationResult: ValidationResult,
     functionResult: any
-  ): Promise<ExecutionMetadata> {
+  ): ExecutionMetadata {
     const totalExecutionTime = Date.now() - startTime;
     const validationExecutionTime = validationResult.executionTime;
     const functionExecutionTime = totalExecutionTime - validationExecutionTime;
@@ -509,11 +509,11 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param error - Wrapper error
    * @returns Execution metadata
    */
-  private async createErrorExecutionMetadata(
+  private createErrorExecutionMetadata(
     executionId: string,
     startTime: number,
     error: WrapperError
-  ): Promise<ExecutionMetadata> {
+  ): ExecutionMetadata {
     const totalExecutionTime = Date.now() - startTime;
 
     // Mock validation result for error case
