@@ -810,6 +810,7 @@ async def extract_links():
 
 asyncio.run(extract_links())
 `;
+  }
 
   /**
    * Generate Python script for image extraction
@@ -872,13 +873,18 @@ async def extract_images():
                 extracted_data.append(img_data)
 
             except Exception as e:
-                sys.stderr.write(f"Error processing image {i}: {str(e)}\n")continueprint(json.dumps(extracted_data))
+                sys.stderr.write(f"Error processing image {i}: {str(e)}\n")
+                continue
+
+        print(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Image extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"Image extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_images())
 `;
+  }
 
   /**
    * Generate Python script for structured data extraction
@@ -963,6 +969,7 @@ async def extract_structured_data():
 
 asyncio.run(extract_structured_data())
 `;
+  }
 
   /**
    * Generate Python script for XPath extraction
@@ -1043,7 +1050,8 @@ async def extract_xpath():
         print(json.dumps(results))
 
     except Exception as e:
-        sys.stderr.write(f"XPath extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"XPath extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_xpath())
 ";
