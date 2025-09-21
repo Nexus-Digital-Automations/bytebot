@@ -3649,12 +3649,14 @@
       "updated_at": "2025-09-21T04:24:59.318Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T04:21:32.891Z",
       "title": "Quality Assurance - Validate ESLint parsing error fixes",
       "description": "Monitor and validate all parsing error fixes from concurrent agents. Run comprehensive ESLint validation to ensure all 24 parsing errors in bytebotd are resolved and no new errors were introduced.",
       "category": "test",
-      "id": "test_1758428492891_31bkcyq9cwj"
+      "id": "test_1758428492891_31bkcyq9cwj",
+      "completed_at": "2025-09-21T04:29:16.150Z",
+      "updated_at": "2025-09-21T04:29:16.150Z"
     },
     {
       "status": "pending",

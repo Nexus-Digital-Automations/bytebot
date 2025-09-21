@@ -721,7 +721,7 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should handle JWT service failures gracefully'async, () => {
+    it('should handle JWT service failures gracefully', async () => {
       const testId = `${operationId}_jwt_service_failure`;console.log(
 
       );

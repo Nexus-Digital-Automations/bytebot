@@ -917,14 +917,19 @@ class RegressionTestManager {
     // Check performance regression
     const performanceChange = (current.duration - baseline.duration) / baseline.duration;
     if (performanceChange > this.regressionThresholds.performanceDegradation) {
-      regressionIssues.push(`Performance degraded by ${(performanceChange * 100).toFixed(1)
-}%`);}// Check success rate regression
+      regressionIssues.push(`Performance degraded by ${(performanceChange * 100).toFixed(1)}%`);
+    }
+
+    // Check success rate regression
     const baselineSuccessRate = baseline.summary.passed / baseline.summary.total;
     const currentSuccessRate = current.summary.passed / current.summary.total;
     const successRateChange = baselineSuccessRate - currentSuccessRate;
 
     if (successRateChange > this.regressionThresholds.successRateDrops) {
-      regressionIssues.push(`Success rate dropped by ${(successRateChange * 100).toFixed(1)}%`);}// Check for new failures
+      regressionIssues.push(`Success rate dropped by ${(successRateChange * 100).toFixed(1)}%`);
+    }
+
+    // Check for new failures
     const newFailures = current.summary.failed - baseline.summary.failed;
     if (newFailures > this.regressionThresholds.newFailures) {
       regressionIssues.push(`${newFailures} new test failures`);
@@ -970,7 +975,8 @@ private generateRegressionSummary(regressions: RegressionDetection[]): string {
     
 }, {} as Record<string, number>);
 
-    return `${regressions.length} regressions detected: ${Object.entries(bySeverity).map(([severity, count]) => `${count} ${severity}`).join(`, ')}';}
+    return `${regressions.length} regressions detected: ${Object.entries(bySeverity).map(([severity, count]) => `${count} ${severity}`).join(', ')}`;
+  }
 
   private generateRegressionRecommendations(regressions: RegressionDetection[]): string[] {
   const recommendations: string[] = [];

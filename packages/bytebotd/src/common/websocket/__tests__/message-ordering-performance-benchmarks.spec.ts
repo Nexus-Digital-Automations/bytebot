@@ -850,17 +850,20 @@ const messageCount = 2000;analyzer.startMeasurement(testName);
 
       // Pre-create messages and validate them
       const messages: ConversationalMessage[] = [];
-      for (let i = 1; i <= messageCount; i++) 
-        const message = createBenchmarkMessage('ack_session', i);service.validateMessageSequence(message);messages.push(message);
-      
-}
+      for (let i = 1; i <= messageCount; i++) {
+        const message = createBenchmarkMessage('ack_session', i);
+        service.validateMessageSequence(message);
+        messages.push(message);
+      }
 
       // Benchmark acknowledgment processing
       for (const message of messages) {
   const operationStart = performance.now();
 
         const deliveryLatency = Math.random() * 50 + 10;
-        service.processDeliveryAcknowledgment(message.messageId, 'ack_session', deliveryLatency);const operationTime = performance.now() - operationStart;analyzer.recordMeasurement(testName, operationTime);
+        service.processDeliveryAcknowledgment(message.messageId, 'ack_session', deliveryLatency);
+        const operationTime = performance.now() - operationStart;
+        analyzer.recordMeasurement(testName, operationTime);
       
 }
 

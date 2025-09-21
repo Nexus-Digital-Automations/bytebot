@@ -561,9 +561,10 @@ expect(requiresApproval).toBe(true);
 
     it('should maintain sub-50ms message delivery under load', async () => {
 
-  const messageCount = 1000;const deliveryTimes: number[] = [];
+  const messageCount = 1000;
+  const deliveryTimes: number[] = [];
 
-      for (let i = 0; i < messageCount; i++) 
+      for (let i = 0; i < messageCount; i++) {
         const start = performance.now();
 
         // Simulate message delivery
