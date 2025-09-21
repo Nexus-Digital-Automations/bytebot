@@ -18,6 +18,8 @@ import { ParlantSecurityValidator } from './parlant-security-validator.service';
 import { ConversationalAuthService } from './conversational-auth.service';
 import { NaturalLanguageRBACService } from './natural-language-rbac.service';
 import { RealTimeSecurityValidator } from './real-time-security-validator.service';
+import { MultiFactorConversationalAuthService } from './multi-factor-conversational-auth.service';
+import { ZeroTrustArchitectureService } from './zero-trust-architecture.service';
 
 @Module({
   imports: [
@@ -47,7 +49,9 @@ import { RealTimeSecurityValidator } from './real-time-security-validator.servic
     ParlantSecurityValidator,
     ConversationalAuthService,
     NaturalLanguageRBACService,
-    RealTimeSecurityValidator
+    RealTimeSecurityValidator,
+    MultiFactorConversationalAuthService,
+    ZeroTrustArchitectureService
   ],
   exports: [
     ParlantJWTBridgeService,
@@ -56,6 +60,8 @@ import { RealTimeSecurityValidator } from './real-time-security-validator.servic
     ConversationalAuthService,
     NaturalLanguageRBACService,
     RealTimeSecurityValidator,
+    MultiFactorConversationalAuthService,
+    ZeroTrustArchitectureService,
     JwtModule
   ]
 })
@@ -66,6 +72,8 @@ export class ParlantAuthModule {
     console.log('  🗣️ Conversational Authentication - Natural language auth flows');
     console.log('  🎭 Natural Language RBAC - Conversational permission management');
     console.log('  🛡️ Real-Time Security Validator - Live threat detection and response');
+    console.log('  🔐 Multi-Factor Conversational Auth - Advanced MFA with voice/biometric');
+    console.log('  🛡️ Zero-Trust Architecture - Continuous verification and adaptive controls');
     console.log('  📊 Performance Optimized - Sub-1000ms response targets');
     console.log('  🏛️ Enterprise Grade - SOC2, GDPR, HIPAA compliance ready');
   }

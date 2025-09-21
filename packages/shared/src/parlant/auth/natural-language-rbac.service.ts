@@ -529,7 +529,7 @@ export class NaturalLanguageRBACService {
     }
 
     // Generate patterns based on frequency
-    for (const [pattern, count] of requestCounts.entries()) {
+    for (const [pattern, count] of Array.from(requestCounts.entries())) {
       if (count >= 3) {
         patterns.push(`Frequent ${pattern} requests (${count} times)`);
       }

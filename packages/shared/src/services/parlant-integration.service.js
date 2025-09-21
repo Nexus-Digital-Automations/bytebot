@@ -57,6 +57,7 @@ let ParlantIntegrationService = ParlantIntegrationService_1 = class ParlantInteg
     constructor() {
         super();
         this.logger = new common_1.Logger(ParlantIntegrationService_1.name);
+        this.httpClient = null;
         this.websocket = null;
         this.isConnected = false;
         this.memoryCache = new Map();
@@ -71,6 +72,9 @@ let ParlantIntegrationService = ParlantIntegrationService_1 = class ParlantInteg
             memoryUsage: 0,
         };
         this.auditEntries = [];
+        this.config = null;
+        this.config = null;
+        this.httpClient = null;
         this.logger.log("🚀 Initializing Maximum Parlant Integration Service");
     }
     async onModuleInit() {

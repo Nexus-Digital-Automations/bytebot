@@ -530,11 +530,13 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         ? Buffer.from(key.keyMaterial, 'hex')
         : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
 
-      // Encrypt data
-      const cipher = crypto.createCipher(encConfig.algorithm, encryptionKey);
+      // Encrypt data - use createCipheriv with proper IV
+      const iv = crypto.randomBytes(16); // 16 bytes for AES-128 IV
+      const cipher = crypto.createCipheriv(encConfig.algorithm, encryptionKey, iv);
       cipher.setAAD(encConfig.aad || Buffer.alloc(0));
 
       const encrypted = Buffer.concat([
+        iv, // Prepend IV to encrypted data for decryption
         cipher.update(dataBuffer),
         cipher.final(),
       ]);
@@ -625,13 +627,16 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         ? Buffer.from(key.keyMaterial, 'hex')
         : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
 
-      // Decrypt data
-      const decipher = crypto.createDecipher(encConfig.algorithm, decryptionKey);
+      // Decrypt data - extract IV from beginning of encrypted data
+      const iv = encrypted.slice(0, 16); // Extract 16-byte IV
+      const actualEncrypted = encrypted.slice(16); // Remaining data is the actual encrypted content
+
+      const decipher = crypto.createDecipheriv(encConfig.algorithm, decryptionKey, iv);
       decipher.setAuthTag(authTag);
       decipher.setAAD(encConfig.aad || Buffer.alloc(0));
 
       const decrypted = Buffer.concat([
-        decipher.update(encrypted),
+        decipher.update(actualEncrypted),
         decipher.final(),
       ]);
 

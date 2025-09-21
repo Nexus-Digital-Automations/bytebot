@@ -668,7 +668,7 @@ export class RealTimeSecurityValidator extends EventEmitter {
    * Monitor active sessions for anomalies
    */
   private async monitorActiveSessions(): Promise<void> {
-    for (const [conversationId, context] of this.activeSecuritySessions.entries()) {
+    for (const [conversationId, context] of Array.from(this.activeSecuritySessions.entries())) {
       const recentEvents = this.getRecentSecurityEvents(conversationId, 600000); // 10 minutes
 
       // Check for anomalous patterns
