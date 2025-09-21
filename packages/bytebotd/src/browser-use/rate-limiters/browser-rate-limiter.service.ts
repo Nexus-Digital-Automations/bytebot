@@ -25,12 +25,22 @@ import {
   Logger,
   TooManyRequestsException,
   ServiceUnavailableException,
-} from '@nestjs/common';import { performance } from 'perf_hooks';import * as crypto from 'crypto';// Authentication context typesimport {
+} from '@nestjs/common';
+import { performance } from 'perf_hooks';
+import * as crypto from 'crypto';
+
+// Authentication context types
+import {
   BrowserUseUserContext,
   BrowserUseSessionContext,
   BrowserUseSecurityContext,
   BrowserPermission,
-} from '../middleware/browser-use-auth.middleware';// Security levelsimport { SecurityLevel } from '../../shared/src/types/parlant-integration.types';/*** Rate limit configuration for different limit types
+} from '../middleware/browser-use-auth.middleware';
+
+// Security levels
+import { SecurityLevel } from '../../shared/src/types/parlant-integration.types';
+
+/*** Rate limit configuration for different limit types
  */
 export interface RateLimitConfig {
   windowSizeMs: number;

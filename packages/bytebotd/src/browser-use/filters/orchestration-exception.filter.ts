@@ -560,12 +560,22 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
   // (Due to length constraints, providing key structure points)
 
   private initializeErrorPatternDatabase(): void {
-    this.logger.log('Error pattern database initialized');}private findRelatedErrors(primaryError: OrchestrationErrorType, correlationId: string): OrchestrationErrorType[] {
+    this.logger.log('Error pattern database initialized');
+  }
+
+  private findRelatedErrors(primaryError: OrchestrationErrorType, correlationId: string): OrchestrationErrorType[] {
     // Implementation for finding related errors
     return [];
   }
 
-  private analyzeErrorPattern(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['errorPattern'] {// Implementation for error pattern analysisreturn 'isolated';}private assessErrorImpact(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['impactAssessment'] {return {totalAffectedOperations: primaryError.affectedOperations.length + relatedErrors.reduce((sum, err) => sum + err.affectedOperations.length, 0),
+  private analyzeErrorPattern(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['errorPattern'] {
+    // Implementation for error pattern analysis
+    return 'isolated';
+  }
+
+  private assessErrorImpact(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[]): AggregatedErrorInfo['impactAssessment'] {
+    return {
+      totalAffectedOperations: primaryError.affectedOperations.length + relatedErrors.reduce((sum, err) => sum + err.affectedOperations.length, 0),
       criticalPathAffected: primaryError.dependencies.criticalPath,
       systemWideImpact: primaryError.severity === OrchestrationErrorSeverity.SYSTEM_WIDE,
       dataIntegrityRisk: false,
@@ -573,20 +583,36 @@ export class OrchestrationExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private buildCorrelationMetadata(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[], correlationId: string): AggregatedErrorInfo['correlationMetadata'] {return {errorCorrelationId: correlationId,
+  private buildCorrelationMetadata(primaryError: OrchestrationErrorType, relatedErrors: OrchestrationErrorType[], correlationId: string): AggregatedErrorInfo['correlationMetadata'] {
+    return {
+      errorCorrelationId: correlationId,
       timelineAnalysis: [
         {
           timestamp: primaryError.timestamp,
-          errorId: primaryError.errorId || 'unknown',category: primaryError.category,causality: 'root_cause',},],
+          errorId: primaryError.errorId || 'unknown',
+          category: primaryError.category,
+          causality: 'root_cause',
+        },
+      ],
       dependencyGraph: [],
     };
   }
 
-  private createCriticalPathRecoveryStrategy(primaryError: OrchestrationErrorType, impactAssessment: AggregatedErrorInfo['impactAssessment']): OrchestrationRecoveryStrategy {return {strategy: 'partial_rollback',priority: 'immediate',estimatedRecoveryTime: 20000,resourceRequirements: {},
+  private createCriticalPathRecoveryStrategy(primaryError: OrchestrationErrorType, impactAssessment: AggregatedErrorInfo['impactAssessment']): OrchestrationRecoveryStrategy {
+    return {
+      strategy: 'partial_rollback',
+      priority: 'immediate',
+      estimatedRecoveryTime: 20000,
+      resourceRequirements: {},
     };
   }
 
-  private createDistributedOperationRecoveryStrategy(primaryError: OrchestrationErrorType, errorPattern: AggregatedErrorInfo['errorPattern']): OrchestrationRecoveryStrategy {return {strategy: 'isolate_and_retry',priority: 'high',estimatedRecoveryTime: 15000,resourceRequirements: {},
+  private createDistributedOperationRecoveryStrategy(primaryError: OrchestrationErrorType, errorPattern: AggregatedErrorInfo['errorPattern']): OrchestrationRecoveryStrategy {
+    return {
+      strategy: 'isolate_and_retry',
+      priority: 'high',
+      estimatedRecoveryTime: 15000,
+      resourceRequirements: {},
     };
   }
 

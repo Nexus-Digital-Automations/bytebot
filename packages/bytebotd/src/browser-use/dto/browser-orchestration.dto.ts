@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsString,
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
   IsOptional,
   IsObject,
   IsArray,
@@ -8,22 +10,52 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';import {IsStr
   ValidateNested,
   Min,
   Max,
-} from 'class-validator';import { Type } from 'class-transformer';import { CreateBrowserTaskDto, BrowserTaskResultDto } from './browser-task.dto';/*** Browser orchestration execution strategies
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateBrowserTaskDto, BrowserTaskResultDto } from './browser-task.dto';
+
+/*** Browser orchestration execution strategies
  */
 export enum OrchestrationStrategy {
-  SEQUENTIAL = 'sequential',PARALLEL = 'parallel',HYBRID = 'hybrid',ADAPTIVE = 'adaptive',}/**
+  SEQUENTIAL = 'sequential',
+  PARALLEL = 'parallel',
+  HYBRID = 'hybrid',
+  ADAPTIVE = 'adaptive',
+}
+
+/**
  * Orchestration execution status
  */
 export enum OrchestrationStatus {
-  PENDING = 'pending',INITIALIZING = 'initializing',EXECUTING = 'executing',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',}/**
+  PENDING = 'pending',
+  INITIALIZING = 'initializing',
+  EXECUTING = 'executing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  TIMEOUT = 'timeout',
+}
+
+/**
  * Load balancing strategies for agent coordination
  */
 export enum LoadBalancingStrategy {
-  ROUND_ROBIN = 'round_robin',LEAST_LOADED = 'least_loaded',CAPABILITY_BASED = 'capability_based',ADAPTIVE = 'adaptive',}/**
+  ROUND_ROBIN = 'round_robin',
+  LEAST_LOADED = 'least_loaded',
+  CAPABILITY_BASED = 'capability_based',
+  ADAPTIVE = 'adaptive',
+}
+
+/**
  * Failure handling strategies
  */
 export enum FailureStrategy {
-  FAIL_FAST = 'fail_fast',CONTINUE_ON_ERROR = 'continue_on_error',RETRY_FAILED = 'retry_failed',}/**
+  FAIL_FAST = 'fail_fast',
+  CONTINUE_ON_ERROR = 'continue_on_error',
+  RETRY_FAILED = 'retry_failed',
+}
+
+/**
  * Multi-agent coordination configuration
  */
 export class MultiAgentConfigDto {
@@ -210,7 +242,10 @@ export class BrowserOrchestrationDto {
   maxRetryAttempts?: number = 2;
 
   @ApiPropertyOptional({
-    description: 'Priority override for all tasks in orchestration',enum: ['low', 'normal', 'high', 'critical'],})@IsOptional()
+    description: 'Priority override for all tasks in orchestration',
+    enum: ['low', 'normal', 'high', 'critical'],
+  })
+  @IsOptional()
   @IsString()
   priorityOverride?: string;
 
@@ -232,22 +267,39 @@ export class BrowserOrchestrationDto {
  */
 export class AgentPerformanceDto {
   @ApiProperty({
-    description: 'Agent identifier',})agentId: string = '';@ApiProperty({description: 'Number of tasks completed by agent',})tasksCompleted: number = 0;
+    description: 'Agent identifier',
+  })
+  agentId: string = '';
 
   @ApiProperty({
-    description: 'Average task execution time in milliseconds',})averageTaskTime: number = 0;
+    description: 'Number of tasks completed by agent',
+  })
+  tasksCompleted: number = 0;
 
   @ApiProperty({
-    description: 'Agent success rate as percentage',})successRate: number = 0;
+    description: 'Average task execution time in milliseconds',
+  })
+  averageTaskTime: number = 0;
 
   @ApiProperty({
-    description: 'Current agent utilization percentage',})utilizationPercent: number = 0;
+    description: 'Agent success rate as percentage',
+  })
+  successRate: number = 0;
 
   @ApiProperty({
-    description: 'Agent memory usage in MB',})memoryUsageMb: number = 0;
+    description: 'Current agent utilization percentage',
+  })
+  utilizationPercent: number = 0;
 
   @ApiProperty({
-    description: 'Agent CPU usage percentage',})cpuUsagePercent: number = 0;
+    description: 'Agent memory usage in MB',
+  })
+  memoryUsageMb: number = 0;
+
+  @ApiProperty({
+    description: 'Agent CPU usage percentage',
+  })
+  cpuUsagePercent: number = 0;
 
   @ApiPropertyOptional({
     description: 'Agent-specific metadata',type: 'object',additionalProperties: true,})
@@ -259,13 +311,19 @@ export class AgentPerformanceDto {
  */
 export class OrchestrationAgentMetricsDto {
   @ApiProperty({
-    description: 'Total number of agents used',})totalAgentsUsed: number = 0;
+    description: 'Total number of agents used',
+  })
+  totalAgentsUsed: number = 0;
 
   @ApiProperty({
-    description: 'Average agent utilization percentage',})averageAgentUtilization: number = 0;
+    description: 'Average agent utilization percentage',
+  })
+  averageAgentUtilization: number = 0;
 
   @ApiProperty({
-    description: 'Peak number of concurrent agents',})peakConcurrentAgents: number = 0;
+    description: 'Peak number of concurrent agents',
+  })
+  peakConcurrentAgents: number = 0;
 
   @ApiProperty({
     description: 'Individual agent performance metrics',type: [AgentPerformanceDto],})
@@ -285,13 +343,35 @@ export class OrchestrationAgentMetricsDto {
  */
 export class OrchestrationLogEntryDto {
   @ApiProperty({
-    description: 'Log entry timestamp',})timestamp: Date = new Date();
+    description: 'Log entry timestamp',
+  })
+  timestamp: Date = new Date();
 
   @ApiProperty({
-    description: 'Log level',enum: ['debug', 'info', 'warn', 'error'],})level: string = 'info';@ApiProperty({description: 'Log message',})message: string = '';@ApiProperty({description: 'Component that generated the log',})component: string = '';@ApiPropertyOptional({description: 'Associated task ID',})taskId?: string;
+    description: 'Log level',
+    enum: ['debug', 'info', 'warn', 'error'],
+  })
+  level: string = 'info';
+
+  @ApiProperty({
+    description: 'Log message',
+  })
+  message: string = '';
+
+  @ApiProperty({
+    description: 'Component that generated the log',
+  })
+  component: string = '';
 
   @ApiPropertyOptional({
-    description: 'Associated agent ID',})agentId?: string;
+    description: 'Associated task ID',
+  })
+  taskId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Associated agent ID',
+  })
+  agentId?: string;
 
   @ApiPropertyOptional({
     description: 'Additional log metadata',type: 'object',additionalProperties: true,})
@@ -303,10 +383,26 @@ export class OrchestrationLogEntryDto {
  */
 export class OrchestrationErrorDto {
   @ApiProperty({
-    description: 'Error message',})message: string = '';@ApiProperty({description: 'Error code',})code: string = '';@ApiPropertyOptional({description: 'Error category',enum: ['validation', 'execution', 'timeout', 'resource', 'system'],})category?: string;
+    description: 'Error message',
+  })
+  message: string = '';
+
+  @ApiProperty({
+    description: 'Error code',
+  })
+  code: string = '';
 
   @ApiPropertyOptional({
-    description: 'Error severity',enum: ['low', 'medium', 'high', 'critical'],})severity?: string;
+    description: 'Error category',
+    enum: ['validation', 'execution', 'timeout', 'resource', 'system'],
+  })
+  category?: string;
+
+  @ApiPropertyOptional({
+    description: 'Error severity',
+    enum: ['low', 'medium', 'high', 'critical'],
+  })
+  severity?: string;
 
   @ApiPropertyOptional({
     description: 'Detailed error information',type: 'object',additionalProperties: true,})
@@ -322,42 +418,71 @@ export class OrchestrationErrorDto {
  */
 export class BrowserOrchestrationResultDto {
   @ApiProperty({
-    description: 'Unique orchestration identifier',})orchestrationId: string = '';@ApiProperty({description: 'Current orchestration status',enum: OrchestrationStatus,})
+    description: 'Unique orchestration identifier',
+  })
+  orchestrationId: string = '';
+
+  @ApiProperty({
+    description: 'Current orchestration status',
+    enum: OrchestrationStatus,
+  })
   status: OrchestrationStatus = OrchestrationStatus.PENDING;
 
   @ApiProperty({
-    description: 'Orchestration execution strategy used',enum: OrchestrationStrategy,})
+    description: 'Orchestration execution strategy used',
+    enum: OrchestrationStrategy,
+  })
   strategy: OrchestrationStrategy = OrchestrationStrategy.ADAPTIVE;
 
   @ApiProperty({
-    description: 'Total number of tasks in orchestration',})totalTasks: number = 0;
+    description: 'Total number of tasks in orchestration',
+  })
+  totalTasks: number = 0;
 
   @ApiProperty({
-    description: 'Number of successfully completed tasks',})successfulTasks: number = 0;
+    description: 'Number of successfully completed tasks',
+  })
+  successfulTasks: number = 0;
 
   @ApiProperty({
-    description: 'Number of failed tasks',})failedTasks: number = 0;
+    description: 'Number of failed tasks',
+  })
+  failedTasks: number = 0;
 
   @ApiProperty({
-    description: 'Number of cancelled tasks',})cancelledTasks: number = 0;
+    description: 'Number of cancelled tasks',
+  })
+  cancelledTasks: number = 0;
 
   @ApiProperty({
-    description: 'Number of tasks currently in progress',})inProgressTasks: number = 0;
+    description: 'Number of tasks currently in progress',
+  })
+  inProgressTasks: number = 0;
 
   @ApiProperty({
-    description: 'Orchestration start timestamp',})startedAt: Date = new Date();
+    description: 'Orchestration start timestamp',
+  })
+  startedAt: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Orchestration completion timestamp',})completedAt?: Date;
+    description: 'Orchestration completion timestamp',
+  })
+  completedAt?: Date;
 
   @ApiProperty({
-    description: 'Total orchestration duration in milliseconds',})durationMs: number = 0;
+    description: 'Total orchestration duration in milliseconds',
+  })
+  durationMs: number = 0;
 
   @ApiProperty({
-    description: 'Success rate as percentage',})successRate: number = 0;
+    description: 'Success rate as percentage',
+  })
+  successRate: number = 0;
 
   @ApiPropertyOptional({
-    description: 'Estimated completion time for active orchestrations',})estimatedCompletionTime?: Date;
+    description: 'Estimated completion time for active orchestrations',
+  })
+  estimatedCompletionTime?: Date;
 
   @ApiProperty({
     description: 'Individual task execution results',type: [BrowserTaskResultDto],})
@@ -398,11 +523,20 @@ export class BrowserOrchestrationResultDto {
  */
 export class OrchestrationProgressUpdateDto {
   @ApiProperty({
-    description: 'Orchestration identifier',})orchestrationId: string = '';@ApiProperty({description: 'Current orchestration status',enum: OrchestrationStatus,})
+    description: 'Orchestration identifier',
+  })
+  orchestrationId: string = '';
+
+  @ApiProperty({
+    description: 'Current orchestration status',
+    enum: OrchestrationStatus,
+  })
   status: OrchestrationStatus = OrchestrationStatus.PENDING;
 
   @ApiPropertyOptional({
-    description: 'Currently executing task identifier',})currentTask?: string;
+    description: 'Currently executing task identifier',
+  })
+  currentTask?: string;
 
   @ApiProperty({
     description: 'Progress information',type: 'object',properties: {completedTasks: { type: 'number' },totalTasks: { type: 'number' },percentage: { type: 'number' },},})
@@ -422,13 +556,19 @@ export class OrchestrationProgressUpdateDto {
   }>;
 
   @ApiProperty({
-    description: 'Update timestamp',})timestamp: Date = new Date();
+    description: 'Update timestamp',
+  })
+  timestamp: Date = new Date();
 
   @ApiPropertyOptional({
-    description: 'Estimated time remaining in milliseconds',})estimatedTimeRemainingMs?: number;
+    description: 'Estimated time remaining in milliseconds',
+  })
+  estimatedTimeRemainingMs?: number;
 
   @ApiPropertyOptional({
-    description: 'Current throughput (tasks per minute)',})currentThroughput?: number;
+    description: 'Current throughput (tasks per minute)',
+  })
+  currentThroughput?: number;
 }
 
 /**
@@ -436,11 +576,25 @@ export class OrchestrationProgressUpdateDto {
  */
 export class OrchestrationSubscriptionDto {
   @ApiProperty({
-    description: 'Orchestration ID to subscribe to',})@IsString()
-  orchestrationId: string = '';@ApiPropertyOptional({description: 'Types of events to subscribe to',type: [String],enum: ['status', 'progress', 'logs', 'metrics'],})@IsOptional()
+    description: 'Orchestration ID to subscribe to',
+  })
+  @IsString()
+  orchestrationId: string = '';
+
+  @ApiPropertyOptional({
+    description: 'Types of events to subscribe to',
+    type: [String],
+    enum: ['status', 'progress', 'logs', 'metrics'],
+  })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  eventTypes?: string[] = ['status', 'progress'];@ApiPropertyOptional({description: 'Enable detailed progress updates',default: false,})
+  eventTypes?: string[] = ['status', 'progress'];
+
+  @ApiPropertyOptional({
+    description: 'Enable detailed progress updates',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   includeDetailedProgress?: boolean = false;
@@ -465,7 +619,9 @@ export class OrchestrationMetricsSummaryDto {
   };
 
   @ApiProperty({
-    description: 'Number of currently active orchestrations',})activeOrchestrations: number = 0;
+    description: 'Number of currently active orchestrations',
+  })
+  activeOrchestrations: number = 0;
 
   @ApiProperty({
     description: 'Recent performance metrics',type: 'object',properties: {orchestrationsLast24h: { type: 'number' },tasksLast24h: { type: 'number' },successRateLast24h: { type: 'number' },},})

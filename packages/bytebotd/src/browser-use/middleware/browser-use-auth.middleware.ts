@@ -29,16 +29,31 @@ import {
   ForbiddenException,
   TooManyRequestsException,
   BadRequestException,
-} from '@nestjs/common';import { Request, Response, NextFunction } from 'express';import { performance } from 'perf_hooks';import * as crypto from 'crypto';import { Reflector } from '@nestjs/core';// Parlant Authentication Bridge Integrationimport {
+} from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import { performance } from 'perf_hooks';
+import * as crypto from 'crypto';
+import { Reflector } from '@nestjs/core';
+
+// Parlant Authentication Bridge Integration
+import {
   ParlantAuthenticationBridgeService,
   AuthenticationRequest,
   AuthenticationResult,
   SessionInformation,
-} from '../../shared/src/parlant/security/authentication-bridge.service';// Enhanced JWT Bridge for session managementimport { EnhancedJwtParlantBridgeService } from '../../shared/src/services/enhanced-jwt-parlant-bridge.service';// Security context and typesimport {
+} from '../../shared/src/parlant/security/authentication-bridge.service';
+
+// Enhanced JWT Bridge for session management
+import { EnhancedJwtParlantBridgeService } from '../../shared/src/services/enhanced-jwt-parlant-bridge.service';
+
+// Security context and types
+import {
   ParlantUserContext,
   SecurityLevel,
   ParlantIntegrationError,
-} from '../../shared/src/types/parlant-integration.types';/*** Extended Express Request with authentication context
+} from '../../shared/src/types/parlant-integration.types';
+
+/*** Extended Express Request with authentication context
  */
 export interface AuthenticatedRequest extends Request {
   user: BrowserUseUserContext;
@@ -221,7 +236,11 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
       global: { windowMs: 60000, maxRequests: 100 }, // 100 requests per minute
       perUser: { windowMs: 60000, maxRequests: 50 }, // 50 requests per minute per user
       perEndpoint: {
-        'POST /browser-use/tasks': { windowMs: 60000, maxRequests: 10 },'POST /browser-use/sessions': { windowMs: 60000, maxRequests: 5 },'POST /browser-use/async-jobs': { windowMs: 300000, maxRequests: 3 }, // 3 per 5 minutes},},
+        'POST /browser-use/tasks': { windowMs: 60000, maxRequests: 10 },
+        'POST /browser-use/sessions': { windowMs: 60000, maxRequests: 5 },
+        'POST /browser-use/async-jobs': { windowMs: 300000, maxRequests: 3 }, // 3 per 5 minutes
+      },
+    },
     threatDetection: {
       enabled: true,
       suspiciousIpThreshold: 0.7,
@@ -363,7 +382,10 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     const authResult = await this.authBridgeService.authenticate(authRequest);
 
     if (!authResult.success) {
-      throw new UnauthorizedException(`Authentication failed: ${authResult.errors.join(`, ')}`);}return authResult;
+      throw new UnauthorizedException(`Authentication failed: ${authResult.errors.join(', ')}`);
+    }
+
+    return authResult;
   }
 
   /**
@@ -696,8 +718,12 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     }
 
     return {
-      type: 'INPUT_VALIDATION',passed,score: passed ? 100 : 50,
-      details: passed ? 'Content validation passed' : issues.join(', '),evidence: { issues },};
+      type: 'INPUT_VALIDATION',
+      passed,
+      score: passed ? 100 : 50,
+      details: passed ? 'Content validation passed' : issues.join(', '),
+      evidence: { issues },
+    };
   }
 
   /**
