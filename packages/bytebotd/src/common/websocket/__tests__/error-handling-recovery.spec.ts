@@ -1204,7 +1204,7 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
   // ===== MALFORMED MESSAGE HANDLING =====
 
   describe('Malformed Message Handling', () => {
-it('should handle malformed messages without crashing', async () => {
+    it('should handle malformed messages without crashing', async () => {
       const client = new ResilientWebSocketClient(TEST_URL, {
         clientId: 'malformed-test',
       });
@@ -1266,8 +1266,7 @@ it('should handle malformed messages without crashing', async () => {
         responseEvents: responseEvents.length,
         connectionStillActive: client.isConnected(),
         validMessageAfterMalformed: responseEvents.some(r => r.payload?.originalMessage?.payload?.validAfterMalformed),
-      
-});
+      });
 
       expect(client.isConnected()).toBe(true); // Connection should survive malformed messages
       expect(responseEvents.some(r => r.payload?.originalMessage?.payload?.validAfterMalformed)).toBe(true);
@@ -1279,8 +1278,7 @@ it('should handle malformed messages without crashing', async () => {
   // ===== NETWORK INTERRUPTION AND RECOVERY =====
 
   describe('Network Interruption and Recovery', () => {
-
-  it('should recover from network partition scenarios', async () => {
+    it('should recover from network partition scenarios', async () => {
       const client = new ResilientWebSocketClient(TEST_URL, {
         autoReconnect: true,
         queueMessages: true,
@@ -1312,19 +1310,19 @@ it('should handle malformed messages without crashing', async () => {
       // Send messages during partition (should be queued)
       for (let i = 0; i < 3; i++) {
   await client.sendMessage({
-  messageId: `partition-msg-${i
-}`,
+          messageId: `partition-msg-${i}`,
           sessionId: 'partition-test-session',
-      timestamp: Date.now(),
-      sequence: i + 1,
+          timestamp: Date.now(),
+          sequence: i + 1,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { duringPartition: true, index: i },
           metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
+            priority: 'normal',
+            requiresAck: false,
+            compression: false,
             routingHints: ['partition-test'],
-},});
+          },
+        });
       }
 
       // Wait for recovery
@@ -1335,9 +1333,8 @@ it('should handle malformed messages without crashing', async () => {
 
       console.log('Network Partition Recovery Results:', {
   partitionDuration: '3000ms',
-        totalRecoveryTime: `${totalRecoveryTime
-}
-ms`,recoveryEvents: recoveryEvents.length,
+        totalRecoveryTime: `${totalRecoveryTime}ms`,
+        recoveryEvents: recoveryEvents.length,
       finalConnectionState: client.isConnected(),
         queueSizeAfterRecovery: client.getQueueSize(),
         recoveryMetrics: {
