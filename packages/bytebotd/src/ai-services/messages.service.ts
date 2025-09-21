@@ -20,7 +20,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import { RiskLevel } from '@bytebot/shared';
+import { ParlantIntegrationService, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== MESSAGES AI INTEGRATION INTERFACES =====
 /**
@@ -215,7 +216,13 @@ export class MessagesService {
           }
         );
 
-        throw new Error(`Message AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with AI message analysis`);// Execute AI message analysis with validated parametersconst response = await this.performMessageAnalysis(request, validationResponse.conversationId);
+        throw new Error(`Message AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
+      }
+
+      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with AI message analysis`);
+
+      // Execute AI message analysis with validated parameters
+      const response = await this.performMessageAnalysis(request, validationResponse.conversationId);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -223,7 +230,9 @@ export class MessagesService {
 
       // Log successful completion with comprehensive audit trail
       this.logger.log(
-        `[${request.operationId}] AI message analysis completed successfully with Parlant validation`,{operationId: request.operationId,
+        `[${request.operationId}] AI message analysis completed successfully with Parlant validation`,
+        {
+          operationId: request.operationId,
           responseId: response.id,
           processingType: response.processingType,
           aiModelUsed: response.aiModelUsed,
@@ -273,7 +282,10 @@ export class MessagesService {
    * for content creation and enhancement operations.
    */
   async generateMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_generate`;const startTime = Date.now();this.logger.log(
+    const operationId = `${request.operationId}_generate`;
+    const startTime = Date.now();
+
+    this.logger.log(
       `[${operationId}] Starting AI message generation with Parlant validation`,
       {
         operationId,
@@ -339,7 +351,10 @@ export class MessagesService {
    * approval for cross-language communication operations.
    */
   async translateMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_translate`;const startTime = Date.now();this.logger.log(
+    const operationId = `${request.operationId}_translate`;
+    const startTime = Date.now();
+
+    this.logger.log(
       `[${operationId}] Starting AI message translation with Parlant validation`,
       {
         operationId,
@@ -404,7 +419,10 @@ export class MessagesService {
    * approval for content categorization and filtering operations.
    */
   async classifyMessages(request: MessageProcessingRequest): Promise<MessageProcessingResponse> {
-    const operationId = `${request.operationId}_classify`;const startTime = Date.now();this.logger.log(
+    const operationId = `${request.operationId}_classify`;
+    const startTime = Date.now();
+
+    this.logger.log(
       `[${operationId}] Starting AI message classification with Parlant validation`,
       {
         operationId,
@@ -675,11 +693,19 @@ export class MessagesService {
    * Get current service health with performance metrics
    */
   getServiceHealth(): {
-    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';metrics: Record<string, unknown>;} {
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
+    metrics: Record<string, unknown>;
+  } {
     const avgProcessingTime = this.averageProcessingTime;
     const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgProcessingTime > 800 || validationRate < 95) {status = 'DEGRADED';}if (avgProcessingTime > 2000 || validationRate < 80) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+
+    if (avgProcessingTime > 800 || validationRate < 95) {
+      status = 'DEGRADED';
+    }
+
+    if (avgProcessingTime > 2000 || validationRate < 80) {
       status = 'FAILED';
     }
 

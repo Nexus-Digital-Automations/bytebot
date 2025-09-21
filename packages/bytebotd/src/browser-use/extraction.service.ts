@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';import { BrowserSessionService } from './browser-session.service';import * as fs from 'fs/promises';import * as path from 'path';import { spawn } from 'child_process';import {TextExtractionConfig,
+import { Injectable, Logger } from '@nestjs/common';
+import { BrowserSessionService } from './browser-session.service';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { spawn } from 'child_process';
+import {
+  TextExtractionConfig,
   TableExtractionConfig,
   LinkExtractionConfig,
   ImageExtractionConfig,
@@ -55,7 +61,9 @@ export class ExtractionService {
     format: ExtractionFormat = ExtractionFormat.JSON,
   ): Promise<TextExtractionResponseDto> {
     const startTime = Date.now();
-    this.logger.log(`Starting text extraction for session: ${sessionId}`, {sessionId,selectors: config.selectors,
+    this.logger.log(`Starting text extraction for session: ${sessionId}`, {
+      sessionId,
+      selectors: config.selectors,
       format,
     });
 
@@ -63,12 +71,18 @@ export class ExtractionService {
       // Validate session
       const session = this.sessionService.getSession(sessionId);
       if (!session) {
-        throw new Error(`Session not found: ${sessionId}`);}// Generate Python script for text extraction
+        throw new Error(`Session not found: ${sessionId}`);
+      }
+
+      // Generate Python script for text extraction
       const script = this.generateTextExtractionScript(sessionId, config, waitForSelector, timeout);
       const result = await this.executePythonScript(script);
 
       if (!result.success) {
-        throw new Error(`Text extraction failed: ${result.error}`);}const extractedData = JSON.parse(result.output) as ExtractedTextData[];
+        throw new Error(`Text extraction failed: ${result.error}`);
+      }
+
+      const extractedData = JSON.parse(result.output) as ExtractedTextData[];
       const executionTime = Date.now() - startTime;
 
       // Calculate metadata
@@ -89,7 +103,10 @@ export class ExtractionService {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      this.logger.error(`Text extraction failed for session: ${sessionId}`, error);return {success: false,
+      this.logger.error(`Text extraction failed for session: ${sessionId}`, error);
+
+      return {
+        success: false,
         timestamp: new Date(),
         executionTime,
         sessionId,
@@ -717,11 +734,17 @@ async def extract_links():
         ${waitForSelector ? `
         # Wait for selector if specified
         await agent.browser.wait_for_selector("${waitForSelector}", timeout=${timeout})
-        ` : ''}# Get current page URL for relative link resolutioncurrent_url = await agent.browser.url()
+        ` : ''}
+
+        # Get current page URL for relative link resolution
+        current_url = await agent.browser.url()
         current_domain = urlparse(current_url).netloc
 
         # Find links within container or entire page
-        container_selector = config.get('containerSelector', 'body')container = await agent.browser.query_selector(container_selector)if not container:
+        container_selector = config.get('containerSelector', 'body')
+        container = await agent.browser.query_selector(container_selector)
+
+        if not container:
             container = await agent.browser.query_selector('body')links = await container.query_selector_all('a[href]')extracted_data = []for i, link in enumerate(links):
             try:
                 href = await link.get_attribute('href')text = await link.text_content()text = text.strip()
@@ -731,19 +754,54 @@ async def extract_links():
                 parsed_url = urlparse(absolute_url)
 
                 # Determine if link is internal or external
-                is_internal = parsed_url.netloc == current_domain or parsed_url.netloc == ''link_type = 'internal' if is_internal else 'external'# Apply include/exclude filtersif not config.get('includeInternal', True) and is_internal:continueif not config.get('includeExternal', True) and not is_internal:continue# Apply regex filters
-                if config.get('filterPattern'):if not re.search(config['filterPattern'], absolute_url):continueif config.get('excludePattern'):if re.search(config['excludePattern'], absolute_url):continuelink_data = {
-                    'url': absolute_url,'text': text,'type': link_type,'metadata': {'position': i}}
+                is_internal = parsed_url.netloc == current_domain or parsed_url.netloc == ''
+                link_type = 'internal' if is_internal else 'external'
 
-                if config.get('includeMetadata', True):# Get additional link attributestitle = await link.get_attribute('title')rel = await link.get_attribute('rel')target = await link.get_attribute('target')if title:link_data['metadata']['title'] = titleif rel:link_data['metadata']['rel'] = relif target:link_data['metadata']['target'] = target
+                # Apply include/exclude filters
+                if not config.get('includeInternal', True) and is_internal:
+                    continue
+                if not config.get('includeExternal', True) and not is_internal:
+                    continue
+
+                # Apply regex filters
+                if config.get('filterPattern'):
+                    if not re.search(config['filterPattern'], absolute_url):
+                        continue
+                if config.get('excludePattern'):
+                    if re.search(config['excludePattern'], absolute_url):
+                        continue
+
+                link_data = {
+                    'url': absolute_url,
+                    'text': text,
+                    'type': link_type,
+                    'metadata': {'position': i}
+                }
+
+                if config.get('includeMetadata', True):
+                    # Get additional link attributes
+                    title = await link.get_attribute('title')
+                    rel = await link.get_attribute('rel')
+                    target = await link.get_attribute('target')
+
+                    if title:
+                        link_data['metadata']['title'] = title
+                    if rel:
+                        link_data['metadata']['rel'] = rel
+                    if target:
+                        link_data['metadata']['target'] = target
 
                 extracted_data.append(link_data)
 
             except Exception as e:
-                sys.stderr.write(f"Error processing link {i}: {str(e)}\n")continueprint(json.dumps(extracted_data))
+                sys.stderr.write(f"Error processing link {i}: {str(e)}\n")
+                continue
+
+        print(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Link extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"Link extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_links())
 ";}

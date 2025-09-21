@@ -20,7 +20,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import { RiskLevel } from '@bytebot/shared';
+import { ParlantIntegrationService, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== GOOGLE AI INTEGRATION INTERFACES =====
 /**
@@ -244,7 +245,13 @@ export class GoogleService {
           }
         );
 
-        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Gemini API call`);// Execute Gemini API call with validated parametersconst response = await this.performGeminiAPICall(request);
+        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
+      }
+
+      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Gemini API call`);
+
+      // Execute Gemini API call with validated parameters
+      const response = await this.performGeminiAPICall(request);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
