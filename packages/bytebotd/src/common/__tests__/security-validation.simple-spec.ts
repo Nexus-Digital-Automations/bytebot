@@ -55,9 +55,10 @@ expect(isXSSPayload(safeText)).toBe(false);});
 
   const isSQLInjection = (text: string): boolean => {
     const sqlPatterns = [
-        /('|")(\s)*(or|and)(\s)+/gi,/(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi,/--/g,
-        /\/\*/
-g,
+        /('|")(\s)*(or|and)(\s)+/gi,
+        /(union|select|insert|update|delete|drop|create|alter|exec|execute)/gi,
+        /--/g,
+        /\/\*/g,
         /\*\//g,
       ];
 
@@ -90,9 +91,10 @@ expect(isSQLInjection(safeInput)).toBe(false);});
 
   describe('Command Injection Protection Logic Tests', () => {
 
-  const isCommandInjection = (text: string): boolean => 
+  const isCommandInjection = (text: string): boolean => {
       const commandPatterns = [
-        /[;&|`$()]/g,/\b(curl|wget|nc|netcat|bash|sh|cmd|powershell)\b/gi,
+        /[;&|`$()]/g,
+        /\b(curl|wget|nc|netcat|bash|sh|cmd|powershell)\b/gi,
       ];
 
       return commandPatterns.some((pattern) => pattern.test(text));
@@ -124,7 +126,8 @@ expect(isCommandInjection(safeInput)).toBe(false);});
 
   describe('Path Traversal Protection Logic Tests', () => {
 
-  const isPathTraversal = (path: string): boolean => const traversalPatterns = [
+  const isPathTraversal = (path: string): boolean => {
+    const traversalPatterns = [
         /\.\.\//g,
         /\.\.\\/g,
         /%2e%2e%2f/gi,
@@ -156,7 +159,14 @@ expect(isPathTraversal(safePath)).toBe(false);});
 
 
   describe('Rate Limiting Configuration Tests', () => {
-it('should have reasonable rate limiting configurations', () => const rateLimitConfigs = {computer_use: { limit: 120, windowSeconds: 60, tier: 'moderate' },auth: { limit: 10, windowSeconds: 60, tier: 'strict' },vision: { limit: 30, windowSeconds: 60, tier: 'moderate' },file_operations: { limit: 20, windowSeconds: 60, tier: 'strict' },};// Verify limits are reasonable
+it('should have reasonable rate limiting configurations', () => {
+    const rateLimitConfigs = {
+      computer_use: { limit: 120, windowSeconds: 60, tier: 'moderate' },
+      auth: { limit: 10, windowSeconds: 60, tier: 'strict' },
+      vision: { limit: 30, windowSeconds: 60, tier: 'moderate' },
+      file_operations: { limit: 20, windowSeconds: 60, tier: 'strict' },
+    };
+    // Verify limits are reasonable
       expect(rateLimitConfigs.computer_use.limit).toBeLessThan(200);
       expect(rateLimitConfigs.auth.limit).toBeLessThan(50);
       expect(rateLimitConfigs.vision.limit).toBeLessThan(100);
@@ -181,8 +191,11 @@ expect(exception.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);});
 
   describe('Input Validation Tests', () => {
 
-  const isValidAction = (action: string): boolean => const validActions = [
-        'screenshot','click_mouse','type_text','key_press','read_file','write_file','application','move_mouse','drag_mouse','scroll_mouse','find_text','ocr',];return validActions.includes(action);
+  const isValidAction = (action: string): boolean => {
+    const validActions = [
+      'screenshot','click_mouse','type_text','key_press','read_file','write_file','application','move_mouse','drag_mouse','scroll_mouse','find_text','ocr'
+    ];
+    return validActions.includes(action);
     
 };
 
@@ -210,9 +223,13 @@ expect(isValidAction(validInput.action)).toBe(true);
 
   describe('Error Handling Security Tests', () => {
 
-  const sanitizeErrorMessage = (message: string): string => return message
-        .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]').replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]').replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]').replace(/NODE_ENV|API_KEY|SECRET|PASSWORD|TOKEN/gi,
-          '[SENSITIVE_REMOVED]',).substring(0, 200);
+  const sanitizeErrorMessage = (message: string): string => {
+    return message
+      .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')
+      .replace(/database|table|column|sql|query/gi, '[DB_INFO_REMOVED]')
+      .replace(/system|process|memory|cpu/gi, '[SYSTEM_INFO_REMOVED]')
+      .replace(/NODE_ENV|API_KEY|SECRET|PASSWORD|TOKEN/gi, '[SENSITIVE_REMOVED]')
+      .substring(0, 200);
     
 };
 
@@ -238,10 +255,23 @@ expect(rateLimitError.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);});
 
 
   describe('Security Headers Configuration Tests', () => {
-it('should have proper security header configuration', () => const securityHeaders = {'x-frame-options': 'DENY','x-content-type-options': 'nosniff','strict-transport-security': 'max-age=31536000; includeSubDomains','referrer-policy': 'strict-origin-when-cross-origin','content-security-policy': "default-src 'self'',};
+it('should have proper security header configuration', () => {
+    const securityHeaders = {
+      'x-frame-options': 'DENY',
+      'x-content-type-options': 'nosniff',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'referrer-policy': 'strict-origin-when-cross-origin',
+      'content-security-policy': "default-src 'self'",
+    };
 
       const expectedHeaders = [
-        'x-frame-options','x-content-type-options','strict-transport-security','referrer-policy','content-security-policy',];expectedHeaders.forEach((header) => {
+        'x-frame-options',
+        'x-content-type-options',
+        'strict-transport-security',
+        'referrer-policy',
+        'content-security-policy',
+      ];
+      expectedHeaders.forEach((header) => {
   expect(securityHeaders).toHaveProperty(header);
         expect(
           (securityHeaders as Record<string, string>)[header],
@@ -255,18 +285,29 @@ it('should have proper security header configuration', () => const securityHeade
 
   describe('CORS Security Configuration Tests', () => {
 
-  const isAllowedOrigin = (origin: string): boolean => const allowedOrigins = [
-        'http://localhost:3000','http://localhost:3001','http://127.0.0.1:3000',];return !origin || allowedOrigins.includes(origin);
+  const isAllowedOrigin = (origin: string): boolean => {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+    ];
+    return !origin || allowedOrigins.includes(origin);
     
 };
 
     it('should have secure CORS configuration', () => {expect(isAllowedOrigin('http://localhost:3000')).toBe(true);
 expect(isAllowedOrigin('https://malicious.com')).toBe(false);
-expect(isAllowedOrigin('')).toBe(true); // Allow no origin (same-origin)});
+expect(isAllowedOrigin('')).toBe(true); // Allow no origin (same-origin)
+    });
 
 
 it('should block unauthorized origins', () => {
-  const unauthorizedOrigins = ['https://malicious.com','http://evil.com','https://attacker.net',];unauthorizedOrigins.forEach((origin) => {
+  const unauthorizedOrigins = [
+      'https://malicious.com',
+      'http://evil.com',
+      'https://attacker.net',
+    ];
+    unauthorizedOrigins.forEach((origin) => {
         expect(isAllowedOrigin(origin)).toBe(false);
       
 });
@@ -277,11 +318,14 @@ it('should block unauthorized origins', () => {
 
   describe('Performance Security Tests', () => {
 
-  it('should complete validation within reasonable time', () => const startTime = Date.now();// Simulate validation work
-      const text = 'Test input for performance validation';
-const isValid = text.length < 1000 && !text.includes('<script>');const duration = Date.now() - startTime;
-expect(duration).toBeLessThan(100); // Should complete quickly
-      expect(isValid).toBe(true);
+  it('should complete validation within reasonable time', () => {
+    const startTime = Date.now();
+    // Simulate validation work
+    const text = 'Test input for performance validation';
+    const isValid = text.length < 1000 && !text.includes('<script>');
+    const duration = Date.now() - startTime;
+    expect(duration).toBeLessThan(100); // Should complete quickly
+    expect(isValid).toBe(true);
     
 });
 
@@ -293,7 +337,8 @@ expect(duration).toBeLessThan(100); // Should complete quickly
       const startTime = Date.now();
       const results = inputs.map((text) => ({
         valid: text.length < 1000 && !text.includes('<script>'),
-      text,}));
+        text,
+      }));
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(500); // All validations in under 500ms
@@ -306,11 +351,13 @@ expect(duration).toBeLessThan(100); // Should complete quickly
 
   describe('Security Configuration Tests', () => {
 
-  it('should have secure default configurations', () => const securityConfig = {corsEnabled: true,
-        rateLimitingEnabled: true,
-        inputValidationEnabled: true,
-        securityHeadersEnabled: true,
-        errorSanitizationEnabled: true,
+  it('should have secure default configurations', () => {
+    const securityConfig = {
+      corsEnabled: true,
+      rateLimitingEnabled: true,
+      inputValidationEnabled: true,
+      securityHeadersEnabled: true,
+      errorSanitizationEnabled: true,
       
 };
 
@@ -323,21 +370,23 @@ expect(duration).toBeLessThan(100); // Should complete quickly
 
 
     it('should have environment-specific security settings', () => {
-  const getConfigForEnv = (env: string) => {switch (env) {
-
-          case 'production':return { strictMode: true, maxInputLength: 1000 
-
-    };
-    case 'staging':return { strictMode: true, maxInputLength: 5000 };
-    case 'development':return { strictMode: false, maxInputLength: 10000 };
+  const getConfigForEnv = (env: string) => {
+        switch (env) {
+          case 'production':
+            return { strictMode: true, maxInputLength: 1000 };
+          case 'staging':
+            return { strictMode: true, maxInputLength: 5000 };
+          case 'development':
+            return { strictMode: false, maxInputLength: 10000 };
   default:
             return { strictMode: false, maxInputLength: 5000 };
         }
       };
 
-      const prodConfig = getConfigForEnv('production');const devConfig = getConfigForEnv('development');
-expect(prodConfig.strictMode).toBe(true);
-expect(prodConfig.maxInputLength).toBeLessThanOrEqual(1000);
+      const prodConfig = getConfigForEnv('production');
+      const devConfig = getConfigForEnv('development');
+      expect(prodConfig.strictMode).toBe(true);
+      expect(prodConfig.maxInputLength).toBeLessThanOrEqual(1000);
       expect(devConfig.strictMode).toBe(false);
       expect(devConfig.maxInputLength).toBeGreaterThan(
         prodConfig.maxInputLength,
@@ -350,9 +399,9 @@ expect(prodConfig.maxInputLength).toBeLessThanOrEqual(1000);
 
 describe('Security Integration Tests Summary', () => {
 
-  it('should pass comprehensive security validation', () => 
-    const securityChecklist = {,
-  corsProtection: true,
+  it('should pass comprehensive security validation', () => {
+    const securityChecklist = {
+      corsProtection: true,
       xssProtection: true,
       sqlInjectionProtection: true,
       commandInjectionProtection: true,
