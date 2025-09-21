@@ -126,7 +126,7 @@ export class SecurityMonitoringService {
   /**
    * Get security dashboard summary
    */
-  async getSecurityDashboardSummary(): Promise<SecurityDashboardSummary> {
+  getSecurityDashboardSummary(): Promise<SecurityDashboardSummary> {
     const environment = this._configService.get<string>(
       "NODE_ENV",
       "development",
@@ -227,7 +227,7 @@ export class SecurityMonitoringService {
       },
     ];
 
-    return {
+    return Promise.resolve({
       timestamp: now,
       environment,
       serviceName,
@@ -238,7 +238,7 @@ export class SecurityMonitoringService {
       topThreats,
       recentAlerts,
       metrics,
-    };
+    });
   }
 
   /**

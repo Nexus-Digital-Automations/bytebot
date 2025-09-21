@@ -454,7 +454,7 @@ export class ComplianceDashboardService {
 
   // Private helper methods
 
-  private async fetchFrameworkStatus(): Promise<ComplianceFrameworkStatus[]> {
+  private fetchFrameworkStatus(): Promise<ComplianceFrameworkStatus[]> {
     // This would typically call the orchestrator security services
     // For now, return mock data with realistic structure
 
@@ -500,12 +500,12 @@ export class ComplianceDashboardService {
       },
     ];
 
-    return frameworks;
+    return Promise.resolve(frameworks);
   }
 
-  private async fetchSecurityMetrics(): Promise<SecurityMetrics> {
+  private fetchSecurityMetrics(): Promise<SecurityMetrics> {
     // Mock security metrics that would come from orchestrator services
-    return {
+    return Promise.resolve({
       totalVulnerabilities: 127,
       criticalVulnerabilities: 3,
       highVulnerabilities: 12,
@@ -519,10 +519,10 @@ export class ComplianceDashboardService {
       auditEvents: 2847,
       threatsDetected: 156,
       threatsBlocked: 152,
-    };
+    });
   }
 
-  private async fetchComplianceGaps(): Promise<ComplianceGapSummary> {
+  private fetchComplianceGaps(): Promise<ComplianceGapSummary> {
     // Mock compliance gaps that would come from orchestrator gap analyzer
     const topGaps: ComplianceGapDetail[] = [
       {
@@ -561,7 +561,7 @@ export class ComplianceDashboardService {
       },
     ];
 
-    return {
+    return Promise.resolve({
       totalGaps: 45,
       criticalGaps: 3,
       highPriorityGaps: 8,
@@ -577,10 +577,10 @@ export class ComplianceDashboardService {
         Documentation: 8,
       },
       estimatedRemediationTime: "3-6 months",
-    };
+    });
   }
 
-  private async fetchSecurityEvents(): Promise<SecurityEventSummary> {
+  private fetchSecurityEvents(): Promise<SecurityEventSummary> {
     // Mock security events that would come from orchestrator event correlation
     const recentEvents: SecurityEventDetail[] = [
       {
@@ -607,7 +607,7 @@ export class ComplianceDashboardService {
       },
     ];
 
-    return {
+    return Promise.resolve({
       totalEvents: 234,
       criticalEvents: 5,
       highPriorityEvents: 18,
@@ -623,7 +623,7 @@ export class ComplianceDashboardService {
         "Data Access": 23,
       },
       trendsData: this.generateEventTrendData(),
-    };
+    });
   }
 
   private calculateExecutiveMetrics(
