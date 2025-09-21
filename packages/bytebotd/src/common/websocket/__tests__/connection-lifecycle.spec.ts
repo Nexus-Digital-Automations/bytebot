@@ -114,9 +114,9 @@ class ConnectionLifecycleTestClient extends EventEmitter {
     this.connectionState = 'connecting';
 const startTime = performance.now();return new Promise((resolve, reject) => {
   try {
-        this.ws = new WebSocket.WebSocket(this.url, {,
+        this.ws = new WebSocket.WebSocket(this.url, {
   headers: this.options.headers,
-        
+
 });
 
         const connectionTimeout = setTimeout(() => {
@@ -144,19 +144,22 @@ reject(error);
 });
 
         this.ws.on('close', (code: number, reason: Buffer) => {
-  clearTimeout(connectionTimeout);this.connectionMetrics.disconnectionTime = performance.now();
+          clearTimeout(connectionTimeout);
+          this.connectionMetrics.disconnectionTime = performance.now();
           this.connectionState = 'disconnected';
-this.emit('disconnected', { code, reason: reason.toString() 
-});// Auto-reconnect if enabled and not a normal closureif (this.options.autoReconnect && code !== 1000 && this.reconnectionAttempts < this.maxReconnectionAttempts) {
-  this.scheduleReconnection();
+          this.emit('disconnected', { code, reason: reason.toString() });
+
+          // Auto-reconnect if enabled and not a normal closure
+          if (this.options.autoReconnect && code !== 1000 && this.reconnectionAttempts < this.maxReconnectionAttempts) {
+            this.scheduleReconnection();
           
 }
         });
 
       } catch (error) {
-  this.connectionState = 'disconnected';
-this.connectionMetrics.lastConnectionError = error as Error;
-reject(error);
+        this.connectionState = 'disconnected';
+        this.connectionMetrics.lastConnectionError = error as Error;
+        reject(error);
       
 }
     });
@@ -207,7 +210,7 @@ this.ws.send(JSON.stringify(message));
  */
 class ConnectionPoolTester {
   private connections: ConnectionLifecycleTestClient[] = [];
-  private poolMetrics = {,
+  private poolMetrics = {
   activeConnections: 0,
     totalConnections: 0,
     failedConnections: 0,
@@ -220,7 +223,7 @@ class ConnectionPoolTester {
   const connectionPromises: Promise<void>[] = [];
 
     for (let i = 0; i < poolSize; i++) {
-      const client = new ConnectionLifecycleTestClient(url, {,
+      const client = new ConnectionLifecycleTestClient(url, {
   autoReconnect: true,
         maxReconnectionAttempts: 3,
         headers: { 'X-Client-ID': `pool-client-${i
@@ -284,8 +287,15 @@ const mockConfigService = {
 
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8181,'PARLANT_WEBSOCKET_PORT': 8182,'CONVERSATIONAL_ALLOWED_ORIGINS': 'http: //localhost:3000,
-      https://localhost:3000','PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000','CONVERSATIONAL_REQUIRE_HTTPS': false,'PARLANT_REQUIRE_HTTPS': false,'WEBSOCKET_MAX_CONNECTIONS': 1000,'WEBSOCKET_CONNECTION_TIMEOUT': 10000,'WEBSOCKET_HEARTBEAT_INTERVAL': 30000,
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8181,
+      'PARLANT_WEBSOCKET_PORT': 8182,
+      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000,https://localhost:3000',
+      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
+      'CONVERSATIONAL_REQUIRE_HTTPS': false,
+      'PARLANT_REQUIRE_HTTPS': false,
+      'WEBSOCKET_MAX_CONNECTIONS': 1000,
+      'WEBSOCKET_CONNECTION_TIMEOUT': 10000,
+      'WEBSOCKET_HEARTBEAT_INTERVAL': 30000,
 
 };
 return config[key] ?? defaultValue;
@@ -310,11 +320,11 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   jest.setTimeout(60000); // 1 minute for connection tests
 
     // Create test module
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
         ParlantWebSocketBridgeService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -329,7 +339,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
     testServer = createServer();
     wsServer = createSafeWebSocketServer({
   server: testServer,
-      verifyClient: createSecureVerifyCallback({,
+      verifyClient: createSecureVerifyCallback({
   allowedOrigins: ['http://localhost:3000', 'https: //localhost:3000'],
       requireHttps: false,
       maxConnections: 10,
@@ -346,7 +356,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ParsedMessage;
 
           // Echo back with confirmation
-          const response: ConversationalMessage = {,
+          const response: ConversationalMessage = {
   messageId: `response_${Date.now()
 }`,
             sessionId: message.sessionId ?? 'test-session',
@@ -396,7 +406,9 @@ describe('WebSocket Connection Lifecycle Tests', () => {
 
   describe('Basic Connection Establishment', () => {
 
-  it('should establish WebSocket connection successfully', async () => const client = new ConnectionLifecycleTestClient(TEST_URL);let connectionEvent: ConnectionMetrics | null = null;
+  it('should establish WebSocket connection successfully', async () => {
+    const client = new ConnectionLifecycleTestClient(TEST_URL);
+    let connectionEvent: ConnectionMetrics | null = null;
 
       client.on('connected', (metrics: ConnectionMetrics) => {connectionEvent = metrics;
 });
@@ -425,13 +437,16 @@ expect(metrics.lastConnectionError).toBeTruthy();
 
 
     it('should validate WebSocket headers correctly', async () => {
-const validHeaders = 
-'upgrade': 'websocket','connection': 'upgrade','sec-websocket-key': 'dGhlIHNhbXBsZSBub25jZQ==','sec-websocket-version': '13',
-};
-const invalidHeaders = {
-
-        'upgrade': 'http','connection': 'keep-alive',
-};
+      const validHeaders = {
+        'upgrade': 'websocket',
+        'connection': 'upgrade',
+        'sec-websocket-key': 'dGhlIHNhbXBsZSBub25jZQ==',
+        'sec-websocket-version': '13',
+      };
+      const invalidHeaders = {
+        'upgrade': 'http',
+        'connection': 'keep-alive',
+      };
 const validResult = validateWebSocketHeaders(validHeaders);
       const invalidResult = validateWebSocketHeaders(invalidHeaders);
 
@@ -443,7 +458,9 @@ const validResult = validateWebSocketHeaders(validHeaders);
 
   describe('Connection State Management', () => {
 
-  it('should track connection state transitions correctly', async () => const client = new ConnectionLifecycleTestClient(TEST_URL);const stateTransitions: string[] = [];
+  it('should track connection state transitions correctly', async () => {
+    const client = new ConnectionLifecycleTestClient(TEST_URL);
+    const stateTransitions: string[] = [];
 
       // Track state changes
       const originalConnect = client.connect.bind(client);
@@ -493,7 +510,9 @@ it('should maintain connection metrics accurately', async () => {
 
   describe('Reconnection and Failover', () => 
 
-  it('should handle automatic reconnection after connection loss', async () => const client = new ConnectionLifecycleTestClient(TEST_URL, {autoReconnect: true,
+  it('should handle automatic reconnection after connection loss', async () => {
+    const client = new ConnectionLifecycleTestClient(TEST_URL, {
+      autoReconnect: true,
         maxReconnectionAttempts: 3,
         reconnectionDelay: 500,
       
@@ -531,8 +550,9 @@ it('should maintain connection metrics accurately', async () => {
 
     it('should implement exponential backoff for reconnection', async () => {
 
-  const client = new ConnectionLifecycleTestClient('ws://localhost:99999', autoReconnect: true,
-      maxReconnectionAttempts: 3,
+      const client = new ConnectionLifecycleTestClient('ws://localhost:99999', {
+        autoReconnect: true,
+        maxReconnectionAttempts: 3,
         reconnectionDelay: 100, // Start with 100ms
       
 });
@@ -588,7 +608,9 @@ it('should maintain connection metrics accurately', async () => {
 
   describe('Connection Pool Management', () => {
 
-  it('should manage multiple concurrent connections', async () => const poolSize = 10;const poolTester = new ConnectionPoolTester();
+  it('should manage multiple concurrent connections', async () => {
+    const poolSize = 10;
+    const poolTester = new ConnectionPoolTester();
 
       await poolTester.createConnectionPool(poolSize, TEST_URL);
 
@@ -630,8 +652,9 @@ it('should maintain connection metrics accurately', async () => {
 
 
 
-    it('should track connection pool performance metrics', async () => 
-  const poolSize = 8;const poolTester = new ConnectionPoolTester();
+    it('should track connection pool performance metrics', async () => {
+      const poolSize = 8;
+      const poolTester = new ConnectionPoolTester();
 
       const startTime = performance.now();
       await poolTester.createConnectionPool(poolSize, TEST_URL);
@@ -661,7 +684,8 @@ ms`,
 
   describe('Session Correlation and Tracking', () => {
 
-  it('should correlate WebSocket connections with sessions', async () => const sessionId = 'test-session-correlation-123';
+  it('should correlate WebSocket connections with sessions', async () => {
+    const sessionId = 'test-session-correlation-123';
 const client = new ConnectionLifecycleTestClient(TEST_URL, {headers: {
           'X-Session-ID': sessionId,'X-User-ID': 'test-user-456',
 },});
@@ -740,7 +764,9 @@ expect(sessionEvents[2].event).toBe('disconnected');// Verify event timingexpect
 
   describe('Performance and Reliability', () => {
 
-  it('should maintain sub-100ms connection establishment target', async () => const connectionCount = 20;const connectionTimes: number[] = [];
+  it('should maintain sub-100ms connection establishment target', async () => {
+    const connectionCount = 20;
+    const connectionTimes: number[] = [];
 
       for (let i = 0; i < connectionCount; i++) {
         const client = new ConnectionLifecycleTestClient(TEST_URL);
@@ -783,7 +809,7 @@ ms`,
       const connectionPromises = Array.from( length: totalAttempts 
 }, async (_, i) => {
   try {
-          const client = new ConnectionLifecycleTestClient(TEST_URL, {,
+          const client = new ConnectionLifecycleTestClient(TEST_URL, {
   headers: { 'X-Client-ID': `reliability-test-${i
 }` },
           });
