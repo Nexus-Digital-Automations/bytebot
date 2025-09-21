@@ -3883,12 +3883,14 @@
       "updated_at": "2025-09-21T05:30:09.986Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T05:21:03.568Z",
       "title": "Fix TypeScript violations in websocket modules",
       "description": "Fix remaining TypeScript violations in websocket modules: @typescript-eslint/no-unsafe-* violations, require-await violations, type safety issues in message handling, unsafe client connection management",
       "category": "error",
-      "id": "error_1758432063568_6pahpk36s3l"
+      "id": "error_1758432063568_6pahpk36s3l",
+      "completed_at": "2025-09-21T05:30:42.274Z",
+      "updated_at": "2025-09-21T05:30:42.274Z"
     },
     {
       "status": "pending",
@@ -3933,12 +3935,14 @@
       "id": "error_1758432065603_phpr8p5cawq"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-21T05:27:47.249Z",
       "title": "Fix concatenated statements and TypeScript syntax errors in parlant-integration.service.ts",
       "description": "Fix all concatenated statements without proper line breaks causing TypeScript compilation errors. Issues include concatenated logging statements, object literals, method calls, and property assignments throughout the file.",
       "category": "error",
-      "id": "error_1758432467248_3c7yp9k8zfw"
+      "id": "error_1758432467248_3c7yp9k8zfw",
+      "completed_at": "2025-09-21T05:33:15.217Z",
+      "updated_at": "2025-09-21T05:33:15.217Z"
     }
   ],
   "agents": {
