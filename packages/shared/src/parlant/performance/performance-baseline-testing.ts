@@ -423,7 +423,14 @@ export class PerformanceBaselineTestingService {
       );
 
       // Generate enterprise compliance analysis
-      const complianceAnalysis = await this.assessEnterpriseCompliance(aggregatedMetrics);
+      const enterpriseAssessment = await this.assessEnterpriseCompliance(aggregatedMetrics);
+      const complianceAnalysis: ComplianceAnalysis = {
+        overallComplianceRate: enterpriseAssessment.overallComplianceRate,
+        complianceTrend: enterpriseAssessment.overallComplianceRate >= 0.8 ? 'stable' : 'degrading',
+        criticalViolations: enterpriseAssessment.criticalGaps.length,
+        highPriorityViolations: enterpriseAssessment.functionsNonCompliant,
+        complianceByRequirement: enterpriseAssessment.complianceByCategory
+      };
 
       const report: PerformanceBenchmarkReport = {
         reportId: this.generateReportId(),
@@ -437,11 +444,11 @@ export class PerformanceBaselineTestingService {
         performanceTrends,
         optimizationOpportunities,
         complianceAnalysis,
-        recommendations: this.generateComprehensiveRecommendations(
+        recommendations: this.generateComprehensiveRecommendations({
           aggregatedMetrics,
           optimizationOpportunities,
           complianceAnalysis
-        )
+        })
       };
 
       this.logger.log(`Performance benchmark report generated: ${report.reportId}`);
@@ -1276,9 +1283,9 @@ export class PerformanceBaselineTestingService {
   /**
    * Get test sessions within a specific time range
    */
-  private getTestSessionsInRange(timeRange: { start: Date; end: Date }): PerformanceBaselineTestResult[] {
-    return this.baselineTestResults.filter(session =>
-      session.timestamp >= timeRange.start && session.timestamp <= timeRange.end
+  private getTestSessionsInRange(timeRange: TimeRange): PerformanceBaselineTestResult[] {
+    return Array.from(this.testResults.values()).filter(session =>
+      session.systemContext.timestamp >= timeRange.startDate && session.systemContext.timestamp <= timeRange.endDate
     );
   }
 
@@ -1287,9 +1294,9 @@ export class PerformanceBaselineTestingService {
    */
   private async aggregatePerformanceMetrics(sessions: PerformanceBaselineTestResult[]): Promise<any> {
     return {
-      averageExecutionTime: sessions.reduce((sum, s) => sum + s.executionTime, 0) / sessions.length,
+      averageExecutionTime: sessions.reduce((sum, s) => sum + s.testExecutionTime, 0) / sessions.length,
       totalSessions: sessions.length,
-      successRate: sessions.filter(s => s.success).length / sessions.length
+      successRate: sessions.filter(s => s.performanceClassification.performanceTier === 'excellent' || s.performanceClassification.performanceTier === 'good' || s.performanceClassification.performanceTier === 'acceptable').length / sessions.length
     };
   }
 
@@ -1776,3 +1783,6 @@ export interface ComprehensiveRecommendation {
   estimatedEffort: string;
   expectedROI: string;
 }
+
+// Type alias for performance baseline test results
+export type PerformanceBaselineTestResult = FunctionBaselineResult;

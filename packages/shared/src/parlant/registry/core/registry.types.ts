@@ -1113,6 +1113,9 @@ export interface VersionChange {
 
   /** Change impact */
   impact: ChangeImpact;
+
+  /** Files affected by this change */
+  files: string[];
 }
 
 /**
@@ -1124,7 +1127,8 @@ export enum ChangeType {
   _PERFORMANCE = "performance",
   _SECURITY = "security",
   _DEPRECATION = "deprecation",
-  _REMOVAL = "removal"
+  _REMOVAL = "removal",
+  _BREAKING = "breaking"
 }
 
 /**

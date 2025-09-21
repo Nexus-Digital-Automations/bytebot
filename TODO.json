@@ -239,6 +239,19 @@
           "action": "auto_unassign_stale",
           "timestamp": "2025-09-18T05:42:01.446Z",
           "reason": "Agent became stale (inactive >7275 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758475393047_1_general_31dd8989",
+          "role": "primary",
+          "assignedAt": "2025-09-21T17:24:47.919Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758475393047_1_general_31dd8989",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T17:57:23.871Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
     },
@@ -518,6 +531,19 @@
           "action": "auto_unassign_stale",
           "timestamp": "2025-09-18T05:42:01.446Z",
           "reason": "Agent became stale (inactive >12533 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758487750381_1_general_240e940b",
+          "role": "primary",
+          "assignedAt": "2025-09-21T20:52:31.346Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758487750381_1_general_240e940b",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T21:39:28.529Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
     },
@@ -2257,9 +2283,9 @@
       "description": "Perform final validation after all specialized agents complete async/await fixes. Re-run ESLint checks, search for remaining violations, validate fixes, and generate comprehensive report.",
       "category": "error",
       "id": "error_1758417359739_tisoozpegre",
-      "assigned_agent": "dev_session_1758474368573_1_general_5a19d1c3",
+      "assigned_agent": null,
       "started_at": "2025-09-21T17:07:04.975Z",
-      "claimed_by": "dev_session_1758474368573_1_general_5a19d1c3",
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758474368573_1_general_5a19d1c3",
@@ -2267,6 +2293,12 @@
           "assignedAt": "2025-09-21T17:07:04.975Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758474368573_1_general_5a19d1c3",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T17:38:46.452Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ],
       "completed_at": "2025-09-21T17:13:57.792Z",
@@ -2321,29 +2353,7 @@
       "updated_at": "2025-09-21T16:24:12.651Z"
     }
   ],
-  "agents": {
-    "dev_session_1758474368573_1_general_5a19d1c3": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T17:06:08.574Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T17:06:08.574Z",
-      "sessionId": null,
-      "metadata": {}
-    }
-  },
+  "agents": {},
   "settings": {
     "auto_sort_enabled": true,
     "sort_criteria": {

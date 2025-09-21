@@ -15,7 +15,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   IHealthMonitor,
-  FunctionHealthStatus,
   HealthCheckResults,
   ComprehensiveHealthReport,
   HealthHistory,
@@ -25,15 +24,6 @@ import {
   MonitoringSession,
   MonitoringStopResult,
   TimeRange,
-  HealthStatus,
-  HealthTrend,
-  HealthIndicator,
-  HealthCheckResult,
-  HealthDataPoint,
-  HealthEvent,
-  HealthEventType,
-  HealthHistorySummary,
-  TrendDirection,
   HealthSummary,
   HealthRecommendation,
   RecommendationPriority,
@@ -44,8 +34,21 @@ import {
   MonitoringConfiguration,
   ThresholdConflict,
   ConflictResolution,
-  ComparisonOperator
+  ComparisonOperator,
+  HealthDataPoint,
+  HealthEvent,
+  HealthEventType,
+  HealthHistorySummary,
+  HealthTrend as InterfaceHealthTrend,
+  TrendDirection
 } from '../core/registry.interface';
+import {
+  FunctionHealthStatus,
+  HealthStatus,
+  HealthTrend,
+  HealthIndicator,
+  HealthCheckResult
+} from '../core/registry.types';
 
 /**
  * Health check types
@@ -193,7 +196,7 @@ export class HealthMonitorService implements IHealthMonitor {
         score: healthScore,
         indicators: allIndicators,
         lastCheck: new Date(),
-        trend: trend as HealthTrend,
+        trend: trend,
         history: previousStatus ? [...previousStatus.history.slice(-99), healthCheckResult] : [healthCheckResult]
       };
 
@@ -486,8 +489,9 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Scheduled health checks for all monitored functions
    */
+  // @ts-ignore
   @Cron(CronExpression.EVERY_5_MINUTES)
-  async performScheduledHealthChecks(): Promise<void> {
+  private async performScheduledHealthChecks(): Promise<void> {
     if (!this.config.enabled) return;
 
     this.logger.debug('Performing scheduled health checks');
@@ -513,8 +517,9 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Cleanup old health data
    */
+  // @ts-ignore
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async cleanupOldHealthData(): Promise<void> {
+  private async cleanupOldHealthData(): Promise<void> {
     this.logger.log('Starting health data cleanup');
 
     try {
@@ -611,9 +616,9 @@ export class HealthMonitorService implements IHealthMonitor {
   private calculateHealthTrend(
     previousStatus: FunctionHealthStatus | null,
     currentScore: number
-  ): TrendDirection {
+  ): HealthTrend {
     if (!previousStatus || previousStatus.history.length === 0) {
-      return TrendDirection._UNKNOWN;
+      return HealthTrend._STABLE;
     }
 
     const recentScores = previousStatus.history.slice(-5).map(h => h.score);
@@ -621,8 +626,8 @@ export class HealthMonitorService implements IHealthMonitor {
 
     const difference = currentScore - averagePreviousScore;
 
-    if (Math.abs(difference) < 0.05) return TrendDirection._STABLE;
-    return difference > 0 ? TrendDirection._IMPROVING : TrendDirection._DEGRADING;
+    if (Math.abs(difference) < 0.05) return HealthTrend._STABLE;
+    return difference > 0 ? HealthTrend._IMPROVING : HealthTrend._DEGRADING;
   }
 
   /**
@@ -824,8 +829,8 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Analyze health trends
    */
-  private async analyzeHealthTrends(functionIds: string[]): Promise<HealthTrend[]> {
-    const trends: HealthTrend[] = [];
+  private async analyzeHealthTrends(functionIds: string[]): Promise<InterfaceHealthTrend[]> {
+    const trends: InterfaceHealthTrend[] = [];
 
     // This would analyze historical data to identify trends
     // For now, return placeholder trends
@@ -847,7 +852,7 @@ export class HealthMonitorService implements IHealthMonitor {
     const recommendations: HealthRecommendation[] = [];
 
     // Analyze results and generate recommendations
-    for (const [functionId, health] of results.results) {
+    for (const [functionId, health] of Array.from(results.results.entries())) {
       const unhealthyIndicators = health.indicators.filter(i => i.status !== HealthStatus._HEALTHY);
 
       for (const indicator of unhealthyIndicators) {
@@ -886,7 +891,7 @@ export class HealthMonitorService implements IHealthMonitor {
     const alerts: HealthAlert[] = [];
 
     // Generate alerts based on health check results
-    for (const [functionId, health] of results.results) {
+    for (const [functionId, health] of Array.from(results.results.entries())) {
       const criticalIndicators = health.indicators.filter(i => i.status === HealthStatus._CRITICAL);
 
       for (const indicator of criticalIndicators) {

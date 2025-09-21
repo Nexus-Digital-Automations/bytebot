@@ -13,9 +13,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
+  RegistrationResult
+} from '../core/registry.interface';
+import {
   FunctionDiscoveryEntry,
   FunctionRegistryEntry,
-  RegistrationResult,
   FunctionMetadata,
   FunctionRegistrationConfig,
   FunctionDependencyInfo,
@@ -40,18 +42,18 @@ import {
   RetryConfig,
   CircuitBreakerConfig,
   FallbackConfig,
-  FallbackStrategy
-} from '../core/registry.interface';
+  FallbackStrategy,
+  FunctionSecurityAssessment,
+  SecurityConsideration,
+  SecurityConsiderationType,
+  SecuritySeverity
+} from '../core/registry.types';
 import {
   FunctionSecurityLevel,
   RiskLevel,
   ValidationMode,
   ApprovalLevel,
-  FunctionSecurityAssessment,
   AuthorInfo,
-  SecurityConsideration,
-  SecurityConsiderationType,
-  SecuritySeverity,
   SecurityConstraint
 } from '../../../types/parlant-integration.types';
 
@@ -848,8 +850,6 @@ export class AutoRegistrationService {
       email: undefined,
       team: 'PARLANT Registry',
       createdAt: new Date(),
-      lastModifiedBy: 'auto-discovery',
-      lastModifiedAt: new Date()
     };
   }
 
@@ -913,7 +913,7 @@ export class AutoRegistrationService {
   private createDefaultConfiguration(config: AutoRegistrationConfig): FunctionRegistrationConfig {
     return {
       enabled: true,
-      defaultValidationMode: ValidationMode._ASYNCHRONOUS,
+      defaultValidationMode: ValidationMode._STRICT,
       defaultApprovalLevel: ApprovalLevel._AUTOMATIC,
       defaultTimeout: 30000,
       cache: {

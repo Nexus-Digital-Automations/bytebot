@@ -18,15 +18,13 @@ import {
   DiscoveryConfiguration,
   FunctionRegistrationConfig,
   FunctionHealthStatus,
-  FunctionVersionInfo,
   RegistrationStatus
 } from './registry.types';
 
 // Re-export commonly used types
 export {
   FunctionRegistrationConfig,
-  FunctionHealthStatus,
-  FunctionVersionInfo
+  FunctionHealthStatus
 };
 
 // ===========================
@@ -1029,6 +1027,8 @@ export interface VersionChange {
   type: ChangeType;
   description: string;
   files: string[];
+  breaking?: boolean;
+  impact?: ChangeImpact;
 }
 
 export enum ChangeType {
@@ -1036,7 +1036,74 @@ export enum ChangeType {
   _BUGFIX = "bugfix",
   _PERFORMANCE = "performance",
   _SECURITY = "security",
+  _BREAKING = "breaking",
+  _DEPRECATION = "deprecation",
+  _REMOVAL = "removal"
+}
+
+export enum ChangeImpact {
+  _NONE = "none",
+  _MINOR = "minor",
+  _MODERATE = "moderate",
+  _MAJOR = "major",
   _BREAKING = "breaking"
+}
+
+export interface VersionEntry {
+  version: string;
+  timestamp: Date;
+  author: string;
+  changes: VersionChange[];
+  tags: string[];
+}
+
+export interface FunctionVersionInfo {
+  current: string;
+  history: VersionEntry[];
+  comparison: VersionComparison;
+  migration: MigrationInfo;
+}
+
+export interface VersionComparison {
+  previousVersion: {
+    version: string;
+    differences: VersionDifference[];
+    compatible: boolean;
+    migrationRequired: boolean;
+  };
+  latestStable: {
+    version: string;
+    differences: VersionDifference[];
+    compatible: boolean;
+    migrationRequired: boolean;
+  };
+  compatibility: {
+    backward: CompatibilityLevel;
+    forward: CompatibilityLevel;
+    api: CompatibilityLevel;
+    binary: CompatibilityLevel;
+  };
+}
+
+export interface MigrationInfo {
+  required: boolean;
+  steps: MigrationStep[];
+  complexity: MigrationComplexity;
+  estimatedDuration: string;
+}
+
+export enum CompatibilityLevel {
+  _NONE = "none",
+  _PARTIAL = "partial",
+  _FULL = "full"
+}
+
+export enum MigrationComplexity {
+  _TRIVIAL = "trivial",
+  _SIMPLE = "simple",
+  _MODERATE = "moderate",
+  _COMPLEX = "complex",
+  _CRITICAL = "critical"
 }
 
 export interface VersionCreationResult {
@@ -1680,3 +1747,4 @@ export interface AuditRequirement {
   /** Additional audit parameters */
   parameters?: Record<string, unknown>;
 }
+

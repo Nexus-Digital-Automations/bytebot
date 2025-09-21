@@ -221,4 +221,68 @@ export declare class ParlantAuthenticationError extends ParlantIntegrationError 
 export declare class ParlantTimeoutError extends ParlantIntegrationError {
     constructor(message: string, details?: Record<string, unknown>);
 }
+export declare enum FunctionSecurityLevel {
+    _PUBLIC = "public",
+    _INTERNAL = "internal",
+    _RESTRICTED = "restricted",
+    _CONFIDENTIAL = "confidential",
+    _SECRET = "secret"
+}
+export declare enum SecurityConsiderationType {
+    _AUTHENTICATION_BYPASS = "authentication_bypass",
+    _PRIVILEGE_ESCALATION = "privilege_escalation",
+    _DATA_EXPOSURE = "data_exposure",
+    _INJECTION_VULNERABILITY = "injection_vulnerability",
+    _DENIAL_OF_SERVICE = "denial_of_service",
+    _CROSS_SITE_SCRIPTING = "cross_site_scripting",
+    _SENSITIVE_DATA_ACCESS = "sensitive_data_access"
+}
+export declare enum SecuritySeverity {
+    _LOW = "low",
+    _MEDIUM = "medium",
+    _HIGH = "high",
+    _CRITICAL = "critical"
+}
+export interface SecurityConsideration {
+    type: SecurityConsiderationType;
+    description: string;
+    severity: SecuritySeverity;
+    mitigations: string[];
+}
+export interface SecurityConstraint {
+    type: string;
+    description: string;
+    parameters: Record<string, unknown>;
+    mandatory: boolean;
+}
+export interface FunctionSecurityAssessment {
+    securityLevel: FunctionSecurityLevel;
+    riskLevel: RiskLevel;
+    considerations: SecurityConsideration[];
+    constraints: SecurityConstraint[];
+    assessedAt: Date;
+    metadata: Record<string, unknown>;
+}
+export interface AuthorInfo {
+    name: string;
+    email?: string;
+    team: string;
+    createdAt: Date;
+}
+export declare enum RiskLevel {
+    _LOW = "low",
+    _MEDIUM = "medium",
+    _HIGH = "high",
+    _CRITICAL = "critical"
+}
+export declare enum ValidationMode {
+    _STRICT = "strict",
+    _PERMISSIVE = "permissive",
+    _ADVISORY = "advisory"
+}
+export declare enum ApprovalLevel {
+    _AUTOMATIC = "automatic",
+    _MANUAL = "manual",
+    _ESCALATED = "escalated"
+}
 //# sourceMappingURL=parlant-integration.types.d.ts.map

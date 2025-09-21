@@ -166,9 +166,11 @@ export interface CoverageReport {
   readonly timestamp: number;
   readonly overall: CoverageOverall;
   readonly files: FileCoverage[];
+  readonly fileCoverage: FileCoverage[];
   readonly uncoveredLines: UncoveredElement[];
   readonly summary: string;
   readonly metadata?: CoverageMetadata;
+  readonly metrics: CoverageMetrics;
 }
 
 /**
@@ -573,6 +575,83 @@ export enum FilterType {
 }
 
 /**
+ * Coverage format types for export
+ */
+export enum CoverageFormat {
+  JSON = 'JSON',
+  XML = 'XML',
+  LCOV = 'LCOV',
+  HTML = 'HTML',
+  CSV = 'CSV',
+  COBERTURA = 'COBERTURA',
+  CLOVER = 'CLOVER',
+  JUNIT = 'JUNIT'
+}
+
+/**
+ * Coverage artifact
+ */
+export interface CoverageArtifact {
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly path: string;
+  readonly size: number;
+  readonly checksum: string;
+  readonly createdAt: Date;
+}
+
+/**
+ * Coverage export result
+ */
+export interface CoverageExportResult {
+  readonly exportId: string;
+  readonly timestamp: Date;
+  readonly formats: any[];
+  readonly artifacts: CoverageArtifact[];
+  readonly integrations: ExternalIntegration[];
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'COMPLETED_WITH_ERRORS' | 'FAILED';
+  duration: number;
+  readonly errors: Array<{
+    readonly type: string;
+    readonly message: string;
+    readonly timestamp: Date;
+  }>;
+}
+
+/**
+ * External integration result
+ */
+export interface ExternalIntegration {
+  readonly tool: string;
+  readonly status: 'SUCCESS' | 'FAILURE';
+  readonly uploadId: string;
+  readonly url?: string;
+  readonly duration: number;
+  readonly response?: any;
+  readonly error?: string;
+}
+
+/**
+ * CI Integration configuration
+ */
+export interface CIIntegrationConfig {
+  readonly enabled: boolean;
+  readonly type: 'GITHUB_ACTIONS' | 'GITLAB_CI' | 'JENKINS' | 'AZURE_DEVOPS' | 'CUSTOM';
+  readonly config: Record<string, any>;
+  readonly artifactPublishing: {
+    readonly enabled: boolean;
+    readonly retentionDays: number;
+    readonly publishFormats: CoverageFormat[];
+  };
+  readonly qualityGates: {
+    readonly enabled: boolean;
+    readonly thresholds: Record<string, number>;
+    readonly failOnThresholdViolation: boolean;
+  };
+}
+
+/**
  * Coverage export configuration
  */
 export interface CoverageExportConfig {
@@ -582,6 +661,25 @@ export interface CoverageExportConfig {
   readonly includeRecommendations: boolean;
   readonly compression: boolean;
   readonly encryption?: EncryptionConfig;
+  readonly externalIntegrations?: Array<{
+    readonly tool: 'SONARQUBE' | 'CODECOV' | 'COVERALLS' | 'CODECLIMATE' | 'CUSTOM';
+    readonly config: {
+      readonly apiUrl?: string;
+      readonly apiKey?: string;
+      readonly projectKey?: string;
+      readonly additionalSettings?: Record<string, any>;
+    };
+    readonly dataMapping: {
+      readonly fieldMappings: Record<string, string>;
+      readonly transformations: string[];
+    };
+    readonly uploadSettings: {
+      readonly enabled: boolean;
+      readonly uploadOnComplete: boolean;
+      readonly retryCount: number;
+      readonly retryDelay: number;
+    };
+  }>;
 }
 
 /**
@@ -901,4 +999,68 @@ export interface HealthFactor {
   readonly weight: number;        // 0-1
   readonly score: number;         // 0-100
   readonly description: string;
+}
+
+// ============================================================================
+// Dashboard-Specific Types
+// ============================================================================
+
+/**
+ * Coverage dashboard data structure
+ */
+export interface CoverageDashboardData {
+  dashboardId: string;
+  timestamp: Date;
+  refreshInterval: number;
+  widgets: any[]; // Dashboard widgets
+  alerts: DashboardCoverageAlert[];
+  metrics: Record<string, CoverageMetrics>;
+  trends: CoverageTrendData[];
+  comparisons: CoverageComparisonResult[];
+  systemStatus: {
+    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    lastUpdate: Date;
+    dataFreshness: 'CURRENT' | 'STALE' | 'OUTDATED';
+    alertCount: number;
+  };
+}
+
+/**
+ * Coverage trend data for dashboard
+ */
+export interface CoverageTrendData {
+  readonly timestamp: Date;
+  readonly overallCoverage: number;
+  readonly functionCoverage: number;
+  readonly lineCoverage: number;
+  readonly branchCoverage: number;
+  readonly testCount: number;
+  readonly executionTime: number;
+}
+
+/**
+ * Coverage visualization configuration
+ */
+export interface CoverageVisualization {
+  id: string;
+  type: 'LINE_CHART' | 'BAR_CHART' | 'PIE_CHART' | 'HEATMAP' | 'TREEMAP';
+  title: string;
+  data: any;
+  config: Record<string, any>;
+  timestamp: Date;
+  generationTime: number;
+}
+
+/**
+ * Dashboard-specific coverage alert
+ */
+export interface DashboardCoverageAlert {
+  id: string;
+  type: 'COVERAGE_THRESHOLD' | 'COVERAGE_TREND' | 'PERFORMANCE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  title: string;
+  message: string;
+  timestamp: Date;
+  source: string;
+  data?: Record<string, any>;
 }

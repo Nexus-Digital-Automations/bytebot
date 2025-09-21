@@ -108,7 +108,9 @@ export class InputCaptureService {
   }
 
   start(taskId: string) {
-    if (this.socket?.connected && this.capturing) {return;}
+    if (this.socket?.connected && this.capturing) {
+      return;
+    }
 
     if (this.socket && !this.socket.connected) {
       this.socket.connect();
@@ -131,7 +133,9 @@ export class InputCaptureService {
     this.socket.on(
       'screenshotAndAction',
       async (shot: { image: string }, action: unknown) => {
-        if (!this.capturing || !taskId) {return;}
+        if (!this.capturing || !taskId) {
+          return;
+        }
 
         // Validate action is a valid GenericAction
         if (!isValidAction(action)) {
@@ -141,7 +145,9 @@ export class InputCaptureService {
 
         // The gateway only sends a click_mouse or drag_mouse action together with screenshots for now.
         const actionType = safeGetString(action, 'action', '');
-        if (actionType !== 'click_mouse' && actionType !== 'drag_mouse') {return;}
+        if (actionType !== 'click_mouse' && actionType !== 'drag_mouse') {
+          return;
+        }
 
         const userActionBlock: UserActionContentBlock = {
           type: MessageContentType._UserAction,
@@ -201,7 +207,9 @@ export class InputCaptureService {
     );
 
     this.socket.on('action', async (action: unknown) => {
-      if (!this.capturing || !taskId) {return;}
+      if (!this.capturing || !taskId) {
+        return;
+      }
 
       // Validate action is a valid GenericAction
       if (!isValidAction(action)) {
@@ -316,9 +324,14 @@ export class InputCaptureService {
   }
 
   stop() {
-    if (!this.socket) {return;}
-    if (this.socket.connected) {this.socket.disconnect();}
-    else {this.socket.removeAllListeners();}
+    if (!this.socket) {
+      return;
+    }
+    if (this.socket.connected) {
+      this.socket.disconnect();
+    } else {
+      this.socket.removeAllListeners();
+    }
     this.socket = null;
     this.capturing = false;
   }

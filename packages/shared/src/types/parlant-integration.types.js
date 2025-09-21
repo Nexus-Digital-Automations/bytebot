@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ParlantTimeoutError = exports.ParlantAuthenticationError = exports.ParlantConnectionError = exports.ParlantValidationError = exports.ParlantIntegrationError = exports.ParlantMessageType = exports.SecurityLevel = void 0;
+exports.ApprovalLevel = exports.ValidationMode = exports.RiskLevel = exports.SecuritySeverity = exports.SecurityConsiderationType = exports.FunctionSecurityLevel = exports.ParlantTimeoutError = exports.ParlantAuthenticationError = exports.ParlantConnectionError = exports.ParlantValidationError = exports.ParlantIntegrationError = exports.ParlantMessageType = exports.SecurityLevel = void 0;
 var SecurityLevel;
 (function (SecurityLevel) {
     SecurityLevel["_MINIMAL"] = "minimal";
@@ -56,4 +56,48 @@ class ParlantTimeoutError extends ParlantIntegrationError {
     }
 }
 exports.ParlantTimeoutError = ParlantTimeoutError;
+var FunctionSecurityLevel;
+(function (FunctionSecurityLevel) {
+    FunctionSecurityLevel["_PUBLIC"] = "public";
+    FunctionSecurityLevel["_INTERNAL"] = "internal";
+    FunctionSecurityLevel["_RESTRICTED"] = "restricted";
+    FunctionSecurityLevel["_CONFIDENTIAL"] = "confidential";
+    FunctionSecurityLevel["_SECRET"] = "secret";
+})(FunctionSecurityLevel || (exports.FunctionSecurityLevel = FunctionSecurityLevel = {}));
+var SecurityConsiderationType;
+(function (SecurityConsiderationType) {
+    SecurityConsiderationType["_AUTHENTICATION_BYPASS"] = "authentication_bypass";
+    SecurityConsiderationType["_PRIVILEGE_ESCALATION"] = "privilege_escalation";
+    SecurityConsiderationType["_DATA_EXPOSURE"] = "data_exposure";
+    SecurityConsiderationType["_INJECTION_VULNERABILITY"] = "injection_vulnerability";
+    SecurityConsiderationType["_DENIAL_OF_SERVICE"] = "denial_of_service";
+    SecurityConsiderationType["_CROSS_SITE_SCRIPTING"] = "cross_site_scripting";
+    SecurityConsiderationType["_SENSITIVE_DATA_ACCESS"] = "sensitive_data_access";
+})(SecurityConsiderationType || (exports.SecurityConsiderationType = SecurityConsiderationType = {}));
+var SecuritySeverity;
+(function (SecuritySeverity) {
+    SecuritySeverity["_LOW"] = "low";
+    SecuritySeverity["_MEDIUM"] = "medium";
+    SecuritySeverity["_HIGH"] = "high";
+    SecuritySeverity["_CRITICAL"] = "critical";
+})(SecuritySeverity || (exports.SecuritySeverity = SecuritySeverity = {}));
+var RiskLevel;
+(function (RiskLevel) {
+    RiskLevel["_LOW"] = "low";
+    RiskLevel["_MEDIUM"] = "medium";
+    RiskLevel["_HIGH"] = "high";
+    RiskLevel["_CRITICAL"] = "critical";
+})(RiskLevel || (exports.RiskLevel = RiskLevel = {}));
+var ValidationMode;
+(function (ValidationMode) {
+    ValidationMode["_STRICT"] = "strict";
+    ValidationMode["_PERMISSIVE"] = "permissive";
+    ValidationMode["_ADVISORY"] = "advisory";
+})(ValidationMode || (exports.ValidationMode = ValidationMode = {}));
+var ApprovalLevel;
+(function (ApprovalLevel) {
+    ApprovalLevel["_AUTOMATIC"] = "automatic";
+    ApprovalLevel["_MANUAL"] = "manual";
+    ApprovalLevel["_ESCALATED"] = "escalated";
+})(ApprovalLevel || (exports.ApprovalLevel = ApprovalLevel = {}));
 //# sourceMappingURL=parlant-integration.types.js.map

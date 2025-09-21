@@ -14,7 +14,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   IVersionManager,
-  FunctionVersionInfo,
   VersionCreationData,
   VersionCreationResult,
   VersionComparisonResult,
@@ -24,22 +23,6 @@ import {
   CompatibilityMatrix,
   RetentionPolicy,
   ArchivalResult,
-  VersionEntry,
-  VersionChange,
-  ChangeType,
-  ChangeImpact,
-  VersionComparison,
-  VersionDiff,
-  CompatibilityLevel,
-  MigrationInfo,
-  MigrationStep,
-  MigrationStepType,
-  AutomationLevel,
-  StepValidation,
-  ValidationCriteria,
-  CriteriaType,
-  ValidationMethod,
-  MigrationComplexity,
   VersionConflict,
   ConflictType,
   ConflictResolution,
@@ -52,8 +35,27 @@ import {
   RiskFactor,
   RiskCategory,
   Likelihood,
-  VerificationResult
+  VerificationResult,
+  MigrationStep,
+  MigrationStepType,
+  VersionChange,
+  ChangeType,
+  ChangeImpact,
+  VersionEntry,
+  FunctionVersionInfo,
+  VersionComparison,
+  CompatibilityLevel,
+  MigrationInfo,
+  MigrationComplexity
 } from '../core/registry.interface';
+
+import {
+  AutomationLevel,
+  StepValidation,
+  ValidationCriteria,
+  CriteriaType,
+  ValidationMethod
+} from '../core/registry.types';
 
 /**
  * Version comparison algorithm types
@@ -774,7 +776,7 @@ export class VersionManagerService implements IVersionManager {
       }
     });
 
-    return [...new Set(tags)]; // Remove duplicates
+    return Array.from(new Set(tags)); // Remove duplicates
   }
 
   /**
@@ -890,7 +892,7 @@ export class VersionManagerService implements IVersionManager {
     const allChanges2 = new Set(entry2.changes.map(c => `${c.type}:${c.description}`));
 
     // Find differences in changes
-    for (const change1 of allChanges1) {
+    for (const change1 of Array.from(allChanges1)) {
       if (!allChanges2.has(change1)) {
         differences.push({
           category: DifferenceCategory._BEHAVIOR,
@@ -901,7 +903,7 @@ export class VersionManagerService implements IVersionManager {
       }
     }
 
-    for (const change2 of allChanges2) {
+    for (const change2 of Array.from(allChanges2)) {
       if (!allChanges1.has(change2)) {
         differences.push({
           category: DifferenceCategory._BEHAVIOR,

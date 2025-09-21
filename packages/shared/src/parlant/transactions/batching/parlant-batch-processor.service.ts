@@ -22,43 +22,37 @@
  * @version 1.0.0 - SOPHISTICATED BATCH PROCESSING WITH PARLANT VALIDATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   TransactionMetadata,
-  TransactionOperation,
-  TransactionState,
   TransactionOperationType,
   TransactionBatchConfiguration,
   TransactionBatchResult,
-  TransactionExecutionContext,
   TransactionOperationResult,
-  TransactionError,
   TransactionErrorType,
   TransactionPerformanceMetrics,
   TransactionAuditInfo,
-  ParlantTransactionValidationRequest,
-  ParlantTransactionValidationResponse,
-} from '../types';
+} from "../types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantUserContext,
   SecurityLevel,
-} from '../../../types/parlant-integration.types';
+} from "../../../types/parlant-integration.types";
 
 /**
  * Batch execution strategy
  */
 export enum BatchExecutionStrategy {
   /** Execute operations sequentially */
-  SEQUENTIAL = 'SEQUENTIAL',
+  SEQUENTIAL = "SEQUENTIAL",
   /** Execute operations in parallel */
-  PARALLEL = 'PARALLEL',
+  PARALLEL = "PARALLEL",
   /** Mixed approach based on dependencies */
-  HYBRID = 'HYBRID',
+  HYBRID = "HYBRID",
   /** Pipeline execution with overlapping stages */
-  PIPELINE = 'PIPELINE',
+  PIPELINE = "PIPELINE",
 }
 
 /**
@@ -66,38 +60,38 @@ export enum BatchExecutionStrategy {
  */
 export enum BatchValidationStrategy {
   /** Validate each operation individually */
-  INDIVIDUAL = 'INDIVIDUAL',
+  INDIVIDUAL = "INDIVIDUAL",
   /** Validate entire batch as one unit */
-  BATCH = 'BATCH',
+  BATCH = "BATCH",
   /** Hybrid approach with intelligent grouping */
-  HYBRID = 'HYBRID',
+  HYBRID = "HYBRID",
   /** Adaptive strategy based on performance */
-  ADAPTIVE = 'ADAPTIVE',
+  ADAPTIVE = "ADAPTIVE",
 }
 
 /**
  * Batch priority level
  */
 export enum BatchPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  REAL_TIME = 'REAL_TIME',
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+  REAL_TIME = "REAL_TIME",
 }
 
 /**
  * Batch state management
  */
 export enum BatchState {
-  PENDING = 'PENDING',
-  QUEUED = 'QUEUED',
-  VALIDATING = 'VALIDATING',
-  EXECUTING = 'EXECUTING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED',
-  PARTIALLY_COMPLETED = 'PARTIALLY_COMPLETED',
+  PENDING = "PENDING",
+  QUEUED = "QUEUED",
+  VALIDATING = "VALIDATING",
+  EXECUTING = "EXECUTING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+  PARTIALLY_COMPLETED = "PARTIALLY_COMPLETED",
 }
 
 /**
@@ -249,16 +243,23 @@ export interface BatchPerformanceMonitor {
   recordBatchStart(): void;
 
   /** Record batch completion */
-  recordBatchCompletion(success: boolean): void;
+  recordBatchCompletion(_success: boolean): void;
 
   /** Record transaction completion */
-  recordTransactionCompletion(transactionId: string, duration: number, success: boolean): void;
+  recordTransactionCompletion(
+    _transactionId: string,
+    _duration: number,
+    _success: boolean,
+  ): void;
 
   /** Record validation metrics */
-  recordValidationMetrics(validationTime: number, transactionCount: number): void;
+  recordValidationMetrics(
+    _validationTime: number,
+    _transactionCount: number,
+  ): void;
 
   /** Record resource usage */
-  recordResourceUsage(usage: Partial<BatchResourceUtilization>): void;
+  recordResourceUsage(_usage: Partial<BatchResourceUtilization>): void;
 
   /** Get current metrics */
   getCurrentMetrics(): BatchPerformanceMetrics;
@@ -272,19 +273,26 @@ export interface BatchPerformanceMonitor {
  */
 export interface BatchAuditLogger {
   /** Log batch creation */
-  logBatchCreation(batch: BatchMetadata): void;
+  logBatchCreation(_batch: BatchMetadata): void;
 
   /** Log batch state change */
-  logBatchStateChange(oldState: BatchState, newState: BatchState, reason: string): void;
+  logBatchStateChange(
+    _oldState: BatchState,
+    _newState: BatchState,
+    _reason: string,
+  ): void;
 
   /** Log transaction processing */
-  logTransactionProcessing(transactionId: string, status: 'STARTED' | 'COMPLETED' | 'FAILED'): void;
+  logTransactionProcessing(
+    _transactionId: string,
+    _status: "STARTED" | "COMPLETED" | "FAILED",
+  ): void;
 
   /** Log validation results */
-  logValidationResults(results: Map<string, ParlantValidationResponse>): void;
+  logValidationResults(_results: Map<string, ParlantValidationResponse>): void;
 
   /** Log batch completion */
-  logBatchCompletion(result: TransactionBatchResult): void;
+  logBatchCompletion(_result: TransactionBatchResult): void;
 
   /** Get audit trail */
   getAuditTrail(): TransactionAuditInfo[];
@@ -321,7 +329,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
   private readonly activeBatches = new Map<string, BatchExecutionContext>();
 
   // Batch performance monitors
-  private readonly performanceMonitors = new Map<string, BatchPerformanceMonitor>();
+  private readonly performanceMonitors = new Map<
+    string,
+    BatchPerformanceMonitor
+  >();
 
   // Batch audit loggers
   private readonly auditLoggers = new Map<string, BatchAuditLogger>();
@@ -344,13 +355,13 @@ export class ParlantBatchProcessorService extends EventEmitter {
     batchTimeout: 30000,
     enableParallelExecution: true,
     maxParallelOperations: 5,
-    validationStrategy: 'HYBRID',
-    failureStrategy: 'CONTINUE_ON_ERROR',
+    validationStrategy: "HYBRID",
+    failureStrategy: "CONTINUE_ON_ERROR",
   };
 
   constructor() {
     super();
-    this.logger.log('PARLANT Batch Processor Service initialized');
+    this.logger.log("PARLANT Batch Processor Service initialized");
 
     // Start batch processing loop
     this.startBatchProcessing();
@@ -375,19 +386,24 @@ export class ParlantBatchProcessorService extends EventEmitter {
       configuration?: Partial<TransactionBatchConfiguration>;
       executionStrategy?: BatchExecutionStrategy;
       validationStrategy?: BatchValidationStrategy;
-    } = {}
+    } = {},
   ): Promise<string> {
     const startTime = Date.now();
     const batchId = this.generateBatchId();
 
-    this.logger.log(`Creating batch ${batchId} with ${transactions.length} transactions`);
+    this.logger.log(
+      `Creating batch ${batchId} with ${transactions.length} transactions`,
+    );
 
     try {
       // Validate input
       this.validateBatchInput(transactions);
 
       // Merge configuration
-      const configuration = { ...this.defaultBatchConfiguration, ...options.configuration };
+      const configuration = {
+        ...this.defaultBatchConfiguration,
+        ...options.configuration,
+      };
 
       // Create batch metadata
       const batchMetadata: BatchMetadata = {
@@ -414,8 +430,15 @@ export class ParlantBatchProcessorService extends EventEmitter {
       const dependencyGraph = this.buildBatchDependencyGraph(transactions);
 
       // Determine execution order and parallel groups
-      const executionOrder = this.determineExecutionOrder(transactions, dependencyGraph);
-      const parallelGroups = this.determineParallelGroups(transactions, dependencyGraph, configuration);
+      const executionOrder = this.determineExecutionOrder(
+        transactions,
+        dependencyGraph,
+      );
+      const parallelGroups = this.determineParallelGroups(
+        transactions,
+        dependencyGraph,
+        configuration,
+      );
 
       // Create batch execution context
       const batchContext: BatchExecutionContext = {
@@ -423,8 +446,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
         batchMetadata,
         transactions,
         configuration,
-        executionStrategy: options.executionStrategy || BatchExecutionStrategy.HYBRID,
-        validationStrategy: options.validationStrategy || BatchValidationStrategy.HYBRID,
+        executionStrategy:
+          options.executionStrategy || BatchExecutionStrategy.HYBRID,
+        validationStrategy:
+          options.validationStrategy || BatchValidationStrategy.HYBRID,
         performanceMonitor,
         auditLogger,
         dependencyGraph,
@@ -441,7 +466,8 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
       // Calculate priority score and estimated execution time
       const priorityScore = this.calculatePriorityScore(batchMetadata);
-      const estimatedExecutionTime = this.estimateBatchExecutionTime(batchContext);
+      const estimatedExecutionTime =
+        this.estimateBatchExecutionTime(batchContext);
 
       // Create queue item
       const queueItem: BatchQueueItem = {
@@ -455,17 +481,25 @@ export class ParlantBatchProcessorService extends EventEmitter {
       this.addToQueue(queueItem);
 
       // Update batch state
-      await this.updateBatchState(batchId, BatchState.QUEUED, 'Batch queued for processing');
+      await this.updateBatchState(
+        batchId,
+        BatchState.QUEUED,
+        "Batch queued for processing",
+      );
 
       // Emit batch created event
-      this.emit('batchCreated', { batchId, batchMetadata, transactions });
+      this.emit("batchCreated", { batchId, batchMetadata, transactions });
 
-      this.logger.log(`Batch ${batchId} created and queued in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Batch ${batchId} created and queued in ${Date.now() - startTime}ms`,
+      );
 
       return batchId;
-
     } catch (error) {
-      this.logger.error(`Failed to create batch: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create batch: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Batch creation failed: ${error.message}`);
     }
   }
@@ -479,10 +513,14 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     try {
       const context = this.getActiveBatch(batchId);
-      const { batchMetadata, transactions, configuration, performanceMonitor, auditLogger } = context;
+      const { batchMetadata, transactions, performanceMonitor, auditLogger } = context;
 
       // Update batch state
-      await this.updateBatchState(batchId, BatchState.VALIDATING, 'Starting batch validation');
+      await this.updateBatchState(
+        batchId,
+        BatchState.VALIDATING,
+        "Starting batch validation",
+      );
 
       // Record batch start
       batchMetadata.startedAt = new Date();
@@ -492,24 +530,36 @@ export class ParlantBatchProcessorService extends EventEmitter {
       const validationResults = await this.performBatchValidation(context);
 
       // Check validation results
-      const validationSuccessful = this.evaluateValidationResults(validationResults);
+      const validationSuccessful =
+        this.evaluateValidationResults(validationResults);
 
       if (!validationSuccessful) {
         const failedValidations = Array.from(validationResults.entries())
           .filter(([_, result]) => !result.approved)
-          .map(([transactionId, result]) => `${transactionId}: ${result.reason}`);
+          .map(
+            ([transactionId, result]) => `${transactionId}: ${result.reason}`,
+          );
 
-        throw new Error(`Batch validation failed: ${failedValidations.join('; ')}`);
+        throw new Error(
+          `Batch validation failed: ${failedValidations.join("; ")}`,
+        );
       }
 
       // Log validation results
       auditLogger.logValidationResults(validationResults);
 
       // Update batch state
-      await this.updateBatchState(batchId, BatchState.EXECUTING, 'Starting batch execution');
+      await this.updateBatchState(
+        batchId,
+        BatchState.EXECUTING,
+        "Starting batch execution",
+      );
 
       // Execute batch based on strategy
-      const operationResults = await this.executeBatch(context, validationResults);
+      const operationResults = await this.executeBatch(
+        context,
+        validationResults,
+      );
 
       // Create batch result
       const batchResult: TransactionBatchResult = {
@@ -518,17 +568,26 @@ export class ParlantBatchProcessorService extends EventEmitter {
         failedOperations: Array.from(operationResults.entries())
           .filter(([_, result]) => !result.success)
           .map(([transactionId, _]) => transactionId),
-        batchMetrics: performanceMonitor.getCurrentMetrics(),
+        batchMetrics: {
+          ...performanceMonitor.getCurrentMetrics(),
+          operationCount: Array.from(operationResults.values()).length,
+          validationRequestCount: transactions.length,
+          retryCount: 0,
+        } as TransactionPerformanceMetrics,
         auditInfo: {
           auditId: `batch_${batchId}_result`,
-          type: 'OPERATION',
+          type: "OPERATION",
           timestamp: new Date(),
           userContext: batchMetadata.userContext,
           details: {
             batchId,
             totalTransactions: transactions.length,
-            successfulTransactions: Array.from(operationResults.values()).filter(r => r.success).length,
-            failedTransactions: Array.from(operationResults.values()).filter(r => !r.success).length,
+            successfulTransactions: Array.from(
+              operationResults.values(),
+            ).filter((r) => r.success).length,
+            failedTransactions: Array.from(operationResults.values()).filter(
+              (r) => !r.success,
+            ).length,
           },
           securityLevel: batchMetadata.securityLevel,
         },
@@ -536,16 +595,27 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
       // Record batch completion
       batchMetadata.completedAt = new Date();
-      batchMetadata.completedTransactions = Array.from(operationResults.values()).filter(r => r.success).length;
-      batchMetadata.failedTransactions = Array.from(operationResults.values()).filter(r => !r.success).length;
+      batchMetadata.completedTransactions = Array.from(
+        operationResults.values(),
+      ).filter((r) => r.success).length;
+      batchMetadata.failedTransactions = Array.from(
+        operationResults.values(),
+      ).filter((r) => !r.success).length;
 
       performanceMonitor.recordBatchCompletion(batchResult.success);
 
       // Update batch state
-      const finalState = batchResult.success ? BatchState.COMPLETED :
-        batchResult.failedOperations.length < transactions.length ? BatchState.PARTIALLY_COMPLETED : BatchState.FAILED;
+      const finalState = batchResult.success
+        ? BatchState.COMPLETED
+        : batchResult.failedOperations.length < transactions.length
+          ? BatchState.PARTIALLY_COMPLETED
+          : BatchState.FAILED;
 
-      await this.updateBatchState(batchId, finalState, 'Batch processing completed');
+      await this.updateBatchState(
+        batchId,
+        finalState,
+        "Batch processing completed",
+      );
 
       // Log batch completion
       auditLogger.logBatchCompletion(batchResult);
@@ -557,17 +627,21 @@ export class ParlantBatchProcessorService extends EventEmitter {
       this.updatePerformanceHistory(performanceMonitor.getCurrentMetrics());
 
       // Emit batch completed event
-      this.emit('batchCompleted', { batchId, batchResult });
+      this.emit("batchCompleted", { batchId, batchResult });
 
       // Clean up resources
       await this.cleanupBatch(batchId);
 
-      this.logger.log(`Batch ${batchId} processed in ${Date.now() - startTime}ms: ${batchResult.success ? 'SUCCESS' : 'PARTIAL/FAILURE'}`);
+      this.logger.log(
+        `Batch ${batchId} processed in ${Date.now() - startTime}ms: ${batchResult.success ? "SUCCESS" : "PARTIAL/FAILURE"}`,
+      );
 
       return batchResult;
-
     } catch (error) {
-      this.logger.error(`Batch processing failed for ${batchId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Batch processing failed for ${batchId}: ${error.message}`,
+        error.stack,
+      );
       await this.handleBatchError(batchId, error);
       throw error;
     }
@@ -578,11 +652,16 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform batch validation based on strategy
    */
-  private async performBatchValidation(context: BatchExecutionContext): Promise<Map<string, ParlantValidationResponse>> {
-    const { batchId, transactions, validationStrategy, performanceMonitor } = context;
+  private async performBatchValidation(
+    context: BatchExecutionContext,
+  ): Promise<Map<string, ParlantValidationResponse>> {
+    const { batchId, transactions, validationStrategy, performanceMonitor } =
+      context;
     const validationStartTime = Date.now();
 
-    this.logger.log(`Performing ${validationStrategy} validation for batch ${batchId}`);
+    this.logger.log(
+      `Performing ${validationStrategy} validation for batch ${batchId}`,
+    );
 
     try {
       let validationResults: Map<string, ParlantValidationResponse>;
@@ -605,17 +684,24 @@ export class ParlantBatchProcessorService extends EventEmitter {
           break;
 
         default:
-          throw new Error(`Unsupported validation strategy: ${validationStrategy}`);
+          throw new Error(
+            `Unsupported validation strategy: ${validationStrategy}`,
+          );
       }
 
       // Record validation metrics
       const validationTime = Date.now() - validationStartTime;
-      performanceMonitor.recordValidationMetrics(validationTime, transactions.length);
+      performanceMonitor.recordValidationMetrics(
+        validationTime,
+        transactions.length,
+      );
 
       return validationResults;
-
     } catch (error) {
-      this.logger.error(`Batch validation failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Batch validation failed: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -623,17 +709,22 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform individual validation for each transaction
    */
-  private async performIndividualValidation(context: BatchExecutionContext): Promise<Map<string, ParlantValidationResponse>> {
+  private async performIndividualValidation(
+    context: BatchExecutionContext,
+  ): Promise<Map<string, ParlantValidationResponse>> {
     const { transactions } = context;
     const results = new Map<string, ParlantValidationResponse>();
 
     for (const transaction of transactions) {
       try {
         const validationRequest = this.createValidationRequest(transaction);
-        const validationResponse = await this.performParlantValidation(validationRequest);
+        const validationResponse =
+          await this.performParlantValidation(validationRequest);
         results.set(transaction.transactionId, validationResponse);
       } catch (error) {
-        this.logger.error(`Individual validation failed for transaction ${transaction.transactionId}: ${error.message}`);
+        this.logger.error(
+          `Individual validation failed for transaction ${transaction.transactionId}: ${error.message}`,
+        );
         // Create failed validation response
         results.set(transaction.transactionId, {
           approved: false,
@@ -641,9 +732,17 @@ export class ParlantBatchProcessorService extends EventEmitter {
           reason: `Validation error: ${error.message}`,
           confidence: 0,
           metadata: {
-            validationTime: Date.now(),
-            validatorId: 'individual-validator',
-            validationVersion: '1.0.0',
+            startTime: new Date(Date.now() - 100),
+            endTime: new Date(),
+            processingTime: 100,
+            cacheStatus: "miss" as const,
+            source: "parlant" as const,
+            riskAssessment: {
+              level: SecurityLevel._LOW,
+              factors: [],
+              score: 10,
+              mitigations: [],
+            },
           },
         });
       }
@@ -655,20 +754,26 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform batch validation as a single unit
    */
-  private async performBatchValidation_Batch(context: BatchExecutionContext): Promise<Map<string, ParlantValidationResponse>> {
+  private async performBatchValidation_Batch(
+    context: BatchExecutionContext,
+  ): Promise<Map<string, ParlantValidationResponse>> {
     const { batchMetadata, transactions } = context;
     const results = new Map<string, ParlantValidationResponse>();
 
     try {
       // Create batch validation request
-      const batchValidationRequest = this.createBatchValidationRequest(batchMetadata, transactions);
-      const batchValidationResponse = await this.performParlantValidation(batchValidationRequest);
+      const batchValidationRequest = this.createBatchValidationRequest(
+        batchMetadata,
+        transactions,
+      );
+      const batchValidationResponse = await this.performParlantValidation(
+        batchValidationRequest,
+      );
 
       // Apply batch result to all transactions
       for (const transaction of transactions) {
         results.set(transaction.transactionId, batchValidationResponse);
       }
-
     } catch (error) {
       this.logger.error(`Batch validation failed: ${error.message}`);
       // Create failed validation response for all transactions
@@ -678,9 +783,17 @@ export class ParlantBatchProcessorService extends EventEmitter {
         reason: `Batch validation error: ${error.message}`,
         confidence: 0,
         metadata: {
-          validationTime: Date.now(),
-          validatorId: 'batch-validator',
-          validationVersion: '1.0.0',
+          startTime: new Date(Date.now() - 100),
+          endTime: new Date(),
+          processingTime: 100,
+          cacheStatus: "miss" as const,
+          source: "parlant" as const,
+          riskAssessment: {
+            level: SecurityLevel._LOW,
+            factors: [],
+            score: 10,
+            mitigations: [],
+          },
         },
       };
 
@@ -695,33 +808,50 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform hybrid validation with intelligent grouping
    */
-  private async performHybridValidation(context: BatchExecutionContext): Promise<Map<string, ParlantValidationResponse>> {
+  private async performHybridValidation(
+    context: BatchExecutionContext,
+  ): Promise<Map<string, ParlantValidationResponse>> {
     const { transactions } = context;
     const results = new Map<string, ParlantValidationResponse>();
 
     // Group transactions by validation complexity
-    const simpleTransactions = transactions.filter(tx => this.isSimpleTransaction(tx));
-    const complexTransactions = transactions.filter(tx => !this.isSimpleTransaction(tx));
+    const simpleTransactions = transactions.filter((tx) =>
+      this.isSimpleTransaction(tx),
+    );
+    const complexTransactions = transactions.filter(
+      (tx) => !this.isSimpleTransaction(tx),
+    );
 
     // Validate simple transactions as a batch
     if (simpleTransactions.length > 0) {
       try {
-        const batchValidationRequest = this.createBatchValidationRequest(context.batchMetadata, simpleTransactions);
-        const batchValidationResponse = await this.performParlantValidation(batchValidationRequest);
+        const batchValidationRequest = this.createBatchValidationRequest(
+          context.batchMetadata,
+          simpleTransactions,
+        );
+        const batchValidationResponse = await this.performParlantValidation(
+          batchValidationRequest,
+        );
 
         for (const transaction of simpleTransactions) {
           results.set(transaction.transactionId, batchValidationResponse);
         }
       } catch (error) {
-        this.logger.error(`Hybrid batch validation failed for simple transactions: ${error.message}`);
+        this.logger.error(
+          `Hybrid batch validation failed for simple transactions: ${error.message}`,
+        );
         // Fall back to individual validation
         for (const transaction of simpleTransactions) {
           try {
             const validationRequest = this.createValidationRequest(transaction);
-            const validationResponse = await this.performParlantValidation(validationRequest);
+            const validationResponse =
+              await this.performParlantValidation(validationRequest);
             results.set(transaction.transactionId, validationResponse);
           } catch (individualError) {
-            results.set(transaction.transactionId, this.createFailedValidationResponse(individualError.message));
+            results.set(
+              transaction.transactionId,
+              this.createFailedValidationResponse(individualError.message),
+            );
           }
         }
       }
@@ -731,11 +861,17 @@ export class ParlantBatchProcessorService extends EventEmitter {
     for (const transaction of complexTransactions) {
       try {
         const validationRequest = this.createValidationRequest(transaction);
-        const validationResponse = await this.performParlantValidation(validationRequest);
+        const validationResponse =
+          await this.performParlantValidation(validationRequest);
         results.set(transaction.transactionId, validationResponse);
       } catch (error) {
-        this.logger.error(`Hybrid individual validation failed for transaction ${transaction.transactionId}: ${error.message}`);
-        results.set(transaction.transactionId, this.createFailedValidationResponse(error.message));
+        this.logger.error(
+          `Hybrid individual validation failed for transaction ${transaction.transactionId}: ${error.message}`,
+        );
+        results.set(
+          transaction.transactionId,
+          this.createFailedValidationResponse(error.message),
+        );
       }
     }
 
@@ -745,7 +881,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform adaptive validation based on performance history
    */
-  private async performAdaptiveValidation(context: BatchExecutionContext): Promise<Map<string, ParlantValidationResponse>> {
+  private async performAdaptiveValidation(
+    context: BatchExecutionContext,
+  ): Promise<Map<string, ParlantValidationResponse>> {
     // Analyze performance history to choose optimal strategy
     const optimalStrategy = this.determineOptimalValidationStrategy(context);
 
@@ -774,11 +912,13 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executeBatch(
     context: BatchExecutionContext,
-    validationResults: Map<string, ParlantValidationResponse>
+    validationResults: Map<string, ParlantValidationResponse>,
   ): Promise<Map<string, TransactionOperationResult>> {
     const { batchId, executionStrategy } = context;
 
-    this.logger.log(`Executing batch ${batchId} with strategy: ${executionStrategy}`);
+    this.logger.log(
+      `Executing batch ${batchId} with strategy: ${executionStrategy}`,
+    );
 
     switch (executionStrategy) {
       case BatchExecutionStrategy.SEQUENTIAL:
@@ -803,41 +943,61 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executeSequential(
     context: BatchExecutionContext,
-    validationResults: Map<string, ParlantValidationResponse>
+    validationResults: Map<string, ParlantValidationResponse>,
   ): Promise<Map<string, TransactionOperationResult>> {
     const { transactions, executionOrder, auditLogger } = context;
     const results = new Map<string, TransactionOperationResult>();
 
     for (const transactionId of executionOrder) {
-      const transaction = transactions.find(tx => tx.transactionId === transactionId);
+      const transaction = transactions.find(
+        (tx) => tx.transactionId === transactionId,
+      );
       if (!transaction) continue;
 
       const validationResult = validationResults.get(transactionId);
       if (!validationResult?.approved) {
         // Skip non-approved transactions
-        results.set(transactionId, this.createFailedOperationResult('Transaction not approved for execution'));
+        results.set(
+          transactionId,
+          this.createFailedOperationResult(
+            "Transaction not approved for execution",
+          ),
+        );
         continue;
       }
 
       try {
-        auditLogger.logTransactionProcessing(transactionId, 'STARTED');
+        auditLogger.logTransactionProcessing(transactionId, "STARTED");
 
-        const result = await this.executeTransaction(transaction, validationResult);
+        const result = await this.executeTransaction(
+          transaction,
+          validationResult,
+        );
         results.set(transactionId, result);
 
-        auditLogger.logTransactionProcessing(transactionId, result.success ? 'COMPLETED' : 'FAILED');
+        auditLogger.logTransactionProcessing(
+          transactionId,
+          result.success ? "COMPLETED" : "FAILED",
+        );
 
         // Handle failure strategy
-        if (!result.success && context.configuration.failureStrategy === 'FAIL_FAST') {
+        if (
+          !result.success &&
+          context.configuration.failureStrategy === "FAIL_FAST"
+        ) {
           break;
         }
-
       } catch (error) {
-        this.logger.error(`Sequential execution failed for transaction ${transactionId}: ${error.message}`);
-        results.set(transactionId, this.createFailedOperationResult(error.message));
-        auditLogger.logTransactionProcessing(transactionId, 'FAILED');
+        this.logger.error(
+          `Sequential execution failed for transaction ${transactionId}: ${error.message}`,
+        );
+        results.set(
+          transactionId,
+          this.createFailedOperationResult(error.message),
+        );
+        auditLogger.logTransactionProcessing(transactionId, "FAILED");
 
-        if (context.configuration.failureStrategy === 'FAIL_FAST') {
+        if (context.configuration.failureStrategy === "FAIL_FAST") {
           break;
         }
       }
@@ -851,34 +1011,52 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executeParallel(
     context: BatchExecutionContext,
-    validationResults: Map<string, ParlantValidationResponse>
+    validationResults: Map<string, ParlantValidationResponse>,
   ): Promise<Map<string, TransactionOperationResult>> {
-    const { transactions, parallelGroups, configuration, auditLogger } = context;
+    const { transactions, parallelGroups, configuration, auditLogger } =
+      context;
     const results = new Map<string, TransactionOperationResult>();
 
     for (const group of parallelGroups) {
       // Execute transactions in parallel group
       const groupPromises = group.map(async (transactionId) => {
-        const transaction = transactions.find(tx => tx.transactionId === transactionId);
+        const transaction = transactions.find(
+          (tx) => tx.transactionId === transactionId,
+        );
         if (!transaction) return null;
 
         const validationResult = validationResults.get(transactionId);
         if (!validationResult?.approved) {
-          return { transactionId, result: this.createFailedOperationResult('Transaction not approved for execution') };
+          return {
+            transactionId,
+            result: this.createFailedOperationResult(
+              "Transaction not approved for execution",
+            ),
+          };
         }
 
         try {
-          auditLogger.logTransactionProcessing(transactionId, 'STARTED');
+          auditLogger.logTransactionProcessing(transactionId, "STARTED");
 
-          const result = await this.executeTransaction(transaction, validationResult);
-          auditLogger.logTransactionProcessing(transactionId, result.success ? 'COMPLETED' : 'FAILED');
+          const result = await this.executeTransaction(
+            transaction,
+            validationResult,
+          );
+          auditLogger.logTransactionProcessing(
+            transactionId,
+            result.success ? "COMPLETED" : "FAILED",
+          );
 
           return { transactionId, result };
-
         } catch (error) {
-          this.logger.error(`Parallel execution failed for transaction ${transactionId}: ${error.message}`);
-          auditLogger.logTransactionProcessing(transactionId, 'FAILED');
-          return { transactionId, result: this.createFailedOperationResult(error.message) };
+          this.logger.error(
+            `Parallel execution failed for transaction ${transactionId}: ${error.message}`,
+          );
+          auditLogger.logTransactionProcessing(transactionId, "FAILED");
+          return {
+            transactionId,
+            result: this.createFailedOperationResult(error.message),
+          };
         }
       });
 
@@ -891,7 +1069,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
           results.set(groupResult.transactionId, groupResult.result);
 
           // Handle failure strategy
-          if (!groupResult.result.success && configuration.failureStrategy === 'FAIL_FAST') {
+          if (
+            !groupResult.result.success &&
+            configuration.failureStrategy === "FAIL_FAST"
+          ) {
             return results;
           }
         }
@@ -906,7 +1087,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executeHybrid(
     context: BatchExecutionContext,
-    validationResults: Map<string, ParlantValidationResponse>
+    validationResults: Map<string, ParlantValidationResponse>,
   ): Promise<Map<string, TransactionOperationResult>> {
     // Analyze dependencies to determine optimal execution
     const { parallelGroups } = context;
@@ -925,7 +1106,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executePipeline(
     context: BatchExecutionContext,
-    validationResults: Map<string, ParlantValidationResponse>
+    validationResults: Map<string, ParlantValidationResponse>,
   ): Promise<Map<string, TransactionOperationResult>> {
     // Simplified pipeline implementation (would be more complex in real scenario)
     return this.executeParallel(context, validationResults);
@@ -947,18 +1128,20 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private validateBatchInput(transactions: TransactionMetadata[]): void {
     if (!transactions || transactions.length === 0) {
-      throw new Error('At least one transaction is required for a batch');
+      throw new Error("At least one transaction is required for a batch");
     }
 
     if (transactions.length > 100) {
-      throw new Error('Maximum 100 transactions allowed per batch');
+      throw new Error("Maximum 100 transactions allowed per batch");
     }
 
     // Check for duplicate transaction IDs
     const transactionIds = new Set<string>();
     for (const transaction of transactions) {
       if (transactionIds.has(transaction.transactionId)) {
-        throw new Error(`Duplicate transaction ID: ${transaction.transactionId}`);
+        throw new Error(
+          `Duplicate transaction ID: ${transaction.transactionId}`,
+        );
       }
       transactionIds.add(transaction.transactionId);
     }
@@ -987,7 +1170,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Build batch dependency graph
    */
-  private buildBatchDependencyGraph(transactions: TransactionMetadata[]): Map<string, Set<string>> {
+  private buildBatchDependencyGraph(
+    transactions: TransactionMetadata[],
+  ): Map<string, Set<string>> {
     const graph = new Map<string, Set<string>>();
 
     for (const transaction of transactions) {
@@ -1009,16 +1194,16 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private determineExecutionOrder(
     transactions: TransactionMetadata[],
-    dependencyGraph: Map<string, Set<string>>
+    dependencyGraph: Map<string, Set<string>>,
   ): string[] {
     const ordered: string[] = [];
-    const remaining = new Set(transactions.map(tx => tx.transactionId));
+    const remaining = new Set(transactions.map((tx) => tx.transactionId));
     const completed = new Set<string>();
 
     while (remaining.size > 0) {
-      const nextTransactions = Array.from(remaining).filter(txId => {
+      const nextTransactions = Array.from(remaining).filter((txId) => {
         const dependencies = dependencyGraph.get(txId) || new Set();
-        return Array.from(dependencies).every(dep => completed.has(dep));
+        return Array.from(dependencies).every((dep) => completed.has(dep));
       });
 
       if (nextTransactions.length === 0) {
@@ -1043,28 +1228,30 @@ export class ParlantBatchProcessorService extends EventEmitter {
   private determineParallelGroups(
     transactions: TransactionMetadata[],
     dependencyGraph: Map<string, Set<string>>,
-    configuration: TransactionBatchConfiguration
+    configuration: TransactionBatchConfiguration,
   ): string[][] {
     if (!configuration.enableParallelExecution) {
       // Return single transaction per group for sequential execution
-      return transactions.map(tx => [tx.transactionId]);
+      return transactions.map((tx) => [tx.transactionId]);
     }
 
     const groups: string[][] = [];
-    const remaining = new Set(transactions.map(tx => tx.transactionId));
+    const remaining = new Set(transactions.map((tx) => tx.transactionId));
     const completed = new Set<string>();
 
     while (remaining.size > 0) {
       const currentGroup: string[] = [];
 
       // Find transactions that can be executed in parallel
-      for (const txId of remaining) {
+      for (const txId of Array.from(remaining)) {
         if (currentGroup.length >= configuration.maxParallelOperations) {
           break;
         }
 
         const dependencies = dependencyGraph.get(txId) || new Set();
-        const canExecute = Array.from(dependencies).every(dep => completed.has(dep));
+        const canExecute = Array.from(dependencies).every((dep) =>
+          completed.has(dep),
+        );
 
         if (canExecute) {
           currentGroup.push(txId);
@@ -1101,7 +1288,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
     };
 
     const baseScore = priorityWeights[batchMetadata.priority];
-    const ageBonus = Math.min(Date.now() - batchMetadata.createdAt.getTime(), 300000) / 300000 * 10; // Max 10 points for age
+    const ageBonus =
+      (Math.min(Date.now() - batchMetadata.createdAt.getTime(), 300000) /
+        300000) *
+      10; // Max 10 points for age
 
     return baseScore + ageBonus;
   }
@@ -1117,8 +1307,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     // Adjust for parallel execution
     if (configuration.enableParallelExecution) {
-      const parallelEfficiency = Math.min(configuration.maxParallelOperations, transactions.length) / transactions.length;
-      estimatedTime *= (1 - parallelEfficiency * 0.5); // Up to 50% reduction
+      const parallelEfficiency =
+        Math.min(configuration.maxParallelOperations, transactions.length) /
+        transactions.length;
+      estimatedTime *= 1 - parallelEfficiency * 0.5; // Up to 50% reduction
     }
 
     // Add validation overhead
@@ -1143,7 +1335,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     this.batchQueue.splice(insertIndex, 0, queueItem);
 
-    this.logger.log(`Batch ${queueItem.context.batchId} added to queue at position ${insertIndex} (priority score: ${queueItem.priorityScore})`);
+    this.logger.log(
+      `Batch ${queueItem.context.batchId} added to queue at position ${insertIndex} (priority score: ${queueItem.priorityScore})`,
+    );
   }
 
   // ===== BATCH PROCESSING LOOP =====
@@ -1157,24 +1351,28 @@ export class ParlantBatchProcessorService extends EventEmitter {
     const processLoop = async () => {
       while (this.isProcessing) {
         try {
-          if (this.currentConcurrentBatches < this.maxConcurrentBatches && this.batchQueue.length > 0) {
+          if (
+            this.currentConcurrentBatches < this.maxConcurrentBatches &&
+            this.batchQueue.length > 0
+          ) {
             const queueItem = this.batchQueue.shift();
             if (queueItem) {
               this.currentConcurrentBatches++;
 
               // Process batch asynchronously
-              this.processBatchAsync(queueItem.context)
-                .finally(() => {
-                  this.currentConcurrentBatches--;
-                });
+              this.processBatchAsync(queueItem.context).finally(() => {
+                this.currentConcurrentBatches--;
+              });
             }
           }
 
           // Wait before checking queue again
-          await new Promise(resolve => setTimeout(resolve, 100));
-
+          await new Promise((resolve) => setTimeout(resolve, 100));
         } catch (error) {
-          this.logger.error(`Error in batch processing loop: ${error.message}`, error.stack);
+          this.logger.error(
+            `Error in batch processing loop: ${error.message}`,
+            error.stack,
+          );
         }
       }
     };
@@ -1185,7 +1383,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Process batch asynchronously
    */
-  private async processBatchAsync(context: BatchExecutionContext): Promise<void> {
+  private async processBatchAsync(
+    context: BatchExecutionContext,
+  ): Promise<void> {
     try {
       const { batchId } = context;
 
@@ -1194,9 +1394,11 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
       // Process the batch
       await this.processBatch(batchId);
-
     } catch (error) {
-      this.logger.error(`Async batch processing failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Async batch processing failed: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -1205,11 +1407,13 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Create validation request for transaction
    */
-  private createValidationRequest(transaction: TransactionMetadata): ParlantValidationRequest {
+  private createValidationRequest(
+    transaction: TransactionMetadata,
+  ): ParlantValidationRequest {
     return {
       operationId: `${transaction.transactionId}_validation`,
-      functionName: 'database_transaction_execution',
-      packageName: 'parlant-batch-processor',
+      functionName: "database_transaction_execution",
+      packageName: "parlant-batch-processor",
       description: `Database transaction execution: ${transaction.operationType}`,
       parameters: {
         transactionId: transaction.transactionId,
@@ -1228,17 +1432,17 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private createBatchValidationRequest(
     batchMetadata: BatchMetadata,
-    transactions: TransactionMetadata[]
+    transactions: TransactionMetadata[],
   ): ParlantValidationRequest {
     return {
       operationId: `${batchMetadata.batchId}_batch_validation`,
-      functionName: 'database_batch_execution',
-      packageName: 'parlant-batch-processor',
+      functionName: "database_batch_execution",
+      packageName: "parlant-batch-processor",
       description: `Database batch execution: ${transactions.length} transactions`,
       parameters: {
         batchId: batchMetadata.batchId,
         transactionCount: transactions.length,
-        transactionTypes: transactions.map(tx => tx.operationType),
+        transactionTypes: transactions.map((tx) => tx.operationType),
         batchPriority: batchMetadata.priority,
       },
       userContext: batchMetadata.userContext,
@@ -1250,19 +1454,31 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Perform PARLANT validation (simulated)
    */
-  private async performParlantValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+  private async performParlantValidation(
+    _request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse> {
     // Simulate validation logic
     const approved = Math.random() > 0.1; // 90% approval rate
 
     return {
       approved,
       conversationId: `conv_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-      reason: approved ? 'Operation approved based on validation' : 'Operation rejected due to validation failure',
+      reason: approved
+        ? "Operation approved based on validation"
+        : "Operation rejected due to validation failure",
       confidence: approved ? 0.9 : 0.95,
       metadata: {
-        validationTime: Date.now(),
-        validatorId: 'batch-validator',
-        validationVersion: '1.0.0',
+        startTime: new Date(Date.now() - 100),
+        endTime: new Date(),
+        processingTime: 100,
+        cacheStatus: "miss" as const,
+        source: "parlant" as const,
+        riskAssessment: {
+          level: SecurityLevel._LOW,
+          factors: [],
+          score: 10,
+          mitigations: [],
+        },
       },
     };
   }
@@ -1272,26 +1488,33 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   private async executeTransaction(
     transaction: TransactionMetadata,
-    validationResult: ParlantValidationResponse
+    _validationResult: ParlantValidationResponse,
   ): Promise<TransactionOperationResult> {
     // Simulate transaction execution
     const executionTime = Math.random() * 1000 + 100; // 100-1100ms
-    await new Promise(resolve => setTimeout(resolve, executionTime));
+    await new Promise((resolve) => setTimeout(resolve, executionTime));
 
     const success = Math.random() > 0.05; // 95% success rate
 
     return {
       success,
-      data: success ? { transactionId: transaction.transactionId, result: 'Transaction completed' } : undefined,
-      error: success ? undefined : {
-        type: TransactionErrorType.EXECUTION_FAILED,
-        message: 'Simulated execution failure',
-        code: 'EXECUTION_ERROR',
-        details: {},
-        timestamp: new Date(),
-        recoverySuggestions: ['Retry operation'],
-        isRecoverable: true,
-      },
+      data: success
+        ? {
+            transactionId: transaction.transactionId,
+            result: "Transaction completed",
+          }
+        : undefined,
+      error: success
+        ? undefined
+        : {
+            type: TransactionErrorType.EXECUTION_FAILED,
+            message: "Simulated execution failure",
+            code: "EXECUTION_ERROR",
+            details: {},
+            timestamp: new Date(),
+            recoverySuggestions: ["Retry operation"],
+            isRecoverable: true,
+          },
       performanceMetrics: {
         executionDuration: executionTime,
         operationCount: 1,
@@ -1300,7 +1523,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
       },
       auditInfo: {
         auditId: `${transaction.transactionId}_execution`,
-        type: 'OPERATION',
+        type: "OPERATION",
         timestamp: new Date(),
         userContext: transaction.userContext,
         details: { success, executionTime },
@@ -1312,16 +1535,26 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Create failed validation response
    */
-  private createFailedValidationResponse(errorMessage: string): ParlantValidationResponse {
+  private createFailedValidationResponse(
+    errorMessage: string,
+  ): ParlantValidationResponse {
     return {
       approved: false,
       conversationId: `failed_${Date.now()}`,
       reason: errorMessage,
       confidence: 0,
       metadata: {
-        validationTime: Date.now(),
-        validatorId: 'error-handler',
-        validationVersion: '1.0.0',
+        startTime: new Date(Date.now() - 100),
+        endTime: new Date(),
+        processingTime: 100,
+        cacheStatus: "miss" as const,
+        source: "parlant" as const,
+        riskAssessment: {
+          level: SecurityLevel._LOW,
+          factors: [],
+          score: 10,
+          mitigations: [],
+        },
       },
     };
   }
@@ -1329,16 +1562,18 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Create failed operation result
    */
-  private createFailedOperationResult(errorMessage: string): TransactionOperationResult {
+  private createFailedOperationResult(
+    errorMessage: string,
+  ): TransactionOperationResult {
     return {
       success: false,
       error: {
         type: TransactionErrorType.EXECUTION_FAILED,
         message: errorMessage,
-        code: 'OPERATION_ERROR',
+        code: "OPERATION_ERROR",
         details: {},
         timestamp: new Date(),
-        recoverySuggestions: ['Check operation parameters', 'Retry operation'],
+        recoverySuggestions: ["Check operation parameters", "Retry operation"],
         isRecoverable: true,
       },
       performanceMetrics: {
@@ -1348,7 +1583,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
       },
       auditInfo: {
         auditId: `failed_operation_${Date.now()}`,
-        type: 'ERROR',
+        type: "ERROR",
         timestamp: new Date(),
         userContext: {} as ParlantUserContext,
         details: { error: errorMessage },
@@ -1360,9 +1595,13 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Evaluate validation results
    */
-  private evaluateValidationResults(validationResults: Map<string, ParlantValidationResponse>): boolean {
+  private evaluateValidationResults(
+    validationResults: Map<string, ParlantValidationResponse>,
+  ): boolean {
     const totalTransactions = validationResults.size;
-    const approvedTransactions = Array.from(validationResults.values()).filter(result => result.approved).length;
+    const approvedTransactions = Array.from(validationResults.values()).filter(
+      (result) => result.approved,
+    ).length;
 
     // Require at least 80% approval rate
     return approvedTransactions / totalTransactions >= 0.8;
@@ -1383,7 +1622,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Determine optimal validation strategy based on performance history
    */
-  private determineOptimalValidationStrategy(context: BatchExecutionContext): BatchValidationStrategy {
+  private determineOptimalValidationStrategy(
+    context: BatchExecutionContext,
+  ): BatchValidationStrategy {
     if (this.performanceHistory.length < 10) {
       // Not enough data, use hybrid
       return BatchValidationStrategy.HYBRID;
@@ -1391,7 +1632,9 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     // Analyze performance history to determine best strategy
     const recentMetrics = this.performanceHistory.slice(-10);
-    const avgValidationTime = recentMetrics.reduce((sum, m) => sum + (m.validationTime || 0), 0) / recentMetrics.length;
+    const avgValidationTime =
+      recentMetrics.reduce((sum, m) => sum + (m.validationTime || 0), 0) /
+      recentMetrics.length;
 
     if (avgValidationTime < 1000) {
       return BatchValidationStrategy.INDIVIDUAL;
@@ -1417,38 +1660,54 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Update batch state
    */
-  private async updateBatchState(batchId: string, newState: BatchState, reason: string): Promise<void> {
+  private async updateBatchState(
+    batchId: string,
+    newState: BatchState,
+    reason: string,
+  ): Promise<void> {
     const context = this.activeBatches.get(batchId);
     if (!context) return;
 
     const oldState = context.batchMetadata.state;
     context.batchMetadata.state = newState;
-    context.batchMetadata.updatedAt = new Date();
+    (context.batchMetadata as BatchMetadata & { updatedAt?: Date }).updatedAt = new Date();
 
     context.auditLogger.logBatchStateChange(oldState, newState, reason);
 
-    this.emit('batchStateChanged', { batchId, oldState, newState, reason });
+    this.emit("batchStateChanged", { batchId, oldState, newState, reason });
 
-    this.logger.log(`Batch ${batchId} state changed from ${oldState} to ${newState}: ${reason}`);
+    this.logger.log(
+      `Batch ${batchId} state changed from ${oldState} to ${newState}: ${reason}`,
+    );
   }
 
   /**
    * Handle batch error
    */
   private async handleBatchError(batchId: string, error: Error): Promise<void> {
-    this.logger.error(`Batch error for ${batchId}: ${error.message}`, error.stack);
+    this.logger.error(
+      `Batch error for ${batchId}: ${error.message}`,
+      error.stack,
+    );
 
-    await this.updateBatchState(batchId, BatchState.FAILED, `Error: ${error.message}`);
+    await this.updateBatchState(
+      batchId,
+      BatchState.FAILED,
+      `Error: ${error.message}`,
+    );
 
-    this.emit('batchError', {
+    this.emit("batchError", {
       batchId,
       error: {
         type: TransactionErrorType.EXECUTION_FAILED,
         message: error.message,
-        code: 'BATCH_ERROR',
+        code: "BATCH_ERROR",
         details: { originalError: error },
         timestamp: new Date(),
-        recoverySuggestions: ['Check batch configuration', 'Retry batch processing'],
+        recoverySuggestions: [
+          "Check batch configuration",
+          "Retry batch processing",
+        ],
         isRecoverable: true,
       },
     });
@@ -1463,7 +1722,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
     this.activeBatches.delete(batchId);
     // Keep performance monitors and audit loggers for historical data
 
-    this.emit('batchCleanedUp', { batchId });
+    this.emit("batchCleanedUp", { batchId });
   }
 
   // ===== MONITOR AND LOGGER CREATION =====
@@ -1471,47 +1730,71 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Create batch performance monitor
    */
-  private createBatchPerformanceMonitor(batchId: string): BatchPerformanceMonitor {
+  private createBatchPerformanceMonitor(
+    _batchId: string,
+  ): BatchPerformanceMonitor {
     let batchStartTime: number;
-    const transactionTimes = new Map<string, { start: number; duration: number; success: boolean }>();
+    const transactionTimes = new Map<
+      string,
+      { start: number; duration: number; success: boolean }
+    >();
     let validationTime = 0;
-    let validationTransactionCount = 0;
+    const _validationTransactionCount = 0;
 
     return {
       recordBatchStart: () => {
         batchStartTime = Date.now();
       },
 
-      recordBatchCompletion: (success: boolean) => {
-        const totalTime = Date.now() - batchStartTime;
+      recordBatchCompletion: (_success: boolean) => {
+        const _totalTime = Date.now() - batchStartTime;
         // Update batch metrics would happen here
       },
 
-      recordTransactionCompletion: (transactionId: string, duration: number, success: boolean) => {
-        transactionTimes.set(transactionId, { start: Date.now() - duration, duration, success });
+      recordTransactionCompletion: (
+        transactionId: string,
+        duration: number,
+        success: boolean,
+      ) => {
+        transactionTimes.set(transactionId, {
+          start: Date.now() - duration,
+          duration,
+          success,
+        });
       },
 
-      recordValidationMetrics: (valTime: number, transactionCount: number) => {
+      recordValidationMetrics: (valTime: number, _transactionCount: number) => {
         validationTime = valTime;
-        validationTransactionCount = transactionCount;
+        // validationTransactionCount would be used for tracking
       },
 
-      recordResourceUsage: (usage: Partial<BatchResourceUtilization>) => {
+      recordResourceUsage: (_usage: Partial<BatchResourceUtilization>) => {
         // Resource usage tracking would be implemented here
       },
 
       getCurrentMetrics: () => {
         const totalTime = batchStartTime ? Date.now() - batchStartTime : 0;
         const completedTransactions = transactionTimes.size;
-        const successfulTransactions = Array.from(transactionTimes.values()).filter(t => t.success).length;
+        const successfulTransactions = Array.from(
+          transactionTimes.values(),
+        ).filter((t) => t.success).length;
 
         return {
           totalExecutionTime: totalTime,
           validationTime,
-          averageTransactionTime: completedTransactions > 0 ?
-            Array.from(transactionTimes.values()).reduce((sum, t) => sum + t.duration, 0) / completedTransactions : 0,
-          throughput: totalTime > 0 ? (completedTransactions / totalTime) * 1000 : 0,
-          successRate: completedTransactions > 0 ? successfulTransactions / completedTransactions : 0,
+          averageTransactionTime:
+            completedTransactions > 0
+              ? Array.from(transactionTimes.values()).reduce(
+                  (sum, t) => sum + t.duration,
+                  0,
+                ) / completedTransactions
+              : 0,
+          throughput:
+            totalTime > 0 ? (completedTransactions / totalTime) * 1000 : 0,
+          successRate:
+            completedTransactions > 0
+              ? successfulTransactions / completedTransactions
+              : 0,
           parallelEfficiency: 0.8, // Would be calculated based on actual parallel execution
           resourceUtilization: {
             cpuUtilization: 50,
@@ -1526,14 +1809,53 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
       generateOptimizationSuggestions: () => {
         const suggestions: string[] = [];
-        const metrics = this.getCurrentMetrics();
+        // Get current metrics from the monitor object
+        const monitor = {
+          getCurrentMetrics: () => ({
+            totalExecutionTime: batchStartTime
+              ? Date.now() - batchStartTime
+              : 0,
+            validationTime,
+            averageTransactionTime:
+              transactionTimes.size > 0
+                ? Array.from(transactionTimes.values()).reduce(
+                    (sum, t) => sum + t.duration,
+                    0,
+                  ) / transactionTimes.size
+                : 0,
+            throughput: 0,
+            successRate:
+              transactionTimes.size > 0
+                ? Array.from(transactionTimes.values()).filter((t) => t.success)
+                    .length / transactionTimes.size
+                : 0,
+            parallelEfficiency: 0.8,
+            resourceUtilization: {
+              cpuUtilization: 50,
+              memoryUtilization: 256,
+              dbConnectionUtilization: 3,
+              networkUtilization: 1024,
+              peakUsage: { cpu: 80, memory: 512, connections: 5 },
+            },
+            optimizationSuggestions: [],
+            operationCount: 1,
+            validationRequestCount: 1,
+            retryCount: 0,
+          }),
+        };
+        const metrics = monitor.getCurrentMetrics();
 
         if (metrics.successRate && metrics.successRate < 0.9) {
-          suggestions.push('Consider reviewing transaction logic to improve success rate');
+          suggestions.push(
+            "Consider reviewing transaction logic to improve success rate",
+          );
         }
 
-        if (metrics.averageTransactionTime && metrics.averageTransactionTime > 1000) {
-          suggestions.push('Consider optimizing transaction execution time');
+        if (
+          metrics.averageTransactionTime &&
+          metrics.averageTransactionTime > 1000
+        ) {
+          suggestions.push("Consider optimizing transaction execution time");
         }
 
         return suggestions;
@@ -1544,25 +1866,36 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Create batch audit logger
    */
-  private createBatchAuditLogger(batchId: string, userContext: ParlantUserContext): BatchAuditLogger {
+  private createBatchAuditLogger(
+    batchId: string,
+    userContext: ParlantUserContext,
+  ): BatchAuditLogger {
     const auditTrail: TransactionAuditInfo[] = [];
 
     return {
       logBatchCreation: (batch: BatchMetadata) => {
         auditTrail.push({
           auditId: `${batchId}_creation_${Date.now()}`,
-          type: 'STATE_CHANGE',
+          type: "STATE_CHANGE",
           timestamp: new Date(),
           userContext,
-          details: { action: 'batch_created', batchId, totalTransactions: batch.totalTransactions },
+          details: {
+            action: "batch_created",
+            batchId,
+            totalTransactions: batch.totalTransactions,
+          },
           securityLevel: batch.securityLevel,
         });
       },
 
-      logBatchStateChange: (oldState: BatchState, newState: BatchState, reason: string) => {
+      logBatchStateChange: (
+        oldState: BatchState,
+        newState: BatchState,
+        reason: string,
+      ) => {
         auditTrail.push({
           auditId: `${batchId}_state_${Date.now()}`,
-          type: 'STATE_CHANGE',
+          type: "STATE_CHANGE",
           timestamp: new Date(),
           userContext,
           details: { oldState, newState, reason },
@@ -1570,10 +1903,13 @@ export class ParlantBatchProcessorService extends EventEmitter {
         });
       },
 
-      logTransactionProcessing: (transactionId: string, status: 'STARTED' | 'COMPLETED' | 'FAILED') => {
+      logTransactionProcessing: (
+        transactionId: string,
+        status: "STARTED" | "COMPLETED" | "FAILED",
+      ) => {
         auditTrail.push({
           auditId: `${batchId}_tx_${transactionId}_${Date.now()}`,
-          type: 'OPERATION',
+          type: "OPERATION",
           timestamp: new Date(),
           userContext,
           details: { transactionId, status },
@@ -1581,15 +1917,19 @@ export class ParlantBatchProcessorService extends EventEmitter {
         });
       },
 
-      logValidationResults: (results: Map<string, ParlantValidationResponse>) => {
+      logValidationResults: (
+        results: Map<string, ParlantValidationResponse>,
+      ) => {
         auditTrail.push({
           auditId: `${batchId}_validation_${Date.now()}`,
-          type: 'VALIDATION',
+          type: "VALIDATION",
           timestamp: new Date(),
           userContext,
           details: {
             totalValidations: results.size,
-            approvedValidations: Array.from(results.values()).filter(r => r.approved).length,
+            approvedValidations: Array.from(results.values()).filter(
+              (r) => r.approved,
+            ).length,
           },
           securityLevel: SecurityLevel._MEDIUM,
         });
@@ -1598,7 +1938,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
       logBatchCompletion: (result: TransactionBatchResult) => {
         auditTrail.push({
           auditId: `${batchId}_completion_${Date.now()}`,
-          type: 'OPERATION',
+          type: "OPERATION",
           timestamp: new Date(),
           userContext,
           details: {
@@ -1606,7 +1946,7 @@ export class ParlantBatchProcessorService extends EventEmitter {
             totalOperations: result.operationResults.size,
             failedOperations: result.failedOperations.length,
           },
-          securityLevel: SecurityLevel.HIGH,
+          securityLevel: SecurityLevel._HIGH,
         });
       },
 
@@ -1618,15 +1958,19 @@ export class ParlantBatchProcessorService extends EventEmitter {
    * Set up event listeners
    */
   private setupEventListeners(): void {
-    this.on('batchCreated', ({ batchId, batchMetadata }) => {
-      this.logger.log(`Batch ${batchId} created with ${batchMetadata.totalTransactions} transactions`);
+    this.on("batchCreated", ({ batchId, batchMetadata }) => {
+      this.logger.log(
+        `Batch ${batchId} created with ${batchMetadata.totalTransactions} transactions`,
+      );
     });
 
-    this.on('batchCompleted', ({ batchId, batchResult }) => {
-      this.logger.log(`Batch ${batchId} completed: ${batchResult.success ? 'SUCCESS' : 'PARTIAL/FAILURE'}`);
+    this.on("batchCompleted", ({ batchId, batchResult }) => {
+      this.logger.log(
+        `Batch ${batchId} completed: ${batchResult.success ? "SUCCESS" : "PARTIAL/FAILURE"}`,
+      );
     });
 
-    this.on('batchError', ({ batchId, error }) => {
+    this.on("batchError", ({ batchId, error }) => {
       this.logger.error(`Batch ${batchId} error: ${error.message}`);
     });
   }
@@ -1649,7 +1993,10 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Get batch status
    */
-  getBatchStatus(batchId: string): { status: BatchState; metadata?: BatchMetadata } {
+  getBatchStatus(batchId: string): {
+    status: BatchState;
+    metadata?: BatchMetadata;
+  } {
     const context = this.activeBatches.get(batchId);
     return {
       status: context ? context.batchMetadata.state : BatchState.PENDING,
@@ -1683,12 +2030,17 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Cancel batch
    */
-  async cancelBatch(batchId: string, reason: string = 'User requested cancellation'): Promise<void> {
+  async cancelBatch(
+    batchId: string,
+    reason: string = "User requested cancellation",
+  ): Promise<void> {
     this.logger.log(`Cancelling batch ${batchId}: ${reason}`);
     await this.updateBatchState(batchId, BatchState.CANCELLED, reason);
 
     // Remove from queue if not yet processed
-    const queueIndex = this.batchQueue.findIndex(item => item.context.batchId === batchId);
+    const queueIndex = this.batchQueue.findIndex(
+      (item) => item.context.batchId === batchId,
+    );
     if (queueIndex >= 0) {
       this.batchQueue.splice(queueIndex, 1);
     }
@@ -1697,7 +2049,11 @@ export class ParlantBatchProcessorService extends EventEmitter {
   /**
    * Get queue status
    */
-  getQueueStatus(): { queueLength: number; activeBatches: number; processingCapacity: number } {
+  getQueueStatus(): {
+    queueLength: number;
+    activeBatches: number;
+    processingCapacity: number;
+  } {
     return {
       queueLength: this.batchQueue.length,
       activeBatches: this.currentConcurrentBatches,
@@ -1710,6 +2066,6 @@ export class ParlantBatchProcessorService extends EventEmitter {
    */
   stopProcessing(): void {
     this.isProcessing = false;
-    this.logger.log('Batch processing stopped');
+    this.logger.log("Batch processing stopped");
   }
 }

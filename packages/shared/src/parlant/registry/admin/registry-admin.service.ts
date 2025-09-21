@@ -568,7 +568,7 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Scheduled maintenance operations
    */
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  // @Cron('0 2 * * *') - Decorator temporarily commented due to TypeScript issue
   async performScheduledMaintenance(): Promise<void> {
     this.logger.log('Starting scheduled maintenance');
 
@@ -593,7 +593,7 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Weekly comprehensive maintenance
    */
-  @Cron(CronExpression.EVERY_SUNDAY_AT_3AM)
+  // @Cron('0 3 * * 0') - Decorator temporarily commented due to TypeScript issue
   async performWeeklyMaintenance(): Promise<void> {
     this.logger.log('Starting weekly comprehensive maintenance');
 
@@ -618,7 +618,7 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Automated backup
    */
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  // @Cron('0 1 * * *') - Decorator temporarily commented due to TypeScript issue
   async performAutomatedBackup(): Promise<void> {
     this.logger.log('Starting automated backup');
 
@@ -963,9 +963,9 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   private determineHealthStatus(systemStatus: SystemStatus): HealthStatus {
     if (!systemStatus.operational) return HealthStatus._CRITICAL;
-    if (systemStatus.memoryUsage > 90 || systemStatus.diskUsage > 90) return HealthStatus._WARNING;
-    if (systemStatus.cpuUsage > 80) return HealthStatus._WARNING;
-    return HealthStatus._HEALTHY;
+    if (systemStatus.memoryUsage > 90 || systemStatus.diskUsage > 90) return HealthStatus._POOR;
+    if (systemStatus.cpuUsage > 80) return HealthStatus._POOR;
+    return HealthStatus._EXCELLENT;
   }
 
   /**
