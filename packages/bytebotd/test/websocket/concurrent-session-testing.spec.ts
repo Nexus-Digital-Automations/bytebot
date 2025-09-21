@@ -1653,7 +1653,7 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       console.log('========================================\n');
     });
 
-    private generateRecommendations(results: ConcurrentTestResults): string[] {
+    function generateRecommendations(results: ConcurrentTestResults): string[] {
       const recommendations: string[] = [];
 
       if (results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions < 100) {

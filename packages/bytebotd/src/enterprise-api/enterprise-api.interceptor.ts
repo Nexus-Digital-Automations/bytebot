@@ -27,7 +27,16 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';import { Observable, throwError } from 'rxjs';import { map, catchError, tap } from 'rxjs/operators';import { Request, Response } from 'express';import { ConfigService } from '@nestjs/config';import { ByteBotdUser } from '../auth/guards/jwt-auth.guard';// ===== INTERCEPTOR TYPES =====/**
+} from '@nestjs/common';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError, tap } from 'rxjs/operators';
+import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { ByteBotdUser } from '../auth/guards/jwt-auth.guard';
+
+// ===== INTERCEPTOR TYPES =====
+
+/**
  * Extended Request interface with optional route and user properties
  */
 interface ExtendedRequest extends Request<Record<string, unknown>, unknown, unknown, Record<string, unknown>, Record<string, unknown>> {

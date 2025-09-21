@@ -38,7 +38,9 @@ function createArgumentMetadata(
 }
 
 // Mock the security utils to avoid compilation issues
-jest.mock('@bytebot/shared/utils/security.utils', () => ({detectXSS: jest.fn().mockReturnValue(false), // Legacy function for decoratorsdetectSQLInjection: jest.fn().mockReturnValue({
+jest.mock('@bytebot/shared/utils/security.utils', () => ({
+  detectXSS: jest.fn().mockReturnValue(false), // Legacy function for decorators
+  detectSQLInjection: jest.fn().mockReturnValue({
     hasInjection: false,
     threats: [],
     riskScore: 0,
@@ -130,19 +132,29 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {let pipe: Co
     jest.clearAllMocks();
   });
 
-  describe('Enhanced Security Pipeline Integration', () => {it('should integrate all security functions in the validation pipeline', async () => {const validInput = {action: 'type_text',
-  text: 'Hello World',};
+  describe('Enhanced Security Pipeline Integration', () => {
+    it('should integrate all security functions in the validation pipeline', async () => {
+      const validInput = {
+        action: 'type_text',
+        text: 'Hello World',
+      };
     const result = await pipe.transform(validInput, createArgumentMetadata());
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
-    // Verify that security functions were calledexpect(mockDetectAdvancedXSS).toHaveBeenCalled();
+
+      // Verify that security functions were called
+      expect(mockDetectAdvancedXSS).toHaveBeenCalled();
       expect(mockDetectSQLInjection).toHaveBeenCalled();
       expect(mockDetectCommandInjection).toHaveBeenCalledWith(
         expect.any(String),
-        { strictMode: true, contextType: 'form' },);});
+        { strictMode: true, contextType: 'form' },
+      );
+    });
 
-    it('should block requests when XSS threats are detected', async () => {// Mock XSS detection to return threatmockDetectAdvancedXSS.mockReturnValueOnce({
+    it('should block requests when XSS threats are detected', async () => {
+      // Mock XSS detection to return threat
+      mockDetectAdvancedXSS.mockReturnValueOnce({
         hasXSS: true,
         threats: ['Script Injection'],
   riskScore: 85,

@@ -117,11 +117,15 @@ export interface OpenInterpreterCancelApiResponse {
  * Type guard for OpenInterpreterStatusApiResponse
  */
 function isOpenInterpreterStatusApiResponse(data: unknown): data is OpenInterpreterStatusApiResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
   return (
-    typeof data === 'object' &&
-    data !== null &&
-    'status' in data &&
-    typeof (data as any).status === 'string'
+    'status' in obj &&
+    typeof obj.status === 'string' &&
+    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(obj.status)
   );
 }
 
@@ -129,11 +133,15 @@ function isOpenInterpreterStatusApiResponse(data: unknown): data is OpenInterpre
  * Type guard for OpenInterpreterResultsApiResponse
  */
 function isOpenInterpreterResultsApiResponse(data: unknown): data is OpenInterpreterResultsApiResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
   return (
-    typeof data === 'object' &&
-    data !== null &&
-    'status' in data &&
-    typeof (data as any).status === 'string'
+    'status' in obj &&
+    typeof obj.status === 'string' &&
+    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(obj.status)
   );
 }
 

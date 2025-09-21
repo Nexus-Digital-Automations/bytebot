@@ -713,7 +713,9 @@ export class ComputerActionValidationPipe
     }>;
     validationStages: string[];
   }): {
-    level: 'none' | 'low' | 'medium' | 'high' | 'critical';adjustedScore: number;reasoning: string[];
+    level: 'none' | 'low' | 'medium' | 'high' | 'critical';
+    adjustedScore: number;
+    reasoning: string[];
   } {
     const { totalRiskScore, threats, detectionEvents } = securityContext;
     let adjustedScore = totalRiskScore;
@@ -762,7 +764,14 @@ export class ComputerActionValidationPipe
    */
   private isCoordinateAction(action: string): boolean {
     const coordinateActions = [
-      'move_mouse','trace_mouse','click_mouse','press_mouse','drag_mouse','scroll',];return coordinateActions.includes(action);
+      'move_mouse',
+      'trace_mouse',
+      'click_mouse',
+      'press_mouse',
+      'drag_mouse',
+      'scroll',
+    ];
+    return coordinateActions.includes(action);
   }
 
   /**

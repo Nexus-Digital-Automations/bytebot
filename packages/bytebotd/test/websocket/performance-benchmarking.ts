@@ -796,7 +796,7 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Calculate performance score for test point
    */
-  private calculatePerformanceScore(measurements: any): number {
+  private calculatePerformanceScore(measurements: BenchmarkTestPoint): number {
     const latencyScore = Math.max(0, 1 - (measurements.latency.percentiles[95] / 1000)); // Penalize >1s P95
     const throughputScore = Math.min(1, measurements.throughput.throughputEfficiency);
     const reliabilityScore = measurements.reliability.successRate / 100;
@@ -807,7 +807,7 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Calculate scalability efficiency
    */
-  private calculateScalabilityEfficiency(sessionCount: number, measurements: any): number {
+  private calculateScalabilityEfficiency(sessionCount: number, measurements: BenchmarkTestPoint): number {
     // Compare actual performance to ideal linear scaling
     const idealThroughputPerSession = 10; // 10 ops/sec per session
     const actualThroughputPerSession = measurements.throughput.sustainedThroughput / sessionCount;
@@ -821,7 +821,7 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Evaluate threshold compliance
    */
-  private evaluateThresholdCompliance(measurements: any): ThresholdComplianceReport {
+  private evaluateThresholdCompliance(measurements: BenchmarkTestPoint): ThresholdComplianceReport {
     const thresholds = this.config.targetPerformanceThresholds;
 
     const latencyP95Compliant = measurements.latency.percentiles[95] <= thresholds.maxLatencyP95;
@@ -1088,7 +1088,7 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Generate capacity recommendations
    */
-  private generateCapacityRecommendations(linearLimit: number, optimalRange: any): {
+  private generateCapacityRecommendations(linearLimit: number, optimalRange: { min: number; max: number }): {
     recommendedMaxSessions: number;
     safeOperatingLimit: number;
     emergencyScalingTrigger: number;

@@ -63,30 +63,72 @@ export class BatchJobValidationPipe implements PipeTransform {
   private readonly MAX_DEPENDENCY_DEPTH = 10;
   private readonly MAX_TIMEOUT = 3600000; // 1 hour
   private readonly MIN_TIMEOUT = 1000; // 1 second
-  private readonly DANGEROUS_ACTIONS = new Set([\n    'write_file',\n    'delete_file',\n    'run_command',\n    'launch_app',\n  ]);async transform(value: unknown, metadata: ArgumentMetadata): Promise<BatchJobSubmissionDto> {if (metadata.type !== 'body' || !value) {throw new BadRequestException('Invalid batch job submission data');\n    }
-  const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = Date.now();try {
-      this.logger.debug(`[${operationId}] Starting batch job validation`);\n\n      // Transform and validate DTO structureconst batchRequest = plainToClass(BatchJobSubmissionDto, value);
-    const validationErrors = await validate(batchRequest, {
+  private readonly DANGEROUS_ACTIONS = new Set([
+    'write_file',
+    'delete_file',
+    'run_command',
+    'launch_app',
+  ]);
+
+  async transform(value: unknown, metadata: ArgumentMetadata): Promise<BatchJobSubmissionDto> {
+    if (metadata.type !== 'body' || !value) {
+      throw new BadRequestException('Invalid batch job submission data');
+    }
+    const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.debug(`[${operationId}] Starting batch job validation`);
+
+      // Transform and validate DTO structure
+      const batchRequest = plainToClass(BatchJobSubmissionDto, value);
+      const validationErrors = await validate(batchRequest, {
         whitelist: true,
         forbidNonWhitelisted: true,
-        transform: true,\n      });
-  if (validationErrors.length > 0) {
+        transform: true,
+      });
+      if (validationErrors.length > 0) {
         const errorMessages = this.formatValidationErrors(validationErrors);
-        throw new BadRequestException(\n          `Batch validation failed: ${errorMessages.join(`, ')}',\n        );\n      }\n\n      // Perform comprehensive business validationconst validationContext = await this.performComprehensiveValidation(
+        throw new BadRequestException(
+          `Batch validation failed: ${errorMessages.join(', ')}`,
+        );
+      }
+
+      // Perform comprehensive business validation
+      const validationContext = await this.performComprehensiveValidation(
         batchRequest,
-        operationId,\n      );
-  if (validationContext.errors.length > 0) {
-        throw new BadRequestException(\n          `Batch validation failed: ${validationContext.errors.join(`, ')}',\n        );\n      }\n\n      // Log warnings if anyif (validationContext.warnings.length > 0) {
-        this.logger.warn(\n          `[${operationId}] Batch validation warnings: ${validationContext.warnings.join(`, ')}',\n        );\n      }const processingTime = Date.now() - startTime;
-      this.logger.debug(\n        `[${operationId}] Batch validation completed successfully (${processingTime}ms)`,\n        {operationId,
-  totalJobs: batchRequest.jobs.length,
+        operationId,
+      );
+      if (validationContext.errors.length > 0) {
+        throw new BadRequestException(
+          `Batch validation failed: ${validationContext.errors.join(', ')}`,
+        );
+      }
+
+      // Log warnings if any
+      if (validationContext.warnings.length > 0) {
+        this.logger.warn(
+          `[${operationId}] Batch validation warnings: ${validationContext.warnings.join(', ')}`,
+        );
+      }
+
+      const processingTime = Date.now() - startTime;
+      this.logger.debug(
+        `[${operationId}] Batch validation completed successfully (${processingTime}ms)`,
+        {
+          operationId,
+          totalJobs: batchRequest.jobs.length,
           executionMode: batchRequest.executionMode,
           processingTime,
-          warningCount: validationContext.warnings.length,\n        },\n      );
-  return batchRequest;\n    } catch (error) {
+          warningCount: validationContext.warnings.length,
+        },
+      );
+
+      return batchRequest;
+    } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(\n        `[${operationId}] Batch validation failed (${processingTime}ms): ${error}`,
+      this.logger.error(
+        `[${operationId}] Batch validation failed (${processingTime}ms): ${error}`,
         error instanceof Error ? error.stack : undefined,\n        {
           operationId,
           processingTime,

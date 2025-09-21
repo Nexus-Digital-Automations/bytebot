@@ -82,8 +82,11 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {let
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should detect advanced SQL injection with database-specific patterns', async () => {const sqlInjectionInput = {action: 'type_text',
-        text: ""; DROP TABLE users; SELECT * FROM admin WHERE 't'='t',};
+    it('should detect advanced SQL injection with database-specific patterns', async () => {
+      const sqlInjectionInput = {
+        action: 'type_text',
+        text: '"; DROP TABLE users; SELECT * FROM admin WHERE \'t\'=\'t\'',
+      };
 
       await expect(
         pipe.transform(sqlInjectionInput, createArgumentMetadata()),
@@ -110,9 +113,14 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {let
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should validate file operations with enhanced security checks', async () => {// Test path traversal attackconst pathTraversalInput = {
+    it('should validate file operations with enhanced security checks', async () => {
+      // Test path traversal attack
+      const pathTraversalInput = {
         action: 'read_file',
-  path: '../../../etc/passwd',};await expect(
+        path: '../../../etc/passwd',
+      };
+
+      await expect(
         pipe.transform(pathTraversalInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 

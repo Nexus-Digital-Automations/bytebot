@@ -545,32 +545,32 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
     });
 
     // Helper methods for phase execution
-    private async executeBasicConcurrencyPhase(): Promise<PhaseTestResult> {
+    async function executeBasicConcurrencyPhase(): Promise<PhaseTestResult> {
       // Simplified basic concurrency test
       return { success: true, sessionsEstablished: 120, message: 'Basic concurrency validated' };
     }
 
-    private async executeSessionIsolationPhase(): Promise<PhaseTestResult> {
+    async function executeSessionIsolationPhase(): Promise<PhaseTestResult> {
       // Simplified session isolation test
       return { success: true, violationsDetected: 0, message: 'Session isolation validated' };
     }
 
-    private async executeResourceManagementPhase(): Promise<PhaseTestResult> {
+    async function executeResourceManagementPhase(): Promise<PhaseTestResult> {
       // Simplified resource management test
       return { success: true, memoryLeakDetected: false, message: 'Resource management validated' };
     }
 
-    private async executeParlantValidationPhase(): Promise<PhaseTestResult> {
+    async function executeParlantValidationPhase(): Promise<PhaseTestResult> {
       // Simplified PARLANT validation test
       return { success: true, accuracyScore: 0.85, message: 'PARLANT validation validated' };
     }
 
-    private async executePerformanceBenchmarkingPhase(): Promise<PhaseTestResult> {
+    async function executePerformanceBenchmarkingPhase(): Promise<PhaseTestResult> {
       // Simplified performance benchmarking test
       return { success: true, performanceScore: 0.8, message: 'Performance benchmarking validated' };
     }
 
-    private async executeEndToEndIntegrationPhase(): Promise<PhaseTestResult> {
+    async function executeEndToEndIntegrationPhase(): Promise<PhaseTestResult> {
       // Simplified end-to-end integration test
       return { success: true, integrationScore: 0.9, message: 'End-to-end integration validated' };
     }
