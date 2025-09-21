@@ -790,7 +790,7 @@ case 'json':
   }
 
   private generateHTMLReport(report: TestReport): string {
-  return '
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -842,7 +842,7 @@ case 'json':
         </thead>
         <tbody>
             ${
-  report.executionDetails.map(exec => "
+  report.executionDetails.map(exec => `
                 <tr class="${exec.success ? 'success' : 'failure'
 }">
                     <td>${exec.planId}</td>
@@ -854,12 +854,14 @@ case 'json':
             `).join('')}</tbody>
     </table>
 </body>
-</html>';}
+</html>`;
+  }
 
   private generatePDFReport(report: TestReport): string {
   // In a real implementation, this would generate a PDF using a library like puppeteer
-    return `PDF Report for ${report.id
-} - ${report.timestamp}`;}}
+    return `PDF Report for ${report.id} - ${report.timestamp}`;
+  }
+}
 
 // Regression Test Manager
 class RegressionTestManager {

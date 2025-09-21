@@ -617,10 +617,13 @@ describe('ConversationalDatabaseService', () => {
     });
 
     it('should not cache critical operations', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-no-cache-123',reason: 'Critical operation approved',
-});mockRepository.findById.mockResolvedValue(testEntity);
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
+        conversationId: 'conv-no-cache-123',
+        reason: 'Critical operation approved',
+      });
+      mockRepository.findById.mockResolvedValue(testEntity);
       mockRepository.delete.mockResolvedValue(true);
 
       // Act - Two delete operations
@@ -639,16 +642,28 @@ describe('ConversationalDatabaseService', () => {
   // ===== PERFORMANCE AND METRICS TESTS =====
 
   describe('Performance and Metrics', () => {
-  it('should track operation metrics correctly', async () => {// ArrangeparlantService.validateOperation
+    it('should track operation metrics correctly', async () => {
+      // Arrange
+      parlantService.validateOperation
         .mockResolvedValueOnce({
-  approved: true,
+          approved: true,
           conversationId: 'conv-metrics-1',
-}).mockResolvedValueOnce({
-  approved: false,
-          conversationId: 'conv-metrics-2',reason: 'Access denied',
-});mockRepository.findById.mockResolvedValue({
-        id: 'metrics-test',name: 'Test',} as TestEntity);// Act
-      await service.findById(mockRepository, 'metrics-test');try {await service.findById(mockRepository, 'metrics-test-2');} catch (_error) {
+        })
+        .mockResolvedValueOnce({
+          approved: false,
+          conversationId: 'conv-metrics-2',
+          reason: 'Access denied',
+        });
+      mockRepository.findById.mockResolvedValue({
+        id: 'metrics-test',
+        name: 'Test',
+      } as TestEntity);
+
+      // Act
+      await service.findById(mockRepository, 'metrics-test');
+      try {
+        await service.findById(mockRepository, 'metrics-test-2');
+      } catch (_error) {
   // Expected to fail
       
 }

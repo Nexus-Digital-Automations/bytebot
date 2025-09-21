@@ -1340,7 +1340,9 @@ describe('Security Penetration Testing Suite', () => {
   sub: 'audit-user',
       id: 'audit-user',
         email: 'audit@test.com',
-      username: 'audituser', role: eventType.user?.role ?? UserRole._VIEWERisActive: true,
+              username: 'audituser',
+              role: eventType.user?.role ?? UserRole._VIEWER,
+              isActive: true,
               
 };
 
@@ -1366,13 +1368,17 @@ describe('Security Penetration Testing Suite', () => {
       console.error = originalConsole.error;
 
       // Validate audit trail
-      const securityAuditEvents = auditEvents.filter((event: AuditEven, t) => {
-        const message = event.message ?? '';const securityTerms = ['security', 'auth', 'attack', 'unauthorized'];return securityTerms.some((term) => message.includes(term));});
+      const securityAuditEvents = auditEvents.filter((event: AuditEvent) => {
+        const message = event.message ?? '';
+        const securityTerms = ['security', 'auth', 'attack', 'unauthorized'];
+        return securityTerms.some((term) => message.includes(term));
+      });
       expect(securityAuditEvents.length).toBeGreaterThan(0);
 
       // Verify audit events contain critical information
-      const hasIPTracking = auditEvents.some((event: AuditEven, t) => {
-  const message = event.message ?? '';const ipAddresses = ['192.168.100.100''10.0.100.100'];
+      const hasIPTracking = auditEvents.some((event: AuditEvent) => {
+        const message = event.message ?? '';
+        const ipAddresses = ['192.168.100.100', '10.0.100.100'];
         return ipAddresses.some((ip) => message.includes(ip));
       
 });

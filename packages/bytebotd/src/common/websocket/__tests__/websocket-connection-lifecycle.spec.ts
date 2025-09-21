@@ -1672,7 +1672,9 @@ MB`,
 
 
     it('should clean up all resources on disconnection', async () => {
-const client = new ConnectionLifecycleTestClient(TEST_URL, 'resource_cleanup_client', heartbeatInterval: 1000,});
+      const client = new ConnectionLifecycleTestClient(TEST_URL, 'resource_cleanup_client', {
+        heartbeatInterval: 1000,
+      });
 
       await client.connect();
 
@@ -1747,13 +1749,11 @@ expect(stats.server.activeSessions).toBeGreaterThanOrEqual(0);
 expect(stats.server.activeConnections).toBeGreaterThanOrEqual(0);
       expect(stats.performance.averageLatency).toBeGreaterThanOrEqual(0);
 
-      console.log('Server Connection Statistics:', ,
-  activeSessions: stats.server.activeSessions,
+      console.log('Server Connection Statistics:', {
+        activeSessions: stats.server.activeSessions,
         activeConnections: stats.server.activeConnections,
-        averageLatency: `${stats.performance.averageLatency
-}
-ms`,uptime: `${(stats.server.uptime / 1000).toFixed(1)}
-s`,
+        averageLatency: `${stats.performance.averageLatency}ms`,
+        uptime: `${(stats.server.uptime / 1000).toFixed(1)}s`,
       });
     });
   });

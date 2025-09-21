@@ -754,12 +754,15 @@ KB`,
   const messageCount = 2000;const initialMemory = analyzer.getCurrentMemoryUsage();
 
       // Create and process messages
-      for (let i = 1; i <= messageCount; i++) 
-        const message = createBenchmarkMessage('cleanup_session', i);const validationResult = service.validateMessageSequence(message);service.addMessageToPriorityQueue(message);
+      for (let i = 1; i <= messageCount; i++) {
+        const message = createBenchmarkMessage('cleanup_session', i);
+        const validationResult = service.validateMessageSequence(message);
+        service.addMessageToPriorityQueue(message);
 
         if (validationResult.deliveryGuaranteed) {
           service.processDeliveryAcknowledgment(message.messageId, 'cleanup_session', 50);
-}}
+        }
+      }
 
       const peakMemory = analyzer.getCurrentMemoryUsage();
 
